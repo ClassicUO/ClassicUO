@@ -1,4 +1,5 @@
 ﻿using ClassicUO.IO;
+using ClassicUO.Sdk.IO;
 using System;
 using System.Collections.Generic;
 using System.Linq;

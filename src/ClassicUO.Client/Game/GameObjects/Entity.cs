@@ -38,7 +38,7 @@ namespace ClassicUO.Game.GameObjects
         public byte HitsPercentage;
         public bool IsClicked;
         public uint LastStepTime;
-        public string Name;
+        public string Name = "";
         public uint Serial;
         public HitsRequestStatus HitsRequest;
 
@@ -63,7 +63,7 @@ namespace ClassicUO.Game.GameObjects
         public RenderedText HitsTexture => _hitsPercText[HitsPercentage % _hitsPercText.Length];
 
 
-        public bool Equals(Entity e)
+        public bool Equals(Entity? e)
         {
             return e != null && Serial == e.Serial;
         }
@@ -161,9 +161,9 @@ namespace ClassicUO.Game.GameObjects
             LastAnimationChangeTime = 0;
         }
 
-        public Item FindItem(ushort graphic, ushort hue = 0xFFFF)
+        public Item? FindItem(ushort graphic, ushort hue = 0xFFFF)
         {
-            Item item = null;
+            Item? item = null;
 
             if (hue == 0xFFFF)
             {
@@ -184,7 +184,7 @@ namespace ClassicUO.Game.GameObjects
 
                     if (SerialHelper.IsValid(it.Container))
                     {
-                        Item found = it.FindItem(graphic, hue);
+                        var found = it.FindItem(graphic, hue);
 
                         if (found != null && found.Hue < minColor)
                         {
@@ -207,7 +207,7 @@ namespace ClassicUO.Game.GameObjects
 
                     if (SerialHelper.IsValid(it.Container))
                     {
-                        Item found = it.FindItem(graphic, hue);
+                        var found = it.FindItem(graphic, hue);
 
                         if (found != null)
                         {
@@ -220,7 +220,7 @@ namespace ClassicUO.Game.GameObjects
             return item;
         }
 
-        public Item GetItemByGraphic(ushort graphic, bool deepsearch = false)
+        public Item? GetItemByGraphic(ushort graphic, bool deepsearch = false)
         {
             for (LinkedObject i = Items; i != null; i = i.Next)
             {
@@ -237,7 +237,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         Item childItem = (Item) ic;
 
-                        Item res = childItem.GetItemByGraphic(graphic, deepsearch);
+                        var res = childItem.GetItemByGraphic(graphic, deepsearch);
 
                         if (res != null)
                         {
@@ -251,7 +251,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Item FindItemByLayer(Layer layer)
+        public Item? FindItemByLayer(Layer layer)
         {
             for (LinkedObject i = Items; i != null; i = i.Next)
             {
@@ -271,17 +271,17 @@ namespace ClassicUO.Game.GameObjects
             return entity.Serial;
         }
 
-        public static bool operator ==(Entity e, Entity s)
+        public static bool operator ==(Entity? e, Entity? s)
         {
             return Equals(e, s);
         }
 
-        public static bool operator !=(Entity e, Entity s)
+        public static bool operator !=(Entity? e, Entity? s)
         {
             return !Equals(e, s);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is Entity ent && Equals(ent);
         }

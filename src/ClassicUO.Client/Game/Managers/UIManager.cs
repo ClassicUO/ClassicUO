@@ -45,7 +45,7 @@ namespace ClassicUO.Game.Managers
                     DraggingControl == null &&
                     MouseOverControl == null &&
                     !IsModalOpen &&
-                    Client.Game.Scene.Camera.Bounds.Contains(mouse);
+                    (Client.Game.Scene?.Camera.Bounds.Contains(mouse) ?? false);
             }
         }
 

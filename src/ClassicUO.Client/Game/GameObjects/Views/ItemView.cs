@@ -266,7 +266,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else if (ishuman)
             {
-                Item itemEquip = owner.FindItemByLayer(layer);
+                var itemEquip = owner.FindItemByLayer(layer);
 
                 if (itemEquip == null)
                 {
@@ -279,7 +279,7 @@ namespace ClassicUO.Game.GameObjects
                 if (
                     Client.Game.UO.FileManager.Animations.EquipConversions.TryGetValue(
                         graphic,
-                        out Dictionary<ushort, EquipConvData> map
+                        out var map
                     )
                 )
                 {
@@ -559,7 +559,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else if (ishuman)
                     {
-                        Item itemEquip = FindItemByLayer(layer);
+                        var itemEquip = FindItemByLayer(layer);
 
                         if (itemEquip == null)
                         {
@@ -571,7 +571,7 @@ namespace ClassicUO.Game.GameObjects
                         if (
                             Client.Game.UO.FileManager.Animations.EquipConversions.TryGetValue(
                                 graphic,
-                                out Dictionary<ushort, EquipConvData> map
+                                out var map
                             )
                         )
                         {

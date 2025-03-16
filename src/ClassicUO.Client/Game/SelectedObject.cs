@@ -10,11 +10,11 @@ namespace ClassicUO.Game
     internal static class SelectedObject
     {
         public static Point TranslatedMousePositionByViewport;
-        public static BaseGameObject Object;
-        public static BaseGameObject LastLeftDownObject;
-        public static Entity HealthbarObject;
-        public static Item SelectedContainer;
-        public static Item CorpseObject;
+        public static BaseGameObject? Object;
+        public static BaseGameObject? LastLeftDownObject;
+        public static Entity? HealthbarObject;
+        public static Item? SelectedContainer;
+        public static Item? CorpseObject;
 
         private static readonly bool[,] _InternalArea = new bool[44, 44];
 

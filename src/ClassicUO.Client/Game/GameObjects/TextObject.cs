@@ -37,14 +37,14 @@ namespace ClassicUO.Game.GameObjects
         public TextObject(World world) : base(world) { }
 
         public byte Alpha;
-        public TextObject DLeft, DRight;
+        public TextObject? DLeft, DRight;
         public ushort Hue;
         public bool IsDestroyed;
         public bool IsTextGump;
         public bool IsTransparent;
-        public GameObject Owner;
+        public GameObject? Owner;
 
-        public RenderedText RenderedText;
+        public RenderedText? RenderedText;
         public long Time, SecondTime;
         public MessageType Type;
         public int X, Y, OffsetY;
@@ -92,7 +92,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void ToTopD()
         {
-            TextObject obj = this;
+            var obj = this;
 
             while (obj != null)
             {
@@ -104,8 +104,8 @@ namespace ClassicUO.Game.GameObjects
                 obj = obj.DLeft;
             }
 
-            TextRenderer next = (TextRenderer) obj;
-            next.MoveToTop(this);
+            var next = (TextRenderer?) obj;
+            next?.MoveToTop(this);
         }
     }
 }

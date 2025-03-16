@@ -8,7 +8,7 @@ namespace ClassicUO.Game
     internal abstract class LinkedObject
     {
         public bool IsEmpty => Items == null;
-        public LinkedObject Previous, Next, Items;
+        public LinkedObject? Previous, Next, Items;
 
         //~LinkedObject()
         //{
@@ -39,8 +39,9 @@ namespace ClassicUO.Game
             }
             else
             {
-                LinkedObject last = GetLast();
-                last.Next = item;
+                var last = GetLast();
+                if (last != null)
+                    last.Next = item;
 
                 Debug.Assert(item.Next == null, "[Append to last-next] item must be unlinked before.");
                 item.Next = null;
@@ -48,7 +49,7 @@ namespace ClassicUO.Game
             }
         }
 
-        public void Remove(LinkedObject item)
+        public void Remove(LinkedObject? item)
         {
             if (item == null)
             {
@@ -106,7 +107,7 @@ namespace ClassicUO.Game
             }
             else
             {
-                LinkedObject next = first.Next;
+                var next = first.Next;
                 item.Next = next;
                 item.Previous = first;
                 first.Next = item;
@@ -140,7 +141,7 @@ namespace ClassicUO.Game
             if (item != null)
             {
                 Unlink(item);
-                LinkedObject last = GetLast();
+                var last = GetLast();
 
                 if (last == null)
                 {
@@ -156,9 +157,9 @@ namespace ClassicUO.Game
             }
         }
 
-        public LinkedObject GetLast()
+        public LinkedObject? GetLast()
         {
-            LinkedObject last = Items;
+            var last = Items;
 
             while (last != null && last.Next != null)
             {
@@ -172,12 +173,12 @@ namespace ClassicUO.Game
         {
             if (Items != null)
             {
-                LinkedObject item = Items;
+                var item = Items;
                 Items = null;
 
                 while (item != null)
                 {
-                    LinkedObject next = item.Next;
+                    var next = item.Next;
                     item.Next = null;
                     item = next;
                 }
@@ -190,7 +191,7 @@ namespace ClassicUO.Game
         /// </summary>
         /// <typeparam name="T">Type of the objects being compared.</typeparam>
         /// <param name="comparison">Comparison function to use when sorting.</param>
-        public LinkedObject SortContents<T>(Comparison<T> comparison) where T : LinkedObject
+        public LinkedObject? SortContents<T>(Comparison<T> comparison) where T : LinkedObject
         {
             if (Items == null)
             {
@@ -199,7 +200,7 @@ namespace ClassicUO.Game
 
             int unitsize = 1; //size of the components we are merging; 1 for first iteration, multiplied by 2 after each iteration
 
-            T p = null, q = null, e = null, head = (T) Items, tail = null;
+            T? p = null, q = null, e = null, head = (T) Items, tail = null;
 
             while (true)
             {
@@ -218,7 +219,7 @@ namespace ClassicUO.Game
                     for (int i = 0; i < unitsize; i++)
                     {
                         psize++;
-                        q = (T) q.Next;
+                        q = (T?) q.Next;
 
                         if (q == null)
                         {
@@ -233,25 +234,25 @@ namespace ClassicUO.Game
                         if (psize == 0)
                         {
                             e = q;
-                            q = (T) q.Next;
+                            q = (T?) q.Next;
                             qsize--;
                         }
                         else if (qsize == 0 || q == null)
                         {
                             e = p;
-                            p = (T) p.Next;
+                            p = (T?) p.Next;
                             psize--;
                         }
                         else if (comparison(p, q) <= 0)
                         {
                             e = p;
-                            p = (T) p.Next;
+                            p = (T?) p.Next;
                             psize--;
                         }
                         else
                         {
                             e = q;
-                            q = (T) q.Next;
+                            q = (T?) q.Next;
                             qsize--;
                         }
 

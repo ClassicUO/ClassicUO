@@ -22,7 +22,7 @@ namespace ClassicUO.Game.Managers
         public uint Inviter { get; set; }
         public bool CanLoot { get; set; }
 
-        public PartyMember[] Members { get; } = new PartyMember[PARTY_SIZE];
+        public PartyMember?[] Members { get; } = new PartyMember[PARTY_SIZE];
 
 
         public long PartyHealTimer { get; set; }
@@ -48,21 +48,20 @@ namespace ClassicUO.Game.Managers
                         Leader = 0;
                         Inviter = 0;
 
-                        for (int i = 0; i < PARTY_SIZE; i++)
+                        foreach (var mem in Members)
                         {
-                            if (Members[i] == null || Members[i].Serial == 0)
+                            if (mem == null || mem.Serial == 0)
                             {
                                 break;
                             }
 
-                            BaseHealthBarGump gump = UIManager.GetGump<BaseHealthBarGump>(Members[i].Serial);
-
+                            var gump = UIManager.GetGump<BaseHealthBarGump>(mem.Serial);
 
                             if (gump != null)
                             {
                                 if (code == 2)
                                 {
-                                    Members[i].Serial = 0;
+                                    mem.Serial = 0;
                                 }
 
                                 gump.RequestUpdateContents();
@@ -115,7 +114,7 @@ namespace ClassicUO.Game.Managers
                             Leader = serial;
                         }
 
-                        BaseHealthBarGump gump = UIManager.GetGump<BaseHealthBarGump>(serial);
+                        var gump = UIManager.GetGump<BaseHealthBarGump>(serial);
 
                         if (gump != null)
                         {
@@ -133,9 +132,10 @@ namespace ClassicUO.Game.Managers
                     {
                         for (int i = 0; i < PARTY_SIZE; i++)
                         {
-                            if (Members[i] != null && SerialHelper.IsValid(Members[i].Serial))
+                            var mem = Members[i];
+                            if (mem != null && SerialHelper.IsValid(mem.Serial))
                             {
-                                uint serial = Members[i].Serial;
+                                uint serial = mem.Serial;
 
                                 Members[i] = null;
 
@@ -156,15 +156,15 @@ namespace ClassicUO.Game.Managers
                     uint ser = p.ReadUInt32BE();
                     string name = p.ReadUnicodeBE();
 
-                    for (int i = 0; i < PARTY_SIZE; i++)
+                    foreach (var mem in Members)
                     {
-                        if (Members[i] != null && Members[i].Serial == ser)
+                        if (mem != null && mem.Serial == ser)
                         {
                             _world.MessageManager.HandleMessage
                             (
                                 null,
                                 name,
-                                Members[i].Name,
+                                mem.Name,
                                 ProfileManager.CurrentProfile.PartyMessageHue,
                                 MessageType.Party,
                                 3,
@@ -191,10 +191,8 @@ namespace ClassicUO.Game.Managers
 
         public bool Contains(uint serial)
         {
-            for (int i = 0; i < PARTY_SIZE; i++)
+            foreach (var mem in Members)
             {
-                PartyMember mem = Members[i];
-
                 if (mem != null && mem.Serial == serial)
                 {
                     return true;
@@ -232,7 +230,7 @@ namespace ClassicUO.Game.Managers
         {
             get
             {
-                Mobile mobile = _world.Mobiles.Get(Serial);
+                var mobile = _world.Mobiles.Get(Serial);
 
                 if (mobile != null)
                 {
@@ -248,7 +246,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public bool Equals(PartyMember other)
+        public bool Equals(PartyMember? other)
         {
             if (other == null)
             {

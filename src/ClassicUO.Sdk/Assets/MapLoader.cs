@@ -628,11 +628,11 @@ namespace ClassicUO.Sdk.Assets
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref IndexMap GetIndex(int map, int x, int y)
+        public ref readonly IndexMap GetIndex(int map, int x, int y)
         {
             int block = x * MapBlocksSize[map, 1] + y;
-
-            return ref BlockData[map][block];
+            var data = BlockData[map];
+            return ref data == null ? ref IndexMap.Invalid : ref data[block];
         }
     }
 

@@ -19,7 +19,7 @@ namespace ClassicUO.Game.Managers
 
     internal sealed class NameOverHeadManager
     {
-        private NameOverHeadHandlerGump _gump;
+        private NameOverHeadHandlerGump? _gump;
         private readonly World _world;
 
         public NameOverHeadManager(World world) { _world = world; }

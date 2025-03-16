@@ -41,8 +41,8 @@ namespace ClassicUO.Game
         private static PixelPicker _picker = new PixelPicker();
         private byte _font;
 
-        private MultilinesFontInfo _info;
-        private string _text;
+        private MultilinesFontInfo? _info;
+        private string _text = "";
 
         public bool IsUnicode { get; set; }
 
@@ -151,7 +151,7 @@ namespace ClassicUO.Game
 
         public int Height { get; private set; }
 
-        public Texture2D Texture { get; set; }
+        public Texture2D? Texture { get; set; }
 
         public static RenderedText Create(
             string text,
@@ -225,7 +225,7 @@ namespace ClassicUO.Game
             return p;
         }
 
-        public MultilinesFontInfo GetInfo()
+        public MultilinesFontInfo? GetInfo()
         {
             return _info;
         }
@@ -265,7 +265,7 @@ namespace ClassicUO.Game
                 return r;
             }
 
-            MultilinesFontInfo info = _info;
+            var info = _info;
 
             if (info == null)
             {
@@ -326,7 +326,7 @@ namespace ClassicUO.Game
                 return 0;
             }
 
-            MultilinesFontInfo info = _info;
+            var info = _info;
 
             int start = 0;
 

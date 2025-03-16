@@ -7,13 +7,13 @@ namespace ClassicUO.Sdk.Assets
 {
     public sealed class LightsLoader : UOFileLoader
     {
-        private UOFileMul _file;
+        private UOFileMul? _file;
 
         public const int MAX_LIGHTS_DATA_INDEX_COUNT = 100;
 
         public LightsLoader(UOFileManager fileManager) : base(fileManager) { }
 
-        public UOFileMul File => _file;
+        public UOFileMul? File => _file;
 
         public override void Load()
         {

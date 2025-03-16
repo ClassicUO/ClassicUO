@@ -853,8 +853,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class ChatLineTime
         {
-            private uint _createdTime;
-            private RenderedText _renderedText;
+            private readonly uint _createdTime;
+            private readonly RenderedText _renderedText;
 
             public ChatLineTime(string text, byte font, bool isunicode, ushort hue)
             {
@@ -900,7 +900,6 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!IsDisposed)
                 {
                     _renderedText?.Destroy();
-                    _renderedText = null;
                 }
             }
         }

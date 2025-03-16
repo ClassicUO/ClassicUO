@@ -45,6 +45,4 @@ public static class ColorConverter
     {
         return (ushort)(((c & 0x1F) * 299 + ((c >> 5) & 0x1F) * 587 + ((c >> 10) & 0x1F) * 114) / 1000);
     }
-
-    public static ushort ColorToHue(uint c) => Color32To16(c);
 }

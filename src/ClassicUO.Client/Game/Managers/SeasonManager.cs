@@ -8,27 +8,21 @@ namespace ClassicUO.Game.Managers
 {
     internal static class SeasonManager
     {
-        private static ushort[] _springLandTile;
-        private static ushort[] _summerLandTile;
-        private static ushort[] _fallLandTile;
-        private static ushort[] _winterLandTile;
-        private static ushort[] _desolationLandTile;
-
-        private static ushort[] _springGraphic;
-        private static ushort[] _summerGraphic;
-        private static ushort[] _fallGraphic;
-        private static ushort[] _winterGraphic;
-        private static ushort[] _desolationGraphic;
+        private static readonly ushort[] _springLandTile;
+        private static readonly ushort[] _summerLandTile;
+        private static readonly ushort[] _fallLandTile;
+        private static readonly ushort[] _winterLandTile;
+        private static readonly ushort[] _desolationLandTile;
+        private static readonly ushort[] _springGraphic;
+        private static readonly ushort[] _summerGraphic;
+        private static readonly ushort[] _fallGraphic;
+        private static readonly ushort[] _winterGraphic;
+        private static readonly ushort[] _desolationGraphic;
 
         private static readonly string _seasonsFilePath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client");
         private static readonly string _seasonsFile = Path.Combine(_seasonsFilePath, "seasons.txt");
 
         static SeasonManager()
-        {
-            LoadSeasonFile();
-        }
-
-        public static void LoadSeasonFile()
         {
             _springLandTile = new ushort[ArtLoader.MAX_LAND_DATA_INDEX_COUNT];
             _summerLandTile = new ushort[ArtLoader.MAX_LAND_DATA_INDEX_COUNT];
@@ -42,6 +36,11 @@ namespace ClassicUO.Game.Managers
             _winterGraphic = new ushort[ArtLoader.MAX_STATIC_DATA_INDEX_COUNT];
             _desolationGraphic = new ushort[ArtLoader.MAX_STATIC_DATA_INDEX_COUNT];
 
+            LoadSeasonFile();
+        }
+
+        public static void LoadSeasonFile()
+        {
             if (!File.Exists(_seasonsFile))
             {
                 CreateDefaultSeasonsFile();
@@ -51,7 +50,7 @@ namespace ClassicUO.Game.Managers
             {
                 while (!reader.EndOfStream)
                 {
-                    string line = reader.ReadLine();
+                    var line = reader.ReadLine();
 
                     if (string.IsNullOrEmpty(line) || line.StartsWith("#") || line.StartsWith("//"))
                     {

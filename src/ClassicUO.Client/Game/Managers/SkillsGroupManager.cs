@@ -24,8 +24,8 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public SkillsGroup Left { get; set; }
-        public SkillsGroup Right { get; set; }
+        public SkillsGroup? Left { get; set; }
+        public SkillsGroup? Right { get; set; }
         public int Count;
         public bool IsMaximized;
         public string Name = ResGeneral.NoName;
@@ -171,7 +171,9 @@ namespace ClassicUO.Game.Managers
         {
             if (Groups[0] == g)
             {
-                var camera = Client.Game.Scene.Camera;
+                var camera = Client.Game.Scene?.Camera;
+                if (camera == null)
+                    return false;
 
                 MessageBoxGump messageBox = new MessageBoxGump(_world, 200, 125, ResGeneral.CannotDeleteThisGroup, null)
                 {
@@ -220,7 +222,7 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            XmlElement root = doc["skillsgroups"];
+            XmlElement? root = doc["skillsgroups"];
 
             if (root != null)
             {
@@ -229,7 +231,7 @@ namespace ClassicUO.Game.Managers
                     SkillsGroup g = new SkillsGroup();
                     g.Name = xml.GetAttribute("name");
 
-                    XmlElement xmlIdsRoot = xml["skillids"];
+                    XmlElement? xmlIdsRoot = xml["skillids"];
 
                     if (xmlIdsRoot != null)
                     {

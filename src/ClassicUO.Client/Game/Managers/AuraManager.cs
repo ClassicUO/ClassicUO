@@ -20,7 +20,7 @@ namespace ClassicUO.Game.Managers
             }
         );
 
-        private Texture2D _texture;
+        private Texture2D? _texture;
         private readonly int _radius;
 
         public Aura(int radius)

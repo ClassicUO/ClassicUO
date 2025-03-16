@@ -1128,7 +1128,7 @@ namespace ClassicUO.Game.GameObjects
 
                 default:
                 {
-                    Item hand2 = mobile.FindItemByLayer(Layer.TwoHanded);
+                    var hand2 = mobile.FindItemByLayer(Layer.TwoHanded);
 
                     if (!isWalking)
                     {
@@ -1194,8 +1194,8 @@ namespace ClassicUO.Game.GameObjects
                             {
                                 unsafe
                                 {
-                                    ushort* handAnimIDs = stackalloc ushort[2];
-                                    Item hand1 = mobile.FindItemByLayer(Layer.OneHanded);
+                                    Span<ushort> handAnimIDs = stackalloc ushort[2];
+                                    var hand1 = mobile.FindItemByLayer(Layer.OneHanded);
 
                                     if (hand1 != null)
                                     {

@@ -86,7 +86,7 @@ namespace ClassicUO.Game.Scenes
             return false;
         }
 
-        private bool CanDragSelectOnObject(GameObject obj)
+        private bool CanDragSelectOnObject(GameObject? obj)
         {
             return obj is null
                 || obj is Static
@@ -423,7 +423,7 @@ namespace ClassicUO.Game.Scenes
                 _continueRunning = true;
             }
 
-            BaseGameObject lastObj = SelectedObject.Object;
+            var lastObj = SelectedObject.Object;
             SelectedObject.LastLeftDownObject = null;
 
             if (UIManager.IsDragging)
@@ -442,7 +442,7 @@ namespace ClassicUO.Game.Scenes
                 ushort dropY = 0;
                 sbyte dropZ = 0;
 
-                GameObject gobj = SelectedObject.Object as GameObject;
+                var gobj = SelectedObject.Object as GameObject;
 
                 if (gobj is Entity obj)
                 {
@@ -546,7 +546,7 @@ namespace ClassicUO.Game.Scenes
                     case CursorTarget.MultiPlacement when _world.CustomHouseManager == null:
 
                         {
-                            BaseGameObject obj = lastObj;
+                            var obj = lastObj;
 
                             if (obj is TextObject ov)
                             {
@@ -585,7 +585,7 @@ namespace ClassicUO.Game.Scenes
                     case CursorTarget.SetTargetClientSide:
 
                         {
-                            BaseGameObject obj = lastObj;
+                            var obj = lastObj;
 
                             if (obj is TextObject ov)
                             {
@@ -641,7 +641,7 @@ namespace ClassicUO.Game.Scenes
             }
             else
             {
-                GameObject obj = lastObj as GameObject;
+                var obj = lastObj as GameObject;
 
                 switch (obj)
                 {
@@ -760,7 +760,7 @@ namespace ClassicUO.Game.Scenes
                 return false;
             }
 
-            BaseGameObject obj = SelectedObject.Object;
+            var obj = SelectedObject.Object;
 
             switch (obj)
             {
@@ -918,7 +918,7 @@ namespace ClassicUO.Game.Scenes
         {
             if (CanExecuteMacro())
             {
-                Macro macro = _world.Macros.FindMacro(button, Keyboard.Alt, Keyboard.Ctrl, Keyboard.Shift);
+                var macro = _world.Macros.FindMacro(button, Keyboard.Alt, Keyboard.Ctrl, Keyboard.Shift);
 
                 if (macro != null && button != MouseButtonType.None)
                 {
@@ -926,11 +926,15 @@ namespace ClassicUO.Game.Scenes
                     {
                         if (mac.Code == MacroType.LookAtMouse)
                         {
-                            Client.Game.Scene.Camera.PeekingToMouse = true;
+                            var camera = Client.Game.Scene?.Camera;
+                            if (camera == null)
+                                return false;
+
+                            camera.PeekingToMouse = true;
 
                             if (mac.SubCode == MacroSubType.LookBackwards)
                             {
-                                Client.Game.Scene.Camera.PeekBackwards = true;
+                                camera.PeekBackwards = true;
                             }
 
                             return true;
@@ -948,9 +952,9 @@ namespace ClassicUO.Game.Scenes
 
         private bool OnExtraMouseUp(MouseButtonType button)
         {
-            if (Client.Game.Scene.Camera.PeekingToMouse)
+            if (Client.Game.Scene?.Camera.PeekingToMouse ?? false)
             {
-                Macro macro = _world.Macros.FindMacro(button, Keyboard.Alt, Keyboard.Ctrl, Keyboard.Shift);
+                var macro = _world.Macros.FindMacro(button, Keyboard.Alt, Keyboard.Ctrl, Keyboard.Shift);
 
                 if (
                     macro != null
@@ -991,7 +995,7 @@ namespace ClassicUO.Game.Scenes
 
             if (CanExecuteMacro())
             {
-                Macro macro = _world.Macros.FindMacro(up, Keyboard.Alt, Keyboard.Ctrl, Keyboard.Shift);
+                var macro = _world.Macros.FindMacro(up, Keyboard.Alt, Keyboard.Ctrl, Keyboard.Shift);
 
                 if (macro != null)
                 {
@@ -1050,7 +1054,7 @@ namespace ClassicUO.Game.Scenes
                     )
                 )
                 {
-                    Entity obj;
+                    Entity? obj;
 
                     if (
                         ProfileManager.CurrentProfile.SallosEasyGrab
@@ -1069,7 +1073,7 @@ namespace ClassicUO.Game.Scenes
                     {
                         if (SerialHelper.IsMobile(obj.Serial) || obj is Item it && it.IsDamageable)
                         {
-                            BaseHealthBarGump customgump = UIManager.GetGump<BaseHealthBarGump>(
+                            var customgump = UIManager.GetGump<BaseHealthBarGump>(
                                 obj
                             );
                             customgump?.Dispose();
@@ -1136,6 +1140,9 @@ namespace ClassicUO.Game.Scenes
             {
                 _world.TargetManager.CancelTarget();
             }
+
+            if (UIManager.SystemChat == null)
+                return;
 
             if (UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl)
             {
@@ -1252,7 +1259,7 @@ namespace ClassicUO.Game.Scenes
 
             if (CanExecuteMacro())
             {
-                Macro macro = _world.Macros.FindMacro(
+                var macro = _world.Macros.FindMacro(
                     e.keysym.sym,
                     Keyboard.Alt,
                     Keyboard.Ctrl,
@@ -1265,11 +1272,15 @@ namespace ClassicUO.Game.Scenes
                     {
                         if (mac.Code == MacroType.LookAtMouse)
                         {
-                            Client.Game.Scene.Camera.PeekingToMouse = true;
-
-                            if (mac.SubCode == MacroSubType.LookBackwards)
+                            var camera = Client.Game.Scene?.Camera;
+                            if (camera != null)
                             {
-                                Client.Game.Scene.Camera.PeekBackwards = true;
+                                camera.PeekingToMouse = true;
+
+                                if (mac.SubCode == MacroSubType.LookBackwards)
+                                {
+                                    camera.PeekBackwards = true;
+                                }
                             }
                         }
                         else if (mac.Code == MacroType.Walk)
@@ -1378,7 +1389,7 @@ namespace ClassicUO.Game.Scenes
 
             if (_flags[4] || Client.Game.Scene.Camera.PeekingToMouse)
             {
-                Macro macro = _world.Macros.FindMacro(
+                var macro = _world.Macros.FindMacro(
                     e.keysym.sym,
                     Keyboard.Alt,
                     Keyboard.Ctrl,

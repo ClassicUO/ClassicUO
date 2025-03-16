@@ -30,7 +30,10 @@ namespace ClassicUO.Game.Managers
 
         public void Draw(UltimaBatcher2D batcher)
         {
-            var camera = Client.Game.Scene.Camera;
+            var camera = Client.Game.Scene?.Camera;
+            if (camera == null)
+                return;
+
             int mode = ProfileManager.CurrentProfile.MobileHPType;
 
             if (mode < 0)
@@ -121,7 +124,7 @@ namespace ClassicUO.Game.Managers
                                     p1.Y += 22;
                                 }
 
-                                p1 = Client.Game.Scene.Camera.WorldToScreen(p1);
+                                p1 = camera.WorldToScreen(p1);
                                 p1.X -= (mobile.HitsTexture.Width >> 1) + 5;
                                 p1.Y -= mobile.HitsTexture.Height;
 
@@ -153,7 +156,7 @@ namespace ClassicUO.Game.Managers
                 }
 
                 p.X -= 5;
-                p = Client.Game.Scene.Camera.WorldToScreen(p);
+                p = camera.WorldToScreen(p);
                 p.X -= BAR_WIDTH_HALF;
                 p.Y -= BAR_HEIGHT_HALF;
 
@@ -191,7 +194,7 @@ namespace ClassicUO.Game.Managers
 
             int per = BAR_WIDTH * entity.HitsPercentage / 100;
 
-            Mobile mobile = entity as Mobile;
+            var mobile = entity as Mobile;
 
             float alpha = passive && !newTargetSystem ? 0.5f : 1.0f;
             ushort hue =

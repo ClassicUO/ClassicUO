@@ -43,18 +43,18 @@ namespace ClassicUO.Game.Scenes
         });
 
         private uint _time_cleanup = Time.Ticks + 5000;
-        private static XBREffect _xbr;
+        private static XBREffect? _xbr;
         private bool _alphaChanged;
         private long _alphaTimer;
         private bool _forceStopScene;
-        private HealthLinesManager _healthLinesManager;
+        private HealthLinesManager? _healthLinesManager;
 
         private Point _lastSelectedMultiPositionInHouseCustomization;
         private int _lightCount;
         private readonly LightData[] _lights = new LightData[
             LightsLoader.MAX_LIGHTS_DATA_INDEX_COUNT
         ];
-        private Item _multi;
+        private Item? _multi;
         private Rectangle _rectangleObj = Rectangle.Empty,
             _rectanglePlayer;
         private long _timePing;
@@ -63,8 +63,8 @@ namespace ClassicUO.Game.Scenes
         private readonly bool _use_render_target = false;
         private readonly UseItemQueue _useItemQueue;
         private bool _useObjectHandles;
-        private RenderTarget2D _world_render_target, _lightRenderTarget;
-        private AnimatedStaticsManager _animatedStaticsManager;
+        private RenderTarget2D? _world_render_target, _lightRenderTarget;
+        private AnimatedStaticsManager? _animatedStaticsManager;
 
         private readonly World _world;
 
@@ -149,7 +149,7 @@ namespace ClassicUO.Game.Scenes
             Plugin.OnConnected();
         }
 
-        private void ChatOnMessageReceived(object sender, MessageEventArgs e)
+        private void ChatOnMessageReceived(object? sender, MessageEventArgs e)
         {
             if (e.Type == MessageType.Command)
             {
@@ -337,7 +337,7 @@ namespace ClassicUO.Game.Scenes
             base.Unload();
         }
 
-        private void SocketOnDisconnected(object sender, SocketError e)
+        private void SocketOnDisconnected(object? sender, SocketError e)
         {
             if (Settings.GlobalSettings.Reconnect)
             {
@@ -413,13 +413,13 @@ namespace ClassicUO.Game.Scenes
             int testX = obj.X + 1;
             int testY = obj.Y + 1;
 
-            GameObject tile = _world.Map.GetTile(testX, testY);
+            var tile = _world.Map.GetTile(testX, testY);
 
             if (tile != null)
             {
                 sbyte z5 = (sbyte)(obj.Z + 5);
 
-                for (GameObject o = tile; o != null; o = o.TNext)
+                for (var o = tile; o != null; o = o.TNext)
                 {
                     if (
                         (!(o is Static s) || s.ItemData.IsTransparent)
@@ -732,7 +732,7 @@ namespace ClassicUO.Game.Scenes
             }
 
             _world.Update();
-            _animatedStaticsManager.Process();
+            _animatedStaticsManager?.Process();
             _world.BoatMovingManager.Update();
             _world.Player.Pathfinder.ProcessAutoWalk();
             _world.DelayedObjectClickManager.Update();
@@ -756,7 +756,7 @@ namespace ClassicUO.Game.Scenes
                 _followingMode && SerialHelper.IsMobile(_followingTarget) && !_world.Player.Pathfinder.AutoWalking
             )
             {
-                Mobile follow = _world.Mobiles.Get(_followingTarget);
+                var follow = _world.Mobiles.Get(_followingTarget);
 
                 if (follow != null)
                 {
@@ -820,7 +820,7 @@ namespace ClassicUO.Game.Scenes
                     int cellX = gobj.X % 8;
                     int cellY = gobj.Y % 8;
 
-                    GameObject o = _world.Map.GetChunk(gobj.X, gobj.Y)?.Tiles[cellX, cellY];
+                    var o = _world.Map?.GetChunk(gobj.X, gobj.Y)?.Tiles[cellX, cellY];
 
                     if (o != null)
                     {
@@ -835,7 +835,8 @@ namespace ClassicUO.Game.Scenes
                         z = gobj.Z;
                     }
 
-                    _world.Map.GetMapZ(x, y, out sbyte groundZ, out sbyte _);
+                    sbyte groundZ = 0;
+                    _world.Map?.GetMapZ(x, y, out groundZ, out sbyte _);
 
                     if (gobj is Static st && st.ItemData.IsWet)
                     {
@@ -849,16 +850,17 @@ namespace ClassicUO.Game.Scenes
                     _multi.SetInWorldTile(x, y, z);
                     _multi.CheckGraphicChange();
 
-                    _world.HouseManager.TryGetHouse(_multi.Serial, out House house);
-
-                    foreach (Multi s in house.Components)
+                    if (_world.HouseManager.TryGetHouse(_multi.Serial, out var house) && house != null)
                     {
-                        s.IsHousePreview = true;
-                        s.SetInWorldTile(
-                            (ushort)(_multi.X + s.MultiOffsetX),
-                            (ushort)(_multi.Y + s.MultiOffsetY),
-                            (sbyte)(_multi.Z + s.MultiOffsetZ)
-                        );
+                        foreach (var s in house.Components)
+                        {
+                            s.IsHousePreview = true;
+                            s.SetInWorldTile(
+                                (ushort)(_multi.X + s.MultiOffsetX),
+                                (ushort)(_multi.Y + s.MultiOffsetY),
+                                (sbyte)(_multi.Z + s.MultiOffsetZ)
+                            );
+                        }
                     }
                 }
             }
@@ -1228,7 +1230,7 @@ namespace ClassicUO.Game.Scenes
 
         public void DrawOverheads(UltimaBatcher2D batcher)
         {
-            _healthLinesManager.Draw(batcher);
+            _healthLinesManager?.Draw(batcher);
 
             if (!UIManager.IsMouseOverWorld)
             {

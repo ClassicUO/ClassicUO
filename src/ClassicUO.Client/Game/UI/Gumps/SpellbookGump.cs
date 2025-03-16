@@ -20,11 +20,11 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class SpellbookGump : Gump
     {
-        private DataBox _dataBox;
-        private HitBox _hitBox;
+        private DataBox? _dataBox;
+        private HitBox? _hitBox;
         private bool _isMinimized;
         private int _maxPage;
-        private GumpPic _pageCornerLeft,
+        private GumpPic? _pageCornerLeft,
             _pageCornerRight,
             _picBase;
         private SpellBookType _spellBookType;
@@ -64,14 +64,16 @@ namespace ClassicUO.Game.UI.Gumps
                         out int dictionaryPagesCount
                     );
 
-                    _picBase.Graphic = value ? minimizedGraphic : bookGraphic;
+                    if (_picBase != null)
+                        _picBase.Graphic = value ? minimizedGraphic : bookGraphic;
 
                     foreach (Control c in Children)
                     {
                         c.IsVisible = !value;
                     }
 
-                    _picBase.IsVisible = true;
+                    if (_picBase != null)
+                        _picBase.IsVisible = true;
                     WantUpdateSize = true;
                 }
             }
@@ -96,7 +98,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
-            Item item = World.Items.Get(LocalSerial);
+            var item = World.Items.Get(LocalSerial);
 
             if (item == null)
             {
@@ -148,7 +150,7 @@ namespace ClassicUO.Game.UI.Gumps
             Client.Game.Audio.PlaySound(0x0055);
         }
 
-        private void _picBase_MouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
+        private void _picBase_MouseDoubleClick(object? sender, MouseDoubleClickEventArgs e)
         {
             if (e.Button == MouseButtonType.Left && IsMinimized)
             {
@@ -156,7 +158,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private void _hitBox_MouseUp(object sender, MouseEventArgs e)
+        private void _hitBox_MouseUp(object? sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtonType.Left && !IsMinimized)
             {
@@ -173,8 +175,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void CreateBook()
         {
-            _dataBox.Clear();
-            _dataBox.WantUpdateSize = true;
+            if (_dataBox != null)
+            {
+                _dataBox.Clear();
+                _dataBox.WantUpdateSize = true;
+            }
 
             GetBookInfo(
                 _spellBookType,
@@ -188,7 +193,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             int totalSpells = 0;
 
-            Item item = World.Items.Get(LocalSerial);
+            var item = World.Items.Get(LocalSerial);
 
             if (item == null)
             {
@@ -220,7 +225,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_spellBookType == SpellBookType.Magery)
             {
-                _dataBox.Add(
+                _dataBox?.Add(
                     new Button((int)ButtonCircle.Circle_1_2, 0x08B1, 0x08B1)
                     {
                         X = 58,
@@ -230,7 +235,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 );
 
-                _dataBox.Add(
+                _dataBox?.Add(
                     new Button((int)ButtonCircle.Circle_1_2, 0x08B2, 0x08B2)
                     {
                         X = 93,
@@ -240,7 +245,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 );
 
-                _dataBox.Add(
+                _dataBox?.Add(
                     new Button((int)ButtonCircle.Circle_3_4, 0x08B3, 0x08B3)
                     {
                         X = 130,
@@ -250,7 +255,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 );
 
-                _dataBox.Add(
+                _dataBox?.Add(
                     new Button((int)ButtonCircle.Circle_3_4, 0x08B4, 0x08B4)
                     {
                         X = 164,
@@ -260,7 +265,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 );
 
-                _dataBox.Add(
+                _dataBox?.Add(
                     new Button((int)ButtonCircle.Circle_5_6, 0x08B5, 0x08B5)
                     {
                         X = 227,
@@ -270,7 +275,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 );
 
-                _dataBox.Add(
+                _dataBox?.Add(
                     new Button((int)ButtonCircle.Circle_5_6, 0x08B6, 0x08B6)
                     {
                         X = 260,
@@ -280,7 +285,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 );
 
-                _dataBox.Add(
+                _dataBox?.Add(
                     new Button((int)ButtonCircle.Circle_7_8, 0x08B7, 0x08B7)
                     {
                         X = 297,
@@ -290,7 +295,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 );
 
-                _dataBox.Add(
+                _dataBox?.Add(
                     new Button((int)ButtonCircle.Circle_7_8, 0x08B8, 0x08B8)
                     {
                         X = 332,
@@ -320,7 +325,7 @@ namespace ClassicUO.Game.UI.Gumps
                             Y = 162
                         };
 
-                        _dataBox.Add(label, page);
+                        _dataBox?.Add(label, page);
                     }
 
                     int indexX = 106;
@@ -339,7 +344,7 @@ namespace ClassicUO.Game.UI.Gumps
                         Y = 10
                     };
 
-                    _dataBox.Add(text, page);
+                    _dataBox?.Add(text, page);
 
                     if (_spellBookType == SpellBookType.Mastery && j >= 1)
                     {
@@ -349,7 +354,7 @@ namespace ClassicUO.Game.UI.Gumps
                             Y = 30
                         };
 
-                        _dataBox.Add(text, page);
+                        _dataBox?.Add(text, page);
 
                         if (
                             World.OPL.TryGetNameAndData(
@@ -410,7 +415,7 @@ namespace ClassicUO.Game.UI.Gumps
                                                     LocalSerial = (uint)(id - 1)
                                                 };
 
-                                                _dataBox.Add(icon, page);
+                                                _dataBox?.Add(icon, page);
                                                 icon.MouseDoubleClick += OnIconDoubleClick;
                                                 icon.DragBegin += OnIconDragBegin;
 
@@ -420,7 +425,7 @@ namespace ClassicUO.Game.UI.Gumps
                                                     Y = iconMY + 2
                                                 };
 
-                                                _dataBox.Add(text, page);
+                                                _dataBox?.Add(text, page);
 
                                                 if (toolTipCliloc > 0)
                                                 {
@@ -456,7 +461,7 @@ namespace ClassicUO.Game.UI.Gumps
                             Y = 30
                         };
 
-                        _dataBox.Add(text, page);
+                        _dataBox?.Add(text, page);
                     }
                     else if (_spellBookType == SpellBookType.Mastery)
                     {
@@ -471,7 +476,7 @@ namespace ClassicUO.Game.UI.Gumps
                             Y = 30
                         };
 
-                        _dataBox.Add(text, page);
+                        _dataBox?.Add(text, page);
                     }
 
                     int topage = pagesToFill + ((spellDone + 1) >> 1);
@@ -521,7 +526,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                                 text.MouseUp += OnLabelMouseUp;
                                 text.MouseDoubleClick += OnLabelMouseDoubleClick;
-                                _dataBox.Add(text, page);
+                                _dataBox?.Add(text, page);
 
                                 y += 15;
                             }
@@ -568,7 +573,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                                 text.MouseUp += OnLabelMouseUp;
                                 text.MouseDoubleClick += OnLabelMouseDoubleClick;
-                                _dataBox.Add(text, page);
+                                _dataBox?.Add(text, page);
 
                                 y += 15;
                             }
@@ -626,11 +631,11 @@ namespace ClassicUO.Game.UI.Gumps
                             Y = topTextY + 4
                         };
 
-                        _dataBox.Add(text, page1);
+                        _dataBox?.Add(text, page1);
 
                         text = new Label(name, false, 0x0288, 80, 6) { X = iconTextX, Y = 34 };
 
-                        _dataBox.Add(text, page1);
+                        _dataBox?.Add(text, page1);
                         int abbreviatureY = 26;
 
                         if (text.Height < 24)
@@ -646,7 +651,7 @@ namespace ClassicUO.Game.UI.Gumps
                             Y = abbreviatureY
                         };
 
-                        _dataBox.Add(text, page1);
+                        _dataBox?.Add(text, page1);
 
                         break;
                     }
@@ -664,11 +669,11 @@ namespace ClassicUO.Game.UI.Gumps
                             Y = topTextY + 4
                         };
 
-                        _dataBox.Add(text, page1);
+                        _dataBox?.Add(text, page1);
 
                         text = new Label(name, false, 0x0288, 80, 6) { X = iconTextX, Y = 34 };
 
-                        _dataBox.Add(text, page1);
+                        _dataBox?.Add(text, page1);
 
                         if (!string.IsNullOrEmpty(abbreviature))
                         {
@@ -687,7 +692,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 Y = abbreviatureY
                             };
 
-                            _dataBox.Add(text, page1);
+                            _dataBox?.Add(text, page1);
                         }
 
                         break;
@@ -701,7 +706,7 @@ namespace ClassicUO.Game.UI.Gumps
                             Y = topTextY
                         };
 
-                        _dataBox.Add(text, page1);
+                        _dataBox?.Add(text, page1);
 
                         if (!string.IsNullOrEmpty(abbreviature))
                         {
@@ -711,7 +716,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 Y = 34
                             };
 
-                            _dataBox.Add(text, page1);
+                            _dataBox?.Add(text, page1);
                         }
 
                         break;
@@ -740,8 +745,8 @@ namespace ClassicUO.Game.UI.Gumps
                     40,
                     iconGraphic,
                     0,
-                    (ushort)spellDef.ID,
-                    spellDef.Name
+                    (ushort)(spellDef?.ID ?? 0),
+                    spellDef?.Name ?? "unknown"
                 )
                 {
                     X = iconX,
@@ -758,13 +763,13 @@ namespace ClassicUO.Game.UI.Gumps
                 icon.MouseDoubleClick += OnIconDoubleClick;
                 icon.DragBegin += OnIconDragBegin;
 
-                _dataBox.Add(icon, page1);
+                _dataBox?.Add(icon, page1);
 
                 if (!string.IsNullOrEmpty(reagents))
                 {
                     if (_spellBookType != SpellBookType.Mastery)
                     {
-                        _dataBox.Add(new GumpPicTiled(iconX, 88, 120, 5, 0x0835), page1);
+                        _dataBox?.Add(new GumpPicTiled(iconX, 88, 120, 5, 0x0835), page1);
                     }
 
                     Label text = new Label(ResGumps.Reagents, false, 0x0288, font: 6)
@@ -773,11 +778,11 @@ namespace ClassicUO.Game.UI.Gumps
                         Y = 92
                     };
 
-                    _dataBox.Add(text, page1);
+                    _dataBox?.Add(text, page1);
 
                     text = new Label(reagents, false, 0x0288, font: 9) { X = iconX, Y = 114 };
 
-                    _dataBox.Add(text, page1);
+                    _dataBox?.Add(text, page1);
                 }
 
                 if (_spellBookType != SpellBookType.Magery)
@@ -790,7 +795,7 @@ namespace ClassicUO.Game.UI.Gumps
                         Y = requiriesY
                     };
 
-                    _dataBox.Add(text, page1);
+                    _dataBox?.Add(text, page1);
                 }
             }
 
@@ -799,7 +804,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void UpdateContents()
         {
-            Item item = World.Items.Get(LocalSerial);
+            var item = World.Items.Get(LocalSerial);
 
             if (item == null)
             {
@@ -813,11 +818,14 @@ namespace ClassicUO.Game.UI.Gumps
             CreateBook();
         }
 
-        private void OnIconDoubleClick(object sender, MouseDoubleClickEventArgs e)
+        private void OnIconDoubleClick(object? sender, MouseDoubleClickEventArgs e)
         {
             if (e.Button == MouseButtonType.Left)
             {
-                SpellDefinition def = GetSpellDefinition((sender as Control).LocalSerial);
+                if (sender is not Control control)
+                    return;
+
+                var def = GetSpellDefinition(control.LocalSerial);
 
                 if (def != null)
                 {
@@ -826,14 +834,17 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private void OnIconDragBegin(object sender, EventArgs e)
+        private void OnIconDragBegin(object? sender, EventArgs e)
         {
             if (UIManager.DraggingControl != this || UIManager.MouseOverControl != sender)
             {
                 return;
             }
 
-            SpellDefinition def = GetSpellDefinition((sender as Control).LocalSerial);
+            if (sender is not Control control)
+                return;
+
+            var def = GetSpellDefinition(control.LocalSerial);
 
             if (def == null)
             {
@@ -852,9 +863,9 @@ namespace ClassicUO.Game.UI.Gumps
             UIManager.AttemptDragControl(gump, true);
         }
 
-        private static UseSpellButtonGump GetSpellFloatingButton(int id)
+        private static UseSpellButtonGump? GetSpellFloatingButton(int id)
         {
-            for (LinkedListNode<Gump> i = UIManager.Gumps.Last; i != null; i = i.Previous)
+            for (var i = UIManager.Gumps.Last; i != null; i = i.Previous)
             {
                 if (i.Value is UseSpellButtonGump g && g.SpellID == id)
                 {
@@ -865,7 +876,7 @@ namespace ClassicUO.Game.UI.Gumps
             return null;
         }
 
-        private SpellDefinition GetSpellDefinition(uint serial)
+        private SpellDefinition? GetSpellDefinition(uint serial)
         {
             int idx =
                 (int)(
@@ -879,9 +890,9 @@ namespace ClassicUO.Game.UI.Gumps
             return GetSpellDefinition(idx);
         }
 
-        private SpellDefinition GetSpellDefinition(int idx)
+        private SpellDefinition? GetSpellDefinition(int idx)
         {
-            SpellDefinition def = null;
+            SpellDefinition? def = null;
 
             switch (_spellBookType)
             {
@@ -1241,6 +1252,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void SetActivePage(int page)
         {
+            if (_dataBox == null || _pageCornerLeft == null || _pageCornerRight == null)
+                return;
+
             if (page == _dataBox.ActivePage)
             {
                 return;
@@ -1262,7 +1276,7 @@ namespace ClassicUO.Game.UI.Gumps
             Client.Game.Audio.PlaySound(0x0055);
         }
 
-        private void OnLabelMouseUp(object sender, MouseEventArgs e)
+        private void OnLabelMouseUp(object? sender, MouseEventArgs e)
         {
             if (
                 e.Button == MouseButtonType.Left
@@ -1274,11 +1288,11 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private void OnLabelMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
+        private void OnLabelMouseDoubleClick(object? sender, MouseDoubleClickEventArgs e)
         {
-            if (e.Button == MouseButtonType.Left && sender is HoveredLabel l)
+            if (e.Button == MouseButtonType.Left && sender is HoveredLabel l && l.Tag is int idx)
             {
-                SpellDefinition def = GetSpellDefinition((int)l.Tag);
+                var def = GetSpellDefinition(idx);
 
                 if (def != null)
                 {
@@ -1294,7 +1308,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update();
 
-            Item item = World.Items.Get(LocalSerial);
+            var item = World.Items.Get(LocalSerial);
 
             if (item == null)
             {
@@ -1372,7 +1386,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private void PageCornerOnMouseClick(object sender, MouseEventArgs e)
+        private void PageCornerOnMouseClick(object? sender, MouseEventArgs e)
         {
             if (
                 e.Button == MouseButtonType.Left
@@ -1380,13 +1394,14 @@ namespace ClassicUO.Game.UI.Gumps
                 && sender is Control ctrl
             )
             {
-                SetActivePage(
-                    ctrl.LocalSerial == 0 ? _dataBox.ActivePage - 1 : _dataBox.ActivePage + 1
-                );
+                if (_dataBox != null)
+                    SetActivePage(
+                        ctrl.LocalSerial == 0 ? _dataBox.ActivePage - 1 : _dataBox.ActivePage + 1
+                    );
             }
         }
 
-        private void PageCornerOnMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
+        private void PageCornerOnMouseDoubleClick(object? sender, MouseDoubleClickEventArgs e)
         {
             if (e.Button == MouseButtonType.Left && sender is Control ctrl)
             {

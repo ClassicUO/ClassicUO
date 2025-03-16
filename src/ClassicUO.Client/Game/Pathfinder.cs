@@ -55,7 +55,7 @@ namespace ClassicUO.Game
 
         private bool CreateItemList(List<PathObject> list, int x, int y, int stepState)
         {
-            GameObject tile = _world.Map.GetTile(x, y, false);
+            var tile = _world.Map.GetTile(x, y, false);
 
             if (tile == null)
             {
@@ -66,7 +66,7 @@ namespace ClassicUO.Game
 
             bool isGM = _world.Player.Graphic == 0x03DB;
 
-            GameObject obj = tile;
+            GameObject? obj = tile;
 
             while (obj.TPrevious != null)
             {
@@ -318,9 +318,9 @@ namespace ClassicUO.Game
                 return 0;
             }
 
-            foreach (PathObject obj in list)
+            foreach (var obj in list)
             {
-                GameObject o = obj.Object;
+                var o = obj.Object;
                 int averageZ = obj.AverageZ;
 
                 if (averageZ <= currentZ && o is Land tile && tile.IsStretched)
@@ -383,7 +383,7 @@ namespace ClassicUO.Game
                 }
                 else
                 {
-                    Item mount = _world.Player.FindItemByLayer(Layer.Mount);
+                    var mount = _world.Player.FindItemByLayer(Layer.Mount);
 
                     if (mount != null && mount.Graphic == 0x3EB3) // sea horse
                     {
@@ -889,7 +889,7 @@ namespace ClassicUO.Game
                 if (_goalFound)
                 {
                     int totalNodes = 0;
-                    PathNode goalNode = _openList[_goalNode];
+                    var goalNode = _openList[_goalNode];
 
                     while (goalNode.Parent != null && goalNode != goalNode.Parent)
                     {
@@ -1038,7 +1038,7 @@ namespace ClassicUO.Game
 
         private class PathObject : IComparable<PathObject>
         {
-            public PathObject(uint flags, int z, int avgZ, int h, GameObject obj)
+            public PathObject(uint flags, int z, int avgZ, int h, GameObject? obj)
             {
                 Flags = flags;
                 Z = z;
@@ -1055,10 +1055,13 @@ namespace ClassicUO.Game
 
             public int Height { get; }
 
-            public GameObject Object { get; }
+            public GameObject? Object { get; }
 
-            public int CompareTo(PathObject other)
+            public int CompareTo(PathObject? other)
             {
+                if (other == null)
+                    return 0;
+
                 int comparision = Z - other.Z;
 
                 if (comparision == 0)
@@ -1088,7 +1091,7 @@ namespace ClassicUO.Game
 
             public int DistFromGoalCost { get; set; }
 
-            public PathNode Parent { get; set; }
+            public PathNode? Parent { get; set; }
 
             public void Reset()
             {

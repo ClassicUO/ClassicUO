@@ -12,7 +12,7 @@ namespace ClassicUO.Game.Managers
 
         public void Add(uint serial, uint revision, string name, string data, int namecliloc)
         {
-            if (!_itemsProperties.TryGetValue(serial, out ItemProperty prop))
+            if (!_itemsProperties.TryGetValue(serial, out var prop))
             {
                 prop = new ItemProperty();
                 _itemsProperties[serial] = prop;
@@ -32,7 +32,7 @@ namespace ClassicUO.Game.Managers
 
         public bool Contains(uint serial)
         {
-            if (_itemsProperties.TryGetValue(serial, out ItemProperty p))
+            if (_itemsProperties.TryGetValue(serial, out var p))
             {
                 return true; //p.Revision != 0;  <-- revision == 0 can contain the name.
             }
@@ -47,7 +47,7 @@ namespace ClassicUO.Game.Managers
 
         public bool IsRevisionEquals(uint serial, uint revision)
         {
-            if (_itemsProperties.TryGetValue(serial, out ItemProperty prop))
+            if (_itemsProperties.TryGetValue(serial, out var prop))
             {
                 return (revision & ~0x40000000) == prop.Revision || // remove the mask
                        revision == prop.Revision;                   // if mask removing didn't work, try a simple compare.
@@ -58,7 +58,7 @@ namespace ClassicUO.Game.Managers
 
         public bool TryGetRevision(uint serial, out uint revision)
         {
-            if (_itemsProperties.TryGetValue(serial, out ItemProperty p))
+            if (_itemsProperties.TryGetValue(serial, out var p))
             {
                 revision = p.Revision;
 
@@ -70,9 +70,9 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
-        public bool TryGetNameAndData(uint serial, out string name, out string data)
+        public bool TryGetNameAndData(uint serial, out string? name, out string? data)
         {
-            if (_itemsProperties.TryGetValue(serial, out ItemProperty p))
+            if (_itemsProperties.TryGetValue(serial, out var p))
             {
                 name = p.Name;
                 data = p.Data;
@@ -87,7 +87,7 @@ namespace ClassicUO.Game.Managers
 
         public int GetNameCliloc(uint serial)
         {
-            if (_itemsProperties.TryGetValue(serial, out ItemProperty p))
+            if (_itemsProperties.TryGetValue(serial, out var p))
             {
                 return p.NameCliloc;
             }
@@ -109,8 +109,8 @@ namespace ClassicUO.Game.Managers
     internal class ItemProperty
     {
         public bool IsEmpty => string.IsNullOrEmpty(Name) && string.IsNullOrEmpty(Data);
-        public string Data;
-        public string Name;
+        public string? Data;
+        public string? Name;
         public uint Revision;
         public uint Serial;
         public int NameCliloc;

@@ -63,7 +63,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void ClearCustomHouseComponents(CUSTOM_HOUSE_MULTI_OBJECT_FLAGS state)
         {
-            Item item = _world.Items.Get(Serial);
+            var item = _world.Items.Get(Serial);
 
             if (item != null)
             {
@@ -106,7 +106,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void Generate(bool recalculate = false, bool pushtotile = true, bool removePreview = false)
         {
-            Item item = _world.Items.Get(Serial);
+            var item = _world.Items.Get(Serial);
             //ClearCustomHouseComponents(0);
 
             foreach (Multi s in Components)
@@ -141,7 +141,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void ClearComponents(bool removeCustomOnly = false)
         {
-            Item item = _world.Items.Get(Serial);
+            var item = _world.Items.Get(Serial);
 
             if (item != null && !item.IsDestroyed)
             {

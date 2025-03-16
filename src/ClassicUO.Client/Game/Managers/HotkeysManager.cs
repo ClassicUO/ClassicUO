@@ -259,7 +259,7 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public bool TryExecuteIfBinded(SDL.SDL_Keycode key, SDL.SDL_Keymod mod, out Action action)
+        public bool TryExecuteIfBinded(SDL.SDL_Keycode key, SDL.SDL_Keymod mod, out Action? action)
         {
             for (int i = 0; i < _hotkeys.Count; i++)
             {

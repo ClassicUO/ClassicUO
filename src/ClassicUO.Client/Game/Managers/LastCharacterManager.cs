@@ -17,9 +17,9 @@ namespace ClassicUO.Game.Managers
         private static readonly string _lastCharacterFilePath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles");
         private static readonly string _lastCharacterFile = Path.Combine(_lastCharacterFilePath, "lastcharacter.json");
 
-        private static List<LastCharacterInfo> LastCharacters { get; set; }
+        private static List<LastCharacterInfo>? LastCharacters { get; set; }
 
-        private static string LastCharacterNameOverride { get; set; }
+        private static string LastCharacterNameOverride { get; set; } = "";
 
         public static void Load()
         {
@@ -41,7 +41,7 @@ namespace ClassicUO.Game.Managers
 
         public static void Save(string account, string server, string name)
         {
-            LastCharacterInfo lastChar = LastCharacters.FirstOrDefault(c => c.AccountName.Equals(account) && c.ServerName == server);
+            var lastChar = LastCharacters?.FirstOrDefault(c => c.AccountName?.Equals(account) ?? false && c.ServerName == server);
 
             // Check to see if they passed in -lastcharactername but picked another character, clear override then
             if (!string.IsNullOrEmpty(LastCharacterNameOverride) && !LastCharacterNameOverride.Equals(name))
@@ -55,15 +55,16 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
-                LastCharacters.Add(new LastCharacterInfo
+                LastCharacters?.Add(new LastCharacterInfo
                 {
                     ServerName = server,
                     LastCharacterName = name,
                     AccountName = account
                 });
             }
-
-            ConfigurationResolver.Save(LastCharacters, _lastCharacterFile, LastCharacterJsonContext.Default.ListLastCharacterInfo);
+            
+            if (LastCharacters != null)
+                ConfigurationResolver.Save(LastCharacters, _lastCharacterFile, LastCharacterJsonContext.Default.ListLastCharacterInfo);
         }
 
         public static string GetLastCharacter(string account, string server)
@@ -71,6 +72,9 @@ namespace ClassicUO.Game.Managers
             if (LastCharacters == null)
             {
                 Load();
+
+                if (LastCharacters == null)
+                    return string.Empty;
             }
 
             // If they passed in a -lastcharactername param, ignore json value, use that value instead
@@ -79,9 +83,9 @@ namespace ClassicUO.Game.Managers
                 return LastCharacterNameOverride;
             }
 
-            LastCharacterInfo lastChar = LastCharacters.FirstOrDefault(c => c.AccountName.Equals(account) && c.ServerName == server);
+            var lastChar = LastCharacters.FirstOrDefault(c => c.AccountName?.Equals(account) ?? false && c.ServerName == server);
 
-            return lastChar != null ? lastChar.LastCharacterName : string.Empty;
+            return lastChar != null ? lastChar.LastCharacterName ?? string.Empty : string.Empty;
         }
 
         public static void OverrideLastCharacter(string name)
@@ -92,8 +96,8 @@ namespace ClassicUO.Game.Managers
 
     public class LastCharacterInfo
     {
-        public string AccountName { get; set; }
-        public string ServerName { get; set; }
-        public string LastCharacterName { get; set; }
+        public string? AccountName { get; set; }
+        public string? ServerName { get; set; }
+        public string? LastCharacterName { get; set; }
     }
 }

@@ -12,13 +12,13 @@ namespace ClassicUO.Sdk.Assets
         public const int MAX_GUMP_DATA_INDEX_COUNT = 0x10000;
 
 
-        private UOFile _file;
+        private UOFile? _file;
 
         public GumpsLoader(UOFileManager fileManager) : base(fileManager) { }
 
 
         public bool UseUOPGumps = false;
-        public UOFile File => _file;
+        public UOFile? File => _file;
 
         public override void Load()
         {

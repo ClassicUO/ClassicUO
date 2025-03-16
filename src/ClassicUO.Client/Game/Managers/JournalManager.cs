@@ -11,12 +11,12 @@ namespace ClassicUO.Game.Managers
 {
     internal sealed class JournalManager
     {
-        private StreamWriter _fileWriter;
+        private StreamWriter? _fileWriter;
         private bool _writerHasException;
 
         public static Deque<JournalEntry> Entries { get; } = new Deque<JournalEntry>(Constants.MAX_JOURNAL_HISTORY_COUNT);
 
-        public event EventHandler<JournalEntry> EntryAdded;
+        public event EventHandler<JournalEntry>? EntryAdded;
 
 
         public void Add(string text, ushort hue, string name, TextType type, bool isunicode = true, MessageType messageType = MessageType.Regular)
@@ -123,8 +123,8 @@ namespace ClassicUO.Game.Managers
         public ushort Hue;
 
         public bool IsUnicode;
-        public string Name;
-        public string Text;
+        public string Name = "";
+        public string Text = "";
 
         public TextType TextType;
         public DateTime Time;

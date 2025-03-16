@@ -377,7 +377,7 @@ namespace ClassicUO.Network
 
             writer.WriteUInt16BE(character.Hue);
 
-            Item hair = character.FindItemByLayer(Layer.Hair);
+            var hair = character.FindItemByLayer(Layer.Hair);
 
             if (hair != null)
             {
@@ -389,7 +389,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2 * 2);
             }
 
-            Item beard = character.FindItemByLayer(Layer.Beard);
+            var beard = character.FindItemByLayer(Layer.Beard);
 
             if (beard != null)
             {
@@ -406,7 +406,7 @@ namespace ClassicUO.Network
             writer.WriteUInt16BE((ushort) slot);
             writer.WriteUInt32BE(clientIP);
 
-            Item shirt = character.FindItemByLayer(Layer.Shirt);
+            var shirt = character.FindItemByLayer(Layer.Shirt);
 
             if (shirt != null)
             {
@@ -417,7 +417,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            Item pants = character.FindItemByLayer(Layer.Pants);
+            var pants = character.FindItemByLayer(Layer.Pants);
 
             if (pants != null)
             {
@@ -976,8 +976,8 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            List<SpeechEntry> entries = Client.Game.UO.FileManager.Speeches.GetKeywords(text);
-            bool encoded = entries != null && entries.Count != 0;
+            var entries = Client.Game.UO.FileManager.Speeches.GetKeywords(text);
+            bool encoded = entries.Count != 0;
 
             if (encoded)
             {
@@ -2691,7 +2691,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_ChatJoinCommand(this NetClient socket, string name, string password = null)
+        public static void Send_ChatJoinCommand(this NetClient socket, string name, string? password = null)
         {
             const byte ID = 0xB3;
 
@@ -2733,7 +2733,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_ChatCreateChannelCommand(this NetClient socket, string name, string password = null)
+        public static void Send_ChatCreateChannelCommand(this NetClient socket, string name, string? password = null)
         {
             const byte ID = 0xB3;
 
@@ -4620,7 +4620,7 @@ namespace ClassicUO.Network
             }
 
             int len = writer.BytesWritten;
-            Plugin.ProcessRecvPacket(writer.AllocatedBuffer, ref len);
+            Plugin.ProcessRecvPacket(writer.AllocatedBuffer ?? [], ref len);
             writer.Dispose();
         }
 
@@ -4664,7 +4664,7 @@ namespace ClassicUO.Network
             }
 
             int len = writer.BytesWritten;
-            Plugin.ProcessRecvPacket(writer.AllocatedBuffer, ref len);
+            Plugin.ProcessRecvPacket(writer.AllocatedBuffer ?? [], ref len);
             writer.Dispose();
         }
     }

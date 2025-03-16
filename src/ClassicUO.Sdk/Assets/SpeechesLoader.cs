@@ -11,7 +11,7 @@ namespace ClassicUO.Sdk.Assets
 {
     public sealed class SpeechesLoader : UOFileLoader
     {
-        private SpeechEntry[] _speech;
+        private SpeechEntry[]? _speech;
 
         public SpeechesLoader(UOFileManager fileManager) : base(fileManager)
         {
@@ -102,9 +102,9 @@ namespace ClassicUO.Sdk.Assets
 
         public List<SpeechEntry> GetKeywords(string text)
         {
-            List<SpeechEntry> list = new List<SpeechEntry>();
+            var list = new List<SpeechEntry>();
 
-            if (FileManager.Version < ClientVersion.CV_305D)
+            if (FileManager.Version < ClientVersion.CV_305D || _speech == null)
             {
                 return list;
             }
@@ -113,7 +113,7 @@ namespace ClassicUO.Sdk.Assets
 
             for (int i = 0; i < _speech.Length; i++)
             {
-                SpeechEntry entry = _speech[i];
+                var entry = _speech[i];
 
                 if (IsMatch(text, in entry))
                 {

@@ -165,7 +165,7 @@ namespace ClassicUO.Game.GameObjects
         {
             get
             {
-                Item it = FindItemByLayer(Layer.Mount);
+                var it = FindItemByLayer(Layer.Mount);
 
                 if (it != null && !IsDrivingBoat && it.GetGraphicForAnimation() != 0xFFFF)
                 {
@@ -180,7 +180,7 @@ namespace ClassicUO.Game.GameObjects
         {
             get
             {
-                Item it = FindItemByLayer(Layer.Mount);
+                var it = FindItemByLayer(Layer.Mount);
 
                 return it != null && it.Graphic == 0x3E96;
             }
@@ -212,11 +212,11 @@ namespace ClassicUO.Game.GameObjects
             return mobile;
         }
 
-        public Item GetSecureTradeBox()
+        public Item? GetSecureTradeBox()
         {
-            for (LinkedObject i = Items; i != null; i = i.Next)
+            for (var i = Items; i != null; i = i.Next)
             {
-                Item it = (Item)i;
+                var it = (Item)i;
 
                 if (it.Graphic == 0x1E5E && it.Layer == 0)
                 {
@@ -875,7 +875,7 @@ namespace ClassicUO.Game.GameObjects
                 && !TestStepNoChangeDirection(this, GetGroupForAnimation(this, isParent: true))
             )
             {
-                GameObject start = this;
+                GameObject? start = this;
 
                 while (start?.TPrevious != null)
                 {
@@ -895,7 +895,7 @@ namespace ClassicUO.Game.GameObjects
                         }
                     }
 
-                    start = (GameObject)start.TNext;
+                    start = start.TNext;
                 }
             }
 
@@ -910,7 +910,7 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            TextObject last = (TextObject)TextContainer.Items;
+            var last = (TextObject?)TextContainer.Items;
 
             while (last?.Next != null)
             {
@@ -974,7 +974,7 @@ namespace ClassicUO.Game.GameObjects
                 p.Y -= HitsTexture.Height;
             }
 
-            for (; last != null; last = (TextObject)last.Previous)
+            for (; last != null; last = (TextObject?)last.Previous)
             {
                 if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                 {

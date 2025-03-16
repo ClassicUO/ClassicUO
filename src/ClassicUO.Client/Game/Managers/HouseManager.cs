@@ -23,7 +23,7 @@ namespace ClassicUO.Game.Managers
             _houses[serial] = revision;
         }
 
-        public bool TryGetHouse(uint serial, out House house)
+        public bool TryGetHouse(uint serial, out House? house)
         {
             return _houses.TryGetValue(serial, out house);
         }
@@ -32,7 +32,7 @@ namespace ClassicUO.Game.Managers
         {
             if (!IsHouseInRange(serial, distance))
             {
-                if (_houses.TryGetValue(serial, out House house))
+                if (_houses.TryGetValue(serial, out var house))
                 {
                     house.ClearComponents();
                     _houses.Remove(serial);
@@ -65,7 +65,7 @@ namespace ClassicUO.Game.Managers
                 //    currY = World.Player.Y;
                 //}
 
-                Item found = _world.Items.Get(serial);
+                var found = _world.Items.Get(serial);
 
                 if (found == null)
                 {
@@ -84,7 +84,7 @@ namespace ClassicUO.Game.Managers
         {
             if (obj != null && TryGetHouse(house, out _))
             {
-                Item found = _world.Items.Get(house);
+                var found = _world.Items.Get(house);
 
                 if (found == null || !found.MultiInfo.HasValue)
                 {
@@ -104,18 +104,18 @@ namespace ClassicUO.Game.Managers
 
         public void Remove(uint serial)
         {
-            if (TryGetHouse(serial, out House house))
+            if (TryGetHouse(serial, out var house))
             {
-                house.ClearComponents();
+                house?.ClearComponents();
                 _houses.Remove(serial);
             }
         }
 
         public void RemoveMultiTargetHouse()
         {
-            if (_houses.TryGetValue(0, out House house))
+            if (_houses.TryGetValue(0, out var house))
             {
-                house.ClearComponents();
+                house?.ClearComponents();
                 _houses.Remove(0);
             }
         }

@@ -155,7 +155,7 @@ namespace ClassicUO.Renderer.Arts
                                 *pixels_ptr =
                                     ColorConverter.Color16To32(
                                         _huesLoader.GetColor16(
-                                            ColorConverter.ColorToHue(c.PackedValue),
+                                            ColorConverter.Color32To16(c.PackedValue),
                                             customHue
                                         )
                                     ) | 0xFF_00_00_00;

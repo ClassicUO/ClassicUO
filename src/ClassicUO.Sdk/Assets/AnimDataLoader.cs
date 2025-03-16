@@ -41,11 +41,10 @@ namespace ClassicUO.Sdk.Assets
 
             _file.Seek(pos, SeekOrigin.Begin);
 
-            Span<byte> buf = stackalloc byte[Unsafe.SizeOf<AnimDataFrame>()];
+            Unsafe.SkipInit<AnimDataFrame>(out var animData);
+            Span<byte> buf = MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref animData, 1));
             _file.Read(buf);
-
-            var span = MemoryMarshal.Cast<byte, AnimDataFrame>(buf);
-            return span[0];
+            return animData;
 
         }
     }

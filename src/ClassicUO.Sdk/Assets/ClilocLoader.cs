@@ -9,7 +9,7 @@ namespace ClassicUO.Sdk.Assets
 {
     public sealed class ClilocLoader : UOFileLoader
     {
-        private string _cliloc;
+        private string _cliloc = "Cliloc.enu";
         private readonly Dictionary<int, string> _entries = new Dictionary<int, string>();
 
         public ClilocLoader(UOFileManager fileManager) : base(fileManager)

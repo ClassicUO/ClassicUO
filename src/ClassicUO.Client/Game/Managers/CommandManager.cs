@@ -107,7 +107,7 @@ namespace ClassicUO.Game.Managers
         {
             name = name.ToLower();
 
-            if (_commands.TryGetValue(name, out Action<string[]> action))
+            if (_commands.TryGetValue(name, out var action))
             {
                 action.Invoke(args);
             }
@@ -125,7 +125,7 @@ namespace ClassicUO.Game.Managers
             }
 
             Mouse.LastLeftButtonClickTime = 0;
-            GameActions.Print(_world, string.Format(ResGeneral.ItemID0Hue1, entity.Graphic, entity.Hue));
+            GameActions.Print(_world, string.Format(ResGeneral.ItemID0Hue1, entity?.Graphic ?? 0, entity?.Hue ?? 0));
         }
     }
 }

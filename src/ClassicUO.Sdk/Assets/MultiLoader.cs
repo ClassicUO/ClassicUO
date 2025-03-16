@@ -15,7 +15,7 @@ namespace ClassicUO.Sdk.Assets
         {
         }
 
-        internal UOFile File { get; private set; }
+        internal UOFile? File { get; private set; }
 
         public override unsafe void Load()
         {
@@ -36,7 +36,7 @@ namespace ClassicUO.Sdk.Assets
                 }
             }
 
-            File.FillEntries();
+            File?.FillEntries();
         }
 
         public List<MultiInfo> GetMultis(uint idx)

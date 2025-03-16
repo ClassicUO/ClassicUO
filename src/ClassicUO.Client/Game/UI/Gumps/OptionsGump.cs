@@ -3883,7 +3883,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_currentProfile.ActivateChatAfterEnter != _chatAfterEnter.IsChecked)
             {
-                UIManager.SystemChat.IsActive = !_chatAfterEnter.IsChecked;
+                if (UIManager.SystemChat != null)
+                    UIManager.SystemChat.IsActive = !_chatAfterEnter.IsChecked;
                 _currentProfile.ActivateChatAfterEnter = _chatAfterEnter.IsChecked;
             }
 
@@ -4105,7 +4106,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.CounterBarHighlightOnAmount = _highlightOnAmount.IsChecked;
             _currentProfile.CounterBarDisplayAbbreviatedAmount = _enableAbbreviatedAmount.IsChecked;
 
-            CounterBarGump counterGump = UIManager.GetGump<CounterBarGump>();
+            var counterGump = UIManager.GetGump<CounterBarGump>();
 
             counterGump?.SetLayout(_currentProfile.CounterBarCellSize, _currentProfile.CounterBarRows, _currentProfile.CounterBarColumns);
 
@@ -4227,7 +4228,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             World.InfoBars.Save();
 
-            InfoBarGump infoBarGump = UIManager.GetGump<InfoBarGump>();
+            var infoBarGump = UIManager.GetGump<InfoBarGump>();
 
             if (_currentProfile.ShowInfoBar)
             {

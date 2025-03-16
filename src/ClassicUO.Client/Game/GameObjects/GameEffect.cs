@@ -65,8 +65,8 @@ namespace ClassicUO.Game.GameObjects
         public uint IntervalInMs;
         public bool IsEnabled;
         public long NextChangeFrameTime;
-        public GameObject Source;
-        protected GameObject Target;
+        public GameObject? Source;
+        protected GameObject? Target;
         protected ushort TargetX;
         protected ushort TargetY;
         protected sbyte TargetZ;

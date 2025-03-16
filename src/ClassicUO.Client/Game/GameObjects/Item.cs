@@ -131,7 +131,7 @@ namespace ClassicUO.Game.GameObjects
         {
             get
             {
-                Item item = this;
+                var item = this;
 
                 while (SerialHelper.IsItem(item.Container))
                 {

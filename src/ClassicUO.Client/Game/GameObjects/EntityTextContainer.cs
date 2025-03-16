@@ -18,7 +18,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (Size >= MaxSize)
             {
-                ((TextObject)Items)?.Destroy();
+                ((TextObject?)Items)?.Destroy();
                 Remove(Items);
             }
             else
@@ -29,12 +29,12 @@ namespace ClassicUO.Game.GameObjects
 
         public new void Clear()
         {
-            TextObject item = (TextObject)Items;
+            var item = (TextObject?)Items;
             Items = null;
 
             while (item != null)
             {
-                TextObject next = (TextObject)item.Next;
+                var next = (TextObject?)item.Next;
                 item.Next = null;
                 item.Destroy();
                 Remove(item);

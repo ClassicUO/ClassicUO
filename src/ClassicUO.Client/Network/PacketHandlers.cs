@@ -6843,7 +6843,7 @@ namespace ClassicUO.Network
                         color = 0x00FFFFFF;
                     }
 
-                    StringBuilder sb = null;
+                    StringBuilder? sb = null;
 
                     if (gparams.Count >= 9)
                     {
@@ -6971,7 +6971,7 @@ namespace ClassicUO.Network
                     string.Equals(entry, "tooltip", StringComparison.InvariantCultureIgnoreCase)
                 )
                 {
-                    string text = null;
+                    string? text;
 
                     if (gparams.Count > 2 && gparams[2].Length != 0)
                     {

@@ -24,7 +24,7 @@ namespace ClassicUO.Game.Managers
 
         public bool IsGuild;
         public uint LastUpdate;
-        public string Name;
+        public string? Name;
         public readonly uint Serial;
         public int X, Y, HP, Map;
 
@@ -95,7 +95,7 @@ namespace ClassicUO.Game.Managers
             int hp,
             int map,
             bool isguild,
-            string name = null,
+            string? name = null,
             bool from_packet = false
         )
         {
@@ -115,7 +115,7 @@ namespace ClassicUO.Game.Managers
 
             if (string.IsNullOrEmpty(name))
             {
-                Entity ent = _world.Get(serial);
+                var ent = _world.Get(serial);
 
                 if (ent != null && !string.IsNullOrEmpty(ent.Name))
                 {
@@ -123,7 +123,7 @@ namespace ClassicUO.Game.Managers
                 }
             }
 
-            if (!Entities.TryGetValue(serial, out WMapEntity entity) || entity == null)
+            if (!Entities.TryGetValue(serial, out var entity) || entity == null)
             {
                 entity = new WMapEntity(serial)
                 {
@@ -189,9 +189,9 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public WMapEntity GetEntity(uint serial)
+        public WMapEntity? GetEntity(uint serial)
         {
-            Entities.TryGetValue(serial, out WMapEntity entity);
+            Entities.TryGetValue(serial, out var entity);
 
             return entity;
         }
@@ -218,11 +218,11 @@ namespace ClassicUO.Game.Managers
 
                 if (_world.Party != null && _world.Party.Leader != 0)
                 {
-                    foreach (PartyMember e in _world.Party.Members)
+                    foreach (var e in _world.Party.Members)
                     {
                         if (e != null && SerialHelper.IsValid(e.Serial))
                         {
-                            Mobile mob = _world.Mobiles.Get(e.Serial);
+                            var mob = _world.Mobiles.Get(e.Serial);
 
                             if (mob == null || mob.Distance > _world.ClientViewRange)
                             {

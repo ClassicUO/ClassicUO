@@ -170,15 +170,17 @@ namespace ClassicUO.Game.Managers
 
         private void SetPositionNearGameObject(ushort g, uint serial, int width, int height)
         {
-            Item item = _world.Items.Get(serial);
+            var item = _world.Items.Get(serial);
 
             if (item == null)
             {
                 return;
             }
 
-            Item bank = _world.Player.FindItemByLayer(Layer.Bank);
-            var camera = Client.Game.Scene.Camera;
+            var bank = _world.Player.FindItemByLayer(Layer.Bank);
+            var camera = Client.Game.Scene?.Camera;
+            if (camera == null)
+                return;
 
             if (bank != null && serial == bank)
             {
@@ -195,7 +197,7 @@ namespace ClassicUO.Game.Managers
             else if (SerialHelper.IsMobile(item.Container))
             {
                 // pack animal, snooped player, npc vendor
-                Mobile mobile = _world.Mobiles.Get(item.Container);
+                var mobile = _world.Mobiles.Get(item.Container);
 
                 if (mobile != null)
                 {
@@ -206,7 +208,7 @@ namespace ClassicUO.Game.Managers
             else
             {
                 // in a container, open near the container
-                ContainerGump parentContainer = UIManager.GetGump<ContainerGump>(item.Container);
+                var parentContainer = UIManager.GetGump<ContainerGump>(item.Container);
 
                 if (parentContainer != null)
                 {

@@ -25,7 +25,7 @@ namespace ClassicUO
             var args = new string[argc];
             for (int i = 0; i < argc; i++)
             {
-                args[i] = Marshal.PtrToStringAnsi(argv[i]);
+                args[i] = Marshal.PtrToStringAnsi(argv[i]) ?? "";
             }
 
             var host = new UnmanagedAssistantHost(hostSetup);
@@ -37,7 +37,7 @@ namespace ClassicUO
         public static void Main(string[] args) => Boot(null, args);
 
 
-        public static void Boot(UnmanagedAssistantHost pluginHost, string[] args)
+        public static void Boot(UnmanagedAssistantHost? pluginHost, string[] args)
         {
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
@@ -163,14 +163,15 @@ namespace ClassicUO
                 flags |= INVALID_UO_DIRECTORY;
             }
 
-            string clientVersionText = Settings.GlobalSettings.ClientVersion;
+            var clientVersionText = Settings.GlobalSettings.ClientVersion;
 
             if (!ClientVersionHelper.IsClientVersionValid(Settings.GlobalSettings.ClientVersion, out ClientVersion clientVersion))
             {
                 Log.Warn($"Client version [{clientVersionText}] is invalid, let's try to read the client.exe");
 
                 // mmm something bad happened, try to load from client.exe [windows only]
-                if (!ClientVersionHelper.TryParseFromFile(Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, "client.exe"), out clientVersionText) || !ClientVersionHelper.IsClientVersionValid(clientVersionText, out clientVersion))
+                if (!ClientVersionHelper.TryParseFromFile(Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, "client.exe"), out clientVersionText) || 
+                    !ClientVersionHelper.IsClientVersionValid(clientVersionText, out clientVersion))
                 {
                     Log.Error("Invalid client version: " + clientVersionText);
 
@@ -181,7 +182,7 @@ namespace ClassicUO
                     Log.Trace($"Found a valid client.exe [{clientVersionText} - {clientVersion}]");
 
                     // update the wrong/missing client version in settings.json
-                    Settings.GlobalSettings.ClientVersion = clientVersionText;
+                    Settings.GlobalSettings.ClientVersion = clientVersionText ?? "0.0.0.0";
                 }
             }
 

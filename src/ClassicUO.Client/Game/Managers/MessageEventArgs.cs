@@ -10,7 +10,7 @@ namespace ClassicUO.Game.Managers
     {
         public MessageEventArgs
         (
-            Entity parent,
+            Entity? parent,
             string text,
             string name,
             ushort hue,
@@ -18,7 +18,7 @@ namespace ClassicUO.Game.Managers
             byte font,
             TextType text_type,
             bool unicode = false,
-            string lang = null
+            string? lang = null
         )
         {
             Parent = parent;
@@ -34,7 +34,7 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        public Entity Parent { get; }
+        public Entity? Parent { get; }
 
         public string Text { get; }
 
@@ -46,13 +46,13 @@ namespace ClassicUO.Game.Managers
 
         public byte Font { get; }
 
-        public string Language { get; }
+        public string? Language { get; }
 
         public uint Cliloc { get; }
 
         public AffixType AffixType { get; }
 
-        public string Affix { get; }
+        public string? Affix { get; }
 
         public bool IsUnicode { get; }
 

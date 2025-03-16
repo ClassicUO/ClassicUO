@@ -112,7 +112,7 @@ namespace ClassicUO.Game.Managers
         public readonly LastTargetInfo LastTargetInfo = new LastTargetInfo();
 
 
-        public MultiTargetInfo MultiTargetInfo { get; private set; }
+        public MultiTargetInfo? MultiTargetInfo { get; private set; }
 
         public CursorTarget TargetingState { get; private set; } = CursorTarget.Invalid;
 
@@ -227,7 +227,7 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            Entity entity = _world.InGame ? _world.Get(serial) : null;
+            var entity = _world.InGame ? _world.Get(serial) : null;
 
             if (entity != null)
             {
@@ -248,7 +248,7 @@ namespace ClassicUO.Game.Managers
 
                         if (SerialHelper.IsMobile(serial) && serial != _world.Player && (_world.Player.NotorietyFlag == NotorietyFlag.Innocent || _world.Player.NotorietyFlag == NotorietyFlag.Ally))
                         {
-                            Mobile mobile = entity as Mobile;
+                            var mobile = entity as Mobile;
 
                             if (mobile != null)
                             {

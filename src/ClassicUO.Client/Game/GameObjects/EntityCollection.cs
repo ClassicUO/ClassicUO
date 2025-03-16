@@ -1,13 +1,12 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System.Collections;
 using System.Collections.Generic;
 
 namespace ClassicUO.Game.GameObjects
 {
     static class DictExt
     {
-        public static T Get<T>(this Dictionary<uint, T> dict, uint serial) where T : Entity
+        public static T? Get<T>(this Dictionary<uint, T> dict, uint serial) where T : Entity
         {
             dict.TryGetValue(serial, out var v);
 

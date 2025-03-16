@@ -159,7 +159,7 @@ namespace ClassicUO.Game.GameObjects
             byte animGroup = GetGroupForAnimation(this, graphic, true);
             byte animIndex = AnimIndex;
 
-            Item mount = FindItemByLayer(Layer.Mount);
+            var mount = FindItemByLayer(Layer.Mount);
             sbyte mountOffsetY = 0;
 
             if (isHuman && mount != null && mount.Graphic != 0x3E96)
@@ -354,7 +354,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     Layer layer = LayerOrder.UsedLayers[layerDir, i];
 
-                    Item item = FindItemByLayer(layer);
+                    var item = FindItemByLayer(layer);
 
                     if (item == null)
                     {
@@ -385,11 +385,11 @@ namespace ClassicUO.Game.GameObjects
                             if (
                                 Client.Game.UO.FileManager.Animations.EquipConversions.TryGetValue(
                                     Graphic,
-                                    out Dictionary<ushort, EquipConvData> map
+                                    out var map
                                 )
                             )
                             {
-                                if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
+                                if (map.TryGetValue(item.ItemData.AnimID, out var data))
                                 {
                                     _equipConvData = data;
                                     graphic = data.Graphic;
@@ -498,7 +498,7 @@ namespace ClassicUO.Game.GameObjects
                 if (
                     Client.Game.UO.FileManager.Animations.EquipConversions.TryGetValue(
                         owner.Graphic,
-                        out Dictionary<ushort, EquipConvData> map
+                        out var map
                     )
                 )
                 {
@@ -638,8 +638,8 @@ namespace ClassicUO.Game.GameObjects
 
         private static void DrawInternal(
             UltimaBatcher2D batcher,
-            Mobile owner,
-            Item entity,
+            Mobile? owner,
+            Item? entity,
             int x,
             int y,
             Vector3 hueVec,
@@ -766,7 +766,7 @@ namespace ClassicUO.Game.GameObjects
 
                     if (charIsSitting)
                     {
-                        Vector3 mod = CalculateSitAnimation(y, entity, isHuman, ref spriteInfo);
+                        var mod = CalculateSitAnimation(y, entity, isHuman, ref spriteInfo);
 
                         batcher.DrawCharacterSitted(
                             spriteInfo.Texture,
@@ -851,12 +851,12 @@ namespace ClassicUO.Game.GameObjects
 
         private static Vector3 CalculateSitAnimation(
             int y,
-            Item entity,
+            Item? entity,
             bool isHuman,
             ref SpriteInfo spriteInfo
         )
         {
-            Vector3 mod = new Vector3();
+            var mod = new Vector3();
 
             const float UPPER_BODY_RATIO = 0.35f;
             const float MID_BODY_RATIO = 0.60f;
@@ -1007,7 +1007,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (isHuman)
             {
-                Item mount = FindItemByLayer(Layer.Mount);
+                var mount = FindItemByLayer(Layer.Mount);
                 if (mount != null)
                 {
                     var mountGraphic = mount.GetGraphicForAnimation();
@@ -1095,7 +1095,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 for (Layer layer = Layer.Invalid + 1; layer < Layer.Mount; ++layer)
                 {
-                    Item item = FindItemByLayer(layer);
+                    var item = FindItemByLayer(layer);
 
                     if (
                         item == null
@@ -1169,8 +1169,8 @@ namespace ClassicUO.Game.GameObjects
             switch (layer)
             {
                 case Layer.Shoes:
-                    Item pants = mobile.FindItemByLayer(Layer.Pants);
-                    Item robe;
+                    var pants = mobile.FindItemByLayer(Layer.Pants);
+                    Item? robe;
 
                     if (
                         mobile.FindItemByLayer(Layer.Legs) != null
@@ -1219,7 +1219,7 @@ namespace ClassicUO.Game.GameObjects
                         )
                     )
                     {
-                        Item skirt = mobile.FindItemByLayer(Layer.Skirt);
+                        var skirt = mobile.FindItemByLayer(Layer.Skirt);
 
                         if (skirt != null && skirt.Graphic != 0x01C7 && skirt.Graphic != 0x01E4)
                         {
@@ -1240,7 +1240,7 @@ namespace ClassicUO.Game.GameObjects
 
                 case Layer.Tunic:
                     robe = mobile.FindItemByLayer(Layer.Robe);
-                    Item tunic = mobile.FindItemByLayer(Layer.Tunic);
+                    var tunic = mobile.FindItemByLayer(Layer.Tunic);
 
                     /*if (robe != null && robe.Graphic != 0)
                         return true;
@@ -1275,7 +1275,7 @@ namespace ClassicUO.Game.GameObjects
 
                         if (tunic != null && tunic.Graphic != 0x1541 && tunic.Graphic != 0x1542)
                         {
-                            Item torso = mobile.FindItemByLayer(Layer.Torso);
+                            var torso = mobile.FindItemByLayer(Layer.Torso);
 
                             if (
                                 torso != null

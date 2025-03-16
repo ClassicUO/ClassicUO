@@ -98,7 +98,7 @@ namespace ClassicUO.Game.Managers
 
             infoBarItems.Clear();
 
-            XmlElement root = doc["infos"];
+            XmlElement? root = doc?["infos"];
 
             if (root != null)
             {
@@ -161,7 +161,7 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        public InfoBarItem(XmlElement xml)
+        public InfoBarItem(XmlElement? xml)
         {
             if (xml == null)
             {
@@ -175,7 +175,7 @@ namespace ClassicUO.Game.Managers
 
         public ushort hue;
 
-        public string label;
+        public string label = "";
         public InfoBarVars var;
 
         public void Save(XmlTextWriter writer)

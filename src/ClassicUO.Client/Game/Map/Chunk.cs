@@ -13,16 +13,6 @@ namespace ClassicUO.Game.Map
 {
     internal sealed class Chunk
     {
-        //private static readonly QueuedPool<Chunk> _pool = new QueuedPool<Chunk>
-        //(
-        //    Constants.PREDICTABLE_CHUNKS,
-        //    c =>
-        //    {
-        //        c.LastAccessTime = Time.Ticks + Constants.CLEAR_TEXTURES_DELAY;
-        //        c.IsDestroyed = false;
-        //    }
-        //);
-
         private readonly World _world;
 
         public Chunk(World world)
@@ -30,10 +20,10 @@ namespace ClassicUO.Game.Map
             _world = world;
         }
 
-        public GameObject[,] Tiles { get; } = new GameObject[8, 8];
+        public GameObject?[,] Tiles { get; } = new GameObject[8, 8];
         public bool IsDestroyed;
         public long LastAccessTime;
-        public LinkedListNode<int> Node;
+        public LinkedListNode<int>? Node { get; set; }
 
 
         public int X;
@@ -57,7 +47,7 @@ namespace ClassicUO.Game.Map
 
             Map map = _world.Map;
 
-            ref var im = ref GetIndex(index);
+            ref readonly var im = ref GetIndex(index);
 
             if (!im.IsValid())
             {
@@ -103,7 +93,7 @@ namespace ClassicUO.Game.Map
                 im.StaticFile.Seek((long)im.StaticAddress, System.IO.SeekOrigin.Begin);
                 im.StaticFile.Read(MemoryMarshal.AsBytes(staticsSpan));
 
-                foreach (ref var sb in staticsSpan)
+                foreach (ref readonly var sb in staticsSpan)
                 {
                     if (sb.Color != 0 && sb.Color != 0xFFFF)
                     {
@@ -129,7 +119,7 @@ namespace ClassicUO.Game.Map
         }
 
 
-        private ref IndexMap GetIndex(int map)
+        private ref readonly IndexMap GetIndex(int map)
         {
             Client.Game.UO.FileManager.Maps.SanitizeMapIndex(ref map);
 
@@ -137,9 +127,9 @@ namespace ClassicUO.Game.Map
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public GameObject GetHeadObject(int x, int y)
+        public GameObject? GetHeadObject(int x, int y)
         {
-            GameObject obj = Tiles[x, y];
+            var obj = Tiles[x, y];
 
             while (obj?.TPrevious != null)
             {
@@ -268,7 +258,7 @@ namespace ClassicUO.Game.Map
             }
 
 
-            GameObject o = Tiles[x, y];
+            var o = Tiles[x, y];
 
             if (o == obj)
             {
@@ -291,8 +281,8 @@ namespace ClassicUO.Game.Map
                 o = o.TPrevious;
             }
 
-            GameObject found = null;
-            GameObject start = o;
+            GameObject? found = null;
+            var start = o;
 
             while (o != null)
             {
@@ -310,7 +300,7 @@ namespace ClassicUO.Game.Map
             if (found != null)
             {
                 obj.TPrevious = found;
-                GameObject next = found.TNext;
+                var next = found.TNext;
                 obj.TNext = next;
                 found.TNext = obj;
 
@@ -329,7 +319,7 @@ namespace ClassicUO.Game.Map
 
         public void RemoveGameObject(GameObject obj, int x, int y)
         {
-            ref GameObject firstNode = ref Tiles[x, y];
+            ref var firstNode = ref Tiles[x, y];
 
             if (firstNode == null || obj == null)
             {
@@ -362,18 +352,18 @@ namespace ClassicUO.Game.Map
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    GameObject obj = Tiles[i, j];
+                    var obj = Tiles[i, j];
 
                     if (obj == null)
                     {
                         continue;
                     }
 
-                    GameObject first = GetHeadObject(i, j);
+                    var first = GetHeadObject(i, j);
 
                     while (first != null)
                     {
-                        GameObject next = first.TNext;
+                        var next = first.TNext;
 
                         if (!ReferenceEquals(first, _world.Player))
                         {
@@ -389,7 +379,7 @@ namespace ClassicUO.Game.Map
                 }
             }
 
-            if (Node.Next != null || Node.Previous != null)
+            if (Node?.Next != null || Node?.Previous != null)
             {
                 Node.List?.Remove(Node);
             }
@@ -404,18 +394,18 @@ namespace ClassicUO.Game.Map
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    GameObject obj = Tiles[i, j];
+                    var obj = Tiles[i, j];
 
                     if (obj == null)
                     {
                         continue;
                     }
 
-                    GameObject first = GetHeadObject(x: i, j);
+                    var first = GetHeadObject(x: i, j);
 
                     while (first != null)
                     {
-                        GameObject next = first.TNext;
+                        var next = first.TNext;
 
                         if (!ReferenceEquals(first, _world.Player))
                         {
@@ -431,7 +421,7 @@ namespace ClassicUO.Game.Map
                 }
             }
 
-            if (Node.Next != null || Node.Previous != null)
+            if (Node?.Next != null || Node?.Previous != null)
             {
                 Node.List?.Remove(Node);
             }
@@ -445,9 +435,9 @@ namespace ClassicUO.Game.Map
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    for (GameObject obj = GetHeadObject(i, j); obj != null; obj = obj.TNext)
+                    for (var obj = GetHeadObject(i, j); obj != null; obj = obj.TNext)
                     {
-                        if (!(obj is Land) && !(obj is Static) /*&& !(obj is Multi)*/)
+                        if (obj is not Land && obj is not Static /*&& !(obj is Multi)*/)
                         {
                             return false;
                         }

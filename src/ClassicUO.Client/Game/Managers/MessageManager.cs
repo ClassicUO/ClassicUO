@@ -48,22 +48,22 @@ namespace ClassicUO.Game.Managers
 
         public PromptData PromptData { get; set; }
 
-        public event EventHandler<MessageEventArgs> MessageReceived;
+        public event EventHandler<MessageEventArgs>? MessageReceived;
 
-        public event EventHandler<MessageEventArgs> LocalizedMessageReceived;
+        public event EventHandler<MessageEventArgs>? LocalizedMessageReceived;
 
 
         public void HandleMessage
         (
-            Entity parent,
-            string text,
+            Entity? parent,
+            string? text,
             string name,
             ushort hue,
             MessageType type,
             byte font,
             TextType textType,
             bool unicode = false,
-            string lang = null
+            string? lang = null
         )
         {
             if (string.IsNullOrEmpty(text))
@@ -73,7 +73,7 @@ namespace ClassicUO.Game.Managers
 
             Profile currentProfile = ProfileManager.CurrentProfile;
 
-            if (currentProfile != null && currentProfile.OverrideAllFonts)
+            if (currentProfile.OverrideAllFonts)
             {
                 font = currentProfile.ChatFont;
                 unicode = currentProfile.OverrideAllFontsIsUnicode;
@@ -98,7 +98,7 @@ namespace ClassicUO.Game.Managers
                 case MessageType.Spell:
                 {
                     //server hue color per default
-                    if (!string.IsNullOrEmpty(text) && SpellDefinition.WordToTargettype.TryGetValue(text, out SpellDefinition spell))
+                    if (!string.IsNullOrEmpty(text) && SpellDefinition.WordToTargettype.TryGetValue(text, out var spell))
                     {
                         if (currentProfile != null && currentProfile.EnabledSpellFormat && !string.IsNullOrWhiteSpace(currentProfile.SpellDisplayFormat))
                         {
@@ -169,7 +169,7 @@ namespace ClassicUO.Game.Managers
                         msg.IsTextGump = true;
                         bool found = false;
 
-                        for (LinkedListNode<Gump> gump = UIManager.Gumps.Last; gump != null; gump = gump.Previous)
+                        for (var gump = UIManager.Gumps.Last; gump != null; gump = gump.Previous)
                         {
                             Control g = gump.Value;
 

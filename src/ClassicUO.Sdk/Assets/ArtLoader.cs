@@ -8,7 +8,7 @@ namespace ClassicUO.Sdk.Assets
 {
     public sealed class ArtLoader : UOFileLoader
     {
-        private UOFile _file;
+        private UOFile? _file;
         public const int MAX_LAND_DATA_INDEX_COUNT = 0x4000;
         public const int MAX_STATIC_DATA_INDEX_COUNT = 0x14000;
 
@@ -17,7 +17,7 @@ namespace ClassicUO.Sdk.Assets
         }
 
 
-        public UOFile File => _file;
+        public UOFile? File => _file;
 
 
         public override void Load()
@@ -39,7 +39,7 @@ namespace ClassicUO.Sdk.Assets
                 }
             }
 
-            _file.FillEntries();
+            _file?.FillEntries();
         }
 
         // public Rectangle GetRealArtBounds(int index) =>

@@ -93,7 +93,7 @@ namespace ClassicUO.Sdk
             return !string.IsNullOrEmpty(version);
         }
 
-        public static bool IsClientVersionValid(string versionText, out ClientVersion version)
+        public static bool IsClientVersionValid(string? versionText, out ClientVersion version)
         {
             version = 0;
 

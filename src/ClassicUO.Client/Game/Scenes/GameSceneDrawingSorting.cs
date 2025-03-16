@@ -92,7 +92,7 @@ namespace ClassicUO.Game.Scenes
             _noDrawRoofs = !ProfileManager.CurrentProfile.DrawRoofs;
             int bx = playerX;
             int by = playerY;
-            Chunk chunk = _world.Map.GetChunk(bx, by, false);
+            var chunk = _world.Map.GetChunk(bx, by, false);
 
             if (chunk != null)
             {
@@ -102,7 +102,7 @@ namespace ClassicUO.Game.Scenes
                 int pz14 = playerZ + 14;
                 int pz16 = playerZ + 16;
 
-                for (GameObject obj = chunk.GetHeadObject(x, y); obj != null; obj = obj.TNext)
+                for (var obj = chunk.GetHeadObject(x, y); obj != null; obj = obj.TNext)
                 {
                     sbyte tileZ = obj.Z;
 
@@ -165,7 +165,7 @@ namespace ClassicUO.Game.Scenes
                     y = playerY % 8;
 
                     for (
-                        GameObject obj2 = chunk.GetHeadObject(x, y);
+                        var obj2 = chunk.GetHeadObject(x, y);
                         obj2 != null;
                         obj2 = obj2.TNext
                     )
@@ -254,11 +254,11 @@ namespace ClassicUO.Game.Scenes
 
         private void ApplyFoliageTransparency(ushort graphic, int x, int y, int z)
         {
-            GameObject tile = _world.Map.GetTile(x, y);
+            var tile = _world.Map.GetTile(x, y);
 
             if (tile != null)
             {
-                for (GameObject obj = tile; obj != null; obj = obj.TNext)
+                for (var obj = tile; obj != null; obj = obj.TNext)
                 {
                     ushort testGraphic = obj.Graphic;
 
@@ -543,7 +543,7 @@ namespace ClassicUO.Game.Scenes
             {
                 for (int x = -1; x <= 2; ++x)
                 {
-                    GameObject tile = _world.Map.GetTile(obj.X + x, obj.Y + y);
+                    var tile = _world.Map.GetTile(obj.X + x, obj.Y + y);
 
                     found = false;
 
@@ -622,7 +622,7 @@ namespace ClassicUO.Game.Scenes
         }
 
         private unsafe bool AddTileToRenderList(
-            GameObject obj,
+            GameObject? obj,
             bool useObjectHandles,
             int maxZ,
             int cotZ,

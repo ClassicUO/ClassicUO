@@ -19,7 +19,7 @@ namespace ClassicUO.Game.Managers
         }
 
         protected TextObject FirstNode;
-        protected TextObject DrawPointer;
+        protected TextObject? DrawPointer;
 
         public override void Destroy()
         {
@@ -38,7 +38,7 @@ namespace ClassicUO.Game.Managers
             int mouseX = Mouse.Position.X;
             int mouseY = Mouse.Position.Y;
 
-            for (TextObject o = DrawPointer; o != null; o = o.DLeft)
+            for (var o = DrawPointer; o != null; o = o.DLeft)
             {
                 if (o.IsDestroyed || o.RenderedText == null || o.RenderedText.IsDestroyed || o.RenderedText.Texture == null || o.Time < ClassicUO.Time.Ticks)
                 {
@@ -98,7 +98,7 @@ namespace ClassicUO.Game.Managers
 
             obj.UnlinkD();
 
-            TextObject next = FirstNode.DRight;
+            var next = FirstNode.DRight;
             FirstNode.DRight = obj;
             obj.DLeft = FirstNode;
             obj.DRight = next;
@@ -175,8 +175,10 @@ namespace ClassicUO.Game.Managers
 
         private bool Collides(TextObject msg)
         {
-            bool result = false;
+            if (msg.RenderedText == null)
+                return false;
 
+            bool result = false;
             Rectangle rect = new Rectangle
             {
                 X = msg.RealScreenPosition.X,
@@ -236,7 +238,7 @@ namespace ClassicUO.Game.Managers
         {
             if (FirstNode != null)
             {
-                TextObject first = FirstNode;
+                var first = FirstNode;
 
                 while (first?.DLeft != null)
                 {
@@ -245,7 +247,7 @@ namespace ClassicUO.Game.Managers
 
                 while (first != null)
                 {
-                    TextObject next = first.DRight;
+                    var next = first.DRight;
 
                     first.Destroy();
                     first.Clear();
@@ -256,7 +258,7 @@ namespace ClassicUO.Game.Managers
 
             if (DrawPointer != null)
             {
-                TextObject first = DrawPointer;
+                var first = DrawPointer;
 
                 while (first?.DLeft != null)
                 {
@@ -265,7 +267,7 @@ namespace ClassicUO.Game.Managers
 
                 while (first != null)
                 {
-                    TextObject next = first.DRight;
+                    var next = first.DRight;
 
                     first.Destroy();
                     first.Clear();

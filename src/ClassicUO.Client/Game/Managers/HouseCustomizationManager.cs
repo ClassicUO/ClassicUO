@@ -12,6 +12,7 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
 using ClassicUO.Network;
 using Microsoft.Xna.Framework;
+using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.Managers
 {
@@ -82,7 +83,7 @@ namespace ClassicUO.Game.Managers
 
         private void InitializeHouse()
         {
-            Item foundation = _world.Items.Get(Serial);
+            var foundation = _world.Items.Get(Serial);
 
             if (foundation == null)
             {
@@ -124,9 +125,9 @@ namespace ClassicUO.Game.Managers
 
         public void GenerateFloorPlace()
         {
-            Item foundationItem = _world.Items.Get(Serial);
+            var foundationItem = _world.Items.Get(Serial);
 
-            if (foundationItem == null || !_world.HouseManager.TryGetHouse(Serial, out House house))
+            if (foundationItem == null || !_world.HouseManager.TryGetHouse(Serial, out var house) || house == null)
             {
                 return;
             }
@@ -258,10 +259,10 @@ namespace ClassicUO.Game.Managers
                         continue;
                     }
 
-                    Multi floorMulti = null;
-                    Multi floorCustomMulti = null;
+                    Multi? floorMulti = null;
+                    Multi? floorCustomMulti = null;
 
-                    foreach (Multi item in multi)
+                    foreach (var item in multi)
                     {
                         if (item.Z != z || (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) == 0)
                         {
@@ -608,7 +609,9 @@ namespace ClassicUO.Game.Managers
             // apply a minor offset for roof tiles
             int zOffset = -3;
 
-            HouseCustomizationGump gump = UIManager.GetGump<HouseCustomizationGump>(Serial);
+            var gump = UIManager.GetGump<HouseCustomizationGump>(Serial);
+            if (gump == null)
+                return;
 
             if (CurrentFloor == 1)
             {
@@ -624,9 +627,9 @@ namespace ClassicUO.Game.Managers
             }
             else if (place.Z >= _world.Player.Z + zOffset && place.Z < _world.Player.Z + 20)
             {
-                Item foundationItem = _world.Items.Get(Serial);
+                var foundationItem = _world.Items.Get(Serial);
 
-                if (foundationItem == null || !_world.HouseManager.TryGetHouse(Serial, out House house))
+                if (foundationItem == null || !_world.HouseManager.TryGetHouse(Serial, out var house) || house == null)
                 {
                     return;
                 }
@@ -826,7 +829,9 @@ namespace ClassicUO.Game.Managers
             if (res1 != -1 && res2 != -1)
             {
                 State = state;
-                HouseCustomizationGump gump = UIManager.GetGump<HouseCustomizationGump>(Serial);
+                var gump = UIManager.GetGump<HouseCustomizationGump>(Serial);
+                if (gump == null)
+                    return;
 
                 if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL || State == CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF || State == CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC)
                 {
@@ -875,7 +880,7 @@ namespace ClassicUO.Game.Managers
 
             var foundationItem = _world.Items.Get(Serial);
 
-            if (foundationItem == null || !_world.HouseManager.TryGetHouse(foundationItem, out House house))
+            if (foundationItem == null || !_world.HouseManager.TryGetHouse(foundationItem, out var house) || house == null)
                 return false;
 
             bool result = true;
@@ -1227,7 +1232,7 @@ namespace ClassicUO.Game.Managers
 
         public bool ValidateItemPlace(Item foundationItem, Multi item, int minZ, int maxZ, List<Point> validatedFloors)
         {
-            if (item == null || !_world.HouseManager.TryGetHouse(foundationItem, out House house) || !item.IsCustom)
+            if (item == null || !_world.HouseManager.TryGetHouse(foundationItem, out var house) || house == null || !item.IsCustom)
             {
                 return true;
             }
@@ -1635,7 +1640,7 @@ namespace ClassicUO.Game.Managers
             {
                 while (!reader.EndOfStream)
                 {
-                    string line = reader.ReadLine();
+                    var line = reader.ReadLine();
 
                     if (string.IsNullOrWhiteSpace(line))
                     {
@@ -1668,7 +1673,7 @@ namespace ClassicUO.Game.Managers
             {
                 while (!reader.EndOfStream)
                 {
-                    string line = reader.ReadLine();
+                    var line = reader.ReadLine();
 
                     if (string.IsNullOrWhiteSpace(line))
                     {

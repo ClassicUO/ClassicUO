@@ -9,15 +9,13 @@ namespace ClassicUO.Sdk.Assets
 {
     public sealed class SkillsLoader : UOFileLoader
     {
-        private UOFileMul _file;
-
         public SkillsLoader(UOFileManager fileManager) : base(fileManager)
         {
         }
 
         public int SkillsCount => Skills.Count;
-        public readonly List<SkillEntry> Skills = new List<SkillEntry>();
-        public readonly List<SkillEntry> SortedSkills = new List<SkillEntry>();
+        public List<SkillEntry> Skills { get; } = [];
+        public List<SkillEntry> SortedSkills { get; } = [];
 
         public override unsafe void Load()
         {
@@ -30,21 +28,21 @@ namespace ClassicUO.Sdk.Assets
             string pathidx = FileManager.GetUOFilePath("Skills.idx");
 
 
-            _file = new UOFileMul(path, pathidx);
-            _file.FillEntries();
+            using var file = new UOFileMul(path, pathidx);
+            file.FillEntries();
 
             var buf = new byte[256];
-            for (int i = 0, count = 0; i < _file.Entries.Length; i++)
+            for (int i = 0, count = 0; i < file.Entries.Length; i++)
             {
-                ref var entry = ref _file.GetValidRefEntry(i);
+                ref var entry = ref file.GetValidRefEntry(i);
                 if (entry.Length <= 0) continue;
 
-                _file.Seek(entry.Offset, System.IO.SeekOrigin.Begin);
-                bool hasAction = _file.ReadInt8() != 0;
+                file.Seek(entry.Offset, System.IO.SeekOrigin.Begin);
+                bool hasAction = file.ReadInt8() != 0;
                 if (buf.Length < entry.Length)
                     buf = new byte[entry.Length];
 
-                _file.Read(buf.AsSpan(0, entry.Length - 1));
+                file.Read(buf.AsSpan(0, entry.Length - 1));
                 var name = Encoding.ASCII.GetString(buf.AsSpan(0, entry.Length - 1)).TrimEnd('\0');
 
                 Skills.Add(new SkillEntry(count++, name, hasAction));

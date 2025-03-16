@@ -93,7 +93,7 @@ namespace ClassicUO.Game.Managers
                 Log.Error(ex.ToString());
             }
 
-            XmlElement root = doc["ignore"];
+            XmlElement? root = doc["ignore"];
 
             if (root != null)
             {

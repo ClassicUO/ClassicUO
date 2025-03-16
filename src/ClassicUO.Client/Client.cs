@@ -199,7 +199,7 @@ namespace ClassicUO
         public static GameController Game { get; private set; }
 
 
-        public static void Run(IPluginHost pluginHost)
+        public static void Run(IPluginHost? pluginHost)
         {
             Debug.Assert(Game == null);
 

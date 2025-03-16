@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using ClassicUO.IO;
+using ClassicUO.Sdk.IO;
 using Xunit;
 
 namespace ClassicUO.UnitTests.IO

@@ -17,9 +17,9 @@ namespace ClassicUO.Game.UI.Gumps
 
     internal class MessageBoxGump : Gump
     {
-        private readonly Action<bool> _action;
+        private readonly Action<bool>? _action;
 
-        public MessageBoxGump(World world, int w, int h, string message, Action<bool> action, bool hasBackground = false, MessageButtonType menuType = MessageButtonType.OK) : base(world, 0, 0)
+        public MessageBoxGump(World world, int w, int h, string message, Action<bool>? action, bool hasBackground = false, MessageButtonType menuType = MessageButtonType.OK) : base(world, 0, 0)
         {
             CanMove = true;
             CanCloseWithRightClick = false;

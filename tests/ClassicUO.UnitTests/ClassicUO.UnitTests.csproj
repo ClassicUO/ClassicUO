@@ -23,6 +23,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\ClassicUO.Client\ClassicUO.Client.csproj" />
+    <ProjectReference Include="..\..\src\ClassicUO.Sdk\ClassicUO.Sdk.csproj" />
   </ItemGroup>
 
 </Project>

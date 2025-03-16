@@ -17,7 +17,7 @@ namespace ClassicUO.Sdk.Assets
         public const int MAX_ACTIONS = 80; // gargoyle is like 78
         public const int MAX_DIRECTIONS = 5;
 
-        private static FrameInfo[] _frames = new FrameInfo[64];
+        private FrameInfo[] _frames = new FrameInfo[64];
 
         private readonly UOFileMul[] _files = new UOFileMul[10];
         private readonly UOFileUop[] _filesUop = new UOFileUop[10];

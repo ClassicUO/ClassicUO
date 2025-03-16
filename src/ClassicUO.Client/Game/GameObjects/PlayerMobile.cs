@@ -103,10 +103,10 @@ namespace ClassicUO.Game.GameObjects
         public ushort Weight;
         public ushort WeightMax;
 
-        public Item FindBandage()
+        public Item? FindBandage()
         {
-            Item backpack = FindItemByLayer(Layer.Backpack);
-            Item item = null;
+            var backpack = FindItemByLayer(Layer.Backpack);
+            Item? item = null;
 
             if (backpack != null)
             {
@@ -116,9 +116,9 @@ namespace ClassicUO.Game.GameObjects
             return item;
         }
 
-        public Item FindItemByGraphic(ushort graphic)
+        public Item? FindItemByGraphic(ushort graphic)
         {
-            Item backpack = FindItemByLayer(Layer.Backpack);
+            var backpack = FindItemByLayer(Layer.Backpack);
 
             if (backpack != null)
             {
@@ -128,9 +128,9 @@ namespace ClassicUO.Game.GameObjects
             return null;
         }
 
-        public Item FindItemByCliloc(int cliloc)
+        public Item? FindItemByCliloc(int cliloc)
         {
-            Item backpack = FindItemByLayer(Layer.Backpack);
+            var backpack = FindItemByLayer(Layer.Backpack);
 
             if (backpack != null)
             {
@@ -140,29 +140,30 @@ namespace ClassicUO.Game.GameObjects
             return null;
         }
 
-        private Item FindItemInContainerRecursive(Item container, ushort graphic)
+        private Item? FindItemInContainerRecursive(Item container, ushort graphic)
         {
-            Item found = null;
-
-            if (container != null)
+            if (container == null)
             {
-                for (LinkedObject i = container.Items; i != null; i = i.Next)
+                return null;
+            }
+
+            Item? found = null;
+            for (var i = container.Items; i != null; i = i.Next)
+            {
+                Item item = (Item)i;
+
+                if (item.Graphic == graphic)
                 {
-                    Item item = (Item) i;
+                    return item;
+                }
 
-                    if (item.Graphic == graphic)
+                if (!item.IsEmpty)
+                {
+                    found = FindItemInContainerRecursive(item, graphic);
+
+                    if (found != null && found.Graphic == graphic)
                     {
-                        return item;
-                    }
-
-                    if (!item.IsEmpty)
-                    {
-                        found = FindItemInContainerRecursive(item, graphic);
-
-                        if (found != null && found.Graphic == graphic)
-                        {
-                            return found;
-                        }
+                        return found;
                     }
                 }
             }
@@ -170,13 +171,13 @@ namespace ClassicUO.Game.GameObjects
             return found;
         }
 
-        private Item FindItemByClilocInContainerRecursive(Item container, int cliloc)
+        private Item? FindItemByClilocInContainerRecursive(Item container, int cliloc)
         {
-            Item found = null;
+            Item? found = null;
 
             if (container != null)
             {
-                for (LinkedObject i = container.Items; i != null; i = i.Next)
+                for (var i = container.Items; i != null; i = i.Next)
                 {
                     Item item = (Item) i;
 
@@ -201,9 +202,9 @@ namespace ClassicUO.Game.GameObjects
             return found;
         }
 
-        public Item FindPreferredItemByCliloc(System.Span<int> clilocs)
+        public Item? FindPreferredItemByCliloc(System.Span<int> clilocs)
         {
-            Item item = null;
+            Item? item = null;
 
             for (int i = 0; i < clilocs.Length; i++)
             {
@@ -262,7 +263,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            for (LinkedListNode<Gump> gump = UIManager.Gumps.First; gump != null; gump = gump.Next)
+            for (var gump = UIManager.Gumps.First; gump != null; gump = gump.Next)
             {
                 if (gump.Value is UseAbilityButtonGump or CombatBookGump)
                     gump.Value.RequestUpdateContents();
@@ -340,17 +341,17 @@ namespace ClassicUO.Game.GameObjects
 
         public void CloseBank()
         {
-            Item bank = FindItemByLayer(Layer.Bank);
+            var bank = FindItemByLayer(Layer.Bank);
 
             if (bank != null && bank.Opened)
             {
                 if (!bank.IsEmpty)
                 {
-                    Item first = (Item) bank.Items;
+                    var first = (Item?) bank.Items;
 
                     while (first != null)
                     {
-                        Item next = (Item) first.Next;
+                        var next = (Item?) first.Next;
 
                         World.RemoveItem(first, true);
 

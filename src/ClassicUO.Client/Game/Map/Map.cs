@@ -10,7 +10,7 @@ namespace ClassicUO.Game.Map
 {
     internal sealed class Map
     {
-        private static Chunk[] _terrainChunks;
+        private static Chunk[] _terrainChunks = [];
         private static readonly bool[] _blockAccessList = new bool[0x1000];
         private readonly LinkedList<int> _usedIndices = new LinkedList<int>();
         private readonly World _world;
@@ -22,7 +22,7 @@ namespace ClassicUO.Game.Map
             Index = index;
             BlocksCount = Client.Game.UO.FileManager.Maps.MapBlocksSize[Index, 0] * Client.Game.UO.FileManager.Maps.MapBlocksSize[Index, 1];
 
-            if (_terrainChunks == null || BlocksCount > _terrainChunks.Length)
+            if (BlocksCount > _terrainChunks.Length)
                 _terrainChunks = new Chunk[BlocksCount];
 
             ClearBockAccess();
@@ -32,7 +32,7 @@ namespace ClassicUO.Game.Map
         public readonly int Index;
 
 
-        public Chunk GetChunk(int block)
+        public Chunk? GetChunk(int block)
         {
             if (block >= 0 && block < BlocksCount)
             {
@@ -42,7 +42,7 @@ namespace ClassicUO.Game.Map
             return null;
         }
 
-        public Chunk GetChunk(int x, int y, bool load = true)
+        public Chunk? GetChunk(int x, int y, bool load = true)
         {
             if (x < 0 || y < 0)
             {
@@ -55,7 +55,7 @@ namespace ClassicUO.Game.Map
             return GetChunk2(cellX, cellY, load);
         }
 
-        public Chunk GetChunk2(int chunkX, int chunkY, bool load = true)
+        public Chunk? GetChunk2(int chunkX, int chunkY, bool load = true)
         {
             int block = GetBlock(chunkX, chunkY);
 
@@ -64,7 +64,7 @@ namespace ClassicUO.Game.Map
                 return null;
             }
 
-            ref Chunk chunk = ref _terrainChunks[block];
+            ref var chunk = ref _terrainChunks[block];
 
             if (chunk == null)
             {
@@ -99,7 +99,7 @@ namespace ClassicUO.Game.Map
         }
 
 
-        public GameObject GetTile(int x, int y, bool load = true)
+        public GameObject? GetTile(int x, int y, bool load = true)
         {
             return GetChunk(x, y, load)?.GetHeadObject(x % 8, y % 8);
         }
@@ -130,7 +130,7 @@ namespace ClassicUO.Game.Map
 
         public void GetMapZ(int x, int y, out sbyte groundZ, out sbyte staticZ)
         {
-            Chunk chunk = GetChunk(x, y);
+            var chunk = GetChunk(x, y);
             //var obj = GetTile(x, y);
             groundZ = staticZ = 0;
 
@@ -139,7 +139,7 @@ namespace ClassicUO.Game.Map
                 return;
             }
 
-            GameObject obj = chunk.Tiles[x % 8, y % 8];
+            var obj = chunk.Tiles[x % 8, y % 8];
 
             while (obj != null)
             {
@@ -171,11 +171,11 @@ namespace ClassicUO.Game.Map
             }
 
             access = true;
-            Chunk chunk = GetChunk(x, y, false);
+            var chunk = GetChunk(x, y, false);
 
             if (chunk != null)
             {
-                GameObject obj = chunk.Tiles[x % 8, y % 8];
+                var obj = chunk.Tiles[x % 8, y % 8];
 
                 for (; obj != null; obj = obj.TNext)
                 {
@@ -235,7 +235,7 @@ namespace ClassicUO.Game.Map
             return blockX * Client.Game.UO.FileManager.Maps.MapBlocksSize[Index, 1] + blockY;
         }
 
-        public IEnumerable<Chunk> GetUsedChunks()
+        public IEnumerable<Chunk?> GetUsedChunks()
         {
             foreach (int i in _usedIndices)
             {
@@ -249,13 +249,13 @@ namespace ClassicUO.Game.Map
             int count = 0;
             long ticks = Time.Ticks - Constants.CLEAR_TEXTURES_DELAY;
 
-            LinkedListNode<int> first = _usedIndices.First;
+            var first = _usedIndices.First;
 
             while (first != null)
             {
-                LinkedListNode<int> next = first.Next;
+                var next = first.Next;
 
-                ref Chunk block = ref _terrainChunks[first.Value];
+                ref var block = ref _terrainChunks[first.Value];
 
                 if (block != null && block.LastAccessTime < ticks && block.HasNoExternalData())
                 {
@@ -274,12 +274,12 @@ namespace ClassicUO.Game.Map
 
         public void Destroy()
         {
-            LinkedListNode<int> first = _usedIndices.First;
+            var first = _usedIndices.First;
 
             while (first != null)
             {
-                LinkedListNode<int> next = first.Next;
-                ref Chunk c = ref _terrainChunks[first.Value];
+                var next = first.Next;
+                ref var c = ref _terrainChunks[first.Value];
                 c?.Destroy();
                 c = null;
                 first = next;

@@ -23,7 +23,7 @@ namespace ClassicUO.Renderer
         private BlendState _blendState;
         private int _currentBufferPosition;
 
-        private Effect _customEffect;
+        private Effect? _customEffect;
 
         private readonly IndexBuffer _indexBuffer;
         private int _numSprites;
@@ -108,7 +108,7 @@ namespace ClassicUO.Renderer
 
         public void Dispose()
         {
-            _vertexInfo = null;
+            _vertexInfo = [];
             _basicUOEffect?.Dispose();
             _vertexBuffer.Dispose();
             _indexBuffer.Dispose();
@@ -300,8 +300,11 @@ namespace ClassicUO.Renderer
             PushSprite(texture);
         }
 
-        public void DrawShadow(Texture2D texture, Vector2 position, Rectangle sourceRect, bool flip, float depth)
+        public void DrawShadow(Texture2D? texture, Vector2 position, Rectangle sourceRect, bool flip, float depth)
         {
+            if (texture == null)
+                return;
+
             float width = sourceRect.Width;
             float height = sourceRect.Height * 0.5f;
             float translatedY = position.Y + height - 10;
@@ -373,7 +376,7 @@ namespace ClassicUO.Renderer
 
         public void DrawCharacterSitted
         (
-            Texture2D texture,
+            Texture2D? texture,
             Vector2 position,
             Rectangle sourceRect,
             Vector3 mod,
@@ -382,6 +385,9 @@ namespace ClassicUO.Renderer
             float depth
         )
         {
+            if (texture == null)
+                return;
+
             EnsureSize();
 
             float h03 = sourceRect.Height * mod.X;
@@ -588,12 +594,15 @@ namespace ClassicUO.Renderer
 
         public void DrawTiled
         (
-            Texture2D texture,
+            Texture2D? texture,
             Rectangle destinationRectangle,
             Rectangle sourceRectangle,
             Vector3 hue
         )
         {
+            if (texture == null)
+                return;
+
             int h = destinationRectangle.Height;
 
             Rectangle rect = sourceRectangle;
@@ -846,7 +855,7 @@ namespace ClassicUO.Renderer
 
         public void Draw
         (
-            Texture2D texture,
+            Texture2D? texture,
             Rectangle destinationRectangle,
             Vector3 color
         )
@@ -873,12 +882,15 @@ namespace ClassicUO.Renderer
 
         public void Draw
         (
-            Texture2D texture,
+            Texture2D? texture,
             Rectangle destinationRectangle,
             Rectangle? sourceRectangle,
             Vector3 color
         )
         {
+            if (texture == null)
+                return;
+
             float sourceX, sourceY, sourceW, sourceH;
             if (sourceRectangle.HasValue)
             {
@@ -973,7 +985,7 @@ namespace ClassicUO.Renderer
 
         private void AddSprite
         (
-            Texture2D texture,
+            Texture2D? texture,
             float sourceX,
             float sourceY,
             float sourceW,
@@ -991,6 +1003,9 @@ namespace ClassicUO.Renderer
             byte effects
         )
         {
+            if (texture == null)
+                return;
+
             EnsureSize();
 
             SetVertex
@@ -1014,12 +1029,12 @@ namespace ClassicUO.Renderer
             Begin(null, Matrix.Identity);
         }
 
-        public void Begin(Effect effect)
+        public void Begin(Effect? effect)
         {
             Begin(effect, Matrix.Identity);
         }
 
-        public void Begin(Effect customEffect, Matrix transform_matrix)
+        public void Begin(Effect? customEffect, Matrix transform_matrix)
         {
             EnsureNotStarted();
             _started = true;
@@ -1334,21 +1349,21 @@ namespace ClassicUO.Renderer
             GraphicsDevice.RasterizerState.ScissorTestEnable = enable;
         }
 
-        public void SetBlendState(BlendState blend)
+        public void SetBlendState(BlendState? blend)
         {
             Flush();
 
             _blendState = blend ?? BlendState.AlphaBlend;
         }
 
-        public void SetStencil(DepthStencilState stencil)
+        public void SetStencil(DepthStencilState? stencil)
         {
             Flush();
 
             _stencil = stencil ?? Stencil;
         }
 
-        public void SetSampler(SamplerState sampler)
+        public void SetSampler(SamplerState? sampler)
         {
             Flush();
 

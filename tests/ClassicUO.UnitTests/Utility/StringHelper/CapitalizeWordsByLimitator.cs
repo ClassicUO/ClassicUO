@@ -10,7 +10,7 @@ namespace ClassicUO.UnitTests.Utility.StringHelper
         [InlineData(null)]
         public void CapitalizeWordsByLimitator_Empty_Input_Should_Return_Empty_String(string input)
         {
-            ClassicUO.Utility.StringHelper.CapitalizeWordsByLimitator(input)
+            ClassicUO.StringHelper.CapitalizeWordsByLimitator(input)
                 .Should()
                 .Be(string.Empty);
         }
@@ -26,7 +26,7 @@ namespace ClassicUO.UnitTests.Utility.StringHelper
 
             var expectedResult = $"Hello{deliminator} Fans of ultima online. Time to play";
 
-            var result = ClassicUO.Utility.StringHelper.CapitalizeWordsByLimitator(input);
+            var result = ClassicUO.StringHelper.CapitalizeWordsByLimitator(input);
 
             result
                 .Should()
@@ -45,7 +45,7 @@ namespace ClassicUO.UnitTests.Utility.StringHelper
 
             var expectedResult = $"Hello{deliminator} fans of ultima online. Time to play";
 
-            var result = ClassicUO.Utility.StringHelper.CapitalizeWordsByLimitator(input);
+            var result = ClassicUO.StringHelper.CapitalizeWordsByLimitator(input);
 
             result
                 .Should()

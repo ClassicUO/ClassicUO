@@ -69,7 +69,7 @@ namespace ClassicUO.Game.Managers
 
         public void AddChannel(string text, bool hasPassword)
         {
-            if (!Channels.TryGetValue(text, out ChatChannel channel))
+            if (!Channels.TryGetValue(text, out var channel))
             {
                 channel = new ChatChannel(text, hasPassword);
                 Channels[text] = channel;

@@ -23,10 +23,10 @@ namespace ClassicUO.Game.UI.Gumps
         private const int RIGHT_X = 223;
         private const int UPPER_MARGIN = 34;
         private const int PAGE_HEIGHT = 166;
-        private StbPageTextBox _bookPage;
+        private StbPageTextBox? _bookPage;
 
-        private GumpPic _forwardGumpPic, _backwardGumpPic;
-        private StbTextBox _titleTextBox, _authorTextBox;
+        private GumpPic? _forwardGumpPic, _backwardGumpPic;
+        private StbTextBox? _titleTextBox, _authorTextBox;
 
         public ModernBookGump
         (
@@ -49,8 +49,8 @@ namespace ClassicUO.Game.UI.Gumps
             BuildGump(title, author);
         }
 
-        internal string[] BookLines => _bookPage._pageLines;
-        internal bool[] _pagesChanged => _bookPage._pagesChanged;
+        internal string[] BookLines => _bookPage?._pageLines ?? [];
+        internal bool[] _pagesChanged => _bookPage?._pagesChanged ?? [];
 
 
         public ushort BookPageCount { get; internal set; }
@@ -64,12 +64,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         internal void ServerSetBookText()
         {
-            if (BookLines == null || BookLines.Length <= 0)
+            if (BookLines == null || BookLines.Length <= 0 || _bookPage == null)
             {
                 return;
             }
 
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             int sw = _bookPage.renderedText.GetCharWidth(' ');
 
             for (int i = 0, l = BookLines.Length; i < l; i++)
@@ -233,7 +233,7 @@ namespace ClassicUO.Game.UI.Gumps
             Client.Game.Audio.PlaySound(0x0055);
         }
 
-        private void PageZero_TextChanged(object sender, EventArgs e)
+        private void PageZero_TextChanged(object? sender, EventArgs e)
         {
             _pagesChanged[0] = true;
         }
@@ -492,7 +492,7 @@ namespace ClassicUO.Game.UI.Gumps
             _bookPage?.Dispose();
         }
 
-        public override void OnHitTestSuccess(int x, int y, ref Control res)
+        public override void OnHitTestSuccess(int x, int y, ref Control? res)
         {
             if (!IsDisposed)
             {

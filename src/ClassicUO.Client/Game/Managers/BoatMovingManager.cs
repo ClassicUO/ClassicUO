@@ -63,14 +63,14 @@ namespace ClassicUO.Game.Managers
             sbyte z
         )
         {
-            Item item = _world.Items.Get(serial);
+            var item = _world.Items.Get(serial);
 
             if (item == null || item.IsDestroyed)
             {
                 return;
             }
 
-            if (!_steps.TryGetValue(serial, out Deque<BoatStep> deque))
+            if (!_steps.TryGetValue(serial, out var deque))
             {
                 deque = new Deque<BoatStep>();
                 _steps[serial] = deque;
@@ -124,9 +124,9 @@ namespace ClassicUO.Game.Managers
 
         public void ClearSteps(uint serial)
         {
-            if (_steps.TryGetValue(serial, out Deque<BoatStep> deque) && deque.Count != 0)
+            if (_steps.TryGetValue(serial, out var deque) && deque.Count != 0)
             {
-                Item multiItem = _world.Items.Get(serial);
+                var multiItem = _world.Items.Get(serial);
 
                 if (multiItem != null)
                 {
@@ -215,7 +215,7 @@ namespace ClassicUO.Game.Managers
                 {
                     ref BoatStep step = ref deques.Front();
 
-                    Item item = _world.Items.Get(step.Serial);
+                    var item = _world.Items.Get(step.Serial);
 
                     if (item == null || item.IsDestroyed)
                     {
@@ -254,7 +254,7 @@ namespace ClassicUO.Game.Managers
 
                     //item.BoatDirection = step.MovingDir;
 
-                    _world.HouseManager.TryGetHouse(item, out House house);
+                    _world.HouseManager.TryGetHouse(item, out var house);
 
                     if (removeStep)
                     {
@@ -342,7 +342,7 @@ namespace ClassicUO.Game.Managers
         {
             if (_items.TryGetValue(serial, out var list))
             {
-                Item item = _world.Items.Get(serial);
+                var item = _world.Items.Get(serial);
 
                 foreach (ref var it in CollectionsMarshal.AsSpan(list))
                 {

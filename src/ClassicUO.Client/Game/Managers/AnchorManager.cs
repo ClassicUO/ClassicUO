@@ -36,33 +36,33 @@ namespace ClassicUO.Game.Managers
             new Point(0, 1)
         };
 
-        private readonly Dictionary<AnchorableGump, AnchorGroup> reverseMap = new Dictionary<AnchorableGump, AnchorGroup>();
+        private readonly Dictionary<AnchorableGump, AnchorGroup> _reverseMap = new Dictionary<AnchorableGump, AnchorGroup>();
 
-        public AnchorGroup this[AnchorableGump control]
+        public AnchorGroup? this[AnchorableGump control]
         {
             get
             {
-                reverseMap.TryGetValue(control, out AnchorGroup group);
+                _reverseMap.TryGetValue(control, out var group);
 
                 return group;
             }
 
             set
             {
-                if (reverseMap.ContainsKey(control) && value == null)
+                if (value == null)
                 {
-                    reverseMap.Remove(control);
+                    _ = _reverseMap.Remove(control);
                 }
-                else
+                else if (_reverseMap.TryAdd(control, value))
                 {
-                    reverseMap.Add(control, value);
+
                 }
             }
         }
 
         public void Save(XmlTextWriter writer)
         {
-            foreach (AnchorGroup value in reverseMap.Values.Distinct())
+            foreach (AnchorGroup value in _reverseMap.Values.Distinct())
             {
                 value.Save(writer);
             }
@@ -93,11 +93,12 @@ namespace ClassicUO.Game.Managers
                         this[host] = new AnchorGroup(host);
                     }
 
-                    if (this[host].IsEmptyDirection(draggedControl, host, relativePosition.Value))
+                    var h = this[host];
+                    if (h != null && h.IsEmptyDirection(draggedControl, host, relativePosition.Value))
                     {
-                        this[host].AnchorControlAt(draggedControl, host, relativePosition.Value);
+                        h.AnchorControlAt(draggedControl, host, relativePosition.Value);
 
-                        this[draggedControl] = this[host];
+                        this[draggedControl] = h;
                     }
                 }
             }
@@ -111,7 +112,8 @@ namespace ClassicUO.Game.Managers
 
                 if (relativePosition.HasValue)
                 {
-                    if (this[host] == null || this[host].IsEmptyDirection(draggedControl, host, relativePosition.Value))
+                    var h = this[host];
+                    if (h == null || h.IsEmptyDirection(draggedControl, host, relativePosition.Value))
                     {
                         Point offset = relativePosition.Value * new Point(g.GroupMatrixWidth, g.GroupMatrixHeight);
 
@@ -123,7 +125,7 @@ namespace ClassicUO.Game.Managers
             return draggedControl.Location;
         }
 
-        public AnchorableGump GetAnchorableControlUnder(AnchorableGump draggedControl)
+        public AnchorableGump? GetAnchorableControlUnder(AnchorableGump draggedControl)
         {
             return ClosestOverlappingControl(draggedControl);
         }
@@ -132,21 +134,19 @@ namespace ClassicUO.Game.Managers
         {
             if (this[control] != null)
             {
-                List<AnchorableGump> group = reverseMap.Where(o => o.Value == this[control]).Select(o => o.Key).ToList();
+                List<AnchorableGump> group = _reverseMap.Where(o => o.Value == this[control]).Select(o => o.Key).ToList();
 
                 if (group.Count == 2) // if detach 1+1 - need destroy all group
                 {
                     foreach (AnchorableGump ctrl in group)
                     {
-                        this[ctrl].DetachControl(ctrl);
-
+                        this[ctrl]?.DetachControl(ctrl);
                         this[ctrl] = null;
                     }
                 }
                 else
                 {
-                    this[control].DetachControl(control);
-
+                    this[control]?.DetachControl(control);
                     this[control] = null;
                 }
             }
@@ -156,7 +156,7 @@ namespace ClassicUO.Game.Managers
         {
             if (this[control] != null)
             {
-                foreach (AnchorableGump ctrl in reverseMap.Where(o => o.Value == this[control]).Select(o => o.Key).ToList())
+                foreach (var ctrl in _reverseMap.Where(o => o.Value == this[control]).Select(o => o.Key).ToList())
                 {
                     this[ctrl] = null;
                     ctrl.Dispose();
@@ -202,14 +202,14 @@ namespace ClassicUO.Game.Managers
             return isInside;
         }
 
-        public AnchorableGump ClosestOverlappingControl(AnchorableGump control)
+        public AnchorableGump? ClosestOverlappingControl(AnchorableGump control)
         {
             if (control == null || control.IsDisposed)
             {
                 return null;
             }
 
-            AnchorableGump closestControl = null;
+            AnchorableGump? closestControl = null;
             int closestDistance = 99999;
 
             foreach (Gump c in UIManager.Gumps)
@@ -262,7 +262,7 @@ namespace ClassicUO.Game.Managers
 
         public class AnchorGroup
         {
-            private AnchorableGump[,] controlMatrix;
+            private AnchorableGump?[,] controlMatrix;
             private int updateCount;
 
             public AnchorGroup(AnchorableGump initial)
@@ -299,7 +299,7 @@ namespace ClassicUO.Game.Managers
                 {
                     for (int x = 0; x < controlMatrix.GetLength(0); x++)
                     {
-                        AnchorableGump gump = controlMatrix[x, y];
+                        var gump = controlMatrix[x, y];
 
                         if (gump != null)
                         {
@@ -321,9 +321,10 @@ namespace ClassicUO.Game.Managers
                 {
                     for (int y = 0; y < controlMatrix.GetLength(1); y++)
                     {
-                        if (controlMatrix[x, y] != null)
+                        var c = controlMatrix[x, y];
+                        if (c != null)
                         {
-                            UIManager.MakeTopMostGump(controlMatrix[x, y]);
+                            UIManager.MakeTopMostGump(c);
                         }
                     }
                 }
@@ -355,15 +356,14 @@ namespace ClassicUO.Game.Managers
                     {
                         for (int y = 0; y < controlMatrix.GetLength(1); y++)
                         {
-                            if (controlMatrix[x, y] != null && controlMatrix[x, y] != control)
+                            var c = controlMatrix[x, y];
+                            if (c != null && c != control)
                             {
-                                if (!visited.Contains(controlMatrix[x, y]))
+                                if (!visited.Contains(c))
                                 {
-                                    controlMatrix[x, y].X += deltaX;
-
-                                    controlMatrix[x, y].Y += deltaY;
-
-                                    visited.Add(controlMatrix[x, y]);
+                                    c.X += deltaX;
+                                    c.Y += deltaY;
+                                    visited.Add(c);
                                 }
                             }
                         }
@@ -478,7 +478,9 @@ namespace ClassicUO.Game.Managers
                 {
                     for (int y = 0; y < controlMatrix.GetLength(1); y++)
                     {
-                        newMatrix[x + xInitial, y + yInitial] = controlMatrix[x, y];
+                        var h = controlMatrix[x, y];
+                        if (h != null)
+                            newMatrix[x + xInitial, y + yInitial] = h;
                     }
                 }
 
@@ -497,7 +499,7 @@ namespace ClassicUO.Game.Managers
                     {
                         if (controlMatrix[x, y] != null)
                         {
-                            Console.Write(" " + controlMatrix[x, y].LocalSerial + " ");
+                            Console.Write(" " + controlMatrix[x, y]!.LocalSerial + " ");
                         }
                         else
                         {

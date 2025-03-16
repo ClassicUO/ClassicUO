@@ -28,8 +28,8 @@ namespace ClassicUO.Game.GameObjects
 
         public bool IsDestroyed { get; protected set; }
         public bool IsPositionChanged { get; protected set; }
-        public TextContainer TextContainer { get; private set; }
-        private AverageOverTime _averageOverTime;
+        public TextContainer? TextContainer { get; private set; }
+        private AverageOverTime? _averageOverTime;
 
         public int Distance
         {
@@ -74,8 +74,8 @@ namespace ClassicUO.Game.GameObjects
         public ushort Hue;
         public Vector3 Offset;
         public short PriorityZ;
-        public GameObject TNext;
-        public GameObject TPrevious;
+        public GameObject? TNext;
+        public GameObject? TPrevious;
         public ushort X,
             Y;
         public sbyte Z;
@@ -114,7 +114,7 @@ namespace ClassicUO.Game.GameObjects
             AddToTile(World.Map?.GetChunk(x, y), x % 8, y % 8);
         }
 
-        public void AddToTile(Chunk chunk, int chunkX, int chunkY)
+        public void AddToTile(Chunk? chunk, int chunkX, int chunkY)
         {
             RemoveFromTile();
 
@@ -186,11 +186,11 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            TextObject last = (TextObject)TextContainer.Items;
+            var last = (TextObject?)TextContainer.Items;
 
             while (last?.Next != null)
             {
-                last = (TextObject)last.Next;
+                last = (TextObject?)last.Next;
             }
 
             if (last == null)
@@ -211,7 +211,7 @@ namespace ClassicUO.Game.GameObjects
 
             p = Client.Game.Scene.Camera.WorldToScreen(p);
 
-            for (; last != null; last = (TextObject)last.Previous)
+            for (; last != null; last = (TextObject?)last.Previous)
             {
                 if (last.RenderedText != null && !last.RenderedText.IsDestroyed)
                 {
@@ -246,9 +246,9 @@ namespace ClassicUO.Game.GameObjects
             //int maxY = minY + ProfileManager.CurrentProfile.GameWindowSize.Y - 6;
 
             for (
-                TextObject item = (TextObject)TextContainer.Items;
+                var item = (TextObject?)TextContainer?.Items;
                 item != null;
-                item = (TextObject)item.Next
+                item = (TextObject?)item.Next
             )
             {
                 if (

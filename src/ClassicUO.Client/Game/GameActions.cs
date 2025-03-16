@@ -46,15 +46,13 @@ namespace ClassicUO.Game
 
         public static void OpenMacroGump(World world, string name)
         {
-            MacroGump macroGump = UIManager.GetGump<MacroGump>();
-
-            macroGump?.Dispose();
+            UIManager.GetGump<MacroGump>()?.Dispose();
             UIManager.Add(new MacroGump(world, name));
         }
 
         public static void OpenPaperdoll(World world, uint serial)
         {
-            PaperDollGump paperDollGump = UIManager.GetGump<PaperDollGump>(serial);
+            var paperDollGump = UIManager.GetGump<PaperDollGump>(serial);
 
             if (paperDollGump == null)
             {
@@ -74,7 +72,7 @@ namespace ClassicUO.Game
 
         public static void OpenSettings(World world, int page = 0)
         {
-            OptionsGump opt = UIManager.GetGump<OptionsGump>();
+            var opt = UIManager.GetGump<OptionsGump>();
 
             if (opt == null)
             {
@@ -113,7 +111,7 @@ namespace ClassicUO.Game
                 return;
             }
 
-            JournalGump journalGump = UIManager.GetGump<JournalGump>();
+            var journalGump = UIManager.GetGump<JournalGump>();
 
             if (journalGump == null)
             {
@@ -133,7 +131,7 @@ namespace ClassicUO.Game
 
         public static void OpenSkills(World world)
         {
-            StandardSkillsGump skillsGump = UIManager.GetGump<StandardSkillsGump>();
+            var skillsGump = UIManager.GetGump<StandardSkillsGump>();
 
             if (skillsGump != null && skillsGump.IsMinimized)
             {
@@ -148,7 +146,7 @@ namespace ClassicUO.Game
 
         public static void OpenMiniMap(World world)
         {
-            MiniMapGump miniMapGump = UIManager.GetGump<MiniMapGump>();
+            var miniMapGump = UIManager.GetGump<MiniMapGump>();
 
             if (miniMapGump == null)
             {
@@ -164,7 +162,7 @@ namespace ClassicUO.Game
 
         public static void OpenWorldMap(World world)
         {
-            WorldMapGump worldMap = UIManager.GetGump<WorldMapGump>();
+            var worldMap = UIManager.GetGump<WorldMapGump>();
 
             if (worldMap == null || worldMap.IsDisposed)
             {
@@ -182,7 +180,7 @@ namespace ClassicUO.Game
         {
             if (world.ChatManager.ChatIsEnabled == ChatStatus.Enabled)
             {
-                ChatGump chatGump = UIManager.GetGump<ChatGump>();
+                var chatGump = UIManager.GetGump<ChatGump>();
 
                 if (chatGump == null)
                 {
@@ -196,7 +194,7 @@ namespace ClassicUO.Game
             }
             else if (world.ChatManager.ChatIsEnabled == ChatStatus.EnabledUserRequest)
             {
-                ChatGumpChooseName chatGump = UIManager.GetGump<ChatGumpChooseName>();
+                var chatGump = UIManager.GetGump<ChatGumpChooseName>();
 
                 if (chatGump == null)
                 {
@@ -217,7 +215,7 @@ namespace ClassicUO.Game
                 return false;
             }
 
-            Item item = world.Items.Get(serial);
+            var item = world.Items.Get(serial);
 
             if (item == null || !item.IsCorpse || item.IsDestroyed)
             {
@@ -232,14 +230,14 @@ namespace ClassicUO.Game
 
         public static bool OpenBackpack(World world)
         {
-            Item backpack = world.Player.FindItemByLayer(Layer.Backpack);
+            var backpack = world.Player.FindItemByLayer(Layer.Backpack);
 
             if (backpack == null)
             {
                 return false;
             }
 
-            ContainerGump backpackGump = UIManager.GetGump<ContainerGump>(backpack);
+            var backpackGump = UIManager.GetGump<ContainerGump>(backpack);
 
             if (backpackGump == null)
             {
@@ -263,7 +261,7 @@ namespace ClassicUO.Game
         {
             if (ProfileManager.CurrentProfile.EnabledCriminalActionQuery)
             {
-                Mobile m = world.Mobiles.Get(serial);
+                var m = world.Mobiles.Get(serial);
 
                 if (m != null && (world.Player.NotorietyFlag == NotorietyFlag.Innocent || world.Player.NotorietyFlag == NotorietyFlag.Ally) && m.NotorietyFlag == NotorietyFlag.Innocent && m != world.Player)
                 {
@@ -373,7 +371,7 @@ namespace ClassicUO.Game
         public static void Print
         (
             World world,
-            Entity entity,
+            Entity? entity,
             string message,
             ushort hue = 946,
             MessageType type = MessageType.Regular,
@@ -448,7 +446,7 @@ namespace ClassicUO.Game
                 return false;
             }
 
-            Item item = world.Items.Get(serial);
+            var item = world.Items.Get(serial);
 
             if (item == null || item.IsDestroyed || item.IsMulti || item.OnGround && (item.IsLocked || item.Distance > Constants.DRAG_ITEMS_DISTANCE))
             {
@@ -459,7 +457,7 @@ namespace ClassicUO.Game
             {
                 if (ProfileManager.CurrentProfile.HoldShiftToSplitStack == Keyboard.Shift)
                 {
-                    SplitMenuGump gump = UIManager.GetGump<SplitMenuGump>(item);
+                    var gump = UIManager.GetGump<SplitMenuGump>(item);
 
                     if (gump != null)
                     {
@@ -544,7 +542,7 @@ namespace ClassicUO.Game
             }
         }
 
-        public static void ReplyGump(uint local, uint server, int button, uint[] switches = null, Tuple<ushort, string>[] entries = null)
+        public static void ReplyGump(uint local, uint server, int button, uint[]? switches = null, Tuple<ushort, string>[] entries = null)
         {
             Socket.Send_GumpResponse(local,
                                      server,
@@ -816,7 +814,7 @@ namespace ClassicUO.Game
         {
             //Socket.Send(new PPickUpRequest(serial, amount));
 
-            Item backpack = world.Player.FindItemByLayer(Layer.Backpack);
+            var backpack = world.Player.FindItemByLayer(Layer.Backpack);
 
             if (backpack == null)
             {

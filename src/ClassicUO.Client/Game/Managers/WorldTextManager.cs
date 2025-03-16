@@ -54,7 +54,7 @@ namespace ClassicUO.Game.Managers
 
                     if (World.CorpseManager.Exists(0, ser))
                     {
-                        Item item = World.CorpseManager.GetCorpseObject(ser);
+                        var item = World.CorpseManager.GetCorpseObject(ser);
 
                         if (item != null && !ReferenceEquals(item, overheadDamage.Value.Parent))
                         {
@@ -78,7 +78,7 @@ namespace ClassicUO.Game.Managers
             {
                 foreach (Tuple<uint, uint> tuple in _subst)
                 {
-                    if (_damages.TryGetValue(tuple.Item1, out OverheadDamage dmg))
+                    if (_damages.TryGetValue(tuple.Item1, out var dmg))
                     {
                         _damages.Remove(tuple.Item1);
                         _damages[tuple.Item2] = dmg;
@@ -102,7 +102,7 @@ namespace ClassicUO.Game.Managers
 
         internal void AddDamage(uint obj, int dmg)
         {
-            if (!_damages.TryGetValue(obj, out OverheadDamage dm) || dm == null)
+            if (!_damages.TryGetValue(obj, out var dm) || dm == null)
             {
                 dm = new OverheadDamage(World, World.Get(obj));
                 _damages[obj] = dm;
