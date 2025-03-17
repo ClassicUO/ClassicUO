@@ -43,7 +43,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             _scene = scene;
             _selectedProfession = profession;
 
-            CityInfo city;
+            CityInfo? city;
 
             if (Client.Game.UO.Version >= ClientVersion.CV_70130)
             {
@@ -182,7 +182,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             SetCity(_scene.GetCity(index));
         }
 
-        private void SetCity(CityInfo city)
+        private void SetCity(CityInfo? city)
         {
             if (city == null)
             {
@@ -212,7 +212,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public override void OnButtonClick(int buttonID)
         {
-            CharCreationGump charCreationGump = UIManager.GetGump<CharCreationGump>();
+            var charCreationGump = UIManager.GetGump<CharCreationGump>();
 
             if (charCreationGump == null)
             {
@@ -343,7 +343,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             public override bool Contains(int x, int y)
             {
-                Control c = null;
+                Control? c = null;
                 _label.HitTest(x, y, ref c);
 
                 if (c != null)

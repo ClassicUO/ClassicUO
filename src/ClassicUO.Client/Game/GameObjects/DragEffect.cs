@@ -32,7 +32,7 @@ namespace ClassicUO.Game.GameObjects
         )
             : base(world, manager, graphic, hue, duration, speed)
         {
-            Entity source = World.Get(src);
+            var source = World.Get(src);
 
             if (SerialHelper.IsValid(src) && source != null)
             {
@@ -43,8 +43,7 @@ namespace ClassicUO.Game.GameObjects
                 SetSource(xSource, ySource, zSource);
             }
 
-
-            Entity target = World.Get(trg);
+            var target = World.Get(trg);
 
             if (SerialHelper.IsValid(trg) && target != null)
             {

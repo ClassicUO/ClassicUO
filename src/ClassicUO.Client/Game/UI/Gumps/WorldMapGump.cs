@@ -1585,7 +1585,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 IsEditable = false,
                             };
 
-                            string hiddenFile = _hiddenMarkerFiles.FirstOrDefault(x => x.Contains(markerFile.Name));
+                            var hiddenFile = _hiddenMarkerFiles.FirstOrDefault(x => x.Contains(markerFile.Name));
 
                             if (!string.IsNullOrEmpty(hiddenFile))
                             {
@@ -1610,7 +1610,7 @@ namespace ClassicUO.Game.UI.Gumps
                                                 ZoomIndex = 3
                                             };
 
-                                            if (_markerIcons.TryGetValue(reader.GetAttribute("Icon").ToLower(), out Texture2D value))
+                                            if (_markerIcons.TryGetValue(reader.GetAttribute("Icon").ToLower(), out var value))
                                             {
                                                 marker.MarkerIcon = value;
 
@@ -1629,7 +1629,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 {
                                     while (!reader.EndOfStream)
                                     {
-                                        string line = reader.ReadLine();
+                                        var line = reader.ReadLine();
 
                                         // ignore empty lines, and if UOAM, ignore the first line that always has a 3
                                         if (string.IsNullOrEmpty(line) || line.Equals("3"))
@@ -1665,7 +1665,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                                             marker.MarkerIconName = iconSplits[0].ToLower();
 
-                                            if (_markerIcons.TryGetValue(iconSplits[0].ToLower(), out Texture2D value))
+                                            if (_markerIcons.TryGetValue(iconSplits[0].ToLower(), out var value))
                                             {
                                                 marker.MarkerIcon = value;
                                             }
@@ -1686,7 +1686,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 {
                                     while (!reader.EndOfStream)
                                     {
-                                        string line = reader.ReadLine();
+                                        var line = reader.ReadLine();
 
                                         if (string.IsNullOrEmpty(line))
                                         {
@@ -1711,7 +1711,7 @@ namespace ClassicUO.Game.UI.Gumps
                                             ZoomIndex = splits.Length == 7 ? int.Parse(splits[6]) : 3
                                         };
 
-                                        if (_markerIcons.TryGetValue(splits[4].ToLower(), out Texture2D value))
+                                        if (_markerIcons.TryGetValue(splits[4].ToLower(), out var value))
                                         {
                                             marker.MarkerIcon = value;
                                         }
@@ -1799,7 +1799,7 @@ namespace ClassicUO.Game.UI.Gumps
                 ZoomIndex = markerZoomLevel
             };
 
-            if (!string.IsNullOrWhiteSpace(mapMarker.MarkerIconName) && _markerIcons.TryGetValue(mapMarker.MarkerIconName, out Texture2D markerIconTexture))
+            if (!string.IsNullOrWhiteSpace(mapMarker.MarkerIconName) && _markerIcons.TryGetValue(mapMarker.MarkerIconName, out var markerIconTexture))
             {
                 mapMarker.MarkerIcon = markerIconTexture;
             }
@@ -1836,7 +1836,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 while (!reader.EndOfStream)
                 {
-                    string line = reader.ReadLine();
+                    var line = reader.ReadLine();
 
                     if (string.IsNullOrEmpty(line))
                     {
@@ -2003,7 +2003,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 foreach (House house in World.HouseManager.Houses)
                 {
-                    Item item = World.Items.Get(house.Serial);
+                    var item = World.Items.Get(house.Serial);
 
                     if (item != null)
                     {
@@ -2025,7 +2025,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_showMarkers && _mapMarkersLoaded)
             {
-                WMapMarker lastMarker = null;
+                WMapMarker? lastMarker = null;
 
                 foreach (WMapMarkerFile file in _markerFiles)
                 {
@@ -2099,7 +2099,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (mob != null && mob.Distance <= World.ClientViewRange)
                         {
-                            WMapEntity wme = World.WMapManager.GetEntity(mob);
+                            var wme = World.WMapManager.GetEntity(mob);
 
                             if (wme != null)
                             {
@@ -2128,7 +2128,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            WMapEntity wme = World.WMapManager.GetEntity(mob.Serial);
+                            var wme = World.WMapManager.GetEntity(mob.Serial);
 
                             if (wme != null && wme.IsGuild)
                             {
@@ -2167,17 +2167,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_showPartyMembers)
             {
-                for (int i = 0; i < 10; i++)
+                foreach (var partyMember in World.Party.Members)
                 {
-                    PartyMember partyMember = World.Party.Members[i];
-
                     if (partyMember != null && SerialHelper.IsValid(partyMember.Serial))
                     {
-                        Mobile mob = World.Mobiles.Get(partyMember.Serial);
+                        var mob = World.Mobiles.Get(partyMember.Serial);
 
                         if (mob != null && mob.Distance <= World.ClientViewRange)
                         {
-                            WMapEntity wme = World.WMapManager.GetEntity(mob);
+                            var wme = World.WMapManager.GetEntity(mob);
 
                             if (wme != null)
                             {
@@ -2204,7 +2202,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            WMapEntity wme = World.WMapManager.GetEntity(partyMember.Serial);
+                            var wme = World.WMapManager.GetEntity(partyMember.Serial);
 
                             if (wme != null && !wme.IsGuild)
                             {
@@ -3050,7 +3048,7 @@ namespace ClassicUO.Game.UI.Gumps
                         return;
                     }
 
-                    UserMarkersGump existingGump = UIManager.GetGump<UserMarkersGump>();
+                    var existingGump = UIManager.GetGump<UserMarkersGump>();
 
                     existingGump?.Dispose();
                     UIManager.Add(new UserMarkersGump(World, _mouseCenter.X, _mouseCenter.Y, userFile.Markers));

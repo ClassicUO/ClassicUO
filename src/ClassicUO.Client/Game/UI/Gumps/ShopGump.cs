@@ -361,7 +361,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void SetNameTo(Item item, string name)
         {
-            if (!string.IsNullOrEmpty(name) && _shopItems.TryGetValue(item, out ShopItem shopItem))
+            if (!string.IsNullOrEmpty(name) && _shopItems.TryGetValue(item, out var shopItem))
             {
                 shopItem.SetName(name, false);
             }
@@ -497,7 +497,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (
                 _transactionItems.TryGetValue(
                     shopItem.LocalSerial,
-                    out TransactionItem transactionItem
+                    out var transactionItem
                 )
             )
             {

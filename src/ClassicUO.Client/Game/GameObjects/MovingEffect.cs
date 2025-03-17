@@ -37,7 +37,7 @@ namespace ClassicUO.Game.GameObjects
             // moving effects want a +22 to the X
             Offset.X += 22;
 
-            Entity source = World.Get(src);
+            var source = World.Get(src);
 
             if (SerialHelper.IsValid(src) && source != null)
             {
@@ -49,7 +49,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
 
-            Entity target = World.Get(trg);
+            var target = World.Get(trg);
 
             if (SerialHelper.IsValid(trg) && target != null)
             {

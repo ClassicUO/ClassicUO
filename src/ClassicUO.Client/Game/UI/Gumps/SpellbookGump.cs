@@ -202,7 +202,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            for (LinkedObject i = item.Items; i != null; i = i.Next)
+            for (var i = item.Items; i != null; i = i.Next)
             {
                 Item spell = (Item)i;
                 int currentCount = spell.Amount;
@@ -359,8 +359,8 @@ namespace ClassicUO.Game.UI.Gumps
                         if (
                             World.OPL.TryGetNameAndData(
                                 LocalSerial,
-                                out string name,
-                                out string data
+                                out var name,
+                                out var data
                             )
                         )
                         {

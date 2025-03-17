@@ -44,7 +44,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case ButtonType.BuffIcon:
 
-                    BuffGump gump = UIManager.GetGump<BuffGump>();
+                    var gump = UIManager.GetGump<BuffGump>();
 
                     if (gump == null)
                     {
@@ -102,7 +102,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public static StatusGumpBase GetStatusGump()
         {
-            StatusGumpBase gump;
+            StatusGumpBase? gump;
 
             if (ProfileManager.CurrentProfile.UseOldStatusGump)
             {

@@ -259,21 +259,21 @@ namespace ClassicUO.Game
                                 //update lookup AND index length on disk
                                 _UL._filesIdxStatics[mapId].WriteArray(block * 12, idxData);
 
-                            Chunk mapChunk = world.Map.GetChunk(block);
+                            var mapChunk = world.Map.GetChunk(block);
 
                             if (mapChunk == null)
                             {
                                 return;
                             }
 
-                            LinkedList<int> linkedList = mapChunk.Node?.List;
+                            var linkedList = mapChunk.Node?.List;
                             List<GameObject> gameObjects = new List<GameObject>();
 
                             for (int x = 0; x < 8; x++)
                             {
                                 for (int y = 0; y < 8; y++)
                                 {
-                                    GameObject gameObject = mapChunk.GetHeadObject(x, y);
+                                    var gameObject = mapChunk.GetHeadObject(x, y);
 
                                     while (gameObject != null)
                                     {
@@ -409,7 +409,7 @@ namespace ClassicUO.Game
 
                     //from byte 0x03 to 0x14 data is unused
                     p.Seek(15);
-                    string name = ValidatePath(p.ReadASCII());
+                    var name = ValidatePath(p.ReadASCII());
 
                     if (string.IsNullOrWhiteSpace(name))
                     {
@@ -480,7 +480,7 @@ namespace ClassicUO.Game
                 {
                     for (int by = blockY; by >= miny; --by)
                     {
-                        Chunk mapChunk = world.Map.GetChunk(blockX * mapHeightInBlocks + by);
+                        var mapChunk = world.Map.GetChunk(blockX * mapHeightInBlocks + by);
 
                         if (mapChunk == null)
                         {
@@ -493,11 +493,11 @@ namespace ClassicUO.Game
                         {
                             for (int y = 0; y < 8; y++)
                             {
-                                GameObject gameObject = mapChunk.GetHeadObject(x, y);
+                                var gameObject = mapChunk.GetHeadObject(x, y);
 
                                 while (gameObject != null)
                                 {
-                                    GameObject currentGameObject = gameObject;
+                                    var currentGameObject = gameObject;
                                     gameObject = gameObject.TNext;
 
                                     if (!(currentGameObject is Land) && !(currentGameObject is Static))
@@ -519,6 +519,9 @@ namespace ClassicUO.Game
 
                         foreach (var headObj in mapChunk.Tiles)
                         {
+                            if (headObj == null)
+                                continue;
+
                             var next = headObj.TNext;
                             while (next != null)
                             {
@@ -603,7 +606,7 @@ namespace ClassicUO.Game
             return (ushort) ((sum2 << 8) | sum1);
         }
 
-        private static string ValidatePath(string shardName)
+        private static string? ValidatePath(string shardName)
         {
             try
             {

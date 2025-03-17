@@ -169,7 +169,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Restore(xml);
 
-            Macro macro = World.Macros.FindMacro(xml.GetAttribute("name"));
+            var macro = World.Macros.FindMacro(xml.GetAttribute("name"));
 
             if (macro != null)
             {

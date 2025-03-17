@@ -139,7 +139,7 @@ namespace ClassicUO.Game.Managers
                 {
                     foreach (ref var it in CollectionsMarshal.AsSpan(list))
                     {
-                        Entity ent = _world.Get(it.Serial);
+                        var ent = _world.Get(it.Serial);
 
                         if (ent == null)
                         {
@@ -349,7 +349,7 @@ namespace ClassicUO.Game.Managers
                     //if (!SerialHelper.IsValid(it.Serial))
                     //    break;
 
-                    Entity entity = _world.Get(it.Serial);
+                    var entity = _world.Get(it.Serial);
 
                     if (entity == null || entity.IsDestroyed)
                     {

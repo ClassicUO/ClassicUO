@@ -284,7 +284,7 @@ namespace ClassicUO.Game.UI.Gumps
                     indexMap.MapFile.Seek((long)indexMap.MapAddress, System.IO.SeekOrigin.Begin);
                     var cells = indexMap.MapFile.Read<MapBlock>().Cells;
 
-                    Chunk block = World.Map.GetChunk(blockIndex);
+                    var block = World.Map.GetChunk(blockIndex);
                     int realBlockX = i << 3;
                     int realBlockY = j << 3;
 

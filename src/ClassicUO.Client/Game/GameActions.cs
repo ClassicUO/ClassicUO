@@ -321,7 +321,7 @@ namespace ClassicUO.Game
             // add  request context menu
             Socket.Send_ClickRequest(serial);
 
-            Entity entity = world.Get(serial);
+            var entity = world.Get(serial);
 
             if (entity != null)
             {
@@ -575,7 +575,7 @@ namespace ClassicUO.Game
         {
             if (world.InGame)
             {
-                Entity ent = world.Get(serial);
+                var ent = world.Get(serial);
 
                 if (ent != null)
                 {
@@ -607,7 +607,7 @@ namespace ClassicUO.Game
         {
             if (Client.Game.UO.Version >= ClientVersion.CV_200 && world.InGame)
             {
-                Entity ent = world.Get(serial);
+                var ent = world.Get(serial);
 
                 if (ent != null && ent.HitsRequest >= HitsRequestStatus.Pending)
                 {

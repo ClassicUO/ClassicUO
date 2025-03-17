@@ -92,7 +92,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            for (LinkedListNode<Gump> g = UIManager.Gumps.Last; g != null; g = g.Previous)
+            for (var g = UIManager.Gumps.Last; g != null; g = g.Previous)
             {
                 if (g.Value is BulletinBoardItem)
                 {

@@ -155,7 +155,7 @@ namespace ClassicUO.Game.UI.Controls
             x += ScreenCoordinateX;
             y += ScreenCoordinateY;
 
-            Control c = null;
+            Control? c = null;
 
             _gumpTop.HitTest(x, y, ref c);
 
@@ -257,7 +257,7 @@ namespace ClassicUO.Game.UI.Controls
             base.Update();
         }
 
-        private void expander_OnMouseDown(object sender, MouseEventArgs args)
+        private void expander_OnMouseDown(object? sender, MouseEventArgs args)
         {
             if (args.Button == MouseButtonType.Left)
             {
@@ -266,7 +266,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        private void expander_OnMouseUp(object sender, MouseEventArgs args)
+        private void expander_OnMouseUp(object? sender, MouseEventArgs args)
         {
             _isExpanding = false;
         }

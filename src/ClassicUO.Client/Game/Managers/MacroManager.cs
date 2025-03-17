@@ -1786,7 +1786,7 @@ namespace ClassicUO.Game.Managers
         {
             if (SerialHelper.IsValid(serial))
             {
-                Entity ent = _world.Get(serial);
+                var ent = _world.Get(serial);
 
                 if (SerialHelper.IsMobile(serial))
                 {

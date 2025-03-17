@@ -340,7 +340,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private static UseAbilityButtonGump GetSpellFloatingButton(int id)
         {
-            for (LinkedListNode<Gump> i = UIManager.Gumps.Last; i != null; i = i.Previous)
+            for (var i = UIManager.Gumps.Last; i != null; i = i.Previous)
             {
                 if (i.Value is UseAbilityButtonGump g && g.Index == id)
                 {

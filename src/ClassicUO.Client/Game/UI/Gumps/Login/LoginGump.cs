@@ -488,7 +488,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         public override void OnKeyboardReturn(int textID, string text)
         {
             SaveCheckboxStatus();
-            LoginScene ls = Client.Game.GetScene<LoginScene>();
+            var ls = Client.Game.GetScene<LoginScene>();
 
             if (ls.CurrentLoginStep == LoginSteps.Main)
             {

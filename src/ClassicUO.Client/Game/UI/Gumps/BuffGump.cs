@@ -289,7 +289,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (delta <= 0)
                         {
-                            ((BuffGump)Parent.Parent)?.RequestUpdateContents();
+                            ((BuffGump?)Parent?.Parent)?.RequestUpdateContents();
                         }
                         else
                         {

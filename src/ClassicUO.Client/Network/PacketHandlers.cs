@@ -466,7 +466,7 @@ namespace ClassicUO.Network
                 return;
             }
 
-            Entity entity =world.Get(p.ReadUInt32BE());
+            var entity = world.Get(p.ReadUInt32BE());
 
             if (entity != null)
             {
@@ -487,7 +487,7 @@ namespace ClassicUO.Network
             }
 
             uint serial = p.ReadUInt32BE();
-            Entity entity =world.Get(serial);
+            var entity = world.Get(serial);
 
             if (entity == null)
             {
@@ -955,7 +955,7 @@ namespace ClassicUO.Network
         private static void Talk(World world, ref StackDataReader p)
         {
             uint serial = p.ReadUInt32BE();
-            Entity entity = world.Get(serial);
+            var entity = world.Get(serial);
             ushort graphic = p.ReadUInt16BE();
             MessageType type = (MessageType)p.ReadUInt8();
             ushort hue = p.ReadUInt16BE();
@@ -1025,7 +1025,7 @@ namespace ClassicUO.Network
                 return;
             }
 
-            Entity entity = world.Get(serial);
+            var entity = world.Get(serial);
 
             if (entity == null)
             {
@@ -1040,7 +1040,7 @@ namespace ClassicUO.Network
 
                 if (SerialHelper.IsValid(it.Container))
                 {
-                    Entity top = world.Get(it.RootContainer);
+                    var top = world.Get(it.RootContainer);
 
                     if (top != null)
                     {
@@ -1128,7 +1128,7 @@ namespace ClassicUO.Network
                     world.HouseManager.Remove(serial);
                 }
 
-                Entity cont =world.Get(item.Container);
+                var cont =world.Get(item.Container);
 
                 if (cont != null)
                 {
@@ -1648,7 +1648,7 @@ namespace ClassicUO.Network
                             item.Z = Client.Game.UO.GameCursor.ItemHold.Z;
                             item.CheckGraphicChange();
 
-                            Entity container = world.Get(Client.Game.UO.GameCursor.ItemHold.Container);
+                            var container = world.Get(Client.Game.UO.GameCursor.ItemHold.Container);
 
                             if (container != null)
                             {
@@ -1767,7 +1767,7 @@ namespace ClassicUO.Network
         {
             uint serial = p.ReadUInt32BE();
 
-            Entity entity =world.Get(serial);
+            var entity =world.Get(serial);
 
             if (entity == null)
             {
@@ -1835,7 +1835,7 @@ namespace ClassicUO.Network
             item.FixHue(p.ReadUInt16BE());
             item.Amount = 1;
 
-            Entity entity =world.Get(item.Container);
+            var entity =world.Get(item.Container);
 
             entity?.PushToBack(item);
 
@@ -2114,7 +2114,7 @@ namespace ClassicUO.Network
 
                 if (i == 0)
                 {
-                    Entity container =world.Get(containerSerial);
+                    var container = world.Get(containerSerial);
 
                     if (container != null)
                     {
@@ -2857,7 +2857,7 @@ namespace ClassicUO.Network
                 UpdateGameObject(world, serial, graphic, 0, 0, x, y, z, direction, hue, flags, 0, 0, 1);
             }
 
-            Entity obj =world.Get(serial);
+            var obj = world.Get(serial);
 
             if (obj == null)
             {
@@ -3110,7 +3110,7 @@ namespace ClassicUO.Network
             }
 
             uint serial = p.ReadUInt32BE();
-            Entity corpse =world.Get(serial);
+            var corpse = world.Get(serial);
 
             if (corpse == null)
             {
@@ -3291,7 +3291,7 @@ namespace ClassicUO.Network
                 wme.Name = name;
             }
 
-            Entity entity = world.Get(serial);
+            var entity = world.Get(serial);
 
             if (entity != null)
             {
@@ -3405,7 +3405,7 @@ namespace ClassicUO.Network
 
         private static void UpdateHitpoints(World world, ref StackDataReader p)
         {
-            Entity entity =world.Get(p.ReadUInt32BE());
+            var entity = world.Get(p.ReadUInt32BE());
 
             if (entity == null)
             {
@@ -3580,7 +3580,7 @@ namespace ClassicUO.Network
             }
 
             uint serial = p.ReadUInt32BE();
-            Entity entity =world.Get(serial);
+            var entity = world.Get(serial);
             ushort graphic = p.ReadUInt16BE();
             MessageType type = (MessageType)p.ReadUInt8();
             ushort hue = p.ReadUInt16BE();
@@ -4639,7 +4639,7 @@ namespace ClassicUO.Network
                 case 0x22:
                     p.Skip(1);
 
-                    Entity en =world.Get(p.ReadUInt32BE());
+                    var en = world.Get(p.ReadUInt32BE());
 
                     if (en != null)
                     {
@@ -4744,7 +4744,7 @@ namespace ClassicUO.Network
             }
 
             uint serial = p.ReadUInt32BE();
-            Entity entity =world.Get(serial);
+            var entity = world.Get(serial);
             ushort graphic = p.ReadUInt16BE();
             MessageType type = (MessageType)p.ReadUInt8();
             ushort hue = p.ReadUInt16BE();
@@ -5831,7 +5831,7 @@ namespace ClassicUO.Network
                     world.RangeSize.Y = cy;
                 }
 
-                Entity ent =world.Get(cSerial);
+                var ent = world.Get(cSerial);
 
                 if (ent == null)
                 {
@@ -6048,7 +6048,7 @@ namespace ClassicUO.Network
                 //}
             }
 
-            Entity container = world.Get(containerSerial);
+            var container = world.Get(containerSerial);
 
             if (container == null)
             {
@@ -6058,7 +6058,7 @@ namespace ClassicUO.Network
                 return;
             }
 
-            Item item = world.Items.Get(serial);
+            var item = world.Items.Get(serial);
 
             if (SerialHelper.IsMobile(serial))
             {

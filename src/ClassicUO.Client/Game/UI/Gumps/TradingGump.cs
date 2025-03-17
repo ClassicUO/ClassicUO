@@ -146,7 +146,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void UpdateContents()
         {
-            Entity container = World.Get(ID1);
+            var container = World.Get(ID1);
 
             if (container == null)
             {
@@ -160,7 +160,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ArtLoader loader = Client.Game.UO.FileManager.Arts;
 
-            for (LinkedObject i = container.Items; i != null; i = i.Next)
+            for (var i = container.Items; i != null; i = i.Next)
             {
                 Item it = (Item)i;
 
@@ -215,7 +215,7 @@ namespace ClassicUO.Game.UI.Gumps
                 v.Dispose();
             }
 
-            for (LinkedObject i = container.Items; i != null; i = i.Next)
+            for (var i = container.Items; i != null; i = i.Next)
             {
                 Item it = (Item)i;
 

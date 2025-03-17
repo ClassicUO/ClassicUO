@@ -316,9 +316,10 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (_textEntries.Count >= 30)
             {
-                LinkedListNode<ChatLineTime> lineToRemove = _textEntries.First;
-                lineToRemove.Value.Destroy();
-                _textEntries.Remove(lineToRemove);
+                var lineToRemove = _textEntries.First;
+                lineToRemove?.Value.Destroy();
+                if (lineToRemove != null)
+                    _textEntries.Remove(lineToRemove);
             }
 
             _textEntries.AddLast(new ChatLineTime(text, font, isunicode, hue));
@@ -484,7 +485,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case SDL.SDL_Keycode.SDLK_q when Keyboard.Ctrl && _messageHistoryIndex > -1 && !ProfileManager.CurrentProfile.DisableCtrlQWBtn:
 
-                    GameScene scene = Client.Game.GetScene<GameScene>();
+                    var scene = Client.Game.GetScene<GameScene>();
 
                     if (scene == null)
                     {

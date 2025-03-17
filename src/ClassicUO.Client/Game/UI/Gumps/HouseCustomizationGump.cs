@@ -591,11 +591,11 @@ namespace ClassicUO.Game.UI.Gumps
             _customHouseManager.Components = 0;
             _customHouseManager.Fixtures = 0;
 
-            Item foundationItem = World.Items.Get(LocalSerial);
+            var foundationItem = World.Items.Get(LocalSerial);
 
             if (foundationItem != null)
             {
-                if (World.HouseManager.TryGetHouse(LocalSerial, out House house))
+                if (World.HouseManager.TryGetHouse(LocalSerial, out var house))
                 {
                     foreach (Multi item in house.Components)
                     {

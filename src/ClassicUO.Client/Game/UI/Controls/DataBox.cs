@@ -41,7 +41,7 @@ namespace ClassicUO.Game.UI.Controls
                 return true;
             }
 
-            Control t = null;
+            Control? t = null;
             x += ScreenCoordinateX;
             y += ScreenCoordinateY;
 

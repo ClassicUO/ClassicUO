@@ -651,7 +651,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             internal void UpdatePageCoords()
             {
-                MultilinesFontInfo info = _rendererText.GetInfo();
+                var info = _rendererText.GetInfo();
 
                 for (int page = 0, y = 0; page < _pageCoords.GetLength(0); page++)
                 {
@@ -682,7 +682,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (selectStart < selectEnd)
                 {
-                    MultilinesFontInfo info = _rendererText.GetInfo();
+                    var info = _rendererText.GetInfo();
 
                     int drawY = 1;
                     int start = 0;

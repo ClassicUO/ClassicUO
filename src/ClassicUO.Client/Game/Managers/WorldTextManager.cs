@@ -46,7 +46,7 @@ namespace ClassicUO.Game.Managers
 
             foreach (KeyValuePair<uint, OverheadDamage> overheadDamage in _damages)
             {
-                Entity mob = World.Get(overheadDamage.Key);
+                var mob = World.Get(overheadDamage.Key);
 
                 if (mob == null || mob.IsDestroyed)
                 {

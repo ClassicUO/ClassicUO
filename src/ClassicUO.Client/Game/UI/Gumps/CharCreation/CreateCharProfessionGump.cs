@@ -88,14 +88,14 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public void SelectProfession(ProfessionInfo info)
         {
-            if (info.Type == ProfessionLoader.PROF_TYPE.CATEGORY && Client.Game.UO.FileManager.Professions.Professions.TryGetValue(info, out List<ProfessionInfo> list) && list != null)
+            if (info.Type == ProfessionLoader.PROF_TYPE.CATEGORY && Client.Game.UO.FileManager.Professions.Professions.TryGetValue(info, out var list) && list != null)
             {
-                Parent.Add(new CreateCharProfessionGump(World, info));
-                Parent.Remove(this);
+                Parent?.Add(new CreateCharProfessionGump(World, info));
+                Parent?.Remove(this);
             }
             else
             {
-                CharCreationGump charCreationGump = UIManager.GetGump<CharCreationGump>();
+                var charCreationGump = UIManager.GetGump<CharCreationGump>();
 
                 charCreationGump?.SetProfession(info);
             }
@@ -110,13 +110,13 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 {
                     if (_Parent != null && _Parent.TopLevel)
                     {
-                        Parent.Add(new CreateCharProfessionGump(World));
-                        Parent.Remove(this);
+                        Parent?.Add(new CreateCharProfessionGump(World));
+                        Parent?.Remove(this);
                     }
                     else
                     {
-                        Parent.Remove(this);
-                        CharCreationGump charCreationGump = UIManager.GetGump<CharCreationGump>();
+                        Parent?.Remove(this);
+                        var charCreationGump = UIManager.GetGump<CharCreationGump>();
                         charCreationGump?.StepBack();
                     }
 

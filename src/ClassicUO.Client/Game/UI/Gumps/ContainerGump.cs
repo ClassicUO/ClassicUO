@@ -34,7 +34,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public ContainerGump(World world, uint serial, ushort gumpid, bool playsound) : base(world, serial, 0)
         {
-            Item item = world.Items.Get(serial);
+            var item = world.Items.Get(serial);
 
             if (item == null)
             {
@@ -154,7 +154,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
             WantUpdateSize = false;
 
-            Item item = World.Items.Get(LocalSerial);
+            var item = World.Items.Get(LocalSerial);
 
             if (item == null)
             {
@@ -237,7 +237,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            Entity it = SelectedObject.Object as Entity;
+            var it = SelectedObject.Object as Entity;
             uint serial = it != null ? it.Serial : 0;
             uint dropcontainer = LocalSerial;
 
@@ -257,7 +257,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                Entity thisCont = World.Items.Get(dropcontainer);
+                Entity? thisCont = World.Items.Get(dropcontainer);
 
                 if (thisCont == null)
                 {
@@ -284,7 +284,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         candrop = true;
 
-                        Item target = World.Items.Get(serial);
+                        var target = World.Items.Get(serial);
 
                         if (target != null)
                         {
@@ -341,7 +341,7 @@ namespace ClassicUO.Game.UI.Gumps
                     && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition
                 )
                 {
-                    ContainerGump gump = UIManager.GetGump<ContainerGump>(dropcontainer);
+                    var gump = UIManager.GetGump<ContainerGump>(dropcontainer);
 
                     if (
                         gump != null
@@ -472,7 +472,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            Item item = World.Items.Get(LocalSerial);
+            var item = World.Items.Get(LocalSerial);
 
             if (item == null || item.IsDestroyed)
             {
@@ -534,7 +534,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void ItemsOnAdded()
         {
-            Entity container = World.Get(LocalSerial);
+            var container = World.Get(LocalSerial);
 
             if (container == null)
             {
@@ -548,7 +548,7 @@ namespace ClassicUO.Game.UI.Gumps
                 IsVisible = true;
             }
 
-            for (LinkedObject i = container.Items; i != null; i = i.Next)
+            for (var i = container.Items; i != null; i = i.Next)
             {
                 Item item = (Item)i;
 
@@ -690,7 +690,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            Item item = World.Items.Get(LocalSerial);
+            var item = World.Items.Get(LocalSerial);
 
             if (item != null)
             {
@@ -702,7 +702,7 @@ namespace ClassicUO.Game.UI.Gumps
                     UIManager.SavePosition(item, Location);
                 }
 
-                for (LinkedObject i = item.Items; i != null; i = i.Next)
+                for (var i = item.Items; i != null; i = i.Next)
                 {
                     Item child = (Item)i;
 

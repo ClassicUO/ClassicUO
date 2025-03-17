@@ -27,7 +27,7 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            Entity entity = _world.Get(Serial);
+            var entity = _world.Get(Serial);
 
             if (entity != null)
             {

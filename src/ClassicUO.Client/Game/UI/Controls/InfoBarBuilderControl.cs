@@ -54,7 +54,7 @@ namespace ClassicUO.Game.UI.Controls
             deleteButton.MouseUp += (sender, e) =>
             {
                 Dispose();
-                ((DataBox) Parent)?.ReArrangeChildren();
+                ((DataBox?) Parent)?.ReArrangeChildren();
             };
 
             Add(new ResizePic(0x0BB8) { X = infoLabel.X - 5, Y = 0, Width = infoLabel.Width + 10, Height = infoLabel.Height });

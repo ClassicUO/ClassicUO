@@ -2122,7 +2122,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             MacroManager macroManager = World.Macros;
 
-            for (Macro macro = (Macro) macroManager.Items; macro != null; macro = (Macro) macro.Next)
+            for (var macro = (Macro?) macroManager.Items; macro != null; macro = (Macro?) macro.Next)
             {
                 NiceButton nb;
 

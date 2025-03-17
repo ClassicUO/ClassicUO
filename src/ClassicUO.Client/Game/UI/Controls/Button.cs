@@ -172,7 +172,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            Texture2D texture = null;
+            Texture2D?texture = null;
             Rectangle bounds = Rectangle.Empty;
 
             if (_entered || IsClicked)

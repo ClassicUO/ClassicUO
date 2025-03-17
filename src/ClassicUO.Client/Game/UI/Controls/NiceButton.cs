@@ -69,7 +69,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (value)
                 {
-                    Control p = Parent;
+                    var p = Parent;
 
                     if (p == null)
                     {

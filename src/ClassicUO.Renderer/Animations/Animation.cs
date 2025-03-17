@@ -257,7 +257,7 @@ namespace ClassicUO.Renderer.Animations
 
             // NOTE:
             // for UOP: we don't call the method index.GetUopGroup(ref x) because the action has been already changed by the method ReplaceAnimationValues
-            AnimationGroup groupObj = null;
+            AnimationGroup? groupObj = null;
             if (useUOP)
             {
                 if (index.UopGroups == null || action >= index.UopGroups.Length)

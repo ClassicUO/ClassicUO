@@ -345,14 +345,14 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
                 }
 
-                Item backpack = _gump.World.Player.FindItemByLayer(Layer.Backpack);
+                var backpack = _gump.World.Player.FindItemByLayer(Layer.Backpack);
 
                 if (backpack == null)
                 {
                     return;
                 }
 
-                Item item = backpack.FindItem(Graphic, Hue);
+                var item = backpack.FindItem(Graphic, Hue);
 
                 if (item != null)
                 {

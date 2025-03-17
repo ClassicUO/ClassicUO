@@ -370,7 +370,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            Mobile mobile = World.Mobiles.Get(LocalSerial);
+            var mobile = World.Mobiles.Get(LocalSerial);
 
             if (mobile != null && mobile.IsDestroyed)
             {

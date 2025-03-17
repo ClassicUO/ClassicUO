@@ -387,14 +387,14 @@ namespace ClassicUO.Game.GameObjects
                     case TradingGump _:
                     case ShopGump _:
 
-                        Entity ent = World.Get(gump.LocalSerial);
+                        var ent = World.Get(gump.LocalSerial);
                         int distance = int.MaxValue;
 
                         if (ent != null)
                         {
                             if (SerialHelper.IsItem(ent.Serial))
                             {
-                                Entity top = World.Get(((Item) ent).RootContainer);
+                                var top = World.Get(((Item) ent).RootContainer);
 
                                 if (top != null)
                                 {
@@ -423,7 +423,7 @@ namespace ClassicUO.Game.GameObjects
                         {
                             if (SerialHelper.IsItem(ent.Serial))
                             {
-                                Entity top = World.Get(((Item) ent).RootContainer);
+                                var top = World.Get(((Item) ent).RootContainer);
 
                                 if (top != null)
                                 {

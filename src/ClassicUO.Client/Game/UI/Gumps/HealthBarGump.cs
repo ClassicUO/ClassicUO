@@ -228,7 +228,7 @@ namespace ClassicUO.Game.UI.Gumps
                 UIManager.SystemChat?.SetFocus();
             }
 
-            Entity entity = World.Get(LocalSerial);
+            var entity = World.Get(LocalSerial);
 
             if (entity != null)
             {
@@ -1581,7 +1581,7 @@ namespace ClassicUO.Game.UI.Gumps
             ushort textColor = 0x0386;
             ushort hitsColor = 0x0386;
 
-            Entity entity = World.Get(LocalSerial);
+            var entity = World.Get(LocalSerial);
 
             if (entity is Item it && it.Layer == 0 && it.Container == World.Player)
             {
@@ -1670,7 +1670,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _hpLineRed.IsVisible = entity.HitsMax > 0;
 
-                Mobile mobile = entity as Mobile;
+                var mobile = entity as Mobile;
 
                 if (!_isDead && entity != World.Player && mobile != null && mobile.IsDead && !inparty && ProfileManager.CurrentProfile.CloseHealthBarType == 2) // is dead
                 {

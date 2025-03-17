@@ -12,7 +12,7 @@ namespace ClassicUO.Game.GameObjects
             IsEnabled = true;
             AnimIndex = 0;
 
-            Entity source = World.Get(src);
+            var source = World.Get(src);
 
             if (SerialHelper.IsValid(src) && source != null)
             {

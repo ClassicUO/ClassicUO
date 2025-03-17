@@ -295,7 +295,7 @@ namespace ClassicUO.Game.UI.Controls
                     }
                     else
                     {
-                        Control p = UIManager.MouseOverControl?.Parent;
+                        var p = UIManager.MouseOverControl?.Parent;
 
                         while (p != null)
                         {

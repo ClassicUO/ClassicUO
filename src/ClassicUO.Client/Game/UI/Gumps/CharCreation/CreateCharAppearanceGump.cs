@@ -229,11 +229,11 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 World.Mobiles.Add(_character);
             }
 
-            LinkedObject first = _character.Items;
+            var first = _character.Items;
 
             while (first != null)
             {
-                LinkedObject next = first.Next;
+                var next = first.Next;
 
                 World.RemoveItem((Item) first, true);
 

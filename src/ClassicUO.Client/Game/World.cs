@@ -50,7 +50,7 @@ namespace ClassicUO.Game
 
         public Point RangeSize;
 
-        public PlayerMobile Player { get; private set; }
+        public PlayerMobile? Player { get; private set; }
 
         public HouseCustomizationManager CustomHouseManager;
 
@@ -102,7 +102,7 @@ namespace ClassicUO.Game
 
         public Dictionary<uint, Mobile> Mobiles { get; } = new Dictionary<uint, Mobile>();
 
-        public Map.Map Map { get; private set; }
+        public Map.Map? Map { get; private set; }
 
         public byte ClientViewRange { get; set; } = Constants.MAX_VIEW_RANGE;
 
@@ -142,9 +142,9 @@ namespace ClassicUO.Game
                             Map.Destroy();
                         }
 
-                        ushort x = Player.X;
-                        ushort y = Player.Y;
-                        sbyte z = Player.Z;
+                        ushort x = Player?.X ?? 0;
+                        ushort y = Player?.Y ?? 0;
+                        sbyte z = Player?.Z ?? 0;
 
                         Map = null;
 
@@ -156,8 +156,8 @@ namespace ClassicUO.Game
                         Client.Game.UO.FileManager.Maps.LoadMap(value, ClientFeatures.Flags.HasFlag(CharacterListFlags.CLF_UNLOCK_FELUCCA_AREAS));
                         Map = new Map.Map(this, value);
 
-                        Player.SetInWorldTile(x, y, z);
-                        Player.ClearSteps();
+                        Player?.SetInWorldTile(x, y, z);
+                        Player?.ClearSteps();
                     }
                     else
                     {
@@ -217,22 +217,25 @@ namespace ClassicUO.Game
         {
             Season = season;
 
-            foreach (Chunk chunk in Map.GetUsedChunks())
+            if (Map != null)
             {
-                for (int x = 0; x < 8; x++)
+                foreach (var chunk in Map.GetUsedChunks())
                 {
-                    for (int y = 0; y < 8; y++)
+                    for (int x = 0; x < 8; x++)
                     {
-                        for (GameObject obj = chunk?.GetHeadObject(x, y); obj != null; obj = obj.TNext)
+                        for (int y = 0; y < 8; y++)
                         {
-                            obj.UpdateGraphicBySeason();
+                            for (var obj = chunk?.GetHeadObject(x, y); obj != null; obj = obj.TNext)
+                            {
+                                obj.UpdateGraphicBySeason();
+                            }
                         }
                     }
                 }
-            }
+            }    
 
             //TODO(deccer): refactor this out into _audioPlayer.PlayMusic(...)
-            UOMusic currentMusic = Client.Game.Audio.GetCurrentMusic();
+            var currentMusic = Client.Game.Audio.GetCurrentMusic();
             if (currentMusic == null || currentMusic.Index == Client.Game.Audio.LoginMusicIndex)
             {
                 Client.Game.Audio.PlayMusic(music, false);
@@ -256,12 +259,12 @@ namespace ClassicUO.Game
             {
                 if (SerialHelper.IsValid(ObjectToRemove))
                 {
-                    Item rem = Items.Get(ObjectToRemove);
+                    var rem = Items.Get(ObjectToRemove);
                     ObjectToRemove = 0;
 
                     if (rem != null)
                     {
-                        Entity container = Get(rem.Container);
+                        var container = Get(rem.Container);
 
                         RemoveItem(rem, true);
 
@@ -401,9 +404,9 @@ namespace ClassicUO.Game
             return SerialHelper.IsMobile(serial) && Mobiles.Contains(serial);
         }
 
-        public Entity Get(uint serial)
+        public Entity? Get(uint serial)
         {
-            Entity ent;
+            Entity? ent;
 
             if (SerialHelper.IsMobile(serial))
             {
@@ -434,7 +437,7 @@ namespace ClassicUO.Game
 
         public Item GetOrCreateItem(uint serial)
         {
-            Item item = Items.Get(serial);
+            var item = Items.Get(serial);
 
             if (item != null && item.IsDestroyed)
             {
@@ -453,7 +456,7 @@ namespace ClassicUO.Game
 
         public Mobile GetOrCreateMobile(uint serial)
         {
-            Mobile mob = Mobiles.Get(serial);
+            var mob = Mobiles.Get(serial);
 
             if (mob != null && mob.IsDestroyed)
             {
@@ -472,7 +475,7 @@ namespace ClassicUO.Game
 
         public void RemoveItemFromContainer(uint serial)
         {
-            Item it = Items.Get(serial);
+            var it = Items.Get(serial);
 
             if (it != null)
             {
@@ -497,7 +500,7 @@ namespace ClassicUO.Game
                     UIManager.GetGump<ContainerGump>(containerSerial)?.RequestUpdateContents();
                 }
 
-                Entity container = Get(containerSerial);
+                var container = Get(containerSerial);
 
                 if (container != null)
                 {
@@ -514,21 +517,22 @@ namespace ClassicUO.Game
 
         public bool RemoveItem(uint serial, bool forceRemove = false)
         {
-            Item item = Items.Get(serial);
+            var item = Items.Get(serial);
 
             if (item == null || item.IsDestroyed)
             {
                 return false;
             }
 
-            LinkedObject first = item.Items;
+            var first = item.Items;
             RemoveItemFromContainer(item);
 
             while (first != null)
             {
-                LinkedObject next = first.Next;
+                var next = first.Next;
 
-                RemoveItem(first as Item, forceRemove);
+                if (first is Item it)
+                    RemoveItem(it.Serial, forceRemove);
 
                 first = next;
             }
@@ -546,20 +550,21 @@ namespace ClassicUO.Game
 
         public bool RemoveMobile(uint serial, bool forceRemove = false)
         {
-            Mobile mobile = Mobiles.Get(serial);
+            var mobile = Mobiles.Get(serial);
 
             if (mobile == null || mobile.IsDestroyed)
             {
                 return false;
             }
 
-            LinkedObject first = mobile.Items;
+            var first = mobile.Items;
 
             while (first != null)
             {
-                LinkedObject next = first.Next;
+                var next = first.Next;
 
-                RemoveItem(first as Item, forceRemove);
+                if (first is Item it)
+                    RemoveItem(it.Serial, forceRemove);
 
                 first = next;
             }
@@ -822,9 +827,9 @@ namespace ClassicUO.Game
         {
             if (!noplayer)
             {
-                Map.Destroy();
+                Map?.Destroy();
                 Map = null;
-                Player.Destroy();
+                Player?.Destroy();
                 Player = null;
             }
 

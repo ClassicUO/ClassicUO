@@ -59,7 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public bool SetName()
         {
-            Entity entity = World.Get(LocalSerial);
+            var entity = World.Get(LocalSerial);
 
             if (entity == null)
             {
@@ -68,7 +68,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (entity is Item item)
             {
-                if (!World.OPL.TryGetNameAndData(item, out string t, out _))
+                if (!World.OPL.TryGetNameAndData(item, out var t, out _))
                 {
                     if (!item.IsCorpse && item.Amount > 1)
                     {

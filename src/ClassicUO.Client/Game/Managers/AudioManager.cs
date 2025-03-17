@@ -96,7 +96,7 @@ namespace ClassicUO.Game.Managers
                 volume = 0;
             }
 
-            UOSound sound = (UOSound) Client.Game.UO.Sounds.GetSound(index);
+            var sound = (UOSound?) Client.Game.UO.Sounds.GetSound(index);
 
             if (sound != null && sound.Play(Time.Ticks, volume))
             {
@@ -144,7 +144,7 @@ namespace ClassicUO.Game.Managers
                 volume = 0;
             }
 
-            UOSound sound = (UOSound)Client.Game.UO.Sounds.GetSound(index);
+            var sound = (UOSound?)Client.Game.UO.Sounds.GetSound(index);
 
             if (sound != null && sound.Play(Time.Ticks, volume, distanceFactor))
             {
@@ -199,7 +199,7 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            Sound m = Client.Game.UO.Sounds.GetMusic(music);
+            var m = Client.Game.UO.Sounds.GetMusic(music);
 
             if (m == null && _currentMusic[0] != null)
             {

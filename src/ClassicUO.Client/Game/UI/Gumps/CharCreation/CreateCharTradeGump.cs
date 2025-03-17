@@ -272,12 +272,12 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public override void OnButtonClick(int buttonID)
         {
-            CharCreationGump charCreationGump = UIManager.GetGump<CharCreationGump>();
+            var charCreationGump = UIManager.GetGump<CharCreationGump>();
 
             switch ((Buttons) buttonID)
             {
                 case Buttons.Prev:
-                    charCreationGump.StepBack();
+                    charCreationGump?.StepBack();
 
                     break;
 
@@ -301,7 +301,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         _character.Intelligence = (ushort) _attributeSliders[1].Value;
                         _character.Dexterity = (ushort) _attributeSliders[2].Value;
 
-                        charCreationGump.SetAttributes(true);
+                        charCreationGump?.SetAttributes(true);
                     }
 
                     break;

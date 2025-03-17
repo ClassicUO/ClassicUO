@@ -42,7 +42,7 @@ namespace ClassicUO.Game.GameObjects
             byte speed
         ) : this(world, manager, graphic, hue, duration, speed)
         {
-            Entity source = World.Get(sourceSerial);
+            var source = World.Get(sourceSerial);
 
             if (source != null && SerialHelper.IsValid(sourceSerial))
             {

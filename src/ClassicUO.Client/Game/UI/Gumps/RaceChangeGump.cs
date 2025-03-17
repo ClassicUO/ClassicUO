@@ -323,11 +323,11 @@ namespace ClassicUO.Game.UI.Gumps
                 fakeMobile = new PlayerMobile(World, 0);
             }
 
-            LinkedObject first = fakeMobile.Items;
+            var first = fakeMobile.Items;
 
             while (first != null)
             {
-                LinkedObject next = first.Next;
+                var next = first.Next;
 
                 World.RemoveItem((Item)first, true);
 

@@ -212,7 +212,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int displayGroup = 0; displayGroup < 2; displayGroup++)
             {
-                for (LinkedObject i = _corpse.Items; i != null; i = i.Next)
+                for (var i = _corpse.Items; i != null; i = i.Next)
                 {
                     Item it = (Item)i;
 
@@ -415,7 +415,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _gump = gump;
                 LocalSerial = serial;
 
-                Item item = _gump.World.Items.Get(serial);
+                var item = _gump.World.Items.Get(serial);
 
                 if (item == null)
                 {
@@ -478,7 +478,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 base.Draw(batcher, x, y);
 
-                Item item = _gump.World.Items.Get(LocalSerial);
+                var item = _gump.World.Items.Get(LocalSerial);
 
                 Vector3 hueVector;
 

@@ -840,7 +840,7 @@ namespace ClassicUO.Collections
 
         #region ObjectListImplementations
 
-        private static bool IsT(object value)
+        private static bool IsT(object? value)
         {
             if (value is T)
             {
@@ -855,7 +855,7 @@ namespace ClassicUO.Collections
             return default(T) == null;
         }
 
-        int IList.Add(object value)
+        int IList.Add(object? value)
         {
             if (value == null && default(T) != null)
             {
@@ -872,17 +872,17 @@ namespace ClassicUO.Collections
             return Count - 1;
         }
 
-        bool IList.Contains(object value)
+        bool IList.Contains(object? value)
         {
             return IsT(value) && ((ICollection<T>)this).Contains((T)value);
         }
 
-        int IList.IndexOf(object value)
+        int IList.IndexOf(object? value)
         {
             return IsT(value) ? IndexOf((T)value) : -1;
         }
 
-        void IList.Insert(int index, object value)
+        void IList.Insert(int index, object? value)
         {
             if (value == null && default(T) != null)
             {
@@ -901,7 +901,7 @@ namespace ClassicUO.Collections
 
         bool IList.IsReadOnly => false;
 
-        void IList.Remove(object value)
+        void IList.Remove(object? value)
         {
             if (IsT(value))
             {
@@ -1038,21 +1038,21 @@ namespace ClassicUO.Collections
                 throw new ArgumentNullException(nameof(source));
             }
 
-            IReadOnlyCollection<T> result = source as IReadOnlyCollection<T>;
+            var result = source as IReadOnlyCollection<T>;
 
             if (result != null)
             {
                 return result;
             }
 
-            ICollection<T> collection = source as ICollection<T>;
+            var collection = source as ICollection<T>;
 
             if (collection != null)
             {
                 return new CollectionWrapper<T>(collection);
             }
 
-            ICollection nongenericCollection = source as ICollection;
+            var nongenericCollection = source as ICollection;
 
             if (nongenericCollection != null)
             {

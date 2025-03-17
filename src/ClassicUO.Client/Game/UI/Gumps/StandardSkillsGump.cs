@@ -568,7 +568,7 @@ namespace ClassicUO.Game.UI.Gumps
                                     .Parent // skillgruop
                         != this)
                     {
-                        SkillsGroupControl originalGroup = (SkillsGroupControl) skillControl.Parent.Parent;
+                        var originalGroup = (SkillsGroupControl?) skillControl.Parent?.Parent;
 
                         if (originalGroup != null)
                         {

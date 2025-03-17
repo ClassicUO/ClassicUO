@@ -427,7 +427,7 @@ namespace ClassicUO.Game.GameObjects
                             if (item.ItemData.IsLight)
                             {
                                 Client.Game
-                                    .GetScene<GameScene>()
+                                    .GetScene<GameScene>()?
                                     .AddLight(this, item, drawX, drawY);
                             }
                         }
@@ -438,7 +438,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (item.ItemData.IsLight)
                         {
-                            Client.Game.GetScene<GameScene>().AddLight(this, item, drawX, drawY);
+                            Client.Game.GetScene<GameScene>()?.AddLight(this, item, drawX, drawY);
 
                             /*DrawInternal
                             (
@@ -843,7 +843,7 @@ namespace ClassicUO.Game.GameObjects
                 if (entity != null && entity.ItemData.IsLight)
                 {
                     Client.Game
-                        .GetScene<GameScene>()
+                        .GetScene<GameScene>()?
                         .AddLight(owner, entity, mirror ? x + spriteInfo.UV.Width : x, y);
                 }
             }

@@ -190,7 +190,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                     pic.MouseDoubleClick += (sender, e) =>
                     {
-                        if ((ushort) ((GumpPic) sender).LocalSerial == 0x5DDA && World.Player.Race == RaceType.GARGOYLE)
+                        if (sender is not GumpPic gpic)
+                            return;
+
+                        if ((ushort) (gpic.LocalSerial) == 0x5DDA && World.Player.Race == RaceType.GARGOYLE)
                         {
                             NetClient.Socket.Send_ToggleGargoyleFlying();
                             e.Result = true;

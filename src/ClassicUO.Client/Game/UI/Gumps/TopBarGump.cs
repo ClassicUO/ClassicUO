@@ -146,7 +146,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public static void Create(World world)
         {
-            TopBarGump gump = UIManager.GetGump<TopBarGump>();
+            var gump = UIManager.GetGump<TopBarGump>();
 
             if (gump == null)
             {
@@ -255,7 +255,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case Buttons.Debug:
 
-                    DebugGump debugGump = UIManager.GetGump<DebugGump>();
+                    var debugGump = UIManager.GetGump<DebugGump>();
 
                     if (debugGump == null)
                     {
@@ -271,7 +271,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.NetStats:
-                    NetworkStatsGump netstatsgump = UIManager.GetGump<NetworkStatsGump>();
+                    var netstatsgump = UIManager.GetGump<NetworkStatsGump>();
 
                     if (netstatsgump == null)
                     {
