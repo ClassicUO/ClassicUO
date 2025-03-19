@@ -2060,7 +2060,7 @@ namespace ClassicUO.Game.Managers
                 {
                     if (int.TryParse(buttonNum.InnerText, out int b))
                     {
-                        if (Enum.IsDefined(typeof(SDL_GameControllerButton), b))
+                        if (Enum.IsDefined<SDL_GameControllerButton>((SDL_GameControllerButton)b))
                         {
                             savedButtons.Add((SDL_GameControllerButton)b);
                         }
