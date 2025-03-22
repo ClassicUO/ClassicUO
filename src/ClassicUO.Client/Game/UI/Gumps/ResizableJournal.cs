@@ -367,7 +367,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     foreach (JournalData _ in journalDatas)
                     {
-                        _.EntryText.Width = Width - BORDER_WIDTH - _.TimeStamp.Width;
+                        _.EntryText = new Label(_.EntryText.Text, _.EntryText.Unicode, _.EntryText.Hue, Width - BORDER_WIDTH - _.TimeStamp.Width, font: _.EntryText.Font);
                         _.EntryText.Update();
                     }
 
@@ -418,7 +418,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 journalDatas.AddToBack(
                     new JournalData(
-                        new Label($"{e.Name}: {e.Text}", e.IsUnicode, e.Hue, font: e.Font),
+                        new Label($"{e.Name}: {e.Text}", e.IsUnicode, e.Hue, Width - BORDER_WIDTH - timeS.Width, font: e.Font),
                         timeS,
                         e.TextType,
                         e.MessageType
@@ -485,7 +485,7 @@ namespace ClassicUO.Game.UI.Gumps
                     TimeStamp?.Dispose();
                 }
 
-                public Label EntryText { get; }
+                public Label EntryText { get; set; }
                 public Label TimeStamp { get; }
                 public TextType TextType { get; }
                 public MessageType MessageType { get; }
