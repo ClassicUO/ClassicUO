@@ -122,6 +122,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _showInfoBar;
         private Checkbox _ignoreAllianceMessages;
         private Checkbox _ignoreGuildMessages, _useAlternateJournal, _partyMessagesOverhead;
+        private ClickableColorBox _AlternateJournalHue;
 
         // general
         private HSliderBar _sliderFPS, _circleOfTranspRadius;
@@ -2515,6 +2516,17 @@ namespace ClassicUO.Game.UI.Gumps
 
             startY += _useAlternateJournal.Height + 2;
 
+            _AlternateJournalHue = AddColorBox
+            (
+                rightArea,
+                startX,
+                startY,
+                _currentProfile.AlternateJournalHue,
+                ResGumps.AlternateJournalHue
+            );
+
+            startY += _AlternateJournalHue.Height + 15;
+
             _partyMessagesOverhead = AddCheckBox
             (
                 rightArea,
@@ -3670,6 +3682,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _ignoreGuildMessages.IsChecked = false;
                     _ignoreAllianceMessages.IsChecked = false;
                     _useAlternateJournal.IsChecked = false;
+                    _AlternateJournalHue.Hue = 0x0000;
                     _partyMessagesOverhead.IsChecked = false;
 
                     break;
@@ -4043,6 +4056,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.IgnoreGuildMessages = _ignoreGuildMessages.IsChecked;
             _currentProfile.IgnoreAllianceMessages = _ignoreAllianceMessages.IsChecked;
             _currentProfile.UseAlternateJournal = _useAlternateJournal.IsChecked;
+            _currentProfile.AlternateJournalHue = _AlternateJournalHue.Hue;
 
             // fonts
             _currentProfile.ForceUnicodeJournal = _forceUnicodeJournal.IsChecked;

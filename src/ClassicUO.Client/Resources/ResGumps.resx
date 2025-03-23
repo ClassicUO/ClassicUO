@@ -1615,6 +1615,9 @@ Client version: '{0}'</value>
   <data name="UseAlternateJournal" xml:space="preserve">
     <value>Use alternative journal</value>
   </data>
+  <data name="AlternateJournalHue" xml:space="preserve">
+    <value>Alternative Journal Hue</value>
+  </data>
   <data name="StayActive" xml:space="preserve">
     <value>Stay active</value>
   </data>
