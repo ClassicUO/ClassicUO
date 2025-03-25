@@ -96,7 +96,6 @@ namespace ClassicUO.Configuration
         public ushort PoisonHue { get; set; } = 0x0044;
         public ushort ParalyzedHue { get; set; } = 0x014C;
         public ushort InvulnerableHue { get; set; } = 0x0030;
-        public ushort AlternateJournalHue { get; set; } = 0x0000;
 
         // visual
         public bool EnabledCriminalActionQuery { get; set; } = true;
@@ -294,7 +293,7 @@ namespace ClassicUO.Configuration
         public bool WorldMapFlipMap { get; set; } = true;
         public bool WorldMapTopMost { get; set; }
         public bool WorldMapFreeView { get; set; }
-        public bool WorldMapShowParty { get; set; } = true;
+        public bool WorldMapShowParty { get; set; } = false;
         public int WorldMapZoomIndex { get; set; } = 4;
         public bool WorldMapShowCoordinates { get; set; } = true;
         public bool WorldMapShowMouseCoordinates { get; set; } = true;
@@ -317,6 +316,10 @@ namespace ClassicUO.Configuration
 
         //Alternate Journal
         public bool UseAlternateJournal { get; set; }
+        public ushort AlternateJournalHue { get; set; }
+        public int AlternateJournalTransparency { get; set; }
+        public bool AlternateJournalTransparencyToggle { get; set; }
+
         public Dictionary<string, MessageType[]> JournalTabs { get; } = new Dictionary<string, MessageType[]>()
         {
             { "All", new MessageType[] {

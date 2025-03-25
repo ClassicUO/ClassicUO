@@ -232,11 +232,20 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Alternative Journal Hue.
+        ///   Looks up a localized string similar to Alternative journal hue.
         /// </summary>
         public static string AlternateJournalHue {
             get {
                 return ResourceManager.GetString("AlternateJournalHue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Alternative journal Transparency.
+        /// </summary>
+        public static string AlternateJournalTransparency {
+            get {
+                return ResourceManager.GetString("AlternateJournalTransparency", resourceCulture);
             }
         }
         

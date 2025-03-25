@@ -61,8 +61,11 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             #region Background
-            _background = new AlphaBlendControl(0.7f);
-            _background.Hue = ProfileManager.CurrentProfile.AlternateJournalHue;
+            if(ProfileManager.CurrentProfile.AlternateJournalTransparencyToggle)    
+                _background = new AlphaBlendControl((float)ProfileManager.CurrentProfile.AlternateJournalTransparency/10);
+            else
+                _background = new AlphaBlendControl(1.0f);
+            _background.Hue = ProfileManager.CurrentProfile.AlternateJournalHue;            // default _background.Hue = 0x0000;
             _background.Width = Width - (BORDER_WIDTH * 2);
             _background.Height = Height - (BORDER_WIDTH * 2);
             _background.X = BORDER_WIDTH;
@@ -367,8 +370,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                     foreach (JournalData _ in journalDatas)
                     {
-                        _.EntryText.Width = Width - BORDER_WIDTH - _.TimeStamp.Width;
-                        _.EntryText.Update();
+                        {
+                            _.EntryText.Width = Width - BORDER_WIDTH - _.TimeStamp.Width;
+                            _.EntryText = new Label(_.EntryText.Text, _.EntryText.Unicode, _.EntryText.Hue, Width - BORDER_WIDTH - _.TimeStamp.Width, font: _.EntryText.Font);
+                            _.EntryText.Update();
+                            _.EntryText.Update();
+                        }
                     }
 
                     CalculateScrollBarMaxValue();
@@ -418,7 +425,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 journalDatas.AddToBack(
                     new JournalData(
-                        new Label($"{e.Name}: {e.Text}", e.IsUnicode, e.Hue, font: e.Font),
+                        new Label($"{e.Name}: {e.Text}", e.IsUnicode, e.Hue, Width - BORDER_WIDTH - timeS.Width, font: e.Font),
                         timeS,
                         e.TextType,
                         e.MessageType
@@ -485,7 +492,7 @@ namespace ClassicUO.Game.UI.Gumps
                     TimeStamp?.Dispose();
                 }
 
-                public Label EntryText { get; }
+                public Label EntryText { get; set; }
                 public Label TimeStamp { get; }
                 public TextType TextType { get; }
                 public MessageType MessageType { get; }

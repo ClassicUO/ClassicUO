@@ -80,7 +80,7 @@ namespace ClassicUO.Game.UI.Gumps
         private bool _showMarkers = true;
         private bool _showMobiles = true;
         private bool _showMultis = true;
-        private bool _showPartyMembers = true;
+        private bool _showPartyMembers = false;
         private bool _showPlayerBar = true;
         private bool _showPlayerName = true;
         private int _zoomIndex = 4;
@@ -181,7 +181,7 @@ namespace ClassicUO.Game.UI.Gumps
             ResizeWindow(new Point(Width, Height));
 
             _flipMap = ProfileManager.CurrentProfile.WorldMapFlipMap;
-            _showPartyMembers = ProfileManager.CurrentProfile.WorldMapShowParty;
+            _showPartyMembers = false;//ProfileManager.CurrentProfile.WorldMapShowParty;
 
             World.WMapManager.SetEnable(_showPartyMembers);
 
@@ -224,7 +224,7 @@ namespace ClassicUO.Game.UI.Gumps
             ProfileManager.CurrentProfile.WorldMapFlipMap = _flipMap;
             ProfileManager.CurrentProfile.WorldMapTopMost = TopMost;
             ProfileManager.CurrentProfile.WorldMapFreeView = FreeView;
-            ProfileManager.CurrentProfile.WorldMapShowParty = _showPartyMembers;
+            ProfileManager.CurrentProfile.WorldMapShowParty = false; // _showPartyMembers;
 
             ProfileManager.CurrentProfile.WorldMapZoomIndex = _zoomIndex;
 
@@ -291,6 +291,7 @@ namespace ClassicUO.Game.UI.Gumps
                 );
             }
 
+            /* Removed due to server not handling the request
             _options["show_party_members"] = new ContextMenuItemEntry
             (
                 ResGumps.ShowPartyMembers,
@@ -304,6 +305,7 @@ namespace ClassicUO.Game.UI.Gumps
                 true,
                 _showPartyMembers
             );
+            */
 
             _options["show_mobiles"] = new ContextMenuItemEntry(ResGumps.ShowMobiles, () => { _showMobiles = !_showMobiles; SaveSettings(); }, true, _showMobiles);
 
@@ -422,7 +424,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             ContextMenu?.Dispose();
             ContextMenu = new ContextMenuControl(this);
-
+            /*
             ContextMenuItemEntry markerFontEntry = new ContextMenuItemEntry(ResGumps.FontStyle);
             markerFontEntry.Add(new ContextMenuItemEntry(string.Format(ResGumps.Style0, 1), () => { SetFont(1); }));
             markerFontEntry.Add(new ContextMenuItemEntry(string.Format(ResGumps.Style0, 2), () => { SetFont(2); }));
@@ -484,12 +486,12 @@ namespace ClassicUO.Game.UI.Gumps
             ContextMenu.Add(markersEntry);
 
             BuildContextMenuForZones(ContextMenu);
-
+            */
             ContextMenuItemEntry namesHpBarEntry = new ContextMenuItemEntry(ResGumps.NamesHealthbars);
             namesHpBarEntry.Add(_options["show_your_name"]);
             namesHpBarEntry.Add(_options["show_your_healthbar"]);
-            namesHpBarEntry.Add(_options["show_party_name"]);
-            namesHpBarEntry.Add(_options["show_party_healthbar"]);
+            //namesHpBarEntry.Add(_options["show_party_name"]);
+            //namesHpBarEntry.Add(_options["show_party_healthbar"]);
 
             ContextMenu.Add(namesHpBarEntry);
 
@@ -497,26 +499,29 @@ namespace ClassicUO.Game.UI.Gumps
             ContextMenu.Add(_options["goto_location"]);
             ContextMenu.Add(_options["flip_map"]);
             ContextMenu.Add(_options["top_most"]);
-
+            /*
             ContextMenuItemEntry freeView = new ContextMenuItemEntry(ResGumps.FreeView);
             freeView.Add(_options["free_view"]);
 
             for (int i = 0; i < MapLoader.MAPS_COUNT; i++)
                 freeView.Add(_options[$"free_view_map_{i}"]);
 
-            ContextMenu.Add(freeView);
+            ContextMenu.Add(freeView);*/
+            ContextMenu.Add(_options["free_view"]);
 
             ContextMenu.Add("", null);
-            ContextMenu.Add(_options["show_party_members"]);
+            //ContextMenu.Add(_options["show_party_members"]);
             ContextMenu.Add(_options["show_mobiles"]);
             ContextMenu.Add(_options["show_multis"]);
             ContextMenu.Add(_options["show_coordinates"]);
             ContextMenu.Add(_options["show_sextant_coordinates"]);
             ContextMenu.Add(_options["show_mouse_coordinates"]);
+            /*
             ContextMenu.Add(_options["allow_positional_target"]);
             ContextMenu.Add("", null);
             ContextMenu.Add(_options["markers_manager"]);
             ContextMenu.Add(_options["add_marker_on_player"]);
+            */
             ContextMenu.Add("", null);
             ContextMenu.Add(_options["reset_map_cache"]);
             ContextMenu.Add(_options["saveclose"]);
@@ -537,7 +542,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_map.Index != World.MapIndex && !_freeView)
                 ChangeMap(World.MapIndex);
 
-            World.WMapManager.RequestServerPartyGuildInfo();
+            //World.WMapManager.RequestServerPartyGuildInfo(); disabled due to server not handling the request
         }
 
         public void ChangeMap(int index)
@@ -2185,6 +2190,8 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
+            //Show party members disabled
+            /*
             if (_showPartyMembers)
             {
                 for (int i = 0; i < 10; i++)
@@ -2243,6 +2250,10 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
             }
+            */
+            
+
+
 
             DrawMobile
             (

@@ -60,14 +60,13 @@ namespace ClassicUO.Game.UI.Gumps
                 new[] { 1, (int)Buttons.Paperdoll },
                 new[] { 1, (int)Buttons.Inventory },
                 new[] { 1, (int)Buttons.Journal },
-                new[] { 0, (int)Buttons.Chat },
+                //new[] { 0, (int)Buttons.Chat },
                 new[] { 0, (int)Buttons.Help },
                 new[] { 1, (int)Buttons.WorldMap },
-                new[] { 0, (int)Buttons.Info },
+                //new[] { 0, (int)Buttons.Info },
                 new[] { 0, (int)Buttons.Debug },
-                new[] { 1, (int)Buttons.NetStats },
-                new[] { 1, (int)Buttons.UOStore },
-                new[] { 1, (int)Buttons.GlobalChat }
+                new[] { 1, (int)Buttons.NetStats }
+                //new[] { 1, (int)Buttons.GlobalChat }
             };
 
             var cliloc = Client.Game.UO.FileManager.Clilocs;
@@ -78,17 +77,17 @@ namespace ClassicUO.Game.UI.Gumps
                 cliloc.GetString(3000133, ResGumps.Paperdoll),
                 cliloc.GetString(3000431, ResGumps.Inventory),
                 cliloc.GetString(3000129, ResGumps.Journal),
-                cliloc.GetString(3000131, ResGumps.Chat),
+                //cliloc.GetString(3000131, ResGumps.Chat),
                 cliloc.GetString(3000134, ResGumps.Help),
                 StringHelper.CapitalizeAllWords(cliloc.GetString(1015233, ResGumps.WorldMap)),
-                cliloc.GetString(1079449, ResGumps.Info),
+                //cliloc.GetString(1079449, ResGumps.Info),
                 cliloc.GetString(1042237, ResGumps.Debug),
                 cliloc.GetString(3000169, ResGumps.NetStats),
-                cliloc.GetString(1158008, ResGumps.UOStore),
-                cliloc.GetString(1158390, ResGumps.GlobalChat)
+                cliloc.GetString(1158008, ResGumps.UOStore)
+                //cliloc.GetString(1158390, ResGumps.GlobalChat)
             };
 
-            bool hasUOStore = Client.Game.UO.Version >= ClientVersion.CV_706400;
+            bool hasUOStore = false;// Client.Game.UO.Version >= ClientVersion.CV_706400;
 
             ResizePic background;
 
@@ -227,7 +226,7 @@ namespace ClassicUO.Game.UI.Gumps
                     GameActions.OpenJournal(World);
 
                     break;
-
+                /*
                 case Buttons.Chat:
                     GameActions.OpenChat(World);
 
@@ -251,7 +250,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     break;
-
+                */
                 case Buttons.Help:
                     GameActions.RequestHelp();
 

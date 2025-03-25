@@ -122,7 +122,6 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _showInfoBar;
         private Checkbox _ignoreAllianceMessages;
         private Checkbox _ignoreGuildMessages, _useAlternateJournal, _partyMessagesOverhead;
-        private ClickableColorBox _AlternateJournalHue;
 
         // general
         private HSliderBar _sliderFPS, _circleOfTranspRadius;
@@ -147,6 +146,11 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _useStandardSkillsGump, _showMobileNameIncoming, _showCorpseNameIncoming;
         private Checkbox _showStatsMessage, _showSkillsMessage;
         private HSliderBar _showSkillsMessageDelta;
+
+        // experimental wotsc
+        private ClickableColorBox _AlternateJournalHue;
+        private Checkbox _AlternateJournalTransparencyToggle;
+        private HSliderBar _AlternateJournalTransparency;
 
 
         private Profile _currentProfile = ProfileManager.CurrentProfile;
@@ -2525,7 +2529,33 @@ namespace ClassicUO.Game.UI.Gumps
                 ResGumps.AlternateJournalHue
             );
 
-            startY += _AlternateJournalHue.Height + 15;
+            startY += _AlternateJournalHue.Height + 5;
+
+            _AlternateJournalTransparencyToggle = AddCheckBox
+            (
+                rightArea,
+                ResGumps.AlternateJournalTransparency,
+                _currentProfile.AlternateJournalTransparencyToggle,
+                startX,
+                startY
+            );
+
+            startX += _AlternateJournalTransparencyToggle.Width + 5;
+
+            _AlternateJournalTransparency = AddHSlider
+            (
+                rightArea,
+                1,
+                10,
+                _currentProfile.AlternateJournalTransparency,
+                startX,
+                startY,
+                180
+            );
+
+            startX = 5;
+
+            startY += _AlternateJournalTransparency.Height + 10;
 
             _partyMessagesOverhead = AddCheckBox
             (
@@ -3681,8 +3711,10 @@ namespace ClassicUO.Game.UI.Gumps
                     _hideChatGradient.IsChecked = false;
                     _ignoreGuildMessages.IsChecked = false;
                     _ignoreAllianceMessages.IsChecked = false;
-                    _useAlternateJournal.IsChecked = false;
+                    _useAlternateJournal.IsChecked = true;
                     _AlternateJournalHue.Hue = 0x0000;
+                    _AlternateJournalTransparency.Value = 7;
+                    _AlternateJournalTransparencyToggle.IsChecked = true;
                     _partyMessagesOverhead.IsChecked = false;
 
                     break;
@@ -4057,6 +4089,8 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.IgnoreAllianceMessages = _ignoreAllianceMessages.IsChecked;
             _currentProfile.UseAlternateJournal = _useAlternateJournal.IsChecked;
             _currentProfile.AlternateJournalHue = _AlternateJournalHue.Hue;
+            _currentProfile.AlternateJournalTransparencyToggle = _AlternateJournalTransparencyToggle.IsChecked; 
+            _currentProfile.AlternateJournalTransparency = _AlternateJournalTransparency.Value;
 
             // fonts
             _currentProfile.ForceUnicodeJournal = _forceUnicodeJournal.IsChecked;
