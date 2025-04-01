@@ -11,6 +11,7 @@ using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Services;
 using ClassicUO.Sdk;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Sdk.IO;
@@ -316,7 +317,7 @@ namespace ClassicUO.Network
             byte id = ID;
             int skillcount = 3;
 
-            if (Client.Game.UO.Version >= ClientVersion.CV_70160)
+            if (ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_70160)
             {
                 id = ID_NEW;
                 ++skillcount;

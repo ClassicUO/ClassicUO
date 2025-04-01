@@ -22,6 +22,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using static SDL2.SDL;
 using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO
 {
@@ -108,6 +109,16 @@ namespace ClassicUO
             SetScene(new MainScene(this));
 #else
             UO.Load(this);
+
+            // Registra i servizi
+            ServiceProvider.Register(new AudioService(Audio));
+            ServiceProvider.Register(new UOService(UO));
+            ServiceProvider.Register(new WindowService(Window));
+            ServiceProvider.Register(new GameService(this));
+            ServiceProvider.Register(new PluginHostService(PluginHost));
+            ServiceProvider.Register(new FileManagerService(UO.FileManager));
+            ServiceProvider.Register(new GameCursorService(UO.GameCursor));
+
             Audio.Initialize();
             // TODO: temporary fix to avoid crash when laoding plugins
             Settings.GlobalSettings.Encryption = (byte) NetClient.Socket.Load(UO.FileManager.Version, (EncryptionType) Settings.GlobalSettings.Encryption);
@@ -223,8 +234,8 @@ namespace ClassicUO
 
         public void SetWindowSize(int width, int height)
         {
-            //width = (int) ((double) width * Client.Game.GraphicManager.PreferredBackBufferWidth / Client.Game.Window.ClientBounds.Width);
-            //height = (int) ((double) height * Client.Game.GraphicManager.PreferredBackBufferHeight / Client.Game.Window.ClientBounds.Height);
+            //width = (int) ((double) width * ServiceProvider.Get<GameService>().GraphicManager.PreferredBackBufferWidth / ServiceProvider.Get<WindowService>().ClientBounds.Width);
+            //height = (int) ((double) height * ServiceProvider.Get<GameService>().GraphicManager.PreferredBackBufferHeight / ServiceProvider.Get<WindowService>().ClientBounds.Height);
 
             /*if (CUOEnviroment.IsHighDPI)
             {
@@ -233,8 +244,8 @@ namespace ClassicUO
             }
             */
 
-            GraphicManager.PreferredBackBufferWidth = width;
-            GraphicManager.PreferredBackBufferHeight = height;
+            GraphicManager.PreferredBackBufferWidth = ServiceProvider.Get<WindowService>().ClientBounds.Width;
+            GraphicManager.PreferredBackBufferHeight = ServiceProvider.Get<WindowService>().ClientBounds.Height;
             GraphicManager.ApplyChanges();
         }
 

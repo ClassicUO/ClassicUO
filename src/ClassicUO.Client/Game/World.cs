@@ -234,7 +234,7 @@ namespace ClassicUO.Game
                         }
                     }
                 }
-            }    
+            }
 
             //TODO(deccer): refactor this out into _audioPlayer.PlayMusic(...)
             var currentMusic = Client.Game.Audio.GetCurrentMusic();

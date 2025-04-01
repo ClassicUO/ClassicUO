@@ -18,6 +18,7 @@ using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -4021,7 +4022,8 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.TerrainShadowsLevel = _terrainShadowLevel.Value;
             _currentProfile.AuraUnderFeetType = _auraType.SelectedIndex;
 
-            Client.Game.IsMouseVisible = Settings.GlobalSettings.RunMouseInASeparateThread = _runMouseInSeparateThread.IsChecked;
+            Settings.GlobalSettings.RunMouseInASeparateThread = _runMouseInSeparateThread.IsChecked;
+            ServiceProvider.Get<GameService>().IsMouseVisible = _runMouseInSeparateThread.IsChecked;
 
             _currentProfile.AuraOnMouse = _auraMouse.IsChecked;
             _currentProfile.AnimatedWaterEffect = _animatedWaterEffect.IsChecked;

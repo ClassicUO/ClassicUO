@@ -3,6 +3,7 @@
 using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Services;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
@@ -175,8 +176,8 @@ namespace ClassicUO.Game
             while (CurrentCount < Count)
             {
                 ref WeatherEffect effect = ref _effects[CurrentCount++];
-                effect.X = RandomHelper.GetValue(0, Client.Game.Scene.Camera.Bounds.Width);
-                effect.Y = RandomHelper.GetValue(0, Client.Game.Scene.Camera.Bounds.Height);
+                effect.X = RandomHelper.GetValue(0, ServiceProvider.Get<SceneService>().Bounds.Width);
+                effect.Y = RandomHelper.GetValue(0, ServiceProvider.Get<SceneService>().Bounds.Height);
             }
         }
 
@@ -205,7 +206,7 @@ namespace ClassicUO.Game
                 randY *= -1;
             }
 
-            Client.Game.Audio.PlaySoundWithDistance(_world, sound, _world.Player.X + randX, _world.Player.Y + randY);
+            ServiceProvider.Get<AudioService>().PlaySoundWithDistance(_world, sound, _world.Player.X + randX, _world.Player.Y + randY);
         }
 
         public void Draw(UltimaBatcher2D batcher, int x, int y)
@@ -284,7 +285,7 @@ namespace ClassicUO.Game
             //}
 
             //Point winpos = ProfileManager.CurrentProfile.GameWindowPosition;
-            Point winsize = new Point(Client.Game.Scene.Camera.Bounds.Width, Client.Game.Scene.Camera.Bounds.Height);
+            Point winsize = new Point(ServiceProvider.Get<SceneService>().Bounds.Width, ServiceProvider.Get<SceneService>().Bounds.Height);
 
             Rectangle snowRect = new Rectangle(0, 0, 2, 2);
 

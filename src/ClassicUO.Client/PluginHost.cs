@@ -1,5 +1,6 @@
 ﻿using ClassicUO.Configuration;
 using ClassicUO.Game;
+using ClassicUO.Game.Services;
 using ClassicUO.Network;
 using Microsoft.Xna.Framework.Graphics;
 using SDL2;
@@ -225,7 +226,7 @@ namespace ClassicUO
         static void setWindowTitle(IntPtr ptr)
         {
             var title = SDL2.SDL.UTF8_ToManaged(ptr);
-            Client.Game.SetWindowTitle(title);
+            ServiceProvider.Get<GameService>().SetWindowTitle(title);
         }
 
         static IntPtr reflectionCmd(IntPtr cmd)
@@ -244,16 +245,16 @@ namespace ClassicUO
                     break;
                 case 3:
                     var subCmd = Unsafe.AsRef<(int, sbyte)>(cmd.ToPointer());
-                    var res = Client.Game.UO?.World?.Player?.Pathfinder?.AutoWalking ?? false;
+                    var res = ServiceProvider.Get<UOService>().World?.Player?.Pathfinder?.AutoWalking ?? false;
 
                     switch (subCmd.Item2)
                     {
                         case -1: return (IntPtr)Unsafe.AsPointer(ref res);
                         case 0:
-                            Client.Game.UO.World.Player.Pathfinder.AutoWalking = false;
+                            ServiceProvider.Get<UOService>().World.Player.Pathfinder.AutoWalking = false;
                             break;
                         default:
-                            Client.Game.UO.World.Player.Pathfinder.AutoWalking = true;
+                            ServiceProvider.Get<UOService>().World.Player.Pathfinder.AutoWalking = true;
                             break;
                     }
 

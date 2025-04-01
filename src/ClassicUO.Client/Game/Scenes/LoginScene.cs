@@ -19,6 +19,7 @@ using Microsoft.Xna.Framework;
 using ClassicUO.Sdk.IO;
 using ClassicUO.Sdk;
 using System.Collections.Generic;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -66,14 +67,15 @@ namespace ClassicUO.Game.Scenes
         {
             base.Load();
 
-            Client.Game.Window.AllowUserResizing = false;
+            ServiceProvider.Get<WindowService>().AllowUserResizing = false;
 
             _autoLogin = Settings.GlobalSettings.AutoLogin;
 
             UIManager.Add(new LoginBackground(_world));
             UIManager.Add(_currentGump = new LoginGump(_world, this));
 
-            Client.Game.Audio.PlayMusic(Client.Game.Audio.LoginMusicIndex, false, true);
+
+            ServiceProvider.Get<AudioService>().PlayMusic(ServiceProvider.Get<AudioService>().LoginMusicIndex, false, true);
 
             if (CanAutologin && CurrentLoginStep != LoginSteps.Main || CUOEnviroment.SkipLoginScreen)
             {
@@ -85,12 +87,12 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            if (Client.Game.IsWindowMaximized())
+            if (ServiceProvider.Get<GameService>().IsWindowMaximized())
             {
-                Client.Game.RestoreWindow();
+                ServiceProvider.Get<GameService>().RestoreWindow();
             }
 
-            Client.Game.SetWindowSize(640, 480);
+            ServiceProvider.Get<GameService>().SetWindowSize(640, 480);
         }
 
 
@@ -101,8 +103,8 @@ namespace ClassicUO.Game.Scenes
                 return;
             }
 
-            Client.Game.Audio?.StopMusic();
-            Client.Game.Audio?.StopSounds();
+            ServiceProvider.Get<AudioService>()?.StopMusic();
+            ServiceProvider.Get<AudioService>()?.StopSounds();
 
             UIManager.GetGump<LoginBackground>()?.Dispose();
 
@@ -112,7 +114,7 @@ namespace ClassicUO.Game.Scenes
             NetClient.Socket.Connected -= OnNetClientConnected;
             NetClient.Socket.Disconnected -= OnNetClientDisconnected;
 
-            Client.Game.UO.GameCursor.IsLoading = false;
+            ServiceProvider.Get<GameCursorService>().IsLoading = false;
             base.Unload();
         }
 
@@ -122,7 +124,7 @@ namespace ClassicUO.Game.Scenes
 
             if (_lastLoginStep != CurrentLoginStep)
             {
-                Client.Game.UO.GameCursor.IsLoading = false;
+                ServiceProvider.Get<GameCursorService>().IsLoading = false;
 
                 // this trick avoid the flickering
                 var g = _currentGump;
