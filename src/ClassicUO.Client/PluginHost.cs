@@ -295,9 +295,9 @@ namespace ClassicUO
             _loadPlugin
             (
                 pluginPathPtr,
-                (uint)Client.Game.UO.Version,
+                (uint)ServiceProvider.Get<UOService>().Version,
                 uoAssetsPtr,
-                Client.Game.Window.Handle
+                ServiceProvider.Get<WindowService>().Handle
             );
 
             if (pluginPathPtr != IntPtr.Zero)

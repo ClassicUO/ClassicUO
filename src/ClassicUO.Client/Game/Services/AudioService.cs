@@ -12,9 +12,9 @@ namespace ClassicUO.Game.Services
             _audio = audio;
         }
 
-        public void PlayMusic(int index, bool loop, bool isWav = false)
+        public void PlayMusic(int index, bool isWarmode = false, bool isLogin = false)
         {
-            _audio.PlayMusic(index, loop, isWav);
+            _audio.PlayMusic(index, isWarmode, isLogin);
         }
 
         public void StopMusic()
@@ -47,6 +47,13 @@ namespace ClassicUO.Game.Services
         public UOMusic? GetCurrentMusic()
         {
             return _audio.GetCurrentMusic();
+        }
+
+        public ushort DeathMusicIndex { get; } = 0x4D2;
+
+        public void StopWarMusic()
+        {
+            _audio.StopWarMusic();
         }
     }
 }

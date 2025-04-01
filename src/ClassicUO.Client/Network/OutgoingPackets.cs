@@ -339,7 +339,7 @@ namespace ClassicUO.Network
             writer.WriteASCII(character.Name, 30);
             writer.WriteZero(2);
 
-            writer.WriteUInt32BE((uint) Client.Game.UO.Protocol);
+            writer.WriteUInt32BE((uint)ServiceProvider.Get<UOService>().Protocol);
             writer.WriteUInt32BE(0x01);
             writer.WriteUInt32BE(0x00);
             writer.WriteUInt8(profession);
@@ -347,7 +347,7 @@ namespace ClassicUO.Network
 
             byte val;
 
-            if (Client.Game.UO.Version < ClientVersion.CV_4011D)
+            if (ServiceProvider.Get<UOService>().Version < ClientVersion.CV_4011D)
             {
                 val = (byte) (character.Flags.HasFlag(Flags.Female) ? 0x01 : 0x00);
             }
@@ -355,7 +355,7 @@ namespace ClassicUO.Network
             {
                 val = (byte) character.Race;
 
-                if (Client.Game.UO.Version < ClientVersion.CV_7000)
+                if (ServiceProvider.Get<UOService>().Version < ClientVersion.CV_7000)
                 {
                     val--;
                 }
@@ -494,7 +494,7 @@ namespace ClassicUO.Network
             writer.WriteUInt32BE(0xEDEDEDED);
             writer.WriteASCII(name, 30);
             writer.WriteZero(2);
-            writer.WriteUInt32BE((uint) Client.Game.UO.Protocol);
+            writer.WriteUInt32BE((uint)ServiceProvider.Get<UOService>().Protocol);
             writer.WriteZero(24);
             writer.WriteUInt32BE(index);
             writer.WriteUInt32BE(ipclient);
@@ -927,7 +927,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            List<SpeechEntry> entries = Client.Game.UO.FileManager.Speeches.GetKeywords(text);
+            List<SpeechEntry> entries = ServiceProvider.Get<UOService>().FileManager.Speeches.GetKeywords(text);
             bool encoded = entries != null && entries.Count != 0;
 
             if (encoded)
@@ -977,7 +977,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            var entries = Client.Game.UO.FileManager.Speeches.GetKeywords(text);
+            var entries = ServiceProvider.Get<UOService>().FileManager.Speeches.GetKeywords(text);
             bool encoded = entries.Count != 0;
 
             if (encoded)
@@ -1058,7 +1058,7 @@ namespace ClassicUO.Network
 
             byte id = ID;
 
-            if (Client.Game.UO.Version < ClientVersion.CV_60142)
+            if (ServiceProvider.Get<UOService>().Version < ClientVersion.CV_60142)
             {
                 id = ID_OLD;
             }
@@ -1074,7 +1074,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            if (Client.Game.UO.Version >= ClientVersion.CV_60142)
+            if (ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_60142)
             {
                 writer.WriteUInt16BE(0x1C);
                 writer.WriteUInt16BE(0x02);
@@ -2604,7 +2604,7 @@ namespace ClassicUO.Network
 
             uint clientFlag = 0;
 
-            for (int i = 0; i < (uint) Client.Game.UO.Protocol; ++i)
+            for (int i = 0; i < (uint)ServiceProvider.Get<UOService>().Protocol; ++i)
             {
                 clientFlag |= (uint) (1 << i);
             }
@@ -4643,9 +4643,9 @@ namespace ClassicUO.Network
             writer.WriteUInt16BE(0xBEEF);
             writer.WriteUInt8(0x01);
 
-            writer.WriteUInt16BE((ushort)Client.Game.UO.FileManager.Skills.SortedSkills.Count);
+            writer.WriteUInt16BE((ushort)ServiceProvider.Get<UOService>().FileManager.Skills.SortedSkills.Count);
 
-            foreach (SkillEntry s in Client.Game.UO.FileManager.Skills.SortedSkills)
+            foreach (SkillEntry s in ServiceProvider.Get<UOService>().FileManager.Skills.SortedSkills)
             {
                 writer.WriteUInt16BE((ushort) s.Index);
                 writer.WriteBool(s.HasAction);

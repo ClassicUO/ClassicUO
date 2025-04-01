@@ -4,6 +4,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Sdk.Assets;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -30,7 +31,7 @@ namespace ClassicUO.Game.GameObjects
 
         public string Name => ItemData.Name;
 
-        public ref StaticTiles ItemData => ref Client.Game.UO.FileManager.TileData.StaticData[Graphic];
+        public ref StaticTiles ItemData => ref ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[Graphic];
         public bool IsCustom;
         public bool IsVegetation;
         public int MultiOffsetX;

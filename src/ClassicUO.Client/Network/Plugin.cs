@@ -16,6 +16,7 @@ using Microsoft.Xna.Framework.Graphics;
 using SDL2;
 using ClassicUO.Sdk;
 using ClassicUO.Platforms;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Network
 {
@@ -168,7 +169,7 @@ namespace ClassicUO.Network
 
             SDL.SDL_SysWMinfo info = new SDL.SDL_SysWMinfo();
             SDL.SDL_VERSION(out info.version);
-            SDL.SDL_GetWindowWMInfo(Client.Game.Window.Handle, ref info);
+            SDL.SDL_GetWindowWMInfo(ServiceProvider.Get<WindowService>().Handle, ref info);
 
             IntPtr hwnd = IntPtr.Zero;
 
@@ -179,7 +180,7 @@ namespace ClassicUO.Network
 
             PluginHeader header = new PluginHeader
             {
-                ClientVersion = (int)Client.Game.UO.Version,
+                ClientVersion = (int)ServiceProvider.Get<UOService>().Version,
                 Recv = Marshal.GetFunctionPointerForDelegate(_recv),
                 Send = Marshal.GetFunctionPointerForDelegate(_send),
                 GetPacketLength = Marshal.GetFunctionPointerForDelegate(_getPacketLength),
@@ -192,7 +193,7 @@ namespace ClassicUO.Network
                 SetTitle = Marshal.GetFunctionPointerForDelegate(_setTitle),
                 Recv_new = Marshal.GetFunctionPointerForDelegate(_recv_new),
                 Send_new = Marshal.GetFunctionPointerForDelegate(_send_new),
-                SDL_Window = Client.Game.Window.Handle,
+                SDL_Window = ServiceProvider.Get<WindowService>().Handle,
                 GetStaticData = Marshal.GetFunctionPointerForDelegate(_get_static_data),
                 GetTileData = Marshal.GetFunctionPointerForDelegate(_get_tile_data),
                 GetCliloc = Marshal.GetFunctionPointerForDelegate(_get_cliloc)
@@ -241,12 +242,12 @@ namespace ClassicUO.Network
             {
                 try
                 {
-                    Client.Game.PluginHost?.LoadPlugin(PluginPath);
+                    ServiceProvider.Get<PluginHostService>()?.LoadPlugin(PluginPath);
 
-                    //Client.Game.AssistantHost.OnSocketConnected += (o, e) => {
-                    //    Client.Game.AssistantHost.PluginInitialize(PluginPath);
+                    //ServiceProvider.Get<PluginHostService>()?.OnSocketConnected += (o, e) => {
+                    //    ServiceProvider.Get<PluginHostService>()?.PluginInitialize(PluginPath);
                     //};
-                    //Client.Game.AssistantHost.Connect("127.0.0.1", 7777);
+                    //ServiceProvider.Get<PluginHostService>()?.Connect("127.0.0.1", 7777);
 
                     //Assembly asm = Assembly.LoadFile(PluginPath);
                     //Type type = asm.GetType("Assistant.Engine");
@@ -404,7 +405,7 @@ namespace ClassicUO.Network
 
         private static void SetWindowTitle(string str)
         {
-            Client.Game.SetWindowTitle(str);
+            ServiceProvider.Get<GameService>().SetWindowTitle(str);
         }
 
         private static bool GetStaticData(
@@ -421,7 +422,7 @@ namespace ClassicUO.Network
         {
             if (index >= 0 && index < ArtLoader.MAX_STATIC_DATA_INDEX_COUNT)
             {
-                ref StaticTiles st = ref Client.Game.UO.FileManager.TileData.StaticData[index];
+                ref StaticTiles st = ref ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[index];
 
                 flags = (ulong)st.Flags;
                 weight = st.Weight;
@@ -447,7 +448,7 @@ namespace ClassicUO.Network
         {
             if (index >= 0 && index < ArtLoader.MAX_STATIC_DATA_INDEX_COUNT)
             {
-                ref LandTiles st = ref Client.Game.UO.FileManager.TileData.LandData[index];
+                ref LandTiles st = ref ServiceProvider.Get<UOService>().FileManager.TileData.LandData[index];
 
                 flags = (ulong)st.Flags;
                 textid = st.TexID;
@@ -461,14 +462,14 @@ namespace ClassicUO.Network
 
         private static bool GetCliloc(int cliloc, string args, bool capitalize, out string buffer)
         {
-            buffer = Client.Game.UO.FileManager.Clilocs.Translate(cliloc, args, capitalize);
+            buffer = ServiceProvider.Get<UOService>().FileManager.Clilocs.Translate(cliloc, args, capitalize);
 
             return buffer != null;
         }
 
         private static void GetStaticImage(ushort g, ref CUO_API.ArtInfo info)
         {
-            //Client.Game.UO.FileManager.Arts.TryGetEntryInfo(g, out long address, out long size, out long compressedsize);
+            //ServiceProvider.Get<UOService>().FileManager.Arts.TryGetEntryInfo(g, out long address, out long size, out long compressedsize);
             //info.Address = address;
             //info.Size = size;
             //info.CompressedSize = compressedsize;
@@ -476,16 +477,16 @@ namespace ClassicUO.Network
 
         internal static bool RequestMove(int dir, bool run)
         {
-            return Client.Game.UO.World.Player.Walk((Direction)dir, run);
+            return ServiceProvider.Get<UOService>().World.Player.Walk((Direction)dir, run);
         }
 
         internal static bool GetPlayerPosition(out int x, out int y, out int z)
         {
-            if (Client.Game.UO.World.Player != null)
+            if (ServiceProvider.Get<UOService>().World.Player != null)
             {
-                x = Client.Game.UO.World.Player.X;
-                y = Client.Game.UO.World.Player.Y;
-                z = Client.Game.UO.World.Player.Z;
+                x = ServiceProvider.Get<UOService>().World.Player.X;
+                y = ServiceProvider.Get<UOService>().World.Player.Y;
+                z = ServiceProvider.Get<UOService>().World.Player.Z;
 
                 return true;
             }
@@ -497,7 +498,7 @@ namespace ClassicUO.Network
 
         internal static void Tick()
         {
-            Client.Game.PluginHost?.Tick();
+            ServiceProvider.Get<PluginHostService>()?.Tick();
 
             foreach (Plugin t in Plugins)
             {
@@ -510,7 +511,7 @@ namespace ClassicUO.Network
 
         internal static bool ProcessRecvPacket(byte[] data, ref int length)
         {
-            bool result = Client.Game.PluginHost?.PacketIn(new ArraySegment<byte>(data, 0, length)) ?? true;
+            bool result = ServiceProvider.Get<PluginHostService>()?.PacketIn(new ArraySegment<byte>(data, 0, length)) ?? true;
 
             foreach (Plugin plugin in Plugins)
             {
@@ -545,7 +546,7 @@ namespace ClassicUO.Network
 
         internal static bool ProcessSendPacket(ref Span<byte> message)
         {
-            bool result = Client.Game.PluginHost?.PacketOut(message) ?? true;
+            bool result = ServiceProvider.Get<PluginHostService>()?.PacketOut(message) ?? true;
 
             foreach (Plugin plugin in Plugins)
             {
@@ -582,7 +583,7 @@ namespace ClassicUO.Network
 
         internal static void OnClosing()
         {
-            Client.Game.PluginHost?.Closing();
+            ServiceProvider.Get<PluginHostService>()?.Closing();
 
             for (int i = 0; i < Plugins.Count; i++)
             {
@@ -597,7 +598,7 @@ namespace ClassicUO.Network
 
         internal static void OnFocusGained()
         {
-            Client.Game.PluginHost?.FocusGained();
+            ServiceProvider.Get<PluginHostService>()?.FocusGained();
 
             foreach (Plugin t in Plugins)
             {
@@ -610,7 +611,7 @@ namespace ClassicUO.Network
 
         internal static void OnFocusLost()
         {
-            Client.Game.PluginHost?.FocusLost();
+            ServiceProvider.Get<PluginHostService>()?.FocusLost();
 
             foreach (Plugin t in Plugins)
             {
@@ -623,7 +624,7 @@ namespace ClassicUO.Network
 
         internal static void OnConnected()
         {
-            Client.Game.PluginHost?.Connected();
+            ServiceProvider.Get<PluginHostService>()?.Connected();
 
             foreach (Plugin t in Plugins)
             {
@@ -636,7 +637,7 @@ namespace ClassicUO.Network
 
         internal static void OnDisconnected()
         {
-            Client.Game.PluginHost?.Disconnected();
+            ServiceProvider.Get<PluginHostService>()?.Disconnected();
 
             foreach (Plugin t in Plugins)
             {
@@ -649,7 +650,7 @@ namespace ClassicUO.Network
 
         internal static bool ProcessHotkeys(int key, int mod, bool ispressed)
         {
-            if ((!Client.Game.UO.World?.InGame ?? false) || UIManager.SystemChat != null && (
+            if ((!ServiceProvider.Get<UOService>().World?.InGame ?? false) || UIManager.SystemChat != null && (
                         ProfileManager.CurrentProfile != null
                             && ProfileManager.CurrentProfile.ActivateChatAfterEnter
                             && UIManager.SystemChat.IsActive
@@ -660,7 +661,7 @@ namespace ClassicUO.Network
                 return true;
             }
 
-            var ok = Client.Game.PluginHost?.Hotkey(key, mod, ispressed);
+            var ok = ServiceProvider.Get<PluginHostService>()?.Hotkey(key, mod, ispressed);
 
             bool result = ok ?? true;
 
@@ -679,7 +680,7 @@ namespace ClassicUO.Network
 
         internal static void ProcessMouse(int button, int wheel)
         {
-            Client.Game.PluginHost?.Mouse(button, wheel);
+            ServiceProvider.Get<PluginHostService>()?.Mouse(button, wheel);
 
             foreach (Plugin plugin in Plugins)
             {
@@ -691,10 +692,10 @@ namespace ClassicUO.Network
         {
             IntPtr cmdList = IntPtr.Zero;
             var len = 0;
-            Client.Game.PluginHost?.GetCommandList(out cmdList, out len);
-            if (Client.Game.PluginHost != null && len != 0 && cmdList != IntPtr.Zero)
+            ServiceProvider.Get<PluginHostService>()?.GetCommandList(out cmdList, out len);
+            if (ServiceProvider.Get<PluginHostService>() != null && len != 0 && cmdList != IntPtr.Zero)
             {
-                HandleCmdList(device, cmdList, len, Client.Game.PluginHost.GfxResources);
+                HandleCmdList(device, cmdList, len, ServiceProvider.Get<PluginHostService>().GfxResources);
             }
 
             foreach (Plugin plugin in Plugins)
@@ -714,7 +715,7 @@ namespace ClassicUO.Network
 
         internal static int ProcessWndProc(SDL.SDL_Event* e)
         {
-            var result = Client.Game.PluginHost?.SdlEvent(e) ?? 0;
+            var result = ServiceProvider.Get<PluginHostService>()?.SdlEvent(e) ?? 0;
 
             foreach (Plugin plugin in Plugins)
             {
@@ -729,7 +730,7 @@ namespace ClassicUO.Network
 
         internal static void UpdatePlayerPosition(int x, int y, int z)
         {
-            Client.Game.PluginHost?.UpdatePlayerPosition(x, y, z);
+            ServiceProvider.Get<PluginHostService>()?.UpdatePlayerPosition(x, y, z);
 
             foreach (Plugin plugin in Plugins)
             {

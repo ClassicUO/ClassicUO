@@ -6,14 +6,25 @@ namespace ClassicUO.Game.Services
 {
     internal class SceneService : IService
     {
-        private readonly Scene _scene;
+        private readonly GameController _game;
 
-        public SceneService(Scene scene)
+        public SceneService(GameController game)
         {
-            _scene = scene;
+            _game = game;
         }
 
-        public Camera Camera => _scene.Camera;
-        public Rectangle Bounds => _scene.Camera.Bounds;
+        public Camera Camera => _game.Scene.Camera;
+        public Rectangle Bounds => _game.Scene.Camera.Bounds;
+        public Scene? CurrentScene => _game.Scene;
+
+        public T? GetScene<T>() where T : Scene
+        {
+            return _game.GetScene<T>();
+        }
+
+        public void SetScene(Scene scene)
+        {
+            _game.SetScene(scene);
+        }
     }
 }

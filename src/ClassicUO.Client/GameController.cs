@@ -118,6 +118,7 @@ namespace ClassicUO
             ServiceProvider.Register(new PluginHostService(PluginHost));
             ServiceProvider.Register(new FileManagerService(UO.FileManager));
             ServiceProvider.Register(new GameCursorService(UO.GameCursor));
+            ServiceProvider.Register(new SceneService(this));
 
             Audio.Initialize();
             // TODO: temporary fix to avoid crash when laoding plugins

@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Text;
 using ClassicUO.Sdk;
 using ClassicUO.Platforms;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Network
 {
@@ -313,7 +314,7 @@ namespace ClassicUO.Network
         {
             if (world.ClientFeatures.TooltipsEnabled && Handler._clilocRequests.Count != 0)
             {
-                if (Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_5090)
+                if (ServiceProvider.Get<UOService>().Version >= ClassicUO.Sdk.ClientVersion.CV_5090)
                 {
                     if (Handler._clilocRequests.Count != 0)
                     {
@@ -526,7 +527,7 @@ namespace ClassicUO.Network
                             !string.IsNullOrEmpty(world.Player.Name) && oldName != world.Player.Name
                         )
                         {
-                            Client.Game.SetWindowTitle(world.Player.Name);
+                            ServiceProvider.Get<GameService>().SetWindowTitle(world.Player.Name);
                         }
 
                         ushort str = p.ReadUInt16BE();
@@ -624,7 +625,7 @@ namespace ClassicUO.Network
                         }
                         else
                         {
-                            if (Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_500A)
+                            if (ServiceProvider.Get<UOService>().Version >= ClassicUO.Sdk.ClientVersion.CV_500A)
                             {
                                 world.Player.WeightMax = (ushort)(
                                     7 * (world.Player.Strength >> 1) + 40
@@ -713,7 +714,7 @@ namespace ClassicUO.Network
                 return;
             }
 
-            if (p[0] == 0x16 && Client.Game.UO.Version < ClassicUO.Sdk.ClientVersion.CV_500A)
+            if (p[0] == 0x16 && ServiceProvider.Get<UOService>().Version < ClassicUO.Sdk.ClientVersion.CV_500A)
             {
                 return;
             }
@@ -736,7 +737,7 @@ namespace ClassicUO.Network
                 {
                     if (enabled)
                     {
-                        if (Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_7000)
+                        if (ServiceProvider.Get<UOService>().Version >= ClassicUO.Sdk.ClientVersion.CV_7000)
                         {
                             mobile.SetSAPoison(true);
                         }
@@ -747,7 +748,7 @@ namespace ClassicUO.Network
                     }
                     else
                     {
-                        if (Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_7000)
+                        if (ServiceProvider.Get<UOService>().Version >= ClassicUO.Sdk.ClientVersion.CV_7000)
                         {
                             mobile.SetSAPoison(false);
                         }
@@ -913,15 +914,15 @@ namespace ClassicUO.Network
                         : ProfileManager.CurrentProfile.LightLevel;
             }
 
-            Client.Game.Audio.UpdateCurrentMusicVolume();
+            ServiceProvider.Get<AudioService>().UpdateCurrentMusicVolume();
 
-            if (Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_200)
+            if (ServiceProvider.Get<UOService>().Version >= ClassicUO.Sdk.ClientVersion.CV_200)
             {
                 if (ProfileManager.CurrentProfile != null)
                 {
                     NetClient.Socket.Send_GameWindowSize(
-                        (uint)Client.Game.Scene.Camera.Bounds.Width,
-                        (uint)Client.Game.Scene.Camera.Bounds.Height
+                        (uint)ServiceProvider.Get<SceneService>().Bounds.Width,
+                        (uint)ServiceProvider.Get<SceneService>().Bounds.Height
                     );
                 }
 
@@ -939,7 +940,7 @@ namespace ClassicUO.Network
             }
 
             if (
-                Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_70796
+                ServiceProvider.Get<UOService>().Version >= ClassicUO.Sdk.ClientVersion.CV_70796
                 && ProfileManager.CurrentProfile != null
             )
             {
@@ -1059,7 +1060,7 @@ namespace ClassicUO.Network
 
                     if (cont == world.Player && it.Layer == Layer.Invalid)
                     {
-                        Client.Game.UO.GameCursor.ItemHold.Enabled = false;
+                        ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled = false;
                     }
 
                     if (it.Layer != Layer.Invalid)
@@ -1332,7 +1333,7 @@ namespace ClassicUO.Network
                 spellbookGump.Location = location;
                 UIManager.Add(spellbookGump);
 
-                Client.Game.Audio.PlaySound(0x0055);
+                ServiceProvider.Get<AudioService>().PlaySound(0x0055);
             }
             else if (graphic == 0x0030)
             {
@@ -1428,12 +1429,12 @@ namespace ClassicUO.Network
 
                     // TODO: check client version ?
                     if (
-                        Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_706000
+                        ServiceProvider.Get<UOService>().Version >= ClassicUO.Sdk.ClientVersion.CV_706000
                         && ProfileManager.CurrentProfile != null
                         && ProfileManager.CurrentProfile.UseLargeContainerGumps
                     )
                     {
-                        var gumps = Client.Game.UO.Gumps;
+                        var gumps = ServiceProvider.Get<UOService>().Self.Gumps;
 
                         switch (graphic)
                         {
@@ -1571,7 +1572,7 @@ namespace ClassicUO.Network
             ushort x = p.ReadUInt16BE();
             ushort y = p.ReadUInt16BE();
 
-            if (Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_6017)
+            if (ServiceProvider.Get<UOService>().Version >= ClassicUO.Sdk.ClientVersion.CV_6017)
             {
                 p.Skip(1);
             }
@@ -1589,29 +1590,29 @@ namespace ClassicUO.Network
                 return;
             }
 
-            var firstItem = world.Items.Get(Client.Game.UO.GameCursor.ItemHold.Serial);
+            var firstItem = world.Items.Get(ServiceProvider.Get<UOService>().GameCursor.ItemHold.Serial);
 
             if (
-                Client.Game.UO.GameCursor.ItemHold.Enabled
-                || Client.Game.UO.GameCursor.ItemHold.Dropped
+                ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled
+                || ServiceProvider.Get<UOService>().GameCursor.ItemHold.Dropped
                     && (firstItem == null || !firstItem.AllowedToDraw)
             )
             {
-                if (world.ObjectToRemove == Client.Game.UO.GameCursor.ItemHold.Serial)
+                if (world.ObjectToRemove == ServiceProvider.Get<UOService>().GameCursor.ItemHold.Serial)
                 {
                     world.ObjectToRemove = 0;
                 }
 
                 if (
-                    SerialHelper.IsValid(Client.Game.UO.GameCursor.ItemHold.Serial)
-                    && Client.Game.UO.GameCursor.ItemHold.Graphic != 0xFFFF
+                    SerialHelper.IsValid(ServiceProvider.Get<UOService>().GameCursor.ItemHold.Serial)
+                    && ServiceProvider.Get<UOService>().GameCursor.ItemHold.Graphic != 0xFFFF
                 )
                 {
-                    if (!Client.Game.UO.GameCursor.ItemHold.UpdatedInWorld)
+                    if (!ServiceProvider.Get<UOService>().GameCursor.ItemHold.UpdatedInWorld)
                     {
                         if (
-                            Client.Game.UO.GameCursor.ItemHold.Layer == Layer.Invalid
-                            && SerialHelper.IsValid(Client.Game.UO.GameCursor.ItemHold.Container)
+                            ServiceProvider.Get<UOService>().GameCursor.ItemHold.Layer == Layer.Invalid
+                            && SerialHelper.IsValid(ServiceProvider.Get<UOService>().GameCursor.ItemHold.Container)
                         )
                         {
                             // Server should send an UpdateContainedItem after this packet.
@@ -1619,36 +1620,36 @@ namespace ClassicUO.Network
 
                             AddItemToContainer(
                                 world,
-                                Client.Game.UO.GameCursor.ItemHold.Serial,
-                                Client.Game.UO.GameCursor.ItemHold.Graphic,
-                                Client.Game.UO.GameCursor.ItemHold.TotalAmount,
-                                Client.Game.UO.GameCursor.ItemHold.X,
-                                Client.Game.UO.GameCursor.ItemHold.Y,
-                                Client.Game.UO.GameCursor.ItemHold.Hue,
-                                Client.Game.UO.GameCursor.ItemHold.Container
+                                ServiceProvider.Get<UOService>().GameCursor.ItemHold.Serial,
+                                ServiceProvider.Get<UOService>().GameCursor.ItemHold.Graphic,
+                                ServiceProvider.Get<UOService>().GameCursor.ItemHold.TotalAmount,
+                                ServiceProvider.Get<UOService>().GameCursor.ItemHold.X,
+                                ServiceProvider.Get<UOService>().GameCursor.ItemHold.Y,
+                                ServiceProvider.Get<UOService>().GameCursor.ItemHold.Hue,
+                                ServiceProvider.Get<UOService>().GameCursor.ItemHold.Container
                             );
 
                             UIManager
-                                .GetGump<ContainerGump>(Client.Game.UO.GameCursor.ItemHold.Container)
+                                .GetGump<ContainerGump>(ServiceProvider.Get<UOService>().GameCursor.ItemHold.Container)
                                 ?.RequestUpdateContents();
                         }
                         else
                         {
                             Item item = world.GetOrCreateItem(
-                                Client.Game.UO.GameCursor.ItemHold.Serial
+                                ServiceProvider.Get<UOService>().GameCursor.ItemHold.Serial
                             );
 
-                            item.Graphic = Client.Game.UO.GameCursor.ItemHold.Graphic;
-                            item.Hue = Client.Game.UO.GameCursor.ItemHold.Hue;
-                            item.Amount = Client.Game.UO.GameCursor.ItemHold.TotalAmount;
-                            item.Flags = Client.Game.UO.GameCursor.ItemHold.Flags;
-                            item.Layer = Client.Game.UO.GameCursor.ItemHold.Layer;
-                            item.X = Client.Game.UO.GameCursor.ItemHold.X;
-                            item.Y = Client.Game.UO.GameCursor.ItemHold.Y;
-                            item.Z = Client.Game.UO.GameCursor.ItemHold.Z;
+                            item.Graphic = ServiceProvider.Get<UOService>().GameCursor.ItemHold.Graphic;
+                            item.Hue = ServiceProvider.Get<UOService>().GameCursor.ItemHold.Hue;
+                            item.Amount = ServiceProvider.Get<UOService>().GameCursor.ItemHold.TotalAmount;
+                            item.Flags = ServiceProvider.Get<UOService>().GameCursor.ItemHold.Flags;
+                            item.Layer = ServiceProvider.Get<UOService>().GameCursor.ItemHold.Layer;
+                            item.X = ServiceProvider.Get<UOService>().GameCursor.ItemHold.X;
+                            item.Y = ServiceProvider.Get<UOService>().GameCursor.ItemHold.Y;
+                            item.Z = ServiceProvider.Get<UOService>().GameCursor.ItemHold.Z;
                             item.CheckGraphicChange();
 
-                            var container = world.Get(Client.Game.UO.GameCursor.ItemHold.Container);
+                            var container = world.Get(ServiceProvider.Get<UOService>().GameCursor.ItemHold.Container);
 
                             if (container != null)
                             {
@@ -1685,13 +1686,13 @@ namespace ClassicUO.Network
                 else
                 {
                     Log.Error(
-                        $"Wrong data: serial = {Client.Game.UO.GameCursor.ItemHold.Serial:X8}  -  graphic = {Client.Game.UO.GameCursor.ItemHold.Graphic:X4}"
+                        $"Wrong data: serial = {ServiceProvider.Get<UOService>().GameCursor.ItemHold.Serial:X8}  -  graphic = {ServiceProvider.Get<UOService>().GameCursor.ItemHold.Graphic:X4}"
                     );
                 }
 
-                UIManager.GetGump<SplitMenuGump>(Client.Game.UO.GameCursor.ItemHold.Serial)?.Dispose();
+                UIManager.GetGump<SplitMenuGump>(ServiceProvider.Get<UOService>().GameCursor.ItemHold.Serial)?.Dispose();
 
-                Client.Game.UO.GameCursor.ItemHold.Clear();
+                ServiceProvider.Get<UOService>().GameCursor.ItemHold.Clear();
             }
             else
             {
@@ -1726,8 +1727,8 @@ namespace ClassicUO.Network
                 return;
             }
 
-            Client.Game.UO.GameCursor.ItemHold.Enabled = false;
-            Client.Game.UO.GameCursor.ItemHold.Dropped = false;
+            ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled = false;
+            ServiceProvider.Get<UOService>().GameCursor.ItemHold.Dropped = false;
         }
 
         private static void DropItemAccepted(World world, ref StackDataReader p)
@@ -1737,8 +1738,8 @@ namespace ClassicUO.Network
                 return;
             }
 
-            Client.Game.UO.GameCursor.ItemHold.Enabled = false;
-            Client.Game.UO.GameCursor.ItemHold.Dropped = false;
+            ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled = false;
+            ServiceProvider.Get<UOService>().GameCursor.ItemHold.Dropped = false;
 
             Console.WriteLine("PACKET - ITEM DROP OK!");
         }
@@ -1752,7 +1753,7 @@ namespace ClassicUO.Network
             {
                 world.Weather.Reset();
 
-                Client.Game.Audio.PlayMusic(Client.Game.Audio.DeathMusicIndex, true);
+                ServiceProvider.Get<AudioService>().PlayMusic(ServiceProvider.Get<AudioService>().DeathMusicIndex, true);
 
                 if (ProfileManager.CurrentProfile.EnableDeathScreen)
                 {
@@ -1934,22 +1935,22 @@ namespace ClassicUO.Network
             {
                 int count = p.ReadUInt16BE();
 
-                Client.Game.UO.FileManager.Skills.Skills.Clear();
-                Client.Game.UO.FileManager.Skills.SortedSkills.Clear();
+                ServiceProvider.Get<UOService>().FileManager.Skills.Skills.Clear();
+                ServiceProvider.Get<UOService>().FileManager.Skills.SortedSkills.Clear();
 
                 for (int i = 0; i < count; i++)
                 {
                     bool haveButton = p.ReadBool();
                     int nameLength = p.ReadUInt8();
 
-                    Client.Game.UO.FileManager.Skills.Skills.Add(
+                    ServiceProvider.Get<UOService>().FileManager.Skills.Skills.Add(
                         new SkillEntry(i, p.ReadASCII(nameLength), haveButton)
                     );
                 }
 
-                Client.Game.UO.FileManager.Skills.SortedSkills.AddRange(Client.Game.UO.FileManager.Skills.Skills);
+                ServiceProvider.Get<UOService>().FileManager.Skills.SortedSkills.AddRange(ServiceProvider.Get<UOService>().FileManager.Skills.Skills);
 
-                Client.Game.UO.FileManager.Skills.SortedSkills.Sort(
+                ServiceProvider.Get<UOService>().FileManager.Skills.SortedSkills.Sort(
                     (a, b) => string.Compare(a.Name, b.Name, StringComparison.InvariantCulture)
                 );
             }
@@ -2104,7 +2105,7 @@ namespace ClassicUO.Network
                 ushort x = p.ReadUInt16BE();
                 ushort y = p.ReadUInt16BE();
 
-                if (Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_6017)
+                if (ServiceProvider.Get<UOService>().Version >= ClassicUO.Sdk.ClientVersion.CV_6017)
                 {
                     p.Skip(1);
                 }
@@ -2206,7 +2207,7 @@ namespace ClassicUO.Network
             ushort y = p.ReadUInt16BE();
             short z = (short)p.ReadUInt16BE();
 
-            Client.Game.Audio.PlaySoundWithDistance(world, index, x, y);
+            ServiceProvider.Get<AudioService>().PlaySoundWithDistance(world, index, x, y);
         }
 
         private static void PlayMusic(World world, ref StackDataReader p)
@@ -2219,26 +2220,26 @@ namespace ClassicUO.Network
                 // Check for stop music packet (6D 1F FF)
                 if (cmd == 0x1F && index == 0xFF)
                 {
-                    Client.Game.Audio.StopMusic();
+                    ServiceProvider.Get<AudioService>().StopMusic();
                 }
                 else
                 {
-                    Client.Game.Audio.PlayMusic(index);
+                    ServiceProvider.Get<AudioService>().PlayMusic(index);
                 }
             }
             else
             {
                 ushort index = p.ReadUInt16BE();
-                Client.Game.Audio.PlayMusic(index);
+                ServiceProvider.Get<AudioService>().PlayMusic(index);
             }
         }
 
         private static void LoginComplete(World world, ref StackDataReader p)
         {
-            if (world.Player != null && Client.Game.Scene is LoginScene)
+            if (world.Player != null && ServiceProvider.Get<SceneService>().CurrentScene is LoginScene)
             {
                 var scene = new GameScene(world);
-                Client.Game.SetScene(scene);
+                ServiceProvider.Get<SceneService>().SetScene(scene);
 
                 //GameActions.OpenPaperdoll(world.Player);
                 GameActions.RequestMobileStatus(world,world.Player);
@@ -2247,12 +2248,12 @@ namespace ClassicUO.Network
                 NetClient.Socket.Send_SkillsRequest(world.Player);
                 scene.DoubleClickDelayed(world.Player);
 
-                if (Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_306E)
+                if (ServiceProvider.Get<UOService>().Version >= ClassicUO.Sdk.ClientVersion.CV_306E)
                 {
                     NetClient.Socket.Send_ClientType();
                 }
 
-                if (Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_305D)
+                if (ServiceProvider.Get<UOService>().Version >= ClassicUO.Sdk.ClientVersion.CV_305D)
                 {
                     NetClient.Socket.Send_ClientViewRange(world.ClientViewRange);
                 }
@@ -2324,7 +2325,7 @@ namespace ClassicUO.Network
 
         private static void SetWeather(World world, ref StackDataReader p)
         {
-            var scene = Client.Game.GetScene<GameScene>();
+            var scene = ServiceProvider.Get<SceneService>().GetScene<GameScene>();
 
             if (scene == null)
             {
@@ -2542,8 +2543,8 @@ namespace ClassicUO.Network
                             );
                             bulletinBoard?.Dispose();
 
-                            int x = (Client.Game.Window.ClientBounds.Width >> 1) - 245;
-                            int y = (Client.Game.Window.ClientBounds.Height >> 1) - 205;
+                            int x = (ServiceProvider.Get<WindowService>().ClientBounds.Width >> 1) - 245;
+                            int y = (ServiceProvider.Get<WindowService>().ClientBounds.Height >> 1) - 205;
 
                             bulletinBoard = new BulletinBoardGump(world, item, x, y, p.ReadUTF8(22, true)); //p.ReadASCII(22));
                             UIManager.Add(bulletinBoard);
@@ -2758,7 +2759,7 @@ namespace ClassicUO.Network
                     }
                     else if (int.TryParse(name, out int cliloc))
                     {
-                        it.Name = Client.Game.UO.FileManager.Clilocs.Translate(
+                        it.Name = ServiceProvider.Get<UOService>().FileManager.Clilocs.Translate(
                             cliloc,
                             $"\t{it.ItemData.Name}: \t{it.Amount}",
                             true
@@ -2905,7 +2906,7 @@ namespace ClassicUO.Network
                 byte layer = p.ReadUInt8();
                 ushort item_hue = 0;
 
-                if (Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_70331)
+                if (ServiceProvider.Get<UOService>().Version >= ClassicUO.Sdk.ClientVersion.CV_70331)
                 {
                     item_hue = p.ReadUInt16BE();
                 }
@@ -2981,7 +2982,7 @@ namespace ClassicUO.Network
                     ushort hue = p.ReadUInt16BE();
                     name = p.ReadASCII(p.ReadUInt8());
 
-                    ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(graphic);
+                    ref readonly var artInfo = ref ServiceProvider.Get<UOService>().Self.Arts.GetArt(graphic);
 
                     if (artInfo.UV.Width != 0 && artInfo.UV.Height != 0)
                     {
@@ -3008,8 +3009,8 @@ namespace ClassicUO.Network
             {
                 GrayMenuGump gump = new GrayMenuGump(world, serial, id, name)
                 {
-                    X = (Client.Game.Window.ClientBounds.Width >> 1) - 200,
-                    Y = (Client.Game.Window.ClientBounds.Height >> 1) - ((121 + count * 21) >> 1)
+                    X = (ServiceProvider.Get<WindowService>().ClientBounds.Width >> 1) - 200,
+                    Y = (ServiceProvider.Get<WindowService>().ClientBounds.Height >> 1) - ((121 + count * 21) >> 1)
                 };
 
                 int offsetY = 35 + gump.Height;
@@ -3157,7 +3158,7 @@ namespace ClassicUO.Network
             MapGump gump = new MapGump(world, serial, gumpid, width, height);
             SpriteInfo multiMapInfo;
 
-            if (p[0] == 0xF5 || Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_308Z)
+            if (p[0] == 0xF5 || ServiceProvider.Get<UOService>().Version >= ClassicUO.Sdk.ClientVersion.CV_308Z)
             {
                 ushort facet = 0;
 
@@ -3166,10 +3167,10 @@ namespace ClassicUO.Network
                     facet = p.ReadUInt16BE();
                 }
 
-                multiMapInfo = Client.Game.UO.MultiMaps.GetMap(facet, width, height, startX, startY, endX, endY);            }
+                multiMapInfo = ServiceProvider.Get<UOService>().Self.MultiMaps.GetMap(facet, width, height, startX, startY, endX, endY);            }
             else
             {
-                multiMapInfo = Client.Game.UO.MultiMaps.GetMap(null, width, height, startX, startY, endX, endY);
+                multiMapInfo = ServiceProvider.Get<UOService>().Self.MultiMaps.GetMap(null, width, height, startX, startY, endX, endY);
             }
 
             if (multiMapInfo.Texture != null)
@@ -3246,10 +3247,10 @@ namespace ClassicUO.Network
             p.Skip(2);
             ushort graphic = p.ReadUInt16BE();
 
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(0x0906);
+            ref readonly var gumpInfo = ref ServiceProvider.Get<UOService>().Self.Gumps.GetGump(0x0906);
 
-            int x = (Client.Game.Window.ClientBounds.Width >> 1) - (gumpInfo.UV.Width >> 1);
-            int y = (Client.Game.Window.ClientBounds.Height >> 1) - (gumpInfo.UV.Height >> 1);
+            int x = (ServiceProvider.Get<WindowService>().ClientBounds.Width >> 1) - (gumpInfo.UV.Width >> 1);
+            int y = (ServiceProvider.Get<WindowService>().ClientBounds.Height >> 1) - (gumpInfo.UV.Height >> 1);
 
             var gump = UIManager.GetGump<ColorPickerGump>(serial);
 
@@ -3303,7 +3304,7 @@ namespace ClassicUO.Network
                     && name != world.Player.Name
                 )
                 {
-                    Client.Game.SetWindowTitle(name);
+                    ServiceProvider.Get<GameService>().SetWindowTitle(name);
                 }
 
                 UIManager.GetGump<NameOverheadGump>(serial)?.SetName();
@@ -3381,7 +3382,7 @@ namespace ClassicUO.Network
 
                 if (int.TryParse(name, out int clilocnum))
                 {
-                    name = Client.Game.UO.FileManager.Clilocs.GetString(clilocnum);
+                    name = ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(clilocnum);
                     fromcliloc = true;
                 }
                 else if (string.IsNullOrEmpty(name))
@@ -3390,7 +3391,7 @@ namespace ClassicUO.Network
 
                     if (!success)
                     {
-                        name = Client.Game.UO.FileManager.TileData.StaticData[graphic].Name;
+                        name = ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[graphic].Name;
                     }
                 }
 
@@ -3556,7 +3557,7 @@ namespace ClassicUO.Network
         {
             if (!world.InGame)
             {
-                var scene = Client.Game.GetScene<LoginScene>();
+                var scene = ServiceProvider.Get<SceneService>().GetScene<LoginScene>();
 
                 if (scene != null)
                 {
@@ -3729,12 +3730,12 @@ namespace ClassicUO.Network
                 world.CorpseManager.Add(corpseSerial, serial, owner.Direction, running != 0);
             }
 
-            var animations = Client.Game.UO.Animations;
+            var animations = ServiceProvider.Get<UOService>().Self.Animations;
             var gfx = owner.Graphic;
             animations.ConvertBodyIfNeeded(ref gfx);
             var animGroup = animations.GetAnimType(gfx);
             var animFlags = animations.GetAnimFlags(gfx);
-            byte group = Client.Game.UO.FileManager.Animations.GetDeathAction(
+            byte group = ServiceProvider.Get<UOService>().FileManager.Animations.GetDeathAction(
                 gfx,
                 animFlags,
                 animGroup,
@@ -4009,7 +4010,7 @@ namespace ClassicUO.Network
         {
             LockedFeatureFlags flags = 0;
 
-            if (Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_60142)
+            if (ServiceProvider.Get<UOService>().Version >= ClassicUO.Sdk.ClientVersion.CV_60142)
             {
                 flags = (LockedFeatureFlags)p.ReadUInt32BE();
             }
@@ -4038,7 +4039,7 @@ namespace ClassicUO.Network
             if (flags.HasFlag(LockedFeatureFlags.ML))
                 bcFlags |= BodyConvFlags.Anim4;
 
-            Client.Game.UO.Animations.UpdateAnimationTable(bcFlags);
+            ServiceProvider.Get<UOService>().Self.Animations.UpdateAnimationTable(bcFlags);
         }
 
         private static void DisplayQuestArrow(World world, ref StackDataReader p)
@@ -4049,7 +4050,7 @@ namespace ClassicUO.Network
 
             uint serial = 0;
 
-            if (Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_7090)
+            if (ServiceProvider.Get<UOService>().Version >= ClassicUO.Sdk.ClientVersion.CV_7090)
             {
                 serial = p.ReadUInt32BE();
             }
@@ -4225,7 +4226,7 @@ namespace ClassicUO.Network
 
                     if (cliloc > 0)
                     {
-                        str = Client.Game.UO.FileManager.Clilocs.GetString((int)cliloc, true);
+                        str = ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString((int)cliloc, true);
 
                         if (!string.IsNullOrEmpty(str))
                         {
@@ -4281,7 +4282,7 @@ namespace ClassicUO.Network
                         }
 
                         short charges = (short)p.ReadUInt16BE();
-                        string attr = Client.Game.UO.FileManager.Clilocs.GetString((int)next);
+                        string attr = ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString((int)next);
 
                         if (attr != null)
                         {
@@ -4395,7 +4396,7 @@ namespace ClassicUO.Network
                 //===========================================================================================
                 case 0x18: // enable map patches
 
-                    if (Client.Game.UO.FileManager.Maps.ApplyPatches(ref p))
+                    if (ServiceProvider.Get<UOService>().FileManager.Maps.ApplyPatches(ref p))
                     {
                         //List<GameObject> list = new List<GameObject>();
 
@@ -4575,7 +4576,7 @@ namespace ClassicUO.Network
 
                         if (world.HouseManager.EntityIntoHouse(serial, world.Player))
                         {
-                            Client.Game.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
+                            ServiceProvider.Get<SceneService>().GetScene<GameScene>()?.UpdateMaxDrawZ(true);
                         }
                     }
 
@@ -4781,7 +4782,7 @@ namespace ClassicUO.Network
                 }
             }
 
-            string text = Client.Game.UO.FileManager.Clilocs.Translate((int)cliloc, arguments);
+            string text = ServiceProvider.Get<UOService>().FileManager.Clilocs.Translate((int)cliloc, arguments);
 
             if (text == null)
             {
@@ -4805,7 +4806,7 @@ namespace ClassicUO.Network
                 type = MessageType.System;
             }
 
-            if (!Client.Game.UO.FileManager.Fonts.UnicodeFontExists((byte)font))
+            if (!ServiceProvider.Get<UOService>().FileManager.Fonts.UnicodeFontExists((byte)font))
             {
                 font = 0;
             }
@@ -4880,7 +4881,7 @@ namespace ClassicUO.Network
             // http://docs.polserver.com/packets/index.php?Packet=0xD1
 
             if (
-                Client.Game.GetScene<GameScene>().DisconnectionRequested
+                ServiceProvider.Get<SceneService>().GetScene<GameScene>().DisconnectionRequested
                 && (
                     world.ClientFeatures.Flags
                     & CharacterListFlags.CLF_OWERWRITE_CONFIGURATION_BUTTON
@@ -4891,7 +4892,7 @@ namespace ClassicUO.Network
                 {
                     // client can disconnect
                     NetClient.Socket.Disconnect();
-                    Client.Game.SetScene(new LoginScene(world));
+                    ServiceProvider.Get<SceneService>().SetScene(new LoginScene(world));
                 }
                 else
                 {
@@ -4953,7 +4954,7 @@ namespace ClassicUO.Network
                     argument = p.ReadUnicodeLE(length / 2);
                 }
 
-                string str = Client.Game.UO.FileManager.Clilocs.Translate(cliloc, argument, true);
+                string str = ServiceProvider.Get<UOService>().FileManager.Clilocs.Translate(cliloc, argument, true);
 
                 if (str == null)
                 {
@@ -4976,7 +4977,7 @@ namespace ClassicUO.Network
                 switch (cliloc)
                 {
                     case 1080418:
-                        if (Client.Game.UO.Version >= ClassicUO.Sdk.ClientVersion.CV_60143)
+                        if (ServiceProvider.Get<UOService>().Version >= ClassicUO.Sdk.ClientVersion.CV_60143)
                             str = "<basefont color=#40a4fe>" + str + "</basefont>";
                         break;
                     case 1061170:
@@ -5337,7 +5338,7 @@ namespace ClassicUO.Network
 
             if (world.HouseManager.EntityIntoHouse(serial, world.Player))
             {
-                Client.Game.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
+                ServiceProvider.Get<SceneService>().GetScene<GameScene>()?.UpdateMaxDrawZ(true);
             }
 
             world.BoatMovingManager.ClearSteps(serial);
@@ -5517,7 +5518,7 @@ namespace ClassicUO.Network
                         ushort arg_length = p.ReadUInt16BE();
                         var str = p.ReadUnicodeLE(2);
                         var args = str + p.ReadUnicodeLE();
-                        string title = Client.Game.UO.FileManager.Clilocs.Translate(
+                        string title = ServiceProvider.Get<UOService>().FileManager.Clilocs.Translate(
                             (int)titleCliloc,
                             args,
                             true
@@ -5531,7 +5532,7 @@ namespace ClassicUO.Network
                         {
                             description =
                                 "\n"
-                                + Client.Game.UO.FileManager.Clilocs.Translate(
+                                + ServiceProvider.Get<UOService>().FileManager.Clilocs.Translate(
                                     (int)descriptionCliloc,
                                     String.IsNullOrEmpty(args_2) ? args : args_2,
                                     true
@@ -5549,7 +5550,7 @@ namespace ClassicUO.Network
 
                         if (wtfCliloc != 0)
                         {
-                            wtf = Client.Game.UO.FileManager.Clilocs.Translate(
+                            wtf = ServiceProvider.Get<UOService>().FileManager.Clilocs.Translate(
                                 (int)wtfCliloc,
                                 String.IsNullOrEmpty(args_3) ? args : args_3,
                                 true
@@ -5678,7 +5679,7 @@ namespace ClassicUO.Network
 
                 case 0xFE:
 
-                    Client.Game.EnqueueAction(5000, () =>
+                    ServiceProvider.Get<GameService>().EnqueueAction(5000, () =>
                     {
                         Log.Info("Razor ACK sent");
                         NetClient.Socket.Send_RazorACK();
@@ -5938,7 +5939,7 @@ namespace ClassicUO.Network
                 return;
             }
 
-            var scene = Client.Game.GetScene<LoginScene>();
+            var scene = ServiceProvider.Get<SceneService>().GetScene<LoginScene>();
 
             if (scene != null)
             {
@@ -5953,7 +5954,7 @@ namespace ClassicUO.Network
                 return;
             }
 
-            var scene = Client.Game.GetScene<LoginScene>();
+            var scene = ServiceProvider.Get<SceneService>().GetScene<LoginScene>();
 
             if (scene != null)
             {
@@ -5968,7 +5969,7 @@ namespace ClassicUO.Network
                 return;
             }
 
-            var scene = Client.Game.GetScene<LoginScene>();
+            var scene = ServiceProvider.Get<SceneService>().GetScene<LoginScene>();
 
             if (scene != null)
             {

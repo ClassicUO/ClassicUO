@@ -199,10 +199,11 @@ namespace ClassicUO.Game.Data
 
     internal static class BuffTable
     {
-        public static ushort[]? Table { get; private set; } = _defaultTable;
+        public static ushort[] Table { get; private set; } = _defaultTable;
 
         public static void Load()
         {
+            Table = _defaultTable;
             string path = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client");
 
             if (!Directory.Exists(path))
@@ -231,7 +232,7 @@ namespace ClassicUO.Game.Data
                     }
                 }
 
-                Table = tempList.ToArray();
+                Table = tempList.ToArray() ?? _defaultTable;
             }
         }
 

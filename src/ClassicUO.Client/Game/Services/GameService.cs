@@ -1,5 +1,7 @@
 using Microsoft.Xna.Framework;
 using ClassicUO.Game;
+using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace ClassicUO.Game.Services
 {
@@ -40,6 +42,14 @@ namespace ClassicUO.Game.Services
         public void RestoreWindow()
         {
             // _game.Window.ClientBounds = new Rectangle(0, 0, 640, 480);
+        }
+
+        public GraphicsDevice GraphicsDevice => _game.GraphicsDevice;
+        public GraphicsDeviceManager GraphicsManager => _game.GraphicManager;
+
+        public void EnqueueAction(uint time, Action action)
+        {
+            _game.EnqueueAction(time, action);
         }
     }
 }

@@ -4,6 +4,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Sdk.Assets;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game
 {
@@ -55,7 +56,7 @@ namespace ClassicUO.Game
 
         public bool Dropped { get; set; }
         public bool UpdatedInWorld { get; set; }
-        public ref StaticTiles ItemData => ref Client.Game.UO.FileManager.TileData.StaticData[Graphic];
+        public ref StaticTiles ItemData => ref ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[Graphic];
 
         public void Set(Item item, ushort amount, Point? offset = null)
         {

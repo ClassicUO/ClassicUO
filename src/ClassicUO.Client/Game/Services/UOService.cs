@@ -13,6 +13,7 @@ namespace ClassicUO.Game.Services
             _uo = uo;
         }
 
+        public UltimaOnline Self => _uo;
         public ClientVersion Version => _uo.Version;
         public ClientFlags Protocol => _uo.Protocol;
         public World World => _uo.World;

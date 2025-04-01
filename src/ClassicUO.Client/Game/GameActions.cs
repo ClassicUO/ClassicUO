@@ -13,6 +13,7 @@ using ClassicUO.Resources;
 using ClassicUO.Sdk;
 using Microsoft.Xna.Framework;
 using static ClassicUO.Network.NetClient;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game
 {
@@ -33,11 +34,11 @@ namespace ClassicUO.Game
             {
                 if (war && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableMusic)
                 {
-                    Client.Game.Audio.PlayMusic((RandomHelper.GetValue(0, 3) % 3) + 38, true);
+                    ServiceProvider.Get<AudioService>().PlayMusic((RandomHelper.GetValue(0, 3) % 3) + 38, true);
                 }
                 else if (!war)
                 {
-                    Client.Game.Audio.StopWarMusic();
+                    ServiceProvider.Get<AudioService>().StopWarMusic();
                 }
             }
 
@@ -78,8 +79,8 @@ namespace ClassicUO.Game
             {
                 OptionsGump optionsGump = new OptionsGump(world)
                 {
-                    X = (Client.Game.Window.ClientBounds.Width >> 1) - 300,
-                    Y = (Client.Game.Window.ClientBounds.Height >> 1) - 250
+                    X = (ServiceProvider.Get<WindowService>().ClientBounds.Width >> 1) - 300,
+                    Y = (ServiceProvider.Get<WindowService>().ClientBounds.Height >> 1) - 250
                 };
 
                 UIManager.Add(optionsGump);
@@ -95,7 +96,7 @@ namespace ClassicUO.Game
 
         public static void OpenStatusBar(World world)
         {
-            Client.Game.Audio.StopWarMusic();
+            ServiceProvider.Get<AudioService>().StopWarMusic();
 
             if (StatusGumpBase.GetStatusGump() == null)
             {
@@ -303,7 +304,7 @@ namespace ClassicUO.Game
 
         public static void DoubleClickQueued(uint serial)
         {
-            Client.Game.GetScene<GameScene>()?.DoubleClickDelayed(serial);
+            ServiceProvider.Get<SceneService>().GetScene<GameScene>()?.DoubleClickDelayed(serial);
         }
 
         public static void DoubleClick(World world, uint serial)
@@ -354,7 +355,7 @@ namespace ClassicUO.Game
             // TODO: identify what means 'older client' that uses ASCIISpeechRquest [0x03]
             //
             // Fix -> #1267
-            if (Client.Game.UO.Version >= ClientVersion.CV_200)
+            if (ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_200)
             {
                 Socket.Send_UnicodeSpeechRequest(message,
                                                  type,
@@ -459,7 +460,7 @@ namespace ClassicUO.Game
             if (world.Player == null)
                 return false;
 
-            if (world.Player.IsDead || Client.Game.UO.GameCursor.ItemHold.Enabled)
+            if (world.Player.IsDead || ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled)
             {
                 return false;
             }
@@ -500,9 +501,9 @@ namespace ClassicUO.Game
                 amount = item.Amount;
             }
 
-            Client.Game.UO.GameCursor.ItemHold.Clear();
-            Client.Game.UO.GameCursor.ItemHold.Set(item, (ushort) amount, offset);
-            Client.Game.UO.GameCursor.ItemHold.IsGumpTexture = is_gump;
+            ServiceProvider.Get<UOService>().GameCursor.ItemHold.Clear();
+            ServiceProvider.Get<UOService>().GameCursor.ItemHold.Set(item, (ushort) amount, offset);
+            ServiceProvider.Get<UOService>().GameCursor.ItemHold.IsGumpTexture = is_gump;
             Socket.Send_PickUpRequest(item, (ushort) amount);
 
             if (item.OnGround)
@@ -519,9 +520,9 @@ namespace ClassicUO.Game
 
         public static void DropItem(uint serial, int x, int y, int z, uint container)
         {
-            if (Client.Game.UO.GameCursor.ItemHold.Enabled && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition && (Client.Game.UO.GameCursor.ItemHold.Serial != container || Client.Game.UO.GameCursor.ItemHold.ItemData.IsStackable))
+            if (ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled && !ServiceProvider.Get<UOService>().GameCursor.ItemHold.IsFixedPosition && (ServiceProvider.Get<UOService>().GameCursor.ItemHold.Serial != container || ServiceProvider.Get<UOService>().GameCursor.ItemHold.ItemData.IsStackable))
             {
-                if (Client.Game.UO.Version >= ClientVersion.CV_6017)
+                if (ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_6017)
                 {
                     Socket.Send_DropRequest(serial,
                                             (ushort)x,
@@ -539,8 +540,8 @@ namespace ClassicUO.Game
                                                 container);
                 }
 
-                Client.Game.UO.GameCursor.ItemHold.Enabled = false;
-                Client.Game.UO.GameCursor.ItemHold.Dropped = true;
+                ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled = false;
+                ServiceProvider.Get<UOService>().GameCursor.ItemHold.Dropped = true;
             }
         }
 
@@ -549,17 +550,17 @@ namespace ClassicUO.Game
             if (world.Player == null)
                 return;
 
-            if (Client.Game.UO.GameCursor.ItemHold.Enabled && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition && Client.Game.UO.GameCursor.ItemHold.ItemData.IsWearable)
+            if (ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled && !ServiceProvider.Get<UOService>().GameCursor.ItemHold.IsFixedPosition && ServiceProvider.Get<UOService>().GameCursor.ItemHold.ItemData.IsWearable)
             {
                 if (!SerialHelper.IsValid(container))
                 {
                     container = world.Player.Serial;
                 }
 
-                Socket.Send_EquipRequest(Client.Game.UO.GameCursor.ItemHold.Serial, (Layer)Client.Game.UO.GameCursor.ItemHold.ItemData.Layer, container);
+                Socket.Send_EquipRequest(ServiceProvider.Get<UOService>().GameCursor.ItemHold.Serial, (Layer)ServiceProvider.Get<UOService>().GameCursor.ItemHold.ItemData.Layer, container);
 
-                Client.Game.UO.GameCursor.ItemHold.Enabled = false;
-                Client.Game.UO.GameCursor.ItemHold.Dropped = true;
+                ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled = false;
+                ServiceProvider.Get<UOService>().GameCursor.ItemHold.Dropped = true;
             }
         }
 
@@ -626,7 +627,7 @@ namespace ClassicUO.Game
 
         public static void SendCloseStatus(World world, uint serial, bool force = false)
         {
-            if (Client.Game.UO.Version >= ClientVersion.CV_200 && world.InGame)
+            if (ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_200 && world.InGame)
             {
                 var ent = world.Get(serial);
 
@@ -826,10 +827,10 @@ namespace ClassicUO.Game
 
         // ===================================================
         [Obsolete("temporary workaround to not break assistants")]
-        public static void UsePrimaryAbility() => UsePrimaryAbility(ClassicUO.Client.Game.UO.World);
+        public static void UsePrimaryAbility() => UsePrimaryAbility(ServiceProvider.Get<UOService>().World);
 
         [Obsolete("temporary workaround to not break assistants")]
-        public static void UseSecondaryAbility() => UseSecondaryAbility(ClassicUO.Client.Game.UO.World);
+        public static void UseSecondaryAbility() => UseSecondaryAbility(ServiceProvider.Get<UOService>().World);
         // ===================================================
 
         public static void QuestArrow(bool rightClick)
