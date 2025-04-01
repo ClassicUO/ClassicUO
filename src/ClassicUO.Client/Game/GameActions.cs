@@ -131,6 +131,9 @@ namespace ClassicUO.Game
 
         public static void OpenSkills(World world)
         {
+            if (world.Player == null)
+                return;
+
             var skillsGump = UIManager.GetGump<StandardSkillsGump>();
 
             if (skillsGump != null && skillsGump.IsMinimized)
@@ -210,6 +213,9 @@ namespace ClassicUO.Game
 
         public static bool OpenCorpse(World world, uint serial)
         {
+            if (world.Player == null)
+                return false;
+
             if (!SerialHelper.IsItem(serial))
             {
                 return false;
@@ -230,6 +236,9 @@ namespace ClassicUO.Game
 
         public static bool OpenBackpack(World world)
         {
+            if (world.Player == null)
+                return false;
+
             var backpack = world.Player.FindItemByLayer(Layer.Backpack);
 
             if (backpack == null)
@@ -259,6 +268,9 @@ namespace ClassicUO.Game
 
         public static void Attack(World world, uint serial)
         {
+            if (world.Player == null)
+                return;
+
             if (ProfileManager.CurrentProfile.EnabledCriminalActionQuery)
             {
                 var m = world.Mobiles.Get(serial);
@@ -296,6 +308,9 @@ namespace ClassicUO.Game
 
         public static void DoubleClick(World world, uint serial)
         {
+            if (world.Player == null)
+                return;
+
             if (serial != world.Player && SerialHelper.IsMobile(serial) && world.Player.InWarMode)
             {
                 RequestMobileStatus(world,serial);
@@ -441,6 +456,9 @@ namespace ClassicUO.Game
             bool is_gump = false
         )
         {
+            if (world.Player == null)
+                return false;
+
             if (world.Player.IsDead || Client.Game.UO.GameCursor.ItemHold.Enabled)
             {
                 return false;
@@ -528,6 +546,9 @@ namespace ClassicUO.Game
 
         public static void Equip(World world, uint container = 0)
         {
+            if (world.Player == null)
+                return;
+
             if (Client.Game.UO.GameCursor.ItemHold.Enabled && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition && Client.Game.UO.GameCursor.ItemHold.ItemData.IsWearable)
             {
                 if (!SerialHelper.IsValid(container))
@@ -757,6 +778,9 @@ namespace ClassicUO.Game
 
         public static void UsePrimaryAbility(World world)
         {
+            if (world.Player == null)
+                return;
+
             ref var ability = ref world.Player.Abilities[0];
 
             if (((byte) ability & 0x80) == 0)
@@ -778,6 +802,9 @@ namespace ClassicUO.Game
 
         public static void UseSecondaryAbility(World world)
         {
+            if (world.Player == null)
+                return;
+
             ref Ability ability = ref world.Player.Abilities[1];
 
             if (((byte) ability & 0x80) == 0)
@@ -812,6 +839,9 @@ namespace ClassicUO.Game
 
         public static void GrabItem(World world, uint serial, ushort amount, uint bag = 0)
         {
+            if (world.Player == null)
+                return;
+
             //Socket.Send(new PPickUpRequest(serial, amount));
 
             var backpack = world.Player.FindItemByLayer(Layer.Backpack);

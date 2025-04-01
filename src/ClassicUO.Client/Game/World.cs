@@ -14,6 +14,7 @@ using ClassicUO.Game.Scenes;
 using MathHelper = ClassicUO.Renderer.MathHelper;
 using ClassicUO.Sdk;
 using ClassicUO.Platforms;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ClassicUO.Game
 {
@@ -50,6 +51,7 @@ namespace ClassicUO.Game
 
         public Point RangeSize;
 
+        [NotNull]
         public PlayerMobile? Player { get; private set; }
 
         public HouseCustomizationManager CustomHouseManager;

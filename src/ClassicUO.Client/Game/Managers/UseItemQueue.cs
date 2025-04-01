@@ -65,7 +65,7 @@ namespace ClassicUO.Game.Managers
         {
             for (int i = 0; i < _actions.Count; i++)
             {
-                Entity entity = _world.Get(_actions[i]);
+                var entity = _world.Get(_actions[i]);
 
                 if (entity == null)
                 {

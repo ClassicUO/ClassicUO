@@ -165,7 +165,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
-            Entity entity = World.Get(LocalSerial);
+            var entity = World.Get(LocalSerial);
 
             if (entity == null)
             {
@@ -185,7 +185,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void CloseWithRightClick()
         {
-            Entity entity = World.Get(LocalSerial);
+            var entity = World.Get(LocalSerial);
 
             if (entity != null)
             {
@@ -210,7 +210,7 @@ namespace ClassicUO.Game.UI.Gumps
             _leftMouseIsDown = false;
             _positionLocked = false;
 
-            Entity entity = World.Get(LocalSerial);
+            var entity = World.Get(LocalSerial);
 
             if (entity is Mobile || entity is Item it && it.IsDamageable)
             {
@@ -219,7 +219,7 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
                 }
 
-                BaseHealthBarGump gump = UIManager.GetGump<BaseHealthBarGump>(LocalSerial);
+                var gump = UIManager.GetGump<BaseHealthBarGump>(LocalSerial);
                 gump?.Dispose();
 
                 if (entity == World.Player && ProfileManager.CurrentProfile.StatusGumpBarMutuallyExclusive)
@@ -369,7 +369,7 @@ namespace ClassicUO.Game.UI.Gumps
                         ushort dropY = 0;
                         sbyte dropZ = 0;
 
-                        Entity obj = World.Get(LocalSerial);
+                        var obj = World.Get(LocalSerial);
 
                         if (obj != null)
                         {
@@ -459,7 +459,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (!_positionLocked && SerialHelper.IsMobile(LocalSerial))
             {
-                Mobile m = World.Mobiles.Get(LocalSerial);
+                var m = World.Mobiles.Get(LocalSerial);
 
                 if (m == null)
                 {
@@ -515,7 +515,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Update();
 
-            Entity entity = World.Get(LocalSerial);
+            var entity = World.Get(LocalSerial);
 
             if (
                 entity == null
@@ -554,7 +554,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (SerialHelper.IsMobile(LocalSerial))
             {
-                Mobile m = World.Mobiles.Get(LocalSerial);
+                var m = World.Mobiles.Get(LocalSerial);
 
                 if (m == null)
                 {
@@ -603,7 +603,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else if (SerialHelper.IsItem(LocalSerial))
             {
-                Item item = World.Items.Get(LocalSerial);
+                var item = World.Items.Get(LocalSerial);
 
                 if (item == null)
                 {

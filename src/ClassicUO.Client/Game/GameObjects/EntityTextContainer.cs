@@ -53,14 +53,14 @@ namespace ClassicUO.Game.GameObjects
         private Rectangle _rectangle;
         private readonly World _world;
 
-        public OverheadDamage(World world, GameObject parent)
+        public OverheadDamage(World world, GameObject? parent)
         {
             _world = world;
             Parent = parent;
             _messages = new Deque<TextObject>();
         }
 
-        public GameObject Parent { get; private set; }
+        public GameObject? Parent { get; private set; }
         public bool IsDestroyed { get; private set; }
         public bool IsEmpty => _messages.Count == 0;
 

@@ -161,7 +161,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _skillListEntries.Clear();
 
-            PropertyInfo pi = typeof(Skill).GetProperty(_sortField);
+            var pi = typeof(Skill).GetProperty(_sortField);
             List<Skill> sortSkills = new List<Skill>(
                 World.Player.Skills.OrderBy(x => pi.GetValue(x, null))
             );

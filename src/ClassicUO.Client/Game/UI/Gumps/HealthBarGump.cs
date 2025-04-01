@@ -1331,7 +1331,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             WantUpdateSize = false;
 
-            Entity entity = World.Get(LocalSerial);
+            var entity = World.Get(LocalSerial);
 
             if (World.Party.Contains(LocalSerial))
             {
@@ -1498,7 +1498,7 @@ namespace ClassicUO.Game.UI.Gumps
                     ushort textColor = 0x0386;
                     ushort hitsColor = 0x0386;
 
-                    Mobile mobile = entity as Mobile;
+                    var mobile = entity as Mobile;
 
                     if (entity != null)
                     {

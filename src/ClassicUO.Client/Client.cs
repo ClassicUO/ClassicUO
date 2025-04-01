@@ -10,6 +10,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using ClassicUO.Sdk;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ClassicUO
 {
@@ -181,7 +182,7 @@ namespace ClassicUO
             Log.Trace($"Client version: {clientVersion}");
             Log.Trace($"Protocol: {Protocol}");
 
-            FileManager = new UOFileManager(clientVersion, clientPath, Settings.GlobalSettings.MapsLayouts);
+            FileManager = new UOFileManager(clientVersion, clientPath, Settings.GlobalSettings.MapsLayouts ?? "");
             FileManager.Load(Settings.GlobalSettings.UseVerdata, Settings.GlobalSettings.Language);
 
             StaticFilters.Load(FileManager.TileData);
@@ -196,7 +197,8 @@ namespace ClassicUO
 
     internal static class Client
     {
-        public static GameController Game { get; private set; }
+        [NotNull]
+        public static GameController? Game { get; private set; }
 
 
         public static void Run(IPluginHost? pluginHost)

@@ -1,5 +1,6 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Microsoft.Xna.Framework;
 
@@ -7,7 +8,8 @@ namespace ClassicUO.Configuration
 {
     internal static class ProfileManager
     {
-        public static Profile CurrentProfile { get; private set; }
+        [NotNull]
+        public static Profile? CurrentProfile { get; private set; }
 
         private static string? _rootPath;
         private static string RootPath

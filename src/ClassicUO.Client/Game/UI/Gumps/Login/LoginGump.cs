@@ -552,7 +552,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                     if (!_textboxAccount.IsDisposed)
                     {
-                        Client.Game.GetScene<LoginScene>().Connect(_textboxAccount.Text, _passwordFake.RealText);
+                        Client.Game.GetScene<LoginScene>()?.Connect(_textboxAccount.Text, _passwordFake.RealText);
                     }
 
                     break;

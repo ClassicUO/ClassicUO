@@ -202,7 +202,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         private unsafe void CreateMiniMapTexture(
-            Texture2D texture,
+            Texture2D? texture,
             Rectangle bounds,
             bool force = false
         )
@@ -325,7 +325,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (block != null)
                             {
-                                GameObject obj = block.Tiles[x, y];
+                                var obj = block.Tiles[x, y];
 
                                 while (obj?.TNext != null)
                                 {
@@ -391,7 +391,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             fixed (uint* ptr = data)
             {
-                texture.SetDataPointerEXT(0, bounds, (IntPtr)ptr, data.Length * sizeof(uint));
+                texture?.SetDataPointerEXT(0, bounds, (IntPtr)ptr, data.Length * sizeof(uint));
             }
         }
 

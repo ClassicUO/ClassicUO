@@ -125,15 +125,18 @@ namespace ClassicUO.Sdk.Assets
 
             if (file is UOFileUop uop)
             {
-                reader = new(uop.Unpack(in entry));
+                reader = new(uop.Unpack(in entry));             
 
-                w = reader.ReadUInt32LE();
-                h = reader.ReadUInt32LE();
+                if (entry.CompressionFlag >= CompressionType.Zlib)
+                {
+                    w = reader.ReadUInt32LE();
+                    h = reader.ReadUInt32LE();
 
-                if (entry.Width <= 0)
-                    entry.Width = (int)w;
-                if (entry.Height <= 0)
-                    entry.Height = (int)h;
+                    if (entry.Width <= 0)
+                        entry.Width = (int)w;
+                    if (entry.Height <= 0)
+                        entry.Height = (int)h;
+                }
             }
             else
             {

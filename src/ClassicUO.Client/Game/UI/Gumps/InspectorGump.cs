@@ -16,9 +16,9 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private const int WIDTH = 500;
         private const int HEIGHT = 400;
-        private readonly GameObject _obj;
+        private readonly GameObject? _obj;
 
-        public InspectorGump(World world, GameObject obj) : base(world, 0, 0)
+        public InspectorGump(World world, GameObject? obj) : base(world, 0, 0)
         {
             X = 200;
             Y = 100;
@@ -117,7 +117,7 @@ namespace ClassicUO.Game.UI.Gumps
             databox.WantUpdateSize = true;
             scrollArea.Add(databox);
 
-            Dictionary<string, string> dict = GetGameObjectProperties(obj);
+            var dict = GetGameObjectProperties(obj);
 
             if (dict != null)
             {
@@ -220,9 +220,12 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private Dictionary<string, string> GetGameObjectProperties(GameObject obj)
+        private Dictionary<string, string> GetGameObjectProperties(GameObject? obj)
         {
-            Dictionary<string, string> dict = new Dictionary<string, string>();
+            var dict = new Dictionary<string, string>();
+
+            if (obj == null)
+                return dict;
 
             dict["Graphics"] = $"0x{obj.Graphic:X4}";
             dict["Hue"] = $"0x{obj.Hue:X4}";

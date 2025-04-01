@@ -92,7 +92,7 @@ namespace ClassicUO.Game.Scenes
             _noDrawRoofs = !ProfileManager.CurrentProfile.DrawRoofs;
             int bx = playerX;
             int by = playerY;
-            var chunk = _world.Map.GetChunk(bx, by, false);
+            var chunk = _world.Map?.GetChunk(bx, by, false);
 
             if (chunk != null)
             {
@@ -157,7 +157,7 @@ namespace ClassicUO.Game.Scenes
                 playerY++;
                 bx = playerX;
                 by = playerY;
-                chunk = _world.Map.GetChunk(bx, by, false);
+                chunk = _world.Map?.GetChunk(bx, by, false);
 
                 if (chunk != null)
                 {
@@ -191,7 +191,7 @@ namespace ClassicUO.Game.Scenes
                                 if (((ulong)itemdata.Flags & 0x204) == 0 && itemdata.IsRoof)
                                 {
                                     _maxZ = tileZ;
-                                    _world.Map.ClearBockAccess();
+                                    _world.Map?.ClearBockAccess();
                                     _maxGroundZ = _world.Map.CalculateNearZ(
                                         tileZ,
                                         playerX,
@@ -254,7 +254,7 @@ namespace ClassicUO.Game.Scenes
 
         private void ApplyFoliageTransparency(ushort graphic, int x, int y, int z)
         {
-            var tile = _world.Map.GetTile(x, y);
+            var tile = _world.Map?.GetTile(x, y);
 
             if (tile != null)
             {
@@ -543,7 +543,7 @@ namespace ClassicUO.Game.Scenes
             {
                 for (int x = -1; x <= 2; ++x)
                 {
-                    var tile = _world.Map.GetTile(obj.X + x, obj.Y + y);
+                    var tile = _world.Map?.GetTile(obj.X + x, obj.Y + y);
 
                     found = false;
 

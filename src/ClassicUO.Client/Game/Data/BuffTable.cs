@@ -199,9 +199,7 @@ namespace ClassicUO.Game.Data
 
     internal static class BuffTable
     {
-        private static ushort[] _table;
-
-        public static ushort[] Table => _table;
+        public static ushort[]? Table { get; private set; } = _defaultTable;
 
         public static void Load()
         {
@@ -233,15 +231,11 @@ namespace ClassicUO.Game.Data
                     }
                 }
 
-                _table = tempList.ToArray();
-            }
-            else
-            {
-                _table = _defaultTable;
+                Table = tempList.ToArray();
             }
         }
 
-        private static ushort[] _defaultTable =
+        private static readonly ushort[] _defaultTable =
         {
             0x754C,
             0x754A,

@@ -441,7 +441,7 @@ namespace ClassicUO.Game.UI.Gumps
                 switch (buttonId)
                 {
                     case (int)ButtonsOption.EDIT_MARKER_BTN:
-                        UserMarkersGump existingGump = UIManager.GetGump<UserMarkersGump>();
+                        var existingGump = UIManager.GetGump<UserMarkersGump>();
 
                         existingGump?.Dispose();
 

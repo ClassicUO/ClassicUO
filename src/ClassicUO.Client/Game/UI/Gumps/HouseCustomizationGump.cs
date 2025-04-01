@@ -595,9 +595,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (foundationItem != null)
             {
-                if (World.HouseManager.TryGetHouse(LocalSerial, out var house))
+                if (World.HouseManager.TryGetHouse(LocalSerial, out var house) && house != null)
                 {
-                    foreach (Multi item in house.Components)
+                    foreach (var item in house.Components)
                     {
                         if (
                             item.IsCustom

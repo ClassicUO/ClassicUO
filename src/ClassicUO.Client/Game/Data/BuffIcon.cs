@@ -14,7 +14,7 @@ namespace ClassicUO.Game.Data
             Text = text;
         }
 
-        public bool Equals(BuffIcon other)
+        public bool Equals(BuffIcon? other)
         {
             return other != null && Type == other.Type;
         }
