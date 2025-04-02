@@ -202,7 +202,7 @@ namespace ClassicUO.Game.Scenes
                 case LoginSteps.EnteringBritania:
                 case LoginSteps.PopUpMessage:
                 case LoginSteps.CharacterCreationDone:
-                    Client.Game.UO.GameCursor.IsLoading = CurrentLoginStep != LoginSteps.PopUpMessage;
+                    ServiceProvider.Get<UOService>().GameCursor.IsLoading = CurrentLoginStep != LoginSteps.PopUpMessage;
 
                     return GetLoadingScreen();
 
@@ -238,26 +238,26 @@ namespace ClassicUO.Game.Scenes
                 switch (CurrentLoginStep)
                 {
                     case LoginSteps.Connecting:
-                        labelText = Client.Game.UO.FileManager.Clilocs.GetString(3000002, ResGeneral.Connecting); // "Connecting..."
+                        labelText = ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(3000002, ResGeneral.Connecting); // "Connecting..."
 
                         showButtons = LoginButtons.Cancel;
 
                         break;
 
                     case LoginSteps.VerifyingAccount:
-                        labelText = Client.Game.UO.FileManager.Clilocs.GetString(3000003, ResGeneral.VerifyingAccount); // "Verifying Account..."
+                        labelText = ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(3000003, ResGeneral.VerifyingAccount); // "Verifying Account..."
 
                         showButtons = LoginButtons.Cancel;
 
                         break;
 
                     case LoginSteps.LoginInToServer:
-                        labelText = Client.Game.UO.FileManager.Clilocs.GetString(3000053, ResGeneral.LoggingIntoShard); // logging into shard
+                        labelText = ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(3000053, ResGeneral.LoggingIntoShard); // logging into shard
 
                         break;
 
                     case LoginSteps.EnteringBritania:
-                        labelText = Client.Game.UO.FileManager.Clilocs.GetString(3000001, ResGeneral.EnteringBritannia); // Entering Britania...
+                        labelText = ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(3000001, ResGeneral.EnteringBritannia); // Entering Britania...
 
                         break;
 
@@ -496,9 +496,9 @@ namespace ClassicUO.Game.Scenes
 
             NetClient.Socket.Encryption?.Initialize(true, address);
 
-            if (Client.Game.UO.Version >= ClientVersion.CV_6040)
+            if (ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_6040)
             {
-                uint clientVersion = (uint) Client.Game.UO.Version;
+                uint clientVersion = (uint) ServiceProvider.Get<UOService>().Version;
 
                 byte major = (byte) (clientVersion >> 24);
                 byte minor = (byte) (clientVersion >> 16);
@@ -711,7 +711,7 @@ namespace ClassicUO.Game.Scenes
             byte count = p.ReadUInt8();
             Cities.Clear();
 
-            bool isNew = Client.Game.UO.Version >= ClientVersion.CV_70130;
+            bool isNew = ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_70130;
             string[] descriptions = [];
 
             if (!isNew)
@@ -749,7 +749,7 @@ namespace ClassicUO.Game.Scenes
                         cityIndex,
                         cityName,
                         cityBuilding,
-                        Client.Game.UO.FileManager.Clilocs.GetString((int) cityDescription),
+                        ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString((int) cityDescription),
                         cityX,
                         cityY,
                         cityZ,
@@ -783,7 +783,7 @@ namespace ClassicUO.Game.Scenes
 
         private string[] ReadCityTextFile(int count)
         {
-            string path = Client.Game.UO.FileManager.GetUOFilePath("citytext.enu");
+            string path = ServiceProvider.Get<UOService>().FileManager.GetUOFilePath("citytext.enu");
 
             if (!File.Exists(path))
             {

@@ -5,6 +5,7 @@ using ClassicUO.Input;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -28,10 +29,10 @@ namespace ClassicUO.Game.UI.Controls
             Location = new Point(x, y);
             AcceptMouseInput = true;
 
-            ref readonly var gumpInfoUp = ref Client.Game.UO.Gumps.GetGump(BUTTON_UP_0);
-            ref readonly var gumpInfoDown = ref Client.Game.UO.Gumps.GetGump(BUTTON_DOWN_0);
-            ref readonly var gumpInfoBackground = ref Client.Game.UO.Gumps.GetGump(BACKGROUND_0);
-            ref readonly var gumpInfoSlider = ref Client.Game.UO.Gumps.GetGump(SLIDER);
+            ref readonly var gumpInfoUp = ref ServiceProvider.Get<UOService>().Gumps.GetGump(BUTTON_UP_0);
+            ref readonly var gumpInfoDown = ref ServiceProvider.Get<UOService>().Gumps.GetGump(BUTTON_DOWN_0);
+            ref readonly var gumpInfoBackground = ref ServiceProvider.Get<UOService>().Gumps.GetGump(BACKGROUND_0);
+            ref readonly var gumpInfoSlider = ref ServiceProvider.Get<UOService>().Gumps.GetGump(SLIDER);
 
             Width = gumpInfoBackground.UV.Width;
 
@@ -63,14 +64,14 @@ namespace ClassicUO.Game.UI.Controls
 
             var hueVector = ShaderHueTranslator.GetHueVector(0);
 
-            ref readonly var gumpInfoUp0 = ref Client.Game.UO.Gumps.GetGump(BUTTON_UP_0);
-            ref readonly var gumpInfoUp1 = ref Client.Game.UO.Gumps.GetGump(BUTTON_UP_1);
-            ref readonly var gumpInfoDown0 = ref Client.Game.UO.Gumps.GetGump(BUTTON_DOWN_0);
-            ref readonly var gumpInfoDown1 = ref Client.Game.UO.Gumps.GetGump(BUTTON_DOWN_1);
-            ref readonly var gumpInfoBackground0 = ref Client.Game.UO.Gumps.GetGump(BACKGROUND_0);
-            ref readonly var gumpInfoBackground1 = ref Client.Game.UO.Gumps.GetGump(BACKGROUND_1);
-            ref readonly var gumpInfoBackground2 = ref Client.Game.UO.Gumps.GetGump(BACKGROUND_2);
-            ref readonly var gumpInfoSlider = ref Client.Game.UO.Gumps.GetGump(SLIDER);
+            ref readonly var gumpInfoUp0 = ref ServiceProvider.Get<UOService>().Gumps.GetGump(BUTTON_UP_0);
+            ref readonly var gumpInfoUp1 = ref ServiceProvider.Get<UOService>().Gumps.GetGump(BUTTON_UP_1);
+            ref readonly var gumpInfoDown0 = ref ServiceProvider.Get<UOService>().Gumps.GetGump(BUTTON_DOWN_0);
+            ref readonly var gumpInfoDown1 = ref ServiceProvider.Get<UOService>().Gumps.GetGump(BUTTON_DOWN_1);
+            ref readonly var gumpInfoBackground0 = ref ServiceProvider.Get<UOService>().Gumps.GetGump(BACKGROUND_0);
+            ref readonly var gumpInfoBackground1 = ref ServiceProvider.Get<UOService>().Gumps.GetGump(BACKGROUND_1);
+            ref readonly var gumpInfoBackground2 = ref ServiceProvider.Get<UOService>().Gumps.GetGump(BACKGROUND_2);
+            ref readonly var gumpInfoSlider = ref ServiceProvider.Get<UOService>().Gumps.GetGump(SLIDER);
 
             // draw scrollbar background
             int middleHeight =
@@ -177,9 +178,9 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override int GetScrollableArea()
         {
-            ref readonly var gumpInfoUp = ref Client.Game.UO.Gumps.GetGump(BUTTON_UP_0);
-            ref readonly var gumpInfoDown = ref Client.Game.UO.Gumps.GetGump(BUTTON_DOWN_0);
-            ref readonly var gumpInfoSlider = ref Client.Game.UO.Gumps.GetGump(SLIDER);
+            ref readonly var gumpInfoUp = ref ServiceProvider.Get<UOService>().Gumps.GetGump(BUTTON_UP_0);
+            ref readonly var gumpInfoDown = ref ServiceProvider.Get<UOService>().Gumps.GetGump(BUTTON_DOWN_0);
+            ref readonly var gumpInfoSlider = ref ServiceProvider.Get<UOService>().Gumps.GetGump(SLIDER);
 
             return Height
                 - gumpInfoUp.UV.Height
@@ -219,9 +220,9 @@ namespace ClassicUO.Game.UI.Controls
                 _clickPosition.X = x;
                 _clickPosition.Y = y;
 
-                ref readonly var gumpInfoUp = ref Client.Game.UO.Gumps.GetGump(BUTTON_UP_0);
-                ref readonly var gumpInfoDown = ref Client.Game.UO.Gumps.GetGump(BUTTON_DOWN_0);
-                ref readonly var gumpInfoSlider = ref Client.Game.UO.Gumps.GetGump(SLIDER);
+                ref readonly var gumpInfoUp = ref ServiceProvider.Get<UOService>().Gumps.GetGump(BUTTON_UP_0);
+                ref readonly var gumpInfoDown = ref ServiceProvider.Get<UOService>().Gumps.GetGump(BUTTON_DOWN_0);
+                ref readonly var gumpInfoSlider = ref ServiceProvider.Get<UOService>().Gumps.GetGump(SLIDER);
 
                 if (
                     y == 0

@@ -6,6 +6,7 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -59,8 +60,9 @@ namespace ClassicUO.Game.GameObjects
             {
                 posY += Z << 2;
 
-                ref readonly var texmapInfo = ref Client.Game.UO.Texmaps.GetTexmap(
-                    Client.Game.UO.FileManager.TileData.LandData[Graphic].TexID
+                var uoService = ServiceProvider.Get<UOService>();
+                ref readonly var texmapInfo = ref uoService.Texmaps.GetTexmap(
+                    uoService.FileManager.TileData.LandData[Graphic].TexID
                 );
 
                 if (texmapInfo.Texture != null)
@@ -93,7 +95,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                ref readonly var artInfo = ref Client.Game.UO.Arts.GetLand(Graphic);
+                ref readonly var artInfo = ref ServiceProvider.Get<UOService>().Arts.GetLand(Graphic);
 
                 if (artInfo.Texture != null)
                 {

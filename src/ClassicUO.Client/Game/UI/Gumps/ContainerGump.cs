@@ -14,6 +14,7 @@ using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -48,11 +49,11 @@ namespace ClassicUO.Game.UI.Gumps
             // New Backpack gumps. Client Version 7.0.53.1
             if (
                 item == world.Player.FindItemByLayer(Layer.Backpack)
-                && Client.Game.UO.Version >= ClientVersion.CV_705301
+                && ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_705301
                 && ProfileManager.CurrentProfile != null
             )
             {
-                var gumps = Client.Game.UO.Gumps;
+                var gumps = ServiceProvider.Get<UOService>().Gumps;
 
                 switch (ProfileManager.CurrentProfile.BackpackStyle)
                 {
@@ -108,7 +109,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_data.OpenSound != 0 && playsound)
             {
-                Client.Game.Audio.PlaySound(_data.OpenSound);
+                ServiceProvider.Get<AudioService>().PlaySound(_data.OpenSound);
             }
         }
 
@@ -206,7 +207,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (
                 e.Button == MouseButtonType.Left
                 && !IsMinimized
-                && !Client.Game.UO.GameCursor.ItemHold.Enabled
+                && !ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled
             )
             {
                 Point offset = Mouse.LDragOffset;
@@ -243,7 +244,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (
                 World.TargetManager.IsTargeting
-                && !Client.Game.UO.GameCursor.ItemHold.Enabled
+                && !ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled
                 && SerialHelper.IsValid(serial)
             )
             {
@@ -278,8 +279,8 @@ namespace ClassicUO.Game.UI.Gumps
                     candrop = false;
 
                     if (
-                        Client.Game.UO.GameCursor.ItemHold.Enabled
-                        && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition
+                        ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled
+                        && !ServiceProvider.Get<UOService>().GameCursor.ItemHold.IsFixedPosition
                     )
                     {
                         candrop = true;
@@ -296,7 +297,7 @@ namespace ClassicUO.Game.UI.Gumps
                             }
                             else if (
                                 target.ItemData.IsStackable
-                                && target.Graphic == Client.Game.UO.GameCursor.ItemHold.Graphic
+                                && target.Graphic == ServiceProvider.Get<UOService>().GameCursor.ItemHold.Graphic
                             )
                             {
                                 dropcontainer = target.Serial;
@@ -328,17 +329,17 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (
                     !candrop
-                    && Client.Game.UO.GameCursor.ItemHold.Enabled
-                    && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition
+                    && ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled
+                    && !ServiceProvider.Get<UOService>().GameCursor.ItemHold.IsFixedPosition
                 )
                 {
-                    Client.Game.Audio.PlaySound(0x0051);
+                    ServiceProvider.Get<AudioService>().PlaySound(0x0051);
                 }
 
                 if (
                     candrop
-                    && Client.Game.UO.GameCursor.ItemHold.Enabled
-                    && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition
+                    && ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled
+                    && !ServiceProvider.Get<UOService>().GameCursor.ItemHold.IsFixedPosition
                 )
                 {
                     var gump = UIManager.GetGump<ContainerGump>(dropcontainer);
@@ -362,13 +363,13 @@ namespace ClassicUO.Game.UI.Gumps
 
                         ref readonly var spriteInfo = ref (
                             (gump.IsChessboard || gump.IsBackgammonBoard)
-                                ? ref Client.Game.UO.Gumps.GetGump(
+                                ? ref ServiceProvider.Get<UOService>().Gumps.GetGump(
                                     (ushort)(
-                                        Client.Game.UO.GameCursor.ItemHold.DisplayedGraphic
+                                        ServiceProvider.Get<UOService>().GameCursor.ItemHold.DisplayedGraphic
                                         - Constants.ITEM_GUMP_TEXTURE_OFFSET
                                     )
                                 )
-                                : ref Client.Game.UO.Arts.GetArt(Client.Game.UO.GameCursor.ItemHold.DisplayedGraphic)
+                                : ref ServiceProvider.Get<UOService>().Arts.GetArt(ServiceProvider.Get<UOService>().GameCursor.ItemHold.DisplayedGraphic)
                         );
 
                         float scale = GetScale();
@@ -404,8 +405,8 @@ namespace ClassicUO.Game.UI.Gumps
                                 && ProfileManager.CurrentProfile.RelativeDragAndDropItems
                             )
                             {
-                                x += Client.Game.UO.GameCursor.ItemHold.MouseOffset.X;
-                                y += Client.Game.UO.GameCursor.ItemHold.MouseOffset.Y;
+                                x += ServiceProvider.Get<UOService>().GameCursor.ItemHold.MouseOffset.X;
+                                y += ServiceProvider.Get<UOService>().GameCursor.ItemHold.MouseOffset.Y;
                             }
 
                             x -= textureW >> 1;
@@ -437,7 +438,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     GameActions.DropItem(
-                        Client.Game.UO.GameCursor.ItemHold.Serial,
+                        ServiceProvider.Get<UOService>().GameCursor.ItemHold.Serial,
                         x,
                         y,
                         0,
@@ -446,7 +447,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     Mouse.CancelDoubleClick = true;
                 }
-                else if (!Client.Game.UO.GameCursor.ItemHold.Enabled && SerialHelper.IsValid(serial))
+                else if (!ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled && SerialHelper.IsValid(serial))
                 {
                     if (!World.DelayedObjectClickManager.IsEnabled)
                     {
@@ -522,7 +523,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.Restore(xml);
             // skip loading
 
-            Client.Game.GetScene<GameScene>()?.DoubleClickDelayed(LocalSerial);
+            ServiceProvider.Get<GameService>().GetScene<GameScene>()?.DoubleClickDelayed(LocalSerial);
 
             Dispose();
         }
@@ -624,13 +625,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             ref readonly var spriteInfo = ref (
                 (IsChessboard || IsBackgammonBoard)
-                    ? ref Client.Game.UO.Gumps.GetGump(
+                    ? ref ServiceProvider.Get<UOService>().Gumps.GetGump(
                         (ushort)(
                             item.DisplayedGraphic
                             - Constants.ITEM_GUMP_TEXTURE_OFFSET
                         )
                     )
-                    : ref Client.Game.UO.Arts.GetArt(item.DisplayedGraphic)
+                    : ref ServiceProvider.Get<UOService>().Arts.GetArt(item.DisplayedGraphic)
             );
 
             if (spriteInfo.Texture != null)
@@ -722,7 +723,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_data.ClosedSound != 0)
             {
-                Client.Game.Audio.PlaySound(_data.ClosedSound);
+                ServiceProvider.Get<AudioService>().PlaySound(_data.ClosedSound);
             }
         }
 

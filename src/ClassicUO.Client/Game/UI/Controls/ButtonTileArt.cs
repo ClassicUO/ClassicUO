@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -26,7 +27,7 @@ namespace ClassicUO.Game.UI.Controls
             ContainsByBounds = true;
             IsFromServer = true;
 
-            ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(_graphic);
+            ref readonly var artInfo = ref ServiceProvider.Get<UOService>().Arts.GetArt(_graphic);
 
             if (artInfo.Texture == null)
             {
@@ -35,7 +36,7 @@ namespace ClassicUO.Game.UI.Controls
                 return;
             }
 
-            _isPartial = Client.Game.UO.FileManager.TileData.StaticData[_graphic].IsPartialHue;
+            _isPartial = ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[_graphic].IsPartialHue;
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -44,7 +45,7 @@ namespace ClassicUO.Game.UI.Controls
 
             var hueVector = ShaderHueTranslator.GetHueVector(_hue, _isPartial, 1f);
 
-            ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(_graphic);
+            ref readonly var artInfo = ref ServiceProvider.Get<UOService>().Arts.GetArt(_graphic);
 
             if (artInfo.Texture != null)
             {

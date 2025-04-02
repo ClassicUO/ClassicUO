@@ -2,6 +2,7 @@ using System;
 using System.Text.RegularExpressions;
 using ClassicUO.Sdk;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.Data;
 
@@ -59,8 +60,8 @@ internal static partial class Sextant
         xWidth = 5120;
         yHeight = 4096;
 
-        var mapWidth = Client.Game.UO.FileManager.Maps.MapsDefaultSize[map.Index, 0];
-        var mapHeight = Client.Game.UO.FileManager.Maps.MapsDefaultSize[map.Index, 1];
+        var mapWidth = ServiceProvider.Get<FileManagerService>().Maps.MapsDefaultSize[map.Index, 0];
+        var mapHeight = ServiceProvider.Get<FileManagerService>().Maps.MapsDefaultSize[map.Index, 1];
 
         var isTrammel = map.Index == 0 && mapWidth == 7168 && mapHeight == 4096;
         var isFelucca = map.Index == 1 && mapWidth == 7168 && mapHeight == 4096;

@@ -8,6 +8,7 @@ using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 using MathHelper = ClassicUO.Renderer.MathHelper;
 using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
 {
@@ -45,7 +46,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             CityInfo? city;
 
-            if (Client.Game.UO.Version >= ClientVersion.CV_70130)
+            if (ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_70130)
             {
                 city = scene.GetCity(0);
             }
@@ -88,7 +89,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             };
 
 
-            if (Client.Game.UO.Version >= ClientVersion.CV_70130)
+            if (ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_70130)
             {
                 Add(new GumpPic(62, 54, (ushort) (0x15D9 + map), 0));
                 Add(new GumpPic(57, 49, 0x15DF, 0));
@@ -158,8 +159,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         cityFacet = 5;
                     }
 
-                    x = 62 + MathHelper.PercetangeOf(Client.Game.UO.FileManager.Maps.MapsDefaultSize[cityFacet, 0] - 2048, c.X, 383);
-                    y = 54 + MathHelper.PercetangeOf(Client.Game.UO.FileManager.Maps.MapsDefaultSize[cityFacet, 1], c.Y, 384);
+                    x = 62 + MathHelper.PercetangeOf(ServiceProvider.Get<UOService>().FileManager.Maps.MapsDefaultSize[cityFacet, 0] - 2048, c.X, 383);
+                    y = 54 + MathHelper.PercetangeOf(ServiceProvider.Get<UOService>().FileManager.Maps.MapsDefaultSize[cityFacet, 1], c.Y, 384);
                 }
                 else if (i < _townButtonsText.Length)
                 {
@@ -196,7 +197,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         private void SetFacet(uint index)
         {
-            if (Client.Game.UO.Version < ClientVersion.CV_70130)
+            if (ServiceProvider.Get<UOService>().Version < ClientVersion.CV_70130)
             {
                 return;
             }

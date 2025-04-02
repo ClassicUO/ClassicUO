@@ -11,6 +11,7 @@ using SDL2;
 using StbTextEditSharp;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -274,7 +275,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (IsUnicode)
             {
-                return Client.Game.UO.FileManager.Fonts.GetInfoUnicode
+                return ServiceProvider.Get<UOService>().Self.FileManager.Fonts.GetInfoUnicode
                 (
                     _rendererText.Font,
                     text,
@@ -286,7 +287,7 @@ namespace ClassicUO.Game.UI.Controls
                 );
             }
 
-            return Client.Game.UO.FileManager.Fonts.GetInfoASCII
+            return ServiceProvider.Get<UOService>().Self.FileManager.Fonts.GetInfoASCII
             (
                 _rendererText.Font,
                 text,
@@ -344,7 +345,7 @@ namespace ClassicUO.Game.UI.Controls
                 }
 
 
-                int realWidth = _rendererText.IsUnicode ? Client.Game.UO.FileManager.Fonts.GetWidthUnicode(_rendererText.Font, text) : Client.Game.UO.FileManager.Fonts.GetWidthASCII(_rendererText.Font, text);
+                int realWidth = _rendererText.IsUnicode ? ServiceProvider.Get<UOService>().Self.FileManager.Fonts.GetWidthUnicode(_rendererText.Font, text) : ServiceProvider.Get<UOService>().Self.FileManager.Fonts.GetWidthASCII(_rendererText.Font, text);
 
                 if (realWidth > _rendererText.MaxWidth)
                 {
@@ -357,7 +358,7 @@ namespace ClassicUO.Game.UI.Controls
                     }
 
                     //MultilinesFontInfo info = _rendererText.IsUnicode
-                    //                              ? Client.Game.UO.FileManager.Fonts.GetInfoUnicode(
+                    //                              ? ServiceProvider.Get<UOService>().Self.FileManager.Fonts.GetInfoUnicode(
                     //                                                                    _rendererText.Font,
                     //                                                                    text,
                     //                                                                    text.Length,
@@ -365,7 +366,7 @@ namespace ClassicUO.Game.UI.Controls
                     //                                                                    (ushort) _rendererText.FontStyle,
                     //                                                                    realWidth
                     //                                                                   )
-                    //                              : Client.Game.UO.FileManager.Fonts.GetInfoASCII(
+                    //                              : ServiceProvider.Get<UOService>().Self.FileManager.Fonts.GetInfoASCII(
                     //                                                                  _rendererText.Font,
                     //                                                                  text,
                     //                                                                  text.Length,

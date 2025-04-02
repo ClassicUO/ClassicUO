@@ -11,6 +11,7 @@ using Microsoft.Xna.Framework;
 using SDL2;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {
@@ -36,13 +37,13 @@ namespace ClassicUO.Game.UI.Gumps.Login
             byte font;
             ushort hue;
 
-            if (Client.Game.UO.Version < ClientVersion.CV_706400)
+            if (ServiceProvider.Get<UOService>().Version < ClientVersion.CV_706400)
             {
                 _buttonNormal = 0x15A4;
                 _buttonOver = 0x15A5;
                 const ushort HUE = 0x0386;
 
-                if (Client.Game.UO.Version >= ClientVersion.CV_500A)
+                if (ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_500A)
                 {
                     Add(new GumpPic(0, 0, 0x2329, 0));
                 }
@@ -73,7 +74,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     }
                 );
 
-                if (Client.Game.UO.Version < ClientVersion.CV_500A)
+                if (ServiceProvider.Get<UOService>().Version < ClientVersion.CV_500A)
                 {
                     Add(new GumpPic(286, 45, 0x058A, 0));
                 }
@@ -463,7 +464,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             loginmusic_checkbox.ValueChanged += (sender, e) =>
             {
                 Settings.GlobalSettings.LoginMusic = loginmusic_checkbox.IsChecked;
-                Client.Game.Audio.UpdateCurrentMusicVolume(true);
+                ServiceProvider.Get<AudioService>().UpdateCurrentMusicVolume(true);
 
                 login_music.IsVisible = Settings.GlobalSettings.LoginMusic;
             };
@@ -471,7 +472,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             login_music.ValueChanged += (sender, e) =>
             {
                 Settings.GlobalSettings.LoginMusicVolume = login_music.Value;
-                Client.Game.Audio.UpdateCurrentMusicVolume(true);
+                ServiceProvider.Get<AudioService>().UpdateCurrentMusicVolume(true);
             };
 
 
@@ -488,7 +489,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         public override void OnKeyboardReturn(int textID, string text)
         {
             SaveCheckboxStatus();
-            var ls = Client.Game.GetScene<LoginScene>();
+            var ls = ServiceProvider.Get<GameService>().GetScene<LoginScene>();
 
             if (ls.CurrentLoginStep == LoginSteps.Main)
             {
@@ -552,13 +553,13 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                     if (!_textboxAccount.IsDisposed)
                     {
-                        Client.Game.GetScene<LoginScene>()?.Connect(_textboxAccount.Text, _passwordFake.RealText);
+                        ServiceProvider.Get<GameService>().GetScene<LoginScene>()?.Connect(_textboxAccount.Text, _passwordFake.RealText);
                     }
 
                     break;
 
                 case Buttons.Quit:
-                    Client.Game.Exit();
+                    ServiceProvider.Get<GameService>().Exit();
 
                     break;
 

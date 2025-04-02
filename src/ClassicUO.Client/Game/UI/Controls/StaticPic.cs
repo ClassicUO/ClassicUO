@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -40,7 +41,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _graphic = value;
 
-                ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(value);
+                ref readonly var artInfo = ref ServiceProvider.Get<UOService>().Self.Arts.GetArt(value);
 
                 if (artInfo.Texture == null)
                 {
@@ -52,7 +53,7 @@ namespace ClassicUO.Game.UI.Controls
                 Width = artInfo.UV.Width;
                 Height = artInfo.UV.Height;
 
-                IsPartialHue = Client.Game.UO.FileManager.TileData.StaticData[value].IsPartialHue;
+                IsPartialHue = ServiceProvider.Get<UOService>().Self.FileManager.TileData.StaticData[value].IsPartialHue;
             }
         }
 
@@ -60,7 +61,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, IsPartialHue, 1);
 
-            ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(Graphic);
+            ref readonly var artInfo = ref ServiceProvider.Get<UOService>().Self.Arts.GetArt(Graphic);
 
             if (artInfo.Texture != null)
             {
@@ -77,7 +78,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            return Client.Game.UO.Arts.PixelCheck(Graphic, x - Offset.X, y - Offset.Y);
+            return ServiceProvider.Get<UOService>().Self.Arts.PixelCheck(Graphic, x - Offset.X, y - Offset.Y);
         }
     }
 }

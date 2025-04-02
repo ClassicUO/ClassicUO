@@ -37,9 +37,9 @@ namespace ClassicUO.Game.Services
             _audio.PlaySoundWithDistance(world, sound, x, y);
         }
 
-        public void UpdateCurrentMusicVolume()
+        public void UpdateCurrentMusicVolume(bool isLogin = false)
         {
-            _audio.UpdateCurrentMusicVolume();
+            _audio.UpdateCurrentMusicVolume(isLogin);
         }
 
         public int LoginMusicIndex => _audio.LoginMusicIndex;

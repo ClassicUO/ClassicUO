@@ -40,7 +40,6 @@ namespace ClassicUO.Game.UI.Gumps
         private HSliderBar _cellSize;
         private Checkbox _containerScaleItems, _containerDoubleClickToLoot, _relativeDragAnDropItems, _useLargeContianersGumps, _highlightContainersWhenMouseIsOver;
 
-
         // containers
         private HSliderBar _containersScale;
         private Combobox _cotType;
@@ -49,7 +48,6 @@ namespace ClassicUO.Game.UI.Gumps
         private Combobox _dragSelectModifierKey;
         private Combobox _backpackStyle;
         private Checkbox _hueContainerGumps;
-
 
         //counters
         private Checkbox _enableCounters, _highlightOnUse, _highlightOnAmount, _enableAbbreviatedAmount;
@@ -148,11 +146,24 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _showStatsMessage, _showSkillsMessage;
         private HSliderBar _showSkillsMessageDelta;
 
-
         private Profile _currentProfile = ProfileManager.CurrentProfile;
+
+        // Manteniamo i servizi che sono utilizzati in più metodi
+        private readonly AudioManager _audioManager;
+        private readonly FileManagerService _fileManager;
+        private readonly GameService _gameService;
 
         public OptionsGump(World world) : base(world, 0, 0)
         {
+            _audioManager = new AudioManager();
+            _fileManager = ServiceProvider.Get<FileManagerService>();
+            _gameService = ServiceProvider.Get<GameService>();
+
+            // Utilizzo di variabili locali per i servizi usati solo nel costruttore
+            var audioService = ServiceProvider.Get<AudioService>();
+            var windowService = ServiceProvider.Get<WindowService>();
+            var uoService = ServiceProvider.Get<UOService>();
+
             Add
             (
                 new AlphaBlendControl(0.95f)
@@ -164,7 +175,6 @@ namespace ClassicUO.Game.UI.Gumps
                     Hue = 999
                 }
             );
-
 
             int i = 0;
 
@@ -419,14 +429,22 @@ namespace ClassicUO.Game.UI.Gumps
             ChangePage(1);
         }
 
-        private static Texture2D LogoTexture
+        public static Texture2D LogoTexture
         {
             get
             {
                 if (_logoTexture2D == null || _logoTexture2D.IsDisposed)
                 {
-                    using var stream = new MemoryStream(Loader.GetCuoLogo().ToArray());
-                    _logoTexture2D = Texture2D.FromStream(Client.Game.GraphicsDevice, stream);
+                    try
+                    {
+                        var fileManager = ServiceProvider.Get<FileManagerService>();
+                        using Stream stream = File.OpenRead(fileManager.GetUOFilePath("logo.png"));
+                        _logoTexture2D = Texture2D.FromStream(ServiceProvider.Get<GameService>().GraphicsDevice, stream);
+                    }
+                    catch
+                    {
+                        return null;
+                    }
                 }
 
                 return _logoTexture2D;
@@ -436,6 +454,15 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildGeneral()
         {
             const int PAGE = 1;
+            var sceneService = ServiceProvider.Get<SceneService>();
+            var uoService = ServiceProvider.Get<UOService>();
+            var gameService = ServiceProvider.Get<GameService>();
+            var windowService = ServiceProvider.Get<WindowService>();
+
+            Add(new Label(ResGumps.General, true, HUE_FONT) { X = 100, Y = 20 }, PAGE);
+
+            var section1 = new DataBox(50, 60, 0, 0);
+            Add(section1, PAGE);
 
             ScrollArea rightArea = new ScrollArea
             (
@@ -646,7 +673,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            _showHouseContent.IsVisible = Client.Game.UO.Version >= ClientVersion.CV_70796;
+            _showHouseContent.IsVisible = uoService.Version >= ClientVersion.CV_70796;
 
             section.Add
             (
@@ -660,7 +687,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            _use_smooth_boat_movement.IsVisible = Client.Game.UO.Version >= ClientVersion.CV_7090;
+            _use_smooth_boat_movement.IsVisible = uoService.Version >= ClientVersion.CV_7090;
 
 
             SettingsSection section2 = AddSettingsSection(box, "Mobiles");
@@ -1243,10 +1270,10 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             section4.Add(new Label(ResGumps.DragSelectStartingPosX, true, HUE_FONT));
-            section4.Add(_dragSelectStartX = new HSliderBar(startX, startY, 200, 0, Client.Game.Scene.Camera.Bounds.Width, _currentProfile.DragSelectStartX, HSliderBarStyle.MetalWidgetRecessedBar, true, 0, HUE_FONT));
+            section4.Add(_dragSelectStartX = new HSliderBar(startX, startY, 200, 0, sceneService.Camera.Bounds.Width, _currentProfile.DragSelectStartX, HSliderBarStyle.MetalWidgetRecessedBar, true, 0, HUE_FONT));
 
             section4.Add(new Label(ResGumps.DragSelectStartingPosY, true, HUE_FONT));
-            section4.Add(_dragSelectStartY = new HSliderBar(startX, startY, 200, 0, Client.Game.Scene.Camera.Bounds.Height, _currentProfile.DragSelectStartY, HSliderBarStyle.MetalWidgetRecessedBar, true, 0, HUE_FONT));
+            section4.Add(_dragSelectStartY = new HSliderBar(startX, startY, 200, 0, sceneService.Camera.Bounds.Height, _currentProfile.DragSelectStartY, HSliderBarStyle.MetalWidgetRecessedBar, true, 0, HUE_FONT));
             section4.Add
             (
                 _dragSelectAsAnchor = AddCheckBox
@@ -1625,7 +1652,7 @@ namespace ClassicUO.Game.UI.Gumps
                 4
             );
 
-            var camera = Client.Game.Scene.Camera;
+            var camera = ServiceProvider.Get<SceneService>().Camera;
 
             _gameWindowPositionX.SetText(camera.Bounds.X.ToString());
 
@@ -3286,7 +3313,7 @@ namespace ClassicUO.Game.UI.Gumps
             int startY = 5;
             Label text;
 
-            bool hasBackpacks = Client.Game.UO.Version >= ClientVersion.CV_705301;
+            bool hasBackpacks = ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_705301;
 
             if(hasBackpacks)
             {
@@ -3353,7 +3380,7 @@ namespace ClassicUO.Game.UI.Gumps
                 startY
             );
 
-            _useLargeContianersGumps.IsVisible = Client.Game.UO.Version >= ClientVersion.CV_706000;
+            _useLargeContianersGumps.IsVisible = ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_706000;
 
             if (_useLargeContianersGumps.IsVisible)
             {
@@ -3602,7 +3629,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _gameWindowFullsize.IsChecked = false;
                     _enableDeathScreen.IsChecked = true;
                     _enableBlackWhiteEffect.IsChecked = true;
-                    Client.Game.Scene.Camera.Zoom = 1f;
+                    ServiceProvider.Get<SceneService>().Camera.Zoom = 1f;
                     _currentProfile.DefaultScale = 1f;
                     _lightBar.Value = 0;
                     _enableLight.IsChecked = false;
@@ -3736,7 +3763,11 @@ namespace ClassicUO.Game.UI.Gumps
             // general
             if (Settings.GlobalSettings.FPS != _sliderFPS.Value)
             {
-                Client.Game.SetRefreshRate(_sliderFPS.Value);
+                var width = ServiceProvider.Get<GameService>().Window.ClientBounds.Width;
+                var height = ServiceProvider.Get<GameService>().Window.ClientBounds.Height;
+                ServiceProvider.Get<GameService>().GraphicsManager.PreferredBackBufferWidth = width;
+                ServiceProvider.Get<GameService>().GraphicsManager.PreferredBackBufferHeight = height;
+                ServiceProvider.Get<GameService>().GraphicsManager.ApplyChanges();
             }
 
             _currentProfile.HighlightGameObjects = _highlightObjects.IsChecked;
@@ -3770,7 +3801,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _currentProfile.DrawRoofs = !_drawRoofs.IsChecked;
 
-                Client.Game.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
+                ServiceProvider.Get<GameService>().GetScene<GameScene>()?.UpdateMaxDrawZ(true);
             }
 
             if (_currentProfile.TopbarGumpIsDisabled != _enableTopbar.IsChecked)
@@ -3857,17 +3888,16 @@ namespace ClassicUO.Game.UI.Gumps
             Settings.GlobalSettings.LoginMusicVolume = _loginMusicVolume.Value;
             Settings.GlobalSettings.LoginMusic = _loginMusic.IsChecked;
 
-            Client.Game.Audio.UpdateCurrentMusicVolume();
-            Client.Game.Audio.UpdateCurrentSoundsVolume();
+            _audioManager.UpdateCurrentMusicVolume();
 
             if (!_currentProfile.EnableMusic)
             {
-                Client.Game.Audio.StopMusic();
+                _audioManager.StopMusic();
             }
 
             if (!_currentProfile.EnableSound)
             {
-                Client.Game.Audio.StopSounds();
+                _audioManager.StopSounds();
             }
 
             // speech
@@ -3897,7 +3927,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.EnableDeathScreen = _enableDeathScreen.IsChecked;
             _currentProfile.EnableBlackWhiteEffect = _enableBlackWhiteEffect.IsChecked;
 
-            var camera = Client.Game.Scene.Camera;
+            var camera = ServiceProvider.Get<SceneService>().Camera;
             _currentProfile.DefaultScale = camera.Zoom = (_sliderZoom.Value * camera.ZoomStep) + camera.ZoomMin;
 
             _currentProfile.EnableMousewheelScaleZoom = _zoomCheckbox.IsChecked;
@@ -3929,7 +3959,7 @@ namespace ClassicUO.Game.UI.Gumps
             int.TryParse(_gameWindowWidth.Text, out int gameWindowSizeWidth);
             int.TryParse(_gameWindowHeight.Text, out int gameWindowSizeHeight);
 
-            if (gameWindowSizeWidth != Client.Game.Scene.Camera.Bounds.Width || gameWindowSizeHeight != Client.Game.Scene.Camera.Bounds.Height)
+            if (gameWindowSizeWidth != ServiceProvider.Get<SceneService>().Camera.Bounds.Width || gameWindowSizeHeight != ServiceProvider.Get<SceneService>().Camera.Bounds.Height)
             {
                 if (vp != null)
                 {
@@ -3970,7 +4000,8 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (vp != null)
                     {
-                        n = vp.ResizeGameWindow(new Point(Client.Game.Window.ClientBounds.Width, Client.Game.Window.ClientBounds.Height));
+                        var windowService = ServiceProvider.Get<WindowService>();
+                        n = vp.ResizeGameWindow(new Point(windowService.ClientBounds.Width, windowService.ClientBounds.Height));
                         vp.SetGameWindowPosition(new Point(-5, -5));
                         _currentProfile.GameWindowPosition = vp.Location;
                     }
@@ -3991,12 +4022,6 @@ namespace ClassicUO.Game.UI.Gumps
                 _gameWindowHeight.SetText(n.Y.ToString());
 
                 _currentProfile.GameWindowFullSize = _gameWindowFullsize.IsChecked;
-            }
-
-            if (_currentProfile.WindowBorderless != _windowBorderless.IsChecked)
-            {
-                _currentProfile.WindowBorderless = _windowBorderless.IsChecked;
-                Client.Game.SetWindowBorderless(_windowBorderless.IsChecked);
             }
 
             _currentProfile.UseAlternativeLights = _altLights.IsChecked;
@@ -4296,7 +4321,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         internal void UpdateVideo()
         {
-            var camera = Client.Game.Scene.Camera;
+            var camera = ServiceProvider.Get<SceneService>().Camera;
 
             _gameWindowPositionX.SetText(camera.Bounds.X.ToString());
             _gameWindowPositionY.SetText(camera.Bounds.Y.ToString());
@@ -4665,7 +4690,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 for (byte i = 0; i < max_font; i++)
                 {
-                    if (Client.Game.UO.FileManager.Fonts.UnicodeFontExists(i))
+                    if (ServiceProvider.Get<UOService>().FileManager.Fonts.UnicodeFontExists(i))
                     {
                         Add
                         (

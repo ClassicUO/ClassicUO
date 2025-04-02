@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using ClassicUO.Game;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using ClassicUO.Game.Scenes;
 
 namespace ClassicUO.Game.Services
 {
@@ -21,35 +22,54 @@ namespace ClassicUO.Game.Services
             set => _game.IsMouseVisible = value;
         }
 
+        public uint[] FrameDelay => _game.FrameDelay;
+
+        public T? GetScene<T>() where T : Scene => _game.GetScene<T>();
+
+        public GameWindow Window => _game.Window;
+
+        public GraphicsDevice GraphicsDevice => _game.GraphicsDevice;
+
         public void SetWindowTitle(string title)
         {
-            _game.Window.Title = title;
+            _game.SetWindowTitle(title);
         }
 
         public void SetWindowSize(int width, int height)
         {
-            _game.GraphicManager.PreferredBackBufferWidth = width;
-            _game.GraphicManager.PreferredBackBufferHeight = height;
-            _game.GraphicManager.ApplyChanges();
+            _game.SetWindowSize(width, height);
+        }
+
+        public void SetWindowBorderless(bool borderless)
+        {
+            _game.SetWindowBorderless(borderless);
+        }
+
+        public void MaximizeWindow()
+        {
+            _game.MaximizeWindow();
         }
 
         public bool IsWindowMaximized()
         {
-            return _game.Window.ClientBounds.Width == _game.GraphicsDevice.DisplayMode.Width &&
-                   _game.Window.ClientBounds.Height == _game.GraphicsDevice.DisplayMode.Height;
+            return _game.IsWindowMaximized();
         }
 
         public void RestoreWindow()
         {
-            // _game.Window.ClientBounds = new Rectangle(0, 0, 640, 480);
+            _game.RestoreWindow();
         }
 
-        public GraphicsDevice GraphicsDevice => _game.GraphicsDevice;
         public GraphicsDeviceManager GraphicsManager => _game.GraphicManager;
 
         public void EnqueueAction(uint time, Action action)
         {
             _game.EnqueueAction(time, action);
+        }
+
+        public void Exit()
+        {
+            _game.Exit();
         }
     }
 }

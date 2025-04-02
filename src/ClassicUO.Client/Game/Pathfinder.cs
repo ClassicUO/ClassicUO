@@ -9,6 +9,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Sdk.Assets;
 using Microsoft.Xna.Framework;
 using MathHelper = ClassicUO.Renderer.MathHelper;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game
 {
@@ -204,7 +205,7 @@ namespace ClassicUO.Game
                             if (!(obj is Mobile))
                             {
                                 var graphic = obj is Item it && it.IsMulti ? it.MultiGraphic : obj.Graphic;
-                                ref StaticTiles itemdata = ref Client.Game.UO.FileManager.TileData.StaticData[graphic];
+                                ref StaticTiles itemdata = ref ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[graphic];
 
                                 if (stepState == (int) PATH_STEP_STATE.PSS_ON_SEA_HORSE)
                                 {

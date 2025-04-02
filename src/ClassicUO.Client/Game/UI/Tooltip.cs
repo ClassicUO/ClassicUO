@@ -7,6 +7,7 @@ using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using ClassicUO.Sdk.IO;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI
 {
@@ -65,8 +66,8 @@ namespace ClassicUO.Game.UI
                 zoom = ProfileManager.CurrentProfile.TooltipDisplayZoom / 100f;
             }
 
-            Client.Game.UO.FileManager.Fonts.SetUseHTML(true);
-            Client.Game.UO.FileManager.Fonts.RecalculateWidthByInfo = true;
+            ServiceProvider.Get<UOService>().FileManager.Fonts.SetUseHTML(true);
+            ServiceProvider.Get<UOService>().FileManager.Fonts.RecalculateWidthByInfo = true;
 
             if (_renderedText == null)
             {
@@ -88,14 +89,14 @@ namespace ClassicUO.Game.UI
             {
                 if (_maxWidth == 0)
                 {
-                    int width = Client.Game.UO.FileManager.Fonts.GetWidthUnicode(font, Text);
+                    int width = ServiceProvider.Get<UOService>().FileManager.Fonts.GetWidthUnicode(font, Text);
 
                     if (width > 600)
                     {
                         width = 600;
                     }
 
-                    width = Client.Game.UO.FileManager.Fonts.GetWidthExUnicode
+                    width = ServiceProvider.Get<UOService>().FileManager.Fonts.GetWidthExUnicode
                     (
                         font,
                         Text,
@@ -121,8 +122,8 @@ namespace ClassicUO.Game.UI
                 _renderedText.Text = _textHTML;
             }
 
-            Client.Game.UO.FileManager.Fonts.RecalculateWidthByInfo = false;
-            Client.Game.UO.FileManager.Fonts.SetUseHTML(false);
+            ServiceProvider.Get<UOService>().FileManager.Fonts.RecalculateWidthByInfo = false;
+            ServiceProvider.Get<UOService>().FileManager.Fonts.SetUseHTML(false);
 
             if (_renderedText.Texture == null || _renderedText.Texture.IsDisposed)
             {
@@ -136,18 +137,18 @@ namespace ClassicUO.Game.UI
             {
                 x = 0;
             }
-            else if (x > Client.Game.Window.ClientBounds.Width - z_width)
+            else if (x > ServiceProvider.Get<WindowService>().ClientBounds.Width - z_width)
             {
-                x = Client.Game.Window.ClientBounds.Width - z_width;
+                x = ServiceProvider.Get<WindowService>().ClientBounds.Width - z_width;
             }
 
             if (y < 0)
             {
                 y = 0;
             }
-            else if (y > Client.Game.Window.ClientBounds.Height - z_height)
+            else if (y > ServiceProvider.Get<WindowService>().ClientBounds.Height - z_height)
             {
-                y = Client.Game.Window.ClientBounds.Height - z_height;
+                y = ServiceProvider.Get<WindowService>().ClientBounds.Height - z_height;
             }
 
 

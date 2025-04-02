@@ -3,6 +3,7 @@
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -22,7 +23,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue);
 
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(Graphic);
+            ref readonly var gumpInfo = ref ServiceProvider.Get<UOService>().Gumps.GetGump(Graphic);
 
             if (gumpInfo.Texture != null)
             {

@@ -1,6 +1,6 @@
-﻿
-using ClassicUO.Configuration;
+﻿using ClassicUO.Configuration;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -10,7 +10,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             CanMove = true;
             CanCloseWithRightClick = true;
-            var camera = Client.Game.Scene.Camera;
+            var sceneService = ServiceProvider.Get<SceneService>();
+            var camera = sceneService.Camera;
 
             AlphaBlendControl macroGumpBackground = new AlphaBlendControl
             {

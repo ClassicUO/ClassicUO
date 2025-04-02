@@ -15,6 +15,7 @@ using MathHelper = ClassicUO.Renderer.MathHelper;
 using ClassicUO.Sdk;
 using ClassicUO.Platforms;
 using System.Diagnostics.CodeAnalysis;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game
 {
@@ -150,12 +151,12 @@ namespace ClassicUO.Game
 
                         Map = null;
 
-                        if (value >= Client.Game.UO.FileManager.Maps.MapsCount)
+                        if (value >= ServiceProvider.Get<UOService>().FileManager.Maps.MapsCount)
                         {
                             value = 0;
                         }
 
-                        Client.Game.UO.FileManager.Maps.LoadMap(value, ClientFeatures.Flags.HasFlag(CharacterListFlags.CLF_UNLOCK_FELUCCA_AREAS));
+                        ServiceProvider.Get<UOService>().FileManager.Maps.LoadMap(value, ClientFeatures.Flags.HasFlag(CharacterListFlags.CLF_UNLOCK_FELUCCA_AREAS));
                         Map = new Map.Map(this, value);
 
                         Player?.SetInWorldTile(x, y, z);
@@ -163,14 +164,14 @@ namespace ClassicUO.Game
                     }
                     else
                     {
-                        Client.Game.UO.FileManager.Maps.LoadMap(value, ClientFeatures.Flags.HasFlag(CharacterListFlags.CLF_UNLOCK_FELUCCA_AREAS));
+                        ServiceProvider.Get<UOService>().FileManager.Maps.LoadMap(value, ClientFeatures.Flags.HasFlag(CharacterListFlags.CLF_UNLOCK_FELUCCA_AREAS));
                         Map = new Map.Map(this, value);
                     }
 
                     // force cursor update when switching map
-                    if (Client.Game.UO.GameCursor != null)
+                    if (ServiceProvider.Get<UOService>().GameCursor != null)
                     {
-                        Client.Game.UO.GameCursor.Graphic = 0xFFFF;
+                        ServiceProvider.Get<UOService>().GameCursor.Graphic = 0xFFFF;
                     }
 
                     UoAssist.SignalMapChanged(value);
@@ -237,10 +238,10 @@ namespace ClassicUO.Game
             }
 
             //TODO(deccer): refactor this out into _audioPlayer.PlayMusic(...)
-            var currentMusic = Client.Game.Audio.GetCurrentMusic();
-            if (currentMusic == null || currentMusic.Index == Client.Game.Audio.LoginMusicIndex)
+            var currentMusic = ServiceProvider.Get<AudioService>().GetCurrentMusic();
+            if (currentMusic == null || currentMusic.Index == ServiceProvider.Get<AudioService>().LoginMusicIndex)
             {
-                Client.Game.Audio.PlayMusic(music, false);
+                ServiceProvider.Get<AudioService>().PlayMusic(music, false);
             }
         }
 

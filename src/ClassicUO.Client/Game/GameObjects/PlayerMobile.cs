@@ -9,6 +9,7 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Network;
 using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -18,11 +19,12 @@ namespace ClassicUO.Game.GameObjects
 
         public PlayerMobile(World world, uint serial) : base(world, serial)
         {
-            Skills = new Skill[Client.Game.UO.FileManager.Skills.SkillsCount];
+            var uoService = ServiceProvider.Get<UOService>();
+            Skills = new Skill[uoService.FileManager.Skills.SkillsCount];
 
             for (int i = 0; i < Skills.Length; i++)
             {
-                SkillEntry skill = Client.Game.UO.FileManager.Skills.Skills[i];
+                SkillEntry skill = uoService.FileManager.Skills.Skills[i];
                 Skills[i] = new Skill(skill.Name, skill.Index, skill.HasAction);
             }
 
@@ -243,12 +245,13 @@ namespace ClassicUO.Game.GameObjects
             {
                 ushort animId = weapon.ItemData.AnimID;
                 ushort animGraphic = 0;
+                var uoService = ServiceProvider.Get<UOService>();
 
-                if (Client.Game.UO.FileManager.TileData.StaticData[weapon.Graphic - 1].AnimID == animId)
+                if (uoService.FileManager.TileData.StaticData[weapon.Graphic - 1].AnimID == animId)
                 {
                     animGraphic = (ushort)(weapon.Graphic - 1);
                 }
-                else if (Client.Game.UO.FileManager.TileData.StaticData[weapon.Graphic + 1].AnimID == animId)
+                else if (uoService.FileManager.TileData.StaticData[weapon.Graphic + 1].AnimID == animId)
                 {
                     animGraphic = (ushort)(weapon.Graphic + 1);
                 }
@@ -481,7 +484,7 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Walk(Direction direction, bool run)
         {
-            if (Walker.WalkingFailed || Walker.LastStepRequestTime > Time.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT || Client.Game.UO.Version >= ClientVersion.CV_60142 && IsParalyzed)
+            if (Walker.WalkingFailed || Walker.LastStepRequestTime > Time.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT || ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_60142 && IsParalyzed)
             {
                 return false;
             }

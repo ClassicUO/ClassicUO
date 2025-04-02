@@ -6,6 +6,8 @@ using ClassicUO.Input;
 using ClassicUO.Sdk;
 using ClassicUO.Sdk.Assets;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Services;
+using ClassicUO.Game.Scenes;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -34,7 +36,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 ref PopupMenuItem item = ref data.Items[i];
 
-                string text = Client.Game.UO.FileManager.Clilocs.GetString(item.Cliloc);
+                string text = ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(item.Cliloc);
 
                 ushort hue = item.Hue;
 
@@ -42,7 +44,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     uint h = (ColorConverter.Color16To32(item.ReplacedHue) << 8) | 0xFF;
 
-                    Client.Game.UO.FileManager.Fonts.SetUseHTML(true, h);
+                    ServiceProvider.Get<UOService>().FileManager.Fonts.SetUseHTML(true, h);
                 }
 
                 Label label = new Label(text, true, hue, font: 1)
@@ -51,7 +53,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = offsetY
                 };
 
-                Client.Game.UO.FileManager.Fonts.SetUseHTML(false);
+                ServiceProvider.Get<UOService>().FileManager.Fonts.SetUseHTML(false);
 
                 HitBox box = new HitBox(10, offsetY, label.Width, label.Height)
                 {
@@ -118,6 +120,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButtonType.Left)
             {
+                var scene = ServiceProvider.Get<SceneService>().GetScene<GameScene>();
                 GameActions.ResponsePopupMenu(_data.Serial, _selectedItem);
                 Dispose();
             }

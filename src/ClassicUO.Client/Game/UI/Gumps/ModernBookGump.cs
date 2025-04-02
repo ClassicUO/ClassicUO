@@ -12,6 +12,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -55,7 +56,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public ushort BookPageCount { get; internal set; }
         public HashSet<int> KnownPages { get; internal set; } = new HashSet<int>();
-        public static bool IsNewBook => Client.Game.UO.Version > ClientVersion.CV_200;
+        public static bool IsNewBook => ServiceProvider.Get<UOService>().Version > ClientVersion.CV_200;
         public bool UseNewHeader { get; set; } = true;
         public static byte DefaultFont => (byte) (IsNewBook ? 1 : 4);
 
@@ -71,6 +72,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             var sb = new StringBuilder();
             int sw = _bookPage.renderedText.GetCharWidth(' ');
+            var uoService = ServiceProvider.Get<UOService>();
 
             for (int i = 0, l = BookLines.Length; i < l; i++)
             {
@@ -82,7 +84,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int i = 0, l = BookLines.Length; i < l; i++)
             {
-                int w = IsNewBook ? Client.Game.UO.FileManager.Fonts.GetWidthUnicode(_bookPage.renderedText.Font, BookLines[i]) : Client.Game.UO.FileManager.Fonts.GetWidthASCII(_bookPage.renderedText.Font, BookLines[i]);
+                int w = IsNewBook ? uoService.FileManager.Fonts.GetWidthUnicode(_bookPage.renderedText.Font, BookLines[i]) : uoService.FileManager.Fonts.GetWidthASCII(_bookPage.renderedText.Font, BookLines[i]);
 
                 sb.Append(BookLines[i]);
 
@@ -230,7 +232,7 @@ namespace ClassicUO.Game.UI.Gumps
             ActivePage = 1;
             UpdatePageButtonVisibility();
 
-            Client.Game.Audio.PlaySound(0x0055);
+            ServiceProvider.Get<AudioService>().PlaySound(0x0055);
         }
 
         private void PageZero_TextChanged(object? sender, EventArgs e)
@@ -275,7 +277,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (page != ActivePage)
             {
-                Client.Game.Audio.PlaySound(0x0055);
+                ServiceProvider.Get<AudioService>().PlaySound(0x0055);
             }
 
             //Non-editable books may only have data for the currently displayed pages,
@@ -548,7 +550,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _gump = gump;
             }
 
-            internal Point _caretPos => _caretScreenPosition;
+            internal Point _caretPos => _rendererText.GetCaretPosition(CaretIndex);
 
             internal RenderedText renderedText => _rendererText;
             internal RenderedText renderedCaret => _rendererCaret;

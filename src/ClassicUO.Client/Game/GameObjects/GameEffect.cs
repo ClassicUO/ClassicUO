@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Sdk.Assets;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -20,7 +21,7 @@ namespace ClassicUO.Game.GameObjects
             Hue = hue;
             AllowedToDraw = CanBeDrawn(world, graphic);
             AlphaHue = 0xFF;
-            AnimDataFrame = Client.Game?.UO?.FileManager?.AnimData?.CalculateCurrentGraphic(graphic) ?? default;
+            AnimDataFrame = ServiceProvider.Get<UOService>()?.FileManager?.AnimData?.CalculateCurrentGraphic(graphic) ?? default;
             IsEnabled = true;
             AnimIndex = 0;
 

@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using ClassicUO.Game.Data;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer.Animations;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -531,7 +532,7 @@ namespace ClassicUO.Game.GameObjects
                 graphic = mobile.GetGraphicForAnimation();
             }
 
-            var animations = Client.Game.UO.Animations;
+            var animations = ServiceProvider.Get<UOService>().Animations;
             if (graphic >= animations.MaxAnimationCount)
             {
                 return 0;
@@ -1439,9 +1440,9 @@ namespace ClassicUO.Game.GameObjects
 
         public static bool IsReplacedObjectAnimation(byte anim, ushort v13)
         {
-            if (anim < Client.Game.UO.FileManager.Animations.GroupReplaces.Length)
+            if (anim < ServiceProvider.Get<UOService>().FileManager.Animations.GroupReplaces.Length)
             {
-                foreach (var tuple in Client.Game.UO.FileManager.Animations.GroupReplaces[anim])
+                foreach (var tuple in ServiceProvider.Get<UOService>().FileManager.Animations.GroupReplaces[anim])
                 {
                     if (tuple.Item1 == v13)
                     {
@@ -1473,16 +1474,16 @@ namespace ClassicUO.Game.GameObjects
                 return idx;
             }
 
-            AnimationGroups group = Client.Game.UO.FileManager.Animations.GetGroupIndex(
+            AnimationGroups group = ServiceProvider.Get<UOService>().FileManager.Animations.GetGroupIndex(
                 graphic,
-                Client.Game.UO.Animations.GetAnimType(graphic)
+                ServiceProvider.Get<UOService>().Animations.GetAnimType(graphic)
             );
 
             if (group == AnimationGroups.Low)
             {
                 return (byte)(
                     getReplacedGroup(
-                        Client.Game.UO.FileManager.Animations.GroupReplaces[0],
+                        ServiceProvider.Get<UOService>().FileManager.Animations.GroupReplaces[0],
                         index,
                         (ushort)LowAnimationGroup.Walk
                     ) % (ushort)LowAnimationGroup.AnimationCount
@@ -1493,7 +1494,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 return (byte)(
                     getReplacedGroup(
-                        Client.Game.UO.FileManager.Animations.GroupReplaces[1],
+                        ServiceProvider.Get<UOService>().FileManager.Animations.GroupReplaces[1],
                         index,
                         (ushort)PeopleAnimationGroup.WalkUnarmed
                     ) % (ushort)PeopleAnimationGroup.AnimationCount
@@ -1511,7 +1512,7 @@ namespace ClassicUO.Game.GameObjects
             byte mode
         )
         {
-            var animations = Client.Game.UO.Animations;
+            var animations = ServiceProvider.Get<UOService>().Animations;
             if (mobile.Graphic >= animations.MaxAnimationCount)
             {
                 return 0;

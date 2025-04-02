@@ -7,6 +7,7 @@ using ClassicUO.Game.UI.Controls;
 using static ClassicUO.Game.UI.Gumps.WorldMapGump;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Resources;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -51,8 +52,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             CanMove = true;
 
-            _mapMaxX= Client.Game.UO.FileManager.Maps.MapsDefaultSize[world.MapIndex, 0];
-            _mapMaxY = Client.Game.UO.FileManager.Maps.MapsDefaultSize[world.MapIndex, 1];
+            _mapMaxX= ServiceProvider.Get<UOService>().Self.FileManager.Maps.MapsDefaultSize[world.MapIndex, 0];
+            _mapMaxY = ServiceProvider.Get<UOService>().Self.FileManager.Maps.MapsDefaultSize[world.MapIndex, 1];
 
             _markers = markers;
             _markerIdx = markerIdx;
@@ -74,7 +75,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Width = 320,
                 Height = 220,
-                X = Client.Game.Scene.Camera.Bounds.Width / 2 - 125,
+                X = ServiceProvider.Get<SceneService>().Camera.Bounds.Width / 2 - 125,
                 Y = 150,
                 Alpha = 0.7f,
                 CanMove = true,

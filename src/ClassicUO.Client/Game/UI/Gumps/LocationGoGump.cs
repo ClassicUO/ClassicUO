@@ -5,6 +5,8 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
+using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps;
 
@@ -111,8 +113,8 @@ internal partial class LocationGoGump : Gump
             }
         );
 
-        X = (Client.Game.Window.ClientBounds.Width - Width) >> 1;
-        Y = (Client.Game.Window.ClientBounds.Height - Height) >> 1;
+        X = (ServiceProvider.Get<WindowService>().ClientBounds.Width - Width) >> 1;
+        Y = (ServiceProvider.Get<WindowService>().ClientBounds.Height - Height) >> 1;
     }
 
     private bool ParsePoint(string text, out Point point)

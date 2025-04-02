@@ -5,6 +5,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Network;
 using ClassicUO.Resources;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -22,20 +23,20 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Width = 270 + nameWidthAdjustment,
                 Height = 80,
-                X = Client.Game.Scene.Camera.Bounds.Width / 2 - 125,
+                X = ServiceProvider.Get<SceneService>().Scene.Camera.Bounds.Width / 2 - 125,
                 Y = 150,
                 Alpha = 0.8f
             };
 
             Label text = new Label(string.Format(ResGumps.P0HasInvitedYouToParty, mobile == null || string.IsNullOrEmpty(mobile.Name) ? ResGumps.NoName : mobile.Name), true, 15)
             {
-                X = Client.Game.Scene.Camera.Bounds.Width / 2 - 115,
+                X = ServiceProvider.Get<SceneService>().Scene.Camera.Bounds.Width / 2 - 115,
                 Y = 165
             };
 
             NiceButton acceptButton = new NiceButton
             (
-                Client.Game.Scene.Camera.Bounds.Width / 2 + 99 + nameWidthAdjustment,
+                ServiceProvider.Get<SceneService>().Scene.Camera.Bounds.Width / 2 + 99 + nameWidthAdjustment,
                 205,
                 45,
                 25,
@@ -45,7 +46,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             NiceButton declineButton = new NiceButton
             (
-                Client.Game.Scene.Camera.Bounds.Width / 2 + 39 + nameWidthAdjustment,
+                ServiceProvider.Get<SceneService>().Scene.Camera.Bounds.Width / 2 + 39 + nameWidthAdjustment,
                 205,
                 45,
                 25,
@@ -80,6 +81,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                 base.Dispose();
             };
+
+            ref readonly var gumpInfo = ref ServiceProvider.Get<UOService>().Gumps.GetGump(0x0802);
+            ServiceProvider.Get<UOService>().Gumps.GetGump(0x0803);
+            ServiceProvider.Get<UOService>().Gumps.GetGump(0x0804);
+            ServiceProvider.Get<UOService>().Gumps.GetGump(0x0805);
         }
     }
 }

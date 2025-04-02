@@ -7,6 +7,7 @@ using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -102,7 +103,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButtonType.Left && ShowLock)
             {
-                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(LOCK_GRAPHIC);
+                ref readonly var gumpInfo = ref ServiceProvider.Get<UOService>().Gumps.GetGump(LOCK_GRAPHIC);
                 if (gumpInfo.Texture != null)
                 {
                     if (
@@ -129,7 +130,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (ShowLock)
             {
                 hueVector = ShaderHueTranslator.GetHueVector(0);
-                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(LOCK_GRAPHIC);
+                ref readonly var gumpInfo = ref ServiceProvider.Get<UOService>().Gumps.GetGump(LOCK_GRAPHIC);
 
                 if (gumpInfo.Texture != null)
                 {

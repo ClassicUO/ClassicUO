@@ -11,6 +11,7 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -57,7 +58,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void CreateMap()
         {
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(
+            var uoService = ServiceProvider.Get<UOService>();
+            ref readonly var gumpInfo = ref uoService.Gumps.GetGump(
                 _useLargeMap ? BIG_MAP_GRAPHIC : SMALL_MAP_GRAPHIC
             );
 
@@ -123,7 +125,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(
+            ref readonly var gumpInfo = ref ServiceProvider.Get<UOService>().Gumps.GetGump(
                 _useLargeMap ? BIG_MAP_GRAPHIC : SMALL_MAP_GRAPHIC
             );
 
@@ -207,6 +209,9 @@ namespace ClassicUO.Game.UI.Gumps
             bool force = false
         )
         {
+            var uoService = ServiceProvider.Get<UOService>();
+            int mapBlockHeight = uoService.FileManager.Maps.MapBlocksSize[World.MapIndex, 1];
+
             ushort lastX = World.Player.X;
             ushort lastY = World.Player.Y;
 
@@ -243,7 +248,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             int maxBlockIndex = World.Map.BlocksCount;
-            int mapBlockHeight = Client.Game.UO.FileManager.Maps.MapBlocksSize[World.MapIndex, 1];
             int index = _useLargeMap ? 1 : 0;
 
             _blankGumpsPixels[index].CopyTo(_blankGumpsPixels[index + 2], 0);
@@ -360,14 +364,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (isLand && color > 0x4000)
                             {
-                                color = Client.Game.UO.FileManager.Hues.GetColor16(
+                                color = uoService.FileManager.Hues.GetColor16(
                                     16384,
                                     (ushort)(color - 0x4000)
                                 ); //28672 is an arbitrary position in hues.mul, is the 14 position in the range
                             }
                             else
                             {
-                                color = Client.Game.UO.FileManager.Hues.GetRadarColorData(color);
+                                color = uoService.FileManager.Hues.GetRadarColorData(color);
                             }
 
                             int py = realBlockY + y - lastY;

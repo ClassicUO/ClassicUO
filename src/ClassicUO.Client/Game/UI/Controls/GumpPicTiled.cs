@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -52,7 +53,8 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     _graphic = value;
 
-                    ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(_graphic);
+                    var uoService = ServiceProvider.Get<UOService>();
+                    ref readonly var gumpInfo = ref uoService.Gumps.GetGump(_graphic);
 
                     if (gumpInfo.Texture == null)
                     {
@@ -73,7 +75,8 @@ namespace ClassicUO.Game.UI.Controls
         {
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, false, Alpha, true);
 
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(Graphic);
+            var uoService = ServiceProvider.Get<UOService>();
+            ref readonly var gumpInfo = ref uoService.Gumps.GetGump(Graphic);
 
             if (gumpInfo.Texture != null)
             {
@@ -96,7 +99,8 @@ namespace ClassicUO.Game.UI.Controls
             x -= Offset.X;
             y -= Offset.Y;
 
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(Graphic);
+            var uoService = ServiceProvider.Get<UOService>();
+            ref readonly var gumpInfo = ref uoService.Gumps.GetGump(Graphic);
 
             if (gumpInfo.Texture == null)
             {
@@ -130,7 +134,7 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            return Client.Game.UO.Gumps.PixelCheck(Graphic, x, y);
+            return uoService.Gumps.PixelCheck(Graphic, x, y);
         }
     }
 }

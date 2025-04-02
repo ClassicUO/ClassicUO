@@ -1,4 +1,5 @@
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -8,18 +9,18 @@ namespace ClassicUO.Game.Services
     {
         private readonly GameController _game;
 
-        public SceneService(GameController game)
+        internal SceneService(GameController game)
         {
             _game = game;
         }
 
-        public Camera Camera => _game.Scene.Camera;
-        public Rectangle Bounds => _game.Scene.Camera.Bounds;
-        public Scene? CurrentScene => _game.Scene;
+        internal Camera Camera => _game.Scene.Camera;
+        internal Rectangle Bounds => _game.Scene.Camera.Bounds;
+        internal Scene? Scene => _game.Scene;
 
-        public T? GetScene<T>() where T : Scene
+        internal T? GetScene<T>() where T : Scene
         {
-            return _game.GetScene<T>();
+            return _game.Scene as T;
         }
 
         public void SetScene(Scene scene)

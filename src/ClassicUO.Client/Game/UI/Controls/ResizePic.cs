@@ -6,6 +6,7 @@ using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -21,7 +22,7 @@ namespace ClassicUO.Game.UI.Controls
 
             for (_maxIndex = 0; _maxIndex < 9; ++_maxIndex)
             {
-                if (Client.Game.UO.Gumps.GetGump((ushort)(Graphic + _maxIndex)).Texture == null)
+                if (ServiceProvider.Get<UOService>().Gumps.GetGump((ushort)(Graphic + _maxIndex)).Texture == null)
                 {
                     break;
                 }
@@ -231,7 +232,7 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            return Client.Game.UO.Gumps.PixelCheck(graphic, x, y);
+            return ServiceProvider.Get<UOService>().Gumps.PixelCheck(graphic, x, y);
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -390,7 +391,7 @@ namespace ClassicUO.Game.UI.Controls
                     ++index;
                 }
 
-                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(
+                ref readonly var gumpInfo = ref ServiceProvider.Get<UOService>().Gumps.GetGump(
                     (ushort)(Graphic + index)
                 );
 

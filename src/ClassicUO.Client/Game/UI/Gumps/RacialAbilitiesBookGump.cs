@@ -8,6 +8,7 @@ using ClassicUO.Sdk.Assets;
 using ClassicUO.Network;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -202,7 +203,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 Add(pic, page1);
-                pic.SetTooltip(Client.Game.UO.FileManager.Clilocs.GetString(_tooltipOffset + i), 150);
+                pic.SetTooltip(ServiceProvider.Get<UOService>().Self.FileManager.Clilocs.GetString(_tooltipOffset + i), 150);
 
                 Add
                 (
@@ -333,7 +334,7 @@ namespace ClassicUO.Game.UI.Gumps
             _pageCornerLeft.Page = ActivePage != 1 ? 0 : int.MaxValue;
             _pageCornerRight.Page = ActivePage != _pagesCount ? 0 : int.MaxValue;
 
-            Client.Game.Audio.PlaySound(0x0055);
+            ServiceProvider.Get<AudioService>().PlaySound(0x0055);
         }
 
         public override void Update()

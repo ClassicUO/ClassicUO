@@ -6,6 +6,7 @@ using ClassicUO.Configuration;
 using ClassicUO.IO.Audio;
 using Microsoft.Xna.Framework.Audio;
 using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.Managers
 {
@@ -32,15 +33,15 @@ namespace ClassicUO.Game.Managers
                 _canReproduceAudio = false;
             }
 
-            LoginMusicIndex = Client.Game.UO.Version switch
+            LoginMusicIndex = ServiceProvider.Get<UOService>().Version switch
             {
                 >= ClientVersion.CV_7000 => 78, // LoginLoop
                 > ClientVersion.CV_308Z => 0,
                 _ => 8 // stones2
             };
 
-            Client.Game.Activated += OnWindowActivated;
-            Client.Game.Deactivated += OnWindowDeactivated;
+            ServiceProvider.Get<UOService>().Activated += OnWindowActivated;
+            ServiceProvider.Get<UOService>().Deactivated += OnWindowDeactivated;
         }
 
         private void OnWindowDeactivated(object? sender, EventArgs e)
@@ -74,7 +75,7 @@ namespace ClassicUO.Game.Managers
 
             float volume = currentProfile.SoundVolume / SOUND_DELTA;
 
-            if (Client.Game.IsActive)
+            if (ServiceProvider.Get<UOService>().IsActive)
             {
                 if (!currentProfile.ReproduceSoundsInBackground)
                 {
@@ -91,12 +92,12 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            if (!currentProfile.EnableSound || !Client.Game.IsActive && !currentProfile.ReproduceSoundsInBackground)
+            if (!currentProfile.EnableSound || !ServiceProvider.Get<UOService>().IsActive && !currentProfile.ReproduceSoundsInBackground)
             {
                 volume = 0;
             }
 
-            var sound = (UOSound?) Client.Game.UO.Sounds.GetSound(index);
+            var sound = (UOSound?) ServiceProvider.Get<UOService>().Sounds.GetSound(index);
 
             if (sound != null && sound.Play(Time.Ticks, volume))
             {
@@ -139,12 +140,12 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            if (currentProfile == null || !currentProfile.EnableSound || !Client.Game.IsActive && !currentProfile.ReproduceSoundsInBackground)
+            if (currentProfile == null || !currentProfile.EnableSound || !ServiceProvider.Get<UOService>().IsActive && !currentProfile.ReproduceSoundsInBackground)
             {
                 volume = 0;
             }
 
-            var sound = (UOSound?)Client.Game.UO.Sounds.GetSound(index);
+            var sound = (UOSound?)ServiceProvider.Get<UOService>().Sounds.GetSound(index);
 
             if (sound != null && sound.Play(Time.Ticks, volume, distanceFactor))
             {
@@ -199,7 +200,7 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            var m = Client.Game.UO.Sounds.GetMusic(music);
+            var m = ServiceProvider.Get<UOService>().Sounds.GetMusic(music);
 
             if (m == null && _currentMusic[0] != null)
             {
@@ -245,7 +246,7 @@ namespace ClassicUO.Game.Managers
                     {
                         return;
                     }
-                    
+
                     var m = _currentMusic[i];
                     if (m == null)
                         return;
@@ -327,7 +328,7 @@ namespace ClassicUO.Game.Managers
             {
                 if (m != null && currentProfile != null)
                 {
-                    if (Client.Game.IsActive)
+                    if (ServiceProvider.Get<UOService>().IsActive)
                     {
                         if (!currentProfile.ReproduceSoundsInBackground)
                         {

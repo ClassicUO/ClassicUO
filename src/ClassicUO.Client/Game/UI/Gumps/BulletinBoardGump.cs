@@ -10,6 +10,7 @@ using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -191,7 +192,7 @@ namespace ClassicUO.Game.UI.Gumps
             _databox = new DataBox(0, 0, 1, 1);
             area.Add(_databox);
 
-            bool useUnicode = Client.Game.UO.Version >= ClientVersion.CV_305D;
+            bool useUnicode = ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_305D;
             byte unicodeFontIndex = 1;
             int unicodeFontHeightOffset = 0;
 
@@ -356,7 +357,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             _textBox.Height = Math.Max
             (
-                Client.Game.UO.FileManager.Fonts.GetHeightUnicode
+                ServiceProvider.Get<UOService>().FileManager.Fonts.GetHeightUnicode
                 (
                     1,
                     _textBox.Text,
@@ -395,7 +396,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             //if (!_textBox.IsDisposed && _textBox.IsChanged)
             //{
-            //    _textBox.Height = System.Math.Max(Client.Game.UO.FileManager.Fonts.GetHeightUnicode(1, _textBox.TxEntry.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 20, 40);
+            //    _textBox.Height = System.Math.Max(ServiceProvider.Get<UOService>().FileManager.Fonts.GetHeightUnicode(1, _textBox.TxEntry.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 20, 40);
 
             //    foreach (Control c in _scrollArea.Children)
             //    {
@@ -493,7 +494,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new GumpPic(0, 0, 0x1523, 0));
 
-            if (Client.Game.UO.Version >= ClientVersion.CV_305D)
+            if (ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_305D)
             {
                 Add
                 (

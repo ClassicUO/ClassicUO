@@ -8,6 +8,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Sdk.IO;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.Data
 {
@@ -211,7 +212,7 @@ namespace ClassicUO.Game.Data
         {
             //foreach (ushort graphic in CaveTiles)
             //{
-            //    ArtTexture texture = Client.Game.UO.FileManager.Arts.GetTexture(graphic);
+            //    ArtTexture texture = ServiceProvider.Get<UOService>().Arts.GetTexture(graphic);
 
             //    if (texture != null)
             //    {
@@ -219,14 +220,14 @@ namespace ClassicUO.Game.Data
             //    }
             //}
 
-            //Client.Game.UO.FileManager.Arts.CleaUnusedResources(short.MaxValue);
+            //ServiceProvider.Get<UOService>().Arts.CleaUnusedResources(short.MaxValue);
         }
 
         public static void CleanTreeTextures()
         {
             //foreach (ushort graphic in TreeTiles)
             //{
-            //    ArtTexture texture = Client.Game.UO.FileManager.Arts.GetTexture(graphic);
+            //    ArtTexture texture = ServiceProvider.Get<UOService>().Arts.GetTexture(graphic);
 
             //    if (texture != null)
             //    {
@@ -234,7 +235,7 @@ namespace ClassicUO.Game.Data
             //    }
             //}
 
-            //Client.Game.UO.FileManager.Arts.CleaUnusedResources(short.MaxValue);
+            //ServiceProvider.Get<UOService>().Arts.CleaUnusedResources(short.MaxValue);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

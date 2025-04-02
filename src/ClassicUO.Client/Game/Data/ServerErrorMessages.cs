@@ -3,6 +3,7 @@
 using System;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Resources;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.Data
 {
@@ -63,7 +64,7 @@ namespace ClassicUO.Game.Data
 
         public static string GetError(byte packetID, byte code, (int min, int max) delay = default)
         {
-            var cliloc = Client.Game.UO.FileManager.Clilocs;
+            var cliloc = ServiceProvider.Get<FileManagerService>().Clilocs;
 
             switch (packetID)
             {

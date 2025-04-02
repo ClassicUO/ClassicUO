@@ -14,6 +14,7 @@ using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 using SDL2;
 using MathHelper = ClassicUO.Renderer.MathHelper;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -167,7 +168,7 @@ namespace ClassicUO.Game.Scenes
             }
             else
             {
-                rect = Client.Game.UO.Gumps.GetGump(0x0804).UV;
+                rect = _uoService.Gumps.GetGump(0x0804).UV;
             }
 
             foreach (Mobile mobile in _world.Mobiles.Values)
@@ -432,8 +433,8 @@ namespace ClassicUO.Game.Scenes
             }
 
             if (
-                Client.Game.UO.GameCursor.ItemHold.Enabled
-                && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition
+                _uoService.GameCursor.ItemHold.Enabled
+                && !_uoService.GameCursor.ItemHold.IsFixedPosition
             )
             {
                 uint drop_container = 0xFFFF_FFFF;
@@ -462,7 +463,7 @@ namespace ClassicUO.Game.Scenes
                             && (
                                 it2.ItemData.IsSurface
                                 || it2.ItemData.IsStackable
-                                    && it2.Graphic == Client.Game.UO.GameCursor.ItemHold.Graphic
+                                    && it2.Graphic == _uoService.GameCursor.ItemHold.Graphic
                             )
                         )
                         {
@@ -484,7 +485,7 @@ namespace ClassicUO.Game.Scenes
                     }
                     else
                     {
-                        Client.Game.Audio.PlaySound(0x0051);
+                        _audioService.PlaySound(0x0051);
                     }
                 }
                 else if (gobj is Land || gobj is Static || gobj is Multi)
@@ -500,7 +501,7 @@ namespace ClassicUO.Game.Scenes
                         if (gobj is Land land) { }
                         else
                         {
-                            ref StaticTiles itemData = ref Client.Game.UO.FileManager.TileData.StaticData[
+                            ref StaticTiles itemData = ref _uoService.FileManager.TileData.StaticData[
                                 gobj.Graphic
                             ];
 
@@ -512,7 +513,7 @@ namespace ClassicUO.Game.Scenes
                     }
                     else
                     {
-                        Client.Game.Audio.PlaySound(0x0051);
+                        _audioService.PlaySound(0x0051);
                     }
                 }
 
@@ -526,7 +527,7 @@ namespace ClassicUO.Game.Scenes
                     if (can_drop)
                     {
                         GameActions.DropItem(
-                            Client.Game.UO.GameCursor.ItemHold.Serial,
+                            _uoService.GameCursor.ItemHold.Serial,
                             dropX,
                             dropY,
                             dropZ,
@@ -653,7 +654,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (string.IsNullOrEmpty(name))
                         {
-                            name = Client.Game.UO.FileManager.Clilocs.GetString(
+                            name = _uoService.FileManager.Clilocs.GetString(
                                 1020000 + st.Graphic,
                                 st.ItemData.Name
                             );
@@ -683,7 +684,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (string.IsNullOrEmpty(name))
                         {
-                            name = Client.Game.UO.FileManager.Clilocs.GetString(
+                            name = _uoService.FileManager.Clilocs.GetString(
                                 1020000 + multi.Graphic,
                                 multi.ItemData.Name
                             );
@@ -869,7 +870,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     if (obj is Static || obj is Multi || obj is Item)
                     {
-                        ref StaticTiles itemdata = ref Client.Game.UO.FileManager.TileData.StaticData[
+                        ref StaticTiles itemdata = ref _uoService.FileManager.TileData.StaticData[
                             obj.Graphic
                         ];
 
@@ -901,14 +902,6 @@ namespace ClassicUO.Game.Scenes
                         return true;
                     }
                 }
-
-                //if (SelectedObject.Object is Land || GameObjectHelper.TryGetStaticData(SelectedObject.Object as GameObject, out var itemdata) && itemdata.IsSurface)
-                //{
-                //    if (SelectedObject.Object is GameObject obj && Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
-                //    {
-
-                //    }
-                //}
             }
 
             return false;
@@ -926,7 +919,7 @@ namespace ClassicUO.Game.Scenes
                     {
                         if (mac.Code == MacroType.LookAtMouse)
                         {
-                            var camera = Client.Game.Scene?.Camera;
+                            var camera = _sceneService.Scene?.Camera;
                             if (camera == null)
                                 return false;
 
@@ -952,7 +945,7 @@ namespace ClassicUO.Game.Scenes
 
         private bool OnExtraMouseUp(MouseButtonType button)
         {
-            if (Client.Game.Scene?.Camera.PeekingToMouse ?? false)
+            if (_sceneService.Scene?.Camera.PeekingToMouse ?? false)
             {
                 var macro = _world.Macros.FindMacro(button, Keyboard.Alt, Keyboard.Ctrl, Keyboard.Shift);
 
@@ -962,11 +955,7 @@ namespace ClassicUO.Game.Scenes
                     && mac.Code == MacroType.LookAtMouse
                 )
                 {
-                    Client.Game.Scene.Camera.PeekingToMouse = Client
-                        .Game
-                        .Scene
-                        .Camera
-                        .PeekBackwards = false;
+                    _sceneService.Scene.Camera.PeekingToMouse = false;
                 }
 
                 return true;
@@ -977,17 +966,17 @@ namespace ClassicUO.Game.Scenes
 
         internal override bool OnMouseWheel(bool up)
         {
-            if (Keyboard.Ctrl && Client.Game.UO.GameCursor.ItemHold.Enabled)
+            if (Keyboard.Ctrl && _uoService.GameCursor.ItemHold.Enabled)
             {
-                if (!up && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition)
+                if (!up && !_uoService.GameCursor.ItemHold.IsFixedPosition)
                 {
-                    Client.Game.UO.GameCursor.ItemHold.IsFixedPosition = true;
-                    Client.Game.UO.GameCursor.ItemHold.IgnoreFixedPosition = true;
-                    Client.Game.UO.GameCursor.ItemHold.FixedX = Mouse.Position.X;
-                    Client.Game.UO.GameCursor.ItemHold.FixedY = Mouse.Position.Y;
+                    _uoService.GameCursor.ItemHold.IsFixedPosition = true;
+                    _uoService.GameCursor.ItemHold.IgnoreFixedPosition = true;
+                    _uoService.GameCursor.ItemHold.FixedX = Mouse.Position.X;
+                    _uoService.GameCursor.ItemHold.FixedY = Mouse.Position.Y;
                 }
 
-                if (Client.Game.UO.GameCursor.ItemHold.IgnoreFixedPosition)
+                if (_uoService.GameCursor.ItemHold.IgnoreFixedPosition)
                 {
                     return true;
                 }
@@ -1039,12 +1028,12 @@ namespace ClassicUO.Game.Scenes
 
             bool ok = true;
 
-            if (Mouse.LButtonPressed && !Client.Game.UO.GameCursor.ItemHold.Enabled)
+            if (Mouse.LButtonPressed && !_uoService.GameCursor.ItemHold.Enabled)
             {
                 Point offset = Mouse.LDragOffset;
 
                 if (
-                    !Client.Game.UO.GameCursor.IsDraggingCursorForced
+                    !_uoService.GameCursor.IsDraggingCursorForced
                     && // don't trigger "sallos ez grab" when dragging wmap or skill
                     !_isSelectionActive
                     && // and ofc when selection is enabled
@@ -1102,7 +1091,7 @@ namespace ClassicUO.Game.Scenes
                             }
                             else
                             {
-                                var bounds = Client.Game.UO.Gumps.GetGump(0x0804).UV;
+                                var bounds = _uoService.Gumps.GetGump(0x0804).UV;
 
                                 UIManager.Add(
                                     customgump = new HealthBarGump(_world, obj)
@@ -1272,7 +1261,7 @@ namespace ClassicUO.Game.Scenes
                     {
                         if (mac.Code == MacroType.LookAtMouse)
                         {
-                            var camera = Client.Game.Scene?.Camera;
+                            var camera = _sceneService.Scene?.Camera;
                             if (camera != null)
                             {
                                 camera.PeekingToMouse = true;
@@ -1387,7 +1376,7 @@ namespace ClassicUO.Game.Scenes
                 Camera.Zoom = ProfileManager.CurrentProfile.DefaultScale;
             }
 
-            if (_flags[4] || Client.Game.Scene.Camera.PeekingToMouse)
+            if (_flags[4] || _sceneService.Scene.Camera.PeekingToMouse)
             {
                 var macro = _world.Macros.FindMacro(
                     e.keysym.sym,
@@ -1402,11 +1391,7 @@ namespace ClassicUO.Game.Scenes
                     {
                         if (mac.Code == MacroType.LookAtMouse)
                         {
-                            Client.Game.Scene.Camera.PeekingToMouse = Client
-                                .Game
-                                .Scene
-                                .Camera
-                                .PeekBackwards = false;
+                            _sceneService.Scene.Camera.PeekingToMouse = false;
                         }
                         else if (mac.Code == MacroType.Walk)
                         {
@@ -1532,6 +1517,429 @@ namespace ClassicUO.Game.Scenes
             _world.Macros.WaitingBandageTarget = false;
             _world.Macros.WaitForTargetTimer = 0;
             _world.Macros.Update();
+        }
+
+        private void HandleMouseInput()
+        {
+            // Ottimizzazione: utilizzo di variabili locali per i servizi
+            var uoService = ServiceProvider.Get<UOService>();
+            var audioService = ServiceProvider.Get<AudioService>();
+            var sceneService = ServiceProvider.Get<SceneService>();
+
+            if ((_rightMousePressed || _continueRunning) && _world.InGame) // && !Pathfinder.AutoWalking)
+            {
+                if (_world.Player.Pathfinder.AutoWalking)
+                {
+                    _world.Player.Pathfinder.StopAutoWalk();
+                }
+
+                int x = Camera.Bounds.X + (Camera.Bounds.Width >> 1);
+                int y = Camera.Bounds.Y + (Camera.Bounds.Height >> 1);
+
+                Direction direction = (Direction)
+                    GameCursor.GetMouseDirection(x, y, Mouse.Position.X, Mouse.Position.Y, 1);
+
+                double mouseRange = MathHelper.Hypotenuse(
+                    x - Mouse.Position.X,
+                    y - Mouse.Position.Y
+                );
+
+                Direction facing = direction;
+
+                if (facing == Direction.North)
+                {
+                    facing = (Direction)8;
+                }
+
+                bool run = mouseRange >= 190;
+
+                if (_world.Player.IsDrivingBoat)
+                {
+                    if (!_boatIsMoving || _boatRun != run || _lastBoatDirection != facing - 1)
+                    {
+                        _boatRun = run;
+                        _lastBoatDirection = facing - 1;
+                        _boatIsMoving = true;
+
+                        _world.BoatMovingManager.MoveRequest(facing - 1, (byte)(run ? 2 : 1));
+                    }
+                }
+                else
+                {
+                    _world.Player.Walk(facing - 1, run);
+                }
+            }
+
+            if (!UIManager.IsMouseOverWorld)
+            {
+                return;
+            }
+
+            if (_world.CustomHouseManager != null)
+            {
+                _isMouseLeftDown = true;
+
+                if (
+                    _world.TargetManager.IsTargeting
+                    && _world.TargetManager.TargetingState == CursorTarget.MultiPlacement
+                    && (
+                        _world.CustomHouseManager.SelectedGraphic != 0
+                        || _world.CustomHouseManager.Erasing
+                        || _world.CustomHouseManager.SeekTile
+                    )
+                    && SelectedObject.Object is GameObject obj
+                )
+                {
+                    _world.CustomHouseManager.OnTargetWorld(obj);
+                    _lastSelectedMultiPositionInHouseCustomization.X = obj.X;
+                    _lastSelectedMultiPositionInHouseCustomization.Y = obj.Y;
+                }
+            }
+            else
+            {
+                SelectedObject.LastLeftDownObject = SelectedObject.Object;
+
+                if (ProfileManager.CurrentProfile.EnableDragSelect && DragSelectModifierActive())
+                {
+                    if (CanDragSelectOnObject(SelectedObject.Object as GameObject))
+                    {
+                        _selectionStart = Mouse.Position;
+                        _isSelectionActive = true;
+                    }
+                }
+                else
+                {
+                    _isMouseLeftDown = true;
+                    _holdMouse2secOverItemTime = Time.Ticks;
+                }
+            }
+
+            if (UIManager.SystemChat != null && !UIManager.SystemChat.IsFocused)
+            {
+                UIManager.KeyboardFocusControl = null;
+                UIManager.SystemChat.SetFocus();
+            }
+
+            if (!ProfileManager.CurrentProfile.DisableAutoMove && _rightMousePressed)
+            {
+                _continueRunning = true;
+            }
+
+            var lastObj = SelectedObject.Object;
+            SelectedObject.LastLeftDownObject = null;
+
+            if (UIManager.IsDragging)
+            {
+                return;
+            }
+
+            if (
+                uoService.GameCursor.ItemHold.Enabled
+                && !uoService.GameCursor.ItemHold.IsFixedPosition
+            )
+            {
+                uint drop_container = 0xFFFF_FFFF;
+                bool can_drop = false;
+                ushort dropX = 0;
+                ushort dropY = 0;
+                sbyte dropZ = 0;
+
+                var gobj = SelectedObject.Object as GameObject;
+
+                if (gobj is Entity obj)
+                {
+                    can_drop = obj.Distance <= Constants.DRAG_ITEMS_DISTANCE;
+
+                    if (can_drop)
+                    {
+                        if (obj is Item it && it.ItemData.IsContainer || obj is Mobile)
+                        {
+                            dropX = 0xFFFF;
+                            dropY = 0xFFFF;
+                            dropZ = 0;
+                            drop_container = obj.Serial;
+                        }
+                        else if (
+                            obj is Item it2
+                            && (
+                                it2.ItemData.IsSurface
+                                || it2.ItemData.IsStackable
+                                    && it2.Graphic == uoService.GameCursor.ItemHold.Graphic
+                            )
+                        )
+                        {
+                            dropX = obj.X;
+                            dropY = obj.Y;
+                            dropZ = obj.Z;
+
+                            if (it2.ItemData.IsSurface)
+                            {
+                                dropZ += (sbyte)(
+                                    it2.ItemData.Height == 0xFF ? 0 : it2.ItemData.Height
+                                );
+                            }
+                            else
+                            {
+                                drop_container = obj.Serial;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        audioService.PlaySound(0x0051);
+                    }
+                }
+                else if (gobj is Land || gobj is Static || gobj is Multi)
+                {
+                    can_drop = gobj.Distance <= Constants.DRAG_ITEMS_DISTANCE;
+
+                    if (can_drop)
+                    {
+                        dropX = gobj.X;
+                        dropY = gobj.Y;
+                        dropZ = gobj.Z;
+
+                        if (gobj is Land land) { }
+                        else
+                        {
+                            ref StaticTiles itemData = ref uoService.FileManager.TileData.StaticData[
+                                gobj.Graphic
+                            ];
+
+                            if (itemData.IsSurface)
+                            {
+                                dropZ += (sbyte)(itemData.Height == 0xFF ? 0 : itemData.Height);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        audioService.PlaySound(0x0051);
+                    }
+                }
+
+                if (can_drop)
+                {
+                    if (drop_container == 0xFFFF_FFFF && dropX == 0 && dropY == 0)
+                    {
+                        can_drop = false;
+                    }
+
+                    if (can_drop)
+                    {
+                        GameActions.DropItem(
+                            uoService.GameCursor.ItemHold.Serial,
+                            dropX,
+                            dropY,
+                            dropZ,
+                            drop_container
+                        );
+                    }
+                }
+            }
+            else if (_world.TargetManager.IsTargeting)
+            {
+                switch (_world.TargetManager.TargetingState)
+                {
+                    case CursorTarget.Grab:
+                    case CursorTarget.SetGrabBag:
+                    case CursorTarget.Position:
+                    case CursorTarget.Object:
+                    case CursorTarget.MultiPlacement when _world.CustomHouseManager == null:
+
+                        {
+                            var obj = lastObj;
+
+                            if (obj is TextObject ov)
+                            {
+                                obj = ov.Owner;
+                            }
+
+                            switch (obj)
+                            {
+                                case Entity ent:
+                                    _world.TargetManager.Target(ent.Serial);
+
+                                    break;
+
+                                case Land land:
+                                    _world.TargetManager.Target(
+                                        0,
+                                        land.X,
+                                        land.Y,
+                                        land.Z,
+                                        land.TileData.IsWet
+                                    );
+
+                                    break;
+
+                                case GameObject o:
+                                    _world.TargetManager.Target(o.Graphic, o.X, o.Y, o.Z);
+
+                                    break;
+                            }
+                        }
+
+                        Mouse.LastLeftButtonClickTime = 0;
+
+                        break;
+
+                    case CursorTarget.SetTargetClientSide:
+
+                        {
+                            var obj = lastObj;
+
+                            if (obj is TextObject ov)
+                            {
+                                obj = ov.Owner;
+                            }
+                            else if (obj is GameEffect eff && eff.Source != null)
+                            {
+                                obj = eff.Source;
+                            }
+
+                            switch (obj)
+                            {
+                                case Entity ent:
+                                    _world.TargetManager.Target(ent.Serial);
+                                    UIManager.Add(new InspectorGump(_world, ent));
+
+                                    break;
+
+                                case Land land:
+                                    _world.TargetManager.Target(0, land.X, land.Y, land.Z);
+                                    UIManager.Add(new InspectorGump(_world, land));
+
+                                    break;
+
+                                case GameObject o:
+                                    _world.TargetManager.Target(o.Graphic, o.X, o.Y, o.Z);
+                                    UIManager.Add(new InspectorGump(_world, o));
+
+                                    break;
+                            }
+
+                            Mouse.LastLeftButtonClickTime = 0;
+                        }
+
+                        break;
+
+                    case CursorTarget.HueCommandTarget:
+
+                        if (SelectedObject.Object is Entity selectedEntity)
+                        {
+                            _world.CommandManager.OnHueTarget(selectedEntity);
+                        }
+
+                        break;
+                    case CursorTarget.IgnorePlayerTarget:
+                        if (SelectedObject.Object is Entity pmEntity)
+                        {
+                            _world.IgnoreManager.AddIgnoredTarget(pmEntity);
+                        }
+                        _world.TargetManager.CancelTarget();
+                        break;
+                }
+            }
+            else
+            {
+                var obj = lastObj as GameObject;
+
+                switch (obj)
+                {
+                    case Static st:
+                        string name = StringHelper.GetPluralAdjustedString(
+                            st.Name,
+                            st.ItemData.Count > 1
+                        );
+
+                        if (string.IsNullOrEmpty(name))
+                        {
+                            name = uoService.FileManager.Clilocs.GetString(
+                                1020000 + st.Graphic,
+                                st.ItemData.Name
+                            );
+                        }
+
+                        _world.MessageManager.HandleMessage(
+                            null,
+                            name,
+                            string.Empty,
+                            0x03b2,
+                            MessageType.Label,
+                            3,
+                            TextType.CLIENT
+                        );
+
+                        obj.AddMessage(MessageType.Label, name, 3, 0x03b2, false, TextType.CLIENT);
+
+                        if (obj.TextContainer != null && obj.TextContainer.MaxSize != 1)
+                        {
+                            obj.TextContainer.MaxSize = 1;
+                        }
+
+                        break;
+
+                    case Multi multi:
+                        name = multi.Name;
+
+                        if (string.IsNullOrEmpty(name))
+                        {
+                            name = uoService.FileManager.Clilocs.GetString(
+                                1020000 + multi.Graphic,
+                                multi.ItemData.Name
+                            );
+                        }
+
+                        _world.MessageManager.HandleMessage(
+                            null,
+                            name,
+                            string.Empty,
+                            0x03b2,
+                            MessageType.Label,
+                            3,
+                            TextType.CLIENT
+                        );
+
+                        obj.AddMessage(MessageType.Label, name, 3, 0x03b2, false, TextType.CLIENT);
+
+                        if (obj.TextContainer != null && obj.TextContainer.MaxSize == 5)
+                        {
+                            obj.TextContainer.MaxSize = 1;
+                        }
+
+                        break;
+
+                    case Entity ent:
+
+                        if (Keyboard.Alt && ent is Mobile)
+                        {
+                            _world.MessageManager.HandleMessage(
+                                _world.Player,
+                                ResGeneral.NowFollowing,
+                                string.Empty,
+                                0,
+                                MessageType.Regular,
+                                3,
+                                TextType.CLIENT
+                            );
+
+                            _followingMode = true;
+                            _followingTarget = ent;
+                        }
+                        else if (!_world.DelayedObjectClickManager.IsEnabled)
+                        {
+                            _world.DelayedObjectClickManager.Set(
+                                ent.Serial,
+                                Mouse.Position.X,
+                                Mouse.Position.Y,
+                                Time.Ticks + Mouse.MOUSE_DELAY_DOUBLE_CLICK
+                            );
+                        }
+
+                        break;
+                }
+            }
         }
     }
 }

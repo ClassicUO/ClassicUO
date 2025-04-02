@@ -7,6 +7,7 @@ using ClassicUO.Collections;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Network;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.Managers
 {
@@ -225,7 +226,7 @@ namespace ClassicUO.Game.Managers
                     }
 
                     bool drift = step.MovingDir != step.FacingDir;
-                    int maxDelay = step.TimeDiff /*- (int) Client.Game.FrameDelay[1]*/;
+                    int maxDelay = step.TimeDiff /*- (int) ServiceProvider.Get<UOService>().FrameDelay[1]*/;
 
                     int delay = (int) Time.Ticks - (int) item.LastStepTime;
                     bool removeStep = delay >= maxDelay;

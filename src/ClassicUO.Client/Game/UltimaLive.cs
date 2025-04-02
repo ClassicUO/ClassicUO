@@ -14,6 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ClassicUO.Sdk.IO;
 using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game
 {
@@ -87,8 +88,8 @@ namespace ClassicUO.Game
                         return;
                     }
 
-                    int mapWidthInBlocks = Client.Game.UO.FileManager.Maps.MapBlocksSize[mapId, 0];
-                    int mapHeightInBlocks = Client.Game.UO.FileManager.Maps.MapBlocksSize[mapId, 1];
+                    int mapWidthInBlocks = ServiceProvider.Get<UOService>().FileManager.Maps.MapBlocksSize[mapId, 0];
+                    int mapHeightInBlocks = ServiceProvider.Get<UOService>().FileManager.Maps.MapBlocksSize[mapId, 1];
                     int blocks = mapWidthInBlocks * mapHeightInBlocks;
 
                     if (block < 0 || block >= blocks)
@@ -210,7 +211,7 @@ namespace ClassicUO.Game
                     p.Buffer.Slice(p.Position, totalLength).CopyTo(staticsData);
 
 
-                    if (block >= 0 && block < Client.Game.UO.FileManager.Maps.MapBlocksSize[mapId, 0] * Client.Game.UO.FileManager.Maps.MapBlocksSize[mapId, 1])
+                    if (block >= 0 && block < ServiceProvider.Get<UOService>().FileManager.Maps.MapBlocksSize[mapId, 0] * ServiceProvider.Get<UOService>().FileManager.Maps.MapBlocksSize[mapId, 1])
                     {
                         int index = block * 12;
 
@@ -361,9 +362,9 @@ namespace ClassicUO.Game
                         int mapNumber = p.ReadUInt8();
                         validMaps.Add(mapNumber);
 
-                        _UL.MapSizeWrapSize[mapNumber, 0] = Math.Min((ushort) Client.Game.UO.FileManager.Maps.MapsDefaultSize[0, 0], p.ReadUInt16BE());
+                        _UL.MapSizeWrapSize[mapNumber, 0] = Math.Min((ushort) ServiceProvider.Get<UOService>().FileManager.Maps.MapsDefaultSize[0, 0], p.ReadUInt16BE());
 
-                        _UL.MapSizeWrapSize[mapNumber, 1] = Math.Min((ushort) Client.Game.UO.FileManager.Maps.MapsDefaultSize[0, 1], p.ReadUInt16BE());
+                        _UL.MapSizeWrapSize[mapNumber, 1] = Math.Min((ushort) ServiceProvider.Get<UOService>().FileManager.Maps.MapsDefaultSize[0, 1], p.ReadUInt16BE());
 
                         _UL.MapSizeWrapSize[mapNumber, 2] = Math.Min(p.ReadUInt16BE(), _UL.MapSizeWrapSize[mapNumber, 0]);
                         _UL.MapSizeWrapSize[mapNumber, 3] = Math.Min(p.ReadUInt16BE(), _UL.MapSizeWrapSize[mapNumber, 1]);
@@ -373,7 +374,7 @@ namespace ClassicUO.Game
                     if (_UL._ValidMaps.Count == 0 || validMaps.Count > _UL._ValidMaps.Count || !validMaps.TrueForAll(i => _UL._ValidMaps.Contains(i)))
                     {
                         _UL._ValidMaps = validMaps;
-                        var mapLoader = new ULMapLoader(Client.Game.UO.FileManager, (uint)sbyte.MaxValue);
+                        var mapLoader = new ULMapLoader(ServiceProvider.Get<UOService>().FileManager, (uint)sbyte.MaxValue);
 
                         //for (int i = 0; i < maps; i++)
                         for (int i = 0; i < validMaps.Count; i++)
@@ -460,8 +461,8 @@ namespace ClassicUO.Game
                 return;
             }
 
-            ushort mapWidthInBlocks = (ushort) Client.Game.UO.FileManager.Maps.MapBlocksSize[mapId, 0];
-            ushort mapHeightInBlocks = (ushort) Client.Game.UO.FileManager.Maps.MapBlocksSize[mapId, 1];
+            ushort mapWidthInBlocks = (ushort) ServiceProvider.Get<UOService>().FileManager.Maps.MapBlocksSize[mapId, 0];
+            ushort mapHeightInBlocks = (ushort) ServiceProvider.Get<UOService>().FileManager.Maps.MapBlocksSize[mapId, 1];
 
             if (block >= 0 && block < mapWidthInBlocks * mapHeightInBlocks)
             {
@@ -655,7 +656,7 @@ namespace ClassicUO.Game
             public override void Dispose()
             {
                 base.Dispose();
-                Client.Game.UO.FileManager.Maps.Dispose();
+                ServiceProvider.Get<UOService>().FileManager.Maps.Dispose();
             }
         }
 
@@ -674,7 +675,7 @@ namespace ClassicUO.Game
 
         //     public override void Dispose()
         //     {
-        //         Client.Game.UO.FileManager.Maps.Dispose();
+        //         ServiceProvider.Get<UOService>().FileManager.Maps.Dispose();
         //     }
 
         //     public void WriteArray(long position, byte[] array)
@@ -751,13 +752,13 @@ namespace ClassicUO.Game
 
             public override void Load()
             {
-                if (Client.Game.UO.FileManager.Maps is ULMapLoader)
+                if (ServiceProvider.Get<UOService>().FileManager.Maps is ULMapLoader)
                 {
                     return;
                 }
 
-                Client.Game.UO.FileManager.Maps?.Dispose();
-                Client.Game.UO.FileManager.Maps = this;
+                ServiceProvider.Get<UOService>().FileManager.Maps?.Dispose();
+                ServiceProvider.Get<UOService>().FileManager.Maps = this;
 
                 _UL._EOF = new uint[NumMaps];
                 _filesStaticsStream = new FileStream[NumMaps];

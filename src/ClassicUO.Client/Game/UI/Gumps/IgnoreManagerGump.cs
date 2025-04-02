@@ -7,6 +7,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -17,7 +18,7 @@ namespace ClassicUO.Game.UI.Gumps
         private const ushort GUMP_WIDTH = 300;
         private const ushort GUMP_HEIGHT = 400;
 
-        private readonly int _gumpPosX = Client.Game.Scene.Camera.Bounds.Width / 2 - 125;
+        private readonly int _gumpPosX = ServiceProvider.Get<SceneService>().Camera.Bounds.Width / 2 - 125;
         private readonly int _gumpPosY = 100;
 
         private static ScrollArea _scrollArea;

@@ -6,6 +6,7 @@ using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -27,7 +28,7 @@ namespace ClassicUO.Game.GameObjects
             Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue, false, 1);
             hueVec.Y = hueVec.X > 1.0f ? ShaderHueTranslator.SHADER_LIGHTS : ShaderHueTranslator.SHADER_NONE;
 
-            ref var index = ref Client.Game.UO.FileManager.Gumps.File.GetValidRefEntry(AnimationGraphic);
+            ref var index = ref ServiceProvider.Get<UOService>().FileManager.Gumps.File.GetValidRefEntry(AnimationGraphic);
 
             posX -= index.Width >> 1;
             posY -= index.Height;

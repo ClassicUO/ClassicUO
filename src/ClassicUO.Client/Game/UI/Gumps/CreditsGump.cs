@@ -7,6 +7,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -26,7 +27,7 @@ In order to run this client you'll need to legally obtain a
 copy of the Ultima Online Classic Client.
 
 Using a custom client to connect to official UO servers is
-strictly forbidden. 
+strictly forbidden.
 We do not assume any responsibility of the usage of this client.
 
 
@@ -41,7 +42,7 @@ Ultima Online(R) 2021 Electronic Arts Inc. All Rights Reserved.
 
         public CreditsGump(World world) : base(world, 0, 0)
         {
-            Client.Game.Audio.PlayMusic(8, false, true);
+            ServiceProvider.Get<AudioService>().PlayMusic(8, false, true);
 
             LayerOrder = UILayer.Over;
             CanCloseWithRightClick = true;

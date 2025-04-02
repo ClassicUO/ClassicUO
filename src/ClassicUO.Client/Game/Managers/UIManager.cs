@@ -7,6 +7,7 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.Managers
 {
@@ -14,7 +15,8 @@ namespace ClassicUO.Game.Managers
     {
         private static readonly Dictionary<uint, Point> _gumpPositionCache = new Dictionary<uint, Point>();
         private static readonly Control?[] _mouseDownControls = new Control[0xFF];
-
+        private static readonly UOService _uoService = ServiceProvider.Get<UOService>();
+        private static readonly SceneService _sceneService = ServiceProvider.Get<SceneService>();
 
         //private static readonly Dictionary<uint, TargetLineGump> _targetLineGumps = new Dictionary<uint, TargetLineGump>();
         private static Point _dragOrigin;
@@ -41,11 +43,11 @@ namespace ClassicUO.Game.Managers
                 Profile profile = ProfileManager.CurrentProfile;
 
                 return profile != null &&
-                    Client.Game.UO.GameCursor.AllowDrawSDLCursor &&
+                    _uoService.GameCursor.AllowDrawSDLCursor &&
                     DraggingControl == null &&
                     MouseOverControl == null &&
                     !IsModalOpen &&
-                    (Client.Game.Scene?.Camera.Bounds.Contains(mouse) ?? false);
+                    (_sceneService.Scene?.Camera.Bounds.Contains(mouse) ?? false);
             }
         }
 
@@ -182,7 +184,7 @@ namespace ClassicUO.Game.Managers
 
             if (MouseOverControl != null)
             {
-                if (mouseOverControl != null && MouseOverControl == mouseOverControl || Client.Game.UO.GameCursor.ItemHold.Enabled)
+                if (mouseOverControl != null && MouseOverControl == mouseOverControl || _uoService.GameCursor.ItemHold.Enabled)
                 {
                     MouseOverControl.InvokeMouseUp(Mouse.Position, button);
                 }
@@ -222,7 +224,7 @@ namespace ClassicUO.Game.Managers
                 {
                     if (button == MouseButtonType.Left)
                     {
-                        Client.Game.UO.World.DelayedObjectClickManager.Clear();
+                        _uoService.World.DelayedObjectClickManager.Clear();
                     }
 
                     return true;
@@ -595,7 +597,7 @@ namespace ClassicUO.Game.Managers
 
         public static void AttemptDragControl(Control control, bool attemptAlwaysSuccessful = false)
         {
-            if ((_isDraggingControl && !attemptAlwaysSuccessful) || Client.Game.UO.GameCursor.ItemHold.Enabled && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition)
+            if ((_isDraggingControl && !attemptAlwaysSuccessful) || _uoService.GameCursor.ItemHold.Enabled && !_uoService.GameCursor.ItemHold.IsFixedPosition)
             {
                 return;
             }

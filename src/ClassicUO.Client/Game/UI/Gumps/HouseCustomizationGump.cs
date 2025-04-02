@@ -12,6 +12,7 @@ using ClassicUO.Network;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -644,7 +645,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _textFixtures.Text = _customHouseManager.Fixtures.ToString();
 
-            string tooltip = Client.Game.UO.FileManager.Clilocs.Translate(
+            string tooltip = ServiceProvider.Get<UOService>().FileManager.Clilocs.Translate(
                 1061039,
                 $"{_customHouseManager.MaxComponets}\t{_customHouseManager.MaxFixtures}",
                 true
@@ -770,7 +771,7 @@ namespace ClassicUO.Game.UI.Gumps
                         continue;
                     }
 
-                    ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt((uint)vec[0].East1);
+                    ref readonly var artInfo = ref ServiceProvider.Get<UOService>().Arts.GetArt((uint)vec[0].East1);
 
                     int offsetX = x + 121 + (48 - artInfo.UV.Width) / 2;
                     int offsetY = y + 36;
@@ -830,7 +831,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (graphic != 0)
                         {
-                            ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(graphic);
+                            ref readonly var artInfo = ref ServiceProvider.Get<UOService>().Arts.GetArt(graphic);
 
                             int offsetX = x + 130 + (48 - artInfo.UV.Width) / 2;
                             int offsetY = y + 36 + (120 - artInfo.UV.Height) / 2;
@@ -932,7 +933,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (graphic != 0)
                     {
-                        ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(graphic);
+                        ref readonly var artInfo = ref ServiceProvider.Get<UOService>().Arts.GetArt(graphic);
 
                         int offsetX = x + 138 + (48 - artInfo.UV.Width) / 2;
 
@@ -1077,7 +1078,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (graphic != 0)
                         {
-                            ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(graphic);
+                            ref readonly var artInfo = ref ServiceProvider.Get<UOService>().Arts.GetArt(graphic);
 
                             int offsetX = x + 123 + (48 - artInfo.UV.Width) / 2;
                             int offsetY = y + 36 + (60 - artInfo.UV.Height) / 2;
@@ -1128,7 +1129,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _dataBox.Add(new ScissorControl(true, 121, 36 + y, 384, 60));
 
                     Label text = new Label(
-                        Client.Game.UO.FileManager.Clilocs.GetString(1062113 + j),
+                        ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(1062113 + j),
                         true,
                         0xFFFF,
                         90,
@@ -1151,7 +1152,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (graphic != 0)
                         {
-                            ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(graphic);
+                            ref readonly var artInfo = ref ServiceProvider.Get<UOService>().Arts.GetArt(graphic);
 
                             int offsetX = x + 123 + (48 - artInfo.UV.Width) / 2;
                             int offsetY = y + 36 + (60 - artInfo.UV.Height) / 2;
@@ -1212,7 +1213,7 @@ namespace ClassicUO.Game.UI.Gumps
                         continue;
                     }
 
-                    ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt((uint)vec[0].NSCrosspiece);
+                    ref readonly var artInfo = ref ServiceProvider.Get<UOService>().Arts.GetArt((uint)vec[0].NSCrosspiece);
 
                     int offsetX = x + 121 + (48 - artInfo.UV.Width) / 2;
                     int offsetY = y + 36;
@@ -1277,7 +1278,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (graphic != 0)
                             {
-                                ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(graphic);
+                                ref readonly var artInfo = ref ServiceProvider.Get<UOService>().Arts.GetArt(graphic);
 
                                 int offsetX = x + 130 + (48 - artInfo.UV.Width) / 2;
                                 int offsetY = y + 44 + (60 - artInfo.UV.Height) / 2;
@@ -1398,7 +1399,7 @@ namespace ClassicUO.Game.UI.Gumps
                         continue;
                     }
 
-                    ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt((uint)vec[0].Piece5);
+                    ref readonly var artInfo = ref ServiceProvider.Get<UOService>().Arts.GetArt((uint)vec[0].Piece5);
 
                     int offsetX = x + 121 + (48 - artInfo.UV.Width) / 2;
                     int offsetY = y + 36;
@@ -1459,7 +1460,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (graphic != 0)
                         {
-                            ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(graphic);
+                            ref readonly var artInfo = ref ServiceProvider.Get<UOService>().Arts.GetArt(graphic);
 
                             int offsetX = x + 130 + (48 - artInfo.UV.Width) / 2;
                             int offsetY = y + 44 + (120 - artInfo.UV.Height) / 2;

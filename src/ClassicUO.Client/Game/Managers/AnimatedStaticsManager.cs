@@ -5,6 +5,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Sdk.Assets;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.Managers
 {
@@ -16,7 +17,7 @@ namespace ClassicUO.Game.Managers
 
         public unsafe void Initialize()
         {
-            var file = Client.Game.UO.FileManager.AnimData.AnimDataFile;
+            var file = ServiceProvider.Get<UOService>().FileManager.AnimData.AnimDataFile;
 
             if (file == null)
             {
@@ -25,9 +26,9 @@ namespace ClassicUO.Game.Managers
 
             uint lastaddr = (uint)(file.Length - sizeof(AnimDataFrame));
 
-            for (int i = 0; i < Client.Game.UO.FileManager.TileData.StaticData.Length; i++)
+            for (int i = 0; i < ServiceProvider.Get<UOService>().FileManager.TileData.StaticData.Length; i++)
             {
-                if (Client.Game.UO.FileManager.TileData.StaticData[i].IsAnimated)
+                if (ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[i].IsAnimated)
                 {
                     uint addr = (uint)(i * 68 + 4 * (i / 8 + 1));
 
@@ -53,7 +54,7 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            var file = Client.Game.UO.FileManager.AnimData.AnimDataFile;
+            var file = ServiceProvider.Get<UOService>().FileManager.AnimData.AnimDataFile;
 
             if (file == null)
             {
@@ -65,7 +66,7 @@ namespace ClassicUO.Game.Managers
             uint delay = Constants.ITEM_EFFECT_ANIMATION_DELAY * 2;
             uint next_time = Time.Ticks + 250;
             bool no_animated_field = ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.FieldsType != 0;
-            var static_data = Client.Game.UO.FileManager.Arts.File.Entries;
+            var static_data = ServiceProvider.Get<UOService>().FileManager.Arts.File.Entries;
 
             foreach (ref var o in CollectionsMarshal.AsSpan(_staticInfos))
             {

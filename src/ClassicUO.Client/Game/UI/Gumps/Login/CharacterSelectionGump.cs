@@ -12,6 +12,7 @@ using ClassicUO.Sdk.Assets;
 using ClassicUO.Resources;
 using SDL2;
 using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {
@@ -30,7 +31,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             int yBonus = 0;
             int listTitleY = 106;
 
-            var loginScene = Client.Game.GetScene<LoginScene>();
+            var loginScene = ServiceProvider.Get<GameService>().GetScene<LoginScene>();
 
             string lastCharName = LastCharacterManager.GetLastCharacter(LoginScene.Account, World.ServerName);
             var lastSelected = loginScene.Characters.FirstOrDefault(o => o == lastCharName);
@@ -38,7 +39,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             LockedFeatureFlags f = World.ClientLockedFeatures.Flags;
             CharacterListFlags ff = World.ClientFeatures.Flags;
 
-            if (Client.Game.UO.Version >= ClientVersion.CV_6040 || Client.Game.UO.Version >= ClientVersion.CV_5020 && loginScene.Characters.Count > 5)
+            if (ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_6040 || ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_5020 && loginScene.Characters.Count > 5)
             {
                 listTitleY = 96;
                 yOffset = 125;
@@ -73,7 +74,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             Add
             (
-                new Label(Client.Game.UO.FileManager.Clilocs.GetString(3000050, "Character Selection"), unicode, hue, font: font)
+                new Label(ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(3000050, "Character Selection"), unicode, hue, font: font)
                 {
                     X = 267, Y = listTitleY
                 },
@@ -186,7 +187,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         public override void OnButtonClick(int buttonID)
         {
-            var loginScene = Client.Game.GetScene<LoginScene>();
+            var loginScene = ServiceProvider.Get<GameService>().GetScene<LoginScene>();
             if (loginScene == null)
                 return;
 
@@ -267,7 +268,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         private void LoginCharacter(uint index)
         {
-            var loginScene = Client.Game.GetScene<LoginScene>();
+            var loginScene = ServiceProvider.Get<GameService>().GetScene<LoginScene>();
 
             if (loginScene != null && index < loginScene.Characters.Count && !string.IsNullOrEmpty(loginScene.Characters[(int)index]))
             {

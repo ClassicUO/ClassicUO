@@ -5,6 +5,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Network;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -178,7 +179,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             _textBox.Height = Math.Max
             (
-                Client.Game.UO.FileManager.Fonts.GetHeightUnicode
+                ServiceProvider.Get<UOService>().FileManager.Fonts.GetHeightUnicode
                 (
                     1,
                     _textBox.Text,

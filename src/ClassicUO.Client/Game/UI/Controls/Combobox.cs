@@ -8,6 +8,8 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -118,9 +120,9 @@ namespace ClassicUO.Game.UI.Controls
             {
                 comboY = 0;
             }
-            else if (comboY + _maxHeight > Client.Game.Window.ClientBounds.Height)
+            else if (comboY + _maxHeight > ServiceProvider.Get<WindowService>().ClientBounds.Height)
             {
-                comboY = Client.Game.Window.ClientBounds.Height - _maxHeight;
+                comboY = ServiceProvider.Get<WindowService>().ClientBounds.Height - _maxHeight;
             }
 
             UIManager.Add

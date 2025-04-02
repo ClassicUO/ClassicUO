@@ -9,6 +9,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Sdk;
 using SDL2;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Platforms
 {
@@ -30,8 +31,8 @@ namespace ClassicUO.Platforms
 
             try
             {
-                if (Client.Game?.Window != null)
-                    _customWindow = new CustomWindow(Client.Game.Window.Handle, world, "UOASSIST-TP-MSG-WND");
+                if (ServiceProvider.Get<WindowService>().Handle != null)
+                    _customWindow = new CustomWindow(ServiceProvider.Get<WindowService>().Handle, world, "UOASSIST-TP-MSG-WND");
             }
             catch
             { }

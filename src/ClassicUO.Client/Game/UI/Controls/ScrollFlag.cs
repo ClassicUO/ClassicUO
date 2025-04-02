@@ -5,6 +5,7 @@ using ClassicUO.Input;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -30,7 +31,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             AcceptMouseInput = true;
 
-            ref readonly var gumpInfoFlag = ref Client.Game.UO.Gumps.GetGump(BUTTON_FLAG);
+            ref readonly var gumpInfoFlag = ref ServiceProvider.Get<UOService>().Self.Gumps.GetGump(BUTTON_FLAG);
 
             if (gumpInfoFlag.Texture == null)
             {
@@ -39,8 +40,8 @@ namespace ClassicUO.Game.UI.Controls
                 return;
             }
 
-            ref readonly var gumpInfoUp = ref Client.Game.UO.Gumps.GetGump(BUTTON_UP);
-            ref readonly var gumpInfoDown = ref Client.Game.UO.Gumps.GetGump(BUTTON_DOWN);
+            ref readonly var gumpInfoUp = ref ServiceProvider.Get<UOService>().Self.Gumps.GetGump(BUTTON_UP);
+            ref readonly var gumpInfoDown = ref ServiceProvider.Get<UOService>().Self.Gumps.GetGump(BUTTON_DOWN);
 
             Width = gumpInfoFlag.UV.Width;
             Height = gumpInfoFlag.UV.Height;
@@ -62,9 +63,9 @@ namespace ClassicUO.Game.UI.Controls
         {
             var hueVector = ShaderHueTranslator.GetHueVector(0);
 
-            ref readonly var gumpInfoFlag = ref Client.Game.UO.Gumps.GetGump(BUTTON_FLAG);
-            ref readonly var gumpInfoUp = ref Client.Game.UO.Gumps.GetGump(BUTTON_UP);
-            ref readonly var gumpInfoDown = ref Client.Game.UO.Gumps.GetGump(BUTTON_DOWN);
+            ref readonly var gumpInfoFlag = ref ServiceProvider.Get<UOService>().Self.Gumps.GetGump(BUTTON_FLAG);
+            ref readonly var gumpInfoUp = ref ServiceProvider.Get<UOService>().Self.Gumps.GetGump(BUTTON_UP);
+            ref readonly var gumpInfoDown = ref ServiceProvider.Get<UOService>().Self.Gumps.GetGump(BUTTON_DOWN);
 
             if (MaxValue != MinValue && gumpInfoFlag.Texture != null)
             {
@@ -99,7 +100,7 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override int GetScrollableArea()
         {
-            ref readonly var gumpInfoFlag = ref Client.Game.UO.Gumps.GetGump(BUTTON_FLAG);
+            ref readonly var gumpInfoFlag = ref ServiceProvider.Get<UOService>().Self.Gumps.GetGump(BUTTON_FLAG);
 
             return Height - gumpInfoFlag.UV.Height;
         }
@@ -108,7 +109,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (y != _clickPosition.Y)
             {
-                ref readonly var gumpInfoFlag = ref Client.Game.UO.Gumps.GetGump(BUTTON_FLAG);
+                ref readonly var gumpInfoFlag = ref ServiceProvider.Get<UOService>().Self.Gumps.GetGump(BUTTON_FLAG);
                 int height = gumpInfoFlag.UV.Height;
 
                 y -= (height >> 1);
@@ -145,7 +146,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            ref readonly var gumpInfoFlag = ref Client.Game.UO.Gumps.GetGump(BUTTON_FLAG);
+            ref readonly var gumpInfoFlag = ref ServiceProvider.Get<UOService>().Self.Gumps.GetGump(BUTTON_FLAG);
 
             if (gumpInfoFlag.Texture == null)
             {
@@ -154,7 +155,7 @@ namespace ClassicUO.Game.UI.Controls
 
             y -= _sliderPosition;
 
-            return Client.Game.UO.Gumps.PixelCheck(BUTTON_FLAG, x, y);
+            return ServiceProvider.Get<UOService>().Self.Gumps.PixelCheck(BUTTON_FLAG, x, y);
         }
     }
 }

@@ -11,6 +11,7 @@ using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -343,7 +344,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 GetSpellFloatingButton(_skill.Index)?.Dispose();
 
-                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(0x24B8);
+                ref readonly var gumpInfo = ref ServiceProvider.Get<UOService>().Self.Gumps.GetGump(0x24B8);
 
                 SkillButtonGump skillButtonGump = new SkillButtonGump(
                     _gump.World,

@@ -9,6 +9,7 @@ using ClassicUO.Sdk.Assets;
 using ClassicUO.Network;
 using ClassicUO.Resources;
 using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.Managers
 {
@@ -103,9 +104,13 @@ namespace ClassicUO.Game.Managers
         private uint _targetCursorId;
         private readonly World _world;
         private readonly byte[] _lastDataBuffer = new byte[19];
+        private readonly UOService _uoService;
 
-
-        public TargetManager(World world) { _world = world; }
+        public TargetManager(World world)
+        {
+            _world = world;
+            _uoService = ServiceProvider.Get<UOService>();
+        }
 
         public uint LastAttack, SelectedTarget, NewTargetSystemSerial;
 
@@ -398,14 +403,14 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
-                if (graphic >= Client.Game.UO.FileManager.TileData.StaticData.Length)
+                if (graphic >= _uoService.FileManager.TileData.StaticData.Length)
                 {
                     return;
                 }
 
-                ref StaticTiles itemData = ref Client.Game.UO.FileManager.TileData.StaticData[graphic];
+                ref StaticTiles itemData = ref _uoService.FileManager.TileData.StaticData[graphic];
 
-                if (Client.Game.UO.Version >= ClientVersion.CV_7090 && itemData.IsSurface)
+                if (_uoService.Version >= ClientVersion.CV_7090 && itemData.IsSurface)
                 {
                     z += itemData.Height;
                 }

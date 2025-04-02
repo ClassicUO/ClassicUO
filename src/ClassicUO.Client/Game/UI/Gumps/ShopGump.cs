@@ -14,6 +14,7 @@ using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ClassicUO.Renderer.Animations;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -88,8 +89,9 @@ namespace ClassicUO.Game.UI.Gumps
             ushort graphicLeft = isBuyGump ? BUY_GRAPHIC_LEFT : SELL_GRAPHIC_LEFT;
             ushort graphicRight = isBuyGump ? BUY_GRAPHIC_RIGHT : SELL_GRAPHIC_RIGHT;
 
-            ref readonly var artInfoLeft = ref Client.Game.UO.Gumps.GetGump(graphicLeft);
-            ref readonly var artInfoRight = ref Client.Game.UO.Gumps.GetGump(graphicRight);
+            var uoService = ServiceProvider.Get<UOService>();
+            ref readonly var artInfoLeft = ref uoService.Self.Gumps.GetGump(graphicLeft);
+            ref readonly var artInfoRight = ref uoService.Self.Gumps.GetGump(graphicRight);
 
             Rectangle offset = new Rectangle(0, 0, artInfoLeft.UV.Width, LEFT_TOP_HEIGHT);
             GumpPicTexture leftTop = new GumpPicTexture(graphicLeft, 0, 0, offset, false);
@@ -320,7 +322,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         //        if (fromcliloc)
         //        {
-        //            shopItem.SetName(Client.Game.UO.FileManager.Clilocs.Translate(it.Name, $"\t{it.Amount}\t{it.ItemData.Name}", true));
+        //            shopItem.SetName(ServiceProvider.Get<UOService>().FileManager.Clilocs.Translate(it.Name, $"\t{it.Amount}\t{it.ItemData.Name}", true));
         //        }
         //    }
         //}
@@ -683,7 +685,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (SerialHelper.IsItem(serial))
                 {
-                    height = Math.Max(Client.Game.UO.FileManager.TileData.StaticData[graphic].Height, height);
+                    var uoService = ServiceProvider.Get<UOService>();
+                    height = Math.Max(uoService.Self.FileManager.TileData.StaticData[graphic].Height, height);
                 }
 
                 Add(
@@ -746,7 +749,7 @@ namespace ClassicUO.Game.UI.Gumps
             private static byte GetAnimGroup(Animations animations, ushort graphic)
             {
                 var groupType = animations.GetAnimType(graphic);
-                switch (Client.Game.UO.FileManager.Animations.GetGroupIndex(graphic, groupType))
+                switch (ServiceProvider.Get<UOService>().Self.FileManager.Animations.GetGroupIndex(graphic, groupType))
                 {
                     case AnimationGroups.Low:
                         return (byte)LowAnimationGroup.Stand;
@@ -780,7 +783,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (InBuyGump && SerialHelper.IsMobile(LocalSerial))
                 {
-                    var animations = Client.Game.UO.Animations;
+                    var animations = ServiceProvider.Get<UOService>().Self.Animations;
                     ushort graphic = Graphic;
 
                     if (graphic >= animations.MaxAnimationCount)
@@ -803,7 +806,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         hueVector = ShaderHueTranslator.GetHueVector(
                             hue2,
-                            Client.Game.UO.FileManager.TileData.StaticData[Graphic].IsPartialHue,
+                            ServiceProvider.Get<UOService>().Self.FileManager.TileData.StaticData[Graphic].IsPartialHue,
                             1f
                         );
 
@@ -827,14 +830,14 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(Graphic);
+                    ref readonly var artInfo = ref ServiceProvider.Get<UOService>().Self.Arts.GetArt(Graphic);
                     hueVector = ShaderHueTranslator.GetHueVector(
                         Hue,
-                        Client.Game.UO.FileManager.TileData.StaticData[Graphic].IsPartialHue,
+                        ServiceProvider.Get<UOService>().Self.FileManager.TileData.StaticData[Graphic].IsPartialHue,
                         1f
                     );
 
-                    var rect = Client.Game.UO.Arts.GetRealArtBounds(Graphic);
+                    var rect = ServiceProvider.Get<UOService>().Self.Arts.GetRealArtBounds(Graphic);
 
                     const int RECT_SIZE = 50;
 
@@ -1085,9 +1088,10 @@ namespace ClassicUO.Game.UI.Gumps
                 CanMove = true;
                 CanCloseWithRightClick = true;
 
-                ref readonly var gumpInfo0 = ref Client.Game.UO.Gumps.GetGump(_graphic);
-                ref readonly var gumpInfo1 = ref Client.Game.UO.Gumps.GetGump((uint)(_graphic + 1));
-                ref readonly var gumpInfo2 = ref Client.Game.UO.Gumps.GetGump((uint)(_graphic + 2));
+                var uoService = ServiceProvider.Get<UOService>();
+                ref readonly var gumpInfo0 = ref uoService.Self.Gumps.GetGump(_graphic);
+                ref readonly var gumpInfo1 = ref uoService.Self.Gumps.GetGump((uint)(_graphic + 1));
+                ref readonly var gumpInfo2 = ref uoService.Self.Gumps.GetGump((uint)(_graphic + 2));
 
                 Height = Math.Max(
                     gumpInfo0.UV.Height,
@@ -1097,9 +1101,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                ref readonly var gumpInfo0 = ref Client.Game.UO.Gumps.GetGump(_graphic);
-                ref readonly var gumpInfo1 = ref Client.Game.UO.Gumps.GetGump((uint)(_graphic + 1));
-                ref readonly var gumpInfo2 = ref Client.Game.UO.Gumps.GetGump((uint)(_graphic + 2));
+                var uoService = ServiceProvider.Get<UOService>();
+                ref readonly var gumpInfo0 = ref uoService.Self.Gumps.GetGump(_graphic);
+                ref readonly var gumpInfo1 = ref uoService.Self.Gumps.GetGump((uint)(_graphic + 1));
+                ref readonly var gumpInfo2 = ref uoService.Self.Gumps.GetGump((uint)(_graphic + 2));
 
                 var hueVector = ShaderHueTranslator.GetHueVector(0, false, Alpha, true);
 
@@ -1148,7 +1153,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                var gumpInfo = Client.Game.UO.Gumps.GetGump(_graphic);
+                var uoService = ServiceProvider.Get<UOService>();
+                var gumpInfo = uoService.Self.Gumps.GetGump(_graphic);
                 var hueVector = ShaderHueTranslator.GetHueVector(0);
 
                 if (_tiled)

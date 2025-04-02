@@ -4,6 +4,7 @@ using ClassicUO.Collections;
 using ClassicUO.Configuration;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -166,7 +167,7 @@ namespace ClassicUO.Game.GameObjects
                         offY = -22;
                     }
 
-                    Client.Game.UO.Animations.GetAnimationDimensions(
+                    ServiceProvider.Get<UOService>().Animations.GetAnimationDimensions(
                         m.AnimIndex,
                         m.GetGraphicForAnimation(),
                         /*(byte) m.GetDirectionForAnimation()*/
@@ -187,7 +188,7 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else
                 {
-                    ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(Parent.Graphic);
+                    ref readonly var artInfo = ref ServiceProvider.Get<UOService>().Arts.GetArt(Parent.Graphic);
 
                     if (artInfo.Texture != null)
                     {
@@ -211,7 +212,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            var camera = Client.Game.Scene?.Camera;
+            var camera = ServiceProvider.Get<SceneService>().Scene?.Camera;
             if (camera == null)
                 return;
 

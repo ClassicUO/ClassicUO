@@ -11,6 +11,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -58,7 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     UIManager.GetGump<OptionsGump>()?.UpdateVideo();
 
-                    if (Client.Game.UO.Version >= ClientVersion.CV_200)
+                    if (ServiceProvider.Get<UOService>().Self.Version >= ClientVersion.CV_200)
                     {
                         NetClient.Socket.Send_GameWindowSize((uint)n.X, (uint)n.Y);
                     }
@@ -122,14 +123,14 @@ namespace ClassicUO.Game.UI.Gumps
                         h = 480;
                     }
 
-                    if (w > Client.Game.Window.ClientBounds.Width - BORDER_WIDTH)
+                    if (w > ServiceProvider.Get<WindowService>().ClientBounds.Width - BORDER_WIDTH)
                     {
-                        w = Client.Game.Window.ClientBounds.Width - BORDER_WIDTH;
+                        w = ServiceProvider.Get<WindowService>().ClientBounds.Width - BORDER_WIDTH;
                     }
 
-                    if (h > Client.Game.Window.ClientBounds.Height - BORDER_WIDTH)
+                    if (h > ServiceProvider.Get<WindowService>().ClientBounds.Height - BORDER_WIDTH)
                     {
-                        h = Client.Game.Window.ClientBounds.Height - BORDER_WIDTH;
+                        h = ServiceProvider.Get<WindowService>().ClientBounds.Height - BORDER_WIDTH;
                     }
 
                     _lastSize.X = w;
@@ -157,9 +158,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             Point position = Location;
 
-            if (position.X + Width - BORDER_WIDTH > Client.Game.Window.ClientBounds.Width)
+            if (position.X + Width - BORDER_WIDTH > ServiceProvider.Get<WindowService>().ClientBounds.Width)
             {
-                position.X = Client.Game.Window.ClientBounds.Width - (Width - BORDER_WIDTH);
+                position.X = ServiceProvider.Get<WindowService>().ClientBounds.Width - (Width - BORDER_WIDTH);
             }
 
             if (position.X < -BORDER_WIDTH)
@@ -167,9 +168,9 @@ namespace ClassicUO.Game.UI.Gumps
                 position.X = -BORDER_WIDTH;
             }
 
-            if (position.Y + Height - BORDER_WIDTH > Client.Game.Window.ClientBounds.Height)
+            if (position.Y + Height - BORDER_WIDTH > ServiceProvider.Get<WindowService>().ClientBounds.Height)
             {
-                position.Y = Client.Game.Window.ClientBounds.Height - (Height - BORDER_WIDTH);
+                position.Y = ServiceProvider.Get<WindowService>().ClientBounds.Height - (Height - BORDER_WIDTH);
             }
 
             if (position.Y < -BORDER_WIDTH)
@@ -312,7 +313,7 @@ namespace ClassicUO.Game.UI.Gumps
                 hueVector.Y = 1;
             }
 
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(H_BORDER);
+            ref readonly var gumpInfo = ref ServiceProvider.Get<UOService>().Self.Gumps.GetGump(H_BORDER);
 
             // sopra
             batcher.DrawTiled(
@@ -330,7 +331,7 @@ namespace ClassicUO.Game.UI.Gumps
                 hueVector
             );
 
-            gumpInfo = ref Client.Game.UO.Gumps.GetGump(V_BORDER);
+            gumpInfo = ref ServiceProvider.Get<UOService>().Self.Gumps.GetGump(V_BORDER);
             //sx
             batcher.DrawTiled(
                 gumpInfo.Texture,

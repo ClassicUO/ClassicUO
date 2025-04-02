@@ -8,6 +8,7 @@ using ClassicUO.Input;
 using ClassicUO.Resources;
 using SDL2;
 using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {
@@ -36,13 +37,13 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 }
             );
 
-            if (Client.Game.UO.Version >= ClientVersion.CV_500A)
+            if (ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_500A)
             {
                 ushort textColor = 0xFFFF;
 
                 Add
                 (
-                    new Label(Client.Game.UO.FileManager.Clilocs.GetString(1044579), true, textColor, font: 1)
+                    new Label(ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(1044579), true, textColor, font: 1)
                     {
                         X = 155, Y = 70
                     }
@@ -52,7 +53,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 {
                     Add
                     (
-                        new Label(Client.Game.UO.FileManager.Clilocs.GetString(1044577), true, textColor, font: 1)
+                        new Label(ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(1044577), true, textColor, font: 1)
                         {
                             X = 400, Y = 70
                         }
@@ -60,7 +61,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                     Add
                     (
-                        new Label(Client.Game.UO.FileManager.Clilocs.GetString(1044578), true, textColor, font: 1)
+                        new Label(ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(1044578), true, textColor, font: 1)
                         {
                             X = 470, Y = 70
                         }
@@ -69,7 +70,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    new Label(Client.Game.UO.FileManager.Clilocs.GetString(1044580), true, textColor, font: 1)
+                    new Label(ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(1044580), true, textColor, font: 1)
                     {
                         X = 153, Y = 368
                     }
@@ -169,11 +170,11 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             DataBox databox = new DataBox(0, 0, 1, 1);
             databox.WantUpdateSize = true;
-             
+
             scrollArea.ScissorRectangle.Y = 16;
             scrollArea.ScissorRectangle.Height = -32;
 
-            var loginScene = Client.Game.GetScene<LoginScene>();
+            var loginScene = ServiceProvider.Get<GameService>().GetScene<LoginScene>();
             if (loginScene != null)
             {
                 foreach (var server in loginScene.Servers)
@@ -208,7 +209,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         public override void OnButtonClick(int buttonID)
         {
-            var loginScene = Client.Game.GetScene<LoginScene>();
+            var loginScene = ServiceProvider.Get<GameService>().GetScene<LoginScene>();
             if (loginScene == null)
                 return;
 
@@ -245,7 +246,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         {
             if (key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER)
             {
-                var loginScene = Client.Game.GetScene<LoginScene>();
+                var loginScene = ServiceProvider.Get<GameService>().GetScene<LoginScene>();
 
                 if (loginScene?.Servers?.Any(s => s != null) ?? false)
                 {

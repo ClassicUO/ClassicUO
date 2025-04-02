@@ -9,6 +9,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps.Login;
 using ClassicUO.Sdk;
 using ClassicUO.Sdk.Assets;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
 {
@@ -29,7 +30,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             CanCloseWithRightClick = false;
         }
 
-        internal static int _skillsCount => Client.Game.UO.Version >= ClientVersion.CV_70160 ? 4 : 3;
+        internal static int _skillsCount => ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_70160 ? 4 : 3;
 
         public void SetCharacter(PlayerMobile character)
         {
@@ -75,7 +76,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         World,
                         400,
                         300,
-                        Client.Game.UO.FileManager.Clilocs.GetString(1063016),
+                        ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(1063016),
                         null,
                         true
                     )

@@ -17,6 +17,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SDL2;
 using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -67,12 +68,19 @@ namespace ClassicUO.Game.Scenes
         private AnimatedStaticsManager? _animatedStaticsManager;
 
         private readonly World _world;
+        private readonly UOService _uoService;
+        private readonly AudioService _audioService;
+        private readonly SceneService _sceneService;
 
         public GameScene(World world)
         {
             _world = world;
             _useItemQueue = new UseItemQueue(world);
+            _uoService = ServiceProvider.Get<UOService>();
+            _audioService = ServiceProvider.Get<AudioService>();
+            _sceneService = ServiceProvider.Get<SceneService>();
         }
+
 
         public bool UpdateDrawPosition { get; set; }
         public bool DisconnectionRequested { get; set; }
@@ -94,7 +102,7 @@ namespace ClassicUO.Game.Scenes
         {
             base.Load();
 
-            Client.Game.Window.AllowUserResizing = true;
+            ServiceProvider.Get<WindowService>().AllowUserResizing = true;
 
             Camera.Zoom = ProfileManager.CurrentProfile.DefaultScale;
             Camera.Bounds.X = Math.Max(0, ProfileManager.CurrentProfile.GameWindowPosition.X);
@@ -102,7 +110,7 @@ namespace ClassicUO.Game.Scenes
             Camera.Bounds.Width = Math.Max(0, ProfileManager.CurrentProfile.GameWindowSize.X);
             Camera.Bounds.Height = Math.Max(0, ProfileManager.CurrentProfile.GameWindowSize.Y);
 
-            Client.Game.UO.GameCursor.ItemHold.Clear();
+            ServiceProvider.Get<UOService>().GameCursor.ItemHold.Clear();
 
             _world.Macros.Clear();
             _world.Macros.Load();
@@ -125,15 +133,15 @@ namespace ClassicUO.Game.Scenes
             _world.MessageManager.MessageReceived += ChatOnMessageReceived;
             UIManager.ContainerScale = ProfileManager.CurrentProfile.ContainersScale / 100f;
 
-            SDL.SDL_SetWindowMinimumSize(Client.Game.Window.Handle, 640, 480);
+            SDL.SDL_SetWindowMinimumSize(ServiceProvider.Get<WindowService>().Handle, 640, 480);
 
             if (ProfileManager.CurrentProfile.WindowBorderless)
             {
-                Client.Game.SetWindowBorderless(true);
+                ServiceProvider.Get<GameService>().SetWindowBorderless(true);
             }
             else if (Settings.GlobalSettings.IsWindowMaximized)
             {
-                Client.Game.MaximizeWindow();
+                ServiceProvider.Get<GameService>().MaximizeWindow();
             }
             else if (Settings.GlobalSettings.WindowSize.HasValue)
             {
@@ -143,7 +151,7 @@ namespace ClassicUO.Game.Scenes
                 w = Math.Max(640, w);
                 h = Math.Max(480, h);
 
-                Client.Game.SetWindowSize(w, h);
+                ServiceProvider.Get<GameService>().SetWindowSize(w, h);
             }
 
             Plugin.OnConnected();
@@ -284,11 +292,11 @@ namespace ClassicUO.Game.Scenes
             );
             ProfileManager.CurrentProfile.DefaultScale = Camera.Zoom;
 
-            Client.Game.Audio?.StopMusic();
-            Client.Game.Audio?.StopSounds();
+            ServiceProvider.Get<AudioService>().StopMusic();
+            ServiceProvider.Get<AudioService>().StopSounds();
 
-            Client.Game.SetWindowTitle(string.Empty);
-            Client.Game.UO.GameCursor.ItemHold.Clear();
+            ServiceProvider.Get<GameService>().SetWindowTitle(string.Empty);
+            ServiceProvider.Get<UOService>().GameCursor.ItemHold.Clear();
 
             try
             {
@@ -327,12 +335,12 @@ namespace ClassicUO.Game.Scenes
             _world.MessageManager.MessageReceived -= ChatOnMessageReceived;
 
             Settings.GlobalSettings.WindowSize = new Point(
-                Client.Game.Window.ClientBounds.Width,
-                Client.Game.Window.ClientBounds.Height
+                ServiceProvider.Get<GameService>().Window.ClientBounds.Width,
+                ServiceProvider.Get<GameService>().Window.ClientBounds.Height
             );
 
-            Settings.GlobalSettings.IsWindowMaximized = Client.Game.IsWindowMaximized();
-            Client.Game.SetWindowBorderless(false);
+            Settings.GlobalSettings.IsWindowMaximized = ServiceProvider.Get<GameService>().IsWindowMaximized();
+            ServiceProvider.Get<GameService>().SetWindowBorderless(false);
 
             base.Unload();
         }
@@ -358,7 +366,7 @@ namespace ClassicUO.Game.Scenes
                         {
                             if (s)
                             {
-                                Client.Game.SetScene(new LoginScene(_world));
+                                ServiceProvider.Get<SceneService>().SetScene(new LoginScene(_world));
                             }
                         }
                     )
@@ -389,7 +397,7 @@ namespace ClassicUO.Game.Scenes
                             else
                             {
                                 NetClient.Socket.Disconnect();
-                                Client.Game.SetScene(new LoginScene(_world));
+                                ServiceProvider.Get<SceneService>().SetScene(new LoginScene(_world));
                             }
                         }
                     }
@@ -504,7 +512,7 @@ namespace ClassicUO.Game.Scenes
                     }
                     else
                     {
-                        ref StaticTiles data = ref Client.Game.UO.FileManager.TileData.StaticData[obj.Graphic];
+                        ref StaticTiles data = ref ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[obj.Graphic];
                         light.ID = data.Layer;
                     }
                 }
@@ -714,7 +722,7 @@ namespace ClassicUO.Game.Scenes
             if (_forceStopScene)
             {
                 LoginScene loginScene = new LoginScene(_world);
-                Client.Game.SetScene(loginScene);
+                ServiceProvider.Get<SceneService>().SetScene(loginScene);
                 loginScene.Reconnect = true;
 
                 return;
@@ -871,7 +879,7 @@ namespace ClassicUO.Game.Scenes
                 _multi = null;
             }
 
-            if (_isMouseLeftDown && !Client.Game.UO.GameCursor.ItemHold.Enabled)
+            if (_isMouseLeftDown && !ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled)
             {
                 if (
                     _world.CustomHouseManager != null
@@ -1192,7 +1200,7 @@ namespace ClassicUO.Game.Scenes
             for (int i = 0; i < _lightCount; i++)
             {
                 ref LightData l = ref _lights[i];
-                ref readonly var lightInfo = ref Client.Game.UO.Lights.GetLight(l.ID);
+                ref readonly var lightInfo = ref ServiceProvider.Get<UOService>().Lights.GetLight(l.ID);
 
                 if (lightInfo.Texture == null)
                 {

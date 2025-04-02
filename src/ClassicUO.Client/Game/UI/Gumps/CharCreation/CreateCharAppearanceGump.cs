@@ -10,6 +10,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
 {
@@ -172,7 +173,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 1
             );
 
-            if (Client.Game.UO.Version >= ClientVersion.CV_60144)
+            if (ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_60144)
             {
                 Add
                 (
@@ -251,6 +252,32 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             else
             {
                 _character.Flags &= ~Flags.Female;
+            }
+
+            Layer layer;
+
+            // Hair
+            layer = Layer.Hair;
+            var content = CharacterCreationValues.GetHairComboContent(isFemale, race);
+            Item item = CreateItem(content.GetGraphic(CurrentOption[layer]), CurrentColorOption[layer].Item2, layer);
+
+            if (item != null)
+            {
+                _character.PushToBack(item);
+            }
+
+            // Facial Hair
+            if (!isFemale && race != RaceType.ELF)
+            {
+                layer = Layer.Beard;
+                content = CharacterCreationValues.GetFacialHairComboContent(race);
+
+                Item iti = CreateItem(content.GetGraphic(CurrentOption[layer]), CurrentColorOption[layer].Item2, layer);
+
+                if (iti != null)
+                {
+                    _character.PushToBack(iti);
+                }
             }
 
             switch (race)
@@ -362,11 +389,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             CurrentColorOption.Clear();
             HandleGenreChange();
             RaceType race = _characterInfo.Race;
-            CharacterListFlags flags = World.ClientFeatures.Flags;
-            LockedFeatureFlags locks = World.ClientLockedFeatures.Flags;
 
-            bool allowElf = (flags & CharacterListFlags.CLF_ELVEN_RACE) != 0 && locks.HasFlag(LockedFeatureFlags.ML);
-            bool allowGarg = locks.HasFlag(LockedFeatureFlags.SA);
+            bool allowElf = (World.ClientFeatures.Flags & CharacterListFlags.CLF_ELVEN_RACE) != 0 && World.ClientLockedFeatures.Flags.HasFlag(LockedFeatureFlags.ML);
+            bool allowGarg = World.ClientLockedFeatures.Flags.HasFlag(LockedFeatureFlags.SA);
 
             if (race == RaceType.ELF && !allowElf)
             {
@@ -415,19 +440,19 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }
 
             // Hair
-            CharacterCreationValues.ComboContent content = CharacterCreationValues.GetHairComboContent(_characterInfo.IsFemale, race);
+            var content = CharacterCreationValues.GetHairComboContent(_characterInfo.IsFemale, race);
 
             bool isAsianLang = string.Compare(Settings.GlobalSettings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 ||
-                string.Compare(Settings.GlobalSettings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
-                string.Compare(Settings.GlobalSettings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
+                string.Compare(Settings.GlobalSettings.Language, "CHS", StringComparison.InvariantCultureIgnoreCase) == 0 ||
+                string.Compare(Settings.GlobalSettings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0;
 
             bool unicode = isAsianLang;
-            byte font = (byte)(isAsianLang ? 3 : 9);
+            byte font = (byte)(isAsianLang ? 1 : 0);
             ushort hue = (ushort)(isAsianLang ? 0xFFFF : 0);
 
             Add
             (
-                _hairLabel = new Label(Client.Game.UO.FileManager.Clilocs.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), unicode, hue, font: font)
+                _hairLabel = new Label(ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), unicode, hue, font: font)
                 {
                     X = 98, Y = 140
                 },
@@ -456,7 +481,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 Add
                 (
-                    _facialLabel = new Label(Client.Game.UO.FileManager.Clilocs.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), unicode, hue, font: font)
+                    _facialLabel = new Label(ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), unicode, hue, font: font)
                     {
                         X = 98, Y = 184
                     },
@@ -768,7 +793,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             int invalid = Validate(character.Name);
             if (invalid > 0)
             {
-                UIManager.GetGump<CharCreationGump>()?.ShowMessage(Client.Game.UO.FileManager.Clilocs.GetString(invalid));
+                UIManager.GetGump<CharCreationGump>()?.ShowMessage(ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(invalid));
 
                 return false;
             }
@@ -780,7 +805,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public static int Validate(string name)
         {
-            return Validate(name, 2, 16, true, false, true, 1, _SpaceDashPeriodQuote, Client.Game.UO.Version >= ClientVersion.CV_5020 ? _Disallowed : new string[] { }, _StartDisallowed);
+            return Validate(name, 2, 16, true, false, true, 1, _SpaceDashPeriodQuote, ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_5020 ? _Disallowed : new string[] { }, _StartDisallowed);
         }
 
         public static int Validate(string name, int minLength, int maxLength, bool allowLetters, bool allowDigits, bool noExceptionsAtStart, int maxExceptions, char[] exceptions, string[] disallowed, string[] startDisallowed)
@@ -1049,7 +1074,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 Add
                 (
-                    new Label(Client.Game.UO.FileManager.Clilocs.GetString(label), unicode, hue, font: font)
+                    new Label(ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(label), unicode, hue, font: font)
                     {
                         X = 0,
                         Y = 0

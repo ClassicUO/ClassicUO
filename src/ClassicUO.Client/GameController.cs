@@ -108,17 +108,21 @@ namespace ClassicUO
 #if false
             SetScene(new MainScene(this));
 #else
-            UO.Load(this);
+            UO.LoadUOFiles();
 
             // Registra i servizi
             ServiceProvider.Register(new AudioService(Audio));
-            ServiceProvider.Register(new UOService(UO));
+            ServiceProvider.Register(new UOService(this, UO));
             ServiceProvider.Register(new WindowService(Window));
             ServiceProvider.Register(new GameService(this));
             ServiceProvider.Register(new PluginHostService(PluginHost));
+            ServiceProvider.Register(new SceneService(this));
+            ServiceProvider.Register(new GraphicsService(GraphicsDevice));
+
+            UO.Setup(this);
             ServiceProvider.Register(new FileManagerService(UO.FileManager));
             ServiceProvider.Register(new GameCursorService(UO.GameCursor));
-            ServiceProvider.Register(new SceneService(this));
+
 
             Audio.Initialize();
             // TODO: temporary fix to avoid crash when laoding plugins
@@ -245,8 +249,8 @@ namespace ClassicUO
             }
             */
 
-            GraphicManager.PreferredBackBufferWidth = ServiceProvider.Get<WindowService>().ClientBounds.Width;
-            GraphicManager.PreferredBackBufferHeight = ServiceProvider.Get<WindowService>().ClientBounds.Height;
+            GraphicManager.PreferredBackBufferWidth = width;
+            GraphicManager.PreferredBackBufferHeight = height;
             GraphicManager.ApplyChanges();
         }
 
@@ -307,8 +311,8 @@ namespace ClassicUO
         {
             SDL_MaximizeWindow(Window.Handle);
 
-            GraphicManager.PreferredBackBufferWidth = Client.Game.Window.ClientBounds.Width;
-            GraphicManager.PreferredBackBufferHeight = Client.Game.Window.ClientBounds.Height;
+            GraphicManager.PreferredBackBufferWidth = Window.ClientBounds.Width;
+            GraphicManager.PreferredBackBufferHeight = Window.ClientBounds.Height;
             GraphicManager.ApplyChanges();
         }
 
@@ -892,6 +896,18 @@ namespace ClassicUO
                     GameActions.Print(UO.World, message, 0x44, MessageType.System);
                 }
             }
+        }
+
+        protected override void OnActivated(object sender, EventArgs args)
+        {
+            base.OnActivated(sender, args);
+            ServiceProvider.Get<UOService>()?.OnActivated();
+        }
+
+        protected override void OnDeactivated(object sender, EventArgs args)
+        {
+            base.OnDeactivated(sender, args);
+            ServiceProvider.Get<UOService>()?.OnDeactivated();
         }
     }
 }

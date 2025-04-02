@@ -4,6 +4,9 @@ using System;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
+using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -16,7 +19,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
             Add(new GumpPic(0, 0, 0x0816, 0));
 
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(0x0816);
+            ref readonly var gumpInfo = ref ServiceProvider.Get<UOService>().Gumps.GetGump(0x0816);
 
             Width = gumpInfo.UV.Width;
             Height = gumpInfo.UV.Height;
@@ -44,8 +47,8 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = false;
             IsModal = true;
 
-            X = (Client.Game.Window.ClientBounds.Width - Width) >> 1;
-            Y = (Client.Game.Window.ClientBounds.Height - Height) >> 1;
+            X = (ServiceProvider.Get<WindowService>().ClientBounds.Width - Width) >> 1;
+            Y = (ServiceProvider.Get<WindowService>().ClientBounds.Height - Height) >> 1;
 
             WantUpdateSize = false;
             _result = result;

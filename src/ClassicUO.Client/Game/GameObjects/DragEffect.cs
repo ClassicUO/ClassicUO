@@ -6,6 +6,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -108,11 +109,12 @@ namespace ClassicUO.Game.GameObjects
                 depth
             );
 
-            ref var data = ref Client.Game.UO.FileManager.TileData.StaticData[Graphic];
+            ref var data = ref ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[Graphic];
 
             if (data.IsLight && Source != null)
             {
-                Client.Game.GetScene<GameScene>()?.AddLight(Source, Source, posX + 22, posY + 22);
+                var scene = ServiceProvider.Get<SceneService>().Scene as GameScene;
+                scene?.AddLight(Source, Source, posX + 22, posY + 22);
             }
 
             return true;

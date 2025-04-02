@@ -12,6 +12,7 @@ using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Sdk.IO;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.Managers
 {
@@ -42,8 +43,13 @@ namespace ClassicUO.Game.Managers
     internal sealed class MessageManager
     {
         private readonly World _world;
+        private readonly UOService _uoService;
 
-        public MessageManager(World world) => _world = world;
+        public MessageManager(World world)
+        {
+            _world = world;
+            _uoService = ServiceProvider.Get<UOService>();
+        }
 
 
         public PromptData PromptData { get; set; }
@@ -247,12 +253,12 @@ namespace ClassicUO.Game.Managers
                 isunicode = ProfileManager.CurrentProfile.OverrideAllFontsIsUnicode;
             }
 
-            int width = isunicode ? Client.Game.UO.FileManager.Fonts.GetWidthUnicode(font, msg) : Client.Game.UO.FileManager.Fonts.GetWidthASCII(font, msg);
+            int width = isunicode ? _uoService.FileManager.Fonts.GetWidthUnicode(font, msg) : _uoService.FileManager.Fonts.GetWidthASCII(font, msg);
 
             if (width > 200)
             {
                 width = isunicode ?
-                    Client.Game.UO.FileManager.Fonts.GetWidthExUnicode
+                    _uoService.FileManager.Fonts.GetWidthExUnicode
                     (
                         font,
                         msg,
@@ -260,7 +266,7 @@ namespace ClassicUO.Game.Managers
                         TEXT_ALIGN_TYPE.TS_LEFT,
                         (ushort) FontStyle.BlackBorder
                     ) :
-                    Client.Game.UO.FileManager.Fonts.GetWidthExASCII
+                    _uoService.FileManager.Fonts.GetWidthExASCII
                     (
                         font,
                         msg,

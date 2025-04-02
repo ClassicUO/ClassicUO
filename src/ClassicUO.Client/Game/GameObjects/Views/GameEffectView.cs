@@ -10,6 +10,7 @@ using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -99,7 +100,7 @@ namespace ClassicUO.Game.GameObjects
                 return false;
             }
 
-            ref StaticTiles data = ref Client.Game.UO.FileManager.TileData.StaticData[Graphic];
+            ref StaticTiles data = ref ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[Graphic];
 
             posX += (int)Offset.X;
             posY += (int)(Offset.Z + Offset.Y);
@@ -247,7 +248,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (data.IsLight && Source != null)
             {
-                Client.Game.GetScene<GameScene>()?.AddLight(Source, Source, posX + 22, posY + 22);
+                ServiceProvider.Get<SceneService>().GetScene<GameScene>()?.AddLight(Source, Source, posX + 22, posY + 22);
             }
 
             return true;

@@ -8,6 +8,7 @@ using ClassicUO.Sdk.Assets;
 using System;
 using System.Runtime.InteropServices;
 using System.Buffers;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.Map
 {
@@ -121,9 +122,9 @@ namespace ClassicUO.Game.Map
 
         private ref readonly IndexMap GetIndex(int map)
         {
-            Client.Game.UO.FileManager.Maps.SanitizeMapIndex(ref map);
+            ServiceProvider.Get<UOService>().FileManager.Maps.SanitizeMapIndex(ref map);
 
-            return ref Client.Game.UO.FileManager.Maps.GetIndex(map, X, Y);
+            return ref ServiceProvider.Get<UOService>().FileManager.Maps.GetIndex(map, X, Y);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -221,7 +222,7 @@ namespace ClassicUO.Game.Map
                     goto default;
 
                 default:
-                    ref StaticTiles data = ref Client.Game.UO.FileManager.TileData.StaticData[graphic];
+                    ref StaticTiles data = ref ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[graphic];
 
                     if (data.IsBackground)
                     {

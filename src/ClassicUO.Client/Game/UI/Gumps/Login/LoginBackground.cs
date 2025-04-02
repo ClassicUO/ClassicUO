@@ -2,6 +2,7 @@
 
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {
@@ -9,7 +10,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
     {
         public LoginBackground(World world) : base(world, 0, 0)
         {
-            if (Client.Game.UO.Version >= ClientVersion.CV_706400)
+            if (ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_706400)
             {
                 // Background
                 Add
@@ -71,7 +72,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         public override void OnButtonClick(int buttonID)
         {
-            Client.Game.Exit();
+            ServiceProvider.Get<GameService>().Exit();
         }
     }
 }

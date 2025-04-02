@@ -4,6 +4,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Sdk.Assets;
 using System.Runtime.CompilerServices;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -29,7 +30,7 @@ namespace ClassicUO.Game.GameObjects
         public ref StaticTiles ItemData
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref Client.Game.UO.FileManager.TileData.StaticData[Graphic];
+            get => ref ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[Graphic];
         }
 
         public bool IsVegetation;

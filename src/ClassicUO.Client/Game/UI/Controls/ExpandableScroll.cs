@@ -5,6 +5,7 @@ using ClassicUO.Input;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -43,7 +44,7 @@ namespace ClassicUO.Game.UI.Controls
 
             for (int i = 0; i < 4; i++)
             {
-                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump((ushort)(graphic + i));
+                ref readonly var gumpInfo = ref ServiceProvider.Get<UOService>().Gumps.GetGump((ushort)(graphic + i));
 
                 if (gumpInfo.Texture == null)
                 {

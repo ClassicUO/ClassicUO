@@ -12,6 +12,7 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -135,7 +136,7 @@ namespace ClassicUO.Game.Scenes
 
                     if (tileZ > pz14 && _maxZ > tileZ)
                     {
-                        ref StaticTiles itemdata = ref Client.Game.UO.FileManager.TileData.StaticData[
+                        ref StaticTiles itemdata = ref ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[
                             obj.Graphic
                         ];
 
@@ -184,7 +185,7 @@ namespace ClassicUO.Game.Scenes
                         {
                             if (!(obj2 is Land))
                             {
-                                ref StaticTiles itemdata = ref Client.Game.UO.FileManager.TileData.StaticData[
+                                ref StaticTiles itemdata = ref ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[
                                     obj2.Graphic
                                 ];
 
@@ -316,7 +317,7 @@ namespace ClassicUO.Game.Scenes
 
                     if (check)
                     {
-                        var rect = Client.Game.UO.Arts.GetRealArtBounds(obj.Graphic);
+                        var rect = ServiceProvider.Get<UOService>().Arts.GetRealArtBounds(obj.Graphic);
 
                         rect.X = obj.RealScreenPosition.X - (rect.Width >> 1) + rect.X;
                         rect.Y = obj.RealScreenPosition.Y - rect.Height + rect.Y;
@@ -553,7 +554,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (tile.Z > obj.Z && (tile is Static || tile is Multi))
                         {
-                            ref var itemData = ref Client.Game.UO.FileManager.TileData.StaticData[tile.Graphic];
+                            ref var itemData = ref ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[tile.Graphic];
 
                             if (itemData.IsNoShoot || itemData.IsWindow)
                             {
@@ -899,7 +900,7 @@ namespace ClassicUO.Game.Scenes
                         {
                             ref StaticTiles itemData = ref (
                                 item.IsMulti
-                                    ? ref Client.Game.UO.FileManager.TileData.StaticData[item.MultiGraphic]
+                                    ? ref ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[item.MultiGraphic]
                                     : ref item.ItemData
                             );
 
@@ -991,15 +992,15 @@ namespace ClassicUO.Game.Scenes
 
                     case GameEffect effect:
                         if (
-                                            !ProcessAlpha(
-                                                obj,
-                                                ref Client.Game.UO.FileManager.TileData.StaticData[effect.Graphic],
-                                                false,
-                                                ref playerScreePos,
-                                                cotZ,
-                                                out _
-                                            )
-                                        )
+                            !ProcessAlpha(
+                                obj,
+                                ref ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[effect.Graphic],
+                                false,
+                                ref playerScreePos,
+                                cotZ,
+                                out _
+                            )
+                        )
                         {
                             continue;
                         }
@@ -1134,10 +1135,10 @@ namespace ClassicUO.Game.Scenes
                 {
                     _world_render_target?.Dispose();
 
-                    PresentationParameters pp = Client.Game.GraphicsDevice.PresentationParameters;
+                    PresentationParameters pp = ServiceProvider.Get<GameService>().GraphicsDevice.PresentationParameters;
 
                     _world_render_target = new RenderTarget2D(
-                        Client.Game.GraphicsDevice,
+                        ServiceProvider.Get<GameService>().GraphicsDevice,
                         winGameWidth * 1,
                         winGameHeight * 1,
                         false,
@@ -1156,10 +1157,10 @@ namespace ClassicUO.Game.Scenes
                 {
                     _lightRenderTarget?.Dispose();
 
-                    PresentationParameters pp = Client.Game.GraphicsDevice.PresentationParameters;
+                    PresentationParameters pp = ServiceProvider.Get<GameService>().GraphicsDevice.PresentationParameters;
 
                     _lightRenderTarget = new RenderTarget2D(
-                        Client.Game.GraphicsDevice,
+                        ServiceProvider.Get<GameService>().GraphicsDevice,
                         winGameWidth,
                         winGameHeight,
                         false,

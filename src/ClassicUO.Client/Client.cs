@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.IO;
 using ClassicUO.Sdk;
 using System.Diagnostics.CodeAnalysis;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO
 {
@@ -37,10 +38,8 @@ namespace ClassicUO
 
         }
 
-        public unsafe void Load(GameController game)
+        public unsafe void Setup(GameController game)
         {
-            LoadUOFiles();
-
             const int TEXTURE_WIDTH = 512;
             const int TEXTURE_HEIGHT = 1024;
             const int LIGHTS_TEXTURE_WIDTH = 32;
@@ -99,7 +98,7 @@ namespace ClassicUO
         }
 
 
-        private void LoadUOFiles()
+        public void LoadUOFiles()
         {
             string clientPath = Settings.GlobalSettings.UltimaOnlineDirectory;
             Log.Trace($"Ultima Online installation folder: {clientPath}");
@@ -118,7 +117,7 @@ namespace ClassicUO
             if (!Directory.Exists(clientPath))
             {
                 Log.Error("Invalid client directory: " + clientPath);
-                Client.ShowErrorMessage(string.Format(ResErrorMessages.ClientPathIsNotAValidUODirectory, clientPath));
+                Errors.ShowErrorMessage(string.Format(ResErrorMessages.ClientPathIsNotAValidUODirectory, clientPath));
 
                 throw new InvalidClientDirectory($"'{clientPath}' is not a valid directory");
             }
@@ -132,7 +131,7 @@ namespace ClassicUO
                 if (!ClientVersionHelper.TryParseFromFile(Path.Combine(clientPath, "client.exe"), out clientVersionText) || !ClientVersionHelper.IsClientVersionValid(clientVersionText, out clientVersion))
                 {
                     Log.Error("Invalid client version: " + clientVersionText);
-                    Client.ShowErrorMessage(string.Format(ResGumps.ImpossibleToDefineTheClientVersion0, clientVersionText));
+                    Errors.ShowErrorMessage(string.Format(ResGumps.ImpossibleToDefineTheClientVersion0, clientVersionText));
 
                     throw new InvalidClientVersion($"Invalid client version: '{clientVersionText}'");
                 }
@@ -191,41 +190,6 @@ namespace ClassicUO
 
             //ATTENTION: you will need to enable ALSO ultimalive server-side, or this code will have absolutely no effect!
             UltimaLive.Enable();
-        }
-    }
-
-
-    internal static class Client
-    {
-        [NotNull]
-        public static GameController? Game { get; private set; }
-
-
-        public static void Run(IPluginHost? pluginHost)
-        {
-            Debug.Assert(Game == null);
-
-            Log.Trace("Running game...");
-
-            using (Game = new GameController(pluginHost))
-            {
-                // https://github.com/FNA-XNA/FNA/wiki/7:-FNA-Environment-Variables#fna_graphics_enable_highdpi
-                CUOEnviroment.IsHighDPI = Environment.GetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI") == "1";
-
-                if (CUOEnviroment.IsHighDPI)
-                {
-                    Log.Trace("HIGH DPI - ENABLED");
-                }
-
-                Game.Run();
-            }
-
-            Log.Trace("Exiting game...");
-        }
-
-        public static void ShowErrorMessage(string msg)
-        {
-            SDL.SDL_ShowSimpleMessageBox(SDL.SDL_MessageBoxFlags.SDL_MESSAGEBOX_ERROR, "ERROR", msg, IntPtr.Zero);
         }
     }
 }

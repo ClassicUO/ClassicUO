@@ -3,11 +3,6 @@ using System;
 
 namespace ClassicUO
 {
-    static class Client
-    {
-        public static GameController Game { get; set; }
-    }
-
     class GameController
     {
         // LoginScene is not supperted here

@@ -2,6 +2,7 @@
 
 using System.Linq;
 using ClassicUO.Sdk.Assets;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.Data
 {
@@ -221,7 +222,7 @@ namespace ClassicUO.Game.Data
             {
                 _ids = ids;
 
-                Labels = labels.Select(o => Client.Game.UO.FileManager.Clilocs.GetString(o)).ToArray();
+                Labels = labels.Select(o => ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(o)).ToArray();
             }
 
             public string[] Labels { get; }

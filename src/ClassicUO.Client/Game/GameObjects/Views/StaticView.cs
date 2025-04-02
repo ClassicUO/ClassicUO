@@ -7,6 +7,7 @@ using ClassicUO.IO;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -84,7 +85,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (ItemData.IsLight)
             {
-                Client.Game.GetScene<GameScene>()?.AddLight(this, this, posX + 22, posY + 22);
+                ServiceProvider.Get<SceneService>().GetScene<GameScene>()?.AddLight(this, this, posX + 22, posY + 22);
             }
 
             return true;
@@ -96,7 +97,7 @@ namespace ClassicUO.Game.GameObjects
                 !(
                     SelectedObject.Object == this
                     || FoliageIndex != -1
-                        && Client.Game.GetScene<GameScene>().FoliageIndex == FoliageIndex
+                        && ServiceProvider.Get<SceneService>().GetScene<GameScene>().FoliageIndex == FoliageIndex
                 )
             )
             {
@@ -109,13 +110,14 @@ namespace ClassicUO.Game.GameObjects
                     graphic = Constants.TREE_REPLACE_GRAPHIC;
                 }
 
-                ref var index = ref Client.Game.UO.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
+                var uoService = ServiceProvider.Get<UOService>();
+                ref var index = ref uoService.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
 
                 Point position = RealScreenPosition;
                 position.X -= index.Width;
                 position.Y -= index.Height;
 
-                return Client.Game.UO.Arts.PixelCheck(
+                return uoService.Arts.PixelCheck(
                     graphic,
                     SelectedObject.TranslatedMousePositionByViewport.X - position.X,
                     SelectedObject.TranslatedMousePositionByViewport.Y - position.Y

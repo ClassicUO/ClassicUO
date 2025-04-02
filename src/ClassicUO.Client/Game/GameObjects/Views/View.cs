@@ -8,6 +8,7 @@ using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -108,11 +109,11 @@ namespace ClassicUO.Game.GameObjects
             bool isWet = false
         )
         {
-            ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(graphic);
+            ref readonly var artInfo = ref ServiceProvider.Get<UOService>().Arts.GetArt(graphic);
 
             if (artInfo.Texture != null)
             {
-                ref var index = ref Client.Game.UO.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
+                ref var index = ref ServiceProvider.Get<UOService>().FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
                 index.Width = (short)((artInfo.UV.Width >> 1) - 22);
                 index.Height = (short)(artInfo.UV.Height - 44);
 
@@ -163,7 +164,7 @@ namespace ClassicUO.Game.GameObjects
             float depth
         )
         {
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(graphic);
+            ref readonly var gumpInfo = ref ServiceProvider.Get<UOService>().Gumps.GetGump(graphic);
 
             if (gumpInfo.Texture != null)
             {
@@ -191,11 +192,11 @@ namespace ClassicUO.Game.GameObjects
             float depth
         )
         {
-            ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(graphic);
+            ref readonly var artInfo = ref ServiceProvider.Get<UOService>().Arts.GetArt(graphic);
 
             if (artInfo.Texture != null)
             {
-                ref var index = ref Client.Game.UO.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
+                ref var index = ref ServiceProvider.Get<UOService>().FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
                 index.Width = (short)((artInfo.UV.Width >> 1) - 22);
                 index.Height = (short)(artInfo.UV.Height - 44);
 
@@ -228,15 +229,15 @@ namespace ClassicUO.Game.GameObjects
             bool isWet = false
         )
         {
-            ref var index = ref Client.Game.UO.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
+            ref var index = ref ServiceProvider.Get<UOService>().FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
 
             graphic = (ushort)(graphic + index.AnimOffset);
 
-            ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(graphic);
+            ref readonly var artInfo = ref ServiceProvider.Get<UOService>().Arts.GetArt(graphic);
 
             if (artInfo.Texture != null)
             {
-                index = ref Client.Game.UO.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
+                index = ref ServiceProvider.Get<UOService>().FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
                 index.Width = (short)((artInfo.UV.Width >> 1) - 22);
                 index.Height = (short)(artInfo.UV.Height - 44);
 

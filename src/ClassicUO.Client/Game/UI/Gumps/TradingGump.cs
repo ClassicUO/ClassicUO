@@ -11,6 +11,7 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -59,7 +60,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _gold = value;
 
-                    if (Client.Game.UO.Version >= ClientVersion.CV_704565)
+                    if (ServiceProvider.Get<UOService>().Self.Version >= ClientVersion.CV_704565)
                     {
                         _myCoins[0].Text = _gold.ToString("N0");
                     }
@@ -76,7 +77,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _platinum = value;
 
-                    if (Client.Game.UO.Version >= ClientVersion.CV_704565)
+                    if (ServiceProvider.Get<UOService>().Self.Version >= ClientVersion.CV_704565)
                     {
                         _myCoins[1].Text = _platinum.ToString("N0");
                     }
@@ -93,7 +94,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _hisGold = value;
 
-                    if (Client.Game.UO.Version >= ClientVersion.CV_704565)
+                    if (ServiceProvider.Get<UOService>().Self.Version >= ClientVersion.CV_704565)
                     {
                         _hisCoins[0].Text = _hisGold.ToString("N0");
                     }
@@ -110,7 +111,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _hisPlatinum = value;
 
-                    if (Client.Game.UO.Version >= ClientVersion.CV_704565)
+                    if (ServiceProvider.Get<UOService>().Self.Version >= ClientVersion.CV_704565)
                     {
                         _hisCoins[1].Text = _hisPlatinum.ToString("N0");
                     }
@@ -158,7 +159,7 @@ namespace ClassicUO.Game.UI.Gumps
                 v.Dispose();
             }
 
-            ArtLoader loader = Client.Game.UO.FileManager.Arts;
+            ArtLoader loader = ServiceProvider.Get<UOService>().Self.FileManager.Arts;
 
             for (var i = container.Items; i != null; i = i.Next)
             {
@@ -172,7 +173,7 @@ namespace ClassicUO.Game.UI.Gumps
                 int x = g.X;
                 int y = g.Y;
 
-                ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(it.DisplayedGraphic);
+                ref readonly var artInfo = ref ServiceProvider.Get<UOService>().Self.Arts.GetArt(it.DisplayedGraphic);
 
                 if (artInfo.Texture != null)
                 {
@@ -227,7 +228,7 @@ namespace ClassicUO.Game.UI.Gumps
                 int x = g.X;
                 int y = g.Y;
 
-                ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(it.DisplayedGraphic);
+                ref readonly var artInfo = ref ServiceProvider.Get<UOService>().Self.Arts.GetArt(it.DisplayedGraphic);
 
                 if (artInfo.Texture != null)
                 {
@@ -264,13 +265,13 @@ namespace ClassicUO.Game.UI.Gumps
             if (button == MouseButtonType.Left)
             {
                 if (
-                    Client.Game.UO.GameCursor.ItemHold.Enabled
-                    && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition
+                    ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Enabled
+                    && !ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.IsFixedPosition
                 )
                 {
                     if (_myBox != null && _myBox.Bounds.Contains(x, y))
                     {
-                        ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(Client.Game.UO.GameCursor.ItemHold.DisplayedGraphic);
+                        ref readonly var artInfo = ref ServiceProvider.Get<UOService>().Self.Arts.GetArt(ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.DisplayedGraphic);
                         x -= _myBox.X;
                         y -= _myBox.Y;
 
@@ -300,7 +301,7 @@ namespace ClassicUO.Game.UI.Gumps
                             y = 0;
                         }
 
-                        GameActions.DropItem(Client.Game.UO.GameCursor.ItemHold.Serial, x, y, 0, ID1);
+                        GameActions.DropItem(ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Serial, x, y, 0, ID1);
                     }
                 }
                 else if (SelectedObject.Object is Item it)
@@ -346,7 +347,7 @@ namespace ClassicUO.Game.UI.Gumps
                 otherX,
                 otherY;
 
-            if (Client.Game.UO.Version >= ClientVersion.CV_704565)
+            if (ServiceProvider.Get<UOService>().Self.Version >= ClientVersion.CV_704565)
             {
                 myX = 37;
                 myY = 29;
@@ -391,13 +392,13 @@ namespace ClassicUO.Game.UI.Gumps
                 opdbX,
                 opdbY;
 
-            if (Client.Game.UO.Version >= ClientVersion.CV_704565)
+            if (ServiceProvider.Get<UOService>().Self.Version >= ClientVersion.CV_704565)
             {
                 Add(new GumpPic(0, 0, 0x088A, 0));
 
                 Add(new Label(World.Player.Name, false, 0x0481, font: 3) { X = 73, Y = 32 });
 
-                int fontWidth = 250 - Client.Game.UO.FileManager.Fonts.GetWidthASCII(3, _name);
+                int fontWidth = 250 - ServiceProvider.Get<UOService>().Self.FileManager.Fonts.GetWidthASCII(3, _name);
 
                 Add(new Label(_name, false, 0x0481, font: 3) { X = fontWidth, Y = 244 });
 
@@ -538,7 +539,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(new Label(World.Player.Name, false, 0x0386, font: 1) { X = 84, Y = 40 });
 
-                int fontWidth = 260 - Client.Game.UO.FileManager.Fonts.GetWidthASCII(1, _name);
+                int fontWidth = 260 - ServiceProvider.Get<UOService>().Self.FileManager.Fonts.GetWidthASCII(1, _name);
 
                 Add(new Label(_name, false, 0x0386, font: 1) { X = fontWidth, Y = 170 });
 
@@ -548,7 +549,7 @@ namespace ClassicUO.Game.UI.Gumps
                 opdbY = 70;
             }
 
-            if (Client.Game.UO.Version < ClientVersion.CV_500A)
+            if (ServiceProvider.Get<UOService>().Self.Version < ClientVersion.CV_500A)
             {
                 Add(new ColorBox(110, 60, 0) { X = 45, Y = 90 });
 

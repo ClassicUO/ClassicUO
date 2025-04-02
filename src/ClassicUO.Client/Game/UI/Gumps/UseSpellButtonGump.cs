@@ -11,6 +11,7 @@ using ClassicUO.Input;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -63,7 +64,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (cliloc != 0)
             {
-                SetTooltip(Client.Game.UO.FileManager.Clilocs.GetString(cliloc), 80);
+                SetTooltip(ServiceProvider.Get<UOService>().Self.FileManager.Clilocs.GetString(cliloc), 80);
             }
 
             WantUpdateSize = true;
@@ -81,7 +82,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(LOCK_GRAPHIC);
+                ref readonly var gumpInfo = ref ServiceProvider.Get<UOService>().Self.Gumps.GetGump(LOCK_GRAPHIC);
 
                 if (gumpInfo.Texture != null)
                 {

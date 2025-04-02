@@ -9,6 +9,8 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -73,7 +75,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void SetInScreen()
         {
-            Rectangle windowBounds = Client.Game.Window.ClientBounds;
+            Rectangle windowBounds = ServiceProvider.Get<WindowService>().ClientBounds;
             Rectangle bounds = Bounds;
             bounds.X += windowBounds.X;
             bounds.Y += windowBounds.Y;
@@ -116,14 +118,14 @@ namespace ClassicUO.Game.UI.Gumps
                 position.Y = -halfHeight;
             }
 
-            if (X > Client.Game.Window.ClientBounds.Width - (Width - halfWidth))
+            if (X > ServiceProvider.Get<WindowService>().ClientBounds.Width - (Width - halfWidth))
             {
-                position.X = Client.Game.Window.ClientBounds.Width - (Width - halfWidth);
+                position.X = ServiceProvider.Get<WindowService>().ClientBounds.Width - (Width - halfWidth);
             }
 
-            if (Y > Client.Game.Window.ClientBounds.Height - (Height - halfHeight))
+            if (Y > ServiceProvider.Get<WindowService>().ClientBounds.Height - (Height - halfHeight))
             {
-                position.Y = Client.Game.Window.ClientBounds.Height - (Height - halfHeight);
+                position.Y = ServiceProvider.Get<WindowService>().ClientBounds.Height - (Height - halfHeight);
             }
 
             Location = position;

@@ -5,6 +5,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
+using ClassicUO.Game.Services;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -44,7 +45,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Dispose();
             }
 
-            GameScene scene = Client.Game.GetScene<GameScene>();
+            GameScene scene = ServiceProvider.Get<SceneService>().GetScene<GameScene>();
 
             if (IsDisposed || ProfileManager.CurrentProfile == null || scene == null)
             {
@@ -83,8 +84,8 @@ namespace ClassicUO.Game.UI.Gumps
             int goy = World.Player.Y - _my;
 
 
-            int x = (Client.Game.Scene.Camera.Bounds.Width >> 1) - (gox - goy) * 22;
-            int y = (Client.Game.Scene.Camera.Bounds.Height >> 1) - (gox + goy) * 22;
+            int x = (ServiceProvider.Get<SceneService>().Scene.Camera.Bounds.Width >> 1) - (gox - goy) * 22;
+            int y = (ServiceProvider.Get<SceneService>().Scene.Camera.Bounds.Height >> 1) - (gox + goy) * 22;
 
             x -= (int) World.Player.Offset.X;
             y -= (int) (World.Player.Offset.Y - World.Player.Offset.Z);
@@ -139,7 +140,7 @@ namespace ClassicUO.Game.UI.Gumps
             var camera = scene.Camera;
 
             Point p = new Point(x, y);
-            p = Client.Game.Scene.Camera.WorldToScreen(p);
+            p = ServiceProvider.Get<SceneService>().Scene.Camera.WorldToScreen(p);
             p.X += camera.Bounds.X;
             p.Y += camera.Bounds.Y;
             x = p.X;

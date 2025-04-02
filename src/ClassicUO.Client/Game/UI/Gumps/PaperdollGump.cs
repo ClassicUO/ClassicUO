@@ -11,9 +11,10 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Network;
-using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
+using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -115,7 +116,7 @@ namespace ClassicUO.Game.UI.Gumps
             var showPaperdollBooks =
                 LocalSerial == World.Player && World.ClientFeatures.PaperdollBooks;
             var showRacialAbilitiesBook =
-                showPaperdollBooks && Client.Game.UO.Version >= ClientVersion.CV_7000;
+                showPaperdollBooks && ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_7000;
 
             if (LocalSerial == World.Player)
             {
@@ -152,7 +153,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 );
 
-                if (Client.Game.UO.Version < ClientVersion.CV_500A)
+                if (ServiceProvider.Get<UOService>().Version < ClientVersion.CV_500A)
                 {
                     // JOURNAL BUTTON
                     Add(
@@ -352,8 +353,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (party == null)
                 {
-                    int x = Client.Game.Window.ClientBounds.Width / 2 - 272;
-                    int y = Client.Game.Window.ClientBounds.Height / 2 - 240;
+                    int x = ServiceProvider.Get<WindowService>().ClientBounds.Width / 2 - 272;
+                    int y = ServiceProvider.Get<WindowService>().ClientBounds.Height / 2 - 240;
                     UIManager.Add(new PartyGump(World, x, y, World.Party.CanLoot));
                 }
                 else
@@ -398,7 +399,7 @@ namespace ClassicUO.Game.UI.Gumps
                     && (item.Layer == Layer.Backpack || item.ItemData.IsContainer);
 
                 if (
-                    _paperDollInteractable.HasFakeItem && !Client.Game.UO.GameCursor.ItemHold.Enabled
+                    _paperDollInteractable.HasFakeItem && !ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled
                     || force_false
                 )
                 {
@@ -406,17 +407,17 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (
                     !_paperDollInteractable.HasFakeItem
-                    && Client.Game.UO.GameCursor.ItemHold.Enabled
-                    && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition
+                    && ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled
+                    && !ServiceProvider.Get<UOService>().GameCursor.ItemHold.IsFixedPosition
                     && UIManager.MouseOverControl?.RootParent == this
                 )
                 {
-                    if (Client.Game.UO.GameCursor.ItemHold.ItemData.AnimID != 0)
+                    if (ServiceProvider.Get<UOService>().GameCursor.ItemHold.ItemData.AnimID != 0)
                     {
                         if (
                             mobile != null
                             && mobile.FindItemByLayer(
-                                (Layer)Client.Game.UO.GameCursor.ItemHold.ItemData.Layer
+                                (Layer)ServiceProvider.Get<UOService>().GameCursor.ItemHold.ItemData.Layer
                             ) == null
                         )
                         {
@@ -438,7 +439,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Mobile container = World.Mobiles.Get(LocalSerial);
 
-                if (Client.Game.UO.GameCursor.ItemHold.Enabled)
+                if (ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled)
                 {
                     if (CanLift || LocalSerial == World.Player.Serial)
                     {
@@ -448,7 +449,7 @@ namespace ClassicUO.Game.UI.Gumps
                         )
                         {
                             GameActions.DropItem(
-                                Client.Game.UO.GameCursor.ItemHold.Serial,
+                                ServiceProvider.Get<UOService>().GameCursor.ItemHold.Serial,
                                 0xFFFF,
                                 0xFFFF,
                                 0,
@@ -459,10 +460,10 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            if (Client.Game.UO.GameCursor.ItemHold.ItemData.IsWearable)
+                            if (ServiceProvider.Get<UOService>().GameCursor.ItemHold.ItemData.IsWearable)
                             {
                                 Item equipment = container.FindItemByLayer(
-                                    (Layer)Client.Game.UO.GameCursor.ItemHold.ItemData.Layer
+                                    (Layer)ServiceProvider.Get<UOService>().GameCursor.ItemHold.ItemData.Layer
                                 );
 
                                 if (equipment == null)
@@ -524,7 +525,7 @@ namespace ClassicUO.Game.UI.Gumps
                 BuildGump();
 
                 //GameActions.DoubleClick(0x8000_0000 | LocalSerial);
-                Client.Game.GetScene<GameScene>()?.DoubleClickDelayed(LocalSerial);
+                ServiceProvider.Get<GameService>().GetScene<GameScene>()?.DoubleClickDelayed(LocalSerial);
 
                 IsMinimized = bool.Parse(xml.GetAttribute("isminimized"));
             }
@@ -559,8 +560,8 @@ namespace ClassicUO.Game.UI.Gumps
         public override void OnButtonClick(int buttonID)
         {
             if (
-                Client.Game.UO.GameCursor.ItemHold.Enabled
-                && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition
+                ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled
+                && !ServiceProvider.Get<UOService>().GameCursor.ItemHold.IsFixedPosition
             )
             {
                 OnMouseUp(0, 0, MouseButtonType.Left);
@@ -581,7 +582,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.LogOut:
-                    Client.Game.GetScene<GameScene>()?.RequestQuitGame();
+                    ServiceProvider.Get<GameService>().GetScene<GameScene>()?.RequestQuitGame();
 
                     break;
 
@@ -658,7 +659,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(0x0804);
+                            ref readonly var gumpInfo = ref ServiceProvider.Get<UOService>().Gumps.GetGump(0x0804);
 
                             UIManager.Add(
                                 new HealthBarGump(World,LocalSerial)
@@ -787,7 +788,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Height = h;
                     WantUpdateSize = false;
 
-                    _rect = Client.Game.UO.Arts.GetRealArtBounds(item.DisplayedGraphic);
+                    _rect = ServiceProvider.Get<UOService>().Arts.GetRealArtBounds(item.DisplayedGraphic);
 
                     _originalSize.X = Width;
                     _originalSize.Y = Height;
@@ -826,7 +827,7 @@ namespace ClassicUO.Game.UI.Gumps
                         true
                     );
 
-                    ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(item.DisplayedGraphic);
+                    ref readonly var artInfo = ref ServiceProvider.Get<UOService>().Arts.GetArt(item.DisplayedGraphic);
 
                     if (artInfo.Texture != null)
                     {

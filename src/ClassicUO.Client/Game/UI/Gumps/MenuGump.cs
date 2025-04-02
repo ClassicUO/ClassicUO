@@ -5,6 +5,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -150,26 +151,35 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _graphic = graphic;
 
-                ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(_graphic);
+                var uoService = ServiceProvider.Get<UOService>();
+                ref readonly var artInfo = ref uoService.Arts.GetArt(_graphic);
 
                 Width = artInfo.UV.Width;
                 Height = artInfo.UV.Height;
                 _hue = hue;
-                _isPartial = Client.Game.UO.FileManager.TileData.StaticData[graphic].IsPartialHue;
+                _isPartial = uoService.FileManager.TileData.StaticData[graphic].IsPartialHue;
             }
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                if (_graphic != 0)
+                var uoService = ServiceProvider.Get<UOService>();
+                ref readonly var artInfo = ref uoService.Arts.GetArt(_graphic);
+
+                if (artInfo.Texture == null)
                 {
-                    ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(_graphic);
-
-                    Vector3 hueVector = ShaderHueTranslator.GetHueVector(_hue, _isPartial, 1f);
-
-                    batcher.Draw(artInfo.Texture, new Vector2(x, y), artInfo.UV, hueVector);
+                    return false;
                 }
 
-                return base.Draw(batcher, x, y);
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(_hue, _isPartial, 1.0f);
+
+                batcher.Draw(
+                    artInfo.Texture,
+                    new Vector2(x, y),
+                    artInfo.UV,
+                    hueVector
+                );
+
+                return true;
             }
         }
 

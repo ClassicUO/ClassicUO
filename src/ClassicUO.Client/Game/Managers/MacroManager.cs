@@ -16,6 +16,8 @@ using ClassicUO.Network;
 using ClassicUO.Resources;
 using ClassicUO.Sdk;
 using SDL2;
+using Microsoft.Xna.Framework;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.Managers
 {
@@ -26,6 +28,8 @@ namespace ClassicUO.Game.Managers
         private MacroObject? _lastMacro;
         private long _nextTimer;
         private readonly World _world;
+        private readonly UOService _uoService;
+        private readonly SceneService _sceneService;
 
         private readonly byte[] _skillTable =
         {
@@ -47,7 +51,12 @@ namespace ClassicUO.Game.Managers
         };
 
 
-        public MacroManager(World world) { _world = world; }
+        public MacroManager(World world)
+        {
+            _world = world;
+            _uoService = ServiceProvider.Get<UOService>();
+            _sceneService = ServiceProvider.Get<SceneService>();
+        }
 
         public long WaitForTargetTimer { get; set; }
 
@@ -601,8 +610,8 @@ namespace ClassicUO.Game.Managers
 
                                     if (party == null)
                                     {
-                                        int x = Client.Game.Window.ClientBounds.Width / 2 - 272;
-                                        int y = Client.Game.Window.ClientBounds.Height / 2 - 240;
+                                        int x = _sceneService.Bounds.Width / 2 - 272;
+                                        int y = _sceneService.Bounds.Height / 2 - 240;
                                         UIManager.Add(new PartyGump(_world, x, y, _world.Party.CanLoot));
                                     }
                                     else
@@ -979,7 +988,7 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.QuitGame:
-                    Client.Game.GetScene<GameScene>()?.RequestQuitGame();
+                    _sceneService.GetScene<GameScene>()?.RequestQuitGame();
 
                     break;
 
@@ -1078,9 +1087,9 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.ArmDisarm:
                     int handIndex = 1 - (macro.SubCode - MacroSubType.LeftHand);
-                    var gs = Client.Game.GetScene<GameScene>();
+                    var gs = _sceneService.GetScene<GameScene>();
 
-                    if (handIndex < 0 || handIndex > 1 || Client.Game.UO.GameCursor.ItemHold.Enabled)
+                    if (handIndex < 0 || handIndex > 1 || _uoService.GameCursor.ItemHold.Enabled)
                     {
                         break;
                     }
@@ -1112,7 +1121,7 @@ namespace ClassicUO.Game.Managers
 
                             GameActions.DropItem
                             (
-                                Client.Game.UO.GameCursor.ItemHold.Serial,
+                                _uoService.GameCursor.ItemHold.Serial,
                                 0xFFFF,
                                 0xFFFF,
                                 0,
@@ -1264,7 +1273,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.BandageSelf:
                 case MacroType.BandageTarget:
 
-                    if (Client.Game.UO.Version < ClientVersion.CV_5020 || ProfileManager.CurrentProfile.BandageSelfOld)
+                    if (_uoService.Version < ClientVersion.CV_5020 || ProfileManager.CurrentProfile.BandageSelfOld)
                     {
                         if (WaitingBandageTarget)
                         {
@@ -1468,7 +1477,7 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.Zoom:
-                    var camera = Client.Game.Scene?.Camera;
+                    var camera = _sceneService.Scene?.Camera;
                     if (camera == null)
                         break;
 

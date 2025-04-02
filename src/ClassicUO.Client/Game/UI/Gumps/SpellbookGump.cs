@@ -15,6 +15,7 @@ using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -91,7 +92,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Restore(xml);
 
-            Client.Game.GetScene<GameScene>().DoubleClickDelayed(LocalSerial);
+            ServiceProvider.Get<GameService>().GetScene<GameScene>().DoubleClickDelayed(LocalSerial);
 
             Dispose();
         }
@@ -147,7 +148,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             RequestUpdateContents();
 
-            Client.Game.Audio.PlaySound(0x0055);
+            ServiceProvider.Get<AudioService>().PlaySound(0x0055);
         }
 
         private void _picBase_MouseDoubleClick(object? sender, MouseDoubleClickEventArgs e)
@@ -168,7 +169,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            Client.Game.Audio.PlaySound(0x0055);
+            ServiceProvider.Get<AudioService>().PlaySound(0x0055);
             UIManager.SavePosition(LocalSerial, Location);
             base.Dispose();
         }
@@ -430,7 +431,7 @@ namespace ClassicUO.Game.UI.Gumps
                                                 if (toolTipCliloc > 0)
                                                 {
                                                     string tooltip =
-                                                        Client.Game.UO.FileManager.Clilocs.GetString(
+                                                        ServiceProvider.Get<UOService>().Self.FileManager.Clilocs.GetString(
                                                             toolTipCliloc + id
                                                         );
 
@@ -756,7 +757,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (toolTipCliloc > 0)
                 {
-                    string tooltip = Client.Game.UO.FileManager.Clilocs.GetString(toolTipCliloc + i);
+                    string tooltip = ServiceProvider.Get<UOService>().Self.FileManager.Clilocs.GetString(toolTipCliloc + i);
                     icon.SetTooltip(tooltip, 250);
                 }
 
@@ -1273,7 +1274,7 @@ namespace ClassicUO.Game.UI.Gumps
             _pageCornerLeft.Page = _dataBox.ActivePage != 1 ? 0 : int.MaxValue;
             _pageCornerRight.Page = _dataBox.ActivePage != _maxPage ? 0 : int.MaxValue;
 
-            Client.Game.Audio.PlaySound(0x0055);
+            ServiceProvider.Get<AudioService>().PlaySound(0x0055);
         }
 
         private void OnLabelMouseUp(object? sender, MouseEventArgs e)
@@ -1502,7 +1503,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-                    ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(0x09CF);
+                    ref readonly var gumpInfo = ref ServiceProvider.Get<UOService>().Self.Gumps.GetGump(0x09CF);
 
                     if (gumpInfo.Texture != null)
                     {

@@ -12,6 +12,7 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -67,7 +68,7 @@ namespace ClassicUO.Game.GameObjects
             bool isHuman = IsHuman;
 
             bool isGargoyle =
-                Client.Game.UO.Version >= ClientVersion.CV_7000
+                ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_7000
                 && (Graphic == 666 || Graphic == 667 || Graphic == 0x02B7 || Graphic == 0x02B6);
 
             Vector3 hueVec = ShaderHueTranslator.GetHueVector(0, false, AlphaHue / 255f);
@@ -153,7 +154,7 @@ namespace ClassicUO.Game.GameObjects
             ProcessSteps(out byte dir);
             byte layerDir = dir;
 
-            Client.Game.UO.Animations.GetAnimDirection(ref dir, ref IsFlipped);
+            ServiceProvider.Get<UOService>().Animations.GetAnimDirection(ref dir, ref IsFlipped);
 
             ushort graphic = GetGraphicForAnimation();
             byte animGroup = GetGroupForAnimation(this, graphic, true);
@@ -169,7 +170,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (
                     mountGraphic != 0xFFFF
-                    && mountGraphic < Client.Game.UO.Animations.MaxAnimationCount
+                    && mountGraphic < ServiceProvider.Get<UOService>().Animations.MaxAnimationCount
                 )
                 {
                     if (Mounts.TryGet(mount.Graphic, out var mountInfo))
@@ -267,7 +268,7 @@ namespace ClassicUO.Game.GameObjects
 
                     ProcessSteps(out dir);
 
-                    Client.Game.UO.FileManager.Animations.FixSittingDirection(
+                    ServiceProvider.Get<UOService>().FileManager.Animations.FixSittingDirection(
                         ref dir,
                         ref IsFlipped,
                         ref drawX,
@@ -383,7 +384,7 @@ namespace ClassicUO.Game.GameObjects
                             }
 
                             if (
-                                Client.Game.UO.FileManager.Animations.EquipConversions.TryGetValue(
+                                ServiceProvider.Get<UOService>().FileManager.Animations.EquipConversions.TryGetValue(
                                     Graphic,
                                     out var map
                                 )
@@ -426,7 +427,7 @@ namespace ClassicUO.Game.GameObjects
                         {
                             if (item.ItemData.IsLight)
                             {
-                                Client.Game
+                                ServiceProvider.Get<SceneService>()
                                     .GetScene<GameScene>()?
                                     .AddLight(this, item, drawX, drawY);
                             }
@@ -438,7 +439,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (item.ItemData.IsLight)
                         {
-                            Client.Game.GetScene<GameScene>()?.AddLight(this, item, drawX, drawY);
+                            ServiceProvider.Get<SceneService>().GetScene<GameScene>()?.AddLight(this, item, drawX, drawY);
 
                             /*DrawInternal
                             (
@@ -496,7 +497,7 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 if (
-                    Client.Game.UO.FileManager.Animations.EquipConversions.TryGetValue(
+                    ServiceProvider.Get<UOService>().FileManager.Animations.EquipConversions.TryGetValue(
                         owner.Graphic,
                         out var map
                     )
@@ -606,7 +607,7 @@ namespace ClassicUO.Game.GameObjects
         {
             spriteInfo = default;
 
-            var frames = Client.Game.UO.Animations.GetAnimationFrames(
+            var frames = ServiceProvider.Get<UOService>().Animations.GetAnimationFrames(
                 graphic,
                 animGroup,
                 direction,
@@ -659,12 +660,12 @@ namespace ClassicUO.Game.GameObjects
             bool charIsSitting
         )
         {
-            if (id >= Client.Game.UO.Animations.MaxAnimationCount || owner == null)
+            if (id >= ServiceProvider.Get<UOService>().Animations.MaxAnimationCount || owner == null)
             {
                 return;
             }
 
-            var frames = Client.Game.UO.Animations.GetAnimationFrames(
+            var frames = ServiceProvider.Get<UOService>().Animations.GetAnimationFrames(
                 id,
                 animGroup,
                 dir,
@@ -842,7 +843,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (entity != null && entity.ItemData.IsLight)
                 {
-                    Client.Game
+                    ServiceProvider.Get<SceneService>()
                         .GetScene<GameScene>()?
                         .AddLight(owner, entity, mirror ? x + spriteInfo.UV.Width : x, y);
                 }
@@ -986,10 +987,10 @@ namespace ClassicUO.Game.GameObjects
 
             bool isHuman = IsHuman;
             bool isGargoyle =
-                Client.Game.UO.Version >= ClientVersion.CV_7000
+                ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_7000
                 && (Graphic == 666 || Graphic == 667 || Graphic == 0x02B7 || Graphic == 0x02B6);
 
-            var animations = Client.Game.UO.Animations;
+            var animations = ServiceProvider.Get<UOService>().Animations;
 
             ProcessSteps(out byte dir);
             bool isFlipped = IsFlipped;

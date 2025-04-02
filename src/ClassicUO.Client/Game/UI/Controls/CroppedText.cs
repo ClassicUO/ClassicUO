@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using ClassicUO.Renderer;
 using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -16,7 +17,7 @@ namespace ClassicUO.Game.UI.Controls
             (
                 text,
                 hue,
-                (byte) (Client.Game.UO.Version >= ClientVersion.CV_305D ? 1 : 0),
+                (byte) (ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_305D ? 1 : 0),
                 true,
                 maxWidth > 0 ? FontStyle.BlackBorder | FontStyle.Cropped : FontStyle.BlackBorder,
                 maxWidth: maxWidth

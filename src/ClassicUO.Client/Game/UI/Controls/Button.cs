@@ -7,6 +7,7 @@ using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -43,7 +44,7 @@ namespace ClassicUO.Game.UI.Controls
             _pressed = pressed;
             _over = over;
 
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(normal);
+            ref readonly var gumpInfo = ref ServiceProvider.Get<UOService>().Gumps.GetGump(normal);
             if (gumpInfo.Texture == null)
             {
                 Dispose();
@@ -116,7 +117,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _normal = value;
 
-                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(value);
+                ref readonly var gumpInfo = ref ServiceProvider.Get<UOService>().Gumps.GetGump(value);
 
                 Width = gumpInfo.UV.Width;
                 Height = gumpInfo.UV.Height;
@@ -130,7 +131,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _pressed = value;
 
-                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(value);
+                ref readonly var gumpInfo = ref ServiceProvider.Get<UOService>().Gumps.GetGump(value);
 
                 Width = gumpInfo.UV.Width;
                 Height = gumpInfo.UV.Height;
@@ -144,7 +145,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _over = value;
 
-                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(value);
+                ref readonly var gumpInfo = ref ServiceProvider.Get<UOService>().Gumps.GetGump(value);
 
                 Width = gumpInfo.UV.Width;
                 Height = gumpInfo.UV.Height;
@@ -179,14 +180,14 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (IsClicked && _pressed > 0)
                 {
-                    ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(_pressed);
+                    ref readonly var gumpInfo = ref ServiceProvider.Get<UOService>().Gumps.GetGump(_pressed);
                     texture = gumpInfo.Texture;
                     bounds = gumpInfo.UV;
                 }
 
                 if (texture == null && _over > 0)
                 {
-                    ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(_over);
+                    ref readonly var gumpInfo = ref ServiceProvider.Get<UOService>().Gumps.GetGump(_over);
                     texture = gumpInfo.Texture;
                     bounds = gumpInfo.UV;
                 }
@@ -194,7 +195,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (texture == null)
             {
-                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(_normal);
+                ref readonly var gumpInfo = ref ServiceProvider.Get<UOService>().Gumps.GetGump(_normal);
                 texture = gumpInfo.Texture;
                 bounds = gumpInfo.UV;
             }
@@ -250,7 +251,7 @@ namespace ClassicUO.Game.UI.Controls
                     return;
                 }
 
-                if (_entered || Client.Game.Scene is GameScene)
+                if (_entered || ServiceProvider.Get<GameService>().GetScene<GameScene>() != null)
                 {
                     switch (ButtonAction)
                     {
@@ -280,7 +281,7 @@ namespace ClassicUO.Game.UI.Controls
 
             return ContainsByBounds
                 ? base.Contains(x, y)
-                : Client.Game.UO.Gumps.PixelCheck(_normal, x - Offset.X, y - Offset.Y);
+                : ServiceProvider.Get<UOService>().Gumps.PixelCheck(_normal, x - Offset.X, y - Offset.Y);
         }
 
         public sealed override void Dispose()

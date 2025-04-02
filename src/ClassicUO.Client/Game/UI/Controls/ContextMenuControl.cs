@@ -7,6 +7,8 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -133,14 +135,14 @@ namespace ClassicUO.Game.UI.Controls
             X = Mouse.Position.X + 5;
             Y = Mouse.Position.Y - 20;
 
-            if (X + _background.Width > Client.Game.Window.ClientBounds.Width)
+            if (X + _background.Width > ServiceProvider.Get<WindowService>().ClientBounds.Width)
             {
-                X = Client.Game.Window.ClientBounds.Width - _background.Width;
+                X = ServiceProvider.Get<WindowService>().ClientBounds.Width - _background.Width;
             }
 
-            if (Y + _background.Height > Client.Game.Window.ClientBounds.Height)
+            if (Y + _background.Height > ServiceProvider.Get<WindowService>().ClientBounds.Height)
             {
-                Y = Client.Game.Window.ClientBounds.Height - _background.Height;
+                Y = ServiceProvider.Get<WindowService>().ClientBounds.Height - _background.Height;
             }
 
             foreach (ContextMenuItem mitem in FindControls<ContextMenuItem>())

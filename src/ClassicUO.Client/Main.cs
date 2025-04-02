@@ -170,7 +170,7 @@ namespace ClassicUO
                 Log.Warn($"Client version [{clientVersionText}] is invalid, let's try to read the client.exe");
 
                 // mmm something bad happened, try to load from client.exe [windows only]
-                if (!ClientVersionHelper.TryParseFromFile(Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, "client.exe"), out clientVersionText) || 
+                if (!ClientVersionHelper.TryParseFromFile(Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, "client.exe"), out clientVersionText) ||
                     !ClientVersionHelper.IsClientVersionValid(clientVersionText, out clientVersion))
                 {
                     Log.Error("Invalid client version: " + clientVersionText);
@@ -190,11 +190,11 @@ namespace ClassicUO
             {
                 if ((flags & INVALID_UO_DIRECTORY) != 0)
                 {
-                    Client.ShowErrorMessage(ResGeneral.YourUODirectoryIsInvalid);
+                    Errors.ShowErrorMessage(ResGeneral.YourUODirectoryIsInvalid);
                 }
                 else if ((flags & INVALID_UO_VERSION) != 0)
                 {
-                    Client.ShowErrorMessage(ResGeneral.YourUOClientVersionIsInvalid);
+                    Errors.ShowErrorMessage(ResGeneral.YourUOClientVersionIsInvalid);
                 }
 
                 PlatformHelper.LaunchBrowser(ResGeneral.ClassicUOLink);
@@ -214,7 +214,22 @@ namespace ClassicUO
                         break;
                 }
 
-                Client.Run(pluginHost);
+                Log.Trace("Running game...");
+
+                using (var game = new GameController(pluginHost))
+                {
+                    // https://github.com/FNA-XNA/FNA/wiki/7:-FNA-Environment-Variables#fna_graphics_enable_highdpi
+                    CUOEnviroment.IsHighDPI = Environment.GetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI") == "1";
+
+                    if (CUOEnviroment.IsHighDPI)
+                    {
+                        Log.Trace("HIGH DPI - ENABLED");
+                    }
+
+                    game.Run();
+                }
+
+                Log.Trace("Exiting game...");
             }
 
             Log.Trace("Closing...");

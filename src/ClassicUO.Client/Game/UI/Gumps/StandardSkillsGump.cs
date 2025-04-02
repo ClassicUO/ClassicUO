@@ -14,6 +14,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 using SDL2;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -267,7 +268,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         byte index = g.GetSkill(i);
 
-                        if (index < Client.Game.UO.FileManager.Skills.SkillsCount)
+                        if (index < ServiceProvider.Get<UOService>().Self.FileManager.Skills.SkillsCount)
                         {
                             control.AddSkill(index, 0, 17 + i * 17);
                         }
@@ -393,7 +394,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(_button);
 
-                int width = Client.Game.UO.FileManager.Fonts.GetWidthASCII(6, group.Name);
+                int width = ServiceProvider.Get<UOService>().Self.FileManager.Fonts.GetWidthASCII(6, group.Name);
 
                 Add
                 (
@@ -624,7 +625,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _textbox.SetText(text);
                 }
 
-                int width = Client.Game.UO.FileManager.Fonts.GetWidthASCII(6, text);
+                int width = ServiceProvider.Get<UOService>().Self.FileManager.Fonts.GetWidthASCII(6, text);
                 int xx = width + 11 + 16;
 
                 if (xx > 0)
@@ -763,7 +764,7 @@ namespace ClassicUO.Game.UI.Gumps
                 X = x;
                 Y = y;
 
-                if (index < 0 || index >= Client.Game.UO.FileManager.Skills.Skills.Count)
+                if (index < 0 || index >= ServiceProvider.Get<UOService>().Self.FileManager.Skills.Skills.Count)
                 {
                     Dispose();
 
@@ -913,7 +914,7 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
                 }
 
-                Client.Game.UO.GameCursor.IsDraggingCursorForced = false;
+                ServiceProvider.Get<UOService>().Self.GameCursor.IsDraggingCursorForced = false;
 
                 if (UIManager.LastControlMouseDown(MouseButtonType.Left) == this && _gump.World.Player.Skills[Index].IsClickable)
                 {
@@ -946,7 +947,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (button == MouseButtonType.Left)
                 {
-                    Client.Game.UO.GameCursor.IsDraggingCursorForced = true;
+                    ServiceProvider.Get<UOService>().Self.GameCursor.IsDraggingCursorForced = true;
                 }
             }
 

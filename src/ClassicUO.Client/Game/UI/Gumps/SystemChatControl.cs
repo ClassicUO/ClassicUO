@@ -12,6 +12,7 @@ using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using SDL2;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -485,7 +486,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case SDL.SDL_Keycode.SDLK_q when Keyboard.Ctrl && _messageHistoryIndex > -1 && !ProfileManager.CurrentProfile.DisableCtrlQWBtn:
 
-                    var scene = Client.Game.GetScene<GameScene>();
+                    var scene = ServiceProvider.Get<GameService>().GetScene<GameScene>();
 
                     if (scene == null)
                     {
@@ -515,7 +516,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case SDL.SDL_Keycode.SDLK_w when Keyboard.Ctrl && !ProfileManager.CurrentProfile.DisableCtrlQWBtn:
 
-                    scene = Client.Game.GetScene<GameScene>();
+                    scene = ServiceProvider.Get<GameService>().GetScene<GameScene>();
 
                     if (scene == null)
                     {

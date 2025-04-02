@@ -1,14 +1,15 @@
 using System;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using SDL2;
 
 namespace ClassicUO.Game.Services
 {
     internal class WindowService : IService
     {
-        private readonly Microsoft.Xna.Framework.GameWindow _window;
+        private readonly GameWindow _window;
 
-        public WindowService(Microsoft.Xna.Framework.GameWindow window)
+        internal WindowService(GameWindow window)
         {
             _window = window;
         }
@@ -19,6 +20,7 @@ namespace ClassicUO.Game.Services
             get => _window.AllowUserResizing;
             set => _window.AllowUserResizing = value;
         }
-        public Rectangle ClientBounds => _window.ClientBounds;
+        internal Rectangle ClientBounds => _window.ClientBounds;
+        internal GameWindow Window => _window;
     }
 }

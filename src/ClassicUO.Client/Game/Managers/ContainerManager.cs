@@ -11,6 +11,7 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using System;
 using ClassicUO.Sdk.IO;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.Managers
 {
@@ -20,10 +21,16 @@ namespace ClassicUO.Game.Managers
             new Dictionary<ushort, ContainerData>();
 
         private readonly World _world;
+        private readonly UOService _uoService;
+        private readonly WindowService _windowService;
+        private readonly SceneService _sceneService;
 
         public ContainerManager(World world)
         {
             _world = world;
+            _uoService = ServiceProvider.Get<UOService>();
+            _windowService = ServiceProvider.Get<WindowService>();
+            _sceneService = ServiceProvider.Get<SceneService>();
             BuildContainerFile(false);
         }
 
@@ -53,7 +60,7 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
-                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(g);
+                ref readonly var gumpInfo = ref _uoService.Gumps.GetGump(g);
 
                 if (gumpInfo.Texture != null)
                 {
@@ -72,7 +79,7 @@ namespace ClassicUO.Game.Managers
                                 break;
 
                             case 1:
-                                X = Client.Game.Window.ClientBounds.Width - width;
+                                X = _windowService.ClientBounds.Width - width;
                                 Y = 0;
 
                                 break;
@@ -93,12 +100,12 @@ namespace ClassicUO.Game.Managers
                                 break;
                         }
 
-                        if (X + width > Client.Game.Window.ClientBounds.Width)
+                        if (X + width > _windowService.ClientBounds.Width)
                         {
                             X -= width;
                         }
 
-                        if (Y + height > Client.Game.Window.ClientBounds.Height)
+                        if (Y + height > _windowService.ClientBounds.Height)
                         {
                             Y -= height;
                         }
@@ -111,14 +118,14 @@ namespace ClassicUO.Game.Managers
                         {
                             if (
                                 X + width + Constants.CONTAINER_RECT_STEP
-                                > Client.Game.Window.ClientBounds.Width
+                                > _windowService.ClientBounds.Width
                             )
                             {
                                 X = Constants.CONTAINER_RECT_DEFAULT_POSITION;
 
                                 if (
                                     Y + height + Constants.CONTAINER_RECT_LINESTEP
-                                    > Client.Game.Window.ClientBounds.Height
+                                    > _windowService.ClientBounds.Height
                                 )
                                 {
                                     Y = Constants.CONTAINER_RECT_DEFAULT_POSITION;
@@ -130,12 +137,12 @@ namespace ClassicUO.Game.Managers
                             }
                             else if (
                                 Y + height + Constants.CONTAINER_RECT_STEP
-                                > Client.Game.Window.ClientBounds.Height
+                                > _windowService.ClientBounds.Height
                             )
                             {
                                 if (
                                     X + width + Constants.CONTAINER_RECT_LINESTEP
-                                    > Client.Game.Window.ClientBounds.Width
+                                    > _windowService.ClientBounds.Width
                                 )
                                 {
                                     X = Constants.CONTAINER_RECT_DEFAULT_POSITION;
@@ -178,7 +185,7 @@ namespace ClassicUO.Game.Managers
             }
 
             var bank = _world.Player.FindItemByLayer(Layer.Bank);
-            var camera = Client.Game.Scene?.Camera;
+            var camera = _sceneService.Scene?.Camera;
             if (camera == null)
                 return;
 

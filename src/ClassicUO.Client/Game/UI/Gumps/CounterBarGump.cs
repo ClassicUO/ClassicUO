@@ -11,6 +11,7 @@ using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -378,19 +379,19 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (button == MouseButtonType.Left)
                 {
-                    if (Client.Game.UO.GameCursor.ItemHold.Enabled)
+                    if (ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled)
                     {
                         SetGraphic(
-                            Client.Game.UO.GameCursor.ItemHold.Graphic,
-                            Client.Game.UO.GameCursor.ItemHold.Hue
+                            ServiceProvider.Get<UOService>().GameCursor.ItemHold.Graphic,
+                            ServiceProvider.Get<UOService>().GameCursor.ItemHold.Hue
                         );
 
                         GameActions.DropItem(
-                            Client.Game.UO.GameCursor.ItemHold.Serial,
-                            Client.Game.UO.GameCursor.ItemHold.X,
-                            Client.Game.UO.GameCursor.ItemHold.Y,
+                            ServiceProvider.Get<UOService>().GameCursor.ItemHold.Serial,
+                            ServiceProvider.Get<UOService>().GameCursor.ItemHold.X,
+                            ServiceProvider.Get<UOService>().GameCursor.ItemHold.Y,
                             0,
-                            Client.Game.UO.GameCursor.ItemHold.Container
+                            ServiceProvider.Get<UOService>().GameCursor.ItemHold.Container
                         );
                     }
                     else if (ProfileManager.CurrentProfile.CastSpellsByOneClick)
@@ -540,7 +541,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         _graphic = graphic;
                         _hue = hue;
-                        _partial = Client.Game.UO.FileManager.TileData.StaticData[graphic].IsPartialHue;
+                        _partial = ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[graphic].IsPartialHue;
                         _label.Y = Parent.Height - 15;
                     }
                     else
@@ -564,8 +565,8 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (_graphic != 0)
                     {
-                        ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(_graphic);
-                        var rect = Client.Game.UO.Arts.GetRealArtBounds(_graphic);
+                        ref readonly var artInfo = ref ServiceProvider.Get<UOService>().Arts.GetArt(_graphic);
+                        var rect = ServiceProvider.Get<UOService>().Arts.GetRealArtBounds(_graphic);
 
                         Vector3 hueVector = ShaderHueTranslator.GetHueVector(_hue, _partial, 1f);
 

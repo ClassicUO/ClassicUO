@@ -10,6 +10,7 @@ using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Sdk.IO;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -83,7 +84,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _timeToUpdate = Time.Ticks + 100;
 
-                GameScene scene = Client.Game.GetScene<GameScene>();
+                GameScene scene = ServiceProvider.Get<GameService>().GetScene<GameScene>();
                 Span<char> span = stackalloc char[256];
                 ValueStringBuilder sb = new ValueStringBuilder(span);
 

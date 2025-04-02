@@ -10,6 +10,7 @@ using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -202,14 +203,14 @@ namespace ClassicUO.Game.GameObjects
 
             Point p = RealScreenPosition;
 
-            var bounds = Client.Game.UO.Arts.GetRealArtBounds(Graphic);
+            var bounds = ServiceProvider.Get<UOService>().Arts.GetRealArtBounds(Graphic);
 
             p.Y -= bounds.Height >> 1;
 
             p.X += (int)Offset.X + 22;
             p.Y += (int)(Offset.Y - Offset.Z) + 44;
 
-            p = Client.Game.Scene.Camera.WorldToScreen(p);
+            p = ServiceProvider.Get<SceneService>().Camera.WorldToScreen(p);
 
             for (; last != null; last = (TextObject?)last.Previous)
             {
@@ -241,7 +242,7 @@ namespace ClassicUO.Game.GameObjects
             int offsetY = 0;
 
             int minX = 6;
-            int maxX = minX + Client.Game.Scene.Camera.Bounds.Width - 6;
+            int maxX = minX + ServiceProvider.Get<SceneService>().Bounds.Width - 6;
             int minY = 0;
             //int maxY = minY + ProfileManager.CurrentProfile.GameWindowSize.Y - 6;
 
@@ -373,7 +374,7 @@ namespace ClassicUO.Game.GameObjects
 
         public static bool CanBeDrawn(World world, ushort g)
         {
-            if (Client.Game == null)
+            if (ServiceProvider.Get<GameService>() == null)
                 return true;
 
             switch (g)
@@ -391,7 +392,7 @@ namespace ClassicUO.Game.GameObjects
                 case 0x9E64:
                 case 0x9E65:
                 case 0x9E7D:
-                    ref var data = ref Client.Game.UO.FileManager.TileData.StaticData[g];
+                    ref var data = ref ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[g];
 
                     return !data.IsBackground && !data.IsSurface;
             }
@@ -407,14 +408,14 @@ namespace ClassicUO.Game.GameObjects
                 // In older clients the tiledata flag for this
                 // item contains NoDiagonal for some reason.
                 // So the next check will make the item invisible.
-                if (g == 0x0F65 && Client.Game.UO.Version < ClientVersion.CV_60144)
+                if (g == 0x0F65 && ServiceProvider.Get<UOService>().Version < ClientVersion.CV_60144)
                 {
                     return true;
                 }
 
-                if (g < Client.Game.UO.FileManager.TileData.StaticData.Length)
+                if (g < ServiceProvider.Get<UOService>().FileManager.TileData.StaticData.Length)
                 {
-                    ref var data = ref Client.Game.UO.FileManager.TileData.StaticData[g];
+                    ref var data = ref ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[g];
 
                     // Hacky way to do not render "nodraw"
                     if (!string.IsNullOrEmpty(data.Name) && data.Name.StartsWith("nodraw", StringComparison.OrdinalIgnoreCase))

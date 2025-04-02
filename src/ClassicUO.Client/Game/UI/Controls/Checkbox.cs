@@ -6,6 +6,7 @@ using ClassicUO.Input;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -29,8 +30,8 @@ namespace ClassicUO.Game.UI.Controls
             _inactive = inactive;
             _active = active;
 
-            ref readonly var gumpInfoInactive = ref Client.Game.UO.Gumps.GetGump(inactive);
-            ref readonly var gumpInfoActive = ref Client.Game.UO.Gumps.GetGump(active);
+            ref readonly var gumpInfoInactive = ref ServiceProvider.Get<UOService>().Gumps.GetGump(inactive);
+            ref readonly var gumpInfoActive = ref ServiceProvider.Get<UOService>().Gumps.GetGump(active);
 
             if (gumpInfoInactive.Texture == null || gumpInfoActive.Texture == null)
             {
@@ -88,7 +89,7 @@ namespace ClassicUO.Game.UI.Controls
 
             var ok = base.Draw(batcher, x, y);
 
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(
+            ref readonly var gumpInfo = ref ServiceProvider.Get<UOService>().Gumps.GetGump(
                 IsChecked ? _active : _inactive
             );
 

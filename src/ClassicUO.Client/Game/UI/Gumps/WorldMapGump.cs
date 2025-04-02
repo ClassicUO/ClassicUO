@@ -28,6 +28,7 @@ using ClassicUO.Sdk;
 using SpriteFont = ClassicUO.Renderer.SpriteFont;
 using static ClassicUO.Game.UI.Gumps.WorldMapGump;
 using StbImageWriteSharp;
+using ClassicUO.Game.Services;
 
 
 namespace ClassicUO.Game.UI.Gumps
@@ -275,7 +276,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _options["free_view"] = new ContextMenuItemEntry(ResGumps.FreeView, () => { FreeView = !FreeView; }, true, FreeView);
 
-            for (int i = 0; i < Client.Game.UO.FileManager.Maps.MapsCount; i++)
+            for (int i = 0; i < ServiceProvider.Get<UOService>().Self.FileManager.Maps.MapsCount; i++)
             {
                 var idx = i;
 
@@ -500,7 +501,7 @@ namespace ClassicUO.Game.UI.Gumps
             ContextMenuItemEntry freeView = new ContextMenuItemEntry(ResGumps.FreeView);
             freeView.Add(_options["free_view"]);
 
-            for (int i = 0; i < Client.Game.UO.FileManager.Maps.MapsCount; i++)
+            for (int i = 0; i < ServiceProvider.Get<UOService>().Self.FileManager.Maps.MapsCount; i++)
                 freeView.Add(_options[$"free_view_map_{i}"]);
 
             ContextMenu.Add(freeView);
@@ -541,7 +542,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void ChangeMap(int index)
         {
-            Client.Game.UO.FileManager.Maps.LoadMap(index, World.ClientFeatures.Flags.HasFlag(CharacterListFlags.CLF_UNLOCK_FELUCCA_AREAS));
+            ServiceProvider.Get<UOService>().Self.FileManager.Maps.LoadMap(index, World.ClientFeatures.Flags.HasFlag(CharacterListFlags.CLF_UNLOCK_FELUCCA_AREAS));
             _map = new Map.Map(World, index);
 
 
@@ -701,7 +702,7 @@ namespace ClassicUO.Game.UI.Gumps
             SaveSettings();
             World.WMapManager.SetEnable(false);
 
-            Client.Game.UO.GameCursor.IsDraggingCursorForced = false;
+            ServiceProvider.Get<UOService>().Self.GameCursor.IsDraggingCursorForced = false;
 
             base.Dispose();
         }
@@ -1060,7 +1061,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                     }
 
-                    Texture2D texture = new Texture2D(Client.Game.GraphicsDevice, surface->w, surface->h);
+                    Texture2D texture = new Texture2D(ServiceProvider.Get<GraphicsService>().GraphicsDevice, surface->w, surface->h);
                     texture.SetDataPointerEXT(0, new Rectangle(0, 0, surface->w, surface->h), surface->pixels, len);
 
                     SDL.SDL_FreeSurface((IntPtr)surface);
@@ -1098,7 +1099,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private unsafe void LoadMap(int mapIndex)
         {
-            if (mapIndex < 0 || mapIndex > Client.Game.UO.FileManager.Maps.MapsCount)
+            if (mapIndex < 0 || mapIndex > ServiceProvider.Get<UOService>().Self.FileManager.Maps.MapsCount)
             {
                 return;
             }
@@ -1113,16 +1114,16 @@ namespace ClassicUO.Game.UI.Gumps
                 const int OFFSET_PIX = 2;
                 const int OFFSET_PIX_HALF = OFFSET_PIX / 2;
 
-                int realWidth = Client.Game.UO.FileManager.Maps.MapsDefaultSize[mapIndex, 0];
-                int realHeight = Client.Game.UO.FileManager.Maps.MapsDefaultSize[mapIndex, 1];
+                int realWidth = ServiceProvider.Get<UOService>().Self.FileManager.Maps.MapsDefaultSize[mapIndex, 0];
+                int realHeight = ServiceProvider.Get<UOService>().Self.FileManager.Maps.MapsDefaultSize[mapIndex, 1];
 
-                int fixedWidth = Client.Game.UO.FileManager.Maps.MapBlocksSize[mapIndex, 0];
-                int fixedHeight = Client.Game.UO.FileManager.Maps.MapBlocksSize[mapIndex, 1];
+                int fixedWidth = ServiceProvider.Get<UOService>().Self.FileManager.Maps.MapBlocksSize[mapIndex, 0];
+                int fixedHeight = ServiceProvider.Get<UOService>().Self.FileManager.Maps.MapBlocksSize[mapIndex, 1];
 
                 _mapTexture?.Dispose();
 
-                var mapFile = Client.Game.UO.FileManager.Maps.GetMapFile(mapIndex);
-                var staticFile = Client.Game.UO.FileManager.Maps.GetStaticFile(mapIndex);
+                var mapFile = ServiceProvider.Get<UOService>().Self.FileManager.Maps.GetMapFile(mapIndex);
+                var staticFile = ServiceProvider.Get<UOService>().Self.FileManager.Maps.GetStaticFile(mapIndex);
 
                 if (mapFile == null || staticFile == null)
                 {
@@ -1180,7 +1181,7 @@ namespace ClassicUO.Game.UI.Gumps
                         var imgSpan = new uint[size];
                         var staticBlocks = new StaticsBlock[32];
 
-                        var huesLoader = Client.Game.UO.FileManager.Hues;
+                        var huesLoader = ServiceProvider.Get<UOService>().Self.FileManager.Hues;
 
                         int bx, by, mapX = 0, mapY = 0, x, y;
 
@@ -1337,7 +1338,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (File.Exists(fileMapPath))
                 {
                     using var stream = File.OpenRead(fileMapPath);
-                    _mapTexture = Texture2D.FromStream(Client.Game.GraphicsDevice, stream);
+                    _mapTexture = Texture2D.FromStream(ServiceProvider.Get<GraphicsService>().GraphicsDevice, stream);
                 }
 
                 GameActions.Print(World, ResGumps.WorldMapLoaded, 0x48);
@@ -1550,7 +1551,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         try
                         {
-                            Texture2D texture = Texture2D.FromStream(Client.Game.GraphicsDevice, ms);
+                            Texture2D texture = Texture2D.FromStream(ServiceProvider.Get<GraphicsService>().GraphicsDevice, ms);
 
                             _markerIcons.Add(Path.GetFileNameWithoutExtension(icon).ToLower(), texture);
                         }
@@ -3009,14 +3010,14 @@ namespace ClassicUO.Game.UI.Gumps
                 _lastScroll.Y = _center.Y;
             }
 
-            Client.Game.UO.GameCursor.IsDraggingCursorForced = false;
+            ServiceProvider.Get<UOService>().Self.GameCursor.IsDraggingCursorForced = false;
 
             base.OnMouseUp(x, y, button);
         }
 
         protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
-            if (!Client.Game.UO.GameCursor.ItemHold.Enabled)
+            if (!ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Enabled)
             {
                 if (button == MouseButtonType.Left && (Keyboard.Alt || _freeView) || button == MouseButtonType.Middle)
                 {
@@ -3032,7 +3033,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _isScrolling = true;
                         CanMove = false;
 
-                        Client.Game.UO.GameCursor.IsDraggingCursorForced = true;
+                        ServiceProvider.Get<UOService>().Self.GameCursor.IsDraggingCursorForced = true;
                     }
                 }
 
@@ -3106,14 +3107,14 @@ namespace ClassicUO.Game.UI.Gumps
                     _center.Y = 0;
                 }
 
-                if (_center.X > Client.Game.UO.FileManager.Maps.MapsDefaultSize[_map.Index, 0])
+                if (_center.X > ServiceProvider.Get<UOService>().Self.FileManager.Maps.MapsDefaultSize[_map.Index, 0])
                 {
-                    _center.X = Client.Game.UO.FileManager.Maps.MapsDefaultSize[_map.Index, 0];
+                    _center.X = ServiceProvider.Get<UOService>().Self.FileManager.Maps.MapsDefaultSize[_map.Index, 0];
                 }
 
-                if (_center.Y > Client.Game.UO.FileManager.Maps.MapsDefaultSize[_map.Index, 1])
+                if (_center.Y > ServiceProvider.Get<UOService>().Self.FileManager.Maps.MapsDefaultSize[_map.Index, 1])
                 {
-                    _center.Y = Client.Game.UO.FileManager.Maps.MapsDefaultSize[_map.Index, 1];
+                    _center.Y = ServiceProvider.Get<UOService>().Self.FileManager.Maps.MapsDefaultSize[_map.Index, 1];
                 }
             }
             else

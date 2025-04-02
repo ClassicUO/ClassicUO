@@ -6,6 +6,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -45,7 +46,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_button);
 
-            SetTooltip(Client.Game.UO.FileManager.Clilocs.GetString(1028838 + (Index - 1)), 80);
+            SetTooltip(ServiceProvider.Get<UOService>().Self.FileManager.Clilocs.GetString(1028838 + (Index - 1)), 80);
 
             WantUpdateSize = true;
             AcceptMouseInput = true;

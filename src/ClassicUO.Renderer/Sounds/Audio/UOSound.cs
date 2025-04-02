@@ -42,10 +42,10 @@ namespace ClassicUO.IO.Audio
             //        return;
             //    }
 
-            //    if (ProfileManager.CurrentProfile == null || !ProfileManager.CurrentProfile.EnableSound || !Client.Game.IsActive && !ProfileManager.CurrentProfile.ReproduceSoundsInBackground)
+            //    if (ProfileManager.CurrentProfile == null || !ProfileManager.CurrentProfile.EnableSound || !ServiceProvider.Get<GameService>().IsActive && !ProfileManager.CurrentProfile.ReproduceSoundsInBackground)
             //        volume = 0;
 
-            //    if (Client.Game.IsActive)
+            //    if (ServiceProvider.Get<GameService>().IsActive)
             //    {
             //        if (!ProfileManager.CurrentProfile.ReproduceSoundsInBackground)
             //            volume = ProfileManager.CurrentProfile.SoundVolume / Constants.SOUND_DELTA;

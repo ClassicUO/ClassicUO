@@ -5,6 +5,9 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
 using SDL2;
+using Microsoft.Xna.Framework;
+using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -72,8 +75,8 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
 
-            X = (Client.Game.Window.ClientBounds.Width - Width) >> 1;
-            Y = (Client.Game.Window.ClientBounds.Height - Height) >> 1;
+            X = (ServiceProvider.Get<WindowService>().ClientBounds.Width - Width) >> 1;
+            Y = (ServiceProvider.Get<WindowService>().ClientBounds.Height - Height) >> 1;
 
             // OK
             Button b;
@@ -222,8 +225,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_textBox);
 
-            X = (Client.Game.Window.ClientBounds.Width - Width) >> 1;
-            Y = (Client.Game.Window.ClientBounds.Height - Height) >> 1;
+            X = (ServiceProvider.Get<WindowService>().ClientBounds.Width - Width) >> 1;
+            Y = (ServiceProvider.Get<WindowService>().ClientBounds.Height - Height) >> 1;
 
 
             // OK

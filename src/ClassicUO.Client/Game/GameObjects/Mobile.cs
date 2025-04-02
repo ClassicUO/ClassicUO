@@ -10,6 +10,8 @@ using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 using ClassicUO.Sdk;
 using ClassicUO.Collections;
+using ClassicUO.Game.Services;
+using ClassicUO.Game.Scenes;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -117,7 +119,7 @@ namespace ClassicUO.Game.GameObjects
         public bool IsParalyzed => (Flags & Flags.Frozen) != 0;
         public bool IsYellowHits => (Flags & Flags.YellowBar) != 0;
         public bool IsPoisoned =>
-            Client.Game.UO.Version >= ClientVersion.CV_7000
+            ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_7000
                 ? _isSA_Poisoned
                 : (Flags & Flags.Poisoned) != 0;
         public bool IgnoreCharacters => (Flags & Flags.IgnoreMobiles) != 0;
@@ -135,7 +137,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public bool IsFlying =>
-            Client.Game.UO.Version >= ClientVersion.CV_7000 && (Flags & Flags.Poisoned) != 0;
+            ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_7000 && (Flags & Flags.Poisoned) != 0;
 
         public virtual bool InWarMode
         {
@@ -159,7 +161,7 @@ namespace ClassicUO.Game.GameObjects
             || Graphic == 0x04E5;
 
         public bool IsGargoyle =>
-            Client.Game.UO.Version >= ClientVersion.CV_7000 && Graphic == 0x029A || Graphic == 0x029B;
+            ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_7000 && Graphic == 0x029A || Graphic == 0x029B;
 
         public bool IsMounted
         {
@@ -381,7 +383,7 @@ namespace ClassicUO.Game.GameObjects
 
                 ushort graphic = GetGraphicForAnimation();
 
-                var animations = Client.Game.UO.Animations;
+                var animations = ServiceProvider.Get<UOService>().Self.Animations;
                 if (graphic >= animations.MaxAnimationCount)
                 {
                     return;
@@ -390,7 +392,7 @@ namespace ClassicUO.Game.GameObjects
                 //byte action = 0;
                 //ushort hue = 0;
 
-                //Client.Game.UO.Animations.ReplaceAnimationValues(
+                //ServiceProvider.Get<UOService>().Animations.ReplaceAnimationValues(
                 //    ref graphic,
                 //    ref action,
                 //    ref hue,
@@ -555,7 +557,7 @@ namespace ClassicUO.Game.GameObjects
 
                     StepSoundOffset = (incID + 1) % 2;
 
-                    Client.Game.Audio.PlaySoundWithDistance(World, soundID, step.X, step.Y);
+                    ServiceProvider.Get<AudioService>().PlaySoundWithDistance(World, soundID, step.X, step.Y);
                     LastStepSoundTime = Time.Ticks + delaySound;
                 }
             }
@@ -571,7 +573,7 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            var animations = Client.Game.UO.Animations;
+            var animations = ServiceProvider.Get<UOService>().Self.Animations;
 
             ushort id = GetGraphicForAnimation();
             byte action = GetGroupForAnimation(this, id, true);
@@ -733,7 +735,7 @@ namespace ClassicUO.Game.GameObjects
 
                     int maxDelay =
                         MovementSpeed.TimeToCompleteMovement(run, mounted)
-                        - (int)Client.Game.FrameDelay[1];
+                        - (int)ServiceProvider.Get<GameService>().FrameDelay[1];
 
                     bool removeStep = delay >= maxDelay;
                     bool directionChange = false;
@@ -939,7 +941,7 @@ namespace ClassicUO.Game.GameObjects
                 p.Y += 22;
             }
 
-            Client.Game.UO.Animations.GetAnimationDimensions(
+            ServiceProvider.Get<UOService>().Self.Animations.GetAnimationDimensions(
                 AnimIndex,
                 GetGraphicForAnimation(),
                 /*(byte) m.GetDirectionForAnimation()*/
@@ -957,7 +959,7 @@ namespace ClassicUO.Game.GameObjects
 
             p.X += (int)Offset.X + 22;
             p.Y += (int)(Offset.Y - Offset.Z - (height + centerY + 8));
-            p = Client.Game.Scene.Camera.WorldToScreen(p);
+            p = ServiceProvider.Get<GameService>().GetScene<GameScene>().Camera.WorldToScreen(p);
 
             if (ObjectHandlesStatus == ObjectHandlesStatus.DISPLAYING)
             {

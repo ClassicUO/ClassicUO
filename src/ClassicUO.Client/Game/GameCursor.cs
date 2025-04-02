@@ -7,6 +7,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.Services;
 using ClassicUO.Game.UI;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
@@ -97,7 +98,7 @@ namespace ClassicUO.Game
                 {
                     ushort id = _cursorData[i, j];
 
-                    var surface = Client.Game.UO.Arts.CreateCursorSurfacePtr(
+                    var surface = ServiceProvider.Get<UOService>().Self.Arts.CreateCursorSurfacePtr(
                         id,
                         (ushort)(i == 2 ? 0x0033 : 0),
                         out int hotX,
@@ -161,7 +162,7 @@ namespace ClassicUO.Game
                 return Point.Zero;
             }
 
-            ref readonly var artInfo = ref (ItemHold.IsGumpTexture ? ref Client.Game.UO.Gumps.GetGump(graphic) : ref Client.Game.UO.Arts.GetArt(graphic));
+            ref readonly var artInfo = ref (ItemHold.IsGumpTexture ? ref ServiceProvider.Get<UOService>().Self.Gumps.GetGump(graphic) : ref ServiceProvider.Get<UOService>().Self.Arts.GetArt(graphic));
 
             float scale = 1;
 
@@ -226,7 +227,7 @@ namespace ClassicUO.Game
             {
                 return;
             }
-            ref readonly var artInfo = ref (ItemHold.IsGumpTexture ? ref Client.Game.UO.Gumps.GetGump(draggingGraphic) : ref Client.Game.UO.Arts.GetArt(draggingGraphic));
+            ref readonly var artInfo = ref (ItemHold.IsGumpTexture ? ref ServiceProvider.Get<UOService>().Self.Gumps.GetGump(draggingGraphic) : ref ServiceProvider.Get<UOService>().Self.Arts.GetArt(draggingGraphic));
 
             Point offset = GetDraggingItemOffset();
 
@@ -424,7 +425,7 @@ namespace ClassicUO.Game
 
                 ushort draggingGraphic = GetDraggingItemGraphic();
 
-                ref readonly var artInfo = ref (ItemHold.IsGumpTexture ? ref Client.Game.UO.Gumps.GetGump(draggingGraphic) : ref Client.Game.UO.Arts.GetArt(draggingGraphic));
+                ref readonly var artInfo = ref (ItemHold.IsGumpTexture ? ref ServiceProvider.Get<UOService>().Self.Gumps.GetGump(draggingGraphic) : ref ServiceProvider.Get<UOService>().Self.Arts.GetArt(draggingGraphic));
 
                 if (artInfo.Texture != null)
                 {
@@ -495,7 +496,7 @@ namespace ClassicUO.Game
                     hueVec = ShaderHueTranslator.GetHueVector(0);
                 }
 
-                ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(Graphic);
+                ref readonly var artInfo = ref ServiceProvider.Get<UOService>().Self.Arts.GetArt(Graphic);
 
                 var rect = artInfo.UV;
 
@@ -516,7 +517,7 @@ namespace ClassicUO.Game
 
         private void DrawToolTip(UltimaBatcher2D batcher, Point position)
         {
-            if (Client.Game.Scene is GameScene gs)
+            if (ServiceProvider.Get<SceneService>().Scene is GameScene gs)
             {
                 if (
                     !_world.ClientFeatures.TooltipsEnabled
@@ -641,7 +642,7 @@ namespace ClassicUO.Game
                 return result;
             }
 
-            var camera = Client.Game.Scene?.Camera;
+            var camera = ServiceProvider.Get<SceneService>().Scene?.Camera;
             if (camera == null)
                 return result;
 

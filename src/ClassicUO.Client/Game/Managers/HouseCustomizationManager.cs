@@ -13,6 +13,7 @@ using ClassicUO.IO;
 using ClassicUO.Network;
 using Microsoft.Xna.Framework;
 using ClassicUO.Renderer;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.Managers
 {
@@ -47,7 +48,7 @@ namespace ClassicUO.Game.Managers
             _world = world;
             Serial = serial;
 
-            var fileManager = Client.Game.UO.FileManager;
+            var fileManager = ServiceProvider.Get<UOService>().FileManager;
             // TODO: don't load the file txt every time the housemanager get initialized
             ParseFileWithCategory<CustomHouseWall, CustomHouseWallCategory>(Walls, fileManager.GetUOFilePath("walls.txt"));
 

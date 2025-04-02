@@ -2,6 +2,7 @@
 
 using System;
 using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.Data
 {
@@ -54,7 +55,7 @@ namespace ClassicUO.Game.Data
 
             PopupEnabled = (flags & CharacterListFlags.CLF_CONTEXT_MENU) != 0;
 
-            TooltipsEnabled = (flags & CharacterListFlags.CLF_PALADIN_NECROMANCER_TOOLTIPS) != 0 && Client.Game.UO.Version >= ClientVersion.CV_308Z;
+            TooltipsEnabled = (flags & CharacterListFlags.CLF_PALADIN_NECROMANCER_TOOLTIPS) != 0 && ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_308Z;
 
             PaperdollBooks = (flags & CharacterListFlags.CLF_PALADIN_NECROMANCER_TOOLTIPS) != 0;
         }

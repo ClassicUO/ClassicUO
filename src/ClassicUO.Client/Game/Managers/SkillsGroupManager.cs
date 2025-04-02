@@ -9,6 +9,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Resources;
 using ClassicUO.Sdk;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.Managers
 {
@@ -98,13 +99,13 @@ namespace ClassicUO.Game.Managers
             byte* table = stackalloc byte[60];
             int index = 0;
 
-            int count = Client.Game.UO.FileManager.Skills.SkillsCount;
+            int count = ServiceProvider.Get<UOService>().FileManager.Skills.SkillsCount;
 
             for (int i = 0; i < count; i++)
             {
                 for (int j = 0; j < Count; j++)
                 {
-                    if (Client.Game.UO.FileManager.Skills.GetSortedIndex(i) == _list[j])
+                    if (ServiceProvider.Get<UOService>().FileManager.Skills.GetSortedIndex(i) == _list[j])
                     {
                         table[index++] = _list[j];
 
@@ -155,12 +156,17 @@ namespace ClassicUO.Game.Managers
     internal sealed class SkillsGroupManager
     {
         private readonly World _world;
+        private readonly UOService _uoService;
+        private readonly SceneService _sceneService;
 
-        public SkillsGroupManager(World world) => _world = world;
-
+        public SkillsGroupManager(World world)
+        {
+            _world = world;
+            _uoService = ServiceProvider.Get<UOService>();
+            _sceneService = ServiceProvider.Get<SceneService>();
+        }
 
         public readonly List<SkillsGroup> Groups = new List<SkillsGroup>();
-
 
         public void Add(SkillsGroup g)
         {
@@ -171,7 +177,7 @@ namespace ClassicUO.Game.Managers
         {
             if (Groups[0] == g)
             {
-                var camera = Client.Game.Scene?.Camera;
+                var camera = _sceneService.Scene?.Camera;
                 if (camera == null)
                     return false;
 
@@ -247,7 +253,6 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-
         public void Save()
         {
             string path = Path.Combine(ProfileManager.CurrentProfile.ProfilePath, "skillsgroups.xml");
@@ -272,12 +277,11 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-
         public void MakeDefault()
         {
             Groups.Clear();
 
-            if (!LoadMULFile(Client.Game.UO.FileManager.GetUOFilePath("skillgrp.mul")))
+            if (!LoadMULFile(_uoService.FileManager.GetUOFilePath("skillgrp.mul")))
             {
                 MakeDefaultMiscellaneous();
                 MakeDefaultCombat();
@@ -313,7 +317,7 @@ namespace ClassicUO.Game.Managers
 
         private void MakeDefaultCombat()
         {
-            int count = Client.Game.UO.FileManager.Skills.SkillsCount;
+            int count = _uoService.FileManager.Skills.SkillsCount;
 
             SkillsGroup g = new SkillsGroup();
             g.Name = ResGeneral.Combat;
@@ -376,7 +380,7 @@ namespace ClassicUO.Game.Managers
 
         private void MakeDefaultMagic()
         {
-            int count = Client.Game.UO.FileManager.Skills.SkillsCount;
+            int count = _uoService.FileManager.Skills.SkillsCount;
 
             SkillsGroup g = new SkillsGroup();
             g.Name = ResGeneral.Magic;
@@ -482,7 +486,6 @@ namespace ClassicUO.Game.Managers
                         strlen *= 2;
                     }
 
-
                     StringBuilder sb = new StringBuilder(17);
 
                     SkillsGroup g = new SkillsGroup();
@@ -525,7 +528,7 @@ namespace ClassicUO.Game.Managers
                     {
                         int grp = bin.ReadInt32();
 
-                        if (grp < groups.Length && skillidx < Client.Game.UO.FileManager.Skills.SkillsCount)
+                        if (grp < groups.Length && skillidx < _uoService.FileManager.Skills.SkillsCount)
                         {
                             groups[grp].Add(skillidx++);
                         }

@@ -27,7 +27,7 @@ namespace ClassicUO.Game.Scenes
 
             if (keyboardState.IsKeyDown(Keys.A))
             {
-                _controller.UO.Load(_controller);
+                _controller.UO.Setup(_controller);
                 Settings.GlobalSettings.Encryption = (byte)NetClient.Socket.Load(_controller.UO.FileManager.Version, (EncryptionType)Settings.GlobalSettings.Encryption);
 
                 Log.Trace("Loading plugins...");

@@ -8,6 +8,7 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Renderer.Animations;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.Managers
 {
@@ -22,15 +23,22 @@ namespace ClassicUO.Game.Managers
         const ushort HP_GRAPHIC = 0x1069;
 
         private readonly World _world;
+        private readonly UOService _uoService;
+        private readonly SceneService _sceneService;
 
-        public HealthLinesManager(World world) { _world = world; }
+        public HealthLinesManager(World world)
+        {
+            _world = world;
+            _uoService = ServiceProvider.Get<UOService>();
+            _sceneService = ServiceProvider.Get<SceneService>();
+        }
 
         public bool IsEnabled =>
             ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ShowMobilesHP;
 
         public void Draw(UltimaBatcher2D batcher)
         {
-            var camera = Client.Game.Scene?.Camera;
+            var camera = _sceneService.Scene?.Camera;
             if (camera == null)
                 return;
 
@@ -43,7 +51,7 @@ namespace ClassicUO.Game.Managers
 
             int showWhen = ProfileManager.CurrentProfile.MobileHPShowWhen;
             var useNewTargetSystem = ProfileManager.CurrentProfile.UseNewTargetSystem;
-            var animations = Client.Game.UO.Animations;
+            var animations = _uoService.Animations;
             var isEnabled = IsEnabled;
 
             foreach (Mobile mobile in _world.Mobiles.Values)
@@ -213,7 +221,7 @@ namespace ClassicUO.Game.Managers
 
             if (newTargetSystem && mobile != null && mobile.Serial != _world.Player.Serial)
             {
-                Client.Game.UO.Animations.GetAnimationDimensions(
+                _uoService.Animations.GetAnimationDimensions(
                     mobile.AnimIndex,
                     mobile.GetGraphicForAnimation(),
                     (byte) mobile.GetDirectionForAnimation(),
@@ -245,11 +253,11 @@ namespace ClassicUO.Game.Managers
                     bottomGump = 0x756C;
                 }
 
-                ref readonly var hueGumpInfo = ref Client.Game.UO.Gumps.GetGump(gumpHue);
+                ref readonly var hueGumpInfo = ref _uoService.Gumps.GetGump(gumpHue);
                 var targetX = x + BAR_WIDTH_HALF - hueGumpInfo.UV.Width / 2f;
                 var topTargetY = height + centerY + 8 + 22 + offsetY;
 
-                ref readonly var newTargGumpInfo = ref Client.Game.UO.Gumps.GetGump(topGump);
+                ref readonly var newTargGumpInfo = ref _uoService.Gumps.GetGump(topGump);
                 if (newTargGumpInfo.Texture != null)
                     batcher.Draw(
                         newTargGumpInfo.Texture,
@@ -268,7 +276,7 @@ namespace ClassicUO.Game.Managers
 
                 y += 7 + newTargGumpInfo.UV.Height / 2 - centerY;
 
-                newTargGumpInfo = ref Client.Game.UO.Gumps.GetGump(bottomGump);
+                newTargGumpInfo = ref _uoService.Gumps.GetGump(bottomGump);
                 if (newTargGumpInfo.Texture != null)
                     batcher.Draw(
                         newTargGumpInfo.Texture,
@@ -279,7 +287,7 @@ namespace ClassicUO.Game.Managers
             }
 
 
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(BACKGROUND_GRAPHIC);
+            ref readonly var gumpInfo = ref _uoService.Gumps.GetGump(BACKGROUND_GRAPHIC);
 
             batcher.Draw(
                 gumpInfo.Texture,
@@ -299,7 +307,7 @@ namespace ClassicUO.Game.Managers
                     offset = per;
                 }
 
-                gumpInfo = ref Client.Game.UO.Gumps.GetGump(HP_GRAPHIC);
+                gumpInfo = ref _uoService.Gumps.GetGump(HP_GRAPHIC);
 
                 batcher.DrawTiled(
                     gumpInfo.Texture,
@@ -332,7 +340,7 @@ namespace ClassicUO.Game.Managers
 
                 hueVec.X = hue;
 
-                gumpInfo = ref Client.Game.UO.Gumps.GetGump(HP_GRAPHIC);
+                gumpInfo = ref _uoService.Gumps.GetGump(HP_GRAPHIC);
                 batcher.DrawTiled(
                     gumpInfo.Texture,
                     new Rectangle(x, y, per * MULTIPLER, gumpInfo.UV.Height * MULTIPLER),
