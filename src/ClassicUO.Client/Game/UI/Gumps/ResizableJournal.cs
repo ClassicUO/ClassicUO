@@ -365,10 +365,10 @@ namespace ClassicUO.Game.UI.Gumps
                     lastWidth = Width;
                     lastHeight = Height;
 
-                    foreach (JournalData _ in journalDatas)
+                    foreach (JournalData jdata in journalDatas)
                     {
-                        _.EntryText = new Label(_.EntryText.Text, _.EntryText.Unicode, _.EntryText.Hue, Width - BORDER_WIDTH - _.TimeStamp.Width, font: _.EntryText.Font);
-                        _.EntryText.Update();
+                        jdata.EntryText = new Label(jdata.EntryText.Text, jdata.EntryText.Unicode, jdata.EntryText.Hue, Width - BORDER_WIDTH - jdata.TimeStamp.Width, font: jdata.EntryText.Font);
+                        jdata.EntryText.Update();
                     }
 
                     CalculateScrollBarMaxValue();
