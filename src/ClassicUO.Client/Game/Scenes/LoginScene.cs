@@ -92,12 +92,12 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            if (ServiceProvider.Get<GameService>().IsWindowMaximized())
+            if (ServiceProvider.Get<EngineService>().IsWindowMaximized())
             {
-                ServiceProvider.Get<GameService>().RestoreWindow();
+                ServiceProvider.Get<EngineService>().RestoreWindow();
             }
 
-            ServiceProvider.Get<GameService>().SetWindowSize(640, 480);
+            ServiceProvider.Get<EngineService>().SetWindowSize(640, 480);
         }
 
 
@@ -207,7 +207,7 @@ namespace ClassicUO.Game.Scenes
                 case LoginSteps.EnteringBritania:
                 case LoginSteps.PopUpMessage:
                 case LoginSteps.CharacterCreationDone:
-                    ServiceProvider.Get<UOService>().GameCursor.IsLoading = CurrentLoginStep != LoginSteps.PopUpMessage;
+                    ServiceProvider.Get<GameCursorService>().GameCursor.IsLoading = CurrentLoginStep != LoginSteps.PopUpMessage;
 
                     return GetLoadingScreen();
 

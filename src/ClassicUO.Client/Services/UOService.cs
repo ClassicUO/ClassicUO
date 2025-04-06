@@ -17,21 +17,17 @@ namespace ClassicUO.Services
 {
     internal class UOService : IService
     {
-        private readonly GameController _game;
         private readonly UltimaOnline _uo;
 
         public event EventHandler? Activated;
         public event EventHandler? Deactivated;
 
-        public UOService(GameController game, UltimaOnline uo)
+        public UOService(UltimaOnline uo)
         {
-            _game = game;
             _uo = uo;
         }
 
-        public bool IsActive => _game.IsActive;
         public UltimaOnline Self => _uo;
-        public GameCursor GameCursor => _uo.GameCursor;
         public Animations Animations => _uo.Animations;
         public Art Arts => _uo.Arts;
         public Gump Gumps => _uo.Gumps;

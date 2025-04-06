@@ -92,7 +92,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Restore(xml);
 
-            ServiceProvider.Get<GameService>().GetScene<GameScene>().DoubleClickDelayed(LocalSerial);
+            ServiceProvider.Get<EngineService>().GetScene<GameScene>().DoubleClickDelayed(LocalSerial);
 
             Dispose();
         }

@@ -187,14 +187,14 @@ namespace ClassicUO.Game.UI.Controls
 
             if (
                 HasFakeItem
-                && uoService.GameCursor.ItemHold.Enabled
-                && !uoService.GameCursor.ItemHold.IsFixedPosition
-                && (byte)Layer.Arms == uoService.GameCursor.ItemHold.ItemData.Layer
+                && ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled
+                && !ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.IsFixedPosition
+                && (byte)Layer.Arms == ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.ItemData.Layer
             )
             {
                 switch_arms_with_torso =
-                    uoService.GameCursor.ItemHold.Graphic == 0x1410
-                    || uoService.GameCursor.ItemHold.Graphic == 0x1417;
+                    ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Graphic == 0x1410
+                    || ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Graphic == 0x1417;
             }
 
             Layer[] layers;
@@ -205,12 +205,12 @@ namespace ClassicUO.Game.UI.Controls
             }
             else if (
                 HasFakeItem
-                && uoService.GameCursor.ItemHold.Enabled
-                && !uoService.GameCursor.ItemHold.IsFixedPosition
-                && (byte)Layer.Cloak == uoService.GameCursor.ItemHold.ItemData.Layer
+                && ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled
+                && !ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.IsFixedPosition
+                && (byte)Layer.Cloak == ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.ItemData.Layer
             )
             {
-                layers = uoService.FileManager.TileData.StaticData[uoService.GameCursor.ItemHold.Graphic].IsContainer
+                layers = uoService.FileManager.TileData.StaticData[ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Graphic].IsContainer
                     ? _layerOrder_quiver_fix
                     : _layerOrder;
             }
@@ -275,16 +275,16 @@ namespace ClassicUO.Game.UI.Controls
                 }
                 else if (
                     HasFakeItem
-                    && uoService.GameCursor.ItemHold.Enabled
-                    && !uoService.GameCursor.ItemHold.IsFixedPosition
-                    && (byte)layer == uoService.GameCursor.ItemHold.ItemData.Layer
-                    && uoService.GameCursor.ItemHold.ItemData.AnimID != 0
+                    && ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled
+                    && !ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.IsFixedPosition
+                    && (byte)layer == ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.ItemData.Layer
+                    && ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.ItemData.AnimID != 0
                 )
                 {
                     ushort id = GetAnimID(
                         mobile.Graphic,
-                        uoService.GameCursor.ItemHold.Graphic,
-                        uoService.GameCursor.ItemHold.ItemData.AnimID,
+                        ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Graphic,
+                        ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.ItemData.AnimID,
                         mobile.IsFemale
                     );
 
@@ -295,12 +295,12 @@ namespace ClassicUO.Game.UI.Controls
                             0,
                             0,
                             id,
-                            (ushort)(uoService.GameCursor.ItemHold.Hue & 0x3FFF),
-                            uoService.GameCursor.ItemHold.Layer
+                            (ushort)(ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Hue & 0x3FFF),
+                            ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Layer
                         )
                         {
                             AcceptMouseInput = true,
-                            IsPartialHue = uoService.GameCursor.ItemHold.IsPartialHue,
+                            IsPartialHue = ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.IsPartialHue,
                             Alpha = 0.5f
                         }
                     );
@@ -511,7 +511,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     if (
                         CanLift
-                        && !ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled
+                        && !ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled
                         && Mouse.LButtonPressed
                         && ServiceProvider.Get<UIService>().LastControlMouseDown(MouseButtonType.Left) == this
                         && (

@@ -251,7 +251,7 @@ namespace ClassicUO.Game.UI.Controls
                     return;
                 }
 
-                if (_entered || ServiceProvider.Get<GameService>().GetScene<GameScene>() != null)
+                if (_entered || ServiceProvider.Get<EngineService>().GetScene<GameScene>() != null)
                 {
                     switch (ButtonAction)
                     {

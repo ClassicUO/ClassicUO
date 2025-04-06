@@ -379,19 +379,19 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (button == MouseButtonType.Left)
                 {
-                    if (ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled)
+                    if (ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled)
                     {
                         SetGraphic(
-                            ServiceProvider.Get<UOService>().GameCursor.ItemHold.Graphic,
-                            ServiceProvider.Get<UOService>().GameCursor.ItemHold.Hue
+                            ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Graphic,
+                            ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Hue
                         );
 
                         GameActions.DropItem(
-                            ServiceProvider.Get<UOService>().GameCursor.ItemHold.Serial,
-                            ServiceProvider.Get<UOService>().GameCursor.ItemHold.X,
-                            ServiceProvider.Get<UOService>().GameCursor.ItemHold.Y,
+                            ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Serial,
+                            ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.X,
+                            ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Y,
                             0,
-                            ServiceProvider.Get<UOService>().GameCursor.ItemHold.Container
+                            ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Container
                         );
                     }
                     else if (ProfileManager.CurrentProfile.CastSpellsByOneClick)

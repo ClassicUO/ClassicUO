@@ -43,7 +43,7 @@ namespace ClassicUO.Game.Managers
                 Profile profile = ProfileManager.CurrentProfile;
 
                 return profile != null &&
-                    _uoService.GameCursor.AllowDrawSDLCursor &&
+                    ServiceProvider.Get<GameCursorService>().GameCursor.AllowDrawSDLCursor &&
                     DraggingControl == null &&
                     MouseOverControl == null &&
                     !IsModalOpen &&
@@ -184,7 +184,7 @@ namespace ClassicUO.Game.Managers
 
             if (MouseOverControl != null)
             {
-                if (mouseOverControl != null && MouseOverControl == mouseOverControl || _uoService.GameCursor.ItemHold.Enabled)
+                if (mouseOverControl != null && MouseOverControl == mouseOverControl || ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled)
                 {
                     MouseOverControl.InvokeMouseUp(Mouse.Position, button);
                 }
@@ -597,7 +597,7 @@ namespace ClassicUO.Game.Managers
 
         public void AttemptDragControl(Control control, bool attemptAlwaysSuccessful = false)
         {
-            if ((_isDraggingControl && !attemptAlwaysSuccessful) || _uoService.GameCursor.ItemHold.Enabled && !_uoService.GameCursor.ItemHold.IsFixedPosition)
+            if ((_isDraggingControl && !attemptAlwaysSuccessful) || ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled && !ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.IsFixedPosition)
             {
                 return;
             }

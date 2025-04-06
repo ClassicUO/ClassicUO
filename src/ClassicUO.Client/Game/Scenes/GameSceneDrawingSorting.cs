@@ -1135,10 +1135,10 @@ namespace ClassicUO.Game.Scenes
                 {
                     _world_render_target?.Dispose();
 
-                    PresentationParameters pp = ServiceProvider.Get<GameService>().GraphicsDevice.PresentationParameters;
+                    PresentationParameters pp = ServiceProvider.Get<EngineService>().GraphicsDevice.PresentationParameters;
 
                     _world_render_target = new RenderTarget2D(
-                        ServiceProvider.Get<GameService>().GraphicsDevice,
+                        ServiceProvider.Get<EngineService>().GraphicsDevice,
                         winGameWidth * 1,
                         winGameHeight * 1,
                         false,
@@ -1157,10 +1157,10 @@ namespace ClassicUO.Game.Scenes
                 {
                     _lightRenderTarget?.Dispose();
 
-                    PresentationParameters pp = ServiceProvider.Get<GameService>().GraphicsDevice.PresentationParameters;
+                    PresentationParameters pp = ServiceProvider.Get<EngineService>().GraphicsDevice.PresentationParameters;
 
                     _lightRenderTarget = new RenderTarget2D(
-                        ServiceProvider.Get<GameService>().GraphicsDevice,
+                        ServiceProvider.Get<EngineService>().GraphicsDevice,
                         winGameWidth,
                         winGameHeight,
                         false,

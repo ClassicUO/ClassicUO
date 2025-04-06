@@ -151,13 +151,13 @@ namespace ClassicUO.Game.UI.Gumps
         // Manteniamo i servizi che sono utilizzati in più metodi
         private readonly AudioManager _audioManager;
         private readonly FileManagerService _fileManager;
-        private readonly GameService _gameService;
+        private readonly EngineService _gameService;
 
         public OptionsGump(World world) : base(world, 0, 0)
         {
             _audioManager = new AudioManager();
             _fileManager = ServiceProvider.Get<FileManagerService>();
-            _gameService = ServiceProvider.Get<GameService>();
+            _gameService = ServiceProvider.Get<EngineService>();
 
             // Utilizzo di variabili locali per i servizi usati solo nel costruttore
             var audioService = ServiceProvider.Get<AudioService>();
@@ -438,7 +438,7 @@ namespace ClassicUO.Game.UI.Gumps
                     try
                     {
                         using var stream = new MemoryStream(Loader.GetCuoLogo().ToArray());
-                        _logoTexture2D = Texture2D.FromStream(ServiceProvider.Get<GameService>().GraphicsDevice, stream);
+                        _logoTexture2D = Texture2D.FromStream(ServiceProvider.Get<EngineService>().GraphicsDevice, stream);
                     }
                     catch
                     {
@@ -455,13 +455,8 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 1;
             var sceneService = ServiceProvider.Get<SceneService>();
             var uoService = ServiceProvider.Get<UOService>();
-            var gameService = ServiceProvider.Get<GameService>();
+            var gameService = ServiceProvider.Get<EngineService>();
             var windowService = ServiceProvider.Get<WindowService>();
-
-            Add(new Label(ResGumps.General, true, HUE_FONT) { X = 100, Y = 20 }, PAGE);
-
-            var section1 = new DataBox(50, 60, 0, 0);
-            Add(section1, PAGE);
 
             ScrollArea rightArea = new ScrollArea
             (
@@ -3762,11 +3757,11 @@ namespace ClassicUO.Game.UI.Gumps
             // general
             if (Settings.GlobalSettings.FPS != _sliderFPS.Value)
             {
-                var width = ServiceProvider.Get<GameService>().Window.ClientBounds.Width;
-                var height = ServiceProvider.Get<GameService>().Window.ClientBounds.Height;
-                ServiceProvider.Get<GameService>().GraphicsManager.PreferredBackBufferWidth = width;
-                ServiceProvider.Get<GameService>().GraphicsManager.PreferredBackBufferHeight = height;
-                ServiceProvider.Get<GameService>().GraphicsManager.ApplyChanges();
+                var width = ServiceProvider.Get<EngineService>().Window.ClientBounds.Width;
+                var height = ServiceProvider.Get<EngineService>().Window.ClientBounds.Height;
+                ServiceProvider.Get<EngineService>().GraphicsManager.PreferredBackBufferWidth = width;
+                ServiceProvider.Get<EngineService>().GraphicsManager.PreferredBackBufferHeight = height;
+                ServiceProvider.Get<EngineService>().GraphicsManager.ApplyChanges();
             }
 
             _currentProfile.HighlightGameObjects = _highlightObjects.IsChecked;
@@ -3800,7 +3795,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _currentProfile.DrawRoofs = !_drawRoofs.IsChecked;
 
-                ServiceProvider.Get<GameService>().GetScene<GameScene>()?.UpdateMaxDrawZ(true);
+                ServiceProvider.Get<EngineService>().GetScene<GameScene>()?.UpdateMaxDrawZ(true);
             }
 
             if (_currentProfile.TopbarGumpIsDisabled != _enableTopbar.IsChecked)
@@ -4047,7 +4042,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.AuraUnderFeetType = _auraType.SelectedIndex;
 
             Settings.GlobalSettings.RunMouseInASeparateThread = _runMouseInSeparateThread.IsChecked;
-            ServiceProvider.Get<GameService>().IsMouseVisible = _runMouseInSeparateThread.IsChecked;
+            ServiceProvider.Get<EngineService>().IsMouseVisible = _runMouseInSeparateThread.IsChecked;
 
             _currentProfile.AuraOnMouse = _auraMouse.IsChecked;
             _currentProfile.AnimatedWaterEffect = _animatedWaterEffect.IsChecked;

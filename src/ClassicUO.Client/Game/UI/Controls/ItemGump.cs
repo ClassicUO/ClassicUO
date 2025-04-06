@@ -4,14 +4,11 @@ using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
-using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
-using Microsoft.Xna.Framework;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Services;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -20,9 +17,16 @@ namespace ClassicUO.Game.UI.Controls
         private ushort _graphic;
         private readonly bool _is_gump;
         private readonly Gump _gump;
+        private readonly UIService _uiService;
+        private readonly UOService _uoService;
+        private readonly GameCursorService _cursorService;
 
         public ItemGump(Gump gump, uint serial, ushort graphic, ushort hue, int x, int y, bool is_gump = false)
         {
+            _uiService = ServiceProvider.Get<UIService>();
+            _uoService = ServiceProvider.Get<UOService>();
+            _cursorService = ServiceProvider.Get<GameCursorService>();
+
             _gump = gump;
             _is_gump = is_gump;
 
@@ -47,11 +51,10 @@ namespace ClassicUO.Game.UI.Controls
             set
             {
                 _graphic = value;
-                var uoService = ServiceProvider.Get<UOService>();
 
                 ref readonly var spriteInfo = ref _is_gump
-                    ? ref uoService.Gumps.GetGump(value)
-                    : ref uoService.Arts.GetArt(value);
+                    ? ref _uoService.Gumps.GetGump(value)
+                    : ref _uoService.Arts.GetArt(value);
 
                 if (spriteInfo.Texture == null)
                 {
@@ -63,7 +66,7 @@ namespace ClassicUO.Game.UI.Controls
                 Width = spriteInfo.UV.Width;
                 Height = spriteInfo.UV.Height;
 
-                IsPartialHue = !_is_gump && uoService.FileManager.TileData.StaticData[value].IsPartialHue;
+                IsPartialHue = !_is_gump && _uoService.FileManager.TileData.StaticData[value].IsPartialHue;
             }
         }
 
@@ -83,12 +86,11 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_gump.World.InGame)
             {
-                var uoService = ServiceProvider.Get<UOService>();
                 if (
                     CanPickUp
-                    && !uoService.GameCursor.ItemHold.Enabled
+                    && !_cursorService.GameCursor.ItemHold.Enabled
                     && Mouse.LButtonPressed
-                    && ServiceProvider.Get<UIService>().LastControlMouseDown(MouseButtonType.Left) == this
+                    && _uiService.LastControlMouseDown(MouseButtonType.Left) == this
                     && (
                         Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF
                             && Mouse.LastLeftButtonClickTime != 0
@@ -114,58 +116,106 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            var uoService = ServiceProvider.Get<UOService>();
-            ref readonly var spriteInfo = ref _is_gump
-                ? ref uoService.Gumps.GetGump(Graphic)
-                : ref uoService.Arts.GetArt(Graphic);
+            base.Draw(batcher, x, y);
 
-            if (spriteInfo.Texture == null)
+            bool partialHue = IsPartialHue;
+            ushort hue = Hue;
+
+            if (HighlightOnMouseOver && MouseIsOver || LocalSerial == SelectedObject.SelectedContainer?.Serial)
             {
-                return false;
+                hue = 0x0035;
+                partialHue = false;
             }
 
-            Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, IsPartialHue, 1.0f);
+            var hueVector = ShaderHueTranslator.GetHueVector(hue, partialHue, 1);
 
-            batcher.Draw(
-                spriteInfo.Texture,
-                new Vector2(x, y),
-                spriteInfo.UV,
-                hueVector
-            );
+            ref readonly var spriteInfo = ref _is_gump
+                ? ref _uoService.Gumps.GetGump(Graphic)
+                : ref _uoService.Arts.GetArt(Graphic);
+
+            if (spriteInfo.Texture != null)
+            {
+                var rect = new Rectangle(x, y, Width, Height);
+
+                batcher.Draw(spriteInfo.Texture, rect, spriteInfo.UV, hueVector);
+
+                var item = _gump.World.Items.Get(LocalSerial);
+
+                if (
+                    item != null
+                    && !item.IsMulti
+                    && !item.IsCoin
+                    && item.Amount > 1
+                    && item.ItemData.IsStackable
+                )
+                {
+                    rect.X += 5;
+                    rect.Y += 5;
+
+                    batcher.Draw(spriteInfo.Texture, rect, spriteInfo.UV, hueVector);
+                }
+            }
 
             return true;
         }
 
         public override bool Contains(int x, int y)
         {
-            if (IsDisposed)
+            ref readonly var spriteInfo = ref _is_gump
+                ? ref _uoService.Gumps.GetGump(Graphic)
+                : ref _uoService.Arts.GetArt(Graphic);
+
+            if (spriteInfo.Texture == null)
             {
                 return false;
             }
 
-            var uoService = ServiceProvider.Get<UOService>();
+            x -= Offset.X;
+            y -= Offset.Y;
+
+            if (
+                ProfileManager.CurrentProfile != null
+                && ProfileManager.CurrentProfile.ScaleItemsInsideContainers
+            )
+            {
+                var scale = _uiService.ContainerScale;
+
+                x = (int)(x / scale);
+                y = (int)(y / scale);
+            }
+
             if (_is_gump)
             {
-                if (uoService.Gumps.PixelCheck(Graphic, x, y))
+                if (_uoService.Gumps.PixelCheck(Graphic, x, y))
                 {
                     return true;
+                }
+
+                var item = _gump.World.Items.Get(LocalSerial);
+
+                if (item != null && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
+                {
+                    if (_uoService.Gumps.PixelCheck(Graphic, x - 5, y - 5))
+                    {
+                        return true;
+                    }
                 }
             }
             else
             {
-                if (uoService.Gumps.PixelCheck(Graphic, x - 5, y - 5))
+                if (_uoService.Arts.PixelCheck(Graphic, x, y))
                 {
                     return true;
                 }
 
-                if (uoService.Arts.PixelCheck(Graphic, x, y))
-                {
-                    return true;
-                }
+                var item = _gump.World.Items.Get(LocalSerial);
 
-                if (uoService.Arts.PixelCheck(Graphic, x - 5, y - 5))
+                if (item != null && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
                 {
-                    return true;
+                    if (_uoService.Arts.PixelCheck(Graphic, x - 5, y - 5))
+                    {
+                        return true;
+                    }
                 }
             }
 
@@ -185,22 +235,29 @@ namespace ClassicUO.Game.UI.Controls
 
         private bool CanPickup()
         {
-            if (IsDisposed)
+            var offset = Mouse.LDragOffset;
+
+            if (
+                Math.Abs(offset.X) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS
+                && Math.Abs(offset.Y) < Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS
+            )
             {
                 return false;
             }
 
-            var uoService = ServiceProvider.Get<UOService>();
-            ref readonly var spriteInfo = ref _is_gump
-                ? ref uoService.Gumps.GetGump(Graphic)
-                : ref uoService.Arts.GetArt(Graphic);
+            var split = _uiService.GetGump<SplitMenuGump>(LocalSerial);
 
-            if (spriteInfo.Texture == null)
+            if (split == null)
             {
-                return false;
+                return true;
             }
 
-            return true;
+            split.X = Mouse.LClickPosition.X - 80;
+            split.Y = Mouse.LClickPosition.Y - 40;
+            _uiService.AttemptDragControl(split, true);
+            split.BringOnTop();
+
+            return false;
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
@@ -236,13 +293,42 @@ namespace ClassicUO.Game.UI.Controls
 
         private void AttemptPickUp()
         {
-            if (IsDisposed)
+            if (CanPickUp)
             {
-                return;
-            }
+                ref readonly var spriteInfo = ref _is_gump
+                    ? ref _uoService.Gumps.GetGump(Graphic)
+                    : ref _uoService.Arts.GetArt(Graphic);
 
-            var uoService = ServiceProvider.Get<UOService>();
-            GameActions.PickUp(_gump.World, LocalSerial, 0, 0);
+                int centerX = spriteInfo.UV.Width >> 1;
+                int centerY = spriteInfo.UV.Height >> 1;
+
+                if (
+                    ProfileManager.CurrentProfile != null
+                    && ProfileManager.CurrentProfile.ScaleItemsInsideContainers
+                )
+                {
+                    var scale = _uiService.ContainerScale;
+                    centerX = (int)(centerX * scale);
+                    centerY = (int)(centerY * scale);
+                }
+
+                if (
+                    ProfileManager.CurrentProfile != null
+                    && ProfileManager.CurrentProfile.RelativeDragAndDropItems
+                )
+                {
+                    Point p = new Point(
+                        centerX - (Mouse.Position.X - ScreenCoordinateX),
+                        centerY - (Mouse.Position.Y - ScreenCoordinateY)
+                    );
+
+                    GameActions.PickUp(_gump.World, LocalSerial, centerX, centerY, offset: p, is_gump: _is_gump);
+                }
+                else
+                {
+                    GameActions.PickUp(_gump.World, LocalSerial, centerX, centerY, is_gump: _is_gump);
+                }
+            }
         }
     }
 }

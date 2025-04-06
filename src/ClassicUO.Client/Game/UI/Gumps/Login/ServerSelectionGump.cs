@@ -174,7 +174,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             scrollArea.ScissorRectangle.Y = 16;
             scrollArea.ScissorRectangle.Height = -32;
 
-            var loginScene = ServiceProvider.Get<GameService>().GetScene<LoginScene>();
+            var loginScene = ServiceProvider.Get<EngineService>().GetScene<LoginScene>();
             if (loginScene != null)
             {
                 foreach (var server in loginScene.Servers)
@@ -209,7 +209,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         public override void OnButtonClick(int buttonID)
         {
-            var loginScene = ServiceProvider.Get<GameService>().GetScene<LoginScene>();
+            var loginScene = ServiceProvider.Get<EngineService>().GetScene<LoginScene>();
             if (loginScene == null)
                 return;
 
@@ -246,7 +246,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         {
             if (key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER)
             {
-                var loginScene = ServiceProvider.Get<GameService>().GetScene<LoginScene>();
+                var loginScene = ServiceProvider.Get<EngineService>().GetScene<LoginScene>();
 
                 if (loginScene?.Servers?.Any(s => s != null) ?? false)
                 {

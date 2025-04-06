@@ -374,7 +374,7 @@ namespace ClassicUO.Game.GameObjects
 
         public static bool CanBeDrawn(World world, ushort g)
         {
-            if (ServiceProvider.Get<GameService>() == null)
+            if (ServiceProvider.Get<EngineService>() == null)
                 return true;
 
             switch (g)

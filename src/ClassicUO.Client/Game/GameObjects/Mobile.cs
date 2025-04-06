@@ -735,7 +735,7 @@ namespace ClassicUO.Game.GameObjects
 
                     int maxDelay =
                         MovementSpeed.TimeToCompleteMovement(run, mounted)
-                        - (int)ServiceProvider.Get<GameService>().FrameDelay[1];
+                        - (int)ServiceProvider.Get<EngineService>().FrameDelay[1];
 
                     bool removeStep = delay >= maxDelay;
                     bool directionChange = false;
@@ -959,7 +959,7 @@ namespace ClassicUO.Game.GameObjects
 
             p.X += (int)Offset.X + 22;
             p.Y += (int)(Offset.Y - Offset.Z - (height + centerY + 8));
-            p = ServiceProvider.Get<GameService>().GetScene<GameScene>().Camera.WorldToScreen(p);
+            p = ServiceProvider.Get<EngineService>().GetScene<GameScene>().Camera.WorldToScreen(p);
 
             if (ObjectHandlesStatus == ObjectHandlesStatus.DISPLAYING)
             {

@@ -914,7 +914,7 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
                 }
 
-                ServiceProvider.Get<UOService>().Self.GameCursor.IsDraggingCursorForced = false;
+                ServiceProvider.Get<GameCursorService>().GameCursor.IsDraggingCursorForced = false;
 
                 if (ServiceProvider.Get<UIService>().LastControlMouseDown(MouseButtonType.Left) == this && _gump.World.Player.Skills[Index].IsClickable)
                 {
@@ -947,7 +947,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (button == MouseButtonType.Left)
                 {
-                    ServiceProvider.Get<UOService>().Self.GameCursor.IsDraggingCursorForced = true;
+                    ServiceProvider.Get<GameCursorService>().GameCursor.IsDraggingCursorForced = true;
                 }
             }
 

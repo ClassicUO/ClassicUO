@@ -47,8 +47,9 @@ namespace ClassicUO.Game
 
         public static void OpenMacroGump(World world, string name)
         {
-            ServiceProvider.Get<UIService>().GetGump<MacroGump>()?.Dispose();
-            ServiceProvider.Get<UIService>().Add(new MacroGump(world, name));
+            var uiService = ServiceProvider.Get<UIService>();
+            uiService.GetGump<MacroGump>()?.Dispose();
+            uiService.Add(new MacroGump(world, name));
         }
 
         public static void OpenPaperdoll(World world, uint serial)
@@ -73,7 +74,8 @@ namespace ClassicUO.Game
 
         public static void OpenSettings(World world, int page = 0)
         {
-            var opt = ServiceProvider.Get<UIService>().GetGump<OptionsGump>();
+            var uiService = ServiceProvider.Get<UIService>();
+            var opt = uiService.GetGump<OptionsGump>();
 
             if (opt == null)
             {
@@ -83,7 +85,7 @@ namespace ClassicUO.Game
                     Y = (ServiceProvider.Get<WindowService>().ClientBounds.Height >> 1) - 250
                 };
 
-                ServiceProvider.Get<UIService>().Add(optionsGump);
+                uiService.Add(optionsGump);
                 optionsGump.ChangePage(page);
                 optionsGump.SetInScreen();
             }
@@ -106,17 +108,19 @@ namespace ClassicUO.Game
 
         public static void OpenJournal(World world)
         {
+            var uiService = ServiceProvider.Get<UIService>();
+
             if (ProfileManager.CurrentProfile.UseAlternateJournal)
             {
-                ServiceProvider.Get<UIService>().Add(new ResizableJournal(world));
+                uiService.Add(new ResizableJournal(world));
                 return;
             }
 
-            var journalGump = ServiceProvider.Get<UIService>().GetGump<JournalGump>();
+            var journalGump = uiService.GetGump<JournalGump>();
 
             if (journalGump == null)
             {
-                ServiceProvider.Get<UIService>().Add(new JournalGump(world) { X = 64, Y = 64 });
+                uiService.Add(new JournalGump(world) { X = 64, Y = 64 });
             }
             else
             {
@@ -150,11 +154,12 @@ namespace ClassicUO.Game
 
         public static void OpenMiniMap(World world)
         {
-            var miniMapGump = ServiceProvider.Get<UIService>().GetGump<MiniMapGump>();
+            var uiService = ServiceProvider.Get<UIService>();
+            var miniMapGump = uiService.GetGump<MiniMapGump>();
 
             if (miniMapGump == null)
             {
-                ServiceProvider.Get<UIService>().Add(new MiniMapGump(world));
+                uiService.Add(new MiniMapGump(world));
             }
             else
             {
@@ -166,12 +171,13 @@ namespace ClassicUO.Game
 
         public static void OpenWorldMap(World world)
         {
-            var worldMap = ServiceProvider.Get<UIService>().GetGump<WorldMapGump>();
+            var uiService = ServiceProvider.Get<UIService>();
+            var worldMap = uiService.GetGump<WorldMapGump>();
 
             if (worldMap == null || worldMap.IsDisposed)
             {
                 worldMap = new WorldMapGump(world);
-                ServiceProvider.Get<UIService>().Add(worldMap);
+                uiService.Add(worldMap);
             }
             else
             {
@@ -182,13 +188,15 @@ namespace ClassicUO.Game
 
         public static void OpenChat(World world)
         {
+            var uiService = ServiceProvider.Get<UIService>();
+
             if (world.ChatManager.ChatIsEnabled == ChatStatus.Enabled)
             {
-                var chatGump = ServiceProvider.Get<UIService>().GetGump<ChatGump>();
+                var chatGump = uiService.GetGump<ChatGump>();
 
                 if (chatGump == null)
                 {
-                    ServiceProvider.Get<UIService>().Add(new ChatGump(world));
+                    uiService.Add(new ChatGump(world));
                 }
                 else
                 {
@@ -198,11 +206,11 @@ namespace ClassicUO.Game
             }
             else if (world.ChatManager.ChatIsEnabled == ChatStatus.EnabledUserRequest)
             {
-                var chatGump = ServiceProvider.Get<UIService>().GetGump<ChatGumpChooseName>();
+                var chatGump = uiService.GetGump<ChatGumpChooseName>();
 
                 if (chatGump == null)
                 {
-                    ServiceProvider.Get<UIService>().Add(new ChatGumpChooseName(world));
+                    uiService.Add(new ChatGumpChooseName(world));
                 }
                 else
                 {
@@ -460,7 +468,9 @@ namespace ClassicUO.Game
             if (world.Player == null)
                 return false;
 
-            if (world.Player.IsDead || ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled)
+            var cursorService = ServiceProvider.Get<GameCursorService>();
+
+            if (world.Player.IsDead || cursorService.GameCursor.ItemHold.Enabled)
             {
                 return false;
             }
@@ -474,9 +484,11 @@ namespace ClassicUO.Game
 
             if (amount <= -1 && item.Amount > 1 && item.ItemData.IsStackable)
             {
+                var uiService = ServiceProvider.Get<UIService>();
+
                 if (ProfileManager.CurrentProfile.HoldShiftToSplitStack == Keyboard.Shift)
                 {
-                    var gump = ServiceProvider.Get<UIService>().GetGump<SplitMenuGump>(item);
+                    var gump = uiService.GetGump<SplitMenuGump>(item);
 
                     if (gump != null)
                     {
@@ -489,8 +501,8 @@ namespace ClassicUO.Game
                         Y = Mouse.Position.Y - 40
                     };
 
-                    ServiceProvider.Get<UIService>().Add(gump);
-                    ServiceProvider.Get<UIService>().AttemptDragControl(gump, true);
+                    uiService.Add(gump);
+                    uiService.AttemptDragControl(gump, true);
 
                     return true;
                 }
@@ -501,9 +513,9 @@ namespace ClassicUO.Game
                 amount = item.Amount;
             }
 
-            ServiceProvider.Get<UOService>().GameCursor.ItemHold.Clear();
-            ServiceProvider.Get<UOService>().GameCursor.ItemHold.Set(item, (ushort) amount, offset);
-            ServiceProvider.Get<UOService>().GameCursor.ItemHold.IsGumpTexture = is_gump;
+            cursorService.GameCursor.ItemHold.Clear();
+            cursorService.GameCursor.ItemHold.Set(item, (ushort) amount, offset);
+            cursorService.GameCursor.ItemHold.IsGumpTexture = is_gump;
             ServiceProvider.Get<PacketHandlerService>().Out.Send_PickUpRequest(item, (ushort) amount);
 
             if (item.OnGround)
@@ -520,10 +532,10 @@ namespace ClassicUO.Game
 
         public static void DropItem(uint serial, int x, int y, int z, uint container)
         {
-            var uoService = ServiceProvider.Get<UOService>();
-            if (uoService.GameCursor.ItemHold.Enabled && !uoService.GameCursor.ItemHold.IsFixedPosition && (uoService.GameCursor.ItemHold.Serial != container || uoService.GameCursor.ItemHold.ItemData.IsStackable))
+            var cursorService = ServiceProvider.Get<GameCursorService>();
+            if (cursorService.GameCursor.ItemHold.Enabled && !cursorService.GameCursor.ItemHold.IsFixedPosition && (cursorService.GameCursor.ItemHold.Serial != container || cursorService.GameCursor.ItemHold.ItemData.IsStackable))
             {
-                if (uoService.Version >= ClientVersion.CV_6017)
+                if (ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_6017)
                 {
                     ServiceProvider.Get<PacketHandlerService>().Out.Send_DropRequest(serial,
                                             (ushort)x,
@@ -541,8 +553,8 @@ namespace ClassicUO.Game
                                                 container);
                 }
 
-                uoService.GameCursor.ItemHold.Enabled = false;
-                uoService.GameCursor.ItemHold.Dropped = true;
+                cursorService.GameCursor.ItemHold.Enabled = false;
+                cursorService.GameCursor.ItemHold.Dropped = true;
             }
         }
 
@@ -552,17 +564,19 @@ namespace ClassicUO.Game
                 return;
 
             var uoService = ServiceProvider.Get<UOService>();
-            if (uoService.GameCursor.ItemHold.Enabled && !uoService.GameCursor.ItemHold.IsFixedPosition && uoService.GameCursor.ItemHold.ItemData.IsWearable)
+            var cursorService = ServiceProvider.Get<GameCursorService>();
+
+            if (cursorService.GameCursor.ItemHold.Enabled && !cursorService.GameCursor.ItemHold.IsFixedPosition && cursorService.GameCursor.ItemHold.ItemData.IsWearable)
             {
                 if (!SerialHelper.IsValid(container))
                 {
                     container = world.Player.Serial;
                 }
 
-                ServiceProvider.Get<PacketHandlerService>().Out.Send_EquipRequest(uoService.GameCursor.ItemHold.Serial, (Layer)uoService.GameCursor.ItemHold.ItemData.Layer, container);
+                ServiceProvider.Get<PacketHandlerService>().Out.Send_EquipRequest(cursorService.GameCursor.ItemHold.Serial, (Layer)cursorService.GameCursor.ItemHold.ItemData.Layer, container);
 
-                uoService.GameCursor.ItemHold.Enabled = false;
-                uoService.GameCursor.ItemHold.Dropped = true;
+                cursorService.GameCursor.ItemHold.Enabled = false;
+                cursorService.GameCursor.ItemHold.Dropped = true;
             }
         }
 
@@ -758,9 +772,11 @@ namespace ClassicUO.Game
 
         public static void OpenAbilitiesBook(World world)
         {
-            if (ServiceProvider.Get<UIService>().GetGump<CombatBookGump>() == null)
+            var uiService = ServiceProvider.Get<UIService>();
+
+            if (uiService.GetGump<CombatBookGump>() == null)
             {
-                ServiceProvider.Get<UIService>().Add(new CombatBookGump(world, 100, 100));
+                uiService.Add(new CombatBookGump(world, 100, 100));
             }
         }
 

@@ -376,7 +376,7 @@ namespace ClassicUO.Network
 
         private static void SetWindowTitle(string str)
         {
-            ServiceProvider.Get<GameService>().SetWindowTitle(str);
+            ServiceProvider.Get<EngineService>().SetWindowTitle(str);
         }
 
         private static bool GetStaticData(

@@ -324,7 +324,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _leftMouseIsDown = false;
 
-                if (!_uoService.GameCursor.ItemHold.Enabled)
+                if (!ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled)
                 {
                     if (
                         ServiceProvider.Get<UIService>().IsDragging
@@ -367,8 +367,8 @@ namespace ClassicUO.Game.UI.Gumps
                 else
                 {
                     if (
-                        _uoService.GameCursor.ItemHold.Enabled
-                        && !_uoService.GameCursor.ItemHold.IsFixedPosition
+                        ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled
+                        && !ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.IsFixedPosition
                     )
                     {
                         uint drop_container = 0xFFFF_FFFF;
@@ -398,7 +398,7 @@ namespace ClassicUO.Game.UI.Gumps
                                         it2.ItemData.IsSurface
                                         || it2.ItemData.IsStackable
                                             && it2.DisplayedGraphic
-                                                == _uoService.GameCursor.ItemHold.DisplayedGraphic
+                                                == ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.DisplayedGraphic
                                     )
                                 )
                                 {
@@ -433,7 +433,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 if (can_drop)
                                 {
                                     GameActions.DropItem(
-                                        _uoService.GameCursor.ItemHold.Serial,
+                                        ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Serial,
                                         dropX,
                                         dropY,
                                         dropZ,

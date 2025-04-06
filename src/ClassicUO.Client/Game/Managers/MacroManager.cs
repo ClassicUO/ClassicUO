@@ -1089,7 +1089,7 @@ namespace ClassicUO.Game.Managers
                     int handIndex = 1 - (macro.SubCode - MacroSubType.LeftHand);
                     var gs = _sceneService.GetScene<GameScene>();
 
-                    if (handIndex < 0 || handIndex > 1 || _uoService.GameCursor.ItemHold.Enabled)
+                    if (handIndex < 0 || handIndex > 1 || ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled)
                     {
                         break;
                     }
@@ -1121,7 +1121,7 @@ namespace ClassicUO.Game.Managers
 
                             GameActions.DropItem
                             (
-                                _uoService.GameCursor.ItemHold.Serial,
+                                ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Serial,
                                 0xFFFF,
                                 0xFFFF,
                                 0,

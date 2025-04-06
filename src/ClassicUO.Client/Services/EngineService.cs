@@ -6,11 +6,11 @@ using ClassicUO.Game.Scenes;
 
 namespace ClassicUO.Services
 {
-    internal class GameService : IService
+    internal class EngineService : IService
     {
         private readonly ClassicUO.GameController _game;
 
-        public GameService(ClassicUO.GameController game)
+        public EngineService(ClassicUO.GameController game)
         {
             _game = game;
         }

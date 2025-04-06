@@ -12,6 +12,8 @@ namespace ClassicUO.Services
             _gameCursor = gameCursor;
         }
 
+        public GameCursor GameCursor => _gameCursor;
+
         public ushort Graphic
         {
             get => _gameCursor.Graphic;

@@ -21,7 +21,6 @@ namespace ClassicUO
         public Renderer.MultiMaps.MultiMap MultiMaps { get; private set; }
         public Renderer.Sounds.Sound Sounds { get; private set; }
         public World World { get; private set; }
-        public GameCursor GameCursor { get; private set; }
 
         public ClientVersion Version { get; private set; }
         public ClientFlags Protocol { get; set; }
@@ -84,7 +83,6 @@ namespace ClassicUO
             LightColors.LoadLights();
 
             World = new World();
-            GameCursor = new GameCursor(World);
         }
 
         public void Unload()

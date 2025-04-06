@@ -220,7 +220,7 @@ internal class IncomingPackets
                         !string.IsNullOrEmpty(_world.Player.Name) && oldName != _world.Player.Name
                     )
                     {
-                        ServiceProvider.Get<GameService>().SetWindowTitle(_world.Player.Name);
+                        ServiceProvider.Get<EngineService>().SetWindowTitle(_world.Player.Name);
                     }
 
                     ushort str = p.ReadUInt16BE();
@@ -753,7 +753,7 @@ internal class IncomingPackets
 
                 if (cont == _world.Player && it.Layer == Layer.Invalid)
                 {
-                    ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled = false;
+                    ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled = false;
                 }
 
                 if (it.Layer != Layer.Invalid)
@@ -1285,29 +1285,31 @@ internal class IncomingPackets
         }
 
         var uoService = ServiceProvider.Get<UOService>();
-        var firstItem = _world.Items.Get(uoService.Self.GameCursor.ItemHold.Serial);
+        var cursorService = ServiceProvider.Get<GameCursorService>();
+
+        var firstItem = _world.Items.Get(cursorService.GameCursor.ItemHold.Serial);
 
         if (
-            uoService.Self.GameCursor.ItemHold.Enabled
-            || uoService.Self.GameCursor.ItemHold.Dropped
+            cursorService.GameCursor.ItemHold.Enabled
+            || cursorService.GameCursor.ItemHold.Dropped
                 && (firstItem == null || !firstItem.AllowedToDraw)
         )
         {
-            if (_world.ObjectToRemove == uoService.Self.GameCursor.ItemHold.Serial)
+            if (_world.ObjectToRemove == cursorService.GameCursor.ItemHold.Serial)
             {
                 _world.ObjectToRemove = 0;
             }
 
             if (
-                SerialHelper.IsValid(uoService.Self.GameCursor.ItemHold.Serial)
-                && uoService.Self.GameCursor.ItemHold.Graphic != 0xFFFF
+                SerialHelper.IsValid(cursorService.GameCursor.ItemHold.Serial)
+                && cursorService.GameCursor.ItemHold.Graphic != 0xFFFF
             )
             {
-                if (!uoService.Self.GameCursor.ItemHold.UpdatedInWorld)
+                if (!cursorService.GameCursor.ItemHold.UpdatedInWorld)
                 {
                     if (
-                        uoService.Self.GameCursor.ItemHold.Layer == Layer.Invalid
-                        && SerialHelper.IsValid(uoService.Self.GameCursor.ItemHold.Container)
+                        cursorService.GameCursor.ItemHold.Layer == Layer.Invalid
+                        && SerialHelper.IsValid(cursorService.GameCursor.ItemHold.Container)
                     )
                     {
                         // Server should send an UpdateContainedItem after this packet.
@@ -1315,36 +1317,36 @@ internal class IncomingPackets
 
                         AddItemToContainer(
                             _world,
-                            uoService.Self.GameCursor.ItemHold.Serial,
-                            uoService.Self.GameCursor.ItemHold.Graphic,
-                            uoService.Self.GameCursor.ItemHold.TotalAmount,
-                            uoService.Self.GameCursor.ItemHold.X,
-                            uoService.Self.GameCursor.ItemHold.Y,
-                            uoService.Self.GameCursor.ItemHold.Hue,
-                            uoService.Self.GameCursor.ItemHold.Container
+                            cursorService.GameCursor.ItemHold.Serial,
+                            cursorService.GameCursor.ItemHold.Graphic,
+                            cursorService.GameCursor.ItemHold.TotalAmount,
+                            cursorService.GameCursor.ItemHold.X,
+                            cursorService.GameCursor.ItemHold.Y,
+                            cursorService.GameCursor.ItemHold.Hue,
+                            cursorService.GameCursor.ItemHold.Container
                         );
 
                         ServiceProvider.Get<UIService>()
-                            .GetGump<ContainerGump>(uoService.Self.GameCursor.ItemHold.Container)
+                            .GetGump<ContainerGump>(cursorService.GameCursor.ItemHold.Container)
                             ?.RequestUpdateContents();
                     }
                     else
                     {
                         Item item = _world.GetOrCreateItem(
-                            uoService.Self.GameCursor.ItemHold.Serial
+                            cursorService.GameCursor.ItemHold.Serial
                         );
 
-                        item.Graphic = uoService.Self.GameCursor.ItemHold.Graphic;
-                        item.Hue = uoService.Self.GameCursor.ItemHold.Hue;
-                        item.Amount = uoService.Self.GameCursor.ItemHold.TotalAmount;
-                        item.Flags = uoService.Self.GameCursor.ItemHold.Flags;
-                        item.Layer = uoService.Self.GameCursor.ItemHold.Layer;
-                        item.X = uoService.Self.GameCursor.ItemHold.X;
-                        item.Y = uoService.Self.GameCursor.ItemHold.Y;
-                        item.Z = uoService.Self.GameCursor.ItemHold.Z;
+                        item.Graphic = cursorService.GameCursor.ItemHold.Graphic;
+                        item.Hue = cursorService.GameCursor.ItemHold.Hue;
+                        item.Amount = cursorService.GameCursor.ItemHold.TotalAmount;
+                        item.Flags = cursorService.GameCursor.ItemHold.Flags;
+                        item.Layer = cursorService.GameCursor.ItemHold.Layer;
+                        item.X = cursorService.GameCursor.ItemHold.X;
+                        item.Y = cursorService.GameCursor.ItemHold.Y;
+                        item.Z = cursorService.GameCursor.ItemHold.Z;
                         item.CheckGraphicChange();
 
-                        var container = _world.Get(uoService.Self.GameCursor.ItemHold.Container);
+                        var container = _world.Get(cursorService.GameCursor.ItemHold.Container);
 
                         if (container != null)
                         {
@@ -1381,13 +1383,13 @@ internal class IncomingPackets
             else
             {
                 Log.Error(
-                    $"Wrong data: serial = {uoService.Self.GameCursor.ItemHold.Serial:X8}  -  graphic = {uoService.Self.GameCursor.ItemHold.Graphic:X4}"
+                    $"Wrong data: serial = {cursorService.GameCursor.ItemHold.Serial:X8}  -  graphic = {cursorService.GameCursor.ItemHold.Graphic:X4}"
                 );
             }
 
-            ServiceProvider.Get<UIService>().GetGump<SplitMenuGump>(uoService.Self.GameCursor.ItemHold.Serial)?.Dispose();
+            ServiceProvider.Get<UIService>().GetGump<SplitMenuGump>(cursorService.GameCursor.ItemHold.Serial)?.Dispose();
 
-            uoService.Self.GameCursor.ItemHold.Clear();
+            cursorService.GameCursor.ItemHold.Clear();
         }
         else
         {
@@ -1422,9 +1424,9 @@ internal class IncomingPackets
             return;
         }
 
-        var uoService = ServiceProvider.Get<UOService>();
-        uoService.Self.GameCursor.ItemHold.Enabled = false;
-        uoService.Self.GameCursor.ItemHold.Dropped = false;
+        var cursorService = ServiceProvider.Get<GameCursorService>();
+        cursorService.GameCursor.ItemHold.Enabled = false;
+        cursorService.GameCursor.ItemHold.Dropped = false;
     }
 
     public void DropItemAccepted(ref StackDataReader p)
@@ -1434,9 +1436,9 @@ internal class IncomingPackets
             return;
         }
 
-        var uoService = ServiceProvider.Get<UOService>();
-        uoService.Self.GameCursor.ItemHold.Enabled = false;
-        uoService.Self.GameCursor.ItemHold.Dropped = false;
+        var cursorService = ServiceProvider.Get<GameCursorService>();
+        cursorService.GameCursor.ItemHold.Enabled = false;
+        cursorService.GameCursor.ItemHold.Dropped = false;
 
         Console.WriteLine("PACKET - ITEM DROP OK!");
     }
@@ -3004,7 +3006,7 @@ internal class IncomingPackets
                 && name != _world.Player.Name
             )
             {
-                ServiceProvider.Get<GameService>().SetWindowTitle(name);
+                ServiceProvider.Get<EngineService>().SetWindowTitle(name);
             }
 
             ServiceProvider.Get<UIService>().GetGump<NameOverheadGump>(serial)?.SetName();
@@ -5379,7 +5381,7 @@ internal class IncomingPackets
 
             case 0xFE:
 
-                ServiceProvider.Get<GameService>().EnqueueAction(5000, () =>
+                ServiceProvider.Get<EngineService>().EnqueueAction(5000, () =>
                 {
                     Log.Info("Razor ACK sent");
                     ServiceProvider.Get<PacketHandlerService>().Out.Send_RazorACK();
@@ -5733,12 +5735,14 @@ internal class IncomingPackets
         uint containerSerial
     )
     {
-        if (ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Serial == serial)
+        var cursorService = ServiceProvider.Get<GameCursorService>();
+
+        if (cursorService.GameCursor.ItemHold.Serial == serial)
         {
-            if (ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Dropped)
+            if (cursorService.GameCursor.ItemHold.Dropped)
             {
                 Console.WriteLine("ADD ITEM TO CONTAINER -- CLEAR HOLD");
-                ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Clear();
+                cursorService.GameCursor.ItemHold.Clear();
             }
 
             //else if (ItemHold.Graphic == graphic && ItemHold.Amount == amount &&
@@ -5879,29 +5883,30 @@ internal class IncomingPackets
         Mobile? mobile = null;
         Item? item = null;
         Entity? obj = _world.Get(serial);
+        var cursorService = ServiceProvider.Get<GameCursorService>();
 
         if (
-            ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Enabled
-            && ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Serial == serial
+            cursorService.GameCursor.ItemHold.Enabled
+            && cursorService.GameCursor.ItemHold.Serial == serial
         )
         {
-            if (SerialHelper.IsValid(ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Container))
+            if (SerialHelper.IsValid(cursorService.GameCursor.ItemHold.Container))
             {
-                if (ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Layer == 0)
+                if (cursorService.GameCursor.ItemHold.Layer == 0)
                 {
                     ServiceProvider.Get<UIService>()
-                        .GetGump<ContainerGump>(ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Container)
+                        .GetGump<ContainerGump>(cursorService.GameCursor.ItemHold.Container)
                         ?.RequestUpdateContents();
                 }
                 else
                 {
                     ServiceProvider.Get<UIService>()
-                        .GetGump<PaperDollGump>(ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Container)
+                        .GetGump<PaperDollGump>(cursorService.GameCursor.ItemHold.Container)
                         ?.RequestUpdateContents();
                 }
             }
 
-            ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.UpdatedInWorld = true;
+            cursorService.GameCursor.ItemHold.UpdatedInWorld = true;
         }
 
         bool created = false;
@@ -6083,14 +6088,14 @@ internal class IncomingPackets
         else
         {
             if (
-                ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Serial == serial
-                && ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Dropped
+                cursorService.GameCursor.ItemHold.Serial == serial
+                && cursorService.GameCursor.ItemHold.Dropped
             )
             {
                 // we want maintain the item data due to the denymoveitem packet
                 //ItemHold.Clear();
-                ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Enabled = false;
-                ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Dropped = false;
+                cursorService.GameCursor.ItemHold.Enabled = false;
+                cursorService.GameCursor.ItemHold.Dropped = false;
             }
 
             if (item?.OnGround ?? false)

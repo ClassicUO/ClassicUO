@@ -115,7 +115,7 @@ namespace ClassicUO.Input
         public static void Update()
         {
             var windowService = ServiceProvider.Get<WindowService>();
-            var gameService = ServiceProvider.Get<GameService>();
+            var gameService = ServiceProvider.Get<EngineService>();
 
             if (!MouseInWindow)
             {

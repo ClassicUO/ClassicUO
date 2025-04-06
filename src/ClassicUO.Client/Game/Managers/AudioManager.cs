@@ -75,7 +75,7 @@ namespace ClassicUO.Game.Managers
 
             float volume = currentProfile.SoundVolume / SOUND_DELTA;
 
-            if (ServiceProvider.Get<UOService>().IsActive)
+            if (ServiceProvider.Get<EngineService>().IsActive)
             {
                 if (!currentProfile.ReproduceSoundsInBackground)
                 {
@@ -92,7 +92,7 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            if (!currentProfile.EnableSound || !ServiceProvider.Get<UOService>().IsActive && !currentProfile.ReproduceSoundsInBackground)
+            if (!currentProfile.EnableSound || !ServiceProvider.Get<EngineService>().IsActive && !currentProfile.ReproduceSoundsInBackground)
             {
                 volume = 0;
             }
@@ -140,7 +140,7 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            if (currentProfile == null || !currentProfile.EnableSound || !ServiceProvider.Get<UOService>().IsActive && !currentProfile.ReproduceSoundsInBackground)
+            if (currentProfile == null || !currentProfile.EnableSound || !ServiceProvider.Get<EngineService>().IsActive && !currentProfile.ReproduceSoundsInBackground)
             {
                 volume = 0;
             }
@@ -328,7 +328,7 @@ namespace ClassicUO.Game.Managers
             {
                 if (m != null && currentProfile != null)
                 {
-                    if (ServiceProvider.Get<UOService>().IsActive)
+                    if (ServiceProvider.Get<EngineService>().IsActive)
                     {
                         if (!currentProfile.ReproduceSoundsInBackground)
                         {

@@ -118,7 +118,7 @@ namespace ClassicUO.Game.Scenes
             Camera.Bounds.Width = Math.Max(0, ProfileManager.CurrentProfile.GameWindowSize.X);
             Camera.Bounds.Height = Math.Max(0, ProfileManager.CurrentProfile.GameWindowSize.Y);
 
-            ServiceProvider.Get<UOService>().GameCursor.ItemHold.Clear();
+            ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Clear();
 
             _world.Macros.Clear();
             _world.Macros.Load();
@@ -145,11 +145,11 @@ namespace ClassicUO.Game.Scenes
 
             if (ProfileManager.CurrentProfile.WindowBorderless)
             {
-                ServiceProvider.Get<GameService>().SetWindowBorderless(true);
+                ServiceProvider.Get<EngineService>().SetWindowBorderless(true);
             }
             else if (Settings.GlobalSettings.IsWindowMaximized)
             {
-                ServiceProvider.Get<GameService>().MaximizeWindow();
+                ServiceProvider.Get<EngineService>().MaximizeWindow();
             }
             else if (Settings.GlobalSettings.WindowSize.HasValue)
             {
@@ -159,7 +159,7 @@ namespace ClassicUO.Game.Scenes
                 w = Math.Max(640, w);
                 h = Math.Max(480, h);
 
-                ServiceProvider.Get<GameService>().SetWindowSize(w, h);
+                ServiceProvider.Get<EngineService>().SetWindowSize(w, h);
             }
 
             Plugin.OnConnected();
@@ -303,8 +303,8 @@ namespace ClassicUO.Game.Scenes
             ServiceProvider.Get<AudioService>().StopMusic();
             ServiceProvider.Get<AudioService>().StopSounds();
 
-            ServiceProvider.Get<GameService>().SetWindowTitle(string.Empty);
-            ServiceProvider.Get<UOService>().GameCursor.ItemHold.Clear();
+            ServiceProvider.Get<EngineService>().SetWindowTitle(string.Empty);
+            ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Clear();
 
             try
             {
@@ -343,12 +343,12 @@ namespace ClassicUO.Game.Scenes
             _world.MessageManager.MessageReceived -= ChatOnMessageReceived;
 
             Settings.GlobalSettings.WindowSize = new Point(
-                ServiceProvider.Get<GameService>().Window.ClientBounds.Width,
-                ServiceProvider.Get<GameService>().Window.ClientBounds.Height
+                ServiceProvider.Get<EngineService>().Window.ClientBounds.Width,
+                ServiceProvider.Get<EngineService>().Window.ClientBounds.Height
             );
 
-            Settings.GlobalSettings.IsWindowMaximized = ServiceProvider.Get<GameService>().IsWindowMaximized();
-            ServiceProvider.Get<GameService>().SetWindowBorderless(false);
+            Settings.GlobalSettings.IsWindowMaximized = ServiceProvider.Get<EngineService>().IsWindowMaximized();
+            ServiceProvider.Get<EngineService>().SetWindowBorderless(false);
 
             base.Unload();
         }
@@ -892,7 +892,7 @@ namespace ClassicUO.Game.Scenes
                 _multi = null;
             }
 
-            if (_isMouseLeftDown && !ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled)
+            if (_isMouseLeftDown && !ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled)
             {
                 if (
                     _world.CustomHouseManager != null

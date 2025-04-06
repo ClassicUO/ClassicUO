@@ -31,7 +31,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             int yBonus = 0;
             int listTitleY = 106;
 
-            var loginScene = ServiceProvider.Get<GameService>().GetScene<LoginScene>();
+            var loginScene = ServiceProvider.Get<EngineService>().GetScene<LoginScene>();
 
             string lastCharName = LastCharacterManager.GetLastCharacter(LoginScene.Account, World.ServerName);
             var lastSelected = loginScene.Characters.FirstOrDefault(o => o == lastCharName);
@@ -188,7 +188,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         public override void OnButtonClick(int buttonID)
         {
-            var loginScene = ServiceProvider.Get<GameService>().GetScene<LoginScene>();
+            var loginScene = ServiceProvider.Get<EngineService>().GetScene<LoginScene>();
             if (loginScene == null)
                 return;
 
@@ -269,7 +269,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         private void LoginCharacter(uint index)
         {
-            var loginScene = ServiceProvider.Get<GameService>().GetScene<LoginScene>();
+            var loginScene = ServiceProvider.Get<EngineService>().GetScene<LoginScene>();
 
             if (loginScene != null && index < loginScene.Characters.Count && !string.IsNullOrEmpty(loginScene.Characters[(int)index]))
             {

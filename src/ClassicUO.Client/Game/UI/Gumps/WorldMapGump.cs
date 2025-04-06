@@ -702,7 +702,7 @@ namespace ClassicUO.Game.UI.Gumps
             SaveSettings();
             World.WMapManager.SetEnable(false);
 
-            ServiceProvider.Get<UOService>().Self.GameCursor.IsDraggingCursorForced = false;
+            ServiceProvider.Get<GameCursorService>().GameCursor.IsDraggingCursorForced = false;
 
             base.Dispose();
         }
@@ -3011,14 +3011,14 @@ namespace ClassicUO.Game.UI.Gumps
                 _lastScroll.Y = _center.Y;
             }
 
-            ServiceProvider.Get<UOService>().Self.GameCursor.IsDraggingCursorForced = false;
+            ServiceProvider.Get<GameCursorService>().GameCursor.IsDraggingCursorForced = false;
 
             base.OnMouseUp(x, y, button);
         }
 
         protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
-            if (!ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Enabled)
+            if (!ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled)
             {
                 if (button == MouseButtonType.Left && (Keyboard.Alt || _freeView) || button == MouseButtonType.Middle)
                 {
@@ -3034,7 +3034,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _isScrolling = true;
                         CanMove = false;
 
-                        ServiceProvider.Get<UOService>().Self.GameCursor.IsDraggingCursorForced = true;
+                        ServiceProvider.Get<GameCursorService>().GameCursor.IsDraggingCursorForced = true;
                     }
                 }
 

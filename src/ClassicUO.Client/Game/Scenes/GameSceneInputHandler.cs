@@ -433,8 +433,8 @@ namespace ClassicUO.Game.Scenes
             }
 
             if (
-                _uoService.GameCursor.ItemHold.Enabled
-                && !_uoService.GameCursor.ItemHold.IsFixedPosition
+                ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled
+                && !ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.IsFixedPosition
             )
             {
                 uint drop_container = 0xFFFF_FFFF;
@@ -463,7 +463,7 @@ namespace ClassicUO.Game.Scenes
                             && (
                                 it2.ItemData.IsSurface
                                 || it2.ItemData.IsStackable
-                                    && it2.Graphic == _uoService.GameCursor.ItemHold.Graphic
+                                    && it2.Graphic == ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Graphic
                             )
                         )
                         {
@@ -527,7 +527,7 @@ namespace ClassicUO.Game.Scenes
                     if (can_drop)
                     {
                         GameActions.DropItem(
-                            _uoService.GameCursor.ItemHold.Serial,
+                            ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Serial,
                             dropX,
                             dropY,
                             dropZ,
@@ -966,17 +966,17 @@ namespace ClassicUO.Game.Scenes
 
         internal override bool OnMouseWheel(bool up)
         {
-            if (Keyboard.Ctrl && _uoService.GameCursor.ItemHold.Enabled)
+            if (Keyboard.Ctrl && ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled)
             {
-                if (!up && !_uoService.GameCursor.ItemHold.IsFixedPosition)
+                if (!up && !ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.IsFixedPosition)
                 {
-                    _uoService.GameCursor.ItemHold.IsFixedPosition = true;
-                    _uoService.GameCursor.ItemHold.IgnoreFixedPosition = true;
-                    _uoService.GameCursor.ItemHold.FixedX = Mouse.Position.X;
-                    _uoService.GameCursor.ItemHold.FixedY = Mouse.Position.Y;
+                    ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.IsFixedPosition = true;
+                    ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.IgnoreFixedPosition = true;
+                    ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.FixedX = Mouse.Position.X;
+                    ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.FixedY = Mouse.Position.Y;
                 }
 
-                if (_uoService.GameCursor.ItemHold.IgnoreFixedPosition)
+                if (ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.IgnoreFixedPosition)
                 {
                     return true;
                 }
@@ -1028,12 +1028,12 @@ namespace ClassicUO.Game.Scenes
 
             bool ok = true;
 
-            if (Mouse.LButtonPressed && !_uoService.GameCursor.ItemHold.Enabled)
+            if (Mouse.LButtonPressed && !ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled)
             {
                 Point offset = Mouse.LDragOffset;
 
                 if (
-                    !_uoService.GameCursor.IsDraggingCursorForced
+                    !ServiceProvider.Get<GameCursorService>().GameCursor.IsDraggingCursorForced
                     && // don't trigger "sallos ez grab" when dragging wmap or skill
                     !_isSelectionActive
                     && // and ofc when selection is enabled
@@ -1634,8 +1634,8 @@ namespace ClassicUO.Game.Scenes
             }
 
             if (
-                uoService.GameCursor.ItemHold.Enabled
-                && !uoService.GameCursor.ItemHold.IsFixedPosition
+                ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled
+                && !ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.IsFixedPosition
             )
             {
                 uint drop_container = 0xFFFF_FFFF;
@@ -1664,7 +1664,7 @@ namespace ClassicUO.Game.Scenes
                             && (
                                 it2.ItemData.IsSurface
                                 || it2.ItemData.IsStackable
-                                    && it2.Graphic == uoService.GameCursor.ItemHold.Graphic
+                                    && it2.Graphic == ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Graphic
                             )
                         )
                         {
@@ -1728,7 +1728,7 @@ namespace ClassicUO.Game.Scenes
                     if (can_drop)
                     {
                         GameActions.DropItem(
-                            uoService.GameCursor.ItemHold.Serial,
+                            ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Serial,
                             dropX,
                             dropY,
                             dropZ,

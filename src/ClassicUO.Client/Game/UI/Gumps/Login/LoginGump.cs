@@ -489,7 +489,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         public override void OnKeyboardReturn(int textID, string text)
         {
             SaveCheckboxStatus();
-            var ls = ServiceProvider.Get<GameService>().GetScene<LoginScene>();
+            var ls = ServiceProvider.Get<EngineService>().GetScene<LoginScene>();
 
             if (ls.CurrentLoginStep == LoginSteps.Main)
             {
@@ -553,13 +553,13 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                     if (!_textboxAccount.IsDisposed)
                     {
-                        ServiceProvider.Get<GameService>().GetScene<LoginScene>()?.Connect(_textboxAccount.Text, _passwordFake.RealText);
+                        ServiceProvider.Get<EngineService>().GetScene<LoginScene>()?.Connect(_textboxAccount.Text, _passwordFake.RealText);
                     }
 
                     break;
 
                 case Buttons.Quit:
-                    ServiceProvider.Get<GameService>().Exit();
+                    ServiceProvider.Get<EngineService>().Exit();
 
                     break;
 

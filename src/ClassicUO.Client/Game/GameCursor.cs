@@ -85,12 +85,14 @@ namespace ClassicUO.Game
         private readonly List<Multi> _temp = new List<Multi>();
         private readonly Tooltip _tooltip;
         private readonly World _world;
+        private readonly UIService _uiService;
 
         public GameCursor(World world)
         {
             _world = world;
             _tooltip = new Tooltip(world);
             _aura = new Aura(30);
+            _uiService = ServiceProvider.Get<UIService>();
 
             for (int i = 0; i < 3; i++)
             {
@@ -172,7 +174,7 @@ namespace ClassicUO.Game
                 && ProfileManager.CurrentProfile.ScaleItemsInsideContainers
             )
             {
-                scale = ServiceProvider.Get<UIService>().ContainerScale;
+                scale = _uiService.ContainerScale;
             }
 
             return new Point(
@@ -224,7 +226,7 @@ namespace ClassicUO.Game
             }
             ushort draggingGraphic = GetDraggingItemGraphic();
 
-            if (draggingGraphic == 0xFFFF || !ItemHold.IsFixedPosition || ServiceProvider.Get<UIService>().IsDragging)
+            if (draggingGraphic == 0xFFFF || !ItemHold.IsFixedPosition || _uiService.IsDragging)
             {
                 return;
             }
@@ -384,7 +386,7 @@ namespace ClassicUO.Game
 
                 if (ProfileManager.CurrentProfile.ShowTargetRangeIndicator)
                 {
-                    if (ServiceProvider.Get<UIService>().IsMouseOverWorld)
+                    if (_uiService.IsMouseOverWorld)
                     {
                         if (SelectedObject.Object is GameObject obj)
                         {
@@ -426,7 +428,7 @@ namespace ClassicUO.Game
                     && ProfileManager.CurrentProfile.ScaleItemsInsideContainers
                 )
                 {
-                    scale = ServiceProvider.Get<UIService>().ContainerScale;
+                    scale = _uiService.ContainerScale;
                 }
 
                 ushort draggingGraphic = GetDraggingItemGraphic();
@@ -542,7 +544,7 @@ namespace ClassicUO.Game
                 {
                     if (
                         !_tooltip.IsEmpty
-                        && (ServiceProvider.Get<UIService>().MouseOverControl == null || ServiceProvider.Get<UIService>().IsMouseOverWorld)
+                        && (_uiService.MouseOverControl == null || _uiService.IsMouseOverWorld)
                     )
                     {
                         _tooltip.Clear();
@@ -551,7 +553,7 @@ namespace ClassicUO.Game
                 else
                 {
                     if (
-                        ServiceProvider.Get<UIService>().IsMouseOverWorld
+                        _uiService.IsMouseOverWorld
                         && SelectedObject.Object is Entity item
                         && _world.OPL.Contains(item)
                     )
@@ -567,8 +569,8 @@ namespace ClassicUO.Game
                     }
 
                     if (
-                        ServiceProvider.Get<UIService>().MouseOverControl != null
-                        && ServiceProvider.Get<UIService>().MouseOverControl.Tooltip is uint serial
+                        _uiService.MouseOverControl != null
+                        && _uiService.MouseOverControl.Tooltip is uint serial
                     )
                     {
                         if (SerialHelper.IsValid(serial) && _world.OPL.Contains(serial))
@@ -587,16 +589,16 @@ namespace ClassicUO.Game
             }
 
             if (
-                ServiceProvider.Get<UIService>().MouseOverControl != null
-                && ServiceProvider.Get<UIService>().MouseOverControl.HasTooltip
+                _uiService.MouseOverControl != null
+                && _uiService.MouseOverControl.HasTooltip
                 && !Mouse.IsDragging
             )
             {
-                if (ServiceProvider.Get<UIService>().MouseOverControl.Tooltip is string text)
+                if (_uiService.MouseOverControl.Tooltip is string text)
                 {
                     if (_tooltip.IsEmpty || _tooltip.Text != text)
                     {
-                        _tooltip.SetText(text, ServiceProvider.Get<UIService>().MouseOverControl.TooltipMaxLength);
+                        _tooltip.SetText(text, _uiService.MouseOverControl.TooltipMaxLength);
                     }
 
                     _tooltip.Draw(batcher, position.X, position.Y + 24);
@@ -617,7 +619,7 @@ namespace ClassicUO.Game
                 return _cursorData[war, 12];
             }
 
-            if (ServiceProvider.Get<UIService>().IsDragging || IsDraggingCursorForced)
+            if (_uiService.IsDragging || IsDraggingCursorForced)
             {
                 return _cursorData[war, 8];
             }
@@ -628,9 +630,9 @@ namespace ClassicUO.Game
             }
 
             if (
-                ServiceProvider.Get<UIService>().MouseOverControl != null
-                && ServiceProvider.Get<UIService>().MouseOverControl.AcceptKeyboardInput
-                && ServiceProvider.Get<UIService>().MouseOverControl.IsEditable
+                _uiService.MouseOverControl != null
+                && _uiService.MouseOverControl.AcceptKeyboardInput
+                && _uiService.MouseOverControl.IsEditable
             )
             {
                 return _cursorData[war, 14];
@@ -638,7 +640,7 @@ namespace ClassicUO.Game
 
             ushort result = _cursorData[war, 9];
 
-            if (!ServiceProvider.Get<UIService>().IsMouseOverWorld)
+            if (!_uiService.IsMouseOverWorld)
             {
                 return result;
             }

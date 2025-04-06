@@ -486,7 +486,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case SDL.SDL_Keycode.SDLK_q when Keyboard.Ctrl && _messageHistoryIndex > -1 && !ProfileManager.CurrentProfile.DisableCtrlQWBtn:
 
-                    var scene = ServiceProvider.Get<GameService>().GetScene<GameScene>();
+                    var scene = ServiceProvider.Get<EngineService>().GetScene<GameScene>();
 
                     if (scene == null)
                     {
@@ -516,7 +516,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case SDL.SDL_Keycode.SDLK_w when Keyboard.Ctrl && !ProfileManager.CurrentProfile.DisableCtrlQWBtn:
 
-                    scene = ServiceProvider.Get<GameService>().GetScene<GameScene>();
+                    scene = ServiceProvider.Get<EngineService>().GetScene<GameScene>();
 
                     if (scene == null)
                     {

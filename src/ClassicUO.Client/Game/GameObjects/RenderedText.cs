@@ -635,7 +635,7 @@ namespace ClassicUO.Game
             if (isValid && (Texture == null || Texture.IsDisposed))
             {
                 Texture = new Texture2D(
-                    ServiceProvider.Get<GameService>().GraphicsDevice,
+                    ServiceProvider.Get<EngineService>().GraphicsDevice,
                     fi.Width,
                     fi.Height,
                     false,

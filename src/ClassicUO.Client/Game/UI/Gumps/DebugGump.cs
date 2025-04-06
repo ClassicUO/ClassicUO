@@ -84,7 +84,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _timeToUpdate = Time.Ticks + 100;
 
-                GameScene scene = ServiceProvider.Get<GameService>().GetScene<GameScene>();
+                GameScene scene = ServiceProvider.Get<EngineService>().GetScene<GameScene>();
                 Span<char> span = stackalloc char[256];
                 ValueStringBuilder sb = new ValueStringBuilder(span);
 

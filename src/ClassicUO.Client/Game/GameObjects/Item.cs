@@ -314,7 +314,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (World.HouseManager.EntityIntoHouse(Serial, World.Player))
             {
-                ServiceProvider.Get<GameService>().GetScene<GameScene>()?.UpdateMaxDrawZ(true);
+                ServiceProvider.Get<EngineService>().GetScene<GameScene>()?.UpdateMaxDrawZ(true);
             }
 
             World.BoatMovingManager.ClearSteps(Serial);

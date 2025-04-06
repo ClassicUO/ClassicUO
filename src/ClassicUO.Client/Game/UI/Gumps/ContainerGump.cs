@@ -207,7 +207,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (
                 e.Button == MouseButtonType.Left
                 && !IsMinimized
-                && !ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled
+                && !ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled
             )
             {
                 Point offset = Mouse.LDragOffset;
@@ -244,7 +244,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (
                 World.TargetManager.IsTargeting
-                && !ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled
+                && !ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled
                 && SerialHelper.IsValid(serial)
             )
             {
@@ -279,8 +279,8 @@ namespace ClassicUO.Game.UI.Gumps
                     candrop = false;
 
                     if (
-                        ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled
-                        && !ServiceProvider.Get<UOService>().GameCursor.ItemHold.IsFixedPosition
+                        ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled
+                        && !ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.IsFixedPosition
                     )
                     {
                         candrop = true;
@@ -297,7 +297,7 @@ namespace ClassicUO.Game.UI.Gumps
                             }
                             else if (
                                 target.ItemData.IsStackable
-                                && target.Graphic == ServiceProvider.Get<UOService>().GameCursor.ItemHold.Graphic
+                                && target.Graphic == ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Graphic
                             )
                             {
                                 dropcontainer = target.Serial;
@@ -329,8 +329,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (
                     !candrop
-                    && ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled
-                    && !ServiceProvider.Get<UOService>().GameCursor.ItemHold.IsFixedPosition
+                    && ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled
+                    && !ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.IsFixedPosition
                 )
                 {
                     ServiceProvider.Get<AudioService>().PlaySound(0x0051);
@@ -338,8 +338,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (
                     candrop
-                    && ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled
-                    && !ServiceProvider.Get<UOService>().GameCursor.ItemHold.IsFixedPosition
+                    && ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled
+                    && !ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.IsFixedPosition
                 )
                 {
                     var gump = ServiceProvider.Get<UIService>().GetGump<ContainerGump>(dropcontainer);
@@ -365,11 +365,11 @@ namespace ClassicUO.Game.UI.Gumps
                             (gump.IsChessboard || gump.IsBackgammonBoard)
                                 ? ref ServiceProvider.Get<UOService>().Gumps.GetGump(
                                     (ushort)(
-                                        ServiceProvider.Get<UOService>().GameCursor.ItemHold.DisplayedGraphic
+                                        ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.DisplayedGraphic
                                         - Constants.ITEM_GUMP_TEXTURE_OFFSET
                                     )
                                 )
-                                : ref ServiceProvider.Get<UOService>().Arts.GetArt(ServiceProvider.Get<UOService>().GameCursor.ItemHold.DisplayedGraphic)
+                                : ref ServiceProvider.Get<UOService>().Arts.GetArt(ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.DisplayedGraphic)
                         );
 
                         float scale = GetScale();
@@ -405,8 +405,8 @@ namespace ClassicUO.Game.UI.Gumps
                                 && ProfileManager.CurrentProfile.RelativeDragAndDropItems
                             )
                             {
-                                x += ServiceProvider.Get<UOService>().GameCursor.ItemHold.MouseOffset.X;
-                                y += ServiceProvider.Get<UOService>().GameCursor.ItemHold.MouseOffset.Y;
+                                x += ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.MouseOffset.X;
+                                y += ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.MouseOffset.Y;
                             }
 
                             x -= textureW >> 1;
@@ -438,7 +438,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     GameActions.DropItem(
-                        ServiceProvider.Get<UOService>().GameCursor.ItemHold.Serial,
+                        ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Serial,
                         x,
                         y,
                         0,
@@ -447,7 +447,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     Mouse.CancelDoubleClick = true;
                 }
-                else if (!ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled && SerialHelper.IsValid(serial))
+                else if (!ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled && SerialHelper.IsValid(serial))
                 {
                     if (!World.DelayedObjectClickManager.IsEnabled)
                     {
@@ -523,7 +523,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.Restore(xml);
             // skip loading
 
-            ServiceProvider.Get<GameService>().GetScene<GameScene>()?.DoubleClickDelayed(LocalSerial);
+            ServiceProvider.Get<EngineService>().GetScene<GameScene>()?.DoubleClickDelayed(LocalSerial);
 
             Dispose();
         }
