@@ -20,7 +20,7 @@ namespace ClassicUO.Game.Services
                 return (T)service;
             }
 
-            Log.Error($"service {typeof(T)} not registered in ServiceProvider.");
+            ArgumentNullException.ThrowIfNull(service, $"service {typeof(T)} not registered in ServiceProvider.");
             return default;
         }
 

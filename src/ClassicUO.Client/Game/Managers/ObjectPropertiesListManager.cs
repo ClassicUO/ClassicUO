@@ -42,7 +42,7 @@ namespace ClassicUO.Game.Managers
             // Original client seems asking for OPL when character is not running.
             // We'll ask OPL when mouse is over an object.
 
-            ServiceProvider.Get<PacketHandlerService>().AddMegaClilocRequest(serial);
+            ServiceProvider.Get<MegaClilocRequestsService>().AddMegaClilocRequest(serial);
 
             return false;
         }

@@ -73,6 +73,8 @@ namespace ClassicUO.Game.Scenes
         private readonly SceneService _sceneService;
         private readonly PacketHandlerService _packetHandlerService;
         private readonly NetClientService _netClientService;
+        private readonly MegaClilocRequestsService _megaClilocRequestsService;
+        private readonly CustomHouseService _customHouseService;
 
         public GameScene(World world)
         {
@@ -83,6 +85,8 @@ namespace ClassicUO.Game.Scenes
             _sceneService = ServiceProvider.Get<SceneService>();
             _packetHandlerService = ServiceProvider.Get<PacketHandlerService>();
             _netClientService = ServiceProvider.Get<NetClientService>();
+            _megaClilocRequestsService = ServiceProvider.Get<MegaClilocRequestsService>();
+            _customHouseService = ServiceProvider.Get<CustomHouseService>();
         }
 
 
@@ -721,7 +725,8 @@ namespace ClassicUO.Game.Scenes
                 _time_cleanup = Time.Ticks + 500;
             }
 
-            _packetHandlerService.SendMegaClilocRequests();
+            _megaClilocRequestsService.SendMegaClilocRequests();
+            _customHouseService.SendCustomHouseRequests();
 
             if (_forceStopScene)
             {

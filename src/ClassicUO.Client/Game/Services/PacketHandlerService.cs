@@ -41,10 +41,6 @@ namespace ClassicUO.Game.Services
             return _packetHandler.ParsePackets(_netClient, data);
         }
 
-        public void AddMegaClilocRequest(uint serial) => _incomingPackets.AddMegaClilocRequest(serial);
-
-        public void SendMegaClilocRequests() => _incomingPackets.SendMegaClilocRequests();
-
         private void DefaultPacketBidings()
         {
             AddHandler(0x1B, _incomingPackets.EnterWorld);

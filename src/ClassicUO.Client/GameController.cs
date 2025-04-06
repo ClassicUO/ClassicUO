@@ -129,6 +129,8 @@ namespace ClassicUO
             ServiceProvider.Register(new FileManagerService(UO.FileManager));
             ServiceProvider.Register(new GameCursorService(UO.GameCursor));
             ServiceProvider.Register(new UIService(_ui = new()));
+            ServiceProvider.Register(new MegaClilocRequestsService());
+            ServiceProvider.Register(new CustomHouseService());
 
             Audio.Initialize();
             // TODO: temporary fix to avoid crash when laoding plugins

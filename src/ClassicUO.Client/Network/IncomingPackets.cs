@@ -25,8 +25,7 @@ delegate void OnPacketBufferReader(ref StackDataReader p);
 
 internal class IncomingPackets
 {
-    private List<uint> _clilocRequests = new List<uint>();
-    private List<uint> _customHouseRequests = new List<uint>();
+    private readonly List<uint> _customHouseRequests = new List<uint>();
     private uint _requestedGridLoot;
 
     private readonly TextFileParser _parser = new TextFileParser(
@@ -49,51 +48,6 @@ internal class IncomingPackets
         _world = world;
     }
 
-    public void SendMegaClilocRequests()
-    {
-        if (_world.ClientFeatures.TooltipsEnabled && _clilocRequests.Count != 0)
-        {
-            if (ServiceProvider.Get<UOService>().Version >= ClassicUO.Sdk.ClientVersion.CV_5090)
-            {
-                if (_clilocRequests.Count != 0)
-                {
-                    ServiceProvider.Get<PacketHandlerService>().Out.Send_MegaClilocRequest(_clilocRequests);
-                }
-            }
-            else
-            {
-                foreach (uint serial in _clilocRequests)
-                {
-                    ServiceProvider.Get<PacketHandlerService>().Out.Send_MegaClilocRequest_Old(serial);
-                }
-
-                _clilocRequests.Clear();
-            }
-        }
-
-        if (_customHouseRequests.Count > 0)
-        {
-            for (int i = 0; i < _customHouseRequests.Count; ++i)
-            {
-                ServiceProvider.Get<PacketHandlerService>().Out.Send_CustomHouseDataRequest(_customHouseRequests[i]);
-            }
-
-            _customHouseRequests.Clear();
-        }
-    }
-
-    public void AddMegaClilocRequest(uint serial)
-    {
-        foreach (uint s in _clilocRequests)
-        {
-            if (s == serial)
-            {
-                return;
-            }
-        }
-
-        _clilocRequests.Add(serial);
-    }
 
     public void TargetCursor(ref StackDataReader p)
     {
@@ -5101,7 +5055,7 @@ internal class IncomingPackets
 
             if (!_world.OPL.IsRevisionEquals(serial, revision))
             {
-                AddMegaClilocRequest(serial);
+                ServiceProvider.Get<MegaClilocRequestsService>().AddMegaClilocRequest(serial);
             }
         }
     }
@@ -6793,7 +6747,7 @@ internal class IncomingPackets
                         && (!_world.OPL.TryGetRevision(s, out uint rev) || rev == 0)
                     )
                     {
-                        AddMegaClilocRequest(s);
+                        ServiceProvider.Get<MegaClilocRequestsService>().AddMegaClilocRequest(s);
                     }
                 }
             }
