@@ -16,7 +16,7 @@ using Microsoft.Xna.Framework.Graphics;
 using SDL2;
 using ClassicUO.Sdk;
 using ClassicUO.Platforms;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Network
 {

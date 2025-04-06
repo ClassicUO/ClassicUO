@@ -11,7 +11,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 using ClassicUO.Sdk;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {

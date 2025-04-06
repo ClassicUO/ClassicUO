@@ -9,7 +9,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Resources;
 using ClassicUO.Sdk;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.Managers
 {

@@ -5,7 +5,7 @@ using ClassicUO.Input;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.UI.Controls
 {

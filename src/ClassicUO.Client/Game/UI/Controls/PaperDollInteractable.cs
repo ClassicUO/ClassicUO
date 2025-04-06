@@ -10,7 +10,7 @@ using ClassicUO.Input;
 using ClassicUO.Sdk;
 using ClassicUO.Sdk.Assets;
 using Microsoft.Xna.Framework;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.UI.Controls
 {

@@ -2,7 +2,7 @@
 
 using System.Linq;
 using ClassicUO.Sdk.Assets;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.Data
 {

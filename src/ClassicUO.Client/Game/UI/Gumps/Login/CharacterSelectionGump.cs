@@ -12,7 +12,7 @@ using ClassicUO.Sdk.Assets;
 using ClassicUO.Resources;
 using SDL2;
 using ClassicUO.Sdk;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {

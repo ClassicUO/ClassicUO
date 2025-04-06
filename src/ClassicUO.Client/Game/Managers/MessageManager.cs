@@ -12,7 +12,7 @@ using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Sdk.IO;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.Managers
 {

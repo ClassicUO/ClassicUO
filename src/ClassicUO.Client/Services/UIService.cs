@@ -6,7 +6,7 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.Services;
+namespace ClassicUO.Services;
 
 internal class UIService : IService
 {

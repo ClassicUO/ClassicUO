@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 using ClassicUO.Game.Data;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer.Animations;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.GameObjects
 {

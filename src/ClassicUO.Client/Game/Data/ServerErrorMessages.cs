@@ -3,7 +3,7 @@
 using System;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Resources;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.Data
 {

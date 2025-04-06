@@ -13,7 +13,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Sdk;
 using System;
 
-namespace ClassicUO.Game.Services
+namespace ClassicUO.Services
 {
     internal class UOService : IService
     {

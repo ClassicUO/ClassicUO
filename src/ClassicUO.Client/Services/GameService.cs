@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using ClassicUO.Game.Scenes;
 
-namespace ClassicUO.Game.Services
+namespace ClassicUO.Services
 {
     internal class GameService : IService
     {

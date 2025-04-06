@@ -13,7 +13,7 @@ using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Sdk;
 using Microsoft.Xna.Framework;

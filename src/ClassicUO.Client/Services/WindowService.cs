@@ -3,7 +3,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SDL2;
 
-namespace ClassicUO.Game.Services
+namespace ClassicUO.Services
 {
     internal class WindowService : IService
     {

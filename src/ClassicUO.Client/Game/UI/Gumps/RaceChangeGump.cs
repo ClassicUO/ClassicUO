@@ -6,7 +6,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Network;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 using System;
 using System.Collections.Generic;
 

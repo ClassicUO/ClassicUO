@@ -8,7 +8,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Sdk.IO;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.Data
 {

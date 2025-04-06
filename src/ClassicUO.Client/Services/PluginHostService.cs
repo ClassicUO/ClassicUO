@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace ClassicUO.Game.Services
+namespace ClassicUO.Services
 {
     internal class PluginHostService : IService
     {

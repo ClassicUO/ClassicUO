@@ -6,7 +6,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Network;
 using ClassicUO.Resources;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {

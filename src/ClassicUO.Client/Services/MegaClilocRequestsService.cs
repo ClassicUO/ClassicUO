@@ -1,7 +1,7 @@
 
 using System.Collections.Generic;
 
-namespace ClassicUO.Game.Services;
+namespace ClassicUO.Services;
 
 internal class MegaClilocRequestsService : IService
 {

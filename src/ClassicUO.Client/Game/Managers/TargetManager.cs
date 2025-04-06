@@ -9,7 +9,7 @@ using ClassicUO.Sdk.Assets;
 using ClassicUO.Network;
 using ClassicUO.Resources;
 using ClassicUO.Sdk;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.Managers
 {

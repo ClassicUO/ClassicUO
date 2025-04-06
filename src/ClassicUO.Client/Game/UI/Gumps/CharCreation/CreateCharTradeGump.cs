@@ -11,7 +11,7 @@ using ClassicUO.Sdk.Assets;
 using ClassicUO.Resources;
 using System.Collections.Generic;
 using ClassicUO.Sdk;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
 {

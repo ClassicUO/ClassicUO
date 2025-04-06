@@ -10,7 +10,7 @@ using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Sdk.IO;
 using Microsoft.Xna.Framework;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {

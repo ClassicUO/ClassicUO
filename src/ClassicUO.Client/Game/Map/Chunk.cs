@@ -8,7 +8,7 @@ using ClassicUO.Sdk.Assets;
 using System;
 using System.Runtime.InteropServices;
 using System.Buffers;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.Map
 {

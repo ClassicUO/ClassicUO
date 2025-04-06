@@ -1,7 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using System;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Network
 {

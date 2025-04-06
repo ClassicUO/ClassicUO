@@ -11,7 +11,7 @@ using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Sdk;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 

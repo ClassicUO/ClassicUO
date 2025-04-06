@@ -14,7 +14,7 @@ using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 using SDL2;
 using MathHelper = ClassicUO.Renderer.MathHelper;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.Scenes
 {

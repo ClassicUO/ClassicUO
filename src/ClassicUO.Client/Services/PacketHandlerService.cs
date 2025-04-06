@@ -1,7 +1,7 @@
 using ClassicUO.Network;
 using System;
 
-namespace ClassicUO.Game.Services
+namespace ClassicUO.Services
 {
     internal class PacketHandlerService : IService
     {

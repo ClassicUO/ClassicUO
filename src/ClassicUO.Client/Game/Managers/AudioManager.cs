@@ -6,7 +6,7 @@ using ClassicUO.Configuration;
 using ClassicUO.IO.Audio;
 using Microsoft.Xna.Framework.Audio;
 using ClassicUO.Sdk;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.Managers
 {

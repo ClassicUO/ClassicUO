@@ -11,7 +11,7 @@ using Microsoft.Xna.Framework;
 using SDL2;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Sdk;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {

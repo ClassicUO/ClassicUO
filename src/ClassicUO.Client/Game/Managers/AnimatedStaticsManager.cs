@@ -5,7 +5,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Sdk.Assets;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.Managers
 {

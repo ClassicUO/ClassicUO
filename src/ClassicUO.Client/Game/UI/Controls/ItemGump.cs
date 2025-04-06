@@ -11,7 +11,7 @@ using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using ClassicUO.Game.Scenes;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.UI.Controls
 {

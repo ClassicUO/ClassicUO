@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using Microsoft.Xna.Framework;

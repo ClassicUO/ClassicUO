@@ -7,7 +7,7 @@ using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using ClassicUO.Sdk.IO;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.UI
 {

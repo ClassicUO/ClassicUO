@@ -21,7 +21,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using static SDL2.SDL;
 using ClassicUO.Sdk;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO
 {

@@ -10,7 +10,7 @@ using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 using ClassicUO.Sdk;
 using ClassicUO.Collections;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 using ClassicUO.Game.Scenes;
 
 namespace ClassicUO.Game.GameObjects

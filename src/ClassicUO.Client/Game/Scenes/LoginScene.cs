@@ -19,7 +19,7 @@ using Microsoft.Xna.Framework;
 using ClassicUO.Sdk.IO;
 using ClassicUO.Sdk;
 using System.Collections.Generic;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.Scenes
 {

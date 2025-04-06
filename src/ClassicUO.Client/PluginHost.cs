@@ -1,6 +1,6 @@
 ﻿using ClassicUO.Configuration;
 using ClassicUO.Game;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 using ClassicUO.Network;
 using Microsoft.Xna.Framework.Graphics;
 using SDL2;

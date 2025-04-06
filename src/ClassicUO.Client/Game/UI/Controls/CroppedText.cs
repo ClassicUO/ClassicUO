@@ -3,7 +3,7 @@
 using System.Collections.Generic;
 using ClassicUO.Renderer;
 using ClassicUO.Sdk;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.UI.Controls
 {

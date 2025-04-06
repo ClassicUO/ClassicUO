@@ -11,7 +11,7 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using System;
 using ClassicUO.Sdk.IO;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.Managers
 {

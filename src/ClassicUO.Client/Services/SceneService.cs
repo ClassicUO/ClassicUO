@@ -3,7 +3,7 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.Services
+namespace ClassicUO.Services
 {
     internal class SceneService : IService
     {

@@ -8,7 +8,7 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using static ClassicUO.Network.NetClient;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.GameObjects
 {

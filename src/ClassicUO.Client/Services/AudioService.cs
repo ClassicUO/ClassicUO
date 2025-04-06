@@ -1,7 +1,7 @@
 using ClassicUO.Game;
 using ClassicUO.IO.Audio;
 
-namespace ClassicUO.Game.Services
+namespace ClassicUO.Services
 {
     internal class AudioService : IService
     {

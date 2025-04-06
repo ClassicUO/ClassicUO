@@ -2,7 +2,7 @@ using ClassicUO.Network;
 using System;
 using System.Net.Sockets;
 
-namespace ClassicUO.Game.Services
+namespace ClassicUO.Services
 {
     internal class NetClientService : IService
     {

@@ -14,7 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ClassicUO.Sdk.IO;
 using ClassicUO.Sdk;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game
 {

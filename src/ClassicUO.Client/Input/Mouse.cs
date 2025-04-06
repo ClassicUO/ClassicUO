@@ -2,7 +2,7 @@
 
 using Microsoft.Xna.Framework;
 using SDL2;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Input
 {

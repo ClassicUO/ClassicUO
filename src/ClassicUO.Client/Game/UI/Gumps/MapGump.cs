@@ -3,7 +3,7 @@
 using System;
 using System.Collections.Generic;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Network;

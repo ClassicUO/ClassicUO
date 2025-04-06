@@ -28,7 +28,7 @@ using ClassicUO.Sdk;
 using SpriteFont = ClassicUO.Renderer.SpriteFont;
 using static ClassicUO.Game.UI.Gumps.WorldMapGump;
 using StbImageWriteSharp;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 
 namespace ClassicUO.Game.UI.Gumps

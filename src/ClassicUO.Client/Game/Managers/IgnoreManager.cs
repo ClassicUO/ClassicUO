@@ -5,7 +5,7 @@ using System.Text;
 using System.Xml;
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Resources;
 using ClassicUO.Sdk;

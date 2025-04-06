@@ -1,6 +1,6 @@
 using ClassicUO.Sdk.Assets;
 
-namespace ClassicUO.Game.Services
+namespace ClassicUO.Services
 {
     internal class FileManagerService : IService
     {

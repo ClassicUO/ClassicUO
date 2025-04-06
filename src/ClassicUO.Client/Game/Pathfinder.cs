@@ -9,7 +9,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Sdk.Assets;
 using Microsoft.Xna.Framework;
 using MathHelper = ClassicUO.Renderer.MathHelper;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game
 {

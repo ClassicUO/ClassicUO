@@ -7,7 +7,7 @@ using ClassicUO.Renderer;
 using SDL2;
 using Microsoft.Xna.Framework;
 using ClassicUO.Sdk;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {

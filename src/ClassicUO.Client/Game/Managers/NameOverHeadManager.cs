@@ -3,7 +3,7 @@
 using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 using ClassicUO.Game.UI.Gumps;
 
 namespace ClassicUO.Game.Managers

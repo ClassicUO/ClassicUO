@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using ClassicUO.Sdk;
 
-namespace ClassicUO.Game.Services
+namespace ClassicUO.Services
 {
     internal static class ServiceProvider
     {

@@ -12,7 +12,7 @@ using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using SDL2;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {

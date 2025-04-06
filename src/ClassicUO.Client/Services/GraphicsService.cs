@@ -1,6 +1,6 @@
 using Microsoft.Xna.Framework.Graphics;
 
-namespace ClassicUO.Game.Services
+namespace ClassicUO.Services
 {
     internal class GraphicsService : IService
     {

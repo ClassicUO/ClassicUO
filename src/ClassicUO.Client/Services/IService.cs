@@ -1,4 +1,4 @@
-namespace ClassicUO.Game.Services
+namespace ClassicUO.Services
 {
     internal interface IService
     {

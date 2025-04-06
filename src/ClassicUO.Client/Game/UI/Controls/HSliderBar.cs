@@ -6,7 +6,7 @@ using ClassicUO.Input;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -142,23 +142,61 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
+            var hueVector = ShaderHueTranslator.GetHueVector(0);
+
             var uoService = ServiceProvider.Get<UOService>();
-            ref readonly var gumpInfo0 = ref uoService.Gumps.GetGump(213);
-            ref readonly var gumpInfo1 = ref uoService.Gumps.GetGump(214);
-            ref readonly var gumpInfo2 = ref uoService.Gumps.GetGump(215);
-            ref readonly var gumpInfo3 = ref uoService.Gumps.GetGump(216);
 
-            if (gumpInfo0.Texture == null || gumpInfo1.Texture == null || gumpInfo2.Texture == null || gumpInfo3.Texture == null)
+            if (_style == HSliderBarStyle.MetalWidgetRecessedBar)
             {
-                return false;
+                ref readonly var gumpInfo0 = ref uoService.Gumps.GetGump(213);
+                ref readonly var gumpInfo1 = ref uoService.Gumps.GetGump(214);
+                ref readonly var gumpInfo2 = ref uoService.Gumps.GetGump(215);
+                ref readonly var gumpInfo3 = ref uoService.Gumps.GetGump(216);
+
+                if (gumpInfo0.Texture == null || gumpInfo1.Texture == null || gumpInfo2.Texture == null || gumpInfo3.Texture == null)
+                {
+                    return false;
+                }
+
+                batcher.Draw(gumpInfo0.Texture, new Vector2(x, y), gumpInfo0.UV, hueVector);
+
+                batcher.DrawTiled(
+                    gumpInfo1.Texture,
+                    new Rectangle(
+                        x + gumpInfo0.UV.Width,
+                        y,
+                        BarWidth - gumpInfo2.UV.Width - gumpInfo0.UV.Width,
+                        gumpInfo1.UV.Height
+                    ),
+                    gumpInfo1.UV,
+                    hueVector
+                );
+
+                batcher.Draw(
+                    gumpInfo2.Texture,
+                    new Vector2(x + BarWidth - gumpInfo2.UV.Width, y),
+                    gumpInfo2.UV,
+                    hueVector
+                );
+
+                batcher.Draw(
+                    gumpInfo3.Texture,
+                    new Vector2(x + _sliderX, y),
+                    gumpInfo3.UV,
+                    hueVector
+                );
             }
+            else
+            {
+                ref readonly var gumpInfo = ref uoService.Gumps.GetGump(idx: 0x845);
 
-            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
-
-            batcher.Draw(gumpInfo0.Texture, new Vector2(x, y), gumpInfo0.UV, hueVector);
-            batcher.Draw(gumpInfo1.Texture, new Vector2(x + gumpInfo0.UV.Width, y), gumpInfo1.UV, hueVector);
-            batcher.Draw(gumpInfo2.Texture, new Vector2(x + gumpInfo0.UV.Width + gumpInfo1.UV.Width, y), gumpInfo2.UV, hueVector);
-            batcher.Draw(gumpInfo3.Texture, new Vector2(x + gumpInfo0.UV.Width + gumpInfo1.UV.Width + gumpInfo2.UV.Width, y), gumpInfo3.UV, hueVector);
+                batcher.Draw(
+                    gumpInfo.Texture,
+                    new Vector2(x + _sliderX, y),
+                    gumpInfo.UV,
+                    hueVector
+                );
+            }
 
             if (_text != null)
             {
@@ -172,7 +210,7 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            return true;
+            return base.Draw(batcher, x, y);
         }
 
         private void InternalSetValue(int value)

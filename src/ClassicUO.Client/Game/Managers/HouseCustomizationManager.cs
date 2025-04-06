@@ -13,7 +13,7 @@ using ClassicUO.IO;
 using ClassicUO.Network;
 using Microsoft.Xna.Framework;
 using ClassicUO.Renderer;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.Managers
 {

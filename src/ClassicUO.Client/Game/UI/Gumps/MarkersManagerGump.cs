@@ -9,7 +9,7 @@ using ClassicUO.Resources;
 using Microsoft.Xna.Framework.Graphics;
 using static ClassicUO.Game.UI.Gumps.WorldMapGump;
 using ClassicUO.Renderer;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {

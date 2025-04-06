@@ -1,7 +1,7 @@
 using ClassicUO.Game;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.Services
+namespace ClassicUO.Services
 {
     internal class GameCursorService : IService
     {

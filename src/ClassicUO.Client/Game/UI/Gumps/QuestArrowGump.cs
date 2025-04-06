@@ -5,7 +5,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps

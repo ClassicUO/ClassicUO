@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;

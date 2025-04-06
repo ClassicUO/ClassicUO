@@ -1,6 +1,6 @@
 ﻿using ClassicUO.Configuration;
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {

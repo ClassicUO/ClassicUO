@@ -2,7 +2,7 @@ using System;
 using System.Text.RegularExpressions;
 using ClassicUO.Sdk;
 using Microsoft.Xna.Framework;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.Data;
 

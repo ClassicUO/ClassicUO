@@ -8,7 +8,7 @@ using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 using MathHelper = ClassicUO.Renderer.MathHelper;
 using ClassicUO.Sdk;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
 {

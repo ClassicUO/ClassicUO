@@ -9,7 +9,7 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Network;
 using ClassicUO.Sdk;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.GameObjects
 {

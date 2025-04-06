@@ -11,7 +11,7 @@ using SDL2;
 using StbTextEditSharp;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Sdk;
-using ClassicUO.Game.Services;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.UI.Controls
 {
