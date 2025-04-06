@@ -53,8 +53,10 @@ namespace ClassicUO.Game
         }
 
         //The UltimaLive packets could be also used for other things than maps and statics
-        private static void OnUltimaLivePacket(World world, ref StackDataReader p)
+        private static void OnUltimaLivePacket(ref StackDataReader p)
         {
+            var world = ServiceProvider.Get<UOService>().World;
+
             p.Seek(13);
             byte command = p.ReadUInt8();
 
@@ -305,9 +307,9 @@ namespace ClassicUO.Game
                         }
 
 
-                        UIManager.GetGump<MiniMapGump>()?.RequestUpdateContents();
+                        ServiceProvider.Get<UIService>().GetGump<MiniMapGump>()?.RequestUpdateContents();
 
-                        //UIManager.GetGump<WorldMapGump>()?.UpdateMap();
+                        //ServiceProvider.Get<UIService>().GetGump<WorldMapGump>()?.UpdateMap();
                         //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
                         //also the server should always send FIRST the landdata packet, and only AFTER land the statics packet
                         _UL.MapCRCs[mapId][block] = ushort.MaxValue;
@@ -445,8 +447,10 @@ namespace ClassicUO.Game
             }
         }
 
-        private static void OnUpdateTerrainPacket(World world, ref StackDataReader p)
+        private static void OnUpdateTerrainPacket(ref StackDataReader p)
         {
+            var world = ServiceProvider.Get<UOService>().World;
+
             int block = (int) p.ReadUInt32BE();
             Span<byte> landData = stackalloc byte[LAND_BLOCK_LENGTH];
 
@@ -543,9 +547,9 @@ namespace ClassicUO.Game
                     }
                 }
 
-                UIManager.GetGump<MiniMapGump>()?.RequestUpdateContents();
+                ServiceProvider.Get<UIService>().GetGump<MiniMapGump>()?.RequestUpdateContents();
 
-                //UIManager.GetGump<WorldMapGump>()?.UpdateMap();
+                //ServiceProvider.Get<UIService>().GetGump<WorldMapGump>()?.UpdateMap();
             }
         }
 

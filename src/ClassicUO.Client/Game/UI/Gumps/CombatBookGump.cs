@@ -279,9 +279,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragBegin(int x, int y)
         {
-            if (UIManager.MouseOverControl?.RootParent == this)
+            if (ServiceProvider.Get<UIService>().MouseOverControl?.RootParent == this)
             {
-                UIManager.MouseOverControl.InvokeDragBegin(new Point(x, y));
+                ServiceProvider.Get<UIService>().MouseOverControl.InvokeDragBegin(new Point(x, y));
             }
 
             base.OnDragBegin(x, y);
@@ -289,9 +289,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragEnd(int x, int y)
         {
-            if (UIManager.MouseOverControl?.RootParent == this)
+            if (ServiceProvider.Get<UIService>().MouseOverControl?.RootParent == this)
             {
-                UIManager.MouseOverControl.InvokeDragEnd(new Point(x, y));
+                ServiceProvider.Get<UIService>().MouseOverControl.InvokeDragEnd(new Point(x, y));
             }
 
             base.OnDragEnd(x, y);
@@ -299,7 +299,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void OnGumpicDragBeginPrimary(object sender, EventArgs e)
         {
-            if (UIManager.DraggingControl != this || UIManager.MouseOverControl != sender)
+            if (ServiceProvider.Get<UIService>().DraggingControl != this || ServiceProvider.Get<UIService>().MouseOverControl != sender)
             {
                 return;
             }
@@ -314,13 +314,13 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = Mouse.LClickPosition.Y - 22
             };
 
-            UIManager.Add(gump);
-            UIManager.AttemptDragControl(gump, true);
+            ServiceProvider.Get<UIService>().Add(gump);
+            ServiceProvider.Get<UIService>().AttemptDragControl(gump, true);
         }
 
         private void OnGumpicDragBeginSecondary(object sender, EventArgs e)
         {
-            if (UIManager.DraggingControl != this || UIManager.MouseOverControl != sender)
+            if (ServiceProvider.Get<UIService>().DraggingControl != this || ServiceProvider.Get<UIService>().MouseOverControl != sender)
             {
                 return;
             }
@@ -335,13 +335,13 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = Mouse.LClickPosition.Y - 22
             };
 
-            UIManager.Add(gump);
-            UIManager.AttemptDragControl(gump, true);
+            ServiceProvider.Get<UIService>().Add(gump);
+            ServiceProvider.Get<UIService>().AttemptDragControl(gump, true);
         }
 
         private static UseAbilityButtonGump GetSpellFloatingButton(int id)
         {
-            for (var i = UIManager.Gumps.Last; i != null; i = i.Previous)
+            for (var i = ServiceProvider.Get<UIService>().Gumps.Last; i != null; i = i.Previous)
             {
                 if (i.Value is UseAbilityButtonGump g && g.Index == id)
                 {

@@ -381,10 +381,10 @@ namespace ClassicUO.Game.UI.Gumps
             if (
                 _corpse != null
                 && !_corpse.IsDestroyed
-                && UIManager.MouseOverControl != null
+                && ServiceProvider.Get<UIService>().MouseOverControl != null
                 && (
-                    UIManager.MouseOverControl == this
-                    || UIManager.MouseOverControl.RootParent == this
+                    ServiceProvider.Get<UIService>().MouseOverControl == this
+                    || ServiceProvider.Get<UIService>().MouseOverControl.RootParent == this
                 )
             )
             {

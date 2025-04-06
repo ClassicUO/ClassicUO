@@ -3,6 +3,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Services;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
@@ -103,7 +104,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (e.Button == MouseButtonType.Left)
                 {
-                    UIManager.Add(new EntryDialog(world, 250, 150, "Enter a tab name", (s) => {
+                    ServiceProvider.Get<UIService>().Add(new EntryDialog(world, 250, 150, "Enter a tab name", (s) => {
                          ProfileManager.CurrentProfile.JournalTabs.Add(s, new MessageType[] { MessageType.Regular });
                          ReloadTabs = true;
                     }));
@@ -575,7 +576,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add("X Delete Tab", () =>
                 {
-                    UIManager.Add(new QuestionGump(world, $"Delete [{name}] tab?", (yes) =>
+                    ServiceProvider.Get<UIService>().Add(new QuestionGump(world, $"Delete [{name}] tab?", (yes) =>
                     {
                         if (yes)
                         {

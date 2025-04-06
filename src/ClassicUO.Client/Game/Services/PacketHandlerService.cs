@@ -36,14 +36,14 @@ namespace ClassicUO.Game.Services
             _packetHandler.Append(data, fromPlugin);
         }
 
-        public int ParsePackets(World world, Span<byte> data)
+        public int ParsePackets(Span<byte> data)
         {
-            return _packetHandler.ParsePackets(_netClient, world, data);
+            return _packetHandler.ParsePackets(_netClient, data);
         }
 
         public void AddMegaClilocRequest(uint serial) => _incomingPackets.AddMegaClilocRequest(serial);
 
-        public void SendMegaClilocRequests(World world) => _incomingPackets.SendMegaClilocRequests(world);
+        public void SendMegaClilocRequests() => _incomingPackets.SendMegaClilocRequests();
 
         private void DefaultPacketBidings()
         {

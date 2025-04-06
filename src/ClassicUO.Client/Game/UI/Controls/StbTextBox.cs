@@ -688,16 +688,16 @@ namespace ClassicUO.Game.UI.Controls
                         {
                             Parent?.OnKeyboardReturn(0, Text);
 
-                            if (UIManager.SystemChat != null && UIManager.SystemChat.TextBoxControl != null && IsFocused)
+                            if (ServiceProvider.Get<UIService>().SystemChat != null && ServiceProvider.Get<UIService>().SystemChat.TextBoxControl != null && IsFocused)
                             {
-                                if (!IsFromServer || !UIManager.SystemChat.TextBoxControl.IsVisible)
+                                if (!IsFromServer || !ServiceProvider.Get<UIService>().SystemChat.TextBoxControl.IsVisible)
                                 {
                                     OnFocusLost();
                                     OnFocusEnter();
                                 }
-                                else if (UIManager.KeyboardFocusControl == null || UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl)
+                                else if (ServiceProvider.Get<UIService>().KeyboardFocusControl == null || ServiceProvider.Get<UIService>().KeyboardFocusControl != ServiceProvider.Get<UIService>().SystemChat.TextBoxControl)
                                 {
-                                    UIManager.SystemChat.TextBoxControl.SetKeyboardFocus();
+                                    ServiceProvider.Get<UIService>().SystemChat.TextBoxControl.SetKeyboardFocus();
                                 }
                             }
                         }

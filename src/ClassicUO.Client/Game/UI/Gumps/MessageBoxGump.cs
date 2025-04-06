@@ -114,8 +114,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             WantUpdateSize = false;
 
-            UIManager.KeyboardFocusControl = this;
-            UIManager.KeyboardFocusControl.SetKeyboardFocus();
+            ServiceProvider.Get<UIService>().KeyboardFocusControl = this;
+            ServiceProvider.Get<UIService>().KeyboardFocusControl.SetKeyboardFocus();
         }
 
         protected override void OnKeyUp(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)

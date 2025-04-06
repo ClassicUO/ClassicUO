@@ -281,15 +281,15 @@ namespace ClassicUO.Game
                         {
                             if (SerialHelper.IsMobile(container.Serial))
                             {
-                                UIManager.GetGump<PaperDollGump>(container.Serial)?.RequestUpdateContents();
+                                ServiceProvider.Get<UIService>().GetGump<PaperDollGump>(container.Serial)?.RequestUpdateContents();
                             }
                             else if (SerialHelper.IsItem(container.Serial))
                             {
-                                UIManager.GetGump<ContainerGump>(container.Serial)?.RequestUpdateContents();
+                                ServiceProvider.Get<UIService>().GetGump<ContainerGump>(container.Serial)?.RequestUpdateContents();
 
                                 if (container.Graphic == 0x2006)
                                 {
-                                    UIManager.GetGump<GridLootGump>(container)?.RequestUpdateContents();
+                                    ServiceProvider.Get<UIService>().GetGump<GridLootGump>(container)?.RequestUpdateContents();
                                 }
                             }
                         }
@@ -497,11 +497,11 @@ namespace ClassicUO.Game
             {
                 if (SerialHelper.IsMobile(containerSerial))
                 {
-                    UIManager.GetGump<PaperDollGump>(containerSerial)?.RequestUpdateContents();
+                    ServiceProvider.Get<UIService>().GetGump<PaperDollGump>(containerSerial)?.RequestUpdateContents();
                 }
                 else if (SerialHelper.IsItem(containerSerial))
                 {
-                    UIManager.GetGump<ContainerGump>(containerSerial)?.RequestUpdateContents();
+                    ServiceProvider.Get<UIService>().GetGump<ContainerGump>(containerSerial)?.RequestUpdateContents();
                 }
 
                 var container = Get(containerSerial);
@@ -794,7 +794,7 @@ namespace ClassicUO.Game
                 RemoveItem(item);
             }
 
-            UIManager.GetGump<BaseHealthBarGump>(Player?.Serial)?.Dispose();
+            ServiceProvider.Get<UIService>().GetGump<BaseHealthBarGump>(Player?.Serial)?.Dispose();
 
             ObjectToRemove = 0;
             LastObject = 0;

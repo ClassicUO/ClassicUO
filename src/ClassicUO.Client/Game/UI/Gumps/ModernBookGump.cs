@@ -334,9 +334,9 @@ namespace ClassicUO.Game.UI.Gumps
             ActivePage = page;
             UpdatePageButtonVisibility();
 
-            if (UIManager.KeyboardFocusControl == null || UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl && UIManager.KeyboardFocusControl != _bookPage && page != _bookPage._focusPage / 2 + 1)
+            if (ServiceProvider.Get<UIService>().KeyboardFocusControl == null || ServiceProvider.Get<UIService>().KeyboardFocusControl != ServiceProvider.Get<UIService>().SystemChat.TextBoxControl && ServiceProvider.Get<UIService>().KeyboardFocusControl != _bookPage && page != _bookPage._focusPage / 2 + 1)
             {
-                UIManager.SystemChat.TextBoxControl.SetKeyboardFocus();
+                ServiceProvider.Get<UIService>().SystemChat.TextBoxControl.SetKeyboardFocus();
             }
         }
 

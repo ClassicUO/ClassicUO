@@ -9,6 +9,7 @@ using ClassicUO.Resources;
 using Microsoft.Xna.Framework.Graphics;
 using static ClassicUO.Game.UI.Gumps.WorldMapGump;
 using ClassicUO.Renderer;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -441,21 +442,21 @@ namespace ClassicUO.Game.UI.Gumps
                 switch (buttonId)
                 {
                     case (int)ButtonsOption.EDIT_MARKER_BTN:
-                        var existingGump = UIManager.GetGump<UserMarkersGump>();
+                        var existingGump = ServiceProvider.Get<UIService>().GetGump<UserMarkersGump>();
 
                         existingGump?.Dispose();
 
                         var editUserMarkerGump = new UserMarkersGump(_gump.World, _marker.X, _marker.Y, _markers, _marker.ColorName, _marker.MarkerIconName, true, _idx);
                         editUserMarkerGump.EditEnd += OnEditEnd;
 
-                        UIManager.Add(editUserMarkerGump);
+                        ServiceProvider.Get<UIService>().Add(editUserMarkerGump);
 
                         break;
                     case (int)ButtonsOption.REMOVE_MARKER_BTN:
                         RemoveMarkerEvent?.Invoke( _idx, EventArgs.Empty);
                         break;
                     case (int)ButtonsOption.GOTO_MARKER_BTN:
-                        var wmGump = UIManager.GetGump<WorldMapGump>();
+                        var wmGump = ServiceProvider.Get<UIService>().GetGump<WorldMapGump>();
                         if (wmGump != null)
                         {
                             wmGump.GoToMarker(_marker.X, _marker.Y, false);

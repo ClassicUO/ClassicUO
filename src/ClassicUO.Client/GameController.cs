@@ -1,6 +1,5 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using ClassicUO.Sdk.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
@@ -40,6 +39,7 @@ namespace ClassicUO
         private bool _pluginsInitialized = false;
         private PacketHandlerService _packetHandlerService;
         private NetClientService _netClientService;
+        private UIManager _ui;
 
         public GameController(IPluginHost? pluginHost)
         {
@@ -115,7 +115,6 @@ namespace ClassicUO
             // Registra i servizi
             var netClient = new NetClient();
             ServiceProvider.Register(_netClientService = new NetClientService(netClient));
-            ServiceProvider.Register(_packetHandlerService = new PacketHandlerService(new PacketHandlers(), new IncomingPackets(), new OutgoingPackets(netClient), netClient));
 
             ServiceProvider.Register(new AudioService(Audio));
             ServiceProvider.Register(new UOService(this, UO));
@@ -126,8 +125,10 @@ namespace ClassicUO
             ServiceProvider.Register(new GraphicsService(GraphicsDevice));
 
             UO.Setup(this);
+            ServiceProvider.Register(_packetHandlerService = new PacketHandlerService(new PacketHandlers(), new IncomingPackets(UO.World), new OutgoingPackets(netClient), netClient));
             ServiceProvider.Register(new FileManagerService(UO.FileManager));
             ServiceProvider.Register(new GameCursorService(UO.GameCursor));
+            ServiceProvider.Register(new UIService(_ui = new()));
 
             Audio.Initialize();
             // TODO: temporary fix to avoid crash when laoding plugins
@@ -306,7 +307,7 @@ namespace ClassicUO
                 SetWindowPositionBySettings();
             }
 
-            var viewport = UIManager.GetGump<WorldViewportGump>();
+            var viewport = ServiceProvider.Get<UIService>().GetGump<WorldViewportGump>();
 
             if (viewport != null && ProfileManager.CurrentProfile.GameWindowFullSize)
             {
@@ -378,7 +379,7 @@ namespace ClassicUO
                 Profiler.ExitContext("Update");
             }
 
-            UIManager.Update();
+            _ui.Update();
 
             _totalElapsed += gameTime.ElapsedGameTime.TotalMilliseconds;
             _currentFpsTime += gameTime.ElapsedGameTime.TotalMilliseconds;
@@ -436,7 +437,7 @@ namespace ClassicUO
 
         public void ProcessPackets(ArraySegment<byte> data)
         {
-            var packetsCount = _packetHandlerService?.ParsePackets(UO.World, data);
+            var packetsCount = _packetHandlerService?.ParsePackets(data);
             _netClientService.Statistics.TotalPacketsReceived += (uint)packetsCount;
         }
 
@@ -481,7 +482,7 @@ namespace ClassicUO
                     Scene.Draw(_uoSpriteBatch);
                 }
 
-                UIManager.Draw(_uoSpriteBatch);
+                _ui.Draw(_uoSpriteBatch);
 
                 if ((UO.World?.InGame ?? false) && SelectedObject.Object is TextObject t)
                 {
@@ -530,7 +531,7 @@ namespace ClassicUO
 
             SetWindowSize(width, height);
 
-            var viewport = UIManager.GetGump<WorldViewportGump>();
+            var viewport = ServiceProvider.Get<UIService>().GetGump<WorldViewportGump>();
 
             if (viewport != null && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.GameWindowFullSize)
             {
@@ -612,7 +613,7 @@ namespace ClassicUO
                     {
                         _ignoreNextTextInput = false;
 
-                        UIManager.KeyboardFocusControl?.InvokeKeyDown(
+                        ServiceProvider.Get<UIService>().KeyboardFocusControl?.InvokeKeyDown(
                             sdlEvent->key.keysym.sym,
                             sdlEvent->key.keysym.mod
                         );
@@ -629,7 +630,7 @@ namespace ClassicUO
                 case SDL_EventType.SDL_KEYUP:
 
                     Keyboard.OnKeyUp(sdlEvent->key);
-                    UIManager.KeyboardFocusControl?.InvokeKeyUp(
+                    ServiceProvider.Get<UIService>().KeyboardFocusControl?.InvokeKeyUp(
                         sdlEvent->key.keysym.sym,
                         sdlEvent->key.keysym.mod
                     );
@@ -664,7 +665,7 @@ namespace ClassicUO
 
                     if (!string.IsNullOrEmpty(s))
                     {
-                        UIManager.KeyboardFocusControl?.InvokeTextInput(s);
+                        ServiceProvider.Get<UIService>().KeyboardFocusControl?.InvokeTextInput(s);
                         Scene?.OnTextInput(s);
                     }
 
@@ -684,7 +685,7 @@ namespace ClassicUO
                     {
                         if (Scene == null || !Scene.OnMouseDragging())
                         {
-                            UIManager.OnMouseDragging();
+                            ServiceProvider.Get<UIService>().OnMouseDragging();
                         }
                     }
 
@@ -698,7 +699,7 @@ namespace ClassicUO
 
                     if (Scene == null || !Scene.OnMouseWheel(isScrolledUp))
                     {
-                        UIManager.OnMouseWheel(isScrolledUp);
+                        ServiceProvider.Get<UIService>().OnMouseWheel(isScrolledUp);
                     }
 
                     break;
@@ -750,13 +751,13 @@ namespace ClassicUO
 
                         bool res =
                             (Scene != null && Scene.OnMouseDoubleClick(buttonType))
-                            || UIManager.OnMouseDoubleClick(buttonType);
+                            || ServiceProvider.Get<UIService>().OnMouseDoubleClick(buttonType);
 
                         if (!res)
                         {
                             if (Scene == null || !Scene.OnMouseDown(buttonType))
                             {
-                                UIManager.OnMouseButtonDown(buttonType);
+                                ServiceProvider.Get<UIService>().OnMouseButtonDown(buttonType);
                             }
                         }
                         else
@@ -776,7 +777,7 @@ namespace ClassicUO
 
                         if (Scene == null || !Scene.OnMouseDown(buttonType))
                         {
-                            UIManager.OnMouseButtonDown(buttonType);
+                            ServiceProvider.Get<UIService>().OnMouseButtonDown(buttonType);
                         }
 
                         lastClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
@@ -839,10 +840,10 @@ namespace ClassicUO
                     {
                         if (
                             (Scene != null && !Scene.OnMouseUp(buttonType))
-                            || UIManager.LastControlMouseDown(buttonType) != null
+                            || ServiceProvider.Get<UIService>().LastControlMouseDown(buttonType) != null
                         )
                         {
-                            UIManager.OnMouseButtonUp(buttonType);
+                            ServiceProvider.Get<UIService>().OnMouseButtonUp(buttonType);
                         }
                     }
 

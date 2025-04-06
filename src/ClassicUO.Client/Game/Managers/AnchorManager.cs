@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using ClassicUO.Game.Services;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using Microsoft.Xna.Framework;
@@ -212,7 +213,7 @@ namespace ClassicUO.Game.Managers
             AnchorableGump? closestControl = null;
             int closestDistance = 99999;
 
-            foreach (Gump c in UIManager.Gumps)
+            foreach (Gump c in ServiceProvider.Get<UIService>().Gumps)
             {
                 if (!c.IsDisposed && c is AnchorableGump host && host.AnchorType == control.AnchorType)
                 {
@@ -324,7 +325,7 @@ namespace ClassicUO.Game.Managers
                         var c = controlMatrix[x, y];
                         if (c != null)
                         {
-                            UIManager.MakeTopMostGump(c);
+                            ServiceProvider.Get<UIService>().MakeTopMostGump(c);
                         }
                     }
                 }

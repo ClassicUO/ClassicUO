@@ -187,7 +187,7 @@ namespace ClassicUO.Game.Managers
                     Y = camera.Bounds.Y + camera.Bounds.Height / 2 - 62
                 };
 
-                UIManager.Add(messageBox);
+                ServiceProvider.Get<UIService>().Add(messageBox);
 
                 return false;
             }

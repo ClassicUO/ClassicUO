@@ -171,11 +171,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (CanMove)
                 {
-                    UIManager.SavePosition(ServerSerial, Location);
+                    ServiceProvider.Get<UIService>().SavePosition(ServerSerial, Location);
                 }
                 else
                 {
-                    UIManager.RemovePosition(ServerSerial);
+                    ServiceProvider.Get<UIService>().RemovePosition(ServerSerial);
                 }
 
                 Dispose();

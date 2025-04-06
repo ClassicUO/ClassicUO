@@ -222,12 +222,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (entity is Mobile || entity is Item it && it.IsDamageable)
             {
-                if (UIManager.IsDragging)
+                if (ServiceProvider.Get<UIService>().IsDragging)
                 {
                     return;
                 }
 
-                var gump = UIManager.GetGump<BaseHealthBarGump>(LocalSerial);
+                var gump = ServiceProvider.Get<UIService>().GetGump<BaseHealthBarGump>(LocalSerial);
                 gump?.Dispose();
 
                 if (entity == World.Player && ProfileManager.CurrentProfile.StatusGumpBarMutuallyExclusive)
@@ -244,7 +244,7 @@ namespace ClassicUO.Game.UI.Gumps
                         HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE
                     );
 
-                    UIManager.Add(
+                    ServiceProvider.Get<UIService>().Add(
                         gump = new HealthBarGumpCustom(World, entity)
                         {
                             X = Mouse.Position.X - (rect.Width >> 1),
@@ -262,10 +262,10 @@ namespace ClassicUO.Game.UI.Gumps
                         Y = Mouse.LClickPosition.Y - (gumpInfo.UV.Height >> 1)
                     };
 
-                    UIManager.Add(healthBar);
+                    ServiceProvider.Get<UIService>().Add(healthBar);
                 }
 
-                UIManager.AttemptDragControl(gump, true);
+                ServiceProvider.Get<UIService>().AttemptDragControl(gump, true);
             }
             else if (entity != null)
             {
@@ -327,7 +327,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!_uoService.GameCursor.ItemHold.Enabled)
                 {
                     if (
-                        UIManager.IsDragging
+                        ServiceProvider.Get<UIService>().IsDragging
                         || Math.Max(Math.Abs(Mouse.LDragOffset.X), Math.Abs(Mouse.LDragOffset.Y))
                             >= 1
                     )
@@ -354,7 +354,7 @@ namespace ClassicUO.Game.UI.Gumps
                         case CursorTarget.SetTargetClientSide:
                             World.TargetManager.Target(LocalSerial);
                             Mouse.LastLeftButtonClickTime = 0;
-                            UIManager.Add(new InspectorGump(World, World.Get(LocalSerial)));
+                            ServiceProvider.Get<UIService>().Add(new InspectorGump(World, World.Get(LocalSerial)));
 
                             break;
 

@@ -5,6 +5,7 @@ using System.Text;
 using System.Xml;
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Services;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Resources;
 using ClassicUO.Sdk;
@@ -49,7 +50,7 @@ namespace ClassicUO.Game.Managers
 
                 IgnoredCharsList.Add(charName);
                 // Redraw list of chars
-                UIManager.GetGump<IgnoreManagerGump>()?.Redraw();
+                ServiceProvider.Get<UIService>().GetGump<IgnoreManagerGump>()?.Redraw();
 
                 GameActions.Print(_world,string.Format(ResGumps.AddToIgnoreListSuccess, charName));
                 return;

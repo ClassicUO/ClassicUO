@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Services;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -68,9 +69,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool IsEnabled { get; set; }
 
-        public bool HasKeyboardFocus => UIManager.KeyboardFocusControl == this;
+        public bool HasKeyboardFocus => ServiceProvider.Get<UIService>().KeyboardFocusControl == this;
 
-        public bool MouseIsOver => UIManager.MouseOverControl == this;
+        public bool MouseIsOver => ServiceProvider.Get<UIService>().MouseOverControl == this;
 
         public bool CanMove { get; set; }
 
@@ -343,7 +344,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public void BringOnTop()
         {
-            UIManager.MakeTopMostGump(this);
+            ServiceProvider.Get<UIService>().MakeTopMostGump(this);
         }
 
         public void SetTooltip(string text, int maxWidth = 0)
@@ -372,7 +373,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (AcceptKeyboardInput && !HasKeyboardFocus)
             {
-                UIManager.KeyboardFocusControl = this;
+                ServiceProvider.Get<UIService>().KeyboardFocusControl = this;
             }
         }
 

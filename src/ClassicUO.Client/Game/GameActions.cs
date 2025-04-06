@@ -47,13 +47,13 @@ namespace ClassicUO.Game
 
         public static void OpenMacroGump(World world, string name)
         {
-            UIManager.GetGump<MacroGump>()?.Dispose();
-            UIManager.Add(new MacroGump(world, name));
+            ServiceProvider.Get<UIService>().GetGump<MacroGump>()?.Dispose();
+            ServiceProvider.Get<UIService>().Add(new MacroGump(world, name));
         }
 
         public static void OpenPaperdoll(World world, uint serial)
         {
-            var paperDollGump = UIManager.GetGump<PaperDollGump>(serial);
+            var paperDollGump = ServiceProvider.Get<UIService>().GetGump<PaperDollGump>(serial);
 
             if (paperDollGump == null)
             {
@@ -73,7 +73,7 @@ namespace ClassicUO.Game
 
         public static void OpenSettings(World world, int page = 0)
         {
-            var opt = UIManager.GetGump<OptionsGump>();
+            var opt = ServiceProvider.Get<UIService>().GetGump<OptionsGump>();
 
             if (opt == null)
             {
@@ -83,7 +83,7 @@ namespace ClassicUO.Game
                     Y = (ServiceProvider.Get<WindowService>().ClientBounds.Height >> 1) - 250
                 };
 
-                UIManager.Add(optionsGump);
+                ServiceProvider.Get<UIService>().Add(optionsGump);
                 optionsGump.ChangePage(page);
                 optionsGump.SetInScreen();
             }
@@ -100,7 +100,7 @@ namespace ClassicUO.Game
 
             if (StatusGumpBase.GetStatusGump() == null)
             {
-                UIManager.Add(StatusGumpBase.AddStatusGump(world, 100, 100));
+                ServiceProvider.Get<UIService>().Add(StatusGumpBase.AddStatusGump(world, 100, 100));
             }
         }
 
@@ -108,15 +108,15 @@ namespace ClassicUO.Game
         {
             if (ProfileManager.CurrentProfile.UseAlternateJournal)
             {
-                UIManager.Add(new ResizableJournal(world));
+                ServiceProvider.Get<UIService>().Add(new ResizableJournal(world));
                 return;
             }
 
-            var journalGump = UIManager.GetGump<JournalGump>();
+            var journalGump = ServiceProvider.Get<UIService>().GetGump<JournalGump>();
 
             if (journalGump == null)
             {
-                UIManager.Add(new JournalGump(world) { X = 64, Y = 64 });
+                ServiceProvider.Get<UIService>().Add(new JournalGump(world) { X = 64, Y = 64 });
             }
             else
             {
@@ -135,7 +135,7 @@ namespace ClassicUO.Game
             if (world.Player == null)
                 return;
 
-            var skillsGump = UIManager.GetGump<StandardSkillsGump>();
+            var skillsGump = ServiceProvider.Get<UIService>().GetGump<StandardSkillsGump>();
 
             if (skillsGump != null && skillsGump.IsMinimized)
             {
@@ -150,11 +150,11 @@ namespace ClassicUO.Game
 
         public static void OpenMiniMap(World world)
         {
-            var miniMapGump = UIManager.GetGump<MiniMapGump>();
+            var miniMapGump = ServiceProvider.Get<UIService>().GetGump<MiniMapGump>();
 
             if (miniMapGump == null)
             {
-                UIManager.Add(new MiniMapGump(world));
+                ServiceProvider.Get<UIService>().Add(new MiniMapGump(world));
             }
             else
             {
@@ -166,12 +166,12 @@ namespace ClassicUO.Game
 
         public static void OpenWorldMap(World world)
         {
-            var worldMap = UIManager.GetGump<WorldMapGump>();
+            var worldMap = ServiceProvider.Get<UIService>().GetGump<WorldMapGump>();
 
             if (worldMap == null || worldMap.IsDisposed)
             {
                 worldMap = new WorldMapGump(world);
-                UIManager.Add(worldMap);
+                ServiceProvider.Get<UIService>().Add(worldMap);
             }
             else
             {
@@ -184,11 +184,11 @@ namespace ClassicUO.Game
         {
             if (world.ChatManager.ChatIsEnabled == ChatStatus.Enabled)
             {
-                var chatGump = UIManager.GetGump<ChatGump>();
+                var chatGump = ServiceProvider.Get<UIService>().GetGump<ChatGump>();
 
                 if (chatGump == null)
                 {
-                    UIManager.Add(new ChatGump(world));
+                    ServiceProvider.Get<UIService>().Add(new ChatGump(world));
                 }
                 else
                 {
@@ -198,11 +198,11 @@ namespace ClassicUO.Game
             }
             else if (world.ChatManager.ChatIsEnabled == ChatStatus.EnabledUserRequest)
             {
-                var chatGump = UIManager.GetGump<ChatGumpChooseName>();
+                var chatGump = ServiceProvider.Get<UIService>().GetGump<ChatGumpChooseName>();
 
                 if (chatGump == null)
                 {
-                    UIManager.Add(new ChatGumpChooseName(world));
+                    ServiceProvider.Get<UIService>().Add(new ChatGumpChooseName(world));
                 }
                 else
                 {
@@ -247,7 +247,7 @@ namespace ClassicUO.Game
                 return false;
             }
 
-            var backpackGump = UIManager.GetGump<ContainerGump>(backpack);
+            var backpackGump = ServiceProvider.Get<UIService>().GetGump<ContainerGump>(backpack);
 
             if (backpackGump == null)
             {
@@ -291,7 +291,7 @@ namespace ClassicUO.Game
                         }
                     );
 
-                    UIManager.Add(messageBox);
+                    ServiceProvider.Get<UIService>().Add(messageBox);
 
                     return;
                 }
@@ -418,7 +418,7 @@ namespace ClassicUO.Game
         {
             ServiceProvider.Get<PacketHandlerService>().Out.Send_PartyAccept(serial);
 
-            UIManager.GetGump<PartyInviteGump>()?.Dispose();
+            ServiceProvider.Get<UIService>().GetGump<PartyInviteGump>()?.Dispose();
         }
 
         public static void RequestPartyRemoveMemberByTarget()
@@ -476,7 +476,7 @@ namespace ClassicUO.Game
             {
                 if (ProfileManager.CurrentProfile.HoldShiftToSplitStack == Keyboard.Shift)
                 {
-                    var gump = UIManager.GetGump<SplitMenuGump>(item);
+                    var gump = ServiceProvider.Get<UIService>().GetGump<SplitMenuGump>(item);
 
                     if (gump != null)
                     {
@@ -489,8 +489,8 @@ namespace ClassicUO.Game
                         Y = Mouse.Position.Y - 40
                     };
 
-                    UIManager.Add(gump);
-                    UIManager.AttemptDragControl(gump, true);
+                    ServiceProvider.Get<UIService>().Add(gump);
+                    ServiceProvider.Get<UIService>().AttemptDragControl(gump, true);
 
                     return true;
                 }
@@ -758,9 +758,9 @@ namespace ClassicUO.Game
 
         public static void OpenAbilitiesBook(World world)
         {
-            if (UIManager.GetGump<CombatBookGump>() == null)
+            if (ServiceProvider.Get<UIService>().GetGump<CombatBookGump>() == null)
             {
-                UIManager.Add(new CombatBookGump(world, 100, 100));
+                ServiceProvider.Get<UIService>().Add(new CombatBookGump(world, 100, 100));
             }
         }
 

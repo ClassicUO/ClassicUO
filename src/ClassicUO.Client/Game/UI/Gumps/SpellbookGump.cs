@@ -170,7 +170,7 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Dispose()
         {
             ServiceProvider.Get<AudioService>().PlaySound(0x0055);
-            UIManager.SavePosition(LocalSerial, Location);
+            ServiceProvider.Get<UIService>().SavePosition(LocalSerial, Location);
             base.Dispose();
         }
 
@@ -837,7 +837,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void OnIconDragBegin(object? sender, EventArgs e)
         {
-            if (UIManager.DraggingControl != this || UIManager.MouseOverControl != sender)
+            if (ServiceProvider.Get<UIService>().DraggingControl != this || ServiceProvider.Get<UIService>().MouseOverControl != sender)
             {
                 return;
             }
@@ -860,13 +860,13 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = Mouse.LClickPosition.Y - 22
             };
 
-            UIManager.Add(gump);
-            UIManager.AttemptDragControl(gump, true);
+            ServiceProvider.Get<UIService>().Add(gump);
+            ServiceProvider.Get<UIService>().AttemptDragControl(gump, true);
         }
 
         private static UseSpellButtonGump? GetSpellFloatingButton(int id)
         {
-            for (var i = UIManager.Gumps.Last; i != null; i = i.Previous)
+            for (var i = ServiceProvider.Get<UIService>().Gumps.Last; i != null; i = i.Previous)
             {
                 if (i.Value is UseSpellButtonGump g && g.SpellID == id)
                 {
@@ -1157,9 +1157,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragBegin(int x, int y)
         {
-            if (UIManager.MouseOverControl?.RootParent == this)
+            if (ServiceProvider.Get<UIService>().MouseOverControl?.RootParent == this)
             {
-                UIManager.MouseOverControl.InvokeDragBegin(new Point(x, y));
+                ServiceProvider.Get<UIService>().MouseOverControl.InvokeDragBegin(new Point(x, y));
             }
 
             base.OnDragBegin(x, y);
@@ -1167,9 +1167,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragEnd(int x, int y)
         {
-            if (UIManager.MouseOverControl?.RootParent == this)
+            if (ServiceProvider.Get<UIService>().MouseOverControl?.RootParent == this)
             {
-                UIManager.MouseOverControl.InvokeDragEnd(new Point(x, y));
+                ServiceProvider.Get<UIService>().MouseOverControl.InvokeDragEnd(new Point(x, y));
             }
 
             base.OnDragEnd(x, y);
@@ -1508,10 +1508,10 @@ namespace ClassicUO.Game.UI.Gumps
                     if (gumpInfo.Texture != null)
                     {
                         if (
-                            UIManager.MouseOverControl != null
+                            ServiceProvider.Get<UIService>().MouseOverControl != null
                             && (
-                                UIManager.MouseOverControl == this
-                                || UIManager.MouseOverControl.RootParent == this
+                                ServiceProvider.Get<UIService>().MouseOverControl == this
+                                || ServiceProvider.Get<UIService>().MouseOverControl.RootParent == this
                             )
                         )
                         {

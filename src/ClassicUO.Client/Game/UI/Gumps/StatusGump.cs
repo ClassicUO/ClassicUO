@@ -26,7 +26,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (ProfileManager.CurrentProfile.StatusGumpBarMutuallyExclusive)
             {
                 // sanity check
-                UIManager.GetGump<HealthBarGump>(World.Player)?.Dispose();
+                ServiceProvider.Get<UIService>().GetGump<HealthBarGump>(World.Player)?.Dispose();
             }
 
             CanCloseWithRightClick = true;
@@ -45,11 +45,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case ButtonType.BuffIcon:
 
-                    var gump = UIManager.GetGump<BuffGump>();
+                    var gump = ServiceProvider.Get<UIService>().GetGump<BuffGump>();
 
                     if (gump == null)
                     {
-                        UIManager.Add(new BuffGump(World, 100, 100));
+                        ServiceProvider.Get<UIService>().Add(new BuffGump(World, 100, 100));
                     }
                     else
                     {
@@ -77,12 +77,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
                     {
-                        UIManager.GetGump<BaseHealthBarGump>(World.Player)?.Dispose();
+                        ServiceProvider.Get<UIService>().GetGump<BaseHealthBarGump>(World.Player)?.Dispose();
 
                         if (ProfileManager.CurrentProfile.CustomBarsToggled)
-                            UIManager.Add(new HealthBarGumpCustom(World, World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
+                            ServiceProvider.Get<UIService>().Add(new HealthBarGumpCustom(World, World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
                         else
-                            UIManager.Add(new HealthBarGump(World, World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
+                            ServiceProvider.Get<UIService>().Add(new HealthBarGump(World, World.Player) { X = ScreenCoordinateX, Y = ScreenCoordinateY });
 
                         if (ProfileManager.CurrentProfile.StatusGumpBarMutuallyExclusive)
                             Dispose();
@@ -107,11 +107,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (ProfileManager.CurrentProfile.UseOldStatusGump)
             {
-                gump = UIManager.GetGump<StatusGumpOld>();
+                gump = ServiceProvider.Get<UIService>().GetGump<StatusGumpOld>();
             }
             else
             {
-                gump = UIManager.GetGump<StatusGumpModern>();
+                gump = ServiceProvider.Get<UIService>().GetGump<StatusGumpModern>();
             }
 
             gump?.SetInScreen();

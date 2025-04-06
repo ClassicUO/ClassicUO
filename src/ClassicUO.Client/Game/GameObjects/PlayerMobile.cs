@@ -266,7 +266,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            for (var gump = UIManager.Gumps.First; gump != null; gump = gump.Next)
+            for (var gump = ServiceProvider.Get<UIService>().Gumps.First; gump != null; gump = gump.Next)
             {
                 if (gump.Value is UseAbilityButtonGump or CombatBookGump)
                     gump.Value.RequestUpdateContents();
@@ -364,7 +364,7 @@ namespace ClassicUO.Game.GameObjects
                     bank.Items = null;
                 }
 
-                UIManager.GetGump<ContainerGump>(bank.Serial)?.Dispose();
+                ServiceProvider.Get<UIService>().GetGump<ContainerGump>(bank.Serial)?.Dispose();
 
                 bank.Opened = false;
             }
@@ -372,7 +372,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void CloseRangedGumps()
         {
-            foreach (Gump gump in UIManager.Gumps)
+            foreach (Gump gump in ServiceProvider.Get<UIService>().Gumps)
             {
                 switch (gump)
                 {

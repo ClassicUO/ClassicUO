@@ -269,7 +269,7 @@ namespace ClassicUO.Game.UI.Gumps
             _options["goto_location"] = new ContextMenuItemEntry
             (
                 ResGumps.GotoLocation,
-                () => UIManager.Add(new LocationGoGump(World, (x, y) => GoToMarker(x, y, true)))
+                () => ServiceProvider.Get<UIService>().Add(new LocationGoGump(World, (x, y) => GoToMarker(x, y, true)))
             );
 
             _options["top_most"] = new ContextMenuItemEntry(ResGumps.TopMost, () => { TopMost = !TopMost; }, true, _isTopMost);
@@ -331,7 +331,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     var mm = new MarkersManagerGump(World);
 
-                    UIManager.Add(mm);
+                    ServiceProvider.Get<UIService>().Add(mm);
                 }
             );
 
@@ -1761,7 +1761,7 @@ namespace ClassicUO.Game.UI.Gumps
                 CanCloseWithRightClick = true
             };
 
-            UIManager.Add(entryDialog);
+            ServiceProvider.Get<UIService>().Add(entryDialog);
         }
 
         private void SaveMakerOnPlayer(string markerName)
@@ -3050,10 +3050,10 @@ namespace ClassicUO.Game.UI.Gumps
                         return;
                     }
 
-                    var existingGump = UIManager.GetGump<UserMarkersGump>();
+                    var existingGump = ServiceProvider.Get<UIService>().GetGump<UserMarkersGump>();
 
                     existingGump?.Dispose();
-                    UIManager.Add(new UserMarkersGump(World, _mouseCenter.X, _mouseCenter.Y, userFile.Markers));
+                    ServiceProvider.Get<UIService>().Add(new UserMarkersGump(World, _mouseCenter.X, _mouseCenter.Y, userFile.Markers));
                 }
             }
 

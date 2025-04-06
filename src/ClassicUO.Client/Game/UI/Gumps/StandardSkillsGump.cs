@@ -228,7 +228,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else if (buttonID == 1) // reset
             {
-                UIManager.Add(
+                ServiceProvider.Get<UIService>().Add(
                     new MessageBoxGump(World, 300, 200,
                                        "Skills will be placed in default groups.\nDo you want reset all groups?",
                                                b =>
@@ -454,8 +454,8 @@ namespace ClassicUO.Game.UI.Gumps
                             _gumpPic.IsVisible = true;
                             _textbox.IsEditable = false;
                             _textbox.AllowSelection = false;
-                            UIManager.KeyboardFocusControl = this;
-                            UIManager.SystemChat.SetFocus();
+                            ServiceProvider.Get<UIService>().KeyboardFocusControl = this;
+                            ServiceProvider.Get<UIService>().SystemChat.SetFocus();
 
                             break;
 
@@ -463,16 +463,16 @@ namespace ClassicUO.Game.UI.Gumps
                             _gumpPic.IsVisible = true;
                             _textbox.IsEditable = false;
                             _textbox.AllowSelection = false;
-                            UIManager.KeyboardFocusControl = this;
+                            ServiceProvider.Get<UIService>().KeyboardFocusControl = this;
 
-                            //UIManager.SystemChat.SetFocus();
+                            //ServiceProvider.Get<UIService>().SystemChat.SetFocus();
                             break;
 
                         case 2:
                             _gumpPic.IsVisible = false;
                             _textbox.IsEditable = true;
                             _textbox.AllowSelection = true;
-                            UIManager.KeyboardFocusControl = _textbox;
+                            ServiceProvider.Get<UIService>().KeyboardFocusControl = _textbox;
                             _textbox.SetKeyboardFocus();
 
                             break;
@@ -485,8 +485,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _gumpPic.IsVisible = true;
                     _textbox.IsEditable = false;
                     _textbox.AllowSelection = false;
-                    UIManager.KeyboardFocusControl = null;
-                    UIManager.SystemChat.SetFocus();
+                    ServiceProvider.Get<UIService>().KeyboardFocusControl = null;
+                    ServiceProvider.Get<UIService>().SystemChat.SetFocus();
                 };
             }
 
@@ -563,7 +563,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             protected override void OnMouseOver(int x, int y)
             {
-                if (UIManager.LastControlMouseDown(MouseButtonType.Left) is SkillItemControl skillControl)
+                if (ServiceProvider.Get<UIService>().LastControlMouseDown(MouseButtonType.Left) is SkillItemControl skillControl)
                 {
                     if (skillControl.Parent // databox
                                     .Parent // skillgruop
@@ -639,8 +639,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _gumpPic.IsVisible = false;
                 }
 
-                UIManager.KeyboardFocusControl = null;
-                UIManager.SystemChat.SetFocus();
+                ServiceProvider.Get<UIService>().KeyboardFocusControl = null;
+                ServiceProvider.Get<UIService>().SystemChat.SetFocus();
 
                 _group.Name = text;
 
@@ -916,15 +916,15 @@ namespace ClassicUO.Game.UI.Gumps
 
                 ServiceProvider.Get<UOService>().Self.GameCursor.IsDraggingCursorForced = false;
 
-                if (UIManager.LastControlMouseDown(MouseButtonType.Left) == this && _gump.World.Player.Skills[Index].IsClickable)
+                if (ServiceProvider.Get<UIService>().LastControlMouseDown(MouseButtonType.Left) == this && _gump.World.Player.Skills[Index].IsClickable)
                 {
-                    if (UIManager.MouseOverControl == null || UIManager.MouseOverControl.RootParent != RootParent)
+                    if (ServiceProvider.Get<UIService>().MouseOverControl == null || ServiceProvider.Get<UIService>().MouseOverControl.RootParent != RootParent)
                     {
                         GetSpellFloatingButton(Index)?.Dispose();
 
                         if (Index >= 0 && Index < _gump.World.Player.Skills.Length)
                         {
-                            UIManager.Add(new SkillButtonGump(_gump.World, _gump.World.Player.Skills[Index], Mouse.Position.X - 44, Mouse.Position.Y - 22));
+                            ServiceProvider.Get<UIService>().Add(new SkillButtonGump(_gump.World, _gump.World.Player.Skills[Index], Mouse.Position.X - 44, Mouse.Position.Y - 22));
                         }
                     }
                 }
@@ -932,7 +932,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             private static SkillButtonGump GetSpellFloatingButton(int id)
             {
-                for (LinkedListNode<Gump> i = UIManager.Gumps.Last; i != null; i = i.Previous)
+                for (LinkedListNode<Gump> i = ServiceProvider.Get<UIService>().Gumps.Last; i != null; i = i.Previous)
                 {
                     if (i.Value is SkillButtonGump g && g.SkillID == id)
                     {
@@ -955,7 +955,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-                if (UIManager.LastControlMouseDown(MouseButtonType.Left) == this)
+                if (ServiceProvider.Get<UIService>().LastControlMouseDown(MouseButtonType.Left) == this)
                 {
                     batcher.Draw
                     (

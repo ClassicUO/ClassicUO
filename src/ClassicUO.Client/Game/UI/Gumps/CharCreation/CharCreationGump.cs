@@ -86,7 +86,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         CanMove = false
                     };
 
-                    UIManager.Add(messageBox);
+                    ServiceProvider.Get<UIService>().Add(messageBox);
 
                     return;
                 }

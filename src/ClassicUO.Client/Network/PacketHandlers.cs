@@ -1,36 +1,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using ClassicUO.Sdk.Assets;
-using ClassicUO.Configuration;
-using ClassicUO.Game;
-using ClassicUO.Game.Data;
-using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
-using ClassicUO.Game.Services;
-using ClassicUO.Game.UI.Controls;
-using ClassicUO.Game.UI.Gumps;
-using ClassicUO.Renderer;
-using ClassicUO.Resources;
 using ClassicUO.Sdk.IO;
-using Microsoft.Xna.Framework;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using ClassicUO.Sdk;
-using ClassicUO.Platforms;
-using ClassicUO.Game.UI.Controls;
-using ClassicUO.Game.UI.Gumps;
-using ClassicUO.Renderer;
-using ClassicUO.Resources;
-using ClassicUO.Sdk.IO;
-using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using ClassicUO.Sdk;
-using ClassicUO.Platforms;
-using ClassicUO.Game.Services;
 
 namespace ClassicUO.Network
 {
@@ -45,14 +17,14 @@ namespace ClassicUO.Network
         private readonly CircularBuffer _buffer = new CircularBuffer();
         private readonly CircularBuffer _pluginsBuffer = new CircularBuffer();
 
-        public int ParsePackets(NetClient socket, World world, Span<byte> data)
+        public int ParsePackets(NetClient socket, Span<byte> data)
         {
             Append(data, false);
 
-            return ParsePackets(socket, world, _buffer, true) + ParsePackets(socket, world, _pluginsBuffer, false);
+            return ParsePackets(socket, _buffer, true) + ParsePackets(socket, _pluginsBuffer, false);
         }
 
-        private int ParsePackets(NetClient socket, World world, CircularBuffer stream, bool allowPlugins)
+        private int ParsePackets(NetClient socket, CircularBuffer stream, bool allowPlugins)
         {
             var packetsCount = 0;
 
@@ -104,7 +76,7 @@ namespace ClassicUO.Network
                     // It will be fixed once the new plugin system is done.
                     if (!allowPlugins || Plugin.ProcessRecvPacket(packetBuffer, ref packetlength))
                     {
-                        AnalyzePacket(world, packetBuffer.AsSpan(0, packetlength), offset);
+                        AnalyzePacket(packetBuffer.AsSpan(0, packetlength), offset);
 
                         ++packetsCount;
                     }
@@ -122,7 +94,7 @@ namespace ClassicUO.Network
             (fromPlugins ? _pluginsBuffer : _buffer).Enqueue(data);
         }
 
-        private void AnalyzePacket(World world, ReadOnlySpan<byte> data, int offset)
+        private void AnalyzePacket(ReadOnlySpan<byte> data, int offset)
         {
             if (data.IsEmpty)
                 return;
@@ -134,7 +106,7 @@ namespace ClassicUO.Network
                 var buffer = new StackDataReader(data);
                 buffer.Seek(offset);
 
-                bufferReader(world, ref buffer);
+                bufferReader(ref buffer);
             }
         }
 

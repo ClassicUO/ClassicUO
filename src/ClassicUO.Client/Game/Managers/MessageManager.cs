@@ -175,7 +175,7 @@ namespace ClassicUO.Game.Managers
                         msg.IsTextGump = true;
                         bool found = false;
 
-                        for (var gump = UIManager.Gumps.Last; gump != null; gump = gump.Previous)
+                        for (var gump = ServiceProvider.Get<UIService>().Gumps.Last; gump != null; gump = gump.Previous)
                         {
                             Control g = gump.Value;
 

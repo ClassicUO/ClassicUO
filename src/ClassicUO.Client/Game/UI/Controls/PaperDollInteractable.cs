@@ -513,7 +513,7 @@ namespace ClassicUO.Game.UI.Controls
                         CanLift
                         && !ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled
                         && Mouse.LButtonPressed
-                        && UIManager.LastControlMouseDown(MouseButtonType.Left) == this
+                        && ServiceProvider.Get<UIService>().LastControlMouseDown(MouseButtonType.Left) == this
                         && (
                             Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF
                                 && Mouse.LastLeftButtonClickTime != 0

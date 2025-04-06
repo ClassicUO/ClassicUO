@@ -646,7 +646,7 @@ namespace ClassicUO.Game.UI.Gumps
                             SelectedIndex = _lastSelectedIndex
                         };
 
-                        UIManager.Add(_colorPickerBox);
+                        ServiceProvider.Get<UIService>().Add(_colorPickerBox);
 
                         _colorPickerBox.ColorSelectedIndex += ColorPickerBoxOnColorSelectedIndex;
                         _colorPickerBox.MouseUp += ColorPickerBoxOnMouseUp;

@@ -3,6 +3,7 @@
 using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Services;
 using ClassicUO.Game.UI.Gumps;
 
 namespace ClassicUO.Game.Managers
@@ -71,7 +72,7 @@ namespace ClassicUO.Game.Managers
             if (_gump == null || _gump.IsDisposed)
             {
                 _gump = new NameOverHeadHandlerGump(_world);
-                UIManager.Add(_gump);
+                ServiceProvider.Get<UIService>().Add(_gump);
             }
 
             _gump.IsEnabled = true;
@@ -83,7 +84,7 @@ namespace ClassicUO.Game.Managers
             if (_gump == null)
             { //Required in case nameplates are active when closing and reopening the client
                 _gump = new NameOverHeadHandlerGump(_world);
-                UIManager.Add(_gump);
+                ServiceProvider.Get<UIService>().Add(_gump);
             }
 
 

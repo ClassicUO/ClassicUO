@@ -10,6 +10,7 @@ using ClassicUO.Sdk.Assets;
 using ClassicUO.Resources;
 using SDL2;
 using ClassicUO.Renderer.Gumps;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -270,7 +271,7 @@ namespace ClassicUO.Game.UI.Controls
                     }
 
                     SetupKeyByDefault();
-                    UIManager.Add(new MessageBoxGump(_gump.World, 250, 150, string.Format(ResGumps.ThisKeyCombinationAlreadyExists, macro.Name), null));
+                    ServiceProvider.Get<UIService>().Add(new MessageBoxGump(_gump.World, 250, 150, string.Format(ResGumps.ThisKeyCombinationAlreadyExists, macro.Name), null));
 
                     return;
                 }
@@ -287,7 +288,7 @@ namespace ClassicUO.Game.UI.Controls
                     }
 
                     SetupKeyByDefault();
-                    UIManager.Add(new MessageBoxGump(_gump.World, 250, 150, string.Format(ResGumps.ThisKeyCombinationAlreadyExists, macro.Name), null));
+                    ServiceProvider.Get<UIService>().Add(new MessageBoxGump(_gump.World, 250, 150, string.Format(ResGumps.ThisKeyCombinationAlreadyExists, macro.Name), null));
 
                     return;
                 }
@@ -304,7 +305,7 @@ namespace ClassicUO.Game.UI.Controls
                     }
 
                     SetupKeyByDefault();
-                    UIManager.Add(new MessageBoxGump(_gump.World, 250, 150, string.Format(ResGumps.ThisKeyCombinationAlreadyExists, macro.Name), null));
+                    ServiceProvider.Get<UIService>().Add(new MessageBoxGump(_gump.World, 250, 150, string.Format(ResGumps.ThisKeyCombinationAlreadyExists, macro.Name), null));
 
                     return;
                 }
@@ -344,13 +345,13 @@ namespace ClassicUO.Game.UI.Controls
                     RemoveLastCommand();
                     break;
                 case (int)buttonsOption.CreateNewMacro:
-                    UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == Macro)?.Dispose();
+                    ServiceProvider.Get<UIService>().Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == Macro)?.Dispose();
 
                     MacroButtonGump macroButtonGump = new MacroButtonGump(_gump.World, Macro, Mouse.Position.X, Mouse.Position.Y);
-                    UIManager.Add(macroButtonGump);
+                    ServiceProvider.Get<UIService>().Add(macroButtonGump);
                     break;
                 case (int)buttonsOption.OpenMacroOptions:
-                    UIManager.Gumps.OfType<MacroGump>().FirstOrDefault()?.Dispose();
+                    ServiceProvider.Get<UIService>().Gumps.OfType<MacroGump>().FirstOrDefault()?.Dispose();
 
                     GameActions.OpenSettings(_gump.World, 4);
                     break;

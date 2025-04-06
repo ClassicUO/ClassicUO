@@ -622,11 +622,11 @@ namespace ClassicUO.Network
 
         internal static bool ProcessHotkeys(int key, int mod, bool ispressed)
         {
-            if ((!ServiceProvider.Get<UOService>().World?.InGame ?? false) || UIManager.SystemChat != null && (
+            if ((!ServiceProvider.Get<UOService>().World?.InGame ?? false) || ServiceProvider.Get<UIService>().SystemChat != null && (
                         ProfileManager.CurrentProfile != null
                             && ProfileManager.CurrentProfile.ActivateChatAfterEnter
-                            && UIManager.SystemChat.IsActive
-                        || UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl
+                            && ServiceProvider.Get<UIService>().SystemChat.IsActive
+                        || ServiceProvider.Get<UIService>().KeyboardFocusControl != ServiceProvider.Get<UIService>().SystemChat.TextBoxControl
                     )
             )
             {

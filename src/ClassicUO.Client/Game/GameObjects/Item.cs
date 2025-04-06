@@ -188,17 +188,17 @@ namespace ClassicUO.Game.GameObjects
 
             if (Opened)
             {
-                UIManager.GetGump<ContainerGump>(Serial)?.Dispose();
-                UIManager.GetGump<SpellbookGump>(Serial)?.Dispose();
-                UIManager.GetGump<MapGump>(Serial)?.Dispose();
+                ServiceProvider.Get<UIService>().GetGump<ContainerGump>(Serial)?.Dispose();
+                ServiceProvider.Get<UIService>().GetGump<SpellbookGump>(Serial)?.Dispose();
+                ServiceProvider.Get<UIService>().GetGump<MapGump>(Serial)?.Dispose();
 
                 if (IsCorpse)
                 {
-                    UIManager.GetGump<GridLootGump>(Serial)?.Dispose();
+                    ServiceProvider.Get<UIService>().GetGump<GridLootGump>(Serial)?.Dispose();
                 }
 
-                UIManager.GetGump<BulletinBoardGump>(Serial)?.Dispose();
-                UIManager.GetGump<SplitMenuGump>(Serial)?.Dispose();
+                ServiceProvider.Get<UIService>().GetGump<BulletinBoardGump>(Serial)?.Dispose();
+                ServiceProvider.Get<UIService>().GetGump<SplitMenuGump>(Serial)?.Dispose();
 
                 Opened = false;
             }
@@ -310,7 +310,7 @@ namespace ClassicUO.Game.GameObjects
 
             house.Bounds = MultiInfo.Value;
 
-            UIManager.GetGump<MiniMapGump>()?.RequestUpdateContents();
+            ServiceProvider.Get<UIService>().GetGump<MiniMapGump>()?.RequestUpdateContents();
 
             if (World.HouseManager.EntityIntoHouse(Serial, World.Player))
             {

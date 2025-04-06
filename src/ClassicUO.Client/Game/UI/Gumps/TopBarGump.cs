@@ -147,7 +147,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public static void Create(World world)
         {
-            var gump = UIManager.GetGump<TopBarGump>();
+            var gump = ServiceProvider.Get<UIService>().GetGump<TopBarGump>();
 
             if (gump == null)
             {
@@ -159,7 +159,7 @@ namespace ClassicUO.Game.UI.Gumps
                     ProfileManager.CurrentProfile.TopbarGumpPosition = Point.Zero;
                 }
 
-                UIManager.Add(
+                ServiceProvider.Get<UIService>().Add(
                     gump = new TopBarGump(world)
                     {
                         X = ProfileManager.CurrentProfile.TopbarGumpPosition.X,
@@ -256,12 +256,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case Buttons.Debug:
 
-                    var debugGump = UIManager.GetGump<DebugGump>();
+                    var debugGump = ServiceProvider.Get<UIService>().GetGump<DebugGump>();
 
                     if (debugGump == null)
                     {
                         debugGump = new DebugGump(World, 100, 100);
-                        UIManager.Add(debugGump);
+                        ServiceProvider.Get<UIService>().Add(debugGump);
                     }
                     else
                     {
@@ -272,12 +272,12 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.NetStats:
-                    var netstatsgump = UIManager.GetGump<NetworkStatsGump>();
+                    var netstatsgump = ServiceProvider.Get<UIService>().GetGump<NetworkStatsGump>();
 
                     if (netstatsgump == null)
                     {
                         netstatsgump = new NetworkStatsGump(World, 100, 100);
-                        UIManager.Add(netstatsgump);
+                        ServiceProvider.Get<UIService>().Add(netstatsgump);
                     }
                     else
                     {

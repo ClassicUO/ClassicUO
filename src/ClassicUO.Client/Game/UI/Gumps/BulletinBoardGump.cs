@@ -50,9 +50,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             hitbox.MouseUp += (sender, e) =>
             {
-                UIManager.GetGump<BulletinBoardItem>(LocalSerial)?.Dispose();
+                ServiceProvider.Get<UIService>().GetGump<BulletinBoardItem>(LocalSerial)?.Dispose();
 
-                UIManager.Add
+                ServiceProvider.Get<UIService>().Add
                 (
                     new BulletinBoardItem
                     (
@@ -93,7 +93,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            for (var g = UIManager.Gumps.Last; g != null; g = g.Previous)
+            for (var g = ServiceProvider.Get<UIService>().Gumps.Last; g != null; g = g.Previous)
             {
                 if (g.Value is BulletinBoardItem)
                 {
@@ -427,7 +427,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case ButtonType.Reply:
-                    UIManager.Add
+                    ServiceProvider.Get<UIService>().Add
                     (
                         new BulletinBoardItem
                         (

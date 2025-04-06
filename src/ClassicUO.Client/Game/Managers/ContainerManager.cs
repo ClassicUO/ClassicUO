@@ -53,7 +53,7 @@ namespace ClassicUO.Game.Managers
 
         public void CalculateContainerPosition(uint serial, ushort g)
         {
-            if (UIManager.GetGumpCachePosition(serial, out Point location))
+            if (ServiceProvider.Get<UIService>().GetGumpCachePosition(serial, out Point location))
             {
                 X = location.X;
                 Y = location.Y;
@@ -64,7 +64,7 @@ namespace ClassicUO.Game.Managers
 
                 if (gumpInfo.Texture != null)
                 {
-                    float scale = UIManager.ContainerScale;
+                    float scale = ServiceProvider.Get<UIService>().ContainerScale;
 
                     int width = (int)(gumpInfo.UV.Width * scale);
                     int height = (int)(gumpInfo.UV.Height * scale);
@@ -215,7 +215,7 @@ namespace ClassicUO.Game.Managers
             else
             {
                 // in a container, open near the container
-                var parentContainer = UIManager.GetGump<ContainerGump>(item.Container);
+                var parentContainer = ServiceProvider.Get<UIService>().GetGump<ContainerGump>(item.Container);
 
                 if (parentContainer != null)
                 {

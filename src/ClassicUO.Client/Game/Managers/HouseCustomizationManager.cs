@@ -610,7 +610,7 @@ namespace ClassicUO.Game.Managers
             // apply a minor offset for roof tiles
             int zOffset = -3;
 
-            var gump = UIManager.GetGump<HouseCustomizationGump>(Serial);
+            var gump = ServiceProvider.Get<UIService>().GetGump<HouseCustomizationGump>(Serial);
             if (gump == null)
                 return;
 
@@ -830,7 +830,7 @@ namespace ClassicUO.Game.Managers
             if (res1 != -1 && res2 != -1)
             {
                 State = state;
-                var gump = UIManager.GetGump<HouseCustomizationGump>(Serial);
+                var gump = ServiceProvider.Get<UIService>().GetGump<HouseCustomizationGump>(Serial);
                 if (gump == null)
                     return;
 

@@ -63,7 +63,7 @@ namespace ClassicUO.Game.Managers
                 return ((_world.ClientFeatures.Flags & CharacterListFlags.CLF_NEW_MOVEMENT_SYSTEM) == 0 || _ackReceived) &&
                         (_netClientService.Socket.Encryption == null || _netClientService.Socket.Encryption.EncryptionType == 0) &&
                         ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.WorldMapShowParty &&
-                        UIManager.GetGump<WorldMapGump>() != null; // horrible, but works
+                        ServiceProvider.Get<UIService>().GetGump<WorldMapGump>() != null; // horrible, but works
             }
         }
 

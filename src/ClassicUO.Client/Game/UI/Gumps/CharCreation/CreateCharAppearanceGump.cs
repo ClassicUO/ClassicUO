@@ -690,7 +690,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public override void OnButtonClick(int buttonID)
         {
-            CharCreationGump charCreationGump = UIManager.GetGump<CharCreationGump>();
+            CharCreationGump charCreationGump = ServiceProvider.Get<UIService>().GetGump<CharCreationGump>();
 
             switch ((Buttons) buttonID)
             {
@@ -793,7 +793,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             int invalid = Validate(character.Name);
             if (invalid > 0)
             {
-                UIManager.GetGump<CharCreationGump>()?.ShowMessage(ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(invalid));
+                ServiceProvider.Get<UIService>().GetGump<CharCreationGump>()?.ShowMessage(ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(invalid));
 
                 return false;
             }
@@ -1156,7 +1156,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                             SelectedIndex = _lastSelectedIndex
                         };
 
-                        UIManager.Add(_colorPickerBox);
+                        ServiceProvider.Get<UIService>().Add(_colorPickerBox);
 
                         _colorPickerBox.ColorSelectedIndex += ColorPickerBoxOnColorSelectedIndex;
                         _colorPickerBox.MouseUp += ColorPickerBoxOnMouseUp;

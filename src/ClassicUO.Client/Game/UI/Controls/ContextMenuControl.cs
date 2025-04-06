@@ -46,14 +46,14 @@ namespace ClassicUO.Game.UI.Controls
 
         public void Show()
         {
-            UIManager.ShowContextMenu(null);
+            ServiceProvider.Get<UIService>().ShowContextMenu(null);
 
             if (_items.Count == 0)
             {
                 return;
             }
 
-            UIManager.ShowContextMenu
+            ServiceProvider.Get<UIService>().ShowContextMenu
             (
                 new ContextMenuShowMenu(_gump.World, _items)
             );
@@ -61,7 +61,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public void Dispose()
         {
-            UIManager.ShowContextMenu(null);
+            ServiceProvider.Get<UIService>().ShowContextMenu(null);
             _items.Clear();
         }
     }
@@ -297,7 +297,7 @@ namespace ClassicUO.Game.UI.Controls
                     }
                     else
                     {
-                        var p = UIManager.MouseOverControl?.Parent;
+                        var p = ServiceProvider.Get<UIService>().MouseOverControl?.Parent;
 
                         while (p != null)
                         {

@@ -126,7 +126,7 @@ namespace ClassicUO.Game.Scenes
             _world.CommandManager.Initialize();
 
             WorldViewportGump viewport = new WorldViewportGump(_world, this);
-            UIManager.Add(viewport, false);
+            ServiceProvider.Get<UIService>().Add(viewport, false);
 
             if (!ProfileManager.CurrentProfile.TopbarGumpIsDisabled)
             {
@@ -135,7 +135,7 @@ namespace ClassicUO.Game.Scenes
 
             _netClientService.RegisterDisconnectedEvent(SocketOnDisconnected);
             _world.MessageManager.MessageReceived += ChatOnMessageReceived;
-            UIManager.ContainerScale = ProfileManager.CurrentProfile.ContainersScale / 100f;
+            ServiceProvider.Get<UIService>().ContainerScale = ProfileManager.CurrentProfile.ContainersScale / 100f;
 
             SDL.SDL_SetWindowMinimumSize(ServiceProvider.Get<WindowService>().Handle, 640, 480);
 
@@ -311,7 +311,7 @@ namespace ClassicUO.Game.Scenes
             _world.TargetManager.Reset();
 
             // special case for wmap. this allow us to save settings
-            UIManager.GetGump<WorldMapGump>()?.SaveSettings();
+            ServiceProvider.Get<UIService>().GetGump<WorldMapGump>()?.SaveSettings();
 
             ProfileManager.CurrentProfile?.Save(_world, ProfileManager.CurrentProfile.ProfilePath);
 
@@ -330,7 +330,7 @@ namespace ClassicUO.Game.Scenes
 
             _world.CommandManager.UnRegisterAll();
             _world.Weather.Reset();
-            UIManager.Clear();
+            ServiceProvider.Get<UIService>().Clear();
             _world.Clear();
             _world.ChatManager.Clear();
             _world.DelayedObjectClickManager.Clear();
@@ -357,7 +357,7 @@ namespace ClassicUO.Game.Scenes
             }
             else
             {
-                UIManager.Add(
+                ServiceProvider.Get<UIService>().Add(
                     new MessageBoxGump(
                         _world,
                         200,
@@ -380,7 +380,7 @@ namespace ClassicUO.Game.Scenes
 
         public void RequestQuitGame()
         {
-            UIManager.Add(
+            ServiceProvider.Get<UIService>().Add(
                 new QuestionGump(
                     _world,
                     ResGeneral.QuitPrompt,
@@ -721,11 +721,11 @@ namespace ClassicUO.Game.Scenes
                 _time_cleanup = Time.Ticks + 500;
             }
 
-            _packetHandlerService.SendMegaClilocRequests(_world);
+            _packetHandlerService.SendMegaClilocRequests();
 
             if (_forceStopScene)
             {
-                LoginScene loginScene = new LoginScene(_world);
+                var loginScene = new LoginScene(_world);
                 ServiceProvider.Get<SceneService>().SetScene(loginScene);
                 loginScene.Reconnect = true;
 
@@ -807,7 +807,7 @@ namespace ClassicUO.Game.Scenes
 
             _useItemQueue.Update();
 
-            if (!UIManager.IsMouseOverWorld)
+            if (!ServiceProvider.Get<UIService>().IsMouseOverWorld)
             {
                 SelectedObject.Object = null;
             }
@@ -1248,7 +1248,7 @@ namespace ClassicUO.Game.Scenes
         {
             _healthLinesManager?.Draw(batcher);
 
-            if (!UIManager.IsMouseOverWorld)
+            if (!ServiceProvider.Get<UIService>().IsMouseOverWorld)
             {
                 SelectedObject.Object = null;
             }

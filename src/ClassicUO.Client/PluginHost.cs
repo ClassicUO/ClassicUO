@@ -225,7 +225,7 @@ namespace ClassicUO
 
         static void setWindowTitle(IntPtr ptr)
         {
-            var title = SDL2.SDL.UTF8_ToManaged(ptr);
+            var title = SDL.UTF8_ToManaged(ptr);
             ServiceProvider.Get<GameService>().SetWindowTitle(title);
         }
 

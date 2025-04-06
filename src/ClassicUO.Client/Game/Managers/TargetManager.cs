@@ -163,7 +163,7 @@ namespace ClassicUO.Game.Managers
 
             if (IsTargeting)
             {
-                //UIManager.RemoveTargetLineGump(LastTarget);
+                //ServiceProvider.Get<UIService>().RemoveTargetLineGump(LastTarget);
             }
             else if (lastTargetting)
             {
@@ -191,7 +191,7 @@ namespace ClassicUO.Game.Managers
                     _world.CustomHouseManager.SelectedGraphic = 0;
                     _world.CustomHouseManager.CombinedStair = false;
 
-                    UIManager.GetGump<HouseCustomizationGump>()?.Update();
+                    ServiceProvider.Get<UIService>().GetGump<HouseCustomizationGump>()?.Update();
                 }
             }
 
@@ -270,7 +270,7 @@ namespace ClassicUO.Game.Managers
                                     showCriminalQuery = true;
                                 }
 
-                                if (showCriminalQuery && UIManager.GetGump<QuestionGump>() == null)
+                                if (showCriminalQuery && ServiceProvider.Get<UIService>().GetGump<QuestionGump>() == null)
                                 {
                                     QuestionGump messageBox = new QuestionGump
                                     (
@@ -298,7 +298,7 @@ namespace ClassicUO.Game.Managers
                                         }
                                     );
 
-                                    UIManager.Add(messageBox);
+                                    ServiceProvider.Get<UIService>().Add(messageBox);
 
                                     return;
                                 }

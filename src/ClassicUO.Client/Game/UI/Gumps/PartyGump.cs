@@ -305,7 +305,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                     {
-                        UIManager.SystemChat.TextBoxControl.SetText("/");
+                        ServiceProvider.Get<UIService>().SystemChat.TextBoxControl.SetText("/");
                     }
 
                     break;
@@ -371,9 +371,9 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            //UIManager.SystemChat.textBox.SetText($"/{index + 1}");
-                            //UIManager.SystemChat.Mode = ChatMode.Party;
-                            UIManager.SystemChat.TextBoxControl.SetText($"/{index + 1} ");
+                            //ServiceProvider.Get<UIService>().SystemChat.textBox.SetText($"/{index + 1}");
+                            //ServiceProvider.Get<UIService>().SystemChat.Mode = ChatMode.Party;
+                            ServiceProvider.Get<UIService>().SystemChat.TextBoxControl.SetText($"/{index + 1} ");
                         }
                     }
                     else if (buttonID >= (int) Buttons.KickMember)

@@ -6,6 +6,7 @@ using ClassicUO.Input;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -64,7 +65,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (button == MouseButtonType.Left)
             {
-                UIManager.GetGump<ColorPickerGump>()?.Dispose();
+                ServiceProvider.Get<UIService>().GetGump<ColorPickerGump>()?.Dispose();
 
                 ColorPickerGump pickerGump = new ColorPickerGump
                 (
@@ -76,7 +77,7 @@ namespace ClassicUO.Game.UI.Controls
                     s => Hue = s
                 );
 
-                UIManager.Add(pickerGump);
+                ServiceProvider.Get<UIService>().Add(pickerGump);
             }
         }
     }

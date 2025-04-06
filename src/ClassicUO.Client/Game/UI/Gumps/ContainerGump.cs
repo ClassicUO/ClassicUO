@@ -233,7 +233,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            if (button != MouseButtonType.Left || UIManager.IsMouseOverWorld)
+            if (button != MouseButtonType.Left || ServiceProvider.Get<UIService>().IsMouseOverWorld)
             {
                 return;
             }
@@ -253,7 +253,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (World.TargetManager.TargetingState == CursorTarget.SetTargetClientSide)
                 {
-                    UIManager.Add(new InspectorGump(World, World.Get(serial)));
+                    ServiceProvider.Get<UIService>().Add(new InspectorGump(World, World.Get(serial)));
                 }
             }
             else
@@ -342,7 +342,7 @@ namespace ClassicUO.Game.UI.Gumps
                     && !ServiceProvider.Get<UOService>().GameCursor.ItemHold.IsFixedPosition
                 )
                 {
-                    var gump = UIManager.GetGump<ContainerGump>(dropcontainer);
+                    var gump = ServiceProvider.Get<UIService>().GetGump<ContainerGump>(dropcontainer);
 
                     if (
                         gump != null
@@ -483,8 +483,8 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             if (
-                UIManager.MouseOverControl != null
-                && UIManager.MouseOverControl.RootParent == this
+                ServiceProvider.Get<UIService>().MouseOverControl != null
+                && ServiceProvider.Get<UIService>().MouseOverControl.RootParent == this
                 && ProfileManager.CurrentProfile != null
                 && ProfileManager.CurrentProfile.HighlightContainerWhenSelected
             )
@@ -530,7 +530,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private float GetScale()
         {
-            return (IsChessboard || IsBackgammonBoard) ? 1f : UIManager.ContainerScale;
+            return (IsChessboard || IsBackgammonBoard) ? 1f : ServiceProvider.Get<UIService>().ContainerScale;
         }
 
         private void ItemsOnAdded()
@@ -700,7 +700,7 @@ namespace ClassicUO.Game.UI.Gumps
                     && ProfileManager.CurrentProfile?.OverrideContainerLocationSetting == 3
                 )
                 {
-                    UIManager.SavePosition(item, Location);
+                    ServiceProvider.Get<UIService>().SavePosition(item, Location);
                 }
 
                 for (var i = item.Items; i != null; i = i.Next)
@@ -709,7 +709,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (child.Container == item)
                     {
-                        UIManager.GetGump<ContainerGump>(child)?.Dispose();
+                        ServiceProvider.Get<UIService>().GetGump<ContainerGump>(child)?.Dispose();
                     }
                 }
             }
@@ -749,7 +749,7 @@ namespace ClassicUO.Game.UI.Gumps
             public override bool Contains(int x, int y)
             {
                 float scale =
-                    Graphic == 0x091A || Graphic == 0x092E ? 1f : UIManager.ContainerScale;
+                    Graphic == 0x091A || Graphic == 0x092E ? 1f : ServiceProvider.Get<UIService>().ContainerScale;
 
                 x = (int)(x / scale);
                 y = (int)(y / scale);

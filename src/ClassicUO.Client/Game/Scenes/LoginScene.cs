@@ -76,8 +76,8 @@ namespace ClassicUO.Game.Scenes
 
             _autoLogin = Settings.GlobalSettings.AutoLogin;
 
-            UIManager.Add(new LoginBackground(_world));
-            UIManager.Add(_currentGump = new LoginGump(_world, this));
+            ServiceProvider.Get<UIService>().Add(new LoginBackground(_world));
+            ServiceProvider.Get<UIService>().Add(_currentGump = new LoginGump(_world, this));
 
             var audioService = ServiceProvider.Get<AudioService>();
             audioService.PlayMusic(audioService.LoginMusicIndex, false, true);
@@ -111,7 +111,7 @@ namespace ClassicUO.Game.Scenes
             ServiceProvider.Get<AudioService>()?.StopMusic();
             ServiceProvider.Get<AudioService>()?.StopSounds();
 
-            UIManager.GetGump<LoginBackground>()?.Dispose();
+            ServiceProvider.Get<UIService>().GetGump<LoginBackground>()?.Dispose();
 
             _currentGump?.Dispose();
 
@@ -135,7 +135,7 @@ namespace ClassicUO.Game.Scenes
                 var g = _currentGump;
                 _currentGump = GetGumpForStep();
                 if (_currentGump != null)
-                    UIManager.Add(_currentGump);
+                    ServiceProvider.Get<UIService>().Add(_currentGump);
                 g?.Dispose();
 
                 _lastLoginStep = CurrentLoginStep;
@@ -541,7 +541,7 @@ namespace ClassicUO.Game.Scenes
 
                     PopupMessage = string.Format(ResGeneral.ReconnectPleaseWait01, _reconnectTryCounter, StringHelper.AddSpaceBeforeCapital(e.ToString()));
 
-                    UIManager.GetGump<LoadingGump>()?.SetText(PopupMessage);
+                    ServiceProvider.Get<UIService>().GetGump<LoadingGump>()?.SetText(PopupMessage);
                 }
                 else
                 {
@@ -586,16 +586,16 @@ namespace ClassicUO.Game.Scenes
                 PopupMessage = string.Empty;
             }
             CurrentLoginStep = LoginSteps.CharacterSelection;
-            UIManager.GetGump<CharacterSelectionGump>()?.Dispose();
+            ServiceProvider.Get<UIService>().GetGump<CharacterSelectionGump>()?.Dispose();
 
             _currentGump?.Dispose();
 
-            UIManager.Add(_currentGump = new CharacterSelectionGump(_world));
+            ServiceProvider.Get<UIService>().Add(_currentGump = new CharacterSelectionGump(_world));
             if (!string.IsNullOrWhiteSpace(PopupMessage))
             {
                 LoadingGump? g = null;
                 g = new LoadingGump(_world,PopupMessage, LoginButtons.OK, (but) => g?.Dispose()) { IsModal = true };
-                UIManager.Add(g);
+                ServiceProvider.Get<UIService>().Add(g);
                 PopupMessage = string.Empty;
             }
         }
