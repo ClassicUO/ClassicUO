@@ -71,6 +71,7 @@ namespace ClassicUO.Game.Scenes
         private readonly UOService _uoService;
         private readonly AudioService _audioService;
         private readonly SceneService _sceneService;
+        private readonly PacketHandlerService _packetHandlerService;
 
         public GameScene(World world)
         {
@@ -79,6 +80,7 @@ namespace ClassicUO.Game.Scenes
             _uoService = ServiceProvider.Get<UOService>();
             _audioService = ServiceProvider.Get<AudioService>();
             _sceneService = ServiceProvider.Get<SceneService>();
+            _packetHandlerService = ServiceProvider.Get<PacketHandlerService>();
         }
 
 
@@ -717,7 +719,7 @@ namespace ClassicUO.Game.Scenes
                 _time_cleanup = Time.Ticks + 500;
             }
 
-            PacketHandlers.SendMegaClilocRequests(_world);
+            _packetHandlerService.SendMegaClilocRequests(_world);
 
             if (_forceStopScene)
             {

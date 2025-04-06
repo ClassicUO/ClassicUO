@@ -38,6 +38,7 @@ namespace ClassicUO
         private bool _suppressedDraw;
         private Texture2D? _background;
         private bool _pluginsInitialized = false;
+        private PacketHandlerService _packetHandlerService;
 
         public GameController(IPluginHost? pluginHost)
         {
@@ -122,11 +123,12 @@ namespace ClassicUO
             UO.Setup(this);
             ServiceProvider.Register(new FileManagerService(UO.FileManager));
             ServiceProvider.Register(new GameCursorService(UO.GameCursor));
+            ServiceProvider.Register(_packetHandlerService = new PacketHandlerService(new PacketHandlers(), new IncomingPackets()));
 
 
             Audio.Initialize();
             // TODO: temporary fix to avoid crash when laoding plugins
-            Settings.GlobalSettings.Encryption = (byte) NetClient.Socket.Load(UO.FileManager.Version, (EncryptionType) Settings.GlobalSettings.Encryption);
+            Settings.GlobalSettings.Encryption = (byte)NetClient.Socket.Load(UO.FileManager.Version, (EncryptionType)Settings.GlobalSettings.Encryption);
 
             Log.Trace("Loading plugins...");
             PluginHost?.Initialize();
@@ -142,6 +144,10 @@ namespace ClassicUO
             SetScene(new LoginScene(UO.World));
 #endif
             SetWindowPositionBySettings();
+
+
+            //ATTENTION: you will need to enable ALSO ultimalive server-side, or this code will have absolutely no effect!
+            UltimaLive.Enable();
         }
 
         protected override void UnloadContent()
@@ -356,9 +362,8 @@ namespace ClassicUO
             Mouse.Update();
 
             var data = NetClient.Socket.CollectAvailableData();
-            var packetsCount = PacketHandlers.Handler.ParsePackets(NetClient.Socket, UO.World, data);
+            ProcessPackets(data);
 
-            NetClient.Socket.Statistics.TotalPacketsReceived += (uint)packetsCount;
             NetClient.Socket.Flush();
 
             Plugin.Tick();
@@ -424,6 +429,12 @@ namespace ClassicUO
             }
 
              base.Update(gameTime);
+        }
+
+        public void ProcessPackets(ArraySegment<byte> data)
+        {
+            var packetsCount = _packetHandlerService?.ParsePackets(NetClient.Socket, UO.World, data);
+            NetClient.Socket.Statistics.TotalPacketsReceived += (uint)packetsCount;
         }
 
         protected override void Draw(GameTime gameTime)

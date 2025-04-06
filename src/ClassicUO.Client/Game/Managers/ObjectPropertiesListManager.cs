@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using System.Collections.Generic;
+using ClassicUO.Game.Services;
 using ClassicUO.Network;
 
 namespace ClassicUO.Game.Managers
@@ -40,7 +41,8 @@ namespace ClassicUO.Game.Managers
             // if we don't have the OPL of this item, let's request it to the server.
             // Original client seems asking for OPL when character is not running.
             // We'll ask OPL when mouse is over an object.
-            PacketHandlers.AddMegaClilocRequest(serial);
+
+            ServiceProvider.Get<PacketHandlerService>().AddMegaClilocRequest(serial);
 
             return false;
         }
