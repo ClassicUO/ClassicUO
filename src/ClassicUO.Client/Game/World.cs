@@ -238,10 +238,11 @@ namespace ClassicUO.Game
             }
 
             //TODO(deccer): refactor this out into _audioPlayer.PlayMusic(...)
-            var currentMusic = ServiceProvider.Get<AudioService>().GetCurrentMusic();
-            if (currentMusic == null || currentMusic.Index == ServiceProvider.Get<AudioService>().LoginMusicIndex)
+            var audioService = ServiceProvider.Get<AudioService>();
+            var currentMusic = audioService.GetCurrentMusic();
+            if (currentMusic == null || currentMusic.Index == audioService.LoginMusicIndex)
             {
-                ServiceProvider.Get<AudioService>().PlayMusic(music, false);
+                audioService.PlayMusic(music, false);
             }
         }
 

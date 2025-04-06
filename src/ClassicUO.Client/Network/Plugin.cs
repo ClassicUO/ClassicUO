@@ -169,7 +169,9 @@ namespace ClassicUO.Network
 
             SDL.SDL_SysWMinfo info = new SDL.SDL_SysWMinfo();
             SDL.SDL_VERSION(out info.version);
-            SDL.SDL_GetWindowWMInfo(ServiceProvider.Get<WindowService>().Handle, ref info);
+
+            var windowService = ServiceProvider.Get<WindowService>();
+            SDL.SDL_GetWindowWMInfo(windowService.Handle, ref info);
 
             IntPtr hwnd = IntPtr.Zero;
 
@@ -178,9 +180,10 @@ namespace ClassicUO.Network
                 hwnd = info.info.win.window;
             }
 
+            var uoService = ServiceProvider.Get<UOService>();
             PluginHeader header = new PluginHeader
             {
-                ClientVersion = (int)ServiceProvider.Get<UOService>().Version,
+                ClientVersion = (int)uoService.Version,
                 Recv = Marshal.GetFunctionPointerForDelegate(_recv),
                 Send = Marshal.GetFunctionPointerForDelegate(_send),
                 GetPacketLength = Marshal.GetFunctionPointerForDelegate(_getPacketLength),
@@ -193,7 +196,7 @@ namespace ClassicUO.Network
                 SetTitle = Marshal.GetFunctionPointerForDelegate(_setTitle),
                 Recv_new = Marshal.GetFunctionPointerForDelegate(_recv_new),
                 Send_new = Marshal.GetFunctionPointerForDelegate(_send_new),
-                SDL_Window = ServiceProvider.Get<WindowService>().Handle,
+                SDL_Window = windowService.Handle,
                 GetStaticData = Marshal.GetFunctionPointerForDelegate(_get_static_data),
                 GetTileData = Marshal.GetFunctionPointerForDelegate(_get_tile_data),
                 GetCliloc = Marshal.GetFunctionPointerForDelegate(_get_cliloc)
@@ -242,40 +245,8 @@ namespace ClassicUO.Network
             {
                 try
                 {
-                    ServiceProvider.Get<PluginHostService>()?.LoadPlugin(PluginPath);
-
-                    //ServiceProvider.Get<PluginHostService>()?.OnSocketConnected += (o, e) => {
-                    //    ServiceProvider.Get<PluginHostService>()?.PluginInitialize(PluginPath);
-                    //};
-                    //ServiceProvider.Get<PluginHostService>()?.Connect("127.0.0.1", 7777);
-
-                    //Assembly asm = Assembly.LoadFile(PluginPath);
-                    //Type type = asm.GetType("Assistant.Engine");
-
-                    //if (type == null)
-                    //{
-                    //    Log.Error(
-                    //        "Unable to find Plugin Type, API requires the public class Engine in namespace Assistant."
-                    //    );
-
-                    //    return;
-                    //}
-
-                    //MethodInfo meth = type.GetMethod(
-                    //    "Install",
-                    //    BindingFlags.Public | BindingFlags.Static
-                    //);
-
-                    //if (meth == null)
-                    //{
-                    //    Log.Error(
-                    //        "Engine class missing public static Install method Needs 'public static unsafe void Install(PluginHeader *plugin)' "
-                    //    );
-
-                    //    return;
-                    //}
-
-                    //meth.Invoke(null, new object[] { (IntPtr)func });
+                    var pluginHostService = ServiceProvider.Get<PluginHostService>();
+                    pluginHostService?.LoadPlugin(PluginPath);
                 }
                 catch (Exception err)
                 {
@@ -482,11 +453,12 @@ namespace ClassicUO.Network
 
         internal static bool GetPlayerPosition(out int x, out int y, out int z)
         {
-            if (ServiceProvider.Get<UOService>().World.Player != null)
+            var uoService = ServiceProvider.Get<UOService>();
+            if (uoService.World.Player != null)
             {
-                x = ServiceProvider.Get<UOService>().World.Player.X;
-                y = ServiceProvider.Get<UOService>().World.Player.Y;
-                z = ServiceProvider.Get<UOService>().World.Player.Z;
+                x = uoService.World.Player.X;
+                y = uoService.World.Player.Y;
+                z = uoService.World.Player.Z;
 
                 return true;
             }
@@ -692,10 +664,11 @@ namespace ClassicUO.Network
         {
             IntPtr cmdList = IntPtr.Zero;
             var len = 0;
-            ServiceProvider.Get<PluginHostService>()?.GetCommandList(out cmdList, out len);
-            if (ServiceProvider.Get<PluginHostService>() != null && len != 0 && cmdList != IntPtr.Zero)
+            var pluginHostService = ServiceProvider.Get<PluginHostService>();
+            pluginHostService?.GetCommandList(out cmdList, out len);
+            if (pluginHostService != null && len != 0 && cmdList != IntPtr.Zero)
             {
-                HandleCmdList(device, cmdList, len, ServiceProvider.Get<PluginHostService>().GfxResources);
+                HandleCmdList(device, cmdList, len, pluginHostService.GfxResources);
             }
 
             foreach (Plugin plugin in Plugins)

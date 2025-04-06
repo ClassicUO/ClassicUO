@@ -31,8 +31,9 @@ namespace ClassicUO.Platforms
 
             try
             {
-                if (ServiceProvider.Get<WindowService>().Handle != null)
-                    _customWindow = new CustomWindow(ServiceProvider.Get<WindowService>().Handle, world, "UOASSIST-TP-MSG-WND");
+                var windowService = ServiceProvider.Get<WindowService>();
+                if (windowService.Handle != null)
+                    _customWindow = new CustomWindow(windowService.Handle, world, "UOASSIST-TP-MSG-WND");
             }
             catch
             { }

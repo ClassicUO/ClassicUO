@@ -162,7 +162,8 @@ namespace ClassicUO.Game
                 return Point.Zero;
             }
 
-            ref readonly var artInfo = ref (ItemHold.IsGumpTexture ? ref ServiceProvider.Get<UOService>().Self.Gumps.GetGump(graphic) : ref ServiceProvider.Get<UOService>().Self.Arts.GetArt(graphic));
+            var uoService = ServiceProvider.Get<UOService>();
+            ref readonly var artInfo = ref (ItemHold.IsGumpTexture ? ref uoService.Self.Gumps.GetGump(graphic) : ref uoService.Self.Arts.GetArt(graphic));
 
             float scale = 1;
 
@@ -227,7 +228,9 @@ namespace ClassicUO.Game
             {
                 return;
             }
-            ref readonly var artInfo = ref (ItemHold.IsGumpTexture ? ref ServiceProvider.Get<UOService>().Self.Gumps.GetGump(draggingGraphic) : ref ServiceProvider.Get<UOService>().Self.Arts.GetArt(draggingGraphic));
+
+            var uoService = ServiceProvider.Get<UOService>();
+            ref readonly var artInfo = ref (ItemHold.IsGumpTexture ? ref uoService.Self.Gumps.GetGump(draggingGraphic) : ref uoService.Self.Arts.GetArt(draggingGraphic));
 
             Point offset = GetDraggingItemOffset();
 
@@ -256,6 +259,9 @@ namespace ClassicUO.Game
 
         public void Draw(UltimaBatcher2D sb)
         {
+            var uoService = ServiceProvider.Get<UOService>();
+            var sceneService = ServiceProvider.Get<SceneService>();
+
             if (_world.InGame && _world.TargetManager.IsTargeting && ProfileManager.CurrentProfile != null)
             {
                 if (_world.TargetManager.TargetingState == CursorTarget.MultiPlacement)
@@ -425,7 +431,7 @@ namespace ClassicUO.Game
 
                 ushort draggingGraphic = GetDraggingItemGraphic();
 
-                ref readonly var artInfo = ref (ItemHold.IsGumpTexture ? ref ServiceProvider.Get<UOService>().Self.Gumps.GetGump(draggingGraphic) : ref ServiceProvider.Get<UOService>().Self.Arts.GetArt(draggingGraphic));
+                ref readonly var artInfo = ref (ItemHold.IsGumpTexture ? ref uoService.Self.Gumps.GetGump(draggingGraphic) : ref uoService.Self.Arts.GetArt(draggingGraphic));
 
                 if (artInfo.Texture != null)
                 {
@@ -465,7 +471,7 @@ namespace ClassicUO.Game
                 }
             }
 
-            DrawToolTip(sb, Mouse.Position);
+            DrawToolTip(sb, Mouse.Position, uoService, sceneService);
 
             if (!Settings.GlobalSettings.RunMouseInASeparateThread)
             {
@@ -496,7 +502,7 @@ namespace ClassicUO.Game
                     hueVec = ShaderHueTranslator.GetHueVector(0);
                 }
 
-                ref readonly var artInfo = ref ServiceProvider.Get<UOService>().Self.Arts.GetArt(Graphic);
+                ref readonly var artInfo = ref uoService.Self.Arts.GetArt(Graphic);
 
                 var rect = artInfo.UV;
 
@@ -515,9 +521,9 @@ namespace ClassicUO.Game
             }
         }
 
-        private void DrawToolTip(UltimaBatcher2D batcher, Point position)
+        private void DrawToolTip(UltimaBatcher2D batcher, Point position, UOService uoService, SceneService sceneService)
         {
-            if (ServiceProvider.Get<SceneService>().Scene is GameScene gs)
+            if (sceneService.Scene is GameScene gs)
             {
                 if (
                     !_world.ClientFeatures.TooltipsEnabled

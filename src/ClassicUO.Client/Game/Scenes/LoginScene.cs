@@ -74,8 +74,8 @@ namespace ClassicUO.Game.Scenes
             UIManager.Add(new LoginBackground(_world));
             UIManager.Add(_currentGump = new LoginGump(_world, this));
 
-
-            ServiceProvider.Get<AudioService>().PlayMusic(ServiceProvider.Get<AudioService>().LoginMusicIndex, false, true);
+            var audioService = ServiceProvider.Get<AudioService>();
+            audioService.PlayMusic(audioService.LoginMusicIndex, false, true);
 
             if (CanAutologin && CurrentLoginStep != LoginSteps.Main || CUOEnviroment.SkipLoginScreen)
             {

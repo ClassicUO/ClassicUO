@@ -19,10 +19,10 @@ public static class Log
     }
 
     private static readonly string[] _prefix = [
-        "{0} | \u001b[90mTRACE\u001b[0m | {1}",  // Gray
+        "{0} | \u001b[90mTRACE\u001b[0m | {1}", // Gray
         "{0} | \u001b[97m INFO\u001b[0m | {1}", // White
         "{0} | \u001b[33m WARN\u001b[0m | {1}", // Yellow
-        "{0} | \u001b[31mERROR\u001b[0m | {1}",  // Red
+        "{0} | \u001b[31mERROR\u001b[0m | {1}", // Red
     ];
 
     private static void ComposeLog(string msg, LogMessageType logMessageType)

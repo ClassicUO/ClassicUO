@@ -437,8 +437,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     try
                     {
-                        var fileManager = ServiceProvider.Get<FileManagerService>();
-                        using Stream stream = File.OpenRead(fileManager.GetUOFilePath("logo.png"));
+                        using var stream = new MemoryStream(Loader.GetCuoLogo().ToArray());
                         _logoTexture2D = Texture2D.FromStream(ServiceProvider.Get<GameService>().GraphicsDevice, stream);
                     }
                     catch

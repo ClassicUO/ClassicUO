@@ -66,8 +66,11 @@ namespace ClassicUO.Game.UI
                 zoom = ProfileManager.CurrentProfile.TooltipDisplayZoom / 100f;
             }
 
-            ServiceProvider.Get<UOService>().FileManager.Fonts.SetUseHTML(true);
-            ServiceProvider.Get<UOService>().FileManager.Fonts.RecalculateWidthByInfo = true;
+            var uoService = ServiceProvider.Get<UOService>();
+            var windowService = ServiceProvider.Get<WindowService>();
+
+            uoService.FileManager.Fonts.SetUseHTML(true);
+            uoService.FileManager.Fonts.RecalculateWidthByInfo = true;
 
             if (_renderedText == null)
             {
@@ -89,14 +92,14 @@ namespace ClassicUO.Game.UI
             {
                 if (_maxWidth == 0)
                 {
-                    int width = ServiceProvider.Get<UOService>().FileManager.Fonts.GetWidthUnicode(font, Text);
+                    int width = uoService.FileManager.Fonts.GetWidthUnicode(font, Text);
 
                     if (width > 600)
                     {
                         width = 600;
                     }
 
-                    width = ServiceProvider.Get<UOService>().FileManager.Fonts.GetWidthExUnicode
+                    width = uoService.FileManager.Fonts.GetWidthExUnicode
                     (
                         font,
                         Text,
@@ -122,8 +125,8 @@ namespace ClassicUO.Game.UI
                 _renderedText.Text = _textHTML;
             }
 
-            ServiceProvider.Get<UOService>().FileManager.Fonts.RecalculateWidthByInfo = false;
-            ServiceProvider.Get<UOService>().FileManager.Fonts.SetUseHTML(false);
+            uoService.FileManager.Fonts.RecalculateWidthByInfo = false;
+            uoService.FileManager.Fonts.SetUseHTML(false);
 
             if (_renderedText.Texture == null || _renderedText.Texture.IsDisposed)
             {
@@ -137,18 +140,18 @@ namespace ClassicUO.Game.UI
             {
                 x = 0;
             }
-            else if (x > ServiceProvider.Get<WindowService>().ClientBounds.Width - z_width)
+            else if (x > windowService.ClientBounds.Width - z_width)
             {
-                x = ServiceProvider.Get<WindowService>().ClientBounds.Width - z_width;
+                x = windowService.ClientBounds.Width - z_width;
             }
 
             if (y < 0)
             {
                 y = 0;
             }
-            else if (y > ServiceProvider.Get<WindowService>().ClientBounds.Height - z_height)
+            else if (y > windowService.ClientBounds.Height - z_height)
             {
-                y = ServiceProvider.Get<WindowService>().ClientBounds.Height - z_height;
+                y = windowService.ClientBounds.Height - z_height;
             }
 
 

@@ -520,9 +520,10 @@ namespace ClassicUO.Game
 
         public static void DropItem(uint serial, int x, int y, int z, uint container)
         {
-            if (ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled && !ServiceProvider.Get<UOService>().GameCursor.ItemHold.IsFixedPosition && (ServiceProvider.Get<UOService>().GameCursor.ItemHold.Serial != container || ServiceProvider.Get<UOService>().GameCursor.ItemHold.ItemData.IsStackable))
+            var uoService = ServiceProvider.Get<UOService>();
+            if (uoService.GameCursor.ItemHold.Enabled && !uoService.GameCursor.ItemHold.IsFixedPosition && (uoService.GameCursor.ItemHold.Serial != container || uoService.GameCursor.ItemHold.ItemData.IsStackable))
             {
-                if (ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_6017)
+                if (uoService.Version >= ClientVersion.CV_6017)
                 {
                     Socket.Send_DropRequest(serial,
                                             (ushort)x,
@@ -540,8 +541,8 @@ namespace ClassicUO.Game
                                                 container);
                 }
 
-                ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled = false;
-                ServiceProvider.Get<UOService>().GameCursor.ItemHold.Dropped = true;
+                uoService.GameCursor.ItemHold.Enabled = false;
+                uoService.GameCursor.ItemHold.Dropped = true;
             }
         }
 
@@ -550,17 +551,18 @@ namespace ClassicUO.Game
             if (world.Player == null)
                 return;
 
-            if (ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled && !ServiceProvider.Get<UOService>().GameCursor.ItemHold.IsFixedPosition && ServiceProvider.Get<UOService>().GameCursor.ItemHold.ItemData.IsWearable)
+            var uoService = ServiceProvider.Get<UOService>();
+            if (uoService.GameCursor.ItemHold.Enabled && !uoService.GameCursor.ItemHold.IsFixedPosition && uoService.GameCursor.ItemHold.ItemData.IsWearable)
             {
                 if (!SerialHelper.IsValid(container))
                 {
                     container = world.Player.Serial;
                 }
 
-                Socket.Send_EquipRequest(ServiceProvider.Get<UOService>().GameCursor.ItemHold.Serial, (Layer)ServiceProvider.Get<UOService>().GameCursor.ItemHold.ItemData.Layer, container);
+                Socket.Send_EquipRequest(uoService.GameCursor.ItemHold.Serial, (Layer)uoService.GameCursor.ItemHold.ItemData.Layer, container);
 
-                ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled = false;
-                ServiceProvider.Get<UOService>().GameCursor.ItemHold.Dropped = true;
+                uoService.GameCursor.ItemHold.Enabled = false;
+                uoService.GameCursor.ItemHold.Dropped = true;
             }
         }
 

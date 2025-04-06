@@ -88,8 +88,9 @@ namespace ClassicUO.Game
                         return;
                     }
 
-                    int mapWidthInBlocks = ServiceProvider.Get<UOService>().FileManager.Maps.MapBlocksSize[mapId, 0];
-                    int mapHeightInBlocks = ServiceProvider.Get<UOService>().FileManager.Maps.MapBlocksSize[mapId, 1];
+                    var uoService = ServiceProvider.Get<UOService>();
+                    int mapWidthInBlocks = uoService.FileManager.Maps.MapBlocksSize[mapId, 0];
+                    int mapHeightInBlocks = uoService.FileManager.Maps.MapBlocksSize[mapId, 1];
                     int blocks = mapWidthInBlocks * mapHeightInBlocks;
 
                     if (block < 0 || block >= blocks)
@@ -210,8 +211,8 @@ namespace ClassicUO.Game
                     byte[] staticsData = new byte[totalLength];
                     p.Buffer.Slice(p.Position, totalLength).CopyTo(staticsData);
 
-
-                    if (block >= 0 && block < ServiceProvider.Get<UOService>().FileManager.Maps.MapBlocksSize[mapId, 0] * ServiceProvider.Get<UOService>().FileManager.Maps.MapBlocksSize[mapId, 1])
+                    var uoService = ServiceProvider.Get<UOService>();
+                    if (block >= 0 && block < uoService.FileManager.Maps.MapBlocksSize[mapId, 0] * uoService.FileManager.Maps.MapBlocksSize[mapId, 1])
                     {
                         int index = block * 12;
 
@@ -461,8 +462,15 @@ namespace ClassicUO.Game
                 return;
             }
 
-            ushort mapWidthInBlocks = (ushort) ServiceProvider.Get<UOService>().FileManager.Maps.MapBlocksSize[mapId, 0];
-            ushort mapHeightInBlocks = (ushort) ServiceProvider.Get<UOService>().FileManager.Maps.MapBlocksSize[mapId, 1];
+            if (!string.IsNullOrEmpty(_UL.ShardName) || p.Length < 11)
+            {
+                //we cannot validate the pathfolder or packet is not correct
+                return;
+            }
+
+            var uoService = ServiceProvider.Get<UOService>();
+            int mapWidthInBlocks = uoService.FileManager.Maps.MapBlocksSize[mapId, 0];
+            int mapHeightInBlocks = uoService.FileManager.Maps.MapBlocksSize[mapId, 1];
 
             if (block >= 0 && block < mapWidthInBlocks * mapHeightInBlocks)
             {
@@ -635,16 +643,12 @@ namespace ClassicUO.Game
 
         private class ULFileMul : FileReader
         {
-            private readonly BinaryReader _reader;
             private readonly BinaryWriter _writer;
 
             public ULFileMul(FileStream stream) : base(stream)
             {
-                _reader = new BinaryReader(stream);
                 _writer = new BinaryWriter(stream);
             }
-
-            public override BinaryReader Reader => _reader;
 
             public void WriteArray(long position, ReadOnlySpan<byte> array)
             {
@@ -752,13 +756,15 @@ namespace ClassicUO.Game
 
             public override void Load()
             {
-                if (ServiceProvider.Get<UOService>().FileManager.Maps is ULMapLoader)
+                var uoService = ServiceProvider.Get<UOService>();
+
+                if (uoService.FileManager.Maps is ULMapLoader)
                 {
                     return;
                 }
 
-                ServiceProvider.Get<UOService>().FileManager.Maps?.Dispose();
-                ServiceProvider.Get<UOService>().FileManager.Maps = this;
+                uoService.FileManager.Maps?.Dispose();
+                uoService.FileManager.Maps = this;
 
                 _UL._EOF = new uint[NumMaps];
                 _filesStaticsStream = new FileStream[NumMaps];
@@ -901,11 +907,9 @@ namespace ClassicUO.Game
 
                 // TODO: stackalloc
                 // ReSharper disable once RedundantExplicitArraySize
-                Span<byte> block = stackalloc byte[196]
+                Span<byte> block = stackalloc byte[]
                 {
                     0x00, 0x00, 0x00, 0x00, //header
-                    0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44,
-                    0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00,
                     0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44,
                     0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00,
                     0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44, 0x02, 0x00, 0x44,

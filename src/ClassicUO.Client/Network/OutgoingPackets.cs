@@ -317,7 +317,8 @@ namespace ClassicUO.Network
             byte id = ID;
             int skillcount = 3;
 
-            if (ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_70160)
+            var uoService = ServiceProvider.Get<UOService>();
+            if (uoService.Version >= ClientVersion.CV_70160)
             {
                 id = ID_NEW;
                 ++skillcount;
@@ -339,7 +340,7 @@ namespace ClassicUO.Network
             writer.WriteASCII(character.Name, 30);
             writer.WriteZero(2);
 
-            writer.WriteUInt32BE((uint)ServiceProvider.Get<UOService>().Protocol);
+            writer.WriteUInt32BE((uint)uoService.Protocol);
             writer.WriteUInt32BE(0x01);
             writer.WriteUInt32BE(0x00);
             writer.WriteUInt8(profession);
@@ -347,7 +348,7 @@ namespace ClassicUO.Network
 
             byte val;
 
-            if (ServiceProvider.Get<UOService>().Version < ClientVersion.CV_4011D)
+            if (uoService.Version < ClientVersion.CV_4011D)
             {
                 val = (byte) (character.Flags.HasFlag(Flags.Female) ? 0x01 : 0x00);
             }
@@ -355,7 +356,7 @@ namespace ClassicUO.Network
             {
                 val = (byte) character.Race;
 
-                if (ServiceProvider.Get<UOService>().Version < ClientVersion.CV_7000)
+                if (uoService.Version < ClientVersion.CV_7000)
                 {
                     val--;
                 }
@@ -4643,9 +4644,10 @@ namespace ClassicUO.Network
             writer.WriteUInt16BE(0xBEEF);
             writer.WriteUInt8(0x01);
 
-            writer.WriteUInt16BE((ushort)ServiceProvider.Get<UOService>().FileManager.Skills.SortedSkills.Count);
+            var uoService = ServiceProvider.Get<UOService>();
+            writer.WriteUInt16BE((ushort)uoService.FileManager.Skills.SortedSkills.Count);
 
-            foreach (SkillEntry s in ServiceProvider.Get<UOService>().FileManager.Skills.SortedSkills)
+            foreach (SkillEntry s in uoService.FileManager.Skills.SortedSkills)
             {
                 writer.WriteUInt16BE((ushort) s.Index);
                 writer.WriteBool(s.HasAction);

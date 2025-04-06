@@ -245,16 +245,17 @@ namespace ClassicUO
                     break;
                 case 3:
                     var subCmd = Unsafe.AsRef<(int, sbyte)>(cmd.ToPointer());
-                    var res = ServiceProvider.Get<UOService>().World?.Player?.Pathfinder?.AutoWalking ?? false;
+                    var uoService = ServiceProvider.Get<UOService>();
+                    var res = uoService.World?.Player?.Pathfinder?.AutoWalking ?? false;
 
                     switch (subCmd.Item2)
                     {
                         case -1: return (IntPtr)Unsafe.AsPointer(ref res);
                         case 0:
-                            ServiceProvider.Get<UOService>().World.Player.Pathfinder.AutoWalking = false;
+                            uoService.World.Player.Pathfinder.AutoWalking = false;
                             break;
                         default:
-                            ServiceProvider.Get<UOService>().World.Player.Pathfinder.AutoWalking = true;
+                            uoService.World.Player.Pathfinder.AutoWalking = true;
                             break;
                     }
 
@@ -292,12 +293,15 @@ namespace ClassicUO
             var pluginPathPtr = Marshal.StringToHGlobalAnsi(pluginPath);
             var uoAssetsPtr = Marshal.StringToHGlobalAnsi(Settings.GlobalSettings.UltimaOnlineDirectory);
 
+            var uoService = ServiceProvider.Get<UOService>();
+            var windowService = ServiceProvider.Get<WindowService>();
+
             _loadPlugin
             (
                 pluginPathPtr,
-                (uint)ServiceProvider.Get<UOService>().Version,
+                (uint)uoService.Version,
                 uoAssetsPtr,
-                ServiceProvider.Get<WindowService>().Handle
+                windowService.Handle
             );
 
             if (pluginPathPtr != IntPtr.Zero)

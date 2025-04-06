@@ -8,7 +8,7 @@ namespace ClassicUO.Renderer
 {
     public static class SolidColorTextureCache
     {
-        private static readonly Dictionary<Color, Texture2D> _textures = new Dictionary<Color, Texture2D>();
+        private static readonly Dictionary<uint, Texture2D> _textures = new Dictionary<uint, Texture2D>();
 
         private static GraphicsDevice _device;
 
@@ -19,7 +19,7 @@ namespace ClassicUO.Renderer
 
         public static Texture2D GetTexture(Color color)
         {
-            if (_textures.TryGetValue(color, out var texture))
+            if (_textures.TryGetValue(color.PackedValue, out var texture))
             {
                 return texture;
             }
@@ -34,7 +34,7 @@ namespace ClassicUO.Renderer
             );
 
             texture.SetData(new[] { color });
-            _textures[color] = texture;
+            _textures[color.PackedValue] = texture;
 
             return texture;
         }

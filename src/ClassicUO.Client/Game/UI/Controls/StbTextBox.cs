@@ -344,8 +344,10 @@ namespace ClassicUO.Game.UI.Controls
                     return;
                 }
 
-
-                int realWidth = _rendererText.IsUnicode ? ServiceProvider.Get<UOService>().Self.FileManager.Fonts.GetWidthUnicode(_rendererText.Font, text) : ServiceProvider.Get<UOService>().Self.FileManager.Fonts.GetWidthASCII(_rendererText.Font, text);
+                var uoService = ServiceProvider.Get<UOService>();
+                int realWidth = _rendererText.IsUnicode
+                    ? uoService.Self.FileManager.Fonts.GetWidthUnicode(_rendererText.Font, text)
+                    : uoService.Self.FileManager.Fonts.GetWidthASCII(_rendererText.Font, text);
 
                 if (realWidth > _rendererText.MaxWidth)
                 {

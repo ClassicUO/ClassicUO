@@ -1584,7 +1584,8 @@ namespace ClassicUO.Network
             ushort x = p.ReadUInt16BE();
             ushort y = p.ReadUInt16BE();
 
-            if (ServiceProvider.Get<UOService>().Version >= ClassicUO.Sdk.ClientVersion.CV_6017)
+            var uoService = ServiceProvider.Get<UOService>();
+            if (uoService.Version >= ClassicUO.Sdk.ClientVersion.CV_6017)
             {
                 p.Skip(1);
             }
@@ -1602,29 +1603,30 @@ namespace ClassicUO.Network
                 return;
             }
 
-            var firstItem = world.Items.Get(ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Serial);
+            var uoService = ServiceProvider.Get<UOService>();
+            var firstItem = world.Items.Get(uoService.Self.GameCursor.ItemHold.Serial);
 
             if (
-                ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Enabled
-                || ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Dropped
+                uoService.Self.GameCursor.ItemHold.Enabled
+                || uoService.Self.GameCursor.ItemHold.Dropped
                     && (firstItem == null || !firstItem.AllowedToDraw)
             )
             {
-                if (world.ObjectToRemove == ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Serial)
+                if (world.ObjectToRemove == uoService.Self.GameCursor.ItemHold.Serial)
                 {
                     world.ObjectToRemove = 0;
                 }
 
                 if (
-                    SerialHelper.IsValid(ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Serial)
-                    && ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Graphic != 0xFFFF
+                    SerialHelper.IsValid(uoService.Self.GameCursor.ItemHold.Serial)
+                    && uoService.Self.GameCursor.ItemHold.Graphic != 0xFFFF
                 )
                 {
-                    if (!ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.UpdatedInWorld)
+                    if (!uoService.Self.GameCursor.ItemHold.UpdatedInWorld)
                     {
                         if (
-                            ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Layer == Layer.Invalid
-                            && SerialHelper.IsValid(ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Container)
+                            uoService.Self.GameCursor.ItemHold.Layer == Layer.Invalid
+                            && SerialHelper.IsValid(uoService.Self.GameCursor.ItemHold.Container)
                         )
                         {
                             // Server should send an UpdateContainedItem after this packet.
@@ -1632,36 +1634,36 @@ namespace ClassicUO.Network
 
                             AddItemToContainer(
                                 world,
-                                ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Serial,
-                                ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Graphic,
-                                ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.TotalAmount,
-                                ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.X,
-                                ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Y,
-                                ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Hue,
-                                ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Container
+                                uoService.Self.GameCursor.ItemHold.Serial,
+                                uoService.Self.GameCursor.ItemHold.Graphic,
+                                uoService.Self.GameCursor.ItemHold.TotalAmount,
+                                uoService.Self.GameCursor.ItemHold.X,
+                                uoService.Self.GameCursor.ItemHold.Y,
+                                uoService.Self.GameCursor.ItemHold.Hue,
+                                uoService.Self.GameCursor.ItemHold.Container
                             );
 
                             UIManager
-                                .GetGump<ContainerGump>(ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Container)
+                                .GetGump<ContainerGump>(uoService.Self.GameCursor.ItemHold.Container)
                                 ?.RequestUpdateContents();
                         }
                         else
                         {
                             Item item = world.GetOrCreateItem(
-                                ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Serial
+                                uoService.Self.GameCursor.ItemHold.Serial
                             );
 
-                            item.Graphic = ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Graphic;
-                            item.Hue = ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Hue;
-                            item.Amount = ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.TotalAmount;
-                            item.Flags = ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Flags;
-                            item.Layer = ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Layer;
-                            item.X = ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.X;
-                            item.Y = ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Y;
-                            item.Z = ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Z;
+                            item.Graphic = uoService.Self.GameCursor.ItemHold.Graphic;
+                            item.Hue = uoService.Self.GameCursor.ItemHold.Hue;
+                            item.Amount = uoService.Self.GameCursor.ItemHold.TotalAmount;
+                            item.Flags = uoService.Self.GameCursor.ItemHold.Flags;
+                            item.Layer = uoService.Self.GameCursor.ItemHold.Layer;
+                            item.X = uoService.Self.GameCursor.ItemHold.X;
+                            item.Y = uoService.Self.GameCursor.ItemHold.Y;
+                            item.Z = uoService.Self.GameCursor.ItemHold.Z;
                             item.CheckGraphicChange();
 
-                            var container = world.Get(ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Container);
+                            var container = world.Get(uoService.Self.GameCursor.ItemHold.Container);
 
                             if (container != null)
                             {
@@ -1698,13 +1700,13 @@ namespace ClassicUO.Network
                 else
                 {
                     Log.Error(
-                        $"Wrong data: serial = {ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Serial:X8}  -  graphic = {ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Graphic:X4}"
+                        $"Wrong data: serial = {uoService.Self.GameCursor.ItemHold.Serial:X8}  -  graphic = {uoService.Self.GameCursor.ItemHold.Graphic:X4}"
                     );
                 }
 
-                UIManager.GetGump<SplitMenuGump>(ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Serial)?.Dispose();
+                UIManager.GetGump<SplitMenuGump>(uoService.Self.GameCursor.ItemHold.Serial)?.Dispose();
 
-                ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Clear();
+                uoService.Self.GameCursor.ItemHold.Clear();
             }
             else
             {
@@ -1739,8 +1741,9 @@ namespace ClassicUO.Network
                 return;
             }
 
-            ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Enabled = false;
-            ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Dropped = false;
+            var uoService = ServiceProvider.Get<UOService>();
+            uoService.Self.GameCursor.ItemHold.Enabled = false;
+            uoService.Self.GameCursor.ItemHold.Dropped = false;
         }
 
         private static void DropItemAccepted(World world, ref StackDataReader p)
@@ -1750,8 +1753,9 @@ namespace ClassicUO.Network
                 return;
             }
 
-            ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Enabled = false;
-            ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Dropped = false;
+            var uoService = ServiceProvider.Get<UOService>();
+            uoService.Self.GameCursor.ItemHold.Enabled = false;
+            uoService.Self.GameCursor.ItemHold.Dropped = false;
 
             Console.WriteLine("PACKET - ITEM DROP OK!");
         }
@@ -1765,7 +1769,8 @@ namespace ClassicUO.Network
             {
                 world.Weather.Reset();
 
-                ServiceProvider.Get<AudioService>().PlayMusic(ServiceProvider.Get<AudioService>().DeathMusicIndex, true);
+                var audioService = ServiceProvider.Get<AudioService>();
+                audioService.PlayMusic(audioService.DeathMusicIndex, true);
 
                 if (ProfileManager.CurrentProfile.EnableDeathScreen)
                 {
@@ -1947,22 +1952,23 @@ namespace ClassicUO.Network
             {
                 int count = p.ReadUInt16BE();
 
-                ServiceProvider.Get<UOService>().FileManager.Skills.Skills.Clear();
-                ServiceProvider.Get<UOService>().FileManager.Skills.SortedSkills.Clear();
+                var uoService = ServiceProvider.Get<UOService>();
+                uoService.FileManager.Skills.Skills.Clear();
+                uoService.FileManager.Skills.SortedSkills.Clear();
 
                 for (int i = 0; i < count; i++)
                 {
                     bool haveButton = p.ReadBool();
                     int nameLength = p.ReadUInt8();
 
-                    ServiceProvider.Get<UOService>().FileManager.Skills.Skills.Add(
+                    uoService.FileManager.Skills.Skills.Add(
                         new SkillEntry(i, p.ReadASCII(nameLength), haveButton)
                     );
                 }
 
-                ServiceProvider.Get<UOService>().FileManager.Skills.SortedSkills.AddRange(ServiceProvider.Get<UOService>().FileManager.Skills.Skills);
+                uoService.FileManager.Skills.SortedSkills.AddRange(uoService.FileManager.Skills.Skills);
 
-                ServiceProvider.Get<UOService>().FileManager.Skills.SortedSkills.Sort(
+                uoService.FileManager.Skills.SortedSkills.Sort(
                     (a, b) => string.Compare(a.Name, b.Name, StringComparison.InvariantCulture)
                 );
             }
@@ -2107,6 +2113,7 @@ namespace ClassicUO.Network
                 return;
             }
 
+            var uoService = ServiceProvider.Get<UOService>();
             ushort count = p.ReadUInt16BE();
 
             for (int i = 0; i < count; i++)
@@ -2117,7 +2124,7 @@ namespace ClassicUO.Network
                 ushort x = p.ReadUInt16BE();
                 ushort y = p.ReadUInt16BE();
 
-                if (ServiceProvider.Get<UOService>().Version >= ClassicUO.Sdk.ClientVersion.CV_6017)
+                if (uoService.Version >= ClassicUO.Sdk.ClientVersion.CV_6017)
                 {
                     p.Skip(1);
                 }
@@ -2125,17 +2132,16 @@ namespace ClassicUO.Network
                 uint containerSerial = p.ReadUInt32BE();
                 ushort hue = p.ReadUInt16BE();
 
-                if (i == 0)
-                {
-                    var container = world.Get(containerSerial);
-
-                    if (container != null)
-                    {
-                        ClearContainerAndRemoveItems(world, container, container.Graphic == 0x2006);
-                    }
-                }
-
-                AddItemToContainer(world, serial, graphic, amount, x, y, hue, containerSerial);
+                AddItemToContainer(
+                    world,
+                    serial,
+                    graphic,
+                    amount,
+                    x,
+                    y,
+                    hue,
+                    containerSerial
+                );
             }
         }
 
@@ -2260,12 +2266,13 @@ namespace ClassicUO.Network
                 NetClient.Socket.Send_SkillsRequest(world.Player);
                 scene.DoubleClickDelayed(world.Player);
 
-                if (ServiceProvider.Get<UOService>().Version >= ClassicUO.Sdk.ClientVersion.CV_306E)
+                var uoService = ServiceProvider.Get<UOService>();
+                if (uoService.Version >= ClassicUO.Sdk.ClientVersion.CV_306E)
                 {
                     NetClient.Socket.Send_ClientType();
                 }
 
-                if (ServiceProvider.Get<UOService>().Version >= ClassicUO.Sdk.ClientVersion.CV_305D)
+                if (uoService.Version >= ClassicUO.Sdk.ClientVersion.CV_305D)
                 {
                     NetClient.Socket.Send_ClientViewRange(world.ClientViewRange);
                 }

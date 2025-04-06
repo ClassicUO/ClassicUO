@@ -1114,16 +1114,17 @@ namespace ClassicUO.Game.UI.Gumps
                 const int OFFSET_PIX = 2;
                 const int OFFSET_PIX_HALF = OFFSET_PIX / 2;
 
-                int realWidth = ServiceProvider.Get<UOService>().Self.FileManager.Maps.MapsDefaultSize[mapIndex, 0];
-                int realHeight = ServiceProvider.Get<UOService>().Self.FileManager.Maps.MapsDefaultSize[mapIndex, 1];
+                var uoService = ServiceProvider.Get<UOService>();
+                int realWidth = uoService.Self.FileManager.Maps.MapsDefaultSize[mapIndex, 0];
+                int realHeight = uoService.Self.FileManager.Maps.MapsDefaultSize[mapIndex, 1];
 
-                int fixedWidth = ServiceProvider.Get<UOService>().Self.FileManager.Maps.MapBlocksSize[mapIndex, 0];
-                int fixedHeight = ServiceProvider.Get<UOService>().Self.FileManager.Maps.MapBlocksSize[mapIndex, 1];
+                int fixedWidth = uoService.Self.FileManager.Maps.MapBlocksSize[mapIndex, 0];
+                int fixedHeight = uoService.Self.FileManager.Maps.MapBlocksSize[mapIndex, 1];
 
                 _mapTexture?.Dispose();
 
-                var mapFile = ServiceProvider.Get<UOService>().Self.FileManager.Maps.GetMapFile(mapIndex);
-                var staticFile = ServiceProvider.Get<UOService>().Self.FileManager.Maps.GetStaticFile(mapIndex);
+                var mapFile = uoService.Self.FileManager.Maps.GetMapFile(mapIndex);
+                var staticFile = uoService.Self.FileManager.Maps.GetStaticFile(mapIndex);
 
                 if (mapFile == null || staticFile == null)
                 {

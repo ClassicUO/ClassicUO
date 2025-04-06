@@ -326,7 +326,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }
             else
             {
-                UIManager.GetGump<CharCreationGump>()?.ShowMessage(ServiceProvider.Get<UOService>().Version <= ClientVersion.CV_5090 ? ResGumps.YouMustHaveThreeUniqueSkillsChosen : ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(1080032));
+                var uoService = ServiceProvider.Get<UOService>();
+                UIManager.GetGump<CharCreationGump>()?.ShowMessage(uoService.Version <= ClientVersion.CV_5090 ? ResGumps.YouMustHaveThreeUniqueSkillsChosen : uoService.FileManager.Clilocs.GetString(1080032));
 
                 return false;
             }

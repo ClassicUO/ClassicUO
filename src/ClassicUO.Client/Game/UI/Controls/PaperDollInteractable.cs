@@ -183,21 +183,18 @@ namespace ClassicUO.Game.UI.Controls
             var arms = mobile.FindItemByLayer(Layer.Arms);
 
             bool switch_arms_with_torso = false;
+            var uoService = ServiceProvider.Get<UOService>();
 
-            if (arms != null)
-            {
-                switch_arms_with_torso = arms.Graphic == 0x1410 || arms.Graphic == 0x1417;
-            }
-            else if (
+            if (
                 HasFakeItem
-                && ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled
-                && !ServiceProvider.Get<UOService>().GameCursor.ItemHold.IsFixedPosition
-                && (byte)Layer.Arms == ServiceProvider.Get<UOService>().GameCursor.ItemHold.ItemData.Layer
+                && uoService.GameCursor.ItemHold.Enabled
+                && !uoService.GameCursor.ItemHold.IsFixedPosition
+                && (byte)Layer.Arms == uoService.GameCursor.ItemHold.ItemData.Layer
             )
             {
                 switch_arms_with_torso =
-                    ServiceProvider.Get<UOService>().GameCursor.ItemHold.Graphic == 0x1410
-                    || ServiceProvider.Get<UOService>().GameCursor.ItemHold.Graphic == 0x1417;
+                    uoService.GameCursor.ItemHold.Graphic == 0x1410
+                    || uoService.GameCursor.ItemHold.Graphic == 0x1417;
             }
 
             Layer[] layers;
@@ -208,12 +205,12 @@ namespace ClassicUO.Game.UI.Controls
             }
             else if (
                 HasFakeItem
-                && ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled
-                && !ServiceProvider.Get<UOService>().GameCursor.ItemHold.IsFixedPosition
-                && (byte)Layer.Cloak == ServiceProvider.Get<UOService>().GameCursor.ItemHold.ItemData.Layer
+                && uoService.GameCursor.ItemHold.Enabled
+                && !uoService.GameCursor.ItemHold.IsFixedPosition
+                && (byte)Layer.Cloak == uoService.GameCursor.ItemHold.ItemData.Layer
             )
             {
-                layers = ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[ServiceProvider.Get<UOService>().GameCursor.ItemHold.Graphic].IsContainer
+                layers = uoService.FileManager.TileData.StaticData[uoService.GameCursor.ItemHold.Graphic].IsContainer
                     ? _layerOrder_quiver_fix
                     : _layerOrder;
             }
@@ -278,16 +275,16 @@ namespace ClassicUO.Game.UI.Controls
                 }
                 else if (
                     HasFakeItem
-                    && ServiceProvider.Get<UOService>().GameCursor.ItemHold.Enabled
-                    && !ServiceProvider.Get<UOService>().GameCursor.ItemHold.IsFixedPosition
-                    && (byte)layer == ServiceProvider.Get<UOService>().GameCursor.ItemHold.ItemData.Layer
-                    && ServiceProvider.Get<UOService>().GameCursor.ItemHold.ItemData.AnimID != 0
+                    && uoService.GameCursor.ItemHold.Enabled
+                    && !uoService.GameCursor.ItemHold.IsFixedPosition
+                    && (byte)layer == uoService.GameCursor.ItemHold.ItemData.Layer
+                    && uoService.GameCursor.ItemHold.ItemData.AnimID != 0
                 )
                 {
                     ushort id = GetAnimID(
                         mobile.Graphic,
-                        ServiceProvider.Get<UOService>().GameCursor.ItemHold.Graphic,
-                        ServiceProvider.Get<UOService>().GameCursor.ItemHold.ItemData.AnimID,
+                        uoService.GameCursor.ItemHold.Graphic,
+                        uoService.GameCursor.ItemHold.ItemData.AnimID,
                         mobile.IsFemale
                     );
 
@@ -298,12 +295,12 @@ namespace ClassicUO.Game.UI.Controls
                             0,
                             0,
                             id,
-                            (ushort)(ServiceProvider.Get<UOService>().GameCursor.ItemHold.Hue & 0x3FFF),
-                            ServiceProvider.Get<UOService>().GameCursor.ItemHold.Layer
+                            (ushort)(uoService.GameCursor.ItemHold.Hue & 0x3FFF),
+                            uoService.GameCursor.ItemHold.Layer
                         )
                         {
                             AcceptMouseInput = true,
-                            IsPartialHue = ServiceProvider.Get<UOService>().GameCursor.ItemHold.IsPartialHue,
+                            IsPartialHue = uoService.GameCursor.ItemHold.IsPartialHue,
                             Alpha = 0.5f
                         }
                     );
@@ -321,7 +318,6 @@ namespace ClassicUO.Game.UI.Controls
                 // If player, apply backpack skin
                 if (mobile.Serial == _paperDollGump.World.Player.Serial)
                 {
-                    var uoService = ServiceProvider.Get<UOService>();
                     var gump = uoService.Gumps;
 
                     switch (ProfileManager.CurrentProfile.BackpackStyle)

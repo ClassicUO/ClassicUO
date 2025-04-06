@@ -5,13 +5,9 @@ using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework.Graphics;
-using SDL2;
 using System;
-using System.Diagnostics;
 using System.IO;
 using ClassicUO.Sdk;
-using System.Diagnostics.CodeAnalysis;
-using ClassicUO.Game.Services;
 
 namespace ClassicUO
 {

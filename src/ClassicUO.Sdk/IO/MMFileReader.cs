@@ -39,7 +39,6 @@ namespace ClassicUO.Sdk.IO
             }
         }
 
-        public override BinaryReader Reader => _file;
 
         public override void Dispose()
         {

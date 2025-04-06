@@ -264,14 +264,15 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButtonType.Left)
             {
+                var uoService = ServiceProvider.Get<UOService>();
                 if (
-                    ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Enabled
-                    && !ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.IsFixedPosition
+                    uoService.Self.GameCursor.ItemHold.Enabled
+                    && !uoService.Self.GameCursor.ItemHold.IsFixedPosition
                 )
                 {
                     if (_myBox != null && _myBox.Bounds.Contains(x, y))
                     {
-                        ref readonly var artInfo = ref ServiceProvider.Get<UOService>().Self.Arts.GetArt(ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.DisplayedGraphic);
+                        ref readonly var artInfo = ref uoService.Self.Arts.GetArt(uoService.Self.GameCursor.ItemHold.DisplayedGraphic);
                         x -= _myBox.X;
                         y -= _myBox.Y;
 
@@ -301,7 +302,7 @@ namespace ClassicUO.Game.UI.Gumps
                             y = 0;
                         }
 
-                        GameActions.DropItem(ServiceProvider.Get<UOService>().Self.GameCursor.ItemHold.Serial, x, y, 0, ID1);
+                        GameActions.DropItem(uoService.Self.GameCursor.ItemHold.Serial, x, y, 0, ID1);
                     }
                 }
                 else if (SelectedObject.Object is Item it)

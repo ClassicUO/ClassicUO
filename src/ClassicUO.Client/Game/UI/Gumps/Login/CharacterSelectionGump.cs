@@ -39,7 +39,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
             LockedFeatureFlags f = World.ClientLockedFeatures.Flags;
             CharacterListFlags ff = World.ClientFeatures.Flags;
 
-            if (ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_6040 || ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_5020 && loginScene.Characters.Count > 5)
+            var uoService = ServiceProvider.Get<UOService>();
+            if (uoService.Version >= ClientVersion.CV_6040 || uoService.Version >= ClientVersion.CV_5020 && loginScene.Characters.Count > 5)
             {
                 listTitleY = 96;
                 yOffset = 125;
@@ -74,7 +75,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             Add
             (
-                new Label(ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(3000050, "Character Selection"), unicode, hue, font: font)
+                new Label(uoService.FileManager.Clilocs.GetString(3000050, "Character Selection"), unicode, hue, font: font)
                 {
                     X = 267, Y = listTitleY
                 },
