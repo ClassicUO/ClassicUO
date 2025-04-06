@@ -44,7 +44,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (Graphic == 0x5DDA && World.Player.Race == RaceType.GARGOYLE)
             {
-                NetClient.Socket.Send_ToggleGargoyleFlying();
+                ServiceProvider.Get<PacketHandlerService>().Out.Send_ToggleGargoyleFlying();
 
                 return true;
             }

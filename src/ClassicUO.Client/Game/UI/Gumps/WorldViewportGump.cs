@@ -61,7 +61,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (ServiceProvider.Get<UOService>().Self.Version >= ClientVersion.CV_200)
                     {
-                        NetClient.Socket.Send_GameWindowSize((uint)n.X, (uint)n.Y);
+                        ServiceProvider.Get<PacketHandlerService>().Out.Send_GameWindowSize((uint)n.X, (uint)n.Y);
                     }
 
                     _clicked = false;

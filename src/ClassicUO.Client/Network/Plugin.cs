@@ -726,7 +726,7 @@ namespace ClassicUO.Network
 
         internal static short OnGetPacketLength(int id)
         {
-            return NetClient.Socket.PacketsTable.GetPacketLength(id);
+            return ServiceProvider.Get<NetClientService>().Socket.PacketsTable.GetPacketLength(id);
         }
 
         internal static bool OnPluginRecv(ref byte[] data, ref int length)
@@ -742,10 +742,7 @@ namespace ClassicUO.Network
 
         internal static bool OnPluginSend(ref byte[] data, ref int length)
         {
-            if (NetClient.Socket.IsConnected)
-            {
-                NetClient.Socket.Send(data.AsSpan(0, length), true);
-            }
+            ServiceProvider.Get<NetClientService>().Socket.Send(data.AsSpan(0, length), true);
 
             return true;
         }
@@ -768,7 +765,7 @@ namespace ClassicUO.Network
         {
             if (buffer != IntPtr.Zero && length > 0)
             {
-                NetClient.Socket.Send(new Span<byte>((void*)buffer, length), true);
+                ServiceProvider.Get<NetClientService>().Socket.Send(new Span<byte>((void*)buffer, length), true);
             }
 
             return true;

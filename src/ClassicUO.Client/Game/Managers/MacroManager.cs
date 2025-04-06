@@ -580,7 +580,7 @@ namespace ClassicUO.Game.Managers
                                             break;
                                     }
 
-                                    NetClient.Socket.Send_OpenSpellBook((byte)type);
+                                    ServiceProvider.Get<PacketHandlerService>().Out.Send_OpenSpellBook((byte)type);
 
                                     break;
 
@@ -1326,11 +1326,11 @@ namespace ClassicUO.Game.Managers
                         {
                             if (macro.Code == MacroType.BandageSelf)
                             {
-                                NetClient.Socket.Send_TargetSelectedObject(bandage.Serial, _world.Player.Serial);
+                                ServiceProvider.Get<PacketHandlerService>().Out.Send_TargetSelectedObject(bandage.Serial, _world.Player.Serial);
                             }
                             else if (SerialHelper.IsMobile(_world.TargetManager.SelectedTarget))
                             {
-                                NetClient.Socket.Send_TargetSelectedObject(bandage.Serial, _world.TargetManager.SelectedTarget);
+                                ServiceProvider.Get<PacketHandlerService>().Out.Send_TargetSelectedObject(bandage.Serial, _world.TargetManager.SelectedTarget);
                             }
                         }
                     }
@@ -1444,7 +1444,7 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.InvokeVirtue:
                     byte id = (byte) (macro.SubCode - MacroSubType.Honor + 1);
-                    NetClient.Socket.Send_InvokeVirtueRequest(id);
+                    ServiceProvider.Get<PacketHandlerService>().Out.Send_InvokeVirtueRequest(id);
 
                     break;
 
@@ -1462,13 +1462,13 @@ namespace ClassicUO.Game.Managers
 
                     if (_world.Player.Race == RaceType.GARGOYLE)
                     {
-                        NetClient.Socket.Send_ToggleGargoyleFlying();
+                        ServiceProvider.Get<PacketHandlerService>().Out.Send_ToggleGargoyleFlying();
                     }
 
                     break;
 
                 case MacroType.EquipLastWeapon:
-                    NetClient.Socket.Send_EquipLastWeapon(_world);
+                    ServiceProvider.Get<PacketHandlerService>().Out.Send_EquipLastWeapon(_world);
 
                     break;
 

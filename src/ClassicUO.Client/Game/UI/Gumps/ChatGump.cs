@@ -9,6 +9,7 @@ using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -219,13 +220,13 @@ namespace ClassicUO.Game.UI.Gumps
                 case 0: // join
                     if (!string.IsNullOrEmpty(_selectedChannelText))
                     {
-                        NetClient.Socket.Send_ChatJoinCommand(_selectedChannelText);
+                        ServiceProvider.Get<PacketHandlerService>().Out.Send_ChatJoinCommand(_selectedChannelText);
                     }
 
                     break;
 
                 case 1: // leave
-                    NetClient.Socket.Send_ChatLeaveChannelCommand();
+                    ServiceProvider.Get<PacketHandlerService>().Out.Send_ChatLeaveChannelCommand();
 
                     break;
 
@@ -413,7 +414,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (buttonID == 1) // ok
                 {
-                    NetClient.Socket.Send_ChatCreateChannelCommand(_textBox.Text);
+                    ServiceProvider.Get<PacketHandlerService>().Out.Send_ChatCreateChannelCommand(_textBox.Text);
                 }
 
                 Dispose();

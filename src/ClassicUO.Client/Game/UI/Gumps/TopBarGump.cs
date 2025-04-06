@@ -244,7 +244,7 @@ namespace ClassicUO.Game.UI.Gumps
                 case Buttons.UOStore:
                     if (ServiceProvider.Get<UOService>().Self.Version >= ClientVersion.CV_706400)
                     {
-                        NetClient.Socket.Send_OpenUOStore();
+                        ServiceProvider.Get<PacketHandlerService>().Out.Send_OpenUOStore();
                     }
 
                     break;

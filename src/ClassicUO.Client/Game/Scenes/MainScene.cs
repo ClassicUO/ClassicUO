@@ -23,25 +23,25 @@ namespace ClassicUO.Game.Scenes
 
         public override void Update()
         {
-            var keyboardState = Keyboard.GetState();
+            // var keyboardState = Keyboard.GetState();
 
-            if (keyboardState.IsKeyDown(Keys.A))
-            {
-                _controller.UO.Setup(_controller);
-                Settings.GlobalSettings.Encryption = (byte)NetClient.Socket.Load(_controller.UO.FileManager.Version, (EncryptionType)Settings.GlobalSettings.Encryption);
+            // if (keyboardState.IsKeyDown(Keys.A))
+            // {
+            //     _controller.UO.Setup(_controller);
+            //     Settings.GlobalSettings.Encryption = (byte)NetClient.Socket.Load(_controller.UO.FileManager.Version, (EncryptionType)Settings.GlobalSettings.Encryption);
 
-                Log.Trace("Loading plugins...");
-                _controller.PluginHost?.Initialize();
+            //     Log.Trace("Loading plugins...");
+            //     _controller.PluginHost?.Initialize();
 
-                foreach (string p in Settings.GlobalSettings.Plugins)
-                {
-                    Plugin.Create(p);
-                }
+            //     foreach (string p in Settings.GlobalSettings.Plugins)
+            //     {
+            //         Plugin.Create(p);
+            //     }
 
-                Log.Trace("Done!");
+            //     Log.Trace("Done!");
 
-                _controller.SetScene(new LoginScene(_controller.UO.World));
-            }
+            //     _controller.SetScene(new LoginScene(_controller.UO.World));
+            // }
 
             base.Update();
         }

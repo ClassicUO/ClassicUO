@@ -215,9 +215,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            if (_originalText != _textBox.Text && World.Player != null && !World.Player.IsDestroyed && NetClient.Socket.IsConnected)
+            if (_originalText != _textBox.Text && World.Player != null && !World.Player.IsDestroyed)
             {
-                NetClient.Socket.Send_ProfileUpdate(LocalSerial, _textBox.Text);
+                ServiceProvider.Get<PacketHandlerService>().Out.Send_ProfileUpdate(LocalSerial, _textBox.Text);
             }
 
             base.Dispose();

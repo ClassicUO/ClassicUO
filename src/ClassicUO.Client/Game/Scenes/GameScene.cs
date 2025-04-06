@@ -72,6 +72,7 @@ namespace ClassicUO.Game.Scenes
         private readonly AudioService _audioService;
         private readonly SceneService _sceneService;
         private readonly PacketHandlerService _packetHandlerService;
+        private readonly NetClientService _netClientService;
 
         public GameScene(World world)
         {
@@ -81,6 +82,7 @@ namespace ClassicUO.Game.Scenes
             _audioService = ServiceProvider.Get<AudioService>();
             _sceneService = ServiceProvider.Get<SceneService>();
             _packetHandlerService = ServiceProvider.Get<PacketHandlerService>();
+            _netClientService = ServiceProvider.Get<NetClientService>();
         }
 
 
@@ -131,7 +133,7 @@ namespace ClassicUO.Game.Scenes
                 TopBarGump.Create(_world);
             }
 
-            NetClient.Socket.Disconnected += SocketOnDisconnected;
+            _netClientService.RegisterDisconnectedEvent(SocketOnDisconnected);
             _world.MessageManager.MessageReceived += ChatOnMessageReceived;
             UIManager.ContainerScale = ProfileManager.CurrentProfile.ContainersScale / 100f;
 
@@ -321,8 +323,8 @@ namespace ClassicUO.Game.Scenes
             StaticFilters.CleanCaveTextures();
             StaticFilters.CleanTreeTextures();
 
-            NetClient.Socket.Disconnected -= SocketOnDisconnected;
-            NetClient.Socket.Disconnect();
+            _netClientService.UnregisterDisconnectedEvent(SocketOnDisconnected);
+            _netClientService.Disconnect();
             _lightRenderTarget?.Dispose();
             _world_render_target?.Dispose();
 
@@ -394,11 +396,11 @@ namespace ClassicUO.Game.Scenes
                             )
                             {
                                 DisconnectionRequested = true;
-                                NetClient.Socket.Send_LogoutNotification();
+                                _packetHandlerService.Out.Send_LogoutNotification();
                             }
                             else
                             {
-                                NetClient.Socket.Disconnect();
+                                _netClientService.Disconnect();
                                 ServiceProvider.Get<SceneService>().SetScene(new LoginScene(_world));
                             }
                         }
@@ -737,7 +739,7 @@ namespace ClassicUO.Game.Scenes
 
             if (Time.Ticks > _timePing)
             {
-                NetClient.Socket.Statistics.SendPing();
+                _netClientService.SendPing();
                 _timePing = (long)Time.Ticks + 1000;
             }
 
@@ -785,6 +787,10 @@ namespace ClassicUO.Game.Scenes
                 {
                     StopFollowing();
                 }
+            }
+            else
+            {
+                StopFollowing();
             }
 
             _world.Macros.Update();

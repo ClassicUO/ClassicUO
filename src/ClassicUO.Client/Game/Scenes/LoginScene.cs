@@ -46,8 +46,13 @@ namespace ClassicUO.Game.Scenes
         private int _reconnectTryCounter = 1;
         private bool _autoLogin;
         private readonly World _world;
+        private readonly NetClientService _netClientService;
 
-        public LoginScene(World world) => _world = world;
+        public LoginScene(World world)
+        {
+            _world = world;
+            _netClientService = ServiceProvider.Get<NetClientService>();
+        }
 
 
         public bool Reconnect { get; set; }
@@ -111,8 +116,8 @@ namespace ClassicUO.Game.Scenes
             _currentGump?.Dispose();
 
             // UnRegistering Packet Events
-            NetClient.Socket.Connected -= OnNetClientConnected;
-            NetClient.Socket.Disconnected -= OnNetClientDisconnected;
+            _netClientService.Socket.Connected -= OnNetClientConnected;
+            _netClientService.Socket.Disconnected -= OnNetClientDisconnected;
 
             ServiceProvider.Get<GameCursorService>().IsLoading = false;
             base.Unload();
@@ -136,7 +141,7 @@ namespace ClassicUO.Game.Scenes
                 _lastLoginStep = CurrentLoginStep;
             }
 
-            if (Reconnect && (CurrentLoginStep == LoginSteps.PopUpMessage || CurrentLoginStep == LoginSteps.Main) && !NetClient.Socket.IsConnected)
+            if (Reconnect && (CurrentLoginStep == LoginSteps.PopUpMessage || CurrentLoginStep == LoginSteps.Main) && !_netClientService.Socket.IsConnected)
             {
                 if (_reconnectTime < Time.Ticks)
                 {
@@ -165,9 +170,9 @@ namespace ClassicUO.Game.Scenes
             {
                 // Note that this will not be an ICMP ping, so it's better that this *not* be affected by -no_server_ping.
 
-                if (NetClient.Socket.IsConnected)
+                if (_netClientService.Socket.IsConnected)
                 {
-                    NetClient.Socket.Statistics.SendPing();
+                    _netClientService.Socket.Statistics.SendPing();
                 }
 
                 _pingTime = Time.Ticks + 60000;
@@ -313,11 +318,11 @@ namespace ClassicUO.Game.Scenes
             //    Log.Error("No Internet Access");
             //};
 
-            NetClient.Socket.Connected -= OnNetClientConnected;
-            NetClient.Socket.Disconnected -= OnNetClientDisconnected;
-            NetClient.Socket.Connected += OnNetClientConnected;
-            NetClient.Socket.Disconnected += OnNetClientDisconnected;
-            NetClient.Socket.Connect(Settings.GlobalSettings.IP, Settings.GlobalSettings.Port);
+            _netClientService.Socket.Connected -= OnNetClientConnected;
+            _netClientService.Socket.Disconnected -= OnNetClientDisconnected;
+            _netClientService.Socket.Connected += OnNetClientConnected;
+            _netClientService.Socket.Disconnected += OnNetClientDisconnected;
+            _netClientService.Socket.Connect(Settings.GlobalSettings.IP, Settings.GlobalSettings.Port);
         }
 
 
@@ -378,7 +383,7 @@ namespace ClassicUO.Game.Scenes
 
                 _world.ServerName = Servers[ServerIndex].Name;
 
-                NetClient.Socket.Send_SelectServer(index);
+                ServiceProvider.Get<PacketHandlerService>().Out.Send_SelectServer(index);
             }
         }
 
@@ -389,7 +394,7 @@ namespace ClassicUO.Game.Scenes
                 LastCharacterManager.Save(Account, _world.ServerName, Characters[(int)index]);
 
                 CurrentLoginStep = LoginSteps.EnteringBritania;
-                NetClient.Socket.Send_SelectCharacter(index, Characters[(int)index], NetClient.Socket.LocalIP);
+                ServiceProvider.Get<PacketHandlerService>().Out.Send_SelectCharacter(index, Characters[(int)index], _netClientService.Socket.LocalIP);
             }
         }
 
@@ -415,9 +420,9 @@ namespace ClassicUO.Game.Scenes
 
             LastCharacterManager.Save(Account, _world.ServerName, character.Name);
 
-            NetClient.Socket.Send_CreateCharacter(character,
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_CreateCharacter(character,
                                                   cityIndex,
-                                                  NetClient.Socket.LocalIP,
+                                                  _netClientService.Socket.LocalIP,
                                                   ServerIndex,
                                                   (uint)i,
                                                   profession);
@@ -429,7 +434,7 @@ namespace ClassicUO.Game.Scenes
         {
             if (CurrentLoginStep == LoginSteps.CharacterSelection)
             {
-                NetClient.Socket.Send_DeleteCharacter((byte)index, NetClient.Socket.LocalIP);
+                ServiceProvider.Get<PacketHandlerService>().Out.Send_DeleteCharacter((byte)index, _netClientService.Socket.LocalIP);
             }
         }
 
@@ -449,12 +454,12 @@ namespace ClassicUO.Game.Scenes
                 case LoginSteps.ServerSelection:
                     DisposeAllServerEntries();
                     CurrentLoginStep = LoginSteps.Main;
-                    NetClient.Socket.Disconnect();
+                    _netClientService.Socket.Disconnect();
 
                     break;
 
                 case LoginSteps.LoginInToServer:
-                    NetClient.Socket.Disconnect();
+                    _netClientService.Socket.Disconnect();
                     Characters.Clear();
                     DisposeAllServerEntries();
                     Connect(Account, Password);
@@ -468,7 +473,7 @@ namespace ClassicUO.Game.Scenes
 
                 case LoginSteps.PopUpMessage:
                 case LoginSteps.CharacterSelection:
-                    NetClient.Socket.Disconnect();
+                    _netClientService.Socket.Disconnect();
                     Characters.Clear();
                     DisposeAllServerEntries();
                     CurrentLoginStep = LoginSteps.Main;
@@ -492,9 +497,9 @@ namespace ClassicUO.Game.Scenes
             Log.Info("Connected!");
             CurrentLoginStep = LoginSteps.VerifyingAccount;
 
-            uint address = NetClient.Socket.LocalIP;
+            uint address = _netClientService.Socket.LocalIP;
 
-            NetClient.Socket.Encryption?.Initialize(true, address);
+            _netClientService.Socket.Encryption?.Initialize(true, address);
 
             if (ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_6040)
             {
@@ -506,14 +511,14 @@ namespace ClassicUO.Game.Scenes
                 byte extra = (byte) clientVersion;
 
 
-                NetClient.Socket.Send_Seed(address, major, minor, build, extra);
+                ServiceProvider.Get<PacketHandlerService>().Out.Send_Seed(address, major, minor, build, extra);
             }
             else
             {
-                NetClient.Socket.Send_Seed_Old(address);
+                ServiceProvider.Get<PacketHandlerService>().Out.Send_Seed_Old(address);
             }
 
-            NetClient.Socket.Send_FirstLogin(Account, Password);
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_FirstLogin(Account, Password);
         }
 
         private void OnNetClientDisconnected(object? sender, SocketError e)
@@ -661,8 +666,8 @@ namespace ClassicUO.Game.Scenes
             ushort port = p.ReadUInt16BE();
             uint seed = p.ReadUInt32BE();
 
-            NetClient.Socket.Disconnect();
-            NetClient.Socket.Connected -= OnNetClientConnected;
+            _netClientService.Socket.Disconnect();
+            _netClientService.Socket.Connected -= OnNetClientConnected;
 
             try
             {
@@ -670,27 +675,27 @@ namespace ClassicUO.Game.Scenes
                 if (Settings.GlobalSettings.IgnoreRelayIp || ip == 0)
                 {
                     Log.Trace("Ignoring relay server packet IP address");
-                    NetClient.Socket.Connect(Settings.GlobalSettings.IP, Settings.GlobalSettings.Port);
+                    _netClientService.Socket.Connect(Settings.GlobalSettings.IP, Settings.GlobalSettings.Port);
                 }
                 else
-                    NetClient.Socket.Connect(new IPAddress(ip).ToString(), port);
+                    _netClientService.Socket.Connect(new IPAddress(ip).ToString(), port);
 
-                if (NetClient.Socket.IsConnected)
+                if (_netClientService.Socket.IsConnected)
                 {
-                    NetClient.Socket.Encryption?.Initialize(false, seed);
-                    NetClient.Socket.EnableCompression();
+                    _netClientService.Socket.Encryption?.Initialize(false, seed);
+                    _netClientService.Socket.EnableCompression();
                     unsafe
                     {
                         Span<byte> b = stackalloc byte[4] { (byte)(seed >> 24), (byte)(seed >> 16), (byte)(seed >> 8), (byte)seed };
-                        NetClient.Socket.Send(b, true, true);
+                        _netClientService.Socket.Send(b, true, true);
                     }
 
-                    NetClient.Socket.Send_SecondLogin(Account, Password, seed);
+                    ServiceProvider.Get<PacketHandlerService>().Out.Send_SecondLogin(Account, Password, seed);
                 }
             }
             finally
             {
-                NetClient.Socket.Connected += OnNetClientConnected;
+                _netClientService.Socket.Connected += OnNetClientConnected;
             }
         }
 

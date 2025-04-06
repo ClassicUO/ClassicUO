@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ClassicUO.Sdk;
 
 namespace ClassicUO.Game.Services
 {
@@ -18,6 +19,8 @@ namespace ClassicUO.Game.Services
             {
                 return (T)service;
             }
+
+            Log.Error($"service {typeof(T)} not registered in ServiceProvider.");
             return default;
         }
 

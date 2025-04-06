@@ -55,14 +55,14 @@ internal class IncomingPackets
             {
                 if (_clilocRequests.Count != 0)
                 {
-                    NetClient.Socket.Send_MegaClilocRequest(_clilocRequests);
+                    ServiceProvider.Get<PacketHandlerService>().Out.Send_MegaClilocRequest(_clilocRequests);
                 }
             }
             else
             {
                 foreach (uint serial in _clilocRequests)
                 {
-                    NetClient.Socket.Send_MegaClilocRequest_Old(serial);
+                    ServiceProvider.Get<PacketHandlerService>().Out.Send_MegaClilocRequest_Old(serial);
                 }
 
                 _clilocRequests.Clear();
@@ -73,7 +73,7 @@ internal class IncomingPackets
         {
             for (int i = 0; i < _customHouseRequests.Count; ++i)
             {
-                NetClient.Socket.Send_CustomHouseDataRequest(_customHouseRequests[i]);
+                ServiceProvider.Get<PacketHandlerService>().Out.Send_CustomHouseDataRequest(_customHouseRequests[i]);
             }
 
             _customHouseRequests.Clear();
@@ -657,19 +657,19 @@ internal class IncomingPackets
         {
             if (ProfileManager.CurrentProfile != null)
             {
-                NetClient.Socket.Send_GameWindowSize(
+                ServiceProvider.Get<PacketHandlerService>().Out.Send_GameWindowSize(
                     (uint)ServiceProvider.Get<SceneService>().Bounds.Width,
                     (uint)ServiceProvider.Get<SceneService>().Bounds.Height
                 );
             }
 
-            NetClient.Socket.Send_Language(Settings.GlobalSettings.Language);
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_Language(Settings.GlobalSettings.Language);
         }
 
-        NetClient.Socket.Send_ClientVersion(Settings.GlobalSettings.ClientVersion);
+        ServiceProvider.Get<PacketHandlerService>().Out.Send_ClientVersion(Settings.GlobalSettings.ClientVersion);
 
         GameActions.SingleClick(world, world.Player);
-        NetClient.Socket.Send_SkillsRequest(world.Player.Serial);
+        ServiceProvider.Get<PacketHandlerService>().Out.Send_SkillsRequest(world.Player.Serial);
 
         if (world.Player.IsDead)
         {
@@ -681,13 +681,13 @@ internal class IncomingPackets
             && ProfileManager.CurrentProfile != null
         )
         {
-            NetClient.Socket.Send_ShowPublicHouseContent(
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_ShowPublicHouseContent(
                 ProfileManager.CurrentProfile.ShowHouseContent
             );
         }
 
-        NetClient.Socket.Send_ToPlugins_AllSkills();
-        NetClient.Socket.Send_ToPlugins_AllSpells();
+        ServiceProvider.Get<PacketHandlerService>().Out.Send_ToPlugins_AllSkills();
+        ServiceProvider.Get<PacketHandlerService>().Out.Send_ToPlugins_AllSpells();
     }
 
     public void Talk(World world, ref StackDataReader p)
@@ -720,7 +720,7 @@ internal class IncomingPackets
             && name.StartsWith("SYSTEM")
         )
         {
-            NetClient.Socket.Send_ACKTalk();
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_ACKTalk();
 
             return;
         }
@@ -1986,20 +1986,20 @@ internal class IncomingPackets
 
             //GameActions.OpenPaperdoll(world.Player);
             GameActions.RequestMobileStatus(world,world.Player);
-            NetClient.Socket.Send_OpenChat("");
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_OpenChat("");
 
-            NetClient.Socket.Send_SkillsRequest(world.Player);
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_SkillsRequest(world.Player);
             scene.DoubleClickDelayed(world.Player);
 
             var uoService = ServiceProvider.Get<UOService>();
             if (uoService.Version >= ClassicUO.Sdk.ClientVersion.CV_306E)
             {
-                NetClient.Socket.Send_ClientType();
+                ServiceProvider.Get<PacketHandlerService>().Out.Send_ClientType();
             }
 
             if (uoService.Version >= ClassicUO.Sdk.ClientVersion.CV_305D)
             {
-                NetClient.Socket.Send_ClientViewRange(world.ClientViewRange);
+                ServiceProvider.Get<PacketHandlerService>().Out.Send_ClientViewRange(world.ClientViewRange);
             }
 
             List<Gump> gumps = ProfileManager.CurrentProfile.ReadGumps(
@@ -2417,7 +2417,7 @@ internal class IncomingPackets
 
     public void Ping(World world, ref StackDataReader p)
     {
-        NetClient.Socket.Statistics.PingReceived(p.ReadUInt8());
+        ServiceProvider.Get<NetClientService>().Statistics.PingReceived(p.ReadUInt8());
     }
 
     public void BuyList(World world, ref StackDataReader p)
@@ -2684,7 +2684,7 @@ internal class IncomingPackets
                     // NOTE: This packet causes some weird issue on sphere servers.
                     //       When the character dies, this packet trigger a "reset" and
                     //       somehow it messes up the packet reading server side
-                    //NetClient.Socket.Send_DeathScreen();
+                    //ServiceProvider.Get<PacketHandlerService>().Out.Send_DeathScreen();
                     world.ChangeSeason(Game.Managers.Season.Desolation, 42);
                 }
                 else
@@ -2965,7 +2965,7 @@ internal class IncomingPackets
                 }
             );
 
-            NetClient.Socket.Send_BookPageDataRequest(serial, 1);
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_BookPageDataRequest(serial, 1);
         }
         else
         {
@@ -3386,7 +3386,7 @@ internal class IncomingPackets
                     0x00
                 };
 
-            NetClient.Socket.Send(buffer);
+            ServiceProvider.Get<NetClientService>().Socket.Send(buffer);
 
             return;
         }
@@ -3598,7 +3598,7 @@ internal class IncomingPackets
                 p.Skip(4);
                 string username = p.ReadUnicodeBE();
                 world.ChatManager.ChatIsEnabled = ChatStatus.Enabled;
-                NetClient.Socket.Send_ChatJoinCommand("General");
+                ServiceProvider.Get<PacketHandlerService>().Out.Send_ChatJoinCommand("General");
 
                 break;
 
@@ -3856,7 +3856,7 @@ internal class IncomingPackets
 
     public void ClientVersion(World world, ref StackDataReader p)
     {
-        NetClient.Socket.Send_ClientVersion(Settings.GlobalSettings.ClientVersion);
+        ServiceProvider.Get<PacketHandlerService>().Out.Send_ClientVersion(Settings.GlobalSettings.ClientVersion);
     }
 
     public void AssistVersion(World world, ref StackDataReader p)
@@ -4078,7 +4078,7 @@ internal class IncomingPackets
 
                 strBuffer.Dispose();
 
-                NetClient.Socket.Send_MegaClilocRequest_Old(item);
+                ServiceProvider.Get<PacketHandlerService>().Out.Send_MegaClilocRequest_Old(item);
 
                 break;
 
@@ -4635,7 +4635,7 @@ internal class IncomingPackets
             if (p.ReadBool())
             {
                 // client can disconnect
-                NetClient.Socket.Disconnect();
+                ServiceProvider.Get<NetClientService>().Disconnect();
                 ServiceProvider.Get<SceneService>().SetScene(new LoginScene(world));
             }
             else
@@ -5426,7 +5426,7 @@ internal class IncomingPackets
                 ServiceProvider.Get<GameService>().EnqueueAction(5000, () =>
                 {
                     Log.Info("Razor ACK sent");
-                    NetClient.Socket.Send_RazorACK();
+                    ServiceProvider.Get<PacketHandlerService>().Out.Send_RazorACK();
                 });
 
                 break;
@@ -5849,7 +5849,7 @@ internal class IncomingPackets
 
             if (gump != null)
             {
-                NetClient.Socket.Send_BulletinBoardRequestMessageSummary(
+                ServiceProvider.Get<PacketHandlerService>().Out.Send_BulletinBoardRequestMessageSummary(
                     containerSerial,
                     serial
                 );

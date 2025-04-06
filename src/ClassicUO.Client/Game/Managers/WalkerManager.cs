@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Services;
 using ClassicUO.Network;
 
 namespace ClassicUO.Game.Managers
@@ -153,7 +154,7 @@ namespace ClassicUO.Game.Managers
             {
                 if (!ResendPacketResync)
                 {
-                    NetClient.Socket.Send_Resync();
+                    ServiceProvider.Get<PacketHandlerService>().Out.Send_Resync();
                     ResendPacketResync = true;
                 }
 

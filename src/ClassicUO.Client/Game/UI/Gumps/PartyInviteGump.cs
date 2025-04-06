@@ -75,7 +75,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (World.Party.Inviter != 0 && World.Party.Leader == 0)
                 {
-                    NetClient.Socket.Send_PartyDecline(World.Party.Inviter);
+                    ServiceProvider.Get<PacketHandlerService>().Out.Send_PartyDecline(World.Party.Inviter);
                     World.Party.Inviter = 0;
                 }
 

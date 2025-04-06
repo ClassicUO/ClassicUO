@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using System;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Network
 {
@@ -76,7 +77,7 @@ namespace ClassicUO.Network
             }
 
             _startTickValue = Time.Ticks;
-            _socket.Send_Ping(_pingIdx);
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_Ping(_pingIdx);
             _pingIdx = (byte)((_pingIdx + 1) % _pings.Length);
         }
 

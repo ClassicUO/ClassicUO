@@ -42,7 +42,7 @@ namespace ClassicUO.Game
                 }
             }
 
-            Socket.Send_ChangeWarMode(war);
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_ChangeWarMode(war);
         }
 
         public static void OpenMacroGump(World world, string name)
@@ -144,7 +144,7 @@ namespace ClassicUO.Game
             else
             {
                 world.SkillsRequested = true;
-                Socket.Send_SkillsRequest(world.Player.Serial);
+                ServiceProvider.Get<PacketHandlerService>().Out.Send_SkillsRequest(world.Player.Serial);
             }
         }
 
@@ -286,7 +286,7 @@ namespace ClassicUO.Game
                         {
                             if (s)
                             {
-                                Socket.Send_AttackRequest(serial);
+                                ServiceProvider.Get<PacketHandlerService>().Out.Send_AttackRequest(serial);
                             }
                         }
                     );
@@ -299,7 +299,7 @@ namespace ClassicUO.Game
 
             world.TargetManager.NewTargetSystemSerial = serial;
             world.TargetManager.LastAttack = serial;
-            Socket.Send_AttackRequest(serial);
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_AttackRequest(serial);
         }
 
         public static void DoubleClickQueued(uint serial)
@@ -319,7 +319,7 @@ namespace ClassicUO.Game
             }
             else
             {
-                Socket.Send_DoubleClick(serial);
+                ServiceProvider.Get<PacketHandlerService>().Out.Send_DoubleClick(serial);
             }
 
             if (SerialHelper.IsItem(serial) || (SerialHelper.IsMobile(serial) && (world.Mobiles.Get(serial)?.IsHuman ?? false)))
@@ -335,7 +335,7 @@ namespace ClassicUO.Game
         public static void SingleClick(World world, uint serial)
         {
             // add  request context menu
-            Socket.Send_ClickRequest(serial);
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_ClickRequest(serial);
 
             var entity = world.Get(serial);
 
@@ -357,7 +357,7 @@ namespace ClassicUO.Game
             // Fix -> #1267
             if (ServiceProvider.Get<UOService>().Version >= ClientVersion.CV_200)
             {
-                Socket.Send_UnicodeSpeechRequest(message,
+                ServiceProvider.Get<PacketHandlerService>().Out.Send_UnicodeSpeechRequest(message,
                                                  type,
                                                  font,
                                                  hue,
@@ -365,7 +365,7 @@ namespace ClassicUO.Game
             }
             else
             {
-                Socket.Send_ASCIISpeechRequest(message, type, font, hue);
+                ServiceProvider.Get<PacketHandlerService>().Out.Send_ASCIISpeechRequest(message, type, font, hue);
             }
         }
 
@@ -411,39 +411,39 @@ namespace ClassicUO.Game
 
         public static void SayParty(string message, uint serial = 0)
         {
-            Socket.Send_PartyMessage(message, serial);
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_PartyMessage(message, serial);
         }
 
         public static void RequestPartyAccept(uint serial)
         {
-            Socket.Send_PartyAccept(serial);
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_PartyAccept(serial);
 
             UIManager.GetGump<PartyInviteGump>()?.Dispose();
         }
 
         public static void RequestPartyRemoveMemberByTarget()
         {
-            Socket.Send_PartyRemoveRequest(0x00);
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_PartyRemoveRequest(0x00);
         }
 
         public static void RequestPartyRemoveMember(uint serial)
         {
-            Socket.Send_PartyRemoveRequest(serial);
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_PartyRemoveRequest(serial);
         }
 
         public static void RequestPartyQuit(PlayerMobile player)
         {
-            Socket.Send_PartyRemoveRequest(player.Serial);
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_PartyRemoveRequest(player.Serial);
         }
 
         public static void RequestPartyInviteByTarget()
         {
-            Socket.Send_PartyInviteRequest();
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_PartyInviteRequest();
         }
 
         public static void RequestPartyLootState(bool isLootable)
         {
-            Socket.Send_PartyChangeLootTypeRequest(isLootable);
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_PartyChangeLootTypeRequest(isLootable);
         }
 
         public static bool PickUp
@@ -504,7 +504,7 @@ namespace ClassicUO.Game
             ServiceProvider.Get<UOService>().GameCursor.ItemHold.Clear();
             ServiceProvider.Get<UOService>().GameCursor.ItemHold.Set(item, (ushort) amount, offset);
             ServiceProvider.Get<UOService>().GameCursor.ItemHold.IsGumpTexture = is_gump;
-            Socket.Send_PickUpRequest(item, (ushort) amount);
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_PickUpRequest(item, (ushort) amount);
 
             if (item.OnGround)
             {
@@ -525,7 +525,7 @@ namespace ClassicUO.Game
             {
                 if (uoService.Version >= ClientVersion.CV_6017)
                 {
-                    Socket.Send_DropRequest(serial,
+                    ServiceProvider.Get<PacketHandlerService>().Out.Send_DropRequest(serial,
                                             (ushort)x,
                                             (ushort)y,
                                             (sbyte)z,
@@ -534,7 +534,7 @@ namespace ClassicUO.Game
                 }
                 else
                 {
-                    Socket.Send_DropRequest_Old(serial,
+                    ServiceProvider.Get<PacketHandlerService>().Out.Send_DropRequest_Old(serial,
                                                 (ushort)x,
                                                 (ushort)y,
                                                 (sbyte)z,
@@ -559,7 +559,7 @@ namespace ClassicUO.Game
                     container = world.Player.Serial;
                 }
 
-                Socket.Send_EquipRequest(uoService.GameCursor.ItemHold.Serial, (Layer)uoService.GameCursor.ItemHold.ItemData.Layer, container);
+                ServiceProvider.Get<PacketHandlerService>().Out.Send_EquipRequest(uoService.GameCursor.ItemHold.Serial, (Layer)uoService.GameCursor.ItemHold.ItemData.Layer, container);
 
                 uoService.GameCursor.ItemHold.Enabled = false;
                 uoService.GameCursor.ItemHold.Dropped = true;
@@ -568,7 +568,7 @@ namespace ClassicUO.Game
 
         public static void ReplyGump(uint local, uint server, int button, uint[] switches, Tuple<ushort, string>[] entries)
         {
-            Socket.Send_GumpResponse(local,
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_GumpResponse(local,
                                      server,
                                      button,
                                      switches,
@@ -577,22 +577,22 @@ namespace ClassicUO.Game
 
         public static void RequestHelp()
         {
-            Socket.Send_HelpRequest();
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_HelpRequest();
         }
 
         public static void RequestQuestMenu(World world)
         {
-            Socket.Send_QuestMenuRequest(world);
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_QuestMenuRequest(world);
         }
 
         public static void RequestProfile(uint serial)
         {
-            Socket.Send_ProfileRequest(serial);
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_ProfileRequest(serial);
         }
 
         public static void ChangeSkillLockStatus(ushort skillindex, byte lockstate)
         {
-            Socket.Send_SkillStatusChangeRequest(skillindex, lockstate);
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_SkillStatusChangeRequest(skillindex, lockstate);
         }
 
         public static void RequestMobileStatus(World world, uint serial, bool force = false)
@@ -622,7 +622,7 @@ namespace ClassicUO.Game
                 {
                     //ent = ent ?? World.Player;
                     //ent.AddMessage(MessageType.Regular, $"PACKET SENT: 0x{serial:X8}", 3, 0x34, true, TextType.OBJECT);
-                    Socket.Send_StatusRequest(serial);
+                    ServiceProvider.Get<PacketHandlerService>().Out.Send_StatusRequest(serial);
                 }
             }
         }
@@ -643,7 +643,7 @@ namespace ClassicUO.Game
                 {
                     //ent = ent ?? World.Player;
                     //ent.AddMessage(MessageType.Regular, $"PACKET REMOVED SENT: 0x{serial:X8}", 3, 0x34 + 10, true, TextType.OBJECT);
-                    Socket.Send_CloseStatusBarGump(serial);
+                    ServiceProvider.Get<PacketHandlerService>().Out.Send_CloseStatusBarGump(serial);
                 }
             }
         }
@@ -653,7 +653,7 @@ namespace ClassicUO.Game
             if (index >= 0)
             {
                 LastSpellIndex = index;
-                Socket.Send_CastSpellFromBook(index, bookSerial);
+                ServiceProvider.Get<PacketHandlerService>().Out.Send_CastSpellFromBook(index, bookSerial);
             }
         }
 
@@ -662,23 +662,23 @@ namespace ClassicUO.Game
             if (index >= 0)
             {
                 LastSpellIndex = index;
-                Socket.Send_CastSpell(index);
+                ServiceProvider.Get<PacketHandlerService>().Out.Send_CastSpell(index);
             }
         }
 
         public static void OpenGuildGump(World world)
         {
-            Socket.Send_GuildMenuRequest(world);
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_GuildMenuRequest(world);
         }
 
         public static void ChangeStatLock(byte stat, Lock state)
         {
-            Socket.Send_StatLockStateRequest(stat, state);
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_StatLockStateRequest(stat, state);
         }
 
         public static void Rename(uint serial, string name)
         {
-            Socket.Send_RenameRequest(serial, name);
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_RenameRequest(serial, name);
         }
 
         public static void UseSkill(int index)
@@ -686,7 +686,7 @@ namespace ClassicUO.Game
             if (index >= 0)
             {
                 LastSkillIndex = index;
-                Socket.Send_UseSkill(index);
+                ServiceProvider.Get<PacketHandlerService>().Out.Send_UseSkill(index);
             }
         }
 
@@ -699,12 +699,12 @@ namespace ClassicUO.Game
                 return;
             }
 
-            Socket.Send_RequestPopupMenu(serial);
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_RequestPopupMenu(serial);
         }
 
         public static void ResponsePopupMenu(uint serial, ushort index)
         {
-            Socket.Send_PopupMenuSelection(serial, index);
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_PopupMenuSelection(serial, index);
         }
 
         public static void MessageOverhead(World world, string message, uint entity)
@@ -719,12 +719,12 @@ namespace ClassicUO.Game
 
         public static void AcceptTrade(uint serial, bool accepted)
         {
-            Socket.Send_TradeResponse(serial, 2, accepted);
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_TradeResponse(serial, 2, accepted);
         }
 
         public static void CancelTrade(uint serial)
         {
-            Socket.Send_TradeResponse(serial, 1, false);
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_TradeResponse(serial, 1, false);
         }
 
         public static void AllNames(World world)
@@ -733,7 +733,7 @@ namespace ClassicUO.Game
             {
                 if (mobile != world.Player)
                 {
-                    Socket.Send_ClickRequest(mobile.Serial);
+                    ServiceProvider.Get<PacketHandlerService>().Out.Send_ClickRequest(mobile.Serial);
                 }
             }
 
@@ -741,19 +741,19 @@ namespace ClassicUO.Game
             {
                 if (item.IsCorpse)
                 {
-                    Socket.Send_ClickRequest(item.Serial);
+                    ServiceProvider.Get<PacketHandlerService>().Out.Send_ClickRequest(item.Serial);
                 }
             }
         }
 
         public static void OpenDoor()
         {
-            Socket.Send_OpenDoor();
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_OpenDoor();
         }
 
         public static void EmoteAction(string action)
         {
-            Socket.Send_EmoteAction(action);
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_EmoteAction(action);
         }
 
         public static void OpenAbilitiesBook(World world)
@@ -769,13 +769,13 @@ namespace ClassicUO.Game
             if ((world.ClientLockedFeatures.Flags & LockedFeatureFlags.AOS) == 0)
             {
                 if (primary)
-                    Socket.Send_StunRequest();
+                    ServiceProvider.Get<PacketHandlerService>().Out.Send_StunRequest();
                 else
-                    Socket.Send_DisarmRequest();
+                    ServiceProvider.Get<PacketHandlerService>().Out.Send_DisarmRequest();
             }
             else
             {
-                Socket.Send_UseCombatAbility(world, idx);
+                ServiceProvider.Get<PacketHandlerService>().Out.Send_UseCombatAbility(world, idx);
             }
         }
 
@@ -837,7 +837,7 @@ namespace ClassicUO.Game
 
         public static void QuestArrow(bool rightClick)
         {
-            Socket.Send_ClickQuestArrow(rightClick);
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_ClickQuestArrow(rightClick);
         }
 
         public static void GrabItem(World world, uint serial, ushort amount, uint bag = 0)

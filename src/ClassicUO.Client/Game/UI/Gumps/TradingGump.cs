@@ -516,7 +516,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (send)
                         {
-                            NetClient.Socket.Send_TradeUpdateGold(
+                            ServiceProvider.Get<PacketHandlerService>().Out.Send_TradeUpdateGold(
                                 ID1,
                                 my_gold_entry,
                                 my_plat_entry

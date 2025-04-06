@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using System;
+using ClassicUO.Game.Services;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Network;
 
@@ -76,7 +77,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (LocalSerial != 0)
                     {
-                        NetClient.Socket.Send_DyeDataResponse(LocalSerial, _graphic, _box.SelectedHue);
+                        ServiceProvider.Get<PacketHandlerService>().Out.Send_DyeDataResponse(LocalSerial, _graphic, _box.SelectedHue);
                     }
 
                     _okClicked?.Invoke(_box.SelectedHue);

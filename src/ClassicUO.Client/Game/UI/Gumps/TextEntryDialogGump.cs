@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Services;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Network;
 
@@ -96,7 +97,7 @@ namespace ClassicUO.Game.UI.Gumps
             switch ((ButtonType) buttonID)
             {
                 case ButtonType.Ok:
-                    NetClient.Socket.Send_TextEntryDialogResponse(LocalSerial,
+                    ServiceProvider.Get<PacketHandlerService>().Out.Send_TextEntryDialogResponse(LocalSerial,
                                                                   ParentID,
                                                                   ButtonID,
                                                                   _textBox.Text,
@@ -107,7 +108,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case ButtonType.Cancel:
-                    NetClient.Socket.Send_TextEntryDialogResponse(LocalSerial,
+                    ServiceProvider.Get<PacketHandlerService>().Out.Send_TextEntryDialogResponse(LocalSerial,
                                                                   ParentID,
                                                                   ButtonID,
                                                                   _textBox.Text,

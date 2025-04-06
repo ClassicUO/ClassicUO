@@ -7,14 +7,24 @@ namespace ClassicUO.Game.Services
     {
         private readonly PacketHandlers _packetHandler;
         private readonly IncomingPackets _incomingPackets;
+        private readonly OutgoingPackets _outgoingPackets;
+        private readonly NetClient _netClient;
 
-        public PacketHandlerService(PacketHandlers packetHandler, IncomingPackets incomingPackets)
+        public PacketHandlerService(
+            PacketHandlers packetHandler,
+            IncomingPackets incomingPackets,
+            OutgoingPackets outgoingPackets,
+            NetClient netClient)
         {
             _packetHandler = packetHandler;
             _incomingPackets = incomingPackets;
+            _outgoingPackets = outgoingPackets;
+            _netClient = netClient;
 
             DefaultPacketBidings();
         }
+
+        public OutgoingPackets Out => _outgoingPackets;
 
         public void AddHandler(byte packetId, OnPacketBufferReader handler)
         {
@@ -26,9 +36,9 @@ namespace ClassicUO.Game.Services
             _packetHandler.Append(data, fromPlugin);
         }
 
-        public int ParsePackets(NetClient socket, World world, Span<byte> data)
+        public int ParsePackets(World world, Span<byte> data)
         {
-            return _packetHandler.ParsePackets(socket, world, data);
+            return _packetHandler.ParsePackets(_netClient, world, data);
         }
 
         public void AddMegaClilocRequest(uint serial) => _incomingPackets.AddMegaClilocRequest(serial);

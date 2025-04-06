@@ -6,6 +6,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Sdk.Assets;
 using ClassicUO.Network;
 using ClassicUO.Resources;
+using ClassicUO.Game.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -277,7 +278,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (World.Party.Leader != 0 && World.Party.CanLoot != CanLoot)
                     {
                         World.Party.CanLoot = CanLoot;
-                        NetClient.Socket.Send_PartyChangeLootTypeRequest(CanLoot);
+                        ServiceProvider.Get<PacketHandlerService>().Out.Send_PartyChangeLootTypeRequest(CanLoot);
                     }
 
                     Dispose();
@@ -346,7 +347,7 @@ namespace ClassicUO.Game.UI.Gumps
                 case Buttons.Add:
                     if (World.Party.Leader == 0 || World.Party.Leader == World.Player)
                     {
-                        NetClient.Socket.Send_PartyInviteRequest();
+                        ServiceProvider.Get<PacketHandlerService>().Out.Send_PartyInviteRequest();
                     }
 
                     break;
@@ -393,7 +394,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            NetClient.Socket.Send_PartyRemoveRequest(World.Party.Members[index].Serial);
+                            ServiceProvider.Get<PacketHandlerService>().Out.Send_PartyRemoveRequest(World.Party.Members[index].Serial);
                         }
                     }
 

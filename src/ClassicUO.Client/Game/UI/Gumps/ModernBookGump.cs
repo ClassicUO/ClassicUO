@@ -289,12 +289,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (leftPage > 0 && !KnownPages.Contains(leftPage))
                 {
-                    NetClient.Socket.Send_BookPageDataRequest(LocalSerial, (ushort)leftPage);
+                    ServiceProvider.Get<PacketHandlerService>().Out.Send_BookPageDataRequest(LocalSerial, (ushort)leftPage);
                 }
 
                 if (rightPage < MaxPage * 2 && !KnownPages.Contains(rightPage))
                 {
-                    NetClient.Socket.Send_BookPageDataRequest(LocalSerial, (ushort)rightPage);
+                    ServiceProvider.Get<PacketHandlerService>().Out.Send_BookPageDataRequest(LocalSerial, (ushort)rightPage);
                 }
             }
             else
@@ -309,11 +309,11 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             if (UseNewHeader)
                             {
-                                NetClient.Socket.Send_BookHeaderChanged(LocalSerial, _titleTextBox.Text, _authorTextBox.Text);
+                                ServiceProvider.Get<PacketHandlerService>().Out.Send_BookHeaderChanged(LocalSerial, _titleTextBox.Text, _authorTextBox.Text);
                             }
                             else
                             {
-                                NetClient.Socket.Send_BookHeaderChanged_Old(LocalSerial, _titleTextBox.Text, _authorTextBox.Text);
+                                ServiceProvider.Get<PacketHandlerService>().Out.Send_BookHeaderChanged_Old(LocalSerial, _titleTextBox.Text, _authorTextBox.Text);
                             }
                         }
                         else
@@ -325,7 +325,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 text[l] = BookLines[x];
                             }
 
-                            NetClient.Socket.Send_BookPageData(LocalSerial, text, i);
+                            ServiceProvider.Get<PacketHandlerService>().Out.Send_BookPageData(LocalSerial, text, i);
                         }
                     }
                 }

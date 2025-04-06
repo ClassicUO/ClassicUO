@@ -3,6 +3,7 @@
 using System;
 using System.Text;
 using System.Xml;
+using ClassicUO.Game.Services;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Network;
@@ -20,10 +21,13 @@ namespace ClassicUO.Game.UI.Gumps
         private uint _time_to_update;
         private readonly AlphaBlendControl _trans;
         private string _cacheText = string.Empty;
+        private readonly NetClientService _netClientService;
 
 
         public NetworkStatsGump(World world, int x, int y) : base(world, 0, 0)
         {
+            _netClientService = ServiceProvider.Get<NetClientService>();
+
             CanMove = true;
             CanCloseWithEsc = false;
             CanCloseWithRightClick = true;
@@ -76,11 +80,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _time_to_update = Time.Ticks + 100;
 
-                if (NetClient.Socket.IsConnected)
+                if (_netClientService.Socket.IsConnected)
                 {
-                    _ping = NetClient.Socket.Statistics.Ping;
-                    _deltaBytesReceived = NetClient.Socket.Statistics.DeltaBytesReceived;
-                    _deltaBytesSent = NetClient.Socket.Statistics.DeltaBytesSent;
+                    _ping = _netClientService.Statistics.Ping;
+                    _deltaBytesReceived = _netClientService.Statistics.DeltaBytesReceived;
+                    _deltaBytesSent = _netClientService.Statistics.DeltaBytesSent;
                 }
 
                 Span<char> span = stackalloc char[128];

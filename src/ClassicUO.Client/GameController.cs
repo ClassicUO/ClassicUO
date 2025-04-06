@@ -39,6 +39,7 @@ namespace ClassicUO
         private Texture2D? _background;
         private bool _pluginsInitialized = false;
         private PacketHandlerService _packetHandlerService;
+        private NetClientService _netClientService;
 
         public GameController(IPluginHost? pluginHost)
         {
@@ -112,6 +113,10 @@ namespace ClassicUO
             UO.LoadUOFiles();
 
             // Registra i servizi
+            var netClient = new NetClient();
+            ServiceProvider.Register(_netClientService = new NetClientService(netClient));
+            ServiceProvider.Register(_packetHandlerService = new PacketHandlerService(new PacketHandlers(), new IncomingPackets(), new OutgoingPackets(netClient), netClient));
+
             ServiceProvider.Register(new AudioService(Audio));
             ServiceProvider.Register(new UOService(this, UO));
             ServiceProvider.Register(new WindowService(Window));
@@ -123,12 +128,10 @@ namespace ClassicUO
             UO.Setup(this);
             ServiceProvider.Register(new FileManagerService(UO.FileManager));
             ServiceProvider.Register(new GameCursorService(UO.GameCursor));
-            ServiceProvider.Register(_packetHandlerService = new PacketHandlerService(new PacketHandlers(), new IncomingPackets()));
-
 
             Audio.Initialize();
             // TODO: temporary fix to avoid crash when laoding plugins
-            Settings.GlobalSettings.Encryption = (byte)NetClient.Socket.Load(UO.FileManager.Version, (EncryptionType)Settings.GlobalSettings.Encryption);
+            Settings.GlobalSettings.Encryption = (byte)netClient.Load(UO.FileManager.Version, (EncryptionType)Settings.GlobalSettings.Encryption);
 
             Log.Trace("Loading plugins...");
             PluginHost?.Initialize();
@@ -361,10 +364,10 @@ namespace ClassicUO
 
             Mouse.Update();
 
-            var data = NetClient.Socket.CollectAvailableData();
+            var data = _netClientService.CollectAvailableData();
             ProcessPackets(data);
 
-            NetClient.Socket.Flush();
+            _netClientService.Flush();
 
             Plugin.Tick();
 
@@ -433,8 +436,8 @@ namespace ClassicUO
 
         public void ProcessPackets(ArraySegment<byte> data)
         {
-            var packetsCount = _packetHandlerService?.ParsePackets(NetClient.Socket, UO.World, data);
-            NetClient.Socket.Statistics.TotalPacketsReceived += (uint)packetsCount;
+            var packetsCount = _packetHandlerService?.ParsePackets(UO.World, data);
+            _netClientService.Statistics.TotalPacketsReceived += (uint)packetsCount;
         }
 
         protected override void Draw(GameTime gameTime)

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Services;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
 using ClassicUO.Sdk;
@@ -47,15 +48,20 @@ namespace ClassicUO.Game.Managers
         private uint _lastUpdate, _lastPacketSend, _lastPacketRecv;
         private readonly List<WMapEntity> _toRemove = new List<WMapEntity>();
         private readonly World _world;
+        private readonly NetClientService _netClientService;
 
-        public WorldMapEntityManager(World world) { _world = world; }
+        public WorldMapEntityManager(World world)
+        {
+            _world = world;
+            _netClientService = ServiceProvider.Get<NetClientService>();
+        }
 
         public bool Enabled
         {
             get
             {
                 return ((_world.ClientFeatures.Flags & CharacterListFlags.CLF_NEW_MOVEMENT_SYSTEM) == 0 || _ackReceived) &&
-                        (NetClient.Socket.Encryption == null || NetClient.Socket.Encryption.EncryptionType == 0) &&
+                        (_netClientService.Socket.Encryption == null || _netClientService.Socket.Encryption.EncryptionType == 0) &&
                         ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.WorldMapShowParty &&
                         UIManager.GetGump<WorldMapGump>() != null; // horrible, but works
             }
@@ -75,7 +81,7 @@ namespace ClassicUO.Game.Managers
                 Log.Warn("Server support new movement system. Can't use the 0xF0 packet to query guild/party position");
                 v = false;
             }
-            else if (NetClient.Socket.Encryption?.EncryptionType != 0 && !_ackReceived)
+            else if (_netClientService.Socket.Encryption?.EncryptionType != 0 && !_ackReceived)
             {
                 Log.Warn("Server has encryption. Can't use the 0xF0 packet to query guild/party position");
                 v = false;
@@ -214,7 +220,7 @@ namespace ClassicUO.Game.Managers
                 //    return;
                 //}
 
-                NetClient.Socket.Send_QueryGuildPosition();
+                ServiceProvider.Get<PacketHandlerService>().Out.Send_QueryGuildPosition();
 
                 if (_world.Party != null && _world.Party.Leader != 0)
                 {
@@ -226,7 +232,7 @@ namespace ClassicUO.Game.Managers
 
                             if (mob == null || mob.Distance > _world.ClientViewRange)
                             {
-                                NetClient.Socket.Send_QueryPartyPosition();
+                                ServiceProvider.Get<PacketHandlerService>().Out.Send_QueryPartyPosition();
 
                                 break;
                             }

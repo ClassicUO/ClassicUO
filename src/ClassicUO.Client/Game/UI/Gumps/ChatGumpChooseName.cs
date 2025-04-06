@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.Game.Services;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
@@ -153,7 +154,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (!string.IsNullOrWhiteSpace(_textBox.Text))
                 {
-                    NetClient.Socket.Send_OpenChat(_textBox.Text);
+                    ServiceProvider.Get<PacketHandlerService>().Out.Send_OpenChat(_textBox.Text);
                 }
             }
 

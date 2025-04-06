@@ -105,11 +105,13 @@ namespace ClassicUO.Game.Managers
         private readonly World _world;
         private readonly byte[] _lastDataBuffer = new byte[19];
         private readonly UOService _uoService;
+        private readonly NetClientService _netClientService;
 
         public TargetManager(World world)
         {
             _world = world;
             _uoService = ServiceProvider.Get<UOService>();
+            _netClientService = ServiceProvider.Get<NetClientService>();
         }
 
         public uint LastAttack, SelectedTarget, NewTargetSystemSerial;
@@ -195,7 +197,7 @@ namespace ClassicUO.Game.Managers
 
             if (IsTargeting || TargetingType == TargetType.Cancel)
             {
-                NetClient.Socket.Send_TargetCancel(TargetingState, _targetCursorId, (byte)TargetingType);
+                ServiceProvider.Get<PacketHandlerService>().Out.Send_TargetCancel(TargetingState, _targetCursorId, (byte)TargetingType);
                 IsTargeting = false;
             }
 
@@ -278,7 +280,7 @@ namespace ClassicUO.Game.Managers
                                         {
                                             if (s)
                                             {
-                                                NetClient.Socket.Send_TargetObject(entity,
+                                                ServiceProvider.Get<PacketHandlerService>().Out.Send_TargetObject(entity,
                                                                                    entity.Graphic,
                                                                                    entity.X,
                                                                                    entity.Y,
@@ -334,7 +336,7 @@ namespace ClassicUO.Game.Managers
                             _lastDataBuffer[18] = (byte)entity.Graphic;
 
 
-                            NetClient.Socket.Send_TargetObject(entity,
+                            ServiceProvider.Get<PacketHandlerService>().Out.Send_TargetObject(entity,
                                                                entity.Graphic,
                                                                entity.X,
                                                                entity.Y,
@@ -442,7 +444,7 @@ namespace ClassicUO.Game.Managers
             _lastDataBuffer[5] = (byte) _targetCursorId;
             _lastDataBuffer[6] = (byte) TargetingType;
 
-            NetClient.Socket.Send(_lastDataBuffer);
+            _netClientService.Socket.Send(_lastDataBuffer);
             Mouse.CancelDoubleClick = true;
             ClearTargetingWithoutTargetCancelPacket();
         }
@@ -484,7 +486,7 @@ namespace ClassicUO.Game.Managers
 
 
 
-            NetClient.Socket.Send_TargetXYZ(graphic,
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_TargetXYZ(graphic,
                                             x,
                                             y,
                                             z,

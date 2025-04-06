@@ -439,7 +439,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (!isFemale && selectedRace != RaceType.ELF) //Has beard
                 {
-                    NetClient.Socket.Send_ChangeRaceRequest(
+                    ServiceProvider.Get<PacketHandlerService>().Out.Send_ChangeRaceRequest(
                         CurrentColorOption[Layer.Invalid].Item2,
                         (ushort)CharacterCreationValues.GetHairComboContent(isFemale, selectedRace).GetGraphic(CurrentOption[Layer.Hair]),
                         CurrentColorOption[Layer.Hair].Item2,
@@ -449,7 +449,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else //No beard
                 {
-                    NetClient.Socket.Send_ChangeRaceRequest(
+                    ServiceProvider.Get<PacketHandlerService>().Out.Send_ChangeRaceRequest(
                         CurrentColorOption[Layer.Invalid].Item2,
                         (ushort)CharacterCreationValues.GetHairComboContent(isFemale, selectedRace).GetGraphic(CurrentOption[Layer.Hair]),
                         CurrentColorOption[Layer.Hair].Item2,

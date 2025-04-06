@@ -1,5 +1,6 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.Game.Services;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Network;
 
@@ -66,13 +67,13 @@ namespace ClassicUO.Game.UI.Gumps
             switch (buttonID)
             {
                 case 1: // prev
-                    NetClient.Socket.Send_TipRequest((ushort)LocalSerial, 0);
+                    ServiceProvider.Get<PacketHandlerService>().Out.Send_TipRequest((ushort)LocalSerial, 0);
                     Dispose();
 
                     break;
 
                 case 2: // next
-                    NetClient.Socket.Send_TipRequest((ushort)LocalSerial, 1);
+                    ServiceProvider.Get<PacketHandlerService>().Out.Send_TipRequest((ushort)LocalSerial, 1);
 
                     Dispose();
 

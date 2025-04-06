@@ -30,8 +30,6 @@ namespace ClassicUO.Network
             _sendStream = new CircularBuffer();
         }
 
-        public static NetClient Socket { get; private set; } = new();
-
         public EncryptionType Load(ClientVersion clientVersion, EncryptionType encryption)
         {
             PacketsTable = new PacketsTable(clientVersion);
