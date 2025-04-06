@@ -43,8 +43,8 @@ namespace ClassicUO.Game.UI.Gumps
             const ushort DARK_MODE_JOURNAL_HUE = 903;
 
             string str = ResGumps.DarkMode;
-            var uoService = ServiceProvider.Get<UOService>();
-            int width = uoService.FileManager.Fonts.GetWidthASCII(6, str);
+            var assetsService = ServiceProvider.Get<AssetsService>();
+            int width = assetsService.Fonts.GetWidthASCII(6, str);
 
             Checkbox darkMode;
 

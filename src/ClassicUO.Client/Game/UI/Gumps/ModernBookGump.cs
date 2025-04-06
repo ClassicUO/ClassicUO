@@ -72,7 +72,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             var sb = new StringBuilder();
             int sw = _bookPage.renderedText.GetCharWidth(' ');
-            var uoService = ServiceProvider.Get<UOService>();
+            var assetsService = ServiceProvider.Get<AssetsService>();
 
             for (int i = 0, l = BookLines.Length; i < l; i++)
             {
@@ -84,7 +84,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int i = 0, l = BookLines.Length; i < l; i++)
             {
-                int w = IsNewBook ? uoService.FileManager.Fonts.GetWidthUnicode(_bookPage.renderedText.Font, BookLines[i]) : uoService.FileManager.Fonts.GetWidthASCII(_bookPage.renderedText.Font, BookLines[i]);
+                int w = IsNewBook ? assetsService.Fonts.GetWidthUnicode(_bookPage.renderedText.Font, BookLines[i]) : assetsService.Fonts.GetWidthASCII(_bookPage.renderedText.Font, BookLines[i]);
 
                 sb.Append(BookLines[i]);
 
@@ -334,9 +334,9 @@ namespace ClassicUO.Game.UI.Gumps
             ActivePage = page;
             UpdatePageButtonVisibility();
 
-            if (ServiceProvider.Get<UIService>().KeyboardFocusControl == null || ServiceProvider.Get<UIService>().KeyboardFocusControl != ServiceProvider.Get<UIService>().SystemChat.TextBoxControl && ServiceProvider.Get<UIService>().KeyboardFocusControl != _bookPage && page != _bookPage._focusPage / 2 + 1)
+            if (ServiceProvider.Get<GuiService>().KeyboardFocusControl == null || ServiceProvider.Get<GuiService>().KeyboardFocusControl != ServiceProvider.Get<GuiService>().SystemChat.TextBoxControl && ServiceProvider.Get<GuiService>().KeyboardFocusControl != _bookPage && page != _bookPage._focusPage / 2 + 1)
             {
-                ServiceProvider.Get<UIService>().SystemChat.TextBoxControl.SetKeyboardFocus();
+                ServiceProvider.Get<GuiService>().SystemChat.TextBoxControl.SetKeyboardFocus();
             }
         }
 

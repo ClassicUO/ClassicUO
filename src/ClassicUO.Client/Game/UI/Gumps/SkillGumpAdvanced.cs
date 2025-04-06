@@ -353,14 +353,14 @@ namespace ClassicUO.Game.UI.Gumps
                     Mouse.LClickPosition.Y + (gumpInfo.UV.Height >> 1)
                 );
 
-                ServiceProvider.Get<UIService>().Add(skillButtonGump);
-                ServiceProvider.Get<UIService>().AttemptDragControl(skillButtonGump, true);
+                ServiceProvider.Get<GuiService>().Add(skillButtonGump);
+                ServiceProvider.Get<GuiService>().AttemptDragControl(skillButtonGump, true);
             }
         }
 
         private static SkillButtonGump GetSpellFloatingButton(int id)
         {
-            for (LinkedListNode<Gump> i = ServiceProvider.Get<UIService>().Gumps.Last; i != null; i = i.Previous)
+            for (LinkedListNode<Gump> i = ServiceProvider.Get<GuiService>().Gumps.Last; i != null; i = i.Previous)
             {
                 if (i.Value is SkillButtonGump g && g.SkillID == id)
                 {

@@ -491,7 +491,7 @@ namespace ClassicUO.Game.Managers
 
                     if (txt != null)
                     {
-                        ServiceProvider.Get<UIService>().SystemChat?.TextBoxControl.AppendText(txt);
+                        ServiceProvider.Get<GuiService>().SystemChat?.TextBoxControl.AppendText(txt);
                     }
 
                     break;
@@ -606,13 +606,13 @@ namespace ClassicUO.Game.Managers
 
                                 case MacroSubType.Mail:
                                 case MacroSubType.PartyManifest:
-                                    var party = ServiceProvider.Get<UIService>().GetGump<PartyGump>();
+                                    var party = ServiceProvider.Get<GuiService>().GetGump<PartyGump>();
 
                                     if (party == null)
                                     {
                                         int x = _sceneService.Bounds.Width / 2 - 272;
                                         int y = _sceneService.Bounds.Height / 2 - 240;
-                                        ServiceProvider.Get<UIService>().Add(new PartyGump(_world, x, y, _world.Party.CanLoot));
+                                        ServiceProvider.Get<GuiService>().Add(new PartyGump(_world, x, y, _world.Party.CanLoot));
                                     }
                                     else
                                     {
@@ -652,7 +652,7 @@ namespace ClassicUO.Game.Managers
 
                                     if (macro.Code == MacroType.Close)
                                     {
-                                        ServiceProvider.Get<UIService>().GetGump<MiniMapGump>()?.Dispose();
+                                        ServiceProvider.Get<GuiService>().GetGump<MiniMapGump>()?.Dispose();
                                     }
 
                                     break;
@@ -661,14 +661,14 @@ namespace ClassicUO.Game.Managers
 
                                     if (macro.Code == MacroType.Close)
                                     {
-                                        ServiceProvider.Get<UIService>().GetGump<OptionsGump>()?.Dispose();
+                                        ServiceProvider.Get<GuiService>().GetGump<OptionsGump>()?.Dispose();
                                     }
 
                                     break;
 
                                 case MacroSubType.Paperdoll:
 
-                                    var paperdoll = ServiceProvider.Get<UIService>().GetGump<PaperDollGump>(_world.Player.Serial);
+                                    var paperdoll = ServiceProvider.Get<GuiService>().GetGump<PaperDollGump>(_world.Player.Serial);
 
                                     if (paperdoll != null)
                                     {
@@ -700,7 +700,7 @@ namespace ClassicUO.Game.Managers
                                         }
                                         else
                                         {
-                                            ServiceProvider.Get<UIService>().GetGump<BaseHealthBarGump>(_world.Player)?.Dispose();
+                                            ServiceProvider.Get<GuiService>().GetGump<BaseHealthBarGump>(_world.Player)?.Dispose();
                                         }
                                     }
                                     else if (macro.Code == MacroType.Minimize)
@@ -712,16 +712,16 @@ namespace ClassicUO.Game.Managers
 
                                             if (ProfileManager.CurrentProfile.CustomBarsToggled)
                                             {
-                                                ServiceProvider.Get<UIService>().Add(new HealthBarGumpCustom(_world, _world.Player) { X = status.ScreenCoordinateX, Y = status.ScreenCoordinateY });
+                                                ServiceProvider.Get<GuiService>().Add(new HealthBarGumpCustom(_world, _world.Player) { X = status.ScreenCoordinateX, Y = status.ScreenCoordinateY });
                                             }
                                             else
                                             {
-                                                ServiceProvider.Get<UIService>().Add(new HealthBarGump(_world, _world.Player) { X = status.ScreenCoordinateX, Y = status.ScreenCoordinateY });
+                                                ServiceProvider.Get<GuiService>().Add(new HealthBarGump(_world, _world.Player) { X = status.ScreenCoordinateX, Y = status.ScreenCoordinateY });
                                             }
                                         }
                                         else
                                         {
-                                            ServiceProvider.Get<UIService>().GetGump<BaseHealthBarGump>(_world.Player)?.BringOnTop();
+                                            ServiceProvider.Get<GuiService>().GetGump<BaseHealthBarGump>(_world.Player)?.BringOnTop();
                                         }
                                     }
                                     else if (macro.Code == MacroType.Maximize)
@@ -732,11 +732,11 @@ namespace ClassicUO.Game.Managers
                                         }
                                         else
                                         {
-                                            var healthbar = ServiceProvider.Get<UIService>().GetGump<BaseHealthBarGump>(_world.Player);
+                                            var healthbar = ServiceProvider.Get<GuiService>().GetGump<BaseHealthBarGump>(_world.Player);
 
                                             if (healthbar != null)
                                             {
-                                                ServiceProvider.Get<UIService>().Add(StatusGumpBase.AddStatusGump(_world, healthbar.ScreenCoordinateX, healthbar.ScreenCoordinateY));
+                                                ServiceProvider.Get<GuiService>().Add(StatusGumpBase.AddStatusGump(_world, healthbar.ScreenCoordinateX, healthbar.ScreenCoordinateY));
                                             }
                                         }
                                     }
@@ -746,7 +746,7 @@ namespace ClassicUO.Game.Managers
                                 case MacroSubType.Journal:
                                     if(ProfileManager.CurrentProfile.UseAlternateJournal)
                                     {
-                                        var rjournal = ServiceProvider.Get<UIService>().GetGump<ResizableJournal>();
+                                        var rjournal = ServiceProvider.Get<GuiService>().GetGump<ResizableJournal>();
                                         if (macro.Code == MacroType.Close)
                                         {
                                             rjournal?.Dispose();
@@ -754,7 +754,7 @@ namespace ClassicUO.Game.Managers
                                         break;
                                     }
 
-                                    var journal = ServiceProvider.Get<UIService>().GetGump<JournalGump>();
+                                    var journal = ServiceProvider.Get<GuiService>().GetGump<JournalGump>();
 
                                     if (journal != null)
                                     {
@@ -778,7 +778,7 @@ namespace ClassicUO.Game.Managers
 
                                     if (ProfileManager.CurrentProfile.StandardSkillsGump)
                                     {
-                                        var skillgump = ServiceProvider.Get<UIService>().GetGump<StandardSkillsGump>();
+                                        var skillgump = ServiceProvider.Get<GuiService>().GetGump<StandardSkillsGump>();
 
                                         if (skillgump != null)
                                         {
@@ -800,7 +800,7 @@ namespace ClassicUO.Game.Managers
                                     {
                                         if (macro.Code == MacroType.Close)
                                         {
-                                            ServiceProvider.Get<UIService>().GetGump<SkillGumpAdvanced>()?.Dispose();
+                                            ServiceProvider.Get<GuiService>().GetGump<SkillGumpAdvanced>()?.Dispose();
                                         }
                                     }
 
@@ -814,7 +814,7 @@ namespace ClassicUO.Game.Managers
                                 case MacroSubType.SpellWeavingSpellbook:
                                 case MacroSubType.MysticismSpellbook:
 
-                                    var spellbook = ServiceProvider.Get<UIService>().GetGump<SpellbookGump>();
+                                    var spellbook = ServiceProvider.Get<GuiService>().GetGump<SpellbookGump>();
 
                                     if (spellbook != null)
                                     {
@@ -838,15 +838,15 @@ namespace ClassicUO.Game.Managers
 
                                     if (macro.Code == MacroType.Close)
                                     {
-                                        ServiceProvider.Get<UIService>().GetGump<MiniMapGump>()?.Dispose();
+                                        ServiceProvider.Get<GuiService>().GetGump<MiniMapGump>()?.Dispose();
                                     }
                                     else if (macro.Code == MacroType.Minimize)
                                     {
-                                        ServiceProvider.Get<UIService>().GetGump<MiniMapGump>()?.ToggleSize(false);
+                                        ServiceProvider.Get<GuiService>().GetGump<MiniMapGump>()?.ToggleSize(false);
                                     }
                                     else if (macro.Code == MacroType.Maximize)
                                     {
-                                        ServiceProvider.Get<UIService>().GetGump<MiniMapGump>()?.ToggleSize(true);
+                                        ServiceProvider.Get<GuiService>().GetGump<MiniMapGump>()?.ToggleSize(true);
                                     }
 
                                     break;
@@ -857,7 +857,7 @@ namespace ClassicUO.Game.Managers
 
                                     if (backpack != null)
                                     {
-                                        var backpackGump = ServiceProvider.Get<UIService>().GetGump<ContainerGump>(backpack.Serial);
+                                        var backpackGump = ServiceProvider.Get<GuiService>().GetGump<ContainerGump>(backpack.Serial);
 
                                         if (backpackGump != null)
                                         {
@@ -887,7 +887,7 @@ namespace ClassicUO.Game.Managers
 
                                     if (macro.Code == MacroType.Close)
                                     {
-                                        ServiceProvider.Get<UIService>().GetGump<PartyGump>()?.Dispose();
+                                        ServiceProvider.Get<GuiService>().GetGump<PartyGump>()?.Dispose();
                                     }
 
                                     break;
@@ -1190,7 +1190,7 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.CloseGump:
 
-                    ServiceProvider.Get<UIService>().Gumps.Where(s => !(s is TopBarGump) && !(s is BuffGump) && !(s is WorldViewportGump)).ToList().ForEach(s => s.Dispose());
+                    ServiceProvider.Get<GuiService>().Gumps.Where(s => !(s is TopBarGump) && !(s is BuffGump) && !(s is WorldViewportGump)).ToList().ForEach(s => s.Dispose());
 
                     break;
 
@@ -1429,7 +1429,7 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.ToggleBuffIconGump:
-                    var buff = ServiceProvider.Get<UIService>().GetGump<BuffGump>();
+                    var buff = ServiceProvider.Get<GuiService>().GetGump<BuffGump>();
 
                     if (buff != null)
                     {
@@ -1437,7 +1437,7 @@ namespace ClassicUO.Game.Managers
                     }
                     else
                     {
-                        ServiceProvider.Get<UIService>().Add(new BuffGump(_world, 100, 100));
+                        ServiceProvider.Get<GuiService>().Add(new BuffGump(_world, 100, 100));
                     }
 
                     break;
@@ -1503,7 +1503,7 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.ToggleChatVisibility:
-                    ServiceProvider.Get<UIService>().SystemChat?.ToggleChatVisibility();
+                    ServiceProvider.Get<GuiService>().SystemChat?.ToggleChatVisibility();
 
                     break;
 
@@ -1714,11 +1714,11 @@ namespace ClassicUO.Game.Managers
                 case MacroType.CloseAllHealthBars:
 
                     //Includes HealthBarGump/HealthBarGumpCustom
-                    IEnumerable<BaseHealthBarGump> healthBarGumps = ServiceProvider.Get<UIService>().Gumps.OfType<BaseHealthBarGump>();
+                    IEnumerable<BaseHealthBarGump> healthBarGumps = ServiceProvider.Get<GuiService>().Gumps.OfType<BaseHealthBarGump>();
 
                     foreach (BaseHealthBarGump healthbar in healthBarGumps)
                     {
-                        if (ServiceProvider.Get<UIService>().AnchorManager[healthbar] == null && healthbar.LocalSerial != _world.Player)
+                        if (ServiceProvider.Get<GuiService>().AnchorManager[healthbar] == null && healthbar.LocalSerial != _world.Player)
                         {
                             healthbar.Dispose();
                         }
@@ -1727,13 +1727,13 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.CloseInactiveHealthBars:
-                    IEnumerable<BaseHealthBarGump> inactiveHealthBarGumps = ServiceProvider.Get<UIService>().Gumps.OfType<BaseHealthBarGump>().Where(hb => hb.IsInactive);
+                    IEnumerable<BaseHealthBarGump> inactiveHealthBarGumps = ServiceProvider.Get<GuiService>().Gumps.OfType<BaseHealthBarGump>().Where(hb => hb.IsInactive);
 
                     foreach (var healthbar in inactiveHealthBarGumps)
                     {
                         if (healthbar.LocalSerial == _world.Player) continue;
 
-                        ServiceProvider.Get<UIService>().AnchorManager[healthbar]?.DetachControl(healthbar);
+                        ServiceProvider.Get<GuiService>().AnchorManager[healthbar]?.DetachControl(healthbar);
                         healthbar.Dispose();
                     }
                     break;
@@ -1742,7 +1742,7 @@ namespace ClassicUO.Game.Managers
                     var gridLootType = ProfileManager.CurrentProfile?.GridLootType; // 0 = none, 1 = only grid, 2 = both
                     if (gridLootType == 0 || gridLootType == 2)
                     {
-                        IEnumerable<ContainerGump> containerGumps = ServiceProvider.Get<UIService>().Gumps.OfType<ContainerGump>().Where(cg => cg.Graphic == ContainerGump.CORPSES_GUMP);
+                        IEnumerable<ContainerGump> containerGumps = ServiceProvider.Get<GuiService>().Gumps.OfType<ContainerGump>().Where(cg => cg.Graphic == ContainerGump.CORPSES_GUMP);
 
                         foreach (var containerGump in containerGumps)
                         {
@@ -1751,7 +1751,7 @@ namespace ClassicUO.Game.Managers
                     }
                     if (gridLootType == 1 || gridLootType == 2)
                     {
-                        IEnumerable<GridLootGump> gridLootGumps = ServiceProvider.Get<UIService>().Gumps.OfType<GridLootGump>();
+                        IEnumerable<GridLootGump> gridLootGumps = ServiceProvider.Get<GuiService>().Gumps.OfType<GridLootGump>();
 
                         foreach (var gridLootGump in gridLootGumps)
                         {

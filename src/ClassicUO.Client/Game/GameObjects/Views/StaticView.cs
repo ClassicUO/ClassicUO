@@ -111,7 +111,8 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 var uoService = ServiceProvider.Get<UOService>();
-                ref var index = ref uoService.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
+                var assetsService = ServiceProvider.Get<AssetsService>();
+                ref var index = ref assetsService.Arts.File.GetValidRefEntry(graphic + 0x4000);
 
                 Point position = RealScreenPosition;
                 position.X -= index.Width;

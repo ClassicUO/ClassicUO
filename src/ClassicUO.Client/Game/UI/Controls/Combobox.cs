@@ -125,7 +125,7 @@ namespace ClassicUO.Game.UI.Controls
                 comboY = ServiceProvider.Get<WindowService>().ClientBounds.Height - _maxHeight;
             }
 
-            ServiceProvider.Get<UIService>().Add
+            ServiceProvider.Get<GuiService>().Add
             (
                 new ComboboxGump
                 (

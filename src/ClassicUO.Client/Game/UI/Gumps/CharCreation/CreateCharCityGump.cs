@@ -159,8 +159,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         cityFacet = 5;
                     }
 
-                    x = 62 + MathHelper.PercetangeOf(ServiceProvider.Get<UOService>().FileManager.Maps.MapsDefaultSize[cityFacet, 0] - 2048, c.X, 383);
-                    y = 54 + MathHelper.PercetangeOf(ServiceProvider.Get<UOService>().FileManager.Maps.MapsDefaultSize[cityFacet, 1], c.Y, 384);
+                    x = 62 + MathHelper.PercetangeOf(ServiceProvider.Get<AssetsService>().Maps.MapsDefaultSize[cityFacet, 0] - 2048, c.X, 383);
+                    y = 54 + MathHelper.PercetangeOf(ServiceProvider.Get<AssetsService>().Maps.MapsDefaultSize[cityFacet, 1], c.Y, 384);
                 }
                 else if (i < _townButtonsText.Length)
                 {
@@ -213,7 +213,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public override void OnButtonClick(int buttonID)
         {
-            var charCreationGump = ServiceProvider.Get<UIService>().GetGump<CharCreationGump>();
+            var charCreationGump = ServiceProvider.Get<GuiService>().GetGump<CharCreationGump>();
 
             if (charCreationGump == null)
             {

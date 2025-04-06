@@ -21,8 +21,8 @@ namespace ClassicUO.Game.Map
         {
             _world = world;
             Index = index;
-            var uoService = ServiceProvider.Get<UOService>();
-            BlocksCount = uoService.FileManager.Maps.MapBlocksSize[Index, 0] * uoService.FileManager.Maps.MapBlocksSize[Index, 1];
+            var assetsService = ServiceProvider.Get<AssetsService>();
+            BlocksCount = assetsService.Maps.MapBlocksSize[Index, 0] * assetsService.Maps.MapBlocksSize[Index, 1];
 
             if (BlocksCount > _terrainChunks.Length)
                 _terrainChunks = new Chunk[BlocksCount];
@@ -178,7 +178,7 @@ namespace ClassicUO.Game.Map
             if (chunk != null)
             {
                 var obj = chunk.Tiles[x % 8, y % 8];
-                var uoService = ServiceProvider.Get<UOService>();
+                var assetsService = ServiceProvider.Get<AssetsService>();
 
                 for (; obj != null; obj = obj.TNext)
                 {
@@ -187,12 +187,12 @@ namespace ClassicUO.Game.Map
                         continue;
                     }
 
-                    if (obj.Graphic >= uoService.FileManager.TileData.StaticData.Length)
+                    if (obj.Graphic >= assetsService.TileData.StaticData.Length)
                     {
                         continue;
                     }
 
-                    if (!uoService.FileManager.TileData.StaticData[obj.Graphic].IsRoof || Math.Abs(z - obj.Z) > 6)
+                    if (!assetsService.TileData.StaticData[obj.Graphic].IsRoof || Math.Abs(z - obj.Z) > 6)
                     {
                         continue;
                     }
@@ -226,9 +226,9 @@ namespace ClassicUO.Game.Map
         {
             int block = GetBlock(blockX, blockY);
             int map = Index;
-            var uoService = ServiceProvider.Get<UOService>();
-            uoService.FileManager.Maps.SanitizeMapIndex(ref map);
-            var list = uoService.FileManager.Maps.BlockData[map];
+            var assetsService = ServiceProvider.Get<AssetsService>();
+            assetsService.Maps.SanitizeMapIndex(ref map);
+            var list = assetsService.Maps.BlockData[map];
 
             return ref list == null || block >= list.Length ? ref IndexMap.Invalid : ref list[block];
         }
@@ -236,8 +236,8 @@ namespace ClassicUO.Game.Map
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private int GetBlock(int blockX, int blockY)
         {
-            var uoService = ServiceProvider.Get<UOService>();
-            return blockX * uoService.FileManager.Maps.MapBlocksSize[Index, 1] + blockY;
+            var assetsService = ServiceProvider.Get<AssetsService>();
+            return blockX * assetsService.Maps.MapBlocksSize[Index, 1] + blockY;
         }
 
         public IEnumerable<Chunk?> GetUsedChunks()

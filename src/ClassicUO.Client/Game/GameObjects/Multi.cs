@@ -31,7 +31,7 @@ namespace ClassicUO.Game.GameObjects
 
         public string Name => ItemData.Name;
 
-        public ref StaticTiles ItemData => ref ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[Graphic];
+        public ref StaticTiles ItemData => ref ServiceProvider.Get<AssetsService>().TileData.StaticData[Graphic];
         public bool IsCustom;
         public bool IsVegetation;
         public int MultiOffsetX;

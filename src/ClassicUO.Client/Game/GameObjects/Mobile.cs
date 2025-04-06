@@ -1062,7 +1062,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (!(this is PlayerMobile))
             {
-                ServiceProvider.Get<UIService>().GetGump<PaperDollGump>(serial)?.Dispose();
+                ServiceProvider.Get<GuiService>().GetGump<PaperDollGump>(serial)?.Dispose();
 
                 //_pool.ReturnOne(this);
             }

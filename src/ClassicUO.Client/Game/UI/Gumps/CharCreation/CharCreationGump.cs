@@ -76,7 +76,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         World,
                         400,
                         300,
-                        ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(1063016),
+                        ServiceProvider.Get<AssetsService>().Clilocs.GetString(1063016),
                         null,
                         true
                     )
@@ -86,7 +86,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         CanMove = false
                     };
 
-                    ServiceProvider.Get<UIService>().Add(messageBox);
+                    ServiceProvider.Get<GuiService>().Add(messageBox);
 
                     return;
                 }

@@ -85,14 +85,14 @@ namespace ClassicUO.Game
         private readonly List<Multi> _temp = new List<Multi>();
         private readonly Tooltip _tooltip;
         private readonly World _world;
-        private readonly UIService _uiService;
+        private readonly GuiService _uiService;
 
         public GameCursor(World world)
         {
             _world = world;
             _tooltip = new Tooltip(world);
             _aura = new Aura(30);
-            _uiService = ServiceProvider.Get<UIService>();
+            _uiService = ServiceProvider.Get<GuiService>();
 
             for (int i = 0; i < 3; i++)
             {

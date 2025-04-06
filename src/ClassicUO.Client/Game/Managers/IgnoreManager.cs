@@ -50,7 +50,7 @@ namespace ClassicUO.Game.Managers
 
                 IgnoredCharsList.Add(charName);
                 // Redraw list of chars
-                ServiceProvider.Get<UIService>().GetGump<IgnoreManagerGump>()?.Redraw();
+                ServiceProvider.Get<GuiService>().GetGump<IgnoreManagerGump>()?.Redraw();
 
                 GameActions.Print(_world,string.Format(ResGumps.AddToIgnoreListSuccess, charName));
                 return;

@@ -40,8 +40,8 @@ namespace ClassicUO.Game.Managers
                 _ => 8 // stones2
             };
 
-            ServiceProvider.Get<UOService>().Activated += OnWindowActivated;
-            ServiceProvider.Get<UOService>().Deactivated += OnWindowDeactivated;
+            ServiceProvider.Get<EngineService>().Activated += OnWindowActivated;
+            ServiceProvider.Get<EngineService>().Deactivated += OnWindowDeactivated;
         }
 
         private void OnWindowDeactivated(object? sender, EventArgs e)

@@ -36,17 +36,17 @@ namespace ClassicUO.Game.UI.Gumps
         public int WidthMultiplier { get; protected set; } = 1;
         public int HeightMultiplier { get; protected set; } = 1;
 
-        public bool ShowLock => Keyboard.Alt && ServiceProvider.Get<UIService>().AnchorManager[this] != null;
+        public bool ShowLock => Keyboard.Alt && ServiceProvider.Get<GuiService>().AnchorManager[this] != null;
 
         protected override void OnMove(int x, int y)
         {
             if (Keyboard.Alt && !ProfileManager.CurrentProfile.HoldAltToMoveGumps)
             {
-                ServiceProvider.Get<UIService>().AnchorManager.DetachControl(this);
+                ServiceProvider.Get<GuiService>().AnchorManager.DetachControl(this);
             }
             else
             {
-                ServiceProvider.Get<UIService>().AnchorManager[this]?.UpdateLocation(this, X - _prevX, Y - _prevY);
+                ServiceProvider.Get<GuiService>().AnchorManager[this]?.UpdateLocation(this, X - _prevX, Y - _prevY);
             }
 
             _prevX = X;
@@ -57,7 +57,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
-            ServiceProvider.Get<UIService>().AnchorManager[this]?.MakeTopMost();
+            ServiceProvider.Get<GuiService>().AnchorManager[this]?.MakeTopMost();
 
             _prevX = X;
             _prevY = Y;
@@ -67,9 +67,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseOver(int x, int y)
         {
-            if (!IsDisposed && ServiceProvider.Get<UIService>().IsDragging && ServiceProvider.Get<UIService>().DraggingControl == this)
+            if (!IsDisposed && ServiceProvider.Get<GuiService>().IsDragging && ServiceProvider.Get<GuiService>().DraggingControl == this)
             {
-                _anchorCandidate = ServiceProvider.Get<UIService>().AnchorManager.GetAnchorableControlUnder(this);
+                _anchorCandidate = ServiceProvider.Get<GuiService>().AnchorManager.GetAnchorableControlUnder(this);
             }
 
             base.OnMouseOver(x, y);
@@ -84,7 +84,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void TryAttacheToExist()
         {
-            _anchorCandidate = ServiceProvider.Get<UIService>().AnchorManager.GetAnchorableControlUnder(this);
+            _anchorCandidate = ServiceProvider.Get<GuiService>().AnchorManager.GetAnchorableControlUnder(this);
 
             Attache();
         }
@@ -93,8 +93,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (_anchorCandidate != null)
             {
-                Location = ServiceProvider.Get<UIService>().AnchorManager.GetCandidateDropLocation(this, _anchorCandidate);
-                ServiceProvider.Get<UIService>().AnchorManager.DropControl(this, _anchorCandidate);
+                Location = ServiceProvider.Get<GuiService>().AnchorManager.GetCandidateDropLocation(this, _anchorCandidate);
+                ServiceProvider.Get<GuiService>().AnchorManager.DropControl(this, _anchorCandidate);
                 _anchorCandidate = null;
             }
         }
@@ -113,7 +113,7 @@ namespace ClassicUO.Game.UI.Gumps
                         && y <= gumpInfo.UV.Height
                     )
                     {
-                        ServiceProvider.Get<UIService>().AnchorManager.DetachControl(this);
+                        ServiceProvider.Get<GuiService>().AnchorManager.DetachControl(this);
                     }
                 }
             }
@@ -135,10 +135,10 @@ namespace ClassicUO.Game.UI.Gumps
                 if (gumpInfo.Texture != null)
                 {
                     if (
-                        ServiceProvider.Get<UIService>().MouseOverControl != null
+                        ServiceProvider.Get<GuiService>().MouseOverControl != null
                         && (
-                            ServiceProvider.Get<UIService>().MouseOverControl == this
-                            || ServiceProvider.Get<UIService>().MouseOverControl.RootParent == this
+                            ServiceProvider.Get<GuiService>().MouseOverControl == this
+                            || ServiceProvider.Get<GuiService>().MouseOverControl.RootParent == this
                         )
                     )
                     {
@@ -159,7 +159,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_anchorCandidate != null)
             {
-                Point drawLoc = ServiceProvider.Get<UIService>().AnchorManager.GetCandidateDropLocation(
+                Point drawLoc = ServiceProvider.Get<GuiService>().AnchorManager.GetCandidateDropLocation(
                     this,
                     _anchorCandidate
                 );
@@ -204,14 +204,14 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void CloseWithRightClick()
         {
             if (
-                ServiceProvider.Get<UIService>().AnchorManager[this] == null
+                ServiceProvider.Get<GuiService>().AnchorManager[this] == null
                 || Keyboard.Alt
                 || !ProfileManager.CurrentProfile.HoldDownKeyAltToCloseAnchored
             )
             {
                 if (ProfileManager.CurrentProfile.CloseAllAnchoredGumpsInGroupWithRightClick)
                 {
-                    ServiceProvider.Get<UIService>().AnchorManager.DisposeAllControls(this);
+                    ServiceProvider.Get<GuiService>().AnchorManager.DisposeAllControls(this);
                 }
 
                 base.CloseWithRightClick();
@@ -220,7 +220,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            ServiceProvider.Get<UIService>().AnchorManager.DetachControl(this);
+            ServiceProvider.Get<GuiService>().AnchorManager.DetachControl(this);
 
             base.Dispose();
         }

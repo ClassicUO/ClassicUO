@@ -12,6 +12,10 @@ namespace ClassicUO.Services
             _audio = audio;
         }
 
+        public int LoginMusicIndex => _audio.LoginMusicIndex;
+        public ushort DeathMusicIndex { get; } = 0x4D2;
+
+
         public void PlayMusic(int index, bool isWarmode = false, bool isLogin = false)
         {
             _audio.PlayMusic(index, isWarmode, isLogin);
@@ -42,14 +46,10 @@ namespace ClassicUO.Services
             _audio.UpdateCurrentMusicVolume(isLogin);
         }
 
-        public int LoginMusicIndex => _audio.LoginMusicIndex;
-
         public UOMusic? GetCurrentMusic()
         {
             return _audio.GetCurrentMusic();
         }
-
-        public ushort DeathMusicIndex { get; } = 0x4D2;
 
         public void StopWarMusic()
         {

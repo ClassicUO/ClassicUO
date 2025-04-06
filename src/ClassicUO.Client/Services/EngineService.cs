@@ -1,5 +1,4 @@
 using Microsoft.Xna.Framework;
-using ClassicUO.Game;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using ClassicUO.Game.Scenes;
@@ -8,12 +7,15 @@ namespace ClassicUO.Services
 {
     internal class EngineService : IService
     {
-        private readonly ClassicUO.GameController _game;
+        private readonly GameController _game;
 
-        public EngineService(ClassicUO.GameController game)
+        public EngineService(GameController game)
         {
             _game = game;
         }
+
+        public event EventHandler? Activated;
+        public event EventHandler? Deactivated;
 
         public bool IsActive => _game.IsActive;
         public bool IsMouseVisible
@@ -70,6 +72,16 @@ namespace ClassicUO.Services
         public void Exit()
         {
             _game.Exit();
+        }
+
+        public void OnActivated()
+        {
+            Activated?.Invoke(this, EventArgs.Empty);
+        }
+
+        public void OnDeactivated()
+        {
+            Deactivated?.Invoke(this, EventArgs.Empty);
         }
     }
 }

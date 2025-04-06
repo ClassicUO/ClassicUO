@@ -85,7 +85,7 @@ namespace ClassicUO.Game.UI.Gumps
             ButtonID = buttonid;
             ParentID = parentid;
 
-            ServiceProvider.Get<UIService>().KeyboardFocusControl = _textBox;
+            ServiceProvider.Get<GuiService>().KeyboardFocusControl = _textBox;
             _textBox.SetKeyboardFocus();
         }
 

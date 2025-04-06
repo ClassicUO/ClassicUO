@@ -100,7 +100,7 @@ namespace ClassicUO.Game.GameObjects
                 return false;
             }
 
-            ref StaticTiles data = ref ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[Graphic];
+            ref StaticTiles data = ref ServiceProvider.Get<AssetsService>().TileData.StaticData[Graphic];
 
             posX += (int)Offset.X;
             posY += (int)(Offset.Z + Offset.Y);

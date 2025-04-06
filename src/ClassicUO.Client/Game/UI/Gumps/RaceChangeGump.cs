@@ -193,7 +193,7 @@ namespace ClassicUO.Game.UI.Gumps
             #region Hair style
             Add
             (
-                new Label(ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(selectedRace == RaceType.GARGOYLE ? 1112309 : 3000121), unicode, hue, font: font)
+                new Label(ServiceProvider.Get<AssetsService>().Clilocs.GetString(selectedRace == RaceType.GARGOYLE ? 1112309 : 3000121), unicode, hue, font: font)
                 {
                     X = x + 1,
                     Y = y
@@ -229,7 +229,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add
                 (
-                    new Label(ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(selectedRace == RaceType.GARGOYLE ? 1112511 : 3000122), unicode, hue, font: font)
+                    new Label(ServiceProvider.Get<AssetsService>().Clilocs.GetString(selectedRace == RaceType.GARGOYLE ? 1112511 : 3000122), unicode, hue, font: font)
                     {
                         X = x + 1,
                         Y = y
@@ -564,7 +564,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add
                 (
-                    new Label(ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(label), unicode, hue, font: font)
+                    new Label(ServiceProvider.Get<AssetsService>().Clilocs.GetString(label), unicode, hue, font: font)
                     {
                         X = 0,
                         Y = 0
@@ -646,7 +646,7 @@ namespace ClassicUO.Game.UI.Gumps
                             SelectedIndex = _lastSelectedIndex
                         };
 
-                        ServiceProvider.Get<UIService>().Add(_colorPickerBox);
+                        ServiceProvider.Get<GuiService>().Add(_colorPickerBox);
 
                         _colorPickerBox.ColorSelectedIndex += ColorPickerBoxOnColorSelectedIndex;
                         _colorPickerBox.MouseUp += ColorPickerBoxOnMouseUp;

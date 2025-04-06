@@ -179,7 +179,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             _textBox.Height = Math.Max
             (
-                ServiceProvider.Get<UOService>().FileManager.Fonts.GetHeightUnicode
+                ServiceProvider.Get<AssetsService>().Fonts.GetHeightUnicode
                 (
                     1,
                     _textBox.Text,

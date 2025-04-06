@@ -1,16 +1,12 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Sdk.Assets;
-using ClassicUO.Renderer;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Sdk.IO;
 using ClassicUO.Services;
 
@@ -44,11 +40,13 @@ namespace ClassicUO.Game.Managers
     {
         private readonly World _world;
         private readonly UOService _uoService;
+        private readonly AssetsService _assetsService;
 
         public MessageManager(World world)
         {
             _world = world;
             _uoService = ServiceProvider.Get<UOService>();
+            _assetsService = ServiceProvider.Get<AssetsService>();
         }
 
 
@@ -175,7 +173,7 @@ namespace ClassicUO.Game.Managers
                         msg.IsTextGump = true;
                         bool found = false;
 
-                        for (var gump = ServiceProvider.Get<UIService>().Gumps.Last; gump != null; gump = gump.Previous)
+                        for (var gump = ServiceProvider.Get<GuiService>().Gumps.Last; gump != null; gump = gump.Previous)
                         {
                             Control g = gump.Value;
 
@@ -253,12 +251,12 @@ namespace ClassicUO.Game.Managers
                 isunicode = ProfileManager.CurrentProfile.OverrideAllFontsIsUnicode;
             }
 
-            int width = isunicode ? _uoService.FileManager.Fonts.GetWidthUnicode(font, msg) : _uoService.FileManager.Fonts.GetWidthASCII(font, msg);
+            int width = isunicode ? _assetsService.Fonts.GetWidthUnicode(font, msg) : _assetsService.Fonts.GetWidthASCII(font, msg);
 
             if (width > 200)
             {
                 width = isunicode ?
-                    _uoService.FileManager.Fonts.GetWidthExUnicode
+                    _assetsService.Fonts.GetWidthExUnicode
                     (
                         font,
                         msg,
@@ -266,7 +264,7 @@ namespace ClassicUO.Game.Managers
                         TEXT_ALIGN_TYPE.TS_LEFT,
                         (ushort) FontStyle.BlackBorder
                     ) :
-                    _uoService.FileManager.Fonts.GetWidthExASCII
+                    _assetsService.Fonts.GetWidthExASCII
                     (
                         font,
                         msg,

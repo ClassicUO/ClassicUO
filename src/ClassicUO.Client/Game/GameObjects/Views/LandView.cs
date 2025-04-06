@@ -61,8 +61,9 @@ namespace ClassicUO.Game.GameObjects
                 posY += Z << 2;
 
                 var uoService = ServiceProvider.Get<UOService>();
+                var assetsService = ServiceProvider.Get<AssetsService>();
                 ref readonly var texmapInfo = ref uoService.Texmaps.GetTexmap(
-                    uoService.FileManager.TileData.LandData[Graphic].TexID
+                    assetsService.TileData.LandData[Graphic].TexID
                 );
 
                 if (texmapInfo.Texture != null)

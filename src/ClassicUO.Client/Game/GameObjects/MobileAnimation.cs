@@ -1440,9 +1440,9 @@ namespace ClassicUO.Game.GameObjects
 
         public static bool IsReplacedObjectAnimation(byte anim, ushort v13)
         {
-            if (anim < ServiceProvider.Get<UOService>().FileManager.Animations.GroupReplaces.Length)
+            if (anim < ServiceProvider.Get<AssetsService>().Animations.GroupReplaces.Length)
             {
-                foreach (var tuple in ServiceProvider.Get<UOService>().FileManager.Animations.GroupReplaces[anim])
+                foreach (var tuple in ServiceProvider.Get<AssetsService>().Animations.GroupReplaces[anim])
                 {
                     if (tuple.Item1 == v13)
                     {
@@ -1474,7 +1474,7 @@ namespace ClassicUO.Game.GameObjects
                 return idx;
             }
 
-            AnimationGroups group = ServiceProvider.Get<UOService>().FileManager.Animations.GetGroupIndex(
+            AnimationGroups group = ServiceProvider.Get<AssetsService>().Animations.GetGroupIndex(
                 graphic,
                 ServiceProvider.Get<UOService>().Animations.GetAnimType(graphic)
             );
@@ -1483,7 +1483,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 return (byte)(
                     getReplacedGroup(
-                        ServiceProvider.Get<UOService>().FileManager.Animations.GroupReplaces[0],
+                        ServiceProvider.Get<AssetsService>().Animations.GroupReplaces[0],
                         index,
                         (ushort)LowAnimationGroup.Walk
                     ) % (ushort)LowAnimationGroup.AnimationCount
@@ -1494,7 +1494,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 return (byte)(
                     getReplacedGroup(
-                        ServiceProvider.Get<UOService>().FileManager.Animations.GroupReplaces[1],
+                        ServiceProvider.Get<AssetsService>().Animations.GroupReplaces[1],
                         index,
                         (ushort)PeopleAnimationGroup.WalkUnarmed
                     ) % (ushort)PeopleAnimationGroup.AnimationCount

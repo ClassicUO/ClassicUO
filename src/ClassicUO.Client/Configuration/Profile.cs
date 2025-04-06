@@ -379,13 +379,13 @@ namespace ClassicUO.Configuration
                 xml.WriteStartDocument(true);
                 xml.WriteStartElement("gumps");
 
-                ServiceProvider.Get<UIService>().AnchorManager.Save(xml);
+                ServiceProvider.Get<GuiService>().AnchorManager.Save(xml);
 
                 var gumps = new LinkedList<Gump>();
 
-                foreach (Gump gump in ServiceProvider.Get<UIService>().Gumps)
+                foreach (Gump gump in ServiceProvider.Get<GuiService>().Gumps)
                 {
-                    if (!gump.IsDisposed && gump.CanBeSaved && !(gump is AnchorableGump anchored && ServiceProvider.Get<UIService>().AnchorManager[anchored] != null))
+                    if (!gump.IsDisposed && gump.CanBeSaved && !(gump is AnchorableGump anchored && ServiceProvider.Get<GuiService>().AnchorManager[anchored] != null))
                     {
                         gumps.AddLast(gump);
                     }
@@ -667,7 +667,7 @@ namespace ClassicUO.Configuration
 
                             if (gump.LocalSerial != 0)
                             {
-                                ServiceProvider.Get<UIService>().SavePosition(gump.LocalSerial, new Point(x, y));
+                                ServiceProvider.Get<GuiService>().SavePosition(gump.LocalSerial, new Point(x, y));
                             }
 
                             if (!gump.IsDisposed)
@@ -747,10 +747,10 @@ namespace ClassicUO.Configuration
 
                                     if (!gump.IsDisposed)
                                     {
-                                        if (ServiceProvider.Get<UIService>().AnchorManager[gump] == null && ancoGroup.IsEmptyDirection(matrix_x, matrix_y))
+                                        if (ServiceProvider.Get<GuiService>().AnchorManager[gump] == null && ancoGroup.IsEmptyDirection(matrix_x, matrix_y))
                                         {
                                             gumps.Add(gump);
-                                            ServiceProvider.Get<UIService>().AnchorManager[gump] = ancoGroup;
+                                            ServiceProvider.Get<GuiService>().AnchorManager[gump] = ancoGroup;
                                             ancoGroup.AddControlToMatrix(matrix_x, matrix_y, gump);
                                         }
                                         else

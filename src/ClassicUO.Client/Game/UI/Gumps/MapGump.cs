@@ -255,7 +255,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             _pinTimer = Time.Ticks + 300;
 
-            if (PlotState != 0 && ServiceProvider.Get<UIService>().MouseOverControl is PinControl pin)
+            if (PlotState != 0 && ServiceProvider.Get<GuiService>().MouseOverControl is PinControl pin)
             {
                 _currentPin = pin;
             }

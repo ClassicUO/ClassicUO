@@ -149,7 +149,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public ref StaticTiles ItemData =>
-            ref ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[IsMulti ? MultiGraphic : Graphic];
+            ref ServiceProvider.Get<AssetsService>().TileData.StaticData[IsMulti ? MultiGraphic : Graphic];
 
         public bool IsLootable =>
             ItemData.Layer != (int)Layer.Hair
@@ -188,17 +188,17 @@ namespace ClassicUO.Game.GameObjects
 
             if (Opened)
             {
-                ServiceProvider.Get<UIService>().GetGump<ContainerGump>(Serial)?.Dispose();
-                ServiceProvider.Get<UIService>().GetGump<SpellbookGump>(Serial)?.Dispose();
-                ServiceProvider.Get<UIService>().GetGump<MapGump>(Serial)?.Dispose();
+                ServiceProvider.Get<GuiService>().GetGump<ContainerGump>(Serial)?.Dispose();
+                ServiceProvider.Get<GuiService>().GetGump<SpellbookGump>(Serial)?.Dispose();
+                ServiceProvider.Get<GuiService>().GetGump<MapGump>(Serial)?.Dispose();
 
                 if (IsCorpse)
                 {
-                    ServiceProvider.Get<UIService>().GetGump<GridLootGump>(Serial)?.Dispose();
+                    ServiceProvider.Get<GuiService>().GetGump<GridLootGump>(Serial)?.Dispose();
                 }
 
-                ServiceProvider.Get<UIService>().GetGump<BulletinBoardGump>(Serial)?.Dispose();
-                ServiceProvider.Get<UIService>().GetGump<SplitMenuGump>(Serial)?.Dispose();
+                ServiceProvider.Get<GuiService>().GetGump<BulletinBoardGump>(Serial)?.Dispose();
+                ServiceProvider.Get<GuiService>().GetGump<SplitMenuGump>(Serial)?.Dispose();
 
                 Opened = false;
             }
@@ -228,7 +228,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             var movable = false;
-            var multis = ServiceProvider.Get<UOService>().FileManager.Multis.GetMultis(Graphic);
+            var multis = ServiceProvider.Get<AssetsService>().Multis.GetMultis(Graphic);
 
             for (var i = 0; i < multis.Count; ++i)
             {
@@ -310,7 +310,7 @@ namespace ClassicUO.Game.GameObjects
 
             house.Bounds = MultiInfo.Value;
 
-            ServiceProvider.Get<UIService>().GetGump<MiniMapGump>()?.RequestUpdateContents();
+            ServiceProvider.Get<GuiService>().GetGump<MiniMapGump>()?.RequestUpdateContents();
 
             if (World.HouseManager.EntityIntoHouse(Serial, World.Player))
             {
@@ -506,7 +506,7 @@ namespace ClassicUO.Game.GameObjects
                     animations.ConvertBodyIfNeeded(ref id);
                     var animGroup = animations.GetAnimType(id);
                     var animFlags = animations.GetAnimFlags(id);
-                    byte action = ServiceProvider.Get<UOService>().FileManager.Animations.GetDeathAction(
+                    byte action = ServiceProvider.Get<AssetsService>().Animations.GetDeathAction(
                         id,
                         animFlags,
                         animGroup,

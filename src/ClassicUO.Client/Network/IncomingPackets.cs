@@ -94,18 +94,18 @@ internal class IncomingPackets
                 name = p.ReadASCII();
             }
 
-            ServiceProvider.Get<UIService>().Add(new TradingGump(_world, serial, name, id1, id2));
+            ServiceProvider.Get<GuiService>().Add(new TradingGump(_world, serial, name, id1, id2));
         }
         else if (type == 1)
         {
-            ServiceProvider.Get<UIService>().GetTradingGump(serial)?.Dispose();
+            ServiceProvider.Get<GuiService>().GetTradingGump(serial)?.Dispose();
         }
         else if (type == 2)
         {
             uint id1 = p.ReadUInt32BE();
             uint id2 = p.ReadUInt32BE();
 
-            var trading = ServiceProvider.Get<UIService>().GetTradingGump(serial);
+            var trading = ServiceProvider.Get<GuiService>().GetTradingGump(serial);
 
             if (trading != null)
             {
@@ -117,7 +117,7 @@ internal class IncomingPackets
         }
         else if (type == 3 || type == 4)
         {
-            var trading = ServiceProvider.Get<UIService>().GetTradingGump(serial);
+            var trading = ServiceProvider.Get<GuiService>().GetTradingGump(serial);
 
             if (trading != null)
             {
@@ -746,7 +746,7 @@ internal class IncomingPackets
 
                         if (tradeBoxItem != null)
                         {
-                            ServiceProvider.Get<UIService>().GetTradingGump(tradeBoxItem)?.RequestUpdateContents();
+                            ServiceProvider.Get<GuiService>().GetTradingGump(tradeBoxItem)?.RequestUpdateContents();
                         }
                     }
                 }
@@ -758,10 +758,10 @@ internal class IncomingPackets
 
                 if (it.Layer != Layer.Invalid)
                 {
-                    ServiceProvider.Get<UIService>().GetGump<PaperDollGump>(cont)?.RequestUpdateContents();
+                    ServiceProvider.Get<GuiService>().GetGump<PaperDollGump>(cont)?.RequestUpdateContents();
                 }
 
-                ServiceProvider.Get<UIService>().GetGump<ContainerGump>(cont)?.RequestUpdateContents();
+                ServiceProvider.Get<GuiService>().GetGump<ContainerGump>(cont)?.RequestUpdateContents();
 
                 if (
                     top != null
@@ -772,14 +772,14 @@ internal class IncomingPackets
                     )
                 )
                 {
-                    ServiceProvider.Get<UIService>().GetGump<GridLootGump>(cont)?.RequestUpdateContents();
+                    ServiceProvider.Get<GuiService>().GetGump<GridLootGump>(cont)?.RequestUpdateContents();
                 }
 
                 if (it.Graphic == 0x0EB0)
                 {
-                    ServiceProvider.Get<UIService>().GetGump<BulletinBoardItem>(serial)?.Dispose();
+                    ServiceProvider.Get<GuiService>().GetGump<BulletinBoardItem>(serial)?.Dispose();
 
-                    var bbgump = ServiceProvider.Get<UIService>().GetGump<BulletinBoardGump>();
+                    var bbgump = ServiceProvider.Get<GuiService>().GetGump<BulletinBoardGump>();
 
                     if (bbgump != null)
                     {
@@ -830,12 +830,12 @@ internal class IncomingPackets
 
                 if (item.Layer != Layer.Invalid)
                 {
-                    ServiceProvider.Get<UIService>().GetGump<PaperDollGump>(cont)?.RequestUpdateContents();
+                    ServiceProvider.Get<GuiService>().GetGump<PaperDollGump>(cont)?.RequestUpdateContents();
                 }
             }
             else if (item.IsMulti)
             {
-                ServiceProvider.Get<UIService>().GetGump<MiniMapGump>()?.RequestUpdateContents();
+                ServiceProvider.Get<GuiService>().GetGump<MiniMapGump>()?.RequestUpdateContents();
             }
 
             _world.RemoveItem(serial, true);
@@ -1014,17 +1014,17 @@ internal class IncomingPackets
                 return;
             }
 
-            ServiceProvider.Get<UIService>().GetGump<SpellbookGump>(serial)?.Dispose();
+            ServiceProvider.Get<GuiService>().GetGump<SpellbookGump>(serial)?.Dispose();
 
             SpellbookGump spellbookGump = new SpellbookGump(_world, spellBookItem);
 
-            if (!ServiceProvider.Get<UIService>().GetGumpCachePosition(spellBookItem, out Point location))
+            if (!ServiceProvider.Get<GuiService>().GetGumpCachePosition(spellBookItem, out Point location))
             {
                 location = new Point(64, 64);
             }
 
             spellbookGump.Location = location;
-            ServiceProvider.Get<UIService>().Add(spellbookGump);
+            ServiceProvider.Get<GuiService>().Add(spellbookGump);
 
             ServiceProvider.Get<AudioService>().PlaySound(0x0055);
         }
@@ -1037,10 +1037,10 @@ internal class IncomingPackets
                 return;
             }
 
-            ServiceProvider.Get<UIService>().GetGump<ShopGump>(serial)?.Dispose();
+            ServiceProvider.Get<GuiService>().GetGump<ShopGump>(serial)?.Dispose();
 
             ShopGump gump = new ShopGump(_world, serial, true, 150, 5);
-            ServiceProvider.Get<UIService>().Add(gump);
+            ServiceProvider.Get<GuiService>().Add(gump);
 
             for (Layer layer = Layer.ShopBuyRestock; layer < Layer.ShopBuy + 1; layer++)
             {
@@ -1115,7 +1115,7 @@ internal class IncomingPackets
                     }
                 }
 
-                var container = ServiceProvider.Get<UIService>().GetGump<ContainerGump>(serial);
+                var container = ServiceProvider.Get<GuiService>().GetGump<ContainerGump>(serial);
                 bool playsound = false;
                 int x,
                     y;
@@ -1219,7 +1219,7 @@ internal class IncomingPackets
                     playsound = true;
                 }
 
-                ServiceProvider.Get<UIService>().Add(
+                ServiceProvider.Get<GuiService>().Add(
                     new ContainerGump(_world, item, graphic, playsound)
                     {
                         X = x,
@@ -1228,7 +1228,7 @@ internal class IncomingPackets
                     }
                 );
 
-                ServiceProvider.Get<UIService>().RemovePosition(serial);
+                ServiceProvider.Get<GuiService>().RemovePosition(serial);
             }
             else
             {
@@ -1326,7 +1326,7 @@ internal class IncomingPackets
                             cursorService.GameCursor.ItemHold.Container
                         );
 
-                        ServiceProvider.Get<UIService>()
+                        ServiceProvider.Get<GuiService>()
                             .GetGump<ContainerGump>(cursorService.GameCursor.ItemHold.Container)
                             ?.RequestUpdateContents();
                     }
@@ -1358,7 +1358,7 @@ internal class IncomingPackets
                                 container.PushToBack(item);
                                 item.Container = container.Serial;
 
-                                ServiceProvider.Get<UIService>()
+                                ServiceProvider.Get<GuiService>()
                                     .GetGump<PaperDollGump>(item.Container)
                                     ?.RequestUpdateContents();
                             }
@@ -1387,7 +1387,7 @@ internal class IncomingPackets
                 );
             }
 
-            ServiceProvider.Get<UIService>().GetGump<SplitMenuGump>(cursorService.GameCursor.ItemHold.Serial)?.Dispose();
+            ServiceProvider.Get<GuiService>().GetGump<SplitMenuGump>(cursorService.GameCursor.ItemHold.Serial)?.Dispose();
 
             cursorService.GameCursor.ItemHold.Clear();
         }
@@ -1525,9 +1525,9 @@ internal class IncomingPackets
 
         if (SerialHelper.IsValid(item.Container))
         {
-            ServiceProvider.Get<UIService>().GetGump<ContainerGump>(item.Container)?.RequestUpdateContents();
+            ServiceProvider.Get<GuiService>().GetGump<ContainerGump>(item.Container)?.RequestUpdateContents();
 
-            ServiceProvider.Get<UIService>().GetGump<PaperDollGump>(item.Container)?.RequestUpdateContents();
+            ServiceProvider.Get<GuiService>().GetGump<PaperDollGump>(item.Container)?.RequestUpdateContents();
         }
 
         item.Graphic = (ushort)(p.ReadUInt16BE() + p.ReadInt8());
@@ -1546,7 +1546,7 @@ internal class IncomingPackets
         }
         else if (SerialHelper.IsValid(item.Container) && item.Layer < Layer.Mount)
         {
-            ServiceProvider.Get<UIService>().GetGump<PaperDollGump>(item.Container)?.RequestUpdateContents();
+            ServiceProvider.Get<GuiService>().GetGump<PaperDollGump>(item.Container)?.RequestUpdateContents();
         }
 
         if (
@@ -1635,23 +1635,23 @@ internal class IncomingPackets
         {
             int count = p.ReadUInt16BE();
 
-            var uoService = ServiceProvider.Get<UOService>();
-            uoService.FileManager.Skills.Skills.Clear();
-            uoService.FileManager.Skills.SortedSkills.Clear();
+            var assetsService = ServiceProvider.Get<AssetsService>();
+            assetsService.Skills.Skills.Clear();
+            assetsService.Skills.SortedSkills.Clear();
 
             for (int i = 0; i < count; i++)
             {
                 bool haveButton = p.ReadBool();
                 int nameLength = p.ReadUInt8();
 
-                uoService.FileManager.Skills.Skills.Add(
+                assetsService.Skills.Skills.Add(
                     new SkillEntry(i, p.ReadASCII(nameLength), haveButton)
                 );
             }
 
-            uoService.FileManager.Skills.SortedSkills.AddRange(uoService.FileManager.Skills.Skills);
+            assetsService.Skills.SortedSkills.AddRange(assetsService.Skills.Skills);
 
-            uoService.FileManager.Skills.SortedSkills.Sort(
+            assetsService.Skills.SortedSkills.Sort(
                 (a, b) => string.Compare(a.Name, b.Name, StringComparison.InvariantCulture)
             );
         }
@@ -1662,11 +1662,11 @@ internal class IncomingPackets
 
             if (ProfileManager.CurrentProfile.StandardSkillsGump)
             {
-                standard = ServiceProvider.Get<UIService>().GetGump<StandardSkillsGump>();
+                standard = ServiceProvider.Get<GuiService>().GetGump<StandardSkillsGump>();
             }
             else
             {
-                advanced = ServiceProvider.Get<UIService>().GetGump<SkillGumpAdvanced>();
+                advanced = ServiceProvider.Get<GuiService>().GetGump<SkillGumpAdvanced>();
             }
 
             if (!isSingleUpdate && (type == 1 || type == 3 || _world.SkillsRequested))
@@ -1678,14 +1678,14 @@ internal class IncomingPackets
                 {
                     if (standard == null)
                     {
-                        ServiceProvider.Get<UIService>().Add(standard = new StandardSkillsGump(_world) { X = 100, Y = 100 });
+                        ServiceProvider.Get<GuiService>().Add(standard = new StandardSkillsGump(_world) { X = 100, Y = 100 });
                     }
                 }
                 else
                 {
                     if (advanced == null)
                     {
-                        ServiceProvider.Get<UIService>().Add(advanced = new SkillGumpAdvanced(_world) { X = 100, Y = 100 });
+                        ServiceProvider.Get<GuiService>().Add(advanced = new SkillGumpAdvanced(_world) { X = 100, Y = 100 });
                     }
                 }
             }
@@ -1837,7 +1837,7 @@ internal class IncomingPackets
 
         uint serial = p.ReadUInt32BE();
 
-        ServiceProvider.Get<UIService>().GetGump<ShopGump>(serial)?.Dispose();
+        ServiceProvider.Get<GuiService>().GetGump<ShopGump>(serial)?.Dispose();
     }
 
     public void PersonalLightLevel(ref StackDataReader p)
@@ -1969,7 +1969,7 @@ internal class IncomingPackets
             {
                 foreach (Gump gump in gumps)
                 {
-                    ServiceProvider.Get<UIService>().Add(gump);
+                    ServiceProvider.Get<GuiService>().Add(gump);
                 }
             }
         }
@@ -1984,7 +1984,7 @@ internal class IncomingPackets
 
         uint serial = p.ReadUInt32BE();
 
-        var gump = ServiceProvider.Get<UIService>().GetGump<MapGump>(serial);
+        var gump = ServiceProvider.Get<GuiService>().GetGump<MapGump>(serial);
 
         if (gump != null)
         {
@@ -2055,7 +2055,7 @@ internal class IncomingPackets
         uint serial = p.ReadUInt32BE();
         ushort pageCnt = p.ReadUInt16BE();
 
-        var gump = ServiceProvider.Get<UIService>().GetGump<ModernBookGump>(serial);
+        var gump = ServiceProvider.Get<GuiService>().GetGump<ModernBookGump>(serial);
 
         if (gump == null || gump.IsDisposed)
         {
@@ -2240,7 +2240,7 @@ internal class IncomingPackets
 
                     if (item != null)
                     {
-                        var bulletinBoard = ServiceProvider.Get<UIService>().GetGump<BulletinBoardGump>(
+                        var bulletinBoard = ServiceProvider.Get<GuiService>().GetGump<BulletinBoardGump>(
                             serial
                         );
                         bulletinBoard?.Dispose();
@@ -2249,7 +2249,7 @@ internal class IncomingPackets
                         int y = (ServiceProvider.Get<WindowService>().ClientBounds.Height >> 1) - 205;
 
                         bulletinBoard = new BulletinBoardGump(_world, item, x, y, p.ReadUTF8(22, true)); //p.ReadASCII(22));
-                        ServiceProvider.Get<UIService>().Add(bulletinBoard);
+                        ServiceProvider.Get<GuiService>().Add(bulletinBoard);
 
                         item.Opened = true;
                     }
@@ -2261,7 +2261,7 @@ internal class IncomingPackets
 
                 {
                     uint boardSerial = p.ReadUInt32BE();
-                    var bulletinBoard = ServiceProvider.Get<UIService>().GetGump<BulletinBoardGump>(
+                    var bulletinBoard = ServiceProvider.Get<GuiService>().GetGump<BulletinBoardGump>(
                         boardSerial
                     );
 
@@ -2292,7 +2292,7 @@ internal class IncomingPackets
 
                 {
                     uint boardSerial = p.ReadUInt32BE();
-                    var bulletinBoard = ServiceProvider.Get<UIService>().GetGump<BulletinBoardGump>(
+                    var bulletinBoard = ServiceProvider.Get<GuiService>().GetGump<BulletinBoardGump>(
                         boardSerial
                     );
 
@@ -2338,7 +2338,7 @@ internal class IncomingPackets
                         string msg = sb.ToString();
                         byte variant = (byte)(1 + (poster == _world.Player.Name ? 1 : 0));
 
-                        ServiceProvider.Get<UIService>().Add(
+                        ServiceProvider.Get<GuiService>().Add(
                             new BulletinBoardItem(
                                 _world,
                                 boardSerial,
@@ -2399,7 +2399,7 @@ internal class IncomingPackets
             return;
         }
 
-        var gump = ServiceProvider.Get<UIService>().GetGump<ShopGump>();
+        var gump = ServiceProvider.Get<GuiService>().GetGump<ShopGump>();
 
         if (gump != null && (gump.LocalSerial != vendor || !gump.IsBuyGump))
         {
@@ -2410,7 +2410,7 @@ internal class IncomingPackets
         if (gump == null)
         {
             gump = new ShopGump(_world, vendor, true, 150, 5);
-            ServiceProvider.Get<UIService>().Add(gump);
+            ServiceProvider.Get<GuiService>().Add(gump);
         }
 
         if (container.Layer == Layer.ShopBuyRestock || container.Layer == Layer.ShopBuy)
@@ -2461,7 +2461,7 @@ internal class IncomingPackets
                 }
                 else if (int.TryParse(name, out int cliloc))
                 {
-                    it.Name = ServiceProvider.Get<UOService>().FileManager.Clilocs.Translate(
+                    it.Name = ServiceProvider.Get<AssetsService>().Clilocs.Translate(
                         cliloc,
                         $"\t{it.ItemData.Name}: \t{it.Amount}",
                         true
@@ -2589,7 +2589,7 @@ internal class IncomingPackets
         {
             mob.NotorietyFlag = notoriety;
 
-            ServiceProvider.Get<UIService>().GetGump<PaperDollGump>(serial)?.RequestUpdateContents();
+            ServiceProvider.Get<GuiService>().GetGump<PaperDollGump>(serial)?.RequestUpdateContents();
         }
 
         if (p[0] != 0x78)
@@ -2651,7 +2651,7 @@ internal class IncomingPackets
                 }
             }
 
-            ServiceProvider.Get<UIService>().GetGump<PaperDollGump>(serial)?.RequestUpdateContents();
+            ServiceProvider.Get<GuiService>().GetGump<PaperDollGump>(serial)?.RequestUpdateContents();
 
             _world.Player.UpdateAbilities();
         }
@@ -2705,7 +2705,7 @@ internal class IncomingPackets
                 }
             }
 
-            ServiceProvider.Get<UIService>().Add(gump);
+            ServiceProvider.Get<GuiService>().Add(gump);
         }
         else
         {
@@ -2756,7 +2756,7 @@ internal class IncomingPackets
 
             gump.SetHeight(gumpHeight);
             gump.WantUpdateSize = false;
-            ServiceProvider.Get<UIService>().Add(gump);
+            ServiceProvider.Get<GuiService>().Add(gump);
         }
     }
 
@@ -2774,16 +2774,16 @@ internal class IncomingPackets
 
         mobile.Title = text;
 
-        var paperdoll = ServiceProvider.Get<UIService>().GetGump<PaperDollGump>(mobile);
+        var paperdoll = ServiceProvider.Get<GuiService>().GetGump<PaperDollGump>(mobile);
 
         if (paperdoll == null)
         {
-            if (!ServiceProvider.Get<UIService>().GetGumpCachePosition(mobile, out Point location))
+            if (!ServiceProvider.Get<GuiService>().GetGumpCachePosition(mobile, out Point location))
             {
                 location = new Point(100, 100);
             }
 
-            ServiceProvider.Get<UIService>().Add(
+            ServiceProvider.Get<GuiService>().Add(
                 new PaperDollGump(_world, mobile, (flags & 0x02) != 0) { Location = location }
             );
         }
@@ -2878,7 +2878,7 @@ internal class IncomingPackets
         if (multiMapInfo.Texture != null)
             gump.SetMapTexture(multiMapInfo.Texture);
 
-        ServiceProvider.Get<UIService>().Add(gump);
+        ServiceProvider.Get<GuiService>().Add(gump);
 
         var it = _world.Items.Get(serial);
 
@@ -2903,7 +2903,7 @@ internal class IncomingPackets
             p.Skip(1);
         }
 
-        var bgump = ServiceProvider.Get<UIService>().GetGump<ModernBookGump>(serial);
+        var bgump = ServiceProvider.Get<GuiService>().GetGump<ModernBookGump>(serial);
 
         if (bgump == null || bgump.IsDisposed)
         {
@@ -2915,7 +2915,7 @@ internal class IncomingPackets
                 ? p.ReadUTF8(30, true)
                 : p.ReadUTF8(p.ReadUInt16BE(), true);
 
-            ServiceProvider.Get<UIService>().Add(
+            ServiceProvider.Get<GuiService>().Add(
                 new ModernBookGump(_world, serial, page_count, title, author, editable, oldpacket)
                 {
                     X = 100,
@@ -2954,7 +2954,7 @@ internal class IncomingPackets
         int x = (ServiceProvider.Get<WindowService>().ClientBounds.Width >> 1) - (gumpInfo.UV.Width >> 1);
         int y = (ServiceProvider.Get<WindowService>().ClientBounds.Height >> 1) - (gumpInfo.UV.Height >> 1);
 
-        var gump = ServiceProvider.Get<UIService>().GetGump<ColorPickerGump>(serial);
+        var gump = ServiceProvider.Get<GuiService>().GetGump<ColorPickerGump>(serial);
 
         if (gump == null || gump.IsDisposed || gump.Graphic != graphic)
         {
@@ -2962,7 +2962,7 @@ internal class IncomingPackets
 
             gump = new ColorPickerGump(_world, serial, graphic, x, y, null);
 
-            ServiceProvider.Get<UIService>().Add(gump);
+            ServiceProvider.Get<GuiService>().Add(gump);
         }
     }
 
@@ -3009,7 +3009,7 @@ internal class IncomingPackets
                 ServiceProvider.Get<EngineService>().SetWindowTitle(name);
             }
 
-            ServiceProvider.Get<UIService>().GetGump<NameOverheadGump>(serial)?.SetName();
+            ServiceProvider.Get<GuiService>().GetGump<NameOverheadGump>(serial)?.SetName();
         }
     }
 
@@ -3068,7 +3068,7 @@ internal class IncomingPackets
             return;
         }
 
-        var gump = ServiceProvider.Get<UIService>().GetGump<ShopGump>(vendor);
+        var gump = ServiceProvider.Get<GuiService>().GetGump<ShopGump>(vendor);
         gump?.Dispose();
         gump = new ShopGump(_world, vendor, false, 100, 0);
 
@@ -3084,7 +3084,7 @@ internal class IncomingPackets
 
             if (int.TryParse(name, out int clilocnum))
             {
-                name = ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(clilocnum);
+                name = ServiceProvider.Get<AssetsService>().Clilocs.GetString(clilocnum);
                 fromcliloc = true;
             }
             else if (string.IsNullOrEmpty(name))
@@ -3093,7 +3093,7 @@ internal class IncomingPackets
 
                 if (!success)
                 {
-                    name = ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[graphic].Name;
+                    name = ServiceProvider.Get<AssetsService>().TileData.StaticData[graphic].Name;
                 }
             }
 
@@ -3103,7 +3103,7 @@ internal class IncomingPackets
             gump.AddItem(serial, graphic, hue, amount, price, name, fromcliloc);
         }
 
-        ServiceProvider.Get<UIService>().Add(gump);
+        ServiceProvider.Get<GuiService>().Add(gump);
     }
 
     public void UpdateHitpoints(ref StackDataReader p)
@@ -3196,7 +3196,7 @@ internal class IncomingPackets
             y = 100;
         }
 
-        ServiceProvider.Get<UIService>().Add(new TipNoticeGump(_world, tip, flag, str) { X = x, Y = y });
+        ServiceProvider.Get<GuiService>().Add(new TipNoticeGump(_world, tip, flag, str) { X = x, Y = y });
     }
 
     public void AttackCharacter(ref StackDataReader p)
@@ -3252,7 +3252,7 @@ internal class IncomingPackets
             CanCloseWithRightClick = haveCancel
         };
 
-        ServiceProvider.Get<UIService>().Add(gump);
+        ServiceProvider.Get<GuiService>().Add(gump);
     }
 
     public void UnicodeTalk(ref StackDataReader p)
@@ -3437,7 +3437,7 @@ internal class IncomingPackets
         animations.ConvertBodyIfNeeded(ref gfx);
         var animGroup = animations.GetAnimType(gfx);
         var animFlags = animations.GetAnimFlags(gfx);
-        byte group = ServiceProvider.Get<UOService>().FileManager.Animations.GetDeathAction(
+        byte group = ServiceProvider.Get<AssetsService>().Animations.GetDeathAction(
             gfx,
             animFlags,
             animGroup,
@@ -3526,7 +3526,7 @@ internal class IncomingPackets
                 _world.ChatManager.CurrentChannelName = channelName;
                 _world.ChatManager.AddChannel(channelName, hasPassword);
 
-                ServiceProvider.Get<UIService>().GetGump<ChatGump>()?.RequestUpdateContents();
+                ServiceProvider.Get<GuiService>().GetGump<ChatGump>()?.RequestUpdateContents();
 
                 break;
 
@@ -3535,7 +3535,7 @@ internal class IncomingPackets
                 channelName = p.ReadUnicodeBE();
                 _world.ChatManager.RemoveChannel(channelName);
 
-                ServiceProvider.Get<UIService>().GetGump<ChatGump>()?.RequestUpdateContents();
+                ServiceProvider.Get<GuiService>().GetGump<ChatGump>()?.RequestUpdateContents();
 
                 break;
 
@@ -3548,7 +3548,7 @@ internal class IncomingPackets
                 _world.ChatManager.Clear();
                 _world.ChatManager.ChatIsEnabled = ChatStatus.Disabled;
 
-                ServiceProvider.Get<UIService>().GetGump<ChatGump>()?.Dispose();
+                ServiceProvider.Get<GuiService>().GetGump<ChatGump>()?.Dispose();
 
                 break;
 
@@ -3581,7 +3581,7 @@ internal class IncomingPackets
                 channelName = p.ReadUnicodeBE();
                 _world.ChatManager.CurrentChannelName = channelName;
 
-                ServiceProvider.Get<UIService>().GetGump<ChatGump>()?.UpdateConference();
+                ServiceProvider.Get<GuiService>().GetGump<ChatGump>()?.UpdateConference();
 
                 GameActions.Print(
                     _world,
@@ -3701,9 +3701,9 @@ internal class IncomingPackets
 
         string body = p.ReadUnicodeBE();
 
-        ServiceProvider.Get<UIService>().GetGump<ProfileGump>(serial)?.Dispose();
+        ServiceProvider.Get<GuiService>().GetGump<ProfileGump>(serial)?.Dispose();
 
-        ServiceProvider.Get<UIService>().Add(
+        ServiceProvider.Get<GuiService>().Add(
             new ProfileGump(_world, serial, header, footer, body, serial == _world.Player.Serial)
         );
     }
@@ -3757,13 +3757,13 @@ internal class IncomingPackets
             serial = p.ReadUInt32BE();
         }
 
-        var arrow = ServiceProvider.Get<UIService>().GetGump<QuestArrowGump>(serial);
+        var arrow = ServiceProvider.Get<GuiService>().GetGump<QuestArrowGump>(serial);
 
         if (display)
         {
             if (arrow == null)
             {
-                ServiceProvider.Get<UIService>().Add(new QuestArrowGump(_world, serial, mx, my));
+                ServiceProvider.Get<GuiService>().Add(new QuestArrowGump(_world, serial, mx, my));
             }
             else
             {
@@ -3860,7 +3860,7 @@ internal class IncomingPackets
                 uint ser = p.ReadUInt32BE();
                 int button = (int)p.ReadUInt32BE();
 
-                var first = ServiceProvider.Get<UIService>().Gumps.First;
+                var first = ServiceProvider.Get<GuiService>().Gumps.First;
 
                 while (first != null)
                 {
@@ -3876,11 +3876,11 @@ internal class IncomingPackets
                         {
                             if (first.Value.CanMove)
                             {
-                                ServiceProvider.Get<UIService>().SavePosition(ser, first.Value.Location);
+                                ServiceProvider.Get<GuiService>().SavePosition(ser, first.Value.Location);
                             }
                             else
                             {
-                                ServiceProvider.Get<UIService>().RemovePosition(ser);
+                                ServiceProvider.Get<GuiService>().RemovePosition(ser);
                             }
                         }
 
@@ -3909,7 +3909,7 @@ internal class IncomingPackets
             //===========================================================================================
             //===========================================================================================
             case 0x0C: // close statusbar gump
-                ServiceProvider.Get<UIService>().GetGump<HealthBarGump>(p.ReadUInt32BE())?.Dispose();
+                ServiceProvider.Get<GuiService>().GetGump<HealthBarGump>(p.ReadUInt32BE())?.Dispose();
 
                 break;
 
@@ -3928,7 +3928,7 @@ internal class IncomingPackets
 
                 if (cliloc > 0)
                 {
-                    str = ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString((int)cliloc, true);
+                    str = ServiceProvider.Get<AssetsService>().Clilocs.GetString((int)cliloc, true);
 
                     if (!string.IsNullOrEmpty(str))
                     {
@@ -3984,7 +3984,7 @@ internal class IncomingPackets
                     }
 
                     short charges = (short)p.ReadUInt16BE();
-                    string attr = ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString((int)next);
+                    string attr = ServiceProvider.Get<AssetsService>().Clilocs.GetString((int)next);
 
                     if (attr != null)
                     {
@@ -4048,7 +4048,7 @@ internal class IncomingPackets
             //===========================================================================================
             //===========================================================================================
             case 0x14: // display popup/context menu
-                ServiceProvider.Get<UIService>().ShowGamePopup(
+                ServiceProvider.Get<GuiService>().ShowGamePopup(
                     new PopupMenuGump(_world, PopupMenuData.Parse(ref p))
                     {
                         X = _world.DelayedObjectClickManager.LastMouseX,
@@ -4067,12 +4067,12 @@ internal class IncomingPackets
                 switch (id)
                 {
                     case 1: // paperdoll
-                        ServiceProvider.Get<UIService>().GetGump<PaperDollGump>(serial)?.Dispose();
+                        ServiceProvider.Get<GuiService>().GetGump<PaperDollGump>(serial)?.Dispose();
 
                         break;
 
                     case 2: //statusbar
-                        ServiceProvider.Get<UIService>().GetGump<HealthBarGump>(serial)?.Dispose();
+                        ServiceProvider.Get<GuiService>().GetGump<HealthBarGump>(serial)?.Dispose();
 
                         if (serial == _world.Player.Serial)
                         {
@@ -4082,12 +4082,12 @@ internal class IncomingPackets
                         break;
 
                     case 8: // char profile
-                        ServiceProvider.Get<UIService>().GetGump<ProfileGump>()?.Dispose();
+                        ServiceProvider.Get<GuiService>().GetGump<ProfileGump>()?.Dispose();
 
                         break;
 
                     case 0x0C: //container
-                        ServiceProvider.Get<UIService>().GetGump<ContainerGump>(serial)?.Dispose();
+                        ServiceProvider.Get<GuiService>().GetGump<ContainerGump>(serial)?.Dispose();
 
                         break;
                 }
@@ -4098,7 +4098,7 @@ internal class IncomingPackets
             //===========================================================================================
             case 0x18: // enable map patches
 
-                if (ServiceProvider.Get<UOService>().FileManager.Maps.ApplyPatches(ref p))
+                if (ServiceProvider.Get<AssetsService>().Maps.ApplyPatches(ref p))
                 {
                     //List<GameObject> list = new List<GameObject>();
 
@@ -4244,7 +4244,7 @@ internal class IncomingPackets
                     }
                 }
 
-                ServiceProvider.Get<UIService>().GetGump<SpellbookGump>(spellbook)?.RequestUpdateContents();
+                ServiceProvider.Get<GuiService>().GetGump<SpellbookGump>(spellbook)?.RequestUpdateContents();
 
                 break;
 
@@ -4274,7 +4274,7 @@ internal class IncomingPackets
                     house.Generate();
                     _world.BoatMovingManager.ClearSteps(serial);
 
-                    ServiceProvider.Get<UIService>().GetGump<MiniMapGump>()?.RequestUpdateContents();
+                    ServiceProvider.Get<GuiService>().GetGump<MiniMapGump>()?.RequestUpdateContents();
 
                     if (_world.HouseManager.EntityIntoHouse(serial, _world.Player))
                     {
@@ -4306,7 +4306,7 @@ internal class IncomingPackets
                         break;
 
                     case 4: // begin
-                        var gump = ServiceProvider.Get<UIService>().GetGump<HouseCustomizationGump>();
+                        var gump = ServiceProvider.Get<GuiService>().GetGump<HouseCustomizationGump>();
 
                         if (gump != null)
                         {
@@ -4314,12 +4314,12 @@ internal class IncomingPackets
                         }
 
                         gump = new HouseCustomizationGump(_world, serial, 50, 50);
-                        ServiceProvider.Get<UIService>().Add(gump);
+                        ServiceProvider.Get<GuiService>().Add(gump);
 
                         break;
 
                     case 5: // end
-                        ServiceProvider.Get<UIService>().GetGump<HouseCustomizationGump>(serial)?.Dispose();
+                        ServiceProvider.Get<GuiService>().GetGump<HouseCustomizationGump>(serial)?.Dispose();
 
                         break;
                 }
@@ -4361,7 +4361,7 @@ internal class IncomingPackets
                 ushort spell = p.ReadUInt16BE();
                 bool active = p.ReadBool();
 
-                foreach (Gump g in ServiceProvider.Get<UIService>().Gumps)
+                foreach (Gump g in ServiceProvider.Get<GuiService>().Gumps)
                 {
                     if (!g.IsDisposed && g.IsVisible)
                     {
@@ -4403,8 +4403,8 @@ internal class IncomingPackets
                 bool isfemale = p.ReadBool();
                 byte race = p.ReadUInt8();
 
-                ServiceProvider.Get<UIService>().GetGump<RaceChangeGump>()?.Dispose();
-                ServiceProvider.Get<UIService>().Add(new RaceChangeGump(_world, isfemale, race));
+                ServiceProvider.Get<GuiService>().GetGump<RaceChangeGump>()?.Dispose();
+                ServiceProvider.Get<GuiService>().Add(new RaceChangeGump(_world, isfemale, race));
                 break;
 
             case 0x2B:
@@ -4461,7 +4461,7 @@ internal class IncomingPackets
 
         if (cliloc == 1008092 || cliloc == 1005445) // value for "You notify them you don't want to join the party" || "You have been added to the party"
         {
-            for (var g = ServiceProvider.Get<UIService>().Gumps.Last; g != null; g = g.Previous)
+            for (var g = ServiceProvider.Get<GuiService>().Gumps.Last; g != null; g = g.Previous)
             {
                 if (g.Value is PartyInviteGump pg)
                 {
@@ -4484,7 +4484,7 @@ internal class IncomingPackets
             }
         }
 
-        string text = ServiceProvider.Get<UOService>().FileManager.Clilocs.Translate((int)cliloc, arguments);
+        string text = ServiceProvider.Get<AssetsService>().Clilocs.Translate((int)cliloc, arguments);
 
         if (text == null)
         {
@@ -4508,7 +4508,7 @@ internal class IncomingPackets
             type = MessageType.System;
         }
 
-        if (!ServiceProvider.Get<UOService>().FileManager.Fonts.UnicodeFontExists((byte)font))
+        if (!ServiceProvider.Get<AssetsService>().Fonts.UnicodeFontExists((byte)font))
         {
             font = 0;
         }
@@ -4656,7 +4656,7 @@ internal class IncomingPackets
                 argument = p.ReadUnicodeLE(length / 2);
             }
 
-            string str = ServiceProvider.Get<UOService>().FileManager.Clilocs.Translate(cliloc, argument, true);
+            string str = ServiceProvider.Get<AssetsService>().Clilocs.Translate(cliloc, argument, true);
 
             if (str == null)
             {
@@ -4777,7 +4777,7 @@ internal class IncomingPackets
 
         if (inBuyList && container != null && SerialHelper.IsValid(container.Serial) && entity is Item itt)
         {
-            ServiceProvider.Get<UIService>().GetGump<ShopGump>(container.RootContainer)?.SetNameTo(itt, name);
+            ServiceProvider.Get<GuiService>().GetGump<ShopGump>(container.RootContainer)?.SetNameTo(itt, name);
         }
     }
 
@@ -5033,10 +5033,10 @@ internal class IncomingPackets
         {
             _world.CustomHouseManager.GenerateFloorPlace();
 
-            ServiceProvider.Get<UIService>().GetGump<HouseCustomizationGump>(house.Serial)?.Update();
+            ServiceProvider.Get<GuiService>().GetGump<HouseCustomizationGump>(house.Serial)?.Update();
         }
 
-        ServiceProvider.Get<UIService>().GetGump<MiniMapGump>()?.RequestUpdateContents();
+        ServiceProvider.Get<GuiService>().GetGump<MiniMapGump>()?.RequestUpdateContents();
 
         if (_world.HouseManager.EntityIntoHouse(serial, _world.Player))
         {
@@ -5193,7 +5193,7 @@ internal class IncomingPackets
 
         if (iconID < BuffTable.Table.Length)
         {
-            var gump = ServiceProvider.Get<UIService>().GetGump<BuffGump>();
+            var gump = ServiceProvider.Get<GuiService>().GetGump<BuffGump>();
             ushort count = p.ReadUInt16BE();
 
             if (count == 0)
@@ -5220,7 +5220,7 @@ internal class IncomingPackets
                     ushort arg_length = p.ReadUInt16BE();
                     var str = p.ReadUnicodeLE(2);
                     var args = str + p.ReadUnicodeLE();
-                    string title = ServiceProvider.Get<UOService>().FileManager.Clilocs.Translate(
+                    string title = ServiceProvider.Get<AssetsService>().Clilocs.Translate(
                         (int)titleCliloc,
                         args,
                         true
@@ -5234,7 +5234,7 @@ internal class IncomingPackets
                     {
                         description =
                             "\n"
-                            + ServiceProvider.Get<UOService>().FileManager.Clilocs.Translate(
+                            + ServiceProvider.Get<AssetsService>().Clilocs.Translate(
                                 (int)descriptionCliloc,
                                 String.IsNullOrEmpty(args_2) ? args : args_2,
                                 true
@@ -5252,7 +5252,7 @@ internal class IncomingPackets
 
                     if (wtfCliloc != 0)
                     {
-                        wtf = ServiceProvider.Get<UOService>().FileManager.Clilocs.Translate(
+                        wtf = ServiceProvider.Get<AssetsService>().Clilocs.Translate(
                             (int)wtfCliloc,
                             String.IsNullOrEmpty(args_3) ? args : args_3,
                             true
@@ -5796,16 +5796,16 @@ internal class IncomingPackets
 
             if (secureBox != null)
             {
-                ServiceProvider.Get<UIService>().GetTradingGump(secureBox)?.RequestUpdateContents();
+                ServiceProvider.Get<GuiService>().GetTradingGump(secureBox)?.RequestUpdateContents();
             }
             else
             {
-                ServiceProvider.Get<UIService>().GetGump<PaperDollGump>(containerSerial)?.RequestUpdateContents();
+                ServiceProvider.Get<GuiService>().GetGump<PaperDollGump>(containerSerial)?.RequestUpdateContents();
             }
         }
         else if (SerialHelper.IsItem(containerSerial))
         {
-            Gump? gump = ServiceProvider.Get<UIService>().GetGump<BulletinBoardGump>(containerSerial);
+            Gump? gump = ServiceProvider.Get<GuiService>().GetGump<BulletinBoardGump>(containerSerial);
 
             if (gump != null)
             {
@@ -5816,11 +5816,11 @@ internal class IncomingPackets
             }
             else
             {
-                gump = ServiceProvider.Get<UIService>().GetGump<SpellbookGump>(containerSerial);
+                gump = ServiceProvider.Get<GuiService>().GetGump<SpellbookGump>(containerSerial);
 
                 if (gump == null)
                 {
-                    gump = ServiceProvider.Get<UIService>().GetGump<ContainerGump>(containerSerial);
+                    gump = ServiceProvider.Get<GuiService>().GetGump<ContainerGump>(containerSerial);
 
                     if (gump != null)
                     {
@@ -5829,7 +5829,7 @@ internal class IncomingPackets
 
                     if (ProfileManager.CurrentProfile.GridLootType > 0)
                     {
-                        var grid_gump = ServiceProvider.Get<UIService>().GetGump<GridLootGump>(
+                        var grid_gump = ServiceProvider.Get<GuiService>().GetGump<GridLootGump>(
                             containerSerial
                         );
 
@@ -5840,7 +5840,7 @@ internal class IncomingPackets
                         )
                         {
                             grid_gump = new GridLootGump(_world, _requestedGridLoot);
-                            ServiceProvider.Get<UIService>().Add(grid_gump);
+                            ServiceProvider.Get<GuiService>().Add(grid_gump);
                             _requestedGridLoot = 0;
                         }
 
@@ -5860,7 +5860,7 @@ internal class IncomingPackets
             }
         }
 
-        ServiceProvider.Get<UIService>().GetTradingGump(containerSerial)?.RequestUpdateContents();
+        ServiceProvider.Get<GuiService>().GetTradingGump(containerSerial)?.RequestUpdateContents();
     }
 
     public void UpdateGameObject(
@@ -5894,13 +5894,13 @@ internal class IncomingPackets
             {
                 if (cursorService.GameCursor.ItemHold.Layer == 0)
                 {
-                    ServiceProvider.Get<UIService>()
+                    ServiceProvider.Get<GuiService>()
                         .GetGump<ContainerGump>(cursorService.GameCursor.ItemHold.Container)
                         ?.RequestUpdateContents();
                 }
                 else
                 {
-                    ServiceProvider.Get<UIService>()
+                    ServiceProvider.Get<GuiService>()
                         .GetGump<PaperDollGump>(cursorService.GameCursor.ItemHold.Container)
                         ?.RequestUpdateContents();
                 }
@@ -6234,13 +6234,13 @@ internal class IncomingPackets
         Gump? gump = null;
         bool mustBeAdded = true;
 
-        if (ServiceProvider.Get<UIService>().GetGumpCachePosition(gumpID, out Point pos))
+        if (ServiceProvider.Get<GuiService>().GetGumpCachePosition(gumpID, out Point pos))
         {
             x = pos.X;
             y = pos.Y;
 
             for (
-                var last = ServiceProvider.Get<UIService>().Gumps.Last;
+                var last = ServiceProvider.Get<GuiService>().Gumps.Last;
                 last != null;
                 last = last.Previous
             )
@@ -6259,7 +6259,7 @@ internal class IncomingPackets
         }
         else
         {
-            ServiceProvider.Get<UIService>().SavePosition(gumpID, new Point(x, y));
+            ServiceProvider.Get<GuiService>().SavePosition(gumpID, new Point(x, y));
         }
 
         if (gump == null)
@@ -6412,43 +6412,43 @@ internal class IncomingPackets
                     switch (pic.Graphic)
                     {
                         case 0x69:
-                            s = ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(1051000 + 2);
+                            s = ServiceProvider.Get<AssetsService>().Clilocs.GetString(1051000 + 2);
 
                             break;
 
                         case 0x6A:
-                            s = ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(1051000 + 7);
+                            s = ServiceProvider.Get<AssetsService>().Clilocs.GetString(1051000 + 7);
 
                             break;
 
                         case 0x6B:
-                            s = ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(1051000 + 5);
+                            s = ServiceProvider.Get<AssetsService>().Clilocs.GetString(1051000 + 5);
 
                             break;
 
                         case 0x6D:
-                            s = ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(1051000 + 6);
+                            s = ServiceProvider.Get<AssetsService>().Clilocs.GetString(1051000 + 6);
 
                             break;
 
                         case 0x6E:
-                            s = ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(1051000 + 1);
+                            s = ServiceProvider.Get<AssetsService>().Clilocs.GetString(1051000 + 1);
 
                             break;
 
                         case 0x6F:
-                            s = ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(1051000 + 3);
+                            s = ServiceProvider.Get<AssetsService>().Clilocs.GetString(1051000 + 3);
 
                             break;
 
                         case 0x70:
-                            s = ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(1051000 + 4);
+                            s = ServiceProvider.Get<AssetsService>().Clilocs.GetString(1051000 + 4);
 
                             break;
 
                         case 0x6C:
                         default:
-                            s = ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(1051000);
+                            s = ServiceProvider.Get<AssetsService>().Clilocs.GetString(1051000);
 
                             break;
                     }
@@ -6496,7 +6496,7 @@ internal class IncomingPackets
                         int.Parse(gparams[6]) == 1,
                         int.Parse(gparams[7]) != 0,
                         gparams[6] != "0" && gparams[7] == "2",
-                        ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(int.Parse(gparams[5].Replace("#", ""))),
+                        ServiceProvider.Get<AssetsService>().Clilocs.GetString(int.Parse(gparams[5].Replace("#", ""))),
                         0,
                         true
                     )
@@ -6530,7 +6530,7 @@ internal class IncomingPackets
                         int.Parse(gparams[6]) == 1,
                         int.Parse(gparams[7]) != 0,
                         gparams[6] != "0" && gparams[7] == "2",
-                        ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(int.Parse(gparams[5].Replace("#", ""))),
+                        ServiceProvider.Get<AssetsService>().Clilocs.GetString(int.Parse(gparams[5].Replace("#", ""))),
                         color,
                         true
                     )
@@ -6574,10 +6574,10 @@ internal class IncomingPackets
                         int.Parse(gparams[6]) != 0,
                         gparams[5] != "0" && gparams[6] == "2",
                         sb == null
-                            ? ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(
+                            ? ServiceProvider.Get<AssetsService>().Clilocs.GetString(
                                 int.Parse(gparams[8].Replace("#", ""))
                             )
-                            : ServiceProvider.Get<UOService>().FileManager.Clilocs.Translate(
+                            : ServiceProvider.Get<AssetsService>().Clilocs.Translate(
                                 int.Parse(gparams[8].Replace("#", "")),
                                 sb.ToString().Trim('@').Replace('@', '\t')
                             ),
@@ -6692,14 +6692,14 @@ internal class IncomingPackets
 
                     if (args.Length == 0)
                     {
-                        text = ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(int.Parse(gparams[1]));
+                        text = ServiceProvider.Get<AssetsService>().Clilocs.GetString(int.Parse(gparams[1]));
                         Log.Error(
                             $"String '{args}' too short, something wrong with gump tooltip: {text}"
                         );
                     }
                     else
                     {
-                        text = ServiceProvider.Get<UOService>().FileManager.Clilocs.Translate(
+                        text = ServiceProvider.Get<AssetsService>().Clilocs.Translate(
                             int.Parse(gparams[1]),
                             args,
                             false
@@ -6708,7 +6708,7 @@ internal class IncomingPackets
                 }
                 else
                 {
-                    text = ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(int.Parse(gparams[1]));
+                    text = ServiceProvider.Get<AssetsService>().Clilocs.GetString(int.Parse(gparams[1]));
                 }
 
                 var last =
@@ -6797,7 +6797,7 @@ internal class IncomingPackets
 
         if (mustBeAdded)
         {
-            ServiceProvider.Get<UIService>().Add(gump);
+            ServiceProvider.Get<GuiService>().Add(gump);
         }
 
         gump.Update();

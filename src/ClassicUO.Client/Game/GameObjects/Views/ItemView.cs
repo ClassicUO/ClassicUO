@@ -171,6 +171,7 @@ namespace ClassicUO.Game.GameObjects
 
             byte direction = (byte)((byte)Layer & 0x7F & 7);
             var uoService = ServiceProvider.Get<UOService>();
+            var assetsService = ServiceProvider.Get<AssetsService>();
             uoService.Animations.GetAnimDirection(ref direction, ref IsFlipped);
 
             byte animIndex = (byte)AnimIndex;
@@ -179,7 +180,7 @@ namespace ClassicUO.Game.GameObjects
             uoService.Animations.ConvertBodyIfNeeded(ref graphic, isCorpse: IsCorpse);
             var animGroup = uoService.Animations.GetAnimType(graphic);
             var animFlags = uoService.Animations.GetAnimFlags(graphic);
-            byte group = uoService.FileManager.Animations.GetDeathAction(
+            byte group = assetsService.Animations.GetDeathAction(
                 graphic,
                 animFlags,
                 animGroup,
@@ -279,8 +280,9 @@ namespace ClassicUO.Game.GameObjects
                 graphic = itemEquip.ItemData.AnimID;
                 ispartialhue = itemEquip.ItemData.IsPartialHue;
 
+                var assetsService = ServiceProvider.Get<AssetsService>();
                 if (
-                    uoService.FileManager.Animations.EquipConversions.TryGetValue(
+                    assetsService.Animations.EquipConversions.TryGetValue(
                         graphic,
                         out var map
                     )
@@ -468,8 +470,8 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else
                     {
-                        var uoService = ServiceProvider.Get<UOService>();
-                        ref var index = ref uoService.FileManager.Arts.File.GetValidRefEntry(
+                        var assetsService = ServiceProvider.Get<AssetsService>();
+                        ref var index = ref assetsService.Arts.File.GetValidRefEntry(
                             graphic + 0x4000
                         );
 
@@ -479,7 +481,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (ServiceProvider.Get<UOService>().Arts.GetArt(graphic).Texture != null)
                 {
-                    ref var index = ref ServiceProvider.Get<UOService>().FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
+                    ref var index = ref ServiceProvider.Get<AssetsService>().Arts.File.GetValidRefEntry(graphic + 0x4000);
 
                     Point position = RealScreenPosition;
                     position.X += (int)Offset.X;
@@ -525,6 +527,7 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 var uoService = ServiceProvider.Get<UOService>();
+                var assetsService = ServiceProvider.Get<AssetsService>();
                 var animations = uoService.Animations;
 
                 Point position = RealScreenPosition;
@@ -569,7 +572,7 @@ namespace ClassicUO.Game.GameObjects
                         graphic = itemEquip.ItemData.AnimID;
 
                         if (
-                            uoService.FileManager.Animations.EquipConversions.TryGetValue(
+                            assetsService.Animations.EquipConversions.TryGetValue(
                                 graphic,
                                 out var map
                             )
@@ -590,7 +593,7 @@ namespace ClassicUO.Game.GameObjects
                     animations.ConvertBodyIfNeeded(ref graphic, isCorpse: IsCorpse);
                     var animGroup = animations.GetAnimType(graphic);
                     var animFlags = animations.GetAnimFlags(graphic);
-                    byte group = uoService.FileManager.Animations.GetDeathAction(
+                    byte group = assetsService.Animations.GetDeathAction(
                         graphic,
                         animFlags,
                         animGroup,

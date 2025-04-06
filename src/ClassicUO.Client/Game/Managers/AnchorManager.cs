@@ -213,7 +213,7 @@ namespace ClassicUO.Game.Managers
             AnchorableGump? closestControl = null;
             int closestDistance = 99999;
 
-            foreach (Gump c in ServiceProvider.Get<UIService>().Gumps)
+            foreach (Gump c in ServiceProvider.Get<GuiService>().Gumps)
             {
                 if (!c.IsDisposed && c is AnchorableGump host && host.AnchorType == control.AnchorType)
                 {
@@ -325,7 +325,7 @@ namespace ClassicUO.Game.Managers
                         var c = controlMatrix[x, y];
                         if (c != null)
                         {
-                            ServiceProvider.Get<UIService>().MakeTopMostGump(c);
+                            ServiceProvider.Get<GuiService>().MakeTopMostGump(c);
                         }
                     }
                 }

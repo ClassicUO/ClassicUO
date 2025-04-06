@@ -17,15 +17,17 @@ namespace ClassicUO.Game.UI.Controls
         private ushort _graphic;
         private readonly bool _is_gump;
         private readonly Gump _gump;
-        private readonly UIService _uiService;
+        private readonly GuiService _uiService;
         private readonly UOService _uoService;
+        private readonly AssetsService _assetsService;
         private readonly GameCursorService _cursorService;
 
         public ItemGump(Gump gump, uint serial, ushort graphic, ushort hue, int x, int y, bool is_gump = false)
         {
-            _uiService = ServiceProvider.Get<UIService>();
+            _uiService = ServiceProvider.Get<GuiService>();
             _uoService = ServiceProvider.Get<UOService>();
             _cursorService = ServiceProvider.Get<GameCursorService>();
+            _assetsService = ServiceProvider.Get<AssetsService>();
 
             _gump = gump;
             _is_gump = is_gump;
@@ -66,7 +68,7 @@ namespace ClassicUO.Game.UI.Controls
                 Width = spriteInfo.UV.Width;
                 Height = spriteInfo.UV.Height;
 
-                IsPartialHue = !_is_gump && _uoService.FileManager.TileData.StaticData[value].IsPartialHue;
+                IsPartialHue = !_is_gump && _assetsService.TileData.StaticData[value].IsPartialHue;
             }
         }
 

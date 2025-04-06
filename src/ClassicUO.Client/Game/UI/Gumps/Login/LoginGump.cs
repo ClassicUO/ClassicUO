@@ -564,7 +564,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     break;
 
                 case Buttons.Credits:
-                    ServiceProvider.Get<UIService>().Add(new CreditsGump(World));
+                    ServiceProvider.Get<GuiService>().Add(new CreditsGump(World));
 
                     break;
             }

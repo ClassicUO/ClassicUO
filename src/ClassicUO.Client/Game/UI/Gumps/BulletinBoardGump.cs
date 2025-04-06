@@ -50,9 +50,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             hitbox.MouseUp += (sender, e) =>
             {
-                ServiceProvider.Get<UIService>().GetGump<BulletinBoardItem>(LocalSerial)?.Dispose();
+                ServiceProvider.Get<GuiService>().GetGump<BulletinBoardItem>(LocalSerial)?.Dispose();
 
-                ServiceProvider.Get<UIService>().Add
+                ServiceProvider.Get<GuiService>().Add
                 (
                     new BulletinBoardItem
                     (
@@ -93,7 +93,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            for (var g = ServiceProvider.Get<UIService>().Gumps.Last; g != null; g = g.Previous)
+            for (var g = ServiceProvider.Get<GuiService>().Gumps.Last; g != null; g = g.Previous)
             {
                 if (g.Value is BulletinBoardItem)
                 {
@@ -357,7 +357,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             _textBox.Height = Math.Max
             (
-                ServiceProvider.Get<UOService>().FileManager.Fonts.GetHeightUnicode
+                ServiceProvider.Get<AssetsService>().Fonts.GetHeightUnicode
                 (
                     1,
                     _textBox.Text,
@@ -396,7 +396,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             //if (!_textBox.IsDisposed && _textBox.IsChanged)
             //{
-            //    _textBox.Height = System.Math.Max(ServiceProvider.Get<UOService>().FileManager.Fonts.GetHeightUnicode(1, _textBox.TxEntry.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 20, 40);
+            //    _textBox.Height = System.Math.Max(ServiceProvider.Get<AssetsService>().Fonts.GetHeightUnicode(1, _textBox.TxEntry.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 20, 40);
 
             //    foreach (Control c in _scrollArea.Children)
             //    {
@@ -427,7 +427,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case ButtonType.Reply:
-                    ServiceProvider.Get<UIService>().Add
+                    ServiceProvider.Get<GuiService>().Add
                     (
                         new BulletinBoardItem
                         (

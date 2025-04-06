@@ -63,7 +63,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             //TextLabelAscii(AControl parent, int x, int y, int font, int hue, string text, int width = 400)
             Add
             (
-                new Label(ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(3000326), unicode, hue, font: font)
+                new Label(ServiceProvider.Get<AssetsService>().Clilocs.GetString(3000326), unicode, hue, font: font)
                 {
                     X = 148, Y = 132
                 }
@@ -72,7 +72,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             // strength, dexterity, intelligence
             Add
             (
-                new Label(ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(3000111), unicode, 1, font: 1)
+                new Label(ServiceProvider.Get<AssetsService>().Clilocs.GetString(3000111), unicode, 1, font: 1)
                 {
                     X = 158, Y = 170
                 }
@@ -80,7 +80,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                new Label(ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(3000112), unicode, 1, font: 1)
+                new Label(ServiceProvider.Get<AssetsService>().Clilocs.GetString(3000112), unicode, 1, font: 1)
                 {
                     X = 158, Y = 250
                 }
@@ -88,7 +88,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                new Label(ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(3000113), unicode, 1, font: 1)
+                new Label(ServiceProvider.Get<AssetsService>().Clilocs.GetString(3000113), unicode, 1, font: 1)
                 {
                     X = 158, Y = 330
                 }
@@ -146,7 +146,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             var clientFlags = World.ClientLockedFeatures.Flags;
 
-            _skillList = ServiceProvider.Get<UOService>().FileManager.Skills.SortedSkills
+            _skillList = ServiceProvider.Get<AssetsService>().Skills.SortedSkills
                          .Where(s =>
                                      // All standard client versions ignore these skills by defualt
                                      //s.Index != 26 && // MagicResist
@@ -273,7 +273,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public override void OnButtonClick(int buttonID)
         {
-            var charCreationGump = ServiceProvider.Get<UIService>().GetGump<CharCreationGump>();
+            var charCreationGump = ServiceProvider.Get<GuiService>().GetGump<CharCreationGump>();
 
             switch ((Buttons) buttonID)
             {
@@ -319,7 +319,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 if (duplicated > 0)
                 {
-                    ServiceProvider.Get<UIService>().GetGump<CharCreationGump>()?.ShowMessage(ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(1080032));
+                    ServiceProvider.Get<GuiService>().GetGump<CharCreationGump>()?.ShowMessage(ServiceProvider.Get<AssetsService>().Clilocs.GetString(1080032));
 
                     return false;
                 }
@@ -327,7 +327,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             else
             {
                 var uoService = ServiceProvider.Get<UOService>();
-                ServiceProvider.Get<UIService>().GetGump<CharCreationGump>()?.ShowMessage(uoService.Version <= ClientVersion.CV_5090 ? ResGumps.YouMustHaveThreeUniqueSkillsChosen : uoService.FileManager.Clilocs.GetString(1080032));
+                var assetsService = ServiceProvider.Get<AssetsService>();
+                ServiceProvider.Get<GuiService>().GetGump<CharCreationGump>()?.ShowMessage(uoService.Version <= ClientVersion.CV_5090 ? ResGumps.YouMustHaveThreeUniqueSkillsChosen : assetsService.Clilocs.GetString(1080032));
 
                 return false;
             }

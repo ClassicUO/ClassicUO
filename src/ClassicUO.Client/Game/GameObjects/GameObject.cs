@@ -392,7 +392,7 @@ namespace ClassicUO.Game.GameObjects
                 case 0x9E64:
                 case 0x9E65:
                 case 0x9E7D:
-                    ref var data = ref ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[g];
+                    ref var data = ref ServiceProvider.Get<AssetsService>().TileData.StaticData[g];
 
                     return !data.IsBackground && !data.IsSurface;
             }
@@ -413,9 +413,9 @@ namespace ClassicUO.Game.GameObjects
                     return true;
                 }
 
-                if (g < ServiceProvider.Get<UOService>().FileManager.TileData.StaticData.Length)
+                if (g < ServiceProvider.Get<AssetsService>().TileData.StaticData.Length)
                 {
-                    ref var data = ref ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[g];
+                    ref var data = ref ServiceProvider.Get<AssetsService>().TileData.StaticData[g];
 
                     // Hacky way to do not render "nodraw"
                     if (!string.IsNullOrEmpty(data.Name) && data.Name.StartsWith("nodraw", StringComparison.OrdinalIgnoreCase))

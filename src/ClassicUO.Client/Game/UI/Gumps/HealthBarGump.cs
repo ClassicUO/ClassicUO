@@ -204,8 +204,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _textBox.IsEditable = false;
                 }
 
-                ServiceProvider.Get<UIService>().KeyboardFocusControl = null;
-                ServiceProvider.Get<UIService>().SystemChat?.SetFocus();
+                ServiceProvider.Get<GuiService>().KeyboardFocusControl = null;
+                ServiceProvider.Get<GuiService>().SystemChat?.SetFocus();
             }
 
             base.OnMouseDown(x, y, button);
@@ -225,8 +225,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _textBox.IsEditable = false;
                 }
 
-                ServiceProvider.Get<UIService>().KeyboardFocusControl = null;
-                ServiceProvider.Get<UIService>().SystemChat?.SetFocus();
+                ServiceProvider.Get<GuiService>().KeyboardFocusControl = null;
+                ServiceProvider.Get<GuiService>().SystemChat?.SetFocus();
             }
 
             var entity = World.Get(LocalSerial);
@@ -247,7 +247,7 @@ namespace ClassicUO.Game.UI.Gumps
                 else
                 {
                     if(StatusGumpBase.GetStatusGump() is null)
-                        ServiceProvider.Get<UIService>().Add(StatusGumpBase.AddStatusGump(World, ScreenCoordinateX, ScreenCoordinateY));
+                        ServiceProvider.Get<GuiService>().Add(StatusGumpBase.AddStatusGump(World, ScreenCoordinateX, ScreenCoordinateY));
 
                     if (ProfileManager.CurrentProfile.StatusGumpBarMutuallyExclusive)
                         Dispose();
@@ -269,8 +269,8 @@ namespace ClassicUO.Game.UI.Gumps
             if ((key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER) && _textBox != null && _textBox.IsEditable)
             {
                 GameActions.Rename(entity, _textBox.Text);
-                ServiceProvider.Get<UIService>().KeyboardFocusControl = null;
-                ServiceProvider.Get<UIService>().SystemChat?.SetFocus();
+                ServiceProvider.Get<GuiService>().KeyboardFocusControl = null;
+                ServiceProvider.Get<GuiService>().SystemChat?.SetFocus();
                 _textBox.IsEditable = false;
             }
         }
@@ -291,7 +291,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected bool CheckIfAnchoredElseDispose()
         {
-            if (ServiceProvider.Get<UIService>().AnchorManager[this] == null && LocalSerial != World.Player)
+            if (ServiceProvider.Get<GuiService>().AnchorManager[this] == null && LocalSerial != World.Player)
             {
                 Dispose();
 
@@ -655,7 +655,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                if (ServiceProvider.Get<UIService>().MouseOverControl != null && ServiceProvider.Get<UIService>().MouseOverControl.RootParent == this)
+                if (ServiceProvider.Get<GuiService>().MouseOverControl != null && ServiceProvider.Get<GuiService>().MouseOverControl.RootParent == this)
                 {
                     SelectedObject.HealthbarObject = entity;
                     SelectedObject.Object = entity;
@@ -1852,7 +1852,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                if (ServiceProvider.Get<UIService>().MouseOverControl != null && ServiceProvider.Get<UIService>().MouseOverControl.RootParent == this)
+                if (ServiceProvider.Get<GuiService>().MouseOverControl != null && ServiceProvider.Get<GuiService>().MouseOverControl.RootParent == this)
                 {
                     SelectedObject.HealthbarObject = entity;
                     SelectedObject.Object = entity;

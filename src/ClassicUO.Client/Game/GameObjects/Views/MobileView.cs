@@ -268,7 +268,7 @@ namespace ClassicUO.Game.GameObjects
 
                     ProcessSteps(out dir);
 
-                    ServiceProvider.Get<UOService>().FileManager.Animations.FixSittingDirection(
+                    ServiceProvider.Get<AssetsService>().Animations.FixSittingDirection(
                         ref dir,
                         ref IsFlipped,
                         ref drawX,
@@ -384,7 +384,7 @@ namespace ClassicUO.Game.GameObjects
                             }
 
                             if (
-                                ServiceProvider.Get<UOService>().FileManager.Animations.EquipConversions.TryGetValue(
+                                ServiceProvider.Get<AssetsService>().Animations.EquipConversions.TryGetValue(
                                     Graphic,
                                     out var map
                                 )
@@ -497,7 +497,7 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 if (
-                    ServiceProvider.Get<UOService>().FileManager.Animations.EquipConversions.TryGetValue(
+                    ServiceProvider.Get<AssetsService>().Animations.EquipConversions.TryGetValue(
                         owner.Graphic,
                         out var map
                     )

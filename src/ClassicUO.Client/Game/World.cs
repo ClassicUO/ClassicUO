@@ -151,12 +151,12 @@ namespace ClassicUO.Game
 
                         Map = null;
 
-                        if (value >= ServiceProvider.Get<UOService>().FileManager.Maps.MapsCount)
+                        if (value >= ServiceProvider.Get<AssetsService>().Maps.MapsCount)
                         {
                             value = 0;
                         }
 
-                        ServiceProvider.Get<UOService>().FileManager.Maps.LoadMap(value, ClientFeatures.Flags.HasFlag(CharacterListFlags.CLF_UNLOCK_FELUCCA_AREAS));
+                        ServiceProvider.Get<AssetsService>().Maps.LoadMap(value, ClientFeatures.Flags.HasFlag(CharacterListFlags.CLF_UNLOCK_FELUCCA_AREAS));
                         Map = new Map.Map(this, value);
 
                         Player?.SetInWorldTile(x, y, z);
@@ -164,7 +164,7 @@ namespace ClassicUO.Game
                     }
                     else
                     {
-                        ServiceProvider.Get<UOService>().FileManager.Maps.LoadMap(value, ClientFeatures.Flags.HasFlag(CharacterListFlags.CLF_UNLOCK_FELUCCA_AREAS));
+                        ServiceProvider.Get<AssetsService>().Maps.LoadMap(value, ClientFeatures.Flags.HasFlag(CharacterListFlags.CLF_UNLOCK_FELUCCA_AREAS));
                         Map = new Map.Map(this, value);
                     }
 
@@ -281,15 +281,15 @@ namespace ClassicUO.Game
                         {
                             if (SerialHelper.IsMobile(container.Serial))
                             {
-                                ServiceProvider.Get<UIService>().GetGump<PaperDollGump>(container.Serial)?.RequestUpdateContents();
+                                ServiceProvider.Get<GuiService>().GetGump<PaperDollGump>(container.Serial)?.RequestUpdateContents();
                             }
                             else if (SerialHelper.IsItem(container.Serial))
                             {
-                                ServiceProvider.Get<UIService>().GetGump<ContainerGump>(container.Serial)?.RequestUpdateContents();
+                                ServiceProvider.Get<GuiService>().GetGump<ContainerGump>(container.Serial)?.RequestUpdateContents();
 
                                 if (container.Graphic == 0x2006)
                                 {
-                                    ServiceProvider.Get<UIService>().GetGump<GridLootGump>(container)?.RequestUpdateContents();
+                                    ServiceProvider.Get<GuiService>().GetGump<GridLootGump>(container)?.RequestUpdateContents();
                                 }
                             }
                         }
@@ -497,11 +497,11 @@ namespace ClassicUO.Game
             {
                 if (SerialHelper.IsMobile(containerSerial))
                 {
-                    ServiceProvider.Get<UIService>().GetGump<PaperDollGump>(containerSerial)?.RequestUpdateContents();
+                    ServiceProvider.Get<GuiService>().GetGump<PaperDollGump>(containerSerial)?.RequestUpdateContents();
                 }
                 else if (SerialHelper.IsItem(containerSerial))
                 {
-                    ServiceProvider.Get<UIService>().GetGump<ContainerGump>(containerSerial)?.RequestUpdateContents();
+                    ServiceProvider.Get<GuiService>().GetGump<ContainerGump>(containerSerial)?.RequestUpdateContents();
                 }
 
                 var container = Get(containerSerial);
@@ -794,7 +794,7 @@ namespace ClassicUO.Game
                 RemoveItem(item);
             }
 
-            ServiceProvider.Get<UIService>().GetGump<BaseHealthBarGump>(Player?.Serial)?.Dispose();
+            ServiceProvider.Get<GuiService>().GetGump<BaseHealthBarGump>(Player?.Serial)?.Dispose();
 
             ObjectToRemove = 0;
             LastObject = 0;

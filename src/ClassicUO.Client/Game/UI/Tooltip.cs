@@ -66,11 +66,11 @@ namespace ClassicUO.Game.UI
                 zoom = ProfileManager.CurrentProfile.TooltipDisplayZoom / 100f;
             }
 
-            var uoService = ServiceProvider.Get<UOService>();
+            var assetsService = ServiceProvider.Get<AssetsService>();
             var windowService = ServiceProvider.Get<WindowService>();
 
-            uoService.FileManager.Fonts.SetUseHTML(true);
-            uoService.FileManager.Fonts.RecalculateWidthByInfo = true;
+            assetsService.Fonts.SetUseHTML(true);
+            assetsService.Fonts.RecalculateWidthByInfo = true;
 
             if (_renderedText == null)
             {
@@ -92,14 +92,14 @@ namespace ClassicUO.Game.UI
             {
                 if (_maxWidth == 0)
                 {
-                    int width = uoService.FileManager.Fonts.GetWidthUnicode(font, Text);
+                    int width = assetsService.Fonts.GetWidthUnicode(font, Text);
 
                     if (width > 600)
                     {
                         width = 600;
                     }
 
-                    width = uoService.FileManager.Fonts.GetWidthExUnicode
+                    width = assetsService.Fonts.GetWidthExUnicode
                     (
                         font,
                         Text,
@@ -125,8 +125,8 @@ namespace ClassicUO.Game.UI
                 _renderedText.Text = _textHTML;
             }
 
-            uoService.FileManager.Fonts.RecalculateWidthByInfo = false;
-            uoService.FileManager.Fonts.SetUseHTML(false);
+            assetsService.Fonts.RecalculateWidthByInfo = false;
+            assetsService.Fonts.SetUseHTML(false);
 
             if (_renderedText.Texture == null || _renderedText.Texture.IsDisposed)
             {

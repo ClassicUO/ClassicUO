@@ -91,9 +91,9 @@ namespace ClassicUO.Game
                         return;
                     }
 
-                    var uoService = ServiceProvider.Get<UOService>();
-                    int mapWidthInBlocks = uoService.FileManager.Maps.MapBlocksSize[mapId, 0];
-                    int mapHeightInBlocks = uoService.FileManager.Maps.MapBlocksSize[mapId, 1];
+                    var assetsService = ServiceProvider.Get<AssetsService>();
+                    int mapWidthInBlocks = assetsService.Maps.MapBlocksSize[mapId, 0];
+                    int mapHeightInBlocks = assetsService.Maps.MapBlocksSize[mapId, 1];
                     int blocks = mapWidthInBlocks * mapHeightInBlocks;
 
                     if (block < 0 || block >= blocks)
@@ -214,8 +214,8 @@ namespace ClassicUO.Game
                     byte[] staticsData = new byte[totalLength];
                     p.Buffer.Slice(p.Position, totalLength).CopyTo(staticsData);
 
-                    var uoService = ServiceProvider.Get<UOService>();
-                    if (block >= 0 && block < uoService.FileManager.Maps.MapBlocksSize[mapId, 0] * uoService.FileManager.Maps.MapBlocksSize[mapId, 1])
+                    var assetsService = ServiceProvider.Get<AssetsService>();
+                    if (block >= 0 && block < assetsService.Maps.MapBlocksSize[mapId, 0] * assetsService.Maps.MapBlocksSize[mapId, 1])
                     {
                         int index = block * 12;
 
@@ -307,7 +307,7 @@ namespace ClassicUO.Game
                         }
 
 
-                        ServiceProvider.Get<UIService>().GetGump<MiniMapGump>()?.RequestUpdateContents();
+                        ServiceProvider.Get<GuiService>().GetGump<MiniMapGump>()?.RequestUpdateContents();
 
                         //ServiceProvider.Get<UIService>().GetGump<WorldMapGump>()?.UpdateMap();
                         //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
@@ -366,9 +366,9 @@ namespace ClassicUO.Game
                         int mapNumber = p.ReadUInt8();
                         validMaps.Add(mapNumber);
 
-                        _UL.MapSizeWrapSize[mapNumber, 0] = Math.Min((ushort) ServiceProvider.Get<UOService>().FileManager.Maps.MapsDefaultSize[0, 0], p.ReadUInt16BE());
+                        _UL.MapSizeWrapSize[mapNumber, 0] = Math.Min((ushort) ServiceProvider.Get<AssetsService>().Maps.MapsDefaultSize[0, 0], p.ReadUInt16BE());
 
-                        _UL.MapSizeWrapSize[mapNumber, 1] = Math.Min((ushort) ServiceProvider.Get<UOService>().FileManager.Maps.MapsDefaultSize[0, 1], p.ReadUInt16BE());
+                        _UL.MapSizeWrapSize[mapNumber, 1] = Math.Min((ushort) ServiceProvider.Get<AssetsService>().Maps.MapsDefaultSize[0, 1], p.ReadUInt16BE());
 
                         _UL.MapSizeWrapSize[mapNumber, 2] = Math.Min(p.ReadUInt16BE(), _UL.MapSizeWrapSize[mapNumber, 0]);
                         _UL.MapSizeWrapSize[mapNumber, 3] = Math.Min(p.ReadUInt16BE(), _UL.MapSizeWrapSize[mapNumber, 1]);
@@ -378,7 +378,7 @@ namespace ClassicUO.Game
                     if (_UL._ValidMaps.Count == 0 || validMaps.Count > _UL._ValidMaps.Count || !validMaps.TrueForAll(i => _UL._ValidMaps.Contains(i)))
                     {
                         _UL._ValidMaps = validMaps;
-                        var mapLoader = new ULMapLoader(ServiceProvider.Get<UOService>().FileManager, (uint)sbyte.MaxValue);
+                        var mapLoader = new ULMapLoader(ServiceProvider.Get<AssetsService>().FileManager, (uint)sbyte.MaxValue);
 
                         //for (int i = 0; i < maps; i++)
                         for (int i = 0; i < validMaps.Count; i++)
@@ -473,9 +473,9 @@ namespace ClassicUO.Game
                 return;
             }
 
-            var uoService = ServiceProvider.Get<UOService>();
-            int mapWidthInBlocks = uoService.FileManager.Maps.MapBlocksSize[mapId, 0];
-            int mapHeightInBlocks = uoService.FileManager.Maps.MapBlocksSize[mapId, 1];
+            var assetsService = ServiceProvider.Get<AssetsService>();
+            int mapWidthInBlocks = assetsService.Maps.MapBlocksSize[mapId, 0];
+            int mapHeightInBlocks = assetsService.Maps.MapBlocksSize[mapId, 1];
 
             if (block >= 0 && block < mapWidthInBlocks * mapHeightInBlocks)
             {
@@ -547,7 +547,7 @@ namespace ClassicUO.Game
                     }
                 }
 
-                ServiceProvider.Get<UIService>().GetGump<MiniMapGump>()?.RequestUpdateContents();
+                ServiceProvider.Get<GuiService>().GetGump<MiniMapGump>()?.RequestUpdateContents();
 
                 //ServiceProvider.Get<UIService>().GetGump<WorldMapGump>()?.UpdateMap();
             }
@@ -665,7 +665,7 @@ namespace ClassicUO.Game
             public override void Dispose()
             {
                 base.Dispose();
-                ServiceProvider.Get<UOService>().FileManager.Maps.Dispose();
+                ServiceProvider.Get<AssetsService>().Maps.Dispose();
             }
         }
 
@@ -684,7 +684,7 @@ namespace ClassicUO.Game
 
         //     public override void Dispose()
         //     {
-        //         ServiceProvider.Get<UOService>().FileManager.Maps.Dispose();
+        //         ServiceProvider.Get<AssetsService>().Maps.Dispose();
         //     }
 
         //     public void WriteArray(long position, byte[] array)
@@ -761,15 +761,15 @@ namespace ClassicUO.Game
 
             public override void Load()
             {
-                var uoService = ServiceProvider.Get<UOService>();
+                var assetsService = ServiceProvider.Get<AssetsService>();
 
-                if (uoService.FileManager.Maps is ULMapLoader)
+                if (assetsService.Maps is ULMapLoader)
                 {
                     return;
                 }
 
-                uoService.FileManager.Maps?.Dispose();
-                uoService.FileManager.Maps = this;
+                assetsService.Maps?.Dispose();
+                assetsService.Maps = this;
 
                 _UL._EOF = new uint[NumMaps];
                 _filesStaticsStream = new FileStream[NumMaps];

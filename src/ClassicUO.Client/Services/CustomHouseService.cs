@@ -19,10 +19,10 @@ internal class CustomHouseService : IService
     {
         if (_customHouseRequests.Count > 0)
         {
+            var outPackets = ServiceProvider.Get<PacketHandlerService>().Out;
+
             for (int i = 0; i < _customHouseRequests.Count; ++i)
-            {
-                ServiceProvider.Get<PacketHandlerService>().Out.Send_CustomHouseDataRequest(_customHouseRequests[i]);
-            }
+                outPackets.Send_CustomHouseDataRequest(_customHouseRequests[i]);
 
             _customHouseRequests.Clear();
         }

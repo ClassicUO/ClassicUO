@@ -393,7 +393,7 @@ namespace ClassicUO.Network
         {
             if (index >= 0 && index < ArtLoader.MAX_STATIC_DATA_INDEX_COUNT)
             {
-                ref StaticTiles st = ref ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[index];
+                ref StaticTiles st = ref ServiceProvider.Get<AssetsService>().TileData.StaticData[index];
 
                 flags = (ulong)st.Flags;
                 weight = st.Weight;
@@ -419,7 +419,7 @@ namespace ClassicUO.Network
         {
             if (index >= 0 && index < ArtLoader.MAX_STATIC_DATA_INDEX_COUNT)
             {
-                ref LandTiles st = ref ServiceProvider.Get<UOService>().FileManager.TileData.LandData[index];
+                ref LandTiles st = ref ServiceProvider.Get<AssetsService>().TileData.LandData[index];
 
                 flags = (ulong)st.Flags;
                 textid = st.TexID;
@@ -433,14 +433,14 @@ namespace ClassicUO.Network
 
         private static bool GetCliloc(int cliloc, string args, bool capitalize, out string buffer)
         {
-            buffer = ServiceProvider.Get<UOService>().FileManager.Clilocs.Translate(cliloc, args, capitalize);
+            buffer = ServiceProvider.Get<AssetsService>().Clilocs.Translate(cliloc, args, capitalize);
 
             return buffer != null;
         }
 
         private static void GetStaticImage(ushort g, ref CUO_API.ArtInfo info)
         {
-            //ServiceProvider.Get<UOService>().FileManager.Arts.TryGetEntryInfo(g, out long address, out long size, out long compressedsize);
+            //ServiceProvider.Get<AssetsService>().Arts.TryGetEntryInfo(g, out long address, out long size, out long compressedsize);
             //info.Address = address;
             //info.Size = size;
             //info.CompressedSize = compressedsize;
@@ -622,11 +622,11 @@ namespace ClassicUO.Network
 
         internal static bool ProcessHotkeys(int key, int mod, bool ispressed)
         {
-            if ((!ServiceProvider.Get<UOService>().World?.InGame ?? false) || ServiceProvider.Get<UIService>().SystemChat != null && (
+            if ((!ServiceProvider.Get<UOService>().World?.InGame ?? false) || ServiceProvider.Get<GuiService>().SystemChat != null && (
                         ProfileManager.CurrentProfile != null
                             && ProfileManager.CurrentProfile.ActivateChatAfterEnter
-                            && ServiceProvider.Get<UIService>().SystemChat.IsActive
-                        || ServiceProvider.Get<UIService>().KeyboardFocusControl != ServiceProvider.Get<UIService>().SystemChat.TextBoxControl
+                            && ServiceProvider.Get<GuiService>().SystemChat.IsActive
+                        || ServiceProvider.Get<GuiService>().KeyboardFocusControl != ServiceProvider.Get<GuiService>().SystemChat.TextBoxControl
                     )
             )
             {

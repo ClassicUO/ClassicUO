@@ -28,7 +28,7 @@ namespace ClassicUO.Game.GameObjects
         public ref LandTiles TileData
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get => ref ServiceProvider.Get<UOService>().FileManager.TileData.LandData[Graphic];
+            get => ref ServiceProvider.Get<AssetsService>().TileData.LandData[Graphic];
         }
         public sbyte AverageZ;
         public bool IsStretched;
@@ -95,7 +95,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void ApplyStretch(Map.Map map, int x, int y, sbyte z)
         {
-            if (IsStretched || ServiceProvider.Get<UOService>().FileManager.Texmaps.File.GetValidRefEntry(TileData.TexID).Length <= 0)
+            if (IsStretched || ServiceProvider.Get<AssetsService>().Texmaps.File.GetValidRefEntry(TileData.TexID).Length <= 0)
             {
                 IsStretched = false;
                 AverageZ = z;

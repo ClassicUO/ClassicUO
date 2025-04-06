@@ -147,7 +147,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public static void Create(World world)
         {
-            var gump = ServiceProvider.Get<UIService>().GetGump<TopBarGump>();
+            var gump = ServiceProvider.Get<GuiService>().GetGump<TopBarGump>();
 
             if (gump == null)
             {
@@ -159,7 +159,7 @@ namespace ClassicUO.Game.UI.Gumps
                     ProfileManager.CurrentProfile.TopbarGumpPosition = Point.Zero;
                 }
 
-                ServiceProvider.Get<UIService>().Add(
+                ServiceProvider.Get<GuiService>().Add(
                     gump = new TopBarGump(world)
                     {
                         X = ProfileManager.CurrentProfile.TopbarGumpPosition.X,
@@ -256,12 +256,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case Buttons.Debug:
 
-                    var debugGump = ServiceProvider.Get<UIService>().GetGump<DebugGump>();
+                    var debugGump = ServiceProvider.Get<GuiService>().GetGump<DebugGump>();
 
                     if (debugGump == null)
                     {
                         debugGump = new DebugGump(World, 100, 100);
-                        ServiceProvider.Get<UIService>().Add(debugGump);
+                        ServiceProvider.Get<GuiService>().Add(debugGump);
                     }
                     else
                     {
@@ -272,12 +272,12 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.NetStats:
-                    var netstatsgump = ServiceProvider.Get<UIService>().GetGump<NetworkStatsGump>();
+                    var netstatsgump = ServiceProvider.Get<GuiService>().GetGump<NetworkStatsGump>();
 
                     if (netstatsgump == null)
                     {
                         netstatsgump = new NetworkStatsGump(World, 100, 100);
-                        ServiceProvider.Get<UIService>().Add(netstatsgump);
+                        ServiceProvider.Get<GuiService>().Add(netstatsgump);
                     }
                     else
                     {

@@ -47,14 +47,14 @@ namespace ClassicUO.Game
 
         public static void OpenMacroGump(World world, string name)
         {
-            var uiService = ServiceProvider.Get<UIService>();
+            var uiService = ServiceProvider.Get<GuiService>();
             uiService.GetGump<MacroGump>()?.Dispose();
             uiService.Add(new MacroGump(world, name));
         }
 
         public static void OpenPaperdoll(World world, uint serial)
         {
-            var paperDollGump = ServiceProvider.Get<UIService>().GetGump<PaperDollGump>(serial);
+            var paperDollGump = ServiceProvider.Get<GuiService>().GetGump<PaperDollGump>(serial);
 
             if (paperDollGump == null)
             {
@@ -74,7 +74,7 @@ namespace ClassicUO.Game
 
         public static void OpenSettings(World world, int page = 0)
         {
-            var uiService = ServiceProvider.Get<UIService>();
+            var uiService = ServiceProvider.Get<GuiService>();
             var opt = uiService.GetGump<OptionsGump>();
 
             if (opt == null)
@@ -102,13 +102,13 @@ namespace ClassicUO.Game
 
             if (StatusGumpBase.GetStatusGump() == null)
             {
-                ServiceProvider.Get<UIService>().Add(StatusGumpBase.AddStatusGump(world, 100, 100));
+                ServiceProvider.Get<GuiService>().Add(StatusGumpBase.AddStatusGump(world, 100, 100));
             }
         }
 
         public static void OpenJournal(World world)
         {
-            var uiService = ServiceProvider.Get<UIService>();
+            var uiService = ServiceProvider.Get<GuiService>();
 
             if (ProfileManager.CurrentProfile.UseAlternateJournal)
             {
@@ -139,7 +139,7 @@ namespace ClassicUO.Game
             if (world.Player == null)
                 return;
 
-            var skillsGump = ServiceProvider.Get<UIService>().GetGump<StandardSkillsGump>();
+            var skillsGump = ServiceProvider.Get<GuiService>().GetGump<StandardSkillsGump>();
 
             if (skillsGump != null && skillsGump.IsMinimized)
             {
@@ -154,7 +154,7 @@ namespace ClassicUO.Game
 
         public static void OpenMiniMap(World world)
         {
-            var uiService = ServiceProvider.Get<UIService>();
+            var uiService = ServiceProvider.Get<GuiService>();
             var miniMapGump = uiService.GetGump<MiniMapGump>();
 
             if (miniMapGump == null)
@@ -171,7 +171,7 @@ namespace ClassicUO.Game
 
         public static void OpenWorldMap(World world)
         {
-            var uiService = ServiceProvider.Get<UIService>();
+            var uiService = ServiceProvider.Get<GuiService>();
             var worldMap = uiService.GetGump<WorldMapGump>();
 
             if (worldMap == null || worldMap.IsDisposed)
@@ -188,7 +188,7 @@ namespace ClassicUO.Game
 
         public static void OpenChat(World world)
         {
-            var uiService = ServiceProvider.Get<UIService>();
+            var uiService = ServiceProvider.Get<GuiService>();
 
             if (world.ChatManager.ChatIsEnabled == ChatStatus.Enabled)
             {
@@ -255,7 +255,7 @@ namespace ClassicUO.Game
                 return false;
             }
 
-            var backpackGump = ServiceProvider.Get<UIService>().GetGump<ContainerGump>(backpack);
+            var backpackGump = ServiceProvider.Get<GuiService>().GetGump<ContainerGump>(backpack);
 
             if (backpackGump == null)
             {
@@ -299,7 +299,7 @@ namespace ClassicUO.Game
                         }
                     );
 
-                    ServiceProvider.Get<UIService>().Add(messageBox);
+                    ServiceProvider.Get<GuiService>().Add(messageBox);
 
                     return;
                 }
@@ -426,7 +426,7 @@ namespace ClassicUO.Game
         {
             ServiceProvider.Get<PacketHandlerService>().Out.Send_PartyAccept(serial);
 
-            ServiceProvider.Get<UIService>().GetGump<PartyInviteGump>()?.Dispose();
+            ServiceProvider.Get<GuiService>().GetGump<PartyInviteGump>()?.Dispose();
         }
 
         public static void RequestPartyRemoveMemberByTarget()
@@ -484,7 +484,7 @@ namespace ClassicUO.Game
 
             if (amount <= -1 && item.Amount > 1 && item.ItemData.IsStackable)
             {
-                var uiService = ServiceProvider.Get<UIService>();
+                var uiService = ServiceProvider.Get<GuiService>();
 
                 if (ProfileManager.CurrentProfile.HoldShiftToSplitStack == Keyboard.Shift)
                 {
@@ -772,7 +772,7 @@ namespace ClassicUO.Game
 
         public static void OpenAbilitiesBook(World world)
         {
-            var uiService = ServiceProvider.Get<UIService>();
+            var uiService = ServiceProvider.Get<GuiService>();
 
             if (uiService.GetGump<CombatBookGump>() == null)
             {

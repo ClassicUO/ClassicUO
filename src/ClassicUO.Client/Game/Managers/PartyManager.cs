@@ -56,7 +56,7 @@ namespace ClassicUO.Game.Managers
                                 break;
                             }
 
-                            var gump = ServiceProvider.Get<UIService>().GetGump<BaseHealthBarGump>(mem.Serial);
+                            var gump = ServiceProvider.Get<GuiService>().GetGump<BaseHealthBarGump>(mem.Serial);
 
                             if (gump != null)
                             {
@@ -71,7 +71,7 @@ namespace ClassicUO.Game.Managers
 
                         Clear();
 
-                        ServiceProvider.Get<UIService>().GetGump<PartyGump>()?.RequestUpdateContents();
+                        ServiceProvider.Get<GuiService>().GetGump<PartyGump>()?.RequestUpdateContents();
 
                         break;
                     }
@@ -84,7 +84,7 @@ namespace ClassicUO.Game.Managers
                     {
                         to_remove = p.ReadUInt32BE();
 
-                        ServiceProvider.Get<UIService>().GetGump<BaseHealthBarGump>(to_remove)?.RequestUpdateContents();
+                        ServiceProvider.Get<GuiService>().GetGump<BaseHealthBarGump>(to_remove)?.RequestUpdateContents();
                     }
 
                     bool remove_all = !add && to_remove == _world.Player;
@@ -115,7 +115,7 @@ namespace ClassicUO.Game.Managers
                             Leader = serial;
                         }
 
-                        var gump = ServiceProvider.Get<UIService>().GetGump<BaseHealthBarGump>(serial);
+                        var gump = ServiceProvider.Get<GuiService>().GetGump<BaseHealthBarGump>(serial);
 
                         if (gump != null)
                         {
@@ -140,7 +140,7 @@ namespace ClassicUO.Game.Managers
 
                                 Members[i] = null;
 
-                                ServiceProvider.Get<UIService>().GetGump<BaseHealthBarGump>(serial)?.RequestUpdateContents();
+                                ServiceProvider.Get<GuiService>().GetGump<BaseHealthBarGump>(serial)?.RequestUpdateContents();
                             }
                         }
 
@@ -148,7 +148,7 @@ namespace ClassicUO.Game.Managers
                     }
 
 
-                    ServiceProvider.Get<UIService>().GetGump<PartyGump>()?.RequestUpdateContents();
+                    ServiceProvider.Get<GuiService>().GetGump<PartyGump>()?.RequestUpdateContents();
 
                     break;
 
@@ -183,7 +183,7 @@ namespace ClassicUO.Game.Managers
 
                     if (ProfileManager.CurrentProfile.PartyInviteGump)
                     {
-                        ServiceProvider.Get<UIService>().Add(new PartyInviteGump(_world, Inviter));
+                        ServiceProvider.Get<GuiService>().Add(new PartyInviteGump(_world, Inviter));
                     }
 
                     break;

@@ -932,7 +932,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            List<SpeechEntry> entries = ServiceProvider.Get<UOService>().FileManager.Speeches.GetKeywords(text);
+            List<SpeechEntry> entries = ServiceProvider.Get<AssetsService>().Speeches.GetKeywords(text);
             bool encoded = entries != null && entries.Count != 0;
 
             if (encoded)
@@ -981,7 +981,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            var entries = ServiceProvider.Get<UOService>().FileManager.Speeches.GetKeywords(text);
+            var entries = ServiceProvider.Get<AssetsService>().Speeches.GetKeywords(text);
             bool encoded = entries.Count != 0;
 
             if (encoded)
@@ -4640,10 +4640,10 @@ namespace ClassicUO.Network
             writer.WriteUInt16BE(0xBEEF);
             writer.WriteUInt8(0x01);
 
-            var uoService = ServiceProvider.Get<UOService>();
-            writer.WriteUInt16BE((ushort)uoService.FileManager.Skills.SortedSkills.Count);
+            var assetsService = ServiceProvider.Get<AssetsService>();
+            writer.WriteUInt16BE((ushort)assetsService.Skills.SortedSkills.Count);
 
-            foreach (SkillEntry s in uoService.FileManager.Skills.SortedSkills)
+            foreach (var s in assetsService.Skills.SortedSkills)
             {
                 writer.WriteUInt16BE((ushort)s.Index);
                 writer.WriteBool(s.HasAction);

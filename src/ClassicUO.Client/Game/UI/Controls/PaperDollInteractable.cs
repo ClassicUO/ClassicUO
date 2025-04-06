@@ -184,6 +184,7 @@ namespace ClassicUO.Game.UI.Controls
 
             bool switch_arms_with_torso = false;
             var uoService = ServiceProvider.Get<UOService>();
+            var assetsService = ServiceProvider.Get<AssetsService>();
 
             if (
                 HasFakeItem
@@ -210,7 +211,7 @@ namespace ClassicUO.Game.UI.Controls
                 && (byte)Layer.Cloak == ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.ItemData.Layer
             )
             {
-                layers = uoService.FileManager.TileData.StaticData[ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Graphic].IsContainer
+                layers = assetsService.TileData.StaticData[ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Graphic].IsContainer
                     ? _layerOrder_quiver_fix
                     : _layerOrder;
             }
@@ -393,7 +394,7 @@ namespace ClassicUO.Game.UI.Controls
 
             ServiceProvider.Get<UOService>().Animations.ConvertBodyIfNeeded(ref mobileGraphic);
 
-            if (ServiceProvider.Get<UOService>().FileManager.Animations.EquipConversions.TryGetValue(mobileGraphic, out var dict))
+            if (ServiceProvider.Get<AssetsService>().Animations.EquipConversions.TryGetValue(mobileGraphic, out var dict))
             {
                 if (dict.TryGetValue(animID, out EquipConvData data))
                 {
@@ -412,7 +413,7 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            if (ServiceProvider.Get<UOService>().FileManager.TileArt.TryGetTileArtInfo(itemGraphic, out var tileArtInfo) && tileArtInfo != null)
+            if (ServiceProvider.Get<AssetsService>().TileArt.TryGetTileArtInfo(itemGraphic, out var tileArtInfo) && tileArtInfo != null)
             {
                 if (tileArtInfo.TryGetAppearance(mobileGraphic, out var appareanceId))
                 {
@@ -513,7 +514,7 @@ namespace ClassicUO.Game.UI.Controls
                         CanLift
                         && !ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled
                         && Mouse.LButtonPressed
-                        && ServiceProvider.Get<UIService>().LastControlMouseDown(MouseButtonType.Left) == this
+                        && ServiceProvider.Get<GuiService>().LastControlMouseDown(MouseButtonType.Left) == this
                         && (
                             Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF
                                 && Mouse.LastLeftButtonClickTime != 0

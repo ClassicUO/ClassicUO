@@ -9,7 +9,6 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Sdk.Assets;
-using ClassicUO.Network;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 using SDL2;
@@ -201,7 +200,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     if (mobile != _world.Player)
                     {
-                        if (ServiceProvider.Get<UIService>().GetGump<BaseHealthBarGump>(mobile) != null)
+                        if (ServiceProvider.Get<GuiService>().GetGump<BaseHealthBarGump>(mobile) != null)
                         {
                             continue;
                         }
@@ -232,7 +231,7 @@ namespace ClassicUO.Game.Scenes
                         hbgc.Y = finalY;
 
                         foreach (
-                            BaseHealthBarGump bar in ServiceProvider.Get<UIService>().Gumps
+                            BaseHealthBarGump bar in ServiceProvider.Get<GuiService>().Gumps
                                 .OfType<BaseHealthBarGump>()
                                 //.OrderBy(s => mobile.NotorietyFlag)
                                 //.OrderBy(s => s.ScreenCoordinateX) ///testing placement SYRUPZ SYRUPZ SYRUPZ
@@ -265,7 +264,7 @@ namespace ClassicUO.Game.Scenes
                         if (!ProfileManager.CurrentProfile.DragSelectAsAnchor)
                             finalY += rect.Height + 2;
 
-                        ServiceProvider.Get<UIService>().Add(hbgc);
+                        ServiceProvider.Get<GuiService>().Add(hbgc);
 
                         hbgc.SetInScreen();
                     }
@@ -325,14 +324,14 @@ namespace ClassicUO.Game.Scenes
         private bool OnLeftMouseDown()
         {
             if (
-                ServiceProvider.Get<UIService>().PopupMenu != null
-                && !ServiceProvider.Get<UIService>().PopupMenu.Bounds.Contains(Mouse.Position.X, Mouse.Position.Y)
+                ServiceProvider.Get<GuiService>().PopupMenu != null
+                && !ServiceProvider.Get<GuiService>().PopupMenu.Bounds.Contains(Mouse.Position.X, Mouse.Position.Y)
             )
             {
-                ServiceProvider.Get<UIService>().ShowGamePopup(null);
+                ServiceProvider.Get<GuiService>().ShowGamePopup(null);
             }
 
-            if (!ServiceProvider.Get<UIService>().IsMouseOverWorld)
+            if (!ServiceProvider.Get<GuiService>().IsMouseOverWorld)
             {
                 return false;
             }
@@ -382,11 +381,11 @@ namespace ClassicUO.Game.Scenes
         private bool OnLeftMouseUp()
         {
             if (
-                ServiceProvider.Get<UIService>().PopupMenu != null
-                && !ServiceProvider.Get<UIService>().PopupMenu.Bounds.Contains(Mouse.Position.X, Mouse.Position.Y)
+                ServiceProvider.Get<GuiService>().PopupMenu != null
+                && !ServiceProvider.Get<GuiService>().PopupMenu.Bounds.Contains(Mouse.Position.X, Mouse.Position.Y)
             )
             {
-                ServiceProvider.Get<UIService>().ShowGamePopup(null);
+                ServiceProvider.Get<GuiService>().ShowGamePopup(null);
             }
 
             if (_isMouseLeftDown)
@@ -408,15 +407,15 @@ namespace ClassicUO.Game.Scenes
                 return true;
             }
 
-            if (!ServiceProvider.Get<UIService>().IsMouseOverWorld)
+            if (!ServiceProvider.Get<GuiService>().IsMouseOverWorld)
             {
                 return false;
             }
 
-            if (ServiceProvider.Get<UIService>().SystemChat != null && !ServiceProvider.Get<UIService>().SystemChat.IsFocused)
+            if (ServiceProvider.Get<GuiService>().SystemChat != null && !ServiceProvider.Get<GuiService>().SystemChat.IsFocused)
             {
-                ServiceProvider.Get<UIService>().KeyboardFocusControl = null;
-                ServiceProvider.Get<UIService>().SystemChat.SetFocus();
+                ServiceProvider.Get<GuiService>().KeyboardFocusControl = null;
+                ServiceProvider.Get<GuiService>().SystemChat.SetFocus();
             }
 
             if (!ProfileManager.CurrentProfile.DisableAutoMove && _rightMousePressed)
@@ -427,7 +426,7 @@ namespace ClassicUO.Game.Scenes
             var lastObj = SelectedObject.Object;
             SelectedObject.LastLeftDownObject = null;
 
-            if (ServiceProvider.Get<UIService>().IsDragging)
+            if (ServiceProvider.Get<GuiService>().IsDragging)
             {
                 return false;
             }
@@ -501,7 +500,7 @@ namespace ClassicUO.Game.Scenes
                         if (gobj is Land land) { }
                         else
                         {
-                            ref StaticTiles itemData = ref _uoService.FileManager.TileData.StaticData[
+                            ref var itemData = ref ServiceProvider.Get<AssetsService>().TileData.StaticData[
                                 gobj.Graphic
                             ];
 
@@ -601,19 +600,19 @@ namespace ClassicUO.Game.Scenes
                             {
                                 case Entity ent:
                                     _world.TargetManager.Target(ent.Serial);
-                                    ServiceProvider.Get<UIService>().Add(new InspectorGump(_world, ent));
+                                    ServiceProvider.Get<GuiService>().Add(new InspectorGump(_world, ent));
 
                                     break;
 
                                 case Land land:
                                     _world.TargetManager.Target(0, land.X, land.Y, land.Z);
-                                    ServiceProvider.Get<UIService>().Add(new InspectorGump(_world, land));
+                                    ServiceProvider.Get<GuiService>().Add(new InspectorGump(_world, land));
 
                                     break;
 
                                 case GameObject o:
                                     _world.TargetManager.Target(o.Graphic, o.X, o.Y, o.Z);
-                                    ServiceProvider.Get<UIService>().Add(new InspectorGump(_world, o));
+                                    ServiceProvider.Get<GuiService>().Add(new InspectorGump(_world, o));
 
                                     break;
                             }
@@ -654,7 +653,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (string.IsNullOrEmpty(name))
                         {
-                            name = _uoService.FileManager.Clilocs.GetString(
+                            name = ServiceProvider.Get<AssetsService>().Clilocs.GetString(
                                 1020000 + st.Graphic,
                                 st.ItemData.Name
                             );
@@ -684,7 +683,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (string.IsNullOrEmpty(name))
                         {
-                            name = _uoService.FileManager.Clilocs.GetString(
+                            name = ServiceProvider.Get<AssetsService>().Clilocs.GetString(
                                 1020000 + multi.Graphic,
                                 multi.ItemData.Name
                             );
@@ -747,7 +746,7 @@ namespace ClassicUO.Game.Scenes
         {
             bool result = false;
 
-            if (!ServiceProvider.Get<UIService>().IsMouseOverWorld)
+            if (!ServiceProvider.Get<GuiService>().IsMouseOverWorld)
             {
                 result = _world.DelayedObjectClickManager.IsEnabled;
 
@@ -812,14 +811,14 @@ namespace ClassicUO.Game.Scenes
         private bool OnRightMouseDown()
         {
             if (
-                ServiceProvider.Get<UIService>().PopupMenu != null
-                && !ServiceProvider.Get<UIService>().PopupMenu.Bounds.Contains(Mouse.Position.X, Mouse.Position.Y)
+                ServiceProvider.Get<GuiService>().PopupMenu != null
+                && !ServiceProvider.Get<GuiService>().PopupMenu.Bounds.Contains(Mouse.Position.X, Mouse.Position.Y)
             )
             {
-                ServiceProvider.Get<UIService>().ShowGamePopup(null);
+                ServiceProvider.Get<GuiService>().ShowGamePopup(null);
             }
 
-            if (!ServiceProvider.Get<UIService>().IsMouseOverWorld)
+            if (!ServiceProvider.Get<GuiService>().IsMouseOverWorld)
             {
                 return false;
             }
@@ -834,11 +833,11 @@ namespace ClassicUO.Game.Scenes
         private bool OnRightMouseUp()
         {
             if (
-                ServiceProvider.Get<UIService>().PopupMenu != null
-                && !ServiceProvider.Get<UIService>().PopupMenu.Bounds.Contains(Mouse.Position.X, Mouse.Position.Y)
+                ServiceProvider.Get<GuiService>().PopupMenu != null
+                && !ServiceProvider.Get<GuiService>().PopupMenu.Bounds.Contains(Mouse.Position.X, Mouse.Position.Y)
             )
             {
-                ServiceProvider.Get<UIService>().ShowGamePopup(null);
+                ServiceProvider.Get<GuiService>().ShowGamePopup(null);
             }
 
             _rightMousePressed = false;
@@ -849,12 +848,12 @@ namespace ClassicUO.Game.Scenes
                 _world.BoatMovingManager.MoveRequest(_world.Player.Direction, 0);
             }
 
-            return ServiceProvider.Get<UIService>().IsMouseOverWorld;
+            return ServiceProvider.Get<GuiService>().IsMouseOverWorld;
         }
 
         private bool OnRightMouseDoubleClick()
         {
-            if (!ServiceProvider.Get<UIService>().IsMouseOverWorld)
+            if (!ServiceProvider.Get<GuiService>().IsMouseOverWorld)
             {
                 return false;
             }
@@ -870,7 +869,7 @@ namespace ClassicUO.Game.Scenes
                 {
                     if (obj is Static || obj is Multi || obj is Item)
                     {
-                        ref StaticTiles itemdata = ref _uoService.FileManager.TileData.StaticData[
+                        ref var itemdata = ref ServiceProvider.Get<AssetsService>().TileData.StaticData[
                             obj.Graphic
                         ];
 
@@ -997,7 +996,7 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            if (!ServiceProvider.Get<UIService>().IsMouseOverWorld)
+            if (!ServiceProvider.Get<GuiService>().IsMouseOverWorld)
             {
                 return false;
             }
@@ -1021,7 +1020,7 @@ namespace ClassicUO.Game.Scenes
 
         internal override bool OnMouseDragging()
         {
-            if (!ServiceProvider.Get<UIService>().IsMouseOverWorld)
+            if (!ServiceProvider.Get<GuiService>().IsMouseOverWorld)
             {
                 return false;
             }
@@ -1062,7 +1061,7 @@ namespace ClassicUO.Game.Scenes
                     {
                         if (SerialHelper.IsMobile(obj.Serial) || obj is Item it && it.IsDamageable)
                         {
-                            var customgump = ServiceProvider.Get<UIService>().GetGump<BaseHealthBarGump>(
+                            var customgump = ServiceProvider.Get<GuiService>().GetGump<BaseHealthBarGump>(
                                 obj
                             );
                             customgump?.Dispose();
@@ -1081,7 +1080,7 @@ namespace ClassicUO.Game.Scenes
                                     HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE
                                 );
 
-                                ServiceProvider.Get<UIService>().Add(
+                                ServiceProvider.Get<GuiService>().Add(
                                     customgump = new HealthBarGumpCustom(_world, obj)
                                     {
                                         X = Mouse.LClickPosition.X - (rect.Width >> 1),
@@ -1093,7 +1092,7 @@ namespace ClassicUO.Game.Scenes
                             {
                                 var bounds = _uoService.Gumps.GetGump(0x0804).UV;
 
-                                ServiceProvider.Get<UIService>().Add(
+                                ServiceProvider.Get<GuiService>().Add(
                                     customgump = new HealthBarGump(_world, obj)
                                     {
                                         X = Mouse.LClickPosition.X - (bounds.Width >> 1),
@@ -1102,7 +1101,7 @@ namespace ClassicUO.Game.Scenes
                                 );
                             }
 
-                            ServiceProvider.Get<UIService>().AttemptDragControl(customgump, true);
+                            ServiceProvider.Get<GuiService>().AttemptDragControl(customgump, true);
                             ok = false;
                         }
                         else if (obj is Item item)
@@ -1130,10 +1129,10 @@ namespace ClassicUO.Game.Scenes
                 _world.TargetManager.CancelTarget();
             }
 
-            if (ServiceProvider.Get<UIService>().SystemChat == null)
+            if (ServiceProvider.Get<GuiService>().SystemChat == null)
                 return;
 
-            if (ServiceProvider.Get<UIService>().KeyboardFocusControl != ServiceProvider.Get<UIService>().SystemChat.TextBoxControl)
+            if (ServiceProvider.Get<GuiService>().KeyboardFocusControl != ServiceProvider.Get<GuiService>().SystemChat.TextBoxControl)
             {
                 return;
             }
@@ -1174,10 +1173,10 @@ namespace ClassicUO.Game.Scenes
                     if (
                         ProfileManager.CurrentProfile.ActivateChatAfterEnter
                         && ProfileManager.CurrentProfile.ActivateChatAdditionalButtons
-                        && !ServiceProvider.Get<UIService>().SystemChat.IsActive
+                        && !ServiceProvider.Get<GuiService>().SystemChat.IsActive
                     )
                     {
-                        ServiceProvider.Get<UIService>().SystemChat.IsActive = true;
+                        ServiceProvider.Get<GuiService>().SystemChat.IsActive = true;
                     }
 
                     break;
@@ -1196,16 +1195,16 @@ namespace ClassicUO.Game.Scenes
                     if (
                         ProfileManager.CurrentProfile.ActivateChatAfterEnter
                         && ProfileManager.CurrentProfile.ActivateChatAdditionalButtons
-                        && !ServiceProvider.Get<UIService>().SystemChat.IsActive
+                        && !ServiceProvider.Get<GuiService>().SystemChat.IsActive
                     )
                     {
                         if (!Keyboard.Shift && !Keyboard.Alt && !Keyboard.Ctrl)
                         {
-                            ServiceProvider.Get<UIService>().SystemChat.IsActive = true;
+                            ServiceProvider.Get<GuiService>().SystemChat.IsActive = true;
                         }
                         else if (Keyboard.Shift && e.keysym.sym == SDL.SDL_Keycode.SDLK_SEMICOLON)
                         {
-                            ServiceProvider.Get<UIService>().SystemChat.IsActive = true;
+                            ServiceProvider.Get<GuiService>().SystemChat.IsActive = true;
                         }
                     }
 
@@ -1214,11 +1213,11 @@ namespace ClassicUO.Game.Scenes
                 case SDL.SDL_Keycode.SDLK_RETURN:
                 case SDL.SDL_Keycode.SDLK_KP_ENTER:
 
-                    if (ServiceProvider.Get<UIService>().KeyboardFocusControl == ServiceProvider.Get<UIService>().SystemChat.TextBoxControl)
+                    if (ServiceProvider.Get<GuiService>().KeyboardFocusControl == ServiceProvider.Get<GuiService>().SystemChat.TextBoxControl)
                     {
                         if (ProfileManager.CurrentProfile.ActivateChatAfterEnter)
                         {
-                            ServiceProvider.Get<UIService>().SystemChat.Mode = ChatMode.Default;
+                            ServiceProvider.Get<GuiService>().SystemChat.Mode = ChatMode.Default;
 
                             if (
                                 !(
@@ -1227,7 +1226,7 @@ namespace ClassicUO.Game.Scenes
                                 )
                             )
                             {
-                                ServiceProvider.Get<UIService>().SystemChat.ToggleChatVisibility();
+                                ServiceProvider.Get<GuiService>().SystemChat.ToggleChatVisibility();
                             }
                         }
 
@@ -1238,8 +1237,8 @@ namespace ClassicUO.Game.Scenes
             }
 
             if (
-                ServiceProvider.Get<UIService>().KeyboardFocusControl == ServiceProvider.Get<UIService>().SystemChat.TextBoxControl
-                && ServiceProvider.Get<UIService>().SystemChat.IsActive
+                ServiceProvider.Get<GuiService>().KeyboardFocusControl == ServiceProvider.Get<GuiService>().SystemChat.TextBoxControl
+                && ServiceProvider.Get<GuiService>().SystemChat.IsActive
                 && ProfileManager.CurrentProfile.ActivateChatAfterEnter
             )
             {
@@ -1331,7 +1330,7 @@ namespace ClassicUO.Game.Scenes
                 }
                 else
                 {
-                    if (string.IsNullOrEmpty(ServiceProvider.Get<UIService>().SystemChat.TextBoxControl.Text))
+                    if (string.IsNullOrEmpty(ServiceProvider.Get<GuiService>().SystemChat.TextBoxControl.Text))
                     {
                         switch (e.keysym.sym)
                         {
@@ -1507,8 +1506,8 @@ namespace ClassicUO.Game.Scenes
 
         private bool CanExecuteMacro()
         {
-            return ServiceProvider.Get<UIService>().KeyboardFocusControl == ServiceProvider.Get<UIService>().SystemChat.TextBoxControl
-                && ServiceProvider.Get<UIService>().SystemChat.Mode >= ChatMode.Default;
+            return ServiceProvider.Get<GuiService>().KeyboardFocusControl == ServiceProvider.Get<GuiService>().SystemChat.TextBoxControl
+                && ServiceProvider.Get<GuiService>().SystemChat.Mode >= ChatMode.Default;
         }
 
         private void ExecuteMacro(MacroObject macro)
@@ -1525,6 +1524,7 @@ namespace ClassicUO.Game.Scenes
             var uoService = ServiceProvider.Get<UOService>();
             var audioService = ServiceProvider.Get<AudioService>();
             var sceneService = ServiceProvider.Get<SceneService>();
+            var assetsService = ServiceProvider.Get<AssetsService>();
 
             if ((_rightMousePressed || _continueRunning) && _world.InGame) // && !Pathfinder.AutoWalking)
             {
@@ -1570,7 +1570,7 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            if (!ServiceProvider.Get<UIService>().IsMouseOverWorld)
+            if (!ServiceProvider.Get<GuiService>().IsMouseOverWorld)
             {
                 return;
             }
@@ -1614,10 +1614,10 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            if (ServiceProvider.Get<UIService>().SystemChat != null && !ServiceProvider.Get<UIService>().SystemChat.IsFocused)
+            if (ServiceProvider.Get<GuiService>().SystemChat != null && !ServiceProvider.Get<GuiService>().SystemChat.IsFocused)
             {
-                ServiceProvider.Get<UIService>().KeyboardFocusControl = null;
-                ServiceProvider.Get<UIService>().SystemChat.SetFocus();
+                ServiceProvider.Get<GuiService>().KeyboardFocusControl = null;
+                ServiceProvider.Get<GuiService>().SystemChat.SetFocus();
             }
 
             if (!ProfileManager.CurrentProfile.DisableAutoMove && _rightMousePressed)
@@ -1628,7 +1628,7 @@ namespace ClassicUO.Game.Scenes
             var lastObj = SelectedObject.Object;
             SelectedObject.LastLeftDownObject = null;
 
-            if (ServiceProvider.Get<UIService>().IsDragging)
+            if (ServiceProvider.Get<GuiService>().IsDragging)
             {
                 return;
             }
@@ -1702,7 +1702,7 @@ namespace ClassicUO.Game.Scenes
                         if (gobj is Land land) { }
                         else
                         {
-                            ref StaticTiles itemData = ref uoService.FileManager.TileData.StaticData[
+                            ref var itemData = ref assetsService.TileData.StaticData[
                                 gobj.Graphic
                             ];
 
@@ -1802,19 +1802,19 @@ namespace ClassicUO.Game.Scenes
                             {
                                 case Entity ent:
                                     _world.TargetManager.Target(ent.Serial);
-                                    ServiceProvider.Get<UIService>().Add(new InspectorGump(_world, ent));
+                                    ServiceProvider.Get<GuiService>().Add(new InspectorGump(_world, ent));
 
                                     break;
 
                                 case Land land:
                                     _world.TargetManager.Target(0, land.X, land.Y, land.Z);
-                                    ServiceProvider.Get<UIService>().Add(new InspectorGump(_world, land));
+                                    ServiceProvider.Get<GuiService>().Add(new InspectorGump(_world, land));
 
                                     break;
 
                                 case GameObject o:
                                     _world.TargetManager.Target(o.Graphic, o.X, o.Y, o.Z);
-                                    ServiceProvider.Get<UIService>().Add(new InspectorGump(_world, o));
+                                    ServiceProvider.Get<GuiService>().Add(new InspectorGump(_world, o));
 
                                     break;
                             }
@@ -1855,7 +1855,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (string.IsNullOrEmpty(name))
                         {
-                            name = uoService.FileManager.Clilocs.GetString(
+                            name = assetsService.Clilocs.GetString(
                                 1020000 + st.Graphic,
                                 st.ItemData.Name
                             );
@@ -1885,7 +1885,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (string.IsNullOrEmpty(name))
                         {
-                            name = uoService.FileManager.Clilocs.GetString(
+                            name = assetsService.Clilocs.GetString(
                                 1020000 + multi.Graphic,
                                 multi.ItemData.Name
                             );

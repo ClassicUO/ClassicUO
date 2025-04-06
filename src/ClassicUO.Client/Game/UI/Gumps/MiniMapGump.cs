@@ -29,6 +29,7 @@ namespace ClassicUO.Game.UI.Gumps
         private long _timeMS;
         private bool _useLargeMap;
         private ushort _x, _y;
+        private readonly AssetsService _assetsService;
         private static readonly uint[][] _blankGumpsPixels = new uint[4][];
 
         const ushort SMALL_MAP_GRAPHIC = 5010;
@@ -36,6 +37,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public MiniMapGump(World world) : base(world, 0, 0)
         {
+            _assetsService = ServiceProvider.Get<AssetsService>();
             CanMove = true;
             AcceptMouseInput = true;
             CanCloseWithRightClick = true;
@@ -209,8 +211,7 @@ namespace ClassicUO.Game.UI.Gumps
             bool force = false
         )
         {
-            var uoService = ServiceProvider.Get<UOService>();
-            int mapBlockHeight = uoService.FileManager.Maps.MapBlocksSize[World.MapIndex, 1];
+            int mapBlockHeight = _assetsService.Maps.MapBlocksSize[World.MapIndex, 1];
 
             ushort lastX = World.Player.X;
             ushort lastY = World.Player.Y;
@@ -364,14 +365,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (isLand && color > 0x4000)
                             {
-                                color = uoService.FileManager.Hues.GetColor16(
+                                color = _assetsService.Hues.GetColor16(
                                     16384,
                                     (ushort)(color - 0x4000)
                                 ); //28672 is an arbitrary position in hues.mul, is the 14 position in the range
                             }
                             else
                             {
-                                color = uoService.FileManager.Hues.GetRadarColorData(color);
+                                color = _assetsService.Hues.GetRadarColorData(color);
                             }
 
                             int py = realBlockY + y - lastY;

@@ -81,7 +81,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            ServiceProvider.Get<UIService>().SavePosition(LocalSerial, Location);
+            ServiceProvider.Get<GuiService>().SavePosition(LocalSerial, Location);
 
             if (LocalSerial == World.Player)
             {
@@ -291,9 +291,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _racialAbilitiesBook.MouseDoubleClick += (sender, e) =>
                     {
-                        if (ServiceProvider.Get<UIService>().GetGump<RacialAbilitiesBookGump>() == null)
+                        if (ServiceProvider.Get<GuiService>().GetGump<RacialAbilitiesBookGump>() == null)
                         {
-                            ServiceProvider.Get<UIService>().Add(new RacialAbilitiesBookGump(World, 100, 100));
+                            ServiceProvider.Get<GuiService>().Add(new RacialAbilitiesBookGump(World, 100, 100));
                         }
                     };
                 }
@@ -349,13 +349,13 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (args.Button == MouseButtonType.Left)
             {
-                PartyGump party = ServiceProvider.Get<UIService>().GetGump<PartyGump>();
+                PartyGump party = ServiceProvider.Get<GuiService>().GetGump<PartyGump>();
 
                 if (party == null)
                 {
                     int x = ServiceProvider.Get<WindowService>().ClientBounds.Width / 2 - 272;
                     int y = ServiceProvider.Get<WindowService>().ClientBounds.Height / 2 - 240;
-                    ServiceProvider.Get<UIService>().Add(new PartyGump(World, x, y, World.Party.CanLoot));
+                    ServiceProvider.Get<GuiService>().Add(new PartyGump(World, x, y, World.Party.CanLoot));
                 }
                 else
                 {
@@ -409,7 +409,7 @@ namespace ClassicUO.Game.UI.Gumps
                     !_paperDollInteractable.HasFakeItem
                     && ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled
                     && !ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.IsFixedPosition
-                    && ServiceProvider.Get<UIService>().MouseOverControl?.RootParent == this
+                    && ServiceProvider.Get<GuiService>().MouseOverControl?.RootParent == this
                 )
                 {
                     if (ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.ItemData.AnimID != 0)
@@ -487,7 +487,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (World.TargetManager.TargetingState == CursorTarget.SetTargetClientSide)
                         {
-                            ServiceProvider.Get<UIService>().Add(new InspectorGump(World,item));
+                            ServiceProvider.Get<GuiService>().Add(new InspectorGump(World,item));
                         }
                     }
                     else if (!World.DelayedObjectClickManager.IsEnabled)
@@ -615,13 +615,13 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (LocalSerial == World.Player)
                     {
-                        ServiceProvider.Get<UIService>().GetGump<BaseHealthBarGump>(LocalSerial)?.Dispose();
+                        ServiceProvider.Get<GuiService>().GetGump<BaseHealthBarGump>(LocalSerial)?.Dispose();
 
                         StatusGumpBase status = StatusGumpBase.GetStatusGump();
 
                         if (status == null)
                         {
-                            ServiceProvider.Get<UIService>().Add(
+                            ServiceProvider.Get<GuiService>().Add(
                                 StatusGumpBase.AddStatusGump(World,
                                     Mouse.Position.X - 100,
                                     Mouse.Position.Y - 25
@@ -635,7 +635,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                     {
-                        if (ServiceProvider.Get<UIService>().GetGump<BaseHealthBarGump>(LocalSerial) != null)
+                        if (ServiceProvider.Get<GuiService>().GetGump<BaseHealthBarGump>(LocalSerial) != null)
                         {
                             break;
                         }
@@ -649,7 +649,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE
                             );
 
-                            ServiceProvider.Get<UIService>().Add(
+                            ServiceProvider.Get<GuiService>().Add(
                                 new HealthBarGumpCustom(World, LocalSerial)
                                 {
                                     X = Mouse.Position.X - (bounds.Width >> 1),
@@ -661,7 +661,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             ref readonly var gumpInfo = ref ServiceProvider.Get<UOService>().Gumps.GetGump(0x0804);
 
-                            ServiceProvider.Get<UIService>().Add(
+                            ServiceProvider.Get<GuiService>().Add(
                                 new HealthBarGump(World,LocalSerial)
                                 {
                                     X = Mouse.Position.X - (gumpInfo.UV.Width >> 1),

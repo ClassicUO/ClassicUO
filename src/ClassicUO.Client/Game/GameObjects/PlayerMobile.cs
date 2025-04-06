@@ -19,12 +19,12 @@ namespace ClassicUO.Game.GameObjects
 
         public PlayerMobile(World world, uint serial) : base(world, serial)
         {
-            var uoService = ServiceProvider.Get<UOService>();
-            Skills = new Skill[uoService.FileManager.Skills.SkillsCount];
+            var assetsService = ServiceProvider.Get<AssetsService>();
+            Skills = new Skill[assetsService.Skills.SkillsCount];
 
             for (int i = 0; i < Skills.Length; i++)
             {
-                SkillEntry skill = uoService.FileManager.Skills.Skills[i];
+                SkillEntry skill = assetsService.Skills.Skills[i];
                 Skills[i] = new Skill(skill.Name, skill.Index, skill.HasAction);
             }
 
@@ -245,13 +245,13 @@ namespace ClassicUO.Game.GameObjects
             {
                 ushort animId = weapon.ItemData.AnimID;
                 ushort animGraphic = 0;
-                var uoService = ServiceProvider.Get<UOService>();
+                var assetsService = ServiceProvider.Get<AssetsService>();
 
-                if (uoService.FileManager.TileData.StaticData[weapon.Graphic - 1].AnimID == animId)
+                if (assetsService.TileData.StaticData[weapon.Graphic - 1].AnimID == animId)
                 {
                     animGraphic = (ushort)(weapon.Graphic - 1);
                 }
-                else if (uoService.FileManager.TileData.StaticData[weapon.Graphic + 1].AnimID == animId)
+                else if (assetsService.TileData.StaticData[weapon.Graphic + 1].AnimID == animId)
                 {
                     animGraphic = (ushort)(weapon.Graphic + 1);
                 }
@@ -266,7 +266,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            for (var gump = ServiceProvider.Get<UIService>().Gumps.First; gump != null; gump = gump.Next)
+            for (var gump = ServiceProvider.Get<GuiService>().Gumps.First; gump != null; gump = gump.Next)
             {
                 if (gump.Value is UseAbilityButtonGump or CombatBookGump)
                     gump.Value.RequestUpdateContents();
@@ -364,7 +364,7 @@ namespace ClassicUO.Game.GameObjects
                     bank.Items = null;
                 }
 
-                ServiceProvider.Get<UIService>().GetGump<ContainerGump>(bank.Serial)?.Dispose();
+                ServiceProvider.Get<GuiService>().GetGump<ContainerGump>(bank.Serial)?.Dispose();
 
                 bank.Opened = false;
             }
@@ -372,7 +372,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void CloseRangedGumps()
         {
-            foreach (Gump gump in ServiceProvider.Get<UIService>().Gumps)
+            foreach (Gump gump in ServiceProvider.Get<GuiService>().Gumps)
             {
                 switch (gump)
                 {

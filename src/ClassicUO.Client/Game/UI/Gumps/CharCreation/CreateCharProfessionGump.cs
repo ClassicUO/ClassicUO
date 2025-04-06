@@ -19,9 +19,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             _Parent = parent;
 
-            if (parent == null || !ServiceProvider.Get<UOService>().FileManager.Professions.Professions.TryGetValue(parent, out var professions) || professions == null)
+            if (parent == null || !ServiceProvider.Get<AssetsService>().Professions.Professions.TryGetValue(parent, out var professions) || professions == null)
             {
-                professions = new List<ProfessionInfo>(ServiceProvider.Get<UOService>().FileManager.Professions.Professions.Keys);
+                professions = new List<ProfessionInfo>(ServiceProvider.Get<AssetsService>().Professions.Professions.Keys);
             }
 
             /* Build the gump */
@@ -40,7 +40,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             Add(new GumpPic(214, 58, 0x058B, 0));
             Add(new GumpPic(300, 51, 0x15A9, 0));
 
-            ClilocLoader localization = ServiceProvider.Get<UOService>().FileManager.Clilocs;
+            ClilocLoader localization = ServiceProvider.Get<AssetsService>().Clilocs;
 
             bool isAsianLang = string.Compare(Settings.GlobalSettings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 ||
                 string.Compare(Settings.GlobalSettings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
@@ -89,14 +89,14 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public void SelectProfession(ProfessionInfo info)
         {
-            if (info.Type == ProfessionLoader.PROF_TYPE.CATEGORY && ServiceProvider.Get<UOService>().FileManager.Professions.Professions.TryGetValue(info, out var list) && list != null)
+            if (info.Type == ProfessionLoader.PROF_TYPE.CATEGORY && ServiceProvider.Get<AssetsService>().Professions.Professions.TryGetValue(info, out var list) && list != null)
             {
                 Parent?.Add(new CreateCharProfessionGump(World, info));
                 Parent?.Remove(this);
             }
             else
             {
-                var charCreationGump = ServiceProvider.Get<UIService>().GetGump<CharCreationGump>();
+                var charCreationGump = ServiceProvider.Get<GuiService>().GetGump<CharCreationGump>();
 
                 charCreationGump?.SetProfession(info);
             }
@@ -117,7 +117,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     else
                     {
                         Parent?.Remove(this);
-                        var charCreationGump = ServiceProvider.Get<UIService>().GetGump<CharCreationGump>();
+                        var charCreationGump = ServiceProvider.Get<GuiService>().GetGump<CharCreationGump>();
                         charCreationGump?.StepBack();
                     }
 
@@ -142,7 +142,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             _info = info;
 
-            ClilocLoader localization = ServiceProvider.Get<UOService>().FileManager.Clilocs;
+            ClilocLoader localization = ServiceProvider.Get<AssetsService>().Clilocs;
 
             ResizePic background = new ResizePic(3000)
             {

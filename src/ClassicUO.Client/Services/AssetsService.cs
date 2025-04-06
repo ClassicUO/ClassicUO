@@ -1,17 +1,20 @@
+using ClassicUO.Sdk;
 using ClassicUO.Sdk.Assets;
 
 namespace ClassicUO.Services
 {
-    internal class FileManagerService : IService
+    internal class AssetsService : IService
     {
         private readonly ClassicUO.Sdk.UOFileManager _fileManager;
 
-        public FileManagerService(ClassicUO.Sdk.UOFileManager fileManager)
+        public AssetsService(ClassicUO.Sdk.UOFileManager fileManager)
         {
             _fileManager = fileManager;
         }
 
-        public MapLoader Maps => _fileManager.Maps;
+        public UOFileManager FileManager => _fileManager;
+
+        public MapLoader Maps { get => _fileManager.Maps; set => _fileManager.Maps = value; }
         public ClilocLoader Clilocs => _fileManager.Clilocs;
         public SkillsLoader Skills => _fileManager.Skills;
         public SpeechesLoader Speeches => _fileManager.Speeches;
@@ -24,6 +27,11 @@ namespace ClassicUO.Services
         public MultiLoader Multis => _fileManager.Multis;
         public SoundsLoader Sounds => _fileManager.Sounds;
         public VerdataLoader Verdata => _fileManager.Verdata;
+        public FontsLoader Fonts => _fileManager.Fonts;
+        public TileArtLoader TileArt => _fileManager.TileArt;
+        public TexmapsLoader Texmaps => _fileManager.Texmaps;
+        public ProfessionLoader Professions => _fileManager.Professions;
+        public AnimDataLoader AnimData => _fileManager.AnimData;
 
         public string GetUOFilePath(string file)
         {

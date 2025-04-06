@@ -1,5 +1,4 @@
 using ClassicUO.Game;
-using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Services
 {

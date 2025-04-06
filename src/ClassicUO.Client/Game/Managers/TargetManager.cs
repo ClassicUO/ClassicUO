@@ -106,12 +106,14 @@ namespace ClassicUO.Game.Managers
         private readonly byte[] _lastDataBuffer = new byte[19];
         private readonly UOService _uoService;
         private readonly NetClientService _netClientService;
+        private readonly AssetsService _assetsService;
 
         public TargetManager(World world)
         {
             _world = world;
             _uoService = ServiceProvider.Get<UOService>();
             _netClientService = ServiceProvider.Get<NetClientService>();
+            _assetsService = ServiceProvider.Get<AssetsService>();
         }
 
         public uint LastAttack, SelectedTarget, NewTargetSystemSerial;
@@ -191,7 +193,7 @@ namespace ClassicUO.Game.Managers
                     _world.CustomHouseManager.SelectedGraphic = 0;
                     _world.CustomHouseManager.CombinedStair = false;
 
-                    ServiceProvider.Get<UIService>().GetGump<HouseCustomizationGump>()?.Update();
+                    ServiceProvider.Get<GuiService>().GetGump<HouseCustomizationGump>()?.Update();
                 }
             }
 
@@ -270,7 +272,7 @@ namespace ClassicUO.Game.Managers
                                     showCriminalQuery = true;
                                 }
 
-                                if (showCriminalQuery && ServiceProvider.Get<UIService>().GetGump<QuestionGump>() == null)
+                                if (showCriminalQuery && ServiceProvider.Get<GuiService>().GetGump<QuestionGump>() == null)
                                 {
                                     QuestionGump messageBox = new QuestionGump
                                     (
@@ -298,7 +300,7 @@ namespace ClassicUO.Game.Managers
                                         }
                                     );
 
-                                    ServiceProvider.Get<UIService>().Add(messageBox);
+                                    ServiceProvider.Get<GuiService>().Add(messageBox);
 
                                     return;
                                 }
@@ -405,12 +407,12 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
-                if (graphic >= _uoService.FileManager.TileData.StaticData.Length)
+                if (graphic >= _assetsService.TileData.StaticData.Length)
                 {
                     return;
                 }
 
-                ref StaticTiles itemData = ref _uoService.FileManager.TileData.StaticData[graphic];
+                ref StaticTiles itemData = ref _assetsService.TileData.StaticData[graphic];
 
                 if (_uoService.Version >= ClientVersion.CV_7090 && itemData.IsSurface)
                 {

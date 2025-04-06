@@ -222,7 +222,7 @@ namespace ClassicUO.Game.Data
             {
                 _ids = ids;
 
-                Labels = labels.Select(o => ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(o)).ToArray();
+                Labels = labels.Select(o => ServiceProvider.Get<AssetsService>().Clilocs.GetString(o)).ToArray();
             }
 
             public string[] Labels { get; }

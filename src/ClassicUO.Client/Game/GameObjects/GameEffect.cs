@@ -21,7 +21,7 @@ namespace ClassicUO.Game.GameObjects
             Hue = hue;
             AllowedToDraw = CanBeDrawn(world, graphic);
             AlphaHue = 0xFF;
-            AnimDataFrame = ServiceProvider.Get<UOService>()?.FileManager?.AnimData?.CalculateCurrentGraphic(graphic) ?? default;
+            AnimDataFrame = ServiceProvider.Get<AssetsService>()?.AnimData?.CalculateCurrentGraphic(graphic) ?? default;
             IsEnabled = true;
             AnimIndex = 0;
 

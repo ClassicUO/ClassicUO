@@ -99,7 +99,7 @@ namespace ClassicUO.Game
 
                         if (IsHTML)
                         {
-                            ServiceProvider.Get<UOService>().FileManager.Fonts.SetUseHTML(false);
+                            ServiceProvider.Get<AssetsService>().Fonts.SetUseHTML(false);
                         }
 
                         Links.Clear();
@@ -113,7 +113,7 @@ namespace ClassicUO.Game
 
                         if (IsUnicode)
                         {
-                            _info = ServiceProvider.Get<UOService>().FileManager.Fonts.GetInfoUnicode(
+                            _info = ServiceProvider.Get<AssetsService>().Fonts.GetInfoUnicode(
                                 Font,
                                 Text,
                                 Text.Length,
@@ -126,7 +126,7 @@ namespace ClassicUO.Game
                         }
                         else
                         {
-                            _info = ServiceProvider.Get<UOService>().FileManager.Fonts.GetInfoASCII(
+                            _info = ServiceProvider.Get<AssetsService>().Fonts.GetInfoASCII(
                                 Font,
                                 Text,
                                 Text.Length,
@@ -202,7 +202,7 @@ namespace ClassicUO.Game
 
             if (IsUnicode)
             {
-                (p.X, p.Y) = ServiceProvider.Get<UOService>().FileManager.Fonts.GetCaretPosUnicode(
+                (p.X, p.Y) = ServiceProvider.Get<AssetsService>().Fonts.GetCaretPosUnicode(
                     Font,
                     Text,
                     caret_index,
@@ -213,7 +213,7 @@ namespace ClassicUO.Game
             }
             else
             {
-                (p.X, p.Y) = ServiceProvider.Get<UOService>().FileManager.Fonts.GetCaretPosASCII(
+                (p.X, p.Y) = ServiceProvider.Get<AssetsService>().Fonts.GetCaretPosASCII(
                     Font,
                     Text,
                     caret_index,
@@ -343,10 +343,10 @@ namespace ClassicUO.Game
 
                         if (IsUnicode)
                         {
-                            return ServiceProvider.Get<UOService>().FileManager.Fonts.GetCharWidthUnicode(Font, c);
+                            return ServiceProvider.Get<AssetsService>().Fonts.GetCharWidthUnicode(Font, c);
                         }
 
-                        return ServiceProvider.Get<UOService>().FileManager.Fonts.GetCharWidthASCII(Font, c);
+                        return ServiceProvider.Get<AssetsService>().Fonts.GetCharWidthASCII(Font, c);
                     }
                 }
 
@@ -361,10 +361,10 @@ namespace ClassicUO.Game
         {
             if (IsUnicode)
             {
-                return ServiceProvider.Get<UOService>().FileManager.Fonts.GetCharWidthUnicode(Font, c);
+                return ServiceProvider.Get<AssetsService>().Fonts.GetCharWidthUnicode(Font, c);
             }
 
-            return ServiceProvider.Get<UOService>().FileManager.Fonts.GetCharWidthASCII(Font, c);
+            return ServiceProvider.Get<AssetsService>().Fonts.GetCharWidthASCII(Font, c);
         }
 
         public bool Draw(
@@ -583,15 +583,15 @@ namespace ClassicUO.Game
 
             if (IsHTML)
             {
-                ServiceProvider.Get<UOService>().FileManager.Fonts.SetUseHTML(true, HTMLColor, HasBackgroundColor);
+                ServiceProvider.Get<AssetsService>().Fonts.SetUseHTML(true, HTMLColor, HasBackgroundColor);
             }
 
-            ServiceProvider.Get<UOService>().FileManager.Fonts.RecalculateWidthByInfo = RecalculateWidthByInfo;
+            ServiceProvider.Get<AssetsService>().Fonts.RecalculateWidthByInfo = RecalculateWidthByInfo;
 
             FontsLoader.FontInfo fi;
             if (IsUnicode)
             {
-                fi = ServiceProvider.Get<UOService>().FileManager.Fonts.GenerateUnicode(
+                fi = ServiceProvider.Get<AssetsService>().Fonts.GenerateUnicode(
                     Font,
                     Text,
                     Hue,
@@ -605,7 +605,7 @@ namespace ClassicUO.Game
             }
             else
             {
-                fi = ServiceProvider.Get<UOService>().FileManager.Fonts.GenerateASCII(
+                fi = ServiceProvider.Get<AssetsService>().Fonts.GenerateASCII(
                     Font,
                     Text,
                     Hue,
@@ -672,10 +672,10 @@ namespace ClassicUO.Game
 
             if (IsHTML)
             {
-                ServiceProvider.Get<UOService>().FileManager.Fonts.SetUseHTML(false);
+                ServiceProvider.Get<AssetsService>().Fonts.SetUseHTML(false);
             }
 
-            ServiceProvider.Get<UOService>().FileManager.Fonts.RecalculateWidthByInfo = false;
+            ServiceProvider.Get<AssetsService>().Fonts.RecalculateWidthByInfo = false;
         }
 
         public void Destroy()

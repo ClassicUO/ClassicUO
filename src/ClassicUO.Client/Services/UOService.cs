@@ -19,8 +19,6 @@ namespace ClassicUO.Services
     {
         private readonly UltimaOnline _uo;
 
-        public event EventHandler? Activated;
-        public event EventHandler? Deactivated;
 
         public UOService(UltimaOnline uo)
         {
@@ -37,17 +35,6 @@ namespace ClassicUO.Services
         public Renderer.Sounds.Sound Sounds => _uo.Sounds;
         public World World => _uo.World;
         public ClientVersion Version => _uo.Version;
-        public UOFileManager FileManager => _uo.FileManager;
         public ClientFlags Protocol => _uo.Protocol;
-
-        internal void OnActivated()
-        {
-            Activated?.Invoke(this, EventArgs.Empty);
-        }
-
-        internal void OnDeactivated()
-        {
-            Deactivated?.Invoke(this, EventArgs.Empty);
-        }
     }
 }

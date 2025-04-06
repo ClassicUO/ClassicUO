@@ -65,7 +65,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (button == MouseButtonType.Left)
             {
-                ServiceProvider.Get<UIService>().GetGump<ColorPickerGump>()?.Dispose();
+                ServiceProvider.Get<GuiService>().GetGump<ColorPickerGump>()?.Dispose();
 
                 ColorPickerGump pickerGump = new ColorPickerGump
                 (
@@ -77,7 +77,7 @@ namespace ClassicUO.Game.UI.Controls
                     s => Hue = s
                 );
 
-                ServiceProvider.Get<UIService>().Add(pickerGump);
+                ServiceProvider.Get<GuiService>().Add(pickerGump);
             }
         }
     }

@@ -263,7 +263,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (button == MouseButtonType.Left)
             {
-                var uoService = ServiceProvider.Get<UOService>();
+                var assetsService = ServiceProvider.Get<AssetsService>();
                 if (_gameText != null)
                 {
                     for (int i = 0; i < _gameText.Links.Count; i++)
@@ -272,7 +272,7 @@ namespace ClassicUO.Game.UI.Controls
 
                         bool inbounds = link.Bounds.Contains(x, (_scrollBar == null ? 0 : _scrollBar.Value) + y);
 
-                        if (inbounds && uoService.FileManager.Fonts.GetWebLink(link.LinkID, out var result))
+                        if (inbounds && assetsService.Fonts.GetWebLink(link.LinkID, out var result))
                         {
                             Log.Info("LINK CLICKED: " + result.Link);
 

@@ -541,7 +541,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         _graphic = graphic;
                         _hue = hue;
-                        _partial = ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[graphic].IsPartialHue;
+                        _partial = ServiceProvider.Get<AssetsService>().TileData.StaticData[graphic].IsPartialHue;
                         _label.Y = Parent.Height - 15;
                     }
                     else

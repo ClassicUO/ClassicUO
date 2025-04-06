@@ -118,7 +118,7 @@ namespace ClassicUO.Game.UI.Gumps
                         };
 
                         Add(text, page);
-                        text.SetTooltip(ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(1061693 + offs), 150);
+                        text.SetTooltip(ServiceProvider.Get<AssetsService>().Clilocs.GetString(1061693 + offs), 150);
 
                         y += 15;
                         offs++;
@@ -130,7 +130,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             byte bab1 = (byte)(((byte)World.Player.PrimaryAbility & 0x7F) - 1);
                             _primAbility = new GumpPic(215, 105, (ushort)(0x5200 + bab1), (ushort)(((byte)World.Player.PrimaryAbility & 0x80) != 0 ? 38 : 0));
-                            _primAbility.SetTooltip(ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(1028838 + bab1));
+                            _primAbility.SetTooltip(ServiceProvider.Get<AssetsService>().Clilocs.GetString(1028838 + bab1));
                             _primAbility.DragBegin += OnGumpicDragBeginPrimary;
                             _primAbility.MouseDoubleClick += PrimaryAbilityMouseDoubleClick;
                         }
@@ -152,7 +152,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             byte bab2 = (byte)(((byte)World.Player.SecondaryAbility & 0x7F) - 1);
                             _secAbility = new GumpPic(215, 150, (ushort)(0x5200 + bab2), (ushort)(((byte)World.Player.SecondaryAbility & 0x80) != 0 ? 38 : 0));
-                            _secAbility.SetTooltip(ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(1028838 + bab2));
+                            _secAbility.SetTooltip(ServiceProvider.Get<AssetsService>().Clilocs.GetString(1028838 + bab2));
                             _secAbility.DragBegin += OnGumpicDragBeginSecondary;
                             _secAbility.MouseDoubleClick += SecondaryAbilityMouseDoubleClick;
                         }
@@ -187,7 +187,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 GumpPic icon = new GumpPic(62, 40, (ushort) (0x5200 + i), 0);
                 Add(icon, pageW);
-                icon.SetTooltip(ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(1061693 + i), 150);
+                icon.SetTooltip(ServiceProvider.Get<AssetsService>().Clilocs.GetString(1061693 + i), 150);
 
                 Label text = new Label
                 (
@@ -217,7 +217,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
                 List<ushort> list = GetItemsList((byte) i);
-                int maxStaticCount = ServiceProvider.Get<UOService>().FileManager.TileData.StaticData.Length;
+                int maxStaticCount = ServiceProvider.Get<AssetsService>().TileData.StaticData.Length;
 
                 int textX = 62;
                 int textY = 98;
@@ -238,7 +238,7 @@ namespace ClassicUO.Game.UI.Gumps
                         continue;
                     }
 
-                    text = new Label(StringHelper.CapitalizeAllWords(ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[id].Name), false, 0x0288, font: 9)
+                    text = new Label(StringHelper.CapitalizeAllWords(ServiceProvider.Get<AssetsService>().TileData.StaticData[id].Name), false, 0x0288, font: 9)
                     {
                         X = textX,
                         Y = textY
@@ -279,9 +279,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragBegin(int x, int y)
         {
-            if (ServiceProvider.Get<UIService>().MouseOverControl?.RootParent == this)
+            if (ServiceProvider.Get<GuiService>().MouseOverControl?.RootParent == this)
             {
-                ServiceProvider.Get<UIService>().MouseOverControl.InvokeDragBegin(new Point(x, y));
+                ServiceProvider.Get<GuiService>().MouseOverControl.InvokeDragBegin(new Point(x, y));
             }
 
             base.OnDragBegin(x, y);
@@ -289,9 +289,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragEnd(int x, int y)
         {
-            if (ServiceProvider.Get<UIService>().MouseOverControl?.RootParent == this)
+            if (ServiceProvider.Get<GuiService>().MouseOverControl?.RootParent == this)
             {
-                ServiceProvider.Get<UIService>().MouseOverControl.InvokeDragEnd(new Point(x, y));
+                ServiceProvider.Get<GuiService>().MouseOverControl.InvokeDragEnd(new Point(x, y));
             }
 
             base.OnDragEnd(x, y);
@@ -299,7 +299,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void OnGumpicDragBeginPrimary(object sender, EventArgs e)
         {
-            if (ServiceProvider.Get<UIService>().DraggingControl != this || ServiceProvider.Get<UIService>().MouseOverControl != sender)
+            if (ServiceProvider.Get<GuiService>().DraggingControl != this || ServiceProvider.Get<GuiService>().MouseOverControl != sender)
             {
                 return;
             }
@@ -314,13 +314,13 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = Mouse.LClickPosition.Y - 22
             };
 
-            ServiceProvider.Get<UIService>().Add(gump);
-            ServiceProvider.Get<UIService>().AttemptDragControl(gump, true);
+            ServiceProvider.Get<GuiService>().Add(gump);
+            ServiceProvider.Get<GuiService>().AttemptDragControl(gump, true);
         }
 
         private void OnGumpicDragBeginSecondary(object sender, EventArgs e)
         {
-            if (ServiceProvider.Get<UIService>().DraggingControl != this || ServiceProvider.Get<UIService>().MouseOverControl != sender)
+            if (ServiceProvider.Get<GuiService>().DraggingControl != this || ServiceProvider.Get<GuiService>().MouseOverControl != sender)
             {
                 return;
             }
@@ -335,13 +335,13 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = Mouse.LClickPosition.Y - 22
             };
 
-            ServiceProvider.Get<UIService>().Add(gump);
-            ServiceProvider.Get<UIService>().AttemptDragControl(gump, true);
+            ServiceProvider.Get<GuiService>().Add(gump);
+            ServiceProvider.Get<GuiService>().AttemptDragControl(gump, true);
         }
 
         private static UseAbilityButtonGump GetSpellFloatingButton(int id)
         {
-            for (var i = ServiceProvider.Get<UIService>().Gumps.Last; i != null; i = i.Previous)
+            for (var i = ServiceProvider.Get<GuiService>().Gumps.Last; i != null; i = i.Previous)
             {
                 if (i.Value is UseAbilityButtonGump g && g.Index == id)
                 {

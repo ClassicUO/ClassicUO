@@ -127,8 +127,8 @@ namespace ClassicUO
 
             UO.Setup(this);
             ServiceProvider.Register(_packetHandlerService = new PacketHandlerService(new PacketHandlers(), new IncomingPackets(UO.World), new OutgoingPackets(netClient), netClient));
-            ServiceProvider.Register(new FileManagerService(UO.FileManager));
-            ServiceProvider.Register(new UIService(_ui = new()));
+            ServiceProvider.Register(new AssetsService(UO.FileManager));
+            ServiceProvider.Register(new GuiService(_ui = new()));
             ServiceProvider.Register(new GameCursorService(_cursor = new GameCursor(UO.World)));
             ServiceProvider.Register(new MegaClilocRequestsService());
             ServiceProvider.Register(new CustomHouseService());
@@ -919,13 +919,13 @@ namespace ClassicUO
         protected override void OnActivated(object sender, EventArgs args)
         {
             base.OnActivated(sender, args);
-            ServiceProvider.Get<UOService>()?.OnActivated();
+            ServiceProvider.Get<EngineService>().OnActivated();
         }
 
         protected override void OnDeactivated(object sender, EventArgs args)
         {
             base.OnDeactivated(sender, args);
-            ServiceProvider.Get<UOService>()?.OnDeactivated();
+            ServiceProvider.Get<EngineService>().OnDeactivated();
         }
     }
 }

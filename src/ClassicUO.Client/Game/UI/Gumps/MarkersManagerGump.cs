@@ -442,21 +442,21 @@ namespace ClassicUO.Game.UI.Gumps
                 switch (buttonId)
                 {
                     case (int)ButtonsOption.EDIT_MARKER_BTN:
-                        var existingGump = ServiceProvider.Get<UIService>().GetGump<UserMarkersGump>();
+                        var existingGump = ServiceProvider.Get<GuiService>().GetGump<UserMarkersGump>();
 
                         existingGump?.Dispose();
 
                         var editUserMarkerGump = new UserMarkersGump(_gump.World, _marker.X, _marker.Y, _markers, _marker.ColorName, _marker.MarkerIconName, true, _idx);
                         editUserMarkerGump.EditEnd += OnEditEnd;
 
-                        ServiceProvider.Get<UIService>().Add(editUserMarkerGump);
+                        ServiceProvider.Get<GuiService>().Add(editUserMarkerGump);
 
                         break;
                     case (int)ButtonsOption.REMOVE_MARKER_BTN:
                         RemoveMarkerEvent?.Invoke( _idx, EventArgs.Empty);
                         break;
                     case (int)ButtonsOption.GOTO_MARKER_BTN:
-                        var wmGump = ServiceProvider.Get<UIService>().GetGump<WorldMapGump>();
+                        var wmGump = ServiceProvider.Get<GuiService>().GetGump<WorldMapGump>();
                         if (wmGump != null)
                         {
                             wmGump.GoToMarker(_marker.X, _marker.Y, false);

@@ -8,11 +8,11 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Services;
 
-internal class UIService : IService
+internal class GuiService : IService
 {
     private readonly UIManager _ui;
 
-    public UIService(UIManager ui)
+    public GuiService(UIManager ui)
     {
         _ui = ui;
     }

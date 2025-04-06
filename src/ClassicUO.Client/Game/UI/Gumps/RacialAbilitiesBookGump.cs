@@ -174,7 +174,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     pic.DragBegin += (sender, e) =>
                     {
-                        if (ServiceProvider.Get<UIService>().DraggingControl != this || ServiceProvider.Get<UIService>().MouseOverControl != sender)
+                        if (ServiceProvider.Get<GuiService>().DraggingControl != this || ServiceProvider.Get<GuiService>().MouseOverControl != sender)
                         {
                             return;
                         }
@@ -185,8 +185,8 @@ namespace ClassicUO.Game.UI.Gumps
                             Y = Mouse.LClickPosition.Y - 20
                         };
 
-                        ServiceProvider.Get<UIService>().Add(gump);
-                        ServiceProvider.Get<UIService>().AttemptDragControl(gump, true);
+                        ServiceProvider.Get<GuiService>().Add(gump);
+                        ServiceProvider.Get<GuiService>().AttemptDragControl(gump, true);
                     };
 
                     pic.MouseDoubleClick += (sender, e) =>
@@ -222,9 +222,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragBegin(int x, int y)
         {
-            if (ServiceProvider.Get<UIService>().MouseOverControl?.RootParent == this)
+            if (ServiceProvider.Get<GuiService>().MouseOverControl?.RootParent == this)
             {
-                ServiceProvider.Get<UIService>().MouseOverControl.InvokeDragBegin(new Point(x, y));
+                ServiceProvider.Get<GuiService>().MouseOverControl.InvokeDragBegin(new Point(x, y));
             }
 
             base.OnDragBegin(x, y);
@@ -232,9 +232,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragEnd(int x, int y)
         {
-            if (ServiceProvider.Get<UIService>().MouseOverControl?.RootParent == this)
+            if (ServiceProvider.Get<GuiService>().MouseOverControl?.RootParent == this)
             {
-                ServiceProvider.Get<UIService>().MouseOverControl.InvokeDragEnd(new Point(x, y));
+                ServiceProvider.Get<GuiService>().MouseOverControl.InvokeDragEnd(new Point(x, y));
             }
 
             base.OnDragEnd(x, y);

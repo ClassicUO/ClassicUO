@@ -17,7 +17,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             LocalSerial = (uint) (7000 + graphic);
 
-            ServiceProvider.Get<UIService>().GetGump<RacialAbilityButton>(LocalSerial)?.Dispose();
+            ServiceProvider.Get<GuiService>().GetGump<RacialAbilityButton>(LocalSerial)?.Dispose();
 
             Graphic = graphic;
             BuildGump();

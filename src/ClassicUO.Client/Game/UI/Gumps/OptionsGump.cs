@@ -150,13 +150,13 @@ namespace ClassicUO.Game.UI.Gumps
 
         // Manteniamo i servizi che sono utilizzati in più metodi
         private readonly AudioManager _audioManager;
-        private readonly FileManagerService _fileManager;
+        private readonly AssetsService _fileManager;
         private readonly EngineService _gameService;
 
         public OptionsGump(World world) : base(world, 0, 0)
         {
             _audioManager = new AudioManager();
-            _fileManager = ServiceProvider.Get<FileManagerService>();
+            _fileManager = ServiceProvider.Get<AssetsService>();
             _gameService = ServiceProvider.Get<EngineService>();
 
             // Utilizzo di variabili locali per i servizi usati solo nel costruttore
@@ -2068,21 +2068,21 @@ namespace ClassicUO.Game.UI.Gumps
 
                         nb.DragBegin += (sss, eee) =>
                         {
-                            if (ServiceProvider.Get<UIService>().DraggingControl != this || ServiceProvider.Get<UIService>().MouseOverControl != sss)
+                            if (ServiceProvider.Get<GuiService>().DraggingControl != this || ServiceProvider.Get<GuiService>().MouseOverControl != sss)
                             {
                                 return;
                             }
 
-                            ServiceProvider.Get<UIService>().Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == _macroControl.Macro)?.Dispose();
+                            ServiceProvider.Get<GuiService>().Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == _macroControl.Macro)?.Dispose();
 
                             MacroButtonGump macroButtonGump = new MacroButtonGump(World, _macroControl.Macro, Mouse.Position.X, Mouse.Position.Y);
 
                             macroButtonGump.X = Mouse.Position.X - (macroButtonGump.Width >> 1);
                             macroButtonGump.Y = Mouse.Position.Y - (macroButtonGump.Height >> 1);
 
-                            ServiceProvider.Get<UIService>().Add(macroButtonGump);
+                            ServiceProvider.Get<GuiService>().Add(macroButtonGump);
 
-                            ServiceProvider.Get<UIService>().AttemptDragControl(macroButtonGump, true);
+                            ServiceProvider.Get<GuiService>().AttemptDragControl(macroButtonGump, true);
                         };
 
                         nb.MouseUp += (sss, eee) =>
@@ -2103,7 +2103,7 @@ namespace ClassicUO.Game.UI.Gumps
                     CanCloseWithRightClick = true
                 };
 
-                ServiceProvider.Get<UIService>().Add(dialog);
+                ServiceProvider.Get<GuiService>().Add(dialog);
             };
 
             delButton.MouseUp += (ss, ee) =>
@@ -2125,7 +2125,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (_macroControl != null)
                             {
-                                ServiceProvider.Get<UIService>().Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == _macroControl.Macro)?.Dispose();
+                                ServiceProvider.Get<GuiService>().Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == _macroControl.Macro)?.Dispose();
 
                                 World.Macros.Remove(_macroControl.Macro);
 
@@ -2137,7 +2137,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                     );
 
-                    ServiceProvider.Get<UIService>().Add(dialog);
+                    ServiceProvider.Get<GuiService>().Add(dialog);
                 }
             };
 
@@ -2179,21 +2179,21 @@ namespace ClassicUO.Game.UI.Gumps
                         return;
                     }
 
-                    if (ServiceProvider.Get<UIService>().DraggingControl != this || ServiceProvider.Get<UIService>().MouseOverControl != sss)
+                    if (ServiceProvider.Get<GuiService>().DraggingControl != this || ServiceProvider.Get<GuiService>().MouseOverControl != sss)
                     {
                         return;
                     }
 
-                    ServiceProvider.Get<UIService>().Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == m)?.Dispose();
+                    ServiceProvider.Get<GuiService>().Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == m)?.Dispose();
 
                     MacroButtonGump macroButtonGump = new MacroButtonGump(World, m, Mouse.Position.X, Mouse.Position.Y);
 
                     macroButtonGump.X = Mouse.Position.X - (macroButtonGump.Width >> 1);
                     macroButtonGump.Y = Mouse.Position.Y - (macroButtonGump.Height >> 1);
 
-                    ServiceProvider.Get<UIService>().Add(macroButtonGump);
+                    ServiceProvider.Get<GuiService>().Add(macroButtonGump);
 
-                    ServiceProvider.Get<UIService>().AttemptDragControl(macroButtonGump, true);
+                    ServiceProvider.Get<GuiService>().AttemptDragControl(macroButtonGump, true);
                 };
 
                 nb.MouseUp += (sss, eee) =>
@@ -3513,9 +3513,9 @@ namespace ClassicUO.Game.UI.Gumps
                 case Buttons.DeleteMacro: break;
                 case Buttons.OpenIgnoreList:
                     // If other IgnoreManagerGump exist - Dispose it
-                    ServiceProvider.Get<UIService>().GetGump<IgnoreManagerGump>()?.Dispose();
+                    ServiceProvider.Get<GuiService>().GetGump<IgnoreManagerGump>()?.Dispose();
                     // Open new
-                    ServiceProvider.Get<UIService>().Add(new IgnoreManagerGump(World));
+                    ServiceProvider.Get<GuiService>().Add(new IgnoreManagerGump(World));
                     break;
             }
         }
@@ -3673,7 +3673,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _allyMessageColorPickerBox.Hue = 0x0057;
                     _chatMessageColorPickerBox.Hue = 0x0256;
                     _chatAfterEnter.IsChecked = false;
-                    ServiceProvider.Get<UIService>().SystemChat.IsActive = !_chatAfterEnter.IsChecked;
+                    ServiceProvider.Get<GuiService>().SystemChat.IsActive = !_chatAfterEnter.IsChecked;
                     _chatAdditionalButtonsCheckbox.IsChecked = true;
                     _chatShiftEnterCheckbox.IsChecked = true;
                     _saveJournalCheckBox.IsChecked = false;
@@ -3752,7 +3752,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void Apply()
         {
-            WorldViewportGump vp = ServiceProvider.Get<UIService>().GetGump<WorldViewportGump>();
+            WorldViewportGump vp = ServiceProvider.Get<GuiService>().GetGump<WorldViewportGump>();
 
             // general
             if (Settings.GlobalSettings.FPS != _sliderFPS.Value)
@@ -3802,7 +3802,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (_enableTopbar.IsChecked)
                 {
-                    ServiceProvider.Get<UIService>().GetGump<TopBarGump>()?.Dispose();
+                    ServiceProvider.Get<GuiService>().GetGump<TopBarGump>()?.Dispose();
                 }
                 else
                 {
@@ -3834,22 +3834,22 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_useStandardSkillsGump.IsChecked)
             {
-                SkillGumpAdvanced newGump = ServiceProvider.Get<UIService>().GetGump<SkillGumpAdvanced>();
+                SkillGumpAdvanced newGump = ServiceProvider.Get<GuiService>().GetGump<SkillGumpAdvanced>();
 
                 if (newGump != null)
                 {
-                    ServiceProvider.Get<UIService>().Add(new StandardSkillsGump(World) { X = newGump.X, Y = newGump.Y });
+                    ServiceProvider.Get<GuiService>().Add(new StandardSkillsGump(World) { X = newGump.X, Y = newGump.Y });
 
                     newGump.Dispose();
                 }
             }
             else
             {
-                StandardSkillsGump standardGump = ServiceProvider.Get<UIService>().GetGump<StandardSkillsGump>();
+                StandardSkillsGump standardGump = ServiceProvider.Get<GuiService>().GetGump<StandardSkillsGump>();
 
                 if (standardGump != null)
                 {
-                    ServiceProvider.Get<UIService>().Add(new SkillGumpAdvanced(World) { X = standardGump.X, Y = standardGump.Y });
+                    ServiceProvider.Get<GuiService>().Add(new SkillGumpAdvanced(World) { X = standardGump.X, Y = standardGump.Y });
 
                     standardGump.Dispose();
                 }
@@ -3908,8 +3908,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_currentProfile.ActivateChatAfterEnter != _chatAfterEnter.IsChecked)
             {
-                if (ServiceProvider.Get<UIService>().SystemChat != null)
-                    ServiceProvider.Get<UIService>().SystemChat.IsActive = !_chatAfterEnter.IsChecked;
+                if (ServiceProvider.Get<GuiService>().SystemChat != null)
+                    ServiceProvider.Get<GuiService>().SystemChat.IsActive = !_chatAfterEnter.IsChecked;
                 _currentProfile.ActivateChatAfterEnter = _chatAfterEnter.IsChecked;
             }
 
@@ -3937,7 +3937,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (_currentProfile.StatusGumpBarMutuallyExclusive)
                         status.Dispose();
-                    ServiceProvider.Get<UIService>().Add(StatusGumpBase.AddStatusGump(World, status.ScreenCoordinateX, status.ScreenCoordinateY));
+                    ServiceProvider.Get<GuiService>().Add(StatusGumpBase.AddStatusGump(World, status.ScreenCoordinateX, status.ScreenCoordinateY));
                 }
             }
 
@@ -3945,7 +3945,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 var active = _currentProfile.StatusGumpBarMutuallyExclusive = _statusGumpBarMutuallyExclusive.IsChecked;
 
-                if (active && StatusGumpBase.GetStatusGump() != null && ServiceProvider.Get<UIService>().GetGump<BaseHealthBarGump>(World.Player) is {} bar)
+                if (active && StatusGumpBase.GetStatusGump() != null && ServiceProvider.Get<GuiService>().GetGump<BaseHealthBarGump>(World.Player) is {} bar)
                     bar.Dispose();
             }
 
@@ -4062,7 +4062,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_currentProfile.ChatFont != _fontValue)
             {
                 _currentProfile.ChatFont = _fontValue;
-                ServiceProvider.Get<UIService>().SystemChat.TextBoxControl.Font = _fontValue;
+                ServiceProvider.Get<GuiService>().SystemChat.TextBoxControl.Font = _fontValue;
             }
 
             // combat
@@ -4127,7 +4127,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.CounterBarHighlightOnAmount = _highlightOnAmount.IsChecked;
             _currentProfile.CounterBarDisplayAbbreviatedAmount = _enableAbbreviatedAmount.IsChecked;
 
-            var counterGump = ServiceProvider.Get<UIService>().GetGump<CounterBarGump>();
+            var counterGump = ServiceProvider.Get<GuiService>().GetGump<CounterBarGump>();
 
             counterGump?.SetLayout(_currentProfile.CounterBarCellSize, _currentProfile.CounterBarRows, _currentProfile.CounterBarColumns);
 
@@ -4138,7 +4138,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (_currentProfile.CounterBarEnabled)
                     {
-                        ServiceProvider.Get<UIService>().Add
+                        ServiceProvider.Get<GuiService>().Add
                         (
                             new CounterBarGump
                             (
@@ -4207,22 +4207,22 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (_currentProfile.CustomBarsToggled)
                 {
-                    List<HealthBarGump> hbgstandard = ServiceProvider.Get<UIService>().Gumps.OfType<HealthBarGump>().ToList();
+                    List<HealthBarGump> hbgstandard = ServiceProvider.Get<GuiService>().Gumps.OfType<HealthBarGump>().ToList();
 
                     foreach (HealthBarGump healthbar in hbgstandard)
                     {
-                        ServiceProvider.Get<UIService>().Add(new HealthBarGumpCustom(World, healthbar.LocalSerial) { X = healthbar.X, Y = healthbar.Y });
+                        ServiceProvider.Get<GuiService>().Add(new HealthBarGumpCustom(World, healthbar.LocalSerial) { X = healthbar.X, Y = healthbar.Y });
 
                         healthbar.Dispose();
                     }
                 }
                 else
                 {
-                    List<HealthBarGumpCustom> hbgcustom = ServiceProvider.Get<UIService>().Gumps.OfType<HealthBarGumpCustom>().ToList();
+                    List<HealthBarGumpCustom> hbgcustom = ServiceProvider.Get<GuiService>().Gumps.OfType<HealthBarGumpCustom>().ToList();
 
                     foreach (HealthBarGumpCustom customhealthbar in hbgcustom)
                     {
-                        ServiceProvider.Get<UIService>().Add(new HealthBarGump(World, customhealthbar.LocalSerial) { X = customhealthbar.X, Y = customhealthbar.Y });
+                        ServiceProvider.Get<GuiService>().Add(new HealthBarGump(World, customhealthbar.LocalSerial) { X = customhealthbar.X, Y = customhealthbar.Y });
 
                         customhealthbar.Dispose();
                     }
@@ -4249,13 +4249,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             World.InfoBars.Save();
 
-            var infoBarGump = ServiceProvider.Get<UIService>().GetGump<InfoBarGump>();
+            var infoBarGump = ServiceProvider.Get<GuiService>().GetGump<InfoBarGump>();
 
             if (_currentProfile.ShowInfoBar)
             {
                 if (infoBarGump == null)
                 {
-                    ServiceProvider.Get<UIService>().Add(new InfoBarGump(World) { X = 300, Y = 300 });
+                    ServiceProvider.Get<GuiService>().Add(new InfoBarGump(World) { X = 300, Y = 300 });
                 }
                 else
                 {
@@ -4278,10 +4278,10 @@ namespace ClassicUO.Game.UI.Gumps
             if ((byte) _containersScale.Value != containerScale || _currentProfile.ScaleItemsInsideContainers != _containerScaleItems.IsChecked)
             {
                 containerScale = _currentProfile.ContainersScale = (byte) _containersScale.Value;
-                ServiceProvider.Get<UIService>().ContainerScale = containerScale / 100f;
+                ServiceProvider.Get<GuiService>().ContainerScale = containerScale / 100f;
                 _currentProfile.ScaleItemsInsideContainers = _containerScaleItems.IsChecked;
 
-                foreach (ContainerGump resizableGump in ServiceProvider.Get<UIService>().Gumps.OfType<ContainerGump>())
+                foreach (ContainerGump resizableGump in ServiceProvider.Get<GuiService>().Gumps.OfType<ContainerGump>())
                 {
                     resizableGump.RequestUpdateContents();
                 }
@@ -4296,7 +4296,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_currentProfile.BackpackStyle != _backpackStyle.SelectedIndex)
             {
                 _currentProfile.BackpackStyle = _backpackStyle.SelectedIndex;
-                ServiceProvider.Get<UIService>().GetGump<PaperDollGump>(World.Player.Serial)?.RequestUpdateContents();
+                ServiceProvider.Get<GuiService>().GetGump<PaperDollGump>(World.Player.Serial)?.RequestUpdateContents();
                 Item backpack = World.Player.FindItemByLayer(Layer.Backpack);
                 GameActions.DoubleClick(World, backpack);
             }
@@ -4526,9 +4526,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragBegin(int x, int y)
         {
-            if (ServiceProvider.Get<UIService>().MouseOverControl?.RootParent == this)
+            if (ServiceProvider.Get<GuiService>().MouseOverControl?.RootParent == this)
             {
-                ServiceProvider.Get<UIService>().MouseOverControl.InvokeDragBegin(new Point(x, y));
+                ServiceProvider.Get<GuiService>().MouseOverControl.InvokeDragBegin(new Point(x, y));
             }
 
             base.OnDragBegin(x, y);
@@ -4536,9 +4536,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragEnd(int x, int y)
         {
-            if (ServiceProvider.Get<UIService>().MouseOverControl?.RootParent == this)
+            if (ServiceProvider.Get<GuiService>().MouseOverControl?.RootParent == this)
             {
-                ServiceProvider.Get<UIService>().MouseOverControl.InvokeDragEnd(new Point(x, y));
+                ServiceProvider.Get<GuiService>().MouseOverControl.InvokeDragEnd(new Point(x, y));
             }
 
             base.OnDragEnd(x, y);
@@ -4682,9 +4682,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _buttons = new RadioButton[max_font];
 
+                var assetsService = ServiceProvider.Get<AssetsService>();
                 for (byte i = 0; i < max_font; i++)
                 {
-                    if (ServiceProvider.Get<UOService>().FileManager.Fonts.UnicodeFontExists(i))
+                    if (assetsService.Fonts.UnicodeFontExists(i))
                     {
                         Add
                         (

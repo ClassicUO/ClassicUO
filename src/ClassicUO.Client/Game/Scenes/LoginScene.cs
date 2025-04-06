@@ -76,8 +76,8 @@ namespace ClassicUO.Game.Scenes
 
             _autoLogin = Settings.GlobalSettings.AutoLogin;
 
-            ServiceProvider.Get<UIService>().Add(new LoginBackground(_world));
-            ServiceProvider.Get<UIService>().Add(_currentGump = new LoginGump(_world, this));
+            ServiceProvider.Get<GuiService>().Add(new LoginBackground(_world));
+            ServiceProvider.Get<GuiService>().Add(_currentGump = new LoginGump(_world, this));
 
             var audioService = ServiceProvider.Get<AudioService>();
             audioService.PlayMusic(audioService.LoginMusicIndex, false, true);
@@ -111,7 +111,7 @@ namespace ClassicUO.Game.Scenes
             ServiceProvider.Get<AudioService>()?.StopMusic();
             ServiceProvider.Get<AudioService>()?.StopSounds();
 
-            ServiceProvider.Get<UIService>().GetGump<LoginBackground>()?.Dispose();
+            ServiceProvider.Get<GuiService>().GetGump<LoginBackground>()?.Dispose();
 
             _currentGump?.Dispose();
 
@@ -135,7 +135,7 @@ namespace ClassicUO.Game.Scenes
                 var g = _currentGump;
                 _currentGump = GetGumpForStep();
                 if (_currentGump != null)
-                    ServiceProvider.Get<UIService>().Add(_currentGump);
+                    ServiceProvider.Get<GuiService>().Add(_currentGump);
                 g?.Dispose();
 
                 _lastLoginStep = CurrentLoginStep;
@@ -243,26 +243,26 @@ namespace ClassicUO.Game.Scenes
                 switch (CurrentLoginStep)
                 {
                     case LoginSteps.Connecting:
-                        labelText = ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(3000002, ResGeneral.Connecting); // "Connecting..."
+                        labelText = ServiceProvider.Get<AssetsService>().Clilocs.GetString(3000002, ResGeneral.Connecting); // "Connecting..."
 
                         showButtons = LoginButtons.Cancel;
 
                         break;
 
                     case LoginSteps.VerifyingAccount:
-                        labelText = ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(3000003, ResGeneral.VerifyingAccount); // "Verifying Account..."
+                        labelText = ServiceProvider.Get<AssetsService>().Clilocs.GetString(3000003, ResGeneral.VerifyingAccount); // "Verifying Account..."
 
                         showButtons = LoginButtons.Cancel;
 
                         break;
 
                     case LoginSteps.LoginInToServer:
-                        labelText = ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(3000053, ResGeneral.LoggingIntoShard); // logging into shard
+                        labelText = ServiceProvider.Get<AssetsService>().Clilocs.GetString(3000053, ResGeneral.LoggingIntoShard); // logging into shard
 
                         break;
 
                     case LoginSteps.EnteringBritania:
-                        labelText = ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(3000001, ResGeneral.EnteringBritannia); // Entering Britania...
+                        labelText = ServiceProvider.Get<AssetsService>().Clilocs.GetString(3000001, ResGeneral.EnteringBritannia); // Entering Britania...
 
                         break;
 
@@ -541,7 +541,7 @@ namespace ClassicUO.Game.Scenes
 
                     PopupMessage = string.Format(ResGeneral.ReconnectPleaseWait01, _reconnectTryCounter, StringHelper.AddSpaceBeforeCapital(e.ToString()));
 
-                    ServiceProvider.Get<UIService>().GetGump<LoadingGump>()?.SetText(PopupMessage);
+                    ServiceProvider.Get<GuiService>().GetGump<LoadingGump>()?.SetText(PopupMessage);
                 }
                 else
                 {
@@ -586,16 +586,16 @@ namespace ClassicUO.Game.Scenes
                 PopupMessage = string.Empty;
             }
             CurrentLoginStep = LoginSteps.CharacterSelection;
-            ServiceProvider.Get<UIService>().GetGump<CharacterSelectionGump>()?.Dispose();
+            ServiceProvider.Get<GuiService>().GetGump<CharacterSelectionGump>()?.Dispose();
 
             _currentGump?.Dispose();
 
-            ServiceProvider.Get<UIService>().Add(_currentGump = new CharacterSelectionGump(_world));
+            ServiceProvider.Get<GuiService>().Add(_currentGump = new CharacterSelectionGump(_world));
             if (!string.IsNullOrWhiteSpace(PopupMessage))
             {
                 LoadingGump? g = null;
                 g = new LoadingGump(_world,PopupMessage, LoginButtons.OK, (but) => g?.Dispose()) { IsModal = true };
-                ServiceProvider.Get<UIService>().Add(g);
+                ServiceProvider.Get<GuiService>().Add(g);
                 PopupMessage = string.Empty;
             }
         }
@@ -754,7 +754,7 @@ namespace ClassicUO.Game.Scenes
                         cityIndex,
                         cityName,
                         cityBuilding,
-                        ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString((int) cityDescription),
+                        ServiceProvider.Get<AssetsService>().Clilocs.GetString((int) cityDescription),
                         cityX,
                         cityY,
                         cityZ,
@@ -788,7 +788,7 @@ namespace ClassicUO.Game.Scenes
 
         private string[] ReadCityTextFile(int count)
         {
-            string path = ServiceProvider.Get<UOService>().FileManager.GetUOFilePath("citytext.enu");
+            string path = ServiceProvider.Get<AssetsService>().GetUOFilePath("citytext.enu");
 
             if (!File.Exists(path))
             {

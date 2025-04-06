@@ -139,7 +139,7 @@ namespace ClassicUO.Game.GameObjects
                     ServiceProvider.Get<PacketHandlerService>().Out.Send_NameRequest(Serial);
                 }
 
-                ServiceProvider.Get<UIService>().Add(new NameOverheadGump(World, this));
+                ServiceProvider.Get<GuiService>().Add(new NameOverheadGump(World, this));
             }
 
 

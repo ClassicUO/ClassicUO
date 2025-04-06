@@ -452,7 +452,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                _hairLabel = new Label(ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), unicode, hue, font: font)
+                _hairLabel = new Label(ServiceProvider.Get<AssetsService>().Clilocs.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), unicode, hue, font: font)
                 {
                     X = 98, Y = 140
                 },
@@ -481,7 +481,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 Add
                 (
-                    _facialLabel = new Label(ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), unicode, hue, font: font)
+                    _facialLabel = new Label(ServiceProvider.Get<AssetsService>().Clilocs.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), unicode, hue, font: font)
                     {
                         X = 98, Y = 184
                     },
@@ -690,7 +690,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public override void OnButtonClick(int buttonID)
         {
-            CharCreationGump charCreationGump = ServiceProvider.Get<UIService>().GetGump<CharCreationGump>();
+            CharCreationGump charCreationGump = ServiceProvider.Get<GuiService>().GetGump<CharCreationGump>();
 
             switch ((Buttons) buttonID)
             {
@@ -793,7 +793,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             int invalid = Validate(character.Name);
             if (invalid > 0)
             {
-                ServiceProvider.Get<UIService>().GetGump<CharCreationGump>()?.ShowMessage(ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(invalid));
+                ServiceProvider.Get<GuiService>().GetGump<CharCreationGump>()?.ShowMessage(ServiceProvider.Get<AssetsService>().Clilocs.GetString(invalid));
 
                 return false;
             }
@@ -1074,7 +1074,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 Add
                 (
-                    new Label(ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(label), unicode, hue, font: font)
+                    new Label(ServiceProvider.Get<AssetsService>().Clilocs.GetString(label), unicode, hue, font: font)
                     {
                         X = 0,
                         Y = 0
@@ -1156,7 +1156,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                             SelectedIndex = _lastSelectedIndex
                         };
 
-                        ServiceProvider.Get<UIService>().Add(_colorPickerBox);
+                        ServiceProvider.Get<GuiService>().Add(_colorPickerBox);
 
                         _colorPickerBox.ColorSelectedIndex += ColorPickerBoxOnColorSelectedIndex;
                         _colorPickerBox.MouseUp += ColorPickerBoxOnMouseUp;

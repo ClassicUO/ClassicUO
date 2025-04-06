@@ -315,7 +315,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (World.TargetManager.TargetingState == CursorTarget.SetTargetClientSide)
                         {
-                            ServiceProvider.Get<UIService>().Add(new InspectorGump(World, it));
+                            ServiceProvider.Get<GuiService>().Add(new InspectorGump(World, it));
                         }
                     }
                     else if (!World.DelayedObjectClickManager.IsEnabled)

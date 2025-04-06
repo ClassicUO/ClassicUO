@@ -64,7 +64,7 @@ namespace ClassicUO.Game.Data
 
         public static string GetError(byte packetID, byte code, (int min, int max) delay = default)
         {
-            var cliloc = ServiceProvider.Get<FileManagerService>().Clilocs;
+            var cliloc = ServiceProvider.Get<AssetsService>().Clilocs;
 
             switch (packetID)
             {

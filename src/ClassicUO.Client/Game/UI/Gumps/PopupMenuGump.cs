@@ -36,7 +36,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 ref PopupMenuItem item = ref data.Items[i];
 
-                string text = ServiceProvider.Get<UOService>().FileManager.Clilocs.GetString(item.Cliloc);
+                string text = ServiceProvider.Get<AssetsService>().Clilocs.GetString(item.Cliloc);
 
                 ushort hue = item.Hue;
 
@@ -44,7 +44,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     uint h = (ColorConverter.Color16To32(item.ReplacedHue) << 8) | 0xFF;
 
-                    ServiceProvider.Get<UOService>().FileManager.Fonts.SetUseHTML(true, h);
+                    ServiceProvider.Get<AssetsService>().Fonts.SetUseHTML(true, h);
                 }
 
                 Label label = new Label(text, true, hue, font: 1)
@@ -53,7 +53,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Y = offsetY
                 };
 
-                ServiceProvider.Get<UOService>().FileManager.Fonts.SetUseHTML(false);
+                ServiceProvider.Get<AssetsService>().Fonts.SetUseHTML(false);
 
                 HitBox box = new HitBox(10, offsetY, label.Width, label.Height)
                 {

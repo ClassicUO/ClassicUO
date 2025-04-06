@@ -87,10 +87,10 @@ namespace ClassicUO.Game.UI.Gumps
                 if (gumpInfo.Texture != null)
                 {
                     if (
-                        ServiceProvider.Get<UIService>().MouseOverControl != null
+                        ServiceProvider.Get<GuiService>().MouseOverControl != null
                         && (
-                            ServiceProvider.Get<UIService>().MouseOverControl == this
-                            || ServiceProvider.Get<UIService>().MouseOverControl.RootParent == this
+                            ServiceProvider.Get<GuiService>().MouseOverControl == this
+                            || ServiceProvider.Get<GuiService>().MouseOverControl.RootParent == this
                         )
                     )
                     {

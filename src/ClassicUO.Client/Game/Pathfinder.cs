@@ -205,7 +205,7 @@ namespace ClassicUO.Game
                             if (!(obj is Mobile))
                             {
                                 var graphic = obj is Item it && it.IsMulti ? it.MultiGraphic : obj.Graphic;
-                                ref StaticTiles itemdata = ref ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[graphic];
+                                ref StaticTiles itemdata = ref ServiceProvider.Get<AssetsService>().TileData.StaticData[graphic];
 
                                 if (stepState == (int) PATH_STEP_STATE.PSS_ON_SEA_HORSE)
                                 {

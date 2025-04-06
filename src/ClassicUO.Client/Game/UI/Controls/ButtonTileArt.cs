@@ -36,7 +36,7 @@ namespace ClassicUO.Game.UI.Controls
                 return;
             }
 
-            _isPartial = ServiceProvider.Get<UOService>().FileManager.TileData.StaticData[_graphic].IsPartialHue;
+            _isPartial = ServiceProvider.Get<AssetsService>().TileData.StaticData[_graphic].IsPartialHue;
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)

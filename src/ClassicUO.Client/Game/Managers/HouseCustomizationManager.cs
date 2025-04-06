@@ -48,21 +48,21 @@ namespace ClassicUO.Game.Managers
             _world = world;
             Serial = serial;
 
-            var fileManager = ServiceProvider.Get<UOService>().FileManager;
+            var assetsService = ServiceProvider.Get<AssetsService>();
             // TODO: don't load the file txt every time the housemanager get initialized
-            ParseFileWithCategory<CustomHouseWall, CustomHouseWallCategory>(Walls, fileManager.GetUOFilePath("walls.txt"));
+            ParseFileWithCategory<CustomHouseWall, CustomHouseWallCategory>(Walls, assetsService.GetUOFilePath("walls.txt"));
 
-            ParseFile(Floors, fileManager.GetUOFilePath("floors.txt"));
-            ParseFile(Doors, fileManager.GetUOFilePath("doors.txt"));
+            ParseFile(Floors, assetsService.GetUOFilePath("floors.txt"));
+            ParseFile(Doors, assetsService.GetUOFilePath("doors.txt"));
 
-            ParseFileWithCategory<CustomHouseMisc, CustomHouseMiscCategory>(Miscs, fileManager.GetUOFilePath("misc.txt"));
+            ParseFileWithCategory<CustomHouseMisc, CustomHouseMiscCategory>(Miscs, assetsService.GetUOFilePath("misc.txt"));
 
-            ParseFile(Stairs, fileManager.GetUOFilePath("stairs.txt"));
-            ParseFile(Teleports, fileManager.GetUOFilePath("teleprts.txt"));
+            ParseFile(Stairs, assetsService.GetUOFilePath("stairs.txt"));
+            ParseFile(Teleports, assetsService.GetUOFilePath("teleprts.txt"));
 
-            ParseFileWithCategory<CustomHouseRoof, CustomHouseRoofCategory>(Roofs, fileManager.GetUOFilePath("roof.txt"));
+            ParseFileWithCategory<CustomHouseRoof, CustomHouseRoofCategory>(Roofs, assetsService.GetUOFilePath("roof.txt"));
 
-            ParseFile(ObjectsInfo, fileManager.GetUOFilePath("suppinfo.txt"));
+            ParseFile(ObjectsInfo, assetsService.GetUOFilePath("suppinfo.txt"));
             //
 
 
@@ -610,7 +610,7 @@ namespace ClassicUO.Game.Managers
             // apply a minor offset for roof tiles
             int zOffset = -3;
 
-            var gump = ServiceProvider.Get<UIService>().GetGump<HouseCustomizationGump>(Serial);
+            var gump = ServiceProvider.Get<GuiService>().GetGump<HouseCustomizationGump>(Serial);
             if (gump == null)
                 return;
 
@@ -830,7 +830,7 @@ namespace ClassicUO.Game.Managers
             if (res1 != -1 && res2 != -1)
             {
                 State = state;
-                var gump = ServiceProvider.Get<UIService>().GetGump<HouseCustomizationGump>(Serial);
+                var gump = ServiceProvider.Get<GuiService>().GetGump<HouseCustomizationGump>(Serial);
                 if (gump == null)
                     return;
 

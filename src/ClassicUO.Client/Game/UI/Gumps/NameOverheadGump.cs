@@ -30,6 +30,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly UOService _uoService;
         private readonly AudioService _audioService;
         private readonly SceneService _sceneService;
+        private readonly AssetsService _assetsService;
 
         public NameOverheadGump(World world, uint serial) : base(world, serial, 0)
         {
@@ -41,6 +42,7 @@ namespace ClassicUO.Game.UI.Gumps
             _uoService = ServiceProvider.Get<UOService>();
             _audioService = ServiceProvider.Get<AudioService>();
             _sceneService = ServiceProvider.Get<SceneService>();
+            _assetsService = ServiceProvider.Get<AssetsService>();
 
             Entity entity = World.Get(serial);
 
@@ -88,7 +90,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (string.IsNullOrEmpty(item.ItemData.Name))
                     {
-                        t += _uoService.FileManager.Clilocs.GetString(1020000 + item.Graphic, true, t);
+                        t += _assetsService.Clilocs.GetString(1020000 + item.Graphic, true, t);
                     }
                     else
                     {
@@ -106,14 +108,14 @@ namespace ClassicUO.Game.UI.Gumps
                     return false;
                 }
 
-                _uoService.FileManager.Fonts.SetUseHTML(true);
-                _uoService.FileManager.Fonts.RecalculateWidthByInfo = true;
+                _assetsService.Fonts.SetUseHTML(true);
+                _assetsService.Fonts.RecalculateWidthByInfo = true;
 
-                int width = _uoService.FileManager.Fonts.GetWidthUnicode(_renderedText.Font, t);
+                int width = _assetsService.Fonts.GetWidthUnicode(_renderedText.Font, t);
 
                 if (width > 200)
                 {
-                    t = _uoService.FileManager.Fonts.GetTextByWidthUnicode(
+                    t = _assetsService.Fonts.GetTextByWidthUnicode(
                         _renderedText.Font,
                         t,
                         200,
@@ -122,8 +124,8 @@ namespace ClassicUO.Game.UI.Gumps
                     );
                 }
 
-                _uoService.FileManager.Fonts.RecalculateWidthByInfo = false;
-                _uoService.FileManager.Fonts.SetUseHTML(false);
+                _assetsService.Fonts.RecalculateWidthByInfo = false;
+                _assetsService.Fonts.SetUseHTML(false);
 
                 _renderedText.MaxWidth = width;
                 _renderedText.Text = t;
@@ -140,11 +142,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 string t = entity.Name;
 
-                int width = _uoService.FileManager.Fonts.GetWidthUnicode(_renderedText.Font, t);
+                int width = _assetsService.Fonts.GetWidthUnicode(_renderedText.Font, t);
 
                 if (width > Constants.OBJECT_HANDLES_GUMP_WIDTH)
                 {
-                    t = _uoService.FileManager.Fonts.GetTextByWidthUnicode(
+                    t = _assetsService.Fonts.GetTextByWidthUnicode(
                         _renderedText.Font,
                         t.AsSpan(),
                         Constants.OBJECT_HANDLES_GUMP_WIDTH,
@@ -222,12 +224,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (entity is Mobile || entity is Item it && it.IsDamageable)
             {
-                if (ServiceProvider.Get<UIService>().IsDragging)
+                if (ServiceProvider.Get<GuiService>().IsDragging)
                 {
                     return;
                 }
 
-                var gump = ServiceProvider.Get<UIService>().GetGump<BaseHealthBarGump>(LocalSerial);
+                var gump = ServiceProvider.Get<GuiService>().GetGump<BaseHealthBarGump>(LocalSerial);
                 gump?.Dispose();
 
                 if (entity == World.Player && ProfileManager.CurrentProfile.StatusGumpBarMutuallyExclusive)
@@ -244,7 +246,7 @@ namespace ClassicUO.Game.UI.Gumps
                         HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE
                     );
 
-                    ServiceProvider.Get<UIService>().Add(
+                    ServiceProvider.Get<GuiService>().Add(
                         gump = new HealthBarGumpCustom(World, entity)
                         {
                             X = Mouse.Position.X - (rect.Width >> 1),
@@ -262,10 +264,10 @@ namespace ClassicUO.Game.UI.Gumps
                         Y = Mouse.LClickPosition.Y - (gumpInfo.UV.Height >> 1)
                     };
 
-                    ServiceProvider.Get<UIService>().Add(healthBar);
+                    ServiceProvider.Get<GuiService>().Add(healthBar);
                 }
 
-                ServiceProvider.Get<UIService>().AttemptDragControl(gump, true);
+                ServiceProvider.Get<GuiService>().AttemptDragControl(gump, true);
             }
             else if (entity != null)
             {
@@ -327,7 +329,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled)
                 {
                     if (
-                        ServiceProvider.Get<UIService>().IsDragging
+                        ServiceProvider.Get<GuiService>().IsDragging
                         || Math.Max(Math.Abs(Mouse.LDragOffset.X), Math.Abs(Mouse.LDragOffset.Y))
                             >= 1
                     )
@@ -354,7 +356,7 @@ namespace ClassicUO.Game.UI.Gumps
                         case CursorTarget.SetTargetClientSide:
                             World.TargetManager.Target(LocalSerial);
                             Mouse.LastLeftButtonClickTime = 0;
-                            ServiceProvider.Get<UIService>().Add(new InspectorGump(World, World.Get(LocalSerial)));
+                            ServiceProvider.Get<GuiService>().Add(new InspectorGump(World, World.Get(LocalSerial)));
 
                             break;
 
