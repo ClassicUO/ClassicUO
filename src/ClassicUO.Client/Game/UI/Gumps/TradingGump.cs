@@ -308,21 +308,21 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (SelectedObject.Object is Item it)
                 {
-                    if (World.TargetManager.IsTargeting)
+                    if (ServiceProvider.Get<ManagersService>().TargetManager.IsTargeting)
                     {
-                        World.TargetManager.Target(it.Serial);
+                        ServiceProvider.Get<ManagersService>().TargetManager.Target(it.Serial);
                         Mouse.CancelDoubleClick = true;
 
-                        if (World.TargetManager.TargetingState == CursorTarget.SetTargetClientSide)
+                        if (ServiceProvider.Get<ManagersService>().TargetManager.TargetingState == CursorTarget.SetTargetClientSide)
                         {
                             ServiceProvider.Get<GuiService>().Add(new InspectorGump(World, it));
                         }
                     }
-                    else if (!World.DelayedObjectClickManager.IsEnabled)
+                    else if (!ServiceProvider.Get<ManagersService>().DelayedObjectClickManager.IsEnabled)
                     {
                         Point off = Mouse.LDragOffset;
 
-                        World.DelayedObjectClickManager.Set(
+                        ServiceProvider.Get<ManagersService>().DelayedObjectClickManager.Set(
                             it.Serial,
                             Mouse.Position.X - off.X - ScreenCoordinateX,
                             Mouse.Position.Y - off.Y - ScreenCoordinateY,

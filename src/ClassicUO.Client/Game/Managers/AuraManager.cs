@@ -4,6 +4,7 @@ using System;
 using ClassicUO.Configuration;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+using ClassicUO.Services;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -90,13 +91,12 @@ namespace ClassicUO.Game.Managers
 
     internal sealed class AuraManager
     {
-        private readonly World _world;
         private readonly Aura _aura;
         private int _saveAuraUnderFeetType;
+        private readonly WorldService _worldService = ServiceProvider.Get<WorldService>();
 
-        public AuraManager(World world)
+        public AuraManager()
         {
-            _world = world;
             _aura = new Aura(30);
         }
 
@@ -114,7 +114,7 @@ namespace ClassicUO.Game.Managers
                     default:
                     case 0: return false;
 
-                    case 1 when _world.Player != null && _world.Player.InWarMode: return true;
+                    case 1 when _worldService.World.Player != null && _worldService.World.Player.InWarMode: return true;
                     case 2 when Keyboard.Ctrl && Keyboard.Shift: return true;
                     case 3: return true;
                 }

@@ -264,7 +264,7 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
-            if (button != MouseButtonType.Left || _gump.World.TargetManager.IsTargeting)
+            if (button != MouseButtonType.Left || ServiceProvider.Get<ManagersService>().TargetManager.IsTargeting)
             {
                 return false;
             }

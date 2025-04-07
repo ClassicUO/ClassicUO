@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Renderer;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.Managers
 {
@@ -52,9 +53,9 @@ namespace ClassicUO.Game.Managers
                 {
                     uint ser = overheadDamage.Key | 0x8000_0000;
 
-                    if (World.CorpseManager.Exists(0, ser))
+                    if (ServiceProvider.Get<ManagersService>().CorpseManager.Exists(0, ser))
                     {
-                        var item = World.CorpseManager.GetCorpseObject(ser);
+                        var item = ServiceProvider.Get<ManagersService>().CorpseManager.GetCorpseObject(ser);
 
                         if (item != null && !ReferenceEquals(item, overheadDamage.Value.Parent))
                         {

@@ -358,7 +358,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _dataBox?.Add(text, page);
 
                         if (
-                            World.OPL.TryGetNameAndData(
+                            ServiceProvider.Get<ManagersService>().OPL.TryGetNameAndData(
                                 LocalSerial,
                                 out var name,
                                 out var data
@@ -1471,14 +1471,14 @@ namespace ClassicUO.Game.UI.Gumps
                 _spellID = spellID;
                 _spellName = spellName;
 
-                _mm = gump.World.Macros;
+                _mm = ServiceProvider.Get<ManagersService>().Macros;
             }
 
             public override void Update()
             {
                 base.Update();
 
-                if (_gump.World.ActiveSpellIcons.IsActive(_spellID))
+                if (ServiceProvider.Get<ManagersService>().ActiveSpellIcons.IsActive(_spellID))
                 {
                     Hue = 38;
                 }

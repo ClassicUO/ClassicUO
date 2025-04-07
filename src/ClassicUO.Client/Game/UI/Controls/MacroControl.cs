@@ -124,7 +124,7 @@ namespace ClassicUO.Game.UI.Controls
             area.Add(_databox);
 
 
-            Macro = _gump.World.Macros.FindMacro(name) ?? Macro.CreateEmptyMacro(name);
+            Macro = ServiceProvider.Get<ManagersService>().Macros.FindMacro(name) ?? Macro.CreateEmptyMacro(name);
 
             SetupKeyByDefault();
             SetupMacroUI();
@@ -261,7 +261,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_hotkeyBox.Key != SDL.SDL_Keycode.SDLK_UNKNOWN)
             {
-                var macro = _gump.World.Macros.FindMacro(_hotkeyBox.Key, alt, ctrl, shift);
+                var macro = ServiceProvider.Get<ManagersService>().Macros.FindMacro(_hotkeyBox.Key, alt, ctrl, shift);
 
                 if (macro != null)
                 {
@@ -278,7 +278,7 @@ namespace ClassicUO.Game.UI.Controls
             }
             else if (_hotkeyBox.MouseButton != MouseButtonType.None)
             {
-                var macro = _gump.World.Macros.FindMacro(_hotkeyBox.MouseButton, alt, ctrl, shift);
+                var macro = ServiceProvider.Get<ManagersService>().Macros.FindMacro(_hotkeyBox.MouseButton, alt, ctrl, shift);
 
                 if (macro != null)
                 {
@@ -295,7 +295,7 @@ namespace ClassicUO.Game.UI.Controls
             }
             else if (_hotkeyBox.WheelScroll == true)
             {
-                var macro = _gump.World.Macros.FindMacro(_hotkeyBox.WheelUp, alt, ctrl, shift);
+                var macro = ServiceProvider.Get<ManagersService>().Macros.FindMacro(_hotkeyBox.WheelUp, alt, ctrl, shift);
 
                 if (macro != null)
                 {

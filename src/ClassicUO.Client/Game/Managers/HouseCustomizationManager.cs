@@ -128,7 +128,7 @@ namespace ClassicUO.Game.Managers
         {
             var foundationItem = _world.Items.Get(Serial);
 
-            if (foundationItem == null || !_world.HouseManager.TryGetHouse(Serial, out var house) || house == null)
+            if (foundationItem == null || !ServiceProvider.Get<ManagersService>().HouseManager.TryGetHouse(Serial, out var house) || house == null)
             {
                 return;
             }
@@ -630,7 +630,7 @@ namespace ClassicUO.Game.Managers
             {
                 var foundationItem = _world.Items.Get(Serial);
 
-                if (foundationItem == null || !_world.HouseManager.TryGetHouse(Serial, out var house) || house == null)
+                if (foundationItem == null || !ServiceProvider.Get<ManagersService>().HouseManager.TryGetHouse(Serial, out var house) || house == null)
                 {
                     return;
                 }
@@ -854,7 +854,7 @@ namespace ClassicUO.Game.Managers
 
         public void SetTargetMulti()
         {
-            _world.TargetManager.SetTargetingMulti
+            ServiceProvider.Get<ManagersService>().TargetManager.SetTargetingMulti
             (
                 0,
                 0,
@@ -881,7 +881,7 @@ namespace ClassicUO.Game.Managers
 
             var foundationItem = _world.Items.Get(Serial);
 
-            if (foundationItem == null || !_world.HouseManager.TryGetHouse(foundationItem, out var house) || house == null)
+            if (foundationItem == null || !ServiceProvider.Get<ManagersService>().HouseManager.TryGetHouse(foundationItem, out var house) || house == null)
                 return false;
 
             bool result = true;
@@ -1233,7 +1233,7 @@ namespace ClassicUO.Game.Managers
 
         public bool ValidateItemPlace(Item foundationItem, Multi item, int minZ, int maxZ, List<Point> validatedFloors)
         {
-            if (item == null || !_world.HouseManager.TryGetHouse(foundationItem, out var house) || house == null || !item.IsCustom)
+            if (item == null || !ServiceProvider.Get<ManagersService>().HouseManager.TryGetHouse(foundationItem, out var house) || house == null || !item.IsCustom)
             {
                 return true;
             }

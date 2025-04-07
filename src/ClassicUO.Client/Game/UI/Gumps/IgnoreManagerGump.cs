@@ -140,10 +140,10 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Dispose()
         {
             if (_isListModified)
-                World.IgnoreManager.SaveIgnoreList();
+                ServiceProvider.Get<ManagersService>().IgnoreManager.SaveIgnoreList();
 
-            if (World.TargetManager.IsTargeting)
-                World.TargetManager.CancelTarget();
+            if (ServiceProvider.Get<ManagersService>().TargetManager.IsTargeting)
+                ServiceProvider.Get<ManagersService>().TargetManager.CancelTarget();
 
             base.Dispose();
         }
@@ -160,7 +160,7 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             var y = 0;
-            foreach (IgnoreListControl element in World.IgnoreManager.IgnoredCharsList.Select(m => new IgnoreListControl(this, m) { Y = y }))
+            foreach (IgnoreListControl element in ServiceProvider.Get<ManagersService>().IgnoreManager.IgnoredCharsList.Select(m => new IgnoreListControl(this, m) { Y = y }))
             {
                 element.RemoveMarkerEvent += MarkerRemoveEventHandler;
 
@@ -201,7 +201,7 @@ namespace ClassicUO.Game.UI.Gumps
             switch (buttonId)
             {
                 case (int)ButtonsId.ADD_NEW_IGNORE:
-                    World.TargetManager.SetTargeting(CursorTarget.IgnorePlayerTarget, CursorType.Target, TargetType.Neutral);
+                    ServiceProvider.Get<ManagersService>().TargetManager.SetTargeting(CursorTarget.IgnorePlayerTarget, CursorType.Target, TargetType.Neutral);
                     break;
             }
         }
@@ -228,7 +228,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override void OnButtonClick(int buttonId)
             {
-                _gump.World.IgnoreManager.RemoveIgnoredTarget(_chName);
+                ServiceProvider.Get<ManagersService>().IgnoreManager.RemoveIgnoredTarget(_chName);
                 RemoveMarkerEvent?.Invoke(this, EventArgs.Empty);
             }
         }

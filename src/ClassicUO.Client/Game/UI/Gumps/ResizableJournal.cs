@@ -256,7 +256,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (journalEntry == null)
                 return;
 
-            if (!string.IsNullOrEmpty(journalEntry.Name) && _world.IgnoreManager.IgnoredCharsList.Contains(journalEntry.Name))
+            if (!string.IsNullOrEmpty(journalEntry.Name) && ServiceProvider.Get<ManagersService>().IgnoreManager.IgnoredCharsList.Contains(journalEntry.Name))
                 return;
 
             _journalArea.AddEntry(journalEntry);

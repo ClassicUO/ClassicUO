@@ -1,7 +1,6 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Configuration;
-using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework.Graphics;
@@ -20,7 +19,6 @@ namespace ClassicUO
         public Renderer.Lights.Light Lights { get; private set; }
         public Renderer.MultiMaps.MultiMap MultiMaps { get; private set; }
         public Renderer.Sounds.Sound Sounds { get; private set; }
-        public World World { get; private set; }
 
         public ClientVersion Version { get; private set; }
         public ClientFlags Protocol { get; set; }
@@ -28,10 +26,6 @@ namespace ClassicUO
         public UOFileManager FileManager { get; private set; }
 
 
-        public UltimaOnline()
-        {
-
-        }
 
         public unsafe void Setup(GameController game)
         {
@@ -81,14 +75,12 @@ namespace ClassicUO
             Sounds = new Renderer.Sounds.Sound(FileManager.Sounds);
 
             LightColors.LoadLights();
-
-            World = new World();
         }
 
         public void Unload()
         {
             FileManager.Dispose();
-            World?.Map?.Destroy();
+            // World?.Map?.Destroy();
         }
 
 

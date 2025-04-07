@@ -72,7 +72,7 @@ namespace ClassicUO.Game.Scenes
                         _lastBoatDirection = facing - 1;
                         _boatIsMoving = true;
 
-                        _world.BoatMovingManager.MoveRequest(facing - 1, (byte)(run ? 2 : 1));
+                        ServiceProvider.Get<ManagersService>().BoatMovingManager.MoveRequest(facing - 1, (byte)(run ? 2 : 1));
                     }
                 }
                 else
@@ -341,8 +341,8 @@ namespace ClassicUO.Game.Scenes
                 _isMouseLeftDown = true;
 
                 if (
-                    _world.TargetManager.IsTargeting
-                    && _world.TargetManager.TargetingState == CursorTarget.MultiPlacement
+                    ServiceProvider.Get<ManagersService>().TargetManager.IsTargeting
+                    && ServiceProvider.Get<ManagersService>().TargetManager.TargetingState == CursorTarget.MultiPlacement
                     && (
                         _world.CustomHouseManager.SelectedGraphic != 0
                         || _world.CustomHouseManager.Erasing
@@ -535,9 +535,9 @@ namespace ClassicUO.Game.Scenes
                     }
                 }
             }
-            else if (_world.TargetManager.IsTargeting)
+            else if (ServiceProvider.Get<ManagersService>().TargetManager.IsTargeting)
             {
-                switch (_world.TargetManager.TargetingState)
+                switch (ServiceProvider.Get<ManagersService>().TargetManager.TargetingState)
                 {
                     case CursorTarget.Grab:
                     case CursorTarget.SetGrabBag:
@@ -556,12 +556,12 @@ namespace ClassicUO.Game.Scenes
                             switch (obj)
                             {
                                 case Entity ent:
-                                    _world.TargetManager.Target(ent.Serial);
+                                    ServiceProvider.Get<ManagersService>().TargetManager.Target(ent.Serial);
 
                                     break;
 
                                 case Land land:
-                                    _world.TargetManager.Target(
+                                    ServiceProvider.Get<ManagersService>().TargetManager.Target(
                                         0,
                                         land.X,
                                         land.Y,
@@ -572,7 +572,7 @@ namespace ClassicUO.Game.Scenes
                                     break;
 
                                 case GameObject o:
-                                    _world.TargetManager.Target(o.Graphic, o.X, o.Y, o.Z);
+                                    ServiceProvider.Get<ManagersService>().TargetManager.Target(o.Graphic, o.X, o.Y, o.Z);
 
                                     break;
                             }
@@ -599,19 +599,19 @@ namespace ClassicUO.Game.Scenes
                             switch (obj)
                             {
                                 case Entity ent:
-                                    _world.TargetManager.Target(ent.Serial);
+                                    ServiceProvider.Get<ManagersService>().TargetManager.Target(ent.Serial);
                                     ServiceProvider.Get<GuiService>().Add(new InspectorGump(_world, ent));
 
                                     break;
 
                                 case Land land:
-                                    _world.TargetManager.Target(0, land.X, land.Y, land.Z);
+                                    ServiceProvider.Get<ManagersService>().TargetManager.Target(0, land.X, land.Y, land.Z);
                                     ServiceProvider.Get<GuiService>().Add(new InspectorGump(_world, land));
 
                                     break;
 
                                 case GameObject o:
-                                    _world.TargetManager.Target(o.Graphic, o.X, o.Y, o.Z);
+                                    ServiceProvider.Get<ManagersService>().TargetManager.Target(o.Graphic, o.X, o.Y, o.Z);
                                     ServiceProvider.Get<GuiService>().Add(new InspectorGump(_world, o));
 
                                     break;
@@ -626,16 +626,16 @@ namespace ClassicUO.Game.Scenes
 
                         if (SelectedObject.Object is Entity selectedEntity)
                         {
-                            _world.CommandManager.OnHueTarget(selectedEntity);
+                            ServiceProvider.Get<ManagersService>().CommandManager.OnHueTarget(selectedEntity);
                         }
 
                         break;
                     case CursorTarget.IgnorePlayerTarget:
                         if (SelectedObject.Object is Entity pmEntity)
                         {
-                            _world.IgnoreManager.AddIgnoredTarget(pmEntity);
+                            ServiceProvider.Get<ManagersService>().IgnoreManager.AddIgnoredTarget(pmEntity);
                         }
-                        _world.TargetManager.CancelTarget();
+                        ServiceProvider.Get<ManagersService>().TargetManager.CancelTarget();
                         break;
                 }
             }
@@ -659,7 +659,7 @@ namespace ClassicUO.Game.Scenes
                             );
                         }
 
-                        _world.MessageManager.HandleMessage(
+                        ServiceProvider.Get<ManagersService>().MessageManager.HandleMessage(
                             null,
                             name,
                             string.Empty,
@@ -689,7 +689,7 @@ namespace ClassicUO.Game.Scenes
                             );
                         }
 
-                        _world.MessageManager.HandleMessage(
+                        ServiceProvider.Get<ManagersService>().MessageManager.HandleMessage(
                             null,
                             name,
                             string.Empty,
@@ -712,7 +712,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (Keyboard.Alt && ent is Mobile)
                         {
-                            _world.MessageManager.HandleMessage(
+                            ServiceProvider.Get<ManagersService>().MessageManager.HandleMessage(
                                 _world.Player,
                                 ResGeneral.NowFollowing,
                                 string.Empty,
@@ -725,9 +725,9 @@ namespace ClassicUO.Game.Scenes
                             _followingMode = true;
                             _followingTarget = ent;
                         }
-                        else if (!_world.DelayedObjectClickManager.IsEnabled)
+                        else if (!ServiceProvider.Get<ManagersService>().DelayedObjectClickManager.IsEnabled)
                         {
-                            _world.DelayedObjectClickManager.Set(
+                            ServiceProvider.Get<ManagersService>().DelayedObjectClickManager.Set(
                                 ent.Serial,
                                 Mouse.Position.X,
                                 Mouse.Position.Y,
@@ -748,11 +748,11 @@ namespace ClassicUO.Game.Scenes
 
             if (!ServiceProvider.Get<GuiService>().IsMouseOverWorld)
             {
-                result = _world.DelayedObjectClickManager.IsEnabled;
+                result = ServiceProvider.Get<ManagersService>().DelayedObjectClickManager.IsEnabled;
 
                 if (result)
                 {
-                    _world.DelayedObjectClickManager.Clear();
+                    ServiceProvider.Get<ManagersService>().DelayedObjectClickManager.Clear();
 
                     return false;
                 }
@@ -802,7 +802,7 @@ namespace ClassicUO.Game.Scenes
 
             if (result)
             {
-                _world.DelayedObjectClickManager.Clear();
+                ServiceProvider.Get<ManagersService>().DelayedObjectClickManager.Clear();
             }
 
             return result;
@@ -845,7 +845,7 @@ namespace ClassicUO.Game.Scenes
             if (_boatIsMoving)
             {
                 _boatIsMoving = false;
-                _world.BoatMovingManager.MoveRequest(_world.Player.Direction, 0);
+                ServiceProvider.Get<ManagersService>().BoatMovingManager.MoveRequest(_world.Player.Direction, 0);
             }
 
             return ServiceProvider.Get<GuiService>().IsMouseOverWorld;
@@ -910,7 +910,7 @@ namespace ClassicUO.Game.Scenes
         {
             if (CanExecuteMacro())
             {
-                var macro = _world.Macros.FindMacro(button, Keyboard.Alt, Keyboard.Ctrl, Keyboard.Shift);
+                var macro = ServiceProvider.Get<ManagersService>().Macros.FindMacro(button, Keyboard.Alt, Keyboard.Ctrl, Keyboard.Shift);
 
                 if (macro != null && button != MouseButtonType.None)
                 {
@@ -946,7 +946,7 @@ namespace ClassicUO.Game.Scenes
         {
             if (_sceneService.Scene?.Camera.PeekingToMouse ?? false)
             {
-                var macro = _world.Macros.FindMacro(button, Keyboard.Alt, Keyboard.Ctrl, Keyboard.Shift);
+                var macro = ServiceProvider.Get<ManagersService>().Macros.FindMacro(button, Keyboard.Alt, Keyboard.Ctrl, Keyboard.Shift);
 
                 if (
                     macro != null
@@ -983,7 +983,7 @@ namespace ClassicUO.Game.Scenes
 
             if (CanExecuteMacro())
             {
-                var macro = _world.Macros.FindMacro(up, Keyboard.Alt, Keyboard.Ctrl, Keyboard.Shift);
+                var macro = ServiceProvider.Get<ManagersService>().Macros.FindMacro(up, Keyboard.Alt, Keyboard.Ctrl, Keyboard.Shift);
 
                 if (macro != null)
                 {
@@ -1124,9 +1124,9 @@ namespace ClassicUO.Game.Scenes
                 return;
             }
 
-            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && _world.TargetManager.IsTargeting)
+            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_ESCAPE && ServiceProvider.Get<ManagersService>().TargetManager.IsTargeting)
             {
-                _world.TargetManager.CancelTarget();
+                ServiceProvider.Get<ManagersService>().TargetManager.CancelTarget();
             }
 
             if (ServiceProvider.Get<GuiService>().SystemChat == null)
@@ -1247,7 +1247,7 @@ namespace ClassicUO.Game.Scenes
 
             if (CanExecuteMacro())
             {
-                var macro = _world.Macros.FindMacro(
+                var macro = ServiceProvider.Get<ManagersService>().Macros.FindMacro(
                     e.keysym.sym,
                     Keyboard.Alt,
                     Keyboard.Ctrl,
@@ -1377,7 +1377,7 @@ namespace ClassicUO.Game.Scenes
 
             if (_flags[4] || _sceneService.Scene.Camera.PeekingToMouse)
             {
-                var macro = _world.Macros.FindMacro(
+                var macro = ServiceProvider.Get<ManagersService>().Macros.FindMacro(
                     e.keysym.sym,
                     Keyboard.Alt,
                     Keyboard.Ctrl,
@@ -1443,9 +1443,9 @@ namespace ClassicUO.Game.Scenes
                                     break;
                             }
 
-                            _world.Macros.SetMacroToExecute(mac);
-                            _world.Macros.WaitForTargetTimer = 0;
-                            _world.Macros.Update();
+                            ServiceProvider.Get<ManagersService>().Macros.SetMacroToExecute(mac);
+                            ServiceProvider.Get<ManagersService>().Macros.WaitForTargetTimer = 0;
+                            ServiceProvider.Get<ManagersService>().Macros.Update();
 
                             for (int i = 0; i < 4; i++)
                             {
@@ -1512,10 +1512,10 @@ namespace ClassicUO.Game.Scenes
 
         private void ExecuteMacro(MacroObject macro)
         {
-            _world.Macros.SetMacroToExecute(macro);
-            _world.Macros.WaitingBandageTarget = false;
-            _world.Macros.WaitForTargetTimer = 0;
-            _world.Macros.Update();
+            ServiceProvider.Get<ManagersService>().Macros.SetMacroToExecute(macro);
+            ServiceProvider.Get<ManagersService>().Macros.WaitingBandageTarget = false;
+            ServiceProvider.Get<ManagersService>().Macros.WaitForTargetTimer = 0;
+            ServiceProvider.Get<ManagersService>().Macros.Update();
         }
 
         private void HandleMouseInput()
@@ -1561,7 +1561,7 @@ namespace ClassicUO.Game.Scenes
                         _lastBoatDirection = facing - 1;
                         _boatIsMoving = true;
 
-                        _world.BoatMovingManager.MoveRequest(facing - 1, (byte)(run ? 2 : 1));
+                        ServiceProvider.Get<ManagersService>().BoatMovingManager.MoveRequest(facing - 1, (byte)(run ? 2 : 1));
                     }
                 }
                 else
@@ -1580,8 +1580,8 @@ namespace ClassicUO.Game.Scenes
                 _isMouseLeftDown = true;
 
                 if (
-                    _world.TargetManager.IsTargeting
-                    && _world.TargetManager.TargetingState == CursorTarget.MultiPlacement
+                    ServiceProvider.Get<ManagersService>().TargetManager.IsTargeting
+                    && ServiceProvider.Get<ManagersService>().TargetManager.TargetingState == CursorTarget.MultiPlacement
                     && (
                         _world.CustomHouseManager.SelectedGraphic != 0
                         || _world.CustomHouseManager.Erasing
@@ -1737,9 +1737,9 @@ namespace ClassicUO.Game.Scenes
                     }
                 }
             }
-            else if (_world.TargetManager.IsTargeting)
+            else if (ServiceProvider.Get<ManagersService>().TargetManager.IsTargeting)
             {
-                switch (_world.TargetManager.TargetingState)
+                switch (ServiceProvider.Get<ManagersService>().TargetManager.TargetingState)
                 {
                     case CursorTarget.Grab:
                     case CursorTarget.SetGrabBag:
@@ -1758,12 +1758,12 @@ namespace ClassicUO.Game.Scenes
                             switch (obj)
                             {
                                 case Entity ent:
-                                    _world.TargetManager.Target(ent.Serial);
+                                    ServiceProvider.Get<ManagersService>().TargetManager.Target(ent.Serial);
 
                                     break;
 
                                 case Land land:
-                                    _world.TargetManager.Target(
+                                    ServiceProvider.Get<ManagersService>().TargetManager.Target(
                                         0,
                                         land.X,
                                         land.Y,
@@ -1774,7 +1774,7 @@ namespace ClassicUO.Game.Scenes
                                     break;
 
                                 case GameObject o:
-                                    _world.TargetManager.Target(o.Graphic, o.X, o.Y, o.Z);
+                                    ServiceProvider.Get<ManagersService>().TargetManager.Target(o.Graphic, o.X, o.Y, o.Z);
 
                                     break;
                             }
@@ -1801,19 +1801,19 @@ namespace ClassicUO.Game.Scenes
                             switch (obj)
                             {
                                 case Entity ent:
-                                    _world.TargetManager.Target(ent.Serial);
+                                    ServiceProvider.Get<ManagersService>().TargetManager.Target(ent.Serial);
                                     ServiceProvider.Get<GuiService>().Add(new InspectorGump(_world, ent));
 
                                     break;
 
                                 case Land land:
-                                    _world.TargetManager.Target(0, land.X, land.Y, land.Z);
+                                    ServiceProvider.Get<ManagersService>().TargetManager.Target(0, land.X, land.Y, land.Z);
                                     ServiceProvider.Get<GuiService>().Add(new InspectorGump(_world, land));
 
                                     break;
 
                                 case GameObject o:
-                                    _world.TargetManager.Target(o.Graphic, o.X, o.Y, o.Z);
+                                    ServiceProvider.Get<ManagersService>().TargetManager.Target(o.Graphic, o.X, o.Y, o.Z);
                                     ServiceProvider.Get<GuiService>().Add(new InspectorGump(_world, o));
 
                                     break;
@@ -1828,16 +1828,16 @@ namespace ClassicUO.Game.Scenes
 
                         if (SelectedObject.Object is Entity selectedEntity)
                         {
-                            _world.CommandManager.OnHueTarget(selectedEntity);
+                            ServiceProvider.Get<ManagersService>().CommandManager.OnHueTarget(selectedEntity);
                         }
 
                         break;
                     case CursorTarget.IgnorePlayerTarget:
                         if (SelectedObject.Object is Entity pmEntity)
                         {
-                            _world.IgnoreManager.AddIgnoredTarget(pmEntity);
+                            ServiceProvider.Get<ManagersService>().IgnoreManager.AddIgnoredTarget(pmEntity);
                         }
-                        _world.TargetManager.CancelTarget();
+                        ServiceProvider.Get<ManagersService>().TargetManager.CancelTarget();
                         break;
                 }
             }
@@ -1861,7 +1861,7 @@ namespace ClassicUO.Game.Scenes
                             );
                         }
 
-                        _world.MessageManager.HandleMessage(
+                        ServiceProvider.Get<ManagersService>().MessageManager.HandleMessage(
                             null,
                             name,
                             string.Empty,
@@ -1891,7 +1891,7 @@ namespace ClassicUO.Game.Scenes
                             );
                         }
 
-                        _world.MessageManager.HandleMessage(
+                        ServiceProvider.Get<ManagersService>().MessageManager.HandleMessage(
                             null,
                             name,
                             string.Empty,
@@ -1914,7 +1914,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (Keyboard.Alt && ent is Mobile)
                         {
-                            _world.MessageManager.HandleMessage(
+                            ServiceProvider.Get<ManagersService>().MessageManager.HandleMessage(
                                 _world.Player,
                                 ResGeneral.NowFollowing,
                                 string.Empty,
@@ -1927,9 +1927,9 @@ namespace ClassicUO.Game.Scenes
                             _followingMode = true;
                             _followingTarget = ent;
                         }
-                        else if (!_world.DelayedObjectClickManager.IsEnabled)
+                        else if (!ServiceProvider.Get<ManagersService>().DelayedObjectClickManager.IsEnabled)
                         {
-                            _world.DelayedObjectClickManager.Set(
+                            ServiceProvider.Get<ManagersService>().DelayedObjectClickManager.Set(
                                 ent.Serial,
                                 Mouse.Position.X,
                                 Mouse.Position.Y,

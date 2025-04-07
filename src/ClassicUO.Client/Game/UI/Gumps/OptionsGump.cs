@@ -2024,7 +2024,7 @@ namespace ClassicUO.Game.UI.Gumps
                             return;
                         }
 
-                        MacroManager manager = World.Macros;
+                        MacroManager manager = ServiceProvider.Get<ManagersService>().Macros;
 
                         if (manager.FindMacro(name) != null)
                         {
@@ -2127,7 +2127,7 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 ServiceProvider.Get<GuiService>().Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == _macroControl.Macro)?.Dispose();
 
-                                World.Macros.Remove(_macroControl.Macro);
+                                ServiceProvider.Get<ManagersService>().Macros.Remove(_macroControl.Macro);
 
                                 _macroControl.Dispose();
                             }
@@ -2142,7 +2142,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
 
 
-            MacroManager macroManager = World.Macros;
+            MacroManager macroManager = ServiceProvider.Get<ManagersService>().Macros;
 
             for (var macro = (Macro?) macroManager.Items; macro != null; macro = (Macro?) macro.Next)
             {
@@ -3468,7 +3468,7 @@ namespace ClassicUO.Game.UI.Gumps
                 IsSelected = true
             };
 
-            button.MouseUp += (sender, e) => { World.ContainerManager.BuildContainerFile(true); };
+            button.MouseUp += (sender, e) => { ServiceProvider.Get<ManagersService>().ContainerManager.BuildContainerFile(true); };
             rightArea.Add(button);
 
             Add(rightArea, PAGE);
@@ -4087,7 +4087,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.ShowDPSWithDamageNumbers = _showDPSCheckbox.IsChecked;
 
             // macros
-            World.Macros.Save();
+            ServiceProvider.Get<ManagersService>().Macros.Save();
 
             // counters
 

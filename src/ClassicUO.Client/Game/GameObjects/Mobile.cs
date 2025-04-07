@@ -665,7 +665,7 @@ namespace ClassicUO.Game.GameObjects
 
                             if ((Serial & 0x80000000) != 0)
                             {
-                                World.CorpseManager.Remove(0, Serial);
+                                ServiceProvider.Get<ManagersService>().CorpseManager.Remove(0, Serial);
                                 World.RemoveMobile(Serial);
                             }
                         }
@@ -675,13 +675,13 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else if ((Serial & 0x80000000) != 0)
                 {
-                    World.CorpseManager.Remove(0, Serial);
+                    ServiceProvider.Get<ManagersService>().CorpseManager.Remove(0, Serial);
                     World.RemoveMobile(Serial);
                 }
             }
             else if ((Serial & 0x80000000) != 0)
             {
-                World.CorpseManager.Remove(0, Serial);
+                ServiceProvider.Get<ManagersService>().CorpseManager.Remove(0, Serial);
                 World.RemoveMobile(Serial);
             }
 

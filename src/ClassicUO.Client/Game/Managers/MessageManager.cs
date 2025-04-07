@@ -38,16 +38,10 @@ namespace ClassicUO.Game.Managers
 
     internal sealed class MessageManager
     {
-        private readonly World _world;
-        private readonly UOService _uoService;
-        private readonly AssetsService _assetsService;
+        private readonly AssetsService _assetsService = ServiceProvider.Get<AssetsService>();
+        private readonly GuiService _guiService = ServiceProvider.Get<GuiService>();
+        private readonly WorldService _worldService = ServiceProvider.Get<WorldService>();
 
-        public MessageManager(World world)
-        {
-            _world = world;
-            _uoService = ServiceProvider.Get<UOService>();
-            _assetsService = ServiceProvider.Get<AssetsService>();
-        }
 
 
         public PromptData PromptData { get; set; }
@@ -151,7 +145,7 @@ namespace ClassicUO.Game.Managers
                     }
 
                     // If person who send that message is in ignores list - but filter out Spell Text
-                    if (_world.IgnoreManager.IgnoredCharsList.Contains(parent.Name) && type != MessageType.Spell)
+                    if (ServiceProvider.Get<ManagersService>().IgnoreManager.IgnoredCharsList.Contains(parent.Name) && type != MessageType.Spell)
                         break;
 
                     TextObject msg = CreateMessage
@@ -168,12 +162,12 @@ namespace ClassicUO.Game.Managers
 
                     if (parent is Item it && !it.OnGround)
                     {
-                        msg.X = _world.DelayedObjectClickManager.X;
-                        msg.Y = _world.DelayedObjectClickManager.Y;
+                        msg.X = ServiceProvider.Get<ManagersService>().DelayedObjectClickManager.X;
+                        msg.Y = ServiceProvider.Get<ManagersService>().DelayedObjectClickManager.Y;
                         msg.IsTextGump = true;
                         bool found = false;
 
-                        for (var gump = ServiceProvider.Get<GuiService>().Gumps.Last; gump != null; gump = gump.Previous)
+                        for (var gump = _guiService.Gumps.Last; gump != null; gump = gump.Previous)
                         {
                             Control g = gump.Value;
 
@@ -296,7 +290,7 @@ namespace ClassicUO.Game.Managers
             }
 
 
-            TextObject textObject = TextObject.Create(_world);
+            var textObject = TextObject.Create(_worldService.World);
             textObject.Alpha = 0xFF;
             textObject.Type = type;
             textObject.Hue = fixedColor;

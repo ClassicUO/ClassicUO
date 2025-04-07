@@ -23,12 +23,9 @@ namespace ClassicUO.Game.Managers
         private readonly Dictionary<uint, List<ItemInside>> _items = new Dictionary<uint, List<ItemInside>>();
 
         private uint _timePacket;
-        private readonly World _world;
+        private readonly PacketHandlerService _packetHandlerService = ServiceProvider.Get<PacketHandlerService>();
+        private readonly WorldService _worldService = ServiceProvider.Get<WorldService>();
 
-        public BoatMovingManager(World world)
-        {
-            _world = world;
-        }
 
 
         private int GetVelocity(byte speed)
@@ -48,7 +45,7 @@ namespace ClassicUO.Game.Managers
 
         public void MoveRequest(Direction direciton, byte speed)
         {
-            ServiceProvider.Get<PacketHandlerService>().Out.Send_MultiBoatMoveRequest(_world.Player, direciton, speed);
+            _packetHandlerService.Out.Send_MultiBoatMoveRequest(_worldService.World.Player, direciton, speed);
             _timePacket = Time.Ticks;
         }
 
@@ -64,7 +61,7 @@ namespace ClassicUO.Game.Managers
             sbyte z
         )
         {
-            var item = _world.Items.Get(serial);
+            var item = _worldService.World.Items.Get(serial);
 
             if (item == null || item.IsDestroyed)
             {
@@ -127,7 +124,7 @@ namespace ClassicUO.Game.Managers
         {
             if (_steps.TryGetValue(serial, out var deque) && deque.Count != 0)
             {
-                var multiItem = _world.Items.Get(serial);
+                var multiItem = _worldService.World.Items.Get(serial);
 
                 if (multiItem != null)
                 {
@@ -140,7 +137,7 @@ namespace ClassicUO.Game.Managers
                 {
                     foreach (ref var it in CollectionsMarshal.AsSpan(list))
                     {
-                        var ent = _world.Get(it.Serial);
+                        var ent = _worldService.World.Get(it.Serial);
 
                         if (ent == null)
                         {
@@ -216,7 +213,7 @@ namespace ClassicUO.Game.Managers
                 {
                     ref BoatStep step = ref deques.Front();
 
-                    var item = _world.Items.Get(step.Serial);
+                    var item = _worldService.World.Items.Get(step.Serial);
 
                     if (item == null || item.IsDestroyed)
                     {
@@ -255,7 +252,7 @@ namespace ClassicUO.Game.Managers
 
                     //item.BoatDirection = step.MovingDir;
 
-                    _world.HouseManager.TryGetHouse(item, out var house);
+                    ServiceProvider.Get<ManagersService>().HouseManager.TryGetHouse(item, out var house);
 
                     if (removeStep)
                     {
@@ -343,14 +340,14 @@ namespace ClassicUO.Game.Managers
         {
             if (_items.TryGetValue(serial, out var list))
             {
-                var item = _world.Items.Get(serial);
+                var item = _worldService.World.Items.Get(serial);
 
                 foreach (ref var it in CollectionsMarshal.AsSpan(list))
                 {
                     //if (!SerialHelper.IsValid(it.Serial))
                     //    break;
 
-                    var entity = _world.Get(it.Serial);
+                    var entity = _worldService.World.Get(it.Serial);
 
                     if (entity == null || entity.IsDestroyed)
                     {

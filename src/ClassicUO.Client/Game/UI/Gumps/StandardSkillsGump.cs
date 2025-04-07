@@ -216,7 +216,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Name = ResGumps.NewGroup
                 };
 
-                World.SkillsGroupManager.Add(g);
+                ServiceProvider.Get<ManagersService>().SkillsGroupManager.Add(g);
 
                 SkillsGroupControl control = new SkillsGroupControl(this, g, 3, 3);
                 _skillsControl.Add(control);
@@ -238,8 +238,8 @@ namespace ClassicUO.Game.UI.Gumps
                                                        _skillsControl.Clear();
                                                        _container.Clear();
 
-                                                       World.SkillsGroupManager.Groups.Clear();
-                                                       World.SkillsGroupManager.MakeDefault();
+                                                       ServiceProvider.Get<ManagersService>().SkillsGroupManager.Groups.Clear();
+                                                       ServiceProvider.Get<ManagersService>().SkillsGroupManager.MakeDefault();
 
                                                        LoadSkills();
 
@@ -254,7 +254,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (World.Player != null)
             {
-                foreach (SkillsGroup g in World.SkillsGroupManager.Groups)
+                foreach (SkillsGroup g in ServiceProvider.Get<ManagersService>().SkillsGroupManager.Groups)
                 {
                     SkillsGroupControl control = new SkillsGroupControl(this, g, 3, 3);
                     _skillsControl.Add(control);
@@ -653,7 +653,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (key == SDL.SDL_Keycode.SDLK_DELETE && _status == 1)
                 {
-                    if (_gump.World.SkillsGroupManager.Remove(_group) && RootParent is StandardSkillsGump gump)
+                    if (ServiceProvider.Get<ManagersService>().SkillsGroupManager.Remove(_group) && RootParent is StandardSkillsGump gump)
                     {
                         SkillsGroupControl first = gump._skillsControl[0];
 

@@ -142,7 +142,7 @@ namespace ClassicUO.Game.GameObjects
             if (
                 !SerialHelper.IsValid(Serial)
                 && IsMulti
-                && World.TargetManager.TargetingState == CursorTarget.MultiPlacement
+                && ServiceProvider.Get<ManagersService>().TargetManager.TargetingState == CursorTarget.MultiPlacement
             )
             {
                 hueVec.Z = 0.5f;
@@ -161,7 +161,7 @@ namespace ClassicUO.Game.GameObjects
             float depth
         )
         {
-            if (IsDestroyed || World.CorpseManager.Exists(Serial, 0))
+            if (IsDestroyed || ServiceProvider.Get<ManagersService>().CorpseManager.Exists(Serial, 0))
             {
                 return false;
             }
@@ -445,7 +445,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (
                     ReferenceEquals(SelectedObject.Object, this)
-                    || World.TargetManager.TargetingState == CursorTarget.MultiPlacement
+                    || ServiceProvider.Get<ManagersService>().TargetManager.TargetingState == CursorTarget.MultiPlacement
                 )
                 {
                     return false;

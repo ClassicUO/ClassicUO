@@ -217,10 +217,10 @@ namespace ClassicUO.Game.GameObjects
             short maxX = 0;
             short maxY = 0;
 
-            if (!World.HouseManager.TryGetHouse(Serial, out var house) || house == null)
+            if (!ServiceProvider.Get<ManagersService>().HouseManager.TryGetHouse(Serial, out var house) || house == null)
             {
                 house = new House(World, Serial, 0, false);
-                World.HouseManager.Add(Serial, house);
+                ServiceProvider.Get<ManagersService>().HouseManager.Add(Serial, house);
             }
             else
             {
@@ -312,12 +312,12 @@ namespace ClassicUO.Game.GameObjects
 
             ServiceProvider.Get<GuiService>().GetGump<MiniMapGump>()?.RequestUpdateContents();
 
-            if (World.HouseManager.EntityIntoHouse(Serial, World.Player))
+            if (ServiceProvider.Get<ManagersService>().HouseManager.EntityIntoHouse(Serial, World.Player))
             {
                 ServiceProvider.Get<EngineService>().GetScene<GameScene>()?.UpdateMaxDrawZ(true);
             }
 
-            World.BoatMovingManager.ClearSteps(Serial);
+            ServiceProvider.Get<ManagersService>().BoatMovingManager.ClearSteps(Serial);
         }
 
         public override void CheckGraphicChange(byte animIndex = 0)
@@ -348,11 +348,11 @@ namespace ClassicUO.Game.GameObjects
             }
             else if (WantUpdateMulti)
             {
-                World.UoAssist.SignalAddMulti((ushort)(Graphic | 0x4000), X, Y);
+                ServiceProvider.Get<ManagersService>().UoAssist.SignalAddMulti((ushort)(Graphic | 0x4000), X, Y);
 
                 if (
                     MultiDistanceBonus == 0
-                    || World.HouseManager.IsHouseInRange(Serial, World.ClientViewRange)
+                    || ServiceProvider.Get<ManagersService>().HouseManager.IsHouseInRange(Serial, World.ClientViewRange)
                 )
                 {
                     LoadMulti();

@@ -47,27 +47,23 @@ namespace ClassicUO.Game.Managers
         private bool _ackReceived;
         private uint _lastUpdate, _lastPacketSend, _lastPacketRecv;
         private readonly List<WMapEntity> _toRemove = new List<WMapEntity>();
-        private readonly World _world;
-        private readonly NetClientService _netClientService;
+        private readonly WorldService _worldService = ServiceProvider.Get<WorldService>();
+        private readonly NetClientService _netClientService = ServiceProvider.Get<NetClientService>();
+        private readonly PacketHandlerService _packetHandlerService = ServiceProvider.Get<PacketHandlerService>();
 
-        public WorldMapEntityManager(World world)
-        {
-            _world = world;
-            _netClientService = ServiceProvider.Get<NetClientService>();
-        }
 
         public bool Enabled
         {
             get
             {
-                return ((_world.ClientFeatures.Flags & CharacterListFlags.CLF_NEW_MOVEMENT_SYSTEM) == 0 || _ackReceived) &&
+                return ((_worldService.World.ClientFeatures.Flags & CharacterListFlags.CLF_NEW_MOVEMENT_SYSTEM) == 0 || _ackReceived) &&
                         (_netClientService.Socket.Encryption == null || _netClientService.Socket.Encryption.EncryptionType == 0) &&
                         ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.WorldMapShowParty &&
                         ServiceProvider.Get<GuiService>().GetGump<WorldMapGump>() != null; // horrible, but works
             }
         }
 
-        public readonly Dictionary<uint, WMapEntity> Entities = new Dictionary<uint, WMapEntity>();
+        public Dictionary<uint, WMapEntity> Entities { get; } = new ();
 
         public void SetACKReceived()
         {
@@ -76,7 +72,7 @@ namespace ClassicUO.Game.Managers
 
         public void SetEnable(bool v)
         {
-            if ((_world.ClientFeatures.Flags & CharacterListFlags.CLF_NEW_MOVEMENT_SYSTEM) != 0 && !_ackReceived)
+            if ((_worldService.World.ClientFeatures.Flags & CharacterListFlags.CLF_NEW_MOVEMENT_SYSTEM) != 0 && !_ackReceived)
             {
                 Log.Warn("Server support new movement system. Can't use the 0xF0 packet to query guild/party position");
                 v = false;
@@ -121,7 +117,7 @@ namespace ClassicUO.Game.Managers
 
             if (string.IsNullOrEmpty(name))
             {
-                var ent = _world.Get(serial);
+                var ent = _worldService.World.Get(serial);
 
                 if (ent != null && !string.IsNullOrEmpty(ent.Name))
                 {
@@ -209,7 +205,7 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            if (_world.InGame && _lastPacketSend < Time.Ticks)
+            if (_worldService.World.InGame && _lastPacketSend < Time.Ticks)
             {
                 //GameActions.Print($"SENDING PACKET! {Time.Ticks}");
 
@@ -220,19 +216,19 @@ namespace ClassicUO.Game.Managers
                 //    return;
                 //}
 
-                ServiceProvider.Get<PacketHandlerService>().Out.Send_QueryGuildPosition();
+                _packetHandlerService.Out.Send_QueryGuildPosition();
 
-                if (_world.Party != null && _world.Party.Leader != 0)
+                if (ServiceProvider.Get<ManagersService>().Party != null && ServiceProvider.Get<ManagersService>().Party.Leader != 0)
                 {
-                    foreach (var e in _world.Party.Members)
+                    foreach (var e in ServiceProvider.Get<ManagersService>().Party.Members)
                     {
                         if (e != null && SerialHelper.IsValid(e.Serial))
                         {
-                            var mob = _world.Mobiles.Get(e.Serial);
+                            var mob = _worldService.World.Mobiles.Get(e.Serial);
 
-                            if (mob == null || mob.Distance > _world.ClientViewRange)
+                            if (mob == null || mob.Distance > _worldService.World.ClientViewRange)
                             {
-                                ServiceProvider.Get<PacketHandlerService>().Out.Send_QueryPartyPosition();
+                                _packetHandlerService.Out.Send_QueryPartyPosition();
 
                                 break;
                             }

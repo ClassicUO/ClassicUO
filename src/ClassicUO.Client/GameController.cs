@@ -41,6 +41,7 @@ namespace ClassicUO
         private NetClientService _netClientService;
         private UIManager _ui;
         private GameCursor _cursor;
+        private World _world;
 
         public GameController(IPluginHost? pluginHost)
         {
@@ -118,20 +119,26 @@ namespace ClassicUO
             ServiceProvider.Register(_netClientService = new NetClientService(netClient));
 
             ServiceProvider.Register(new AudioService(Audio));
-            ServiceProvider.Register(new UOService(UO));
             ServiceProvider.Register(new WindowService(Window));
             ServiceProvider.Register(new EngineService(this));
             ServiceProvider.Register(new PluginHostService(PluginHost));
-            ServiceProvider.Register(new SceneService(this));
+            ServiceProvider.Register(new SceneService(this)); // REMOVE THIS LATER
             ServiceProvider.Register(new GraphicsService(GraphicsDevice));
 
             UO.Setup(this);
-            ServiceProvider.Register(_packetHandlerService = new PacketHandlerService(new PacketHandlers(), new IncomingPackets(UO.World), new OutgoingPackets(netClient), netClient));
+            var world = _world = new World();
+
+            ServiceProvider.Register(new UOService(UO));
+            ServiceProvider.Register(_packetHandlerService =
+                new PacketHandlerService(new PacketHandlers(), new IncomingPackets(), new OutgoingPackets(netClient), netClient));
             ServiceProvider.Register(new AssetsService(UO.FileManager));
+
+            ServiceProvider.Register(new WorldService(world));
             ServiceProvider.Register(new GuiService(_ui = new()));
-            ServiceProvider.Register(new GameCursorService(_cursor = new GameCursor(UO.World)));
+            ServiceProvider.Register(new GameCursorService(_cursor = new GameCursor()));
             ServiceProvider.Register(new MegaClilocRequestsService());
             ServiceProvider.Register(new CustomHouseService());
+            ServiceProvider.Register(new ManagersService());
 
             Audio.Initialize();
             // TODO: temporary fix to avoid crash when laoding plugins
@@ -148,7 +155,7 @@ namespace ClassicUO
 
             Log.Trace("Done!");
 
-            SetScene(new LoginScene(UO.World));
+            SetScene(new LoginScene(world));
 #endif
             SetWindowPositionBySettings();
 
@@ -487,7 +494,7 @@ namespace ClassicUO
 
                 _ui.Draw(_uoSpriteBatch);
 
-                if ((UO.World?.InGame ?? false) && SelectedObject.Object is TextObject t)
+                if ((_world?.InGame ?? false) && SelectedObject.Object is TextObject t)
                 {
                     if (t.IsTextGump)
                     {
@@ -495,7 +502,7 @@ namespace ClassicUO
                     }
                     else
                     {
-                        UO.World.WorldTextManager?.MoveToTop(t);
+                        _world.WorldTextManager?.MoveToTop(t);
                     }
                 }
 
@@ -911,7 +918,7 @@ namespace ClassicUO
                 }
                 else
                 {
-                    GameActions.Print(UO.World, message, 0x44, MessageType.System);
+                    GameActions.Print(_world, message, 0x44, MessageType.System);
                 }
             }
         }

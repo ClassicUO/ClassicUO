@@ -309,7 +309,7 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            TextObject msg = World.MessageManager.CreateMessage(
+            TextObject msg = ServiceProvider.Get<ManagersService>().MessageManager.CreateMessage(
                 text,
                 hue,
                 font,

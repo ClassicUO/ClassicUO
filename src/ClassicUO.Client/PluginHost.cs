@@ -245,17 +245,17 @@ namespace ClassicUO
                     break;
                 case 3:
                     var subCmd = Unsafe.AsRef<(int, sbyte)>(cmd.ToPointer());
-                    var uoService = ServiceProvider.Get<UOService>();
-                    var res = uoService.World?.Player?.Pathfinder?.AutoWalking ?? false;
+                    var worldService = ServiceProvider.Get<WorldService>();
+                    var res = worldService.World?.Player?.Pathfinder?.AutoWalking ?? false;
 
                     switch (subCmd.Item2)
                     {
                         case -1: return (IntPtr)Unsafe.AsPointer(ref res);
                         case 0:
-                            uoService.World.Player.Pathfinder.AutoWalking = false;
+                            worldService.World.Player.Pathfinder.AutoWalking = false;
                             break;
                         default:
-                            uoService.World.Player.Pathfinder.AutoWalking = true;
+                            worldService.World.Player.Pathfinder.AutoWalking = true;
                             break;
                     }
 

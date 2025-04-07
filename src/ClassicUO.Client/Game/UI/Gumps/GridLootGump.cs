@@ -182,7 +182,7 @@ namespace ClassicUO.Game.UI.Gumps
             else if (buttonID == 2)
             {
                 GameActions.Print(World, ResGumps.TargetContainerToGrabItemsInto);
-                World.TargetManager.SetTargeting(CursorTarget.SetGrabBag, 0, TargetType.Neutral);
+                ServiceProvider.Get<ManagersService>().TargetManager.SetTargeting(CursorTarget.SetGrabBag, 0, TargetType.Neutral);
             }
             else
             {

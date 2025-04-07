@@ -61,11 +61,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             acceptButton.MouseUp += (sender, e) =>
             {
-                if (World.Party.Inviter != 0 && World.Party.Leader == 0)
+                if (ServiceProvider.Get<ManagersService>().Party.Inviter != 0 && ServiceProvider.Get<ManagersService>().Party.Leader == 0)
                 {
-                    GameActions.RequestPartyAccept(World.Party.Inviter);
-                    World.Party.Leader = World.Party.Inviter;
-                    World.Party.Inviter = 0;
+                    GameActions.RequestPartyAccept(ServiceProvider.Get<ManagersService>().Party.Inviter);
+                    ServiceProvider.Get<ManagersService>().Party.Leader = ServiceProvider.Get<ManagersService>().Party.Inviter;
+                    ServiceProvider.Get<ManagersService>().Party.Inviter = 0;
                 }
 
                 base.Dispose();
@@ -73,10 +73,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             declineButton.MouseUp += (sender, e) =>
             {
-                if (World.Party.Inviter != 0 && World.Party.Leader == 0)
+                if (ServiceProvider.Get<ManagersService>().Party.Inviter != 0 && ServiceProvider.Get<ManagersService>().Party.Leader == 0)
                 {
-                    ServiceProvider.Get<PacketHandlerService>().Out.Send_PartyDecline(World.Party.Inviter);
-                    World.Party.Inviter = 0;
+                    ServiceProvider.Get<PacketHandlerService>().Out.Send_PartyDecline(ServiceProvider.Get<ManagersService>().Party.Inviter);
+                    ServiceProvider.Get<ManagersService>().Party.Inviter = 0;
                 }
 
                 base.Dispose();

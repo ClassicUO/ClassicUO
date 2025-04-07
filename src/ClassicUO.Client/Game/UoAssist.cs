@@ -16,12 +16,10 @@ namespace ClassicUO.Platforms
     internal sealed class UoAssist
     {
         private readonly CustomWindow _customWindow;
-        private readonly World _world;
+        private readonly WindowService _windowService = ServiceProvider.Get<WindowService>();
 
-        public UoAssist(World world)
+        public UoAssist()
         {
-            _world = world;
-
             if (Environment.OSVersion.Platform != PlatformID.Win32NT)
             {
                 Log.Warn("This OS does not support the UOAssist API");
@@ -31,9 +29,7 @@ namespace ClassicUO.Platforms
 
             try
             {
-                var windowService = ServiceProvider.Get<WindowService>();
-                if (windowService.Handle != null)
-                    _customWindow = new CustomWindow(windowService.Handle, world, "UOASSIST-TP-MSG-WND");
+                _customWindow = new CustomWindow(_windowService.Handle, "UOASSIST-TP-MSG-WND");
             }
             catch
             { }
@@ -71,7 +67,6 @@ namespace ClassicUO.Platforms
 
         private class CustomWindow : IDisposable
         {
-            private readonly World _world;
             private const int ERROR_CLASS_ALREADY_EXISTS = 1410;
             public const uint WM_USER = 0x400;
 
@@ -81,14 +76,13 @@ namespace ClassicUO.Platforms
 
             private bool m_disposed;
             private IntPtr m_hwnd;
+            private readonly WorldService _worldService = ServiceProvider.Get<WorldService>();
 
 
             private readonly WndProc m_wnd_proc_delegate;
 
-            public CustomWindow(IntPtr wndHandle, World world, string class_name)
+            public CustomWindow(IntPtr wndHandle, string class_name)
             {
-                _world = world;
-
                 SDL.SDL_SysWMinfo info = new SDL.SDL_SysWMinfo();
                 SDL.SDL_VERSION(out info.version);
                 SDL.SDL_GetWindowWMInfo(wndHandle, ref info);
@@ -244,9 +238,9 @@ namespace ClassicUO.Platforms
 
                         _wndRegs.Add(wParam, new WndRegEnt(wParam, lParam == 1 ? 1 : 0));
 
-                        if (lParam == 1 && _world.InGame)
+                        if (lParam == 1 && _worldService.World.InGame)
                         {
-                            foreach (Item item in _world.Items.Values)
+                            foreach (Item item in _worldService.World.Items.Values)
                             {
                                 if (item.IsMulti)
                                 {
@@ -261,9 +255,9 @@ namespace ClassicUO.Platforms
 
                     case UOAMessage.GET_COORDS:
 
-                        if (_world.Player != null)
+                        if (_worldService.World.Player != null)
                         {
-                            return (_world.Player.X & 0xFFFF) | ((_world.Player.Y & 0xFFFF) << 16);
+                            return (_worldService.World.Player.X & 0xFFFF) | ((_worldService.World.Player.Y & 0xFFFF) << 16);
                         }
 
                         break;
@@ -272,19 +266,19 @@ namespace ClassicUO.Platforms
 
                     case UOAMessage.GET_STAT:
 
-                        if (_world.Player == null || wParam < 0 || wParam > 5)
+                        if (_worldService.World.Player == null || wParam < 0 || wParam > 5)
                         {
                             return 0;
                         }
 
                         switch (wParam)
                         {
-                            case 0: return _world.Player.Strength;
-                            case 1: return _world.Player.Intelligence;
-                            case 2: return _world.Player.Dexterity;
-                            case 3: return _world.Player.Weight;
-                            case 4: return _world.Player.HitsMax;
-                            case 5: return (int)_world.Player.TithingPoints;
+                            case 0: return _worldService.World.Player.Strength;
+                            case 1: return _worldService.World.Player.Intelligence;
+                            case 2: return _worldService.World.Player.Dexterity;
+                            case 3: return _worldService.World.Player.Weight;
+                            case 4: return _worldService.World.Player.HitsMax;
+                            case 5: return (int)_worldService.World.Player.TithingPoints;
                         }
 
                         return 0;
@@ -294,7 +288,7 @@ namespace ClassicUO.Platforms
 
                     case UOAMessage.DISPLAY_TEXT:
 
-                        if (_world.Player != null)
+                        if (_worldService.World.Player != null)
                         {
                             ushort hue = (ushort) (wParam & 0xFFFF);
                             StringBuilder sb = new StringBuilder(256);
@@ -306,7 +300,7 @@ namespace ClassicUO.Platforms
 
                             if ((wParam & 0x00010000) != 0)
                             {
-                                _world.MessageManager.HandleMessage
+                                ServiceProvider.Get<ManagersService>().MessageManager.HandleMessage
                                 (
                                     null,
                                     sb.ToString(),
@@ -320,7 +314,7 @@ namespace ClassicUO.Platforms
                             }
                             else
                             {
-                                _world.Player.AddMessage
+                                _worldService.World.Player.AddMessage
                                 (
                                     MessageType.Regular,
                                     sb.ToString(),
@@ -336,7 +330,7 @@ namespace ClassicUO.Platforms
 
                         break;
 
-                    case UOAMessage.REQUEST_MULTIS: return _world.Player != null ? 1 : 0;
+                    case UOAMessage.REQUEST_MULTIS: return _worldService.World.Player != null ? 1 : 0;
 
                     case UOAMessage.ADD_CMD:
 
@@ -350,17 +344,17 @@ namespace ClassicUO.Platforms
 
                         if (wParam == 0)
                         {
-                            _world.CommandManager.UnRegister(sb.ToString());
+                            ServiceProvider.Get<ManagersService>().CommandManager.UnRegister(sb.ToString());
 
                             return 0;
                         }
 
-                        new WndCmd(_world, _cmdID, (IntPtr) wParam, sb.ToString());
+                        new WndCmd(_worldService.World, _cmdID, (IntPtr) wParam, sb.ToString());
 
                         return (int) _cmdID++;
                     }
 
-                    case UOAMessage.GET_UID: return _world.Player != null ? (int)_world.Player.Serial : 0;
+                    case UOAMessage.GET_UID: return _worldService.World.Player != null ? (int)_worldService.World.Player.Serial : 0;
                     case UOAMessage.GET_SHARDNAME: break;
                     case UOAMessage.ADD_USER_2_PARTY: break;
 
@@ -378,7 +372,7 @@ namespace ClassicUO.Platforms
 
                         return (int) hwnd;
 
-                    case UOAMessage.GET_POISON: return _world.Player != null && _world.Player.IsPoisoned ? 1 : 0;
+                    case UOAMessage.GET_POISON: return _worldService.World.Player != null && _worldService.World.Player.IsPoisoned ? 1 : 0;
 
                     case UOAMessage.SET_SKILL_LOCK: break;
                     case UOAMessage.GET_ACCT_ID: break;
@@ -415,25 +409,25 @@ namespace ClassicUO.Platforms
 
             public void SignalHitsUpdate()
             {
-                if (_world.Player != null)
+                if (_worldService.World.Player != null)
                 {
-                    PostMessage((uint) UOAMessage.STR_STATUS, (IntPtr)_world.Player.HitsMax, (IntPtr)_world.Player.Hits);
+                    PostMessage((uint) UOAMessage.STR_STATUS, (IntPtr)_worldService.World.Player.HitsMax, (IntPtr)_worldService.World.Player.Hits);
                 }
             }
 
             public void SignalStaminaUpdate()
             {
-                if (_world.Player != null)
+                if (_worldService.World.Player != null)
                 {
-                    PostMessage((uint) UOAMessage.DEX_STATUS, (IntPtr)_world.Player.HitsMax, (IntPtr)_world.Player.Hits);
+                    PostMessage((uint) UOAMessage.DEX_STATUS, (IntPtr)_worldService.World.Player.HitsMax, (IntPtr)_worldService.World.Player.Hits);
                 }
             }
 
             public void SignalManaUpdate()
             {
-                if (_world.Player != null)
+                if (_worldService.World.Player != null)
                 {
-                    PostMessage((uint) UOAMessage.INT_STATUS, (IntPtr)_world.Player.HitsMax, (IntPtr)_world.Player.Hits);
+                    PostMessage((uint) UOAMessage.INT_STATUS, (IntPtr)_worldService.World.Player.HitsMax, (IntPtr)_worldService.World.Player.Hits);
                 }
             }
 
@@ -561,7 +555,7 @@ namespace ClassicUO.Platforms
                 {
                     Msg = msg;
                     hWnd = handle;
-                    world.CommandManager.Register(cmd, MyCallback);
+                    ServiceProvider.Get<ManagersService>().CommandManager.Register(cmd, MyCallback);
                 }
 
                 private void MyCallback(string[] args)

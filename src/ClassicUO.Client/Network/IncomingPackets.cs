@@ -41,33 +41,30 @@ internal class IncomingPackets
         new[] { '@', '@' }
     );
 
-    private readonly World _world;
-
-    public IncomingPackets(World world)
-    {
-        _world = world;
-    }
 
 
     public void TargetCursor(ref StackDataReader p)
     {
-        _world.TargetManager.SetTargeting(
+        var managersService = ServiceProvider.Get<ManagersService>();
+
+        managersService.TargetManager.SetTargeting(
             (CursorTarget)p.ReadUInt8(),
             p.ReadUInt32BE(),
             (TargetType)p.ReadUInt8()
         );
 
-        if (_world.Party.PartyHealTimer < Time.Ticks && _world.Party.PartyHealTarget != 0)
+        if (managersService.Party.PartyHealTimer < Time.Ticks && managersService.Party.PartyHealTarget != 0)
         {
-            _world.TargetManager.Target(_world.Party.PartyHealTarget);
-            _world.Party.PartyHealTimer = 0;
-            _world.Party.PartyHealTarget = 0;
+            managersService.TargetManager.Target(managersService.Party.PartyHealTarget);
+            managersService.Party.PartyHealTimer = 0;
+            managersService.Party.PartyHealTarget = 0;
         }
     }
 
     public void SecureTrading(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
@@ -81,7 +78,7 @@ internal class IncomingPackets
             uint id2 = p.ReadUInt32BE();
 
             // standard client doesn't allow the trading system if one of the traders is invisible (=not sent by server)
-            if (_world.Get(id1) == null ||_world.Get(id2) == null)
+            if (world.Get(id1) == null ||world.Get(id2) == null)
             {
                 return;
             }
@@ -94,7 +91,7 @@ internal class IncomingPackets
                 name = p.ReadASCII();
             }
 
-            ServiceProvider.Get<GuiService>().Add(new TradingGump(_world, serial, name, id1, id2));
+            ServiceProvider.Get<GuiService>().Add(new TradingGump(world, serial, name, id1, id2));
         }
         else if (type == 1)
         {
@@ -137,6 +134,7 @@ internal class IncomingPackets
 
     public void ClientTalk(ref StackDataReader p)
     {
+        var world = ServiceProvider.Get<WorldService>().World;
         switch (p.ReadUInt8())
         {
             case 0x78:
@@ -155,12 +153,13 @@ internal class IncomingPackets
 
     public void Damage(ref StackDataReader p)
     {
-        if (_world.Player == null)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.Player == null)
         {
             return;
         }
 
-        var entity = _world.Get(p.ReadUInt32BE());
+        var entity = world.Get(p.ReadUInt32BE());
 
         if (entity != null)
         {
@@ -168,20 +167,21 @@ internal class IncomingPackets
 
             if (damage > 0)
             {
-                _world.WorldTextManager.AddDamage(entity, damage);
+                world.WorldTextManager.AddDamage(entity, damage);
             }
         }
     }
 
     public void CharacterStatus(ref StackDataReader p)
     {
-        if (_world.Player == null)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.Player == null)
         {
             return;
         }
 
         uint serial = p.ReadUInt32BE();
-        var entity = _world.Get(serial);
+        var entity = world.Get(serial);
 
         if (entity == null)
         {
@@ -214,35 +214,35 @@ internal class IncomingPackets
             {
                 mobile.IsFemale = p.ReadBool();
 
-                if (mobile == _world.Player)
+                if (mobile == world.Player)
                 {
                     if (
-                        !string.IsNullOrEmpty(_world.Player.Name) && oldName != _world.Player.Name
+                        !string.IsNullOrEmpty(world.Player.Name) && oldName != world.Player.Name
                     )
                     {
-                        ServiceProvider.Get<EngineService>().SetWindowTitle(_world.Player.Name);
+                        ServiceProvider.Get<EngineService>().SetWindowTitle(world.Player.Name);
                     }
 
                     ushort str = p.ReadUInt16BE();
                     ushort dex = p.ReadUInt16BE();
                     ushort intell = p.ReadUInt16BE();
-                    _world.Player.Stamina = p.ReadUInt16BE();
-                    _world.Player.StaminaMax = p.ReadUInt16BE();
-                    _world.Player.Mana = p.ReadUInt16BE();
-                    _world.Player.ManaMax = p.ReadUInt16BE();
-                    _world.Player.Gold = p.ReadUInt32BE();
-                    _world.Player.PhysicalResistance = (short)p.ReadUInt16BE();
-                    _world.Player.Weight = p.ReadUInt16BE();
+                    world.Player.Stamina = p.ReadUInt16BE();
+                    world.Player.StaminaMax = p.ReadUInt16BE();
+                    world.Player.Mana = p.ReadUInt16BE();
+                    world.Player.ManaMax = p.ReadUInt16BE();
+                    world.Player.Gold = p.ReadUInt32BE();
+                    world.Player.PhysicalResistance = (short)p.ReadUInt16BE();
+                    world.Player.Weight = p.ReadUInt16BE();
 
                     if (
-                        _world.Player.Strength != 0
+                        world.Player.Strength != 0
                         && ProfileManager.CurrentProfile != null
                         && ProfileManager.CurrentProfile.ShowStatsChangedMessage
                     )
                     {
-                        ushort currentStr = _world.Player.Strength;
-                        ushort currentDex = _world.Player.Dexterity;
-                        ushort currentInt = _world.Player.Intelligence;
+                        ushort currentStr = world.Player.Strength;
+                        ushort currentDex = world.Player.Dexterity;
+                        ushort currentInt = world.Player.Intelligence;
 
                         int deltaStr = str - currentStr;
                         int deltaDex = dex - currentDex;
@@ -251,7 +251,7 @@ internal class IncomingPackets
                         if (deltaStr != 0)
                         {
                             GameActions.Print(
-                                _world,
+                                world,
                                 string.Format(
                                     ResGeneral.Your0HasChangedBy1ItIsNow2,
                                     ResGeneral.Strength,
@@ -268,7 +268,7 @@ internal class IncomingPackets
                         if (deltaDex != 0)
                         {
                             GameActions.Print(
-                                _world,
+                                world,
                                 string.Format(
                                     ResGeneral.Your0HasChangedBy1ItIsNow2,
                                     ResGeneral.Dexterity,
@@ -285,7 +285,7 @@ internal class IncomingPackets
                         if (deltaInt != 0)
                         {
                             GameActions.Print(
-                                _world,
+                                world,
                                 string.Format(
                                     ResGeneral.Your0HasChangedBy1ItIsNow2,
                                     ResGeneral.Intelligence,
@@ -300,13 +300,13 @@ internal class IncomingPackets
                         }
                     }
 
-                    _world.Player.Strength = str;
-                    _world.Player.Dexterity = dex;
-                    _world.Player.Intelligence = intell;
+                    world.Player.Strength = str;
+                    world.Player.Dexterity = dex;
+                    world.Player.Intelligence = intell;
 
                     if (type >= 5) //ML
                     {
-                        _world.Player.WeightMax = p.ReadUInt16BE();
+                        world.Player.WeightMax = p.ReadUInt16BE();
                         byte race = p.ReadUInt8();
 
                         if (race == 0)
@@ -314,82 +314,83 @@ internal class IncomingPackets
                             race = 1;
                         }
 
-                        _world.Player.Race = (RaceType)race;
+                        world.Player.Race = (RaceType)race;
                     }
                     else
                     {
                         if (ServiceProvider.Get<UOService>().Version >= ClassicUO.Sdk.ClientVersion.CV_500A)
                         {
-                            _world.Player.WeightMax = (ushort)(
-                                7 * (_world.Player.Strength >> 1) + 40
+                            world.Player.WeightMax = (ushort)(
+                                7 * (world.Player.Strength >> 1) + 40
                             );
                         }
                         else
                         {
-                            _world.Player.WeightMax = (ushort)(_world.Player.Strength * 4 + 25);
+                            world.Player.WeightMax = (ushort)(world.Player.Strength * 4 + 25);
                         }
                     }
 
                     if (type >= 3) //Renaissance
                     {
-                        _world.Player.StatsCap = (short)p.ReadUInt16BE();
-                        _world.Player.Followers = p.ReadUInt8();
-                        _world.Player.FollowersMax = p.ReadUInt8();
+                        world.Player.StatsCap = (short)p.ReadUInt16BE();
+                        world.Player.Followers = p.ReadUInt8();
+                        world.Player.FollowersMax = p.ReadUInt8();
                     }
 
                     if (type >= 4) //AOS
                     {
-                        _world.Player.FireResistance = (short)p.ReadUInt16BE();
-                        _world.Player.ColdResistance = (short)p.ReadUInt16BE();
-                        _world.Player.PoisonResistance = (short)p.ReadUInt16BE();
-                        _world.Player.EnergyResistance = (short)p.ReadUInt16BE();
-                        _world.Player.Luck = p.ReadUInt16BE();
-                        _world.Player.DamageMin = (short)p.ReadUInt16BE();
-                        _world.Player.DamageMax = (short)p.ReadUInt16BE();
-                        _world.Player.TithingPoints = p.ReadUInt32BE();
+                        world.Player.FireResistance = (short)p.ReadUInt16BE();
+                        world.Player.ColdResistance = (short)p.ReadUInt16BE();
+                        world.Player.PoisonResistance = (short)p.ReadUInt16BE();
+                        world.Player.EnergyResistance = (short)p.ReadUInt16BE();
+                        world.Player.Luck = p.ReadUInt16BE();
+                        world.Player.DamageMin = (short)p.ReadUInt16BE();
+                        world.Player.DamageMax = (short)p.ReadUInt16BE();
+                        world.Player.TithingPoints = p.ReadUInt32BE();
                     }
 
                     if (type >= 6)
                     {
-                        _world.Player.MaxPhysicResistence =
+                        world.Player.MaxPhysicResistence =
                             p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                        _world.Player.MaxFireResistence =
+                        world.Player.MaxFireResistence =
                             p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                        _world.Player.MaxColdResistence =
+                        world.Player.MaxColdResistence =
                             p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                        _world.Player.MaxPoisonResistence =
+                        world.Player.MaxPoisonResistence =
                             p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                        _world.Player.MaxEnergyResistence =
+                        world.Player.MaxEnergyResistence =
                             p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                        _world.Player.DefenseChanceIncrease =
+                        world.Player.DefenseChanceIncrease =
                             p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                        _world.Player.MaxDefenseChanceIncrease =
+                        world.Player.MaxDefenseChanceIncrease =
                             p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                        _world.Player.HitChanceIncrease =
+                        world.Player.HitChanceIncrease =
                             p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                        _world.Player.SwingSpeedIncrease =
+                        world.Player.SwingSpeedIncrease =
                             p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                        _world.Player.DamageIncrease =
+                        world.Player.DamageIncrease =
                             p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                        _world.Player.LowerReagentCost =
+                        world.Player.LowerReagentCost =
                             p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                        _world.Player.SpellDamageIncrease =
+                        world.Player.SpellDamageIncrease =
                             p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                        _world.Player.FasterCastRecovery =
+                        world.Player.FasterCastRecovery =
                             p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                        _world.Player.FasterCasting =
+                        world.Player.FasterCasting =
                             p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                        _world.Player.LowerManaCost =
+                        world.Player.LowerManaCost =
                             p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
                     }
                 }
             }
 
-            if (mobile == _world.Player)
+            if (mobile == world.Player)
             {
-                _world.UoAssist.SignalHits();
-                _world.UoAssist.SignalStamina();
-                _world.UoAssist.SignalMana();
+                var managersService = ServiceProvider.Get<ManagersService>();
+                managersService.UoAssist.SignalHits();
+                managersService.UoAssist.SignalStamina();
+                managersService.UoAssist.SignalMana();
             }
         }
     }
@@ -402,7 +403,8 @@ internal class IncomingPackets
 
     public void NewHealthbarUpdate(ref StackDataReader p)
     {
-        if (_world.Player == null)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.Player == null)
         {
             return;
         }
@@ -412,7 +414,7 @@ internal class IncomingPackets
             return;
         }
 
-        var mobile = _world.Mobiles.Get(p.ReadUInt32BE());
+        var mobile = world.Mobiles.Get(p.ReadUInt32BE());
 
         if (mobile == null)
         {
@@ -471,7 +473,8 @@ internal class IncomingPackets
 
     public void UpdateItem(ref StackDataReader p)
     {
-        if (_world.Player == null)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.Player == null)
         {
             return;
         }
@@ -556,7 +559,7 @@ internal class IncomingPackets
         }
 
         UpdateGameObject(
-            _world,
+            world,
             serial,
             graphic,
             graphicInc,
@@ -575,35 +578,36 @@ internal class IncomingPackets
 
     public void EnterWorld(ref StackDataReader p)
     {
+        var world = ServiceProvider.Get<WorldService>().World;
         uint serial = p.ReadUInt32BE();
 
-        _world.CreatePlayer(serial);
+        world.CreatePlayer(serial);
 
         p.Skip(4);
-        _world.Player.Graphic = p.ReadUInt16BE();
-        _world.Player.CheckGraphicChange();
+        world.Player.Graphic = p.ReadUInt16BE();
+        world.Player.CheckGraphicChange();
         ushort x = p.ReadUInt16BE();
         ushort y = p.ReadUInt16BE();
         sbyte z = (sbyte)p.ReadUInt16BE();
 
-        if (_world.Map == null)
+        if (world.Map == null)
         {
-            _world.MapIndex = 0;
+            world.MapIndex = 0;
         }
 
-        _world.Player.SetInWorldTile(x, y, z);
-        _world.Player.Direction = (Direction)(p.ReadUInt8() & 0x7);
-        _world.RangeSize.X = x;
-        _world.RangeSize.Y = y;
+        world.Player.SetInWorldTile(x, y, z);
+        world.Player.Direction = (Direction)(p.ReadUInt8() & 0x7);
+        world.RangeSize.X = x;
+        world.RangeSize.Y = y;
 
         if (
             ProfileManager.CurrentProfile != null
             && ProfileManager.CurrentProfile.UseCustomLightLevel
         )
         {
-            _world.Light.Overall =
+            world.Light.Overall =
                 ProfileManager.CurrentProfile.LightLevelType == 1
-                    ? Math.Min(_world.Light.Overall, ProfileManager.CurrentProfile.LightLevel)
+                    ? Math.Min(world.Light.Overall, ProfileManager.CurrentProfile.LightLevel)
                     : ProfileManager.CurrentProfile.LightLevel;
         }
 
@@ -624,12 +628,12 @@ internal class IncomingPackets
 
         ServiceProvider.Get<PacketHandlerService>().Out.Send_ClientVersion(Settings.GlobalSettings.ClientVersion);
 
-        GameActions.SingleClick(_world, _world.Player);
-        ServiceProvider.Get<PacketHandlerService>().Out.Send_SkillsRequest(_world.Player.Serial);
+        GameActions.SingleClick(world, world.Player);
+        ServiceProvider.Get<PacketHandlerService>().Out.Send_SkillsRequest(world.Player.Serial);
 
-        if (_world.Player.IsDead)
+        if (world.Player.IsDead)
         {
-            _world.ChangeSeason(Game.Managers.Season.Desolation, 42);
+            world.ChangeSeason(Game.Managers.Season.Desolation, 42);
         }
 
         if (
@@ -648,8 +652,9 @@ internal class IncomingPackets
 
     public void Talk(ref StackDataReader p)
     {
+        var world = ServiceProvider.Get<WorldService>().World;
         uint serial = p.ReadUInt32BE();
-        var entity = _world.Get(serial);
+        var entity = world.Get(serial);
         ushort graphic = p.ReadUInt16BE();
         MessageType type = (MessageType)p.ReadUInt8();
         ushort hue = p.ReadUInt16BE();
@@ -702,24 +707,25 @@ internal class IncomingPackets
             }
         }
 
-        _world.MessageManager.HandleMessage(entity, text, name, hue, type, (byte)font, text_type);
+        ServiceProvider.Get<ManagersService>().MessageManager.HandleMessage(entity, text, name, hue, type, (byte)font, text_type);
     }
 
     public void DeleteObject(ref StackDataReader p)
     {
-        if (_world.Player == null)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.Player == null)
         {
             return;
         }
 
         uint serial = p.ReadUInt32BE();
 
-        if (_world.Player == serial)
+        if (world.Player == serial)
         {
             return;
         }
 
-        var entity = _world.Get(serial);
+        var entity = world.Get(serial);
 
         if (entity == null)
         {
@@ -734,15 +740,15 @@ internal class IncomingPackets
 
             if (SerialHelper.IsValid(it.Container))
             {
-                var top = _world.Get(it.RootContainer);
+                var top = world.Get(it.RootContainer);
 
                 if (top != null)
                 {
-                    if (top == _world.Player)
+                    if (top == world.Player)
                     {
                         updateAbilities =
                             it.Layer == Layer.OneHanded || it.Layer == Layer.TwoHanded;
-                        var tradeBoxItem = _world.Player.GetSecureTradeBox();
+                        var tradeBoxItem = world.Player.GetSecureTradeBox();
 
                         if (tradeBoxItem != null)
                         {
@@ -751,7 +757,7 @@ internal class IncomingPackets
                     }
                 }
 
-                if (cont == _world.Player && it.Layer == Layer.Invalid)
+                if (cont == world.Player && it.Layer == Layer.Invalid)
                 {
                     ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled = false;
                 }
@@ -789,14 +795,14 @@ internal class IncomingPackets
             }
         }
 
-        if (_world.CorpseManager.Exists(0, serial))
+        if (ServiceProvider.Get<ManagersService>().CorpseManager.Exists(0, serial))
         {
             return;
         }
 
         if (entity is Mobile m)
         {
-            if (_world.Party.Contains(serial))
+            if (ServiceProvider.Get<ManagersService>().Party.Contains(serial))
             {
                 // m.RemoveFromTile();
             }
@@ -810,7 +816,7 @@ internal class IncomingPackets
                 //    NetClient.Socket.Send(new PCloseStatusBarGump(serial));
                 //}
 
-                _world.RemoveMobile(serial, true);
+                world.RemoveMobile(serial, true);
             }
         }
         else
@@ -819,10 +825,10 @@ internal class IncomingPackets
 
             if (item.IsMulti)
             {
-                _world.HouseManager.Remove(serial);
+                ServiceProvider.Get<ManagersService>().HouseManager.Remove(serial);
             }
 
-            var cont =_world.Get(item.Container);
+            var cont =world.Get(item.Container);
 
             if (cont != null)
             {
@@ -838,18 +844,19 @@ internal class IncomingPackets
                 ServiceProvider.Get<GuiService>().GetGump<MiniMapGump>()?.RequestUpdateContents();
             }
 
-            _world.RemoveItem(serial, true);
+            world.RemoveItem(serial, true);
 
             if (updateAbilities)
             {
-                _world.Player.UpdateAbilities();
+                world.Player.UpdateAbilities();
             }
         }
     }
 
     public void UpdatePlayer(ref StackDataReader p)
     {
-        if (_world.Player == null)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.Player == null)
         {
             return;
         }
@@ -865,12 +872,13 @@ internal class IncomingPackets
         Direction direction = (Direction)p.ReadUInt8();
         sbyte z = p.ReadInt8();
 
-        UpdatePlayer(_world, serial, graphic, graphic_inc, hue, flags, x, y, z, serverID, direction);
+        UpdatePlayer(world, serial, graphic, graphic_inc, hue, flags, x, y, z, serverID, direction);
     }
 
     public void DenyWalk(ref StackDataReader p)
     {
-        if (_world.Player == null)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.Player == null)
         {
             return;
         }
@@ -882,15 +890,16 @@ internal class IncomingPackets
         direction &= Direction.Up;
         sbyte z = p.ReadInt8();
 
-        _world.Player.Walker.DenyWalk(seq, x, y, z);
-        _world.Player.Direction = direction;
+        world.Player.Walker.DenyWalk(seq, x, y, z);
+        world.Player.Direction = direction;
 
-        _world.Weather.Reset();
+        ServiceProvider.Get<ManagersService>().Weather.Reset();
     }
 
     public void ConfirmWalk(ref StackDataReader p)
     {
-        if (_world.Player == null)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.Player == null)
         {
             return;
         }
@@ -903,14 +912,15 @@ internal class IncomingPackets
             noto = 0x01;
         }
 
-        _world.Player.NotorietyFlag = (NotorietyFlag)noto;
-        _world.Player.Walker.ConfirmWalk(seq);
+        world.Player.NotorietyFlag = (NotorietyFlag)noto;
+        world.Player.Walker.ConfirmWalk(seq);
 
-        _world.Player.AddToTile();
+        world.Player.AddToTile();
     }
 
     public void DragAnimation(ref StackDataReader p)
     {
+        var world = ServiceProvider.Get<WorldService>().World;
         ushort graphic = p.ReadUInt16BE();
         graphic += p.ReadUInt8();
         ushort hue = p.ReadUInt16BE();
@@ -937,7 +947,7 @@ internal class IncomingPackets
             graphic = 0x0EF2;
         }
 
-        var entity = _world.Mobiles.Get(source);
+        var entity = world.Mobiles.Get(source);
 
         if (entity == null)
         {
@@ -950,7 +960,7 @@ internal class IncomingPackets
             sourceZ = entity.Z;
         }
 
-        var destEntity = _world.Mobiles.Get(dest);
+        var destEntity = world.Mobiles.Get(dest);
 
         if (destEntity == null)
         {
@@ -963,7 +973,7 @@ internal class IncomingPackets
             destZ = destEntity.Z;
         }
 
-        _world.SpawnEffect(
+        world.SpawnEffect(
             !SerialHelper.IsValid(source) || !SerialHelper.IsValid(dest)
                 ? GraphicEffectType.Moving
                 : GraphicEffectType.DragEffect,
@@ -997,7 +1007,8 @@ internal class IncomingPackets
 
     public void OpenContainer(ref StackDataReader p)
     {
-        if (_world.Player == null)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.Player == null)
         {
             return;
         }
@@ -1007,7 +1018,7 @@ internal class IncomingPackets
 
         if (graphic == 0xFFFF)
         {
-            var spellBookItem = _world.Items.Get(serial);
+            var spellBookItem = world.Items.Get(serial);
 
             if (spellBookItem == null)
             {
@@ -1016,7 +1027,7 @@ internal class IncomingPackets
 
             ServiceProvider.Get<GuiService>().GetGump<SpellbookGump>(serial)?.Dispose();
 
-            SpellbookGump spellbookGump = new SpellbookGump(_world, spellBookItem);
+            SpellbookGump spellbookGump = new SpellbookGump(world, spellBookItem);
 
             if (!ServiceProvider.Get<GuiService>().GetGumpCachePosition(spellBookItem, out Point location))
             {
@@ -1030,7 +1041,7 @@ internal class IncomingPackets
         }
         else if (graphic == 0x0030)
         {
-            var vendor = _world.Mobiles.Get(serial);
+            var vendor = world.Mobiles.Get(serial);
 
             if (vendor == null)
             {
@@ -1039,7 +1050,7 @@ internal class IncomingPackets
 
             ServiceProvider.Get<GuiService>().GetGump<ShopGump>(serial)?.Dispose();
 
-            ShopGump gump = new ShopGump(_world, serial, true, 150, 5);
+            ShopGump gump = new ShopGump(world, serial, true, 150, 5);
             ServiceProvider.Get<GuiService>().Add(gump);
 
             for (Layer layer = Layer.ShopBuyRestock; layer < Layer.ShopBuy + 1; layer++)
@@ -1093,7 +1104,7 @@ internal class IncomingPackets
         }
         else
         {
-            var item = _world.Items.Get(serial);
+            var item = world.Items.Get(serial);
 
             if (item != null)
             {
@@ -1213,14 +1224,14 @@ internal class IncomingPackets
                 }
                 else
                 {
-                    _world.ContainerManager.CalculateContainerPosition(serial, graphic);
-                    x = _world.ContainerManager.X;
-                    y = _world.ContainerManager.Y;
+                    ServiceProvider.Get<ManagersService>().ContainerManager.CalculateContainerPosition(serial, graphic);
+                    x = ServiceProvider.Get<ManagersService>().ContainerManager.X;
+                    y = ServiceProvider.Get<ManagersService>().ContainerManager.Y;
                     playsound = true;
                 }
 
                 ServiceProvider.Get<GuiService>().Add(
-                    new ContainerGump(_world, item, graphic, playsound)
+                    new ContainerGump(world, item, graphic, playsound)
                     {
                         X = x,
                         Y = y,
@@ -1238,7 +1249,7 @@ internal class IncomingPackets
 
         if (graphic != 0x0030)
         {
-            var it = _world.Items.Get(serial);
+            var it = world.Items.Get(serial);
 
             if (it != null)
             {
@@ -1246,7 +1257,7 @@ internal class IncomingPackets
 
                 if (!it.IsCorpse && graphic != 0xFFFF)
                 {
-                    ClearContainerAndRemoveItems(_world, it);
+                    ClearContainerAndRemoveItems(world, it);
                 }
             }
         }
@@ -1254,7 +1265,8 @@ internal class IncomingPackets
 
     public void UpdateContainedItem(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
@@ -1274,12 +1286,13 @@ internal class IncomingPackets
         uint containerSerial = p.ReadUInt32BE();
         ushort hue = p.ReadUInt16BE();
 
-        AddItemToContainer(_world, serial, graphic, amount, x, y, hue, containerSerial);
+        AddItemToContainer(world, serial, graphic, amount, x, y, hue, containerSerial);
     }
 
     public void DenyMoveItem(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
@@ -1287,7 +1300,7 @@ internal class IncomingPackets
         var uoService = ServiceProvider.Get<UOService>();
         var cursorService = ServiceProvider.Get<GameCursorService>();
 
-        var firstItem = _world.Items.Get(cursorService.GameCursor.ItemHold.Serial);
+        var firstItem = world.Items.Get(cursorService.GameCursor.ItemHold.Serial);
 
         if (
             cursorService.GameCursor.ItemHold.Enabled
@@ -1295,9 +1308,9 @@ internal class IncomingPackets
                 && (firstItem == null || !firstItem.AllowedToDraw)
         )
         {
-            if (_world.ObjectToRemove == cursorService.GameCursor.ItemHold.Serial)
+            if (world.ObjectToRemove == cursorService.GameCursor.ItemHold.Serial)
             {
-                _world.ObjectToRemove = 0;
+                world.ObjectToRemove = 0;
             }
 
             if (
@@ -1316,7 +1329,7 @@ internal class IncomingPackets
                         Console.WriteLine("=== DENY === ADD TO CONTAINER");
 
                         AddItemToContainer(
-                            _world,
+                            world,
                             cursorService.GameCursor.ItemHold.Serial,
                             cursorService.GameCursor.ItemHold.Graphic,
                             cursorService.GameCursor.ItemHold.TotalAmount,
@@ -1332,7 +1345,7 @@ internal class IncomingPackets
                     }
                     else
                     {
-                        Item item = _world.GetOrCreateItem(
+                        Item item = world.GetOrCreateItem(
                             cursorService.GameCursor.ItemHold.Serial
                         );
 
@@ -1346,7 +1359,7 @@ internal class IncomingPackets
                         item.Z = cursorService.GameCursor.ItemHold.Z;
                         item.CheckGraphicChange();
 
-                        var container = _world.Get(cursorService.GameCursor.ItemHold.Container);
+                        var container = world.Get(cursorService.GameCursor.ItemHold.Container);
 
                         if (container != null)
                         {
@@ -1354,7 +1367,7 @@ internal class IncomingPackets
                             {
                                 Console.WriteLine("=== DENY === ADD TO PAPERDOLL");
 
-                                _world.RemoveItemFromContainer(item);
+                                world.RemoveItemFromContainer(item);
                                 container.PushToBack(item);
                                 item.Container = container.Serial;
 
@@ -1366,14 +1379,14 @@ internal class IncomingPackets
                             {
                                 Console.WriteLine("=== DENY === SOMETHING WRONG");
 
-                                _world.RemoveItem(item, true);
+                                world.RemoveItem(item, true);
                             }
                         }
                         else
                         {
                             Console.WriteLine("=== DENY === ADD TO TERRAIN");
 
-                            _world.RemoveItemFromContainer(item);
+                            world.RemoveItemFromContainer(item);
 
                             item.SetInWorldTile(item.X, item.Y, item.Z);
                         }
@@ -1396,7 +1409,7 @@ internal class IncomingPackets
             Log.Warn("There was a problem with ItemHold object. It was cleared before :|");
         }
 
-        //var result = _world.Items.Get(ItemHold.Serial);
+        //var result = world.Items.Get(ItemHold.Serial);
 
         //if (result != null && !result.IsDestroyed)
         //    result.AllowedToDraw = true;
@@ -1405,7 +1418,7 @@ internal class IncomingPackets
 
         if (code < 5)
         {
-            _world.MessageManager.HandleMessage(
+            ServiceProvider.Get<ManagersService>().MessageManager.HandleMessage(
                 null,
                 ServerErrorMessages.GetError(p[0], code),
                 string.Empty,
@@ -1419,7 +1432,8 @@ internal class IncomingPackets
 
     public void EndDraggingItem(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
@@ -1431,7 +1445,8 @@ internal class IncomingPackets
 
     public void DropItemAccepted(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
@@ -1445,30 +1460,32 @@ internal class IncomingPackets
 
     public void DeathScreen(ref StackDataReader p)
     {
+        var world = ServiceProvider.Get<WorldService>().World;
         // todo
         byte action = p.ReadUInt8();
 
         if (action != 1)
         {
-            _world.Weather.Reset();
+            ServiceProvider.Get<ManagersService>().Weather.Reset();
 
             var audioService = ServiceProvider.Get<AudioService>();
             audioService.PlayMusic(audioService.DeathMusicIndex, true);
 
             if (ProfileManager.CurrentProfile.EnableDeathScreen)
             {
-                _world.Player.DeathScreenTimer = Time.Ticks + Constants.DEATH_SCREEN_TIMER;
+                world.Player.DeathScreenTimer = Time.Ticks + Constants.DEATH_SCREEN_TIMER;
             }
 
-            GameActions.RequestWarMode(_world.Player, false);
+            GameActions.RequestWarMode(world.Player, false);
         }
     }
 
     public void MobileAttributes(ref StackDataReader p)
     {
+        var world = ServiceProvider.Get<WorldService>().World;
         uint serial = p.ReadUInt32BE();
 
-        var entity =_world.Get(serial);
+        var entity =world.Get(serial);
 
         if (entity == null)
         {
@@ -1497,30 +1514,31 @@ internal class IncomingPackets
             mobile.StaminaMax = p.ReadUInt16BE();
             mobile.Stamina = p.ReadUInt16BE();
 
-            if (mobile == _world.Player)
+            if (mobile == world.Player)
             {
-                _world.UoAssist.SignalHits();
-                _world.UoAssist.SignalStamina();
-                _world.UoAssist.SignalMana();
+                ServiceProvider.Get<ManagersService>().UoAssist.SignalHits();
+                ServiceProvider.Get<ManagersService>().UoAssist.SignalStamina();
+                ServiceProvider.Get<ManagersService>().UoAssist.SignalMana();
             }
         }
     }
 
     public void EquipItem(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
 
         uint serial = p.ReadUInt32BE();
 
-        Item item = _world.GetOrCreateItem(serial);
+        Item item = world.GetOrCreateItem(serial);
 
         if (item.Graphic != 0 && item.Layer != Layer.Backpack)
         {
             //ClearContainerAndRemoveItems(item);
-            _world.RemoveItemFromContainer(item);
+            world.RemoveItemFromContainer(item);
         }
 
         if (SerialHelper.IsValid(item.Container))
@@ -1536,7 +1554,7 @@ internal class IncomingPackets
         item.FixHue(p.ReadUInt16BE());
         item.Amount = 1;
 
-        var entity =_world.Get(item.Container);
+        var entity =world.Get(item.Container);
 
         entity?.PushToBack(item);
 
@@ -1550,11 +1568,11 @@ internal class IncomingPackets
         }
 
         if (
-            entity == _world.Player
+            entity == world.Player
             && (item.Layer == Layer.OneHanded || item.Layer == Layer.TwoHanded)
         )
         {
-            _world.Player?.UpdateAbilities();
+            world.Player?.UpdateAbilities();
         }
 
         //if (ItemHold.Serial == item.Serial)
@@ -1567,7 +1585,8 @@ internal class IncomingPackets
 
     public void Swing(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
@@ -1576,7 +1595,7 @@ internal class IncomingPackets
 
         uint attackers = p.ReadUInt32BE();
 
-        if (attackers != _world.Player)
+        if (attackers != world.Player)
         {
             return;
         }
@@ -1586,33 +1605,33 @@ internal class IncomingPackets
         const int TIME_TURN_TO_LASTTARGET = 2000;
 
         if (
-            _world.TargetManager.LastAttack == defenders
-            && _world.Player.InWarMode
-            && _world.Player.Walker.LastStepRequestTime + TIME_TURN_TO_LASTTARGET < Time.Ticks
-            && _world.Player.Steps.Count == 0
+            ServiceProvider.Get<ManagersService>().TargetManager.LastAttack == defenders
+            && world.Player.InWarMode
+            && world.Player.Walker.LastStepRequestTime + TIME_TURN_TO_LASTTARGET < Time.Ticks
+            && world.Player.Steps.Count == 0
         )
         {
-            var enemy = _world.Mobiles.Get(defenders);
+            var enemy = world.Mobiles.Get(defenders);
 
             if (enemy != null)
             {
                 Direction pdir = DirectionHelper.GetDirectionAB(
-                    _world.Player.X,
-                    _world.Player.Y,
+                    world.Player.X,
+                    world.Player.Y,
                     enemy.X,
                     enemy.Y
                 );
 
-                int x = _world.Player.X;
-                int y = _world.Player.Y;
-                sbyte z = _world.Player.Z;
+                int x = world.Player.X;
+                int y = world.Player.Y;
+                sbyte z = world.Player.Z;
 
                 if (
-                    _world.Player.Pathfinder.CanWalk(ref pdir, ref x, ref y, ref z)
-                    && _world.Player.Direction != pdir
+                    world.Player.Pathfinder.CanWalk(ref pdir, ref x, ref y, ref z)
+                    && world.Player.Direction != pdir
                 )
                 {
-                    _world.Player.Walk(pdir, false);
+                    world.Player.Walk(pdir, false);
                 }
             }
         }
@@ -1622,7 +1641,8 @@ internal class IncomingPackets
 
     public void UpdateSkills(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
@@ -1669,23 +1689,23 @@ internal class IncomingPackets
                 advanced = ServiceProvider.Get<GuiService>().GetGump<SkillGumpAdvanced>();
             }
 
-            if (!isSingleUpdate && (type == 1 || type == 3 || _world.SkillsRequested))
+            if (!isSingleUpdate && (type == 1 || type == 3 || world.SkillsRequested))
             {
-                _world.SkillsRequested = false;
+                world.SkillsRequested = false;
 
                 // TODO: make a base class for this gump
                 if (ProfileManager.CurrentProfile.StandardSkillsGump)
                 {
                     if (standard == null)
                     {
-                        ServiceProvider.Get<GuiService>().Add(standard = new StandardSkillsGump(_world) { X = 100, Y = 100 });
+                        ServiceProvider.Get<GuiService>().Add(standard = new StandardSkillsGump(world) { X = 100, Y = 100 });
                     }
                 }
                 else
                 {
                     if (advanced == null)
                     {
-                        ServiceProvider.Get<GuiService>().Add(advanced = new SkillGumpAdvanced(_world) { X = 100, Y = 100 });
+                        ServiceProvider.Get<GuiService>().Add(advanced = new SkillGumpAdvanced(world) { X = 100, Y = 100 });
                     }
                 }
             }
@@ -1719,9 +1739,9 @@ internal class IncomingPackets
                     cap = p.ReadUInt16BE();
                 }
 
-                if (id < _world.Player.Skills.Length)
+                if (id < world.Player.Skills.Length)
                 {
-                    Skill skill = _world.Player.Skills[id];
+                    Skill skill = world.Player.Skills[id];
 
                     if (skill != null)
                     {
@@ -1739,7 +1759,7 @@ internal class IncomingPackets
                             )
                             {
                                 GameActions.Print(
-                                    _world,
+                                    world,
                                     string.Format(
                                         ResGeneral.YourSkillIn0Has1By2ItIsNow3,
                                         skill.Name,
@@ -1777,7 +1797,8 @@ internal class IncomingPackets
 
     public void Pathfinding(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
@@ -1786,12 +1807,13 @@ internal class IncomingPackets
         ushort y = p.ReadUInt16BE();
         ushort z = p.ReadUInt16BE();
 
-        _world.Player.Pathfinder.WalkTo(x, y, z, 0);
+        world.Player.Pathfinder.WalkTo(x, y, z, 0);
     }
 
     public void UpdateContainedItems(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
@@ -1816,7 +1838,7 @@ internal class IncomingPackets
             ushort hue = p.ReadUInt16BE();
 
             AddItemToContainer(
-                _world,
+                world,
                 serial,
                 graphic,
                 amount,
@@ -1830,7 +1852,8 @@ internal class IncomingPackets
 
     public void CloseVendorInterface(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
@@ -1842,12 +1865,13 @@ internal class IncomingPackets
 
     public void PersonalLightLevel(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
 
-        if (_world.Player == p.ReadUInt32BE())
+        if (world.Player == p.ReadUInt32BE())
         {
             byte level = p.ReadUInt8();
 
@@ -1856,18 +1880,19 @@ internal class IncomingPackets
                 level = 0x1E;
             }
 
-            _world.Light.RealPersonal = level;
+            world.Light.RealPersonal = level;
 
             if (!ProfileManager.CurrentProfile.UseCustomLightLevel)
             {
-                _world.Light.Personal = level;
+                world.Light.Personal = level;
             }
         }
     }
 
     public void LightLevel(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
@@ -1879,14 +1904,14 @@ internal class IncomingPackets
             level = 0x1E;
         }
 
-        _world.Light.RealOverall = level;
+        world.Light.RealOverall = level;
 
         if (
             !ProfileManager.CurrentProfile.UseCustomLightLevel
             || ProfileManager.CurrentProfile.LightLevelType == 1
         )
         {
-            _world.Light.Overall =
+            world.Light.Overall =
                 ProfileManager.CurrentProfile.LightLevelType == 1
                     ? Math.Min(level, ProfileManager.CurrentProfile.LightLevel)
                     : level;
@@ -1895,7 +1920,8 @@ internal class IncomingPackets
 
     public void PlaySoundEffect(ref StackDataReader p)
     {
-        if (_world.Player == null)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.Player == null)
         {
             return;
         }
@@ -1908,11 +1934,12 @@ internal class IncomingPackets
         ushort y = p.ReadUInt16BE();
         short z = (short)p.ReadUInt16BE();
 
-        ServiceProvider.Get<AudioService>().PlaySoundWithDistance(_world, index, x, y);
+        ServiceProvider.Get<AudioService>().PlaySoundWithDistance(world, index, x, y);
     }
 
     public void PlayMusic(ref StackDataReader p)
     {
+        var world = ServiceProvider.Get<WorldService>().World;
         if (p.Length == 3) // Play Midi Music packet (0x6D, 0x10, index)
         {
             byte cmd = p.ReadUInt8();
@@ -1937,17 +1964,18 @@ internal class IncomingPackets
 
     public void LoginComplete(ref StackDataReader p)
     {
-        if (_world.Player != null && ServiceProvider.Get<SceneService>().Scene is LoginScene)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.Player != null && ServiceProvider.Get<SceneService>().Scene is LoginScene)
         {
-            var scene = new GameScene(_world);
+            var scene = new GameScene(world);
             ServiceProvider.Get<SceneService>().SetScene(scene);
 
-            //GameActions.OpenPaperdoll(_world.Player);
-            GameActions.RequestMobileStatus(_world,_world.Player);
+            //GameActions.OpenPaperdoll(world.Player);
+            GameActions.RequestMobileStatus(world,world.Player);
             ServiceProvider.Get<PacketHandlerService>().Out.Send_OpenChat("");
 
-            ServiceProvider.Get<PacketHandlerService>().Out.Send_SkillsRequest(_world.Player);
-            scene.DoubleClickDelayed(_world.Player);
+            ServiceProvider.Get<PacketHandlerService>().Out.Send_SkillsRequest(world.Player);
+            scene.DoubleClickDelayed(world.Player);
 
             var uoService = ServiceProvider.Get<UOService>();
             if (uoService.Version >= ClassicUO.Sdk.ClientVersion.CV_306E)
@@ -1957,11 +1985,11 @@ internal class IncomingPackets
 
             if (uoService.Version >= ClassicUO.Sdk.ClientVersion.CV_305D)
             {
-                ServiceProvider.Get<PacketHandlerService>().Out.Send_ClientViewRange(_world.ClientViewRange);
+                ServiceProvider.Get<PacketHandlerService>().Out.Send_ClientViewRange(world.ClientViewRange);
             }
 
             List<Gump> gumps = ProfileManager.CurrentProfile.ReadGumps(
-                _world,
+                world,
                 ProfileManager.CurrentProfile.ProfilePath
             );
 
@@ -1977,7 +2005,8 @@ internal class IncomingPackets
 
     public void MapData(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
@@ -2027,6 +2056,7 @@ internal class IncomingPackets
 
     public void SetWeather(ref StackDataReader p)
     {
+        var world = ServiceProvider.Get<WorldService>().World;
         var scene = ServiceProvider.Get<SceneService>().GetScene<GameScene>();
 
         if (scene == null)
@@ -2036,18 +2066,19 @@ internal class IncomingPackets
 
         WeatherType type = (WeatherType)p.ReadUInt8();
 
-        if (_world.Weather.CurrentWeather != type)
+        if (ServiceProvider.Get<ManagersService>().Weather.CurrentWeather != type)
         {
             byte count = p.ReadUInt8();
             byte temp = p.ReadUInt8();
 
-            _world.Weather.Generate(type, count, temp);
+            ServiceProvider.Get<ManagersService>().Weather.Generate(type, count, temp);
         }
     }
 
     public void BookData(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
@@ -2111,7 +2142,8 @@ internal class IncomingPackets
 
     public void CharacterAnimation(ref StackDataReader p)
     {
-        var mobile = _world.Mobiles.Get(p.ReadUInt32BE());
+        var world = ServiceProvider.Get<WorldService>().World;
+        var mobile = world.Mobiles.Get(p.ReadUInt32BE());
 
         if (mobile == null)
         {
@@ -2138,7 +2170,8 @@ internal class IncomingPackets
 
     public void GraphicEffect(ref StackDataReader p)
     {
-        if (_world.Player == null)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.Player == null)
         {
             return;
         }
@@ -2197,7 +2230,7 @@ internal class IncomingPackets
             }
         }
 
-        _world.SpawnEffect(
+        world.SpawnEffect(
             type,
             source,
             target,
@@ -2220,12 +2253,14 @@ internal class IncomingPackets
 
     public void ClientViewRange(ref StackDataReader p)
     {
-        _world.ClientViewRange = p.ReadUInt8();
+        var world = ServiceProvider.Get<WorldService>().World;
+        world.ClientViewRange = p.ReadUInt8();
     }
 
     public void BulletinBoardData(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
@@ -2236,7 +2271,7 @@ internal class IncomingPackets
 
                 {
                     uint serial = p.ReadUInt32BE();
-                    var item = _world.Items.Get(serial);
+                    var item = world.Items.Get(serial);
 
                     if (item != null)
                     {
@@ -2248,7 +2283,7 @@ internal class IncomingPackets
                         int x = (ServiceProvider.Get<WindowService>().ClientBounds.Width >> 1) - 245;
                         int y = (ServiceProvider.Get<WindowService>().ClientBounds.Height >> 1) - 205;
 
-                        bulletinBoard = new BulletinBoardGump(_world, item, x, y, p.ReadUTF8(22, true)); //p.ReadASCII(22));
+                        bulletinBoard = new BulletinBoardGump(world, item, x, y, p.ReadUTF8(22, true)); //p.ReadASCII(22));
                         ServiceProvider.Get<GuiService>().Add(bulletinBoard);
 
                         item.Opened = true;
@@ -2336,11 +2371,11 @@ internal class IncomingPackets
                         }
 
                         string msg = sb.ToString();
-                        byte variant = (byte)(1 + (poster == _world.Player.Name ? 1 : 0));
+                        byte variant = (byte)(1 + (poster == world.Player.Name ? 1 : 0));
 
                         ServiceProvider.Get<GuiService>().Add(
                             new BulletinBoardItem(
-                                _world,
+                                world,
                                 boardSerial,
                                 serial,
                                 poster,
@@ -2365,34 +2400,37 @@ internal class IncomingPackets
 
     public void Warmode(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
 
-        _world.Player.InWarMode = p.ReadBool();
+        world.Player.InWarMode = p.ReadBool();
     }
 
     public void Ping(ref StackDataReader p)
     {
+        var world = ServiceProvider.Get<WorldService>().World;
         ServiceProvider.Get<NetClientService>().Statistics.PingReceived(p.ReadUInt8());
     }
 
     public void BuyList(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
 
-        var container = _world.Items.Get(p.ReadUInt32BE());
+        var container = world.Items.Get(p.ReadUInt32BE());
 
         if (container == null)
         {
             return;
         }
 
-        var vendor = _world.Mobiles.Get(container.Container);
+        var vendor = world.Mobiles.Get(container.Container);
 
         if (vendor == null)
         {
@@ -2409,7 +2447,7 @@ internal class IncomingPackets
 
         if (gump == null)
         {
-            gump = new ShopGump(_world, vendor, true, 150, 5);
+            gump = new ShopGump(world, vendor, true, 150, 5);
             ServiceProvider.Get<GuiService>().Add(gump);
         }
 
@@ -2455,7 +2493,7 @@ internal class IncomingPackets
                 byte nameLen = p.ReadUInt8();
                 string name = p.ReadASCII(nameLen);
 
-                if (_world.OPL.TryGetNameAndData(it.Serial, out var s, out _))
+                if (ServiceProvider.Get<ManagersService>().OPL.TryGetNameAndData(it.Serial, out var s, out _))
                 {
                     it.Name = s ?? "";
                 }
@@ -2490,13 +2528,14 @@ internal class IncomingPackets
 
     public void UpdateCharacter(ref StackDataReader p)
     {
-        if (_world.Player == null)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.Player == null)
         {
             return;
         }
 
         uint serial = p.ReadUInt32BE();
-        var mobile = _world.Mobiles.Get(serial);
+        var mobile = world.Mobiles.Get(serial);
 
         if (mobile == null)
         {
@@ -2514,7 +2553,7 @@ internal class IncomingPackets
 
         mobile.NotorietyFlag = notoriety;
 
-        if (serial == _world.Player)
+        if (serial == world.Player)
         {
             mobile.Flags = flags;
             mobile.Graphic = graphic;
@@ -2524,13 +2563,14 @@ internal class IncomingPackets
         }
         else
         {
-            UpdateGameObject(_world, serial, graphic, 0, 0, x, y, z, direction, hue, flags, 0, 1, 1);
+            UpdateGameObject(world, serial, graphic, 0, 0, x, y, z, direction, hue, flags, 0, 1, 1);
         }
     }
 
     public void UpdateObject(ref StackDataReader p)
     {
-        if (_world.Player == null)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.Player == null)
         {
             return;
         }
@@ -2545,22 +2585,22 @@ internal class IncomingPackets
         Flags flags = (Flags)p.ReadUInt8();
         NotorietyFlag notoriety = (NotorietyFlag)p.ReadUInt8();
         bool oldDead = false;
-        //bool alreadyExists =_world.Get(serial) != null;
+        //bool alreadyExists =world.Get(serial) != null;
 
-        if (serial == _world.Player)
+        if (serial == world.Player)
         {
-            oldDead = _world.Player.IsDead;
-            _world.Player.Graphic = graphic;
-            _world.Player.CheckGraphicChange();
-            _world.Player.FixHue(hue);
-            _world.Player.Flags = flags;
+            oldDead = world.Player.IsDead;
+            world.Player.Graphic = graphic;
+            world.Player.CheckGraphicChange();
+            world.Player.FixHue(hue);
+            world.Player.Flags = flags;
         }
         else
         {
-            UpdateGameObject(_world, serial, graphic, 0, 0, x, y, z, direction, hue, flags, 0, 0, 1);
+            UpdateGameObject(world, serial, graphic, 0, 0, x, y, z, direction, hue, flags, 0, 0, 1);
         }
 
-        var obj = _world.Get(serial);
+        var obj = world.Get(serial);
 
         if (obj == null)
         {
@@ -2578,7 +2618,7 @@ internal class IncomingPackets
 
                 if (!it.Opened && it.Layer != Layer.Backpack)
                 {
-                    _world.RemoveItem(it.Serial, true);
+                    world.RemoveItem(it.Serial, true);
                 }
 
                 o = next;
@@ -2618,11 +2658,11 @@ internal class IncomingPackets
                 item_hue = p.ReadUInt16BE();
             }
 
-            Item item = _world.GetOrCreateItem(itemSerial);
+            Item item = world.GetOrCreateItem(itemSerial);
             item.Graphic = itemGraphic;
             item.FixHue(item_hue);
             item.Amount = 1;
-            _world.RemoveItemFromContainer(item);
+            world.RemoveItemFromContainer(item);
             item.Container = serial;
             item.Layer = (Layer)layer;
 
@@ -2633,33 +2673,34 @@ internal class IncomingPackets
             itemSerial = p.ReadUInt32BE();
         }
 
-        if (serial == _world.Player)
+        if (serial == world.Player)
         {
-            if (oldDead != _world.Player.IsDead)
+            if (oldDead != world.Player.IsDead)
             {
-                if (_world.Player.IsDead)
+                if (world.Player.IsDead)
                 {
                     // NOTE: This packet causes some weird issue on sphere servers.
                     //       When the character dies, this packet trigger a "reset" and
                     //       somehow it messes up the packet reading server side
                     //ServiceProvider.Get<PacketHandlerService>().Out.Send_DeathScreen();
-                    _world.ChangeSeason(Game.Managers.Season.Desolation, 42);
+                    world.ChangeSeason(Game.Managers.Season.Desolation, 42);
                 }
                 else
                 {
-                    _world.ChangeSeason(_world.OldSeason, _world.OldMusicIndex);
+                    world.ChangeSeason(world.OldSeason, world.OldMusicIndex);
                 }
             }
 
             ServiceProvider.Get<GuiService>().GetGump<PaperDollGump>(serial)?.RequestUpdateContents();
 
-            _world.Player.UpdateAbilities();
+            world.Player.UpdateAbilities();
         }
     }
 
     public void OpenMenu(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
@@ -2674,7 +2715,7 @@ internal class IncomingPackets
 
         if (menuid != 0)
         {
-            MenuGump gump = new MenuGump(_world, serial, id, name) { X = 100, Y = 100 };
+            MenuGump gump = new MenuGump(world, serial, id, name) { X = 100, Y = 100 };
 
             int posX = 0;
 
@@ -2709,7 +2750,7 @@ internal class IncomingPackets
         }
         else
         {
-            GrayMenuGump gump = new GrayMenuGump(_world, serial, id, name)
+            GrayMenuGump gump = new GrayMenuGump(world, serial, id, name)
             {
                 X = (ServiceProvider.Get<WindowService>().ClientBounds.Width >> 1) - 200,
                 Y = (ServiceProvider.Get<WindowService>().ClientBounds.Height >> 1) - ((121 + count * 21) >> 1)
@@ -2762,7 +2803,8 @@ internal class IncomingPackets
 
     public void OpenPaperdoll(ref StackDataReader p)
     {
-        var mobile = _world.Mobiles.Get(p.ReadUInt32BE());
+        var world = ServiceProvider.Get<WorldService>().World;
+        var mobile = world.Mobiles.Get(p.ReadUInt32BE());
 
         if (mobile == null)
         {
@@ -2784,7 +2826,7 @@ internal class IncomingPackets
             }
 
             ServiceProvider.Get<GuiService>().Add(
-                new PaperDollGump(_world, mobile, (flags & 0x02) != 0) { Location = location }
+                new PaperDollGump(world, mobile, (flags & 0x02) != 0) { Location = location }
             );
         }
         else
@@ -2807,13 +2849,14 @@ internal class IncomingPackets
 
     public void CorpseEquipment(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
 
         uint serial = p.ReadUInt32BE();
-        var corpse = _world.Get(serial);
+        var corpse = world.Get(serial);
 
         if (corpse == null)
         {
@@ -2834,9 +2877,9 @@ internal class IncomingPackets
 
             if (layer - 1 != Layer.Backpack)
             {
-                Item item = _world.GetOrCreateItem(item_serial);
+                Item item = world.GetOrCreateItem(item_serial);
 
-                _world.RemoveItemFromContainer(item);
+                world.RemoveItemFromContainer(item);
                 item.Container = serial;
                 item.Layer = layer - 1;
                 corpse.PushToBack(item);
@@ -2848,6 +2891,7 @@ internal class IncomingPackets
 
     public void DisplayMap(ref StackDataReader p)
     {
+        var world = ServiceProvider.Get<WorldService>().World;
         uint serial = p.ReadUInt32BE();
         ushort gumpid = p.ReadUInt16BE();
         ushort startX = p.ReadUInt16BE();
@@ -2857,7 +2901,7 @@ internal class IncomingPackets
         ushort width = p.ReadUInt16BE();
         ushort height = p.ReadUInt16BE();
 
-        MapGump gump = new MapGump(_world, serial, gumpid, width, height);
+        MapGump gump = new MapGump(world, serial, gumpid, width, height);
         SpriteInfo multiMapInfo;
 
         if (p[0] == 0xF5 || ServiceProvider.Get<UOService>().Version >= ClassicUO.Sdk.ClientVersion.CV_308Z)
@@ -2880,7 +2924,7 @@ internal class IncomingPackets
 
         ServiceProvider.Get<GuiService>().Add(gump);
 
-        var it = _world.Items.Get(serial);
+        var it = world.Items.Get(serial);
 
         if (it != null)
         {
@@ -2890,6 +2934,7 @@ internal class IncomingPackets
 
     public void OpenBook(ref StackDataReader p)
     {
+        var world = ServiceProvider.Get<WorldService>().World;
         uint serial = p.ReadUInt32BE();
         bool oldpacket = p[0] == 0x93;
         bool editable = p.ReadBool();
@@ -2916,7 +2961,7 @@ internal class IncomingPackets
                 : p.ReadUTF8(p.ReadUInt16BE(), true);
 
             ServiceProvider.Get<GuiService>().Add(
-                new ModernBookGump(_world, serial, page_count, title, author, editable, oldpacket)
+                new ModernBookGump(world, serial, page_count, title, author, editable, oldpacket)
                 {
                     X = 100,
                     Y = 100
@@ -2945,6 +2990,7 @@ internal class IncomingPackets
 
     public void DyeData(ref StackDataReader p)
     {
+        var world = ServiceProvider.Get<WorldService>().World;
         uint serial = p.ReadUInt32BE();
         p.Skip(2);
         ushort graphic = p.ReadUInt16BE();
@@ -2960,7 +3006,7 @@ internal class IncomingPackets
         {
             gump?.Dispose();
 
-            gump = new ColorPickerGump(_world, serial, graphic, x, y, null);
+            gump = new ColorPickerGump(world, serial, graphic, x, y, null);
 
             ServiceProvider.Get<GuiService>().Add(gump);
         }
@@ -2968,18 +3014,20 @@ internal class IncomingPackets
 
     public void MovePlayer(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
 
         Direction direction = (Direction)p.ReadUInt8();
-        _world.Player.Walk(direction & Direction.Mask, (direction & Direction.Running) != 0);
+        world.Player.Walk(direction & Direction.Mask, (direction & Direction.Running) != 0);
     }
 
     public void UpdateName(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
@@ -2987,23 +3035,23 @@ internal class IncomingPackets
         uint serial = p.ReadUInt32BE();
         string name = p.ReadASCII();
 
-        var wme = _world.WMapManager.GetEntity(serial);
+        var wme = ServiceProvider.Get<ManagersService>().WMapManager.GetEntity(serial);
 
         if (wme != null && !string.IsNullOrEmpty(name))
         {
             wme.Name = name;
         }
 
-        var entity = _world.Get(serial);
+        var entity = world.Get(serial);
 
         if (entity != null)
         {
             entity.Name = name;
 
             if (
-                serial == _world.Player.Serial
+                serial == world.Player.Serial
                 && !string.IsNullOrEmpty(name)
-                && name != _world.Player.Name
+                && name != world.Player.Name
             )
             {
                 ServiceProvider.Get<EngineService>().SetWindowTitle(name);
@@ -3015,7 +3063,8 @@ internal class IncomingPackets
 
     public void MultiPlacement(ref StackDataReader p)
     {
-        if (_world.Player == null)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.Player == null)
         {
             return;
         }
@@ -3030,17 +3079,18 @@ internal class IncomingPackets
         ushort zOff = p.ReadUInt16BE();
         ushort hue = p.ReadUInt16BE();
 
-        _world.TargetManager.SetTargetingMulti(targID, multiID, xOff, yOff, zOff, hue);
+        ServiceProvider.Get<ManagersService>().TargetManager.SetTargetingMulti(targID, multiID, xOff, yOff, zOff, hue);
     }
 
     public void ASCIIPrompt(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
 
-        _world.MessageManager.PromptData = new PromptData
+        ServiceProvider.Get<ManagersService>().MessageManager.PromptData = new PromptData
         {
             Prompt = ConsolePrompt.ASCII,
             Data = p.ReadUInt64BE()
@@ -3049,12 +3099,13 @@ internal class IncomingPackets
 
     public void SellList(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
 
-        var vendor = _world.Mobiles.Get(p.ReadUInt32BE());
+        var vendor = world.Mobiles.Get(p.ReadUInt32BE());
 
         if (vendor == null)
         {
@@ -3070,7 +3121,7 @@ internal class IncomingPackets
 
         var gump = ServiceProvider.Get<GuiService>().GetGump<ShopGump>(vendor);
         gump?.Dispose();
-        gump = new ShopGump(_world, vendor, false, 100, 0);
+        gump = new ShopGump(world, vendor, false, 100, 0);
 
         for (int i = 0; i < countItems; i++)
         {
@@ -3089,7 +3140,7 @@ internal class IncomingPackets
             }
             else if (string.IsNullOrEmpty(name))
             {
-                bool success = _world.OPL.TryGetNameAndData(serial, out name, out _);
+                bool success = ServiceProvider.Get<ManagersService>().OPL.TryGetNameAndData(serial, out name, out _);
 
                 if (!success)
                 {
@@ -3108,7 +3159,8 @@ internal class IncomingPackets
 
     public void UpdateHitpoints(ref StackDataReader p)
     {
-        var entity = _world.Get(p.ReadUInt32BE());
+        var world = ServiceProvider.Get<WorldService>().World;
+        var entity = world.Get(p.ReadUInt32BE());
 
         if (entity == null)
         {
@@ -3123,15 +3175,16 @@ internal class IncomingPackets
             entity.HitsRequest = HitsRequestStatus.Received;
         }
 
-        if (entity == _world.Player)
+        if (entity == world.Player)
         {
-            _world.UoAssist.SignalHits();
+            ServiceProvider.Get<ManagersService>().UoAssist.SignalHits();
         }
     }
 
     public void UpdateMana(ref StackDataReader p)
     {
-        var mobile = _world.Mobiles.Get(p.ReadUInt32BE());
+        var world = ServiceProvider.Get<WorldService>().World;
+        var mobile = world.Mobiles.Get(p.ReadUInt32BE());
 
         if (mobile == null)
         {
@@ -3141,15 +3194,16 @@ internal class IncomingPackets
         mobile.ManaMax = p.ReadUInt16BE();
         mobile.Mana = p.ReadUInt16BE();
 
-        if (mobile == _world.Player)
+        if (mobile == world.Player)
         {
-            _world.UoAssist.SignalMana();
+            ServiceProvider.Get<ManagersService>().UoAssist.SignalMana();
         }
     }
 
     public void UpdateStamina(ref StackDataReader p)
     {
-        var mobile = _world.Mobiles.Get(p.ReadUInt32BE());
+        var world = ServiceProvider.Get<WorldService>().World;
+        var mobile = world.Mobiles.Get(p.ReadUInt32BE());
 
         if (mobile == null)
         {
@@ -3159,14 +3213,15 @@ internal class IncomingPackets
         mobile.StaminaMax = p.ReadUInt16BE();
         mobile.Stamina = p.ReadUInt16BE();
 
-        if (mobile == _world.Player)
+        if (mobile == world.Player)
         {
-            _world.UoAssist.SignalStamina();
+            ServiceProvider.Get<ManagersService>().UoAssist.SignalStamina();
         }
     }
 
     public void OpenUrl(ref StackDataReader p)
     {
+        var world = ServiceProvider.Get<WorldService>().World;
         string url = p.ReadASCII();
 
         if (!string.IsNullOrEmpty(url))
@@ -3177,6 +3232,7 @@ internal class IncomingPackets
 
     public void TipWindow(ref StackDataReader p)
     {
+        var world = ServiceProvider.Get<WorldService>().World;
         byte flag = p.ReadUInt8();
 
         if (flag == 1)
@@ -3196,28 +3252,30 @@ internal class IncomingPackets
             y = 100;
         }
 
-        ServiceProvider.Get<GuiService>().Add(new TipNoticeGump(_world, tip, flag, str) { X = x, Y = y });
+        ServiceProvider.Get<GuiService>().Add(new TipNoticeGump(world, tip, flag, str) { X = x, Y = y });
     }
 
     public void AttackCharacter(ref StackDataReader p)
     {
+        var world = ServiceProvider.Get<WorldService>().World;
         uint serial = p.ReadUInt32BE();
 
-        //if (TargetManager.LastAttack != serial && _world.InGame)
+        //if (TargetManager.LastAttack != serial && world.InGame)
         //{
 
 
 
         //}
 
-        GameActions.SendCloseStatus(_world, _world.TargetManager.LastAttack);
-        _world.TargetManager.LastAttack = serial;
-        GameActions.RequestMobileStatus(_world, serial);
+        GameActions.SendCloseStatus(world, ServiceProvider.Get<ManagersService>().TargetManager.LastAttack);
+        ServiceProvider.Get<ManagersService>().TargetManager.LastAttack = serial;
+        GameActions.RequestMobileStatus(world, serial);
     }
 
     public void TextEntryDialog(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
@@ -3237,7 +3295,7 @@ internal class IncomingPackets
         string desc = p.ReadASCII(descLen);
 
         TextEntryDialogGump gump = new TextEntryDialogGump(
-            _world,
+            world,
             serial,
             143,
             172,
@@ -3257,7 +3315,8 @@ internal class IncomingPackets
 
     public void UnicodeTalk(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             var scene = ServiceProvider.Get<SceneService>().GetScene<LoginScene>();
 
@@ -3283,7 +3342,7 @@ internal class IncomingPackets
         }
 
         uint serial = p.ReadUInt32BE();
-        var entity = _world.Get(serial);
+        var entity = world.Get(serial);
         ushort graphic = p.ReadUInt16BE();
         MessageType type = (MessageType)p.ReadUInt8();
         ushort hue = p.ReadUInt16BE();
@@ -3382,7 +3441,7 @@ internal class IncomingPackets
             }
         }
 
-        _world.MessageManager.HandleMessage(
+        ServiceProvider.Get<ManagersService>().MessageManager.HandleMessage(
             entity,
             text,
             name,
@@ -3397,7 +3456,8 @@ internal class IncomingPackets
 
     public void DisplayDeath(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
@@ -3406,16 +3466,16 @@ internal class IncomingPackets
         uint corpseSerial = p.ReadUInt32BE();
         uint running = p.ReadUInt32BE();
 
-        var owner = _world.Mobiles.Get(serial);
+        var owner = world.Mobiles.Get(serial);
 
-        if (owner == null || serial == _world.Player)
+        if (owner == null || serial == world.Player)
         {
             return;
         }
 
         serial |= 0x80000000;
 
-        if (_world.Mobiles.Remove(owner.Serial))
+        if (world.Mobiles.Remove(owner.Serial))
         {
             for (var i = owner.Items; i != null; i = i.Next)
             {
@@ -3423,13 +3483,13 @@ internal class IncomingPackets
                 it.Container = serial;
             }
 
-            _world.Mobiles[serial] = owner;
+            world.Mobiles[serial] = owner;
             owner.Serial = serial;
         }
 
         if (SerialHelper.IsValid(corpseSerial))
         {
-            _world.CorpseManager.Add(corpseSerial, serial, owner.Direction, running != 0);
+            ServiceProvider.Get<ManagersService>().CorpseManager.Add(corpseSerial, serial, owner.Direction, running != 0);
         }
 
         var animations = ServiceProvider.Get<UOService>().Self.Animations;
@@ -3449,13 +3509,14 @@ internal class IncomingPackets
 
         if (ProfileManager.CurrentProfile.AutoOpenCorpses)
         {
-            _world.Player.TryOpenCorpses();
+            world.Player.TryOpenCorpses();
         }
     }
 
     public void OpenGump(ref StackDataReader p)
     {
-        if (_world.Player == null)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.Player == null)
         {
             return;
         }
@@ -3510,11 +3571,12 @@ internal class IncomingPackets
         //    index += length;
         //}
 
-        CreateGump(_world, sender, gumpID, x, y, cmd, lines);
+        CreateGump(world, sender, gumpID, x, y, cmd, lines);
     }
 
     public void ChatMessage(ref StackDataReader p)
     {
+        var world = ServiceProvider.Get<WorldService>().World;
         ushort cmd = p.ReadUInt16BE();
 
         switch (cmd)
@@ -3523,8 +3585,8 @@ internal class IncomingPackets
                 p.Skip(4);
                 string channelName = p.ReadUnicodeBE();
                 bool hasPassword = p.ReadUInt16BE() == 0x31;
-                _world.ChatManager.CurrentChannelName = channelName;
-                _world.ChatManager.AddChannel(channelName, hasPassword);
+                world.ChatManager.CurrentChannelName = channelName;
+                world.ChatManager.AddChannel(channelName, hasPassword);
 
                 ServiceProvider.Get<GuiService>().GetGump<ChatGump>()?.RequestUpdateContents();
 
@@ -3533,20 +3595,20 @@ internal class IncomingPackets
             case 0x03E9: // destroy conference
                 p.Skip(4);
                 channelName = p.ReadUnicodeBE();
-                _world.ChatManager.RemoveChannel(channelName);
+                world.ChatManager.RemoveChannel(channelName);
 
                 ServiceProvider.Get<GuiService>().GetGump<ChatGump>()?.RequestUpdateContents();
 
                 break;
 
             case 0x03EB: // display enter username window
-                _world.ChatManager.ChatIsEnabled = ChatStatus.EnabledUserRequest;
+                world.ChatManager.ChatIsEnabled = ChatStatus.EnabledUserRequest;
 
                 break;
 
             case 0x03EC: // close chat
-                _world.ChatManager.Clear();
-                _world.ChatManager.ChatIsEnabled = ChatStatus.Disabled;
+                world.ChatManager.Clear();
+                world.ChatManager.ChatIsEnabled = ChatStatus.Disabled;
 
                 ServiceProvider.Get<GuiService>().GetGump<ChatGump>()?.Dispose();
 
@@ -3555,7 +3617,7 @@ internal class IncomingPackets
             case 0x03ED: // username accepted, display chat
                 p.Skip(4);
                 string username = p.ReadUnicodeBE();
-                _world.ChatManager.ChatIsEnabled = ChatStatus.Enabled;
+                world.ChatManager.ChatIsEnabled = ChatStatus.Enabled;
                 ServiceProvider.Get<PacketHandlerService>().Out.Send_ChatJoinCommand("General");
 
                 break;
@@ -3579,12 +3641,12 @@ internal class IncomingPackets
             case 0x03F1: // you have joined a conference
                 p.Skip(4);
                 channelName = p.ReadUnicodeBE();
-                _world.ChatManager.CurrentChannelName = channelName;
+                world.ChatManager.CurrentChannelName = channelName;
 
                 ServiceProvider.Get<GuiService>().GetGump<ChatGump>()?.UpdateConference();
 
                 GameActions.Print(
-                    _world,
+                    world,
                     string.Format(ResGeneral.YouHaveJoinedThe0Channel, channelName),
                     ProfileManager.CurrentProfile.ChatMessageHue,
                     MessageType.Regular,
@@ -3598,7 +3660,7 @@ internal class IncomingPackets
                 channelName = p.ReadUnicodeBE();
 
                 GameActions.Print(
-                    _world,
+                    world,
                     string.Format(ResGeneral.YouHaveLeftThe0Channel, channelName),
                     ProfileManager.CurrentProfile.ChatMessageHue,
                     MessageType.Regular,
@@ -3628,7 +3690,7 @@ internal class IncomingPackets
 
                 //Color c = new Color(49, 82, 156, 0);
                 GameActions.Print(
-                    _world,
+                    world,
                     $"{username}: {msgSent}",
                     ProfileManager.CurrentProfile.ChatMessageHue,
                     MessageType.Regular,
@@ -3674,7 +3736,7 @@ internal class IncomingPackets
                     }
 
                     GameActions.Print(
-                        _world,
+                        world,
                         msg,
                         ProfileManager.CurrentProfile.ChatMessageHue,
                         MessageType.Regular,
@@ -3690,7 +3752,8 @@ internal class IncomingPackets
 
     public void CharacterProfile(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
@@ -3704,12 +3767,13 @@ internal class IncomingPackets
         ServiceProvider.Get<GuiService>().GetGump<ProfileGump>(serial)?.Dispose();
 
         ServiceProvider.Get<GuiService>().Add(
-            new ProfileGump(_world, serial, header, footer, body, serial == _world.Player.Serial)
+            new ProfileGump(world, serial, header, footer, body, serial == world.Player.Serial)
         );
     }
 
     public void EnableLockedFeatures(ref StackDataReader p)
     {
+        var world = ServiceProvider.Get<WorldService>().World;
         LockedFeatureFlags flags = 0;
 
         if (ServiceProvider.Get<UOService>().Version >= ClassicUO.Sdk.ClientVersion.CV_60142)
@@ -3721,9 +3785,9 @@ internal class IncomingPackets
             flags = (LockedFeatureFlags)p.ReadUInt16BE();
         }
 
-        _world.ClientLockedFeatures.SetFlags(flags);
+        world.ClientLockedFeatures.SetFlags(flags);
 
-        _world.ChatManager.ChatIsEnabled = _world.ClientLockedFeatures.Flags.HasFlag(
+        world.ChatManager.ChatIsEnabled = world.ClientLockedFeatures.Flags.HasFlag(
             LockedFeatureFlags.T2A
         )
             ? ChatStatus.Enabled
@@ -3746,6 +3810,7 @@ internal class IncomingPackets
 
     public void DisplayQuestArrow(ref StackDataReader p)
     {
+        var world = ServiceProvider.Get<WorldService>().World;
         bool display = p.ReadBool();
         ushort mx = p.ReadUInt16BE();
         ushort my = p.ReadUInt16BE();
@@ -3763,7 +3828,7 @@ internal class IncomingPackets
         {
             if (arrow == null)
             {
-                ServiceProvider.Get<GuiService>().Add(new QuestArrowGump(_world, serial, mx, my));
+                ServiceProvider.Get<GuiService>().Add(new QuestArrowGump(world, serial, mx, my));
             }
             else
             {
@@ -3783,7 +3848,8 @@ internal class IncomingPackets
 
     public void Season(ref StackDataReader p)
     {
-        if (_world.Player == null)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.Player == null)
         {
             return;
         }
@@ -3796,29 +3862,31 @@ internal class IncomingPackets
             season = 0;
         }
 
-        if (_world.Player.IsDead && season == 4)
+        if (world.Player.IsDead && season == 4)
         {
             return;
         }
 
-        _world.OldSeason = (Season)season;
-        _world.OldMusicIndex = music;
+        world.OldSeason = (Season)season;
+        world.OldMusicIndex = music;
 
-        if (_world.Season == Game.Managers.Season.Desolation)
+        if (world.Season == Game.Managers.Season.Desolation)
         {
-            _world.OldMusicIndex = 42;
+            world.OldMusicIndex = 42;
         }
 
-        _world.ChangeSeason((Season)season, music);
+        world.ChangeSeason((Season)season, music);
     }
 
     public void ClientVersion(ref StackDataReader p)
     {
+        var world = ServiceProvider.Get<WorldService>().World;
         ServiceProvider.Get<PacketHandlerService>().Out.Send_ClientVersion(Settings.GlobalSettings.ClientVersion);
     }
 
     public void AssistVersion(ref StackDataReader p)
     {
+        var world = ServiceProvider.Get<WorldService>().World;
         //uint version = p.ReadUInt32BE();
 
         //string[] parts = Service.GetByLocalSerial<Settings>().ClientVersion.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
@@ -3830,6 +3898,7 @@ internal class IncomingPackets
 
     public void ExtendedCommand(ref StackDataReader p)
     {
+        var world = ServiceProvider.Get<WorldService>().World;
         ushort cmd = p.ReadUInt16BE();
 
         switch (cmd)
@@ -3842,7 +3911,7 @@ internal class IncomingPackets
             case 1: // fast walk prevention
                 for (int i = 0; i < 6; i++)
                 {
-                    _world.Player.Walker.FastWalkStack.SetValue(i, p.ReadUInt32BE());
+                    world.Player.Walker.FastWalkStack.SetValue(i, p.ReadUInt32BE());
                 }
 
                 break;
@@ -3850,7 +3919,7 @@ internal class IncomingPackets
             //===========================================================================================
             //===========================================================================================
             case 2: // add key to fast walk stack
-                _world.Player.Walker.FastWalkStack.AddValue(p.ReadUInt32BE());
+                world.Player.Walker.FastWalkStack.AddValue(p.ReadUInt32BE());
 
                 break;
 
@@ -3895,14 +3964,14 @@ internal class IncomingPackets
             //===========================================================================================
             //===========================================================================================
             case 6: //party
-                _world.Party.ParsePacket(ref p);
+                ServiceProvider.Get<ManagersService>().Party.ParsePacket(ref p);
 
                 break;
 
             //===========================================================================================
             //===========================================================================================
             case 8: // map change
-                _world.MapIndex = p.ReadUInt8();
+                world.MapIndex = p.ReadUInt8();
 
                 break;
 
@@ -3916,7 +3985,7 @@ internal class IncomingPackets
             //===========================================================================================
             //===========================================================================================
             case 0x10: // display equip info
-                var item = _world.Items.Get(p.ReadUInt32BE());
+                var item = world.Items.Get(p.ReadUInt32BE());
 
                 if (item == null)
                 {
@@ -3935,7 +4004,7 @@ internal class IncomingPackets
                         item.Name = str;
                     }
 
-                    _world.MessageManager.HandleMessage(
+                    ServiceProvider.Get<ManagersService>().MessageManager.HandleMessage(
                         item,
                         str,
                         item.Name,
@@ -4022,7 +4091,7 @@ internal class IncomingPackets
 
                 if (strBuffer.Length != 0)
                 {
-                    _world.MessageManager.HandleMessage(
+                    ServiceProvider.Get<ManagersService>().MessageManager.HandleMessage(
                         item,
                         strBuffer.ToString(),
                         item.Name,
@@ -4049,10 +4118,10 @@ internal class IncomingPackets
             //===========================================================================================
             case 0x14: // display popup/context menu
                 ServiceProvider.Get<GuiService>().ShowGamePopup(
-                    new PopupMenuGump(_world, PopupMenuData.Parse(ref p))
+                    new PopupMenuGump(world, PopupMenuData.Parse(ref p))
                     {
-                        X = _world.DelayedObjectClickManager.LastMouseX,
-                        Y = _world.DelayedObjectClickManager.LastMouseY
+                        X = ServiceProvider.Get<ManagersService>().DelayedObjectClickManager.LastMouseX,
+                        Y = ServiceProvider.Get<ManagersService>().DelayedObjectClickManager.LastMouseY
                     }
                 );
 
@@ -4074,7 +4143,7 @@ internal class IncomingPackets
                     case 2: //statusbar
                         ServiceProvider.Get<GuiService>().GetGump<HealthBarGump>(serial)?.Dispose();
 
-                        if (serial == _world.Player.Serial)
+                        if (serial == world.Player.Serial)
                         {
                             StatusGumpBase.GetStatusGump()?.Dispose();
                         }
@@ -4102,9 +4171,9 @@ internal class IncomingPackets
                 {
                     //List<GameObject> list = new List<GameObject>();
 
-                    //foreach (int i in _world.Map.GetUsedChunks())
+                    //foreach (int i in world.Map.GetUsedChunks())
                     //{
-                    //    Chunk chunk = _world.Map.Chunks[i];
+                    //    Chunk chunk = world.Map.Chunks[i];
 
                     //    for (int xx = 0; xx < 8; xx++)
                     //    {
@@ -4124,9 +4193,9 @@ internal class IncomingPackets
                     //}
 
 
-                    int map = _world.MapIndex;
-                    _world.MapIndex = -1;
-                    _world.MapIndex = map;
+                    int map = world.MapIndex;
+                    world.MapIndex = -1;
+                    world.MapIndex = map;
 
                     Log.Trace("Map Patches applied.");
                 }
@@ -4142,7 +4211,7 @@ internal class IncomingPackets
                 switch (version)
                 {
                     case 0:
-                        var bonded = _world.Mobiles.Get(serial);
+                        var bonded = world.Mobiles.Get(serial);
 
                         if (bonded == null)
                         {
@@ -4156,14 +4225,14 @@ internal class IncomingPackets
 
                     case 2:
 
-                        if (serial == _world.Player)
+                        if (serial == world.Player)
                         {
                             byte updategump = p.ReadUInt8();
                             byte state = p.ReadUInt8();
 
-                            _world.Player.StrLock = (Lock)((state >> 4) & 3);
-                            _world.Player.DexLock = (Lock)((state >> 2) & 3);
-                            _world.Player.IntLock = (Lock)(state & 3);
+                            world.Player.StrLock = (Lock)((state >> 4) & 3);
+                            world.Player.DexLock = (Lock)((state >> 2) & 3);
+                            world.Player.IntLock = (Lock)(state & 3);
 
                             StatusGumpBase.GetStatusGump()?.RequestUpdateContents();
                         }
@@ -4188,7 +4257,7 @@ internal class IncomingPackets
                                 goto case 0;
                             }
 
-                            var mobile = _world.Mobiles.Get(serial);
+                            var mobile = world.Mobiles.Get(serial);
 
                             if (mobile != null)
                             {
@@ -4199,7 +4268,7 @@ internal class IncomingPackets
                                 mobile.AnimIndex = (byte)frame;
                             }
                         }
-                        else if (_world.Player != null && serial == _world.Player)
+                        else if (world.Player != null && serial == world.Player)
                         {
                             p.Seek(pos);
                             goto case 2;
@@ -4214,7 +4283,7 @@ internal class IncomingPackets
             //===========================================================================================
             case 0x1B: // new spellbook content
                 p.Skip(2);
-                Item spellbook = _world.GetOrCreateItem(p.ReadUInt32BE());
+                Item spellbook = world.GetOrCreateItem(p.ReadUInt32BE());
                 spellbook.Graphic = p.ReadUInt16BE();
                 spellbook.Clear();
                 ushort type = p.ReadUInt16BE();
@@ -4234,7 +4303,7 @@ internal class IncomingPackets
                         {
                             ushort cc = (ushort)(j * 32 + i + 1);
                             // FIXME: should i call Item.Create ?
-                            Item spellItem = Item.Create(_world, cc); // new Item()
+                            Item spellItem = Item.Create(world, cc); // new Item()
                             spellItem.Serial = cc;
                             spellItem.Graphic = 0x1F2E;
                             spellItem.Amount = cc;
@@ -4254,15 +4323,15 @@ internal class IncomingPackets
                 serial = p.ReadUInt32BE();
                 uint revision = p.ReadUInt32BE();
 
-                var multi = _world.Items.Get(serial);
+                var multi = world.Items.Get(serial);
 
                 if (multi == null)
                 {
-                    _world.HouseManager.Remove(serial);
+                    ServiceProvider.Get<ManagersService>().HouseManager.Remove(serial);
                 }
 
                 if (
-                    !_world.HouseManager.TryGetHouse(serial, out var house)
+                    !ServiceProvider.Get<ManagersService>().HouseManager.TryGetHouse(serial, out var house)
                     || !house.IsCustom
                     || house.Revision != revision
                 )
@@ -4272,11 +4341,11 @@ internal class IncomingPackets
                 else
                 {
                     house.Generate();
-                    _world.BoatMovingManager.ClearSteps(serial);
+                    ServiceProvider.Get<ManagersService>().BoatMovingManager.ClearSteps(serial);
 
                     ServiceProvider.Get<GuiService>().GetGump<MiniMapGump>()?.RequestUpdateContents();
 
-                    if (_world.HouseManager.EntityIntoHouse(serial, _world.Player))
+                    if (ServiceProvider.Get<ManagersService>().HouseManager.EntityIntoHouse(serial, world.Player))
                     {
                         ServiceProvider.Get<SceneService>().GetScene<GameScene>()?.UpdateMaxDrawZ(true);
                     }
@@ -4313,7 +4382,7 @@ internal class IncomingPackets
                             break;
                         }
 
-                        gump = new HouseCustomizationGump(_world, serial, 50, 50);
+                        gump = new HouseCustomizationGump(world, serial, 50, 50);
                         ServiceProvider.Get<GuiService>().Add(gump);
 
                         break;
@@ -4332,7 +4401,7 @@ internal class IncomingPackets
 
                 for (int i = 0; i < 2; i++)
                 {
-                    _world.Player.Abilities[i] &= (Ability)0x7F;
+                    world.Player.Abilities[i] &= (Ability)0x7F;
                 }
 
                 break;
@@ -4342,7 +4411,7 @@ internal class IncomingPackets
             case 0x22:
                 p.Skip(1);
 
-                var en = _world.Get(p.ReadUInt32BE());
+                var en = world.Get(p.ReadUInt32BE());
 
                 if (en != null)
                 {
@@ -4350,7 +4419,7 @@ internal class IncomingPackets
 
                     if (damage > 0)
                     {
-                        _world.WorldTextManager.AddDamage(en, damage);
+                        world.WorldTextManager.AddDamage(en, damage);
                     }
                 }
 
@@ -4370,12 +4439,12 @@ internal class IncomingPackets
                             if (active)
                             {
                                 spellButton.Hue = 38;
-                                _world.ActiveSpellIcons.Add(spell);
+                                ServiceProvider.Get<ManagersService>().ActiveSpellIcons.Add(spell);
                             }
                             else
                             {
                                 spellButton.Hue = 0;
-                                _world.ActiveSpellIcons.Remove(spell);
+                                ServiceProvider.Get<ManagersService>().ActiveSpellIcons.Remove(spell);
                             }
 
                             break;
@@ -4395,7 +4464,7 @@ internal class IncomingPackets
                     val = 0;
                 }
 
-                _world.Player.SpeedMode = (CharacterSpeedType)val;
+                world.Player.SpeedMode = (CharacterSpeedType)val;
 
                 break;
 
@@ -4404,7 +4473,7 @@ internal class IncomingPackets
                 byte race = p.ReadUInt8();
 
                 ServiceProvider.Get<GuiService>().GetGump<RaceChangeGump>()?.Dispose();
-                ServiceProvider.Get<GuiService>().Add(new RaceChangeGump(_world, isfemale, race));
+                ServiceProvider.Get<GuiService>().Add(new RaceChangeGump(world, isfemale, race));
                 break;
 
             case 0x2B:
@@ -4412,7 +4481,7 @@ internal class IncomingPackets
                 byte animID = p.ReadUInt8();
                 byte frameCount = p.ReadUInt8();
 
-                foreach (Mobile m in _world.Mobiles.Values)
+                foreach (Mobile m in world.Mobiles.Values)
                 {
                     if ((m.Serial & 0xFFFF) == serial)
                     {
@@ -4441,13 +4510,14 @@ internal class IncomingPackets
 
     public void DisplayClilocString(ref StackDataReader p)
     {
-        if (_world.Player == null)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.Player == null)
         {
             return;
         }
 
         uint serial = p.ReadUInt32BE();
-        var entity = _world.Get(serial);
+        var entity = world.Get(serial);
         ushort graphic = p.ReadUInt16BE();
         MessageType type = (MessageType)p.ReadUInt8();
         ushort hue = p.ReadUInt16BE();
@@ -4540,7 +4610,7 @@ internal class IncomingPackets
                 return;
         }
 
-        _world.MessageManager.HandleMessage(
+        ServiceProvider.Get<ManagersService>().MessageManager.HandleMessage(
             entity,
             text,
             name,
@@ -4554,12 +4624,13 @@ internal class IncomingPackets
 
     public void UnicodePrompt(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
 
-        _world.MessageManager.PromptData = new PromptData
+        ServiceProvider.Get<ManagersService>().MessageManager.PromptData = new PromptData
         {
             Prompt = ConsolePrompt.Unicode,
             Data = p.ReadUInt64BE()
@@ -4580,12 +4651,13 @@ internal class IncomingPackets
 
     public void Logout(ref StackDataReader p)
     {
+        var world = ServiceProvider.Get<WorldService>().World;
         // http://docs.polserver.com/packets/index.php?Packet=0xD1
 
         if (
             ServiceProvider.Get<SceneService>().GetScene<GameScene>().DisconnectionRequested
             && (
-                _world.ClientFeatures.Flags
+                world.ClientFeatures.Flags
                 & CharacterListFlags.CLF_OWERWRITE_CONFIGURATION_BUTTON
             ) != 0
         )
@@ -4594,7 +4666,7 @@ internal class IncomingPackets
             {
                 // client can disconnect
                 ServiceProvider.Get<NetClientService>().Disconnect();
-                ServiceProvider.Get<SceneService>().SetScene(new LoginScene(_world));
+                ServiceProvider.Get<SceneService>().SetScene(new LoginScene(world));
             }
             else
             {
@@ -4605,7 +4677,8 @@ internal class IncomingPackets
 
     public void MegaCliloc(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
@@ -4623,16 +4696,16 @@ internal class IncomingPackets
 
         uint revision = p.ReadUInt32BE();
 
-        Entity? entity = _world.Mobiles.Get(serial);
+        Entity? entity = world.Mobiles.Get(serial);
 
         if (entity == null)
         {
             if (SerialHelper.IsMobile(serial))
             {
-                Log.Warn("Searching a mobile into _world.Items from MegaCliloc packet");
+                Log.Warn("Searching a mobile into world.Items from MegaCliloc packet");
             }
 
-            entity = _world.Items.Get(serial);
+            entity = world.Items.Get(serial);
         }
 
         List<(int, string, int)> list = new List<(int, string, int)>();
@@ -4683,7 +4756,7 @@ internal class IncomingPackets
                         str = "<basefont color=#40a4fe>" + str + "</basefont>";
                     break;
                 case 1061170:
-                    if (int.TryParse(argument, out var strength) && _world.Player.Strength < strength)
+                    if (int.TryParse(argument, out var strength) && world.Player.Strength < strength)
                         str = "<basefont color=#FF0000>" + str + "</basefont>";
                     break;
                 case 1062613:
@@ -4717,7 +4790,7 @@ internal class IncomingPackets
 
         if (entity is Item it && SerialHelper.IsValid(it.Container))
         {
-            container = _world.Items.Get(it.Container);
+            container = world.Items.Get(it.Container);
         }
 
         bool inBuyList = false;
@@ -4773,7 +4846,7 @@ internal class IncomingPackets
             sb.Dispose();
         }
 
-        _world.OPL.Add(serial, revision, name, data, namecliloc);
+        ServiceProvider.Get<ManagersService>().OPL.Add(serial, revision, name, data, namecliloc);
 
         if (inBuyList && container != null && SerialHelper.IsValid(container.Serial) && entity is Item itt)
         {
@@ -4950,10 +5023,11 @@ internal class IncomingPackets
 
     public void CustomHouse(ref StackDataReader p)
     {
+        var world = ServiceProvider.Get<WorldService>().World;
         bool compressed = p.ReadUInt8() == 0x03;
         bool enableReponse = p.ReadBool();
         uint serial = p.ReadUInt32BE();
-        var foundation = _world.Items.Get(serial);
+        var foundation = world.Items.Get(serial);
         uint revision = p.ReadUInt32BE();
 
         if (foundation == null)
@@ -4970,10 +5044,10 @@ internal class IncomingPackets
 
         p.Skip(4);
 
-        if (!_world.HouseManager.TryGetHouse(foundation, out var house))
+        if (!ServiceProvider.Get<ManagersService>().HouseManager.TryGetHouse(foundation, out var house))
         {
-            house = new House(_world, foundation, revision, true);
-            _world.HouseManager.Add(foundation, house);
+            house = new House(world, foundation, revision, true);
+            ServiceProvider.Get<ManagersService>().HouseManager.Add(foundation, house);
         }
         else
         {
@@ -5029,33 +5103,34 @@ internal class IncomingPackets
             p.Skip(clen);
         }
 
-        if (_world.CustomHouseManager != null)
+        if (world.CustomHouseManager != null)
         {
-            _world.CustomHouseManager.GenerateFloorPlace();
+            world.CustomHouseManager.GenerateFloorPlace();
 
             ServiceProvider.Get<GuiService>().GetGump<HouseCustomizationGump>(house.Serial)?.Update();
         }
 
         ServiceProvider.Get<GuiService>().GetGump<MiniMapGump>()?.RequestUpdateContents();
 
-        if (_world.HouseManager.EntityIntoHouse(serial, _world.Player))
+        if (ServiceProvider.Get<ManagersService>().HouseManager.EntityIntoHouse(serial, world.Player))
         {
             ServiceProvider.Get<SceneService>().GetScene<GameScene>()?.UpdateMaxDrawZ(true);
         }
 
-        _world.BoatMovingManager.ClearSteps(serial);
+        ServiceProvider.Get<ManagersService>().BoatMovingManager.ClearSteps(serial);
     }
 
     public void CharacterTransferLog(ref StackDataReader p) { }
 
     public void OPLInfo(ref StackDataReader p)
     {
-        if (_world.ClientFeatures.TooltipsEnabled)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.ClientFeatures.TooltipsEnabled)
         {
             uint serial = p.ReadUInt32BE();
             uint revision = p.ReadUInt32BE();
 
-            if (!_world.OPL.IsRevisionEquals(serial, revision))
+            if (!ServiceProvider.Get<ManagersService>().OPL.IsRevisionEquals(serial, revision))
             {
                 ServiceProvider.Get<MegaClilocRequestsService>().AddMegaClilocRequest(serial);
             }
@@ -5064,6 +5139,7 @@ internal class IncomingPackets
 
     public void OpenCompressedGump(ref StackDataReader p)
     {
+        var world = ServiceProvider.Get<WorldService>().World;
         uint sender = p.ReadUInt32BE();
         uint gumpID = p.ReadUInt32BE();
         uint x = p.ReadUInt32BE();
@@ -5154,7 +5230,7 @@ internal class IncomingPackets
                 }
             }
 
-            CreateGump(_world, sender, gumpID, (int)x, (int)y, layout, lines);
+            CreateGump(world, sender, gumpID, (int)x, (int)y, layout, lines);
         }
         finally
         {
@@ -5164,6 +5240,7 @@ internal class IncomingPackets
 
     public void UpdateMobileStatus(ref StackDataReader p)
     {
+        var world = ServiceProvider.Get<WorldService>().World;
         uint serial = p.ReadUInt32BE();
         byte status = p.ReadUInt8();
 
@@ -5175,7 +5252,8 @@ internal class IncomingPackets
 
     public void BuffDebuff(ref StackDataReader p)
     {
-        if (_world.Player == null)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.Player == null)
         {
             return;
         }
@@ -5198,7 +5276,7 @@ internal class IncomingPackets
 
             if (count == 0)
             {
-                _world.Player.RemoveBuff(ic);
+                world.Player.RemoveBuff(ic);
                 gump?.RequestUpdateContents();
             }
             else
@@ -5265,8 +5343,8 @@ internal class IncomingPackets
                     }
 
                     string text = $"<left>{title}{description}{wtf}</left>";
-                    bool alreadyExists = _world.Player.IsBuffIconExists(ic);
-                    _world.Player.AddBuff(ic, BuffTable.Table[iconID], timer, text);
+                    bool alreadyExists = world.Player.IsBuffIconExists(ic);
+                    world.Player.AddBuff(ic, BuffTable.Table[iconID], timer, text);
 
                     if (!alreadyExists)
                     {
@@ -5279,12 +5357,13 @@ internal class IncomingPackets
 
     public void NewCharacterAnimation(ref StackDataReader p)
     {
-        if (_world.Player == null)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.Player == null)
         {
             return;
         }
 
-        var mobile = _world.Mobiles.Get(p.ReadUInt32BE());
+        var mobile = world.Mobiles.Get(p.ReadUInt32BE());
 
         if (mobile == null)
         {
@@ -5309,6 +5388,7 @@ internal class IncomingPackets
 
     public void DisplayWaypoint(ref StackDataReader p)
     {
+        var world = ServiceProvider.Get<WorldService>().World;
         uint serial = p.ReadUInt32BE();
         ushort x = p.ReadUInt16BE();
         ushort y = p.ReadUInt16BE();
@@ -5322,19 +5402,21 @@ internal class IncomingPackets
 
     public void RemoveWaypoint(ref StackDataReader p)
     {
+        var world = ServiceProvider.Get<WorldService>().World;
         uint serial = p.ReadUInt32BE();
     }
 
     public void KrriosClientSpecial(ref StackDataReader p)
     {
+        var world = ServiceProvider.Get<WorldService>().World;
         byte type = p.ReadUInt8();
 
         switch (type)
         {
             case 0x00: // accepted
                 Log.Trace("Krrios special packet accepted");
-                _world.WMapManager.SetACKReceived();
-                _world.WMapManager.SetEnable(true);
+                ServiceProvider.Get<ManagersService>().WMapManager.SetACKReceived();
+                ServiceProvider.Get<ManagersService>().WMapManager.SetEnable(true);
 
                 break;
 
@@ -5353,7 +5435,7 @@ internal class IncomingPackets
                         byte map = p.ReadUInt8();
                         int hits = type == 1 ? 0 : p.ReadUInt8();
 
-                        _world.WMapManager.AddOrUpdate(
+                        ServiceProvider.Get<ManagersService>().WMapManager.AddOrUpdate(
                             serial,
                             x,
                             y,
@@ -5366,7 +5448,7 @@ internal class IncomingPackets
                     }
                 }
 
-                _world.WMapManager.RemoveUnupdatedWEntity();
+                ServiceProvider.Get<ManagersService>().WMapManager.RemoveUnupdatedWEntity();
 
                 break;
 
@@ -5395,7 +5477,8 @@ internal class IncomingPackets
 
     public void UpdateItemSA(ref StackDataReader p)
     {
-        if (_world.Player == null)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.Player == null)
         {
             return;
         }
@@ -5415,10 +5498,10 @@ internal class IncomingPackets
         Flags flags = (Flags)p.ReadUInt8();
         ushort unk2 = p.ReadUInt16BE();
 
-        if (serial != _world.Player)
+        if (serial != world.Player)
         {
             UpdateGameObject(
-                _world,
+                world,
                 serial,
                 graphic,
                 graphicInc,
@@ -5436,18 +5519,19 @@ internal class IncomingPackets
 
             if (graphic == 0x2006 && ProfileManager.CurrentProfile.AutoOpenCorpses)
             {
-                _world.Player.TryOpenCorpses();
+                world.Player.TryOpenCorpses();
             }
         }
         else if (p[0] == 0xF7)
         {
-            UpdatePlayer(_world, serial, graphic, graphicInc, hue, flags, x, y, z, 0, dir);
+            UpdatePlayer(world, serial, graphic, graphicInc, hue, flags, x, y, z, 0, dir);
         }
     }
 
     public void BoatMoving(ref StackDataReader p)
     {
-        if (!_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (!world.InGame)
         {
             return;
         }
@@ -5460,7 +5544,7 @@ internal class IncomingPackets
         ushort y = p.ReadUInt16BE();
         ushort z = p.ReadUInt16BE();
 
-        var multi = _world.Items.Get(serial);
+        var multi = world.Items.Get(serial);
 
         if (multi == null)
         {
@@ -5470,7 +5554,7 @@ internal class IncomingPackets
         //multi.LastX = x;
         //multi.LastY = y;
 
-        //if (_world.HouseManager.TryGetHouse(serial, out var house))
+        //if (ServiceProvider.Get<ManagersService>().HouseManager.TryGetHouse(serial, out var house))
         //{
         //    foreach (Multi component in house.Components)
         //    {
@@ -5485,7 +5569,7 @@ internal class IncomingPackets
 
         if (smooth)
         {
-            _world.BoatMovingManager.AddStep(
+            ServiceProvider.Get<ManagersService>().BoatMovingManager.AddStep(
                 serial,
                 boatSpeed,
                 movingDirection,
@@ -5513,7 +5597,7 @@ internal class IncomingPackets
 
             multi.SetInWorldTile(x, y, (sbyte)z);
 
-            if (_world.HouseManager.TryGetHouse(serial, out var house))
+            if (ServiceProvider.Get<ManagersService>().HouseManager.TryGetHouse(serial, out var house))
             {
                 house.Generate(true, true, true);
             }
@@ -5528,13 +5612,13 @@ internal class IncomingPackets
             ushort cy = p.ReadUInt16BE();
             ushort cz = p.ReadUInt16BE();
 
-            if (cSerial == _world.Player)
+            if (cSerial == world.Player)
             {
-                _world.RangeSize.X = cx;
-                _world.RangeSize.Y = cy;
+                world.RangeSize.X = cx;
+                world.RangeSize.Y = cy;
             }
 
-            var ent = _world.Get(cSerial);
+            var ent = world.Get(cSerial);
 
             if (ent == null)
             {
@@ -5559,7 +5643,7 @@ internal class IncomingPackets
 
             if (smooth)
             {
-                _world.BoatMovingManager.PushItemToList(
+                ServiceProvider.Get<ManagersService>().BoatMovingManager.PushItemToList(
                     serial,
                     cSerial,
                     x - cx,
@@ -5569,10 +5653,10 @@ internal class IncomingPackets
             }
             else
             {
-                if (cSerial == _world.Player)
+                if (cSerial == world.Player)
                 {
                     UpdatePlayer(
-                        _world,
+                        world,
                         cSerial,
                         ent.Graphic,
                         0,
@@ -5582,13 +5666,13 @@ internal class IncomingPackets
                         cy,
                         (sbyte)cz,
                         0,
-                        _world.Player.Direction
+                        world.Player.Direction
                     );
                 }
                 else
                 {
                     UpdateGameObject(
-                        _world,
+                        world,
                         cSerial,
                         ent.Graphic,
                         0,
@@ -5610,7 +5694,8 @@ internal class IncomingPackets
 
     public void PacketList(ref StackDataReader p)
     {
-        if (_world.Player == null)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.Player == null)
         {
             return;
         }
@@ -5636,7 +5721,8 @@ internal class IncomingPackets
 
     public void ServerListReceived(ref StackDataReader p)
     {
-        if (_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.InGame)
         {
             return;
         }
@@ -5651,7 +5737,8 @@ internal class IncomingPackets
 
     public void ReceiveServerRelay(ref StackDataReader p)
     {
-        if (_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.InGame)
         {
             return;
         }
@@ -5666,7 +5753,8 @@ internal class IncomingPackets
 
     public void UpdateCharacterList(ref StackDataReader p)
     {
-        if (_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.InGame)
         {
             return;
         }
@@ -5681,7 +5769,8 @@ internal class IncomingPackets
 
     public void ReceiveCharacterList(ref StackDataReader p)
     {
-        if (_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.InGame)
         {
             return;
         }
@@ -5696,7 +5785,8 @@ internal class IncomingPackets
 
     public void LoginDelay(ref StackDataReader p)
     {
-        if (_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.InGame)
         {
             return;
         }
@@ -5711,7 +5801,8 @@ internal class IncomingPackets
 
     public void ReceiveLoginRejection(ref StackDataReader p)
     {
-        if (_world.InGame)
+        var world = ServiceProvider.Get<WorldService>().World;
+        if (world.InGame)
         {
             return;
         }
@@ -5725,7 +5816,7 @@ internal class IncomingPackets
     }
 
     public void AddItemToContainer(
-        World _world,
+        World world,
         uint serial,
         ushort graphic,
         ushort amount,
@@ -5753,30 +5844,30 @@ internal class IncomingPackets
             //}
         }
 
-        var container = _world.Get(containerSerial);
+        var container = world.Get(containerSerial);
 
         if (container == null)
         {
             Log.Warn($"No container ({containerSerial}) found");
 
-            //container = _world.GetOrCreateItem(containerSerial);
+            //container = world.GetOrCreateItem(containerSerial);
             return;
         }
 
-        var item = _world.Items.Get(serial);
+        var item = world.Items.Get(serial);
 
         if (SerialHelper.IsMobile(serial))
         {
-            _world.RemoveMobile(serial, true);
+            world.RemoveMobile(serial, true);
             Log.Warn("AddItemToContainer function adds mobile as Item");
         }
 
         if (item != null && (container.Graphic != 0x2006 || item.Layer == Layer.Invalid))
         {
-            _world.RemoveItem(item, true);
+            world.RemoveItem(item, true);
         }
 
-        item = _world.GetOrCreateItem(serial);
+        item = world.GetOrCreateItem(serial);
         item.Graphic = graphic;
         item.CheckGraphicChange();
         item.Amount = amount;
@@ -5785,13 +5876,13 @@ internal class IncomingPackets
         item.Y = y;
         item.Z = 0;
 
-        _world.RemoveItemFromContainer(item);
+        world.RemoveItemFromContainer(item);
         item.Container = containerSerial;
         container.PushToBack(item);
 
         if (SerialHelper.IsMobile(containerSerial))
         {
-            var m = _world.Mobiles.Get(containerSerial);
+            var m = world.Mobiles.Get(containerSerial);
             var secureBox = m?.GetSecureTradeBox();
 
             if (secureBox != null)
@@ -5839,7 +5930,7 @@ internal class IncomingPackets
                             && _requestedGridLoot == containerSerial
                         )
                         {
-                            grid_gump = new GridLootGump(_world, _requestedGridLoot);
+                            grid_gump = new GridLootGump(world, _requestedGridLoot);
                             ServiceProvider.Get<GuiService>().Add(grid_gump);
                             _requestedGridLoot = 0;
                         }
@@ -5864,7 +5955,7 @@ internal class IncomingPackets
     }
 
     public void UpdateGameObject(
-        World _world,
+        World world,
         uint serial,
         ushort graphic,
         byte graphic_inc,
@@ -5882,7 +5973,7 @@ internal class IncomingPackets
     {
         Mobile? mobile = null;
         Item? item = null;
-        Entity? obj = _world.Get(serial);
+        Entity? obj = world.Get(serial);
         var cursorService = ServiceProvider.Get<GameCursorService>();
 
         if (
@@ -5917,7 +6008,7 @@ internal class IncomingPackets
 
             if (SerialHelper.IsMobile(serial) && type != 3)
             {
-                mobile = _world.GetOrCreateMobile(serial);
+                mobile = world.GetOrCreateMobile(serial);
 
                 if (mobile == null)
                 {
@@ -5936,7 +6027,7 @@ internal class IncomingPackets
             }
             else
             {
-                item = _world.GetOrCreateItem(serial);
+                item = world.GetOrCreateItem(serial);
 
                 if (item == null)
                 {
@@ -5954,7 +6045,7 @@ internal class IncomingPackets
 
                 if (SerialHelper.IsValid(item.Container))
                 {
-                    _world.RemoveItemFromContainer(item);
+                    world.RemoveItemFromContainer(item);
                 }
             }
             else
@@ -6019,12 +6110,12 @@ internal class IncomingPackets
         {
             graphic += graphic_inc;
 
-            if (serial != _world.Player)
+            if (serial != world.Player)
             {
                 Direction cleaned_dir = direction & Direction.Up;
                 bool isrun = (direction & Direction.Running) != 0;
 
-                if (_world.Get(mobile) == null || mobile.X == 0xFFFF && mobile.Y == 0xFFFF)
+                if (world.Get(mobile) == null || mobile.X == 0xFFFF && mobile.Y == 0xFFFF)
                 {
                     mobile.X = x;
                     mobile.Y = y;
@@ -6056,14 +6147,14 @@ internal class IncomingPackets
             {
                 if (ProfileManager.CurrentProfile.ShowNewMobileNameIncoming)
                 {
-                    GameActions.SingleClick(_world, serial);
+                    GameActions.SingleClick(world, serial);
                 }
             }
             else if (graphic == 0x2006)
             {
                 if (ProfileManager.CurrentProfile.ShowNewCorpseNameIncoming)
                 {
-                    GameActions.SingleClick(_world, serial);
+                    GameActions.SingleClick(world, serial);
                 }
             }
         }
@@ -6077,7 +6168,7 @@ internal class IncomingPackets
                 // This is actually a way to get all Hp from all new mobiles.
                 // Real UO client does it only when LastAttack == serial.
                 // We force to close suddenly.
-                GameActions.RequestMobileStatus(_world, serial);
+                GameActions.RequestMobileStatus(world, serial);
 
                 //if (TargetManager.LastAttack != serial)
                 //{
@@ -6104,14 +6195,14 @@ internal class IncomingPackets
 
                 if (graphic == 0x2006 && ProfileManager.CurrentProfile.AutoOpenCorpses)
                 {
-                    _world.Player.TryOpenCorpses();
+                    world.Player.TryOpenCorpses();
                 }
             }
         }
     }
 
     public void UpdatePlayer(
-        World _world,
+        World world,
         uint serial,
         ushort graphic,
         byte graph_inc,
@@ -6124,60 +6215,60 @@ internal class IncomingPackets
         Direction direction
     )
     {
-        if (serial == _world.Player)
+        if (serial == world.Player)
         {
-            _world.RangeSize.X = x;
-            _world.RangeSize.Y = y;
+            world.RangeSize.X = x;
+            world.RangeSize.Y = y;
 
-            bool olddead = _world.Player.IsDead;
-            ushort old_graphic = _world.Player.Graphic;
+            bool olddead = world.Player.IsDead;
+            ushort old_graphic = world.Player.Graphic;
 
-            _world.Player.CloseBank();
-            _world.Player.Walker.WalkingFailed = false;
-            _world.Player.Graphic = graphic;
-            _world.Player.Direction = direction & Direction.Mask;
-            _world.Player.FixHue(hue);
-            _world.Player.Flags = flags;
-            _world.Player.Walker.DenyWalk(0xFF, -1, -1, -1);
+            world.Player.CloseBank();
+            world.Player.Walker.WalkingFailed = false;
+            world.Player.Graphic = graphic;
+            world.Player.Direction = direction & Direction.Mask;
+            world.Player.FixHue(hue);
+            world.Player.Flags = flags;
+            world.Player.Walker.DenyWalk(0xFF, -1, -1, -1);
 
             var gs = ServiceProvider.Get<SceneService>().GetScene<GameScene>();
 
             if (gs != null)
             {
-                _world.Weather.Reset();
+                ServiceProvider.Get<ManagersService>().Weather.Reset();
                 gs.UpdateDrawPosition = true;
             }
 
             // std client keeps the target open!
-            /*if (old_graphic != 0 && old_graphic != _world.Player.Graphic)
+            /*if (old_graphic != 0 && old_graphic != world.Player.Graphic)
             {
-                if (_world.Player.IsDead)
+                if (world.Player.IsDead)
                 {
                     TargetManager.Reset();
                 }
             }*/
 
-            if (olddead != _world.Player.IsDead)
+            if (olddead != world.Player.IsDead)
             {
-                if (_world.Player.IsDead)
+                if (world.Player.IsDead)
                 {
-                    _world.ChangeSeason(Game.Managers.Season.Desolation, 42);
+                    world.ChangeSeason(Game.Managers.Season.Desolation, 42);
                 }
                 else
                 {
-                    _world.ChangeSeason(_world.OldSeason, _world.OldMusicIndex);
+                    world.ChangeSeason(world.OldSeason, world.OldMusicIndex);
                 }
             }
 
-            _world.Player.Walker.ResendPacketResync = false;
-            _world.Player.CloseRangedGumps();
-            _world.Player.SetInWorldTile(x, y, z);
-            _world.Player.UpdateAbilities();
+            world.Player.Walker.ResendPacketResync = false;
+            world.Player.CloseRangedGumps();
+            world.Player.SetInWorldTile(x, y, z);
+            world.Player.UpdateAbilities();
         }
     }
 
     public void ClearContainerAndRemoveItems(
-        World _world,
+        World world,
         Entity container,
         bool remove_unequipped = false
     )
@@ -6204,7 +6295,7 @@ internal class IncomingPackets
             }
             else
             {
-                _world.RemoveItem(it, true);
+                world.RemoveItem(it, true);
             }
 
             first = next;
@@ -6214,7 +6305,7 @@ internal class IncomingPackets
     }
 
     public Gump? CreateGump(
-        World _world,
+        World world,
         uint sender,
         uint gumpID,
         int x,
@@ -6264,7 +6355,7 @@ internal class IncomingPackets
 
         if (gump == null)
         {
-            gump = new Gump(_world, sender, gumpID)
+            gump = new Gump(world, sender, gumpID)
             {
                 X = x,
                 Y = y,
@@ -6344,7 +6435,7 @@ internal class IncomingPackets
 
                 if (isVirtue)
                 {
-                    pic = new VirtueGumpPic(_world, gparams);
+                    pic = new VirtueGumpPic(world, gparams);
                     pic.ContainsByBounds = true;
 
                     string s,
@@ -6741,7 +6832,7 @@ internal class IncomingPackets
                 )
             )
             {
-                if (_world.ClientFeatures.TooltipsEnabled && gump.Children.Count != 0)
+                if (world.ClientFeatures.TooltipsEnabled && gump.Children.Count != 0)
                 {
                     gump.Children[gump.Children.Count - 1].SetTooltip(
                         SerialHelper.Parse(gparams[1])
@@ -6749,7 +6840,7 @@ internal class IncomingPackets
 
                     if (
                         uint.TryParse(gparams[1], out uint s)
-                        && (!_world.OPL.TryGetRevision(s, out uint rev) || rev == 0)
+                        && (!ServiceProvider.Get<ManagersService>().OPL.TryGetRevision(s, out uint rev) || rev == 0)
                     )
                     {
                         ServiceProvider.Get<MegaClilocRequestsService>().AddMegaClilocRequest(s);

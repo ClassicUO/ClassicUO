@@ -6,18 +6,14 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.Resources;
 using ClassicUO.Sdk;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.Managers
 {
     internal sealed class CommandManager
     {
         private readonly Dictionary<string, Action<string[]>> _commands = new Dictionary<string, Action<string[]>>();
-        private readonly World _world;
-
-        public CommandManager(World world)
-        {
-            _world = world;
-        }
+        private readonly WorldService _worldService = ServiceProvider.Get<WorldService>();
 
         public void Initialize()
         {
@@ -26,12 +22,12 @@ namespace ClassicUO.Game.Managers
                 "info",
                 s =>
                 {
-                    if (_world.TargetManager.IsTargeting)
+                    if (ServiceProvider.Get<ManagersService>().TargetManager.IsTargeting)
                     {
-                        _world.TargetManager.CancelTarget();
+                        ServiceProvider.Get<ManagersService>().TargetManager.CancelTarget();
                     }
 
-                    _world.TargetManager.SetTargeting(CursorTarget.SetTargetClientSide, CursorType.Target, TargetType.Neutral);
+                    ServiceProvider.Get<ManagersService>().TargetManager.SetTargeting(CursorTarget.SetTargetClientSide, CursorType.Target, TargetType.Neutral);
                 }
             );
 
@@ -40,9 +36,9 @@ namespace ClassicUO.Game.Managers
                 "datetime",
                 s =>
                 {
-                    if (_world.Player != null)
+                    if (_worldService.World.Player != null)
                     {
-                        GameActions.Print(_world, string.Format(ResGeneral.CurrentDateTimeNowIs0, DateTime.Now));
+                        GameActions.Print(_worldService.World, string.Format(ResGeneral.CurrentDateTimeNowIs0, DateTime.Now));
                     }
                 }
             );
@@ -52,12 +48,12 @@ namespace ClassicUO.Game.Managers
                 "hue",
                 s =>
                 {
-                    if (_world.TargetManager.IsTargeting)
+                    if (ServiceProvider.Get<ManagersService>().TargetManager.IsTargeting)
                     {
-                        _world.TargetManager.CancelTarget();
+                        ServiceProvider.Get<ManagersService>().TargetManager.CancelTarget();
                     }
 
-                    _world.TargetManager.SetTargeting(CursorTarget.HueCommandTarget, CursorType.Target, TargetType.Neutral);
+                    ServiceProvider.Get<ManagersService>().TargetManager.SetTargeting(CursorTarget.HueCommandTarget, CursorType.Target, TargetType.Neutral);
                 }
             );
 
@@ -121,11 +117,11 @@ namespace ClassicUO.Game.Managers
         {
             if (entity != null)
             {
-                _world.TargetManager.Target(entity);
+                ServiceProvider.Get<ManagersService>().TargetManager.Target(entity);
             }
 
             Mouse.LastLeftButtonClickTime = 0;
-            GameActions.Print(_world, string.Format(ResGeneral.ItemID0Hue1, entity?.Graphic ?? 0, entity?.Hue ?? 0));
+            GameActions.Print(_worldService.World, string.Format(ResGeneral.ItemID0Hue1, entity?.Graphic ?? 0, entity?.Hue ?? 0));
         }
     }
 }

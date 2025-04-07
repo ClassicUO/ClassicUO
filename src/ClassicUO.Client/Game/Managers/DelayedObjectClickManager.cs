@@ -2,14 +2,13 @@
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.Managers
 {
     internal sealed class DelayedObjectClickManager
     {
-        private readonly World _world;
-
-        public DelayedObjectClickManager(World world) { _world = world; }
+        private readonly WorldService _worldService = ServiceProvider.Get<WorldService>();
 
         public uint Serial { get; private set; }
         public bool IsEnabled { get; private set; }
@@ -27,16 +26,16 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            var entity = _world.Get(Serial);
+            var entity = _worldService.World.Get(Serial);
 
             if (entity != null)
             {
-                if (!_world.ClientFeatures.TooltipsEnabled || SerialHelper.IsItem(Serial) && ((Item) entity).IsLocked && ((Item) entity).ItemData.Weight == 255 && !((Item) entity).ItemData.IsContainer)
+                if (!_worldService.World.ClientFeatures.TooltipsEnabled || SerialHelper.IsItem(Serial) && ((Item) entity).IsLocked && ((Item) entity).ItemData.Weight == 255 && !((Item) entity).ItemData.IsContainer)
                 {
-                    GameActions.SingleClick(_world, Serial);
+                    GameActions.SingleClick(_worldService.World, Serial);
                 }
 
-                if (_world.ClientFeatures.PopupEnabled)
+                if (_worldService.World.ClientFeatures.PopupEnabled)
                 {
                     GameActions.OpenPopupMenu(Serial);
                 }

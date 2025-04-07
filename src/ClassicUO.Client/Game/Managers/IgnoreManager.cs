@@ -14,9 +14,8 @@ namespace ClassicUO.Game.Managers
 {
     internal sealed class IgnoreManager
     {
-        private readonly World _world;
+        private readonly WorldService _worldSerice = ServiceProvider.Get<WorldService>();
 
-        public IgnoreManager(World world) { _world = world; }
 
         /// <summary>
         /// Set of Char names
@@ -38,13 +37,13 @@ namespace ClassicUO.Game.Managers
         /// <param name="entity">Targeted Entity</param>
         public void AddIgnoredTarget(Entity entity)
         {
-            if (entity is Mobile m && !m.IsYellowHits && m.Serial != _world.Player.Serial)
+            if (entity is Mobile m && !m.IsYellowHits && m.Serial != _worldSerice.World.Player.Serial)
             {
                 var charName = m.Name;
 
                 if (IgnoredCharsList.Contains(charName))
                 {
-                    GameActions.Print(_world, string.Format(ResGumps.AddToIgnoreListExist, charName));
+                    GameActions.Print(_worldSerice.World, string.Format(ResGumps.AddToIgnoreListExist, charName));
                     return;
                 }
 
@@ -52,11 +51,11 @@ namespace ClassicUO.Game.Managers
                 // Redraw list of chars
                 ServiceProvider.Get<GuiService>().GetGump<IgnoreManagerGump>()?.Redraw();
 
-                GameActions.Print(_world,string.Format(ResGumps.AddToIgnoreListSuccess, charName));
+                GameActions.Print(_worldSerice.World,string.Format(ResGumps.AddToIgnoreListSuccess, charName));
                 return;
             }
 
-            GameActions.Print(_world,string.Format(ResGumps.AddToIgnoreListNotMobile));
+            GameActions.Print(_worldSerice.World,string.Format(ResGumps.AddToIgnoreListNotMobile));
         }
 
         /// <summary>

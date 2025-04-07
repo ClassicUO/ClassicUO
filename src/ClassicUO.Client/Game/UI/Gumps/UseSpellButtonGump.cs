@@ -33,7 +33,7 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
             CanCloseWithRightClick = true;
 
-            _mm = world.Macros;
+            _mm = ServiceProvider.Get<ManagersService>().Macros;
         }
 
         public UseSpellButtonGump(World world, SpellDefinition spell) : this(world)

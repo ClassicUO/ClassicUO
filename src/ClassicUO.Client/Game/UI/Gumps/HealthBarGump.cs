@@ -138,9 +138,9 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            if (World.TargetManager.IsTargeting)
+            if (ServiceProvider.Get<ManagersService>().TargetManager.IsTargeting)
             {
-                World.TargetManager.Target(LocalSerial);
+                ServiceProvider.Get<ManagersService>().TargetManager.Target(LocalSerial);
                 Mouse.LastLeftButtonClickTime = 0;
             }
             else if (_canChangeName && !_targetBroke)
@@ -175,7 +175,7 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void OnDragEnd(int x, int y)
         {
             // when dragging an healthbar with target on, we have to reset the dclick timer
-            if (World.TargetManager.IsTargeting)
+            if (ServiceProvider.Get<ManagersService>().TargetManager.IsTargeting)
             {
                 Mouse.LastLeftButtonClickTime = 0;
                 Mouse.CancelDoubleClick = true;
@@ -191,10 +191,10 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            if (World.TargetManager.IsTargeting)
+            if (ServiceProvider.Get<ManagersService>().TargetManager.IsTargeting)
             {
                 _targetBroke = true;
-                World.TargetManager.Target(LocalSerial);
+                ServiceProvider.Get<ManagersService>().TargetManager.Target(LocalSerial);
                 Mouse.LastLeftButtonClickTime = 0;
             }
             else if (_canChangeName)
@@ -378,7 +378,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            bool inparty = World.Party.Contains(LocalSerial);
+            bool inparty = ServiceProvider.Get<ManagersService>().Party.Contains(LocalSerial);
 
 
             ushort textColor = 0x0386;
@@ -392,7 +392,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (entity == null || entity.IsDestroyed)
             {
-                if (LocalSerial != World.Player && (ProfileManager.CurrentProfile.CloseHealthBarType == 1 || ProfileManager.CurrentProfile.CloseHealthBarType == 2 && World.CorpseManager.Exists(0, LocalSerial | 0x8000_0000)))
+                if (LocalSerial != World.Player && (ProfileManager.CurrentProfile.CloseHealthBarType == 1 || ProfileManager.CurrentProfile.CloseHealthBarType == 2 && ServiceProvider.Get<ManagersService>().CorpseManager.Exists(0, LocalSerial | 0x8000_0000)))
                 {
                     //### KEEPS PARTY BAR ACTIVE WHEN PARTY MEMBER DIES & MOBILEBAR CLOSE SELECTED ###//
                     if (!inparty && CheckIfAnchoredElseDispose())
@@ -413,7 +413,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _outOfRange = true;
                     textColor = 912;
 
-                    if (World.TargetManager.LastAttack != LocalSerial)
+                    if (ServiceProvider.Get<ManagersService>().TargetManager.LastAttack != LocalSerial)
                     {
                         GameActions.SendCloseStatus(World,LocalSerial);
                     }
@@ -550,9 +550,9 @@ namespace ClassicUO.Game.UI.Gumps
                     _bars[0].IsVisible = true;
                 }
 
-                if (World.TargetManager.LastTargetInfo.Serial != World.Player && !_outOfRange && mobile != null)
+                if (ServiceProvider.Get<ManagersService>().TargetManager.LastTargetInfo.Serial != World.Player && !_outOfRange && mobile != null)
                 {
-                    if (mobile == World.TargetManager.LastTargetInfo.Serial)
+                    if (mobile == ServiceProvider.Get<ManagersService>().TargetManager.LastTargetInfo.Serial)
                     {
                         _border[0].LineColor = HPB_COLOR_RED;
 
@@ -561,7 +561,7 @@ namespace ClassicUO.Game.UI.Gumps
                             _border[1].LineColor = _border[2].LineColor = _border[3].LineColor = HPB_COLOR_RED;
                         }
                     }
-                    else if (mobile != World.TargetManager.LastTargetInfo.Serial)
+                    else if (mobile != ServiceProvider.Get<ManagersService>().TargetManager.LastTargetInfo.Serial)
                     {
                         _border[0].LineColor = HPB_COLOR_BLACK;
 
@@ -697,7 +697,7 @@ namespace ClassicUO.Game.UI.Gumps
             Entity entity = World.Get(LocalSerial);
 
 
-            if (World.Party.Contains(LocalSerial))
+            if (ServiceProvider.Get<ManagersService>().Party.Contains(LocalSerial))
             {
                 Height = HPB_HEIGHT_MULTILINE;
                 Width = HPB_WIDTH;
@@ -1334,7 +1334,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             var entity = World.Get(LocalSerial);
 
-            if (World.Party.Contains(LocalSerial))
+            if (ServiceProvider.Get<ManagersService>().Party.Contains(LocalSerial))
             {
                 Add
                 (
@@ -1576,7 +1576,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            bool inparty = World.Party.Contains(LocalSerial);
+            bool inparty = ServiceProvider.Get<ManagersService>().Party.Contains(LocalSerial);
 
 
             ushort textColor = 0x0386;
@@ -1591,7 +1591,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (entity == null || entity.IsDestroyed)
             {
-                if (LocalSerial != World.Player && !inparty && (ProfileManager.CurrentProfile.CloseHealthBarType == 1 || ProfileManager.CurrentProfile.CloseHealthBarType == 2 && World.CorpseManager.Exists(0, LocalSerial | 0x8000_0000)))
+                if (LocalSerial != World.Player && !inparty && (ProfileManager.CurrentProfile.CloseHealthBarType == 1 || ProfileManager.CurrentProfile.CloseHealthBarType == 2 && ServiceProvider.Get<ManagersService>().CorpseManager.Exists(0, LocalSerial | 0x8000_0000)))
                 {
                     if (CheckIfAnchoredElseDispose())
                     {
@@ -1612,7 +1612,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _outOfRange = true;
 
-                    if (World.TargetManager.LastAttack != LocalSerial)
+                    if (ServiceProvider.Get<ManagersService>().TargetManager.LastAttack != LocalSerial)
                     {
                         GameActions.SendCloseStatus(World, LocalSerial);
                     }
@@ -1876,15 +1876,15 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case ButtonParty.Heal1:
                     GameActions.CastSpell(29);
-                    World.Party.PartyHealTimer = Time.Ticks + 50;
-                    World.Party.PartyHealTarget = LocalSerial;
+                    ServiceProvider.Get<ManagersService>().Party.PartyHealTimer = Time.Ticks + 50;
+                    ServiceProvider.Get<ManagersService>().Party.PartyHealTarget = LocalSerial;
 
                     break;
 
                 case ButtonParty.Heal2:
                     GameActions.CastSpell(11);
-                    World.Party.PartyHealTimer = Time.Ticks + 50;
-                    World.Party.PartyHealTarget = LocalSerial;
+                    ServiceProvider.Get<ManagersService>().Party.PartyHealTimer = Time.Ticks + 50;
+                    ServiceProvider.Get<ManagersService>().Party.PartyHealTarget = LocalSerial;
 
                     break;
             }

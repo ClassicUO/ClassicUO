@@ -157,17 +157,10 @@ namespace ClassicUO.Game.Managers
     internal sealed class SkillsGroupManager
     {
         private readonly World _world;
-        private readonly UOService _uoService;
-        private readonly SceneService _sceneService;
-        private readonly AssetsService _assetsService;
+        private readonly SceneService _sceneService = ServiceProvider.Get<SceneService>();
+        private readonly AssetsService _assetsService = ServiceProvider.Get<AssetsService>();
+        private readonly GuiService _guiService = ServiceProvider.Get<GuiService>();
 
-        public SkillsGroupManager(World world)
-        {
-            _world = world;
-            _uoService = ServiceProvider.Get<UOService>();
-            _sceneService = ServiceProvider.Get<SceneService>();
-            _assetsService = ServiceProvider.Get<AssetsService>();
-        }
 
         public readonly List<SkillsGroup> Groups = new List<SkillsGroup>();
 
@@ -190,7 +183,7 @@ namespace ClassicUO.Game.Managers
                     Y = camera.Bounds.Y + camera.Bounds.Height / 2 - 62
                 };
 
-                ServiceProvider.Get<GuiService>().Add(messageBox);
+                _guiService.Add(messageBox);
 
                 return false;
             }

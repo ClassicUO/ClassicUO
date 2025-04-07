@@ -30,7 +30,7 @@ namespace ClassicUO.Game.UI
 
         public bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            if (SerialHelper.IsValid(Serial) && _world.OPL.TryGetRevision(Serial, out uint revision) && _hash != revision)
+            if (SerialHelper.IsValid(Serial) && ServiceProvider.Get<ManagersService>().OPL.TryGetRevision(Serial, out uint revision) && _hash != revision)
             {
                 _hash = revision;
                 Text = ReadProperties(Serial, out _textHTML);
@@ -212,7 +212,7 @@ namespace ClassicUO.Game.UI
             {
                 uint revision2 = 0;
 
-                if (Serial == 0 || Serial != serial || _world.OPL.TryGetRevision(Serial, out uint revision) && _world.OPL.TryGetRevision(serial, out revision2) && revision != revision2)
+                if (Serial == 0 || Serial != serial || ServiceProvider.Get<ManagersService>().OPL.TryGetRevision(Serial, out uint revision) && ServiceProvider.Get<ManagersService>().OPL.TryGetRevision(serial, out revision2) && revision != revision2)
                 {
                     _maxWidth = 0;
                     Serial = serial;
@@ -232,7 +232,7 @@ namespace ClassicUO.Game.UI
             string result = null;
             htmltext = string.Empty;
 
-            if (SerialHelper.IsValid(serial) && _world.OPL.TryGetNameAndData(serial, out string name, out string data))
+            if (SerialHelper.IsValid(serial) && ServiceProvider.Get<ManagersService>().OPL.TryGetNameAndData(serial, out string name, out string data))
             {
                 var sbHTML = new ValueStringBuilder();
                 {

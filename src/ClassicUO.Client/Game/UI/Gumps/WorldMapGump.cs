@@ -182,7 +182,7 @@ namespace ClassicUO.Game.UI.Gumps
             _flipMap = ProfileManager.CurrentProfile.WorldMapFlipMap;
             _showPartyMembers = ProfileManager.CurrentProfile.WorldMapShowParty;
 
-            World.WMapManager.SetEnable(_showPartyMembers);
+            ServiceProvider.Get<ManagersService>().WMapManager.SetEnable(_showPartyMembers);
 
             _zoomIndex = ProfileManager.CurrentProfile.WorldMapZoomIndex;
 
@@ -297,7 +297,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _showPartyMembers = !_showPartyMembers;
 
-                    World.WMapManager.SetEnable(_showPartyMembers);
+                    ServiceProvider.Get<ManagersService>().WMapManager.SetEnable(_showPartyMembers);
                     SaveSettings();
                 },
                 true,
@@ -537,7 +537,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_map.Index != World.MapIndex && !_freeView)
                 ChangeMap(World.MapIndex);
 
-            World.WMapManager.RequestServerPartyGuildInfo();
+            ServiceProvider.Get<ManagersService>().WMapManager.RequestServerPartyGuildInfo();
         }
 
         public void ChangeMap(int index)
@@ -688,7 +688,7 @@ namespace ClassicUO.Game.UI.Gumps
             int x = position.X - X - ParentX;
             int y = position.Y - Y - ParentY;
             CanvasToWorld(x, y, out int xMap, out int yMap);
-            World.TargetManager.Target
+            ServiceProvider.Get<ManagersService>().TargetManager.Target
             (
                 0,
                 (ushort)xMap,
@@ -700,7 +700,7 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Dispose()
         {
             SaveSettings();
-            World.WMapManager.SetEnable(false);
+            ServiceProvider.Get<ManagersService>().WMapManager.SetEnable(false);
 
             ServiceProvider.Get<GameCursorService>().GameCursor.IsDraggingCursorForced = false;
 
@@ -1979,7 +1979,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            //foreach (House house in World.HouseManager.Houses)
+            //foreach (House house in ServiceProvider.Get<ManagersService>().HouseManager.Houses)
             //{
             //    foreach (Multi multi in house.Components)
             //    {
@@ -2003,7 +2003,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_showMultis)
             {
-                foreach (House house in World.HouseManager.Houses)
+                foreach (House house in ServiceProvider.Get<ManagersService>().HouseManager.Houses)
                 {
                     var item = World.Items.Get(house.Serial);
 
@@ -2101,7 +2101,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (mob != null && mob.Distance <= World.ClientViewRange)
                         {
-                            var wme = World.WMapManager.GetEntity(mob);
+                            var wme = ServiceProvider.Get<ManagersService>().WMapManager.GetEntity(mob);
 
                             if (wme != null)
                             {
@@ -2130,7 +2130,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            var wme = World.WMapManager.GetEntity(mob.Serial);
+                            var wme = ServiceProvider.Get<ManagersService>().WMapManager.GetEntity(mob.Serial);
 
                             if (wme != null && wme.IsGuild)
                             {
@@ -2150,9 +2150,9 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            foreach (WMapEntity wme in World.WMapManager.Entities.Values)
+            foreach (WMapEntity wme in ServiceProvider.Get<ManagersService>().WMapManager.Entities.Values)
             {
-                if (wme.IsGuild && !World.Party.Contains(wme.Serial))
+                if (wme.IsGuild && !ServiceProvider.Get<ManagersService>().Party.Contains(wme.Serial))
                 {
                     DrawWMEntity
                     (
@@ -2169,7 +2169,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_showPartyMembers)
             {
-                foreach (var partyMember in World.Party.Members)
+                foreach (var partyMember in ServiceProvider.Get<ManagersService>().Party.Members)
                 {
                     if (partyMember != null && SerialHelper.IsValid(partyMember.Serial))
                     {
@@ -2177,7 +2177,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (mob != null && mob.Distance <= World.ClientViewRange)
                         {
-                            var wme = World.WMapManager.GetEntity(mob);
+                            var wme = ServiceProvider.Get<ManagersService>().WMapManager.GetEntity(mob);
 
                             if (wme != null)
                             {
@@ -2204,7 +2204,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            var wme = World.WMapManager.GetEntity(partyMember.Serial);
+                            var wme = ServiceProvider.Get<ManagersService>().WMapManager.GetEntity(partyMember.Serial);
 
                             if (wme != null && !wme.IsGuild)
                             {
@@ -2993,7 +2993,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            var allowTarget = _allowPositionalTarget && World.TargetManager.IsTargeting && World.TargetManager.TargetingState == CursorTarget.Position;
+            var allowTarget = _allowPositionalTarget && ServiceProvider.Get<ManagersService>().TargetManager.IsTargeting && ServiceProvider.Get<ManagersService>().TargetManager.TargetingState == CursorTarget.Position;
             if (allowTarget && button == MouseButtonType.Left)
             {
                 HandlePositionTarget();

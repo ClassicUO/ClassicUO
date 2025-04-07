@@ -6,7 +6,6 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Sdk.Assets;
-using ClassicUO.Network;
 using ClassicUO.Resources;
 using ClassicUO.Sdk;
 using ClassicUO.Services;
@@ -102,19 +101,13 @@ namespace ClassicUO.Game.Managers
     internal sealed class TargetManager
     {
         private uint _targetCursorId;
-        private readonly World _world;
         private readonly byte[] _lastDataBuffer = new byte[19];
-        private readonly UOService _uoService;
-        private readonly NetClientService _netClientService;
-        private readonly AssetsService _assetsService;
+        private readonly UOService _uoService = ServiceProvider.Get<UOService>();
+        private readonly NetClientService _netClientService = ServiceProvider.Get<NetClientService>();
+        private readonly AssetsService _assetsService = ServiceProvider.Get<AssetsService>();
+        private readonly WorldService _worldService = ServiceProvider.Get<WorldService>();
 
-        public TargetManager(World world)
-        {
-            _world = world;
-            _uoService = ServiceProvider.Get<UOService>();
-            _netClientService = ServiceProvider.Get<NetClientService>();
-            _assetsService = ServiceProvider.Get<AssetsService>();
-        }
+
 
         public uint LastAttack, SelectedTarget, NewTargetSystemSerial;
 
@@ -135,7 +128,7 @@ namespace ClassicUO.Game.Managers
             {
                 MultiTargetInfo = null;
                 TargetingState = 0;
-                _world.HouseManager.Remove(0);
+                ServiceProvider.Get<ManagersService>().HouseManager.Remove(0);
             }
 
             IsTargeting = false;
@@ -184,14 +177,14 @@ namespace ClassicUO.Game.Managers
         {
             if (TargetingState == CursorTarget.MultiPlacement)
             {
-                _world.HouseManager.Remove(0);
+                ServiceProvider.Get<ManagersService>().HouseManager.Remove(0);
 
-                if (_world.CustomHouseManager != null)
+                if (_worldService.World.CustomHouseManager != null)
                 {
-                    _world.CustomHouseManager.Erasing = false;
-                    _world.CustomHouseManager.SeekTile = false;
-                    _world.CustomHouseManager.SelectedGraphic = 0;
-                    _world.CustomHouseManager.CombinedStair = false;
+                    _worldService.World.CustomHouseManager.Erasing = false;
+                    _worldService.World.CustomHouseManager.SeekTile = false;
+                    _worldService.World.CustomHouseManager.SelectedGraphic = 0;
+                    _worldService.World.CustomHouseManager.CombinedStair = false;
 
                     ServiceProvider.Get<GuiService>().GetGump<HouseCustomizationGump>()?.Update();
                 }
@@ -236,7 +229,7 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            var entity = _world.InGame ? _world.Get(serial) : null;
+            var entity = _worldService.World.InGame ? _worldService.World.Get(serial) : null;
 
             if (entity != null)
             {
@@ -250,12 +243,12 @@ namespace ClassicUO.Game.Managers
                     case CursorTarget.HueCommandTarget:
                     case CursorTarget.SetTargetClientSide:
 
-                        if (entity != _world.Player)
+                        if (entity != _worldService.World.Player)
                         {
                             LastTargetInfo.SetEntity(serial);
                         }
 
-                        if (SerialHelper.IsMobile(serial) && serial != _world.Player && (_world.Player.NotorietyFlag == NotorietyFlag.Innocent || _world.Player.NotorietyFlag == NotorietyFlag.Ally))
+                        if (SerialHelper.IsMobile(serial) && serial != _worldService.World.Player && (_worldService.World.Player.NotorietyFlag == NotorietyFlag.Innocent || _worldService.World.Player.NotorietyFlag == NotorietyFlag.Ally))
                         {
                             var mobile = entity as Mobile;
 
@@ -276,7 +269,7 @@ namespace ClassicUO.Game.Managers
                                 {
                                     QuestionGump messageBox = new QuestionGump
                                     (
-                                        _world,
+                                        _worldService.World,
                                         "This may flag\nyou criminal!",
                                         s =>
                                         {
@@ -294,7 +287,7 @@ namespace ClassicUO.Game.Managers
 
                                                 if (LastTargetInfo.Serial != serial)
                                                 {
-                                                    GameActions.RequestMobileStatus(_world, serial);
+                                                    GameActions.RequestMobileStatus(_worldService.World, serial);
                                                 }
                                             }
                                         }
@@ -348,7 +341,7 @@ namespace ClassicUO.Game.Managers
 
                             if (SerialHelper.IsMobile(serial) && LastTargetInfo.Serial != serial)
                             {
-                                GameActions.RequestMobileStatus(_world,serial);
+                                GameActions.RequestMobileStatus(_worldService.World,serial);
                             }
                         }
 
@@ -362,7 +355,7 @@ namespace ClassicUO.Game.Managers
 
                         if (SerialHelper.IsItem(serial))
                         {
-                            GameActions.GrabItem(_world, serial, ((Item) entity).Amount);
+                            GameActions.GrabItem(_worldService.World, serial, ((Item) entity).Amount);
                         }
 
                         ClearTargetingWithoutTargetCancelPacket();
@@ -374,7 +367,7 @@ namespace ClassicUO.Game.Managers
                         if (SerialHelper.IsItem(serial))
                         {
                             ProfileManager.CurrentProfile.GrabBagSerial = serial;
-                            GameActions.Print(_world, string.Format(ResGeneral.GrabBagSet0, serial));
+                            GameActions.Print(_worldService.World, string.Format(ResGeneral.GrabBagSet0, serial));
                         }
 
                         ClearTargetingWithoutTargetCancelPacket();
@@ -383,7 +376,7 @@ namespace ClassicUO.Game.Managers
                     case CursorTarget.IgnorePlayerTarget:
                         if (SelectedObject.Object is Entity pmEntity)
                         {
-                            _world.IgnoreManager.AddIgnoredTarget(pmEntity);
+                            ServiceProvider.Get<ManagersService>().IgnoreManager.AddIgnoredTarget(pmEntity);
                         }
                         CancelTarget();
                         return;

@@ -17,20 +17,20 @@ namespace ClassicUO.Game.Managers
 {
     internal sealed class ContainerManager
     {
-        private readonly Dictionary<ushort, ContainerData> _data =
-            new Dictionary<ushort, ContainerData>();
-
-        private readonly World _world;
+        private readonly Dictionary<ushort, ContainerData> _data = new Dictionary<ushort, ContainerData>();
+        private readonly WorldService _worldService;
         private readonly UOService _uoService;
         private readonly WindowService _windowService;
         private readonly SceneService _sceneService;
+        private readonly GuiService _guiService;
 
-        public ContainerManager(World world)
+        public ContainerManager()
         {
-            _world = world;
+            _worldService = ServiceProvider.Get<WorldService>();
             _uoService = ServiceProvider.Get<UOService>();
             _windowService = ServiceProvider.Get<WindowService>();
             _sceneService = ServiceProvider.Get<SceneService>();
+            _guiService = ServiceProvider.Get<GuiService>();
             BuildContainerFile(false);
         }
 
@@ -53,7 +53,7 @@ namespace ClassicUO.Game.Managers
 
         public void CalculateContainerPosition(uint serial, ushort g)
         {
-            if (ServiceProvider.Get<GuiService>().GetGumpCachePosition(serial, out Point location))
+            if (_guiService.GetGumpCachePosition(serial, out Point location))
             {
                 X = location.X;
                 Y = location.Y;
@@ -64,7 +64,7 @@ namespace ClassicUO.Game.Managers
 
                 if (gumpInfo.Texture != null)
                 {
-                    float scale = ServiceProvider.Get<GuiService>().ContainerScale;
+                    float scale = _guiService.ContainerScale;
 
                     int width = (int)(gumpInfo.UV.Width * scale);
                     int height = (int)(gumpInfo.UV.Height * scale);
@@ -177,14 +177,16 @@ namespace ClassicUO.Game.Managers
 
         private void SetPositionNearGameObject(ushort g, uint serial, int width, int height)
         {
-            var item = _world.Items.Get(serial);
+            var world = _worldService.World;
+
+            var item = world.Items.Get(serial);
 
             if (item == null)
             {
                 return;
             }
 
-            var bank = _world.Player.FindItemByLayer(Layer.Bank);
+            var bank = world.Player.FindItemByLayer(Layer.Bank);
             var camera = _sceneService.Scene?.Camera;
             if (camera == null)
                 return;
@@ -192,8 +194,8 @@ namespace ClassicUO.Game.Managers
             if (bank != null && serial == bank)
             {
                 // open bank near player
-                X = _world.Player.RealScreenPosition.X + camera.Bounds.X + 40;
-                Y = _world.Player.RealScreenPosition.Y + camera.Bounds.Y - (height >> 1);
+                X = world.Player.RealScreenPosition.X + camera.Bounds.X + 40;
+                Y = world.Player.RealScreenPosition.Y + camera.Bounds.Y - (height >> 1);
             }
             else if (item.OnGround)
             {
@@ -204,7 +206,7 @@ namespace ClassicUO.Game.Managers
             else if (SerialHelper.IsMobile(item.Container))
             {
                 // pack animal, snooped player, npc vendor
-                var mobile = _world.Mobiles.Get(item.Container);
+                var mobile = world.Mobiles.Get(item.Container);
 
                 if (mobile != null)
                 {
@@ -215,7 +217,7 @@ namespace ClassicUO.Game.Managers
             else
             {
                 // in a container, open near the container
-                var parentContainer = ServiceProvider.Get<GuiService>().GetGump<ContainerGump>(item.Container);
+                var parentContainer = _guiService.GetGump<ContainerGump>(item.Container);
 
                 if (parentContainer != null)
                 {

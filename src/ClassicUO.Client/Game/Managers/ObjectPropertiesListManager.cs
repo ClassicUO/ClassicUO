@@ -2,14 +2,13 @@
 
 using System.Collections.Generic;
 using ClassicUO.Services;
-using ClassicUO.Network;
 
 namespace ClassicUO.Game.Managers
 {
     internal sealed class ObjectPropertiesListManager
     {
         private readonly Dictionary<uint, ItemProperty> _itemsProperties = new Dictionary<uint, ItemProperty>();
-
+        private readonly MegaClilocRequestsService _megaClilocRequestsService = ServiceProvider.Get<MegaClilocRequestsService>();
 
         public void Add(uint serial, uint revision, string name, string data, int namecliloc)
         {
@@ -17,10 +16,6 @@ namespace ClassicUO.Game.Managers
             {
                 prop = new ItemProperty();
                 _itemsProperties[serial] = prop;
-            }
-            else
-            {
-
             }
 
             prop.Serial = serial;
@@ -42,7 +37,7 @@ namespace ClassicUO.Game.Managers
             // Original client seems asking for OPL when character is not running.
             // We'll ask OPL when mouse is over an object.
 
-            ServiceProvider.Get<MegaClilocRequestsService>().AddMegaClilocRequest(serial);
+            _megaClilocRequestsService.AddMegaClilocRequest(serial);
 
             return false;
         }
@@ -108,18 +103,12 @@ namespace ClassicUO.Game.Managers
         }
     }
 
-    internal class ItemProperty
+    internal sealed class ItemProperty
     {
-        public bool IsEmpty => string.IsNullOrEmpty(Name) && string.IsNullOrEmpty(Data);
         public string? Data;
         public string? Name;
         public uint Revision;
         public uint Serial;
         public int NameCliloc;
-
-        public string CreateData(bool extended)
-        {
-            return string.Empty;
-        }
     }
 }

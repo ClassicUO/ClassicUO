@@ -166,7 +166,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             float scale = GetScale();
 
-            _data = World.ContainerManager.Get(Graphic);
+            _data = ServiceProvider.Get<ManagersService>().ContainerManager.Get(Graphic);
             ushort g = _data.Graphic;
 
             _gumpPicContainer?.Dispose();
@@ -243,15 +243,15 @@ namespace ClassicUO.Game.UI.Gumps
             uint dropcontainer = LocalSerial;
 
             if (
-                World.TargetManager.IsTargeting
+                ServiceProvider.Get<ManagersService>().TargetManager.IsTargeting
                 && !ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled
                 && SerialHelper.IsValid(serial)
             )
             {
-                World.TargetManager.Target(serial);
+                ServiceProvider.Get<ManagersService>().TargetManager.Target(serial);
                 Mouse.CancelDoubleClick = true;
 
-                if (World.TargetManager.TargetingState == CursorTarget.SetTargetClientSide)
+                if (ServiceProvider.Get<ManagersService>().TargetManager.TargetingState == CursorTarget.SetTargetClientSide)
                 {
                     ServiceProvider.Get<GuiService>().Add(new InspectorGump(World, World.Get(serial)));
                 }
@@ -359,7 +359,7 @@ namespace ClassicUO.Game.UI.Gumps
                             y += 20;
                         }
 
-                        Rectangle containerBounds = World.ContainerManager.Get(gump.Graphic).Bounds;
+                        Rectangle containerBounds = ServiceProvider.Get<ManagersService>().ContainerManager.Get(gump.Graphic).Bounds;
 
                         ref readonly var spriteInfo = ref (
                             (gump.IsChessboard || gump.IsBackgammonBoard)
@@ -449,11 +449,11 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (!ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Enabled && SerialHelper.IsValid(serial))
                 {
-                    if (!World.DelayedObjectClickManager.IsEnabled)
+                    if (!ServiceProvider.Get<ManagersService>().DelayedObjectClickManager.IsEnabled)
                     {
                         Point off = Mouse.LDragOffset;
 
-                        World.DelayedObjectClickManager.Set(
+                        ServiceProvider.Get<ManagersService>().DelayedObjectClickManager.Set(
                             serial,
                             Mouse.Position.X - off.X - ScreenCoordinateX,
                             Mouse.Position.Y - off.Y - ScreenCoordinateY,

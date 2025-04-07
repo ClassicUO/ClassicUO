@@ -81,7 +81,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (entity is Item item)
             {
-                if (!World.OPL.TryGetNameAndData(item, out var t, out _))
+                if (!ServiceProvider.Get<ManagersService>().OPL.TryGetNameAndData(item, out var t, out _))
                 {
                     if (!item.IsCorpse && item.Amount > 1)
                     {
@@ -340,28 +340,28 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                if (World.TargetManager.IsTargeting)
+                if (ServiceProvider.Get<ManagersService>().TargetManager.IsTargeting)
                 {
-                    switch (World.TargetManager.TargetingState)
+                    switch (ServiceProvider.Get<ManagersService>().TargetManager.TargetingState)
                     {
                         case CursorTarget.Position:
                         case CursorTarget.Object:
                         case CursorTarget.Grab:
                         case CursorTarget.SetGrabBag:
-                            World.TargetManager.Target(LocalSerial);
+                            ServiceProvider.Get<ManagersService>().TargetManager.Target(LocalSerial);
                             Mouse.LastLeftButtonClickTime = 0;
 
                             break;
 
                         case CursorTarget.SetTargetClientSide:
-                            World.TargetManager.Target(LocalSerial);
+                            ServiceProvider.Get<ManagersService>().TargetManager.Target(LocalSerial);
                             Mouse.LastLeftButtonClickTime = 0;
                             ServiceProvider.Get<GuiService>().Add(new InspectorGump(World, World.Get(LocalSerial)));
 
                             break;
 
                         case CursorTarget.HueCommandTarget:
-                            World.CommandManager.OnHueTarget(World.Get(LocalSerial));
+                            ServiceProvider.Get<ManagersService>().CommandManager.OnHueTarget(World.Get(LocalSerial));
 
                             break;
                     }
@@ -445,9 +445,9 @@ namespace ClassicUO.Game.UI.Gumps
                             }
                         }
                     }
-                    else if (!World.DelayedObjectClickManager.IsEnabled)
+                    else if (!ServiceProvider.Get<ManagersService>().DelayedObjectClickManager.IsEnabled)
                     {
-                        World.DelayedObjectClickManager.Set(
+                        ServiceProvider.Get<ManagersService>().DelayedObjectClickManager.Set(
                             LocalSerial,
                             Mouse.Position.X,
                             Mouse.Position.Y,
@@ -538,7 +538,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                if (entity == World.TargetManager.LastTargetInfo.Serial)
+                if (entity == ServiceProvider.Get<ManagersService>().TargetManager.LastTargetInfo.Serial)
                 {
                     _borderColor = SolidColorTextureCache.GetTexture(Color.Red);
                     _background.Hue = _renderedText.Hue = entity is Mobile m

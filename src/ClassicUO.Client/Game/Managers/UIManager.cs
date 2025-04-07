@@ -16,6 +16,7 @@ namespace ClassicUO.Game.Managers
         private readonly Dictionary<uint, Point> _gumpPositionCache = new Dictionary<uint, Point>();
         private readonly Control?[] _mouseDownControls = new Control[0xFF];
         private readonly UOService _uoService = ServiceProvider.Get<UOService>();
+        private readonly WorldService _worldService = ServiceProvider.Get<WorldService>();
         private readonly SceneService _sceneService = ServiceProvider.Get<SceneService>();
 
         //private readonly Dictionary<uint, TargetLineGump> _targetLineGumps = new Dictionary<uint, TargetLineGump>();
@@ -224,7 +225,7 @@ namespace ClassicUO.Game.Managers
                 {
                     if (button == MouseButtonType.Left)
                     {
-                        _uoService.World.DelayedObjectClickManager.Clear();
+                        ServiceProvider.Get<ManagersService>().DelayedObjectClickManager.Clear();
                     }
 
                     return true;

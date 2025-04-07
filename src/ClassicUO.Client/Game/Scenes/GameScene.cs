@@ -120,14 +120,14 @@ namespace ClassicUO.Game.Scenes
 
             ServiceProvider.Get<GameCursorService>().GameCursor.ItemHold.Clear();
 
-            _world.Macros.Clear();
-            _world.Macros.Load();
+            ServiceProvider.Get<ManagersService>().Macros.Clear();
+            ServiceProvider.Get<ManagersService>().Macros.Load();
             _animatedStaticsManager = new AnimatedStaticsManager();
             _animatedStaticsManager.Initialize();
             _world.InfoBars.Load();
             _healthLinesManager = new HealthLinesManager(_world);
 
-            _world.CommandManager.Initialize();
+            ServiceProvider.Get<ManagersService>().CommandManager.Initialize();
 
             WorldViewportGump viewport = new WorldViewportGump(_world, this);
             ServiceProvider.Get<GuiService>().Add(viewport, false);
@@ -138,7 +138,7 @@ namespace ClassicUO.Game.Scenes
             }
 
             _netClientService.RegisterDisconnectedEvent(SocketOnDisconnected);
-            _world.MessageManager.MessageReceived += ChatOnMessageReceived;
+            ServiceProvider.Get<ManagersService>().MessageManager.MessageReceived += ChatOnMessageReceived;
             ServiceProvider.Get<GuiService>().ContainerScale = ProfileManager.CurrentProfile.ContainersScale / 100f;
 
             SDL.SDL_SetWindowMinimumSize(ServiceProvider.Get<WindowService>().Handle, 640, 480);
@@ -312,15 +312,15 @@ namespace ClassicUO.Game.Scenes
             }
             catch { }
 
-            _world.TargetManager.Reset();
+            ServiceProvider.Get<ManagersService>().TargetManager.Reset();
 
             // special case for wmap. this allow us to save settings
             ServiceProvider.Get<GuiService>().GetGump<WorldMapGump>()?.SaveSettings();
 
             ProfileManager.CurrentProfile?.Save(_world, ProfileManager.CurrentProfile.ProfilePath);
 
-            _world.Macros.Save();
-            _world.Macros.Clear();
+            ServiceProvider.Get<ManagersService>().Macros.Save();
+            ServiceProvider.Get<ManagersService>().Macros.Clear();
             _world.InfoBars.Save();
             ProfileManager.UnLoadProfile();
 
@@ -332,15 +332,15 @@ namespace ClassicUO.Game.Scenes
             _lightRenderTarget?.Dispose();
             _world_render_target?.Dispose();
 
-            _world.CommandManager.UnRegisterAll();
-            _world.Weather.Reset();
+            ServiceProvider.Get<ManagersService>().CommandManager.UnRegisterAll();
+            ServiceProvider.Get<ManagersService>().Weather.Reset();
             ServiceProvider.Get<GuiService>().Clear();
             _world.Clear();
             _world.ChatManager.Clear();
-            _world.DelayedObjectClickManager.Clear();
+            ServiceProvider.Get<ManagersService>().DelayedObjectClickManager.Clear();
 
             _useItemQueue?.Clear();
-            _world.MessageManager.MessageReceived -= ChatOnMessageReceived;
+            ServiceProvider.Get<ManagersService>().MessageManager.MessageReceived -= ChatOnMessageReceived;
 
             Settings.GlobalSettings.WindowSize = new Point(
                 ServiceProvider.Get<EngineService>().Window.ClientBounds.Width,
@@ -589,17 +589,17 @@ namespace ClassicUO.Game.Scenes
 
             GetViewPort();
 
-            var useObjectHandles = _world.NameOverHeadManager.IsToggled || Keyboard.Ctrl && Keyboard.Shift;
+            var useObjectHandles = ServiceProvider.Get<ManagersService>().NameOverHeadManager.IsToggled || Keyboard.Ctrl && Keyboard.Shift;
             if (useObjectHandles != _useObjectHandles)
             {
                 _useObjectHandles = useObjectHandles;
                 if (_useObjectHandles)
                 {
-                    _world.NameOverHeadManager.Open();
+                    ServiceProvider.Get<ManagersService>().NameOverHeadManager.Open();
                 }
                 else
                 {
-                    _world.NameOverHeadManager.Close();
+                    ServiceProvider.Get<ManagersService>().NameOverHeadManager.Close();
                 }
             }
 
@@ -750,9 +750,9 @@ namespace ClassicUO.Game.Scenes
 
             _world.Update();
             _animatedStaticsManager?.Process();
-            _world.BoatMovingManager.Update();
+            ServiceProvider.Get<ManagersService>().BoatMovingManager.Update();
             _world.Player.Pathfinder.ProcessAutoWalk();
-            _world.DelayedObjectClickManager.Update();
+            ServiceProvider.Get<ManagersService>().DelayedObjectClickManager.Update();
 
             if (!MoveCharacterByMouseInput() && !currentProfile.DisableArrowBtn)
             {
@@ -798,11 +798,11 @@ namespace ClassicUO.Game.Scenes
                 StopFollowing();
             }
 
-            _world.Macros.Update();
+            ServiceProvider.Get<ManagersService>().Macros.Update();
 
             if (
                 (currentProfile.CorpseOpenOptions == 1 || currentProfile.CorpseOpenOptions == 3)
-                    && _world.TargetManager.IsTargeting
+                    && ServiceProvider.Get<ManagersService>().TargetManager.IsTargeting
                 || (currentProfile.CorpseOpenOptions == 2 || currentProfile.CorpseOpenOptions == 3)
                     && _world.Player.IsHidden
             )
@@ -818,17 +818,17 @@ namespace ClassicUO.Game.Scenes
             }
 
             if (
-                _world.TargetManager.IsTargeting
-                && _world.TargetManager.TargetingState == CursorTarget.MultiPlacement
+                ServiceProvider.Get<ManagersService>().TargetManager.IsTargeting
+                && ServiceProvider.Get<ManagersService>().TargetManager.TargetingState == CursorTarget.MultiPlacement
                 && _world.CustomHouseManager == null
-                && _world.TargetManager.MultiTargetInfo != null
+                && ServiceProvider.Get<ManagersService>().TargetManager.MultiTargetInfo != null
             )
             {
                 if (_multi == null)
                 {
                     _multi = Item.Create(_world, 0);
-                    _multi.Graphic = _world.TargetManager.MultiTargetInfo.Model;
-                    _multi.Hue = _world.TargetManager.MultiTargetInfo.Hue;
+                    _multi.Graphic = ServiceProvider.Get<ManagersService>().TargetManager.MultiTargetInfo.Model;
+                    _multi.Hue = ServiceProvider.Get<ManagersService>().TargetManager.MultiTargetInfo.Hue;
                     _multi.IsMulti = true;
                 }
 
@@ -864,14 +864,14 @@ namespace ClassicUO.Game.Scenes
                         groundZ = gobj.Z;
                     }
 
-                    x = (ushort)(x - _world.TargetManager.MultiTargetInfo.XOff);
-                    y = (ushort)(y - _world.TargetManager.MultiTargetInfo.YOff);
-                    z = (sbyte)(groundZ - _world.TargetManager.MultiTargetInfo.ZOff);
+                    x = (ushort)(x - ServiceProvider.Get<ManagersService>().TargetManager.MultiTargetInfo.XOff);
+                    y = (ushort)(y - ServiceProvider.Get<ManagersService>().TargetManager.MultiTargetInfo.YOff);
+                    z = (sbyte)(groundZ - ServiceProvider.Get<ManagersService>().TargetManager.MultiTargetInfo.ZOff);
 
                     _multi.SetInWorldTile(x, y, z);
                     _multi.CheckGraphicChange();
 
-                    if (_world.HouseManager.TryGetHouse(_multi.Serial, out var house) && house != null)
+                    if (ServiceProvider.Get<ManagersService>().HouseManager.TryGetHouse(_multi.Serial, out var house) && house != null)
                     {
                         foreach (var s in house.Components)
                         {
@@ -887,7 +887,7 @@ namespace ClassicUO.Game.Scenes
             }
             else if (_multi != null)
             {
-                _world.HouseManager.RemoveMultiTargetHouse();
+                ServiceProvider.Get<ManagersService>().HouseManager.RemoveMultiTargetHouse();
                 _multi.Destroy();
                 _multi = null;
             }
@@ -1111,8 +1111,8 @@ namespace ClassicUO.Game.Scenes
 
             if (
                 _multi != null
-                && _world.TargetManager.IsTargeting
-                && _world.TargetManager.TargetingState == CursorTarget.MultiPlacement
+                && ServiceProvider.Get<ManagersService>().TargetManager.IsTargeting
+                && ServiceProvider.Get<ManagersService>().TargetManager.TargetingState == CursorTarget.MultiPlacement
             )
             {
                 _multi.Draw(
@@ -1127,7 +1127,7 @@ namespace ClassicUO.Game.Scenes
             batcher.SetStencil(null);
 
             // draw weather
-            _world.Weather.Draw(batcher, 0, 0); // TODO: fix the depth
+            ServiceProvider.Get<ManagersService>().Weather.Draw(batcher, 0, 0); // TODO: fix the depth
 
             batcher.End();
 
@@ -1344,7 +1344,7 @@ namespace ClassicUO.Game.Scenes
                 _followingTarget = 0;
                 _world.Player.Pathfinder.StopAutoWalk();
 
-                _world.MessageManager.HandleMessage(
+                ServiceProvider.Get<ManagersService>().MessageManager.HandleMessage(
                     _world.Player,
                     ResGeneral.StoppedFollowing,
                     string.Empty,

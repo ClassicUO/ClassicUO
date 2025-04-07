@@ -204,7 +204,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void SetOtherHousesState(bool visible)
         {
-            foreach (var multi in World.HouseManager.Houses.Where(s => s.Serial != LocalSerial)
+            foreach (var multi in ServiceProvider.Get<ManagersService>().HouseManager.Houses.Where(s => s.Serial != LocalSerial)
                                        .SelectMany(s => s.Components))
             {
                 if (visible)
@@ -596,7 +596,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (foundationItem != null)
             {
-                if (World.HouseManager.TryGetHouse(LocalSerial, out var house) && house != null)
+                if (ServiceProvider.Get<ManagersService>().HouseManager.TryGetHouse(LocalSerial, out var house) && house != null)
                 {
                     foreach (var item in house.Components)
                     {
@@ -1808,7 +1808,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _customHouseManager.SelectedGraphic = 0;
                     _customHouseManager.CombinedStair = false;
                     UpdateMaxPage();
-                    World.TargetManager.CancelTarget();
+                    ServiceProvider.Get<ManagersService>().TargetManager.CancelTarget();
                     Update();
 
                     break;
@@ -1820,7 +1820,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _customHouseManager.SelectedGraphic = 0;
                     _customHouseManager.CombinedStair = false;
                     UpdateMaxPage();
-                    World.TargetManager.CancelTarget();
+                    ServiceProvider.Get<ManagersService>().TargetManager.CancelTarget();
                     Update();
 
                     break;
@@ -1832,7 +1832,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _customHouseManager.SelectedGraphic = 0;
                     _customHouseManager.CombinedStair = false;
                     UpdateMaxPage();
-                    World.TargetManager.CancelTarget();
+                    ServiceProvider.Get<ManagersService>().TargetManager.CancelTarget();
                     Update();
 
                     break;
@@ -1844,7 +1844,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _customHouseManager.SelectedGraphic = 0;
                     _customHouseManager.CombinedStair = false;
                     UpdateMaxPage();
-                    World.TargetManager.CancelTarget();
+                    ServiceProvider.Get<ManagersService>().TargetManager.CancelTarget();
                     Update();
 
                     break;
@@ -1856,7 +1856,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _customHouseManager.SelectedGraphic = 0;
                     _customHouseManager.CombinedStair = false;
                     UpdateMaxPage();
-                    World.TargetManager.CancelTarget();
+                    ServiceProvider.Get<ManagersService>().TargetManager.CancelTarget();
                     Update();
 
                     break;
@@ -1868,7 +1868,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _customHouseManager.SelectedGraphic = 0;
                     _customHouseManager.CombinedStair = false;
                     UpdateMaxPage();
-                    World.TargetManager.CancelTarget();
+                    ServiceProvider.Get<ManagersService>().TargetManager.CancelTarget();
                     Update();
 
                     break;
@@ -1898,7 +1898,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _customHouseManager.MaxPage = 1;
                     _customHouseManager.SelectedGraphic = 0;
                     _customHouseManager.CombinedStair = false;
-                    World.TargetManager.CancelTarget();
+                    ServiceProvider.Get<ManagersService>().TargetManager.CancelTarget();
                     Update();
 
                     break;
@@ -2048,7 +2048,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _customHouseManager.SelectedGraphic = 0;
                     _customHouseManager.CombinedStair = false;
                     UpdateMaxPage();
-                    World.TargetManager.CancelTarget();
+                    ServiceProvider.Get<ManagersService>().TargetManager.CancelTarget();
                     Update();
 
                     break;
@@ -2084,7 +2084,7 @@ namespace ClassicUO.Game.UI.Gumps
             SetOtherHousesState(true);
             World.CustomHouseManager = null;
             ServiceProvider.Get<PacketHandlerService>().Out.Send_CustomHouseBuildingExit(World);
-            World.TargetManager.CancelTarget();
+            ServiceProvider.Get<ManagersService>().TargetManager.CancelTarget();
 
             base.Dispose();
         }

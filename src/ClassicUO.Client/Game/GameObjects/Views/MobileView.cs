@@ -52,13 +52,13 @@ namespace ClassicUO.Game.GameObjects
 
             bool hasShadow = !IsDead && !IsHidden && ProfileManager.CurrentProfile.ShadowsEnabled;
 
-            if (World.AuraManager.IsEnabled)
+            if (ServiceProvider.Get<ManagersService>().AuraManager.IsEnabled)
             {
-                World.AuraManager.Draw(
+                ServiceProvider.Get<ManagersService>().AuraManager.Draw(
                     batcher,
                     drawX,
                     drawY,
-                    ProfileManager.CurrentProfile.PartyAura && World.Party.Contains(this)
+                    ProfileManager.CurrentProfile.PartyAura && ServiceProvider.Get<ManagersService>().Party.Contains(this)
                         ? ProfileManager.CurrentProfile.PartyAuraHue
                         : Notoriety.GetHue(NotorietyFlag),
                     depth + 1f
@@ -139,9 +139,9 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            bool isAttack = Serial == World.TargetManager.LastAttack;
+            bool isAttack = Serial == ServiceProvider.Get<ManagersService>().TargetManager.LastAttack;
             bool isUnderMouse =
-                World.TargetManager.IsTargeting && ReferenceEquals(SelectedObject.Object, this);
+                ServiceProvider.Get<ManagersService>().TargetManager.IsTargeting && ReferenceEquals(SelectedObject.Object, this);
 
             if (Serial != World.Player.Serial)
             {

@@ -55,7 +55,7 @@ namespace ClassicUO.Game
         //The UltimaLive packets could be also used for other things than maps and statics
         private static void OnUltimaLivePacket(ref StackDataReader p)
         {
-            var world = ServiceProvider.Get<UOService>().World;
+            var world = ServiceProvider.Get<WorldService>().World;
 
             p.Seek(13);
             byte command = p.ReadUInt8();
@@ -449,7 +449,7 @@ namespace ClassicUO.Game
 
         private static void OnUpdateTerrainPacket(ref StackDataReader p)
         {
-            var world = ServiceProvider.Get<UOService>().World;
+            var world = ServiceProvider.Get<WorldService>().World;
 
             int block = (int) p.ReadUInt32BE();
             Span<byte> landData = stackalloc byte[LAND_BLOCK_LENGTH];

@@ -29,12 +29,7 @@ namespace ClassicUO.Game
 
         private readonly WeatherEffect[] _effects = new WeatherEffect[MAX_WEATHER_EFFECT];
         private uint _timer, _windTimer, _lastTick;
-        private readonly World _world;
-
-        public Weather(World world)
-        {
-            _world = world;
-        }
+        private readonly WorldService _worldService = ServiceProvider.Get<WorldService>();
 
 
         public WeatherType? CurrentWeather { get; private set; }
@@ -96,7 +91,7 @@ namespace ClassicUO.Game
                     {
                         GameActions.Print
                         (
-                            _world,
+                            _worldService.World,
                             ResGeneral.ItBeginsToRain,
                             1154,
                             MessageType.System,
@@ -114,7 +109,7 @@ namespace ClassicUO.Game
                     {
                         GameActions.Print
                         (
-                            _world,
+                            _worldService.World,
                             ResGeneral.AFierceStormApproaches,
                             1154,
                             MessageType.System,
@@ -134,7 +129,7 @@ namespace ClassicUO.Game
                     {
                         GameActions.Print
                         (
-                            _world,
+                            _worldService.World,
                             ResGeneral.ItBeginsToSnow,
                             1154,
                             MessageType.System,
@@ -154,7 +149,7 @@ namespace ClassicUO.Game
                     {
                         GameActions.Print
                         (
-                            _world,
+                            _worldService.World,
                             ResGeneral.AStormIsBrewing,
                             1154,
                             MessageType.System,
@@ -207,7 +202,7 @@ namespace ClassicUO.Game
                 randY *= -1;
             }
 
-            ServiceProvider.Get<AudioService>().PlaySoundWithDistance(_world, sound, _world.Player.X + randX, _world.Player.Y + randY);
+            ServiceProvider.Get<AudioService>().PlaySoundWithDistance(_worldService.World, sound, _worldService.World.Player.X + randX, _worldService.World.Player.Y + randY);
         }
 
         public void Draw(UltimaBatcher2D batcher, int x, int y)

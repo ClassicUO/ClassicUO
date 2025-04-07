@@ -4,6 +4,7 @@ using System;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Resources;
+using ClassicUO.Services;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -58,10 +59,10 @@ namespace ClassicUO.Game.UI.Gumps
                     color: 0xFFFF
                 )
                 {
-                    IsChecked = world.NameOverHeadManager.IsToggled,
+                    IsChecked = ServiceProvider.Get<ManagersService>().NameOverHeadManager.IsToggled,
                 }
             );
-            stayActive.ValueChanged += (sender, e) => world.NameOverHeadManager.IsToggled = stayActive.IsChecked;
+            stayActive.ValueChanged += (sender, e) => ServiceProvider.Get<ManagersService>().NameOverHeadManager.IsToggled = stayActive.IsChecked;
 
             Add
             (
@@ -74,7 +75,7 @@ namespace ClassicUO.Game.UI.Gumps
                     color: 0xFFFF
                 )
                 {
-                    IsChecked = World.NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.All,
+                    IsChecked = ServiceProvider.Get<ManagersService>().NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.All,
                     Y = stayActive.Y + stayActive.Height
                 }
             );
@@ -91,7 +92,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
                 {
                     Y = all.Y + all.Height,
-                    IsChecked = World.NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.Mobiles
+                    IsChecked = ServiceProvider.Get<ManagersService>().NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.Mobiles
                 }
             );
 
@@ -107,7 +108,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
                 {
                     Y = mobiles.Y + mobiles.Height,
-                    IsChecked = World.NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.Items
+                    IsChecked = ServiceProvider.Get<ManagersService>().NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.Items
                 }
             );
 
@@ -123,7 +124,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
                 {
                     Y = items.Y + items.Height,
-                    IsChecked = World.NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.MobilesCorpses
+                    IsChecked = ServiceProvider.Get<ManagersService>().NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.MobilesCorpses
                 }
             );
 
@@ -137,7 +138,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (all.IsChecked)
                 {
-                    World.NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.All;
+                    ServiceProvider.Get<ManagersService>().NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.All;
                 }
             };
 
@@ -145,7 +146,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (mobiles.IsChecked)
                 {
-                    World.NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.Mobiles;
+                    ServiceProvider.Get<ManagersService>().NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.Mobiles;
                 }
             };
 
@@ -153,7 +154,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (items.IsChecked)
                 {
-                    World.NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.Items;
+                    ServiceProvider.Get<ManagersService>().NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.Items;
                 }
             };
 
@@ -161,7 +162,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (mobilesCorpses.IsChecked)
                 {
-                    World.NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.MobilesCorpses;
+                    ServiceProvider.Get<ManagersService>().NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.MobilesCorpses;
                 }
             };
         }

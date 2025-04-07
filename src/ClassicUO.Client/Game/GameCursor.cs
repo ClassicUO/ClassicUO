@@ -84,13 +84,13 @@ namespace ClassicUO.Game
         private bool _needGraphicUpdate = true;
         private readonly List<Multi> _temp = new List<Multi>();
         private readonly Tooltip _tooltip;
-        private readonly World _world;
+        private readonly WorldService _worldService;
         private readonly GuiService _uiService;
 
-        public GameCursor(World world)
+        public GameCursor()
         {
-            _world = world;
-            _tooltip = new Tooltip(world);
+            _worldService = ServiceProvider.Get<WorldService>();
+            _tooltip = new Tooltip(_worldService.World);
             _aura = new Aura(30);
             _uiService = ServiceProvider.Get<GuiService>();
 
@@ -204,10 +204,12 @@ namespace ClassicUO.Game
                         id -= 0x206A;
                     }
 
+                    var world = _worldService.World;
+
                     int war =
-                        _world.InGame && _world.Player.InWarMode
+                        world.InGame && world.Player.InWarMode
                             ? 1
-                            : _world.InGame && _world.MapIndex != 0
+                            : world.InGame && world.MapIndex != 0
                                 ? 2
                                 : 0;
 
@@ -263,21 +265,22 @@ namespace ClassicUO.Game
         {
             var uoService = ServiceProvider.Get<UOService>();
             var sceneService = ServiceProvider.Get<SceneService>();
+            var world = _worldService.World;
 
-            if (_world.InGame && _world.TargetManager.IsTargeting && ProfileManager.CurrentProfile != null)
+            if (world.InGame && ServiceProvider.Get<ManagersService>().TargetManager.IsTargeting && ProfileManager.CurrentProfile != null)
             {
-                if (_world.TargetManager.TargetingState == CursorTarget.MultiPlacement)
+                if (ServiceProvider.Get<ManagersService>().TargetManager.TargetingState == CursorTarget.MultiPlacement)
                 {
                     if (
-                        _world.CustomHouseManager != null
-                        && _world.CustomHouseManager.SelectedGraphic != 0
+                        world.CustomHouseManager != null
+                        && world.CustomHouseManager.SelectedGraphic != 0
                     )
                     {
                         ushort hue = 0;
 
                         _componentsList.Clear();
                         if (
-                            !_world.CustomHouseManager.CanBuildHere(
+                            !world.CustomHouseManager.CanBuildHere(
                                 _componentsList,
                                 out CUSTOM_HOUSE_BUILD_TYPE type
                             )
@@ -293,7 +296,7 @@ namespace ClassicUO.Game
 
                             for (int i = 0; i < _componentsList.Count; i++)
                             {
-                                Multi m = Multi.Create(_world, _componentsList[i].Graphic);
+                                Multi m = Multi.Create(world, _componentsList[i].Graphic);
                                 m.AlphaHue = 0xFF;
                                 m.Hue = hue;
                                 m.State = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW;
@@ -307,13 +310,13 @@ namespace ClassicUO.Game
                             {
                                 int z = 0;
 
-                                if (selectedObj.Z < _world.CustomHouseManager.MinHouseZ)
+                                if (selectedObj.Z < world.CustomHouseManager.MinHouseZ)
                                 {
                                     if (
-                                        selectedObj.X >= _world.CustomHouseManager.StartPos.X - 1
-                                        && selectedObj.X <= _world.CustomHouseManager.EndPos.X - 1
-                                        && selectedObj.Y >= _world.CustomHouseManager.StartPos.Y - 1
-                                        && selectedObj.Y <= _world.CustomHouseManager.EndPos.Y - 1
+                                        selectedObj.X >= world.CustomHouseManager.StartPos.X - 1
+                                        && selectedObj.X <= world.CustomHouseManager.EndPos.X - 1
+                                        && selectedObj.Y >= world.CustomHouseManager.StartPos.Y - 1
+                                        && selectedObj.Y <= world.CustomHouseManager.EndPos.Y - 1
                                     )
                                     {
                                         if (type != CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
@@ -330,7 +333,7 @@ namespace ClassicUO.Game
                                     _temp[i].SetInWorldTile(
                                         (ushort)(selectedObj.X + item.X),
                                         (ushort)(selectedObj.Y + item.Y),
-                                        (sbyte)(_world.Player.Z + item.Z)
+                                        (sbyte)(world.Player.Z + item.Z)
                                     );
                                 }
                             }
@@ -363,7 +366,7 @@ namespace ClassicUO.Game
 
                     ushort hue = 0;
 
-                    switch (_world.TargetManager.TargetingType)
+                    switch (ServiceProvider.Get<ManagersService>().TargetManager.TargetingType)
                     {
                         case TargetType.Neutral:
                             hue = 0x03b2;
@@ -495,7 +498,7 @@ namespace ClassicUO.Game
 
                 Vector3 hueVec;
 
-                if (_world.InGame && _world.MapIndex != 0 && !_world.Player.InWarMode)
+                if (world.InGame && world.MapIndex != 0 && !world.Player.InWarMode)
                 {
                     hueVec = ShaderHueTranslator.GetHueVector(0x0033);
                 }
@@ -525,10 +528,11 @@ namespace ClassicUO.Game
 
         private void DrawToolTip(UltimaBatcher2D batcher, Point position, UOService uoService, SceneService sceneService)
         {
+            var world = _worldService.World;
             if (sceneService.Scene is GameScene gs)
             {
                 if (
-                    !_world.ClientFeatures.TooltipsEnabled
+                    !world.ClientFeatures.TooltipsEnabled
                     || (
                         SelectedObject.Object is Item selectedItem
                         && selectedItem.IsLocked
@@ -537,7 +541,7 @@ namespace ClassicUO.Game
                         &&
                         // We need to check if OPL contains data.
                         // If not we can ignore tooltip.
-                        !_world.OPL.Contains(selectedItem)
+                        !ServiceProvider.Get<ManagersService>().OPL.Contains(selectedItem)
                     )
                     || (ItemHold.Enabled && !ItemHold.IsFixedPosition)
                 )
@@ -555,7 +559,7 @@ namespace ClassicUO.Game
                     if (
                         _uiService.IsMouseOverWorld
                         && SelectedObject.Object is Entity item
-                        && _world.OPL.Contains(item)
+                        && ServiceProvider.Get<ManagersService>().OPL.Contains(item)
                     )
                     {
                         if (_tooltip.IsEmpty || item != _tooltip.Serial)
@@ -573,7 +577,7 @@ namespace ClassicUO.Game
                         && _uiService.MouseOverControl.Tooltip is uint serial
                     )
                     {
-                        if (SerialHelper.IsValid(serial) && _world.OPL.Contains(serial))
+                        if (SerialHelper.IsValid(serial) && ServiceProvider.Get<ManagersService>().OPL.Contains(serial))
                         {
                             if (_tooltip.IsEmpty || serial != _tooltip.Serial)
                             {
@@ -612,9 +616,10 @@ namespace ClassicUO.Game
 
         private ushort AssignGraphicByState()
         {
-            int war = _world.InGame && _world.Player.InWarMode ? 1 : 0;
+            var world = _worldService.World;
+            int war = world.InGame && world.Player.InWarMode ? 1 : 0;
 
-            if (_world.TargetManager.IsTargeting)
+            if (ServiceProvider.Get<ManagersService>().TargetManager.IsTargeting)
             {
                 return _cursorData[war, 12];
             }

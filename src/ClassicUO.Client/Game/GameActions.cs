@@ -305,8 +305,8 @@ namespace ClassicUO.Game
                 }
             }
 
-            world.TargetManager.NewTargetSystemSerial = serial;
-            world.TargetManager.LastAttack = serial;
+            ServiceProvider.Get<ManagersService>().TargetManager.NewTargetSystemSerial = serial;
+            ServiceProvider.Get<ManagersService>().TargetManager.LastAttack = serial;
             ServiceProvider.Get<PacketHandlerService>().Out.Send_AttackRequest(serial);
         }
 
@@ -403,7 +403,7 @@ namespace ClassicUO.Game
             bool unicode = true
         )
         {
-            world.MessageManager.HandleMessage
+            ServiceProvider.Get<ManagersService>().MessageManager.HandleMessage
             (
                 entity,
                 message,
@@ -845,10 +845,10 @@ namespace ClassicUO.Game
 
         // ===================================================
         [Obsolete("temporary workaround to not break assistants")]
-        public static void UsePrimaryAbility() => UsePrimaryAbility(ServiceProvider.Get<UOService>().World);
+        public static void UsePrimaryAbility() => UsePrimaryAbility(ServiceProvider.Get<WorldService>().World);
 
         [Obsolete("temporary workaround to not break assistants")]
-        public static void UseSecondaryAbility() => UseSecondaryAbility(ServiceProvider.Get<UOService>().World);
+        public static void UseSecondaryAbility() => UseSecondaryAbility(ServiceProvider.Get<WorldService>().World);
         // ===================================================
 
         public static void QuestArrow(bool rightClick)

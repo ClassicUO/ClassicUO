@@ -273,7 +273,7 @@ namespace ClassicUO.Game.Scenes
 
         private void UpdateObjectHandles(Entity obj, bool useObjectHandles)
         {
-            if (useObjectHandles && _world.NameOverHeadManager.IsAllowed(obj))
+            if (useObjectHandles && ServiceProvider.Get<ManagersService>().NameOverHeadManager.IsAllowed(obj))
             {
                 if (obj.ObjectHandlesStatus != ObjectHandlesStatus.CLOSED)
                 {

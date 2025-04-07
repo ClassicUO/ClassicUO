@@ -20,10 +20,10 @@ namespace ClassicUO.Game.Managers
 
     internal sealed class NameOverHeadManager
     {
+        private readonly WorldService _worldService = ServiceProvider.Get<WorldService>();
+        private readonly GuiService _guiService = ServiceProvider.Get<GuiService>();
         private NameOverHeadHandlerGump? _gump;
-        private readonly World _world;
 
-        public NameOverHeadManager(World world) { _world = world; }
 
         public NameOverheadTypeAllowed TypeAllowed
         {
@@ -59,7 +59,7 @@ namespace ClassicUO.Game.Managers
                 return true;
             }
 
-            if (TypeAllowed.HasFlag(NameOverheadTypeAllowed.Corpses) && SerialHelper.IsItem(serial.Serial) && _world.Items.Get(serial)?.IsCorpse == true)
+            if (TypeAllowed.HasFlag(NameOverheadTypeAllowed.Corpses) && SerialHelper.IsItem(serial.Serial) && _worldService.World.Items.Get(serial)?.IsCorpse == true)
             {
                 return true;
             }
@@ -71,8 +71,8 @@ namespace ClassicUO.Game.Managers
         {
             if (_gump == null || _gump.IsDisposed)
             {
-                _gump = new NameOverHeadHandlerGump(_world);
-                ServiceProvider.Get<GuiService>().Add(_gump);
+                _gump = new NameOverHeadHandlerGump(_worldService.World);
+                _guiService.Add(_gump);
             }
 
             _gump.IsEnabled = true;
@@ -82,9 +82,10 @@ namespace ClassicUO.Game.Managers
         public void Close()
         {
             if (_gump == null)
-            { //Required in case nameplates are active when closing and reopening the client
-                _gump = new NameOverHeadHandlerGump(_world);
-                ServiceProvider.Get<GuiService>().Add(_gump);
+            {
+                //Required in case nameplates are active when closing and reopening the client
+                _gump = new NameOverHeadHandlerGump(_worldService.World);
+                _guiService.Add(_gump);
             }
 
 

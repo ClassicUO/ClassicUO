@@ -11,6 +11,7 @@ using ClassicUO.Sdk.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -112,9 +113,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (_macro != null)
             {
-                World.Macros.SetMacroToExecute(_macro.Items as MacroObject);
-                World.Macros.WaitForTargetTimer = 0;
-                World.Macros.Update();
+                ServiceProvider.Get<ManagersService>().Macros.SetMacroToExecute(_macro.Items as MacroObject);
+                ServiceProvider.Get<ManagersService>().Macros.WaitForTargetTimer = 0;
+                ServiceProvider.Get<ManagersService>().Macros.Update();
             }
         }
 
@@ -155,7 +156,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_macro != null)
             {
                 // hack to give macro buttons a unique id for use in anchor groups
-                int macroid = World.Macros.GetAllMacros().IndexOf(_macro);
+                int macroid = ServiceProvider.Get<ManagersService>().Macros.GetAllMacros().IndexOf(_macro);
 
                 LocalSerial = (uint) macroid + 1000;
 
@@ -169,7 +170,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Restore(xml);
 
-            var macro = World.Macros.FindMacro(xml.GetAttribute("name"));
+            var macro = ServiceProvider.Get<ManagersService>().Macros.FindMacro(xml.GetAttribute("name"));
 
             if (macro != null)
             {

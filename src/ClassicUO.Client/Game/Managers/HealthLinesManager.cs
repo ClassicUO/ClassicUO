@@ -65,12 +65,12 @@ namespace ClassicUO.Game.Managers
                 var forceDraw = false;
                 var passive = mobile.Serial != _world.Player.Serial;
 
-                if (_world.TargetManager.LastTargetInfo.Serial == mobile ||
-                    _world.TargetManager.LastAttack == mobile ||
-                    _world.TargetManager.SelectedTarget == mobile ||
-                    _world.TargetManager.NewTargetSystemSerial == mobile)
+                if (ServiceProvider.Get<ManagersService>().TargetManager.LastTargetInfo.Serial == mobile ||
+                    ServiceProvider.Get<ManagersService>().TargetManager.LastAttack == mobile ||
+                    ServiceProvider.Get<ManagersService>().TargetManager.SelectedTarget == mobile ||
+                    ServiceProvider.Get<ManagersService>().TargetManager.NewTargetSystemSerial == mobile)
                 {
-                    newTargSystem = useNewTargetSystem && _world.TargetManager.NewTargetSystemSerial == mobile;
+                    newTargSystem = useNewTargetSystem && ServiceProvider.Get<ManagersService>().TargetManager.NewTargetSystemSerial == mobile;
                     passive = false;
                     forceDraw = true;
                 }

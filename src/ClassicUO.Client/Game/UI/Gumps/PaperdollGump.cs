@@ -355,7 +355,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     int x = ServiceProvider.Get<WindowService>().ClientBounds.Width / 2 - 272;
                     int y = ServiceProvider.Get<WindowService>().ClientBounds.Height / 2 - 240;
-                    ServiceProvider.Get<GuiService>().Add(new PartyGump(World, x, y, World.Party.CanLoot));
+                    ServiceProvider.Get<GuiService>().Add(new PartyGump(World, x, y, ServiceProvider.Get<ManagersService>().Party.CanLoot));
                 }
                 else
                 {
@@ -479,22 +479,22 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (SelectedObject.Object is Item item)
                 {
-                    if (World.TargetManager.IsTargeting)
+                    if (ServiceProvider.Get<ManagersService>().TargetManager.IsTargeting)
                     {
-                        World.TargetManager.Target(item.Serial);
+                        ServiceProvider.Get<ManagersService>().TargetManager.Target(item.Serial);
                         Mouse.CancelDoubleClick = true;
                         Mouse.LastLeftButtonClickTime = 0;
 
-                        if (World.TargetManager.TargetingState == CursorTarget.SetTargetClientSide)
+                        if (ServiceProvider.Get<ManagersService>().TargetManager.TargetingState == CursorTarget.SetTargetClientSide)
                         {
                             ServiceProvider.Get<GuiService>().Add(new InspectorGump(World,item));
                         }
                     }
-                    else if (!World.DelayedObjectClickManager.IsEnabled)
+                    else if (!ServiceProvider.Get<ManagersService>().DelayedObjectClickManager.IsEnabled)
                     {
                         Point off = Mouse.LDragOffset;
 
-                        World.DelayedObjectClickManager.Set(
+                        ServiceProvider.Get<ManagersService>().DelayedObjectClickManager.Set(
                             item.Serial,
                             Mouse.Position.X - off.X - ScreenCoordinateX,
                             Mouse.Position.Y - off.Y - ScreenCoordinateY,

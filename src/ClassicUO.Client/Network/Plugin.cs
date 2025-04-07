@@ -448,17 +448,17 @@ namespace ClassicUO.Network
 
         internal static bool RequestMove(int dir, bool run)
         {
-            return ServiceProvider.Get<UOService>().World.Player.Walk((Direction)dir, run);
+            return ServiceProvider.Get<WorldService>().World.Player.Walk((Direction)dir, run);
         }
 
         internal static bool GetPlayerPosition(out int x, out int y, out int z)
         {
-            var uoService = ServiceProvider.Get<UOService>();
-            if (uoService.World.Player != null)
+            var worldService = ServiceProvider.Get<WorldService>();
+            if (worldService.World.Player != null)
             {
-                x = uoService.World.Player.X;
-                y = uoService.World.Player.Y;
-                z = uoService.World.Player.Z;
+                x = worldService.World.Player.X;
+                y = worldService.World.Player.Y;
+                z = worldService.World.Player.Z;
 
                 return true;
             }
@@ -622,7 +622,7 @@ namespace ClassicUO.Network
 
         internal static bool ProcessHotkeys(int key, int mod, bool ispressed)
         {
-            if ((!ServiceProvider.Get<UOService>().World?.InGame ?? false) || ServiceProvider.Get<GuiService>().SystemChat != null && (
+            if ((!ServiceProvider.Get<WorldService>().World?.InGame ?? false) || ServiceProvider.Get<GuiService>().SystemChat != null && (
                         ProfileManager.CurrentProfile != null
                             && ProfileManager.CurrentProfile.ActivateChatAfterEnter
                             && ServiceProvider.Get<GuiService>().SystemChat.IsActive

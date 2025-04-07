@@ -18,7 +18,7 @@ internal class MegaClilocRequestsService : IService
 
     public void SendMegaClilocRequests()
     {
-        var world = ServiceProvider.Get<UOService>().World;
+        var world = ServiceProvider.Get<WorldService>().World;
 
         if (world.ClientFeatures.TooltipsEnabled && _clilocRequests.Count != 0)
         {

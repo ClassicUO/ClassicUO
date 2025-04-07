@@ -72,8 +72,8 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
 
-            bool isLeader = World.Party.Leader == 0 || World.Party.Leader == World.Player;
-            bool isMemeber = World.Party.Leader != 0 && World.Party.Leader != World.Player;
+            bool isLeader = ServiceProvider.Get<ManagersService>().Party.Leader == 0 || ServiceProvider.Get<ManagersService>().Party.Leader == World.Player;
+            bool isMemeber = ServiceProvider.Get<ManagersService>().Party.Leader != 0 && ServiceProvider.Get<ManagersService>().Party.Leader != World.Player;
 
             int yPtr = 48;
 
@@ -106,9 +106,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 string name = "";
 
-                if (World.Party.Members[i] != null && World.Party.Members[i].Name != null)
+                if (ServiceProvider.Get<ManagersService>().Party.Members[i] != null && ServiceProvider.Get<ManagersService>().Party.Members[i].Name != null)
                 {
-                    name = World.Party.Members[i].Name;
+                    name = ServiceProvider.Get<ManagersService>().Party.Members[i].Name;
                 }
 
                 Add
@@ -275,9 +275,9 @@ namespace ClassicUO.Game.UI.Gumps
             switch ((Buttons) buttonID)
             {
                 case Buttons.OK:
-                    if (World.Party.Leader != 0 && World.Party.CanLoot != CanLoot)
+                    if (ServiceProvider.Get<ManagersService>().Party.Leader != 0 && ServiceProvider.Get<ManagersService>().Party.CanLoot != CanLoot)
                     {
-                        World.Party.CanLoot = CanLoot;
+                        ServiceProvider.Get<ManagersService>().Party.CanLoot = CanLoot;
                         ServiceProvider.Get<PacketHandlerService>().Out.Send_PartyChangeLootTypeRequest(CanLoot);
                     }
 
@@ -291,7 +291,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.SendMessage:
-                    if (World.Party.Leader == 0)
+                    if (ServiceProvider.Get<ManagersService>().Party.Leader == 0)
                     {
                         GameActions.Print
                         (
@@ -317,7 +317,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.Leave:
-                    if (World.Party.Leader == 0)
+                    if (ServiceProvider.Get<ManagersService>().Party.Leader == 0)
                     {
                         GameActions.Print
                         (
@@ -335,9 +335,9 @@ namespace ClassicUO.Game.UI.Gumps
                         GameActions.RequestPartyQuit(World.Player);
                         //for (int i = 0; i < 10; i++)
                         //{
-                        //    if (World.Party.Members[i] != null && World.Party.Members[i].Serial != 0)
+                        //    if (ServiceProvider.Get<ManagersService>().Party.Members[i] != null && ServiceProvider.Get<ManagersService>().Party.Members[i].Serial != 0)
                         //    {
-                        //        NetClient.Socket.Send(new PPartyRemoveRequest(World.Party.Members[i].Serial));
+                        //        NetClient.Socket.Send(new PPartyRemoveRequest(ServiceProvider.Get<ManagersService>().Party.Members[i].Serial));
                         //    }
                         //}
                     }
@@ -345,7 +345,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.Add:
-                    if (World.Party.Leader == 0 || World.Party.Leader == World.Player)
+                    if (ServiceProvider.Get<ManagersService>().Party.Leader == 0 || ServiceProvider.Get<ManagersService>().Party.Leader == World.Player)
                     {
                         ServiceProvider.Get<PacketHandlerService>().Out.Send_PartyInviteRequest();
                     }
@@ -357,7 +357,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         int index = (int) (buttonID - Buttons.TellMember);
 
-                        if (World.Party.Members[index] == null || World.Party.Members[index].Serial == 0)
+                        if (ServiceProvider.Get<ManagersService>().Party.Members[index] == null || ServiceProvider.Get<ManagersService>().Party.Members[index].Serial == 0)
                         {
                             GameActions.Print
                             (
@@ -380,7 +380,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         int index = (int) (buttonID - Buttons.KickMember);
 
-                        if (World.Party.Members[index] == null || World.Party.Members[index].Serial == 0)
+                        if (ServiceProvider.Get<ManagersService>().Party.Members[index] == null || ServiceProvider.Get<ManagersService>().Party.Members[index].Serial == 0)
                         {
                             GameActions.Print
                             (
@@ -394,7 +394,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else
                         {
-                            ServiceProvider.Get<PacketHandlerService>().Out.Send_PartyRemoveRequest(World.Party.Members[index].Serial);
+                            ServiceProvider.Get<PacketHandlerService>().Out.Send_PartyRemoveRequest(ServiceProvider.Get<ManagersService>().Party.Members[index].Serial);
                         }
                     }
 

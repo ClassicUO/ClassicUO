@@ -1,17 +1,11 @@
-using ClassicUO.Game;
-using ClassicUO.Renderer;
 using ClassicUO.Renderer.Arts;
 using ClassicUO.Renderer.Gumps;
-using ClassicUO.Renderer.Sounds;
 using ClassicUO.Renderer.Texmaps;
 using ClassicUO.Renderer.Lights;
 using ClassicUO.Renderer.MultiMaps;
 using ClassicUO.Renderer.Animations;
-using ClassicUO.IO.Audio;
 using ClassicUO.Game.Data;
-using ClassicUO.Game.Managers;
 using ClassicUO.Sdk;
-using System;
 
 namespace ClassicUO.Services
 {
@@ -33,7 +27,6 @@ namespace ClassicUO.Services
         public Light Lights => _uo.Lights;
         public MultiMap MultiMaps => _uo.MultiMaps;
         public Renderer.Sounds.Sound Sounds => _uo.Sounds;
-        public World World => _uo.World;
         public ClientVersion Version => _uo.Version;
         public ClientFlags Protocol => _uo.Protocol;
     }

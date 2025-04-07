@@ -3,18 +3,16 @@
 using System;
 using System.Collections.Generic;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Services;
 
 namespace ClassicUO.Game.Managers
 {
     internal sealed class HouseManager
     {
         private readonly Dictionary<uint, House> _houses = new Dictionary<uint, House>();
-        private readonly World _world;
+        private readonly WorldService _worldService = ServiceProvider.Get<WorldService>();
 
-        public HouseManager(World world)
-        {
-            _world = world;
-        }
+
 
         public IReadOnlyCollection<House> Houses => _houses.Values;
 
@@ -49,8 +47,8 @@ namespace ClassicUO.Game.Managers
         {
             if (TryGetHouse(serial, out _))
             {
-                int currX = _world.RangeSize.X;
-                int currY = _world.RangeSize.Y;
+                int currX = _worldService.World.RangeSize.X;
+                int currY = _worldService.World.RangeSize.Y;
 
                 //if (World.Player.IsMoving)
                 //{
@@ -65,7 +63,7 @@ namespace ClassicUO.Game.Managers
                 //    currY = World.Player.Y;
                 //}
 
-                var found = _world.Items.Get(serial);
+                var found = _worldService.World.Items.Get(serial);
 
                 if (found == null)
                 {
@@ -84,7 +82,7 @@ namespace ClassicUO.Game.Managers
         {
             if (obj != null && TryGetHouse(house, out _))
             {
-                var found = _world.Items.Get(house);
+                var found = _worldService.World.Items.Get(house);
 
                 if (found == null || !found.MultiInfo.HasValue)
                 {

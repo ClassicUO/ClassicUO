@@ -184,7 +184,7 @@ namespace ClassicUO.Game.GameObjects
                     Item item = (Item) i;
 
 
-                    if (cliloc == World.OPL.GetNameCliloc(item.Serial))
+                    if (cliloc == ServiceProvider.Get<ManagersService>().OPL.GetNameCliloc(item.Serial))
                     {
                         return item;
                     }
@@ -193,7 +193,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         found = FindItemByClilocInContainerRecursive(item, cliloc);
 
-                        if (found != null && cliloc == World.OPL.GetNameCliloc(found.Serial))
+                        if (found != null && cliloc == ServiceProvider.Get<ManagersService>().OPL.GetNameCliloc(found.Serial))
                         {
                             return found;
                         }
@@ -287,7 +287,7 @@ namespace ClassicUO.Game.GameObjects
         {
             if (ProfileManager.CurrentProfile.AutoOpenCorpses)
             {
-                if ((ProfileManager.CurrentProfile.CorpseOpenOptions == 1 || ProfileManager.CurrentProfile.CorpseOpenOptions == 3) && World.TargetManager.IsTargeting)
+                if ((ProfileManager.CurrentProfile.CorpseOpenOptions == 1 || ProfileManager.CurrentProfile.CorpseOpenOptions == 3) && ServiceProvider.Get<ManagersService>().TargetManager.IsTargeting)
                 {
                     return;
                 }

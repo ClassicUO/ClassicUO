@@ -269,7 +269,7 @@ namespace ClassicUO.Game.UI.Gumps
             var usrSend = entry.Name != string.Empty ? $"{entry.Name}" : string.Empty;
 
             // Check if ignored person
-            if (!string.IsNullOrEmpty(usrSend) && World.IgnoreManager.IgnoredCharsList.Contains(usrSend))
+            if (!string.IsNullOrEmpty(usrSend) && ServiceProvider.Get<ManagersService>().IgnoreManager.IgnoredCharsList.Contains(usrSend))
                 return;
 
             string text = $"{usrSend}: {entry.Text}";

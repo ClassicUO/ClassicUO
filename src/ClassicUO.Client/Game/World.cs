@@ -27,79 +27,29 @@ namespace ClassicUO.Game
 
         public World()
         {
-            WMapManager = new WorldMapEntityManager(this);
-            CorpseManager = new CorpseManager(this);
-            Party = new PartyManager(this);
-            HouseManager = new HouseManager(this);
             WorldTextManager = new WorldTextManager(this);
             _effectManager = new EffectManager(this);
-            MessageManager = new MessageManager(this);
-            ContainerManager = new ContainerManager(this);
-            IgnoreManager = new IgnoreManager(this);
-            SkillsGroupManager = new SkillsGroupManager(this);
-            ChatManager = new ChatManager(this);
-            AuraManager = new AuraManager(this);
-            UoAssist = new UoAssist(this);
-            TargetManager = new TargetManager(this);
-            DelayedObjectClickManager = new DelayedObjectClickManager(this);
-            BoatMovingManager = new BoatMovingManager(this);
-            NameOverHeadManager = new NameOverHeadManager(this);
-            Macros = new MacroManager(this);
-            CommandManager = new CommandManager(this);
-            Weather = new Weather(this);
-            InfoBars = new InfoBarManager(this);
+
+            ChatManager = new ChatManager();
+            InfoBars = new InfoBarManager();
         }
 
         public Point RangeSize;
+        public uint LastObject, ObjectToRemove;
+
 
         [NotNull]
         public PlayerMobile? Player { get; private set; }
 
-        public HouseCustomizationManager CustomHouseManager;
-
-        public WorldMapEntityManager WMapManager { get; }
-
-        public ActiveSpellIconsManager ActiveSpellIcons = new ActiveSpellIconsManager();
-
-        public uint LastObject, ObjectToRemove;
-
-        public ObjectPropertiesListManager OPL { get; } = new ObjectPropertiesListManager();
-
-        public CorpseManager CorpseManager { get; }
-
-        public PartyManager Party { get; }
-
-        public HouseManager HouseManager { get; }
-
-        public MessageManager MessageManager { get; }
-
-        public ContainerManager ContainerManager { get; }
-
-        public IgnoreManager IgnoreManager { get; }
-
-        public SkillsGroupManager SkillsGroupManager { get; }
-
         public ChatManager ChatManager { get; }
 
-        public AuraManager AuraManager { get; }
-
-        public UoAssist UoAssist { get; }
-
-        public TargetManager TargetManager { get; }
-
-        public DelayedObjectClickManager DelayedObjectClickManager { get; }
-
-        public BoatMovingManager BoatMovingManager { get; }
-
-        public NameOverHeadManager NameOverHeadManager { get; }
-
-        public MacroManager Macros { get; }
-
-        public CommandManager CommandManager { get; }
-
-        public Weather Weather { get; }
-
+        public HouseCustomizationManager CustomHouseManager;
         public InfoBarManager InfoBars { get; }
+
+
+
+
+
 
         public Dictionary<uint, Item> Items { get; } = new Dictionary<uint, Item>();
 
@@ -174,7 +124,7 @@ namespace ClassicUO.Game
                         ServiceProvider.Get<GameCursorService>().GameCursor.Graphic = 0xFFFF;
                     }
 
-                    UoAssist.SignalMapChanged(value);
+                    ServiceProvider.Get<ManagersService>().UoAssist.SignalMapChanged(value);
                 }
             }
         }
@@ -259,143 +209,146 @@ namespace ClassicUO.Game
 
         public void Update()
         {
-            if (Player != null)
+            if (Player == null)
             {
-                if (SerialHelper.IsValid(ObjectToRemove))
+                return;
+            }
+
+            if (SerialHelper.IsValid(ObjectToRemove))
+            {
+                var rem = Items.Get(ObjectToRemove);
+                ObjectToRemove = 0;
+
+                if (rem != null)
                 {
-                    var rem = Items.Get(ObjectToRemove);
-                    ObjectToRemove = 0;
+                    var container = Get(rem.Container);
 
-                    if (rem != null)
+                    RemoveItem(rem, true);
+
+                    if (rem.Layer == Layer.OneHanded || rem.Layer == Layer.TwoHanded)
                     {
-                        var container = Get(rem.Container);
+                        Player.UpdateAbilities();
+                    }
 
-                        RemoveItem(rem, true);
-
-                        if (rem.Layer == Layer.OneHanded || rem.Layer == Layer.TwoHanded)
+                    if (container != null)
+                    {
+                        if (SerialHelper.IsMobile(container.Serial))
                         {
-                            Player.UpdateAbilities();
+                            ServiceProvider.Get<GuiService>().GetGump<PaperDollGump>(container.Serial)?.RequestUpdateContents();
                         }
-
-                        if (container != null)
+                        else if (SerialHelper.IsItem(container.Serial))
                         {
-                            if (SerialHelper.IsMobile(container.Serial))
+                            ServiceProvider.Get<GuiService>().GetGump<ContainerGump>(container.Serial)?.RequestUpdateContents();
+
+                            if (container.Graphic == 0x2006)
                             {
-                                ServiceProvider.Get<GuiService>().GetGump<PaperDollGump>(container.Serial)?.RequestUpdateContents();
-                            }
-                            else if (SerialHelper.IsItem(container.Serial))
-                            {
-                                ServiceProvider.Get<GuiService>().GetGump<ContainerGump>(container.Serial)?.RequestUpdateContents();
-
-                                if (container.Graphic == 0x2006)
-                                {
-                                    ServiceProvider.Get<GuiService>().GetGump<GridLootGump>(container)?.RequestUpdateContents();
-                                }
-                            }
-                        }
-                    }
-                }
-
-                bool do_delete = _timeToDelete < Time.Ticks;
-
-                if (do_delete)
-                {
-                    _timeToDelete = Time.Ticks + 50;
-                }
-
-                foreach (Mobile mob in Mobiles.Values)
-                {
-                    mob.Update();
-
-                    if (do_delete && mob.Distance > ClientViewRange /*CheckToRemove(mob, ClientViewRange)*/)
-                    {
-                        RemoveMobile(mob);
-                    }
-
-                    if (mob.IsDestroyed)
-                    {
-                        _toRemove.Add(mob.Serial);
-                    }
-                    else
-                    {
-                        if (mob.NotorietyFlag == NotorietyFlag.Ally)
-                        {
-                            WMapManager.AddOrUpdate
-                            (
-                                mob.Serial,
-                                mob.X,
-                                mob.Y,
-                                MathHelper.PercetangeOf(mob.Hits, mob.HitsMax),
-                                MapIndex,
-                                true,
-                                mob.Name
-                            );
-                        }
-                        else if (Party.Leader != 0 && Party.Contains(mob))
-                        {
-                            WMapManager.AddOrUpdate
-                            (
-                                mob.Serial,
-                                mob.X,
-                                mob.Y,
-                                MathHelper.PercetangeOf(mob.Hits, mob.HitsMax),
-                                MapIndex,
-                                false,
-                                mob.Name
-                            );
-                        }
-                    }
-                }
-
-                if (_toRemove.Count != 0)
-                {
-                    for (int i = 0; i < _toRemove.Count; i++)
-                    {
-                        Mobiles.Remove(_toRemove[i]);
-                    }
-
-                    _toRemove.Clear();
-                }
-
-                foreach (Item item in Items.Values)
-                {
-                    item.Update();
-
-                    if (do_delete && item.OnGround && item.Distance > ClientViewRange /*CheckToRemove(item, ClientViewRange)*/)
-                    {
-                        if (item.IsMulti)
-                        {
-                            if (HouseManager.TryToRemove(item, ClientViewRange))
-                            {
-                                RemoveItem(item);
+                                ServiceProvider.Get<GuiService>().GetGump<GridLootGump>(container)?.RequestUpdateContents();
                             }
                         }
-                        else
+                    }
+                }
+            }
+
+            bool do_delete = _timeToDelete < Time.Ticks;
+
+            if (do_delete)
+            {
+                _timeToDelete = Time.Ticks + 50;
+            }
+
+            var party = ServiceProvider.Get<ManagersService>().Party;
+            foreach (var mob in Mobiles.Values)
+            {
+                mob.Update();
+
+                if (do_delete && mob.Distance > ClientViewRange /*CheckToRemove(mob, ClientViewRange)*/)
+                {
+                    RemoveMobile(mob);
+                }
+
+                if (mob.IsDestroyed)
+                {
+                    _toRemove.Add(mob.Serial);
+                }
+                else
+                {
+                    if (mob.NotorietyFlag == NotorietyFlag.Ally)
+                    {
+                        ServiceProvider.Get<ManagersService>().WMapManager.AddOrUpdate
+                        (
+                            mob.Serial,
+                            mob.X,
+                            mob.Y,
+                            MathHelper.PercetangeOf(mob.Hits, mob.HitsMax),
+                            MapIndex,
+                            true,
+                            mob.Name
+                        );
+                    }
+                    else if (party.Leader != 0 && party.Contains(mob))
+                    {
+                        ServiceProvider.Get<ManagersService>().WMapManager.AddOrUpdate
+                        (
+                            mob.Serial,
+                            mob.X,
+                            mob.Y,
+                            MathHelper.PercetangeOf(mob.Hits, mob.HitsMax),
+                            MapIndex,
+                            false,
+                            mob.Name
+                        );
+                    }
+                }
+            }
+
+            if (_toRemove.Count != 0)
+            {
+                for (int i = 0; i < _toRemove.Count; i++)
+                {
+                    Mobiles.Remove(_toRemove[i]);
+                }
+
+                _toRemove.Clear();
+            }
+
+            foreach (var item in Items.Values)
+            {
+                item.Update();
+
+                if (do_delete && item.OnGround && item.Distance > ClientViewRange /*CheckToRemove(item, ClientViewRange)*/)
+                {
+                    if (item.IsMulti)
+                    {
+                        if (ServiceProvider.Get<ManagersService>().HouseManager.TryToRemove(item, ClientViewRange))
                         {
                             RemoveItem(item);
                         }
                     }
-
-                    if (item.IsDestroyed)
+                    else
                     {
-                        _toRemove.Add(item.Serial);
+                        RemoveItem(item);
                     }
                 }
 
-                if (_toRemove.Count != 0)
+                if (item.IsDestroyed)
                 {
-                    for (int i = 0; i < _toRemove.Count; i++)
-                    {
-                        Items.Remove(_toRemove[i]);
-                    }
+                    _toRemove.Add(item.Serial);
+                }
+            }
 
-                    _toRemove.Clear();
+            if (_toRemove.Count != 0)
+            {
+                for (int i = 0; i < _toRemove.Count; i++)
+                {
+                    Items.Remove(_toRemove[i]);
                 }
 
-                _effectManager.Update();
-                WorldTextManager.Update();
-                WMapManager.RemoveUnupdatedWEntity();
+                _toRemove.Clear();
             }
+
+            _effectManager.Update();
+            WorldTextManager.Update();
+            ServiceProvider.Get<ManagersService>().WMapManager.RemoveUnupdatedWEntity();
         }
 
         public bool Contains(uint serial)
@@ -541,7 +494,7 @@ namespace ClassicUO.Game
                 first = next;
             }
 
-            OPL.Remove(serial);
+            ServiceProvider.Get<ManagersService>().OPL.Remove(serial);
             item.Destroy();
 
             if (forceRemove)
@@ -573,7 +526,7 @@ namespace ClassicUO.Game
                 first = next;
             }
 
-            OPL.Remove(serial);
+            ServiceProvider.Get<ManagersService>().OPL.Remove(serial);
             mobile.Destroy();
 
             if (forceRemove)
@@ -660,7 +613,7 @@ namespace ClassicUO.Game
                     switch (scanType)
                     {
                         case ScanTypeObject.Party:
-                            if (!Party.Contains(mobile))
+                            if (!ServiceProvider.Get<ManagersService>().Party.Contains(mobile))
                             {
                                 continue;
                             }
@@ -734,7 +687,7 @@ namespace ClassicUO.Game
                     switch (scanType)
                     {
                         case ScanTypeObject.Party:
-                            if (!Party.Contains(mobile))
+                            if (!ServiceProvider.Get<ManagersService>().Party.Contains(mobile))
                             {
                                 continue;
                             }
@@ -807,22 +760,22 @@ namespace ClassicUO.Game
             Light.Overall = Light.RealOverall = 0;
             Light.Personal = Light.RealPersonal = 0;
             ClientLockedFeatures.SetFlags(0);
-            Party?.Clear();
-            TargetManager.LastAttack = 0;
-            MessageManager.PromptData = default;
+            ServiceProvider.Get<ManagersService>().Party?.Clear();
+            ServiceProvider.Get<ManagersService>().TargetManager.LastAttack = 0;
+            ServiceProvider.Get<ManagersService>().MessageManager.PromptData = default;
             _effectManager.Clear();
             _toRemove.Clear();
-            CorpseManager.Clear();
-            OPL.Clear();
-            WMapManager.Clear();
-            HouseManager?.Clear();
+            ServiceProvider.Get<ManagersService>().CorpseManager.Clear();
+            ServiceProvider.Get<ManagersService>().OPL.Clear();
+            ServiceProvider.Get<ManagersService>().WMapManager.Clear();
+            ServiceProvider.Get<ManagersService>().HouseManager?.Clear();
 
             Season = Season.Summer;
             OldSeason = Season.Summer;
 
             Journal.Clear();
             WorldTextManager.Clear();
-            ActiveSpellIcons.Clear();
+            ServiceProvider.Get<ManagersService>().ActiveSpellIcons.Clear();
 
             SkillsRequested = false;
         }
@@ -849,7 +802,7 @@ namespace ClassicUO.Game
 
                 if (item.OnGround && item.IsMulti)
                 {
-                    HouseManager.Remove(item.Serial);
+                    ServiceProvider.Get<ManagersService>().HouseManager.Remove(item.Serial);
                 }
 
                 _toRemove.Add(item);

@@ -107,7 +107,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             WantUpdateSize = false;
 
-            _gump.World.MessageManager.MessageReceived += ChatOnMessageReceived;
+            ServiceProvider.Get<ManagersService>().MessageManager.MessageReceived += ChatOnMessageReceived;
             Mode = ChatMode.Default;
 
             IsActive = !ProfileManager.CurrentProfile.ActivateChatAfterEnter;
@@ -276,7 +276,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            _gump.World.MessageManager.MessageReceived -= ChatOnMessageReceived;
+            ServiceProvider.Get<ManagersService>().MessageManager.MessageReceived -= ChatOnMessageReceived;
             base.Dispose();
         }
 
@@ -378,9 +378,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (pos < TextBoxControl.Text.Length && int.TryParse(TextBoxControl.Text.Substring(1, pos), out int index) && index > 0 && index < 11)
                             {
-                                if (_gump.World.Party.Members[index - 1] != null && _gump.World.Party.Members[index - 1].Serial != 0)
+                                if (ServiceProvider.Get<ManagersService>().Party.Members[index - 1] != null && ServiceProvider.Get<ManagersService>().Party.Members[index - 1].Serial != 0)
                                 {
-                                    AppendChatModePrefix(string.Format(ResGumps.Tell0, _gump.World.Party.Members[index - 1].Name), ProfileManager.CurrentProfile.PartyMessageHue, string.Empty);
+                                    AppendChatModePrefix(string.Format(ResGumps.Tell0, ServiceProvider.Get<ManagersService>().Party.Members[index - 1].Name), ProfileManager.CurrentProfile.PartyMessageHue, string.Empty);
                                 }
                                 else
                                 {
@@ -493,7 +493,7 @@ namespace ClassicUO.Game.UI.Gumps
                         return;
                     }
 
-                    if (_gump.World.Macros.FindMacro(key, false, true, false) != null)
+                    if (ServiceProvider.Get<ManagersService>().Macros.FindMacro(key, false, true, false) != null)
                     {
                         return;
                     }
@@ -523,7 +523,7 @@ namespace ClassicUO.Game.UI.Gumps
                         return;
                     }
 
-                    if (_gump.World.Macros.FindMacro(key, false, true, false) != null)
+                    if (ServiceProvider.Get<ManagersService>().Macros.FindMacro(key, false, true, false) != null)
                     {
                         return;
                     }
@@ -553,18 +553,18 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
 
-                case SDL.SDL_Keycode.SDLK_ESCAPE when _gump.World.MessageManager.PromptData.Prompt != ConsolePrompt.None:
+                case SDL.SDL_Keycode.SDLK_ESCAPE when ServiceProvider.Get<ManagersService>().MessageManager.PromptData.Prompt != ConsolePrompt.None:
 
-                    if (_gump.World.MessageManager.PromptData.Prompt == ConsolePrompt.ASCII)
+                    if (ServiceProvider.Get<ManagersService>().MessageManager.PromptData.Prompt == ConsolePrompt.ASCII)
                     {
                         ServiceProvider.Get<PacketHandlerService>().Out.Send_ASCIIPromptResponse(_gump.World, string.Empty, true);
                     }
-                    else if (_gump.World.MessageManager.PromptData.Prompt == ConsolePrompt.Unicode)
+                    else if (ServiceProvider.Get<ManagersService>().MessageManager.PromptData.Prompt == ConsolePrompt.Unicode)
                     {
                         ServiceProvider.Get<PacketHandlerService>().Out.Send_UnicodePromptResponse(_gump.World, string.Empty, Settings.GlobalSettings.Language, true);
                     }
 
-                    _gump.World.MessageManager.PromptData = default;
+                    ServiceProvider.Get<ManagersService>().MessageManager.PromptData = default;
 
                     break;
             }
@@ -591,18 +591,18 @@ namespace ClassicUO.Game.UI.Gumps
             _messageHistoryIndex = _messageHistory.Count;
             Mode = ChatMode.Default;
 
-            if (_gump.World.MessageManager.PromptData.Prompt != ConsolePrompt.None)
+            if (ServiceProvider.Get<ManagersService>().MessageManager.PromptData.Prompt != ConsolePrompt.None)
             {
-                if (_gump.World.MessageManager.PromptData.Prompt == ConsolePrompt.ASCII)
+                if (ServiceProvider.Get<ManagersService>().MessageManager.PromptData.Prompt == ConsolePrompt.ASCII)
                 {
                     ServiceProvider.Get<PacketHandlerService>().Out.Send_ASCIIPromptResponse(_gump.World, text, text.Length < 1);
                 }
-                else if (_gump.World.MessageManager.PromptData.Prompt == ConsolePrompt.Unicode)
+                else if (ServiceProvider.Get<ManagersService>().MessageManager.PromptData.Prompt == ConsolePrompt.Unicode)
                 {
                     ServiceProvider.Get<PacketHandlerService>().Out.Send_UnicodePromptResponse(_gump.World, text, Settings.GlobalSettings.Language, text.Length < 1);
                 }
 
-                _gump.World.MessageManager.PromptData = default;
+                ServiceProvider.Get<ManagersService>().MessageManager.PromptData = default;
             }
             else
             {
@@ -634,13 +634,13 @@ namespace ClassicUO.Game.UI.Gumps
                         switch (text.ToLower())
                         {
                             case "add":
-                                if (_gump.World.Party.Leader == 0 || _gump.World.Party.Leader == _gump.World.Player)
+                                if (ServiceProvider.Get<ManagersService>().Party.Leader == 0 || ServiceProvider.Get<ManagersService>().Party.Leader == _gump.World.Player)
                                 {
                                     GameActions.RequestPartyInviteByTarget();
                                 }
                                 else
                                 {
-                                    _gump.World.MessageManager.HandleMessage
+                                    ServiceProvider.Get<ManagersService>().MessageManager.HandleMessage
                                     (
                                         null,
                                         ResGumps.YouAreNotPartyLeader,
@@ -656,13 +656,13 @@ namespace ClassicUO.Game.UI.Gumps
 
                             case "loot":
 
-                                if (_gump.World.Party.Leader != 0)
+                                if (ServiceProvider.Get<ManagersService>().Party.Leader != 0)
                                 {
-                                    _gump.World.Party.CanLoot = !_gump.World.Party.CanLoot;
+                                    ServiceProvider.Get<ManagersService>().Party.CanLoot = !ServiceProvider.Get<ManagersService>().Party.CanLoot;
                                 }
                                 else
                                 {
-                                    _gump.World.MessageManager.HandleMessage
+                                    ServiceProvider.Get<ManagersService>().MessageManager.HandleMessage
                                     (
                                         null,
                                         ResGumps.YouAreNotInAParty,
@@ -679,9 +679,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                             case "quit":
 
-                                if (_gump.World.Party.Leader == 0)
+                                if (ServiceProvider.Get<ManagersService>().Party.Leader == 0)
                                 {
-                                    _gump.World.MessageManager.HandleMessage
+                                    ServiceProvider.Get<ManagersService>().MessageManager.HandleMessage
                                     (
                                         null,
                                         ResGumps.YouAreNotInAParty,
@@ -696,10 +696,10 @@ namespace ClassicUO.Game.UI.Gumps
                                 {
                                     GameActions.RequestPartyQuit(_gump.World.Player);
 
-                                    //for (int i = 0; i < World.Party.Members.Length; i++)
+                                    //for (int i = 0; i < ServiceProvider.Get<ManagersService>().Party.Members.Length; i++)
                                     //{
-                                    //    if (World.Party.Members[i] != null && World.Party.Members[i].Serial != 0)
-                                    //        GameActions.RequestPartyRemoveMember(World.Party.Members[i].Serial);
+                                    //    if (ServiceProvider.Get<ManagersService>().Party.Members[i] != null && ServiceProvider.Get<ManagersService>().Party.Members[i].Serial != 0)
+                                    //        GameActions.RequestPartyRemoveMember(ServiceProvider.Get<ManagersService>().Party.Members[i].Serial);
                                     //}
                                 }
 
@@ -707,15 +707,15 @@ namespace ClassicUO.Game.UI.Gumps
 
                             case "accept":
 
-                                if (_gump.World.Party.Leader == 0 && (_gump.World.Party.Inviter != 0))
+                                if (ServiceProvider.Get<ManagersService>().Party.Leader == 0 && (ServiceProvider.Get<ManagersService>().Party.Inviter != 0))
                                 {
-                                    GameActions.RequestPartyAccept(_gump.World.Party.Inviter);
-                                    _gump.World.Party.Leader = _gump.World.Party.Inviter;
-                                    _gump.World.Party.Inviter = 0;
+                                    GameActions.RequestPartyAccept(ServiceProvider.Get<ManagersService>().Party.Inviter);
+                                    ServiceProvider.Get<ManagersService>().Party.Leader = ServiceProvider.Get<ManagersService>().Party.Inviter;
+                                    ServiceProvider.Get<ManagersService>().Party.Inviter = 0;
                                 }
                                 else
                                 {
-                                    _gump.World.MessageManager.HandleMessage
+                                    ServiceProvider.Get<ManagersService>().MessageManager.HandleMessage
                                     (
                                         null,
                                         ResGumps.NoOneHasInvitedYouToBeInAParty,
@@ -731,15 +731,15 @@ namespace ClassicUO.Game.UI.Gumps
 
                             case "decline":
 
-                                if (_gump.World.Party.Leader == 0 && _gump.World.Party.Inviter != 0)
+                                if (ServiceProvider.Get<ManagersService>().Party.Leader == 0 && ServiceProvider.Get<ManagersService>().Party.Inviter != 0)
                                 {
-                                    ServiceProvider.Get<PacketHandlerService>().Out.Send_PartyDecline(_gump.World.Party.Inviter);
-                                    _gump.World.Party.Leader = 0;
-                                    _gump.World.Party.Inviter = 0;
+                                    ServiceProvider.Get<PacketHandlerService>().Out.Send_PartyDecline(ServiceProvider.Get<ManagersService>().Party.Inviter);
+                                    ServiceProvider.Get<ManagersService>().Party.Leader = 0;
+                                    ServiceProvider.Get<ManagersService>().Party.Inviter = 0;
                                 }
                                 else
                                 {
-                                    _gump.World.MessageManager.HandleMessage
+                                    ServiceProvider.Get<ManagersService>().MessageManager.HandleMessage
                                     (
                                         null,
                                         ResGumps.NoOneHasInvitedYouToBeInAParty,
@@ -756,13 +756,13 @@ namespace ClassicUO.Game.UI.Gumps
 
                             case "rem":
 
-                                if (_gump.World.Party.Leader != 0 && _gump.World.Party.Leader == _gump.World.Player)
+                                if (ServiceProvider.Get<ManagersService>().Party.Leader != 0 && ServiceProvider.Get<ManagersService>().Party.Leader == _gump.World.Player)
                                 {
                                     GameActions.RequestPartyRemoveMemberByTarget();
                                 }
                                 else
                                 {
-                                    _gump.World.MessageManager.HandleMessage
+                                    ServiceProvider.Get<ManagersService>().MessageManager.HandleMessage
                                     (
                                         null,
                                         ResGumps.YouAreNotPartyLeader,
@@ -779,7 +779,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             default:
 
-                                if (_gump.World.Party.Leader != 0)
+                                if (ServiceProvider.Get<ManagersService>().Party.Leader != 0)
                                 {
                                     uint serial = 0;
 
@@ -792,9 +792,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                                     if (pos < text.Length)
                                     {
-                                        if (int.TryParse(text.Substring(0, pos), out int index) && index > 0 && index < 11 && _gump.World.Party.Members[index - 1] != null && _gump.World.Party.Members[index - 1].Serial != 0)
+                                        if (int.TryParse(text.Substring(0, pos), out int index) && index > 0 && index < 11 && ServiceProvider.Get<ManagersService>().Party.Members[index - 1] != null && ServiceProvider.Get<ManagersService>().Party.Members[index - 1].Serial != 0)
                                         {
-                                            serial = _gump.World.Party.Members[index - 1].Serial;
+                                            serial = ServiceProvider.Get<ManagersService>().Party.Members[index - 1].Serial;
                                         }
                                     }
 
@@ -833,13 +833,13 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (tt.Length != 0)
                         {
-                            _gump.World.CommandManager.Execute(tt[0], tt);
+                            ServiceProvider.Get<ManagersService>().CommandManager.Execute(tt[0], tt);
                         }
 
                         break;
 
                     case ChatMode.UOAMChat:
-                        _gump.World.UoAssist.SignalMessage(text);
+                        ServiceProvider.Get<ManagersService>().UoAssist.SignalMessage(text);
 
                         break;
 
