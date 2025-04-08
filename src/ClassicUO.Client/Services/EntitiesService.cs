@@ -1,242 +1,247 @@
-// using System;
-// using System.Collections.Generic;
-// using ClassicUO.Game;
-// using ClassicUO.Game.GameObjects;
-// using ClassicUO.Game.UI.Gumps;
+using System;
+using System.Collections.Generic;
+using ClassicUO.Game;
+using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.UI.Gumps;
 
-// namespace ClassicUO.Services;
+namespace ClassicUO.Services;
 
-// internal class EntitiesService : IService
-// {
-//     public bool IsGame => Player != null;
-//     public PlayerMobile? Player { get; private set; }
-//     public Dictionary<uint, Item> Items { get; } = [];
-//     public Dictionary<uint, Mobile> Mobiles { get; } = [];
+internal class EntitiesService : IService
+{
+    public bool IsGame => Player != null;
+    public PlayerMobile? Player { get; private set; }
+    public Dictionary<uint, Item> Items { get; } = [];
+    public Dictionary<uint, Mobile> Mobiles { get; } = [];
 
-//     public event EventHandler<uint> OnPlayerCreated, OnMobileCreated, OnItemCreated;
-//     public event EventHandler<uint> OnPlayerDeleted, OnMobileDeleted, OnItemDeleted;
+    public event EventHandler<uint> OnPlayerCreated, OnMobileCreated, OnItemCreated;
+    public event EventHandler<uint> OnPlayerDeleted, OnMobileDeleted, OnItemDeleted;
 
-//     public void CreatePlayer(World world, uint serial)
-//     {
-//         Player = new PlayerMobile(world, serial);
-//         Mobiles.Add(serial, Player);
+    public void CreatePlayer(World world, uint serial)
+    {
+        Player = new PlayerMobile(world, serial);
+        Mobiles.Add(serial, Player);
 
-//         OnPlayerCreated?.Invoke(world, serial);
-//     }
+        OnPlayerCreated?.Invoke(world, serial);
+    }
 
-//     public void DeletePlayer()
-//     {
-//         var world = Player?.World;
-//         var serial = Player?.Serial ?? 0;
-//         Player?.Destroy();
-//         Player = null;
+    public void DeletePlayer()
+    {
+        var world = Player?.World;
+        var serial = Player?.Serial ?? 0;
+        Player?.Destroy();
+        Player = null;
 
-//         if (serial != 0)
-//             OnPlayerDeleted?.Invoke(world, serial);
+        if (serial != 0)
+            OnPlayerDeleted?.Invoke(world, serial);
 
-//         Mobiles.Remove(serial);
-//     }
+        Mobiles.Remove(serial);
+    }
 
-//     public void Clear()
-//     {
-//         foreach (Mobile mobile in Mobiles.Values)
-//             RemoveMobile(mobile);
+    public void Update()
+    {
 
-//         foreach (Item item in Items.Values)
-//             RemoveItem(item);
+    }
 
-//         Items.Clear();
-//         Mobiles.Clear();
-//         DeletePlayer();
-//     }
+    public void Clear()
+    {
+        foreach (Mobile mobile in Mobiles.Values)
+            RemoveMobile(mobile);
 
-//     public bool Contains(uint serial)
-//     {
-//         if (SerialHelper.IsItem(serial))
-//         {
-//             return Items.Contains(serial);
-//         }
+        foreach (Item item in Items.Values)
+            RemoveItem(item);
 
-//         return SerialHelper.IsMobile(serial) && Mobiles.Contains(serial);
-//     }
+        Items.Clear();
+        Mobiles.Clear();
+        DeletePlayer();
+    }
 
-//     public Entity? Get(uint serial)
-//     {
-//         Entity? ent;
+    public bool Contains(uint serial)
+    {
+        if (SerialHelper.IsItem(serial))
+        {
+            return Items.Contains(serial);
+        }
 
-//         if (SerialHelper.IsMobile(serial))
-//         {
-//             ent = Mobiles.Get(serial);
+        return SerialHelper.IsMobile(serial) && Mobiles.Contains(serial);
+    }
 
-//             if (ent == null)
-//             {
-//                 ent = Items.Get(serial);
-//             }
-//         }
-//         else
-//         {
-//             ent = Items.Get(serial);
+    public Entity? Get(uint serial)
+    {
+        Entity? ent;
 
-//             if (ent == null)
-//             {
-//                 ent = Mobiles.Get(serial);
-//             }
-//         }
+        if (SerialHelper.IsMobile(serial))
+        {
+            ent = Mobiles.Get(serial);
 
-//         if (ent != null && ent.IsDestroyed)
-//         {
-//             ent = null;
-//         }
+            if (ent == null)
+            {
+                ent = Items.Get(serial);
+            }
+        }
+        else
+        {
+            ent = Items.Get(serial);
 
-//         return ent;
-//     }
+            if (ent == null)
+            {
+                ent = Mobiles.Get(serial);
+            }
+        }
 
-//     public Item GetOrCreateItem(World world, uint serial)
-//     {
-//         var item = Items.Get(serial);
+        if (ent != null && ent.IsDestroyed)
+        {
+            ent = null;
+        }
 
-//         if (item != null && item.IsDestroyed)
-//         {
-//             Items.Remove(serial);
-//             item = null;
-//         }
+        return ent;
+    }
 
-//         if (item == null /*|| item.IsDestroyed*/)
-//         {
-//             item = Item.Create(world, serial);
-//             Items.Add(item);
-//             OnItemCreated?.Invoke(world, serial);
-//         }
+    public Item GetOrCreateItem(World world, uint serial)
+    {
+        var item = Items.Get(serial);
 
-//         return item;
-//     }
+        if (item != null && item.IsDestroyed)
+        {
+            Items.Remove(serial);
+            item = null;
+        }
 
-//     public Mobile GetOrCreateMobile(World world, uint serial)
-//     {
-//         var mob = Mobiles.Get(serial);
+        if (item == null /*|| item.IsDestroyed*/)
+        {
+            item = Item.Create(world, serial);
+            Items.Add(item);
+            OnItemCreated?.Invoke(world, serial);
+        }
 
-//         if (mob != null && mob.IsDestroyed)
-//         {
-//             Mobiles.Remove(serial);
-//             mob = null;
-//         }
+        return item;
+    }
 
-//         if (mob == null /*|| mob.IsDestroyed*/)
-//         {
-//             mob = Mobile.Create(world, serial);
-//             Mobiles.Add(mob);
-//             OnMobileCreated?.Invoke(world, serial);
-//         }
+    public Mobile GetOrCreateMobile(World world, uint serial)
+    {
+        var mob = Mobiles.Get(serial);
 
-//         return mob;
-//     }
+        if (mob != null && mob.IsDestroyed)
+        {
+            Mobiles.Remove(serial);
+            mob = null;
+        }
 
-//     public void RemoveItemFromContainer(uint serial)
-//     {
-//         var it = Items.Get(serial);
+        if (mob == null /*|| mob.IsDestroyed*/)
+        {
+            mob = Mobile.Create(world, serial);
+            Mobiles.Add(mob);
+            OnMobileCreated?.Invoke(world, serial);
+        }
 
-//         if (it != null)
-//         {
-//             RemoveItemFromContainer(it);
-//         }
-//     }
+        return mob;
+    }
 
-//     public void RemoveItemFromContainer(Item obj)
-//     {
-//         uint containerSerial = obj.Container;
+    public void RemoveItemFromContainer(uint serial)
+    {
+        var it = Items.Get(serial);
 
-//         // if entity is running the "dying" animation we have to reset container too.
-//         // SerialHelper.IsValid(containerSerial) is not ideal in this case
-//         if (containerSerial != 0xFFFF_FFFF)
-//         {
-//             if (SerialHelper.IsMobile(containerSerial))
-//             {
-//                 ServiceProvider.Get<GuiService>().GetGump<PaperDollGump>(containerSerial)?.RequestUpdateContents();
-//             }
-//             else if (SerialHelper.IsItem(containerSerial))
-//             {
-//                 ServiceProvider.Get<GuiService>().GetGump<ContainerGump>(containerSerial)?.RequestUpdateContents();
-//             }
+        if (it != null)
+        {
+            RemoveItemFromContainer(it);
+        }
+    }
 
-//             var container = Get(containerSerial);
+    public void RemoveItemFromContainer(Item obj)
+    {
+        uint containerSerial = obj.Container;
 
-//             if (container != null)
-//             {
-//                 container.Remove(obj);
-//             }
+        // if entity is running the "dying" animation we have to reset container too.
+        // SerialHelper.IsValid(containerSerial) is not ideal in this case
+        if (containerSerial != 0xFFFF_FFFF)
+        {
+            if (SerialHelper.IsMobile(containerSerial))
+            {
+                ServiceProvider.Get<GuiService>().GetGump<PaperDollGump>(containerSerial)?.RequestUpdateContents();
+            }
+            else if (SerialHelper.IsItem(containerSerial))
+            {
+                ServiceProvider.Get<GuiService>().GetGump<ContainerGump>(containerSerial)?.RequestUpdateContents();
+            }
 
-//             obj.Container = 0xFFFF_FFFF;
-//         }
+            var container = Get(containerSerial);
 
-//         obj.Next = null;
-//         obj.Previous = null;
-//         obj.RemoveFromTile();
-//     }
+            if (container != null)
+            {
+                container.Remove(obj);
+            }
 
-//     public bool RemoveItem(uint serial, bool forceRemove = false)
-//     {
-//         var item = Items.Get(serial);
+            obj.Container = 0xFFFF_FFFF;
+        }
 
-//         if (item == null || item.IsDestroyed)
-//         {
-//             return false;
-//         }
+        obj.Next = null;
+        obj.Previous = null;
+        obj.RemoveFromTile();
+    }
 
-//         var first = item.Items;
-//         RemoveItemFromContainer(item);
+    public bool RemoveItem(uint serial, bool forceRemove = false)
+    {
+        var item = Items.Get(serial);
 
-//         while (first != null)
-//         {
-//             var next = first.Next;
+        if (item == null || item.IsDestroyed)
+        {
+            return false;
+        }
 
-//             if (first is Item it)
-//                 RemoveItem(it.Serial, forceRemove);
+        var first = item.Items;
+        RemoveItemFromContainer(item);
 
-//             first = next;
-//         }
+        while (first != null)
+        {
+            var next = first.Next;
 
-//         OPL.Remove(serial);
-//         item.Destroy();
+            if (first is Item it)
+                RemoveItem(it.Serial, forceRemove);
 
-//         if (forceRemove)
-//         {
-//             Items.Remove(serial);
-//             OnItemDeleted?.Invoke(item.World, serial);
-//         }
+            first = next;
+        }
 
-//         return true;
-//     }
+        ServiceProvider.Get<ManagersService>().OPL.Remove(serial);
+        item.Destroy();
 
-//     public bool RemoveMobile(uint serial, bool forceRemove = false)
-//     {
-//         var mobile = Mobiles.Get(serial);
+        if (forceRemove)
+        {
+            Items.Remove(serial);
+            OnItemDeleted?.Invoke(item.World, serial);
+        }
 
-//         if (mobile == null || mobile.IsDestroyed)
-//         {
-//             return false;
-//         }
+        return true;
+    }
 
-//         var first = mobile.Items;
+    public bool RemoveMobile(uint serial, bool forceRemove = false)
+    {
+        var mobile = Mobiles.Get(serial);
 
-//         while (first != null)
-//         {
-//             var next = first.Next;
+        if (mobile == null || mobile.IsDestroyed)
+        {
+            return false;
+        }
 
-//             if (first is Item it)
-//                 RemoveItem(it.Serial, forceRemove);
+        var first = mobile.Items;
 
-//             first = next;
-//         }
+        while (first != null)
+        {
+            var next = first.Next;
 
-//         OPL.Remove(serial);
-//         mobile.Destroy();
+            if (first is Item it)
+                RemoveItem(it.Serial, forceRemove);
 
-//         if (forceRemove)
-//         {
-//             Mobiles.Remove(serial);
-//             OnMobileDeleted?.Invoke(mobile.World, serial);
-//         }
+            first = next;
+        }
 
-//         return true;
-//     }
-// }
+        ServiceProvider.Get<ManagersService>().OPL.Remove(serial);
+        mobile.Destroy();
+
+        if (forceRemove)
+        {
+            Mobiles.Remove(serial);
+            OnMobileDeleted?.Invoke(mobile.World, serial);
+        }
+
+        return true;
+    }
+}

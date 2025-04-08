@@ -1,19 +1,20 @@
-using ClassicUO.Game;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
 
 namespace ClassicUO.Services
 {
     internal class PluginHostService : IService
     {
-        private readonly ClassicUO.IPluginHost? _pluginHost;
+        private readonly IPluginHost? _pluginHost;
 
-        public PluginHostService(ClassicUO.IPluginHost? pluginHost)
+        public PluginHostService(IPluginHost? pluginHost)
         {
             _pluginHost = pluginHost;
         }
+
+        public Dictionary<IntPtr, GraphicsResource> GfxResources => _pluginHost?.GfxResources;
+
 
         public void LoadPlugin(string pluginPath)
         {
@@ -86,7 +87,5 @@ namespace ClassicUO.Services
         {
             return _pluginHost?.PacketIn(buffer) ?? true;
         }
-
-        public Dictionary<IntPtr, GraphicsResource> GfxResources => _pluginHost?.GfxResources;
     }
 }

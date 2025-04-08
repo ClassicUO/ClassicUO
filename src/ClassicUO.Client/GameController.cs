@@ -42,6 +42,7 @@ namespace ClassicUO
         private UIManager _ui;
         private GameCursor _cursor;
         private World _world;
+        private readonly List<(uint, Action)> _queuedActions = new ();
 
         public GameController(IPluginHost? pluginHost)
         {
@@ -73,7 +74,6 @@ namespace ClassicUO
         public GraphicsDeviceManager GraphicManager { get; }
         public readonly uint[] FrameDelay = new uint[2];
 
-        private readonly List<(uint, Action)> _queuedActions = new ();
 
         public void EnqueueAction(uint time, Action action)
         {
@@ -112,7 +112,7 @@ namespace ClassicUO
 #if false
             SetScene(new MainScene(this));
 #else
-            UO.LoadUOFiles();
+            UO.LoadUOFiles(GraphicsDevice);
 
             // Registra i servizi
             var netClient = new NetClient();
@@ -125,7 +125,6 @@ namespace ClassicUO
             ServiceProvider.Register(new SceneService(this)); // REMOVE THIS LATER
             ServiceProvider.Register(new GraphicsService(GraphicsDevice));
 
-            UO.Setup(this);
             var world = _world = new World();
 
             ServiceProvider.Register(new UOService(UO));

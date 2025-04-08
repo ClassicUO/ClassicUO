@@ -32,6 +32,9 @@ namespace ClassicUO.Services
 
         public GraphicsDevice GraphicsDevice => _game.GraphicsDevice;
 
+        public GraphicsDeviceManager GraphicsManager => _game.GraphicManager;
+
+
         public void SetWindowTitle(string title)
         {
             _game.SetWindowTitle(title);
@@ -61,8 +64,6 @@ namespace ClassicUO.Services
         {
             _game.RestoreWindow();
         }
-
-        public GraphicsDeviceManager GraphicsManager => _game.GraphicManager;
 
         public void EnqueueAction(uint time, Action action)
         {

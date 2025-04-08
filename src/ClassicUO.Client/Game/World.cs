@@ -2,18 +2,15 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using ClassicUO.IO.Audio;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Map;
 using ClassicUO.Game.UI.Gumps;
 using Microsoft.Xna.Framework;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Scenes;
 using MathHelper = ClassicUO.Renderer.MathHelper;
 using ClassicUO.Sdk;
-using ClassicUO.Platforms;
 using System.Diagnostics.CodeAnalysis;
 using ClassicUO.Services;
 
@@ -38,8 +35,7 @@ namespace ClassicUO.Game
         public uint LastObject, ObjectToRemove;
 
 
-        [NotNull]
-        public PlayerMobile? Player { get; private set; }
+
 
         public ChatManager ChatManager { get; }
 
@@ -47,13 +43,13 @@ namespace ClassicUO.Game
         public InfoBarManager InfoBars { get; }
 
 
-
-
-
-
+        [NotNull]
+        public PlayerMobile? Player { get; private set; }
         public Dictionary<uint, Item> Items { get; } = new Dictionary<uint, Item>();
-
         public Dictionary<uint, Mobile> Mobiles { get; } = new Dictionary<uint, Mobile>();
+        public bool InGame => Player != null && Map != null;
+
+
 
         public Map.Map? Map { get; private set; }
 
@@ -128,8 +124,6 @@ namespace ClassicUO.Game
                 }
             }
         }
-
-        public bool InGame => Player != null && Map != null;
 
         public IsometricLight Light { get; } = new IsometricLight
         {

@@ -27,7 +27,7 @@ namespace ClassicUO
 
 
 
-        public unsafe void Setup(GameController game)
+        private unsafe void Setup(GraphicsDevice device)
         {
             const int TEXTURE_WIDTH = 512;
             const int TEXTURE_HEIGHT = 1024;
@@ -35,8 +35,8 @@ namespace ClassicUO
             const int LIGHTS_TEXTURE_HEIGHT = 63;
 
             var hueSamplers = new Texture2D[2];
-            hueSamplers[0] = new Texture2D(game.GraphicsDevice, TEXTURE_WIDTH, TEXTURE_HEIGHT);
-            hueSamplers[1] = new Texture2D(game.GraphicsDevice, LIGHTS_TEXTURE_WIDTH, LIGHTS_TEXTURE_HEIGHT);
+            hueSamplers[0] = new Texture2D(device, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+            hueSamplers[1] = new Texture2D(device, LIGHTS_TEXTURE_WIDTH, LIGHTS_TEXTURE_HEIGHT);
 
             var buffer = new uint[Math.Max(
                 LIGHTS_TEXTURE_WIDTH * LIGHTS_TEXTURE_HEIGHT,
@@ -63,15 +63,15 @@ namespace ClassicUO
                 );
             }
 
-            game.GraphicsDevice.Textures[1] = hueSamplers[0];
-            game.GraphicsDevice.Textures[2] = hueSamplers[1];
+            device.Textures[1] = hueSamplers[0];
+            device.Textures[2] = hueSamplers[1];
 
-            Animations = new Renderer.Animations.Animations(FileManager.Animations, game.GraphicsDevice);
-            Arts = new Renderer.Arts.Art(FileManager.Arts, FileManager.Hues, game.GraphicsDevice);
-            Gumps = new Renderer.Gumps.Gump(FileManager.Gumps, game.GraphicsDevice);
-            Texmaps = new Renderer.Texmaps.Texmap(FileManager.Texmaps, game.GraphicsDevice);
-            Lights = new Renderer.Lights.Light(FileManager.Lights, game.GraphicsDevice);
-            MultiMaps = new Renderer.MultiMaps.MultiMap(FileManager.MultiMaps, game.GraphicsDevice);
+            Animations = new Renderer.Animations.Animations(FileManager.Animations, device);
+            Arts = new Renderer.Arts.Art(FileManager.Arts, FileManager.Hues, device);
+            Gumps = new Renderer.Gumps.Gump(FileManager.Gumps, device);
+            Texmaps = new Renderer.Texmaps.Texmap(FileManager.Texmaps, device);
+            Lights = new Renderer.Lights.Light(FileManager.Lights, device);
+            MultiMaps = new Renderer.MultiMaps.MultiMap(FileManager.MultiMaps, device);
             Sounds = new Renderer.Sounds.Sound(FileManager.Sounds);
 
             LightColors.LoadLights();
@@ -84,7 +84,7 @@ namespace ClassicUO
         }
 
 
-        public void LoadUOFiles()
+        public void LoadUOFiles(GraphicsDevice device)
         {
             string clientPath = Settings.GlobalSettings.UltimaOnlineDirectory;
             Log.Trace($"Ultima Online installation folder: {clientPath}");
@@ -173,6 +173,8 @@ namespace ClassicUO
             StaticFilters.Load(FileManager.TileData);
             BuffTable.Load();
             ChairTable.Load();
+
+            Setup(device);
         }
     }
 }

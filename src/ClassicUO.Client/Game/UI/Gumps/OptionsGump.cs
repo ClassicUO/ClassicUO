@@ -159,11 +159,6 @@ namespace ClassicUO.Game.UI.Gumps
             _fileManager = ServiceProvider.Get<AssetsService>();
             _gameService = ServiceProvider.Get<EngineService>();
 
-            // Utilizzo di variabili locali per i servizi usati solo nel costruttore
-            var audioService = ServiceProvider.Get<AudioService>();
-            var windowService = ServiceProvider.Get<WindowService>();
-            var uoService = ServiceProvider.Get<UOService>();
-
             Add
             (
                 new AlphaBlendControl(0.95f)

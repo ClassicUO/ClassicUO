@@ -1345,7 +1345,7 @@ internal class IncomingPackets
                     }
                     else
                     {
-                        Item item = world.GetOrCreateItem(
+                        var item = world.GetOrCreateItem(
                             cursorService.GameCursor.ItemHold.Serial
                         );
 
@@ -1485,7 +1485,7 @@ internal class IncomingPackets
         var world = ServiceProvider.Get<WorldService>().World;
         uint serial = p.ReadUInt32BE();
 
-        var entity =world.Get(serial);
+        var entity = world.Get(serial);
 
         if (entity == null)
         {
