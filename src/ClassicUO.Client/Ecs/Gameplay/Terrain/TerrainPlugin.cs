@@ -20,10 +20,12 @@ struct TileStretched
 
 readonly struct TerrainPlugin : IPlugin
 {
+    internal sealed class ChunksLoadedMap : Dictionary<uint, List<ulong>> { }
+
     public void Build(Scheduler scheduler)
     {
         scheduler.AddEvent<OnNewChunkRequest>();
-        scheduler.AddResource(new Dictionary<uint, List<ulong>>());
+        scheduler.AddResource(new ChunksLoadedMap());
 
         var enqueueChunksRequestsFn = EnqueueChunksRequests;
         scheduler.AddSystem(enqueueChunksRequestsFn, threadingType: ThreadingMode.Single)
@@ -80,7 +82,7 @@ readonly struct TerrainPlugin : IPlugin
     (
         TinyEcs.World world,
         Res<UOFileManager> fileManager,
-        Res<Dictionary<uint, List<ulong>>> chunksLoaded,
+        Res<ChunksLoadedMap> chunksLoaded,
         Local<StaticsBlock[]> staticsBlockBuffer,
         EventReader<OnNewChunkRequest> chunkRequests
     )
@@ -214,7 +216,7 @@ readonly struct TerrainPlugin : IPlugin
     (
        TinyEcs.World world,
        Local<List<uint>> toRemove,
-       Res<Dictionary<uint, List<ulong>>> chunksLoaded,
+       Res<ChunksLoadedMap> chunksLoaded,
        Query<Data<WorldPosition>, Filter<With<NetworkSerial>, Without<Player>, Without<ContainedInto>>> queryAll,
        Query<Data<WorldPosition>, With<Player>> playerQuery
     )
