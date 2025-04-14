@@ -17,14 +17,15 @@ internal readonly struct PickupPlugin : IPlugin
         scheduler.AddSystem(pickupItemDelayedFn, threadingType: ThreadingMode.Single)
             .RunIf((SchedulerState sched) => sched.ResourceExists<SelectedEntity>() && sched.ResourceExists<GrabbedItem>())
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial == 0)
-            .RunIf((World world, Res<SelectedEntity> selectedEnt) => {
+            .RunIf((World world, Res<SelectedEntity> selectedEnt, Query<Data<NetworkSerial>, Filter<With<Items>>> q) =>
+            {
                 if (!selectedEnt.Value.Entity.IsValid())
                     return false;
                 if (!world.Exists(selectedEnt.Value.Entity))
                     return false;
 
                 var entity = world.Entity(selectedEnt.Value.Entity);
-                return entity.Has<Items>() && entity.Has<NetworkSerial>();
+                return q.Contains(entity.ID);
             })
             .RunIf((Res<MouseContext> mouseCtx) =>
             {
@@ -37,7 +38,8 @@ internal readonly struct PickupPlugin : IPlugin
 
                 return true;
             })
-            .RunIf((Local<float?> delay, Time time, Res<MouseContext> mouseCtx, Res<GrabbedItem> grabbedEntity) => {
+            .RunIf((Local<float?> delay, Time time, Res<MouseContext> mouseCtx, Res<GrabbedItem> grabbedEntity) =>
+            {
                 if (mouseCtx.Value.IsReleased(Input.MouseButtonType.Left))
                     delay.Value = null;
                 else if (mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Left))
@@ -56,7 +58,7 @@ internal readonly struct PickupPlugin : IPlugin
         scheduler.AddSystem(pickupItemFn, threadingType: ThreadingMode.Single)
             .RunIf((SchedulerState sched) => sched.ResourceExists<SelectedEntity>() && sched.ResourceExists<GrabbedItem>())
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial == 0)
-            .RunIf((World world, Res<SelectedEntity> selectedEnt) =>
+            .RunIf((World world, Res<SelectedEntity> selectedEnt, Query<Data<NetworkSerial>, Filter<With<Items>>> q) =>
             {
                 if (!selectedEnt.Value.Entity.IsValid())
                     return false;
@@ -64,7 +66,7 @@ internal readonly struct PickupPlugin : IPlugin
                     return false;
 
                 var entity = world.Entity(selectedEnt.Value.Entity);
-                return entity.Has<Items>() && entity.Has<NetworkSerial>();
+                return q.Contains(entity.ID);
             })
             .RunIf((Res<MouseContext> mouseCtx) =>
             {
@@ -97,15 +99,15 @@ internal readonly struct PickupPlugin : IPlugin
         World world,
         Res<SelectedEntity> selectedEntity,
         Res<GrabbedItem> grabbedItem,
-        Res<NetClient> network
+        Res<NetClient> network,
+        Query<Data<NetworkSerial, Amount>> q
     )
     {
         var entity = world.Entity(selectedEntity.Value.Entity);
-        var serial = entity.Get<NetworkSerial>().Value;
-        var amount = Math.Min(1, entity.Get<Amount>().Value);
-        Console.WriteLine("pickup item serial: {0} amount: {1}", serial, amount);
-        network.Value.Send_PickUpRequest(serial, (ushort)amount);
-        grabbedItem.Value.Serial = serial;
+        (var serial, var amount) = q.Get(entity.ID);
+        Console.WriteLine("pickup item serial: {0} amount: {1}", serial.Ref.Value, amount.Ref.Value);
+        network.Value.Send_PickUpRequest(serial.Ref.Value, (ushort)amount.Ref.Value);
+        grabbedItem.Value.Serial = serial.Ref.Value;
     }
 
     void DropItem(
@@ -114,7 +116,7 @@ internal readonly struct PickupPlugin : IPlugin
         Res<GrabbedItem> grabbedItem,
         Res<NetClient> network,
         Res<NetworkEntitiesMap> networkEntities
-        // Query<Data<NetworkSerial>, Filter<Optional<NetworkSerial>>> query
+    // Query<Data<NetworkSerial>, Filter<Optional<NetworkSerial>>> query
     )
     {
         // TODO: add all scenarios

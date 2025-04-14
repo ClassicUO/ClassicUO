@@ -288,6 +288,7 @@ readonly struct MobAnimationsPlugin : IPlugin
 
                     if (step.Run)
                         direction.Ref.Value |= Direction.Running;
+
                     for (var j = 1; j < steps.Ref.Count; ++j)
                         steps.Ref[j - 1] = steps.Ref[j];
 
