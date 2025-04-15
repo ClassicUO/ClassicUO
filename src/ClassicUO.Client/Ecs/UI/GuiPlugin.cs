@@ -129,7 +129,7 @@ internal readonly struct GuiPlugin : IPlugin
                                         b.Draw
                                         (
                                             gumpInfo.Texture,
-                                            uoCommand.Position,
+                                            new Vector2(boundingBox.x, boundingBox.y),
                                             gumpInfo.UV,
                                             uoCommand.Hue,
                                             0.0f,
@@ -148,7 +148,7 @@ internal readonly struct GuiPlugin : IPlugin
                                         b.Draw
                                         (
                                             artInfo.Texture,
-                                            uoCommand.Position,
+                                            new Vector2(boundingBox.x, boundingBox.y),
                                             artInfo.UV,
                                             uoCommand.Hue,
                                             0.0f,
@@ -201,7 +201,19 @@ internal readonly struct GuiPlugin : IPlugin
                 var config = node.Config;
                 if (node.UOConfig.Type != ClayUOCommandType.None)
                 {
-                    config.custom.customData = (void*)commandBuffer.AddCommand(node.UOConfig);
+                    var uoConfig = node.UOConfig;
+                    if (!Unsafe.IsNullRef(ref interaction))
+                    {
+                        if (interaction == UIInteractionState.Hover)
+                        {
+                            uoConfig.Hue = new Vector3(0x44, 1, 1);
+                        }
+                        else if (interaction == UIInteractionState.Pressed)
+                        {
+                            uoConfig.Hue = new Vector3(38, 1, 1);
+                        }
+                    }
+                    config.custom.customData = (void*)commandBuffer.AddCommand(uoConfig);
                 }
 
                 Clay.ConfigureOpenElement(config);
@@ -336,7 +348,6 @@ internal struct ClayUOCommandData
     public ClayUOCommandType Type;
 
     public uint Id;
-    public Vector2 Position;
     public Vector3 Hue;
 }
 
@@ -381,48 +392,4 @@ internal sealed class ClayUOCommandBuffer
     }
 
     public int Count => _index;
-
-    public nint AddGumpCommand(uint gumpIndex, Vector2 position, Vector3 hue)
-    {
-        return AddCommand(new ClayUOCommandData
-        {
-            Type = ClayUOCommandType.Gump,
-            Id = gumpIndex,
-            Position = position,
-            Hue = hue
-        });
-    }
-
-    public nint AddArtCommand(uint artIndex, Vector2 position, Vector3 hue)
-    {
-        return AddCommand(new ClayUOCommandData
-        {
-            Type = ClayUOCommandType.Art,
-            Id = artIndex,
-            Position = position,
-            Hue = hue
-        });
-    }
-
-    public nint AddTextCommand(uint textIndex, Vector2 position, Vector3 hue)
-    {
-        return AddCommand(new ClayUOCommandData
-        {
-            Type = ClayUOCommandType.Text,
-            Id = textIndex,
-            Position = position,
-            Hue = hue
-        });
-    }
-
-    public nint AddAnimationCommand(uint animIndex, Vector2 position, Vector3 hue)
-    {
-        return AddCommand(new ClayUOCommandData
-        {
-            Type = ClayUOCommandType.Animation,
-            Id = animIndex,
-            Position = position,
-            Hue = hue
-        });
-    }
 }

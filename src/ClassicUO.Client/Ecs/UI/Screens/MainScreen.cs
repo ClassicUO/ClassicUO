@@ -11,8 +11,6 @@ internal readonly struct MainScreenPlugin : IPlugin
     {
         scheduler.AddSystem((TinyEcs.World world, Res<ClayUOCommandBuffer> clay, Res<AssetsServer> assets) =>
         {
-            ref readonly var gumpInfo = ref assets.Value.Gumps.GetGump(0x123);
-
             var root = world.Entity()
                 .Set(new UINode()
                 {
@@ -20,8 +18,8 @@ internal readonly struct MainScreenPlugin : IPlugin
                         backgroundColor = new (48, 48, 48, 255),
                         layout = {
                             sizing = {
-                                width = Clay_SizingAxis.Percent(0.3f),
-                                height = Clay_SizingAxis.Percent(0.3f),
+                                width = Clay_SizingAxis.Fit(0, 0),
+                                height = Clay_SizingAxis.Fit(0, 0),
                             },
                             // childAlignment = {
                             //     x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER,
@@ -36,32 +34,41 @@ internal readonly struct MainScreenPlugin : IPlugin
                     }
                 });
 
-            var child = world.Entity()
-                .Set(new UINode()
-                {
-                    // Config = {
-                    //     custom = {
-                    //         customData = (void*) clay.Value.AddGumpCommand(0x123, default, Vector3.UnitZ),
-                    //     }
-                    // }
-                    Config = {
-                        layout = {
-                            sizing = {
-                                width = Clay_SizingAxis.Fixed(gumpInfo.UV.Width),
-                                height = Clay_SizingAxis.Fixed(gumpInfo.UV.Height),
-                            }
-                        }
-                    },
-                    UOConfig = {
-                        Type = ClayUOCommandType.Gump,
-                        Id = 0x123,
-                        Position = default,
-                        Hue = Vector3.UnitZ,
-                    }
-                });
 
-            root.AddChild(child);
+
+            root.AddChild(AddGump(world, assets, 0x014E, Vector3.UnitZ));
+            root.AddChild(AddGump(world, assets, 0x05CA, Vector3.UnitZ, new(25, 240))
+                .Set(UIInteractionState.None));
 
         }, Stages.Startup, ThreadingMode.Single);
+    }
+
+    private static EntityView AddGump(TinyEcs.World world, AssetsServer assets, ushort id, Vector3 hue, Vector2? position = null)
+    {
+        ref readonly var gumpInfo = ref assets.Gumps.GetGump(id);
+        return world.Entity()
+            .Set(new UINode()
+            {
+                Config = {
+                    layout = {
+                        sizing = {
+                            width = Clay_SizingAxis.Fixed(gumpInfo.UV.Width),
+                            height = Clay_SizingAxis.Fixed(gumpInfo.UV.Height),
+                        }
+                    },
+                    floating = {
+                        attachTo = position.HasValue ? Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT : Clay_FloatingAttachToElement.CLAY_ATTACH_TO_NONE,
+                        offset = {
+                            x = position?.X ?? 0,
+                            y = position?.Y ?? 0
+                        }
+                    }
+                },
+                UOConfig = {
+                    Type = ClayUOCommandType.Gump,
+                    Id = id,
+                    Hue = hue,
+                }
+            });
     }
 }
