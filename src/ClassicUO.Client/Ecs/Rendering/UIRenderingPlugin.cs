@@ -8,14 +8,22 @@ using TinyEcs;
 namespace ClassicUO.Ecs;
 
 
+internal sealed class GuiOptions
+{
+    public float Scale { get; set; } = 2f;
+}
+
 internal struct UIRenderingPlugin : IPlugin
 {
     public void Build(Scheduler scheduler)
     {
+        scheduler.AddResource(new GuiOptions());
+
         // drawing
         scheduler.AddSystem((
             Res<Renderer.UltimaBatcher2D> batch,
             Res<AssetsServer> assets,
+            Res<GuiOptions> guiOptions,
             Local<Texture2D> dumbTexture,
             Query<
                 Data<GuiBounds, GuiInputState, ZIndex, GuiUOInteractionWidget, Hue>,
@@ -38,7 +46,8 @@ internal struct UIRenderingPlugin : IPlugin
 
             foreach ((var bounds, var inputState, var zIndex, var uoWidget, var color) in query)
             {
-                var hue = inputState.Ref switch {
+                var hue = inputState.Ref switch
+                {
                     GuiInputState.Over => new Vector3(0x44, 1, 1f),
                     GuiInputState.Pressed => new Vector3(38, 1, 1f),
                     _ => Unsafe.IsNullRef(ref color.Ref) ? Vector3.UnitZ : new Vector3(color.Ref.Value, 1, 1f)
@@ -46,20 +55,20 @@ internal struct UIRenderingPlugin : IPlugin
 
                 if (Unsafe.IsNullRef(ref uoWidget.Ref))
                 {
-                    b.DrawRectangle
-                    (
-                        dumbTexture,
-                        bounds.Ref.Value.X,
-                        bounds.Ref.Value.Y,
-                        bounds.Ref.Value.Width,
-                        bounds.Ref.Value.Height,
+                    b.Draw(dumbTexture,
+                        new Vector2(bounds.Ref.Value.X, bounds.Ref.Value.Y),
+                        new(0, 0, bounds.Ref.Value.Width, bounds.Ref.Value.Height),
                         hue,
-                        zIndex.Ref.Value
-                    );
+                        0.0f,
+                        Vector2.Zero,
+                        1.0f * guiOptions.Value.Scale,
+                        SpriteEffects.None,
+                        zIndex.Ref.Value);
                 }
                 else
                 {
-                    var graphic = inputState.Ref switch {
+                    var graphic = inputState.Ref switch
+                    {
                         GuiInputState.Over => uoWidget.Ref.Over,
                         GuiInputState.Pressed => uoWidget.Ref.Pressed,
                         _ => uoWidget.Ref.Normal
@@ -80,7 +89,7 @@ internal struct UIRenderingPlugin : IPlugin
                             hue,
                             0.0f,
                             Vector2.Zero,
-                            1.0f,
+                            1.0f * guiOptions.Value.Scale,
                             SpriteEffects.None,
                             zIndex.Ref.Value
                         );
@@ -100,6 +109,7 @@ internal struct UIRenderingPlugin : IPlugin
             Query<Data<GuiBounds, ZIndex, GuiInputState, Children>, Filter<With<Gui>, Optional<Children>>> query,
             Query<Data<GuiBounds, Children>, Filter<With<Gui>, Optional<Children>>> queryChildren,
             Res<MouseContext> mouseCtx,
+            Res<GuiOptions> guiOptions,
             Local<EntityView?> selected) =>
         {
             var mousePos = mouseCtx.Value.Position;
@@ -156,9 +166,15 @@ internal struct UIRenderingPlugin : IPlugin
                         }
                     }
                 }
-                else if (bounds.Ref.Value.Contains((int)mousePos.X, (int)mousePos.Y))
+                else
                 {
-                    if (!isDragging)
+                    var scaledBounds = new Rectangle(
+                        bounds.Ref.Value.X,
+                        bounds.Ref.Value.Y,
+                        (int)(bounds.Ref.Value.Width * guiOptions.Value.Scale),
+                        (int)(bounds.Ref.Value.Height * guiOptions.Value.Scale));
+
+                    if (!isDragging && scaledBounds.Contains((int)mousePos.X, (int)mousePos.Y))
                     {
                         if (!lastZIndex.HasValue || lastZIndex.Value <= zIndex.Ref.Value)
                         {
@@ -204,10 +220,10 @@ internal struct UIRenderingPlugin : IPlugin
                     .Add<Gui>()
                     .Set(new ZIndex() { Value = zIndex })
                     .Set(GuiInputState.None)
-                    .Set(new GuiBounds() { Value = bounds ?? Rectangle.Empty});
+                    .Set(new GuiBounds() { Value = bounds ?? Rectangle.Empty });
 
 
-            var root = basicWidget(world, new () { X = 100, Y = 200, Width = 120, Height = 90 })
+            var root = basicWidget(world, new() { X = 100, Y = 200, Width = 120, Height = 90 })
                 .Add<GuiRoot>();
 
             var child0 = basicWidget(world, zIndex: 2)

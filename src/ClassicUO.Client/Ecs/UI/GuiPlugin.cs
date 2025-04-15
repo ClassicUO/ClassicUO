@@ -1,8 +1,8 @@
 using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 using Clay_cs;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -29,7 +29,7 @@ internal readonly struct GuiPlugin : IPlugin
             });
             Clay.SetPointerState(new(mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y),
                 mouseCtx.Value.IsPressed(Input.MouseButtonType.Left));
-            Clay.UpdateScrollContainers(true, new (0, mouseCtx.Value.Wheel), time.Frame);
+            Clay.UpdateScrollContainers(true, new(0, mouseCtx.Value.Wheel), time.Frame);
         }, Stages.Update, ThreadingMode.Single);
 
         scheduler.AddSystem((
@@ -70,6 +70,11 @@ internal readonly struct GuiPlugin : IPlugin
 
                 switch (cmd.commandType)
                 {
+                    case Clay_RenderCommandType.CLAY_RENDER_COMMAND_TYPE_TEXT:
+                        ref readonly var text = ref cmd.renderData.text;
+
+                        break;
+
                     case Clay_RenderCommandType.CLAY_RENDER_COMMAND_TYPE_RECTANGLE:
                         ref readonly var config = ref cmd.renderData.rectangle;
 
@@ -97,6 +102,11 @@ internal readonly struct GuiPlugin : IPlugin
                             SpriteEffects.None,
                             0f
                         );
+
+                        break;
+
+                    case Clay_RenderCommandType.CLAY_RENDER_COMMAND_TYPE_CUSTOM:
+                        ref readonly var custom = ref cmd.renderData.custom;
 
                         break;
 
@@ -240,4 +250,23 @@ enum UIInteractionState : byte
     None,
     Hover,
     Pressed
+}
+
+enum ClayUOCommandType : byte
+{
+    Text,
+    Gump,
+    Art,
+    Animation,
+}
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct ClayUOCommandData
+{
+    public ClayUOCommandType Type;
+
+    public uint Index;
+    public Vector2 Size;
+    public Vector2 Position;
+    public Vector3 Hue;
 }

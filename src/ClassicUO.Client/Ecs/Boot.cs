@@ -14,14 +14,16 @@ internal readonly struct CuoPlugin : IPlugin
         scheduler.AddResource(new GameContext() { Map = -1 });
         scheduler.AddResource(Settings.GlobalSettings);
 
-        scheduler.AddSystem((Res<GameContext> gameCtx, Res<Settings> settings) => {
+        scheduler.AddSystem((Res<GameContext> gameCtx, Res<Settings> settings) =>
+        {
             ClientVersionHelper.IsClientVersionValid(
                 settings.Value.ClientVersion,
                 out gameCtx.Value.ClientVersion
             );
         }, Stages.Startup);
 
-        scheduler.AddPlugin(new FnaPlugin() {
+        scheduler.AddPlugin(new FnaPlugin()
+        {
             WindowResizable = true,
             MouseVisible = true,
             VSync = true, // don't kill the gpu
@@ -29,7 +31,7 @@ internal readonly struct CuoPlugin : IPlugin
         scheduler.AddPlugin<AssetsPlugin>();
         scheduler.AddPlugin<TerrainPlugin>();
         scheduler.AddPlugin<NetworkPlugin>();
-        // scheduler.AddPlugin<ChatPlugin>();
+        scheduler.AddPlugin<ChatPlugin>();
         scheduler.AddPlugin<PickupPlugin>();
         scheduler.AddPlugin<MobAnimationsPlugin>();
         scheduler.AddPlugin<PlayerMovementPlugin>();
@@ -40,10 +42,11 @@ internal readonly struct CuoPlugin : IPlugin
 
         // TODO: remove this once the UI is done
         scheduler.AddSystem((EventWriter<OnLoginRequest> writer, Res<Settings> settings) =>
-            writer.Enqueue(new OnLoginRequest() {
+            writer.Enqueue(new OnLoginRequest()
+            {
                 Address = settings.Value.IP,
                 Port = settings.Value.Port,
-        }), Stages.Startup);
+            }), Stages.Startup);
 
         scheduler
             .AddSystem((TinyEcs.World world) => Console.WriteLine("Archetypes removed: {0}", world.RemoveEmptyArchetypes()), threadingType: ThreadingMode.Single)

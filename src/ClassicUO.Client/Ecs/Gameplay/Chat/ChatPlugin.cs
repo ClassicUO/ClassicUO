@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Network;
@@ -8,10 +9,17 @@ using TinyEcs;
 
 namespace ClassicUO.Ecs;
 
+
+internal sealed class ChatOptions
+{
+    public int MaxMessageLength { get; set; } = 120;
+}
+
 internal readonly struct ChatPlugin : IPlugin
 {
     public void Build(Scheduler scheduler)
     {
+        scheduler.AddResource(new ChatOptions());
         scheduler.AddEvent<CharInputEvent>();
 
         scheduler.AddSystem
@@ -20,38 +28,65 @@ internal readonly struct ChatPlugin : IPlugin
             {
                 TextInputEXT.TextInput += c =>
                 {
-                    writer.Enqueue(new () { Value = c });
+                    writer.Enqueue(new() { Value = c });
                 };
             },
             Stages.Startup,
             ThreadingMode.Single
         );
 
-        scheduler.AddSystem
-        (
-            (EventReader<CharInputEvent> reader, Local<StringBuilder> sb, Res<NetClient> network, Res<GameContext> gameCtx, Res<Settings> settings) =>
+        scheduler.AddSystem((
+            EventReader<CharInputEvent> reader,
+            Local<StringBuilder> sb,
+            Res<UOFileManager> fileManager,
+            Res<NetClient> network,
+            Res<GameContext> gameCtx,
+            Res<Settings> settings,
+            Res<ChatOptions> chatOptions
+        ) =>
             {
                 sb.Value ??= new StringBuilder();
 
                 foreach (var ev in reader)
                 {
                     if (ev.Value == '\n') continue;
+                    if (ev.Value == '\t') continue;
+
+                    if (ev.Value == '\b')
+                    {
+                        if (sb.Value.Length > 0)
+                            sb.Value.Remove(sb.Value.Length - 1, 1);
+
+                        continue;
+                    }
 
                     if (ev.Value == '\r')
                     {
                         if (sb.Value.Length > 0)
                         {
+                            var text = sb.Value.ToString();
+                            var entries = fileManager.Value.Speeches.GetKeywords(text);
+
                             if (gameCtx.Value.ClientVersion >= ClientVersion.CV_200)
                             {
-                                network.Value.Send_UnicodeSpeechRequest(sb.ToString(),
-                                                                        MessageType.Regular,
-                                                                        3,
-                                                                        0x44,
-                                                                        settings.Value.Language);
+                                network.Value.Send_UnicodeSpeechRequest(
+                                    text,
+                                    MessageType.Regular,
+                                    3,
+                                    0x44,
+                                    settings.Value.Language,
+                                    entries
+                                );
                             }
                             else
                             {
-                                network.Value.Send_ASCIISpeechRequest(sb.ToString(), MessageType.Regular, 3, 0x44);
+                                network.Value.Send_ASCIISpeechRequest(
+                                    text,
+                                    MessageType.Regular,
+                                    3,
+                                    0x44,
+                                    entries
+                                );
                             }
 
                             sb.Value.Clear();
@@ -60,7 +95,8 @@ internal readonly struct ChatPlugin : IPlugin
                         continue;
                     }
 
-                    sb.Value.Append(ev.Value);
+                    if (sb.Value.Length < chatOptions.Value.MaxMessageLength)
+                        sb.Value.Append(ev.Value);
                 }
             },
             Stages.Update,

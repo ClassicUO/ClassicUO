@@ -78,10 +78,10 @@ readonly struct NetworkPlugin : IPlugin
             if (gameCtx.Value.ClientVersion >= ClientVersion.CV_6040)
             {
                 // NOTE: im forcing the use of latest client just for convenience rn
-                var major = (byte) ((uint)gameCtx.Value.ClientVersion >> 24);
-                var minor = (byte) ((uint)gameCtx.Value.ClientVersion >> 16);
-                var build = (byte) ((uint)gameCtx.Value.ClientVersion >> 8);
-                var extra = (byte) gameCtx.Value.ClientVersion;
+                var major = (byte)((uint)gameCtx.Value.ClientVersion >> 24);
+                var minor = (byte)((uint)gameCtx.Value.ClientVersion >> 16);
+                var build = (byte)((uint)gameCtx.Value.ClientVersion >> 8);
+                var extra = (byte)gameCtx.Value.ClientVersion;
 
                 network.Value.Send_Seed(network.Value.LocalIP, major, minor, build, extra);
             }

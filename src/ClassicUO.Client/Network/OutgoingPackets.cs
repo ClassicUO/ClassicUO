@@ -74,7 +74,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -105,7 +105,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -136,7 +136,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -179,7 +179,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -222,7 +222,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -254,7 +254,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -287,7 +287,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -338,7 +338,7 @@ namespace ClassicUO.Network
             writer.WriteASCII(character.Name, 30);
             writer.WriteZero(2);
 
-            writer.WriteUInt32BE((uint) Client.Game.UO.Protocol);
+            writer.WriteUInt32BE((uint)Client.Game.UO.Protocol);
             writer.WriteUInt32BE(0x01);
             writer.WriteUInt32BE(0x00);
             writer.WriteUInt8(profession);
@@ -348,31 +348,31 @@ namespace ClassicUO.Network
 
             if (Client.Game.UO.Version < ClientVersion.CV_4011D)
             {
-                val = (byte) (character.Flags.HasFlag(Flags.Female) ? 0x01 : 0x00);
+                val = (byte)(character.Flags.HasFlag(Flags.Female) ? 0x01 : 0x00);
             }
             else
             {
-                val = (byte) character.Race;
+                val = (byte)character.Race;
 
                 if (Client.Game.UO.Version < ClientVersion.CV_7000)
                 {
                     val--;
                 }
 
-                val = (byte) (val * 2 + (byte) (character.Flags.HasFlag(Flags.Female) ? 0x01 : 0x00));
+                val = (byte)(val * 2 + (byte)(character.Flags.HasFlag(Flags.Female) ? 0x01 : 0x00));
             }
 
             writer.WriteUInt8(val);
-            writer.WriteUInt8((byte) character.Strength);
-            writer.WriteUInt8((byte) character.Dexterity);
-            writer.WriteUInt8((byte) character.Intelligence);
+            writer.WriteUInt8((byte)character.Strength);
+            writer.WriteUInt8((byte)character.Dexterity);
+            writer.WriteUInt8((byte)character.Intelligence);
 
             List<Skill> skills = character.Skills.OrderByDescending(o => o.Value).Take(skillcount).ToList();
 
             foreach (Skill skill in skills)
             {
-                writer.WriteUInt8((byte) skill.Index);
-                writer.WriteUInt8((byte) skill.ValueFixed);
+                writer.WriteUInt8((byte)skill.Index);
+                writer.WriteUInt8((byte)skill.ValueFixed);
             }
 
             writer.WriteUInt16BE(character.Hue);
@@ -401,9 +401,9 @@ namespace ClassicUO.Network
                 writer.WriteZero(2 * 2);
             }
 
-            writer.WriteUInt16BE((ushort) cityIndex);
+            writer.WriteUInt16BE((ushort)cityIndex);
             writer.WriteZero(2);
-            writer.WriteUInt16BE((ushort) slot);
+            writer.WriteUInt16BE((ushort)slot);
             writer.WriteUInt32BE(clientIP);
 
             Item shirt = character.FindItemByLayer(Layer.Shirt);
@@ -431,7 +431,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -464,7 +464,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -493,7 +493,7 @@ namespace ClassicUO.Network
             writer.WriteUInt32BE(0xEDEDEDED);
             writer.WriteASCII(name, 30);
             writer.WriteZero(2);
-            writer.WriteUInt32BE((uint) protocol);
+            writer.WriteUInt32BE((uint)protocol);
             writer.WriteZero(24);
             writer.WriteUInt32BE(index);
             writer.WriteUInt32BE(ipclient);
@@ -501,7 +501,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -533,7 +533,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -575,7 +575,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -619,7 +619,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -645,13 +645,13 @@ namespace ClassicUO.Network
             }
 
             writer.WriteUInt32BE(serial);
-            writer.WriteUInt8((byte) layer);
+            writer.WriteUInt8((byte)layer);
             writer.WriteUInt32BE(container);
 
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -683,7 +683,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -713,7 +713,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -745,7 +745,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -777,7 +777,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -808,7 +808,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -838,7 +838,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -869,7 +869,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -900,7 +900,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -911,7 +911,7 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
-        public static void Send_ASCIISpeechRequest(this NetClient socket, string text, MessageType type, byte font, ushort hue)
+        public static void Send_ASCIISpeechRequest(this NetClient socket, string text, MessageType type, byte font, ushort hue, List<SpeechEntry> entries)
         {
             const byte ID = 0x03;
 
@@ -926,7 +926,6 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            List<SpeechEntry> entries = Client.Game.UO.FileManager.Speeches.GetKeywords(text);
             bool encoded = entries != null && entries.Count != 0;
 
             if (encoded)
@@ -934,7 +933,7 @@ namespace ClassicUO.Network
                 type |= MessageType.Encoded;
             }
 
-            writer.WriteUInt8((byte) type);
+            writer.WriteUInt8((byte)type);
             writer.WriteUInt16BE(hue);
             writer.WriteUInt16BE(font);
             writer.WriteASCII(text);
@@ -942,7 +941,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -960,7 +959,8 @@ namespace ClassicUO.Network
             MessageType type,
             byte font,
             ushort hue,
-            string lang
+            string lang,
+            List<SpeechEntry> entries
         )
         {
             const byte ID = 0xAD;
@@ -976,7 +976,6 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            List<SpeechEntry> entries = Client.Game.UO.FileManager.Speeches.GetKeywords(text);
             bool encoded = entries != null && entries.Count != 0;
 
             if (encoded)
@@ -984,7 +983,7 @@ namespace ClassicUO.Network
                 type |= MessageType.Encoded;
             }
 
-            writer.WriteUInt8((byte) type);
+            writer.WriteUInt8((byte)type);
             writer.WriteUInt16BE(hue);
             writer.WriteUInt16BE(font);
             writer.WriteASCII(lang, 4);
@@ -994,7 +993,7 @@ namespace ClassicUO.Network
                 List<byte> codeBytes = new List<byte>();
                 byte[] utf8 = Encoding.UTF8.GetBytes(text);
                 int len = entries.Count;
-                codeBytes.Add((byte) (len >> 4));
+                codeBytes.Add((byte)(len >> 4));
                 int num3 = len & 15;
                 bool flag = false;
                 int index = 0;
@@ -1005,13 +1004,13 @@ namespace ClassicUO.Network
 
                     if (flag)
                     {
-                        codeBytes.Add((byte) (keywordID >> 4));
+                        codeBytes.Add((byte)(keywordID >> 4));
                         num3 = keywordID & 15;
                     }
                     else
                     {
-                        codeBytes.Add((byte) ((num3 << 4) | ((keywordID >> 8) & 15)));
-                        codeBytes.Add((byte) keywordID);
+                        codeBytes.Add((byte)((num3 << 4) | ((keywordID >> 8) & 15)));
+                        codeBytes.Add((byte)keywordID);
                     }
 
                     index++;
@@ -1020,7 +1019,7 @@ namespace ClassicUO.Network
 
                 if (!flag)
                 {
-                    codeBytes.Add((byte) (num3 << 4));
+                    codeBytes.Add((byte)(num3 << 4));
                 }
 
                 for (int i = 0; i < codeBytes.Count; ++i)
@@ -1039,7 +1038,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -1077,7 +1076,7 @@ namespace ClassicUO.Network
             {
                 writer.WriteUInt16BE(0x1C);
                 writer.WriteUInt16BE(0x02);
-                writer.WriteUInt16BE((ushort) idx);
+                writer.WriteUInt16BE((ushort)idx);
             }
             else
             {
@@ -1088,7 +1087,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -1120,7 +1119,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -1152,7 +1151,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -1184,7 +1183,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -1216,7 +1215,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -1248,7 +1247,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -1284,30 +1283,30 @@ namespace ClassicUO.Network
 
             writer.WriteUInt32BE(local);
             writer.WriteUInt32BE(server);
-            writer.WriteUInt32BE((uint) button);
+            writer.WriteUInt32BE((uint)button);
 
-            writer.WriteUInt32BE((uint) switches.Length);
+            writer.WriteUInt32BE((uint)switches.Length);
 
             for (int i = 0; i < switches.Length; ++i)
             {
                 writer.WriteUInt32BE(switches[i]);
             }
 
-            writer.WriteUInt32BE((uint) entries.Length);
+            writer.WriteUInt32BE((uint)entries.Length);
 
             for (int i = 0; i < entries.Length; ++i)
             {
                 int len = Math.Min(239, entries[i].Item2.Length);
 
                 writer.WriteUInt16BE(entries[i].Item1);
-                writer.WriteUInt16BE((ushort) len);
+                writer.WriteUInt16BE((ushort)len);
                 writer.WriteUnicodeBE(entries[i].Item2, len);
             }
 
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -1340,7 +1339,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -1379,7 +1378,7 @@ namespace ClassicUO.Network
 
             if (code != 0)
             {
-                writer.WriteUInt16BE((ushort) code);
+                writer.WriteUInt16BE((ushort)code);
                 writer.WriteUInt16BE(itemGraphic);
                 writer.WriteUInt16BE(itemHue);
             }
@@ -1387,7 +1386,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -1421,7 +1420,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -1456,7 +1455,7 @@ namespace ClassicUO.Network
             {
                 writer.WriteUInt8(0x02);
                 writer.WriteUInt32BE(serial);
-                writer.WriteUInt32BE((uint) (state ? 1 : 0));
+                writer.WriteUInt32BE((uint)(state ? 1 : 0));
             }
             else
             {
@@ -1468,7 +1467,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -1502,7 +1501,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -1533,7 +1532,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -1571,13 +1570,13 @@ namespace ClassicUO.Network
             writer.WriteUInt8(parentID);
             writer.WriteUInt8(button);
             writer.WriteBool(code);
-            writer.WriteUInt16BE((ushort) (text.Length + 1));
+            writer.WriteUInt16BE((ushort)(text.Length + 1));
             writer.WriteASCII(text, text.Length + 1);
 
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -1609,7 +1608,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -1640,7 +1639,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -1672,7 +1671,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -1714,13 +1713,13 @@ namespace ClassicUO.Network
             writer.WriteUInt32BE(entity);
             writer.WriteUInt16BE(x);
             writer.WriteUInt16BE(y);
-            writer.WriteUInt16BE((ushort) z);
+            writer.WriteUInt16BE((ushort)z);
             writer.WriteUInt16BE(graphic);
 
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -1761,13 +1760,13 @@ namespace ClassicUO.Network
             writer.WriteUInt32BE(0x00);
             writer.WriteUInt16BE(x);
             writer.WriteUInt16BE(y);
-            writer.WriteUInt16BE((ushort) z);
+            writer.WriteUInt16BE((ushort)z);
             writer.WriteUInt16BE(graphic);
 
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -1793,7 +1792,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            writer.WriteUInt8((byte) type);
+            writer.WriteUInt8((byte)type);
             writer.WriteUInt32BE(cursorID);
             writer.WriteUInt8(cursorType);
             writer.WriteUInt32BE(0x00);
@@ -1803,7 +1802,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -1830,13 +1829,13 @@ namespace ClassicUO.Network
             }
 
             writer.WriteUInt64BE(world.MessageManager.PromptData.Data);
-            writer.WriteUInt32BE((uint) (cancel ? 0 : 1));
+            writer.WriteUInt32BE((uint)(cancel ? 0 : 1));
             writer.WriteASCII(text);
 
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -1863,7 +1862,7 @@ namespace ClassicUO.Network
             }
 
             writer.WriteUInt64BE(world.MessageManager.PromptData.Data);
-            writer.WriteUInt32BE((uint) (cancel ? 0 : 1));
+            writer.WriteUInt32BE((uint)(cancel ? 0 : 1));
             writer.WriteASCII(lang, 3);
             writer.WriteUInt8(0x00);
             writer.WriteUnicodeLE(text, text.Length);
@@ -1871,7 +1870,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -1904,7 +1903,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -1936,7 +1935,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -1965,13 +1964,13 @@ namespace ClassicUO.Network
             writer.WriteUInt8(0x01);
             writer.WriteUInt32BE(serial);
             writer.WriteUInt16BE(0x01);
-            writer.WriteUInt16BE((ushort) text.Length);
+            writer.WriteUInt16BE((ushort)text.Length);
             writer.WriteUnicodeBE(text, text.Length);
 
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -2003,7 +2002,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -2035,7 +2034,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -2068,7 +2067,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -2101,7 +2100,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -2134,7 +2133,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -2167,7 +2166,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -2200,7 +2199,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -2245,7 +2244,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -2278,7 +2277,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -2311,7 +2310,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -2344,7 +2343,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -2377,7 +2376,7 @@ namespace ClassicUO.Network
             writer.WriteUInt8(0x05);
             writer.WriteUInt32BE(serial);
             writer.WriteUInt32BE(msgSerial);
-            writer.WriteUInt8((byte) (subject.Length + 1));
+            writer.WriteUInt8((byte)(subject.Length + 1));
 
             byte[] title = Encoding.UTF8.GetBytes(subject);
             writer.Write(title);
@@ -2410,7 +2409,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -2444,7 +2443,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -2476,7 +2475,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -2508,7 +2507,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -2539,7 +2538,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -2572,7 +2571,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -2603,9 +2602,9 @@ namespace ClassicUO.Network
 
             uint clientFlag = 0;
 
-            for (int i = 0; i < (uint) protocol; ++i)
+            for (int i = 0; i < (uint)protocol; ++i)
             {
-                clientFlag |= (uint) (1 << i);
+                clientFlag |= (uint)(1 << i);
             }
 
 
@@ -2614,7 +2613,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -2647,7 +2646,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -2680,7 +2679,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -2721,7 +2720,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -2762,7 +2761,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -2794,7 +2793,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -2827,7 +2826,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -2866,7 +2865,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -2909,7 +2908,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -2942,7 +2941,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -2975,7 +2974,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -3008,7 +3007,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -3041,7 +3040,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -3073,7 +3072,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -3111,7 +3110,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -3139,12 +3138,12 @@ namespace ClassicUO.Network
 
             writer.WriteUInt16BE(0x1A);
             writer.WriteUInt8(stat);
-            writer.WriteUInt8((byte) state);
+            writer.WriteUInt8((byte)state);
 
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -3177,7 +3176,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -3213,7 +3212,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -3245,16 +3244,16 @@ namespace ClassicUO.Network
             writer.WriteUInt8(0x00);
             writer.WriteUInt16BE(0);
             int titleLength = Encoding.UTF8.GetByteCount(title);
-            writer.WriteUInt16BE((ushort) titleLength);
+            writer.WriteUInt16BE((ushort)titleLength);
             writer.WriteUTF8(title, titleLength);
             int authorLength = Encoding.UTF8.GetByteCount(author);
-            writer.WriteUInt16BE((ushort) authorLength);
+            writer.WriteUInt16BE((ushort)authorLength);
             writer.WriteUTF8(author, authorLength);
 
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -3283,8 +3282,8 @@ namespace ClassicUO.Network
 
             writer.WriteUInt32BE(serial);
             writer.WriteUInt16BE(0x01);
-            writer.WriteUInt16BE((ushort) page);
-            writer.WriteUInt16BE((ushort) text.Length);
+            writer.WriteUInt16BE((ushort)page);
+            writer.WriteUInt16BE((ushort)text.Length);
 
             for (int i = 0; i < text.Length; ++i)
             {
@@ -3324,7 +3323,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -3359,7 +3358,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -3408,7 +3407,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -3436,7 +3435,7 @@ namespace ClassicUO.Network
             }
 
             writer.WriteUInt32BE(serial);
-            writer.WriteUInt16BE((ushort) items.Length);
+            writer.WriteUInt16BE((ushort)items.Length);
 
             for (int i = 0; i < items.Length; ++i)
             {
@@ -3448,7 +3447,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -3483,7 +3482,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -3517,7 +3516,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -3551,7 +3550,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -3583,7 +3582,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -3614,7 +3613,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -3645,7 +3644,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -3689,7 +3688,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -3717,14 +3716,14 @@ namespace ClassicUO.Network
 
             writer.WriteUInt16BE(0x33);
             writer.WriteUInt32BE(serial);
-            writer.WriteUInt8((byte) dir);
-            writer.WriteUInt8((byte) dir);
+            writer.WriteUInt8((byte)dir);
+            writer.WriteUInt8((byte)dir);
             writer.WriteUInt8(speed);
 
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -3754,7 +3753,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -3786,14 +3785,14 @@ namespace ClassicUO.Network
                 direction |= Direction.Running;
             }
 
-            writer.WriteUInt8((byte) direction);
+            writer.WriteUInt8((byte)direction);
             writer.WriteUInt8(seq);
             writer.WriteUInt32BE(fastWalk);
 
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -3826,7 +3825,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -3860,7 +3859,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -3894,7 +3893,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -3928,7 +3927,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -3963,7 +3962,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -3997,7 +3996,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -4031,7 +4030,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -4065,7 +4064,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -4098,7 +4097,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -4129,15 +4128,15 @@ namespace ClassicUO.Network
             writer.WriteUInt8(0x00);
             writer.WriteUInt32BE(graphic);
             writer.WriteUInt8(0x00);
-            writer.WriteUInt32BE((uint) x);
+            writer.WriteUInt32BE((uint)x);
             writer.WriteUInt8(0x00);
-            writer.WriteUInt32BE((uint) y);
+            writer.WriteUInt32BE((uint)y);
             writer.WriteUInt8(0x0A);
 
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -4168,17 +4167,17 @@ namespace ClassicUO.Network
             writer.WriteUInt8(0x00);
             writer.WriteUInt32BE(graphic);
             writer.WriteUInt8(0x00);
-            writer.WriteUInt32BE((uint) x);
+            writer.WriteUInt32BE((uint)x);
             writer.WriteUInt8(0x00);
-            writer.WriteUInt32BE((uint) y);
+            writer.WriteUInt32BE((uint)y);
             writer.WriteUInt8(0x00);
-            writer.WriteUInt32BE((uint) z);
+            writer.WriteUInt32BE((uint)z);
             writer.WriteUInt8(0x0A);
 
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -4209,17 +4208,17 @@ namespace ClassicUO.Network
             writer.WriteUInt8(0x00);
             writer.WriteUInt32BE(graphic);
             writer.WriteUInt8(0x00);
-            writer.WriteUInt32BE((uint) x);
+            writer.WriteUInt32BE((uint)x);
             writer.WriteUInt8(0x00);
-            writer.WriteUInt32BE((uint) y);
+            writer.WriteUInt32BE((uint)y);
             writer.WriteUInt8(0x00);
-            writer.WriteUInt32BE((uint) z);
+            writer.WriteUInt32BE((uint)z);
             writer.WriteUInt8(0x0A);
 
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -4250,17 +4249,17 @@ namespace ClassicUO.Network
             writer.WriteUInt8(0x00);
             writer.WriteUInt32BE(graphic);
             writer.WriteUInt8(0x00);
-            writer.WriteUInt32BE((uint) x);
+            writer.WriteUInt32BE((uint)x);
             writer.WriteUInt8(0x00);
-            writer.WriteUInt32BE((uint) y);
+            writer.WriteUInt32BE((uint)y);
             writer.WriteUInt8(0x00);
-            writer.WriteUInt32BE((uint) z);
+            writer.WriteUInt32BE((uint)z);
             writer.WriteUInt8(0x0A);
 
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -4291,15 +4290,15 @@ namespace ClassicUO.Network
             writer.WriteUInt8(0x00);
             writer.WriteUInt32BE(graphic);
             writer.WriteUInt8(0x00);
-            writer.WriteUInt32BE((uint) x);
+            writer.WriteUInt32BE((uint)x);
             writer.WriteUInt8(0x00);
-            writer.WriteUInt32BE((uint) y);
+            writer.WriteUInt32BE((uint)y);
             writer.WriteUInt8(0x0A);
 
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -4339,7 +4338,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -4368,7 +4367,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -4399,7 +4398,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {
@@ -4646,10 +4645,10 @@ namespace ClassicUO.Network
 
             foreach (SkillEntry s in Client.Game.UO.FileManager.Skills.SortedSkills)
             {
-                writer.WriteUInt16BE((ushort) s.Index);
+                writer.WriteUInt16BE((ushort)s.Index);
                 writer.WriteBool(s.HasAction);
 
-                writer.WriteUInt16BE((ushort) s.Name.Length);
+                writer.WriteUInt16BE((ushort)s.Name.Length);
                 writer.WriteUnicodeBE(s.Name, s.Name.Length);
             }
 
