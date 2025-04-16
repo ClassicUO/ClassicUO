@@ -34,13 +34,80 @@ internal readonly struct MainScreenPlugin : IPlugin
                     }
                 });
 
+            // background
+            root.AddChild(AddGump(
+                world,
+                assets,
+                0x014E,
+                Vector3.UnitZ
+            ));
 
+            // quit button
+            root.AddChild(AddButton(
+                world,
+                assets,
+                (0x05CA, 0x05C9, 0x05C8),
+                Vector3.UnitZ,
+                new(25, 240)
+            ).Set(ButtonAction.Quit));
 
-            root.AddChild(AddGump(world, assets, 0x014E, Vector3.UnitZ));
-            root.AddChild(AddGump(world, assets, 0x05CA, Vector3.UnitZ, new(25, 240))
-                .Set(UIInteractionState.None));
+            // credit button
+            root.AddChild(AddButton(
+                world,
+                assets,
+                (0x05D0, 0x05CF, 0x5CE),
+                Vector3.UnitZ,
+                new(530, 125)
+            ).Set(ButtonAction.Credits));
+
+            // arrow button
+            root.AddChild(AddButton(
+                world,
+                assets,
+                (0x5CD, 0x5CC, 0x5CB),
+                Vector3.UnitZ,
+                new(280, 365)
+            ).Set(ButtonAction.Arrow));
 
         }, Stages.Startup, ThreadingMode.Single);
+
+
+        scheduler.AddSystem((Query<Data<UIInteractionState, ButtonAction>> query) =>
+        {
+            foreach ((var interaction, var action) in query)
+            {
+                if (interaction.Ref == UIInteractionState.Pressed)
+                {
+                    Action fn = action.Ref switch
+                    {
+                        ButtonAction.Quit => () => Console.WriteLine("quit"),
+                        ButtonAction.Credits => () => Console.WriteLine("credits"),
+                        ButtonAction.Arrow => () => Console.WriteLine("arrow"),
+                        _ => null
+                    };
+
+                    fn?.Invoke();
+
+                    interaction.Ref = UIInteractionState.Handled;
+                }
+            }
+        }, Stages.Update, ThreadingMode.Single);
+    }
+
+    enum ButtonAction : byte
+    {
+        Quit = 0,
+        Credits = 1,
+        Arrow = 2,
+    }
+
+
+
+    private static EntityView AddButton(TinyEcs.World world, AssetsServer assets, (ushort normal, ushort pressed, ushort over) ids, Vector3 hue, Vector2? position = null)
+    {
+        return AddGump(world, assets, ids.normal, hue, position)
+            .Set(UIInteractionState.None)
+            .Set(new UOButton() { Normal = ids.normal, Pressed = ids.pressed, Over = ids.over });
     }
 
     private static EntityView AddGump(TinyEcs.World world, AssetsServer assets, ushort id, Vector3 hue, Vector2? position = null)

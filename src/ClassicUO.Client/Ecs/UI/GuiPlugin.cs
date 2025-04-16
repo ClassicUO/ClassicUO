@@ -36,7 +36,21 @@ internal readonly struct GuiPlugin : IPlugin
             Clay.UpdateScrollContainers(true, new(0, mouseCtx.Value.Wheel), time.Frame);
         }, Stages.Update, ThreadingMode.Single);
 
+        scheduler.AddSystem((Query<Data<UINode, UOButton, UIInteractionState>> query) =>
+        {
+            foreach ((var ent, var node, var button, var interaction) in query)
+            {
+                node.Ref.UOConfig.Id = interaction.Ref switch
+                {
+                    UIInteractionState.Over => button.Ref.Over,
+                    UIInteractionState.Pressed or UIInteractionState.Handled => button.Ref.Pressed,
+                    _ => button.Ref.Normal
+                };
+            }
+        }, Stages.Update, ThreadingMode.Single);
+
         scheduler.AddSystem((
+            Local<ulong> lastEntityPressed,
             Res<UltimaBatcher2D> batcher,
             Local<Texture2D> dumbTexture,
             Res<AssetsServer> assets,
@@ -52,12 +66,27 @@ internal readonly struct GuiPlugin : IPlugin
                 dumbTexture.Value.SetData([Color.White]);
             }
 
+            if (lastEntityPressed.Value != 0 && mouseCtx.Value.IsReleased(MouseButtonType.Left))
+            {
+                lastEntityPressed.Value = 0;
+            }
+
             commandBuffer.Value.Reset();
 
             Clay.BeginLayout();
-            foreach ((var node, var interaction, var children) in query)
-                renderNodes(ref node.Ref, ref interaction.Ref, ref children.Ref, mouseCtx, commandBuffer, queryChildren);
+            ulong found = 0;
+            var lastInteraction = UIInteractionState.None;
+            foreach ((var ent, var node, var interaction, var children) in query)
+                renderNodes(ent.Ref, ref found, lastEntityPressed.Value, ref lastInteraction, ref node.Ref, ref interaction.Ref, ref children.Ref, mouseCtx, commandBuffer, queryChildren);
             var cmds = Clay.EndLayout();
+
+            if (found != 0)
+            {
+                lastEntityPressed.Value = found;
+                (_, var interaction, _) = queryChildren.Get(found);
+                if (!Unsafe.IsNullRef(ref interaction.Ref))
+                    interaction.Ref = lastInteraction;
+            }
 
             var b = batcher.Value;
             b.GraphicsDevice.Clear(ClearOptions.DepthBuffer, Color.Transparent, 1, 0);
@@ -66,12 +95,12 @@ internal readonly struct GuiPlugin : IPlugin
             b.SetSampler(SamplerState.PointClamp);
             b.SetStencil(DepthStencilState.Default);
 
-            Console.WriteLine("cmds count: {0}", cmds.length);
+            // Console.WriteLine("cmds count: {0}", cmds.length);
 
             var span = new ReadOnlySpan<Clay_RenderCommand>(cmds.internalArray, cmds.length);
             foreach (ref readonly var cmd in span)
             {
-                Console.WriteLine("cmds type: {0}", cmd.commandType);
+                // Console.WriteLine("cmds type: {0}", cmd.commandType);
 
                 ref readonly var boundingBox = ref cmd.boundingBox;
 
@@ -185,6 +214,10 @@ internal readonly struct GuiPlugin : IPlugin
 
             static void renderNodes
             (
+                ulong ent,
+                ref ulong found,
+                ulong lastPressed,
+                ref UIInteractionState newInteraction,
                 ref UINode node, ref UIInteractionState interaction, ref Children children,
                 MouseContext mouseCtx,
                 ClayUOCommandBuffer commandBuffer,
@@ -193,30 +226,38 @@ internal readonly struct GuiPlugin : IPlugin
             {
                 Clay.OpenElement();
 
-                if (!Unsafe.IsNullRef(ref interaction))
-                {
-                    interaction = Clay.IsHovered() ? mouseCtx.IsPressed(MouseButtonType.Left) ? UIInteractionState.Pressed : UIInteractionState.Hover : UIInteractionState.None;
-                }
-
                 var config = node.Config;
                 if (node.UOConfig.Type != ClayUOCommandType.None)
                 {
-                    var uoConfig = node.UOConfig;
-                    if (!Unsafe.IsNullRef(ref interaction))
-                    {
-                        if (interaction == UIInteractionState.Hover)
-                        {
-                            uoConfig.Hue = new Vector3(0x44, 1, 1);
-                        }
-                        else if (interaction == UIInteractionState.Pressed)
-                        {
-                            uoConfig.Hue = new Vector3(38, 1, 1);
-                        }
-                    }
-                    config.custom.customData = (void*)commandBuffer.AddCommand(uoConfig);
+                    config.custom.customData = (void*)commandBuffer.AddCommand(node.UOConfig);
                 }
 
                 Clay.ConfigureOpenElement(config);
+
+                if (!Unsafe.IsNullRef(ref interaction))
+                {
+                    if (lastPressed != 0)
+                    {
+                        if (lastPressed == ent && mouseCtx.IsPressed(MouseButtonType.Left))
+                        {
+                            if (interaction != UIInteractionState.Handled)
+                                newInteraction = UIInteractionState.Pressed;
+                            else
+                                newInteraction = UIInteractionState.Handled;
+                            found = ent;
+                        }
+                    }
+                    else
+                    {
+                        if (!mouseCtx.IsPressed(MouseButtonType.Left) && Clay.IsHovered())
+                        {
+                            found = ent;
+                            newInteraction = UIInteractionState.Over;
+                        }
+
+                        interaction = UIInteractionState.None;
+                    }
+                }
 
                 if (!string.IsNullOrEmpty(node.Text))
                 {
@@ -227,93 +268,14 @@ internal readonly struct GuiPlugin : IPlugin
                 {
                     foreach (var child in children)
                     {
-                        (var childNode, var childInteraction, var childChildren) = query.Get(child);
-                        renderNodes(ref childNode.Ref, ref childInteraction.Ref, ref childChildren.Ref, mouseCtx, commandBuffer, query);
+                        (var childEnt, var childNode, var childInteraction, var childChildren) = query.Get(child);
+                        renderNodes(childEnt.Ref, ref found, lastPressed, ref newInteraction, ref childNode.Ref, ref childInteraction.Ref, ref childChildren.Ref, mouseCtx, commandBuffer, query);
                     }
                 }
 
                 Clay.CloseElement();
             }
         }, Stages.AfterUpdate, ThreadingMode.Single);
-
-
-        scheduler.AddSystem((World ecs, Res<AssetsServer> assets) =>
-        {
-            return;
-            ref readonly var gumpInfo = ref assets.Value.Gumps.GetGump(0x085d);
-
-            var clayEnt = ecs.Entity()
-                .Set(new UINode()
-                {
-                    Config = {
-                        backgroundColor = new (48, 48, 48, 255),
-                        layout = {
-                            sizing = {
-                                width = Clay_SizingAxis.Percent(0.3f),
-                                height = Clay_SizingAxis.Percent(0.3f),
-                            },
-                            // childAlignment = {
-                            //     x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER,
-                            //     y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER
-                            // },
-                            layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
-                            childGap = 8
-                        },
-                        scroll = {
-                            vertical = true
-                        }
-                    }
-                });
-
-            for (var i = 0; i < 100; ++i)
-            {
-                // var childText = ecs.Entity()
-                //     .Set(new UINode()
-                //     {
-                //         Text = "hello",
-                //         TextConfig = {
-                //             fontId = 0,
-                //             fontSize = 20,
-                //             textColor = new (255, 255, 255, 255)
-                //         },
-                //         Config = {
-                //             backgroundColor = new (68, 68, 68, 255),
-                //             layout = {
-                //                 sizing = {
-                //                     width = Clay_SizingAxis.Percent(0.5f),
-                //                     height = Clay_SizingAxis.Percent(0.5f),
-                //                 }
-                //             }
-                //         }
-                //     });
-
-                var childImage = ecs.Entity()
-                    .Set(new UINode()
-                    {
-                        Config = {
-                            // backgroundColor = new (68, 68, 68, 255),
-                            layout = {
-                                sizing = {
-                                    width = Clay_SizingAxis.Fixed(gumpInfo.UV.Width),
-                                    height = Clay_SizingAxis.Fixed(gumpInfo.UV.Height),
-                                }
-                            },
-                            image = {
-                                imageData = ((nint)0x085d).ToPointer(),
-                                sourceDimensions = {
-                                    width = gumpInfo.UV.Width,
-                                    height = gumpInfo.UV.Height
-                                }
-                            }
-                        }
-                    })
-                    .Set(UIInteractionState.None);
-
-
-                // clayEnt.AddChild(childText);
-                clayEnt.AddChild(childImage);
-            }
-        }, Stages.Startup, ThreadingMode.Single);
     }
 }
 
@@ -328,8 +290,15 @@ struct UINode
 enum UIInteractionState : byte
 {
     None,
-    Hover,
-    Pressed
+    Over,
+    Pressed,
+    Handled,
+}
+
+
+struct UOButton
+{
+    public ushort Normal, Pressed, Over;
 }
 
 enum ClayUOCommandType : byte

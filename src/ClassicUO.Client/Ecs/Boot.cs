@@ -37,16 +37,16 @@ internal readonly struct CuoPlugin : IPlugin
         scheduler.AddPlugin<PlayerMovementPlugin>();
         scheduler.AddPlugin<WorldRenderingPlugin>();
         scheduler.AddPlugin<TextOverheadPlugin>();
-        scheduler.AddPlugin<UIRenderingPlugin>();
+        // scheduler.AddPlugin<UIRenderingPlugin>();
         scheduler.AddPlugin<GuiPlugin>();
 
         // TODO: remove this once the UI is done
-        scheduler.AddSystem((EventWriter<OnLoginRequest> writer, Res<Settings> settings) =>
-            writer.Enqueue(new OnLoginRequest()
-            {
-                Address = settings.Value.IP,
-                Port = settings.Value.Port,
-            }), Stages.Startup);
+        // scheduler.AddSystem((EventWriter<OnLoginRequest> writer, Res<Settings> settings) =>
+        //     writer.Enqueue(new OnLoginRequest()
+        //     {
+        //         Address = settings.Value.IP,
+        //         Port = settings.Value.Port,
+        //     }), Stages.Startup);
 
         scheduler
             .AddSystem((TinyEcs.World world) => Console.WriteLine("Archetypes removed: {0}", world.RemoveEmptyArchetypes()), threadingType: ThreadingMode.Single)
