@@ -78,7 +78,10 @@ internal readonly struct MainScreenPlugin : IPlugin
                 Vector3.UnitZ,
                 new(218, 283),
                 new(210, 30)
-            ).Add<MainScene>());
+            ).Add<TextInput>()
+                .Add<MainScene>()
+                .Add<UsernameInput>()
+                .Set(UIInteractionState.None));
 
             // password background
             root.AddChild(AddGumpNinePatch(
@@ -88,16 +91,7 @@ internal readonly struct MainScreenPlugin : IPlugin
                 Vector3.UnitZ,
                 new(218, 283 + 50),
                 new(210, 30)
-            ).Add<MainScene>());
-
-            root.AddChild(AddLabel(world, "", new(218, 283), new(210, 30))
-                .Add<TextInput>()
-                .Add<MainScene>()
-                .Add<UsernameInput>()
-                .Set(UIInteractionState.None));
-
-            root.AddChild(AddLabel(world, "", new(218, 283 + 50), new(210, 30))
-                .Add<TextInput>()
+            ).Add<TextInput>()
                 .Add<MainScene>()
                 .Add<PasswordInput>()
                 .Set(UIInteractionState.None));

@@ -440,8 +440,10 @@ internal readonly struct GuiPlugin : IPlugin
 
 struct UINode
 {
+    // TODO: make text as separate component
     public string Text;
     public Clay_TextElementConfig TextConfig;
+
     public Clay_ElementDeclaration Config;
     public ClayUOCommandData UOConfig;
 }
