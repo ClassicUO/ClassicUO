@@ -14,6 +14,8 @@ internal readonly struct FnaPlugin : IPlugin
 
     public void Build(Scheduler scheduler)
     {
+        scheduler.AddPlugin<TextHandlerPlugin>();
+
         scheduler.AddResource(new UoGame(MouseVisible, WindowResizable, VSync));
         scheduler.AddSystemParam(new Time());
 

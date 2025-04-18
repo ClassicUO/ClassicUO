@@ -12,6 +12,13 @@ using TinyEcs;
 
 namespace ClassicUO.Ecs;
 
+
+internal sealed class FocusedInput
+{
+    public ulong Entity { get; set; }
+};
+
+
 internal readonly struct GuiPlugin : IPlugin
 {
     private unsafe static Clay_Dimensions OnMeasureText(Clay_StringSlice slice, Clay_TextElementConfig* config, void* userData)
@@ -32,7 +39,7 @@ internal readonly struct GuiPlugin : IPlugin
     public unsafe void Build(Scheduler scheduler)
     {
         scheduler.AddResource(new ClayUOCommandBuffer());
-        scheduler.AddResource(new FocusedTextInput());
+        scheduler.AddResource(new FocusedInput());
 
         scheduler.AddPlugin<MainScreenPlugin>();
 
@@ -69,10 +76,15 @@ internal readonly struct GuiPlugin : IPlugin
             }
         }, Stages.Update, ThreadingMode.Single);
 
-        scheduler.AddSystem((Res<FocusedTextInput> focusedTextInput) =>
+        scheduler.AddSystem((EventReader<CharInputEvent> reader, Res<FocusedInput> focusedInput, Query<Data<UINode>, Filter<With<TextInput>>> query) =>
         {
+            (_, var node) = query.Get(focusedInput.Value.Entity);
 
-        }, Stages.Update, ThreadingMode.Single);
+            foreach (var c in reader)
+                node.Ref.Text = TextComposer.Compose(node.Ref.Text, c.Value);
+        }, Stages.Update, ThreadingMode.Single)
+        .RunIf((EventReader<CharInputEvent> reader, Res<FocusedInput> focusedInput, Query<Data<UINode>, Filter<With<TextInput>>> query)
+            => !reader.IsEmpty && focusedInput.Value.Entity != 0 && query.Count() > 0);
 
         scheduler.AddSystem((
             Local<ulong> lastEntityPressed,
@@ -81,6 +93,8 @@ internal readonly struct GuiPlugin : IPlugin
             Res<AssetsServer> assets,
             Res<MouseContext> mouseCtx,
             Res<ClayUOCommandBuffer> commandBuffer,
+            Res<FocusedInput> focusedInput,
+            Query<Data<UINode>, Filter<With<TextInput>>> queryTextInput,
             Query<Data<UINode, UIInteractionState, Children>, Filter<With<Parent>, Optional<UIInteractionState>, Optional<Children>>> query,
             Query<Data<UINode, UIInteractionState, Children>, Filter<Optional<UIInteractionState>, Optional<Children>>> queryChildren
         ) =>
@@ -111,6 +125,11 @@ internal readonly struct GuiPlugin : IPlugin
                 (_, var interaction, _) = queryChildren.Get(found);
                 if (!Unsafe.IsNullRef(ref interaction.Ref))
                     interaction.Ref = lastInteraction;
+
+                if (lastInteraction == UIInteractionState.Pressed && queryTextInput.Contains(found))
+                {
+                    focusedInput.Value.Entity = found;
+                }
             }
 
             var b = batcher.Value;
@@ -441,22 +460,8 @@ struct UOButton
     public ushort Normal, Pressed, Over;
 }
 
+struct TextInput;
 
-internal sealed class FocusedTextInput
-{
-    private readonly StringBuilder _sb = new();
-
-    public void Clear() => _sb.Clear();
-    public void Append(char c) => _sb.Append(c);
-    public void Append(ReadOnlySpan<char> s) => _sb.Append(s);
-
-    public override string ToString()
-    {
-        var str = _sb.ToString();
-        Clear();
-        return str;
-    }
-}
 
 enum ClayUOCommandType : byte
 {

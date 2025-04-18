@@ -12,6 +12,7 @@ internal readonly struct MainScreenPlugin : IPlugin
         scheduler.AddSystem((TinyEcs.World world, Res<ClayUOCommandBuffer> clay, Res<AssetsServer> assets) =>
         {
             var root = world.Entity()
+                .Add<MainScene>()
                 .Set(new UINode()
                 {
                     Config = {
@@ -40,7 +41,7 @@ internal readonly struct MainScreenPlugin : IPlugin
                 assets,
                 0x014E,
                 Vector3.UnitZ
-            ));
+            ).Add<MainScene>());
 
             // quit button
             root.AddChild(AddButton(
@@ -49,7 +50,7 @@ internal readonly struct MainScreenPlugin : IPlugin
                 (0x05CA, 0x05C9, 0x05C8),
                 Vector3.UnitZ,
                 new(25, 240)
-            ).Set(ButtonAction.Quit));
+            ).Set(ButtonAction.Quit).Add<MainScene>());
 
             // credit button
             root.AddChild(AddButton(
@@ -58,7 +59,7 @@ internal readonly struct MainScreenPlugin : IPlugin
                 (0x05D0, 0x05CF, 0x5CE),
                 Vector3.UnitZ,
                 new(530, 125)
-            ).Set(ButtonAction.Credits));
+            ).Set(ButtonAction.Credits).Add<MainScene>());
 
             // arrow button
             root.AddChild(AddButton(
@@ -67,7 +68,7 @@ internal readonly struct MainScreenPlugin : IPlugin
                 (0x5CD, 0x5CC, 0x5CB),
                 Vector3.UnitZ,
                 new(280, 365)
-            ).Set(ButtonAction.Arrow));
+            ).Set(ButtonAction.Login).Add<MainScene>());
 
             // username background
             root.AddChild(AddGumpNinePatch(
@@ -77,7 +78,7 @@ internal readonly struct MainScreenPlugin : IPlugin
                 Vector3.UnitZ,
                 new(218, 283),
                 new(210, 30)
-            ));
+            ).Add<MainScene>());
 
             // password background
             root.AddChild(AddGumpNinePatch(
@@ -87,14 +88,26 @@ internal readonly struct MainScreenPlugin : IPlugin
                 Vector3.UnitZ,
                 new(218, 283 + 50),
                 new(210, 30)
-            ));
+            ).Add<MainScene>());
 
-            root.AddChild(AddLabel(world, "HELLO!!", new(218, 283)));
+            root.AddChild(AddLabel(world, "", new(218, 283), new(210, 30))
+                .Add<TextInput>()
+                .Add<MainScene>()
+                .Add<UsernameInput>()
+                .Set(UIInteractionState.None));
+
+            root.AddChild(AddLabel(world, "", new(218, 283 + 50), new(210, 30))
+                .Add<TextInput>()
+                .Add<MainScene>()
+                .Add<PasswordInput>()
+                .Set(UIInteractionState.None));
 
         }, Stages.Startup, ThreadingMode.Single);
 
 
-        scheduler.AddSystem((Query<Data<UIInteractionState, ButtonAction>> query) =>
+        scheduler.AddSystem((Query<Data<UIInteractionState, ButtonAction>> query,
+            Single<Data<UINode>, Filter<With<UsernameInput>, With<MainScene>>> queryUsername,
+            Single<Data<UINode>, Filter<With<PasswordInput>, With<MainScene>>> queryPassword) =>
         {
             foreach ((var interaction, var action) in query)
             {
@@ -104,7 +117,13 @@ internal readonly struct MainScreenPlugin : IPlugin
                     {
                         ButtonAction.Quit => () => Console.WriteLine("quit"),
                         ButtonAction.Credits => () => Console.WriteLine("credits"),
-                        ButtonAction.Arrow => () => Console.WriteLine("arrow"),
+                        ButtonAction.Login => () =>
+                        {
+                            (_, var username) = queryUsername.Get();
+                            (_, var password) = queryPassword.Get();
+                            Login(username.Ref.Text, password.Ref.Text);
+                        }
+                        ,
                         _ => null
                     };
 
@@ -114,15 +133,23 @@ internal readonly struct MainScreenPlugin : IPlugin
         }, Stages.Update, ThreadingMode.Single);
     }
 
+    private static void Login(string username, string password)
+    {
+        Console.WriteLine("login --> username: {0} -  password: {1}", username, password);
+    }
+
     enum ButtonAction : byte
     {
         Quit = 0,
         Credits = 1,
-        Arrow = 2,
+        Login = 2,
     }
 
+    struct MainScene;
+    struct UsernameInput;
+    struct PasswordInput;
 
-    private static EntityView AddLabel(TinyEcs.World world, string text, Vector2? position = null)
+    private static EntityView AddLabel(TinyEcs.World world, string text, Vector2? position = null, Vector2? size = null)
     {
         return world.Entity()
             .Set(new UINode()
@@ -134,6 +161,12 @@ internal readonly struct MainScreenPlugin : IPlugin
                     textColor = new (255, 255, 255, 255),
                 },
                 Config = {
+                    layout = {
+                        sizing = {
+                            width = Clay_SizingAxis.Fixed(size.HasValue ? size.Value.X : 0),
+                            height = Clay_SizingAxis.Fixed(size.HasValue ? size.Value.Y : 0),
+                        }
+                    },
                     floating = {
                         attachTo = position.HasValue ? Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT : Clay_FloatingAttachToElement.CLAY_ATTACH_TO_NONE,
                         offset = {

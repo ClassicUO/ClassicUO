@@ -4,7 +4,6 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Network;
 using ClassicUO.Utility;
-using Microsoft.Xna.Framework.Input;
 using TinyEcs;
 
 namespace ClassicUO.Ecs;
@@ -20,20 +19,6 @@ internal readonly struct ChatPlugin : IPlugin
     public void Build(Scheduler scheduler)
     {
         scheduler.AddResource(new ChatOptions());
-        scheduler.AddEvent<CharInputEvent>();
-
-        scheduler.AddSystem
-        (
-            (EventWriter<CharInputEvent> writer) =>
-            {
-                TextInputEXT.TextInput += c =>
-                {
-                    writer.Enqueue(new() { Value = c });
-                };
-            },
-            Stages.Startup,
-            ThreadingMode.Single
-        );
 
         scheduler.AddSystem((
             EventReader<CharInputEvent> reader,
@@ -101,11 +86,7 @@ internal readonly struct ChatPlugin : IPlugin
             },
             Stages.Update,
             ThreadingMode.Single
-        );
-    }
-
-    struct CharInputEvent
-    {
-        public char Value;
+        ).RunIf((EventReader<CharInputEvent> reader, Res<NetClient> network)
+            => !reader.IsEmpty && network.Value.IsConnected);
     }
 }
