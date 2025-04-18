@@ -563,11 +563,6 @@ public unsafe partial struct Clay_ErrorHandler
 
 internal static unsafe partial class ClayInterop
 {
-    // public static void Clay__SuppressUnusedLatchDefinitionVariableWarning()
-    // {
-    //     (void)(CLAY__ELEMENT_DEFINITION_LATCH);
-    // }
-
     [DllImport("Clay", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     [return: NativeTypeName("uint32_t")]
     public static extern uint Clay_MinMemorySize();

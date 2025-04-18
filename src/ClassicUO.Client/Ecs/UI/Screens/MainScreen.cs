@@ -69,6 +69,28 @@ internal readonly struct MainScreenPlugin : IPlugin
                 new(280, 365)
             ).Set(ButtonAction.Arrow));
 
+            // username background
+            root.AddChild(AddGumpNinePatch(
+                world,
+                assets,
+                0x0BB8,
+                Vector3.UnitZ,
+                new(218, 283),
+                new(210, 30)
+            ));
+
+            // password background
+            root.AddChild(AddGumpNinePatch(
+                world,
+                assets,
+                0x0BB8,
+                Vector3.UnitZ,
+                new(218, 283 + 50),
+                new(210, 30)
+            ));
+
+            root.AddChild(AddLabel(world, "HELLO!!", new(218, 283)));
+
         }, Stages.Startup, ThreadingMode.Single);
 
 
@@ -76,7 +98,7 @@ internal readonly struct MainScreenPlugin : IPlugin
         {
             foreach ((var interaction, var action) in query)
             {
-                if (interaction.Ref == UIInteractionState.Pressed)
+                if (interaction.Ref == UIInteractionState.Released)
                 {
                     Action fn = action.Ref switch
                     {
@@ -87,8 +109,6 @@ internal readonly struct MainScreenPlugin : IPlugin
                     };
 
                     fn?.Invoke();
-
-                    interaction.Ref = UIInteractionState.Handled;
                 }
             }
         }, Stages.Update, ThreadingMode.Single);
@@ -102,6 +122,28 @@ internal readonly struct MainScreenPlugin : IPlugin
     }
 
 
+    private static EntityView AddLabel(TinyEcs.World world, string text, Vector2? position = null)
+    {
+        return world.Entity()
+            .Set(new UINode()
+            {
+                Text = text,
+                TextConfig = {
+                    fontId = 0,
+                    fontSize = 12,
+                    textColor = new (255, 255, 255, 255),
+                },
+                Config = {
+                    floating = {
+                        attachTo = position.HasValue ? Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT : Clay_FloatingAttachToElement.CLAY_ATTACH_TO_NONE,
+                        offset = {
+                            x = position?.X ?? 0,
+                            y = position?.Y ?? 0
+                        }
+                    }
+                }
+            });
+    }
 
     private static EntityView AddButton(TinyEcs.World world, AssetsServer assets, (ushort normal, ushort pressed, ushort over) ids, Vector3 hue, Vector2? position = null)
     {
@@ -133,6 +175,35 @@ internal readonly struct MainScreenPlugin : IPlugin
                 },
                 UOConfig = {
                     Type = ClayUOCommandType.Gump,
+                    Id = id,
+                    Hue = hue,
+                }
+            });
+    }
+
+    private static EntityView AddGumpNinePatch(TinyEcs.World world, AssetsServer assets, ushort id, Vector3 hue, Vector2? position = null, Vector2? size = null)
+    {
+        ref readonly var gumpInfo = ref assets.Gumps.GetGump(id);
+        return world.Entity()
+            .Set(new UINode()
+            {
+                Config = {
+                    layout = {
+                        sizing = {
+                            width = Clay_SizingAxis.Fixed(size.HasValue ? size.Value.X : gumpInfo.UV.Width),
+                            height = Clay_SizingAxis.Fixed(size.HasValue ? size.Value.Y : gumpInfo.UV.Height),
+                        }
+                    },
+                    floating = {
+                        attachTo = position.HasValue ? Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT : Clay_FloatingAttachToElement.CLAY_ATTACH_TO_NONE,
+                        offset = {
+                            x = position?.X ?? 0,
+                            y = position?.Y ?? 0
+                        }
+                    }
+                },
+                UOConfig = {
+                    Type = ClayUOCommandType.GumpNinePatch,
                     Id = id,
                     Hue = hue,
                 }

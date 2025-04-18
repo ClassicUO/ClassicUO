@@ -1487,6 +1487,7 @@ uint64_t Clay__HashData(const uint8_t *data, size_t length)
     Clay__SIMDARXMix(&v2, &v3);
     v0 = _mm_add_epi64(v0, v2);
     v1 = _mm_add_epi64(v1, v3);
+    v0 = _mm_add_epi64(v0, v1);
 
     uint64_t result[2];
     _mm_storeu_si128((__m128i *)result, v0);
@@ -1547,6 +1548,7 @@ uint64_t Clay__HashData(const uint8_t *data, size_t length)
     Clay__SIMDARXMix(&v2, &v3);
     v0 = vaddq_u64(v0, v2);
     v1 = vaddq_u64(v1, v3);
+    v0 = vaddq_u64(v0, v1);
 
     uint64_t result[2];
     vst1q_u64(result, v0);
