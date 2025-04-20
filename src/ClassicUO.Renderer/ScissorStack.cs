@@ -48,6 +48,11 @@ namespace ClassicUO.Renderer
 
         public static Rectangle PopScissors(GraphicsDevice device)
         {
+            if (_scissors.Count == 0)
+            {
+                return Rectangle.Empty;
+            }
+
             Rectangle scissors = _scissors.Pop();
 
             if (_scissors.Count == 0)
@@ -69,14 +74,15 @@ namespace ClassicUO.Renderer
 
             Rectangle newScissor = new Rectangle
             {
-                X = (int) tmp.X, Y = (int) tmp.Y
+                X = (int)tmp.X,
+                Y = (int)tmp.Y
             };
 
             tmp.X = sx + sw;
             tmp.Y = sy + sh;
             Vector2.Transform(ref tmp, ref batchTransform, out tmp);
-            newScissor.Width = (int) tmp.X - newScissor.X;
-            newScissor.Height = (int) tmp.Y - newScissor.Y;
+            newScissor.Width = (int)tmp.X - newScissor.X;
+            newScissor.Height = (int)tmp.Y - newScissor.Y;
 
             return newScissor;
         }

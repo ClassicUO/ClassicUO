@@ -48,7 +48,7 @@ float3 get_rgb(float gray, float hue)
     float halfPixelX = (1.0f / (HUE_COLUMNS * HUE_WIDTH)) * 0.5f;
     float hueColumnWidth = 1.0f / HUE_COLUMNS;
     float hueStart = frac(hue / HUE_COLUMNS);
-    
+
     float xPos = hueStart + gray / HUE_COLUMNS;
     xPos = clamp(xPos, hueStart + halfPixelX, hueStart + hueColumnWidth - halfPixelX);
     float yPos = (hue % HUES_PER_TEXTURE) / (HUES_PER_TEXTURE - 1);
@@ -76,23 +76,23 @@ float3 get_colored_light(float shader, float gray)
 PS_INPUT VertexShaderFunction(VS_INPUT IN)
 {
 	PS_INPUT OUT;
-	
+
 	OUT.Position = mul(mul(IN.Position, WorldMatrix), MatrixTransform);
-	
+
 	OUT.Position.x -= 0.5 / Viewport.x;
 	OUT.Position.y += 0.5 / Viewport.y;
 
-	OUT.TexCoord = IN.TexCoord; 
+	OUT.TexCoord = IN.TexCoord;
 	OUT.Normal = IN.Normal;
 	OUT.Hue = IN.Hue;
-	
+
 	return OUT;
 }
 
 float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
-{	
+{
 	float4 color = tex2D(DrawSampler, IN.TexCoord.xy);
-		
+
 	if (color.a == 0.0f)
 		discard;
 
@@ -122,15 +122,16 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	}
 	else if (mode == HUE_TEXT_NO_BLACK)
 	{
-		if (color.r > 0.04f || color.g > 0.04f || color.b > 0.04f)
+		if (color.r > 0.08f || color.g > 0.08f || color.b > 0.08f)
 		{
 			color.rgb = get_rgb(1.0f, hue);
 		}
 	}
 	else if (mode == HUE_TEXT)
 	{
+		color.rgb = color.rgb * IN.Normal;
 		// 31 is max red, so this is just selecting the color of the darkest pixel in the hue
-		color.rgb = get_rgb(1.0f, hue);
+		// color.rgb = get_rgb(1.0f, hue);
 	}
 	else if (mode == LAND)
 	{

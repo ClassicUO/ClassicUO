@@ -16,11 +16,13 @@ internal readonly struct MainScreenPlugin : IPlugin
                 .Set(new UINode()
                 {
                     Config = {
-                        backgroundColor = new (48, 48, 48, 255),
+                        backgroundColor = new (1, 0, 0, 1),
                         layout = {
                             sizing = {
-                                width = Clay_SizingAxis.Fit(0, 0),
-                                height = Clay_SizingAxis.Fit(0, 0),
+                                width = Clay_SizingAxis.Grow(),
+                                height = Clay_SizingAxis.Grow(),
+                                // width = Clay_SizingAxis.Fit(0, 0),
+                                // height = Clay_SizingAxis.Fit(0, 0),
                             },
                             // childAlignment = {
                             //     x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER,
@@ -40,7 +42,8 @@ internal readonly struct MainScreenPlugin : IPlugin
                 world,
                 assets,
                 0x014E,
-                Vector3.UnitZ
+                Vector3.UnitZ,
+                new(0, 0)
             ).Add<MainScene>());
 
             // quit button
@@ -77,8 +80,16 @@ internal readonly struct MainScreenPlugin : IPlugin
                 0x0BB8,
                 Vector3.UnitZ,
                 new(218, 283),
-                new(210, 30)
-            ).Add<TextInput>()
+                new(210, 30))
+                .Set(new TextInput()
+                {
+                    Text = "",
+                    TextConfig = {
+                            fontId = 0,
+                            fontSize = 24,
+                            textColor = new (0.2f, 0.2f, 0.2f, 1),
+                        },
+                })
                 .Add<MainScene>()
                 .Add<UsernameInput>()
                 .Set(UIInteractionState.None));
@@ -90,18 +101,25 @@ internal readonly struct MainScreenPlugin : IPlugin
                 0x0BB8,
                 Vector3.UnitZ,
                 new(218, 283 + 50),
-                new(210, 30)
-            ).Add<TextInput>()
+                new(210, 30))
+                .Set(new TextInput()
+                {
+                    Text = "",
+                    TextConfig = {
+                        fontId = 0,
+                        fontSize = 24,
+                        textColor = new (1, 1, 1, 1),
+                    },
+                })
                 .Add<MainScene>()
                 .Add<PasswordInput>()
                 .Set(UIInteractionState.None));
-
         }, Stages.Startup, ThreadingMode.Single);
 
 
         scheduler.AddSystem((Query<Data<UIInteractionState, ButtonAction>> query,
-            Single<Data<UINode>, Filter<With<UsernameInput>, With<MainScene>>> queryUsername,
-            Single<Data<UINode>, Filter<With<PasswordInput>, With<MainScene>>> queryPassword) =>
+            Single<Data<TextInput>, Filter<With<UsernameInput>, With<MainScene>>> queryUsername,
+            Single<Data<TextInput>, Filter<With<PasswordInput>, With<MainScene>>> queryPassword) =>
         {
             foreach ((var interaction, var action) in query)
             {
@@ -145,31 +163,36 @@ internal readonly struct MainScreenPlugin : IPlugin
 
     private static EntityView AddLabel(TinyEcs.World world, string text, Vector2? position = null, Vector2? size = null)
     {
-        return world.Entity()
-            .Set(new UINode()
-            {
-                Text = text,
-                TextConfig = {
-                    fontId = 0,
-                    fontSize = 12,
-                    textColor = new (255, 255, 255, 255),
+        var ent = world.Entity();
+        ent.Set(new UINode()
+        {
+            Config = {
+                // id = Clay.Id(ent.ID.ToString()),
+                layout = {
+                    sizing = {
+                        width = Clay_SizingAxis.Fixed(size.HasValue ? size.Value.X : 0),
+                        height = Clay_SizingAxis.Fixed(size.HasValue ? size.Value.Y : 0),
+                    }
                 },
-                Config = {
-                    layout = {
-                        sizing = {
-                            width = Clay_SizingAxis.Fixed(size.HasValue ? size.Value.X : 0),
-                            height = Clay_SizingAxis.Fixed(size.HasValue ? size.Value.Y : 0),
-                        }
-                    },
-                    floating = {
-                        attachTo = position.HasValue ? Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT : Clay_FloatingAttachToElement.CLAY_ATTACH_TO_NONE,
-                        offset = {
-                            x = position?.X ?? 0,
-                            y = position?.Y ?? 0
-                        }
+                floating = {
+                    attachTo = position.HasValue ? Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT : Clay_FloatingAttachToElement.CLAY_ATTACH_TO_NONE,
+                    offset = {
+                        x = position?.X ?? 0,
+                        y = position?.Y ?? 0
                     }
                 }
-            });
+            }
+        }).Set(new TextInput()
+        {
+            Text = text,
+            TextConfig = {
+                fontId = 0,
+                fontSize = 12,
+                textColor = new (255, 255, 255, 255),
+            },
+        });
+
+        return ent;
     }
 
     private static EntityView AddButton(TinyEcs.World world, AssetsServer assets, (ushort normal, ushort pressed, ushort over) ids, Vector3 hue, Vector2? position = null)
@@ -182,58 +205,63 @@ internal readonly struct MainScreenPlugin : IPlugin
     private static EntityView AddGump(TinyEcs.World world, AssetsServer assets, ushort id, Vector3 hue, Vector2? position = null)
     {
         ref readonly var gumpInfo = ref assets.Gumps.GetGump(id);
-        return world.Entity()
-            .Set(new UINode()
-            {
-                Config = {
-                    layout = {
-                        sizing = {
-                            width = Clay_SizingAxis.Fixed(gumpInfo.UV.Width),
-                            height = Clay_SizingAxis.Fixed(gumpInfo.UV.Height),
-                        }
-                    },
-                    floating = {
-                        attachTo = position.HasValue ? Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT : Clay_FloatingAttachToElement.CLAY_ATTACH_TO_NONE,
-                        offset = {
-                            x = position?.X ?? 0,
-                            y = position?.Y ?? 0
-                        }
+        var ent = world.Entity();
+        ent.Set(new UINode()
+        {
+            Config = {
+                // id = Clay.Id(ent.ID.ToString()),
+                layout = {
+                    sizing = {
+                        width = Clay_SizingAxis.Fixed(gumpInfo.UV.Width),
+                        height = Clay_SizingAxis.Fixed(gumpInfo.UV.Height),
                     }
                 },
-                UOConfig = {
-                    Type = ClayUOCommandType.Gump,
-                    Id = id,
-                    Hue = hue,
+                floating = {
+                    attachTo = position.HasValue ? Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT : Clay_FloatingAttachToElement.CLAY_ATTACH_TO_NONE,
+                    offset = {
+                        x = position?.X ?? 0,
+                        y = position?.Y ?? 0
+                    }
                 }
-            });
+            },
+            UOConfig = {
+                Type = ClayUOCommandType.Gump,
+                Id = id,
+                Hue = hue,
+            }
+        });
+
+        return ent;
     }
 
     private static EntityView AddGumpNinePatch(TinyEcs.World world, AssetsServer assets, ushort id, Vector3 hue, Vector2? position = null, Vector2? size = null)
     {
         ref readonly var gumpInfo = ref assets.Gumps.GetGump(id);
-        return world.Entity()
-            .Set(new UINode()
-            {
-                Config = {
-                    layout = {
-                        sizing = {
-                            width = Clay_SizingAxis.Fixed(size.HasValue ? size.Value.X : gumpInfo.UV.Width),
-                            height = Clay_SizingAxis.Fixed(size.HasValue ? size.Value.Y : gumpInfo.UV.Height),
-                        }
-                    },
-                    floating = {
-                        attachTo = position.HasValue ? Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT : Clay_FloatingAttachToElement.CLAY_ATTACH_TO_NONE,
-                        offset = {
-                            x = position?.X ?? 0,
-                            y = position?.Y ?? 0
-                        }
+        var ent = world.Entity();
+        ent.Set(new UINode()
+        {
+            Config = {
+                // id = Clay.Id(ent.ID.ToString()),
+                layout = {
+                    sizing = {
+                        width = Clay_SizingAxis.Fixed(size.HasValue ? size.Value.X : gumpInfo.UV.Width),
+                        height = Clay_SizingAxis.Fixed(size.HasValue ? size.Value.Y : gumpInfo.UV.Height),
                     }
                 },
-                UOConfig = {
-                    Type = ClayUOCommandType.GumpNinePatch,
-                    Id = id,
-                    Hue = hue,
+                floating = {
+                    attachTo = position.HasValue ? Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT : Clay_FloatingAttachToElement.CLAY_ATTACH_TO_NONE,
+                    offset = {
+                        x = position?.X ?? 0,
+                        y = position?.Y ?? 0
+                    }
                 }
-            });
+            },
+            UOConfig = {
+                Type = ClayUOCommandType.GumpNinePatch,
+                Id = id,
+                Hue = hue,
+            }
+        });
+        return ent;
     }
 }

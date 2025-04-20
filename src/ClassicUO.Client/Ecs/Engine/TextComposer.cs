@@ -9,11 +9,11 @@ internal static class TextComposer
             if (!string.IsNullOrEmpty(text) && text.Length > 0)
                 return text.Remove(text.Length - 1, 1);
 
-            return string.Empty;
+            return text;
         }
 
         if (v == '\t')
-            return string.Empty;
+            return text;
 
         if (v == '\r')
             v = '\n';

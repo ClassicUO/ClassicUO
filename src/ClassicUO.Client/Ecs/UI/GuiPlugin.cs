@@ -21,17 +21,14 @@ internal sealed class FocusedInput
 
 internal readonly struct GuiPlugin : IPlugin
 {
-    private unsafe static Clay_Dimensions OnMeasureText(Clay_StringSlice slice, Clay_TextElementConfig* config, void* userData)
+    private static unsafe Clay_Dimensions OnMeasureText(Clay_StringSlice slice, Clay_TextElementConfig* config, void* userData)
     {
         var raw = new ReadOnlySpan<byte>(slice.chars, slice.length);
         var text = Encoding.UTF8.GetString(raw);
 
-        var font = config->fontId switch
-        {
-            _ => Fonts.Bold,
-        };
-
-        var size = font.MeasureString(text);
+        var font = FontCache.GetFont(config->fontId);
+        var dynFont = font.GetFont(config->fontSize);
+        var size = dynFont.MeasureString(text);
 
         return new Clay_Dimensions(size.X, size.Y);
     }
@@ -47,7 +44,7 @@ internal readonly struct GuiPlugin : IPlugin
         {
             var arenaHandle = Clay.CreateArena(Clay.MinMemorySize());
             var ctx = Clay.Initialize(arenaHandle, new() { width = 300, height = 300 }, 0);
-            var measureTextFn = (IntPtr)(delegate*<Clay_StringSlice, Clay_TextElementConfig*, void*, Clay_Dimensions>)&OnMeasureText;
+            var measureTextFn = (nint)(delegate*<Clay_StringSlice, Clay_TextElementConfig*, void*, Clay_Dimensions>)&OnMeasureText;
             Clay.SetMeasureTextFunction(measureTextFn);
         }, Stages.Startup, ThreadingMode.Single);
 
@@ -76,7 +73,7 @@ internal readonly struct GuiPlugin : IPlugin
             }
         }, Stages.Update, ThreadingMode.Single);
 
-        scheduler.AddSystem((EventReader<CharInputEvent> reader, Res<FocusedInput> focusedInput, Query<Data<UINode>, Filter<With<TextInput>>> query) =>
+        scheduler.AddSystem((EventReader<CharInputEvent> reader, Res<FocusedInput> focusedInput, Query<Data<TextInput>> query) =>
         {
             (_, var node) = query.Get(focusedInput.Value.Entity);
 
@@ -94,9 +91,13 @@ internal readonly struct GuiPlugin : IPlugin
             Res<MouseContext> mouseCtx,
             Res<ClayUOCommandBuffer> commandBuffer,
             Res<FocusedInput> focusedInput,
+            Local<StringBuilder> sb,
             Query<Data<UINode>, Filter<With<TextInput>>> queryTextInput,
-            Query<Data<UINode, UIInteractionState, Children>, Filter<With<Parent>, Optional<UIInteractionState>, Optional<Children>>> query,
-            Query<Data<UINode, UIInteractionState, Children>, Filter<Optional<UIInteractionState>, Optional<Children>>> queryChildren
+            Query<Data<UINode, UIInteractionState>> queryInteraction,
+            Query<Data<UINode, TextInput, UIInteractionState, Children>,
+                  Filter<Without<Parent>, Optional<TextInput>, Optional<UIInteractionState>, Optional<Children>>> query,
+            Query<Data<UINode, TextInput, UIInteractionState, Children>,
+                  Filter<With<Parent>, Optional<TextInput>, Optional<UIInteractionState>, Optional<Children>>> queryChildren
         ) =>
         {
             if (dumbTexture.Value == null)
@@ -115,14 +116,26 @@ internal readonly struct GuiPlugin : IPlugin
             Clay.BeginLayout();
             ulong found = 0;
             var lastInteraction = UIInteractionState.None;
-            foreach ((var ent, var node, var interaction, var children) in query)
-                renderNodes(ent.Ref, ref found, lastEntityPressed.Value, ref lastInteraction, ref node.Ref, ref interaction.Ref, ref children.Ref, mouseCtx, commandBuffer, queryChildren);
+            foreach ((var ent, var node, var text, var interaction, var children) in query)
+                renderNodes(
+                    ent.Ref,
+                    ref found,
+                    lastEntityPressed.Value,
+                    ref lastInteraction,
+                    ref node.Ref,
+                    ref text.Ref,
+                    ref interaction.Ref,
+                    ref children.Ref,
+                    mouseCtx,
+                    commandBuffer,
+                    queryChildren
+                );
             var cmds = Clay.EndLayout();
 
             if (found != 0)
             {
                 lastEntityPressed.Value = found;
-                (_, var interaction, _) = queryChildren.Get(found);
+                (_, var interaction) = queryInteraction.Get(found);
                 if (!Unsafe.IsNullRef(ref interaction.Ref))
                     interaction.Ref = lastInteraction;
 
@@ -153,10 +166,10 @@ internal readonly struct GuiPlugin : IPlugin
                     case Clay_RenderCommandType.CLAY_RENDER_COMMAND_TYPE_TEXT:
                         {
                             ref readonly var t = ref cmd.renderData.text;
-                            var font = t.fontId switch
-                            {
-                                _ => Fonts.Bold,
-                            };
+                            var font = FontCache.GetFont(t.fontId);
+
+                            sb.Value ??= new();
+                            sb.Value.Clear();
 
                             var rentedChars = ArrayPool<char>.Shared.Rent(t.stringContents.length);
 
@@ -165,7 +178,20 @@ internal readonly struct GuiPlugin : IPlugin
                                 var sp = new ReadOnlySpan<byte>(t.stringContents.chars, t.stringContents.length);
                                 var charsWritten = Encoding.UTF8.GetChars(sp, rentedChars);
 
-                                b.DrawString(font, rentedChars.AsSpan(0, charsWritten), new Vector2(boundingBox.x, boundingBox.y), Vector3.UnitZ);
+                                foreach (ref readonly var c in rentedChars.AsSpan(0, charsWritten))
+                                {
+                                    sb.Value.Append(c);
+                                }
+
+                                var dynFont = font.GetFont(t.fontSize);
+                                dynFont.DrawText(
+                                    b,
+                                    sb.Value,
+                                    new(boundingBox.x, boundingBox.y),
+                                    new Color(t.textColor.r, t.textColor.g, t.textColor.b, t.textColor.a),
+                                    characterSpacing: t.letterSpacing,
+                                    lineSpacing: t.lineHeight
+                                );
                             }
                             finally
                             {
@@ -178,11 +204,11 @@ internal readonly struct GuiPlugin : IPlugin
                     case Clay_RenderCommandType.CLAY_RENDER_COMMAND_TYPE_RECTANGLE:
                         ref readonly var config = ref cmd.renderData.rectangle;
 
-                        b.Draw(
-                            dumbTexture.Value,
-                            new Rectangle((int)boundingBox.x, (int)boundingBox.y, (int)boundingBox.width, (int)boundingBox.height),
-                            new Vector3(0x44, 1, 1)
-                        );
+                        b.Draw(dumbTexture.Value,
+                            new Vector2((int)boundingBox.x, (int)boundingBox.y),
+                            new Rectangle(0, 0, (int)boundingBox.width, (int)boundingBox.height),
+                            new Color(config.backgroundColor.r, config.backgroundColor.g, config.backgroundColor.b, config.backgroundColor.a),
+                            0f, Vector2.One, 0f);
 
                         break;
 
@@ -372,10 +398,11 @@ internal readonly struct GuiPlugin : IPlugin
                 ref ulong found,
                 ulong lastPressed,
                 ref UIInteractionState newInteraction,
-                ref UINode node, ref UIInteractionState interaction, ref Children children,
+                ref UINode node, ref TextInput text, ref UIInteractionState interaction, ref Children children,
                 MouseContext mouseCtx,
                 ClayUOCommandBuffer commandBuffer,
-                Query<Data<UINode, UIInteractionState, Children>, Filter<Optional<UIInteractionState>, Optional<Children>>> query
+                Query<Data<UINode, TextInput, UIInteractionState, Children>,
+                      Filter<With<Parent>, Optional<TextInput>, Optional<UIInteractionState>, Optional<Children>>> query
             )
             {
                 Clay.OpenElement();
@@ -418,17 +445,29 @@ internal readonly struct GuiPlugin : IPlugin
                     }
                 }
 
-                if (!string.IsNullOrEmpty(node.Text))
+                if (!Unsafe.IsNullRef(ref text) && !string.IsNullOrEmpty(text.Text))
                 {
-                    Clay.OpenTextElement(node.Text, node.TextConfig);
+                    Clay.OpenTextElement(text.Text, text.TextConfig);
                 }
 
                 if (!Unsafe.IsNullRef(ref children))
                 {
                     foreach (var child in children)
                     {
-                        (var childEnt, var childNode, var childInteraction, var childChildren) = query.Get(child);
-                        renderNodes(childEnt.Ref, ref found, lastPressed, ref newInteraction, ref childNode.Ref, ref childInteraction.Ref, ref childChildren.Ref, mouseCtx, commandBuffer, query);
+                        (var childEnt, var childNode, var childText, var childInteraction, var childChildren) = query.Get(child);
+                        renderNodes(
+                            childEnt.Ref,
+                            ref found,
+                            lastPressed,
+                            ref newInteraction,
+                            ref childNode.Ref,
+                            ref childText.Ref,
+                            ref childInteraction.Ref,
+                            ref childChildren.Ref,
+                            mouseCtx,
+                            commandBuffer,
+                            query
+                        );
                     }
                 }
 
@@ -440,10 +479,6 @@ internal readonly struct GuiPlugin : IPlugin
 
 struct UINode
 {
-    // TODO: make text as separate component
-    public string Text;
-    public Clay_TextElementConfig TextConfig;
-
     public Clay_ElementDeclaration Config;
     public ClayUOCommandData UOConfig;
 }
@@ -462,7 +497,11 @@ struct UOButton
     public ushort Normal, Pressed, Over;
 }
 
-struct TextInput;
+struct TextInput
+{
+    public string Text;
+    public Clay_TextElementConfig TextConfig;
+}
 
 
 enum ClayUOCommandType : byte
