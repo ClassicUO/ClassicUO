@@ -1,0 +1,182 @@
+using System;
+using ClassicUO.Configuration;
+using ClassicUO.Utility;
+using Clay_cs;
+using Microsoft.Xna.Framework;
+using TinyEcs;
+
+namespace ClassicUO.Ecs;
+
+
+internal readonly struct LoginScreenPlugin : IPlugin
+{
+    public unsafe void Build(Scheduler scheduler)
+    {
+        var setupFn = Setup;
+        var buttonsHandlerFn = ButtonsHandler;
+        var deleteMenuFn = DeleteMenu;
+
+        var rootSystem = scheduler.AddSystems([
+            scheduler.AddSystem(buttonsHandlerFn, Stages.Update, ThreadingMode.Single),
+            scheduler.AddSystem(deleteMenuFn, Stages.Update, ThreadingMode.Single)
+                     .RunIf((Res<GameContext> gameCtx) => gameCtx.Value.PlayerSerial != 0)
+        ]).RunIf((Res<GameState> state) => state == GameState.LoginScreen);
+
+        scheduler.AddSystem(setupFn, Stages.Startup, ThreadingMode.Single)
+                 .RunIf((Res<GameState> state) => state == GameState.LoginScreen);
+    }
+
+    private static void Setup(TinyEcs.World world, Res<GumpBuilder> gumpBuilder, Res<ClayUOCommandBuffer> clay, Res<AssetsServer> assets)
+    {
+        var root = world.Entity()
+            .Add<LoginScene>()
+            .Set(new UINode()
+            {
+                Config = {
+                    backgroundColor = new (0.2f, 0.2f, 0.2f, 1),
+                    layout = {
+                        sizing = {
+                            width = Clay_SizingAxis.Grow(),
+                            height = Clay_SizingAxis.Grow(),
+                        },
+                        layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
+                    }
+                }
+            });
+
+        // background
+        root.AddChild(gumpBuilder.Value.AddGump(
+            0x014E,
+            Vector3.UnitZ,
+            new(0, 0)
+        ).Add<LoginScene>());
+
+        // quit button
+        root.AddChild(gumpBuilder.Value.AddButton(
+            (0x05CA, 0x05C9, 0x05C8),
+            Vector3.UnitZ,
+            new(25, 240)
+        ).Set(ButtonAction.Quit).Add<LoginScene>());
+
+        // credit button
+        root.AddChild(gumpBuilder.Value.AddButton(
+            (0x05D0, 0x05CF, 0x5CE),
+            Vector3.UnitZ,
+            new(530, 125)
+        ).Set(ButtonAction.Credits).Add<LoginScene>());
+
+        // arrow button
+        root.AddChild(gumpBuilder.Value.AddButton(
+            (0x5CD, 0x5CC, 0x5CB),
+            Vector3.UnitZ,
+            new(280, 365)
+        ).Set(ButtonAction.Login).Add<LoginScene>());
+
+        // username background
+        root.AddChild(gumpBuilder.Value.AddGumpNinePatch(
+            0x0BB8,
+            Vector3.UnitZ,
+            new(218, 283),
+            new(210, 30))
+            .Set(new TextInput()
+            {
+                TextConfig = {
+                    fontId = 0,
+                    fontSize = 24,
+                    textColor = new (0.2f, 0.2f, 0.2f, 1),
+                },
+            })
+            .Add<LoginScene>()
+            .Add<UsernameInput>()
+            .Set(UIInteractionState.None));
+
+        // password background
+        root.AddChild(gumpBuilder.Value.AddGumpNinePatch(
+            0x0BB8,
+            Vector3.UnitZ,
+            new(218, 283 + 50),
+            new(210, 30))
+            .Set(new TextInput()
+            {
+                ReplaceChar = '*',
+                TextConfig = {
+                    fontId = 0,
+                    fontSize = 24,
+                    textColor = new (1, 1, 1, 1),
+                },
+            })
+            .Add<LoginScene>()
+            .Add<PasswordInput>()
+            .Set(UIInteractionState.None));
+    }
+
+    private static void ButtonsHandler(
+        Query<Data<UIInteractionState, ButtonAction>> query,
+        Res<Settings> settings,
+        EventWriter<OnLoginRequest> writer,
+        Single<Data<TextInput>, Filter<With<UsernameInput>, With<LoginScene>>> queryUsername,
+        Single<Data<TextInput>, Filter<With<PasswordInput>, With<LoginScene>>> queryPassword
+    )
+    {
+        foreach ((var interaction, var action) in query)
+        {
+            if (interaction.Ref == UIInteractionState.Released)
+            {
+                Action fn = action.Ref switch
+                {
+                    ButtonAction.Quit => () => Console.WriteLine("quit"),
+                    ButtonAction.Credits => () => Console.WriteLine("credits"),
+                    ButtonAction.Login => () =>
+                    {
+                        (_, var username) = queryUsername.Get();
+                        (_, var password) = queryPassword.Get();
+                        Login(writer, settings, username.Ref.Text, password.Ref.Text);
+                    }
+                    ,
+                    _ => null
+                };
+
+                fn?.Invoke();
+            }
+        }
+    }
+
+    private static void DeleteMenu(Commands commands, Query<Data<UINode>, Filter<Without<Parent>, With<LoginScene>>> query)
+    {
+        foreach ((var ent, _) in query)
+            commands.Entity(ent.Ref).Delete();
+    }
+
+    private static void Login(EventWriter<OnLoginRequest> writer, Settings settings, string username, string password)
+    {
+        if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
+        {
+            Console.WriteLine("username or password is empty");
+            return;
+        }
+
+        settings.Username = username;
+        settings.Password = Crypter.Encrypt(password);
+
+        Console.WriteLine("doing login");
+
+        writer.Enqueue(new()
+        {
+            Username = settings.Username,
+            Password = settings.Password,
+            Address = settings.IP,
+            Port = settings.Port,
+        });
+    }
+
+    private enum ButtonAction : byte
+    {
+        Quit = 0,
+        Credits = 1,
+        Login = 2,
+    }
+
+    private struct LoginScene;
+    private struct UsernameInput;
+    private struct PasswordInput;
+}

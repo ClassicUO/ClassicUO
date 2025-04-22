@@ -200,7 +200,7 @@ public static class Clay
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static void OpenTextElement(string text, Clay_TextElementConfig c)
+    public static void OpenTextElement(ReadOnlySpan<char> text, Clay_TextElementConfig c)
     {
         OpenTextElement(ClayStrings.Get(text), c);
     }

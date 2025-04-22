@@ -10,42 +10,48 @@ namespace Clay_cs;
 /// </summary>
 public readonly struct ClayStringCollection() : IDisposable
 {
-	private readonly Dictionary<string, (GCHandle handle, int length)> _dictionary = new();
+    private readonly Dictionary<string, (GCHandle handle, int length)> _dictionary = new();
 
-	public unsafe Clay_String Get(string txt)
-	{
-		if (_dictionary.TryGetValue(txt, out var pair)) return Get(pair);
+    public Clay_String Get(ReadOnlySpan<char> txt)
+    {
+        var lookup = _dictionary.GetAlternateLookup<ReadOnlySpan<char>>();
+        if (lookup.TryGetValue(txt, out var pair)) return Get(pair);
 
-		var bytes = Encoding.UTF8.GetBytes(txt);
-		pair.handle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
-		pair.length = bytes.Length;
-		_dictionary.Add(txt, pair);
-		return Get(pair);
-	}
+        var count = Encoding.UTF8.GetByteCount(txt);
 
-	private static unsafe Clay_String Get((GCHandle handle, int length) pair)
-	{
-		return new Clay_String
-		{
-			length = pair.length,
-			chars = (sbyte*)pair.handle.AddrOfPinnedObject(),
-		};
-	}
+        var buffer = new byte[count];
+        var read = Encoding.UTF8.GetBytes(txt, buffer.AsSpan(0, count));
 
-	public void Clear()
-	{
-		foreach (var pair in _dictionary)
-		{
-			pair.Value.handle.Free();
-		}
+        pair.handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+        pair.length = read;
 
-		_dictionary.Clear();
-	}
+        _ = lookup.TryAdd(txt, pair);
+        return Get(pair);
+    }
 
-	public void Dispose()
-	{
-		Clear();
-	}
+    private static unsafe Clay_String Get((GCHandle handle, int length) pair)
+    {
+        return new Clay_String
+        {
+            length = pair.length,
+            chars = (sbyte*)pair.handle.AddrOfPinnedObject(),
+        };
+    }
 
-	public Clay_String this[string str] => Get(str);
+    public void Clear()
+    {
+        foreach (var pair in _dictionary)
+        {
+            pair.Value.handle.Free();
+        }
+
+        _dictionary.Clear();
+    }
+
+    public void Dispose()
+    {
+        Clear();
+    }
+
+    public Clay_String this[ReadOnlySpan<char> str] => Get(str);
 }

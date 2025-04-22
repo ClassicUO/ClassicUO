@@ -16,6 +16,8 @@ delegate void OnPacket(ReadOnlySpan<byte> buffer);
 
 struct OnLoginRequest
 {
+    public string Username;
+    public string Password;
     public string Address;
     public ushort Port;
 }
@@ -90,7 +92,7 @@ readonly struct NetworkPlugin : IPlugin
                 network.Value.Send_Seed_Old(network.Value.LocalIP);
             }
 
-            network.Value.Send_FirstLogin(settings.Value.Username, Crypter.Decrypt(settings.Value.Password));
+            network.Value.Send_FirstLogin(request.Username, Crypter.Decrypt(request.Password));
 
             break;
         }

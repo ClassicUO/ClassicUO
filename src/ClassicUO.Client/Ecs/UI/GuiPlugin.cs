@@ -16,7 +16,7 @@ namespace ClassicUO.Ecs;
 internal sealed class FocusedInput
 {
     public ulong Entity { get; set; }
-};
+}
 
 
 internal readonly struct GuiPlugin : IPlugin
@@ -38,7 +38,12 @@ internal readonly struct GuiPlugin : IPlugin
         scheduler.AddResource(new ClayUOCommandBuffer());
         scheduler.AddResource(new FocusedInput());
 
-        scheduler.AddPlugin<MainScreenPlugin>();
+        scheduler.AddSystem((SchedulerState state, World world, Res<AssetsServer> assets) =>
+            state.AddResource(new GumpBuilder(world, assets)),
+        Stages.Startup, ThreadingMode.Single);
+
+        scheduler.AddPlugin<LoginScreenPlugin>();
+        scheduler.AddPlugin<GameScreenPlugin>();
 
         scheduler.AddSystem(() =>
         {
@@ -62,7 +67,7 @@ internal readonly struct GuiPlugin : IPlugin
 
         scheduler.AddSystem((Query<Data<UINode, UOButton, UIInteractionState>> query) =>
         {
-            foreach ((var ent, var node, var button, var interaction) in query)
+            foreach ((var node, var button, var interaction) in query)
             {
                 node.Ref.UOConfig.Id = interaction.Ref switch
                 {
@@ -72,6 +77,38 @@ internal readonly struct GuiPlugin : IPlugin
                 };
             }
         }, Stages.Update, ThreadingMode.Single);
+
+        scheduler.AddSystem((Query<Data<TextInput>> query, Res<FocusedInput> focusedInput) =>
+        {
+            var ok = false;
+            var last = 0ul;
+            foreach ((var ent, var textInput) in query)
+            {
+                if (focusedInput.Value.Entity == ent.Ref)
+                {
+                    ok = true;
+                    continue;
+                }
+
+                if (ok)
+                    last = ent.Ref;
+            }
+
+            if (ok && last == 0)
+            {
+                foreach ((var ent, var textInput) in query)
+                {
+                    last = ent.Ref;
+                    break;
+                }
+            }
+
+            if (last != 0)
+            {
+                focusedInput.Value.Entity = last;
+            }
+        }, Stages.Update, ThreadingMode.Single)
+        .RunIf((Res<KeyboardContext> keyboardCtx) => keyboardCtx.Value.IsPressedOnce(Microsoft.Xna.Framework.Input.Keys.Tab));
 
         scheduler.AddSystem((EventReader<CharInputEvent> reader, Res<FocusedInput> focusedInput, Query<Data<TextInput>> query) =>
         {
@@ -130,7 +167,6 @@ internal readonly struct GuiPlugin : IPlugin
                     commandBuffer,
                     queryChildren
                 );
-            var cmds = Clay.EndLayout();
 
             if (found != 0)
             {
@@ -144,6 +180,8 @@ internal readonly struct GuiPlugin : IPlugin
                     focusedInput.Value.Entity = found;
                 }
             }
+
+            var cmds = Clay.EndLayout();
 
             var b = batcher.Value;
             b.GraphicsDevice.Clear(ClearOptions.DepthBuffer, Color.Transparent, 1, 0);
@@ -190,7 +228,8 @@ internal readonly struct GuiPlugin : IPlugin
                                     new(boundingBox.x, boundingBox.y),
                                     new Color(t.textColor.r, t.textColor.g, t.textColor.b, t.textColor.a),
                                     characterSpacing: t.letterSpacing,
-                                    lineSpacing: t.lineHeight
+                                    lineSpacing: t.lineHeight,
+                                    effect: FontStashSharp.FontSystemEffect.Stroked, effectAmount: 1
                                 );
                             }
                             finally
@@ -447,7 +486,29 @@ internal readonly struct GuiPlugin : IPlugin
 
                 if (!Unsafe.IsNullRef(ref text) && !string.IsNullOrEmpty(text.Text))
                 {
-                    Clay.OpenTextElement(text.Text, text.TextConfig);
+                    if (text.ReplaceChar != 0)
+                    {
+                        char[] rentedBuffer = null;
+                        Span<char> buffer = text.Text.Length < 256 ?
+                            stackalloc char[text.Text.Length]
+                            :
+                            rentedBuffer = ArrayPool<char>.Shared.Rent(text.Text.Length);
+
+                        try
+                        {
+                            buffer.Slice(0, text.Text.Length).Fill(text.ReplaceChar);
+                            Clay.OpenTextElement(buffer.Slice(0, text.Text.Length), text.TextConfig);
+                        }
+                        finally
+                        {
+                            if (rentedBuffer != null)
+                                ArrayPool<char>.Shared.Return(rentedBuffer);
+                        }
+                    }
+                    else
+                    {
+                        Clay.OpenTextElement(text.Text, text.TextConfig);
+                    }
                 }
 
                 if (!Unsafe.IsNullRef(ref children))
@@ -500,6 +561,7 @@ struct UOButton
 struct TextInput
 {
     public string Text;
+    public char ReplaceChar;
     public Clay_TextElementConfig TextConfig;
 }
 

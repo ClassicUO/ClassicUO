@@ -11,6 +11,7 @@ internal readonly struct CuoPlugin : IPlugin
 {
     public void Build(Scheduler scheduler)
     {
+        scheduler.AddState(GameState.LoginScreen);
         scheduler.AddResource(new GameContext() { Map = -1 });
         scheduler.AddResource(Settings.GlobalSettings);
 
@@ -30,6 +31,7 @@ internal readonly struct CuoPlugin : IPlugin
         });
         scheduler.AddPlugin<AssetsPlugin>();
         scheduler.AddPlugin<TerrainPlugin>();
+        scheduler.AddPlugin<GuiPlugin>();
         scheduler.AddPlugin<NetworkPlugin>();
         scheduler.AddPlugin<ChatPlugin>();
         scheduler.AddPlugin<PickupPlugin>();
@@ -38,7 +40,8 @@ internal readonly struct CuoPlugin : IPlugin
         scheduler.AddPlugin<WorldRenderingPlugin>();
         scheduler.AddPlugin<TextOverheadPlugin>();
         // scheduler.AddPlugin<UIRenderingPlugin>();
-        scheduler.AddPlugin<GuiPlugin>();
+
+
 
         // TODO: remove this once the UI is done
         // scheduler.AddSystem((EventWriter<OnLoginRequest> writer, Res<Settings> settings) =>
@@ -73,4 +76,10 @@ struct GameContext
     public ClientFlags Protocol;
     public ClientVersion ClientVersion;
     public int MaxMapWidth, MaxMapHeight;
+}
+
+public enum GameState : byte
+{
+    LoginScreen,
+    GameScreen
 }
