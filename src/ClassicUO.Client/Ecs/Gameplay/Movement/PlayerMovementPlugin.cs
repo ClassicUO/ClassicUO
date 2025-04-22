@@ -60,10 +60,16 @@ readonly struct PlayerMovementPlugin : IPlugin
 
         var enqueuePlayerStepsFn = EnqueuePlayerSteps;
         scheduler.AddSystem(enqueuePlayerStepsFn, threadingType: ThreadingMode.Single)
-            .RunIf((Res<MouseContext> mouseCtx, Res<PlayerStepsContext> playerRequestedSteps, Time time, Query<TinyEcs.Data<WorldPosition, Facing, MobileSteps, MobAnimation>, With<Player>> playerQuery)
-                => mouseCtx.Value.IsPressed(Input.MouseButtonType.Right) &&
-                   playerRequestedSteps.Value.LastStep < time.Total && playerRequestedSteps.Value.Index < 5 &&
-                   playerQuery.Count() > 0);
+            .RunIf((
+                Res<MouseContext> mouseCtx,
+                Res<PlayerStepsContext> playerRequestedSteps,
+                Res<Camera> camera,
+                Time time,
+                Query<TinyEcs.Data<WorldPosition, Facing, MobileSteps, MobAnimation>, With<Player>> playerQuery
+            ) => mouseCtx.Value.IsPressed(Input.MouseButtonType.Right) &&
+                    camera.Value.Bounds.Contains((int)mouseCtx.Value.Position.X, (int)mouseCtx.Value.Position.Y) &&
+                    playerRequestedSteps.Value.LastStep < time.Total && playerRequestedSteps.Value.Index < 5 &&
+                    playerQuery.Count() > 0);
 
         var parseAcceptedStepsFn = ParseAcceptedSteps;
         scheduler.AddSystem(parseAcceptedStepsFn, threadingType: ThreadingMode.Single)

@@ -78,7 +78,7 @@ internal readonly struct GuiPlugin : IPlugin
             }
         }, Stages.Update, ThreadingMode.Single);
 
-        scheduler.AddSystem((Query<Data<TextInput>> query, Res<FocusedInput> focusedInput) =>
+        scheduler.AddSystem((Query<Data<Text>, Filter<With<TextInput>>> query, Res<FocusedInput> focusedInput) =>
         {
             var ok = false;
             var last = 0ul;
@@ -110,12 +110,12 @@ internal readonly struct GuiPlugin : IPlugin
         }, Stages.Update, ThreadingMode.Single)
         .RunIf((Res<KeyboardContext> keyboardCtx) => keyboardCtx.Value.IsPressedOnce(Microsoft.Xna.Framework.Input.Keys.Tab));
 
-        scheduler.AddSystem((EventReader<CharInputEvent> reader, Res<FocusedInput> focusedInput, Query<Data<TextInput>> query) =>
+        scheduler.AddSystem((EventReader<CharInputEvent> reader, Res<FocusedInput> focusedInput, Query<Data<Text>, Filter<With<TextInput>>> query) =>
         {
             (_, var node) = query.Get(focusedInput.Value.Entity);
 
             foreach (var c in reader)
-                node.Ref.Text = TextComposer.Compose(node.Ref.Text, c.Value);
+                node.Ref.Value = TextComposer.Compose(node.Ref.Value, c.Value);
         }, Stages.Update, ThreadingMode.Single)
         .RunIf((EventReader<CharInputEvent> reader, Res<FocusedInput> focusedInput, Query<Data<UINode>, Filter<With<TextInput>>> query)
             => !reader.IsEmpty && focusedInput.Value.Entity != 0 && query.Count() > 0);
@@ -129,12 +129,12 @@ internal readonly struct GuiPlugin : IPlugin
             Res<ClayUOCommandBuffer> commandBuffer,
             Res<FocusedInput> focusedInput,
             Local<StringBuilder> sb,
-            Query<Data<UINode>, Filter<With<TextInput>>> queryTextInput,
+            Query<Data<UINode>, Filter<With<Text>, With<TextInput>>> queryTextInput,
             Query<Data<UINode, UIInteractionState>> queryInteraction,
-            Query<Data<UINode, TextInput, UIInteractionState, Children>,
-                  Filter<Without<Parent>, Optional<TextInput>, Optional<UIInteractionState>, Optional<Children>>> query,
-            Query<Data<UINode, TextInput, UIInteractionState, Children>,
-                  Filter<With<Parent>, Optional<TextInput>, Optional<UIInteractionState>, Optional<Children>>> queryChildren
+            Query<Data<UINode, Text, UIInteractionState, Children>,
+                  Filter<Without<Parent>, Optional<Text>, Optional<UIInteractionState>, Optional<Children>>> query,
+            Query<Data<UINode, Text, UIInteractionState, Children>,
+                  Filter<With<Parent>, Optional<Text>, Optional<UIInteractionState>, Optional<Children>>> queryChildren
         ) =>
         {
             if (dumbTexture.Value == null)
@@ -437,11 +437,11 @@ internal readonly struct GuiPlugin : IPlugin
                 ref ulong found,
                 ulong lastPressed,
                 ref UIInteractionState newInteraction,
-                ref UINode node, ref TextInput text, ref UIInteractionState interaction, ref Children children,
+                ref UINode node, ref Text text, ref UIInteractionState interaction, ref Children children,
                 MouseContext mouseCtx,
                 ClayUOCommandBuffer commandBuffer,
-                Query<Data<UINode, TextInput, UIInteractionState, Children>,
-                      Filter<With<Parent>, Optional<TextInput>, Optional<UIInteractionState>, Optional<Children>>> query
+                Query<Data<UINode, Text, UIInteractionState, Children>,
+                      Filter<With<Parent>, Optional<Text>, Optional<UIInteractionState>, Optional<Children>>> query
             )
             {
                 Clay.OpenElement();
@@ -484,20 +484,20 @@ internal readonly struct GuiPlugin : IPlugin
                     }
                 }
 
-                if (!Unsafe.IsNullRef(ref text) && !string.IsNullOrEmpty(text.Text))
+                if (!Unsafe.IsNullRef(ref text) && !string.IsNullOrEmpty(text.Value))
                 {
                     if (text.ReplaceChar != 0)
                     {
                         char[] rentedBuffer = null;
-                        Span<char> buffer = text.Text.Length < 256 ?
-                            stackalloc char[text.Text.Length]
+                        Span<char> buffer = text.Value.Length < 256 ?
+                            stackalloc char[text.Value.Length]
                             :
-                            rentedBuffer = ArrayPool<char>.Shared.Rent(text.Text.Length);
+                            rentedBuffer = ArrayPool<char>.Shared.Rent(text.Value.Length);
 
                         try
                         {
-                            buffer.Slice(0, text.Text.Length).Fill(text.ReplaceChar);
-                            Clay.OpenTextElement(buffer.Slice(0, text.Text.Length), text.TextConfig);
+                            buffer.Slice(0, text.Value.Length).Fill(text.ReplaceChar);
+                            Clay.OpenTextElement(buffer.Slice(0, text.Value.Length), text.TextConfig);
                         }
                         finally
                         {
@@ -507,7 +507,7 @@ internal readonly struct GuiPlugin : IPlugin
                     }
                     else
                     {
-                        Clay.OpenTextElement(text.Text, text.TextConfig);
+                        Clay.OpenTextElement(text.Value, text.TextConfig);
                     }
                 }
 
@@ -558,12 +558,14 @@ struct UOButton
     public ushort Normal, Pressed, Over;
 }
 
-struct TextInput
+struct Text
 {
-    public string Text;
+    public string Value;
     public char ReplaceChar;
     public Clay_TextElementConfig TextConfig;
 }
+
+struct TextInput;
 
 
 enum ClayUOCommandType : byte

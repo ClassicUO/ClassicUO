@@ -78,7 +78,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
             Vector3.UnitZ,
             new(218, 283),
             new(210, 30))
-            .Set(new TextInput()
+            .Set(new Text()
             {
                 TextConfig = {
                     fontId = 0,
@@ -86,6 +86,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
                     textColor = new (0.2f, 0.2f, 0.2f, 1),
                 },
             })
+            .Add<TextInput>()
             .Add<LoginScene>()
             .Add<UsernameInput>()
             .Set(UIInteractionState.None));
@@ -96,7 +97,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
             Vector3.UnitZ,
             new(218, 283 + 50),
             new(210, 30))
-            .Set(new TextInput()
+            .Set(new Text()
             {
                 ReplaceChar = '*',
                 TextConfig = {
@@ -105,6 +106,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
                     textColor = new (1, 1, 1, 1),
                 },
             })
+            .Add<TextInput>()
             .Add<LoginScene>()
             .Add<PasswordInput>()
             .Set(UIInteractionState.None));
@@ -114,8 +116,8 @@ internal readonly struct LoginScreenPlugin : IPlugin
         Query<Data<UIInteractionState, ButtonAction>> query,
         Res<Settings> settings,
         EventWriter<OnLoginRequest> writer,
-        Single<Data<TextInput>, Filter<With<UsernameInput>, With<LoginScene>>> queryUsername,
-        Single<Data<TextInput>, Filter<With<PasswordInput>, With<LoginScene>>> queryPassword
+        Single<Data<Text>, Filter<With<UsernameInput>, With<LoginScene>, With<TextInput>>> queryUsername,
+        Single<Data<Text>, Filter<With<PasswordInput>, With<LoginScene>, With<TextInput>>> queryPassword
     )
     {
         foreach ((var interaction, var action) in query)
@@ -130,7 +132,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
                     {
                         (_, var username) = queryUsername.Get();
                         (_, var password) = queryPassword.Get();
-                        Login(writer, settings, username.Ref.Text, password.Ref.Text);
+                        Login(writer, settings, username.Ref.Value, password.Ref.Value);
                     }
                     ,
                     _ => null

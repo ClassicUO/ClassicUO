@@ -37,9 +37,9 @@ internal sealed class GumpBuilder
                     }
                 }
             }
-        }).Set(new TextInput()
+        }).Set(new Text()
         {
-            Text = text,
+            Value = text,
             TextConfig = {
                 fontId = 0,
                 fontSize = 12,
