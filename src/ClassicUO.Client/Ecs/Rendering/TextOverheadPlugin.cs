@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Text;
+using ClassicUO.Assets;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TinyEcs;
@@ -62,16 +65,19 @@ struct TextOverheadPlugin : IPlugin
         TinyEcs.World world, Time time, Res<TextOverHeadManager> textOverHeadManager,
         Res<NetworkEntitiesMap> networkEntities, Res<UltimaBatcher2D> batcher,
         Res<GameContext> gameCtx,
-        Res<Camera> camera)
+        Res<Camera> camera,
+        Res<UOFileManager> fileManager)
     {
         textOverHeadManager.Value.Update(world, time, networkEntities);
-        textOverHeadManager.Value.Render(world, networkEntities, batcher, gameCtx, camera);
+        textOverHeadManager.Value.Render(world, networkEntities, batcher, gameCtx, camera, fileManager.Value.Hues);
     }
 }
 
 internal sealed class TextOverHeadManager
 {
     const int MAX_LENGTH = 200;
+
+    private readonly StringBuilder _sb = new();
 
     private readonly List<uint> _toRemove = new();
     private readonly List<(int, int)> _cuttedTextIndices = new();
@@ -135,7 +141,17 @@ internal sealed class TextOverHeadManager
 
     private static Texture2D _texture;
 
-    public void Render(World world, NetworkEntitiesMap networkEntities, UltimaBatcher2D batch, GameContext gameCtx, Camera camera)
+
+    private void CopyToStringBuilder(ReadOnlySpan<char> span)
+    {
+        _sb.Clear();
+        foreach (ref readonly var c in span)
+        {
+            _sb.Append(c);
+        }
+    }
+
+    public void Render(World world, NetworkEntitiesMap networkEntities, UltimaBatcher2D batch, GameContext gameCtx, Camera camera, HuesLoader huesLoader)
     {
         var center = Isometric.IsoToScreen(gameCtx.CenterX, gameCtx.CenterY, gameCtx.CenterZ);
         var windowSize = new Vector2(camera.Bounds.Width, camera.Bounds.Height);
@@ -144,6 +160,7 @@ internal sealed class TextOverHeadManager
         center.Y += 22f;
         center -= gameCtx.CenterOffset;
 
+        const int FONT_SIZE = 18;
 
         var backupViewport = batch.GraphicsDevice.Viewport;
         batch.GraphicsDevice.Viewport = camera.GetViewport();
@@ -186,7 +203,7 @@ internal sealed class TextOverHeadManager
             position.Y += 22f;
             position.Y -= Constants.DEFAULT_CHARACTER_HEIGHT * 5;
 
-            (var bounds, var totalLines) = GetBounds(list);
+            (var bounds, var totalLines) = GetBounds(list, FONT_SIZE);
 
             var lineHeight = bounds.Y / totalLines;
             // if (position.X < camera.Bounds.X)
@@ -203,7 +220,7 @@ internal sealed class TextOverHeadManager
 
             var last = list.Last;
             var offsetY = 0f;
-            var alpha = IsOverlapped(world, networkEntities, list) ? 0.3f : 1f;
+            var alpha = IsOverlapped(world, networkEntities, list, FONT_SIZE) ? 0.3f : 1f;
 
             while (last != null)
             {
@@ -213,9 +230,11 @@ internal sealed class TextOverHeadManager
                 var text = last.Value;
                 var font = text.MessageType switch
                 {
-                    MessageType.Spell => Fonts.Regular,
-                    _ => Fonts.Bold,
+                    MessageType.Spell => FontCache.GetFont(4),
+                    _ => FontCache.GetFont(0),
                 };
+
+                var dynFont = font.GetFont(FONT_SIZE);
 
                 var textLength = text.Text.Length;
                 var currentStart = 0;
@@ -228,7 +247,8 @@ internal sealed class TextOverHeadManager
 
                     for (int i = currentStart; i < textLength; i++)
                     {
-                        var charSize = font.MeasureString(text.Text.AsSpan(i, 1)).X;
+                        CopyToStringBuilder(text.Text.AsSpan(i, 1));
+                        var charSize = dynFont.MeasureString(_sb).X;
                         if (char.IsWhiteSpace(text.Text[i]))
                             lastWhiteSpaceIndex = i;
 
@@ -249,7 +269,8 @@ internal sealed class TextOverHeadManager
                     lines.Add((currentStart, spanLength));
 
                     var line = text.Text.AsSpan(currentStart, spanLength);
-                    var size = font.MeasureString(line);
+                    CopyToStringBuilder(line);
+                    var size = dynFont.MeasureString(_sb);
                     var pos = position - size / 2f;
                     startPos.X = Math.Min(startPos.X, pos.X);
                     widthMax = Math.Max(widthMax, size.X);
@@ -270,10 +291,17 @@ internal sealed class TextOverHeadManager
                 for (var i = lines.Count - 1; i >= 0; i--)
                 {
                     var line = text.Text.AsSpan(lines[i].Item1, lines[i].Item2);
+                    CopyToStringBuilder(line);
+                    dynFont.DrawText(batch,
+                       _sb, startPos,
+                       GetColor(huesLoader, alpha, text.Hue),
+                       effect: FontStashSharp.FontSystemEffect.Stroked,
+                       effectAmount: 1
+                    );
 
-                    // Draw the text
-                    batch.DrawString(font, line, startPos + Vector2.One, ShaderHueTranslator.GetHueVector(1, false, alpha));
-                    batch.DrawString(font, line, startPos, ShaderHueTranslator.GetHueVector(text.Hue, false, alpha));
+                    // // Draw the text
+                    // batch.DrawString(font, line, startPos + Vector2.One, ShaderHueTranslator.GetHueVector(1, false, alpha));
+                    // batch.DrawString(font, line, startPos, ShaderHueTranslator.GetHueVector(text.Hue, false, alpha));
 
                     startPos.Y -= heightMax;
                     offsetY -= heightMax;
@@ -291,9 +319,22 @@ internal sealed class TextOverHeadManager
         batch.GraphicsDevice.Viewport = backupViewport;
     }
 
-    private bool IsOverlapped(TinyEcs.World world, NetworkEntitiesMap networkEntities, LinkedList<TextInfo> list)
+    private Color GetColor(HuesLoader huesLoader, float alpha = 1.0f, ushort hue = 0)
     {
-        (var bounds, var totalLines) = GetBounds(list);
+        // this might be simplified somehow
+        var h = HuesHelper.Color16To32(
+            huesLoader.GetColor16(
+                 HuesHelper.ColorToHue(Color.White), hue > 0 ? hue : ushort.MinValue)) | 0xFF_00_00_00;
+
+        var c = new Color() { PackedValue = h };
+        c.A = (byte)Microsoft.Xna.Framework.MathHelper.Clamp(alpha * 255f, byte.MinValue, byte.MaxValue);
+
+        return c;
+    }
+
+    private bool IsOverlapped(TinyEcs.World world, NetworkEntitiesMap networkEntities, LinkedList<TextInfo> list, int fontSize)
+    {
+        (var bounds, var totalLines) = GetBounds(list, fontSize);
 
         if (list.Count == 0)
             return false;
@@ -341,7 +382,7 @@ internal sealed class TextOverHeadManager
             if (current.Value.First == null)
                 return false;
 
-            (var bounds2, var totalLines2) = GetBounds(current.Value);
+            (var bounds2, var totalLines2) = GetBounds(current.Value, fontSize);
 
             var ent = networkEntities.Get(world, current.Value.First.Value.Serial);
             if (!ent.ID.IsValid())
@@ -377,7 +418,7 @@ internal sealed class TextOverHeadManager
         return false;
     }
 
-    private (Vector2 bounds, int lines) GetBounds(LinkedList<TextInfo> list)
+    private (Vector2 bounds, int lines) GetBounds(LinkedList<TextInfo> list, int fontSize)
     {
         var bounds = Vector2.Zero;
         var last = list.Last;
@@ -388,9 +429,11 @@ internal sealed class TextOverHeadManager
             var text = last.Value;
             var font = text.MessageType switch
             {
-                MessageType.Spell => Fonts.Regular,
-                _ => Fonts.Bold,
+                MessageType.Spell => FontCache.GetFont(4),
+                _ => FontCache.GetFont(0),
             };
+
+            var dynFont = font.GetFont(fontSize);
 
             var textLength = text.Text.Length;
             var currentStart = 0;
@@ -405,7 +448,8 @@ internal sealed class TextOverHeadManager
 
                 for (int i = currentStart; i < textLength; i++)
                 {
-                    var charSize = font.MeasureString(text.Text.AsSpan(i, 1)).X;
+                    CopyToStringBuilder(text.Text.AsSpan(i, 1));
+                    var charSize = dynFont.MeasureString(_sb).X;
                     if (char.IsWhiteSpace(text.Text[i]))
                         lastWhiteSpaceIndex = i;
 
@@ -420,7 +464,8 @@ internal sealed class TextOverHeadManager
 
                 var spanLength = cutAtIndex - currentStart;
                 var line = text.Text.AsSpan(currentStart, spanLength);
-                var size = font.MeasureString(line);
+                CopyToStringBuilder(line);
+                var size = dynFont.MeasureString(_sb);
 
                 widthMax = Math.Max(widthMax, size.X);
                 heightMax = Math.Max(heightMax, size.Y);

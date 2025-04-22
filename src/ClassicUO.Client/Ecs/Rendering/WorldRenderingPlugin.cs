@@ -17,11 +17,11 @@ readonly struct WorldRenderingPlugin : IPlugin
     {
         scheduler.AddResource(new SelectedEntity());
 
-        scheduler.AddSystem((Res<MouseContext> mouseCtx, Res<KeyboardContext> keyboardCtx, Res<GameContext> gameCtx) =>
+        scheduler.AddSystem((Res<MouseContext> mouseCtx, Res<KeyboardContext> keyboardCtx, Res<GameContext> gameCtx, Res<Camera> camera) =>
         {
             if (mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
             {
-                gameCtx.Value.CenterOffset += mouseCtx.Value.PositionOffset;
+                gameCtx.Value.CenterOffset += mouseCtx.Value.PositionOffset * camera.Value.Zoom;
             }
 
             if (keyboardCtx.Value.IsPressedOnce(Keys.Space))
