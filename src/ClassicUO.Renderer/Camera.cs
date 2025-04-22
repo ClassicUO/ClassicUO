@@ -79,7 +79,7 @@ namespace ClassicUO.Renderer
                 _updateMatrixes = true;
             }
 
-            _timeDelta= timeDelta;
+            _timeDelta = timeDelta;
             _mousePos = mousePos;
 
             UpdateMatrices();
@@ -103,18 +103,55 @@ namespace ClassicUO.Renderer
             return point;
         }
 
+        public Vector2 ScreenToWorld(Vector2 point)
+        {
+            UpdateMatrices();
+
+            Transform(ref point, ref _inverseTransform, out point);
+
+            return point;
+        }
+
+        public Vector2 WorldToScreen(Vector2 point)
+        {
+            UpdateMatrices();
+
+            Transform(ref point, ref _transform, out point);
+
+            return point;
+        }
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void Transform(ref Point position, ref Matrix matrix, out Point result)
         {
             float x = position.X * matrix.M11 + position.Y * matrix.M21 + matrix.M41;
             float y = position.X * matrix.M12 + position.Y * matrix.M22 + matrix.M42;
-            result.X = (int) x;
-            result.Y = (int) y;
+            result.X = (int)x;
+            result.Y = (int)y;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void Transform(ref Vector2 position, ref Matrix matrix, out Vector2 result)
+        {
+            float x = position.X * matrix.M11 + position.Y * matrix.M21 + matrix.M41;
+            float y = position.X * matrix.M12 + position.Y * matrix.M22 + matrix.M42;
+            result.X = x;
+            result.Y = y;
         }
 
         public Point MouseToWorldPosition()
         {
             Point mouse = _mousePos;
+
+            mouse.X -= Bounds.X;
+            mouse.Y -= Bounds.Y;
+
+            return ScreenToWorld(mouse);
+        }
+
+        public Vector2 MouseToWorldPosition2()
+        {
+            Vector2 mouse = new(_mousePos.X, _mousePos.Y);
 
             mouse.X -= Bounds.X;
             mouse.Y -= Bounds.Y;

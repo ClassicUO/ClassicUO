@@ -11,8 +11,8 @@ internal readonly struct CuoPlugin : IPlugin
 {
     public void Build(Scheduler scheduler)
     {
-        scheduler.AddState(GameState.LoginScreen);
-        scheduler.AddResource(new GameContext() { Map = -1 });
+        scheduler.AddState(GameState.GameScreen);
+        scheduler.AddResource(new GameContext() { Map = -1, MaxObjectsDistance = 32 });
         scheduler.AddResource(Settings.GlobalSettings);
 
         scheduler.AddSystem((Res<GameContext> gameCtx, Res<Settings> settings) =>
@@ -44,12 +44,14 @@ internal readonly struct CuoPlugin : IPlugin
 
 
         // TODO: remove this once the UI is done
-        // scheduler.AddSystem((EventWriter<OnLoginRequest> writer, Res<Settings> settings) =>
-        //     writer.Enqueue(new OnLoginRequest()
-        //     {
-        //         Address = settings.Value.IP,
-        //         Port = settings.Value.Port,
-        //     }), Stages.Startup);
+        scheduler.AddSystem((EventWriter<OnLoginRequest> writer, Res<Settings> settings) =>
+            writer.Enqueue(new OnLoginRequest()
+            {
+                Address = settings.Value.IP,
+                Port = settings.Value.Port,
+                Username = settings.Value.Username,
+                Password = settings.Value.Password,
+            }), Stages.Startup);
 
         scheduler
             .AddSystem((TinyEcs.World world) => Console.WriteLine("Archetypes removed: {0}", world.RemoveEmptyArchetypes()), threadingType: ThreadingMode.Single)
@@ -76,6 +78,7 @@ struct GameContext
     public ClientFlags Protocol;
     public ClientVersion ClientVersion;
     public int MaxMapWidth, MaxMapHeight;
+    public int MaxObjectsDistance;
 }
 
 public enum GameState : byte

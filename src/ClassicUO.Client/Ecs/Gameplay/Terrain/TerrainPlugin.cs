@@ -214,18 +214,19 @@ readonly struct TerrainPlugin : IPlugin
 
     void RemoveEntitiesOutOfRange
     (
-       TinyEcs.World world,
+       Commands commands,
+       Res<GameContext> gameCtx,
        Local<List<uint>> toRemove,
        Res<ChunksLoadedMap> chunksLoaded,
        Query<Data<WorldPosition>, Filter<With<NetworkSerial>, Without<Player>, Without<ContainedInto>>> queryAll,
-       Query<Data<WorldPosition>, With<Player>> playerQuery
+       Single<Data<WorldPosition>, With<Player>> playerQuery
     )
     {
         toRemove.Value ??= new();
 
         const int MAX_DIST = 64;
 
-        (_, var pos) = playerQuery.Single();
+        (_, var pos) = playerQuery.Get();
 
         foreach ((var key, var list) in chunksLoaded.Value)
         {
@@ -238,7 +239,7 @@ readonly struct TerrainPlugin : IPlugin
                 toRemove.Value.Add(key);
 
                 foreach (var entity in list)
-                    world.Delete(entity);
+                    commands.Entity(entity).Delete();
             }
         }
 
@@ -249,13 +250,12 @@ readonly struct TerrainPlugin : IPlugin
 
         toRemove.Value.Clear();
 
-
         foreach ((var entity, var mobPos) in queryAll)
         {
             var dist2 = GetDist(pos.Ref.X, pos.Ref.Y, mobPos.Ref.X, mobPos.Ref.Y);
-            if (dist2 > MAX_DIST)
+            if (dist2 > gameCtx.Value.MaxObjectsDistance)
             {
-                entity.Ref.Delete();
+                commands.Entity(entity.Ref).Delete();
             }
         }
     }

@@ -17,7 +17,7 @@ using PacketsMap = Dictionary<byte, OnPacket>;
 
 sealed class NetworkEntitiesMap
 {
-    private readonly Dictionary<uint, ulong> _entities = new ();
+    private readonly Dictionary<uint, ulong> _entities = new();
     private readonly List<uint> _toRemove = new();
 
     public EntityView GetOrCreate(TinyEcs.World world, uint serial)
@@ -468,7 +468,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                         Serial = serial,
                         Name = name,
                         Hue = hue,
-                        Font = (byte) font,
+                        Font = (byte)font,
                         Text = text,
                         MessageType = msgType,
                     });
@@ -495,8 +495,8 @@ readonly struct InGamePacketsPlugin : IPlugin
                     .Set(new Graphic() { Value = graphic })
                     // .Set(new WorldPosition() { X = x, Y = y, Z = z })
                     .Set(new Hue() { Value = hue })
-                    .Set(new MobileFlags() { Value = flags});
-                    //.Set(new Facing() { Value = dir });
+                    .Set(new MobileFlags() { Value = flags });
+                //.Set(new Facing() { Value = dir });
 
                 var slots = parentEnt.Has<EquipmentSlots>() ? parentEnt.Get<EquipmentSlots>() : new EquipmentSlots();
 
@@ -527,7 +527,7 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                 parentEnt.Set(slots);
 
-                mobileQueuedSteps.Enqueue(new ()
+                mobileQueuedSteps.Enqueue(new()
                 {
                     Serial = serial,
                     X = x,
@@ -544,6 +544,7 @@ readonly struct InGamePacketsPlugin : IPlugin
             {
                 var reader = new StackDataReader(buffer);
                 var range = reader.ReadUInt8();
+                gameCtx.Value.MaxObjectsDistance = range;
             };
 
             // ascii speech
@@ -579,7 +580,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                     Serial = serial,
                     Name = name,
                     Hue = hue,
-                    Font = (byte) font,
+                    Font = (byte)font,
                     Text = text,
                     MessageType = msgType,
                 });
@@ -672,16 +673,16 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var ent = entitiesMap.Value.GetOrCreate(world, serial);
                 ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
                     .Set(new Hue() { Value = hue });
-                    // .Set(new WorldPosition() { X = x, Y = y, Z = z })
-                    //.Set(new Facing() { Value = (Direction)direction });
+                // .Set(new WorldPosition() { X = x, Y = y, Z = z })
+                //.Set(new Facing() { Value = (Direction)direction });
 
-                mobileQueuedSteps.Enqueue(new ()
+                mobileQueuedSteps.Enqueue(new()
                 {
                     Serial = serial,
                     X = x,
                     Y = y,
                     Z = z,
-                    Direction = (Direction) direction,
+                    Direction = (Direction)direction,
                 });
             };
 
@@ -808,11 +809,11 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var ent = entitiesMap.Value.GetOrCreate(world, serial);
                 ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
                     .Set(new Hue() { Value = hue })
-                    .Set(new MobileFlags() { Value = flags});
-                    //.Set(new WorldPosition() { X = x, Y = y, Z = z })
-                    //.Set(new Facing() { Value = direction });
+                    .Set(new MobileFlags() { Value = flags });
+                //.Set(new WorldPosition() { X = x, Y = y, Z = z })
+                //.Set(new Facing() { Value = direction });
 
-                mobileQueuedSteps.Enqueue(new ()
+                mobileQueuedSteps.Enqueue(new()
                 {
                     Serial = serial,
                     X = x,
@@ -836,7 +837,9 @@ readonly struct InGamePacketsPlugin : IPlugin
                 {
                     Sequence = sequence,
                     Direction = direction,
-                    X = x, Y = y, Z = z
+                    X = x,
+                    Y = y,
+                    Z = z
                 });
             };
 
@@ -846,7 +849,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var reader = new StackDataReader(buffer);
 
                 var sequence = reader.ReadUInt8();
-                var notoriety = (NotorietyFlag) reader.ReadUInt8();
+                var notoriety = (NotorietyFlag)reader.ReadUInt8();
 
                 acceptedSteps.Enqueue(new()
                 {
@@ -1306,10 +1309,10 @@ readonly struct InGamePacketsPlugin : IPlugin
                 ent.Set(new Graphic() { Value = graphic })
                     .Set(new Hue() { Value = hue })
                     .Set(new MobileFlags() { Value = flags });
-                    // .Set(new WorldPosition() { X = x, Y = y, Z = z })
-                    //.Set(new Facing() { Value = direction });
+                // .Set(new WorldPosition() { X = x, Y = y, Z = z })
+                //.Set(new Facing() { Value = direction });
 
-                mobileQueuedSteps.Enqueue(new ()
+                mobileQueuedSteps.Enqueue(new()
                 {
                     Serial = serial,
                     X = x,

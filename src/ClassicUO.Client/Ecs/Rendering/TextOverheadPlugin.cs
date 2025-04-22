@@ -61,10 +61,11 @@ struct TextOverheadPlugin : IPlugin
     void ShowTextOverhead(
         TinyEcs.World world, Time time, Res<TextOverHeadManager> textOverHeadManager,
         Res<NetworkEntitiesMap> networkEntities, Res<UltimaBatcher2D> batcher,
-        Res<GameContext> gameCtx)
+        Res<GameContext> gameCtx,
+        Res<Camera> camera)
     {
         textOverHeadManager.Value.Update(world, time, networkEntities);
-        textOverHeadManager.Value.Render(world, networkEntities, batcher, gameCtx);
+        textOverHeadManager.Value.Render(world, networkEntities, batcher, gameCtx, camera);
     }
 }
 
@@ -73,7 +74,7 @@ internal sealed class TextOverHeadManager
     const int MAX_LENGTH = 200;
 
     private readonly List<uint> _toRemove = new();
-    private readonly List<(int, int)> _cuttedTextIndices = new ();
+    private readonly List<(int, int)> _cuttedTextIndices = new();
     private readonly Dictionary<uint, LinkedList<TextInfo>> _textOverHeadMap = new();
     private readonly LinkedList<LinkedList<TextInfo>> _mainLinkedList = new();
 
@@ -134,17 +135,19 @@ internal sealed class TextOverHeadManager
 
     private static Texture2D _texture;
 
-    public void Render(World world, NetworkEntitiesMap networkEntities, UltimaBatcher2D batch, GameContext gameCtx)
+    public void Render(World world, NetworkEntitiesMap networkEntities, UltimaBatcher2D batch, GameContext gameCtx, Camera camera)
     {
         var center = Isometric.IsoToScreen(gameCtx.CenterX, gameCtx.CenterY, gameCtx.CenterZ);
-        var windowSize = new Vector2(batch.GraphicsDevice.PresentationParameters.BackBufferWidth, batch.GraphicsDevice.PresentationParameters.BackBufferHeight);
+        var windowSize = new Vector2(camera.Bounds.Width, camera.Bounds.Height);
         center -= windowSize / 2f;
         center.X += 22f;
         center.Y += 22f;
         center -= gameCtx.CenterOffset;
 
+
+        var backupViewport = batch.GraphicsDevice.Viewport;
+        batch.GraphicsDevice.Viewport = camera.GetViewport();
         var matrix = Matrix.Identity;
-        //matrix = Matrix.CreateScale(0.45f);
 
         batch.Begin(null, matrix);
         batch.SetBrightlight(1.7f);
@@ -154,7 +157,7 @@ internal sealed class TextOverHeadManager
 
         if (_texture == null)
         {
-            _texture = new (batch.GraphicsDevice, 1, 1);
+            _texture = new(batch.GraphicsDevice, 1, 1);
             _texture.SetData(new Color[1] { Color.White });
         }
 
@@ -186,10 +189,12 @@ internal sealed class TextOverHeadManager
             (var bounds, var totalLines) = GetBounds(list);
 
             var lineHeight = bounds.Y / totalLines;
-            if (position.X < 0)
-                position.X = 0;
+            // if (position.X < camera.Bounds.X)
+            //     position.X = camera.Bounds.X;
             if (position.Y < bounds.Y - lineHeight)
                 position.Y = bounds.Y - lineHeight;
+
+            position = camera.WorldToScreen(position);
 
 
             // batch.DrawRectangle(_texture, (int)(position.X - bounds.X * 0.5f), (int)(position.Y - bounds.Y + lineHeight), (int)bounds.X, (int)bounds.Y, Vector3.UnitZ);
@@ -258,7 +263,7 @@ internal sealed class TextOverHeadManager
                     startPos.X = 0;
                 if (startPos.Y < (lines.Count - 1) * heightMax)
                     startPos.Y = (lines.Count - 1) * heightMax;
-                if (startPos.X + widthMax> windowSize.X)
+                if (startPos.X + widthMax > windowSize.X)
                     startPos.X = windowSize.X - widthMax;
 
                 // Now draw the lines in correct order (top-down)
@@ -282,6 +287,8 @@ internal sealed class TextOverHeadManager
 
         batch.SetSampler(null);
         batch.End();
+
+        batch.GraphicsDevice.Viewport = backupViewport;
     }
 
     private bool IsOverlapped(TinyEcs.World world, NetworkEntitiesMap networkEntities, LinkedList<TextInfo> list)
@@ -315,7 +322,7 @@ internal sealed class TextOverHeadManager
         if (positionMain.Y < bounds.Y - lineHeight)
             positionMain.Y = bounds.Y - lineHeight;
 
-        var rectMain = new Rectangle((int) (positionMain.X - bounds.X * 0.5f), (int) (positionMain.Y - bounds.Y + lineHeight), (int) bounds.X, (int)bounds.Y);
+        var rectMain = new Rectangle((int)(positionMain.X - bounds.X * 0.5f), (int)(positionMain.Y - bounds.Y + lineHeight), (int)bounds.X, (int)bounds.Y);
 
         var first = _mainLinkedList.First;
         LinkedListNode<LinkedList<TextInfo>> current = null;
@@ -357,7 +364,7 @@ internal sealed class TextOverHeadManager
             if (position.Y < bounds2.Y - lineHeight2)
                 position.Y = bounds2.Y - lineHeight2;
 
-            var rect = new Rectangle((int) (position.X - bounds2.X * 0.5f), (int) (position.Y - bounds2.Y + lineHeight2), (int) bounds2.X, (int)bounds2.Y);
+            var rect = new Rectangle((int)(position.X - bounds2.X * 0.5f), (int)(position.Y - bounds2.Y + lineHeight2), (int)bounds2.X, (int)bounds2.Y);
 
             if (rectMain.Intersects(rect))
             {

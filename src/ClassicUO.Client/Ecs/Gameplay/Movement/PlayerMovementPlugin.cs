@@ -82,6 +82,7 @@ readonly struct PlayerMovementPlugin : IPlugin
         Res<MouseContext> mouseCtx,
         Res<NetClient> network,
         Res<PlayerStepsContext> playerRequestedSteps,
+        Res<Camera> camera,
         Query<TinyEcs.Data<WorldPosition, Facing, MobileSteps, MobAnimation>, With<Player>> playerQuery,
         Query<TinyEcs.Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tilesQuery,
         Query<TinyEcs.Data<WorldPosition, Graphic>, TinyEcs.Filter<Without<IsTile>, Without<MobAnimation>>> staticsQuery,
@@ -91,13 +92,11 @@ readonly struct PlayerMovementPlugin : IPlugin
         terrainList.Value ??= new();
         Span<sbyte> diag = [1, -1];
 
-        // TODO: we grab the center of the screen atm for convenience. But it will be necessary to use the game window bounds
-        // var center = Isometric.IsoToScreen(gameCtx.Value.CenterX, gameCtx.Value.CenterY, gameCtx.Value.CenterZ);
-        var center = new Vector2(device.Value.PresentationParameters.BackBufferWidth, device.Value.PresentationParameters.BackBufferHeight);
-        center.X -= device.Value.PresentationParameters.BackBufferWidth / 2f;
-        center.Y -= device.Value.PresentationParameters.BackBufferHeight / 2f;
+        var center = new Vector2(camera.Value.Bounds.Right, camera.Value.Bounds.Bottom);
+        center.X -= camera.Value.Bounds.Width / 2f;
+        center.Y -= camera.Value.Bounds.Height / 2f;
 
-        var mouseDir = (Direction) ClassicUO.Game.GameCursor.GetMouseDirection((int)center.X, (int)center.Y, (int)mouseCtx.Value.Position.X, (int)mouseCtx.Value.Position.Y, 1);
+        var mouseDir = (Direction)ClassicUO.Game.GameCursor.GetMouseDirection((int)center.X, (int)center.Y, (int)mouseCtx.Value.Position.X, (int)mouseCtx.Value.Position.Y, 1);
         var mouseRange = Utility.MathHelper.Hypotenuse(center.X - mouseCtx.Value.Position.X, center.Y - mouseCtx.Value.Position.Y);
         var facing = mouseDir == Direction.North ? Direction.Mask : mouseDir - 1;
         var run = mouseRange >= 190 || false;
@@ -112,8 +111,8 @@ readonly struct PlayerMovementPlugin : IPlugin
         if (!hasNoSteps)
         {
             ref var lastStep = ref mobSteps.Ref[Math.Max(0, mobSteps.Ref.Count - 1)];
-            playerX = (ushort) lastStep.X;
-            playerY = (ushort) lastStep.Y;
+            playerX = (ushort)lastStep.X;
+            playerY = (ushort)lastStep.Y;
             playerZ = lastStep.Z;
             playerDir = (Direction)lastStep.Direction;
         }
@@ -511,7 +510,7 @@ readonly struct PlayerMovementPlugin : IPlugin
 
         if (playerZ < minZ)
         {
-            playerZ = (sbyte) minZ;
+            playerZ = (sbyte)minZ;
         }
 
         var currentTempZ = 1000000;

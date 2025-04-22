@@ -56,11 +56,11 @@ readonly struct WorldRenderingPlugin : IPlugin
     (
         TinyEcs.World world,
         Res<SelectedEntity> selectedEntity,
-        Res<MouseContext> mouseContext,
         Res<GameContext> gameCtx,
         Res<Renderer.UltimaBatcher2D> batch,
         Res<AssetsServer> assetsServer,
         Res<UOFileManager> fileManager,
+        Res<Camera> camera,
         Local<(int lastPosX, int lastPosY, int lastPosZ)?> lastPos,
         Local<(int? maxZ, int? maxZGround, int? maxZRoof, bool drawRoof)> localZInfo,
         Query<Data<WorldPosition>, With<Player>> queryPlayer,
@@ -188,22 +188,25 @@ readonly struct WorldRenderingPlugin : IPlugin
         }
 
         var center = Isometric.IsoToScreen(gameCtx.Value.CenterX, gameCtx.Value.CenterY, gameCtx.Value.CenterZ);
-        center.X -= batch.Value.GraphicsDevice.PresentationParameters.BackBufferWidth / 2f;
-        center.Y -= batch.Value.GraphicsDevice.PresentationParameters.BackBufferHeight / 2f;
+        center.X -= camera.Value.Bounds.Width / 2f;
+        center.Y -= camera.Value.Bounds.Height / 2f;
         center.X += 22f;
         center.Y += 22f;
         center -= gameCtx.Value.CenterOffset;
 
 
-        var matrix = Matrix.Identity;
-        //matrix = Matrix.CreateScale(0.45f);
+        var viewportBackup = batch.Value.GraphicsDevice.Viewport;
+        var cameraViewport = camera.Value.GetViewport();
+        var matrix = camera.Value.ViewTransformMatrix;
 
+        batch.Value.GraphicsDevice.Viewport = cameraViewport;
         batch.Value.Begin(null, matrix);
         batch.Value.SetBrightlight(1.7f);
         batch.Value.SetSampler(SamplerState.PointClamp);
         batch.Value.SetStencil(DepthStencilState.Default);
 
-        var mousePos = mouseContext.Value.Position;
+        var mousePos = camera.Value.MouseToWorldPosition2();
+        // var mousePos = camera.Value.ScreenToWorld(mouseContext.Value.Position);
         selectedEntity.Value.Clear();
 
         foreach ((var entity, var worldPos, var graphic, var stretched) in queryTiles)
@@ -230,7 +233,12 @@ readonly struct WorldRenderingPlugin : IPlugin
                     color.Y = ShaderHueTranslator.SHADER_HUED;
                 }
 
-                selectedEntity.Value.IsPointInStretchedLand(entity.Ref, depthZ, in stretched.Ref.Offset, mousePos, position - center);
+                selectedEntity.Value.IsPointInStretchedLand(
+                    entity.Ref,
+                    depthZ,
+                    in stretched.Ref.Offset,
+                    mousePos,
+                    position - center);
 
                 batch.Value.DrawStretchedLand(
                     textmapInfo.Texture,
@@ -679,6 +687,8 @@ readonly struct WorldRenderingPlugin : IPlugin
         batch.Value.SetSampler(null);
         batch.Value.SetStencil(null);
         batch.Value.End();
+
+        batch.Value.GraphicsDevice.Viewport = viewportBackup;
     }
 
 
