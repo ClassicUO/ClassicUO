@@ -10,3 +10,6 @@
 [submodule "external/TinyEcs"]
 	path = external/TinyEcs
 	url = https://github.com/andreakarasho/TinyEcs.git
+[submodule "external/FontStashSharp"]
+	path = external/FontStashSharp
+	url = https://github.com/FontStashSharp/FontStashSharp.git
