@@ -30,7 +30,11 @@ pub fn build(b: *std.Build) void {
     lib.linkLibC();
     lib.addIncludePath(b.path("src/clay.h"));
     lib.addCSourceFile(.{ .file = b.path("src/clay.c"), .flags = &flags });
-    lib.root_module.addCMacro("CLAY_DLL", "1");
+
+    // Add CLAY_DLL macro only on Windows
+    if (target.result.os.tag == .windows) {
+        lib.root_module.addCMacro("CLAY_DLL", "1");
+    }
 
     b.installArtifact(lib);
 }
