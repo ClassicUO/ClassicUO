@@ -16,8 +16,13 @@ internal readonly struct LoginScreenPlugin : IPlugin
         var buttonsHandlerFn = ButtonsHandler;
         var deleteMenuFn = DeleteMenu;
 
-        scheduler.OnUpdate(buttonsHandlerFn, ThreadingMode.Single);
+        scheduler.AddState<LoginInteraction>();
+
+        scheduler.OnUpdate(buttonsHandlerFn, ThreadingMode.Single)
+            .RunIf((SchedulerState state) => state.InState(GameState.LoginScreen))
+            .RunIf((SchedulerState state) => state.InState(LoginInteraction.None));
         scheduler.OnEnter(GameState.LoginScreen, setupFn, ThreadingMode.Single);
+        scheduler.OnEnter(GameState.LoginScreen, (State<LoginInteraction> state) => state.Set(LoginInteraction.None), ThreadingMode.Single);
         scheduler.OnExit(GameState.LoginScreen, deleteMenuFn, ThreadingMode.Single);
     }
 
@@ -112,6 +117,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
     private static void ButtonsHandler(
         Query<Data<UIInteractionState, ButtonAction>> query,
         Res<Settings> settings,
+        State<LoginInteraction> state,
         EventWriter<OnLoginRequest> writer,
         Single<Data<Text>, Filter<With<UsernameInput>, With<LoginScene>, With<TextInput>>> queryUsername,
         Single<Data<Text>, Filter<With<PasswordInput>, With<LoginScene>, With<TextInput>>> queryPassword
@@ -130,6 +136,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
                         (_, var username) = queryUsername.Get();
                         (_, var password) = queryPassword.Get();
                         Login(writer, settings, username.Ref.Value, password.Ref.Value);
+                        state.Set(LoginInteraction.LoginRequested);
                     }
                     ,
                     _ => null
@@ -175,6 +182,12 @@ internal readonly struct LoginScreenPlugin : IPlugin
         Quit = 0,
         Credits = 1,
         Login = 2,
+    }
+
+    private enum LoginInteraction : byte
+    {
+        None,
+        LoginRequested
     }
 
     private struct LoginScene;
