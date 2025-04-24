@@ -20,7 +20,7 @@ internal readonly struct FnaPlugin : IPlugin
         scheduler.AddResource(new UoGame(MouseVisible, WindowResizable, VSync));
         scheduler.AddSystemParam(new Time());
 
-        scheduler.AddSystem(static (Res<UoGame> game, SchedulerState schedState) =>
+        scheduler.OnStartup(static (Res<UoGame> game, SchedulerState schedState) =>
         {
             UnsafeFNAAccessor.BeforeLoop(game.Value);
             game.Value.RunOneFrame();
@@ -28,9 +28,9 @@ internal readonly struct FnaPlugin : IPlugin
             schedState.AddResource(new KeyboardContext(game));
             schedState.AddResource(new MouseContext(game));
             UnsafeFNAAccessor.GetSetRunApplication(game.Value) = true;
-        }, Stages.Startup, ThreadingMode.Single);
+        }, ThreadingMode.Single);
 
-        scheduler.AddSystem((Res<UoGame> game, Time time) =>
+        scheduler.OnUpdate((Res<UoGame> game, Time time) =>
         {
             game.Value.SuppressDraw();
             game.Value.Tick();
@@ -39,23 +39,24 @@ internal readonly struct FnaPlugin : IPlugin
             time.Total += time.Frame * 1000f;
 
             FrameworkDispatcher.Update();
-        }, threadingType: ThreadingMode.Single).RunIf((SchedulerState state) => state.ResourceExists<UoGame>());
+        }, ThreadingMode.Single)
+        .RunIf((SchedulerState state) => state.ResourceExists<UoGame>());
 
 
-        scheduler.AddSystem((Res<GraphicsDevice> device) => device.Value.Clear(Color.Black), Stages.FrameStart, ThreadingMode.Single)
+        scheduler.OnFrameStart((Res<GraphicsDevice> device) => device.Value.Clear(Color.Black), ThreadingMode.Single)
                  .RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>());
 
-        scheduler.AddSystem((Res<GraphicsDevice> device) => device.Value.Present(), Stages.FrameEnd, ThreadingMode.Single)
+        scheduler.OnFrameEnd((Res<GraphicsDevice> device) => device.Value.Present(), ThreadingMode.Single)
                  .RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>());
 
-        scheduler.AddSystem(() => Environment.Exit(0), Stages.AfterUpdate, ThreadingMode.Single)
+        scheduler.OnAfterUpdate(() => Environment.Exit(0), ThreadingMode.Single)
                 .RunIf(static (Res<UoGame> game) => !UnsafeFNAAccessor.GetSetRunApplication(game.Value));
 
-        scheduler.AddSystem((Res<MouseContext> mouseCtx, Res<KeyboardContext> keyboardCtx, Time time) =>
+        scheduler.OnFrameEnd((Res<MouseContext> mouseCtx, Res<KeyboardContext> keyboardCtx, Time time) =>
         {
             mouseCtx.Value.Update(time.Total);
             keyboardCtx.Value.Update(time.Total);
-        }, Stages.FrameEnd);
+        }, ThreadingMode.Single);
     }
 
     private sealed class UnsafeFNAAccessor

@@ -20,7 +20,7 @@ internal readonly struct ChatPlugin : IPlugin
     {
         scheduler.AddResource(new ChatOptions());
 
-        scheduler.AddSystem((
+        scheduler.OnUpdate((
             EventReader<CharInputEvent> reader,
             Local<StringBuilder> sb,
             Res<UOFileManager> fileManager,
@@ -84,7 +84,6 @@ internal readonly struct ChatPlugin : IPlugin
                         sb.Value.Append(ev.Value);
                 }
             },
-            Stages.Update,
             ThreadingMode.Single
         ).RunIf((EventReader<CharInputEvent> reader, Res<NetClient> network)
             => !reader.IsEmpty && network.Value.IsConnected);

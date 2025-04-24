@@ -15,13 +15,13 @@ internal readonly struct CuoPlugin : IPlugin
         scheduler.AddResource(new GameContext() { Map = -1, MaxObjectsDistance = 32 });
         scheduler.AddResource(Settings.GlobalSettings);
 
-        scheduler.AddSystem((Res<GameContext> gameCtx, Res<Settings> settings) =>
+        scheduler.OnStartup((Res<GameContext> gameCtx, Res<Settings> settings) =>
         {
             ClientVersionHelper.IsClientVersionValid(
                 settings.Value.ClientVersion,
                 out gameCtx.Value.ClientVersion
             );
-        }, Stages.Startup);
+        });
 
         scheduler.AddPlugin(new FnaPlugin()
         {
@@ -53,17 +53,17 @@ internal readonly struct CuoPlugin : IPlugin
         //        Password = settings.Value.Password,
         //    }), Stages.Startup);
 
-        scheduler
-            .AddSystem((TinyEcs.World world) => Console.WriteLine("Archetypes removed: {0}", world.RemoveEmptyArchetypes()), threadingType: ThreadingMode.Single)
-            .RunIf(
-                (Time time, Local<float> updateTime) =>
-                {
-                    if (updateTime.Value > time.Total)
-                        return false;
+        // scheduler
+        //     .OnUpdate((TinyEcs.World world) => Console.WriteLine("Archetypes removed: {0}", world.RemoveEmptyArchetypes()), ThreadingMode.Single)
+        //     .RunIf(
+        //         (Time time, Local<float> updateTime) =>
+        //         {
+        //             if (updateTime.Value > time.Total)
+        //                 return false;
 
-                    updateTime.Value = time.Total + 3000f;
-                    return true;
-                });
+        //             updateTime.Value = time.Total + 3000f;
+        //             return true;
+        //         });
     }
 }
 

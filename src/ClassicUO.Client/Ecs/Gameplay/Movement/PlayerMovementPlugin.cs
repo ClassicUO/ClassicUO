@@ -59,7 +59,7 @@ readonly struct PlayerMovementPlugin : IPlugin
         scheduler.AddEvent<AcceptedStep>();
 
         var enqueuePlayerStepsFn = EnqueuePlayerSteps;
-        scheduler.AddSystem(enqueuePlayerStepsFn, threadingType: ThreadingMode.Single)
+        scheduler.OnUpdate(enqueuePlayerStepsFn, ThreadingMode.Single)
             .RunIf((
                 Res<MouseContext> mouseCtx,
                 Res<PlayerStepsContext> playerRequestedSteps,
@@ -72,11 +72,11 @@ readonly struct PlayerMovementPlugin : IPlugin
                     playerQuery.Count() > 0);
 
         var parseAcceptedStepsFn = ParseAcceptedSteps;
-        scheduler.AddSystem(parseAcceptedStepsFn, threadingType: ThreadingMode.Single)
+        scheduler.OnUpdate(parseAcceptedStepsFn, ThreadingMode.Single)
             .RunIf((EventReader<AcceptedStep> responses) => !responses.IsEmpty);
 
         var parseDeniedStepsFn = ParseDeniedSteps;
-        scheduler.AddSystem(parseDeniedStepsFn, threadingType: ThreadingMode.Single)
+        scheduler.OnUpdate(parseDeniedStepsFn, ThreadingMode.Single)
             .RunIf((EventReader<RejectedStep> responses) => !responses.IsEmpty);
     }
 

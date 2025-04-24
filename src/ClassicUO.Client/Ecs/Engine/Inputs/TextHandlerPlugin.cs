@@ -9,7 +9,7 @@ internal readonly struct TextHandlerPlugin : IPlugin
     {
         scheduler.AddEvent<CharInputEvent>();
 
-        scheduler.AddSystem
+        scheduler.OnStartup
         (
             (EventWriter<CharInputEvent> writer) =>
             {
@@ -18,7 +18,6 @@ internal readonly struct TextHandlerPlugin : IPlugin
                     writer.Enqueue(new() { Value = c });
                 };
             },
-            Stages.Startup,
             ThreadingMode.Single
         );
     }

@@ -17,7 +17,7 @@ readonly struct WorldRenderingPlugin : IPlugin
     {
         scheduler.AddResource(new SelectedEntity());
 
-        scheduler.AddSystem((Res<MouseContext> mouseCtx, Res<KeyboardContext> keyboardCtx, Res<GameContext> gameCtx, Res<Camera> camera) =>
+        scheduler.OnFrameStart((Res<MouseContext> mouseCtx, Res<KeyboardContext> keyboardCtx, Res<GameContext> gameCtx, Res<Camera> camera) =>
         {
             if (mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
             {
@@ -28,9 +28,9 @@ readonly struct WorldRenderingPlugin : IPlugin
             {
                 gameCtx.Value.FreeView = !gameCtx.Value.FreeView;
             }
-        }, Stages.FrameStart).RunIf((Res<UoGame> game) => game.Value.IsActive);
+        }, ThreadingMode.Single).RunIf((Res<UoGame> game) => game.Value.IsActive);
 
-        scheduler.AddSystem
+        scheduler.OnUpdate
         (
             (Res<GameContext> gameCtx, Query<Data<WorldPosition, ScreenPositionOffset>, With<Player>> playerQuery) =>
             {
@@ -42,11 +42,11 @@ readonly struct WorldRenderingPlugin : IPlugin
                     gameCtx.Value.CenterOffset = offset.Ref.Value * -1;
                 }
             },
-            threadingType: ThreadingMode.Single
+            ThreadingMode.Single
         ).RunIf((Res<GameContext> gameCtx) => !gameCtx.Value.FreeView);
 
         var renderingFn = Rendering;
-        scheduler.AddSystem(renderingFn, Stages.AfterUpdate, ThreadingMode.Single)
+        scheduler.OnAfterUpdate(renderingFn, ThreadingMode.Single)
                  .RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>())
                  .RunIf((SchedulerState state) => state.InState(GameState.GameScreen))
                  .RunIf((Query<Data<WorldPosition>, With<Player>> playerQuery) => playerQuery.Count() > 0);

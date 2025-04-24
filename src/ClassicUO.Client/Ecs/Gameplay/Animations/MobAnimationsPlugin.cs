@@ -77,14 +77,14 @@ readonly struct MobAnimationsPlugin : IPlugin
         scheduler.AddEvent<MobileQueuedStep>();
 
         var readMobileStepsFn = ReadMobilesSteps;
-        scheduler.AddSystem(readMobileStepsFn, threadingType: ThreadingMode.Single)
+        scheduler.OnUpdate(readMobileStepsFn, ThreadingMode.Single)
             .RunIf((EventReader<MobileQueuedStep> stepsQueued) => !stepsQueued.IsEmpty);
 
         var handleMobileStepsFn = HandleMobileSteps;
-        scheduler.AddSystem(handleMobileStepsFn, threadingType: ThreadingMode.Single);
+        scheduler.OnUpdate(handleMobileStepsFn, ThreadingMode.Single);
 
         var processMobileAnimationsFn = ProcessMobileAnimations;
-        scheduler.AddSystem(processMobileAnimationsFn, threadingType: ThreadingMode.Single);
+        scheduler.OnUpdate(processMobileAnimationsFn, ThreadingMode.Single);
     }
 
     void ReadMobilesSteps(TinyEcs.World world, Time time, EventReader<MobileQueuedStep> stepsQueued, Res<GameContext> gameCtx, Res<NetworkEntitiesMap> entitiesMap)

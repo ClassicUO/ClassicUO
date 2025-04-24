@@ -169,21 +169,24 @@ sealed class NetworkEntitiesMap
             world.Delete(id);
             result = true;
         }
+        else
+        {
+
+        }
 
         Console.WriteLine("deleted: serial: 0x{0:X8} | ecsId: {1} | result: {2}", serial, id, result);
 
         return result;
     }
 
-    public void Clear(Commands commands, TinyEcs.World world)
+    public void Clear()
     {
-        foreach ((var serial, var id) in _entities)
-        {
-            if (world.Exists(id))
-                commands.Entity(id).Delete();
-        }
-
         _entities.Clear();
+    }
+
+    public Dictionary<uint, ulong>.Enumerator GetEnumerator()
+    {
+        return _entities.GetEnumerator();
     }
 }
 
@@ -193,10 +196,28 @@ readonly struct InGamePacketsPlugin : IPlugin
     {
         scheduler.AddResource(new NetworkEntitiesMap());
 
-        scheduler.OnExit(GameState.GameScreen, (Commands commands, TinyEcs.World world, Res<NetworkEntitiesMap> entitiesMap)
-            => entitiesMap.Value.Clear(commands, world), ThreadingMode.Single);
+        scheduler.OnExit(GameState.GameScreen, (
+            Commands commands,
+            TinyEcs.World world,
+            Query<Data<NetworkSerial>, Filter<Without<Parent>>> query,
+            Res<NetworkEntitiesMap> entitiesMap) =>
+            {
+                foreach ((var ent, var serial) in query)
+                {
+                    entitiesMap.Value.Remove(world, serial.Ref.Value);
+                }
 
-        scheduler.AddSystem((
+                foreach ((var serial, var ent) in entitiesMap.Value)
+                {
+                    if (world.Exists(ent))
+                        world.Delete(ent);
+                }
+
+                entitiesMap.Value.Clear();
+
+            }, ThreadingMode.Single);
+
+        scheduler.OnStartup((
             Res<NetworkEntitiesMap> entitiesMap,
             Res<Settings> settings,
             Res<PacketsMap> packetsMap,
@@ -1993,6 +2014,6 @@ readonly struct InGamePacketsPlugin : IPlugin
                     }
                 }
             };
-        }, Stages.Startup, ThreadingMode.Single);
+        }, ThreadingMode.Single);
     }
 }

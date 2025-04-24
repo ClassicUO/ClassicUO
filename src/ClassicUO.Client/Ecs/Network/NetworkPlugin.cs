@@ -31,7 +31,7 @@ readonly struct NetworkPlugin : IPlugin
         scheduler.AddEvent<OnLoginRequest>();
 
         var setupSocketFn = SetupSocket;
-        scheduler.AddSystem(setupSocketFn, Stages.Startup);
+        scheduler.OnStartup(setupSocketFn);
 
         scheduler.AddPlugin<LoginPacketsPlugin>();
         scheduler.AddPlugin<InGamePacketsPlugin>();
@@ -43,7 +43,7 @@ readonly struct NetworkPlugin : IPlugin
             buffer.Value.Clear();
         }, ThreadingMode.Single);
 
-        scheduler.AddSystem((Res<NetClient> network) => network.Value.Send_Ping(0xFF), threadingType: ThreadingMode.Single)
+        scheduler.OnUpdate((Res<NetClient> network) => network.Value.Send_Ping(0xFF), ThreadingMode.Single)
             .RunIf((Res<GameContext> gameCtx, Res<NetClient> network) => network.Value!.IsConnected && gameCtx.Value.PlayerSerial != 0)
             .RunIf((Time time, Local<float> updateTime) =>
             {
@@ -55,11 +55,11 @@ readonly struct NetworkPlugin : IPlugin
             });
 
         var handleLoginRequestsFn = HandleLoginRequests;
-        scheduler.AddSystem(handleLoginRequestsFn, threadingType: ThreadingMode.Single)
+        scheduler.OnUpdate(handleLoginRequestsFn, ThreadingMode.Single)
             .RunIf((EventReader<OnLoginRequest> loginRequests) => !loginRequests.IsEmpty);
 
         var packetReaderFn = PacketReader;
-        scheduler.AddSystem(packetReaderFn, threadingType: ThreadingMode.Single)
+        scheduler.OnUpdate(packetReaderFn, ThreadingMode.Single)
             .RunIf((Res<NetClient> network) => network.Value!.IsConnected);
     }
 

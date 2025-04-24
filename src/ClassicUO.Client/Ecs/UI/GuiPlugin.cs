@@ -38,9 +38,9 @@ internal readonly struct GuiPlugin : IPlugin
         scheduler.AddResource(new ClayUOCommandBuffer());
         scheduler.AddResource(new FocusedInput());
 
-        scheduler.AddSystem((SchedulerState state, World world, Res<AssetsServer> assets) =>
+        scheduler.OnStartup((SchedulerState state, World world, Res<AssetsServer> assets) =>
             state.AddResource(new GumpBuilder(world, assets)),
-        Stages.Startup, ThreadingMode.Single);
+        ThreadingMode.Single);
 
         scheduler.AddPlugin<LoginScreenPlugin>();
         scheduler.AddPlugin<GameScreenPlugin>();
@@ -48,15 +48,15 @@ internal readonly struct GuiPlugin : IPlugin
         scheduler.OnExit(GameState.LoginScreen, (Res<FocusedInput> focusedInput) => focusedInput.Value.Entity = 0, ThreadingMode.Single);
         scheduler.OnExit(GameState.GameScreen, (Res<FocusedInput> focusedInput) => focusedInput.Value.Entity = 0, ThreadingMode.Single);
 
-        scheduler.AddSystem(() =>
+        scheduler.OnStartup(() =>
         {
             var arenaHandle = Clay.CreateArena(Clay.MinMemorySize());
             var ctx = Clay.Initialize(arenaHandle, new() { width = 300, height = 300 }, 0);
             var measureTextFn = (nint)(delegate*<Clay_StringSlice, Clay_TextElementConfig*, void*, Clay_Dimensions>)&OnMeasureText;
             Clay.SetMeasureTextFunction(measureTextFn);
-        }, Stages.Startup, ThreadingMode.Single);
+        }, ThreadingMode.Single);
 
-        scheduler.AddSystem((Res<GraphicsDevice> device, Res<MouseContext> mouseCtx, Time time) =>
+        scheduler.OnUpdate((Res<GraphicsDevice> device, Res<MouseContext> mouseCtx, Time time) =>
         {
             Clay.SetLayoutDimensions(new()
             {
@@ -66,9 +66,9 @@ internal readonly struct GuiPlugin : IPlugin
             Clay.SetPointerState(new(mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y),
                 mouseCtx.Value.IsPressed(Input.MouseButtonType.Left));
             Clay.UpdateScrollContainers(true, new(0, mouseCtx.Value.Wheel), time.Frame);
-        }, Stages.Update, ThreadingMode.Single);
+        }, ThreadingMode.Single);
 
-        scheduler.AddSystem((Query<Data<UINode, UOButton, UIInteractionState>> query) =>
+        scheduler.OnUpdate((Query<Data<UINode, UOButton, UIInteractionState>> query) =>
         {
             foreach ((var node, var button, var interaction) in query)
             {
@@ -79,9 +79,9 @@ internal readonly struct GuiPlugin : IPlugin
                     _ => button.Ref.Normal
                 };
             }
-        }, Stages.Update, ThreadingMode.Single);
+        }, ThreadingMode.Single);
 
-        scheduler.AddSystem((Query<Data<Text>, Filter<With<TextInput>>> query, Res<FocusedInput> focusedInput) =>
+        scheduler.OnUpdate((Query<Data<Text>, Filter<With<TextInput>>> query, Res<FocusedInput> focusedInput) =>
         {
             var ok = false;
             var last = 0ul;
@@ -110,20 +110,20 @@ internal readonly struct GuiPlugin : IPlugin
             {
                 focusedInput.Value.Entity = last;
             }
-        }, Stages.Update, ThreadingMode.Single)
+        }, ThreadingMode.Single)
         .RunIf((Res<KeyboardContext> keyboardCtx) => keyboardCtx.Value.IsPressedOnce(Microsoft.Xna.Framework.Input.Keys.Tab));
 
-        scheduler.AddSystem((EventReader<CharInputEvent> reader, Res<FocusedInput> focusedInput, Query<Data<Text>, Filter<With<TextInput>>> query) =>
+        scheduler.OnUpdate((EventReader<CharInputEvent> reader, Res<FocusedInput> focusedInput, Query<Data<Text>, Filter<With<TextInput>>> query) =>
         {
             (_, var node) = query.Get(focusedInput.Value.Entity);
 
             foreach (var c in reader)
                 node.Ref.Value = TextComposer.Compose(node.Ref.Value, c.Value);
-        }, Stages.Update, ThreadingMode.Single)
+        }, ThreadingMode.Single)
         .RunIf((EventReader<CharInputEvent> reader, Res<FocusedInput> focusedInput, Query<Data<UINode>, Filter<With<TextInput>>> query)
             => !reader.IsEmpty && focusedInput.Value.Entity != 0 && query.Count() > 0);
 
-        scheduler.AddSystem((
+        scheduler.OnAfterUpdate((
             Local<ulong> lastEntityPressed,
             Res<UltimaBatcher2D> batcher,
             Local<Texture2D> dumbTexture,
@@ -537,7 +537,7 @@ internal readonly struct GuiPlugin : IPlugin
 
                 Clay.CloseElement();
             }
-        }, Stages.AfterUpdate, ThreadingMode.Single);
+        }, ThreadingMode.Single);
     }
 }
 

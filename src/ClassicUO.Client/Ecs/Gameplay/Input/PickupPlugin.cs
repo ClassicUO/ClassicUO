@@ -14,7 +14,7 @@ internal readonly struct PickupPlugin : IPlugin
         var pickupItemFn = PickupItem;
         var dropItemFn = DropItem;
 
-        scheduler.AddSystem(pickupItemDelayedFn, threadingType: ThreadingMode.Single)
+        scheduler.OnUpdate(pickupItemDelayedFn, ThreadingMode.Single)
             .RunIf((SchedulerState sched) => sched.ResourceExists<SelectedEntity>() && sched.ResourceExists<GrabbedItem>())
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial == 0)
             .RunIf((World world, Res<SelectedEntity> selectedEnt, Query<Data<NetworkSerial>, Filter<With<Items>>> q) =>
@@ -55,7 +55,7 @@ internal readonly struct PickupPlugin : IPlugin
                 return false;
             });
 
-        scheduler.AddSystem(pickupItemFn, threadingType: ThreadingMode.Single)
+        scheduler.OnUpdate(pickupItemFn, ThreadingMode.Single)
             .RunIf((SchedulerState sched) => sched.ResourceExists<SelectedEntity>() && sched.ResourceExists<GrabbedItem>())
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial == 0)
             .RunIf((World world, Res<SelectedEntity> selectedEnt, Query<Data<NetworkSerial>, Filter<With<Items>>> q) =>
@@ -81,17 +81,17 @@ internal readonly struct PickupPlugin : IPlugin
             });
 
 
-        scheduler.AddSystem(dropItemFn, threadingType: ThreadingMode.Single)
+        scheduler.OnUpdate(dropItemFn, ThreadingMode.Single)
             .RunIf((SchedulerState sched) => sched.ResourceExists<SelectedEntity>() && sched.ResourceExists<GrabbedItem>())
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial != 0)
             .RunIf((Res<MouseContext> mouseCtx) => mouseCtx.Value.IsReleased(Input.MouseButtonType.Left));
 
 
-        scheduler.AddSystem((Res<MouseContext> mouseCtx, Res<GrabbedItem> grabbedEntity) =>
+        scheduler.OnUpdate((Res<MouseContext> mouseCtx, Res<GrabbedItem> grabbedEntity) =>
         {
             if (mouseCtx.Value.IsReleased(Input.MouseButtonType.Left))
                 grabbedEntity.Value.Serial = 0;
-        }, threadingType: ThreadingMode.Single)
+        }, ThreadingMode.Single)
         .RunIf((SchedulerState sched) => sched.ResourceExists<SelectedEntity>() && sched.ResourceExists<GrabbedItem>());
     }
 

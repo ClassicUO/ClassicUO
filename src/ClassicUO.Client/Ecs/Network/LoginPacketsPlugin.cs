@@ -15,7 +15,7 @@ readonly struct LoginPacketsPlugin : IPlugin
 {
     public void Build(Scheduler scheduler)
     {
-        scheduler.AddSystem((
+        scheduler.OnStartup((
             Res<Settings> settings,
             Res<PacketsMap> packetsMap,
             Res<NetClient> network,
@@ -83,6 +83,6 @@ readonly struct LoginPacketsPlugin : IPlugin
                     network.Value.Send_SecondLogin(settings.Value.Username, Crypter.Decrypt(settings.Value.Password), seed);
                 }
             };
-        }, Stages.Startup, ThreadingMode.Single);
+        }, ThreadingMode.Single);
     }
 }

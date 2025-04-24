@@ -28,15 +28,15 @@ readonly struct TerrainPlugin : IPlugin
         scheduler.AddResource(new ChunksLoadedMap());
 
         var enqueueChunksRequestsFn = EnqueueChunksRequests;
-        scheduler.AddSystem(enqueueChunksRequestsFn, threadingType: ThreadingMode.Single)
+        scheduler.OnUpdate(enqueueChunksRequestsFn, ThreadingMode.Single)
             .RunIf((Query<TinyEcs.Data<WorldPosition>, With<Player>> playerQuery) => playerQuery.Count() > 0);
 
         var loadChunksFn = LoadChunks;
-        scheduler.AddSystem(loadChunksFn, threadingType: ThreadingMode.Single)
+        scheduler.OnUpdate(loadChunksFn, ThreadingMode.Single)
             .RunIf((EventReader<OnNewChunkRequest> reader) => !reader.IsEmpty);
 
         var removeEntitiesOutOfRangeFn = RemoveEntitiesOutOfRange;
-        scheduler.AddSystem(removeEntitiesOutOfRangeFn, threadingType: ThreadingMode.Single)
+        scheduler.OnUpdate(removeEntitiesOutOfRangeFn, ThreadingMode.Single)
             .RunIf((Query<TinyEcs.Data<WorldPosition>, With<Player>> playerQuery, Local<float> timeUpdate, Time time) =>
             {
                 if (timeUpdate.Value > time.Total)

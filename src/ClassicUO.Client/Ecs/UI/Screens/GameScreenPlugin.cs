@@ -117,10 +117,12 @@ internal readonly struct GameScreenPlugin : IPlugin
         // );
     }
 
-    private static void Cleanup(Commands commands, Query<Data<UINode>, Filter<Without<Parent>, With<GameScene>>> query)
+    private static void Cleanup(World world, Query<Data<UINode>, Filter<Without<Parent>, With<GameScene>>> query)
     {
+        Console.WriteLine("[GameScreen] cleanup start");
         foreach ((var ent, _) in query)
-            commands.Entity(ent.Ref).Delete();
+            world.Delete(ent.Ref);
+        Console.WriteLine("[GameScreen] cleanup done");
     }
 
     private static void UpdateCamera(Time time, Res<Camera> camera, Res<MouseContext> mouseCtx)

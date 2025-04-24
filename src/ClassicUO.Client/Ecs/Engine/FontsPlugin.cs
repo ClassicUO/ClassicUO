@@ -13,7 +13,7 @@ internal readonly struct FontsPlugin : IPlugin
     {
         // scheduler.AddResource(new FontCache());
 
-        scheduler.AddSystem(() =>
+        scheduler.OnStartup(() =>
         {
             void registerFont(string name, ReadOnlySpan<byte> fontData)
             {
@@ -27,7 +27,7 @@ internal readonly struct FontsPlugin : IPlugin
             registerFont("bold", TTFFontsLoader.Bold());
             registerFont("bold-italic", TTFFontsLoader.BoldItalic());
             registerFont("italic", TTFFontsLoader.MediumItalic());
-        }, Stages.Startup, ThreadingMode.Single);
+        }, ThreadingMode.Single);
     }
 }
 
