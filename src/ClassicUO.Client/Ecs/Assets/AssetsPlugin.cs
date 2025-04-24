@@ -14,11 +14,12 @@ readonly struct AssetsPlugin : IPlugin
     public void Build(Scheduler scheduler)
     {
         var loadAssetsFn = LoadAssets;
-        scheduler.AddSystem(loadAssetsFn, Stages.Startup);
+        scheduler.OnStartup(loadAssetsFn, ThreadingMode.Single);
     }
 
     unsafe void LoadAssets
     (
+        State<GameState> state,
         Res<GraphicsDevice> device,
         Res<GameContext> gameCtx,
         Res<Settings> settings,
@@ -90,5 +91,7 @@ readonly struct AssetsPlugin : IPlugin
 
         device.Value.Textures[1] = hueSamplers[0];
         device.Value.Textures[2] = hueSamplers[1];
+
+        state.Set(GameState.LoginScreen);
     }
 }

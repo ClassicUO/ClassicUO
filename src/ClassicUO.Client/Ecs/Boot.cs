@@ -11,7 +11,7 @@ internal readonly struct CuoPlugin : IPlugin
 {
     public void Build(Scheduler scheduler)
     {
-        scheduler.AddState(GameState.LoginScreen);
+        scheduler.AddState(GameState.Loading);
         scheduler.AddResource(new GameContext() { Map = -1, MaxObjectsDistance = 32 });
         scheduler.AddResource(Settings.GlobalSettings);
 
@@ -44,7 +44,7 @@ internal readonly struct CuoPlugin : IPlugin
 
 
         // TODO: remove this once the UI is done
-        //scheduler.AddSystem((EventWriter<OnLoginRequest> writer, Res<Settings> settings) =>
+        // scheduler.AddSystem((EventWriter<OnLoginRequest> writer, Res<Settings> settings) =>
         //    writer.Enqueue(new OnLoginRequest()
         //    {
         //        Address = settings.Value.IP,
@@ -83,6 +83,7 @@ struct GameContext
 
 public enum GameState : byte
 {
+    Loading,
     LoginScreen,
     GameScreen
 }

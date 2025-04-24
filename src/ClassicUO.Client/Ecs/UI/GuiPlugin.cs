@@ -45,6 +45,9 @@ internal readonly struct GuiPlugin : IPlugin
         scheduler.AddPlugin<LoginScreenPlugin>();
         scheduler.AddPlugin<GameScreenPlugin>();
 
+        scheduler.OnExit(GameState.LoginScreen, (Res<FocusedInput> focusedInput) => focusedInput.Value.Entity = 0, ThreadingMode.Single);
+        scheduler.OnExit(GameState.GameScreen, (Res<FocusedInput> focusedInput) => focusedInput.Value.Entity = 0, ThreadingMode.Single);
+
         scheduler.AddSystem(() =>
         {
             var arenaHandle = Clay.CreateArena(Clay.MinMemorySize());

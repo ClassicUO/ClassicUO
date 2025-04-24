@@ -11,20 +11,18 @@ internal readonly struct GameScreenPlugin : IPlugin
     public void Build(Scheduler scheduler)
     {
         var setupFn = Setup;
+        var cleanupFn = Cleanup;
         var updateCameraFn = UpdateCamera;
 
         scheduler.AddResource(new Camera(0.5f, 2.5f, 0.1f));
 
-        scheduler.AddSystem(setupFn, Stages.Startup, ThreadingMode.Single)
-                 .RunIf((Res<GameState> state) => state == GameState.GameScreen);
+        scheduler.OnEnter(GameState.GameScreen, setupFn, ThreadingMode.Single);
+        scheduler.OnExit(GameState.GameScreen, cleanupFn, ThreadingMode.Single);
 
-        scheduler.AddSystems([
-            scheduler.AddSystem(updateCameraFn, Stages.Update, ThreadingMode.Single)
-        ], Stages.Update, ThreadingMode.Single)
-        ;//.RunIf((Res<GameState> state) => state == GameState.GameScreen);
+        scheduler.OnUpdate(updateCameraFn, ThreadingMode.Single)
+                 ; //.RunIf((SchedulerState state) => state.InState(GameState.GameScreen));
 
-
-        scheduler.AddSystem((Query<Data<UINode, UIInteractionState, ButtonAction>> query, Res<NetClient> network, Res<GameState> state) =>
+        scheduler.OnUpdate((Query<Data<UINode, UIInteractionState, ButtonAction>> query, Res<NetClient> network, State<GameState> state) =>
         {
             foreach ((var node, var interaction, var action) in query)
             {
@@ -35,13 +33,13 @@ internal readonly struct GameScreenPlugin : IPlugin
                         case ButtonAction.Logout:
                             Console.WriteLine("Logout button pressed");
                             network.Value.Disconnect();
-                            state.Value = GameState.LoginScreen;
+                            state.Set(GameState.LoginScreen);
                             break;
                     }
                 }
             }
-
-        }, Stages.Update, ThreadingMode.Single);
+        }, ThreadingMode.Single)
+        .RunIf((SchedulerState state) => state.InState(GameState.GameScreen));
     }
 
     private static void Setup(World world, Res<GumpBuilder> gumpBuilder, Res<ClayUOCommandBuffer> clay)
@@ -117,6 +115,12 @@ internal readonly struct GameScreenPlugin : IPlugin
         //         new(0, 0)
         //     ).Add<GameScene>()
         // );
+    }
+
+    private static void Cleanup(Commands commands, Query<Data<UINode>, Filter<Without<Parent>, With<GameScene>>> query)
+    {
+        foreach ((var ent, _) in query)
+            commands.Entity(ent.Ref).Delete();
     }
 
     private static void UpdateCamera(Time time, Res<Camera> camera, Res<MouseContext> mouseCtx)

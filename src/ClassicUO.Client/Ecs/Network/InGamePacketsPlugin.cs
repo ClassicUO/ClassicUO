@@ -12,7 +12,6 @@ using TinyEcs;
 
 namespace ClassicUO.Ecs;
 
-using static TinyEcs.Defaults;
 using PacketsMap = Dictionary<byte, OnPacket>;
 
 sealed class NetworkEntitiesMap
@@ -175,6 +174,17 @@ sealed class NetworkEntitiesMap
 
         return result;
     }
+
+    public void Clear(Commands commands, TinyEcs.World world)
+    {
+        foreach ((var serial, var id) in _entities)
+        {
+            if (world.Exists(id))
+                commands.Entity(id).Delete();
+        }
+
+        _entities.Clear();
+    }
 }
 
 readonly struct InGamePacketsPlugin : IPlugin
@@ -183,6 +193,9 @@ readonly struct InGamePacketsPlugin : IPlugin
     {
         scheduler.AddResource(new NetworkEntitiesMap());
 
+        scheduler.OnExit(GameState.GameScreen, (Commands commands, TinyEcs.World world, Res<NetworkEntitiesMap> entitiesMap)
+            => entitiesMap.Value.Clear(commands, world), ThreadingMode.Single);
+
         scheduler.AddSystem((
             Res<NetworkEntitiesMap> entitiesMap,
             Res<Settings> settings,
@@ -190,10 +203,11 @@ readonly struct InGamePacketsPlugin : IPlugin
             Res<NetClient> network,
             Res<UOFileManager> fileManager,
             Res<GameContext> gameCtx,
+            State<GameState> state,
             EventWriter<AcceptedStep> acceptedSteps,
             EventWriter<RejectedStep> rejectedSteps,
             EventWriter<MobileQueuedStep> mobileQueuedSteps,
-            EventWriter<TextInfo> textOverHeadQueue,
+            EventWriter<TextInfoEvent> textOverHeadQueue,
             TinyEcs.World world
         ) =>
         {
@@ -236,6 +250,8 @@ readonly struct InGamePacketsPlugin : IPlugin
                     .Set(new Facing() { Value = dir })
                     .Set(new MobileSteps())
                     .Add<Player>();
+
+                state.Set(GameState.GameScreen);
             };
 
             // login complete
@@ -463,7 +479,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                     var text = reader.ReadUnicodeBE();
                     Console.WriteLine("[0xAE] {0} says: '{1}'", name, text);
 
-                    textOverHeadQueue.Enqueue(new TextInfo()
+                    textOverHeadQueue.Enqueue(new TextInfoEvent()
                     {
                         Serial = serial,
                         Name = name,
@@ -575,7 +591,7 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                 Console.WriteLine("[0x1C] {0} says: '{1}'", name, text);
 
-                textOverHeadQueue.Enqueue(new TextInfo()
+                textOverHeadQueue.Enqueue(new TextInfoEvent()
                 {
                     Serial = serial,
                     Name = name,

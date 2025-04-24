@@ -69,6 +69,7 @@ internal static class FontCache
         _fonts.Add(fontSystem);
     }
 
+
     public static FontSystem GetFont(int fontIndex)
     {
         if (fontIndex < 0 || fontIndex >= _fonts.Count)
@@ -76,4 +77,14 @@ internal static class FontCache
 
         return _fonts[fontIndex];
     }
+}
+
+public enum FontType
+{
+    Regular,
+    Bold,
+    Italic,
+    BoldItalic,
+    Medium,
+    MediumItalic,
 }

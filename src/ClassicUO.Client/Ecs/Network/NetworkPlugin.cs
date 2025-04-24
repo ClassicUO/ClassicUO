@@ -26,6 +26,7 @@ readonly struct NetworkPlugin : IPlugin
 {
     public void Build(Scheduler scheduler)
     {
+        scheduler.AddResource(new CircularBuffer());
         scheduler.AddResource(new PacketsMap());
         scheduler.AddEvent<OnLoginRequest>();
 
@@ -34,6 +35,13 @@ readonly struct NetworkPlugin : IPlugin
 
         scheduler.AddPlugin<LoginPacketsPlugin>();
         scheduler.AddPlugin<InGamePacketsPlugin>();
+
+        scheduler.OnExit(GameState.GameScreen, (Res<NetClient> network, Res<CircularBuffer> buffer, Res<GameContext> gameCtx) =>
+        {
+            gameCtx.Value.PlayerSerial = 0;
+            network.Value.Disconnect();
+            buffer.Value.Clear();
+        }, ThreadingMode.Single);
 
         scheduler.AddSystem((Res<NetClient> network) => network.Value.Send_Ping(0xFF), threadingType: ThreadingMode.Single)
             .RunIf((Res<GameContext> gameCtx, Res<NetClient> network) => network.Value!.IsConnected && gameCtx.Value.PlayerSerial != 0)
@@ -99,9 +107,9 @@ readonly struct NetworkPlugin : IPlugin
         loginRequests.Clear();
     }
 
-    void PacketReader(Res<NetClient> network, Res<PacketsMap> packetsMap, Local<CircularBuffer> buffer, Local<byte[]> packetBuffer)
+    void PacketReader(Res<NetClient> network, Res<PacketsMap> packetsMap, Res<CircularBuffer> buffer, Local<byte[]> packetBuffer)
     {
-        buffer.Value ??= new();
+        // buffer.Value ??= new();
         packetBuffer.Value ??= new byte[4096];
 
         var availableData = network.Value.CollectAvailableData();

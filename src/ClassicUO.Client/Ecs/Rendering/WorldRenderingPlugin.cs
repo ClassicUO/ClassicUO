@@ -48,6 +48,7 @@ readonly struct WorldRenderingPlugin : IPlugin
         var renderingFn = Rendering;
         scheduler.AddSystem(renderingFn, Stages.AfterUpdate, ThreadingMode.Single)
                  .RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>())
+                 .RunIf((SchedulerState state) => state.InState(GameState.GameScreen))
                  .RunIf((Query<Data<WorldPosition>, With<Player>> playerQuery) => playerQuery.Count() > 0);
     }
 

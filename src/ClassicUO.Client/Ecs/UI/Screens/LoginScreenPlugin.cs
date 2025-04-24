@@ -16,14 +16,9 @@ internal readonly struct LoginScreenPlugin : IPlugin
         var buttonsHandlerFn = ButtonsHandler;
         var deleteMenuFn = DeleteMenu;
 
-        var rootSystem = scheduler.AddSystems([
-            scheduler.AddSystem(buttonsHandlerFn, Stages.Update, ThreadingMode.Single),
-            scheduler.AddSystem(deleteMenuFn, Stages.Update, ThreadingMode.Single)
-                     .RunIf((Res<GameContext> gameCtx) => gameCtx.Value.PlayerSerial != 0)
-        ]).RunIf((Res<GameState> state) => state == GameState.LoginScreen);
-
-        scheduler.AddSystem(setupFn, Stages.Startup, ThreadingMode.Single)
-                 .RunIf((Res<GameState> state) => state == GameState.LoginScreen);
+        scheduler.OnUpdate(buttonsHandlerFn, ThreadingMode.Single);
+        scheduler.OnEnter(GameState.LoginScreen, setupFn, ThreadingMode.Single);
+        scheduler.OnExit(GameState.LoginScreen, deleteMenuFn, ThreadingMode.Single);
     }
 
     private static void Setup(TinyEcs.World world, Res<GumpBuilder> gumpBuilder, Res<ClayUOCommandBuffer> clay, Res<AssetsServer> assets)

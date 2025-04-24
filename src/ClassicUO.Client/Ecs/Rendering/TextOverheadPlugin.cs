@@ -14,7 +14,7 @@ using World = TinyEcs.World;
 
 namespace ClassicUO.Ecs;
 
-struct TextInfo
+struct TextInfoEvent
 {
     public uint Serial;
     public string Text;
@@ -25,22 +25,22 @@ struct TextInfo
     public float Time;
 }
 
-struct TextOverheadPlugin : IPlugin
+internal readonly struct TextOverheadPlugin : IPlugin
 {
     public void Build(Scheduler scheduler)
     {
-        scheduler.AddEvent<TextInfo>();
+        scheduler.AddEvent<TextInfoEvent>();
         scheduler.AddResource(new TextOverHeadManager());
 
         var readTextOverHeadFn = ReadTextOverhead;
-        scheduler.AddSystem(readTextOverHeadFn, Stages.Update, ThreadingMode.Single)
-                 .RunIf((EventReader<TextInfo> texts) => !texts.IsEmpty);
+        scheduler.OnUpdate(readTextOverHeadFn, ThreadingMode.Single)
+                 .RunIf((EventReader<TextInfoEvent> texts) => !texts.IsEmpty);
 
         var showTextOverheadFn = ShowTextOverhead;
-        scheduler.AddSystem(showTextOverheadFn, Stages.AfterUpdate, ThreadingMode.Single);
+        scheduler.OnAfterUpdate(showTextOverheadFn, ThreadingMode.Single);
     }
 
-    void ReadTextOverhead(TinyEcs.World world, Time time, EventReader<TextInfo> texts, Res<TextOverHeadManager> textOverHeadManager)
+    private static void ReadTextOverhead(TinyEcs.World world, Time time, EventReader<TextInfoEvent> texts, Res<TextOverHeadManager> textOverHeadManager)
     {
         foreach (var text in texts)
         {
@@ -61,7 +61,7 @@ struct TextOverheadPlugin : IPlugin
         }
     }
 
-    void ShowTextOverhead(
+    private static void ShowTextOverhead(
         TinyEcs.World world, Time time, Res<TextOverHeadManager> textOverHeadManager,
         Res<NetworkEntitiesMap> networkEntities, Res<UltimaBatcher2D> batcher,
         Res<GameContext> gameCtx,
@@ -81,10 +81,10 @@ internal sealed class TextOverHeadManager
 
     private readonly List<uint> _toRemove = new();
     private readonly List<(int, int)> _cuttedTextIndices = new();
-    private readonly Dictionary<uint, LinkedList<TextInfo>> _textOverHeadMap = new();
-    private readonly LinkedList<LinkedList<TextInfo>> _mainLinkedList = new();
+    private readonly Dictionary<uint, LinkedList<TextInfoEvent>> _textOverHeadMap = new();
+    private readonly LinkedList<LinkedList<TextInfoEvent>> _mainLinkedList = new();
 
-    public void Append(TextInfo text)
+    public void Append(TextInfoEvent text)
     {
         if (!_textOverHeadMap.TryGetValue(text.Serial, out var list))
         {
@@ -208,8 +208,8 @@ internal sealed class TextOverHeadManager
             var lineHeight = bounds.Y / totalLines;
             // if (position.X < camera.Bounds.X)
             //     position.X = camera.Bounds.X;
-            if (position.Y < bounds.Y - lineHeight)
-                position.Y = bounds.Y - lineHeight;
+            // if (position.Y < bounds.Y - lineHeight)
+            //     position.Y = bounds.Y - lineHeight;
 
             position = camera.WorldToScreen(position);
 
@@ -332,7 +332,7 @@ internal sealed class TextOverHeadManager
         return c;
     }
 
-    private bool IsOverlapped(TinyEcs.World world, NetworkEntitiesMap networkEntities, LinkedList<TextInfo> list, int fontSize)
+    private bool IsOverlapped(TinyEcs.World world, NetworkEntitiesMap networkEntities, LinkedList<TextInfoEvent> list, int fontSize)
     {
         (var bounds, var totalLines) = GetBounds(list, fontSize);
 
@@ -366,7 +366,7 @@ internal sealed class TextOverHeadManager
         var rectMain = new Rectangle((int)(positionMain.X - bounds.X * 0.5f), (int)(positionMain.Y - bounds.Y + lineHeight), (int)bounds.X, (int)bounds.Y);
 
         var first = _mainLinkedList.First;
-        LinkedListNode<LinkedList<TextInfo>> current = null;
+        LinkedListNode<LinkedList<TextInfoEvent>> current = null;
         while (first != null)
         {
             if (first.Value == list)
@@ -418,7 +418,7 @@ internal sealed class TextOverHeadManager
         return false;
     }
 
-    private (Vector2 bounds, int lines) GetBounds(LinkedList<TextInfo> list, int fontSize)
+    private (Vector2 bounds, int lines) GetBounds(LinkedList<TextInfoEvent> list, int fontSize)
     {
         var bounds = Vector2.Zero;
         var last = list.Last;
