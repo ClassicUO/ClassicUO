@@ -21,7 +21,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
         scheduler.OnExit(GameState.LoginScreen, deleteMenuFn, ThreadingMode.Single);
     }
 
-    private static void Setup(TinyEcs.World world, Res<GumpBuilder> gumpBuilder, Res<ClayUOCommandBuffer> clay, Res<AssetsServer> assets)
+    private static void Setup(TinyEcs.World world, Res<GumpBuilder> gumpBuilder, Res<ClayUOCommandBuffer> clay, Res<AssetsServer> assets, Res<Settings> settings)
     {
         var root = world.Entity()
             .Add<LoginScene>()
@@ -75,6 +75,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
             new(210, 30))
             .Set(new Text()
             {
+                Value = settings.Value.Username,
                 TextConfig = {
                     fontId = 0,
                     fontSize = 24,
@@ -94,6 +95,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
             new(210, 30))
             .Set(new Text()
             {
+                Value = Crypter.Decrypt(settings.Value.Password),
                 ReplaceChar = '*',
                 TextConfig = {
                     fontId = 0,
@@ -138,10 +140,12 @@ internal readonly struct LoginScreenPlugin : IPlugin
         }
     }
 
-    private static void DeleteMenu(Commands commands, Query<Data<UINode>, Filter<Without<Parent>, With<LoginScene>>> query)
+    private static void DeleteMenu(World world, Query<Data<UINode>, Filter<Without<Parent>, With<LoginScene>>> query)
     {
+        Console.WriteLine("[LoginScreen] cleanup start");
         foreach ((var ent, _) in query)
-            commands.Entity(ent.Ref).Delete();
+            world.Delete(ent.Ref);
+        Console.WriteLine("[LoginScreen] cleanup start");
     }
 
     private static void Login(EventWriter<OnLoginRequest> writer, Settings settings, string username, string password)
