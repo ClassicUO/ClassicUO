@@ -8,20 +8,11 @@ using TinyEcs;
 
 namespace ClassicUO.Ecs;
 
-
-struct OnNewChunkRequest { public int Map; public int RangeStartX, RangeStartY, RangeEndX, RangeEndY; }
-
-struct TileStretched
+internal readonly struct TerrainPlugin : IPlugin
 {
-    public sbyte AvgZ, MinZ;
-    public Renderer.UltimaBatcher2D.YOffsets Offset;
-    public Vector3 NormalTop, NormalRight, NormalLeft, NormalBottom;
-}
+    private struct OnNewChunkRequest { public int Map; public int RangeStartX, RangeStartY, RangeEndX, RangeEndY; }
+    private struct Terrain { }
 
-struct Terrain { }
-
-readonly struct TerrainPlugin : IPlugin
-{
     internal sealed class ChunksLoadedMap : Dictionary<uint, List<ulong>> { }
     internal sealed class LastPosition { public ushort? LastX, LastY; }
 
@@ -283,7 +274,7 @@ readonly struct TerrainPlugin : IPlugin
             var dist2 = GetDist(pos.Ref.X, pos.Ref.Y, mobPos.Ref.X, mobPos.Ref.Y);
             if (dist2 > gameCtx.Value.MaxObjectsDistance)
             {
-                commands.Entity(entity.Ref).Delete();
+                entity.Ref.Delete();
             }
         }
     }
@@ -490,4 +481,12 @@ readonly struct TerrainPlugin : IPlugin
         return true;
     }
 
+}
+
+
+struct TileStretched
+{
+    public sbyte AvgZ, MinZ;
+    public Renderer.UltimaBatcher2D.YOffsets Offset;
+    public Vector3 NormalTop, NormalRight, NormalLeft, NormalBottom;
 }
