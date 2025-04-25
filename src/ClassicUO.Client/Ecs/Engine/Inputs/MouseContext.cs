@@ -23,7 +23,7 @@ internal sealed class MouseContext : InputContext<MouseButtonType>
 
     public override bool IsPressedOnce(MouseButtonType input) => VerifyCondition(input, ButtonState.Pressed, ButtonState.Released);
 
-    public override bool IsReleased(MouseButtonType input) => VerifyCondition(input, ButtonState.Released, ButtonState.Released);
+    public override bool IsReleased(MouseButtonType input) => VerifyCondition(input, ButtonState.Released, ButtonState.Pressed);
 
     public bool IsPressedDouble(MouseButtonType input)
     {

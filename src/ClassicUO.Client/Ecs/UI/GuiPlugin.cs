@@ -125,13 +125,13 @@ internal readonly struct GuiPlugin : IPlugin
 
         scheduler.OnAfterUpdate((
             Local<ulong> lastEntityPressed,
-            Res<UltimaBatcher2D> batcher,
             Local<Texture2D> dumbTexture,
+            Local<StringBuilder> sb,
+            Res<UltimaBatcher2D> batcher,
             Res<AssetsServer> assets,
             Res<MouseContext> mouseCtx,
             Res<ClayUOCommandBuffer> commandBuffer,
             Res<FocusedInput> focusedInput,
-            Local<StringBuilder> sb,
             Query<Data<UINode>, Filter<With<Text>, With<TextInput>>> queryTextInput,
             Query<Data<UINode, UIInteractionState>> queryInteraction,
             Query<Data<UINode, Text, UIInteractionState, Children>,
@@ -144,11 +144,6 @@ internal readonly struct GuiPlugin : IPlugin
             {
                 dumbTexture.Value = new Texture2D(batcher.Value.GraphicsDevice, 1, 1);
                 dumbTexture.Value.SetData([Color.White]);
-            }
-
-            if (lastEntityPressed.Value != 0 && mouseCtx.Value.IsReleased(MouseButtonType.Left))
-            {
-                lastEntityPressed.Value = 0;
             }
 
             commandBuffer.Value.Reset();
@@ -171,9 +166,10 @@ internal readonly struct GuiPlugin : IPlugin
                     queryChildren
                 );
 
+            lastEntityPressed.Value = found;
+
             if (found != 0)
             {
-                lastEntityPressed.Value = found;
                 (_, var interaction) = queryInteraction.Get(found);
                 if (!Unsafe.IsNullRef(ref interaction.Ref))
                     interaction.Ref = lastInteraction;
@@ -465,13 +461,18 @@ internal readonly struct GuiPlugin : IPlugin
                         {
                             if (mouseCtx.IsPressed(MouseButtonType.Left))
                             {
-                                newInteraction = UIInteractionState.Pressed;
                                 found = ent;
+                                newInteraction = UIInteractionState.Pressed;
                             }
                             else if (interaction == UIInteractionState.Pressed)
                             {
-                                newInteraction = UIInteractionState.Released;
                                 found = ent;
+                                newInteraction = UIInteractionState.Released;
+                            }
+                            else if (interaction == UIInteractionState.Over && Clay.IsHovered())
+                            {
+                                found = ent;
+                                newInteraction = UIInteractionState.Over;
                             }
                         }
                     }
@@ -482,9 +483,9 @@ internal readonly struct GuiPlugin : IPlugin
                             found = ent;
                             newInteraction = UIInteractionState.Over;
                         }
-
-                        interaction = UIInteractionState.None;
                     }
+
+                    interaction = UIInteractionState.None;
                 }
 
                 if (!Unsafe.IsNullRef(ref text) && !string.IsNullOrEmpty(text.Value))
