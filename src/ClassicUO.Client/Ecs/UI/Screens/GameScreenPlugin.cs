@@ -2,6 +2,7 @@ using System;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using Clay_cs;
+using Microsoft.Xna.Framework;
 using TinyEcs;
 
 namespace ClassicUO.Ecs;
@@ -26,7 +27,6 @@ internal readonly struct GameScreenPlugin : IPlugin
                     {
                         case ButtonAction.Logout:
                             Console.WriteLine("Logout button pressed");
-                            network.Value.Disconnect();
                             state.Set(GameState.LoginScreen);
                             break;
                     }
@@ -38,6 +38,7 @@ internal readonly struct GameScreenPlugin : IPlugin
         scheduler.OnUpdate((
             Res<Camera> camera,
             Res<MouseContext> mouseCtx,
+            Local<Rectangle> lastSize,
             Single<Data<UINode, UIInteractionState>, Filter<With<GameWindowBorderUI>, With<GameScene>>> queryGameWindowBorder,
             Single<Data<UINode, UIInteractionState>, Filter<With<GameWindowBorderResizeUI>, With<GameScene>>> queryGameWindowBorderResize,
             Single<Data<UINode>, Filter<With<GameWindowUI>, With<GameScene>>> queryGameWindow
@@ -52,6 +53,8 @@ internal readonly struct GameScreenPlugin : IPlugin
                 {
                     camera.Value.Bounds.X += (int)mouseCtx.Value.PositionOffset.X;
                     camera.Value.Bounds.Y += (int)mouseCtx.Value.PositionOffset.Y;
+
+                    lastSize.Value = camera.Value.Bounds;
                 }
             }
 
@@ -59,30 +62,39 @@ internal readonly struct GameScreenPlugin : IPlugin
             {
                 if (mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
                 {
-                    camera.Value.Bounds.Width += (int)mouseCtx.Value.PositionOffset.X;
-                    camera.Value.Bounds.Height += (int)mouseCtx.Value.PositionOffset.Y;
+                    ref var newBounds = ref lastSize.Value;
+                    newBounds.Width += (int)mouseCtx.Value.PositionOffset.X;
+                    newBounds.Height += (int)mouseCtx.Value.PositionOffset.Y;
 
-                    camera.Value.Bounds.Width = Math.Max(300, camera.Value.Bounds.Width);
-                    camera.Value.Bounds.Height = Math.Max(300, camera.Value.Bounds.Height);
+                    if (newBounds.Width >= 300)
+                        camera.Value.Bounds.Width = newBounds.Width;
+                    if (newBounds.Height >= 300)
+                        camera.Value.Bounds.Height = newBounds.Height;
+                }
+                else
+                {
+                    lastSize.Value = camera.Value.Bounds;
                 }
             }
 
+            const int BORDER_SIZE = 10;
+
             nodeBorderResize.Ref.Config.floating.offset = new()
             {
-                x = camera.Value.Bounds.X + camera.Value.Bounds.Width + 10 - nodeBorderResize.Ref.Config.layout.sizing.width.size.minMax.max,
-                y = camera.Value.Bounds.Y + camera.Value.Bounds.Height + 10 - nodeBorderResize.Ref.Config.layout.sizing.height.size.minMax.max,
+                x = camera.Value.Bounds.X + camera.Value.Bounds.Width + BORDER_SIZE - nodeBorderResize.Ref.Config.layout.sizing.width.size.minMax.max,
+                y = camera.Value.Bounds.Y + camera.Value.Bounds.Height + BORDER_SIZE - nodeBorderResize.Ref.Config.layout.sizing.height.size.minMax.max,
             };
 
 
             nodeBorder.Ref.Config.floating.offset = new()
             {
-                x = camera.Value.Bounds.X - 5,
-                y = camera.Value.Bounds.Y - 5,
+                x = camera.Value.Bounds.X - BORDER_SIZE * 0.5f,
+                y = camera.Value.Bounds.Y - BORDER_SIZE * 0.5f,
             };
             nodeBorder.Ref.Config.layout.sizing = new()
             {
-                width = Clay_SizingAxis.Fixed(camera.Value.Bounds.Width + 10),
-                height = Clay_SizingAxis.Fixed(camera.Value.Bounds.Height + 10),
+                width = Clay_SizingAxis.Fixed(camera.Value.Bounds.Width + BORDER_SIZE),
+                height = Clay_SizingAxis.Fixed(camera.Value.Bounds.Height + BORDER_SIZE),
             };
 
 
@@ -132,6 +144,8 @@ internal readonly struct GameScreenPlugin : IPlugin
                             height = Clay_SizingAxis.Fixed(25),
                         },
                         layoutDirection = Clay_LayoutDirection.CLAY_LEFT_TO_RIGHT,
+                        childGap = 4,
+                        padding =  Clay_Padding.All(4),
                     }
                 }
             })
@@ -146,8 +160,12 @@ internal readonly struct GameScreenPlugin : IPlugin
                         sizing = {
                             width = Clay_SizingAxis.Fixed(100),
                             height = Clay_SizingAxis.Grow(),
+                        },
+                        childAlignment = {
+                            x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER,
+                            y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER,
                         }
-                    }
+                    },
                 }
             })
             .Set(new Text()
