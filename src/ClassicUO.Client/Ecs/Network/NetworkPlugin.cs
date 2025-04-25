@@ -38,6 +38,7 @@ readonly struct NetworkPlugin : IPlugin
 
         scheduler.OnExit(GameState.GameScreen, (Res<NetClient> network, Res<CircularBuffer> buffer, Res<GameContext> gameCtx) =>
         {
+            gameCtx.Value.Map = -1;
             gameCtx.Value.PlayerSerial = 0;
             network.Value.Disconnect();
             buffer.Value.Clear();

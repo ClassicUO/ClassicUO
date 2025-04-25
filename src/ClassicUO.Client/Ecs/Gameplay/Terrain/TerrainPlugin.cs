@@ -18,18 +18,22 @@ struct TileStretched
     public Vector3 NormalTop, NormalRight, NormalLeft, NormalBottom;
 }
 
+struct Terrain { }
+
 readonly struct TerrainPlugin : IPlugin
 {
     internal sealed class ChunksLoadedMap : Dictionary<uint, List<ulong>> { }
+    internal sealed class LastPosition { public ushort? LastX, LastY; }
 
     public void Build(Scheduler scheduler)
     {
         scheduler.AddEvent<OnNewChunkRequest>();
         scheduler.AddResource(new ChunksLoadedMap());
+        scheduler.AddResource(new LastPosition());
 
         var enqueueChunksRequestsFn = EnqueueChunksRequests;
         scheduler.OnUpdate(enqueueChunksRequestsFn, ThreadingMode.Single)
-            .RunIf((Query<TinyEcs.Data<WorldPosition>, With<Player>> playerQuery) => playerQuery.Count() > 0);
+            .RunIf((Query<Data<WorldPosition>, With<Player>> playerQuery) => playerQuery.Count() > 0);
 
         var loadChunksFn = LoadChunks;
         scheduler.OnUpdate(loadChunksFn, ThreadingMode.Single)
@@ -37,27 +41,48 @@ readonly struct TerrainPlugin : IPlugin
 
         var removeEntitiesOutOfRangeFn = RemoveEntitiesOutOfRange;
         scheduler.OnUpdate(removeEntitiesOutOfRangeFn, ThreadingMode.Single)
-            .RunIf((Query<TinyEcs.Data<WorldPosition>, With<Player>> playerQuery, Local<float> timeUpdate, Time time) =>
+            .RunIf((Query<Data<WorldPosition>, With<Player>> playerQuery, Local<float> timeUpdate, Time time) =>
             {
                 if (timeUpdate.Value > time.Total)
                     return false;
                 timeUpdate.Value = time.Total + 3000;
                 return playerQuery.Count() > 0;
             });
+
+        scheduler.OnExit(GameState.GameScreen, (
+            Res<ChunksLoadedMap> chunksLoaded,
+            Res<GameContext> gameCtx,
+            Res<LastPosition> lastPos,
+            EventReader<OnNewChunkRequest> reader,
+            Query<Data<WorldPosition>, With<Terrain>> query
+        ) =>
+        {
+            foreach ((var ent, _) in query)
+            {
+                ent.Ref.Delete();
+            }
+
+            chunksLoaded.Value.Clear();
+            reader.Clear();
+            lastPos.Value.LastX = null;
+            lastPos.Value.LastY = null;
+        }, ThreadingMode.Single);
     }
 
     void EnqueueChunksRequests
     (
         Res<GameContext> gameCtx,
-        Query<Data<WorldPosition>, With<Player>> playerQuery,
-        EventWriter<OnNewChunkRequest> chunkRequests,
-        Local<(ushort? LastX, ushort? LastY)> lastPos
+        Res<LastPosition> lastPos,
+        Single<Data<WorldPosition>, With<Player>> playerQuery,
+        EventWriter<OnNewChunkRequest> chunkRequests
     )
     {
         if (gameCtx.Value.Map == -1)
+        {
             return;
+        }
 
-        (_, var pos) = playerQuery.Single();
+        (_, var pos) = playerQuery.Get();
 
         if (lastPos.Value.LastX.HasValue && lastPos.Value.LastY.HasValue)
             if (lastPos.Value.LastX == pos.Ref.X && lastPos.Value.LastY == pos.Ref.Y)
@@ -80,7 +105,7 @@ readonly struct TerrainPlugin : IPlugin
 
     void LoadChunks
     (
-        TinyEcs.World world,
+        World world,
         Res<UOFileManager> fileManager,
         Res<ChunksLoadedMap> chunksLoaded,
         Local<StaticsBlock[]> staticsBlockBuffer,
@@ -155,7 +180,8 @@ readonly struct TerrainPlugin : IPlugin
                                     })
                                     .Set(new WorldPosition() { X = tileX, Y = tileY, Z = z })
                                     .Set(new Graphic() { Value = tileID })
-                                    .Add<IsTile>();
+                                    .Add<IsTile>()
+                                    .Add<Terrain>();
 
                                 list.Add(e);
                             }
@@ -164,7 +190,8 @@ readonly struct TerrainPlugin : IPlugin
                                 var e = world.Entity()
                                     .Set(new WorldPosition() { X = tileX, Y = tileY, Z = z })
                                     .Set(new Graphic() { Value = tileID })
-                                    .Add<IsTile>();
+                                    .Add<IsTile>()
+                                    .Add<Terrain>();
 
                                 list.Add(e);
                             }
@@ -202,7 +229,8 @@ readonly struct TerrainPlugin : IPlugin
                                 .Set(new WorldPosition() { X = staX, Y = staY, Z = sb.Z })
                                 .Set(new Graphic() { Value = sb.Color })
                                 .Set(new Hue() { Value = sb.Hue })
-                                .Add<IsStatic>();
+                                .Add<IsStatic>()
+                                .Add<Terrain>();
 
                             list.Add(e);
                         }

@@ -223,6 +223,7 @@ readonly struct InGamePacketsPlugin : IPlugin
             Res<PacketsMap> packetsMap,
             Res<NetClient> network,
             Res<UOFileManager> fileManager,
+            Res<Profile> profile,
             Res<GameContext> gameCtx,
             State<GameState> state,
             EventWriter<AcceptedStep> acceptedSteps,

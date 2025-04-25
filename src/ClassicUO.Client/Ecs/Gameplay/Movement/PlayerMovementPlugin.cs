@@ -60,16 +60,41 @@ readonly struct PlayerMovementPlugin : IPlugin
 
         var enqueuePlayerStepsFn = EnqueuePlayerSteps;
         scheduler.OnUpdate(enqueuePlayerStepsFn, ThreadingMode.Single)
+            .RunIf((Res<MouseContext> mouseCtx, Res<Camera> camera, Local<(float X, float Y)> clickedPos) =>
+            {
+                if (mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Right))
+                {
+                    clickedPos.Value = (mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y);
+                }
+
+                return camera.Value.Bounds.Contains((int)clickedPos.Value.X, (int)clickedPos.Value.Y);
+            })
             .RunIf((
                 Res<MouseContext> mouseCtx,
                 Res<PlayerStepsContext> playerRequestedSteps,
                 Res<Camera> camera,
+                Local<bool> autoWalk,
                 Time time,
-                Query<TinyEcs.Data<WorldPosition, Facing, MobileSteps, MobAnimation>, With<Player>> playerQuery
-            ) => mouseCtx.Value.IsPressed(Input.MouseButtonType.Right) &&
-                    camera.Value.Bounds.Contains((int)mouseCtx.Value.Position.X, (int)mouseCtx.Value.Position.Y) &&
-                    playerRequestedSteps.Value.LastStep < time.Total && playerRequestedSteps.Value.Index < 5 &&
-                    playerQuery.Count() > 0);
+                Query<Data<WorldPosition, Facing, MobileSteps, MobAnimation>, With<Player>> playerQuery
+            ) =>
+            {
+                if (!autoWalk)
+                {
+                    if (mouseCtx.Value.IsPressed(Input.MouseButtonType.Right) &&
+                        mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
+                    {
+                        autoWalk.Value = true;
+                    }
+                }
+                else if (mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Right))
+                {
+                    autoWalk.Value = false;
+                }
+
+                return (autoWalk || mouseCtx.Value.IsPressed(Input.MouseButtonType.Right)) &&
+                         playerRequestedSteps.Value.LastStep < time.Total && playerRequestedSteps.Value.Index < 5 &&
+                         playerQuery.Count() > 0;
+            });
 
         var parseAcceptedStepsFn = ParseAcceptedSteps;
         scheduler.OnUpdate(parseAcceptedStepsFn, ThreadingMode.Single)
@@ -89,9 +114,9 @@ readonly struct PlayerMovementPlugin : IPlugin
         Res<NetClient> network,
         Res<PlayerStepsContext> playerRequestedSteps,
         Res<Camera> camera,
-        Query<TinyEcs.Data<WorldPosition, Facing, MobileSteps, MobAnimation>, With<Player>> playerQuery,
-        Query<TinyEcs.Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tilesQuery,
-        Query<TinyEcs.Data<WorldPosition, Graphic>, TinyEcs.Filter<Without<IsTile>, Without<MobAnimation>>> staticsQuery,
+        Query<Data<WorldPosition, Facing, MobileSteps, MobAnimation>, With<Player>> playerQuery,
+        Query<Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tilesQuery,
+        Query<Data<WorldPosition, Graphic>, Filter<Without<IsTile>, Without<MobAnimation>>> staticsQuery,
         Time time
     )
     {
@@ -287,8 +312,8 @@ readonly struct PlayerMovementPlugin : IPlugin
     private static void FillListOfItemsAtPosition
     (
         List<TerrainInfo> list,
-        Query<TinyEcs.Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tileQuery,
-        Query<TinyEcs.Data<WorldPosition, Graphic>, TinyEcs.Filter<Without<IsTile>, Without<MobAnimation>>> staticsQuery,
+        Query<Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tileQuery,
+        Query<Data<WorldPosition, Graphic>, Filter<Without<IsTile>, Without<MobAnimation>>> staticsQuery,
         TileDataLoader tileData,
         int x, int y
     )

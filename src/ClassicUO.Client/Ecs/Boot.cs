@@ -32,38 +32,10 @@ internal readonly struct CuoPlugin : IPlugin
         scheduler.AddPlugin<AssetsPlugin>();
         scheduler.AddPlugin<TerrainPlugin>();
         scheduler.AddPlugin<GuiPlugin>();
+
         scheduler.AddPlugin<NetworkPlugin>();
-        scheduler.AddPlugin<ChatPlugin>();
-        scheduler.AddPlugin<PickupPlugin>();
-        scheduler.AddPlugin<MobAnimationsPlugin>();
-        scheduler.AddPlugin<PlayerMovementPlugin>();
-        scheduler.AddPlugin<WorldRenderingPlugin>();
-        scheduler.AddPlugin<TextOverheadPlugin>();
-        // scheduler.AddPlugin<UIRenderingPlugin>();
-
-
-
-        // TODO: remove this once the UI is done
-        // scheduler.AddSystem((EventWriter<OnLoginRequest> writer, Res<Settings> settings) =>
-        //    writer.Enqueue(new OnLoginRequest()
-        //    {
-        //        Address = settings.Value.IP,
-        //        Port = settings.Value.Port,
-        //        Username = settings.Value.Username,
-        //        Password = settings.Value.Password,
-        //    }), Stages.Startup);
-
-        // scheduler
-        //     .OnUpdate((TinyEcs.World world) => Console.WriteLine("Archetypes removed: {0}", world.RemoveEmptyArchetypes()), ThreadingMode.Single)
-        //     .RunIf(
-        //         (Time time, Local<float> updateTime) =>
-        //         {
-        //             if (updateTime.Value > time.Total)
-        //                 return false;
-
-        //             updateTime.Value = time.Total + 3000f;
-        //             return true;
-        //         });
+        scheduler.AddPlugin<GameplayPlugin>();
+        scheduler.AddPlugin<RenderingPlugin>();
     }
 }
 

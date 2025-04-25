@@ -1,6 +1,5 @@
 using System;
 using ClassicUO.Network;
-using ClassicUO.Renderer;
 using Clay_cs;
 using TinyEcs;
 
@@ -12,15 +11,9 @@ internal readonly struct GameScreenPlugin : IPlugin
     {
         var setupFn = Setup;
         var cleanupFn = Cleanup;
-        var updateCameraFn = UpdateCamera;
-
-        scheduler.AddResource(new Camera(0.5f, 2.5f, 0.1f));
 
         scheduler.OnEnter(GameState.GameScreen, setupFn, ThreadingMode.Single);
         scheduler.OnExit(GameState.GameScreen, cleanupFn, ThreadingMode.Single);
-
-        scheduler.OnUpdate(updateCameraFn, ThreadingMode.Single)
-                 ; //.RunIf((SchedulerState state) => state.InState(GameState.GameScreen));
 
         scheduler.OnUpdate((Query<Data<UINode, UIInteractionState, ButtonAction>> query, Res<NetClient> network, State<GameState> state) =>
         {
@@ -107,14 +100,6 @@ internal readonly struct GameScreenPlugin : IPlugin
 
         root.AddChild(menuBar);
         menuBar.AddChild(menuBarItem);
-
-        // root.AddChild(
-        //     gumpBuilder.Value.AddGump(
-        //         0x014E,
-        //         Vector3.UnitZ,
-        //         new(0, 0)
-        //     ).Add<GameScene>()
-        // );
     }
 
     private static void Cleanup(World world, Query<Data<UINode>, Filter<Without<Parent>, With<GameScene>>> query)
@@ -123,18 +108,6 @@ internal readonly struct GameScreenPlugin : IPlugin
         foreach ((var ent, _) in query)
             world.Delete(ent.Ref);
         Console.WriteLine("[GameScreen] cleanup done");
-    }
-
-    private static void UpdateCamera(Time time, Res<Camera> camera, Res<MouseContext> mouseCtx)
-    {
-        var mousePos = mouseCtx.Value.Position;
-
-        if (mouseCtx.Value.Wheel > 0)
-            camera.Value.ZoomIn();
-        else if (mouseCtx.Value.Wheel < 0)
-            camera.Value.ZoomOut();
-        camera.Value.Bounds = new(300, 50, 800, 600); // TODO: get the actual window size
-        camera.Value.Update(true, time.Total, new((int)mousePos.X, (int)mousePos.Y));
     }
 
     private struct GameScene;

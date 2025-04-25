@@ -1,4 +1,5 @@
 using ClassicUO.Assets;
+using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Renderer;
@@ -15,6 +16,12 @@ readonly struct WorldRenderingPlugin : IPlugin
 {
     public void Build(Scheduler scheduler)
     {
+        // TODO: find a better place to initialize this
+        scheduler.AddResource(new Profile()
+        {
+            GameWindowPosition = new(20, 40)
+        });
+        scheduler.AddPlugin<CameraPlugin>();
         scheduler.AddResource(new SelectedEntity());
 
         scheduler.OnFrameStart((Res<MouseContext> mouseCtx, Res<KeyboardContext> keyboardCtx, Res<GameContext> gameCtx, Res<Camera> camera) =>
