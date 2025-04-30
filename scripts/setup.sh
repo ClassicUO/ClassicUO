@@ -10,14 +10,19 @@ else
     echo "Zig is already installed"
 fi
 
+pushd ..
 dotnet tool install --global ClangSharpPInvokeGenerator
+popd
 
-cd ../external/Clay-cs/Clay-builder
+pushd ../external/Clay-cs/Clay-builder
 zig build
+popd
 
-cd ../../TinyEcs
+pushd ../external/TinyEcs
 dotnet build
+popd
 
-cd ../../src/ClassicUO.Client
+pushd ../src/ClassicUO.Client
 dotnet build
+popd
 
