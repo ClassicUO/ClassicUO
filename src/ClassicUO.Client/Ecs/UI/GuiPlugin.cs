@@ -68,7 +68,7 @@ internal readonly struct GuiPlugin : IPlugin
             Clay.UpdateScrollContainers(true, new(0, mouseCtx.Value.Wheel), time.Frame);
         }, ThreadingMode.Single);
 
-        scheduler.OnUpdate((Query<Data<UINode, UOButton, UIInteractionState>> query) =>
+        scheduler.OnUpdate((Query<Data<UINode, UOButton, UIInteractionState>, Changed<UIInteractionState>> query) =>
         {
             foreach ((var node, var button, var interaction) in query)
             {
@@ -170,9 +170,12 @@ internal readonly struct GuiPlugin : IPlugin
 
             if (found != 0)
             {
-                (_, var interaction) = queryInteraction.Get(found);
+                (var ent, var node, var interaction) = queryInteraction.Get(found);
                 if (!Unsafe.IsNullRef(ref interaction.Ref))
+                {
                     interaction.Ref = lastInteraction;
+                    ent.Ref.Set(lastInteraction);
+                }
 
                 if (lastInteraction == UIInteractionState.Pressed && queryTextInput.Contains(found))
                 {
@@ -432,7 +435,7 @@ internal readonly struct GuiPlugin : IPlugin
 
             static void renderNodes
             (
-                ulong ent,
+                EntityView ent,
                 ref ulong found,
                 ulong lastPressed,
                 ref UIInteractionState newInteraction,
@@ -485,7 +488,10 @@ internal readonly struct GuiPlugin : IPlugin
                         }
                     }
 
-                    interaction = UIInteractionState.None;
+                    if (interaction != UIInteractionState.None)
+                    {
+                        ent.Set(UIInteractionState.None);
+                    }
                 }
 
                 if (!Unsafe.IsNullRef(ref text) && !string.IsNullOrEmpty(text.Value))

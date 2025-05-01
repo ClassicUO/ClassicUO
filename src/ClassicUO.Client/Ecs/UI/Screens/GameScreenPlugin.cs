@@ -249,7 +249,6 @@ internal readonly struct GameScreenPlugin : IPlugin
         root.AddChild(menuBar);
         menuBar.AddChild(menuBarItem);
 
-
         root.AddChild(gameWindowBorder);
         root.AddChild(gameWindowBorderResize);
         root.AddChild(gameWindow);

@@ -24,9 +24,20 @@ readonly struct WorldRenderingPlugin : IPlugin
         scheduler.AddPlugin<CameraPlugin>();
         scheduler.AddResource(new SelectedEntity());
 
-        scheduler.OnFrameStart((Res<MouseContext> mouseCtx, Res<KeyboardContext> keyboardCtx, Res<GameContext> gameCtx, Res<Camera> camera) =>
+        scheduler.OnFrameStart((
+            Res<MouseContext> mouseCtx,
+            Res<KeyboardContext> keyboardCtx,
+            Res<GameContext> gameCtx,
+            Res<Camera> camera,
+            Local<bool> canMove
+        ) =>
         {
-            if (mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
+            if (mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Left))
+            {
+                canMove.Value = camera.Value.Bounds.Contains((int)mouseCtx.Value.Position.X, (int)mouseCtx.Value.Position.Y);
+            }
+
+            if (canMove && mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
             {
                 gameCtx.Value.CenterOffset += mouseCtx.Value.PositionOffset * camera.Value.Zoom;
             }
