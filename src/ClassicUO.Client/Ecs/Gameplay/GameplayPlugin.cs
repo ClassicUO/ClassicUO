@@ -8,6 +8,7 @@ internal readonly struct GameplayPlugin : IPlugin
     {
         scheduler.AddPlugin<ChatPlugin>();
         scheduler.AddPlugin<PickupPlugin>();
+        scheduler.AddPlugin<UseObjectPlugin>();
         scheduler.AddPlugin<MobAnimationsPlugin>();
         scheduler.AddPlugin<PlayerMovementPlugin>();
     }

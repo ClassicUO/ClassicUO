@@ -63,11 +63,20 @@ readonly struct WorldRenderingPlugin : IPlugin
             ThreadingMode.Single
         ).RunIf((Res<GameContext> gameCtx) => !gameCtx.Value.FreeView);
 
+        var cleanupFn = Cleanup;
+        scheduler.OnExit(GameState.GameScreen, cleanupFn, ThreadingMode.Single);
+
         var renderingFn = Rendering;
         scheduler.OnAfterUpdate(renderingFn, ThreadingMode.Single)
                  .RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>())
                  .RunIf((SchedulerState state) => state.InState(GameState.GameScreen))
                  .RunIf((Query<Data<WorldPosition>, With<Player>> playerQuery) => playerQuery.Count() > 0);
+    }
+
+
+    private static void Cleanup(Res<SelectedEntity> selecteEntity)
+    {
+        selecteEntity.Value.Clear();
     }
 
 

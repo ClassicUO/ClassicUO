@@ -17,7 +17,7 @@ internal readonly struct GameScreenPlugin : IPlugin
         scheduler.OnEnter(GameState.GameScreen, setupFn, ThreadingMode.Single);
         scheduler.OnExit(GameState.GameScreen, cleanupFn, ThreadingMode.Single);
 
-        scheduler.OnUpdate((Query<Data<UINode, UIInteractionState, ButtonAction>> query, Res<NetClient> network, State<GameState> state) =>
+        scheduler.OnUpdate((Query<Data<UINode, UIInteractionState, ButtonAction>, Changed<UIInteractionState>> query, Res<NetClient> network, State<GameState> state) =>
         {
             foreach ((var node, var interaction, var action) in query)
             {
