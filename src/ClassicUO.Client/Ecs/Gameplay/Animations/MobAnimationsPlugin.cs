@@ -121,7 +121,7 @@ readonly struct MobAnimationsPlugin : IPlugin
 
             ref var steps = ref world.Get<MobileSteps>(ent);
 
-            if (steps.Index >= MobileSteps.COUNT)
+            if (steps.Index >= MobileSteps.COUNT - 1)
             {
                 world.Set(ent, new WorldPosition()
                 {
