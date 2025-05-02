@@ -115,7 +115,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
     }
 
     private static void ButtonsHandler(
-        Query<Data<UIInteractionState, ButtonAction>> query,
+        Query<Data<UIInteractionState, ButtonAction>, Changed<UIInteractionState>> query,
         Res<Settings> settings,
         State<LoginInteraction> state,
         EventWriter<OnLoginRequest> writer,
@@ -152,7 +152,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
         Console.WriteLine("[LoginScreen] cleanup start");
         foreach ((var ent, _) in query)
             world.Delete(ent.Ref);
-        Console.WriteLine("[LoginScreen] cleanup start");
+        Console.WriteLine("[LoginScreen] cleanup done");
     }
 
     private static void Login(EventWriter<OnLoginRequest> writer, Settings settings, string username, string password)

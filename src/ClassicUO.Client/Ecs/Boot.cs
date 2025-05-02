@@ -57,5 +57,7 @@ public enum GameState : byte
 {
     Loading,
     LoginScreen,
+    ServerSelection,
+    CharacterSelection,
     GameScreen
 }

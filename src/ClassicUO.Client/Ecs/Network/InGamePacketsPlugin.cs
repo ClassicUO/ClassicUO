@@ -197,7 +197,6 @@ readonly struct InGamePacketsPlugin : IPlugin
         scheduler.AddResource(new NetworkEntitiesMap());
 
         scheduler.OnExit(GameState.GameScreen, (
-            Commands commands,
             TinyEcs.World world,
             Query<Data<NetworkSerial>, Filter<Without<Parent>>> query,
             Res<NetworkEntitiesMap> entitiesMap) =>

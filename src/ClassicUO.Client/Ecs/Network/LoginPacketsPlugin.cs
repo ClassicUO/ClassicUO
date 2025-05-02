@@ -19,7 +19,9 @@ readonly struct LoginPacketsPlugin : IPlugin
             Res<Settings> settings,
             Res<PacketsMap> packetsMap,
             Res<NetClient> network,
-            Res<GameContext> gameCtx
+            Res<GameContext> gameCtx,
+            State<GameState> gameState,
+            EventWriter<ServerSelectionInfoEvent> serverWriter
         ) =>
         {
             // server list
@@ -28,7 +30,7 @@ readonly struct LoginPacketsPlugin : IPlugin
                 var reader = new StackDataReader(buffer);
                 var flags = reader.ReadUInt8();
                 var count = reader.ReadUInt16BE();
-                var serverList = new List<(ushort index, string name)>();
+                var serverList = new List<ServerInfo>();
 
                 for (var i = 0; i < count; ++i)
                 {
@@ -38,11 +40,17 @@ readonly struct LoginPacketsPlugin : IPlugin
                     var timeZone = reader.ReadUInt8();
                     var address = reader.ReadUInt32BE();
 
-                    serverList.Add((index, name));
-                    Console.WriteLine("server entry -> {0}", name);
+                    serverList.Add(new (
+                        index, name, percFull, timeZone, address
+                    ));
                 }
 
-                network.Value.Send_SelectServer((byte)serverList[0].index);
+                gameState.Set(GameState.ServerSelection);
+                serverWriter.Enqueue(new ()
+                {
+                    Servers = serverList
+                });
+                // network.Value.Send_SelectServer((byte)serverList[0].index);
             };
 
             // characters list

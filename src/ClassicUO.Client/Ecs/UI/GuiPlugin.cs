@@ -33,6 +33,13 @@ internal readonly struct GuiPlugin : IPlugin
         return new Clay_Dimensions(size.X, size.Y);
     }
 
+    private static unsafe void OnClayError(Clay_ErrorData errorData)
+    {
+        var raw = new ReadOnlySpan<byte>(errorData.errorText.chars, errorData.errorText.length);
+        var text = Encoding.UTF8.GetString(raw);
+        Console.WriteLine($"Clay error: {errorData.errorType} - {text}");
+    }
+
     public unsafe void Build(Scheduler scheduler)
     {
         scheduler.AddResource(new ClayUOCommandBuffer());
@@ -43,6 +50,7 @@ internal readonly struct GuiPlugin : IPlugin
         ThreadingMode.Single);
 
         scheduler.AddPlugin<LoginScreenPlugin>();
+        scheduler.AddPlugin<ServerSelectionPlugin>();
         scheduler.AddPlugin<GameScreenPlugin>();
 
         scheduler.OnExit(GameState.LoginScreen, (Res<FocusedInput> focusedInput) => focusedInput.Value.Entity = 0, ThreadingMode.Single);
@@ -51,7 +59,8 @@ internal readonly struct GuiPlugin : IPlugin
         scheduler.OnStartup(() =>
         {
             var arenaHandle = Clay.CreateArena(Clay.MinMemorySize());
-            var ctx = Clay.Initialize(arenaHandle, new() { width = 300, height = 300 }, 0);
+            var errorFn = (nint)(delegate*<Clay_ErrorData, void>)&OnClayError;
+            var ctx = Clay.Initialize(arenaHandle, new() { width = 300, height = 300 }, errorFn);
             var measureTextFn = (nint)(delegate*<Clay_StringSlice, Clay_TextElementConfig*, void*, Clay_Dimensions>)&OnMeasureText;
             Clay.SetMeasureTextFunction(measureTextFn);
         }, ThreadingMode.Single);
