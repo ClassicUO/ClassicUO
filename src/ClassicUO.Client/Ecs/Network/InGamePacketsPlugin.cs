@@ -229,7 +229,7 @@ readonly struct InGamePacketsPlugin : IPlugin
             EventWriter<AcceptedStep> acceptedSteps,
             EventWriter<RejectedStep> rejectedSteps,
             EventWriter<MobileQueuedStep> mobileQueuedSteps,
-            EventWriter<TextInfoEvent> textOverHeadQueue,
+            EventWriter<TextOverheadEvent> textOverHeadQueue,
             TinyEcs.World world
         ) =>
         {
@@ -270,7 +270,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 ent.Set(new Ecs.WorldPosition() { X = x, Y = y, Z = z })
                     .Set(new Ecs.Graphic() { Value = graphic })
                     .Set(new Facing() { Value = dir })
-                    .Set(new MobileSteps())
+                    .Set(new MobileSteps() { Index = -1 })
                     .Add<Player>();
 
                 state.Set(GameState.GameScreen);
@@ -501,7 +501,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                     var text = reader.ReadUnicodeBE();
                     Console.WriteLine("[0xAE] {0} says: '{1}'", name, text);
 
-                    textOverHeadQueue.Enqueue(new TextInfoEvent()
+                    textOverHeadQueue.Enqueue(new TextOverheadEvent()
                     {
                         Serial = serial,
                         Name = name,
@@ -613,7 +613,7 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                 Console.WriteLine("[0x1C] {0} says: '{1}'", name, text);
 
-                textOverHeadQueue.Enqueue(new TextInfoEvent()
+                textOverHeadQueue.Enqueue(new TextOverheadEvent()
                 {
                     Serial = serial,
                     Name = name,

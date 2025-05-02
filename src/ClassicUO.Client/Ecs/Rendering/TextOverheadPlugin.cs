@@ -14,7 +14,7 @@ using World = TinyEcs.World;
 
 namespace ClassicUO.Ecs;
 
-struct TextInfoEvent
+internal struct TextOverheadEvent
 {
     public uint Serial;
     public string Text;
@@ -29,18 +29,18 @@ internal readonly struct TextOverheadPlugin : IPlugin
 {
     public void Build(Scheduler scheduler)
     {
-        scheduler.AddEvent<TextInfoEvent>();
+        scheduler.AddEvent<TextOverheadEvent>();
         scheduler.AddResource(new TextOverHeadManager());
 
         var readTextOverHeadFn = ReadTextOverhead;
         scheduler.OnUpdate(readTextOverHeadFn, ThreadingMode.Single)
-                 .RunIf((EventReader<TextInfoEvent> texts) => !texts.IsEmpty);
+                 .RunIf((EventReader<TextOverheadEvent> texts) => !texts.IsEmpty);
 
         var showTextOverheadFn = ShowTextOverhead;
         scheduler.OnAfterUpdate(showTextOverheadFn, ThreadingMode.Single);
     }
 
-    private static void ReadTextOverhead(TinyEcs.World world, Time time, EventReader<TextInfoEvent> texts, Res<TextOverHeadManager> textOverHeadManager)
+    private static void ReadTextOverhead(TinyEcs.World world, Time time, EventReader<TextOverheadEvent> texts, Res<TextOverHeadManager> textOverHeadManager)
     {
         foreach (var text in texts)
         {
@@ -81,10 +81,10 @@ internal sealed class TextOverHeadManager
 
     private readonly List<uint> _toRemove = new();
     private readonly List<(int, int)> _cuttedTextIndices = new();
-    private readonly Dictionary<uint, LinkedList<TextInfoEvent>> _textOverHeadMap = new();
-    private readonly LinkedList<LinkedList<TextInfoEvent>> _mainLinkedList = new();
+    private readonly Dictionary<uint, LinkedList<TextOverheadEvent>> _textOverHeadMap = new();
+    private readonly LinkedList<LinkedList<TextOverheadEvent>> _mainLinkedList = new();
 
-    public void Append(TextInfoEvent text)
+    public void Append(TextOverheadEvent text)
     {
         if (!_textOverHeadMap.TryGetValue(text.Serial, out var list))
         {
@@ -332,7 +332,7 @@ internal sealed class TextOverHeadManager
         return c;
     }
 
-    private bool IsOverlapped(TinyEcs.World world, NetworkEntitiesMap networkEntities, LinkedList<TextInfoEvent> list, int fontSize)
+    private bool IsOverlapped(TinyEcs.World world, NetworkEntitiesMap networkEntities, LinkedList<TextOverheadEvent> list, int fontSize)
     {
         (var bounds, var totalLines) = GetBounds(list, fontSize);
 
@@ -366,7 +366,7 @@ internal sealed class TextOverHeadManager
         var rectMain = new Rectangle((int)(positionMain.X - bounds.X * 0.5f), (int)(positionMain.Y - bounds.Y + lineHeight), (int)bounds.X, (int)bounds.Y);
 
         var first = _mainLinkedList.First;
-        LinkedListNode<LinkedList<TextInfoEvent>> current = null;
+        LinkedListNode<LinkedList<TextOverheadEvent>> current = null;
         while (first != null)
         {
             if (first.Value == list)
@@ -418,7 +418,7 @@ internal sealed class TextOverHeadManager
         return false;
     }
 
-    private (Vector2 bounds, int lines) GetBounds(LinkedList<TextInfoEvent> list, int fontSize)
+    private (Vector2 bounds, int lines) GetBounds(LinkedList<TextOverheadEvent> list, int fontSize)
     {
         var bounds = Vector2.Zero;
         var last = list.Last;

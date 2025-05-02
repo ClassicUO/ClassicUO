@@ -55,7 +55,7 @@ struct MobileSteps
     public const int COUNT = 10;
 
     private MobileStepArray _steps;
-    public int Count;
+    public int Index;
     public float Time;
 
     [UnscopedRef]
@@ -106,7 +106,7 @@ readonly struct MobAnimationsPlugin : IPlugin
             }
 
             if (!world.Has<MobileSteps>(ent))
-                world.Set(ent, new MobileSteps());
+                world.Set(ent, new MobileSteps() { Index = -1 });
 
             if (!world.Has<WorldPosition>(ent))
                 world.Set(ent, new WorldPosition()
@@ -121,7 +121,7 @@ readonly struct MobAnimationsPlugin : IPlugin
 
             ref var steps = ref world.Get<MobileSteps>(ent);
 
-            if (steps.Count >= MobileSteps.COUNT)
+            if (steps.Index >= MobileSteps.COUNT)
             {
                 world.Set(ent, new WorldPosition()
                 {
@@ -130,7 +130,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                     Z = queuedStep.Z,
                 });
                 world.Set(ent, new Facing() { Value = queuedStep.Direction });
-                steps.Count = 0;
+                steps.Index = -1;
                 continue;
             }
 
@@ -140,7 +140,7 @@ readonly struct MobAnimationsPlugin : IPlugin
 
             var clearedDir = (queuedStep.Direction & (Direction.Mask | ~Direction.Running));
 
-            if (steps.Count == 0)
+            if (steps.Index < 0)
             {
                 ref var pos = ref world.Get<WorldPosition>(ent);
                 endX = pos.X;
@@ -150,7 +150,7 @@ readonly struct MobAnimationsPlugin : IPlugin
             }
             else
             {
-                ref var step = ref steps[Math.Min(0, steps.Count - 1)];
+                ref var step = ref steps[steps.Index];
                 endX = step.X;
                 endY = step.Y;
                 endZ = step.Z;
@@ -162,7 +162,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                 continue;
             }
 
-            if (steps.Count == 0)
+            if (steps.Index < 0)
             {
                 if (steps.Time <= time.Total - Constants.WALKING_DELAY)
                 {
@@ -179,33 +179,33 @@ readonly struct MobAnimationsPlugin : IPlugin
             {
                 if (moveDir != endDir)
                 {
-                    ref var step1 = ref steps[Math.Min(MobileSteps.COUNT - 1, steps.Count)];
+                    steps.Index = Math.Min(MobileSteps.COUNT - 1, steps.Index + 1);
+                    ref var step1 = ref steps[steps.Index];
                     step1.X = endX;
                     step1.Y = endY;
                     step1.Z = endZ;
                     step1.Direction = (byte)moveDir;
                     step1.Run = queuedStep.Direction.HasFlag(Direction.Running);
-                    steps.Count = Math.Min(MobileSteps.COUNT, steps.Count + 1);
                 }
 
-                ref var step2 = ref steps[Math.Min(MobileSteps.COUNT - 1, steps.Count)];
+                steps.Index = Math.Min(MobileSteps.COUNT - 1, steps.Index + 1);
+                ref var step2 = ref steps[steps.Index];
                 step2.X = queuedStep.X;
                 step2.Y = queuedStep.Y;
                 step2.Z = queuedStep.Z;
                 step2.Direction = (byte)moveDir;
                 step2.Run = queuedStep.Direction.HasFlag(Direction.Running);
-                steps.Count = Math.Min(MobileSteps.COUNT, steps.Count + 1);
             }
 
             if (moveDir != clearedDir)
             {
-                ref var step3 = ref steps[Math.Min(MobileSteps.COUNT - 1, steps.Count)];
+                steps.Index = Math.Min(MobileSteps.COUNT - 1, steps.Index + 1);
+                ref var step3 = ref steps[steps.Index];
                 step3.X = queuedStep.X;
                 step3.Y = queuedStep.Y;
                 step3.Z = queuedStep.Z;
                 step3.Direction = (byte)clearedDir;
                 step3.Run = queuedStep.Direction.HasFlag(Direction.Running);
-                steps.Count = Math.Min(MobileSteps.COUNT, steps.Count + 1);
             }
         }
     }
@@ -218,14 +218,14 @@ readonly struct MobAnimationsPlugin : IPlugin
     {
         foreach ((var steps, var position, var direction, var animation, var offset) in queryHandleWalking)
         {
-            while (steps.Ref.Count > 0)
+            while (steps.Ref.Index >= 0)
             {
                 ref var step = ref steps.Ref[0];
 
                 var delay = time.Total - steps.Ref.Time;
                 var mount = animation.Ref.MountAction != 0xFF;
 
-                if (!mount && steps.Ref.Count > 1 && delay > 0)
+                if (!mount && steps.Ref.Index > 0 && delay > 0)
                 {
                     mount = delay <= (step.Run ? MovementSpeed.STEP_DELAY_MOUNT_RUN : MovementSpeed.STEP_DELAY_WALK);
                 }
@@ -289,10 +289,10 @@ readonly struct MobAnimationsPlugin : IPlugin
                     if (step.Run)
                         direction.Ref.Value |= Direction.Running;
 
-                    for (var j = 1; j < steps.Ref.Count; ++j)
+                    for (var j = 1; j <= steps.Ref.Index; ++j)
                         steps.Ref[j - 1] = steps.Ref[j];
 
-                    steps.Ref.Count = Math.Max(0, steps.Ref.Count - 1);
+                    steps.Ref.Index -= 1;
                     offset.Ref.Value = Vector2.Zero;
 
                     if (directionChange)
@@ -352,7 +352,7 @@ readonly struct MobAnimationsPlugin : IPlugin
             {
                 isWalking = mobSteps.Ref.Time > time.Total - Constants.WALKING_DELAY;
 
-                if (mobSteps.Ref.Count > 0)
+                if (mobSteps.Ref.Index >= 0)
                 {
                     isWalking = true;
                     realDirection = (Direction)mobSteps.Ref[0].Direction;

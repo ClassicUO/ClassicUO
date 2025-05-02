@@ -133,7 +133,7 @@ readonly struct PlayerMovementPlugin : IPlugin
         var run = mouseRange >= 190 || false;
 
         (var worldPos, var dir, var mobSteps, var animation) = playerQuery.Single();
-        var hasNoSteps = mobSteps.Ref.Count == 0;
+        var hasNoSteps = mobSteps.Ref.Index < 0;
         var playerX = worldPos.Ref.X;
         var playerY = worldPos.Ref.Y;
         var playerZ = worldPos.Ref.Z;
@@ -141,7 +141,7 @@ readonly struct PlayerMovementPlugin : IPlugin
 
         if (!hasNoSteps)
         {
-            ref var lastStep = ref mobSteps.Ref[Math.Max(0, mobSteps.Ref.Count - 1)];
+            ref var lastStep = ref mobSteps.Ref[mobSteps.Ref.Index];
             playerX = (ushort)lastStep.X;
             playerY = (ushort)lastStep.Y;
             playerZ = lastStep.Z;
@@ -226,13 +226,13 @@ readonly struct PlayerMovementPlugin : IPlugin
             if (run)
                 requestedStep.Direction |= Direction.Running;
 
-            ref var step = ref mobSteps.Ref[mobSteps.Ref.Count];
+            mobSteps.Ref.Index = Math.Min(MobileSteps.COUNT - 1, mobSteps.Ref.Index + 1);
+            ref var step = ref mobSteps.Ref[mobSteps.Ref.Index];
             step.X = playerX;
             step.Y = playerY;
             step.Z = playerZ;
             step.Direction = (byte)playerDir;
             step.Run = run;
-            mobSteps.Ref.Count = Math.Min(MobileSteps.COUNT - 1, mobSteps.Ref.Count + 1);
 
             if (hasNoSteps)
                 mobSteps.Ref.Time = time.Total;
@@ -300,7 +300,7 @@ readonly struct PlayerMovementPlugin : IPlugin
             pos.Ref.Y = response.Y;
             pos.Ref.Z = response.Z;
             dir.Ref.Value = response.Direction;
-            steps.Ref.Count = 0;
+            steps.Ref.Index = -1;
         }
 
         playerRequestedSteps.Value.Index = 0;
