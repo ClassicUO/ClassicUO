@@ -1,4 +1,5 @@
 using ClassicUO.Assets;
+using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -12,9 +13,10 @@ internal readonly struct TerrainPlugin : IPlugin
 {
     private struct OnNewChunkRequest { public int Map; public int RangeStartX, RangeStartY, RangeEndX, RangeEndY; }
     private struct Terrain { }
+    private struct TerrainChunk { public int X, Y; }
 
-    internal sealed class ChunksLoadedMap : Dictionary<uint, List<ulong>> { }
-    internal sealed class LastPosition { public ushort? LastX, LastY; }
+    internal sealed class ChunksLoadedMap : Dictionary<uint, (uint Time, ulong entity)> { }
+    internal sealed class LastPosition { public ushort? LastX, LastY; public (int, int)? LastCameraBounds; public float LastCameraZoom; }
 
     public void Build(Scheduler scheduler)
     {
@@ -29,6 +31,11 @@ internal readonly struct TerrainPlugin : IPlugin
         var loadChunksFn = LoadChunks;
         scheduler.OnUpdate(loadChunksFn, ThreadingMode.Single)
             .RunIf((EventReader<OnNewChunkRequest> reader) => !reader.IsEmpty);
+
+        var checkChunksFn = CheckChunk;
+        scheduler.OnUpdate(checkChunksFn, ThreadingMode.Single)
+            .RunIf((Query<Data<TerrainChunk>> query, SchedulerState state)
+                => query.Count() > 0 && state.InState(GameState.GameScreen));
 
         var removeEntitiesOutOfRangeFn = RemoveEntitiesOutOfRange;
         scheduler.OnUpdate(removeEntitiesOutOfRangeFn, ThreadingMode.Single)
@@ -57,13 +64,57 @@ internal readonly struct TerrainPlugin : IPlugin
             reader.Clear();
             lastPos.Value.LastX = null;
             lastPos.Value.LastY = null;
+            lastPos.Value.LastCameraBounds = null;
+            lastPos.Value.LastCameraZoom = 0f;
         }, ThreadingMode.Single);
     }
 
-    void EnqueueChunksRequests
+    private static int GetCameraOffset(Camera camera)
+    {
+        var cameraBounds = camera.Bounds;
+        var maxSize = Math.Max(cameraBounds.Width, cameraBounds.Height);
+        maxSize /= 60;
+        return (int)(maxSize * camera.Zoom);
+    }
+
+    private static void CheckChunk(
+        Time time,
+        Res<Camera> camera,
+        Res<GameContext> gameCtx,
+        Res<ChunksLoadedMap> chunksLoaded,
+        Single<Data<WorldPosition>, With<Player>> playerQuery,
+        Query<Data<TerrainChunk>> query)
+    {
+        (_, var pos) = playerQuery.Get();
+
+        var offset = GetCameraOffset(camera.Value);
+        var startTileX = Math.Max(0, pos.Ref.X - offset) / 8;
+        var startTileY = Math.Max(0, pos.Ref.Y - offset) / 8;
+        var endTileX = Math.Min(gameCtx.Value.MaxMapWidth, pos.Ref.X + offset) / 8;
+        var endTileY = Math.Min(gameCtx.Value.MaxMapHeight, pos.Ref.Y + offset) / 8;
+
+        foreach ((_, var chunk) in query)
+        {
+            var chunkX = chunk.Ref.X;
+            var chunkY = chunk.Ref.Y;
+
+            if (chunkX >= startTileX && chunkX <= endTileX && chunkY >= startTileY && chunkY <= endTileY)
+            {
+                var key = CreateChunkKey(chunk.Ref.X, chunk.Ref.Y);
+                ref var res = ref CollectionsMarshal.GetValueRefOrNullRef(chunksLoaded.Value, key);
+                if (!Unsafe.IsNullRef(ref res))
+                {
+                    res.Time = (uint)time.Total + 5000;
+                }
+            }
+        }
+    }
+
+    private static void EnqueueChunksRequests
     (
         Res<GameContext> gameCtx,
         Res<LastPosition> lastPos,
+        Res<Camera> camera,
         Single<Data<WorldPosition>, With<Player>> playerQuery,
         EventWriter<OnNewChunkRequest> chunkRequests
     )
@@ -75,28 +126,38 @@ internal readonly struct TerrainPlugin : IPlugin
 
         (_, var pos) = playerQuery.Get();
 
-        if (lastPos.Value.LastX.HasValue && lastPos.Value.LastY.HasValue)
-            if (lastPos.Value.LastX == pos.Ref.X && lastPos.Value.LastY == pos.Ref.Y)
+        if (lastPos.Value.LastCameraBounds.HasValue && lastPos.Value.LastX.HasValue && lastPos.Value.LastY.HasValue)
+            if (lastPos.Value.LastX == pos.Ref.X && lastPos.Value.LastY == pos.Ref.Y &&
+                lastPos.Value.LastCameraBounds.Value.Item1 == camera.Value.Bounds.Width &&
+                lastPos.Value.LastCameraBounds.Value.Item2 == camera.Value.Bounds.Height &&
+                lastPos.Value.LastCameraZoom == camera.Value.Zoom)
                 return;
 
         lastPos.Value.LastX = pos.Ref.X;
         lastPos.Value.LastY = pos.Ref.Y;
+        lastPos.Value.LastCameraBounds = (camera.Value.Bounds.Width, camera.Value.Bounds.Height);
+        lastPos.Value.LastCameraZoom = camera.Value.Zoom;
 
-        var offset = 4;
+        var offset = GetCameraOffset(camera.Value);
+        var startTileX = Math.Max(0, pos.Ref.X - offset);
+        var startTileY = Math.Max(0, pos.Ref.Y - offset);
+        var endTileX = Math.Min(gameCtx.Value.MaxMapWidth, pos.Ref.X + offset);
+        var endTileY = Math.Min(gameCtx.Value.MaxMapHeight, pos.Ref.Y + offset);
 
         chunkRequests.Enqueue(new()
         {
             Map = gameCtx.Value.Map,
-            RangeStartX = Math.Max(0, pos.Ref.X / 8 - offset),
-            RangeStartY = Math.Max(0, pos.Ref.Y / 8 - offset),
-            RangeEndX = Math.Min(gameCtx.Value.MaxMapWidth / 8, pos.Ref.X / 8 + offset),
-            RangeEndY = Math.Min(gameCtx.Value.MaxMapHeight / 8, pos.Ref.Y / 8 + offset),
+            RangeStartX = startTileX / 8,
+            RangeStartY = startTileY / 8,
+            RangeEndX = endTileX / 8,
+            RangeEndY = endTileY / 8,
         });
     }
 
-    void LoadChunks
+    private static void LoadChunks
     (
         World world,
+        Time time,
         Res<UOFileManager> fileManager,
         Res<ChunksLoadedMap> chunksLoaded,
         Local<StaticsBlock[]> staticsBlockBuffer,
@@ -120,8 +181,10 @@ internal readonly struct TerrainPlugin : IPlugin
                     if (chunksLoaded.Value.ContainsKey(key))
                         continue;
 
-                    var list = new List<ulong>();
-                    chunksLoaded.Value.Add(key, list);
+                    var chunk = world.Entity()
+                        .Set(new TerrainChunk() { X = chunkX, Y = chunkY });
+
+                    chunksLoaded.Value.Add(key, ((uint)time.Total + 5000, chunk.ID));
 
                     im.MapFile.Seek((long)im.MapAddress, System.IO.SeekOrigin.Begin);
                     var cells = im.MapFile.Read<Assets.MapBlock>().Cells;
@@ -174,7 +237,7 @@ internal readonly struct TerrainPlugin : IPlugin
                                     .Add<IsTile>()
                                     .Add<Terrain>();
 
-                                list.Add(e);
+                                chunk.AddChild(e);
                             }
                             else
                             {
@@ -184,7 +247,7 @@ internal readonly struct TerrainPlugin : IPlugin
                                     .Add<IsTile>()
                                     .Add<Terrain>();
 
-                                list.Add(e);
+                                chunk.AddChild(e);
                             }
                         }
                     }
@@ -223,7 +286,7 @@ internal readonly struct TerrainPlugin : IPlugin
                                 .Add<IsStatic>()
                                 .Add<Terrain>();
 
-                            list.Add(e);
+                            chunk.AddChild(e);
                         }
                     }
                 }
@@ -231,34 +294,31 @@ internal readonly struct TerrainPlugin : IPlugin
         }
     }
 
-    void RemoveEntitiesOutOfRange
+    private static void RemoveEntitiesOutOfRange
     (
        Commands commands,
        Res<GameContext> gameCtx,
-       Local<List<uint>> toRemove,
        Res<ChunksLoadedMap> chunksLoaded,
+       Res<Camera> camera,
+       Local<List<uint>> toRemove,
+       Time time,
        Query<Data<WorldPosition>, Filter<With<NetworkSerial>, Without<Player>, Without<ContainedInto>>> queryAll,
        Single<Data<WorldPosition>, With<Player>> playerQuery
     )
     {
         toRemove.Value ??= new();
 
-        const int MAX_DIST = 64;
-
         (_, var pos) = playerQuery.Get();
 
-        foreach ((var key, var list) in chunksLoaded.Value)
+        foreach ((var key, (var lastAccess, var entity)) in chunksLoaded.Value)
         {
-            var x = (int)((key >> 16) & 0xFFFF);
-            var y = (int)(key & 0xFFFF);
+            // var x = (int)((key >> 16) & 0xFFFF);
+            // var y = (int)(key & 0xFFFF);
 
-            var dist = GetDist(pos.Ref.X, pos.Ref.Y, x * 8, y * 8);
-            if (dist > MAX_DIST)
+            if (time.Total > lastAccess)
             {
                 toRemove.Value.Add(key);
-
-                foreach (var entity in list)
-                    commands.Entity(entity).Delete();
+                commands.Entity(entity).Delete();
             }
         }
 
@@ -279,7 +339,6 @@ internal readonly struct TerrainPlugin : IPlugin
         }
     }
 
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int GetDist(int x0, int y0, int x1, int y1)
     {
@@ -289,7 +348,7 @@ internal readonly struct TerrainPlugin : IPlugin
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static uint CreateChunkKey(int x, int y) => (uint)(((x & 0xFFFF) << 16) | (y & 0xFFFF));
 
-    static bool ApplyStretch(
+    private static bool ApplyStretch(
         MapLoader mapLoader,
         TexmapsLoader texmapsLoader,
         int mapIndex,

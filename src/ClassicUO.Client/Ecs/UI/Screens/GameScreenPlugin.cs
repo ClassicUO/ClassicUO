@@ -17,6 +17,26 @@ internal readonly struct GameScreenPlugin : IPlugin
         scheduler.OnEnter(GameState.GameScreen, setupFn, ThreadingMode.Single);
         scheduler.OnExit(GameState.GameScreen, cleanupFn, ThreadingMode.Single);
 
+
+        scheduler.OnUpdate((World world, Query<Data<UINode, Text>, With<TotalEntitiesMenu>> query) =>
+        {
+            var total = world.EntityCount;
+            foreach ((var node, var text) in query)
+            {
+                text.Ref.Value = $"Total entities: {total}";
+            }
+        }, ThreadingMode.Single)
+            .RunIf((SchedulerState state) => state.InState(GameState.GameScreen))
+            .RunIf((Time time, Local<float> lastAccess) =>
+            {
+                if (time.Total > lastAccess.Value)
+                {
+                    lastAccess.Value = time.Total + 250f;
+                    return true;
+                }
+                return false;
+            });
+
         scheduler.OnUpdate((Query<Data<UINode, UIInteractionState, ButtonAction>, Changed<UIInteractionState>> query, Res<NetClient> network, State<GameState> state) =>
         {
             foreach ((var node, var interaction, var action) in query)
@@ -181,6 +201,36 @@ internal readonly struct GameScreenPlugin : IPlugin
             .Set(UIInteractionState.None)
             .Add<GameScene>();
 
+        var menuBarItem2 = world.Entity()
+            .Set(new UINode()
+            {
+                Config = {
+                    backgroundColor = new (0f, 0f, 0.5f, 1),
+                    layout = {
+                        sizing = {
+                            width = Clay_SizingAxis.Fixed(200),
+                            height = Clay_SizingAxis.Grow(),
+                        },
+                        childAlignment = {
+                            x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER,
+                            y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER,
+                        }
+                    },
+                }
+            })
+            .Set(new Text()
+            {
+                Value = "Total entities: {0}",
+                TextConfig = {
+                    fontId = 0,
+                    fontSize = 18,
+                    textColor = new (1, 1, 1, 1),
+                },
+            })
+            .Set(UIInteractionState.None)
+            .Add<GameScene>()
+            .Add<TotalEntitiesMenu>();
+
 
 
         var gameWindowBorder = world.Entity()
@@ -248,6 +298,7 @@ internal readonly struct GameScreenPlugin : IPlugin
 
         root.AddChild(menuBar);
         menuBar.AddChild(menuBarItem);
+        menuBar.AddChild(menuBarItem2);
 
         root.AddChild(gameWindowBorder);
         root.AddChild(gameWindowBorderResize);
@@ -266,6 +317,7 @@ internal readonly struct GameScreenPlugin : IPlugin
     private struct GameWindowUI;
     private struct GameWindowBorderUI;
     private struct GameWindowBorderResizeUI;
+    private struct TotalEntitiesMenu;
 
     private enum ButtonAction
     {

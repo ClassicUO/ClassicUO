@@ -53,8 +53,9 @@ internal readonly struct GuiPlugin : IPlugin
         scheduler.AddPlugin<ServerSelectionPlugin>();
         scheduler.AddPlugin<GameScreenPlugin>();
 
-        scheduler.OnExit(GameState.LoginScreen, (Res<FocusedInput> focusedInput) => focusedInput.Value.Entity = 0, ThreadingMode.Single);
-        scheduler.OnExit(GameState.GameScreen, (Res<FocusedInput> focusedInput) => focusedInput.Value.Entity = 0, ThreadingMode.Single);
+        var states = Enum.GetValues<GameState>();
+        foreach (var state in states)
+            scheduler.OnExit(state, (Res<FocusedInput> focusedInput) => focusedInput.Value.Entity = 0, ThreadingMode.Single);
 
         scheduler.OnStartup(() =>
         {

@@ -15,7 +15,7 @@ dotnet tool install --global ClangSharpPInvokeGenerator
 popd
 
 pushd ../external/Clay-cs/Clay-builder
-zig build
+zig build --release=safe
 popd
 
 pushd ../external/TinyEcs
