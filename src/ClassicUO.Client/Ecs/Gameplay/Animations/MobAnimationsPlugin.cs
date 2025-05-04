@@ -87,7 +87,14 @@ readonly struct MobAnimationsPlugin : IPlugin
         scheduler.OnUpdate(processMobileAnimationsFn, ThreadingMode.Single);
     }
 
-    void ReadMobilesSteps(TinyEcs.World world, Time time, EventReader<MobileQueuedStep> stepsQueued, Res<GameContext> gameCtx, Res<NetworkEntitiesMap> entitiesMap)
+    void ReadMobilesSteps(
+        TinyEcs.World world,
+        Time time,
+        EventReader<MobileQueuedStep> stepsQueued,
+        Res<GameContext> gameCtx,
+        Res<NetworkEntitiesMap> entitiesMap,
+        Query<Data<WorldPosition, Facing, MobileSteps, MobAnimation>, With<NetworkSerial>> query
+    )
     {
         foreach (var queuedStep in stepsQueued)
         {
@@ -105,32 +112,31 @@ readonly struct MobAnimationsPlugin : IPlugin
                 continue;
             }
 
-            if (!world.Has<MobileSteps>(ent))
-                world.Set(ent, new MobileSteps() { Index = -1 });
 
-            if (!world.Has<WorldPosition>(ent))
-                world.Set(ent, new WorldPosition()
-                {
-                    X = queuedStep.X,
-                    Y = queuedStep.Y,
-                    Z = queuedStep.Z,
-                });
+            (var position, var direction, var steps, var animation) = query.Get(ent);
 
-            if (!world.Has<Facing>(ent))
-                world.Set(ent, new Facing() { Value = queuedStep.Direction });
-
-            ref var steps = ref world.Get<MobileSteps>(ent);
-
-            if (steps.Index >= MobileSteps.COUNT - 1)
+            if (!query.Contains(ent))
             {
-                world.Set(ent, new WorldPosition()
+                ent.Set(new WorldPosition()
                 {
                     X = queuedStep.X,
                     Y = queuedStep.Y,
                     Z = queuedStep.Z,
-                });
-                world.Set(ent, new Facing() { Value = queuedStep.Direction });
-                steps.Index = -1;
+                })
+                .Set(new Facing() { Value = queuedStep.Direction })
+                .Set(new MobileSteps() { Index = -1 })
+                .Set(new MobAnimation() { Time = time.Total });
+
+                return;
+            }
+
+            if (steps.Ref.Index >= MobileSteps.COUNT - 1)
+            {
+                position.Ref.X = queuedStep.X;
+                position.Ref.Y = queuedStep.Y;
+                position.Ref.Z = queuedStep.Z;
+                direction.Ref.Value = queuedStep.Direction;
+                steps.Ref.Index = -1;
                 continue;
             }
 
@@ -140,17 +146,16 @@ readonly struct MobAnimationsPlugin : IPlugin
 
             var clearedDir = (queuedStep.Direction & (Direction.Mask | ~Direction.Running));
 
-            if (steps.Index < 0)
+            if (steps.Ref.Index < 0)
             {
-                ref var pos = ref world.Get<WorldPosition>(ent);
-                endX = pos.X;
-                endY = pos.Y;
-                endZ = pos.Z;
-                endDir = world.Get<Facing>(ent).Value;
+                endX = position.Ref.X;
+                endY = position.Ref.Y;
+                endZ = position.Ref.Z;
+                endDir = direction.Ref.Value;
             }
             else
             {
-                ref var step = ref steps[steps.Index];
+                ref var step = ref steps.Ref[steps.Ref.Index];
                 endX = step.X;
                 endY = step.Y;
                 endZ = step.Z;
@@ -162,15 +167,14 @@ readonly struct MobAnimationsPlugin : IPlugin
                 continue;
             }
 
-            if (steps.Index < 0)
+            if (steps.Ref.Index < 0)
             {
-                if (steps.Time <= time.Total - Constants.WALKING_DELAY)
+                if (steps.Ref.Time <= time.Total - Constants.WALKING_DELAY)
                 {
-                    ref var anim = ref world.Get<MobAnimation>(ent);
-                    anim.Run = true;
+                    animation.Ref.Run = true;
                     //anim.Time = 0;
                 }
-                steps.Time = time.Total;
+                steps.Ref.Time = time.Total;
             }
 
             var moveDir = DirectionHelper.CalculateDirection(endX, endY, queuedStep.X, queuedStep.Y);
@@ -179,8 +183,8 @@ readonly struct MobAnimationsPlugin : IPlugin
             {
                 if (moveDir != endDir)
                 {
-                    steps.Index = Math.Min(MobileSteps.COUNT - 1, steps.Index + 1);
-                    ref var step1 = ref steps[steps.Index];
+                    steps.Ref.Index = Math.Min(MobileSteps.COUNT - 1, steps.Ref.Index + 1);
+                    ref var step1 = ref steps.Ref[steps.Ref.Index];
                     step1.X = endX;
                     step1.Y = endY;
                     step1.Z = endZ;
@@ -188,8 +192,8 @@ readonly struct MobAnimationsPlugin : IPlugin
                     step1.Run = queuedStep.Direction.HasFlag(Direction.Running);
                 }
 
-                steps.Index = Math.Min(MobileSteps.COUNT - 1, steps.Index + 1);
-                ref var step2 = ref steps[steps.Index];
+                steps.Ref.Index = Math.Min(MobileSteps.COUNT - 1, steps.Ref.Index + 1);
+                ref var step2 = ref steps.Ref[steps.Ref.Index];
                 step2.X = queuedStep.X;
                 step2.Y = queuedStep.Y;
                 step2.Z = queuedStep.Z;
@@ -199,8 +203,8 @@ readonly struct MobAnimationsPlugin : IPlugin
 
             if (moveDir != clearedDir)
             {
-                steps.Index = Math.Min(MobileSteps.COUNT - 1, steps.Index + 1);
-                ref var step3 = ref steps[steps.Index];
+                steps.Ref.Index = Math.Min(MobileSteps.COUNT - 1, steps.Ref.Index + 1);
+                ref var step3 = ref steps.Ref[steps.Ref.Index];
                 step3.X = queuedStep.X;
                 step3.Y = queuedStep.Y;
                 step3.Z = queuedStep.Z;

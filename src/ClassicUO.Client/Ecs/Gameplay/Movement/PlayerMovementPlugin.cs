@@ -31,7 +31,7 @@ struct PlayerStepsContext
 {
     public PlayerStepsArray Steps;
     public float LastStep;
-    public int Index;
+    public int Count;
     public byte Sequence;
     public bool ResyncSent;
 }
@@ -92,7 +92,7 @@ readonly struct PlayerMovementPlugin : IPlugin
                 }
 
                 return (autoWalk || mouseCtx.Value.IsPressed(Input.MouseButtonType.Right)) &&
-                         playerRequestedSteps.Value.LastStep < time.Total && playerRequestedSteps.Value.Index < 5 &&
+                         playerRequestedSteps.Value.LastStep < time.Total && playerRequestedSteps.Value.Count < 5 &&
                          playerQuery.Count() > 0;
             });
 
@@ -211,7 +211,7 @@ readonly struct PlayerMovementPlugin : IPlugin
             var playerFlags = Flags.None;
             var isMountedOrFlying = animation.Ref.MountAction != 0xFF || playerFlags.HasFlag(Flags.Flying);
             var stepTime = sameDir ? MovementSpeed.TimeToCompleteMovement(run, isMountedOrFlying) : Constants.TURN_DELAY;
-            ref var requestedStep = ref playerRequestedSteps.Value.Steps[playerRequestedSteps.Value.Index];
+            ref var requestedStep = ref playerRequestedSteps.Value.Steps[playerRequestedSteps.Value.Count];
             requestedStep.Sequence = playerRequestedSteps.Value.Sequence;
             requestedStep.X = playerX;
             requestedStep.Y = playerY;
@@ -220,7 +220,7 @@ readonly struct PlayerMovementPlugin : IPlugin
 
             network.Value.Send_WalkRequest(requestedStep.Direction, requestedStep.Sequence, run, 0);
 
-            playerRequestedSteps.Value.Index = Math.Min(5, playerRequestedSteps.Value.Index + 1);
+            playerRequestedSteps.Value.Count = Math.Min(5, playerRequestedSteps.Value.Count + 1);
             playerRequestedSteps.Value.Sequence = (byte)((playerRequestedSteps.Value.Sequence % byte.MaxValue) + 1);
             playerRequestedSteps.Value.LastStep = time.Total + stepTime;
             if (run)
@@ -247,7 +247,7 @@ readonly struct PlayerMovementPlugin : IPlugin
             var notoriety = response.Notoriety;
 
             var stepIndex = 0;
-            for (var i = 0; i < playerRequestedSteps.Value.Index; i++)
+            for (var i = 0; i < playerRequestedSteps.Value.Count; i++)
             {
                 ref readonly var step = ref playerRequestedSteps.Value.Steps[i];
 
@@ -259,17 +259,17 @@ readonly struct PlayerMovementPlugin : IPlugin
                 stepIndex += 1;
             }
 
-            var isBadStep = stepIndex == playerRequestedSteps.Value.Index;
+            var isBadStep = stepIndex == playerRequestedSteps.Value.Count;
 
             if (!isBadStep)
             {
                 Console.WriteLine("step accepted");
-                for (var i = 1; i < playerRequestedSteps.Value.Index; i++)
+                for (var i = 1; i < playerRequestedSteps.Value.Count; i++)
                 {
                     playerRequestedSteps.Value.Steps[i - 1] = playerRequestedSteps.Value.Steps[i];
                 }
 
-                playerRequestedSteps.Value.Index = Math.Max(0, playerRequestedSteps.Value.Index - 1);
+                playerRequestedSteps.Value.Count = Math.Max(0, playerRequestedSteps.Value.Count - 1);
             }
 
             if (isBadStep)
@@ -282,8 +282,10 @@ readonly struct PlayerMovementPlugin : IPlugin
                     playerRequestedSteps.Value.ResyncSent = true;
                 }
 
-                playerRequestedSteps.Value.Index = 0;
+                playerRequestedSteps.Value.Count = 0;
                 playerRequestedSteps.Value.Sequence = 0;
+
+                break;
             }
         }
     }
@@ -303,7 +305,7 @@ readonly struct PlayerMovementPlugin : IPlugin
             steps.Ref.Index = -1;
         }
 
-        playerRequestedSteps.Value.Index = 0;
+        playerRequestedSteps.Value.Count = 0;
         playerRequestedSteps.Value.Sequence = 0;
         playerRequestedSteps.Value.LastStep = 0;
         playerRequestedSteps.Value.ResyncSent = false;

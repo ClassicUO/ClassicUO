@@ -26,16 +26,16 @@ internal readonly struct GameScreenPlugin : IPlugin
                 text.Ref.Value = $"Total entities: {total}";
             }
         }, ThreadingMode.Single)
-            .RunIf((SchedulerState state) => state.InState(GameState.GameScreen))
-            .RunIf((Time time, Local<float> lastAccess) =>
+        .RunIf((SchedulerState state) => state.InState(GameState.GameScreen))
+        .RunIf((Time time, Local<float> lastAccess) =>
+        {
+            if (time.Total > lastAccess.Value)
             {
-                if (time.Total > lastAccess.Value)
-                {
-                    lastAccess.Value = time.Total + 250f;
-                    return true;
-                }
-                return false;
-            });
+                lastAccess.Value = time.Total + 250f;
+                return true;
+            }
+            return false;
+        });
 
         scheduler.OnUpdate((Query<Data<UINode, UIInteractionState, ButtonAction>, Changed<UIInteractionState>> query, Res<NetClient> network, State<GameState> state) =>
         {
@@ -73,28 +73,23 @@ internal readonly struct GameScreenPlugin : IPlugin
                 {
                     camera.Value.Bounds.X += (int)mouseCtx.Value.PositionOffset.X;
                     camera.Value.Bounds.Y += (int)mouseCtx.Value.PositionOffset.Y;
-
-                    lastSize.Value = camera.Value.Bounds;
                 }
             }
 
-            if (interactionResize.Ref == UIInteractionState.Pressed)
+            if (interactionResize.Ref == UIInteractionState.Pressed && mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
             {
-                if (mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
-                {
-                    ref var newBounds = ref lastSize.Value;
-                    newBounds.Width += (int)mouseCtx.Value.PositionOffset.X;
-                    newBounds.Height += (int)mouseCtx.Value.PositionOffset.Y;
+                ref var newBounds = ref lastSize.Value;
+                newBounds.Width += (int)mouseCtx.Value.PositionOffset.X;
+                newBounds.Height += (int)mouseCtx.Value.PositionOffset.Y;
 
-                    if (newBounds.Width >= 300)
-                        camera.Value.Bounds.Width = newBounds.Width;
-                    if (newBounds.Height >= 300)
-                        camera.Value.Bounds.Height = newBounds.Height;
-                }
-                else
-                {
-                    lastSize.Value = camera.Value.Bounds;
-                }
+                if (newBounds.Width >= 300)
+                    camera.Value.Bounds.Width = newBounds.Width;
+                if (newBounds.Height >= 300)
+                    camera.Value.Bounds.Height = newBounds.Height;
+            }
+            else
+            {
+                lastSize.Value = camera.Value.Bounds;
             }
 
             const int BORDER_SIZE = 10;
@@ -147,6 +142,7 @@ internal readonly struct GameScreenPlugin : IPlugin
                             height = Clay_SizingAxis.Grow(),
                         },
                         layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
+                        padding = Clay_Padding.All(4),
                     }
                 }
             })
@@ -161,11 +157,15 @@ internal readonly struct GameScreenPlugin : IPlugin
                     layout = {
                         sizing = {
                             width = Clay_SizingAxis.Grow(),
-                            height = Clay_SizingAxis.Fixed(25),
+                            height = Clay_SizingAxis.Fit(0,0),
                         },
                         layoutDirection = Clay_LayoutDirection.CLAY_LEFT_TO_RIGHT,
                         childGap = 4,
-                        padding =  Clay_Padding.All(4),
+                        childAlignment = {
+                            x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_RIGHT,
+                            y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER,
+                        },
+                        padding = Clay_Padding.All(4),
                     }
                 }
             })
@@ -178,13 +178,14 @@ internal readonly struct GameScreenPlugin : IPlugin
                     backgroundColor = new (0f, 0f, 0.5f, 1),
                     layout = {
                         sizing = {
-                            width = Clay_SizingAxis.Fixed(100),
+                            width = Clay_SizingAxis.Fit(0, 0),
                             height = Clay_SizingAxis.Grow(),
                         },
                         childAlignment = {
                             x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER,
                             y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER,
-                        }
+                        },
+                        padding =  Clay_Padding.All(4),
                     },
                 }
             })
@@ -208,26 +209,26 @@ internal readonly struct GameScreenPlugin : IPlugin
                     backgroundColor = new (0f, 0f, 0.5f, 1),
                     layout = {
                         sizing = {
-                            width = Clay_SizingAxis.Fixed(200),
+                            width = Clay_SizingAxis.Fit(0, 0),
                             height = Clay_SizingAxis.Grow(),
                         },
                         childAlignment = {
                             x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER,
                             y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER,
-                        }
+                        },
+                        padding = Clay_Padding.All(4),
                     },
                 }
             })
             .Set(new Text()
             {
-                Value = "Total entities: {0}",
+                Value = "Total entities: 0",
                 TextConfig = {
                     fontId = 0,
                     fontSize = 18,
                     textColor = new (1, 1, 1, 1),
                 },
             })
-            .Set(UIInteractionState.None)
             .Add<GameScene>()
             .Add<TotalEntitiesMenu>();
 
