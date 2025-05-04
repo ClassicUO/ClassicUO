@@ -127,7 +127,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                 .Set(new MobileSteps() { Index = -1 })
                 .Set(new MobAnimation() { Time = time.Total });
 
-                return;
+                continue;
             }
 
             if (steps.Ref.Index >= MobileSteps.COUNT - 1)
