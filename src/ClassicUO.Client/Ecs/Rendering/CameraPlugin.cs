@@ -35,10 +35,13 @@ internal readonly struct CameraPlugin : IPlugin
     {
         var mousePos = mouseCtx.Value.Position;
 
-        if (mouseCtx.Value.Wheel > 0)
-            camera.Value.ZoomIn();
-        else if (mouseCtx.Value.Wheel < 0)
-            camera.Value.ZoomOut();
+        if (camera.Value.Bounds.Contains((int)mouseCtx.Value.Position.X, (int)mouseCtx.Value.Position.Y))
+        {
+            if (mouseCtx.Value.Wheel > 0)
+                camera.Value.ZoomIn();
+            else if (mouseCtx.Value.Wheel < 0)
+                camera.Value.ZoomOut();
+        }
 
         camera.Value.Update(true, time.Total, new((int)mousePos.X, (int)mousePos.Y));
     }

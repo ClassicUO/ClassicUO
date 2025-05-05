@@ -17,7 +17,8 @@ internal readonly struct ServerSelectionPlugin : IPlugin
 
         scheduler.OnExit(GameState.ServerSelection, cleanupFn, ThreadingMode.Single);
         scheduler.OnUpdate(serverInfoSetupFn, ThreadingMode.Single)
-                 .RunIf((SchedulerState state, EventReader<ServerSelectionInfoEvent> reader) => !reader.IsEmpty && state.InState(GameState.ServerSelection));
+                 .RunIf((SchedulerState state, EventReader<ServerSelectionInfoEvent> reader)
+                    => !reader.IsEmpty && state.InState(GameState.ServerSelection));
         scheduler.OnUpdate(serverSelectedFn, ThreadingMode.Single)
                  .RunIf((SchedulerState state) => state.InState(GameState.ServerSelection));
     }
@@ -70,7 +71,7 @@ internal readonly struct ServerSelectionPlugin : IPlugin
                             y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_TOP,
                         },
                         padding = Clay_Padding.All(8),
-                        childGap = 8
+                        childGap = 4
                     }
                 }
             })
@@ -103,7 +104,7 @@ internal readonly struct ServerSelectionPlugin : IPlugin
                             y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_TOP,
                         },
                         padding = Clay_Padding.All(8),
-                        childGap = 8
+                        childGap = 4
                     }
                 }
             });
@@ -136,7 +137,7 @@ internal readonly struct ServerSelectionPlugin : IPlugin
                                     y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER,
                                 },
                                 padding = Clay_Padding.All(8),
-                                childGap = 8
+                                childGap = 4
                             }
                         }
                     })

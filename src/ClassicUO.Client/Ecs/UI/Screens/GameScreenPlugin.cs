@@ -124,7 +124,6 @@ internal readonly struct GameScreenPlugin : IPlugin
                 width = Clay_SizingAxis.Fixed(camera.Value.Bounds.Width),
                 height = Clay_SizingAxis.Fixed(camera.Value.Bounds.Height),
             };
-
         }, ThreadingMode.Single)
         .RunIf((SchedulerState state) => state.InState(GameState.GameScreen) && state.ResourceExists<Camera>());
     }
