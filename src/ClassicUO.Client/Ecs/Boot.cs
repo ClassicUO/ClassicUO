@@ -59,5 +59,6 @@ public enum GameState : byte
     LoginScreen,
     ServerSelection,
     CharacterSelection,
+    LoginError,
     GameScreen
 }

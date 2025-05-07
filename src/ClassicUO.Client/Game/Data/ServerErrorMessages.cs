@@ -61,10 +61,8 @@ namespace ClassicUO.Game.Data
             };
         }
 
-        public static string GetError(byte packetID, byte code, (int min, int max) delay = default)
+        public static string GetError(ClilocLoader cliloc, byte packetID, byte code, (int min, int max) delay = default)
         {
-            var cliloc = Client.Game.UO.FileManager.Clilocs;
-
             switch (packetID)
             {
                 case 0x53:

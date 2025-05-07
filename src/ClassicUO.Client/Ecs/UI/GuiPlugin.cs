@@ -6,6 +6,7 @@ using System.Text;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Clay_cs;
+using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TinyEcs;
@@ -28,7 +29,11 @@ internal readonly struct GuiPlugin : IPlugin
 
         var font = FontCache.GetFont(config->fontId);
         var dynFont = font.GetFont(config->fontSize);
-        var size = dynFont.MeasureString(text);
+        var size = dynFont.MeasureString(
+            text,
+            characterSpacing: config->letterSpacing,
+            lineSpacing: config->lineHeight,
+            effect: FontSystemEffect.Stroked, effectAmount: 1);
 
         return new Clay_Dimensions(size.X, size.Y);
     }
@@ -51,6 +56,8 @@ internal readonly struct GuiPlugin : IPlugin
 
         scheduler.AddPlugin<LoginScreenPlugin>();
         scheduler.AddPlugin<ServerSelectionPlugin>();
+        scheduler.AddPlugin<CharacterSelectionPlugin>();
+        scheduler.AddPlugin<LoginErrorScreenPlugin>();
         scheduler.AddPlugin<GameScreenPlugin>();
 
         var states = Enum.GetValues<GameState>();
@@ -241,6 +248,7 @@ internal readonly struct GuiPlugin : IPlugin
                                     new Color(t.textColor.r, t.textColor.g, t.textColor.b, t.textColor.a),
                                     characterSpacing: t.letterSpacing,
                                     lineSpacing: t.lineHeight,
+                                    textStyle: TextStyle.None,
                                     effect: FontStashSharp.FontSystemEffect.Stroked, effectAmount: 1
                                 );
                             }

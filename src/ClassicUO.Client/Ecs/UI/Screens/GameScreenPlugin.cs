@@ -18,7 +18,10 @@ internal readonly struct GameScreenPlugin : IPlugin
         scheduler.OnExit(GameState.GameScreen, cleanupFn, ThreadingMode.Single);
 
 
-        scheduler.OnUpdate((World world, Query<Data<UINode, Text>, With<TotalEntitiesMenu>> query) =>
+        scheduler.OnUpdate((
+            World world,
+            Query<Data<UINode, Text>, With<TotalEntitiesMenu>> query
+        ) =>
         {
             var total = world.EntityCount;
             foreach ((var node, var text) in query)
@@ -37,7 +40,11 @@ internal readonly struct GameScreenPlugin : IPlugin
             return false;
         });
 
-        scheduler.OnUpdate((Query<Data<UINode, UIInteractionState, ButtonAction>, Changed<UIInteractionState>> query, Res<NetClient> network, State<GameState> state) =>
+        scheduler.OnUpdate((
+            Query<Data<UINode, UIInteractionState, ButtonAction>, Changed<UIInteractionState>> query,
+            Res<NetClient> network,
+            State<GameState> state
+        ) =>
         {
             foreach ((var node, var interaction, var action) in query)
             {
@@ -99,7 +106,6 @@ internal readonly struct GameScreenPlugin : IPlugin
                 x = camera.Value.Bounds.X + camera.Value.Bounds.Width + BORDER_SIZE - nodeBorderResize.Ref.Config.layout.sizing.width.size.minMax.max,
                 y = camera.Value.Bounds.Y + camera.Value.Bounds.Height + BORDER_SIZE - nodeBorderResize.Ref.Config.layout.sizing.height.size.minMax.max,
             };
-
 
             nodeBorder.Ref.Config.floating.offset = new()
             {
@@ -232,6 +238,22 @@ internal readonly struct GameScreenPlugin : IPlugin
             .Add<TotalEntitiesMenu>();
 
 
+        var gameWindowRoot = world.Entity()
+            .Set(new UINode()
+            {
+                Config = {
+                    backgroundColor = new (0f, 0f, 0f, 0f),
+                    layout = {
+                        sizing = {
+                            width = Clay_SizingAxis.Grow(),
+                            height = Clay_SizingAxis.Grow(),
+                        },
+                        layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
+                        padding = Clay_Padding.All(4),
+                    }
+                }
+            })
+            .Add<GameScene>();
 
         var gameWindowBorder = world.Entity()
             .Set(new UINode()
@@ -245,7 +267,7 @@ internal readonly struct GameScreenPlugin : IPlugin
                         },
                     },
                     floating = {
-                        attachTo = Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT,
+                        attachTo = Clay_FloatingAttachToElement.CLAY_ATTACH_TO_ROOT,
                         zIndex = 0,
                     }
                 }
@@ -266,7 +288,7 @@ internal readonly struct GameScreenPlugin : IPlugin
                         },
                     },
                     floating = {
-                        attachTo = Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT,
+                        attachTo = Clay_FloatingAttachToElement.CLAY_ATTACH_TO_ROOT,
                         zIndex = 0,
                     }
                 }
@@ -287,7 +309,7 @@ internal readonly struct GameScreenPlugin : IPlugin
                         },
                     },
                     floating = {
-                        attachTo = Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT,
+                        attachTo = Clay_FloatingAttachToElement.CLAY_ATTACH_TO_ROOT,
                         zIndex = 0,
                     }
                 }
@@ -296,13 +318,16 @@ internal readonly struct GameScreenPlugin : IPlugin
             .Add<GameScene>();
 
 
-        root.AddChild(menuBar);
         menuBar.AddChild(menuBarItem);
         menuBar.AddChild(menuBarItem2);
 
-        root.AddChild(gameWindowBorder);
-        root.AddChild(gameWindowBorderResize);
-        root.AddChild(gameWindow);
+        gameWindowRoot.AddChild(gameWindowBorder);
+        gameWindowRoot.AddChild(gameWindowBorderResize);
+        gameWindowRoot.AddChild(gameWindow);
+
+
+        root.AddChild(menuBar);
+        root.AddChild(gameWindowRoot);
     }
 
     private static void Cleanup(World world, Query<Data<UINode>, Filter<Without<Parent>, With<GameScene>>> query)

@@ -60,12 +60,8 @@ internal static class FontCache
 
     public static void Register(string fontName, FontSystem fontSystem)
     {
-        if (fontName == null)
-            throw new ArgumentNullException(nameof(fontName));
-        if (fontSystem == null)
-            throw new ArgumentNullException(nameof(fontSystem));
-
-        _fontsCache[fontName] = fontSystem;
+        ArgumentNullException.ThrowIfNull(fontName);
+        _fontsCache[fontName] = fontSystem ?? throw new ArgumentNullException(nameof(fontSystem));
         _fonts.Add(fontSystem);
     }
 
