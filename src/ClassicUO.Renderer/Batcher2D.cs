@@ -1270,7 +1270,6 @@ namespace ClassicUO.Renderer
             _projectionMatrix.M11 = (float)(2.0 / GraphicsDevice.Viewport.Width);
             _projectionMatrix.M22 = (float)(-2.0 / GraphicsDevice.Viewport.Height);
 
-            Matrix matrix = _projectionMatrix;
             Matrix.CreateOrthographicOffCenter
             (
                 0f,
@@ -1279,7 +1278,7 @@ namespace ClassicUO.Renderer
                 0,
                 short.MinValue,
                 short.MaxValue,
-                out matrix
+                out var matrix
             );
             Matrix.Multiply(ref _transformMatrix, ref matrix, out matrix);
 

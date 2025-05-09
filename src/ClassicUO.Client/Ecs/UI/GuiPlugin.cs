@@ -22,6 +22,9 @@ internal sealed class FocusedInput
 
 internal readonly struct GuiPlugin : IPlugin
 {
+    private const FontSystemEffect FONT_EFFECT = FontSystemEffect.Stroked;
+    private const int FONT_EFFECT_AMOUNT = 1;
+
     private static unsafe Clay_Dimensions OnMeasureText(Clay_StringSlice slice, Clay_TextElementConfig* config, void* userData)
     {
         var raw = new ReadOnlySpan<byte>(slice.chars, slice.length);
@@ -33,7 +36,7 @@ internal readonly struct GuiPlugin : IPlugin
             text,
             characterSpacing: config->letterSpacing,
             lineSpacing: config->lineHeight,
-            effect: FontSystemEffect.Stroked, effectAmount: 1);
+            effect: FONT_EFFECT, effectAmount: FONT_EFFECT_AMOUNT);
 
         return new Clay_Dimensions(size.X, size.Y);
     }
@@ -233,13 +236,9 @@ internal readonly struct GuiPlugin : IPlugin
                             try
                             {
                                 var sp = new ReadOnlySpan<byte>(t.stringContents.chars, t.stringContents.length);
-                                var charsWritten = Encoding.UTF8.GetChars(sp, rentedChars);
+                                var charsWritten = Encoding.UTF8.GetChars(sp, rentedChars.AsSpan(0, t.stringContents.length));
 
-                                foreach (ref readonly var c in rentedChars.AsSpan(0, charsWritten))
-                                {
-                                    sb.Value.Append(c);
-                                }
-
+                                sb.Value.Append(rentedChars.AsSpan(0, charsWritten));
                                 var dynFont = font.GetFont(t.fontSize);
                                 dynFont.DrawText(
                                     b,
@@ -248,8 +247,7 @@ internal readonly struct GuiPlugin : IPlugin
                                     new Color(t.textColor.r, t.textColor.g, t.textColor.b, t.textColor.a),
                                     characterSpacing: t.letterSpacing,
                                     lineSpacing: t.lineHeight,
-                                    textStyle: TextStyle.None,
-                                    effect: FontStashSharp.FontSystemEffect.Stroked, effectAmount: 1
+                                    effect: FONT_EFFECT, effectAmount: FONT_EFFECT_AMOUNT
                                 );
                             }
                             finally

@@ -103,7 +103,7 @@ internal readonly struct LoginPacketsPlugin : IPlugin
             };
 
             // login errors
-            var loginErrorsPackets = (byte id, ReadOnlySpan<byte> buffer) =>
+            void loginErrorsPackets(byte id, ReadOnlySpan<byte> buffer)
             {
                 var reader = new StackDataReader(buffer);
                 var code = reader.ReadUInt8();
@@ -115,7 +115,7 @@ internal readonly struct LoginPacketsPlugin : IPlugin
                 {
                     Error = new(errorMsg)
                 });
-            };
+            }
 
             packetsMap.Value[0x82] = (buffer) => loginErrorsPackets(0x82, buffer);
             packetsMap.Value[0x85] = (buffer) => loginErrorsPackets(0x85, buffer);
