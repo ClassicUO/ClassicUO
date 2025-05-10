@@ -41,6 +41,8 @@ namespace ClassicUO.Game.UI.Controls
         }
 
         public ushort Hue { get; set; }
+        public bool IsPartialHue { get; set; }
+
 
         public override bool Contains(int x, int y)
         {
@@ -100,7 +102,6 @@ namespace ClassicUO.Game.UI.Controls
             )
         { }
 
-        public bool IsPartialHue { get; set; }
         public bool ContainsByBounds { get; set; }
 
         public override bool Contains(int x, int y)
@@ -214,7 +215,7 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, false, Alpha, true);
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, IsPartialHue, Alpha, true);
 
             ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(Graphic);
 
