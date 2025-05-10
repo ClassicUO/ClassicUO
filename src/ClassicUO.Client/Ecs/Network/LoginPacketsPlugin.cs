@@ -129,6 +129,7 @@ internal readonly struct LoginPacketsPlugin : IPlugin
 
                 if (network.Value.IsConnected)
                 {
+                    network.Value.Encryption?.Initialize(false, seed);
                     network.Value.EnableCompression();
                     Span<byte> b = [(byte)(seed >> 24), (byte)(seed >> 16), (byte)(seed >> 8), (byte)seed];
                     network.Value.Send(b, true, true);

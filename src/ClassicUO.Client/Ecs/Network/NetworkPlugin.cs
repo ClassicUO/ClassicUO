@@ -86,6 +86,8 @@ readonly struct NetworkPlugin : IPlugin
             if (!network.Value.IsConnected)
                 continue;
 
+            network.Value.Encryption?.Initialize(true, network.Value.LocalIP);
+
             if (gameCtx.Value.ClientVersion >= ClientVersion.CV_6040)
             {
                 // NOTE: im forcing the use of latest client just for convenience rn
