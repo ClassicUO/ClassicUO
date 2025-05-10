@@ -73,12 +73,46 @@ internal readonly struct LoginPacketsPlugin : IPlugin
                 }
 
                 var cityCount = reader.ReadUInt8();
-                // bla bla
+                var cities = new List<TownInfo>();
+                var asNew = gameCtx.Value.ClientVersion >= ClientVersion.CV_70130;
+                for (var i = 0; i < cityCount; ++i)
+                {
+                    TownInfo city;
+                    if (asNew)
+                    {
+                        city = new TownInfo(
+                            reader.ReadUInt8(),
+                            reader.ReadASCII(32),
+                            reader.ReadASCII(32),
+                            ((ushort)reader.ReadUInt32BE(), (ushort)reader.ReadUInt32BE(), (sbyte)reader.ReadUInt32BE()),
+                            reader.ReadUInt32BE(),
+                            reader.ReadUInt32BE()
+                        );
+
+                        reader.Skip(4);
+                    }
+                    else
+                    {
+                        city = new TownInfo(
+                            reader.ReadUInt8(),
+                            reader.ReadASCII(31),
+                            reader.ReadASCII(31),
+                            (0, 0, 0), // TODO: X, Y. Z is 0
+                            0,
+                            0
+                        );
+                    }
+
+                    cities.Add(city);
+                }
+
+                gameCtx.Value.ClientFeatures = (CharacterListFlags)reader.ReadUInt32BE();
 
                 gameState.Set(GameState.CharacterSelection);
                 characterWriter.Enqueue(new()
                 {
-                    Characters = characters
+                    Characters = characters,
+                    Towns = cities
                 });
             };
 

@@ -48,6 +48,7 @@ struct GameContext
     public bool FreeView;
     public uint PlayerSerial;
     public ClientFlags Protocol;
+    public CharacterListFlags ClientFeatures;
     public ClientVersion ClientVersion;
     public int MaxMapWidth, MaxMapHeight;
     public int MaxObjectsDistance;

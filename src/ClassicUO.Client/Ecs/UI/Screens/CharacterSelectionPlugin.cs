@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using ClassicUO.Game.Data;
 using ClassicUO.Network;
 using Clay_cs;
 using TinyEcs;
@@ -181,9 +182,19 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
 internal struct CharacterSelectionInfoEvent
 {
     public List<CharacterInfo> Characters;
+    public List<TownInfo> Towns;
 }
 
 internal record struct CharacterInfo(
     string Name,
     uint Index
+);
+
+internal record struct TownInfo(
+    byte Index,
+    string Name,
+    string Building,
+    (ushort X, ushort Y, sbyte Z) Position,
+    uint Map,
+    uint ClilocDescription
 );
