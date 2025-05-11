@@ -470,6 +470,11 @@ internal readonly struct GuiPlugin : IPlugin
                     config.custom.customData = (void*)commandBuffer.AddCommand(node.UOConfig);
                 }
 
+                if (config.clip.horizontal || config.clip.vertical)
+                {
+                    config.clip.childOffset = Clay.GetScrollOffset();
+                }
+
                 Clay.ConfigureOpenElement(config);
 
                 if (!Unsafe.IsNullRef(ref interaction))

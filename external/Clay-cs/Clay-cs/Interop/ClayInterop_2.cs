@@ -151,7 +151,7 @@ public partial struct Clay_SizingMinMax
 
 public partial struct Clay_SizingAxis
 {
-    [NativeTypeName("__AnonymousRecord_clay_L326_C9")]
+    [NativeTypeName("__AnonymousRecord_clay_L307_C5")]
     public ClaySizingUnion size;
 
     public Clay__SizingType type;
@@ -310,11 +310,18 @@ public unsafe partial struct Clay_CustomElementConfig
     public void* customData;
 }
 
-public partial struct Clay_ScrollElementConfig
+public partial struct Clay_ClipElementConfig
 {
     public bool horizontal;
 
     public bool vertical;
+
+    public Clay_Vector2 childOffset;
+}
+
+public partial struct Clay__Clay_ClipElementConfigWrapper
+{
+    public Clay_ClipElementConfig wrapped;
 }
 
 public partial struct Clay_BorderWidth
@@ -388,7 +395,7 @@ public unsafe partial struct Clay_CustomRenderData
     public void* customData;
 }
 
-public partial struct Clay_ScrollRenderData
+public partial struct Clay_ClipRenderData
 {
     public bool horizontal;
 
@@ -423,7 +430,7 @@ public partial struct Clay_RenderData
     public Clay_BorderRenderData border;
 
     [FieldOffset(0)]
-    public Clay_ScrollRenderData scroll;
+    public Clay_ClipRenderData clip;
 }
 
 public unsafe partial struct Clay_ScrollContainerData
@@ -434,7 +441,7 @@ public unsafe partial struct Clay_ScrollContainerData
 
     public Clay_Dimensions contentDimensions;
 
-    public Clay_ScrollElementConfig config;
+    public Clay_ClipElementConfig config;
 
     public bool found;
 }
@@ -519,7 +526,7 @@ public unsafe partial struct Clay_ElementDeclaration
 
     public Clay_CustomElementConfig custom;
 
-    public Clay_ScrollElementConfig scroll;
+    public Clay_ClipElementConfig clip;
 
     public Clay_BorderElementConfig border;
 
@@ -584,6 +591,9 @@ internal static unsafe partial class ClayInterop
 
     [DllImport("Clay", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern void Clay_UpdateScrollContainers(bool enableDragScrolling, Clay_Vector2 scrollDelta, float deltaTime);
+
+    [DllImport("Clay", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern Clay_Vector2 Clay_GetScrollOffset();
 
     [DllImport("Clay", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern void Clay_SetLayoutDimensions(Clay_Dimensions dimensions);

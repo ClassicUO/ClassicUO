@@ -157,6 +157,12 @@ public static class Clay
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Clay_Vector2 GetScrollOffset()
+    {
+        return ClayInterop.Clay_GetScrollOffset();
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static void UpdateScrollContainers(bool enableDragScrolling, Vector2 moveDelta, float timeDelta)
     {
         ClayInterop.Clay_UpdateScrollContainers(enableDragScrolling, moveDelta, timeDelta);

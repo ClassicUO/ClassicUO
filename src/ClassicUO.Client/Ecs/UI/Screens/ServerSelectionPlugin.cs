@@ -106,8 +106,8 @@ internal readonly struct ServerSelectionPlugin : IPlugin
                         padding = Clay_Padding.All(8),
                         childGap = 4
                     },
-                    scroll = {
-                        vertical = true,
+                    clip = {
+                        vertical = true
                     }
                 }
             });
