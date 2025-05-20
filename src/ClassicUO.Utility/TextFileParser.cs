@@ -30,18 +30,6 @@ namespace ClassicUO.Utility
             _pos = 0;
         }
 
-        public bool IsDelimiter()
-        {
-            bool result = false;
-
-            for (int i = 0; i < _delimiters.Length && !result; i++)
-            {
-                result = _string[_pos] == _delimiters[i];
-            }
-
-            return result;
-        }
-
         public bool IsEOF()
         {
             return _pos >= _Size;
@@ -54,181 +42,78 @@ namespace ClassicUO.Utility
                 if (_string[i] == '\n')
                 {
                     _eol = i;
-
-                    break;
-                }
-                else if (i + 1 >= _Size)
-                {
-                    _eol = i + 1;
-
-                    break;
+                    return;
                 }
             }
+
+            _eol = _Size;
         }
 
         private void SkipToData()
         {
-            while (_pos < _eol && IsDelimiter())
-            {
+            while (_pos < _eol && IsDelimiter(_string[_pos]))
                 _pos++;
-            }
+        }
+
+        private bool IsDelimiter(char c)
+        {
+            foreach (char d in _delimiters)
+                if (c == d)
+                    return true;
+            return false;
         }
 
         private bool IsComment()
         {
-            bool result = _string[_pos] == '\n';
+            foreach (char c in _comments)
+                if (_string[_pos] == c)
+                    return true;
+            return false;
+        }
 
-            for (int i = 0; i < _comments.Length && !result; i++)
+        private bool TryGetQuotePair(out char startQuote, out char endQuote)
+        {
+            for (int i = 0; i + 1 < _quotes.Length; i += 2)
             {
-                result = _string[_pos] == _comments[i];
-
-                if (result && i + 1 < _comments.Length && _comments[i] == _comments[i + 1] && _pos + 1 < _eol)
+                if (_string[_pos] == _quotes[i])
                 {
-                    result = _string[_pos] == _string[_pos + 1];
-                    i++;
+                    startQuote = _quotes[i];
+                    endQuote = _quotes[i + 1];
+                    return true;
                 }
             }
 
-            return result;
+            startQuote = endQuote = '\0';
+            return false;
         }
 
-        private bool IsQuote()
+        private void ObtainQuotedData(char endQuote, bool areTheSame)
         {
-            bool result = _string[_pos] == '\n';
+            _pos++; // skip opening quote
 
-            for (int i = 0; i < _quotes.Length && !result; i += 2)
+            while (_pos < _eol)
             {
-                if (_string[_pos] == _quotes[i] || i + 1 < _quotes.Length && _string[_pos] == _quotes[i + 1])
+                if (_string[_pos] == endQuote)
                 {
-                    result = true;
-
-                    break;
-                }
-            }
-
-            return result;
-        }
-
-        private bool IsSecondQuote()
-        {
-            bool result = _string[_pos] == '\n';
-
-            for (int i = 0; i + 1 < _quotes.Length && !result; i += 2)
-            {
-                if (_string[_pos] == _quotes[i + 1])
-                {
-                    result = true;
-
-                    break;
-                }
-            }
-
-            return result;
-        }
-
-        private void ObtainData()
-        {
-            while (_pos < _Size && _string[_pos] != '\n')
-            {
-                if (IsDelimiter())
-                {
-                    break;
+                    if (!areTheSame)
+                        _pos++; // skip end quote
+                    return;
                 }
 
-                if (IsComment())
-                {
-                    _pos = _eol;
-
-                    break;
-                }
-
-                if (_string[_pos] != '\r' && (!_trim || _string[_pos] != ' ' && _string[_pos] != '\t'))
-                {
-                    for (int i = 0; i < _quotes.Length; i++)
-                    {
-                        if (_string[_pos] == _quotes[i])
-                        {
-                            return;
-                        }
-                    }
-
-                    _sb.Append(_string[_pos]);
-                }
-
+                _sb.Append(_string[_pos]);
                 _pos++;
             }
         }
 
-        private void ObtainQuotedData(bool save = true)
+        private void ObtainUnquotedData()
         {
-            bool exit = false;
-
-            for (int i = 0; i < _quotes.Length; i += 2)
+            while (_pos < _eol)
             {
-                if (_string[_pos] == _quotes[i])
-                {
-                    char endQuote = _quotes[i + 1];
-                    exit = true;
+                if (IsDelimiter(_string[_pos]) || IsComment())
+                    return;
 
-                    int pos = _pos + 1;
-                    int start = pos;
-
-                    while (pos < _eol && _string[pos] != '\n' && _string[pos] != endQuote)
-                    {
-                        if (_string[pos] == _quotes[i]) // another {
-                        {
-                            _pos = pos;
-                            ObtainQuotedData(false); // skip
-                            pos = _pos;
-                        }
-
-                        pos++;
-                    }
-
-                    _pos++;
-                    int size = pos - start;
-
-                    if (size > 0)
-                    {
-                        if (save)
-                        {
-                            ReadOnlySpan<char> span = _string.AsSpan(start, size);
-                            int idx0 = span.IndexOf('\r');
-                            int idx1 = span.IndexOf('\n');
-
-                            if (idx0 >= 0)
-                            {
-                                span = span.Slice(start, idx0);
-                            }
-                            else if (idx1 >= 0)
-                            {
-                                span = span.Slice(start, idx1);
-                            }
-
-                            unsafe
-                            {
-                                fixed (char* ptr = span)
-                                {
-                                    _sb.Append(ptr, span.Length);
-                                }
-                            }
-                        }
-
-                        _pos = pos;
-
-                        if (_pos < _eol && _string[_pos] == endQuote)
-                        {
-                            _pos++;
-                        }
-                    }
-
-                    break;
-                }
-            }
-
-            if (!exit)
-            {
-                ObtainData();
+                _sb.Append(_string[_pos]);
+                _pos++;
             }
         }
 
@@ -237,35 +122,38 @@ namespace ClassicUO.Utility
             _trim = trim;
             List<string> result = new List<string>();
 
-            if (_pos < _Size)
+            while (_pos < _Size)
             {
                 GetEOL();
+                SkipToData();
 
                 while (_pos < _eol)
                 {
-                    SkipToData();
-
-                    if (_pos >= _eol)
-                    {
-                        break;
-                    }
-
                     if (IsComment())
-                    {
                         break;
-                    }
 
-                    ObtainQuotedData();
+                    if (TryGetQuotePair(out char start, out char end))
+                    {
+                        ObtainQuotedData(end, start == end);
+                    }
+                    else
+                    {
+                        ObtainUnquotedData();
+                    }
 
                     if (_sb.Length > 0)
                     {
-                        result.Add(_sb.ToString());
+                        string token = _sb.ToString();
+                        if (trim)
+                            token = token.Trim();
+
+                        if (token.Length > 0)
+                            result.Add(token);
+
                         _sb.Clear();
                     }
-                    else if (IsSecondQuote())
-                    {
-                        _pos++;
-                    }
+
+                    SkipToData();
                 }
 
                 _pos = _eol + 1;
@@ -276,37 +164,11 @@ namespace ClassicUO.Utility
 
         public List<string> GetTokens(string str, bool trim = true)
         {
-            _trim = trim;
-            List<string> result = new List<string>();
-
-            _pos = 0;
             _string = str;
-            _eol = _Size = str.Length;
-
-            while (_pos < _eol)
-            {
-                SkipToData();
-
-                if (_pos >= _eol)
-                {
-                    break;
-                }
-
-                if (IsComment())
-                {
-                    break;
-                }
-
-                ObtainQuotedData();
-
-                if (_sb.Length > 0)
-                {
-                    result.Add(_sb.ToString());
-                    _sb.Clear();
-                }
-            }
-
-            return result;
+            _Size = str.Length;
+            _pos = 0;
+            _eol = _Size;
+            return ReadTokens(trim);
         }
     }
 }
