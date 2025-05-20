@@ -114,7 +114,7 @@ readonly struct PlayerMovementPlugin : IPlugin
         Res<NetClient> network,
         Res<PlayerStepsContext> playerRequestedSteps,
         Res<Camera> camera,
-        Query<Data<WorldPosition, Facing, MobileSteps, MobAnimation>, With<Player>> playerQuery,
+        Single<Data<WorldPosition, Facing, MobileSteps, MobAnimation, MobileFlags>, With<Player>> playerQuery,
         Query<Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tilesQuery,
         Query<Data<WorldPosition, Graphic>, Filter<Without<IsTile>, Without<MobAnimation>>> staticsQuery,
         Time time
@@ -132,7 +132,7 @@ readonly struct PlayerMovementPlugin : IPlugin
         var facing = mouseDir == Direction.North ? Direction.Mask : mouseDir - 1;
         var run = mouseRange >= 190 || false;
 
-        (var worldPos, var dir, var mobSteps, var animation) = playerQuery.Single();
+        (var worldPos, var dir, var mobSteps, var animation, var flags) = playerQuery.Get();
         var hasNoSteps = mobSteps.Ref.Index < 0;
         var playerX = worldPos.Ref.X;
         var playerY = worldPos.Ref.Y;
@@ -207,9 +207,7 @@ readonly struct PlayerMovementPlugin : IPlugin
 
         if (canMove || !sameDir)
         {
-            // ref var playerFlags = ref playerQuery.Single<MobileFlags>();
-            var playerFlags = Flags.None;
-            var isMountedOrFlying = animation.Ref.MountAction != 0xFF || playerFlags.HasFlag(Flags.Flying);
+            var isMountedOrFlying = animation.Ref.MountAction != 0xFF || flags.Ref.Value.HasFlag(Flags.Flying);
             var stepTime = sameDir ? MovementSpeed.TimeToCompleteMovement(run, isMountedOrFlying) : Constants.TURN_DELAY;
             ref var requestedStep = ref playerRequestedSteps.Value.Steps[playerRequestedSteps.Value.Count];
             requestedStep.Sequence = playerRequestedSteps.Value.Sequence;

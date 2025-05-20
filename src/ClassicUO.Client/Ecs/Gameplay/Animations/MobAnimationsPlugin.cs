@@ -217,17 +217,17 @@ readonly struct MobAnimationsPlugin : IPlugin
     void HandleMobileSteps
     (
         Time time,
-        Query<TinyEcs.Data<MobileSteps, WorldPosition, Facing, MobAnimation, ScreenPositionOffset>, Without<ContainedInto>> queryHandleWalking
+        Query<TinyEcs.Data<MobileSteps, WorldPosition, Facing, MobAnimation, ScreenPositionOffset, MobileFlags>, Without<ContainedInto>> queryHandleWalking
     )
     {
-        foreach ((var steps, var position, var direction, var animation, var offset) in queryHandleWalking)
+        foreach ((var steps, var position, var direction, var animation, var offset, var flags) in queryHandleWalking)
         {
             while (steps.Ref.Index >= 0)
             {
                 ref var step = ref steps.Ref[0];
 
                 var delay = time.Total - steps.Ref.Time;
-                var mount = animation.Ref.MountAction != 0xFF;
+                var mount = animation.Ref.MountAction != 0xFF || flags.Ref.Value.HasFlag(Flags.Flying);
 
                 if (!mount && steps.Ref.Index > 0 && delay > 0)
                 {
