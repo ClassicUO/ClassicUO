@@ -12,6 +12,7 @@ namespace ClassicUO.Ecs;
 internal sealed class ChatOptions
 {
     public int MaxMessageLength { get; set; } = 120;
+    public ushort ChatColor { get; set; } = 0x44;
 }
 
 internal readonly struct ChatPlugin : IPlugin
@@ -58,7 +59,7 @@ internal readonly struct ChatPlugin : IPlugin
                                     text,
                                     MessageType.Regular,
                                     3,
-                                    0x44,
+                                    chatOptions.Value.ChatColor,
                                     settings.Value.Language,
                                     entries
                                 );
@@ -69,7 +70,7 @@ internal readonly struct ChatPlugin : IPlugin
                                     text,
                                     MessageType.Regular,
                                     3,
-                                    0x44,
+                                    chatOptions.Value.ChatColor,
                                     entries
                                 );
                             }

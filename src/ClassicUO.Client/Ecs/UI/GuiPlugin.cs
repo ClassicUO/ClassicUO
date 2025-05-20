@@ -74,6 +74,8 @@ internal readonly struct GuiPlugin : IPlugin
             var ctx = Clay.Initialize(arenaHandle, new() { width = 300, height = 300 }, errorFn);
             var measureTextFn = (nint)(delegate*<Clay_StringSlice, Clay_TextElementConfig*, void*, Clay_Dimensions>)&OnMeasureText;
             Clay.SetMeasureTextFunction(measureTextFn);
+
+            // Clay.SetDebugModeEnabled(true);
         }, ThreadingMode.Single);
 
         scheduler.OnUpdate((Res<GraphicsDevice> device, Res<MouseContext> mouseCtx, Time time) =>
@@ -212,12 +214,19 @@ internal readonly struct GuiPlugin : IPlugin
             b.SetSampler(SamplerState.PointClamp);
             b.SetStencil(DepthStencilState.Default);
 
-            // Console.WriteLine("cmds count: {0}", cmds.length);
-
             var span = new ReadOnlySpan<Clay_RenderCommand>(cmds.internalArray, cmds.length);
             foreach (ref readonly var cmd in span)
             {
-                // Console.WriteLine("cmds type: {0}", cmd.commandType);
+                static Color toColor(ref readonly Clay_Color c)
+                {
+                    return new Color
+                    (
+                        c.r > 1f ? MathHelper.Clamp(c.r / 255f, 0f, 1f) : c.r,
+                        c.g > 1f ? MathHelper.Clamp(c.g / 255f, 0f, 1f) : c.g,
+                        c.b > 1f ? MathHelper.Clamp(c.b / 255f, 0f, 1f) : c.b,
+                        c.a > 1f ? MathHelper.Clamp(c.a / 255f, 0f, 1f) : c.a
+                    );
+                }
 
                 ref readonly var boundingBox = ref cmd.boundingBox;
 
@@ -244,7 +253,7 @@ internal readonly struct GuiPlugin : IPlugin
                                     b,
                                     sb.Value,
                                     new(boundingBox.x, boundingBox.y),
-                                    new Color(t.textColor.r, t.textColor.g, t.textColor.b, t.textColor.a),
+                                    toColor(in t.textColor),
                                     characterSpacing: t.letterSpacing,
                                     lineSpacing: t.lineHeight,
                                     effect: FONT_EFFECT, effectAmount: FONT_EFFECT_AMOUNT
@@ -264,7 +273,7 @@ internal readonly struct GuiPlugin : IPlugin
                         b.Draw(dumbTexture.Value,
                             new Vector2((int)boundingBox.x, (int)boundingBox.y),
                             new Rectangle(0, 0, (int)boundingBox.width, (int)boundingBox.height),
-                            new Color(config.backgroundColor.r, config.backgroundColor.g, config.backgroundColor.b, config.backgroundColor.a),
+                            toColor(in config.backgroundColor),
                             0f, Vector2.One, 0f);
 
                         break;
