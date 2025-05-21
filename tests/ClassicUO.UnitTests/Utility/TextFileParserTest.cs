@@ -13,7 +13,7 @@ namespace ClassicUO.UnitTests.Utility
         [Fact]
         public void Parse_Long_Text()
         {
-            string s = " {a # quoted\tstring} a non quoted string    #ignoredstring  ";
+            string s = " hello{a # quoted\tstring} a non quoted string    #ignoredstring  ";
             char[] delimiters = new char[] { ' ', '\t' };
             char[] comments = new char[] { '#' };
             char[] quotes = new char[] { '{', '}' };
@@ -25,12 +25,13 @@ namespace ClassicUO.UnitTests.Utility
             List<string> tokens = parser.ReadTokens(trim);
 
             Assert.NotEmpty(tokens);
-            Assert.Equal(5, tokens.Count);
-            Assert.Equal("a # quoted\tstring", tokens[0]);
-            Assert.Equal("a", tokens[1]);
-            Assert.Equal("non", tokens[2]);
-            Assert.Equal("quoted", tokens[3]);
-            Assert.Equal("string", tokens[4]);
+            Assert.Equal(6, tokens.Count);
+            Assert.Equal("hello", tokens[0]);
+            Assert.Equal("a # quoted\tstring", tokens[1]);
+            Assert.Equal("a", tokens[2]);
+            Assert.Equal("non", tokens[3]);
+            Assert.Equal("quoted", tokens[4]);
+            Assert.Equal("string", tokens[5]);
         }
 
         [Fact]

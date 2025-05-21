@@ -108,7 +108,7 @@ namespace ClassicUO.Utility
         {
             while (_pos < _eol)
             {
-                if (IsDelimiter(_string[_pos]) || IsComment())
+                if (IsDelimiter(_string[_pos]) || IsComment() || TryGetQuotePair(out _, out _))
                     return;
 
                 _sb.Append(_string[_pos]);
