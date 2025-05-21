@@ -30,6 +30,7 @@ internal sealed class GumpBuilder
                     }
                 },
                 floating = {
+                    clipTo = Clay_FloatingClipToElement.CLAY_CLIP_TO_ATTACHED_PARENT,
                     attachTo = position.HasValue ? Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT : Clay_FloatingAttachToElement.CLAY_ATTACH_TO_NONE,
                     offset = {
                         x = position?.X ?? 0,
@@ -72,6 +73,7 @@ internal sealed class GumpBuilder
                     }
                 },
                 floating = {
+                    clipTo = Clay_FloatingClipToElement.CLAY_CLIP_TO_ATTACHED_PARENT,
                     attachTo = position.HasValue ? Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT : Clay_FloatingAttachToElement.CLAY_ATTACH_TO_NONE,
                     offset = {
                         x = position?.X ?? 0,
@@ -104,6 +106,7 @@ internal sealed class GumpBuilder
                     }
                 },
                 floating = {
+                    clipTo = Clay_FloatingClipToElement.CLAY_CLIP_TO_ATTACHED_PARENT,
                     attachTo = position.HasValue ? Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT : Clay_FloatingAttachToElement.CLAY_ATTACH_TO_NONE,
                     offset = {
                         x = position?.X ?? 0,

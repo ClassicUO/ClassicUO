@@ -16,7 +16,7 @@ internal readonly struct TerrainPlugin : IPlugin
     private struct TerrainChunk { public int X, Y; }
 
     internal sealed class ChunksLoadedMap : Dictionary<uint, (uint Time, ulong entity)> { }
-    internal sealed class LastPosition { public ushort? LastX, LastY; public (int, int)? LastCameraBounds; public float LastCameraZoom; }
+    internal sealed class LastPosition { public int Map = -1; public ushort? LastX, LastY; public (int, int)? LastCameraBounds; public float LastCameraZoom; }
 
     public void Build(Scheduler scheduler)
     {
@@ -81,6 +81,7 @@ internal readonly struct TerrainPlugin : IPlugin
         Time time,
         Res<Camera> camera,
         Res<GameContext> gameCtx,
+        Res<UOFileManager> fileManager,
         Res<ChunksLoadedMap> chunksLoaded,
         Single<Data<WorldPosition>, With<Player>> playerQuery,
         Query<Data<TerrainChunk>> query)
@@ -90,8 +91,8 @@ internal readonly struct TerrainPlugin : IPlugin
         var offset = GetCameraOffset(camera.Value);
         var startTileX = Math.Max(0, pos.Ref.X - offset) / 8;
         var startTileY = Math.Max(0, pos.Ref.Y - offset) / 8;
-        var endTileX = Math.Min(gameCtx.Value.MaxMapWidth, pos.Ref.X + offset) / 8;
-        var endTileY = Math.Min(gameCtx.Value.MaxMapHeight, pos.Ref.Y + offset) / 8;
+        var endTileX = Math.Min(fileManager.Value.Maps.MapsDefaultSize[gameCtx.Value.Map, 0], pos.Ref.X + offset) / 8;
+        var endTileY = Math.Min(fileManager.Value.Maps.MapsDefaultSize[gameCtx.Value.Map, 1], pos.Ref.Y + offset) / 8;
 
         foreach ((_, var chunk) in query)
         {
@@ -115,6 +116,7 @@ internal readonly struct TerrainPlugin : IPlugin
         Res<GameContext> gameCtx,
         Res<LastPosition> lastPos,
         Res<Camera> camera,
+        Res<UOFileManager> fileManager,
         Single<Data<WorldPosition>, With<Player>> playerQuery,
         EventWriter<OnNewChunkRequest> chunkRequests
     )
@@ -127,12 +129,14 @@ internal readonly struct TerrainPlugin : IPlugin
         (_, var pos) = playerQuery.Get();
 
         if (lastPos.Value.LastCameraBounds.HasValue && lastPos.Value.LastX.HasValue && lastPos.Value.LastY.HasValue)
-            if (lastPos.Value.LastX == pos.Ref.X && lastPos.Value.LastY == pos.Ref.Y &&
+            if (lastPos.Value.Map != gameCtx.Value.Map &&
+                lastPos.Value.LastX == pos.Ref.X && lastPos.Value.LastY == pos.Ref.Y &&
                 lastPos.Value.LastCameraBounds.Value.Item1 == camera.Value.Bounds.Width &&
                 lastPos.Value.LastCameraBounds.Value.Item2 == camera.Value.Bounds.Height &&
                 lastPos.Value.LastCameraZoom == camera.Value.Zoom)
                 return;
 
+        lastPos.Value.Map = gameCtx.Value.Map;
         lastPos.Value.LastX = pos.Ref.X;
         lastPos.Value.LastY = pos.Ref.Y;
         lastPos.Value.LastCameraBounds = (camera.Value.Bounds.Width, camera.Value.Bounds.Height);
@@ -141,8 +145,8 @@ internal readonly struct TerrainPlugin : IPlugin
         var offset = GetCameraOffset(camera.Value);
         var startTileX = Math.Max(0, pos.Ref.X - offset);
         var startTileY = Math.Max(0, pos.Ref.Y - offset);
-        var endTileX = Math.Min(gameCtx.Value.MaxMapWidth, pos.Ref.X + offset);
-        var endTileY = Math.Min(gameCtx.Value.MaxMapHeight, pos.Ref.Y + offset);
+        var endTileX = Math.Min(fileManager.Value.Maps.MapsDefaultSize[gameCtx.Value.Map, 0], pos.Ref.X + offset);
+        var endTileY = Math.Min(fileManager.Value.Maps.MapsDefaultSize[gameCtx.Value.Map, 1], pos.Ref.Y + offset);
 
         chunkRequests.Enqueue(new()
         {

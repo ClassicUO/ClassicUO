@@ -50,7 +50,6 @@ struct GameContext
     public ClientFlags Protocol;
     public CharacterListFlags ClientFeatures;
     public ClientVersion ClientVersion;
-    public int MaxMapWidth, MaxMapHeight;
     public int MaxObjectsDistance;
 }
 

@@ -58,6 +58,14 @@ readonly struct PlayerMovementPlugin : IPlugin
         scheduler.AddEvent<RejectedStep>();
         scheduler.AddEvent<AcceptedStep>();
 
+        scheduler.OnEnter
+        (
+            GameState.GameScreen, (Res<PlayerStepsContext> playerRequestedSteps) =>
+            {
+                playerRequestedSteps.Value = new PlayerStepsContext();
+            }, ThreadingMode.Single
+        );
+
         var enqueuePlayerStepsFn = EnqueuePlayerSteps;
         scheduler.OnUpdate(enqueuePlayerStepsFn, ThreadingMode.Single)
             .RunIf((Res<MouseContext> mouseCtx, Res<Camera> camera, Local<(float X, float Y)> clickedPos) =>

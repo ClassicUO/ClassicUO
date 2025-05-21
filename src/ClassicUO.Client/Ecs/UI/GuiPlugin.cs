@@ -75,7 +75,7 @@ internal readonly struct GuiPlugin : IPlugin
             var measureTextFn = (nint)(delegate*<Clay_StringSlice, Clay_TextElementConfig*, void*, Clay_Dimensions>)&OnMeasureText;
             Clay.SetMeasureTextFunction(measureTextFn);
 
-            // Clay.SetDebugModeEnabled(true);
+             // Clay.SetDebugModeEnabled(true);
         }, ThreadingMode.Single);
 
         scheduler.OnUpdate((Res<GraphicsDevice> device, Res<MouseContext> mouseCtx, Time time) =>
@@ -217,17 +217,6 @@ internal readonly struct GuiPlugin : IPlugin
             var span = new ReadOnlySpan<Clay_RenderCommand>(cmds.internalArray, cmds.length);
             foreach (ref readonly var cmd in span)
             {
-                static Color toColor(ref readonly Clay_Color c)
-                {
-                    return new Color
-                    (
-                        c.r > 1f ? MathHelper.Clamp(c.r / 255f, 0f, 1f) : c.r,
-                        c.g > 1f ? MathHelper.Clamp(c.g / 255f, 0f, 1f) : c.g,
-                        c.b > 1f ? MathHelper.Clamp(c.b / 255f, 0f, 1f) : c.b,
-                        c.a > 1f ? MathHelper.Clamp(c.a / 255f, 0f, 1f) : c.a
-                    );
-                }
-
                 ref readonly var boundingBox = ref cmd.boundingBox;
 
                 switch (cmd.commandType)
@@ -451,6 +440,19 @@ internal readonly struct GuiPlugin : IPlugin
                     case Clay_RenderCommandType.CLAY_RENDER_COMMAND_TYPE_SCISSOR_END:
                         b.ClipEnd();
                         break;
+                }
+
+                continue;
+
+                static Color toColor(ref readonly Clay_Color c)
+                {
+                    return new Color
+                    (
+                        c.r > 1f ? MathHelper.Clamp(c.r / 255f, 0f, 1f) : c.r,
+                        c.g > 1f ? MathHelper.Clamp(c.g / 255f, 0f, 1f) : c.g,
+                        c.b > 1f ? MathHelper.Clamp(c.b / 255f, 0f, 1f) : c.b,
+                        c.a > 1f ? MathHelper.Clamp(c.a / 255f, 0f, 1f) : c.a
+                    );
                 }
             }
 

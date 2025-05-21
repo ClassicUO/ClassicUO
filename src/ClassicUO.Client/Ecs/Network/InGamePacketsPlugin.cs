@@ -262,8 +262,6 @@ readonly struct InGamePacketsPlugin : IPlugin
                 gameCtx.Value.CenterY = y;
                 gameCtx.Value.CenterZ = z;
                 gameCtx.Value.PlayerSerial = serial;
-                gameCtx.Value.MaxMapWidth = mapWidth;
-                gameCtx.Value.MaxMapHeight = mapHeight;
 
                 var ent = entitiesMap.Value.GetOrCreate(world, serial);
                 ent.Set(new Ecs.WorldPosition() { X = x, Y = y, Z = z })
