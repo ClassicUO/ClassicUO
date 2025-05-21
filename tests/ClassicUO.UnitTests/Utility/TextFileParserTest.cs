@@ -58,5 +58,38 @@ namespace ClassicUO.UnitTests.Utility
             Assert.Equal("7", tokens[6]);
             Assert.Equal("baz", tokens[7]);
         }
+
+        [Fact]
+        public void Parse_MultiLine_Text()
+        {
+            string s = "#comment must be skipped\n\n1 2 3 4\n 5 6 7 8\n@5 foo@6 bar@7@baz";
+            char[] delimiters = new char[] { ' ', '\t' };
+            char[] comments = new char[] { '#' };
+            char[] quotes = new char[] { '@', '@' };
+            bool trim = true;
+
+
+            var parser = new TextFileParser(s, delimiters, comments, quotes);
+
+            var tokens = parser.ReadTokens(trim);
+            Assert.Empty(tokens);
+
+            tokens = parser.ReadTokens(trim);
+            Assert.Empty(tokens);
+
+            tokens = parser.ReadTokens(trim);
+            Assert.Equal(4, tokens.Count);
+            Assert.Equal(tokens[0..], ["1", "2", "3", "4"]);
+
+            tokens = parser.ReadTokens(trim);
+            Assert.Equal(4, tokens.Count);
+            Assert.Equal(tokens[0..], ["5", "6", "7", "8"]);
+
+            tokens = parser.ReadTokens(trim);
+            Assert.Equal(4, tokens.Count);
+            Assert.Equal(tokens[0..], ["5 foo", "6 bar", "7", "baz"]);
+
+            Assert.True(parser.IsEOF());
+        }
     }
 }

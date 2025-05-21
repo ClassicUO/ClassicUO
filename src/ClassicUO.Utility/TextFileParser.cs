@@ -1,6 +1,5 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -122,43 +121,42 @@ namespace ClassicUO.Utility
             _trim = trim;
             List<string> result = new List<string>();
 
-            while (_pos < _Size)
+            if (_pos >= _Size)
+                return result;
+
+            GetEOL(); // sets _eol to the end of the current line
+            SkipToData();
+
+            while (_pos < _eol)
             {
-                GetEOL();
-                SkipToData();
+                if (IsComment())
+                    break;
 
-                while (_pos < _eol)
+                if (TryGetQuotePair(out char start, out char end))
                 {
-                    if (IsComment())
-                        break;
-
-                    if (TryGetQuotePair(out char start, out char end))
-                    {
-                        ObtainQuotedData(end, start == end);
-                    }
-                    else
-                    {
-                        ObtainUnquotedData();
-                    }
-
-                    if (_sb.Length > 0)
-                    {
-                        string token = _sb.ToString();
-                        if (trim)
-                            token = token.Trim();
-
-                        if (token.Length > 0)
-                            result.Add(token);
-
-                        _sb.Clear();
-                    }
-
-                    SkipToData();
+                    ObtainQuotedData(end, start == end);
+                }
+                else
+                {
+                    ObtainUnquotedData();
                 }
 
-                _pos = _eol + 1;
+                if (_sb.Length > 0)
+                {
+                    string token = _sb.ToString();
+                    if (trim)
+                        token = token.Trim();
+
+                    if (token.Length > 0)
+                        result.Add(token);
+
+                    _sb.Clear();
+                }
+
+                SkipToData();
             }
 
+            _pos = _eol + 1; // move to next line
             return result;
         }
 
@@ -167,8 +165,17 @@ namespace ClassicUO.Utility
             _string = str;
             _Size = str.Length;
             _pos = 0;
-            _eol = _Size;
-            return ReadTokens(trim);
+
+            List<string> result = new List<string>();
+
+            while (_pos < _Size)
+            {
+                List<string> lineTokens = ReadTokens(trim);
+                result.AddRange(lineTokens);
+            }
+
+            return result;
         }
+
     }
 }
