@@ -388,6 +388,7 @@ namespace ClassicUO.Game.UI.Controls
 
         internal event EventHandler<KeyboardEventArgs> KeyDown, KeyUp;
 
+        internal event EventHandler<SDL.SDL_GameControllerButton> ControllerButtonUp, ControllerButtonDown;
 
         public void HitTest(int x, int y, ref Control res)
         {
@@ -578,6 +579,11 @@ namespace ClassicUO.Game.UI.Controls
             OnTextInput(c);
         }
 
+        public void InvokeControllerButtonUp(SDL.SDL_GameControllerButton button) { OnControllerButtonUp(button); ControllerButtonUp?.Raise(button); }
+
+        public void InvokeControllerButtonDown(SDL.SDL_GameControllerButton button) { OnControllerButtonDown(button); ControllerButtonDown?.Raise(button); }
+
+
         public void InvokeKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
             OnKeyDown(key, mod);
@@ -669,6 +675,16 @@ namespace ClassicUO.Game.UI.Controls
 
         protected virtual void OnTextInput(string c)
         {
+        }
+
+        protected virtual void OnControllerButtonUp(SDL.SDL_GameControllerButton button) 
+        {
+            Parent?.OnControllerButtonUp(button);
+        }
+
+        protected virtual void OnControllerButtonDown(SDL.SDL_GameControllerButton button) 
+        {
+            Parent?.OnControllerButtonDown(button);
         }
 
         protected virtual void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
