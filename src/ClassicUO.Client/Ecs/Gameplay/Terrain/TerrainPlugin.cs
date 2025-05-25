@@ -129,7 +129,7 @@ internal readonly struct TerrainPlugin : IPlugin
         (_, var pos) = playerQuery.Get();
 
         if (lastPos.Value.LastCameraBounds.HasValue && lastPos.Value.LastX.HasValue && lastPos.Value.LastY.HasValue)
-            if (lastPos.Value.Map != gameCtx.Value.Map &&
+            if (lastPos.Value.Map == gameCtx.Value.Map &&
                 lastPos.Value.LastX == pos.Ref.X && lastPos.Value.LastY == pos.Ref.Y &&
                 lastPos.Value.LastCameraBounds.Value.Item1 == camera.Value.Bounds.Width &&
                 lastPos.Value.LastCameraBounds.Value.Item2 == camera.Value.Bounds.Height &&
