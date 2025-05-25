@@ -1,5 +1,8 @@
 using System;
+using System.Buffers;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
@@ -8,6 +11,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 using TinyEcs;
 
 namespace ClassicUO.Ecs;
@@ -224,6 +228,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             Res<UOFileManager> fileManager,
             Res<Profile> profile,
             Res<GameContext> gameCtx,
+            Res<MultiCache> multiCache,
+            Res<DelayedAction> delayedActions,
             State<GameState> state,
             EventWriter<AcceptedStep> acceptedSteps,
             EventWriter<RejectedStep> rejectedSteps,
@@ -418,6 +424,19 @@ readonly struct InGamePacketsPlugin : IPlugin
                     case 0x1D:
                         serial = reader.ReadUInt32BE();
                         var revision = reader.ReadUInt32BE();
+
+                        var house = entitiesMap.Value.GetOrCreate(world, serial);
+
+                        if (house.Has<HouseRevision>())
+                        {
+                            if (house.Get<HouseRevision>().Value == revision)
+                                return;
+                        }
+
+                        house.Set(new HouseRevision() { Value = revision });
+
+                        delayedActions.Value.Add(() => network.Value.Send_CustomHouseDataRequest(serial), 1000);
+
                         break;
 
                     // house customization menu
@@ -710,6 +729,39 @@ readonly struct InGamePacketsPlugin : IPlugin
                     .Set(new Hue() { Value = hue });
                 // .Set(new WorldPosition() { X = x, Y = y, Z = z })
                 //.Set(new Facing() { Value = (Direction)direction });
+
+                if (type == 2)
+                {
+                    ent.Add<IsMulti>();
+
+                    var multiInfo = multiCache.Value.GetMulti((ushort)(graphic + graphicInc));
+                    foreach (ref readonly var block in CollectionsMarshal.AsSpan(multiInfo.Blocks))
+                    {
+                        if (!block.IsVisible)
+                            continue;
+
+                        var b = world.Entity()
+                            .Set
+                            (
+                                new Graphic()
+                                {
+                                    Value = block.ID
+                                }
+                            )
+                            .Set(new Hue()).Set
+                            (
+                                new WorldPosition()
+                                {
+                                    X = (ushort)(x + block.X),
+                                    Y = (ushort)(y + block.Y),
+                                    Z = (sbyte)(z + block.Z)
+                                }
+                            )
+                            .Add<IsMulti>();
+
+                        ent.AddChild(b);
+                    }
+                }
 
                 mobileQueuedSteps.Enqueue(new()
                 {
@@ -1093,8 +1145,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                         .Set(new Hue() { Value = hue })
                         .Set(new WorldPosition() { X = x, Y = y, Z = (sbyte)gridIdx })
                         .Set(new Amount() { Value = amount })
-                        .Add<ContainedInto>()
-                        ;
+                        .Add<ContainedInto>();
                     parentEnt.AddChild(childEnt);
                 }
             };
@@ -1775,12 +1826,206 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var revision = reader.ReadUInt32BE();
                 reader.Skip(4);
 
+                var parent = entitiesMap.Value.GetOrCreate(world, serial);
+
+                var multiRect = Rectangle.Empty;
+                (var startX, var startY, var startZ) = parent.Get<WorldPosition>();
+
+                if (parent.Has<IsMulti>())
+                {
+                    parent.Set
+                    (
+                        new HouseRevision()
+                        {
+                            Value = revision
+                        }
+                    );
+
+                    if (parent.Has<Graphic>())
+                    {
+                        ref var graphic = ref parent.Get<Graphic>();
+                        var multiInfo = multiCache.Value.GetMulti(graphic.Value);
+
+                        //if (addDefaultBlocks)
+                        {
+                            // foreach (ref readonly var block in CollectionsMarshal.AsSpan(multiInfo.Blocks))
+                            // {
+                            //     if (!block.IsVisible)
+                            //         continue;
+                            //
+                            //     var b = world.Entity()
+                            //         .Set
+                            //         (
+                            //             new Graphic()
+                            //             {
+                            //                 Value = block.ID
+                            //             }
+                            //         )
+                            //         .Set(new Hue()).Set
+                            //         (
+                            //             new WorldPosition()
+                            //             {
+                            //                 X = (ushort)(startX + block.X),
+                            //                 Y = (ushort)(startY + block.Y),
+                            //                 Z = (sbyte)(startZ + block.Z)
+                            //             }
+                            //         )
+                            //         .Add<IsMulti>();
+                            //
+                            //     parent.AddChild(b);
+                            // }
+                        }
+
+                        multiRect = multiInfo.Bounds;
+                    }
+                }
+
                 var planesCount = reader.ReadUInt8();
 
                 for (var i = 0; i < planesCount; ++i)
                 {
                     var header = reader.ReadUInt32BE();
-                    // TODO: read the house data
+                    var dlen = (int)(((header & 0xFF0000) >> 16) | ((header & 0xF0) << 4));
+                    var clen = (int)(((header & 0xFF00) >> 8) | ((header & 0x0F) << 8));
+                    var planeZ = (int)((header & 0x0F000000) >> 24);
+                    var planeMode = (int)((header & 0xF0000000) >> 28);
+
+                    if (clen <= 0)
+                        continue;
+
+                    var buff = ArrayPool<byte>.Shared.Rent(dlen);
+
+                    try
+                    {
+                        var result = ZLib.Decompress(reader.Buffer.Slice(reader.Position, clen), buff.AsSpan(0, dlen));
+                        var houseReader = new StackDataReader(buff.AsSpan(0, dlen));
+
+                        switch (planeMode)
+                        {
+                            case 0:
+                            {
+                                var c = dlen / 5;
+
+                                for (var j = 0; j < c; ++j)
+                                {
+                                    var b = world.Entity()
+                                        .Set
+                                        (
+                                            new Graphic()
+                                            {
+                                                Value = houseReader.ReadUInt16BE()
+                                            }
+                                        )
+                                        .Set(new Hue())
+                                        .Set
+                                        (
+                                            new WorldPosition()
+                                            {
+                                                X = (ushort)(startX + houseReader.ReadInt8()),
+                                                Y = (ushort)(startY + houseReader.ReadInt8()),
+                                                Z = (sbyte)(startZ + houseReader.ReadInt8()),
+                                            }
+                                        );
+
+                                    parent.AddChild(b);
+                                }
+                                break;
+                            }
+                            case 1:
+                            {
+                                var z = planeZ > 0 ? (sbyte)((planeZ - 1) % 4 * 20 + 7) : 0;
+                                var c = dlen >> 2;
+
+                                for (var j = 0; j < c; ++j)
+                                {
+                                    var id = houseReader.ReadUInt16BE();
+                                    (var x, var y) = (houseReader.ReadInt8(), houseReader.ReadInt8());
+                                    if (id != 0)
+                                    {
+                                        var b = world.Entity()
+                                            .Set(new Graphic() { Value = id })
+                                            .Set(new Hue())
+                                            .Set
+                                            (
+                                                new WorldPosition()
+                                                {
+                                                    X = (ushort)(startX + x),
+                                                    Y = (ushort)(startY + y),
+                                                    Z = (sbyte)(startZ + z),
+                                                }
+                                            );
+
+                                        parent.AddChild(b);
+                                    }
+                                }
+
+                                break;
+                            }
+                            case 2:
+                            {
+                                short offX = 0, offY = 0, multiHeight = 0;
+                                var z = planeZ > 0 ? (sbyte)((planeZ - 1) % 4 * 20 + 7) : 0;
+
+                                if (planeZ <= 0)
+                                {
+                                    offX = (short)multiRect.X;
+                                    offY = (short)multiRect.Y;
+                                    multiHeight = (short)(multiRect.Height - multiRect.Y + 2);
+                                }
+                                else if (planeZ <= 4)
+                                {
+                                    offX = (short)(multiRect.X + 1);
+                                    offY = (short)(multiRect.Y + 1);
+                                    multiHeight = (short)(multiRect.Height - multiRect.Y);
+                                }
+                                else
+                                {
+                                    offX = (short)multiRect.X;
+                                    offY = (short)multiRect.Y;
+                                    multiHeight = (short)(multiRect.Height - multiRect.Y + 1);
+                                }
+
+                                var c = dlen >> 1;
+
+                                for (var j = 0; j < c; ++j)
+                                {
+                                    var id = houseReader.ReadUInt16BE();
+                                    if (id != 0)
+                                    {
+                                        var x = (sbyte)(j / multiHeight + offX);
+                                        var y = (sbyte)(j % multiHeight + offY);
+                                        var b = world.Entity().Set
+                                            (
+                                                new Graphic()
+                                                {
+                                                    Value = id
+                                                }
+                                            )
+                                            .Set(new Hue())
+                                            .Set
+                                            (
+                                                new WorldPosition()
+                                                {
+                                                    X = (ushort)(startX + x),
+                                                    Y = (ushort)(startY + y),
+                                                    Z = (sbyte)(startZ + z),
+                                                }
+                                            );
+
+                                        parent.AddChild(b);
+                                    }
+                                }
+
+                                break;
+                            }
+                        }
+                    }
+                    finally
+                    {
+                        ArrayPool<byte>.Shared.Return(buff);
+                    }
+
+                    reader.Skip(clen);
                 }
             };
 
@@ -1970,6 +2215,41 @@ readonly struct InGamePacketsPlugin : IPlugin
                     .Set(new WorldPosition() { X = x, Y = y, Z = z })
                     .Set(new Facing() { Value = dir })
                     .Set(new Amount() { Value = amount });
+
+                if (type != 2)
+                {
+                    return;
+                }
+
+                ent.Add<IsMulti>();
+
+                var multiInfo = multiCache.Value.GetMulti((ushort)(graphic + graphicInc));
+                foreach (ref readonly var block in CollectionsMarshal.AsSpan(multiInfo.Blocks))
+                {
+                    if (!block.IsVisible)
+                        continue;
+
+                    var b = world.Entity()
+                        .Set
+                        (
+                            new Graphic()
+                            {
+                                Value = block.ID
+                            }
+                        )
+                        .Set(new Hue()).Set
+                        (
+                            new WorldPosition()
+                            {
+                                X = (ushort)(x + block.X),
+                                Y = (ushort)(y + block.Y),
+                                Z = (sbyte)(z + block.Z)
+                            }
+                        )
+                        .Add<IsMulti>();
+
+                    ent.AddChild(b);
+                }
             };
 
             // boat moving

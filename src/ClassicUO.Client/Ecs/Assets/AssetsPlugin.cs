@@ -34,6 +34,7 @@ readonly struct AssetsPlugin : IPlugin
         schedState.AddResource(fileManager);
         schedState.AddResource(new AssetsServer(fileManager, device));
         schedState.AddResource(new UltimaBatcher2D(device));
+        schedState.AddResource(new MultiCache(fileManager.Multis));
 
         gameCtx.Value.Protocol = ClientFlags.CF_T2A;
 

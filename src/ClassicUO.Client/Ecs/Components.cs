@@ -109,3 +109,9 @@ internal struct IsStatic;
 internal struct IsTile;
 internal struct Items;
 internal struct Mobiles;
+internal struct IsMulti;
+
+internal struct HouseRevision
+{
+    public uint Value;
+}

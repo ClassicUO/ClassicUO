@@ -104,7 +104,10 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
                             y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_TOP,
                         },
                         padding = Clay_Padding.All(8),
-                        childGap = 4
+                        childGap = 4,
+                    },
+                    clip = {
+                        vertical = true
                     }
                 }
             });
