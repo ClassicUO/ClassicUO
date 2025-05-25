@@ -1831,53 +1831,19 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var multiRect = Rectangle.Empty;
                 (var startX, var startY, var startZ) = parent.Get<WorldPosition>();
 
-                if (parent.Has<IsMulti>())
-                {
-                    parent.Set
-                    (
-                        new HouseRevision()
-                        {
-                            Value = revision
-                        }
-                    );
-
-                    if (parent.Has<Graphic>())
+                parent.Set
+                (
+                    new HouseRevision()
                     {
-                        ref var graphic = ref parent.Get<Graphic>();
-                        var multiInfo = multiCache.Value.GetMulti(graphic.Value);
-
-                        //if (addDefaultBlocks)
-                        {
-                            // foreach (ref readonly var block in CollectionsMarshal.AsSpan(multiInfo.Blocks))
-                            // {
-                            //     if (!block.IsVisible)
-                            //         continue;
-                            //
-                            //     var b = world.Entity()
-                            //         .Set
-                            //         (
-                            //             new Graphic()
-                            //             {
-                            //                 Value = block.ID
-                            //             }
-                            //         )
-                            //         .Set(new Hue()).Set
-                            //         (
-                            //             new WorldPosition()
-                            //             {
-                            //                 X = (ushort)(startX + block.X),
-                            //                 Y = (ushort)(startY + block.Y),
-                            //                 Z = (sbyte)(startZ + block.Z)
-                            //             }
-                            //         )
-                            //         .Add<IsMulti>();
-                            //
-                            //     parent.AddChild(b);
-                            // }
-                        }
-
-                        multiRect = multiInfo.Bounds;
+                        Value = revision
                     }
+                );
+
+                if (parent.Has<Graphic>())
+                {
+                    ref var graphic = ref parent.Get<Graphic>();
+                    var multiInfo = multiCache.Value.GetMulti(graphic.Value);
+                    multiRect = multiInfo.Bounds;
                 }
 
                 var planesCount = reader.ReadUInt8();

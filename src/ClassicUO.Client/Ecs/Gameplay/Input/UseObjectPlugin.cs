@@ -28,7 +28,7 @@ internal readonly struct UseObjectPlugin : IPlugin
             return;
 
         (var ent, var serial) = query.Get(selectedEntity.Value.Entity);
-        if (!Unsafe.IsNullRef(ref serial))
+        if (serial.IsValid())
         {
             network.Value.Send_DoubleClick(serial.Ref.Value);
         }

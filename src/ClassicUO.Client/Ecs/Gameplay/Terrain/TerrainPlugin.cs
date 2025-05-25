@@ -301,12 +301,14 @@ internal readonly struct TerrainPlugin : IPlugin
     private static void RemoveEntitiesOutOfRange
     (
        Commands commands,
+       Time time,
        Res<GameContext> gameCtx,
        Res<ChunksLoadedMap> chunksLoaded,
        Res<Camera> camera,
        Local<List<uint>> toRemove,
-       Time time,
-       Query<Data<WorldPosition>, Filter<With<NetworkSerial>, Without<Player>, Without<ContainedInto>>> queryAll,
+       Res<MultiCache> multiCache,
+       Query<Data<WorldPosition>, Filter<With<NetworkSerial>, Without<IsMulti>, Without<Player>, Without<ContainedInto>>> queryAll,
+       Query<Data<WorldPosition, Graphic>, Filter<With<NetworkSerial>, With<IsMulti>, Without<Player>, Without<ContainedInto>>> queryMultis,
        Single<Data<WorldPosition>, With<Player>> playerQuery
     )
     {
@@ -316,9 +318,6 @@ internal readonly struct TerrainPlugin : IPlugin
 
         foreach ((var key, (var lastAccess, var entity)) in chunksLoaded.Value)
         {
-            // var x = (int)((key >> 16) & 0xFFFF);
-            // var y = (int)(key & 0xFFFF);
-
             if (time.Total > lastAccess)
             {
                 toRemove.Value.Add(key);
@@ -337,6 +336,18 @@ internal readonly struct TerrainPlugin : IPlugin
         {
             var dist2 = GetDist(pos.Ref.X, pos.Ref.Y, mobPos.Ref.X, mobPos.Ref.Y);
             if (dist2 > gameCtx.Value.MaxObjectsDistance)
+            {
+                entity.Ref.Delete();
+            }
+        }
+
+        foreach ((var entity, var mobPos, var graphic) in queryMultis)
+        {
+            var bounds = multiCache.Value.GetMulti(graphic.Ref.Value).Bounds;
+            var dist2 = GetDist(pos.Ref.X, pos.Ref.Y, mobPos.Ref.X + bounds.X, mobPos.Ref.Y + bounds.Y);
+            var dist22 = GetDist(pos.Ref.X, pos.Ref.Y, mobPos.Ref.X + bounds.Width, mobPos.Ref.Y + bounds.Height);
+
+            if (dist2 > gameCtx.Value.MaxObjectsDistance * 2 && dist22 > gameCtx.Value.MaxObjectsDistance * 2)
             {
                 entity.Ref.Delete();
             }
