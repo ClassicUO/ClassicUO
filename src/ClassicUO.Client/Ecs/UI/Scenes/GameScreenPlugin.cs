@@ -20,14 +20,20 @@ internal readonly struct GameScreenPlugin : IPlugin
 
         scheduler.OnUpdate((
             World world,
-            Query<Data<UINode, Text>, With<TotalEntitiesMenu>> query
+            Query<Data<UINode, Text>, With<TotalEntitiesMenu>> query,
+            Query<Empty, With<IsTile>> queryTiles,
+            Query<Empty, With<IsStatic>> queryStatics
         ) =>
         {
             var total = world.EntityCount;
+            var countTiles = queryTiles.Count();
+            var countStatics = queryStatics.Count();
             foreach ((var node, var text) in query)
             {
-                text.Ref.Value = $"Total entities: {total}";
+                text.Ref.Value = $"Total entities: {total} - tiles: {countTiles} - statics: {countStatics}";
             }
+
+
         }, ThreadingMode.Single)
         .RunIf((SchedulerState state) => state.InState(GameState.GameScreen))
         .RunIf((Time time, Local<float> lastAccess) =>

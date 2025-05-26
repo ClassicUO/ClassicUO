@@ -71,10 +71,10 @@ internal readonly struct TerrainPlugin : IPlugin
 
     private static int GetCameraOffset(Camera camera)
     {
+        const float TILE_SIZE = 60f;
         var cameraBounds = camera.Bounds;
-        var maxSize = Math.Max(cameraBounds.Width, cameraBounds.Height);
-        maxSize /= 60;
-        return (int)(maxSize * camera.Zoom);
+        return Math.Max((int)((cameraBounds.Width / TILE_SIZE + 1) * camera.Zoom),
+                (int)((cameraBounds.Height / TILE_SIZE + 1) * camera.Zoom));
     }
 
     private static void CheckChunk(
@@ -89,8 +89,8 @@ internal readonly struct TerrainPlugin : IPlugin
         (_, var pos) = playerQuery.Get();
 
         var offset = GetCameraOffset(camera.Value);
-        var startTileX = Math.Max(0, pos.Ref.X - offset) / 8;
-        var startTileY = Math.Max(0, pos.Ref.Y - offset) / 8;
+        var startTileX = Math.Max(0, (pos.Ref.X - offset) / 8);
+        var startTileY = Math.Max(0, (pos.Ref.Y - offset) / 8);
         var endTileX = Math.Min(fileManager.Value.Maps.MapsDefaultSize[gameCtx.Value.Map, 0], pos.Ref.X + offset) / 8;
         var endTileY = Math.Min(fileManager.Value.Maps.MapsDefaultSize[gameCtx.Value.Map, 1], pos.Ref.Y + offset) / 8;
 
@@ -143,16 +143,16 @@ internal readonly struct TerrainPlugin : IPlugin
         lastPos.Value.LastCameraZoom = camera.Value.Zoom;
 
         var offset = GetCameraOffset(camera.Value);
-        var startTileX = Math.Max(0, pos.Ref.X - offset);
-        var startTileY = Math.Max(0, pos.Ref.Y - offset);
+        var startTileX = Math.Max(0, (pos.Ref.X - offset) / 8);
+        var startTileY = Math.Max(0, (pos.Ref.Y - offset) / 8);
         var endTileX = Math.Min(fileManager.Value.Maps.MapsDefaultSize[gameCtx.Value.Map, 0], pos.Ref.X + offset);
         var endTileY = Math.Min(fileManager.Value.Maps.MapsDefaultSize[gameCtx.Value.Map, 1], pos.Ref.Y + offset);
 
         chunkRequests.Enqueue(new()
         {
             Map = gameCtx.Value.Map,
-            RangeStartX = startTileX / 8,
-            RangeStartY = startTileY / 8,
+            RangeStartX = startTileX,
+            RangeStartY = startTileY,
             RangeEndX = endTileX / 8,
             RangeEndY = endTileY / 8,
         });
@@ -178,7 +178,7 @@ internal readonly struct TerrainPlugin : IPlugin
                 {
                     ref var im = ref fileManager.Value.Maps.GetIndex(chunkEv.Map, chunkX, chunkY);
 
-                    if (im.MapAddress == 0)
+                    if (!im.IsValid())
                         continue;
 
                     var key = CreateChunkKey(chunkX, chunkY);
@@ -256,7 +256,7 @@ internal readonly struct TerrainPlugin : IPlugin
                         }
                     }
 
-                    if (im.StaticAddress != 0)
+                    if (im.StaticAddress != 0 && im.StaticCount > 0)
                     {
                         staticsBlockBuffer.Value ??= new StaticsBlock[im.StaticCount];
                         if (staticsBlockBuffer.Value.Length < im.StaticCount)

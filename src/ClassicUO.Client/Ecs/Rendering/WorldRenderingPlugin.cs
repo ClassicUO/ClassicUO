@@ -1,3 +1,4 @@
+using System;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
@@ -7,6 +8,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Runtime.CompilerServices;
+using ClassicUO.Utility;
 using TinyEcs;
 using World = TinyEcs.World;
 
@@ -121,7 +123,7 @@ readonly struct WorldRenderingPlugin : IPlugin
                 if (pos.Ref.X == playerX && pos.Ref.Y == playerY)
                 {
                     var tileZ = pos.Ref.Z;
-                    if (!Unsafe.IsNullRef(ref stretched.Ref))
+                    if (stretched.IsValid())
                     {
                         tileZ = stretched.Ref.AvgZ;
                     }
@@ -234,24 +236,44 @@ readonly struct WorldRenderingPlugin : IPlugin
         batch.Value.SetStencil(DepthStencilState.Default);
 
         var mousePos = camera.Value.MouseToWorldPosition2();
-        // var mousePos = camera.Value.ScreenToWorld(mouseContext.Value.Position);
         selectedEntity.Value.Clear();
+
+        var cameraBounds = camera.Value.Bounds;
+
+        var drawOffset = (int)(44 / camera.Value.Zoom);
+        cameraBounds.Location = camera.Value.ScreenToWorld(new Point(-drawOffset, -drawOffset));
+        var s = camera.Value.ScreenToWorld(new Point(cameraBounds.Width + drawOffset, cameraBounds.Height + drawOffset));
+        cameraBounds.Width = s.X;
+        cameraBounds.Height = s.Y;
 
         foreach ((var entity, var worldPos, var graphic, var stretched) in queryTiles)
         {
             if (localZInfo.Value.maxZGround.HasValue && worldPos.Ref.Z > localZInfo.Value.maxZGround)
                 continue;
 
-            var isStretched = !Unsafe.IsNullRef(ref stretched.Ref);
+            var position = Isometric.IsoToScreen(worldPos.Ref.X, worldPos.Ref.Y, worldPos.Ref.Z);
+            position -= center;
 
-            if (isStretched)
+            if (position.X < cameraBounds.X || position.X > cameraBounds.Width)
+                continue;
+
+            if (position.Y > cameraBounds.Height)
+                continue;
+
+            if (!CanBeDrawn(gameCtx.Value.ClientVersion, fileManager.Value.TileData, graphic.Ref.Value))
+                continue;
+
+            if (stretched.IsValid())
             {
+                position.Y += worldPos.Ref.Z << 2;
+
+                if (position.Y - (stretched.Ref.MinZ << 2) < cameraBounds.Y)
+                    continue;
+
                 ref readonly var textmapInfo = ref assetsServer.Value.Texmaps.GetTexmap(fileManager.Value.TileData.LandData[graphic.Ref.Value].TexID);
                 if (textmapInfo.Texture == null)
                     continue;
 
-                var position = Isometric.IsoToScreen(worldPos.Ref.X, worldPos.Ref.Y, worldPos.Ref.Z);
-                position.Y += worldPos.Ref.Z << 2;
                 var depthZ = Isometric.GetDepthZ(worldPos.Ref.X, worldPos.Ref.Y, stretched.Ref.AvgZ - 2);
                 var color = new Vector3(0, Renderer.ShaderHueTranslator.SHADER_LAND, 1f);
 
@@ -266,11 +288,11 @@ readonly struct WorldRenderingPlugin : IPlugin
                     depthZ,
                     in stretched.Ref.Offset,
                     mousePos,
-                    position - center);
+                    position);
 
                 batch.Value.DrawStretchedLand(
                     textmapInfo.Texture,
-                    position - center,
+                    position,
                     textmapInfo.UV,
                     ref stretched.Ref.Offset,
                     ref stretched.Ref.NormalTop,
@@ -283,11 +305,13 @@ readonly struct WorldRenderingPlugin : IPlugin
             }
             else
             {
+                if (position.Y < cameraBounds.Y)
+                    continue;
+
                 ref readonly var artInfo = ref assetsServer.Value.Arts.GetLand(graphic.Ref.Value);
                 if (artInfo.Texture == null)
                     continue;
 
-                var position = Isometric.IsoToScreen(worldPos.Ref.X, worldPos.Ref.Y, worldPos.Ref.Z);
                 var depthZ = Isometric.GetDepthZ(worldPos.Ref.X, worldPos.Ref.Y, worldPos.Ref.Z - 2);
                 var color = Vector3.UnitZ;
 
@@ -297,11 +321,11 @@ readonly struct WorldRenderingPlugin : IPlugin
                     color.Y = ShaderHueTranslator.SHADER_HUED;
                 }
 
-                selectedEntity.Value.IsPointInLand(entity.Ref, depthZ, mousePos, position - center);
+                selectedEntity.Value.IsPointInLand(entity.Ref, depthZ, mousePos, position);
 
                 batch.Value.Draw(
                     artInfo.Texture,
-                    position - center,
+                    position,
                     artInfo.UV,
                     color,
                     rotation: 0f,
@@ -316,41 +340,63 @@ readonly struct WorldRenderingPlugin : IPlugin
 
         foreach ((var entity, var worldPos, var graphic, var hue) in queryStatics)
         {
-            if (maxZ.HasValue && worldPos.Ref.Z >= maxZ)
+            ref readonly var tileData = ref fileManager.Value.TileData.StaticData[graphic.Ref.Value];
+
+            if (tileData.IsRoof && !localZInfo.Value.drawRoof)
                 continue;
 
-            if (fileManager.Value.TileData.StaticData[graphic.Ref.Value].IsRoof && !localZInfo.Value.drawRoof)
+            if (tileData.IsInternal)
+                continue;
+
+            var priorityZ = worldPos.Ref.Z;
+
+            if (tileData.IsBackground)
+            {
+                priorityZ -= 1;
+            }
+
+            if (tileData.Height != 0)
+            {
+                priorityZ += 1;
+            }
+
+            if (tileData.IsWall)
+            {
+                priorityZ += 2;
+            }
+
+            if (tileData.IsMultiMovable)
+            {
+                priorityZ += 1;
+            }
+
+            var maxObjectZ = (int)priorityZ;
+            var height = CalculateObjectHeight(ref maxObjectZ, in tileData);
+
+            if (maxZ.HasValue && maxObjectZ > maxZ)
+            {
+                continue;
+            }
+
+            var position = Isometric.IsoToScreen(worldPos.Ref.X, worldPos.Ref.Y, worldPos.Ref.Z);
+            position -= center;
+
+            if (position.X < cameraBounds.X || position.X > cameraBounds.Width)
+                continue;
+
+            if (position.Y < cameraBounds.Y || position.Y > cameraBounds.Height)
+                continue;
+
+            if (!CanBeDrawn(gameCtx.Value.ClientVersion, fileManager.Value.TileData, graphic.Ref.Value))
                 continue;
 
             ref readonly var artInfo = ref assetsServer.Value.Arts.GetArt(graphic.Ref.Value);
             if (artInfo.Texture == null)
                 continue;
 
-            var priorityZ = worldPos.Ref.Z;
-
-            if (fileManager.Value.TileData.StaticData[graphic.Ref.Value].IsBackground)
-            {
-                priorityZ -= 1;
-            }
-
-            if (fileManager.Value.TileData.StaticData[graphic.Ref.Value].Height != 0)
-            {
-                priorityZ += 1;
-            }
-
-            if (fileManager.Value.TileData.StaticData[graphic.Ref.Value].IsWall)
-            {
-                priorityZ += 2;
-            }
-
-            if (fileManager.Value.TileData.StaticData[graphic.Ref.Value].IsMultiMovable)
-            {
-                priorityZ += 1;
-            }
-
-            var position = Isometric.IsoToScreen(worldPos.Ref.X, worldPos.Ref.Y, worldPos.Ref.Z);
             position.X -= (short)((artInfo.UV.Width >> 1) - 22);
             position.Y -= (short)(artInfo.UV.Height - 44);
+
             var depthZ = Isometric.GetDepthZ(worldPos.Ref.X, worldPos.Ref.Y, priorityZ);
             var color = Renderer.ShaderHueTranslator.GetHueVector(hue.Ref.Value, fileManager.Value.TileData.StaticData[graphic.Ref.Value].IsPartialHue, 1f);
 
@@ -361,13 +407,13 @@ readonly struct WorldRenderingPlugin : IPlugin
                 color.Z = 1f;
             }
 
-            var p = mousePos - (position - center);
+            var p = mousePos - position;
             if (assetsServer.Value.Arts.PixelCheck(graphic.Ref.Value, (int)p.X, (int)p.Y))
                 selectedEntity.Value.Set(entity.Ref, depthZ);
 
             batch.Value.Draw(
                 artInfo.Texture,
-                position - center,
+                position,
                 artInfo.UV,
                 color,
                 rotation: 0f,
@@ -396,6 +442,8 @@ readonly struct WorldRenderingPlugin : IPlugin
             var uoHue = hue.Ref.Value;
             var priorityZ = pos.Ref.Z;
             var position = Isometric.IsoToScreen(pos.Ref.X, pos.Ref.Y, pos.Ref.Z);
+            position -= center;
+
             Texture2D texture;
             Rectangle? uv;
             var mirror = false;
@@ -435,16 +483,16 @@ readonly struct WorldRenderingPlugin : IPlugin
             //}
 
             priorityZ += 2;
-            var dir = Unsafe.IsNullRef(ref direction.Ref) ? Direction.North : direction.Ref.Value;
+            var dir = direction.IsValid() ? direction.Ref.Value : Direction.North;
             (dir, mirror) = FixDirection(dir);
 
             byte animAction = 0;
             var animIndex = 0;
-            if (!Unsafe.IsNullRef(ref animation.Ref))
+            if (animation.IsValid())
             {
                 animAction = animation.Ref.Action;
                 animIndex = animation.Ref.Index;
-                if (!Unsafe.IsNullRef(ref direction.Ref))
+                if (direction.IsValid())
                     animation.Ref.Direction = (direction.Ref.Value & (~Direction.Running | Direction.Mask));
             }
 
@@ -508,8 +556,8 @@ readonly struct WorldRenderingPlugin : IPlugin
                 (byte)dir,
                 isUop,
                 animIndex,
-                mirror ? (int)((position.X - center.X) + uv.Value.Width - mousePos.X) : (int)(mousePos.X - (position.X - center.X)),
-                (int)(mousePos.Y - (position.Y - center.Y))
+                mirror ? (int)(position.X + uv.Value.Width - mousePos.X) : (int)(mousePos.X - position.X),
+                (int)(mousePos.Y - position.Y)
             ))
             {
                 selectedEntity.Value.Set(entity.Ref, depthZ);
@@ -543,7 +591,7 @@ readonly struct WorldRenderingPlugin : IPlugin
             batch.Value.Draw
             (
                 texture,
-                position - center,
+                position,
                 uv,
                 color,
                 0f,
@@ -610,80 +658,83 @@ readonly struct WorldRenderingPlugin : IPlugin
 
             (var dir, var mirror) = FixDirection(animation.Ref.Direction);
 
-            if (!Unsafe.IsNullRef(ref animation.Ref))
+            if (!animation.IsValid())
             {
-                for (int j = -1; j < Constants.USED_LAYER_COUNT; j++)
+                continue;
+            }
+
+            for (int j = -1; j < Constants.USED_LAYER_COUNT; j++)
+            {
+                var layer = j == -1 ? Layer.Mount : LayerOrder.UsedLayers[(int)animation.Ref.Direction & 0x7, j];
+                var layerEnt = slots.Ref[layer];
+                if (!layerEnt.IsValid())
+                    continue;
+
+                if (!world.Exists(layerEnt))
                 {
-                    var layer = j == -1 ? Layer.Mount : LayerOrder.UsedLayers[(int)animation.Ref.Direction & 0x7, j];
-                    var layerEnt = slots.Ref[layer];
-                    if (!layerEnt.IsValid())
-                        continue;
+                    slots.Ref[layer] = 0;
+                    continue;
+                }
 
-                    if (!world.Exists(layerEnt))
-                    {
-                        slots.Ref[layer] = 0;
-                        continue;
-                    }
+                byte animAction = animation.Ref.Action;
+                var graphicLayer = world.Get<Graphic>(layerEnt).Value;
+                var hueLayer = world.Get<Hue>(layerEnt).Value;
+                var animId = graphicLayer;
+                var offsetY = 0;
+                if (layer == Layer.Mount)
+                {
+                    (animId, offsetY) = Mounts.FixMountGraphic(fileManager.Value.TileData, animId);
+                    animAction = animation.Ref.MountAction;
+                }
+                else if (!IsItemCovered2(world, ref slots.Ref, layer))
+                {
+                    if (fileManager.Value.TileData.StaticData[graphicLayer].AnimID != 0)
+                        animId = fileManager.Value.TileData.StaticData[graphicLayer].AnimID;
+                }
+                else
+                {
+                    continue;
+                }
 
-                    byte animAction = animation.Ref.Action;
-                    var graphicLayer = world.Get<Graphic>(layerEnt).Value;
-                    var hueLayer = world.Get<Hue>(layerEnt).Value;
-                    var animId = graphicLayer;
-                    var offsetY = 0;
-                    if (layer == Layer.Mount)
-                    {
-                        (animId, offsetY) = Mounts.FixMountGraphic(fileManager.Value.TileData, animId);
-                        animAction = animation.Ref.MountAction;
-                    }
-                    else if (!IsItemCovered2(world, ref slots.Ref, layer))
-                    {
-                        if (fileManager.Value.TileData.StaticData[graphicLayer].AnimID != 0)
-                            animId = fileManager.Value.TileData.StaticData[graphicLayer].AnimID;
-                    }
-                    else
-                    {
-                        continue;
-                    }
+                var frames = assetsServer.Value.Animations.GetAnimationFrames
+                (
+                    animId,
+                    animAction,
+                    (byte)dir,
+                    out var baseHue,
+                    out var isUop
+                );
 
-                    var frames = assetsServer.Value.Animations.GetAnimationFrames
-                    (
-                        animId,
-                        animAction,
-                        (byte)dir,
-                        out var baseHue,
-                        out var isUop
-                    );
+                ref readonly var frame = ref frames.IsEmpty ?
+                    ref SpriteInfo.Empty
+                    :
+                    ref frames[animation.Ref.Index % frames.Length];
 
-                    ref readonly var frame = ref frames.IsEmpty ?
-                        ref SpriteInfo.Empty
-                        :
-                        ref frames[animation.Ref.Index % frames.Length];
+                if (frame.Texture == null)
+                    continue;
 
-                    if (frame.Texture == null)
-                        continue;
+                var position = Isometric.IsoToScreen(pos.Ref.X, pos.Ref.Y, pos.Ref.Z);
+                position.Y -= offsetY;
+                position.X += 22;
+                position.Y += 22;
+                if (mirror)
+                    position.X -= frame.UV.Width - frame.Center.X;
+                else
+                    position.X -= frame.Center.X;
+                position.Y -= frame.UV.Height + frame.Center.Y;
 
-                    var position = Isometric.IsoToScreen(pos.Ref.X, pos.Ref.Y, pos.Ref.Z);
-                    position.Y -= offsetY;
-                    position.X += 22;
-                    position.Y += 22;
-                    if (mirror)
-                        position.X -= frame.UV.Width - frame.Center.X;
-                    else
-                        position.X -= frame.Center.X;
-                    position.Y -= frame.UV.Height + frame.Center.Y;
-
-                    var color = ShaderHueTranslator.GetHueVector(FixHue(hueLayer != 0 ? hueLayer : baseHue));
-                    position += offset.Ref.Value;
+                var color = ShaderHueTranslator.GetHueVector(FixHue(hueLayer != 0 ? hueLayer : baseHue));
+                position += offset.Ref.Value;
 
 
-                    if (entity.Ref == selectedEntity.Value.Entity)
-                    {
-                        color.X = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE - 1;
-                        color.Y = ShaderHueTranslator.SHADER_HUED;
-                        color.Z = 1f;
-                    }
+                if (entity.Ref == selectedEntity.Value.Entity)
+                {
+                    color.X = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE - 1;
+                    color.Y = ShaderHueTranslator.SHADER_HUED;
+                    color.Z = 1f;
+                }
 
-                    if (assetsServer.Value.Animations.PixelCheck(
+                if (assetsServer.Value.Animations.PixelCheck(
                         animId,
                         animAction,
                         (byte)dir,
@@ -692,23 +743,22 @@ readonly struct WorldRenderingPlugin : IPlugin
                         mirror ? (int)((position.X - center.X) + frame.UV.Width - mousePos.X) : (int)(mousePos.X - (position.X - center.X)),
                         (int)(mousePos.Y - (position.Y - center.Y))
                     ))
-                    {
-                        selectedEntity.Value.Set(entity.Ref, depthZ);
-                    }
-
-                    batch.Value.Draw
-                    (
-                        frame.Texture,
-                        position - center,
-                        frame.UV,
-                        color,
-                        0f,
-                        Vector2.Zero,
-                        1f,
-                        mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
-                        depthZ + (j == -1 ? -0.01f : 0f) // hack to bring the mount back to the body
-                    );
+                {
+                    selectedEntity.Value.Set(entity.Ref, depthZ);
                 }
+
+                batch.Value.Draw
+                (
+                    frame.Texture,
+                    position - center,
+                    frame.UV,
+                    color,
+                    0f,
+                    Vector2.Zero,
+                    1f,
+                    mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
+                    depthZ + (j == -1 ? -0.01f : 0f) // hack to bring the mount back to the body
+                );
             }
         }
 
@@ -741,7 +791,96 @@ readonly struct WorldRenderingPlugin : IPlugin
         return fixedColor;
     }
 
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    static byte CalculateObjectHeight(ref int maxObjectZ, ref readonly StaticTiles itemData)
+    {
+        if (
+            itemData.Height != 0xFF /*&& itemData.Flags != 0*/
+        )
+        {
+            byte height = itemData.Height;
+
+            if (itemData.Height == 0)
+            {
+                if (!itemData.IsBackground && !itemData.IsSurface)
+                {
+                    height = 10;
+                }
+            }
+
+            if ((itemData.Flags & TileFlag.Bridge) != 0)
+            {
+                height /= 2;
+            }
+
+            maxObjectZ += height;
+
+            return height;
+        }
+
+        return 0xFF;
+    }
+
+    static bool CanBeDrawn(ClientVersion version, TileDataLoader tileData, ushort g)
+    {
+        switch (g)
+        {
+            case 0x0001:
+            case 0x21BC:
+            case 0xA1FE:
+            case 0xA1FF:
+            case 0xA200:
+            case 0xA201:
+                //case 0x5690:
+                return false;
+
+            case 0x9E4C:
+            case 0x9E64:
+            case 0x9E65:
+            case 0x9E7D:
+                ref var data = ref tileData.StaticData[g];
+
+                return !data.IsBackground && !data.IsSurface;
+        }
+
+        if (g != 0x63D3)
+        {
+            if (g >= 0x2198 && g <= 0x21A4)
+            {
+                return false;
+            }
+
+            // Easel fix.
+            // In older clients the tiledata flag for this
+            // item contains NoDiagonal for some reason.
+            // So the next check will make the item invisible.
+            if (g == 0x0F65 && version < ClientVersion.CV_60144)
+            {
+                return true;
+            }
+
+            if (g < tileData.StaticData.Length)
+            {
+                ref var data = ref tileData.StaticData[g];
+
+                // Hacky way to do not render "nodraw"
+                if (!string.IsNullOrEmpty(data.Name) && data.Name.StartsWith("nodraw", StringComparison.OrdinalIgnoreCase))
+                    return false;
+
+                if (
+                    !data.IsNoDiagonal
+                    || data.IsAnimated
+                        // && world.Player != null
+                        // && world.Player.Race == RaceType.GARGOYLE
+                )
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     static (Direction, bool) FixDirection(Direction dir)
     {
         dir &= ~Direction.Running;

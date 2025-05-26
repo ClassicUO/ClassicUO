@@ -730,7 +730,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 // .Set(new WorldPosition() { X = x, Y = y, Z = z })
                 //.Set(new Facing() { Value = (Direction)direction });
 
-                if (type == 2)
+                if (type == 2 && !ent.Has<IsMulti>())
                 {
                     ent.Add<IsMulti>();
 
@@ -2187,34 +2187,37 @@ readonly struct InGamePacketsPlugin : IPlugin
                     return;
                 }
 
-                ent.Add<IsMulti>();
-
-                var multiInfo = multiCache.Value.GetMulti((ushort)(graphic + graphicInc));
-                foreach (ref readonly var block in CollectionsMarshal.AsSpan(multiInfo.Blocks))
+                if (!ent.Has<IsMulti>())
                 {
-                    if (!block.IsVisible)
-                        continue;
+                    ent.Add<IsMulti>();
 
-                    var b = world.Entity()
-                        .Set
-                        (
-                            new Graphic()
-                            {
-                                Value = block.ID
-                            }
-                        )
-                        .Set(new Hue()).Set
-                        (
-                            new WorldPosition()
-                            {
-                                X = (ushort)(x + block.X),
-                                Y = (ushort)(y + block.Y),
-                                Z = (sbyte)(z + block.Z)
-                            }
-                        )
-                        .Add<IsMulti>();
+                    var multiInfo = multiCache.Value.GetMulti((ushort)(graphic + graphicInc));
+                    foreach (ref readonly var block in CollectionsMarshal.AsSpan(multiInfo.Blocks))
+                    {
+                        if (!block.IsVisible)
+                            continue;
 
-                    ent.AddChild(b);
+                        var b = world.Entity()
+                            .Set
+                            (
+                                new Graphic()
+                                {
+                                    Value = block.ID
+                                }
+                            )
+                            .Set(new Hue()).Set
+                            (
+                                new WorldPosition()
+                                {
+                                    X = (ushort)(x + block.X),
+                                    Y = (ushort)(y + block.Y),
+                                    Z = (sbyte)(z + block.Z)
+                                }
+                            )
+                            .Add<IsMulti>();
+
+                        ent.AddChild(b);
+                    }
                 }
             };
 
