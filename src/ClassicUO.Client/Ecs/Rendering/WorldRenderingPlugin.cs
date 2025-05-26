@@ -82,6 +82,20 @@ readonly struct WorldRenderingPlugin : IPlugin
     }
 
 
+    private struct MaxZInfo
+    {
+        public int? MaxZ;
+        public int? MaxZGround;
+        public int? MaxZRoof;
+        public bool DrawRoof;
+        public bool IsSameTile;
+        public bool IsTileAhead;
+        public bool IsUnderStatic;
+
+        public bool IsUnderRoof => IsSameTile && IsTileAhead;
+    }
+
+
     void Rendering
     (
         TinyEcs.World world,
@@ -92,7 +106,9 @@ readonly struct WorldRenderingPlugin : IPlugin
         Res<UOFileManager> fileManager,
         Res<Camera> camera,
         Local<(int lastPosX, int lastPosY, int lastPosZ)?> lastPos,
-        Local<(int? maxZ, int? maxZGround, int? maxZRoof, bool drawRoof)> localZInfo,
+        Local<MaxZInfo> workinZInfo,
+        Local<MaxZInfo> backupZInfo,
+        Local<int> calculateZ,
         Query<Data<WorldPosition>, With<Player>> queryPlayer,
         Query<Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> queryTiles,
         Query<Data<WorldPosition, Graphic, Hue>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>>> queryStatics,
@@ -106,115 +122,67 @@ readonly struct WorldRenderingPlugin : IPlugin
         (var playerX, var playerY, var playerZ) = playerPos.Ref;
 
         int? maxZ = null;
+        var playerZ16 = playerZ + 16;
+        var playerZ14 = playerZ + 14;
+
+
+        if (calculateZ.Value >= 2)
+        {
+            calculateZ.Value = 0;
+        }
+
         if (!lastPos.Value.HasValue ||
             lastPos.Value.Value.lastPosX != playerX ||
             lastPos.Value.Value.lastPosY != playerY ||
             lastPos.Value.Value.lastPosZ != playerZ)
         {
-            localZInfo.Value.maxZ = null;
-            localZInfo.Value.maxZGround = null;
-            localZInfo.Value.maxZRoof = null;
-            localZInfo.Value.drawRoof = true;
-            var playerZ16 = playerZ + 16;
-            var playerZ14 = playerZ + 14;
-
-            foreach ((var pos, var _, var stretched) in queryTiles)
+            if (calculateZ == 0)
             {
-                if (pos.Ref.X == playerX && pos.Ref.Y == playerY)
-                {
-                    var tileZ = pos.Ref.Z;
-                    if (stretched.IsValid())
-                    {
-                        tileZ = stretched.Ref.AvgZ;
-                    }
-
-                    if (tileZ > playerZ16)
-                    {
-                        localZInfo.Value.maxZGround = playerZ16;
-                    }
-                }
+                workinZInfo.Value.MaxZ = null;
+                workinZInfo.Value.MaxZGround = null;
+                workinZInfo.Value.MaxZRoof = null;
+                workinZInfo.Value.DrawRoof = true;
+                workinZInfo.Value.IsSameTile = false;
+                workinZInfo.Value.IsTileAhead = false;
+                workinZInfo.Value.IsUnderStatic = false;
+            }
+            else if (calculateZ.Value > 0)
+            {
+                backupZInfo.Value = workinZInfo.Value;
+                lastPos.Value = (playerX, playerY, playerZ);
             }
 
-            var isUnderStatic = false;
-            (var isSameTile, var isTileAhead) = (false, false);
+            calculateZ.Value++;
+        }
 
-            foreach ((var pos, var graphic, var _) in queryStatics)
-            {
-                var tileDataFlags = fileManager.Value.TileData.StaticData[graphic.Ref.Value].Flags;
-
-                if (pos.Ref.Z > playerZ14)
-                {
-                    if (((ulong)tileDataFlags & 0x204) == 0 && tileDataFlags.HasFlag(TileFlag.Roof))
-                    {
-                        if (pos.Ref.X == playerX && pos.Ref.Y == playerY)
-                            isSameTile = true;
-                        else if (pos.Ref.X == playerX + 1 && pos.Ref.Y == playerY + 1)
-                            isTileAhead = true;
-                    }
-
-                    var max = localZInfo.Value.maxZRoof ?? 127;
-
-                    if (max > pos.Ref.Z)
-                    {
-                        if (((ulong)tileDataFlags & 0x204) == 0 && tileDataFlags.HasFlag(TileFlag.Roof))
-                        {
-                            localZInfo.Value.maxZRoof = pos.Ref.Z;
-                            localZInfo.Value.drawRoof = false;
-                        }
-                    }
-                }
-
-                if (pos.Ref.X == playerX && pos.Ref.Y == playerY)
-                {
-                    if (pos.Ref.Z > playerZ14)
-                    {
-                        var max = localZInfo.Value.maxZ ?? 127;
-
-                        if (max > pos.Ref.Z)
-                        {
-                            if (((ulong)tileDataFlags & 0x20004) == 0 && (!tileDataFlags.HasFlag(TileFlag.Roof) || tileDataFlags.HasFlag(TileFlag.Surface)))
-                            {
-                                isUnderStatic = true;
-                                localZInfo.Value.maxZ = pos.Ref.Z;
-                                localZInfo.Value.drawRoof = false;
-                            }
-                        }
-                    }
-                }
-            }
-
-
-            var isUnderRoof = isSameTile && isTileAhead;
-
-            if (isUnderStatic && isUnderRoof)
-            {
-                if (localZInfo.Value.maxZRoof < localZInfo.Value.maxZ)
-                    maxZ = localZInfo.Value.maxZRoof;
-                else
-                    maxZ = localZInfo.Value.maxZ;
-            }
-            else if (isUnderStatic)
-            {
-                maxZ = localZInfo.Value.maxZ;
-            }
-            else if (isUnderRoof)
-            {
-                maxZ = localZInfo.Value.maxZRoof;
-            }
+        if (backupZInfo.Value.IsUnderStatic && backupZInfo.Value.IsUnderRoof)
+        {
+            if (backupZInfo.Value.MaxZRoof < backupZInfo.Value.MaxZ)
+                maxZ = backupZInfo.Value.MaxZRoof;
             else
-            {
-                localZInfo.Value.drawRoof = true;
-            }
+                maxZ = backupZInfo.Value.MaxZ;
+        }
+        else if (backupZInfo.Value.IsUnderStatic)
+        {
+            maxZ = backupZInfo.Value.MaxZ;
+        }
+        else if (backupZInfo.Value.IsUnderRoof)
+        {
+            maxZ = backupZInfo.Value.MaxZRoof;
+        }
+        else
+        {
+            backupZInfo.Value.DrawRoof = true;
+        }
 
-            if (localZInfo.Value.maxZGround.HasValue && localZInfo.Value.maxZGround < maxZ)
-            {
-                maxZ = localZInfo.Value.maxZGround.Value;
-            }
+        if (backupZInfo.Value.MaxZGround.HasValue && backupZInfo.Value.MaxZGround < maxZ)
+        {
+            maxZ = backupZInfo.Value.MaxZGround.Value;
+        }
 
-            if (maxZ.HasValue && maxZ < playerZ16)
-            {
-                maxZ = playerZ16;
-            }
+        if (maxZ.HasValue && maxZ < playerZ16)
+        {
+            maxZ = playerZ16;
         }
 
         var center = Isometric.IsoToScreen(gameCtx.Value.CenterX, gameCtx.Value.CenterY, gameCtx.Value.CenterZ);
@@ -248,7 +216,7 @@ readonly struct WorldRenderingPlugin : IPlugin
 
         foreach ((var entity, var worldPos, var graphic, var stretched) in queryTiles)
         {
-            if (localZInfo.Value.maxZGround.HasValue && worldPos.Ref.Z > localZInfo.Value.maxZGround)
+            if (backupZInfo.Value.MaxZGround.HasValue && worldPos.Ref.Z > backupZInfo.Value.MaxZGround)
                 continue;
 
             var position = Isometric.IsoToScreen(worldPos.Ref.X, worldPos.Ref.Y, worldPos.Ref.Z);
@@ -262,6 +230,17 @@ readonly struct WorldRenderingPlugin : IPlugin
 
             if (!CanBeDrawn(gameCtx.Value.ClientVersion, fileManager.Value.TileData, graphic.Ref.Value))
                 continue;
+
+            if (calculateZ == 1)
+            {
+                if (worldPos.Ref.X == playerX && worldPos.Ref.Y == playerY)
+                {
+                    if ((stretched.IsValid() ? stretched.Ref.AvgZ : worldPos.Ref.Z) > playerZ16)
+                    {
+                        workinZInfo.Value.MaxZGround = playerZ16;
+                    }
+                }
+            }
 
             if (stretched.IsValid())
             {
@@ -342,7 +321,7 @@ readonly struct WorldRenderingPlugin : IPlugin
         {
             ref readonly var tileData = ref fileManager.Value.TileData.StaticData[graphic.Ref.Value];
 
-            if (tileData.IsRoof && !localZInfo.Value.drawRoof)
+            if (tileData.IsRoof && !backupZInfo.Value.DrawRoof)
                 continue;
 
             if (tileData.IsInternal)
@@ -393,6 +372,51 @@ readonly struct WorldRenderingPlugin : IPlugin
             ref readonly var artInfo = ref assetsServer.Value.Arts.GetArt(graphic.Ref.Value);
             if (artInfo.Texture == null)
                 continue;
+
+            if (calculateZ == 1)
+            {
+                var tileDataFlags = tileData.Flags;
+
+                if (worldPos.Ref.Z > playerZ14)
+                {
+                    if (((ulong)tileDataFlags & 0x204) == 0 && tileDataFlags.HasFlag(TileFlag.Roof))
+                    {
+                        if (worldPos.Ref.X == playerX && worldPos.Ref.Y == playerY)
+                            workinZInfo.Value.IsSameTile = true;
+                        else if (worldPos.Ref.X == playerX + 1 && worldPos.Ref.Y == playerY + 1)
+                            workinZInfo.Value.IsTileAhead = true;
+                    }
+
+                    var max = workinZInfo.Value.MaxZRoof ?? 127;
+
+                    if (max > worldPos.Ref.Z)
+                    {
+                        if (((ulong)tileDataFlags & 0x204) == 0 && tileDataFlags.HasFlag(TileFlag.Roof))
+                        {
+                            workinZInfo.Value.MaxZRoof = worldPos.Ref.Z;
+                            workinZInfo.Value.DrawRoof = false;
+                        }
+                    }
+                }
+
+                if (worldPos.Ref.X == playerX && worldPos.Ref.Y == playerY)
+                {
+                    if (worldPos.Ref.Z > playerZ14)
+                    {
+                        var max = workinZInfo.Value.MaxZ ?? 127;
+
+                        if (max > worldPos.Ref.Z)
+                        {
+                            if (((ulong)tileDataFlags & 0x20004) == 0 && (!tileDataFlags.HasFlag(TileFlag.Roof) || tileDataFlags.HasFlag(TileFlag.Surface)))
+                            {
+                                workinZInfo.Value.IsUnderStatic = true;
+                                workinZInfo.Value.MaxZ = worldPos.Ref.Z;
+                                workinZInfo.Value.DrawRoof = false;
+                            }
+                        }
+                    }
+                }
+            }
 
             position.X -= (short)((artInfo.UV.Width >> 1) - 22);
             position.Y -= (short)(artInfo.UV.Height - 44);
