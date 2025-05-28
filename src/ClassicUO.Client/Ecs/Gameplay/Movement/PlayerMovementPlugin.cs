@@ -80,7 +80,6 @@ readonly struct PlayerMovementPlugin : IPlugin
             .RunIf((
                 Res<MouseContext> mouseCtx,
                 Res<PlayerStepsContext> playerRequestedSteps,
-                Res<Camera> camera,
                 Local<bool> autoWalk,
                 Time time,
                 Query<Data<WorldPosition, Facing, MobileSteps, MobAnimation>, With<Player>> playerQuery
@@ -224,6 +223,7 @@ readonly struct PlayerMovementPlugin : IPlugin
             requestedStep.Z = playerZ;
             requestedStep.Direction = playerDir;
 
+            Console.WriteLine("SEQUENCE: {0}", requestedStep.Sequence);
             network.Value.Send_WalkRequest(requestedStep.Direction, requestedStep.Sequence, run, 0);
 
             playerRequestedSteps.Value.Count = Math.Min(5, playerRequestedSteps.Value.Count + 1);
@@ -267,9 +267,18 @@ readonly struct PlayerMovementPlugin : IPlugin
 
             var isBadStep = stepIndex == playerRequestedSteps.Value.Count;
 
+            if (isBadStep)
+            {
+                if (response.Sequence < playerRequestedSteps.Value.Sequence)
+                {
+                    isBadStep = false;
+                }
+            }
+
             if (!isBadStep)
             {
-                Console.WriteLine("step accepted");
+                playerRequestedSteps.Value.ResyncSent = false;
+                Console.WriteLine("step accepted {0}", playerRequestedSteps.Value.Steps[stepIndex].Sequence);
                 for (var i = 1; i < playerRequestedSteps.Value.Count; i++)
                 {
                     playerRequestedSteps.Value.Steps[i - 1] = playerRequestedSteps.Value.Steps[i];

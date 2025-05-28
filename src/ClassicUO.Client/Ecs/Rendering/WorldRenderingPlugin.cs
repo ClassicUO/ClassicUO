@@ -14,7 +14,7 @@ using World = TinyEcs.World;
 
 namespace ClassicUO.Ecs;
 
-readonly struct WorldRenderingPlugin : IPlugin
+internal readonly struct WorldRenderingPlugin : IPlugin
 {
     public void Build(Scheduler scheduler)
     {
@@ -92,11 +92,11 @@ readonly struct WorldRenderingPlugin : IPlugin
         public bool IsTileAhead;
         public bool IsUnderStatic;
 
-        public bool IsUnderRoof => IsSameTile && IsTileAhead;
+        public readonly bool IsUnderRoof => IsSameTile && IsTileAhead;
     }
 
 
-    void Rendering
+    private static void Rendering
     (
         TinyEcs.World world,
         Res<SelectedEntity> selectedEntity,
@@ -107,7 +107,7 @@ readonly struct WorldRenderingPlugin : IPlugin
         Res<Camera> camera,
         Local<(int lastPosX, int lastPosY, int lastPosZ)?> lastPos,
         Local<MaxZInfo> workingZInfo,
-        Query<Data<WorldPosition>, With<Player>> queryPlayer,
+        Single<Data<WorldPosition>, With<Player>> queryPlayer,
         Query<Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> queryTiles,
         Query<Data<WorldPosition, Graphic, Hue>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>>> queryStatics,
         Query<Data<WorldPosition, Graphic, Hue, NetworkSerial, ScreenPositionOffset, Facing, MobAnimation, MobileSteps>,
@@ -116,7 +116,7 @@ readonly struct WorldRenderingPlugin : IPlugin
             Filter<Without<ContainedInto>, Optional<MobileSteps>, Optional<MobAnimation>>> queryEquipmentSlots
     )
     {
-        (_, var playerPos) = queryPlayer.Single();
+        (_, var playerPos) = queryPlayer.Get();
         (var playerX, var playerY, var playerZ) = playerPos.Ref;
 
         int? maxZ = null;
@@ -144,10 +144,7 @@ readonly struct WorldRenderingPlugin : IPlugin
 
         if (backupZInfo.IsUnderStatic && backupZInfo.IsUnderRoof)
         {
-            if (backupZInfo.MaxZRoof < backupZInfo.MaxZ)
-                maxZ = backupZInfo.MaxZRoof;
-            else
-                maxZ = backupZInfo.MaxZ;
+            maxZ = backupZInfo.MaxZRoof < backupZInfo.MaxZ ? backupZInfo.MaxZRoof : backupZInfo.MaxZ;
         }
         else if (backupZInfo.IsUnderStatic)
         {
@@ -258,7 +255,8 @@ readonly struct WorldRenderingPlugin : IPlugin
                     depthZ,
                     in stretched.Ref.Offset,
                     mousePos,
-                    position);
+                    position
+                );
 
                 batch.Value.DrawStretchedLand(
                     textmapInfo.Texture,
@@ -788,7 +786,7 @@ readonly struct WorldRenderingPlugin : IPlugin
     }
 
 
-    static ushort FixHue(ushort hue)
+    private static ushort FixHue(ushort hue)
     {
         var fixedColor = (ushort)(hue & 0x3FFF);
 
@@ -809,7 +807,7 @@ readonly struct WorldRenderingPlugin : IPlugin
         return fixedColor;
     }
 
-    static byte CalculateObjectHeight(ref int maxObjectZ, ref readonly StaticTiles itemData)
+    private static byte CalculateObjectHeight(ref int maxObjectZ, ref readonly StaticTiles itemData)
     {
         if (
             itemData.Height != 0xFF /*&& itemData.Flags != 0*/
@@ -838,7 +836,7 @@ readonly struct WorldRenderingPlugin : IPlugin
         return 0xFF;
     }
 
-    static bool CanBeDrawn(ClientVersion version, TileDataLoader tileData, ushort g)
+    private static bool CanBeDrawn(ClientVersion version, TileDataLoader tileData, ushort g)
     {
         switch (g)
         {
@@ -899,7 +897,7 @@ readonly struct WorldRenderingPlugin : IPlugin
         return false;
     }
 
-    static (Direction, bool) FixDirection(Direction dir)
+    private static (Direction, bool) FixDirection(Direction dir)
     {
         dir &= ~Direction.Running;
         dir &= Direction.Mask;
@@ -942,7 +940,7 @@ readonly struct WorldRenderingPlugin : IPlugin
         return (dir, mirror);
     }
 
-    static bool IsItemCovered2(World world, ref EquipmentSlots slots, Layer layer)
+    private static bool IsItemCovered2(World world, ref EquipmentSlots slots, Layer layer)
     {
         switch (layer)
         {
