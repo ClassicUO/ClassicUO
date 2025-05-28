@@ -232,8 +232,7 @@ readonly struct PlayerMovementPlugin : IPlugin
             if (run)
                 requestedStep.Direction |= Direction.Running;
 
-            mobSteps.Ref.Index = Math.Min(MobileSteps.COUNT - 1, mobSteps.Ref.Index + 1);
-            ref var step = ref mobSteps.Ref[mobSteps.Ref.Index];
+            ref var step = ref mobSteps.Ref.NextStep();
             step.X = playerX;
             step.Y = playerY;
             step.Z = playerZ;

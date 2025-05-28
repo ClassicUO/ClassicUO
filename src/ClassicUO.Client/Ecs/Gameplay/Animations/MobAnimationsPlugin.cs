@@ -60,6 +60,13 @@ struct MobileSteps
 
     [UnscopedRef]
     public ref Game.GameObjects.Mobile.Step this[int index] => ref _steps[index];
+
+    [UnscopedRef]
+    public ref Game.GameObjects.Mobile.Step NextStep()
+    {
+        Index = Math.Min(COUNT - 1, Index + 1);
+        return ref _steps[Index];
+    }
 }
 
 struct MobileQueuedStep
@@ -162,6 +169,8 @@ readonly struct MobAnimationsPlugin : IPlugin
                 endDir = (Direction)step.Direction;
             }
 
+            endDir &= (Direction.Mask | ~Direction.Running);
+
             if (endX == queuedStep.X && endY == queuedStep.Y && endZ == queuedStep.Z && clearedDir == endDir)
             {
                 continue;
@@ -171,8 +180,13 @@ readonly struct MobAnimationsPlugin : IPlugin
             {
                 if (steps.Ref.Time <= time.Total - Constants.WALKING_DELAY)
                 {
-                    animation.Ref.Run = true;
-                    //anim.Time = 0;
+                    animation.Ref = new()
+                    {
+                        Time = time.Total
+                    };
+                    // animation.Ref.Action = 0xFF;
+                    // animation.Ref.Run = true;
+                    // animation.Ref.Time = time.Total;
                 }
                 steps.Ref.Time = time.Total;
             }
@@ -183,8 +197,7 @@ readonly struct MobAnimationsPlugin : IPlugin
             {
                 if (moveDir != endDir)
                 {
-                    steps.Ref.Index = Math.Min(MobileSteps.COUNT - 1, steps.Ref.Index + 1);
-                    ref var step1 = ref steps.Ref[steps.Ref.Index];
+                    ref var step1 = ref steps.Ref.NextStep();
                     step1.X = endX;
                     step1.Y = endY;
                     step1.Z = endZ;
@@ -192,8 +205,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                     step1.Run = queuedStep.Direction.HasFlag(Direction.Running);
                 }
 
-                steps.Ref.Index = Math.Min(MobileSteps.COUNT - 1, steps.Ref.Index + 1);
-                ref var step2 = ref steps.Ref[steps.Ref.Index];
+                ref var step2 = ref steps.Ref.NextStep();
                 step2.X = queuedStep.X;
                 step2.Y = queuedStep.Y;
                 step2.Z = queuedStep.Z;
@@ -203,8 +215,7 @@ readonly struct MobAnimationsPlugin : IPlugin
 
             if (moveDir != clearedDir)
             {
-                steps.Ref.Index = Math.Min(MobileSteps.COUNT - 1, steps.Ref.Index + 1);
-                ref var step3 = ref steps.Ref[steps.Ref.Index];
+                ref var step3 = ref steps.Ref.NextStep();
                 step3.X = queuedStep.X;
                 step3.Y = queuedStep.Y;
                 step3.Z = queuedStep.Z;
@@ -226,12 +237,20 @@ readonly struct MobAnimationsPlugin : IPlugin
             {
                 ref var step = ref steps.Ref[0];
 
+                if (animation.Ref.IsFromServer)
+                {
+                    animation.Ref = new()
+                    {
+                        Time = time.Total
+                    };
+                }
+
                 var delay = time.Total - steps.Ref.Time;
                 var mount = animation.Ref.MountAction != 0xFF || flags.Ref.Value.HasFlag(Flags.Flying);
 
                 if (!mount && steps.Ref.Index > 0 && delay > 0)
                 {
-                    mount = delay <= (step.Run ? MovementSpeed.STEP_DELAY_MOUNT_RUN : MovementSpeed.STEP_DELAY_WALK);
+                    mount = delay <= (step.Run ? MovementSpeed.STEP_DELAY_MOUNT_RUN : MovementSpeed.STEP_DELAY_MOUNT_WALK);
                 }
 
                 var maxDelay = MovementSpeed.TimeToCompleteMovement(step.Run, mount) - time.Frame;
@@ -293,7 +312,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                     if (step.Run)
                         direction.Ref.Value |= Direction.Running;
 
-                    for (var j = 1; j <= steps.Ref.Index; ++j)
+                    for (int j = 1, count = steps.Ref.Index + 1; j < count; ++j)
                         steps.Ref[j - 1] = steps.Ref[j];
 
                     steps.Ref.Index -= 1;
