@@ -345,14 +345,14 @@ readonly struct MobAnimationsPlugin : IPlugin
             if (animation.Ref.Time >= time.Total)
                 continue;
 
-            var flags = Unsafe.IsNullRef(ref mobFlags.Ref) ? Flags.None : mobFlags.Ref.Value;
+            var flags = mobFlags.IsValid() ? mobFlags.Ref.Value : Flags.None;
             var isWalking = false;
             var iterate = true;
             var realDirection = direction.Ref.Value;
             var mirror = false;
             var animId = graphic.Ref.Value;
 
-            if (!Unsafe.IsNullRef(ref mobSteps.Ref))
+            if (mobSteps.IsValid())
             {
                 isWalking = mobSteps.Ref.Time > time.Total - Constants.WALKING_DELAY;
 
@@ -443,7 +443,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                 {
                     animation.Ref.Run = true;
                 }
-            SKIP:;
+                SKIP:;
             }
             else
             {

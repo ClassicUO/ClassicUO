@@ -310,37 +310,14 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         {
             ref readonly var tileData = ref fileManager.Value.TileData.StaticData[graphic.Ref.Value];
 
-            if (tileData.IsRoof && !backupZInfo.DrawRoof)
-                continue;
-
             if (tileData.IsInternal)
                 continue;
 
-            var priorityZ = worldPos.Ref.Z;
-
-            if (tileData.IsBackground)
-            {
-                priorityZ -= 1;
-            }
-
-            if (tileData.Height != 0)
-            {
-                priorityZ += 1;
-            }
-
-            if (tileData.IsWall)
-            {
-                priorityZ += 2;
-            }
-
-            if (tileData.IsMultiMovable)
-            {
-                priorityZ += 1;
-            }
-
             // var maxObjectZ = (int)priorityZ;
             // var height = CalculateObjectHeight(ref maxObjectZ, in tileData);
-            var hide = maxZ.HasValue && worldPos.Ref.Z >= maxZ;
+
+            var hide = tileData.IsRoof && !backupZInfo.DrawRoof;
+            hide |= maxZ.HasValue && worldPos.Ref.Z >= maxZ;
             if (!calculateZ && hide)
             {
                 continue;
@@ -412,6 +389,28 @@ internal readonly struct WorldRenderingPlugin : IPlugin
 
             position.X -= (short)((artInfo.UV.Width >> 1) - 22);
             position.Y -= (short)(artInfo.UV.Height - 44);
+
+            var priorityZ = worldPos.Ref.Z;
+
+            if (tileData.IsBackground)
+            {
+                priorityZ -= 1;
+            }
+
+            if (tileData.Height != 0)
+            {
+                priorityZ += 1;
+            }
+
+            if (tileData.IsWall)
+            {
+                priorityZ += 2;
+            }
+
+            if (tileData.IsMultiMovable)
+            {
+                priorityZ += 1;
+            }
 
             var depthZ = Isometric.GetDepthZ(worldPos.Ref.X, worldPos.Ref.Y, priorityZ);
             var color = Renderer.ShaderHueTranslator.GetHueVector(hue.Ref.Value, fileManager.Value.TileData.StaticData[graphic.Ref.Value].IsPartialHue, 1f);
