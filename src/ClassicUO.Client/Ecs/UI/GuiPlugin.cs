@@ -87,7 +87,7 @@ internal readonly struct GuiPlugin : IPlugin
             });
             Clay.SetPointerState(new(mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y),
                 mouseCtx.Value.IsPressed(Input.MouseButtonType.Left));
-            Clay.UpdateScrollContainers(true, new(0, mouseCtx.Value.Wheel), time.Frame);
+            Clay.UpdateScrollContainers(true, new(0, mouseCtx.Value.Wheel * 3), time.Frame);
         }, ThreadingMode.Single);
 
         scheduler.OnUpdate((Query<Data<UINode, UOButton, UIInteractionState>, Changed<UIInteractionState>> query) =>

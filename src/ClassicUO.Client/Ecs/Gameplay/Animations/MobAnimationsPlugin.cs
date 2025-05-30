@@ -39,7 +39,7 @@ struct MobAnimation
     }
 }
 
-struct MobileFlags
+struct ServerFlags
 {
     public Flags Value;
 }
@@ -54,8 +54,10 @@ struct MobileSteps
 {
     public const int COUNT = 10;
 
+    public MobileSteps() {}
+
     private MobileStepArray _steps;
-    public int Index;
+    public int Index = -1;
     public float Time;
 
     [UnscopedRef]
@@ -66,6 +68,28 @@ struct MobileSteps
     {
         Index = Math.Min(COUNT - 1, Index + 1);
         return ref _steps[Index];
+    }
+
+    [UnscopedRef]
+    public ref Game.GameObjects.Mobile.Step CurrentStep()
+    {
+        return ref _steps[Index];
+    }
+
+    public void ClearSteps()
+    {
+        var count = Math.Min(COUNT, Index + 1);
+        Index = -1;
+
+        for (var i = 0; i < count; ++i)
+        {
+            ref var step = ref _steps[i];
+            step.X = 0;
+            step.Y = 0;
+            step.Z = 0;
+            step.Direction = 0;
+            step.Run = false;
+        }
     }
 }
 
@@ -143,7 +167,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                 position.Ref.Y = queuedStep.Y;
                 position.Ref.Z = queuedStep.Z;
                 direction.Ref.Value = queuedStep.Direction;
-                steps.Ref.Index = -1;
+                steps.Ref.ClearSteps();
                 continue;
             }
 
@@ -162,7 +186,7 @@ readonly struct MobAnimationsPlugin : IPlugin
             }
             else
             {
-                ref var step = ref steps.Ref[steps.Ref.Index];
+                ref var step = ref steps.Ref.CurrentStep();
                 endX = step.X;
                 endY = step.Y;
                 endZ = step.Z;
@@ -228,22 +252,28 @@ readonly struct MobAnimationsPlugin : IPlugin
     void HandleMobileSteps
     (
         Time time,
-        Query<TinyEcs.Data<MobileSteps, WorldPosition, Facing, MobAnimation, ScreenPositionOffset, MobileFlags>, Without<ContainedInto>> queryHandleWalking
+        Query<TinyEcs.Data<MobileSteps, WorldPosition, Facing, MobAnimation, ScreenPositionOffset, ServerFlags>, Without<ContainedInto>> queryHandleWalking
     )
     {
-        foreach ((var steps, var position, var direction, var animation, var offset, var flags) in queryHandleWalking)
+        foreach ((
+             var steps,
+             var position,
+             var direction,
+             var animation,
+             var offset,
+             var flags) in queryHandleWalking)
         {
             while (steps.Ref.Index >= 0)
             {
                 ref var step = ref steps.Ref[0];
 
-                if (animation.Ref.IsFromServer)
-                {
-                    animation.Ref = new()
-                    {
-                        Time = time.Total
-                    };
-                }
+                // if (animation.Ref.IsFromServer)
+                // {
+                //     animation.Ref = new()
+                //     {
+                //         Time = time.Total
+                //     };
+                // }
 
                 var delay = time.Total - steps.Ref.Time;
                 var mount = animation.Ref.MountAction != 0xFF || flags.Ref.Value.HasFlag(Flags.Flying);
@@ -280,7 +310,9 @@ readonly struct MobAnimationsPlugin : IPlugin
                     }
 
                     if (badStep)
+                    {
                         removeStep = true;
+                    }
                     else
                     {
                         var stepsCount = maxDelay / (float)Constants.CHARACTER_ANIMATION_DELAY;
@@ -312,7 +344,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                     if (step.Run)
                         direction.Ref.Value |= Direction.Running;
 
-                    for (int j = 1, count = steps.Ref.Index + 1; j < count; ++j)
+                    for (int j = 1, count = Math.Min(MobileSteps.COUNT, steps.Ref.Index + 1); j < count; ++j)
                         steps.Ref[j - 1] = steps.Ref[j];
 
                     steps.Ref.Index -= 1;
@@ -337,8 +369,8 @@ readonly struct MobAnimationsPlugin : IPlugin
         Res<GameContext> gameCtx,
         Res<UOFileManager> fileManager,
         Res<AssetsServer> assetsServer,
-        Query<TinyEcs.Data<MobAnimation, Graphic, Facing, EquipmentSlots, MobileFlags, MobileSteps>,
-            Filter<Without<ContainedInto>, Optional<MobileFlags>, Optional<MobileSteps>>> query
+        Query<TinyEcs.Data<MobAnimation, Graphic, Facing, EquipmentSlots, ServerFlags, MobileSteps>,
+            Filter<Without<ContainedInto>, Optional<ServerFlags>, Optional<MobileSteps>>> query
     )
     {
         foreach ((

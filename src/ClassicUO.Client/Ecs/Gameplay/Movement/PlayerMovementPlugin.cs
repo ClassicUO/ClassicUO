@@ -121,7 +121,7 @@ readonly struct PlayerMovementPlugin : IPlugin
         Res<NetClient> network,
         Res<PlayerStepsContext> playerRequestedSteps,
         Res<Camera> camera,
-        Single<Data<WorldPosition, Facing, MobileSteps, MobAnimation, MobileFlags>, With<Player>> playerQuery,
+        Single<Data<WorldPosition, Facing, MobileSteps, MobAnimation, ServerFlags>, With<Player>> playerQuery,
         Query<Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tilesQuery,
         Query<Data<WorldPosition, Graphic>, Filter<Without<IsTile>, Without<MobAnimation>>> staticsQuery,
         Time time
@@ -148,7 +148,7 @@ readonly struct PlayerMovementPlugin : IPlugin
 
         if (!hasNoSteps)
         {
-            ref var lastStep = ref mobSteps.Ref[mobSteps.Ref.Index];
+            ref var lastStep = ref mobSteps.Ref.CurrentStep();
             playerX = (ushort)lastStep.X;
             playerY = (ushort)lastStep.Y;
             playerZ = lastStep.Z;
@@ -277,7 +277,7 @@ readonly struct PlayerMovementPlugin : IPlugin
             if (!isBadStep)
             {
                 playerRequestedSteps.Value.ResyncSent = false;
-                Console.WriteLine("step accepted {0}", playerRequestedSteps.Value.Steps[stepIndex].Sequence);
+                // Console.WriteLine("step accepted {0}", playerRequestedSteps.Value.Steps[stepIndex].Sequence);
                 for (var i = 1; i < playerRequestedSteps.Value.Count; i++)
                 {
                     playerRequestedSteps.Value.Steps[i - 1] = playerRequestedSteps.Value.Steps[i];
@@ -316,7 +316,7 @@ readonly struct PlayerMovementPlugin : IPlugin
             pos.Ref.Y = response.Y;
             pos.Ref.Z = response.Z;
             dir.Ref.Value = response.Direction;
-            steps.Ref.Index = -1;
+            steps.Ref.ClearSteps();
         }
 
         playerRequestedSteps.Value.Count = 0;
@@ -355,7 +355,7 @@ readonly struct PlayerMovementPlugin : IPlugin
             }
 
             TerrainInfo tinfo;
-            if (Unsafe.IsNullRef(ref stretched.Ref))
+            if (!stretched.IsValid())
             {
                 tinfo = new()
                 {
