@@ -2181,26 +2181,24 @@ readonly struct InGamePacketsPlugin : IPlugin
                     .Set(new Amount() { Value = amount })
                     .Set(new ServerFlags() { Value = flags });
 
-                if (type != 2)
+                if (SerialHelper.IsMobile(serial))
                 {
-                    if (SerialHelper.IsMobile(serial))
+                    mobileQueuedSteps.Enqueue(new ()
                     {
-                        mobileQueuedSteps.Enqueue(new ()
-                        {
-                            Serial = serial,
-                            X = x,
-                            Y = y,
-                            Z = z,
-                            Direction = dir,
-                        });
-                    }
-                    else
-                    {
-                        ent.Set(new WorldPosition() { X = x, Y = y, Z = z })
-                           .Set(new Facing() { Value = dir });
-                    }
+                        Serial = serial,
+                        X = x,
+                        Y = y,
+                        Z = z,
+                        Direction = dir,
+                    });
                 }
-                else if (!ent.Has<IsMulti>())
+                else
+                {
+                    ent.Set(new WorldPosition() { X = x, Y = y, Z = z })
+                        .Set(new Facing() { Value = dir });
+                }
+
+                if (type == 2 && !ent.Has<IsMulti>())
                 {
                     ent.Add<IsMulti>();
 
