@@ -31,7 +31,12 @@ internal readonly struct CameraPlugin : IPlugin
         );
     }
 
-    private static void UpdateCamera(Time time, Res<Camera> camera, Res<MouseContext> mouseCtx, Res<Profile> profile)
+    private static void UpdateCamera(
+        Time time,
+        Res<Camera> camera,
+        Res<MouseContext> mouseCtx,
+        Res<Profile> profile
+    )
     {
         var mousePos = mouseCtx.Value.Position;
 

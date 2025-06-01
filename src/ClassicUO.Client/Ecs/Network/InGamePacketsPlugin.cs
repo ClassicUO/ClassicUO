@@ -16,8 +16,6 @@ using TinyEcs;
 
 namespace ClassicUO.Ecs;
 
-using PacketsMap = Dictionary<byte, OnPacket>;
-
 sealed class NetworkEntitiesMap
 {
     private readonly Dictionary<uint, ulong> _entities = new();
@@ -974,44 +972,44 @@ readonly struct InGamePacketsPlugin : IPlugin
                 (var dstX, var dstY, var dstZ) = (reader.ReadUInt16BE(), reader.ReadUInt16BE(), reader.ReadInt8());
             };
 
-            // open container
-            packetsMap.Value[0x24] = buffer =>
-            {
-                var reader = new StackDataReader(buffer);
-
-                var serial = reader.ReadUInt32BE();
-                var graphic = reader.ReadUInt16BE();
-            };
-
-            // update container
-            packetsMap.Value[0x25] = buffer =>
-            {
-                var reader = new StackDataReader(buffer);
-
-                var serial = reader.ReadUInt32BE();
-                var graphic = reader.ReadUInt16BE();
-                var graphicInc = reader.ReadInt8();
-                var amount = Math.Max((ushort)1, reader.ReadUInt16BE());
-                (var x, var y) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
-
-                if (gameCtx.Value.ClientVersion >= ClientVersion.CV_6017)
-                    reader.Skip(1);
-
-                var containerSerial = reader.ReadUInt32BE();
-                var hue = reader.ReadUInt16BE();
-
-                var ent = entitiesMap.Value.GetOrCreate(world, serial);
-                var parentEnt = entitiesMap.Value.GetOrCreate(world, containerSerial);
-
-                ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
-                    .Set(new WorldPosition() { X = x, Y = y, Z = 0 })
-                    .Set(new Hue() { Value = hue })
-                    .Set(new Amount() { Value = amount })
-                    .Add<ContainedInto>()
-                    ;
-
-                parentEnt.AddChild(ent);
-            };
+            // // open container
+            // packetsMap.Value[0x24] = buffer =>
+            // {
+            //     var reader = new StackDataReader(buffer);
+            //
+            //     var serial = reader.ReadUInt32BE();
+            //     var graphic = reader.ReadUInt16BE();
+            // };
+            //
+            // // update container
+            // packetsMap.Value[0x25] = buffer =>
+            // {
+            //     var reader = new StackDataReader(buffer);
+            //
+            //     var serial = reader.ReadUInt32BE();
+            //     var graphic = reader.ReadUInt16BE();
+            //     var graphicInc = reader.ReadInt8();
+            //     var amount = Math.Max((ushort)1, reader.ReadUInt16BE());
+            //     (var x, var y) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
+            //
+            //     if (gameCtx.Value.ClientVersion >= ClientVersion.CV_6017)
+            //         reader.Skip(1);
+            //
+            //     var containerSerial = reader.ReadUInt32BE();
+            //     var hue = reader.ReadUInt16BE();
+            //
+            //     var ent = entitiesMap.Value.GetOrCreate(world, serial);
+            //     var parentEnt = entitiesMap.Value.GetOrCreate(world, containerSerial);
+            //
+            //     ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
+            //         .Set(new WorldPosition() { X = x, Y = y, Z = 0 })
+            //         .Set(new Hue() { Value = hue })
+            //         .Set(new Amount() { Value = amount })
+            //         .Add<ContainedInto>()
+            //         ;
+            //
+            //     parentEnt.AddChild(ent);
+            // };
 
             // deny move item
             packetsMap.Value[0x27] = buffer =>
@@ -1134,35 +1132,35 @@ readonly struct InGamePacketsPlugin : IPlugin
                 (var x, var y, var z) = (reader.ReadUInt16BE(), reader.ReadUInt16BE(), reader.ReadUInt16BE());
             };
 
-            // update contained items
-            packetsMap.Value[0x3C] = buffer =>
-            {
-                var reader = new StackDataReader(buffer);
-
-                var count = reader.ReadUInt16BE();
-
-                for (var i = 0; i < count; ++i)
-                {
-                    var serial = reader.ReadUInt32BE();
-                    var graphic = reader.ReadUInt16BE();
-                    var graphicInc = reader.ReadUInt8();
-                    var amount = Math.Max((ushort)1, reader.ReadUInt16BE());
-                    (var x, var y) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
-                    var gridIdx = gameCtx.Value.ClientVersion < ClientVersion.CV_6017 ?
-                         0 : reader.ReadUInt8();
-                    var containerSerial = reader.ReadUInt32BE();
-                    var hue = reader.ReadUInt16BE();
-
-                    var parentEnt = entitiesMap.Value.GetOrCreate(world, containerSerial);
-                    var childEnt = entitiesMap.Value.GetOrCreate(world, serial);
-                    childEnt.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
-                        .Set(new Hue() { Value = hue })
-                        .Set(new WorldPosition() { X = x, Y = y, Z = (sbyte)gridIdx })
-                        .Set(new Amount() { Value = amount })
-                        .Add<ContainedInto>();
-                    parentEnt.AddChild(childEnt);
-                }
-            };
+            // // update contained items
+            // packetsMap.Value[0x3C] = buffer =>
+            // {
+            //     var reader = new StackDataReader(buffer);
+            //
+            //     var count = reader.ReadUInt16BE();
+            //
+            //     for (var i = 0; i < count; ++i)
+            //     {
+            //         var serial = reader.ReadUInt32BE();
+            //         var graphic = reader.ReadUInt16BE();
+            //         var graphicInc = reader.ReadUInt8();
+            //         var amount = Math.Max((ushort)1, reader.ReadUInt16BE());
+            //         (var x, var y) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
+            //         var gridIdx = gameCtx.Value.ClientVersion < ClientVersion.CV_6017 ?
+            //              0 : reader.ReadUInt8();
+            //         var containerSerial = reader.ReadUInt32BE();
+            //         var hue = reader.ReadUInt16BE();
+            //
+            //         var parentEnt = entitiesMap.Value.GetOrCreate(world, containerSerial);
+            //         var childEnt = entitiesMap.Value.GetOrCreate(world, serial);
+            //         childEnt.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
+            //             .Set(new Hue() { Value = hue })
+            //             .Set(new WorldPosition() { X = x, Y = y, Z = (sbyte)gridIdx })
+            //             .Set(new Amount() { Value = amount })
+            //             .Add<ContainedInto>();
+            //         parentEnt.AddChild(childEnt);
+            //     }
+            // };
 
             // player light level
             packetsMap.Value[0x4E] = buffer =>

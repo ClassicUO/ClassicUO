@@ -9,9 +9,7 @@ using System.Collections.Generic;
 using System.Net;
 using TinyEcs;
 
-namespace ClassicUO.Ecs.NetworkPlugins;
-
-using PacketsMap = Dictionary<byte, OnPacket>;
+namespace ClassicUO.Ecs;
 
 internal readonly struct LoginPacketsPlugin : IPlugin
 {

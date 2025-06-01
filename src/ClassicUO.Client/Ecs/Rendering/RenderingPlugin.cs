@@ -7,6 +7,7 @@ internal readonly struct RenderingPlugin : IPlugin
 {
     public void Build(Scheduler scheduler)
     {
+        scheduler.AddPlugin<GuiRenderingPlugin>();
         scheduler.AddPlugin<WorldRenderingPlugin>();
         scheduler.AddPlugin<TextOverheadPlugin>();
     }

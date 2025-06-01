@@ -9,6 +9,8 @@ namespace ClassicUO.Ecs;
 
 internal readonly struct GameScreenPlugin : IPlugin
 {
+    const int BORDER_SIZE = 10;
+
     public void Build(Scheduler scheduler)
     {
         var setupFn = Setup;
@@ -48,7 +50,6 @@ internal readonly struct GameScreenPlugin : IPlugin
 
         scheduler.OnUpdate((
             Query<Data<UINode, UIInteractionState, ButtonAction>, Changed<UIInteractionState>> query,
-            Res<NetClient> network,
             State<GameState> state
         ) =>
         {
@@ -105,8 +106,6 @@ internal readonly struct GameScreenPlugin : IPlugin
                 lastSize.Value = camera.Value.Bounds;
             }
 
-            const int BORDER_SIZE = 10;
-
             nodeBorderResize.Ref.Config.floating.offset = new()
             {
                 x = camera.Value.Bounds.X + camera.Value.Bounds.Width + BORDER_SIZE - nodeBorderResize.Ref.Config.layout.sizing.width.size.minMax.max,
@@ -142,7 +141,7 @@ internal readonly struct GameScreenPlugin : IPlugin
 
     private static void Setup(World world, Res<GumpBuilder> gumpBuilder, Res<ClayUOCommandBuffer> clay)
     {
-        var root = world.Entity()
+        var root = world.Entity("GAME_SCENE_ROOT")
             .Set(new UINode()
             {
                 Config = {
@@ -196,7 +195,7 @@ internal readonly struct GameScreenPlugin : IPlugin
                             x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER,
                             y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER,
                         },
-                        padding =  Clay_Padding.All(4),
+                        padding = Clay_Padding.All(4),
                     },
                 }
             })
@@ -268,8 +267,8 @@ internal readonly struct GameScreenPlugin : IPlugin
                     backgroundColor = new (38f / 255f, 38f / 255f, 38f / 255f, 1),
                     layout = {
                         sizing = {
-                            width = Clay_SizingAxis.Fixed(10),
-                            height = Clay_SizingAxis.Fixed(10),
+                            width = Clay_SizingAxis.Fixed(BORDER_SIZE),
+                            height = Clay_SizingAxis.Fixed(BORDER_SIZE),
                         },
                     },
                     floating = {
@@ -289,8 +288,8 @@ internal readonly struct GameScreenPlugin : IPlugin
                     backgroundColor = new (1f, 0f, 0f, 1),
                     layout = {
                         sizing = {
-                            width = Clay_SizingAxis.Fixed(10),
-                            height = Clay_SizingAxis.Fixed(10),
+                            width = Clay_SizingAxis.Fixed(BORDER_SIZE),
+                            height = Clay_SizingAxis.Fixed(BORDER_SIZE),
                         },
                     },
                     floating = {
@@ -310,8 +309,8 @@ internal readonly struct GameScreenPlugin : IPlugin
                     backgroundColor = new (0f, 0f, 0f, 1),
                     layout = {
                         sizing = {
-                            width = Clay_SizingAxis.Fixed(10),
-                            height = Clay_SizingAxis.Fixed(10),
+                            width = Clay_SizingAxis.Fixed(BORDER_SIZE),
+                            height = Clay_SizingAxis.Fixed(BORDER_SIZE),
                         },
                     },
                     floating = {

@@ -3,14 +3,11 @@ using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Network;
 using ClassicUO.Utility;
-using ClassicUO.Ecs.NetworkPlugins;
 using TinyEcs;
 using ClassicUO.Network.Encryption;
 using ClassicUO.Assets;
 
 namespace ClassicUO.Ecs;
-
-using PacketsMap = Dictionary<byte, OnPacket>;
 
 delegate void OnPacket(ReadOnlySpan<byte> buffer);
 
@@ -21,6 +18,8 @@ struct OnLoginRequest
     public string Address;
     public ushort Port;
 }
+
+internal sealed class PacketsMap : Dictionary<byte, OnPacket>;
 
 readonly struct NetworkPlugin : IPlugin
 {

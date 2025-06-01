@@ -11,5 +11,6 @@ internal readonly struct GameplayPlugin : IPlugin
         scheduler.AddPlugin<UseObjectPlugin>();
         scheduler.AddPlugin<MobAnimationsPlugin>();
         scheduler.AddPlugin<PlayerMovementPlugin>();
+        scheduler.AddPlugin<ContainersPlugin>();
     }
 }

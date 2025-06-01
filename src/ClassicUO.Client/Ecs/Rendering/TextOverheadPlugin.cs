@@ -40,7 +40,12 @@ internal readonly struct TextOverheadPlugin : IPlugin
         scheduler.OnAfterUpdate(showTextOverheadFn, ThreadingMode.Single);
     }
 
-    private static void ReadTextOverhead(TinyEcs.World world, Time time, EventReader<TextOverheadEvent> texts, Res<TextOverHeadManager> textOverHeadManager)
+    private static void ReadTextOverhead(
+        TinyEcs.World world,
+        Time time,
+        EventReader<TextOverheadEvent> texts,
+        Res<TextOverHeadManager> textOverHeadManager
+    )
     {
         foreach (var text in texts)
         {
@@ -151,7 +156,14 @@ internal sealed class TextOverHeadManager
         }
     }
 
-    public void Render(World world, NetworkEntitiesMap networkEntities, UltimaBatcher2D batch, GameContext gameCtx, Camera camera, HuesLoader huesLoader)
+    public void Render(
+        World world,
+        NetworkEntitiesMap networkEntities,
+        UltimaBatcher2D batch,
+        GameContext gameCtx,
+        Camera camera,
+        HuesLoader huesLoader
+    )
     {
         var center = Isometric.IsoToScreen(gameCtx.CenterX, gameCtx.CenterY, gameCtx.CenterZ);
         var windowSize = new Vector2(camera.Bounds.Width, camera.Bounds.Height);
@@ -164,11 +176,8 @@ internal sealed class TextOverHeadManager
 
         var backupViewport = batch.GraphicsDevice.Viewport;
         batch.GraphicsDevice.Viewport = camera.GetViewport();
-        var matrix = Matrix.Identity;
 
-        batch.Begin(null, matrix);
-        batch.SetBrightlight(1.7f);
-        batch.SetSampler(SamplerState.PointClamp);
+        batch.Begin();
 
         var lines = _cuttedTextIndices;
 
@@ -313,7 +322,7 @@ internal sealed class TextOverHeadManager
             }
         }
 
-        batch.SetSampler(null);
+        // batch.SetSampler(null);
         batch.End();
 
         batch.GraphicsDevice.Viewport = backupViewport;
@@ -332,7 +341,12 @@ internal sealed class TextOverHeadManager
         return c;
     }
 
-    private bool IsOverlapped(TinyEcs.World world, NetworkEntitiesMap networkEntities, LinkedList<TextOverheadEvent> list, int fontSize)
+    private bool IsOverlapped(
+        TinyEcs.World world,
+        NetworkEntitiesMap networkEntities,
+        LinkedList<TextOverheadEvent> list,
+        int fontSize
+    )
     {
         (var bounds, var totalLines) = GetBounds(list, fontSize);
 
