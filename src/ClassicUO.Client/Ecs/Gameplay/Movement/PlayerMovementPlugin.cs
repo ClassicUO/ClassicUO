@@ -315,7 +315,7 @@ readonly struct PlayerMovementPlugin : IPlugin
             pos.Ref.X = response.X;
             pos.Ref.Y = response.Y;
             pos.Ref.Z = response.Z;
-            dir.Ref.Value = response.Direction;
+            dir.Ref.Value = response.Direction & Direction.Mask;
             steps.Ref.ClearSteps();
         }
 

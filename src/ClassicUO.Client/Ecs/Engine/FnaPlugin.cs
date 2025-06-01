@@ -23,8 +23,9 @@ internal readonly struct FnaPlugin : IPlugin
 
         scheduler.OnStartup(static (Res<UoGame> game, SchedulerState schedState) =>
         {
-            UnsafeFNAAccessor.BeforeLoop(game.Value);
             game.Value.RunOneFrame();
+            UnsafeFNAAccessor.BeforeLoop(game.Value);
+            // game.Value.RunOneFrame();
             schedState.AddResource(game.Value.GraphicsDevice);
             schedState.AddResource(new KeyboardContext(game));
             schedState.AddResource(new MouseContext(game));

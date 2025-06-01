@@ -726,9 +726,13 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                 var ent = entitiesMap.Value.GetOrCreate(world, serial);
                 ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
-                    .Set(new Hue() { Value = hue });
-                // .Set(new WorldPosition() { X = x, Y = y, Z = z })
-                //.Set(new Facing() { Value = (Direction)direction });
+                    .Set(new Hue() { Value = hue })
+                    .Set(new ServerFlags() { Value = (Flags)flags });
+
+                if (count > 0)
+                    ent.Set(new Amount() { Value = count });
+
+
 
                 if (type == 2 && !ent.Has<IsMulti>())
                 {
@@ -763,14 +767,24 @@ readonly struct InGamePacketsPlugin : IPlugin
                     }
                 }
 
-                mobileQueuedSteps.Enqueue(new()
+
+                if (SerialHelper.IsMobile(serial))
                 {
-                    Serial = serial,
-                    X = x,
-                    Y = y,
-                    Z = z,
-                    Direction = (Direction)direction,
-                });
+                    mobileQueuedSteps.Enqueue(new()
+                    {
+                        Serial = serial,
+                        X = x,
+                        Y = y,
+                        Z = z,
+                        Direction = (Direction)direction,
+                    });
+                }
+                else
+                {
+                    ent.Set(new WorldPosition() { X = x, Y = y, Z = z })
+                        .Set(new Facing() { Value = (Direction)direction });
+                }
+
             };
 
             // damage

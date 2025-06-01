@@ -76,9 +76,9 @@ internal readonly struct WorldRenderingPlugin : IPlugin
     }
 
 
-    private static void Cleanup(Res<SelectedEntity> selecteEntity)
+    private static void Cleanup(Res<SelectedEntity> selectedEntity)
     {
-        selecteEntity.Value.Clear();
+        selectedEntity.Value.Clear();
     }
 
 
