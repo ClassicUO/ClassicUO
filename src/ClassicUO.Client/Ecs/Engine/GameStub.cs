@@ -27,6 +27,18 @@ internal sealed class UoGame : Microsoft.Xna.Framework.Game
     public GraphicsDeviceManager GraphicManager { get; }
     public GameTime GameTime { get; private set; }
 
+    protected override void Initialize()
+    {
+        base.Initialize();
+
+        if (GraphicManager.GraphicsDevice.Adapter.IsProfileSupported(GraphicsProfile.HiDef))
+        {
+            GraphicManager.GraphicsProfile = GraphicsProfile.HiDef;
+        }
+
+        GraphicManager.ApplyChanges();
+    }
+
     protected override void Update(GameTime gameTime)
     {
         GameTime = gameTime;

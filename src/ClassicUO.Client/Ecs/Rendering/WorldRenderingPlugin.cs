@@ -25,6 +25,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         });
         scheduler.AddPlugin<CameraPlugin>();
         scheduler.AddResource(new SelectedEntity());
+        scheduler.AddResource(new Viewport());
 
         scheduler.OnFrameStart((
             Res<MouseContext> mouseCtx,
@@ -68,11 +69,23 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         var cleanupFn = Cleanup;
         scheduler.OnExit(GameState.GameScreen, cleanupFn, ThreadingMode.Single);
 
+
+        var beginRenderingFn = BeginRendering;
         var renderingFn = Rendering;
-        scheduler.OnAfterUpdate(renderingFn, ThreadingMode.Single)
+        var showTextOverheadFn = ShowTextOverhead;
+        var endRenderingFn = EndRendering;
+
+        var beginRenderingSystem = scheduler.OnAfterUpdate(beginRenderingFn, ThreadingMode.Single);
+        var endRenderingSystem = scheduler.OnAfterUpdate(endRenderingFn, ThreadingMode.Single);
+        var worldRenderingSystem = scheduler.OnAfterUpdate(renderingFn, ThreadingMode.Single)
                  .RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>())
                  .RunIf((SchedulerState state) => state.InState(GameState.GameScreen))
                  .RunIf((Query<Data<WorldPosition>, With<Player>> playerQuery) => playerQuery.Count() > 0);
+        var textOverheadRenderingSystem = scheduler.OnAfterUpdate(showTextOverheadFn, ThreadingMode.Single);
+
+        beginRenderingSystem.RunBefore(worldRenderingSystem);
+        worldRenderingSystem.RunBefore(endRenderingSystem);
+        textOverheadRenderingSystem.RunAfter(worldRenderingSystem);
     }
 
 
@@ -95,6 +108,41 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         public readonly bool IsUnderRoof => IsSameTile && IsTileAhead;
     }
 
+    private static void ShowTextOverhead(
+        World world,
+        Time time,
+        Res<TextOverHeadManager> textOverHeadManager,
+        Res<NetworkEntitiesMap> networkEntities,
+        Res<UltimaBatcher2D> batcher,
+        Res<GameContext> gameCtx,
+        Res<Camera> camera,
+        Res<UOFileManager> fileManager)
+    {
+        textOverHeadManager.Value.Update(world, time, networkEntities);
+        textOverHeadManager.Value.Render(world, networkEntities, batcher, gameCtx, camera, fileManager.Value.Hues);
+    }
+
+    private static void BeginRendering(
+        Res<Camera> camera,
+        Res<RenderTarget2D> renderTarget,
+        Res<UltimaBatcher2D> batch,
+        Res<Viewport> viewport
+    )
+    {
+        viewport.Value = batch.Value.GraphicsDevice.Viewport;
+        var cameraViewport = camera.Value.GetViewport();
+
+        batch.Value.GraphicsDevice.Viewport = cameraViewport;
+        batch.Value.GraphicsDevice.SetRenderTarget(renderTarget);
+        batch.Value.GraphicsDevice.Clear(Color.Black);
+        // batch.Value.GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.DepthBuffer, Color.Transparent, 1.0f, 0);
+    }
+
+    private static void EndRendering(Res<UltimaBatcher2D> batch, Res<Viewport> viewport)
+    {
+        batch.Value.GraphicsDevice.SetRenderTarget(null);
+        batch.Value.GraphicsDevice.Viewport = viewport;
+    }
 
     private static void Rendering
     (
@@ -116,6 +164,11 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             Filter<Without<ContainedInto>, Optional<MobileSteps>, Optional<MobAnimation>>> queryEquipmentSlots
     )
     {
+        batch.Value.Begin(null, camera.Value.ViewTransformMatrix);
+        batch.Value.SetBrightlight(1.7f);
+        batch.Value.SetSampler(SamplerState.PointClamp);
+        batch.Value.SetStencil(DepthStencilState.Default);
+
         (_, var playerPos) = queryPlayer.Get();
         (var playerX, var playerY, var playerZ) = playerPos.Ref;
 
@@ -175,17 +228,6 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         center.X += 22f;
         center.Y += 22f;
         center -= gameCtx.Value.CenterOffset;
-
-
-        var viewportBackup = batch.Value.GraphicsDevice.Viewport;
-        var cameraViewport = camera.Value.GetViewport();
-        var matrix = camera.Value.ViewTransformMatrix;
-
-        batch.Value.GraphicsDevice.Viewport = cameraViewport;
-        batch.Value.Begin(null, matrix);
-        batch.Value.SetBrightlight(1.7f);
-        batch.Value.SetSampler(SamplerState.PointClamp);
-        batch.Value.SetStencil(DepthStencilState.Default);
 
         var mousePos = camera.Value.MouseToWorldPosition2();
         selectedEntity.Value.Clear();
@@ -777,11 +819,10 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             }
         }
 
+
         batch.Value.SetSampler(null);
         batch.Value.SetStencil(null);
         batch.Value.End();
-
-        batch.Value.GraphicsDevice.Viewport = viewportBackup;
     }
 
 

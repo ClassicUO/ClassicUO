@@ -3,6 +3,7 @@ using ClassicUO.Network;
 using ClassicUO.Renderer;
 using Clay_cs;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using TinyEcs;
 
 namespace ClassicUO.Ecs;
@@ -13,6 +14,8 @@ internal readonly struct GameScreenPlugin : IPlugin
 
     public void Build(Scheduler scheduler)
     {
+        scheduler.AddResource<RenderTarget2D>(null);
+
         var setupFn = Setup;
         var cleanupFn = Cleanup;
 
@@ -71,6 +74,9 @@ internal readonly struct GameScreenPlugin : IPlugin
 
         scheduler.OnUpdate((
             Res<Camera> camera,
+            Res<RenderTarget2D> renderTarget,
+            Res<ImageCache> imageCache,
+            Res<UltimaBatcher2D> batch,
             Res<MouseContext> mouseCtx,
             Local<Rectangle> lastSize,
             Single<Data<UINode, UIInteractionState>, Filter<With<GameWindowBorderUI>, With<GameScene>>> queryGameWindowBorder,
@@ -135,6 +141,30 @@ internal readonly struct GameScreenPlugin : IPlugin
                 width = Clay_SizingAxis.Fixed(camera.Value.Bounds.Width),
                 height = Clay_SizingAxis.Fixed(camera.Value.Bounds.Height),
             };
+
+            if (renderTarget.Value == null || renderTarget.Value.IsDisposed ||
+                renderTarget.Value.Width != batch.Value.GraphicsDevice.PresentationParameters.BackBufferWidth ||
+                renderTarget.Value.Height != batch.Value.GraphicsDevice.PresentationParameters.BackBufferHeight)
+            {
+                renderTarget.Value?.Dispose();
+                renderTarget.Value = new(
+                    batch.Value.GraphicsDevice,
+                    batch.Value.GraphicsDevice.PresentationParameters.BackBufferWidth,
+                    batch.Value.GraphicsDevice.PresentationParameters.BackBufferHeight,
+                    false,
+                    SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
+
+                imageCache.Value[renderTarget.Value.GetHashCode()] = renderTarget.Value;
+            }
+            else
+            {
+                var id = (nint)renderTarget.Value.GetHashCode();
+
+                unsafe
+                {
+                    node.Ref.Config.image.imageData = (void*)id;
+                }
+            }
         }, ThreadingMode.Single)
         .RunIf((SchedulerState state) => state.InState(GameState.GameScreen) && state.ResourceExists<Camera>());
     }
@@ -145,7 +175,7 @@ internal readonly struct GameScreenPlugin : IPlugin
             .Set(new UINode()
             {
                 Config = {
-                    backgroundColor = new (18f / 255f, 18f / 255f, 18f / 255f, 1),
+                    backgroundColor = new (18f / 255f, 18f / 255f, 18f / 255f, 0f),
                     layout = {
                         sizing = {
                             width = Clay_SizingAxis.Grow(),
@@ -306,7 +336,7 @@ internal readonly struct GameScreenPlugin : IPlugin
             .Set(new UINode()
             {
                 Config = {
-                    backgroundColor = new (0f, 0f, 0f, 1),
+                    backgroundColor = new (1f, 1f, 1f, 1f),
                     layout = {
                         sizing = {
                             width = Clay_SizingAxis.Fixed(BORDER_SIZE),

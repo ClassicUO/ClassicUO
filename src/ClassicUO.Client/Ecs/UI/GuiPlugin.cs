@@ -1,5 +1,6 @@
 using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -12,12 +13,6 @@ using Microsoft.Xna.Framework.Graphics;
 using TinyEcs;
 
 namespace ClassicUO.Ecs;
-
-
-internal sealed class FocusedInput
-{
-    public ulong Entity { get; set; }
-}
 
 
 internal readonly struct GuiPlugin : IPlugin
@@ -52,6 +47,7 @@ internal readonly struct GuiPlugin : IPlugin
     {
         scheduler.AddResource(new ClayUOCommandBuffer());
         scheduler.AddResource(new FocusedInput());
+        scheduler.AddResource(new ImageCache());
 
         scheduler.OnStartup((SchedulerState state, World world, Res<AssetsServer> assets) =>
             state.AddResource(new GumpBuilder(world, assets)),
@@ -67,104 +63,126 @@ internal readonly struct GuiPlugin : IPlugin
         foreach (var state in states)
             scheduler.OnExit(state, (Res<FocusedInput> focusedInput) => focusedInput.Value.Entity = 0, ThreadingMode.Single);
 
-        scheduler.OnStartup(() =>
-        {
-            var arenaHandle = Clay.CreateArena(Clay.MinMemorySize());
-            var errorFn = (nint)(delegate*<Clay_ErrorData, void>)&OnClayError;
-            var ctx = Clay.Initialize(arenaHandle, new() { width = 300, height = 300 }, errorFn);
-            var measureTextFn = (nint)(delegate*<Clay_StringSlice, Clay_TextElementConfig*, void*, Clay_Dimensions>)&OnMeasureText;
-            Clay.SetMeasureTextFunction(measureTextFn);
 
-             // Clay.SetDebugModeEnabled(true);
-        }, ThreadingMode.Single);
+        var setupClayFn = SetupClay;
+        scheduler.OnStartup(setupClayFn, ThreadingMode.Single);
 
-        scheduler.OnUpdate((Res<GraphicsDevice> device, Res<MouseContext> mouseCtx, Time time) =>
+        var setClayWorkspaceDimensionsFn = SetClayWorkspaceDimensions;
+        scheduler.OnUpdate(setClayWorkspaceDimensionsFn, ThreadingMode.Single);
+
+        var updateUOButtonsStateFn = UpdateUOButtonsState;
+        scheduler.OnUpdate(updateUOButtonsStateFn, ThreadingMode.Single);
+
+        var updateFocusedInputFn = UpdateFocusedInput;
+        scheduler.OnUpdate(updateFocusedInputFn, ThreadingMode.Single)
+            .RunIf((Res<KeyboardContext> keyboardCtx) => keyboardCtx.Value.IsPressedOnce(Microsoft.Xna.Framework.Input.Keys.Tab));
+
+        var readCharInputsFn = ReadCharInputs;
+        scheduler.OnUpdate(readCharInputsFn, ThreadingMode.Single)
+            .RunIf((EventReader<CharInputEvent> reader,
+                    Res<FocusedInput> focusedInput,
+                    Query<Data<UINode>, Filter<With<TextInput>>> query) =>
+                        !reader.IsEmpty && focusedInput.Value.Entity != 0 && query.Count() > 0);
+
+        var moveFocusedElementsByMouseFn = MoveFocusedElementsByMouse;
+        scheduler.OnUpdate(moveFocusedElementsByMouseFn, ThreadingMode.Single        );
+    }
+
+
+    private static unsafe void SetupClay()
+    {
+        var arenaHandle = Clay.CreateArena(Clay.MinMemorySize());
+        var errorFn = (nint)(delegate*<Clay_ErrorData, void>)&OnClayError;
+        var ctx = Clay.Initialize(arenaHandle, new() { width = 300, height = 300 }, errorFn);
+        var measureTextFn = (nint)(delegate*<Clay_StringSlice, Clay_TextElementConfig*, void*, Clay_Dimensions>)&OnMeasureText;
+        Clay.SetMeasureTextFunction(measureTextFn);
+
+        Clay.SetDebugModeEnabled(true);
+    }
+
+    private static void SetClayWorkspaceDimensions(Res<GraphicsDevice> device, Res<MouseContext> mouseCtx, Time time)
+    {
+        Clay.SetLayoutDimensions(new()
         {
-            Clay.SetLayoutDimensions(new()
+            width = device.Value.PresentationParameters.BackBufferWidth,
+            height = device.Value.PresentationParameters.BackBufferHeight,
+        });
+        Clay.SetPointerState(new(mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y),
+                             mouseCtx.Value.IsPressed(Input.MouseButtonType.Left));
+        Clay.UpdateScrollContainers(true, new(0, mouseCtx.Value.Wheel * 3), time.Frame);
+    }
+
+    private static void UpdateUOButtonsState(Query<Data<UINode, UOButton, UIInteractionState>, Changed<UIInteractionState>> query)
+    {
+        foreach ((var node, var button, var interaction) in query)
+        {
+            node.Ref.UOConfig.Id = interaction.Ref switch
             {
-                width = device.Value.PresentationParameters.BackBufferWidth,
-                height = device.Value.PresentationParameters.BackBufferHeight,
-            });
-            Clay.SetPointerState(new(mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y),
-                mouseCtx.Value.IsPressed(Input.MouseButtonType.Left));
-            Clay.UpdateScrollContainers(true, new(0, mouseCtx.Value.Wheel * 3), time.Frame);
-        }, ThreadingMode.Single);
+                UIInteractionState.Over => button.Ref.Over,
+                UIInteractionState.Pressed => button.Ref.Pressed,
+                _ => button.Ref.Normal
+            };
+        }
+    }
 
-        scheduler.OnUpdate((Query<Data<UINode, UOButton, UIInteractionState>, Changed<UIInteractionState>> query) =>
+    private static void UpdateFocusedInput(Query<Data<Text>, Filter<With<TextInput>>> query, Res<FocusedInput> focusedInput)
+    {
+        var ok = false;
+        var last = 0ul;
+        foreach ((var ent, var textInput) in query)
         {
-            foreach ((var node, var button, var interaction) in query)
+            if (focusedInput.Value.Entity == ent.Ref)
             {
-                node.Ref.UOConfig.Id = interaction.Ref switch
-                {
-                    UIInteractionState.Over => button.Ref.Over,
-                    UIInteractionState.Pressed => button.Ref.Pressed,
-                    _ => button.Ref.Normal
-                };
+                ok = true;
+                continue;
             }
-        }, ThreadingMode.Single);
 
-        scheduler.OnUpdate((Query<Data<Text>, Filter<With<TextInput>>> query, Res<FocusedInput> focusedInput) =>
+            if (ok)
+                last = ent.Ref;
+        }
+
+        if (ok && last == 0)
         {
-            var ok = false;
-            var last = 0ul;
             foreach ((var ent, var textInput) in query)
             {
-                if (focusedInput.Value.Entity == ent.Ref)
-                {
-                    ok = true;
-                    continue;
-                }
-
-                if (ok)
-                    last = ent.Ref;
+                last = ent.Ref;
+                break;
             }
+        }
 
-            if (ok && last == 0)
-            {
-                foreach ((var ent, var textInput) in query)
-                {
-                    last = ent.Ref;
-                    break;
-                }
-            }
-
-            if (last != 0)
-            {
-                focusedInput.Value.Entity = last;
-            }
-        }, ThreadingMode.Single)
-        .RunIf((Res<KeyboardContext> keyboardCtx) => keyboardCtx.Value.IsPressedOnce(Microsoft.Xna.Framework.Input.Keys.Tab));
-
-        scheduler.OnUpdate((EventReader<CharInputEvent> reader, Res<FocusedInput> focusedInput, Query<Data<Text>, Filter<With<TextInput>>> query) =>
+        if (last != 0)
         {
-            (_, var node) = query.Get(focusedInput.Value.Entity);
+            focusedInput.Value.Entity = last;
+        }
+    }
 
-            foreach (var c in reader)
-                node.Ref.Value = TextComposer.Compose(node.Ref.Value, c.Value);
-        }, ThreadingMode.Single)
-        .RunIf((EventReader<CharInputEvent> reader, Res<FocusedInput> focusedInput, Query<Data<UINode>, Filter<With<TextInput>>> query)
-            => !reader.IsEmpty && focusedInput.Value.Entity != 0 && query.Count() > 0);
+    private static void ReadCharInputs(
+        EventReader<CharInputEvent> reader,
+        Res<FocusedInput> focusedInput,
+        Query<Data<Text>, Filter<With<TextInput>>> query)
+    {
+        (_, var node) = query.Get(focusedInput.Value.Entity);
 
-        scheduler.OnUpdate
-        (
-            (
-                Res<MouseContext> mouseCtx,
-                Query<Data<UINode, UIInteractionState>, With<UIMovable>> query) =>
+        foreach (var c in reader)
+            node.Ref.Value = TextComposer.Compose(node.Ref.Value, c.Value);
+    }
+
+    private static void MoveFocusedElementsByMouse(
+        Res<MouseContext> mouseCtx,
+        Query<Data<UINode, UIInteractionState>, With<UIMovable>> query
+    )
+    {
+        foreach ((var node, var interaction) in query)
+        {
+            if (interaction.Ref == UIInteractionState.Pressed)
             {
-                foreach ((var node, var interaction) in query)
+                if (mouseCtx.Value.IsPressed(MouseButtonType.Left))
                 {
-                    if (interaction.Ref == UIInteractionState.Pressed)
-                    {
-                        if (mouseCtx.Value.IsPressed(MouseButtonType.Left))
-                        {
-                            node.Ref.Config.floating.offset.x += mouseCtx.Value.PositionOffset.X;
-                            node.Ref.Config.floating.offset.y += mouseCtx.Value.PositionOffset.Y;
-                        }
-                    }
+                    node.Ref.Config.floating.offset.x += mouseCtx.Value.PositionOffset.X;
+                    node.Ref.Config.floating.offset.y += mouseCtx.Value.PositionOffset.Y;
                 }
-
-            }, ThreadingMode.Single
-        );
+            }
+        }
     }
 }
 
@@ -218,6 +236,13 @@ internal struct ClayUOCommandData
     public uint Id;
     public Vector3 Hue;
 }
+
+internal sealed class FocusedInput
+{
+    public ulong Entity { get; set; }
+}
+
+internal sealed class ImageCache : Dictionary<nint, Texture2D>;
 
 internal sealed class ClayUOCommandBuffer
 {

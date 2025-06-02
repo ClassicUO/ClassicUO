@@ -35,9 +35,6 @@ internal readonly struct TextOverheadPlugin : IPlugin
         var readTextOverHeadFn = ReadTextOverhead;
         scheduler.OnUpdate(readTextOverHeadFn, ThreadingMode.Single)
                  .RunIf((EventReader<TextOverheadEvent> texts) => !texts.IsEmpty);
-
-        var showTextOverheadFn = ShowTextOverhead;
-        scheduler.OnAfterUpdate(showTextOverheadFn, ThreadingMode.Single);
     }
 
     private static void ReadTextOverhead(
@@ -66,16 +63,7 @@ internal readonly struct TextOverheadPlugin : IPlugin
         }
     }
 
-    private static void ShowTextOverhead(
-        TinyEcs.World world, Time time, Res<TextOverHeadManager> textOverHeadManager,
-        Res<NetworkEntitiesMap> networkEntities, Res<UltimaBatcher2D> batcher,
-        Res<GameContext> gameCtx,
-        Res<Camera> camera,
-        Res<UOFileManager> fileManager)
-    {
-        textOverHeadManager.Value.Update(world, time, networkEntities);
-        textOverHeadManager.Value.Render(world, networkEntities, batcher, gameCtx, camera, fileManager.Value.Hues);
-    }
+
 }
 
 internal sealed class TextOverHeadManager
@@ -174,9 +162,9 @@ internal sealed class TextOverHeadManager
 
         const int FONT_SIZE = 18;
 
-        var backupViewport = batch.GraphicsDevice.Viewport;
-        batch.GraphicsDevice.Viewport = camera.GetViewport();
-
+        // var backupViewport = batch.GraphicsDevice.Viewport;
+        // batch.GraphicsDevice.Viewport = camera.GetViewport();
+        //
         batch.Begin();
 
         var lines = _cuttedTextIndices;
@@ -324,8 +312,8 @@ internal sealed class TextOverHeadManager
 
         // batch.SetSampler(null);
         batch.End();
-
-        batch.GraphicsDevice.Viewport = backupViewport;
+        //
+        // batch.GraphicsDevice.Viewport = backupViewport;
     }
 
     private Color GetColor(HuesLoader huesLoader, float alpha = 1.0f, ushort hue = 0)

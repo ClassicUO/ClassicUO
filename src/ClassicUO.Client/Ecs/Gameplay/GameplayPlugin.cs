@@ -7,6 +7,7 @@ internal readonly struct GameplayPlugin : IPlugin
     public void Build(Scheduler scheduler)
     {
         scheduler.AddPlugin<ChatPlugin>();
+        scheduler.AddPlugin<TextOverheadPlugin>();
         scheduler.AddPlugin<PickupPlugin>();
         scheduler.AddPlugin<UseObjectPlugin>();
         scheduler.AddPlugin<MobAnimationsPlugin>();

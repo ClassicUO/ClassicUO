@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Buffers;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
 using ClassicUO.Input;
@@ -27,6 +28,7 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
             Res<AssetsServer> assets,
             Res<MouseContext> mouseCtx,
             Res<ClayUOCommandBuffer> commandBuffer,
+            Res<ImageCache> imageCache,
             Res<FocusedInput> focusedInput,
             Query<Data<UINode>, Filter<With<Text>, With<TextInput>>> queryTextInput,
             Query<Data<UINode, UIInteractionState>> queryInteraction,
@@ -82,11 +84,7 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
             var cmds = Clay.EndLayout();
 
             var b = batcher.Value;
-            // b.GraphicsDevice.Clear(ClearOptions.DepthBuffer, Color.Transparent, 1, 0);
-
             b.Begin();
-            // b.SetSampler(SamplerState.PointClamp);
-            // b.SetStencil(DepthStencilState.Default);
 
             var span = new ReadOnlySpan<Clay_RenderCommand>(cmds.internalArray, cmds.length);
             foreach (ref readonly var cmd in span)
@@ -144,20 +142,30 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                     case Clay_RenderCommandType.CLAY_RENDER_COMMAND_TYPE_IMAGE:
                         {
                             ref readonly var img = ref cmd.renderData.image;
-                            ref readonly var gumpInfo = ref assets.Value.Gumps.GetGump((uint)(nint)img.imageData);
 
-                            b.Draw
-                            (
-                                gumpInfo.Texture,
-                                new Vector2(boundingBox.x, boundingBox.y),
-                                gumpInfo.UV,
-                                Vector3.UnitZ,
-                                0.0f,
-                                Vector2.Zero,
-                                1.0f,
-                                SpriteEffects.None,
-                                0f
-                            );
+                            if (!imageCache.Value.TryGetValue((nint)img.imageData, out var texture) || texture.IsDisposed)
+                            {
+                                continue;
+                            }
+
+                            b.Draw(texture,
+                               new Vector2((int)boundingBox.x, (int)boundingBox.y),
+                               new Rectangle(0, 0, (int)boundingBox.width, (int)boundingBox.height),
+                               toColor(in img.backgroundColor),
+                               0f, Vector2.One, 0f);
+
+                            // b.Draw
+                            // (
+                            //     texture,
+                            //     new Vector2(boundingBox.x, boundingBox.y),
+                            //     new Rectangle(0, 0, (int)boundingBox.width, (int)boundingBox.height),
+                            //     Vector3.UnitZ,
+                            //     0.0f,
+                            //     Vector2.Zero,
+                            //     1.0f,
+                            //     SpriteEffects.None,
+                            //     0f
+                            // );
 
                             break;
                         }
@@ -330,8 +338,6 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                 }
             }
 
-            // b.SetSampler(null);
-            // b.SetStencil(null);
             b.End();
 
             static void renderNodes
@@ -434,7 +440,12 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                         if (!query.Contains(child))
                             continue;
 
-                        (var childEnt, var childNode, var childText, var childInteraction, var childChildren) = query.Get(child);
+                        (var childEnt,
+                         var childNode,
+                         var childText,
+                         var childInteraction,
+                         var childChildren) = query.Get(child);
+
                         renderNodes(
                             childEnt.Ref,
                             ref found,

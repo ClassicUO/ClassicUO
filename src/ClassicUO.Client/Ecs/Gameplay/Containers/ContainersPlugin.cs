@@ -144,9 +144,9 @@ internal readonly struct ContainersPlugin : IPlugin
             parentEnt.AddChild(ent);
 
 
-            ref readonly var artInfo = ref assets.Value.Gumps.GetGump((ushort)(graphic + graphicInc));
+            ref readonly var artInfo = ref assets.Value.Arts.GetArt((ushort)(graphic + graphicInc));
 
-            ent.Set
+            ent.Add<UIMovable>().Set(UIInteractionState.None).Set
             (
                 new UINode()
                 {
@@ -175,7 +175,7 @@ internal readonly struct ContainersPlugin : IPlugin
                     UOConfig =
                     {
                         Type = ClayUOCommandType.Art,
-                        Id = graphic,
+                        Id = (ushort)(graphic + graphicInc),
                         Hue = new Vector3(hue, 1, 1),
                     }
                 }
@@ -210,9 +210,9 @@ internal readonly struct ContainersPlugin : IPlugin
                     .Add<ContainedInto>();
                 parentEnt.AddChild(ent);
 
-                ref readonly var artInfo = ref assets.Value.Gumps.GetGump((ushort)(graphic + graphicInc));
+                ref readonly var artInfo = ref assets.Value.Arts.GetArt((ushort)(graphic + graphicInc));
 
-                ent.Set
+                ent.Add<UIMovable>().Set(UIInteractionState.None).Set
                 (
                     new UINode()
                     {
@@ -241,7 +241,7 @@ internal readonly struct ContainersPlugin : IPlugin
                         UOConfig =
                         {
                             Type = ClayUOCommandType.Art,
-                            Id = graphic,
+                            Id = (ushort)(graphic + graphicInc),
                             Hue = new Vector3(hue, 1, 1),
                         }
                     }
