@@ -158,11 +158,9 @@ internal readonly struct GameScreenPlugin : IPlugin
             }
             else
             {
-                var id = (nint)renderTarget.Value.GetHashCode();
-
                 unsafe
                 {
-                    node.Ref.Config.image.imageData = (void*)id;
+                    node.Ref.Config.image.imageData = (void*)renderTarget.Value.GetHashCode();
                 }
             }
         }, ThreadingMode.Single)
@@ -171,11 +169,11 @@ internal readonly struct GameScreenPlugin : IPlugin
 
     private static void Setup(World world, Res<GumpBuilder> gumpBuilder, Res<ClayUOCommandBuffer> clay)
     {
-        var root = world.Entity("GAME_SCENE_ROOT")
+        var root = world.Entity()
             .Set(new UINode()
             {
                 Config = {
-                    backgroundColor = new (18f / 255f, 18f / 255f, 18f / 255f, 0f),
+                    backgroundColor = new (18f / 255f, 18f / 255f, 18f / 255f, 1f),
                     layout = {
                         sizing = {
                             width = Clay_SizingAxis.Grow(),
@@ -187,6 +185,84 @@ internal readonly struct GameScreenPlugin : IPlugin
                 }
             })
             .Add<GameScene>();
+
+        var floating = new Clay_FloatingElementConfig()
+        {
+            attachTo = Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT,
+            clipTo = Clay_FloatingClipToElement.CLAY_CLIP_TO_ATTACHED_PARENT,
+            zIndex = 0
+        };
+
+        // var gameWindowRoot = world.Entity()
+        //     .Set(new UINode()
+        //     {
+        //         Config = {
+        //             backgroundColor = new (0f, 0f, 0f, 0f),
+        //             layout = {
+        //                 sizing = {
+        //                     width = Clay_SizingAxis.Grow(),
+        //                     height = Clay_SizingAxis.Grow(),
+        //                 },
+        //                 layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
+        //                 padding = Clay_Padding.All(4),
+        //             }
+        //         }
+        //     })
+        //     .Add<GameScene>();
+
+        var gameWindowBorder = world.Entity()
+            .Set(new UINode()
+            {
+                Config = {
+                    backgroundColor = new (38f / 255f, 38f / 255f, 38f / 255f, 1),
+                    layout = {
+                        sizing = {
+                            width = Clay_SizingAxis.Fixed(BORDER_SIZE),
+                            height = Clay_SizingAxis.Fixed(BORDER_SIZE),
+                        },
+                    },
+                    floating = floating
+                }
+            })
+            .Set(UIInteractionState.None)
+            .Add<GameWindowBorderUI>()
+            .Add<GameScene>();
+
+        var gameWindowBorderResize = world.Entity()
+            .Set(new UINode()
+            {
+                Config = {
+                    backgroundColor = new (1f, 0f, 0f, 1),
+                    layout = {
+                        sizing = {
+                            width = Clay_SizingAxis.Fixed(BORDER_SIZE),
+                            height = Clay_SizingAxis.Fixed(BORDER_SIZE),
+                        },
+                    },
+                    floating = floating
+                }
+            })
+            .Set(UIInteractionState.None)
+            .Add<GameWindowBorderResizeUI>()
+            .Add<GameScene>();
+
+        var gameWindow = world.Entity()
+            .Set(new UINode()
+            {
+                Config = {
+                    backgroundColor = new (1f, 1f, 1f, 1f),
+                    layout = {
+                        sizing = {
+                            width = Clay_SizingAxis.Fixed(BORDER_SIZE),
+                            height = Clay_SizingAxis.Fixed(BORDER_SIZE),
+                        },
+                    },
+                    floating = floating
+                }
+            })
+            .Add<GameWindowUI>()
+            .Add<GameScene>();
+
 
 
         var menuBar = world.Entity()
@@ -206,9 +282,12 @@ internal readonly struct GameScreenPlugin : IPlugin
                             y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER,
                         },
                         padding = Clay_Padding.All(4),
-                    }
+                    },
+                    // floating = floating
                 }
             })
+            // .Set(UIInteractionState.None)
+            // .Add<UIMovable>()
             .Add<GameScene>();
 
         var menuBarItem = world.Entity()
@@ -273,96 +352,19 @@ internal readonly struct GameScreenPlugin : IPlugin
             .Add<TotalEntitiesMenu>();
 
 
-        var gameWindowRoot = world.Entity()
-            .Set(new UINode()
-            {
-                Config = {
-                    backgroundColor = new (0f, 0f, 0f, 0f),
-                    layout = {
-                        sizing = {
-                            width = Clay_SizingAxis.Grow(),
-                            height = Clay_SizingAxis.Grow(),
-                        },
-                        layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
-                        padding = Clay_Padding.All(4),
-                    }
-                }
-            })
-            .Add<GameScene>();
-
-        var gameWindowBorder = world.Entity()
-            .Set(new UINode()
-            {
-                Config = {
-                    backgroundColor = new (38f / 255f, 38f / 255f, 38f / 255f, 1),
-                    layout = {
-                        sizing = {
-                            width = Clay_SizingAxis.Fixed(BORDER_SIZE),
-                            height = Clay_SizingAxis.Fixed(BORDER_SIZE),
-                        },
-                    },
-                    floating = {
-                        clipTo = Clay_FloatingClipToElement.CLAY_CLIP_TO_ATTACHED_PARENT,
-                        attachTo = Clay_FloatingAttachToElement.CLAY_ATTACH_TO_ROOT,
-                    }
-                }
-            })
-            .Set(UIInteractionState.None)
-            .Add<GameWindowBorderUI>()
-            .Add<GameScene>();
-
-        var gameWindowBorderResize = world.Entity()
-            .Set(new UINode()
-            {
-                Config = {
-                    backgroundColor = new (1f, 0f, 0f, 1),
-                    layout = {
-                        sizing = {
-                            width = Clay_SizingAxis.Fixed(BORDER_SIZE),
-                            height = Clay_SizingAxis.Fixed(BORDER_SIZE),
-                        },
-                    },
-                    floating = {
-                        clipTo = Clay_FloatingClipToElement.CLAY_CLIP_TO_ATTACHED_PARENT,
-                        attachTo = Clay_FloatingAttachToElement.CLAY_ATTACH_TO_ROOT,
-                    }
-                }
-            })
-            .Set(UIInteractionState.None)
-            .Add<GameWindowBorderResizeUI>()
-            .Add<GameScene>();
-
-        var gameWindow = world.Entity()
-            .Set(new UINode()
-            {
-                Config = {
-                    backgroundColor = new (1f, 1f, 1f, 1f),
-                    layout = {
-                        sizing = {
-                            width = Clay_SizingAxis.Fixed(BORDER_SIZE),
-                            height = Clay_SizingAxis.Fixed(BORDER_SIZE),
-                        },
-                    },
-                    floating = {
-                        clipTo = Clay_FloatingClipToElement.CLAY_CLIP_TO_ATTACHED_PARENT,
-                        attachTo = Clay_FloatingAttachToElement.CLAY_ATTACH_TO_ROOT,
-                    }
-                }
-            })
-            .Add<GameWindowUI>()
-            .Add<GameScene>();
 
 
         menuBar.AddChild(menuBarItem);
         menuBar.AddChild(menuBarItem2);
 
-        gameWindowRoot.AddChild(gameWindowBorder);
-        gameWindowRoot.AddChild(gameWindowBorderResize);
-        gameWindowRoot.AddChild(gameWindow);
 
 
+        root.AddChild(gameWindowBorder);
+        root.AddChild(gameWindowBorderResize);
+        root.AddChild(gameWindow);
+
+        // root.AddChild(gameWindowRoot);
         root.AddChild(menuBar);
-        root.AddChild(gameWindowRoot);
     }
 
     private static void Cleanup(World world, Query<Data<UINode>, Filter<Without<Parent>, With<GameScene>>> query)

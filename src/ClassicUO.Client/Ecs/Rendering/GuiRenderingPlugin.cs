@@ -154,19 +154,6 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                                toColor(in img.backgroundColor),
                                0f, Vector2.One, 0f);
 
-                            // b.Draw
-                            // (
-                            //     texture,
-                            //     new Vector2(boundingBox.x, boundingBox.y),
-                            //     new Rectangle(0, 0, (int)boundingBox.width, (int)boundingBox.height),
-                            //     Vector3.UnitZ,
-                            //     0.0f,
-                            //     Vector2.Zero,
-                            //     1.0f,
-                            //     SpriteEffects.None,
-                            //     0f
-                            // );
-
                             break;
                         }
 
