@@ -759,7 +759,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                                     Z = (sbyte)(z + block.Z)
                                 }
                             )
-                            .Add<IsMulti>();
+                            .Add<NormalMulti>();
 
                         ent.AddChild(b);
                     }
@@ -1903,7 +1903,8 @@ readonly struct InGamePacketsPlugin : IPlugin
                                                 Y = (ushort)(startY + houseReader.ReadInt8()),
                                                 Z = (sbyte)(startZ + houseReader.ReadInt8()),
                                             }
-                                        );
+                                        )
+                                        .Add<CustomMulti>();
 
                                     parent.AddChild(b);
                                 }
@@ -1931,7 +1932,8 @@ readonly struct InGamePacketsPlugin : IPlugin
                                                     Y = (ushort)(startY + y),
                                                     Z = (sbyte)(startZ + z),
                                                 }
-                                            );
+                                            )
+                                            .Add<CustomMulti>();
 
                                         parent.AddChild(b);
                                     }
@@ -1988,7 +1990,8 @@ readonly struct InGamePacketsPlugin : IPlugin
                                                     Y = (ushort)(startY + y),
                                                     Z = (sbyte)(startZ + z),
                                                 }
-                                            );
+                                            )
+                                            .Add<CustomMulti>();
 
                                         parent.AddChild(b);
                                     }
@@ -2236,8 +2239,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                                     Y = (ushort)(y + block.Y),
                                     Z = (sbyte)(z + block.Z)
                                 }
-                            )
-                            .Add<IsMulti>();
+                            ).Add<NormalMulti>();
 
                         ent.AddChild(b);
                     }

@@ -23,7 +23,6 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         {
             GameWindowPosition = new(20, 40)
         });
-        scheduler.AddPlugin<CameraPlugin>();
         scheduler.AddResource(new SelectedEntity());
         scheduler.AddResource(new Viewport());
 
@@ -240,7 +239,11 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         cameraBounds.Width = s.X;
         cameraBounds.Height = s.Y;
 
-        foreach ((var entity, var worldPos, var graphic, var stretched) in queryTiles)
+        foreach ((
+             var entity,
+             var worldPos,
+             var graphic,
+             var stretched) in queryTiles)
         {
             var hide = backupZInfo.MaxZGround.HasValue && worldPos.Ref.Z > backupZInfo.MaxZGround;
             if (!calculateZ && hide)
@@ -348,7 +351,11 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         }
 
 
-        foreach ((var entity, var worldPos, var graphic, var hue) in queryStatics)
+        foreach ((
+            var entity,
+            var worldPos,
+            var graphic,
+            var hue) in queryStatics)
         {
             ref readonly var tileData = ref fileManager.Value.TileData.StaticData[graphic.Ref.Value];
 
@@ -452,6 +459,11 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             if (tileData.IsMultiMovable)
             {
                 priorityZ += 1;
+            }
+
+            if (entity.Ref.Has<NormalMulti>())
+            {
+                priorityZ -= 1;
             }
 
             var depthZ = Isometric.GetDepthZ(worldPos.Ref.X, worldPos.Ref.Y, priorityZ);

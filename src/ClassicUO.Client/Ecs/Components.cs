@@ -115,3 +115,6 @@ internal struct HouseRevision
 {
     public uint Value;
 }
+
+internal struct CustomMulti;
+internal struct NormalMulti;

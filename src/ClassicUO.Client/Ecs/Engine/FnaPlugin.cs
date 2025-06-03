@@ -17,6 +17,8 @@ internal readonly struct FnaPlugin : IPlugin
         scheduler.AddPlugin<TextHandlerPlugin>();
         scheduler.AddPlugin<FontsPlugin>();
         scheduler.AddPlugin<DelayedActionPlugin>();
+        scheduler.AddPlugin<CameraPlugin>();
+
 
         scheduler.AddResource(new UoGame(MouseVisible, WindowResizable, VSync));
         scheduler.AddSystemParam(new Time());
