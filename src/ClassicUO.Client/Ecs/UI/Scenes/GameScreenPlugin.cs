@@ -173,7 +173,7 @@ internal readonly struct GameScreenPlugin : IPlugin
             .Set(new UINode()
             {
                 Config = {
-                    backgroundColor = new (18f / 255f, 18f / 255f, 18f / 255f, 1f),
+                    backgroundColor = new (18f / 255f, 18f / 255f, 18f / 255f, 0f),
                     layout = {
                         sizing = {
                             width = Clay_SizingAxis.Grow(),
@@ -190,7 +190,7 @@ internal readonly struct GameScreenPlugin : IPlugin
         {
             attachTo = Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT,
             clipTo = Clay_FloatingClipToElement.CLAY_CLIP_TO_ATTACHED_PARENT,
-            zIndex = 0
+            zIndex = -1
         };
 
         // var gameWindowRoot = world.Entity()

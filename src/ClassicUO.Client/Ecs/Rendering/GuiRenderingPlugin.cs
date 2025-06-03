@@ -117,6 +117,7 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                                     toColor(in t.textColor),
                                     characterSpacing: t.letterSpacing,
                                     lineSpacing: t.lineHeight,
+                                    layerDepth: cmd.zIndex,
                                     effect: FONT_EFFECT, effectAmount: FONT_EFFECT_AMOUNT
                                 );
                             }
@@ -135,7 +136,7 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                             new Vector2((int)boundingBox.x, (int)boundingBox.y),
                             new Rectangle(0, 0, (int)boundingBox.width, (int)boundingBox.height),
                             toColor(in config.backgroundColor),
-                            0f, Vector2.One, 0f);
+                            0f, Vector2.One, cmd.zIndex);
 
                         break;
 
@@ -152,7 +153,7 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                                new Vector2((int)boundingBox.x, (int)boundingBox.y),
                                new Rectangle(0, 0, (int)boundingBox.width, (int)boundingBox.height),
                                toColor(in img.backgroundColor),
-                               0f, Vector2.One, 0f);
+                               0f, Vector2.One, cmd.zIndex);
 
                             break;
                         }
@@ -180,7 +181,7 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                                                 Vector2.Zero,
                                                 1.0f,
                                                 SpriteEffects.None,
-                                                0f
+                                                cmd.zIndex
                                             );
                                         }
                                         break;
@@ -204,7 +205,7 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                                         var offsetRight = Math.Max(gumpInfo2.UV.Width, gumpInfo7.UV.Width) - gumpInfo4.UV.Width;
 
                                         if (gumpInfo0.Texture != null)
-                                            b.Draw(gumpInfo0.Texture, new Vector2(boundingBox.x, boundingBox.y), gumpInfo0.UV, uoCommand.Hue);
+                                            b.Draw(gumpInfo0.Texture, new Vector2(boundingBox.x, boundingBox.y), gumpInfo0.UV, uoCommand.Hue, cmd.zIndex);
 
                                         if (gumpInfo1.Texture != null)
                                             b.DrawTiled(gumpInfo1.Texture,
@@ -214,37 +215,37 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                                                 (int)boundingBox.width - gumpInfo0.UV.Width - gumpInfo2.UV.Width,
                                                 gumpInfo1.UV.Height
                                             ),
-                                            gumpInfo1.UV, uoCommand.Hue);
+                                            gumpInfo1.UV, uoCommand.Hue, cmd.zIndex);
 
                                         if (gumpInfo2.Texture != null)
                                             b.Draw(gumpInfo2.Texture,
                                                 new Vector2(boundingBox.x + (boundingBox.width - gumpInfo2.UV.Width), boundingBox.y + offsetTop),
-                                                gumpInfo2.UV, uoCommand.Hue);
+                                                gumpInfo2.UV, uoCommand.Hue, cmd.zIndex);
 
                                         if (gumpInfo3.Texture != null)
                                             b.DrawTiled(gumpInfo3.Texture,
-                                           new(
-                                               (int)boundingBox.x,
-                                               (int)boundingBox.y + gumpInfo0.UV.Height,
-                                               gumpInfo3.UV.Width,
-                                               (int)boundingBox.height - gumpInfo0.UV.Height - gumpInfo5.UV.Height
-                                           ),
-                                           gumpInfo3.UV, uoCommand.Hue);
+                                               new(
+                                                   (int)boundingBox.x,
+                                                   (int)boundingBox.y + gumpInfo0.UV.Height,
+                                                   gumpInfo3.UV.Width,
+                                                   (int)boundingBox.height - gumpInfo0.UV.Height - gumpInfo5.UV.Height
+                                               ),
+                                            gumpInfo3.UV, uoCommand.Hue, cmd.zIndex);
 
                                         if (gumpInfo4.Texture != null)
                                             b.DrawTiled(gumpInfo4.Texture,
-                                           new(
-                                               (int)boundingBox.x + ((int)boundingBox.width - gumpInfo4.UV.Width),
-                                               (int)boundingBox.y + gumpInfo2.UV.Height,
-                                               gumpInfo4.UV.Width,
-                                               (int)boundingBox.height - gumpInfo2.UV.Height - gumpInfo7.UV.Height
-                                           ),
-                                           gumpInfo4.UV, uoCommand.Hue);
+                                               new(
+                                                   (int)boundingBox.x + ((int)boundingBox.width - gumpInfo4.UV.Width),
+                                                   (int)boundingBox.y + gumpInfo2.UV.Height,
+                                                   gumpInfo4.UV.Width,
+                                                   (int)boundingBox.height - gumpInfo2.UV.Height - gumpInfo7.UV.Height
+                                               ),
+                                            gumpInfo4.UV, uoCommand.Hue, cmd.zIndex);
 
                                         if (gumpInfo5.Texture != null)
                                             b.Draw(gumpInfo5.Texture,
                                                 new Vector2(boundingBox.x, boundingBox.y + (boundingBox.height - gumpInfo5.UV.Height)),
-                                                gumpInfo5.UV, uoCommand.Hue);
+                                                gumpInfo5.UV, uoCommand.Hue, cmd.zIndex);
 
                                         if (gumpInfo6.Texture != null)
                                             b.DrawTiled(gumpInfo6.Texture,
@@ -254,12 +255,12 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                                                (int)boundingBox.width - gumpInfo5.UV.Width - gumpInfo7.UV.Width,
                                                gumpInfo6.UV.Height
                                            ),
-                                           gumpInfo6.UV, uoCommand.Hue);
+                                           gumpInfo6.UV, uoCommand.Hue, cmd.zIndex);
 
                                         if (gumpInfo7.Texture != null)
                                             b.Draw(gumpInfo7.Texture,
                                                 new Vector2(boundingBox.x + (boundingBox.width - gumpInfo7.UV.Width), boundingBox.y + (boundingBox.height - gumpInfo7.UV.Height)),
-                                                gumpInfo7.UV, uoCommand.Hue);
+                                                gumpInfo7.UV, uoCommand.Hue, cmd.zIndex);
 
                                         if (gumpInfo8.Texture != null)
                                             b.DrawTiled(gumpInfo8.Texture,
@@ -269,7 +270,7 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                                                ((int)boundingBox.width - gumpInfo0.UV.Width - gumpInfo2.UV.Width) + (offsetLeft + offsetRight),
                                                (int)boundingBox.height - gumpInfo2.UV.Height - gumpInfo7.UV.Height
                                            ),
-                                           gumpInfo8.UV, uoCommand.Hue);
+                                           gumpInfo8.UV, uoCommand.Hue, cmd.zIndex);
 
                                         break;
                                     }
@@ -288,7 +289,7 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                                             Vector2.Zero,
                                             1.0f,
                                             SpriteEffects.None,
-                                            0f
+                                            cmd.zIndex
                                         );
                                     }
                                     break;

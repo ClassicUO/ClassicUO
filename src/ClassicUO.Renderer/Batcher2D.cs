@@ -683,7 +683,8 @@ namespace ClassicUO.Renderer
             Texture2D texture,
             Rectangle destinationRectangle,
             Rectangle sourceRectangle,
-            Vector3 hue
+            Vector3 hue,
+            float depth = 0f
         )
         {
             int h = destinationRectangle.Height;
@@ -707,7 +708,8 @@ namespace ClassicUO.Renderer
                         texture,
                         pos,
                         rect,
-                        hue
+                        hue,
+                        depth
                     );
 
                     w -= sourceRectangle.Width;

@@ -133,13 +133,13 @@ internal readonly struct WorldRenderingPlugin : IPlugin
 
         batch.Value.GraphicsDevice.Viewport = cameraViewport;
         batch.Value.GraphicsDevice.SetRenderTarget(renderTarget);
-        batch.Value.GraphicsDevice.Clear(Color.Black);
-        // batch.Value.GraphicsDevice.Clear(ClearOptions.Target | ClearOptions.DepthBuffer, Color.Transparent, 1.0f, 0);
+        batch.Value.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0, 0);
     }
 
     private static void EndRendering(Res<UltimaBatcher2D> batch, Res<Viewport> viewport)
     {
         batch.Value.GraphicsDevice.SetRenderTarget(null);
+        batch.Value.GraphicsDevice.Clear(ClearOptions.Target, new Color(18f / 255f, 18f / 255f, 18f / 255f, 1f), 0, 0);
         batch.Value.GraphicsDevice.Viewport = viewport;
     }
 
