@@ -81,6 +81,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clay-cs", "external\Clay-cs
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FontStashSharp.FNA.Core", "external\FontStashSharp\src\XNA\FontStashSharp.FNA.Core.csproj", "{774C00E5-921D-494A-8E23-B0A2D0A13018}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TinyEcs.SourceGenerator", "external\TinyEcs\tools\TinyEcs.SourceGenerator\TinyEcs.SourceGenerator.csproj", "{047B5709-F0D6-410B-BE72-9A5070BCE4A2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -259,6 +261,18 @@ Global
 		{774C00E5-921D-494A-8E23-B0A2D0A13018}.Release|x64.Build.0 = Release|Any CPU
 		{774C00E5-921D-494A-8E23-B0A2D0A13018}.Release|x86.ActiveCfg = Release|Any CPU
 		{774C00E5-921D-494A-8E23-B0A2D0A13018}.Release|x86.Build.0 = Release|Any CPU
+		{047B5709-F0D6-410B-BE72-9A5070BCE4A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{047B5709-F0D6-410B-BE72-9A5070BCE4A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{047B5709-F0D6-410B-BE72-9A5070BCE4A2}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{047B5709-F0D6-410B-BE72-9A5070BCE4A2}.Debug|x64.Build.0 = Debug|Any CPU
+		{047B5709-F0D6-410B-BE72-9A5070BCE4A2}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{047B5709-F0D6-410B-BE72-9A5070BCE4A2}.Debug|x86.Build.0 = Debug|Any CPU
+		{047B5709-F0D6-410B-BE72-9A5070BCE4A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{047B5709-F0D6-410B-BE72-9A5070BCE4A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{047B5709-F0D6-410B-BE72-9A5070BCE4A2}.Release|x64.ActiveCfg = Release|Any CPU
+		{047B5709-F0D6-410B-BE72-9A5070BCE4A2}.Release|x64.Build.0 = Release|Any CPU
+		{047B5709-F0D6-410B-BE72-9A5070BCE4A2}.Release|x86.ActiveCfg = Release|Any CPU
+		{047B5709-F0D6-410B-BE72-9A5070BCE4A2}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

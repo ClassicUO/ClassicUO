@@ -5,22 +5,16 @@ using TinyEcs;
 
 namespace ClassicUO.Ecs;
 
-internal readonly struct ServerSelectionPlugin : IPlugin
+[TinyPlugin]
+internal readonly partial struct ServerSelectionPlugin
 {
     public void Build(Scheduler scheduler)
     {
         scheduler.AddEvent<ServerSelectionInfoEvent>();
 
         var cleanupFn = Cleanup;
-        var serverInfoSetupFn = ServerInfoSetup;
-        var serverSelectedFn = ServerSelected;
 
         scheduler.OnExit(GameState.ServerSelection, cleanupFn, ThreadingMode.Single);
-        scheduler.OnUpdate(serverInfoSetupFn, ThreadingMode.Single)
-                 .RunIf((SchedulerState state, EventReader<ServerSelectionInfoEvent> reader)
-                    => !reader.IsEmpty && state.InState(GameState.ServerSelection));
-        scheduler.OnUpdate(serverSelectedFn, ThreadingMode.Single)
-                 .RunIf((SchedulerState state) => state.InState(GameState.ServerSelection));
     }
 
 
@@ -32,6 +26,16 @@ internal readonly struct ServerSelectionPlugin : IPlugin
         }
     }
 
+
+    private static bool HasServerSelectionInfoEvent(EventReader<ServerSelectionInfoEvent> reader) => !reader.IsEmpty;
+
+    private static bool IsInServerSelection(SchedulerState state) => state.InState(GameState.ServerSelection);
+
+
+
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
+    [RunIf(nameof(HasServerSelectionInfoEvent))]
+    [RunIf(nameof(IsInServerSelection))]
     private static void ServerInfoSetup(World world, EventReader<ServerSelectionInfoEvent> reader)
     {
         var root = world.Entity()
@@ -162,6 +166,9 @@ internal readonly struct ServerSelectionPlugin : IPlugin
         }
     }
 
+
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
+    [RunIf(nameof(IsInServerSelection))]
     private static void ServerSelected(
         Res<NetClient> network,
         Query<

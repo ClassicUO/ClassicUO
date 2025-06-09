@@ -4,19 +4,21 @@ using TinyEcs;
 
 namespace ClassicUO.Ecs;
 
-internal readonly struct DelayedActionPlugin : IPlugin
+[TinyPlugin]
+internal readonly partial struct DelayedActionPlugin
 {
     public void Build(Scheduler scheduler)
     {
         scheduler.AddResource(new DelayedAction());
+    }
 
-        scheduler.OnBeforeUpdate
-        (
-            (Res<DelayedAction> delayedAction, Time time) =>
-            {
-                delayedAction.Value.Run(time.Total);
-            }, ThreadingMode.Single
-        );
+    [TinySystem(Stages.BeforeUpdate, ThreadingMode.Single)]
+    private static void ExecuteDelayedActions(
+        Res<DelayedAction> delayedAction,
+        Time time
+    )
+    {
+        delayedAction.Value.Run(time.Total);
     }
 }
 

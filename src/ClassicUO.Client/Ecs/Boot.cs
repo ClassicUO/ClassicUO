@@ -7,32 +7,38 @@ using TinyEcs;
 
 namespace ClassicUO.Ecs;
 
-internal readonly struct CuoPlugin : IPlugin
+
+[TinyPlugin]
+internal readonly partial struct CuoPlugin
 {
     public void Build(Scheduler scheduler)
     {
         scheduler.AddState(GameState.Loading);
-        scheduler.AddResource(new GameContext() { Map = -1, MaxObjectsDistance = 32 });
+
+        scheduler.AddResource
+        (
+            new GameContext()
+            {
+                Map = -1,
+                MaxObjectsDistance = 32
+            }
+        );
+
         scheduler.AddResource(Settings.GlobalSettings);
 
-        scheduler.OnStartup((Res<GameContext> gameCtx, Res<Settings> settings) =>
-        {
-            ClientVersionHelper.IsClientVersionValid(
-                settings.Value.ClientVersion,
-                out gameCtx.Value.ClientVersion
-            );
-        });
+        scheduler.AddPlugin
+        (
+            new FnaPlugin()
+            {
+                WindowResizable = true,
+                MouseVisible = true,
+                VSync = true, // don't kill the gpu
+            }
+        );
 
-        scheduler.AddPlugin(new FnaPlugin()
-        {
-            WindowResizable = true,
-            MouseVisible = true,
-            VSync = true, // don't kill the gpu
-        });
         scheduler.AddPlugin<AssetsPlugin>();
         scheduler.AddPlugin<TerrainPlugin>();
         scheduler.AddPlugin<GuiPlugin>();
-
         scheduler.AddPlugin<NetworkPlugin>();
         scheduler.AddPlugin<GameplayPlugin>();
         scheduler.AddPlugin<RenderingPlugin>();

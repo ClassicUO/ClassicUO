@@ -25,18 +25,19 @@ internal struct TextOverheadEvent
     public float Time;
 }
 
-internal readonly struct TextOverheadPlugin : IPlugin
+[TinyPlugin]
+internal readonly partial struct TextOverheadPlugin
 {
     public void Build(Scheduler scheduler)
     {
         scheduler.AddEvent<TextOverheadEvent>();
         scheduler.AddResource(new TextOverHeadManager());
-
-        var readTextOverHeadFn = ReadTextOverhead;
-        scheduler.OnUpdate(readTextOverHeadFn, ThreadingMode.Single)
-                 .RunIf((EventReader<TextOverheadEvent> texts) => !texts.IsEmpty);
     }
 
+    private static bool OnTextOverheadEventsNotEmpty(EventReader<TextOverheadEvent> texts) => !texts.IsEmpty;
+
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
+    [RunIf(nameof(OnTextOverheadEventsNotEmpty))]
     private static void ReadTextOverhead(
         TinyEcs.World world,
         Time time,

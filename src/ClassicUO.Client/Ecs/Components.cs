@@ -118,3 +118,7 @@ internal struct HouseRevision
 
 internal struct CustomMulti;
 internal struct NormalMulti;
+
+
+
+public sealed class TinySystemOnUpdateAttribute() : TinySystemAttribute(Stages.Update, ThreadingMode.Single);

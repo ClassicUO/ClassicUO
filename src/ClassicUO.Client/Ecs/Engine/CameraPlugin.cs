@@ -4,18 +4,15 @@ using TinyEcs;
 
 namespace ClassicUO.Ecs;
 
-internal readonly struct CameraPlugin : IPlugin
+[TinyPlugin]
+internal readonly partial struct CameraPlugin
 {
     public void Build(Scheduler scheduler)
     {
-        var updateCameraFn = UpdateCamera;
         var setCameraBoundsFn = SetCameraBounds;
 
         scheduler.AddResource(new Camera(0.5f, 2.5f, 0.1f) { Bounds = new(0, 0, 800, 600) });
-
         scheduler.OnEnter(GameState.GameScreen, setCameraBoundsFn, ThreadingMode.Single);
-        scheduler.OnUpdate(updateCameraFn, ThreadingMode.Single)
-                .RunIf((SchedulerState state) => state.InState(GameState.GameScreen));
     }
 
     private static void SetCameraBounds(
@@ -31,6 +28,10 @@ internal readonly struct CameraPlugin : IPlugin
         );
     }
 
+    private static bool OnInGameState(SchedulerState state) => state.InState(GameState.GameScreen);
+
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
+    [RunIf(nameof(OnInGameState))]
     private static void UpdateCamera(
         Time time,
         Res<Camera> camera,

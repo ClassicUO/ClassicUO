@@ -1,5 +1,4 @@
 using System;
-using ClassicUO.Network;
 using ClassicUO.Renderer;
 using Clay_cs;
 using Microsoft.Xna.Framework;
@@ -8,7 +7,9 @@ using TinyEcs;
 
 namespace ClassicUO.Ecs;
 
-internal readonly struct GameScreenPlugin : IPlugin
+
+[TinyPlugin]
+internal readonly partial struct GameScreenPlugin
 {
     const int BORDER_SIZE = 10;
 
@@ -21,150 +22,6 @@ internal readonly struct GameScreenPlugin : IPlugin
 
         scheduler.OnEnter(GameState.GameScreen, setupFn, ThreadingMode.Single);
         scheduler.OnExit(GameState.GameScreen, cleanupFn, ThreadingMode.Single);
-
-
-        scheduler.OnUpdate((
-            World world,
-            Query<Data<UINode, Text>, With<TotalEntitiesMenu>> query,
-            Query<Empty, With<IsTile>> queryTiles,
-            Query<Empty, With<IsStatic>> queryStatics
-        ) =>
-        {
-            var total = world.EntityCount;
-            var countTiles = queryTiles.Count();
-            var countStatics = queryStatics.Count();
-            foreach ((var node, var text) in query)
-            {
-                text.Ref.Value = $"Total entities: {total} - tiles: {countTiles} - statics: {countStatics}";
-            }
-
-
-        }, ThreadingMode.Single)
-        .RunIf((SchedulerState state) => state.InState(GameState.GameScreen))
-        .RunIf((Time time, Local<float> lastAccess) =>
-        {
-            if (time.Total > lastAccess.Value)
-            {
-                lastAccess.Value = time.Total + 250f;
-                return true;
-            }
-            return false;
-        });
-
-        scheduler.OnUpdate((
-            Query<Data<UINode, UIInteractionState, ButtonAction>, Changed<UIInteractionState>> query,
-            State<GameState> state
-        ) =>
-        {
-            foreach ((var node, var interaction, var action) in query)
-            {
-                if (interaction.Ref == UIInteractionState.Released)
-                {
-                    switch (action.Ref)
-                    {
-                        case ButtonAction.Logout:
-                            Console.WriteLine("Logout button pressed");
-                            state.Set(GameState.LoginScreen);
-                            break;
-                    }
-                }
-            }
-        }, ThreadingMode.Single)
-        .RunIf((SchedulerState state) => state.InState(GameState.GameScreen));
-
-        scheduler.OnUpdate((
-            Res<Camera> camera,
-            Res<RenderTarget2D> renderTarget,
-            Res<ImageCache> imageCache,
-            Res<UltimaBatcher2D> batch,
-            Res<MouseContext> mouseCtx,
-            Local<Rectangle> lastSize,
-            Single<Data<UINode, UIInteractionState>, Filter<With<GameWindowBorderUI>, With<GameScene>>> queryGameWindowBorder,
-            Single<Data<UINode, UIInteractionState>, Filter<With<GameWindowBorderResizeUI>, With<GameScene>>> queryGameWindowBorderResize,
-            Single<Data<UINode>, Filter<With<GameWindowUI>, With<GameScene>>> queryGameWindow
-        ) =>
-        {
-            (var nodeBorder, var interaction) = queryGameWindowBorder.Get();
-            (var nodeBorderResize, var interactionResize) = queryGameWindowBorderResize.Get();
-
-            if (interaction.Ref == UIInteractionState.Pressed)
-            {
-                if (mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
-                {
-                    camera.Value.Bounds.X += (int)mouseCtx.Value.PositionOffset.X;
-                    camera.Value.Bounds.Y += (int)mouseCtx.Value.PositionOffset.Y;
-                }
-            }
-
-            if (interactionResize.Ref == UIInteractionState.Pressed && mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
-            {
-                ref var newBounds = ref lastSize.Value;
-                newBounds.Width += (int)mouseCtx.Value.PositionOffset.X;
-                newBounds.Height += (int)mouseCtx.Value.PositionOffset.Y;
-
-                if (newBounds.Width >= 300)
-                    camera.Value.Bounds.Width = newBounds.Width;
-                if (newBounds.Height >= 300)
-                    camera.Value.Bounds.Height = newBounds.Height;
-            }
-            else
-            {
-                lastSize.Value = camera.Value.Bounds;
-            }
-
-            nodeBorderResize.Ref.Config.floating.offset = new()
-            {
-                x = camera.Value.Bounds.X + camera.Value.Bounds.Width + BORDER_SIZE - nodeBorderResize.Ref.Config.layout.sizing.width.size.minMax.max,
-                y = camera.Value.Bounds.Y + camera.Value.Bounds.Height + BORDER_SIZE - nodeBorderResize.Ref.Config.layout.sizing.height.size.minMax.max,
-            };
-
-            nodeBorder.Ref.Config.floating.offset = new()
-            {
-                x = camera.Value.Bounds.X - BORDER_SIZE * 0.5f,
-                y = camera.Value.Bounds.Y - BORDER_SIZE * 0.5f,
-            };
-            nodeBorder.Ref.Config.layout.sizing = new()
-            {
-                width = Clay_SizingAxis.Fixed(camera.Value.Bounds.Width + BORDER_SIZE),
-                height = Clay_SizingAxis.Fixed(camera.Value.Bounds.Height + BORDER_SIZE),
-            };
-
-
-            (_, var node) = queryGameWindow.Get();
-            node.Ref.Config.floating.offset = new()
-            {
-                x = camera.Value.Bounds.X,
-                y = camera.Value.Bounds.Y,
-            };
-            node.Ref.Config.layout.sizing = new()
-            {
-                width = Clay_SizingAxis.Fixed(camera.Value.Bounds.Width),
-                height = Clay_SizingAxis.Fixed(camera.Value.Bounds.Height),
-            };
-
-            if (renderTarget.Value == null || renderTarget.Value.IsDisposed ||
-                renderTarget.Value.Width != batch.Value.GraphicsDevice.PresentationParameters.BackBufferWidth ||
-                renderTarget.Value.Height != batch.Value.GraphicsDevice.PresentationParameters.BackBufferHeight)
-            {
-                renderTarget.Value?.Dispose();
-                renderTarget.Value = new(
-                    batch.Value.GraphicsDevice,
-                    batch.Value.GraphicsDevice.PresentationParameters.BackBufferWidth,
-                    batch.Value.GraphicsDevice.PresentationParameters.BackBufferHeight,
-                    false,
-                    SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
-
-                imageCache.Value[renderTarget.Value.GetHashCode()] = renderTarget.Value;
-            }
-            else
-            {
-                unsafe
-                {
-                    node.Ref.Config.image.imageData = (void*)renderTarget.Value.GetHashCode();
-                }
-            }
-        }, ThreadingMode.Single)
-        .RunIf((SchedulerState state) => state.InState(GameState.GameScreen) && state.ResourceExists<Camera>());
     }
 
     private static void Setup(World world, Res<GumpBuilder> gumpBuilder, Res<ClayUOCommandBuffer> clay)
@@ -253,8 +110,8 @@ internal readonly struct GameScreenPlugin : IPlugin
                     backgroundColor = new (1f, 1f, 1f, 1f),
                     layout = {
                         sizing = {
-                            width = Clay_SizingAxis.Fixed(BORDER_SIZE),
-                            height = Clay_SizingAxis.Fixed(BORDER_SIZE),
+                            width = Clay_SizingAxis.Fixed(600),
+                            height = Clay_SizingAxis.Fixed(480),
                         },
                     },
                     floating = floating
@@ -365,6 +222,178 @@ internal readonly struct GameScreenPlugin : IPlugin
 
         // root.AddChild(gameWindowRoot);
         root.AddChild(menuBar);
+    }
+
+
+
+    private static bool IsInGameScreen(SchedulerState state) => state.InState(GameState.GameScreen);
+
+    private static bool IsCameraExists(SchedulerState state) => state.ResourceExists<Camera>();
+
+    private static bool IsTimeToUpdate(Time time, Local<float> lastAccess)
+    {
+        if (time.Total > lastAccess.Value)
+        {
+            lastAccess.Value = time.Total + 250f;
+            return true;
+        }
+        return false;
+    }
+
+
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
+    [RunIf(nameof(IsInGameScreen))]
+    [RunIf(nameof(IsTimeToUpdate))]
+    private static void PrintTotalEntities(
+        World world,
+        Query<Data<UINode, Text>, With<TotalEntitiesMenu>> query,
+        Query<Empty, With<IsTile>> queryTiles,
+        Query<Empty, With<IsStatic>> queryStatics
+    )
+    {
+        var total = world.EntityCount;
+        var countTiles = queryTiles.Count();
+        var countStatics = queryStatics.Count();
+        foreach ((var node, var text) in query)
+        {
+            text.Ref.Value = $"Total entities: {total} - tiles: {countTiles} - statics: {countStatics}";
+        }
+    }
+
+
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
+    [RunIf(nameof(IsInGameScreen))]
+    private static void ButtonHandler(
+        Query<Data<UINode, UIInteractionState, ButtonAction>, Changed<UIInteractionState>> query,
+        State<GameState> state
+    )
+    {
+        foreach ((var node, var interaction, var action) in query)
+        {
+            if (interaction.Ref == UIInteractionState.Released)
+            {
+                switch (action.Ref)
+                {
+                    case ButtonAction.Logout:
+                        Console.WriteLine("Logout button pressed");
+                        state.Set(GameState.LoginScreen);
+                        break;
+                }
+            }
+        }
+    }
+
+
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
+    [RunIf(nameof(IsInGameScreen))]
+    [RunIf(nameof(IsCameraExists))]
+    private static void AdjustGameWindow(
+        Res<Camera> camera,
+        Res<RenderTarget2D> renderTarget,
+        Res<ImageCache> imageCache,
+        Res<UltimaBatcher2D> batch,
+        Res<MouseContext> mouseCtx,
+        Local<Rectangle> lastSize,
+        Single<Data<UINode, UIInteractionState>, Filter<With<GameWindowBorderUI>, With<GameScene>>> queryGameWindowBorder,
+        Single<Data<UINode, UIInteractionState>, Filter<With<GameWindowBorderResizeUI>, With<GameScene>>> queryGameWindowBorderResize,
+        Single<Data<UINode>, Filter<With<GameWindowUI>, With<GameScene>>> queryGameWindow
+    )
+    {
+        (var nodeBorder, var interaction) = queryGameWindowBorder.Get();
+        (var nodeBorderResize, var interactionResize) = queryGameWindowBorderResize.Get();
+        (_, var nodeGameWindow) = queryGameWindow.Get();
+
+        if (interaction.Ref == UIInteractionState.Pressed)
+        {
+            if (mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
+            {
+                nodeGameWindow.Ref.Config.floating.offset.x += (int)mouseCtx.Value.PositionOffset.X;
+                nodeGameWindow.Ref.Config.floating.offset.y += (int)mouseCtx.Value.PositionOffset.Y;
+            }
+        }
+
+        if (interactionResize.Ref == UIInteractionState.Pressed && mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
+        {
+            ref var newBounds = ref lastSize.Value;
+            newBounds.Width += (int)mouseCtx.Value.PositionOffset.X;
+            newBounds.Height += (int)mouseCtx.Value.PositionOffset.Y;
+
+            if (newBounds.Width >= 300)
+                nodeGameWindow.Ref.Config.layout.sizing.width = Clay_SizingAxis.Fixed(newBounds.Width);
+            if (newBounds.Height >= 300)
+                nodeGameWindow.Ref.Config.layout.sizing.height = Clay_SizingAxis.Fixed(newBounds.Height);
+        }
+        else
+        {
+            lastSize.Value = new
+            (
+                (int)nodeGameWindow.Ref.Config.floating.offset.x,
+                (int)nodeGameWindow.Ref.Config.floating.offset.y,
+                (int)nodeGameWindow.Ref.Config.layout.sizing.width.size.minMax.max,
+                (int)nodeGameWindow.Ref.Config.layout.sizing.height.size.minMax.max
+            );
+        }
+
+
+        nodeBorder.Ref.Config.floating.offset = nodeBorderResize.Ref.Config.floating.offset = nodeGameWindow.Ref.Config.floating.offset;
+
+
+
+        nodeBorderResize.Ref.Config.floating.offset.x += nodeGameWindow.Ref.Config.layout.sizing.width.size.minMax.max + BORDER_SIZE -
+                                                         nodeBorderResize.Ref.Config.layout.sizing.width.size.minMax.max;
+        nodeBorderResize.Ref.Config.floating.offset.y += nodeGameWindow.Ref.Config.layout.sizing.height.size.minMax.max + BORDER_SIZE -
+                                                         nodeBorderResize.Ref.Config.layout.sizing.height.size.minMax.max;
+
+        nodeBorder.Ref.Config.floating.offset.x -= BORDER_SIZE * 0.5f;
+        nodeBorder.Ref.Config.floating.offset.y -= BORDER_SIZE * 0.5f;
+
+        // nodeBorderResize.Ref.Config.floating.offset = new()
+        // {
+        //     x = camera.Value.Bounds.X + camera.Value.Bounds.Width + BORDER_SIZE - nodeBorderResize.Ref.Config.layout.sizing.width.size.minMax.max,
+        //     y = camera.Value.Bounds.Y + camera.Value.Bounds.Height + BORDER_SIZE - nodeBorderResize.Ref.Config.layout.sizing.height.size.minMax.max,
+        // };
+
+        // nodeBorder.Ref.Config.floating.offset = new()
+        // {
+        //     x = camera.Value.Bounds.X - BORDER_SIZE * 0.5f,
+        //     y = camera.Value.Bounds.Y - BORDER_SIZE * 0.5f,
+        // };
+        nodeBorder.Ref.Config.layout.sizing = new()
+        {
+            width = Clay_SizingAxis.Fixed(nodeGameWindow.Ref.Config.layout.sizing.width.size.minMax.max + BORDER_SIZE),
+            height = Clay_SizingAxis.Fixed(nodeGameWindow.Ref.Config.layout.sizing.height.size.minMax.max + BORDER_SIZE),
+        };
+
+
+        camera.Value.Bounds = new(
+            (int)nodeGameWindow.Ref.Config.floating.offset.x,
+            (int)nodeGameWindow.Ref.Config.floating.offset.y,
+            (int)nodeGameWindow.Ref.Config.layout.sizing.width.size.minMax.max,
+            (int)nodeGameWindow.Ref.Config.layout.sizing.height.size.minMax.max
+        );
+
+
+        if (renderTarget.Value == null || renderTarget.Value.IsDisposed ||
+            renderTarget.Value.Width != batch.Value.GraphicsDevice.PresentationParameters.BackBufferWidth ||
+            renderTarget.Value.Height != batch.Value.GraphicsDevice.PresentationParameters.BackBufferHeight)
+        {
+            renderTarget.Value?.Dispose();
+            renderTarget.Value = new(
+                batch.Value.GraphicsDevice,
+                batch.Value.GraphicsDevice.PresentationParameters.BackBufferWidth,
+                batch.Value.GraphicsDevice.PresentationParameters.BackBufferHeight,
+                false,
+                SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
+
+            imageCache.Value[renderTarget.Value.GetHashCode()] = renderTarget.Value;
+        }
+        else
+        {
+            unsafe
+            {
+                nodeGameWindow.Ref.Config.image.imageData = (void*)renderTarget.Value.GetHashCode();
+            }
+        }
     }
 
     private static void Cleanup(World world, Query<Data<UINode>, Filter<Without<Parent>, With<GameScene>>> query)

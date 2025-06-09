@@ -7,27 +7,30 @@ using TinyEcs;
 
 namespace ClassicUO.Ecs;
 
-internal readonly struct FontsPlugin : IPlugin
+[TinyPlugin]
+internal readonly partial struct FontsPlugin
 {
     public void Build(Scheduler scheduler)
     {
         // scheduler.AddResource(new FontCache());
+    }
 
-        scheduler.OnStartup(() =>
+
+    [TinySystem(Stages.Startup, ThreadingMode.Single)]
+    private static void Setup()
+    {
+        void registerFont(string name, ReadOnlySpan<byte> fontData)
         {
-            void registerFont(string name, ReadOnlySpan<byte> fontData)
-            {
-                var fontSystem = new FontSystem();
-                fontSystem.AddFont(fontData.ToArray());
-                FontCache.Register(name, fontSystem);
-            }
+            var fontSystem = new FontSystem();
+            fontSystem.AddFont(fontData.ToArray());
+            FontCache.Register(name, fontSystem);
+        }
 
-            registerFont("medium", TTFFontsLoader.Medium());
-            registerFont("regular", TTFFontsLoader.Regular());
-            registerFont("bold", TTFFontsLoader.Bold());
-            registerFont("bold-italic", TTFFontsLoader.BoldItalic());
-            registerFont("italic", TTFFontsLoader.MediumItalic());
-        }, ThreadingMode.Single);
+        registerFont("medium", TTFFontsLoader.Medium());
+        registerFont("regular", TTFFontsLoader.Regular());
+        registerFont("bold", TTFFontsLoader.Bold());
+        registerFont("bold-italic", TTFFontsLoader.BoldItalic());
+        registerFont("italic", TTFFontsLoader.MediumItalic());
     }
 }
 

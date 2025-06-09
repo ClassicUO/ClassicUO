@@ -6,22 +6,15 @@ using TinyEcs;
 
 namespace ClassicUO.Ecs;
 
-internal readonly struct CharacterSelectionPlugin : IPlugin
+[TinyPlugin]
+internal readonly partial struct CharacterSelectionPlugin
 {
     public void Build(Scheduler scheduler)
     {
         scheduler.AddEvent<CharacterSelectionInfoEvent>();
 
         var cleanupFn = Cleanup;
-        var characterInfoSetupFn = CharacterInfoSetup;
-        var characterSelectedFn = CharacterSelected;
-
         scheduler.OnExit(GameState.CharacterSelection, cleanupFn, ThreadingMode.Single);
-        scheduler.OnUpdate(characterInfoSetupFn, ThreadingMode.Single)
-                 .RunIf((SchedulerState state, EventReader<CharacterSelectionInfoEvent> reader)
-                     => !reader.IsEmpty && state.InState(GameState.CharacterSelection));
-        scheduler.OnUpdate(characterSelectedFn, ThreadingMode.Single)
-                 .RunIf((SchedulerState state) => state.InState(GameState.CharacterSelection));
     }
 
     private static void Cleanup(Query<Data<UINode>, Filter<With<CharacterSelectionScene>, Without<Parent>>> query)
@@ -32,6 +25,14 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
         }
     }
 
+    private static bool IsInGameSelection(SchedulerState state) => state.InState(GameState.CharacterSelection);
+    private static bool IsCharSelectionInfoEventNotEmpty(EventReader<CharacterSelectionInfoEvent> reader) => !reader.IsEmpty;
+
+
+
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
+    [RunIf(nameof(IsInGameSelection))]
+    [RunIf(nameof(IsCharSelectionInfoEventNotEmpty))]
     private static void CharacterInfoSetup(World world, EventReader<CharacterSelectionInfoEvent> reader)
     {
         var root = world.Entity()
@@ -162,6 +163,9 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
         }
     }
 
+
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
+    [RunIf(nameof(IsInGameSelection))]
     private static void CharacterSelected(
         Res<NetClient> network,
         Res<GameContext> gameCtx,

@@ -8,6 +8,9 @@
     <PublishAot>true</PublishAot>
     <PlatformTarget>x64</PlatformTarget>
     <PublishAot>true</PublishAot>
+
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+    <CompilerGeneratedFilesOutputPath>$(BaseIntermediateOutputPath)\Generated</CompilerGeneratedFilesOutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
@@ -91,6 +94,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\external\TinyEcs\src\TinyEcs.csproj" />
+    <ProjectReference Include="..\..\external\TinyEcs\tools\TinyEcs.SourceGenerator\TinyEcs.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <PropertyGroup>

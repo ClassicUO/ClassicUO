@@ -15,78 +15,85 @@ internal sealed class ChatOptions
     public ushort ChatColor { get; set; } = 0x44;
 }
 
-internal readonly struct ChatPlugin : IPlugin
+
+[TinyPlugin]
+internal readonly partial struct ChatPlugin
 {
     public void Build(Scheduler scheduler)
     {
         scheduler.AddResource(new ChatOptions());
+    }
 
-        scheduler.OnUpdate((
-            EventReader<CharInputEvent> reader,
-            Local<StringBuilder> sb,
-            Res<UOFileManager> fileManager,
-            Res<NetClient> network,
-            Res<GameContext> gameCtx,
-            Res<Settings> settings,
-            Res<ChatOptions> chatOptions
-        ) =>
+
+    private static bool OnCheckIfEventReaderIsEmpty(
+        EventReader<CharInputEvent> reader,
+        Res<NetClient> network
+    ) => !reader.IsEmpty && network.Value.IsConnected;
+
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
+    [RunIf(nameof(OnCheckIfEventReaderIsEmpty))]
+    private static void ReadOnCharEvents(
+        EventReader<CharInputEvent> reader,
+        Local<StringBuilder> sb,
+        Res<UOFileManager> fileManager,
+        Res<NetClient> network,
+        Res<GameContext> gameCtx,
+        Res<Settings> settings,
+        Res<ChatOptions> chatOptions
+    )
+    {
+        sb.Value ??= new StringBuilder();
+
+        foreach (var ev in reader)
+        {
+            if (ev.Value == '\n') continue;
+            if (ev.Value == '\t') continue;
+
+            if (ev.Value == '\b')
             {
-                sb.Value ??= new StringBuilder();
+                if (sb.Value.Length > 0)
+                    sb.Value.Remove(sb.Value.Length - 1, 1);
 
-                foreach (var ev in reader)
+                continue;
+            }
+
+            if (ev.Value == '\r')
+            {
+                if (sb.Value.Length > 0)
                 {
-                    if (ev.Value == '\n') continue;
-                    if (ev.Value == '\t') continue;
+                    var text = sb.Value.ToString();
+                    var entries = fileManager.Value.Speeches.GetKeywords(text);
 
-                    if (ev.Value == '\b')
+                    if (gameCtx.Value.ClientVersion >= ClientVersion.CV_200)
                     {
-                        if (sb.Value.Length > 0)
-                            sb.Value.Remove(sb.Value.Length - 1, 1);
-
-                        continue;
+                        network.Value.Send_UnicodeSpeechRequest(
+                            text,
+                            MessageType.Regular,
+                            3,
+                            chatOptions.Value.ChatColor,
+                            settings.Value.Language,
+                            entries
+                        );
+                    }
+                    else
+                    {
+                        network.Value.Send_ASCIISpeechRequest(
+                            text,
+                            MessageType.Regular,
+                            3,
+                            chatOptions.Value.ChatColor,
+                            entries
+                        );
                     }
 
-                    if (ev.Value == '\r')
-                    {
-                        if (sb.Value.Length > 0)
-                        {
-                            var text = sb.Value.ToString();
-                            var entries = fileManager.Value.Speeches.GetKeywords(text);
-
-                            if (gameCtx.Value.ClientVersion >= ClientVersion.CV_200)
-                            {
-                                network.Value.Send_UnicodeSpeechRequest(
-                                    text,
-                                    MessageType.Regular,
-                                    3,
-                                    chatOptions.Value.ChatColor,
-                                    settings.Value.Language,
-                                    entries
-                                );
-                            }
-                            else
-                            {
-                                network.Value.Send_ASCIISpeechRequest(
-                                    text,
-                                    MessageType.Regular,
-                                    3,
-                                    chatOptions.Value.ChatColor,
-                                    entries
-                                );
-                            }
-
-                            sb.Value.Clear();
-                        }
-
-                        continue;
-                    }
-
-                    if (sb.Value.Length < chatOptions.Value.MaxMessageLength)
-                        sb.Value.Append(ev.Value);
+                    sb.Value.Clear();
                 }
-            },
-            ThreadingMode.Single
-        ).RunIf((EventReader<CharInputEvent> reader, Res<NetClient> network)
-            => !reader.IsEmpty && network.Value.IsConnected);
+
+                continue;
+            }
+
+            if (sb.Value.Length < chatOptions.Value.MaxMessageLength)
+                sb.Value.Append(ev.Value);
+        }
     }
 }

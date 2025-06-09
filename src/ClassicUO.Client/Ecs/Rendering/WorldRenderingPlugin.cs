@@ -14,7 +14,8 @@ using World = TinyEcs.World;
 
 namespace ClassicUO.Ecs;
 
-internal readonly struct WorldRenderingPlugin : IPlugin
+[TinyPlugin]
+internal readonly partial struct WorldRenderingPlugin
 {
     public void Build(Scheduler scheduler)
     {
@@ -26,67 +27,58 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         scheduler.AddResource(new SelectedEntity());
         scheduler.AddResource(new Viewport());
 
-        scheduler.OnFrameStart((
-            Res<MouseContext> mouseCtx,
-            Res<KeyboardContext> keyboardCtx,
-            Res<GameContext> gameCtx,
-            Res<Camera> camera,
-            Local<bool> canMove
-        ) =>
-        {
-            if (mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Left))
-            {
-                canMove.Value = camera.Value.Bounds.Contains((int)mouseCtx.Value.Position.X, (int)mouseCtx.Value.Position.Y);
-            }
-
-            if (canMove && mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
-            {
-                gameCtx.Value.CenterOffset += mouseCtx.Value.PositionOffset * camera.Value.Zoom;
-            }
-
-            if (keyboardCtx.Value.IsPressedOnce(Keys.Space))
-            {
-                gameCtx.Value.FreeView = !gameCtx.Value.FreeView;
-            }
-        }, ThreadingMode.Single).RunIf((Res<UoGame> game) => game.Value.IsActive);
-
-        scheduler.OnUpdate
-        (
-            (Res<GameContext> gameCtx, Query<Data<WorldPosition, ScreenPositionOffset>, With<Player>> playerQuery) =>
-            {
-                foreach ((var position, var offset) in playerQuery)
-                {
-                    gameCtx.Value.CenterX = position.Ref.X;
-                    gameCtx.Value.CenterY = position.Ref.Y;
-                    gameCtx.Value.CenterZ = position.Ref.Z;
-                    gameCtx.Value.CenterOffset = offset.Ref.Value * -1;
-                }
-            },
-            ThreadingMode.Single
-        ).RunIf((Res<GameContext> gameCtx) => !gameCtx.Value.FreeView);
 
         var cleanupFn = Cleanup;
         scheduler.OnExit(GameState.GameScreen, cleanupFn, ThreadingMode.Single);
-
-
-        var beginRenderingFn = BeginRendering;
-        var renderingFn = Rendering;
-        var showTextOverheadFn = ShowTextOverhead;
-        var endRenderingFn = EndRendering;
-
-        var beginRenderingSystem = scheduler.OnAfterUpdate(beginRenderingFn, ThreadingMode.Single);
-        var endRenderingSystem = scheduler.OnAfterUpdate(endRenderingFn, ThreadingMode.Single);
-        var worldRenderingSystem = scheduler.OnAfterUpdate(renderingFn, ThreadingMode.Single)
-                 .RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>())
-                 .RunIf((SchedulerState state) => state.InState(GameState.GameScreen))
-                 .RunIf((Query<Data<WorldPosition>, With<Player>> playerQuery) => playerQuery.Count() > 0);
-        var textOverheadRenderingSystem = scheduler.OnAfterUpdate(showTextOverheadFn, ThreadingMode.Single);
-
-        beginRenderingSystem.RunBefore(worldRenderingSystem);
-        worldRenderingSystem.RunBefore(endRenderingSystem);
-        textOverheadRenderingSystem.RunAfter(worldRenderingSystem);
     }
 
+    private static bool CanRender(SchedulerState state, Query<Data<WorldPosition>, With<Player>> playerQuery)
+        => state.ResourceExists<GraphicsDevice>() && state.InState(GameState.GameScreen) && playerQuery.Count() > 0;
+
+    private static bool IsGameActive(Res<UoGame> game) => game.Value.IsActive;
+
+    [TinySystem(Stages.FrameStart, ThreadingMode.Single)]
+    [RunIf(nameof(IsGameActive))]
+    private static void HandleCameraDragging(
+        Res<MouseContext> mouseCtx,
+        Res<KeyboardContext> keyboardCtx,
+        Res<GameContext> gameCtx,
+        Res<Camera> camera,
+        Local<bool> canMove
+    )
+    {
+        if (mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Left))
+        {
+            canMove.Value = camera.Value.Bounds.Contains((int)mouseCtx.Value.Position.X, (int)mouseCtx.Value.Position.Y);
+        }
+
+        if (canMove && mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
+        {
+            gameCtx.Value.CenterOffset += mouseCtx.Value.PositionOffset * camera.Value.Zoom;
+        }
+
+        if (keyboardCtx.Value.IsPressedOnce(Keys.Space))
+        {
+            gameCtx.Value.FreeView = !gameCtx.Value.FreeView;
+        }
+    }
+
+
+
+    private static bool IsNotFreeView(Res<GameContext> gameCtx) => !gameCtx.Value.FreeView;
+
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
+    [RunIf(nameof(IsNotFreeView))]
+    private static void UpdateGameCtxWithPlayerCenter(Res<GameContext> gameCtx, Query<Data<WorldPosition, ScreenPositionOffset>, With<Player>> playerQuery)
+    {
+        foreach ((var position, var offset) in playerQuery)
+        {
+            gameCtx.Value.CenterX = position.Ref.X;
+            gameCtx.Value.CenterY = position.Ref.Y;
+            gameCtx.Value.CenterZ = position.Ref.Z;
+            gameCtx.Value.CenterOffset = offset.Ref.Value * -1;
+        }
+    }
 
     private static void Cleanup(Res<SelectedEntity> selectedEntity)
     {
@@ -107,20 +99,9 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         public readonly bool IsUnderRoof => IsSameTile && IsTileAhead;
     }
 
-    private static void ShowTextOverhead(
-        World world,
-        Time time,
-        Res<TextOverHeadManager> textOverHeadManager,
-        Res<NetworkEntitiesMap> networkEntities,
-        Res<UltimaBatcher2D> batcher,
-        Res<GameContext> gameCtx,
-        Res<Camera> camera,
-        Res<UOFileManager> fileManager)
-    {
-        textOverHeadManager.Value.Update(world, time, networkEntities);
-        textOverHeadManager.Value.Render(world, networkEntities, batcher, gameCtx, camera, fileManager.Value.Hues);
-    }
 
+    [TinySystem(Stages.AfterUpdate, ThreadingMode.Single)]
+    [BeforeOf(nameof(WorldRendering))]
     private static void BeginRendering(
         Res<Camera> camera,
         Res<RenderTarget2D> renderTarget,
@@ -136,6 +117,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         batch.Value.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0, 0);
     }
 
+    [TinySystem(Stages.AfterUpdate, ThreadingMode.Single)]
     private static void EndRendering(Res<UltimaBatcher2D> batch, Res<Viewport> viewport)
     {
         batch.Value.GraphicsDevice.SetRenderTarget(null);
@@ -143,7 +125,10 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         batch.Value.GraphicsDevice.Viewport = viewport;
     }
 
-    private static void Rendering
+    [TinySystem(Stages.AfterUpdate, ThreadingMode.Single)]
+    [BeforeOf(nameof(EndRendering))]
+    [RunIf(nameof(CanRender))]
+    private static void WorldRendering
     (
         TinyEcs.World world,
         Res<SelectedEntity> selectedEntity,
@@ -835,6 +820,23 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         batch.Value.SetSampler(null);
         batch.Value.SetStencil(null);
         batch.Value.End();
+    }
+
+
+    [TinySystem(Stages.AfterUpdate, ThreadingMode.Single)]
+    [AfterOf(nameof(WorldRendering))]
+    private static void ShowTextOverhead(
+        World world,
+        Time time,
+        Res<TextOverHeadManager> textOverHeadManager,
+        Res<NetworkEntitiesMap> networkEntities,
+        Res<UltimaBatcher2D> batcher,
+        Res<GameContext> gameCtx,
+        Res<Camera> camera,
+        Res<UOFileManager> fileManager)
+    {
+        textOverHeadManager.Value.Update(world, time, networkEntities);
+        textOverHeadManager.Value.Render(world, networkEntities, batcher, gameCtx, camera, fileManager.Value.Hues);
     }
 
 

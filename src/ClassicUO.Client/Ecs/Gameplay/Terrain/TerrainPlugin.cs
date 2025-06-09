@@ -9,7 +9,8 @@ using TinyEcs;
 
 namespace ClassicUO.Ecs;
 
-internal readonly struct TerrainPlugin : IPlugin
+[TinyPlugin]
+internal readonly partial struct TerrainPlugin
 {
     private struct OnNewChunkRequest { public int Map; public int RangeStartX, RangeStartY, RangeEndX, RangeEndY; }
     private struct Terrain { }
@@ -24,28 +25,6 @@ internal readonly struct TerrainPlugin : IPlugin
         scheduler.AddResource(new ChunksLoadedMap());
         scheduler.AddResource(new LastPosition());
 
-        var enqueueChunksRequestsFn = EnqueueChunksRequests;
-        scheduler.OnUpdate(enqueueChunksRequestsFn, ThreadingMode.Single)
-            .RunIf((Query<Data<WorldPosition>, With<Player>> playerQuery) => playerQuery.Count() > 0);
-
-        var loadChunksFn = LoadChunks;
-        scheduler.OnUpdate(loadChunksFn, ThreadingMode.Single)
-            .RunIf((EventReader<OnNewChunkRequest> reader) => !reader.IsEmpty);
-
-        var checkChunksFn = CheckChunk;
-        scheduler.OnUpdate(checkChunksFn, ThreadingMode.Single)
-            .RunIf((Query<Data<TerrainChunk>> query, SchedulerState state)
-                => query.Count() > 0 && state.InState(GameState.GameScreen));
-
-        var removeEntitiesOutOfRangeFn = RemoveEntitiesOutOfRange;
-        scheduler.OnUpdate(removeEntitiesOutOfRangeFn, ThreadingMode.Single)
-            .RunIf((Query<Data<WorldPosition>, With<Player>> playerQuery, Local<float> timeUpdate, Time time) =>
-            {
-                if (timeUpdate.Value > time.Total)
-                    return false;
-                timeUpdate.Value = time.Total + 3000;
-                return playerQuery.Count() > 0;
-            });
 
         scheduler.OnExit(GameState.GameScreen, (
             Res<ChunksLoadedMap> chunksLoaded,
@@ -77,6 +56,12 @@ internal readonly struct TerrainPlugin : IPlugin
                 (int)((cameraBounds.Height / TILE_SIZE + 1) * camera.Zoom));
     }
 
+
+    private static bool IsInGameScreen(Query<Data<TerrainChunk>> query, SchedulerState state)
+        => query.Count() > 0 && state.InState(GameState.GameScreen);
+
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
+    [RunIf(nameof(IsInGameScreen))]
     private static void CheckChunk(
         Time time,
         Res<Camera> camera,
@@ -111,6 +96,22 @@ internal readonly struct TerrainPlugin : IPlugin
         }
     }
 
+
+
+    private static bool DoesPlayerExist
+    (
+        Query<Data<WorldPosition>, With<Player>> playerQuery,
+        Res<GameContext> gameCtx
+    )
+    {
+        if (gameCtx.Value.Map == -1)
+            return false;
+
+        return playerQuery.Count() > 0;
+    }
+
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
+    [RunIf(nameof(DoesPlayerExist))]
     private static void EnqueueChunksRequests
     (
         Res<GameContext> gameCtx,
@@ -158,6 +159,14 @@ internal readonly struct TerrainPlugin : IPlugin
         });
     }
 
+
+    private static bool OnCheckIfEventReaderIsNotEmpty(EventReader<OnNewChunkRequest> reader)
+    {
+        return !reader.IsEmpty;
+    }
+
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
+    [RunIf(nameof(OnCheckIfEventReaderIsNotEmpty))]
     private static void LoadChunks
     (
         World world,
@@ -298,6 +307,17 @@ internal readonly struct TerrainPlugin : IPlugin
         }
     }
 
+
+    private static bool IsTimeToUpdate(Query<Data<WorldPosition>, With<Player>> playerQuery, Local<float> timeUpdate, Time time)
+    {
+        if (timeUpdate.Value > time.Total)
+            return false;
+        timeUpdate.Value = time.Total + 3000;
+        return playerQuery.Count() > 0;
+    }
+
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
+    [RunIf(nameof(IsTimeToUpdate))]
     private static void RemoveEntitiesOutOfRange
     (
        Commands commands,

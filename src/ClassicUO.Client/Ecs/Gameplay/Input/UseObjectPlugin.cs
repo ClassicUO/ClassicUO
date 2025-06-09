@@ -5,16 +5,19 @@ using TinyEcs;
 namespace ClassicUO.Ecs;
 
 
-internal readonly struct UseObjectPlugin : IPlugin
+[TinyPlugin]
+internal readonly partial struct UseObjectPlugin
 {
     public void Build(Scheduler scheduler)
     {
-        var useObjectFn = UseObject;
-        scheduler.OnUpdate(useObjectFn, ThreadingMode.Single)
-            .RunIf((Res<MouseContext> mouseCtx) => mouseCtx.Value.IsPressedDouble(Input.MouseButtonType.Left));
+
     }
 
 
+    private static bool IsLeftDoublePressed(Res<MouseContext> mouseCtx) => mouseCtx.Value.IsPressedDouble(Input.MouseButtonType.Left);
+
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
+    [RunIf(nameof(IsLeftDoublePressed))]
     private static void UseObject(
         Res<MouseContext> mouseContext,
         Res<SelectedEntity> selectedEntity,

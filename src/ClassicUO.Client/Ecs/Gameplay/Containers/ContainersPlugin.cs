@@ -9,26 +9,40 @@ using TinyEcs;
 
 namespace ClassicUO.Ecs;
 
-internal readonly struct ContainersPlugin : IPlugin
+[TinyPlugin]
+internal readonly partial struct ContainersPlugin
 {
     public void Build(Scheduler scheduler)
     {
         scheduler.AddEvent<ContainerOpenedEvent>();
         scheduler.AddEvent<ContainerClosedEvent>();
         scheduler.AddEvent<ContainerUpdateEvent>();
+    }
 
-        var registerOpenContainerFn = RegisterOpenContainer;
-        scheduler.OnStartup(registerOpenContainerFn, ThreadingMode.Single);
+    private static bool OnSelectedEntityExists(SchedulerState state) => state.ResourceExists<SelectedEntity>();
 
-        var registerUpdateContainerFn = RegisterUpdateContainer;
-        scheduler.OnStartup(registerUpdateContainerFn, ThreadingMode.Single);
-
-        var onOpenContainersFn = OnOpenContainers;
-        scheduler.OnUpdate(onOpenContainersFn, ThreadingMode.Single)
-            .RunIf((EventReader<ContainerOpenedEvent> reader) => !reader.IsEmpty);
+    [TinySystem(threadingMode: ThreadingMode.Single)]
+    [RunIf(nameof(OnSelectedEntityExists))]
+    private static void SelectItemInContainer(
+        Res<SelectedEntity> selectedEntity,
+        Query<Data<NetworkSerial, UIInteractionState>, Filter<With<ContainedInto>>> query
+    )
+    {
+        foreach ((var ent, var serial, var interaction) in query)
+        {
+            if (interaction.Ref is UIInteractionState.Over or UIInteractionState.Pressed)
+            {
+                selectedEntity.Value.Clear();
+                selectedEntity.Value.Set(ent.Ref, float.MaxValue);
+            }
+        }
     }
 
 
+    private static bool OnEventReaderIsNotEmpty(EventReader<ContainerOpenedEvent> reader) => !reader.IsEmpty;
+
+    [TinySystem(threadingMode: ThreadingMode.Single)]
+    [RunIf(nameof(OnEventReaderIsNotEmpty))]
     private static void OnOpenContainers(
         World world,
         Res<NetworkEntitiesMap> entitiesMap,
@@ -88,6 +102,8 @@ internal readonly struct ContainersPlugin : IPlugin
         }
     }
 
+
+    [TinySystem(Stages.Startup, ThreadingMode.Single)]
     private static void RegisterOpenContainer(
         Res<PacketsMap> packets,
         EventWriter<ContainerOpenedEvent> writer
@@ -105,6 +121,7 @@ internal readonly struct ContainersPlugin : IPlugin
         };
     }
 
+    [TinySystem(Stages.Startup, ThreadingMode.Single)]
     private static void RegisterUpdateContainer(
         Res<PacketsMap> packets,
         Res<GameContext> gameCtx,

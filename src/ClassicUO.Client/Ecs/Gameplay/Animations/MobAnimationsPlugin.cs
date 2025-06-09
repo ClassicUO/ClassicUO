@@ -101,24 +101,20 @@ struct MobileQueuedStep
     public Direction Direction;
 }
 
-readonly struct MobAnimationsPlugin : IPlugin
+[TinyPlugin]
+internal readonly partial struct MobAnimationsPlugin
 {
     public void Build(Scheduler scheduler)
     {
         scheduler.AddEvent<MobileQueuedStep>();
-
-        var readMobileStepsFn = ReadMobilesSteps;
-        scheduler.OnUpdate(readMobileStepsFn, ThreadingMode.Single)
-            .RunIf((EventReader<MobileQueuedStep> stepsQueued) => !stepsQueued.IsEmpty);
-
-        var handleMobileStepsFn = HandleMobileSteps;
-        scheduler.OnUpdate(handleMobileStepsFn, ThreadingMode.Single);
-
-        var processMobileAnimationsFn = ProcessMobileAnimations;
-        scheduler.OnUpdate(processMobileAnimationsFn, ThreadingMode.Single);
     }
 
-    void ReadMobilesSteps(
+    private static bool OnMobileQueuedStepsNotEmpty(EventReader<MobileQueuedStep> stepsQueued) => !stepsQueued.IsEmpty;
+
+
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
+    [RunIf(nameof(OnMobileQueuedStepsNotEmpty))]
+    private static void ReadMobilesSteps(
         TinyEcs.World world,
         Time time,
         EventReader<MobileQueuedStep> stepsQueued,
@@ -249,7 +245,9 @@ readonly struct MobAnimationsPlugin : IPlugin
         }
     }
 
-    void HandleMobileSteps
+
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
+    private static void HandleMobileSteps
     (
         Time time,
         Query<TinyEcs.Data<MobileSteps, WorldPosition, Facing, MobAnimation, ScreenPositionOffset, ServerFlags>, Without<ContainedInto>> queryHandleWalking
@@ -362,7 +360,9 @@ readonly struct MobAnimationsPlugin : IPlugin
         }
     }
 
-    void ProcessMobileAnimations
+
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
+    private static void ProcessMobileAnimations
     (
         TinyEcs.World world,
         Time time,

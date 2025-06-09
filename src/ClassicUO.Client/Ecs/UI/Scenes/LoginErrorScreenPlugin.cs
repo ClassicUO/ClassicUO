@@ -4,22 +4,15 @@ using TinyEcs;
 
 namespace ClassicUO.Ecs;
 
-internal readonly struct LoginErrorScreenPlugin : IPlugin
+[TinyPlugin]
+internal readonly partial struct LoginErrorScreenPlugin
 {
     public void Build(Scheduler scheduler)
     {
         scheduler.AddEvent<LoginErrorsInfoEvent>();
 
         var cleanupFn = Cleanup;
-        var loginErrorSetupFn = LoginErrorInfoSetup;
-        var buttonHandlerFn = ButtonHandler;
-
         scheduler.OnExit(GameState.LoginError, cleanupFn, ThreadingMode.Single);
-        scheduler.OnUpdate(loginErrorSetupFn, ThreadingMode.Single)
-                 .RunIf((SchedulerState state, EventReader<LoginErrorsInfoEvent> reader)
-                     => !reader.IsEmpty && state.InState(GameState.LoginError));
-        scheduler.OnUpdate(buttonHandlerFn, ThreadingMode.Single)
-                 .RunIf((SchedulerState state) => state.InState(GameState.LoginError));
     }
 
     private static void Cleanup(Query<Data<UINode>, Filter<With<LoginErrorScene>, Without<Parent>>> query)
@@ -30,6 +23,14 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
         }
     }
 
+
+    private static bool IsInLoginErrorState(SchedulerState state) => state.InState(GameState.LoginError);
+    private static bool HasErrorInfoEvents(EventReader<LoginErrorsInfoEvent> reader) => !reader.IsEmpty;
+
+
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
+    [RunIf(nameof(IsInLoginErrorState))]
+    [RunIf(nameof(HasErrorInfoEvents))]
     private static void LoginErrorInfoSetup(World world, EventReader<LoginErrorsInfoEvent> reader)
     {
         var root = world.Entity()
@@ -210,6 +211,9 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
         root.AddChild(menu);
     }
 
+
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
+    [RunIf(nameof(IsInLoginErrorState))]
     private static void ButtonHandler(
         Res<NetClient> network,
         State<GameState> state,

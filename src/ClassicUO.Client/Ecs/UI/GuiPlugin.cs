@@ -15,7 +15,8 @@ using TinyEcs;
 namespace ClassicUO.Ecs;
 
 
-internal readonly struct GuiPlugin : IPlugin
+[TinyPlugin]
+internal readonly partial struct GuiPlugin
 {
     private const FontSystemEffect FONT_EFFECT = FontSystemEffect.Stroked;
     private const int FONT_EFFECT_AMOUNT = 1;
@@ -62,33 +63,10 @@ internal readonly struct GuiPlugin : IPlugin
         var states = Enum.GetValues<GameState>();
         foreach (var state in states)
             scheduler.OnExit(state, (Res<FocusedInput> focusedInput) => focusedInput.Value.Entity = 0, ThreadingMode.Single);
-
-
-        var setupClayFn = SetupClay;
-        scheduler.OnStartup(setupClayFn, ThreadingMode.Single);
-
-        var setClayWorkspaceDimensionsFn = SetClayWorkspaceDimensions;
-        scheduler.OnUpdate(setClayWorkspaceDimensionsFn, ThreadingMode.Single);
-
-        var updateUOButtonsStateFn = UpdateUOButtonsState;
-        scheduler.OnUpdate(updateUOButtonsStateFn, ThreadingMode.Single);
-
-        var updateFocusedInputFn = UpdateFocusedInput;
-        scheduler.OnUpdate(updateFocusedInputFn, ThreadingMode.Single)
-            .RunIf((Res<KeyboardContext> keyboardCtx) => keyboardCtx.Value.IsPressedOnce(Microsoft.Xna.Framework.Input.Keys.Tab));
-
-        var readCharInputsFn = ReadCharInputs;
-        scheduler.OnUpdate(readCharInputsFn, ThreadingMode.Single)
-            .RunIf((EventReader<CharInputEvent> reader,
-                    Res<FocusedInput> focusedInput,
-                    Query<Data<UINode>, Filter<With<TextInput>>> query) =>
-                        !reader.IsEmpty && focusedInput.Value.Entity != 0 && query.Count() > 0);
-
-        var moveFocusedElementsByMouseFn = MoveFocusedElementsByMouse;
-        scheduler.OnUpdate(moveFocusedElementsByMouseFn, ThreadingMode.Single        );
     }
 
 
+    [TinySystem(Stages.Startup, ThreadingMode.Single)]
     private static unsafe void SetupClay()
     {
         var arenaHandle = Clay.CreateArena(Clay.MinMemorySize());
@@ -100,6 +78,7 @@ internal readonly struct GuiPlugin : IPlugin
         // Clay.SetDebugModeEnabled(true);
     }
 
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
     private static void SetClayWorkspaceDimensions(Res<GraphicsDevice> device, Res<MouseContext> mouseCtx, Time time)
     {
         Clay.SetLayoutDimensions(new()
@@ -112,6 +91,7 @@ internal readonly struct GuiPlugin : IPlugin
         Clay.UpdateScrollContainers(true, new(0, mouseCtx.Value.Wheel * 3), time.Frame);
     }
 
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
     private static void UpdateUOButtonsState(Query<Data<UINode, UOButton, UIInteractionState>, Changed<UIInteractionState>> query)
     {
         foreach ((var node, var button, var interaction) in query)
@@ -125,6 +105,11 @@ internal readonly struct GuiPlugin : IPlugin
         }
     }
 
+
+    private static bool IsTabPressedOnce(Res<KeyboardContext> keyboardCtx) => keyboardCtx.Value.IsPressedOnce(Microsoft.Xna.Framework.Input.Keys.Tab);
+
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
+    [RunIf(nameof(IsTabPressedOnce))]
     private static void UpdateFocusedInput(Query<Data<Text>, Filter<With<TextInput>>> query, Res<FocusedInput> focusedInput)
     {
         var ok = false;
@@ -156,6 +141,13 @@ internal readonly struct GuiPlugin : IPlugin
         }
     }
 
+
+    private static bool CanReadCharInputs(EventReader<CharInputEvent> reader, Res<FocusedInput> focusedInput, Query<Data<UINode>, Filter<With<TextInput>>> query) =>
+        !reader.IsEmpty && focusedInput.Value.Entity != 0 && query.Count() > 0;
+
+
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
+    [RunIf(nameof(CanReadCharInputs))]
     private static void ReadCharInputs(
         EventReader<CharInputEvent> reader,
         Res<FocusedInput> focusedInput,
@@ -167,6 +159,8 @@ internal readonly struct GuiPlugin : IPlugin
             node.Ref.Value = TextComposer.Compose(node.Ref.Value, c.Value);
     }
 
+
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
     private static void MoveFocusedElementsByMouse(
         Res<MouseContext> mouseCtx,
         Query<Data<UINode, UIInteractionState>, With<UIMovable>> query

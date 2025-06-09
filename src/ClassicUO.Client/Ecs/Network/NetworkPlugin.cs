@@ -21,16 +21,15 @@ struct OnLoginRequest
 
 internal sealed class PacketsMap : Dictionary<byte, OnPacket>;
 
-readonly struct NetworkPlugin : IPlugin
+[TinyPlugin]
+internal readonly partial struct NetworkPlugin
 {
     public void Build(Scheduler scheduler)
     {
+        scheduler.AddResource(new NetClient());
         scheduler.AddResource(new CircularBuffer());
         scheduler.AddResource(new PacketsMap());
         scheduler.AddEvent<OnLoginRequest>();
-
-        var setupSocketFn = SetupSocket;
-        scheduler.OnStartup(setupSocketFn);
 
         scheduler.AddPlugin<LoginPacketsPlugin>();
         scheduler.AddPlugin<InGamePacketsPlugin>();
@@ -42,34 +41,20 @@ readonly struct NetworkPlugin : IPlugin
             network.Value.Disconnect();
             buffer.Value.Clear();
         }, ThreadingMode.Single);
-
-        scheduler.OnUpdate((Res<NetClient> network) => network.Value.Send_Ping(0xFF), ThreadingMode.Single)
-            .RunIf((Res<GameContext> gameCtx, Res<NetClient> network) => network.Value!.IsConnected && gameCtx.Value.PlayerSerial != 0)
-            .RunIf((Time time, Local<float> updateTime) =>
-            {
-                if (updateTime.Value >= time.Total)
-                    return false;
-
-                updateTime.Value = time.Total + 1000f;
-                return true;
-            });
-
-        var handleLoginRequestsFn = HandleLoginRequests;
-        scheduler.OnUpdate(handleLoginRequestsFn, ThreadingMode.Single)
-            .RunIf((EventReader<OnLoginRequest> loginRequests) => !loginRequests.IsEmpty);
-
-        var packetReaderFn = PacketReader;
-        scheduler.OnUpdate(packetReaderFn, ThreadingMode.Single)
-            .RunIf((Res<NetClient> network) => network.Value!.IsConnected);
     }
 
-    void SetupSocket(Res<Settings> settings, Res<UOFileManager> fileManager, SchedulerState sched)
+
+    [TinySystem(Stages.Startup, ThreadingMode.Single)]
+    void SetupSocket(Res<NetClient> socket, Res<Settings> settings, Res<UOFileManager> fileManager, SchedulerState sched)
     {
-        var socket = new NetClient();
-        settings.Value.Encryption = (byte)socket.Load(fileManager.Value.Version, (EncryptionType)settings.Value.Encryption);
-        sched.AddResource(socket);
+        settings.Value.Encryption = (byte)socket.Value.Load(fileManager.Value.Version, (EncryptionType)settings.Value.Encryption);
     }
 
+    private static bool IsLoginRequestsNotEmpty(EventReader<OnLoginRequest> loginRequests) => !loginRequests.IsEmpty;
+
+
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
+    [RunIf(nameof(IsLoginRequestsNotEmpty))]
     void HandleLoginRequests(
         EventReader<OnLoginRequest> loginRequests,
         Res<NetClient> network,
@@ -109,6 +94,32 @@ readonly struct NetworkPlugin : IPlugin
         loginRequests.Clear();
     }
 
+
+    private static bool IsClientConnected(Res<NetClient> network) => network.Value!.IsConnected;
+
+
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
+    [RunIf(nameof(IsClientConnected))]
+    void SendPingEverySecond(
+        Res<GameContext> gameCtx,
+        Res<NetClient> network,
+        Time time,
+        Local<float> updateTime
+    )
+    {
+        if (gameCtx.Value.PlayerSerial == 0)
+            return;
+
+        if (updateTime.Value >= time.Total)
+            return;
+
+        updateTime.Value = time.Total + 1000f;
+        network.Value.Send_Ping(0xFF);
+    }
+
+
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
+    [RunIf(nameof(IsClientConnected))]
     void PacketReader(Res<NetClient> network, Res<PacketsMap> packetsMap, Res<CircularBuffer> buffer, Local<byte[]> packetBuffer)
     {
         // buffer.Value ??= new();

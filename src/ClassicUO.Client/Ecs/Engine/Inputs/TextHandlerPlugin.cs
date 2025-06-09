@@ -3,24 +3,26 @@ using TinyEcs;
 
 namespace ClassicUO.Ecs;
 
-internal readonly struct TextHandlerPlugin : IPlugin
+[TinyPlugin]
+internal readonly partial struct TextHandlerPlugin
 {
     public void Build(Scheduler scheduler)
     {
         scheduler.AddEvent<CharInputEvent>();
+    }
 
-        scheduler.OnStartup
+
+    [TinySystem(Stages.Startup, ThreadingMode.Single)]
+    private static void CharInput(EventWriter<CharInputEvent> writer)
+    {
+        TextInputEXT.TextInput += c => writer.Enqueue
         (
-            (EventWriter<CharInputEvent> writer) =>
+            new()
             {
-                TextInputEXT.TextInput += c =>
-                {
-                    writer.Enqueue(new() { Value = c });
-                };
-                TextInputEXT.StartTextInput();
-            },
-            ThreadingMode.Single
+                Value = c
+            }
         );
+        TextInputEXT.StartTextInput();
     }
 }
 

@@ -50,7 +50,9 @@ struct AcceptedStep
     public NotorietyFlag Notoriety;
 }
 
-readonly struct PlayerMovementPlugin : IPlugin
+
+[TinyPlugin]
+internal readonly partial struct PlayerMovementPlugin
 {
     public void Build(Scheduler scheduler)
     {
@@ -65,53 +67,53 @@ readonly struct PlayerMovementPlugin : IPlugin
                 playerRequestedSteps.Value = new PlayerStepsContext();
             }, ThreadingMode.Single
         );
-
-        var enqueuePlayerStepsFn = EnqueuePlayerSteps;
-        scheduler.OnUpdate(enqueuePlayerStepsFn, ThreadingMode.Single)
-            .RunIf((Res<MouseContext> mouseCtx, Res<Camera> camera, Local<(float X, float Y)> clickedPos) =>
-            {
-                if (mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Right))
-                {
-                    clickedPos.Value = (mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y);
-                }
-
-                return camera.Value.Bounds.Contains((int)clickedPos.Value.X, (int)clickedPos.Value.Y);
-            })
-            .RunIf((
-                Res<MouseContext> mouseCtx,
-                Res<PlayerStepsContext> playerRequestedSteps,
-                Local<bool> autoWalk,
-                Time time,
-                Query<Data<WorldPosition, Facing, MobileSteps, MobAnimation>, With<Player>> playerQuery
-            ) =>
-            {
-                if (!autoWalk)
-                {
-                    if (mouseCtx.Value.IsPressed(Input.MouseButtonType.Right) &&
-                        mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
-                    {
-                        autoWalk.Value = true;
-                    }
-                }
-                else if (mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Right))
-                {
-                    autoWalk.Value = false;
-                }
-
-                return (autoWalk || mouseCtx.Value.IsPressed(Input.MouseButtonType.Right)) &&
-                         playerRequestedSteps.Value.LastStep < time.Total && playerRequestedSteps.Value.Count < 5 &&
-                         playerQuery.Count() > 0;
-            });
-
-        var parseAcceptedStepsFn = ParseAcceptedSteps;
-        scheduler.OnUpdate(parseAcceptedStepsFn, ThreadingMode.Single)
-            .RunIf((EventReader<AcceptedStep> responses) => !responses.IsEmpty);
-
-        var parseDeniedStepsFn = ParseDeniedSteps;
-        scheduler.OnUpdate(parseDeniedStepsFn, ThreadingMode.Single)
-            .RunIf((EventReader<RejectedStep> responses) => !responses.IsEmpty);
     }
 
+
+    private static bool IsMouseInCameraBounds
+    (
+        Res<MouseContext> mouseCtx,
+        Res<Camera> camera,
+        Local<(float X, float Y)> clickedPos
+    )
+    {
+        if (mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Right))
+        {
+            clickedPos.Value = (mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y);
+        }
+
+        return camera.Value.Bounds.Contains((int)clickedPos.Value.X, (int)clickedPos.Value.Y);
+    }
+
+    private static bool CanWalk(
+        Res<MouseContext> mouseCtx,
+        Res<PlayerStepsContext> playerRequestedSteps,
+        Local<bool> autoWalk,
+        Time time,
+        Query<Data<WorldPosition, Facing, MobileSteps, MobAnimation>, With<Player>> playerQuery
+    )
+    {
+        if (!autoWalk)
+        {
+            if (mouseCtx.Value.IsPressed(Input.MouseButtonType.Right) &&
+                mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
+            {
+                autoWalk.Value = true;
+            }
+        }
+        else if (mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Right))
+        {
+            autoWalk.Value = false;
+        }
+
+        return (autoWalk || mouseCtx.Value.IsPressed(Input.MouseButtonType.Right)) &&
+               playerRequestedSteps.Value.LastStep < time.Total && playerRequestedSteps.Value.Count < 5 &&
+               playerQuery.Count() > 0;
+    }
+
+    [TinySystem(threadingMode: ThreadingMode.Single)]
+    [RunIf(nameof(IsMouseInCameraBounds))]
+    [RunIf(nameof(CanWalk))]
     void EnqueuePlayerSteps
     (
         Local<List<TerrainInfo>> terrainList,
@@ -244,7 +246,16 @@ readonly struct PlayerMovementPlugin : IPlugin
         }
     }
 
-    void ParseAcceptedSteps(EventReader<AcceptedStep> acceptedSteps, Res<PlayerStepsContext> playerRequestedSteps, Res<NetClient> network)
+
+    private static bool IsAcceptedStepsNotEmpty(EventReader<AcceptedStep> responses) => !responses.IsEmpty;
+
+    [TinySystem(threadingMode: ThreadingMode.Single)]
+    [RunIf(nameof(IsAcceptedStepsNotEmpty))]
+    void ParseAcceptedSteps(
+        EventReader<AcceptedStep> acceptedSteps,
+        Res<PlayerStepsContext> playerRequestedSteps,
+        Res<NetClient> network
+    )
     {
         foreach (var response in acceptedSteps)
         {
@@ -304,8 +315,16 @@ readonly struct PlayerMovementPlugin : IPlugin
         }
     }
 
-    void ParseDeniedSteps(EventReader<RejectedStep> rejectedSteps, Res<PlayerStepsContext> playerRequestedSteps,
-        Query<Data<WorldPosition, Facing, MobileSteps>, With<Player>> playerQuery)
+
+    private static bool IsRejectedStepsNotEmpty(EventReader<RejectedStep> responses) => !responses.IsEmpty;
+
+    [TinySystem(threadingMode: ThreadingMode.Single)]
+    [RunIf(nameof(IsRejectedStepsNotEmpty))]
+    void ParseDeniedSteps(
+        EventReader<RejectedStep> rejectedSteps,
+        Res<PlayerStepsContext> playerRequestedSteps,
+        Query<Data<WorldPosition, Facing, MobileSteps>, With<Player>> playerQuery
+    )
     {
         Console.WriteLine("step denied");
 

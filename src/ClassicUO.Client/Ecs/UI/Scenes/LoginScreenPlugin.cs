@@ -8,9 +8,10 @@ using TinyEcs;
 namespace ClassicUO.Ecs;
 
 
-internal readonly struct LoginScreenPlugin : IPlugin
+[TinyPlugin]
+internal readonly partial struct LoginScreenPlugin
 {
-    public unsafe void Build(Scheduler scheduler)
+    public void Build(Scheduler scheduler)
     {
         var setupFn = Setup;
         var buttonsHandlerFn = ButtonsHandler;
@@ -18,9 +19,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
 
         scheduler.AddState<LoginInteraction>();
 
-        scheduler.OnUpdate(buttonsHandlerFn, ThreadingMode.Single)
-            .RunIf((SchedulerState state) => state.InState(GameState.LoginScreen))
-            .RunIf((SchedulerState state) => state.InState(LoginInteraction.None));
+
         scheduler.OnEnter(GameState.LoginScreen, setupFn, ThreadingMode.Single);
         scheduler.OnEnter(GameState.LoginScreen, (State<LoginInteraction> state) => state.Set(LoginInteraction.None), ThreadingMode.Single);
         scheduler.OnExit(GameState.LoginScreen, deleteMenuFn, ThreadingMode.Single);
@@ -135,6 +134,11 @@ internal readonly struct LoginScreenPlugin : IPlugin
         root.AddChild(mainMenu);
     }
 
+
+    private static bool IsInLoginScreenState(SchedulerState state) => state.InState(GameState.LoginScreen) && state.InState(LoginInteraction.None);
+
+    [TinySystem(Stages.Update, ThreadingMode.Single)]
+    [RunIf(nameof(IsInLoginScreenState))]
     private static void ButtonsHandler(
         Query<Data<UIInteractionState, ButtonAction>, Changed<UIInteractionState>> query,
         Res<Settings> settings,

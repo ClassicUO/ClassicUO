@@ -9,15 +9,24 @@ using TinyEcs;
 
 namespace ClassicUO.Ecs;
 
-readonly struct AssetsPlugin : IPlugin
+
+[TinyPlugin]
+internal readonly partial struct AssetsPlugin
 {
     public void Build(Scheduler scheduler)
     {
-        var loadAssetsFn = LoadAssets;
-        scheduler.OnStartup(loadAssetsFn, ThreadingMode.Single);
     }
 
-    unsafe void LoadAssets
+
+    [TinySystem(Stages.Startup, ThreadingMode.Single)]
+    [BeforeOf(nameof(LoadAssets))]
+    private static void SetupClientVersion(Res<GameContext> gameCtx, Res<Settings> settings)
+    {
+        ClientVersionHelper.IsClientVersionValid(settings.Value.ClientVersion, out gameCtx.Value.ClientVersion);
+    }
+
+    [TinySystem(Stages.Startup, ThreadingMode.Single)]
+    private static unsafe void LoadAssets
     (
         State<GameState> state,
         Res<GraphicsDevice> device,
