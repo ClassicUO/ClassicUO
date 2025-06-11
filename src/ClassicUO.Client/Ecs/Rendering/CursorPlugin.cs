@@ -19,7 +19,7 @@ internal readonly partial struct CursorPlugin
 
     [TinySystem(Stages.AfterUpdate, ThreadingMode.Single)]
     [RunIf(nameof(IsGrabbedEntityValid))]
-    void RenderCursor(
+    private static void RenderCursor(
         Res<UltimaBatcher2D> batch,
         Res<MouseContext> mouseCtx,
         Res<GrabbedItem> grabbedItem,
