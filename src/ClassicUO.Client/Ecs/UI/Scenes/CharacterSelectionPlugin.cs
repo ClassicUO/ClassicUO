@@ -174,7 +174,12 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
         {
             if (interaction.Ref == UIInteractionState.Released)
             {
-                network.Value.Send_SelectCharacter(characterInfo.Ref.Index, characterInfo.Ref.Name, network.Value.LocalIP, gameCtx.Value.Protocol);
+                network.Value.Send_SelectCharacter(
+                    characterInfo.Ref.Index,
+                    characterInfo.Ref.Name,
+                    network.Value.LocalIP,
+                    gameCtx.Value.Protocol
+                );
             }
         }
     }
