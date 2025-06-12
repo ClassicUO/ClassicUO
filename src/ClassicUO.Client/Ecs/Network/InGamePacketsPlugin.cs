@@ -216,7 +216,7 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                 entitiesMap.Value.Clear();
 
-            }, ThreadingMode.Single);
+            });
 
         scheduler.OnStartup((
             Res<NetworkEntitiesMap> entitiesMap,
@@ -1881,104 +1881,17 @@ readonly struct InGamePacketsPlugin : IPlugin
                         switch (planeMode)
                         {
                             case 0:
-                            {
-                                var c = dlen / 5;
-
-                                for (var j = 0; j < c; ++j)
                                 {
-                                    var b = world.Entity()
-                                        .Set
-                                        (
-                                            new Graphic()
-                                            {
-                                                Value = houseReader.ReadUInt16BE()
-                                            }
-                                        )
-                                        .Set(new Hue())
-                                        .Set
-                                        (
-                                            new WorldPosition()
-                                            {
-                                                X = (ushort)(startX + houseReader.ReadInt8()),
-                                                Y = (ushort)(startY + houseReader.ReadInt8()),
-                                                Z = (sbyte)(startZ + houseReader.ReadInt8()),
-                                            }
-                                        )
-                                        .Add<CustomMulti>();
+                                    var c = dlen / 5;
 
-                                    parent.AddChild(b);
-                                }
-                                break;
-                            }
-                            case 1:
-                            {
-                                var z = planeZ > 0 ? (sbyte)((planeZ - 1) % 4 * 20 + 7) : 0;
-                                var c = dlen >> 2;
-
-                                for (var j = 0; j < c; ++j)
-                                {
-                                    var id = houseReader.ReadUInt16BE();
-                                    (var x, var y) = (houseReader.ReadInt8(), houseReader.ReadInt8());
-                                    if (id != 0)
+                                    for (var j = 0; j < c; ++j)
                                     {
                                         var b = world.Entity()
-                                            .Set(new Graphic() { Value = id })
-                                            .Set(new Hue())
                                             .Set
-                                            (
-                                                new WorldPosition()
-                                                {
-                                                    X = (ushort)(startX + x),
-                                                    Y = (ushort)(startY + y),
-                                                    Z = (sbyte)(startZ + z),
-                                                }
-                                            )
-                                            .Add<CustomMulti>();
-
-                                        parent.AddChild(b);
-                                    }
-                                }
-
-                                break;
-                            }
-                            case 2:
-                            {
-                                short offX = 0, offY = 0, multiHeight = 0;
-                                var z = planeZ > 0 ? (sbyte)((planeZ - 1) % 4 * 20 + 7) : 0;
-
-                                if (planeZ <= 0)
-                                {
-                                    offX = (short)multiRect.X;
-                                    offY = (short)multiRect.Y;
-                                    multiHeight = (short)(multiRect.Height - multiRect.Y + 2);
-                                }
-                                else if (planeZ <= 4)
-                                {
-                                    offX = (short)(multiRect.X + 1);
-                                    offY = (short)(multiRect.Y + 1);
-                                    multiHeight = (short)(multiRect.Height - multiRect.Y);
-                                }
-                                else
-                                {
-                                    offX = (short)multiRect.X;
-                                    offY = (short)multiRect.Y;
-                                    multiHeight = (short)(multiRect.Height - multiRect.Y + 1);
-                                }
-
-                                var c = dlen >> 1;
-
-                                for (var j = 0; j < c; ++j)
-                                {
-                                    var id = houseReader.ReadUInt16BE();
-                                    if (id != 0)
-                                    {
-                                        var x = (sbyte)(j / multiHeight + offX);
-                                        var y = (sbyte)(j % multiHeight + offY);
-                                        var b = world.Entity().Set
                                             (
                                                 new Graphic()
                                                 {
-                                                    Value = id
+                                                    Value = houseReader.ReadUInt16BE()
                                                 }
                                             )
                                             .Set(new Hue())
@@ -1986,19 +1899,106 @@ readonly struct InGamePacketsPlugin : IPlugin
                                             (
                                                 new WorldPosition()
                                                 {
-                                                    X = (ushort)(startX + x),
-                                                    Y = (ushort)(startY + y),
-                                                    Z = (sbyte)(startZ + z),
+                                                    X = (ushort)(startX + houseReader.ReadInt8()),
+                                                    Y = (ushort)(startY + houseReader.ReadInt8()),
+                                                    Z = (sbyte)(startZ + houseReader.ReadInt8()),
                                                 }
                                             )
                                             .Add<CustomMulti>();
 
                                         parent.AddChild(b);
                                     }
+                                    break;
                                 }
+                            case 1:
+                                {
+                                    var z = planeZ > 0 ? (sbyte)((planeZ - 1) % 4 * 20 + 7) : 0;
+                                    var c = dlen >> 2;
 
-                                break;
-                            }
+                                    for (var j = 0; j < c; ++j)
+                                    {
+                                        var id = houseReader.ReadUInt16BE();
+                                        (var x, var y) = (houseReader.ReadInt8(), houseReader.ReadInt8());
+                                        if (id != 0)
+                                        {
+                                            var b = world.Entity()
+                                                .Set(new Graphic() { Value = id })
+                                                .Set(new Hue())
+                                                .Set
+                                                (
+                                                    new WorldPosition()
+                                                    {
+                                                        X = (ushort)(startX + x),
+                                                        Y = (ushort)(startY + y),
+                                                        Z = (sbyte)(startZ + z),
+                                                    }
+                                                )
+                                                .Add<CustomMulti>();
+
+                                            parent.AddChild(b);
+                                        }
+                                    }
+
+                                    break;
+                                }
+                            case 2:
+                                {
+                                    short offX = 0, offY = 0, multiHeight = 0;
+                                    var z = planeZ > 0 ? (sbyte)((planeZ - 1) % 4 * 20 + 7) : 0;
+
+                                    if (planeZ <= 0)
+                                    {
+                                        offX = (short)multiRect.X;
+                                        offY = (short)multiRect.Y;
+                                        multiHeight = (short)(multiRect.Height - multiRect.Y + 2);
+                                    }
+                                    else if (planeZ <= 4)
+                                    {
+                                        offX = (short)(multiRect.X + 1);
+                                        offY = (short)(multiRect.Y + 1);
+                                        multiHeight = (short)(multiRect.Height - multiRect.Y);
+                                    }
+                                    else
+                                    {
+                                        offX = (short)multiRect.X;
+                                        offY = (short)multiRect.Y;
+                                        multiHeight = (short)(multiRect.Height - multiRect.Y + 1);
+                                    }
+
+                                    var c = dlen >> 1;
+
+                                    for (var j = 0; j < c; ++j)
+                                    {
+                                        var id = houseReader.ReadUInt16BE();
+                                        if (id != 0)
+                                        {
+                                            var x = (sbyte)(j / multiHeight + offX);
+                                            var y = (sbyte)(j % multiHeight + offY);
+                                            var b = world.Entity().Set
+                                                (
+                                                    new Graphic()
+                                                    {
+                                                        Value = id
+                                                    }
+                                                )
+                                                .Set(new Hue())
+                                                .Set
+                                                (
+                                                    new WorldPosition()
+                                                    {
+                                                        X = (ushort)(startX + x),
+                                                        Y = (ushort)(startY + y),
+                                                        Z = (sbyte)(startZ + z),
+                                                    }
+                                                )
+                                                .Add<CustomMulti>();
+
+                                            parent.AddChild(b);
+                                        }
+                                    }
+
+                                    break;
+                                }
                         }
                     }
                     finally
@@ -2198,7 +2198,7 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                 if (SerialHelper.IsMobile(serial))
                 {
-                    mobileQueuedSteps.Enqueue(new ()
+                    mobileQueuedSteps.Enqueue(new()
                     {
                         Serial = serial,
                         X = x,
@@ -2286,6 +2286,6 @@ readonly struct InGamePacketsPlugin : IPlugin
                     }
                 }
             };
-        }, ThreadingMode.Single);
+        });
     }
 }

@@ -48,7 +48,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             {
                 gameCtx.Value.FreeView = !gameCtx.Value.FreeView;
             }
-        }, ThreadingMode.Single).RunIf((Res<UoGame> game) => game.Value.IsActive);
+        }).RunIf((Res<UoGame> game) => game.Value.IsActive);
 
         scheduler.OnUpdate
         (
@@ -61,12 +61,11 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                     gameCtx.Value.CenterZ = position.Ref.Z;
                     gameCtx.Value.CenterOffset = offset.Ref.Value * -1;
                 }
-            },
-            ThreadingMode.Single
+            }
         ).RunIf((Res<GameContext> gameCtx) => !gameCtx.Value.FreeView);
 
         var cleanupFn = Cleanup;
-        scheduler.OnExit(GameState.GameScreen, cleanupFn, ThreadingMode.Single);
+        scheduler.OnExit(GameState.GameScreen, cleanupFn);
 
 
         var beginRenderingFn = BeginRendering;
@@ -74,13 +73,13 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         var showTextOverheadFn = ShowTextOverhead;
         var endRenderingFn = EndRendering;
 
-        var beginRenderingSystem = scheduler.OnAfterUpdate(beginRenderingFn, ThreadingMode.Single);
-        var endRenderingSystem = scheduler.OnAfterUpdate(endRenderingFn, ThreadingMode.Single);
-        var worldRenderingSystem = scheduler.OnAfterUpdate(renderingFn, ThreadingMode.Single)
+        var beginRenderingSystem = scheduler.OnAfterUpdate(beginRenderingFn);
+        var endRenderingSystem = scheduler.OnAfterUpdate(endRenderingFn);
+        var worldRenderingSystem = scheduler.OnAfterUpdate(renderingFn)
                  .RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>())
                  .RunIf((SchedulerState state) => state.InState(GameState.GameScreen))
                  .RunIf((Query<Data<WorldPosition>, With<Player>> playerQuery) => playerQuery.Count() > 0);
-        var textOverheadRenderingSystem = scheduler.OnAfterUpdate(showTextOverheadFn, ThreadingMode.Single);
+        var textOverheadRenderingSystem = scheduler.OnAfterUpdate(showTextOverheadFn);
 
         beginRenderingSystem.RunBefore(worldRenderingSystem);
         worldRenderingSystem.RunBefore(endRenderingSystem);

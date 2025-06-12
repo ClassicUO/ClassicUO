@@ -84,8 +84,7 @@ internal readonly struct ChatPlugin : IPlugin
                     if (sb.Value.Length < chatOptions.Value.MaxMessageLength)
                         sb.Value.Append(ev.Value);
                 }
-            },
-            ThreadingMode.Single
+            }
         ).RunIf((EventReader<CharInputEvent> reader, Res<NetClient> network)
             => !reader.IsEmpty && network.Value.IsConnected);
     }

@@ -63,11 +63,11 @@ readonly struct PlayerMovementPlugin : IPlugin
             GameState.GameScreen, (Res<PlayerStepsContext> playerRequestedSteps) =>
             {
                 playerRequestedSteps.Value = new PlayerStepsContext();
-            }, ThreadingMode.Single
+            }
         );
 
         var enqueuePlayerStepsFn = EnqueuePlayerSteps;
-        scheduler.OnUpdate(enqueuePlayerStepsFn, ThreadingMode.Single)
+        scheduler.OnUpdate(enqueuePlayerStepsFn)
             .RunIf((Res<MouseContext> mouseCtx, Res<Camera> camera, Local<(float X, float Y)> clickedPos) =>
             {
                 if (mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Right))
@@ -104,11 +104,11 @@ readonly struct PlayerMovementPlugin : IPlugin
             });
 
         var parseAcceptedStepsFn = ParseAcceptedSteps;
-        scheduler.OnUpdate(parseAcceptedStepsFn, ThreadingMode.Single)
+        scheduler.OnUpdate(parseAcceptedStepsFn)
             .RunIf((EventReader<AcceptedStep> responses) => !responses.IsEmpty);
 
         var parseDeniedStepsFn = ParseDeniedSteps;
-        scheduler.OnUpdate(parseDeniedStepsFn, ThreadingMode.Single)
+        scheduler.OnUpdate(parseDeniedStepsFn)
             .RunIf((EventReader<RejectedStep> responses) => !responses.IsEmpty);
     }
 

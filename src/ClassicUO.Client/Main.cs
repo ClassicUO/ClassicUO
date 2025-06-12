@@ -226,7 +226,7 @@ namespace ClassicUO
                 }
 
                 using var ecs = new TinyEcs.World();
-                var scheduler = new Scheduler(ecs);
+                var scheduler = new Scheduler(ecs, ThreadingMode.Single);
 
                 scheduler.AddPlugin<Ecs.CuoPlugin>();
                 scheduler.Run(() => false);

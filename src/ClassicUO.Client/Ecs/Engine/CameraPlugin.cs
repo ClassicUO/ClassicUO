@@ -13,8 +13,8 @@ internal readonly struct CameraPlugin : IPlugin
 
         scheduler.AddResource(new Camera(0.5f, 2.5f, 0.1f) { Bounds = new(0, 0, 800, 600) });
 
-        scheduler.OnEnter(GameState.GameScreen, setCameraBoundsFn, ThreadingMode.Single);
-        scheduler.OnUpdate(updateCameraFn, ThreadingMode.Single)
+        scheduler.OnEnter(GameState.GameScreen, setCameraBoundsFn);
+        scheduler.OnUpdate(updateCameraFn)
                 .RunIf((SchedulerState state) => state.InState(GameState.GameScreen));
     }
 

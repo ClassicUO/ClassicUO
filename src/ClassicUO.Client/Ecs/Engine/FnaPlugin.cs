@@ -32,7 +32,7 @@ internal readonly struct FnaPlugin : IPlugin
             schedState.AddResource(new KeyboardContext(game));
             schedState.AddResource(new MouseContext(game));
             UnsafeFNAAccessor.GetSetRunApplication(game.Value) = true;
-        }, ThreadingMode.Single);
+        });
 
         scheduler.OnUpdate((Res<UoGame> game, Time time) =>
         {
@@ -43,24 +43,24 @@ internal readonly struct FnaPlugin : IPlugin
             time.Total += time.Frame * 1000f;
 
             FrameworkDispatcher.Update();
-        }, ThreadingMode.Single)
+        })
         .RunIf((SchedulerState state) => state.ResourceExists<UoGame>());
 
 
-        scheduler.OnFrameStart((Res<GraphicsDevice> device) => device.Value.Clear(Color.Black), ThreadingMode.Single)
+        scheduler.OnFrameStart((Res<GraphicsDevice> device) => device.Value.Clear(Color.Black))
                  .RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>());
 
-        scheduler.OnFrameEnd((Res<GraphicsDevice> device) => device.Value.Present(), ThreadingMode.Single)
+        scheduler.OnFrameEnd((Res<GraphicsDevice> device) => device.Value.Present())
                  .RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>());
 
-        scheduler.OnAfterUpdate(() => Environment.Exit(0), ThreadingMode.Single)
+        scheduler.OnAfterUpdate(() => Environment.Exit(0))
                 .RunIf(static (Res<UoGame> game) => !UnsafeFNAAccessor.GetSetRunApplication(game.Value));
 
         scheduler.OnFrameEnd((Res<MouseContext> mouseCtx, Res<KeyboardContext> keyboardCtx, Time time) =>
         {
             mouseCtx.Value.Update(time.Total);
             keyboardCtx.Value.Update(time.Total);
-        }, ThreadingMode.Single);
+        });
     }
 
     private sealed class UnsafeFNAAccessor

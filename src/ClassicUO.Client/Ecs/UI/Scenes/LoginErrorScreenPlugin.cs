@@ -14,11 +14,11 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
         var loginErrorSetupFn = LoginErrorInfoSetup;
         var buttonHandlerFn = ButtonHandler;
 
-        scheduler.OnExit(GameState.LoginError, cleanupFn, ThreadingMode.Single);
-        scheduler.OnUpdate(loginErrorSetupFn, ThreadingMode.Single)
+        scheduler.OnExit(GameState.LoginError, cleanupFn);
+        scheduler.OnUpdate(loginErrorSetupFn)
                  .RunIf((SchedulerState state, EventReader<LoginErrorsInfoEvent> reader)
                      => !reader.IsEmpty && state.InState(GameState.LoginError));
-        scheduler.OnUpdate(buttonHandlerFn, ThreadingMode.Single)
+        scheduler.OnUpdate(buttonHandlerFn)
                  .RunIf((SchedulerState state) => state.InState(GameState.LoginError));
     }
 

@@ -18,14 +18,14 @@ internal readonly struct GameScreenPlugin : IPlugin
 
 
         var setupFn = Setup;
-        scheduler.OnEnter(GameState.GameScreen, setupFn, ThreadingMode.Single);
+        scheduler.OnEnter(GameState.GameScreen, setupFn);
 
         var cleanupFn = Cleanup;
-        scheduler.OnExit(GameState.GameScreen, cleanupFn, ThreadingMode.Single);
+        scheduler.OnExit(GameState.GameScreen, cleanupFn);
 
 
         var updateEntitiesCountFn = UpdateEntitiesCount;
-        scheduler.OnUpdate(updateEntitiesCountFn, ThreadingMode.Single)
+        scheduler.OnUpdate(updateEntitiesCountFn)
             .RunIf((SchedulerState state) => state.InState(GameState.GameScreen))
             .RunIf((Time time, Local<float> lastAccess) =>
             {
@@ -39,12 +39,12 @@ internal readonly struct GameScreenPlugin : IPlugin
 
 
         var handleButtonsPressedFn = HandleButtonsPressed;
-        scheduler.OnUpdate(handleButtonsPressedFn, ThreadingMode.Single)
+        scheduler.OnUpdate(handleButtonsPressedFn)
             .RunIf((SchedulerState state) => state.InState(GameState.GameScreen));
 
 
         var adjustCameraAndBoundsFn = AdjustCameraAndBounds;
-        scheduler.OnUpdate(adjustCameraAndBoundsFn, ThreadingMode.Single)
+        scheduler.OnUpdate(adjustCameraAndBoundsFn)
             .RunIf((SchedulerState state) => state.InState(GameState.GameScreen) && state.ResourceExists<Camera>());
     }
 

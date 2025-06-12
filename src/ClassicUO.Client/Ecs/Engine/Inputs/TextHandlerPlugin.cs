@@ -18,8 +18,7 @@ internal readonly struct TextHandlerPlugin : IPlugin
                     writer.Enqueue(new() { Value = c });
                 };
                 TextInputEXT.StartTextInput();
-            },
-            ThreadingMode.Single
+            }
         );
     }
 }

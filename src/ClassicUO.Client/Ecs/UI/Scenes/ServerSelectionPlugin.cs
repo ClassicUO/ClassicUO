@@ -15,11 +15,11 @@ internal readonly struct ServerSelectionPlugin : IPlugin
         var serverInfoSetupFn = ServerInfoSetup;
         var serverSelectedFn = ServerSelected;
 
-        scheduler.OnExit(GameState.ServerSelection, cleanupFn, ThreadingMode.Single);
-        scheduler.OnUpdate(serverInfoSetupFn, ThreadingMode.Single)
+        scheduler.OnExit(GameState.ServerSelection, cleanupFn);
+        scheduler.OnUpdate(serverInfoSetupFn)
                  .RunIf((SchedulerState state, EventReader<ServerSelectionInfoEvent> reader)
                     => !reader.IsEmpty && state.InState(GameState.ServerSelection));
-        scheduler.OnUpdate(serverSelectedFn, ThreadingMode.Single)
+        scheduler.OnUpdate(serverSelectedFn)
                  .RunIf((SchedulerState state) => state.InState(GameState.ServerSelection));
     }
 

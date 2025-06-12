@@ -25,20 +25,20 @@ internal readonly struct TerrainPlugin : IPlugin
         scheduler.AddResource(new LastPosition());
 
         var enqueueChunksRequestsFn = EnqueueChunksRequests;
-        scheduler.OnUpdate(enqueueChunksRequestsFn, ThreadingMode.Single)
+        scheduler.OnUpdate(enqueueChunksRequestsFn)
             .RunIf((Query<Data<WorldPosition>, With<Player>> playerQuery) => playerQuery.Count() > 0);
 
         var loadChunksFn = LoadChunks;
-        scheduler.OnUpdate(loadChunksFn, ThreadingMode.Single)
+        scheduler.OnUpdate(loadChunksFn)
             .RunIf((EventReader<OnNewChunkRequest> reader) => !reader.IsEmpty);
 
         var checkChunksFn = CheckChunk;
-        scheduler.OnUpdate(checkChunksFn, ThreadingMode.Single)
+        scheduler.OnUpdate(checkChunksFn)
             .RunIf((Query<Data<TerrainChunk>> query, SchedulerState state)
                 => query.Count() > 0 && state.InState(GameState.GameScreen));
 
         var removeEntitiesOutOfRangeFn = RemoveEntitiesOutOfRange;
-        scheduler.OnUpdate(removeEntitiesOutOfRangeFn, ThreadingMode.Single)
+        scheduler.OnUpdate(removeEntitiesOutOfRangeFn)
             .RunIf((Query<Data<WorldPosition>, With<Player>> playerQuery, Local<float> timeUpdate, Time time) =>
             {
                 if (timeUpdate.Value > time.Total)
@@ -66,7 +66,7 @@ internal readonly struct TerrainPlugin : IPlugin
             lastPos.Value.LastY = null;
             lastPos.Value.LastCameraBounds = null;
             lastPos.Value.LastCameraZoom = 0f;
-        }, ThreadingMode.Single);
+        });
     }
 
     private static int GetCameraOffset(Camera camera)

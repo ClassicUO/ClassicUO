@@ -27,7 +27,7 @@ internal readonly struct FontsPlugin : IPlugin
             registerFont("bold", TTFFontsLoader.Bold());
             registerFont("bold-italic", TTFFontsLoader.BoldItalic());
             registerFont("italic", TTFFontsLoader.MediumItalic());
-        }, ThreadingMode.Single);
+        });
     }
 }
 

@@ -10,7 +10,7 @@ internal readonly struct UseObjectPlugin : IPlugin
     public void Build(Scheduler scheduler)
     {
         var useObjectFn = UseObject;
-        scheduler.OnUpdate(useObjectFn, ThreadingMode.Single)
+        scheduler.OnUpdate(useObjectFn)
             .RunIf((Res<MouseContext> mouseCtx) => mouseCtx.Value.IsPressedDouble(Input.MouseButtonType.Left));
     }
 

@@ -18,12 +18,12 @@ internal readonly struct LoginScreenPlugin : IPlugin
 
         scheduler.AddState<LoginInteraction>();
 
-        scheduler.OnUpdate(buttonsHandlerFn, ThreadingMode.Single)
+        scheduler.OnUpdate(buttonsHandlerFn)
             .RunIf((SchedulerState state) => state.InState(GameState.LoginScreen))
             .RunIf((SchedulerState state) => state.InState(LoginInteraction.None));
-        scheduler.OnEnter(GameState.LoginScreen, setupFn, ThreadingMode.Single);
-        scheduler.OnEnter(GameState.LoginScreen, (State<LoginInteraction> state) => state.Set(LoginInteraction.None), ThreadingMode.Single);
-        scheduler.OnExit(GameState.LoginScreen, deleteMenuFn, ThreadingMode.Single);
+        scheduler.OnEnter(GameState.LoginScreen, setupFn);
+        scheduler.OnEnter(GameState.LoginScreen, (State<LoginInteraction> state) => state.Set(LoginInteraction.None));
+        scheduler.OnExit(GameState.LoginScreen, deleteMenuFn);
     }
 
     private static void Setup(TinyEcs.World world, Res<GumpBuilder> gumpBuilder, Res<ClayUOCommandBuffer> clay, Res<AssetsServer> assets, Res<Settings> settings)

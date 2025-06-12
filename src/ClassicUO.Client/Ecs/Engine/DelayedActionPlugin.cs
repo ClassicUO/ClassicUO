@@ -15,7 +15,7 @@ internal readonly struct DelayedActionPlugin : IPlugin
             (Res<DelayedAction> delayedAction, Time time) =>
             {
                 delayedAction.Value.Run(time.Total);
-            }, ThreadingMode.Single
+            }
         );
     }
 }

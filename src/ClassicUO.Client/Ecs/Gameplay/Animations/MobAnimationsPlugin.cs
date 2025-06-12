@@ -54,7 +54,7 @@ struct MobileSteps
 {
     public const int COUNT = 10;
 
-    public MobileSteps() {}
+    public MobileSteps() { }
 
     private MobileStepArray _steps;
     public int Index = -1;
@@ -108,14 +108,14 @@ readonly struct MobAnimationsPlugin : IPlugin
         scheduler.AddEvent<MobileQueuedStep>();
 
         var readMobileStepsFn = ReadMobilesSteps;
-        scheduler.OnUpdate(readMobileStepsFn, ThreadingMode.Single)
+        scheduler.OnUpdate(readMobileStepsFn)
             .RunIf((EventReader<MobileQueuedStep> stepsQueued) => !stepsQueued.IsEmpty);
 
         var handleMobileStepsFn = HandleMobileSteps;
-        scheduler.OnUpdate(handleMobileStepsFn, ThreadingMode.Single);
+        scheduler.OnUpdate(handleMobileStepsFn);
 
         var processMobileAnimationsFn = ProcessMobileAnimations;
-        scheduler.OnUpdate(processMobileAnimationsFn, ThreadingMode.Single);
+        scheduler.OnUpdate(processMobileAnimationsFn);
     }
 
     void ReadMobilesSteps(
@@ -494,7 +494,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                 {
                     animation.Ref.Run = true;
                 }
-                SKIP:;
+            SKIP:;
             }
             else
             {

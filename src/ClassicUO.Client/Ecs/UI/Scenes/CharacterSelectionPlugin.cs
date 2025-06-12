@@ -16,11 +16,11 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
         var characterInfoSetupFn = CharacterInfoSetup;
         var characterSelectedFn = CharacterSelected;
 
-        scheduler.OnExit(GameState.CharacterSelection, cleanupFn, ThreadingMode.Single);
-        scheduler.OnUpdate(characterInfoSetupFn, ThreadingMode.Single)
+        scheduler.OnExit(GameState.CharacterSelection, cleanupFn);
+        scheduler.OnUpdate(characterInfoSetupFn)
                  .RunIf((SchedulerState state, EventReader<CharacterSelectionInfoEvent> reader)
                      => !reader.IsEmpty && state.InState(GameState.CharacterSelection));
-        scheduler.OnUpdate(characterSelectedFn, ThreadingMode.Single)
+        scheduler.OnUpdate(characterSelectedFn)
                  .RunIf((SchedulerState state) => state.InState(GameState.CharacterSelection));
     }
 

@@ -18,13 +18,13 @@ internal readonly struct ContainersPlugin : IPlugin
         scheduler.AddEvent<ContainerUpdateEvent>();
 
         var registerOpenContainerFn = RegisterOpenContainer;
-        scheduler.OnStartup(registerOpenContainerFn, ThreadingMode.Single);
+        scheduler.OnStartup(registerOpenContainerFn);
 
         var registerUpdateContainerFn = RegisterUpdateContainer;
-        scheduler.OnStartup(registerUpdateContainerFn, ThreadingMode.Single);
+        scheduler.OnStartup(registerUpdateContainerFn);
 
         var onOpenContainersFn = OnOpenContainers;
-        scheduler.OnUpdate(onOpenContainersFn, ThreadingMode.Single)
+        scheduler.OnUpdate(onOpenContainersFn)
             .RunIf((EventReader<ContainerOpenedEvent> reader) => !reader.IsEmpty);
     }
 
@@ -54,7 +54,7 @@ internal readonly struct ContainersPlugin : IPlugin
                 (
                     new UINode()
                     {
-                       Config =
+                        Config =
                        {
                            layout =
                            {
@@ -74,7 +74,7 @@ internal readonly struct ContainersPlugin : IPlugin
                                }
                            }
                        },
-                       UOConfig = {
+                        UOConfig = {
                            Type = ClayUOCommandType.Gump,
                            Id = ev.Graphic,
                            Hue = Vector3.UnitZ,
@@ -101,7 +101,7 @@ internal readonly struct ContainersPlugin : IPlugin
             var serial = reader.ReadUInt32BE();
             var graphic = reader.ReadUInt16BE();
 
-            writer.Enqueue(new (serial, graphic));
+            writer.Enqueue(new(serial, graphic));
         };
     }
 

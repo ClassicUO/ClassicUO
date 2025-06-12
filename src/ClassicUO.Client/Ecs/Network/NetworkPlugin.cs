@@ -41,9 +41,9 @@ readonly struct NetworkPlugin : IPlugin
             gameCtx.Value.PlayerSerial = 0;
             network.Value.Disconnect();
             buffer.Value.Clear();
-        }, ThreadingMode.Single);
+        });
 
-        scheduler.OnUpdate((Res<NetClient> network) => network.Value.Send_Ping(0xFF), ThreadingMode.Single)
+        scheduler.OnUpdate((Res<NetClient> network) => network.Value.Send_Ping(0xFF))
             .RunIf((Res<GameContext> gameCtx, Res<NetClient> network) => network.Value!.IsConnected && gameCtx.Value.PlayerSerial != 0)
             .RunIf((Time time, Local<float> updateTime) =>
             {
@@ -55,11 +55,11 @@ readonly struct NetworkPlugin : IPlugin
             });
 
         var handleLoginRequestsFn = HandleLoginRequests;
-        scheduler.OnUpdate(handleLoginRequestsFn, ThreadingMode.Single)
+        scheduler.OnUpdate(handleLoginRequestsFn)
             .RunIf((EventReader<OnLoginRequest> loginRequests) => !loginRequests.IsEmpty);
 
         var packetReaderFn = PacketReader;
-        scheduler.OnUpdate(packetReaderFn, ThreadingMode.Single)
+        scheduler.OnUpdate(packetReaderFn)
             .RunIf((Res<NetClient> network) => network.Value!.IsConnected);
     }
 

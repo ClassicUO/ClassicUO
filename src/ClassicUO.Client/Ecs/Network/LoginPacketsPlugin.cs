@@ -154,6 +154,6 @@ internal readonly struct LoginPacketsPlugin : IPlugin
             packetsMap.Value[0x85] = (buffer) => loginErrorsPackets(0x85, buffer);
             packetsMap.Value[0x53] = (buffer) => loginErrorsPackets(0x53, buffer);
 
-        }, ThreadingMode.Single);
+        });
     }
 }

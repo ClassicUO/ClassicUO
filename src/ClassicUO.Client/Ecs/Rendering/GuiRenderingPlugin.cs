@@ -452,6 +452,6 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
 
                 Clay.CloseElement();
             }
-        }, ThreadingMode.Single);
+        });
     }
 }

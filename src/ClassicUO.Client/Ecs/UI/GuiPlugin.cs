@@ -50,8 +50,7 @@ internal readonly struct GuiPlugin : IPlugin
         scheduler.AddResource(new ImageCache());
 
         scheduler.OnStartup((SchedulerState state, World world, Res<AssetsServer> assets) =>
-            state.AddResource(new GumpBuilder(world, assets)),
-        ThreadingMode.Single);
+            state.AddResource(new GumpBuilder(world, assets)));
 
         scheduler.AddPlugin<LoginScreenPlugin>();
         scheduler.AddPlugin<ServerSelectionPlugin>();
@@ -61,31 +60,31 @@ internal readonly struct GuiPlugin : IPlugin
 
         var states = Enum.GetValues<GameState>();
         foreach (var state in states)
-            scheduler.OnExit(state, (Res<FocusedInput> focusedInput) => focusedInput.Value.Entity = 0, ThreadingMode.Single);
+            scheduler.OnExit(state, (Res<FocusedInput> focusedInput) => focusedInput.Value.Entity = 0);
 
 
         var setupClayFn = SetupClay;
-        scheduler.OnStartup(setupClayFn, ThreadingMode.Single);
+        scheduler.OnStartup(setupClayFn);
 
         var setClayWorkspaceDimensionsFn = SetClayWorkspaceDimensions;
-        scheduler.OnUpdate(setClayWorkspaceDimensionsFn, ThreadingMode.Single);
+        scheduler.OnUpdate(setClayWorkspaceDimensionsFn);
 
         var updateUOButtonsStateFn = UpdateUOButtonsState;
-        scheduler.OnUpdate(updateUOButtonsStateFn, ThreadingMode.Single);
+        scheduler.OnUpdate(updateUOButtonsStateFn);
 
         var updateFocusedInputFn = UpdateFocusedInput;
-        scheduler.OnUpdate(updateFocusedInputFn, ThreadingMode.Single)
+        scheduler.OnUpdate(updateFocusedInputFn)
             .RunIf((Res<KeyboardContext> keyboardCtx) => keyboardCtx.Value.IsPressedOnce(Microsoft.Xna.Framework.Input.Keys.Tab));
 
         var readCharInputsFn = ReadCharInputs;
-        scheduler.OnUpdate(readCharInputsFn, ThreadingMode.Single)
+        scheduler.OnUpdate(readCharInputsFn)
             .RunIf((EventReader<CharInputEvent> reader,
                     Res<FocusedInput> focusedInput,
                     Query<Data<UINode>, Filter<With<TextInput>>> query) =>
                         !reader.IsEmpty && focusedInput.Value.Entity != 0 && query.Count() > 0);
 
         var moveFocusedElementsByMouseFn = MoveFocusedElementsByMouse;
-        scheduler.OnUpdate(moveFocusedElementsByMouseFn, ThreadingMode.Single        );
+        scheduler.OnUpdate(moveFocusedElementsByMouseFn);
     }
 
 

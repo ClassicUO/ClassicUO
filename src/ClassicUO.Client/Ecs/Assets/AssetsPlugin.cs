@@ -14,7 +14,7 @@ readonly struct AssetsPlugin : IPlugin
     public void Build(Scheduler scheduler)
     {
         var loadAssetsFn = LoadAssets;
-        scheduler.OnStartup(loadAssetsFn, ThreadingMode.Single);
+        scheduler.OnStartup(loadAssetsFn);
     }
 
     unsafe void LoadAssets

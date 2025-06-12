@@ -33,7 +33,7 @@ internal readonly struct TextOverheadPlugin : IPlugin
         scheduler.AddResource(new TextOverHeadManager());
 
         var readTextOverHeadFn = ReadTextOverhead;
-        scheduler.OnUpdate(readTextOverHeadFn, ThreadingMode.Single)
+        scheduler.OnUpdate(readTextOverHeadFn)
                  .RunIf((EventReader<TextOverheadEvent> texts) => !texts.IsEmpty);
     }
 

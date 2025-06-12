@@ -14,7 +14,7 @@ internal readonly struct PickupPlugin : IPlugin
         var pickupItemFn = PickupItem;
         var dropItemFn = DropItem;
 
-        scheduler.OnUpdate(pickupItemDelayedFn, ThreadingMode.Single)
+        scheduler.OnUpdate(pickupItemDelayedFn)
             .RunIf((SchedulerState sched) => sched.ResourceExists<SelectedEntity>() && sched.ResourceExists<GrabbedItem>())
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial == 0)
             .RunIf((Res<MouseContext> mouseCtx) =>
@@ -55,7 +55,7 @@ internal readonly struct PickupPlugin : IPlugin
                 return false;
             });
 
-        scheduler.OnUpdate(pickupItemFn, ThreadingMode.Single)
+        scheduler.OnUpdate(pickupItemFn)
             .RunIf((SchedulerState sched) => sched.ResourceExists<SelectedEntity>() && sched.ResourceExists<GrabbedItem>())
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial == 0)
             .RunIf((Res<MouseContext> mouseCtx) =>
@@ -81,7 +81,7 @@ internal readonly struct PickupPlugin : IPlugin
             });
 
 
-        scheduler.OnUpdate(dropItemFn, ThreadingMode.Single)
+        scheduler.OnUpdate(dropItemFn)
             .RunIf((SchedulerState sched) => sched.ResourceExists<SelectedEntity>() && sched.ResourceExists<GrabbedItem>())
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial != 0)
             .RunIf((Res<MouseContext> mouseCtx) => mouseCtx.Value.IsReleased(Input.MouseButtonType.Left));

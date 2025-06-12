@@ -11,7 +11,7 @@ internal readonly struct CursorPlugin : IPlugin
     public void Build(Scheduler scheduler)
     {
         var renderCursorFn = RenderCursor;
-        scheduler.OnAfterUpdate(renderCursorFn, ThreadingMode.Single)
+        scheduler.OnAfterUpdate(renderCursorFn)
             .RunIf((SchedulerState state) => state.ResourceExists<GrabbedItem>())
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial != 0 && grabbedItem.Value.Graphic != 0);
     }
@@ -34,7 +34,7 @@ internal readonly struct CursorPlugin : IPlugin
             artInfo.Texture,
             mouseCtx.Value.Position,
             artInfo.UV,
-            grabbed.Hue == 0 ? Vector3.UnitZ : new (grabbed.Hue, 1, 1f),
+            grabbed.Hue == 0 ? Vector3.UnitZ : new(grabbed.Hue, 1, 1f),
             0f,
             Vector2.Zero,
             1f,
