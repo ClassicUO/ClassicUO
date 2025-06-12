@@ -9,5 +9,6 @@ internal readonly struct RenderingPlugin : IPlugin
     {
         scheduler.AddPlugin<WorldRenderingPlugin>();
         scheduler.AddPlugin<GuiRenderingPlugin>();
+        scheduler.AddPlugin<CursorPlugin>();
     }
 }

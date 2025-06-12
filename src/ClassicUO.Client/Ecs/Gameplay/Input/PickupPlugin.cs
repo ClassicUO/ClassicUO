@@ -17,16 +17,6 @@ internal readonly struct PickupPlugin : IPlugin
         scheduler.OnUpdate(pickupItemDelayedFn, ThreadingMode.Single)
             .RunIf((SchedulerState sched) => sched.ResourceExists<SelectedEntity>() && sched.ResourceExists<GrabbedItem>())
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial == 0)
-            .RunIf((World world, Res<SelectedEntity> selectedEnt, Query<Data<NetworkSerial>, Filter<With<Items>>> q) =>
-            {
-                if (!selectedEnt.Value.Entity.IsValid())
-                    return false;
-                if (!world.Exists(selectedEnt.Value.Entity))
-                    return false;
-
-                var entity = world.Entity(selectedEnt.Value.Entity);
-                return q.Contains(entity.ID);
-            })
             .RunIf((Res<MouseContext> mouseCtx) =>
             {
                 if (mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
@@ -38,7 +28,17 @@ internal readonly struct PickupPlugin : IPlugin
 
                 return true;
             })
-            .RunIf((Local<float?> delay, Time time, Res<MouseContext> mouseCtx, Res<GrabbedItem> grabbedEntity) =>
+            .RunIf((World world, Res<SelectedEntity> selectedEnt, Query<Data<NetworkSerial>, Filter<With<Items>>> q) =>
+            {
+                if (!selectedEnt.Value.Entity.IsValid())
+                    return false;
+                if (!world.Exists(selectedEnt.Value.Entity))
+                    return false;
+
+                var entity = world.Entity(selectedEnt.Value.Entity);
+                return q.Contains(entity.ID);
+            })
+            .RunIf((Local<float?> delay, Time time, Res<MouseContext> mouseCtx) =>
             {
                 if (mouseCtx.Value.IsReleased(Input.MouseButtonType.Left))
                     delay.Value = null;
@@ -58,16 +58,6 @@ internal readonly struct PickupPlugin : IPlugin
         scheduler.OnUpdate(pickupItemFn, ThreadingMode.Single)
             .RunIf((SchedulerState sched) => sched.ResourceExists<SelectedEntity>() && sched.ResourceExists<GrabbedItem>())
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial == 0)
-            .RunIf((World world, Res<SelectedEntity> selectedEnt, Query<Data<NetworkSerial>, Filter<With<Items>>> q) =>
-            {
-                if (!selectedEnt.Value.Entity.IsValid())
-                    return false;
-                if (!world.Exists(selectedEnt.Value.Entity))
-                    return false;
-
-                var entity = world.Entity(selectedEnt.Value.Entity);
-                return q.Contains(entity.ID);
-            })
             .RunIf((Res<MouseContext> mouseCtx) =>
             {
                 if (mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
@@ -78,6 +68,16 @@ internal readonly struct PickupPlugin : IPlugin
                 }
 
                 return false;
+            })
+            .RunIf((World world, Res<SelectedEntity> selectedEnt, Query<Data<NetworkSerial>, Filter<With<Items>>> q) =>
+            {
+                if (!selectedEnt.Value.Entity.IsValid())
+                    return false;
+                if (!world.Exists(selectedEnt.Value.Entity))
+                    return false;
+
+                var entity = world.Entity(selectedEnt.Value.Entity);
+                return q.Contains(entity.ID);
             });
 
 
@@ -85,14 +85,6 @@ internal readonly struct PickupPlugin : IPlugin
             .RunIf((SchedulerState sched) => sched.ResourceExists<SelectedEntity>() && sched.ResourceExists<GrabbedItem>())
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial != 0)
             .RunIf((Res<MouseContext> mouseCtx) => mouseCtx.Value.IsReleased(Input.MouseButtonType.Left));
-
-
-        scheduler.OnUpdate((Res<MouseContext> mouseCtx, Res<GrabbedItem> grabbedEntity) =>
-        {
-            if (mouseCtx.Value.IsReleased(Input.MouseButtonType.Left))
-                grabbedEntity.Value.Serial = 0;
-        }, ThreadingMode.Single)
-        .RunIf((SchedulerState sched) => sched.ResourceExists<SelectedEntity>() && sched.ResourceExists<GrabbedItem>());
     }
 
     void PickupItem(
@@ -100,14 +92,18 @@ internal readonly struct PickupPlugin : IPlugin
         Res<SelectedEntity> selectedEntity,
         Res<GrabbedItem> grabbedItem,
         Res<NetClient> network,
-        Query<Data<NetworkSerial, Amount>> q
+        Query<Data<NetworkSerial, Amount, Graphic, Hue>> q
     )
     {
         var entity = world.Entity(selectedEntity.Value.Entity);
-        (var serial, var amount) = q.Get(entity.ID);
+        (var serial, var amount, var graphic, var hue) = q.Get(entity.ID);
         Console.WriteLine("pickup item serial: {0} amount: {1}", serial.Ref.Value, amount.Ref.Value);
         network.Value.Send_PickUpRequest(serial.Ref.Value, (ushort)amount.Ref.Value);
+
         grabbedItem.Value.Serial = serial.Ref.Value;
+        grabbedItem.Value.Graphic = graphic.Ref.Value;
+        grabbedItem.Value.Hue = hue.Ref.Value;
+        grabbedItem.Value.Amount = amount.Ref.Value;
     }
 
     void DropItem(
@@ -116,7 +112,6 @@ internal readonly struct PickupPlugin : IPlugin
         Res<GrabbedItem> grabbedItem,
         Res<NetClient> network,
         Res<NetworkEntitiesMap> networkEntities
-    // Query<Data<NetworkSerial>, Filter<Optional<NetworkSerial>>> query
     )
     {
         // TODO: add all scenarios
@@ -128,10 +123,24 @@ internal readonly struct PickupPlugin : IPlugin
 
         Console.WriteLine("drop item to {0}", targetEntity.ID);
         network.Value.Send_DropRequest(grabbedItem.Value.Serial, targetX, targetY, targetZ, 0, targetSerial);
+
+        grabbedItem.Value.Clear();
     }
 }
 
 internal sealed class GrabbedItem
 {
     public uint Serial { get; set; }
+    public ushort Graphic { get; set; }
+    public ushort Hue { get; set; }
+    public int Amount { get; set; }
+
+
+    public void Clear()
+    {
+        Serial = 0;
+        Graphic = 0;
+        Hue = 0;
+        Amount = 0;
+    }
 }
