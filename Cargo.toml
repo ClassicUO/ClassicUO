@@ -1,0 +1,3 @@
+[workspace]
+
+members = ["src/Mods/my-plugin"]

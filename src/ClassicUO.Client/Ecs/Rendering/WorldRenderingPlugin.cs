@@ -248,8 +248,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             if (!calculateZ && hide)
                 continue;
 
-            var position = Isometric.IsoToScreen(worldPos.Ref.X, worldPos.Ref.Y, worldPos.Ref.Z);
-            position -= center;
+            var position = worldPos.Ref.ToIso() - center;
 
             if (position.X < cameraBounds.X || position.X > cameraBounds.Width)
                 continue;
@@ -371,8 +370,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                 continue;
             }
 
-            var position = Isometric.IsoToScreen(worldPos.Ref.X, worldPos.Ref.Y, worldPos.Ref.Z);
-            position -= center;
+            var position = worldPos.Ref.ToIso() - center;
 
             if (position.X < cameraBounds.X || position.X > cameraBounds.Width)
                 continue;
@@ -509,8 +507,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
 
             var uoHue = hue.Ref.Value;
             var priorityZ = pos.Ref.Z;
-            var position = Isometric.IsoToScreen(pos.Ref.X, pos.Ref.Y, pos.Ref.Z);
-            position -= center;
+            var position = pos.Ref.ToIso() - center;
 
             Texture2D texture;
             Rectangle? uv;
@@ -781,7 +778,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                 if (frame.Texture == null)
                     continue;
 
-                var position = Isometric.IsoToScreen(pos.Ref.X, pos.Ref.Y, pos.Ref.Z);
+                var position = pos.Ref.ToIso();
                 position.Y -= offsetY;
                 position.X += 22;
                 position.Y += 22;

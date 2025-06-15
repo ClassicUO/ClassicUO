@@ -6,6 +6,7 @@ using ClassicUO.Utility;
 using TinyEcs;
 using ClassicUO.Network.Encryption;
 using ClassicUO.Assets;
+using System.Runtime.InteropServices;
 
 namespace ClassicUO.Ecs;
 
@@ -109,7 +110,13 @@ readonly struct NetworkPlugin : IPlugin
         loginRequests.Clear();
     }
 
-    void PacketReader(Res<NetClient> network, Res<PacketsMap> packetsMap, Res<CircularBuffer> buffer, Local<byte[]> packetBuffer)
+    void PacketReader(
+        Res<List<Mod>> mods,
+        Res<NetClient> network,
+        Res<PacketsMap> packetsMap,
+        Res<CircularBuffer> buffer,
+        Local<byte[]> packetBuffer
+    )
     {
         // buffer.Value ??= new();
         packetBuffer.Value ??= new byte[4096];
@@ -150,9 +157,23 @@ readonly struct NetworkPlugin : IPlugin
 
             // Console.WriteLine(">> packet-in: ID 0x{0:X2} | Len: {1}", packetId, packetLen);
 
-            if (packetsMap.Value.TryGetValue(packetId, out var handler))
+            var sp = packetBuffer.Value.AsSpan(0, packetLen + packetHeaderOffset);
+            foreach (var mod in mods.Value)
             {
-                handler(packetBuffer.Value.AsSpan(packetHeaderOffset, packetLen - packetHeaderOffset));
+                var res = mod.Plugin.Call("packet_recv", sp);
+                if (res.IsEmpty)
+                {
+                    sp = [];
+                }
+                else
+                {
+                    res.CopyTo(sp);
+                }
+            }
+
+            if (!sp.IsEmpty && packetsMap.Value.TryGetValue(packetId, out var handler))
+            {
+                handler(sp.Slice(packetHeaderOffset, packetLen - packetHeaderOffset));
             }
         }
 

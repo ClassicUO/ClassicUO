@@ -1,4 +1,3 @@
-using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Utility;
@@ -36,6 +35,8 @@ internal readonly struct CuoPlugin : IPlugin
         scheduler.AddPlugin<NetworkPlugin>();
         scheduler.AddPlugin<GameplayPlugin>();
         scheduler.AddPlugin<RenderingPlugin>();
+
+        scheduler.AddPlugin<ModdingPlugins>();
     }
 }
 

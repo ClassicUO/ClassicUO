@@ -1972,7 +1972,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                                         var id = houseReader.ReadUInt16BE();
                                         if (id != 0)
                                         {
-                                            var x = (sbyte)(j / multiHeight + offX);
+                                            var x = (sbyte)((j == 0 ? 0 : (j / multiHeight)) + offX);
                                             var y = (sbyte)(j % multiHeight + offY);
                                             var b = world.Entity().Set
                                                 (

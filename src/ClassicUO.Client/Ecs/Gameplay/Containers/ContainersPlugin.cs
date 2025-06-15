@@ -26,8 +26,33 @@ internal readonly struct ContainersPlugin : IPlugin
         var onOpenContainersFn = OnOpenContainers;
         scheduler.OnUpdate(onOpenContainersFn)
             .RunIf((EventReader<ContainerOpenedEvent> reader) => !reader.IsEmpty);
+
+        var closeContainersTooFarFromPlayerFn = CloseContainersTooFarFromPlayer;
+        scheduler.OnUpdate(closeContainersTooFarFromPlayerFn)
+            .RunIf((Query<Data<WorldPosition>, With<Player>> queryPlayer) => queryPlayer.Count() > 0);
     }
 
+
+    private static void CloseContainersTooFarFromPlayer(
+        Query<Data<WorldPosition>,
+             Filter<With<IsContainer>, With<UINode>, With<UIInteractionState>, With<UIMovable>>> query,
+        Single<Data<WorldPosition>, With<Player>> queryPlayer
+    )
+    {
+        const int MAX_CONTAINER_DIST = 5;
+        (_, var playerPos) = queryPlayer.Get();
+
+        foreach ((var ent, var pos) in query)
+        {
+            if (Math.Abs(playerPos.Ref.X - pos.Ref.X) >= MAX_CONTAINER_DIST ||
+                Math.Abs(playerPos.Ref.Y - pos.Ref.Y) >= MAX_CONTAINER_DIST)
+            {
+                ent.Ref.Unset<UINode>();
+                ent.Ref.Unset<UIInteractionState>();
+                ent.Ref.Unset<UIMovable>();
+            }
+        }
+    }
 
     private static void OnOpenContainers(
         World world,
@@ -55,30 +80,30 @@ internal readonly struct ContainersPlugin : IPlugin
                     new UINode()
                     {
                         Config =
-                       {
-                           layout =
-                           {
-                               sizing =
-                               {
-                                   width = Clay_SizingAxis.Fixed(gumpInfo.UV.Width),
-                                   height = Clay_SizingAxis.Fixed(gumpInfo.UV.Height),
-                               },
-                               layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM
-                           },
-                           floating = {
-                               clipTo = Clay_FloatingClipToElement.CLAY_CLIP_TO_ATTACHED_PARENT,
-                               attachTo = Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT,
-                               offset = {
-                                   x = 0,
-                                   y = 0
-                               }
-                           }
-                       },
+                        {
+                            layout =
+                            {
+                                sizing =
+                                {
+                                    width = Clay_SizingAxis.Fixed(gumpInfo.UV.Width),
+                                    height = Clay_SizingAxis.Fixed(gumpInfo.UV.Height),
+                                },
+                                layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM
+                            },
+                            floating = {
+                                clipTo = Clay_FloatingClipToElement.CLAY_CLIP_TO_ATTACHED_PARENT,
+                                attachTo = Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT,
+                                offset = {
+                                    x = 0,
+                                    y = 0
+                                }
+                            }
+                        },
                         UOConfig = {
-                           Type = ClayUOCommandType.Gump,
-                           Id = ev.Graphic,
-                           Hue = Vector3.UnitZ,
-                       }
+                            Type = ClayUOCommandType.Gump,
+                            Id = ev.Graphic,
+                            Hue = Vector3.UnitZ,
+                        }
                     }
                 )
                 .Set(UIInteractionState.None)
@@ -132,7 +157,8 @@ internal readonly struct ContainersPlugin : IPlugin
             var hue = reader.ReadUInt16BE();
 
             var ent = entitiesMap.Value.GetOrCreate(world, serial);
-            var parentEnt = entitiesMap.Value.GetOrCreate(world, containerSerial);
+            var parentEnt = entitiesMap.Value.GetOrCreate(world, containerSerial)
+                .Add<IsContainer>();
 
             ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
                 .Set(new WorldPosition() { X = x, Y = y, Z = 0 })
@@ -201,7 +227,8 @@ internal readonly struct ContainersPlugin : IPlugin
                 var containerSerial = reader.ReadUInt32BE();
                 var hue = reader.ReadUInt16BE();
 
-                var parentEnt = entitiesMap.Value.GetOrCreate(world, containerSerial);
+                var parentEnt = entitiesMap.Value.GetOrCreate(world, containerSerial)
+                    .Add<IsContainer>();
                 var ent = entitiesMap.Value.GetOrCreate(world, serial);
                 ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
                     .Set(new Hue() { Value = hue })

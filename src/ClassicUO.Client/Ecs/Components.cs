@@ -17,6 +17,8 @@ struct WorldPosition
         y = Y;
         z = Z;
     }
+
+    public readonly Vector2 ToIso() => Isometric.IsoToScreen(X, Y, Z);
 }
 
 struct Graphic
@@ -45,6 +47,7 @@ struct Amount
 }
 
 struct ContainedInto;
+struct IsContainer;
 
 struct Hitpoints
 {
