@@ -2,11 +2,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using ClassicUO.Game.Data;
 using Microsoft.Xna.Framework;
-using TinyEcs;
 
 namespace ClassicUO.Ecs;
 
-struct WorldPosition
+internal struct WorldPosition
 {
     public ushort X, Y;
     public sbyte Z;
@@ -21,7 +20,7 @@ struct WorldPosition
     public readonly Vector2 ToIso() => Isometric.IsoToScreen(X, Y, Z);
 }
 
-struct Graphic
+internal struct Graphic
 {
     public ushort Value;
 }

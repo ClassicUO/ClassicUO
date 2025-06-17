@@ -20,20 +20,26 @@ sealed class NetworkEntitiesMap
 {
     private readonly Dictionary<uint, ulong> _entities = new();
     private readonly List<uint> _toRemove = new();
+    private readonly TinyEcs.World _world;
 
-    public EntityView GetOrCreate(TinyEcs.World world, uint serial)
+    public NetworkEntitiesMap(TinyEcs.World world)
+    {
+        _world = world;
+    }
+
+    public EntityView GetOrCreate(uint serial)
     {
         if (_entities.TryGetValue(serial, out var id))
         {
-            if (world.Exists(id))
+            if (_world.Exists(id))
             {
-                return world.Entity(id);
+                return _world.Entity(id);
             }
 
             _entities.Remove(serial);
         }
 
-        var ent = world.Entity()
+        var ent = _world.Entity()
             .Set(new NetworkSerial() { Value = serial });
 
         if (SerialHelper.IsMobile(serial))
@@ -54,13 +60,13 @@ sealed class NetworkEntitiesMap
         return ent;
     }
 
-    public EntityView Get(TinyEcs.World world, uint serial)
+    public EntityView Get(uint serial)
     {
         if (_entities.TryGetValue(serial, out var id))
         {
-            if (world.Exists(id))
+            if (_world.Exists(id))
             {
-                return world.Entity(id);
+                return _world.Entity(id);
             }
 
             _entities.Remove(serial);
@@ -69,12 +75,12 @@ sealed class NetworkEntitiesMap
         return EntityView.Invalid;
     }
 
-    public bool Remove(TinyEcs.World world, uint serial)
+    public bool Remove(uint serial)
     {
         var result = false;
         if (_entities.Remove(serial, out var id))
         {
-            if (!world.Exists(id))
+            if (!_world.Exists(id))
                 return false;
 
             //// Some entities might have a network entity associated [child].
@@ -127,17 +133,17 @@ sealed class NetworkEntitiesMap
             //    }
             //}
 
-            if (world.Has<EquipmentSlots>(id))
+            if (_world.Has<EquipmentSlots>(id))
             {
-                ref var slots = ref world.Get<EquipmentSlots>(id);
+                ref var slots = ref _world.Get<EquipmentSlots>(id);
                 for (Layer layer = Layer.Invalid + 1; layer <= Layer.Bank; layer++)
                 {
                     var e = slots[layer];
                     slots[layer] = 0;
 
-                    if (e.IsValid() && world.Exists(e) && world.Has<NetworkSerial>(e))
+                    if (e.IsValid() && _world.Exists(e) && _world.Has<NetworkSerial>(e))
                     {
-                        ref var ser = ref world.Get<NetworkSerial>(e);
+                        ref var ser = ref _world.Get<NetworkSerial>(e);
                         Console.WriteLine("  removing serial: 0x{0:X8} associated to 0x{1:X8}", ser.Value, serial);
                         _toRemove.Add(ser.Value);
                         // if (Remove(world, ser.Value))
@@ -162,13 +168,13 @@ sealed class NetworkEntitiesMap
 
             foreach (var s in _toRemove)
             {
-                if (_entities.Remove(s, out var childId) && world.Exists(childId))
-                    world.Delete(childId);
+                if (_entities.Remove(s, out var childId) && _world.Exists(childId))
+                    _world.Delete(childId);
             }
 
             _toRemove.Clear();
 
-            world.Delete(id);
+            _world.Delete(id);
             result = true;
         }
         else
@@ -196,7 +202,10 @@ readonly struct InGamePacketsPlugin : IPlugin
 {
     public void Build(Scheduler scheduler)
     {
-        scheduler.AddResource(new NetworkEntitiesMap());
+        scheduler.OnStartup((SchedulerState state, TinyEcs.World world) =>
+        {
+            state.AddResource(new NetworkEntitiesMap(world));
+        });
 
         scheduler.OnExit(GameState.GameScreen, (
             TinyEcs.World world,
@@ -205,7 +214,7 @@ readonly struct InGamePacketsPlugin : IPlugin
             {
                 foreach ((var ent, var serial) in query)
                 {
-                    entitiesMap.Value.Remove(world, serial.Ref.Value);
+                    entitiesMap.Value.Remove(serial.Ref.Value);
                 }
 
                 foreach ((var serial, var ent) in entitiesMap.Value)
@@ -267,7 +276,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 gameCtx.Value.CenterZ = z;
                 gameCtx.Value.PlayerSerial = serial;
 
-                var ent = entitiesMap.Value.GetOrCreate(world, serial);
+                var ent = entitiesMap.Value.GetOrCreate(serial);
                 ent.Set(new Ecs.WorldPosition() { X = x, Y = y, Z = z })
                     .Set(new Ecs.Graphic() { Value = graphic })
                     .Set(new Facing() { Value = dir })
@@ -423,7 +432,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                         serial = reader.ReadUInt32BE();
                         var revision = reader.ReadUInt32BE();
 
-                        var house = entitiesMap.Value.GetOrCreate(world, serial);
+                        var house = entitiesMap.Value.GetOrCreate(serial);
 
                         if (house.Has<HouseRevision>())
                         {
@@ -542,7 +551,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 if (id == 0xD3)
                     reader.Skip(sizeof(ushort) * 3);
 
-                var parentEnt = entitiesMap.Value.GetOrCreate(world, serial);
+                var parentEnt = entitiesMap.Value.GetOrCreate(serial);
                 parentEnt
                     .Set(new Graphic() { Value = graphic })
                     // .Set(new WorldPosition() { X = x, Y = y, Z = z })
@@ -567,7 +576,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                         itemHue = reader.ReadUInt16BE();
                     }
 
-                    var child = entitiesMap.Value.GetOrCreate(world, itemSerial);
+                    var child = entitiesMap.Value.GetOrCreate(itemSerial);
                     child.Set(new Graphic() { Value = itemGraphic })
                         .Set(new Hue() { Value = itemHue });
                     // child.Set(new EquippedItem() { Layer = layer }, parentEnt);
@@ -722,7 +731,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                     type = 2;
                 }
 
-                var ent = entitiesMap.Value.GetOrCreate(world, serial);
+                var ent = entitiesMap.Value.GetOrCreate(serial);
                 ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
                     .Set(new Hue() { Value = hue })
                     .Set(new ServerFlags() { Value = (Flags)flags });
@@ -803,7 +812,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var canBeRenamed = reader.ReadBool();
                 var type = reader.ReadUInt8();
 
-                var ent = entitiesMap.Value.GetOrCreate(world, serial);
+                var ent = entitiesMap.Value.GetOrCreate(serial);
                 ent.Set(new Hitpoints() { Value = hits, MaxValue = hitsMax });
 
                 if (type > 0)
@@ -887,7 +896,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var reader = new StackDataReader(buffer);
                 var serial = reader.ReadUInt32BE();
                 Console.WriteLine("delete obj from packet: 0x{0:X8}", serial);
-                var deleted = entitiesMap.Value.Remove(world, serial);
+                var deleted = entitiesMap.Value.Remove(serial);
             };
 
             // update player
@@ -905,7 +914,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var direction = (Direction)reader.ReadUInt8();
                 var z = reader.ReadInt8();
 
-                var ent = entitiesMap.Value.GetOrCreate(world, serial);
+                var ent = entitiesMap.Value.GetOrCreate(serial);
                 ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
                     .Set(new Hue() { Value = hue })
                     .Set(new ServerFlags() { Value = flags });
@@ -998,8 +1007,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             //     var containerSerial = reader.ReadUInt32BE();
             //     var hue = reader.ReadUInt16BE();
             //
-            //     var ent = entitiesMap.Value.GetOrCreate(world, serial);
-            //     var parentEnt = entitiesMap.Value.GetOrCreate(world, containerSerial);
+            //     var ent = entitiesMap.Value.GetOrCreate(serial);
+            //     var parentEnt = entitiesMap.Value.GetOrCreate(containerSerial);
             //
             //     ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
             //         .Set(new WorldPosition() { X = x, Y = y, Z = 0 })
@@ -1046,7 +1055,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 (var manaMax, var mana) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
                 (var stamMax, var stam) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
 
-                entitiesMap.Value.GetOrCreate(world, serial)
+                entitiesMap.Value.GetOrCreate(serial)
                     .Set(new Hitpoints() { Value = hits, MaxValue = hitsMax })
                     .Set(new Mana() { Value = mana, MaxValue = manaMax })
                     .Set(new Stamina() { Value = stam, MaxValue = stamMax });
@@ -1064,8 +1073,8 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var container = reader.ReadUInt32BE();
                 var hue = reader.ReadUInt16BE();
 
-                var parentEnt = entitiesMap.Value.GetOrCreate(world, container);
-                var childEnt = entitiesMap.Value.GetOrCreate(world, serial);
+                var parentEnt = entitiesMap.Value.GetOrCreate(container);
+                var childEnt = entitiesMap.Value.GetOrCreate(serial);
                 childEnt.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
                     .Set(new Hue() { Value = hue });
                 // childEnt.Set(new EquippedItem() { Layer = layer }, parentEnt);
@@ -1151,8 +1160,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             //         var containerSerial = reader.ReadUInt32BE();
             //         var hue = reader.ReadUInt16BE();
             //
-            //         var parentEnt = entitiesMap.Value.GetOrCreate(world, containerSerial);
-            //         var childEnt = entitiesMap.Value.GetOrCreate(world, serial);
+            //         var parentEnt = entitiesMap.Value.GetOrCreate(containerSerial);
+            //         var childEnt = entitiesMap.Value.GetOrCreate(serial);
             //         childEnt.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
             //             .Set(new Hue() { Value = hue })
             //             .Set(new WorldPosition() { X = x, Y = y, Z = (sbyte)gridIdx })
@@ -1252,7 +1261,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var loop = reader.ReadBool();
                 var delay = reader.ReadUInt8();
 
-                // var ent = entitiesMap.Value.GetOrCreate(world, serial);
+                // var ent = entitiesMap.Value.GetOrCreate(serial);
                 // var index = ClassicUO.Game.GameObjects.Mobile.GetReplacedObjectAnimation(ent.Get<Graphic>().Value, action);
 
                 // ent.Set(new MobAnimation()
@@ -1403,7 +1412,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var flags = (Flags)reader.ReadUInt8();
                 var notoriety = (NotorietyFlag)reader.ReadUInt8();
 
-                var ent = entitiesMap.Value.GetOrCreate(world, serial);
+                var ent = entitiesMap.Value.GetOrCreate(serial);
                 ent.Set(new Graphic() { Value = graphic })
                     .Set(new Hue() { Value = hue })
                     .Set(new ServerFlags() { Value = flags });
@@ -1460,7 +1469,7 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                 var serial = reader.ReadUInt32BE();
 
-                var parentEnt = entitiesMap.Value.GetOrCreate(world, serial);
+                var parentEnt = entitiesMap.Value.GetOrCreate(serial);
 
                 var slots = parentEnt.Has<EquipmentSlots>() ? parentEnt.Get<EquipmentSlots>() : new EquipmentSlots();
 
@@ -1469,7 +1478,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 while ((layer = (Layer)reader.ReadUInt8()) != Layer.Invalid &&
                      (itemSerial = reader.ReadUInt32BE()) != 0)
                 {
-                    var childEnt = entitiesMap.Value.GetOrCreate(world, itemSerial);
+                    var childEnt = entitiesMap.Value.GetOrCreate(itemSerial);
                     // childEnt.Set(new EquippedItem() { Layer = layer }, parentEnt);
 
                     slots[layer] = childEnt;
@@ -1604,7 +1613,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var serial = reader.ReadUInt32BE();
                 (var hitsMax, var hits) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
 
-                entitiesMap.Value.GetOrCreate(world, serial)
+                entitiesMap.Value.GetOrCreate(serial)
                     .Set(new Hitpoints() { Value = hits, MaxValue = hitsMax });
             };
 
@@ -1616,7 +1625,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var serial = reader.ReadUInt32BE();
                 (var manaMax, var mana) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
 
-                entitiesMap.Value.GetOrCreate(world, serial)
+                entitiesMap.Value.GetOrCreate(serial)
                     .Set(new Mana() { Value = mana, MaxValue = manaMax });
             };
 
@@ -1628,7 +1637,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var serial = reader.ReadUInt32BE();
                 (var stamMax, var stam) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
 
-                entitiesMap.Value.GetOrCreate(world, serial)
+                entitiesMap.Value.GetOrCreate(serial)
                     .Set(new Stamina() { Value = stam, MaxValue = stamMax });
             };
 
@@ -1838,7 +1847,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var revision = reader.ReadUInt32BE();
                 reader.Skip(4);
 
-                var parent = entitiesMap.Value.GetOrCreate(world, serial);
+                var parent = entitiesMap.Value.GetOrCreate(serial);
 
                 var multiRect = Rectangle.Empty;
                 (var startX, var startY, var startZ) = parent.Get<WorldPosition>();
@@ -2108,7 +2117,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 // TODO
                 // var group = ClassicUO.Game.GameObjects.Mobile.GetObjectNewAnimation()
 
-                // entitiesMap.Value.GetOrCreate(world, serial)
+                // entitiesMap.Value.GetOrCreate(serial)
                 //     .Set(new MobAnimation()
                 //     {
                 //         Index = 1,
@@ -2190,7 +2199,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var flags = (Flags)reader.ReadUInt8();
                 var unk2 = reader.ReadUInt16BE();
 
-                var ent = entitiesMap.Value.GetOrCreate(world, serial);
+                var ent = entitiesMap.Value.GetOrCreate(serial);
                 ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
                     .Set(new Hue() { Value = hue })
                     .Set(new Amount() { Value = amount })
@@ -2263,7 +2272,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                     var entitySerial = reader.ReadUInt32BE();
                     (var entX, var entY, var entZ) = (reader.ReadUInt16BE(), reader.ReadUInt16BE(), reader.ReadUInt16BE());
 
-                    var ent = entitiesMap.Value.GetOrCreate(world, serial);
+                    var ent = entitiesMap.Value.GetOrCreate(serial);
                     ent.Set(new WorldPosition() { X = entX, Y = entY, Z = (sbyte)entZ });
                 }
             };

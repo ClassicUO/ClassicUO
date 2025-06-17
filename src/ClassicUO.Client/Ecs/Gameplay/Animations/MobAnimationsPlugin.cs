@@ -129,7 +129,7 @@ readonly struct MobAnimationsPlugin : IPlugin
     {
         foreach (var queuedStep in stepsQueued)
         {
-            var ent = entitiesMap.Value.GetOrCreate(world, queuedStep.Serial);
+            var ent = entitiesMap.Value.GetOrCreate(queuedStep.Serial);
 
             if (gameCtx.Value.PlayerSerial == queuedStep.Serial)
             {

@@ -97,7 +97,7 @@ internal sealed class TextOverHeadManager
     {
         foreach ((var serial, var list) in _textOverHeadMap)
         {
-            var ent = networkEntities.Get(world, serial);
+            var ent = networkEntities.Get(serial);
 
             if (!ent.ID.IsValid() || list.Count == 0)
             {
@@ -183,7 +183,7 @@ internal sealed class TextOverHeadManager
             if (list.First == null)
                 continue;
 
-            var ent = networkEntities.Get(world, list.First.Value.Serial);
+            var ent = networkEntities.Get(list.First.Value.Serial);
 
             if (!ent.ID.IsValid())
                 continue;
@@ -344,7 +344,7 @@ internal sealed class TextOverHeadManager
         if (list.First == null)
             return false;
 
-        var mainEnt = networkEntities.Get(world, list.First.Value.Serial);
+        var mainEnt = networkEntities.Get(list.First.Value.Serial);
         if (!mainEnt.ID.IsValid())
             return false;
 
@@ -386,7 +386,7 @@ internal sealed class TextOverHeadManager
 
             (var bounds2, var totalLines2) = GetBounds(current.Value, fontSize);
 
-            var ent = networkEntities.Get(world, current.Value.First.Value.Serial);
+            var ent = networkEntities.Get(current.Value.First.Value.Serial);
             if (!ent.ID.IsValid())
                 continue;
 

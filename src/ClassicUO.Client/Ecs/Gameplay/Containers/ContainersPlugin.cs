@@ -74,7 +74,7 @@ internal readonly struct ContainersPlugin : IPlugin
             else
             {
                 ref readonly var gumpInfo = ref assets.Value.Gumps.GetGump(ev.Graphic);
-                var ent = entitiesMap.Value.GetOrCreate(world, ev.Serial);
+                var ent = entitiesMap.Value.GetOrCreate(ev.Serial);
                 ent.Set
                 (
                     new UINode()
@@ -156,8 +156,8 @@ internal readonly struct ContainersPlugin : IPlugin
             var containerSerial = reader.ReadUInt32BE();
             var hue = reader.ReadUInt16BE();
 
-            var ent = entitiesMap.Value.GetOrCreate(world, serial);
-            var parentEnt = entitiesMap.Value.GetOrCreate(world, containerSerial)
+            var ent = entitiesMap.Value.GetOrCreate(serial);
+            var parentEnt = entitiesMap.Value.GetOrCreate(containerSerial)
                 .Add<IsContainer>();
 
             ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
@@ -227,9 +227,9 @@ internal readonly struct ContainersPlugin : IPlugin
                 var containerSerial = reader.ReadUInt32BE();
                 var hue = reader.ReadUInt16BE();
 
-                var parentEnt = entitiesMap.Value.GetOrCreate(world, containerSerial)
+                var parentEnt = entitiesMap.Value.GetOrCreate(containerSerial)
                     .Add<IsContainer>();
-                var ent = entitiesMap.Value.GetOrCreate(world, serial);
+                var ent = entitiesMap.Value.GetOrCreate(serial);
                 ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
                     .Set(new Hue() { Value = hue })
                     .Set(new WorldPosition() { X = x, Y = y, Z = 0 })
