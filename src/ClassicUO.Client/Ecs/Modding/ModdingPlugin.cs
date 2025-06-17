@@ -27,8 +27,7 @@ internal readonly struct ModdingPlugins : IPlugin
             Res<PacketsMap> packetMap,
             Res<Settings> settings,
             Res<NetworkEntitiesMap> networkEntities,
-            Res<GameContext> gameCtx,
-            World world
+            Res<GameContext> gameCtx
         ) =>
         {
             Extism.Sdk.Plugin.ConfigureFileLogging("stdout", LogLevel.Info);
@@ -59,7 +58,7 @@ internal readonly struct ModdingPlugins : IPlugin
                     }),
 
                     HostFunction.FromMethod("cuo_add_packet_handler", null, (CurrentPlugin p, long offset) => {
-                        var handlerInfo = JsonSerializer.Deserialize(p.ReadBytes(offset), ComponentsJsonContext.Default.PacketHandlerInfo);
+                        var handlerInfo = JsonSerializer.Deserialize(p.ReadBytes(offset), PluginJsonContext.Default.PacketHandlerInfo);
                         packetMap.Value[handlerInfo.PacketId] = buffer => {
                             plugin.Call(handlerInfo.FuncName, buffer);
                         };
@@ -84,7 +83,7 @@ internal readonly struct ModdingPlugins : IPlugin
                 static IEnumerable<HostFunction> bind<T>(string postfix, NetworkEntitiesMap networkEntities)
                     where T : struct
                 {
-                    var ctx = (JsonTypeInfo<T>)ComponentsJsonContext.Default.GetTypeInfo(typeof(T));
+                    var ctx = (JsonTypeInfo<T>)PluginJsonContext.Default.GetTypeInfo(typeof(T));
                     yield return serializeProps<T>("cuo_get_" + postfix, networkEntities, ctx);
                     yield return deserializeProps<T>("cuo_set_" + postfix, networkEntities, ctx);
                 }
@@ -140,7 +139,7 @@ internal readonly struct ModdingPlugins : IPlugin
                             if (arch == null)
                                 return p.WriteString("{}");
 
-                            var json = JsonSerializer.Serialize(ent.Archetype.All, ComponentsJsonContext.Default.ComponentInfoArray);
+                            var json = JsonSerializer.Serialize(ent.Archetype.All, PluginJsonContext.Default.ComponentInfoArray);
                             return p.WriteString(json);
                         });
                 }
@@ -167,8 +166,13 @@ internal readonly struct ModdingPlugins : IPlugin
 
 [JsonSourceGenerationOptions(IncludeFields = true, PropertyNameCaseInsensitive = true, PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
 [JsonSerializable(typeof(ComponentInfo[]), GenerationMode = JsonSourceGenerationMode.Serialization)]
-[JsonSerializable(typeof(PacketHandlerInfo), GenerationMode = JsonSourceGenerationMode.Default)]
 
+// internals
+[JsonSerializable(typeof(PacketHandlerInfo), GenerationMode = JsonSourceGenerationMode.Default)]
+[JsonSerializable(typeof(MousePosProxy), GenerationMode = JsonSourceGenerationMode.Default)]
+
+
+// components
 [JsonSerializable(typeof(WorldPosition), GenerationMode = JsonSourceGenerationMode.Default)]
 [JsonSerializable(typeof(Graphic), GenerationMode = JsonSourceGenerationMode.Default)]
 [JsonSerializable(typeof(Hue), GenerationMode = JsonSourceGenerationMode.Default)]
@@ -177,8 +181,9 @@ internal readonly struct ModdingPlugins : IPlugin
 [JsonSerializable(typeof(Hitpoints), GenerationMode = JsonSourceGenerationMode.Default)]
 [JsonSerializable(typeof(Mana), GenerationMode = JsonSourceGenerationMode.Default)]
 [JsonSerializable(typeof(Stamina), GenerationMode = JsonSourceGenerationMode.Default)]
-internal partial class ComponentsJsonContext : JsonSerializerContext { }
+internal partial class PluginJsonContext : JsonSerializerContext { }
 
 
 
 internal record struct PacketHandlerInfo(byte PacketId, string FuncName);
+internal record struct MousePosProxy(string Button, string Pressed);
