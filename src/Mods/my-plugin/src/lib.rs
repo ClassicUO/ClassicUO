@@ -78,17 +78,6 @@ pub fn packet_recv(mut packet: Vec<u8>) -> FnResult<Vec<u8>> {
     // info!("{}", format!("equipment {:?}", player_equipment));
     info!("{}", format!("graphic {:02X?}", player_graphic.value));
 
-    unsafe {
-        cuo_ecs_set_component(
-            Json(SetComponent {
-                entity: 123,
-                component_id: 3,
-            }),
-            vec![0xDE, 0xAD, 0xBE, 0xEF],
-        )
-        .unwrap()
-    }
-
     set_entity_graphic(player_serial, Graphic { value: 0x12 });
 
     // if let Some(table_mem) = config::get_memory("packet_table").unwrap() {
@@ -120,10 +109,12 @@ fn register_all_packets() {
 }
 
 fn register_handler(packet_id: u8, fn_name: &str) {
-    let mut vec: Vec<u8> = vec![packet_id];
-    vec.extend_from_slice(fn_name.as_bytes());
     unsafe {
-        cuo_add_packet_handler(vec).unwrap();
+        cuo_add_packet_handler(Json(PacketHandlerInfo {
+            packet_id,
+            func_name: fn_name.to_string(),
+        }))
+        .unwrap();
     }
 }
 
@@ -208,18 +199,19 @@ struct ComponentInfo {
 }
 
 #[derive(Debug, serde::Serialize)]
-struct SetComponent {
-    entity: u64,
-    component_id: u64,
+#[serde(rename_all = "camelCase")]
+struct PacketHandlerInfo {
+    packet_id: u8,
+    func_name: String,
 }
 
 #[host_fn]
 extern "ExtismHost" {
 
     fn cuo_ecs_get_components(serial: Vec<u8>) -> Json<Vec<ComponentInfo>>;
-    fn cuo_ecs_set_component(info: Json<SetComponent>, buf: Vec<u8>);
 
-    fn cuo_add_packet_handler(handler_desc: Vec<u8>);
+    fn cuo_add_packet_handler(handler_desc: Json<PacketHandlerInfo>);
+
     fn cuo_get_packet_size(id: Vec<u8>) -> Vec<u8>;
     fn cuo_send_to_server(packet: Vec<u8>);
 

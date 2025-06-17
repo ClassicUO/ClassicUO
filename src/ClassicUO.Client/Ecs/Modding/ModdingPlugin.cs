@@ -47,8 +47,7 @@ internal readonly struct ModdingPlugins : IPlugin
                 Extism.Sdk.Plugin plugin = null;
 
                 HostFunction[] functions = [
-                    HostFunction.FromMethod("cuo_get_packet_size", null, (CurrentPlugin p, long offset) =>
-                    {
+                    HostFunction.FromMethod("cuo_get_packet_size", null, (CurrentPlugin p, long offset) => {
                         var span = p.ReadBytes(offset);
                         var size = network.Value.PacketsTable.GetPacketLength(span[0]);
                         return p.WriteBytes(size.AsBytes());
@@ -60,36 +59,12 @@ internal readonly struct ModdingPlugins : IPlugin
                     }),
 
                     HostFunction.FromMethod("cuo_add_packet_handler", null, (CurrentPlugin p, long offset) => {
-                        var handlerDescriptionSpan = p.ReadBytes(offset);
-                        var packetId = handlerDescriptionSpan[0];
-                        var funcName = Encoding.UTF8.GetString(handlerDescriptionSpan.Slice(1));
-
-                        packetMap.Value[packetId] = buffer => {
-                            plugin.Call(funcName, buffer);
+                        var handlerInfo = JsonSerializer.Deserialize(p.ReadBytes(offset), ComponentsJsonContext.Default.PacketHandlerInfo);
+                        packetMap.Value[handlerInfo.PacketId] = buffer => {
+                            plugin.Call(handlerInfo.FuncName, buffer);
                         };
                     }),
 
-
-                    HostFunction.FromMethod("cuo_ecs_set_component", null, (CurrentPlugin p, long keyOffset, long valueOffset) => {
-                        var key = p.ReadBytes(keyOffset);
-                        var val = p.ReadBytes(valueOffset);
-
-                        var setCmpInfo = JsonSerializer.Deserialize(key, ComponentsJsonContext.Default.SetComponent);
-                        var tt = ComponentsJsonContext.Default.GetTypeInfo(typeof(WorldPosition));
-
-                        var obj = tt.CreateObject();
-
-
-                        // return p.WriteString("{}");
-                    }),
-
-                    // HostFunction.FromMethod("cuo_get_entity_graphic", null, (CurrentPlugin p, long offset) => {
-                    //     var serial = p.ReadBytes(offset).As<uint>();
-                    //     var ent = networkEntities.Value.Get(world, serial);
-                    //     if (ent == 0 || !ent.Has<Graphic>())
-                    //         return p.WriteBytes([]);
-                    //     return p.WriteBytes(ent.Get<Graphic>().Value.AsBytes());
-                    // })
 
                     HostFunction.FromMethod("cuo_get_player_serial", null, p => {
                         return p.WriteBytes(gameCtx.Value.PlayerSerial.AsBytes());
@@ -97,21 +72,11 @@ internal readonly struct ModdingPlugins : IPlugin
 
                     archAsJson("cuo_ecs_get_components", networkEntities),
 
-                    // HostFunction.FromMethod("cuo_ecs_get_component", null, (CurrentPlugin p, long offset) =>{
-                    //     (var id, var cmpId) = p.ReadBytes(offset).As<(ulong, ulong)>();
-                    //     if (id == 0)
-                    //         return p.WriteBytes([]);
-
-                    //     return 0;
-                    // }),
 
                     ..bind<Graphic>("entity_graphic", networkEntities),
                     ..bind<Hue>("entity_hue", networkEntities),
                     ..bind<Facing>("entity_direction", networkEntities),
                     ..bind<WorldPosition>("entity_position", networkEntities),
-
-                    // serializeProps("cuo_get_entity_equipment", networkEntities, ComponentsJsonContext.Default.EquipmentSlots),
-                    // serializeProps("cuo_get_entity_position", networkEntities, ComponentsJsonContext.Default.WorldPosition),
                 ];
 
 
@@ -119,20 +84,10 @@ internal readonly struct ModdingPlugins : IPlugin
                 static IEnumerable<HostFunction> bind<T>(string postfix, NetworkEntitiesMap networkEntities)
                     where T : struct
                 {
-                    yield return serializeProps<T>("cuo_get_" + postfix, networkEntities, (JsonTypeInfo<T>)ComponentsJsonContext.Default.GetTypeInfo(typeof(T)));
-                    yield return deserializeProps<T>("cuo_set_" + postfix, networkEntities, (JsonTypeInfo<T>)ComponentsJsonContext.Default.GetTypeInfo(typeof(T)));
-
-                    // return HostFunction.FromMethod(name, null,
-                    // (CurrentPlugin p, long offset) =>
-                    //     {
-                    //         var serial = p.ReadBytes(offset).As<uint>();
-                    //         var ent = networkEntities.Get(serial);
-                    //         if (ent == 0 || !ent.Has<T>())
-                    //             return p.WriteBytes([]);
-                    //         return p.WriteBytes(ent.Get<T>().AsBytes());
-                    //     });
+                    var ctx = (JsonTypeInfo<T>)ComponentsJsonContext.Default.GetTypeInfo(typeof(T));
+                    yield return serializeProps<T>("cuo_get_" + postfix, networkEntities, ctx);
+                    yield return deserializeProps<T>("cuo_set_" + postfix, networkEntities, ctx);
                 }
-
 
                 static HostFunction serializeProps<T>(string name, NetworkEntitiesMap networkEntities, JsonTypeInfo<T> ctx)
                     where T : struct
@@ -212,7 +167,7 @@ internal readonly struct ModdingPlugins : IPlugin
 
 [JsonSourceGenerationOptions(IncludeFields = true, PropertyNameCaseInsensitive = true, PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
 [JsonSerializable(typeof(ComponentInfo[]), GenerationMode = JsonSourceGenerationMode.Serialization)]
-[JsonSerializable(typeof(SetComponent), GenerationMode = JsonSourceGenerationMode.Default)]
+[JsonSerializable(typeof(PacketHandlerInfo), GenerationMode = JsonSourceGenerationMode.Default)]
 
 [JsonSerializable(typeof(WorldPosition), GenerationMode = JsonSourceGenerationMode.Default)]
 [JsonSerializable(typeof(Graphic), GenerationMode = JsonSourceGenerationMode.Default)]
@@ -226,4 +181,4 @@ internal partial class ComponentsJsonContext : JsonSerializerContext { }
 
 
 
-internal record struct SetComponent(ulong Entity, ulong ComponentId);
+internal record struct PacketHandlerInfo(byte PacketId, string FuncName);
