@@ -1,9 +1,11 @@
-using System;
 using ClassicUO.Assets;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SDL2;
+using System;
+using static ClassicUO.Renderer.UltimaBatcher2D;
 
 namespace ClassicUO.Renderer.Arts
 {
@@ -41,43 +43,52 @@ namespace ClassicUO.Renderer.Arts
             if (spriteInfo.Texture == null)
             {
                 var artInfo = _artLoader.GetArt(idx);
-                if (!artInfo.Pixels.IsEmpty)
+
+                if (artInfo.Pixels.IsEmpty && idx > 0)
                 {
-                    spriteInfo.Texture = _atlas.AddSprite(
-                        artInfo.Pixels,
-                        artInfo.Width,
-                        artInfo.Height,
-                        out spriteInfo.UV
+                    // Trying to load a texture that does not exist in the client MULs
+                    // Degrading gracefully and only crash if not even the fallback ItemID exists
+                    Log.Error(
+                        $"Texture not found for sprite: idx: {idx}; itemid: {(idx > 0x4000 ? idx - 0x4000 : '-')}"
                     );
+                    return ref Get(0); // ItemID of "UNUSED" placeholder
+                }
 
-                    if (idx > 0x4000)
+                spriteInfo.Texture = _atlas.AddSprite(
+                    artInfo.Pixels,
+                    artInfo.Width,
+                    artInfo.Height,
+                    out spriteInfo.UV
+                );
+
+                if (idx > 0x4000)
+                {
+                    idx -= 0x4000;
+                    _picker.Set(idx, artInfo.Width, artInfo.Height, artInfo.Pixels);
+
+                    var pos1 = 0;
+                    int minX = artInfo.Width,
+                        minY = artInfo.Height,
+                        maxX = 0,
+                        maxY = 0;
+
+                    for (int y = 0; y < artInfo.Height; ++y)
                     {
-                        idx -= 0x4000;
-                        _picker.Set(idx, artInfo.Width, artInfo.Height, artInfo.Pixels);
-
-                        var pos1 = 0;
-                        int minX = artInfo.Width,
-                            minY = artInfo.Height,
-                            maxX = 0,
-                            maxY = 0;
-
-                        for (int y = 0; y < artInfo.Height; ++y)
+                        for (int x = 0; x < artInfo.Width; ++x)
                         {
-                            for (int x = 0; x < artInfo.Width; ++x)
+                            if (artInfo.Pixels[pos1++] != 0)
                             {
-                                if (artInfo.Pixels[pos1++] != 0)
-                                {
-                                    minX = Math.Min(minX, x);
-                                    maxX = Math.Max(maxX, x);
-                                    minY = Math.Min(minY, y);
-                                    maxY = Math.Max(maxY, y);
-                                }
+                                minX = Math.Min(minX, x);
+                                maxX = Math.Max(maxX, x);
+                                minY = Math.Min(minY, y);
+                                maxY = Math.Max(maxY, y);
                             }
                         }
-
-                        _realArtBounds[idx] = new Rectangle(minX, minY, maxX - minX, maxY - minY);
                     }
+
+                    _realArtBounds[idx] = new Rectangle(minX, minY, maxX - minX, maxY - minY);
                 }
+                
             }
 
             return ref spriteInfo;
