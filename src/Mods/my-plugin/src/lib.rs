@@ -1,8 +1,18 @@
 use extism_pdk::*;
 
 #[plugin_fn]
-pub fn register(name: String) -> FnResult<()> {
+pub fn on_init() -> FnResult<()> {
     register_all_packets();
+    Ok(())
+}
+
+#[plugin_fn]
+pub fn on_update() -> FnResult<()> {
+    Ok(())
+}
+
+#[plugin_fn]
+pub fn on_event() -> FnResult<()> {
     Ok(())
 }
 

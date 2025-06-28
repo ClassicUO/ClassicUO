@@ -1,3 +1,4 @@
+using System;
 using ClassicUO.Assets;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -41,6 +42,23 @@ namespace ClassicUO.Renderer.Gumps
             }
 
             return ref spriteInfo;
+        }
+
+        public void SetGump(uint idx, ReadOnlySpan<uint> data, int w, int h)
+        {
+            if (idx >= _spriteInfos.Length)
+                return;
+
+            ref var spriteInfo = ref _spriteInfos[idx];
+
+            spriteInfo.Texture = _atlas.AddSprite(
+                data,
+                w,
+                h,
+                out spriteInfo.UV
+            );
+
+            _picker.Set(idx, w, h, data, replace: true);
         }
 
         public bool PixelCheck(uint idx, int x, int y) => _picker.Get(idx, x, y);

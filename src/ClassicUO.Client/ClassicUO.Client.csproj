@@ -7,7 +7,6 @@
     <RootNamespace>ClassicUO</RootNamespace>
     <PublishAot>true</PublishAot>
     <PlatformTarget>x64</PlatformTarget>
-    <PublishAot>true</PublishAot>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
@@ -96,6 +95,7 @@
   <ItemGroup>
     <PackageReference Include="Extism.runtime.all" Version="1.11.1" />
     <PackageReference Include="Extism.Sdk" Version="1.9.1" />
+    <PackageReference Include="Serde" Version="0.8.0" />
   </ItemGroup>
 
   <PropertyGroup>

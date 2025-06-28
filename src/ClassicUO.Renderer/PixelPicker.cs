@@ -12,7 +12,7 @@ namespace ClassicUO.Renderer
             public int StartIndex;
         }
 
-        private readonly Dictionary<ulong, TextureInfo> _ids = new ();
+        private readonly Dictionary<ulong, TextureInfo> _ids = new();
         private byte[] _data = new byte[0x40000];
         private int _dataCount = 0;
 
@@ -71,11 +71,16 @@ namespace ClassicUO.Renderer
             }
         }
 
-        public void Set(ulong textureID, int width, int height, ReadOnlySpan<uint> pixels)
+        public void Set(ulong textureID, int width, int height, ReadOnlySpan<uint> pixels, bool replace = false)
         {
             if (_ids.ContainsKey(textureID))
             {
-                return;
+                if (!replace)
+                {
+                    return;
+                }
+
+                _ids.Remove(textureID);
             }
 
             int startIdx = _dataCount;

@@ -111,7 +111,7 @@ readonly struct NetworkPlugin : IPlugin
     }
 
     void PacketReader(
-        Res<List<Mod>> mods,
+        Query<Data<WasmMod>> queryMods,
         Res<NetClient> network,
         Res<PacketsMap> packetsMap,
         Res<CircularBuffer> buffer,
@@ -158,16 +158,20 @@ readonly struct NetworkPlugin : IPlugin
             // Console.WriteLine(">> packet-in: ID 0x{0:X2} | Len: {1}", packetId, packetLen);
 
             var sp = packetBuffer.Value.AsSpan(0, packetLen + packetHeaderOffset);
-            foreach (var mod in mods.Value)
+
+            foreach ((_, var mod) in queryMods)
             {
-                var res = mod.Plugin.Call("packet_recv", sp);
-                if (res.IsEmpty)
+                if (mod.Ref.Mod.Plugin.FunctionExists("packet_recv"))
                 {
-                    sp = [];
-                }
-                else
-                {
-                    res.CopyTo(sp);
+                    var res = mod.Ref.Mod.Plugin.Call("packet_recv", sp);
+                    if (res.IsEmpty)
+                    {
+                        sp = [];
+                    }
+                    else
+                    {
+                        res.CopyTo(sp);
+                    }
                 }
             }
 

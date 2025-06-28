@@ -75,8 +75,8 @@ internal readonly struct FnaPlugin : IPlugin
 
 internal sealed class Time : SystemParam<TinyEcs.World>, IIntoSystemParam<World>
 {
-    public float Total;
-    public float Frame;
+    public float Total { get; set; }
+    public float Frame { get; set; }
 
     public static ISystemParam<World> Generate(World arg)
     {
