@@ -1,23 +1,31 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
+using System.Threading.Tasks;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
+using Clay_cs;
 using Extism.Sdk;
+using Extism.Sdk.Native;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Serde;
-using Serde.Json;
 using TinyEcs;
 
 namespace ClassicUO.Ecs;
 
+// https://github.com/bakcxoj/bevy_wasm
+// https://github.com/mhmd-azeez/extism-space-commander/blob/main/scripts/mod_manager.cs#L161
 
 internal readonly struct ModdingPlugins : IPlugin
 {
@@ -28,13 +36,16 @@ internal readonly struct ModdingPlugins : IPlugin
 
         scheduler.OnStartup((
             World world,
-            EventWriter<(Mod, PluginMessage)> writer,
+            EventWriter<(Mod, PluginMessage)> pluginWriter,
+            EventWriter<HostMessage> hostWriter,
             Res<NetClient> network,
             Res<PacketsMap> packetMap,
             Res<Settings> settings,
             Res<NetworkEntitiesMap> networkEntities,
             Res<GameContext> gameCtx,
-            Res<GraphicsDevice> device
+            Res<GraphicsDevice> device,
+            Res<AssetsServer> assets,
+            Res<UOFileManager> fileManager
         ) =>
         {
             Extism.Sdk.Plugin.ConfigureFileLogging("stdout", LogLevel.Info);
@@ -66,20 +77,91 @@ internal readonly struct ModdingPlugins : IPlugin
                         network.Value.Send(packet, true);
                     }),
 
-                    // HostFunction.FromMethod("cuo_add_packet_handler", null, (CurrentPlugin p, long offset) => {
-                    //     var handlerInfo = JsonSerializer.Deserialize(p.ReadBytes(offset), PluginJsonContext.Default.PacketHandlerInfo);
-                    //     packetMap.Value[handlerInfo.PacketId] = buffer => {
-                    //         plugin.Call(handlerInfo.FuncName, buffer);
-                    //     };
-                    // }),
+                    HostFunction.FromMethod("cuo_set_packet_handler", null, (CurrentPlugin p, long offset) => {
+                        var handlerInfo = p.ReadString(offset).FromJson<PacketHandlerInfo>();
+                        if (plugin.FunctionExists(handlerInfo.FuncName))
+                        {
+                            packetMap.Value[handlerInfo.PacketId] = buffer
+                                => plugin.Call(handlerInfo.FuncName, buffer);
+                        }
+                    }),
+
+                    HostFunction.FromMethod("cuo_add_packet_handler", null, (CurrentPlugin p, long offset) => {
+                        var handlerInfo = p.ReadString(offset).FromJson<PacketHandlerInfo>();
+                        if (plugin.FunctionExists(handlerInfo.FuncName))
+                        {
+                            if (!packetMap.Value.TryGetValue(handlerInfo.PacketId, out var fn))
+                            {
+                                return;
+                            }
+
+                            packetMap.Value[handlerInfo.PacketId] = buffer => {
+                                    plugin.Call(handlerInfo.FuncName, buffer);
+                                    fn(buffer);
+                                };
+                        }
+                    }),
+
+                    HostFunction.FromMethod("cuo_set_sprite", null, (CurrentPlugin p, long offset) => {
+                        var spriteDesc = p.ReadString(offset).FromJson<SpriteDescription>();
+                        var data = Convert.FromBase64String(spriteDesc.Base64Data);
+
+                        if (spriteDesc.Compression == 1)
+                        {
+                            data = Uncompress(data);
+                        }
+
+                        var pixels = MemoryMarshal.Cast<byte, uint>(data);
+
+                        switch (spriteDesc.AssetType)
+                        {
+                            case AssetType.Gump:
+                                assets.Value.Gumps.SetGump(spriteDesc.Idx, pixels, spriteDesc.Width, spriteDesc.Height);
+                                break;
+                            default:
+                                Console.WriteLine("'cuo_set_sprite' for {0} not implemented yet", spriteDesc.AssetType);
+                                break;
+                        }
+                    }),
+
+                    HostFunction.FromMethod("cuo_get_sprite", null, (CurrentPlugin p, long offset) => {
+                        var spriteDesc = p.ReadString(offset).FromJson<SpriteDescription>();
+
+                        switch (spriteDesc.AssetType)
+                        {
+                            case AssetType.Gump:
+                                var gumpInfo = fileManager.Value.Gumps.GetGump(spriteDesc.Idx);
+                                if (gumpInfo.Pixels.IsEmpty)
+                                    return p.WriteBytes([]);
+
+                                var json = createSpriteDesc(spriteDesc, gumpInfo.Pixels.AsBytes(), (gumpInfo.Width, gumpInfo.Height), 1)
+                                    .ToJson();
+                                return p.WriteString(json);
+
+                            default:
+                                Console.WriteLine("'cuo_get_sprite' for {0} not implemented yet", spriteDesc.AssetType);
+                                break;
+                        }
+
+                        static SpriteDescription createSpriteDesc(SpriteDescription input, ReadOnlySpan<byte> data, (int w, int h) imgSize, int compression)
+                        {
+                            data = compression == 1 ? Compress(data) : data;
+                            var base64Data = Convert.ToBase64String(data);
+                            return new SpriteDescription(input.AssetType, input.Idx, imgSize.w, imgSize.h, base64Data, compression);
+                        }
+
+                        return p.WriteBytes([]);
+                    }),
+
 
 
                     HostFunction.FromMethod("send_events", null, (CurrentPlugin p, long offset) => {
-                        var events = p.ReadString(offset)
+                        var str = p.ReadString(offset);
+                        var events = str
                             .FromJson<PluginMessages>();
 
                         foreach (var ev in events.Messages)
-                            writer.Enqueue((mod, ev));
+                            pluginWriter.Enqueue((mod, ev));
                     }),
 
 
@@ -87,61 +169,98 @@ internal readonly struct ModdingPlugins : IPlugin
                         return p.WriteBytes(gameCtx.Value.PlayerSerial.AsBytes());
                     }),
 
-                    archAsJson("cuo_ecs_get_components", networkEntities),
 
 
-                    // ..bind<Graphic>("entity_graphic", networkEntities),
-                    // ..bind<Hue>("entity_hue", networkEntities),
-                    // ..bind<Facing>("entity_direction", networkEntities),
-                    // ..bind<WorldPosition>("entity_position", networkEntities),
+                    HostFunction.FromMethod("cuo_ui_node", null, (CurrentPlugin p, long offset) => {
+                        var nodes = p.ReadString(offset).FromJson<UINodes>();
+
+                        var set = new Dictionary<int, ulong>();
+                        foreach (var node in nodes.Nodes)
+                        {
+                            var ent = world.Entity()
+                                .Set(new UINode() {
+                                    Config = {
+                                        layout = node.Config.Layout,
+                                        backgroundColor = node.Config.BackgroundColor,
+                                        cornerRadius = node.Config.CornerRadius,
+                                        floating = node.Config.Floating,
+                                        clip = node.Config.Clip,
+                                        border = node.Config.Border
+                                    },
+                                    UOConfig = node.UOConfig
+                                });
+
+                            set.Add(node.Id, ent.ID);
+                        }
+
+                        foreach ((var childIndex, var parentIndex) in nodes.Relations)
+                        {
+                            var child = set[childIndex];
+                            var parent = set[parentIndex];
+
+                            world.Entity(parent).AddChild(child);
+                        }
+                    }),
+
+
+                    ..bind<Graphic>("entity_graphic", networkEntities),
+                    ..bind<Hue>("entity_hue", networkEntities),
+                    ..bind<Facing>("entity_direction", networkEntities),
+                    ..bind<WorldPosition>("entity_position", networkEntities),
+                    ..bind<MobAnimation>("entity_animation", networkEntities),
+                    ..bind<ServerFlags>("entity_flags", networkEntities),
+                    ..bind<Hitpoints>("entity_hp", networkEntities),
+                    ..bind<Stamina>("entity_stamina", networkEntities),
+                    ..bind<Mana>("entity_mana", networkEntities),
+
                 ];
 
 
 
-                // static IEnumerable<HostFunction> bind<T>(string postfix, NetworkEntitiesMap networkEntities)
-                //     where T : struct
-                // {
-                //     var ctx = (JsonTypeInfo<T>)PluginJsonContext.Default.GetTypeInfo(typeof(T));
-                //     yield return serializeProps<T>("cuo_get_" + postfix, networkEntities, ctx);
-                //     yield return deserializeProps<T>("cuo_set_" + postfix, networkEntities, ctx);
-                // }
+                static IEnumerable<HostFunction> bind<T>(string postfix, NetworkEntitiesMap networkEntities)
+                    where T : struct
+                {
+                    var ctx = (JsonTypeInfo<T>)ModdingJsonContext.Default.GetTypeInfo(typeof(T));
+                    yield return serializeProps<T>("cuo_get_" + postfix, networkEntities, ctx);
+                    yield return deserializeProps<T>("cuo_set_" + postfix, networkEntities, ctx);
+                }
 
-                // static HostFunction serializeProps<T>(string name, NetworkEntitiesMap networkEntities, JsonTypeInfo<T> ctx)
-                //     where T : struct
-                // {
-                //     ArgumentNullException.ThrowIfNull(ctx);
+                static HostFunction serializeProps<T>(string name, NetworkEntitiesMap networkEntities, JsonTypeInfo<T> ctx)
+                    where T : struct
+                {
+                    ArgumentNullException.ThrowIfNull(ctx);
 
-                //     return HostFunction.FromMethod(name, null,
-                //     (CurrentPlugin p, long offset) =>
-                //         {
-                //             var serial = p.ReadBytes(offset).As<uint>();
-                //             var ent = networkEntities.Get(serial);
-                //             if (ent == 0 || !ent.Has<T>())
-                //                 return p.WriteString("{}");
+                    return HostFunction.FromMethod(name, null,
+                    (CurrentPlugin p, long offset) =>
+                        {
+                            var serial = p.ReadBytes(offset).As<uint>();
+                            var ent = networkEntities.Get(serial);
+                            if (ent == 0 || !ent.Has<T>())
+                                return p.WriteString("{}");
 
-                //             var json = JsonSerializer.Serialize(ent.Get<T>(), ctx);
-                //             return p.WriteString(json);
-                //         });
-                // }
+                            var json = JsonSerializer.Serialize(ent.Get<T>(), ctx);
+                            return p.WriteString(json);
+                        });
+                }
 
-                // static HostFunction deserializeProps<T>(string name, NetworkEntitiesMap networkEntities, JsonTypeInfo<T> ctx)
-                //     where T : struct
-                // {
-                //     ArgumentNullException.ThrowIfNull(ctx);
+                static HostFunction deserializeProps<T>(string name, NetworkEntitiesMap networkEntities, JsonTypeInfo<T> ctx)
+                    where T : struct
+                {
+                    ArgumentNullException.ThrowIfNull(ctx);
 
-                //     return HostFunction.FromMethod(name, null,
-                //     (CurrentPlugin p, long keyOffset, long valueOffset) =>
-                //         {
-                //             var serial = p.ReadBytes(keyOffset).As<uint>();
-                //             var ent = networkEntities.Get(serial);
-                //             if (ent == 0)
-                //                 return;
+                    return HostFunction.FromMethod(name, null,
+                    (CurrentPlugin p, long keyOffset, long valueOffset) =>
+                        {
+                            var serial = p.ReadBytes(keyOffset).As<uint>();
+                            var ent = networkEntities.Get(serial);
+                            if (ent == 0)
+                                return;
 
-                //             var value = p.ReadBytes(valueOffset);
-                //             var val = JsonSerializer.Deserialize(value, ctx);
-                //             ent.Set(val);
-                //         });
-                // }
+                            var value = p.ReadBytes(valueOffset);
+                            var val = JsonSerializer.Deserialize(value, ctx);
+                            ent.Set(val);
+                        });
+                }
 
                 static HostFunction archAsJson(string name, NetworkEntitiesMap networkEntities)
                 {
@@ -163,7 +282,7 @@ internal readonly struct ModdingPlugins : IPlugin
                 }
 
                 var manifest = new Manifest(uri?.IsFile ?? true ? new PathWasmSource(path) : new UrlWasmSource(uri));
-                plugin = new Extism.Sdk.Plugin(manifest, functions, true);
+                plugin = new Extism.Sdk.CompiledPlugin(manifest, functions, true).Instantiate();
 
 
                 var ok = true;
@@ -186,17 +305,37 @@ internal readonly struct ModdingPlugins : IPlugin
                 mod = new Mod(plugin);
                 world.Entity()
                     .Set(new WasmMod() { Mod = mod });
+
+
+                // world.OnEntityCreated += (w, id) =>
+                // {
+                //     hostWriter.Enqueue(new HostMessage.EntitySpawned(id));
+                // };
+                // world.OnEntityDeleted += (w, id) =>
+                // {
+                //     hostWriter.Enqueue(new HostMessage.EntityRemoved(id));
+                // };
+                // world.OnComponentSet += (w, id, cmp) =>
+                // {
+                //     hostWriter.Enqueue(new HostMessage.ComponentAdded(id, cmp));
+                // };
+                // world.OnComponentUnset += (w, id, cmp) =>
+                // {
+                //     hostWriter.Enqueue(new HostMessage.ComponentRemoved(id, cmp));
+                // };
             }
 
         });
 
 
+
+
         scheduler.OnAfterUpdate((Res<MouseContext> mouseCtx, Res<KeyboardContext> keyboardCtx, EventWriter<HostMessage> writer) =>
         {
-            if (mouseCtx.Value.PositionOffset != Vector2.Zero)
-            {
-                writer.Enqueue(new HostMessage.MouseMove(mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y));
-            }
+            // if (mouseCtx.Value.PositionOffset != Vector2.Zero)
+            // {
+            //     writer.Enqueue(new HostMessage.MouseMove(mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y));
+            // }
 
             if (mouseCtx.Value.Wheel != 0)
             {
@@ -205,7 +344,7 @@ internal readonly struct ModdingPlugins : IPlugin
 
             for (var button = Input.MouseButtonType.Left; button < Input.MouseButtonType.Size; button += 1)
             {
-                if (mouseCtx.Value.IsPressed(button))
+                if (mouseCtx.Value.IsPressedOnce(button))
                 {
                     writer.Enqueue(new HostMessage.MousePressed((int)button, mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y));
                 }
@@ -223,14 +362,14 @@ internal readonly struct ModdingPlugins : IPlugin
 
             for (var key = Keys.None + 1; key <= Keys.OemEnlW; key += 1)
             {
-                if (keyboardCtx.Value.IsPressed(key))
+                if (keyboardCtx.Value.IsPressedOnce(key))
                 {
-                    writer.Enqueue(new HostMessage.KeyPressed((int)key));
+                    writer.Enqueue(new HostMessage.KeyPressed(key));
                 }
 
                 if (keyboardCtx.Value.IsReleased(key))
                 {
-                    writer.Enqueue(new HostMessage.KeyReleased((int)key));
+                    writer.Enqueue(new HostMessage.KeyReleased(key));
                 }
             }
         });
@@ -250,9 +389,31 @@ internal readonly struct ModdingPlugins : IPlugin
             .RunIf((EventReader<(Mod, PluginMessage)> reader) => !reader.IsEmpty);
     }
 
+    private static unsafe byte[] Uncompress(ReadOnlySpan<byte> data)
+    {
+        fixed (byte* dataPtr = data)
+        {
+            using var ms = new UnmanagedMemoryStream(dataPtr, data.Length);
+            using var deflateStream = new System.IO.Compression.DeflateStream(ms, System.IO.Compression.CompressionMode.Decompress);
+            using var msOut = new MemoryStream();
+            deflateStream.CopyTo(msOut);
+            return msOut.ToArray();
+        }
+    }
+
+    private static unsafe byte[] Compress(ReadOnlySpan<byte> data)
+    {
+        using var ms = new MemoryStream();
+        {
+            using var deflateStream = new System.IO.Compression.DeflateStream(ms, System.IO.Compression.CompressionMode.Compress, leaveOpen: true);
+            deflateStream.Write(data);
+        }
+        return ms.ToArray();
+    }
+
     private static void ModInitialize(Query<Data<WasmMod>, Without<WasmInitialized>> query)
     {
-        var pluginVersion = new HostMessage.WasmPluginVersion().ToJson<HostMessage>();
+        var pluginVersion = new WasmPluginVersion().ToJson();
 
         foreach ((var ent, var mod) in query)
         {
@@ -291,6 +452,7 @@ internal readonly struct ModdingPlugins : IPlugin
     }
 
     private static void ReadModEvents(
+        World world,
         Res<PacketsMap> packetMap,
         Res<AssetsServer> assets,
         EventReader<(Mod, PluginMessage)> reader
@@ -322,6 +484,28 @@ internal readonly struct ModdingPlugins : IPlugin
                         assets.Value.Gumps.SetGump(overrideAsset.Idx, data, overrideAsset.Width, overrideAsset.Height);
                     }
                     break;
+
+                case PluginMessage.SetComponent<Graphic> setter:
+                    setComponent(world, setter);
+                    break;
+                case PluginMessage.SetComponent<Hue> setter:
+                    setComponent(world, setter);
+                    break;
+            }
+
+
+            static void setComponent<T>(World world, PluginMessage.SetComponent<T> setter) where T : struct
+            {
+                if (!world.Exists(setter.Entity))
+                    return;
+
+                var cmpEnt = world.Entity<T>();
+                ref var cmp = ref cmpEnt.Get<ComponentInfo>();
+
+                if (cmp.Size > 0)
+                    world.Set(setter.Entity, setter.Value);
+                else
+                    world.Add<T>(setter.Entity);
             }
         }
     }
@@ -337,61 +521,116 @@ internal struct WasmMod
 internal struct WasmInitialized;
 
 
-// [JsonSourceGenerationOptions(IncludeFields = true, PropertyNameCaseInsensitive = true, PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
-// [JsonSerializable(typeof(ComponentInfo[]), GenerationMode = JsonSourceGenerationMode.Serialization)]
+[JsonSourceGenerationOptions(IncludeFields = true, PropertyNameCaseInsensitive = true, PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
 
-// // internals
-// [JsonSerializable(typeof(PacketHandlerInfo), GenerationMode = JsonSourceGenerationMode.Default)]
+// components
+[JsonSerializable(typeof(WorldPosition), GenerationMode = JsonSourceGenerationMode.Default)]
+[JsonSerializable(typeof(Graphic), GenerationMode = JsonSourceGenerationMode.Default)]
+[JsonSerializable(typeof(Hue), GenerationMode = JsonSourceGenerationMode.Default)]
+[JsonSerializable(typeof(Facing), GenerationMode = JsonSourceGenerationMode.Default)]
+[JsonSerializable(typeof(EquipmentSlots), GenerationMode = JsonSourceGenerationMode.Default)]
+[JsonSerializable(typeof(Hitpoints), GenerationMode = JsonSourceGenerationMode.Default)]
+[JsonSerializable(typeof(Mana), GenerationMode = JsonSourceGenerationMode.Default)]
+[JsonSerializable(typeof(Stamina), GenerationMode = JsonSourceGenerationMode.Default)]
+[JsonSerializable(typeof(MobAnimation), GenerationMode = JsonSourceGenerationMode.Default)]
+[JsonSerializable(typeof(ServerFlags), GenerationMode = JsonSourceGenerationMode.Default)]
 
-
-// // components
-// [JsonSerializable(typeof(WorldPosition), GenerationMode = JsonSourceGenerationMode.Default)]
-// [JsonSerializable(typeof(Graphic), GenerationMode = JsonSourceGenerationMode.Default)]
-// [JsonSerializable(typeof(Hue), GenerationMode = JsonSourceGenerationMode.Default)]
-// [JsonSerializable(typeof(Facing), GenerationMode = JsonSourceGenerationMode.Default)]
-// [JsonSerializable(typeof(EquipmentSlots), GenerationMode = JsonSourceGenerationMode.Default)]
-// [JsonSerializable(typeof(Hitpoints), GenerationMode = JsonSourceGenerationMode.Default)]
-// [JsonSerializable(typeof(Mana), GenerationMode = JsonSourceGenerationMode.Default)]
-// [JsonSerializable(typeof(Stamina), GenerationMode = JsonSourceGenerationMode.Default)]
-
-
-// [JsonSerializable(typeof(WasmPluginVersion), GenerationMode = JsonSourceGenerationMode.Default)]
-// // [JsonSerializable(typeof(List<IHostMessage>), GenerationMode = JsonSourceGenerationMode.Default)]
-// [JsonSerializable(typeof(IPluginMessage[]), GenerationMode = JsonSourceGenerationMode.Default)]
-// internal partial class PluginJsonContext : JsonSerializerContext { }
+[JsonSerializable(typeof(UINodes), GenerationMode = JsonSourceGenerationMode.Default)]
 
 
+[JsonSerializable(typeof(HostMessages), GenerationMode = JsonSourceGenerationMode.Default)]
+[JsonSerializable(typeof(PluginMessages), GenerationMode = JsonSourceGenerationMode.Default)]
+[JsonSerializable(typeof(TimeProxy), GenerationMode = JsonSourceGenerationMode.Default)]
+[JsonSerializable(typeof(WasmPluginVersion), GenerationMode = JsonSourceGenerationMode.Default)]
+[JsonSerializable(typeof(PacketHandlerInfo), GenerationMode = JsonSourceGenerationMode.Default)]
+[JsonSerializable(typeof(SpriteDescription), GenerationMode = JsonSourceGenerationMode.Default)]
+internal partial class ModdingJsonContext : JsonSerializerContext { }
 
-// [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
-// [JsonDerivedType(typeof(MouseMove), nameof(MouseMove))]
-// [JsonDerivedType(typeof(MousePressed), nameof(MousePressed))]
-// [JsonDerivedType(typeof(MouseReleased), nameof(MouseReleased))]
-// [JsonDerivedType(typeof(KeyPressed), nameof(KeyPressed))]
-// [JsonDerivedType(typeof(KeyReleased), nameof(KeyReleased))]
-// internal interface IHostMessage
-// {
-//     internal record struct MouseMove(float X, float Y) : IHostMessage;
-//     internal record struct MousePressed(int Button, float X, float Y) : IHostMessage;
-//     internal record struct MouseReleased(int Button, float X, float Y) : IHostMessage;
-//     internal record struct KeyPressed(Keys Key) : IHostMessage;
-//     internal record struct KeyReleased(Keys Key) : IHostMessage;
-// }
-
-// [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
-// [JsonDerivedType(typeof(SetPacketHandler), nameof(SetPacketHandler))]
-// [JsonDerivedType(typeof(PlayerInfo), nameof(PlayerInfo))]
-// [JsonDerivedType(typeof(OverrideAsset), nameof(OverrideAsset))]
-// internal interface IPluginMessage
-// {
-//     internal record struct SetPacketHandler(byte PacketId, string FuncName) : IPluginMessage;
-
-//     internal record struct PlayerInfo(uint Serial, ushort Graphic, ushort X, ushort Y, sbyte Z) : IPluginMessage;
-
-//     internal record struct OverrideAsset(AssetType AssetType, uint Idx, string DataBase64, int Width, int Height) : IPluginMessage;
-// }
+internal record struct WasmPluginVersion(uint Version = 1);
+internal record struct TimeProxy(float Total, float Frame);
+internal record struct PacketHandlerInfo(byte PacketId, string FuncName);
+internal record struct SpriteDescription(AssetType AssetType, uint Idx, int Width, int Height, string Base64Data, int Compression);
 
 
-[GenerateSerde]
+
+internal record struct UINodes(List<UINodeProxy> Nodes, Dictionary<int, int> Relations);
+internal record struct UINodeProxy(int Id, ClayElementDeclProxy Config, ClayUOCommandData UOConfig);
+
+
+
+internal record struct ClayElementIdProxy(uint Id, uint Offset, uint BaseId, string StringId);
+internal record struct ClayImageProxy(string Base64Data, Clay_Dimensions SourceDimensions);
+internal struct ClayElementDeclProxy
+{
+    public ClayElementIdProxy Id;
+    public Clay_LayoutConfig Layout;
+    public Clay_Color BackgroundColor;
+    public Clay_CornerRadius CornerRadius;
+    public ClayImageProxy Image;
+    public Clay_FloatingElementConfig Floating;
+    public Clay_ClipElementConfig Clip;
+    public Clay_BorderElementConfig Border;
+}
+
+internal record struct HostMessages(List<HostMessage> Messages);
+internal record struct PluginMessages(List<PluginMessage> Messages);
+
+
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
+[JsonDerivedType(typeof(MouseMove), nameof(MouseMove))]
+[JsonDerivedType(typeof(MouseWheel), nameof(MouseWheel))]
+[JsonDerivedType(typeof(MousePressed), nameof(MousePressed))]
+[JsonDerivedType(typeof(MouseReleased), nameof(MouseReleased))]
+[JsonDerivedType(typeof(MouseDoubleClick), nameof(MouseDoubleClick))]
+[JsonDerivedType(typeof(KeyPressed), nameof(KeyPressed))]
+[JsonDerivedType(typeof(KeyReleased), nameof(KeyReleased))]
+
+[JsonDerivedType(typeof(EntitySpawned), nameof(EntitySpawned))]
+[JsonDerivedType(typeof(EntityRemoved), nameof(EntityRemoved))]
+[JsonDerivedType(typeof(ComponentAdded), nameof(ComponentAdded))]
+[JsonDerivedType(typeof(ComponentRemoved), nameof(ComponentRemoved))]
+
+internal interface HostMessage
+{
+    internal record struct MouseMove(float X, float Y) : HostMessage;
+    internal record struct MouseWheel(float Delta) : HostMessage;
+    internal record struct MousePressed(int Button, float X, float Y) : HostMessage;
+    internal record struct MouseReleased(int Button, float X, float Y) : HostMessage;
+    internal record struct MouseDoubleClick(int Button, float X, float Y) : HostMessage;
+    internal record struct KeyPressed(Keys Key) : HostMessage;
+    internal record struct KeyReleased(Keys Key) : HostMessage;
+
+
+
+
+    internal record struct EntitySpawned(ulong Id) : HostMessage;
+    internal record struct EntityRemoved(ulong Id) : HostMessage;
+    internal record struct ComponentAdded(ulong Entity, ComponentInfo Info) : HostMessage;
+    internal record struct ComponentRemoved(ulong Entity, ComponentInfo Info) : HostMessage;
+
+}
+
+[JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
+[JsonDerivedType(typeof(SetPacketHandler), nameof(SetPacketHandler))]
+[JsonDerivedType(typeof(OverrideAsset), nameof(OverrideAsset))]
+[JsonDerivedType(typeof(SetComponent<Graphic>), nameof(SetComponent<>) + nameof(Graphic))]
+[JsonDerivedType(typeof(SetComponent<Hue>), nameof(SetComponent<>) + nameof(Hue))]
+internal interface PluginMessage
+{
+    internal record struct SetPacketHandler(byte PacketId, string FuncName) : PluginMessage;
+    internal record struct OverrideAsset(AssetType AssetType, uint Idx, string DataBase64, int Width, int Height) : PluginMessage;
+
+
+    internal record struct SetComponent<T>(ulong Entity, T Value) : PluginMessage where T : struct;
+
+
+    // internal record struct Query(ulong[] ids) : PluginMessage;
+
+
+    // internal record struct SpawnEntity : PluginMessage;
+}
+
+
 internal enum AssetType
 {
     Gump,
@@ -399,51 +638,16 @@ internal enum AssetType
     Animation,
 }
 
-[GenerateSerde]
-partial record Hello(int A);
 
-
-
-[GenerateSerde]
-internal partial record struct HostMessages(List<HostMessage> Messages);
-[GenerateSerde]
-internal partial record struct PluginMessages(List<PluginMessage> Messages);
-
-[GenerateSerde]
-abstract partial record HostMessage
+public static class JsonEx
 {
-    private HostMessage() { }
+    public static string ToJson<T>(this T obj)
+    {
+        return JsonSerializer.Serialize(obj, (JsonTypeInfo<T>)ModdingJsonContext.Default.GetTypeInfo(typeof(T)));
+    }
 
-    public partial record WasmPluginVersion(uint Version = 1) : HostMessage;
-
-    public partial record MouseMove(float X, float Y) : HostMessage;
-
-    public partial record MouseWheel(float Delta) : HostMessage;
-
-    public partial record MousePressed(int Button, float X, float Y) : HostMessage;
-
-    public partial record MouseReleased(int Button, float X, float Y) : HostMessage;
-
-    public partial record MouseDoubleClick(int Button, float X, float Y) : HostMessage;
-
-    public partial record KeyPressed(int Key) : HostMessage;
-
-    public partial record KeyReleased(int Key) : HostMessage;
+    public static T FromJson<T>(this string json)
+    {
+        return JsonSerializer.Deserialize(json, (JsonTypeInfo<T>)ModdingJsonContext.Default.GetTypeInfo(typeof(T)));
+    }
 }
-
-[GenerateSerde]
-abstract partial record PluginMessage
-{
-    private PluginMessage() { }
-
-
-    public partial record SetPacketHandler(byte PacketId, string FuncName) : PluginMessage;
-
-    public partial record PlayerInfo(uint Serial, ushort Graphic, ushort X, ushort Y, sbyte Z) : PluginMessage;
-
-    public partial record OverrideAsset(AssetType AssetType, uint Idx, string DataBase64, int Width, int Height) : PluginMessage;
-}
-
-
-[GenerateSerde]
-partial record struct TimeProxy(float Total, float Frame);

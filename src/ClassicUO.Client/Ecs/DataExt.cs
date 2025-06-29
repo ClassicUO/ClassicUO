@@ -27,4 +27,11 @@ internal static class DataExt
     {
         return MemoryMarshal.AsBytes(MemoryMarshal.CreateSpan(ref val, 1));
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Span<byte> AsBytes<T>(this Span<T> val)
+        where T : unmanaged
+    {
+        return MemoryMarshal.AsBytes(val);
+    }
 }
