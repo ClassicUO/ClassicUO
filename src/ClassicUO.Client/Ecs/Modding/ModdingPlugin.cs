@@ -187,8 +187,30 @@ internal readonly struct ModdingPlugins : IPlugin
                                         clip = node.Config.Clip,
                                         border = node.Config.Border
                                     },
-                                    UOConfig = node.UOConfig
+                                    UOConfig = node.UOConfig ?? default
                                 });
+
+                            if (node.TextConfig is ClayTextProxy {} textCfg)
+                            {
+                                ent.Set(new Text() {
+                                    Value = textCfg.Value,
+                                    TextConfig = {
+                                        fontId = textCfg.FontId,
+                                        fontSize = textCfg.FontSize,
+                                        letterSpacing = textCfg.LetterSpacing,
+                                        lineHeight = textCfg.LineHeight,
+                                        textAlignment = textCfg.TextAlignment,
+                                        textColor = textCfg.TextColor,
+                                        wrapMode = textCfg.WrapMode
+                                    }
+                                });
+                            }
+
+                            if (node.Movable)
+                                ent.Add<UIMovable>();
+
+                            if (node.AcceptInputs)
+                                ent.Set(UIInteractionState.None);
 
                             set.Add(node.Id, ent.ID);
                         }
@@ -554,10 +576,12 @@ internal record struct SpriteDescription(AssetType AssetType, uint Idx, int Widt
 
 
 internal record struct UINodes(List<UINodeProxy> Nodes, Dictionary<int, int> Relations);
-internal record struct UINodeProxy(int Id, ClayElementDeclProxy Config, ClayUOCommandData UOConfig);
+internal record struct UINodeProxy(int Id, ClayElementDeclProxy Config, ClayUOCommandData? UOConfig = null, ClayTextProxy? TextConfig = null, bool Movable = false, bool AcceptInputs = false);
 
 
 
+internal record struct ClayTextProxy(string Value, Clay_Color TextColor, ushort FontId, ushort FontSize, ushort LetterSpacing, ushort LineHeight, Clay_TextElementConfigWrapMode WrapMode, Clay_TextAlignment TextAlignment);
+internal record struct UITextProxy(string Value, char ReplacedChar = '\0', ClayTextProxy TextConfig = default);
 internal record struct ClayElementIdProxy(uint Id, uint Offset, uint BaseId, string StringId);
 internal record struct ClayImageProxy(string Base64Data, Clay_Dimensions SourceDimensions);
 internal struct ClayElementDeclProxy
