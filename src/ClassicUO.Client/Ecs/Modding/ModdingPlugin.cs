@@ -106,7 +106,7 @@ internal readonly struct ModdingPlugins : IPlugin
                         var spriteDesc = p.ReadString(offset).FromJson<SpriteDescription>();
                         var data = Convert.FromBase64String(spriteDesc.Base64Data);
 
-                        if (spriteDesc.Compression == 1)
+                        if (spriteDesc.Compression == CompressionType.Zlib)
                         {
                             data = Uncompress(data);
                         }
@@ -134,7 +134,16 @@ internal readonly struct ModdingPlugins : IPlugin
                                 if (gumpInfo.Pixels.IsEmpty)
                                     return p.WriteBytes([]);
 
-                                var json = createSpriteDesc(spriteDesc, gumpInfo.Pixels.AsBytes(), (gumpInfo.Width, gumpInfo.Height), 1)
+                                var json = createSpriteDesc(spriteDesc, gumpInfo.Pixels.AsBytes(), (gumpInfo.Width, gumpInfo.Height), CompressionType.Zlib)
+                                    .ToJson();
+                                return p.WriteString(json);
+
+                            case AssetType.Arts:
+                                var artInfo = fileManager.Value.Arts.GetArt(spriteDesc.Idx);
+                                if (artInfo.Pixels.IsEmpty)
+                                    return p.WriteBytes([]);
+
+                                json = createSpriteDesc(spriteDesc, artInfo.Pixels.AsBytes(), (artInfo.Width, artInfo.Height), CompressionType.Zlib)
                                     .ToJson();
                                 return p.WriteString(json);
 
@@ -143,9 +152,9 @@ internal readonly struct ModdingPlugins : IPlugin
                                 break;
                         }
 
-                        static SpriteDescription createSpriteDesc(SpriteDescription input, ReadOnlySpan<byte> data, (int w, int h) imgSize, int compression)
+                        static SpriteDescription createSpriteDesc(SpriteDescription input, ReadOnlySpan<byte> data, (int w, int h) imgSize, CompressionType compression)
                         {
-                            data = compression == 1 ? Compress(data) : data;
+                            data = compression == CompressionType.Zlib ? Compress(data) : data;
                             var base64Data = Convert.ToBase64String(data);
                             return new SpriteDescription(input.AssetType, input.Idx, imgSize.w, imgSize.h, base64Data, compression);
                         }
@@ -156,12 +165,11 @@ internal readonly struct ModdingPlugins : IPlugin
 
 
                     HostFunction.FromMethod("send_events", null, (CurrentPlugin p, long offset) => {
-                        var str = p.ReadString(offset);
-                        var events = str
-                            .FromJson<PluginMessages>();
+                        // var str = p.ReadString(offset);
+                        // var events = str.FromJson<PluginMessages>();
 
-                        foreach (var ev in events.Messages)
-                            pluginWriter.Enqueue((mod, ev));
+                        // foreach (var ev in events.Messages)
+                        //     pluginWriter.Enqueue((mod, ev));
                     }),
 
 
@@ -179,13 +187,17 @@ internal readonly struct ModdingPlugins : IPlugin
                         {
                             var ent = world.Entity()
                                 .Set(new UINode() {
+                                    // TODO: missing some config
                                     Config = {
-                                        layout = node.Config.Layout,
-                                        backgroundColor = node.Config.BackgroundColor,
-                                        cornerRadius = node.Config.CornerRadius,
-                                        floating = node.Config.Floating,
-                                        clip = node.Config.Clip,
-                                        border = node.Config.Border
+                                        layout = node.Config.Layout ?? default,
+                                        backgroundColor = node.Config.BackgroundColor ?? default,
+                                        cornerRadius = node.Config.CornerRadius ?? default,
+                                        floating = node.Config.Floating ?? default,
+                                        clip = node.Config.Clip ?? default,
+                                        border = node.Config.Border ?? default,
+                                        image = {
+                                            // imageData = node.Config.Image.Base64Data
+                                        }
                                     },
                                     UOConfig = node.UOConfig ?? default
                                 });
@@ -284,24 +296,6 @@ internal readonly struct ModdingPlugins : IPlugin
                         });
                 }
 
-                static HostFunction archAsJson(string name, NetworkEntitiesMap networkEntities)
-                {
-                    return HostFunction.FromMethod(name, null,
-                    (CurrentPlugin p, long offset) =>
-                        {
-                            var serial = p.ReadBytes(offset).As<uint>();
-                            var ent = networkEntities.Get(serial);
-                            if (ent == 0)
-                                return p.WriteString("{}");
-
-                            var arch = ent.Archetype;
-                            if (arch == null)
-                                return p.WriteString("{}");
-
-                            // var json = JsonSerializer.Serialize(ent.Archetype.All, PluginJsonContext.Default.ComponentInfoArray);
-                            return p.WriteString("{}");
-                        });
-                }
 
                 var manifest = new Manifest(uri?.IsFile ?? true ? new PathWasmSource(path) : new UrlWasmSource(uri));
                 plugin = new Extism.Sdk.CompiledPlugin(manifest, functions, true).Instantiate();
@@ -327,24 +321,6 @@ internal readonly struct ModdingPlugins : IPlugin
                 mod = new Mod(plugin);
                 world.Entity()
                     .Set(new WasmMod() { Mod = mod });
-
-
-                // world.OnEntityCreated += (w, id) =>
-                // {
-                //     hostWriter.Enqueue(new HostMessage.EntitySpawned(id));
-                // };
-                // world.OnEntityDeleted += (w, id) =>
-                // {
-                //     hostWriter.Enqueue(new HostMessage.EntityRemoved(id));
-                // };
-                // world.OnComponentSet += (w, id, cmp) =>
-                // {
-                //     hostWriter.Enqueue(new HostMessage.ComponentAdded(id, cmp));
-                // };
-                // world.OnComponentUnset += (w, id, cmp) =>
-                // {
-                //     hostWriter.Enqueue(new HostMessage.ComponentRemoved(id, cmp));
-                // };
             }
 
         });
@@ -480,56 +456,56 @@ internal readonly struct ModdingPlugins : IPlugin
         EventReader<(Mod, PluginMessage)> reader
     )
     {
-        foreach ((var mod, var ev) in reader)
-        {
-            switch (ev)
-            {
-                case PluginMessage.SetPacketHandler setHandler:
-                    if (mod.Plugin.FunctionExists(setHandler.FuncName))
-                    {
-                        packetMap.Value[setHandler.PacketId] = buffer =>
-                            mod.Plugin.Call(setHandler.FuncName, buffer);
-                    }
-                    else
-                    {
-                        Console.WriteLine("trying to assing the handler {0:X2} but function name {1} doesn't exists in the following plugin {2}",
-                            setHandler.PacketId, setHandler.FuncName, mod.Plugin.Id);
-                    }
+        // foreach ((var mod, var ev) in reader)
+        // {
+        //     switch (ev)
+        //     {
+        //         case PluginMessage.SetPacketHandler setHandler:
+        //             if (mod.Plugin.FunctionExists(setHandler.FuncName))
+        //             {
+        //                 packetMap.Value[setHandler.PacketId] = buffer =>
+        //                     mod.Plugin.Call(setHandler.FuncName, buffer);
+        //             }
+        //             else
+        //             {
+        //                 Console.WriteLine("trying to assing the handler {0:X2} but function name {1} doesn't exists in the following plugin {2}",
+        //                     setHandler.PacketId, setHandler.FuncName, mod.Plugin.Id);
+        //             }
 
-                    break;
-
-
-                case PluginMessage.OverrideAsset overrideAsset:
-                    if (overrideAsset.AssetType == AssetType.Gump)
-                    {
-                        var data = MemoryMarshal.Cast<byte, uint>(Convert.FromBase64String(overrideAsset.DataBase64));
-                        assets.Value.Gumps.SetGump(overrideAsset.Idx, data, overrideAsset.Width, overrideAsset.Height);
-                    }
-                    break;
-
-                case PluginMessage.SetComponent<Graphic> setter:
-                    setComponent(world, setter);
-                    break;
-                case PluginMessage.SetComponent<Hue> setter:
-                    setComponent(world, setter);
-                    break;
-            }
+        //             break;
 
 
-            static void setComponent<T>(World world, PluginMessage.SetComponent<T> setter) where T : struct
-            {
-                if (!world.Exists(setter.Entity))
-                    return;
+        //         case PluginMessage.OverrideAsset overrideAsset:
+        //             if (overrideAsset.AssetType == AssetType.Gump)
+        //             {
+        //                 var data = MemoryMarshal.Cast<byte, uint>(Convert.FromBase64String(overrideAsset.DataBase64));
+        //                 assets.Value.Gumps.SetGump(overrideAsset.Idx, data, overrideAsset.Width, overrideAsset.Height);
+        //             }
+        //             break;
 
-                var cmpEnt = world.Entity<T>();
-                ref var cmp = ref cmpEnt.Get<ComponentInfo>();
+        //         case PluginMessage.SetComponent<Graphic> setter:
+        //             setComponent(world, setter);
+        //             break;
+        //         case PluginMessage.SetComponent<Hue> setter:
+        //             setComponent(world, setter);
+        //             break;
+        //     }
 
-                if (cmp.Size > 0)
-                    world.Set(setter.Entity, setter.Value);
-                else
-                    world.Add<T>(setter.Entity);
-            }
-        }
+
+        //     static void setComponent<T>(World world, PluginMessage.SetComponent<T> setter) where T : struct
+        //     {
+        //         if (!world.Exists(setter.Entity))
+        //             return;
+
+        //         var cmpEnt = world.Entity<T>();
+        //         ref var cmp = ref cmpEnt.Get<ComponentInfo>();
+
+        //         if (cmp.Size > 0)
+        //             world.Set(setter.Entity, setter.Value);
+        //         else
+        //             world.Add<T>(setter.Entity);
+        //     }
+        // }
     }
 }
 
@@ -571,29 +547,40 @@ internal partial class ModdingJsonContext : JsonSerializerContext { }
 internal record struct WasmPluginVersion(uint Version = 1);
 internal record struct TimeProxy(float Total, float Frame);
 internal record struct PacketHandlerInfo(byte PacketId, string FuncName);
-internal record struct SpriteDescription(AssetType AssetType, uint Idx, int Width, int Height, string Base64Data, int Compression);
+internal record struct SpriteDescription(AssetType AssetType, uint Idx, int Width, int Height, string Base64Data, CompressionType Compression);
 
-
+enum CompressionType
+{
+    None,
+    Zlib
+}
 
 internal record struct UINodes(List<UINodeProxy> Nodes, Dictionary<int, int> Relations);
-internal record struct UINodeProxy(int Id, ClayElementDeclProxy Config, ClayUOCommandData? UOConfig = null, ClayTextProxy? TextConfig = null, bool Movable = false, bool AcceptInputs = false);
+internal record struct UINodeProxy(
+    int Id,
+    ClayElementDeclProxy Config,
+    ClayUOCommandData? UOConfig = null,
+    ClayTextProxy? TextConfig = null,
+    bool Movable = false,
+    bool AcceptInputs = false
+);
 
 
 
 internal record struct ClayTextProxy(string Value, Clay_Color TextColor, ushort FontId, ushort FontSize, ushort LetterSpacing, ushort LineHeight, Clay_TextElementConfigWrapMode WrapMode, Clay_TextAlignment TextAlignment);
 internal record struct UITextProxy(string Value, char ReplacedChar = '\0', ClayTextProxy TextConfig = default);
 internal record struct ClayElementIdProxy(uint Id, uint Offset, uint BaseId, string StringId);
-internal record struct ClayImageProxy(string Base64Data, Clay_Dimensions SourceDimensions);
+internal record struct ClayImageProxy(string Base64Data);
 internal struct ClayElementDeclProxy
 {
-    public ClayElementIdProxy Id;
-    public Clay_LayoutConfig Layout;
-    public Clay_Color BackgroundColor;
-    public Clay_CornerRadius CornerRadius;
-    public ClayImageProxy Image;
-    public Clay_FloatingElementConfig Floating;
-    public Clay_ClipElementConfig Clip;
-    public Clay_BorderElementConfig Border;
+    public ClayElementIdProxy? Id;
+    public Clay_LayoutConfig? Layout;
+    public Clay_Color? BackgroundColor;
+    public Clay_CornerRadius? CornerRadius;
+    public ClayImageProxy? Image;
+    public Clay_FloatingElementConfig? Floating;
+    public Clay_ClipElementConfig? Clip;
+    public Clay_BorderElementConfig? Border;
 }
 
 internal record struct HostMessages(List<HostMessage> Messages);
@@ -609,11 +596,6 @@ internal record struct PluginMessages(List<PluginMessage> Messages);
 [JsonDerivedType(typeof(KeyPressed), nameof(KeyPressed))]
 [JsonDerivedType(typeof(KeyReleased), nameof(KeyReleased))]
 
-[JsonDerivedType(typeof(EntitySpawned), nameof(EntitySpawned))]
-[JsonDerivedType(typeof(EntityRemoved), nameof(EntityRemoved))]
-[JsonDerivedType(typeof(ComponentAdded), nameof(ComponentAdded))]
-[JsonDerivedType(typeof(ComponentRemoved), nameof(ComponentRemoved))]
-
 internal interface HostMessage
 {
     internal record struct MouseMove(float X, float Y) : HostMessage;
@@ -624,34 +606,12 @@ internal interface HostMessage
     internal record struct KeyPressed(Keys Key) : HostMessage;
     internal record struct KeyReleased(Keys Key) : HostMessage;
 
-
-
-
-    internal record struct EntitySpawned(ulong Id) : HostMessage;
-    internal record struct EntityRemoved(ulong Id) : HostMessage;
-    internal record struct ComponentAdded(ulong Entity, ComponentInfo Info) : HostMessage;
-    internal record struct ComponentRemoved(ulong Entity, ComponentInfo Info) : HostMessage;
-
 }
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
-[JsonDerivedType(typeof(SetPacketHandler), nameof(SetPacketHandler))]
-[JsonDerivedType(typeof(OverrideAsset), nameof(OverrideAsset))]
-[JsonDerivedType(typeof(SetComponent<Graphic>), nameof(SetComponent<>) + nameof(Graphic))]
-[JsonDerivedType(typeof(SetComponent<Hue>), nameof(SetComponent<>) + nameof(Hue))]
 internal interface PluginMessage
 {
-    internal record struct SetPacketHandler(byte PacketId, string FuncName) : PluginMessage;
-    internal record struct OverrideAsset(AssetType AssetType, uint Idx, string DataBase64, int Width, int Height) : PluginMessage;
 
-
-    internal record struct SetComponent<T>(ulong Entity, T Value) : PluginMessage where T : struct;
-
-
-    // internal record struct Query(ulong[] ids) : PluginMessage;
-
-
-    // internal record struct SpawnEntity : PluginMessage;
 }
 
 
