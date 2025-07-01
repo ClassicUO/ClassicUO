@@ -1,25 +1,16 @@
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
-using System.Threading.Tasks;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
-using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
 using Clay_cs;
 using Extism.Sdk;
-using Extism.Sdk.Native;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using TinyEcs;
 
@@ -34,6 +25,21 @@ internal readonly struct ModdingPlugins : IPlugin
     {
         scheduler.AddEvent<HostMessage>();
         scheduler.AddEvent<(Mod, PluginMessage)>();
+
+        scheduler.OnUpdate
+        ((Query<Data<UINode, UIInteractionState, PluginEntity>, Changed<UIInteractionState>> query, Res<MouseContext> mouseCtx) =>
+            {
+                foreach ((var ent, var node, var interaction, var pluginEnt) in query)
+                {
+                    if (interaction.Ref == UIInteractionState.Released)
+                    {
+                        var ev = new UIMouseEvent(ent.Ref.ID, 0, mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y, interaction.Ref).ToJson();
+                        pluginEnt.Ref.Mod.Plugin.Call("on_ui_mouse_event", ev);
+                    }
+                }
+            }
+        );
+            //.RunIf((Query<Data<UINode, UIInteractionState, PluginEntity>, Changed<UIInteractionState>> query) => query.Count() > 0);
 
         scheduler.OnStartup((
             World world,
@@ -62,7 +68,7 @@ internal readonly struct ModdingPlugins : IPlugin
                     continue;
                 }
 
-                Mod mod;
+                Mod mod = null;
                 Extism.Sdk.Plugin plugin = null;
 
                 HostFunction[] functions = [
@@ -155,6 +161,7 @@ internal readonly struct ModdingPlugins : IPlugin
                             default:
                                 Console.WriteLine("'cuo_get_sprite' for {0} not implemented yet", spriteDesc.AssetType);
                                 break;
+
                         }
 
                         return p.WriteBytes([]);
@@ -184,7 +191,7 @@ internal readonly struct ModdingPlugins : IPlugin
 
                     HostFunction.FromMethod("cuo_ecs_spawn_entity", null, (CurrentPlugin p) =>
                     {
-                        var ent = world.Entity().Add<PluginEntity>();
+                        var ent = world.Entity().Set(new PluginEntity(mod));
                         return ent.ID;
                     }),
 
@@ -252,6 +259,7 @@ internal readonly struct ModdingPlugins : IPlugin
                         foreach (var node in nodes.Nodes)
                         {
                             var ent = world.Entity(node.Id)
+                                .Set(new PluginEntity(mod))
                                 .Set(new UINode() {
                                     // TODO: missing some config
                                     Config = {
@@ -289,6 +297,22 @@ internal readonly struct ModdingPlugins : IPlugin
 
                             if (node.AcceptInputs)
                                 ent.Set(UIInteractionState.None);
+
+                            if (node.WidgetType == ClayWidgetType.TextInput)
+                                ent.Add<TextInput>();
+                            else if (node.WidgetType == ClayWidgetType.Button)
+                            {
+                                if (node.UOButton is {} button)
+                                {
+                                    ent.Set(UIInteractionState.None);
+                                    ent.Set(new UOButton()
+                                    {
+                                        Normal = button.Normal,
+                                        Over = button.Over,
+                                        Pressed = button.Pressed
+                                    });
+                                }
+                            }
                         }
 
                         foreach (var (child, parent) in nodes.Relations)
@@ -317,55 +341,8 @@ internal readonly struct ModdingPlugins : IPlugin
                 ];
 
 
-
-                static IEnumerable<HostFunction> bind<T>(string postfix, NetworkEntitiesMap networkEntities)
-                    where T : struct
-                {
-                    var ctx = (JsonTypeInfo<T>)ModdingJsonContext.Default.GetTypeInfo(typeof(T));
-                    yield return serializeProps<T>("cuo_get_" + postfix, networkEntities, ctx);
-                    yield return deserializeProps<T>("cuo_set_" + postfix, networkEntities, ctx);
-                }
-
-                static HostFunction serializeProps<T>(string name, NetworkEntitiesMap networkEntities, JsonTypeInfo<T> ctx)
-                    where T : struct
-                {
-                    ArgumentNullException.ThrowIfNull(ctx);
-
-                    return HostFunction.FromMethod(name, null,
-                    (CurrentPlugin p, long offset) =>
-                        {
-                            var serial = p.ReadBytes(offset).As<uint>();
-                            var ent = networkEntities.Get(serial);
-                            if (ent == 0 || !ent.Has<T>())
-                                return p.WriteString("{}");
-
-                            var json = JsonSerializer.Serialize(ent.Get<T>(), ctx);
-                            return p.WriteString(json);
-                        });
-                }
-
-                static HostFunction deserializeProps<T>(string name, NetworkEntitiesMap networkEntities, JsonTypeInfo<T> ctx)
-                    where T : struct
-                {
-                    ArgumentNullException.ThrowIfNull(ctx);
-
-                    return HostFunction.FromMethod(name, null, (CurrentPlugin p, long keyOffset, long valueOffset) =>
-                    {
-                        var serial = p.ReadBytes(keyOffset).As<uint>();
-                        var ent = networkEntities.Get(serial);
-                        if (ent == 0)
-                            return;
-
-                        var value = p.ReadBytes(valueOffset);
-                        var val = JsonSerializer.Deserialize(value, ctx);
-                        ent.Set(val);
-                    });
-                }
-
-
                 var manifest = new Manifest(uri?.IsFile ?? true ? new PathWasmSource(path) : new UrlWasmSource(uri));
                 plugin = new Extism.Sdk.CompiledPlugin(manifest, functions, true).Instantiate();
-
 
                 var ok = true;
                 foreach (var fnName in requiredFunctions)
@@ -387,6 +364,52 @@ internal readonly struct ModdingPlugins : IPlugin
                 mod = new Mod(plugin);
                 world.Entity()
                     .Set(new WasmMod() { Mod = mod });
+            }
+
+
+            static IEnumerable<HostFunction> bind<T>(string postfix, NetworkEntitiesMap networkEntities)
+                    where T : struct
+            {
+                var ctx = (JsonTypeInfo<T>)ModdingJsonContext.Default.GetTypeInfo(typeof(T));
+                yield return serializeProps<T>("cuo_get_" + postfix, networkEntities, ctx);
+                yield return deserializeProps<T>("cuo_set_" + postfix, networkEntities, ctx);
+                yield break;
+
+
+                static HostFunction serializeProps<T>(string name, NetworkEntitiesMap networkEntities, JsonTypeInfo<T> ctx)
+                    where T : struct
+                {
+                    ArgumentNullException.ThrowIfNull(ctx);
+
+                    return HostFunction.FromMethod(name, null, (CurrentPlugin p, long offset) =>
+                    {
+                       var serial = p.ReadBytes(offset).As<uint>();
+                       var ent = networkEntities.Get(serial);
+                       if (ent == 0 || !ent.Has<T>())
+                           return p.WriteString("{}");
+
+                       var json = JsonSerializer.Serialize(ent.Get<T>(), ctx);
+                       return p.WriteString(json);
+                    });
+                }
+
+                static HostFunction deserializeProps<T>(string name, NetworkEntitiesMap networkEntities, JsonTypeInfo<T> ctx)
+                    where T : struct
+                {
+                    ArgumentNullException.ThrowIfNull(ctx);
+
+                    return HostFunction.FromMethod(name, null, (CurrentPlugin p, long keyOffset, long valueOffset) =>
+                    {
+                        var serial = p.ReadBytes(keyOffset).As<uint>();
+                        var ent = networkEntities.Get(serial);
+                        if (ent == 0)
+                            return;
+
+                        var value = p.ReadBytes(valueOffset);
+                        var val = JsonSerializer.Deserialize(value, ctx);
+                        ent.Set(val);
+                    });
+                }
             }
 
         });
@@ -600,6 +623,7 @@ internal struct WasmInitialized;
 [JsonSerializable(typeof(ServerFlags), GenerationMode = JsonSourceGenerationMode.Default)]
 
 [JsonSerializable(typeof(UINodes), GenerationMode = JsonSourceGenerationMode.Default)]
+[JsonSerializable(typeof(UIMouseEvent), GenerationMode = JsonSourceGenerationMode.Default)]
 [JsonSerializable(typeof(QueryRequest), GenerationMode = JsonSourceGenerationMode.Default)]
 [JsonSerializable(typeof(QueryResponse), GenerationMode = JsonSourceGenerationMode.Default)]
 
@@ -636,12 +660,24 @@ internal record struct UINodeProxy(
     ClayElementDeclProxy Config,
     ClayUOCommandData? UOConfig = null,
     UITextProxy? TextConfig = null,
+    UOButtonWidgetProxy? UOButton = null,
+    ClayWidgetType WidgetType = ClayWidgetType.None,
     bool Movable = false,
     bool AcceptInputs = false
 );
 
-internal record struct UITextProxy(string Value, char ReplacedChar = '\0', ClayTextProxy TextConfig = default);
+internal record struct UOButtonWidgetProxy(ushort Normal, ushort Pressed, ushort Over);
+internal record struct UIMouseEvent(ulong Id, int Button, float X, float Y, UIInteractionState State);
 
+
+enum ClayWidgetType
+{
+    None,
+    Button,
+    TextInput
+}
+
+internal record struct UITextProxy(string Value, char ReplacedChar = '\0', ClayTextProxy TextConfig = default);
 internal record struct ClayTextProxy(Clay_Color TextColor, ushort FontId, ushort FontSize, ushort LetterSpacing, ushort LineHeight, Clay_TextElementConfigWrapMode WrapMode, Clay_TextAlignment TextAlignment);
 internal record struct ClayElementIdProxy(uint Id, uint Offset, uint BaseId, string StringId);
 internal record struct ClayImageProxy(string Base64Data);
@@ -697,7 +733,10 @@ internal enum AssetType
 }
 
 
-internal struct PluginEntity;
+internal readonly struct PluginEntity(Mod mod)
+{
+    public Mod Mod { get; } = mod;
+}
 
 public static class JsonEx
 {
