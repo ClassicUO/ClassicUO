@@ -38,8 +38,7 @@ internal readonly struct ModdingPlugins : IPlugin
                     }
                 }
             }
-        );
-            //.RunIf((Query<Data<UINode, UIInteractionState, PluginEntity>, Changed<UIInteractionState>> query) => query.Count() > 0);
+        ).RunIf((Query<Data<UINode, UIInteractionState, PluginEntity>, Changed<UIInteractionState>> query) => query.Count() > 0);
 
         scheduler.OnStartup((
             World world,
