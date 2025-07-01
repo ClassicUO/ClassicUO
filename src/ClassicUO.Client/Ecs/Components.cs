@@ -48,7 +48,7 @@ struct Amount
 struct ContainedInto;
 struct IsContainer;
 
-struct Hitpoints
+struct Hits
 {
     public ushort Value, MaxValue;
 }

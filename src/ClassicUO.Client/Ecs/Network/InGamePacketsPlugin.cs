@@ -813,7 +813,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var type = reader.ReadUInt8();
 
                 var ent = entitiesMap.Value.GetOrCreate(serial);
-                ent.Set(new Hitpoints() { Value = hits, MaxValue = hitsMax });
+                ent.Set(new Hits() { Value = hits, MaxValue = hitsMax });
 
                 if (type > 0)
                 {
@@ -1056,7 +1056,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 (var stamMax, var stam) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
 
                 entitiesMap.Value.GetOrCreate(serial)
-                    .Set(new Hitpoints() { Value = hits, MaxValue = hitsMax })
+                    .Set(new Hits() { Value = hits, MaxValue = hitsMax })
                     .Set(new Mana() { Value = mana, MaxValue = manaMax })
                     .Set(new Stamina() { Value = stam, MaxValue = stamMax });
             };
@@ -1614,7 +1614,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 (var hitsMax, var hits) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
 
                 entitiesMap.Value.GetOrCreate(serial)
-                    .Set(new Hitpoints() { Value = hits, MaxValue = hitsMax });
+                    .Set(new Hits() { Value = hits, MaxValue = hitsMax });
             };
 
             // update mana

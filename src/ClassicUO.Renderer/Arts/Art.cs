@@ -83,6 +83,23 @@ namespace ClassicUO.Renderer.Arts
             return ref spriteInfo;
         }
 
+        public void SetArt(uint idx, ReadOnlySpan<uint> data, int w, int h)
+        {
+            if (idx >= _spriteInfos.Length)
+                return;
+
+            ref var spriteInfo = ref _spriteInfos[idx];
+
+            spriteInfo.Texture = _atlas.AddSprite(
+                data,
+                w,
+                h,
+                out spriteInfo.UV
+            );
+
+            _picker.Set(idx, w, h, data, replace: true);
+        }
+
         public unsafe IntPtr CreateCursorSurfacePtr(
             int index,
             ushort customHue,

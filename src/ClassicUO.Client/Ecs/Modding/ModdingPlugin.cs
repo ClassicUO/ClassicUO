@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -43,7 +44,6 @@ internal readonly struct ModdingPlugins : IPlugin
             Res<Settings> settings,
             Res<NetworkEntitiesMap> networkEntities,
             Res<GameContext> gameCtx,
-            Res<GraphicsDevice> device,
             Res<AssetsServer> assets,
             Res<UOFileManager> fileManager
         ) =>
@@ -62,7 +62,7 @@ internal readonly struct ModdingPlugins : IPlugin
                     continue;
                 }
 
-                Mod mod = null;
+                Mod mod;
                 Extism.Sdk.Plugin plugin = null;
 
                 HostFunction[] functions = [
@@ -118,6 +118,11 @@ internal readonly struct ModdingPlugins : IPlugin
                             case AssetType.Gump:
                                 assets.Value.Gumps.SetGump(spriteDesc.Idx, pixels, spriteDesc.Width, spriteDesc.Height);
                                 break;
+
+                            case AssetType.Arts:
+                                assets.Value.Arts.SetArt(spriteDesc.Idx, pixels, spriteDesc.Width, spriteDesc.Height);
+                                break;
+
                             default:
                                 Console.WriteLine("'cuo_set_sprite' for {0} not implemented yet", spriteDesc.AssetType);
                                 break;
@@ -152,14 +157,14 @@ internal readonly struct ModdingPlugins : IPlugin
                                 break;
                         }
 
+                        return p.WriteBytes([]);
+
                         static SpriteDescription createSpriteDesc(SpriteDescription input, ReadOnlySpan<byte> data, (int w, int h) imgSize, CompressionType compression)
                         {
                             data = compression == CompressionType.Zlib ? Compress(data) : data;
                             var base64Data = Convert.ToBase64String(data);
                             return new SpriteDescription(input.AssetType, input.Idx, imgSize.w, imgSize.h, base64Data, compression);
                         }
-
-                        return p.WriteBytes([]);
                     }),
 
 
@@ -173,19 +178,80 @@ internal readonly struct ModdingPlugins : IPlugin
                     }),
 
 
-                    HostFunction.FromMethod("cuo_get_player_serial", null, p => {
-                        return p.WriteBytes(gameCtx.Value.PlayerSerial.AsBytes());
+                    HostFunction.FromMethod("cuo_get_player_serial", null, p
+                        => p.WriteBytes(gameCtx.Value.PlayerSerial.AsBytes())),
+
+
+                    HostFunction.FromMethod("cuo_ecs_spawn_entity", null, (CurrentPlugin p) =>
+                    {
+                        var ent = world.Entity().Add<PluginEntity>();
+                        return ent.ID;
                     }),
 
+                    HostFunction.FromMethod("cuo_ecs_delete_entity", null, (CurrentPlugin p, ulong id) =>
+                    {
+                        if (world.Exists(id))
+                            world.Delete(id);
+                    }),
+
+
+                    HostFunction.FromMethod("cuo_ecs_set_component", null, (CurrentPlugin plugin, ulong id, long offset) =>
+                    {
+                        if (!world.Exists(id))
+                            return;
+
+                        // var ent = world.Entity(id);
+                        // world.Set();
+                    }),
+
+
+                    HostFunction.FromMethod("cuo_ecs_query", null, (CurrentPlugin p, long offset) =>
+                    {
+                        var request = p.ReadString(offset).FromJson<QueryRequest>();
+
+                        if (request.Terms.Count == 0)
+                        {
+                            Console.WriteLine("cuo_ecs_query: empty request");
+                            return p.WriteString("{}");
+                        }
+
+                        var builder = world.QueryBuilder();
+                        foreach (var (id, op) in request.Terms)
+                        {
+                            switch (op)
+                            {
+                                case TermOp.With:
+                                    builder.With(id);
+                                    break;
+                                case TermOp.Without:
+                                    builder.Without(id);
+                                    break;
+                                case TermOp.Optional:
+                                    builder.Optional(id);
+                                    break;
+                                default:
+                                    throw new ArgumentOutOfRangeException(nameof(op), op, null);
+                            }
+                        }
+
+                        var query = builder.Build();
+                        var it = query.Iter();
+
+                        var list = new List<ArchetypeProxy>();
+                        while (it.Next())
+                            list.Add(new ArchetypeProxy(it.Archetype.All.Select(s => new ComponentInfoProxy(s.ID, s.Size, world.Name(s.ID))), MemoryMarshal.ToEnumerable(it.EntitiesAsMemory()).Select(static s => s.ID)));
+
+                        var response = new QueryResponse(list).ToJson();
+                        return p.WriteString(response);
+                    }),
 
 
                     HostFunction.FromMethod("cuo_ui_node", null, (CurrentPlugin p, long offset) => {
                         var nodes = p.ReadString(offset).FromJson<UINodes>();
 
-                        var set = new Dictionary<int, ulong>();
                         foreach (var node in nodes.Nodes)
                         {
-                            var ent = world.Entity()
+                            var ent = world.Entity(node.Id)
                                 .Set(new UINode() {
                                     // TODO: missing some config
                                     Config = {
@@ -202,18 +268,18 @@ internal readonly struct ModdingPlugins : IPlugin
                                     UOConfig = node.UOConfig ?? default
                                 });
 
-                            if (node.TextConfig is ClayTextProxy {} textCfg)
+                            if (node.TextConfig is {} textCfg)
                             {
                                 ent.Set(new Text() {
                                     Value = textCfg.Value,
                                     TextConfig = {
-                                        fontId = textCfg.FontId,
-                                        fontSize = textCfg.FontSize,
-                                        letterSpacing = textCfg.LetterSpacing,
-                                        lineHeight = textCfg.LineHeight,
-                                        textAlignment = textCfg.TextAlignment,
-                                        textColor = textCfg.TextColor,
-                                        wrapMode = textCfg.WrapMode
+                                        fontId = textCfg.TextConfig.FontId,
+                                        fontSize = textCfg.TextConfig.FontSize,
+                                        letterSpacing = textCfg.TextConfig.LetterSpacing,
+                                        lineHeight = textCfg.TextConfig.LineHeight,
+                                        textAlignment = textCfg.TextConfig.TextAlignment,
+                                        textColor = textCfg.TextConfig.TextColor,
+                                        wrapMode = textCfg.TextConfig.WrapMode
                                     }
                                 });
                             }
@@ -223,14 +289,15 @@ internal readonly struct ModdingPlugins : IPlugin
 
                             if (node.AcceptInputs)
                                 ent.Set(UIInteractionState.None);
-
-                            set.Add(node.Id, ent.ID);
                         }
 
-                        foreach ((var childIndex, var parentIndex) in nodes.Relations)
+                        foreach (var (child, parent) in nodes.Relations)
                         {
-                            var child = set[childIndex];
-                            var parent = set[parentIndex];
+                            if (!world.Exists(child))
+                                continue;
+
+                            if (!world.Exists(parent))
+                                continue;
 
                             world.Entity(parent).AddChild(child);
                         }
@@ -243,7 +310,7 @@ internal readonly struct ModdingPlugins : IPlugin
                     ..bind<WorldPosition>("entity_position", networkEntities),
                     ..bind<MobAnimation>("entity_animation", networkEntities),
                     ..bind<ServerFlags>("entity_flags", networkEntities),
-                    ..bind<Hitpoints>("entity_hp", networkEntities),
+                    ..bind<Hits>("entity_hp", networkEntities),
                     ..bind<Stamina>("entity_stamina", networkEntities),
                     ..bind<Mana>("entity_mana", networkEntities),
 
@@ -282,18 +349,17 @@ internal readonly struct ModdingPlugins : IPlugin
                 {
                     ArgumentNullException.ThrowIfNull(ctx);
 
-                    return HostFunction.FromMethod(name, null,
-                    (CurrentPlugin p, long keyOffset, long valueOffset) =>
-                        {
-                            var serial = p.ReadBytes(keyOffset).As<uint>();
-                            var ent = networkEntities.Get(serial);
-                            if (ent == 0)
-                                return;
+                    return HostFunction.FromMethod(name, null, (CurrentPlugin p, long keyOffset, long valueOffset) =>
+                    {
+                        var serial = p.ReadBytes(keyOffset).As<uint>();
+                        var ent = networkEntities.Get(serial);
+                        if (ent == 0)
+                            return;
 
-                            var value = p.ReadBytes(valueOffset);
-                            var val = JsonSerializer.Deserialize(value, ctx);
-                            ent.Set(val);
-                        });
+                        var value = p.ReadBytes(valueOffset);
+                        var val = JsonSerializer.Deserialize(value, ctx);
+                        ent.Set(val);
+                    });
                 }
 
 
@@ -399,7 +465,7 @@ internal readonly struct ModdingPlugins : IPlugin
         }
     }
 
-    private static unsafe byte[] Compress(ReadOnlySpan<byte> data)
+    private static byte[] Compress(ReadOnlySpan<byte> data)
     {
         using var ms = new MemoryStream();
         {
@@ -527,13 +593,15 @@ internal struct WasmInitialized;
 [JsonSerializable(typeof(Hue), GenerationMode = JsonSourceGenerationMode.Default)]
 [JsonSerializable(typeof(Facing), GenerationMode = JsonSourceGenerationMode.Default)]
 [JsonSerializable(typeof(EquipmentSlots), GenerationMode = JsonSourceGenerationMode.Default)]
-[JsonSerializable(typeof(Hitpoints), GenerationMode = JsonSourceGenerationMode.Default)]
+[JsonSerializable(typeof(Hits), GenerationMode = JsonSourceGenerationMode.Default)]
 [JsonSerializable(typeof(Mana), GenerationMode = JsonSourceGenerationMode.Default)]
 [JsonSerializable(typeof(Stamina), GenerationMode = JsonSourceGenerationMode.Default)]
 [JsonSerializable(typeof(MobAnimation), GenerationMode = JsonSourceGenerationMode.Default)]
 [JsonSerializable(typeof(ServerFlags), GenerationMode = JsonSourceGenerationMode.Default)]
 
 [JsonSerializable(typeof(UINodes), GenerationMode = JsonSourceGenerationMode.Default)]
+[JsonSerializable(typeof(QueryRequest), GenerationMode = JsonSourceGenerationMode.Default)]
+[JsonSerializable(typeof(QueryResponse), GenerationMode = JsonSourceGenerationMode.Default)]
 
 
 [JsonSerializable(typeof(HostMessages), GenerationMode = JsonSourceGenerationMode.Default)]
@@ -555,20 +623,26 @@ enum CompressionType
     Zlib
 }
 
-internal record struct UINodes(List<UINodeProxy> Nodes, Dictionary<int, int> Relations);
+
+internal record struct ComponentInfoProxy(ulong Id, int Size, string Name);
+internal record struct QueryRequest(List<(ulong Ids, TermOp Op)> Terms);
+internal record struct ArchetypeProxy(IEnumerable<ComponentInfoProxy> Components, IEnumerable<ulong> Entities);
+internal record struct QueryResponse(List<ArchetypeProxy> Results);
+
+
+internal record struct UINodes(List<UINodeProxy> Nodes, Dictionary<ulong, ulong> Relations);
 internal record struct UINodeProxy(
-    int Id,
+    ulong Id,
     ClayElementDeclProxy Config,
     ClayUOCommandData? UOConfig = null,
-    ClayTextProxy? TextConfig = null,
+    UITextProxy? TextConfig = null,
     bool Movable = false,
     bool AcceptInputs = false
 );
 
-
-
-internal record struct ClayTextProxy(string Value, Clay_Color TextColor, ushort FontId, ushort FontSize, ushort LetterSpacing, ushort LineHeight, Clay_TextElementConfigWrapMode WrapMode, Clay_TextAlignment TextAlignment);
 internal record struct UITextProxy(string Value, char ReplacedChar = '\0', ClayTextProxy TextConfig = default);
+
+internal record struct ClayTextProxy(Clay_Color TextColor, ushort FontId, ushort FontSize, ushort LetterSpacing, ushort LineHeight, Clay_TextElementConfigWrapMode WrapMode, Clay_TextAlignment TextAlignment);
 internal record struct ClayElementIdProxy(uint Id, uint Offset, uint BaseId, string StringId);
 internal record struct ClayImageProxy(string Base64Data);
 internal struct ClayElementDeclProxy
@@ -583,7 +657,7 @@ internal struct ClayElementDeclProxy
     public Clay_BorderElementConfig? Border;
 }
 
-internal record struct HostMessages(List<HostMessage> Messages);
+internal record struct HostMessages(IEnumerable<HostMessage> Messages);
 internal record struct PluginMessages(List<PluginMessage> Messages);
 
 
@@ -622,6 +696,8 @@ internal enum AssetType
     Animation,
 }
 
+
+internal struct PluginEntity;
 
 public static class JsonEx
 {
