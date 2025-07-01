@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <RuntimeIdentifier>wasi-wasm</RuntimeIdentifier>
+    <OutputType>Exe</OutputType>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <InvariantGlobalization>true</InvariantGlobalization>
+
+    <WasmSingleFileBundle>true</WasmSingleFileBundle>
+    <TrimMode>full</TrimMode>
+    <DebuggerSupport>false</DebuggerSupport>
+    <EventSourceSupport>false</EventSourceSupport>
+    <StackTraceSupport>false</StackTraceSupport>
+    <UseSystemResourceKeys>true</UseSystemResourceKeys>
+    <NativeDebugSymbols>false</NativeDebugSymbols>
+    <EnableUnsafeUTF7Encoding>false</EnableUnsafeUTF7Encoding>
+    <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
+
+    <RunAOTCompilation>true</RunAOTCompilation>
+    <PublishTrimmed>true</PublishTrimmed>
+
+    <WasmEnableSIMD>true</WasmEnableSIMD>
+    <WasmNativeStrip>true</WasmNativeStrip>
+    <!-- <PublishTrimmed>true</PublishTrimmed>
+    <SelfContained>true</SelfContained>
+    <MSBuildEnableWorkloadResolver>false</MSBuildEnableWorkloadResolver>
+    <UseAppHost>false</UseAppHost> -->
+
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Extism.Pdk" Version="1.1.1" />
+    <!-- <PackageReference Include="Microsoft.DotNet.ILCompiler.LLVM" Version="10.0.0-*" />
+    <PackageReference Include="runtime.$(NETCoreSdkPortableRuntimeIdentifier).Microsoft.DotNet.ILCompiler.LLVM" Version="10.0.0-*" /> -->
+  </ItemGroup>
+
+  <!-- <ItemGroup>
+    <DirectPInvoke Include="extism" />
+  </ItemGroup> -->
+</Project>

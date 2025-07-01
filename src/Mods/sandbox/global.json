@@ -1,0 +1,6 @@
+{
+  "sdk": {
+    "version": "8.0.404",
+	  "workloadVersion": "8.0.400"
+  }
+}
