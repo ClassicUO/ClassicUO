@@ -1,0 +1,15 @@
+{
+  "name": "ts-example",
+  "packageManager": "yarn@3.2.0",
+  "main": "src/index.ts",
+  "scripts": {
+    "tsc": "tsc --declaration src/index.ts --emitDeclarationOnly --outDir ./dist",
+    "build": "cross-env NODE_ENV=production node esbuild.js && extism-js dist/index.js -i src/index.d.ts -o dist/ts-example.wasm"
+  },
+  "devDependencies": {
+    "@extism/js-pdk": "^1.1.1",
+    "cross-env": "^7.0.3",
+    "esbuild": "^0.25.5",
+    "typescript": "^5.8.3"
+  }
+}

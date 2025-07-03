@@ -1,0 +1,13 @@
+{
+  "include": ["src/**/*"],
+  "compilerOptions": {
+    "baseUrl": ".",
+    "lib": [], // this ensures unsupported globals aren't suggested
+    "types": ["@extism/js-pdk", "./src/index.d.ts"], // while this makes the IDE aware of the ones that are
+    "noEmit": true, // this is only relevant for tsconfig.json
+    "target": "es2020",
+    "module": "es2020",
+    "downlevelIteration": true,
+    "moduleResolution": "node"
+  }
+}
