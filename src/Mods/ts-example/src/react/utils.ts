@@ -73,6 +73,7 @@ export const Colors = {
   red: createColor(1, 0, 0, 1),
   green: createColor(0, 1, 0, 1),
   blue: createColor(0, 0, 1, 1),
+  link: createColor(0.4, 0.6, 1, 1), // Light blue for links
 };
 
 export const Sizing = {
