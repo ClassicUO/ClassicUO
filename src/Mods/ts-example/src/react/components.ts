@@ -98,6 +98,34 @@ export interface TextInputProps extends BaseElementProps {
   onChange?: (value: string) => void;
 }
 
+// Checkbox component props
+export interface CheckboxProps extends BaseElementProps {
+  checked?: boolean;
+  onChange?: (checked: boolean) => void;
+  floating?: ClayFloatingElementConfig;
+  size?: ClaySize;
+}
+
+// Label component props
+export interface LabelProps extends BaseElementProps {
+  text: string;
+  textStyle?: ClayText;
+  floating?: ClayFloatingElementConfig;
+  size?: ClaySize;
+}
+
+// HSliderBar component props
+export interface HSliderBarProps extends BaseElementProps {
+  min?: number;
+  max?: number;
+  value?: number;
+  onChange?: (value: number) => void;
+  floating?: ClayFloatingElementConfig;
+  size?: ClaySize;
+  barGumpId?: number;
+  handleGumpId?: number;
+}
+
 // JSX Intrinsic Elements
 declare global {
   namespace JSX {
@@ -107,6 +135,9 @@ declare global {
       Button: ButtonProps;
       Text: TextProps;
       TextInput: TextInputProps;
+      Checkbox: CheckboxProps;
+      Label: LabelProps;
+      HSliderBar: HSliderBarProps;
     }
   }
 }
@@ -116,7 +147,10 @@ export type ClayElementNames =
   | "Gump"
   | "Button"
   | "Text"
-  | "TextInput";
+  | "TextInput"
+  | "Checkbox"
+  | "Label"
+  | "HSliderBar";
 
 export type ClayElementPropTypes =
   | {
@@ -138,4 +172,16 @@ export type ClayElementPropTypes =
   | {
       type: Lowercase<"textinput">;
       props: TextInputProps;
+    }
+  | {
+      type: Lowercase<"checkbox">;
+      props: CheckboxProps;
+    }
+  | {
+      type: Lowercase<"label">;
+      props: LabelProps;
+    }
+  | {
+      type: Lowercase<"hsliderbar">;
+      props: HSliderBarProps;
     };
