@@ -37,10 +37,4 @@ export function createClayColor(
   return { r, g, b, a };
 }
 
-export function createVector3(x: number, y: number, z: number): Vector3 {
-  return { x, y, z };
-}
 
-export function createVector2(x: number, y: number): Vector2 {
-  return { x, y };
-}

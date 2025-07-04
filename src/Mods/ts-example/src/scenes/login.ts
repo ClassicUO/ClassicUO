@@ -1,15 +1,11 @@
-import {
-  createClayColor,
-  createClaySizingAxis,
-  createVector3,
-} from "../ui/utils";
-import { HostWrapper } from "../host/hostWrapper";
+import { createClayColor, createClaySizingAxis } from "../ui/utils";
+import { HostWrapper } from "../host/wrapper";
 import {
   ClayLayoutDirection,
-  ClayLayoutAlignmentY,
+  ClayLayoutAlignment,
   ClaySizingType,
-  UINodeProxy,
-  ClayLayoutAlignmentX,
+  UINode,
+  ClayLayoutAlignment,
   ClayWidgetType,
   UINodes,
 } from "../types";
@@ -18,7 +14,7 @@ import { GumpBuilder } from "../ui/gumpBuilder";
 export function createLoginScreenMenu(
   addCallback: (id: number, callback: () => void) => void
 ): void {
-  const root: UINodeProxy = {
+  const root: UINode = {
     id: HostWrapper.spawnEcsEntity(),
     config: {
       backgroundColor: createClayColor(0.2, 0.2, 0.2, 1),
@@ -28,15 +24,15 @@ export function createLoginScreenMenu(
           height: createClaySizingAxis(ClaySizingType.Grow),
         },
         childAlignment: {
-          x: ClayLayoutAlignmentX.Center,
-          y: ClayLayoutAlignmentY.Center,
+          x: ClayLayoutAlignment.Center,
+          y: ClayLayoutAlignment.Center,
         },
         layoutDirection: ClayLayoutDirection.TopToBottom,
       },
     },
   };
 
-  const mainMenu: UINodeProxy = {
+  const mainMenu: UINode = {
     id: HostWrapper.spawnEcsEntity(),
     config: {
       backgroundColor: createClayColor(0.2, 0.2, 0.2, 1),
@@ -51,7 +47,7 @@ export function createLoginScreenMenu(
   };
 
   const builder = new GumpBuilder();
-  const unitZ = createVector3(0, 0, 1);
+  const unitZ = { x: 0, y: 0, z: 1 };
 
   const background = builder.addGump(0x014e, unitZ);
   const quitButton = builder.addButton([0x05ca, 0x05c9, 0x05c8], unitZ, {

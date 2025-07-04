@@ -1,5 +1,5 @@
 import {
-  UINodeProxy,
+  UINode,
   Vector2,
   Vector3,
   AssetType,
@@ -9,13 +9,13 @@ import {
   ClayFloatingAttachToElement,
   ClayFloatingClipToElement,
 } from "../types";
-import { HostWrapper } from "../host/hostWrapper";
+import { HostWrapper } from "../host/wrapper";
 import { createClaySizingAxis, createClayColor } from "./utils";
 
 // Gump builder class
 export class GumpBuilder {
-  addLabel(text: string, position?: Vector2, size?: Vector2): UINodeProxy {
-    const node: UINodeProxy = {
+  addLabel(text: string, position?: Vector2, size?: Vector2): UINode {
+    const node: UINode = {
       id: HostWrapper.spawnEcsEntity(),
       config: {
         layout: {
@@ -54,7 +54,7 @@ export class GumpBuilder {
     ids: [number, number, number],
     hue: Vector3,
     position?: Vector2
-  ): UINodeProxy {
+  ): UINode {
     const node = this.addGump(ids[0], hue, position, false, true);
     node.widgetType = ClayWidgetType.Button;
     node.uoButton = { normal: ids[0], pressed: ids[1], over: ids[2] };
@@ -67,13 +67,13 @@ export class GumpBuilder {
     position?: Vector2,
     movable: boolean = false,
     acceptInputs: boolean = false
-  ): UINodeProxy {
+  ): UINode {
     const spriteInfo = HostWrapper.getSprite({
       assetType: AssetType.Gump,
       idx: id,
     });
 
-    const node: UINodeProxy = {
+    const node: UINode = {
       id: HostWrapper.spawnEcsEntity(),
       config: {
         layout: {
@@ -113,13 +113,13 @@ export class GumpBuilder {
     hue: Vector3,
     position?: Vector2,
     size?: Vector2
-  ): UINodeProxy {
+  ): UINode {
     const spriteInfo = HostWrapper.getSprite({
       assetType: AssetType.Gump,
       idx: id,
     });
 
-    const node: UINodeProxy = {
+    const node: UINode = {
       id: HostWrapper.spawnEcsEntity(),
       config: {
         layout: {

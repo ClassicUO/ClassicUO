@@ -8,20 +8,39 @@ import {
   HostMessages,
   UIMouseEvent,
 } from "./types";
-import { HostWrapper, Zlib } from "./host/hostWrapper";
+import React from "react";
+import { HostWrapper, Zlib } from "./host/wrapper";
 import { base64Encode } from "./ui/utils";
 import { createLoginScreenMenu } from "./scenes/login";
+import { ClayReactRenderer } from "./react";
+import { LoginScreen } from "./components";
 
 class State {
-  public static time = 0;
+  public static tick = 0;
   public static uiCallbacks: Record<number, () => void> = {};
+  public static renderer: ClayReactRenderer | null = null;
+  public static timeouts: Map<number, { callback: () => void; delay: number }> =
+    new Map();
 }
+
+Object.assign(globalThis, {
+  React,
+  setTimeout: (callback: () => void, delay: number) => {
+    console.log("setTimeout", callback, delay);
+    State.timeouts.set(State.tick + delay, { callback, delay });
+    // random integer id
+    return Math.floor(Math.random() * 1000000);
+  },
+  clearTimeout: (timeoutId: number) => {
+    console.log("clearTimeout", timeoutId);
+    State.timeouts.delete(timeoutId);
+  },
+});
 
 // Main plugin functions
 export function on_init(): I32 {
   console.log("plugin initialized");
 
-  // Send packet to server
   // HostWrapper.sendPacketToServer(new Uint8Array([0x73, 0xff]));
 
   return 1;
@@ -31,7 +50,16 @@ export function on_update(): I32 {
   const json = HostWrapper.getInputString();
   const time: TimeProxy = JSON.parse(json);
 
-  State.time = time.total;
+  State.tick = time.total;
+
+  if (State.timeouts.size > 0) {
+    for (const [id, timeout] of State.timeouts) {
+      if (State.tick >= timeout.delay) {
+        timeout.callback();
+        State.timeouts.delete(id);
+      }
+    }
+  }
 
   return 1;
 }
@@ -94,6 +122,26 @@ export function on_event(): I32 {
             });
             break;
 
+          case Keys.R:
+            console.log("Keys.R => creating renderer");
+            State.renderer?.unmount();
+            State.renderer = new ClayReactRenderer();
+
+            State.renderer.render(
+              <LoginScreen
+                onQuit={() => {
+                  console.log("React: Quit button clicked");
+                }}
+                onCredits={() => {
+                  console.log("React: Credits button clicked");
+                }}
+                onLogin={() => {
+                  console.log("React: Login button clicked");
+                }}
+              />
+            );
+            break;
+
           case Keys.H:
             const response = HostWrapper.query({
               terms: [{ ids: 1, op: TermOp.Optional }],
@@ -114,9 +162,13 @@ export function on_ui_mouse_event(): I32 {
   const json = HostWrapper.getInputString();
   const ev: UIMouseEvent = JSON.parse(json);
 
-  console.log("on_ui_mouse_event callbacks", Object.keys(State.uiCallbacks));
-  if (ev.state === UIInteractionState.Released && State.uiCallbacks[ev.id]) {
-    State.uiCallbacks[ev.id]();
+  if (ev.state === UIInteractionState.Released) {
+    State.renderer?.handleUIEvent(ev.id, "click");
+
+    // old render method
+    if (State.uiCallbacks[ev.id]) {
+      State.uiCallbacks[ev.id]();
+    }
   }
 
   return 1;

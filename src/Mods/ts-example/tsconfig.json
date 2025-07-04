@@ -8,6 +8,10 @@
     "target": "es2020",
     "module": "es2020",
     "downlevelIteration": true,
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true
   }
 }

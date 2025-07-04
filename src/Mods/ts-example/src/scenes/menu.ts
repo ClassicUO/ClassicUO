@@ -1,11 +1,11 @@
 import { createClayColor, createClaySizingAxis } from "../ui/utils";
-import { HostWrapper } from "../host/hostWrapper";
+import { HostWrapper } from "../host/wrapper";
 import {
   ClayLayoutDirection,
-  ClayLayoutAlignmentY,
+  ClayLayoutAlignment,
   ClaySizingType,
-  UINodeProxy,
-  ClayLayoutAlignmentX,
+  UINode,
+  ClayLayoutAlignment,
   UINodes,
   ClayFloatingClipToElement,
   ClayFloatingAttachToElement,
@@ -15,7 +15,7 @@ import {
 export function createMenu(uiCallbacks: Record<number, () => void>): void {
   const rootEnt = HostWrapper.spawnEcsEntity();
 
-  const root: UINodeProxy = {
+  const root: UINode = {
     id: rootEnt,
     config: {
       backgroundColor: createClayColor(0.6, 0.6, 0.6, 1),
@@ -32,8 +32,8 @@ export function createMenu(uiCallbacks: Record<number, () => void>): void {
         },
         layoutDirection: ClayLayoutDirection.TopToBottom,
         childAlignment: {
-          x: ClayLayoutAlignmentX.Center,
-          y: ClayLayoutAlignmentY.Center,
+          x: ClayLayoutAlignment.Center,
+          y: ClayLayoutAlignment.Center,
         },
       },
       floating: {
@@ -47,7 +47,7 @@ export function createMenu(uiCallbacks: Record<number, () => void>): void {
   };
 
   const childEnt = HostWrapper.spawnEcsEntity();
-  const child: UINodeProxy = {
+  const child: UINode = {
     id: childEnt,
     config: {
       backgroundColor: createClayColor(1, 0, 0, 1),
@@ -70,7 +70,7 @@ export function createMenu(uiCallbacks: Record<number, () => void>): void {
   };
 
   const childEnt2 = HostWrapper.spawnEcsEntity();
-  const child2: UINodeProxy = {
+  const child2: UINode = {
     id: childEnt2,
     config: {
       backgroundColor: createClayColor(0, 1, 0, 1),

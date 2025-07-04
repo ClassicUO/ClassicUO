@@ -1,4 +1,271 @@
 // Enums
+
+export enum AssetType {
+  Gump = 0,
+  Arts = 1,
+  Animation = 2,
+}
+
+export enum CompressionType {
+  None = 0,
+  Zlib = 1,
+}
+
+export enum ClayWidgetType {
+  None = 0,
+  Button = 1,
+  TextInput = 2,
+}
+
+export enum ClayUOCommandType {
+  None = 0,
+  Text = 1,
+  Gump = 2,
+  GumpNinePatch = 3,
+  Art = 4,
+  Land = 5,
+  Animation = 6,
+}
+
+export enum TermOp {
+  With = 0,
+  Without = 1,
+  Optional = 2,
+}
+
+export enum UIInteractionState {
+  None = 0,
+  Over = 1,
+  Pressed = 2,
+  Released = 3,
+}
+
+export enum ClayLayoutDirection {
+  LeftToRight = 0,
+  TopToBottom = 1,
+}
+
+export enum ClayLayoutAlignment {
+  Left = 0,
+  Top = 0,
+  Right = 1,
+  Bottom = 1,
+  Center = 2,
+}
+
+export enum ClaySizingType {
+  Fit = 0,
+  Grow = 1,
+  Percent = 2,
+  Fixed = 3,
+}
+
+export enum ClayFloatingAttachToElement {
+  None = 0,
+  Parent = 1,
+  ElementWithId = 2,
+  Root = 3,
+}
+
+export enum ClayFloatingClipToElement {
+  None = 0,
+  AttachedParent = 1,
+}
+
+export enum ClayTextAlignment {
+  Left = 0,
+  Center = 1,
+  Right = 2,
+}
+
+// Data structures
+export interface Vector2 {
+  x: number;
+  y: number;
+}
+
+export interface Vector3 {
+  x: number;
+  y: number;
+  z: number;
+}
+
+export interface ClayColor {
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+}
+
+export interface ClaySizingAxis {
+  minMax?: { min: number; max: number };
+  percent?: number;
+}
+
+export interface ClaySizing {
+  size: ClaySizingAxis;
+  type: ClaySizingType;
+}
+
+export interface ClayChildAlignment {
+  x: ClayLayoutAlignment;
+  y: ClayLayoutAlignment;
+}
+
+export interface ClayLayoutConfig {
+  sizing?: {
+    width: ClaySizing;
+    height: ClaySizing;
+  };
+  padding?: { left: number; right: number; top: number; bottom: number };
+  childGap?: number;
+  childAlignment?: ClayChildAlignment;
+  layoutDirection?: ClayLayoutDirection;
+}
+
+export interface ClayFloatingElementConfig {
+  offset: Vector2;
+  expand?: { width: number; height: number };
+  parentId?: number;
+  zIndex?: number;
+  attachPoints?: { element: number; parent: number };
+  pointerCaptureMode?: number;
+  attachTo: ClayFloatingAttachToElement;
+  clipTo: ClayFloatingClipToElement;
+}
+
+export interface ClayElementDecl {
+  id?: { id: number; offset: number; baseId: number; stringId: string };
+  layout?: ClayLayoutConfig;
+  backgroundColor?: ClayColor;
+  cornerRadius?: {
+    topLeft: number;
+    topRight: number;
+    bottomLeft: number;
+    bottomRight: number;
+  };
+  image?: { base64Data: string };
+  floating?: ClayFloatingElementConfig;
+  clip?: { horizontal: boolean; vertical: boolean; childOffset: Vector2 };
+  border?: {
+    color: ClayColor;
+    width: {
+      left: number;
+      right: number;
+      top: number;
+      bottom: number;
+      betweenChildren: number;
+    };
+  };
+}
+
+export interface ClayUOCommandData {
+  type: ClayUOCommandType;
+  id: number;
+  hue: Partial<Vector3>;
+}
+
+export interface ClayText {
+  textColor: ClayColor;
+  fontId: number;
+  fontSize: number;
+  letterSpacing?: number;
+  lineHeight?: number;
+  wrapMode?: number;
+  textAlignment?: ClayTextAlignment;
+}
+
+export interface ClaySize {
+  width: number;
+  height: number;
+}
+
+export interface UIText {
+  value: string;
+  replacedChar?: string;
+  textConfig: ClayText;
+}
+
+export interface UOButtonWidgetProxy {
+  normal: number;
+  pressed: number;
+  over: number;
+}
+
+export interface UINode {
+  id: number;
+  config: ClayElementDecl;
+  uoConfig?: ClayUOCommandData;
+  textConfig?: UIText;
+  uoButton?: UOButtonWidgetProxy;
+  widgetType?: ClayWidgetType;
+  movable?: boolean;
+  acceptInputs?: boolean;
+}
+
+export interface UINodes {
+  nodes: UINode[];
+  relations: Record<number, number>;
+}
+
+export interface Graphic {
+  value: number;
+}
+
+export interface SpriteDescription {
+  assetType: AssetType;
+  idx: number;
+  width?: number;
+  height?: number;
+  base64Data?: string;
+  compression?: CompressionType;
+}
+
+export interface TimeProxy {
+  total: number;
+  frame: number;
+}
+
+export interface ComponentInfo {
+  id: number;
+  size: number;
+  name: string;
+}
+
+export interface Archetype {
+  components: ComponentInfo[];
+  entities: number[];
+}
+
+export interface QueryRequest {
+  terms: Array<{ ids: number; op: TermOp }>;
+}
+
+export interface QueryResponse {
+  results: Archetype[];
+}
+
+export interface UIMouseEvent {
+  id: number;
+  button: number;
+  x: number;
+  y: number;
+  state: UIInteractionState;
+}
+
+export interface HostMessage {
+  $type: string;
+  x?: number;
+  y?: number;
+  delta?: number;
+  button?: number;
+  key?: Keys;
+}
+
+export interface HostMessages {
+  messages: HostMessage[];
+}
+
 export enum Keys {
   None = 0,
   Back = 8,
@@ -160,267 +427,4 @@ export enum Keys {
   OemAuto = 0xf3,
   OemCopy = 0xf2,
   OemEnlW = 0xf4,
-}
-
-export enum AssetType {
-  Gump = 0,
-  Arts = 1,
-  Animation = 2,
-}
-
-export enum CompressionType {
-  None = 0,
-  Zlib = 1,
-}
-
-export enum ClayWidgetType {
-  None = 0,
-  Button = 1,
-  TextInput = 2,
-}
-
-export enum ClayUOCommandType {
-  None = 0,
-  Text = 1,
-  Gump = 2,
-  GumpNinePatch = 3,
-  Art = 4,
-  Land = 5,
-  Animation = 6,
-}
-
-export enum TermOp {
-  With = 0,
-  Without = 1,
-  Optional = 2,
-}
-
-export enum UIInteractionState {
-  None = 0,
-  Over = 1,
-  Pressed = 2,
-  Released = 3,
-}
-
-export enum ClayLayoutDirection {
-  LeftToRight = 0,
-  TopToBottom = 1,
-}
-
-export enum ClayLayoutAlignmentX {
-  Left = 0,
-  Right = 1,
-  Center = 2,
-}
-
-export enum ClayLayoutAlignmentY {
-  Top = 0,
-  Bottom = 1,
-  Center = 2,
-}
-
-export enum ClaySizingType {
-  Fit = 0,
-  Grow = 1,
-  Percent = 2,
-  Fixed = 3,
-}
-
-export enum ClayFloatingAttachToElement {
-  None = 0,
-  Parent = 1,
-  ElementWithId = 2,
-  Root = 3,
-}
-
-export enum ClayFloatingClipToElement {
-  None = 0,
-  AttachedParent = 1,
-}
-
-export enum ClayTextAlignment {
-  Left = 0,
-  Center = 1,
-  Right = 2,
-}
-
-// Data structures
-export interface Vector2 {
-  x: number;
-  y: number;
-}
-
-export interface Vector3 {
-  x: number;
-  y: number;
-  z: number;
-}
-
-export interface ClayColor {
-  r: number;
-  g: number;
-  b: number;
-  a: number;
-}
-
-export interface ClaySizingAxis {
-  type: ClaySizingType;
-  minMax?: { min: number; max: number };
-  percent?: number;
-}
-
-export interface ClaySizing {
-  width: ClaySizingAxis;
-  height: ClaySizingAxis;
-}
-
-export interface ClayChildAlignment {
-  x: ClayLayoutAlignmentX;
-  y: ClayLayoutAlignmentY;
-}
-
-export interface ClayLayoutConfig {
-  sizing?: ClaySizing;
-  padding?: { left: number; right: number; top: number; bottom: number };
-  childGap?: number;
-  childAlignment?: ClayChildAlignment;
-  layoutDirection?: ClayLayoutDirection;
-}
-
-export interface ClayFloatingElementConfig {
-  offset: Vector2;
-  expand?: { width: number; height: number };
-  parentId?: number;
-  zIndex?: number;
-  attachPoints?: { element: number; parent: number };
-  pointerCaptureMode?: number;
-  attachTo: ClayFloatingAttachToElement;
-  clipTo: ClayFloatingClipToElement;
-}
-
-export interface ClayElementDeclProxy {
-  id?: { id: number; offset: number; baseId: number; stringId: string };
-  layout?: ClayLayoutConfig;
-  backgroundColor?: ClayColor;
-  cornerRadius?: {
-    topLeft: number;
-    topRight: number;
-    bottomLeft: number;
-    bottomRight: number;
-  };
-  image?: { base64Data: string };
-  floating?: ClayFloatingElementConfig;
-  clip?: { horizontal: boolean; vertical: boolean; childOffset: Vector2 };
-  border?: {
-    color: ClayColor;
-    width: {
-      left: number;
-      right: number;
-      top: number;
-      bottom: number;
-      betweenChildren: number;
-    };
-  };
-}
-
-export interface ClayUOCommandData {
-  type: ClayUOCommandType;
-  id: number;
-  hue: Vector3;
-}
-
-export interface ClayTextProxy {
-  textColor: ClayColor;
-  fontId: number;
-  fontSize: number;
-  letterSpacing?: number;
-  lineHeight?: number;
-  wrapMode?: number;
-  textAlignment?: ClayTextAlignment;
-}
-
-export interface UITextProxy {
-  value: string;
-  replacedChar?: string;
-  textConfig: ClayTextProxy;
-}
-
-export interface UOButtonWidgetProxy {
-  normal: number;
-  pressed: number;
-  over: number;
-}
-
-export interface UINodeProxy {
-  id: number;
-  config: ClayElementDeclProxy;
-  uoConfig?: ClayUOCommandData;
-  textConfig?: UITextProxy;
-  uoButton?: UOButtonWidgetProxy;
-  widgetType?: ClayWidgetType;
-  movable?: boolean;
-  acceptInputs?: boolean;
-}
-
-export interface UINodes {
-  nodes: UINodeProxy[];
-  relations: Record<number, number>;
-}
-
-export interface Graphic {
-  value: number;
-}
-
-export interface SpriteDescription {
-  assetType: AssetType;
-  idx: number;
-  width?: number;
-  height?: number;
-  base64Data?: string;
-  compression?: CompressionType;
-}
-
-export interface TimeProxy {
-  total: number;
-  frame: number;
-}
-
-export interface ComponentInfoProxy {
-  id: number;
-  size: number;
-  name: string;
-}
-
-export interface ArchetypeProxy {
-  components: ComponentInfoProxy[];
-  entities: number[];
-}
-
-export interface QueryRequest {
-  terms: Array<{ ids: number; op: TermOp }>;
-}
-
-export interface QueryResponse {
-  results: ArchetypeProxy[];
-}
-
-export interface UIMouseEvent {
-  id: number;
-  button: number;
-  x: number;
-  y: number;
-  state: UIInteractionState;
-}
-
-export interface HostMessage {
-  $type: string;
-  x?: number;
-  y?: number;
-  delta?: number;
-  button?: number;
-  key?: Keys;
-}
-
-export interface HostMessages {
-  messages: HostMessage[];
 }
