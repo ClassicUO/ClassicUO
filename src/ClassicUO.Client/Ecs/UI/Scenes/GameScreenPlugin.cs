@@ -105,7 +105,7 @@ internal readonly struct GameScreenPlugin : IPlugin
                     floating = floating
                 }
             })
-            .Set(UIInteractionState.None)
+            .Set(new UIMouseAction())
             .Add<GameWindowBorderUI>()
             .Add<GameScene>();
 
@@ -123,7 +123,7 @@ internal readonly struct GameScreenPlugin : IPlugin
                     floating = floating
                 }
             })
-            .Set(UIInteractionState.None)
+            .Set(new UIMouseAction())
             .Add<GameWindowBorderResizeUI>()
             .Add<GameScene>();
 
@@ -167,7 +167,7 @@ internal readonly struct GameScreenPlugin : IPlugin
                     // floating = floating
                 }
             })
-            // .Set(UIInteractionState.None)
+            // .Set(new UIMouseAction())
             // .Add<UIMovable>()
             .Add<GameScene>();
 
@@ -199,7 +199,7 @@ internal readonly struct GameScreenPlugin : IPlugin
                 },
             })
             .Set(ButtonAction.Logout)
-            .Set(UIInteractionState.None)
+            .Set(new UIMouseAction())
             .Add<GameScene>();
 
         var menuBarItem2 = world.Entity()
@@ -256,16 +256,17 @@ internal readonly struct GameScreenPlugin : IPlugin
         Res<UltimaBatcher2D> batch,
         Res<MouseContext> mouseCtx,
         Local<Rectangle> lastSize,
-        Single<Data<UINode, UIInteractionState>, Filter<With<GameWindowBorderUI>, With<GameScene>>> queryGameWindowBorder,
-        Single<Data<UINode, UIInteractionState>, Filter<With<GameWindowBorderResizeUI>, With<GameScene>>> queryGameWindowBorderResize,
+        Single<Data<UINode, UIMouseAction>, Filter<With<GameWindowBorderUI>, With<GameScene>>> queryGameWindowBorder,
+        Single<Data<UINode, UIMouseAction>, Filter<With<GameWindowBorderResizeUI>, With<GameScene>>> queryGameWindowBorderResize,
         Single<Data<UINode>, Filter<With<GameWindowUI>, With<GameScene>>> queryGameWindow
     )
     {
         (var nodeBorder, var interaction) = queryGameWindowBorder.Get();
         (var nodeBorderResize, var interactionResize) = queryGameWindowBorderResize.Get();
 
-        if (interaction.Ref == UIInteractionState.Pressed)
+        if (interaction.Ref.State == UIInteractionState.Pressed)
         {
+            // TODO: check mouse button
             if (mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
             {
                 camera.Value.Bounds.X += (int)mouseCtx.Value.PositionOffset.X;
@@ -273,7 +274,7 @@ internal readonly struct GameScreenPlugin : IPlugin
             }
         }
 
-        if (interactionResize.Ref == UIInteractionState.Pressed && mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
+        if (interactionResize.Ref.State == UIInteractionState.Pressed && mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
         {
             ref var newBounds = ref lastSize.Value;
             newBounds.Width += (int)mouseCtx.Value.PositionOffset.X;
@@ -343,13 +344,13 @@ internal readonly struct GameScreenPlugin : IPlugin
     }
 
     private static void HandleButtonsPressed(
-        Query<Data<UINode, UIInteractionState, ButtonAction>, Changed<UIInteractionState>> query,
+        Query<Data<UINode, UIMouseAction, ButtonAction>, Changed<UIMouseAction>> query,
         State<GameState> state
     )
     {
         foreach ((var node, var interaction, var action) in query)
         {
-            if (interaction.Ref == UIInteractionState.Released)
+            if (interaction.Ref is { State: UIInteractionState.Released, Button: Input.MouseButtonType.Left })
             {
                 switch (action.Ref)
                 {

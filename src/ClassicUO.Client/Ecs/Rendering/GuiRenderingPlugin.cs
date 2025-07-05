@@ -31,11 +31,11 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
             Res<ImageCache> imageCache,
             Res<FocusedInput> focusedInput,
             Query<Data<UINode>, Filter<With<Text>, With<TextInput>>> queryTextInput,
-            Query<Data<UINode, UIInteractionState>> queryInteraction,
-            Query<Data<UINode, Text, UIInteractionState, Children>,
-                  Filter<Without<Parent>, Optional<Text>, Optional<UIInteractionState>, Optional<Children>>> query,
-            Query<Data<UINode, Text, UIInteractionState, Children>,
-                  Filter<With<Parent>, Optional<Text>, Optional<UIInteractionState>, Optional<Children>>> queryChildren
+            Query<Data<UINode, UIMouseAction>> queryInteraction,
+            Query<Data<UINode, Text, UIMouseAction, Children>,
+                  Filter<Without<Parent>, Optional<Text>, Optional<UIMouseAction>, Optional<Children>>> query,
+            Query<Data<UINode, Text, UIMouseAction, Children>,
+                  Filter<With<Parent>, Optional<Text>, Optional<UIMouseAction>, Optional<Children>>> queryChildren
         ) =>
         {
             if (dumbTexture.Value == null)
@@ -48,7 +48,7 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
 
             Clay.BeginLayout();
             ulong found = 0;
-            var lastInteraction = UIInteractionState.None;
+            var lastInteraction = new UIMouseAction();
             foreach ((var ent, var node, var text, var interaction, var children) in query)
                 renderNodes(
                     ent.Ref,
@@ -75,7 +75,7 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                     ent.Ref.Set(lastInteraction);
                 }
 
-                if (lastInteraction == UIInteractionState.Pressed && queryTextInput.Contains(found))
+                if (lastInteraction is { State: UIInteractionState.Pressed, Button: MouseButtonType.Left }  && queryTextInput.Contains(found))
                 {
                     focusedInput.Value.Entity = found;
                 }
@@ -333,12 +333,12 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                 EntityView ent,
                 ref ulong found,
                 ulong lastPressed,
-                ref UIInteractionState newInteraction,
-                ref UINode node, ref Text text, ref UIInteractionState interaction, ref Children children,
+                ref UIMouseAction newInteraction,
+                ref UINode node, ref Text text, ref UIMouseAction interaction, ref Children children,
                 MouseContext mouseCtx,
                 ClayUOCommandBuffer commandBuffer,
-                Query<Data<UINode, Text, UIInteractionState, Children>,
-                      Filter<With<Parent>, Optional<Text>, Optional<UIInteractionState>, Optional<Children>>> query
+                Query<Data<UINode, Text, UIMouseAction, Children>,
+                      Filter<With<Parent>, Optional<Text>, Optional<UIMouseAction>, Optional<Children>>> query
             )
             {
                 Clay.OpenElement();
@@ -362,20 +362,31 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                     {
                         if (lastPressed == ent)
                         {
-                            if (mouseCtx.IsPressed(MouseButtonType.Left))
+                            for (var button = MouseButtonType.None + 1; button < MouseButtonType.Size; button++)
                             {
-                                found = ent;
-                                newInteraction = UIInteractionState.Pressed;
-                            }
-                            else if (interaction == UIInteractionState.Pressed)
-                            {
-                                found = ent;
-                                newInteraction = UIInteractionState.Released;
-                            }
-                            else if (interaction == UIInteractionState.Over && Clay.IsHovered())
-                            {
-                                found = ent;
-                                newInteraction = UIInteractionState.Over;
+                                newInteraction.Button = MouseButtonType.None;
+                                if (mouseCtx.IsPressed(button))
+                                {
+                                    found = ent;
+                                    newInteraction.State = UIInteractionState.Pressed;
+                                    newInteraction.Button = button;
+                                    break;
+                                }
+
+                                if (interaction.State == UIInteractionState.Pressed && interaction.Button == button)
+                                {
+                                    found = ent;
+                                    newInteraction.State = UIInteractionState.Released;
+                                    newInteraction.Button = button;
+                                    break;
+                                }
+
+                                if (interaction.State == UIInteractionState.Over && Clay.IsHovered())
+                                {
+                                    found = ent;
+                                    newInteraction.State = UIInteractionState.Over;
+                                    newInteraction.Button = MouseButtonType.None;
+                                }
                             }
                         }
                     }
@@ -384,13 +395,13 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                         if (!mouseCtx.IsPressed(MouseButtonType.Left) && Clay.IsHovered())
                         {
                             found = ent;
-                            newInteraction = UIInteractionState.Over;
+                            newInteraction.State = UIInteractionState.Over;
                         }
                     }
 
-                    if (interaction != UIInteractionState.None)
+                    if (interaction.State != UIInteractionState.None)
                     {
-                        ent.Set(UIInteractionState.None);
+                        ent.Set(new UIMouseAction());
                     }
                 }
 

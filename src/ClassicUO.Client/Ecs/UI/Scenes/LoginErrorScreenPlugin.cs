@@ -142,7 +142,7 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
                         textColor = new (1f, 1f, 1f, 1),
                     }
                 })
-                .Set(UIInteractionState.None);
+                .Set(new UIMouseAction());
 
             menu.AddChild(serverEnt);
         }
@@ -202,7 +202,7 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
                 }
             })
             .Set(LoginButtons.Ok)
-            .Set(UIInteractionState.None);
+            .Set(new UIMouseAction());
 
         footerMenu.AddChild(okButtonEntity);
         menu.AddChild(footerMenu);
@@ -214,14 +214,14 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
         Res<NetClient> network,
         State<GameState> state,
         Query<
-            Data<LoginButtons, UIInteractionState>,
-            Filter<Changed<UIInteractionState>, With<LoginErrorScene>>
+            Data<LoginButtons, UIMouseAction>,
+            Filter<Changed<UIMouseAction>, With<LoginErrorScene>>
         > query
     )
     {
         foreach ((var buttonType, var interaction) in query)
         {
-            if (interaction.Ref != UIInteractionState.Released)
+            if (interaction.Ref.State != UIInteractionState.Released)
                 continue;
 
             if (buttonType.Ref == LoginButtons.Ok)

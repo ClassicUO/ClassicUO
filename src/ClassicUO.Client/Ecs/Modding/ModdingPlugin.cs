@@ -21,32 +21,32 @@ namespace ClassicUO.Ecs;
 // https://github.com/bakcxoj/bevy_wasm
 // https://github.com/mhmd-azeez/extism-space-commander/blob/main/scripts/mod_manager.cs#L161
 
-internal readonly struct ModdingPlugins : IPlugin
+internal readonly struct ModdingPlugin : IPlugin
 {
     public void Build(Scheduler scheduler)
     {
         scheduler.AddEvent<HostMessage>();
         scheduler.AddEvent<(Mod, PluginMessage)>();
 
-        scheduler.OnUpdate((Query<Data<UINode, UIInteractionState, PluginEntity>, Changed<UIInteractionState>> query, Res<MouseContext> mouseCtx) =>
+        scheduler.OnUpdate((Query<Data<UINode, UIMouseAction, PluginEntity>, Changed<UIMouseAction>> query, Res<MouseContext> mouseCtx) =>
         {
             foreach ((var ent, var node, var interaction, var pluginEnt) in query)
             {
-                if (interaction.Ref != UIInteractionState.Released)
-                {
-                    continue;
-                }
+                // if (interaction.Ref.State != UIInteractionState.Released)
+                // {
+                //     continue;
+                // }
 
                 if (!pluginEnt.Ref.Mod.Plugin.FunctionExists("on_ui_mouse_event"))
                 {
                     continue;
                 }
 
-                var ev = new UIMouseEvent(ent.Ref.ID, (int)MouseButtonType.Left, mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y, interaction.Ref).ToJson();
+                var ev = new UIMouseEvent(ent.Ref.ID, (int)interaction.Ref.Button, mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y, interaction.Ref.State).ToJson();
                 pluginEnt.Ref.Mod.Plugin.Call("on_ui_mouse_event", ev);
             }
         }
-        ).RunIf((Query<Data<UINode, UIInteractionState, PluginEntity>, Changed<UIInteractionState>> query) => query.Count() > 0);
+        ).RunIf((Query<Data<UINode, UIMouseAction, PluginEntity>, Changed<UIMouseAction>> query) => query.Count() > 0);
 
         scheduler.OnStartup((
             World world,
@@ -309,7 +309,7 @@ internal readonly struct ModdingPlugins : IPlugin
                                 ent.Add<UIMovable>();
 
                             if (node.AcceptInputs)
-                                ent.Set(UIInteractionState.None);
+                                ent.Set(new UIMouseAction());
 
                             if (node.WidgetType == ClayWidgetType.TextInput)
                                 ent.Add<TextInput>();
@@ -317,7 +317,7 @@ internal readonly struct ModdingPlugins : IPlugin
                             {
                                 if (node.UOButton is {} button)
                                 {
-                                    ent.Set(UIInteractionState.None);
+                                    ent.Set(new UIMouseAction());
                                     ent.Set(new UOButton()
                                     {
                                         Normal = button.Normal,

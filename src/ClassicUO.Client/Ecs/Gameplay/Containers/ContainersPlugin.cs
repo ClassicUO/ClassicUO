@@ -35,7 +35,7 @@ internal readonly struct ContainersPlugin : IPlugin
 
     private static void CloseContainersTooFarFromPlayer(
         Query<Data<WorldPosition>,
-             Filter<With<IsContainer>, With<UINode>, With<UIInteractionState>, With<UIMovable>>> query,
+             Filter<With<IsContainer>, With<UINode>, With<UIMouseAction>, With<UIMovable>>> query,
         Single<Data<WorldPosition>, With<Player>> queryPlayer
     )
     {
@@ -48,7 +48,7 @@ internal readonly struct ContainersPlugin : IPlugin
                 Math.Abs(playerPos.Ref.Y - pos.Ref.Y) >= MAX_CONTAINER_DIST)
             {
                 ent.Ref.Unset<UINode>();
-                ent.Ref.Unset<UIInteractionState>();
+                ent.Ref.Unset<UIMouseAction>();
                 ent.Ref.Unset<UIMovable>();
             }
         }
@@ -106,7 +106,7 @@ internal readonly struct ContainersPlugin : IPlugin
                         }
                     }
                 )
-                .Set(UIInteractionState.None)
+                .Set(new UIMouseAction())
                 .Add<UIMovable>()
                 ;
             }
@@ -172,7 +172,7 @@ internal readonly struct ContainersPlugin : IPlugin
 
             ref readonly var artInfo = ref assets.Value.Arts.GetArt((ushort)(graphic + graphicInc));
 
-            ent.Add<UIMovable>().Set(UIInteractionState.None).Set
+            ent.Add<UIMovable>().Set(new UIMouseAction()).Set
             (
                 new UINode()
                 {
@@ -239,7 +239,7 @@ internal readonly struct ContainersPlugin : IPlugin
 
                 ref readonly var artInfo = ref assets.Value.Arts.GetArt((ushort)(graphic + graphicInc));
 
-                ent.Add<UIMovable>().Set(UIInteractionState.None).Set
+                ent.Add<UIMovable>().Set(new UIMouseAction()).Set
                 (
                     new UINode()
                     {

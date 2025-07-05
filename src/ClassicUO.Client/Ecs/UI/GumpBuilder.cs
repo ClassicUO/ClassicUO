@@ -54,7 +54,7 @@ internal sealed class GumpBuilder
     public EntityView AddButton((ushort normal, ushort pressed, ushort over) ids, Vector3 hue, Vector2? position = null)
     {
         return AddGump(ids.normal, hue, position)
-            .Set(UIInteractionState.None)
+            .Set(new UIMouseAction())
             .Set(new UOButton() { Normal = ids.normal, Pressed = ids.pressed, Over = ids.over });
     }
 

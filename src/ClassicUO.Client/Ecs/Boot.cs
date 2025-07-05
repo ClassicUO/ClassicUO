@@ -36,7 +36,7 @@ internal readonly struct CuoPlugin : IPlugin
         scheduler.AddPlugin<GameplayPlugin>();
         scheduler.AddPlugin<RenderingPlugin>();
 
-        scheduler.AddPlugin<ModdingPlugins>();
+        scheduler.AddPlugin<ModdingPlugin>();
     }
 }
 

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using ClassicUO.Network;
+using ClassicUO.Input;
 using Clay_cs;
 using TinyEcs;
 
@@ -155,7 +156,7 @@ internal readonly struct ServerSelectionPlugin : IPlugin
                             textColor = new (1f, 1f, 1f, 1),
                         }
                     })
-                    .Set(UIInteractionState.None);
+                    .Set(new UIMouseAction());
 
                 menu.AddChild(serverEnt);
             }
@@ -165,13 +166,13 @@ internal readonly struct ServerSelectionPlugin : IPlugin
     private static void ServerSelected(
         Res<NetClient> network,
         Query<
-            Data<ServerInfo, UIInteractionState>,
-            Filter<Changed<UIInteractionState>, With<ServerSelectionScene>>
+            Data<ServerInfo, UIMouseAction>,
+            Filter<Changed<UIMouseAction>, With<ServerSelectionScene>>
         > query)
     {
         foreach ((var serverInfo, var interaction) in query)
         {
-            if (interaction.Ref == UIInteractionState.Released)
+            if (interaction.Ref is { State: UIInteractionState.Released, Button: MouseButtonType.Left })
             {
                 network.Value.Send_SelectServer((byte)serverInfo.Ref.Index);
             }

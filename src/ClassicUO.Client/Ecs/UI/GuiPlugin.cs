@@ -111,14 +111,14 @@ internal readonly struct GuiPlugin : IPlugin
         Clay.UpdateScrollContainers(true, new(0, mouseCtx.Value.Wheel * 3), time.Frame);
     }
 
-    private static void UpdateUOButtonsState(Query<Data<UINode, UOButton, UIInteractionState>, Changed<UIInteractionState>> query)
+    private static void UpdateUOButtonsState(Query<Data<UINode, UOButton, UIMouseAction>, Changed<UIMouseAction>> query)
     {
         foreach ((var node, var button, var interaction) in query)
         {
             node.Ref.UOConfig.Id = interaction.Ref switch
             {
-                UIInteractionState.Over => button.Ref.Over,
-                UIInteractionState.Pressed => button.Ref.Pressed,
+                { State: UIInteractionState.Over } => button.Ref.Over,
+                { State: UIInteractionState.Pressed, Button: MouseButtonType.Left } => button.Ref.Pressed,
                 _ => button.Ref.Normal
             };
         }
@@ -168,12 +168,12 @@ internal readonly struct GuiPlugin : IPlugin
 
     private static void MoveFocusedElementsByMouse(
         Res<MouseContext> mouseCtx,
-        Query<Data<UINode, UIInteractionState>, With<UIMovable>> query
+        Query<Data<UINode, UIMouseAction>, With<UIMovable>> query
     )
     {
         foreach ((var node, var interaction) in query)
         {
-            if (interaction.Ref == UIInteractionState.Pressed)
+            if (interaction.Ref.State == UIInteractionState.Pressed && interaction.Ref.Button == MouseButtonType.Left)
             {
                 if (mouseCtx.Value.IsPressed(MouseButtonType.Left))
                 {
@@ -197,6 +197,12 @@ enum UIInteractionState : byte
     Over,
     Pressed,
     Released,
+}
+
+struct UIMouseAction
+{
+    public UIInteractionState State;
+    public MouseButtonType Button;
 }
 
 struct UIMovable;

@@ -1,5 +1,6 @@
 using System;
 using ClassicUO.Configuration;
+using ClassicUO.Input;
 using ClassicUO.Utility;
 using Clay_cs;
 using Microsoft.Xna.Framework;
@@ -109,7 +110,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
             .Add<TextInput>()
             .Add<LoginScene>()
             .Add<UsernameInput>()
-            .Set(UIInteractionState.None));
+            .Set(new UIMouseAction()));
 
         // password background
         mainMenu.AddChild(gumpBuilder.Value.AddGumpNinePatch(
@@ -130,13 +131,13 @@ internal readonly struct LoginScreenPlugin : IPlugin
             .Add<TextInput>()
             .Add<LoginScene>()
             .Add<PasswordInput>()
-            .Set(UIInteractionState.None));
+            .Set(new UIMouseAction()));
 
         root.AddChild(mainMenu);
     }
 
     private static void ButtonsHandler(
-        Query<Data<UIInteractionState, ButtonAction>, Changed<UIInteractionState>> query,
+        Query<Data<UIMouseAction, ButtonAction>, Changed<UIMouseAction>> query,
         Res<Settings> settings,
         State<LoginInteraction> state,
         EventWriter<OnLoginRequest> writer,
@@ -146,25 +147,27 @@ internal readonly struct LoginScreenPlugin : IPlugin
     {
         foreach ((var interaction, var action) in query)
         {
-            if (interaction.Ref == UIInteractionState.Released)
+            if (interaction.Ref is not { State: UIInteractionState.Released, Button: MouseButtonType.Left })
             {
-                Action fn = action.Ref switch
-                {
-                    ButtonAction.Quit => () => Console.WriteLine("quit"),
-                    ButtonAction.Credits => () => Console.WriteLine("credits"),
-                    ButtonAction.Login => () =>
-                    {
-                        (_, var username) = queryUsername.Get();
-                        (_, var password) = queryPassword.Get();
-                        Login(writer, settings, username.Ref.Value, password.Ref.Value);
-                        state.Set(LoginInteraction.LoginRequested);
-                    }
-                    ,
-                    _ => null
-                };
-
-                fn?.Invoke();
+                continue;
             }
+
+            Action fn = action.Ref switch
+            {
+                ButtonAction.Quit => () => Console.WriteLine("quit"),
+                ButtonAction.Credits => () => Console.WriteLine("credits"),
+                ButtonAction.Login => () =>
+                {
+                    (_, var username) = queryUsername.Get();
+                    (_, var password) = queryPassword.Get();
+                    Login(writer, settings, username.Ref.Value, password.Ref.Value);
+                    state.Set(LoginInteraction.LoginRequested);
+                }
+                ,
+                _ => null
+            };
+
+            fn?.Invoke();
         }
     }
 
