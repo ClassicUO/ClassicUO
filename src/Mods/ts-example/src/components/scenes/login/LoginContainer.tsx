@@ -1,13 +1,17 @@
 import React from "react";
-import { View, Gump, Colors } from "../react";
+import { View, Gump } from "~/react";
+import { Colors } from "~/ui";
 import {
   ClayFloatingAttachToElement,
   ClayFloatingClipToElement,
+  ClayLayoutAlignment,
   ClayLayoutDirection,
   ClaySizingType,
-} from "src/types";
+} from "~/types";
 
-export const LoginBackground: React.FC = () => {
+export const LoginContainer: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   // Note: In the original C# code, client version determines gump IDs
   // For now, we'll use the newer client gump IDs (>= CV_706400)
   const isNewClient = true; // This should be determined from client version
@@ -17,8 +21,9 @@ export const LoginBackground: React.FC = () => {
 
   return (
     <View
-      backgroundColor={Colors.black}
+      backgroundColor={Colors.transparent}
       layout={{
+        layoutDirection: ClayLayoutDirection.TopToBottom,
         sizing: {
           width: {
             type: ClaySizingType.Grow,
@@ -29,7 +34,10 @@ export const LoginBackground: React.FC = () => {
             size: {},
           },
         },
-        layoutDirection: ClayLayoutDirection.TopToBottom,
+        childAlignment: {
+          x: ClayLayoutAlignment.Center,
+          y: ClayLayoutAlignment.Center,
+        },
       }}
     >
       {/* Main background gump */}
@@ -58,6 +66,8 @@ export const LoginBackground: React.FC = () => {
       {/* For older clients, there would be additional gumps like: */}
       {/* - Tile gump (0x0150) at position 0,0 */}
       {/* - ResizePic (0x13BE) at position 136,95 size 408,342 */}
+
+      {children}
     </View>
   );
 };

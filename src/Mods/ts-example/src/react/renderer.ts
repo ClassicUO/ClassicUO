@@ -26,6 +26,7 @@ export class ClayReactRenderer {
   }
 
   render(element: React.ReactElement): void {
+    console.log("ClayReactRenderer render");
     this.reconciler.updateContainer(element, this.fiberRoot, null, () => {});
   }
 

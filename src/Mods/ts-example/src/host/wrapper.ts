@@ -4,7 +4,7 @@ import {
   UINodes,
   QueryRequest,
   QueryResponse,
-} from "../types";
+} from "~/types";
 
 type HostFunctions = ReturnType<typeof Host.getFunctions>;
 
@@ -58,7 +58,7 @@ export class HostWrapper {
 
   static createUINodes(nodes: UINodes): void {
     const json = JSON.stringify(nodes, null, 2);
-    console.log("createUINodes", json);
+    // console.log("createUINodes", json);
     const memIn = Memory.fromString(json);
     this.functions.cuo_ui_node(memIn.offset);
   }
@@ -101,6 +101,11 @@ export class HostWrapper {
 
   static setUILayout(entityId: number, layout: any): void {
     console.log("setUILayout", entityId, layout);
+    if (!layout) {
+      console.warn("setUILayout: no layout provided", entityId);
+      return;
+    }
+
     const mem = Memory.fromString(JSON.stringify(layout));
     this.functions.cuo_ui_set_layout(entityId, mem.offset);
   }

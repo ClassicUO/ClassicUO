@@ -1,5 +1,5 @@
-import { UINodes, UINode } from "../types";
-import { HostWrapper } from "../host/wrapper";
+import { UINodes, UINode } from "~/types";
+import { HostWrapper } from "~/host";
 import { ClayElement } from "./components";
 
 export class ClayContainer {
@@ -11,7 +11,6 @@ export class ClayContainer {
   appendChild(child: ClayElement): void {
     this.elements.push(child);
     this.trackEntity(child);
-    this.synced = false;
   }
 
   removeChild(child: ClayElement): void {
@@ -19,7 +18,6 @@ export class ClayContainer {
     if (index !== -1) {
       this.elements.splice(index, 1);
       this.cleanupEntity(child);
-      this.synced = false;
     }
   }
 
@@ -31,7 +29,6 @@ export class ClayContainer {
       this.elements.push(child);
     }
     this.trackEntity(child);
-    this.synced = false;
   }
 
   clear(): void {
@@ -82,7 +79,7 @@ export class ClayContainer {
     HostWrapper.createUINodes(uiNodes);
     this.synced = true;
 
-    console.log("ClayContainer render", uiNodes);
+    // console.log("ClayContainer render", uiNodes);
   }
 
   private collectNodes(

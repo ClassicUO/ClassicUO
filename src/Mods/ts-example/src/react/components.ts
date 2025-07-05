@@ -10,7 +10,7 @@ import type {
   ClaySize,
   ClayLayoutDirection,
   ClayChildAlignment,
-} from "../types";
+} from "~/types";
 
 export interface ClayElement {
   type: string;
@@ -24,6 +24,9 @@ export interface ClayElement {
 export interface BaseElementProps {
   children?: React.ReactNode;
   onClick?: () => void;
+  movable?: boolean;
+  acceptInputs?: boolean;
+  textConfig?: ClayText;
 }
 
 // View component props
@@ -31,7 +34,6 @@ export interface ViewProps extends BaseElementProps {
   backgroundColor?: ClayColor;
   layout: ClayLayoutConfig;
   floating?: ClayFloatingElementConfig;
-  movable?: boolean;
   cornerRadius?: {
     topLeft: number;
     topRight: number;
@@ -73,7 +75,7 @@ export interface ButtonProps extends BaseElementProps {
   acceptInputs?: boolean;
   size: ClaySize;
   floating?: ClayFloatingElementConfig;
-  hue?: Vector3;
+  hue?: Partial<Vector3>;
 }
 
 // Text component props
@@ -82,8 +84,9 @@ export interface TextProps extends BaseElementProps {
   style?: ClayText;
   floating?: ClayFloatingElementConfig;
   size?: ClaySize;
-  layout: ClayLayoutConfig;
 }
+
+export type LabelProps = TextProps;
 
 // TextInput component props
 export interface TextInputProps extends BaseElementProps {
@@ -102,14 +105,6 @@ export interface TextInputProps extends BaseElementProps {
 export interface CheckboxProps extends BaseElementProps {
   checked?: boolean;
   onChange?: (checked: boolean) => void;
-  floating?: ClayFloatingElementConfig;
-  size?: ClaySize;
-}
-
-// Label component props
-export interface LabelProps extends BaseElementProps {
-  text: string;
-  textStyle?: ClayText;
   floating?: ClayFloatingElementConfig;
   size?: ClaySize;
 }

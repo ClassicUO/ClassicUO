@@ -2,16 +2,12 @@ import {
   UINode,
   ClayWidgetType,
   ClayUOCommandType,
-  ClayElementDecl,
   ClaySizingType,
   ClayLayoutDirection,
   ClayLayoutAlignment,
-} from "../types";
-import {
-  ClayElement,
-  ClayElementNames,
-  ClayElementPropTypes,
-} from "./components";
+} from "~/types";
+import { TextStyle } from "~/ui";
+import { ClayElementPropTypes } from "./components";
 
 export function createElement(type: string, props: any, id: number): UINode {
   const data = { type, props } as ClayElementPropTypes;
@@ -146,8 +142,7 @@ export function createElement(type: string, props: any, id: number): UINode {
       };
     }
 
-    case "text":
-      const size = data.props.size ?? { width: 50, height: 25 };
+    case "text": {
       return {
         id,
         config: {
@@ -155,13 +150,35 @@ export function createElement(type: string, props: any, id: number): UINode {
         },
         textConfig: {
           value: data.props.children || "",
-          textConfig: data.props.style,
+          textConfig: data.props.style ?? TextStyle.default,
         },
         widgetType: ClayWidgetType.None,
+        uoConfig: {
+          type: ClayUOCommandType.Text,
+          id: 0,
+          hue: { x: 0, y: 0, z: 1 },
+        },
       };
+    }
 
-    default:
+    default: {
       console.warn(`Unknown element type: ${type}`);
-      throw new Error(`Unknown element type: ${type}`);
+      return {
+        id,
+        config: {
+          floating: data.props.floating,
+        },
+        textConfig: {
+          value: `MISSING(${type})`,
+          textConfig: TextStyle.default,
+        },
+        widgetType: ClayWidgetType.None,
+        uoConfig: {
+          type: ClayUOCommandType.Text,
+          id: 0,
+          hue: { x: 0, y: 0, z: 1 },
+        },
+      };
+    }
   }
 }

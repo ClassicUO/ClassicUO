@@ -3,20 +3,18 @@ import {
   DefaultEventPriority,
   NoEventPriority,
 } from "react-reconciler/constants.js";
-import { HostWrapper } from "../host/wrapper";
+import { HostWrapper } from "~/host";
 import { ClayContainer } from "./container";
 import { ClayElement, ClayElementNames } from "./components";
 import { createContext } from "react";
 import { createElement } from "./createElement";
+import { TextStyle } from "~ui/utils";
 
 type Props = Record<string, unknown>;
 type HostContext = {};
 export type ClayReconciler = ReturnType<typeof getClayReconciler>;
 
-// Host configuration for react-reconciler
 export function getClayReconciler() {
-  console.log("creating HostConfig");
-
   let currentUpdatePriority = NoEventPriority;
   let currentRootNode: ClayElement | undefined;
 
@@ -64,7 +62,13 @@ export function getClayReconciler() {
       return { type, props, children: [], instanceId, node };
     },
     createTextInstance: (text, rootContainer, hostContext, internalHandle) => {
-      console.log("createTextInstance", text);
+      console.log(
+        "createTextInstance",
+        text,
+        rootContainer,
+        hostContext,
+        internalHandle
+      );
       const instanceId = HostWrapper.spawnEcsEntity();
       const node = createElement("text", { children: text }, instanceId);
       HostWrapper.createUINodes({ nodes: [node], relations: {} });
@@ -82,7 +86,15 @@ export function getClayReconciler() {
       parent.children.push(child);
     },
     finalizeInitialChildren: () => false,
-    shouldSetTextContent: () => false,
+    shouldSetTextContent: (type, props) => {
+      console.log("shouldSetTextContent", type, props);
+
+      if (type.toLowerCase() === "text") {
+        return true;
+      }
+
+      return false;
+    },
 
     // Mutation methods
     appendChild: (parent, child) => {
@@ -121,19 +133,25 @@ export function getClayReconciler() {
       instance.props = newProps;
       const oldNode = instance.node;
       instance.node = createElement(type, newProps, instance.instanceId);
-      HostWrapper.setUILayout(instance.instanceId, instance.node.config.layout);
+      if (instance.node.config.layout) {
+        HostWrapper.setUILayout(
+          instance.instanceId,
+          instance.node.config.layout
+        );
+      }
     },
     commitTextUpdate: (textInstance, oldText, newText) => {
-      // console.log("commitTextUpdate", oldText, newText);
+      console.log("commitTextUpdate", textInstance, oldText, newText);
       if (textInstance.node) {
         textInstance.node.textConfig = {
           value: newText,
-          textConfig: textInstance.props.style,
+          textConfig:
+            textInstance.node.textConfig?.textConfig ?? TextStyle.default,
         };
+        HostWrapper.setUIText(textInstance.instanceId, newText);
       }
     },
     clearContainer: (container) => {
-      console.log("clearContainer");
       container.clear();
     },
 

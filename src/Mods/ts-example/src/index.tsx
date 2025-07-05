@@ -11,7 +11,6 @@ import {
 import React from "react";
 import { HostWrapper, Zlib } from "./host/wrapper";
 import { base64Encode } from "./ui/utils";
-import { createLoginScreenMenu } from "./scenes/login";
 import { ClayReactRenderer } from "./react";
 import { LoginScreen } from "./components";
 
@@ -117,9 +116,6 @@ export function on_event(): I32 {
           }
 
           case Keys.G:
-            createLoginScreenMenu((id, callback) => {
-              State.uiCallbacks[id] = callback;
-            });
             break;
 
           case Keys.R:
