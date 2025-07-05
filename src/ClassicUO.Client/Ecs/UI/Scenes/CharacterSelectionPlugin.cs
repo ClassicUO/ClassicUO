@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using ClassicUO.Game.Data;
+using ClassicUO.Input;
 using ClassicUO.Network;
 using Clay_cs;
 using TinyEcs;
@@ -155,7 +156,7 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
                             textColor = new (1f, 1f, 1f, 1),
                         }
                     })
-                    .Set(UIInteractionState.None);
+                    .Set(new UIMouseAction());
 
                 menu.AddChild(characterEnt);
             }
@@ -166,13 +167,13 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
         Res<NetClient> network,
         Res<GameContext> gameCtx,
         Query<
-            Data<CharacterInfo, UIInteractionState>,
-            Filter<Changed<UIInteractionState>, With<CharacterSelectionScene>>
+            Data<CharacterInfo, UIMouseAction>,
+            Filter<Changed<UIMouseAction>, With<CharacterSelectionScene>>
         > query)
     {
         foreach ((var characterInfo, var interaction) in query)
         {
-            if (interaction.Ref == UIInteractionState.Released)
+            if (interaction.Ref is { State: UIInteractionState.Released, Button: MouseButtonType.Left })
             {
                 network.Value.Send_SelectCharacter(
                     characterInfo.Ref.Index,
