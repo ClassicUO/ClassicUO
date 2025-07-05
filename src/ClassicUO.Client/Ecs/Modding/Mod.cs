@@ -3,20 +3,9 @@ using Extism.Sdk;
 
 namespace ClassicUO.Ecs;
 
-class Mod : IDisposable
+internal class Mod(Plugin plugin) : IDisposable
 {
-    private readonly Plugin _plugin;
+    public Plugin Plugin { get; } = plugin;
 
-    public Mod(Plugin plugin)
-    {
-        _plugin = plugin;
-    }
-
-    public Plugin Plugin => _plugin;
-
-
-    public void Dispose()
-    {
-        _plugin.Dispose();
-    }
+    public void Dispose() => Plugin.Dispose();
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,6 +9,7 @@ using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.Input;
 using ClassicUO.Network;
 using Clay_cs;
 using Extism.Sdk;
@@ -26,18 +28,24 @@ internal readonly struct ModdingPlugins : IPlugin
         scheduler.AddEvent<HostMessage>();
         scheduler.AddEvent<(Mod, PluginMessage)>();
 
-        scheduler.OnUpdate
-        ((Query<Data<UINode, UIInteractionState, PluginEntity>, Changed<UIInteractionState>> query, Res<MouseContext> mouseCtx) =>
+        scheduler.OnUpdate((Query<Data<UINode, UIInteractionState, PluginEntity>, Changed<UIInteractionState>> query, Res<MouseContext> mouseCtx) =>
+        {
+            foreach ((var ent, var node, var interaction, var pluginEnt) in query)
             {
-                foreach ((var ent, var node, var interaction, var pluginEnt) in query)
+                if (interaction.Ref != UIInteractionState.Released)
                 {
-                    if (interaction.Ref == UIInteractionState.Released)
-                    {
-                        var ev = new UIMouseEvent(ent.Ref.ID, 0, mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y, interaction.Ref).ToJson();
-                        pluginEnt.Ref.Mod.Plugin.Call("on_ui_mouse_event", ev);
-                    }
+                    continue;
                 }
+
+                if (!pluginEnt.Ref.Mod.Plugin.FunctionExists("on_ui_mouse_event"))
+                {
+                    continue;
+                }
+
+                var ev = new UIMouseEvent(ent.Ref.ID, (int)MouseButtonType.Left, mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y, interaction.Ref).ToJson();
+                pluginEnt.Ref.Mod.Plugin.Call("on_ui_mouse_event", ev);
             }
+        }
         ).RunIf((Query<Data<UINode, UIInteractionState, PluginEntity>, Changed<UIInteractionState>> query) => query.Count() > 0);
 
         scheduler.OnStartup((
@@ -50,7 +58,8 @@ internal readonly struct ModdingPlugins : IPlugin
             Res<NetworkEntitiesMap> networkEntities,
             Res<GameContext> gameCtx,
             Res<AssetsServer> assets,
-            Res<UOFileManager> fileManager
+            Res<UOFileManager> fileManager,
+            SchedulerState state
         ) =>
         {
             Extism.Sdk.Plugin.ConfigureFileLogging("stdout", LogLevel.Info);
@@ -101,9 +110,9 @@ internal readonly struct ModdingPlugins : IPlugin
                             }
 
                             packetMap.Value[handlerInfo.PacketId] = buffer => {
-                                    plugin.Call(handlerInfo.FuncName, buffer);
-                                    fn(buffer);
-                                };
+                                plugin.Call(handlerInfo.FuncName, buffer);
+                                fn(buffer);
+                            };
                         }
                     }),
 
@@ -184,8 +193,13 @@ internal readonly struct ModdingPlugins : IPlugin
                     }),
 
 
-                    HostFunction.FromMethod("cuo_get_player_serial", null, p
-                        => p.WriteBytes(gameCtx.Value.PlayerSerial.AsBytes())),
+                    HostFunction.FromMethod("cuo_get_player_serial", null, p =>
+                    {
+                        var span = gameCtx.Value.PlayerSerial.AsBytes();
+                        // BinaryPrimitives.WriteUInt32BigEndian(span, gameCtx.Value.PlayerSerial);
+                        var addr = p.WriteBytes(span);
+                        return addr;
+                    }),
 
 
                     HostFunction.FromMethod("cuo_ecs_spawn_entity", null, (CurrentPlugin p) =>
@@ -331,7 +345,7 @@ internal readonly struct ModdingPlugins : IPlugin
                             return;
 
                         Console.WriteLine("cuo_ui_delete_node {0}", entityId);
-                            
+
                         world.Entity((ulong)entityId).Delete();
                     }),
 
@@ -340,7 +354,7 @@ internal readonly struct ModdingPlugins : IPlugin
                             return;
 
                         Console.WriteLine("cuo_ui_add_node {0} {1}", entityId, parentId);
-                            
+
                         world.Entity((ulong)entityId).AddChild((ulong)parentId);
                     }),
 
@@ -361,11 +375,11 @@ internal readonly struct ModdingPlugins : IPlugin
                     HostFunction.FromMethod("cuo_ui_set_text", null, (CurrentPlugin p, long entityId, long textOffset) => {
                         if (!world.Exists((ulong)entityId))
                             return;
-                            
+
                         var newText = p.ReadString(textOffset);
                         var entity = world.Entity((ulong)entityId);
                         Console.WriteLine("cuo_ui_set_text {0} {1}", entityId, newText);
-                        
+
                         if (entity.Has<Text>()) {
                             ref var text = ref entity.Get<Text>();
                             text.Value = newText;
@@ -375,12 +389,12 @@ internal readonly struct ModdingPlugins : IPlugin
                     HostFunction.FromMethod("cuo_ui_set_layout", null, (CurrentPlugin p, long entityId, long layoutOffset) => {
                         if (!world.Exists((ulong)entityId))
                             return;
-                            
+
                         var json = p.ReadString(layoutOffset);
                         var layout = json.FromJson<Clay_LayoutConfig>();
                         var entity = world.Entity((ulong)entityId);
                         Console.WriteLine("cuo_ui_set_layout {0} {1}", entityId, json);
-                        
+
                         if (entity.Has<UINode>()) {
                             ref var node = ref entity.Get<UINode>();
                             node.Config.layout = layout;
@@ -390,19 +404,17 @@ internal readonly struct ModdingPlugins : IPlugin
                     HostFunction.FromMethod("cuo_ui_set_background", null, (CurrentPlugin p, long entityId, long colorOffset) => {
                         if (!world.Exists((ulong)entityId))
                             return;
-                            
+
                         var json = p.ReadString(colorOffset);
                         var color = json.FromJson<Clay_Color>();
                         var entity = world.Entity((ulong)entityId);
                         Console.WriteLine("cuo_ui_set_background {0} {1}", entityId, json);
-                        
+
                         if (entity.Has<UINode>()) {
                             ref var node = ref entity.Get<UINode>();
                             node.Config.backgroundColor = color;
                         }
                     }),
-
-
 
 
                     ..bind<Graphic>("entity_graphic", networkEntities),
@@ -414,7 +426,6 @@ internal readonly struct ModdingPlugins : IPlugin
                     ..bind<Hits>("entity_hp", networkEntities),
                     ..bind<Stamina>("entity_stamina", networkEntities),
                     ..bind<Mana>("entity_mana", networkEntities),
-
                 ];
 
 
@@ -448,13 +459,12 @@ internal readonly struct ModdingPlugins : IPlugin
                     where T : struct
             {
                 var ctx = (JsonTypeInfo<T>)ModdingJsonContext.Default.GetTypeInfo(typeof(T));
-                yield return serializeProps<T>("cuo_get_" + postfix, networkEntities, ctx);
-                yield return deserializeProps<T>("cuo_set_" + postfix, networkEntities, ctx);
+                yield return serializeProps("cuo_get_" + postfix, networkEntities, ctx);
+                yield return deserializeProps("cuo_set_" + postfix, networkEntities, ctx);
                 yield break;
 
 
-                static HostFunction serializeProps<T>(string name, NetworkEntitiesMap networkEntities, JsonTypeInfo<T> ctx)
-                    where T : struct
+                static HostFunction serializeProps(string name, NetworkEntitiesMap networkEntities, JsonTypeInfo<T> ctx)
                 {
                     ArgumentNullException.ThrowIfNull(ctx);
 
@@ -470,8 +480,7 @@ internal readonly struct ModdingPlugins : IPlugin
                     });
                 }
 
-                static HostFunction deserializeProps<T>(string name, NetworkEntitiesMap networkEntities, JsonTypeInfo<T> ctx)
-                    where T : struct
+                static HostFunction deserializeProps(string name, NetworkEntitiesMap networkEntities, JsonTypeInfo<T> ctx)
                 {
                     ArgumentNullException.ThrowIfNull(ctx);
 
