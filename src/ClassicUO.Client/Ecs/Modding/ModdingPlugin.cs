@@ -13,6 +13,7 @@ using ClassicUO.Input;
 using ClassicUO.Network;
 using Clay_cs;
 using Extism.Sdk;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using TinyEcs;
 
@@ -32,17 +33,14 @@ internal readonly struct ModdingPlugin : IPlugin
         {
             foreach ((var ent, var node, var interaction, var pluginEnt) in query)
             {
-                // if (interaction.Ref.State != UIInteractionState.Released)
-                // {
-                //     continue;
-                // }
-
                 if (!pluginEnt.Ref.Mod.Plugin.FunctionExists("on_ui_mouse_event"))
                 {
                     continue;
                 }
 
-                var ev = new UIMouseEvent(ent.Ref.ID, (int)interaction.Ref.Button, mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y, interaction.Ref.State).ToJson();
+                var ev = new UIMouseEvent(ent.Ref.ID, (int)interaction.Ref.Button,
+                                          mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y,
+                                          interaction.Ref.State).ToJson();
                 pluginEnt.Ref.Mod.Plugin.Call("on_ui_mouse_event", ev);
             }
         }
@@ -58,8 +56,7 @@ internal readonly struct ModdingPlugin : IPlugin
             Res<NetworkEntitiesMap> networkEntities,
             Res<GameContext> gameCtx,
             Res<AssetsServer> assets,
-            Res<UOFileManager> fileManager,
-            SchedulerState state
+            Res<UOFileManager> fileManager
         ) =>
         {
             Extism.Sdk.Plugin.ConfigureFileLogging("stdout", LogLevel.Info);
@@ -505,10 +502,10 @@ internal readonly struct ModdingPlugin : IPlugin
 
         scheduler.OnAfterUpdate((Res<MouseContext> mouseCtx, Res<KeyboardContext> keyboardCtx, EventWriter<HostMessage> writer) =>
         {
-            // if (mouseCtx.Value.PositionOffset != Vector2.Zero)
-            // {
-            //     writer.Enqueue(new HostMessage.MouseMove(mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y));
-            // }
+            if (mouseCtx.Value.PositionOffset != Vector2.Zero)
+            {
+                writer.Enqueue(new HostMessage.MouseMove(mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y));
+            }
 
             if (mouseCtx.Value.Wheel != 0)
             {
