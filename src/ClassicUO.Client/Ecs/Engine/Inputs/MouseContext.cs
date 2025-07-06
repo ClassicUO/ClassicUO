@@ -11,12 +11,14 @@ internal sealed class MouseContext : InputContext<MouseButtonType>
     private MouseState _oldState, _newState;
     private float _lastClickTime, _currentTime;
     private MouseButtonType? _lastClickButton;
+    private Vector2 _lastMouseClickPosition;
 
     internal MouseContext(Microsoft.Xna.Framework.Game game) : base(game) { }
 
 
     public Vector2 Position => new(_newState.X, _newState.Y);
     public Vector2 PositionOffset => new(_newState.X - _oldState.X, _newState.Y - _oldState.Y);
+    public Vector2 DraggingOffset => new (_newState.X - _lastMouseClickPosition.X, _newState.Y - _lastMouseClickPosition.Y);
     public float Wheel { get; private set; }
 
     public override bool IsPressed(MouseButtonType input) => VerifyCondition(input, ButtonState.Pressed, ButtonState.Pressed);
@@ -44,6 +46,20 @@ internal sealed class MouseContext : InputContext<MouseButtonType>
 
     public override void Update(float deltaTime)
     {
+        for (var button = MouseButtonType.None + 1; button < MouseButtonType.Size; button++)
+        {
+            if (IsPressedOnce(button))
+            {
+                _lastMouseClickPosition = Position;
+                break;
+            }
+
+            if (IsReleased(button))
+            {
+                _lastMouseClickPosition = Vector2.Zero;
+            }
+        }
+
         _oldState = _newState;
         _newState = Microsoft.Xna.Framework.Input.Mouse.GetState();
         _currentTime = deltaTime;

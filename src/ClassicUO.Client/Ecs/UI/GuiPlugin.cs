@@ -195,6 +195,7 @@ enum UIInteractionState : byte
 {
     None,
     Over,
+    Left,
     Pressed,
     Released,
 }

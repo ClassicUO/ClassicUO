@@ -11,7 +11,7 @@ namespace ClassicUO.Ecs;
 
 internal readonly struct LoginScreenPlugin : IPlugin
 {
-    public unsafe void Build(Scheduler scheduler)
+    public void Build(Scheduler scheduler)
     {
         var setupFn = Setup;
         var buttonsHandlerFn = ButtonsHandler;
