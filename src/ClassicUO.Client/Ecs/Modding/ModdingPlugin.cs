@@ -661,7 +661,6 @@ internal readonly struct ModdingPlugin : IPlugin
 
 
     private static void PropagateTextConfigToChildTextFragments(
-        World world,
         Query<Data<Text, Children>, Filter<Changed<Children>, With<PluginEntity>>> query,
         Query<Data<Text>, With<Parent>> queryChildren
     )
