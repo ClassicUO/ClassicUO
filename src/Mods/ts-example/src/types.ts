@@ -15,6 +15,7 @@ export enum ClayWidgetType {
   None = 0,
   Button = 1,
   TextInput = 2,
+  TextFragment = 3,
 }
 
 export enum ClayUOCommandType {
@@ -181,7 +182,7 @@ export interface ClaySize {
 }
 
 export interface UIText {
-  value: string;
+  value: string | string[];
   replacedChar?: string;
   textConfig: ClayText;
 }

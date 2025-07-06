@@ -221,6 +221,8 @@ struct Text
 
 struct TextInput;
 
+struct TextFragment;
+
 
 enum ClayUOCommandType : byte
 {

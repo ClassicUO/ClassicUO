@@ -67,7 +67,7 @@ export function on_event(): I32 {
   const json = HostWrapper.getInputString();
   const evList: HostMessages = JSON.parse(json);
 
-  console.log("on_event", evList);
+  // console.log("on_event", evList);
 
   for (const ev of evList.messages) {
     switch (ev.$type) {

@@ -3,6 +3,7 @@ using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -202,19 +203,19 @@ internal readonly struct ModdingPlugin : IPlugin
                     HostFunction.FromMethod("cuo_ecs_spawn_entity", null, (CurrentPlugin p) =>
                     {
                         var ent = world.Entity().Set(new PluginEntity(mod));
-                        return ent.ID;
+                        return (long)ent.ID;
                     }),
 
-                    HostFunction.FromMethod("cuo_ecs_delete_entity", null, (CurrentPlugin p, ulong id) =>
+                    HostFunction.FromMethod("cuo_ecs_delete_entity", null, (CurrentPlugin p, long id) =>
                     {
-                        if (world.Exists(id))
-                            world.Delete(id);
+                        if (world.Exists((ulong)id))
+                            world.Delete((ulong)id);
                     }),
 
 
-                    HostFunction.FromMethod("cuo_ecs_set_component", null, (CurrentPlugin plugin, ulong id, long offset) =>
+                    HostFunction.FromMethod("cuo_ecs_set_component", null, (CurrentPlugin plugin, long id, long offset) =>
                     {
-                        if (!world.Exists(id))
+                        if (!world.Exists((ulong)id))
                             return;
 
                         // var ent = world.Entity(id);
@@ -288,7 +289,7 @@ internal readonly struct ModdingPlugin : IPlugin
 
                             if (node.TextConfig is {} textCfg)
                             {
-                                ent.Set(new Text() {
+                                var config = new Text() {
                                     Value = textCfg.Value,
                                     TextConfig = {
                                         fontId = textCfg.TextConfig.FontId,
@@ -299,7 +300,9 @@ internal readonly struct ModdingPlugin : IPlugin
                                         textColor = textCfg.TextConfig.TextColor,
                                         wrapMode = textCfg.TextConfig.WrapMode
                                     }
-                                });
+                                };
+
+                                ent.Set(config);
                             }
 
                             if (node.Movable)
@@ -310,6 +313,8 @@ internal readonly struct ModdingPlugin : IPlugin
 
                             if (node.WidgetType == ClayWidgetType.TextInput)
                                 ent.Add<TextInput>();
+                            else if (node.WidgetType == ClayWidgetType.TextFragment)
+                                ent.Add<TextFragment>();
                             else if (node.WidgetType == ClayWidgetType.Button)
                             {
                                 if (node.UOButton is {} button)
@@ -335,82 +340,22 @@ internal readonly struct ModdingPlugin : IPlugin
 
                             world.Entity(parent).AddChild(child);
                         }
+                        
+                        PropagateTextConfigToChildTextFragments(world, scheduler);
                     }),
 
-                    HostFunction.FromMethod("cuo_ui_delete_node", null, (CurrentPlugin p, long entityId) => {
-                        if (!world.Exists((ulong)entityId))
-                            return;
-
-                        Console.WriteLine("cuo_ui_delete_node {0}", entityId);
-
-                        world.Entity((ulong)entityId).Delete();
-                    }),
-
-                    HostFunction.FromMethod("cuo_ui_add_node", null, (CurrentPlugin p, long entityId, long parentId) => {
-                        if (!world.Exists((ulong)entityId))
-                            return;
-
-                        Console.WriteLine("cuo_ui_add_node {0} {1}", entityId, parentId);
-
-                        world.Entity((ulong)entityId).AddChild((ulong)parentId);
-                    }),
-
-                    HostFunction.FromMethod("cuo_ui_insert_node", null, (CurrentPlugin p, long entityId, long parentId, long index) =>
+                    HostFunction.FromMethod("cuo_add_entity_to_parent", null, (CurrentPlugin p, long entityId, long parentId, long index) =>
                     {
                         if (!world.Exists((ulong)entityId) || !world.Exists((ulong)parentId))
-                        {
                             return;
-                        }
-                        Console.WriteLine("cuo_ui_insert_node {0} {1} {2}", entityId, parentId, index);
 
-                        var ent = world.Entity((ulong)entityId);
+                        Console.WriteLine("cuo_add_entity_to_parent {0} {1} {2}", entityId, parentId, index);
+
                         var parent = world.Entity((ulong)parentId);
-                        parent.AddChild(ent, (int)index);
-                    }),
-
-
-                    HostFunction.FromMethod("cuo_ui_set_text", null, (CurrentPlugin p, long entityId, long textOffset) => {
-                        if (!world.Exists((ulong)entityId))
-                            return;
-
-                        var newText = p.ReadString(textOffset);
                         var entity = world.Entity((ulong)entityId);
-                        Console.WriteLine("cuo_ui_set_text {0} {1}", entityId, newText);
+                        parent.AddChild(entity, (int)index);
 
-                        if (entity.Has<Text>()) {
-                            ref var text = ref entity.Get<Text>();
-                            text.Value = newText;
-                        }
-                    }),
-
-                    HostFunction.FromMethod("cuo_ui_set_layout", null, (CurrentPlugin p, long entityId, long layoutOffset) => {
-                        if (!world.Exists((ulong)entityId))
-                            return;
-
-                        var json = p.ReadString(layoutOffset);
-                        var layout = json.FromJson<Clay_LayoutConfig>();
-                        var entity = world.Entity((ulong)entityId);
-                        Console.WriteLine("cuo_ui_set_layout {0} {1}", entityId, json);
-
-                        if (entity.Has<UINode>()) {
-                            ref var node = ref entity.Get<UINode>();
-                            node.Config.layout = layout;
-                        }
-                    }),
-
-                    HostFunction.FromMethod("cuo_ui_set_background", null, (CurrentPlugin p, long entityId, long colorOffset) => {
-                        if (!world.Exists((ulong)entityId))
-                            return;
-
-                        var json = p.ReadString(colorOffset);
-                        var color = json.FromJson<Clay_Color>();
-                        var entity = world.Entity((ulong)entityId);
-                        Console.WriteLine("cuo_ui_set_background {0} {1}", entityId, json);
-
-                        if (entity.Has<UINode>()) {
-                            ref var node = ref entity.Get<UINode>();
-                            node.Config.backgroundColor = color;
-                        }
+                        PropagateTextConfigToChildTextFragments(world, scheduler);
                     }),
 
 
@@ -451,6 +396,22 @@ internal readonly struct ModdingPlugin : IPlugin
                     .Set(new WasmMod() { Mod = mod });
             }
 
+
+            static void PropagateTextConfigToChildTextFragments(World world, Scheduler scheduler)
+            {
+                scheduler.OnFrameEnd<Query<Data<UINode, Children, Text, PluginEntity>, With<Children>>>(query => {
+                    foreach(var (_, children, text, _) in query) {
+                        foreach (var childId in children.Ref)
+                        {
+                            var child = world.Entity(childId);
+                            if (child.Has<TextFragment>() && child.Has<Text>())
+                            {
+                                child.Set(new Text { Value = child.Get<Text>().Value, TextConfig = text.Ref.TextConfig });
+                            }
+                        }
+                    }
+                });
+            }
 
             static IEnumerable<HostFunction> bind<T>(string postfix, NetworkEntitiesMap networkEntities)
                     where T : struct
@@ -757,7 +718,8 @@ enum ClayWidgetType
 {
     None,
     Button,
-    TextInput
+    TextInput,
+    TextFragment
 }
 
 internal record struct UITextProxy(string Value, char ReplacedChar = '\0', ClayTextProxy TextConfig = default);

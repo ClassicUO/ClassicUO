@@ -33,24 +33,40 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   const [password, setPassword] = React.useState("");
   const [autologin, setAutologin] = React.useState(false);
   const [saveAccount, setSaveAccount] = React.useState(false);
-  const [showCredits] = React.useState(true);
+  const [showCredits, setShowCredits] = React.useState(true);
   const [musicEnabled, setMusicEnabled] = React.useState(true);
   const [musicVolume, setMusicVolume] = React.useState(100);
+  const [testText, setTestText] = React.useState("TEST");
+  const [count, setCount] = React.useState(0);
+  const renderCount = React.useRef(0);
 
   // Animation state for next button
   // Note: In a custom React reconciler, animations should be handled differently
   // For now, we'll use a static state. The game engine should handle animations.
   const nextButtonAnimation = false;
 
-  console.log("LoginScreen", { username });
-
   const handleLogin = () => {
+    console.log("handleLogin");
+
     onLogin(username, password);
-    setUsername(() => "NEW USERNAME");
+    setShowCredits((prev) => !prev);
+    setTestText((prev) => prev + " TEST");
+    setCount((prev) => prev + 1);
   };
+
+  console.log("Rendering LoginScreen");
+  renderCount.current++;
 
   return (
     <LoginContainer>
+      <Text floating={Float.offsetParent(5, 5)} style={TextStyle.title}>
+        Render Count: {renderCount.current}
+      </Text>
+      <Text floating={Float.offsetParent(150, 150)} style={TextStyle.link}>
+        <>{count}</>
+        {testText}
+      </Text>
+
       {/* Account Name Input Background */}
       <Gump
         gumpId={0x0bb8}

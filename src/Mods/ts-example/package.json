@@ -4,7 +4,7 @@
   "main": "src/index.tsx",
   "scripts": {
     "tsc": "tsc --declaration src/index.tsx --emitDeclarationOnly --outDir ./dist",
-    "build": "cross-env NODE_ENV=development node esbuild.js && extism-js dist/index.js -i src/index.d.ts -o dist/ts-example.wasm"
+    "build": "cross-env NODE_ENV=development node esbuild.js && extism-js --skip-opt dist/index.js -i src/index.d.ts -o dist/ts-example.wasm"
   },
   "dependencies": {
     "react": "^19.1.0",

@@ -20,11 +20,6 @@ declare module "extism:host" {
     cuo_ecs_delete_entity(id: I64): void;
     cuo_ecs_query(ptr: I64): I64;
     cuo_ecs_set_component(ptr: I64, ptr2: I64): void;
-    cuo_ui_add_node(id: I64, parentId: I64): void;
-    cuo_ui_insert_node(id: I64, parentId: I64, index: I64): void;
-    cuo_ui_delete_node(id: I64): void;
-    cuo_ui_set_text(id: I64, ptr: I64): void;
-    cuo_ui_set_layout(id: I64, ptr: I64): void;
-    cuo_ui_set_background(id: I64, ptr: I64): void;
+    cuo_add_entity_to_parent(id: I64, parentId: I64, index: I64): void;
   }
 }

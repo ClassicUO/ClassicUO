@@ -58,7 +58,7 @@ export class ClayContainer {
     this.uiCallbacks.delete(element.instanceId);
 
     // Use the new UI-specific delete function which handles recursive cleanup
-    HostWrapper.deleteUINode(element.instanceId);
+    HostWrapper.deleteEntity(element.instanceId);
   }
 
   render(): void {
@@ -76,7 +76,7 @@ export class ClayContainer {
     };
 
     // Send to host
-    HostWrapper.createUINodes(uiNodes);
+    HostWrapper.setNode(uiNodes);
     this.synced = true;
 
     // console.log("ClayContainer render", uiNodes);

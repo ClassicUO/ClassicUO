@@ -4,6 +4,7 @@ import {
   UINodes,
   QueryRequest,
   QueryResponse,
+  UINode,
 } from "~/types";
 
 type HostFunctions = ReturnType<typeof Host.getFunctions>;
@@ -56,19 +57,36 @@ export class HostWrapper {
     return new Uint32Array(bytes)[0];
   }
 
-  static createUINodes(nodes: UINodes): void {
-    const json = JSON.stringify(nodes, null, 2);
-    // console.log("createUINodes", json);
+  static setNode(data: UINode | UINodes): void {
+    const json = JSON.stringify(
+      "id" in data ? { nodes: [data], relations: {} } : data,
+      null,
+      2
+    );
+    // console.log("setNode", json);
     const memIn = Memory.fromString(json);
     this.functions.cuo_ui_node(memIn.offset);
   }
 
-  static spawnEcsEntity(): number {
-    return this.functions.cuo_ecs_spawn_entity() as number;
+  static spawnEntity(): number {
+    const id = this.functions.cuo_ecs_spawn_entity() as number;
+    console.log("spawnEntity", id);
+    return id;
   }
 
-  static deleteEcsEntity(id: number): void {
+  static deleteEntity(id: number): void {
+    console.log("deleteEntity", id);
     this.functions.cuo_ecs_delete_entity(id);
+  }
+
+  static addEntityToParent(
+    entityId: number,
+    parentId: number,
+    index: number = -1
+  ): void {
+    console.log("addEntityToParent", entityId, parentId, index);
+
+    this.functions.cuo_add_entity_to_parent(entityId, parentId, index);
   }
 
   static query(query: QueryRequest): QueryResponse {
@@ -76,44 +94,6 @@ export class HostWrapper {
     const offset = this.functions.cuo_ecs_query(memIn.offset);
     const memOut = Memory.find(offset).readString();
     return JSON.parse(memOut);
-  }
-
-  static deleteUINode(entityId: number): void {
-    console.log("deleteUINode", entityId);
-    this.functions.cuo_ui_delete_node(entityId);
-  }
-
-  static addUINode(entityId: number, parentId: number): void {
-    console.log("addUINode", entityId, parentId);
-    this.functions.cuo_ui_add_node(entityId, parentId);
-  }
-
-  static insertUINode(entityId: number, parentId: number, index: number): void {
-    console.log("insertUINode", entityId, parentId, index);
-    this.functions.cuo_ui_insert_node(entityId, parentId, index);
-  }
-
-  static setUIText(entityId: number, text: string): void {
-    console.log("setUIText", entityId, text);
-    const mem = Memory.fromString(text);
-    this.functions.cuo_ui_set_text(entityId, mem.offset);
-  }
-
-  static setUILayout(entityId: number, layout: any): void {
-    console.log("setUILayout", entityId, layout);
-    if (!layout) {
-      console.warn("setUILayout: no layout provided", entityId);
-      return;
-    }
-
-    const mem = Memory.fromString(JSON.stringify(layout));
-    this.functions.cuo_ui_set_layout(entityId, mem.offset);
-  }
-
-  static setUIBackground(entityId: number, color: any): void {
-    console.log("setUIBackground", entityId, color);
-    const mem = Memory.fromString(JSON.stringify(color));
-    this.functions.cuo_ui_set_background(entityId, mem.offset);
   }
 }
 

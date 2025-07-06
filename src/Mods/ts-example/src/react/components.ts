@@ -80,7 +80,6 @@ export interface ButtonProps extends BaseElementProps {
 
 // Text component props
 export interface TextProps extends BaseElementProps {
-  children?: string;
   style?: ClayText;
   floating?: ClayFloatingElementConfig;
   size?: ClaySize;

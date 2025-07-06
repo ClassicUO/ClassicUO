@@ -149,7 +149,7 @@ export function createElement(type: string, props: any, id: number): UINode {
           floating: data.props.floating,
         },
         textConfig: {
-          value: data.props.children || "",
+          value: "",
           textConfig: data.props.style ?? TextStyle.default,
         },
         widgetType: ClayWidgetType.None,

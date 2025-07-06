@@ -9,6 +9,7 @@ import { ClayElement, ClayElementNames } from "./components";
 import { createContext } from "react";
 import { createElement } from "./createElement";
 import { TextStyle } from "~ui/utils";
+import { ClayUOCommandType, ClayWidgetType } from "~/types";
 
 type Props = Record<string, unknown>;
 type HostContext = {};
@@ -53,12 +54,12 @@ export function getClayReconciler() {
       hostContext,
       internalHandle
     ) => {
-      const instanceId = HostWrapper.spawnEcsEntity();
+      const instanceId = HostWrapper.spawnEntity();
 
       console.log("createInstance", instanceId, type, props);
       const node = createElement(type, props, instanceId);
 
-      HostWrapper.createUINodes({ nodes: [node], relations: {} });
+      HostWrapper.setNode(node);
       return { type, props, children: [], instanceId, node };
     },
     createTextInstance: (text, rootContainer, hostContext, internalHandle) => {
@@ -69,88 +70,87 @@ export function getClayReconciler() {
         hostContext,
         internalHandle
       );
-      const instanceId = HostWrapper.spawnEcsEntity();
-      const node = createElement("text", { children: text }, instanceId);
-      HostWrapper.createUINodes({ nodes: [node], relations: {} });
+      const id = HostWrapper.spawnEntity();
+      // const node = createElement("text", { children: text }, instanceId);
+
+      const node = {
+        id,
+        config: {},
+        textConfig: { value: text, textConfig: TextStyle.default },
+        widgetType: ClayWidgetType.TextFragment,
+      };
+
+      HostWrapper.setNode(node);
 
       return {
-        type: "text",
-        props: { children: text },
+        type: "text-fragment",
+        props: {},
         children: [],
-        instanceId,
-        node: node,
+        instanceId: id,
+        node,
       };
     },
     appendInitialChild: (parent, child) => {
-      console.log("appendInitialChild", parent.type, child.type);
+      // console.log("appendInitialChild", parent.type, child.type);
       parent.children.push(child);
     },
     finalizeInitialChildren: () => false,
-    shouldSetTextContent: (type, props) => {
-      console.log("shouldSetTextContent", type, props);
-
-      if (type.toLowerCase() === "text") {
-        return true;
-      }
-
-      return false;
-    },
 
     // Mutation methods
     appendChild: (parent, child) => {
-      console.log("appendChild", parent.type, child.type);
+      // console.log("appendChild", parent.type, child.type);
       parent.children.push(child);
-      HostWrapper.addUINode(child.instanceId, parent.instanceId);
+      HostWrapper.addEntityToParent(child.instanceId, parent.instanceId, -1);
     },
     appendChildToContainer: (container, child) => {
       console.log("appendChildToContainer", child.type);
       container.appendChild(child);
     },
     removeChild: (parent, child) => {
-      console.log("removeChild", parent.type, child.type);
+      // console.log("removeChild", parent.type, child.type);
       const index = parent.children.indexOf(child);
       if (index !== -1) {
         parent.children.splice(index, 1);
-        HostWrapper.deleteUINode(child.instanceId);
+        HostWrapper.deleteEntity(child.instanceId);
       }
     },
     removeChildFromContainer: (container, child) => {
-      console.log("removeChildFromContainer", child.type);
+      // console.log("removeChildFromContainer", child.type);
       container.removeChild(child);
     },
     insertBefore: (parent, child, beforeChild) => {
-      console.log("insertBefore", parent.type, child.type, beforeChild.type);
+      // console.log("insertBefore", parent.type, child.type, beforeChild.type);
       const index = parent.children.indexOf(beforeChild);
       if (index !== -1) {
         parent.children.splice(index, 0, child);
       } else {
         parent.children.push(child);
       }
-      HostWrapper.insertUINode(child.instanceId, parent.instanceId, index);
+      HostWrapper.addEntityToParent(child.instanceId, parent.instanceId, index);
     },
     commitUpdate: (instance, type, oldProps, newProps) => {
       // console.log("commitUpdate", type, oldProps, newProps);
       instance.props = newProps;
       const oldNode = instance.node;
       instance.node = createElement(type, newProps, instance.instanceId);
-      if (instance.node.config.layout) {
-        HostWrapper.setUILayout(
-          instance.instanceId,
-          instance.node.config.layout
-        );
-      }
+      HostWrapper.setNode(instance.node);
     },
     commitTextUpdate: (textInstance, oldText, newText) => {
-      console.log("commitTextUpdate", textInstance, oldText, newText);
-      if (textInstance.node) {
-        textInstance.node.textConfig = {
-          value: newText,
-          textConfig:
-            textInstance.node.textConfig?.textConfig ?? TextStyle.default,
-        };
-        HostWrapper.setUIText(textInstance.instanceId, newText);
-      }
+      console.log("commitTextUpdate", textInstance.node.id, oldText, newText);
+
+      textInstance.node.textConfig.value = newText;
+      HostWrapper.setNode(textInstance.node);
     },
+    shouldSetTextContent: (type, props) => {
+      // console.log("shouldSetTextContent", type, props);
+
+      if (type.toLowerCase() === "text-fragment") {
+        return true;
+      }
+
+      return false;
+    },
+
     clearContainer: (container) => {
       container.clear();
     },
