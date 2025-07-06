@@ -7,6 +7,8 @@ import {
   TimeProxy,
   HostMessages,
   UIMouseEvent,
+  UIEvent,
+  EventType,
 } from "./types";
 import React from "react";
 import { HostWrapper, Zlib } from "./host/wrapper";
@@ -154,20 +156,13 @@ export function on_event(): I32 {
   return 1;
 }
 
-export function on_ui_mouse_event(): I32 {
-  const json = HostWrapper.getInputString();
-  const ev: UIMouseEvent = JSON.parse(json);
+export function on_ui_event(): I32 {
+    const json = HostWrapper.getInputString();
+    const ev: UIEvent = JSON.parse(json);
 
-  if (ev.state === UIInteractionState.Released) {
-    State.renderer?.handleUIEvent(ev.id, "click");
+    State.renderer?.handleUIEvent(ev.entityId, ev.eventId);
 
-    // old render method
-    if (State.uiCallbacks[ev.id]) {
-      State.uiCallbacks[ev.id]();
-    }
-  }
-
-  return 1;
+    return 1;
 }
 
 export function on_ui_keyboard_event(): I32 {

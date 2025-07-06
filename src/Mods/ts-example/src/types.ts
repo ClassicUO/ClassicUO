@@ -209,6 +209,18 @@ export interface UINodes {
   relations: Record<number, number>;
 }
 
+export interface UIEvent {
+    eventType: EventType;
+    entityId: number;
+
+    eventId?: number;
+    x?: number;
+    y?: number;
+    wheel?: number;
+    mouseButton?: MouseButtonType;
+    key?: Keys;
+}
+
 export interface Graphic {
   value: number;
 }
@@ -265,6 +277,32 @@ export interface HostMessage {
 
 export interface HostMessages {
   messages: HostMessage[];
+}
+
+export enum MouseButtonType
+{
+    None = 0,
+    Left = 1,
+    Middle = 2,
+    Right = 3,
+    XButton1 = 4,
+    XButton2 = 5,
+}
+
+export enum EventType
+{
+    OnMouseMove,
+    OnMouseWheel,
+    OnMouseOver,
+    OnMousePressed,
+    OnMouseReleased,
+    OnMouseDoubleClick,
+    OnMouseEnter,
+    OnMouseLeave,
+    OnDragging,
+
+    OnKeyPressed,
+    OnKeyReleased,
 }
 
 export enum Keys {

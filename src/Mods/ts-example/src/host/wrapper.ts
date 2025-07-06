@@ -5,6 +5,7 @@ import {
   QueryRequest,
   QueryResponse,
   UINode,
+  UIEvent,
 } from "~/types";
 
 type HostFunctions = ReturnType<typeof Host.getFunctions>;
@@ -66,6 +67,12 @@ export class HostWrapper {
     // console.log("setNode", json);
     const memIn = Memory.fromString(json);
     this.functions.cuo_ui_node(memIn.offset);
+  }
+
+  static addEventListener(event: UIEvent): number {
+      const json = JSON.stringify(event);
+      const memIn = Memory.fromString(json);
+      return this.functions.cuo_ui_add_event_listener(memIn.offset) as number;
   }
 
   static spawnEntity(): number {

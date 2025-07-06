@@ -1,11 +1,11 @@
-import { UINodes, UINode } from "~/types";
+import { UINodes, UINode, UIEvent, EventType, Keys, MouseButtonType } from "~/types";
 import { HostWrapper } from "~/host";
 import { ClayElement } from "./components";
 
 export class ClayContainer {
   public elements: ClayElement[] = [];
   public synced: boolean = true;
-  public uiCallbacks: Map<number, () => void> = new Map();
+  public uiCallbacks: Map<number, Map<number, () => void>> = new Map();
   private allEntities: Set<number> = new Set(); // Track all created entities
 
   appendChild(child: ClayElement): void {
@@ -99,7 +99,40 @@ export class ClayContainer {
 
         // Register callbacks
         if (element.props.onClick) {
-          this.uiCallbacks.set(element.instanceId, element.props.onClick);
+          const eventId = HostWrapper.addEventListener({
+            eventType: EventType.OnMouseReleased,
+            entityId: element.instanceId,
+            mouseButton: MouseButtonType.Left
+          });
+
+          const eventId2 = HostWrapper.addEventListener({
+            eventType: EventType.OnMouseOver,
+            entityId: element.instanceId,
+          });
+
+          const eventId3 = HostWrapper.addEventListener({
+             eventType: EventType.OnMouseLeave,
+             entityId: element.instanceId,
+          });
+
+
+          if (!this.uiCallbacks.has(element.instanceId)) {
+            this.uiCallbacks.set(element.instanceId, new Map());
+          }
+
+          const events = this.uiCallbacks.get(element.instanceId);
+
+          if (eventId !== 0) {
+            events.set(eventId, element.props.onClick);
+          }
+
+          if (eventId2 !== 0) {
+            events.set(eventId2, () => console.log("on mouse over the element"));
+          }
+
+          if (eventId3 !== 0) {
+            events.set(eventId3, () => console.log("on mouse leave the element"));
+          }
         }
 
         // Recursively collect children
@@ -114,7 +147,10 @@ export class ClayContainer {
   }
 
   // Called from plugin's UI event handler
-  handleUIEvent(entityId: number, eventType: string): void {
-    this.uiCallbacks.get(entityId)?.();
+  handleUIEvent(entityId: number, eventId: number): void {
+    const events = this.uiCallbacks.get(entityId);
+    if (events) {
+        events.get(eventId)?.();
+    }
   }
 }

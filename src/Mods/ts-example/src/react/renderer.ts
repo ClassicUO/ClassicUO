@@ -40,7 +40,7 @@ export class ClayReactRenderer {
   }
 
   // Handle UI events from CUO
-  handleUIEvent(entityId: number, eventType: string = "click"): void {
-    this.container.handleUIEvent(entityId, eventType);
+  handleUIEvent(entityId: number, eventId: number): void {
+    this.container.handleUIEvent(entityId, eventId);
   }
 }

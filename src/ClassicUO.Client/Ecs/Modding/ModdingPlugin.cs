@@ -368,26 +368,38 @@ internal readonly struct ModdingPlugin : IPlugin
 
 
                 HostFunction.FromMethod("cuo_ui_add_event_listener", null, (CurrentPlugin p, long offset) => {
-                    var addEvent = p.ReadString(offset).FromJson<AddEventListener>();
+                    var addEvent = p.ReadString(offset).FromJson<UIEvent>();
 
                     if (!world.Exists(addEvent.EntityId))
-                        return;
+                        return 0ul;
 
                     var entity = world.Entity(addEvent.EntityId);
-                    entity.Set(addEvent);
+                    var ev = world.Entity().Set(addEvent);
 
-                    var ev = world.Entity(addEvent.EventName);
-                    ev.AddChild(entity);
+                    // when the entity will be deleted, the event will be deleted too.
+                    // this needs to be handled by the plugin too (?)
+                    entity.AddChild(ev);
 
-                    // var json = p.ReadString(eventOffset);
-                    // var eventType = json.FromJson<UIMouseEvent>();
-                    // var entity = world.Entity((ulong)entityId);
-                    // Console.WriteLine("cuo_ui_add_event_listener {0} {1}", entityId, json);
-                    //
-                    // if (entity.Has<UINode>()) {
-                    //     ref var node = ref entity.Get<UINode>();
-                    //     node.AddEventListener(eventType);
-                    // }
+                    return ev.ID;
+                }),
+
+                HostFunction.FromMethod("cuo_ui_remove_event_listener", null, (CurrentPlugin p, long offset) => {
+                    var removeEvent = p.ReadString(offset).FromJson<UIEvent>();
+
+                    if (!world.Exists(removeEvent.EntityId))
+                        return 0ul;
+
+                    if (removeEvent.EventId is null)
+                        return 0ul;
+
+                    if (!world.Exists(removeEvent.EventId.Value))
+                        return 0ul;
+
+                    var entity = world.Entity(removeEvent.EntityId);
+                    var ev = world.Entity(removeEvent.EventId.Value);
+                    entity.RemoveChild(ev);
+
+                    return ev.ID;
                 }),
 
 
@@ -621,26 +633,41 @@ internal readonly struct ModdingPlugin : IPlugin
     }
 
     private static void SendUIEvents(
-        Query<Data<UINode, UIMouseAction, PluginEntity>, Changed<UIMouseAction>> queryChanged,
+        Query<Data<UINode, UIMouseAction, PluginEntity, Children>, Changed<UIMouseAction>> queryChanged,
         Query<Data<UINode, UIMouseAction, PluginEntity>> query,
+        Query<Data<UIEvent>, With<Parent>> queryEvents,
         Res<MouseContext> mouseCtx
     )
     {
         var isDragging = mouseCtx.Value.PositionOffset.Length() > 1;
-        foreach ((var ent, var node, var mouseAction, var pluginEnt) in queryChanged)
+        foreach ((var ent, var node, var mouseAction, var pluginEnt, var children) in queryChanged)
         {
-            EventType? ev = mouseAction.Ref switch
+            (EventType? ev, MouseButtonType? button) = mouseAction.Ref switch
             {
-                { State: UIInteractionState.Pressed } => EventType.OnMousePressed,
-                { State: UIInteractionState.Released } => EventType.OnMouseReleased,
-                { State: UIInteractionState.Over } => EventType.OnMouseOver,
-                { State: UIInteractionState.Left } => EventType.OnMouseLeave,_ => null
+                { State: UIInteractionState.Pressed } => (EventType.OnMousePressed, mouseAction.Ref.Button),
+                { State: UIInteractionState.Released } => (EventType.OnMouseReleased, mouseAction.Ref.Button),
+                { State: UIInteractionState.Over } => (EventType.OnMouseOver, null),
+                { State: UIInteractionState.Left } => (EventType.OnMouseLeave, null),
+                _ => ((EventType?)null, (MouseButtonType?)null)
             };
 
-            if (ev.HasValue)
+            foreach (var child in children.Ref)
             {
-                Console.WriteLine("event {0}", ev.Value);
+                if (!queryEvents.Contains(child))
+                    continue;
 
+                (var eventId, var uiEv) = queryEvents.Get(child);
+
+                if (ev.HasValue && uiEv.Ref.EventType == ev.Value && uiEv.Ref.MouseButton == button)
+                {
+                    Console.WriteLine("event {0}", ev.Value);
+
+                    if (pluginEnt.Ref.Mod.Plugin.FunctionExists("on_ui_event"))
+                    {
+                        var json = (uiEv.Ref with { EventType = ev.Value, EntityId = ent.Ref.ID, EventId = eventId.Ref.ID }).ToJson();
+                        pluginEnt.Ref.Mod.Plugin.Call("on_ui_event", json);
+                    }
+                }
             }
         }
 
@@ -730,8 +757,7 @@ internal struct WasmInitialized;
 
 [JsonSerializable(typeof(UINodes), GenerationMode = JsonSourceGenerationMode.Default)]
 [JsonSerializable(typeof(UIMouseEvent), GenerationMode = JsonSourceGenerationMode.Default)]
-[JsonSerializable(typeof(AddEventListener), GenerationMode = JsonSourceGenerationMode.Default)]
-[JsonSerializable(typeof(RemoveEventListener), GenerationMode = JsonSourceGenerationMode.Default)]
+[JsonSerializable(typeof(UIEvent), GenerationMode = JsonSourceGenerationMode.Default)]
 
 [JsonSerializable(typeof(QueryRequest), GenerationMode = JsonSourceGenerationMode.Default)]
 [JsonSerializable(typeof(QueryResponse), GenerationMode = JsonSourceGenerationMode.Default)]
@@ -777,8 +803,17 @@ internal record struct UINodeProxy(
 internal record struct UOButtonWidgetProxy(ushort Normal, ushort Pressed, ushort Over);
 internal record struct UIMouseEvent(ulong Id, int Button, float X, float Y, UIInteractionState State);
 
-internal record struct AddEventListener(string EventName, ulong EntityId, string Callback);
-internal record struct RemoveEventListener(string EventName, ulong EntityId, string Callback);
+internal record struct UIEvent(
+    EventType EventType,
+    ulong EntityId,
+
+    ulong? EventId = null,
+    float? X = null,
+    float? Y = null,
+    int? Wheel = null,
+    MouseButtonType? MouseButton = null,
+    Keys? Key = null
+);
 
 enum EventType
 {
@@ -863,8 +898,6 @@ internal readonly struct PluginEntity(Mod mod)
 {
     public Mod Mod { get; } = mod;
 }
-
-
 
 public static class JsonEx
 {
