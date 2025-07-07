@@ -3,7 +3,6 @@ declare module "main" {
   export function on_update(): I32;
   export function on_event(): I32;
   export function on_ui_event(): I32;
-  export function on_ui_keyboard_event(): I32;
   export function Handler_0x73(): I32;
 }
 

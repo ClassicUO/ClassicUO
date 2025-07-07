@@ -173,13 +173,10 @@ internal readonly struct GuiPlugin : IPlugin
     {
         foreach ((var node, var interaction) in query)
         {
-            if (interaction.Ref.State == UIInteractionState.Pressed && interaction.Ref.Button == MouseButtonType.Left)
+            if (interaction.Ref is { State: UIInteractionState.Pressed, Button: MouseButtonType.Left })
             {
-                if (mouseCtx.Value.IsPressed(MouseButtonType.Left))
-                {
-                    node.Ref.Config.floating.offset.x += mouseCtx.Value.PositionOffset.X;
-                    node.Ref.Config.floating.offset.y += mouseCtx.Value.PositionOffset.Y;
-                }
+                node.Ref.Config.floating.offset.x += mouseCtx.Value.PositionOffset.X;
+                node.Ref.Config.floating.offset.y += mouseCtx.Value.PositionOffset.Y;
             }
         }
     }

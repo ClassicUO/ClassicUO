@@ -165,11 +165,6 @@ export function on_ui_event(): I32 {
     return 1;
 }
 
-export function on_ui_keyboard_event(): I32 {
-  // Handle keyboard events
-  return 1;
-}
-
 export function Handler_0x73(): I32 {
   console.log("warn", "0x73 handler");
   return 1;
