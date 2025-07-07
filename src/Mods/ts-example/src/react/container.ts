@@ -106,7 +106,7 @@ export class ClayContainer {
           });
 
           const eventId2 = HostWrapper.addEventListener({
-            eventType: EventType.OnMouseOver,
+            eventType: EventType.OnMouseEnter,
             entityId: element.instanceId,
           });
 
@@ -114,6 +114,23 @@ export class ClayContainer {
              eventType: EventType.OnMouseLeave,
              entityId: element.instanceId,
           });
+
+          const eventId4 = HostWrapper.addEventListener({
+              eventType: EventType.OnDragging,
+              entityId: element.instanceId,
+              mouseButton: MouseButtonType.Left
+          });
+
+          const eventId5 = HostWrapper.addEventListener({
+              eventType: EventType.OnMouseDoubleClick,
+              entityId: element.instanceId,
+              mouseButton: MouseButtonType.Left
+          });
+
+            const eventId6 = HostWrapper.addEventListener({
+                eventType: EventType.OnMouseWheel,
+                entityId: element.instanceId,
+            });
 
 
           if (!this.uiCallbacks.has(element.instanceId)) {
@@ -127,12 +144,24 @@ export class ClayContainer {
           }
 
           if (eventId2 !== 0) {
-            events.set(eventId2, () => console.log("on mouse over the element"));
+            events.set(eventId2, () => console.log("mouse enter the element", element.instanceId));
           }
 
           if (eventId3 !== 0) {
-            events.set(eventId3, () => console.log("on mouse leave the element"));
+            events.set(eventId3, () => console.log("mouse leave the element", element.instanceId));
           }
+
+          if (eventId4 !== 0) {
+             events.set(eventId4, () => console.log("dragging the element", element.instanceId));
+          }
+
+          if (eventId5 !== 0) {
+             events.set(eventId5, () => console.log("dclick the element", element.instanceId));
+          }
+
+            if (eventId6 !== 0) {
+                events.set(eventId6, () => console.log("mouse over the element", element.instanceId));
+            }
         }
 
         // Recursively collect children

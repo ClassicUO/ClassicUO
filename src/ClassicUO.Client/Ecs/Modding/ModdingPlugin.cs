@@ -649,7 +649,7 @@ internal readonly struct ModdingPlugin : IPlugin
             {
                 { State: UIInteractionState.Pressed } => (EventType.OnMousePressed, mouseAction.Ref.Button),
                 { State: UIInteractionState.Released } => (EventType.OnMouseReleased, mouseAction.Ref.Button),
-                { State: UIInteractionState.Over } => (EventType.OnMouseOver, null),
+                { State: UIInteractionState.Over } => (EventType.OnMouseEnter, null),
                 { State: UIInteractionState.Left } => (EventType.OnMouseLeave, null),
                 _ => ((EventType?)null, (MouseButtonType?)null)
             };
@@ -686,7 +686,8 @@ internal readonly struct ModdingPlugin : IPlugin
                     EntityId = ent.Ref.ID,
                     EventId = eventId.Ref.ID,
                     X = mousePos.X,
-                    Y = mousePos.Y
+                    Y = mousePos.Y,
+                    Wheel = mouseCtx.Value.Wheel
                 }).ToJson();
                 pluginEnt.Ref.Mod.Plugin.Call("on_ui_event", json);
             }
@@ -697,6 +698,10 @@ internal readonly struct ModdingPlugin : IPlugin
             (EventType? ev, MouseButtonType? button) = mouseAction.Ref switch
             {
                 { State: UIInteractionState.Pressed } when isDragging && mouseCtx.Value.IsPressed(mouseAction.Ref.Button) => (EventType.OnDragging, mouseAction.Ref.Button),
+
+                // this will get spammed all the time, not sure how much worth it is
+                { State: UIInteractionState.Over } when mouseCtx.Value.Wheel != 0 => (EventType.OnMouseWheel, null),
+                { State: UIInteractionState.Over } => (EventType.OnMouseOver, null),
                 _ => ((EventType?)null, (MouseButtonType?)null)
             };
 
@@ -726,7 +731,8 @@ internal readonly struct ModdingPlugin : IPlugin
                     EntityId = ent.Ref.ID,
                     EventId = eventId.Ref.ID,
                     X = mousePos.X,
-                    Y = mousePos.Y
+                    Y = mousePos.Y,
+                    Wheel = mouseCtx.Value.Wheel
                 }).ToJson();
                 pluginEnt.Ref.Mod.Plugin.Call("on_ui_event", json);
             }
@@ -857,14 +863,14 @@ internal record struct UIEvent(
     ulong? EventId = null,
     float? X = null,
     float? Y = null,
-    int? Wheel = null,
+    float? Wheel = null,
     MouseButtonType? MouseButton = null,
     Keys? Key = null
 );
 
 enum EventType
 {
-    OnMouseMove,
+    OnMouseMove, // this is the same as MouseOver I guess
     OnMouseWheel,
     OnMouseOver,
     OnMousePressed,
