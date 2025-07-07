@@ -395,9 +395,10 @@ internal readonly struct ModdingPlugin : IPlugin
                     if (!world.Exists(removeEvent.EventId.Value))
                         return 0ul;
 
-                    var entity = world.Entity(removeEvent.EntityId);
+                    // var entity = world.Entity(removeEvent.EntityId);
                     var ev = world.Entity(removeEvent.EventId.Value);
-                    entity.RemoveChild(ev);
+                    ev.Delete();
+                    // entity.RemoveChild(ev);
 
                     return ev.ID;
                 }),
@@ -634,12 +635,14 @@ internal readonly struct ModdingPlugin : IPlugin
 
     private static void SendUIEvents(
         Query<Data<UINode, UIMouseAction, PluginEntity, Children>, Changed<UIMouseAction>> queryChanged,
-        Query<Data<UINode, UIMouseAction, PluginEntity>> query,
+        Query<Data<UINode, UIMouseAction, PluginEntity, Children>> query,
         Query<Data<UIEvent>, With<Parent>> queryEvents,
-        Res<MouseContext> mouseCtx
+        Res<MouseContext> mouseCtx,
+        Res<KeyboardContext> keyboardCtx
     )
     {
         var isDragging = mouseCtx.Value.PositionOffset.Length() > 1;
+        var mousePos = mouseCtx.Value.Position;
         foreach ((var ent, var node, var mouseAction, var pluginEnt, var children) in queryChanged)
         {
             (EventType? ev, MouseButtonType? button) = mouseAction.Ref switch
@@ -651,6 +654,15 @@ internal readonly struct ModdingPlugin : IPlugin
                 _ => ((EventType?)null, (MouseButtonType?)null)
             };
 
+            if (mouseCtx.Value.IsPressedDouble(mouseAction.Ref.Button))
+            {
+                ev = EventType.OnMouseDoubleClick;
+                button = mouseAction.Ref.Button;
+            }
+
+            if (ev == null && button == null)
+                continue;
+
             foreach (var child in children.Ref)
             {
                 if (!queryEvents.Contains(child))
@@ -658,30 +670,65 @@ internal readonly struct ModdingPlugin : IPlugin
 
                 (var eventId, var uiEv) = queryEvents.Get(child);
 
-                if (ev.HasValue && uiEv.Ref.EventType == ev.Value && uiEv.Ref.MouseButton == button)
+                if (!ev.HasValue || uiEv.Ref.EventType != ev.Value || uiEv.Ref.MouseButton != button)
                 {
-                    Console.WriteLine("event {0}", ev.Value);
-
-                    if (pluginEnt.Ref.Mod.Plugin.FunctionExists("on_ui_event"))
-                    {
-                        var json = (uiEv.Ref with { EventType = ev.Value, EntityId = ent.Ref.ID, EventId = eventId.Ref.ID }).ToJson();
-                        pluginEnt.Ref.Mod.Plugin.Call("on_ui_event", json);
-                    }
+                    continue;
                 }
+
+                if (!pluginEnt.Ref.Mod.Plugin.FunctionExists("on_ui_event"))
+                {
+                    continue;
+                }
+
+                Console.WriteLine("event {0}", ev.Value);
+                var json = (uiEv.Ref with
+                {
+                    EntityId = ent.Ref.ID,
+                    EventId = eventId.Ref.ID,
+                    X = mousePos.X,
+                    Y = mousePos.Y
+                }).ToJson();
+                pluginEnt.Ref.Mod.Plugin.Call("on_ui_event", json);
             }
         }
 
-        if (isDragging)
+        foreach ((var ent, var node, var mouseAction, var pluginEnt, var children) in query)
         {
-            foreach ((var ent, var node, var mouseAction, var pluginEnt) in query)
+            (EventType? ev, MouseButtonType? button) = mouseAction.Ref switch
             {
-                if (mouseAction.Ref.State == UIInteractionState.Pressed)
+                { State: UIInteractionState.Pressed } when isDragging && mouseCtx.Value.IsPressed(mouseAction.Ref.Button) => (EventType.OnDragging, mouseAction.Ref.Button),
+                _ => ((EventType?)null, (MouseButtonType?)null)
+            };
+
+            if (ev == null && button == null)
+                continue;
+
+            foreach (var child in children.Ref)
+            {
+                if (!queryEvents.Contains(child))
+                    continue;
+
+                (var eventId, var uiEv) = queryEvents.Get(child);
+
+                if (!ev.HasValue || uiEv.Ref.EventType != ev.Value || uiEv.Ref.MouseButton != button)
                 {
-                    if (mouseCtx.Value.IsPressed(mouseAction.Ref.Button))
-                    {
-                        Console.WriteLine("event {0}", EventType.OnDragging);
-                    }
+                    continue;
                 }
+
+                if (!pluginEnt.Ref.Mod.Plugin.FunctionExists("on_ui_event"))
+                {
+                    continue;
+                }
+
+                Console.WriteLine("event {0}", ev.Value);
+                var json = (uiEv.Ref with
+                {
+                    EntityId = ent.Ref.ID,
+                    EventId = eventId.Ref.ID,
+                    X = mousePos.X,
+                    Y = mousePos.Y
+                }).ToJson();
+                pluginEnt.Ref.Mod.Plugin.Call("on_ui_event", json);
             }
         }
     }

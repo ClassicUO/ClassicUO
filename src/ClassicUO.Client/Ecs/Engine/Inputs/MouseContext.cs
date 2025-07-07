@@ -10,7 +10,7 @@ internal sealed class MouseContext : InputContext<MouseButtonType>
 
     private MouseState _oldState, _newState;
     private float _lastClickTime, _currentTime;
-    private MouseButtonType? _lastClickButton;
+    private readonly MouseButtonType?[] _lastClickButtons = new MouseButtonType?[2];
     private Vector2 _lastMouseClickPosition;
 
     internal MouseContext(Microsoft.Xna.Framework.Game game) : base(game) { }
@@ -27,30 +27,31 @@ internal sealed class MouseContext : InputContext<MouseButtonType>
 
     public override bool IsReleased(MouseButtonType input) => VerifyCondition(input, ButtonState.Released, ButtonState.Pressed);
 
-    public bool IsPressedDouble(MouseButtonType input)
-    {
-        if (IsPressedOnce(input))
-        {
-            if (_lastClickButton == input && _lastClickTime + DCLICK_DELTA > _currentTime)
-            {
-                _lastClickButton = null;
-                return true;
-            }
-
-            _lastClickButton = input;
-            _lastClickTime = _currentTime;
-        }
-
-        return false;
-    }
+    public bool IsPressedDouble(MouseButtonType input) => _lastClickButtons[0] == input && _lastClickButtons[1] == input;
 
     public override void Update(float deltaTime)
     {
         for (var button = MouseButtonType.None + 1; button < MouseButtonType.Size; button++)
         {
+            if (IsPressedDouble(button))
+            {
+                _lastClickButtons[0] = _lastClickButtons[1] = null;
+            }
+
             if (IsPressedOnce(button))
             {
                 _lastMouseClickPosition = Position;
+
+                if (_lastClickButtons[0] == null)
+                {
+                    _lastClickButtons[0] = button;
+                    _lastClickTime = _currentTime + DCLICK_DELTA;
+                }
+                else if (_lastClickButtons[0] == button && _lastClickButtons[1] == null)
+                {
+                    _lastClickButtons[1] = button;
+                }
+
                 break;
             }
 
@@ -58,6 +59,11 @@ internal sealed class MouseContext : InputContext<MouseButtonType>
             {
                 _lastMouseClickPosition = Vector2.Zero;
             }
+        }
+
+        if (_currentTime > _lastClickTime)
+        {
+            _lastClickButtons[0] = _lastClickButtons[1] = null;
         }
 
         _oldState = _newState;
