@@ -1,5 +1,4 @@
 import React from "react";
-import { View, Gump } from "~/react";
 import { Colors } from "~/ui";
 import {
   ClayFloatingAttachToElement,
@@ -7,7 +6,8 @@ import {
   ClayLayoutAlignment,
   ClayLayoutDirection,
   ClaySizingType,
-} from "~/types";
+} from "~/host";
+import { View, Gump } from "~/react";
 
 export const LoginContainer: React.FC<{ children: React.ReactNode }> = ({
   children,

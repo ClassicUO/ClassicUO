@@ -5,16 +5,16 @@
     "lib": [], // this ensures unsupported globals aren't suggested
     "types": ["@extism/js-pdk", "./src/index.d.ts"], // while this makes the IDE aware of the ones that are
     "noEmit": true, // this is only relevant for tsconfig.json
-    "target": "es2020",
-    "module": "es2020",
+    "target": "ES2020",
+    "module": "ES2020",
     "downlevelIteration": true,
     "moduleResolution": "node",
-    "jsx": "react-jsx",
-    "jsxImportSource": "react",
+    "resolveJsonModule": true,
+    "jsx": "react",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "paths": {
-      "~*": ["src/*"]
+      "~/*": ["src/*"]
     }
   }
 }

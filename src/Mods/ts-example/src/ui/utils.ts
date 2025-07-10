@@ -8,7 +8,7 @@ import {
   ClayLayoutDirection,
   ClaySizing,
   ClayText,
-} from "~/types";
+} from "~/host";
 
 // Base64 encoding function (replacement for btoa)
 export function base64Encode(data: Uint8Array): string {

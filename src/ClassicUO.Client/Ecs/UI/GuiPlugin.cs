@@ -96,7 +96,7 @@ internal readonly struct GuiPlugin : IPlugin
         var measureTextFn = (nint)(delegate*<Clay_StringSlice, Clay_TextElementConfig*, void*, Clay_Dimensions>)&OnMeasureText;
         Clay.SetMeasureTextFunction(measureTextFn);
 
-        // Clay.SetDebugModeEnabled(true);
+        Clay.SetDebugModeEnabled(true);
     }
 
     private static void SetClayWorkspaceDimensions(Res<GraphicsDevice> device, Res<MouseContext> mouseCtx, Time time)

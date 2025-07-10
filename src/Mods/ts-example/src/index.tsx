@@ -9,38 +9,19 @@ import {
   UIMouseEvent,
   UIEvent,
   EventType,
-} from "./types";
+} from "./host";
 import React from "react";
 import { HostWrapper, Zlib } from "./host/wrapper";
 import { base64Encode } from "./ui/utils";
 import { ClayReactRenderer } from "./react";
 import { LoginScreen } from "./components";
-
-class State {
-  public static tick = 0;
-  public static uiCallbacks: Record<number, () => void> = {};
-  public static renderer: ClayReactRenderer | null = null;
-  public static timeouts: Map<number, { callback: () => void; delay: number }> =
-    new Map();
-}
-
-Object.assign(globalThis, {
-  React,
-  setTimeout: (callback: () => void, delay: number) => {
-    console.log("setTimeout", callback, delay);
-    State.timeouts.set(State.tick + delay, { callback, delay });
-    // random integer id
-    return Math.floor(Math.random() * 1000000);
-  },
-  clearTimeout: (timeoutId: number) => {
-    console.log("clearTimeout", timeoutId);
-    State.timeouts.delete(timeoutId);
-  },
-});
+import { State } from "./state";
+import { polyfill } from "./polyfill";
 
 // Main plugin functions
 export function on_init(): I32 {
   console.log("plugin initialized");
+  polyfill();
 
   // HostWrapper.sendPacketToServer(new Uint8Array([0x73, 0xff]));
 
@@ -48,18 +29,26 @@ export function on_init(): I32 {
 }
 
 export function on_update(): I32 {
-  const json = HostWrapper.getInputString();
-  const time: TimeProxy = JSON.parse(json);
+  try {
+    const json = HostWrapper.getInputString();
+    const time: TimeProxy = JSON.parse(json);
 
-  State.tick = time.total;
+    State.tick = time.total;
 
-  if (State.timeouts.size > 0) {
-    for (const [id, timeout] of State.timeouts) {
-      if (State.tick >= timeout.delay) {
-        timeout.callback();
-        State.timeouts.delete(id);
+    if (State.timeouts.size > 0) {
+      for (const [id, timeout] of State.timeouts) {
+        if (State.tick >= timeout.delay) {
+          try {
+            timeout.callback();
+          } catch (e) {
+            console.error("set timeout callback error", e);
+          }
+          State.timeouts.delete(id);
+        }
       }
     }
+  } catch (e) {
+    console.error("error during on_update", e);
   }
 
   return 1;
@@ -157,12 +146,12 @@ export function on_event(): I32 {
 }
 
 export function on_ui_event(): I32 {
-    const json = HostWrapper.getInputString();
-    const ev: UIEvent = JSON.parse(json);
+  const json = HostWrapper.getInputString();
+  const ev: UIEvent = JSON.parse(json);
 
-    State.renderer?.handleUIEvent(ev.entityId, ev.eventId);
+  State.renderer?.handleUIEvent(ev);
 
-    return 1;
+  return 1;
 }
 
 export function Handler_0x73(): I32 {

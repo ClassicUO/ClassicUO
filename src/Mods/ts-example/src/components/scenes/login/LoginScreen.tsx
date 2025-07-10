@@ -1,13 +1,4 @@
 import React from "react";
-import {
-  View,
-  Gump,
-  Button,
-  TextInput,
-  Checkbox,
-  Text,
-  HSliderBar,
-} from "~/react";
 import { ChildAlign, Colors, Float, TextStyle } from "~/ui";
 import {
   ClayFloatingAttachToElement,
@@ -15,8 +6,9 @@ import {
   ClayLayoutAlignment,
   ClayLayoutDirection,
   ClaySizingType,
-} from "~/types";
+} from "~/host";
 import { LoginContainer } from "./LoginContainer";
+import { Text, Button, Gump, TextInput, Checkbox, HSliderBar } from "~/react";
 
 export interface LoginScreenProps {
   onQuit: () => void;
@@ -49,9 +41,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
     console.log("handleLogin");
 
     onLogin(username, password);
-    setShowCredits((prev) => !prev);
-    setTestText((prev) => prev + " TEST");
-    setCount((prev) => prev + 1);
+    setShowCredits(!showCredits);
+    setTestText(testText + " TEST");
+    setCount(count + 1);
   };
 
   console.log("Rendering LoginScreen");
@@ -62,11 +54,10 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
       <Text floating={Float.offsetParent(5, 5)} style={TextStyle.title}>
         Render Count: {renderCount.current}
       </Text>
-      <Text floating={Float.offsetParent(150, 150)} style={TextStyle.link}>
+      <Text floating={Float.offsetParent(120, 120)} style={TextStyle.link}>
         <>{count}</>
         {testText}
       </Text>
-
       {/* Account Name Input Background */}
       <Gump
         gumpId={0x0bb8}

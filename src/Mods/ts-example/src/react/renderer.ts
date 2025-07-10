@@ -1,6 +1,7 @@
 import { OpaqueRoot } from "react-reconciler";
 import { getClayReconciler, ClayReconciler } from "./reconciler";
 import { ClayContainer } from "./container";
+import { UIEvent } from "~/host";
 import React from "react";
 
 export class ClayReactRenderer {
@@ -9,8 +10,8 @@ export class ClayReactRenderer {
   private fiberRoot: OpaqueRoot;
 
   constructor() {
-    this.reconciler = getClayReconciler();
     this.container = new ClayContainer();
+    this.reconciler = getClayReconciler(this.container);
     this.fiberRoot = this.reconciler.createContainer(
       this.container,
       0, // ConcurrentRoot
@@ -26,7 +27,6 @@ export class ClayReactRenderer {
   }
 
   render(element: React.ReactElement): void {
-    console.log("ClayReactRenderer render");
     this.reconciler.updateContainer(element, this.fiberRoot, null, () => {});
   }
 
@@ -40,7 +40,7 @@ export class ClayReactRenderer {
   }
 
   // Handle UI events from CUO
-  handleUIEvent(entityId: number, eventId: number): void {
-    this.container.handleUIEvent(entityId, eventId);
+  handleUIEvent(event: UIEvent): void {
+    this.container.handleUIEvent(event);
   }
 }

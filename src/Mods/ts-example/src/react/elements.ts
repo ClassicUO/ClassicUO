@@ -10,7 +10,7 @@ import type {
   ClaySize,
   ClayLayoutDirection,
   ClayChildAlignment,
-} from "~/types";
+} from "~/host";
 
 export interface ClayElement {
   type: string;
@@ -120,62 +120,31 @@ export interface HSliderBarProps extends BaseElementProps {
   handleGumpId?: number;
 }
 
-// JSX Intrinsic Elements
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      View: ViewProps;
-      Gump: GumpProps;
-      Button: ButtonProps;
-      Text: TextProps;
-      TextInput: TextInputProps;
-      Checkbox: CheckboxProps;
-      Label: LabelProps;
-      HSliderBar: HSliderBarProps;
-    }
-  }
-}
+export type ClayElementMap = {
+  View: ViewProps;
+  Gump: GumpProps;
+  Button: ButtonProps;
+  Text: TextProps;
+  TextInput: TextInputProps;
+  Checkbox: CheckboxProps;
+  Label: LabelProps;
+  HSliderBar: HSliderBarProps;
+};
 
-export type ClayElementNames =
-  | "View"
-  | "Gump"
-  | "Button"
-  | "Text"
-  | "TextInput"
-  | "Checkbox"
-  | "Label"
-  | "HSliderBar";
+export type ClayElementNames = keyof ClayElementMap;
 
-export type ClayElementPropTypes =
-  | {
-      type: Lowercase<"View">;
-      props: ViewProps;
-    }
-  | {
-      type: Lowercase<"gump">;
-      props: GumpProps;
-    }
-  | {
-      type: Lowercase<"button">;
-      props: ButtonProps;
-    }
-  | {
-      type: Lowercase<"text">;
-      props: TextProps;
-    }
-  | {
-      type: Lowercase<"textinput">;
-      props: TextInputProps;
-    }
-  | {
-      type: Lowercase<"checkbox">;
-      props: CheckboxProps;
-    }
-  | {
-      type: Lowercase<"label">;
-      props: LabelProps;
-    }
-  | {
-      type: Lowercase<"hsliderbar">;
-      props: HSliderBarProps;
-    };
+export type ClayElementPropTypes = {
+  [K in keyof ClayElementMap]: {
+    type: Lowercase<K>;
+    props: ClayElementMap[K];
+  };
+}[keyof ClayElementMap];
+
+export const View = "view" as unknown as React.FC<ViewProps>;
+export const Gump = "gump" as unknown as React.FC<GumpProps>;
+export const Button = "button" as unknown as React.FC<ButtonProps>;
+export const Text = "text" as unknown as React.FC<TextProps>;
+export const TextInput = "textinput" as unknown as React.FC<TextInputProps>;
+export const Checkbox = "checkbox" as unknown as React.FC<CheckboxProps>;
+export const Label = "label" as unknown as React.FC<LabelProps>;
+export const HSliderBar = "hsliderbar" as unknown as React.FC<HSliderBarProps>;

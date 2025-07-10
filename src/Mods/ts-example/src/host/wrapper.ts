@@ -6,7 +6,7 @@ import {
   QueryResponse,
   UINode,
   UIEvent,
-} from "~/types";
+} from "~/host";
 
 type HostFunctions = ReturnType<typeof Host.getFunctions>;
 
@@ -70,19 +70,23 @@ export class HostWrapper {
   }
 
   static addEventListener(event: UIEvent): number {
-      const json = JSON.stringify(event);
-      const memIn = Memory.fromString(json);
-      return this.functions.cuo_ui_add_event_listener(memIn.offset) as number;
+    const json = JSON.stringify(event);
+    const memIn = Memory.fromString(json);
+    return this.functions.cuo_ui_add_event_listener(memIn.offset) as number;
+  }
+
+  static removeEventListener(event: UIEvent): void {
+    const json = JSON.stringify(event);
+    const memIn = Memory.fromString(json);
+    this.functions.cuo_ui_remove_event_listener(memIn.offset);
   }
 
   static spawnEntity(): number {
     const id = this.functions.cuo_ecs_spawn_entity() as number;
-    console.log("spawnEntity", id);
     return id;
   }
 
   static deleteEntity(id: number): void {
-    console.log("deleteEntity", id);
     this.functions.cuo_ecs_delete_entity(id);
   }
 
@@ -91,8 +95,6 @@ export class HostWrapper {
     parentId: number,
     index: number = -1
   ): void {
-    console.log("addEntityToParent", entityId, parentId, index);
-
     this.functions.cuo_add_entity_to_parent(entityId, parentId, index);
   }
 

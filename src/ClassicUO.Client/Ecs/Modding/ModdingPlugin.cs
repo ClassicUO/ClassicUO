@@ -55,7 +55,7 @@ internal readonly struct ModdingPlugin : IPlugin
         scheduler.OnUpdate(sendUIEventsFn);
 
         var propagateTextConfigFn = PropagateTextConfigToChildTextFragments;
-        scheduler.OnAfterUpdate(propagateTextConfigFn);
+        scheduler.OnUpdate(propagateTextConfigFn);
     }
 
 
@@ -370,8 +370,9 @@ internal readonly struct ModdingPlugin : IPlugin
                 HostFunction.FromMethod("cuo_ui_add_event_listener", null, (CurrentPlugin p, long offset) => {
                     var addEvent = p.ReadString(offset).FromJson<UIEvent>();
 
-                    if (!world.Exists(addEvent.EntityId))
+                    if (!world.Exists(addEvent.EntityId)) {
                         return 0ul;
+                    }
 
                     var entity = world.Entity(addEvent.EntityId);
                     var ev = world.Entity().Set(addEvent);
@@ -645,22 +646,21 @@ internal readonly struct ModdingPlugin : IPlugin
         var mousePos = mouseCtx.Value.Position;
         foreach ((var ent, var node, var mouseAction, var pluginEnt, var children) in queryChanged)
         {
-            (EventType? ev, MouseButtonType? button) = mouseAction.Ref switch
+            EventType? ev = mouseAction.Ref switch
             {
-                { State: UIInteractionState.Pressed } => (EventType.OnMousePressed, mouseAction.Ref.Button),
-                { State: UIInteractionState.Released } => (EventType.OnMouseReleased, mouseAction.Ref.Button),
-                { State: UIInteractionState.Over } => (EventType.OnMouseEnter, null),
-                { State: UIInteractionState.Left } => (EventType.OnMouseLeave, null),
-                _ => ((EventType?)null, (MouseButtonType?)null)
+                { State: UIInteractionState.Pressed } => (EventType.OnMousePressed),
+                { State: UIInteractionState.Released } => (EventType.OnMouseReleased),
+                { State: UIInteractionState.Over } => (EventType.OnMouseEnter),
+                { State: UIInteractionState.Left } => (EventType.OnMouseLeave),
+                _ => ((EventType?)null)
             };
 
             if (mouseCtx.Value.IsPressedDouble(mouseAction.Ref.Button))
             {
                 ev = EventType.OnMouseDoubleClick;
-                button = mouseAction.Ref.Button;
             }
 
-            if (ev == null && button == null)
+            if (ev == null)
                 continue;
 
             foreach (var child in children.Ref)
@@ -670,7 +670,7 @@ internal readonly struct ModdingPlugin : IPlugin
 
                 (var eventId, var uiEv) = queryEvents.Get(child);
 
-                if (!ev.HasValue || uiEv.Ref.EventType != ev.Value || uiEv.Ref.MouseButton != button)
+                if (!ev.HasValue || uiEv.Ref.EventType != ev.Value)
                 {
                     continue;
                 }
@@ -680,14 +680,14 @@ internal readonly struct ModdingPlugin : IPlugin
                     continue;
                 }
 
-                Console.WriteLine("event {0}", ev.Value);
                 var json = (uiEv.Ref with
                 {
                     EntityId = ent.Ref.ID,
                     EventId = eventId.Ref.ID,
                     X = mousePos.X,
                     Y = mousePos.Y,
-                    Wheel = mouseCtx.Value.Wheel
+                    Wheel = mouseCtx.Value.Wheel,
+                    MouseButton = mouseAction.Ref.Button,
                 }).ToJson();
                 pluginEnt.Ref.Mod.Plugin.Call("on_ui_event", json);
             }
@@ -695,17 +695,17 @@ internal readonly struct ModdingPlugin : IPlugin
 
         foreach ((var ent, var node, var mouseAction, var pluginEnt, var children) in query)
         {
-            (EventType? ev, MouseButtonType? button) = mouseAction.Ref switch
+            EventType? ev = mouseAction.Ref switch
             {
-                { State: UIInteractionState.Pressed } when isDragging && mouseCtx.Value.IsPressed(mouseAction.Ref.Button) => (EventType.OnDragging, mouseAction.Ref.Button),
+                { State: UIInteractionState.Pressed } when isDragging && mouseCtx.Value.IsPressed(mouseAction.Ref.Button) => (EventType.OnDragging),
 
                 // this will get spammed all the time, not sure how much worth it is
-                { State: UIInteractionState.Over } when mouseCtx.Value.Wheel != 0 => (EventType.OnMouseWheel, null),
-                { State: UIInteractionState.Over } => (EventType.OnMouseOver, null),
-                _ => ((EventType?)null, (MouseButtonType?)null)
+                { State: UIInteractionState.Over } when mouseCtx.Value.Wheel != 0 => (EventType.OnMouseWheel),
+                { State: UIInteractionState.Over } => (EventType.OnMouseOver),
+                _ => ((EventType?)null)
             };
 
-            if (ev == null && button == null)
+            if (ev == null)
                 continue;
 
             foreach (var child in children.Ref)
@@ -715,7 +715,7 @@ internal readonly struct ModdingPlugin : IPlugin
 
                 (var eventId, var uiEv) = queryEvents.Get(child);
 
-                if (!ev.HasValue || uiEv.Ref.EventType != ev.Value || uiEv.Ref.MouseButton != button)
+                if (!ev.HasValue || uiEv.Ref.EventType != ev.Value)
                 {
                     continue;
                 }
@@ -725,14 +725,14 @@ internal readonly struct ModdingPlugin : IPlugin
                     continue;
                 }
 
-                Console.WriteLine("event {0}", ev.Value);
                 var json = (uiEv.Ref with
                 {
                     EntityId = ent.Ref.ID,
                     EventId = eventId.Ref.ID,
                     X = mousePos.X,
                     Y = mousePos.Y,
-                    Wheel = mouseCtx.Value.Wheel
+                    Wheel = mouseCtx.Value.Wheel,
+                    MouseButton = mouseAction.Ref.Button,
                 }).ToJson();
                 pluginEnt.Ref.Mod.Plugin.Call("on_ui_event", json);
             }
@@ -741,7 +741,7 @@ internal readonly struct ModdingPlugin : IPlugin
 
 
     private static void PropagateTextConfigToChildTextFragments(
-        Query<Data<Text, Children>, Filter<Changed<Children>, With<PluginEntity>>> query,
+        Query<Data<Text, Children>, Filter<With<PluginEntity>>> query,
         Query<Data<Text>, With<Parent>> queryChildren
     )
     {

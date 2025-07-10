@@ -5,15 +5,17 @@ import {
   ClaySizingType,
   ClayLayoutDirection,
   ClayLayoutAlignment,
-} from "~/types";
+} from "~/host";
 import { TextStyle } from "~/ui";
-import { ClayElementPropTypes } from "./components";
+import { ClayElementPropTypes } from "./elements";
+import * as P from "ts-pattern";
 
 export function createElement(type: string, props: any, id: number): UINode {
-  const data = { type, props } as ClayElementPropTypes;
-
-  switch (data.type) {
-    case "view":
+  return P.match<ClayElementPropTypes, UINode>({
+    type: type.toLowerCase(),
+    props,
+  } as ClayElementPropTypes)
+    .with({ type: "view" }, (data) => {
       return {
         id,
         config: {
@@ -24,17 +26,17 @@ export function createElement(type: string, props: any, id: number): UINode {
           border: data.props.border,
           clip: data.props.clip,
         },
-        movable: props.movable || false,
-        acceptInputs: props.acceptInputs || false,
+        movable: data.props.movable || false,
+        acceptInputs: data.props.acceptInputs || false,
       };
-
-    case "gump": {
+    })
+    .with({ type: "gump" }, (data) => {
       const size = data.props.size ?? { width: 50, height: 25 };
 
       return {
         id,
         uoConfig: {
-          type: props.ninePatch
+          type: data.props.ninePatch
             ? ClayUOCommandType.GumpNinePatch
             : ClayUOCommandType.Gump,
           id: data.props.gumpId,
@@ -68,8 +70,8 @@ export function createElement(type: string, props: any, id: number): UINode {
           floating: data.props.floating,
         },
       };
-    }
-    case "button": {
+    })
+    .with({ type: "button" }, (data) => {
       const size = data.props.size ?? { width: 50, height: 25 };
 
       return {
@@ -105,9 +107,8 @@ export function createElement(type: string, props: any, id: number): UINode {
           floating: data.props.floating,
         },
       };
-    }
-
-    case "textinput": {
+    })
+    .with({ type: "textinput" }, (data) => {
       const size = data.props.size ?? { width: 50, height: 25 };
       return {
         id,
@@ -140,9 +141,8 @@ export function createElement(type: string, props: any, id: number): UINode {
           floating: data.props.floating,
         },
       };
-    }
-
-    case "text": {
+    })
+    .with({ type: "text" }, (data) => {
       return {
         id,
         config: {
@@ -159,17 +159,42 @@ export function createElement(type: string, props: any, id: number): UINode {
           hue: { x: 0, y: 0, z: 1 },
         },
       };
-    }
-
-    default: {
-      console.warn(`Unknown element type: ${type}`);
+    })
+    .with({ type: "checkbox" }, (data) => {
       return {
         id,
-        config: {
-          floating: data.props.floating,
-        },
+        config: { floating: data.props.floating },
         textConfig: {
-          value: `MISSING(${type})`,
+          value: `CHECKBOX`,
+          textConfig: TextStyle.default,
+        },
+        widgetType: ClayWidgetType.None,
+        uoConfig: {
+          id: 0,
+          type: ClayUOCommandType.Text,
+          hue: { x: 0, y: 0, z: 1 },
+        },
+      };
+    })
+    .with({ type: "label" }, (data) => {
+      return {
+        id,
+        config: { floating: data.props.floating },
+        textConfig: { value: `LABEL`, textConfig: TextStyle.default },
+        widgetType: ClayWidgetType.None,
+        uoConfig: {
+          id: 0,
+          type: ClayUOCommandType.Text,
+          hue: { x: 0, y: 0, z: 1 },
+        },
+      };
+    })
+    .with({ type: "hsliderbar" }, (data) => {
+      return {
+        id,
+        config: { floating: data.props.floating },
+        textConfig: {
+          value: `HSLIDERBAR`,
           textConfig: TextStyle.default,
         },
         widgetType: ClayWidgetType.None,
@@ -179,6 +204,6 @@ export function createElement(type: string, props: any, id: number): UINode {
           hue: { x: 0, y: 0, z: 1 },
         },
       };
-    }
-  }
+    })
+    .exhaustive();
 }
