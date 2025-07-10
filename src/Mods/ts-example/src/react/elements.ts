@@ -140,6 +140,7 @@ export type ClayElementPropTypes = {
   };
 }[keyof ClayElementMap];
 
+// primitive built-in components, these resolve to Clay elements inside CUO
 export const View = "view" as unknown as React.FC<ViewProps>;
 export const Gump = "gump" as unknown as React.FC<GumpProps>;
 export const Button = "button" as unknown as React.FC<ButtonProps>;

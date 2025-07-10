@@ -3,6 +3,10 @@ import { EventType } from "~/host";
 import { ClayContainer } from "./container";
 import { DiffKeys } from "~/support";
 
+export type EventCallbackMap = Map<
+  number,
+  Map<EventType, (event: UIEvent) => void>
+>;
 export type EventName = CamelCase<keyof typeof EventType>;
 
 const eventMap = {

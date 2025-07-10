@@ -3,6 +3,7 @@ import { getClayReconciler, ClayReconciler } from "./reconciler";
 import { ClayContainer } from "./container";
 import { UIEvent } from "~/host";
 import React from "react";
+import { EventCallbackMap } from "./events";
 
 export class ClayReactRenderer {
   private container: ClayContainer;
@@ -10,7 +11,8 @@ export class ClayReactRenderer {
   private fiberRoot: OpaqueRoot;
 
   constructor() {
-    this.container = new ClayContainer();
+    const eventCallbacks: EventCallbackMap = new Map();
+    this.container = new ClayContainer(eventCallbacks);
     this.reconciler = getClayReconciler(this.container);
     this.fiberRoot = this.reconciler.createContainer(
       this.container,

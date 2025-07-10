@@ -8,16 +8,14 @@ import {
 } from "~/host";
 import { HostWrapper } from "~/host";
 import { ClayElement } from "./elements";
+import { EventCallbackMap } from "./events";
 
 export class ClayContainer {
   public elements: ClayElement[] = [];
   public synced: boolean = true;
-  private static eventCallbacks: Map<
-    number,
-    Map<EventType, (event: UIEvent) => void>
-  > = new Map();
-  // Track all created entities
   private entities: Set<number> = new Set();
+
+  constructor(private eventCallbacks: EventCallbackMap = new Map()) {}
 
   appendChild(child: ClayElement): void {
     this.elements.push(child);
@@ -62,7 +60,7 @@ export class ClayContainer {
 
   private cleanupEntity(element: ClayElement): void {
     this.entities.delete(element.instanceId);
-    ClayContainer.eventCallbacks.delete(element.instanceId);
+    this.eventCallbacks.delete(element.instanceId);
 
     HostWrapper.deleteEntity(element.instanceId);
   }
@@ -116,22 +114,27 @@ export class ClayContainer {
 
   // Called from plugin's UI event handler
   handleUIEvent(event: UIEvent): void {
-    const callback = ClayContainer.eventCallbacks
+    // stale event handler?
+    if (!this.entities.has(event.entityId)) {
+      console.warn("event handler called for untracked entity", event);
+      return;
+    }
+
+    const callback = this.eventCallbacks
       .get(event.entityId)
       ?.get(event.eventType);
 
     if (typeof callback === "function") {
       callback(event);
-      ClayContainer.eventCallbacks.get(event.entityId)?.delete(event.eventType);
     }
   }
 
   addEvent(event: UIEvent, callback: (event: UIEvent) => void): void {
-    if (!ClayContainer.eventCallbacks.has(event.entityId)) {
-      ClayContainer.eventCallbacks.set(event.entityId, new Map());
+    if (!this.eventCallbacks.has(event.entityId)) {
+      this.eventCallbacks.set(event.entityId, new Map());
     }
 
-    const map = ClayContainer.eventCallbacks.get(event.entityId);
+    const map = this.eventCallbacks.get(event.entityId);
 
     if (!map?.has(event.eventType)) {
       HostWrapper.addEventListener(event);
@@ -140,7 +143,7 @@ export class ClayContainer {
   }
 
   removeEvent(event: UIEvent): void {
-    ClayContainer.eventCallbacks.get(event.entityId)?.delete(event.eventType);
+    this.eventCallbacks.get(event.entityId)?.delete(event.eventType);
     HostWrapper.removeEventListener(event);
   }
 }

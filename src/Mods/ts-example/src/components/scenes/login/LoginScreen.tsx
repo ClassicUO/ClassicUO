@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useMemo } from "react";
 import { ChildAlign, Colors, Float, TextStyle } from "~/ui";
 import {
   ClayFloatingAttachToElement,
@@ -36,6 +36,16 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
   // Note: In a custom React reconciler, animations should be handled differently
   // For now, we'll use a static state. The game engine should handle animations.
   const nextButtonAnimation = false;
+
+  // test memoized event handlers stick
+  const handleQuit = useMemo(() => {
+    const random = Math.random();
+    return () => {
+      console.log("handleQuit", random);
+      setTestText((prev) => prev + " QUIT");
+      onQuit();
+    };
+  }, [onQuit]);
 
   const handleLogin = () => {
     console.log("handleLogin");
@@ -101,7 +111,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
 
       {/* Quit Button */}
       <Button
-        onClick={onQuit}
+        onClick={handleQuit}
         gumpIds={{ normal: 0x05ca, pressed: 0x05c9, over: 0x05c8 }}
         size={{ width: 66, height: 66 }}
         hue={{ z: 1 }}
