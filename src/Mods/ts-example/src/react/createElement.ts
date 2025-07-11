@@ -205,5 +205,38 @@ export function createElement(type: string, props: any, id: number): UINode {
         },
       };
     })
+    .with({ type: "art" }, (data) => {
+      const size = data.props.size;
+
+      return {
+        id,
+        uoConfig: {
+          type: ClayUOCommandType.Art,
+          id: data.props.artId,
+          hue: data.props.hue ?? { x: 0, y: 0, z: 1 },
+        },
+        config: {
+          layout: size ? {
+            sizing: {
+              width: {
+                type: ClaySizingType.Fixed,
+                size: {
+                  minMax: { min: size.width, max: size.width },
+                  percent: size.width,
+                },
+              },
+              height: {
+                type: ClaySizingType.Fixed,
+                size: {
+                  minMax: { min: size.height, max: size.height },
+                  percent: size.height,
+                },
+              },
+            },
+          } : undefined,
+          floating: data.props.floating,
+        },
+      };
+    })
     .exhaustive();
 }

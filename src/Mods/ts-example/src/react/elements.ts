@@ -3,14 +3,15 @@ import type {
   ClayLayoutConfig,
   ClayFloatingElementConfig,
   ClayColor,
-  Vector3,
   Vector2,
   ClayText,
   UINode,
   ClaySize,
   ClayLayoutDirection,
   ClayChildAlignment,
+  Vector3,
 } from "~/host";
+import { EventHandlerMap } from "./events";
 
 export interface ClayElement {
   type: string;
@@ -21,9 +22,8 @@ export interface ClayElement {
 }
 
 // Base props that all components can accept
-export interface BaseElementProps {
+export interface BaseElementProps extends EventHandlerMap {
   children?: React.ReactNode;
-  onClick?: () => void;
   movable?: boolean;
   acceptInputs?: boolean;
   textConfig?: ClayText;
@@ -120,6 +120,14 @@ export interface HSliderBarProps extends BaseElementProps {
   handleGumpId?: number;
 }
 
+// Art component props
+export interface ArtProps extends BaseElementProps {
+  artId: number;
+  floating?: ClayFloatingElementConfig;
+  hue?: Partial<Vector3>;
+  size?: ClaySize;
+}
+
 export type ClayElementMap = {
   View: ViewProps;
   Gump: GumpProps;
@@ -129,6 +137,7 @@ export type ClayElementMap = {
   Checkbox: CheckboxProps;
   Label: LabelProps;
   HSliderBar: HSliderBarProps;
+  Art: ArtProps;
 };
 
 export type ClayElementNames = keyof ClayElementMap;
@@ -149,3 +158,4 @@ export const TextInput = "textinput" as unknown as React.FC<TextInputProps>;
 export const Checkbox = "checkbox" as unknown as React.FC<CheckboxProps>;
 export const Label = "label" as unknown as React.FC<LabelProps>;
 export const HSliderBar = "hsliderbar" as unknown as React.FC<HSliderBarProps>;
+export const Art = "art" as unknown as React.FC<ArtProps>;

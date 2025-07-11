@@ -14,7 +14,7 @@ import React from "react";
 import { HostWrapper, Zlib } from "./host/wrapper";
 import { base64Encode } from "./ui/utils";
 import { ClayReactRenderer } from "./react";
-import { LoginScreen } from "./components";
+import { LoginScreen, StorybookScreen } from "./components";
 import { State } from "./state";
 import { polyfill } from "./polyfill";
 
@@ -129,6 +129,14 @@ export function on_event(): I32 {
             );
             break;
 
+          case Keys.T:
+            console.log("Keys.T => creating renderer");
+            State.renderer?.unmount();
+            State.renderer = new ClayReactRenderer();
+
+            State.renderer.render(<StorybookScreen />);
+            break;
+
           case Keys.H:
             const response = HostWrapper.query({
               terms: [{ ids: 1, op: TermOp.Optional }],
@@ -150,6 +158,7 @@ export function on_ui_event(): I32 {
   const ev: UIEvent = JSON.parse(json);
 
   State.renderer?.handleUIEvent(ev);
+  console.log("on_ui_event", ev);
 
   return 1;
 }

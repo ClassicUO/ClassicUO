@@ -38,6 +38,30 @@ const eventMap = {
 
 const eventNames = Object.keys(eventMap) as EventName[];
 
+export type EventHandlerMap = {
+  onMouseMove?: (event: UIEvent) => void;
+  onMouseWheel?: (event: UIEvent) => void;
+  onMouseOver?: (event: UIEvent) => void;
+  onMousePressed?: (event: UIEvent) => void;
+  onMouseReleased?: (event: UIEvent) => void;
+  onMouseDoubleClick?: (event: UIEvent) => void;
+  onMouseEnter?: (event: UIEvent) => void;
+  onMouseLeave?: (event: UIEvent) => void;
+  onDragging?: (event: UIEvent) => void;
+  onKeyPressed?: (event: UIEvent) => void;
+  onKeyReleased?: (event: UIEvent) => void;
+  onFocus?: (event: UIEvent) => void;
+  onBlur?: (event: UIEvent) => void;
+  onClick?: (event: UIEvent) => void;
+  onDoubleClick?: (event: UIEvent) => void;
+  onKeyDown?: (event: UIEvent) => void;
+  onKeyUp?: (event: UIEvent) => void;
+  onKeyPress?: (event: UIEvent) => void;
+  onMouseDown?: (event: UIEvent) => void;
+  onMouseUp?: (event: UIEvent) => void;
+  onMouseClick?: (event: UIEvent) => void;
+};
+
 export const applyEvents = (
   container: ClayContainer,
   id: number,

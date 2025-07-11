@@ -23,16 +23,16 @@ export interface Vector2 {
 }
 
 export interface Vector3 {
-  x: number;
-  y: number;
-  z: number;
+  x: number; // Game hue, e.g. 0x44
+  y: number; // Color mode, e.g. 1
+  z: number; // Alpha 0-255 e.g. 1
 }
 
 export interface ClayColor {
-  r: number;
-  g: number;
-  b: number;
-  a: number;
+  r: number; // 0.0 - 1.0
+  g: number; // 0.0 - 1.0
+  b: number; // 0.0 - 1.0
+  a: number; // 0.0 - 1.0
 }
 
 export interface ClaySizingAxis {

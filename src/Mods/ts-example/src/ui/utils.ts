@@ -222,28 +222,28 @@ export const TextStyle = {
   },
   xsmall: {
     fontId: 0,
-    fontSize: 8,
+    fontSize: 10,
     textColor: Colors.white,
     textAlignment: TextAlign.left,
   },
 
   small: {
     fontId: 0,
-    fontSize: 10,
+    fontSize: 12,
     textColor: Colors.white,
     textAlignment: TextAlign.left,
   },
 
   medium: {
     fontId: 0,
-    fontSize: 14,
+    fontSize: 16,
     textColor: Colors.white,
     textAlignment: TextAlign.left,
   },
 
   large: {
     fontId: 0,
-    fontSize: 16,
+    fontSize: 18,
     textColor: Colors.white,
     textAlignment: TextAlign.left,
   },
@@ -257,7 +257,7 @@ export const TextStyle = {
 
   xxlarge: {
     fontId: 0,
-    fontSize: 24,
+    fontSize: 22,
     textColor: Colors.white,
     textAlignment: TextAlign.left,
   },
