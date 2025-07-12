@@ -1,7 +1,6 @@
 import { CamelCase } from "type-fest";
 import { EventType, HostWrapper, UIEvent } from "~/host";
 import { DiffKeys } from "~/support";
-import { ClayElement } from "./elements";
 
 export type EventListenerMap = Map<
   number,
@@ -127,7 +126,8 @@ export class EventManager {
 
   dispatch(event: UIEvent) {
     if (typeof event.eventId !== "number") return;
-    this.eventListeners.get(event.entityId)?.(event);
+
+    this.eventListeners.get(event.eventId)?.(event);
   }
 }
 
