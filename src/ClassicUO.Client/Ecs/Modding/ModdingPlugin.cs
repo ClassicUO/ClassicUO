@@ -457,13 +457,13 @@ internal readonly struct ModdingPlugin : IPlugin
 
                 return HostFunction.FromMethod(name, null, (CurrentPlugin p, long offset) =>
                 {
-                   var serial = p.ReadBytes(offset).As<uint>();
-                   var ent = networkEntities.Get(serial);
-                   if (ent == 0 || !ent.Has<T>())
-                       return p.WriteString("{}");
+                    var serial = p.ReadBytes(offset).As<uint>();
+                    var ent = networkEntities.Get(serial);
+                    if (ent == 0 || !ent.Has<T>())
+                        return p.WriteString("{}");
 
-                   var json = JsonSerializer.Serialize(ent.Get<T>(), ctx);
-                   return p.WriteString(json);
+                    var json = JsonSerializer.Serialize(ent.Get<T>(), ctx);
+                    return p.WriteString(json);
                 });
             }
 
@@ -638,7 +638,7 @@ internal readonly struct ModdingPlugin : IPlugin
         Query<Data<UINode, UIMouseAction, PluginEntity, Children>, Changed<UIMouseAction>> queryChanged,
         Query<Data<UINode, UIMouseAction, PluginEntity, Children>> query,
         Query<Data<UIEvent>, With<Parent>> queryEvents,
-        Query<Data<Parent>, With<Children>> queryParents,
+        Query<Data<Parent>, With<UINode>> queryUIParents,
         Res<MouseContext> mouseCtx,
         Res<KeyboardContext> keyboardCtx
     )
@@ -697,6 +697,37 @@ internal readonly struct ModdingPlugin : IPlugin
                     Console.WriteLine("on_ui_event returned 0, stopping event propagation");
                     break;
                 }
+
+
+                // find all ancestors of the entity
+
+                var parentId = ent.Ref.ID;
+                while (queryUIParents.Contains(parentId))
+                {
+                    (_, var parent) = queryUIParents.Get(parentId);
+                    Console.WriteLine(parent.Ref.Id);
+
+                    // push the event
+                    json = (uiEv.Ref with
+                    {
+                        EntityId = parentId,
+                        EventId = eventId.Ref.ID,
+                        X = mousePos.X,
+                        Y = mousePos.Y,
+                        Wheel = mouseCtx.Value.Wheel,
+                        MouseButton = mouseAction.Ref.Button,
+                    }).ToJson();
+
+                    result = pluginEnt.Ref.Mod.Plugin.Call("on_ui_event", json);
+                    if (result == "0")
+                    {
+                        Console.WriteLine("on_ui_event returned 0, stopping event propagation");
+                        break;
+                    }
+
+                    parentId = parent.Ref.Id;
+                }
+
             }
         }
 
@@ -741,7 +772,7 @@ internal readonly struct ModdingPlugin : IPlugin
                     Wheel = mouseCtx.Value.Wheel,
                     MouseButton = mouseAction.Ref.Button,
                 }).ToJson();
-                
+
                 if (pluginEnt.Ref.Mod.Plugin.Call("on_ui_event", json) == "0")
                 {
                     Console.WriteLine("on_ui_event returned 0, stopping event propagation");
@@ -757,7 +788,7 @@ internal readonly struct ModdingPlugin : IPlugin
         Query<Data<Text>, With<Parent>> queryChildren
     )
     {
-        foreach(var (text, children) in query)
+        foreach (var (text, children) in query)
         {
             foreach (var childId in children.Ref)
             {
