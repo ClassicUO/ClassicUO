@@ -7,11 +7,22 @@ import type {
   ClayText,
   UINode,
   ClaySize,
-  ClayLayoutDirection,
+  LayoutDirection,
   ClayChildAlignment,
   Vector3,
+  ClayPadding,
 } from "~/host";
 import { EventHandlerMap } from "./events";
+
+export const defaultHue: Vector3 = { x: 0, y: 0, z: 1.0 };
+
+export const hueToVector3 = (hue: Hue = {}): Vector3 => {
+  return {
+    x: hue.hue ?? 0,
+    y: hue.hueMode ?? 0,
+    z: hue.alpha ?? 1.0,
+  };
+};
 
 export interface ClayElement {
   type: string;
@@ -21,12 +32,18 @@ export interface ClayElement {
   node?: UINode;
 }
 
+export type Hue = {
+  hue?: number; // 0 - 65535 hue based on hues.mul
+  hueMode?: number; // 0 - 255 hue mode
+  alpha?: number; // 0.0 - 1.0 alpha
+};
+
 // Base props that all components can accept
 export interface BaseElementProps extends EventHandlerMap {
   children?: React.ReactNode;
   movable?: boolean;
   acceptInputs?: boolean;
-  textConfig?: ClayText;
+  padding?: ClayPadding;
 }
 
 // View component props
@@ -34,6 +51,7 @@ export interface ViewProps extends BaseElementProps {
   backgroundColor?: ClayColor;
   layout: ClayLayoutConfig;
   floating?: ClayFloatingElementConfig;
+  padding?: ClayPadding;
   cornerRadius?: {
     topLeft: number;
     topRight: number;
@@ -59,12 +77,13 @@ export interface ViewProps extends BaseElementProps {
 
 // Gump component props
 export interface GumpProps extends BaseElementProps {
-  gumpId: number;
-  direction?: ClayLayoutDirection;
+  id: number;
+  direction?: LayoutDirection;
   floating?: ClayFloatingElementConfig;
-  hue?: Partial<Vector3>;
+  hue?: Partial<Hue>;
   ninePatch?: boolean;
   size?: ClaySize;
+  padding?: ClayPadding;
   childAlignment?: ClayChildAlignment;
 }
 
@@ -75,13 +94,15 @@ export interface ButtonProps extends BaseElementProps {
   acceptInputs?: boolean;
   size: ClaySize;
   floating?: ClayFloatingElementConfig;
-  hue?: Partial<Vector3>;
+  padding?: ClayPadding;
+  hue?: Partial<Hue>;
 }
 
 // Text component props
 export interface TextProps extends BaseElementProps {
   style?: ClayText;
   floating?: ClayFloatingElementConfig;
+  padding?: ClayPadding;
   size?: ClaySize;
 }
 
@@ -95,6 +116,7 @@ export interface TextInputProps extends BaseElementProps {
   backgroundColor?: ClayColor;
   textStyle?: ClayText;
   value?: string;
+  padding?: ClayPadding;
   size?: ClaySize;
   acceptInputs?: boolean;
   onChange?: (value: string) => void;
@@ -105,6 +127,7 @@ export interface CheckboxProps extends BaseElementProps {
   checked?: boolean;
   onChange?: (checked: boolean) => void;
   floating?: ClayFloatingElementConfig;
+  padding?: ClayPadding;
   size?: ClaySize;
 }
 
@@ -115,6 +138,7 @@ export interface HSliderBarProps extends BaseElementProps {
   value?: number;
   onChange?: (value: number) => void;
   floating?: ClayFloatingElementConfig;
+  padding?: ClayPadding;
   size?: ClaySize;
   barGumpId?: number;
   handleGumpId?: number;
@@ -122,9 +146,10 @@ export interface HSliderBarProps extends BaseElementProps {
 
 // Art component props
 export interface ArtProps extends BaseElementProps {
-  artId: number;
+  id: number;
   floating?: ClayFloatingElementConfig;
-  hue?: Partial<Vector3>;
+  hue?: Partial<Hue>;
+  padding?: ClayPadding;
   size?: ClaySize;
 }
 

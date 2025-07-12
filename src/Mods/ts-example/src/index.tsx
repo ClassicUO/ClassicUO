@@ -12,7 +12,7 @@ import {
 } from "./host";
 import React from "react";
 import { HostWrapper, Zlib } from "./host/wrapper";
-import { base64Encode } from "./ui/utils";
+import { base64Encode } from "./ui/theme";
 import { ClayReactRenderer } from "./react";
 import { LoginScreen, StorybookScreen } from "./components";
 import { State } from "./state";
@@ -158,8 +158,6 @@ export function on_ui_event(): I32 {
   const ev: UIEvent = JSON.parse(json);
 
   State.renderer?.handleUIEvent(ev);
-  console.log("on_ui_event", ev);
-
   return 1;
 }
 

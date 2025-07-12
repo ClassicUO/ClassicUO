@@ -1,13 +1,13 @@
 import {
-  ClayLayoutAlignment,
-  ClayLayoutDirection,
-  ClaySizingType,
-  ClayTextAlignment,
-  ClayTextWrapMode,
+  LayoutAlignment,
+  LayoutDirection,
+  SizingType,
+  TextAlignment,
+  TextWrapMode,
   ClayUOCommandType,
   ClayWidgetType,
-  ClayFloatingAttachToElement,
-  ClayFloatingClipToElement,
+  FloatingAttachToElement,
+  FloatingClipToElement,
   AssetType,
   CompressionType,
   TermOp,
@@ -40,14 +40,26 @@ export interface ClaySizingAxis {
   percent?: number;
 }
 
-export interface ClaySizing {
-  size: ClaySizingAxis;
-  type: ClaySizingType;
-}
+export type ClaySizing =
+  | {
+      size: ClaySizingAxis;
+      type: SizingType.Fixed | SizingType.Percent | SizingType.Fit;
+    }
+  | {
+      type: SizingType.Grow;
+      size: {};
+    };
 
 export interface ClayChildAlignment {
-  x: ClayLayoutAlignment;
-  y: ClayLayoutAlignment;
+  x: LayoutAlignment;
+  y: LayoutAlignment;
+}
+
+export interface ClayPadding {
+  left?: number;
+  right?: number;
+  top?: number;
+  bottom?: number;
 }
 
 export interface ClayLayoutConfig {
@@ -55,10 +67,10 @@ export interface ClayLayoutConfig {
     width: ClaySizing;
     height: ClaySizing;
   };
-  padding?: { left: number; right: number; top: number; bottom: number };
+  padding?: ClayPadding;
   childGap?: number;
   childAlignment?: ClayChildAlignment;
-  layoutDirection?: ClayLayoutDirection;
+  layoutDirection?: LayoutDirection;
 }
 
 export interface ClayFloatingElementConfig {
@@ -68,8 +80,8 @@ export interface ClayFloatingElementConfig {
   zIndex?: number;
   attachPoints?: { element: number; parent: number };
   pointerCaptureMode?: number;
-  attachTo: ClayFloatingAttachToElement;
-  clipTo: ClayFloatingClipToElement;
+  attachTo: FloatingAttachToElement;
+  clipTo: FloatingClipToElement;
 }
 
 export interface ClayElementDecl {
@@ -105,12 +117,12 @@ export interface ClayUOCommandData {
 
 export interface ClayText {
   textColor: ClayColor;
-  fontId: number;
+  fontId?: number;
   fontSize: number;
   letterSpacing?: number;
   lineHeight?: number;
-  wrapMode?: ClayTextWrapMode;
-  textAlignment?: ClayTextAlignment;
+  wrapMode?: TextWrapMode;
+  textAlignment?: TextAlignment;
 }
 
 export interface ClaySize {

@@ -1,11 +1,11 @@
 import React, { useCallback, useMemo } from "react";
 import { ChildAlign, Colors, Float, TextStyle } from "~/ui";
 import {
-  ClayFloatingAttachToElement,
-  ClayFloatingClipToElement,
-  ClayLayoutAlignment,
-  ClayLayoutDirection,
-  ClaySizingType,
+  FloatingAttachToElement,
+  FloatingClipToElement,
+  LayoutAlignment,
+  LayoutDirection,
+  SizingType,
 } from "~/host";
 import { LoginContainer } from "./LoginContainer";
 import { Text, Button, Gump, TextInput, Checkbox, HSliderBar } from "~/react";
@@ -70,13 +70,12 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
       </Text>
       {/* Account Name Input Background */}
       <Gump
-        gumpId={0x0bb8}
-        hue={{ z: 1 }}
+        id={0x0bb8}
         ninePatch={true}
         size={{ width: 210, height: 30 }}
         floating={Float.offsetParent(218, 283)}
         childAlignment={ChildAlign.center}
-        direction={ClayLayoutDirection.LeftToRight}
+        direction={LayoutDirection.LeftToRight}
       >
         <TextInput
           placeholder="Enter account name"
@@ -90,12 +89,11 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
 
       {/* Password Input Background */}
       <Gump
-        gumpId={0x0bb8}
-        hue={{ z: 1 }}
+        id={0x0bb8}
         ninePatch={true}
         size={{ width: 210, height: 30 }}
         floating={Float.offsetParent(218, 333)}
-        direction={ClayLayoutDirection.LeftToRight}
+        direction={LayoutDirection.LeftToRight}
         childAlignment={ChildAlign.center}
       >
         <TextInput
@@ -114,7 +112,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
         onClick={handleQuit}
         gumpIds={{ normal: 0x05ca, pressed: 0x05c9, over: 0x05c8 }}
         size={{ width: 66, height: 66 }}
-        hue={{ z: 1 }}
         floating={Float.offsetParent(25, 240)}
       />
 
@@ -124,7 +121,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           onClick={onCredits}
           gumpIds={{ normal: 0x05d0, pressed: 0x05cf, over: 0x05ce }}
           size={{ width: 104, height: 36 }}
-          hue={{ z: 1 }}
           floating={Float.offsetParent(530, 125)}
         />
       )}
@@ -137,7 +133,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           over: 0x05cb,
         }}
         size={{ width: 85, height: 28 }}
-        hue={{ z: 1 }}
         floating={Float.offsetParent(280, 365)}
         onClick={handleLogin}
       />

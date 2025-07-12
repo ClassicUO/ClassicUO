@@ -3,17 +3,18 @@ import { getClayReconciler, ClayReconciler } from "./reconciler";
 import { ClayContainer } from "./container";
 import { UIEvent } from "~/host";
 import React from "react";
-import { EventCallbackMap } from "./events";
+import { EventManager } from "./events";
 
 export class ClayReactRenderer {
   private container: ClayContainer;
   private reconciler: ClayReconciler;
   private fiberRoot: OpaqueRoot;
+  private events: EventManager;
 
   constructor() {
-    const eventCallbacks: EventCallbackMap = new Map();
-    this.container = new ClayContainer(eventCallbacks);
-    this.reconciler = getClayReconciler(this.container);
+    this.events = new EventManager();
+    this.container = new ClayContainer(this.events);
+    this.reconciler = getClayReconciler(this.events);
     this.fiberRoot = this.reconciler.createContainer(
       this.container,
       0, // ConcurrentRoot
@@ -43,6 +44,6 @@ export class ClayReactRenderer {
 
   // Handle UI events from CUO
   handleUIEvent(event: UIEvent): void {
-    this.container.handleUIEvent(event);
+    this.events.dispatch(event);
   }
 }

@@ -1,51 +1,44 @@
-import {
-  UINodes,
-  UINode,
-  UIEvent,
-  EventType,
-  Keys,
-  MouseButtonType,
-} from "~/host";
+import { UINodes, UINode } from "~/host";
 import { HostWrapper } from "~/host";
 import { ClayElement } from "./elements";
-import { EventCallbackMap } from "./events";
+import { EventManager } from "./events";
 
 export class ClayContainer {
-  public elements: ClayElement[] = [];
+  public children: ClayElement[] = [];
   public synced: boolean = true;
   private entities: Set<number> = new Set();
 
-  constructor(private eventCallbacks: EventCallbackMap = new Map()) {}
+  constructor(private events: EventManager) {}
 
   appendChild(child: ClayElement): void {
-    this.elements.push(child);
+    this.children.push(child);
     this.trackEntity(child);
   }
 
   removeChild(child: ClayElement): void {
-    const index = this.elements.indexOf(child);
+    const index = this.children.indexOf(child);
     if (index !== -1) {
-      this.elements.splice(index, 1);
+      this.children.splice(index, 1);
       this.cleanupEntity(child);
     }
   }
 
   insertBefore(child: ClayElement, beforeChild: ClayElement): void {
-    const index = this.elements.indexOf(beforeChild);
+    const index = this.children.indexOf(beforeChild);
     if (index !== -1) {
-      this.elements.splice(index, 0, child);
+      this.children.splice(index, 0, child);
     } else {
-      this.elements.push(child);
+      this.children.push(child);
     }
     this.trackEntity(child);
   }
 
   clear(): void {
     // Clean up all entities before clearing
-    for (const element of this.elements) {
+    for (const element of this.children) {
       this.cleanupEntity(element);
     }
-    this.elements = [];
+    this.children = [];
     // ClayContainer.uiCallbacks.clear(); // TODO: necessary?
     this.entities.clear();
     this.synced = false;
@@ -60,7 +53,7 @@ export class ClayContainer {
 
   private cleanupEntity(element: ClayElement): void {
     this.entities.delete(element.instanceId);
-    this.eventCallbacks.delete(element.instanceId);
+    this.events.clearEntityEvents(element.instanceId);
 
     HostWrapper.deleteEntity(element.instanceId);
   }
@@ -72,7 +65,7 @@ export class ClayContainer {
     const nodes: UINode[] = [];
     const relations: Record<number, number> = {};
 
-    this.collectNodes(this.elements, nodes, relations);
+    this.collectNodes(this.children, nodes, relations);
 
     const uiNodes: UINodes = {
       nodes,
@@ -80,10 +73,10 @@ export class ClayContainer {
     };
 
     // Send to host
-    HostWrapper.setNode(uiNodes);
+    // HostWrapper.setNode(uiNodes);
     this.synced = true;
 
-    // console.log("ClayContainer render", uiNodes);
+    console.log("ClayContainer render", uiNodes);
   }
 
   private collectNodes(
@@ -110,40 +103,5 @@ export class ClayContainer {
         );
       }
     }
-  }
-
-  // Called from plugin's UI event handler
-  handleUIEvent(event: UIEvent): void {
-    // stale event handler?
-    if (!this.entities.has(event.entityId)) {
-      console.warn("event handler called for untracked entity", event);
-      return;
-    }
-
-    const callback = this.eventCallbacks
-      .get(event.entityId)
-      ?.get(event.eventType);
-
-    if (typeof callback === "function") {
-      callback(event);
-    }
-  }
-
-  addEvent(event: UIEvent, callback: (event: UIEvent) => void): void {
-    if (!this.eventCallbacks.has(event.entityId)) {
-      this.eventCallbacks.set(event.entityId, new Map());
-    }
-
-    const map = this.eventCallbacks.get(event.entityId);
-
-    if (!map?.has(event.eventType)) {
-      HostWrapper.addEventListener(event);
-    }
-    map.set(event.eventType, callback);
-  }
-
-  removeEvent(event: UIEvent): void {
-    this.eventCallbacks.get(event.entityId)?.delete(event.eventType);
-    HostWrapper.removeEventListener(event);
   }
 }

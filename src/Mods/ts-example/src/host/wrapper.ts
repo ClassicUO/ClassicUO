@@ -72,6 +72,7 @@ export class HostWrapper {
   static addEventListener(event: UIEvent): number {
     const json = JSON.stringify(event);
     const memIn = Memory.fromString(json);
+    console.log("addEventListener", json);
     return this.functions.cuo_ui_add_event_listener(memIn.offset) as number;
   }
 
@@ -95,6 +96,7 @@ export class HostWrapper {
     parentId: number,
     index: number = -1
   ): void {
+    console.log("addEntityToParent", entityId, parentId, index);
     this.functions.cuo_add_entity_to_parent(entityId, parentId, index);
   }
 

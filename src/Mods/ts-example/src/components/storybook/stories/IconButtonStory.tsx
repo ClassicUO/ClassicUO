@@ -2,13 +2,15 @@ import React from "react";
 import { IconButton } from "~/components/design-system";
 import { StorybookSection } from "../StorybookSection";
 import { ComponentShowcase } from "../ComponentShowcase";
-import { Colors, Float } from "~/ui";
-import { View } from "~/react";
 import {
-  ClayLayoutAlignment,
-  ClayLayoutDirection,
-  ClaySizingType,
-} from "~/host";
+  ChildAlign,
+  Colors,
+  Float,
+  LayoutAlignment,
+  LayoutDirection,
+  Sizing,
+} from "~/ui";
+import { View } from "~/react";
 
 /**
  * IconButtonStory - Comprehensive showcase of IconButton component
@@ -28,25 +30,17 @@ export const IconButtonStory: React.FC = () => {
     <StorybookSection
       title="IconButton"
       description="Button with icon overlay supporting both gump and art icons"
+      spacing={40}
     >
       <View
         backgroundColor={Colors.transparent}
         layout={{
-          layoutDirection: ClayLayoutDirection.LeftToRight,
+          layoutDirection: LayoutDirection.LeftToRight,
           sizing: {
-            width: {
-              type: ClaySizingType.Grow,
-              size: {},
-            },
-            height: {
-              type: ClaySizingType.Fit,
-              size: {},
-            },
+            width: Sizing.grow(),
+            height: Sizing.fit(),
           },
-          childAlignment: {
-            x: ClayLayoutAlignment.Left,
-            y: ClayLayoutAlignment.Top,
-          },
+          childAlignment: ChildAlign.topLeft,
         }}
       >
         {/* Basic IconButton with Gump */}
@@ -107,23 +101,16 @@ export const IconButtonStory: React.FC = () => {
       <View
         backgroundColor={Colors.transparent}
         layout={{
-          layoutDirection: ClayLayoutDirection.LeftToRight,
+          layoutDirection: LayoutDirection.LeftToRight,
           sizing: {
-            width: {
-              type: ClaySizingType.Grow,
-              size: {},
-            },
-            height: {
-              type: ClaySizingType.Fit,
-              size: {},
-            },
+            width: Sizing.grow(),
+            height: Sizing.fit(),
           },
           childAlignment: {
-            x: ClayLayoutAlignment.Left,
-            y: ClayLayoutAlignment.Top,
+            x: LayoutAlignment.Left,
+            y: LayoutAlignment.Top,
           },
         }}
-        floating={Float.offsetParent(0, 160)}
       >
         {/* IconButton with offset */}
         <ComponentShowcase
@@ -143,12 +130,12 @@ export const IconButtonStory: React.FC = () => {
         <ComponentShowcase
           name="Custom Hue"
           description="Button with custom color hue"
-          code="hue={{ r: 0, g: 1.0, b: 0, a: 1.0 }}"
+          code="color={{ hue: 0x44 }}"
         >
           <IconButton
             icon={{ type: "gump", id: 0x15a4 }}
             size={{ width: 44, height: 44 }}
-            hue={{ x: 0x44, y: 1, z: 1 }}
+            color={{ hue: 0x44 }}
             onClick={handleClick}
           />
         </ComponentShowcase>

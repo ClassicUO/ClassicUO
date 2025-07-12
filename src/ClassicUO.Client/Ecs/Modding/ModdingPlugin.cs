@@ -638,6 +638,7 @@ internal readonly struct ModdingPlugin : IPlugin
         Query<Data<UINode, UIMouseAction, PluginEntity, Children>, Changed<UIMouseAction>> queryChanged,
         Query<Data<UINode, UIMouseAction, PluginEntity, Children>> query,
         Query<Data<UIEvent>, With<Parent>> queryEvents,
+        Query<Data<Parent>, With<Children>> queryParents,
         Res<MouseContext> mouseCtx,
         Res<KeyboardContext> keyboardCtx
     )
@@ -689,7 +690,13 @@ internal readonly struct ModdingPlugin : IPlugin
                     Wheel = mouseCtx.Value.Wheel,
                     MouseButton = mouseAction.Ref.Button,
                 }).ToJson();
-                pluginEnt.Ref.Mod.Plugin.Call("on_ui_event", json);
+
+                var result = pluginEnt.Ref.Mod.Plugin.Call("on_ui_event", json);
+                if (result == "0")
+                {
+                    Console.WriteLine("on_ui_event returned 0, stopping event propagation");
+                    break;
+                }
             }
         }
 
@@ -734,7 +741,12 @@ internal readonly struct ModdingPlugin : IPlugin
                     Wheel = mouseCtx.Value.Wheel,
                     MouseButton = mouseAction.Ref.Button,
                 }).ToJson();
-                pluginEnt.Ref.Mod.Plugin.Call("on_ui_event", json);
+                
+                if (pluginEnt.Ref.Mod.Plugin.Call("on_ui_event", json) == "0")
+                {
+                    Console.WriteLine("on_ui_event returned 0, stopping event propagation");
+                    break;
+                }
             }
         }
     }

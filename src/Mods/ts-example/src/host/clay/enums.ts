@@ -39,12 +39,12 @@ export enum UIInteractionState {
   Released = 3,
 }
 
-export enum ClayLayoutDirection {
+export enum LayoutDirection {
   LeftToRight = 0,
   TopToBottom = 1,
 }
 
-export enum ClayLayoutAlignment {
+export enum LayoutAlignment {
   Left = 0,
   Top = 0,
   Right = 1,
@@ -52,32 +52,32 @@ export enum ClayLayoutAlignment {
   Center = 2,
 }
 
-export enum ClaySizingType {
+export enum SizingType {
   Fit = 0,
   Grow = 1,
   Percent = 2,
   Fixed = 3,
 }
 
-export enum ClayFloatingAttachToElement {
+export enum FloatingAttachToElement {
   None = 0,
   Parent = 1,
   ElementWithId = 2,
   Root = 3,
 }
 
-export enum ClayFloatingClipToElement {
+export enum FloatingClipToElement {
   None = 0,
   AttachedParent = 1,
 }
 
-export enum ClayTextAlignment {
+export enum TextAlignment {
   Left = 0,
   Center = 1,
   Right = 2,
 }
 
-export enum ClayTextWrapMode {
+export enum TextWrapMode {
   Words = 0,
   Newlines = 1,
   None = 2,

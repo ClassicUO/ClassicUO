@@ -1,8 +1,8 @@
 import React from "react";
-import { Button, Art, Gump } from "~/react";
+import { Button, Art, Gump, Hue } from "~/react";
 import {
-  ClayFloatingAttachToElement,
-  ClayFloatingClipToElement,
+  FloatingAttachToElement,
+  FloatingClipToElement,
   type ClayFloatingElementConfig,
   type ClaySize,
   type ClayColor,
@@ -32,7 +32,7 @@ export interface IconButtonProps {
   /**
    * Color hue for the button
    */
-  hue?: Partial<Vector3>;
+  color?: Partial<Hue>;
 
   /**
    * Click handler
@@ -86,7 +86,7 @@ export const IconButton: React.FC<IconButtonProps> = ({
   icon,
   size,
   floating,
-  hue = { x: 0, y: 0, z: 1 },
+  color: hue,
   onClick,
   movable = false,
   disabled = false,
@@ -105,29 +105,21 @@ export const IconButton: React.FC<IconButtonProps> = ({
       x: size.width / 2 - size.width / 2 / 2 + iconOffset.x,
       y: size.height / 2 - size.height / 2 / 2 + iconOffset.y,
     },
-    attachTo: floating?.attachTo ?? ClayFloatingAttachToElement.Parent,
-    clipTo: floating?.clipTo ?? ClayFloatingClipToElement.AttachedParent,
+    attachTo: floating?.attachTo ?? FloatingAttachToElement.Parent,
+    clipTo: floating?.clipTo ?? FloatingClipToElement.AttachedParent,
   };
 
-  return icon.type === "gump" ? (
-    <Gump
+  const Tag = icon.type === "gump" ? Gump : Art;
+
+  return (
+    <Tag
+      id={icon.id}
       movable={movable}
       acceptInputs={!disabled}
       onClick={handleClick}
-      gumpId={icon.id}
       size={size}
       floating={iconFloating}
-      hue={disabled ? { x: 0, y: 1, z: 0.5 } : hue}
-    />
-  ) : (
-    <Art
-      movable={movable}
-      acceptInputs={!disabled}
-      onClick={handleClick}
-      artId={icon.id}
-      size={size}
-      floating={iconFloating}
-      hue={disabled ? { x: 0, y: 1, z: 0.5 } : hue}
+      hue={disabled ? { ...hue, alpha: 0.5 } : hue}
     />
   );
 };

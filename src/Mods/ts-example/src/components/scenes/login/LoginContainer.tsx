@@ -1,12 +1,5 @@
 import React from "react";
-import { Colors } from "~/ui";
-import {
-  ClayFloatingAttachToElement,
-  ClayFloatingClipToElement,
-  ClayLayoutAlignment,
-  ClayLayoutDirection,
-  ClaySizingType,
-} from "~/host";
+import { ChildAlign, Colors, Float, Sizing, LayoutDirection } from "~/ui";
 import { View, Gump } from "~/react";
 
 export const LoginContainer: React.FC<{ children: React.ReactNode }> = ({
@@ -23,45 +16,23 @@ export const LoginContainer: React.FC<{ children: React.ReactNode }> = ({
     <View
       backgroundColor={Colors.transparent}
       layout={{
-        layoutDirection: ClayLayoutDirection.TopToBottom,
+        layoutDirection: LayoutDirection.TopToBottom,
         sizing: {
-          width: {
-            type: ClaySizingType.Grow,
-            size: {},
-          },
-          height: {
-            type: ClaySizingType.Grow,
-            size: {},
-          },
+          width: Sizing.grow(),
+          height: Sizing.grow(),
         },
-        childAlignment: {
-          x: ClayLayoutAlignment.Center,
-          y: ClayLayoutAlignment.Center,
-        },
+        childAlignment: ChildAlign.center,
       }}
     >
       {/* Main background gump */}
       <Gump
-        gumpId={backgroundGumpId}
-        hue={{ x: 0, y: 0, z: 1 }}
+        id={backgroundGumpId}
         size={{ width: 640, height: 480 }}
-        floating={{
-          offset: { x: 0, y: 0 },
-          attachTo: ClayFloatingAttachToElement.Parent,
-          clipTo: ClayFloatingClipToElement.AttachedParent,
-        }}
+        floating={Float.offsetParent(0, 0)}
       />
 
       {/* UO Flag */}
-      <Gump
-        gumpId={uoFlagGumpId}
-        hue={{ x: 0, y: 0, z: 1 }}
-        floating={{
-          offset: { x: 0, y: 0 },
-          attachTo: ClayFloatingAttachToElement.Parent,
-          clipTo: ClayFloatingClipToElement.AttachedParent,
-        }}
-      />
+      <Gump id={uoFlagGumpId} floating={Float.offsetParent(0, 0)} />
 
       {/* For older clients, there would be additional gumps like: */}
       {/* - Tile gump (0x0150) at position 0,0 */}

@@ -8,16 +8,16 @@ import { ClayContainer } from "./container";
 import { ClayElement, ClayElementNames } from "./elements";
 import { createContext } from "react";
 import { createElement } from "./createElement";
-import { TextStyle } from "~/ui/utils";
+import { TextStyle } from "~/ui/theme";
 import { ClayUOCommandType, ClayWidgetType } from "~/host";
-import { applyEvents } from "./events";
+import { applyEvents, EventManager } from "./events";
 import { shallowDiff } from "~/support";
 
 type Props = Record<string, unknown>;
 type HostContext = {};
 export type ClayReconciler = ReturnType<typeof getClayReconciler>;
 
-export function getClayReconciler(container: ClayContainer) {
+export function getClayReconciler(events: EventManager) {
   let currentUpdatePriority = NoEventPriority;
   let currentRootNode: ClayElement | undefined;
 
@@ -29,7 +29,7 @@ export function getClayReconciler(container: ClayContainer) {
   const prepareForCommit = () => null;
 
   const resetAfterCommit = (container: ClayContainer) => {
-    container.render();
+    // container.render();
   };
 
   const createInstance = (
@@ -44,7 +44,7 @@ export function getClayReconciler(container: ClayContainer) {
 
     const node = createElement(type, props, instanceId);
     applyEvents(
-      container,
+      events,
       instanceId,
       {
         added: Object.keys(props),
@@ -86,12 +86,17 @@ export function getClayReconciler(container: ClayContainer) {
   };
 
   const appendInitialChild = (parent: ClayElement, child: ClayElement) => {
-    // console.log("appendInitialChild", parent.type, child.type);
+    // console.log(
+    //   "appendInitialChild",
+    //   [parent.type, parent.instanceId],
+    //   [child.type, child.instanceId]
+    // );
     parent.children.push(child);
+    HostWrapper.addEntityToParent(child.instanceId, parent.instanceId, -1);
   };
 
   const finalizeInitialChildren = () => {
-    return false;
+    return true;
   };
 
   const appendChild = (parent: ClayElement, child: ClayElement) => {
@@ -149,7 +154,7 @@ export function getClayReconciler(container: ClayContainer) {
 
     instance.props = newProps;
     const diff = shallowDiff(oldProps, newProps);
-    applyEvents(container, instance.instanceId, diff, newProps);
+    applyEvents(events, instance.instanceId, diff, newProps, oldProps);
 
     if (
       Object.keys(diff.added).length > 0 ||
@@ -233,6 +238,11 @@ export function getClayReconciler(container: ClayContainer) {
 
   const waitForCommitToBeReady = () => null;
 
+  const commitMount = (instance: ClayElement) => {
+    // mutate nodes before committing
+    // console.log("commitMount", instance.type);
+  };
+
   const reconciler = createReconciler<
     ClayElementNames,
     Props,
@@ -311,6 +321,7 @@ export function getClayReconciler(container: ClayContainer) {
     startSuspendingCommit,
     suspendInstance,
     waitForCommitToBeReady,
+    commitMount,
   });
 
   return reconciler;

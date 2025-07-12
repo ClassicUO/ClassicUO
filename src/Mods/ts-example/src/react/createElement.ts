@@ -2,13 +2,15 @@ import {
   UINode,
   ClayWidgetType,
   ClayUOCommandType,
-  ClaySizingType,
-  ClayLayoutDirection,
-  ClayLayoutAlignment,
+  SizingType,
+  LayoutDirection,
+  LayoutAlignment,
+  Vector3,
 } from "~/host";
 import { TextStyle } from "~/ui";
-import { ClayElementPropTypes } from "./elements";
+import { ClayElementPropTypes, defaultHue, hueToVector3 } from "./elements";
 import * as P from "ts-pattern";
+import { hasEventProp } from "./events";
 
 export function createElement(type: string, props: any, id: number): UINode {
   return P.match<ClayElementPropTypes, UINode>({
@@ -25,6 +27,7 @@ export function createElement(type: string, props: any, id: number): UINode {
           cornerRadius: data.props.cornerRadius,
           border: data.props.border,
           clip: data.props.clip,
+          padding: data.props.padding,
         },
         movable: data.props.movable || false,
         acceptInputs: data.props.acceptInputs || false,
@@ -35,25 +38,27 @@ export function createElement(type: string, props: any, id: number): UINode {
 
       return {
         id,
+        movable: data.props.movable ?? false,
+        acceptInputs: data.props.acceptInputs ?? hasEventProp(data.props),
         uoConfig: {
           type: data.props.ninePatch
             ? ClayUOCommandType.GumpNinePatch
             : ClayUOCommandType.Gump,
-          id: data.props.gumpId,
-          hue: data.props.hue ?? { x: 0, y: 0, z: 1 },
+          id: data.props.id,
+          hue: hueToVector3(data.props.hue),
         },
         config: {
           layout: {
             sizing: {
               width: {
-                type: ClaySizingType.Fixed,
+                type: SizingType.Fixed,
                 size: {
                   minMax: { min: size.width, max: size.width },
                   percent: size.width,
                 },
               },
               height: {
-                type: ClaySizingType.Fixed,
+                type: SizingType.Fixed,
                 size: {
                   minMax: { min: size.height, max: size.height },
                   percent: size.height,
@@ -61,11 +66,12 @@ export function createElement(type: string, props: any, id: number): UINode {
               },
             },
             layoutDirection:
-              data.props.direction ?? ClayLayoutDirection.TopToBottom,
+              data.props.direction ?? LayoutDirection.TopToBottom,
             childAlignment: data.props.childAlignment ?? {
-              x: ClayLayoutAlignment.Center,
-              y: ClayLayoutAlignment.Center,
+              x: LayoutAlignment.Center,
+              y: LayoutAlignment.Center,
             },
+            padding: data.props.padding,
           },
           floating: data.props.floating,
         },
@@ -77,11 +83,11 @@ export function createElement(type: string, props: any, id: number): UINode {
       return {
         id,
         movable: data.props.movable ?? false,
-        acceptInputs: data.props.acceptInputs ?? true,
+        acceptInputs: data.props.acceptInputs ?? hasEventProp(data.props),
         uoConfig: {
           type: ClayUOCommandType.Gump,
           id: data.props.gumpIds.normal,
-          hue: data.props.hue ?? { x: 0, y: 0, z: 1 },
+          hue: hueToVector3(data.props.hue),
         },
         uoButton: data.props.gumpIds,
         widgetType: ClayWidgetType.Button,
@@ -93,16 +99,17 @@ export function createElement(type: string, props: any, id: number): UINode {
                   minMax: { min: size.width, max: size.width },
                   percent: size.width,
                 },
-                type: ClaySizingType.Fixed,
+                type: SizingType.Fixed,
               },
               height: {
                 size: {
                   minMax: { min: size.height, max: size.height },
                   percent: size.height,
                 },
-                type: ClaySizingType.Fixed,
+                type: SizingType.Fixed,
               },
             },
+            padding: data.props.padding,
           },
           floating: data.props.floating,
         },
@@ -118,7 +125,7 @@ export function createElement(type: string, props: any, id: number): UINode {
           textConfig: data.props.textStyle,
         },
         widgetType: ClayWidgetType.TextInput,
-        acceptInputs: data.props.acceptInputs ?? true,
+        acceptInputs: data.props.acceptInputs ?? hasEventProp(data.props),
         config: {
           layout: {
             sizing: {
@@ -127,16 +134,17 @@ export function createElement(type: string, props: any, id: number): UINode {
                   minMax: { min: size.width, max: size.width },
                   percent: size.width,
                 },
-                type: ClaySizingType.Fixed,
+                type: SizingType.Fixed,
               },
               height: {
                 size: {
                   minMax: { min: size.height, max: size.height },
                   percent: size.height,
                 },
-                type: ClaySizingType.Fixed,
+                type: SizingType.Fixed,
               },
             },
+            padding: data.props.padding,
           },
           floating: data.props.floating,
         },
@@ -145,8 +153,12 @@ export function createElement(type: string, props: any, id: number): UINode {
     .with({ type: "text" }, (data) => {
       return {
         id,
+        movable: data.props.movable ?? false,
+        acceptInputs:
+          data.props.acceptInputs ?? hasEventProp(data.props) ?? true,
         config: {
           floating: data.props.floating,
+          padding: data.props.padding,
         },
         textConfig: {
           value: "",
@@ -156,14 +168,15 @@ export function createElement(type: string, props: any, id: number): UINode {
         uoConfig: {
           type: ClayUOCommandType.Text,
           id: 0,
-          hue: { x: 0, y: 0, z: 1 },
+          hue: defaultHue,
         },
       };
     })
     .with({ type: "checkbox" }, (data) => {
       return {
         id,
-        config: { floating: data.props.floating },
+        acceptInputs: data.props.acceptInputs ?? hasEventProp(data.props),
+        config: { floating: data.props.floating, padding: data.props.padding },
         textConfig: {
           value: `CHECKBOX`,
           textConfig: TextStyle.default,
@@ -172,27 +185,35 @@ export function createElement(type: string, props: any, id: number): UINode {
         uoConfig: {
           id: 0,
           type: ClayUOCommandType.Text,
-          hue: { x: 0, y: 0, z: 1 },
+          hue: defaultHue,
         },
       };
     })
     .with({ type: "label" }, (data) => {
       return {
         id,
-        config: { floating: data.props.floating },
+        acceptInputs: data.props.acceptInputs ?? hasEventProp(data.props),
+        config: {
+          floating: data.props.floating,
+          padding: data.props.padding,
+        },
         textConfig: { value: `LABEL`, textConfig: TextStyle.default },
         widgetType: ClayWidgetType.None,
         uoConfig: {
           id: 0,
           type: ClayUOCommandType.Text,
-          hue: { x: 0, y: 0, z: 1 },
+          hue: defaultHue,
         },
       };
     })
     .with({ type: "hsliderbar" }, (data) => {
       return {
         id,
-        config: { floating: data.props.floating },
+        acceptInputs: data.props.acceptInputs ?? hasEventProp(data.props),
+        config: {
+          floating: data.props.floating,
+          padding: data.props.padding,
+        },
         textConfig: {
           value: `HSLIDERBAR`,
           textConfig: TextStyle.default,
@@ -201,7 +222,7 @@ export function createElement(type: string, props: any, id: number): UINode {
         uoConfig: {
           type: ClayUOCommandType.Text,
           id: 0,
-          hue: { x: 0, y: 0, z: 1 },
+          hue: defaultHue,
         },
       };
     })
@@ -210,31 +231,35 @@ export function createElement(type: string, props: any, id: number): UINode {
 
       return {
         id,
+        acceptInputs: data.props.acceptInputs ?? hasEventProp(data.props),
         uoConfig: {
           type: ClayUOCommandType.Art,
-          id: data.props.artId,
-          hue: data.props.hue ?? { x: 0, y: 0, z: 1 },
+          id: data.props.id,
+          hue: hueToVector3(data.props.hue),
         },
         config: {
-          layout: size ? {
-            sizing: {
-              width: {
-                type: ClaySizingType.Fixed,
-                size: {
-                  minMax: { min: size.width, max: size.width },
-                  percent: size.width,
+          layout: size
+            ? {
+                sizing: {
+                  width: {
+                    type: SizingType.Fixed,
+                    size: {
+                      minMax: { min: size.width, max: size.width },
+                      percent: size.width,
+                    },
+                  },
+                  height: {
+                    type: SizingType.Fixed,
+                    size: {
+                      minMax: { min: size.height, max: size.height },
+                      percent: size.height,
+                    },
+                  },
                 },
-              },
-              height: {
-                type: ClaySizingType.Fixed,
-                size: {
-                  minMax: { min: size.height, max: size.height },
-                  percent: size.height,
-                },
-              },
-            },
-          } : undefined,
+              }
+            : undefined,
           floating: data.props.floating,
+          padding: data.props.padding,
         },
       };
     })
