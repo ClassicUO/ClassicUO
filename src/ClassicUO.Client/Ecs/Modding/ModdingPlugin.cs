@@ -321,8 +321,8 @@ internal readonly struct ModdingPlugin : IPlugin
                         if (node.Movable)
                             ent.Add<UIMovable>();
 
-                        // if (node.AcceptInputs)
-                        ent.Set(new UIMouseAction());
+                        if (node.AcceptInputs)
+                            ent.Set(new UIMouseAction());
 
                         if (node.WidgetType == ClayWidgetType.TextInput)
                             ent.Add<TextInput>();
@@ -636,8 +636,8 @@ internal readonly struct ModdingPlugin : IPlugin
     }
 
     private static void SendUIEvents(
-        Query<Data<UINode, UIMouseAction, PluginEntity, Children>, Filter<Changed<UIMouseAction>, Optional<Children>>> queryChanged,
-        Query<Data<UINode, UIMouseAction, PluginEntity, Children>, Optional<Children>> query,
+        Query<Data<UINode, UIMouseAction, PluginEntity>, Changed<UIMouseAction>> queryChanged,
+        Query<Data<UINode, UIMouseAction, PluginEntity>> query,
         Query<Data<UIEvent>, With<Parent>> queryEvents,
         Query<Data<Children>> children,
         Query<Data<Parent>, With<UINode>> queryUIParents,
@@ -701,7 +701,7 @@ internal readonly struct ModdingPlugin : IPlugin
 
 
 
-        foreach ((var ent, var node, var mouseAction, var pluginEnt, var events) in queryChanged)
+        foreach ((var ent, var node, var mouseAction, var pluginEnt) in queryChanged)
         {
             EventType? eventType = mouseAction.Ref.State switch
             {
@@ -721,7 +721,7 @@ internal readonly struct ModdingPlugin : IPlugin
                 continue;
 
 
-            var result2 = sendEventForId(
+            var result = sendEventForId(
                 ent.Ref.ID,
                 queryEvents,
                 children,
@@ -731,14 +731,14 @@ internal readonly struct ModdingPlugin : IPlugin
                 pluginEnt.Ref.Mod
             );
 
+            if (!result)
+                continue;
 
             var parentId = ent.Ref.ID;
             while (queryUIParents.Contains(parentId))
             {
                 (_, var parent) = queryUIParents.Get(parentId);
-                Console.WriteLine(parent.Ref.Id);
-
-                var result = sendEventForId(
+                result = sendEventForId(
                     parent.Ref.Id,
                     queryEvents,
                     children,
@@ -748,101 +748,12 @@ internal readonly struct ModdingPlugin : IPlugin
                     pluginEnt.Ref.Mod
                 );
 
+                // block the events propagation
+                if (!result)
+                    break;
+
                 parentId = parent.Ref.Id;
             }
-
-            // // // There are no events associated to this entity.
-            // // // We need to traverse all parents and sends events to them
-            // if (!events.IsValid() || events.Ref.Count == 0)
-            // {
-            //     // try to send events to the anchestors of this node
-
-
-            //     continue;
-            // }
-
-
-
-            // // send events associated to this element only
-            // foreach (var ev in events.Ref)
-            // {
-            //     // check if the entity has attached events to it
-            //     if (!queryEvents.Contains(ev))
-            //     {
-            //         continue;
-            //     }
-
-            //     (var eventId, var uiEv) = queryEvents.Get(ev);
-
-            //     if (eventType.HasValue && uiEv.Ref.EventType == eventType.Value)
-            //     {
-            //         if (pluginEnt.Ref.Mod.Plugin.FunctionExists("on_ui_event"))
-            //         {
-            //             var json = (uiEv.Ref with
-            //             {
-            //                 EntityId = ent.Ref.ID,
-            //                 EventId = eventId.Ref.ID,
-            //                 X = mousePos.X,
-            //                 Y = mousePos.Y,
-            //                 Wheel = mouseCtx.Value.Wheel,
-            //                 MouseButton = mouseAction.Ref.Button,
-            //             }).ToJson();
-
-            //             var result = pluginEnt.Ref.Mod.Plugin.Call("on_ui_event", json);
-            //             if (result == "0")
-            //             {
-            //                 Console.WriteLine("on_ui_event returned 0, stopping event propagation");
-            //                 break;
-            //             }
-            //         }
-
-            //         // var parentId = ent.Ref.ID;
-            //         // while (queryUIParents.Contains(parentId))
-            //         // {
-            //         //     (_, var parent) = queryUIParents.Get(parentId);
-            //         //     Console.WriteLine(parent.Ref.Id);
-
-            //         //     var result = sendEventForId(
-            //         //         parent.Ref.Id,
-            //         //         queryEvents,
-            //         //         children,
-            //         //         mouseCtx,
-            //         //         mouseAction.Ref.Button,
-            //         //         pluginEnt.Ref.Mod
-            //         //     );
-
-            //         //     parentId = parent.Ref.Id;
-            //         // }
-
-            //         // find all ancestors of the entity and propagate the same event
-            //         // var parentId = ent.Ref.ID;
-            //         // while (queryUIParents.Contains(parentId))
-            //         // {
-            //         //     (_, var parent) = queryUIParents.Get(parentId);
-            //         //     Console.WriteLine(parent.Ref.Id);
-
-            //         //     // push the event
-            //         //     var json = (uiEv.Ref with
-            //         //     {
-            //         //         EntityId = parentId,
-            //         //         EventId = eventId.Ref.ID,
-            //         //         X = mousePos.X,
-            //         //         Y = mousePos.Y,
-            //         //         Wheel = mouseCtx.Value.Wheel,
-            //         //         MouseButton = mouseAction.Ref.Button,
-            //         //     }).ToJson();
-
-            //         //     var result = pluginEnt.Ref.Mod.Plugin.Call("on_ui_event", json);
-            //         //     if (result == "0")
-            //         //     {
-            //         //         Console.WriteLine("on_ui_event returned 0, stopping event propagation");
-            //         //         break;
-            //         //     }
-
-            //         //     parentId = parent.Ref.Id;
-            //         // }
-            //     }
-            // }
         }
 
         // foreach ((var ent, var node, var mouseAction, var pluginEnt, var events) in query)
