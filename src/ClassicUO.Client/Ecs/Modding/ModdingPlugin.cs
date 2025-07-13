@@ -286,6 +286,7 @@ internal readonly struct ModdingPlugin : IPlugin
                             .Set(new UINode() {
                                 // TODO: missing some config
                                 Config = {
+                                    id = node.Config.Id.HasValue && !string.IsNullOrEmpty(node.Config.Id.Value.StringId) ? Clay.Id(node.Config.Id.Value.StringId) : default,
                                     layout = node.Config.Layout ?? default,
                                     backgroundColor = node.Config.BackgroundColor ?? default,
                                     cornerRadius = node.Config.CornerRadius ?? default,

@@ -78,7 +78,7 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                     }
                 }
 
-                if (lastMouseAction is { State: UIInteractionState.Pressed, Button: MouseButtonType.Left }  && queryTextInput.Contains(found))
+                if (lastMouseAction is { State: UIInteractionState.Pressed, Button: MouseButtonType.Left } && queryTextInput.Contains(found))
                 {
                     focusedInput.Value.Entity = found;
                 }
@@ -365,59 +365,105 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                     {
                         if (lastPressed == ent)
                         {
+                            var done = false;
                             for (var button = MouseButtonType.None + 1; button < MouseButtonType.Size; button++)
                             {
                                 newInteraction.Button = MouseButtonType.None;
+
                                 if ((mouseCtx.IsPressed(button) && interaction.State == UIInteractionState.Pressed) || // still pressed from the previous frame
                                      mouseCtx.IsPressedOnce(button)) // pressed for the first time
                                 {
                                     found = ent;
-
                                     newInteraction.State = UIInteractionState.Pressed;
                                     newInteraction.Button = button;
+                                    done = true;
+                                    Console.WriteLine("setting pressed");
                                     break;
                                 }
 
-                                if (interaction.State == UIInteractionState.Pressed && interaction.Button == button)
+                                if (interaction.State == UIInteractionState.Pressed)
                                 {
+                                    if (interaction.Button != button)
+                                    {
+                                        continue;
+                                    }
+
                                     found = ent;
                                     newInteraction.State = UIInteractionState.Released;
                                     newInteraction.Button = button;
+                                    done = true;
+                                    Console.WriteLine("setting released");
                                     break;
                                 }
+                            }
 
-                                if (interaction.State == UIInteractionState.Over)
+                            if (!done)
+                            {
+                                if (interaction.State == UIInteractionState.Over && !Clay.IsHovered())
                                 {
                                     found = ent;
                                     newInteraction.State = Clay.IsHovered() ? UIInteractionState.Over : UIInteractionState.Left;
                                     newInteraction.Button = MouseButtonType.None;
+                                    Console.WriteLine("setting left 1");
+                                    done = true;
                                 }
                             }
                         }
                     }
                     else
                     {
-                        var foundAnOveredElement = false;
+                        var isPressing = false;
                         for (var button = MouseButtonType.None + 1; button < MouseButtonType.Size; button++)
                         {
-                            if (!mouseCtx.IsPressed(button) && Clay.IsHovered())
+                            if (mouseCtx.IsPressedOnce(button))
                             {
-                                found = ent;
-                                foundAnOveredElement = true;
+                                isPressing = true;
+                                if (Clay.IsHovered())
+                                {
+                                    found = ent;
+                                    interaction.State = UIInteractionState.Pressed;
+                                    interaction.Button = MouseButtonType.None; // trick to update the found ent
 
+                                    newInteraction.State = UIInteractionState.Pressed;
+                                    newInteraction.Button = button;
+
+                                    Console.WriteLine("setting start pressing");
+                                }
                                 break;
                             }
                         }
 
-                        if (foundAnOveredElement)
+                        if (!isPressing)
                         {
-                            newInteraction.State = UIInteractionState.Over;
-                            newInteraction.Button = MouseButtonType.None;
+                            if (Clay.IsHovered())
+                            {
+                                if (interaction.State != UIInteractionState.Over)
+                                {
+                                    found = ent;
+                                    newInteraction.State = UIInteractionState.Over;
+                                    newInteraction.Button = MouseButtonType.None;
+
+                                    Console.WriteLine("setting over");
+                                }
+                            }
+                            else
+                            {
+                                if (interaction.State == UIInteractionState.Over)
+                                {
+                                    found = ent;
+                                    newInteraction.State = UIInteractionState.Left;
+                                    newInteraction.Button = MouseButtonType.None;
+
+                                    Console.WriteLine("setting left");
+                                }
+                            }
                         }
                     }
 
                     if (interaction.State != UIInteractionState.None)
                     {
+                        // interaction.State = UIInteractionState.None;
+                        // interaction.Button = MouseButtonType.None;
                         // ent.Set(new UIMouseAction());
                     }
                 }
