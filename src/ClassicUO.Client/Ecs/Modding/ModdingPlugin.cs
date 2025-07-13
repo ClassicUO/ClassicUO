@@ -286,7 +286,7 @@ internal readonly struct ModdingPlugin : IPlugin
                             .Set(new UINode() {
                                 // TODO: missing some config
                                 Config = {
-                                    id = node.Config.Id.HasValue && !string.IsNullOrEmpty(node.Config.Id.Value.StringId) ? Clay.Id(node.Config.Id.Value.StringId) : default,
+                                    id = Clay.Id(node.Id.ToString()),
                                     layout = node.Config.Layout ?? default,
                                     backgroundColor = node.Config.BackgroundColor ?? default,
                                     cornerRadius = node.Config.CornerRadius ?? default,
@@ -321,8 +321,8 @@ internal readonly struct ModdingPlugin : IPlugin
                         if (node.Movable)
                             ent.Add<UIMovable>();
 
-                        if (node.AcceptInputs)
-                            ent.Set(new UIMouseAction());
+                        // if (node.AcceptInputs)
+                        ent.Set(new UIMouseAction());
 
                         if (node.WidgetType == ClayWidgetType.TextInput)
                             ent.Add<TextInput>();
@@ -636,9 +636,10 @@ internal readonly struct ModdingPlugin : IPlugin
     }
 
     private static void SendUIEvents(
-        Query<Data<UINode, UIMouseAction, PluginEntity, Children>, Changed<UIMouseAction>> queryChanged,
-        Query<Data<UINode, UIMouseAction, PluginEntity, Children>> query,
+        Query<Data<UINode, UIMouseAction, PluginEntity, Children>, Filter<Changed<UIMouseAction>, Optional<Children>>> queryChanged,
+        Query<Data<UINode, UIMouseAction, PluginEntity, Children>, Optional<Children>> query,
         Query<Data<UIEvent>, With<Parent>> queryEvents,
+        Query<Data<Children>> children,
         Query<Data<Parent>, With<UINode>> queryUIParents,
         Res<MouseContext> mouseCtx,
         Res<KeyboardContext> keyboardCtx
@@ -646,141 +647,317 @@ internal readonly struct ModdingPlugin : IPlugin
     {
         var isDragging = mouseCtx.Value.PositionOffset.Length() > 1;
         var mousePos = mouseCtx.Value.Position;
-        foreach ((var ent, var node, var mouseAction, var pluginEnt, var children) in queryChanged)
+
+        static bool sendEventForId(
+            ulong id,
+            Query<Data<UIEvent>, With<Parent>> queryEvents,
+            Query<Data<Children>> queryChildren,
+            MouseContext mouseCtx,
+            EventType eventType,
+            MouseButtonType button,
+            Mod mod
+        )
         {
-            EventType? ev = mouseAction.Ref switch
+            // check if there is any child event
+            if (!queryChildren.Contains(id))
+                return true;
+
+            (_, var children) = queryChildren.Get(id);
+
+            foreach (var child in children.Ref)
             {
-                { State: UIInteractionState.Pressed } => (EventType.OnMousePressed),
-                { State: UIInteractionState.Released } => (EventType.OnMouseReleased),
-                { State: UIInteractionState.Over } => (EventType.OnMouseEnter),
-                { State: UIInteractionState.Left } => (EventType.OnMouseLeave),
-                _ => ((EventType?)null)
+                // check if child is an event
+                if (!queryEvents.Contains(child))
+                    return true;
+
+                (var eventId, var uiEv) = queryEvents.Get(child);
+
+                if (uiEv.Ref.EventType != eventType)
+                {
+                    continue;
+                }
+
+                // push the event
+                var json = (uiEv.Ref with
+                {
+                    EntityId = id,
+                    EventId = eventId.Ref.ID,
+                    X = mouseCtx.Position.X,
+                    Y = mouseCtx.Position.Y,
+                    Wheel = mouseCtx.Wheel,
+                    MouseButton = button,
+                }).ToJson();
+
+                var result = mod.Plugin.Call("on_ui_event", json);
+                if (result == "0")
+                {
+                    Console.WriteLine("on_ui_event returned 0, stopping event propagation");
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+
+
+        foreach ((var ent, var node, var mouseAction, var pluginEnt, var events) in queryChanged)
+        {
+            EventType? eventType = mouseAction.Ref.State switch
+            {
+                UIInteractionState.Pressed => EventType.OnMousePressed,
+                UIInteractionState.Released => EventType.OnMouseReleased,
+                UIInteractionState.Over => EventType.OnMouseEnter,
+                UIInteractionState.Left => EventType.OnMouseLeave,
+                _ => null
             };
 
             if (mouseCtx.Value.IsPressedDouble(mouseAction.Ref.Button))
             {
-                ev = EventType.OnMouseDoubleClick;
+                eventType = EventType.OnMouseDoubleClick;
             }
 
-            if (ev == null)
+            if (eventType == null)
                 continue;
 
-            foreach (var child in children.Ref)
+
+            var result2 = sendEventForId(
+                ent.Ref.ID,
+                queryEvents,
+                children,
+                mouseCtx,
+                eventType.Value,
+                mouseAction.Ref.Button,
+                pluginEnt.Ref.Mod
+            );
+
+
+            var parentId = ent.Ref.ID;
+            while (queryUIParents.Contains(parentId))
             {
-                if (!queryEvents.Contains(child))
-                    continue;
+                (_, var parent) = queryUIParents.Get(parentId);
+                Console.WriteLine(parent.Ref.Id);
 
-                (var eventId, var uiEv) = queryEvents.Get(child);
+                var result = sendEventForId(
+                    parent.Ref.Id,
+                    queryEvents,
+                    children,
+                    mouseCtx,
+                    eventType.Value,
+                    mouseAction.Ref.Button,
+                    pluginEnt.Ref.Mod
+                );
 
-                if (!ev.HasValue || uiEv.Ref.EventType != ev.Value)
-                {
-                    continue;
-                }
-
-                if (!pluginEnt.Ref.Mod.Plugin.FunctionExists("on_ui_event"))
-                {
-                    continue;
-                }
-
-                var json = (uiEv.Ref with
-                {
-                    EntityId = ent.Ref.ID,
-                    EventId = eventId.Ref.ID,
-                    X = mousePos.X,
-                    Y = mousePos.Y,
-                    Wheel = mouseCtx.Value.Wheel,
-                    MouseButton = mouseAction.Ref.Button,
-                }).ToJson();
-
-                var result = pluginEnt.Ref.Mod.Plugin.Call("on_ui_event", json);
-                if (result == "0")
-                {
-                    Console.WriteLine("on_ui_event returned 0, stopping event propagation");
-                    break;
-                }
-
-
-                // find all ancestors of the entity
-
-                var parentId = ent.Ref.ID;
-                while (queryUIParents.Contains(parentId))
-                {
-                    (_, var parent) = queryUIParents.Get(parentId);
-                    Console.WriteLine(parent.Ref.Id);
-
-                    // push the event
-                    json = (uiEv.Ref with
-                    {
-                        EntityId = parentId,
-                        EventId = eventId.Ref.ID,
-                        X = mousePos.X,
-                        Y = mousePos.Y,
-                        Wheel = mouseCtx.Value.Wheel,
-                        MouseButton = mouseAction.Ref.Button,
-                    }).ToJson();
-
-                    result = pluginEnt.Ref.Mod.Plugin.Call("on_ui_event", json);
-                    if (result == "0")
-                    {
-                        Console.WriteLine("on_ui_event returned 0, stopping event propagation");
-                        break;
-                    }
-
-                    parentId = parent.Ref.Id;
-                }
-
+                parentId = parent.Ref.Id;
             }
+
+            // // // There are no events associated to this entity.
+            // // // We need to traverse all parents and sends events to them
+            // if (!events.IsValid() || events.Ref.Count == 0)
+            // {
+            //     // try to send events to the anchestors of this node
+
+
+            //     continue;
+            // }
+
+
+
+            // // send events associated to this element only
+            // foreach (var ev in events.Ref)
+            // {
+            //     // check if the entity has attached events to it
+            //     if (!queryEvents.Contains(ev))
+            //     {
+            //         continue;
+            //     }
+
+            //     (var eventId, var uiEv) = queryEvents.Get(ev);
+
+            //     if (eventType.HasValue && uiEv.Ref.EventType == eventType.Value)
+            //     {
+            //         if (pluginEnt.Ref.Mod.Plugin.FunctionExists("on_ui_event"))
+            //         {
+            //             var json = (uiEv.Ref with
+            //             {
+            //                 EntityId = ent.Ref.ID,
+            //                 EventId = eventId.Ref.ID,
+            //                 X = mousePos.X,
+            //                 Y = mousePos.Y,
+            //                 Wheel = mouseCtx.Value.Wheel,
+            //                 MouseButton = mouseAction.Ref.Button,
+            //             }).ToJson();
+
+            //             var result = pluginEnt.Ref.Mod.Plugin.Call("on_ui_event", json);
+            //             if (result == "0")
+            //             {
+            //                 Console.WriteLine("on_ui_event returned 0, stopping event propagation");
+            //                 break;
+            //             }
+            //         }
+
+            //         // var parentId = ent.Ref.ID;
+            //         // while (queryUIParents.Contains(parentId))
+            //         // {
+            //         //     (_, var parent) = queryUIParents.Get(parentId);
+            //         //     Console.WriteLine(parent.Ref.Id);
+
+            //         //     var result = sendEventForId(
+            //         //         parent.Ref.Id,
+            //         //         queryEvents,
+            //         //         children,
+            //         //         mouseCtx,
+            //         //         mouseAction.Ref.Button,
+            //         //         pluginEnt.Ref.Mod
+            //         //     );
+
+            //         //     parentId = parent.Ref.Id;
+            //         // }
+
+            //         // find all ancestors of the entity and propagate the same event
+            //         // var parentId = ent.Ref.ID;
+            //         // while (queryUIParents.Contains(parentId))
+            //         // {
+            //         //     (_, var parent) = queryUIParents.Get(parentId);
+            //         //     Console.WriteLine(parent.Ref.Id);
+
+            //         //     // push the event
+            //         //     var json = (uiEv.Ref with
+            //         //     {
+            //         //         EntityId = parentId,
+            //         //         EventId = eventId.Ref.ID,
+            //         //         X = mousePos.X,
+            //         //         Y = mousePos.Y,
+            //         //         Wheel = mouseCtx.Value.Wheel,
+            //         //         MouseButton = mouseAction.Ref.Button,
+            //         //     }).ToJson();
+
+            //         //     var result = pluginEnt.Ref.Mod.Plugin.Call("on_ui_event", json);
+            //         //     if (result == "0")
+            //         //     {
+            //         //         Console.WriteLine("on_ui_event returned 0, stopping event propagation");
+            //         //         break;
+            //         //     }
+
+            //         //     parentId = parent.Ref.Id;
+            //         // }
+            //     }
+            // }
         }
 
-        foreach ((var ent, var node, var mouseAction, var pluginEnt, var children) in query)
-        {
-            EventType? ev = mouseAction.Ref switch
-            {
-                { State: UIInteractionState.Pressed } when isDragging && mouseCtx.Value.IsPressed(mouseAction.Ref.Button) => (EventType.OnDragging),
+        // foreach ((var ent, var node, var mouseAction, var pluginEnt, var events) in query)
+        // {
+        //     EventType? ev = mouseAction.Ref switch
+        //     {
+        //         { State: UIInteractionState.Pressed } when isDragging && mouseCtx.Value.IsPressed(mouseAction.Ref.Button) => (EventType.OnDragging),
 
-                // this will get spammed all the time, not sure how much worth it is
-                { State: UIInteractionState.Over } when mouseCtx.Value.Wheel != 0 => (EventType.OnMouseWheel),
-                { State: UIInteractionState.Over } => (EventType.OnMouseOver),
-                _ => ((EventType?)null)
-            };
+        //         // this will get spammed all the time, not sure how much worth it is
+        //         { State: UIInteractionState.Over } when mouseCtx.Value.Wheel != 0 => (EventType.OnMouseWheel),
+        //         { State: UIInteractionState.Over } => (EventType.OnMouseOver),
+        //         _ => ((EventType?)null)
+        //     };
 
-            if (ev == null)
-                continue;
+        //     var pid = ent.Ref.ID;
 
-            foreach (var child in children.Ref)
-            {
-                if (!queryEvents.Contains(child))
-                    continue;
+        //     if (ev == null)
+        //         continue;
 
-                (var eventId, var uiEv) = queryEvents.Get(child);
+        //     if (ent.Ref.Has<Text>())
+        //     {
+        //         ref var t = ref ent.Ref.Get<Text>();
 
-                if (!ev.HasValue || uiEv.Ref.EventType != ev.Value)
-                {
-                    continue;
-                }
+        //         Console.WriteLine(t.Value);
+        //     }
 
-                if (!pluginEnt.Ref.Mod.Plugin.FunctionExists("on_ui_event"))
-                {
-                    continue;
-                }
 
-                var json = (uiEv.Ref with
-                {
-                    EntityId = ent.Ref.ID,
-                    EventId = eventId.Ref.ID,
-                    X = mousePos.X,
-                    Y = mousePos.Y,
-                    Wheel = mouseCtx.Value.Wheel,
-                    MouseButton = mouseAction.Ref.Button,
-                }).ToJson();
+        //     if (!events.IsValid() || events.Ref.Count == 0)
+        //     {
+        //         // parse anchestors
+        //         var parentId = ent.Ref.ID;
+        //         while (queryUIParents.Contains(parentId))
+        //         {
+        //             (_, var parent) = queryUIParents.Get(parentId);
+        //             Console.WriteLine(parent.Ref.Id);
 
-                if (pluginEnt.Ref.Mod.Plugin.Call("on_ui_event", json) == "0")
-                {
-                    Console.WriteLine("on_ui_event returned 0, stopping event propagation");
-                    break;
-                }
-            }
-        }
+        //             var result = sendEventForId(
+        //                 parent.Ref.Id,
+        //                 queryEvents,
+        //                 children,
+        //                 mouseCtx,
+        //                 mouseAction.Ref.Button,
+        //                 pluginEnt.Ref.Mod
+        //             );
+
+        //             parentId = parent.Ref.Id;
+        //         }
+
+        //         continue;
+        //     }
+
+        //     foreach (var child in events.Ref)
+        //     {
+        //         if (!queryEvents.Contains(child))
+        //             continue;
+
+        //         (var eventId, var uiEv) = queryEvents.Get(child);
+
+        //         if (!ev.HasValue || uiEv.Ref.EventType != ev.Value)
+        //         {
+        //             continue;
+        //         }
+
+        //         if (!pluginEnt.Ref.Mod.Plugin.FunctionExists("on_ui_event"))
+        //         {
+        //             continue;
+        //         }
+
+        //         var json = (uiEv.Ref with
+        //         {
+        //             EntityId = ent.Ref.ID,
+        //             EventId = eventId.Ref.ID,
+        //             X = mousePos.X,
+        //             Y = mousePos.Y,
+        //             Wheel = mouseCtx.Value.Wheel,
+        //             MouseButton = mouseAction.Ref.Button,
+        //         }).ToJson();
+
+        //         var result = pluginEnt.Ref.Mod.Plugin.Call("on_ui_event", json);
+        //         if (result == "0")
+        //         {
+        //             Console.WriteLine("on_ui_event returned 0, stopping event propagation");
+        //             break;
+        //         }
+
+        //         // find all ancestors of the entity
+        //         var parentId = ent.Ref.ID;
+        //         while (queryUIParents.Contains(parentId))
+        //         {
+        //             (_, var parent) = queryUIParents.Get(parentId);
+        //             Console.WriteLine(parent.Ref.Id);
+
+        //             // push the event
+        //             json = (uiEv.Ref with
+        //             {
+        //                 EntityId = parentId,
+        //                 EventId = eventId.Ref.ID,
+        //                 X = mousePos.X,
+        //                 Y = mousePos.Y,
+        //                 Wheel = mouseCtx.Value.Wheel,
+        //                 MouseButton = mouseAction.Ref.Button,
+        //             }).ToJson();
+
+        //             result = pluginEnt.Ref.Mod.Plugin.Call("on_ui_event", json);
+        //             if (result == "0")
+        //             {
+        //                 Console.WriteLine("on_ui_event returned 0, stopping event propagation");
+        //                 break;
+        //             }
+
+        //             parentId = parent.Ref.Id;
+        //         }
+        //     }
+        // }
+
     }
 
 
