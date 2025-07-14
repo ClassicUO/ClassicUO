@@ -173,7 +173,7 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
     {
         foreach ((var characterInfo, var interaction) in query)
         {
-            if (interaction.Ref is { State: UIInteractionState.Released, Button: MouseButtonType.Left })
+            if (interaction.Ref is { IsPressed: true, Button: MouseButtonType.Left })
             {
                 network.Value.Send_SelectCharacter(
                     characterInfo.Ref.Index,

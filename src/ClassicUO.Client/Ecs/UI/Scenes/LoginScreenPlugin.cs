@@ -147,7 +147,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
     {
         foreach ((var interaction, var action) in query)
         {
-            if (interaction.Ref is not { State: UIInteractionState.Released, Button: MouseButtonType.Left })
+            if (interaction.Ref is not { WasPressed: true, IsPressed: false, Button: MouseButtonType.Left })
             {
                 continue;
             }

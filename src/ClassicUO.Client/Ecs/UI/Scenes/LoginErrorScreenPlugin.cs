@@ -221,7 +221,7 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
     {
         foreach ((var buttonType, var interaction) in query)
         {
-            if (interaction.Ref.State != UIInteractionState.Released)
+            if (!interaction.Ref.IsPressed)
                 continue;
 
             if (buttonType.Ref == LoginButtons.Ok)

@@ -19,6 +19,13 @@ public static class Clay
 
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static unsafe ReadOnlySpan<Clay_ElementId> GetPointerOverIds()
+    {
+        var array = ClayInterop.Clay_GetPointerOverIds();
+        return new ReadOnlySpan<Clay_ElementId>(array.internalArray, array.length);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static int GetMaxElementCount()
     {
         return ClayInterop.Clay_GetMaxElementCount();

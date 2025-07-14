@@ -264,17 +264,14 @@ internal readonly struct GameScreenPlugin : IPlugin
         (var nodeBorder, var interaction) = queryGameWindowBorder.Get();
         (var nodeBorderResize, var interactionResize) = queryGameWindowBorderResize.Get();
 
-        if (interaction.Ref.State == UIInteractionState.Pressed)
+
+        if (interaction.Ref is { IsPressed: true, Button: Input.MouseButtonType.Left })
         {
-            // TODO: check mouse button
-            if (mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
-            {
-                camera.Value.Bounds.X += (int)mouseCtx.Value.PositionOffset.X;
-                camera.Value.Bounds.Y += (int)mouseCtx.Value.PositionOffset.Y;
-            }
+            camera.Value.Bounds.X += (int)mouseCtx.Value.PositionOffset.X;
+            camera.Value.Bounds.Y += (int)mouseCtx.Value.PositionOffset.Y;
         }
 
-        if (interactionResize.Ref.State == UIInteractionState.Pressed && mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
+        if (interactionResize.Ref.IsPressed && mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
         {
             ref var newBounds = ref lastSize.Value;
             newBounds.Width += (int)mouseCtx.Value.PositionOffset.X;
@@ -350,7 +347,7 @@ internal readonly struct GameScreenPlugin : IPlugin
     {
         foreach ((var node, var interaction, var action) in query)
         {
-            if (interaction.Ref is { State: UIInteractionState.Released, Button: Input.MouseButtonType.Left })
+            if (interaction.Ref is { WasPressed: true, IsPressed: false, Button: Input.MouseButtonType.Left })
             {
                 switch (action.Ref)
                 {

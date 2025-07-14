@@ -172,7 +172,7 @@ internal readonly struct ServerSelectionPlugin : IPlugin
     {
         foreach ((var serverInfo, var interaction) in query)
         {
-            if (interaction.Ref is { State: UIInteractionState.Released, Button: MouseButtonType.Left })
+            if (interaction.Ref is { WasPressed: true, IsPressed: false, Button: MouseButtonType.Left })
             {
                 network.Value.Send_SelectServer((byte)serverInfo.Ref.Index);
             }

@@ -117,8 +117,8 @@ internal readonly struct GuiPlugin : IPlugin
         {
             node.Ref.UOConfig.Id = interaction.Ref switch
             {
-                { State: UIInteractionState.Over } => button.Ref.Over,
-                { State: UIInteractionState.Pressed, Button: MouseButtonType.Left } => button.Ref.Pressed,
+                { IsPressed: false, WasPressed: false, IsHovered: true } => button.Ref.Over,
+                { IsPressed: true, Button: MouseButtonType.Left } => button.Ref.Pressed,
                 _ => button.Ref.Normal
             };
         }
@@ -173,11 +173,30 @@ internal readonly struct GuiPlugin : IPlugin
     {
         foreach ((var node, var interaction) in query)
         {
-            if (interaction.Ref is { State: UIInteractionState.Pressed, Button: MouseButtonType.Left })
+            // if (interaction.Ref is { State: UIInteractionState.Pressed, Button: MouseButtonType.Left })
+
+            if (interaction.Ref is { IsPressed: true, Button: MouseButtonType.Left })
             {
                 node.Ref.Config.floating.offset.x += mouseCtx.Value.PositionOffset.X;
                 node.Ref.Config.floating.offset.y += mouseCtx.Value.PositionOffset.Y;
             }
+        }
+    }
+
+
+    private static void HandleNodeStates(
+        Res<MouseContext> mouseCtx,
+        Query<Data<UINode, Text, UIMouseAction, Children>,
+              Filter<Without<Parent>, Optional<Text>, Optional<UIMouseAction>, Optional<Children>>> queryMainNodes,
+        Query<Data<UINode, Text, UIMouseAction, Children>,
+              Filter<With<Parent>, Optional<Text>, Optional<UIMouseAction>, Optional<Children>>> queryChildren
+    )
+    {
+        foreach ((var ent, var node, var text, var mouseAction, var children) in queryMainNodes)
+        {
+            var isOpen = Clay.IsPointerOver(Clay.Id(ent.Ref.ID.ToString()));
+
+
         }
     }
 }
@@ -199,7 +218,9 @@ enum UIInteractionState : byte
 
 struct UIMouseAction
 {
-    public UIInteractionState State;
+    // public UIInteractionState State, OldState;
+    public bool WasHovered, IsHovered;
+    public bool WasPressed, IsPressed;
     public MouseButtonType Button;
 }
 

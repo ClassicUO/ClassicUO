@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
@@ -286,7 +287,7 @@ internal readonly struct ModdingPlugin : IPlugin
                             .Set(new UINode() {
                                 // TODO: missing some config
                                 Config = {
-                                    id = Clay.Id(node.Id.ToString()),
+                                    // id = Clay.Id(node.Id.ToString()),
                                     layout = node.Config.Layout ?? default,
                                     backgroundColor = node.Config.BackgroundColor ?? default,
                                     cornerRadius = node.Config.CornerRadius ?? default,
@@ -694,21 +695,35 @@ internal readonly struct ModdingPlugin : IPlugin
                     Console.WriteLine("on_ui_event returned 0, stopping event propagation");
                     return false;
                 }
+
+                Console.WriteLine("event {0} sent to {1}", eventId.Ref.ID, id);
             }
 
             return true;
         }
 
+        static List<ulong> getHierarchy(ulong parentId, Query<Data<Parent>, With<UINode>> queryUIParents)
+        {
+            var list = new List<ulong>();
+            while (queryUIParents.Contains(parentId))
+            {
+                (_, var parent) = queryUIParents.Get(parentId);
 
+                list.Add(parentId);
+                parentId = parent.Ref.Id;
+            }
+
+            return list;
+        }
 
         foreach ((var ent, var node, var mouseAction, var pluginEnt) in queryChanged)
         {
-            EventType? eventType = mouseAction.Ref.State switch
+            EventType? eventType = mouseAction.Ref switch
             {
-                UIInteractionState.Pressed => EventType.OnMousePressed,
-                UIInteractionState.Released => EventType.OnMouseReleased,
-                UIInteractionState.Over => EventType.OnMouseEnter,
-                UIInteractionState.Left => EventType.OnMouseLeave,
+                { IsPressed: true, WasPressed: false, IsHovered: true } => EventType.OnMousePressed,
+                { IsPressed: false, WasPressed: true } => EventType.OnMouseReleased,
+                { IsHovered: true, WasHovered: false } => EventType.OnMouseEnter,
+                { IsHovered: false, WasHovered: true } => EventType.OnMouseLeave,
                 _ => null
             };
 
@@ -720,6 +735,34 @@ internal readonly struct ModdingPlugin : IPlugin
             if (eventType == null)
                 continue;
 
+
+            // var hierarchy = getHierarchy(ent.Ref.ID, queryUIParents);
+
+            // for (var i = hierarchy.Count - 1; i >= 0; i--)
+            // {
+            //     var result = sendEventForId(
+            //         hierarchy[i],
+            //         queryEvents,
+            //         children,
+            //         mouseCtx,
+            //         eventType.Value,
+            //         mouseAction.Ref.Button,
+            //         pluginEnt.Ref.Mod
+            //     );
+            // }
+
+            // for (var i = 0; i < hierarchy.Count; i++)
+            // {
+            //     var result = sendEventForId(
+            //         hierarchy[i],
+            //         queryEvents,
+            //         children,
+            //         mouseCtx,
+            //         eventType.Value,
+            //         mouseAction.Ref.Button,
+            //         pluginEnt.Ref.Mod
+            //     );
+            // }
 
             var result = sendEventForId(
                 ent.Ref.ID,
