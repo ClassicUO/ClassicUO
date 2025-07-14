@@ -74,41 +74,40 @@ internal readonly struct ContainersPlugin : IPlugin
             else
             {
                 ref readonly var gumpInfo = ref assets.Value.Gumps.GetGump(ev.Graphic);
-                var ent = entitiesMap.Value.GetOrCreate(ev.Serial);
-                ent.Set
-                (
-                    new UINode()
-                    {
-                        Config =
+                var ent = entitiesMap.Value.GetOrCreate(ev.Serial)
+                    .SetUINode
+                    (
+                        new UINode()
                         {
-                            layout =
+                            Config =
                             {
-                                sizing =
+                                layout =
                                 {
-                                    width = Clay_SizingAxis.Fixed(gumpInfo.UV.Width),
-                                    height = Clay_SizingAxis.Fixed(gumpInfo.UV.Height),
+                                    sizing =
+                                    {
+                                        width = Clay_SizingAxis.Fixed(gumpInfo.UV.Width),
+                                        height = Clay_SizingAxis.Fixed(gumpInfo.UV.Height),
+                                    },
+                                    layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM
                                 },
-                                layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM
-                            },
-                            floating = {
-                                clipTo = Clay_FloatingClipToElement.CLAY_CLIP_TO_ATTACHED_PARENT,
-                                attachTo = Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT,
-                                offset = {
-                                    x = 0,
-                                    y = 0
+                                floating = {
+                                    clipTo = Clay_FloatingClipToElement.CLAY_CLIP_TO_ATTACHED_PARENT,
+                                    attachTo = Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT,
+                                    offset = {
+                                        x = 0,
+                                        y = 0
+                                    }
                                 }
+                            },
+                            UOConfig = {
+                                Type = ClayUOCommandType.Gump,
+                                Id = ev.Graphic,
+                                Hue = Vector3.UnitZ,
                             }
-                        },
-                        UOConfig = {
-                            Type = ClayUOCommandType.Gump,
-                            Id = ev.Graphic,
-                            Hue = Vector3.UnitZ,
                         }
-                    }
-                )
-                .Set(new UIMouseAction())
-                .Add<UIMovable>()
-                ;
+                    )
+                    .Set(new UIMouseAction())
+                    .Add<UIMovable>();
             }
         }
     }
@@ -172,74 +171,9 @@ internal readonly struct ContainersPlugin : IPlugin
 
             ref readonly var artInfo = ref assets.Value.Arts.GetArt((ushort)(graphic + graphicInc));
 
-            ent.Add<UIMovable>().Set(new UIMouseAction()).Set
-            (
-                new UINode()
-                {
-                    Config =
-                    {
-                        layout =
-                        {
-                            sizing =
-                            {
-                                width = Clay_SizingAxis.Fixed(artInfo.UV.Width),
-                                height = Clay_SizingAxis.Fixed(artInfo.UV.Height),
-                            },
-                            layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM
-                        },
-                        floating =
-                        {
-                            clipTo = Clay_FloatingClipToElement.CLAY_CLIP_TO_ATTACHED_PARENT,
-                            attachTo = Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT,
-                            offset =
-                            {
-                                x = x,
-                                y = y
-                            }
-                        }
-                    },
-                    UOConfig =
-                    {
-                        Type = ClayUOCommandType.Art,
-                        Id = (ushort)(graphic + graphicInc),
-                        Hue = new Vector3(hue, 1, 1),
-                    }
-                }
-            );
-        };
-
-        // update contained items
-        packets.Value[0x3C] = buffer =>
-        {
-            var reader = new StackDataReader(buffer);
-
-            var count = reader.ReadUInt16BE();
-
-            for (var i = 0; i < count; ++i)
-            {
-                var serial = reader.ReadUInt32BE();
-                var graphic = reader.ReadUInt16BE();
-                var graphicInc = reader.ReadUInt8();
-                var amount = Math.Max((ushort)1, reader.ReadUInt16BE());
-                (var x, var y) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
-                var gridIdx = gameCtx.Value.ClientVersion < ClientVersion.CV_6017 ?
-                    0 : reader.ReadUInt8();
-                var containerSerial = reader.ReadUInt32BE();
-                var hue = reader.ReadUInt16BE();
-
-                var parentEnt = entitiesMap.Value.GetOrCreate(containerSerial)
-                    .Add<IsContainer>();
-                var ent = entitiesMap.Value.GetOrCreate(serial);
-                ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
-                    .Set(new Hue() { Value = hue })
-                    .Set(new WorldPosition() { X = x, Y = y, Z = 0 })
-                    .Set(new Amount() { Value = amount })
-                    .Add<ContainedInto>();
-                parentEnt.AddChild(ent);
-
-                ref readonly var artInfo = ref assets.Value.Arts.GetArt((ushort)(graphic + graphicInc));
-
-                ent.Add<UIMovable>().Set(new UIMouseAction()).Set
+            ent.Add<UIMovable>()
+                .Set(new UIMouseAction())
+                .SetUINode
                 (
                     new UINode()
                     {
@@ -273,6 +207,75 @@ internal readonly struct ContainersPlugin : IPlugin
                         }
                     }
                 );
+        };
+
+        // update contained items
+        packets.Value[0x3C] = buffer =>
+        {
+            var reader = new StackDataReader(buffer);
+
+            var count = reader.ReadUInt16BE();
+
+            for (var i = 0; i < count; ++i)
+            {
+                var serial = reader.ReadUInt32BE();
+                var graphic = reader.ReadUInt16BE();
+                var graphicInc = reader.ReadUInt8();
+                var amount = Math.Max((ushort)1, reader.ReadUInt16BE());
+                (var x, var y) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
+                var gridIdx = gameCtx.Value.ClientVersion < ClientVersion.CV_6017 ?
+                    0 : reader.ReadUInt8();
+                var containerSerial = reader.ReadUInt32BE();
+                var hue = reader.ReadUInt16BE();
+
+                var parentEnt = entitiesMap.Value.GetOrCreate(containerSerial)
+                    .Add<IsContainer>();
+                var ent = entitiesMap.Value.GetOrCreate(serial);
+                ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
+                    .Set(new Hue() { Value = hue })
+                    .Set(new WorldPosition() { X = x, Y = y, Z = 0 })
+                    .Set(new Amount() { Value = amount })
+                    .Add<ContainedInto>();
+                parentEnt.AddChild(ent);
+
+                ref readonly var artInfo = ref assets.Value.Arts.GetArt((ushort)(graphic + graphicInc));
+
+                ent.Add<UIMovable>()
+                    .Set(new UIMouseAction())
+                    .SetUINode
+                    (
+                        new UINode()
+                        {
+                            Config =
+                            {
+                                layout =
+                                {
+                                    sizing =
+                                    {
+                                        width = Clay_SizingAxis.Fixed(artInfo.UV.Width),
+                                        height = Clay_SizingAxis.Fixed(artInfo.UV.Height),
+                                    },
+                                    layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM
+                                },
+                                floating =
+                                {
+                                    clipTo = Clay_FloatingClipToElement.CLAY_CLIP_TO_ATTACHED_PARENT,
+                                    attachTo = Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT,
+                                    offset =
+                                    {
+                                        x = x,
+                                        y = y
+                                    }
+                                }
+                            },
+                            UOConfig =
+                            {
+                                Type = ClayUOCommandType.Art,
+                                Id = (ushort)(graphic + graphicInc),
+                                Hue = new Vector3(hue, 1, 1),
+                            }
+                        }
+                    );
             }
         };
     }

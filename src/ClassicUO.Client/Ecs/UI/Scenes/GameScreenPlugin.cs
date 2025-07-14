@@ -51,7 +51,7 @@ internal readonly struct GameScreenPlugin : IPlugin
     private static void Setup(World world, Res<GumpBuilder> gumpBuilder, Res<ClayUOCommandBuffer> clay)
     {
         var root = world.Entity()
-            .Set(new UINode()
+            .SetUINode(new UINode()
             {
                 Config = {
                     backgroundColor = new (18f / 255f, 18f / 255f, 18f / 255f, 0f),
@@ -74,25 +74,8 @@ internal readonly struct GameScreenPlugin : IPlugin
             zIndex = -1
         };
 
-        // var gameWindowRoot = world.Entity()
-        //     .Set(new UINode()
-        //     {
-        //         Config = {
-        //             backgroundColor = new (0f, 0f, 0f, 0f),
-        //             layout = {
-        //                 sizing = {
-        //                     width = Clay_SizingAxis.Grow(),
-        //                     height = Clay_SizingAxis.Grow(),
-        //                 },
-        //                 layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
-        //                 padding = Clay_Padding.All(4),
-        //             }
-        //         }
-        //     })
-        //     .Add<GameScene>();
-
         var gameWindowBorder = world.Entity()
-            .Set(new UINode()
+            .SetUINode(new UINode()
             {
                 Config = {
                     backgroundColor = new (38f / 255f, 38f / 255f, 38f / 255f, 1),
@@ -110,7 +93,7 @@ internal readonly struct GameScreenPlugin : IPlugin
             .Add<GameScene>();
 
         var gameWindowBorderResize = world.Entity()
-            .Set(new UINode()
+            .SetUINode(new UINode()
             {
                 Config = {
                     backgroundColor = new (1f, 0f, 0f, 1),
@@ -128,7 +111,7 @@ internal readonly struct GameScreenPlugin : IPlugin
             .Add<GameScene>();
 
         var gameWindow = world.Entity()
-            .Set(new UINode()
+            .SetUINode(new UINode()
             {
                 Config = {
                     backgroundColor = new (1f, 1f, 1f, 1f),
@@ -147,7 +130,7 @@ internal readonly struct GameScreenPlugin : IPlugin
 
 
         var menuBar = world.Entity()
-            .Set(new UINode()
+            .SetUINode(new UINode()
             {
                 Config = {
                     backgroundColor = new (0f, 0f, 0f, 1),
@@ -172,7 +155,7 @@ internal readonly struct GameScreenPlugin : IPlugin
             .Add<GameScene>();
 
         var menuBarItem = world.Entity()
-            .Set(new UINode()
+            .SetUINode(new UINode()
             {
                 Config = {
                     backgroundColor = new (0f, 0f, 0.5f, 1),
@@ -203,7 +186,7 @@ internal readonly struct GameScreenPlugin : IPlugin
             .Add<GameScene>();
 
         var menuBarItem2 = world.Entity()
-            .Set(new UINode()
+            .SetUINode(new UINode()
             {
                 Config = {
                     backgroundColor = new (0f, 0f, 0.5f, 1),

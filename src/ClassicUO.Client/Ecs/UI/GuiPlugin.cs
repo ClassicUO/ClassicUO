@@ -85,6 +85,9 @@ internal readonly struct GuiPlugin : IPlugin
 
         var moveFocusedElementsByMouseFn = MoveFocusedElementsByMouse;
         scheduler.OnUpdate(moveFocusedElementsByMouseFn);
+
+        var handleNodeStatesFn = HandleNodeStates;
+        scheduler.OnFrameEnd(handleNodeStatesFn);
     }
 
 
@@ -186,22 +189,64 @@ internal readonly struct GuiPlugin : IPlugin
 
     private static void HandleNodeStates(
         Res<MouseContext> mouseCtx,
-        Query<Data<UINode, Text, UIMouseAction, Children>,
-              Filter<Without<Parent>, Optional<Text>, Optional<UIMouseAction>, Optional<Children>>> queryMainNodes,
-        Query<Data<UINode, Text, UIMouseAction, Children>,
-              Filter<With<Parent>, Optional<Text>, Optional<UIMouseAction>, Optional<Children>>> queryChildren
+        Query<Data<UINode, UIMouseAction>> query
     )
     {
-        foreach ((var ent, var node, var text, var mouseAction, var children) in queryMainNodes)
+        var pointerOverIds = Clay.GetPointerOverIds();
+        foreach ((var ent, var node, var interaction) in query)
         {
-            var isOpen = Clay.IsPointerOver(Clay.Id(ent.Ref.ID.ToString()));
+            var isHovered = containsId(node.Ref.Config.id, pointerOverIds);
 
+            interaction.Ref.WasHovered = interaction.Ref.IsHovered;
+            interaction.Ref.IsHovered = isHovered;
+            interaction.Ref.WasPressed = interaction.Ref.IsPressed;
+            var oldButton = interaction.Ref.Button;
 
+            MouseButtonType? buttonPressed = null;
+            for (var button = MouseButtonType.None + 1; button < MouseButtonType.Size; button++)
+            {
+                if ((isHovered && mouseCtx.Value.IsPressedOnce(button)) ||
+                    (interaction.Ref.WasPressed && mouseCtx.Value.IsPressed(button)))
+                {
+                    buttonPressed = button;
+                }
+            }
+
+            if (buttonPressed.HasValue)
+            {
+                interaction.Ref.IsPressed = true;
+                interaction.Ref.Button = buttonPressed.Value;
+            }
+            else
+            {
+                interaction.Ref.IsPressed = false;
+                interaction.Ref.Button = interaction.Ref.WasPressed ? interaction.Ref.Button : MouseButtonType.None;
+            }
+
+            var isChanged = interaction.Ref.WasPressed != interaction.Ref.IsPressed ||
+                            interaction.Ref.WasHovered != interaction.Ref.IsHovered ||
+                            interaction.Ref.Button != oldButton;
+
+            if (isChanged)
+            {
+                ent.Ref.Set(interaction.Ref);
+            }
+        }
+
+        static bool containsId(Clay_ElementId id, ReadOnlySpan<Clay_ElementId> pointerOverIds)
+        {
+            foreach (ref readonly var elemId in pointerOverIds)
+            {
+                if (elemId.id == id.id)
+                    return true;
+            }
+
+            return false;
         }
     }
 }
 
-struct UINode
+internal struct UINode
 {
     public Clay_ElementDeclaration Config;
     public ClayUOCommandData UOConfig;
@@ -311,4 +356,21 @@ internal sealed class ClayUOCommandBuffer
     }
 
     public int Count => _index;
+}
+
+internal static class GuiPluginEx
+{
+    /// <summary>
+    /// This function sets the UINode & UIMouseAction components
+    /// </summary>
+    /// <param name="ent"></param>
+    /// <param name="node"></param>
+    /// <returns></returns>
+    public static EntityView SetUINode(this EntityView ent, UINode node)
+    {
+        if (node.Config.id.id == 0)
+            node.Config.id = Clay.Id(ent.ID.ToString());
+
+        return ent.Set(node).Set(new UIMouseAction());
+    }
 }

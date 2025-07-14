@@ -76,8 +76,7 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                     mouseCtx,
                     commandBuffer,
                     queryChildren,
-                    pointerOverIds,
-                    containsId
+                    pointerOverIds
                 );
             }
 
@@ -360,8 +359,7 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                 Query<Data<UINode, Text, UIMouseAction, Children>,
                       Filter<With<Parent>, Optional<Text>, Optional<UIMouseAction>, Optional<Children>>> query,
 
-                ReadOnlySpan<Clay_ElementId> pointerOverIds,
-                Func<Clay_ElementId, ReadOnlySpan<Clay_ElementId>, bool> isPointerHover
+                ReadOnlySpan<Clay_ElementId> pointerOverIds
             )
             {
                 Clay.OpenElement();
@@ -377,48 +375,60 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                     config.clip.childOffset = Clay.GetScrollOffset();
                 }
 
-                config.id = Clay.Id(ent.ID.ToString());
+                // config.id = Clay.Id(ent.ID.ToString());
+                // var isHovered = containsId(config.id, pointerOverIds);
+
+                // if (!isHovered && Clay.IsHovered())
+                // {
+                //     isHovered = true;
+                // }
+
+                if (!Unsafe.IsNullRef(ref interaction) && interaction.IsHovered)
+                {
+                    config.backgroundColor.r = 1;
+                    config.backgroundColor.g = 0;
+                    config.backgroundColor.b = 0;
+                    config.backgroundColor.a = 1;
+                }
 
                 Clay.ConfigureOpenElement(config);
 
                 if (!Unsafe.IsNullRef(ref interaction))
                 {
-                    var isHovered = containsId(config.id, pointerOverIds);  //Clay.IsHovered();
+                    // interaction.WasHovered = interaction.IsHovered;
+                    // interaction.IsHovered = isHovered;
+                    // interaction.WasPressed = interaction.IsPressed;
+                    // var oldButton = interaction.Button;
 
-                    interaction.WasHovered = interaction.IsHovered;
-                    interaction.IsHovered = isHovered;
-                    interaction.WasPressed = interaction.IsPressed;
-                    var oldButton = interaction.Button;
+                    // MouseButtonType? buttonPressed = null;
+                    // for (var button = MouseButtonType.None + 1; button < MouseButtonType.Size; button++)
+                    // {
+                    //     if ((isHovered && mouseCtx.IsPressedOnce(button)) ||
+                    //         (interaction.WasPressed && mouseCtx.IsPressed(button)))
+                    //     {
+                    //         buttonPressed = button;
+                    //     }
+                    // }
 
-                    MouseButtonType? buttonPressed = null;
-                    for (var button = MouseButtonType.None + 1; button < MouseButtonType.Size; button++)
-                    {
-                        if ((isHovered && mouseCtx.IsPressedOnce(button)) ||
-                            (interaction.WasPressed && mouseCtx.IsPressed(button)))
-                        {
-                            buttonPressed = button;
-                        }
-                    }
+                    // if (buttonPressed.HasValue)
+                    // {
+                    //     interaction.IsPressed = true;
+                    //     interaction.Button = buttonPressed.Value;
+                    // }
+                    // else
+                    // {
+                    //     interaction.IsPressed = false;
+                    //     interaction.Button = interaction.WasPressed ? interaction.Button : MouseButtonType.None;
+                    // }
 
-                    if (buttonPressed.HasValue)
-                    {
-                        interaction.IsPressed = true;
-                        interaction.Button = buttonPressed.Value;
-                    }
-                    else
-                    {
-                        interaction.IsPressed = false;
-                        interaction.Button = interaction.WasPressed ? interaction.Button : MouseButtonType.None;
-                    }
+                    // var isChanged = interaction.WasPressed != interaction.IsPressed ||
+                    //                 interaction.WasHovered != interaction.IsHovered ||
+                    //                 interaction.Button != oldButton;
 
-                    var isChanged = interaction.WasPressed != interaction.IsPressed ||
-                                    interaction.WasHovered != interaction.IsHovered ||
-                                    interaction.Button != oldButton;
-
-                    if (isChanged)
-                    {
-                        ent.Set(interaction);
-                    }
+                    // if (isChanged)
+                    // {
+                    //     ent.Set(interaction);
+                    // }
 
                     // if (interaction.OldState != interaction.State)
                     // {
@@ -643,8 +653,7 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                             mouseCtx,
                             commandBuffer,
                             query,
-                            pointerOverIds,
-                            isPointerHover
+                            pointerOverIds
                         );
                     }
                 }

@@ -37,7 +37,7 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
     {
         var root = world.Entity()
             .Add<CharacterSelectionScene>()
-            .Set(new UINode()
+            .SetUINode(new UINode()
             {
                 Config = {
                     backgroundColor = new (0.2f, 0.2f, 0.2f, 1),
@@ -57,24 +57,24 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
 
         var characterSelectionLabel = world.Entity()
             .Add<CharacterSelectionScene>()
-            .Set(new UINode()
+            .SetUINode(new UINode()
             {
                 Config = {
-                    backgroundColor = new (0.3f, 0.3f, 0.3f, 1),
-                    layout = {
-                        sizing = {
-                            width = Clay_SizingAxis.Percent(0.5f),
-                            height = Clay_SizingAxis.Fit(0, 0),
-                        },
-                        layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
-                        childAlignment = {
-                            x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_LEFT,
-                            y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_TOP,
-                        },
-                        padding = Clay_Padding.All(8),
-                        childGap = 4
+                        backgroundColor = new (0.3f, 0.3f, 0.3f, 1),
+                        layout = {
+                            sizing = {
+                                width = Clay_SizingAxis.Percent(0.5f),
+                                height = Clay_SizingAxis.Fit(0, 0),
+                            },
+                            layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
+                            childAlignment = {
+                                x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_LEFT,
+                                y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_TOP,
+                            },
+                            padding = Clay_Padding.All(8),
+                            childGap = 4
+                        }
                     }
-                }
             })
             .Set(new Text()
             {
@@ -90,7 +90,7 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
 
         var menu = world.Entity()
             .Add<CharacterSelectionScene>()
-            .Set(new UINode()
+            .SetUINode(new UINode()
             {
                 Config = {
                     backgroundColor = new (0.3f, 0.3f, 0.3f, 1),
@@ -126,7 +126,7 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
                 var characterEnt = world.Entity()
                     .Add<CharacterSelectionScene>()
                     .Set(character)
-                    .Set(new UINode()
+                    .SetUINode(new UINode()
                     {
                         Config = {
                             backgroundColor = new (0.6f, 0.6f, 0.6f, 1),
@@ -150,10 +150,10 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
                         Value = character.Name,
                         TextConfig =
                         {
-                            fontId = 0,
-                            fontSize = 24,
-                            // textAlignment = Clay_TextAlignment.CLAY_TEXT_ALIGN_CENTER,
-                            textColor = new (1f, 1f, 1f, 1),
+                                fontId = 0,
+                                fontSize = 24,
+                                // textAlignment = Clay_TextAlignment.CLAY_TEXT_ALIGN_CENTER,
+                                textColor = new (1f, 1f, 1f, 1),
                         }
                     })
                     .Set(new UIMouseAction());

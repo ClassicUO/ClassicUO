@@ -34,7 +34,7 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
     {
         var root = world.Entity()
             .Add<LoginErrorScene>()
-            .Set(new UINode()
+            .SetUINode(new UINode()
             {
                 Config = {
                     backgroundColor = new (0.2f, 0.2f, 0.2f, 1),
@@ -54,7 +54,7 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
 
         var loginErrorLabel = world.Entity()
             .Add<LoginErrorScene>()
-            .Set(new UINode()
+            .SetUINode(new UINode()
             {
                 Config = {
                     backgroundColor = new (0.3f, 0.3f, 0.3f, 1),
@@ -87,7 +87,7 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
 
         var menu = world.Entity()
             .Add<LoginErrorScene>()
-            .Set(new UINode()
+            .SetUINode(new UINode()
             {
                 Config = {
                         backgroundColor = new (0.3f, 0.3f, 0.3f, 1),
@@ -112,7 +112,7 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
             var serverEnt = world.Entity()
                 .Add<LoginErrorScene>()
                 .Set(ev.Error)
-                .Set(new UINode()
+                .SetUINode(new UINode()
                 {
                     Config = {
                         backgroundColor = new (0.6f, 0.6f, 0.6f, 1),
@@ -149,7 +149,7 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
 
         var footerMenu = world.Entity()
             .Add<LoginErrorScene>()
-            .Set(new UINode()
+            .SetUINode(new UINode()
             {
                 Config = {
                     backgroundColor = new (0, 0, 0, 0),
@@ -171,7 +171,7 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
 
         var okButtonEntity = world.Entity()
             .Add<LoginErrorScene>()
-            .Set(new UINode()
+            .SetUINode(new UINode()
             {
                 Config = {
                     backgroundColor = new (0.6f, 0.6f, 0.6f, 1),

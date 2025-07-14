@@ -37,7 +37,7 @@ internal readonly struct ServerSelectionPlugin : IPlugin
     {
         var root = world.Entity()
             .Add<ServerSelectionScene>()
-            .Set(new UINode()
+            .SetUINode(new UINode()
             {
                 Config = {
                     backgroundColor = new (0.2f, 0.2f, 0.2f, 1),
@@ -57,7 +57,7 @@ internal readonly struct ServerSelectionPlugin : IPlugin
 
         var serverSelectionLabel = world.Entity()
             .Add<ServerSelectionScene>()
-            .Set(new UINode()
+            .SetUINode(new UINode()
             {
                 Config = {
                     backgroundColor = new (0.3f, 0.3f, 0.3f, 1),
@@ -90,7 +90,7 @@ internal readonly struct ServerSelectionPlugin : IPlugin
 
         var menu = world.Entity()
             .Add<ServerSelectionScene>()
-            .Set(new UINode()
+            .SetUINode(new UINode()
             {
                 Config = {
                     backgroundColor = new (0.3f, 0.3f, 0.3f, 1),
@@ -126,7 +126,7 @@ internal readonly struct ServerSelectionPlugin : IPlugin
                 var serverEnt = world.Entity()
                     .Add<ServerSelectionScene>()
                     .Set(server)
-                    .Set(new UINode()
+                    .SetUINode(new UINode()
                     {
                         Config = {
                             backgroundColor = new (0.6f, 0.6f, 0.6f, 1),

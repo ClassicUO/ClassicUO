@@ -284,7 +284,7 @@ internal readonly struct ModdingPlugin : IPlugin
                     {
                         var ent = world.Entity(node.Id)
                             .Set(new PluginEntity(mod))
-                            .Set(new UINode() {
+                            .SetUINode(new UINode() {
                                 // TODO: missing some config
                                 Config = {
                                     // id = Clay.Id(node.Id.ToString()),
@@ -322,8 +322,8 @@ internal readonly struct ModdingPlugin : IPlugin
                         if (node.Movable)
                             ent.Add<UIMovable>();
 
-                        if (node.AcceptInputs)
-                            ent.Set(new UIMouseAction());
+                        // if (node.AcceptInputs)
+                        // ent.Set(new UIMouseAction());
 
                         if (node.WidgetType == ClayWidgetType.TextInput)
                             ent.Add<TextInput>();
@@ -333,7 +333,6 @@ internal readonly struct ModdingPlugin : IPlugin
                         {
                             if (node.UOButton is {} button)
                             {
-                                ent.Set(new UIMouseAction());
                                 ent.Set(new UOButton()
                                 {
                                     Normal = button.Normal,
@@ -724,6 +723,7 @@ internal readonly struct ModdingPlugin : IPlugin
                 { IsPressed: false, WasPressed: true } => EventType.OnMouseReleased,
                 { IsHovered: true, WasHovered: false } => EventType.OnMouseEnter,
                 { IsHovered: false, WasHovered: true } => EventType.OnMouseLeave,
+                { IsHovered: true } => EventType.OnMouseOver,
                 _ => null
             };
 

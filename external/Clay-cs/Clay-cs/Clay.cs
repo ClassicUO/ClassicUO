@@ -243,7 +243,7 @@ public static class Clay
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Clay_ElementId Id(string text)
+    public static Clay_ElementId Id(ReadOnlySpan<char> text)
     {
         return Id(ClayStrings.Get(text));
     }
