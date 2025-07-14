@@ -388,6 +388,7 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                     interaction.WasHovered = interaction.IsHovered;
                     interaction.IsHovered = isHovered;
                     interaction.WasPressed = interaction.IsPressed;
+                    var oldButton = interaction.Button;
 
                     MouseButtonType? buttonPressed = null;
                     for (var button = MouseButtonType.None + 1; button < MouseButtonType.Size; button++)
@@ -411,7 +412,8 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                     }
 
                     var isChanged = interaction.WasPressed != interaction.IsPressed ||
-                                    interaction.WasHovered != interaction.IsHovered;
+                                    interaction.WasHovered != interaction.IsHovered ||
+                                    interaction.Button != oldButton;
 
                     if (isChanged)
                     {
