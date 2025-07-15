@@ -93,7 +93,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Extism.runtime.all" Version="1.11.1" />
+    <PackageReference Include="Extism.runtime.all" Version="1.12.0" />
     <PackageReference Include="Extism.Sdk" Version="1.9.1" />
   </ItemGroup>
 
