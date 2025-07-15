@@ -42,7 +42,6 @@ export type Hue = {
 export interface BaseElementProps extends EventHandlerMap {
   children?: React.ReactNode;
   movable?: boolean;
-  acceptInputs?: boolean;
   padding?: ClayPadding;
 }
 

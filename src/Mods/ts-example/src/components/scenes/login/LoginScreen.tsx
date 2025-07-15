@@ -83,7 +83,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           value={username}
           onChange={(value) => setUsername(value)}
           size={{ width: 200, height: 30 }}
-          acceptInputs={true}
         />
       </Gump>
 
@@ -103,7 +102,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({
           value={password}
           onChange={(value) => setPassword(value)}
           size={{ width: 200, height: 30 }}
-          acceptInputs={true}
         />
       </Gump>
 

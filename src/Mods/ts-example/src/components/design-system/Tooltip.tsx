@@ -212,7 +212,6 @@ export const Tooltip: React.FC<TooltipProps> = ({
           y: LayoutAlignment.Center,
         },
       }}
-      acceptInputs={true}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >

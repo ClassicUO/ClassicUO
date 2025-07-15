@@ -798,120 +798,6 @@ internal readonly struct ModdingPlugin : IPlugin
                 parentId = parent.Ref.Id;
             }
         }
-
-        // foreach ((var ent, var node, var mouseAction, var pluginEnt, var events) in query)
-        // {
-        //     EventType? ev = mouseAction.Ref switch
-        //     {
-        //         { State: UIInteractionState.Pressed } when isDragging && mouseCtx.Value.IsPressed(mouseAction.Ref.Button) => (EventType.OnDragging),
-
-        //         // this will get spammed all the time, not sure how much worth it is
-        //         { State: UIInteractionState.Over } when mouseCtx.Value.Wheel != 0 => (EventType.OnMouseWheel),
-        //         { State: UIInteractionState.Over } => (EventType.OnMouseOver),
-        //         _ => ((EventType?)null)
-        //     };
-
-        //     var pid = ent.Ref.ID;
-
-        //     if (ev == null)
-        //         continue;
-
-        //     if (ent.Ref.Has<Text>())
-        //     {
-        //         ref var t = ref ent.Ref.Get<Text>();
-
-        //         Console.WriteLine(t.Value);
-        //     }
-
-
-        //     if (!events.IsValid() || events.Ref.Count == 0)
-        //     {
-        //         // parse anchestors
-        //         var parentId = ent.Ref.ID;
-        //         while (queryUIParents.Contains(parentId))
-        //         {
-        //             (_, var parent) = queryUIParents.Get(parentId);
-        //             Console.WriteLine(parent.Ref.Id);
-
-        //             var result = sendEventForId(
-        //                 parent.Ref.Id,
-        //                 queryEvents,
-        //                 children,
-        //                 mouseCtx,
-        //                 mouseAction.Ref.Button,
-        //                 pluginEnt.Ref.Mod
-        //             );
-
-        //             parentId = parent.Ref.Id;
-        //         }
-
-        //         continue;
-        //     }
-
-        //     foreach (var child in events.Ref)
-        //     {
-        //         if (!queryEvents.Contains(child))
-        //             continue;
-
-        //         (var eventId, var uiEv) = queryEvents.Get(child);
-
-        //         if (!ev.HasValue || uiEv.Ref.EventType != ev.Value)
-        //         {
-        //             continue;
-        //         }
-
-        //         if (!pluginEnt.Ref.Mod.Plugin.FunctionExists("on_ui_event"))
-        //         {
-        //             continue;
-        //         }
-
-        //         var json = (uiEv.Ref with
-        //         {
-        //             EntityId = ent.Ref.ID,
-        //             EventId = eventId.Ref.ID,
-        //             X = mousePos.X,
-        //             Y = mousePos.Y,
-        //             Wheel = mouseCtx.Value.Wheel,
-        //             MouseButton = mouseAction.Ref.Button,
-        //         }).ToJson();
-
-        //         var result = pluginEnt.Ref.Mod.Plugin.Call("on_ui_event", json);
-        //         if (result == "0")
-        //         {
-        //             Console.WriteLine("on_ui_event returned 0, stopping event propagation");
-        //             break;
-        //         }
-
-        //         // find all ancestors of the entity
-        //         var parentId = ent.Ref.ID;
-        //         while (queryUIParents.Contains(parentId))
-        //         {
-        //             (_, var parent) = queryUIParents.Get(parentId);
-        //             Console.WriteLine(parent.Ref.Id);
-
-        //             // push the event
-        //             json = (uiEv.Ref with
-        //             {
-        //                 EntityId = parentId,
-        //                 EventId = eventId.Ref.ID,
-        //                 X = mousePos.X,
-        //                 Y = mousePos.Y,
-        //                 Wheel = mouseCtx.Value.Wheel,
-        //                 MouseButton = mouseAction.Ref.Button,
-        //             }).ToJson();
-
-        //             result = pluginEnt.Ref.Mod.Plugin.Call("on_ui_event", json);
-        //             if (result == "0")
-        //             {
-        //                 Console.WriteLine("on_ui_event returned 0, stopping event propagation");
-        //                 break;
-        //             }
-
-        //             parentId = parent.Ref.Id;
-        //         }
-        //     }
-        // }
-
     }
 
 
@@ -1024,8 +910,7 @@ internal record struct UINodeProxy(
     UITextProxy? TextConfig = null,
     UOButtonWidgetProxy? UOButton = null,
     ClayWidgetType WidgetType = ClayWidgetType.None,
-    bool Movable = false,
-    bool AcceptInputs = false
+    bool Movable = false
 );
 
 internal record struct UOButtonWidgetProxy(ushort Normal, ushort Pressed, ushort Over);

@@ -115,7 +115,6 @@ export const IconButton: React.FC<IconButtonProps> = ({
     <Tag
       id={icon.id}
       movable={movable}
-      acceptInputs={!disabled}
       onClick={handleClick}
       size={size}
       floating={iconFloating}

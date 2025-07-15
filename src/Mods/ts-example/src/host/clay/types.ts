@@ -150,7 +150,6 @@ export interface UINode {
   uoButton?: UOButtonWidgetProxy;
   widgetType?: ClayWidgetType;
   movable?: boolean;
-  acceptInputs?: boolean;
 }
 
 export interface UINodes {

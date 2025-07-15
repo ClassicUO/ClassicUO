@@ -30,7 +30,6 @@ export function createElement(type: string, props: any, id: number): UINode {
           padding: data.props.padding,
         },
         movable: data.props.movable || false,
-        acceptInputs: data.props.acceptInputs || false,
       };
     })
     .with({ type: "gump" }, (data) => {
@@ -39,7 +38,6 @@ export function createElement(type: string, props: any, id: number): UINode {
       return {
         id,
         movable: data.props.movable ?? false,
-        acceptInputs: data.props.acceptInputs ?? hasEventProp(data.props),
         uoConfig: {
           type: data.props.ninePatch
             ? ClayUOCommandType.GumpNinePatch
@@ -83,7 +81,6 @@ export function createElement(type: string, props: any, id: number): UINode {
       return {
         id,
         movable: data.props.movable ?? false,
-        acceptInputs: data.props.acceptInputs ?? hasEventProp(data.props),
         uoConfig: {
           type: ClayUOCommandType.Gump,
           id: data.props.gumpIds.normal,
@@ -154,8 +151,6 @@ export function createElement(type: string, props: any, id: number): UINode {
       return {
         id,
         movable: data.props.movable ?? false,
-        acceptInputs:
-          data.props.acceptInputs ?? hasEventProp(data.props) ?? true,
         config: {
           floating: data.props.floating,
           padding: data.props.padding,
@@ -175,7 +170,6 @@ export function createElement(type: string, props: any, id: number): UINode {
     .with({ type: "checkbox" }, (data) => {
       return {
         id,
-        acceptInputs: data.props.acceptInputs ?? hasEventProp(data.props),
         config: { floating: data.props.floating, padding: data.props.padding },
         textConfig: {
           value: `CHECKBOX`,
@@ -192,7 +186,6 @@ export function createElement(type: string, props: any, id: number): UINode {
     .with({ type: "label" }, (data) => {
       return {
         id,
-        acceptInputs: data.props.acceptInputs ?? hasEventProp(data.props),
         config: {
           floating: data.props.floating,
           padding: data.props.padding,
@@ -209,7 +202,6 @@ export function createElement(type: string, props: any, id: number): UINode {
     .with({ type: "hsliderbar" }, (data) => {
       return {
         id,
-        acceptInputs: data.props.acceptInputs ?? hasEventProp(data.props),
         config: {
           floating: data.props.floating,
           padding: data.props.padding,
@@ -231,7 +223,6 @@ export function createElement(type: string, props: any, id: number): UINode {
 
       return {
         id,
-        acceptInputs: data.props.acceptInputs ?? hasEventProp(data.props),
         uoConfig: {
           type: ClayUOCommandType.Art,
           id: data.props.id,
