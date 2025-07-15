@@ -1517,6 +1517,114 @@ namespace ClassicUO.Renderer
         }
 
 
+        public void DrawRoundedRectangleFilled(
+            Texture2D texture,
+            Rectangle rectangle,
+            float cornerRadius,
+            Color color,
+            float depth = 0.0f)
+        {
+            if (cornerRadius <= 0)
+            {
+                // Fallback to regular filled rectangle - convert Vector3 to Color
+                Draw(texture, position: new Vector2(rectangle.X, rectangle.Y),
+                     sourceRectangle: new Rectangle(0, 0, rectangle.Width, rectangle.Height),
+                     color, rotation: 0f, scale: Vector2.One, depth: depth);
+                return;
+            }
+
+            // Clamp corner radius
+            float maxRadius = Math.Min(rectangle.Width, rectangle.Height) * 0.5f;
+            cornerRadius = Math.Min(cornerRadius, maxRadius);
+
+            // Draw the main body (center rectangle)
+            var centerRect = new Rectangle(
+                rectangle.X + (int)cornerRadius,
+                rectangle.Y,
+                rectangle.Width - (int)(cornerRadius * 2),
+                rectangle.Height
+            );
+            if (centerRect.Width > 0)
+            {
+                Draw(texture, new Vector2(centerRect.X, centerRect.Y),
+                     new Rectangle(0, 0, centerRect.Width, centerRect.Height),
+                     color, 0f, Vector2.One, depth);
+            }
+
+            // Draw left and right rectangles
+            var leftRect = new Rectangle(
+                rectangle.X,
+                rectangle.Y + (int)cornerRadius,
+                (int)cornerRadius,
+                rectangle.Height - (int)(cornerRadius * 2)
+            );
+            if (leftRect.Width > 0 && leftRect.Height > 0)
+            {
+                Draw(texture, new Vector2(leftRect.X, leftRect.Y),
+                     new Rectangle(0, 0, leftRect.Width, leftRect.Height),
+                     color, 0f, Vector2.One, depth);
+            }
+
+            var rightRect = new Rectangle(
+                rectangle.X + rectangle.Width - (int)cornerRadius,
+                rectangle.Y + (int)cornerRadius,
+                (int)cornerRadius,
+                rectangle.Height - (int)(cornerRadius * 2)
+            );
+            if (rightRect.Width > 0 && rightRect.Height > 0)
+            {
+                Draw(texture, new Vector2(rightRect.X, rightRect.Y),
+                     new Rectangle(0, 0, rightRect.Width, rightRect.Height),
+                     color, 0f, Vector2.One, depth);
+            }
+
+            // Draw the four rounded corners using circles
+            DrawRoundedCorner(texture, rectangle.X + cornerRadius, rectangle.Y + cornerRadius, cornerRadius, color, depth, 0); // Top-left
+            DrawRoundedCorner(texture, rectangle.X + rectangle.Width - cornerRadius, rectangle.Y + cornerRadius, cornerRadius, color, depth, 1); // Top-right
+            DrawRoundedCorner(texture, rectangle.X + rectangle.Width - cornerRadius, rectangle.Y + rectangle.Height - cornerRadius, cornerRadius, color, depth, 2); // Bottom-right
+            DrawRoundedCorner(texture, rectangle.X + cornerRadius, rectangle.Y + rectangle.Height - cornerRadius, cornerRadius, color, depth, 3); // Bottom-left
+        }
+
+        private void DrawRoundedCorner(Texture2D texture, float centerX, float centerY, float radius, Color color, float depth, int quadrant)
+        {
+            // Draw the corner as overlapping small rectangles in a grid pattern
+            int steps = (int)(radius * 2); // Number of pixels to cover
+
+            for (int x = 0; x < steps; x++)
+            {
+                for (int y = 0; y < steps; y++)
+                {
+                    float px = centerX + (x - radius) + 0.5f;
+                    float py = centerY + (y - radius) + 0.5f;
+
+                    // Check if this pixel is within the quarter circle for this quadrant
+                    float dx = px - centerX;
+                    float dy = py - centerY;
+                    float distance = (float)Math.Sqrt(dx * dx + dy * dy);
+
+                    if (distance <= radius)
+                    {
+                        // Check if it's in the correct quadrant
+                        bool inQuadrant = false;
+                        switch (quadrant)
+                        {
+                            case 0: inQuadrant = dx <= 0 && dy <= 0; break; // Top-left
+                            case 1: inQuadrant = dx >= 0 && dy <= 0; break; // Top-right
+                            case 2: inQuadrant = dx >= 0 && dy >= 0; break; // Bottom-right
+                            case 3: inQuadrant = dx <= 0 && dy >= 0; break; // Bottom-left
+                        }
+
+                        if (inQuadrant)
+                        {
+                            Draw(texture, new Vector2(px, py), new Rectangle(0, 0, 1, 1), color, 0f, Vector2.One, depth);
+                        }
+                    }
+                }
+            }
+        }
+
+
+
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
         private struct PositionNormalTextureColor4 : IVertexType
         {

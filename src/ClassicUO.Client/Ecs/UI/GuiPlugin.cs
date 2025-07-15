@@ -186,7 +186,6 @@ internal readonly struct GuiPlugin : IPlugin
         }
     }
 
-
     private static void HandleNodeStates(
         Res<MouseContext> mouseCtx,
         Query<Data<UINode, UIMouseAction>> query
@@ -195,7 +194,7 @@ internal readonly struct GuiPlugin : IPlugin
         var pointerOverIds = Clay.GetPointerOverIds();
         foreach ((var ent, var node, var interaction) in query)
         {
-            var isHovered = containsId(node.Ref.Config.id, pointerOverIds);
+            var isHovered = containsId(in node.Ref.Config.id, pointerOverIds);
 
             interaction.Ref.WasHovered = interaction.Ref.IsHovered;
             interaction.Ref.IsHovered = isHovered;
@@ -233,7 +232,7 @@ internal readonly struct GuiPlugin : IPlugin
             }
         }
 
-        static bool containsId(Clay_ElementId id, ReadOnlySpan<Clay_ElementId> pointerOverIds)
+        static bool containsId(ref readonly Clay_ElementId id, ReadOnlySpan<Clay_ElementId> pointerOverIds)
         {
             foreach (ref readonly var elemId in pointerOverIds)
             {

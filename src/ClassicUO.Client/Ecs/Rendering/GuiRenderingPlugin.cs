@@ -21,7 +21,6 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
     public void Build(Scheduler scheduler)
     {
         scheduler.OnAfterUpdate((
-            Local<ulong> lastEntityPressed,
             Local<Texture2D> dumbTexture,
             Local<StringBuilder> sb,
             Res<UltimaBatcher2D> batcher,
@@ -47,58 +46,34 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
             commandBuffer.Value.Reset();
 
             Clay.BeginLayout();
-            ulong found = 0;
-            var lastMouseAction = new UIMouseAction();
-
-            static bool containsId(Clay_ElementId id, ReadOnlySpan<Clay_ElementId> pointerOverIds)
-            {
-                foreach (ref readonly var elemId in pointerOverIds)
-                {
-                    if (elemId.id == id.id)
-                        return true;
-                }
-
-                return false;
-            }
-
-            var pointerOverIds = Clay.GetPointerOverIds();
             foreach ((var ent, var node, var text, var interaction, var children) in query)
             {
                 renderNodes(
                     ent.Ref,
-                    ref found,
-                    lastEntityPressed.Value,
-                    ref lastMouseAction,
                     ref node.Ref,
                     ref text.Ref,
                     ref interaction.Ref,
                     ref children.Ref,
                     mouseCtx,
                     commandBuffer,
-                    queryChildren,
-                    pointerOverIds
+                    queryChildren
                 );
             }
 
-            lastEntityPressed.Value = found;
+            // (var ent, var node, var mouseAction) = queryInteraction.Get(found);
+            // if (mouseAction.IsValid())
+            // {
+            //     if (mouseAction.Ref.State != lastMouseAction.State || mouseAction.Ref.Button != lastMouseAction.Button)
+            //     {
+            //         mouseAction.Ref = lastMouseAction;
+            //         ent.Ref.Set(lastMouseAction);
+            //     }
+            // }
 
-            if (found != 0)
-            {
-                // (var ent, var node, var mouseAction) = queryInteraction.Get(found);
-                // if (mouseAction.IsValid())
-                // {
-                //     if (mouseAction.Ref.State != lastMouseAction.State || mouseAction.Ref.Button != lastMouseAction.Button)
-                //     {
-                //         mouseAction.Ref = lastMouseAction;
-                //         ent.Ref.Set(lastMouseAction);
-                //     }
-                // }
-
-                // if (lastMouseAction is { State: UIInteractionState.Pressed, Button: MouseButtonType.Left } && queryTextInput.Contains(found))
-                // {
-                //     focusedInput.Value.Entity = found;
-                // }
-            }
+            // if (lastMouseAction is { State: UIInteractionState.Pressed, Button: MouseButtonType.Left } && queryTextInput.Contains(found))
+            // {
+            //     focusedInput.Value.Entity = found;
+            // }
 
             var cmds = Clay.EndLayout();
 
@@ -151,11 +126,24 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                     case Clay_RenderCommandType.CLAY_RENDER_COMMAND_TYPE_RECTANGLE:
                         ref readonly var config = ref cmd.renderData.rectangle;
 
-                        b.Draw(dumbTexture.Value,
-                            new Vector2((int)boundingBox.x, (int)boundingBox.y),
-                            new Rectangle(0, 0, (int)boundingBox.width, (int)boundingBox.height),
-                            toColor(in config.backgroundColor),
-                            0f, Vector2.One, cmd.zIndex);
+                        if (config.cornerRadius.topLeft > 0)
+                        {
+                            var radius = (config.cornerRadius.topLeft * 2) /
+                                (float)((boundingBox.width > boundingBox.height) ? boundingBox.height : boundingBox.width);
+
+                            b.DrawRoundedRectangleFilled(dumbTexture.Value,
+                                new Rectangle((int)boundingBox.x, (int)boundingBox.y, (int)boundingBox.width, (int)boundingBox.height),
+                                radius,
+                                toColor(in config.backgroundColor), cmd.zIndex);
+                        }
+                        else
+                        {
+                            b.Draw(dumbTexture.Value,
+                                new Vector2((int)boundingBox.x, (int)boundingBox.y),
+                                new Rectangle(0, 0, (int)boundingBox.width, (int)boundingBox.height),
+                                toColor(in config.backgroundColor),
+                                0f, Vector2.One, cmd.zIndex);
+                        }
 
                         break;
 
@@ -350,16 +338,11 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
             static void renderNodes
             (
                 EntityView ent,
-                ref ulong found,
-                ulong lastPressed,
-                ref UIMouseAction newInteraction,
                 ref UINode node, ref Text text, ref UIMouseAction interaction, ref Children children,
                 MouseContext mouseCtx,
                 ClayUOCommandBuffer commandBuffer,
                 Query<Data<UINode, Text, UIMouseAction, Children>,
-                      Filter<With<Parent>, Optional<Text>, Optional<UIMouseAction>, Optional<Children>>> query,
-
-                ReadOnlySpan<Clay_ElementId> pointerOverIds
+                      Filter<With<Parent>, Optional<Text>, Optional<UIMouseAction>, Optional<Children>>> query
             )
             {
                 Clay.OpenElement();
@@ -375,14 +358,6 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                     config.clip.childOffset = Clay.GetScrollOffset();
                 }
 
-                // config.id = Clay.Id(ent.ID.ToString());
-                // var isHovered = containsId(config.id, pointerOverIds);
-
-                // if (!isHovered && Clay.IsHovered())
-                // {
-                //     isHovered = true;
-                // }
-
                 if (!Unsafe.IsNullRef(ref interaction) && interaction.IsHovered)
                 {
                     config.backgroundColor.r = 1;
@@ -392,214 +367,6 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                 }
 
                 Clay.ConfigureOpenElement(config);
-
-                if (!Unsafe.IsNullRef(ref interaction))
-                {
-                    // interaction.WasHovered = interaction.IsHovered;
-                    // interaction.IsHovered = isHovered;
-                    // interaction.WasPressed = interaction.IsPressed;
-                    // var oldButton = interaction.Button;
-
-                    // MouseButtonType? buttonPressed = null;
-                    // for (var button = MouseButtonType.None + 1; button < MouseButtonType.Size; button++)
-                    // {
-                    //     if ((isHovered && mouseCtx.IsPressedOnce(button)) ||
-                    //         (interaction.WasPressed && mouseCtx.IsPressed(button)))
-                    //     {
-                    //         buttonPressed = button;
-                    //     }
-                    // }
-
-                    // if (buttonPressed.HasValue)
-                    // {
-                    //     interaction.IsPressed = true;
-                    //     interaction.Button = buttonPressed.Value;
-                    // }
-                    // else
-                    // {
-                    //     interaction.IsPressed = false;
-                    //     interaction.Button = interaction.WasPressed ? interaction.Button : MouseButtonType.None;
-                    // }
-
-                    // var isChanged = interaction.WasPressed != interaction.IsPressed ||
-                    //                 interaction.WasHovered != interaction.IsHovered ||
-                    //                 interaction.Button != oldButton;
-
-                    // if (isChanged)
-                    // {
-                    //     ent.Set(interaction);
-                    // }
-
-                    // if (interaction.OldState != interaction.State)
-                    // {
-                    //     ent.Set(interaction);
-                    // }
-
-                    // if (isHovered || interaction.State == UIInteractionState.Pressed)
-                    // {
-                    //     var ok = false;
-                    //     for (var button = MouseButtonType.None + 1; button < MouseButtonType.Size; button++)
-                    //     {
-                    //         if (mouseCtx.IsPressedOnce(button) || (mouseCtx.IsPressed(button) && interaction.State == UIInteractionState.Pressed))
-                    //         {
-                    //             interaction.State = UIInteractionState.Pressed;
-                    //             interaction.Button = button;
-
-                    //             ent.Set(interaction);
-                    //             ok = true;
-
-                    //             Console.WriteLine("setting pressed {0}", ent.ID);
-                    //         }
-                    //         else if (mouseCtx.IsReleased(button) && interaction.State == UIInteractionState.Pressed)
-                    //         {
-                    //             interaction.State = UIInteractionState.Released;
-                    //             interaction.Button = button;
-
-                    //             ent.Set(interaction);
-                    //             ok = true;
-
-                    //             Console.WriteLine("setting released {0}", ent.ID);
-                    //         }
-                    //     }
-
-                    //     if (!ok && interaction.State is UIInteractionState.Released or UIInteractionState.None)
-                    //     {
-                    //         interaction.State = UIInteractionState.Over;
-                    //         interaction.Button = MouseButtonType.None;
-
-                    //         ent.Set(interaction);
-
-                    //         Console.WriteLine("setting over {0}", ent.ID);
-                    //     }
-                    // }
-                    // else
-                    // {
-                    //     if (interaction.State == UIInteractionState.Over)
-                    //     {
-                    //         interaction.State = UIInteractionState.Left;
-                    //         interaction.Button = MouseButtonType.None;
-
-                    //         ent.Set(interaction);
-
-                    //         Console.WriteLine("setting left {0}", ent.ID);
-                    //     }
-                    //     else if (interaction.State != UIInteractionState.None)
-                    //     {
-                    //         interaction.State = UIInteractionState.None;
-                    //         interaction.Button = MouseButtonType.None;
-
-                    //         ent.Set(interaction);
-
-                    //         Console.WriteLine("setting none {0}", ent.ID);
-                    //     }
-                    // }
-
-                    // if (lastPressed != 0)
-                    // {
-                    //     if (lastPressed == ent)
-                    //     {
-                    //         var done = false;
-                    //         for (var button = MouseButtonType.None + 1; button < MouseButtonType.Size; button++)
-                    //         {
-                    //             newInteraction.Button = MouseButtonType.None;
-
-                    //             if ((mouseCtx.IsPressed(button) && interaction.State == UIInteractionState.Pressed) || // still pressed from the previous frame
-                    //                  mouseCtx.IsPressedOnce(button)) // pressed for the first time
-                    //             {
-                    //                 found = ent;
-                    //                 newInteraction.State = UIInteractionState.Pressed;
-                    //                 newInteraction.Button = button;
-                    //                 done = true;
-                    //                 Console.WriteLine("setting pressed {0}", ent.ID);
-                    //                 break;
-                    //             }
-
-                    //             if (interaction.State == UIInteractionState.Pressed)
-                    //             {
-                    //                 if (interaction.Button != button)
-                    //                 {
-                    //                     continue;
-                    //                 }
-
-                    //                 found = ent;
-                    //                 newInteraction.State = UIInteractionState.Released;
-                    //                 newInteraction.Button = button;
-                    //                 done = true;
-                    //                 Console.WriteLine("setting released {0}", ent.ID);
-                    //                 break;
-                    //             }
-                    //         }
-
-                    //         if (!done)
-                    //         {
-                    //             if (interaction.State == UIInteractionState.Over && !isOpen2)
-                    //             {
-                    //                 found = ent;
-                    //                 newInteraction.State = isOpen2 ? UIInteractionState.Over : UIInteractionState.Left;
-                    //                 newInteraction.Button = MouseButtonType.None;
-                    //                 Console.WriteLine("setting left 1 - {0}", ent.ID);
-                    //                 done = true;
-                    //             }
-                    //         }
-                    //     }
-                    // }
-                    // else
-                    // {
-                    //     var isPressing = false;
-                    //     for (var button = MouseButtonType.None + 1; button < MouseButtonType.Size; button++)
-                    //     {
-                    //         if (mouseCtx.IsPressedOnce(button))
-                    //         {
-                    //             isPressing = true;
-                    //             if (isOpen2)
-                    //             {
-                    //                 found = ent;
-                    //                 interaction.State = UIInteractionState.Pressed;
-                    //                 interaction.Button = MouseButtonType.None; // trick to update the found ent
-
-                    //                 newInteraction.State = UIInteractionState.Pressed;
-                    //                 newInteraction.Button = button;
-
-                    //                 Console.WriteLine("setting start pressing {0}", ent.ID);
-                    //             }
-                    //             break;
-                    //         }
-                    //     }
-
-                    //     if (!isPressing)
-                    //     {
-                    //         if (isOpen2)
-                    //         {
-                    //             if (interaction.State != UIInteractionState.Over)
-                    //             {
-                    //                 found = ent;
-                    //                 newInteraction.State = UIInteractionState.Over;
-                    //                 newInteraction.Button = MouseButtonType.None;
-
-                    //                 Console.WriteLine("setting over {0}", ent.ID);
-                    //             }
-                    //         }
-                    //         else
-                    //         {
-                    //             if (interaction.State == UIInteractionState.Over)
-                    //             {
-                    //                 found = ent;
-                    //                 newInteraction.State = UIInteractionState.Left;
-                    //                 newInteraction.Button = MouseButtonType.None;
-
-                    //                 Console.WriteLine("setting left {0}", ent.ID);
-                    //             }
-                    //         }
-                    //     }
-                    // }
-
-                    // if (interaction.State != UIInteractionState.None)
-                    {
-                        // interaction.State = UIInteractionState.None;
-                        // interaction.Button = MouseButtonType.None;
-                        // ent.Set(new UIMouseAction());
-                    }
-                }
 
                 if (!Unsafe.IsNullRef(ref text) && !string.IsNullOrEmpty(text.Value))
                 {
@@ -643,17 +410,13 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
 
                         renderNodes(
                             childEnt.Ref,
-                            ref found,
-                            lastPressed,
-                            ref newInteraction,
                             ref childNode.Ref,
                             ref childText.Ref,
                             ref childInteraction.Ref,
                             ref childChildren.Ref,
                             mouseCtx,
                             commandBuffer,
-                            query,
-                            pointerOverIds
+                            query
                         );
                     }
                 }
