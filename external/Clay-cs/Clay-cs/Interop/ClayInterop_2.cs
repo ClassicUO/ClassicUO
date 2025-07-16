@@ -162,7 +162,7 @@ public partial struct Clay_SizingMinMax
 
 public partial struct Clay_SizingAxis
 {
-    [NativeTypeName("__AnonymousRecord_clay_L380_C3")]
+    [NativeTypeName("__AnonymousRecord_clay_L316_C5")]
     public ClaySizingUnion size;
 
     public Clay__SizingType type;
@@ -705,7 +705,10 @@ internal static unsafe partial class ClayInterop
     public static extern void Clay__CloseElement();
 
     [DllImport("Clay", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
-    public static extern Clay_ElementId Clay__HashString(Clay_String key, [NativeTypeName("uint32_t")] uint offset, [NativeTypeName("uint32_t")] uint seed);
+    public static extern Clay_ElementId Clay__HashString(Clay_String key, [NativeTypeName("uint32_t")] uint seed);
+
+    [DllImport("Clay", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
+    public static extern Clay_ElementId Clay__HashStringWithOffset(Clay_String key, [NativeTypeName("uint32_t")] uint offset, [NativeTypeName("uint32_t")] uint seed);
 
     [DllImport("Clay", CallingConvention = CallingConvention.Cdecl, ExactSpelling = true)]
     public static extern void Clay__OpenTextElement(Clay_String text, Clay_TextElementConfig* textConfig);

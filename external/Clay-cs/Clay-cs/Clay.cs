@@ -257,6 +257,6 @@ public static class Clay
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     internal static Clay_ElementId HashId(Clay_String text, uint offset, uint seed)
     {
-        return ClayInterop.Clay__HashString(text, offset, seed);
+        return ClayInterop.Clay__HashStringWithOffset(text, offset, seed);
     }
 }
