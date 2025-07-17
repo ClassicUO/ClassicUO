@@ -642,11 +642,16 @@ internal readonly struct ModdingPlugin : IPlugin
         Query<Data<Children>> children,
         Query<Data<Parent>, With<UINode>> queryUIParents,
         Res<MouseContext> mouseCtx,
-        Res<KeyboardContext> keyboardCtx
+        Res<KeyboardContext> keyboardCtx,
+        Local<Vector2> lastMousePos
     )
     {
         var isDragging = mouseCtx.Value.PositionOffset.Length() > 1;
+        var isMouseWheel = mouseCtx.Value.Wheel != 0;
         var mousePos = mouseCtx.Value.Position;
+        var isMousePosChanged = mousePos != lastMousePos.Value;
+        lastMousePos.Value = mousePos;
+
 
         static bool sendEventForId(
             ulong id,
@@ -701,19 +706,6 @@ internal readonly struct ModdingPlugin : IPlugin
             return true;
         }
 
-        static List<ulong> getHierarchy(ulong parentId, Query<Data<Parent>, With<UINode>> queryUIParents)
-        {
-            var list = new List<ulong>();
-            while (queryUIParents.Contains(parentId))
-            {
-                (_, var parent) = queryUIParents.Get(parentId);
-
-                list.Add(parentId);
-                parentId = parent.Ref.Id;
-            }
-
-            return list;
-        }
 
         foreach ((var ent, var node, var mouseAction, var pluginEnt) in queryChanged)
         {
@@ -723,7 +715,6 @@ internal readonly struct ModdingPlugin : IPlugin
                 { IsPressed: false, WasPressed: true } => EventType.OnMouseReleased,
                 { IsHovered: true, WasHovered: false } => EventType.OnMouseEnter,
                 { IsHovered: false, WasHovered: true } => EventType.OnMouseLeave,
-                { IsHovered: true } => EventType.OnMouseOver,
                 _ => null
             };
 
@@ -735,34 +726,7 @@ internal readonly struct ModdingPlugin : IPlugin
             if (eventType == null)
                 continue;
 
-
-            // var hierarchy = getHierarchy(ent.Ref.ID, queryUIParents);
-
-            // for (var i = hierarchy.Count - 1; i >= 0; i--)
-            // {
-            //     var result = sendEventForId(
-            //         hierarchy[i],
-            //         queryEvents,
-            //         children,
-            //         mouseCtx,
-            //         eventType.Value,
-            //         mouseAction.Ref.Button,
-            //         pluginEnt.Ref.Mod
-            //     );
-            // }
-
-            // for (var i = 0; i < hierarchy.Count; i++)
-            // {
-            //     var result = sendEventForId(
-            //         hierarchy[i],
-            //         queryEvents,
-            //         children,
-            //         mouseCtx,
-            //         eventType.Value,
-            //         mouseAction.Ref.Button,
-            //         pluginEnt.Ref.Mod
-            //     );
-            // }
+            Console.WriteLine("event {0} on {1}", eventType.Value, ent.Ref.ID);
 
             var result = sendEventForId(
                 ent.Ref.ID,
@@ -796,6 +760,59 @@ internal readonly struct ModdingPlugin : IPlugin
                     break;
 
                 parentId = parent.Ref.Id;
+            }
+        }
+
+        if (isMousePosChanged || isMouseWheel)
+        {
+            foreach ((var ent, var node, var mouseAction, var pluginEnt) in query)
+            {
+                EventType? eventType = mouseAction.Ref switch
+                {
+                    { IsPressed: true, WasPressed: true, Button: MouseButtonType.Left } when isMousePosChanged => EventType.OnDragging,
+                    { IsHovered: true } when isMouseWheel => EventType.OnMouseWheel,
+                    { IsHovered: true } when isMousePosChanged => EventType.OnMouseOver,
+                    _ => null
+                };
+
+                if (eventType == null)
+                    continue;
+
+                Console.WriteLine("event {0} on {1}", eventType.Value, ent.Ref.ID);
+
+                var result = sendEventForId(
+                    ent.Ref.ID,
+                    queryEvents,
+                    children,
+                    mouseCtx,
+                    eventType.Value,
+                    mouseAction.Ref.Button,
+                    pluginEnt.Ref.Mod
+                );
+
+                if (!result)
+                    continue;
+
+                var parentId = ent.Ref.ID;
+                while (queryUIParents.Contains(parentId))
+                {
+                    (_, var parent) = queryUIParents.Get(parentId);
+                    result = sendEventForId(
+                        parent.Ref.Id,
+                        queryEvents,
+                        children,
+                        mouseCtx,
+                        eventType.Value,
+                        mouseAction.Ref.Button,
+                        pluginEnt.Ref.Mod
+                    );
+
+                    // block the events propagation
+                    if (!result)
+                        break;
+
+                    parentId = parent.Ref.Id;
+                }
             }
         }
     }

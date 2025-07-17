@@ -262,7 +262,6 @@ enum UIInteractionState : byte
 
 struct UIMouseAction
 {
-    // public UIInteractionState State, OldState;
     public bool WasHovered, IsHovered;
     public bool WasPressed, IsPressed;
     public MouseButtonType Button;
