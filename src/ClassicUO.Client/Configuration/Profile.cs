@@ -221,8 +221,6 @@ namespace ClassicUO.Configuration
         public int CounterBarAbbreviatedAmount { get; set; } = 1000;
         public int CounterBarHighlightAmount { get; set; } = 5;
         public int CounterBarCellSize { get; set; } = 40;
-        public int CounterBarRows { get; set; } = 1;
-        public int CounterBarColumns { get; set; } = 1;
 
         public bool ShowSkillsChangedMessage { get; set; } = true;
         public int ShowSkillsChangedDeltaValue { get; set; } = 1;

@@ -1,72 +1,64 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System.Collections.Generic;
-using System.IO;
-using System.Xml;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Xml;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class CounterBarGump : Gump
+    internal class CounterBarGump : ResizableGump
     {
         private AlphaBlendControl _background;
 
-        private int _rows,
-            _columns,
-            _rectSize;
+        private DataBox _dataBox;
+        private int _rectSize;
+        private ScissorControl _scissor;
 
-        //private bool _isVertical;
-
-        public CounterBarGump(World world) : base(world, 0, 0) { }
+        public CounterBarGump(World world) : base(world, 0, 0, 50, 50, 0, 0, 0) { }
 
         public CounterBarGump(
             World world,
             int x,
             int y,
-            int rectSize = 30,
-            int rows = 1,
-            int columns = 1 /*, bool vertical = false*/
-        ) : base(world, 0, 0)
+            int rectSize = 30
+        ) : base(world, 0, 0, 50, 50, 0, 0, 0)
         {
             X = x;
             Y = y;
 
-            if (rectSize < 30)
-            {
-                rectSize = 30;
-            }
-            else if (rectSize > 80)
-            {
-                rectSize = 80;
-            }
-
-            if (rows < 1)
-            {
-                rows = 1;
-            }
-
-            if (columns < 1)
-            {
-                columns = 1;
-            }
-
-            _rows = rows;
-            _columns = columns;
-            _rectSize = rectSize;
-            //_isVertical = vertical;
+            SetCellSize(rectSize);
 
             BuildGump();
+        }
+
+        public void SetCellSize(int size)
+        {
+            if (size != _rectSize)
+            {
+                if (size < 30)
+                {
+                    size = 30;
+                }
+                else if (size > 80)
+                {
+                    size = 80;
+                }
+                _rectSize = size;
+                SetupLayout();
+            }
         }
 
         public override GumpType GumpType => GumpType.CounterBar;
@@ -78,175 +70,123 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptKeyboardInput = false;
             CanCloseWithRightClick = false;
             WantUpdateSize = false;
+            int borderSize = BoderSize;
 
-            Width = _rectSize * _columns + 1;
-            Height = _rectSize * _rows + 1;
+            Add(_background = new AlphaBlendControl(0.7f) { X = borderSize, Y = borderSize, Width = Width - borderSize * 2, Height = Height - borderSize * 2 });
 
-            Add(_background = new AlphaBlendControl(0.7f) { Width = Width, Height = Height });
+            Add(_scissor = new ScissorControl(true, borderSize, borderSize, 0, 0));
+            _dataBox = new DataBox(borderSize, borderSize, 0, 0);
+            Add(_dataBox);
+            Add(new ScissorControl(false));
+            _dataBox.WantUpdateSize = true;
 
-            for (int row = 0; row < _rows; row++)
+            ResizeWindow(new Point(Width, Height));
+            OnResize();
+        }
+
+        public override void OnResize()
+        {
+            base.OnResize();
+
+            if (_background != null)
             {
-                for (int col = 0; col < _columns; col++)
+                SetupLayout();
+            }
+        }
+
+        private void SetupLayout()
+        {
+            if (_background == null)
+            {
+                return;
+            }
+
+            int width = Width - this.BoderSize * 2;
+            int height = Height - this.BoderSize * 2;
+            _background.Width = width;
+            _background.Height = height;
+            _dataBox.Width = 0;
+            _dataBox.Height = 0;
+            _dataBox.WantUpdateSize = true;
+
+            _scissor.Width = width;
+            _scissor.Height = height;
+
+            int x = 2;
+            int y = 2;
+
+            for (int i = 0; i < _dataBox.Children.Count; i++)
+            {
+                CounterItem c = (CounterItem)_dataBox.Children[i];
+                if (!c.IsDisposed)
                 {
-                    Add(
-                        new CounterItem(
-                            this,
-                            col * _rectSize + 2,
-                            row * _rectSize + 2,
-                            _rectSize - 4,
-                            _rectSize - 4
-                        )
-                    );
+                    c.X = x;
+                    c.Y = y;
+                    c.Width = _rectSize - 4;
+                    c.Height = _rectSize - 4;
+
+                    x += _rectSize + 2;
+
+                    if (x + _rectSize > width)
+                    {
+                        x = 2;
+                        y += _rectSize + 2;
+                    }
                 }
             }
         }
 
-        public void SetLayout(int size, int rows, int columns)
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
-            bool ok = false;
-
-            //if (_isVertical != isvertical)
-            //{
-            //    _isVertical = isvertical;
-            //    int temp = _rows;
-            //    _rows = _columns;
-            //    _columns = temp;
-            //    ok = true;
-            //}
-
-            if (rows > 30)
+            if (button == MouseButtonType.Left)
             {
-                rows = 30;
+                ShowBorder = !ShowBorder;
+                return true;
             }
 
-            if (columns > 30)
-            {
-                columns = 30;
-            }
-
-            if (size < 30)
-            {
-                size = 30;
-            }
-            else if (size > 80)
-            {
-                size = 80;
-            }
-
-            if (_rectSize != size)
-            {
-                ok = true;
-                _rectSize = size;
-            }
-
-            if (rows < 1)
-            {
-                rows = 1;
-            }
-
-            if (_rows != rows)
-            {
-                ok = true;
-                _rows = rows;
-            }
-
-            if (columns < 1)
-            {
-                columns = 1;
-            }
-
-            if (_columns != columns)
-            {
-                ok = true;
-                _columns = columns;
-            }
-
-            if (ok)
-            {
-                ApplyLayout();
-            }
+            return false;
         }
 
-        private void ApplyLayout()
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            Width = _rectSize * _columns + 1;
-            Height = _rectSize * _rows + 1;
-
-            _background.Width = Width;
-            _background.Height = Height;
-
-            CounterItem[] items = GetControls<CounterItem>();
-
-            int[] indices = new int[items.Length];
-
-            for (int row = 0; row < _rows; row++)
+            if (button == MouseButtonType.Left)
             {
-                for (int col = 0; col < _columns; col++)
+                if (Client.Game.UO.GameCursor.ItemHold.Enabled && Client.Game.UO.GameCursor.ItemHold.Graphic != 0)
                 {
-                    int index = /*_isVertical ? col * _rows + row :*/
-                        row * _columns + col;
+                    CounterItem item = new CounterItem(this, Client.Game.UO.GameCursor.ItemHold.Graphic, Client.Game.UO.GameCursor.ItemHold.Hue);
+                    _dataBox.Add(item);
+                    GameActions.DropItem(Client.Game.UO.GameCursor.ItemHold.Serial, Client.Game.UO.GameCursor.ItemHold.X, Client.Game.UO.GameCursor.ItemHold.Y, 0, Client.Game.UO.GameCursor.ItemHold.Container);
 
-                    if (index < items.Length)
-                    {
-                        CounterItem c = items[index];
+                    SetupLayout();
 
-                        c.X = col * _rectSize + 2;
-                        c.Y = row * _rectSize + 2;
-                        c.Width = _rectSize - 4;
-                        c.Height = _rectSize - 4;
-
-                        c.SetGraphic(c.Graphic, c.Hue);
-
-                        indices[index] = -1;
-                    }
-                    else
-                    {
-                        Add(
-                            new CounterItem(
-                                this,
-                                col * _rectSize + 2,
-                                row * _rectSize + 2,
-                                _rectSize - 4,
-                                _rectSize - 4
-                            )
-                        );
-                    }
+                    return;
                 }
             }
 
-            for (int i = 0; i < indices.Length; i++)
-            {
-                int index = indices[i];
-
-                if (index >= 0 && index < items.Length)
-                {
-                    items[i].Parent = null;
-
-                    items[i].Dispose();
-                }
-            }
-
-            SetInScreen();
+            base.OnMouseUp(x, y, button);
         }
 
         public override void Save(XmlTextWriter writer)
         {
             base.Save(writer);
 
-            writer.WriteAttributeString("rows", _rows.ToString());
-            writer.WriteAttributeString("columns", _columns.ToString());
             writer.WriteAttributeString("rectsize", _rectSize.ToString());
+            writer.WriteAttributeString("width", Width.ToString());
+            writer.WriteAttributeString("height", Height.ToString());
 
             IEnumerable<CounterItem> controls = FindControls<CounterItem>();
 
             writer.WriteStartElement("controls");
 
-            foreach (CounterItem control in controls)
+            foreach (CounterItem control in _dataBox.Children.Cast<CounterItem>())
             {
-                writer.WriteStartElement("control");
-                writer.WriteAttributeString("graphic", control.Graphic.ToString());
-                writer.WriteAttributeString("hue", control.Hue.ToString());
-                writer.WriteEndElement();
+                if (control.Graphic != 0)
+                {
+                    writer.WriteStartElement("control");
+                    writer.WriteAttributeString("graphic", control.Graphic.ToString());
+                    writer.WriteAttributeString("hue", control.Hue.ToString());
+                    writer.WriteEndElement();
+                }
             }
 
             writer.WriteEndElement();
@@ -256,9 +196,20 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Restore(xml);
 
-            _rows = int.Parse(xml.GetAttribute("rows"));
-            _columns = int.Parse(xml.GetAttribute("columns"));
-            _rectSize = int.Parse(xml.GetAttribute("rectsize"));
+            SetCellSize(int.Parse(xml.GetAttribute("rectsize")));
+
+            if (!int.TryParse(xml.GetAttribute("width"), out int width))
+            {
+                width = 200;
+            }
+
+            if (!int.TryParse(xml.GetAttribute("height"), out int height))
+            {
+                height = 80;
+            }
+
+            Width = width;
+            Height = height;
 
             BuildGump();
 
@@ -266,26 +217,21 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (controlsXml != null)
             {
-                CounterItem[] items = GetControls<CounterItem>();
-                int index = 0;
-
                 foreach (XmlElement controlXml in controlsXml.GetElementsByTagName("control"))
                 {
-                    if (index < items.Length)
+                    ushort graphic = ushort.Parse(controlXml.GetAttribute("graphic"));
+
+                    if (graphic != 0)
                     {
-                        items[index++]?.SetGraphic(
-                            ushort.Parse(controlXml.GetAttribute("graphic")),
-                            ushort.Parse(controlXml.GetAttribute("hue"))
-                        );
-                    }
-                    else
-                    {
-                        Log.Error(ResGumps.IndexOutOfbounds);
+                        CounterItem c = new CounterItem(this, graphic, ushort.Parse(controlXml.GetAttribute("hue")));
+                        _dataBox.Add(c);
                     }
                 }
             }
 
             IsEnabled = IsVisible = ProfileManager.CurrentProfile.CounterBarEnabled;
+
+            SetupLayout();
         }
 
         private class CounterItem : Control
@@ -295,21 +241,19 @@ namespace ClassicUO.Game.UI.Gumps
             private uint _time;
             private readonly CounterBarGump _gump;
 
-            public CounterItem(CounterBarGump gump, int x, int y, int w, int h)
+            public CounterItem(CounterBarGump gump, ushort graphic, ushort hue)
             {
                 _gump = gump;
+                
                 AcceptMouseInput = true;
                 WantUpdateSize = false;
                 CanMove = true;
                 CanCloseWithRightClick = false;
 
-                X = x;
-                Y = y;
-                Width = w;
-                Height = h;
-
                 _image = new ImageWithText();
                 Add(_image);
+
+                SetGraphic(graphic, hue);
 
                 ContextMenu = new ContextMenuControl(_gump);
                 ContextMenu.Add(ResGumps.UseObject, Use);
@@ -338,6 +282,13 @@ namespace ClassicUO.Game.UI.Gumps
                 _image?.ChangeGraphic(0, 0);
                 _amount = 0;
                 Graphic = 0;
+
+                Dispose();
+
+                if (RootParent is CounterBarGump g)
+                {
+                    g.SetupLayout();
+                }
             }
 
             public void Use()
@@ -426,6 +377,12 @@ namespace ClassicUO.Game.UI.Gumps
             public override void Update()
             {
                 base.Update();
+
+                if (!IsDisposed)
+                {
+                    _image.Width = Width;
+                    _image.Height = Height;
+                }
 
                 if (Parent != null && Parent.IsEnabled && _time < Time.Ticks)
                 {
@@ -543,7 +500,6 @@ namespace ClassicUO.Game.UI.Gumps
                         _graphic = graphic;
                         _hue = hue;
                         _partial = Client.Game.UO.FileManager.TileData.StaticData[graphic].IsPartialHue;
-                        _label.Y = Parent.Height - 15;
                     }
                     else
                     {
@@ -559,6 +515,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         Width = Parent.Width;
                         Height = Parent.Height;
+                        _label.Y = Parent.Height - 15;
                     }
                 }
 

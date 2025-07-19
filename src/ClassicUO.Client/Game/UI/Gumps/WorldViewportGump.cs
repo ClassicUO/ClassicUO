@@ -284,7 +284,7 @@ namespace ClassicUO.Game.UI.Gumps
 
     internal class BorderControl : Control
     {
-        private readonly int _borderSize;
+        public int BorderSize { get; internal set; }
 
         const ushort H_BORDER = 0x0A8C;
         const ushort V_BORDER = 0x0A8D;
@@ -295,7 +295,7 @@ namespace ClassicUO.Game.UI.Gumps
             Y = y;
             Width = w;
             Height = h;
-            _borderSize = borderSize;
+            BorderSize = borderSize;
             CanMove = true;
             AcceptMouseInput = true;
         }
@@ -317,7 +317,7 @@ namespace ClassicUO.Game.UI.Gumps
             // sopra
             batcher.DrawTiled(
                 gumpInfo.Texture,
-                new Rectangle(x, y, Width, _borderSize),
+                new Rectangle(x, y, Width, BorderSize),
                 gumpInfo.UV,
                 hueVector
             );
@@ -325,7 +325,7 @@ namespace ClassicUO.Game.UI.Gumps
             // sotto
             batcher.DrawTiled(
                 gumpInfo.Texture,
-                new Rectangle(x, y + Height - _borderSize, Width, _borderSize),
+                new Rectangle(x, y + Height - BorderSize, Width, BorderSize),
                 gumpInfo.UV,
                 hueVector
             );
@@ -334,7 +334,7 @@ namespace ClassicUO.Game.UI.Gumps
             //sx
             batcher.DrawTiled(
                 gumpInfo.Texture,
-                new Rectangle(x, y, _borderSize, Height),
+                new Rectangle(x, y, BorderSize, Height),
                 gumpInfo.UV,
                 hueVector
             );
@@ -343,10 +343,10 @@ namespace ClassicUO.Game.UI.Gumps
             batcher.DrawTiled(
                 gumpInfo.Texture,
                 new Rectangle(
-                    x + Width - _borderSize,
+                    x + Width - BorderSize,
                     y + (gumpInfo.UV.Width >> 1),
-                    _borderSize,
-                    Height - _borderSize
+                    BorderSize,
+                    Height - BorderSize
                 ),
                 gumpInfo.UV,
                 hueVector
