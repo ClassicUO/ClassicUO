@@ -3018,7 +3018,6 @@ namespace ClassicUO.Game.UI.Gumps
             startY += text.Height + 2;
             text = AddLabel(rightArea, ResGumps.CellSize, startX, startY);
 
-            int initialX = startX;
             startX += text.Width + 5;
 
             _cellSize = AddHSlider
@@ -3031,46 +3030,6 @@ namespace ClassicUO.Game.UI.Gumps
                 startY,
                 80
             );
-
-
-            startX = initialX;
-            startY += text.Height + 2 + 15;
-
-            _rows = AddInputField
-            (
-                rightArea,
-                startX,
-                startY,
-                50,
-                30,
-                ResGumps.Counter_Rows,
-                50,
-                false,
-                true,
-                30
-            );
-
-            _rows.SetText(_currentProfile.CounterBarRows.ToString());
-
-
-            startX += _rows.Width + 5 + 100;
-
-            _columns = AddInputField
-            (
-                rightArea,
-                startX,
-                startY,
-                50,
-                30,
-                ResGumps.Counter_Columns,
-                50,
-                false,
-                true,
-                30
-            );
-
-            _columns.SetText(_currentProfile.CounterBarColumns.ToString());
-
 
             Add(rightArea, PAGE);
         }
@@ -4086,23 +4045,9 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.CounterBarEnabled = _enableCounters.IsChecked;
             _currentProfile.CounterBarCellSize = _cellSize.Value;
 
-            if (!int.TryParse(_rows.Text, out int v))
-            {
-                v = 1;
-                _rows.SetText("1");
-            }
-
-            _currentProfile.CounterBarRows = v;
-
-            if (!int.TryParse(_columns.Text, out v))
-            {
-                v = 1;
-                _columns.SetText("1");
-            }
-            _currentProfile.CounterBarColumns = v;
             _currentProfile.CounterBarHighlightOnUse = _highlightOnUse.IsChecked;
 
-            if (!int.TryParse(_highlightAmount.Text, out v))
+            if (!int.TryParse(_highlightAmount.Text, out int v))
             {
                 v = 5;
                 _highlightAmount.SetText("5");
@@ -4120,9 +4065,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             CounterBarGump counterGump = UIManager.GetGump<CounterBarGump>();
 
-            counterGump?.SetLayout(_currentProfile.CounterBarCellSize, _currentProfile.CounterBarRows, _currentProfile.CounterBarColumns);
-
-
             if (before != _currentProfile.CounterBarEnabled)
             {
                 if (counterGump == null)
@@ -4136,9 +4078,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 World,
                                 200,
                                 200,
-                                _currentProfile.CounterBarCellSize,
-                                _currentProfile.CounterBarRows,
-                                _currentProfile.CounterBarColumns
+                                _currentProfile.CounterBarCellSize
                             )
                         );
                     }

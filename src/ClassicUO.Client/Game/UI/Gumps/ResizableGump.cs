@@ -69,6 +69,10 @@ namespace ClassicUO.Game.UI.Gumps
             set => _borderControl.IsVisible = _button.IsVisible = value;
         }
 
+        public int BoderSize
+        {
+            get => _borderControl.BorderSize;
+        }
 
         public Point ResizeWindow(Point newSize)
         {
