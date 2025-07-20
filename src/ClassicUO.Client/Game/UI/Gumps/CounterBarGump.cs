@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -9,11 +8,9 @@ using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Xml;
 
@@ -27,14 +24,18 @@ namespace ClassicUO.Game.UI.Gumps
         private int _rectSize;
         private ScissorControl _scissor;
 
-        public CounterBarGump(World world) : base(world, 0, 0, 50, 50, 0, 0, 0) { }
+        public CounterBarGump(World world) : base(world, 0, 0, 50, 50, 0, 0, 0)
+        {
+            ContextMenu = new ContextMenuControl(this);
+            ContextMenu.Add(ResGumps.Add, AddPlaceholder);
+        }
 
         public CounterBarGump(
             World world,
             int x,
             int y,
             int rectSize = 30
-        ) : base(world, 0, 0, 50, 50, 0, 0, 0)
+        ) : this(world)
         {
             X = x;
             Y = y;
@@ -42,6 +43,12 @@ namespace ClassicUO.Game.UI.Gumps
             SetCellSize(rectSize);
 
             BuildGump();
+        }
+
+        private void AddPlaceholder()
+        {
+            _dataBox.Add(new CounterItem(this, 0, 0));
+            SetupLayout();
         }
 
         public void SetCellSize(int size)
@@ -254,10 +261,6 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(_image);
 
                 SetGraphic(graphic, hue);
-
-                ContextMenu = new ContextMenuControl(_gump);
-                ContextMenu.Add(ResGumps.UseObject, Use);
-                ContextMenu.Add(ResGumps.Remove, RemoveItem);
             }
 
             public ushort Graphic { get; private set; }
@@ -268,13 +271,15 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _image.ChangeGraphic(graphic, hue);
 
-                if (graphic == 0)
-                {
-                    return;
-                }
-
                 Graphic = graphic;
                 Hue = hue;
+
+                ContextMenu = new ContextMenuControl(_gump);
+                if (graphic != 0)
+                {
+                    ContextMenu.Add(ResGumps.UseObject, Use);
+                }
+                ContextMenu.Add(ResGumps.Remove, RemoveItem);
             }
 
             public void RemoveItem()
@@ -351,9 +356,13 @@ namespace ClassicUO.Game.UI.Gumps
                         Use();
                     }
                 }
-                else if (button == MouseButtonType.Right && Keyboard.Alt && Graphic != 0)
+                else if (button == MouseButtonType.Right && Keyboard.Alt )
                 {
                     RemoveItem();
+                }
+                else if (button == MouseButtonType.Right)
+                {
+                    base.OnMouseUp(x, y, button);
                 }
                 else if (Graphic != 0)
                 {
