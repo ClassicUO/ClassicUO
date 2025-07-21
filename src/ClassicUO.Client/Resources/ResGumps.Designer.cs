@@ -898,6 +898,42 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Compare to....
+        /// </summary>
+        public static string CounterCompareTo {
+            get {
+                return ResourceManager.GetString("CounterCompareTo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The value must be a valid number!.
+        /// </summary>
+        public static string CounterCompareToDialogInvalid {
+            get {
+                return ResourceManager.GetString("CounterCompareToDialogInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Compare to value.
+        /// </summary>
+        public static string CounterCompareToDialogText1 {
+            get {
+                return ResourceManager.GetString("CounterCompareToDialogText1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to (leave empty to reset).
+        /// </summary>
+        public static string CounterCompareToDialogText2 {
+            get {
+                return ResourceManager.GetString("CounterCompareToDialogText2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Counter Layout:.
         /// </summary>
         public static string CounterLayout {

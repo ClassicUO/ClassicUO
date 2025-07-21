@@ -3,6 +3,7 @@
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
@@ -10,7 +11,9 @@ using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Xml;
 
@@ -47,7 +50,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void AddPlaceholder()
         {
-            _dataBox.Add(new CounterItem(this, 0, 0));
+            _dataBox.Add(new CounterItem(this, 0, 0, 0));
             SetupLayout();
         }
 
@@ -160,7 +163,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (Client.Game.UO.GameCursor.ItemHold.Enabled && Client.Game.UO.GameCursor.ItemHold.Graphic != 0)
                 {
-                    CounterItem item = new CounterItem(this, Client.Game.UO.GameCursor.ItemHold.Graphic, Client.Game.UO.GameCursor.ItemHold.Hue);
+                    CounterItem item = new CounterItem(this, Client.Game.UO.GameCursor.ItemHold.Graphic, Client.Game.UO.GameCursor.ItemHold.Hue, 0);
                     _dataBox.Add(item);
                     GameActions.DropItem(Client.Game.UO.GameCursor.ItemHold.Serial, Client.Game.UO.GameCursor.ItemHold.X, Client.Game.UO.GameCursor.ItemHold.Y, 0, Client.Game.UO.GameCursor.ItemHold.Container);
 
@@ -192,6 +195,7 @@ namespace ClassicUO.Game.UI.Gumps
                     writer.WriteStartElement("control");
                     writer.WriteAttributeString("graphic", control.Graphic.ToString());
                     writer.WriteAttributeString("hue", control.Hue.ToString());
+                    writer.WriteAttributeString("compareto", control.CompareTo.ToString());
                     writer.WriteEndElement();
                 }
             }
@@ -230,7 +234,13 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (graphic != 0)
                     {
-                        CounterItem c = new CounterItem(this, graphic, ushort.Parse(controlXml.GetAttribute("hue")));
+                        if (!int.TryParse(controlXml.GetAttribute("compareto"), out int compareTo))
+                        {
+                            compareTo = 0;
+                        }
+
+                        CounterItem c = new CounterItem(this, graphic, ushort.Parse(controlXml.GetAttribute("hue")), compareTo);
+
                         _dataBox.Add(c);
                     }
                 }
@@ -248,9 +258,10 @@ namespace ClassicUO.Game.UI.Gumps
             private uint _time;
             private readonly CounterBarGump _gump;
 
-            public CounterItem(CounterBarGump gump, ushort graphic, ushort hue)
+            public CounterItem(CounterBarGump gump, ushort graphic, ushort hue, int compareTo)
             {
                 _gump = gump;
+                CompareTo = compareTo;
                 
                 AcceptMouseInput = true;
                 WantUpdateSize = false;
@@ -267,6 +278,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             public ushort Hue { get; private set; }
 
+            public int CompareTo { get; private set; }
+
             public void SetGraphic(ushort graphic, ushort hue)
             {
                 _image.ChangeGraphic(graphic, hue);
@@ -278,8 +291,34 @@ namespace ClassicUO.Game.UI.Gumps
                 if (graphic != 0)
                 {
                     ContextMenu.Add(ResGumps.UseObject, Use);
+                    ContextMenu.Add(ResGumps.CounterCompareTo, CompareToSelected);
                 }
                 ContextMenu.Add(ResGumps.Remove, RemoveItem);
+            }
+
+            private void CompareToSelected()
+            {
+                UIManager.Add(new EntryDialog(_gump.World, 250, 160,
+                    string.Format("{0}\n{1}", ResGumps.CounterCompareToDialogText1, ResGumps.CounterCompareToDialogText2),
+                    CompareToDialogClosed, _amount.ToString()));
+            }
+
+            private void CompareToDialogClosed(string newValue)
+            {
+                if (string.IsNullOrEmpty(newValue))
+                {
+                    CompareTo = 0;
+                }
+                else if (int.TryParse(newValue, out int parsedValue))
+                {
+                    CompareTo = parsedValue;
+                }
+                else
+                {
+                    UIManager.Add(new EntryDialog(_gump.World, 250, 180,
+                        string.Format("{0}\n{1}\n\n{2}", ResGumps.CounterCompareToDialogText1, ResGumps.CounterCompareToDialogText2, ResGumps.CounterCompareToDialogInvalid),
+                        CompareToDialogClosed, newValue));
+                }
             }
 
             public void RemoveItem()
@@ -383,6 +422,11 @@ namespace ClassicUO.Game.UI.Gumps
                 return true;
             }
 
+            private int CalculateDisplayAmount()
+            {
+                return _amount - CompareTo;
+            }
+
             public override void Update()
             {
                 base.Update();
@@ -422,19 +466,38 @@ namespace ClassicUO.Game.UI.Gumps
                             }
                         }
 
+                        int displayAmount = CalculateDisplayAmount();
+                        string prefix;
+                        if (CompareTo == 0)
+                        {
+                            prefix = "";
+                        }
+                        else if (displayAmount == 0)
+                        {
+                            prefix = "±";
+                        }
+                        else if (displayAmount > 0)
+                        {
+                            prefix = "+";
+                        }
+                        else
+                        {
+                            prefix = "";  // a negative number already comes with its prefix
+                        }
+
                         if (ProfileManager.CurrentProfile.CounterBarDisplayAbbreviatedAmount)
                         {
                             if (
-                                _amount >= ProfileManager.CurrentProfile.CounterBarAbbreviatedAmount
+                                displayAmount >= ProfileManager.CurrentProfile.CounterBarAbbreviatedAmount
                             )
                             {
-                                _image.SetAmount(StringHelper.IntToAbbreviatedString(_amount));
+                                _image.SetAmount(prefix + StringHelper.IntToAbbreviatedString(displayAmount));
 
                                 return;
                             }
                         }
 
-                        _image.SetAmount(_amount.ToString());
+                        _image.SetAmount(prefix + displayAmount.ToString());
                     }
                 }
             }
@@ -467,7 +530,7 @@ namespace ClassicUO.Game.UI.Gumps
                     MouseIsOver
                         ? Color.Yellow
                         : ProfileManager.CurrentProfile.CounterBarHighlightOnAmount
-                        && _amount < ProfileManager.CurrentProfile.CounterBarHighlightAmount
+                        && CalculateDisplayAmount() < ProfileManager.CurrentProfile.CounterBarHighlightAmount
                         && Graphic != 0
                             ? Color.Red
                             : Color.Gray

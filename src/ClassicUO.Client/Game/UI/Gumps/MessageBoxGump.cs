@@ -150,7 +150,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Action<string> _action;
         private readonly StbTextBox _textBox;
 
-        public EntryDialog(World world, int w, int h, string message, Action<string> action) : base(world, 0, 0)
+        public EntryDialog(World world, int w, int h, string message, Action<string> action, string initialValue = "") : base(world, 0, 0)
         {
             CanMove = false;
             CanCloseWithRightClick = false;
@@ -217,7 +217,8 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 42,
                 Y = 45 + l.Height + 7,
                 Width = ww,
-                Height = 25
+                Height = 25,
+                Text = initialValue
             };
 
             Add(_textBox);
