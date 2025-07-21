@@ -1621,4 +1621,16 @@ Client version: '{0}'</value>
   <data name="OverheadPartyMessages" xml:space="preserve">
     <value>Show party messages overhead</value>
   </data>
+  <data name="CounterCompareTo" xml:space="preserve">
+    <value>Compare to...</value>
+  </data>
+  <data name="CounterCompareToDialogText1" xml:space="preserve">
+    <value>Compare to value</value>
+  </data>
+  <data name="CounterCompareToDialogText2" xml:space="preserve">
+    <value>(leave empty to reset)</value>
+  </data>
+  <data name="CounterCompareToDialogInvalid" xml:space="preserve">
+    <value>The value must be a valid number!</value>
+  </data>
 </root>
