@@ -209,7 +209,10 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     writer.WriteStartElement("control");
                     writer.WriteAttributeString("graphic", control.Graphic.ToString());
-                    writer.WriteAttributeString("hue", control.Hue.ToString());
+                    if (control.Hue != null)
+                    {
+                        writer.WriteAttributeString("hue", control.Hue.Value.ToString());
+                    }
                     writer.WriteAttributeString("compareto", control.CompareTo.ToString());
                     writer.WriteEndElement();
                 }
@@ -254,7 +257,9 @@ namespace ClassicUO.Game.UI.Gumps
                             compareTo = 0;
                         }
 
-                        CounterItem c = new CounterItem(this, graphic, ushort.Parse(controlXml.GetAttribute("hue")), compareTo);
+                        string hue = controlXml.GetAttribute("hue");
+
+                        CounterItem c = new(this, graphic, string.IsNullOrEmpty(hue) ? null : ushort.Parse(controlXml.GetAttribute("hue")), compareTo);
 
                         _dataBox.Add(c);
                         

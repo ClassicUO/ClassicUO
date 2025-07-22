@@ -10,6 +10,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -26,7 +27,7 @@ namespace ClassicUO.Game.UI.Gumps
             private uint _time;
             private readonly CounterBarGump _gump;
 
-            public CounterItem(CounterBarGump gump, ushort graphic, ushort hue, int compareTo)
+            public CounterItem(CounterBarGump gump, ushort graphic, ushort? hue, int compareTo)
             {
                 _gump = gump;
                 CompareTo = compareTo;
@@ -44,13 +45,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             public ushort Graphic { get; private set; }
 
-            public ushort Hue { get; private set; }
+            public ushort? Hue { get; private set; }
 
             public int CompareTo { get; private set; }
 
-            public void SetGraphic(ushort graphic, ushort hue)
+            public void SetGraphic(ushort graphic, ushort? hue)
             {
-                _image.ChangeGraphic(graphic, hue);
+                _image.ChangeGraphic(graphic, hue ?? 0);
 
                 Graphic = graphic;
                 Hue = hue;
@@ -60,7 +61,22 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     ContextMenu.Add(ResGumps.UseObject, Use);
                     ContextMenu.Add(ResGumps.CounterCompareTo, CompareToSelected);
+                    ContextMenu.Add(Hue != null ? ResGumps.CounterIgnoreHueOff : ResGumps.CounterIgnoreHueOn, ToggleIgnoreHue);
                 }
+            }
+
+            private void ToggleIgnoreHue()
+            {
+                if (Hue != null)
+                {
+                    Hue = null;
+                }
+                else
+                {
+                    Hue = 0;
+                }
+
+                SetGraphic(Graphic, Hue);
             }
 
             private void CompareToSelected()
@@ -116,7 +132,7 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
                 }
 
-                Item item = backpack.FindItem(Graphic, Hue);
+                Item item = Hue == null ? backpack.FindItem(Graphic): backpack.FindItem(Graphic, Hue.Value);
 
                 if (item != null)
                 {
@@ -127,9 +143,16 @@ namespace ClassicUO.Game.UI.Gumps
             protected override void OnMouseOver(int x, int y)
             {
                 base.OnMouseOver(x, y);
-
-                if (_gump.World.Player.FindItemByLayer(Layer.Backpack)?.FindItem(Graphic, Hue) is {} item)
-                    SetTooltip(item);
+                if (Hue == null)
+                {
+                    if (_gump.World.Player.FindItemByLayer(Layer.Backpack)?.FindItem(Graphic) is { } item)
+                        SetTooltip(item);
+                }
+                else
+                {
+                    if (_gump.World.Player.FindItemByLayer(Layer.Backpack)?.FindItem(Graphic, Hue.Value) is { } item)
+                        SetTooltip(item);
+                }
             }
 
             protected override void OnMouseExit(int x, int y)
@@ -326,7 +349,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            private static void GetAmount(Item parent, ushort graphic, ushort hue, ref int amount)
+            private static void GetAmount(Item parent, ushort graphic, ushort? hue, ref int amount)
             {
                 if (parent == null)
                 {
@@ -339,7 +362,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     GetAmount(item, graphic, hue, ref amount);
 
-                    if (item.Graphic == graphic && item.Hue == hue && item.Exists)
+                    if (item.Graphic == graphic && (hue == null || item.Hue == hue.Value) && item.Exists)
                     {
                         amount += item.Amount;
                     }

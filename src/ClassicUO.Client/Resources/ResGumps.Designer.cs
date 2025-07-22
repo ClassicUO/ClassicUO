@@ -898,7 +898,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Compare to....
+        ///   Looks up a localized string similar to Compare amount to....
         /// </summary>
         public static string CounterCompareTo {
             get {
@@ -930,6 +930,24 @@ namespace ClassicUO.Resources {
         public static string CounterCompareToDialogText2 {
             get {
                 return ResourceManager.GetString("CounterCompareToDialogText2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Compare Hue (ON).
+        /// </summary>
+        public static string CounterIgnoreHueOff {
+            get {
+                return ResourceManager.GetString("CounterIgnoreHueOff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Compare Hue (OFF).
+        /// </summary>
+        public static string CounterIgnoreHueOn {
+            get {
+                return ResourceManager.GetString("CounterIgnoreHueOn", resourceCulture);
             }
         }
         
