@@ -32,6 +32,9 @@ internal readonly struct CuoPlugin : IPlugin
         scheduler.AddPlugin<TerrainPlugin>();
         scheduler.AddPlugin<GuiPlugin>();
 
+        scheduler.AddPlugin<LoginScreenPlugin>();
+        scheduler.AddPlugin<GameScreenPlugin>();
+
         scheduler.AddPlugin<NetworkPlugin>();
         scheduler.AddPlugin<GameplayPlugin>();
         scheduler.AddPlugin<RenderingPlugin>();

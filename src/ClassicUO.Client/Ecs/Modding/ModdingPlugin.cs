@@ -194,7 +194,6 @@ internal readonly struct ModdingPlugin : IPlugin
                 }),
 
 
-
                 HostFunction.FromMethod("send_events", null, (CurrentPlugin p, long offset) => {
                     // var str = p.ReadString(offset);
                     // var events = str.FromJson<PluginMessages>();

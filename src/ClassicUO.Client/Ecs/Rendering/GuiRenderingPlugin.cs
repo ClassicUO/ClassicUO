@@ -46,15 +46,13 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
             commandBuffer.Value.Reset();
 
             Clay.BeginLayout();
-            foreach ((var ent, var node, var text, var interaction, var children) in query)
+            foreach (var (node, text, interaction, children) in query)
             {
                 renderNodes(
-                    ent.Ref,
                     ref node.Ref,
                     ref text.Ref,
                     ref interaction.Ref,
                     ref children.Ref,
-                    mouseCtx,
                     commandBuffer,
                     queryChildren
                 );
@@ -128,8 +126,7 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
 
                         if (config.cornerRadius.topLeft > 0)
                         {
-                            var radius = (config.cornerRadius.topLeft * 2) /
-                                (float)((boundingBox.width > boundingBox.height) ? boundingBox.height : boundingBox.width);
+                            var radius = config.cornerRadius.topLeft;
 
                             b.DrawRoundedRectangleFilled(dumbTexture.Value,
                                 new Rectangle((int)boundingBox.x, (int)boundingBox.y, (int)boundingBox.width, (int)boundingBox.height),
@@ -337,9 +334,7 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
 
             static void renderNodes
             (
-                EntityView ent,
                 ref UINode node, ref Text text, ref UIMouseAction interaction, ref Children children,
-                MouseContext mouseCtx,
                 ClayUOCommandBuffer commandBuffer,
                 Query<Data<UINode, Text, UIMouseAction, Children>,
                       Filter<With<Parent>, Optional<Text>, Optional<UIMouseAction>, Optional<Children>>> query
@@ -360,10 +355,10 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
 
                 if (!Unsafe.IsNullRef(ref interaction) && interaction.IsHovered)
                 {
-                    config.backgroundColor.r = 1;
-                    config.backgroundColor.g = 0;
-                    config.backgroundColor.b = 0;
-                    config.backgroundColor.a = 1;
+                    config.backgroundColor.a = 0.3f;
+                    config.backgroundColor.r = 1 * config.backgroundColor.a;
+                    config.backgroundColor.g = 0 * config.backgroundColor.a;
+                    config.backgroundColor.b = 0 * config.backgroundColor.a;
                 }
 
                 Clay.ConfigureOpenElement(config);
@@ -402,19 +397,16 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                         if (!query.Contains(child))
                             continue;
 
-                        (var childEnt,
-                         var childNode,
+                        (var childNode,
                          var childText,
                          var childInteraction,
                          var childChildren) = query.Get(child);
 
                         renderNodes(
-                            childEnt.Ref,
                             ref childNode.Ref,
                             ref childText.Ref,
                             ref childInteraction.Ref,
                             ref childChildren.Ref,
-                            mouseCtx,
                             commandBuffer,
                             query
                         );

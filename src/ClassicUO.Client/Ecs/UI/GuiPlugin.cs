@@ -20,29 +20,6 @@ internal readonly struct GuiPlugin : IPlugin
     private const FontSystemEffect FONT_EFFECT = FontSystemEffect.Stroked;
     private const int FONT_EFFECT_AMOUNT = 1;
 
-    private static unsafe Clay_Dimensions OnMeasureText(Clay_StringSlice slice, Clay_TextElementConfig* config, void* userData)
-    {
-        var raw = new ReadOnlySpan<byte>(slice.chars, slice.length);
-        var text = Encoding.UTF8.GetString(raw);
-
-        var font = FontCache.GetFont(config->fontId);
-        var dynFont = font.GetFont(config->fontSize);
-        var size = dynFont.MeasureString(
-            text,
-            characterSpacing: config->letterSpacing,
-            lineSpacing: config->lineHeight,
-            effect: FONT_EFFECT, effectAmount: FONT_EFFECT_AMOUNT);
-
-        return new Clay_Dimensions(size.X, size.Y);
-    }
-
-    private static unsafe void OnClayError(Clay_ErrorData errorData)
-    {
-        var raw = new ReadOnlySpan<byte>(errorData.errorText.chars, errorData.errorText.length);
-        var text = Encoding.UTF8.GetString(raw);
-        Console.WriteLine($"Clay error: {errorData.errorType} - {text}");
-    }
-
     public void Build(Scheduler scheduler)
     {
         scheduler.AddResource(new ClayUOCommandBuffer());
@@ -52,16 +29,10 @@ internal readonly struct GuiPlugin : IPlugin
         scheduler.OnStartup((SchedulerState state, World world, Res<AssetsServer> assets) =>
             state.AddResource(new GumpBuilder(world, assets)));
 
-        scheduler.AddPlugin<LoginScreenPlugin>();
-        scheduler.AddPlugin<ServerSelectionPlugin>();
-        scheduler.AddPlugin<CharacterSelectionPlugin>();
-        scheduler.AddPlugin<LoginErrorScreenPlugin>();
-        scheduler.AddPlugin<GameScreenPlugin>();
 
         var states = Enum.GetValues<GameState>();
         foreach (var state in states)
             scheduler.OnExit(state, (Res<FocusedInput> focusedInput) => focusedInput.Value.Entity = 0);
-
 
         var setupClayFn = SetupClay;
         scheduler.OnStartup(setupClayFn);
@@ -90,6 +61,29 @@ internal readonly struct GuiPlugin : IPlugin
         scheduler.OnFrameEnd(handleNodeStatesFn);
     }
 
+
+    private static unsafe Clay_Dimensions OnMeasureText(Clay_StringSlice slice, Clay_TextElementConfig* config, void* userData)
+    {
+        var raw = new ReadOnlySpan<byte>(slice.chars, slice.length);
+        var text = Encoding.UTF8.GetString(raw);
+
+        var font = FontCache.GetFont(config->fontId);
+        var dynFont = font.GetFont(config->fontSize);
+        var size = dynFont.MeasureString(
+            text,
+            characterSpacing: config->letterSpacing,
+            lineSpacing: config->lineHeight,
+            effect: FONT_EFFECT, effectAmount: FONT_EFFECT_AMOUNT);
+
+        return new Clay_Dimensions(size.X, size.Y);
+    }
+
+    private static unsafe void OnClayError(Clay_ErrorData errorData)
+    {
+        var raw = new ReadOnlySpan<byte>(errorData.errorText.chars, errorData.errorText.length);
+        var text = Encoding.UTF8.GetString(raw);
+        Console.WriteLine($"Clay error: {errorData.errorType} - {text}");
+    }
 
     private static unsafe void SetupClay()
     {
@@ -176,8 +170,6 @@ internal readonly struct GuiPlugin : IPlugin
     {
         foreach ((var node, var interaction) in query)
         {
-            // if (interaction.Ref is { State: UIInteractionState.Pressed, Button: MouseButtonType.Left })
-
             if (interaction.Ref is { IsPressed: true, Button: MouseButtonType.Left })
             {
                 node.Ref.Config.floating.offset.x += mouseCtx.Value.PositionOffset.X;

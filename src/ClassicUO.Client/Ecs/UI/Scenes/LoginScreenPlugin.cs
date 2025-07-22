@@ -25,6 +25,11 @@ internal readonly struct LoginScreenPlugin : IPlugin
         scheduler.OnEnter(GameState.LoginScreen, setupFn);
         scheduler.OnEnter(GameState.LoginScreen, (State<LoginInteraction> state) => state.Set(LoginInteraction.None));
         scheduler.OnExit(GameState.LoginScreen, deleteMenuFn);
+
+
+        scheduler.AddPlugin<ServerSelectionPlugin>();
+        scheduler.AddPlugin<CharacterSelectionPlugin>();
+        scheduler.AddPlugin<LoginErrorScreenPlugin>();
     }
 
     private static void Setup(TinyEcs.World world, Res<GumpBuilder> gumpBuilder, Res<ClayUOCommandBuffer> clay, Res<AssetsServer> assets, Res<Settings> settings)

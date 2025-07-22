@@ -35,6 +35,8 @@ internal readonly struct ServerSelectionPlugin : IPlugin
 
     private static void ServerInfoSetup(World world, EventReader<ServerSelectionInfoEvent> reader)
     {
+        var cornerRadius = Clay_CornerRadius.All(8);
+
         var root = world.Entity()
             .Add<ServerSelectionScene>()
             .SetUINode(new UINode()
@@ -60,6 +62,7 @@ internal readonly struct ServerSelectionPlugin : IPlugin
             .SetUINode(new UINode()
             {
                 Config = {
+                    cornerRadius = cornerRadius,
                     backgroundColor = new (0.3f, 0.3f, 0.3f, 1),
                     layout = {
                         sizing = {
@@ -93,6 +96,7 @@ internal readonly struct ServerSelectionPlugin : IPlugin
             .SetUINode(new UINode()
             {
                 Config = {
+                    cornerRadius = cornerRadius,
                     backgroundColor = new (0.3f, 0.3f, 0.3f, 1),
                     layout = {
                         sizing = {
@@ -129,6 +133,7 @@ internal readonly struct ServerSelectionPlugin : IPlugin
                     .SetUINode(new UINode()
                     {
                         Config = {
+                            cornerRadius = cornerRadius,
                             backgroundColor = new (0.6f, 0.6f, 0.6f, 1),
                             layout = {
                                 sizing = {
