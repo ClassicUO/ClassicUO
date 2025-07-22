@@ -312,7 +312,7 @@ namespace ClassicUO.Game.UI.Gumps
                         if (ProfileManager.CurrentProfile.CounterBarDisplayAbbreviatedAmount)
                         {
                             if (
-                                displayAmount >= ProfileManager.CurrentProfile.CounterBarAbbreviatedAmount
+                                Math.Abs(displayAmount) >= ProfileManager.CurrentProfile.CounterBarAbbreviatedAmount
                             )
                             {
                                 _image.SetAmount(prefix + StringHelper.IntToAbbreviatedString(displayAmount));
