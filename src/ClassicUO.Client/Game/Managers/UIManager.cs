@@ -1,7 +1,11 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Collections.Specialized;
+using System.Linq;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -510,6 +514,46 @@ namespace ClassicUO.Game.Managers
 
             return null;
         }
+
+        /// <summary>
+        ///     Returns all controls which are part of a Gump from the provided list,
+        ///     as long as they are below the current mouse cursor position.
+        ///     
+        ///     Never returns null, but an empty enumerable instead.
+        /// </summary>
+        /// <param name="allowedGumps">Gumps for which hovered controls should be returned</param>
+        /// <returns>Read-only enumerable with the desired controls.</returns>
+        public static IEnumerable<Control> GetAllMouseOverControls(IEnumerable<Type> allowedGumps)
+        {
+            List<Control> results = new List<Control>();
+
+            Point position = Mouse.Position;
+
+            Control control = null;
+
+            IsModalOpen = IsModalControlOpen();
+
+            for (LinkedListNode<Gump> first = Gumps.First; first != null; first = first.Next)
+            {
+                Control c = first.Value;
+
+                if (IsModalOpen && !c.IsModal || !c.IsVisible || !c.IsEnabled || !allowedGumps.Contains(c.GetType()))
+                {
+                    continue;
+                }
+
+                c.HitTest(position, ref control);
+
+                if (control != null)
+                {
+                    results.Add(control);
+                }
+            }
+
+            return results.AsReadOnly();
+        }
+
+
 
         public static void MakeTopMostGump(Control control)
         {
