@@ -1622,7 +1622,7 @@ Client version: '{0}'</value>
     <value>Show party messages overhead</value>
   </data>
   <data name="CounterCompareTo" xml:space="preserve">
-    <value>Compare to...</value>
+    <value>Compare amount to...</value>
   </data>
   <data name="CounterCompareToDialogText1" xml:space="preserve">
     <value>Compare to value</value>
@@ -1632,5 +1632,11 @@ Client version: '{0}'</value>
   </data>
   <data name="CounterCompareToDialogInvalid" xml:space="preserve">
     <value>The value must be a valid number!</value>
+  </data>
+  <data name="CounterIgnoreHueOff" xml:space="preserve">
+    <value>Compare Hue (ON)</value>
+  </data>
+  <data name="CounterIgnoreHueOn" xml:space="preserve">
+    <value>Compare Hue (OFF)</value>
   </data>
 </root>
