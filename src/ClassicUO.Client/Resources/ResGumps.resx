@@ -1645,4 +1645,10 @@ Client version: '{0}'</value>
   <data name="CounterErrorSlotNotValid" xml:space="preserve">
     <value>Counter Bar: Slot '{0}' is not a valid number</value>
   </data>
+  <data name="CounterReadonlyOn" xml:space="preserve">
+    <value>Read-only mode (ON)</value>
+  </data>
+  <data name="CounterReadonlyOff" xml:space="preserve">
+    <value>Read-only mode (OFF)</value>
+  </data>
 </root>

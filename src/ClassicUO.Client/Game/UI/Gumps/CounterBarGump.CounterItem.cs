@@ -56,12 +56,21 @@ namespace ClassicUO.Game.UI.Gumps
                 Graphic = graphic;
                 Hue = hue;
 
+                ConfigureContextMenu();
+            }
+
+            internal void ConfigureContextMenu()
+            {
                 ContextMenu = new ContextMenuControl(_gump);
-                if (graphic != 0)
+                if (Graphic != 0)
                 {
                     ContextMenu.Add(ResGumps.UseObject, Use);
                     ContextMenu.Add(ResGumps.CounterCompareTo, CompareToSelected);
                     ContextMenu.Add(Hue != null ? ResGumps.CounterIgnoreHueOff : ResGumps.CounterIgnoreHueOn, ToggleIgnoreHue);
+                }
+                else
+                {
+                    _gump.ConfigureContextMenu(ContextMenu); // Placeholders receive context menu from parent
                 }
             }
 
@@ -163,6 +172,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             protected override void OnDragBegin(int x, int y)
             {
+                if (!_gump.ShowBorder)
+                {
+                    // in read-only mode
+                    return;
+                }
+
                 DraggableGump gump = new DraggableGump(_gump.World)
                 {
                     X = Mouse.LClickPosition.X - 22,
@@ -181,6 +196,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             protected override void OnDragEnd(int x, int y)
             {
+                if (!_gump.ShowBorder)
+                {
+                    // in read-only mode
+                    return;
+                }
+
                 Control oldParent = this.Parent;
                 if (oldParent is DraggableGump)
                 {
@@ -224,10 +245,14 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (Client.Game.UO.GameCursor.ItemHold.Enabled)
                     {
-                        SetGraphic(
-                            Client.Game.UO.GameCursor.ItemHold.Graphic,
-                            Client.Game.UO.GameCursor.ItemHold.Hue
-                        );
+                        if (_gump.ShowBorder)
+                        {
+                            // not in read-only mode
+                            SetGraphic(
+                                Client.Game.UO.GameCursor.ItemHold.Graphic,
+                                Client.Game.UO.GameCursor.ItemHold.Hue
+                            );
+                        }
 
                         GameActions.DropItem(
                             Client.Game.UO.GameCursor.ItemHold.Serial,
@@ -244,7 +269,11 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (button == MouseButtonType.Right && Keyboard.Alt )
                 {
-                    RemoveItem();
+                    if (_gump.ShowBorder)
+                    {
+                        // not in read-only mode
+                        RemoveItem();
+                    }
                 }
                 else if (button == MouseButtonType.Right)
                 {
