@@ -979,6 +979,24 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Read-only mode (OFF).
+        /// </summary>
+        public static string CounterReadonlyOff {
+            get {
+                return ResourceManager.GetString("CounterReadonlyOff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Read-only mode (ON).
+        /// </summary>
+        public static string CounterReadonlyOn {
+            get {
+                return ResourceManager.GetString("CounterReadonlyOn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Counters.
         /// </summary>
         public static string Counters {

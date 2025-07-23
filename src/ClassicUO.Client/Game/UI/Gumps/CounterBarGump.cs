@@ -4,8 +4,10 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
+using ClassicUO.Renderer.Gumps;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.ConstrainedExecution;
@@ -28,8 +30,31 @@ namespace ClassicUO.Game.UI.Gumps
 
         public CounterBarGump(World world) : base(world, 0, 0, 50, 50, 0, 0, 0)
         {
-            ContextMenu = new ContextMenuControl(this);
-            ContextMenu.Add(ResGumps.Add, AddPlaceholder);
+            ContextMenu = ConfigureContextMenu(new ContextMenuControl(this));
+        }
+
+        private ContextMenuControl ConfigureContextMenu(ContextMenuControl control)
+        {
+            control.Add(ResGumps.Add, AddPlaceholder);
+            if (ShowBorder)
+            {
+                control.Add(ResGumps.CounterReadonlyOff, ToggleReadOnly);
+            }
+            else
+            {
+                control.Add(ResGumps.CounterReadonlyOn, ToggleReadOnly);
+            }
+
+            return control;
+        }
+
+        private void ToggleReadOnly()
+        {
+            ShowBorder = !ShowBorder;
+
+            ContextMenu = ConfigureContextMenu(new ContextMenuControl(this));
+
+            _dataBox.Children.ForEach(child => { (child as CounterItem)?.ConfigureContextMenu(); });
         }
 
         public CounterBarGump(
@@ -171,7 +196,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButtonType.Left)
             {
-                ShowBorder = !ShowBorder;
+                ToggleReadOnly();
                 return true;
             }
 
@@ -184,8 +209,12 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (Client.Game.UO.GameCursor.ItemHold.Enabled && Client.Game.UO.GameCursor.ItemHold.Graphic != 0)
                 {
-                    CounterItem item = new CounterItem(this, Client.Game.UO.GameCursor.ItemHold.Graphic, Client.Game.UO.GameCursor.ItemHold.Hue, 0);
-                    _dataBox.Add(item);
+                    if (ShowBorder)
+                    {
+                        // not in read-only mode
+                        CounterItem item = new CounterItem(this, Client.Game.UO.GameCursor.ItemHold.Graphic, Client.Game.UO.GameCursor.ItemHold.Hue, 0);
+                        _dataBox.Add(item);
+                    }
                     GameActions.DropItem(Client.Game.UO.GameCursor.ItemHold.Serial, Client.Game.UO.GameCursor.ItemHold.X, Client.Game.UO.GameCursor.ItemHold.Y, 0, Client.Game.UO.GameCursor.ItemHold.Container);
 
                     SetupLayout();
@@ -226,6 +255,7 @@ namespace ClassicUO.Game.UI.Gumps
             writer.WriteAttributeString("rectsize", _rectSize.ToString());
             writer.WriteAttributeString("width", Width.ToString());
             writer.WriteAttributeString("height", Height.ToString());
+            writer.WriteAttributeString("readonly", (!ShowBorder).ToString());
 
             IEnumerable<CounterItem> controls = FindControls<CounterItem>();
 
@@ -253,7 +283,6 @@ namespace ClassicUO.Game.UI.Gumps
             SetCellSize(int.Parse(xml.GetAttribute("rectsize")));
 
 
-
             if (!int.TryParse(xml.GetAttribute("width"), out int width))
             {
                 if (int.TryParse(xml.GetAttribute("columns"), out int columns)) //legacy
@@ -276,6 +305,11 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     height = 80;
                 }
+            }
+
+            if (bool.TryParse(xml.GetAttribute("readonly"), out bool isReadOnly))
+            {
+                ShowBorder = !isReadOnly;
             }
 
             Width = width;
