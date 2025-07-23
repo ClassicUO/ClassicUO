@@ -1778,6 +1778,16 @@ namespace ClassicUO.Game.Managers
                 case MacroType.LookAtMouse:
                     // handle in gamesceneinput
                     break;
+
+                case MacroType.UseCounterBarSlot:
+                    {
+                        MacroObjectString objectString = (MacroObjectString)macro;
+                        string slotString = objectString.Text;
+
+                        CounterBarGump gump = UIManager.Gumps.First(gump => gump is CounterBarGump) as CounterBarGump;
+                        gump?.UseSlot(slotString);
+                        break;
+                    }
             }
 
 
@@ -2033,6 +2043,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.SetUpdateRange:
                 case MacroType.ModifyUpdateRange:
                 case MacroType.RazorMacro:
+                case MacroType.UseCounterBarSlot:
                     obj = new MacroObjectString(code, MacroSubType.MSC_NONE);
 
                     break;
@@ -2207,6 +2218,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.SetUpdateRange:
                 case MacroType.ModifyUpdateRange:
                 case MacroType.RazorMacro:
+                case MacroType.UseCounterBarSlot:
                     SubMenuType = 2;
 
                     break;
@@ -2323,7 +2335,8 @@ namespace ClassicUO.Game.Managers
         CloseInactiveHealthBars,
         CloseCorpses,
         UseObject,
-        LookAtMouse
+        LookAtMouse,
+        UseCounterBarSlot
     }
 
     internal enum MacroSubType
