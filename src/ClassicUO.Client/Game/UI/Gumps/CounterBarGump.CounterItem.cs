@@ -23,8 +23,10 @@ namespace ClassicUO.Game.UI.Gumps
         private class CounterItem : Control
         {
             private int _amount;
+            private uint _lastChangeTime;
             private readonly ImageWithText _image;
             private uint _time;
+            private AlphaBlendControl _background;
             private readonly CounterBarGump _gump;
 
             public CounterItem(CounterBarGump gump, ushort graphic, ushort? hue, int compareTo)
@@ -37,8 +39,8 @@ namespace ClassicUO.Game.UI.Gumps
                 CanMove = true;
                 CanCloseWithRightClick = false;
 
-                _image = new ImageWithText();
-                Add(_image);
+                Add(_background = new AlphaBlendControl(0.0f) { X = 0, Y = 0 });
+                Add(_image = new ImageWithText());
 
                 SetGraphic(graphic, hue);
             }
@@ -311,6 +313,9 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _image.Width = Width;
                     _image.Height = Height;
+
+                    _background.Width = Width;
+                    _background.Height = Height;
                 }
 
                 if (Parent != null && Parent.IsEnabled && _time < Time.Ticks)
@@ -323,6 +328,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else
                     {
+                        int previousAmount = _amount;
                         _amount = 0;
 
                         for (
@@ -340,6 +346,22 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 GetAmount(item, Graphic, Hue, ref _amount);
                             }
+                        }
+
+                        if (ProfileManager.CurrentProfile.CounterBarHighlightOnUse)
+                        {
+                            if (_amount > previousAmount)
+                            {
+                                _background.Hue = 1165; //icelight
+                                _lastChangeTime = Time.Ticks;
+                            }
+                            else if (_amount < previousAmount)
+                            {
+                                _background.Hue = 1166; //firelight
+                                _lastChangeTime = Time.Ticks;
+                            }
+
+                            _background.Alpha = Math.Min(1, 1 - (Time.Ticks - _lastChangeTime) / 5000f);
                         }
 
                         int displayAmount = CalculateDisplayAmount();
