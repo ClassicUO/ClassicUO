@@ -8,12 +8,18 @@ using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.ConstrainedExecution;
 using System.Xml;
 
 namespace ClassicUO.Game.UI.Gumps
 {
     internal partial class CounterBarGump : ResizableGump
     {
+        private static readonly int BORDER_LEFT = 2;
+        private static readonly int BORDER_RIGHT = 2;
+        private static readonly int BORDER_TOP = 2;
+        private static readonly int BORDER_BOTTOM = 2;
+
         private AlphaBlendControl _background;
 
         private DataBox _dataBox;
@@ -135,25 +141,25 @@ namespace ClassicUO.Game.UI.Gumps
             _scissor.Width = width;
             _scissor.Height = height;
 
-            int x = 2;
-            int y = 2;
+            int x = 0;
+            int y = 0;
 
             for (int i = 0; i < _dataBox.Children.Count; i++)
             {
                 CounterItem c = _dataBox.Children[i] as CounterItem;
                 if ( c != null && !c.IsDisposed)
                 {
-                    c.X = x;
-                    c.Y = y;
-                    c.Width = _rectSize - 4;
-                    c.Height = _rectSize - 4;
+                    c.X = x + BORDER_LEFT;
+                    c.Y = y + BORDER_TOP;
+                    c.Width = _rectSize - BORDER_LEFT - BORDER_RIGHT;
+                    c.Height = _rectSize - BORDER_TOP - BORDER_BOTTOM;
 
-                    x += _rectSize + 2;
+                    x += _rectSize;
 
                     if (x + _rectSize > width)
                     {
-                        x = 2;
-                        y += _rectSize + 2;
+                        x = 0;
+                        y += _rectSize;
                     }
 
                     continue;
@@ -227,17 +233,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             foreach (CounterItem control in _dataBox.Children.FindAll(c => c is CounterItem).Cast<CounterItem>())
             {
-                if (control.Graphic != 0)
+                writer.WriteStartElement("control");
+                writer.WriteAttributeString("graphic", control.Graphic.ToString());
+                if (control.Hue != null)
                 {
-                    writer.WriteStartElement("control");
-                    writer.WriteAttributeString("graphic", control.Graphic.ToString());
-                    if (control.Hue != null)
-                    {
-                        writer.WriteAttributeString("hue", control.Hue.Value.ToString());
-                    }
-                    writer.WriteAttributeString("compareto", control.CompareTo.ToString());
-                    writer.WriteEndElement();
+                    writer.WriteAttributeString("hue", control.Hue.Value.ToString());
                 }
+                writer.WriteAttributeString("compareto", control.CompareTo.ToString());
+                writer.WriteEndElement();
             }
 
             writer.WriteEndElement();
@@ -249,14 +252,30 @@ namespace ClassicUO.Game.UI.Gumps
 
             SetCellSize(int.Parse(xml.GetAttribute("rectsize")));
 
+
+
             if (!int.TryParse(xml.GetAttribute("width"), out int width))
             {
-                width = 200;
+                if (int.TryParse(xml.GetAttribute("columns"), out int columns)) //legacy
+                {
+                    width = columns * _rectSize + BoderSize * 2; // outer border
+                }
+                else
+                {
+                    width = 200;
+                }
             }
 
             if (!int.TryParse(xml.GetAttribute("height"), out int height))
             {
-                height = 80;
+                if (int.TryParse(xml.GetAttribute("rows"), out int rows)) //legacy
+                {
+                    height = rows * _rectSize + BoderSize * 2; // outer border
+                }
+                else
+                {
+                    height = 80;
+                }
             }
 
             Width = width;
@@ -272,20 +291,21 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     ushort graphic = ushort.Parse(controlXml.GetAttribute("graphic"));
 
-                    if (graphic != 0)
+                    if (graphic == 0)
                     {
-                        if (!int.TryParse(controlXml.GetAttribute("compareto"), out int compareTo))
-                        {
-                            compareTo = 0;
-                        }
-
-                        string hue = controlXml.GetAttribute("hue");
-
-                        CounterItem c = new(this, graphic, string.IsNullOrEmpty(hue) ? null : ushort.Parse(controlXml.GetAttribute("hue")), compareTo);
-
-                        _dataBox.Add(c);
-                        
+                        _dataBox.Add(new CounterItem(this, 0, 0, 0));
+                        continue;
                     }
+                    if (!int.TryParse(controlXml.GetAttribute("compareto"), out int compareTo))
+                    {
+                        compareTo = 0;
+                    }
+
+                    string hue = controlXml.GetAttribute("hue");
+
+                    CounterItem c = new(this, graphic, string.IsNullOrEmpty(hue) ? null : ushort.Parse(controlXml.GetAttribute("hue")), compareTo);
+
+                    _dataBox.Add(c);
                 }
             }
 
