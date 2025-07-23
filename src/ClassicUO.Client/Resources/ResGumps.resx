@@ -1639,4 +1639,10 @@ Client version: '{0}'</value>
   <data name="CounterIgnoreHueOn" xml:space="preserve">
     <value>Compare Hue (OFF)</value>
   </data>
+  <data name="CounterErrorSlotNotFound" xml:space="preserve">
+    <value>Counter Bar: Slot number '{0}' could not be found</value>
+  </data>
+  <data name="CounterErrorSlotNotValid" xml:space="preserve">
+    <value>Counter Bar: Slot '{0}' is not a valid number</value>
+  </data>
 </root>

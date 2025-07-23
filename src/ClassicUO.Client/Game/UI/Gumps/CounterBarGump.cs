@@ -191,6 +191,28 @@ namespace ClassicUO.Game.UI.Gumps
             base.OnMouseUp(x, y, button);
         }
 
+        internal void UseSlot(string slotString)
+        {
+            if (!string.IsNullOrEmpty(slotString) && ushort.TryParse(slotString, out ushort slot))
+            {
+                // slot index is 1-based since we have to assume the average user is non-technical
+                // everything else would be confusing
+
+                if (_dataBox.Children.Skip(slot - 1).FirstOrDefault() is CounterItem item)
+                {
+                    item.Use();
+                }
+                else
+                {
+                    GameActions.Print(World, string.Format(ResGumps.CounterErrorSlotNotFound, slotString));
+                }
+            }
+            else
+            {
+                GameActions.Print(World, string.Format(ResGumps.CounterErrorSlotNotValid, slotString));
+            }
+        }
+
         public override void Save(XmlTextWriter writer)
         {
             base.Save(writer);

@@ -934,6 +934,24 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Counter Bar: Slot number &apos;{0}&apos; could not be found.
+        /// </summary>
+        public static string CounterErrorSlotNotFound {
+            get {
+                return ResourceManager.GetString("CounterErrorSlotNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Counter Bar: Slot &apos;{0}&apos; is not a valid number.
+        /// </summary>
+        public static string CounterErrorSlotNotValid {
+            get {
+                return ResourceManager.GetString("CounterErrorSlotNotValid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Compare Hue (ON).
         /// </summary>
         public static string CounterIgnoreHueOff {
