@@ -31,6 +31,24 @@ namespace ClassicUO.Game.UI.Gumps
         public CounterBarGump(World world) : base(world, 0, 0, 50, 50, 0, 0, 0)
         {
             ContextMenu = ConfigureContextMenu(new ContextMenuControl(this));
+
+            ResizeCompleted += CounterBarGump_ResizeCompleted;
+        }
+
+        private void CounterBarGump_ResizeCompleted(object sender, ResizeCompletedEventArgs e)
+        {
+            SnapToGrid();
+        }
+
+        private void SnapToGrid()
+        {
+            int tooWide = (Width - BoderSize * 2) % _rectSize;
+            int tooHigh = (Height - BoderSize * 2) % _rectSize;
+
+            if (tooWide > 0 || tooHigh > 0)
+            {
+                ResizeWindow(new Point(Width - tooWide, Height - tooHigh));
+            }
         }
 
         private ContextMenuControl ConfigureContextMenu(ContextMenuControl control)
@@ -91,6 +109,7 @@ namespace ClassicUO.Game.UI.Gumps
                     size = 80;
                 }
                 _rectSize = size;
+                SnapToGrid();
                 SetupLayout();
             }
         }
@@ -115,6 +134,7 @@ namespace ClassicUO.Game.UI.Gumps
             _dataBox.WantUpdateSize = true;
 
             ResizeWindow(new Point(Width, Height));
+            SnapToGrid();
             OnResize();
         }
 
