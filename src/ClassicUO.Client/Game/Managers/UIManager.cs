@@ -523,7 +523,7 @@ namespace ClassicUO.Game.Managers
         /// </summary>
         /// <param name="allowedGumps">Gumps for which hovered controls should be returned</param>
         /// <returns>Read-only enumerable with the desired controls.</returns>
-        public static IEnumerable<Control> GetAllMouseOverControls(IEnumerable<Type> allowedGumps)
+        public static IEnumerable<Control> GetAllMouseOverControlsOfType<T>() where T : Control
         {
             List<Control> results = new List<Control>();
 
@@ -537,7 +537,7 @@ namespace ClassicUO.Game.Managers
             {
                 Control c = first.Value;
 
-                if (IsModalOpen && !c.IsModal || !c.IsVisible || !c.IsEnabled || !allowedGumps.Contains(c.GetType()))
+                if (IsModalOpen && !c.IsModal || !c.IsVisible || !c.IsEnabled || c is not T)
                 {
                     continue;
                 }

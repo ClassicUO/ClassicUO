@@ -1,17 +1,17 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System.Collections.Generic;
-using System.Linq;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.Assets;
 using ClassicUO.Network;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-using ClassicUO.Game.Scenes;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -219,6 +219,30 @@ namespace ClassicUO.Game.GameObjects
             }
 
             return item;
+        }
+
+        public int GetTotalAmountOfItem(ushort graphic, ushort? hue)
+        {
+            int _amount = 0;
+
+            for (
+                Item item = (Item)World.Player.Items;
+                item != null;
+                item = (Item)item.Next
+            )
+            {
+                if (
+                    item.ItemData.IsContainer
+                    && !item.IsEmpty
+                    && item.Layer >= Layer.OneHanded
+                    && item.Layer <= Layer.Legs
+                )
+                {
+                    item.GetTotalAmount(graphic, hue, ref _amount);
+                }
+            }
+
+            return _amount;
         }
 
         public void AddBuff(BuffIconType type, ushort graphic, uint time, string text)

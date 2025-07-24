@@ -51,7 +51,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
         //counters
-        private Checkbox _enableCounters, _highlightOnUse, _highlightOnAmount, _enableAbbreviatedAmount;
+        private Checkbox _enableCounters, _highlightOnChange, _highlightOnAmount, _enableAbbreviatedAmount;
         private Checkbox _enableDragSelect, _dragSelectHumanoidsOnly, _dragSelectHostileOnly;
 
         // sounds
@@ -2938,16 +2938,16 @@ namespace ClassicUO.Game.UI.Gumps
             startX += 40;
             startY += _enableCounters.Height + 2;
 
-            _highlightOnUse = AddCheckBox
+            _highlightOnChange = AddCheckBox
             (
                 rightArea,
-                ResGumps.HighlightOnUse,
-                _currentProfile.CounterBarHighlightOnUse,
+                ResGumps.HighlightOnChange,
+                _currentProfile.CounterBarHighlightOnChange,
                 startX,
                 startY
             );
 
-            startY += _highlightOnUse.Height + 2;
+            startY += _highlightOnChange.Height + 2;
 
             _enableAbbreviatedAmount = AddCheckBox
             (
@@ -3657,7 +3657,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case 9: // counters
                     _enableCounters.IsChecked = false;
-                    _highlightOnUse.IsChecked = false;
+                    _highlightOnChange.IsChecked = false;
                     _enableAbbreviatedAmount.IsChecked = false;
                     _columns.SetText("1");
                     _rows.SetText("1");
@@ -4045,7 +4045,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.CounterBarEnabled = _enableCounters.IsChecked;
             _currentProfile.CounterBarCellSize = _cellSize.Value;
 
-            _currentProfile.CounterBarHighlightOnUse = _highlightOnUse.IsChecked;
+            _currentProfile.CounterBarHighlightOnChange = _highlightOnChange.IsChecked;
 
             if (!int.TryParse(_highlightAmount.Text, out int v))
             {

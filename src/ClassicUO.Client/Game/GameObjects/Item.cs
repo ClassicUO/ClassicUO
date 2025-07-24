@@ -543,5 +543,21 @@ namespace ClassicUO.Game.GameObjects
                 LastAnimationChangeTime = Time.Ticks + Constants.CHARACTER_ANIMATION_DELAY;
             }
         }
+
+        public void GetTotalAmount(ushort graphic, ushort? hue, ref int amount)
+        {
+            for (LinkedObject i = Items; i != null; i = i.Next)
+            {
+                if (i is Item item)
+                {
+                    item.GetTotalAmount(graphic, hue, ref amount);
+
+                    if (item.Graphic == graphic && (hue == null || item.Hue == hue.Value) && item.Exists)
+                    {
+                        amount += item.Amount;
+                    }
+                }
+            }
+        }
     }
 }
