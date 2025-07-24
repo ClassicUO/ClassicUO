@@ -361,7 +361,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 _lastChangeTime = Time.Ticks;
                             }
 
-                            _background.Alpha = Math.Min(1, 1 - (Time.Ticks - _lastChangeTime) / 5000f);
+                            _background.Alpha = Math.Max(0, 1 - (Time.Ticks - _lastChangeTime) / 5000f);
                         }
 
                         int displayAmount = CalculateDisplayAmount();
