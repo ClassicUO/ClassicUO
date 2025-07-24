@@ -1784,8 +1784,10 @@ namespace ClassicUO.Game.Managers
                         MacroObjectString objectString = (MacroObjectString)macro;
                         string slotString = objectString.Text;
 
-                        CounterBarGump gump = UIManager.Gumps.First(gump => gump is CounterBarGump) as CounterBarGump;
-                        gump?.UseSlot(slotString);
+                        if (UIManager.GetGump<CounterBarGump>() is { } bar)
+                        {
+                            bar.UseSlot(slotString);
+                        }
                         break;
                     }
             }

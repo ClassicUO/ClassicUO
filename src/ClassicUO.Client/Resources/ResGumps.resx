@@ -638,8 +638,8 @@ Murderers, Criminals, Grays (Monsters/Animals)</value>
   <data name="EnableCounters" xml:space="preserve">
     <value>Enable Counters</value>
   </data>
-  <data name="HighlightOnUse" xml:space="preserve">
-    <value>Highlight On Use</value>
+  <data name="HighlightOnChange" xml:space="preserve">
+    <value>Highlight On Change</value>
   </data>
   <data name="EnableAbbreviatedAmountCountrs" xml:space="preserve">
     <value>Enable abbreviated amount values

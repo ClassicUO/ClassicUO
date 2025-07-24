@@ -17,6 +17,8 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal partial class CounterBarGump : ResizableGump
     {
+        private const int MIN_SIZE = 30;
+        private const int MAX_SIZE = 80;
         private static readonly int BORDER_LEFT = 2;
         private static readonly int BORDER_RIGHT = 2;
         private static readonly int BORDER_TOP = 2;
@@ -27,6 +29,8 @@ namespace ClassicUO.Game.UI.Gumps
         private DataBox _dataBox;
         private int _rectSize;
         private ScissorControl _scissor;
+
+        public bool ReadOnly { get => !ShowBorder; set => ShowBorder = !value; }
 
         public CounterBarGump(World world) : base(world, 0, 0, 50, 50, 0, 0, 0)
         {
@@ -54,13 +58,13 @@ namespace ClassicUO.Game.UI.Gumps
         private ContextMenuControl ConfigureContextMenu(ContextMenuControl control)
         {
             control.Add(ResGumps.Add, AddPlaceholder);
-            if (ShowBorder)
+            if (ReadOnly)
             {
-                control.Add(ResGumps.CounterReadonlyOff, ToggleReadOnly);
+                control.Add(ResGumps.CounterReadonlyOn, ToggleReadOnly);
             }
             else
             {
-                control.Add(ResGumps.CounterReadonlyOn, ToggleReadOnly);
+                control.Add(ResGumps.CounterReadonlyOff, ToggleReadOnly);
             }
 
             return control;
@@ -68,7 +72,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void ToggleReadOnly()
         {
-            ShowBorder = !ShowBorder;
+            ReadOnly = !ReadOnly;
 
             ContextMenu = ConfigureContextMenu(new ContextMenuControl(this));
 
@@ -79,7 +83,7 @@ namespace ClassicUO.Game.UI.Gumps
             World world,
             int x,
             int y,
-            int rectSize = 30
+            int rectSize = MIN_SIZE
         ) : this(world)
         {
             X = x;
@@ -100,13 +104,13 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (size != _rectSize)
             {
-                if (size < 30)
+                if (size < MIN_SIZE)
                 {
-                    size = 30;
+                    size = MIN_SIZE;
                 }
-                else if (size > 80)
+                else if (size > MAX_SIZE)
                 {
-                    size = 80;
+                    size = MAX_SIZE;
                 }
                 _rectSize = size;
                 SnapToGrid();
@@ -229,9 +233,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (Client.Game.UO.GameCursor.ItemHold.Enabled && Client.Game.UO.GameCursor.ItemHold.Graphic != 0)
                 {
-                    if (ShowBorder)
+                    if (!ReadOnly)
                     {
-                        // not in read-only mode
                         CounterItem item = new CounterItem(this, Client.Game.UO.GameCursor.ItemHold.Graphic, Client.Game.UO.GameCursor.ItemHold.Hue, 0);
                         _dataBox.Add(item);
                     }
@@ -275,7 +278,7 @@ namespace ClassicUO.Game.UI.Gumps
             writer.WriteAttributeString("rectsize", _rectSize.ToString());
             writer.WriteAttributeString("width", Width.ToString());
             writer.WriteAttributeString("height", Height.ToString());
-            writer.WriteAttributeString("readonly", (!ShowBorder).ToString());
+            writer.WriteAttributeString("readonly", ReadOnly.ToString());
 
             IEnumerable<CounterItem> controls = FindControls<CounterItem>();
 
@@ -323,13 +326,13 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    height = 80;
+                    height = MAX_SIZE;
                 }
             }
 
             if (bool.TryParse(xml.GetAttribute("readonly"), out bool isReadOnly))
             {
-                ShowBorder = !isReadOnly;
+                ReadOnly = isReadOnly;
             }
 
             Width = width;

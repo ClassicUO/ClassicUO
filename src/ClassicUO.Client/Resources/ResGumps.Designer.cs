@@ -1934,11 +1934,11 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Highlight On Use.
+        ///   Looks up a localized string similar to Highlight On Change.
         /// </summary>
-        public static string HighlightOnUse {
+        public static string HighlightOnChange {
             get {
-                return ResourceManager.GetString("HighlightOnUse", resourceCulture);
+                return ResourceManager.GetString("HighlightOnChange", resourceCulture);
             }
         }
         

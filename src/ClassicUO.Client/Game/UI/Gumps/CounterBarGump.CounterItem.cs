@@ -22,6 +22,11 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private class CounterItem : Control
         {
+            private const int UPDATE_INTERVAL = 100;
+            private const int DRAG_OFFSET = 22;
+            private const float HIGHLIGHT_AMOUNT_CHANGED_DURATION = 5000f;
+            private const int HIGHLIGHT_AMOUNT_CHANGED_UP_HUE = 1165; //icelight
+            private const int HIGHLIGHT_AMOUNT_CHANGED_DOWN_HUE = 1166; //firelight
             private int _amount;
             private uint _lastChangeTime;
             private readonly ImageWithText _image;
@@ -174,16 +179,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             protected override void OnDragBegin(int x, int y)
             {
-                if (!_gump.ShowBorder)
+                if (_gump.ReadOnly)
                 {
-                    // in read-only mode
                     return;
                 }
 
                 DraggableGump gump = new DraggableGump(_gump.World)
                 {
-                    X = Mouse.LClickPosition.X - 22,
-                    Y = Mouse.LClickPosition.Y - 22
+                    X = Mouse.LClickPosition.X - DRAG_OFFSET,
+                    Y = Mouse.LClickPosition.Y - DRAG_OFFSET
                 };
                 gump.Add(this);
                 X = 0;
@@ -198,16 +202,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             protected override void OnDragEnd(int x, int y)
             {
-                if (!_gump.ShowBorder)
+                if (_gump.ReadOnly)
                 {
-                    // in read-only mode
                     return;
                 }
 
                 Control oldParent = this.Parent;
                 if (oldParent is DraggableGump)
                 {
-                    FinalizeDragDrop(oldParent, UIManager.GetAllMouseOverControls([typeof(CounterBarGump)]));
+                    FinalizeDragDrop(oldParent, UIManager.GetAllMouseOverControlsOfType<CounterBarGump>());
                 }
 
                 base.OnDragEnd(x, y);
@@ -215,26 +218,28 @@ namespace ClassicUO.Game.UI.Gumps
 
             private void FinalizeDragDrop(Control oldParent, IEnumerable<Control> hoveredControls)
             {
-                if (hoveredControls.Any())
+                if (!hoveredControls.Any())
                 {
-                    int desiredIndex = Math.Min(hoveredControls.Count() - 1, 1);
+                    oldParent.Dispose();
+                    return;
+                }
 
-                    CounterItem item = hoveredControls.First() as CounterItem;
-                    CounterBarGump bar = hoveredControls.First().RootParent as CounterBarGump;
+                int desiredIndex = Math.Min(hoveredControls.Count() - 1, 1);
 
-                    if (bar != null)
+                CounterItem item = hoveredControls.First() as CounterItem;
+                CounterBarGump bar = hoveredControls.First().RootParent as CounterBarGump;
+
+                if (bar != null)
+                {
+                    if (item != null)
                     {
-                        if (item != null)
-                        {
-                            bar._dataBox.Insert(bar._dataBox.Children.IndexOf(item), this);
-                            bar.SetupLayout();
-                        }
-                        else
-                        {
-                            bar._dataBox.Add(this);
-                            bar.SetupLayout();
-                        }
-                            
+                        bar._dataBox.Insert(bar._dataBox.Children.IndexOf(item), this);
+                        bar.SetupLayout();
+                    }
+                    else
+                    {
+                        bar._dataBox.Add(this);
+                        bar.SetupLayout();
                     }
 
                 }
@@ -243,47 +248,48 @@ namespace ClassicUO.Game.UI.Gumps
 
             protected override void OnMouseUp(int x, int y, MouseButtonType button)
             {
-                if (button == MouseButtonType.Left)
+                switch (button)
                 {
-                    if (Client.Game.UO.GameCursor.ItemHold.Enabled)
-                    {
-                        if (_gump.ShowBorder)
+                    case MouseButtonType.Left:
+                        if (Client.Game.UO.GameCursor.ItemHold.Enabled)
                         {
-                            // not in read-only mode
-                            SetGraphic(
-                                Client.Game.UO.GameCursor.ItemHold.Graphic,
-                                Client.Game.UO.GameCursor.ItemHold.Hue
+                            if (!_gump.ReadOnly)
+                            {
+                                SetGraphic(
+                                    Client.Game.UO.GameCursor.ItemHold.Graphic,
+                                    Client.Game.UO.GameCursor.ItemHold.Hue
+                                );
+                            }
+
+                            GameActions.DropItem(
+                                Client.Game.UO.GameCursor.ItemHold.Serial,
+                                Client.Game.UO.GameCursor.ItemHold.X,
+                                Client.Game.UO.GameCursor.ItemHold.Y,
+                                0,
+                                Client.Game.UO.GameCursor.ItemHold.Container
                             );
                         }
+                        else if (ProfileManager.CurrentProfile.CastSpellsByOneClick)
+                        {
+                            Use();
+                        }
+                        break;
+                    case MouseButtonType.Right when Keyboard.Alt:
+                        if (!_gump.ReadOnly)
+                        {
+                            RemoveItem();
+                        }
+                        break;
+                    case MouseButtonType.Right:
+                        base.OnMouseUp(x, y, button);
+                        break;
+                    default:
+                        if (Graphic != 0)
+                        {
+                            base.OnMouseUp(x, y, button);
+                        }
 
-                        GameActions.DropItem(
-                            Client.Game.UO.GameCursor.ItemHold.Serial,
-                            Client.Game.UO.GameCursor.ItemHold.X,
-                            Client.Game.UO.GameCursor.ItemHold.Y,
-                            0,
-                            Client.Game.UO.GameCursor.ItemHold.Container
-                        );
-                    }
-                    else if (ProfileManager.CurrentProfile.CastSpellsByOneClick)
-                    {
-                        Use();
-                    }
-                }
-                else if (button == MouseButtonType.Right && Keyboard.Alt )
-                {
-                    if (_gump.ShowBorder)
-                    {
-                        // not in read-only mode
-                        RemoveItem();
-                    }
-                }
-                else if (button == MouseButtonType.Right)
-                {
-                    base.OnMouseUp(x, y, button);
-                }
-                else if (Graphic != 0)
-                {
-                    base.OnMouseUp(x, y, button);
+                        break;
                 }
             }
 
@@ -318,106 +324,92 @@ namespace ClassicUO.Game.UI.Gumps
                     _background.Height = Height;
                 }
 
-                if (Parent != null && Parent.IsEnabled && _time < Time.Ticks)
-                {
-                    _time = Time.Ticks + 100;
-
-                    if (Graphic == 0)
-                    {
-                        _image.SetAmount(string.Empty);
-                    }
-                    else
-                    {
-                        int previousAmount = _amount;
-                        _amount = 0;
-
-                        for (
-                            Item item = (Item)_gump.World.Player.Items;
-                            item != null;
-                            item = (Item)item.Next
-                        )
-                        {
-                            if (
-                                item.ItemData.IsContainer
-                                && !item.IsEmpty
-                                && item.Layer >= Layer.OneHanded
-                                && item.Layer <= Layer.Legs
-                            )
-                            {
-                                GetAmount(item, Graphic, Hue, ref _amount);
-                            }
-                        }
-
-                        if (ProfileManager.CurrentProfile.CounterBarHighlightOnUse)
-                        {
-                            if (_amount > previousAmount)
-                            {
-                                _background.Hue = 1165; //icelight
-                                _lastChangeTime = Time.Ticks;
-                            }
-                            else if (_amount < previousAmount)
-                            {
-                                _background.Hue = 1166; //firelight
-                                _lastChangeTime = Time.Ticks;
-                            }
-
-                            _background.Alpha = Math.Max(0, 1 - (Time.Ticks - _lastChangeTime) / 5000f);
-                        }
-
-                        int displayAmount = CalculateDisplayAmount();
-                        string prefix;
-                        if (CompareTo == 0)
-                        {
-                            prefix = "";
-                        }
-                        else if (displayAmount == 0)
-                        {
-                            prefix = "±";
-                        }
-                        else if (displayAmount > 0)
-                        {
-                            prefix = "+";
-                        }
-                        else
-                        {
-                            prefix = "";  // a negative number already comes with its prefix
-                        }
-
-                        if (ProfileManager.CurrentProfile.CounterBarDisplayAbbreviatedAmount)
-                        {
-                            if (
-                                Math.Abs(displayAmount) >= ProfileManager.CurrentProfile.CounterBarAbbreviatedAmount
-                            )
-                            {
-                                _image.SetAmount(prefix + StringHelper.IntToAbbreviatedString(displayAmount));
-
-                                return;
-                            }
-                        }
-
-                        _image.SetAmount(prefix + displayAmount.ToString());
-                    }
-                }
-            }
-
-            private static void GetAmount(Item parent, ushort graphic, ushort? hue, ref int amount)
-            {
-                if (parent == null)
+                if (Parent == null || !Parent.IsEnabled || _time >= Time.Ticks)
                 {
                     return;
                 }
 
-                for (LinkedObject i = parent.Items; i != null; i = i.Next)
+                _time = Time.Ticks + UPDATE_INTERVAL;
+
+                if (Graphic == 0)
                 {
-                    Item item = (Item)i;
+                    _image.SetAmount(string.Empty);
+                    return;
+                }
 
-                    GetAmount(item, graphic, hue, ref amount);
+                int previousAmount = _amount;
+                _amount = _gump.World.Player.GetTotalAmountOfItem(Graphic, Hue);
 
-                    if (item.Graphic == graphic && (hue == null || item.Hue == hue.Value) && item.Exists)
+                UpdateOnChangeAnimation(previousAmount);
+
+                _image.SetAmount(CalculateDisplayAmountText());
+            }
+
+            private void UpdateOnChangeAnimation(int previousAmount)
+            {
+                if (ProfileManager.CurrentProfile.CounterBarHighlightOnChange)
+                {
+                    if (_amount > previousAmount)
                     {
-                        amount += item.Amount;
+                        _background.Hue = HIGHLIGHT_AMOUNT_CHANGED_UP_HUE;
+                        _lastChangeTime = Time.Ticks;
+                    }
+                    else if (_amount < previousAmount)
+                    {
+                        _background.Hue = HIGHLIGHT_AMOUNT_CHANGED_DOWN_HUE;
+                        _lastChangeTime = Time.Ticks;
+                    }
+
+                    _background.Alpha = Math.Max(0, 1 - (Time.Ticks - _lastChangeTime) / HIGHLIGHT_AMOUNT_CHANGED_DURATION);
+                }
+            }
+
+            private string CalculateDisplayAmountText()
+            {
+                int displayAmount = CalculateDisplayAmount();
+                string prefix = CalculateAmountPrefix(displayAmount);
+
+                if (string.IsNullOrEmpty(prefix) && displayAmount == 1)
+                {
+                    // don't show a number if there is only one!
+                    return string.Empty;
+                }
+
+                string displayText = prefix + displayAmount.ToString();
+                if (ProfileManager.CurrentProfile.CounterBarDisplayAbbreviatedAmount)
+                {
+                    if (
+                        Math.Abs(displayAmount) >= ProfileManager.CurrentProfile.CounterBarAbbreviatedAmount
+                    )
+                    {
+                        displayText = prefix + StringHelper.IntToAbbreviatedString(displayAmount);
                     }
                 }
+
+                return displayText;
+            }
+
+            private string CalculateAmountPrefix(int displayAmount)
+            {
+                string prefix;
+                if (CompareTo == 0)
+                {
+                    prefix = "";
+                }
+                else if (displayAmount == 0)
+                {
+                    prefix = "±";
+                }
+                else if (displayAmount > 0)
+                {
+                    prefix = "+";
+                }
+                else
+                {
+                    prefix = "";  // a negative number already comes with its prefix
+                }
+
+                return prefix;
             }
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
