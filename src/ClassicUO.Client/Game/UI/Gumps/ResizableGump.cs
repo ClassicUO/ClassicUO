@@ -11,10 +11,19 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly BorderControl _borderControl;
         private readonly Button _button;
         private bool _clicked;
-        private Point _lastSize, _savedSize;
+        private Point _lastSize, _savedSize, _beforeResizeSize;
         private readonly int _minH;
         private readonly int _minW;
 
+        public class ResizeCompletedEventArgs(Point beforeResize)
+        {
+            public Point BeforeResize { get; } = beforeResize; // readonly
+        }
+
+        // Declare the delegate (if using non-generic pattern).
+        public delegate void ResizeCompletedHandler(object sender, ResizeCompletedEventArgs e);
+
+        public event ResizeCompletedHandler ResizeCompleted;
 
         protected ResizableGump
         (
@@ -43,12 +52,16 @@ namespace ClassicUO.Game.UI.Gumps
             _button = new Button(0, 0x837, 0x838, 0x838);
             Add(_button);
 
-            _button.MouseDown += (sender, e) => { _clicked = true; };
+            _button.MouseDown += (sender, e) => { 
+                _clicked = true;
+                _beforeResizeSize = _savedSize;
+            };
 
             _button.MouseUp += (sender, e) =>
             {
                 ResizeWindow(_lastSize);
                 _clicked = false;
+                ResizeCompleted?.Invoke(this, new(_beforeResizeSize));
             };
 
             WantUpdateSize = false;
