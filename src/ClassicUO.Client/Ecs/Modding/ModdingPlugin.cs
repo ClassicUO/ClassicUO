@@ -672,7 +672,7 @@ internal readonly struct ModdingPlugin : IPlugin
             {
                 // check if child is an event
                 if (!queryEvents.Contains(child))
-                    return true;
+                    continue;
 
                 (var eventId, var uiEv) = queryEvents.Get(child);
 
