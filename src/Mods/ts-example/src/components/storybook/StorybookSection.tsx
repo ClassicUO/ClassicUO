@@ -28,33 +28,31 @@ export const StorybookSection: React.FC<StorybookSectionProps> = ({
   description,
   children,
   spacing = 20,
-}) => {
-  return (
-    <View
-      backgroundColor={Colors.transparent}
-      padding={{ left: spacing }}
-      layout={{
-        layoutDirection: LayoutDirection.TopToBottom,
-        sizing: { width: Sizing.grow(), height: Sizing.fit() },
-        childAlignment: ChildAlign.topLeft,
-      }}
+}) => (
+  <View
+    backgroundColor={Colors.transparent}
+    padding={{ left: spacing }}
+    layout={{
+      layoutDirection: LayoutDirection.TopToBottom,
+      sizing: { width: Sizing.grow(), height: Sizing.fit() },
+      childAlignment: ChildAlign.topLeft,
+    }}
+  >
+    {/* Section background */}
+    <Gump
+      id={0x0bb8}
+      ninePatch={true}
+      size={{ width: 720, height: 40 }}
+      hue={{ alpha: 0.8 }}
     >
-      {/* Section background */}
-      <Gump
-        id={0x0bb8}
-        ninePatch={true}
-        size={{ width: 720, height: 40 }}
-        hue={{ alpha: 0.8 }}
-      >
-        {/* Section title */}
-        <Text style={TextStyle.medium}>{title}</Text>
+      {/* Section title */}
+      <Text style={TextStyle.medium}>{title}</Text>
 
-        {/* Section description */}
-        {description && <Text style={TextStyle.small}>{description}</Text>}
-      </Gump>
+      {/* Section description */}
+      {description && <Text style={TextStyle.small}>{description}</Text>}
+    </Gump>
 
-      {/* Content area with proper spacing */}
-      {children}
-    </View>
-  );
-};
+    {/* Content area with proper spacing */}
+    {children}
+  </View>
+);

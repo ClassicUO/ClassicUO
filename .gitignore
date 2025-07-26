@@ -20,6 +20,10 @@ bld/
 [Oo]bj/
 [Ll]og/
 
+# Generated using dotnet run from root of repo
+[Dd]ata/
+settings.json
+
 # Visual Studio Code
 .vscode/
 

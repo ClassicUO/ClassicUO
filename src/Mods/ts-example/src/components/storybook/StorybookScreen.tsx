@@ -64,13 +64,9 @@ export const StorybookScreen: React.FC<StorybookScreenProps> = ({ onBack }) => {
   const [selectedSection, setSelectedSection] =
     React.useState<StorybookSectionTitle>("Display");
 
-  const section = sections.find((section) => section.title === selectedSection);
-
-  if (!section) {
-    console.error(`StorybookScreen: Section ${selectedSection} not found`);
-    return null;
-  }
-  const Stories = section.Stories;
+  const { title, description, Stories } = sections.find(
+    (section) => section.title === selectedSection
+  )!;
 
   return (
     <View
@@ -95,7 +91,7 @@ export const StorybookScreen: React.FC<StorybookScreenProps> = ({ onBack }) => {
           <Text
             onClick={() => {
               console.log("clicked", selectedSection, section.title);
-              return setSelectedSection(section.title);
+              setSelectedSection(() => section.title);
             }}
             key={section.title}
             style={{
@@ -111,11 +107,7 @@ export const StorybookScreen: React.FC<StorybookScreenProps> = ({ onBack }) => {
         ))}
       </View>
 
-      <StorybookSection
-        title={section.title}
-        description={section.description}
-        spacing={20}
-      >
+      <StorybookSection title={title} description={description} spacing={20}>
         <Stories />
       </StorybookSection>
     </View>

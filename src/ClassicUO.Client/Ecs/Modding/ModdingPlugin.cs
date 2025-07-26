@@ -699,7 +699,6 @@ internal readonly struct ModdingPlugin : IPlugin
                     return false;
                 }
 
-                Console.WriteLine("event {0} sent to {1}", eventId.Ref.ID, id);
             }
 
             return true;
@@ -725,7 +724,6 @@ internal readonly struct ModdingPlugin : IPlugin
             if (eventType == null)
                 continue;
 
-            Console.WriteLine("event {0} on {1}", eventType.Value, ent.Ref.ID);
 
             var result = sendEventForId(
                 ent.Ref.ID,

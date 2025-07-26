@@ -75,13 +75,24 @@ export type EventHandlerMap = {
 
 export type EventListener = (event: UIEvent) => void;
 
-const EventListenerSymbol = Symbol("EventListener");
+type EventListenerData = {
+  eventId: number;
+  entityId: number;
+  eventType: EventType;
+};
+
+const EventListenerBrandSymbol = Symbol("EventListener");
 type BrandedEventListener = EventListener & {
-  [EventListenerSymbol]: {
-    eventId: number;
-    entityId: number;
-    eventType: EventType;
-  };
+  [EventListenerBrandSymbol]: EventListenerData;
+};
+
+const brandListener = (
+  listener: EventListener | BrandedEventListener,
+  data: EventListenerData
+) => {
+  return Object.assign(listener, {
+    [EventListenerBrandSymbol]: data,
+  }) as BrandedEventListener;
 };
 
 export class EventManager {
@@ -91,25 +102,39 @@ export class EventManager {
   addListener(entityId: number, eventType: EventType, listener: EventListener) {
     const eventId = HostWrapper.addEventListener({ entityId, eventType });
 
-    const brandedListener = Object.assign(listener, {
-      [EventListenerSymbol]: { eventId, entityId, eventType },
-    }) as BrandedEventListener;
+    const brandedListener = brandListener(listener, {
+      eventId,
+      entityId,
+      eventType,
+    });
 
     this.eventListeners.set(eventId, brandedListener);
 
     if (!this.entityIdToEventId.has(entityId)) {
       this.entityIdToEventId.set(entityId, new Set());
     }
+
     this.entityIdToEventId.get(entityId)?.add(eventId);
+
+    console.log("added event listener", eventId, entityId, eventType);
   }
 
   removeListener(listener: EventListener) {
-    if (!listener[EventListenerSymbol]) return;
+    if (!listener[EventListenerBrandSymbol]) return;
 
-    const data = listener[EventListenerSymbol];
+    const data = listener[EventListenerBrandSymbol];
+
     HostWrapper.removeEventListener(data);
+
     this.eventListeners.delete(data.eventId);
     this.entityIdToEventId.get(data.entityId)?.delete(data.eventId);
+
+    console.log(
+      "removed event listener",
+      data.eventId,
+      data.entityId,
+      data.eventType
+    );
   }
 
   clearEntityEvents(entityId: number) {
@@ -126,6 +151,8 @@ export class EventManager {
 
   dispatch(event: UIEvent) {
     if (typeof event.eventId !== "number") return;
+
+    console.log("dispatch from game", event);
 
     this.eventListeners.get(event.eventId)?.(event);
   }
@@ -150,8 +177,6 @@ export const applyEvents = (
       const fn = props[event] as (event: UIEvent) => void;
 
       if (typeof fn === "function") {
-        console.log("applyEvents added", event, fn, eventMap[event]);
-
         events.addListener(id, eventMap[event], fn);
       }
     }
@@ -163,8 +188,6 @@ export const applyEvents = (
       if (!eventNames.includes(event as EventName)) {
         continue;
       }
-
-      console.log("applyEvents deleted", event, eventMap[event]);
 
       const fn = props[event] as (event: UIEvent) => void;
       if (typeof fn === "function") {
@@ -182,8 +205,6 @@ export const applyEvents = (
 
       const fn = props[event] as (event: UIEvent) => void;
       if (typeof fn === "function") {
-        console.log("applyEvents updated", event, fn, eventMap[event]);
-
         events.removeListener(oldProps[event] as EventListener);
         events.addListener(id, eventMap[event], fn);
       }

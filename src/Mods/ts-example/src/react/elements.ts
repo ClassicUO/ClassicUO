@@ -95,6 +95,8 @@ export interface ButtonProps extends BaseElementProps {
   floating?: ClayFloatingElementConfig;
   padding?: ClayPadding;
   hue?: Partial<Hue>;
+  textStyle?: ClayText;
+  textColor?: ClayColor;
 }
 
 // Text component props

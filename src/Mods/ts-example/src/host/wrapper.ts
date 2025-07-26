@@ -72,14 +72,14 @@ export class HostWrapper {
   static addEventListener(event: UIEvent): number {
     const json = JSON.stringify(event);
     const memIn = Memory.fromString(json);
-    console.log("addEventListener", json);
+    console.log("HostWrapper:addEventListener", json);
     return this.functions.cuo_ui_add_event_listener(memIn.offset) as number;
   }
 
-  static removeEventListener(event: UIEvent): void {
+  static removeEventListener(event: UIEvent): number {
     const json = JSON.stringify(event);
     const memIn = Memory.fromString(json);
-    this.functions.cuo_ui_remove_event_listener(memIn.offset);
+    return this.functions.cuo_ui_remove_event_listener(memIn.offset) as number;
   }
 
   static spawnEntity(): number {
