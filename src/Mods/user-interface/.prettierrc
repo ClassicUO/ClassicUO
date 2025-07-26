@@ -1,0 +1,17 @@
+{
+  "trailingComma": "all",
+  "singleQuote": true,
+  "semi": true,
+  "printWidth": 120,
+  "tabWidth": 2,
+  "useTabs": false,
+  "proseWrap": "always",
+  "plugins": ["@ianvs/prettier-plugin-sort-imports"],
+  "importOrderParserPlugins": ["typescript", "jsx", "decorators-legacy"],
+  "importOrderTypeScriptVersion": "5.0.0",
+  "importOrder": ["<THIRD_PARTY_MODULES>", "^(@classicuo)(/.*)$", "^(~)(/.*)$", "^[.]"],
+  "overrides": [
+    { "files": "*.js", "options": { "parser": "babel" } },
+    { "files": "*.(ts|tsx)", "options": { "parser": "typescript" } }
+  ]
+}

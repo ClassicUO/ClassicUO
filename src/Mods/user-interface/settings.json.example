@@ -1,0 +1,35 @@
+{
+  "username": "",
+  "password": "",
+  "ip": "127.0.0.1",
+  "port": 5003,
+  "ultimaonlinedirectory": "<path>/ultimaonlinedirectory",
+  "profilespath": "",
+  "clientversion": "7.0.95.0",
+  "lang": "ENA",
+  "lastservernum": 1,
+  "last_server_name": "UO Server",
+  "fps": 250,
+  "window_position": {
+    "X": 2560,
+    "Y": 0
+  },
+  "window_size": {
+    "X": 2560,
+    "Y": 1356
+  },
+  "is_win_maximized": true,
+  "saveaccount": true,
+  "autologin": true,
+  "reconnect": false,
+  "reconnect_time": 1000,
+  "login_music": false,
+  "login_music_volume": 50,
+  "fixed_time_step": true,
+  "run_mouse_in_separate_thread": true,
+  "force_driver": 2,
+  "use_verdata": false,
+  "maps_layouts": null,
+  "encryption": 0,
+  "plugins": ["<path>/ClassicUO/src/Mods/user-interface/dist/user-interface.wasm"]
+}

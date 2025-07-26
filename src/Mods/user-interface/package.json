@@ -1,0 +1,48 @@
+{
+  "name": "@classicuo/user-interface",
+  "packageManager": "yarn@3.2.0",
+  "main": "src/index.tsx",
+  "license": "BSD-2-Clause",
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "type-check": "tsc --noEmit",
+    "build": "node esbuild.mjs && extism-js --skip-opt dist/index.js -i src/index.d.ts -o dist/user-interface.wasm",
+    "dotnet:run": "cd ../../../ && dotnet run --project src/ClassicUO.Client/ClassicUO.Client.csproj",
+    "start:dev": "cross-env NODE_ENV=development yarn build && yarn dotnet:run",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "change-case": "^5.4.4",
+    "deep-object-diff": "^1.1.9",
+    "react": "^19.1.0",
+    "react-reconciler": "^0.32.0",
+    "ts-pattern": "^5.7.1",
+    "type-fest": "^4.41.0",
+    "typescript": "^5.8.3"
+  },
+  "devDependencies": {
+    "@extism/js-pdk": "^1.1.1",
+    "@ianvs/prettier-plugin-sort-imports": "^4.5.1",
+    "@types/react": "^19.1.8",
+    "@types/react-reconciler": "^0.32.0",
+    "@typescript-eslint/eslint-plugin": "^8.25.0",
+    "@typescript-eslint/parser": "^8.25.0",
+    "concurrently": "^9.1.2",
+    "cross-env": "^7.0.3",
+    "esbuild": "^0.25.8",
+    "eslint": "^9.32.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.3",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "prettier": "^3.6.2",
+    "tsx": "^4.20.3",
+    "vitest": "^3.2.4"
+  }
+}
