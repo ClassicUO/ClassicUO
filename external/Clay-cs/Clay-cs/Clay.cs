@@ -117,9 +117,10 @@ public static class Clay
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Clay_RenderCommandArray EndLayout()
+    public static unsafe ReadOnlySpan<Clay_RenderCommand> EndLayout()
     {
-        return ClayInterop.Clay_EndLayout();
+        var r = ClayInterop.Clay_EndLayout();
+        return new(r.internalArray, r.length);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]

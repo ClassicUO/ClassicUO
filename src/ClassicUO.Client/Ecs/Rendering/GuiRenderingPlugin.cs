@@ -78,8 +78,7 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
             var b = batcher.Value;
             b.Begin();
 
-            var span = new ReadOnlySpan<Clay_RenderCommand>(cmds.internalArray, cmds.length);
-            foreach (ref readonly var cmd in span)
+            foreach (ref readonly var cmd in cmds)
             {
                 ref readonly var boundingBox = ref cmd.boundingBox;
 

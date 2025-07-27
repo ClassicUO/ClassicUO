@@ -77,7 +77,7 @@
     <DataFiles_lib64 Include="$(ProjectDir)..\..\external\lib64\*.*" />
     <DataFiles_osx Include="$(ProjectDir)..\..\external\osx\*.*" />
     <DataFiles_vulkan Include="$(ProjectDir)..\..\external\vulkan\icd.d\*.*" />
-    <ClayLib_Windows Include="$(ProjectDir)..\..\external\Clay-cs\Clay-builder\zig-out\bin\Clay.dll" />
+    <ClayLib_Windows Include="$(ProjectDir)..\..\external\Clay-cs\Clay-builder\zig-out\bin\*.*" />
     <ClayLib_Linux Include="$(ProjectDir)..\..\external\Clay-cs\Clay-builder\zig-out\lib\libClay.so" />
     <ClayLib_MacOS Include="$(ProjectDir)..\..\external\Clay-cs\Clay-builder\zig-out\lib\libClay.dylib" />
   </ItemGroup>
