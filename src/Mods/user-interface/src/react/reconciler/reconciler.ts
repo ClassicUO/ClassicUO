@@ -2,12 +2,12 @@ import { createContext } from 'react';
 import createReconciler, { type ReactContext } from 'react-reconciler';
 import { DefaultEventPriority, NoEventPriority } from 'react-reconciler/constants.js';
 import { ClayWidgetType, HostWrapper } from '~/host';
-import { shallowDiff } from '~/support';
+import { shallowDiffKeys } from '~/support';
 import { TextStyle } from '~/ui/theme';
+import { ClayElement, ClayElementNames } from '../elements';
+import { applyEvents, EventManager } from '../events';
 import { ClayContainer } from './container';
 import { createElement } from './createElement';
-import { ClayElement, ClayElementNames } from './elements';
-import { applyEvents, EventManager } from './events';
 
 type Props = Record<string, unknown>;
 type HostContext = object;
@@ -133,7 +133,7 @@ export function getClayReconciler(events: EventManager) {
     // console.log("commitUpdate", type, oldProps, newProps, commits++);
 
     instance.props = newProps;
-    const diff = shallowDiff(oldProps, newProps);
+    const diff = shallowDiffKeys(oldProps, newProps);
     applyEvents(events, instance.instanceId, diff, newProps, oldProps);
 
     if (

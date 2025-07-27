@@ -1,6 +1,6 @@
 import { HostWrapper, UINode, UINodes } from '~/host';
-import { ClayElement } from './elements';
-import { EventManager } from './events';
+import { ClayElement } from '../elements';
+import { EventManager } from '../events';
 
 export class ClayContainer {
   public children: ClayElement[] = [];

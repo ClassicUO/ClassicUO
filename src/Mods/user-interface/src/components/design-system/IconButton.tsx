@@ -40,11 +40,6 @@ export interface IconButtonProps {
   onClick?: () => void;
 
   /**
-   * Whether the button can be moved
-   */
-  movable?: boolean;
-
-  /**
    * Disabled state
    */
   disabled?: boolean;
@@ -88,7 +83,6 @@ export const IconButton: React.FC<IconButtonProps> = ({
   floating,
   color: hue,
   onClick,
-  movable = false,
   disabled = false,
   iconOffset = { x: 0, y: 0 },
 }) => {
@@ -114,7 +108,6 @@ export const IconButton: React.FC<IconButtonProps> = ({
   return (
     <Tag
       id={icon.id}
-      movable={movable}
       onClick={handleClick}
       size={size}
       floating={iconFloating}

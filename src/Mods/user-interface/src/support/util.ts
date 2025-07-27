@@ -5,7 +5,12 @@ export type DiffKeys = {
   deleted: string[];
 };
 
-export function shallowDiff(base: Record<string, unknown>, compared: Record<string, unknown>): DiffKeys {
+/**
+ * @param base - The base object to compare against
+ * @param compared - The object to compare to the base
+ * @returns An object containing the updated, unchanged, added, and deleted keys
+ */
+export function shallowDiffKeys(base: Record<string, unknown>, compared: Record<string, unknown>): DiffKeys {
   const unchanged: string[] = [];
   const updated: string[] = [];
   const deleted: string[] = [];
@@ -13,24 +18,22 @@ export function shallowDiff(base: Record<string, unknown>, compared: Record<stri
 
   // Loop through the compared object
   Object.keys(compared).forEach((key) => {
-    // To get the added items
     if (!(key in base)) {
+      // added
       added.push(key);
-
-      // The updated items
     } else if (compared[key] !== base[key]) {
+      // updated
       updated.push(key);
-
-      // And the unchanged
     } else if (compared[key] === base[key]) {
+      // unchanged
       unchanged.push(key);
     }
   });
 
   // Loop through the before object
   Object.keys(base).forEach((key) => {
-    // To get the deleted items
     if (!(key in compared)) {
+      // deleted
       deleted.push(key);
     }
   });

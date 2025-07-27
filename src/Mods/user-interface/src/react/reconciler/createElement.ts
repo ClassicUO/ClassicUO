@@ -1,8 +1,8 @@
 import * as P from 'ts-pattern';
 import { ClayUOCommandType, ClayWidgetType, LayoutAlignment, LayoutDirection, SizingType, UINode } from '~/host';
 import { TextStyle } from '~/ui';
-import { ClayElementPropTypes, defaultHue, hueToVector3 } from './elements';
-import { hasEventProp } from './events';
+import { ClayElementPropTypes, defaultHue, hueToVector3 } from '../elements';
+import { hasEventProp } from '../events';
 
 export function createElement(type: string, props: unknown, id: number): UINode {
   return P.match<ClayElementPropTypes, UINode>({

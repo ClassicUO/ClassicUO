@@ -96,7 +96,7 @@ export const TooltipStory: React.FC = () => {
           description="Tooltip with custom background"
           code="backgroundGumpId={0x13be}"
         >
-          <Tooltip content="Custom background style" backgroundGumpId={0x13be}>
+          <Tooltip content="Custom background style" art={0x13be}>
             <IconButton icon={{ type: 'gump', id: 0x15a4 }} size={{ width: 44, height: 44 }} />
           </Tooltip>
         </ComponentShowcase>

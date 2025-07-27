@@ -503,7 +503,14 @@ internal readonly struct ModdingPlugin : IPlugin
         var timeProxy = new TimeProxy(time.Total, time.Frame).ToJson();
         foreach ((_, var mod) in query)
         {
-            var result = mod.Ref.Mod.Plugin.Call("on_update", timeProxy);
+            try
+            {
+                var result = mod.Ref.Mod.Plugin.Call("on_update", timeProxy);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("on_update failed: {0}", e);
+            }
         }
     }
 
