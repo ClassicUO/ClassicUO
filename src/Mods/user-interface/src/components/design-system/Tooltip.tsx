@@ -55,7 +55,7 @@ export interface TooltipProps {
   /**
    * Custom gump ID for the tooltip background (defaults to standard UO tooltip style)
    */
-  backgroundGumpId?: number;
+  art?: number;
 
   /**
    * Whether to use nine-patch rendering for the background
@@ -80,10 +80,10 @@ export const Tooltip: React.FC<TooltipProps> = ({
   children,
   position = 'top',
   backgroundColor = Colors.transparent,
-  width: width = 300,
-  height: height = 60,
+  width = 300,
+  height,
   padding = 8,
-  backgroundGumpId = 0x0bb8,
+  art = 0x0bb8,
   ninePatch = true,
   delay = 500,
 }) => {
@@ -170,7 +170,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
       {/* Tooltip overlay */}
       {isVisible && (
         <View
-          backgroundColor={backgroundColor}
+          backgroundColor={Colors.lightBlue}
           layout={{
             layoutDirection: LayoutDirection.TopToBottom,
             sizing: { width: Sizing.fixed(tooltipSize.width), height: Sizing.fit() },
@@ -180,7 +180,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
           padding={{ left: padding, right: padding, top: padding, bottom: padding }}
         >
           {/* Tooltip background */}
-          <Gump id={backgroundGumpId} ninePatch={ninePatch} size={tooltipSize} hue={{ alpha: 0.9 }}>
+          <Gump id={art} ninePatch={ninePatch} size={tooltipSize} hue={{ alpha: 0.9 }}>
             {/* Tooltip content */}
             <View
               backgroundColor={backgroundColor}

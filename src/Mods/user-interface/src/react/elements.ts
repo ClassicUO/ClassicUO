@@ -12,7 +12,7 @@ import type {
   Vector2,
   Vector3,
 } from '~/host';
-import { EventHandlerMap } from './events';
+import { ReactEventHandlerProps } from './events';
 
 export const defaultHue: Vector3 = { x: 0, y: 0, z: 1.0 };
 
@@ -39,7 +39,7 @@ export type Hue = {
 };
 
 // Base props that all components can accept
-export interface BaseElementProps extends EventHandlerMap {
+export interface BaseElementProps extends ReactEventHandlerProps {
   children?: React.ReactNode;
   movable?: boolean;
   padding?: ClayPadding;

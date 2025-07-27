@@ -2,7 +2,10 @@ import { Graphic, QueryRequest, QueryResponse, SpriteDescription, UIEvent, UINod
 
 type HostFunctions = ReturnType<typeof Host.getFunctions>;
 
-// Host wrapper functions
+/**
+ * This is the wrapper for the host functions.
+ * We handle the data serialization going in <-> out to CUO.
+ */
 export class HostWrapper {
   static hostFunctions: HostFunctions;
 

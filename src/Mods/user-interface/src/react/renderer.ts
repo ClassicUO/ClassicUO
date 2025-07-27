@@ -1,9 +1,8 @@
 import React from 'react';
 import { OpaqueRoot } from 'react-reconciler';
 import { UIEvent } from '~/host';
-import { ClayContainer } from './container';
 import { EventManager } from './events';
-import { ClayReconciler, getClayReconciler } from './reconciler';
+import { ClayContainer, ClayReconciler, getClayReconciler } from './reconciler';
 
 export class ClayReactRenderer {
   private container: ClayContainer;

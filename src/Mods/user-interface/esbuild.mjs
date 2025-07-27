@@ -13,6 +13,6 @@ esbuild.build({
   jsx: 'automatic', // Enable JSX support
   jsxImportSource: 'react', // Use React as JSX import source
   define: {
-    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV),
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV ?? 'production'),
   },
 });
