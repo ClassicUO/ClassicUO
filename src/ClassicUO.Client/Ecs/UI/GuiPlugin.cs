@@ -359,7 +359,7 @@ internal static class GuiPluginEx
     public static EntityView SetUINode(this EntityView ent, UINode node)
     {
         if (node.Config.id.id == 0)
-            node.Config.id = Clay.Id((0xFFFFFFFB * ent.ID.RealId()).ToString());
+            node.Config.id = Clay.Id(ent.ID.RealId().ToString());
         return ent.Set(node).Set(new UIMouseAction());
     }
 }
