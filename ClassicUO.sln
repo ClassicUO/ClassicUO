@@ -69,6 +69,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassicUO.Renderer", "src\C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassicUO.Utility", "src\ClassicUO.Utility\ClassicUO.Utility.csproj", "{9B748316-24DC-40AA-A39D-476EF83DF96C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassicUO.Schema", "src\ClassicUO.Schema\ClassicUO.Schema.csproj", "{B9DFCEE6-A5AF-4179-BB4E-368B8A2E8470}"
+EndProject
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FNA.Core", "external\FNA\FNA.Core.csproj", "{A6DCFCE5-192B-4AE1-B228-206D37A0021C}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClassicUO.Bootstrap", "src\ClassicUO.Bootstrap\src\ClassicUO.Bootstrap.csproj", "{8974A04C-8360-4225-ABDD-0C56555F676D}"
@@ -81,6 +84,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Clay-cs", "external\Clay-cs
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FontStashSharp.FNA.Core", "external\FontStashSharp\src\XNA\FontStashSharp.FNA.Core.csproj", "{774C00E5-921D-494A-8E23-B0A2D0A13018}"
 EndProject
+
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -259,6 +263,18 @@ Global
 		{774C00E5-921D-494A-8E23-B0A2D0A13018}.Release|x64.Build.0 = Release|Any CPU
 		{774C00E5-921D-494A-8E23-B0A2D0A13018}.Release|x86.ActiveCfg = Release|Any CPU
 		{774C00E5-921D-494A-8E23-B0A2D0A13018}.Release|x86.Build.0 = Release|Any CPU
+		{B9DFCEE6-A5AF-4179-BB4E-368B8A2E8470}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B9DFCEE6-A5AF-4179-BB4E-368B8A2E8470}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B9DFCEE6-A5AF-4179-BB4E-368B8A2E8470}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{B9DFCEE6-A5AF-4179-BB4E-368B8A2E8470}.Debug|x64.Build.0 = Debug|Any CPU
+		{B9DFCEE6-A5AF-4179-BB4E-368B8A2E8470}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B9DFCEE6-A5AF-4179-BB4E-368B8A2E8470}.Debug|x86.Build.0 = Debug|Any CPU
+		{B9DFCEE6-A5AF-4179-BB4E-368B8A2E8470}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B9DFCEE6-A5AF-4179-BB4E-368B8A2E8470}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B9DFCEE6-A5AF-4179-BB4E-368B8A2E8470}.Release|x64.ActiveCfg = Release|Any CPU
+		{B9DFCEE6-A5AF-4179-BB4E-368B8A2E8470}.Release|x64.Build.0 = Release|Any CPU
+		{B9DFCEE6-A5AF-4179-BB4E-368B8A2E8470}.Release|x86.ActiveCfg = Release|Any CPU
+		{B9DFCEE6-A5AF-4179-BB4E-368B8A2E8470}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -279,6 +295,7 @@ Global
 		{3712A71D-7451-497B-824C-5B33785F06BE} = {FA5D7AB8-3570-4E55-95B0-35BA6842FEE3}
 		{7B528D46-3576-420E-A7B3-6E6781219607} = {FA5D7AB8-3570-4E55-95B0-35BA6842FEE3}
 		{774C00E5-921D-494A-8E23-B0A2D0A13018} = {FA5D7AB8-3570-4E55-95B0-35BA6842FEE3}
+		{B9DFCEE6-A5AF-4179-BB4E-368B8A2E8470} = {8EAF9583-DC5B-46DC-A01E-47B00A1C862E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0A99E91A-ADAB-45C3-8170-2656140F6EFA}

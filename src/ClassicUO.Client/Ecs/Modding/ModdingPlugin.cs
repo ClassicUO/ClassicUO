@@ -13,6 +13,7 @@ using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Input;
 using ClassicUO.Network;
+using ClassicUO.Schema;
 using Clay_cs;
 using Extism.Sdk;
 using Microsoft.Xna.Framework;
@@ -195,6 +196,25 @@ internal readonly struct ModdingPlugin : IPlugin
 
 
                 HostFunction.FromMethod("send_events", null, (CurrentPlugin p, long offset) => {
+
+                    var list = new Schema.LoginCharacterList {
+                        Characters = { "test", "test2" }
+                    };
+
+                    var t = new Schema.LoginEvent(new Schema.LoginCharacterList {
+                        Characters = { "test", "test2" }
+                    });
+                    
+                    
+                    var json = list.ToJson();
+                    Console.WriteLine(json);
+
+                    Schema.EventEnvelope e = new()
+                    {
+                        Seq = 1,
+                        Event = new Schema.EventType(new LoginCharacterList()),
+                    };
+
                     // var str = p.ReadString(offset);
                     // var events = str.FromJson<PluginMessages>();
 

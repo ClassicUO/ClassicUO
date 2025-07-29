@@ -133,7 +133,6 @@ export const TooltipStory: React.FC = () => {
         >
           <Tooltip
             width={220}
-            height={200}
             content={
               <View
                 backgroundColor={Colors.transparent}

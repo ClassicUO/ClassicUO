@@ -1,0 +1,42 @@
+// FlatBuffer schema for Login events
+// This file defines the message contracts for login-related operations
+
+namespace ClassicUO.Schema;
+
+// Incoming events (from client/plugin to host)
+table LoginRequest {
+  username: string;
+  password: string;
+}
+
+table LoginServerSelect {
+  index: int32;
+}
+
+table LoginCharacterSelect {
+  index: int32;
+}
+
+// Outgoing events (from host to client/plugin)
+table LoginResponse {
+  code: int32;
+  message: string;
+}
+
+table LoginServerList {
+  servers: [string];
+}
+
+table LoginCharacterList {
+  characters: [string];
+}
+
+// Union type for all login events
+union LoginEvent {
+  LoginRequest,
+  LoginServerSelect,
+  LoginCharacterSelect,
+  LoginResponse,
+  LoginServerList,
+  LoginCharacterList
+}

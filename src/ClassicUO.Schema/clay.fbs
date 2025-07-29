@@ -1,0 +1,140 @@
+namespace ClassicUO.Schema;
+
+enum ClayWidgetType : byte {
+    None = 0,
+    Button = 1,
+    TextInput = 2,
+    TextFragment = 3
+}
+
+enum ClayTextElementConfigWrapMode : byte {
+    None = 0,
+    Words = 1
+}
+
+enum ClayTextAlignment : byte {
+    Left = 0,
+    Center = 1,
+    Right = 2
+}
+
+struct ClayColor {
+    r: float;
+    g: float;
+    b: float;
+    a: float;
+}
+
+struct ClayLayoutConfig {
+    width: float;
+    height: float;
+    min_width: float;
+    min_height: float;
+    max_width: float;
+    max_height: float;
+    padding_left: float;
+    padding_right: float;
+    padding_top: float;
+    padding_bottom: float;
+    margin_left: float;
+    margin_right: float;
+    margin_top: float;
+    margin_bottom: float;
+}
+
+struct ClayCornerRadius {
+    top_left: float;
+    top_right: float;
+    bottom_left: float;
+    bottom_right: float;
+}
+
+struct ClayFloatingElementConfig {
+    offset_x: float;
+    offset_y: float;
+    expand_x: float;
+    expand_y: float;
+    z_index: uint16;
+    parent_id: uint32;
+    attachment_x: byte;
+    attachment_y: byte;
+}
+
+struct ClayClipElementConfig {
+    enabled: bool;
+}
+
+struct ClayBorderElementConfig {
+    width: float;
+    color: ClayColor;
+}
+
+table ClayElementId {
+    id: uint32;
+    offset: uint32;
+    base_id: uint32;
+    string_id: string;
+}
+
+table ClayImage {
+    base64_data: string;
+}
+
+table ClayTextConfig {
+    text_color: ClayColor;
+    font_id: uint16;
+    font_size: uint16;
+    letter_spacing: uint16;
+    line_height: uint16;
+    wrap_mode: ClayTextElementConfigWrapMode;
+    text_alignment: ClayTextAlignment;
+}
+
+table UIText {
+    value: string;
+    replaced_char: uint16;
+    text_config: ClayTextConfig;
+}
+
+table UOButtonWidget {
+    normal: uint16;
+    pressed: uint16;
+    over: uint16;
+}
+
+table ClayUOCommandData {
+    // Add specific fields based on your UO command data structure
+    command_type: uint32;
+    data: [uint8];
+}
+
+table ClayElementDecl {
+    id: ClayElementId;
+    layout: ClayLayoutConfig;
+    background_color: ClayColor;
+    corner_radius: ClayCornerRadius;
+    image: ClayImage;
+    floating: ClayFloatingElementConfig;
+    clip: ClayClipElementConfig;
+    border: ClayBorderElementConfig;
+}
+
+table UINodeProxy {
+    id: uint64;
+    config: ClayElementDecl;
+    uo_config: ClayUOCommandData;
+    text_config: UIText;
+    uo_button: UOButtonWidget;
+    widget_type: ClayWidgetType = None;
+    movable: bool = false;
+}
+
+table UINodes {
+    nodes: [UINodeProxy];
+    relations: [UINodeRelation];
+}
+
+table UINodeRelation {
+    child: uint64;
+    parent: uint64;
+}

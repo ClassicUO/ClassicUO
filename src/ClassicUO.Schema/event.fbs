@@ -1,0 +1,21 @@
+include "login.fbs";
+include "clay.fbs";
+
+namespace ClassicUO.Schema;
+
+// Union of all possible event types
+union EventType {
+  // Login Events
+  LoginRequest,
+  LoginServerSelect,
+  LoginCharacterSelect,
+  LoginResponse,
+  LoginServerList,
+  LoginCharacterList
+}
+
+// The main event envelope that wraps all events
+table EventEnvelope {
+  seq: uint32;
+  event: EventType;
+}

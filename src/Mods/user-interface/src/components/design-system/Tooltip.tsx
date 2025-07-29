@@ -81,7 +81,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   position = 'top',
   backgroundColor = Colors.transparent,
   width = 300,
-  height,
+  height = 60,
   padding = 8,
   art = 0x0bb8,
   ninePatch = true,

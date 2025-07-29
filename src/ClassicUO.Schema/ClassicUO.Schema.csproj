@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FlatSharpSchema Include="*.fbs">
+      <Access>Public</Access>
+      <NullableAnnotations>true</NullableAnnotations>
+    </FlatSharpSchema>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FlatSharp.Runtime" Version="7.9.0" />
+    <PackageReference Include="FlatSharp.Compiler" Version="7.9.0">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+</Project>
