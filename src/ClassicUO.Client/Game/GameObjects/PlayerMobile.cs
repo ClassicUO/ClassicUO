@@ -4,8 +4,6 @@ using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
-using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
 using ClassicUO.Utility;
@@ -231,15 +229,19 @@ namespace ClassicUO.Game.GameObjects
                 item = (Item)item.Next
             )
             {
-                if (
-                    item.ItemData.IsContainer
-                    && !item.IsEmpty
-                    && item.Layer >= Layer.OneHanded
-                    && item.Layer <= Layer.Legs
-                )
+                if (item.Layer < Layer.OneHanded || item.Layer > Layer.Legs)
+                {
+                    continue;
+                }
+                if (item.ItemData.IsContainer && !item.IsEmpty)
                 {
                     item.GetTotalAmount(graphic, hue, ref _amount);
                 }
+                else if (item.Graphic == graphic && (!hue.HasValue || item.Hue == hue.Value))
+                {
+                    _amount += item.Amount;
+                }
+
             }
 
             return _amount;
