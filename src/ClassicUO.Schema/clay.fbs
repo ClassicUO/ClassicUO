@@ -1,3 +1,6 @@
+attribute "fs_valueStruct";
+attribute "fs_serializer";
+
 namespace ClassicUO.Schema;
 
 enum ClayWidgetType : byte {
@@ -18,14 +21,14 @@ enum ClayTextAlignment : byte {
     Right = 2
 }
 
-struct ClayColor {
+struct ClayColor (fs_valueStruct) {
     r: float;
     g: float;
     b: float;
     a: float;
 }
 
-struct ClayLayoutConfig {
+struct ClayLayoutConfig (fs_valueStruct) {
     width: float;
     height: float;
     min_width: float;
@@ -42,14 +45,14 @@ struct ClayLayoutConfig {
     margin_bottom: float;
 }
 
-struct ClayCornerRadius {
+struct ClayCornerRadius (fs_valueStruct) {
     top_left: float;
     top_right: float;
     bottom_left: float;
     bottom_right: float;
 }
 
-struct ClayFloatingElementConfig {
+struct ClayFloatingElementConfig (fs_valueStruct) {
     offset_x: float;
     offset_y: float;
     expand_x: float;
@@ -60,11 +63,11 @@ struct ClayFloatingElementConfig {
     attachment_y: byte;
 }
 
-struct ClayClipElementConfig {
+struct ClayClipElementConfig (fs_valueStruct) {
     enabled: bool;
 }
 
-struct ClayBorderElementConfig {
+struct ClayBorderElementConfig (fs_valueStruct) {
     width: float;
     color: ClayColor;
 }
@@ -129,12 +132,12 @@ table UINodeProxy {
     movable: bool = false;
 }
 
-table UINodes {
-    nodes: [UINodeProxy];
-    relations: [UINodeRelation];
-}
-
 table UINodeRelation {
     child: uint64;
     parent: uint64;
+}
+
+table UINodes (fs_serializer) {
+    nodes: [UINodeProxy];
+    relations: [UINodeRelation];
 }

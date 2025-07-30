@@ -1,21 +1,20 @@
 using System;
-using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Schema;
 using Clay_cs;
 using Extism.Sdk;
+using FlatSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using TinyEcs;
@@ -196,7 +195,6 @@ internal readonly struct ModdingPlugin : IPlugin
 
 
                 HostFunction.FromMethod("send_events", null, (CurrentPlugin p, long offset) => {
-
                     var list = new Schema.LoginCharacterList {
                         Characters = { "test", "test2" }
                     };
@@ -204,8 +202,8 @@ internal readonly struct ModdingPlugin : IPlugin
                     var t = new Schema.LoginEvent(new Schema.LoginCharacterList {
                         Characters = { "test", "test2" }
                     });
-                    
-                    
+
+
                     var json = list.ToJson();
                     Console.WriteLine(json);
 
@@ -295,6 +293,10 @@ internal readonly struct ModdingPlugin : IPlugin
                     return p.WriteString(response);
                 }),
 
+                HostFunction.FromMethod("cuo_ui_node_2", null, (CurrentPlugin p, long offset) => {
+                    using var tempBuf = p.Buffer(offset);
+                    var nodes = Schema.UINodes.Serializer.Parse(tempBuf.Memory);
+                }),
 
                 HostFunction.FromMethod("cuo_ui_node", null, (CurrentPlugin p, long offset) => {
                     var nodes = p.ReadString(offset).FromJson<UINodes>();
@@ -1062,5 +1064,23 @@ public static class JsonEx
     public static T FromJson<T>(this string json)
     {
         return JsonSerializer.Deserialize(json, (JsonTypeInfo<T>)ModdingJsonContext.Default.GetTypeInfo(typeof(T)));
+    }
+}
+
+public static class CurrentPluginExtismExt
+{
+    public static unsafe TempBuffer<byte> Buffer(this CurrentPlugin p, long offset)
+    {
+        if (offset < 0)
+        {
+            throw new ArgumentOutOfRangeException(nameof(offset), "Offset must be non-negative.");
+        }
+
+        var span = p.ReadBytes(offset);
+
+        var temp = new TempBuffer<byte>(span.Length);
+        span.CopyTo(temp.Span);
+
+        return temp;
     }
 }

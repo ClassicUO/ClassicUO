@@ -4,4 +4,4 @@ attribute "fs_serializer";
 
 namespace ClassicUO.Schema;
 
-root_type EventEnvelope; 
+root_type EventEnvelope;
