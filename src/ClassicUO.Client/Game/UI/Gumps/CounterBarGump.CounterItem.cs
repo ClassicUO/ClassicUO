@@ -10,7 +10,6 @@ using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -141,14 +140,7 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
                 }
 
-                Item backpack = _gump.World.Player.FindItemByLayer(Layer.Backpack);
-
-                if (backpack == null)
-                {
-                    return;
-                }
-
-                Item item = Hue == null ? backpack.FindItem(Graphic): backpack.FindItem(Graphic, Hue.Value);
+                Item item = _gump.World.Player.FindItem(Graphic, Hue ?? 0xFFFF);
 
                 if (item != null)
                 {

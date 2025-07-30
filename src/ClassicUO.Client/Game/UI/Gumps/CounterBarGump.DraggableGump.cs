@@ -1,11 +1,6 @@
 ﻿using ClassicUO.Game.Managers;
-using ClassicUO.Game.UI.Controls;
 using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ClassicUO.Game.UI.Gumps
 {
