@@ -4,8 +4,10 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
+using ClassicUO.Renderer.Lights;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
@@ -21,13 +23,22 @@ namespace ClassicUO.Game.UI.Gumps
         private static readonly int BORDER_TOP = 2;
         private static readonly int BORDER_BOTTOM = 2;
 
+        private static readonly ushort HELP_TEXT_HUE = 0x32; // light yellow
+
         private AlphaBlendControl _background;
+        private Label _helpTextLabel;
 
         private DataBox _dataBox;
         private int _rectSize;
         private ScissorControl _scissor;
 
-        public bool ReadOnly { get => !ShowBorder; set => ShowBorder = !value; }
+        public bool ReadOnly
+        {
+            get => !ShowBorder;
+            set => ShowBorder = !value || _helpTextLabel != null;
+            // It makes no sense to put the bar into read-only mode
+            // while the text is shown to drop an item there to get started
+        }
 
         public CounterBarGump(World world) : base(world, 0, 0, 50, 50, 0, 0, 0)
         {
@@ -43,12 +54,20 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void SnapToGrid()
         {
-            int tooWide = (Width - BoderSize * 2) % _rectSize;
-            int tooHigh = (Height - BoderSize * 2) % _rectSize;
+            int desiredWidth = Width;
+            int desiredHeight = Height;
+
+            if (_helpTextLabel != null)
+            {
+                desiredWidth = Math.Max(desiredWidth, 6 * _rectSize + BORDER_LEFT + BORDER_RIGHT); // wide enough to show the help Text
+            }
+
+            int tooWide = (desiredWidth - BoderSize * 2) % _rectSize;
+            int tooHigh = (desiredHeight - BoderSize * 2) % _rectSize;
 
             if (tooWide > 0 || tooHigh > 0)
             {
-                ResizeWindow(new Point(Width - tooWide, Height - tooHigh));
+                ResizeWindow(new Point(desiredWidth - tooWide, desiredHeight - tooHigh));
             }
         }
 
@@ -189,6 +208,25 @@ namespace ClassicUO.Game.UI.Gumps
 
             int x = 0;
             int y = 0;
+
+            if (_dataBox?.Children.Count == 0 && _helpTextLabel == null)
+            {
+                Add(_helpTextLabel = new Label(ResGumps.CounterEmptyHelpText, true, HELP_TEXT_HUE)
+                {
+                    X = BORDER_LEFT * 4,
+                    Y = BORDER_TOP * 4,
+                    Width = width - (BORDER_LEFT - BORDER_RIGHT) * 4,
+                    Height = height - (BORDER_TOP - BORDER_BOTTOM) * 4
+                });
+
+                SnapToGrid();
+            }
+
+            if (_dataBox?.Children.Count > 0 && _helpTextLabel != null)
+            {
+                _helpTextLabel.Dispose();
+                _helpTextLabel = null;
+            }
 
             for (int i = 0; i < _dataBox.Children.Count; i++)
             {

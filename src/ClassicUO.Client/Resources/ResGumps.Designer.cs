@@ -934,6 +934,16 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Drop an item here to
+        ///start your first counter.
+        /// </summary>
+        public static string CounterEmptyHelpText {
+            get {
+                return ResourceManager.GetString("CounterEmptyHelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Counter Bar: Slot number &apos;{0}&apos; could not be found.
         /// </summary>
         public static string CounterErrorSlotNotFound {
