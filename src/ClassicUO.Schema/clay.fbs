@@ -1,5 +1,6 @@
 attribute "fs_valueStruct";
 attribute "fs_serializer";
+attribute "fs_unsafeExternal";
 
 namespace ClassicUO.Schema;
 
@@ -11,14 +12,39 @@ enum ClayWidgetType : byte {
 }
 
 enum ClayTextElementConfigWrapMode : byte {
-    None = 0,
-    Words = 1
+    CLAY_TEXT_WRAP_WORDS = 0,
+    CLAY_TEXT_WRAP_NEWLINES = 1,
+    CLAY_TEXT_WRAP_NONE = 2
 }
 
 enum ClayTextAlignment : byte {
-    Left = 0,
-    Center = 1,
-    Right = 2
+    CLAY_TEXT_ALIGN_LEFT = 0,
+    CLAY_TEXT_ALIGN_CENTER = 1,
+    CLAY_TEXT_ALIGN_RIGHT = 2
+}
+
+enum ClayLayoutDirection : byte {
+    CLAY_LEFT_TO_RIGHT = 0,
+    CLAY_TOP_TO_BOTTOM = 1
+}
+
+enum ClayLayoutAlignmentX : byte {
+    CLAY_ALIGN_X_LEFT = 0,
+    CLAY_ALIGN_X_RIGHT = 1,
+    CLAY_ALIGN_X_CENTER = 2
+}
+
+enum ClayLayoutAlignmentY : byte {
+    CLAY_ALIGN_Y_TOP = 0,
+    CLAY_ALIGN_Y_BOTTOM = 1,
+    CLAY_ALIGN_Y_CENTER = 2
+}
+
+enum ClaySizingType : byte {
+    CLAY_SIZING_TYPE_FIT = 0,
+    CLAY_SIZING_TYPE_GROW = 1,
+    CLAY_SIZING_TYPE_PERCENT = 2,
+    CLAY_SIZING_TYPE_FIXED = 3
 }
 
 struct ClayColor (fs_valueStruct) {
@@ -28,21 +54,51 @@ struct ClayColor (fs_valueStruct) {
     a: float;
 }
 
-struct ClayLayoutConfig (fs_valueStruct) {
+struct ClayDimensions (fs_valueStruct) {
     width: float;
     height: float;
-    min_width: float;
-    min_height: float;
-    max_width: float;
-    max_height: float;
-    padding_left: float;
-    padding_right: float;
-    padding_top: float;
-    padding_bottom: float;
-    margin_left: float;
-    margin_right: float;
-    margin_top: float;
-    margin_bottom: float;
+}
+
+struct ClayVector2 (fs_valueStruct) {
+    x: float;
+    y: float;
+}
+
+struct ClayChildAlignment (fs_valueStruct) {
+    x: ClayLayoutAlignmentX;
+    y: ClayLayoutAlignmentY;
+}
+
+struct ClaySizingMinMax (fs_valueStruct) {
+    min: float;
+    max: float;
+}
+
+// Remove fs_valueStruct from all structs that contain other structs
+struct ClaySizingAxis {
+    min_max: ClaySizingMinMax;
+    percent: float;
+    type: ClaySizingType;
+}
+
+struct ClaySizing {
+    width: ClaySizingAxis;
+    height: ClaySizingAxis;
+}
+
+struct ClayPadding (fs_valueStruct) {
+    left: uint16;
+    right: uint16;
+    top: uint16;
+    bottom: uint16;
+}
+
+table ClayLayoutConfig {
+    sizing: ClaySizing;
+    padding: ClayPadding;
+    child_gap: uint16;
+    child_alignment: ClayChildAlignment;
+    layout_direction: ClayLayoutDirection;
 }
 
 struct ClayCornerRadius (fs_valueStruct) {
@@ -52,35 +108,55 @@ struct ClayCornerRadius (fs_valueStruct) {
     bottom_right: float;
 }
 
-struct ClayFloatingElementConfig (fs_valueStruct) {
-    offset_x: float;
-    offset_y: float;
-    expand_x: float;
-    expand_y: float;
-    z_index: uint16;
+struct ClayFloatingElementConfig {
+    offset: ClayVector2;
+    expand: ClayDimensions;
     parent_id: uint32;
-    attachment_x: byte;
-    attachment_y: byte;
+    z_index: int16;
 }
 
-struct ClayClipElementConfig (fs_valueStruct) {
-    enabled: bool;
+struct ClayClipElementConfig {
+    horizontal: bool;
+    vertical: bool;
+    child_offset: ClayVector2;
 }
 
-struct ClayBorderElementConfig (fs_valueStruct) {
-    width: float;
+struct ClayBorderWidth (fs_valueStruct) {
+    left: uint16;
+    right: uint16;
+    top: uint16;
+    bottom: uint16;
+    between_children: uint16;
+}
+
+struct ClayBorderElementConfig {
     color: ClayColor;
+    width: ClayBorderWidth;
+}
+
+struct ClayAspectRatioElementConfig (fs_valueStruct) {
+    aspect_ratio: float;
+}
+
+table ClayString {
+    length: int32;
+    chars: string;
+    is_statically_allocated: bool;
 }
 
 table ClayElementId {
     id: uint32;
     offset: uint32;
     base_id: uint32;
-    string_id: string;
+    string_id: ClayString;
 }
 
-table ClayImage {
-    base64_data: string;
+table ClayImageElementConfig {
+    image_data: [uint8]; // void* represented as byte array
+}
+
+table ClayCustomElementConfig {
+    custom_data: [uint8]; // void* represented as byte array
 }
 
 table ClayTextConfig {
@@ -106,7 +182,6 @@ table UOButtonWidget {
 }
 
 table ClayUOCommandData {
-    // Add specific fields based on your UO command data structure
     command_type: uint32;
     data: [uint8];
 }
@@ -116,10 +191,13 @@ table ClayElementDecl {
     layout: ClayLayoutConfig;
     background_color: ClayColor;
     corner_radius: ClayCornerRadius;
-    image: ClayImage;
+    aspect_ratio: ClayAspectRatioElementConfig;
+    image: ClayImageElementConfig;
     floating: ClayFloatingElementConfig;
+    custom: ClayCustomElementConfig;
     clip: ClayClipElementConfig;
     border: ClayBorderElementConfig;
+    user_data: [uint8]; // void* represented as byte array
 }
 
 table UINodeProxy {
@@ -132,7 +210,7 @@ table UINodeProxy {
     movable: bool = false;
 }
 
-table UINodeRelation {
+struct UINodeRelation (fs_valueStruct) {
     child: uint64;
     parent: uint64;
 }

@@ -11,13 +11,12 @@ using ClassicUO.Configuration;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Network;
-using ClassicUO.Schema;
 using Clay_cs;
 using Extism.Sdk;
-using FlatSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using TinyEcs;
+using FlatSharp;
 
 namespace ClassicUO.Ecs;
 
@@ -195,23 +194,23 @@ internal readonly struct ModdingPlugin : IPlugin
 
 
                 HostFunction.FromMethod("send_events", null, (CurrentPlugin p, long offset) => {
-                    var list = new Schema.LoginCharacterList {
-                        Characters = { "test", "test2" }
-                    };
-
-                    var t = new Schema.LoginEvent(new Schema.LoginCharacterList {
-                        Characters = { "test", "test2" }
-                    });
-
-
-                    var json = list.ToJson();
-                    Console.WriteLine(json);
-
-                    Schema.EventEnvelope e = new()
-                    {
-                        Seq = 1,
-                        Event = new Schema.EventType(new LoginCharacterList()),
-                    };
+                    // var list = new Schema.LoginCharacterList {
+                    //     Characters = { "test", "test2" }
+                    // };
+                    //
+                    // var t = new Schema.LoginEvent(new Schema.LoginCharacterList {
+                    //     Characters = { "test", "test2" }
+                    // });
+                    //
+                    //
+                    // var json = list.ToJson();
+                    // Console.WriteLine(json);
+                    //
+                    // Schema.EventEnvelope e = new()
+                    // {
+                    //     Seq = 1,
+                    //     Event = new Schema.EventType(new LoginCharacterList()),
+                    // };
 
                     // var str = p.ReadString(offset);
                     // var events = str.FromJson<PluginMessages>();
@@ -295,11 +294,91 @@ internal readonly struct ModdingPlugin : IPlugin
 
                 HostFunction.FromMethod("cuo_ui_node_2", null, (CurrentPlugin p, long offset) => {
                     using var tempBuf = p.Buffer(offset);
+
                     var nodes = Schema.UINodes.Serializer.Parse(tempBuf.Memory);
+
+                    // foreach (var node in nodes.Nodes)
+                    // {
+                    //     var ent = world.Entity(node.Id)
+                    //         .Set(new PluginEntity(mod))
+                    //         .SetUINode(new UINode() {
+                    //             // TODO: missing some config
+                    //             Config = {
+                    //                 layout = node.Config.Layout is {} layout ? new ()
+                    //                 {
+                    //                     padding = layout.Padding,
+                    //                 } : default,
+                    //                 backgroundColor = node.Config.BackgroundColor ?? default,
+                    //                 cornerRadius = node.Config.CornerRadius ?? default,
+                    //                 floating = node.Config.Floating ?? default,
+                    //                 clip = node.Config.Clip ?? default,
+                    //                 border = node.Config.Border ?? default,
+                    //                 image = {
+                    //                     // imageData = node.Config.Image.Base64Data
+                    //                 }
+                    //             },
+                    //             UOConfig = node.UOConfig ?? default
+                    //         });
+                    //
+                    //     if (node.TextConfig is {} textCfg)
+                    //     {
+                    //         var config = new Text() {
+                    //             Value = textCfg.Value,
+                    //             TextConfig = {
+                    //                 fontId = textCfg.TextConfig.FontId,
+                    //                 fontSize = textCfg.TextConfig.FontSize,
+                    //                 letterSpacing = textCfg.TextConfig.LetterSpacing,
+                    //                 lineHeight = textCfg.TextConfig.LineHeight,
+                    //                 textAlignment = textCfg.TextConfig.TextAlignment,
+                    //                 textColor = textCfg.TextConfig.TextColor,
+                    //                 wrapMode = textCfg.TextConfig.WrapMode
+                    //             }
+                    //         };
+                    //
+                    //         ent.Set(config);
+                    //     }
+                    //
+                    //     if (node.Movable)
+                    //         ent.Add<UIMovable>();
+                    //
+                    //     // if (node.AcceptInputs)
+                    //     // ent.Set(new UIMouseAction());
+                    //
+                    //     if (node.WidgetType == ClayWidgetType.TextInput)
+                    //         ent.Add<TextInput>();
+                    //     else if (node.WidgetType == ClayWidgetType.TextFragment)
+                    //         ent.Add<TextFragment>();
+                    //     else if (node.WidgetType == ClayWidgetType.Button)
+                    //     {
+                    //         if (node.UOButton is {} button)
+                    //         {
+                    //             ent.Set(new UOButton()
+                    //             {
+                    //                 Normal = button.Normal,
+                    //                 Over = button.Over,
+                    //                 Pressed = button.Pressed
+                    //             });
+                    //         }
+                    //     }
+                    // }
+                    //
+                    // foreach (var (child, parent) in nodes.Relations)
+                    // {
+                    //     if (!world.Exists(child))
+                    //         continue;
+                    //
+                    //     if (!world.Exists(parent))
+                    //         continue;
+                    //
+                    //     world.Entity(parent).AddChild(child);
+                    // }
                 }),
 
                 HostFunction.FromMethod("cuo_ui_node", null, (CurrentPlugin p, long offset) => {
                     var nodes = p.ReadString(offset).FromJson<UINodes>();
+
+                    // using var tempBuf = p.Buffer(offset);
+                    // var nodes2 = Schema.UINodes.Serializer.Parse(tempBuf.Memory);
 
                     foreach (var node in nodes.Nodes)
                     {
@@ -308,7 +387,6 @@ internal readonly struct ModdingPlugin : IPlugin
                             .SetUINode(new UINode() {
                                 // TODO: missing some config
                                 Config = {
-                                    // id = Clay.Id(node.Id.ToString()),
                                     layout = node.Config.Layout ?? default,
                                     backgroundColor = node.Config.BackgroundColor ?? default,
                                     cornerRadius = node.Config.CornerRadius ?? default,
@@ -1069,7 +1147,7 @@ public static class JsonEx
 
 public static class CurrentPluginExtismExt
 {
-    public static unsafe TempBuffer<byte> Buffer(this CurrentPlugin p, long offset)
+    public static TempBuffer<byte> Buffer(this CurrentPlugin p, long offset)
     {
         if (offset < 0)
         {
