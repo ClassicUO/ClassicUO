@@ -1,4 +1,14 @@
-import { Graphic, QueryRequest, QueryResponse, SpriteDescription, UIEvent, UINode, UINodes } from '~/host';
+import {
+    Graphic,
+    PluginMessage,
+    PluginMessages,
+    QueryRequest,
+    QueryResponse,
+    SpriteDescription,
+    UIEvent,
+    UINode,
+    UINodes
+} from '~/host';
 
 type HostFunctions = ReturnType<typeof Host.getFunctions>;
 
@@ -92,6 +102,11 @@ export class HostWrapper {
     const offset = this.functions.cuo_ecs_query(memIn.offset);
     const memOut = Memory.find(offset).readString();
     return JSON.parse(memOut);
+  }
+
+  static sendEvents(events: PluginMessages): void {
+    const memIn = Memory.fromString(JSON.stringify(events));
+    this.functions.cuo_send_events(memIn.offset);
   }
 }
 

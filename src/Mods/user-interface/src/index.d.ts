@@ -29,5 +29,6 @@ declare module 'extism:host' {
     cuo_ecs_query(ptr: I64): I64;
     cuo_ecs_set_component(ptr: I64, ptr2: I64): void;
     cuo_add_entity_to_parent(id: I64, parentId: I64, index: I64): void;
+    cuo_send_events(ptr: I64): void;
   }
 }

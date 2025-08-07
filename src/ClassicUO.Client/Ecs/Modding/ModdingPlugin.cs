@@ -8,9 +8,11 @@ using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Network;
+using ClassicUO.Utility;
 using Clay_cs;
 using Extism.Sdk;
 using Microsoft.Xna.Framework;
@@ -193,7 +195,7 @@ internal readonly struct ModdingPlugin : IPlugin
                 }),
 
 
-                HostFunction.FromMethod("send_events", null, (CurrentPlugin p, long offset) => {
+                HostFunction.FromMethod("cuo_send_events", (mod, pluginWriter), static (CurrentPlugin p, long offset) => {
                     // var list = new Schema.LoginCharacterList {
                     //     Characters = { "test", "test2" }
                     // };
@@ -212,11 +214,13 @@ internal readonly struct ModdingPlugin : IPlugin
                     //     Event = new Schema.EventType(new LoginCharacterList()),
                     // };
 
-                    // var str = p.ReadString(offset);
-                    // var events = str.FromJson<PluginMessages>();
 
-                    // foreach (var ev in events.Messages)
-                    //     pluginWriter.Enqueue((mod, ev));
+                    var ptr = p.GetUserData<(Mod mod, EventWriter<(Mod, PluginMessage)> writer)>();
+                    var str = p.ReadString(offset);
+                    var events = str.FromJson<PluginMessages>();
+
+                    foreach (var ev in events.Messages)
+                        ptr.writer.Enqueue((ptr.mod, ev));
                 }),
 
 
@@ -638,9 +642,53 @@ internal readonly struct ModdingPlugin : IPlugin
         World world,
         Res<PacketsMap> packetMap,
         Res<AssetsServer> assets,
+        Res<NetClient> network,
+        Res<GameContext> gameCtx,
+        Res<Settings> settings,
         EventReader<(Mod, PluginMessage)> reader
     )
     {
+        foreach ((var mod, var ev) in reader)
+        {
+            switch (ev)
+            {
+                case PluginMessage.LoginRequest loginRequest:
+                    network.Value.Connect(settings.Value.IP, settings.Value.Port);
+
+                    if (!network.Value.IsConnected)
+                        continue;
+
+                    network.Value.Encryption?.Initialize(true, network.Value.LocalIP);
+
+                    if (gameCtx.Value.ClientVersion >= ClientVersion.CV_6040)
+                    {
+                        // NOTE: im forcing the use of latest client just for convenience rn
+                        var major = (byte)((uint)gameCtx.Value.ClientVersion >> 24);
+                        var minor = (byte)((uint)gameCtx.Value.ClientVersion >> 16);
+                        var build = (byte)((uint)gameCtx.Value.ClientVersion >> 8);
+                        var extra = (byte)gameCtx.Value.ClientVersion;
+
+                        network.Value.Send_Seed(network.Value.LocalIP, major, minor, build, extra);
+                    }
+                    else
+                    {
+                        network.Value.Send_Seed_Old(network.Value.LocalIP);
+                    }
+
+                    network.Value.Send_FirstLogin(loginRequest.Username, loginRequest.Password);
+
+                    break;
+
+                case PluginMessage.ServerLoginRequest serverLoginRequest:
+                    if (network.Value.IsConnected)
+                    {
+                        network.Value.Send_SelectServer(serverLoginRequest.Index);
+                    }
+
+                    break;
+            }
+        }
+
         // foreach ((var mod, var ev) in reader)
         // {
         //     switch (ev)
@@ -1101,6 +1149,8 @@ internal record struct PluginMessages(List<PluginMessage> Messages);
 [JsonDerivedType(typeof(KeyPressed), nameof(KeyPressed))]
 [JsonDerivedType(typeof(KeyReleased), nameof(KeyReleased))]
 
+[JsonDerivedType(typeof(LoginResponse), nameof(LoginResponse))]
+[JsonDerivedType(typeof(ServerLoginResponse), nameof(ServerLoginResponse))]
 internal interface HostMessage
 {
     internal record struct MouseMove(float X, float Y) : HostMessage;
@@ -1110,12 +1160,20 @@ internal interface HostMessage
     internal record struct MouseDoubleClick(int Button, float X, float Y) : HostMessage;
     internal record struct KeyPressed(Keys Key) : HostMessage;
     internal record struct KeyReleased(Keys Key) : HostMessage;
+
+
+
+    internal record struct LoginResponse(CharacterListFlags Flags, IEnumerable<CharacterInfo> Characters, IEnumerable<TownInfo> Cities) : HostMessage;
+    internal record struct ServerLoginResponse(byte Flags, IEnumerable<ServerInfo> Servers) : HostMessage;
 }
 
+
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
+[JsonDerivedType(typeof(LoginRequest), nameof(LoginRequest))]
 internal interface PluginMessage
 {
-
+    internal record struct LoginRequest(string Username, string Password) : PluginMessage;
+    internal record struct ServerLoginRequest(byte Index) : PluginMessage;
 }
 
 

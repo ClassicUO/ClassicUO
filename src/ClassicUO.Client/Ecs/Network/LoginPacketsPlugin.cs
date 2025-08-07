@@ -24,7 +24,10 @@ internal readonly struct LoginPacketsPlugin : IPlugin
             State<GameState> gameState,
             EventWriter<ServerSelectionInfoEvent> serverWriter,
             EventWriter<CharacterSelectionInfoEvent> characterWriter,
-            EventWriter<LoginErrorsInfoEvent> loginErrorWriter
+            EventWriter<LoginErrorsInfoEvent> loginErrorWriter,
+
+            // modding
+            EventWriter<HostMessage> hostMsgsWriter
         ) =>
         {
             // server list
@@ -53,6 +56,8 @@ internal readonly struct LoginPacketsPlugin : IPlugin
                 {
                     Servers = serverList
                 });
+
+                hostMsgsWriter.Enqueue(new HostMessage.ServerLoginResponse(flags, serverList));
             };
 
             // characters list
@@ -104,7 +109,7 @@ internal readonly struct LoginPacketsPlugin : IPlugin
                     cities.Add(city);
                 }
 
-                gameCtx.Value.ClientFeatures = (CharacterListFlags)reader.ReadUInt32BE();
+                var flags = gameCtx.Value.ClientFeatures = (CharacterListFlags)reader.ReadUInt32BE();
 
                 gameState.Set(GameState.CharacterSelection);
                 characterWriter.Enqueue(new()
@@ -112,6 +117,8 @@ internal readonly struct LoginPacketsPlugin : IPlugin
                     Characters = characters,
                     Towns = cities
                 });
+
+                hostMsgsWriter.Enqueue(new HostMessage.LoginResponse(flags, characters, cities));
             };
 
             // server relay

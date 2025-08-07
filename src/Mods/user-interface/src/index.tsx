@@ -50,7 +50,17 @@ export function on_event(): I32 {
               <LoginScreen
                 onQuit={() => console.log('React: Quit button clicked')}
                 onCredits={() => console.log('React: Credits button clicked')}
-                onLogin={() => console.log('React: Login button clicked')}
+                onLogin={(username, password) => {
+                    console.log('React: Login button clicked');
+                    HostWrapper.sendEvents({
+                        messages: [{
+                          $type: 'LoginRequest',
+                          username: username,
+                          password: password
+                        }]
+                    })
+                  }
+                }
               />,
             );
             break;

@@ -235,3 +235,14 @@ export interface HostMessage {
 export interface HostMessages {
   messages: HostMessage[];
 }
+
+
+export interface PluginMessage {
+  $type: string;
+  username?: string;
+  password?: string;
+}
+
+export interface PluginMessages {
+  messages: PluginMessage[];
+}
