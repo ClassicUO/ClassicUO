@@ -86,6 +86,7 @@ jobs:
           allowUpdates: true
           tag: "ClassicUO-dev-release"
           token: ${{ secrets.GITHUB_TOKEN }}
+          commit: ${{ github.sha }}
 
   #   - name: Repo Preparation - clone
   #     uses: actions/checkout@master
