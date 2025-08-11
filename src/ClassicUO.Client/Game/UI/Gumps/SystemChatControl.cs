@@ -35,7 +35,8 @@ namespace ClassicUO.Game.UI.Gumps
 
     internal class SystemChatControl : Control
     {
-        private const int MAX_MESSAGE_LENGHT = 100;
+        private const int MAX_MESSAGE_LENGTH = 100;
+        private const int TEXTBOX_LENGTH = 500;
         private const int CHAT_X_OFFSET = 3;
         private const int CHAT_HEIGHT = 15;
         private static readonly List<Tuple<ChatMode, string>> _messageHistory = new List<Tuple<ChatMode, string>>();
@@ -66,7 +67,7 @@ namespace ClassicUO.Game.UI.Gumps
             TextBoxControl = new StbTextBox
             (
                 ProfileManager.CurrentProfile.ChatFont,
-                MAX_MESSAGE_LENGHT,
+                TEXTBOX_LENGTH,
                 Width,
                 true,
                 FontStyle.BlackBorder | FontStyle.Fixed,
@@ -570,6 +571,28 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        public string ExtractSendableTextSubstring(ref string textBoxText)
+        {
+            string toReturn;
+            if (textBoxText.Length <= MAX_MESSAGE_LENGTH)
+            {
+                toReturn = textBoxText;
+                textBoxText = string.Empty;
+                return toReturn;
+            }
+
+            int lastSpaceIndex = textBoxText.LastIndexOf(' ', MAX_MESSAGE_LENGTH);
+
+            if (lastSpaceIndex < 0)
+            {
+                lastSpaceIndex = MAX_MESSAGE_LENGTH;
+            }
+
+            toReturn = textBoxText.Substring(0, lastSpaceIndex);
+            textBoxText = textBoxText.Substring(lastSpaceIndex).TrimStart();
+            return toReturn;
+        }
+
         public override void OnKeyboardReturn(int textID, string text)
         {
             if (!IsActive && ProfileManager.CurrentProfile.ActivateChatAfterEnter || Mode != ChatMode.Default && string.IsNullOrEmpty(text))
@@ -586,13 +609,34 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             ChatMode sentMode = Mode;
-            TextBoxControl.ClearText();
+
+            string message = ExtractSendableTextSubstring(ref text);
+
+            HandleMessageSend(message, sentMode, ref text);
+
+            if (text.Length <= 0)
+            {
+                text = string.Empty;
+                TextBoxControl.ClearText();
+                Mode = ChatMode.Default;
+                DisposeChatModePrefix();
+            }
+            else
+            {
+                TextBoxControl.Text = text;
+            }
+        }
+
+        private void HandleMessageSend(string text, ChatMode sentMode, ref string remainder)
+        {
             _messageHistory.Add(new Tuple<ChatMode, string>(Mode, text));
             _messageHistoryIndex = _messageHistory.Count;
-            Mode = ChatMode.Default;
+
 
             if (_gump.World.MessageManager.PromptData.Prompt != ConsolePrompt.None)
             {
+                remainder = string.Empty; // prompt responses may never cross multiple messages
+
                 if (_gump.World.MessageManager.PromptData.Prompt == ConsolePrompt.ASCII)
                 {
                     NetClient.Socket.Send_ASCIIPromptResponse(_gump.World, text, text.Length < 1);
@@ -795,6 +839,11 @@ namespace ClassicUO.Game.UI.Gumps
                                         if (int.TryParse(text.Substring(0, pos), out int index) && index > 0 && index < 11 && _gump.World.Party.Members[index - 1] != null && _gump.World.Party.Members[index - 1].Serial != 0)
                                         {
                                             serial = _gump.World.Party.Members[index - 1].Serial;
+                                            if (remainder.Length > 0)
+                                            {
+                                                // push the index to the front of the remainder to send the rest of the text to the correct person as well
+                                                remainder = index + " " + remainder;
+                                            }
                                         }
                                     }
 
@@ -849,8 +898,6 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
                 }
             }
-
-            DisposeChatModePrefix();
         }
 
         private class ChatLineTime
