@@ -549,7 +549,47 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
 
+                case SDL.SDL_Keycode.SDLK_BACKSPACE when Keyboard.Ctrl && !Keyboard.Alt && !Keyboard.Shift:
+                    {
+                        if (!IsActive)
+                        {
+                            return;
+                        }
+
+                        String text = TextBoxControl.Text;
+
+                        if (string.IsNullOrEmpty(text))
+                        {
+                            Mode = ChatMode.Default;
+                            break;
+                        }
+
+                        // ignore the final character since that's a space if we press Ctrl + Backspace multiple times
+                        int index = text.LastIndexOf(' ', text.Length - 2);
+
+                        if (index >= 0)
+                        {
+                            // do not remove the final space since we assume the user wants to continue writing
+                            TextBoxControl.SetText(text[..(index + 1)]);
+                        }
+                        else
+                        {
+                            TextBoxControl.ClearText();
+                        }
+
+                        if (string.IsNullOrEmpty(TextBoxControl.Text))
+                        {
+                            Mode = ChatMode.Default;
+                        }
+                        break;
+                    }
+
                 case SDL.SDL_Keycode.SDLK_BACKSPACE when !Keyboard.Ctrl && !Keyboard.Alt && !Keyboard.Shift && string.IsNullOrEmpty(TextBoxControl.Text):
+                    if (!IsActive)
+                    {
+                        return;
+                    }
+
                     Mode = ChatMode.Default;
 
                     break;
