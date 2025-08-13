@@ -61,6 +61,11 @@ namespace ClassicUO.Game
             get => Global.Host.ReflectionAutowalking(-1);
             set => Global.Host.ReflectionAutowalking((sbyte)(value ? 1 : 0));
         }
+
+        public static bool WalkTo(int x, int y, int z, int distance)
+        {
+            return Global.Host.ReflectionWalkTo(x, y, z, distance);
+        }
     }
 
     public sealed class MacroManager : LinkedObject
