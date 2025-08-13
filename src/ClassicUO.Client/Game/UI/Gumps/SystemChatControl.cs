@@ -1,7 +1,5 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
@@ -14,6 +12,9 @@ using ClassicUO.Resources;
 using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Platforms;
 using SDL2;
+using System;
+using System.Collections.Generic;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -564,7 +565,7 @@ namespace ClassicUO.Game.UI.Gumps
                             break;
                         }
 
-                        // ignore the final character since that's a space if we press Ctrl + Backspace multiple times
+                        // ignore the final character since that's a space if the user presses Ctrl + Backspace multiple times
                         int index = text.LastIndexOf(' ', text.Length - 2);
 
                         if (index >= 0)
@@ -633,41 +634,72 @@ namespace ClassicUO.Game.UI.Gumps
             return toReturn;
         }
 
+        private void ResetTextBox()
+        {
+            TextBoxControl.ClearText();
+            Mode = ChatMode.Default;
+            DisposeChatModePrefix();
+        }
+
+        public bool IsComposing
+        {
+            get => IsActive && TextBoxControl.Text.Length > 0;
+        }
+
         public override void OnKeyboardReturn(int textID, string text)
         {
-            if (!IsActive && ProfileManager.CurrentProfile.ActivateChatAfterEnter || Mode != ChatMode.Default && string.IsNullOrEmpty(text))
+            if (!IsActive && ProfileManager.CurrentProfile.ActivateChatAfterEnter || string.IsNullOrEmpty(text))
             {
-                TextBoxControl.ClearText();
-                text = string.Empty;
-                Mode = ChatMode.Default;
+                ResetTextBox();
             }
 
-            if (string.IsNullOrEmpty(text))
+            var isPrompted = _gump.World.MessageManager.PromptData.Prompt != ConsolePrompt.None;
+
+            if (TryHandleMessageMultipartSend(text, Mode, isPrompted, out var remainder))
             {
-                return;
-            }
-
-
-            ChatMode sentMode = Mode;
-
-            string message = ExtractSendableTextSubstring(ref text);
-
-            HandleMessageSend(message, sentMode, ref text);
-
-            if (text.Length <= 0)
-            {
-                text = string.Empty;
-                TextBoxControl.ClearText();
-                Mode = ChatMode.Default;
-                DisposeChatModePrefix();
+                TextBoxControl.SetText(remainder);
             }
             else
             {
-                TextBoxControl.Text = text;
+                HandleMessageSend(text, Mode);
+                TextBoxControl.ClearText();
+            }
+
+            if (TextBoxControl.Length == 0)
+            {
+                ResetTextBox();
             }
         }
 
-        private void HandleMessageSend(string text, ChatMode sentMode, ref string remainder)
+        private bool TryHandleMessageMultipartSend(string text, ChatMode mode, bool isPrompted, out string remainder)
+        {
+            // Prompt response messages cannot be multiple parts
+            if (isPrompted || text.Length <= MAX_MESSAGE_LENGTH || mode == ChatMode.ClientCommand)
+            {
+                remainder = text;
+                return false;
+            }
+
+            int lastSpaceIndex = text.LastIndexOf(' ', MAX_MESSAGE_LENGTH);
+            if (lastSpaceIndex < 0)
+            {
+                lastSpaceIndex = MAX_MESSAGE_LENGTH;
+            }
+
+            var message = text[..lastSpaceIndex];
+            remainder = text[lastSpaceIndex..].TrimStart();
+
+            HandleMessageSend(message, mode);
+
+            // Preserve the party index we're messaging
+            // otherwise the remainder would be sent to all instead of that specific person
+            if (mode == ChatMode.Party && int.TryParse(text[0..2], out var partyCharIndex) && partyCharIndex is > 0 and < 11)
+                remainder = $"{partyCharIndex} {remainder}";
+
+            return true;
+        }
+
+        private void HandleMessageSend(string text, ChatMode sentMode)
         {
             _messageHistory.Add(new Tuple<ChatMode, string>(Mode, text));
             _messageHistoryIndex = _messageHistory.Count;
@@ -675,8 +707,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_gump.World.MessageManager.PromptData.Prompt != ConsolePrompt.None)
             {
-                remainder = string.Empty; // prompt responses may never cross multiple messages
-
                 if (_gump.World.MessageManager.PromptData.Prompt == ConsolePrompt.ASCII)
                 {
                     NetClient.Socket.Send_ASCIIPromptResponse(_gump.World, text, text.Length < 1);
@@ -879,11 +909,6 @@ namespace ClassicUO.Game.UI.Gumps
                                         if (int.TryParse(text.Substring(0, pos), out int index) && index > 0 && index < 11 && _gump.World.Party.Members[index - 1] != null && _gump.World.Party.Members[index - 1].Serial != 0)
                                         {
                                             serial = _gump.World.Party.Members[index - 1].Serial;
-                                            if (remainder.Length > 0)
-                                            {
-                                                // push the index to the front of the remainder to send the rest of the text to the correct person as well
-                                                remainder = index + " " + remainder;
-                                            }
                                         }
                                     }
 

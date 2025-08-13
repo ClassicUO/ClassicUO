@@ -1223,19 +1223,20 @@ namespace ClassicUO.Game.Scenes
                     {
                         if (ProfileManager.CurrentProfile.ActivateChatAfterEnter)
                         {
-                            UIManager.SystemChat.Mode = ChatMode.Default;
-
-                            if (
-                                !(
-                                    Keyboard.Shift
-                                    && ProfileManager.CurrentProfile.ActivateChatShiftEnterSupport
-                                )
-                            )
+                            if (UIManager.SystemChat.IsActive && Keyboard.Shift && ProfileManager.CurrentProfile.ActivateChatShiftEnterSupport)
                             {
-                                UIManager.SystemChat.ToggleChatVisibility();
+                                // Shift+Enter keeps the chat the way it is
+                                return;
                             }
-                        }
 
+                            if (UIManager.SystemChat.IsComposing)
+                            {
+                                // still text left to be sent, do nothing
+                                return;
+                            }
+                            UIManager.SystemChat.ToggleChatVisibility();
+                        }
+                        // everything else is handled in the system chat control
                         return;
                     }
 
