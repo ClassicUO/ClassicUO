@@ -419,6 +419,15 @@ sealed class ClassicUOHost : IPluginHandler
         return toBool;
     }
 
+    public unsafe bool ReflectionWalkTo(int x, int y, int z, int distance)
+    {
+        var f = (4, x, y, z, distance);
+        var result = SendReflectionCmd((IntPtr)(&f));
+        var toBool = Unsafe.AsRef<bool>(result.ToPointer());
+        Console.WriteLine("bool: {0} [{1}]", toBool, result);
+        return toBool;
+    }
+
     IntPtr SendReflectionCmd(IntPtr ptr)
     {
         return _reflectionCmd?.Delegate?.Invoke(ptr) ?? IntPtr.Zero;
