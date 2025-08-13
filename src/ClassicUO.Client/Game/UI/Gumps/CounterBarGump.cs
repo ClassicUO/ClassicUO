@@ -370,9 +370,6 @@ namespace ClassicUO.Game.UI.Gumps
                 ReadOnly = isReadOnly;
             }
 
-            Width = width;
-            Height = height;
-
             BuildGump();
 
             XmlElement controlsXml = xml["controls"];
@@ -402,6 +399,10 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             IsEnabled = IsVisible = ProfileManager.CurrentProfile.CounterBarEnabled;
+
+            // resize only after items have been added
+            // because an empty counter bar will always receive a minimum width for the help text
+            ResizeWindow(new Point(width, height));
 
             SetupLayout();
         }
