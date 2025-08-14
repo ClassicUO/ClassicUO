@@ -3,15 +3,15 @@ using CUO_API;
 using System;
 using System.Buffers;
 using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
-
 
 #if !DEBUG
+using System.IO;
+using System.Reflection;
+using System.Threading;
+
 AppDomain.CurrentDomain.UnhandledException += (s, e) =>
 {
     var dt = DateTime.Now;
@@ -415,7 +415,6 @@ sealed class ClassicUOHost : IPluginHandler
         var f = (3, walking);
         var result = SendReflectionCmd((IntPtr)(&f));
         var toBool = Unsafe.AsRef<bool>(result.ToPointer());
-        Console.WriteLine("bool: {0} [{1}]", toBool, result);
         return toBool;
     }
 
@@ -424,7 +423,6 @@ sealed class ClassicUOHost : IPluginHandler
         var f = (4, x, y, z, distance);
         var result = SendReflectionCmd((IntPtr)(&f));
         var toBool = Unsafe.AsRef<bool>(result.ToPointer());
-        Console.WriteLine("bool: {0} [{1}]", toBool, result);
         return toBool;
     }
 
