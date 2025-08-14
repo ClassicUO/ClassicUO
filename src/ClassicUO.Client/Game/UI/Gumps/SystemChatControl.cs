@@ -1,7 +1,5 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
@@ -14,6 +12,9 @@ using ClassicUO.Resources;
 using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Platforms;
 using SDL2;
+using System;
+using System.Collections.Generic;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -35,7 +36,8 @@ namespace ClassicUO.Game.UI.Gumps
 
     internal class SystemChatControl : Control
     {
-        private const int MAX_MESSAGE_LENGHT = 100;
+        private const int MAX_MESSAGE_LENGTH = 100;
+        private const int TEXTBOX_LENGTH = 500;
         private const int CHAT_X_OFFSET = 3;
         private const int CHAT_HEIGHT = 15;
         private static readonly List<Tuple<ChatMode, string>> _messageHistory = new List<Tuple<ChatMode, string>>();
@@ -66,7 +68,7 @@ namespace ClassicUO.Game.UI.Gumps
             TextBoxControl = new StbTextBox
             (
                 ProfileManager.CurrentProfile.ChatFont,
-                MAX_MESSAGE_LENGHT,
+                TEXTBOX_LENGTH,
                 Width,
                 true,
                 FontStyle.BlackBorder | FontStyle.Fixed,
@@ -548,7 +550,47 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
 
+                case SDL.SDL_Keycode.SDLK_BACKSPACE when Keyboard.Ctrl && !Keyboard.Alt && !Keyboard.Shift:
+                    {
+                        if (!IsActive)
+                        {
+                            return;
+                        }
+
+                        String text = TextBoxControl.Text;
+
+                        if (string.IsNullOrEmpty(text))
+                        {
+                            Mode = ChatMode.Default;
+                            break;
+                        }
+
+                        // ignore the final character since that's a space if the user presses Ctrl + Backspace multiple times
+                        int index = text.LastIndexOf(' ', text.Length - 2);
+
+                        if (index >= 0)
+                        {
+                            // do not remove the final space since we assume the user wants to continue writing
+                            TextBoxControl.SetText(text[..(index + 1)]);
+                        }
+                        else
+                        {
+                            TextBoxControl.ClearText();
+                        }
+
+                        if (string.IsNullOrEmpty(TextBoxControl.Text))
+                        {
+                            Mode = ChatMode.Default;
+                        }
+                        break;
+                    }
+
                 case SDL.SDL_Keycode.SDLK_BACKSPACE when !Keyboard.Ctrl && !Keyboard.Alt && !Keyboard.Shift && string.IsNullOrEmpty(TextBoxControl.Text):
+                    if (!IsActive)
+                    {
+                        return;
+                    }
+
                     Mode = ChatMode.Default;
 
                     break;
@@ -570,26 +612,98 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        public string ExtractSendableTextSubstring(ref string textBoxText)
+        {
+            string toReturn;
+            if (textBoxText.Length <= MAX_MESSAGE_LENGTH)
+            {
+                toReturn = textBoxText;
+                textBoxText = string.Empty;
+                return toReturn;
+            }
+
+            int lastSpaceIndex = textBoxText.LastIndexOf(' ', MAX_MESSAGE_LENGTH);
+
+            if (lastSpaceIndex < 0)
+            {
+                lastSpaceIndex = MAX_MESSAGE_LENGTH;
+            }
+
+            toReturn = textBoxText.Substring(0, lastSpaceIndex);
+            textBoxText = textBoxText.Substring(lastSpaceIndex).TrimStart();
+            return toReturn;
+        }
+
+        private void ResetTextBox()
+        {
+            TextBoxControl.ClearText();
+            Mode = ChatMode.Default;
+            DisposeChatModePrefix();
+        }
+
+        public bool IsComposing
+        {
+            get => IsActive && TextBoxControl.Text.Length > 0;
+        }
+
         public override void OnKeyboardReturn(int textID, string text)
         {
-            if (!IsActive && ProfileManager.CurrentProfile.ActivateChatAfterEnter || Mode != ChatMode.Default && string.IsNullOrEmpty(text))
+            if (!IsActive && ProfileManager.CurrentProfile.ActivateChatAfterEnter || string.IsNullOrEmpty(text))
             {
+                ResetTextBox();
+            }
+
+            var isPrompted = _gump.World.MessageManager.PromptData.Prompt != ConsolePrompt.None;
+
+            if (TryHandleMessageMultipartSend(text, Mode, isPrompted, out var remainder))
+            {
+                TextBoxControl.SetText(remainder);
+            }
+            else
+            {
+                HandleMessageSend(text, Mode);
                 TextBoxControl.ClearText();
-                text = string.Empty;
-                Mode = ChatMode.Default;
             }
 
-            if (string.IsNullOrEmpty(text))
+            if (TextBoxControl.Length == 0)
             {
-                return;
+                ResetTextBox();
+            }
+        }
+
+        private bool TryHandleMessageMultipartSend(string text, ChatMode mode, bool isPrompted, out string remainder)
+        {
+            // Prompt response messages cannot be multiple parts
+            if (isPrompted || text.Length <= MAX_MESSAGE_LENGTH || mode == ChatMode.ClientCommand)
+            {
+                remainder = text;
+                return false;
             }
 
+            int lastSpaceIndex = text.LastIndexOf(' ', MAX_MESSAGE_LENGTH);
+            if (lastSpaceIndex < 0)
+            {
+                lastSpaceIndex = MAX_MESSAGE_LENGTH;
+            }
 
-            ChatMode sentMode = Mode;
-            TextBoxControl.ClearText();
+            var message = text[..lastSpaceIndex];
+            remainder = text[lastSpaceIndex..].TrimStart();
+
+            HandleMessageSend(message, mode);
+
+            // Preserve the party index we're messaging
+            // otherwise the remainder would be sent to all instead of that specific person
+            if (mode == ChatMode.Party && int.TryParse(text[0..2], out var partyCharIndex) && partyCharIndex is > 0 and < 11)
+                remainder = $"{partyCharIndex} {remainder}";
+
+            return true;
+        }
+
+        private void HandleMessageSend(string text, ChatMode sentMode)
+        {
             _messageHistory.Add(new Tuple<ChatMode, string>(Mode, text));
             _messageHistoryIndex = _messageHistory.Count;
-            Mode = ChatMode.Default;
+
 
             if (_gump.World.MessageManager.PromptData.Prompt != ConsolePrompt.None)
             {
@@ -849,8 +963,6 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
                 }
             }
-
-            DisposeChatModePrefix();
         }
 
         private class ChatLineTime
