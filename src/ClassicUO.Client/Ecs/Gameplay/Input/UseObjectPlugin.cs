@@ -11,6 +11,7 @@ internal readonly struct UseObjectPlugin : IPlugin
     {
         var useObjectFn = UseObject;
         scheduler.OnUpdate(useObjectFn)
+            .RunIf((SchedulerState state) => state.InState(GameState.GameScreen))
             .RunIf((Res<MouseContext> mouseCtx) => mouseCtx.Value.IsPressedDouble(Input.MouseButtonType.Left));
     }
 
@@ -19,9 +20,7 @@ internal readonly struct UseObjectPlugin : IPlugin
         Res<MouseContext> mouseContext,
         Res<SelectedEntity> selectedEntity,
         Res<NetClient> network,
-        Query<
-            Data<NetworkSerial>
-        > query
+        Query<Data<NetworkSerial>> query
     )
     {
         if (!query.Contains(selectedEntity.Value.Entity))

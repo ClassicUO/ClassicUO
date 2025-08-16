@@ -14,6 +14,7 @@ using TinyEcs;
 
 namespace ClassicUO.Ecs;
 
+public struct TESTME;
 
 internal readonly struct GuiPlugin : IPlugin
 {
@@ -59,10 +60,41 @@ internal readonly struct GuiPlugin : IPlugin
 
         var handleNodeStatesFn = HandleNodeStates;
         scheduler.OnFrameEnd(handleNodeStatesFn);
+
+        // scheduler.OnFrameEnd((Query<Data<UINode>, With<TESTME>> q) =>
+        // {
+        //     foreach (var (ent, node) in q)
+        //     {
+        //         ent.Ref.Delete();
+        //         // Console.WriteLine("3 - TESTME {0} gen: {1}", ent.Ref.ID.RealId(), ent.Ref.Generation);
+        //     }
+        // });
+
+        // scheduler.OnFrameEnd((World world) =>
+        // {
+        //     var ent = world.Entity().Add<TESTME>().SetUINode(new()
+        //     {
+        //         Config = {
+        //             backgroundColor = new(1f, 0, 0, 1f),
+        //             layout = {
+        //                 sizing = {
+        //                     width = Clay_SizingAxis.Fixed(100),
+        //                     height= Clay_SizingAxis.Fixed(100)
+        //                 }
+        //             }
+        //         }
+        //     });
+
+        //     // Console.WriteLine("1 - TESTME {0} gen: {1}", ent.ID.RealId(), ent.Generation);
+        // });
     }
 
 
-    private static unsafe Clay_Dimensions OnMeasureText(Clay_StringSlice slice, Clay_TextElementConfig* config, void* userData)
+    private static unsafe Clay_Dimensions OnMeasureText(
+        Clay_StringSlice slice,
+        Clay_TextElementConfig* config,
+        void* userData
+    )
     {
         var raw = new ReadOnlySpan<byte>(slice.chars, slice.length);
         var text = Encoding.UTF8.GetString(raw);
@@ -96,7 +128,11 @@ internal readonly struct GuiPlugin : IPlugin
         Clay.SetDebugModeEnabled(true);
     }
 
-    private static void SetClayWorkspaceDimensions(Res<GraphicsDevice> device, Res<MouseContext> mouseCtx, Time time)
+    private static void SetClayWorkspaceDimensions(
+        Res<GraphicsDevice> device,
+        Res<MouseContext> mouseCtx,
+        Time time
+    )
     {
         Clay.SetLayoutDimensions(new()
         {
@@ -108,7 +144,9 @@ internal readonly struct GuiPlugin : IPlugin
         Clay.UpdateScrollContainers(true, new(0, mouseCtx.Value.Wheel * 3), time.Frame);
     }
 
-    private static void UpdateUOButtonsState(Query<Data<UINode, UOButton, UIMouseAction>, Changed<UIMouseAction>> query)
+    private static void UpdateUOButtonsState(
+        Query<Data<UINode, UOButton, UIMouseAction>, Changed<UIMouseAction>> query
+    )
     {
         foreach ((var node, var button, var interaction) in query)
         {
@@ -121,7 +159,10 @@ internal readonly struct GuiPlugin : IPlugin
         }
     }
 
-    private static void UpdateFocusedInput(Query<Data<Text>, Filter<With<TextInput>>> query, Res<FocusedInput> focusedInput)
+    private static void UpdateFocusedInput(
+        Query<Data<Text>, Filter<With<TextInput>>> query,
+        Res<FocusedInput> focusedInput
+    )
     {
         var ok = false;
         var last = 0ul;
@@ -157,6 +198,9 @@ internal readonly struct GuiPlugin : IPlugin
         Res<FocusedInput> focusedInput,
         Query<Data<Text>, Filter<With<TextInput>>> query)
     {
+        if (!query.Contains(focusedInput.Value.Entity))
+            return;
+
         (_, var node) = query.Get(focusedInput.Value.Entity);
 
         foreach (var c in reader)
@@ -180,6 +224,7 @@ internal readonly struct GuiPlugin : IPlugin
 
     private static void HandleNodeStates(
         Res<MouseContext> mouseCtx,
+        Res<FocusedInput> focusedInput,
         Query<Data<UINode, UIMouseAction>> query
     )
     {
@@ -207,6 +252,7 @@ internal readonly struct GuiPlugin : IPlugin
             {
                 interaction.Ref.IsPressed = true;
                 interaction.Ref.Button = buttonPressed.Value;
+                focusedInput.Value.Entity = ent.Ref; // Set focused input to the current entity
             }
             else
             {

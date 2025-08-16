@@ -62,16 +62,10 @@ internal readonly struct ModdingPlugin : IPlugin
 
     private static void SetupMods(
         World world,
-        // EventWriter<(Mod, PluginMessage)> pluginWriter,
-        // EventWriter<HostMessage> hostWriter,
         Res<NetClient> network,
-        // Res<PacketsMap> packetMap,
         Res<Settings> settings,
         Res<NetworkEntitiesMap> networkEntities,
         SchedulerState schedState
-        // Res<GameContext> gameCtx,
-        // Res<AssetsServer> assets,
-        // Res<UOFileManager> fileManager
     )
     {
         Extism.Sdk.Plugin.ConfigureFileLogging("stdout", LogLevel.Info);
@@ -574,9 +568,6 @@ internal readonly struct ModdingPlugin : IPlugin
             }
         }
     }
-
-
-
 }
 
 
@@ -736,6 +727,7 @@ internal interface HostMessage
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "$type")]
 [JsonDerivedType(typeof(LoginRequest), nameof(LoginRequest))]
+[JsonDerivedType(typeof(ServerLoginRequest), nameof(ServerLoginRequest))]
 internal interface PluginMessage
 {
     internal record struct LoginRequest(string Username, string Password) : PluginMessage;

@@ -144,7 +144,6 @@ internal static class Api
                 }
             }),
 
-
             HostFunction.FromMethod("cuo_send_events", tuple, static (CurrentPlugin p, long offset) =>
             {
                 (var modRef, var scheduler) = p.GetUserData<(WeakReference<Mod>, SchedulerState)>();
@@ -157,7 +156,6 @@ internal static class Api
                     writer.Enqueue((mod, ev));
             }),
 
-
             HostFunction.FromMethod("cuo_get_player_serial", tuple, static p =>
             {
                 (_, var scheduler) = p.GetUserData<(WeakReference<Mod>, SchedulerState)>();
@@ -166,7 +164,6 @@ internal static class Api
                 var addr = p.WriteBytes(span);
                 return addr;
             }),
-
 
             HostFunction.FromMethod("cuo_ecs_spawn_entity", tuple, static (CurrentPlugin p) =>
             {
@@ -226,7 +223,6 @@ internal static class Api
                 var response = new QueryResponse(list).ToJson();
                 return p.WriteString(response);
             }),
-
 
             HostFunction.FromMethod("cuo_ui_node", tuple, static (CurrentPlugin p, long offset) =>
             {
@@ -324,16 +320,14 @@ internal static class Api
                 parent.AddChild(entity, (int)index);
             }),
 
-
             HostFunction.FromMethod("cuo_ui_add_event_listener", tuple, static (CurrentPlugin p, long offset) =>
             {
                 (var modRef, var scheduler) = p.GetUserData<(WeakReference<Mod>, SchedulerState)>();
                 var world = scheduler.GetSystemParam<World>();
                 var addEvent = p.ReadString(offset).FromJson<UIEvent>();
 
-                if (!world.Exists(addEvent.EntityId)) {
+                if (!world.Exists(addEvent.EntityId))
                     return 0ul;
-                }
 
                 var entity = world.Entity(addEvent.EntityId);
                 var ev = world.Entity().Set(addEvent);

@@ -238,11 +238,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         cameraBounds.Width = s.X;
         cameraBounds.Height = s.Y;
 
-        foreach ((
-             var entity,
-             var worldPos,
-             var graphic,
-             var stretched) in queryTiles)
+        foreach ((var entity, var worldPos, var graphic, var stretched) in queryTiles)
         {
             var hide = backupZInfo.MaxZGround.HasValue && worldPos.Ref.Z > backupZInfo.MaxZGround;
             if (!calculateZ && hide)
@@ -349,11 +345,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         }
 
 
-        foreach ((
-            var entity,
-            var worldPos,
-            var graphic,
-            var hue) in queryStatics)
+        foreach ((var entity, var worldPos, var graphic, var hue) in queryStatics)
         {
             ref readonly var tileData = ref fileManager.Value.TileData.StaticData[graphic.Ref.Value];
 

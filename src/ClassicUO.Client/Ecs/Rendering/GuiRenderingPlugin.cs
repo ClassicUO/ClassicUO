@@ -28,7 +28,6 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
             Res<MouseContext> mouseCtx,
             Res<ClayUOCommandBuffer> commandBuffer,
             Res<ImageCache> imageCache,
-            Res<FocusedInput> focusedInput,
             Query<Data<UINode>, Filter<With<Text>, With<TextInput>>> queryTextInput,
             Query<Data<UINode, UIMouseAction>> queryInteraction,
             Query<Data<UINode, Text, UIMouseAction, Children>,
