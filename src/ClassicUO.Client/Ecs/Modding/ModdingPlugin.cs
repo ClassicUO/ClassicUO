@@ -11,6 +11,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Ecs.Modding;
 using ClassicUO.Ecs.Modding.Guest;
 using ClassicUO.Ecs.Modding.Host;
+using ClassicUO.Ecs.Modding.UI;
 using ClassicUO.Game.Data;
 using ClassicUO.Input;
 using ClassicUO.IO;
@@ -34,7 +35,6 @@ internal readonly struct ModdingPlugin : IPlugin
         scheduler.AddEvent<HostMessage>();
         scheduler.AddEvent<(Mod, PluginMessage)>();
 
-
         var setupModsFn = SetupMods;
         scheduler.OnStartup(setupModsFn);
 
@@ -51,6 +51,10 @@ internal readonly struct ModdingPlugin : IPlugin
         var modReadEventsFn = ReadModEvents;
         scheduler.OnUpdate(modReadEventsFn)
             .RunIf((EventReader<(Mod, PluginMessage)> reader) => !reader.IsEmpty);
+
+        scheduler.AddPlugin<InputPlugin>();
+        scheduler.AddPlugin<TextPlugin>();
+        scheduler.AddPlugin<UIEventsPlugin>();
     }
 
 

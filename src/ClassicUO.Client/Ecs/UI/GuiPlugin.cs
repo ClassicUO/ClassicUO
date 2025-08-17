@@ -252,7 +252,13 @@ internal readonly struct GuiPlugin : IPlugin
             {
                 interaction.Ref.IsPressed = true;
                 interaction.Ref.Button = buttonPressed.Value;
-                focusedInput.Value.Entity = ent.Ref; // Set focused input to the current entity
+
+                // check the top most element
+                if (pointerOverIds.Length > 0 && pointerOverIds[^1].id == node.Ref.Config.id.id)
+                {
+                    // if the last pointer over id is the same as the current node, we set the focused input
+                    focusedInput.Value.Entity = ent.Ref; // Set focused input to the current entity
+                }
             }
             else
             {
