@@ -1,14 +1,16 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using ClassicUO.Assets;
+using ClassicUO.Ecs.Modding.Guest;
+using ClassicUO.Ecs.Modding.UI;
 using ClassicUO.Network;
 using Extism.Sdk;
 using TinyEcs;
 
-namespace ClassicUO.Ecs;
+namespace ClassicUO.Ecs.Modding;
 
 internal static class Api
 {
@@ -180,48 +182,6 @@ internal static class Api
                 var world = scheduler.GetSystemParam<World>();
                 if (world.Exists((ulong)id))
                     world.Delete((ulong)id);
-            }),
-
-            HostFunction.FromMethod("cuo_ecs_query", tuple, static (CurrentPlugin p, long offset) =>
-            {
-                (_, var scheduler) = p.GetUserData<(WeakReference<Mod>, SchedulerState)>();
-                var world = scheduler.GetSystemParam<World>();
-                var request = p.ReadString(offset).FromJson<QueryRequest>();
-
-                if (request.Terms.Count == 0)
-                {
-                    Console.WriteLine("cuo_ecs_query: empty request");
-                    return p.WriteString("{}");
-                }
-
-                var builder = world.QueryBuilder();
-                foreach (var (id, op) in request.Terms)
-                {
-                    switch (op)
-                    {
-                        case TermOp.With:
-                            builder.With(id);
-                            break;
-                        case TermOp.Without:
-                            builder.Without(id);
-                            break;
-                        case TermOp.Optional:
-                            builder.Optional(id);
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(op), op, null);
-                    }
-                }
-
-                var query = builder.Build();
-                var it = query.Iter();
-
-                var list = new List<ArchetypeProxy>();
-                while (it.Next())
-                    list.Add(new ArchetypeProxy(it.Archetype.All.Select(s => new ComponentInfoProxy(s.ID, s.Size, world.Name(s.ID))), MemoryMarshal.ToEnumerable(it.EntitiesAsMemory()).Select(static s => s.ID)));
-
-                var response = new QueryResponse(list).ToJson();
-                return p.WriteString(response);
             }),
 
             HostFunction.FromMethod("cuo_ui_node", tuple, static (CurrentPlugin p, long offset) =>

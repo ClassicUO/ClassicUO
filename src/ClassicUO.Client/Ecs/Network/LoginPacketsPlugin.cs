@@ -1,5 +1,6 @@
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.Ecs.Modding.Host;
 using ClassicUO.Game.Data;
 using ClassicUO.IO;
 using ClassicUO.Network;

@@ -289,15 +289,6 @@ internal struct UINode
     public ClayUOCommandData UOConfig;
 }
 
-enum UIInteractionState : byte
-{
-    None,
-    Over,
-    Left,
-    Pressed,
-    Released,
-}
-
 struct UIMouseAction
 {
     public bool WasHovered, IsHovered;
