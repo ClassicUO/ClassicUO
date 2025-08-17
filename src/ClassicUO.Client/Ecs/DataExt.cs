@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -33,5 +34,11 @@ internal static class DataExt
         where T : unmanaged
     {
         return MemoryMarshal.AsBytes(val);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Span<T> AsSpan<T>(this List<T> list)
+    {
+        return CollectionsMarshal.AsSpan(list);
     }
 }

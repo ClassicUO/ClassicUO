@@ -342,48 +342,7 @@ internal sealed class FocusedInput
 
 internal sealed class ImageCache : Dictionary<nint, Texture2D>;
 
-internal sealed class ClayUOCommandBuffer
-{
-    private ClayUOCommandData[] _commands;
-    private int _index;
-    private const int DefaultCapacity = 256;
-
-    public ClayUOCommandBuffer()
-    {
-        _commands = new ClayUOCommandData[DefaultCapacity];
-        _index = 0;
-    }
-
-    public void Reset()
-    {
-        _index = 0;
-    }
-
-    public nint AddCommand(in ClayUOCommandData command)
-    {
-        EnsureCapacity();
-        _commands[_index] = command;
-        return (nint)(++_index);
-    }
-
-    public ref readonly ClayUOCommandData GetCommand(int index)
-    {
-        if (index < 0 || index >= _commands.Length)
-            throw new IndexOutOfRangeException($"Command index {index} is out of range");
-
-        return ref _commands[index];
-    }
-
-    private void EnsureCapacity()
-    {
-        if (_index >= _commands.Length)
-        {
-            Array.Resize(ref _commands, _commands.Length * 2);
-        }
-    }
-
-    public int Count => _index;
-}
+internal sealed class ClayUOCommandBuffer : List<ClayUOCommandData>;
 
 internal static class GuiPluginEx
 {

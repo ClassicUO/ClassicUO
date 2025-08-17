@@ -15,7 +15,7 @@ public readonly ref struct TempBuffer<T>(int size) : IDisposable
     {
         if (_rentedBuffer != null)
         {
-            ArrayPool<T>.Shared.Return(_rentedBuffer, clearArray: true);
+            ArrayPool<T>.Shared.Return(_rentedBuffer);
         }
     }
 }

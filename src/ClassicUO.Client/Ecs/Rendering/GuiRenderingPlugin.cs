@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Buffers;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Text;
-using ClassicUO.Input;
+using ClassicUO.IO;
 using ClassicUO.Renderer;
 using Clay_cs;
 using FontStashSharp;
@@ -42,7 +41,7 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                 dumbTexture.Value.SetData([Color.White]);
             }
 
-            commandBuffer.Value.Reset();
+            commandBuffer.Value.Clear();
 
             Clay.BeginLayout();
             foreach (var (node, text, interaction, children) in query)
@@ -57,25 +56,12 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                 );
             }
 
-            // (var ent, var node, var mouseAction) = queryInteraction.Get(found);
-            // if (mouseAction.IsValid())
-            // {
-            //     if (mouseAction.Ref.State != lastMouseAction.State || mouseAction.Ref.Button != lastMouseAction.Button)
-            //     {
-            //         mouseAction.Ref = lastMouseAction;
-            //         ent.Ref.Set(lastMouseAction);
-            //     }
-            // }
-
-            // if (lastMouseAction is { State: UIInteractionState.Pressed, Button: MouseButtonType.Left } && queryTextInput.Contains(found))
-            // {
-            //     focusedInput.Value.Entity = found;
-            // }
-
             var cmds = Clay.EndLayout();
 
             var b = batcher.Value;
             b.Begin();
+
+            var uoCmdsSpan = commandBuffer.Value.AsSpan();
 
             foreach (ref readonly var cmd in cmds)
             {
@@ -91,30 +77,22 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                             sb.Value ??= new();
                             sb.Value.Clear();
 
-                            var rentedChars = ArrayPool<char>.Shared.Rent(t.stringContents.length);
+                            using var tempChars = new TempBuffer<char>(t.stringContents.length);
+                            var sp = new ReadOnlySpan<byte>(t.stringContents.chars, t.stringContents.length);
+                            var charsWritten = Encoding.UTF8.GetChars(sp, tempChars.Span);
 
-                            try
-                            {
-                                var sp = new ReadOnlySpan<byte>(t.stringContents.chars, t.stringContents.length);
-                                var charsWritten = Encoding.UTF8.GetChars(sp, rentedChars.AsSpan(0, t.stringContents.length));
-
-                                sb.Value.Append(rentedChars.AsSpan(0, charsWritten));
-                                var dynFont = font.GetFont(t.fontSize);
-                                dynFont.DrawText(
-                                    b,
-                                    sb.Value,
-                                    new(boundingBox.x, boundingBox.y),
-                                    toColor(in t.textColor),
-                                    characterSpacing: t.letterSpacing,
-                                    lineSpacing: t.lineHeight,
-                                    layerDepth: cmd.zIndex,
-                                    effect: FONT_EFFECT, effectAmount: FONT_EFFECT_AMOUNT
-                                );
-                            }
-                            finally
-                            {
-                                ArrayPool<char>.Shared.Return(rentedChars);
-                            }
+                            sb.Value.Append(tempChars.Span.Slice(0, charsWritten));
+                            var dynFont = font.GetFont(t.fontSize);
+                            dynFont.DrawText(
+                                b,
+                                sb.Value,
+                                new(boundingBox.x, boundingBox.y),
+                                toColor(in t.textColor),
+                                characterSpacing: t.letterSpacing,
+                                lineSpacing: t.lineHeight,
+                                layerDepth: cmd.zIndex,
+                                effect: FONT_EFFECT, effectAmount: FONT_EFFECT_AMOUNT
+                            );
 
                             break;
                         }
@@ -164,7 +142,7 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                         {
                             ref readonly var custom = ref cmd.renderData.custom;
                             var commandIndex = ((int)custom.customData) - 1;
-                            ref readonly var uoCommand = ref commandBuffer.Value.GetCommand(commandIndex);
+                            ref readonly var uoCommand = ref uoCmdsSpan[commandIndex];
 
                             switch (uoCommand.Type)
                             {
@@ -343,7 +321,9 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                 var config = node.Config;
                 if (node.UOConfig.Type != ClayUOCommandType.None)
                 {
-                    config.custom.customData = (void*)commandBuffer.AddCommand(node.UOConfig);
+                    commandBuffer.Add(node.UOConfig);
+                    var count = commandBuffer.Count;
+                    config.custom.customData = (void*)(nint)count;
                 }
 
                 if (config.clip.horizontal || config.clip.vertical)
