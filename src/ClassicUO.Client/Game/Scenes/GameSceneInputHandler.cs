@@ -870,11 +870,9 @@ namespace ClassicUO.Game.Scenes
                 {
                     if (obj is Static || obj is Multi || obj is Item)
                     {
-                        ref StaticTiles itemdata = ref Client.Game.UO.FileManager.TileData.StaticData[
-                            obj.Graphic
-                        ];
-
-                        if (itemdata.IsSurface && _world.Player.Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
+                        // previously we only triggered the pathfinder if the target was a surface
+                        // now we trigger it always and the pathfinder decides if the target is blocked and then only walks next to it
+                        if (_world.Player.Pathfinder.WalkTo(obj.X, obj.Y, obj.Z, 0))
                         {
                             _world.Player.AddMessage(
                                 MessageType.Label,
