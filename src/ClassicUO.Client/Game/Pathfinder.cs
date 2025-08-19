@@ -934,6 +934,16 @@ namespace ClassicUO.Game
                 return false;
             }
 
+            if (distance == 0 && IsBlocked(x, y, z))
+            {
+                // Don't do time-consuming computations and freeze the client if the final field is not reachable
+                // instead we should just move to a field beside it
+                // This is only one edge case but it should be one of the most common ones that we can catch early and cheaply
+
+                // For example pathfinding to a tree, to a treasure chest, to a rock, etc.
+                distance = 1;
+            }
+
             for (int i = 0; i < PATHFINDER_MAX_NODES; i++)
             {
                 if (_openList[i] == null)
@@ -983,6 +993,13 @@ namespace ClassicUO.Game
             }
 
             return _pathSize != 0;
+        }
+
+        private bool IsBlocked(int x, int y, int z)
+        {
+            sbyte tempZ = (sbyte)z;
+
+            return !CalculateNewZ(x, y, ref tempZ, (byte)Direction.North);
         }
 
         public void ProcessAutoWalk()
