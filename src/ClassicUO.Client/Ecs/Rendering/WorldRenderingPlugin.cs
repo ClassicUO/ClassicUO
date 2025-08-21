@@ -456,7 +456,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             }
 
             var depthZ = Isometric.GetDepthZ(worldPos.Ref.X, worldPos.Ref.Y, priorityZ);
-            var color = Renderer.ShaderHueTranslator.GetHueVector(hue.Ref.Value, fileManager.Value.TileData.StaticData[graphic.Ref.Value].IsPartialHue, 1f);
+            var color = Renderer.ShaderHueTranslator.GetHueVector(hue.Ref.Value, tileData.IsPartialHue, 1f);
 
             if (entity.Ref == selectedEntity.Value.Entity)
             {

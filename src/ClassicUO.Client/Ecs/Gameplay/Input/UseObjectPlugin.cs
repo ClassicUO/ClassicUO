@@ -4,7 +4,6 @@ using TinyEcs;
 
 namespace ClassicUO.Ecs;
 
-
 internal readonly struct UseObjectPlugin : IPlugin
 {
     public void Build(Scheduler scheduler)
@@ -14,7 +13,6 @@ internal readonly struct UseObjectPlugin : IPlugin
             .RunIf((SchedulerState state) => state.InState(GameState.GameScreen))
             .RunIf((Res<MouseContext> mouseCtx) => mouseCtx.Value.IsPressedDouble(Input.MouseButtonType.Left));
     }
-
 
     private static void UseObject(
         Res<MouseContext> mouseContext,

@@ -11,10 +11,31 @@ enum ClayWidgetType
     TextFragment
 }
 
-internal record struct UITextProxy(string Value, char ReplacedChar = '\0', ClayTextProxy TextConfig = default);
-internal record struct ClayTextProxy(Clay_Color TextColor, ushort FontId, ushort FontSize, ushort LetterSpacing, ushort LineHeight, Clay_TextElementConfigWrapMode WrapMode, Clay_TextAlignment TextAlignment);
-internal record struct ClayElementIdProxy(uint Id, uint Offset, uint BaseId, string StringId);
+internal record struct UITextProxy(
+    string Value,
+    char ReplacedChar = '\0',
+    ClayTextProxy TextConfig = default
+);
+
+internal record struct ClayTextProxy(
+    Clay_Color TextColor,
+    ushort FontId,
+    ushort FontSize,
+    ushort LetterSpacing,
+    ushort LineHeight,
+    Clay_TextElementConfigWrapMode WrapMode,
+    Clay_TextAlignment TextAlignment
+);
+
+internal record struct ClayElementIdProxy(
+    uint Id,
+    uint Offset,
+    uint BaseId,
+    string StringId
+);
+
 internal record struct ClayImageProxy(string Base64Data);
+
 internal struct ClayElementDeclProxy
 {
     public ClayElementIdProxy? Id;
@@ -27,7 +48,11 @@ internal struct ClayElementDeclProxy
     public Clay_BorderElementConfig? Border;
 }
 
-internal record struct UOButtonWidgetProxy(ushort Normal, ushort Pressed, ushort Over);
+internal record struct UOButtonWidgetProxy(
+    ushort Normal,
+    ushort Pressed,
+    ushort Over
+);
 
 internal record struct UINodeProxy(
     ulong Id,
@@ -39,4 +64,7 @@ internal record struct UINodeProxy(
     bool Movable = false
 );
 
-internal record struct UINodes(List<UINodeProxy> Nodes, Dictionary<ulong, ulong> Relations);
+internal record struct UINodes(
+    List<UINodeProxy> Nodes,
+    Dictionary<ulong, ulong> Relations
+);

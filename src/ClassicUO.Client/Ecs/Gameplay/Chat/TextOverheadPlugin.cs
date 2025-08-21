@@ -41,6 +41,7 @@ internal readonly struct TextOverheadPlugin : IPlugin
         TinyEcs.World world,
         Time time,
         EventReader<TextOverheadEvent> texts,
+        EventWriter<Modding.Host.HostMessage> hostMsgs,
         Res<TextOverHeadManager> textOverHeadManager
     )
     {
@@ -58,6 +59,15 @@ internal readonly struct TextOverheadPlugin : IPlugin
                     copyText.Time = time.Total + 5000f;
 
                     textOverHeadManager.Value.Append(copyText);
+
+                    hostMsgs.Enqueue(new Modding.Host.HostMessage.MessageReceived(
+                        copyText.MessageType,
+                        copyText.Text,
+                        copyText.Name,
+                        copyText.Serial,
+                        copyText.Hue,
+                        copyText.Font
+                    ));
                     break;
             }
         }

@@ -1,0 +1,66 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/external/">
+    <Project Path="external/Clay-cs/Clay-cs/Clay-cs.csproj" />
+    <Project Path="external/FileEmbed/FileEmbed/FileEmbed.csproj" />
+    <Project Path="external/FNA/FNA.Core.csproj" />
+    <Project Path="external/FontStashSharp/src/XNA/FontStashSharp.FNA.Core.csproj" />
+    <Project Path="external/MP3Sharp/MP3Sharp/MP3Sharp.csproj" />
+    <Project Path="external/TinyEcs/src/TinyEcs.csproj" />
+  </Folder>
+  <Folder Name="/scripts/">
+    <File Path="scripts/build.cmd" />
+    <File Path="scripts/build.sh" />
+  </Folder>
+  <Folder Name="/settings/">
+    <File Path=".editorconfig" />
+    <File Path="ClassicUO.licenseheader" />
+    <File Path="ClassicUO.sln.DotSettings" />
+    <File Path="src/Directory.Build.props" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/ClassicUO.Assets/ClassicUO.Assets.csproj" />
+    <Project Path="src/ClassicUO.Bootstrap/src/ClassicUO.Bootstrap.csproj" />
+    <Project Path="src/ClassicUO.Client/ClassicUO.Client.csproj" />
+    <Project Path="src/ClassicUO.IO/ClassicUO.IO.csproj" />
+    <Project Path="src/ClassicUO.Renderer/ClassicUO.Renderer.csproj" />
+    <Project Path="src/ClassicUO.Schema/ClassicUO.Schema.csproj" />
+    <Project Path="src/ClassicUO.Utility/ClassicUO.Utility.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/ClassicUO.UnitTests/ClassicUO.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/ManifestCreator/ManifestCreator.csproj" />
+  </Folder>
+  <Folder Name="/tools/monokickstart/">
+    <File Path="tools/monokickstart/Accessibility.dll" />
+    <File Path="tools/monokickstart/ClassicUO" />
+    <File Path="tools/monokickstart/ClassicUO.bin.osx" />
+    <File Path="tools/monokickstart/ClassicUO.bin.x86_64" />
+    <File Path="tools/monokickstart/Microsoft.CSharp.dll" />
+    <File Path="tools/monokickstart/Mono.Posix.dll" />
+    <File Path="tools/monokickstart/Mono.Security.dll" />
+    <File Path="tools/monokickstart/monoconfig" />
+    <File Path="tools/monokickstart/monomachineconfig" />
+    <File Path="tools/monokickstart/mscorlib.dll" />
+    <File Path="tools/monokickstart/Newtonsoft.Json.dll" />
+    <File Path="tools/monokickstart/System.Configuration.dll" />
+    <File Path="tools/monokickstart/System.Core.dll" />
+    <File Path="tools/monokickstart/System.Data.dll" />
+    <File Path="tools/monokickstart/System.dll" />
+    <File Path="tools/monokickstart/System.Drawing.dll" />
+    <File Path="tools/monokickstart/System.IO.Compression.dll" />
+    <File Path="tools/monokickstart/System.IO.Compression.FileSystem.dll" />
+    <File Path="tools/monokickstart/System.Numerics.dll" />
+    <File Path="tools/monokickstart/System.Runtime.Serialization.dll" />
+    <File Path="tools/monokickstart/System.Security.dll" />
+    <File Path="tools/monokickstart/System.Windows.Forms.dll" />
+    <File Path="tools/monokickstart/System.Xml.dll" />
+    <File Path="tools/monokickstart/System.Xml.Linq.dll" />
+  </Folder>
+</Solution>

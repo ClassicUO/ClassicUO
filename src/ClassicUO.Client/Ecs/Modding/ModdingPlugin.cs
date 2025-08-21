@@ -52,6 +52,13 @@ internal readonly struct ModdingPlugin : IPlugin
         scheduler.OnUpdate(modReadEventsFn)
             .RunIf((EventReader<(Mod, PluginMessage)> reader) => !reader.IsEmpty);
 
+        foreach (var state in Enum.GetValues<GameState>())
+        {
+            scheduler.OnEnter(state, static (EventWriter<HostMessage> hostMsgs, State<GameState> state)
+                => hostMsgs.Enqueue(new HostMessage.GameStateChanged(state.Current))
+            );
+        }
+
         scheduler.AddPlugin<InputPlugin>();
         scheduler.AddPlugin<TextPlugin>();
         scheduler.AddPlugin<UIEventsPlugin>();

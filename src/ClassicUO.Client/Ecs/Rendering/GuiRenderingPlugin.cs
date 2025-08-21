@@ -333,10 +333,10 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
 
                 if (!Unsafe.IsNullRef(ref interaction) && interaction.IsHovered)
                 {
-                    config.backgroundColor.a = 0.3f;
-                    config.backgroundColor.r = 1 * config.backgroundColor.a;
-                    config.backgroundColor.g = 0 * config.backgroundColor.a;
-                    config.backgroundColor.b = 0 * config.backgroundColor.a;
+                    // config.backgroundColor.a = 0.3f;
+                    // config.backgroundColor.r = 1 * config.backgroundColor.a;
+                    // config.backgroundColor.g = 0 * config.backgroundColor.a;
+                    // config.backgroundColor.b = 0 * config.backgroundColor.a;
                 }
 
                 Clay.ConfigureOpenElement(config);

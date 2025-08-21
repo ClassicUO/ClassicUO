@@ -1,5 +1,6 @@
 ﻿using System;
 using ClassicUO.Assets;
+using ClassicUO.Ecs.Modding.Host;
 using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Utility;
@@ -34,15 +35,16 @@ internal readonly struct ContainersPlugin : IPlugin
 
 
     private static void CloseContainersTooFarFromPlayer(
-        Query<Data<WorldPosition>,
+        Query<Data<WorldPosition, NetworkSerial>,
              Filter<With<IsContainer>, With<UINode>, With<UIMouseAction>, With<UIMovable>>> query,
-        Single<Data<WorldPosition>, With<Player>> queryPlayer
+        Single<Data<WorldPosition>, With<Player>> queryPlayer,
+        EventWriter<HostMessage> hostMsgs
     )
     {
         const int MAX_CONTAINER_DIST = 5;
         (_, var playerPos) = queryPlayer.Get();
 
-        foreach ((var ent, var pos) in query)
+        foreach ((var ent, var pos, var serial) in query)
         {
             if (Math.Abs(playerPos.Ref.X - pos.Ref.X) >= MAX_CONTAINER_DIST ||
                 Math.Abs(playerPos.Ref.Y - pos.Ref.Y) >= MAX_CONTAINER_DIST)
@@ -50,6 +52,8 @@ internal readonly struct ContainersPlugin : IPlugin
                 ent.Ref.Unset<UINode>();
                 ent.Ref.Unset<UIMouseAction>();
                 ent.Ref.Unset<UIMovable>();
+
+                hostMsgs.Enqueue(new HostMessage.ContainerClosed(serial.Ref.Value));
             }
         }
     }
@@ -114,7 +118,8 @@ internal readonly struct ContainersPlugin : IPlugin
 
     private static void RegisterOpenContainer(
         Res<PacketsMap> packets,
-        EventWriter<ContainerOpenedEvent> writer
+        EventWriter<ContainerOpenedEvent> writer,
+        EventWriter<HostMessage> hostMsgs
     )
     {
         // open container
@@ -126,6 +131,7 @@ internal readonly struct ContainersPlugin : IPlugin
             var graphic = reader.ReadUInt16BE();
 
             writer.Enqueue(new(serial, graphic));
+            hostMsgs.Enqueue(new HostMessage.ContainerOpened(serial, graphic));
         };
     }
 
@@ -135,7 +141,8 @@ internal readonly struct ContainersPlugin : IPlugin
         Res<NetworkEntitiesMap> entitiesMap,
         Res<AssetsServer> assets,
         World world,
-        EventWriter<ContainerUpdateEvent> writer
+        EventWriter<ContainerUpdateEvent> writer,
+        EventWriter<HostMessage> hostMsgs
     )
     {
         // update container
@@ -168,6 +175,17 @@ internal readonly struct ContainersPlugin : IPlugin
 
             parentEnt.AddChild(ent);
 
+            hostMsgs.Enqueue(new HostMessage.ContainerItemAdded
+            (
+                containerSerial,
+                serial,
+                (ushort)(graphic + graphicInc),
+                amount,
+                x,
+                y,
+                0,
+                hue
+            ));
 
             ref readonly var artInfo = ref assets.Value.Arts.GetArt((ushort)(graphic + graphicInc));
 
@@ -227,6 +245,18 @@ internal readonly struct ContainersPlugin : IPlugin
                     0 : reader.ReadUInt8();
                 var containerSerial = reader.ReadUInt32BE();
                 var hue = reader.ReadUInt16BE();
+
+                hostMsgs.Enqueue(new HostMessage.ContainerItemAdded
+                (
+                    containerSerial,
+                    serial,
+                    (ushort)(graphic + graphicInc),
+                    amount,
+                    x,
+                    y,
+                    gridIdx,
+                    hue
+                ));
 
                 var parentEnt = entitiesMap.Value.GetOrCreate(containerSerial)
                     .Add<IsContainer>();
