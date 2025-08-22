@@ -22,6 +22,19 @@ namespace ClassicUO.Game.UI.Controls
 
         private readonly int _maxCharCount = -1;
 
+        public class BeforeTextChangedEventArgs : EventArgs
+        {
+            public BeforeTextChangedEventArgs(string previousText, string newText, int newCaretIndex)
+            {
+                PreviousText = previousText;
+                NewText = newText;
+                NewCaretIndex = newCaretIndex;
+
+            }
+            public string PreviousText { get; }
+            public string NewText { get; set; }
+            public int NewCaretIndex { get; set; }
+        }
 
         public StbTextBox
         (
@@ -133,6 +146,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool AllowTAB { get; set; }
         public bool NoSelection { get; set; }
+        public bool PassEnterToParent { get; set; } = false;
 
         public int CaretIndex
         {
@@ -233,11 +247,13 @@ namespace ClassicUO.Game.UI.Controls
 
                 //Sanitize(ref value);
 
+                string previousText = _rendererText.Text;
+
                 _rendererText.Text = value;
 
                 if (!_is_writing)
                 {
-                    OnTextChanged();
+                    OnTextChanged(previousText);
                 }
             }
         }
@@ -269,6 +285,7 @@ namespace ClassicUO.Game.UI.Controls
         protected bool _leftWasDown, _fromServer;
         protected RenderedText _rendererText, _rendererCaret;
 
+        public event EventHandler<BeforeTextChangedEventArgs> BeforeTextChanged;
         public event EventHandler TextChanged;
 
         public MultilinesFontInfo CalculateFontInfo(string text, bool countret = true)
@@ -429,8 +446,19 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-        protected virtual void OnTextChanged()
+        protected virtual void OnTextChanged(string previousText)
         {
+            BeforeTextChangedEventArgs preProcessorArgs = new BeforeTextChangedEventArgs(previousText, Text, Stb.CursorIndex);
+            BeforeTextChanged?.Invoke(this, preProcessorArgs);
+
+            if (preProcessorArgs.NewText != Text)
+            {
+                // Do not set the property "this.Text", since we don't need to do another round of OnTextChanged
+                _rendererText.Text = preProcessorArgs.NewText;
+            }
+
+            Stb.CursorIndex = preProcessorArgs.NewCaretIndex;
+
             TextChanged?.Raise(this);
 
             UpdateCaretScreenPosition();
@@ -675,7 +703,7 @@ namespace ClassicUO.Game.UI.Controls
                 case SDL.SDL_Keycode.SDLK_RETURN:
                     if (IsEditable)
                     {
-                        if (Multiline)
+                        if (Multiline && !PassEnterToParent)
                         {
                             if (!_fromServer && !IsMaxCharReached(0))
                             {
@@ -725,6 +753,7 @@ namespace ClassicUO.Game.UI.Controls
             }
             else
             {
+                string previousText = Text;
                 if (_maxCharCount > 0)
                 {
                     if (NumbersOnly)
@@ -744,7 +773,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (!_is_writing)
                 {
-                    OnTextChanged();
+                    OnTextChanged(previousText);
                 }
             }
         }
@@ -753,13 +782,15 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (Length != 0)
             {
+                string previousText = Text;
+                
                 SelectionStart = 0;
                 SelectionEnd = 0;
                 Stb.Delete(0, Length);
 
                 if (!_is_writing)
                 {
-                    OnTextChanged();
+                    OnTextChanged(previousText);
                 }
             }
         }
@@ -776,6 +807,8 @@ namespace ClassicUO.Game.UI.Controls
             {
                 return;
             }
+
+            string previousText = Text;
 
             _is_writing = true;
 
@@ -839,12 +872,12 @@ namespace ClassicUO.Game.UI.Controls
                 if (count > 1)
                 {
                     Stb.Paste(c);
-                    OnTextChanged();
+                    OnTextChanged(previousText);
                 }
                 else if (_rendererText.GetCharWidth(c[0]) > 0 || c[0] == '\n')
                 {
                     Stb.InputChar(c[0]);
-                    OnTextChanged();
+                    OnTextChanged(previousText);
                 }
             }
 
