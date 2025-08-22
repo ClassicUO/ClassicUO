@@ -679,7 +679,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 base.OnTextInput(c);
             }
 
-            protected override void OnTextChanged()
+            protected override void OnTextChanged(string previousText)
             {
                 if (Text.Length > 0)
                 {
@@ -690,7 +690,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     _rendererText.Text = string.Empty;
                 }
 
-                base.OnTextChanged();
+                base.OnTextChanged(previousText);
                 UpdateCaretScreenPosition();
             }
 

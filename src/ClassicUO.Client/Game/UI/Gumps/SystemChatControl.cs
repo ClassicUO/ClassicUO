@@ -9,12 +9,10 @@ using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
-using ClassicUO.Utility.Collections;
-using ClassicUO.Utility.Platforms;
 using SDL2;
 using System;
 using System.Collections.Generic;
-using static System.Net.Mime.MediaTypeNames;
+using System.Linq;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -71,15 +69,21 @@ namespace ClassicUO.Game.UI.Gumps
                 TEXTBOX_LENGTH,
                 Width,
                 true,
-                FontStyle.BlackBorder | FontStyle.Fixed,
+                FontStyle.BlackBorder,
                 33
             )
             {
                 X = CHAT_X_OFFSET,
                 Y = Height - CHAT_HEIGHT,
                 Width = Width - CHAT_X_OFFSET,
-                Height = CHAT_HEIGHT
+                Height = CHAT_HEIGHT,
+                Multiline = true,
+                PassEnterToParent = true
             };
+
+            TextBoxControl.BeforeTextChanged += TextBoxControl_BeforeTextChanged;
+
+            TextBoxControl.TextChanged += TextBoxControl_TextChanged;
 
             float gradientTransparency = ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.HideChatGradient ? 0.0f : 0.5f;
 
@@ -116,6 +120,59 @@ namespace ClassicUO.Game.UI.Gumps
             IsActive = !ProfileManager.CurrentProfile.ActivateChatAfterEnter;
 
             SetFocus();
+        }
+
+        private void TextBoxControl_TextChanged(object sender, EventArgs e)
+        {
+            Resize();
+        }
+
+        private void TextBoxControl_BeforeTextChanged(object sender, StbTextBox.BeforeTextChangedEventArgs e)
+        {
+            // Normalize text before creating new newlines
+            string text = e.NewText.Replace("\n", " ");
+            var isPrompted = _gump.World.MessageManager.PromptData.Prompt != ConsolePrompt.None;
+
+            string result = string.Empty;
+            string message;
+
+            int relativeCursorIndex = e.NewCaretIndex;
+
+            // repeatedly split the message up, create line breaks
+            // and move the caret accordingly in case we had to add a new character instead of just replacing
+            // a space with a newline
+            // The latter happens only if there are no candidate spaces to break in the overflowing line
+            while (TrySplitMessage(text, Mode, isPrompted, out message, out string remainder))
+            {
+                result = AppendMultilinePart(result, message);
+                if (relativeCursorIndex >= message.Length)
+                {
+                    int cursorIndexDelta = (message.Length + 1 + remainder.Length) - text.Length;
+
+                    e.NewCaretIndex += cursorIndexDelta;
+                    relativeCursorIndex += cursorIndexDelta;
+                }
+
+                relativeCursorIndex -= message.Length;
+                text = remainder;
+            }
+
+            result = AppendMultilinePart(result, message);
+            e.NewText = result;
+        }
+
+        private static string AppendMultilinePart(string result, string message)
+        {
+            if (result.Length > 0)
+            {
+                result += "\n" + message;
+            }
+            else
+            {
+                result = message;
+            }
+
+            return result;
         }
 
         public bool IsActive
@@ -332,14 +389,16 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (TextBoxControl != null)
             {
+                int lines = TextBoxControl.Text.Count('\n') + 1;
+
                 TextBoxControl.X = CHAT_X_OFFSET;
-                TextBoxControl.Y = Height - CHAT_HEIGHT - CHAT_X_OFFSET;
+                TextBoxControl.Y = Height - lines * CHAT_HEIGHT - CHAT_X_OFFSET;
                 TextBoxControl.Width = Width - CHAT_X_OFFSET;
-                TextBoxControl.Height = CHAT_HEIGHT + CHAT_X_OFFSET;
+                TextBoxControl.Height = lines * CHAT_HEIGHT + CHAT_X_OFFSET;
                 _trans.X = TextBoxControl.X - CHAT_X_OFFSET;
                 _trans.Y = TextBoxControl.Y;
                 _trans.Width = Width;
-                _trans.Height = CHAT_HEIGHT + 5;
+                _trans.Height = TextBoxControl.Height + 5;
             }
         }
 
@@ -566,12 +625,13 @@ namespace ClassicUO.Game.UI.Gumps
                         }
 
                         // ignore the final character since that's a space if the user presses Ctrl + Backspace multiple times
-                        int index = text.LastIndexOf(' ', text.Length - 2);
+                        int index = text.LastIndexOf(' ', TextBoxControl.CaretIndex - 1);
 
                         if (index >= 0)
                         {
                             // do not remove the final space since we assume the user wants to continue writing
-                            TextBoxControl.SetText(text[..(index + 1)]);
+                            TextBoxControl.SetText(text[..(index + 1)] + text[TextBoxControl.CaretIndex..]);
+                            TextBoxControl.CaretIndex = index + 1;
                         }
                         else
                         {
@@ -673,21 +733,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         private bool TryHandleMessageMultipartSend(string text, ChatMode mode, bool isPrompted, out string remainder)
         {
-            // Prompt response messages cannot be multiple parts
-            if (isPrompted || text.Length <= MAX_MESSAGE_LENGTH || mode == ChatMode.ClientCommand)
+            if (!TrySplitMessage(text, mode, isPrompted, out string message, out remainder))
             {
-                remainder = text;
+                remainder = message;
                 return false;
             }
-
-            int lastSpaceIndex = text.LastIndexOf(' ', MAX_MESSAGE_LENGTH);
-            if (lastSpaceIndex < 0)
-            {
-                lastSpaceIndex = MAX_MESSAGE_LENGTH;
-            }
-
-            var message = text[..lastSpaceIndex];
-            remainder = text[lastSpaceIndex..].TrimStart();
 
             HandleMessageSend(message, mode);
 
@@ -696,6 +746,27 @@ namespace ClassicUO.Game.UI.Gumps
             if (mode == ChatMode.Party && int.TryParse(text[0..2], out var partyCharIndex) && partyCharIndex is > 0 and < 11)
                 remainder = $"{partyCharIndex} {remainder}";
 
+            return true;
+        }
+
+        private bool TrySplitMessage(string text, ChatMode mode, bool isPrompted, out string message, out string remainder)
+        {
+            // Prompt response messages cannot be multiple parts
+            if (isPrompted || text.Length <= MAX_MESSAGE_LENGTH || mode == ChatMode.ClientCommand)
+            {
+                message = text;
+                remainder = string.Empty;
+                return false;
+            }
+
+            int lastSpaceIndex = text.LastIndexOfAny([' ', '\n'], MAX_MESSAGE_LENGTH);
+            if (lastSpaceIndex < 0)
+            {
+                lastSpaceIndex = MAX_MESSAGE_LENGTH;
+            }
+
+            message = text[..lastSpaceIndex];
+            remainder = text[lastSpaceIndex..].TrimStart();
             return true;
         }
 

@@ -763,7 +763,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            protected override void OnTextChanged()
+            protected override void OnTextChanged(string previousText)
             {
                 _is_writing = true;
 
@@ -836,7 +836,7 @@ namespace ClassicUO.Game.UI.Gumps
                     UpdatePageCoords();
                 }
 
-                base.OnTextChanged();
+                base.OnTextChanged(previousText);
                 _is_writing = false;
             }
 
