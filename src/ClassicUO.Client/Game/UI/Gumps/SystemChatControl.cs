@@ -9,7 +9,6 @@ using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
-using Microsoft.Xna.Framework.Audio;
 using SDL2;
 using System;
 using System.Collections.Generic;
@@ -115,6 +114,11 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         private void TextBoxControl_TextChanged(object sender, EventArgs e)
+        {
+            RecalculateHuesAndSizes();
+        }
+
+        private void RecalculateHuesAndSizes()
         {
             ushort hue = GetChatHue(Mode);
             TextBoxControl.Hue = hue;
@@ -375,7 +379,7 @@ namespace ClassicUO.Game.UI.Gumps
         private void DisposeChatModePrefix()
         {
             _currentChatModeLabel.IsVisible = false;
-            Resize();
+            RecalculateHuesAndSizes();
         }
 
         public void AddLine(string text, byte font, ushort hue, bool isunicode)
@@ -514,11 +518,6 @@ namespace ClassicUO.Game.UI.Gumps
             else if (Mode == ChatMode.ClientCommand && TextBoxControl.Text.Length == 1 && TextBoxControl.Text[0] == '-')
             {
                 Mode = ChatMode.UOAMChat;
-            }
-
-            if (!_currentChatModeLabel.IsVisible && ProfileManager.CurrentProfile.SpeechHue != TextBoxControl.Hue)
-            {
-                TextBoxControl.Hue = ProfileManager.CurrentProfile.SpeechHue;
             }
 
             _trans.Alpha = ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.HideChatGradient ? 0.0f : 0.5f;
