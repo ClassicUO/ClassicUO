@@ -73,10 +73,6 @@ namespace ClassicUO.Game.UI.Gumps
                 33
             )
             {
-                X = CHAT_X_OFFSET,
-                Y = Height - CHAT_HEIGHT,
-                Width = Width - CHAT_X_OFFSET,
-                Height = CHAT_HEIGHT,
                 Multiline = true,
                 PassEnterToParent = true
             };
@@ -91,10 +87,6 @@ namespace ClassicUO.Game.UI.Gumps
             (
                 _trans = new AlphaBlendControl(gradientTransparency)
                 {
-                    X = TextBoxControl.X,
-                    Y = TextBoxControl.Y,
-                    Width = Width,
-                    Height = CHAT_HEIGHT + 5,
                     IsVisible = !ProfileManager.CurrentProfile.ActivateChatAfterEnter,
                     AcceptMouseInput = true
                 }
@@ -106,8 +98,6 @@ namespace ClassicUO.Game.UI.Gumps
             (
                 _currentChatModeLabel = new Label(string.Empty, true, 0, style: FontStyle.BlackBorder)
                 {
-                    X = TextBoxControl.X,
-                    Y = TextBoxControl.Y,
                     IsVisible = false
                 }
             );
@@ -347,7 +337,6 @@ namespace ClassicUO.Game.UI.Gumps
                 _currentChatModeLabel.Hue = hue;
                 _currentChatModeLabel.Text = labelText;
                 _currentChatModeLabel.IsVisible = true;
-                _currentChatModeLabel.Location = TextBoxControl.Location;
                 Resize();
                 TextBoxControl.Hue = hue;
 
@@ -365,12 +354,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void DisposeChatModePrefix()
         {
-            if (_currentChatModeLabel.IsVisible)
-            {
-                TextBoxControl.Hue = 33;
-                _currentChatModeLabel.IsVisible = false;
-                Resize();
-            }
+            _currentChatModeLabel.IsVisible = false;
+            Resize();
         }
 
         public void AddLine(string text, byte font, ushort hue, bool isunicode)
@@ -391,16 +376,24 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 int lines = TextBoxControl.Text.Count('\n') + 1;
 
-                int chatModeOffset = _currentChatModeLabel.IsVisible ? _currentChatModeLabel.Width : 0;
+                // the chat mode is always on the left and on the bottom
+                _currentChatModeLabel.X = CHAT_X_OFFSET;
+                _currentChatModeLabel.Y = Height - CHAT_HEIGHT - CHAT_X_OFFSET;
 
+                // if the chat mode is visible, it should push the text box further to the right
+                int chatModeOffset = _currentChatModeLabel.IsVisible ? _currentChatModeLabel.Width : 0;
                 TextBoxControl.X = CHAT_X_OFFSET + chatModeOffset;
                 TextBoxControl.Y = Height - lines * CHAT_HEIGHT - CHAT_X_OFFSET;
+                // if the text box has been pushed to the right, it should not clip into the void
                 TextBoxControl.Width = Width - CHAT_X_OFFSET - chatModeOffset;
+                // if the text box has more than one line, it will grow upwards
                 TextBoxControl.Height = lines * CHAT_HEIGHT + CHAT_X_OFFSET;
-                _trans.X = TextBoxControl.X - CHAT_X_OFFSET;
+                
+                // the dark background should always cover chat mode and text box fully
+                _trans.X = TextBoxControl.X - CHAT_X_OFFSET - chatModeOffset;
                 _trans.Y = TextBoxControl.Y;
                 _trans.Width = Width;
-                _trans.Height = TextBoxControl.Height + 5;
+                _trans.Height = TextBoxControl.Height;
             }
         }
 
@@ -503,7 +496,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Mode = ChatMode.UOAMChat;
             }
 
-            if (ProfileManager.CurrentProfile.SpeechHue != TextBoxControl.Hue)
+            if (!_currentChatModeLabel.IsVisible && ProfileManager.CurrentProfile.SpeechHue != TextBoxControl.Hue)
             {
                 TextBoxControl.Hue = ProfileManager.CurrentProfile.SpeechHue;
             }
