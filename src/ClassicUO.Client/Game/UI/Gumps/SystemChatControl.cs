@@ -9,6 +9,7 @@ using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
+using Microsoft.Xna.Framework.Audio;
 using SDL2;
 using System;
 using System.Collections.Generic;
@@ -106,6 +107,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _gump.World.MessageManager.MessageReceived += ChatOnMessageReceived;
             Mode = ChatMode.Default;
+            TextBoxControl.Hue = GetChatHue(Mode);
 
             IsActive = !ProfileManager.CurrentProfile.ActivateChatAfterEnter;
 
@@ -114,6 +116,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void TextBoxControl_TextChanged(object sender, EventArgs e)
         {
+            ushort hue = GetChatHue(Mode);
+            TextBoxControl.Hue = hue;
+            _currentChatModeLabel.Hue = hue;
             Resize();
         }
 
@@ -196,61 +201,78 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         case ChatMode.Default:
                             DisposeChatModePrefix();
-                            TextBoxControl.Hue = ProfileManager.CurrentProfile.SpeechHue;
                             TextBoxControl.ClearText();
 
                             break;
 
                         case ChatMode.Whisper:
-                            AppendChatModePrefix(ResGumps.Whisper, ProfileManager.CurrentProfile.WhisperHue, TextBoxControl.Text);
+                            AppendChatModePrefix(ResGumps.Whisper, TextBoxControl.Text);
 
                             break;
 
                         case ChatMode.Emote:
-                            AppendChatModePrefix(ResGumps.Emote, ProfileManager.CurrentProfile.EmoteHue, TextBoxControl.Text);
+                            AppendChatModePrefix(ResGumps.Emote, TextBoxControl.Text);
 
                             break;
 
                         case ChatMode.Yell:
-                            AppendChatModePrefix(ResGumps.Yell, ProfileManager.CurrentProfile.YellHue, TextBoxControl.Text);
+                            AppendChatModePrefix(ResGumps.Yell, TextBoxControl.Text);
 
                             break;
 
                         case ChatMode.Party:
-                            AppendChatModePrefix(ResGumps.Party, ProfileManager.CurrentProfile.PartyMessageHue, TextBoxControl.Text);
+                            AppendChatModePrefix(ResGumps.Party, TextBoxControl.Text);
 
                             break;
 
                         case ChatMode.Guild:
-                            AppendChatModePrefix(ResGumps.Guild, ProfileManager.CurrentProfile.GuildMessageHue, TextBoxControl.Text);
+                            AppendChatModePrefix(ResGumps.Guild, TextBoxControl.Text);
 
                             break;
 
                         case ChatMode.Alliance:
-                            AppendChatModePrefix(ResGumps.Alliance, ProfileManager.CurrentProfile.AllyMessageHue, TextBoxControl.Text);
+                            AppendChatModePrefix(ResGumps.Alliance, TextBoxControl.Text);
 
                             break;
 
                         case ChatMode.ClientCommand:
-                            AppendChatModePrefix(ResGumps.Command, 1161, TextBoxControl.Text);
+                            AppendChatModePrefix(ResGumps.Command, TextBoxControl.Text);
 
                             break;
 
                         case ChatMode.UOAMChat:
                             DisposeChatModePrefix();
-                            AppendChatModePrefix(ResGumps.UOAM, 83, TextBoxControl.Text);
+                            AppendChatModePrefix(ResGumps.UOAM, TextBoxControl.Text);
 
                             break;
 
                         case ChatMode.UOChat:
                             DisposeChatModePrefix();
 
-                            AppendChatModePrefix(ResGumps.Chat, ProfileManager.CurrentProfile.ChatMessageHue, TextBoxControl.Text);
+                            AppendChatModePrefix(ResGumps.Chat, TextBoxControl.Text);
 
                             break;
                     }
                 }
             }
+        }
+
+        private ushort GetChatHue(ChatMode mode)
+        {
+            return mode switch
+            {
+                ChatMode.Default => ProfileManager.CurrentProfile.SpeechHue,
+                ChatMode.Whisper => ProfileManager.CurrentProfile.WhisperHue,
+                ChatMode.Emote => ProfileManager.CurrentProfile.EmoteHue,
+                ChatMode.Yell => ProfileManager.CurrentProfile.YellHue,
+                ChatMode.Party => ProfileManager.CurrentProfile.PartyMessageHue,
+                ChatMode.Guild => ProfileManager.CurrentProfile.GuildMessageHue,
+                ChatMode.Alliance => ProfileManager.CurrentProfile.AllyMessageHue,
+                ChatMode.ClientCommand => 1161,
+                ChatMode.UOAMChat => 83,
+                ChatMode.UOChat => ProfileManager.CurrentProfile.ChatMessageHue,
+                _ => 33,
+            };
         }
 
         public readonly StbTextBox TextBoxControl;
@@ -330,15 +352,13 @@ namespace ClassicUO.Game.UI.Gumps
             base.Dispose();
         }
 
-        private void AppendChatModePrefix(string labelText, ushort hue, string text)
+        private void AppendChatModePrefix(string labelText, string text)
         {
             if (!_currentChatModeLabel.IsVisible)
             {
-                _currentChatModeLabel.Hue = hue;
                 _currentChatModeLabel.Text = labelText;
                 _currentChatModeLabel.IsVisible = true;
                 Resize();
-                TextBoxControl.Hue = hue;
 
                 int idx = string.IsNullOrEmpty(text) ? -1 : TextBoxControl.Text.IndexOf(text);
                 string str = string.Empty;
@@ -436,11 +456,11 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 if (_gump.World.Party.Members[index - 1] != null && _gump.World.Party.Members[index - 1].Serial != 0)
                                 {
-                                    AppendChatModePrefix(string.Format(ResGumps.Tell0, _gump.World.Party.Members[index - 1].Name), ProfileManager.CurrentProfile.PartyMessageHue, string.Empty);
+                                    AppendChatModePrefix(string.Format(ResGumps.Tell0, _gump.World.Party.Members[index - 1].Name), string.Empty);
                                 }
                                 else
                                 {
-                                    AppendChatModePrefix(ResGumps.TellEmpty, ProfileManager.CurrentProfile.PartyMessageHue, string.Empty);
+                                    AppendChatModePrefix(ResGumps.TellEmpty, string.Empty);
                                 }
 
                                 Mode = ChatMode.Party;
