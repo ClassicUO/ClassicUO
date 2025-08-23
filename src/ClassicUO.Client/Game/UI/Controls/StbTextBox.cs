@@ -146,7 +146,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool AllowTAB { get; set; }
         public bool NoSelection { get; set; }
-        public bool PassEnterToParent { get; set; } = false;
+        public bool PassEnterToParent { get; set; }
 
         public int CaretIndex
         {
