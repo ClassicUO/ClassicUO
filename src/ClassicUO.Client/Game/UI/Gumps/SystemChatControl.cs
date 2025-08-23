@@ -348,7 +348,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _currentChatModeLabel.Text = labelText;
                 _currentChatModeLabel.IsVisible = true;
                 _currentChatModeLabel.Location = TextBoxControl.Location;
-                TextBoxControl.X = _currentChatModeLabel.Width;
+                Resize();
                 TextBoxControl.Hue = hue;
 
                 int idx = string.IsNullOrEmpty(text) ? -1 : TextBoxControl.Text.IndexOf(text);
@@ -368,8 +368,8 @@ namespace ClassicUO.Game.UI.Gumps
             if (_currentChatModeLabel.IsVisible)
             {
                 TextBoxControl.Hue = 33;
-                TextBoxControl.X -= _currentChatModeLabel.Width;
                 _currentChatModeLabel.IsVisible = false;
+                Resize();
             }
         }
 
@@ -391,9 +391,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 int lines = TextBoxControl.Text.Count('\n') + 1;
 
-                TextBoxControl.X = CHAT_X_OFFSET;
+                int chatModeOffset = _currentChatModeLabel.IsVisible ? _currentChatModeLabel.Width : 0;
+
+                TextBoxControl.X = CHAT_X_OFFSET + chatModeOffset;
                 TextBoxControl.Y = Height - lines * CHAT_HEIGHT - CHAT_X_OFFSET;
-                TextBoxControl.Width = Width - CHAT_X_OFFSET;
+                TextBoxControl.Width = Width - CHAT_X_OFFSET - chatModeOffset;
                 TextBoxControl.Height = lines * CHAT_HEIGHT + CHAT_X_OFFSET;
                 _trans.X = TextBoxControl.X - CHAT_X_OFFSET;
                 _trans.Y = TextBoxControl.Y;
