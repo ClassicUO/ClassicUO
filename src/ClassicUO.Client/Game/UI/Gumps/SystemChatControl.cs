@@ -50,6 +50,8 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly LinkedList<ChatLineTime> _textEntries;
         private readonly AlphaBlendControl _trans;
 
+        private static readonly ChatMode[] SINGLE_LINE_CHAT_MODES = [ChatMode.ClientCommand, ChatMode.Prompt];
+
 
         public SystemChatControl(WorldViewportGump gump, int x, int y, int w, int h)
         {
@@ -80,6 +82,8 @@ namespace ClassicUO.Game.UI.Gumps
             TextBoxControl.BeforeTextChanged += TextBoxControl_BeforeTextChanged;
 
             TextBoxControl.TextChanged += TextBoxControl_TextChanged;
+
+            _gump.World.MessageManager.ServerPromptChanged += MessageManager_ServerPromptChanged;
 
             float gradientTransparency = ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.HideChatGradient ? 0.0f : 0.5f;
 
@@ -113,6 +117,26 @@ namespace ClassicUO.Game.UI.Gumps
             SetFocus();
         }
 
+        private void MessageManager_ServerPromptChanged(object sender, PromptData e)
+        {
+            if (e.Prompt == ConsolePrompt.None)
+            {
+                if (Mode == ChatMode.Prompt)
+                {
+                    Mode = ChatMode.Default;
+                    RecalculateHuesAndSizes();
+                }
+            }
+            else
+            {
+                if (Mode != ChatMode.Prompt)
+                {
+                    Mode = ChatMode.Prompt;
+                    RecalculateHuesAndSizes();
+                }
+            }
+        }
+
         private void TextBoxControl_TextChanged(object sender, EventArgs e)
         {
             RecalculateHuesAndSizes();
@@ -130,7 +154,6 @@ namespace ClassicUO.Game.UI.Gumps
         {
             // Normalize text before creating new newlines
             string text = e.NewText.Replace("\n", " ");
-            var isPrompted = _gump.World.MessageManager.PromptData.Prompt != ConsolePrompt.None;
 
             string result = string.Empty;
             string message;
@@ -141,7 +164,7 @@ namespace ClassicUO.Game.UI.Gumps
             // and move the caret accordingly in case we had to add a new character instead of just replacing
             // a space with a newline
             // The latter happens only if there are no candidate spaces to break in the overflowing line
-            while (TrySplitMessage(text, Mode, isPrompted, out message, out string remainder))
+            while (TrySplitMessage(text, Mode, out message, out string remainder))
             {
                 result = AppendMultilinePart(result, message);
                 if (relativeCursorIndex >= message.Length)
@@ -197,7 +220,13 @@ namespace ClassicUO.Game.UI.Gumps
             get => _mode;
             set
             {
+                ChatMode previousMode = _mode;
                 _mode = value;
+
+                if (previousMode == ChatMode.Prompt && previousMode != value)
+                {
+                    _gump.World.MessageManager.CancelServerPrompt();
+                }
 
                 if (IsActive)
                 {
@@ -256,6 +285,11 @@ namespace ClassicUO.Game.UI.Gumps
                             AppendChatModePrefix(ResGumps.Chat, TextBoxControl.Text);
 
                             break;
+
+                        case ChatMode.Prompt:
+                            AppendChatModePrefix(ResGumps.Prompt, TextBoxControl.Text);
+                            
+                            break;
                     }
                 }
             }
@@ -275,6 +309,7 @@ namespace ClassicUO.Game.UI.Gumps
                 ChatMode.ClientCommand => 1161,
                 ChatMode.UOAMChat => 83,
                 ChatMode.UOChat => ProfileManager.CurrentProfile.ChatMessageHue,
+                ChatMode.Prompt => 946,
                 _ => 33,
             };
         }
@@ -438,8 +473,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 first = next;
             }
-
-
 
             if (Mode == ChatMode.Default && IsActive)
             {
@@ -669,18 +702,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
 
-                case SDL.SDL_Keycode.SDLK_ESCAPE when _gump.World.MessageManager.PromptData.Prompt != ConsolePrompt.None:
+                case SDL.SDL_Keycode.SDLK_ESCAPE when Mode == ChatMode.Prompt:
 
-                    if (_gump.World.MessageManager.PromptData.Prompt == ConsolePrompt.ASCII)
-                    {
-                        NetClient.Socket.Send_ASCIIPromptResponse(_gump.World, string.Empty, true);
-                    }
-                    else if (_gump.World.MessageManager.PromptData.Prompt == ConsolePrompt.Unicode)
-                    {
-                        NetClient.Socket.Send_UnicodePromptResponse(_gump.World, string.Empty, Settings.GlobalSettings.Language, true);
-                    }
-
-                    _gump.World.MessageManager.PromptData = default;
+                    Mode = ChatMode.Default;
 
                     break;
             }
@@ -727,9 +751,7 @@ namespace ClassicUO.Game.UI.Gumps
                 ResetTextBox();
             }
 
-            var isPrompted = _gump.World.MessageManager.PromptData.Prompt != ConsolePrompt.None;
-
-            if (TryHandleMessageMultipartSend(text, Mode, isPrompted, out var remainder))
+            if (TryHandleMessageMultipartSend(text, Mode, out var remainder))
             {
                 TextBoxControl.SetText(remainder);
             }
@@ -745,9 +767,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private bool TryHandleMessageMultipartSend(string text, ChatMode mode, bool isPrompted, out string remainder)
+        private bool TryHandleMessageMultipartSend(string text, ChatMode mode, out string remainder)
         {
-            if (!TrySplitMessage(text, mode, isPrompted, out string message, out remainder))
+            if (!TrySplitMessage(text, mode, out string message, out remainder))
             {
                 remainder = message;
                 return false;
@@ -763,10 +785,10 @@ namespace ClassicUO.Game.UI.Gumps
             return true;
         }
 
-        private bool TrySplitMessage(string text, ChatMode mode, bool isPrompted, out string message, out string remainder)
+        private bool TrySplitMessage(string text, ChatMode mode, out string message, out string remainder)
         {
             // Prompt response messages cannot be multiple parts
-            if (isPrompted || text.Length <= MAX_MESSAGE_LENGTH || mode == ChatMode.ClientCommand)
+            if (text.Length <= MAX_MESSAGE_LENGTH || SINGLE_LINE_CHAT_MODES.Contains(mode))
             {
                 message = text;
                 remainder = string.Empty;
@@ -790,263 +812,251 @@ namespace ClassicUO.Game.UI.Gumps
             _messageHistoryIndex = _messageHistory.Count;
 
 
-            if (_gump.World.MessageManager.PromptData.Prompt != ConsolePrompt.None)
+            switch (sentMode)
             {
-                if (_gump.World.MessageManager.PromptData.Prompt == ConsolePrompt.ASCII)
-                {
-                    NetClient.Socket.Send_ASCIIPromptResponse(_gump.World, text, text.Length < 1);
-                }
-                else if (_gump.World.MessageManager.PromptData.Prompt == ConsolePrompt.Unicode)
-                {
-                    NetClient.Socket.Send_UnicodePromptResponse(_gump.World, text, Settings.GlobalSettings.Language, text.Length < 1);
-                }
+                case ChatMode.Default:
+                    GameActions.Say(text, ProfileManager.CurrentProfile.SpeechHue);
 
-                _gump.World.MessageManager.PromptData = default;
-            }
-            else
-            {
-                switch (sentMode)
-                {
-                    case ChatMode.Default:
-                        GameActions.Say(text, ProfileManager.CurrentProfile.SpeechHue);
+                    break;
 
-                        break;
+                case ChatMode.Whisper:
+                    GameActions.Say(text, ProfileManager.CurrentProfile.WhisperHue, MessageType.Whisper);
 
-                    case ChatMode.Whisper:
-                        GameActions.Say(text, ProfileManager.CurrentProfile.WhisperHue, MessageType.Whisper);
+                    break;
 
-                        break;
+                case ChatMode.Emote:
+                    text = ResGeneral.EmoteChar + text + ResGeneral.EmoteChar;
+                    GameActions.Say(text, ProfileManager.CurrentProfile.EmoteHue, MessageType.Emote);
 
-                    case ChatMode.Emote:
-                        text = ResGeneral.EmoteChar + text + ResGeneral.EmoteChar;
-                        GameActions.Say(text, ProfileManager.CurrentProfile.EmoteHue, MessageType.Emote);
+                    break;
 
-                        break;
+                case ChatMode.Yell:
+                    GameActions.Say(text, ProfileManager.CurrentProfile.YellHue, MessageType.Yell);
 
-                    case ChatMode.Yell:
-                        GameActions.Say(text, ProfileManager.CurrentProfile.YellHue, MessageType.Yell);
+                    break;
 
-                        break;
+                case ChatMode.Prompt:
+                    _gump.World.MessageManager.SendServerPromptResponse(text);
+                    break;
 
-                    case ChatMode.Party:
+                case ChatMode.Party:
 
-                        switch (text.ToLower())
-                        {
-                            case "add":
-                                if (_gump.World.Party.Leader == 0 || _gump.World.Party.Leader == _gump.World.Player)
+                    switch (text.ToLower())
+                    {
+                        case "add":
+                            if (_gump.World.Party.Leader == 0 || _gump.World.Party.Leader == _gump.World.Player)
+                            {
+                                GameActions.RequestPartyInviteByTarget();
+                            }
+                            else
+                            {
+                                _gump.World.MessageManager.HandleMessage
+                                (
+                                    null,
+                                    ResGumps.YouAreNotPartyLeader,
+                                    "System",
+                                    0xFFFF,
+                                    MessageType.Regular,
+                                    3,
+                                    TextType.SYSTEM
+                                );
+                            }
+
+                            break;
+
+                        case "loot":
+
+                            if (_gump.World.Party.Leader != 0)
+                            {
+                                _gump.World.Party.CanLoot = !_gump.World.Party.CanLoot;
+                            }
+                            else
+                            {
+                                _gump.World.MessageManager.HandleMessage
+                                (
+                                    null,
+                                    ResGumps.YouAreNotInAParty,
+                                    "System",
+                                    0xFFFF,
+                                    MessageType.Regular,
+                                    3,
+                                    TextType.SYSTEM
+                                );
+                            }
+
+
+                            break;
+
+                        case "quit":
+
+                            if (_gump.World.Party.Leader == 0)
+                            {
+                                _gump.World.MessageManager.HandleMessage
+                                (
+                                    null,
+                                    ResGumps.YouAreNotInAParty,
+                                    "System",
+                                    0xFFFF,
+                                    MessageType.Regular,
+                                    3,
+                                    TextType.SYSTEM
+                                );
+                            }
+                            else
+                            {
+                                GameActions.RequestPartyQuit(_gump.World.Player);
+
+                                //for (int i = 0; i < World.Party.Members.Length; i++)
+                                //{
+                                //    if (World.Party.Members[i] != null && World.Party.Members[i].Serial != 0)
+                                //        GameActions.RequestPartyRemoveMember(World.Party.Members[i].Serial);
+                                //}
+                            }
+
+                            break;
+
+                        case "accept":
+
+                            if (_gump.World.Party.Leader == 0 && (_gump.World.Party.Inviter != 0))
+                            {
+                                GameActions.RequestPartyAccept(_gump.World.Party.Inviter);
+                                _gump.World.Party.Leader = _gump.World.Party.Inviter;
+                                _gump.World.Party.Inviter = 0;
+                            }
+                            else
+                            {
+                                _gump.World.MessageManager.HandleMessage
+                                (
+                                    null,
+                                    ResGumps.NoOneHasInvitedYouToBeInAParty,
+                                    "System",
+                                    0xFFFF,
+                                    MessageType.Regular,
+                                    3,
+                                    TextType.SYSTEM
+                                );
+                            }
+
+                            break;
+
+                        case "decline":
+
+                            if (_gump.World.Party.Leader == 0 && _gump.World.Party.Inviter != 0)
+                            {
+                                NetClient.Socket.Send_PartyDecline(_gump.World.Party.Inviter);
+                                _gump.World.Party.Leader = 0;
+                                _gump.World.Party.Inviter = 0;
+                            }
+                            else
+                            {
+                                _gump.World.MessageManager.HandleMessage
+                                (
+                                    null,
+                                    ResGumps.NoOneHasInvitedYouToBeInAParty,
+                                    "System",
+                                    0xFFFF,
+                                    MessageType.Regular,
+                                    3,
+                                    TextType.SYSTEM
+                                );
+                            }
+
+
+                            break;
+
+                        case "rem":
+
+                            if (_gump.World.Party.Leader != 0 && _gump.World.Party.Leader == _gump.World.Player)
+                            {
+                                GameActions.RequestPartyRemoveMemberByTarget();
+                            }
+                            else
+                            {
+                                _gump.World.MessageManager.HandleMessage
+                                (
+                                    null,
+                                    ResGumps.YouAreNotPartyLeader,
+                                    "System",
+                                    0xFFFF,
+                                    MessageType.Regular,
+                                    3,
+                                    TextType.SYSTEM
+                                );
+                            }
+
+
+                            break;
+
+                        default:
+
+                            if (_gump.World.Party.Leader != 0)
+                            {
+                                uint serial = 0;
+
+                                int pos = 0;
+
+                                while (pos < text.Length && text[pos] != ' ')
                                 {
-                                    GameActions.RequestPartyInviteByTarget();
+                                    pos++;
                                 }
-                                else
+
+                                if (pos < text.Length)
                                 {
-                                    _gump.World.MessageManager.HandleMessage
-                                    (
-                                        null,
-                                        ResGumps.YouAreNotPartyLeader,
-                                        "System",
-                                        0xFFFF,
-                                        MessageType.Regular,
-                                        3,
-                                        TextType.SYSTEM
-                                    );
-                                }
-
-                                break;
-
-                            case "loot":
-
-                                if (_gump.World.Party.Leader != 0)
-                                {
-                                    _gump.World.Party.CanLoot = !_gump.World.Party.CanLoot;
-                                }
-                                else
-                                {
-                                    _gump.World.MessageManager.HandleMessage
-                                    (
-                                        null,
-                                        ResGumps.YouAreNotInAParty,
-                                        "System",
-                                        0xFFFF,
-                                        MessageType.Regular,
-                                        3,
-                                        TextType.SYSTEM
-                                    );
-                                }
-
-
-                                break;
-
-                            case "quit":
-
-                                if (_gump.World.Party.Leader == 0)
-                                {
-                                    _gump.World.MessageManager.HandleMessage
-                                    (
-                                        null,
-                                        ResGumps.YouAreNotInAParty,
-                                        "System",
-                                        0xFFFF,
-                                        MessageType.Regular,
-                                        3,
-                                        TextType.SYSTEM
-                                    );
-                                }
-                                else
-                                {
-                                    GameActions.RequestPartyQuit(_gump.World.Player);
-
-                                    //for (int i = 0; i < World.Party.Members.Length; i++)
-                                    //{
-                                    //    if (World.Party.Members[i] != null && World.Party.Members[i].Serial != 0)
-                                    //        GameActions.RequestPartyRemoveMember(World.Party.Members[i].Serial);
-                                    //}
-                                }
-
-                                break;
-
-                            case "accept":
-
-                                if (_gump.World.Party.Leader == 0 && (_gump.World.Party.Inviter != 0))
-                                {
-                                    GameActions.RequestPartyAccept(_gump.World.Party.Inviter);
-                                    _gump.World.Party.Leader = _gump.World.Party.Inviter;
-                                    _gump.World.Party.Inviter = 0;
-                                }
-                                else
-                                {
-                                    _gump.World.MessageManager.HandleMessage
-                                    (
-                                        null,
-                                        ResGumps.NoOneHasInvitedYouToBeInAParty,
-                                        "System",
-                                        0xFFFF,
-                                        MessageType.Regular,
-                                        3,
-                                        TextType.SYSTEM
-                                    );
-                                }
-
-                                break;
-
-                            case "decline":
-
-                                if (_gump.World.Party.Leader == 0 && _gump.World.Party.Inviter != 0)
-                                {
-                                    NetClient.Socket.Send_PartyDecline(_gump.World.Party.Inviter);
-                                    _gump.World.Party.Leader = 0;
-                                    _gump.World.Party.Inviter = 0;
-                                }
-                                else
-                                {
-                                    _gump.World.MessageManager.HandleMessage
-                                    (
-                                        null,
-                                        ResGumps.NoOneHasInvitedYouToBeInAParty,
-                                        "System",
-                                        0xFFFF,
-                                        MessageType.Regular,
-                                        3,
-                                        TextType.SYSTEM
-                                    );
-                                }
-
-
-                                break;
-
-                            case "rem":
-
-                                if (_gump.World.Party.Leader != 0 && _gump.World.Party.Leader == _gump.World.Player)
-                                {
-                                    GameActions.RequestPartyRemoveMemberByTarget();
-                                }
-                                else
-                                {
-                                    _gump.World.MessageManager.HandleMessage
-                                    (
-                                        null,
-                                        ResGumps.YouAreNotPartyLeader,
-                                        "System",
-                                        0xFFFF,
-                                        MessageType.Regular,
-                                        3,
-                                        TextType.SYSTEM
-                                    );
-                                }
-
-
-                                break;
-
-                            default:
-
-                                if (_gump.World.Party.Leader != 0)
-                                {
-                                    uint serial = 0;
-
-                                    int pos = 0;
-
-                                    while (pos < text.Length && text[pos] != ' ')
+                                    if (int.TryParse(text.Substring(0, pos), out int index) && index > 0 && index < 11 && _gump.World.Party.Members[index - 1] != null && _gump.World.Party.Members[index - 1].Serial != 0)
                                     {
-                                        pos++;
+                                        serial = _gump.World.Party.Members[index - 1].Serial;
                                     }
-
-                                    if (pos < text.Length)
-                                    {
-                                        if (int.TryParse(text.Substring(0, pos), out int index) && index > 0 && index < 11 && _gump.World.Party.Members[index - 1] != null && _gump.World.Party.Members[index - 1].Serial != 0)
-                                        {
-                                            serial = _gump.World.Party.Members[index - 1].Serial;
-                                        }
-                                    }
-
-                                    GameActions.SayParty(text, serial);
-                                }
-                                else
-                                {
-                                    GameActions.Print
-                                    (
-                                        _gump.World,
-                                        string.Format(ResGumps.NoteToSelf0, text),
-                                        0,
-                                        MessageType.System,
-                                        3,
-                                        false
-                                    );
                                 }
 
-                                break;
-                        }
+                                GameActions.SayParty(text, serial);
+                            }
+                            else
+                            {
+                                GameActions.Print
+                                (
+                                    _gump.World,
+                                    string.Format(ResGumps.NoteToSelf0, text),
+                                    0,
+                                    MessageType.System,
+                                    3,
+                                    false
+                                );
+                            }
 
-                        break;
+                            break;
+                    }
 
-                    case ChatMode.Guild:
-                        GameActions.Say(text, ProfileManager.CurrentProfile.GuildMessageHue, MessageType.Guild);
+                    break;
 
-                        break;
+                case ChatMode.Guild:
+                    GameActions.Say(text, ProfileManager.CurrentProfile.GuildMessageHue, MessageType.Guild);
 
-                    case ChatMode.Alliance:
-                        GameActions.Say(text, ProfileManager.CurrentProfile.AllyMessageHue, MessageType.Alliance);
+                    break;
 
-                        break;
+                case ChatMode.Alliance:
+                    GameActions.Say(text, ProfileManager.CurrentProfile.AllyMessageHue, MessageType.Alliance);
 
-                    case ChatMode.ClientCommand:
-                        string[] tt = text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                    break;
 
-                        if (tt.Length != 0)
-                        {
-                            _gump.World.CommandManager.Execute(tt[0], tt);
-                        }
+                case ChatMode.ClientCommand:
+                    string[] tt = text.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
-                        break;
+                    if (tt.Length != 0)
+                    {
+                        _gump.World.CommandManager.Execute(tt[0], tt);
+                    }
 
-                    case ChatMode.UOAMChat:
-                        _gump.World.UoAssist.SignalMessage(text);
+                    break;
 
-                        break;
+                case ChatMode.UOAMChat:
+                    _gump.World.UoAssist.SignalMessage(text);
 
-                    case ChatMode.UOChat:
-                        NetClient.Socket.Send_ChatMessageCommand(text);
+                    break;
 
-                        break;
-                }
+                case ChatMode.UOChat:
+                    NetClient.Socket.Send_ChatMessageCommand(text);
+
+                    break;
             }
         }
 
