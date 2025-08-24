@@ -1655,4 +1655,7 @@ Client version: '{0}'</value>
     <value>Drop an item here to
 start your first counter</value>
   </data>
+  <data name="Prompt" xml:space="preserve">
+    <value>[Prompt]:</value>
+  </data>
 </root>

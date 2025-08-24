@@ -3337,11 +3337,7 @@ namespace ClassicUO.Network
                 return;
             }
 
-            world.MessageManager.PromptData = new PromptData
-            {
-                Prompt = ConsolePrompt.ASCII,
-                Data = p.ReadUInt64BE()
-            };
+            world.MessageManager.PromptData = new PromptData(ConsolePrompt.ASCII, p.ReadUInt64BE());
         }
 
         private static void SellList(World world, ref StackDataReader p)
@@ -4858,11 +4854,7 @@ namespace ClassicUO.Network
                 return;
             }
 
-            world.MessageManager.PromptData = new PromptData
-            {
-                Prompt = ConsolePrompt.Unicode,
-                Data = p.ReadUInt64BE()
-            };
+            world.MessageManager.PromptData = new PromptData(ConsolePrompt.Unicode, p.ReadUInt64BE());
         }
 
         private static void Semivisible(World world, ref StackDataReader p) { }
