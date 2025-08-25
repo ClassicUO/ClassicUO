@@ -387,6 +387,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
+            TextBoxControl.BeforeTextChanged -= TextBoxControl_BeforeTextChanged;
+            TextBoxControl.TextChanged -= TextBoxControl_TextChanged;
+            _gump.World.MessageManager.ServerPromptChanged -= MessageManager_ServerPromptChanged;
             _gump.World.MessageManager.MessageReceived -= ChatOnMessageReceived;
             base.Dispose();
         }
