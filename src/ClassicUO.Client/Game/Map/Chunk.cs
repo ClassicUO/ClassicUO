@@ -1,14 +1,15 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+using ClassicUO.Assets;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Assets;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility;
 using System;
-using System.Runtime.InteropServices;
 using System.Buffers;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace ClassicUO.Game.Map
 {
@@ -52,7 +53,7 @@ namespace ClassicUO.Game.Map
         }
 
 
-        public unsafe void Load(int index)
+        public unsafe void Load(int index, bool updateWorldMap = false)
         {
             IsDestroyed = false;
 
@@ -71,6 +72,10 @@ namespace ClassicUO.Game.Map
             var cells = block.Cells;
             int bx = X << 3;
             int by = Y << 3;
+
+            uint[] bufferBlock = new uint[64];
+            sbyte[] bufferBlockZ = new sbyte[64];
+            var huesLoader = Client.Game.UO.FileManager.Hues;
 
             for (int y = 0; y < 8; ++y)
             {
@@ -94,6 +99,15 @@ namespace ClassicUO.Game.Map
                     land.UpdateScreenPosition();
 
                     AddGameObject(land, x, y);
+
+                    if (updateWorldMap)
+                    {
+                        ushort color = (ushort)(0x8000 | huesLoader.GetRadarColorData(tileID & 0x3FFF));
+
+                        int blockIndex = y * 8 + x;
+                        bufferBlock[blockIndex] = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
+                        bufferBlockZ[blockIndex] = z;
+                    }
                 }
             }
 
@@ -122,10 +136,73 @@ namespace ClassicUO.Game.Map
                         staticObject.UpdateScreenPosition();
 
                         AddGameObject(staticObject, sb.X, sb.Y);
+
+                        if (updateWorldMap)
+                        {
+                            int blockIndex = (sb.Y << 3) + sb.X;
+                            if (GameObject.CanBeDrawn(_world, sb.Color) && sb.Z >= bufferBlockZ[blockIndex])
+                            {
+                                ushort color = (ushort)(0x8000 | (sb.Hue != 0 ? huesLoader.GetColor16(16384, sb.Hue) : huesLoader.GetRadarColorData(sb.Color + 0x4000)));
+
+                                bufferBlock[blockIndex] = HuesHelper.Color16To32(color) | 0xFF_00_00_00;
+                                bufferBlockZ[blockIndex] = sb.Z;
+                            }
+                        }
                     }
                 }
 
                 ArrayPool<StaticsBlock>.Shared.Return(staticsBlockBuffer);
+            }
+
+            if (updateWorldMap)
+            {
+                const float MAG_0 = 80f / 100f;
+                const float MAG_1 = 100f / 80f;
+
+                for (int i = 0; i < bufferBlock.Length - 1; i++)
+                {
+                    sbyte z0 = bufferBlockZ[i];
+                    sbyte z1 = z0;
+                    if (i < bufferBlock.Length - 1)
+                        z1 = bufferBlockZ[i + 1];
+
+                    if (z0 == z1)
+                    {
+                        continue;
+                    }
+
+                    ref uint cc = ref bufferBlock[i];
+
+                    if (cc == 0)
+                    {
+                        continue;
+                    }
+
+                    byte r = (byte)(cc & 0xFF);
+                    byte g = (byte)((cc >> 8) & 0xFF);
+                    byte b = (byte)((cc >> 16) & 0xFF);
+                    byte a = (byte)((cc >> 24) & 0xFF);
+
+                    if (r != 0 || g != 0 || b != 0)
+                    {
+                        if (z0 < z1)
+                        {
+                            r = (byte)Math.Min(0xFF, r * MAG_0);
+                            g = (byte)Math.Min(0xFF, g * MAG_0);
+                            b = (byte)Math.Min(0xFF, b * MAG_0);
+                        }
+                        else
+                        {
+                            r = (byte)Math.Min(0xFF, r * MAG_1);
+                            g = (byte)Math.Min(0xFF, g * MAG_1);
+                            b = (byte)Math.Min(0xFF, b * MAG_1);
+                        }
+
+                        cc = (uint)(r | (g << 8) | (b << 16) | (a << 24));
+                    }
+                }
+
+                UIManager.GetGump<WorldMapGump>()?.UpdateWorldMapChunk(X, Y, bufferBlock);
             }
         }
 

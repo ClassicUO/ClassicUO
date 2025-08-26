@@ -1368,6 +1368,32 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        public unsafe Task UpdateWorldMapChunk(int mapBlockX, int mapBlockY, uint[] bufferBlock)
+        {
+            if (_mapLoading == 1)
+            {
+                return Task.CompletedTask;
+            }
+
+            return Task.Run
+            (
+                () =>
+                {
+                    // Adjust map coordinates based on the block to reload
+                    int startMapX = mapBlockX << 3;  // Multiply by 8 to get the actual map coordinate
+                    int startMapY = mapBlockY << 3;  // Multiply by 8 to get the actual map coordinate
+
+                    int blockWidth = 8;
+                    int blockHeight = 8;
+
+                    fixed (uint* pixels = &bufferBlock[0])
+                    {
+                        _mapTexture.SetDataPointerEXT(0, new Rectangle(startMapX, startMapY, blockWidth, blockHeight), (IntPtr)pixels, sizeof(uint) * blockWidth * blockHeight);
+                    }
+                }
+            );
+        }
+
         internal class ZonesFileZoneData
         {
             public string Label { get; set; }
