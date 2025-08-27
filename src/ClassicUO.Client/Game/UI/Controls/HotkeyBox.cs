@@ -3,7 +3,6 @@
 using System;
 using ClassicUO.Input;
 using ClassicUO.Assets;
-using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using SDL2;
 
@@ -86,6 +85,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public SDL.SDL_Keycode Key { get; private set; }
         public MouseButtonType MouseButton { get; private set; }
+        public SDL.SDL_GameControllerButton[] Buttons { get; private set; }
         public bool WheelScroll { get; private set; }
         public bool WheelUp { get; private set; }
         public SDL.SDL_Keymod Mod { get; private set; }
@@ -112,6 +112,20 @@ namespace ClassicUO.Game.UI.Controls
 
         public event EventHandler HotkeyChanged, HotkeyCancelled;
 
+        protected override void OnControllerButtonDown(SDL.SDL_GameControllerButton button)
+        {
+            if (IsActive)
+            {
+                SetButtons(Controller.PressedButtons());
+            }
+        }
+
+        public void SetButtons(SDL.SDL_GameControllerButton[] buttons)
+        {
+            ResetBinding();
+            Buttons = buttons;
+            _label.Text = Controller.GetButtonNames(buttons);
+        }
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
@@ -235,6 +249,7 @@ namespace ClassicUO.Game.UI.Controls
             WheelScroll = false;
             Mod = 0;
             _label.Text = string.Empty;
+            Buttons = null;
         }
 
         private void LabelOnMouseUp(object sender, MouseEventArgs e)
@@ -260,6 +275,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     Key = SDL.SDL_Keycode.SDLK_UNKNOWN;
                     Mod = SDL.SDL_Keymod.KMOD_NONE;
+                    Buttons = null;
 
                     break;
             }
