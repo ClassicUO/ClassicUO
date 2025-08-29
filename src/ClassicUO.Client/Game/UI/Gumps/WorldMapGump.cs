@@ -1370,7 +1370,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public unsafe Task UpdateWorldMapChunk(int mapBlockX, int mapBlockY, uint[] bufferBlock)
         {
-            if (_mapLoading == 1)
+            if (_mapLoading == 1 || _mapTexture == null)
             {
                 return Task.CompletedTask;
             }
