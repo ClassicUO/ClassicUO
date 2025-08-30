@@ -12,10 +12,19 @@ namespace ClassicUO.Ecs;
 internal readonly struct TerrainPlugin : IPlugin
 {
     private struct OnNewChunkRequest { public int Map; public int RangeStartX, RangeStartY, RangeEndX, RangeEndY; }
-    private struct Terrain { }
+    private struct Terrain;
     private struct TerrainChunk { public int X, Y; }
 
-    internal sealed class ChunksLoadedMap : Dictionary<uint, (uint Time, ulong entity)> { }
+    internal sealed class ChunksLoadedMap : Dictionary<uint, (uint Time, ulong entity)>
+    {
+        public bool ContainsKey((int x, int y) key) => ContainsKey(CreateChunkKey(key.x, key.y));
+        public bool TryGetValue((int x, int y) key, out (uint Time, ulong entity) value) => TryGetValue(CreateChunkKey(key.x, key.y), out value);
+        public void Add((int x, int y) key, (uint Time, ulong entity) value) => Add(CreateChunkKey(key.x, key.y), value);
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static uint CreateChunkKey(int x, int y) => (uint)(((x & 0xFFFF) << 16) | (y & 0xFFFF));
+    }
     internal sealed class LastPosition { public int Map = -1; public ushort? LastX, LastY; public (int, int)? LastCameraBounds; public float LastCameraZoom; }
 
     public void Build(Scheduler scheduler)
@@ -84,7 +93,8 @@ internal readonly struct TerrainPlugin : IPlugin
         Res<UOFileManager> fileManager,
         Res<ChunksLoadedMap> chunksLoaded,
         Single<Data<WorldPosition>, With<Player>> playerQuery,
-        Query<Data<TerrainChunk>> query)
+        Query<Data<TerrainChunk>> query
+    )
     {
         (_, var pos) = playerQuery.Get();
 
@@ -101,7 +111,7 @@ internal readonly struct TerrainPlugin : IPlugin
 
             if (chunkX >= startTileX && chunkX <= endTileX && chunkY >= startTileY && chunkY <= endTileY)
             {
-                var key = CreateChunkKey(chunk.Ref.X, chunk.Ref.Y);
+                var key = ChunksLoadedMap.CreateChunkKey(chunk.Ref.X, chunk.Ref.Y);
                 ref var res = ref CollectionsMarshal.GetValueRefOrNullRef(chunksLoaded.Value, key);
                 if (!Unsafe.IsNullRef(ref res))
                 {
@@ -111,8 +121,7 @@ internal readonly struct TerrainPlugin : IPlugin
         }
     }
 
-    private static void EnqueueChunksRequests
-    (
+    private static void EnqueueChunksRequests(
         Res<GameContext> gameCtx,
         Res<LastPosition> lastPos,
         Res<Camera> camera,
@@ -158,8 +167,7 @@ internal readonly struct TerrainPlugin : IPlugin
         });
     }
 
-    private static void LoadChunks
-    (
+    private static void LoadChunks(
         World world,
         Time time,
         Res<UOFileManager> fileManager,
@@ -181,14 +189,13 @@ internal readonly struct TerrainPlugin : IPlugin
                     if (!im.IsValid())
                         continue;
 
-                    var key = CreateChunkKey(chunkX, chunkY);
-                    if (chunksLoaded.Value.ContainsKey(key))
+                    if (chunksLoaded.Value.ContainsKey((chunkX, chunkY)))
                         continue;
 
                     var chunk = world.Entity()
                         .Set(new TerrainChunk() { X = chunkX, Y = chunkY });
 
-                    chunksLoaded.Value.Add(key, ((uint)time.Total + 5000, chunk.ID));
+                    chunksLoaded.Value.Add((chunkX, chunkY), ((uint)time.Total + 5000, chunk.ID));
 
                     im.MapFile.Seek((long)im.MapAddress, System.IO.SeekOrigin.Begin);
                     var cells = im.MapFile.Read<Assets.MapBlock>().Cells;
@@ -298,8 +305,7 @@ internal readonly struct TerrainPlugin : IPlugin
         }
     }
 
-    private static void RemoveEntitiesOutOfRange
-    (
+    private static void RemoveEntitiesOutOfRange(
        Commands commands,
        Time time,
        Res<GameContext> gameCtx,
@@ -359,9 +365,6 @@ internal readonly struct TerrainPlugin : IPlugin
     {
         return Math.Max(Math.Abs(x0 - x1), Math.Abs(y0 - y1));
     }
-
-    [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static uint CreateChunkKey(int x, int y) => (uint)(((x & 0xFFFF) << 16) | (y & 0xFFFF));
 
     private static bool ApplyStretch(
         MapLoader mapLoader,
@@ -554,7 +557,6 @@ internal readonly struct TerrainPlugin : IPlugin
 
         return true;
     }
-
 }
 
 

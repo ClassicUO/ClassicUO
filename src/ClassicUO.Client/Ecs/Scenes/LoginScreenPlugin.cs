@@ -36,7 +36,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
     {
         var root = world.Entity()
             .Add<LoginScene>()
-            .SetUINode(new UINode()
+            .CreateUINode(new UINode()
             {
                 Config = {
                     backgroundColor = new (0.2f, 0.2f, 0.2f, 1),
@@ -56,7 +56,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
 
         var mainMenu = world.Entity()
             .Add<LoginScene>()
-            .SetUINode(new UINode()
+            .CreateUINode(new UINode()
             {
                 Config = {
                     backgroundColor = new (0.2f, 0.2f, 0.2f, 1),

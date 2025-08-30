@@ -16,6 +16,41 @@ using TinyEcs;
 
 namespace ClassicUO.Ecs;
 
+internal static class NetworkEntitiesExt
+{
+    public static EntityView CreateNetworkEntity(this EntityView ent, uint serial)
+    {
+        if (SerialHelper.IsMobile(serial))
+            return ent.CreateMobile(serial);
+        else
+            return ent.CreateItem(serial);
+    }
+
+    public static EntityView CreateMobile(this EntityView ent, uint serial)
+    {
+        if (!SerialHelper.IsMobile(serial))
+            throw new ArgumentException("serial is not a mobile");
+
+        ent.Set(new NetworkSerial() { Value = serial });
+        ent.Set(new MobAnimation());
+        ent.Set(new ScreenPositionOffset());
+        ent.Add<Mobiles>();
+
+        return ent;
+    }
+
+    public static EntityView CreateItem(this EntityView ent, uint serial)
+    {
+        if (SerialHelper.IsMobile(serial))
+            throw new ArgumentException("serial is not an item");
+
+        ent.Set(new NetworkSerial() { Value = serial });
+        ent.Add<Items>();
+
+        return ent;
+    }
+}
+
 sealed class NetworkEntitiesMap
 {
     private readonly Dictionary<uint, ulong> _entities = new();
@@ -39,19 +74,7 @@ sealed class NetworkEntitiesMap
             _entities.Remove(serial);
         }
 
-        var ent = _world.Entity()
-            .Set(new NetworkSerial() { Value = serial });
-
-        if (SerialHelper.IsMobile(serial))
-        {
-            ent.Set(new MobAnimation());
-            ent.Set(new ScreenPositionOffset());
-            ent.Add<Mobiles>();
-        }
-        else
-        {
-            ent.Add<Items>();
-        }
+        var ent = _world.Entity().CreateNetworkEntity(serial);
 
         _entities.Add(serial, ent.ID);
 
@@ -238,8 +261,6 @@ readonly struct InGamePacketsPlugin : IPlugin
             Res<MultiCache> multiCache,
             Res<DelayedAction> delayedActions,
             State<GameState> state,
-            EventWriter<AcceptedStep> acceptedSteps,
-            EventWriter<RejectedStep> rejectedSteps,
             EventWriter<MobileQueuedStep> mobileQueuedSteps,
             EventWriter<TextOverheadEvent> textOverHeadQueue,
             TinyEcs.World world
@@ -931,40 +952,40 @@ readonly struct InGamePacketsPlugin : IPlugin
                 });
             };
 
-            // deny walk
-            packetsMap.Value[0x21] = buffer =>
-            {
-                var reader = new StackDataReader(buffer);
+            // // deny walk
+            // packetsMap.Value[0x21] = buffer =>
+            // {
+            //     var reader = new StackDataReader(buffer);
 
-                byte sequence = reader.ReadUInt8();
-                (var x, var y) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
-                var direction = (Direction)reader.ReadUInt8();
-                var z = reader.ReadInt8();
+            //     byte sequence = reader.ReadUInt8();
+            //     (var x, var y) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
+            //     var direction = (Direction)reader.ReadUInt8();
+            //     var z = reader.ReadInt8();
 
-                rejectedSteps.Enqueue(new()
-                {
-                    Sequence = sequence,
-                    Direction = direction,
-                    X = x,
-                    Y = y,
-                    Z = z
-                });
-            };
+            //     rejectedSteps.Enqueue(new()
+            //     {
+            //         Sequence = sequence,
+            //         Direction = direction,
+            //         X = x,
+            //         Y = y,
+            //         Z = z
+            //     });
+            // };
 
-            // confirm walk
-            packetsMap.Value[0x22] = buffer =>
-            {
-                var reader = new StackDataReader(buffer);
+            // // confirm walk
+            // packetsMap.Value[0x22] = buffer =>
+            // {
+            //     var reader = new StackDataReader(buffer);
 
-                var sequence = reader.ReadUInt8();
-                var notoriety = (NotorietyFlag)reader.ReadUInt8();
+            //     var sequence = reader.ReadUInt8();
+            //     var notoriety = (NotorietyFlag)reader.ReadUInt8();
 
-                acceptedSteps.Enqueue(new()
-                {
-                    Sequence = sequence,
-                    Notoriety = notoriety
-                });
-            };
+            //     acceptedSteps.Enqueue(new()
+            //     {
+            //         Sequence = sequence,
+            //         Notoriety = notoriety
+            //     });
+            // };
 
             // drag animation
             packetsMap.Value[0x23] = buffer =>
@@ -1020,23 +1041,23 @@ readonly struct InGamePacketsPlugin : IPlugin
             //     parentEnt.AddChild(ent);
             // };
 
-            // deny move item
-            packetsMap.Value[0x27] = buffer =>
-            {
-                var reader = new StackDataReader(buffer);
+            // // deny move item
+            // packetsMap.Value[0x27] = buffer =>
+            // {
+            //     var reader = new StackDataReader(buffer);
 
-                var code = reader.ReadUInt8();
-            };
+            //     var code = reader.ReadUInt8();
+            // };
 
-            // end draggin item
-            packetsMap.Value[0x28] = buffer =>
-            {
-            };
+            // // end draggin item
+            // packetsMap.Value[0x28] = buffer =>
+            // {
+            // };
 
-            // drpp item ok
-            packetsMap.Value[0x29] = buffer =>
-            {
-            };
+            // // drpp item ok
+            // packetsMap.Value[0x29] = buffer =>
+            // {
+            // };
 
             // show death screen
             packetsMap.Value[0x2C] = buffer =>

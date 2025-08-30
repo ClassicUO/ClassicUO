@@ -39,7 +39,7 @@ internal readonly struct ServerSelectionPlugin : IPlugin
 
         var root = world.Entity()
             .Add<ServerSelectionScene>()
-            .SetUINode(new UINode()
+            .CreateUINode(new UINode()
             {
                 Config = {
                     backgroundColor = new (0.2f, 0.2f, 0.2f, 1),
@@ -59,7 +59,7 @@ internal readonly struct ServerSelectionPlugin : IPlugin
 
         var serverSelectionLabel = world.Entity()
             .Add<ServerSelectionScene>()
-            .SetUINode(new UINode()
+            .CreateUINode(new UINode()
             {
                 Config = {
                     cornerRadius = cornerRadius,
@@ -93,7 +93,7 @@ internal readonly struct ServerSelectionPlugin : IPlugin
 
         var menu = world.Entity()
             .Add<ServerSelectionScene>()
-            .SetUINode(new UINode()
+            .CreateUINode(new UINode()
             {
                 Config = {
                     cornerRadius = cornerRadius,
@@ -130,7 +130,7 @@ internal readonly struct ServerSelectionPlugin : IPlugin
                 var serverEnt = world.Entity()
                     .Add<ServerSelectionScene>()
                     .Set(server)
-                    .SetUINode(new UINode()
+                    .CreateUINode(new UINode()
                     {
                         Config = {
                             cornerRadius = cornerRadius,

@@ -5,6 +5,7 @@ using System.Runtime.InteropServices;
 using ClassicUO.Assets;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
+using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -57,6 +58,9 @@ readonly struct PlayerMovementPlugin : IPlugin
         scheduler.AddResource(new PlayerStepsContext());
         scheduler.AddEvent<RejectedStep>();
         scheduler.AddEvent<AcceptedStep>();
+
+        var setupPackets = SetupPackets;
+        scheduler.OnStartup(setupPackets);
 
         scheduler.OnEnter
         (
@@ -112,8 +116,50 @@ readonly struct PlayerMovementPlugin : IPlugin
             .RunIf((EventReader<RejectedStep> responses) => !responses.IsEmpty);
     }
 
-    void EnqueuePlayerSteps
-    (
+
+    static void SetupPackets(
+        Res<PacketsMap> packetsMap,
+        EventWriter<AcceptedStep> acceptedSteps,
+        EventWriter<RejectedStep> rejectedSteps
+    )
+    {
+        // deny walk
+        packetsMap.Value[0x21] = buffer =>
+        {
+            var reader = new StackDataReader(buffer);
+
+            byte sequence = reader.ReadUInt8();
+            (var x, var y) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
+            var direction = (Direction)reader.ReadUInt8();
+            var z = reader.ReadInt8();
+
+            rejectedSteps.Enqueue(new()
+            {
+                Sequence = sequence,
+                Direction = direction,
+                X = x,
+                Y = y,
+                Z = z
+            });
+        };
+
+        // confirm walk
+        packetsMap.Value[0x22] = buffer =>
+        {
+            var reader = new StackDataReader(buffer);
+
+            var sequence = reader.ReadUInt8();
+            var notoriety = (NotorietyFlag)reader.ReadUInt8();
+
+            acceptedSteps.Enqueue(new()
+            {
+                Sequence = sequence,
+                Notoriety = notoriety
+            });
+        };
+    }
+
+    static void EnqueuePlayerSteps(
         Local<List<TerrainInfo>> terrainList,
         Res<UOFileManager> fileManager,
         Res<GraphicsDevice> device,
@@ -121,9 +167,12 @@ readonly struct PlayerMovementPlugin : IPlugin
         Res<NetClient> network,
         Res<PlayerStepsContext> playerRequestedSteps,
         Res<Camera> camera,
+        Res<TerrainPlugin.ChunksLoadedMap> chunksLoaded,
+        Query<Data<Children>> childrenQuery,
+        Query<Data<WorldPosition, Graphic>, Filter<Without<IsTile>, Without<IsStatic>, Without<MobAnimation>>> othersQuery,
         Single<Data<WorldPosition, Facing, MobileSteps, MobAnimation, ServerFlags>, With<Player>> playerQuery,
         Query<Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tilesQuery,
-        Query<Data<WorldPosition, Graphic>, Filter<Without<IsTile>, Without<MobAnimation>>> staticsQuery,
+        Query<Data<WorldPosition, Graphic>, Filter<With<IsStatic>, Without<IsTile>, Without<MobAnimation>>> staticsQuery,
         Time time
     )
     {
@@ -137,7 +186,7 @@ readonly struct PlayerMovementPlugin : IPlugin
         var mouseDir = (Direction)ClassicUO.Game.GameCursor.GetMouseDirection((int)center.X, (int)center.Y, (int)mouseCtx.Value.Position.X, (int)mouseCtx.Value.Position.Y, 1);
         var mouseRange = Utility.MathHelper.Hypotenuse(center.X - mouseCtx.Value.Position.X, center.Y - mouseCtx.Value.Position.Y);
         var facing = mouseDir == Direction.North ? Direction.Mask : mouseDir - 1;
-        var run = mouseRange >= 190 || false;
+        var run = mouseRange >= Constants.THREESHOLD_MOUSE_WALK_RUN || false;
 
         (var worldPos, var dir, var mobSteps, var animation, var flags) = playerQuery.Get();
         var hasNoSteps = mobSteps.Ref.Index < 0;
@@ -164,7 +213,7 @@ readonly struct PlayerMovementPlugin : IPlugin
         var newFacing = facing;
 
         var sameDir = playerDir == facing;
-        var canMove = CheckMovement(terrainList, tilesQuery, staticsQuery, fileManager.Value.TileData, facing, ref newX, ref newY, ref newZ);
+        var canMove = CheckMovement(terrainList, chunksLoaded, childrenQuery, othersQuery, tilesQuery, staticsQuery, fileManager.Value.TileData, facing, ref newX, ref newY, ref newZ);
         var isDiagonal = (byte)facing % 2 != 0;
 
         if (isDiagonal)
@@ -177,7 +226,7 @@ readonly struct PlayerMovementPlugin : IPlugin
                     var testX = playerX;
                     var testY = playerY;
                     var testZ = playerZ;
-                    canMove = CheckMovement(terrainList, tilesQuery, staticsQuery, fileManager.Value.TileData, testDir, ref testX, ref testY, ref testZ);
+                    canMove = CheckMovement(terrainList, chunksLoaded, childrenQuery, othersQuery, tilesQuery, staticsQuery, fileManager.Value.TileData, testDir, ref testX, ref testY, ref testZ);
                 }
             }
 
@@ -189,7 +238,7 @@ readonly struct PlayerMovementPlugin : IPlugin
                     newX = playerX;
                     newY = playerY;
                     newZ = playerZ;
-                    canMove = CheckMovement(terrainList, tilesQuery, staticsQuery, fileManager.Value.TileData, newFacing, ref newX, ref newY, ref newZ);
+                    canMove = CheckMovement(terrainList, chunksLoaded, childrenQuery, othersQuery, tilesQuery, staticsQuery, fileManager.Value.TileData, newFacing, ref newX, ref newY, ref newZ);
                 }
             }
         }
@@ -244,7 +293,11 @@ readonly struct PlayerMovementPlugin : IPlugin
         }
     }
 
-    void ParseAcceptedSteps(EventReader<AcceptedStep> acceptedSteps, Res<PlayerStepsContext> playerRequestedSteps, Res<NetClient> network)
+    static void ParseAcceptedSteps(
+        EventReader<AcceptedStep> acceptedSteps,
+        Res<PlayerStepsContext> playerRequestedSteps,
+        Res<NetClient> network
+    )
     {
         foreach (var response in acceptedSteps)
         {
@@ -304,12 +357,15 @@ readonly struct PlayerMovementPlugin : IPlugin
         }
     }
 
-    void ParseDeniedSteps(EventReader<RejectedStep> rejectedSteps, Res<PlayerStepsContext> playerRequestedSteps,
-        Query<Data<WorldPosition, Facing, MobileSteps>, With<Player>> playerQuery)
+    static void ParseDeniedSteps(
+        EventReader<RejectedStep> rejectedSteps,
+        Res<PlayerStepsContext> playerRequestedSteps,
+        Single<Data<WorldPosition, Facing, MobileSteps>, With<Player>> playerQuery
+    )
     {
         Console.WriteLine("step denied");
 
-        (var pos, var dir, var steps) = playerQuery.Single();
+        (var pos, var dir, var steps) = playerQuery.Get();
         foreach (var response in rejectedSteps)
         {
             pos.Ref.X = response.X;
@@ -325,68 +381,121 @@ readonly struct PlayerMovementPlugin : IPlugin
         playerRequestedSteps.Value.ResyncSent = false;
     }
 
-    private static void FillListOfItemsAtPosition
-    (
+    private static void FillListOfItemsAtPosition(
         List<TerrainInfo> list,
+        TerrainPlugin.ChunksLoadedMap chunksLoaded,
+        Query<Data<Children>> childrenQuery,
+        Query<Data<WorldPosition, Graphic>, Filter<Without<IsTile>, Without<IsStatic>, Without<MobAnimation>>> othersQuery,
         Query<Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tileQuery,
-        Query<Data<WorldPosition, Graphic>, Filter<Without<IsTile>, Without<MobAnimation>>> staticsQuery,
+        Query<Data<WorldPosition, Graphic>, Filter<With<IsStatic>, Without<IsTile>, Without<MobAnimation>>> staticsQuery,
         TileDataLoader tileData,
         int x, int y
     )
     {
         list.Clear();
 
-        foreach ((var pos, var graphic, var stretched) in tileQuery)
+        if (!chunksLoaded.TryGetValue((x >> 3, y >> 3), out var val))
+            return;
+
+        if (childrenQuery.Contains(val.entity))
         {
-            if (pos.Ref.X != x || pos.Ref.Y != y)
-                continue;
-
-            if (!((graphic.Ref.Value < 0x01AE && graphic.Ref.Value != 2) || (graphic.Ref.Value > 0x01B5 && graphic.Ref.Value != 0x1DB)))
-                continue;
-
-            ref var landData = ref tileData.LandData[graphic.Ref.Value];
-            var flags = TerrainFlags.ImpassableOrSurface;
-
-            if (!landData.IsImpassable)
+            (_, var children) = childrenQuery.Get(val.entity);
+            foreach (var child in children.Ref)
             {
-                flags = TerrainFlags.ImpassableOrSurface |
-                        TerrainFlags.Surface |
-                        TerrainFlags.Bridge;
-            }
-
-            TerrainInfo tinfo;
-            if (!stretched.IsValid())
-            {
-                tinfo = new()
+                if (tileQuery.Contains(child))
                 {
-                    Flags = flags,
-                    Z = pos.Ref.Z,
-                    AvgZ = pos.Ref.Z,
-                    Height = pos.Ref.Z,
-                    LandStretched = !Unsafe.IsNullRef(ref stretched.Ref),
-                    LandBounds = default,
-                    RealZ = pos.Ref.Z
-                };
-            }
-            else
-            {
-                tinfo = new TerrainInfo()
-                {
-                    Flags = flags,
-                    Z = stretched.Ref.MinZ,
-                    AvgZ = stretched.Ref.AvgZ,
-                    Height = stretched.Ref.AvgZ - stretched.Ref.MinZ,
-                    LandStretched = !Unsafe.IsNullRef(ref stretched.Ref),
-                    LandBounds = stretched.Ref.Offset,
-                    RealZ = pos.Ref.Z
-                };
-            }
+                    (var pos, var graphic, var stretched) = tileQuery.Get(child);
+                    if (pos.Ref.X != x || pos.Ref.Y != y)
+                        continue;
 
-            list.Add(tinfo);
+                    if (!((graphic.Ref.Value < 0x01AE && graphic.Ref.Value != 2) || (graphic.Ref.Value > 0x01B5 && graphic.Ref.Value != 0x1DB)))
+                        continue;
+
+                    ref var landData = ref tileData.LandData[graphic.Ref.Value];
+                    var flags = TerrainFlags.ImpassableOrSurface;
+
+                    if (!landData.IsImpassable)
+                    {
+                        flags = TerrainFlags.ImpassableOrSurface |
+                                TerrainFlags.Surface |
+                                TerrainFlags.Bridge;
+                    }
+
+                    TerrainInfo tinfo;
+                    if (!stretched.IsValid())
+                    {
+                        tinfo = new()
+                        {
+                            Flags = flags,
+                            Z = pos.Ref.Z,
+                            AvgZ = pos.Ref.Z,
+                            Height = pos.Ref.Z,
+                            LandStretched = !Unsafe.IsNullRef(ref stretched.Ref),
+                            LandBounds = default,
+                            RealZ = pos.Ref.Z
+                        };
+                    }
+                    else
+                    {
+                        tinfo = new TerrainInfo()
+                        {
+                            Flags = flags,
+                            Z = stretched.Ref.MinZ,
+                            AvgZ = stretched.Ref.AvgZ,
+                            Height = stretched.Ref.AvgZ - stretched.Ref.MinZ,
+                            LandStretched = !Unsafe.IsNullRef(ref stretched.Ref),
+                            LandBounds = stretched.Ref.Offset,
+                            RealZ = pos.Ref.Z
+                        };
+                    }
+
+                    list.Add(tinfo);
+                }
+
+                if (staticsQuery.Contains(child))
+                {
+                    (var pos, var graphic) = staticsQuery.Get(child);
+                    if (pos.Ref.X != x || pos.Ref.Y != y)
+                        continue;
+
+                    ref var staticData = ref tileData.StaticData[graphic.Ref.Value];
+                    TerrainFlags flags = 0;
+
+                    if (staticData.IsImpassable || staticData.IsSurface)
+                    {
+                        flags = TerrainFlags.ImpassableOrSurface;
+                    }
+
+                    if (!staticData.IsImpassable)
+                    {
+                        if (staticData.IsSurface)
+                        {
+                            flags |= TerrainFlags.Surface;
+                        }
+
+                        if (staticData.IsBridge)
+                        {
+                            flags |= TerrainFlags.Bridge;
+                        }
+                    }
+
+                    if (flags != 0)
+                    {
+                        var tinfo = new TerrainInfo()
+                        {
+                            Flags = flags,
+                            Z = pos.Ref.Z,
+                            AvgZ = pos.Ref.Z + (staticData.IsBridge ? staticData.Height / 2 : staticData.Height),
+                            Height = staticData.Height
+                        };
+
+                        list.Add(tinfo);
+                    }
+                }
+            }
         }
 
-
-        foreach ((var pos, var graphic) in staticsQuery)
+        foreach ((var pos, var graphic) in othersQuery)
         {
             if (pos.Ref.X != x || pos.Ref.Y != y)
                 continue;
@@ -427,11 +536,13 @@ readonly struct PlayerMovementPlugin : IPlugin
         }
     }
 
-    private static void GetMinMaxZ
-    (
+    private static void GetMinMaxZ(
         List<TerrainInfo> list,
-        Query<TinyEcs.Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tileQuery,
-        Query<TinyEcs.Data<WorldPosition, Graphic>, TinyEcs.Filter<Without<IsTile>, Without<MobAnimation>>> staticsQuery,
+        TerrainPlugin.ChunksLoadedMap chunksLoaded,
+        Query<Data<Children>> childrenQuery,
+        Query<Data<WorldPosition, Graphic>, Filter<Without<IsTile>, Without<IsStatic>, Without<MobAnimation>>> othersQuery,
+        Query<Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tileQuery,
+        Query<Data<WorldPosition, Graphic>, Filter<With<IsStatic>, Without<IsTile>, Without<MobAnimation>>> staticsQuery,
         TileDataLoader tileData,
         Direction facing,
         int playerX, int playerY, int playerZ,
@@ -468,7 +579,7 @@ readonly struct PlayerMovementPlugin : IPlugin
         newDir &= 7;
         var newX = (ushort)(playerX + offX[newDir ^ 4]);
         var newY = (ushort)(playerY + offY[newDir ^ 4]);
-        FillListOfItemsAtPosition(list, tileQuery, staticsQuery, tileData, newX, newY);
+        FillListOfItemsAtPosition(list, chunksLoaded, childrenQuery, othersQuery, tileQuery, staticsQuery, tileData, newX, newY);
 
         maxZ = playerZ;
         minZ = -128;
@@ -524,11 +635,13 @@ readonly struct PlayerMovementPlugin : IPlugin
         maxZ += 2;
     }
 
-    private static bool CheckMovement
-    (
+    private static bool CheckMovement(
         List<TerrainInfo> list,
-        Query<TinyEcs.Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tileQuery,
-        Query<TinyEcs.Data<WorldPosition, Graphic>, TinyEcs.Filter<Without<IsTile>, Without<MobAnimation>>> staticsQuery,
+        TerrainPlugin.ChunksLoadedMap chunksLoaded,
+        Query<Data<Children>> childrenQuery,
+        Query<Data<WorldPosition, Graphic>, Filter<Without<IsTile>, Without<IsStatic>, Without<MobAnimation>>> othersQuery,
+        Query<Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tileQuery,
+        Query<Data<WorldPosition, Graphic>, Filter<With<IsStatic>, Without<IsTile>, Without<MobAnimation>>> staticsQuery,
         TileDataLoader tileData,
         Direction facing,
         ref ushort playerX, ref ushort playerY, ref sbyte playerZ
@@ -537,9 +650,9 @@ readonly struct PlayerMovementPlugin : IPlugin
         GetNewXY(facing, out var offsetX, out var offsetY);
         var newX = (ushort)(playerX + offsetX);
         var newY = (ushort)(playerY + offsetY);
-        GetMinMaxZ(list, tileQuery, staticsQuery, tileData, facing, newX, newY, playerZ, out var minZ, out var maxZ);
+        GetMinMaxZ(list, chunksLoaded, childrenQuery, othersQuery, tileQuery, staticsQuery, tileData, facing, newX, newY, playerZ, out var minZ, out var maxZ);
 
-        FillListOfItemsAtPosition(list, tileQuery, staticsQuery, tileData, newX, newY);
+        FillListOfItemsAtPosition(list, chunksLoaded, childrenQuery, othersQuery, tileQuery, staticsQuery, tileData, newX, newY);
         if (list.Count == 0)
             return false;
 
@@ -611,7 +724,11 @@ readonly struct PlayerMovementPlugin : IPlugin
         return canMove;
     }
 
-    private static void GetNewXY(Direction direction, out int offsetX, out int offsetY)
+    private static void GetNewXY(
+        Direction direction,
+        out int offsetX,
+        out int offsetY
+    )
     {
         direction &= Direction.Mask;
         offsetX = 0; offsetY = 0;

@@ -358,7 +358,7 @@ internal static class GuiPluginEx
     /// <param name="ent"></param>
     /// <param name="node"></param>
     /// <returns></returns>
-    public static EntityView SetUINode(this EntityView ent, UINode node)
+    public static EntityView CreateUINode(this EntityView ent, UINode node)
     {
         if (node.Config.id.id == 0)
             node.Config.id = Clay.Id(ent.ID.RealId().ToString());

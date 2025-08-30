@@ -79,7 +79,7 @@ internal readonly struct ContainersPlugin : IPlugin
             {
                 ref readonly var gumpInfo = ref assets.Value.Gumps.GetGump(ev.Graphic);
                 var ent = entitiesMap.Value.GetOrCreate(ev.Serial)
-                    .SetUINode
+                    .CreateUINode
                     (
                         new UINode()
                         {
@@ -191,7 +191,7 @@ internal readonly struct ContainersPlugin : IPlugin
 
             ent.Add<UIMovable>()
                 .Set(new UIMouseAction())
-                .SetUINode
+                .CreateUINode
                 (
                     new UINode()
                     {
@@ -272,7 +272,7 @@ internal readonly struct ContainersPlugin : IPlugin
 
                 ent.Add<UIMovable>()
                     .Set(new UIMouseAction())
-                    .SetUINode
+                    .CreateUINode
                     (
                         new UINode()
                         {

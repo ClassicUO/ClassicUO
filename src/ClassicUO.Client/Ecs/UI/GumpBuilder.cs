@@ -19,7 +19,7 @@ internal sealed class GumpBuilder
     public EntityView AddLabel(string text, Vector2? position = null, Vector2? size = null)
     {
         var ent = _world.Entity()
-            .SetUINode(new UINode()
+            .CreateUINode(new UINode()
             {
                 Config = {
                     // id = Clay.Id(ent.ID.ToString()),
@@ -62,7 +62,7 @@ internal sealed class GumpBuilder
     {
         ref readonly var gumpInfo = ref _assets.Gumps.GetGump(id);
         var ent = _world.Entity()
-            .SetUINode(new UINode()
+            .CreateUINode(new UINode()
             {
                 Config = {
                     // id = Clay.Id(ent.ID.ToString()),
@@ -95,7 +95,7 @@ internal sealed class GumpBuilder
     {
         ref readonly var gumpInfo = ref _assets.Gumps.GetGump(id);
         var ent = _world.Entity()
-            .SetUINode(new UINode()
+            .CreateUINode(new UINode()
             {
                 Config = {
                     // id = Clay.Id(ent.ID.ToString()),

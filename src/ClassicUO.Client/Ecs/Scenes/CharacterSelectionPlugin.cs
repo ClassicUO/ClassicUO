@@ -37,7 +37,7 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
     {
         var root = world.Entity()
             .Add<CharacterSelectionScene>()
-            .SetUINode(new UINode()
+            .CreateUINode(new UINode()
             {
                 Config = {
                     backgroundColor = new (0.2f, 0.2f, 0.2f, 1),
@@ -57,7 +57,7 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
 
         var characterSelectionLabel = world.Entity()
             .Add<CharacterSelectionScene>()
-            .SetUINode(new UINode()
+            .CreateUINode(new UINode()
             {
                 Config = {
                         backgroundColor = new (0.3f, 0.3f, 0.3f, 1),
@@ -90,7 +90,7 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
 
         var menu = world.Entity()
             .Add<CharacterSelectionScene>()
-            .SetUINode(new UINode()
+            .CreateUINode(new UINode()
             {
                 Config = {
                     backgroundColor = new (0.3f, 0.3f, 0.3f, 1),
@@ -126,7 +126,7 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
                 var characterEnt = world.Entity()
                     .Add<CharacterSelectionScene>()
                     .Set(character)
-                    .SetUINode(new UINode()
+                    .CreateUINode(new UINode()
                     {
                         Config = {
                             backgroundColor = new (0.6f, 0.6f, 0.6f, 1),

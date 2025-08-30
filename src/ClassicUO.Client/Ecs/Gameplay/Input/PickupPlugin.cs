@@ -1,4 +1,5 @@
 using System;
+using ClassicUO.IO;
 using ClassicUO.Network;
 using TinyEcs;
 
@@ -10,9 +11,12 @@ internal readonly struct PickupPlugin : IPlugin
     {
         scheduler.AddResource(new GrabbedItem());
 
+        var packetSetup = PacketSetup;
         var pickupItemDelayedFn = PickupItem;
         var pickupItemFn = PickupItem;
         var dropItemFn = DropItem;
+
+        scheduler.OnStartup(packetSetup);
 
         scheduler.OnUpdate(pickupItemDelayedFn)
             .RunIf((SchedulerState sched) => sched.ResourceExists<SelectedEntity>() && sched.ResourceExists<GrabbedItem>())
@@ -87,7 +91,34 @@ internal readonly struct PickupPlugin : IPlugin
             .RunIf((Res<MouseContext> mouseCtx) => mouseCtx.Value.IsReleased(Input.MouseButtonType.Left));
     }
 
-    void PickupItem(
+
+    static void PacketSetup(
+        Res<PacketsMap> packetsMap,
+        Res<GrabbedItem> grabbedItem
+    )
+    {
+        // deny move item
+        packetsMap.Value[0x27] = buffer =>
+        {
+            var reader = new StackDataReader(buffer);
+            var code = reader.ReadUInt8();
+
+            grabbedItem.Value.Clear();
+        };
+
+        // end draggin item
+        packetsMap.Value[0x28] = buffer =>
+        {
+            grabbedItem.Value.Clear();
+        };
+
+        // drop item ok
+        packetsMap.Value[0x29] = buffer =>
+        {
+        };
+    }
+
+    static void PickupItem(
         World world,
         Res<SelectedEntity> selectedEntity,
         Res<GrabbedItem> grabbedItem,
@@ -100,29 +131,40 @@ internal readonly struct PickupPlugin : IPlugin
         Console.WriteLine("pickup item serial: {0} amount: {1}", serial.Ref.Value, amount.Ref.Value);
         network.Value.Send_PickUpRequest(serial.Ref.Value, (ushort)amount.Ref.Value);
 
+        grabbedItem.Value.Clear();
+        grabbedItem.Value.IsActive = true;
         grabbedItem.Value.Serial = serial.Ref.Value;
         grabbedItem.Value.Graphic = graphic.Ref.Value;
         grabbedItem.Value.Hue = hue.Ref.Value;
         grabbedItem.Value.Amount = amount.Ref.Value;
     }
 
-    void DropItem(
+    static void DropItem(
         World world,
         Res<SelectedEntity> selectedEntity,
         Res<GrabbedItem> grabbedItem,
         Res<NetClient> network,
-        Res<NetworkEntitiesMap> networkEntities
+        Res<NetworkEntitiesMap> networkEntities,
+        Query<Data<NetworkSerial, WorldPosition>, Optional<NetworkSerial>> query
     )
     {
         // TODO: add all scenarios
-        var targetEntity = world.Entity(selectedEntity.Value.Entity);
-        var targetSerial = targetEntity.Has<NetworkSerial>() ? targetEntity.Get<NetworkSerial>().Value : 0xFFFF_FFFF;
-        (ushort targetX, ushort targetY, sbyte targetZ) = targetEntity.Get<WorldPosition>();
-        if (targetSerial != 0xFFFF_FFFF)
+
+        if (!query.Contains(selectedEntity.Value.Entity))
+        {
+            Console.WriteLine("no target entity found for drop item");
+            return;
+        }
+
+        (var targetEntity, var targetSerial, var targetWorldPos) = query.Get(selectedEntity.Value.Entity);
+        var serial = targetSerial.IsValid() ? targetSerial.Ref.Value : 0xFFFF_FFFF;
+
+        (ushort targetX, ushort targetY, sbyte targetZ) = targetWorldPos.Ref;
+        if (serial != 0xFFFF_FFFF)
             (targetX, targetY, targetZ) = (0, 0, 0);
 
-        Console.WriteLine("drop item to {0}", targetEntity.ID);
-        network.Value.Send_DropRequest(grabbedItem.Value.Serial, targetX, targetY, targetZ, 0, targetSerial);
+        Console.WriteLine("drop item to {0}", targetEntity.Ref.ID);
+        network.Value.Send_DropRequest(grabbedItem.Value.Serial, targetX, targetY, targetZ, 0, serial);
 
         grabbedItem.Value.Clear();
     }
@@ -130,6 +172,7 @@ internal readonly struct PickupPlugin : IPlugin
 
 internal sealed class GrabbedItem
 {
+    public bool IsActive { get; set; }
     public uint Serial { get; set; }
     public ushort Graphic { get; set; }
     public ushort Hue { get; set; }
@@ -138,6 +181,7 @@ internal sealed class GrabbedItem
 
     public void Clear()
     {
+        IsActive = false;
         Serial = 0;
         Graphic = 0;
         Hue = 0;
