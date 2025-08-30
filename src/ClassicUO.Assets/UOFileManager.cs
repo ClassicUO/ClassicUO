@@ -49,7 +49,7 @@ namespace ClassicUO.Assets
 
         public ClientVersion Version { get; }
         public string BasePath { get; }
-        public bool IsUOPInstallation { get; private set; }
+        public bool IsUOPInstallation { get; set; }
 
         public AnimationsLoader Animations { get; }
         public AnimDataLoader AnimData { get; }
