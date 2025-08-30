@@ -168,6 +168,7 @@ readonly struct PlayerMovementPlugin : IPlugin
         Res<PlayerStepsContext> playerRequestedSteps,
         Res<Camera> camera,
         Res<TerrainPlugin.ChunksLoadedMap> chunksLoaded,
+        Res<MultiCache> multiCache,
         Query<Data<Children>> childrenQuery,
         Query<Data<WorldPosition, Graphic>, Filter<Without<IsTile>, Without<IsStatic>, Without<MobAnimation>>> othersQuery,
         Single<Data<WorldPosition, Facing, MobileSteps, MobAnimation, ServerFlags>, With<Player>> playerQuery,
@@ -213,7 +214,20 @@ readonly struct PlayerMovementPlugin : IPlugin
         var newFacing = facing;
 
         var sameDir = playerDir == facing;
-        var canMove = CheckMovement(terrainList, chunksLoaded, childrenQuery, othersQuery, tilesQuery, staticsQuery, fileManager.Value.TileData, facing, ref newX, ref newY, ref newZ);
+        var canMove = CheckMovement(
+            terrainList,
+            chunksLoaded,
+            multiCache,
+            childrenQuery,
+            othersQuery,
+            tilesQuery,
+            staticsQuery,
+            fileManager.Value.TileData,
+            facing,
+            ref newX,
+            ref newY,
+            ref newZ
+        );
         var isDiagonal = (byte)facing % 2 != 0;
 
         if (isDiagonal)
@@ -226,7 +240,20 @@ readonly struct PlayerMovementPlugin : IPlugin
                     var testX = playerX;
                     var testY = playerY;
                     var testZ = playerZ;
-                    canMove = CheckMovement(terrainList, chunksLoaded, childrenQuery, othersQuery, tilesQuery, staticsQuery, fileManager.Value.TileData, testDir, ref testX, ref testY, ref testZ);
+                    canMove = CheckMovement(
+                        terrainList,
+                        chunksLoaded,
+                        multiCache,
+                        childrenQuery,
+                        othersQuery,
+                        tilesQuery,
+                        staticsQuery,
+                        fileManager.Value.TileData,
+                        testDir,
+                        ref testX,
+                        ref testY,
+                        ref testZ
+                    );
                 }
             }
 
@@ -238,7 +265,20 @@ readonly struct PlayerMovementPlugin : IPlugin
                     newX = playerX;
                     newY = playerY;
                     newZ = playerZ;
-                    canMove = CheckMovement(terrainList, chunksLoaded, childrenQuery, othersQuery, tilesQuery, staticsQuery, fileManager.Value.TileData, newFacing, ref newX, ref newY, ref newZ);
+                    canMove = CheckMovement(
+                        terrainList,
+                        chunksLoaded,
+                        multiCache,
+                        childrenQuery,
+                        othersQuery,
+                        tilesQuery,
+                        staticsQuery,
+                        fileManager.Value.TileData,
+                        newFacing,
+                        ref newX,
+                        ref newY,
+                        ref newZ
+                    );
                 }
             }
         }
@@ -384,6 +424,7 @@ readonly struct PlayerMovementPlugin : IPlugin
     private static void FillListOfItemsAtPosition(
         List<TerrainInfo> list,
         TerrainPlugin.ChunksLoadedMap chunksLoaded,
+        MultiCache multiCache,
         Query<Data<Children>> childrenQuery,
         Query<Data<WorldPosition, Graphic>, Filter<Without<IsTile>, Without<IsStatic>, Without<MobAnimation>>> othersQuery,
         Query<Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tileQuery,
@@ -495,12 +536,21 @@ readonly struct PlayerMovementPlugin : IPlugin
             }
         }
 
-        foreach ((var pos, var graphic) in othersQuery)
+        foreach ((var ent, var pos, var graphic) in othersQuery)
         {
             if (pos.Ref.X != x || pos.Ref.Y != y)
                 continue;
 
-            ref var staticData = ref tileData.StaticData[graphic.Ref.Value];
+            var grapicValue = graphic.Ref.Value;
+            if (ent.Ref.Has<HouseRevision>())
+            {
+                var multiInfo = multiCache.GetMulti(grapicValue);
+                if (multiInfo.Id != 0)
+                    grapicValue = multiInfo.Id;
+            }
+
+
+            ref var staticData = ref tileData.StaticData[grapicValue];
             TerrainFlags flags = 0;
 
             if (staticData.IsImpassable || staticData.IsSurface)
@@ -539,6 +589,7 @@ readonly struct PlayerMovementPlugin : IPlugin
     private static void GetMinMaxZ(
         List<TerrainInfo> list,
         TerrainPlugin.ChunksLoadedMap chunksLoaded,
+        MultiCache multiCache,
         Query<Data<Children>> childrenQuery,
         Query<Data<WorldPosition, Graphic>, Filter<Without<IsTile>, Without<IsStatic>, Without<MobAnimation>>> othersQuery,
         Query<Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tileQuery,
@@ -579,7 +630,18 @@ readonly struct PlayerMovementPlugin : IPlugin
         newDir &= 7;
         var newX = (ushort)(playerX + offX[newDir ^ 4]);
         var newY = (ushort)(playerY + offY[newDir ^ 4]);
-        FillListOfItemsAtPosition(list, chunksLoaded, childrenQuery, othersQuery, tileQuery, staticsQuery, tileData, newX, newY);
+        FillListOfItemsAtPosition(
+            list,
+            chunksLoaded,
+            multiCache,
+            childrenQuery,
+            othersQuery,
+            tileQuery,
+            staticsQuery,
+            tileData,
+            newX,
+            newY
+        );
 
         maxZ = playerZ;
         minZ = -128;
@@ -638,6 +700,7 @@ readonly struct PlayerMovementPlugin : IPlugin
     private static bool CheckMovement(
         List<TerrainInfo> list,
         TerrainPlugin.ChunksLoadedMap chunksLoaded,
+        MultiCache multiCache,
         Query<Data<Children>> childrenQuery,
         Query<Data<WorldPosition, Graphic>, Filter<Without<IsTile>, Without<IsStatic>, Without<MobAnimation>>> othersQuery,
         Query<Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tileQuery,
@@ -650,9 +713,36 @@ readonly struct PlayerMovementPlugin : IPlugin
         GetNewXY(facing, out var offsetX, out var offsetY);
         var newX = (ushort)(playerX + offsetX);
         var newY = (ushort)(playerY + offsetY);
-        GetMinMaxZ(list, chunksLoaded, childrenQuery, othersQuery, tileQuery, staticsQuery, tileData, facing, newX, newY, playerZ, out var minZ, out var maxZ);
+        GetMinMaxZ(
+            list,
+            chunksLoaded,
+            multiCache,
+            childrenQuery,
+            othersQuery,
+            tileQuery,
+            staticsQuery,
+            tileData,
+            facing,
+            newX,
+            newY,
+            playerZ,
+            out var minZ,
+            out var maxZ
+        );
 
-        FillListOfItemsAtPosition(list, chunksLoaded, childrenQuery, othersQuery, tileQuery, staticsQuery, tileData, newX, newY);
+        FillListOfItemsAtPosition(
+            list,
+            chunksLoaded,
+            multiCache,
+            childrenQuery,
+            othersQuery,
+            tileQuery,
+            staticsQuery,
+            tileData,
+            newX,
+            newY
+        );
+
         if (list.Count == 0)
             return false;
 
@@ -691,7 +781,7 @@ readonly struct PlayerMovementPlugin : IPlugin
                         if ((temptInfo.Flags & (TerrainFlags.Surface | TerrainFlags.Bridge)) != 0)
                         {
                             if (temptInfo.AvgZ >= currentZ && tinfo.Z - temptInfo.AvgZ >= ClassicUO.Game.Constants.DEFAULT_BLOCK_HEIGHT &&
-                                (temptInfo.AvgZ <= maxZ && temptInfo.Flags.HasFlag(TerrainFlags.Surface) || temptInfo.Flags.HasFlag(TerrainFlags.Bridge) && temptInfo.Z <= maxZ))
+                                (temptInfo.AvgZ <= maxZ && temptInfo.Flags.HasFlag(TerrainFlags.Surface) || (temptInfo.Flags.HasFlag(TerrainFlags.Bridge) && temptInfo.Z <= maxZ)))
                             {
                                 var delta = Math.Abs(playerZ - temptInfo.AvgZ);
                                 if (delta < currentTempZ)
@@ -769,10 +859,10 @@ readonly struct PlayerMovementPlugin : IPlugin
     [Flags]
     private enum TerrainFlags : uint
     {
-        ImpassableOrSurface = 0x01,
-        Surface = 0x02,
-        Bridge = 0x04,
-        NoDiagonal = 0x08
+        ImpassableOrSurface = 0x00000001,
+        Surface = 0x00000002,
+        Bridge = 0x00000004,
+        NoDiagonal = 0x00000008
     }
 
     private struct TerrainInfo : IComparable<TerrainInfo>
