@@ -15,14 +15,9 @@ namespace ClassicUO.Utility
                 Directory.CreateDirectory(path);
             }
 
-            char[] invalid = Path.GetInvalidFileNameChars();
-
             for (int i = 0; i < parts.Length; i++)
             {
-                for (int j = 0; j < invalid.Length; j++)
-                {
-                    parts[i] = parts[i].Replace(invalid[j].ToString(), "");
-                }
+                ReplaceInvalidPathCharacters(parts[i]);
             }
 
             StringBuilder sb = new StringBuilder();
@@ -40,6 +35,17 @@ namespace ClassicUO.Utility
 
                 path = r;
                 sb.Clear();
+            }
+
+            return path;
+        }
+
+        public static string ReplaceInvalidPathCharacters(string path)
+        {
+            char[] invalid = Path.GetInvalidFileNameChars();
+            for (int j = 0; j < invalid.Length; j++)
+            {
+                path = path.Replace(invalid[j].ToString(), "");
             }
 
             return path;
