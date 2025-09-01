@@ -1128,7 +1128,8 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!_mapCache.TryGetValue(mapFile.FilePath, out var fileMapPath))
                 {
                     //Delete old map cache files
-                    Directory.GetFiles(_mapsCachePath, "map" + mapIndex + "_*.png").ForEach(s => File.Delete(s));
+                    if (Directory.Exists(_mapsCachePath))
+                        Directory.GetFiles(_mapsCachePath, "map" + mapIndex + "_*.png").ForEach(s => File.Delete(s));
 
                     using var mapReader = new BinaryReader(File.Open(mapFile.FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
                     using var staticsReader = new BinaryReader(File.Open(staticFile.FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
