@@ -159,46 +159,56 @@ namespace ClassicUO.Game.Map
                 const float MAG_0 = 80f / 100f;
                 const float MAG_1 = 100f / 80f;
 
-                for (int i = 0; i < bufferBlock.Length - 1; i++)
+                for (int y = 0; y < 8; ++y)
                 {
-                    sbyte z0 = bufferBlockZ[i];
-                    sbyte z1 = z0;
-                    if (i < bufferBlock.Length - 1)
-                        z1 = bufferBlockZ[i + 1];
-
-                    if (z0 == z1)
+                    for (int x = 0; x < 8; ++x)
                     {
-                        continue;
-                    }
+                        int blockCurrent = y * 8 + x;
+                        int blockNext = (y + 1) * 8 + x;
 
-                    ref uint cc = ref bufferBlock[i];
-
-                    if (cc == 0)
-                    {
-                        continue;
-                    }
-
-                    byte r = (byte)(cc & 0xFF);
-                    byte g = (byte)((cc >> 8) & 0xFF);
-                    byte b = (byte)((cc >> 16) & 0xFF);
-                    byte a = (byte)((cc >> 24) & 0xFF);
-
-                    if (r != 0 || g != 0 || b != 0)
-                    {
-                        if (z0 < z1)
+                        //Reached last line, nothing to compare with
+                        if (y == 7)
                         {
-                            r = (byte)Math.Min(0xFF, r * MAG_0);
-                            g = (byte)Math.Min(0xFF, g * MAG_0);
-                            b = (byte)Math.Min(0xFF, b * MAG_0);
-                        }
-                        else
-                        {
-                            r = (byte)Math.Min(0xFF, r * MAG_1);
-                            g = (byte)Math.Min(0xFF, g * MAG_1);
-                            b = (byte)Math.Min(0xFF, b * MAG_1);
+                            break;
                         }
 
-                        cc = (uint)(r | (g << 8) | (b << 16) | (a << 24));
+                        sbyte z0 = bufferBlockZ[++blockCurrent];
+                        sbyte z1 = bufferBlockZ[blockNext];
+
+                        if (z0 == z1)
+                        {
+                            continue;
+                        }
+
+                        ref uint cc = ref bufferBlock[blockCurrent];
+
+                        if (cc == 0)
+                        {
+                            continue;
+                        }
+
+                        byte r = (byte)(cc & 0xFF);
+                        byte g = (byte)((cc >> 8) & 0xFF);
+                        byte b = (byte)((cc >> 16) & 0xFF);
+                        byte a = (byte)((cc >> 24) & 0xFF);
+
+                        if (r != 0 || g != 0 || b != 0)
+                        {
+                            if (z0 < z1)
+                            {
+                                r = (byte)Math.Min(0xFF, r * MAG_0);
+                                g = (byte)Math.Min(0xFF, g * MAG_0);
+                                b = (byte)Math.Min(0xFF, b * MAG_0);
+                            }
+                            else
+                            {
+                                r = (byte)Math.Min(0xFF, r * MAG_1);
+                                g = (byte)Math.Min(0xFF, g * MAG_1);
+                                b = (byte)Math.Min(0xFF, b * MAG_1);
+                            }
+
+                            cc = (uint)(r | (g << 8) | (b << 16) | (a << 24));
+                        }
                     }
                 }
 

@@ -1127,6 +1127,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (!_mapCache.TryGetValue(mapFile.FilePath, out var fileMapPath))
                 {
+                    //Delete old map cache files
+                    Directory.GetFiles(_mapsCachePath, "map" + mapIndex + "_*.png").ForEach(s => File.Delete(s));
+
                     using var mapReader = new BinaryReader(File.Open(mapFile.FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
                     using var staticsReader = new BinaryReader(File.Open(staticFile.FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
 
@@ -1379,9 +1382,13 @@ namespace ClassicUO.Game.UI.Gumps
             (
                 () =>
                 {
-                    // Adjust map coordinates based on the block to reload
-                    int startMapX = mapBlockX << 3;  // Multiply by 8 to get the actual map coordinate
-                    int startMapY = mapBlockY << 3;  // Multiply by 8 to get the actual map coordinate
+                    const int OFFSET_PIX = 2;
+                    const int OFFSET_PIX_HALF = OFFSET_PIX / 2;
+
+                    //Adjust map coordinates based on the block to reload
+                    //Multiply by 8 to get the actual map coordinate
+                    int startMapX = (mapBlockX << 3) + OFFSET_PIX_HALF;
+                    int startMapY = (mapBlockY << 3) + OFFSET_PIX_HALF;
 
                     int blockWidth = 8;
                     int blockHeight = 8;
@@ -1392,6 +1399,11 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
             );
+        }
+
+        public static void ClearMapCache()
+        {
+            _mapCache?.Clear();
         }
 
         internal class ZonesFileZoneData
