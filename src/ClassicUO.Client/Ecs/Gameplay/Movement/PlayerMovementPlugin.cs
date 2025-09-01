@@ -542,13 +542,13 @@ readonly struct PlayerMovementPlugin : IPlugin
                 continue;
 
             var grapicValue = graphic.Ref.Value;
+            // TODO: use Optional<HouseRevision> in query
             if (ent.Ref.Has<HouseRevision>())
             {
                 var multiInfo = multiCache.GetMulti(grapicValue);
                 if (multiInfo.Id != 0)
                     grapicValue = multiInfo.Id;
             }
-
 
             ref var staticData = ref tileData.StaticData[grapicValue];
             TerrainFlags flags = 0;

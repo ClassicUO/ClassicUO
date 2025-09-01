@@ -67,6 +67,23 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         var cleanupFn = Cleanup;
         scheduler.OnExit(GameState.GameScreen, cleanupFn);
 
+        scheduler.OnUpdate((
+            Query<Data<WorldPosition>, Without<ScreenPosition>> query2,
+            Query<Data<WorldPosition, ScreenPosition>, Changed<WorldPosition>> query
+        ) =>
+        {
+            foreach ((var ent, var worldPos) in query2)
+            {
+                var iso = worldPos.Ref.WorldToScreen();
+                ent.Ref.Set(new ScreenPosition() { Value = iso });
+            }
+
+            foreach ((var worldPos, var screenPos) in query)
+            {
+                var iso = worldPos.Ref.WorldToScreen();
+                screenPos.Ref.Value = iso;
+            }
+        });
 
         var beginRenderingFn = BeginRendering;
         var renderingFn = Rendering;
@@ -90,20 +107,6 @@ internal readonly struct WorldRenderingPlugin : IPlugin
     private static void Cleanup(Res<SelectedEntity> selectedEntity)
     {
         selectedEntity.Value.Clear();
-    }
-
-
-    private struct MaxZInfo
-    {
-        public int? MaxZ;
-        public int? MaxZGround;
-        public int? MaxZRoof;
-        public bool DrawRoof;
-        public bool IsSameTile;
-        public bool IsTileAhead;
-        public bool IsUnderStatic;
-
-        public readonly bool IsUnderRoof => IsSameTile && IsTileAhead;
     }
 
     private static void ShowTextOverhead(
@@ -142,8 +145,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         batch.Value.GraphicsDevice.Viewport = viewport;
     }
 
-    private static void Rendering
-    (
+    private static void Rendering(
         TinyEcs.World world,
         Res<SelectedEntity> selectedEntity,
         Res<GameContext> gameCtx,
@@ -154,19 +156,21 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         Local<(int lastPosX, int lastPosY, int lastPosZ)?> lastPos,
         Local<MaxZInfo> workingZInfo,
         Single<Data<WorldPosition>, With<Player>> queryPlayer,
-        Query<Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> queryTiles,
-        Query<Data<WorldPosition, Graphic, Hue>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>>> queryStatics,
+        Query<Data<WorldPosition, ScreenPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> queryTiles,
+        Query<Data<WorldPosition, ScreenPosition, Graphic, Hue>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>>> queryStatics,
         Query<Data<WorldPosition, Graphic, Hue, NetworkSerial, ScreenPositionOffset, Facing, MobAnimation, MobileSteps>,
             Filter<Without<ContainedInto>, Optional<Facing>, Optional<MobAnimation>, Optional<MobileSteps>>> queryBodyOnly,
         Query<Data<EquipmentSlots, ScreenPositionOffset, WorldPosition, Graphic, Facing, MobileSteps, MobAnimation>,
             Filter<Without<ContainedInto>, Optional<MobileSteps>, Optional<MobAnimation>>> queryEquipmentSlots
     )
     {
+        // Setup rendering state
         batch.Value.Begin(null, camera.Value.ViewTransformMatrix);
         batch.Value.SetBrightlight(1.7f);
         batch.Value.SetSampler(SamplerState.PointClamp);
         batch.Value.SetStencil(DepthStencilState.Default);
 
+        // Get player position and calculate visibility information
         (_, var playerPos) = queryPlayer.Get();
         (var playerX, var playerY, var playerZ) = playerPos.Ref;
 
@@ -193,6 +197,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             lastPos.Value = (playerX, playerY, playerZ);
         }
 
+        // Calculate maxZ based on environment
         if (backupZInfo.IsUnderStatic && backupZInfo.IsUnderRoof)
         {
             maxZ = backupZInfo.MaxZRoof < backupZInfo.MaxZ ? backupZInfo.MaxZRoof : backupZInfo.MaxZ;
@@ -220,6 +225,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             maxZ = playerZ16;
         }
 
+        // Calculate camera-related values once
         var center = Isometric.IsoToScreen(gameCtx.Value.CenterX, gameCtx.Value.CenterY, gameCtx.Value.CenterZ);
         center.X -= camera.Value.Bounds.Width / 2f;
         center.Y -= camera.Value.Bounds.Height / 2f;
@@ -231,38 +237,92 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         selectedEntity.Value.Clear();
 
         var cameraBounds = camera.Value.Bounds;
-
         var drawOffset = (int)(44 / camera.Value.Zoom);
         cameraBounds.Location = camera.Value.ScreenToWorld(new Point(-drawOffset, -drawOffset));
         var s = camera.Value.ScreenToWorld(new Point(cameraBounds.Width + drawOffset, cameraBounds.Height + drawOffset));
         cameraBounds.Width = s.X;
         cameraBounds.Height = s.Y;
 
-        foreach ((var entity, var worldPos, var graphic, var stretched) in queryTiles)
-        {
+        // Cache file manager data
+        var tileDataCache = fileManager.Value.TileData;
+
+        // Render each layer
+        RenderTiles(
+            world, selectedEntity, gameCtx, batch, assetsServer, fileManager, 
+            camera, calculateZ, workingZInfo, playerX, playerY, playerZ16, 
+            backupZInfo, maxZ, center, mousePos, cameraBounds, queryTiles);
+
+        RenderStatics(
+            world, selectedEntity, gameCtx, batch, assetsServer, fileManager, 
+            camera, calculateZ, workingZInfo, playerX, playerY, playerZ14, 
+            backupZInfo, maxZ, center, mousePos, cameraBounds, queryStatics);
+
+        RenderBodies(
+            world, selectedEntity, batch, assetsServer, fileManager, 
+            maxZ, center, mousePos, queryBodyOnly);
+
+        RenderEquipment(
+            world, selectedEntity, batch, assetsServer, fileManager, 
+            maxZ, center, mousePos, queryEquipmentSlots);
+
+        // Clean up resources - only change state if necessary
+        batch.Value.SetSampler(null);
+        batch.Value.SetStencil(null);
+        batch.Value.End();
+    }
+
+
+    private static void RenderTiles(
+        TinyEcs.World world,
+        Res<SelectedEntity> selectedEntity,
+        Res<GameContext> gameCtx,
+        Res<UltimaBatcher2D> batch,
+        Res<AssetsServer> assetsServer,
+        Res<UOFileManager> fileManager,
+        Res<Camera> camera,
+        bool calculateZ,
+        Local<MaxZInfo> workingZInfo,
+        int playerX,
+        int playerY,
+        int playerZ16,
+        MaxZInfo backupZInfo,
+        int? maxZ,
+        Vector2 center,
+        Vector2 mousePos,
+        Rectangle cameraBounds,
+        Query<Data<WorldPosition, ScreenPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> queryTiles)
+    {
+        // Cache frequently accessed resources
+        var tileDataCache = fileManager.Value.TileData;
+        var texmaps = assetsServer.Value.Texmaps;
+        var arts = assetsServer.Value.Arts;
+        
+        // Process all tiles in one pass
+        foreach (var (entity, worldPos, screenPos, graphic, stretched) in queryTiles)
+        {            
+            // Early filtering
             var hide = backupZInfo.MaxZGround.HasValue && worldPos.Ref.Z > backupZInfo.MaxZGround;
             if (!calculateZ && hide)
                 continue;
 
-            var position = worldPos.Ref.ToIso() - center;
+            // Calculate position only once
+            var iso = screenPos.Ref.Value;
+            Vector2.Subtract(ref iso, ref center, out var position);
 
-            if (position.X < cameraBounds.X || position.X > cameraBounds.Width)
+            // Quick bounds checking for early exit
+            if (position.X < cameraBounds.X || position.X > cameraBounds.Width || 
+                position.Y > cameraBounds.Height)
                 continue;
 
-            if (position.Y > cameraBounds.Height)
+            if (!CanBeDrawn(gameCtx.Value.ClientVersion, tileDataCache, graphic.Ref.Value))
                 continue;
 
-            if (!CanBeDrawn(gameCtx.Value.ClientVersion, fileManager.Value.TileData, graphic.Ref.Value))
-                continue;
-
-            if (calculateZ)
+            // Z-calculations (only if needed)
+            if (calculateZ && worldPos.Ref.X == playerX && worldPos.Ref.Y == playerY)
             {
-                if (worldPos.Ref.X == playerX && worldPos.Ref.Y == playerY)
+                if ((stretched.IsValid() ? stretched.Ref.AvgZ : worldPos.Ref.Z) > playerZ16)
                 {
-                    if ((stretched.IsValid() ? stretched.Ref.AvgZ : worldPos.Ref.Z) > playerZ16)
-                    {
-                        workingZInfo.Value.MaxZGround = playerZ16;
-                    }
+                    workingZInfo.Value.MaxZGround = playerZ16;
                 }
             }
 
@@ -271,17 +331,18 @@ internal readonly struct WorldRenderingPlugin : IPlugin
 
             if (stretched.IsValid())
             {
+                // Handle stretched land
                 position.Y += worldPos.Ref.Z << 2;
-
+                
                 if (position.Y - (stretched.Ref.MinZ << 2) < cameraBounds.Y)
                     continue;
 
-                ref readonly var textmapInfo = ref assetsServer.Value.Texmaps.GetTexmap(fileManager.Value.TileData.LandData[graphic.Ref.Value].TexID);
+                ref readonly var textmapInfo = ref texmaps.GetTexmap(tileDataCache.LandData[graphic.Ref.Value].TexID);
                 if (textmapInfo.Texture == null)
                     continue;
 
                 var depthZ = Isometric.GetDepthZ(worldPos.Ref.X, worldPos.Ref.Y, stretched.Ref.AvgZ - 2);
-                var color = new Vector3(0, Renderer.ShaderHueTranslator.SHADER_LAND, 1f);
+                var color = new Vector3(0, ShaderHueTranslator.SHADER_LAND, 1f);
 
                 if (entity.Ref == selectedEntity.Value.Entity)
                 {
@@ -312,10 +373,11 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             }
             else
             {
+                // Handle regular land
                 if (position.Y < cameraBounds.Y)
                     continue;
 
-                ref readonly var artInfo = ref assetsServer.Value.Arts.GetLand(graphic.Ref.Value);
+                ref readonly var artInfo = ref arts.GetLand(graphic.Ref.Value);
                 if (artInfo.Texture == null)
                     continue;
 
@@ -343,40 +405,63 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                 );
             }
         }
+    }
 
-
-        foreach ((var entity, var worldPos, var graphic, var hue) in queryStatics)
-        {
-            ref readonly var tileData = ref fileManager.Value.TileData.StaticData[graphic.Ref.Value];
-
+    private static void RenderStatics(
+        TinyEcs.World world,
+        Res<SelectedEntity> selectedEntity,
+        Res<GameContext> gameCtx,
+        Res<UltimaBatcher2D> batch,
+        Res<AssetsServer> assetsServer,
+        Res<UOFileManager> fileManager,
+        Res<Camera> camera,
+        bool calculateZ,
+        Local<MaxZInfo> workingZInfo,
+        int playerX,
+        int playerY,
+        int playerZ14,
+        MaxZInfo backupZInfo,
+        int? maxZ,
+        Vector2 center,
+        Vector2 mousePos,
+        Rectangle cameraBounds,
+        Query<Data<WorldPosition, ScreenPosition, Graphic, Hue>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>>> queryStatics)
+    {
+        // Cache frequently accessed resources
+        var tileDataCache = fileManager.Value.TileData;
+        var arts = assetsServer.Value.Arts;
+    
+        // Process all statics in one pass with optimized property access
+        foreach (var (entity, worldPos, screenPos, graphic, hue) in queryStatics)
+        {            
+            ref readonly var tileData = ref tileDataCache.StaticData[graphic.Ref.Value];
+            
+            // Early filtering
             if (tileData.IsInternal)
                 continue;
-
-            // var maxObjectZ = (int)priorityZ;
-            // var height = CalculateObjectHeight(ref maxObjectZ, in tileData);
 
             var hide = tileData.IsRoof && !backupZInfo.DrawRoof;
             hide |= maxZ.HasValue && worldPos.Ref.Z >= maxZ;
             if (!calculateZ && hide)
-            {
-                continue;
-            }
-
-            var position = worldPos.Ref.ToIso() - center;
-
-            if (position.X < cameraBounds.X || position.X > cameraBounds.Width)
                 continue;
 
-            if (position.Y < cameraBounds.Y || position.Y > cameraBounds.Height)
+            // Calculate position only once
+            var iso = screenPos.Ref.Value;
+            Vector2.Subtract(ref iso, ref center, out var position);
+
+            // Quick bounds checking for early exit
+            if (position.X < cameraBounds.X || position.X > cameraBounds.Width ||
+                position.Y < cameraBounds.Y || position.Y > cameraBounds.Height)
                 continue;
 
-            if (!CanBeDrawn(gameCtx.Value.ClientVersion, fileManager.Value.TileData, graphic.Ref.Value))
+            if (!CanBeDrawn(gameCtx.Value.ClientVersion, tileDataCache, graphic.Ref.Value))
                 continue;
 
-            ref readonly var artInfo = ref assetsServer.Value.Arts.GetArt(graphic.Ref.Value);
+            ref readonly var artInfo = ref arts.GetArt(graphic.Ref.Value);
             if (artInfo.Texture == null)
                 continue;
 
+            // Z-calculations (only if needed)
             if (calculateZ)
             {
                 var tileDataFlags = tileData.Flags;
@@ -425,35 +510,17 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             if (hide)
                 continue;
 
+            // Position calculation
             position.X -= (short)((artInfo.UV.Width >> 1) - 22);
             position.Y -= (short)(artInfo.UV.Height - 44);
 
+            // Priority calculation
             var priorityZ = worldPos.Ref.Z;
-
-            if (tileData.IsBackground)
-            {
-                priorityZ -= 1;
-            }
-
-            if (tileData.Height != 0)
-            {
-                priorityZ += 1;
-            }
-
-            if (tileData.IsWall)
-            {
-                priorityZ += 2;
-            }
-
-            if (tileData.IsMultiMovable)
-            {
-                priorityZ += 1;
-            }
-
-            if (entity.Ref.Has<NormalMulti>())
-            {
-                priorityZ -= 1;
-            }
+            if (tileData.IsBackground) priorityZ -= 1;
+            if (tileData.Height != 0) priorityZ += 1;
+            if (tileData.IsWall) priorityZ += 2;
+            if (tileData.IsMultiMovable) priorityZ += 1;
+            if (entity.Ref.Has<NormalMulti>()) priorityZ -= 1;
 
             var depthZ = Isometric.GetDepthZ(worldPos.Ref.X, worldPos.Ref.Y, priorityZ);
             var color = Renderer.ShaderHueTranslator.GetHueVector(hue.Ref.Value, tileData.IsPartialHue, 1f);
@@ -465,10 +532,12 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                 color.Z = 1f;
             }
 
+            // Selection checking
             var p = mousePos - position;
             if (assetsServer.Value.Arts.PixelCheck(graphic.Ref.Value, (int)p.X, (int)p.Y))
                 selectedEntity.Value.Set(entity.Ref, depthZ);
 
+            // Draw the static
             batch.Value.Draw(
                 artInfo.Texture,
                 position,
@@ -481,68 +550,39 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                 depthZ
             );
         }
+    }
 
-
-        foreach ((
-            var entity,
-            var pos,
-            var graphic,
-            var hue,
-            var serial,
-            var offset,
-            var direction,
-            var animation,
-            var steps) in queryBodyOnly)
-        {
+    private static void RenderBodies(
+        TinyEcs.World world,
+        Res<SelectedEntity> selectedEntity,
+        Res<UltimaBatcher2D> batch,
+        Res<AssetsServer> assetsServer,
+        Res<UOFileManager> fileManager,
+        int? maxZ,
+        Vector2 center,
+        Vector2 mousePos,
+        Query<Data<WorldPosition, Graphic, Hue, NetworkSerial, ScreenPositionOffset, Facing, MobAnimation, MobileSteps>,
+            Filter<Without<ContainedInto>, Optional<Facing>, Optional<MobAnimation>, Optional<MobileSteps>>> queryBodyOnly)
+    {
+        // Cache animation service
+        var animations = assetsServer.Value.Animations;
+    
+        foreach (var (entity, pos, graphic, hue, serial, offset, direction, animation, steps) in queryBodyOnly)
+        {            
+            // Early filtering
             if (maxZ.HasValue && pos.Ref.Z >= maxZ)
                 continue;
 
-            var uoHue = hue.Ref.Value;
             var priorityZ = pos.Ref.Z;
-            var position = pos.Ref.ToIso() - center;
+            var iso = pos.Ref.WorldToScreen();
+            Vector2.Subtract(ref iso, ref center, out var position);
 
-            Texture2D texture;
-            Rectangle? uv;
-            var mirror = false;
-
-            //if (ClassicUO.Game.SerialHelper.IsMobile(serial.Value))
-            //{
-
-            //}
-            //else
-            //{
-            //    ref readonly var artInfo = ref assetsServer.Value.Arts.GetArt(graphic.Value);
-
-            //    if (fileManager.Value.TileData.StaticData[graphic.Value].IsBackground)
-            //    {
-            //        priorityZ -= 1;
-            //    }
-
-            //    if (fileManager.Value.TileData.StaticData[graphic.Value].Height != 0)
-            //    {
-            //        priorityZ += 1;
-            //    }
-
-            //    if (fileManager.Value.TileData.StaticData[graphic.Value].IsWall)
-            //    {
-            //        priorityZ += 2;
-            //    }
-
-            //    if (fileManager.Value.TileData.StaticData[graphic.Value].IsMultiMovable)
-            //    {
-            //        priorityZ += 1;
-            //    }
-
-            //    texture = artInfo.Texture;
-            //    uv = artInfo.UV;
-            //    position.X -= (short)((artInfo.UV.Width >> 1) - 22);
-            //    position.Y -= (short)(artInfo.UV.Height - 44);
-            //}
-
+            // Direction handling
             priorityZ += 2;
             var dir = direction.IsValid() ? direction.Ref.Value : Direction.North;
-            (dir, mirror) = FixDirection(dir);
+            (dir, var mirror) = FixDirection(dir);
 
+            // Animation data
             byte animAction = 0;
             var animIndex = 0;
             if (animation.IsValid())
@@ -553,8 +593,8 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                     animation.Ref.Direction = (direction.Ref.Value & (~Direction.Running | Direction.Mask));
             }
 
-            var frames = assetsServer.Value.Animations.GetAnimationFrames
-            (
+            // Get animation frames
+            var frames = animations.GetAnimationFrames(
                 graphic.Ref.Value,
                 animAction,
                 (byte)dir,
@@ -562,16 +602,22 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                 out var isUop
             );
 
-            if (uoHue == 0)
-                uoHue = baseHue;
+            var uoHue = hue.Ref.Value == 0 ? baseHue : hue.Ref.Value;
 
+            // Get current frame
             ref readonly var frame = ref frames.IsEmpty ?
                 ref SpriteInfo.Empty
                 :
                 ref frames[animIndex % frames.Length];
 
-            texture = frame.Texture;
-            uv = frame.UV;
+            var texture = frame.Texture;
+            var uv = frame.UV;
+            
+            // Skip if no texture
+            if (texture == null)
+                continue;
+
+            // Calculate position
             position.X += 22;
             position.Y += 22;
             if (mirror)
@@ -580,13 +626,11 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                 position.X -= frame.Center.X;
             position.Y -= frame.UV.Height + frame.Center.Y;
 
-            if (texture == null)
-                continue;
-
             var depthZ = Isometric.GetDepthZ(pos.Ref.X, pos.Ref.Y, priorityZ);
             var color = ShaderHueTranslator.GetHueVector(FixHue(uoHue));
             position += offset.Ref.Value;
 
+            // Adjust depth based on offset
             if (offset.Ref.Value.X > 0 && offset.Ref.Value.Y > 0)
             {
                 depthZ = Isometric.GetDepthZ(pos.Ref.X + 1, pos.Ref.Y, priorityZ);
@@ -607,46 +651,22 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                 color.Z = 1f;
             }
 
-            if (assetsServer.Value.Animations.PixelCheck(
+            // Selection checking
+            if (animations.PixelCheck(
                 graphic.Ref.Value,
                 animAction,
                 (byte)dir,
                 isUop,
                 animIndex,
-                mirror ? (int)(position.X + uv.Value.Width - mousePos.X) : (int)(mousePos.X - position.X),
+                mirror ? (int)(position.X + uv.Width - mousePos.X) : (int)(mousePos.X - position.X),
                 (int)(mousePos.Y - position.Y)
             ))
             {
                 selectedEntity.Value.Set(entity.Ref, depthZ);
             }
 
-            // if (!Unsafe.IsNullRef(ref steps) && steps.Count > 0)
-            // {
-            //     ref var step = ref steps[steps.Count - 1];
-            //
-            //     if (((Direction)step.Direction & Direction.Mask) is Direction.Down or Direction.South or Direction.East)
-            //     {
-            //         priorityZ = (sbyte)(step.Z + 2);
-            //         depthZ = Isometric.GetDepthZ(step.X, step.Y, priorityZ);
-            //     }
-            // }
-            // else
-            // {
-            //     depthZ = (direction.Value & Direction.Mask) switch
-            //     {
-            //         Direction.Down => Isometric.GetDepthZ(pos.X + 1, pos.Y + 1, priorityZ - 1),
-            //         Direction.South => Isometric.GetDepthZ(pos.X, pos.Y + 1, priorityZ - 1),
-            //         Direction.East => Isometric.GetDepthZ(pos.X + 1, pos.Y, priorityZ -1),
-            //         _ => depthZ
-            //     };
-            // }
-            // else if ((direction.Value & Direction.Mask) is Direction.Down or Direction.South or Direction.East)
-            // {
-            //     depthZ = Isometric.GetDepthZ(pos.X + 1, pos.Y + 1, priorityZ);
-            // }
-
-            batch.Value.Draw
-            (
+            // Draw the body
+            batch.Value.Draw(
                 texture,
                 position,
                 uv,
@@ -658,27 +678,41 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                 depthZ
             );
         }
+    }
 
-
-        foreach ((
-            var entity,
-            var slots,
-            var offset,
-            var pos,
-            var graphic,
-            var direction,
-            var steps,
-            var animation) in queryEquipmentSlots)
-        {
+    private static void RenderEquipment(
+        TinyEcs.World world,
+        Res<SelectedEntity> selectedEntity,
+        Res<UltimaBatcher2D> batch,
+        Res<AssetsServer> assetsServer,
+        Res<UOFileManager> fileManager,
+        int? maxZ,
+        Vector2 center,
+        Vector2 mousePos,
+        Query<Data<EquipmentSlots, ScreenPositionOffset, WorldPosition, Graphic, Facing, MobileSteps, MobAnimation>,
+            Filter<Without<ContainedInto>, Optional<MobileSteps>, Optional<MobAnimation>>> queryEquipmentSlots)
+    {
+        // Cache frequently accessed resources
+        var tileDataCache = fileManager.Value.TileData;
+        var animations = assetsServer.Value.Animations;
+    
+        foreach (var (entity, slots, offset, pos, graphic, _, steps, animation) in queryEquipmentSlots)
+        {            
+            // Early filtering
             if (maxZ.HasValue && pos.Ref.Z >= maxZ)
                 continue;
 
             if (!Races.IsHuman(graphic.Ref.Value))
                 continue;
 
+            if (!animation.IsValid())
+                continue;
+
+            // Calculate priority and depth
             var priorityZ = pos.Ref.Z + 2;
             var depthZ = Isometric.GetDepthZ(pos.Ref.X, pos.Ref.Y, priorityZ);
 
+            // Adjust depth based on offset
             if (offset.Ref.Value.X > 0 && offset.Ref.Value.Y > 0)
             {
                 depthZ = Isometric.GetDepthZ(pos.Ref.X + 1, pos.Ref.Y, priorityZ);
@@ -692,38 +726,16 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                 depthZ = Isometric.GetDepthZ(pos.Ref.X, pos.Ref.Y + 1, priorityZ);
             }
 
-            // if (!Unsafe.IsNullRef(ref steps) && steps.Count > 0)
-            // {
-            //     ref var step = ref steps[steps.Count - 1];
-            //
-            //     if (((Direction)step.Direction & Direction.Mask) is Direction.Down or Direction.South or Direction.East)
-            //     {
-            //         priorityZ = (sbyte)(step.Z + 2);
-            //         depthZ = Isometric.GetDepthZ(step.X, step.Y, priorityZ);
-            //     }
-            // }
-            // else // if ((direction.Value & Direction.Mask) is Direction.Down or Direction.South or Direction.East)
-            // {
-            //     depthZ = (direction.Value & Direction.Mask) switch
-            //     {
-            //         Direction.Down => Isometric.GetDepthZ(pos.X + 1, pos.Y + 1, priorityZ - 1),
-            //         Direction.South => Isometric.GetDepthZ(pos.X, pos.Y + 1, priorityZ - 1),
-            //         Direction.East => Isometric.GetDepthZ(pos.X + 1, pos.Y, priorityZ -1),
-            //         _ => depthZ
-            //     };
-            // }
-
+            // Fix direction for animation
             (var dir, var mirror) = FixDirection(animation.Ref.Direction);
 
-            if (!animation.IsValid())
-            {
-                continue;
-            }
-
+            // Process each equipment layer
             for (int j = -1; j < Constants.USED_LAYER_COUNT; j++)
             {
                 var layer = j == -1 ? Layer.Mount : LayerOrder.UsedLayers[(int)animation.Ref.Direction & 0x7, j];
                 var layerEnt = slots.Ref[layer];
+                
+                // Skip invalid or hidden layers
                 if (!layerEnt.IsValid())
                     continue;
 
@@ -733,28 +745,29 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                     continue;
                 }
 
+                if (layer != Layer.Mount && IsItemCovered2(world, ref slots.Ref, layer))
+                    continue;
+
+                // Get layer data
                 byte animAction = animation.Ref.Action;
                 var graphicLayer = world.Get<Graphic>(layerEnt).Value;
                 var hueLayer = world.Get<Hue>(layerEnt).Value;
                 var animId = graphicLayer;
                 var offsetY = 0;
+                
+                // Handle mount layer specially
                 if (layer == Layer.Mount)
                 {
                     (animId, offsetY) = Mounts.FixMountGraphic(fileManager.Value.TileData, animId);
                     animAction = animation.Ref.MountAction;
                 }
-                else if (!IsItemCovered2(world, ref slots.Ref, layer))
+                else if (tileDataCache.StaticData[graphicLayer].AnimID != 0)
                 {
-                    if (fileManager.Value.TileData.StaticData[graphicLayer].AnimID != 0)
-                        animId = fileManager.Value.TileData.StaticData[graphicLayer].AnimID;
-                }
-                else
-                {
-                    continue;
+                    animId = tileDataCache.StaticData[graphicLayer].AnimID;
                 }
 
-                var frames = assetsServer.Value.Animations.GetAnimationFrames
-                (
+                // Get animation frames
+                var frames = animations.GetAnimationFrames(
                     animId,
                     animAction,
                     (byte)dir,
@@ -770,7 +783,8 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                 if (frame.Texture == null)
                     continue;
 
-                var position = pos.Ref.ToIso();
+                // Calculate position
+                var position = pos.Ref.WorldToScreen();
                 position.Y -= offsetY;
                 position.X += 22;
                 position.Y += 22;
@@ -783,7 +797,6 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                 var color = ShaderHueTranslator.GetHueVector(FixHue(hueLayer != 0 ? hueLayer : baseHue));
                 position += offset.Ref.Value;
 
-
                 if (entity.Ref == selectedEntity.Value.Entity)
                 {
                     color.X = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE - 1;
@@ -791,7 +804,8 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                     color.Z = 1f;
                 }
 
-                if (assetsServer.Value.Animations.PixelCheck(
+                // Selection checking
+                if (animations.PixelCheck(
                         animId,
                         animAction,
                         (byte)dir,
@@ -804,8 +818,8 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                     selectedEntity.Value.Set(entity.Ref, depthZ);
                 }
 
-                batch.Value.Draw
-                (
+                // Draw the equipment piece
+                batch.Value.Draw(
                     frame.Texture,
                     position - center,
                     frame.UV,
@@ -818,11 +832,6 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                 );
             }
         }
-
-
-        batch.Value.SetSampler(null);
-        batch.Value.SetStencil(null);
-        batch.Value.End();
     }
 
 
@@ -1102,6 +1111,19 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         }
 
         return false;
+    }
+
+    private struct MaxZInfo
+    {
+        public int? MaxZ;
+        public int? MaxZGround;
+        public int? MaxZRoof;
+        public bool DrawRoof;
+        public bool IsSameTile;
+        public bool IsTileAhead;
+        public bool IsUnderStatic;
+
+        public readonly bool IsUnderRoof => IsSameTile && IsTileAhead;
     }
 }
 
