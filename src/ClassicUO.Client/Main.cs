@@ -225,7 +225,6 @@ namespace ClassicUO
                         break;
                 }
 
-                Environment.SetEnvironmentVariable("FNA3D_FORCE_DRIVER", "Vulkan");
                 Console.WriteLine("FNA3D_FORCE_DRIVER: " + Environment.GetEnvironmentVariable("FNA3D_FORCE_DRIVER"));
 
                 using var ecs = new TinyEcs.World();
