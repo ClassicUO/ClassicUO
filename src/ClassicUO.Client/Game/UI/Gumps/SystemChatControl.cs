@@ -37,7 +37,7 @@ namespace ClassicUO.Game.UI.Gumps
         private const int MAX_MESSAGE_LENGTH = 100;
         private const int TEXTBOX_LENGTH = 500;
         private const int CHAT_X_OFFSET = 3;
-        private const int CHAT_HEIGHT = 15;
+        private const int CHAT_HEIGHT = 16;
         private static readonly List<Tuple<ChatMode, string>> _messageHistory = new List<Tuple<ChatMode, string>>();
         private static int _messageHistoryIndex = -1;
 
