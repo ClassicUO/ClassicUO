@@ -73,6 +73,14 @@ internal static class Mounts
         _mounts[0x3ED8] = new(0x060F, 0x3ED8, 0); // a black dog?
         _mounts[0x3ED9] = new(0x0610, 0x3ED9, 0); // a doberman?
         _mounts[0x3EDA] = new(0x0590, 0x3EDA, 9); // Frostmites Beetles
+        _mounts[0x3EDB] = new(0x0611, 0x3EDB, 0); // Manticore
+        _mounts[0x3EDC] = new(0x0666, 0x3EDC, 0); // Bear Zombie
+        _mounts[0x3EDD] = new(0x0581, 0x3EDD, 0); // Dragon_Hildebrandt
+        _mounts[0x3EDD] = new(0x0590, 0x3EDE, 0); // Horse_Clydesdale
+        _mounts[0x3EDE] = new(0x0676, 0x3EDF, 0); // Horse_Elemental_Earth
+        _mounts[0x3EDF] = new(0x0677, 0x3EE0, 0); // Horse_Elemental_Fire
+        _mounts[0x3EE1] = new(0x0678, 0x3EE1, 0); // Horse_Elemental_Water
+        _mounts[0x3EE2] = new(0x0679, 0x3EE2, 0); // Horse_Elemental_Air
     }
 
     public static bool TryGet(ushort animId, out MountInfo mountInfo)
