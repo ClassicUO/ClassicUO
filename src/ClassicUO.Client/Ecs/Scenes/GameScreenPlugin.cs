@@ -1,4 +1,5 @@
 using System;
+using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using Clay_cs;
@@ -254,7 +255,7 @@ internal readonly struct GameScreenPlugin : IPlugin
             camera.Value.Bounds.Y += (int)mouseCtx.Value.PositionOffset.Y;
         }
 
-        if (interactionResize.Ref.IsPressed && mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
+        if (interactionResize.Ref is { IsPressed: true, WasPressed: true, Button: MouseButtonType.Left })
         {
             ref var newBounds = ref lastSize.Value;
             newBounds.Width += (int)mouseCtx.Value.PositionOffset.X;

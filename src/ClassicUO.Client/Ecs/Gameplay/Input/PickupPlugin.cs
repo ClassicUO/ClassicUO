@@ -1,6 +1,7 @@
 using System;
 using ClassicUO.IO;
 using ClassicUO.Network;
+using ClassicUO.Renderer;
 using TinyEcs;
 
 namespace ClassicUO.Ecs;
@@ -21,29 +22,22 @@ internal readonly struct PickupPlugin : IPlugin
         scheduler.OnUpdate(pickupItemDelayedFn)
             .RunIf((SchedulerState sched) => sched.ResourceExists<SelectedEntity>() && sched.ResourceExists<GrabbedItem>())
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial == 0)
-            .RunIf((Res<MouseContext> mouseCtx) =>
+            .RunIf((Res<MouseContext> mouseCtx, Res<Camera> camera, Local<float?> delay, Time time) =>
             {
-                if (mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
+                if (!camera.Value.Bounds.Contains((int)mouseCtx.Value.Position.X, (int)mouseCtx.Value.Position.Y))
                 {
-                    var offset = mouseCtx.Value.PositionOffset;
-                    if (offset.Length() > 1)
-                        return false;
+                    return false;
                 }
 
-                return true;
-            })
-            .RunIf((World world, Res<SelectedEntity> selectedEnt, Query<Data<NetworkSerial>, Filter<With<Items>>> q) =>
-            {
-                if (!selectedEnt.Value.Entity.IsValid())
+                if (!mouseCtx.Value.IsPressed(Input.MouseButtonType.Left) && !mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Left))
+                {
                     return false;
-                if (!world.Exists(selectedEnt.Value.Entity))
+                }
+
+                var offset = mouseCtx.Value.PositionOffset;
+                if (offset.Length() > 1)
                     return false;
 
-                var entity = world.Entity(selectedEnt.Value.Entity);
-                return q.Contains(entity.ID);
-            })
-            .RunIf((Local<float?> delay, Time time, Res<MouseContext> mouseCtx) =>
-            {
                 if (mouseCtx.Value.IsReleased(Input.MouseButtonType.Left))
                     delay.Value = null;
                 else if (mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Left))
@@ -57,31 +51,40 @@ internal readonly struct PickupPlugin : IPlugin
                 if (delay.Value.HasValue)
                     Console.WriteLine("waiting time {0}", delay - time.Total);
                 return false;
+            })
+            .RunIf((Res<SelectedEntity> selectedEnt, Query<Data<NetworkSerial>, Filter<With<Items>>> q) =>
+            {
+                if (!selectedEnt.Value.Entity.IsValid())
+                    return false;
+                return q.Contains(selectedEnt.Value.Entity);
             });
 
         scheduler.OnUpdate(pickupItemFn)
             .RunIf((SchedulerState sched) => sched.ResourceExists<SelectedEntity>() && sched.ResourceExists<GrabbedItem>())
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial == 0)
-            .RunIf((Res<MouseContext> mouseCtx) =>
+            .RunIf((Res<MouseContext> mouseCtx, Res<Camera> camera) =>
             {
-                if (mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
+                if (!camera.Value.Bounds.Contains((int)mouseCtx.Value.Position.X, (int)mouseCtx.Value.Position.Y))
                 {
-                    var offset = mouseCtx.Value.PositionOffset;
-                    if (offset.Length() > 1)
-                        return true;
+                    return false;
                 }
+
+                if (!mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
+                {
+                    return false;
+                }
+
+                var offset = mouseCtx.Value.PositionOffset;
+                if (offset.Length() > 1)
+                    return true;
 
                 return false;
             })
-            .RunIf((World world, Res<SelectedEntity> selectedEnt, Query<Data<NetworkSerial>, Filter<With<Items>>> q) =>
+            .RunIf((Res<SelectedEntity> selectedEnt, Query<Data<NetworkSerial>, Filter<With<Items>>> q) =>
             {
                 if (!selectedEnt.Value.Entity.IsValid())
                     return false;
-                if (!world.Exists(selectedEnt.Value.Entity))
-                    return false;
-
-                var entity = world.Entity(selectedEnt.Value.Entity);
-                return q.Contains(entity.ID);
+                return q.Contains(selectedEnt.Value.Entity);
             });
 
 
@@ -104,17 +107,20 @@ internal readonly struct PickupPlugin : IPlugin
             var code = reader.ReadUInt8();
 
             grabbedItem.Value.Clear();
+            Console.WriteLine("deny move item code: {0:X2}", code);
         };
 
         // end draggin item
         packetsMap.Value[0x28] = buffer =>
         {
             grabbedItem.Value.Clear();
+            Console.WriteLine("end dragging item");
         };
 
         // drop item ok
         packetsMap.Value[0x29] = buffer =>
         {
+            Console.WriteLine("drop item ok");
         };
     }
 

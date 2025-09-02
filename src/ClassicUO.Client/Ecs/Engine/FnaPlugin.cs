@@ -56,7 +56,7 @@ internal readonly struct FnaPlugin : IPlugin
         scheduler.OnAfterUpdate(() => Environment.Exit(0))
                 .RunIf(static (Res<UoGame> game) => !UnsafeFNAAccessor.GetSetRunApplication(game.Value));
 
-        scheduler.OnFrameEnd((Res<MouseContext> mouseCtx, Res<KeyboardContext> keyboardCtx, Time time) =>
+        scheduler.OnFrameStart((Res<MouseContext> mouseCtx, Res<KeyboardContext> keyboardCtx, Time time) =>
         {
             mouseCtx.Value.Update(time.Total);
             keyboardCtx.Value.Update(time.Total);

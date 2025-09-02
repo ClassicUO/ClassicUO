@@ -243,27 +243,26 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         cameraBounds.Width = s.X;
         cameraBounds.Height = s.Y;
 
-        // Cache file manager data
-        var tileDataCache = fileManager.Value.TileData;
-
         // Render each layer
         RenderTiles(
-            world, selectedEntity, gameCtx, batch, assetsServer, fileManager, 
-            camera, calculateZ, workingZInfo, playerX, playerY, playerZ16, 
+            world, selectedEntity, gameCtx, batch, assetsServer, fileManager,
+            camera, calculateZ, workingZInfo, playerX, playerY, playerZ16,
             backupZInfo, maxZ, center, mousePos, cameraBounds, queryTiles);
 
         RenderStatics(
-            world, selectedEntity, gameCtx, batch, assetsServer, fileManager, 
-            camera, calculateZ, workingZInfo, playerX, playerY, playerZ14, 
+            world, selectedEntity, gameCtx, batch, assetsServer, fileManager,
+            camera, calculateZ, workingZInfo, playerX, playerY, playerZ14,
             backupZInfo, maxZ, center, mousePos, cameraBounds, queryStatics);
 
         RenderBodies(
-            world, selectedEntity, batch, assetsServer, fileManager, 
+            world, selectedEntity, batch, assetsServer, fileManager,
             maxZ, center, mousePos, queryBodyOnly);
 
         RenderEquipment(
-            world, selectedEntity, batch, assetsServer, fileManager, 
+            world, selectedEntity, batch, assetsServer, fileManager,
             maxZ, center, mousePos, queryEquipmentSlots);
+
+        RenderEffects();
 
         // Clean up resources - only change state if necessary
         batch.Value.SetSampler(null);
@@ -296,10 +295,10 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         var tileDataCache = fileManager.Value.TileData;
         var texmaps = assetsServer.Value.Texmaps;
         var arts = assetsServer.Value.Arts;
-        
+
         // Process all tiles in one pass
         foreach (var (entity, worldPos, screenPos, graphic, stretched) in queryTiles)
-        {            
+        {
             // Early filtering
             var hide = backupZInfo.MaxZGround.HasValue && worldPos.Ref.Z > backupZInfo.MaxZGround;
             if (!calculateZ && hide)
@@ -310,7 +309,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             Vector2.Subtract(ref iso, ref center, out var position);
 
             // Quick bounds checking for early exit
-            if (position.X < cameraBounds.X || position.X > cameraBounds.Width || 
+            if (position.X < cameraBounds.X || position.X > cameraBounds.Width ||
                 position.Y > cameraBounds.Height)
                 continue;
 
@@ -333,7 +332,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             {
                 // Handle stretched land
                 position.Y += worldPos.Ref.Z << 2;
-                
+
                 if (position.Y - (stretched.Ref.MinZ << 2) < cameraBounds.Y)
                     continue;
 
@@ -430,12 +429,12 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         // Cache frequently accessed resources
         var tileDataCache = fileManager.Value.TileData;
         var arts = assetsServer.Value.Arts;
-    
+
         // Process all statics in one pass with optimized property access
         foreach (var (entity, worldPos, screenPos, graphic, hue) in queryStatics)
-        {            
+        {
             ref readonly var tileData = ref tileDataCache.StaticData[graphic.Ref.Value];
-            
+
             // Early filtering
             if (tileData.IsInternal)
                 continue;
@@ -552,6 +551,11 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         }
     }
 
+    private static void RenderEffects()
+    {
+        // TODO: implement
+    }
+
     private static void RenderBodies(
         TinyEcs.World world,
         Res<SelectedEntity> selectedEntity,
@@ -566,9 +570,9 @@ internal readonly struct WorldRenderingPlugin : IPlugin
     {
         // Cache animation service
         var animations = assetsServer.Value.Animations;
-    
+
         foreach (var (entity, pos, graphic, hue, serial, offset, direction, animation, steps) in queryBodyOnly)
-        {            
+        {
             // Early filtering
             if (maxZ.HasValue && pos.Ref.Z >= maxZ)
                 continue;
@@ -612,7 +616,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
 
             var texture = frame.Texture;
             var uv = frame.UV;
-            
+
             // Skip if no texture
             if (texture == null)
                 continue;
@@ -695,9 +699,9 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         // Cache frequently accessed resources
         var tileDataCache = fileManager.Value.TileData;
         var animations = assetsServer.Value.Animations;
-    
+
         foreach (var (entity, slots, offset, pos, graphic, _, steps, animation) in queryEquipmentSlots)
-        {            
+        {
             // Early filtering
             if (maxZ.HasValue && pos.Ref.Z >= maxZ)
                 continue;
@@ -734,7 +738,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             {
                 var layer = j == -1 ? Layer.Mount : LayerOrder.UsedLayers[(int)animation.Ref.Direction & 0x7, j];
                 var layerEnt = slots.Ref[layer];
-                
+
                 // Skip invalid or hidden layers
                 if (!layerEnt.IsValid())
                     continue;
@@ -754,7 +758,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                 var hueLayer = world.Get<Hue>(layerEnt).Value;
                 var animId = graphicLayer;
                 var offsetY = 0;
-                
+
                 // Handle mount layer specially
                 if (layer == Layer.Mount)
                 {

@@ -17,7 +17,8 @@ internal struct WorldPosition
         z = Z;
     }
 
-    public readonly Vector2 ToIso() => Isometric.IsoToScreen(X, Y, Z);
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public readonly Vector2 WorldToScreen() => Isometric.IsoToScreen(X, Y, Z);
 }
 
 internal struct Graphic
@@ -100,6 +101,11 @@ struct EquipmentSlots
 
     [UnscopedRef]
     public ref ulong this[Layer layer] => ref _array[(int)layer];
+}
+
+public struct ScreenPosition
+{
+    public Vector2 Value;
 }
 
 public struct ScreenPositionOffset
