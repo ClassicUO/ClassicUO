@@ -5,12 +5,10 @@ using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ClassicUO.Assets
 {
@@ -18,10 +16,17 @@ namespace ClassicUO.Assets
     {
         private readonly UOFilesOverrideMap _overrideMap;
 
-        public UOFileManager(ClientVersion clientVersion, string uoPath)
+        public UOFileManager(ClientVersion clientVersion, string uoPath) : this(clientVersion, uoPath, new UOFilesOverrideMap())
+        {
+        }
+        
+        public UOFileManager(ClientVersion clientVersion, string uoPath, UOFilesOverrideMap overrideMap)
         {
             Version = clientVersion;
             BasePath = uoPath;
+
+            _overrideMap = overrideMap;
+            IsUOPInstallation = Version >= ClientVersion.CV_7000 && File.Exists(GetUOFilePath("MainMisc.uop"));
 
             Animations = new AnimationsLoader(this);
             AnimData = new AnimDataLoader(this);
@@ -43,8 +48,6 @@ namespace ClassicUO.Assets
             Professions = new ProfessionLoader(this);
             TileArt = new TileArtLoader(this);
             StringDictionary = new StringDictionaryLoader(this);
-
-            _overrideMap = new UOFilesOverrideMap();
         }
 
         public ClientVersion Version { get; }
@@ -138,11 +141,7 @@ namespace ClassicUO.Assets
         public void Load(bool useVerdata, string lang, string mapsLayouts = "")
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
-
-            _overrideMap.Load(); // need to load this first so that it manages can perform the file overrides if needed
-
-            IsUOPInstallation = Version >= ClientVersion.CV_7000 && File.Exists(GetUOFilePath("MainMisc.uop"));
-
+            
             Maps.MapsLayouts = mapsLayouts;
 
             Animations.Load();

@@ -290,7 +290,7 @@ namespace ClassicUO
 
                     case "filesoverride":
                     case "uofilesoverride":
-                        UOFilesOverrideMap.OverrideFile = value;
+                        Settings.GlobalSettings.OverrideFile = value;
 
                         break;
 
