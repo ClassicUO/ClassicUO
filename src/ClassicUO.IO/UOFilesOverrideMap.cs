@@ -7,23 +7,21 @@ namespace ClassicUO.IO
 {
     public sealed class UOFilesOverrideMap : Dictionary<string, string>
     {
-        public static string OverrideFile { get; set; }
-
-        public UOFilesOverrideMap() : base()
+        public UOFilesOverrideMap()
         {
         }
-
-        public void Load()
+        
+        public UOFilesOverrideMap(string overrideFile)
         {
-            if (!File.Exists(OverrideFile))
+            if (!File.Exists(overrideFile))
             {
                 Log.Trace($"No Override File found, ignoring.");
                 return; // if the file doesn't exist then we ignore
             }
 
-            Log.Trace($"Loading Override File:\t\t{OverrideFile}");
+            Log.Trace($"Loading Override File:\t\t{overrideFile}");
 
-            using (FileStream stream = new FileStream(OverrideFile, FileMode.Open, FileAccess.Read, FileShare.Read))
+            using (FileStream stream = new FileStream(overrideFile, FileMode.Open, FileAccess.Read, FileShare.Read))
             using (StreamReader reader = new StreamReader(stream))
             {
                 // we will gracefully ignore any failures when trying to read
