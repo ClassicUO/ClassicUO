@@ -42,6 +42,9 @@ using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using SDL2;
 using System.Collections.Generic;
+using System.IO;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {
@@ -51,11 +54,13 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private readonly ushort _buttonOver;
         private readonly Checkbox _checkboxAutologin;
         private readonly Checkbox _checkboxSaveAccount;
-        private readonly Button _nextArrow0;
+        private readonly ImageButton _nextArrow0;
         private readonly PasswordStbTextBox _passwordFake;
         private readonly StbTextBox _textboxAccount;
 
         private float _time;
+        private Texture2D LogoBackgroundImg = PNGLoader.Instance.GetImageTexture(Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "logodust.png"));
+
 
         public LoginGump(LoginScene scene) : base(0, 0)
         {
@@ -67,259 +72,107 @@ namespace ClassicUO.Game.UI.Gumps.Login
             byte font;
             ushort hue;
 
-            if (Client.Version < ClientVersion.CV_706400)
-            {
-                _buttonNormal = 0x15A4;
-                _buttonOver = 0x15A5;
-                const ushort HUE = 0x0386;
 
-                if (Client.Version >= ClientVersion.CV_500A)
+            _buttonNormal = 0x5CD;
+            _buttonOver = 0x5CB;
+            UIManager.Add(new LoginBackground());
+            Add(new CustomGumpPic
+                    (
+                        380,
+                        200,
+                        LogoBackgroundImg,
+                        0
+                    ));
+
+
+
+            Add
+               (
+                   new Label($"UO Version {Settings.GlobalSettings.ClientVersion}.", false, 0x034E, font: 9)
+                   {
+                       X = 395,
+                       Y = 700
+                   }
+               );
+
+            Add
+            (
+                new Label(string.Format("LegionUO Version {0}", CUOEnviroment.Version), false, 0x034E, font: 9)
                 {
-                    Add(new GumpPic(0, 0, 0x2329, 0));
+                    X = 395,
+                    Y = 720
                 }
+            );
 
-                //UO Flag
-                Add(new GumpPic(0, 4, 0x15A0, 0) { AcceptKeyboardInput = false });
 
-                // Quit Button
-                Add
-                (
-                    new Button((int)Buttons.Quit, 0x1589, 0x158B, 0x158A)
-                    {
-                        X = 555,
-                        Y = 4,
-                        ButtonAction = ButtonAction.Activate
-                    }
-                );
-
-                //Login Panel
-                Add
-                (
-                    new ResizePic(0x13BE)
-                    {
-                        X = 128,
-                        Y = 288,
-                        Width = 451,
-                        Height = 157
-                    }
-                );
-
-                if (Client.Version < ClientVersion.CV_500A)
+            // Arrow Button
+            /*
+            Add
+            (
+                _nextArrow0 = new Button((int)Buttons.NextArrow, 0x5CD, 0x5CC, 0x5CB)
                 {
-                    Add(new GumpPic(286, 45, 0x058A, 0));
+                    X = 455,
+                    Y = 570,
+                    ButtonAction = ButtonAction.Activate
                 }
+            );
+            */
 
-                // Credits
-                Add
-                (
-                    new Button((int)Buttons.Credits, 0x1583, 0x1585, 0x1584)
-                    {
-                        X = 60,
-                        Y = 385,
-                        ButtonAction = ButtonAction.Activate
-                    }
-                );
+            Add(_nextArrow0 = new ImageButton(
+               455,
+               570,
+               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_login.png"),
+               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_pressed_login.png"),
+               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_hover_login.png")
+           ));
 
-                Add
-                (
-                    new Label(ResGumps.LoginToUO, false, HUE, font: 2)
-                    {
-                        X = 253,
-                        Y = 305
-                    }
-                );
-
-                Add
-                (
-                    new Label(ResGumps.Account, false, HUE, font: 2)
-                    {
-                        X = 183,
-                        Y = 345
-                    }
-                );
-
-                Add
-                (
-                    new Label(ResGumps.Password, false, HUE, font: 2)
-                    {
-                        X = 183,
-                        Y = 385
-                    }
-                );
-
-                // Arrow Button
-                Add
-                (
-                    _nextArrow0 = new Button((int)Buttons.NextArrow, 0x15A4, 0x15A6, 0x15A5)
-                    {
-                        X = 610,
-                        Y = 445,
-                        ButtonAction = ButtonAction.Activate
-                    }
-                );
-
-
-                offsetX = 328;
-                offsetY = 343;
-                offtextY = 40;
-
-                Add
-                (
-                    new Label($"UO Version {Settings.GlobalSettings.ClientVersion}.", false, 0x034E, font: 9)
-                    {
-                        X = 286,
-                        Y = 453
-                    }
-                );
-
-                Add
-                (
-                    new Label(string.Format("Dust765 Version {0}", CUOEnviroment.Version), false, 0x034E, font: 9)
-                    {
-                        X = 286,
-                        Y = 465
-                    }
-                );
-
-
-                Add
-                (
-                    _checkboxAutologin = new Checkbox
-                    (
-                        0x00D2,
-                        0x00D3,
-                        ResGumps.Autologin,
-                        1,
-                        0x0386,
-                        false
-                    )
-                    {
-                        X = 150,
-                        Y = 417
-                    }
-                );
-
-                Add
-                (
-                    _checkboxSaveAccount = new Checkbox
-                    (
-                        0x00D2,
-                        0x00D3,
-                        ResGumps.SaveAccount,
-                        1,
-                        0x0386,
-                        false
-                    )
-                    {
-                        X = _checkboxAutologin.X + _checkboxAutologin.Width + 10,
-                        Y = 417
-                    }
-                );
-
-                font = 1;
-                hue = 0x0386;
-            }
-            else
+            _nextArrow0.OnButtonClick += () =>
             {
-                _buttonNormal = 0x5CD;
-                _buttonOver = 0x5CB;
+                OnButtonClick(0);
+            };
 
-                Add(new GumpPic(0, 0, 0x014E, 0));
+            offsetX = 370;
+            offsetY = 430;
+            offtextY = 40;
 
-                //// Quit Button
-                Add
+
+            Add
+            (
+                _checkboxAutologin = new Checkbox
                 (
-                    new Button((int)Buttons.Quit, 0x05CA, 0x05C9, 0x05C8)
-                    {
-                        X = 25,
-                        Y = 240,
-                        ButtonAction = ButtonAction.Activate
-                    }
-                );
+                    0x00D2,
+                    0x00D3,
+                    ResGumps.Autologin,
+                    9,
+                    0x0481,
+                    false
+                )
+                {
+                    X = 510,
+                    Y = 510
+                }
+            );
 
-                //// Credit Button
-                Add
+            Add
+            (
+                _checkboxSaveAccount = new Checkbox
                 (
-                    new Button((int)Buttons.Credits, 0x05D0, 0x05CF, 0x5CE)
-                    {
-                        X = 530,
-                        Y = 125,
-                        ButtonAction = ButtonAction.Activate
-                    }
-                );
+                    0x00D2,
+                    0x00D3,
+                    ResGumps.SaveAccount,
+                    9,
+                    0x0481,
+                    false
+                )
+                {
+                    X = 375,
+                    Y = 510
+                }
+            );
 
-                // Arrow Button
-                Add
-                (
-                    _nextArrow0 = new Button((int)Buttons.NextArrow, 0x5CD, 0x5CC, 0x5CB)
-                    {
-                        X = 280,
-                        Y = 365,
-                        ButtonAction = ButtonAction.Activate
-                    }
-                );
+            font = 9;
+            hue = 0x0481;
 
-                offsetX = 218;
-                offsetY = 283;
-                offtextY = 50;
-
-
-                Add
-                (
-                    new Label($"UO Version {Settings.GlobalSettings.ClientVersion}.", false, 0x0481, font: 9)
-                    {
-                        X = 286,
-                        Y = 453
-                    }
-                );
-
-                Add
-                (
-                    new Label(string.Format("Dust765.4 Version {0}", CUOEnviroment.Version), false, 0x0481, font: 9)
-                    {
-                        X = 286,
-                        Y = 465
-                    }
-                );
-
-
-                Add
-                (
-                    _checkboxAutologin = new Checkbox
-                    (
-                        0x00D2,
-                        0x00D3,
-                        ResGumps.Autologin,
-                        9,
-                        0x0481,
-                        false
-                    )
-                    {
-                        X = 150,
-                        Y = 417
-                    }
-                );
-
-                Add
-                (
-                    _checkboxSaveAccount = new Checkbox
-                    (
-                        0x00D2,
-                        0x00D3,
-                        ResGumps.SaveAccount,
-                        9,
-                        0x0481,
-                        false
-                    )
-                    {
-                        X = _checkboxAutologin.X + _checkboxAutologin.Width + 10,
-                        Y = 417
-                    }
-                );
-
-                font = 9;
-                hue = 0x0481;
-            }
 
 
             // Account Text Input Background
@@ -329,7 +182,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 {
                     X = offsetX,
                     Y = offsetY,
-                    Width = 210,
+                    Width = 270,
                     Height = 30
                 }
             );
@@ -341,13 +194,61 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 {
                     X = offsetX,
                     Y = offsetY + offtextY,
-                    Width = 210,
+                    Width = 270,
                     Height = 30
                 }
             );
 
             offsetX += 7;
 
+            Checkbox loginmusic_checkbox = new Checkbox
+            (
+                0x00D2,
+                0x00D3,
+                "Music",
+                font,
+                hue,
+                false
+            )
+            {
+                X = 375,
+                Y = 535,
+                IsChecked = Settings.GlobalSettings.LoginMusic
+            };
+
+            Add(loginmusic_checkbox);
+
+            HSliderBar login_music = new HSliderBar
+            (
+                loginmusic_checkbox.X + loginmusic_checkbox.Width + 10,
+                loginmusic_checkbox.Y + 4,
+                80,
+                0,
+                100,
+                Settings.GlobalSettings.LoginMusicVolume,
+                HSliderBarStyle.MetalWidgetRecessedBar,
+                true,
+                font,
+                hue,
+                false
+            );
+
+            Add(login_music);
+            login_music.IsVisible = Settings.GlobalSettings.LoginMusic;
+
+            loginmusic_checkbox.ValueChanged += (sender, e) =>
+            {
+                Settings.GlobalSettings.LoginMusic = loginmusic_checkbox.IsChecked;
+                Client.Game.Audio.UpdateCurrentMusicVolume(true);
+
+                login_music.IsVisible = Settings.GlobalSettings.LoginMusic;
+            };
+
+            login_music.ValueChanged += (sender, e) =>
+            {
+                Settings.GlobalSettings.LoginMusicVolume = login_music.Value;
+                Client.Game.Audio.UpdateCurrentMusicVolume(true);
+            };
             // Text Inputs
             Add
             (
@@ -405,117 +306,27 @@ namespace ClassicUO.Game.UI.Gumps.Login
             _checkboxAutologin.IsChecked = Settings.GlobalSettings.AutoLogin;
 
 
-            Add
-            (
-                new HtmlControl
-                (
-                    505,
-                    420,
-                    150,
-                    15,
-                    false,
-                    false,
-                    false,
-                    "<body link=\"#FF00FF00\" vlink=\"#FF00FF00\" ><a href=\"https://www.classicuo.eu/support.php\">Support ClassicUO!",
-                    0x32,
-                    true,
-                    isunicode: true,
-                    style: FontStyle.BlackBorder
-                )
-            );
-
-
-            Add
-            (
-                new HtmlControl
-                (
-                    505,
-                    440,
-                    100,
-                    15,
-                    false,
-                    false,
-                    false,
-                    "<body link=\"#FF00FF00\" vlink=\"#FF00FF00\" ><a href=\"https://www.classicuo.eu\">Website",
-                    0x32,
-                    true,
-                    isunicode: true,
-                    style: FontStyle.BlackBorder
-                )
-            );
-
-            Add
-            (
-                new HtmlControl
-                (
-                    505,
-                    460,
-                    100,
-                    15,
-                    false,
-                    false,
-                    false,
-                    "<body link=\"#FF00FF00\" vlink=\"#FF00FF00\" ><a href=\"https://discord.gg/VdyCpjQ\">Join Discord",
-                    0x32,
-                    true,
-                    isunicode: true,
-                    style: FontStyle.BlackBorder
-                )
-            );
-
             TextBox _;
             HitBox _hit;
-            
 
-           
-
-            Checkbox loginmusic_checkbox = new Checkbox
-            (
-                0x00D2,
-                0x00D3,
-                "Music",
-                font,
-                hue,
-                false
-            )
+            Add(_ = new TextBox("Legion Suport", TrueTypeLoader.EMBEDDED_FONT, 15, 200, Color.Orange, strokeEffect: false) { X = 30, Y = 660, AcceptMouseInput = true });
+            Add(_hit = new HitBox(_.X, _.Y, _.MeasuredSize.X, _.MeasuredSize.Y));
+            _hit.MouseUp += (s, e) =>
             {
-                X = _checkboxSaveAccount.X + _checkboxSaveAccount.Width + 10,
-                Y = 417,
-                IsChecked = Settings.GlobalSettings.LoginMusic
+                Utility.Platforms.PlatformHelper.LaunchBrowser("https://github.com/bittiez/ClassicUO/wiki");
+            };
+            Add(_ = new TextBox("LegionUO Wiki", TrueTypeLoader.EMBEDDED_FONT, 15, 200, Color.Orange, strokeEffect: false) { X = 30, Y = 680, AcceptMouseInput = true });
+            Add(_hit = new HitBox(_.X, _.Y, _.MeasuredSize.X, _.MeasuredSize.Y));
+            _hit.MouseUp += (s, e) =>
+            {
+                Utility.Platforms.PlatformHelper.LaunchBrowser("https://github.com/bittiez/ClassicUO/wiki");
             };
 
-            Add(loginmusic_checkbox);
-
-            HSliderBar login_music = new HSliderBar
-            (
-                loginmusic_checkbox.X + loginmusic_checkbox.Width + 10,
-                loginmusic_checkbox.Y + 4,
-                80,
-                0,
-                100,
-                Settings.GlobalSettings.LoginMusicVolume,
-                HSliderBarStyle.MetalWidgetRecessedBar,
-                true,
-                font,
-                hue,
-                false
-            );
-
-            Add(login_music);
-            login_music.IsVisible = Settings.GlobalSettings.LoginMusic;
-
-            loginmusic_checkbox.ValueChanged += (sender, e) =>
+            Add(_ = new TextBox("LegionUO Discord", TrueTypeLoader.EMBEDDED_FONT, 15, 200, Color.Orange, strokeEffect: false) { X = 30, Y = 700, AcceptMouseInput = true });
+            Add(_hit = new HitBox(_.X, _.Y, _.MeasuredSize.X, _.MeasuredSize.Y));
+            _hit.MouseUp += (s, e) =>
             {
-                Settings.GlobalSettings.LoginMusic = loginmusic_checkbox.IsChecked;
-                Client.Game.Audio.UpdateCurrentMusicVolume(true);
-
-                login_music.IsVisible = Settings.GlobalSettings.LoginMusic;
-            };
-
-            login_music.ValueChanged += (sender, e) =>
-            {
-                Settings.GlobalSettings.LoginMusicVolume = login_music.Value;
-                Client.Game.Audio.UpdateCurrentMusicVolume(true);
+                Utility.Platforms.PlatformHelper.LaunchBrowser("https://discord.gg/SqwtB5g95H");
             };
 
 
@@ -528,11 +339,11 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 _textboxAccount.SetKeyboardFocus();
             }
 
-            _ = new TextBox("A new version of Dust765.4 is available!\n Click to open the download page.", TrueTypeLoader.EMBEDDED_FONT, 20, 300, Color.Yellow, strokeEffect: false) { X = 10, Y = 10, AcceptMouseInput = false };
+            _ = new TextBox("A new version of TazUO is available!\n Click to open the download page.", TrueTypeLoader.EMBEDDED_FONT, 20, 300, Color.Yellow, strokeEffect: false) { X = 10, Y = 10, AcceptMouseInput = false };
             Add(_hit = new HitBox(_.X, _.Y, _.MeasuredSize.X, _.MeasuredSize.Y));
             _hit.MouseUp += (s, e) =>
             {
-                Utility.Platforms.PlatformHelper.LaunchBrowser("https://github.com/dust765/ClassicUO/releases/latest");
+                Utility.Platforms.PlatformHelper.LaunchBrowser("https://github.com/jsebold666/TazUO/releases/latest");
             };
             _hit.Add(new AlphaBlendControl() { Width = _hit.Width, Height = _hit.Height });
             Add(_);
@@ -586,7 +397,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 _time = (float)Time.Ticks + 1000;
 
-                _nextArrow0.ButtonGraphicNormal = _nextArrow0.ButtonGraphicNormal == _buttonNormal ? _buttonOver : _buttonNormal;
+                // _nextArrow0.ButtonGraphicNormal = _nextArrow0.ButtonGraphicNormal == _buttonNormal ? _buttonOver : _buttonNormal;
             }
 
             if (_passwordFake.HasKeyboardFocus)
@@ -625,16 +436,11 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     {
                         Client.Game.GetScene<LoginScene>().Connect(_textboxAccount.Text, _passwordFake.RealText);
                     }
-
+                    UIManager.GetGump<LoginBackground>()?.Dispose();
                     break;
 
                 case Buttons.Quit:
                     Client.Game.Exit();
-
-                    break;
-
-                case Buttons.Credits:
-                    UIManager.Add(new CreditsGump());
 
                     break;
             }
@@ -734,6 +540,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
             {
                 base.OnKeyDown(key, mod);
+
                 UpdateCaretScreenPosition();
             }
 

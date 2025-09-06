@@ -35,6 +35,8 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Assets;
 using SDL2;
+using ClassicUO.Game.Managers;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {
@@ -49,7 +51,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
     internal class LoadingGump : Gump
     {
         private readonly Action<int> _buttonClick;
-        private readonly Label _label;
+        private readonly TextBox _label;
 
         public LoadingGump(string labelText, LoginButtons showButtons, Action<int> buttonClick = null) : base(0, 0)
         {
@@ -64,28 +66,35 @@ namespace ClassicUO.Game.UI.Gumps.Login
             bool unicode = isAsianLang;
             byte font = (byte)(isAsianLang ? 1 : 2);
             ushort hue = (ushort)(isAsianLang ? 0xFFFF : 0x0386);
-            
-            _label = new Label
-            (
-                labelText,
-                unicode,
-                hue,
-                326,
-                font,
-                align: TEXT_ALIGN_TYPE.TS_CENTER
-            )
-            {
-                X = 162,
-                Y = 178
-            };
+
 
             Add
-            (
-                new ResizePic(0x0A28)
-                {
-                    X = 142, Y = 134, Width = 366, Height = 212
-                }
-            );
+              (
+                 new SquareBlendControl
+                 {
+                     X = 0,
+                     Y = 0,
+                     Width = 1024,
+                     Height = 768,
+                     Hue = 0x1AF // Cor preta (0x0000)
+                 }
+              );
+
+
+
+            _label = new TextBox(labelText, TrueTypeLoader.EMBEDDED_FONT, 24, 300, Color.Orange, strokeEffect: false) { X = 446, Y = 250, AcceptMouseInput = false };
+            Add
+              (
+                 new SquareBlendControl
+                 {
+                     X = 356,
+                     Y = 230,
+                     Width = 366,
+                     Height = 212,
+                     Hue = 0x1AF // Cor preta (0x0000)
+                 }
+              );
+
 
             Add(_label);
 
@@ -95,7 +104,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 (
                     new Button((int) LoginButtons.OK, 0x0481, 0x0483, 0x0482)
                     {
-                        X = 306, Y = 304, ButtonAction = ButtonAction.Activate
+                        X = 456, Y = 324, ButtonAction = ButtonAction.Activate
                     }
                 );
             }
@@ -105,8 +114,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 (
                     new Button((int) LoginButtons.Cancel, 0x047E, 0x0480, 0x047F)
                     {
-                        X = 306,
-                        Y = 304,
+                        X = 510,
+                        Y = 324,
                         ButtonAction = ButtonAction.Activate
                     }
                 );
@@ -117,7 +126,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 (
                     new Button((int) LoginButtons.OK, 0x0481, 0x0483, 0x0482)
                     {
-                        X = 264, Y = 304, ButtonAction = ButtonAction.Activate
+                        X = 426, Y = 304, ButtonAction = ButtonAction.Activate
                     }
                 );
 
@@ -125,7 +134,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 (
                     new Button((int) LoginButtons.Cancel, 0x047E, 0x0480, 0x047F)
                     {
-                        X = 348, Y = 304, ButtonAction = ButtonAction.Activate
+                        X = 496, Y = 304, ButtonAction = ButtonAction.Activate
                     }
                 );
             }

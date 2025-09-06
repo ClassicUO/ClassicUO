@@ -410,7 +410,7 @@ namespace ClassicUO.Game.UI.Controls
             _updateUI = true;
         }
 
-        protected static ushort GetAnimID(ushort graphic, ushort animID, bool isfemale)
+        public static ushort GetAnimID(ushort graphic, ushort animID, bool isfemale)
         {
             int offset = isfemale ? Constants.FEMALE_GUMP_OFFSET : Constants.MALE_GUMP_OFFSET;
 
@@ -468,7 +468,7 @@ namespace ClassicUO.Game.UI.Controls
             return (ushort)(animID + offset);
         }
 
-        protected class GumpPicEquipment : GumpPic
+        public class GumpPicEquipment : GumpPic
         {
             private readonly Layer _layer;
 
@@ -554,5 +554,7 @@ namespace ClassicUO.Game.UI.Controls
                 SelectedObject.Object = World.Get(LocalSerial);
             }
         }
+
+
     }
 }

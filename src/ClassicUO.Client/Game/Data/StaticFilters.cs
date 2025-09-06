@@ -451,4 +451,5 @@ namespace ClassicUO.Game.Data
         }
         // ## BEGIN - END ## // MISC2
     }
+    
 }

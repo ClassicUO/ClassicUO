@@ -144,7 +144,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             foreach (var button in _overheadButtons)
             {
-                button.IsChecked = NameOverHeadManager.LastActiveNameOverheadOption == button.Text;
+                button.IsChecked = NameOverHeadManager.LastActiveNameOverheadOption.Replace("\\u0026", "&") == button.Text;
             }
         }
 
@@ -186,7 +186,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
                 {
                     Y = 20 * index + 44,
-                    IsChecked = NameOverHeadManager.LastActiveNameOverheadOption == option.Name,
+                    IsChecked = NameOverHeadManager.LastActiveNameOverheadOption.Replace("\\u0026", "&") == option.Name,
                 }
             );
 

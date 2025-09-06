@@ -188,7 +188,7 @@ namespace ClassicUO.Game.UI.Gumps
             #endregion
 
             #region TOP BAR AREA
-            containerNameLabel = new Label(GetContainerName(), true, 0x0481)
+            containerNameLabel = new Label(GetContainerName(), true, 0x0481, ishtml: true)
             {
                 X = borderWidth,
                 Y = -20

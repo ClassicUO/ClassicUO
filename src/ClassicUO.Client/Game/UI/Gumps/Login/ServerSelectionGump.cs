@@ -42,162 +42,97 @@ using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using SDL2;
+using Microsoft.Xna.Framework.Graphics;
+using System.IO;
+using ClassicUO.Game.Managers;
+using Microsoft.Xna.Framework;
+using ClassicUO.Game.GameObjects;
+using System;
+
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {
     internal class ServerSelectionGump : Gump
     {
-        private const ushort SELECTED_COLOR = 0x0021;
-        private const ushort NORMAL_COLOR = 0x034F;
+        private const ushort SELECTED_COLOR = 0x0481;
+        private const ushort NORMAL_COLOR = 0x0481;
+        private ImageButton button;
 
         public ServerSelectionGump() : base(0, 0)
         {
-            //AddChildren(new LoginBackground(true));
+            // Background
+            UIManager.Add(new SelectServerBackground());
 
-            Add
-            (
-                new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
-                {
-                    X = 586, Y = 445, ButtonAction = ButtonAction.Activate
-                }
-            );
+            Add(button = new ImageButton(
+                30,
+                680,
+                Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_prev.png"),
+                Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_pressed_prev.png"),
+                Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_hover_prev.png")
+            ));
 
-            Add
-            (
-                new Button((int) Buttons.Next, 0x15A4, 0x15A6, 0x15A5)
-                {
-                    X = 610, Y = 445, ButtonAction = ButtonAction.Activate
-                }
-            );
+            button.OnButtonClick += () =>
+            {
+                OnButtonClick(0);
+            };
+
+            Add(button = new ImageButton(
+               920,
+               680,
+               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_next.png"),
+               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_pressed_next.png"),
+               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_hover_next.png")
+           ));
+
+            button.OnButtonClick += () =>
+            {
+                OnButtonClick(1);
+            };
+
 
             if (Client.Version >= ClientVersion.CV_500A)
             {
-                ushort textColor = 0xFFFF;
-
                 Add
                 (
-                    new Label(ClilocLoader.Instance.GetString(1044579), true, textColor, font: 1)
-                    {
-                        X = 155, Y = 70
-                    }
+                    new TextBox(ClilocLoader.Instance.GetString(1044579), TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.Orange, strokeEffect: true) { X = 210, Y = 70, AcceptMouseInput = true }
+                 
                 ); // "Select which shard to play on:"
 
                 if (CUOEnviroment.NoServerPing == false)
                 {
                     Add
                     (
-                        new Label(ClilocLoader.Instance.GetString(1044577), true, textColor, font: 1)
-                        {
-                            X = 400, Y = 70
-                        }
+                        new TextBox(ClilocLoader.Instance.GetString(1044577), TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.Orange, strokeEffect: true) { X = 650, Y = 70, AcceptMouseInput = true }
                     ); // "Latency:"
+                   
 
-                    Add
-                    (
-                        new Label(ClilocLoader.Instance.GetString(1044578), true, textColor, font: 1)
-                        {
-                            X = 470, Y = 70
-                        }
-                    ); // "Packet Loss:"
                 }
 
-                Add
-                (
-                    new Label(ClilocLoader.Instance.GetString(1044580), true, textColor, font: 1)
-                    {
-                        X = 153, Y = 368
-                    }
-                ); // "Sort by:"
+
             }
             else
             {
-                ushort textColor = 0x0481;
-
                 Add
                 (
-                    new Label(ResGumps.SelectWhichShardToPlayOn, false, textColor, font: 9)
-                    {
-                        X = 155, Y = 70
-                    }
+     
+                    new TextBox(ResGumps.SelectWhichShardToPlayOn, TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.Orange, strokeEffect: true) { X = 210, Y = 70, AcceptMouseInput = true }
+
                 );
 
                 Add
                 (
-                    new Label(ResGumps.Latency, false, textColor, font: 9)
-                    {
-                        X = 400, Y = 70
-                    }
+                    new TextBox(ResGumps.Latency, TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.Orange, strokeEffect: true) { X = 650, Y = 70, AcceptMouseInput = true }
                 );
 
-                Add
-                (
-                    new Label(ResGumps.PacketLoss, false, textColor, font: 9)
-                    {
-                        X = 470, Y = 70
-                    }
-                );
-
-                Add
-                (
-                    new Label(ResGumps.SortBy, false, textColor, font: 9)
-                    {
-                        X = 153, Y = 368
-                    }
-                );
             }
-
-            Add
-            (
-                new Button((int) Buttons.SortTimeZone, 0x093B, 0x093C, 0x093D)
-                {
-                    X = 230, Y = 366
-                }
-            );
-
-            Add
-            (
-                new Button((int) Buttons.SortFull, 0x093E, 0x093F, 0x0940)
-                {
-                    X = 338, Y = 366
-                }
-            );
-
-            Add
-            (
-                new Button((int) Buttons.SortConnection, 0x0941, 0x0942, 0x0943)
-                {
-                    X = 446, Y = 366
-                }
-            );
-
-            // World Pic Bg
-            Add(new GumpPic(150, 390, 0x0589, 0));
-
-            // Earth
-            Add
-            (
-                new Button((int) Buttons.Earth, 0x15E8, 0x15EA, 0x15E9)
-                {
-                    X = 160, Y = 400, ButtonAction = ButtonAction.Activate
-                }
-            );
-
-            // Sever Scroll Area Bg
-            Add
-            (
-                new ResizePic(0x0DAC)
-                {
-                    X = 150, Y = 90, Width = 393 - 14, Height = 271
-                }
-            );
 
             // Sever Scroll Area
             ScrollArea scrollArea = new ScrollArea
             (
                 150,
                 90,
-                393,
-                271,
+                600,
+                500,
                 true
             );
 
@@ -218,17 +153,44 @@ namespace ClassicUO.Game.UI.Gumps.Login
             Add(scrollArea);
             scrollArea.Add(databox);
 
+            Add
+             (
+                new AlphaBlendControl
+                {
+                    X = 210,
+                    Y = 620,
+                    Width = 540,
+                    Height = 85,
+                    Hue = 0x0000 // Cor preta (0x0000)
+                }
+             );
+
+
+            // Earth
+            Add
+            (
+                new Button((int)Buttons.Earth, 0x15E8, 0x15EA, 0x15E9)
+                {
+                    X = 243,
+                    Y = 630,
+                    ButtonAction = ButtonAction.Activate
+                }
+            );
+
+            Add
+                (
+
+                     new TextBox("Last server is played:", TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.Orange, strokeEffect: true) { X = 310, Y = 640, AcceptMouseInput = true }
+                );
+
+
             if (loginScene.Servers.Length != 0)
             {
                 int index = loginScene.GetServerIndexFromSettings();
 
                 Add
                 (
-                    new Label(loginScene.Servers[index].Name, false, 0x0481, font: 9)
-                    {
-                        X = 243,
-                        Y = 420
-                    }
+                    new TextBox(loginScene.Servers[index].Name, TrueTypeLoader.EMBEDDED_FONT, 20, 300, Color.Orange, strokeEffect: true) { X = 310, Y = 660, AcceptMouseInput = true }
                 );
             }
 
@@ -258,13 +220,33 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                             loginScene.SelectServer((byte) loginScene.Servers[index].Index);
                         }
+                        UIManager.GetGump<SelectServerBackground>()?.Dispose();
+                        UIManager.Add(new CharacterSelectionBackground());
 
                         break;
 
                     case Buttons.Prev:
+                        UIManager.GetGump<SelectServerBackground>()?.Dispose();
+                        UIManager.GetGump<CharacterSelectionBackground>()?.Dispose();
                         loginScene.StepBack();
 
                         break;
+                }
+            }
+        }
+
+        protected override void OnControllerButtonUp(SDL.SDL_GameControllerButton button)
+        {
+            base.OnControllerButtonUp(button);
+            if (button == SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_A)
+            {
+                LoginScene loginScene = Client.Game.GetScene<LoginScene>();
+
+                if (loginScene.Servers?.Any(s => s != null) ?? false)
+                {
+                    int index = loginScene.GetServerIndexFromSettings();
+
+                    loginScene.SelectServer((byte)loginScene.Servers[index].Index);
                 }
             }
         }
@@ -295,13 +277,14 @@ namespace ClassicUO.Game.UI.Gumps.Login
             Server = 99
         }
 
+
         private class ServerEntryGump : Control
         {
             private readonly int _buttonId;
             private readonly ServerListEntry _entry;
-            private readonly HoveredLabel _server_packet_loss;
-            private readonly HoveredLabel _server_ping;
-            private readonly HoveredLabel _serverName;
+            private readonly TextBox _server_ping;
+            private TextBox _serverName;
+            private AlphaBlendControl _alphaBlendControl;
             private uint _pingCheckTime = 0;
 
             public ServerEntryGump(ServerListEntry entry, byte font, ushort normal_hue, ushort selected_hue)
@@ -311,60 +294,34 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 _buttonId = entry.Index;
 
                 Add
+               (
+                  _alphaBlendControl = new AlphaBlendControl
+                  {
+                      X = 30,
+                      Width = 640,
+                      Height = 30,
+                      Hue = 0 // Cor preta (0x0000)
+                  }
+               );
+
+
+                Add
                 (
-                    _serverName = new HoveredLabel
-                    (
-                        entry.Name,
-                        false,
-                        normal_hue,
-                        selected_hue,
-                        selected_hue,
-                        font: font
-                    )
-                    {
-                        X = 74,
-                        AcceptMouseInput = false
-                    }
+                    _serverName = new TextBox(entry.Name, TrueTypeLoader.EMBEDDED_FONT, 18, 300, Color.Orange, strokeEffect: false) { X = 74, Y = 6, AcceptMouseInput = true }
+                    
                 );
 
                 Add
                 (
-                    _server_ping = new HoveredLabel
-                    (
-                        CUOEnviroment.NoServerPing ? string.Empty : "-",
-                        false,
-                        normal_hue,
-                        selected_hue,
-                        selected_hue,
-                        font: font
-                    )
-                    {
-                        X = 250,
-                        AcceptMouseInput = false
-                    }
+                    _server_ping = new TextBox(CUOEnviroment.NoServerPing ? string.Empty : "-", TrueTypeLoader.EMBEDDED_FONT, 18, 70, Color.Orange, strokeEffect: false) { X = 500, Y = 6, AcceptMouseInput = true }
+        
                 );
 
-                Add
-                (
-                    _server_packet_loss = new HoveredLabel
-                    (
-                        CUOEnviroment.NoServerPing ? string.Empty : "-",
-                        false,
-                        normal_hue,
-                        selected_hue,
-                        selected_hue,
-                        font: font
-                    )
-                    {
-                        X = 320,
-                        AcceptMouseInput = false
-                    }
-                );
 
 
                 AcceptMouseInput = true;
-                Width = 370;
-                Height = 25;
+                Width = 620;
+                Height = 31;
 
                 WantUpdateSize = false;
             }
@@ -372,19 +329,18 @@ namespace ClassicUO.Game.UI.Gumps.Login
             protected override void OnMouseEnter(int x, int y)
             {
                 base.OnMouseEnter(x, y);
-
-                _serverName.IsSelected = true;
-                _server_packet_loss.IsSelected = true;
-                _server_ping.IsSelected = true;
+                _alphaBlendControl.Hue = 0x7EA; // Cor preta original
+                _serverName.IsFocused = true;
+                _server_ping.IsFocused = true;
             }
 
             protected override void OnMouseExit(int x, int y)
             {
                 base.OnMouseExit(x, y);
 
-                _serverName.IsSelected = false;
-                _server_packet_loss.IsSelected = false;
-                _server_ping.IsSelected = false;
+                _alphaBlendControl.Hue = 0x0000; // Cor preta original
+                _serverName.IsFocused = false;
+                _server_ping.IsFocused = false;
             }
 
             protected override void OnMouseUp(int x, int y, MouseButtonType button)
@@ -431,7 +387,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
                             break;
                     }
 
-                    _server_packet_loss.Text = $"{_entry.PacketLoss}%";
                 }
             }
         }

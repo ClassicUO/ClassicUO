@@ -41,6 +41,7 @@ using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using MathHelper = ClassicUO.Utility.MathHelper;
+using System.IO;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
 {
@@ -53,6 +54,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private readonly LoginScene _scene;
         private CityInfo _selectedCity;
         private readonly byte _selectedProfession;
+        private readonly ImageButton _nextButton;
+        private readonly ImageButton button;
 
         private readonly Point[] _townButtonsText =
         {
@@ -123,7 +126,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             if (Client.Version >= ClientVersion.CV_70130)
             {
-                Add(new GumpPic(62, 54, (ushort) (0x15D9 + map), 0));
+                Add(new GumpPic(62, 54, (ushort)(0x15D9 + map), 0));
                 Add(new GumpPic(57, 49, 0x15DF, 0));
                 _facetName.Text = _cityNames[map];
             }
@@ -141,25 +144,33 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             Add(_facetName);
 
 
-            Add
-            (
-                new Button((int) Buttons.PreviousScreen, 0x15A1, 0x15A3, 0x15A2)
-                {
-                    X = 586,
-                    Y = 445,
-                    ButtonAction = ButtonAction.Activate
-                }
-            );
+            // Prev/Next
+            Add(_nextButton = new ImageButton(
+                30,
+                680,
+                Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_prev.png"),
+                Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_pressed_prev.png"),
+                Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_hover_prev.png")
+            ));
 
-            Add
-            (
-                new Button((int) Buttons.Finish, 0x15A4, 0x15A6, 0x15A5)
-                {
-                    X = 610,
-                    Y = 445,
-                    ButtonAction = ButtonAction.Activate
-                }
-            );
+            _nextButton.OnButtonClick += () =>
+            {
+                OnButtonClick(0);
+            };
+
+
+            Add(button = new ImageButton(
+               920,
+               680,
+               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_next.png"),
+               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_pressed_next.png"),
+               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_hover_next.png")
+           ));
+
+            button.OnButtonClick += () =>
+            {
+                OnButtonClick(1);
+            };
 
 
             _htmlControl = new HtmlControl
@@ -252,7 +263,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             if (index >= _cityNames.Length)
             {
-                index = (uint) (_cityNames.Length - 1);
+                index = (uint)(_cityNames.Length - 1);
             }
 
             _facetName.Text = _cityNames[index];
@@ -268,7 +279,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 return;
             }
 
-            switch ((Buttons) buttonID)
+            switch ((Buttons)buttonID)
             {
                 case Buttons.PreviousScreen:
                     charCreationGump.StepBack(_selectedProfession > 0 ? 2 : 1);
@@ -356,7 +367,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 _label.MouseUp += (sender, e) =>
                 {
                     _label.IsSelected = true;
-                    int idx = (int) _label.Tag;
+                    int idx = (int)_label.Tag;
                     OnButtonClick(idx + 2);
                 };
 

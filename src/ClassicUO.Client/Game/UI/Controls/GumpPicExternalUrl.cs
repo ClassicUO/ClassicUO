@@ -33,6 +33,8 @@
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Png;
 using System;
 using System.IO;
 using System.Net.Http;
@@ -72,12 +74,12 @@ namespace ClassicUO.Game.UI.Controls
                     using (HttpClient httpClient = new HttpClient())
                     using (Stream stream = httpClient.GetStreamAsync(ImgUrl).Result)
                     {
-                        using (System.Drawing.Image image = System.Drawing.Image.FromStream(stream))
+                        using (var image = Image.Load(stream))
                         {
                             Console.WriteLine($"Image size {image.Width} x {image.Height}");
 
                             var memStream = new MemoryStream();
-                            image.Save(memStream, System.Drawing.Imaging.ImageFormat.Png);
+                            image.Save(memStream, new PngEncoder());
 
                             using (memStream)
                             {
@@ -102,9 +104,9 @@ namespace ClassicUO.Game.UI.Controls
             if (imageTexture != null)
             {
                 if (!Resize)
-                    batcher.DrawTiled(imageTexture, new Rectangle(x, y, Width, Height), imageTexture.Bounds, hueVector);
+                    batcher.DrawTiled(imageTexture, new Microsoft.Xna.Framework.Rectangle(x, y, Width, Height), imageTexture.Bounds, hueVector);
                 else
-                    batcher.Draw(imageTexture, new Rectangle(x, y, Width, Height), imageTexture.Bounds, hueVector);
+                    batcher.Draw(imageTexture, new Microsoft.Xna.Framework.Rectangle(x, y, Width, Height), imageTexture.Bounds, hueVector);
             }
 
             return base.Draw(batcher, x, y); ;

@@ -116,6 +116,14 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        public void UpdateScrollbarPosition()
+        {
+            if (_isNormalScroll)
+                _scrollBar.X = Width - 14;
+            else
+                _scrollBar.X = Width - 19;
+        }
+
         public int ScrollBarWidth()
         {
             if (_scrollBar == null)

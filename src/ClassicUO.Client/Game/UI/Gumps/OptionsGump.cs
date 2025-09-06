@@ -77,7 +77,7 @@ namespace ClassicUO.Game.UI.Gumps
         private InputField _autoOpenCorpseRange;
 
         //experimental
-        private Checkbox _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _disableAutoMove, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG, _saveHealthbars;
+        private Checkbox _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _disableAutoMove, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _autoAvoidObstacules, _customBars, _customBarsBBG, _saveHealthbars;
         private HSliderBar _cellSize;
         private Checkbox _containerScaleItems, _containerDoubleClickToLoot, _relativeDragAnDropItems, _useLargeContianersGumps, _highlightContainersWhenMouseIsOver, _useGridLayoutContainerGumps;
 
@@ -1431,7 +1431,7 @@ namespace ClassicUO.Game.UI.Gumps
                     startY
                 )
             );
-
+                
             section4.Add
             (
                 _showTargetRangeIndicator = AddCheckBox
@@ -1439,6 +1439,18 @@ namespace ClassicUO.Game.UI.Gumps
                     null,
                     ResGumps.ShowTarRangeIndic,
                     _currentProfile.ShowTargetRangeIndicator,
+                    startX,
+                    startY
+                )
+            );
+
+            section4.Add
+            (
+                _autoAvoidObstacules = AddCheckBox
+                (
+                    null,
+                    ResGumps.AutoAvoidObstacules,
+                    _currentProfile.AutoAvoidObstacules,
                     startX,
                     startY
                 )
@@ -6807,6 +6819,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _textFading.IsChecked = true;
                     _enableDragSelect.IsChecked = false;
                     _showTargetRangeIndicator.IsChecked = false;
+                    _autoAvoidObstacules.IsChecked = false;
                     _customBars.IsChecked = false;
                     _customBarsBBG.IsChecked = false;
                     _autoOpenCorpse.IsChecked = false;
@@ -6852,8 +6865,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _windowBorderless.IsChecked = false;
                     _zoomCheckbox.IsChecked = false;
                     _restorezoomCheckbox.IsChecked = false;
-                    _gameWindowWidth.SetText("600");
-                    _gameWindowHeight.SetText("480");
+                    _gameWindowWidth.SetText("768");
+                    _gameWindowHeight.SetText("1024");
                     _gameWindowPositionX.SetText("20");
                     _gameWindowPositionY.SetText("20");
                     _gameWindowLock.IsChecked = false;
@@ -7456,7 +7469,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (vp != null)
                     {
-                        n = vp.ResizeGameWindow(new Point(600, 480));
+                        n = vp.ResizeGameWindow(new Point(1024, 768));
                         vp.SetGameWindowPosition(new Point(20, 20));
                         _currentProfile.GameWindowPosition = vp.Location;
                     }
@@ -7650,7 +7663,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.OverrideContainerLocationSetting = _overrideContainerLocationSetting.SelectedIndex;
 
             _currentProfile.ShowTargetRangeIndicator = _showTargetRangeIndicator.IsChecked;
-
+            _currentProfile.AutoAvoidObstacules = _autoAvoidObstacules.IsChecked;
 
             bool updateHealthBars = _currentProfile.CustomBarsToggled != _customBars.IsChecked;
             _currentProfile.CustomBarsToggled = _customBars.IsChecked;

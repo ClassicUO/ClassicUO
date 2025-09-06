@@ -50,7 +50,7 @@ namespace ClassicUO.Utility.Platforms
 
         public static void Start()
         {
-            if (Environment.OSVersion.Platform != PlatformID.Win32NT)
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 Log.Warn("This OS does not support the UOAssist API");
 
@@ -177,6 +177,7 @@ namespace ClassicUO.Utility.Platforms
                 GC.SuppressFinalize(this);
             }
 
+#if WINDOWS
             [DllImport("user32.dll")]
             internal static extern uint PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
 
@@ -217,6 +218,17 @@ namespace ClassicUO.Utility.Platforms
 
             [DllImport("user32.dll", SetLastError = true)]
             private static extern bool DestroyWindow(IntPtr hWnd);
+#else
+            internal static uint PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam) => 0;
+            internal static ushort GlobalAddAtom(string str) => 0;
+            internal static ushort GlobalDeleteAtom(ushort atom) => 0;
+            internal static uint GlobalGetAtomName(ushort atom, StringBuilder buff, int bufLen) => 0;
+            private static bool ShowWindow(IntPtr hWnd, int nCmdShow) => false;
+            private static ushort RegisterClassW([In] ref WNDCLASS lpWndClass) => 0;
+            private static IntPtr CreateWindowExW(uint dwExStyle, string lpClassName, string lpWindowName, uint dwStyle, int x, int y, int nWidth, int nHeight, IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance, IntPtr lpParam) => IntPtr.Zero;
+            private static IntPtr DefWindowProcW(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam) => IntPtr.Zero;
+            private static bool DestroyWindow(IntPtr hWnd) => false;
+#endif
 
             private void Dispose(bool disposing)
             {

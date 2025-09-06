@@ -90,6 +90,21 @@ namespace ClassicUO.Game.GameObjects
             ushort hue = Hue;
             ushort graphic = DisplayedGraphic;
             bool partial = ItemData.IsPartialHue;
+            if (ProfileManager.CurrentProfile.AutoAvoidObstacules) {
+                if  (StaticFilters.isHumanAndMonster(graphic))
+                {
+                    if (StaticFilters.IsOutStamina())
+                    {
+                        TileDataLoader.Instance.StaticData[Graphic].SetImpassable(true);
+
+                    }
+                    else
+                    {
+                        TileDataLoader.Instance.StaticData[Graphic].SetImpassable(false);
+                    }
+                        
+                }
+            }
 
             // ## BEGIN - END ## // ART / HUE CHANGES
             if (CombatCollection.IsStealthArt(Graphic))
@@ -264,6 +279,8 @@ namespace ClassicUO.Game.GameObjects
 
             return true;
         }
+
+
 
         private bool DrawCorpse(
             UltimaBatcher2D batcher,

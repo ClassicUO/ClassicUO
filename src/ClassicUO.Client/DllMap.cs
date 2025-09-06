@@ -13,6 +13,7 @@ namespace ClassicUO
     // only works in .NET Core. disable in .NET framework
     public static class DllMap
     {
+#if WINDOWS
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetDefaultDllDirectories(int directoryFlags);
@@ -23,6 +24,11 @@ namespace ClassicUO
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetDllDirectory(string lpPathName);
+#else
+        private static bool SetDefaultDllDirectories(int directoryFlags) => false;
+        private static void AddDllDirectory(string lpPathName) { }
+        private static bool SetDllDirectory(string lpPathName) => false;
+#endif
 
         private const int LOAD_LIBRARY_SEARCH_DEFAULT_DIRS = 0x00001000;
 

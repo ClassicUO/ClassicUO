@@ -31,7 +31,6 @@
 #endregion
 
 using System.Collections.Generic;
-using System.IO;
 using System.Xml;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -103,6 +102,8 @@ namespace ClassicUO.Game.UI.Gumps
             BuildGump();
 
             CurrentCounterBarGump = this;
+
+            SetInScreen();
         }
 
         public override GumpType GumpType => GumpType.CounterBar;
@@ -446,16 +447,16 @@ namespace ClassicUO.Game.UI.Gumps
                     else if (ProfileManager.CurrentProfile.CastSpellsByOneClick)
                     {
                         Use();
+                        return;
                     }
                 }
                 else if (button == MouseButtonType.Right && Keyboard.Alt && Graphic != 0)
                 {
                     RemoveItem();
+                    return;
                 }
-                else if (Graphic != 0)
-                {
-                    base.OnMouseUp(x, y, button);
-                }
+
+                base.OnMouseUp(x, y, button);
             }
 
             protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
@@ -532,7 +533,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            private static void GetAmount(Item parent, ushort graphic, ushort hue, ref int amount)
+            private void GetAmount(Item parent, ushort graphic, ushort hue, ref int amount)
             {
                 if (parent == null)
                 {
@@ -548,6 +549,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (item.Graphic == graphic && item.Hue == hue && item.Exists)
                     {
                         amount += item.Amount;
+                        SetTooltip(item);
                     }
                 }
             }

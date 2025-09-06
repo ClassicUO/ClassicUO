@@ -1335,6 +1335,11 @@ namespace ClassicUO.Game.Scenes
                 TargetManager.CancelTarget();
             }
 
+            if(e.keysym.sym == SDL.SDL_Keycode.SDLK_LCTRL && UIManager.IsMouseOverWorld && !Client.Game.GameCursor.ItemHold.Enabled && ProfileManager.CurrentProfile.EnableNearbyItemGump && NearbyItems.NearbyItemGump == null )
+            {
+                UIManager.Add(new NearbyItems());
+            }
+
             if (UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl)
             {
                 return;
@@ -1344,7 +1349,7 @@ namespace ClassicUO.Game.Scenes
             {
                 case SDL.SDL_Keycode.SDLK_ESCAPE:
 
-                    if (Pathfinder.AutoWalking && Pathfinder.PathindingCanBeCancelled)
+                    if (Pathfinder.AutoWalking && Pathfinder.PathFindingCanBeCancelled)
                     {
                         Pathfinder.StopAutoWalk();
                     }

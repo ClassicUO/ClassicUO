@@ -1,0 +1,63 @@
+name: dust765-2.0
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Restore dependencies
+        run: dotnet restore src/ClassicUO.Client/ClassicUO.Client.csproj
+      - name: Build
+        run: dotnet publish src/ClassicUO.Client/ClassicUO.Client.csproj -c Release -r win-x64 --self-contained false -o build/win-x64
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dust765-2.0-windows
+          path: build/win-x64
+
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Restore dependencies
+        run: dotnet restore src/ClassicUO.Client/ClassicUO.Client.csproj
+      - name: Build
+        run: dotnet publish src/ClassicUO.Client/ClassicUO.Client.csproj -c Release -r linux-x64 --self-contained false -o build/linux-x64
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dust765-2.0-linux
+          path: build/linux-x64
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Restore dependencies
+        run: dotnet restore src/ClassicUO.Client/ClassicUO.Client.csproj
+      - name: Build
+        run: dotnet publish src/ClassicUO.Client/ClassicUO.Client.csproj -c Release -r osx-x64 --self-contained false -o build/osx-x64
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dust765-2.0-macos
+          path: build/osx-x64

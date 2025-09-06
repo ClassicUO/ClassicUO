@@ -186,7 +186,7 @@ namespace ClassicUO.Game.UI.Controls
                 else
                     Option.NameOverheadOptionFlags &= ~(int)optionFlag;
 
-                if (NameOverHeadManager.LastActiveNameOverheadOption == Option.Name)
+                if (NameOverHeadManager.LastActiveNameOverheadOption.Replace("\\u0026", "&") == Option.Name)
                     NameOverHeadManager.ActiveOverheadOptions = (NameOverheadOptions)Option.NameOverheadOptionFlags;
             };
 

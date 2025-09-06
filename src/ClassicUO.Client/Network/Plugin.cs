@@ -147,9 +147,25 @@ namespace ClassicUO.Network
 
         public bool IsValid { get; private set; }
 
+        private static bool IsLikelyWindowsSpecificPlugin(string path)
+        {
+            string fileName = Path.GetFileName(path).ToLowerInvariant();
+            
+            // Check for known Windows-specific plugin names or patterns
+            return fileName.Contains("assistant") || 
+                   fileName.Contains("razor") || 
+                   fileName.Contains("steam") ||
+                   fileName.Contains("windows") ||
+                   fileName.Contains("wpf");
+        }
+
+#if WINDOWS
         [DllImport("kernel32", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool DeleteFile(string name);
+#else
+        public static bool DeleteFile(string name) => File.Exists(name) && File.Delete(name);
+#endif
 
         public static Plugin Create(string path)
         {
@@ -166,12 +182,18 @@ namespace ClassicUO.Network
 
             Log.Trace($"Loading plugin: {path}");
 
+            // Check if this might be a Windows-specific plugin
+            if (IsLikelyWindowsSpecificPlugin(path))
+            {
+                Log.Trace($"Plugin '{Path.GetFileName(path)}' appears to be Windows-specific. Will attempt to load but may fail on non-Windows platforms.");
+            }
+
             Plugin p = new Plugin(path);
             p.Load();
 
             if (!p.IsValid)
             {
-                Log.Warn($"Invalid plugin: {path}");
+                Log.Warn($"Plugin '{Path.GetFileName(path)}' could not be loaded. It may be incompatible with the current platform or .NET version.");
 
                 return null;
             }
@@ -301,9 +323,24 @@ namespace ClassicUO.Network
                 }
                 catch (Exception err)
                 {
-                    Log.Error(
-                        $"Plugin threw an error during Initialization. {err.Message} {err.StackTrace} {err.InnerException?.Message} {err.InnerException?.StackTrace}"
-                    );
+                    // Check for specific compatibility issues
+                    if (err is TypeLoadException || 
+                        (err.InnerException is TypeLoadException) ||
+                        err.Message.Contains("WindowsBase") ||
+                        err.Message.Contains("System.Windows.Threading.Dispatcher"))
+                    {
+                        Log.Warn(
+                            $"Plugin '{Path.GetFileName(PluginPath)}' requires Windows-specific assemblies and cannot run on this platform. " +
+                            $"This plugin is designed for .NET Framework or Windows-specific .NET versions. " +
+                            $"Plugin will be skipped. Error: {err.Message}"
+                        );
+                    }
+                    else
+                    {
+                        Log.Error(
+                            $"Plugin '{Path.GetFileName(PluginPath)}' threw an error during Initialization. {err.Message} {err.StackTrace} {err.InnerException?.Message} {err.InnerException?.StackTrace}"
+                        );
+                    }
 
                     return;
                 }

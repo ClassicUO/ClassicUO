@@ -145,7 +145,7 @@ namespace ClassicUO.Game
                         {
                             value = 0;
                         }
-
+                        MapLoader.Instance.LoadMap(value, ClientFeatures.Flags.HasFlag(CharacterListFlags.CLF_UNLOCK_FELUCCA_AREAS));
                         Map = new Map.Map(value);
 
                         Player.SetInWorldTile(x, y, z);
@@ -153,6 +153,7 @@ namespace ClassicUO.Game
                     }
                     else
                     {
+                        MapLoader.Instance.LoadMap(value, ClientFeatures.Flags.HasFlag(CharacterListFlags.CLF_UNLOCK_FELUCCA_AREAS));
                         Map = new Map.Map(value);
                     }
 

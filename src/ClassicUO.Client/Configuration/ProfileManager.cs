@@ -65,6 +65,8 @@ namespace ClassicUO.Configuration
             CurrentProfile.CharacterName = charactername;
 
             ValidateFields(CurrentProfile);
+
+            ClassicUO.Game.Managers.IgnoreManager.Initialize();
         }
 
 
@@ -90,14 +92,14 @@ namespace ClassicUO.Configuration
                 throw new InvalidDataException();
             }
 
-            if (profile.WindowClientBounds.X < 600)
+            if (profile.WindowClientBounds.X < 1024)
             {
-                profile.WindowClientBounds = new Point(600, profile.WindowClientBounds.Y);
+                profile.WindowClientBounds = new Point(1024, profile.WindowClientBounds.Y);
             }
 
-            if (profile.WindowClientBounds.Y < 480)
+            if (profile.WindowClientBounds.Y < 768)
             {
-                profile.WindowClientBounds = new Point(profile.WindowClientBounds.X, 480);
+                profile.WindowClientBounds = new Point(profile.WindowClientBounds.X, 768);
             }
         }
 

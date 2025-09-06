@@ -64,7 +64,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         public void SetCharacter(PlayerMobile character)
         {
             _character = character;
-            SetStep(CharCreationStep.ChooseProfession);
+            
         }
 
         public void SetAttributes(bool force = false)
@@ -82,7 +82,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             for (int i = 0; i < _skillsCount; i++)
             {
                 int skillIndex = info.SkillDefVal[i, 0];
-
+                 
                 if (skillIndex >= _character.Skills.Length)
                 {
                     continue;
@@ -131,9 +131,11 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             _character.Intelligence = (ushort) _selectedProfession.StatsVal[1];
             _character.Dexterity = (ushort) _selectedProfession.StatsVal[2];
 
-            SetAttributes();
+            
 
-            SetStep(_selectedProfession.DescriptionIndex > 0 ? CharCreationStep.ChooseCity : CharCreationStep.ChooseTrade);
+            //SetAttributes();
+
+            //SetStep(_selectedProfession.DescriptionIndex > 0 ? CharCreationStep.ChooseCity : CharCreationStep.ChooseTrade);
         }
 
         public void CreateCharacter(byte profession)

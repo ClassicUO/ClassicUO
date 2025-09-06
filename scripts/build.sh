@@ -18,4 +18,4 @@ fi
 echo "OUTPUT PATH: ${output}${config}"
 
 
-msbuild "../src/ClassicUO.csproj" /p:Configuration=$config /p:OutputPath="${output}${config}"
+dotnet build "../src/ClassicUO.Client/ClassicUO.Client.csproj" -c $config -o "${output}${config}"

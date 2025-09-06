@@ -76,8 +76,9 @@ namespace ClassicUO.Utility
         CV_704565 = (7 << 24) | (0 << 16) | (45 << 8) | 65,          //
         CV_705301 = (7 << 24) | (0 << 16) | (53 << 8) | 01,          // Alternate backpack skins
         CV_706000 = (7 << 24) | (0 << 16) | (60 << 8) | 0,
-        CV_706400 = (7 << 24) | (0 << 16) | (64 << 8) | 0, // Endless Journey background
-        CV_70796 = (7 << 24) | (0 << 16) | (79 << 8) | 6   // Display houses content option
+        CV_706400 = (7 << 24) | (0 << 16) | (64 << 8) | 0,           // Endless Journey background
+        CV_70796 = (7 << 24) | (0 << 16) | (79 << 8) | 6,            // Display houses content option
+        CV_7010400 = (7 << 24) | (0 << 16) | (104 << 8) | 0,         // new file format
     }
 
     public static class ClientVersionHelper

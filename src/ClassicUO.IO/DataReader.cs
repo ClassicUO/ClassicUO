@@ -174,6 +174,8 @@ namespace ClassicUO.IO
             return v;
         }
 
+        
+
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public uint ReadUInt()
         {
@@ -206,6 +208,7 @@ namespace ClassicUO.IO
 
             return v;
         }
+
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public byte[] ReadArray(int count)
@@ -278,5 +281,6 @@ namespace ClassicUO.IO
 
             return (uint) ((ReadByte() << 24) | (ReadByte() << 16) | (ReadByte() << 8) | ReadByte());
         }
+
     }
 }

@@ -345,6 +345,21 @@ namespace ClassicUO.Game.Managers
             return null;
         }
 
+        public static Gump GetGumpServer(uint serial)
+        {
+            for (LinkedListNode<Gump> last = Gumps.Last; last != null; last = last.Previous)
+            {
+                Control c = last.Value;
+
+                if (!c.IsDisposed && c.ServerSerial == serial)
+                {
+                    return c as Gump;
+                }
+            }
+
+            return null;
+        }
+
         public static TradingGump GetTradingGump(uint serial)
         {
             for (LinkedListNode<Gump> g = Gumps.Last; g != null; g = g.Previous)

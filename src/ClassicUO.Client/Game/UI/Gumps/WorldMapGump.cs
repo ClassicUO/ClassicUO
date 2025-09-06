@@ -2610,7 +2610,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             WMapEntity wme = World.WMapManager.GetEntity(partyMember.Serial);
 
-                            if (wme != null && !wme.IsGuild)
+                            if (wme != null)
                             {
                                 DrawWMEntity
                                 (

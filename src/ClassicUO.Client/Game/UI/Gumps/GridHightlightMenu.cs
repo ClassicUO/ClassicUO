@@ -2,6 +2,8 @@
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Logging;
+using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -170,85 +172,64 @@ namespace ClassicUO.Game.UI.Gumps
             return data.ToArray();
         }
 
-        public static void ExportGridHightlightSettings()
+        public static async void ExportGridHightlightSettings()
         {
             GridHighlightData[] allData = GetAllGridHighlightData();
 
-            if (!CUOEnviroment.IsUnix)
+            try
             {
-                Thread t = new Thread(() =>
+                var fileName = await CrossPlatformFileDialog.ShowSaveFileDialog(
+                    "Save grid highlight settings",
+                    "Json files (*.json)|*.json|All files (*.*)|*.*",
+                    Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client")
+                );
+
+                if (!string.IsNullOrEmpty(fileName))
                 {
-                    System.Windows.Forms.SaveFileDialog saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
-                    saveFileDialog1.Filter = "Json|*.json";
-                    saveFileDialog1.Title = "Save grid highlight settings";
-                    saveFileDialog1.ShowDialog();
-
                     string result = JsonSerializer.Serialize(allData);
-
-                    // If the file name is not an empty string open it for saving.
-                    if (saveFileDialog1.FileName != "")
-                    {
-                        System.IO.FileStream fs =
-                            (System.IO.FileStream)saveFileDialog1.OpenFile();
-                        // NOTE that the FilterIndex property is one-based.
-                        switch (saveFileDialog1.FilterIndex)
-                        {
-                            default:
-                                byte[] data = Encoding.UTF8.GetBytes(result);
-                                fs.Write(data, 0, data.Length);
-                                break;
-                        }
-
-                        fs.Close();
-                    }
-                });
-                t.SetApartmentState(ApartmentState.STA);
-                t.Start();
+                    await File.WriteAllTextAsync(fileName, result, Encoding.UTF8);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Error exporting grid highlight settings: {ex.Message}");
             }
         }
 
-        public static void ImportGridHighlightSettings()
+        public static async void ImportGridHighlightSettings()
         {
-            if (!CUOEnviroment.IsUnix)
+            try
             {
-                Thread t = new Thread(() =>
+                var fileName = await CrossPlatformFileDialog.ShowOpenFileDialog(
+                    "Import grid highlight settings",
+                    "Json files (*.json)|*.json|All files (*.*)|*.*",
+                    Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client")
+                );
+
+                if (!string.IsNullOrEmpty(fileName) && File.Exists(fileName))
                 {
-                    System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog();
-                    openFileDialog.Filter = "Json|*.json";
-                    openFileDialog.Title = "Import grid highlight settings";
-                    openFileDialog.ShowDialog();
-
-                    // If the file name is not an empty string open it for saving.
-                    if (openFileDialog.FileName != "")
+                    try
                     {
-                        // NOTE that the FilterIndex property is one-based.
-                        switch (openFileDialog.FilterIndex)
-                        {
-                            default:
-                                try
-                                {
-                                    string result = File.ReadAllText(openFileDialog.FileName);
+                        string result = await File.ReadAllTextAsync(fileName);
 
-                                    GridHighlightData[] imported = JsonSerializer.Deserialize<GridHighlightData[]>(result);
+                        GridHighlightData[] imported = JsonSerializer.Deserialize<GridHighlightData[]>(result);
 
-                                    foreach (GridHighlightData importedData in imported)
-                                        importedData.Save();
+                        foreach (GridHighlightData importedData in imported)
+                            importedData.Save();
 
-                                    UIManager.GetGump<GridHightlightMenu>()?.Dispose();
-                                    UIManager.Add(new GridHightlightMenu());
-
-                                }
-                                catch (System.Exception e)
-                                {
-                                    GameActions.Print("It looks like there was an error trying to import your grid highlight settings.", 32);
-                                    Console.WriteLine(e.ToString());
-                                }
-                                break;
-                        }
+                        UIManager.GetGump<GridHightlightMenu>()?.Dispose();
+                        UIManager.Add(new GridHightlightMenu());
                     }
-                });
-                t.SetApartmentState(ApartmentState.STA);
-                t.Start();
+                    catch (Exception e)
+                    {
+                        GameActions.Print("It looks like there was an error trying to import your grid highlight settings.", 32);
+                        Console.WriteLine(e.ToString());
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Error opening file dialog: {ex.Message}");
             }
         }
 

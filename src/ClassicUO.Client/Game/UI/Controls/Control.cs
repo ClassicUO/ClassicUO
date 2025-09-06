@@ -488,9 +488,9 @@ namespace ClassicUO.Game.UI.Controls
             return this;
         }
 
-        public void ForceSizeUpdate()
+        public void ForceSizeUpdate(bool onlyIfLarger = true)
         {
-            int h = Height, w = Width;
+            int h = onlyIfLarger ? Height : 0, w = onlyIfLarger ? Width : 0;
             for (int i = 0; i < Children.Count; i++)
             {
                 Control c = Children[i];

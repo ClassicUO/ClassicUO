@@ -2,21 +2,16 @@
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace ClassicUO.Game.UI.Gumps
 {
     internal class SkillProgressBar : Gump
     {
-        public SkillProgressBar(int skillIndex) : base((uint)skillIndex + 764544, 0)
+        private long expireAt = long.MaxValue;
+        public SkillProgressBar(int skillIndex) : base(0, 0)
         {
-            UIManager.GetGump<SkillProgressBar>((uint)skillIndex + 764544)?.Dispose();
-
             Height = 40;
             Width = 300;
 
@@ -43,6 +38,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         private int skillIndex { get; }
 
+        public void SetDuration(long ms)
+        {
+            expireAt = Time.Ticks + ms;
+        }
+
         protected override void OnMove(int x, int y)
         {
             base.OnMove(x, y);
@@ -67,6 +67,9 @@ namespace ClassicUO.Game.UI.Gumps
                 Rectangle barBounds = Client.Game.Gumps.GetGump(0x0805).UV;
 
                 int widthPercent = (int)(barBounds.Width * (s.Value / s.Cap));
+                if(widthPercent > barBounds.Width)
+                    widthPercent = barBounds.Width;
+
                 Add(new GumpPic(0, Height - barBounds.Height, 0x0805, 0) { X = (Width / 2) - (barBounds.Width / 2) }); //Background
 
                 if (widthPercent > 0)
@@ -74,38 +77,59 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        public override void Update()
+        {
+            base.Update();
+
+            if (Time.Ticks >= expireAt)
+            {
+                Dispose();
+            }
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            QueManager.ShowNext();
+        }
+
         public static class QueManager
         {
-            private static TimeSpan duration = TimeSpan.FromSeconds(5);
-
             private static ConcurrentQueue<SkillProgressBar> skillProgressBars = new ConcurrentQueue<SkillProgressBar>();
+            public static SkillProgressBar CurrentProgressBar;
 
-            private static bool threadRunning = false;
 
             public static void AddSkill(int skillIndex)
             {
                 skillProgressBars.Enqueue(new SkillProgressBar(skillIndex));
-                StartProcessing();
+
+                if (CurrentProgressBar == null || CurrentProgressBar.IsDisposed)
+                {
+                    ShowNext();
+                }
             }
 
-            private static void StartProcessing()
+            public static void ShowNext()
             {
-                if (threadRunning)
-                {
-                    return;
-                }
-                threadRunning = true;
-
-                Task.Factory.StartNew(() =>
-                {
-                    while (skillProgressBars.TryDequeue(out SkillProgressBar bar))
+                if (World.InGame)
+                    if (skillProgressBars.TryDequeue(out var skillProgressBar))
                     {
-                        UIManager.Add(bar);
-                        Task.Delay(duration).Wait();
-                        bar?.Dispose();
+                        CurrentProgressBar = skillProgressBar;
+                        skillProgressBar.SetDuration(4000); //Expire in 4 seconds
+                        UIManager.Add(skillProgressBar);
                     }
-                    threadRunning = false;
-                });
+                    else
+                    {
+                        //Not in game anymore, clear the que
+                        Reset();
+                    }
+            }
+
+            public static void Reset()
+            {
+                while(skillProgressBars.TryDequeue( out var skillProgressBar))
+                    skillProgressBar?.Dispose();
+                skillProgressBars = new ConcurrentQueue<SkillProgressBar>();
             }
         }
     }

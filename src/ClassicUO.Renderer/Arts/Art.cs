@@ -28,7 +28,7 @@ namespace ClassicUO.Renderer.Arts
         public ref readonly SpriteInfo GetArt(uint idx)
             => ref Get(idx + 0x4000);
 
-        private ref readonly SpriteInfo Get(uint idx)
+        public ref readonly SpriteInfo Get(uint idx)
         {
             if (idx >= _spriteInfos.Length)
                 return ref SpriteInfo.Empty;

@@ -1,6 +1,6 @@
 #region license
 
-// Copyright (c) 2021, andreakarasho
+// Copyright (c) 2024, andreakarasho
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -560,6 +560,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.Close:
                 case MacroType.Minimize:
                 case MacroType.Maximize:
+                case MacroType.ToggleGump:
 
                     switch (macro.Code)
                     {
@@ -953,7 +954,158 @@ namespace ClassicUO.Game.Managers
                             }
 
                             break;
+
+                        case MacroType.ToggleGump:
+                            Gump g;
+                            switch (macro.SubCode)
+                            {
+                                case MacroSubType.Configuration:
+                                    if (!GameActions.CloseSettings())
+                                        GameActions.OpenSettings();
+                                    break;
+
+                                case MacroSubType.Paperdoll:
+                                    if (!GameActions.ClosePaperdoll())
+                                        GameActions.OpenPaperdoll(World.Player);
+
+                                    break;
+
+                                case MacroSubType.Status:
+                                    if (!GameActions.CloseStatusBar())
+                                        GameActions.OpenStatusBar();
+
+                                    break;
+
+                                case MacroSubType.Journal:
+                                    if (!GameActions.CloseAllJournals())
+                                        GameActions.OpenJournal();
+
+                                    break;
+
+                                case MacroSubType.Skills:
+                                    if (!GameActions.CloseSkills())
+                                        GameActions.OpenSkills();
+
+                                    break;
+
+                                case MacroSubType.MageSpellbook:
+                                case MacroSubType.NecroSpellbook:
+                                case MacroSubType.PaladinSpellbook:
+                                case MacroSubType.BushidoSpellbook:
+                                case MacroSubType.NinjitsuSpellbook:
+                                case MacroSubType.SpellWeavingSpellbook:
+                                case MacroSubType.MysticismSpellbook:
+
+                                    SpellBookType type = SpellBookType.Magery;
+
+                                    switch (macro.SubCode)
+                                    {
+                                        case MacroSubType.NecroSpellbook:
+                                            type = SpellBookType.Necromancy;
+
+                                            break;
+
+                                        case MacroSubType.PaladinSpellbook:
+                                            type = SpellBookType.Chivalry;
+
+                                            break;
+
+                                        case MacroSubType.BushidoSpellbook:
+                                            type = SpellBookType.Bushido;
+
+                                            break;
+
+                                        case MacroSubType.NinjitsuSpellbook:
+                                            type = SpellBookType.Ninjitsu;
+
+                                            break;
+
+                                        case MacroSubType.SpellWeavingSpellbook:
+                                            type = SpellBookType.Spellweaving;
+
+                                            break;
+
+                                        case MacroSubType.MysticismSpellbook:
+                                            type = SpellBookType.Mysticism;
+
+                                            break;
+
+                                        case MacroSubType.BardSpellbook:
+                                            type = SpellBookType.Mastery;
+
+                                            break;
+                                    }
+
+                                    if (!GameActions.CloseSpellBook(type))
+                                        NetClient.Socket.Send_OpenSpellBook((byte)type);
+
+                                    break;
+
+                                case MacroSubType.Chat:
+                                    if (!GameActions.CloseChat())
+                                        GameActions.OpenChat();
+
+                                    break;
+
+                                case MacroSubType.Backpack:
+                                    if (!GameActions.CloseBackpack())
+                                        GameActions.OpenBackpack();
+
+                                    break;
+
+                                case MacroSubType.Overview:
+                                    if (!GameActions.CloseMiniMap())
+                                        GameActions.OpenMiniMap();
+
+                                    break;
+
+                                case MacroSubType.WorldMap:
+                                    if (!GameActions.CloseWorldMap())
+                                        GameActions.OpenWorldMap();
+
+                                    break;
+
+                                case MacroSubType.Mail:
+                                case MacroSubType.PartyManifest:
+                                    PartyGump party = UIManager.GetGump<PartyGump>();
+
+                                    if (party == null)
+                                    {
+                                        int x = Client.Game.Window.ClientBounds.Width / 2 - 272;
+                                        int y = Client.Game.Window.ClientBounds.Height / 2 - 240;
+                                        UIManager.Add(new PartyGump(x, y, World.Party.CanLoot));
+                                    }
+                                    else
+                                    {
+                                        party.Dispose();
+                                    }
+
+                                    break;
+
+                                case MacroSubType.Guild:
+                                    //Guild gump is server-side, no way of knowing if one is open
+                                    break;
+
+                                case MacroSubType.QuestLog:
+                                    //Server side gump, unknown if it is open
+
+                                    break;
+
+                                case MacroSubType.PartyChat:
+                                case MacroSubType.CombatBook:
+                                case MacroSubType.RacialAbilitiesBook:
+                                case MacroSubType.BardSpellbook:
+                                    Log.Warn($"Macro '{macro.SubCode}' not implemented");
+
+                                    break;
+                            }
+                            break;
                     }
+
+                    break;
+                case MacroType.ToggleDurabilityGump:
+                    if (!GameActions.CloseDurabilityGump())
+                        GameActions.OpenDurabilityGump();
 
                     break;
 
@@ -990,7 +1142,7 @@ namespace ClassicUO.Game.Managers
                         int totalCount = 0;
                         int spellType;
 
-                        for (spellType = 0; spellType < 7; spellType++)
+                        for (spellType = 0; spellType < 8; spellType++)
                         {
                             totalCount += _spellsCountTable[spellType];
 
@@ -2101,6 +2253,15 @@ namespace ClassicUO.Game.Managers
                         CommandManager.Execute(parts[0], parts);
                     }
                     break;
+                case MacroType.DisarmAbility:
+                    NetClient.Socket.Send_DisarmRequest();
+
+                    break;
+
+                case MacroType.StunAbility:
+                    NetClient.Socket.Send_StunRequest();
+
+                    break;
             }
 
 
@@ -2479,6 +2640,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.Close:
                 case MacroType.Minimize:
                 case MacroType.Maximize:
+                case MacroType.ToggleGump:
                     offset = (int)MacroSubType.Configuration;
                     count = MacroSubType.Anatomy - MacroSubType.Configuration;
 
@@ -2504,8 +2666,9 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.CastSpell:
                     offset = (int)MacroSubType.Clumsy;
-                    count = MacroSubType.Hostile - MacroSubType.Clumsy;
-
+                    var countInitial = MacroSubType.Hostile - MacroSubType.Clumsy;
+                    var countFinal = MacroSubType.DeathRay - MacroSubType.Boarding;
+                    count = countInitial + 33 + 43;
                     break;
 
                 case MacroType.SelectNext:
@@ -2558,6 +2721,7 @@ namespace ClassicUO.Game.Managers
                 case MacroType.Close:
                 case MacroType.Minimize:
                 case MacroType.Maximize:
+                case MacroType.ToggleGump:
                 case MacroType.UseSkill:
                 case MacroType.ArmDisarm:
                 case MacroType.InvokeVirtue:
@@ -2692,7 +2856,7 @@ namespace ClassicUO.Game.Managers
         Zoom,
         ToggleChatVisibility,
         INVALID,
-        Aura = 62,
+        Aura,
         AuraOnOff,
         Grab,
         SetGrabBag,
@@ -2769,7 +2933,11 @@ namespace ClassicUO.Game.Managers
         LookAtMouse,
         // ## BEGIN - END ## // BASICSETUP
         UseCounterBar,
-        ClientCommand
+        ClientCommand,
+        StunAbility,
+        DisarmAbility,
+        ToggleGump,
+        ToggleDurabilityGump
     }
 
     public enum MacroSubType
@@ -2980,6 +3148,9 @@ namespace ClassicUO.Game.Managers
         Perseverance,
         Tribulation,
         Despair,
+
+
+
         Hostile, //Select Next/Preveous/Nearest group
         Party,
         Follower,
@@ -3022,6 +3193,47 @@ namespace ClassicUO.Game.Managers
         SpellStone,
 
         LookForwards,
-        LookBackwards
+        LookBackwards,
+
+        DeathRay,
+        EtherealBurst,
+        NetherBlast,
+        MysticWeapon,
+        CommandUndead,
+        Conduit,
+        ManaShield,
+        SummonReaper,
+        EnchantedSummoning,
+        AnticipateHit,
+        Warcry,
+        Intuition,
+        Rejuvenate,
+        HolyFist,
+        Shadow,
+        WhiteTigerForm,
+        FlamingShot,
+        PlayingTheOdds,
+        Thrust,
+        Pierce,
+        Stagger,
+        Toughness,
+        Onslaught,
+        FocusedEye,
+        ElementalFury,
+        CalledShot,
+        WarriorsGifts,
+        ShieldBash,
+        Bodyguard,
+        HeightenSenses,
+        Tolerance,
+        InjectedStrike,
+        Potency,
+        Rampage,
+        FistsofFury,
+        Knockout,
+        Whispering,
+        CombatTraining,
+        Boarding,
+
     }
 }

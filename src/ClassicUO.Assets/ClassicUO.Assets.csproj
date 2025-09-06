@@ -15,6 +15,7 @@
     <None Remove="gumpartassets\40310.png" />
     <None Remove="gumpartassets\40311.png" />
     <None Remove="gumpartassets\40312.png" />
+    <None Remove="gumpartassets\modern-paperdollgump.png" />
     <None Remove="Roboto-Regular.ttf" />
   </ItemGroup>
 
@@ -29,6 +30,7 @@
     <EmbeddedResource Include="gumpartassets\40310.png" />
     <EmbeddedResource Include="gumpartassets\40311.png" />
     <EmbeddedResource Include="gumpartassets\40312.png" />
+    <EmbeddedResource Include="gumpartassets\modern-paperdollgump.png" />
     <EmbeddedResource Include="Roboto-Regular.ttf" />
   </ItemGroup>
 
@@ -36,6 +38,10 @@
     <ProjectReference Include="..\..\external\FontStashSharp\src\XNA\FontStashSharp.FNA.Core.csproj" />
     <ProjectReference Include="..\ClassicUO.IO\ClassicUO.IO.csproj" />
     <ProjectReference Include="..\ClassicUO.Utility\ClassicUO.Utility.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="System.Text.Json" Version="8.0.5" />
   </ItemGroup>
 
 </Project>

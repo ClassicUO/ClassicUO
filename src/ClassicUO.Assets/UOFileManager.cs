@@ -43,7 +43,7 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Assets
 {
-    public static class UOFileManager
+    public class UOFileManager
     {
         public static string GetUOFilePath(string file)
         {
@@ -178,6 +178,7 @@ namespace ClassicUO.Assets
                                 (uint) verdata.Length,
                                 vh.Position,
                                 (int) vh.Length,
+                                0,
                                 0,
                                 (short) (vh.GumpData >> 16),
                                 (short) (vh.GumpData & 0xFFFF)

@@ -162,6 +162,7 @@ namespace ClassicUO.Game.Scenes
             Macros.Load();
 
             NameOverHeadManager.Load();
+            PaperdollSelectCharManager.Instance.Load();
 
             // ## BEGIN - END ## // TEXTUREMANAGER
             _textureManager = new TextureManager();
@@ -190,7 +191,7 @@ namespace ClassicUO.Game.Scenes
             EventSink.MessageReceived += ChatOnMessageReceived;
             UIManager.ContainerScale = ProfileManager.CurrentProfile.ContainersScale / 100f;
 
-            SDL.SDL_SetWindowMinimumSize(Client.Game.Window.Handle, 640, 480);
+            SDL.SDL_SetWindowMinimumSize(Client.Game.Window.Handle, 1024, 768);
 
             if (ProfileManager.CurrentProfile.WindowBorderless)
             {
@@ -205,8 +206,8 @@ namespace ClassicUO.Game.Scenes
                 int w = Settings.GlobalSettings.WindowSize.Value.X;
                 int h = Settings.GlobalSettings.WindowSize.Value.Y;
 
-                w = Math.Max(640, w);
-                h = Math.Max(480, h);
+                w = Math.Max(1024, w);
+                h = Math.Max(768, h);
 
                 Client.Game.SetWindowSize(w, h);
             }
@@ -310,6 +311,8 @@ namespace ClassicUO.Game.Scenes
             {
                 XmlGumpHandler.TryAutoOpenByName(xml);
             }
+
+            LegionScripting.LegionScripting.Init();
         }
 
         private void ChatOnMessageReceived(object sender, MessageEventArgs e)
@@ -451,6 +454,8 @@ namespace ClassicUO.Game.Scenes
                 return;
             }
 
+            LegionScripting.LegionScripting.Unload();
+
             ProfileManager.CurrentProfile.GameWindowPosition = new Point(
                 Camera.Bounds.X,
                 Camera.Bounds.Y
@@ -503,6 +508,7 @@ namespace ClassicUO.Game.Scenes
 
             CommandManager.UnRegisterAll();
             Weather.Reset();
+            SkillProgressBar.QueManager.Reset();
             UIManager.Clear();
             World.Clear();
             ChatManager.Clear();

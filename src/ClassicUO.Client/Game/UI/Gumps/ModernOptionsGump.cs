@@ -28,6 +28,7 @@ namespace ClassicUO.Game.UI.Gumps
     internal class ModernOptionsGump : Gump
     {
         private LeftSideMenuRightSideContent mainContent;
+        private mainScrollArea mainScrollAreaContent;
         private List<SettingsOption> options = new List<SettingsOption>();
 
         public static string SearchText { get; private set; } = string.Empty;
@@ -529,7 +530,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    UIManager.GetGump<WorldViewportGump>()?.ResizeGameWindow(new Point(600, 480));
+                    UIManager.GetGump<WorldViewportGump>()?.ResizeGameWindow(new Point(1024, 768));
                     UIManager.GetGump<WorldViewportGump>()?.SetGameWindowPosition(new Point(25, 25));
                     profile.GameWindowPosition = new Point(25, 25);
                 }
@@ -839,6 +840,136 @@ namespace ClassicUO.Game.UI.Gumps
                     PAGE.Macros
                 ));
         }
+
+
+
+
+        private void BuildInfoBar()
+        {
+            mainScrollArea content = new mainScrollArea(mainContent.RightWidth, mainContent.Height, (int)(mainContent.RightWidth * 1.0));
+            int page = ((int)PAGE.InfoBar + 1000);
+
+            #region Active Info Bar
+            CheckboxWithLabel b;
+            content.AddToLeft(b = new CheckboxWithLabel(lang.GetInfoBars.ShowInfoBar, 0, profile.ShowInfoBar, (b) =>
+            {
+                profile.ShowInfoBar = b;
+                InfoBarGump infoBarGump = UIManager.GetGump<InfoBarGump>();
+
+                if (b)
+                {
+                    if (infoBarGump == null)
+                    {
+                        UIManager.Add(new InfoBarGump { X = 300, Y = 300 });
+                    }
+                    else
+                    {
+                        infoBarGump.ResetItems();
+                        infoBarGump.SetInScreen();
+                    }
+                }
+                else
+                {
+                    infoBarGump?.Dispose();
+                }
+            }));
+            PositionHelper.BlankLine();
+            PositionHelper.BlankLine();
+            #endregion
+            #region Select type infobar
+            ComboBoxWithLabel c;
+            content.AddToLeft(c = new ComboBoxWithLabel(lang.GetInfoBars.HighlightType, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetInfoBars.HighLightOpt_TextColor, lang.GetInfoBars.HighLightOpt_ColoredBars }, profile.InfoBarHighlightType, (i, s) => { profile.InfoBarHighlightType = i; }));
+            PositionHelper.BlankLine();
+            PositionHelper.BlankLine();
+            #endregion
+            #region Select type infobar
+            DataBox infoBarItems = new DataBox(0, 0, 0, 0) { AcceptMouseInput = true };
+            ModernButton addItem;
+            content.AddToLeft(addItem = new ModernButton(0, 0, 150, 40, ButtonAction.Activate, lang.GetInfoBars.AddItem, Theme.BUTTON_FONT_COLOR) { ButtonParameter = -1, IsSelectable = true, IsSelected = true });
+            PositionHelper.BlankLine();
+            PositionHelper.BlankLine();
+            addItem.MouseUp += (s, e) =>
+            {
+                InfoBarItem ibi;
+                InfoBarBuilderControl ibbc = new InfoBarBuilderControl(ibi = new InfoBarItem("HP", InfoBarVars.HP, 0x3B9), content);
+                infoBarItems.Add(ibbc);
+                infoBarItems.ReArrangeChildren();
+                infoBarItems.ForceSizeUpdate();
+                infoBarItems.Parent?.ForceSizeUpdate();
+                Client.Game.GetScene<GameScene>().InfoBars?.AddItem(ibi);
+                UIManager.GetGump<InfoBarGump>()?.ResetItems();
+                content.AddToLeft(ibbc);
+                content.ForceSizeUpdate();
+                int yOffset = 0;
+                foreach (var child in content.Children)
+                {
+                    if (child is ScrollArea scrollArea)
+                    {
+                        foreach (var scrollChild in scrollArea.Children)
+                        {
+                            if (scrollChild is InfoBarBuilderControl control)
+                            {
+                                control.Y = yOffset + 170;
+                                yOffset += control.Height;
+                                content.ForceSizeUpdate();
+                            }
+                        }
+
+                    }
+                }
+                content.ForceSizeUpdate();
+            };
+            content.BlankLine();
+            content.AddToLeftText(new TextBox(lang.GetInfoBars.Label, Theme.FONT, Theme.STANDARD_TEXT_SIZE, 100, Theme.TEXT_FONT_COLOR, FontStashSharp.RichText.TextHorizontalAlignment.Center, false), 0, 135);
+            content.AddToLeftText(new TextBox(lang.GetInfoBars.Color, Theme.FONT, Theme.STANDARD_TEXT_SIZE, 100, Theme.TEXT_FONT_COLOR, FontStashSharp.RichText.TextHorizontalAlignment.Center, false), 120, 135);
+            content.AddToLeftText(new TextBox(lang.GetInfoBars.Data, Theme.FONT, Theme.STANDARD_TEXT_SIZE, 100, Theme.TEXT_FONT_COLOR, FontStashSharp.RichText.TextHorizontalAlignment.Center, false), 180, 135);
+            content.AddToLine(new Line(0, 10, content.LeftWidth, 1, Color.Gray.PackedValue), 0, 160);
+            content.BlankLine();
+            InfoBarManager ibmanager = Client.Game.GetScene<GameScene>().InfoBars;
+            List<InfoBarItem> _infoBarItems = ibmanager.GetInfoBars();
+            for (int i = 0; i < _infoBarItems.Count; i++)
+            {
+                InfoBarBuilderControl ibbc = new InfoBarBuilderControl(_infoBarItems[i], content);
+                infoBarItems.ReArrangeChildren();
+                infoBarItems.ForceSizeUpdate();
+                infoBarItems.Parent?.ForceSizeUpdate();
+                int yOffset = 0;
+
+                content.AddToLeft(ibbc);
+                content.ForceSizeUpdate();
+                foreach (var child in content.Children)
+                {
+                    if (child is ScrollArea scrollArea)
+                    {
+                        // Iterar pelos filhos dentro de cada ScrollArea
+                        foreach (var scrollChild in scrollArea.Children)
+                        {
+                            if (scrollChild is InfoBarBuilderControl control)
+                            {
+                                control.Y = yOffset + 170;
+                                yOffset += control.Height; // Ajuste o espaçamento conforme necessário
+                                content.ForceSizeUpdate();
+                            }
+                        }
+                        content.ForceSizeUpdate();
+                    }
+                }
+                content.ForceSizeUpdate();
+            }
+
+
+            #endregion
+
+
+            options.Add(new SettingsOption(
+                    "",
+                    content,
+                    mainContent.RightWidth,
+                    PAGE.InfoBar
+                ));
+        }
+
+
 
         private void BuildTooltips()
         {
@@ -1392,118 +1523,6 @@ namespace ClassicUO.Game.UI.Gumps
             PositionHelper.PositionExact(s.FullControl, ss.FullControl.X + ss.FullControl.Width + 30, ss.FullControl.Y);
         }
 
-        private void BuildInfoBar()
-        {
-            SettingsOption s;
-            PositionHelper.Reset();
-
-            options.Add(s = new SettingsOption(
-                    "",
-                    new CheckboxWithLabel(lang.GetInfoBars.ShowInfoBar, 0, profile.ShowInfoBar, (b) =>
-                    {
-                        profile.ShowInfoBar = b;
-                        InfoBarGump infoBarGump = UIManager.GetGump<InfoBarGump>();
-
-                        if (b)
-                        {
-                            if (infoBarGump == null)
-                            {
-                                UIManager.Add(new InfoBarGump { X = 300, Y = 300 });
-                            }
-                            else
-                            {
-                                infoBarGump.ResetItems();
-                                infoBarGump.SetInScreen();
-                            }
-                        }
-                        else
-                        {
-                            infoBarGump?.Dispose();
-                        }
-                    }),
-                    mainContent.RightWidth,
-                    PAGE.InfoBar
-                ));
-            PositionHelper.PositionControl(s.FullControl);
-            PositionHelper.Indent();
-
-            options.Add(s = new SettingsOption(
-                "",
-                new ComboBoxWithLabel(lang.GetInfoBars.HighlightType, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetInfoBars.HighLightOpt_TextColor, lang.GetInfoBars.HighLightOpt_ColoredBars }, profile.InfoBarHighlightType, (i, s) => { profile.InfoBarHighlightType = i; }),
-                mainContent.RightWidth,
-                PAGE.InfoBar
-            ));
-            PositionHelper.PositionControl(s.FullControl);
-            PositionHelper.RemoveIndent();
-
-            PositionHelper.BlankLine();
-
-            DataBox infoBarItems = new DataBox(0, 0, 0, 0) { AcceptMouseInput = true };
-
-            ModernButton addItem;
-            options.Add(s = new SettingsOption(
-                "",
-                addItem = new ModernButton(0, 0, 150, 40, ButtonAction.Activate, lang.GetInfoBars.AddItem, Theme.BUTTON_FONT_COLOR) { ButtonParameter = -1, IsSelectable = true, IsSelected = true },
-                mainContent.RightWidth,
-                PAGE.InfoBar
-            ));
-            addItem.MouseUp += (s, e) =>
-            {
-                InfoBarItem ibi;
-                InfoBarBuilderControl ibbc = new InfoBarBuilderControl(ibi = new InfoBarItem("HP", InfoBarVars.HP, 0x3B9));
-                infoBarItems.Add(ibbc);
-                infoBarItems.ReArrangeChildren();
-                infoBarItems.ForceSizeUpdate();
-                infoBarItems.Parent?.ForceSizeUpdate();
-                Client.Game.GetScene<GameScene>().InfoBars?.AddItem(ibi);
-                UIManager.GetGump<InfoBarGump>()?.ResetItems();
-            };
-            PositionHelper.PositionControl(s.FullControl);
-            SettingsOption ss = s;
-            PositionHelper.BlankLine();
-            PositionHelper.BlankLine();
-
-            options.Add(s = new SettingsOption(lang.GetInfoBars.Label, new Area(false), mainContent.RightWidth, PAGE.InfoBar));
-            PositionHelper.PositionExact(s.FullControl, ss.FullControl.X, ss.FullControl.Y + ss.FullControl.Height + 40);
-            ss = s;
-
-            options.Add(s = new SettingsOption(lang.GetInfoBars.Color, new Area(false), mainContent.RightWidth, PAGE.InfoBar));
-            PositionHelper.PositionExact(s.FullControl, ss.FullControl.X + 150, ss.FullControl.Y);
-            ss = s;
-
-            options.Add(s = new SettingsOption(lang.GetInfoBars.Data, new Area(false), mainContent.RightWidth, PAGE.InfoBar));
-            PositionHelper.PositionExact(s.FullControl, ss.FullControl.X + 55, ss.FullControl.Y);
-            ss = s;
-
-            options.Add(s = new SettingsOption(
-                    "",
-                    new Line(0, 0, mainContent.RightWidth, 1, Color.Gray.PackedValue) { AcceptMouseInput = false },
-                    mainContent.RightWidth,
-                    PAGE.InfoBar
-                ));
-            PositionHelper.PositionExact(s.FullControl, ss.FullControl.X - 205, ss.FullControl.Y + ss.FullControl.Height + 2);
-            PositionHelper.BlankLine();
-
-
-            InfoBarManager ibmanager = Client.Game.GetScene<GameScene>().InfoBars;
-            List<InfoBarItem> _infoBarItems = ibmanager.GetInfoBars();
-
-            for (int i = 0; i < _infoBarItems.Count; i++)
-            {
-                InfoBarBuilderControl ibbc = new InfoBarBuilderControl(_infoBarItems[i]);
-                infoBarItems.Add(ibbc);
-            }
-            infoBarItems.ReArrangeChildren();
-            infoBarItems.ForceSizeUpdate();
-
-            options.Add(s = new SettingsOption(
-                    "",
-                    infoBarItems,
-                    mainContent.RightWidth,
-                    PAGE.InfoBar
-                ));
-            PositionHelper.PositionControl(s.FullControl);
-        }
 
         private void BuildContainers()
         {
@@ -1929,11 +1948,14 @@ namespace ClassicUO.Game.UI.Gumps
             conditionsDataBox.ReArrangeChildren();
             conditionsDataBox.ForceSizeUpdate();
 
+            ScrollArea scroll = new ScrollArea(0, 0, mainContent.RightWidth, mainContent.Height - PositionHelper.Y) { CanMove = true, AcceptMouseInput = true };
+            scroll.Add(conditionsDataBox);
+
             options.Add(s = new SettingsOption(
-                "",
-                conditionsDataBox,
-                mainContent.RightWidth,
-                PAGE.TUOCooldowns
+               "",
+              scroll,
+              mainContent.RightWidth,
+              PAGE.TUOCooldowns
             ));
             PositionHelper.PositionControl(s.FullControl);
         }
@@ -3594,6 +3616,9 @@ namespace ClassicUO.Game.UI.Gumps
                 profile.DisableSystemChat = b;
             }), true, page);
             content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.AutoAvoidObstacules, isChecked: profile.AutoAvoidObstacules, valueChanged: (b) => { profile.AutoAvoidObstacules = b; }), true, page);
+
+            content.BlankLine();
             content.AddToRight(new CheckboxWithLabel(lang.GetTazUO.EnableImprovedBuffGump, 0, profile.UseImprovedBuffBar, (b) =>
             {
                 profile.UseImprovedBuffBar = b;
@@ -3728,6 +3753,8 @@ namespace ClassicUO.Game.UI.Gumps
             }), true, page);
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel(lang.GetTazUO.SOSGumpID, Theme.INPUT_WIDTH, profile.SOSGumpID.ToString(), true, (s, e) => { if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint id)) { profile.SOSGumpID = id; } }), true, page);
+            content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel(lang.GetTazUO.NearbyItemGump, isChecked: profile.EnableNearbyItemGump, valueChanged: (e) => { profile.EnableNearbyItemGump = e; }), true, page);
             #endregion
 
             #region Tooltips
@@ -4175,7 +4202,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
             main.Add(_preview);
 
-            main.Height = _conditionText.Bounds.Bottom;
+            main.ForceSizeUpdate();
 
             _background.Width = width;
             _background.Height = main.Height;
@@ -5046,9 +5073,11 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private class InputField : Control
+        public class InputField : Control
         {
             private readonly StbTextBox _textbox;
+
+            private AlphaBlendControl _background;
 
             public event EventHandler TextChanged { add { _textbox.TextChanged += value; } remove { _textbox.TextChanged -= value; } }
 
@@ -5081,7 +5110,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _textbox.Text = text;
                 _textbox.NumbersOnly = numbersOnly;
 
-                Add(new AlphaBlendControl() { Width = Width, Height = Height });
+                Add(_background = new AlphaBlendControl() { Width = Width, Height = Height });
                 Add(_textbox);
                 if (onTextChanges != null)
                 {
@@ -5101,6 +5130,12 @@ namespace ClassicUO.Game.UI.Gumps
                 return true;
             }
 
+
+            public void UpdateBackground()
+            {
+                _background.Width = Width;
+                _background.Height = Height;
+            }
 
             public string Text => _textbox.Text;
 
@@ -5962,7 +5997,7 @@ namespace ClassicUO.Game.UI.Gumps
             private readonly ModernColorPickerWithLabel labelColor;
             private readonly ComboBoxWithLabel varStat;
 
-            public InfoBarBuilderControl(InfoBarItem item)
+            public InfoBarBuilderControl(InfoBarItem item, mainScrollArea content)
             {
                 AcceptMouseInput = true;
                 infoLabel = new InputField(130, 40, text: item.label, onTextChanges: (s, e) => { item.label = ((InputField.StbTextBox)s).Text; UIManager.GetGump<InfoBarGump>()?.ResetItems(); }) { X = 5 };
@@ -5994,17 +6029,46 @@ namespace ClassicUO.Game.UI.Gumps
                         db.Remove(this);
                         db.ReArrangeChildren();
                         db.ForceSizeUpdate();
+                        content.ForceSizeUpdate();
                     }
                     Client.Game.GetScene<GameScene>().InfoBars?.RemoveItem(item);
                     UIManager.GetGump<InfoBarGump>()?.ResetItems();
+                    content.Remove(this);
+                    content.ForceSizeUpdate();
+
+                    int yOffset = 0;
+                    foreach (var child in content.Children)
+                    {
+                        if (child is ScrollArea scrollArea)
+                        {
+                            foreach (var scrollChild in scrollArea.Children)
+                            {
+                                if (scrollChild is InfoBarBuilderControl control)
+                                {
+
+                                    scrollChild.Remove(this);
+                                    control.Y = yOffset + 170;
+                                    yOffset += control.Height;
+                                    control.ForceSizeUpdate();
+                                    content.ForceSizeUpdate();
+
+
+                                }
+                            }
+
+                            content.ForceSizeUpdate();
+                        }
+                    }
+
+                    content.ForceSizeUpdate();
                 };
 
                 Add(infoLabel);
                 Add(varStat);
                 Add(labelColor);
                 Add(deleteButton);
-
                 ForceSizeUpdate();
+                content.ForceSizeUpdate();
             }
 
             public override void Update()
@@ -6038,6 +6102,117 @@ namespace ClassicUO.Game.UI.Gumps
             public InfoBarVars Var => (InfoBarVars)varStat.SelectedIndex;
             public ushort Hue => labelColor.Hue;
         }
+
+        private class mainScrollArea : Control
+        {
+            private ScrollArea left, right;
+            private int leftY, rightY = Theme.TOP_PADDING, leftX, rightX;
+
+            public ScrollArea LeftArea => left;
+            public ScrollArea RightArea => right;
+
+            public new int ActivePage
+            {
+                get => base.ActivePage;
+                set
+                {
+                    base.ActivePage = value;
+                    right.ActivePage = value;
+                }
+            }
+
+            public mainScrollArea(int width, int height, int leftWidth, int page = 0)
+            {
+                Width = width;
+                Height = height;
+                CanMove = true;
+                CanCloseWithRightClick = true;
+                AcceptMouseInput = true;
+
+                Add(left = new ScrollArea(0, 0, leftWidth, height) { CanMove = true, AcceptMouseInput = true }, page);
+
+
+                LeftWidth = leftWidth - Theme.SCROLL_BAR_WIDTH;
+                RightWidth = Width - leftWidth;
+            }
+
+            public int LeftWidth { get; }
+            public int RightWidth { get; }
+
+            public void AddToLeft(Control c, bool autoPosition = true, int page = 0)
+            {
+                if (autoPosition)
+                {
+                    c.Y = leftY + 10;
+                    c.X = leftX;
+                    leftY += c.Height + 10;
+                }
+
+                left.Add(c, page);
+            }
+
+            public void AddToLine(Control c, int x, int y, bool autoPosition = true, int page = 0)
+            {
+                if (autoPosition)
+                {
+                    c.Y = y;
+                    c.X = leftX + x;
+                }
+
+                left.Add(c, page);
+            }
+
+            public void AddToLeftText(Control c, int x, int y, bool autoPosition = true, int page = 0)
+            {
+                if (autoPosition)
+                {
+                    c.Y = y;
+                    c.X = leftX + x;
+                }
+
+                left.Add(c, page);
+            }
+
+
+            public void BlankLine()
+            {
+                rightY += Theme.BLANK_LINE;
+            }
+
+            public void Indent()
+            {
+                rightX += Theme.INDENT_SPACE;
+            }
+
+            public void RemoveIndent()
+            {
+                rightX -= Theme.INDENT_SPACE;
+                if (rightX < 0)
+                {
+                    rightX = 0;
+                }
+            }
+
+            public void ResetRightSide()
+            {
+                rightY = Theme.TOP_PADDING;
+                rightX = 0;
+            }
+
+            public void SetMatchingButton(int page)
+            {
+                foreach (Control c in left.Children)
+                {
+                    if (c is ModernButton button && button.ButtonParameter == page)
+                    {
+                        ((SearchableOption)button).OnSearchMatch();
+                        int p = Parent == null ? Page : Parent.Page;
+                        ModernOptionsGump.SetParentsForMatchingSearch(this, p);
+                    }
+                }
+            }
+        }
+
 
         private class LeftSideMenuRightSideContent : Control
         {
@@ -6980,6 +7155,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
 
+
                 private void AddSubMacro(MacroObject obj)
                 {
                     if (obj == null || obj.Code == 0)
@@ -6999,6 +7175,53 @@ namespace ClassicUO.Game.UI.Gumps
                             for (int i = 0; i < count; i++)
                             {
                                 names[i] = _allSubHotkeysNames[i + offset];
+                            }
+
+                            if (obj.Code == MacroType.CastSpell)
+                            {
+                                List<string> namesList = new List<string>(names);
+
+                                namesList.Remove("Hostile");
+                                namesList.Remove("Party");
+                                namesList.Remove("Follower");
+                                namesList.Remove("Object");
+                                namesList.Remove("Mobile");
+                                namesList.Remove("MscTotalCount");
+                                namesList.Remove("INVALID_0");
+                                namesList.Remove("INVALID_1");
+                                namesList.Remove("INVALID_2");
+                                namesList.Remove("INVALID_3");
+                                namesList.Remove("ConfusionBlastPotion");
+                                namesList.Remove("CurePotion");
+                                namesList.Remove("AgilityPotion");
+                                namesList.Remove("StrengthPotion");
+                                namesList.Remove("PoisonPotion");
+                                namesList.Remove("RefreshPotion");
+                                namesList.Remove("HealPotion");
+                                namesList.Remove("ExplosionPotion");
+
+                                namesList.Remove("DefaultZoom");
+                                namesList.Remove("ZoomIn");
+                                namesList.Remove("ZoomOut");
+
+                                namesList.Remove("BestHealPotion");
+                                namesList.Remove("BestCurePotion");
+                                namesList.Remove("BestRefreshPotion");
+                                namesList.Remove("BestStrengthPotion");
+                                namesList.Remove("BestAgiPotion");
+                                namesList.Remove("BestExplosionPotion");
+                                namesList.Remove("BestConflagPotion");
+                                namesList.Remove("EnchantedApple");
+                                namesList.Remove("PetalsOfTrinsic");
+                                namesList.Remove("OrangePetals");
+                                namesList.Remove("TrappedBox");
+                                namesList.Remove("SmokeBomb");
+                                namesList.Remove("HealStone");
+                                namesList.Remove("SpellStone");
+
+                                namesList.Remove("LookForwards");
+                                namesList.Remove("LookBackwards");
+                                names = namesList.ToArray();
                             }
 
                             ComboBoxWithLabel sub = new ComboBoxWithLabel(string.Empty, 0, 200, names, (int)obj.SubCode - offset, (i, s) =>
@@ -7456,7 +7679,7 @@ namespace ClassicUO.Game.UI.Gumps
                     else
                         Option.NameOverheadOptionFlags &= ~(int)optionFlag;
 
-                    if (NameOverHeadManager.LastActiveNameOverheadOption == Option.Name)
+                    if (NameOverHeadManager.LastActiveNameOverheadOption.Replace("\\u0026", "&") == Option.Name)
                         NameOverHeadManager.ActiveOverheadOptions = (NameOverheadOptions)Option.NameOverheadOptionFlags;
                 });
 
@@ -7590,6 +7813,8 @@ namespace ClassicUO.Game.UI.Gumps
                 OptionLabel = optionLabel;
                 OptionControl = control;
                 OptionsPage = optionsPage;
+
+                // Criar o controle principal
                 FullControl = new Area(false) { AcceptMouseInput = true, CanMove = true, CanCloseWithRightClick = true };
 
                 if (!string.IsNullOrEmpty(OptionLabel))
@@ -7633,12 +7858,36 @@ namespace ClassicUO.Game.UI.Gumps
 
                 FullControl.X = x;
                 FullControl.Y = y;
+
+                // Adicionar FullControl dentro de uma ScrollArea
+                int scrollAreaHeight = 100;
+
+                ScrollArea scrollArea = new ScrollArea(
+                    x,
+                    y,
+                    FullControl.Width,
+                     scrollAreaHeight,
+                    FullControl.Height // Definir uma altura fixa para a área de rolagem
+
+                )
+                {
+                    AcceptMouseInput = true
+                };
+
+                scrollArea.Add(FullControl);
+
+                FullControl.X = 0;
+                FullControl.Y = 0;
+
+                // Substituir FullControl por ScrollArea para ter a rolagem disponível
+                ScrollContainer = scrollArea;
             }
 
             public string OptionLabel { get; }
             public Control OptionControl { get; }
             public PAGE OptionsPage { get; }
             public Area FullControl { get; }
+            public ScrollArea ScrollContainer { get; }
         }
 
         private class ThemeSettings : UISettings

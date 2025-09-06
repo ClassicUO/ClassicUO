@@ -58,6 +58,8 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        public bool MultiLine { get; set; }
+
         public TextBox
         (
             string text,
@@ -157,6 +159,11 @@ namespace ClassicUO.Game.UI.Controls
                     return 0;
 
                 return _rtl.Size.Y;
+            }
+
+            set
+            {
+                base.Height = value;
             }
         }
 
@@ -302,6 +309,9 @@ namespace ClassicUO.Game.UI.Controls
             finalString = finalString.Replace("<BODY>", "").Replace("<body>", "");
             finalString = finalString.Replace("</BODY>", "").Replace("</body>", "");
             finalString = finalString.Replace("</p>", "").Replace("<p>", "");
+            finalString = finalString.Replace("</BIG>", "").Replace("<BIG>", "");
+            finalString = finalString.Replace("</big>", "").Replace("<big>", "");
+            finalString = finalString.Replace("<basefont>", "").Replace("<BASEFONT>", "");
             return finalString;
         }
 
@@ -327,6 +337,11 @@ namespace ClassicUO.Game.UI.Controls
                         Text = text,
                         Width = Width,
                     };
+                }
+
+                if (MultiLine)
+                {
+                    base.Height = _rtl.Size.Y;
                 }
 
                 WantUpdateSize = false;

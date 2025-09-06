@@ -52,7 +52,7 @@ namespace ClassicUO.Game.UI.Gumps
     internal class DurabilitysGump : Gump
     {
         private const int WIDTH = 300, HEIGHT = 400;
-
+        private static int lastX, lastY;
 
         private enum DurabilityColors
         {
@@ -75,8 +75,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             Width = WIDTH;
             Height = HEIGHT;
-            X = Client.Game.Scene.Camera.Bounds.Width - Width - 10;
-            Y = Client.Game.Scene.Camera.Bounds.Y + 10;
+
+            X = lastX;
+            Y = lastY;
+
+            if(lastX == default || lastY == default)
+            {
+                X = lastX = (Client.Game.Scene.Camera.Bounds.Width - Width) / 2;
+                Y = lastY = Client.Game.Scene.Camera.Bounds.Y + 20;
+            }            
 
 
             var _borderControl = new BorderControl
@@ -128,6 +135,13 @@ namespace ClassicUO.Game.UI.Gumps
             Add(a);
         }
 
+        public override void Dispose()
+        {
+            base.Dispose();
+            lastX = X;
+            lastY = Y;
+        }
+
         protected override void UpdateContents()
         {
             _dataBox.Clear();
@@ -158,7 +172,7 @@ namespace ClassicUO.Game.UI.Gumps
                 a.Y = startY;
 
                 Label name;
-                a.Add(name = new Label($"{(string.IsNullOrWhiteSpace(item.Name) ? item.Layer : item.Name)}", true, 0xFFFF));
+                a.Add(name = new Label($"{(string.IsNullOrWhiteSpace(item.Name) ? item.Layer : item.Name)}", true, 0xFFFF, ishtml: true));
                 GumpPic red;
                 a.Add(red = new GumpPic(0, name.Y + name.Height + 5, (ushort)DurabilityColors.RED, 0));
 

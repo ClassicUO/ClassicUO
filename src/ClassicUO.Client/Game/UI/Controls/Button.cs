@@ -30,12 +30,14 @@
 
 #endregion
 
+using ClassicUO.Assets;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Controls
@@ -339,4 +341,98 @@ namespace ClassicUO.Game.UI.Controls
             base.Dispose();
         }
     }
+
+    public class ImageButton : Control
+    {
+        private readonly Texture2D _textureNormal;
+        private readonly Texture2D _texturePressed;
+        private readonly Texture2D _textureOver;
+
+        private bool _isPressed;
+        private bool _isHovered;
+
+        public event Action OnButtonClick;
+
+        public ImageButton(int x, int y, string normalPath, string pressedPath = null, string overPath = null)
+        {
+
+            _textureNormal = PNGLoader.Instance.GetImageTexture(normalPath);
+            _texturePressed = pressedPath != null ? PNGLoader.Instance.GetImageTexture(pressedPath) : null;
+            _textureOver = overPath != null ? PNGLoader.Instance.GetImageTexture(overPath) : null;
+            X = x;
+            Y = y;
+
+            if (_textureNormal != null)
+            {
+                Width = _textureNormal.Width;
+                Height = _textureNormal.Height;
+            }
+
+            AcceptMouseInput = true;
+        }
+
+        public Action OnClick { get; set; }
+
+        protected override void OnMouseEnter(int x, int y)
+        {
+            _isHovered = true;
+        }
+
+        protected override void OnMouseExit(int x, int y)
+        {
+            _isHovered = false;
+        }
+
+        protected override void OnMouseDown(int x, int y, MouseButtonType button)
+        {
+            if (button == MouseButtonType.Left)
+            {
+                _isPressed = true;
+            }
+        }
+
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
+        {
+
+            if (button == MouseButtonType.Left)
+            {
+                _isPressed = false;
+
+                if (MouseIsOver)
+                {
+                    // Dispara o callback, se definido
+                    OnClick?.Invoke();
+
+                    // Dispara o evento OnButtonClick
+                    OnButtonClick?.Invoke();
+                }
+            }
+            
+        }
+
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        {
+            Texture2D textureToDraw = _textureNormal;
+            Vector3 hueVector;
+            hueVector = ShaderHueTranslator.GetHueVector(0x0, false, Alpha, true);
+
+            if (_isPressed && _texturePressed != null)
+            {
+                textureToDraw = _texturePressed;
+            }
+            else if (_isHovered && _textureOver != null)
+            {
+                textureToDraw = _textureOver;
+            }
+
+            if (textureToDraw != null)
+            {
+                Vector2 position = new Vector2(x, y);
+                batcher.Draw(textureToDraw, position, null, hueVector);
+            }
+
+            return base.Draw(batcher, x, y);
+        }
+    }
+
 }

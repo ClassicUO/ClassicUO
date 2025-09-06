@@ -462,6 +462,7 @@ namespace ClassicUO
             }
 
             UIManager.Update();
+            LegionScripting.LegionScripting.OnUpdate();
 
             if (Time.Ticks >= _nextSlowUpdate)
             {
@@ -945,6 +946,15 @@ namespace ClassicUO
                     UIManager.KeyboardFocusControl?.InvokeControllerButtonDown((SDL_GameControllerButton)sdlEvent->cbutton.button);
                     Scene.OnControllerButtonDown(sdlEvent->cbutton);
 
+                    if (sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+                    {
+                        UIManager.OnMouseWheel(false);
+                    }
+                    else if (sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_UP)
+                    {
+                        UIManager.OnMouseWheel(true);
+                    }
+
                     if (sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_RIGHTSTICK)
                     {
                         SDL_Event e = new SDL_Event();
@@ -1093,59 +1103,29 @@ namespace ClassicUO
 
             graphicDevice.GetBackBufferData(position, colors, 0, colors.Length);
 
-            using (
-                Texture2D texture = new Texture2D(
-                    GraphicsDevice,
-                    position.Width,
-                    position.Height,
-                    false,
-                    SurfaceFormat.Color
-                )
-            )
+            using (Texture2D texture = new Texture2D(GraphicsDevice, position.Width, position.Height, false, SurfaceFormat.Color))
             {
                 texture.SetData(colors);
-
-                if (CUOEnviroment.IsUnix)
+                string screenshotsFolder = FileSystemHelper.CreateFolderIfNotExists(
+                    CUOEnviroment.ExecutablePath,
+                    "Data",
+                    "Client",
+                    "Screenshots"
+                );
+                string path = Path.Combine(
+                    screenshotsFolder,
+                    $"screenshot_{DateTime.Now:yyyy-MM-dd_hh-mm-ss}.png"
+                );
+                using FileStream fileStream = File.Create(path);
+                texture.SaveAsPng(fileStream, texture.Width, texture.Height);
+                string message = string.Format(ResGeneral.ScreenshotStoredIn0, path);
+                if (ProfileManager.CurrentProfile == null || ProfileManager.CurrentProfile.HideScreenshotStoredInMessage)
                 {
-                    string screenshotsFolder = FileSystemHelper.CreateFolderIfNotExists(
-                        CUOEnviroment.ExecutablePath,
-                        "Data",
-                        "Client",
-                        "Screenshots"
-                    );
-
-                    string path = Path.Combine(
-                        screenshotsFolder,
-                        $"screenshot_{DateTime.Now:yyyy-MM-dd_hh-mm-ss}.png"
-                    );
-
-                    using FileStream fileStream = File.Create(path);
-                    texture.SaveAsPng(fileStream, texture.Width, texture.Height);
-                    string message = string.Format(ResGeneral.ScreenshotStoredIn0, path);
-
-                    if (ProfileManager.CurrentProfile == null || ProfileManager.CurrentProfile.HideScreenshotStoredInMessage)
-                    {
-                        Log.Info(message);
-                    }
-                    else
-                    {
-                        GameActions.Print(message, 0x44, MessageType.System);
-                    }
+                    Log.Info(message);
                 }
                 else
                 {
-                    using (MemoryStream stream = new MemoryStream())
-                    {
-                        texture.SaveAsPng(stream, texture.Width, texture.Height);
-
-                        try
-                        {
-                            System.Windows.Forms.Clipboard.SetImage(System.Drawing.Image.FromStream(stream));
-                            GameActions.Print("Copied screenshot to your clipboard");
-                        }
-                        catch { }
-                    }
-
+                    GameActions.Print(message, 0x44, MessageType.System);
                 }
             }
         }

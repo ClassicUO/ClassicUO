@@ -1,5 +1,6 @@
 ﻿using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.UI.Gumps;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -22,6 +23,8 @@ namespace ClassicUO.Game.Managers
         private bool loaded = false;
         private string savePath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", "AutoLoot.json");
         private bool lootTaskRunning = false;
+        private ProgressBarGump progressBarGump;
+        private int currentLootTotalCount = 0;
 
         private AutoLootManager() { Load(); }
 
@@ -42,8 +45,22 @@ namespace ClassicUO.Game.Managers
                         lootTaskRunning = true;
                         if (lootItems != null && !lootItems.IsEmpty)
                         {
+                            if(ProfileManager.CurrentProfile.EnableAutoLootProgressBar && (progressBarGump == null || progressBarGump.IsDisposed))
+                            {
+                                progressBarGump = new ProgressBarGump("Auto looting...", 0) { 
+                                    Y = (ProfileManager.CurrentProfile.GameWindowPosition.Y + ProfileManager.CurrentProfile.GameWindowSize.Y) - 150
+                                };
+                                progressBarGump.CenterXInViewPort();
+                                UIManager.Add(progressBarGump);
+                            }
+
                             while (lootItems.TryDequeue(out uint moveItem))
                             {
+                                if (progressBarGump != null && !progressBarGump.IsDisposed)
+                                {
+                                    progressBarGump.CurrentPercentage = 1 - ((double)lootItems.Count / (double)currentLootTotalCount);
+                                }
+
                                 Item m = World.Items.Get(moveItem);
                                 if (m != null)
                                 {
@@ -53,10 +70,14 @@ namespace ClassicUO.Game.Managers
                             }
                         }
                         lootTaskRunning = false;
+                        progressBarGump?.Dispose();
+                        currentLootTotalCount = lootItems.Count;
                     }
                     catch
                     {
                         lootTaskRunning = false;
+                        progressBarGump?.Dispose();
+                        currentLootTotalCount = lootItems.Count;
                     }
                 });
             }
@@ -72,6 +93,7 @@ namespace ClassicUO.Game.Managers
 
             if (IsOnLootList(i))
             {
+                currentLootTotalCount++;
                 GameActions.Print($"SAL Looting: {i.Name} {i.Graphic} x {i.Amount}");
                 lootItems.Enqueue(i);
             }

@@ -42,26 +42,58 @@ using ClassicUO.Assets;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using SDL2;
+using System.Security.Cryptography;
+using ClassicUO.Renderer.Arts;
+using ClassicUO.Renderer;
+using ClassicUO.Game.GameObjects;
+using Cyotek.Drawing.BitmapFont;
+using System.IO;
+using System.Collections.Generic;
+using System.Text.Json;
+using ClassicUO.Game.UI.Controls;
+using static ClassicUO.Game.UI.Controls.PaperDollInteractable;
+using FontStashSharp.RichText;
+using Microsoft.Xna.Framework;
+using static ClassicUO.Game.UI.Gumps.Login.CharacterSelectionGump;
+using System.Reflection;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {
     internal class CharacterSelectionGump : Gump
     {
-        private const ushort SELECTED_COLOR = 0x0021;
-        private const ushort NORMAL_COLOR = 0x034F;
+
+        private static ushort ConvertToRGB565(Color color)
+        {
+            ushort r = (ushort)((color.R >> 3) & 0x1F); // 5 bits para R
+            ushort g = (ushort)((color.G >> 2) & 0x3F); // 6 bits para G
+            ushort b = (ushort)((color.B >> 3) & 0x1F); // 5 bits para B
+
+            return (ushort)((r << 11) | (g << 5) | b);
+        }
+
+        //private const ushort SELECTED_COLOR = 0xAAF;
+        private static readonly ushort SELECTED_COLOR = 0x4E9;
+        private static readonly ushort NORMAL_COLOR = 0x4EB;
         private uint _selectedCharacter;
+        private ImageButton button;
+        private ImageButton buttonnew;
+        private CharacterEntryGump _characterEntryGump;
+        private CharacterEntryGump _lastSelectedGumpPic;
+        private static Art art { get; set; }
+
+
 
         public CharacterSelectionGump() : base(0, 0)
         {
             CanCloseWithRightClick = false;
 
             int posInList = 0;
-            int yOffset = 150;
+            int yOffset = 290;
             int yBonus = 0;
             int listTitleY = 106;
 
             LoginScene loginScene = Client.Game.GetScene<LoginScene>();
-            
+
             string lastCharName = LastCharacterManager.GetLastCharacter(LoginScene.Account, World.ServerName);
             string lastSelected = loginScene.Characters.FirstOrDefault(o => o == lastCharName);
 
@@ -71,48 +103,39 @@ namespace ClassicUO.Game.UI.Gumps.Login
             if (Client.Version >= ClientVersion.CV_6040 || Client.Version >= ClientVersion.CV_5020 && loginScene.Characters.Length > 5)
             {
                 listTitleY = 96;
-                yOffset = 125;
+                yOffset = 290;
                 yBonus = 45;
             }
 
             if (!string.IsNullOrEmpty(lastSelected))
             {
-                _selectedCharacter = (uint) Array.IndexOf(loginScene.Characters, lastSelected);
+                _selectedCharacter = (uint)Array.IndexOf(loginScene.Characters, lastSelected);
             }
             else if (loginScene.Characters.Length > 0)
             {
                 _selectedCharacter = 0;
             }
 
-            Add
-            (
-                new ResizePic(0x0A28)
-                {
-                    X = 160, Y = 70, Width = 408, Height = 343 + yBonus
-                },
-                1
-            );
-            
-            bool isAsianLang = string.Compare(Settings.GlobalSettings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 || 
+
+            bool isAsianLang = string.Compare(Settings.GlobalSettings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 ||
                 string.Compare(Settings.GlobalSettings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
                 string.Compare(Settings.GlobalSettings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
 
             bool unicode = isAsianLang;
             byte font = (byte)(isAsianLang ? 1 : 2);
-            ushort hue = (ushort)(isAsianLang ? 0xFFFF : 0x0386);
+            ushort hue = (ushort)(isAsianLang ? 0 : 0);
 
             Add
-            (
-                new Label(ClilocLoader.Instance.GetString(3000050, "Character Selection"), unicode, hue, font: font)
-                {
-                    X = 267, Y = listTitleY
-                },
-                1
-            );
-            
+               (
+                   new TextBox(ClilocLoader.Instance.GetString(3000050, "Character Selection"), TrueTypeLoader.EMBEDDED_FONT, 30, 300, Color.Orange, strokeEffect: true) { X = 447, Y = listTitleY, AcceptMouseInput = true }
+
+               );
+
+
             for (int i = 0, valid = 0; i < loginScene.Characters.Length; i++)
             {
                 string character = loginScene.Characters[i];
+                uint bodyId = loginScene.GetCharacterBodyID(i);
 
                 if (!string.IsNullOrEmpty(character))
                 {
@@ -130,17 +153,24 @@ namespace ClassicUO.Game.UI.Gumps.Login
                             break;
                         }
                     }
-                    
+
                     Add
                     (
-                        new CharacterEntryGump((uint) i, character, SelectCharacter, LoginCharacter)
+                        _characterEntryGump = new CharacterEntryGump((uint)i, character, bodyId, SelectCharacter, LoginCharacter, SelectCharacterHover)
                         {
-                            X = 224,
-                            Y = yOffset + posInList * 40,
-                            Hue = i == _selectedCharacter ? SELECTED_COLOR : NORMAL_COLOR
+                            X = 5 + posInList * 140,
+                            Y = yOffset + posInList * 3
                         },
                         1
                     );
+
+                    _characterEntryGump.buttonDelete.OnButtonClick += () =>
+                    {
+
+                        OnButtonClick(1);
+                    };
+
+
 
                     posInList++;
                 }
@@ -150,45 +180,79 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 Add
                 (
-                    new Button((int) Buttons.New, 0x159D, 0x159F, 0x159E)
-                    {
-                        X = 224, Y = 350 + yBonus, ButtonAction = ButtonAction.Activate
-                    },
-                    1
+                    buttonnew = new ImageButton(
+                        30,
+                        210 + yBonus,
+                        Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_new.png"),
+                        Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_pressed_new.png"),
+                        Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_hover_new.png")
+                    )
+      
                 );
+
+                buttonnew.OnButtonClick += () =>
+                {
+                    OnButtonClick(0);
+                };
             }
 
-            Add
-            (
-                new Button((int) Buttons.Delete, 0x159A, 0x159C, 0x159B)
-                {
-                    X = 442,
-                    Y = 350 + yBonus,
-                    ButtonAction = ButtonAction.Activate
-                },
-                1
-            );
+           
 
-            Add
-            (
-                new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
-                {
-                    X = 586, Y = 445, ButtonAction = ButtonAction.Activate
-                },
-                1
-            );
+            Add(button = new ImageButton(
+                30,
+                680,
+                Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_prev.png"),
+                Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_pressed_prev.png"),
+                Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_hover_prev.png")
+            ));
 
-            Add
-            (
-                new Button((int) Buttons.Next, 0x15A4, 0x15A6, 0x15A5)
-                {
-                    X = 610, Y = 445, ButtonAction = ButtonAction.Activate
-                },
-                1
-            );
+            button.OnButtonClick += () =>
+            {
+                OnButtonClick(3);
+            };
+
+            Add(button = new ImageButton(
+               920,
+               680,
+               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_next.png"),
+               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_pressed_next.png"),
+               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_hover_next.png")
+           ));
+
+            button.OnButtonClick += () =>
+            {
+                OnButtonClick(2);
+            };
+
 
             AcceptKeyboardInput = true;
             ChangePage(1);
+        }
+
+        private void OnGumpPicMouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtonType.Left)
+            {
+                // Se existir um GumpPic previamente selecionado, restaura sua opacidade
+                if (_lastSelectedGumpPic != null)
+                {
+                    _lastSelectedGumpPic.Alpha = 1.0f; // Restaura opacidade total
+                }
+
+                // Define o novo GumpPic clicado como selecionado
+                _characterEntryGump.Alpha = 0.5f; // Define opacidade reduzida (50%)
+                _lastSelectedGumpPic = _characterEntryGump; // Atualiza o GumpPic selecionado globalmente
+            }
+        }
+
+        private void OnGumpPicMouseEnter(object sender, EventArgs e)
+        {
+           // _characterEntryGump.Alpha = 0.5f; // Set opacity to 50% on hover
+        }
+
+        private void OnGumpPicMouseExit(object sender, EventArgs e)
+        {
+            //_characterEntryGump.Alpha = 1.0f; // Reset opacity to 100% when not hovered
         }
 
         private bool CanCreateChar(LoginScene scene)
@@ -206,6 +270,16 @@ namespace ClassicUO.Game.UI.Gumps.Login
             return false;
         }
 
+        protected override void OnControllerButtonUp(SDL.SDL_GameControllerButton button)
+        {
+            base.OnControllerButtonUp(button);
+
+            if (button == SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_A)
+            {
+                LoginCharacter(_selectedCharacter);
+            }
+        }
+
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
         {
             if (key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER)
@@ -218,7 +292,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         {
             LoginScene loginScene = Client.Game.GetScene<LoginScene>();
 
-            switch ((Buttons) buttonID)
+            switch ((Buttons)buttonID)
             {
                 case Buttons.Delete:
                     DeleteCharacter(loginScene);
@@ -231,6 +305,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     break;
 
                 case Buttons.Next:
+                    UIManager.GetGump<LoginBackground>()?.Dispose();
+                    UIManager.GetGump<CharacterSelectionBackground>()?.Dispose();
+                    UIManager.GetGump<SelectServerBackground>()?.Dispose();
                     LoginCharacter(_selectedCharacter);
 
                     break;
@@ -265,7 +342,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                         LoginButtons.OK | LoginButtons.Cancel,
                         buttonID =>
                         {
-                            if (buttonID == (int) LoginButtons.OK)
+                            if (buttonID == (int)LoginButtons.OK)
                             {
                                 loginScene.DeleteCharacter(_selectedCharacter);
                             }
@@ -282,15 +359,51 @@ namespace ClassicUO.Game.UI.Gumps.Login
             }
         }
 
+        private CharacterEntryGump _lastSelectedGump;
+
         private void SelectCharacter(uint index)
         {
             _selectedCharacter = index;
 
             foreach (CharacterEntryGump characterGump in FindControls<CharacterEntryGump>())
             {
-                characterGump.Hue = characterGump.CharacterIndex == index ? SELECTED_COLOR : NORMAL_COLOR;
+                if (characterGump.CharacterIndex == index)
+                {
+                    characterGump.Hue = SELECTED_COLOR;
+                    characterGump.Alpha = 0.1f; // Mantém a opacidade reduzida no item selecionado
+                    _lastSelectedGump = characterGump;
+                    characterGump.buttonDelete.IsVisible = true;
+                    characterGump.visibleTn = true;
+                    characterGump.fullBlendControl.Alpha = 0.2f;
+                    characterGump.fullBlendControl.IsVisible = true;
+                }
+                else
+                {
+                    characterGump.Hue = NORMAL_COLOR;
+                    characterGump.Alpha = 0.1f; // Restaura a opacidade dos demais itens
+                    characterGump.buttonDelete.IsVisible = false;
+                    characterGump.visibleTn = false;
+                    characterGump.fullBlendControl.Alpha = 0.0f;
+                    characterGump.fullBlendControl.IsVisible = false;
+
+                }
             }
         }
+
+        private void SelectCharacterHover(uint index)
+        {
+            _selectedCharacter = index;
+
+            foreach (CharacterEntryGump characterGump in FindControls<CharacterEntryGump>())
+            {
+                characterGump.Hue = characterGump._indexCharacter == index ? SELECTED_COLOR : NORMAL_COLOR;
+                characterGump._label.Hue = characterGump._indexCharacter == index ? SELECTED_COLOR : NORMAL_COLOR;
+                characterGump.fullBlendControl.Alpha = characterGump._indexCharacter == index ? 0.2f : 0.0f;
+                characterGump.fullBlendControl.IsVisible = characterGump._indexCharacter == index ? true : false;
+
+            }
+        }
+
 
         private void LoginCharacter(uint index)
         {
@@ -298,6 +411,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             if (loginScene.Characters != null && loginScene.Characters.Length > index && !string.IsNullOrEmpty(loginScene.Characters[index]))
             {
+                UIManager.GetGump<LoginBackground>()?.Dispose();
+                UIManager.GetGump<CharacterSelectionBackground>()?.Dispose();
+                UIManager.GetGump<SelectServerBackground>()?.Dispose();
                 loginScene.SelectCharacter(index);
             }
         }
@@ -310,43 +426,159 @@ namespace ClassicUO.Game.UI.Gumps.Login
             Prev
         }
 
-        private class CharacterEntryGump : Control
+        public class CharacterEntryGump : Control
         {
-            private readonly Label _label;
+            public TextBox _label;
             private readonly Action<uint> _loginFn;
             private readonly Action<uint> _selectedFn;
+            private readonly Action<uint> _hoverFn;
+            private readonly uint _bodyID;
+            private static Art art { get; set; }
+            private static PlayerMobile _character;
+            private PaperDollInteractable _paperDoll;
+            private readonly string savePath;
+            public uint _indexCharacter;
+            public ImageButton buttonDelete;
+            public FullBlendControl fullBlendControl;
+            public bool visibleTn { get; set; }
 
-            public CharacterEntryGump(uint index, string character, Action<uint> selectedFn, Action<uint> loginFn)
+            public Dictionary<string, PaperdollItem> Load()
+            {
+                if (File.Exists(savePath))
+                {
+                    try
+                    {
+                        string json = File.ReadAllText(savePath);
+                        return JsonSerializer.Deserialize<Dictionary<string, PaperdollItem>>(json) ?? new Dictionary<string, PaperdollItem>();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Failed to load marked tile data: {ex.Message}");
+                        return null;
+                    }
+                }
+                return null;
+            }
+
+
+            public CharacterEntryGump(uint index, string character, uint bodyID, Action<uint> selectedFn, Action<uint> loginFn, Action<uint> hoverFn)
             {
                 CharacterIndex = index;
+                _indexCharacter = index;
+                _bodyID = bodyID;
                 _selectedFn = selectedFn;
+                _hoverFn = hoverFn;
                 _loginFn = loginFn;
+                savePath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", Settings.GlobalSettings.Username, World.ServerName, character, "paperdollSelectCharManager.json");
+                var items = Load();
+
 
                 // Bg
-                Add
-                (
-                    new ResizePic(0x0BB8)
+                Add(new GumpPic(0, 0, 0x000C, 0) { IsPartialHue = true }.ScaleWidthAndHeight(Scale).SetInternalScale(Scale));
+
+                Mobile mobiles = World.Mobiles.Get(LocalSerial);
+
+                if (items != null && savePath != null)
+                {
+                    var customLayerOrder = new Dictionary<Layer, int>
                     {
-                        X = 0, Y = 0, Width = 280, Height = 30
+                    { Layer.Helmet, 7 },
+                    { Layer.Robe, 6},
+                    { Layer.Hair, 5 },
+                    { Layer.Beard, 4 },
+                    { Layer.Waist, 3 },
+                    { Layer.OneHanded, 2},
+                    { Layer.TwoHanded, 2 },
+                    { Layer.Talisman, 1 }
+                    };
+
+                    foreach (var item in items.Values
+                        .OrderBy(i => customLayerOrder.ContainsKey(i.Layer) ? customLayerOrder[i.Layer] : 0)
+                        .ThenBy(i => i.Layer))
+                    {
+                        if (item.Graphic > 0 && item.Layer != Layer.Bracelet || item.Graphic > 0 && item.Layer != Layer.Ring || item.Graphic > 0 && item.Layer != Layer.Backpack) 
+                        {
+                            ushort id = GetAnimID(
+                                0x000C,
+                                item.AnimID,
+                                false
+                            );
+
+                            Add(new GumpPicEquipment(
+                               item.Serial,
+                               0,
+                               0,
+                               id,
+                               (ushort)(item.Hue & 0xFFFF),
+                                item.Layer
+                            )
+                            {
+                                AcceptMouseInput = true,
+
+                                IsPartialHue = item.IsPartialHue,
+                                CanLift = World.InGame
+                                   && !World.Player.IsDead
+                                   && LocalSerial == World.Player,
+                            }.ScaleWidthAndHeight(Scale).SetInternalScale(InternalScale));
+                        }
                     }
-                );
+                }
+                else
+                {
+                    Add(new GumpPic(1, 1, 0xC4E9, 0));
+                    Add(new GumpPic(1, 1, 0xC502, 0));
+                    Add(new GumpPic(1, 1, 0xC4FE, 0));
+                    Add(new GumpPic(1, 1, 0xC530, 0));
+                }
 
                 // Char Name
                 Add
-                (
-                    _label = new Label
-                    (
-                        character,
-                        false,
-                        NORMAL_COLOR,
-                        270,
-                        5,
-                        align: TEXT_ALIGN_TYPE.TS_CENTER
-                    )
-                    {
-                        X = 0
-                    }
-                );
+               (
+                   _label = new TextBox(character, TrueTypeLoader.EMBEDDED_FONT, 16, 190, Color.Orange, align: TextHorizontalAlignment.Center, strokeEffect: true) { AcceptMouseInput = true }
+
+               );
+
+                Add
+                  (
+                     fullBlendControl = new FullBlendControl
+                     {
+                         X = 40,
+                         Y = 230,
+                         Width = 120,
+                         Height = 2,
+                         Hue = 0x801
+                     }
+                  );
+
+                fullBlendControl.Alpha = 0.0f;
+                fullBlendControl.IsVisible = false;
+
+
+                Add
+               (
+                   new Button((int)Buttons.Delete, 0x159A, 0x159C, 0x159B)
+                   {
+                       X = 16,
+                       Y = 190,
+                       ButtonAction = ButtonAction.Activate
+                   },
+                   1
+               );
+
+                Add
+               (
+                   buttonDelete = new ImageButton(
+                       75,
+                       245,
+                       Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_delete.png"),
+                       Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_pressed_new.png"),
+                       Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_hover_delete.png")
+                   )
+
+               );
+                visibleTn = true;
+                buttonDelete.IsVisible = visibleTn;
+                buttonDelete.Alpha = 0.0f;
 
                 AcceptMouseInput = true;
             }
@@ -355,8 +587,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             public ushort Hue
             {
-                get => _label.Hue;
-                set => _label.Hue = value;
+                get => (ushort)_label.Hue;
+                set => _label.Hue = (ushort)value;
             }
 
             protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
@@ -377,7 +609,24 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 if (button == MouseButtonType.Left)
                 {
                     _selectedFn(CharacterIndex);
+                    buttonDelete.IsVisible = true;
+                    buttonDelete.Alpha = 1.0f;
+                    fullBlendControl.Alpha = 0.2f;
+                    fullBlendControl.IsVisible = true;
                 }
+            }
+
+            protected override void OnMouseOver(int x, int y)
+            {
+                _hoverFn(CharacterIndex);
+               
+
+            }
+
+            protected override void OnMouseExit(int x, int y)
+            {
+                _hoverFn(CharacterIndex);
+                
             }
         }
     }

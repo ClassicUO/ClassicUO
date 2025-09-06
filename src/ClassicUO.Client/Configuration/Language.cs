@@ -194,6 +194,8 @@ namespace ClassicUO.Configuration
             public string ObjFade { get; set; } = "Enable object fading";
             public string TextFade { get; set; } = "Enable text fading";
             public string CursorRange { get; set; } = "Show target range indicator";
+
+            public string AutoAvoidObstacules { get; set; } = "Auto Avoid Obstacules";
             public string DragSelectHP { get; set; } = "Enable drag select for health bars";
             public string DragKeyMod { get; set; } = "Key modifier";
             public string DragPlayersOnly { get; set; } = "Players only";
@@ -522,6 +524,7 @@ namespace ClassicUO.Configuration
             public string PlayerOffsetY { get; set; } = "Player Offset Y";
             public string UseLandTexturesWhereAvailable { get; set; } = "Use land textures where available(Experimental)";
             public string SOSGumpID { get; set; } = "SOS Gump ID";
+            public string NearbyItemGump { get; set; } = "Enable nearby item gump";
             #endregion
 
             #region Tooltips

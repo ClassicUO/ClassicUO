@@ -143,6 +143,7 @@ namespace ClassicUO.Configuration
         public bool HighlightMobilesByInvul { get; set; } = true;
         public bool ShowMobilesHP { get; set; }
         public bool ShowTargetIndicator { get; set; }
+        public bool AutoAvoidObstacules { get; set; } = true;
         public int MobileHPType { get; set; }     // 0 = %, 1 = line, 2 = both
         public int MobileHPShowWhen { get; set; } // 0 = Always, 1 - <100%
         public bool DrawRoofs { get; set; } = true;
@@ -179,24 +180,24 @@ namespace ClassicUO.Configuration
         public byte TooltipFont { get; set; } = 1;
 
         // movements
-        public bool EnablePathfind { get; set; }
+        public bool EnablePathfind { get; set; } = true;
         public bool UseShiftToPathfind { get; set; }
         public bool PathfindSingleClick { get; set; }
-        public bool AlwaysRun { get; set; }
-        public bool AlwaysRunUnlessHidden { get; set; }
+        public bool AlwaysRun { get; set; } = true;
+        public bool AlwaysRunUnlessHidden { get; set; } = true;
         public bool SmoothMovements { get; set; } = true;
         public bool HoldDownKeyTab { get; set; } = true;
         public bool HoldShiftForContext { get; set; } = false;
         public bool HoldShiftToSplitStack { get; set; } = false;
 
         // general
-        [JsonConverter(typeof(Point2Converter))] public Point WindowClientBounds { get; set; } = new Point(600, 480);
+        [JsonConverter(typeof(Point2Converter))] public Point WindowClientBounds { get; set; } = new Point(1024, 768);
         [JsonConverter(typeof(Point2Converter))] public Point ContainerDefaultPosition { get; set; } = new Point(24, 24);
         [JsonConverter(typeof(Point2Converter))] public Point GameWindowPosition { get; set; } = new Point(10, 10);
         public bool GameWindowLock { get; set; }
         public bool GameWindowFullSize { get; set; }
         public bool WindowBorderless { get; set; } = false;
-        [JsonConverter(typeof(Point2Converter))] public Point GameWindowSize { get; set; } = new Point(600, 480);
+        [JsonConverter(typeof(Point2Converter))] public Point GameWindowSize { get; set; } = new Point(1024, 768);
         [JsonConverter(typeof(Point2Converter))] public Point TopbarGumpPosition { get; set; } = new Point(0, 0);
         public bool TopbarGumpIsMinimized { get; set; }
         public bool TopbarGumpIsDisabled { get; set; }
@@ -224,9 +225,9 @@ namespace ClassicUO.Configuration
         public bool CastSpellsByOneClick { get; set; }
         public bool BuffBarTime { get; set; }
         public bool FastSpellsAssign { get; set; }
-        public bool AutoOpenDoors { get; set; }
-        public bool SmoothDoors { get; set; }
-        public bool AutoOpenCorpses { get; set; }
+        public bool AutoOpenDoors { get; set; } = true;
+        public bool SmoothDoors { get; set; } = true;
+        public bool AutoOpenCorpses { get; set; } = true;
         public int AutoOpenCorpseRange { get; set; } = 2;
         public int CorpseOpenOptions { get; set; } = 3;
         public bool SkipEmptyCorpse { get; set; }
@@ -886,6 +887,9 @@ namespace ClassicUO.Configuration
         public bool JournalAnchorEnabled { get; set; } = false;
         public bool EnableGumpCloseAnimation { get; set; } = true;
 
+        public bool EnableAutoLootProgressBar { get; set; } = true;
+        public bool EnableNearbyItemGump {  get; set; } = true;
+
 
         public void Save(string path, bool saveGumps = true)
         {
@@ -1230,6 +1234,9 @@ namespace ClassicUO.Configuration
                                     break;
                                 case GumpType.DurabilityGump:
                                     gump = new DurabilitysGump();
+                                    break;
+                                case GumpType.ScriptManager:
+                                    gump = new LegionScripting.ScriptManagerGump();
                                     break;
                             }
 

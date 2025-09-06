@@ -265,6 +265,19 @@ namespace ClassicUO.Game.Managers
             {
                 Task.Run(SpellDefinition.SaveAllSpellsToJson);
             });
+
+            Register("setinscreen", (s) =>
+            {
+                for (LinkedListNode<Gump> last = UIManager.Gumps.Last; last != null; last = last.Previous)
+                {
+                    Gump c = last.Value;
+
+                    if (!c.IsDisposed)
+                    {
+                        c.SetInScreen();   
+                    }
+                }
+            });
         }
 
 

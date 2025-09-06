@@ -13,6 +13,8 @@ namespace ClassicUO.Assets
 
         private string exePath;
 
+        public Dictionary<string, Texture2D> EmbeddedArt = new Dictionary<string, Texture2D>();
+
         private uint[] gump_availableIDs;
         private Dictionary<uint, Texture2D> gump_textureCache = new Dictionary<uint, Texture2D>();
 
@@ -248,7 +250,6 @@ namespace ClassicUO.Assets
                         }
 
                         var resourceName = assembly.GetName().Name + $".gumpartassets.{i}.png";
-                        Console.WriteLine(resourceName);
                         try
                         {
                             Stream stream = assembly.GetManifestResourceStream(resourceName);
@@ -276,6 +277,30 @@ namespace ClassicUO.Assets
                             }
                         }
                         catch (Exception e) { Console.WriteLine(e.Message); }
+                    }
+
+                    //Load all embedded art in gumpartassets folder
+                    var resourceNames = assembly.GetManifestResourceNames();
+                    foreach (var resourceName in resourceNames)
+                    {
+                        string path = assembly.GetName().Name + ".gumpartassets.";
+                        if (resourceName.IndexOf(path) == 0 && resourceName.EndsWith(".png"))
+                        {
+                            var fName = resourceName.Substring(path.Length);
+                            Console.WriteLine(fName);
+                            try
+                            {
+                                Stream stream = assembly.GetManifestResourceStream(resourceName);
+                                if (stream != null)
+                                {
+                                    Texture2D texture = Texture2D.FromStream(GraphicsDevice, stream);
+                                    FixPNGAlpha(ref texture);
+                                    EmbeddedArt.Add(fName, texture);
+                                    stream.Dispose();
+                                }
+                            }
+                            catch (Exception e) { Console.WriteLine(e.Message); }
+                        }
                     }
                 });
         }
