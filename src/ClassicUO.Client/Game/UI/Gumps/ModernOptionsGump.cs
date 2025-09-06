@@ -47,11 +47,8 @@ namespace ClassicUO.Game.UI.Gumps
                     if (_settings == null)
                     {
                         _settings = new ThemeSettings();
-                        ThemeSettings.Save<ThemeSettings>(typeof(ModernOptionsGump).ToString(), _settings);
-                    }
-                    else
-                    { //Save changes if things have changed
-                        ThemeSettings.Save<ThemeSettings>(typeof(ModernOptionsGump).ToString(), _settings);
+                        // Save the new settings without causing recursion
+                        UISettings.Save<ThemeSettings>(typeof(ModernOptionsGump).ToString(), _settings);
                     }
                     return _settings;
                 }
@@ -75,14 +72,14 @@ namespace ClassicUO.Game.UI.Gumps
             X = (Client.Game.Window.ClientBounds.Width >> 1) - (Width >> 1);
             Y = (Client.Game.Window.ClientBounds.Height >> 1) - (Height >> 1);
 
-            Add(new ColorBox(Width, Height, Theme.BACKGROUND) { AcceptMouseInput = true, CanMove = true, Alpha = 0.85f });
+            Add(new RoundedColorBox(Width, Height, Color.Black, 12) { AcceptMouseInput = true, CanMove = true, Alpha = 0.95f });
 
-            Add(new ColorBox(Width, 40, Theme.SEARCH_BACKGROUND) { AcceptMouseInput = true, CanMove = true, Alpha = 0.85f });
+            Add(new RoundedColorBox(Width, 40, Color.FromNonPremultiplied(20, 20, 20, 255), 8) { AcceptMouseInput = true, CanMove = true, Alpha = 0.95f });
 
-            Add(new TextBox(lang.OptionsTitle, Theme.FONT, 30, null, Color.White, strokeEffect: false) { X = 10, Y = 7, AcceptMouseInput = false });
+            Add(new TextBox(lang.OptionsTitle, Theme.FONT, Theme.STANDARD_TEXT_SIZE + 8, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { X = 10, Y = 7, AcceptMouseInput = false });
 
             Control c;
-            Add(c = new TextBox(lang.Search, Theme.FONT, 30, null, Color.White, strokeEffect: false) { Y = 7, AcceptMouseInput = false });
+            Add(c = new TextBox(lang.Search, Theme.FONT, Theme.STANDARD_TEXT_SIZE + 8, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7, AcceptMouseInput = false });
 
             InputField search;
             Add(search = new InputField(400, 30) { X = Width - 405, Y = 5 });
@@ -2175,10 +2172,10 @@ namespace ClassicUO.Game.UI.Gumps
             }), true, page);
             content.RemoveIndent();
             content.BlankLine();
-            content.AddToRight(new TextBox("----- FEATURES ----- ", Theme.FONT, 18, null, Color.White, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new TextBox("----- FEATURES ----- ", Theme.FONT, Theme.STANDARD_TEXT_SIZE + 2, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
             content.Indent();
 
-            content.AddToRight(new TextBox("HighlightTileAtRange (toggle HighlightTileAtRange on / off)", Theme.FONT, 16, null, Color.White, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new TextBox("HighlightTileAtRange (toggle HighlightTileAtRange on / off)", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
 
             content.RemoveIndent();
             content.BlankLine();
@@ -2247,7 +2244,7 @@ namespace ClassicUO.Game.UI.Gumps
                 profile.SpellOnCursor = b;
             }), true, page);
 
-            content.AddToRight(new TextBox("Spellicon offset:", Theme.FONT, 18, null, Color.White, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new TextBox("Spellicon offset:", Theme.FONT, Theme.STANDARD_TEXT_SIZE + 2, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
             content.Indent();
             content.AddToRight(new InputFieldWithLabel("X", Theme.INPUT_WIDTH, profile.SpellOnCursorOffset.X.ToString(), false, (s, e) =>
             {
@@ -2526,7 +2523,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 profile.InvisibleHousesZ = (byte)i;
             }), true, page);
-            content.AddToRight(new TextBox("Dont make Invisible or Transparent below (Z level):", Theme.FONT, 16, null, Color.White, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new TextBox("Dont make Invisible or Transparent below (Z level):", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
             content.BlankLine();
             content.AddToRight(new SliderWithLabel("Z level ", 0, Theme.SLIDER_WIDTH, 0, 100, profile.DontRemoveHouseBelowZ, (i) =>
             {
@@ -2550,11 +2547,11 @@ namespace ClassicUO.Game.UI.Gumps
                 profile.ShowDeathOnWorldmap = b;
             }), true, page);
             content.BlankLine();
-            content.AddToRight(new TextBox("----- FEATURES ----- ", Theme.FONT, 18, null, Color.White, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new TextBox("----- FEATURES ----- ", Theme.FONT, Theme.STANDARD_TEXT_SIZE + 2, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
             content.Indent();
 
-            content.AddToRight(new TextBox("ToggleTransparentHouses (toggle ToggleTransparentHouses on / off)", Theme.FONT, 16, null, Color.White, strokeEffect: false) { Y = 7 }, true, page);
-            content.AddToRight(new TextBox("ToggleInvisibleHouses (toggle ToggleInvisibleHouses on / off)", Theme.FONT, 16, null, Color.White, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new TextBox("ToggleTransparentHouses (toggle ToggleTransparentHouses on / off)", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new TextBox("ToggleInvisibleHouses (toggle ToggleInvisibleHouses on / off)", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
 
 
             content.BlankLine();
@@ -2632,9 +2629,9 @@ namespace ClassicUO.Game.UI.Gumps
             }), true, page);
 
             content.BlankLine();
-            content.AddToRight(new TextBox("----- SETTINGS (AL) ----- ", Theme.FONT, 18, null, Color.White, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new TextBox("----- SETTINGS (AL) ----- ", Theme.FONT, Theme.STANDARD_TEXT_SIZE + 2, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
             content.BlankLine();
-            content.AddToRight(new TextBox("----- DISABLE / ENABLE AL ON CHANGES BELOW ----- ", Theme.FONT, 16, null, Color.White, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new TextBox("----- DISABLE / ENABLE AL ON CHANGES BELOW ----- ", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
             content.BlankLine();
 
             content.AddToRight(new InputFieldWithLabel("Time between looting two items(ms) ", Theme.INPUT_WIDTH, profile.UOClassicCombatAL_LootDelay.ToString(), false, (s, e) =>
@@ -2741,7 +2738,7 @@ namespace ClassicUO.Game.UI.Gumps
             }), true, page);
 
             content.BlankLine();
-            content.AddToRight(new TextBox("----- DISABLE / ENABLE BUFFBAR ON CHANGES BELOW ----- ", Theme.FONT, 16, null, Color.White, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new TextBox("----- DISABLE / ENABLE BUFFBAR ON CHANGES BELOW ----- ", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
             content.BlankLine();
             content.AddToRight(new CheckboxWithLabel("Show Swing Line", 0, profile.UOClassicCombatBuffbar_SwingEnabled, (b) =>
             {
@@ -2813,7 +2810,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }), true, page);
             content.BlankLine();
-            content.AddToRight(new TextBox("-----SETTINGS (BUFFBAR AND SELF)-----", Theme.FONT, 16, null, Color.White, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new TextBox("-----SETTINGS (BUFFBAR AND SELF)-----", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("General cooldown when you get disarmed (ms)", Theme.INPUT_WIDTH, profile.UOClassicCombatSelf_DisarmedCooldown.ToString(), false, (s, e) =>
             {
@@ -2875,7 +2872,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             }), true, page);
             content.BlankLine();
-            content.AddToRight(new TextBox("-----SETTINGS (SELF)-----", Theme.FONT, 16, null, Color.White, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new TextBox("-----SETTINGS (SELF)-----", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
             content.BlankLine();
             content.AddToRight(new CheckboxWithLabel("Are trapped pouches colored from server?", 0, profile.UOClassicCombatSelf_ColoredPouches, (b) =>
             {
@@ -2891,7 +2888,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }), true, page);
             content.BlankLine();
-            content.AddToRight(new TextBox("-----SETTINGS (COOLDOWNS)-----", Theme.FONT, 16, null, Color.White, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new TextBox("-----SETTINGS (COOLDOWNS)-----", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("ActionCooldown (ms): ", Theme.INPUT_WIDTH, profile.UOClassicCombatSelf_ActionCooldown.ToString(), false, (s, e) =>
             {
@@ -2950,7 +2947,7 @@ namespace ClassicUO.Game.UI.Gumps
             }), true, page);
             content.BlankLine();
 
-            content.AddToRight(new TextBox("-----SETTINGS (TRESHOLDS)-----", Theme.FONT, 16, null, Color.White, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new TextBox("-----SETTINGS (TRESHOLDS)-----", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("Bandies treshold (diffhits >= ):", Theme.INPUT_WIDTH, profile.UOClassicCombatSelf_BandiesHPTreshold.ToString(), false, (s, e) =>
             {
@@ -2984,7 +2981,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }), true, page);
             content.BlankLine();
-            content.AddToRight(new TextBox("-----SETTINGS (MISC)-----", Theme.FONT, 16, null, Color.White, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new TextBox("-----SETTINGS (MISC)-----", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
 
             content.AddToRight(new InputFieldWithLabel("Auto rearm weps held before got disarmeded (ms)", Theme.INPUT_WIDTH, profile.UOClassicCombatSelf_RefreshpotStamTreshold.ToString(), false, (s, e) =>
             {
@@ -3045,7 +3042,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.AddToLeft(SubCategoryButton("Macros", page, content.LeftWidth));
             content.ResetRightSide();
-            content.AddToRight(new TextBox("LastTargetRC (last target with custom range check)", Theme.FONT, 16, null, Color.White, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new TextBox("LastTargetRC (last target with custom range check)", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
             content.Indent();
             content.AddToRight(new SliderWithLabel("LastTargetRC - Range:", 0, Theme.SLIDER_WIDTH, 1, 30, profile.LastTargetRange, (i) =>
             {
@@ -3053,22 +3050,22 @@ namespace ClassicUO.Game.UI.Gumps
             }), true, page);
             content.RemoveIndent();
             content.BlankLine();
-            content.AddToRight(new TextBox("ObjectInfo (macro for -info command)", Theme.FONT, 16, null, Color.White, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new TextBox("ObjectInfo (macro for -info command)", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
             content.BlankLine();
-            content.AddToRight(new TextBox("HideX (remove landtile, entity, mobile or item)", Theme.FONT, 16, null, Color.White, strokeEffect: false) { Y = 7 }, true, page);
-            content.BlankLine();
-
-            content.AddToRight(new TextBox("HealOnHPChange (keep pressed, casts heal on own hp change", Theme.FONT, 16, null, Color.White, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new TextBox("HideX (remove landtile, entity, mobile or item)", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
             content.BlankLine();
 
-            content.AddToRight(new TextBox("HarmOnSwing (keep pressed, casts harm on next own swing animation)", Theme.FONT, 16, null, Color.White, strokeEffect: false) { Y = 7 }, true, page);
-            content.BlankLine();
-            content.AddToRight(new TextBox("CureGH (if poisoned cure, else greater heal)", Theme.FONT, 16, null, Color.White, strokeEffect: false) { Y = 7 }, true, page);
-            content.BlankLine();
-            content.AddToRight(new TextBox("SetTargetClientSide (set target client side only)", Theme.FONT, 16, null, Color.White, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new TextBox("HealOnHPChange (keep pressed, casts heal on own hp change", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
             content.BlankLine();
 
-            content.AddToRight(new TextBox("OpenCorpses (opens 0x2006 corpses within 2 tiles)", Theme.FONT, 16, null, Color.White, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new TextBox("HarmOnSwing (keep pressed, casts harm on next own swing animation)", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
+            content.BlankLine();
+            content.AddToRight(new TextBox("CureGH (if poisoned cure, else greater heal)", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
+            content.BlankLine();
+            content.AddToRight(new TextBox("SetTargetClientSide (set target client side only)", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
+            content.BlankLine();
+
+            content.AddToRight(new TextBox("OpenCorpses (opens 0x2006 corpses within 2 tiles)", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
             content.BlankLine();
 
             #endregion
@@ -3104,7 +3101,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }), true, page);
             content.BlankLine();
-            content.AddToRight(new TextBox("(Doubleklick to lock in place)", Theme.FONT, 16, null, Color.White, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new TextBox("(Doubleklick to lock in place)", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
             content.BlankLine();
             content.AddToRight(new CheckboxWithLabel("Show gump when using bandages ", 0, profile.BandageGump, (b) =>
             {
@@ -4366,19 +4363,16 @@ namespace ClassicUO.Game.UI.Gumps
                     return false;
                 }
 
-                batcher.Draw(
-                    SolidColorTextureCache.GetTexture(Color.White),
-                    new Rectangle(x, y, Theme.CHECKBOX_SIZE, Theme.CHECKBOX_SIZE),
-                    hueVector
-                );
+                // Draw rounded checkbox background
+                DrawRoundedRectangle(batcher, x, y, Theme.CHECKBOX_SIZE, Theme.CHECKBOX_SIZE, 4, Theme.TEXT_FONT_COLOR, hueVector);
 
                 if (IsChecked)
                 {
-                    batcher.Draw(
-                        SolidColorTextureCache.GetTexture(Color.Black),
-                        new Rectangle(x + (Theme.CHECKBOX_SIZE / 2) / 2, y + (Theme.CHECKBOX_SIZE / 2) / 2, Theme.CHECKBOX_SIZE / 2, Theme.CHECKBOX_SIZE / 2),
-                        hueVector
-                    );
+                    // Draw rounded checkmark
+                    int checkSize = Theme.CHECKBOX_SIZE / 2;
+                    int checkX = x + (Theme.CHECKBOX_SIZE - checkSize) / 2;
+                    int checkY = y + (Theme.CHECKBOX_SIZE - checkSize) / 2;
+                    DrawRoundedRectangle(batcher, checkX, checkY, checkSize, checkSize, 2, Color.Black, hueVector);
                 }
 
                 _text.Draw(batcher, x + _text.X, y + _text.Y);
@@ -4413,6 +4407,60 @@ namespace ClassicUO.Game.UI.Gumps
             public void OnSearchMatch()
             {
                 _text.Alpha = 1f;
+            }
+
+            private void DrawRoundedRectangle(UltimaBatcher2D batcher, int x, int y, int width, int height, int radius, Color color, Vector3 hueVector)
+            {
+                Texture2D texture = SolidColorTextureCache.GetTexture(color);
+
+                // Main rectangle (center)
+                if (width > radius * 2 && height > radius * 2)
+                {
+                    batcher.Draw(
+                        texture,
+                        new Rectangle(x + radius, y + radius, width - radius * 2, height - radius * 2),
+                        hueVector
+                    );
+                }
+
+                // Top and bottom rectangles
+                if (width > radius * 2)
+                {
+                    batcher.Draw(
+                        texture,
+                        new Rectangle(x + radius, y, width - radius * 2, radius),
+                        hueVector
+                    );
+                    batcher.Draw(
+                        texture,
+                        new Rectangle(x + radius, y + height - radius, width - radius * 2, radius),
+                        hueVector
+                    );
+                }
+
+                // Left and right rectangles
+                if (height > radius * 2)
+                {
+                    batcher.Draw(
+                        texture,
+                        new Rectangle(x, y + radius, radius, height - radius * 2),
+                        hueVector
+                    );
+                    batcher.Draw(
+                        texture,
+                        new Rectangle(x + width - radius, y + radius, radius, height - radius * 2),
+                        hueVector
+                    );
+                }
+
+                // Corner rectangles (simplified rounded corners)
+                if (radius > 0)
+                {
+                    batcher.Draw(texture, new Rectangle(x, y, radius, radius), hueVector);
+                    batcher.Draw(texture, new Rectangle(x + width - radius, y, radius, radius), hueVector);
+                    batcher.Draw(texture, new Rectangle(x, y + height - radius, radius, radius), hueVector);
+                    batcher.Draw(texture, new Rectangle(x + width - radius, y + height - radius, radius, radius), hueVector);
+                }
             }
         }
 
@@ -4566,7 +4614,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     //Draw background line
                     batcher.Draw(
-                        SolidColorTextureCache.GetTexture(Color.White),
+                        SolidColorTextureCache.GetTexture(Theme.TEXT_FONT_COLOR),
                         new Rectangle(mx, y + 3, BarWidth, 10),
                         hueVector
                         );
@@ -4574,7 +4622,7 @@ namespace ClassicUO.Game.UI.Gumps
                     hueVector = ShaderHueTranslator.GetHueVector(Theme.SEARCH_BACKGROUND);
 
                     batcher.Draw(
-                        SolidColorTextureCache.GetTexture(Color.White),
+                        SolidColorTextureCache.GetTexture(Theme.TEXT_FONT_COLOR),
                         new Rectangle(mx + _sliderX, y, 15, 16),
                         hueVector
                         );
@@ -4770,7 +4818,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     string initialText = selected > -1 ? items[selected] : string.Empty;
 
-                    Add(new ColorBox(Width, Height, Theme.SEARCH_BACKGROUND));
+                    Add(new RoundedColorBox(Width, Height, Color.FromNonPremultiplied(30, 30, 30, 255), 6));
 
                     Add
                     (
@@ -4859,8 +4907,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                         _combobox = combobox;
 
-                        ColorBox cb;
-                        Add(cb = new ColorBox(width, 0, Theme.BACKGROUND));
+                        RoundedColorBox cb;
+                        Add(cb = new RoundedColorBox(width, 0, Color.FromNonPremultiplied(40, 40, 40, 255), 4));
 
                         HoveredLabel[] labels = new HoveredLabel[items.Length];
 
@@ -6341,7 +6389,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add
                 (
-                    TextLabel = new TextBox(text, Theme.FONT, 20, w, fontColor, align, false)
+                    TextLabel = new TextBox(text, Theme.FONT, Theme.STANDARD_TEXT_SIZE + 4, w, fontColor, align, false)
                 );
 
                 TextLabel.Y = (h - TextLabel.Height) >> 1;
@@ -6691,8 +6739,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _emptySpace;
 
                 private Vector3 hueVector = ShaderHueTranslator.GetHueVector(Theme.BACKGROUND, false, 0.75f);
-                private Vector3 hueVectorForeground = ShaderHueTranslator.GetHueVector(Theme.BLACK, false, 0.75f);
-                private Texture2D whiteTexture = SolidColorTextureCache.GetTexture(Color.White);
+                private Vector3 hueVectorForeground = ShaderHueTranslator.GetHueVector(Theme.BLACK, false, 0f);
+                private Texture2D whiteTexture = SolidColorTextureCache.GetTexture(Theme.TEXT_FONT_COLOR);
 
                 public ScrollBar(int x, int y, int height)
                 {
@@ -7819,7 +7867,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (!string.IsNullOrEmpty(OptionLabel))
                 {
-                    Control labelTextBox = new TextBox(OptionLabel, Theme.FONT, 20, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { AcceptMouseInput = false };
+                    Control labelTextBox = new TextBox(OptionLabel, Theme.FONT, Theme.STANDARD_TEXT_SIZE + 4, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { AcceptMouseInput = false };
                     FullControl.Add(labelTextBox, (int)optionsPage);
 
                     if (labelTextBox.Width > maxTotalWidth)
@@ -7901,28 +7949,30 @@ namespace ClassicUO.Game.UI.Gumps
             public int BLANK_LINE { get; set; } = 20;
             public int HORIZONTAL_SPACING_CONTROLS { get; set; } = 20;
 
-            public int STANDARD_TEXT_SIZE { get; set; } = 20;
+            // Reduced font size for darker theme
+            public int STANDARD_TEXT_SIZE { get; set; } = 16;
 
-            public float NO_MATCH_SEARCH { get; set; } = 0.5f;
+            public float NO_MATCH_SEARCH { get; set; } = 0.3f;
 
-            public ushort BACKGROUND { get; set; } = 897;
-            public ushort SEARCH_BACKGROUND { get; set; } = 899;
-            public ushort CHECKBOX { get; set; } = 899;
+            // Dark theme colors
+            public ushort BACKGROUND { get; set; } = 0; // Pure black background
+            public ushort SEARCH_BACKGROUND { get; set; } = 0; // Black search background
+            public ushort CHECKBOX { get; set; } = 0; // Black checkbox
             public int CHECKBOX_SIZE { get; set; } = 30;
             public ushort BLACK { get; set; } = 0;
 
             [JsonConverter(typeof(ColorJsonConverter))]
-            public Color DROPDOWN_OPTION_NORMAL_HUE { get; set; } = Color.White;
+            public Color DROPDOWN_OPTION_NORMAL_HUE { get; set; } = Color.DarkGray;
             [JsonConverter(typeof(ColorJsonConverter))]
 
-            public Color DROPDOWN_OPTION_HOVER_HUE { get; set; } = Color.AntiqueWhite;
+            public Color DROPDOWN_OPTION_HOVER_HUE { get; set; } = Color.Gray;
             [JsonConverter(typeof(ColorJsonConverter))]
-            public Color DROPDOWN_OPTION_SELECTED_HUE { get; set; } = Color.CadetBlue;
+            public Color DROPDOWN_OPTION_SELECTED_HUE { get; set; } = Color.DarkSlateGray;
 
             [JsonConverter(typeof(ColorJsonConverter))]
-            public Color BUTTON_FONT_COLOR { get; set; } = Color.White;
+            public Color BUTTON_FONT_COLOR { get; set; } = Color.WhiteSmoke;
             [JsonConverter(typeof(ColorJsonConverter))]
-            public Color TEXT_FONT_COLOR { get; set; } = Color.White;
+            public Color TEXT_FONT_COLOR { get; set; } = Color.WhiteSmoke;
 
             public string FONT { get; set; } = TrueTypeLoader.EMBEDDED_FONT;
         }

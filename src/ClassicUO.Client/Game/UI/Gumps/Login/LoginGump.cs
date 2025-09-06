@@ -78,8 +78,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
             UIManager.Add(new LoginBackground());
             Add(new CustomGumpPic
                     (
-                        380,
-                        200,
+                        310,
+                        120,
                         LogoBackgroundImg,
                         0
                     ));
@@ -97,7 +97,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             Add
             (
-                new Label(string.Format("LegionUO Version {0}", CUOEnviroment.Version), false, 0x034E, font: 9)
+                new Label(string.Format("Dust765 Version {0}", CUOEnviroment.Version), false, 0x034E, font: 9)
                 {
                     X = 395,
                     Y = 720
@@ -121,15 +121,28 @@ namespace ClassicUO.Game.UI.Gumps.Login
             Add(_nextArrow0 = new ImageButton(
                455,
                570,
-               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_login.png"),
-               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_pressed_login.png"),
-               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_hover_login.png")
+               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_next.png"),
+               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_pressed_next.png"),
+               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_hover_next.png")
            ));
+
 
             _nextArrow0.OnButtonClick += () =>
             {
                 OnButtonClick(0);
             };
+
+
+            //Add(_nextArrow0 = new DarkRedButton(
+            //    x: 455,             // posição X
+            //    y: 570,             // posição Y
+            //    text: "Login", // texto do botão
+            //    gumpNormal: 0x15E1, // ID do gump normal
+            //    gumpHover: 0x15E3,  // ID do gump quando hover
+            //    gumpPressed: 0x15E5,// ID do gump pressionado
+            //    fontPath: "fonts/Arial.ttf", // caminho da fonte TTF
+            //    fontSize: 16        // tamanho da fonte
+            //));
 
             offsetX = 370;
             offsetY = 430;
@@ -309,25 +322,13 @@ namespace ClassicUO.Game.UI.Gumps.Login
             TextBox _;
             HitBox _hit;
 
-            Add(_ = new TextBox("Legion Suport", TrueTypeLoader.EMBEDDED_FONT, 15, 200, Color.Orange, strokeEffect: false) { X = 30, Y = 660, AcceptMouseInput = true });
-            Add(_hit = new HitBox(_.X, _.Y, _.MeasuredSize.X, _.MeasuredSize.Y));
-            _hit.MouseUp += (s, e) =>
-            {
-                Utility.Platforms.PlatformHelper.LaunchBrowser("https://github.com/bittiez/ClassicUO/wiki");
-            };
-            Add(_ = new TextBox("LegionUO Wiki", TrueTypeLoader.EMBEDDED_FONT, 15, 200, Color.Orange, strokeEffect: false) { X = 30, Y = 680, AcceptMouseInput = true });
+            Add(_ = new TextBox("Dust765 Suport", TrueTypeLoader.EMBEDDED_FONT, 15, 200, Color.DarkRed, strokeEffect: false) { X = 30, Y = 660, AcceptMouseInput = true });
             Add(_hit = new HitBox(_.X, _.Y, _.MeasuredSize.X, _.MeasuredSize.Y));
             _hit.MouseUp += (s, e) =>
             {
                 Utility.Platforms.PlatformHelper.LaunchBrowser("https://github.com/bittiez/ClassicUO/wiki");
             };
 
-            Add(_ = new TextBox("LegionUO Discord", TrueTypeLoader.EMBEDDED_FONT, 15, 200, Color.Orange, strokeEffect: false) { X = 30, Y = 700, AcceptMouseInput = true });
-            Add(_hit = new HitBox(_.X, _.Y, _.MeasuredSize.X, _.MeasuredSize.Y));
-            _hit.MouseUp += (s, e) =>
-            {
-                Utility.Platforms.PlatformHelper.LaunchBrowser("https://discord.gg/SqwtB5g95H");
-            };
 
 
             if (!string.IsNullOrEmpty(_textboxAccount.Text))
