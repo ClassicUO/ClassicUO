@@ -1,0 +1,97 @@
+name: Dust-ActiveDev-Deploy
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    branches: [dev_dust765_activedev]
+    workflows: [Build-Test]
+    types:
+      - completed
+      
+concurrency:
+  group: maindeploy
+  cancel-in-progress: true
+
+env:
+  CUO_ASSEMBLY_VERSION: '1.0.0.${{ github.run_number }}'
+  CUO_OUTPUT_PATH: '../../bin/dist'
+  CUO_PROJECT_PATH: "src/ClassicUO.Client/ClassicUO.Client.csproj"
+  CUO_ZIP_NAME: "Dust765_activedev.zip"
+
+  DOTNET_NOLOGO: false
+  DOTNET_CLI_TELEMETRY_OPTOUT: 1
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  NUGET_XMLDOC_MODE: skip
+
+jobs:
+  removeoldrelease:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v1
+    
+    - name: Remove old Release
+      uses: dev-drprasad/delete-tag-and-release@v0.2.1
+      with:
+        delete_release: true
+        tag_name: Dust765_activedev
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
+  build:
+    # if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      max-parallel: 1
+      matrix:
+       os: [ macos-latest, ubuntu-latest, windows-latest ]
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: 'dev_dust765_activedev'
+      
+    - name: Get submodules
+      run: |
+        git config --global url."https://".insteadOf git://
+        git submodule update --init --recursive
+        
+    - name: Setup .NET 7
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 7.0.x
+        include-prerelease: true
+            
+    - name: Build
+      run: dotnet publish ${{ env.CUO_PROJECT_PATH }} -c Release -o ${{ env.CUO_OUTPUT_PATH }} -p:IS_DEV_BUILD=true -p:AssemblyVersion=${{ env.CUO_ASSEMBLY_VERSION }} -p:FileVersion=${{ env.CUO_ASSEMBLY_VERSION }}
+      
+    - name: Create manifest
+      run: |
+        dotnet run --project tools/ManifestCreator/ManifestCreator.csproj "${{ env.CUO_OUTPUT_PATH }}" "unix-auto" "${{ runner.os }}${{ env.CUO_ZIP_NAME }}"
+        mkdir upload
+        mv manifest.xml upload
+      
+    - name: Create package
+      uses: thedoctor0/zip-release@master
+      with:
+        type: 'zip'
+        directory: ${{ env.CUO_OUTPUT_PATH }}
+        filename: ${{ runner.os }}${{ env.CUO_ZIP_NAME }}
+        exclusions: '*.zip manifest.xml'
+            
+    - name: Move output
+      run: mv "${{ env.CUO_OUTPUT_PATH }}/${{ runner.os }}${{ env.CUO_ZIP_NAME }}" upload
+              
+    - name: Upload Release
+      uses: ncipollo/release-action@v1
+      with:
+        artifacts: "upload/${{ runner.os }}${{ env.CUO_ZIP_NAME }}"
+        name: 'Dust765 - ActiveDev - 1.0.0.${{ github.run_number }}'
+        body: 'These are built automatically on the dev_dust765_activedev branch. These may include features that are still being worked on/not complete.'
+        makeLatest: false
+        allowUpdates: true
+        prerelease: true
+        tag: Dust765_activedev
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+        

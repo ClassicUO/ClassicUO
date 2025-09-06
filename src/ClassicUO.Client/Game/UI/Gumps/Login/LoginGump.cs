@@ -54,7 +54,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private readonly ushort _buttonOver;
         private readonly Checkbox _checkboxAutologin;
         private readonly Checkbox _checkboxSaveAccount;
-        private readonly ImageButton _nextArrow0;
+        private readonly GothicStyleButton _nextArrow0;
         private readonly PasswordStbTextBox _passwordFake;
         private readonly StbTextBox _textboxAccount;
 
@@ -118,16 +118,18 @@ namespace ClassicUO.Game.UI.Gumps.Login
             );
             */
 
-            Add(_nextArrow0 = new ImageButton(
-               455,
-               570,
-               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_next.png"),
-               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_pressed_next.png"),
-               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_hover_next.png")
-           ));
+            // Substituir o ImageButton pelo GothicStyleButton
+            Add(_nextArrow0 = new GothicStyleButton(
+                x: 455,
+                y: 570,
+                width: 120,
+                height: 40,
+                text: "LOGIN",
+                fontPath: null, // Usar fonte padrão
+                fontSize: 16
+            ));
 
-
-            _nextArrow0.OnButtonClick += () =>
+            _nextArrow0.OnClick += () =>
             {
                 OnButtonClick(0);
             };

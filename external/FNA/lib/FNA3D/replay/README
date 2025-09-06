@@ -1,0 +1,25 @@
+This is the replay tool for FNA3D trace files.
+
+About
+-----
+Traces are made with a custom FNA3D binary that writes the entire call stream,
+including texture and buffer data, and contains no backend information of any
+kind. This ensures that traces made from any platform can be played back on
+every other platform, and can be rendered with any backend that FNA3D provides.
+
+How to Use
+----------
+To enable tracing, set -DTRACING_SUPPORT=ON when configuring via CMake. If you
+use one of the premade projects, simply add FNA3D_TRACING to the defines.
+
+Place the FNA3D library where appropriate, then run your application for as long
+as is appropriate. Note that you will want both a lot of disk space as well as
+good disk performance, as these files get large VERY quickly! Once the file is
+made, you can play it back with `fna3d_replay`.
+
+Found an issue?
+---------------
+Like with FNA3D, tracing issues should be reported via GitHub, but if you want
+to diagnose crashes yourself, the easiest way is to simply printf the `mark`
+value right before the big giant switch statement, then you can work your way
+from there once you know which API call caused the problem.
