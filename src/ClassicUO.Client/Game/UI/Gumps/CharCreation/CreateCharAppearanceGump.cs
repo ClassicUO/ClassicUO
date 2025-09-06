@@ -291,7 +291,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
                (
-                   new TextBox("Character Name", TrueTypeLoader.EMBEDDED_FONT, 22, 300, Color.Orange, strokeEffect: true) { X = 465, Y = 44, AcceptMouseInput = false }
+                   new TextBox("Character Name", TrueTypeLoader.EMBEDDED_FONT, 22, 300, Color.DarkRed, strokeEffect: true) { X = 465, Y = 44, AcceptMouseInput = false }
 
                );
 
@@ -436,19 +436,19 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
                (
-                   new TextBox(ClilocLoader.Instance.GetString(3000111), TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.Orange, strokeEffect: false) { X = 375, Y = 544, AcceptMouseInput = false }
+                   new TextBox(ClilocLoader.Instance.GetString(3000111), TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: false) { X = 375, Y = 544, AcceptMouseInput = false }
 
                );
 
             Add
               (
-                  new TextBox(ClilocLoader.Instance.GetString(3000112), TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.Orange, strokeEffect: false) { X = 495, Y = 544, AcceptMouseInput = false }
+                  new TextBox(ClilocLoader.Instance.GetString(3000112), TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: false) { X = 495, Y = 544, AcceptMouseInput = false }
 
               );
 
             Add
               (
-                  new TextBox(ClilocLoader.Instance.GetString(3000113), TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.Orange, strokeEffect: false) { X = 608, Y = 544, AcceptMouseInput = false }
+                  new TextBox(ClilocLoader.Instance.GetString(3000113), TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: false) { X = 608, Y = 544, AcceptMouseInput = false }
 
               );
 
@@ -456,7 +456,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             // sliders for attributes
             _attributeSliders = new HSliderBar[3];
 
-            Microsoft.Xna.Framework.Color cor = Microsoft.Xna.Framework.Color.Orange;
+            Microsoft.Xna.Framework.Color cor = Microsoft.Xna.Framework.Color.DarkRed;
             ushort corConvertida = (ushort)(cor.R << 8 | cor.G);
 
             Add
@@ -821,7 +821,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
 
             Add(
-                _hairLabel =  new TextBox(ClilocLoader.Instance.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.Orange, strokeEffect: true) { X = 755, Y = 91, AcceptMouseInput = false }
+                _hairLabel =  new TextBox(ClilocLoader.Instance.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: true) { X = 755, Y = 91, AcceptMouseInput = false }
             );
 
             Add
@@ -845,7 +845,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 content = CharacterCreationValues.GetFacialHairComboContent(race);
 
                 Add(
-                    _facialLabel = new TextBox(ClilocLoader.Instance.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.Orange, strokeEffect: true) { X = 755, Y = 141, AcceptMouseInput = false }
+                    _facialLabel = new TextBox(ClilocLoader.Instance.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: true) { X = 755, Y = 141, AcceptMouseInput = false }
                 );
 
                 Add
@@ -1431,7 +1431,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                  Add
                  (
-                     new TextBox(ClilocLoader.Instance.GetString(label), TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.Orange, strokeEffect: true) { X = 0, Y = 0, AcceptMouseInput = false }
+                     new TextBox(ClilocLoader.Instance.GetString(label), TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: true) { X = 0, Y = 0, AcceptMouseInput = false }
 
                  );
 

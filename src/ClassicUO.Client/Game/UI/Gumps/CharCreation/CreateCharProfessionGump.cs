@@ -180,7 +180,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
                 (
-                    new TextBox(localization.GetString(info.Localization), TrueTypeLoader.EMBEDDED_FONT, 18, 300, Color.Orange, strokeEffect: false) { X = 190, Y = 8, AcceptMouseInput = false }
+                    new TextBox(localization.GetString(info.Localization), TrueTypeLoader.EMBEDDED_FONT, 18, 300, Color.DarkRed, strokeEffect: false) { X = 190, Y = 8, AcceptMouseInput = false }
 
                 );
 

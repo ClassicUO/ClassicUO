@@ -1242,7 +1242,18 @@ namespace ClassicUO.Game.Scenes
             }
 
             batcher.Begin(null, matrix);
-            batcher.SetBrightlight(ProfileManager.CurrentProfile.TerrainShadowsLevel * 0.1f);
+            
+            // Melhoria: Sistema de iluminação mais realista
+            float baseLight = ProfileManager.CurrentProfile.TerrainShadowsLevel * 0.1f;
+            
+            // Adicionar variação de iluminação baseada na hora do dia
+            float timeOfDay = GetTimeOfDayLighting();
+            float dynamicLight = baseLight + (timeOfDay * 0.3f);
+            
+            // Limitar valores para evitar extremos
+            dynamicLight = System.Math.Max(0.1f, System.Math.Min(1.0f, dynamicLight));
+            
+            batcher.SetBrightlight(dynamicLight);
 
             // https://shawnhargreaves.com/blog/depth-sorting-alpha-blended-objects.html
             batcher.SetStencil(DepthStencilState.Default);
@@ -1551,6 +1562,29 @@ namespace ClassicUO.Game.Scenes
             public bool IsHue;
             public int DrawX,
                 DrawY;
+        }
+        
+        /// <summary>
+        /// Calcula a iluminação baseada na hora do dia para efeito mais realista
+        /// </summary>
+        private float GetTimeOfDayLighting()
+        {
+            if (World.Player == null)
+                return 0.5f; // Iluminação neutra se não houver jogador
+            
+            // Simular hora do dia baseada no tempo de jogo
+            // 0.0 = meia-noite (escuro), 0.5 = meio-dia (claro), 1.0 = meia-noite (escuro)
+            float gameTime = (Time.Ticks % 24000) / 24000f; // Ciclo de 24 horas em ticks
+            
+            // Calcular iluminação baseada na hora
+            if (gameTime < 0.25f) // 00:00 - 06:00 (noite)
+                return 0.2f + (gameTime / 0.25f) * 0.3f; // Escuro para menos escuro
+            else if (gameTime < 0.5f) // 06:00 - 12:00 (manhã)
+                return 0.5f + ((gameTime - 0.25f) / 0.25f) * 0.5f; // Menos escuro para claro
+            else if (gameTime < 0.75f) // 12:00 - 18:00 (tarde)
+                return 1.0f - ((gameTime - 0.5f) / 0.25f) * 0.3f; // Claro para menos claro
+            else // 18:00 - 24:00 (noite)
+                return 0.7f - ((gameTime - 0.75f) / 0.25f) * 0.5f; // Menos claro para escuro
         }
     }
 }

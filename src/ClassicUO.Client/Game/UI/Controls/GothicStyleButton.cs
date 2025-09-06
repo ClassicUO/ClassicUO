@@ -29,12 +29,15 @@ namespace ClassicUO.Game.UI.Controls
             Height = height;
             _text = text;
 
-            // Cores do tema gótico/medieval - Vermelho escuro com degradê
-            _baseColor = new Color(140, 25, 25); // Vermelho escuro base mais vibrante
-            _highlightColor = new Color(180, 50, 50); // Vermelho médio para realces
-            _shadowColor = new Color(80, 15, 15); // Vermelho muito escuro para sombras
-            _textColor = new Color(240, 220, 200); // Cor clara para o texto (dourado)
-            _textShadowColor = new Color(30, 10, 10); // Sombra do texto mais escura
+            // Cores do tema gótico/medieval - Vermelho escuro com degradê mais realista
+            _baseColor       = new Color(90, 20, 20);    // Tom de pedra vermelha escura (fundo principal)
+            _highlightColor  = new Color(140, 40, 30);   // Realce interno, mais claro e quente
+            _shadowColor     = new Color(40, 10, 10);    // Sombra bem profunda, quase preta
+            //_edgeColor       = new Color(110, 30, 25);   // Bordas do relevo (intermediário entre base e highlight)
+            //_glowColor       = new Color(180, 80, 40);   // Brilho externo alaranjado (aura quente)
+            _textColor       = new Color(200, 160, 120); // Texto em dourado queimado (bem legível no fundo)
+            _textShadowColor = new Color(30, 5, 5);      // Sombra de texto, contraste forte
+            //_crackColor      = new Color(60, 15, 15);    // Fissuras/textura da pedra
 
             // Carregar fonte gótica se disponível, senão usar fonte padrão
             if (!string.IsNullOrEmpty(fontPath))
@@ -199,22 +202,34 @@ namespace ClassicUO.Game.UI.Controls
 
         private void DrawTextureEffect(UltimaBatcher2D batcher, int x, int y, int width, int height, Color baseColor)
         {
-            // Adicionar efeito de textura gótica com linhas verticais mais sutis
+            // Melhoria: Efeito de textura mais realista e orgânico
             var textureColor = new Color(
-                Math.Max(0, baseColor.R - 15),
-                Math.Max(0, baseColor.G - 8),
-                Math.Max(0, baseColor.B - 8)
+                Math.Max(0, baseColor.R - 12),
+                Math.Max(0, baseColor.G - 6),
+                Math.Max(0, baseColor.B - 6)
             );
 
-            // Desenhar linhas verticais mais finas e espaçadas para efeito gótico
-            for (int i = 6; i < width - 6; i += 8)
+            // Desenhar padrão de textura mais orgânico (não uniforme)
+            Random random = new Random(12345); // Seed fixo para consistência
+            
+            for (int i = 4; i < width - 4; i += 6)
             {
-                int lineX = x + i;
-                if (lineX >= x && lineX < x + width)
+                int lineX = x + i + random.Next(-2, 3); // Variação sutil na posição
+                if (lineX >= x + 2 && lineX < x + width - 2)
                 {
-                    // Linha mais fina (1 pixel) para efeito sutil
-                    batcher.Draw(_pixelTexture, new Rectangle(lineX, y + 2, 1, height - 4), 
-                        new Vector3(textureColor.R / 255f, textureColor.G / 255f, textureColor.B / 255f));
+                    int lineHeight = height - 6 + random.Next(-2, 3); // Variação na altura
+                    int lineY = y + 3 + random.Next(-1, 2); // Variação na posição Y
+                    
+                    // Linha com variação de opacidade
+                    var lineColor = new Color(
+                        textureColor.R,
+                        textureColor.G,
+                        textureColor.B,
+                        (byte)(180 + random.Next(-30, 31)) // Variação de opacidade
+                    );
+                    
+                    batcher.Draw(_pixelTexture, new Rectangle(lineX, lineY, 1, lineHeight), 
+                        new Vector3(lineColor.R / 255f, lineColor.G / 255f, lineColor.B / 255f));
                 }
             }
         }

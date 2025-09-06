@@ -75,8 +75,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private static readonly ushort SELECTED_COLOR = 0x4E9;
         private static readonly ushort NORMAL_COLOR = 0x4EB;
         private uint _selectedCharacter;
-        private ImageButton button;
-        private ImageButton buttonnew;
+        private GothicStyleButton button;
+        private GothicStyleButton buttonnew;
         private CharacterEntryGump _characterEntryGump;
         private CharacterEntryGump _lastSelectedGumpPic;
         private static Art art { get; set; }
@@ -127,7 +127,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             Add
                (
-                   new TextBox(ClilocLoader.Instance.GetString(3000050, "Character Selection"), TrueTypeLoader.EMBEDDED_FONT, 30, 300, Color.Orange, strokeEffect: true) { X = 447, Y = listTitleY, AcceptMouseInput = true }
+                   new TextBox(ClilocLoader.Instance.GetString(3000050, "Character Selection"), TrueTypeLoader.EMBEDDED_FONT, 30, 300, Color.DarkRed, strokeEffect: true) { X = 447, Y = listTitleY, AcceptMouseInput = true }
 
                );
 
@@ -164,7 +164,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                         1
                     );
 
-                    _characterEntryGump.buttonDelete.OnButtonClick += () =>
+                    _characterEntryGump.buttonDelete.OnClick += () =>
                     {
 
                         OnButtonClick(1);
@@ -180,46 +180,56 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 Add
                 (
-                    buttonnew = new ImageButton(
-                        30,
-                        210 + yBonus,
-                        Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_new.png"),
-                        Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_pressed_new.png"),
-                        Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_hover_new.png")
-                    )
-      
-                );
 
-                buttonnew.OnButtonClick += () =>
+                    buttonnew = new GothicStyleButton(
+                        x: 30,
+                        y: 180 + yBonus,
+                        width: 120,
+                        height: 40,
+                        text: "NEW",
+                        fontPath: null, // Usar fonte padrão
+                        fontSize: 16
+                    ));
+
+      
+           
+
+                buttonnew.OnClick += () =>
                 {
                     OnButtonClick(0);
                 };
-            }
+
+
+            } 
 
            
 
-            Add(button = new ImageButton(
-                30,
-                680,
-                Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_prev.png"),
-                Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_pressed_prev.png"),
-                Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_hover_prev.png")
-            ));
+            Add(button = new GothicStyleButton(
+                        x: 30,
+                        y: 680,
+                        width: 120,
+                        height: 40,
+                        text: "BACK",
+                        fontPath: null, // Usar fonte padrão
+                        fontSize: 16
+                    ));
 
-            button.OnButtonClick += () =>
+            button.OnClick += () =>
             {
                 OnButtonClick(3);
             };
 
-            Add(button = new ImageButton(
-               920,
-               680,
-               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_next.png"),
-               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_pressed_next.png"),
-               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_hover_next.png")
-           ));
+            Add(button = new GothicStyleButton(
+                        x: 890,
+                        y: 680,
+                        width: 120,
+                        height: 40,
+                        text: "NEXT",
+                        fontPath: null, // Usar fonte padrão
+                        fontSize: 16
+                    ));
 
-            button.OnButtonClick += () =>
+            button.OnClick += () =>
             {
                 OnButtonClick(2);
             };
@@ -438,7 +448,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             private PaperDollInteractable _paperDoll;
             private readonly string savePath;
             public uint _indexCharacter;
-            public ImageButton buttonDelete;
+            public GothicStyleButton buttonDelete;
             public FullBlendControl fullBlendControl;
             public bool visibleTn { get; set; }
 
@@ -534,7 +544,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 // Char Name
                 Add
                (
-                   _label = new TextBox(character, TrueTypeLoader.EMBEDDED_FONT, 16, 190, Color.Orange, align: TextHorizontalAlignment.Center, strokeEffect: true) { AcceptMouseInput = true }
+                   _label = new TextBox(character, TrueTypeLoader.EMBEDDED_FONT, 16, 190, Color.DarkRed, align: TextHorizontalAlignment.Center, strokeEffect: true) { AcceptMouseInput = true }
 
                );
 
@@ -565,17 +575,15 @@ namespace ClassicUO.Game.UI.Gumps.Login
                    1
                );
 
-                Add
-               (
-                   buttonDelete = new ImageButton(
-                       75,
-                       245,
-                       Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_delete.png"),
-                       Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_pressed_new.png"),
-                       Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_hover_delete.png")
-                   )
-
-               );
+                Add(buttonDelete = new GothicStyleButton(
+                      x: 75,
+                      y: 245,
+                      width: 20,
+                      height: 20,
+                      text: "X",
+                      fontPath: null, // Usar fonte padrão
+                      fontSize: 22
+                  ));
                 visibleTn = true;
                 buttonDelete.IsVisible = visibleTn;
                 buttonDelete.Alpha = 0.0f;

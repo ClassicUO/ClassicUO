@@ -82,7 +82,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
 
 
-            _label = new TextBox(labelText, TrueTypeLoader.EMBEDDED_FONT, 24, 300, Color.Orange, strokeEffect: false) { X = 446, Y = 250, AcceptMouseInput = false };
+            _label = new TextBox(labelText, TrueTypeLoader.EMBEDDED_FONT, 24, 300, Color.DarkRed, strokeEffect: false) { X = 446, Y = 250, AcceptMouseInput = false };
             Add
               (
                  new SquareBlendControl

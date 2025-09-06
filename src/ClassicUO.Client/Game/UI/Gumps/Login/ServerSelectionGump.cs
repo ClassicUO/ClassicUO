@@ -56,45 +56,62 @@ namespace ClassicUO.Game.UI.Gumps.Login
     {
         private const ushort SELECTED_COLOR = 0x0481;
         private const ushort NORMAL_COLOR = 0x0481;
-        private ImageButton button;
+        private GothicStyleButton button;
+        private Texture2D LogoBackgroundImg = PNGLoader.Instance.GetImageTexture(Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "logodust.png"));
 
         public ServerSelectionGump() : base(0, 0)
         {
             // Background
-            UIManager.Add(new SelectServerBackground());
+            UIManager.Add(new LoginBackground());
 
-            Add(button = new ImageButton(
-                30,
-                680,
-                Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_prev.png"),
-                Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_pressed_prev.png"),
-                Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_hover_prev.png")
+            Add(new CustomGumpPic
+                    (
+                        280,
+                        240,
+                        LogoBackgroundImg,
+                        0
+                    ));
+
+
+            // Substituir o ImageButton pelo GothicStyleButton
+            Add(button = new GothicStyleButton(
+                x: 30,
+                y: 680,
+                width: 120,
+                height: 40,
+                text: "BACK",
+                fontPath: null, // Usar fonte padrão
+                fontSize: 16
             ));
 
-            button.OnButtonClick += () =>
+            button.OnClick += () =>
             {
                 OnButtonClick(0);
             };
 
-            Add(button = new ImageButton(
-               920,
-               680,
-               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_next.png"),
-               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_pressed_next.png"),
-               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_hover_next.png")
-           ));
+                      // Substituir o ImageButton pelo GothicStyleButton
+            Add(button = new GothicStyleButton(
+                x: 890,
+                y: 680,
+                width: 120,
+                height: 40,
+                text: "NEXT",
+                fontPath: null, // Usar fonte padrão
+                fontSize: 16
+            ));
 
-            button.OnButtonClick += () =>
+            button.OnClick += () =>
             {
                 OnButtonClick(1);
             };
+
 
 
             if (Client.Version >= ClientVersion.CV_500A)
             {
                 Add
                 (
-                    new TextBox(ClilocLoader.Instance.GetString(1044579), TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.Orange, strokeEffect: true) { X = 210, Y = 70, AcceptMouseInput = true }
+                    new TextBox(ClilocLoader.Instance.GetString(1044579), TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: true) { X = 210, Y = 70, AcceptMouseInput = true }
                  
                 ); // "Select which shard to play on:"
 
@@ -102,7 +119,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 {
                     Add
                     (
-                        new TextBox(ClilocLoader.Instance.GetString(1044577), TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.Orange, strokeEffect: true) { X = 650, Y = 70, AcceptMouseInput = true }
+                        new TextBox(ClilocLoader.Instance.GetString(1044577), TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: true) { X = 650, Y = 70, AcceptMouseInput = true }
                     ); // "Latency:"
                    
 
@@ -115,13 +132,13 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Add
                 (
      
-                    new TextBox(ResGumps.SelectWhichShardToPlayOn, TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.Orange, strokeEffect: true) { X = 210, Y = 70, AcceptMouseInput = true }
+                    new TextBox(ResGumps.SelectWhichShardToPlayOn, TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: true) { X = 210, Y = 70, AcceptMouseInput = true }
 
                 );
 
                 Add
                 (
-                    new TextBox(ResGumps.Latency, TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.Orange, strokeEffect: true) { X = 650, Y = 70, AcceptMouseInput = true }
+                    new TextBox(ResGumps.Latency, TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: true) { X = 650, Y = 70, AcceptMouseInput = true }
                 );
 
             }
@@ -180,7 +197,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             Add
                 (
 
-                     new TextBox("Last server is played:", TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.Orange, strokeEffect: true) { X = 310, Y = 640, AcceptMouseInput = true }
+                     new TextBox("Last server is played:", TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: true) { X = 310, Y = 640, AcceptMouseInput = true }
                 );
 
 
@@ -190,7 +207,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    new TextBox(loginScene.Servers[index].Name, TrueTypeLoader.EMBEDDED_FONT, 20, 300, Color.Orange, strokeEffect: true) { X = 310, Y = 660, AcceptMouseInput = true }
+                    new TextBox(loginScene.Servers[index].Name, TrueTypeLoader.EMBEDDED_FONT, 20, 300, Color.DarkRed, strokeEffect: true) { X = 310, Y = 660, AcceptMouseInput = true }
                 );
             }
 
@@ -307,13 +324,13 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    _serverName = new TextBox(entry.Name, TrueTypeLoader.EMBEDDED_FONT, 18, 300, Color.Orange, strokeEffect: false) { X = 74, Y = 6, AcceptMouseInput = true }
+                    _serverName = new TextBox(entry.Name, TrueTypeLoader.EMBEDDED_FONT, 18, 300, Color.DarkRed, strokeEffect: false) { X = 74, Y = 6, AcceptMouseInput = true }
                     
                 );
 
                 Add
                 (
-                    _server_ping = new TextBox(CUOEnviroment.NoServerPing ? string.Empty : "-", TrueTypeLoader.EMBEDDED_FONT, 18, 70, Color.Orange, strokeEffect: false) { X = 500, Y = 6, AcceptMouseInput = true }
+                    _server_ping = new TextBox(CUOEnviroment.NoServerPing ? string.Empty : "-", TrueTypeLoader.EMBEDDED_FONT, 18, 70, Color.DarkRed, strokeEffect: false) { X = 500, Y = 6, AcceptMouseInput = true }
         
                 );
 
