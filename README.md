@@ -19,6 +19,11 @@
 
 Welcome to the **Dust765** project - where we don't just break barriers, we **obliterate them**. While others play nice in their little sandboxes, we're here to remind everyone that **true innovation doesn't come from playing favorites**.
 
+Discord: dust765#2787
+
+Dust765: 7 Link, 6 Gaechti, 5 Syrupz and jsebold666
+
+
 **What makes us different?**
 - 🚫 **No Cliques** - We don't care about your "elite" status or who you know
 - 🌍 **No Platform Discrimination** - Windows, Linux, macOS - we treat them all equally
@@ -142,6 +147,7 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 ## 🙏 **Acknowledgments**
 
 - **andreakarasho** - Original creator of ClassicUO (the real MVP)
+- **gaetchi** - Best cheater 
 - **FNA Team** - Cross-platform graphics engine (the unsung heroes)
 - **UO Community** - For the feedback and support (even the toxic parts)
 - **Contributors** - Everyone who helped make this project possible
