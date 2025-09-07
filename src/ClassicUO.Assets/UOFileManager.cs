@@ -164,6 +164,7 @@ namespace ClassicUO.Assets
             MultiMaps.Load();
             TileArt.Load();
             StringDictionary.Load();
+            Verdata.Load();
 
             ReadArtDefFile();
 
