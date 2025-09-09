@@ -111,6 +111,10 @@ namespace ClassicUO.Input
 
         public static bool MouseInWindow { get; set; }
 
+        public static float ControllerSensitivity { get; set; } = 3f;
+
+        public static bool IsWarping { get; set; }
+
         public static void Update()
         {
             if (!MouseInWindow)
@@ -123,6 +127,21 @@ namespace ClassicUO.Input
             else
             {
                 SDL.SDL_GetMouseState(out Position.X, out Position.Y);
+            }
+
+
+            if (Controller.GetGamePadState.IsConnected && Controller.GetGamePadState.ThumbSticks.Right != Vector2.Zero)
+            {
+                Position.X += (int)(ControllerSensitivity * Controller.GetGamePadState.ThumbSticks.Right.X);
+                Position.Y -= (int)(ControllerSensitivity * Controller.GetGamePadState.ThumbSticks.Right.Y);
+
+                IsWarping = true;
+
+                SDL.SDL_WarpMouseInWindow(Client.Game.Window.Handle, Position.X, Position.Y);
+            }
+            else
+            {
+                IsWarping = false;
             }
 
             // Scale the mouse coordinates for the faux-backbuffer
