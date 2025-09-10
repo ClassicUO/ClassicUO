@@ -187,7 +187,9 @@ namespace ClassicUO
             Log.Trace($"Client version: {clientVersion}");
             Log.Trace($"Protocol: {Protocol}");
 
-            FileManager = new UOFileManager(clientVersion, clientPath, new UOFilesOverrideMap(Settings.GlobalSettings.OverrideFile));
+            var filesOverride = new UOFilesOverrideMap(Settings.GlobalSettings.OverrideFile);
+            filesOverride.Load();
+            FileManager = new UOFileManager(clientVersion, clientPath, filesOverride);
             FileManager.Load(Settings.GlobalSettings.UseVerdata, Settings.GlobalSettings.Language, Settings.GlobalSettings.MapsLayouts);
 
             StaticFilters.Load(FileManager.TileData);
