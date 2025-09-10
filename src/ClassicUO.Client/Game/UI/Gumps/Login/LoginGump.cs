@@ -78,7 +78,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             UIManager.Add(new LoginBackground());
             Add(new CustomGumpPic
                     (
-                        310,
+                        276,
                         120,
                         LogoBackgroundImg,
                         0
@@ -324,7 +324,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             TextBox _;
             HitBox _hit;
 
-            Add(_ = new TextBox("Dust765 Suport", TrueTypeLoader.EMBEDDED_FONT, 15, 200, Color.DarkRed, strokeEffect: false) { X = 30, Y = 660, AcceptMouseInput = true });
+            Add(_ = new TextBox("Dust765 Support", TrueTypeLoader.EMBEDDED_FONT, 15, 200, Color.DarkRed, strokeEffect: false) { X = 30, Y = 660, AcceptMouseInput = true });
             Add(_hit = new HitBox(_.X, _.Y, _.MeasuredSize.X, _.MeasuredSize.Y));
             _hit.MouseUp += (s, e) =>
             {

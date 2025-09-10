@@ -61,18 +61,18 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private PlayerMobile _character;
         private CharacterInfo _characterInfo;
         private readonly Button _maleRadio, _femaleRadio;
-        private Combobox _hairCombobox, _facialCombobox;
+        private GothicStyleCombobox _hairCombobox, _facialCombobox;
         private TextBox _hairLabel, _facialLabel;
         private readonly StbTextBox _nameTextBox;
         private PaperDollInteractable _paperDoll;
-        private readonly ImageButton _nextButton;
+        private readonly GothicStyleButton _nextButton;
         private readonly Dictionary<Layer, Tuple<int, ushort>> CurrentColorOption = new Dictionary<Layer, Tuple<int, ushort>>();
-        private ImageButton button;
-        private ImageButton buttonMale;
-        private ImageButton buttonFemale;
-        private ImageButton buttonHuman;
-        private ImageButton buttonElf;
-        private ImageButton buttonGargolye;
+        private GothicStyleButton button;
+        private GothicStyleButton buttonMale;
+        private GothicStyleButton buttonFemale;
+        private GothicStyleButton buttonHuman;
+        private GothicStyleButton buttonElf;
+        private GothicStyleButton buttonGargolye;
         private readonly ProfessionInfo _Parent;
         private HSliderBar[] _attributeSliders;
         private HSliderBar[] _hairSliders;
@@ -291,7 +291,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
                (
-                   new TextBox("Character Name", TrueTypeLoader.EMBEDDED_FONT, 22, 300, Color.DarkRed, strokeEffect: true) { X = 465, Y = 44, AcceptMouseInput = false }
+                   new TextBox("Character Name", TrueTypeLoader.EMBEDDED_FONT, 28, 300, Color.DarkRed, strokeEffect: true) { X = 465, Y = 44, AcceptMouseInput = false }
 
                );
 
@@ -300,7 +300,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
            (
               new FullBlendControl
               {
-                  X = 448,
+                  X = 442,
                   Y = 73,
                   Width = 215,
                   Height = 20,
@@ -311,31 +311,53 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             // Male/Female Radios
 
-            Add(buttonMale = new ImageButton(
-                384,
-                264,
-                Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_male.png"),
-                Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_pressed_prev.png"),
-                Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_hover_male.png")
+            // Substituir o ImageButton pelo GothicStyleButton
+            Add(_nextButton = new GothicStyleButton(
+                x: 30,
+                y: 680,
+                width: 120,
+                height: 40,
+                text: "BACK",
+                fontPath: null, // Usar fonte padrão
+                fontSize: 16
             ));
 
-            buttonMale.OnButtonClick += () =>
+            _nextButton.OnClick += () =>
+            {
+                OnButtonClick(5);
+            };
+
+            // Substituir o ImageButton pelo GothicStyleButton
+            Add(buttonMale = new GothicStyleButton(
+                x: 384,
+                y: 264,
+                width: 80,
+                height: 26,
+                text: "MALE ♂",
+                fontPath: null, // Usar fonte padrão
+                fontSize: 16
+            ));
+
+            buttonMale.OnClick += () =>
             {
                 OnButtonClick(0);
             };
 
-            Add(buttonFemale = new ImageButton(
-               384,
-               290,
-               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_female.png"),
-               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_pressed_prev.png"),
-               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_hover_female.png")
-           ));
+            Add(buttonFemale = new GothicStyleButton(
+                x: 384,
+                y: 290,
+                width: 80,
+                height: 26,
+                text: "FEMALE ♀",
+                fontPath: null, // Usar fonte padrão
+                fontSize: 16
+            ));
 
-            buttonFemale.OnButtonClick += () =>
+            buttonFemale.OnClick += () =>
             {
                 OnButtonClick(1);
             };
+
 
             Add
             (
@@ -356,30 +378,32 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             );
 
             // Races
+            Add(buttonHuman = new GothicStyleButton(
+                x: 384,
+                y: 154,
+                width: 80,
+                height: 26,
+                text: "HUMAN",
+                fontPath: null, // Usar fonte padrão
+                fontSize: 16
+            ));
 
-            Add(buttonHuman = new ImageButton(
-               384,
-               154,
-               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_human.png"),
-               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_human.png"),
-               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_human.png")
-           ));
-
-            buttonHuman.OnButtonClick += () =>
+            buttonHuman.OnClick += () =>
             {
                 OnButtonClick(2);
             };
 
-
-            Add(buttonElf = new ImageButton(
-               504,
-               154,
-               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_elf.png"),
-               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_elf.png"),
-               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_elf.png")
+            Add(buttonElf = new GothicStyleButton(
+                x: 504,
+                y: 154,
+                width: 80,
+                height: 26,
+                text: "ELF",
+                fontPath: null, // Usar fonte padrão
+                fontSize: 16
             ));
 
-            buttonElf.OnButtonClick += () =>
+            buttonElf.OnClick += () =>
             {
                 OnButtonClick(3);
             };
@@ -387,49 +411,60 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             if (Client.Version >= ClientVersion.CV_60144)
             {
 
-                Add(buttonGargolye = new ImageButton(
-                   604,
-                   154,
-                   Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_gargolye.png"),
-                   Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_gargolye.png"),
-                   Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_gargolye.png")
+                Add(buttonGargolye = new GothicStyleButton(
+                    x: 604,
+                    y: 154,
+                    width: 80,
+                    height: 26,
+                    text: "GARGOLYE",
+                    fontPath: null, // Usar fonte padrão
+                    fontSize: 16
                 ));
 
-                buttonGargolye.OnButtonClick += () =>
+                buttonGargolye.OnClick += () =>
                 {
                     OnButtonClick(4);
                 };
+
+                
             }
 
 
 
-            // Prev/Next
-            Add(_nextButton = new ImageButton(
-               30,
-               680,
-               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_prev.png"),
-               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_pressed_prev.png"),
-               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_hover_prev.png")
-           ));
 
-            _nextButton.OnButtonClick += () =>
+            // Prev/Next
+
+            // Substituir o ImageButton pelo GothicStyleButton
+            Add(_nextButton = new GothicStyleButton(
+                x: 30,
+                y: 680,
+                width: 120,
+                height: 40,
+                text: "BACK",
+                fontPath: null, // Usar fonte padrão
+                fontSize: 16
+            ));
+
+            _nextButton.OnClick += () =>
             {
                 OnButtonClick(5);
             };
 
-            Add(button = new ImageButton(
-               920,
-               680,
-               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_normal_next.png"),
-               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_pressed_next.png"),
-               Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "btn_hover_next.png")
-           ));
+            // Substituir o ImageButton pelo GothicStyleButton
+            Add(button = new GothicStyleButton(
+                x: 890,
+                y: 680,
+                width: 120,
+                height: 40,
+                text: "NEXT",
+                fontPath: null, // Usar fonte padrão
+                fontSize: 16
+            ));
 
-            button.OnButtonClick += () =>
+            button.OnClick += () =>
             {
                 OnButtonClick(6);
             };
-
 
 
             // strength, dexterity, intelligence
@@ -592,8 +627,6 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }
         }
 
-
-       
 
         private bool ValidateValues()
         {
@@ -826,18 +859,19 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                _hairCombobox = new Combobox
+                _hairCombobox = new GothicStyleCombobox
                 (
                     755,
                     111,
                     120,
+                    25,
                     content.Labels,
                     CurrentOption[Layer.Hair]
                 ),
                 1
             );
 
-            _hairCombobox.OnOptionSelected += Hair_OnOptionSelected;
+            _hairCombobox.OnSelectionChanged += (sender, index) => Hair_OnOptionSelected(sender, index);
 
             // Facial Hair
             if (!_characterInfo.IsFemale && race != RaceType.ELF)
@@ -850,18 +884,19 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 Add
                 (
-                    _facialCombobox = new Combobox
+                    _facialCombobox = new GothicStyleCombobox
                     (
                         755,
                         161,
                         120,
+                        25,
                         content.Labels,
                         CurrentOption[Layer.Beard]
                     ),
                     1
                 );
 
-                _facialCombobox.OnOptionSelected += Facial_OnOptionSelected;
+                _facialCombobox.OnSelectionChanged += (sender, index) => Facial_OnOptionSelected(sender, index);
             }
             else
             {
@@ -1055,7 +1090,6 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             CharCreationGump charCreationGump = UIManager.GetGump<CharCreationGump>();
 
-
             switch ((Buttons) buttonID)
             {
                 case Buttons.FemaleButton:
@@ -1128,10 +1162,6 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                                     skill.Lock = Lock.Locked;
                                 }
                             }
-
-                           
-
-                            
                         }
 
                     }

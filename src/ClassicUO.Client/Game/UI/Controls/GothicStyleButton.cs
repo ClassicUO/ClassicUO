@@ -29,15 +29,12 @@ namespace ClassicUO.Game.UI.Controls
             Height = height;
             _text = text;
 
-            // Cores do tema gótico/medieval - Vermelho escuro com degradê mais realista
-            _baseColor       = new Color(90, 20, 20);    // Tom de pedra vermelha escura (fundo principal)
-            _highlightColor  = new Color(140, 40, 30);   // Realce interno, mais claro e quente
-            _shadowColor     = new Color(40, 10, 10);    // Sombra bem profunda, quase preta
-            //_edgeColor       = new Color(110, 30, 25);   // Bordas do relevo (intermediário entre base e highlight)
-            //_glowColor       = new Color(180, 80, 40);   // Brilho externo alaranjado (aura quente)
-            _textColor       = new Color(200, 160, 120); // Texto em dourado queimado (bem legível no fundo)
-            _textShadowColor = new Color(30, 5, 5);      // Sombra de texto, contraste forte
-            //_crackColor      = new Color(60, 15, 15);    // Fissuras/textura da pedra
+            // Cores do tema gótico/medieval - Background vermelho escuro com texto branco
+            _baseColor = Color.DarkRed;                    // Background vermelho escuro
+            _highlightColor = new Color(180, 50, 50);      // Realce mais claro para bordas
+            _shadowColor = new Color(80, 15, 15);          // Sombra mais escura
+            _textColor = Color.White;                      // Texto branco para contraste
+            _textShadowColor = Color.Black;                // Sombra preta do texto
 
             // Carregar fonte gótica se disponível, senão usar fonte padrão
             if (!string.IsNullOrEmpty(fontPath))
@@ -94,41 +91,33 @@ namespace ClassicUO.Game.UI.Controls
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             // Ajustar cores baseado no estado
-            Color currentBaseColor = _baseColor;
-            Color currentHighlightColor = _highlightColor;
+            Color currentBaseColor = _shadowColor;
+            Color currentHighlightColor = _shadowColor;
             Color currentShadowColor = _shadowColor;
 
             if (_isPressed)
             {
                 // Quando pressionado, inverter as cores para dar efeito de "pressionado"
-                currentBaseColor = _shadowColor;
-                currentHighlightColor = _baseColor;
-                currentShadowColor = new Color(_shadowColor.R - 20, _shadowColor.G - 10, _shadowColor.B - 10);
+                currentBaseColor = _baseColor;
+                currentHighlightColor = _highlightColor;
+                currentShadowColor = _shadowColor;
             }
             else if (_isHovered)
             {
-                // Quando hover, clarear as cores
-                currentBaseColor = new Color(
-                    Math.Min(255, _baseColor.R + 20),
-                    Math.Min(255, _baseColor.G + 10),
-                    Math.Min(255, _baseColor.B + 10)
-                );
-                currentHighlightColor = new Color(
-                    Math.Min(255, _highlightColor.R + 20),
-                    Math.Min(255, _highlightColor.G + 10),
-                    Math.Min(255, _highlightColor.B + 10)
-                );
+                currentBaseColor = _baseColor;
+                currentHighlightColor = _shadowColor;
+                currentShadowColor = _shadowColor;
             }
 
             // Criar textura de pixel se não existir
             if (_pixelTexture == null)
             {
                 _pixelTexture = new Texture2D(batcher.GraphicsDevice, 1, 1);
-                _pixelTexture.SetData(new[] { Color.White });
+                _pixelTexture.SetData(new[] { Color.Red });
             }
 
             // Desenhar sombra do botão (offset para baixo e direita)
-            batcher.Draw(_pixelTexture, new Rectangle(x + 3, y + 3, Width, Height), new Vector3(currentShadowColor.R / 255f, currentShadowColor.G / 255f, currentShadowColor.B / 255f));
+            batcher.Draw(_pixelTexture, new Rectangle(x + 3, y + 3, Width, Height), Color.DarkRed.ToVector3());
 
             // Desenhar o botão principal com degradê
             DrawGradientButton(batcher, x, y, Width, Height, currentBaseColor, currentShadowColor);
@@ -202,11 +191,11 @@ namespace ClassicUO.Game.UI.Controls
 
         private void DrawTextureEffect(UltimaBatcher2D batcher, int x, int y, int width, int height, Color baseColor)
         {
-            // Melhoria: Efeito de textura mais realista e orgânico
+            // Efeito de textura vermelha mais sutil
             var textureColor = new Color(
-                Math.Max(0, baseColor.R - 12),
-                Math.Max(0, baseColor.G - 6),
-                Math.Max(0, baseColor.B - 6)
+                Math.Max(0, baseColor.R - 20),    // Vermelho mais escuro para textura
+                Math.Max(0, baseColor.G - 10),    // Verde reduzido
+                Math.Max(0, baseColor.B - 8)      // Azul reduzido
             );
 
             // Desenhar padrão de textura mais orgânico (não uniforme)
