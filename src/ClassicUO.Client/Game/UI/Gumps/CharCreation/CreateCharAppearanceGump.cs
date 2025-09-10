@@ -74,7 +74,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private GothicStyleButton buttonElf;
         private GothicStyleButton buttonGargolye;
         private readonly ProfessionInfo _Parent;
-        private HSliderBar[] _attributeSliders;
+        private GothicStyleSliderBar[] _attributeSliders;
         private HSliderBar[] _hairSliders;
         private bool _showSkills = false;
         private readonly Dictionary<Layer, int> CurrentOption = new Dictionary<Layer, int>
@@ -489,14 +489,14 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
 
             // sliders for attributes
-            _attributeSliders = new HSliderBar[3];
+            _attributeSliders = new GothicStyleSliderBar[3];
 
             Microsoft.Xna.Framework.Color cor = Microsoft.Xna.Framework.Color.DarkRed;
             ushort corConvertida = (ushort)(cor.R << 8 | cor.G);
 
             Add
             (
-                _attributeSliders[0] = new HSliderBar
+                _attributeSliders[0] = new GothicStyleSliderBar
                 (
                     375,
                     564,
@@ -504,15 +504,14 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     10,
                     60,
                     ProfessionInfo._VoidStats[0],
-                    HSliderBarStyle.MetalWidgetRecessedBar,
-                    true,
-                    color: corConvertida
+                    14,
+                    true
                 )
             ); 
 
             Add
             (
-                _attributeSliders[1] = new HSliderBar
+                _attributeSliders[1] = new GothicStyleSliderBar
                 (
                     495,
                     564,
@@ -520,14 +519,14 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     10,
                     60,
                     ProfessionInfo._VoidStats[1],
-                    HSliderBarStyle.MetalWidgetRecessedBar,
+                    14,
                     true
                 )
             );
 
             Add
             (
-                _attributeSliders[2] = new HSliderBar
+                _attributeSliders[2] = new GothicStyleSliderBar
                 (
                     608,
                     564,
@@ -535,7 +534,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     10,
                     60,
                     ProfessionInfo._VoidStats[2],
-                    HSliderBarStyle.MetalWidgetRecessedBar,
+                    14,
                     true
                 )
             );
