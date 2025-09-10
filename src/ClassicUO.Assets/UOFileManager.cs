@@ -26,6 +26,7 @@ namespace ClassicUO.Assets
             BasePath = uoPath;
 
             _overrideMap = overrideMap;
+            _overrideMap.Load();
             IsUOPInstallation = Version >= ClientVersion.CV_7000 && File.Exists(GetUOFilePath("MainMisc.uop"));
 
             Animations = new AnimationsLoader(this);
