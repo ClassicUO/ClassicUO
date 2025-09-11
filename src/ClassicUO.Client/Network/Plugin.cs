@@ -35,6 +35,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using ClassicUO.PluginCompatibility;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
@@ -293,7 +294,15 @@ namespace ClassicUO.Network
             {
                 try
                 {
-                    Assembly asm = Assembly.LoadFile(PluginPath);
+                    // Usar o carregador melhorado para compatibilidade
+                    Assembly asm = LoadPluginWithEnhancedCompatibility(PluginPath);
+                    
+                    if (asm == null)
+                    {
+                        Log.Error($"Failed to load plugin assembly: {Path.GetFileName(PluginPath)}");
+                        return;
+                    }
+
                     Type type = asm.GetType("Assistant.Engine");
 
                     if (type == null)
@@ -1439,6 +1448,40 @@ namespace ClassicUO.Network
             public IntPtr GetStaticData;
             public IntPtr GetTileData;
             public IntPtr GetCliloc;
+        }
+
+        private static Assembly LoadPluginWithEnhancedCompatibility(string pluginPath)
+        {
+            try
+            {
+                // Verificar se é Classic Assist e usar compatibilidade específica
+                if (ClassicAssistCompatibility.TryLoadClassicAssist(pluginPath))
+                {
+                    Log.Trace($"Classic Assist loaded with compatibility mode: {Path.GetFileName(pluginPath)}");
+                    return Assembly.LoadFile(pluginPath);
+                }
+
+                // Verificar compatibilidade para outros plugins
+                PluginCompatibilityManager.LogCompatibilityInfo(pluginPath);
+                
+                // Usar o carregador melhorado
+                return EnhancedPluginLoader.LoadPluginWithCompatibility(pluginPath);
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Enhanced plugin loading failed for {Path.GetFileName(pluginPath)}: {ex.Message}");
+                
+                // Fallback para carregamento tradicional
+                try
+                {
+                    return Assembly.LoadFile(pluginPath);
+                }
+                catch (Exception fallbackEx)
+                {
+                    Log.Error($"Fallback loading also failed: {fallbackEx.Message}");
+                    return null;
+                }
+            }
         }
     }
 }

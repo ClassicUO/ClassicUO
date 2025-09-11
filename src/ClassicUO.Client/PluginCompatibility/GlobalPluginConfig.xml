@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <runtime>
+    <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
+      <!-- Binding redirects para compatibilidade com .NET Framework 4.8 -->
+      
+      <!-- System.Windows.Forms -->
+      <dependentAssembly>
+        <assemblyIdentity name="System.Windows.Forms" 
+                          publicKeyToken="b77a5c561934e089" 
+                          culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-4.0.0.0" 
+                         newVersion="4.0.0.0" />
+      </dependentAssembly>
+      
+      <!-- System.Drawing -->
+      <dependentAssembly>
+        <assemblyIdentity name="System.Drawing" 
+                          publicKeyToken="b03f5f7f11d50a3a" 
+                          culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-4.0.0.0" 
+                         newVersion="4.0.0.0" />
+      </dependentAssembly>
+      
+      <!-- System -->
+      <dependentAssembly>
+        <assemblyIdentity name="System" 
+                          publicKeyToken="b77a5c561934e089" 
+                          culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-4.0.0.0" 
+                         newVersion="4.0.0.0" />
+      </dependentAssembly>
+      
+      <!-- System.Core -->
+      <dependentAssembly>
+        <assemblyIdentity name="System.Core" 
+                          publicKeyToken="b77a5c561934e089" 
+                          culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-4.0.0.0" 
+                         newVersion="4.0.0.0" />
+      </dependentAssembly>
+      
+      <!-- System.Xml -->
+      <dependentAssembly>
+        <assemblyIdentity name="System.Xml" 
+                          publicKeyToken="b77a5c561934e089" 
+                          culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-4.0.0.0" 
+                         newVersion="4.0.0.0" />
+      </dependentAssembly>
+      
+      <!-- System.Configuration -->
+      <dependentAssembly>
+        <assemblyIdentity name="System.Configuration" 
+                          publicKeyToken="b03f5f7f11d50a3a" 
+                          culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-4.0.0.0" 
+                         newVersion="4.0.0.0" />
+      </dependentAssembly>
+      
+      <!-- System.Data -->
+      <dependentAssembly>
+        <assemblyIdentity name="System.Data" 
+                          publicKeyToken="b77a5c561934e089" 
+                          culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-4.0.0.0" 
+                         newVersion="4.0.0.0" />
+      </dependentAssembly>
+      
+      <!-- System.Web -->
+      <dependentAssembly>
+        <assemblyIdentity name="System.Web" 
+                          publicKeyToken="b03f5f7f11d50a3a" 
+                          culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-4.0.0.0" 
+                         newVersion="4.0.0.0" />
+      </dependentAssembly>
+      
+      <!-- System.Web.Extensions -->
+      <dependentAssembly>
+        <assemblyIdentity name="System.Web.Extensions" 
+                          publicKeyToken="31bf3856ad364e35" 
+                          culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-4.0.0.0" 
+                         newVersion="4.0.0.0" />
+      </dependentAssembly>
+      
+      <!-- System.Web.Extensions.Design -->
+      <dependentAssembly>
+        <assemblyIdentity name="System.Web.Extensions.Design" 
+                          publicKeyToken="31bf3856ad364e35" 
+                          culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-4.0.0.0" 
+                         newVersion="4.0.0.0" />
+      </dependentAssembly>
+      
+      <!-- System.Net.Http -->
+      <dependentAssembly>
+        <assemblyIdentity name="System.Net.Http" 
+                          publicKeyToken="b03f5f7f11d50a3a" 
+                          culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-4.0.0.0" 
+                         newVersion="4.0.0.0" />
+      </dependentAssembly>
+      
+      <!-- System.Numerics -->
+      <dependentAssembly>
+        <assemblyIdentity name="System.Numerics" 
+                          publicKeyToken="b77a5c561934e089" 
+                          culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-4.0.0.0" 
+                         newVersion="4.0.0.0" />
+      </dependentAssembly>
+      
+      <!-- System.Numerics.Vectors -->
+      <dependentAssembly>
+        <assemblyIdentity name="System.Numerics.Vectors" 
+                          publicKeyToken="b03f5f7f11d50a3a" 
+                          culture="neutral" />
+        <bindingRedirect oldVersion="0.0.0.0-4.0.0.0" 
+                         newVersion="4.0.0.0" />
+      </dependentAssembly>
+      
+    </assemblyBinding>
+  </runtime>
+  
+  <!-- Configurações específicas para plugins -->
+  <appSettings>
+    <add key="PluginCompatibilityMode" value="true" />
+    <add key="EnableLegacyPluginSupport" value="true" />
+    <add key="PluginLoadTimeout" value="30000" />
+    <add key="EnablePluginSandboxing" value="false" />
+  </appSettings>
+  
+  <!-- Configurações de runtime para compatibilidade -->
+  <startup>
+    <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.8" />
+  </startup>
+  
+</configuration>

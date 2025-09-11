@@ -1230,6 +1230,13 @@ namespace ClassicUO.Game.Scenes
         {
             SelectedObject.Object = null;
             FillGameObjectList();
+            
+            // Aplicar otimizações de performance
+            PerformanceOptimizer.UpdateViewport(
+                Camera.Bounds, 
+                new Vector2(Camera.Bounds.X + Camera.Bounds.Width / 2, Camera.Bounds.Y + Camera.Bounds.Height / 2),
+                ProfileManager.CurrentProfile?.MaxRenderDistance ?? 24f
+            );
 
             if (use_render_target)
             {

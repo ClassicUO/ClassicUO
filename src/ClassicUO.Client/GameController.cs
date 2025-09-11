@@ -120,6 +120,10 @@ namespace ClassicUO
 
             SetRefreshRate(Settings.GlobalSettings.FPS);
             _uoSpriteBatch = new UltimaBatcher2D(GraphicsDevice);
+            
+            // Aplicar configurações de performance
+            ClassicUO.Game.Scenes.PerformanceOptimizer.ApplyGraphicsQualitySettings();
+            ClassicUO.Game.Scenes.PerformanceOptimizer.OptimizeForPerformance();
 
             _filter = HandleSdlEvent;
             SDL_SetEventFilter(_filter, IntPtr.Zero);

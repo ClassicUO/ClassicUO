@@ -48,7 +48,7 @@ namespace ClassicUO.Renderer
         private static readonly float[] _cornerOffsetX = new float[] { 0.0f, 1.0f, 0.0f, 1.0f };
         private static readonly float[] _cornerOffsetY = new float[] { 0.0f, 0.0f, 1.0f, 1.0f };
 
-        private const int MAX_SPRITES = 0x800;
+        private const int MAX_SPRITES = 0x2000;
         private const int MAX_VERTICES = MAX_SPRITES * 4;
         private const int MAX_INDICES = MAX_SPRITES * 6;
         private BlendState _blendState;

@@ -471,6 +471,17 @@ namespace ClassicUO.Configuration
         public bool UOClassicCombatLines_ToggleLastTarget { get; set; } = false;
         public bool UOClassicCombatLines_ToggleHuntingMmode { get; set; } = false;
         public bool UOClassicCombatLines_ToggleHMBlue { get; set; } = false;
+        
+        // ## BEGIN - END ## // PERFORMANCE SETTINGS
+        public int GraphicsQuality { get; set; } = 2; // 0 = Low, 1 = Medium, 2 = High
+        public bool EnableFrustumCulling { get; set; } = true;
+        public bool EnableTextureCaching { get; set; } = true;
+        public int MaxRenderDistance { get; set; } = 24; // Max view range
+        public bool OptimizeBackgroundRendering { get; set; } = true;
+        public bool ReduceParticleEffects { get; set; } = false;
+        public bool EnableVSync { get; set; } = false;
+        public int SpriteBatchSize { get; set; } = 8192; // 0x2000
+        // ## BEGIN - END ## // PERFORMANCE SETTINGS
         public bool UOClassicCombatLines_ToggleHMRed { get; set; } = false;
         public bool UOClassicCombatLines_ToggleHMOrange { get; set; } = false;
         public bool UOClassicCombatLines_ToggleHMCriminal { get; set; } = false;
