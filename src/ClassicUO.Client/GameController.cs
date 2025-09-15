@@ -83,6 +83,12 @@ namespace ClassicUO
 
             GraphicManager.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
             SetVSync(false);
+            
+            // Forçar PresentInterval.Immediate para FPS ilimitados
+            GraphicManager.PreparingDeviceSettings += (sender, e) =>
+            {
+                e.GraphicsDeviceInformation.PresentationParameters.PresentationInterval = PresentInterval.Immediate;
+            };
 
             Window.ClientSizeChanged += WindowOnClientSizeChanged;
             Window.AllowUserResizing = true;
@@ -124,9 +130,15 @@ namespace ClassicUO
             // Aplicar configurações de performance
             ClassicUO.Game.Scenes.PerformanceOptimizer.ApplyGraphicsQualitySettings();
             ClassicUO.Game.Scenes.PerformanceOptimizer.OptimizeForPerformance();
+            
+            // Aplicar configurações de VSync após GraphicsDevice estar inicializado
+            SetVSync(ProfileManager.CurrentProfile?.EnableVSync ?? false);
 
             _filter = HandleSdlEvent;
             SDL_SetEventFilter(_filter, IntPtr.Zero);
+
+            // Otimizações SDL2 para FPS alto
+            OptimizeSDL2ForHighFPS();
 
             base.Initialize();
         }
@@ -290,6 +302,21 @@ namespace ClassicUO
         public void SetVSync(bool value)
         {
             GraphicManager.SynchronizeWithVerticalRetrace = value;
+            
+            // Configurar PresentInterval para controle total do VSync
+            // Só aplicar se GraphicsDevice já foi inicializado
+            if (GraphicManager.GraphicsDevice != null)
+            {
+                if (value)
+                {
+                    GraphicManager.GraphicsDevice.PresentationParameters.PresentationInterval = PresentInterval.One;
+                }
+                else
+                {
+                    GraphicManager.GraphicsDevice.PresentationParameters.PresentationInterval = PresentInterval.Immediate;
+                }
+            }
+            
             GraphicManager.ApplyChanges();
         }
 
@@ -348,6 +375,26 @@ namespace ClassicUO
             GraphicManager.PreferredBackBufferWidth = width;
             GraphicManager.PreferredBackBufferHeight = height;
             GraphicManager.ApplyChanges();
+        }
+
+        private void OptimizeSDL2ForHighFPS()
+        {
+            // Configurar hints SDL2 para máxima performance
+            SDL_SetHint("SDL_RENDER_VSYNC", "0"); // Desabilitar VSync no SDL2
+            SDL_SetHint("SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS", "0"); // Não minimizar ao perder foco
+            SDL_SetHint("SDL_TIMER_RESOLUTION", "1"); // Resolução de timer de 1ms para FPS alto
+            
+            // Otimizações específicas para Windows
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                SDL_SetHint("SDL_WINDOWS_DISABLE_THREAD_NAMING", "1");
+                SDL_SetHint("SDL_VIDEO_WINDOW_SHARE_PIXEL_FORMAT", "1");
+            }
+            
+            // Configurar timer de alta resolução
+            SDL_SetHint("SDL_HINT_TIMER_RESOLUTION", "1");
+            
+            Log.Trace("SDL2 otimizado para FPS alto");
         }
 
         public void SetWindowBorderless(bool borderless)
@@ -515,7 +562,9 @@ namespace ClassicUO
             }
             else
             {
+                // Frame limiting completamente desabilitado - renderizar sempre
                 _suppressedDraw = false;
+                _totalElapsed = 0; // Reset para evitar acúmulo
             }
 
             GameCursor?.Update();
