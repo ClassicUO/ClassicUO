@@ -480,6 +480,7 @@ namespace ClassicUO.Configuration
         public bool OptimizeBackgroundRendering { get; set; } = true;
         public bool ReduceParticleEffects { get; set; } = false;
         public bool EnableVSync { get; set; } = false;
+        public bool DisableFrameLimiting { get; set; } = true; // Para FPS ilimitados
         public int SpriteBatchSize { get; set; } = 8192; // 0x2000
         // ## BEGIN - END ## // PERFORMANCE SETTINGS
         public bool UOClassicCombatLines_ToggleHMRed { get; set; } = false;

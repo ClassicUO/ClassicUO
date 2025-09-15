@@ -90,7 +90,7 @@ namespace ClassicUO
             IsMouseVisible = Settings.GlobalSettings.RunMouseInASeparateThread;
 
             IsFixedTimeStep = false; // Settings.GlobalSettings.FixedTimeStep;
-            TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0 / 250.0);
+            TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0 / Settings.GlobalSettings.FPS);
             InactiveSleepTime = TimeSpan.Zero;
         }
 
@@ -290,6 +290,7 @@ namespace ClassicUO
         public void SetVSync(bool value)
         {
             GraphicManager.SynchronizeWithVerticalRetrace = value;
+            GraphicManager.ApplyChanges();
         }
 
         public void SetRefreshRate(int rate)
@@ -322,6 +323,9 @@ namespace ClassicUO
 
             _intervalFixedUpdate[0] = frameDelay;
             _intervalFixedUpdate[1] = 217; // 5 FPS
+            
+            // Atualizar TargetElapsedTime para refletir o novo FPS
+            TargetElapsedTime = TimeSpan.FromMilliseconds(frameDelay);
         }
 
         private void SetWindowPosition(int x, int y)
@@ -485,28 +489,33 @@ namespace ClassicUO
                 _currentFpsTime = 0;
             }
 
-            double x = _intervalFixedUpdate[
-                !IsActive
-                && ProfileManager.CurrentProfile != null
-                && ProfileManager.CurrentProfile.ReduceFPSWhenInactive
-                    ? 1
-                    : 0
-            ];
-            _suppressedDraw = false;
-
-            if (_totalElapsed > x)
+            // Verificar se o frame limiting deve ser desabilitado
+            bool disableFrameLimiting = ProfileManager.CurrentProfile?.DisableFrameLimiting ?? false;
+            
+            if (!disableFrameLimiting)
             {
-                _totalElapsed %= x;
+                double x = _intervalFixedUpdate[
+                    !IsActive
+                    && ProfileManager.CurrentProfile != null
+                    && ProfileManager.CurrentProfile.ReduceFPSWhenInactive
+                        ? 1
+                        : 0
+                ];
+                _suppressedDraw = false;
+
+                if (_totalElapsed > x)
+                {
+                    _totalElapsed %= x;
+                }
+                else
+                {
+                    _suppressedDraw = true;
+                    SuppressDraw();
+                }
             }
             else
             {
-                _suppressedDraw = true;
-                SuppressDraw();
-
-                if (!gameTime.IsRunningSlowly)
-                {
-                    Thread.Sleep(1);
-                }
+                _suppressedDraw = false;
             }
 
             GameCursor?.Update();

@@ -88,6 +88,12 @@ namespace ClassicUO.Game.Scenes
             var profile = ProfileManager.CurrentProfile;
             if (profile == null) return;
             
+            // Aplicar configurações de VSync
+            if (Client.Game != null)
+            {
+                Client.Game.SetVSync(profile.EnableVSync);
+            }
+            
             switch (profile.GraphicsQuality)
             {
                 case 0: // Low
