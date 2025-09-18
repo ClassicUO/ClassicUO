@@ -114,6 +114,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _box.SelectedHue = obj.Hue;
 
+                // If the hue is not valid (rejected by the setter), send a message to the user
                 if (_box.SelectedHue != obj.Hue)
                 {
                     string badHueMessage = Client.Game.UO.FileManager.Clilocs.GetString(1042295);

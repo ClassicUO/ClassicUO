@@ -233,6 +233,8 @@ namespace ClassicUO.Game.UI.Controls
             // revert setting the Graduation later if it does not contain the desired color
             int previousGraduation = Graduation;
 
+            // When calculating the color from the graduation, it's incremented twice by one in CreateTexture()
+            // To revert this we could subtract two but to avoid negative values, adding 3 does the same thing because of the modulo
             Graduation = (desiredHue + 3) % 5;
 
             for (int i = 0; i < Hues.Length; i++)
