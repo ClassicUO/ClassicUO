@@ -61,6 +61,9 @@ namespace ClassicUO.Game.UI.Gumps
         private FontSelector _fontSelectorChat;
         private Checkbox _forceUnicodeJournal;
         private InputField _gameWindowHeight;
+        private Checkbox _maxJournalFilesEnabled;
+        private InputField _maxJournalFiles;
+        private Checkbox _journalFileWithSerial;
 
         private Checkbox _gameWindowLock, _gameWindowFullsize;
         // GameWindowPosition
@@ -2436,6 +2439,61 @@ namespace ClassicUO.Game.UI.Gumps
                 World.Journal.CloseWriter();
             }
 
+            startX += 40;
+
+            _maxJournalFilesEnabled = AddCheckBox
+            (
+                rightArea,
+                ResGumps.MaxJournalFiles,
+                _currentProfile.MaxJournalFiles >= 0,
+                startX,
+                startY
+            );
+
+            startX += _maxJournalFilesEnabled.Width + 5;
+
+            _maxJournalFiles = AddInputField
+            (
+                rightArea,
+                startX,
+                startY,
+                50,
+                TEXTBOX_HEIGHT,
+                null,
+                50,
+                false,
+                true,
+                999
+            );
+
+            if (_currentProfile.MaxJournalFiles < 0)
+            {
+                // if the checkbox is unchecked, we set the value of the input field to 100
+                // so when the user checks it, there's a sensible default value.
+                _maxJournalFiles.SetText("100");
+            }
+            else
+            {
+                _maxJournalFiles.SetText(_currentProfile.MaxJournalFiles.ToString());
+            }
+
+            startX = 5;
+
+            startX += 40;
+            startY += _maxJournalFiles.Height + 2 + 5;
+
+            _journalFileWithSerial = AddCheckBox
+            (
+                rightArea,
+                ResGumps.JournalFileWithSerial,
+                _currentProfile.JournalFileWithSerial,
+                startX,
+                startY
+            );
+
+            startX = 5;
+            startY += _journalFileWithSerial.Height + 2 + 5;
+
             _chatAfterEnter = AddCheckBox
             (
                 rightArea,
@@ -3862,6 +3920,25 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.ActivateChatShiftEnterSupport = _chatShiftEnterCheckbox.IsChecked;
             _currentProfile.SaveJournalToFile = _saveJournalCheckBox.IsChecked;
             _currentProfile.OverheadPartyMessages = _partyMessagesOverhead.IsChecked;
+
+            if (!_maxJournalFilesEnabled.IsChecked)
+            {
+                // if the checkbox is unchecked, ignore the input field and set to -1 (unlimited)
+                _currentProfile.MaxJournalFiles = -1;
+            }
+            else
+            {
+                if (int.TryParse(_maxJournalFiles.Text, out int maxJournalFiles))
+                {
+                    _currentProfile.MaxJournalFiles = maxJournalFiles;
+                }
+                else
+                {
+                    _currentProfile.MaxJournalFiles = -1;
+                }
+            }
+
+            _currentProfile.JournalFileWithSerial = _journalFileWithSerial.IsChecked;
 
             // video
             _currentProfile.EnableDeathScreen = _enableDeathScreen.IsChecked;
