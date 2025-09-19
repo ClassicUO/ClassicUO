@@ -1,5 +1,6 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
+using System;
 using System.IO;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
@@ -8,6 +9,7 @@ namespace ClassicUO.Configuration
 {
     internal static class ProfileManager
     {
+        public static GlobalProfile GlobalProfile { get; private set; }
         public static Profile CurrentProfile { get; private set; }
         public static string ProfilePath { get; private set; }
 
@@ -34,6 +36,8 @@ namespace ClassicUO.Configuration
 
         public static void Load(string servername, string username, string charactername)
         {
+            GlobalProfile = ConfigurationResolver.Load<GlobalProfile>(Path.Combine(RootPath, "globalprofile.json"), ProfileJsonContext.DefaultToUse.GlobalProfile) ?? new GlobalProfile();
+
             string path = FileSystemHelper.CreateFolderIfNotExists(RootPath, username, servername, charactername);
             string fileToLoad = Path.Combine(path, "profile.json");
 
@@ -49,7 +53,7 @@ namespace ClassicUO.Configuration
 
         public static void SetProfileAsDefault(Profile profile)
         {
-            profile.SaveAs(RootPath, "default.json");
+            Save(profile, RootPath, "default.json");
         }
 
         public static Profile NewFromDefault()
@@ -92,7 +96,14 @@ namespace ClassicUO.Configuration
 
         public static void UnLoadProfile()
         {
+            GlobalProfile = null;
             CurrentProfile = null;
+        }
+
+        internal static void Save(Profile profile, string path, string filename = "profile.json")
+        {
+            ConfigurationResolver.Save(profile, Path.Combine(path, filename), ProfileJsonContext.DefaultToUse.Profile);
+            ConfigurationResolver.Save(GlobalProfile, Path.Combine(RootPath, "globalprofile.json"), ProfileJsonContext.DefaultToUse.GlobalProfile);
         }
     }
 }

@@ -150,7 +150,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _showStatsMessage, _showSkillsMessage;
         private HSliderBar _showSkillsMessageDelta;
 
-
+        private GlobalProfile _globalProfile = ProfileManager.GlobalProfile;
         private Profile _currentProfile = ProfileManager.CurrentProfile;
 
         public OptionsGump(World world) : base(world, 0, 0)
@@ -2445,7 +2445,7 @@ namespace ClassicUO.Game.UI.Gumps
             (
                 rightArea,
                 ResGumps.MaxJournalFiles,
-                _currentProfile.MaxJournalFiles >= 0,
+                _globalProfile.MaxJournalFiles >= 0,
                 startX,
                 startY
             );
@@ -2466,7 +2466,7 @@ namespace ClassicUO.Game.UI.Gumps
                 999
             );
 
-            if (_currentProfile.MaxJournalFiles < 0)
+            if (_globalProfile.MaxJournalFiles < 0)
             {
                 // if the checkbox is unchecked, we set the value of the input field to 100
                 // so when the user checks it, there's a sensible default value.
@@ -2474,7 +2474,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                _maxJournalFiles.SetText(_currentProfile.MaxJournalFiles.ToString());
+                _maxJournalFiles.SetText(_globalProfile.MaxJournalFiles.ToString());
             }
 
             startX = 5;
@@ -2486,7 +2486,7 @@ namespace ClassicUO.Game.UI.Gumps
             (
                 rightArea,
                 ResGumps.JournalFileWithSerial,
-                _currentProfile.JournalFileWithSerial,
+                _globalProfile.JournalFileWithSerial,
                 startX,
                 startY
             );
@@ -3924,21 +3924,21 @@ namespace ClassicUO.Game.UI.Gumps
             if (!_maxJournalFilesEnabled.IsChecked)
             {
                 // if the checkbox is unchecked, ignore the input field and set to -1 (unlimited)
-                _currentProfile.MaxJournalFiles = -1;
+                _globalProfile.MaxJournalFiles = -1;
             }
             else
             {
                 if (int.TryParse(_maxJournalFiles.Text, out int maxJournalFiles))
                 {
-                    _currentProfile.MaxJournalFiles = maxJournalFiles;
+                    _globalProfile.MaxJournalFiles = maxJournalFiles;
                 }
                 else
                 {
-                    _currentProfile.MaxJournalFiles = -1;
+                    _globalProfile.MaxJournalFiles = -1;
                 }
             }
 
-            _currentProfile.JournalFileWithSerial = _journalFileWithSerial.IsChecked;
+            _globalProfile.JournalFileWithSerial = _journalFileWithSerial.IsChecked;
 
             // video
             _currentProfile.EnableDeathScreen = _enableDeathScreen.IsChecked;

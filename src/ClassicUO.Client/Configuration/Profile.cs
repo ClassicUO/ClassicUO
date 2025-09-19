@@ -20,6 +20,7 @@ using Microsoft.Xna.Framework;
 namespace ClassicUO.Configuration
 {
     //[JsonSourceGenerationOptions(WriteIndented = true, PropertyNamingPolicy = JsonKnownNamingPolicy.Unspecified)]
+    [JsonSerializable(typeof(GlobalProfile), GenerationMode = JsonSourceGenerationMode.Metadata)]
     [JsonSerializable(typeof(Profile), GenerationMode = JsonSourceGenerationMode.Metadata)]
     sealed partial class ProfileJsonContext : JsonSerializerContext
     {
@@ -45,7 +46,11 @@ namespace ClassicUO.Configuration
         public static ProfileJsonContext DefaultToUse { get; } = new ProfileJsonContext(_jsonOptions.Value);
     }
 
-
+    internal sealed class GlobalProfile
+    {
+        public int MaxJournalFiles { get; set; } = 100;
+        public bool JournalFileWithSerial { get; set; } = false;
+    }
 
     internal sealed class Profile
     {
@@ -67,8 +72,6 @@ namespace ClassicUO.Configuration
         public int SpeechDelay { get; set; } = 100;
         public bool ScaleSpeechDelay { get; set; } = true;
         public bool SaveJournalToFile { get; set; } = true;
-        public int MaxJournalFiles { get; set; } = 100;
-        public bool JournalFileWithSerial { get; set; } = false;
         public bool ForceUnicodeJournal { get; set; }
         public bool IgnoreAllianceMessages { get; set; }
         public bool IgnoreGuildMessages { get; set; }
@@ -353,18 +356,12 @@ namespace ClassicUO.Configuration
         {
             Log.Trace($"Saving path:\t\t{path}");
 
-            // Save profile settings
-            ConfigurationResolver.Save(this, Path.Combine(path, "profile.json"), ProfileJsonContext.DefaultToUse.Profile);
+            ProfileManager.Save(this, path);
 
             // Save opened gumps
             SaveGumps(world, path);
 
             Log.Trace("Saving done!");
-        }
-
-        public void SaveAs(string path, string filename = "default.json")
-        {
-            ConfigurationResolver.Save(this, Path.Combine(path, filename), ProfileJsonContext.DefaultToUse.Profile);
         }
 
         private void SaveGumps(World world, string path)
