@@ -67,6 +67,8 @@ namespace ClassicUO.Configuration
         public int SpeechDelay { get; set; } = 100;
         public bool ScaleSpeechDelay { get; set; } = true;
         public bool SaveJournalToFile { get; set; } = true;
+        public int MaxJournalFiles { get; set; } = 100;
+        public bool JournalFileWithSerial { get; set; } = false;
         public bool ForceUnicodeJournal { get; set; }
         public bool IgnoreAllianceMessages { get; set; }
         public bool IgnoreGuildMessages { get; set; }

@@ -20,7 +20,7 @@ namespace ClassicUO.Game.Managers
         public event EventHandler<JournalEntry> EntryAdded;
 
 
-        public void Add(string text, ushort hue, string name, TextType type, bool isunicode = true, MessageType messageType = MessageType.Regular)
+        public void Add(string text, ushort hue, string name, uint? serial, TextType type, bool isunicode = true, MessageType messageType = MessageType.Regular)
         {
             JournalEntry entry = Entries.Count >= Constants.MAX_JOURNAL_HISTORY_COUNT ? Entries.RemoveFromFront() : new JournalEntry();
 
@@ -57,11 +57,14 @@ namespace ClassicUO.Game.Managers
                 CreateWriter();
             }
 
-            string output = $"[{timeNow:G}]  {name}: {text}";
+            bool saveSerial = ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.JournalFileWithSerial;
+            string serialText = saveSerial && serial.HasValue ? $"<0x{serial:X8}> " : string.Empty;
+
+            string output = $"[{timeNow:G}]  {serialText}{name}: {text}";
 
             if (string.IsNullOrWhiteSpace(name))
             {
-                output = $"[{timeNow:G}]  {text}";
+                output = $"[{timeNow:G}]  {serialText}{text}";
             }
 
             _fileWriter?.WriteLine(output);
@@ -80,13 +83,20 @@ namespace ClassicUO.Game.Managers
                         AutoFlush = true
                     };
 
+                    int maxJournalFiles = ProfileManager.CurrentProfile.MaxJournalFiles;
+
+                    if (maxJournalFiles < 0)
+                    {
+                        return;
+                    }
+
                     try
                     {
                         string[] files = Directory.GetFiles(path, "*_journal.txt");
                         Array.Sort(files);
                         Array.Reverse(files);
 
-                        for (int i = files.Length - 1; i >= 100; --i)
+                        for (int i = files.Length - 1; i >= maxJournalFiles; --i)
                         {
                             File.Delete(files[i]);
                         }

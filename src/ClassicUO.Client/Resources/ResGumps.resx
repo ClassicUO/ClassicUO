@@ -1658,4 +1658,10 @@ start your first counter</value>
   <data name="Prompt" xml:space="preserve">
     <value>[Prompt]:</value>
   </data>
+  <data name="MaxJournalFiles" xml:space="preserve">
+    <value>Delete old files after this amount:</value>
+  </data>
+  <data name="JournalFileWithSerial" xml:space="preserve">
+    <value>Add the speaker's serial to the journal file</value>
+  </data>
 </root>
