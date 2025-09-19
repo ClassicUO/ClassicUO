@@ -15,6 +15,7 @@ namespace ClassicUO.Game.UI.Gumps
         private const int SLIDER_MAX = 4;
         private readonly ColorPickerBox _box;
         private readonly StaticPic _dyeTybeImage;
+        private readonly HSliderBar _slider;
 
         private readonly ushort _graphic;
         private readonly Action<ushort> _okClicked;
@@ -47,11 +48,9 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
 
-            HSliderBar slider;
-
             Add
             (
-                slider = new HSliderBar
+                _slider = new HSliderBar
                 (
                     39,
                     142,
@@ -63,7 +62,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            slider.ValueChanged += (sender, e) => { _box.Graduation = slider.Value; };
+            _slider.ValueChanged += (sender, e) => { _box.Graduation = _slider.Value; };
             Add(_box = new ColorPickerBox(World, 34, 34));
             _box.ColorSelectedIndex += (sender, e) => { _dyeTybeImage.Hue = _box.SelectedHue; };
             
@@ -114,9 +113,14 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _box.SelectedHue = obj.Hue;
 
-                // If the hue is not valid (rejected by the setter), send a message to the user
-                if (_box.SelectedHue != obj.Hue)
+                if (_box.SelectedHue == obj.Hue)
                 {
+                    _slider.Value = _box.Graduation;
+                }
+                else
+                {
+                    // If the hue is not valid (rejected by the setter), send a message to the user
+
                     string badHueMessage = Client.Game.UO.FileManager.Clilocs.GetString(1042295);
 
                     World.MessageManager.HandleMessage(

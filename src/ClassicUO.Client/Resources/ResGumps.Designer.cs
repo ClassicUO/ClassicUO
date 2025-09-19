@@ -2314,6 +2314,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Add the speaker&apos;s serial to the journal file.
+        /// </summary>
+        public static string JournalFileWithSerial {
+            get {
+                return ResourceManager.GetString("JournalFileWithSerial", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Key combination already exists..
         /// </summary>
         public static string KeyCombinationAlreadyExists {
@@ -2735,6 +2744,15 @@ namespace ClassicUO.Resources {
         public static string MaximumStats {
             get {
                 return ResourceManager.GetString("MaximumStats", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Delete old files after this amount:.
+        /// </summary>
+        public static string MaxJournalFiles {
+            get {
+                return ResourceManager.GetString("MaxJournalFiles", resourceCulture);
             }
         }
         
