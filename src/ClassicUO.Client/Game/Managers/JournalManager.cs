@@ -58,7 +58,7 @@ namespace ClassicUO.Game.Managers
             }
 
             bool saveSerial = ProfileManager.GlobalProfile != null && ProfileManager.GlobalProfile.JournalFileWithSerial;
-            string serialText = saveSerial && serial.HasValue ? $"<0x{serial:X8}> " : string.Empty;
+            string serialText = saveSerial && serial.HasValue ? $"<0x{serial.Value:X8}> " : string.Empty;
 
             string output = $"[{timeNow:G}]  {serialText}{name}: {text}";
 
