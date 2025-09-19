@@ -57,7 +57,7 @@ namespace ClassicUO.Game.Managers
                 CreateWriter();
             }
 
-            bool saveSerial = ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.JournalFileWithSerial;
+            bool saveSerial = ProfileManager.GlobalProfile != null && ProfileManager.GlobalProfile.JournalFileWithSerial;
             string serialText = saveSerial && serial.HasValue ? $"<0x{serial:X8}> " : string.Empty;
 
             string output = $"[{timeNow:G}]  {serialText}{name}: {text}";
@@ -83,7 +83,7 @@ namespace ClassicUO.Game.Managers
                         AutoFlush = true
                     };
 
-                    int maxJournalFiles = ProfileManager.CurrentProfile.MaxJournalFiles;
+                    int maxJournalFiles = ProfileManager.GlobalProfile?.MaxJournalFiles ?? -1;
 
                     if (maxJournalFiles < 0)
                     {
