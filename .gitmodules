@@ -1,0 +1,4 @@
+[submodule "external/FNA"]
+	path = external/FNA
+	url = https://github.com/FNA-XNA/FNA.git
+	branch = master

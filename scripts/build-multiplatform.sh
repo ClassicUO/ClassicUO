@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ClassicUO Multiplatform Build Script
-# Supports Windows, macOS, and Linux
+# Supports Windows, macOS, and Linux (x64 and ARM64)
 
 set -e
 
@@ -34,25 +34,32 @@ case $OS in
         PLATFORM="linux"
         if [ "$ARCH" = "x86_64" ]; then
             RUNTIME="linux-x64"
+            PLATFORM_SUFFIX="x64"
         elif [ "$ARCH" = "aarch64" ]; then
             RUNTIME="linux-arm64"
+            PLATFORM_SUFFIX="arm64"
         else
             RUNTIME="linux-$ARCH"
+            PLATFORM_SUFFIX="$ARCH"
         fi
         ;;
     Darwin*)
         PLATFORM="macos"
         if [ "$ARCH" = "x86_64" ]; then
             RUNTIME="osx-x64"
+            PLATFORM_SUFFIX="x64"
         elif [ "$ARCH" = "arm64" ]; then
             RUNTIME="osx-arm64"
+            PLATFORM_SUFFIX="arm64"
         else
             RUNTIME="osx-$ARCH"
+            PLATFORM_SUFFIX="$ARCH"
         fi
         ;;
     CYGWIN*|MINGW*|MSYS*)
         PLATFORM="windows"
         RUNTIME="win-x64"
+        PLATFORM_SUFFIX="x64"
         ;;
     *)
         echo "Unsupported platform: $OS"
@@ -60,19 +67,19 @@ case $OS in
         ;;
 esac
 
-echo "Platform: $PLATFORM"
+echo "Platform: $PLATFORM ($PLATFORM_SUFFIX)"
 echo "Runtime: $RUNTIME"
 
 # Build for current platform
-OUTPUT_DIR="$OUTPUT_BASE/$CONFIG-$PLATFORM"
+OUTPUT_DIR="$OUTPUT_BASE/$CONFIG-$PLATFORM-$PLATFORM_SUFFIX"
 echo "Output directory: $OUTPUT_DIR"
 
 echo "Building..."
-dotnet build "$PROJECT_PATH" -c "$CONFIG" -o "$OUTPUT_DIR"
+dotnet build "$PROJECT_PATH" -c "$CONFIG" -p:Platform="$PLATFORM_SUFFIX" -o "$OUTPUT_DIR"
 
 echo "Publishing self-contained..."
-PUBLISH_DIR="$OUTPUT_BASE/publish-$PLATFORM"
-dotnet publish "$PROJECT_PATH" -c "$CONFIG" -r "$RUNTIME" --self-contained true -o "$PUBLISH_DIR"
+PUBLISH_DIR="$OUTPUT_BASE/publish-$PLATFORM-$PLATFORM_SUFFIX"
+dotnet publish "$PROJECT_PATH" -c "$CONFIG" -p:Platform="$PLATFORM_SUFFIX" -r "$RUNTIME" --self-contained true -o "$PUBLISH_DIR"
 
 echo "Build completed successfully!"
 echo "Executable location: $PUBLISH_DIR/ClassicUO"

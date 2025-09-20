@@ -1,0 +1,7 @@
+[submodule "MojoShader"]
+	path = MojoShader
+	url = git://github.com/FNA-XNA/MojoShader
+	branch = upstream
+[submodule "Vulkan-Headers"]
+	path = Vulkan-Headers
+	url = git://github.com/KhronosGroup/Vulkan-Headers.git

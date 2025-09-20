@@ -1,0 +1,32 @@
+{
+  "username": "",
+  "password": "",
+  "ip": "",
+  "port": 0,
+  "ultimaonlinedirectory": "",
+  "profilespath": "",
+  "clientversion": "",
+  "lang": "",
+  "lastservernum": 1,
+  "last_server_name": "",
+  "fps": 60,
+  "window_position": null,
+  "window_size": null,
+  "is_win_maximized": true,
+  "saveaccount": true,
+  "autologin": false,
+  "reconnect": false,
+  "reconnect_time": 1,
+  "login_music": true,
+  "login_music_volume": 70,
+  "shard_type": 0,
+  "fixed_time_step": true,
+  "run_mouse_in_separate_thread": true,
+  "force_driver": 0,
+  "use_verdata": false,
+  "maps_layouts": null,
+  "encryption": 0,
+  "plugins": [
+    "./Assistant/Razor.dll"
+  ]
+}

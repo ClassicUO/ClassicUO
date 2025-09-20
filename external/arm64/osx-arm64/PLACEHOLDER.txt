@@ -1,0 +1,25 @@
+# macOS ARM64 Native Libraries Placeholder
+
+This directory should contain the following ARM64 native libraries for macOS (Apple Silicon):
+
+## Required Files:
+- libFAudio.0.dylib
+- libFNA3D.0.dylib
+- libMoltenVK.dylib
+- libSDL2-2.0.0.dylib
+- libtheorafile.dylib
+- libvulkan.1.dylib
+
+## How to Obtain:
+1. Build FNA from source for macOS ARM64
+2. Download pre-built ARM64 libraries from FNA releases
+3. Use Xcode with ARM64 target
+
+## Notes:
+- These must be ARM64 (arm64) libraries, not x86_64
+- Libraries should be compatible with the FNA version used in ClassicUO
+- See external/arm64/README.md for detailed instructions
+
+## Verification:
+Use `file library.dylib` to verify the architecture shows "arm64"
+Use `otool -L library.dylib` to check dependencies

@@ -33,9 +33,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using ClassicUO.PluginCompatibility;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
@@ -153,12 +153,17 @@ namespace ClassicUO.Network
             string fileName = Path.GetFileName(path).ToLowerInvariant();
             
             // Check for known Windows-specific plugin names or patterns
-            return fileName.Contains("assistant") || 
-                   fileName.Contains("razor") || 
-                   fileName.Contains("steam") ||
-                   fileName.Contains("windows") ||
-                   fileName.Contains("wpf");
+            var windowsSpecificPatterns = new[]
+            {
+                "assistant", "razor", "steam", "windows", "wpf", "winforms", "system.windows",
+                "classicassist", "uoassistant", "razorenhanced", "steamworks", "discord",
+                "system.drawing", "system.windows.forms", "system.windows.presentation",
+                "presentationcore", "presentationframework", "windowsbase"
+            };
+            
+            return windowsSpecificPatterns.Any(pattern => fileName.Contains(pattern));
         }
+
 
 #if WINDOWS
         [DllImport("kernel32", CharSet = CharSet.Unicode, SetLastError = true)]
@@ -183,11 +188,9 @@ namespace ClassicUO.Network
 
             Log.Trace($"Loading plugin: {path}");
 
-            // Check if this might be a Windows-specific plugin
-            if (IsLikelyWindowsSpecificPlugin(path))
-            {
-                Log.Trace($"Plugin '{Path.GetFileName(path)}' appears to be Windows-specific. Will attempt to load but may fail on non-Windows platforms.");
-            }
+            Log.Info($"Loading plugin: {Path.GetFileName(path)}");
+
+
 
             Plugin p = new Plugin(path);
             p.Load();
@@ -294,8 +297,7 @@ namespace ClassicUO.Network
             {
                 try
                 {
-                    // Usar o carregador melhorado para compatibilidade
-                    Assembly asm = LoadPluginWithEnhancedCompatibility(PluginPath);
+                    Assembly asm = LoadPlugin(PluginPath);
                     
                     if (asm == null)
                     {
@@ -1450,37 +1452,17 @@ namespace ClassicUO.Network
             public IntPtr GetCliloc;
         }
 
-        private static Assembly LoadPluginWithEnhancedCompatibility(string pluginPath)
+        private static Assembly LoadPlugin(string pluginPath)
         {
             try
             {
-                // Verificar se é Classic Assist e usar compatibilidade específica
-                if (ClassicAssistCompatibility.TryLoadClassicAssist(pluginPath))
-                {
-                    Log.Trace($"Classic Assist loaded with compatibility mode: {Path.GetFileName(pluginPath)}");
-                    return Assembly.LoadFile(pluginPath);
-                }
-
-                // Verificar compatibilidade para outros plugins
-                PluginCompatibilityManager.LogCompatibilityInfo(pluginPath);
-                
-                // Usar o carregador melhorado
-                return EnhancedPluginLoader.LoadPluginWithCompatibility(pluginPath);
+                Log.Info($"Loading plugin: {Path.GetFileName(pluginPath)}");
+                return Assembly.LoadFrom(pluginPath);
             }
             catch (Exception ex)
             {
-                Log.Error($"Enhanced plugin loading failed for {Path.GetFileName(pluginPath)}: {ex.Message}");
-                
-                // Fallback para carregamento tradicional
-                try
-                {
-                    return Assembly.LoadFile(pluginPath);
-                }
-                catch (Exception fallbackEx)
-                {
-                    Log.Error($"Fallback loading also failed: {fallbackEx.Message}");
-                    return null;
-                }
+                Log.Error($"Failed to load plugin '{Path.GetFileName(pluginPath)}': {ex.Message}");
+                return null;
             }
         }
     }

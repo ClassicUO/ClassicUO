@@ -1,0 +1,894 @@
+/* FNA3D - 3D Graphics Library for FNA
+ *
+ * Copyright (c) 2020-2021 Ethan Lee
+ *
+ * This software is provided 'as-is', without any express or implied warranty.
+ * In no event will the authors be held liable for any damages arising from
+ * the use of this software.
+ *
+ * Permission is granted to anyone to use this software for any purpose,
+ * including commercial applications, and to alter it and redistribute it
+ * freely, subject to the following restrictions:
+ *
+ * 1. The origin of this software must not be misrepresented; you must not
+ * claim that you wrote the original software. If you use this software in a
+ * product, an acknowledgment in the product documentation would be
+ * appreciated but is not required.
+ *
+ * 2. Altered source versions must be plainly marked as such, and must not be
+ * misrepresented as being the original software.
+ *
+ * 3. This notice may not be removed or altered from any source distribution.
+ *
+ * Ethan "flibitijibibo" Lee <flibitijibibo@flibitijibibo.com>
+ *
+ */
+
+#if FNA3D_DRIVER_TEMPLATE
+
+#include "FNA3D_Driver.h"
+
+#include <SDL.h>
+
+/* Internal Structures */
+
+typedef struct TemplateTexture /* Cast FNA3D_Texture* to this! */
+{
+	uint8_t filler;
+} TemplateTexture;
+
+typedef struct TemplateRenderbuffer /* Cast FNA3D_Renderbuffer* to this! */
+{
+	uint8_t filler;
+} TemplateRenderbuffer;
+
+typedef struct TemplateBuffer /* Cast FNA3D_Buffer* to this! */
+{
+	intptr_t size;
+} TemplateBuffer;
+
+typedef struct TemplateEffect /* Cast FNA3D_Effect* to this! */
+{
+	MOJOSHADER_effect *effect;
+} TemplateEffect;
+
+typedef struct TemplateQuery /* Cast FNA3D_Query* to this! */
+{
+	uint8_t filler;
+} TemplateQuery;
+
+typedef struct TemplateRenderer /* Cast FNA3D_Renderer* to this! */
+{
+	uint8_t filler;
+} TemplateRenderer;
+
+/* XNA->Template Translation Arrays */
+
+static TEMPLATE_SURFACE_FORMAT_TYPE XNAToTMP_TextureFormat[] =
+{
+	0,	/* SurfaceFormat.Color */
+	0,	/* SurfaceFormat.Bgr565 */
+	0,	/* SurfaceFormat.Bgra5551 */
+	0,	/* SurfaceFormat.Bgra4444 */
+	0,	/* SurfaceFormat.Dxt1 */
+	0,	/* SurfaceFormat.Dxt3 */
+	0,	/* SurfaceFormat.Dxt5 */
+	0,	/* SurfaceFormat.NormalizedByte2 */
+	0,	/* SurfaceFormat.NormalizedByte4 */
+	0,	/* SurfaceFormat.Rgba1010102 */
+	0,	/* SurfaceFormat.Rg32 */
+	0,	/* SurfaceFormat.Rgba64 */
+	0,	/* SurfaceFormat.Alpha8 */
+	0,	/* SurfaceFormat.Single */
+	0,	/* SurfaceFormat.Vector2 */
+	0,	/* SurfaceFormat.Vector4 */
+	0,	/* SurfaceFormat.HalfSingle */
+	0,	/* SurfaceFormat.HalfVector2 */
+	0,	/* SurfaceFormat.HalfVector4 */
+	0,	/* SurfaceFormat.HdrBlendable */
+	0,	/* SurfaceFormat.ColorBgraEXT */
+};
+
+static TEMPLATE_DEPTH_FORMAT_TYPE XNAToTMP_DepthFormat[] =
+{
+	0,	/* DepthFormat.None */
+	0,	/* DepthFormat.Depth16 */
+	0,	/* DepthFormat.Depth24 */
+	0	/* DepthFormat.Depth24Stencil8 */
+};
+
+static TEMPLATE_VERTEX_FORMAT_TYPE XNAToTMP_VertexAttribType[] =
+{
+	0,	/* VertexElementFormat.Single */
+	0,	/* VertexElementFormat.Vector2 */
+	0,	/* VertexElementFormat.Vector3 */
+	0,	/* VertexElementFormat.Vector4 */
+	0,	/* VertexElementFormat.Color */
+	0,	/* VertexElementFormat.Byte4 */
+	0,	/* VertexElementFormat.Short2 */
+	0,	/* VertexElementFormat.Short4 */
+	0,	/* VertexElementFormat.NormalizedShort2 */
+	0,	/* VertexElementFormat.NormalizedShort4 */
+	0,	/* VertexElementFormat.HalfVector2 */
+	0	/* VertexElementFormat.HalfVector4 */
+};
+
+static TEMPLATE_INDEX_TYPE XNAToTMP_IndexType[] =
+{
+	0,	/* IndexElementSize.SixteenBits */
+	0	/* IndexElementSize.ThirtyTwoBits */
+};
+
+static TEMPLATE_BLEND_MODE_TYPE XNAToTMP_BlendMode[] =
+{
+	0,	/* Blend.One */
+	0,	/* Blend.Zero */
+	0,	/* Blend.SourceColor */
+	0,	/* Blend.InverseSourceColor */
+	0,	/* Blend.SourceAlpha */
+	0,	/* Blend.InverseSourceAlpha */
+	0,	/* Blend.DestinationColor */
+	0,	/* Blend.InverseDestinationColor */
+	0,	/* Blend.DestinationAlpha */
+	0,	/* Blend.InverseDestinationAlpha */
+	0,	/* Blend.BlendFactor */
+	0,	/* Blend.InverseBlendFactor */
+	0	/* Blend.SourceAlphaSaturation */
+};
+
+static TEMPLATE_BLEND_OPERATION_TYPE XNAToTMP_BlendOperation[] =
+{
+	0,	/* BlendFunction.Add */
+	0,	/* BlendFunction.Subtract */
+	0,	/* BlendFunction.ReverseSubtract */
+	0,	/* BlendFunction.Max */
+	0	/* BlendFunction.Min */
+};
+
+static TEMPLATE_COMPARE_FUNCTION_TYPE XNAToTMP_CompareFunc[] =
+{
+	0,	/* CompareFunction.Always */
+	0,	/* CompareFunction.Never */
+	0,	/* CompareFunction.Less */
+	0,	/* CompareFunction.LessEqual */
+	0,	/* CompareFunction.Equal */
+	0,	/* CompareFunction.GreaterEqual */
+	0,	/* CompareFunction.Greater */
+	0	/* CompareFunction.NotEqual */
+};
+
+static TEMPLATE_STENCIL_OPERATION_TYPE XNAToTMP_StencilOp[] =
+{
+	0,	/* StencilOperation.Keep */
+	0,	/* StencilOperation.Zero */
+	0,	/* StencilOperation.Replace */
+	0,	/* StencilOperation.Increment */
+	0,	/* StencilOperation.Decrement */
+	0,	/* StencilOperation.IncrementSaturation */
+	0,	/* StencilOperation.DecrementSaturation */
+	0	/* StencilOperation.Invert */
+};
+
+static TEMPLATE_FILL_MODE_TYPE XNAToTMP_FillMode[] =
+{
+	0,	/* FillMode.Solid */
+	0,	/* FillMode.WireFrame */
+};
+
+static float XNAToTMP_DepthBiasScale[] =
+{
+	0.0f,				/* DepthFormat.None */
+	(float) ((1 << 16) - 1),	/* DepthFormat.Depth16 */
+	(float) ((1 << 24) - 1),	/* DepthFormat.Depth24 */
+	(float) ((1 << 24) - 1) 	/* DepthFormat.Depth24Stencil8 */
+};
+
+static TEMPLATE_CULL_MODE_TYPE XNAToTMP_CullingEnabled[] =
+{
+	0,	/* CullMode.None */
+	0,	/* CullMode.CullClockwiseFace */
+	0 	/* CullMode.CullCounterClockwiseFace */
+};
+
+static TEMPLATE_TEXTURE_ADDRESS_MODE_TYPE XNAToTMP_Wrap[] =
+{
+	0,	/* TextureAddressMode.Wrap */
+	0,	/* TextureAddressMode.Clamp */
+	0	/* TextureAddressMode.Mirror */
+};
+
+static TEMPLATE_TEXTURE_FILTER_TYPE XNAToTMP_MagFilter[] =
+{
+	0,	/* TextureFilter.Linear */
+	0,	/* TextureFilter.Point */
+	0,	/* TextureFilter.Anisotropic */
+	0,	/* TextureFilter.LinearMipPoint */
+	0,	/* TextureFilter.PointMipLinear */
+	0,	/* TextureFilter.MinLinearMagPointMipLinear */
+	0,	/* TextureFilter.MinLinearMagPointMipPoint */
+	0,	/* TextureFilter.MinPointMagLinearMipLinear */
+	0	/* TextureFilter.MinPointMagLinearMipPoint */
+};
+
+static TEMPLATE_TEXTURE_MIP_FILTER_TYPE XNAToTMP_MipFilter[] =
+{
+	0,	/* TextureFilter.Linear */
+	0,	/* TextureFilter.Point */
+	0,	/* TextureFilter.Anisotropic */
+	0,	/* TextureFilter.LinearMipPoint */
+	0,	/* TextureFilter.PointMipLinear */
+	0,	/* TextureFilter.MinLinearMagPointMipLinear */
+	0,	/* TextureFilter.MinLinearMagPointMipPoint */
+	0,	/* TextureFilter.MinPointMagLinearMipLinear */
+	0	/* TextureFilter.MinPointMagLinearMipPoint */
+};
+
+static TEMPLATE_TEXTURE_FILTER_TYPE XNAToTMP_MinFilter[] =
+{
+	0,	/* TextureFilter.Linear */
+	0,	/* TextureFilter.Point */
+	0,	/* TextureFilter.Anisotropic */
+	0,	/* TextureFilter.LinearMipPoint */
+	0,	/* TextureFilter.PointMipLinear */
+	0,	/* TextureFilter.MinLinearMagPointMipLinear */
+	0,	/* TextureFilter.MinLinearMagPointMipPoint */
+	0,	/* TextureFilter.MinPointMagLinearMipLinear */
+	0	/* TextureFilter.MinPointMagLinearMipPoint */
+};
+
+static TEMPLATE_PRIMITIVE_TYPE XNAToTMP_Primitive[] =
+{
+	0,	/* PrimitiveType.TriangleList */
+	0,	/* PrimitiveType.TriangleStrip */
+	0,	/* PrimitiveType.LineList */
+	0,	/* PrimitiveType.LineStrip */
+	0	/* PrimitiveType.PointListEXT */
+};
+
+/* Renderer Implementation */
+
+/* Quit */
+
+static void TEMPLATE_DestroyDevice(FNA3D_Device *device)
+{
+	TemplateRenderer* renderer = (TemplateRenderer*) device->driverData;
+	SDL_free(renderer);
+	SDL_free(device);
+}
+
+/* Presentation */
+
+static void TEMPLATE_SwapBuffers(
+	FNA3D_Renderer *driverData,
+	FNA3D_Rect *sourceRectangle,
+	FNA3D_Rect *destinationRectangle,
+	void* overrideWindowHandle
+) {
+}
+
+/* Drawing */
+
+static void TEMPLATE_Clear(
+	FNA3D_Renderer *driverData,
+	FNA3D_ClearOptions options,
+	FNA3D_Vec4 *color,
+	float depth,
+	int32_t stencil
+) {
+}
+
+static void TEMPLATE_DrawIndexedPrimitives(
+	FNA3D_Renderer *driverData,
+	FNA3D_PrimitiveType primitiveType,
+	int32_t baseVertex,
+	int32_t minVertexIndex,
+	int32_t numVertices,
+	int32_t startIndex,
+	int32_t primitiveCount,
+	FNA3D_Buffer *indices,
+	FNA3D_IndexElementSize indexElementSize
+) {
+}
+
+static void TEMPLATE_DrawInstancedPrimitives(
+	FNA3D_Renderer *driverData,
+	FNA3D_PrimitiveType primitiveType,
+	int32_t baseVertex,
+	int32_t minVertexIndex,
+	int32_t numVertices,
+	int32_t startIndex,
+	int32_t primitiveCount,
+	int32_t instanceCount,
+	FNA3D_Buffer *indices,
+	FNA3D_IndexElementSize indexElementSize
+) {
+}
+
+static void TEMPLATE_DrawPrimitives(
+	FNA3D_Renderer *driverData,
+	FNA3D_PrimitiveType primitiveType,
+	int32_t vertexStart,
+	int32_t primitiveCount
+) {
+}
+
+/* Mutable Render States */
+
+static void TEMPLATE_SetViewport(FNA3D_Renderer *driverData, FNA3D_Viewport *viewport)
+{
+}
+
+static void TEMPLATE_SetScissorRect(FNA3D_Renderer *driverData, FNA3D_Rect *scissor)
+{
+}
+
+static void TEMPLATE_GetBlendFactor(
+	FNA3D_Renderer *driverData,
+	FNA3D_Color *blendFactor
+) {
+}
+
+static void TEMPLATE_SetBlendFactor(
+	FNA3D_Renderer *driverData,
+	FNA3D_Color *blendFactor
+) {
+}
+
+static int32_t TEMPLATE_GetMultiSampleMask(FNA3D_Renderer *driverData)
+{
+	return 0;
+}
+
+static void TEMPLATE_SetMultiSampleMask(FNA3D_Renderer *driverData, int32_t mask)
+{
+}
+
+static int32_t TEMPLATE_GetReferenceStencil(FNA3D_Renderer *driverData)
+{
+	return 0;
+}
+
+static void TEMPLATE_SetReferenceStencil(FNA3D_Renderer *driverData, int32_t ref)
+{
+}
+
+/* Immutable Render States */
+
+static void TEMPLATE_SetBlendState(
+	FNA3D_Renderer *driverData,
+	FNA3D_BlendState *blendState
+) {
+}
+
+static void TEMPLATE_SetDepthStencilState(
+	FNA3D_Renderer *driverData,
+	FNA3D_DepthStencilState *depthStencilState
+) {
+}
+
+static void TEMPLATE_ApplyRasterizerState(
+	FNA3D_Renderer *driverData,
+	FNA3D_RasterizerState *rasterizerState
+) {
+}
+
+static void TEMPLATE_VerifySampler(
+	FNA3D_Renderer *driverData,
+	int32_t index,
+	FNA3D_Texture *texture,
+	FNA3D_SamplerState *sampler
+) {
+}
+
+static void TEMPLATE_VerifyVertexSampler(
+	FNA3D_Renderer *driverData,
+	int32_t index,
+	FNA3D_Texture *texture,
+	FNA3D_SamplerState *sampler
+) {
+}
+
+/* Vertex State */
+
+static void TEMPLATE_ApplyVertexBufferBindings(
+	FNA3D_Renderer *driverData,
+	FNA3D_VertexBufferBinding *bindings,
+	int32_t numBindings,
+	uint8_t bindingsUpdated,
+	int32_t baseVertex
+) {
+}
+
+/* Render Targets */
+
+static void TEMPLATE_SetRenderTargets(
+	FNA3D_Renderer *driverData,
+	FNA3D_RenderTargetBinding *renderTargets,
+	int32_t numRenderTargets,
+	FNA3D_Renderbuffer *depthStencilBuffer,
+	FNA3D_DepthFormat depthFormat,
+	uint8_t preserveTargetContents
+) {
+}
+
+static void TEMPLATE_ResolveTarget(
+	FNA3D_Renderer *driverData,
+	FNA3D_RenderTargetBinding *target
+) {
+}
+
+/* Backbuffer Functions */
+
+static void TEMPLATE_ResetBackbuffer(
+	FNA3D_Renderer *driverData,
+	FNA3D_PresentationParameters *presentationParameters
+) {
+}
+
+static void TEMPLATE_ReadBackbuffer(
+	FNA3D_Renderer *driverData,
+	int32_t x,
+	int32_t y,
+	int32_t w,
+	int32_t h,
+	void* data,
+	int32_t dataLength
+) {
+}
+
+static void TEMPLATE_GetBackbufferSize(
+	FNA3D_Renderer *driverData,
+	int32_t *w,
+	int32_t *h
+) {
+}
+
+static FNA3D_SurfaceFormat TEMPLATE_GetBackbufferSurfaceFormat(
+	FNA3D_Renderer *driverData
+) {
+	return FNA3D_SURFACEFORMAT_COLOR;
+}
+
+static FNA3D_DepthFormat TEMPLATE_GetBackbufferDepthFormat(
+	FNA3D_Renderer *driverData
+) {
+	return FNA3D_DEPTHFORMAT_NONE;
+}
+
+static int32_t TEMPLATE_GetBackbufferMultiSampleCount(
+	FNA3D_Renderer *driverData
+) {
+	return 0;
+}
+
+/* Textures */
+
+static FNA3D_Texture* TEMPLATE_CreateTexture2D(
+	FNA3D_Renderer *driverData,
+	FNA3D_SurfaceFormat format,
+	int32_t width,
+	int32_t height,
+	int32_t levelCount,
+	uint8_t isRenderTarget
+) {
+	return NULL;
+}
+
+static FNA3D_Texture* TEMPLATE_CreateTexture3D(
+	FNA3D_Renderer *driverData,
+	FNA3D_SurfaceFormat format,
+	int32_t width,
+	int32_t height,
+	int32_t depth,
+	int32_t levelCount
+) {
+	return NULL;
+}
+
+static FNA3D_Texture* TEMPLATE_CreateTextureCube(
+	FNA3D_Renderer *driverData,
+	FNA3D_SurfaceFormat format,
+	int32_t size,
+	int32_t levelCount,
+	uint8_t isRenderTarget
+) {
+	return NULL;
+}
+
+static void TEMPLATE_AddDisposeTexture(
+	FNA3D_Renderer *driverData,
+	FNA3D_Texture *texture
+) {
+}
+
+static void TEMPLATE_SetTextureData2D(
+	FNA3D_Renderer *driverData,
+	FNA3D_Texture *texture,
+	int32_t x,
+	int32_t y,
+	int32_t w,
+	int32_t h,
+	int32_t level,
+	void* data,
+	int32_t dataLength
+) {
+}
+
+static void TEMPLATE_SetTextureData3D(
+	FNA3D_Renderer *driverData,
+	FNA3D_Texture *texture,
+	int32_t x,
+	int32_t y,
+	int32_t z,
+	int32_t w,
+	int32_t h,
+	int32_t d,
+	int32_t level,
+	void* data,
+	int32_t dataLength
+) {
+}
+
+static void TEMPLATE_SetTextureDataCube(
+	FNA3D_Renderer *driverData,
+	FNA3D_Texture *texture,
+	int32_t x,
+	int32_t y,
+	int32_t w,
+	int32_t h,
+	FNA3D_CubeMapFace cubeMapFace,
+	int32_t level,
+	void* data,
+	int32_t dataLength
+) {
+}
+
+static void TEMPLATE_SetTextureDataYUV(
+	FNA3D_Renderer *driverData,
+	FNA3D_Texture *y,
+	FNA3D_Texture *u,
+	FNA3D_Texture *v,
+	int32_t yWidth,
+	int32_t yHeight,
+	int32_t uvWidth,
+	int32_t uvHeight,
+	void* data,
+	int32_t dataLength
+) {
+}
+
+static void TEMPLATE_GetTextureData2D(
+	FNA3D_Renderer *driverData,
+	FNA3D_Texture *texture,
+	int32_t x,
+	int32_t y,
+	int32_t w,
+	int32_t h,
+	int32_t level,
+	void* data,
+	int32_t dataLength
+) {
+}
+
+static void TEMPLATE_GetTextureData3D(
+	FNA3D_Renderer *driverData,
+	FNA3D_Texture *texture,
+	int32_t x,
+	int32_t y,
+	int32_t z,
+	int32_t w,
+	int32_t h,
+	int32_t d,
+	int32_t level,
+	void* data,
+	int32_t dataLength
+) {
+}
+
+static void TEMPLATE_GetTextureDataCube(
+	FNA3D_Renderer *driverData,
+	FNA3D_Texture *texture,
+	int32_t x,
+	int32_t y,
+	int32_t w,
+	int32_t h,
+	FNA3D_CubeMapFace cubeMapFace,
+	int32_t level,
+	void* data,
+	int32_t dataLength
+) {
+}
+
+/* Renderbuffers */
+
+static FNA3D_Renderbuffer* TEMPLATE_GenColorRenderbuffer(
+	FNA3D_Renderer *driverData,
+	int32_t width,
+	int32_t height,
+	FNA3D_SurfaceFormat format,
+	int32_t multiSampleCount,
+	FNA3D_Texture *texture
+) {
+	return NULL;
+}
+
+static FNA3D_Renderbuffer* TEMPLATE_GenDepthStencilRenderbuffer(
+	FNA3D_Renderer *driverData,
+	int32_t width,
+	int32_t height,
+	FNA3D_DepthFormat format,
+	int32_t multiSampleCount
+) {
+	return NULL;
+}
+
+static void TEMPLATE_AddDisposeRenderbuffer(
+	FNA3D_Renderer *driverData,
+	FNA3D_Renderbuffer *renderbuffer
+) {
+}
+
+/* Vertex Buffers */
+
+static FNA3D_Buffer* TEMPLATE_GenVertexBuffer(
+	FNA3D_Renderer *driverData,
+	uint8_t dynamic,
+	FNA3D_BufferUsage usage,
+	int32_t sizeInBytes
+) {
+	return NULL;
+}
+
+static void TEMPLATE_AddDisposeVertexBuffer(
+	FNA3D_Renderer *driverData,
+	FNA3D_Buffer *buffer
+) {
+}
+
+static void TEMPLATE_SetVertexBufferData(
+	FNA3D_Renderer *driverData,
+	FNA3D_Buffer *buffer,
+	int32_t offsetInBytes,
+	void* data,
+	int32_t elementCount,
+	int32_t elementSizeInBytes,
+	int32_t vertexStride,
+	FNA3D_SetDataOptions options
+) {
+}
+
+static void TEMPLATE_GetVertexBufferData(
+	FNA3D_Renderer *driverData,
+	FNA3D_Buffer *buffer,
+	int32_t offsetInBytes,
+	void* data,
+	int32_t elementCount,
+	int32_t elementSizeInBytes,
+	int32_t vertexStride
+) {
+}
+
+/* Index Buffers */
+
+static FNA3D_Buffer* TEMPLATE_GenIndexBuffer(
+	FNA3D_Renderer *driverData,
+	uint8_t dynamic,
+	FNA3D_BufferUsage usage,
+	int32_t sizeInBytes
+) {
+	return NULL;
+}
+
+static void TEMPLATE_AddDisposeIndexBuffer(
+	FNA3D_Renderer *driverData,
+	FNA3D_Buffer *buffer
+) {
+}
+
+static void TEMPLATE_SetIndexBufferData(
+	FNA3D_Renderer *driverData,
+	FNA3D_Buffer *buffer,
+	int32_t offsetInBytes,
+	void* data,
+	int32_t dataLength,
+	FNA3D_SetDataOptions options
+) {
+}
+
+static void TEMPLATE_GetIndexBufferData(
+	FNA3D_Renderer *driverData,
+	FNA3D_Buffer *buffer,
+	int32_t offsetInBytes,
+	void* data,
+	int32_t dataLength
+) {
+}
+
+/* Effects */
+
+static void TEMPLATE_CreateEffect(
+	FNA3D_Renderer *driverData,
+	uint8_t *effectCode,
+	uint32_t effectCodeLength,
+	FNA3D_Effect **effect,
+	MOJOSHADER_effect **effectData
+) {
+	*effect = NULL;
+	*effectData = NULL;
+}
+
+static void TEMPLATE_CloneEffect(
+	FNA3D_Renderer *driverData,
+	FNA3D_Effect *cloneSource,
+	FNA3D_Effect **effect,
+	MOJOSHADER_effect **effectData
+) {
+	*effect = NULL;
+	*effectData = NULL;
+}
+
+static void TEMPLATE_AddDisposeEffect(
+	FNA3D_Renderer *driverData,
+	FNA3D_Effect *effect
+) {
+}
+
+static void TEMPLATE_SetEffectTechnique(
+	FNA3D_Renderer *driverData,
+	FNA3D_Effect *effect,
+	MOJOSHADER_effectTechnique *technique
+) {
+}
+
+static void TEMPLATE_ApplyEffect(
+	FNA3D_Renderer *driverData,
+	FNA3D_Effect *effect,
+	uint32_t pass,
+	MOJOSHADER_effectStateChanges *stateChanges
+) {
+}
+
+static void TEMPLATE_BeginPassRestore(
+	FNA3D_Renderer *driverData,
+	FNA3D_Effect *effect,
+	MOJOSHADER_effectStateChanges *stateChanges
+) {
+}
+
+static void TEMPLATE_EndPassRestore(
+	FNA3D_Renderer *driverData,
+	FNA3D_Effect *effect
+) {
+}
+
+/* Queries */
+
+static FNA3D_Query* TEMPLATE_CreateQuery(FNA3D_Renderer *driverData)
+{
+	return NULL;
+}
+
+static void TEMPLATE_AddDisposeQuery(
+	FNA3D_Renderer *driverData,
+	FNA3D_Query *query
+) {
+}
+
+static void TEMPLATE_QueryBegin(FNA3D_Renderer *driverData, FNA3D_Query *query)
+{
+}
+
+static void TEMPLATE_QueryEnd(FNA3D_Renderer *driverData, FNA3D_Query *query)
+{
+}
+
+static uint8_t TEMPLATE_QueryComplete(
+	FNA3D_Renderer *driverData,
+	FNA3D_Query *query
+) {
+	return 1;
+}
+
+static int32_t TEMPLATE_QueryPixelCount(
+	FNA3D_Renderer *driverData,
+	FNA3D_Query *query
+) {
+	return 0;
+}
+
+/* Feature Queries */
+
+static uint8_t TEMPLATE_SupportsDXT1(FNA3D_Renderer *driverData)
+{
+	return 0;
+}
+
+static uint8_t TEMPLATE_SupportsS3TC(FNA3D_Renderer *driverData)
+{
+	return 0;
+}
+
+static uint8_t TEMPLATE_SupportsHardwareInstancing(FNA3D_Renderer *driverData)
+{
+	return 0;
+}
+
+static uint8_t TEMPLATE_SupportsNoOverwrite(FNA3D_Renderer *driverData)
+{
+	return 0;
+}
+
+static void TEMPLATE_GetMaxTextureSlots(
+	FNA3D_Renderer *driverData,
+	int32_t *textures,
+	int32_t *vertexTextures
+) {
+}
+
+static int32_t TEMPLATE_GetMaxMultiSampleCount(
+	FNA3D_Renderer *driverData,
+	FNA3D_SurfaceFormat format,
+	int32_t multiSampleCount
+) {
+	return 0;
+}
+
+/* Debugging */
+
+static void TEMPLATE_SetStringMarker(FNA3D_Renderer *driverData, const char *text)
+{
+}
+
+/* External Interop */
+
+static void TEMPLATE_GetSysRenderer(
+	FNA3D_Renderer *driverData,
+	FNA3D_SysRendererEXT *sysrenderer
+) {
+}
+
+static FNA3D_Texture* TEMPLATE_CreateSysTexture(
+	FNA3D_Renderer *driverData,
+	FNA3D_SysTextureEXT *systexture
+) {
+	return NULL;
+}
+
+/* Driver */
+
+static uint8_t TEMPLATE_PrepareWindowAttributes(uint32_t *flags)
+{
+	return 0; /* Set this to 1 when the driver is usable! */
+}
+
+static void TEMPLATE_GetDrawableSize(void* window, int32_t *w, int32_t *h)
+{
+}
+
+static FNA3D_Device* TEMPLATE_CreateDevice(
+	FNA3D_PresentationParameters *presentationParameters,
+	uint8_t debugMode
+) {
+	FNA3D_Device *result = (FNA3D_Device*) SDL_malloc(sizeof(FNA3D_Device));
+	TemplateRenderer *renderer = (TemplateRenderer*) SDL_malloc(
+		sizeof(TemplateRenderer)
+	);
+	result->driverData = (FNA3D_Renderer*) renderer;
+	ASSIGN_DRIVER(TEMPLATE)
+	return result;
+}
+
+FNA3D_Driver TemplateDriver = {
+	"Template",
+	TEMPLATE_PrepareWindowAttributes,
+	TEMPLATE_GetDrawableSize,
+	TEMPLATE_CreateDevice
+};
+
+#else
+
+extern int this_tu_is_empty;
+
+#endif /* FNA3D_DRIVER_TEMPLATE */
+
+/* vim: set noexpandtab shiftwidth=8 tabstop=8: */

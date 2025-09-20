@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net471</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <PackageId>FontStashSharp.FNA</PackageId>
     <AssemblyName>FontStashSharp.FNA</AssemblyName>
     <Description>FontStashSharp for FNA</Description>

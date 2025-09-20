@@ -3,7 +3,7 @@
 
   [![.NET 8](https://img.shields.io/badge/.NET-8.0-blue.svg)](https://dotnet.microsoft.com/download/dotnet/8.0)
   [![FNA](https://img.shields.io/badge/FNA-25.09-green.svg)](https://github.com/FNA-XNA/FNA)
-  [![Cross-Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-orange.svg)](https://github.com/andreakarasho/ClassicUO)
+  [![Cross-Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS%20%7C%20ARM64-orange.svg)](https://github.com/andreakarasho/ClassicUO)
   [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
 
 </div>
@@ -39,15 +39,16 @@ The **Dust765** project isn't just another UO client. It's a **statement**. A st
 
 ### ✨ **Cross-Platform Domination**
 
-- **Windows x64** - Because even Windows users deserve quality
-- **Linux x64** - For the penguin lovers who got tired of being ignored
-- **macOS x64** - Because Apple users are people too (surprisingly)
+- **Windows x64 & ARM64** - Because even Windows users deserve quality (and the future is ARM64)
+- **Linux x64 & ARM64** - For the penguin lovers who got tired of being ignored
+- **macOS x64 & ARM64** - Because Apple users are people too (and Apple Silicon rocks)
 
 ### 🛠️ **Cutting-Edge Technology**
 
 - **.NET 8.0** - The latest and greatest (unlike some projects stuck in the past)
 - **Self-Contained** - No more "it works on my machine" excuses
 - **Native Libraries** - Optimized for each platform (because we actually care)
+- **ARM64 Support** - The future is now! Apple Silicon, Windows ARM, Linux ARM64
 
 ### 🎮 **The Complete Experience**
 
