@@ -103,7 +103,10 @@ namespace ClassicUO.Configuration
         internal static void Save(Profile profile, string path, string filename = "profile.json")
         {
             ConfigurationResolver.Save(profile, Path.Combine(path, filename), ProfileJsonContext.DefaultToUse.Profile);
-            ConfigurationResolver.Save(GlobalProfile, Path.Combine(RootPath, "globalprofile.json"), ProfileJsonContext.DefaultToUse.GlobalProfile);
+            if (GlobalProfile != null)
+            {
+                ConfigurationResolver.Save(GlobalProfile, Path.Combine(RootPath, "globalprofile.json"), ProfileJsonContext.DefaultToUse.GlobalProfile);
+            }
         }
     }
 }

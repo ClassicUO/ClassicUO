@@ -78,32 +78,31 @@ namespace ClassicUO.Game.Managers
                 {
                     string path = FileSystemHelper.CreateFolderIfNotExists(Path.Combine(CUOEnviroment.ExecutablePath, "Data"), "Client", "JournalLogs");
 
+                    int maxJournalFiles = ProfileManager.GlobalProfile?.MaxJournalFiles ?? -1;
+
+                    if (maxJournalFiles >= 0)
+                    {
+                        try
+                        {
+                            string[] files = Directory.GetFiles(path, "*_journal.txt");
+                            Array.Sort(files);
+                            Array.Reverse(files);
+
+                            for (int i = files.Length - 1; i >= maxJournalFiles; --i)
+                            {
+                                File.Delete(files[i]);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error($"Failed to delete old journal files. Original Error: {ex.Message}");
+                        }
+                    }
+
                     _fileWriter = new StreamWriter(File.Open(Path.Combine(path, $"{DateTime.Now:yyyy_MM_dd_HH_mm_ss}_journal.txt"), FileMode.Create, FileAccess.Write, FileShare.Read))
                     {
                         AutoFlush = true
                     };
-
-                    int maxJournalFiles = ProfileManager.GlobalProfile?.MaxJournalFiles ?? -1;
-
-                    if (maxJournalFiles < 0)
-                    {
-                        return;
-                    }
-
-                    try
-                    {
-                        string[] files = Directory.GetFiles(path, "*_journal.txt");
-                        Array.Sort(files);
-                        Array.Reverse(files);
-
-                        for (int i = files.Length - 1; i >= maxJournalFiles; --i)
-                        {
-                            File.Delete(files[i]);
-                        }
-                    }
-                    catch
-                    {
-                    }
                 }
                 catch (Exception ex)
                 {

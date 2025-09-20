@@ -2314,7 +2314,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Add the speaker&apos;s serial to the journal file.
+        ///   Looks up a localized string similar to Add speaker serial to journal entries.
         /// </summary>
         public static string JournalFileWithSerial {
             get {
@@ -2748,7 +2748,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Delete old files after this amount:.
+        ///   Looks up a localized string similar to Keep at most this many journal files:.
         /// </summary>
         public static string MaxJournalFiles {
             get {
