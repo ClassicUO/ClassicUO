@@ -1,9 +1,9 @@
 <div align="center">
   <img src="src/ClassicUO.Assets/gumpartassets/logodust.png" alt="Legion Logo" width="200"/>
 
-  [![.NET 8](https://img.shields.io/badge/.NET-8.0-blue.svg)](https://dotnet.microsoft.com/download/dotnet/8.0)
+  [![.NET Framework](https://img.shields.io/badge/.NET-Framework%204.8-blue.svg)](https://dotnet.microsoft.com/download/dotnet-framework/net48)
   [![FNA](https://img.shields.io/badge/FNA-25.09-green.svg)](https://github.com/FNA-XNA/FNA)
-  [![Cross-Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS%20%7C%20ARM64-orange.svg)](https://github.com/andreakarasho/ClassicUO)
+  [![Cross-Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-orange.svg)](https://github.com/andreakarasho/ClassicUO)
   [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
 
 </div>
@@ -39,16 +39,16 @@ The **Dust765** project isn't just another UO client. It's a **statement**. A st
 
 ### ✨ **Cross-Platform Domination**
 
-- **Windows x64 & ARM64** - Because even Windows users deserve quality (and the future is ARM64)
-- **Linux x64 & ARM64** - For the penguin lovers who got tired of being ignored
-- **macOS x64 & ARM64** - Because Apple users are people too (and Apple Silicon rocks)
+- **Windows x64** - Because even Windows users deserve quality
+- **Linux x64** - For the penguin lovers who got tired of being ignored
+- **macOS x64** - Because Apple users are people too
 
 ### 🛠️ **Cutting-Edge Technology**
 
-- **.NET 8.0** - The latest and greatest (unlike some projects stuck in the past)
-- **Self-Contained** - No more "it works on my machine" excuses
+- **.NET Framework 4.8** - Stable and reliable (proven technology)
+- **Mono Support** - Cross-platform compatibility through Mono runtime
 - **Native Libraries** - Optimized for each platform (because we actually care)
-- **ARM64 Support** - The future is now! Apple Silicon, Windows ARM, Linux ARM64
+- **Multi-Platform** - Windows, Linux, and macOS support
 
 ### 🎮 **The Complete Experience**
 
@@ -78,7 +78,8 @@ Our builds are generated automatically (unlike some projects that require a bloo
 
 ### 📋 **Prerequisites**
 
-- [.NET 8.0 SDK](https://dotnet.microsoft.com/download/dotnet/8.0) (the real one, not some ancient version)
+- [.NET Framework 4.8](https://dotnet.microsoft.com/download/dotnet-framework/net48) (for Windows)
+- [Mono](https://www.mono-project.com/download/stable/) (for Linux/macOS)
 - Git (for cloning, not for drama)
 - Visual Studio 2022 / VS Code / Rider (optional, but recommended)
 
@@ -95,10 +96,11 @@ git submodule update --init --recursive
 # Build for all platforms (because we're not lazy)
 dotnet build
 
-# Build specific platform (if you're into that sort of thing)
-dotnet publish src/ClassicUO.Client/ClassicUO.Client.csproj -c Release -r win-x64 --self-contained true
-dotnet publish src/ClassicUO.Client/ClassicUO.Client.csproj -c Release -r linux-x64 --self-contained true
-dotnet publish src/ClassicUO.Client/ClassicUO.Client.csproj -c Release -r osx-x64 --self-contained true
+# Build with .NET Framework 4.8 (Windows)
+dotnet build src/ClassicUO.Client/ClassicUO.Client.csproj -c Release
+
+# Build with Mono (Linux/macOS)
+mono mscorlib.dll
 ```
 
 ### 🧪 **Build Scripts**
@@ -110,18 +112,18 @@ dotnet publish src/ClassicUO.Client/ClassicUO.Client.csproj -c Release -r osx-x6
 
 ### ✅ **Completed**
 
-- [X] Migration to .NET 8.0 (because we're not stuck in the past)
+- [X] Migration to .NET Framework 4.8 (stable and reliable)
 - [X] Update to FNA 25.09 (latest and greatest)
-- [X] Removal of Windows-specific dependencies (because we're not biased)
-- [X] Cross-platform build system (that actually works)
+- [X] Cross-platform build system with Mono support
 - [X] Automated CI/CD (because manual builds are for peasants)
+- [X] Multi-platform compatibility (Windows, Linux, macOS)
 
 ### 🔄 **In Development**
 
 - [ ] Performance optimizations (because speed matters)
 - [ ] Automated testing (because we're not animals)
 - [ ] Expanded documentation (because we're not lazy)
-- [ ] ARM64 support (because the future is now)
+- [ ] Enhanced Mono compatibility (because cross-platform matters)
 
 ### 🎯 **Future**
 
@@ -174,13 +176,10 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ---
 
-<div align="center">
-  <strong>🌟 If this project helped you, consider giving it a ⭐ on the repository! 🌟</strong>
 
-  `<br><br>`
+🌟 If this project helped you, consider giving it a ⭐ on the repository! 🌟
 
-  `<em>`"Innovation doesn't come from cliques, but from true collaboration."`</em>`
+"Innovation doesn't come from cliques, but from true collaboration."`
 
-  `<strong>`🎭 The Dust765 Project - Breaking Barriers, Building Bridges 🎭`</strong>`
+🎭 The Dust765 Project - Breaking Barriers, Building Bridges 🎭
 
-</div>

@@ -1,4 +1,4 @@
-name: dust765-2.0
+name: Dust765
 
 on:
   push:
@@ -12,52 +12,72 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup .NET 8
+      - name: Setup .NET Framework 4.8
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '4.8.x'
       - name: Restore dependencies
         run: dotnet restore src/ClassicUO.Client/ClassicUO.Client.csproj
-      - name: Build
-        run: dotnet publish src/ClassicUO.Client/ClassicUO.Client.csproj -c Release -r win-x64 --self-contained false -o build/win-x64
+      - name: Build with .NET Framework 4.8
+        run: dotnet build src/ClassicUO.Client/ClassicUO.Client.csproj -c Release
+      - name: Copy build artifacts
+        run: |
+          mkdir -p build/win-x64
+          xcopy /E /I bin\Release\* build\win-x64\
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dust765-2.0-windows
+          name: Dust765-windows
           path: build/win-x64
 
   build-linux:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup .NET 8
+      - name: Setup Mono for .NET Framework 4.8
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '4.8.x'
+      - name: Install Mono
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y mono-complete msbuild
       - name: Restore dependencies
         run: dotnet restore src/ClassicUO.Client/ClassicUO.Client.csproj
-      - name: Build
-        run: dotnet publish src/ClassicUO.Client/ClassicUO.Client.csproj -c Release -r linux-x64 --self-contained false -o build/linux-x64
+      - name: Build with Mono
+        run: dotnet build src/ClassicUO.Client/ClassicUO.Client.csproj -c Release
+      - name: Copy build artifacts
+        run: |
+          mkdir -p build/linux-x64
+          cp -r bin/Release/* build/linux-x64/
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dust765-2.0-linux
+          name: Dust765-linux
           path: build/linux-x64
 
   build-macos:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup .NET 8
+      - name: Setup Mono for .NET Framework 4.8
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '4.8.x'
+      - name: Install Mono
+        run: |
+          brew install mono
+          brew install msbuild
       - name: Restore dependencies
         run: dotnet restore src/ClassicUO.Client/ClassicUO.Client.csproj
-      - name: Build
-        run: dotnet publish src/ClassicUO.Client/ClassicUO.Client.csproj -c Release -r osx-x64 --self-contained false -o build/osx-x64
+      - name: Build with Mono
+        run: dotnet build src/ClassicUO.Client/ClassicUO.Client.csproj -c Release
+      - name: Copy build artifacts
+        run: |
+          mkdir -p build/osx-x64
+          cp -r bin/Release/* build/osx-x64/
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: dust765-2.0-macos
+          name: Dust765-macos
           path: build/osx-x64
