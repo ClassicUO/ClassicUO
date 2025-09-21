@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFramework>net48</TargetFramework>
     <OutputType>Exe</OutputType>
     <ApplicationIcon>cuoicon.ico</ApplicationIcon>
     <AssemblyName>ClassicUO</AssemblyName>
@@ -103,19 +104,14 @@
 
   <ItemGroup>
     <DataFiles_x64 Include="$(ProjectDir)..\..\external\x64\*.*" />
-    <DataFiles_lib64 Include="$(ProjectDir)..\..\external\lib64\*.*" />
-    <DataFiles_osx Include="$(ProjectDir)..\..\external\osx\*.*" />
-    <DataFiles_arm64_win Include="$(ProjectDir)..\..\external\arm64\win-arm64\*.*" />
-    <DataFiles_arm64_osx Include="$(ProjectDir)..\..\external\arm64\osx-arm64\*.*" />
-    <DataFiles_arm64_linux Include="$(ProjectDir)..\..\external\arm64\linux-arm64\*.*" />
-    <DataFiles_vulkan Include="$(ProjectDir)..\..\external\vulkan\icd.d\*.*" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
-    <PackageReference Include="System.CodeDom" Version="8.0.0" />
-    <PackageReference Include="System.Drawing.Common" Version="8.0.0" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.5" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
+    <PackageReference Include="System.CodeDom" Version="4.7.0" />
+    <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="2.1.3" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>
 
   <ItemGroup>
@@ -133,12 +129,6 @@
   </ItemGroup>
   <Target Name="CopyExternalDeps_build" AfterTargets="Build">
     <Copy SourceFiles="@(DataFiles_x64)" DestinationFolder="$(TargetDir)\x64\" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(DataFiles_lib64)" DestinationFolder="$(TargetDir)\lib64\" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(DataFiles_osx)" DestinationFolder="$(TargetDir)\osx\" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(DataFiles_arm64_win)" DestinationFolder="$(TargetDir)\arm64\win-arm64\" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(DataFiles_arm64_osx)" DestinationFolder="$(TargetDir)\arm64\osx-arm64\" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(DataFiles_arm64_linux)" DestinationFolder="$(TargetDir)\arm64\linux-arm64\" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(DataFiles_vulkan)" DestinationFolder="$(TargetDir)\vulkan\icd.d\" SkipUnchangedFiles="true" />
   </Target>
 
   <Target Name="CopyExternalDeps_publish" AfterTargets="Publish">
@@ -147,14 +137,7 @@
     </ItemGroup>
 
     <Copy SourceFiles="@(DataFiles_x64)" DestinationFolder="$(PublishDir)\x64\" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(DataFiles_lib64)" DestinationFolder="$(PublishDir)\lib64\" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(DataFiles_osx)" DestinationFolder="$(PublishDir)\osx\" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(DataFiles_arm64_win)" DestinationFolder="$(PublishDir)\arm64\win-arm64\" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(DataFiles_arm64_osx)" DestinationFolder="$(PublishDir)\arm64\osx-arm64\" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(DataFiles_arm64_linux)" DestinationFolder="$(PublishDir)\arm64\linux-arm64\" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(DataFiles_vulkan)" DestinationFolder="$(PublishDir)\vulkan\icd.d\" SkipUnchangedFiles="true" />
-
-    <Copy SourceFiles="@(MonockickstartPath)" DestinationFolder="$(PublishDir)\" SkipUnchangedFiles="true" Condition="$(TargetFramework.StartsWith('net4'))" />
+    <Copy SourceFiles="@(MonockickstartPath)" DestinationFolder="$(PublishDir)\" SkipUnchangedFiles="true" />
 
   </Target>
 

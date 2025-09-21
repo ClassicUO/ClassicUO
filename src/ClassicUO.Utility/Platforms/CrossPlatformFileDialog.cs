@@ -182,15 +182,15 @@ namespace ClassicUO.Utility.Platforms
                     if (process == null)
                         return null;
 
-                    await process.WaitForExitAsync();
+                    process.WaitForExit();
                     
                     if (process.ExitCode == 0)
                     {
-                        return await process.StandardOutput.ReadToEndAsync();
+                        return process.StandardOutput.ReadToEnd();
                     }
                     else
                     {
-                        var error = await process.StandardError.ReadToEndAsync();
+                        var error = process.StandardError.ReadToEnd();
                         Console.WriteLine($"Error running {fileName}: {error}");
                         return null;
                     }

@@ -187,7 +187,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (!string.IsNullOrEmpty(fileName))
                 {
                     string result = JsonSerializer.Serialize(allData);
-                    await File.WriteAllTextAsync(fileName, result, Encoding.UTF8);
+                    File.WriteAllText(fileName, result, Encoding.UTF8);
                 }
             }
             catch (Exception ex)
@@ -210,7 +210,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     try
                     {
-                        string result = await File.ReadAllTextAsync(fileName);
+                        string result = File.ReadAllText(fileName);
 
                         GridHighlightData[] imported = JsonSerializer.Deserialize<GridHighlightData[]>(result);
 

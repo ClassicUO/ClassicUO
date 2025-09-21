@@ -19,7 +19,7 @@ namespace ClassicUO.UnitTests.Network
 
         public PluginIntegrationTests()
         {
-            _tempDirectory = Path.Combine(Path.GetTempPath(), "ClassicUO_PluginIntegrationTests", Guid.NewGuid().ToString("N")[..8]);
+            _tempDirectory = Path.Combine(Path.GetTempPath(), "ClassicUO_PluginIntegrationTests", Guid.NewGuid().ToString("N").Substring(0, 8));
             Directory.CreateDirectory(_tempDirectory);
             _testPluginPath = Path.Combine(_tempDirectory, "IntegrationTestPlugin.dll");
         }

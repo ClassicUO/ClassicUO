@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net48</TargetFramework>
     <LangVersion>12</LangVersion>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <Platforms>AnyCPU;ARM64;x64</Platforms>

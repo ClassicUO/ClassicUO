@@ -164,7 +164,7 @@ namespace ClassicUO.Game.Managers
                 if (!string.IsNullOrEmpty(fileName))
                 {
                     string result = JsonSerializer.Serialize(allData);
-                    await File.WriteAllTextAsync(fileName, result, Encoding.UTF8);
+                    File.WriteAllText(fileName, result, Encoding.UTF8);
                 }
             }
             catch (Exception ex)
@@ -187,7 +187,7 @@ namespace ClassicUO.Game.Managers
                 {
                     try
                     {
-                        string result = await File.ReadAllTextAsync(fileName);
+                        string result = File.ReadAllText(fileName);
 
                         ToolTipOverrideData[] imported = JsonSerializer.Deserialize<ToolTipOverrideData[]>(result);
 

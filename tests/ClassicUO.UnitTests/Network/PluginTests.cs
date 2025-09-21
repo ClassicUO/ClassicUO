@@ -20,7 +20,7 @@ namespace ClassicUO.UnitTests.Network
         public PluginTests()
         {
             // Criar diretório temporário para testes
-            _tempDirectory = Path.Combine(Path.GetTempPath(), "ClassicUO_PluginTests", Guid.NewGuid().ToString("N")[..8]);
+            _tempDirectory = Path.Combine(Path.GetTempPath(), "ClassicUO_PluginTests", Guid.NewGuid().ToString("N").Substring(0, 8));
             Directory.CreateDirectory(_tempDirectory);
 
             // Caminho para o plugin de teste

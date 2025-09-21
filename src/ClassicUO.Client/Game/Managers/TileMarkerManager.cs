@@ -49,7 +49,7 @@ namespace ClassicUO.Game.Managers
             try
             {
                 string json = JsonSerializer.Serialize(markedTiles);
-                await File.WriteAllTextAsync(savePath, json);
+                File.WriteAllText(savePath, json);
             }
             catch { Console.WriteLine("Failed to save marked tile data."); }
         }
@@ -70,7 +70,7 @@ namespace ClassicUO.Game.Managers
             if(File.Exists(savePath))
                 try
                 {
-                    string json = await File.ReadAllTextAsync(savePath);
+                    string json = File.ReadAllText(savePath);
                     markedTiles = JsonSerializer.Deserialize<Dictionary<string, ushort>>(json) ?? new Dictionary<string, ushort>();
                 }
                 catch { }

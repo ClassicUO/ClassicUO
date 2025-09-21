@@ -19,7 +19,7 @@ namespace ClassicUO.UnitTests.Network
 
         public ClassicUOPluginSystemTests()
         {
-            _tempDirectory = Path.Combine(Path.GetTempPath(), "ClassicUO_PluginSystemTests", Guid.NewGuid().ToString("N")[..8]);
+            _tempDirectory = Path.Combine(Path.GetTempPath(), "ClassicUO_PluginSystemTests", Guid.NewGuid().ToString("N").Substring(0, 8));
             Directory.CreateDirectory(_tempDirectory);
             _testPluginPath = Path.Combine(_tempDirectory, "ClassicUOTestPlugin.dll");
         }
