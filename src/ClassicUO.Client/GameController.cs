@@ -91,7 +91,7 @@ namespace ClassicUO
             _filter = HandleSdlEvent;
             SDL_SetEventFilter(_filter, IntPtr.Zero);
 
-            SDL_StartTextInput(Window.Handle);
+            Microsoft.Xna.Framework.Input.TextInputEXT.StartTextInput();
 
             base.Initialize();
         }
