@@ -18,7 +18,7 @@ using ClassicUO.Utility.Platforms;
 using CUO_API;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using SDL2;
+using SDL3;
 
 namespace ClassicUO.Network
 {
@@ -169,15 +169,13 @@ namespace ClassicUO.Network
             _get_tile_data = GetTileData;
             _get_cliloc = GetCliloc;
 
-            SDL.SDL_SysWMinfo info = new SDL.SDL_SysWMinfo();
-            SDL.SDL_VERSION(out info.version);
-            SDL.SDL_GetWindowWMInfo(Client.Game.Window.Handle, ref info);
-
             IntPtr hwnd = IntPtr.Zero;
-
-            if (info.subsystem == SDL.SDL_SYSWM_TYPE.SDL_SYSWM_WINDOWS)
+            if (CUOEnviroment.IsWindows)
             {
-                hwnd = info.info.win.window;
+                hwnd = SDL.SDL_GetPointerProperty(
+                    SDL.SDL_GetWindowProperties(Client.Game.Window.Handle),
+                    SDL.SDL_PROP_WINDOW_WIN32_HWND_POINTER, IntPtr.Zero
+                );
             }
 
             PluginHeader header = new PluginHeader
