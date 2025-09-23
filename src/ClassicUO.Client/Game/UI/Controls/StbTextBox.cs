@@ -10,7 +10,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
-using SDL2;
+using SDL3;
 using StbTextEditSharp;
 
 namespace ClassicUO.Game.UI.Controls
@@ -505,7 +505,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     break;
 
-                case SDL.SDL_Keycode.SDLK_a when Keyboard.Ctrl && !NoSelection:
+                case SDL.SDL_Keycode.SDLK_A when Keyboard.Ctrl && !NoSelection:
                     SelectAll();
 
                     break;
@@ -521,7 +521,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     break;
 
-                case SDL.SDL_Keycode.SDLK_c when Keyboard.Ctrl && !NoSelection:
+                case SDL.SDL_Keycode.SDLK_C when Keyboard.Ctrl && !NoSelection:
                     int selectStart = Math.Min(Stb.SelectStart, Stb.SelectEnd);
                     int selectEnd = Math.Max(Stb.SelectStart, Stb.SelectEnd);
 
@@ -532,7 +532,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     break;
 
-                case SDL.SDL_Keycode.SDLK_x when Keyboard.Ctrl && !NoSelection:
+                case SDL.SDL_Keycode.SDLK_X when Keyboard.Ctrl && !NoSelection:
                     selectStart = Math.Min(Stb.SelectStart, Stb.SelectEnd);
                     selectEnd = Math.Max(Stb.SelectStart, Stb.SelectEnd);
 
@@ -548,17 +548,17 @@ namespace ClassicUO.Game.UI.Controls
 
                     break;
 
-                case SDL.SDL_Keycode.SDLK_v when Keyboard.Ctrl && IsEditable:
+                case SDL.SDL_Keycode.SDLK_V when Keyboard.Ctrl && IsEditable:
                     OnTextInput(StringHelper.GetClipboardText(Multiline));
 
                     break;
 
-                case SDL.SDL_Keycode.SDLK_z when Keyboard.Ctrl && IsEditable:
+                case SDL.SDL_Keycode.SDLK_Z when Keyboard.Ctrl && IsEditable:
                     stb_key = ControlKeys.Undo;
 
                     break;
 
-                case SDL.SDL_Keycode.SDLK_y when Keyboard.Ctrl && IsEditable:
+                case SDL.SDL_Keycode.SDLK_Y when Keyboard.Ctrl && IsEditable:
                     stb_key = ControlKeys.Redo;
 
                     break;

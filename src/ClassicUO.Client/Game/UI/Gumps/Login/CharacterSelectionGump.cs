@@ -11,7 +11,7 @@ using ClassicUO.Input;
 using ClassicUO.Assets;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
-using SDL2;
+using SDL3;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {

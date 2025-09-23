@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Security;
 using System.Text;
-using SDL2;
+using SDL3;
 
 namespace ClassicUO.Utility
 {
@@ -287,7 +287,7 @@ namespace ClassicUO.Utility
 
         public static string GetClipboardText(bool multiline)
         {
-            if (SDL.SDL_HasClipboardText() != SDL.SDL_bool.SDL_FALSE)
+            if (SDL.SDL_HasClipboardText())
             {
                 string s = multiline ? SDL.SDL_GetClipboardText() : SDL.SDL_GetClipboardText()?.Replace('\n', ' ') ?? null;
 
