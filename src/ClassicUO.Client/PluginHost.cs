@@ -2,7 +2,7 @@
 using ClassicUO.Game;
 using ClassicUO.Network;
 using Microsoft.Xna.Framework.Graphics;
-using SDL2;
+using SDL3;
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
@@ -360,7 +360,7 @@ namespace ClassicUO
         public bool Hotkey(int key, int mod, bool pressed);
         public void Mouse(int button, int wheel);
         public void GetCommandList(out IntPtr listPtr, out int listCount);
-        public unsafe int SdlEvent(SDL2.SDL.SDL_Event* ev);
+        public unsafe int SdlEvent(SDL3.SDL.SDL_Event* ev);
         public void UpdatePlayerPosition(int x, int y, int z);
         public bool PacketIn(ArraySegment<byte> buffer);
         public bool PacketOut(Span<byte> buffer);
