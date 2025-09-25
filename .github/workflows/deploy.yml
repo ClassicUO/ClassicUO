@@ -92,7 +92,7 @@ jobs:
         uses: signpath/github-action-submit-signing-request@v1
         with:
           api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
-          organization-id: 'ClassicUO'
+          organization-id: '8da8dbcb-06bc-4fd9-b049-387482dc5fb6'
           project-slug: 'ClassicUO'
           signing-policy-slug: 'test-signing'
           github-artifact-id: '${{ steps.upload-unsigned-artifact.outputs.artifact-id }}'
