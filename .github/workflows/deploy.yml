@@ -103,6 +103,7 @@ jobs:
           output-artifact-directory: 'signed/'
 
       - name: Create signed package
+        if: matrix.os == 'windows-latest'
         uses: thedoctor0/zip-release@master
         with:
           type: "zip"
