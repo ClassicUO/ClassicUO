@@ -86,6 +86,7 @@ jobs:
         id: upload-unsigned-artifact
         uses: actions/upload-artifact@v4
         with: 
+          name: "${{ env.CUO_ZIP_NAME }}"
           path: "upload/${{ env.CUO_ZIP_NAME }}"
 
       - id: SignPath
