@@ -87,8 +87,9 @@ jobs:
         uses: actions/upload-artifact@v4
         with: 
           path: "upload/${{ env.CUO_ZIP_NAME }}"
-    
+
       - id: SignPath
+        if: matrix.os == 'windows-latest'
         uses: signpath/github-action-submit-signing-request@v1
         with:
           api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
@@ -97,9 +98,10 @@ jobs:
           signing-policy-slug: 'test-signing'
           github-artifact-id: '${{ steps.upload-unsigned-artifact.outputs.artifact-id }}'
           wait-for-completion: true
-          output-artifact-directory: '/signed/'
+          output-artifact-directory: 'signed/'
 
-      - name: Upload Release
+      - name: Upload Release (Windows signed)
+        if: matrix.os == 'windows-latest'
         uses: ncipollo/release-action@v1
         with:
           artifacts: "signed/${{ env.CUO_ZIP_NAME }}"
@@ -111,6 +113,21 @@ jobs:
           tag: "ClassicUO-dev-release"
           token: ${{ secrets.GITHUB_TOKEN }}
           commit: ${{ github.sha }}
+
+      - name: Upload Release (Unsigned)
+        if: matrix.os != 'windows-latest'
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "upload/${{ env.CUO_ZIP_NAME }}"
+          name: "ClassicUO dev preview"
+          body: "This build may not be safe: use it at your own risk."
+          draft: false
+          prerelease: true
+          allowUpdates: true
+          tag: "ClassicUO-dev-release"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit: ${{ github.sha }}
+
 
   #   - name: Repo Preparation - clone
   #     uses: actions/checkout@master
