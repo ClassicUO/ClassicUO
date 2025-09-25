@@ -102,6 +102,14 @@ jobs:
           wait-for-completion: true
           output-artifact-directory: 'signed/'
 
+      - name: Create signed package
+        uses: thedoctor0/zip-release@master
+        with:
+          type: "zip"
+          directory: signed
+          filename: ${{ env.CUO_ZIP_NAME }}
+          exclusions: "*.zip manifest.xml"
+
       - name: Upload Release (Windows signed)
         if: matrix.os == 'windows-latest'
         uses: ncipollo/release-action@v1
