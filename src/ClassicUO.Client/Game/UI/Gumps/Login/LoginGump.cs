@@ -10,7 +10,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
-using SDL2;
+using SDL3;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {

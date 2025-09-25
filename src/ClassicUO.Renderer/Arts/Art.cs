@@ -1,9 +1,11 @@
 using ClassicUO.Assets;
+using ClassicUO.Renderer.Lights;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using SDL2;
+using SDL3;
+using SixLabors.ImageSharp.PixelFormats;
 using System;
 using static ClassicUO.Renderer.UltimaBatcher2D;
 
@@ -113,14 +115,12 @@ namespace ClassicUO.Renderer.Arts
             fixed (uint* ptr = artInfo.Pixels)
             {
                 SDL.SDL_Surface* surface = (SDL.SDL_Surface*)
-                    SDL.SDL_CreateRGBSurfaceWithFormatFrom(
-                        (IntPtr)ptr,
+                    SDL.SDL_CreateSurfaceFrom(
                         artInfo.Width,
                         artInfo.Height,
-                        32,
-                        4 * artInfo.Width,
-                        SDL.SDL_PIXELFORMAT_ABGR8888
-                    );
+                        SDL.SDL_PixelFormat.SDL_PIXELFORMAT_ABGR8888,
+                        (IntPtr)ptr,
+                        4 * artInfo.Width);
 
                 int stride = surface->pitch >> 2;
                 uint* pixels_ptr = (uint*)surface->pixels;
