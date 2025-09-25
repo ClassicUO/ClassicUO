@@ -82,10 +82,27 @@ jobs:
           git tag -f ClassicUO-dev-release
           git push -f origin ClassicUO-dev-release
 
+      - name: upload-unsigned-artifact
+        id: upload-unsigned-artifact
+        uses: actions/upload-artifact@v4
+        with: 
+          path: "upload/${{ env.CUO_ZIP_NAME }}"
+    
+      - id: SignPath
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
+          organization-id: 'ClassicUO'
+          project-slug: 'ClassicUO'
+          signing-policy-slug: 'test-signing'
+          github-artifact-id: '${{ steps.upload-unsigned-artifact.outputs.artifact-id }}'
+          wait-for-completion: true
+          output-artifact-directory: '/signed/'
+
       - name: Upload Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "upload/${{ env.CUO_ZIP_NAME }}"
+          artifacts: "signed/${{ env.CUO_ZIP_NAME }}"
           name: "ClassicUO dev preview"
           body: "This build may not be safe: use it at your own risk."
           draft: false
