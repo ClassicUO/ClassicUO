@@ -111,7 +111,8 @@ namespace ClassicUO.Game.Map
                 }
             }
 
-            if (im.StaticAddress != 0 && im.StaticCount > 0)
+            //If Ultima Live is on, the statics of the first map block explored could be saved to StaticAdress 0, because the static file could be empty, so we can't check StaticAdress != 0
+            if (im.StaticAddress >= 0 && im.StaticCount > 0)
             {
                 var staticsBlockBuffer = ArrayPool<StaticsBlock>.Shared.Rent((int)im.StaticCount);
                 var staticsSpan = staticsBlockBuffer.AsSpan(0, (int)im.StaticCount);
