@@ -16,6 +16,8 @@
     <None Remove="gumpartassets\40311.png" />
     <None Remove="gumpartassets\40312.png" />
     <None Remove="gumpartassets\modern-paperdollgump.png" />
+    <None Remove="gumpartassets\loginbg.png" />
+    <None Remove="gumpartassets\logodust.png" />
     <None Remove="Roboto-Regular.ttf" />
   </ItemGroup>
 
@@ -31,6 +33,8 @@
     <EmbeddedResource Include="gumpartassets\40311.png" />
     <EmbeddedResource Include="gumpartassets\40312.png" />
     <EmbeddedResource Include="gumpartassets\modern-paperdollgump.png" />
+    <EmbeddedResource Include="gumpartassets\loginbg.png" />
+    <EmbeddedResource Include="gumpartassets\logodust.png" />
     <EmbeddedResource Include="Roboto-Regular.ttf" />
   </ItemGroup>
 
@@ -43,5 +47,18 @@
   <ItemGroup>
     <PackageReference Update="System.Text.Json" Version="8.0.5" />
   </ItemGroup>
+
+  <Target Name="CopyExternalImages" AfterTargets="Build">
+    <ItemGroup>
+      <ExternalImages Include="gumpartassets\loginbg.png" />
+      <ExternalImages Include="gumpartassets\logodust.png" />
+    </ItemGroup>
+    
+    <MakeDir Directories="$(OutputPath)ExternalImages" />
+    
+    <Copy SourceFiles="@(ExternalImages)" 
+          DestinationFiles="@(ExternalImages->'$(OutputPath)ExternalImages\%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
+  </Target>
 
 </Project>

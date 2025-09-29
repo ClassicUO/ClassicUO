@@ -380,20 +380,15 @@ namespace ClassicUO.Game.UI.Controls
                 }
 
                 // Desenhar fundo do dropdown
-                Color baseColor = Color.DarkRed;
-                Color shadowColor = new Color(80, 15, 15);
+                Color baseColor = new Color(0, 0, 0, (byte)(255)); // Preto com opacity 0.87
+                Color shadowColor = new Color(0, 0, 0, (byte)(255));
                 Color highlightColor = new Color(180, 50, 50);
 
                 // Sombra (fundo escuro atrás)
-                batcher.Draw(_pixelTexture, new Rectangle(x + 2, y + 2, Width, Height), 
-                    new Vector3(shadowColor.R / 255f, shadowColor.G / 255f, shadowColor.B / 255f));
+                batcher.Draw(SolidColorTextureCache.GetTexture(shadowColor), new Rectangle(x + 2, y + 2, Width, Height), Vector3.Zero);
 
                 // Fundo principal sólido
-                for (int i = 0; i < Height; i++)
-                {
-                    batcher.Draw(_pixelTexture, new Rectangle(x, y + i, Width, 1), 
-                        new Vector3(baseColor.R / 255f, baseColor.G / 255f, baseColor.B / 255f));
-                }
+                batcher.Draw(SolidColorTextureCache.GetTexture(baseColor), new Rectangle(x, y, Width, Height), Vector3.Zero);
 
                 // Bordas
                 // Superior

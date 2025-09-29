@@ -10,6 +10,7 @@
     <AssemblyVersion>2.0.9</AssemblyVersion>
     <FileVersion>2.0.9</FileVersion>
     <Copyright>Dust765.4</Copyright>
+    <StartupObject></StartupObject>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
