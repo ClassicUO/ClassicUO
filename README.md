@@ -2,7 +2,7 @@
   <img src="src/ClassicUO.Assets/gumpartassets/logodust.png" alt="Legion Logo" width="200"/>
 
   [![.NET Framework](https://img.shields.io/badge/.NET-Framework%204.8-blue.svg)](https://dotnet.microsoft.com/download/dotnet-framework/net48)
-  [![FNA](https://img.shields.io/badge/FNA-25.09-green.svg)](https://github.com/FNA-XNA/FNA)
+  [![FNA](https://img.shields.io/badge/FNA-21.10-green.svg)](https://github.com/FNA-XNA/FNA)
   [![Cross-Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-orange.svg)](https://github.com/andreakarasho/ClassicUO)
   [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.md)
 
@@ -20,7 +20,7 @@ Welcome to the **Dust765** project - where we don't just break barriers, we **ob
 
 Discord: dust765#2787
 
-Dust765: 7 Link, 6 Gaechti, 5 Syrupz and jsebold666
+Dust765: 7 Link, 6 Gaechti, 5 Syrupz and jsebold666 (astraroth)
 
 **What makes us different?**
 
