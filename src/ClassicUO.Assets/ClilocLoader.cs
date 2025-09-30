@@ -5,14 +5,14 @@ using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ClassicUO.Assets
 {
     public sealed class ClilocLoader : UOFileLoader
     {
+        private const string MISSING_CLILOC_TEXT = "MegaCliloc: missing {0} [~1_val~] [~2_val~]";
         private string _cliloc;
         private readonly Dictionary<int, string> _entries = new Dictionary<int, string>();
 
@@ -96,50 +96,31 @@ namespace ClassicUO.Assets
             _entries.Clear();
         }
 
-        public string GetString(int number)
+        [return: NotNull]
+        public string GetString(int clilocNum, string fallback = null)
         {
-            _entries.TryGetValue(number, out string text);
+            _entries.TryGetValue(clilocNum, out string text);
+
+            return text ?? fallback ?? string.Format(MISSING_CLILOC_TEXT, clilocNum);
+        }
+
+        [return: NotNull]
+        public string GetString(int clilocNum, bool camelcase, string fallback = "")
+        {
+            string text = GetString(clilocNum, fallback);
+
+            if (camelcase)
+            {
+                return StringHelper.CapitalizeAllWords(text);
+            }
 
             return text;
         }
 
-        public string GetString(int number, string replace)
-        {
-            string s = GetString(number);
-
-            if (string.IsNullOrEmpty(s))
-            {
-                s = replace;
-            }
-
-            return s;
-        }
-
-        public string GetString(int number, bool camelcase, string replace = "")
-        {
-            string s = GetString(number);
-
-            if (string.IsNullOrEmpty(s) && !string.IsNullOrEmpty(replace))
-            {
-                s = replace;
-            }
-
-            if (camelcase && !string.IsNullOrEmpty(s))
-            {
-                s = StringHelper.CapitalizeAllWords(s);
-            }
-
-            return s;
-        }
-
+        [return: NotNull]
         public unsafe string Translate(int clilocNum, string arg = "", bool capitalize = false)
         {
             string baseCliloc = GetString(clilocNum);
-
-            if (baseCliloc == null)
-            {
-                return null;
-            }
 
             if (arg == null)
             {
