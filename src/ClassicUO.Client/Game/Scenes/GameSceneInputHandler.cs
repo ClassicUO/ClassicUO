@@ -87,6 +87,62 @@ namespace ClassicUO.Game.Scenes
             return false;
         }
 
+        private bool MoveCharByController()
+        {
+            const float THRESHOLD = 0.3f;
+
+            Microsoft.Xna.Framework.Input.GamePadState gamePadState = Microsoft.Xna.Framework.Input.GamePad.GetState(PlayerIndex.One);
+
+            if (gamePadState.IsConnected && gamePadState.ThumbSticks.Left != Vector2.Zero && _world.InGame)
+            {
+                var dir = gamePadState.ThumbSticks.Left;
+                bool run = dir.X > 0.5 || dir.Y > 0.5 || dir.X < -0.5 || dir.Y < -0.5;
+
+                if (dir.X > THRESHOLD && dir.Y > THRESHOLD) // North
+                {
+                    _world.Player.Walk(Direction.North, run);
+                    return true;
+                }
+                if (dir.X < -THRESHOLD && dir.Y < -THRESHOLD) // South
+                {
+                    _world.Player.Walk(Direction.South, run);
+                    return true;
+                }
+                if (dir.X < -THRESHOLD && dir.Y > THRESHOLD) // Left
+                {
+                    _world.Player.Walk(Direction.West, run);
+                    return true;
+                }
+                if (dir.X > THRESHOLD && dir.Y < -THRESHOLD) // Left
+                {
+                    _world.Player.Walk(Direction.East, run);
+                    return true;
+                }
+
+                if (dir.X < THRESHOLD && dir.Y > THRESHOLD) //Up
+                {
+                    _world.Player.Walk(Direction.Up, run);
+                    return true;
+                }
+                if (dir.X < THRESHOLD && dir.Y < -THRESHOLD) //Down
+                {
+                    _world.Player.Walk(Direction.Down, run);
+                    return true;
+                }
+                if (dir.X > THRESHOLD && dir.Y < THRESHOLD) // Right
+                {
+                    _world.Player.Walk(Direction.Right, run);
+                    return true;
+                }
+                if (dir.X < -THRESHOLD && dir.Y < THRESHOLD) // Left
+                {
+                    _world.Player.Walk(Direction.Left, run);
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private bool CanDragSelectOnObject(GameObject obj)
         {
             return obj is null
@@ -1505,6 +1561,20 @@ namespace ClassicUO.Game.Scenes
                 else
                 {
                     GameActions.ToggleWarMode(_world.Player);
+                }
+            }
+        }
+
+        internal override void OnControllerButtonDown(SDL.SDL_ControllerButtonEvent e)
+        {
+            base.OnControllerButtonDown(e);
+
+            if (_world.InGame)
+            {
+                Macro macro = _world.Macros.FindMacro((SDL.SDL_GameControllerButton)e.button);
+                if (macro != null && macro.Items is MacroObject mac)
+                {
+                    ExecuteMacro(mac);
                 }
             }
         }
