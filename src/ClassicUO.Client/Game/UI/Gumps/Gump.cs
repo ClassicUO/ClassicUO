@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Xml;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.Renderer;
-using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using System;
+using System.Collections.Generic;
+using System.Xml;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -130,9 +128,9 @@ namespace ClassicUO.Game.UI.Gumps
             Location = position;
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            return IsVisible && base.Draw(batcher, x, y);
+            return IsVisible && base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
         }
 
         public override void OnButtonClick(int buttonID)

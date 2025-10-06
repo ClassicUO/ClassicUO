@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -11,13 +8,16 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -4331,34 +4331,41 @@ namespace ClassicUO.Game.UI.Gumps
             _gameWindowHeight.SetText(camera.Bounds.Height.ToString());
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
+            float layerDepth = layerDepthRef;
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-            batcher.Draw
-            (
-                LogoTexture,
-                new Rectangle
+            renderLists.AddGumpNoAtlas(batcher =>
+            {
+                batcher.Draw
                 (
-                    x + 190,
-                    y + 20,
-                    WIDTH - 250,
-                    400
-                ),
-                hueVector
-            );
+                    LogoTexture,
+                    new Rectangle
+                    (
+                        x + 190,
+                        y + 20,
+                        WIDTH - 250,
+                        400
+                    ),
+                    hueVector,
+                    layerDepth
+                );
 
-            batcher.DrawRectangle
-            (
-                SolidColorTextureCache.GetTexture(Color.Gray),
-                x,
-                y,
-                Width,
-                Height,
-                hueVector
-            );
+                batcher.DrawRectangle
+                (
+                    SolidColorTextureCache.GetTexture(Color.Gray),
+                    x,
+                    y,
+                    Width,
+                    Height,
+                    hueVector,
+                    layerDepth
+                );
+                return true;
+            });
 
-            return base.Draw(batcher, x, y);
+            return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
         }
 
         private InputField AddInputField
@@ -4789,15 +4796,21 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(_textbox);
             }
 
-            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
             {
-                if (batcher.ClipBegin(x, y, Width, Height))
+                float layerDepth = layerDepthRef;
+                renderLists.AddGumpNoAtlas(batcher =>
                 {
-                    base.Draw(batcher, x, y);
+                    if (batcher.ClipBegin(x, y, Width, Height))
+                    {
+                        RenderLists childRenderLists = new();
+                        base.AddToRenderLists(childRenderLists, x, y, ref layerDepth);
 
-                    batcher.ClipEnd();
-                }
-
+                        childRenderLists.DrawRenderLists(batcher, sbyte.MaxValue);
+                        batcher.ClipEnd();
+                    }
+                    return true;
+                });
                 return true;
             }
 

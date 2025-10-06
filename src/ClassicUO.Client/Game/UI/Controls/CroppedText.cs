@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System.Collections.Generic;
-using ClassicUO.Renderer;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Utility;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -34,11 +34,19 @@ namespace ClassicUO.Game.UI.Controls
             IsFromServer = true;
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            _gameText.Draw(batcher, x, y);
+            float layerDepth = layerDepthRef;
+            renderLists.AddGumpNoAtlas
+            (
+                (batcher) =>
+                {
+                    _gameText.Draw(batcher, x, y, layerDepth);
+                    return true;
+                }
+            );
 
-            return base.Draw(batcher, x, y);
+            return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
         }
 
         public override void Dispose()

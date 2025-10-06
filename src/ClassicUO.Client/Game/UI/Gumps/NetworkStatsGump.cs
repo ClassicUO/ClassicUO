@@ -1,14 +1,14 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Text;
-using System.Xml;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using System;
+using System.Xml;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -107,12 +107,13 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            if (!base.Draw(batcher, x, y))
+            if (!base.AddToRenderLists(renderLists, x, y, ref layerDepthRef))
             {
                 return false;
             }
+            float layerDepth = layerDepthRef;
 
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
@@ -135,13 +136,20 @@ namespace ClassicUO.Game.UI.Gumps
 
             hueVector.Y = 1;
 
-            batcher.DrawString
-            (
-                Fonts.Bold,
-                _cacheText,
-                x + 10,
-                y + 10,
-                hueVector
+            renderLists.AddGumpNoAtlas(
+                batcher =>
+                {
+                    batcher.DrawString
+                    (
+                        Fonts.Bold,
+                        _cacheText,
+                        x + 10,
+                        y + 10,
+                        hueVector,
+                        layerDepth
+                    );
+                    return true;
+                }
             );
 
             return true;

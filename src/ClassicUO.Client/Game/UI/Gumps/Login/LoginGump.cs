@@ -1,11 +1,11 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
@@ -642,11 +642,11 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 }
             }
 
-            protected override void DrawCaret(UltimaBatcher2D batcher, int x, int y)
+            protected override void DrawCaret(UltimaBatcher2D batcher, int x, int y, float layerDepth)
             {
                 if (HasKeyboardFocus)
                 {
-                    _rendererCaret.Draw(batcher, x + _caretScreenPosition.X, y + _caretScreenPosition.Y);
+                    _rendererCaret.Draw(batcher, x + _caretScreenPosition.X, y + _caretScreenPosition.Y, layerDepth);
                 }
             }
 
@@ -706,17 +706,24 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 _caretScreenPosition = _rendererText.GetCaretPosition(Stb.CursorIndex);
             }
 
-            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
             {
-                if (batcher.ClipBegin(x, y, Width, Height))
-                {
-                    DrawSelection(batcher, x, y);
+                float layerDepth = layerDepthRef;
+                renderLists.AddGumpNoAtlas(
+                    batcher =>
+                    {
+                        if (batcher.ClipBegin(x, y, Width, Height))
+                        {
+                            DrawSelection(batcher, x, y, layerDepth);
 
-                    _rendererText.Draw(batcher, x, y);
+                            _rendererText.Draw(batcher, x, y, layerDepth);
 
-                    DrawCaret(batcher, x, y);
-                    batcher.ClipEnd();
-                }
+                            DrawCaret(batcher, x, y, layerDepth);
+                            batcher.ClipEnd();
+                        }
+                        return true;
+                    }
+                );
 
                 return true;
             }

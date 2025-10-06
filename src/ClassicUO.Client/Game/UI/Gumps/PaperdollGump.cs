@@ -1,7 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Xml;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -9,11 +7,11 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
-using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using System;
+using System.Xml;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -805,7 +803,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+                public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
                 {
                     Item item = _gump.World.Items.Get(LocalSerial);
 
@@ -828,23 +826,34 @@ namespace ClassicUO.Game.UI.Gumps
 
                     ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(item.DisplayedGraphic);
 
-                    if (artInfo.Texture != null)
+                    var texture = artInfo.Texture;
+                    if (texture != null)
                     {
-                        batcher.Draw(
-                            artInfo.Texture,
-                            new Rectangle(
-                                x + _point.X,
-                                y + _point.Y,
-                                _originalSize.X,
-                                _originalSize.Y
-                            ),
-                            new Rectangle(
-                                artInfo.UV.X + _rect.X,
-                                artInfo.UV.Y + _rect.Y,
-                                _rect.Width,
-                                _rect.Height
-                            ),
-                            hueVector
+                        float layerDepth = layerDepthRef;
+                        var sourceRectangle = artInfo.UV;
+                        renderLists.AddGumpWithAtlas
+                        (
+                            (batcher) =>
+                            {
+                                batcher.Draw(
+                                    texture,
+                                    new Rectangle(
+                                        x + _point.X,
+                                        y + _point.Y,
+                                        _originalSize.X,
+                                        _originalSize.Y
+                                    ),
+                                    new Rectangle(
+                                        sourceRectangle.X + _rect.X,
+                                        sourceRectangle.Y + _rect.Y,
+                                        _rect.Width,
+                                        _rect.Height
+                                    ),
+                                    hueVector,
+                                    layerDepth
+                                );
+                                return true;
+                            }
                         );
 
                         return true;

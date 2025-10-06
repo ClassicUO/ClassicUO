@@ -1,6 +1,5 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
@@ -35,8 +34,9 @@ namespace ClassicUO
         private double _totalElapsed, _currentFpsTime;
         private uint _totalFrames;
         private UltimaBatcher2D _uoSpriteBatch;
+        private RenderTargets _renderTargets = new();
+        private readonly RenderLists _renderLists = new();
         private bool _suppressedDraw;
-        private Texture2D _background;
         private bool _pluginsInitialized = false;
 
         public GameController(IPluginHost pluginHost)
@@ -106,8 +106,7 @@ namespace ClassicUO
 
             var bytes = Loader.GetBackgroundImage().ToArray();
             using var ms = new MemoryStream(bytes);
-            _background = Texture2D.FromStream(GraphicsDevice, ms);
-
+            _renderTargets.InitializeBackground(Texture2D.FromStream(GraphicsDevice, ms));
 #if false
             SetScene(new MainScene(this));
 #else
@@ -332,9 +331,9 @@ namespace ClassicUO
 
         protected override void Update(GameTime gameTime)
         {
-            if (Profiler.InContext("OutOfContext"))
+            if (Profiler.InContext(Profiler.ProfilerContext.OUT_OF_CONTEXT))
             {
-                Profiler.ExitContext("OutOfContext");
+                Profiler.ExitContext(Profiler.ProfilerContext.OUT_OF_CONTEXT);
             }
 
             Time.Ticks = (uint)gameTime.TotalGameTime.TotalMilliseconds;
@@ -352,9 +351,9 @@ namespace ClassicUO
 
             if (Scene != null && Scene.IsLoaded && !Scene.IsDestroyed)
             {
-                Profiler.EnterContext("Update");
+                Profiler.EnterContext(Profiler.ProfilerContext.UPDATE_WORLD);
                 Scene.Update();
-                Profiler.ExitContext("Update");
+                Profiler.ExitContext(Profiler.ProfilerContext.UPDATE_WORLD);
             }
 
             UIManager.Update();
@@ -415,39 +414,34 @@ namespace ClassicUO
 
         protected override void Draw(GameTime gameTime)
         {
+            _renderTargets.EnsureSizes(
+                GraphicsDevice,
+                new Rectangle(0, 0, GraphicManager.PreferredBackBufferWidth, GraphicManager.PreferredBackBufferHeight),
+                Scene.Camera.Bounds,
+                DpiScale
+            );
+
             Profiler.EndFrame();
             Profiler.BeginFrame();
 
-            if (Profiler.InContext("OutOfContext"))
+            if (Profiler.InContext(Profiler.ProfilerContext.OUT_OF_CONTEXT))
             {
-                Profiler.ExitContext("OutOfContext");
+                Profiler.ExitContext(Profiler.ProfilerContext.OUT_OF_CONTEXT);
             }
 
-            Profiler.EnterContext("RenderFrame");
+            Profiler.EnterContext(Profiler.ProfilerContext.RENDER_FRAME);
 
             _totalFrames++;
 
             GraphicsDevice.Clear(Color.Black);
 
-            _uoSpriteBatch.Begin();
-            var rect = new Rectangle(
-                0,
-                0,
-                GraphicManager.PreferredBackBufferWidth,
-                GraphicManager.PreferredBackBufferHeight
-            );
-            _uoSpriteBatch.DrawTiled(
-                _background,
-                rect,
-                _background.Bounds,
-                new Vector3(0, 0, 0.1f)
-            );
-            _uoSpriteBatch.End();
-
             if (Scene != null && Scene.IsLoaded && !Scene.IsDestroyed)
             {
-                Scene.Draw(_uoSpriteBatch);
+                Scene.Draw(_uoSpriteBatch, _renderTargets);
             }
+
+            _uoSpriteBatch.GraphicsDevice.SetRenderTarget(_renderTargets.UiRenderTarget);
+            GraphicsDevice.Clear(Color.Transparent);
 
             UIManager.Draw(_uoSpriteBatch);
 
@@ -470,12 +464,21 @@ namespace ClassicUO
             UO.GameCursor?.Draw(_uoSpriteBatch);
             _uoSpriteBatch.End();
 
-            Profiler.ExitContext("RenderFrame");
-            Profiler.EnterContext("OutOfContext");
+            _uoSpriteBatch.GraphicsDevice.SetRenderTarget(null);
+
+            _renderTargets.Draw(_uoSpriteBatch);
+
+            Profiler.ExitContext(Profiler.ProfilerContext.RENDER_FRAME);
+            Profiler.EnterContext(Profiler.ProfilerContext.OUT_OF_CONTEXT);
 
             Plugin.ProcessDrawCmdList(GraphicsDevice);
 
             base.Draw(gameTime);
+        }
+
+        public float DpiScale
+        {
+            get => SDL_GetWindowDisplayScale(Window.Handle);
         }
 
         protected override bool BeginDraw()

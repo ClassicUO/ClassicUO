@@ -127,10 +127,10 @@ namespace ClassicUO.Input
                 Position.Y = (int)y;
             }
 
-            // Scale the mouse coordinates for the faux-backbuffer
-            Position.X = (int) ((double) Position.X * Client.Game.GraphicManager.PreferredBackBufferWidth / Client.Game.Window.ClientBounds.Width);
+            // Scale the mouse coordinates for the faux-backbuffer and DPI settings
+            Position.X = (int) ((double) Position.X * (Client.Game.GraphicManager.PreferredBackBufferWidth / Client.Game.Window.ClientBounds.Width) / Client.Game.DpiScale);
 
-            Position.Y = (int) ((double) Position.Y * Client.Game.GraphicManager.PreferredBackBufferHeight / Client.Game.Window.ClientBounds.Height);
+            Position.Y = (int) ((double) Position.Y * (Client.Game.GraphicManager.PreferredBackBufferHeight / Client.Game.Window.ClientBounds.Height) / Client.Game.DpiScale);
 
             IsDragging = LButtonPressed || RButtonPressed || MButtonPressed;
         }

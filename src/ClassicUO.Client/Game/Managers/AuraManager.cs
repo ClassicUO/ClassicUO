@@ -1,11 +1,11 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
 using ClassicUO.Configuration;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace ClassicUO.Game.Managers
 {
@@ -30,6 +30,8 @@ namespace ClassicUO.Game.Managers
 
         public void Draw(UltimaBatcher2D batcher, int x, int y, ushort hue, float depth)
         {
+            int yBump = -5;
+
             if (_texture == null || _texture.IsDisposed)
             {
                 var w = _radius * 2;
@@ -47,7 +49,8 @@ namespace ClassicUO.Game.Managers
             Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue, false, 1);
 
             batcher.SetBlendState(_blend.Value);
-            batcher.Draw(_texture, new Vector2(x, y), null, hueVec, 0f, Vector2.Zero, 1f, SpriteEffects.None, depth);
+            batcher.Draw(_texture, new Rectangle(x, y + yBump, _radius * 2, _radius - yBump), new Rectangle(0, 0, _radius * 2, _radius - yBump), hueVec, depth + 1f);
+            batcher.Draw(_texture, new Rectangle(x, y + _radius, _radius * 2, _radius + yBump), new Rectangle(0, _radius - yBump, _radius * 2, _radius + yBump), hueVec, depth + 1.49f);
             batcher.SetBlendState(null);
         }
 
@@ -72,7 +75,7 @@ namespace ClassicUO.Game.Managers
 
                     var opacityFactor = 1f - distance / (float)radius;
 
-                    blendedColors[x + y * width] = new Color(opacityFactor, opacityFactor, opacityFactor, opacityFactor);
+                    blendedColors[x + y * width] = Color.White * opacityFactor;
                 }
             }
 
@@ -97,7 +100,7 @@ namespace ClassicUO.Game.Managers
         public AuraManager(World world)
         {
             _world = world;
-            _aura = new Aura(30);
+            _aura = new Aura(40);
         }
 
         public bool IsEnabled
