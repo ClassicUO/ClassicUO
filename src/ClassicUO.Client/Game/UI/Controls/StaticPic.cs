@@ -1,10 +1,10 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System.Collections.Generic;
-using ClassicUO.Assets;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -57,23 +57,34 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
+            float layerDepth = layerDepthRef;
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, IsPartialHue, 1);
 
             ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(Graphic);
 
-            if (artInfo.Texture != null)
+            var texture = artInfo.Texture;
+            if (texture != null)
             {
-                batcher.Draw(
-                    artInfo.Texture,
-                    new Rectangle(x, y, Width, Height),
-                    artInfo.UV,
-                    hueVector
+                var sourceRectangle = artInfo.UV;
+                renderLists.AddGumpWithAtlas
+                (
+                    (batcher) =>
+                    {
+                        batcher.Draw(
+                            texture,
+                            new Rectangle(x, y, Width, Height),
+                            sourceRectangle,
+                            hueVector,
+                            layerDepth
+                        );
+                        return true;
+                    }
                 );
             }
 
-            return base.Draw(batcher, x, y);
+            return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
         }
 
         public override bool Contains(int x, int y)

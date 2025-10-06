@@ -1,14 +1,15 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System.Collections.Generic;
+using ClassicUO.Assets;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -480,27 +481,36 @@ namespace ClassicUO.Game.UI.Gumps
                 return true;
             }
 
-            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
             {
+                float layerDepth = layerDepthRef;
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
                 if (MouseIsOver)
                 {
-                    batcher.Draw
+                    renderLists.AddGumpNoAtlas
                     (
-                        SolidColorTextureCache.GetTexture(Color.Cyan),
-                        new Rectangle
-                        (
-                            x,
-                            y,
-                            Width,
-                            Height
-                        ),
-                        hueVector
+                        batcher =>
+                        {
+                            batcher.Draw
+                            (
+                                SolidColorTextureCache.GetTexture(Color.Cyan),
+                                new Rectangle
+                                (
+                                    x,
+                                    y,
+                                    Width,
+                                    Height
+                                ),
+                                hueVector,
+                                layerDepth
+                            );
+                            return true;
+                        }
                     );
                 }
 
-                return base.Draw(batcher, x, y);
+                return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
             }
         }
     }

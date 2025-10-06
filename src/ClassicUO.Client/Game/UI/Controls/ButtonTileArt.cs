@@ -1,10 +1,10 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System.Collections.Generic;
-using ClassicUO.Assets;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -39,9 +39,10 @@ namespace ClassicUO.Game.UI.Controls
             _isPartial = Client.Game.UO.FileManager.TileData.StaticData[_graphic].IsPartialHue;
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            base.Draw(batcher, x, y);
+            base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
+            float layerDepth = layerDepthRef;
 
             var hueVector = ShaderHueTranslator.GetHueVector(_hue, _isPartial, 1f);
 
@@ -49,11 +50,21 @@ namespace ClassicUO.Game.UI.Controls
 
             if (artInfo.Texture != null)
             {
-                batcher.Draw(
-                    artInfo.Texture,
-                    new Vector2(x + _tileX, y + _tileY),
-                    artInfo.UV,
-                    hueVector
+                var texture = artInfo.Texture;
+                var sourceRectangle = artInfo.UV;
+                renderLists.AddGumpWithAtlas
+                (
+                    (batcher) =>
+                    {
+                        batcher.Draw(
+                            texture,
+                            new Vector2(x + _tileX, y + _tileY),
+                            sourceRectangle,
+                            hueVector,
+                            layerDepth
+                        );
+                        return true;
+                    }
                 );
 
                 return true;

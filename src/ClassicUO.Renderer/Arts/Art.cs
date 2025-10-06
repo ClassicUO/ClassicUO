@@ -1,13 +1,10 @@
 using ClassicUO.Assets;
-using ClassicUO.Renderer.Lights;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SDL3;
-using SixLabors.ImageSharp.PixelFormats;
 using System;
-using static ClassicUO.Renderer.UltimaBatcher2D;
 
 namespace ClassicUO.Renderer.Arts
 {
@@ -100,7 +97,8 @@ namespace ClassicUO.Renderer.Arts
             int index,
             ushort customHue,
             out int hotX,
-            out int hotY
+            out int hotY,
+            float dpiScale
         )
         {
             hotX = hotY = 0;
@@ -122,11 +120,29 @@ namespace ClassicUO.Renderer.Arts
                         (IntPtr)ptr,
                         4 * artInfo.Width);
 
+                int width = artInfo.Width;
+                int height = artInfo.Height;
+
+                if (dpiScale != 1f)
+                {
+                    width = (int)(artInfo.Width * dpiScale);
+                    height = (int)(artInfo.Height * dpiScale);
+
+                    SDL.SDL_Surface* newSurface = (SDL.SDL_Surface*)SDL.SDL_ScaleSurface(
+                        (nint)surface,
+                        width,
+                        height,
+                        SDL.SDL_ScaleMode.SDL_SCALEMODE_NEAREST);
+
+                    SDL.SDL_DestroySurface((nint)surface);
+                    surface = newSurface;
+                }
+
                 int stride = surface->pitch >> 2;
                 uint* pixels_ptr = (uint*)surface->pixels;
-                uint* p_line_end = pixels_ptr + artInfo.Width;
-                uint* p_img_end = pixels_ptr + stride * artInfo.Height;
-                int delta = stride - artInfo.Width;
+                uint* p_line_end = pixels_ptr + width;
+                uint* p_img_end = pixels_ptr + stride * height;
+                int delta = stride - width;
                 short curX = 0;
                 short curY = 0;
                 Color c = default;
@@ -139,7 +155,7 @@ namespace ClassicUO.Renderer.Arts
                     {
                         if (*pixels_ptr != 0 && *pixels_ptr != 0xFF_00_00_00)
                         {
-                            if (curX >= artInfo.Width - 1 || curY >= artInfo.Height - 1)
+                            if (curX >= width - 1 || curY >= height - 1)
                             {
                                 *pixels_ptr = 0;
                             }

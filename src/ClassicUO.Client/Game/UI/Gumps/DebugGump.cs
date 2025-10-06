@@ -1,7 +1,5 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Xml;
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
@@ -10,6 +8,8 @@ using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using System;
+using System.Xml;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -18,7 +18,7 @@ namespace ClassicUO.Game.UI.Gumps
         private const string DEBUG_STRING_0 = "- FPS: {0} (Min={1}, Max={2}), Zoom: {3:0.00}, Total Objs: {4}\n";
         private const string DEBUG_STRING_1 = "- Mobiles: {0}   Items: {1}   Statics: {2}   Multi: {3}   Lands: {4}   Effects: {5}\n";
         private const string DEBUG_STRING_2 = "- CharPos: {0}\n- Mouse: {1}\n- InGamePos: {2}\n";
-        private const string DEBUG_STRING_3 = "- Selected: {0}";
+        private const string DEBUG_STRING_3 = "- Selected: {0}\n";
 
         private const string DEBUG_STRING_SMALL = "FPS: {0}\nZoom: {1:0.00}";
         private const string DEBUG_STRING_SMALL_NO_ZOOM = "FPS: {0}";
@@ -109,32 +109,27 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (Profiler.Enabled)
                     {
-                        double timeDraw = Profiler.GetContext("RenderFrame").TimeInContext;
+                        double timeDraw = Profiler.GetContext(Profiler.ProfilerContext.RENDER_FRAME).TimeInContext;
+                        double timeDrawWorld = Profiler.GetContext(Profiler.ProfilerContext.RENDER_FRAME_WORLD).TimeInContext;
+                        double timeDrawWorldPrepare = Profiler.GetContext(Profiler.ProfilerContext.RENDER_FRAME_WORLD_PREPARE).TimeInContext;
+                        double timeDrawUi = Profiler.GetContext(Profiler.ProfilerContext.RENDER_FRAME_UI).TimeInContext;
 
-                        double timeUpdate = Profiler.GetContext("Update").TimeInContext;
+                        double timeUpdate = Profiler.GetContext(Profiler.ProfilerContext.UPDATE_WORLD).TimeInContext;
 
-                        double timeFixedUpdate = Profiler.GetContext("FixedUpdate").TimeInContext;
-
-                        double timeOutOfContext = Profiler.GetContext("OutOfContext").TimeInContext;
+                        double timeOutOfContext = Profiler.GetContext(Profiler.ProfilerContext.OUT_OF_CONTEXT).TimeInContext;
 
                         //double timeTotalCheck = timeOutOfContext + timeDraw + timeUpdate;
                         double timeTotal = Profiler.TrackedTime;
 
-                        double avgDrawMs = Profiler.GetContext("RenderFrame").AverageTime;
+                        double avgDrawMs = Profiler.GetContext(Profiler.ProfilerContext.RENDER_FRAME).AverageTime;
 
                         sb.Append("- Profiling\n");
 
                         sb.Append
                         (
-                            string.Format
-                            (
-                                "    Draw:{0:0.0}% Update:{1:0.0}% FixedUpd:{2:0.0} AvgDraw:{3:0.0}ms {4}\n",
-                                100d * (timeDraw / timeTotal),
-                                100d * (timeUpdate / timeTotal),
-                                100d * (timeFixedUpdate / timeTotal),
-                                avgDrawMs,
-                                CUOEnviroment.CurrentRefreshRate
-                            )
+                            $"    - Draw:{100d * (timeDraw / timeTotal):0.0}% (Prepare:{100d * (timeDrawWorldPrepare / timeTotal):0.0}% World:{100d * (timeDrawWorld / timeTotal):0.0}%, UI:{100d * (timeDrawUi / timeTotal):0.0}%)\n" +
+                            $"    - Update:{100d * (timeUpdate / timeTotal):0.0}%\n" +
+                            $"    - AvgDraw:{avgDrawMs:0.0}ms {CUOEnviroment.CurrentRefreshRate} FPS\n"
                         );
                     }
                 }
@@ -167,24 +162,31 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            if (!base.Draw(batcher, x, y))
+            if (!base.AddToRenderLists(renderLists, x, y, ref layerDepthRef))
             {
                 return false;
             }
+            float layerDepth = layerDepthRef;
 
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-            batcher.DrawString
-            (
-                Fonts.Bold,
-                _cacheText,
-                x + 10,
-                y + 10,
-                hueVector
+            renderLists.AddGumpNoAtlas(
+                batcher =>
+                {
+                    batcher.DrawString
+                    (
+                        Fonts.Bold,
+                        _cacheText,
+                        x + 10,
+                        y + 10,
+                        hueVector,
+                        layerDepth
+                    );
+                    return true;
+                }
             );
-
             return true;
         }
 

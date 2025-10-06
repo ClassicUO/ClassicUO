@@ -1,11 +1,10 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System.Xml;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
-using ClassicUO.Renderer;
+using System.Xml;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -80,7 +79,7 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
             if (IsDisposed)
             {
@@ -99,7 +98,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
 
-            return base.Draw(batcher, x, y);
+            return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
         }
 
         public override void Save(XmlTextWriter writer)

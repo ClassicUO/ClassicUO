@@ -1,8 +1,5 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System.Collections.Generic;
-using System.Linq;
-using System.Xml;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
@@ -10,6 +7,9 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
+using System.Linq;
+using System.Xml;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -185,38 +185,47 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update();
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            base.Draw(batcher, x, y);
+            base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
+            float layerDepth = layerDepthRef;
 
             if (Var != InfoBarVars.NameNotoriety && ProfileManager.CurrentProfile.InfoBarHighlightType == 1 && _warningLinesHue != 0x0481)
             {
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector(_warningLinesHue);
 
-                batcher.Draw
-                (
-                    SolidColorTextureCache.GetTexture(Color.White),
-                    new Rectangle
-                    (
-                        _data.ScreenCoordinateX,
-                        _data.ScreenCoordinateY,
-                        _data.Width,
-                        2
-                    ),
-                    hueVector
-                );
+                renderLists.AddGumpNoAtlas(
+                    batcher =>
+                    {
+                        batcher.Draw
+                        (
+                            SolidColorTextureCache.GetTexture(Color.White),
+                            new Rectangle
+                            (
+                                _data.ScreenCoordinateX,
+                                _data.ScreenCoordinateY,
+                                _data.Width,
+                                2
+                            ),
+                            hueVector,
+                            layerDepth
+                        );
 
-                batcher.Draw
-                (
-                    SolidColorTextureCache.GetTexture(Color.White),
-                    new Rectangle
-                    (
-                        _data.ScreenCoordinateX,
-                        _data.ScreenCoordinateY + Parent.Height - 2,
-                        _data.Width,
-                        2
-                    ),
-                    hueVector
+                        batcher.Draw
+                        (
+                            SolidColorTextureCache.GetTexture(Color.White),
+                            new Rectangle
+                            (
+                                _data.ScreenCoordinateX,
+                                _data.ScreenCoordinateY + Parent.Height - 2,
+                                _data.Width,
+                                2
+                            ),
+                            hueVector,
+                            layerDepth
+                        );
+                        return true;
+                    }
                 );
             }
 
