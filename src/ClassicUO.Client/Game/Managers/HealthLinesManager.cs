@@ -3,11 +3,8 @@
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
-using ClassicUO.Game.Scenes;
-using ClassicUO.Renderer.Animations;
 
 namespace ClassicUO.Game.Managers
 {
@@ -28,7 +25,7 @@ namespace ClassicUO.Game.Managers
         public bool IsEnabled =>
             ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ShowMobilesHP;
 
-        public void Draw(UltimaBatcher2D batcher)
+        public void Draw(UltimaBatcher2D batcher, float layerDepth)
         {
             var camera = Client.Game.Scene.Camera;
             int mode = ProfileManager.CurrentProfile.MobileHPType;
@@ -140,7 +137,7 @@ namespace ClassicUO.Game.Managers
                                     )
                                 )
                                 {
-                                    mobile.HitsTexture.Draw(batcher, p1.X, p1.Y);
+                                    mobile.HitsTexture.Draw(batcher, p1.X, p1.Y, layerDepth);
                                 }
 
                                 if (newTargSystem)
@@ -169,7 +166,7 @@ namespace ClassicUO.Game.Managers
 
                 if ((isEnabled && mode >= 1) || newTargSystem || forceDraw)
                 {
-                    DrawHealthLine(batcher, mobile, p.X, p.Y, offsetY, passive, newTargSystem);
+                    DrawHealthLine(batcher, mobile, p.X, p.Y, offsetY, passive, newTargSystem, layerDepth);
                 }
             }
         }
@@ -181,7 +178,8 @@ namespace ClassicUO.Game.Managers
             int y,
             int offsetY,
             bool passive,
-            bool newTargetSystem
+            bool newTargetSystem,
+            float layerDepth
         )
         {
             if (entity == null)
@@ -252,7 +250,8 @@ namespace ClassicUO.Game.Managers
                         newTargGumpInfo.Texture,
                         new Vector2(targetX, y - topTargetY),
                         newTargGumpInfo.UV,
-                        hueVec
+                        hueVec,
+                        layerDepth
                     );
 
                 if (hueGumpInfo.Texture != null)
@@ -260,7 +259,8 @@ namespace ClassicUO.Game.Managers
                         hueGumpInfo.Texture,
                         new Vector2(targetX, y - topTargetY),
                         hueGumpInfo.UV,
-                        hueVec
+                        hueVec,
+                        layerDepth
                     );
 
                 y += 7 + newTargGumpInfo.UV.Height / 2 - centerY;
@@ -271,7 +271,8 @@ namespace ClassicUO.Game.Managers
                         newTargGumpInfo.Texture,
                         new Vector2(targetX, y - 1 - newTargGumpInfo.UV.Height / 2f),
                         newTargGumpInfo.UV,
-                        hueVec
+                        hueVec,
+                        layerDepth
                     );
             }
 
@@ -282,7 +283,8 @@ namespace ClassicUO.Game.Managers
                 gumpInfo.Texture,
                 new Rectangle(x, y, gumpInfo.UV.Width * MULTIPLER, gumpInfo.UV.Height * MULTIPLER),
                 gumpInfo.UV,
-                hueVec
+                hueVec,
+                layerDepth
             );
 
             hueVec.X = 0x21;
@@ -307,7 +309,8 @@ namespace ClassicUO.Game.Managers
                         gumpInfo.UV.Height * MULTIPLER
                     ),
                     gumpInfo.UV,
-                    hueVec
+                    hueVec,
+                    layerDepth
                 );
             }
 
@@ -334,7 +337,8 @@ namespace ClassicUO.Game.Managers
                     gumpInfo.Texture,
                     new Rectangle(x, y, per * MULTIPLER, gumpInfo.UV.Height * MULTIPLER),
                     gumpInfo.UV,
-                    hueVec
+                    hueVec,
+                    layerDepth
                 );
             }
         }

@@ -1,22 +1,20 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.IO;
-using System.Xml;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
-using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SDL3;
-using ClassicUO.Game.Scenes;
+using System;
+using System.Xml;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -1221,21 +1219,28 @@ namespace ClassicUO.Game.UI.Gumps
             public int LineWidth { get; set; }
             public Texture2D LineColor { get; set; }
 
-            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
             {
+                float layerDepth = layerDepthRef;
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, Alpha);
-
-                batcher.Draw
-                (
-                    LineColor,
-                    new Rectangle
-                    (
-                        x,
-                        y,
-                        LineWidth,
-                        Height
-                    ),
-                    hueVector
+                renderLists.AddGumpNoAtlas(
+                    batcher =>
+                    {
+                        batcher.Draw
+                        (
+                            LineColor,
+                            new Rectangle
+                            (
+                                x,
+                                y,
+                                LineWidth,
+                                Height
+                            ),
+                            hueVector,
+                            layerDepth
+                        );
+                        return true;
+                    }
                 );
 
                 return true;

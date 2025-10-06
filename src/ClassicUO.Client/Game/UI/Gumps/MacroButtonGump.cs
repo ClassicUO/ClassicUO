@@ -1,16 +1,16 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Xml;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Xml;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -118,34 +118,41 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
+            float layerDepth = layerDepthRef;
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
+            renderLists.AddGumpNoAtlas(
+                batcher =>
+                {
+                    batcher.Draw
+                    (
+                        backgroundTexture,
+                        new Rectangle
+                        (
+                            x,
+                            y,
+                            Width,
+                            Height
+                        ),
+                        hueVector,
+                        layerDepth
+                    );
 
-            batcher.Draw
-            (
-                backgroundTexture,
-                new Rectangle
-                (
-                    x,
-                    y,
-                    Width,
-                    Height
-                ),
-                hueVector
+                    batcher.DrawRectangle
+                    (
+                        SolidColorTextureCache.GetTexture(Color.Gray),
+                        x,
+                        y,
+                        Width,
+                        Height,
+                        hueVector,
+                        layerDepth
+                    );
+                    return true;
+                }
             );
-
-            batcher.DrawRectangle
-            (
-                SolidColorTextureCache.GetTexture(Color.Gray),
-                x,
-                y,
-                Width,
-                Height,
-                hueVector
-            );
-
-            base.Draw(batcher, x, y);
+            base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
 
             return true;
         }
