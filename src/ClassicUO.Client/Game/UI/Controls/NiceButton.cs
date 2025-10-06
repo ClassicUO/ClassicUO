@@ -1,10 +1,11 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System.Collections.Generic;
-using ClassicUO.Input;
 using ClassicUO.Assets;
+using ClassicUO.Game.Scenes;
+using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -121,22 +122,30 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
             if (IsSelected)
             {
+                float layerDepth = layerDepthRef;
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, Alpha);
 
-                batcher.Draw
-                (
-                    _texture,
-                    new Vector2(x, y),
-                    new Rectangle(0, 0, Width, Height),
-                    hueVector
+                renderLists.AddGumpNoAtlas(
+                    batcher =>
+                    {
+                        batcher.Draw
+                        (
+                            _texture,
+                            new Vector2(x, y),
+                            new Rectangle(0, 0, Width, Height),
+                            hueVector,
+                            layerDepth
+                        );
+                        return true;
+                    }
                 );
             }
 
-            return base.Draw(batcher, x, y);
+            return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
         }
     }
 }

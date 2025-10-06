@@ -1,17 +1,16 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Xml;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
+using System;
+using System.Collections.Generic;
+using System.Xml;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -323,22 +322,38 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
             {
+                float layerDepth = layerDepthRef;
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, _alpha / 255f, true);
 
                 ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(Graphic);
-
-                if (gumpInfo.Texture != null)
+                var texture = gumpInfo.Texture;
+                if (texture != null)
                 {
-                    batcher.Draw(gumpInfo.Texture, new Vector2(x, y), gumpInfo.UV, hueVector);
 
+                    var sourceRectangle = gumpInfo.UV;
+                    renderLists.AddGumpWithAtlas
+                    (
+                        (batcher) =>
+                        {
+                            batcher.Draw(texture, new Vector2(x, y), sourceRectangle, hueVector, layerDepth);
+                            return true;
+                        }
+                    );
                     if (
                         ProfileManager.CurrentProfile != null
                         && ProfileManager.CurrentProfile.BuffBarTime
                     )
                     {
-                        _gText.Draw(batcher, x - 3, y + gumpInfo.UV.Height / 2 - 3, hueVector.Z);
+                        renderLists.AddGumpNoAtlas
+                    (
+                        (batcher) =>
+                        {
+                            _gText.Draw(batcher, x - 3, y + sourceRectangle.Height / 2 - 3, hueVector.Z);
+                            return true;
+                        }
+                    );
                     }
                 }
 

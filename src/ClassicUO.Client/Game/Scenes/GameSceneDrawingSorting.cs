@@ -1,20 +1,16 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
+using System;
+using System.Runtime.CompilerServices;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -49,26 +45,7 @@ namespace ClassicUO.Game.Scenes
             _oldPlayerZ;
         private int _foliageCount;
 
-
-        private readonly List<GameObject> _renderListStatics = new List<GameObject>();
-        private readonly List<GameObject> _renderListTransparentObjects = new List<GameObject>();
-        private readonly List<GameObject> _renderListAnimations = new List<GameObject>();
-        private readonly List<GameObject> _renderListEffects = new List<GameObject>();
-
-        //// statics
-        //private GameObject _renderListStaticsHead, _renderList;
-        //private int _renderListStaticsCount;
-
-        //// lands
-        //private GameObject _renderListTransparentObjectsHead, _renderListTransparentObjects;
-        //private int _renderListTransparentObjectsCount;
-
-        //// animations
-        //private GameObject _renderListAnimationsHead, _renderListAnimations;
-        //private int _renderListAnimationCount;
-
-        //private GameObject _renderListEffectsHead, _renderListEffects;
-        //private int _renderListEffectCount;
+        private readonly RenderLists _renderLists = new();
 
         public sbyte FoliageIndex { get; private set; }
 
@@ -582,9 +559,9 @@ namespace ClassicUO.Game.Scenes
             return found;
         }
 
-        private void PushToRenderList(
+        private void PushToRenderQueue(
             GameObject obj,
-            List<GameObject> renderList,
+            bool isTransparent,
             bool allowSelection
         )
         {
@@ -614,14 +591,7 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            if (obj.AlphaHue != byte.MaxValue)
-            {
-                _renderListTransparentObjects.Add(obj);
-            }
-            else
-            {
-                renderList.Add(obj);
-            }
+            _renderLists.Add(obj, isTransparent || obj.AlphaHue != byte.MaxValue);
         }
 
         private unsafe bool AddTileToRenderList(
@@ -673,9 +643,9 @@ namespace ClassicUO.Game.Scenes
                             continue;
                         }
 
-                        PushToRenderList(
+                        PushToRenderQueue(
                             obj,
-                            _renderListStatics,
+                            false,
                             true
                         );
                         break;
@@ -752,17 +722,17 @@ namespace ClassicUO.Game.Scenes
                                 )
                             )
                             {
-                                PushToRenderList(
+                                PushToRenderQueue(
                                     obj,
-                                    _renderListTransparentObjects,
+                                    true,
                                     allowSelection
                                 );
                             }
                             else
                             {
-                                PushToRenderList(
+                                PushToRenderQueue(
                                     obj,
-                                    _renderListStatics,
+                                    false,
                                     allowSelection
                                 );
                             }
@@ -838,17 +808,17 @@ namespace ClassicUO.Game.Scenes
                                 )
                             )
                             {
-                                PushToRenderList(
+                                PushToRenderQueue(
                                     obj,
-                                    _renderListTransparentObjects,
+                                    true,
                                     allowSelection
                                 );
                             }
                             else
                             {
-                                PushToRenderList(
+                                PushToRenderQueue(
                                     obj,
-                                    _renderListStatics,
+                                    false,
                                     allowSelection
                                 );
                             }
@@ -890,9 +860,9 @@ namespace ClassicUO.Game.Scenes
 
                             obj.AllowedToDraw = !HasSurfaceOverhead(mobile);
 
-                            PushToRenderList(
+                            PushToRenderQueue(
                                 obj,
-                                _renderListAnimations,
+                                false,
                                 allowSelection
                             );
                             break;
@@ -974,17 +944,17 @@ namespace ClassicUO.Game.Scenes
 
                             if (item.IsCorpse)
                             {
-                                PushToRenderList(
+                                PushToRenderQueue(
                                     obj,
-                                    _renderListAnimations,
+                                    false,
                                     allowSelection
                                 );
                             }
                             else
                             {
-                                PushToRenderList(
+                                PushToRenderQueue(
                                     obj,
-                                    _renderListStatics,
+                                    false,
                                     true
                                 );
                             }
@@ -1017,9 +987,9 @@ namespace ClassicUO.Game.Scenes
 
                         //PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, false);
 
-                        PushToRenderList(
+                        PushToRenderQueue(
                             obj,
-                            _renderListEffects,
+                            false,
                             false
                         );
                         break;
@@ -1079,12 +1049,6 @@ namespace ClassicUO.Game.Scenes
                 winGameScaledHeight = 0;
             }
 
-            //if (_use_render_target)
-            //{
-            //    winDrawOffsetX += winGameScaledOffsetX >> 1;
-            //    winDrawOffsetY += winGameScaledOffsetY >> 1;
-            //}
-
             int size = (int)(Math.Max(winGameWidth / 44f + 1, winGameHeight / 44f + 1) * zoom);
 
             if (Camera.Offset.X != 0 || Camera.Offset.Y != 0)
@@ -1125,53 +1089,6 @@ namespace ClassicUO.Game.Scenes
             {
                 UpdateDrawPosition = true;
                 _lastCamOffset = Camera.Offset;
-
-                if (
-                    _use_render_target
-                    && (
-                        _world_render_target == null
-                        || _world_render_target.Width != (int)(winGameWidth * zoom)
-                        || _world_render_target.Height != (int)(winGameHeight * zoom)
-                    )
-                )
-                {
-                    _world_render_target?.Dispose();
-
-                    PresentationParameters pp = Client.Game.GraphicsDevice.PresentationParameters;
-
-                    _world_render_target = new RenderTarget2D(
-                        Client.Game.GraphicsDevice,
-                        winGameWidth * 1,
-                        winGameHeight * 1,
-                        false,
-                        pp.BackBufferFormat,
-                        pp.DepthStencilFormat,
-                        pp.MultiSampleCount,
-                        pp.RenderTargetUsage
-                    );
-                }
-
-                if (
-                    _lightRenderTarget == null
-                    || _lightRenderTarget.Width != winGameWidth
-                    || _lightRenderTarget.Height != winGameHeight
-                )
-                {
-                    _lightRenderTarget?.Dispose();
-
-                    PresentationParameters pp = Client.Game.GraphicsDevice.PresentationParameters;
-
-                    _lightRenderTarget = new RenderTarget2D(
-                        Client.Game.GraphicsDevice,
-                        winGameWidth,
-                        winGameHeight,
-                        false,
-                        pp.BackBufferFormat,
-                        pp.DepthStencilFormat,
-                        pp.MultiSampleCount,
-                        pp.RenderTargetUsage
-                    );
-                }
             }
 
             _minTile.X = realMinRangeX;

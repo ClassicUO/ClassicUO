@@ -1,17 +1,18 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using ClassicUO.Game.Managers;
-using ClassicUO.Input;
 using ClassicUO.Assets;
+using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
+using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using SDL3;
 using StbTextEditSharp;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -884,22 +885,31 @@ namespace ClassicUO.Game.UI.Controls
             _is_writing = false;
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            if (batcher.ClipBegin(x, y, Width, Height))
-            {
-                base.Draw(batcher, x, y);
-                DrawSelection(batcher, x, y);
-                _rendererText.Draw(batcher, x, y);
-                DrawCaret(batcher, x, y);
+            float layerDepth = layerDepthRef;
+            renderLists.AddGumpNoAtlas(
+                batcher =>
+                {
+                    if (batcher.ClipBegin(x, y, Width, Height))
+                    {
+                        RenderLists childRenderLists = new();
+                        base.AddToRenderLists(childRenderLists, x, y, ref layerDepth);
+                        childRenderLists.DrawRenderLists(batcher, sbyte.MaxValue);
+                        DrawSelection(batcher, x, y, layerDepth);
+                        _rendererText.Draw(batcher, x, y, layerDepth);
+                        DrawCaret(batcher, x, y, layerDepth);
 
-                batcher.ClipEnd();
-            }
+                        batcher.ClipEnd();
+                    }
+                    return true;
+                }
+            );
 
             return true;
         }
 
-        private protected void DrawSelection(UltimaBatcher2D batcher, int x, int y)
+        private protected void DrawSelection(UltimaBatcher2D batcher, int x, int y, float layerDepth)
         {
             if (!AllowSelection)
             {
@@ -957,7 +967,8 @@ namespace ClassicUO.Game.UI.Controls
                                     endX,
                                     info.MaxHeight + 1
                                 ),
-                                hueVector
+                                hueVector,
+                                layerDepth
                             );
 
                             break;
@@ -975,7 +986,8 @@ namespace ClassicUO.Game.UI.Controls
                                 info.Width - drawX,
                                 info.MaxHeight + 1
                             ),
-                            hueVector
+                            hueVector,
+                            layerDepth
                         );
 
                         // first selection is gone. M
@@ -989,11 +1001,11 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        protected virtual void DrawCaret(UltimaBatcher2D batcher, int x, int y)
+        protected virtual void DrawCaret(UltimaBatcher2D batcher, int x, int y, float layerDepth)
         {
             if (HasKeyboardFocus)
             {
-                _rendererCaret.Draw(batcher, x + _caretScreenPosition.X, y + _caretScreenPosition.Y);
+                _rendererCaret.Draw(batcher, x + _caretScreenPosition.X, y + _caretScreenPosition.Y, layerDepth);
             }
         }
 

@@ -4,6 +4,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
@@ -404,9 +405,10 @@ namespace ClassicUO.Game.UI.Gumps
                 return prefix;
             }
 
-            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
             {
-                base.Draw(batcher, x, y);
+                base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
+                float layerDepth = layerDepthRef;
 
                 Texture2D color = SolidColorTextureCache.GetTexture(
                     MouseIsOver
@@ -420,7 +422,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-                batcher.DrawRectangle(color, x, y, Width, Height, hueVector);
+                renderLists.AddGumpNoAtlas(batcher =>
+                {
+                    batcher.DrawRectangle(color, x, y, Width, Height, hueVector, layerDepth);
+
+                    return true;
+                });
 
                 return true;
             }
@@ -473,10 +480,11 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
-                public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+                public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
                 {
                     if (_graphic != 0)
                     {
+                        float layerDepth = layerDepthRef;
                         ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(_graphic);
                         var rect = Client.Game.UO.Arts.GetRealArtBounds(_graphic);
 
@@ -497,20 +505,30 @@ namespace ClassicUO.Game.UI.Gumps
                             point.Y = (Height >> 1) - (originalSize.Y >> 1);
                         }
 
-                        batcher.Draw(
-                            artInfo.Texture,
-                            new Rectangle(x + point.X, y + point.Y, originalSize.X, originalSize.Y),
-                            new Rectangle(
-                                artInfo.UV.X + rect.X,
-                                artInfo.UV.Y + rect.Y,
-                                rect.Width,
-                                rect.Height
-                            ),
-                            hueVector
+                        var texture = artInfo.Texture;
+                        var sourceRectangle = artInfo.UV;
+                        renderLists.AddGumpWithAtlas
+                        (
+                            (batcher) =>
+                            {
+                                batcher.Draw(
+                                    texture,
+                                    new Rectangle(x + point.X, y + point.Y, originalSize.X, originalSize.Y),
+                                    new Rectangle(
+                                        sourceRectangle.X + rect.X,
+                                        sourceRectangle.Y + rect.Y,
+                                        rect.Width,
+                                        rect.Height
+                                    ),
+                                    hueVector,
+                                    layerDepth
+                                );
+                                return true;
+                            }
                         );
                     }
 
-                    return base.Draw(batcher, x, y);
+                    return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
                 }
 
                 public void SetAmount(string amount)

@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Collections.Generic;
-using ClassicUO.Assets;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -235,22 +235,32 @@ namespace ClassicUO.Game.UI.Controls
             return Client.Game.UO.Gumps.PixelCheck(graphic, x, y);
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            if (batcher.ClipBegin(x, y, Width, Height))
-            {
-                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, Alpha, true);
+            float layerDepth = layerDepthRef;
+            renderLists.AddGumpNoAtlas(
+                batcher =>
+                {
+                    if (batcher.ClipBegin(x, y, Width, Height))
+                    {
+                        Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, Alpha, true);
 
-                DrawInternal(batcher, x, y, hueVector);
-                base.Draw(batcher, x, y);
+                        DrawInternal(batcher, x, y, hueVector, layerDepth);
+                        RenderLists childRenderLists = new();
+                        base.AddToRenderLists(childRenderLists, x, y, ref layerDepth);
+                        childRenderLists.DrawRenderLists(batcher, sbyte.MaxValue);
 
-                batcher.ClipEnd();
-            }
+                        batcher.ClipEnd();
+                    }
+
+                    return true;
+                }
+            );
 
             return true;
         }
 
-        private void DrawInternal(UltimaBatcher2D batcher, int x, int y, Vector3 color)
+        private void DrawInternal(UltimaBatcher2D batcher, int x, int y, Vector3 color, float layerDepth)
         {
             var texture0 = GetTexture(0, out var bounds0);
             var texture1 = GetTexture(1, out var bounds1);
@@ -269,7 +279,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (texture0 != null)
             {
-                batcher.Draw(texture0, new Vector2(x, y), bounds0, color);
+                batcher.Draw(texture0, new Vector2(x, y), bounds0, color, layerDepth);
             }
 
             if (texture1 != null)
@@ -283,7 +293,8 @@ namespace ClassicUO.Game.UI.Controls
                         bounds1.Height
                     ),
                     bounds1,
-                    color
+                    color,
+                    layerDepth
                 );
             }
 
@@ -293,7 +304,8 @@ namespace ClassicUO.Game.UI.Controls
                     texture2,
                     new Vector2(x + (Width - bounds2.Width), y + offsetTop),
                     bounds2,
-                    color
+                    color,
+                    layerDepth
                 );
             }
 
@@ -308,7 +320,8 @@ namespace ClassicUO.Game.UI.Controls
                         Height - bounds0.Height - bounds5.Height
                     ),
                     bounds3,
-                    color
+                    color,
+                    layerDepth
                 );
             }
 
@@ -323,7 +336,8 @@ namespace ClassicUO.Game.UI.Controls
                         Height - bounds2.Height - bounds7.Height
                     ),
                     bounds4,
-                    color
+                    color,
+                    layerDepth
                 );
             }
 
@@ -333,7 +347,8 @@ namespace ClassicUO.Game.UI.Controls
                     texture5,
                     new Vector2(x, y + (Height - bounds5.Height)),
                     bounds5,
-                    color
+                    color,
+                    layerDepth
                 );
             }
 
@@ -348,7 +363,8 @@ namespace ClassicUO.Game.UI.Controls
                         bounds6.Height
                     ),
                     bounds6,
-                    color
+                    color,
+                    layerDepth
                 );
             }
 
@@ -358,7 +374,8 @@ namespace ClassicUO.Game.UI.Controls
                     texture7,
                     new Vector2(x + (Width - bounds7.Width), y + (Height - bounds7.Height)),
                     bounds7,
-                    color
+                    color,
+                    layerDepth
                 );
             }
 
@@ -373,7 +390,8 @@ namespace ClassicUO.Game.UI.Controls
                         Height - bounds2.Height - bounds7.Height
                     ),
                     bounds8,
-                    color
+                    color,
+                    layerDepth
                 );
             }
         }

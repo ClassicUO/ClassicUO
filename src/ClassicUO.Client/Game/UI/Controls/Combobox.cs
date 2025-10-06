@@ -1,13 +1,12 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Linq;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
-using ClassicUO.Renderer;
-using Microsoft.Xna.Framework;
+using System;
+using System.Linq;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -93,13 +92,27 @@ namespace ClassicUO.Game.UI.Controls
         public event EventHandler<int> OnOptionSelected;
 
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            if (batcher.ClipBegin(x, y, Width, Height))
-            {
-                base.Draw(batcher, x, y);
-                batcher.ClipEnd();
-            }
+            float layerDepth = layerDepthRef;
+            renderLists.AddGumpNoAtlas
+            (
+                (batcher) =>
+                {
+                    // work-around to allow clipping children
+                    RenderLists comboBoxRenderLists = new();
+                    base.AddToRenderLists(comboBoxRenderLists, x, y, ref layerDepth);
+
+                    if (batcher.ClipBegin(x, y, Width, Height))
+                    {
+                        comboBoxRenderLists.DrawRenderLists(batcher, sbyte.MaxValue);
+                        batcher.ClipEnd();
+                    }
+                    return true;
+                }
+            );
+
+
 
             return true;
         }
@@ -241,14 +254,25 @@ namespace ClassicUO.Game.UI.Controls
             }
 
 
-            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
             {
-                if (batcher.ClipBegin(x, y, Width, Height))
-                {
-                    base.Draw(batcher, x, y);
+                float layerDepth = layerDepthRef + 100f; // Combo list should be over other gumps
+                renderLists.AddGumpNoAtlas
+                (
+                    (batcher) =>
+                    {
+                        // work-around to allow clipping children
+                        RenderLists comboBoxRenderLists = new();
+                        base.AddToRenderLists(comboBoxRenderLists, x, y, ref layerDepth);
 
-                    batcher.ClipEnd();
-                }
+                        if (batcher.ClipBegin(x, y, Width, Height))
+                        {
+                            comboBoxRenderLists.DrawRenderLists(batcher, sbyte.MaxValue);
+                            batcher.ClipEnd();
+                        }
+                        return true;
+                    }
+                );
 
                 return true;
             }

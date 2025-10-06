@@ -1,17 +1,12 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
@@ -20,31 +15,35 @@ using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SDL3;
+using System;
+using System.Collections.Generic;
+using System.Net.Sockets;
 
 namespace ClassicUO.Game.Scenes
 {
     internal partial class GameScene : Scene
     {
-        private static readonly Lazy<BlendState> _darknessBlend = new Lazy<BlendState>(() =>
+        private static readonly Func<BlendState> _darknessBlend = new(() =>
         {
-            BlendState state = new BlendState();
-            state.ColorSourceBlend = Blend.Zero;
-            state.ColorDestinationBlend = Blend.SourceColor;
-            state.ColorBlendFunction = BlendFunction.Add;
-
-            return state;
+            return new BlendState
+            {
+                ColorSourceBlend = Blend.Zero,
+                ColorDestinationBlend = Blend.SourceColor,
+                ColorBlendFunction = BlendFunction.Add
+            };
         });
 
-        private static readonly Lazy<BlendState> _altLightsBlend = new Lazy<BlendState>(() =>
+        private static readonly Func<BlendState> _altLightsBlend = new(() =>
         {
-            BlendState state = new BlendState();
-            state.ColorSourceBlend = Blend.DestinationColor;
-            state.ColorDestinationBlend = Blend.One;
-            state.ColorBlendFunction = BlendFunction.Add;
-
-            return state;
+            return new BlendState
+            {
+                ColorSourceBlend = Blend.DestinationColor,
+                ColorDestinationBlend = Blend.One,
+                ColorBlendFunction = BlendFunction.Add
+            };
         });
 
+        private const float MAX_LAYER_DEPTH = 0x8000;
         private uint _time_cleanup = Time.Ticks + 5000;
         private static XBREffect _xbr;
         private bool _alphaChanged;
@@ -63,10 +62,8 @@ namespace ClassicUO.Game.Scenes
         private long _timePing;
 
         private uint _timeToPlaceMultiInHouseCustomization;
-        private readonly bool _use_render_target = false;
         private readonly UseItemQueue _useItemQueue;
         private bool _useObjectHandles;
-        private RenderTarget2D _world_render_target, _lightRenderTarget;
         private AnimatedStaticsManager _animatedStaticsManager;
 
         private readonly World _world;
@@ -316,8 +313,6 @@ namespace ClassicUO.Game.Scenes
 
             NetClient.Socket.Disconnected -= SocketOnDisconnected;
             NetClient.Socket.Disconnect();
-            _lightRenderTarget?.Dispose();
-            _world_render_target?.Dispose();
 
             _world.CommandManager.UnRegisterAll();
             _world.Weather.Reset();
@@ -548,10 +543,7 @@ namespace ClassicUO.Game.Scenes
 
         private void FillGameObjectList()
         {
-            _renderListStatics.Clear();
-            _renderListAnimations.Clear();
-            _renderListEffects.Clear();
-            _renderListTransparentObjects.Clear();
+            _renderLists.Clear();
 
             _foliageCount = 0;
 
@@ -645,19 +637,6 @@ namespace ClassicUO.Game.Scenes
                     }
                 }
             }
-
-
-            //for (var x = minX; x <= maxX; x++)
-            //    for (var y = minY; y <= maxY; y++)
-            //    {
-            //        AddTileToRenderList(
-            //            map.GetTile(x, y),
-            //            use_handles,
-            //            150,
-            //            maxCotZ,
-            //            ref playerPos
-            //        );
-            //    }
 
             if (_alphaChanged)
             {
@@ -907,7 +886,7 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        public override bool Draw(UltimaBatcher2D batcher)
+        public override bool Draw(UltimaBatcher2D batcher, RenderTargets renderTargets)
         {
             if (!_world.InGame)
             {
@@ -921,127 +900,29 @@ namespace ClassicUO.Game.Scenes
 
             Viewport r_viewport = batcher.GraphicsDevice.Viewport;
             Viewport camera_viewport = Camera.GetViewport();
-            Matrix matrix = _use_render_target ? Matrix.Identity : Camera.ViewTransformMatrix;
+            Matrix matrix = Camera.ViewTransformMatrix;
 
             bool can_draw_lights = false;
 
-            if (!_use_render_target)
-            {
-                can_draw_lights = PrepareLightsRendering(batcher, ref matrix);
-                batcher.GraphicsDevice.Viewport = camera_viewport;
-            }
+            can_draw_lights = PrepareLightsRendering(batcher, ref matrix, renderTargets);
+            batcher.GraphicsDevice.Viewport = camera_viewport;
 
-            DrawWorld(batcher, ref matrix, _use_render_target);
-
-            if (_use_render_target)
-            {
-                can_draw_lights = PrepareLightsRendering(batcher, ref matrix);
-                batcher.GraphicsDevice.Viewport = camera_viewport;
-            }
-
-            // draw world rt
-            Vector3 hue = Vector3.Zero;
-            hue.Z = 1f;
-
-            if (_use_render_target)
-            {
-                //switch (ProfileManager.CurrentProfile.FilterType)
-                //{
-                //    default:
-                //    case 0:
-                //        batcher.SetSampler(SamplerState.PointClamp);
-                //        break;
-                //    case 1:
-                //        batcher.SetSampler(SamplerState.AnisotropicClamp);
-                //        break;
-                //    case 2:
-                //        batcher.SetSampler(SamplerState.LinearClamp);
-                //        break;
-                //}
-
-                if (_xbr == null)
-                {
-                    _xbr = new XBREffect(batcher.GraphicsDevice);
-                }
-
-                _xbr.TextureSize.SetValue(new Vector2(Camera.Bounds.Width, Camera.Bounds.Height));
-
-                //Point p = Point.Zero;
-
-                //p = Camera.ScreenToWorld(p);
-                //int minPixelsX = p.X;
-                //int minPixelsY = p.Y;
-
-                //p.X = Camera.Bounds.Width;
-                //p.Y = Camera.Bounds.Height;
-                //p = Camera.ScreenToWorld(p);
-                //int maxPixelsX = p.X;
-                //int maxPixelsY = p.Y;
-
-                batcher.Begin(null, Camera.ViewTransformMatrix);
-
-                batcher.Draw(
-                    _world_render_target,
-                    new Rectangle(0, 0, Camera.Bounds.Width, Camera.Bounds.Height),
-                    hue
-                );
-
-                batcher.End();
-
-                //batcher.SetSampler(null);
-            }
-
-            // draw lights
-            if (can_draw_lights)
-            {
-                batcher.Begin();
-
-                if (UseAltLights)
-                {
-                    hue.Z = .5f;
-                    batcher.SetBlendState(_altLightsBlend.Value);
-                }
-                else
-                {
-                    batcher.SetBlendState(_darknessBlend.Value);
-                }
-
-                batcher.Draw(
-                    _lightRenderTarget,
-                    new Rectangle(0, 0, Camera.Bounds.Width, Camera.Bounds.Height),
-                    hue
-                );
-
-                batcher.SetBlendState(null);
-                batcher.End();
-
-                hue.Z = 1f;
-            }
-
-            batcher.Begin();
-            DrawOverheads(batcher);
-            DrawSelection(batcher);
-            batcher.End();
+            DrawWorld(batcher, ref matrix, renderTargets);
 
             batcher.GraphicsDevice.Viewport = r_viewport;
 
-            return base.Draw(batcher);
+            return base.Draw(batcher, renderTargets);
         }
 
-        private void DrawWorld(UltimaBatcher2D batcher, ref Matrix matrix, bool use_render_target)
+        private void DrawWorld(UltimaBatcher2D batcher, ref Matrix matrix, RenderTargets renderTargets)
         {
+            batcher.GraphicsDevice.SetRenderTarget(renderTargets.WorldRenderTarget);
             SelectedObject.Object = null;
+            Profiler.EnterContext(Profiler.ProfilerContext.RENDER_FRAME_WORLD_PREPARE);
             FillGameObjectList();
-
-            if (use_render_target)
-            {
-                batcher.GraphicsDevice.SetRenderTarget(_world_render_target);
-                batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0f, 0);
-            }
-            else
-            {
-                batcher.SetSampler(SamplerState.PointClamp);
-            }
+            Profiler.ExitContext(Profiler.ProfilerContext.RENDER_FRAME_WORLD_PREPARE);
+            Profiler.EnterContext(Profiler.ProfilerContext.RENDER_FRAME_WORLD);
+            batcher.SetSampler(SamplerState.PointClamp);
 
             batcher.Begin(null, matrix);
             batcher.SetBrightlight(ProfileManager.CurrentProfile.TerrainShadowsLevel * 0.1f);
@@ -1049,44 +930,10 @@ namespace ClassicUO.Game.Scenes
             // https://shawnhargreaves.com/blog/depth-sorting-alpha-blended-objects.html
             batcher.SetStencil(DepthStencilState.Default);
 
-            RenderedObjectsCount = 0;
-            RenderedObjectsCount += DrawRenderList(
+            RenderedObjectsCount = _renderLists.DrawRenderLists(
                 batcher,
-                _renderListStatics
+                _maxGroundZ
             );
-            RenderedObjectsCount += DrawRenderList(
-                batcher,
-                _renderListAnimations
-            );
-            RenderedObjectsCount += DrawRenderList(
-                batcher,
-                _renderListEffects
-            );
-
-            if (_renderListTransparentObjects.Count > 0)
-            {
-                batcher.SetStencil(DepthStencilState.DepthRead);
-                RenderedObjectsCount += DrawRenderList(
-                    batcher,
-                    _renderListTransparentObjects
-                );
-            }
-
-            batcher.SetStencil(null);
-
-            //var worldPoint = Camera.MouseToWorldPosition() + _offset;
-            //worldPoint.X += 22;
-            //worldPoint.Y += 22;
-
-            //var isoX = (int)(0.5f * (worldPoint.X / 22f + worldPoint.Y / 22f));
-            //var isoY = (int)(0.5f * (-worldPoint.X / 22f + worldPoint.Y / 22f));
-
-            //GameObject selectedObject = World.Map.GetTile(isoX, isoY, false);
-
-            //if (selectedObject != null)
-            //{
-            //    selectedObject.Hue = 0x44;
-            //}
 
 
             if (
@@ -1103,67 +950,39 @@ namespace ClassicUO.Game.Scenes
                 );
             }
 
+            // draw weather
+            _world.Weather.Draw(batcher, 0, 0, MAX_LAYER_DEPTH - 1);
+
+            DrawOverheads(batcher, MAX_LAYER_DEPTH);
+            DrawSelection(batcher, MAX_LAYER_DEPTH);
+
             batcher.SetSampler(null);
             batcher.SetStencil(null);
-
-            // draw weather
-            _world.Weather.Draw(batcher, 0, 0); // TODO: fix the depth
-
             batcher.End();
 
             int flushes = batcher.FlushesDone;
             int switches = batcher.TextureSwitches;
-
-            if (use_render_target)
-            {
-                batcher.GraphicsDevice.SetRenderTarget(null);
-            }
-
-            //batcher.Begin();
-            //hueVec.X = 0;
-            //hueVec.Y = 1;
-            //hueVec.Z = 1;
-            //string s = $"Flushes: {flushes}\nSwitches: {switches}\nArt texture count: {TextureAtlas.Shared.TexturesCount}\nMaxZ: {_maxZ}\nMaxGround: {_maxGroundZ}";
-            //batcher.DrawString(Fonts.Bold, s, 200, 200, ref hueVec);
-            //hueVec = Vector3.Zero;
-            //batcher.DrawString(Fonts.Bold, s, 200 + 1, 200 - 1, ref hueVec);
-            //batcher.End();
+            batcher.GraphicsDevice.SetRenderTarget(null);
+            Profiler.ExitContext(Profiler.ProfilerContext.RENDER_FRAME_WORLD);
         }
 
-        private int DrawRenderList(UltimaBatcher2D batcher, List<GameObject> renderList)
+        private bool PrepareLightsRendering(UltimaBatcher2D batcher, ref Matrix matrix, RenderTargets renderTargets)
         {
-            int done = 0;
+            InitializeRenderTargets(renderTargets);
 
-            foreach (var obj in renderList)
-            {
-                if (obj.Z <= _maxGroundZ)
-                {
-                    float depth = obj.CalculateDepthZ();
-
-                    if (
-                        obj.Draw(batcher, obj.RealScreenPosition.X, obj.RealScreenPosition.Y, depth)
-                    )
-                    {
-                        ++done;
-                    }
-                }
-            }
-
-            return done;
-        }
-
-        private bool PrepareLightsRendering(UltimaBatcher2D batcher, ref Matrix matrix)
-        {
             if (
                 !UseLights && !UseAltLights
                 || _world.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect
-                || _lightRenderTarget == null
             )
             {
+                batcher.GraphicsDevice.SetRenderTarget(renderTargets.LightRenderTarget);
+                batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.White, 0f, 0); // white = maximum light level
+                batcher.GraphicsDevice.SetRenderTarget(null);
+
                 return false;
             }
 
-            batcher.GraphicsDevice.SetRenderTarget(_lightRenderTarget);
+            batcher.GraphicsDevice.SetRenderTarget(renderTargets.LightRenderTarget);
             batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0f, 0);
 
             if (!UseAltLights)
@@ -1215,7 +1034,8 @@ namespace ClassicUO.Game.Scenes
                         l.DrawY - lightInfo.UV.Height * 0.5f
                     ),
                     lightInfo.UV,
-                    hue
+                    hue,
+                    0f
                 );
             }
 
@@ -1229,9 +1049,22 @@ namespace ClassicUO.Game.Scenes
             return true;
         }
 
-        public void DrawOverheads(UltimaBatcher2D batcher)
+        private void InitializeRenderTargets(RenderTargets renderTargets)
         {
-            _healthLinesManager.Draw(batcher);
+            renderTargets.SetLightsConfiguration(
+                UseAltLights ? _altLightsBlend : (UseLights ? _darknessBlend : () => null),
+                () =>
+                {
+                    Vector3 v = Vector3.Zero;
+                    v.Z = UseAltLights ? 0.5f : 1f;
+                    return v;
+                }
+            );
+        }
+
+        public void DrawOverheads(UltimaBatcher2D batcher, float layerDepth)
+        {
+            _healthLinesManager.Draw(batcher, layerDepth);
 
             if (!UIManager.IsMouseOverWorld)
             {
@@ -1239,10 +1072,10 @@ namespace ClassicUO.Game.Scenes
             }
 
             _world.WorldTextManager.ProcessWorldText(true);
-            _world.WorldTextManager.Draw(batcher, Camera.Bounds.X, Camera.Bounds.Y);
+            _world.WorldTextManager.Draw(batcher, Camera.Bounds.X, Camera.Bounds.Y, layerDepth);
         }
 
-        public void DrawSelection(UltimaBatcher2D batcher)
+        public void DrawSelection(UltimaBatcher2D batcher, float layerDepth)
         {
             if (_isSelectionActive)
             {
@@ -1264,7 +1097,8 @@ namespace ClassicUO.Game.Scenes
                 batcher.Draw(
                     SolidColorTextureCache.GetTexture(Color.Black),
                     selectionRect,
-                    selectionHue
+                    selectionHue,
+                    layerDepth
                 );
 
                 selectionHue.Z = 0.3f;
@@ -1275,7 +1109,8 @@ namespace ClassicUO.Game.Scenes
                     selectionRect.Y,
                     selectionRect.Width,
                     selectionRect.Height,
-                    selectionHue
+                    selectionHue,
+                    layerDepth
                 );
             }
         }
@@ -1304,7 +1139,8 @@ namespace ClassicUO.Game.Scenes
                         _youAreDeadText.Draw(
                             batcher,
                             Camera.Bounds.X + (Camera.Bounds.Width / 2 - _youAreDeadText.Width / 2),
-                            Camera.Bounds.Bottom / 2
+                            Camera.Bounds.Bottom / 2,
+                            0f
                         );
                         batcher.End();
 

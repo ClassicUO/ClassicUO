@@ -1,8 +1,5 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.IO;
-using System.Xml;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -10,9 +7,10 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using System;
+using System.Xml;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -659,9 +657,10 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            base.Draw(batcher, x, y);
+            base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
+            float layerDepth = layerDepthRef;
 
             if (CUOEnviroment.Debug && !IsMinimized)
             {
@@ -674,13 +673,20 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-                batcher.DrawRectangle(
-                    SolidColorTextureCache.GetTexture(Color.Red),
-                    x + boundX,
-                    y + boundY,
-                    boundWidth - boundX,
-                    boundHeight - boundY,
-                    hueVector
+                renderLists.AddGumpNoAtlas(
+                    batcher =>
+                    {
+                        batcher.DrawRectangle(
+                            SolidColorTextureCache.GetTexture(Color.Red),
+                            x + boundX,
+                            y + boundY,
+                            boundWidth - boundX,
+                            boundHeight - boundY,
+                            hueVector,
+                            layerDepth
+                        );
+                        return true;
+                    }
                 );
             }
 
