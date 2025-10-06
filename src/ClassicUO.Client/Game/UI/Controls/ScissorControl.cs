@@ -1,7 +1,6 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using ClassicUO.Renderer;
-using Microsoft.Xna.Framework;
+using ClassicUO.Game.Scenes;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -27,16 +26,22 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool DoScissor;
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            if (DoScissor)
-            {
-                batcher.ClipBegin(x, y, Width, Height);
-            }
-            else
-            {
-                batcher.ClipEnd();
-            }
+            renderLists.AddGumpWithAtlas(
+                batcher =>
+                {
+                    if (DoScissor)
+                    {
+                        batcher.ClipBegin(x, y, Width, Height);
+                    }
+                    else
+                    {
+                        batcher.ClipEnd();
+                    }
+                    return true;
+                }
+            );
 
             return true;
         }

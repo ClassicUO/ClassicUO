@@ -6,7 +6,6 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -120,10 +119,10 @@ namespace ClassicUO.Renderer
             _basicUOEffect.Brighlight.SetValue(f);
         }
 
-        public void DrawString(SpriteFont spriteFont, ReadOnlySpan<char> text, int x, int y, Vector3 color)
-            => DrawString(spriteFont, text, new Vector2(x, y), color);
+        public void DrawString(SpriteFont spriteFont, ReadOnlySpan<char> text, int x, int y, Vector3 color, float layerDepth)
+            => DrawString(spriteFont, text, new Vector2(x, y), color, layerDepth);
 
-        public void DrawString(SpriteFont spriteFont, ReadOnlySpan<char> text, Vector2 position, Vector3 color)
+        public void DrawString(SpriteFont spriteFont, ReadOnlySpan<char> text, Vector2 position, Vector3 color, float layerDepth)
         {
             if (text.IsEmpty)
             {
@@ -213,7 +212,8 @@ namespace ClassicUO.Renderer
                     textureValue,
                     position + pos,
                     cGlyph,
-                    color
+                    color,
+                    layerDepth
                 );
 
                 curOffset.X += cKern.Y + cKern.Z;
@@ -591,7 +591,8 @@ namespace ClassicUO.Renderer
             Texture2D texture,
             Rectangle destinationRectangle,
             Rectangle sourceRectangle,
-            Vector3 hue
+            Vector3 hue,
+            float layerDepth
         )
         {
             int h = destinationRectangle.Height;
@@ -615,7 +616,8 @@ namespace ClassicUO.Renderer
                         texture,
                         pos,
                         rect,
-                        hue
+                        hue,
+                        layerDepth
                     );
 
                     w -= sourceRectangle.Width;
@@ -635,7 +637,7 @@ namespace ClassicUO.Renderer
             int width,
             int height,
             Vector3 hue,
-            float depth = 0f
+            float depth
         )
         {
             Rectangle rect = new Rectangle(x, y, width, 1);
@@ -667,7 +669,8 @@ namespace ClassicUO.Renderer
             Vector2 start,
             Vector2 end,
             Vector3 color,
-            float stroke
+            float stroke,
+            float depth
         )
         {
             var radians = ClassicUO.Utility.MathHelper.AngleBetweenVectors(start, end);
@@ -683,7 +686,7 @@ namespace ClassicUO.Renderer
                 Vector2.Zero,
                 new Vector2(length, stroke),
                 SpriteEffects.None,
-                0
+                depth
             );
         }
 
@@ -694,10 +697,11 @@ namespace ClassicUO.Renderer
         (
             Texture2D texture,
             Vector2 position,
-            Vector3 color
+            Vector3 color,
+            float depth
         )
         {
-            AddSprite(texture, 0f, 0f, 1f, 1f, position.X, position.Y, texture.Width, texture.Height, color, 0f, 0f, 0f, 1f, 0f, 0);
+            AddSprite(texture, 0f, 0f, 1f, 1f, position.X, position.Y, texture.Width, texture.Height, color, 0f, 0f, 0f, 1f, depth, 0);
         }
 
         public void Draw
@@ -705,7 +709,8 @@ namespace ClassicUO.Renderer
             Texture2D texture,
             Vector2 position,
             Rectangle? sourceRectangle,
-            Vector3 color
+            Vector3 color,
+            float depth
         )
         {
             float sourceX, sourceY, sourceW, sourceH;
@@ -730,7 +735,7 @@ namespace ClassicUO.Renderer
                 destH = texture.Height;
             }
 
-            AddSprite(texture, sourceX, sourceY, sourceW, sourceH, position.X, position.Y, destW, destH, color, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0);
+            AddSprite(texture, sourceX, sourceY, sourceW, sourceH, position.X, position.Y, destW, destH, color, 0.0f, 0.0f, 0.0f, 1.0f, depth, 0);
         }
 
         public void Draw
@@ -848,7 +853,8 @@ namespace ClassicUO.Renderer
         (
             Texture2D texture,
             Rectangle destinationRectangle,
-            Vector3 color
+            Vector3 color,
+            float layerDepth
         )
         {
             AddSprite(
@@ -866,7 +872,7 @@ namespace ClassicUO.Renderer
                 0.0f,
                 0.0f,
                 1.0f,
-                0.0f,
+                layerDepth,
                 0
             );
         }
@@ -876,7 +882,8 @@ namespace ClassicUO.Renderer
             Texture2D texture,
             Rectangle destinationRectangle,
             Rectangle? sourceRectangle,
-            Vector3 color
+            Vector3 color,
+            float layerDepth
         )
         {
             float sourceX, sourceY, sourceW, sourceH;
@@ -911,7 +918,7 @@ namespace ClassicUO.Renderer
                 0.0f,
                 0.0f,
                 1.0f,
-                0.0f,
+                layerDepth,
                 0
             );
         }

@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.Managers
 {
@@ -31,7 +31,7 @@ namespace ClassicUO.Game.Managers
             ProcessWorldText(false);
         }
 
-        public virtual void Draw(UltimaBatcher2D batcher, int startX, int startY, bool isGump = false)
+        public virtual void Draw(UltimaBatcher2D batcher, int startX, int startY, float layerDepth, bool isGump = false)
         {
             ProcessWorldText(false);
 
@@ -83,6 +83,7 @@ namespace ClassicUO.Game.Managers
                     batcher,
                     x,
                     y,
+                    layerDepth,
                     alpha,
                     hue
                 );

@@ -1,11 +1,9 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Text;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
@@ -165,7 +163,8 @@ namespace ClassicUO.Game.UI
                     (int)(z_width * zoom),
                     (int)(z_height * zoom)
                 ),
-                hue_vec
+                hue_vec,
+                0f
             );
 
 
@@ -176,7 +175,8 @@ namespace ClassicUO.Game.UI
                 y - 2,
                 (int) (z_width * zoom),
                 (int) (z_height * zoom),
-                hue_vec
+                hue_vec,
+                0f
             );
 
             batcher.Draw
@@ -190,7 +190,8 @@ namespace ClassicUO.Game.UI
                     (int)(_renderedText.Texture.Height * zoom)
                 ),
                 null,
-                Vector3.UnitZ
+                Vector3.UnitZ,
+                0f
             );
 
             return true;

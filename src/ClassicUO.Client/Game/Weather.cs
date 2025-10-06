@@ -1,12 +1,11 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using System;
 using MathHelper = Microsoft.Xna.Framework.MathHelper;
 
 namespace ClassicUO.Game
@@ -209,7 +208,7 @@ namespace ClassicUO.Game
             Client.Game.Audio.PlaySoundWithDistance(_world, sound, _world.Player.X + randX, _world.Player.Y + randY);
         }
 
-        public void Draw(UltimaBatcher2D batcher, int x, int y)
+        public void Draw(UltimaBatcher2D batcher, int x, int y, float layerDepth)
         {
             bool removeEffects = false;
 
@@ -423,7 +422,8 @@ namespace ClassicUO.Game
                            start,
                            end,
                            Vector3.UnitZ,
-                           2
+                           2,
+                           layerDepth
                         );
 
                         break;
@@ -440,7 +440,8 @@ namespace ClassicUO.Game
                         (
                             SolidColorTextureCache.GetTexture(Color.White),
                             snowRect,
-                            Vector3.UnitZ
+                            Vector3.UnitZ,
+                            layerDepth
                         );
 
                         break;

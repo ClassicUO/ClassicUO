@@ -1,10 +1,9 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using ClassicUO.Input;
-using ClassicUO.Assets;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using System;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -58,43 +57,52 @@ namespace ClassicUO.Game.UI.Controls
 
         public override ClickPriority Priority { get; set; } = ClickPriority.High;
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            var hueVector = ShaderHueTranslator.GetHueVector(0);
-
-            ref readonly var gumpInfoFlag = ref Client.Game.UO.Gumps.GetGump(BUTTON_FLAG);
-            ref readonly var gumpInfoUp = ref Client.Game.UO.Gumps.GetGump(BUTTON_UP);
-            ref readonly var gumpInfoDown = ref Client.Game.UO.Gumps.GetGump(BUTTON_DOWN);
-
-            if (MaxValue != MinValue && gumpInfoFlag.Texture != null)
-            {
-                batcher.Draw(
-                    gumpInfoFlag.Texture,
-                    new Vector2(x, y + _sliderPosition),
-                    gumpInfoFlag.UV,
-                    hueVector
-                );
-            }
-
-            if (_showButtons)
-            {
-                if (gumpInfoUp.Texture != null)
+            float layerDepth = layerDepthRef;
+            renderLists.AddGumpWithAtlas
+            (
+                (batcher) =>
                 {
-                    batcher.Draw(gumpInfoUp.Texture, new Vector2(x, y), gumpInfoUp.UV, hueVector);
-                }
+                    var hueVector = ShaderHueTranslator.GetHueVector(0);
 
-                if (gumpInfoDown.Texture != null)
-                {
-                    batcher.Draw(
-                        gumpInfoDown.Texture,
-                        new Vector2(x, y + Height),
-                        gumpInfoDown.UV,
-                        hueVector
-                    );
-                }
-            }
+                    ref readonly var gumpInfoFlag = ref Client.Game.UO.Gumps.GetGump(BUTTON_FLAG);
+                    ref readonly var gumpInfoUp = ref Client.Game.UO.Gumps.GetGump(BUTTON_UP);
+                    ref readonly var gumpInfoDown = ref Client.Game.UO.Gumps.GetGump(BUTTON_DOWN);
 
-            return base.Draw(batcher, x, y);
+                    if (MaxValue != MinValue && gumpInfoFlag.Texture != null)
+                    {
+                        batcher.Draw(
+                            gumpInfoFlag.Texture,
+                            new Vector2(x, y + _sliderPosition),
+                            gumpInfoFlag.UV,
+                            hueVector,
+                            layerDepth
+                        );
+                    }
+
+                    if (_showButtons)
+                    {
+                        if (gumpInfoUp.Texture != null)
+                        {
+                            batcher.Draw(gumpInfoUp.Texture, new Vector2(x, y), gumpInfoUp.UV, hueVector, layerDepth);
+                        }
+
+                        if (gumpInfoDown.Texture != null)
+                        {
+                            batcher.Draw(
+                                gumpInfoDown.Texture,
+                                new Vector2(x, y + Height),
+                                gumpInfoDown.UV,
+                                hueVector,
+                                layerDepth
+                            );
+                        }
+                    }
+                    return true;
+                }
+            );
+            return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
         }
 
         protected override int GetScrollableArea()

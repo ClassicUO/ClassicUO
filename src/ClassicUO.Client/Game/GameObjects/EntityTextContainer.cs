@@ -1,6 +1,5 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Collections;
@@ -137,7 +136,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public void Draw(UltimaBatcher2D batcher)
+        public void Draw(UltimaBatcher2D batcher, float layerDepth)
         {
             if (IsDestroyed || _messages.Count == 0)
             {
@@ -224,7 +223,7 @@ namespace ClassicUO.Game.GameObjects
                 item.X = p.X - (item.RenderedText.Width >> 1);
                 item.Y = p.Y - offY - item.RenderedText.Height - item.OffsetY;
 
-                item.RenderedText.Draw(batcher, item.X, item.Y, item.Alpha / 255f);
+                item.RenderedText.Draw(batcher, item.X, item.Y, layerDepth, item.Alpha / 255f);
                 offY += item.RenderedText.Height;
             }
         }

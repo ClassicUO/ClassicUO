@@ -5,7 +5,6 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
@@ -302,7 +301,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public ushort Hue { get; set; }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
@@ -311,48 +310,59 @@ namespace ClassicUO.Game.UI.Gumps
                 hueVector.X = Hue;
                 hueVector.Y = 1;
             }
+            float layerDepth = layerDepthRef;
 
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(H_BORDER);
+            renderLists.AddGumpWithAtlas(
+                (batcher) =>
+                {
+                    ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(H_BORDER);
 
-            // sopra
-            batcher.DrawTiled(
-                gumpInfo.Texture,
-                new Rectangle(x, y, Width, BorderSize),
-                gumpInfo.UV,
-                hueVector
+                    // sopra
+                    batcher.DrawTiled(
+                        gumpInfo.Texture,
+                        new Rectangle(x, y, Width, BorderSize),
+                        gumpInfo.UV,
+                        hueVector,
+                        layerDepth
+                    );
+
+                    // sotto
+                    batcher.DrawTiled(
+                        gumpInfo.Texture,
+                        new Rectangle(x, y + Height - BorderSize, Width, BorderSize),
+                        gumpInfo.UV,
+                        hueVector,
+                        layerDepth
+                    );
+
+                    gumpInfo = ref Client.Game.UO.Gumps.GetGump(V_BORDER);
+                    //sx
+                    batcher.DrawTiled(
+                        gumpInfo.Texture,
+                        new Rectangle(x, y, BorderSize, Height),
+                        gumpInfo.UV,
+                        hueVector,
+                        layerDepth
+                    );
+
+                    //dx
+                    batcher.DrawTiled(
+                        gumpInfo.Texture,
+                        new Rectangle(
+                            x + Width - BorderSize,
+                            y + (gumpInfo.UV.Width >> 1),
+                            BorderSize,
+                            Height - BorderSize
+                        ),
+                        gumpInfo.UV,
+                        hueVector,
+                        layerDepth
+                    );
+                    return true;
+                }
             );
 
-            // sotto
-            batcher.DrawTiled(
-                gumpInfo.Texture,
-                new Rectangle(x, y + Height - BorderSize, Width, BorderSize),
-                gumpInfo.UV,
-                hueVector
-            );
-
-            gumpInfo = ref Client.Game.UO.Gumps.GetGump(V_BORDER);
-            //sx
-            batcher.DrawTiled(
-                gumpInfo.Texture,
-                new Rectangle(x, y, BorderSize, Height),
-                gumpInfo.UV,
-                hueVector
-            );
-
-            //dx
-            batcher.DrawTiled(
-                gumpInfo.Texture,
-                new Rectangle(
-                    x + Width - BorderSize,
-                    y + (gumpInfo.UV.Width >> 1),
-                    BorderSize,
-                    Height - BorderSize
-                ),
-                gumpInfo.UV,
-                hueVector
-            );
-
-            return base.Draw(batcher, x, y);
+            return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
         }
     }
 }

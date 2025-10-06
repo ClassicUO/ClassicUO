@@ -1,16 +1,16 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System.Linq;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
-using ClassicUO.Game.Scenes;
+using System.Linq;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -312,26 +312,33 @@ namespace ClassicUO.Game.UI.Gumps
             base.Dispose();
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
             if (!IsVisible || IsDisposed)
             {
                 return false;
             }
 
-            base.Draw(batcher, x, y);
+            base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
+            float layerDepth = layerDepthRef;
 
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-            batcher.DrawRectangle(
-                SolidColorTextureCache.GetTexture(Color.Gray),
-                x,
-                y,
-                Width,
-                Height,
-                hueVector
+            renderLists.AddGumpNoAtlas(
+                batcher =>
+                {
+                    batcher.DrawRectangle(
+                        SolidColorTextureCache.GetTexture(Color.Gray),
+                        x,
+                        y,
+                        Width,
+                        Height,
+                        hueVector,
+                        layerDepth
+                    );
+                    return true;
+                }
             );
-
             return true;
         }
 
@@ -474,9 +481,10 @@ namespace ClassicUO.Game.UI.Gumps
                 WantUpdateSize = false;
             }
 
-            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
             {
-                base.Draw(batcher, x, y);
+                base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
+                float layerDepth = layerDepthRef;
 
                 Item item = _gump.World.Items.Get(LocalSerial);
 
@@ -508,46 +516,65 @@ namespace ClassicUO.Game.UI.Gumps
                         originalSize.Y = rect.Height;
                         point.Y = (_hit.Height >> 1) - (originalSize.Y >> 1);
                     }
-
-                    batcher.Draw(
-                        artInfo.Texture,
-                        new Rectangle(
-                            x + point.X,
-                            y + point.Y + _hit.Y,
-                            originalSize.X,
-                            originalSize.Y
-                        ),
-                        new Rectangle(
-                            artInfo.UV.X + rect.X,
-                            artInfo.UV.Y + rect.Y,
-                            rect.Width,
-                            rect.Height
-                        ),
-                        hueVector
+                    var texture = artInfo.Texture;
+                    var sourceRectangle = artInfo.UV;
+                    renderLists.AddGumpWithAtlas
+                    (
+                        (batcher) =>
+                        {
+                            batcher.Draw(
+                                texture,
+                                new Rectangle(
+                                    x + point.X,
+                                    y + point.Y + _hit.Y,
+                                    originalSize.X,
+                                    originalSize.Y
+                                ),
+                                new Rectangle(
+                                    sourceRectangle.X + rect.X,
+                                    sourceRectangle.Y + rect.Y,
+                                    rect.Width,
+                                    rect.Height
+                                ),
+                                hueVector,
+                                layerDepth
+                            );
+                            return true;
+                        }
                     );
                 }
 
                 hueVector = ShaderHueTranslator.GetHueVector(0);
-
-                batcher.DrawRectangle(
-                    SolidColorTextureCache.GetTexture(Color.Gray),
-                    x,
-                    y + 15,
-                    Width,
-                    Height - 15,
-                    hueVector
+                renderLists.AddGumpNoAtlas(
+                    batcher =>
+                    {
+                        batcher.DrawRectangle(
+                            SolidColorTextureCache.GetTexture(Color.Gray),
+                            x,
+                            y + 15,
+                            Width,
+                            Height - 15,
+                            hueVector,
+                            layerDepth
+                        );
+                        return true;
+                    }
                 );
-
                 if (_hit.MouseIsOver)
                 {
                     hueVector.Z = 0.7f;
-
-                    batcher.Draw(
-                        SolidColorTextureCache.GetTexture(Color.Yellow),
-                        new Rectangle(x + 1, y + 15, Width - 1, Height - 15),
-                        hueVector
+                    renderLists.AddGumpNoAtlas(
+                        batcher =>
+                        {
+                            batcher.Draw(
+                                SolidColorTextureCache.GetTexture(Color.Yellow),
+                                new Rectangle(x + 1, y + 15, Width - 1, Height - 15),
+                                hueVector,
+                                layerDepth
+                            );
+                            return true;
+                        }
                     );
-
                     hueVector.Z = 1;
                 }
 

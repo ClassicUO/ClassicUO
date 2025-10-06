@@ -1,14 +1,13 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Runtime.InteropServices;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -135,8 +134,9 @@ namespace ClassicUO.Game.UI.Controls
             base.Update();
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
+            float layerDepth = layerDepthRef;
             Texture2D texture = SolidColorTextureCache.GetTexture(Color.White);
 
             Rectangle rect = new Rectangle(0, 0, _cellWidth, _cellHeight);
@@ -152,11 +152,18 @@ namespace ClassicUO.Game.UI.Controls
                     rect.X = x + j * _cellWidth;
                     rect.Y = y + i * _cellHeight;
 
-                    batcher.Draw
-                    (
-                        texture,
-                        rect,
-                        hueVector
+                    renderLists.AddGumpNoAtlas(
+                        batcher =>
+                        {
+                            batcher.Draw
+                            (
+                                texture,
+                                rect,
+                                hueVector,
+                                layerDepth
+                            );
+                            return true;
+                        }
                     );
                 }
             }
@@ -170,15 +177,22 @@ namespace ClassicUO.Game.UI.Controls
                 rect.Width = 2;
                 rect.Height = 2;
 
-                batcher.Draw
-                (
-                    SolidColorTextureCache.GetTexture(Color.White),
-                    rect,
-                    hueVector
+                renderLists.AddGumpNoAtlas(
+                    batcher =>
+                    {
+                        batcher.Draw
+                        (
+                            SolidColorTextureCache.GetTexture(Color.White),
+                            rect,
+                            hueVector,
+                            layerDepth
+                        );
+                        return true;
+                    }
                 );
             }
 
-            return base.Draw(batcher, x, y);
+            return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
         }
 
 

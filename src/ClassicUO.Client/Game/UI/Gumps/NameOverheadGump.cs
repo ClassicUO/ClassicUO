@@ -1,18 +1,18 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using ClassicUO.Game.Scenes;
+using System;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -547,7 +547,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
             if (IsDisposed || !SetName())
             {
@@ -642,27 +642,37 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 return false;
             }
+            float layerDepth = layerDepthRef;
 
             X = x;
             Y = y;
+            renderLists.AddGumpNoAtlas(
+                batcher =>
+                {
+                    batcher.DrawRectangle(_borderColor, x - 1, y - 1, Width + 1, Height + 1, hueVector, layerDepth);
+                    return true;
+                }
+            );
 
-            batcher.DrawRectangle(_borderColor, x - 1, y - 1, Width + 1, Height + 1, hueVector);
-
-            base.Draw(batcher, x, y);
+            base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
 
             int renderedTextOffset = Math.Max(0, Width - _renderedText.Width - 4) >> 1;
-
-            return _renderedText.Draw(
-                batcher,
-                Width,
-                Height,
-                x + 2 + renderedTextOffset,
-                y + 2,
-                Width,
-                Height,
-                0,
-                0
+            renderLists.AddGumpNoAtlas(batcher =>
+                {
+                    return _renderedText.Draw(
+                        batcher,
+                        Width,
+                        Height,
+                        x + 2 + renderedTextOffset,
+                        y + 2,
+                        Width,
+                        Height,
+                        0,
+                        0
+                    );
+                }
             );
+            return true;
         }
 
         public override void Dispose()

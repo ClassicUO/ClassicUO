@@ -1,12 +1,12 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Collections.Generic;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using System;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -80,27 +80,46 @@ namespace ClassicUO.Game.UI.Controls
 
         public event EventHandler ValueChanged;
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
             if (IsDisposed)
             {
                 return false;
             }
 
-            var ok = base.Draw(batcher, x, y);
+            var ok = base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
+            float layerDepth = layerDepthRef;
 
             ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(
                 IsChecked ? _active : _inactive
             );
+            var texture = gumpInfo.Texture;
+            var sourceRectangle = gumpInfo.UV;
+            renderLists.AddGumpWithAtlas
+            (
+                (batcher) =>
+                {
+                    batcher.Draw(
+                        texture,
+                        new Vector2(x, y),
+                        sourceRectangle,
+                        ShaderHueTranslator.GetHueVector(0),
+                        layerDepth
+                     );
 
-            batcher.Draw(
-                gumpInfo.Texture,
-                new Vector2(x, y),
-                gumpInfo.UV,
-                ShaderHueTranslator.GetHueVector(0)
+                    return true;
+                }
             );
 
-            _text.Draw(batcher, x + gumpInfo.UV.Width + 2, y);
+            renderLists.AddGumpNoAtlas
+            (
+                (batcher) =>
+                {
+                    _text.Draw(batcher, x + sourceRectangle.Width + 2, y, layerDepth);
+
+                    return true;
+                }
+            );
 
             return ok;
         }
