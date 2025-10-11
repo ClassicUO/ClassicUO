@@ -28,42 +28,7 @@ internal sealed class PacketsMap : Dictionary<byte, OnPacket>;
 internal sealed class PacketsMap2 : Dictionary<byte, Func<IPacket>>;
 
 
-internal interface IPacket
-{
-    byte Id { get; }
-    void Fill(StackDataReader reader);
-}
 
-
-internal struct OnEnterWorldPacket() : IPacket
-{
-    public byte Id { get; } = 0x1B;
-
-    public uint Serial { get; private set; }
-    public uint Unused0 { get; private set; }
-    public ushort Graphic { get; private set; }
-    public (ushort X, ushort Y, sbyte Z) Position { get; private set; }
-    public Direction Direction { get; private set; }
-    public uint Unused1 { get; private set; }
-    public uint Unused2 { get; private set; }
-    public byte Unused3 { get; private set; }
-    public ushort MapWidth { get; private set; }
-    public ushort MapHeight { get; private set; }
-
-    public void Fill(StackDataReader reader)
-    {
-        Serial = reader.ReadUInt32BE();
-        Unused0 = reader.ReadUInt32BE();
-        Graphic = reader.ReadUInt16BE();
-        Position = (reader.ReadUInt16BE(), reader.ReadUInt16BE(), (sbyte)reader.ReadUInt16BE());
-        Direction = (Direction) reader.ReadUInt8();
-        Unused1 = reader.ReadUInt32BE();
-        Unused2 = reader.ReadUInt32BE();
-        Unused3 = reader.ReadUInt8();
-        MapWidth = reader.ReadUInt16BE();
-        MapHeight = reader.ReadUInt16BE();
-    }
-}
 
 readonly struct NetworkPlugin : IPlugin
 {
@@ -91,25 +56,111 @@ readonly struct NetworkPlugin : IPlugin
                     packetsMap.Value.Add(packet.Id, fn);
                 }
 
-                create<OnEnterWorldPacket>();
+                create<OnEnterWorldPacket_0x1B>();
+                create<OnLoginCompletePacket_0x55>();
+                create<OnExtendedCommandPacket_0xBF>();
+                create<OnClientVersionPacket_0xBD>();
+                create<OnUnicodeSpeechPacket_0xAE>();
+                create<OnUpdateObjectPacket_0xD3>();
+                create<OnUpdateObjectAltPacket_0x78>();
+                create<OnViewRangePacket_0xC8>();
+                create<OnAsciiSpeechPacket_0x1C>();
+                create<OnUpdateItemPacket_0x1A>();
+                create<OnDamagePacket_0x0B>();
+                create<OnCharacterStatusPacket_0x11>();
+                create<OnHealthBarStatusPacket_0x16>();
+                create<OnHealthBarStatusDetailsPacket_0x17>();
+                create<OnDeleteObjectPacket_0x1D>();
+                create<OnUpdatePlayerPacket_0x20>();
+                create<OnDragAnimationPacket_0x23>();
+                create<OnShowDeathScreenPacket_0x2C>();
+                create<OnMobileAttributesPacket_0x2D>();
+                create<OnEquipItemPacket_0x2E>();
+                create<OnSwingPacket_0x2F>();
+                create<OnUpdateSkillsPacket_0x3A>();
+                create<OnPathfindingPacket_0x38>();
+                create<OnPlayerLightLevelPacket_0x4E>();
+                create<OnServerLightLevelPacket_0x4F>();
+                create<OnSoundEffectPacket_0x54>();
+                create<OnPlayMusicPacket_0x6D>();
+                create<OnMapDataPacket_0x56>();
+                create<OnWeatherPacket_0x65>();
+                create<OnBookPagesPacket_0x66>();
+                create<OnCharacterAnimationPacket_0x6E>();
+                create<OnGraphicEffectPacket_0x70>();
+                create<OnGraphicEffectC0Packet_0xC0>();
+                create<OnGraphicEffectC7Packet_0xC7>();
+                create<OnBulletinBoardPacket_0x71>();
+                create<OnWarmodePacket_0x72>();
+                create<OnPingPacket_0x73>();
+                create<OnBuyListPacket_0x74>();
+                create<OnUpdateCharacterPacket_0x77>();
+                create<OnUpdateCharacterAltPacket_0xD2>();
+                create<OnOpenMenuPacket_0x7C>();
+                create<OnOpenPaperdollPacket_0x88>();
+                create<OnCorpseEquipmentPacket_0x89>();
+                create<OnShowMapPacket_0x90>();
+                create<OnShowMapFacetPacket_0xF5>();
+                create<OnOpenBookPacket_0x93>();
+                create<OnOpenBookAltPacket_0xD4>();
+                create<OnColorPickerPacket_0x95>();
+                create<OnMovePlayerPacket_0x97>();
+                create<OnUpdateNamePacket_0x98>();
+                create<OnPlaceMultiPacket_0x99>();
+                create<OnAsciiPromptPacket_0x9A>();
+                create<OnSellListPacket_0x9E>();
+                create<OnUpdateHitsPacket_0xA1>();
+                create<OnUpdateManaPacket_0xA2>();
+                create<OnUpdateStaminaPacket_0xA3>();
+                create<OnOpenUrlPacket_0xA5>();
+                create<OnWindowTipPacket_0xA6>();
+                create<OnAttackEntityPacket_0xAA>();
+                create<OnTextEntryDialogPacket_0xAB>();
+                create<OnShowDeathActionPacket_0xAF>();
+                create<OnOpenGumpPacket_0xB0>();
+                create<OnChatMessagePacket_0xB2>();
+                create<OnOpenCharacterProfilePacket_0xB8>();
+                create<OnLockFeaturesPacket_0xB9>();
+                create<OnQuestPointerPacket_0xBA>();
+                create<OnSeasonChangePacket_0xBC>();
+                create<OnClilocMessagePacket_0xC1>();
+                create<OnClilocMessageAffixPacket_0xCC>();
+                create<OnUnicodePromptPacket_0xC2>();
+                create<OnLogoutRequestPacket_0xD1>();
+                create<OnMegaClilocPacket_0xD6>();
+                create<OnCustomHousePacket_0xD8>();
+                create<OnOplInfoPacket_0xDC>();
+                create<OnOpenCompressedGumpPacket_0xDD>();
+                create<OnUpdateMobileStatusPacket_0xDE>();
+                create<OnBuffDebuffPacket_0xDF>();
+                create<OnNewCharacterAnimationPacket_0xE2>();
+                create<OnAddWaypointPacket_0xE5>();
+                create<OnRemoveWaypointPacket_0xE6>();
+                create<OnKrriosClientPacket_0xF0>();
+                create<OnUpdateItemSAPacket_0xF3>();
+                create<OnBoatMovingPacket_0xF6>();
+                create<OnPacketListPacket_0xF7>();
             })
 
             .AddSystem((EventReader<IPacket> reader) =>
             {
                 foreach (var packet in reader.Read())
                 {
-                    if (packet is OnEnterWorldPacket enterWorld)
+                    Console.WriteLine(">> packet event: ID 0x{0:X2}", packet.Id);
+                    switch (packet)
                     {
-                        Console.WriteLine(">> OnEnterWorld: Serial 0x{0:X8} | Graphic 0x{1:X4} | Pos {2},{3},{4} | Dir {5} | MapSize {6}x{7}",
-                            enterWorld.Serial,
-                            enterWorld.Graphic,
-                            enterWorld.Position.X,
-                            enterWorld.Position.Y,
-                            enterWorld.Position.Z,
-                            enterWorld.Direction,
-                            enterWorld.MapWidth,
-                            enterWorld.MapHeight
-                        );
+                        case OnEnterWorldPacket_0x1B enterWorld:
+                            Console.WriteLine(">> OnEnterWorld: Serial 0x{0:X8} | Graphic 0x{1:X4} | Pos {2},{3},{4} | Dir {5} | MapSize {6}x{7}",
+                               enterWorld.Serial,
+                               enterWorld.Graphic,
+                               enterWorld.Position.X,
+                               enterWorld.Position.Y,
+                               enterWorld.Position.Z,
+                               enterWorld.Direction,
+                               enterWorld.MapWidth,
+                               enterWorld.MapHeight
+                           );
+                            break;
                     }
                 }
             })

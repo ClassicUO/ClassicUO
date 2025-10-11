@@ -1,17 +1,22 @@
 using System.Runtime.CompilerServices;
 using ClassicUO.Network;
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
 
 internal readonly struct UseObjectPlugin : IPlugin
 {
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
         var useObjectFn = UseObject;
-        scheduler.OnUpdate(useObjectFn)
-            .RunIf((SchedulerState state) => state.InState(GameState.GameScreen))
-            .RunIf((Res<MouseContext> mouseCtx) => mouseCtx.Value.IsPressedDouble(Input.MouseButtonType.Left));
+
+        app
+            .AddSystem(useObjectFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
+            .RunIf((Res<MouseContext> mouseCtx) => mouseCtx.Value.IsPressedDouble(Input.MouseButtonType.Left))
+            .Build();
     }
 
     private static void UseObject(

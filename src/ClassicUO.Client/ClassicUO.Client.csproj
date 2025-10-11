@@ -28,7 +28,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Ecs\Network\IncomingPackets\" />
     <Folder Include="Properties\" />
   </ItemGroup>
 
