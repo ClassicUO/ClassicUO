@@ -18,149 +18,194 @@ internal readonly struct LoginPacketsPlugin : IPlugin
     public void Build(App app)
     {
         app
+            .AddSystem(Stage.Startup, (Res<PacketsMap2> packetsMap) =>
+            {
+                void create<T>() where T : IPacket, new()
+                {
+                    var temp = new T();
+                    if (!packetsMap.Value.ContainsKey(temp.Id))
+                    {
+                        packetsMap.Value.Add(temp.Id, () => new T());
+                    }
+                }
+
+                create<OnServerListPacket_0xA8>();
+                create<OnCharacterListPacket_0xA9>();
+                create<OnServerRelayPacket_0x8C>();
+                create<OnLoginErrorPacket_0x82>();
+                create<OnLoginErrorPacket_0x85>();
+                create<OnLoginErrorPacket_0x53>();
+            })
+
             .AddSystem(
                 (
-                    Res<Settings> settings, Res<PacketsMap> packetsMap, Res<NetClient> network, Res<UOFileManager> fileMaanger, ResMut<GameContext> gameCtx,
-                    ResMut<NextState<GameState>> gameState, EventWriter<ServerSelectionInfoEvent> serverWriter, EventWriter<CharacterSelectionInfoEvent> characterWriter,
+                    EventReader<IPacket> packets,
+                    Res<Settings> settings,
+                    Res<NetClient> network,
+                    Res<UOFileManager> fileManager,
+                    ResMut<GameContext> gameCtx,
+                    ResMut<NextState<GameState>> gameState,
+                    EventWriter<ServerSelectionInfoEvent> serverWriter,
+                    EventWriter<CharacterSelectionInfoEvent> characterWriter,
                     EventWriter<LoginErrorsInfoEvent> loginErrorWriter,
-
-                    // modding
                     EventWriter<HostMessage> hostMsgsWriter
                 ) =>
                 {
-// server list
-            packetsMap.Value[0xA8] = buffer =>
-            {
-                var reader = new StackDataReader(buffer);
-                var flags = reader.ReadUInt8();
-                var count = reader.ReadUInt16BE();
-                var serverList = new List<ServerInfo>();
-
-                for (var i = 0; i < count; ++i)
-                {
-                    var index = reader.ReadUInt16BE();
-                    var name = reader.ReadASCII(32, true);
-                    var percFull = reader.ReadUInt8();
-                    var timeZone = reader.ReadUInt8();
-                    var address = reader.ReadUInt32BE();
-
-                    serverList.Add(new(
-                        index, name, percFull, timeZone, address
-                    ));
-                }
-
-                gameState.Value.Set(GameState.ServerSelection);
-                serverWriter.Send(new()
-                {
-                    Servers = serverList
-                });
-
-                hostMsgsWriter.Send(new HostMessage.ServerLoginResponse(flags, serverList));
-            };
-
-            // characters list
-            packetsMap.Value[0xA9] = buffer =>
-            {
-                var reader = new StackDataReader(buffer);
-                var charactersCount = reader.ReadUInt8();
-                var characters = new List<CharacterInfo>();
-                for (uint i = 0; i < charactersCount; ++i)
-                {
-                    var name = reader.ReadASCII(30).TrimEnd('\0').Trim();
-                    reader.Skip(30);
-
-                    if (!string.IsNullOrEmpty(name))
-                        characters.Add(new(name, i));
-                }
-
-                var cityCount = reader.ReadUInt8();
-                var cities = new List<TownInfo>();
-                var asNew = gameCtx.Value.ClientVersion >= ClientVersion.CV_70130;
-                for (var i = 0; i < cityCount; ++i)
-                {
-                    TownInfo city;
-                    if (asNew)
+                    foreach (var packet in packets.Read())
                     {
-                        city = new TownInfo(
-                            reader.ReadUInt8(),
-                            reader.ReadASCII(32),
-                            reader.ReadASCII(32),
-                            ((ushort)reader.ReadUInt32BE(), (ushort)reader.ReadUInt32BE(), (sbyte)reader.ReadUInt32BE()),
-                            reader.ReadUInt32BE(),
-                            reader.ReadUInt32BE()
-                        );
+                        switch (packet)
+                        {
+                            case OnServerListPacket_0xA8 serverList:
+                                HandleServerListPacket(serverList, gameState, serverWriter, hostMsgsWriter);
+                                break;
 
-                        reader.Skip(4);
+                            case OnCharacterListPacket_0xA9 characterList:
+                                HandleCharacterListPacket(characterList, gameCtx, gameState, characterWriter, hostMsgsWriter);
+                                break;
+
+                            case OnServerRelayPacket_0x8C serverRelay:
+                                HandleServerRelayPacket(serverRelay, settings, network);
+                                break;
+
+                            case OnLoginErrorPacket_0x82 loginError82:
+                                HandleLoginErrorPacket(packet.Id, loginError82, fileManager, gameState, loginErrorWriter);
+                                break;
+
+                            case OnLoginErrorPacket_0x85 loginError85:
+                                HandleLoginErrorPacket(packet.Id, loginError85, fileManager, gameState, loginErrorWriter);
+                                break;
+
+                            case OnLoginErrorPacket_0x53 loginError53:
+                                HandleLoginErrorPacket(packet.Id, loginError53, fileManager, gameState, loginErrorWriter);
+                                break;
+                        }
                     }
-                    else
-                    {
-                        city = new TownInfo(
-                            reader.ReadUInt8(),
-                            reader.ReadASCII(31),
-                            reader.ReadASCII(31),
-                            (0, 0, 0), // TODO: X, Y. Z is 0
-                            0,
-                            0
-                        );
-                    }
-
-                    cities.Add(city);
-                }
-
-                var flags = gameCtx.Value.ClientFeatures = (CharacterListFlags)reader.ReadUInt32BE();
-
-                gameState.Value.Set(GameState.CharacterSelection);
-                characterWriter.Send(new()
-                {
-                    Characters = characters,
-                    Towns = cities
-                });
-
-                hostMsgsWriter.Send(new HostMessage.LoginResponse(flags, characters, cities));
-            };
-
-            // server relay
-            packetsMap.Value[0x8C] = buffer =>
-            {
-                var reader = new StackDataReader(buffer);
-                var ip = reader.ReadUInt32LE();
-                var port = reader.ReadUInt16BE();
-                var seed = reader.ReadUInt32BE();
-
-                network.Value.Disconnect();
-                network.Value.Connect(new IPAddress(ip).ToString(), port);
-
-                if (network.Value.IsConnected)
-                {
-                    network.Value.Encryption?.Initialize(false, seed);
-                    network.Value.EnableCompression();
-                    Span<byte> b = [(byte)(seed >> 24), (byte)(seed >> 16), (byte)(seed >> 8), (byte)seed];
-                    network.Value.Send(b, true, true);
-                    network.Value.Send_SecondLogin(settings.Value.Username, Crypter.Decrypt(settings.Value.Password), seed);
-                }
-            };
-
-            // login errors
-            void loginErrorsPackets(byte id, ReadOnlySpan<byte> buffer)
-            {
-                var reader = new StackDataReader(buffer);
-                var code = reader.ReadUInt8();
-
-                var errorMsg = ServerErrorMessages.GetError(fileMaanger.Value.Clilocs, id, code);
-
-                gameState.Value.Set(GameState.LoginError);
-                loginErrorWriter.Send(new()
-                {
-                    Error = new(errorMsg)
-                });
-            }
-
-            packetsMap.Value[0x82] = (buffer) => loginErrorsPackets(0x82, buffer);
-            packetsMap.Value[0x85] = (buffer) => loginErrorsPackets(0x85, buffer);
-            packetsMap.Value[0x53] = (buffer) => loginErrorsPackets(0x53, buffer);
-
                 })
-            .InStage(Stage.Startup)
+            .InStage(Stage.Update)
+            .RunIf((EventReader<IPacket> packets) => packets.HasEvents)
             .Build();
+    }
+
+    static void HandleServerListPacket(
+        OnServerListPacket_0xA8 packet,
+        ResMut<NextState<GameState>> gameState,
+        EventWriter<ServerSelectionInfoEvent> serverWriter,
+        EventWriter<HostMessage> hostMsgsWriter
+    )
+    {
+        gameState.Value.Set(GameState.ServerSelection);
+        serverWriter.Send(new ServerSelectionInfoEvent
+        {
+            Servers = packet.Servers
+        });
+
+        hostMsgsWriter.Send(new HostMessage.ServerLoginResponse(packet.Flags, packet.Servers));
+    }
+
+    static void HandleCharacterListPacket(
+        OnCharacterListPacket_0xA9 packet,
+        ResMut<GameContext> gameCtx,
+        ResMut<NextState<GameState>> gameState,
+        EventWriter<CharacterSelectionInfoEvent> characterWriter,
+        EventWriter<HostMessage> hostMsgsWriter
+    )
+    {
+        var towns = ParseTowns(packet, gameCtx.Value.ClientVersion);
+        gameCtx.Value.ClientFeatures = packet.Flags;
+
+        gameState.Value.Set(GameState.CharacterSelection);
+        characterWriter.Send(new CharacterSelectionInfoEvent
+        {
+            Characters = packet.Characters,
+            Towns = towns
+        });
+
+        hostMsgsWriter.Send(new HostMessage.LoginResponse(packet.Flags, packet.Characters, towns));
+    }
+
+    static void HandleServerRelayPacket(
+        OnServerRelayPacket_0x8C packet,
+        Res<Settings> settings,
+        Res<NetClient> network
+    )
+    {
+        network.Value.Disconnect();
+        network.Value.Connect(new IPAddress(packet.Ip).ToString(), packet.Port);
+
+        if (network.Value.IsConnected)
+        {
+            network.Value.Encryption?.Initialize(false, packet.Seed);
+            network.Value.EnableCompression();
+            Span<byte> seedBytes = stackalloc byte[4]
+            {
+                (byte)(packet.Seed >> 24),
+                (byte)(packet.Seed >> 16),
+                (byte)(packet.Seed >> 8),
+                (byte)packet.Seed
+            };
+
+            network.Value.Send(seedBytes, true, true);
+            network.Value.Send_SecondLogin(settings.Value.Username, Crypter.Decrypt(settings.Value.Password), packet.Seed);
+        }
+    }
+
+    static void HandleLoginErrorPacket(
+        byte packetId,
+        ILoginErrorPacket packet,
+        Res<UOFileManager> fileManager,
+        ResMut<NextState<GameState>> gameState,
+        EventWriter<LoginErrorsInfoEvent> loginErrorWriter
+    )
+    {
+        var errorMsg = ServerErrorMessages.GetError(fileManager.Value.Clilocs, packetId, packet.Code);
+
+        gameState.Value.Set(GameState.LoginError);
+        loginErrorWriter.Send(new LoginErrorsInfoEvent
+        {
+            Error = new(errorMsg)
+        });
+    }
+
+    static List<TownInfo> ParseTowns(OnCharacterListPacket_0xA9 packet, ClientVersion clientVersion)
+    {
+        var towns = new List<TownInfo>();
+        if (packet.CityData.Length == 0 || packet.CityCount == 0)
+            return towns;
+
+        var reader = new StackDataReader(packet.CityData);
+        var useNewFormat = clientVersion >= ClientVersion.CV_70130;
+
+        for (var i = 0; i < packet.CityCount && reader.Remaining > 0; ++i)
+        {
+            var index = reader.ReadUInt8();
+
+            if (useNewFormat && reader.Remaining >= 32 + 32 + sizeof(uint) * 5)
+            {
+                var name = reader.ReadASCII(32);
+                var building = reader.ReadASCII(32);
+                var x = (ushort)reader.ReadUInt32BE();
+                var y = (ushort)reader.ReadUInt32BE();
+                var z = (sbyte)reader.ReadUInt32BE();
+                var map = reader.ReadUInt32BE();
+                var cliloc = reader.ReadUInt32BE();
+
+                // skip unknown padding
+                if (reader.Remaining >= sizeof(uint))
+                    reader.Skip(sizeof(uint));
+
+                towns.Add(new TownInfo(index, name, building, (x, y, z), map, cliloc));
+            }
+            else
+            {
+                if (reader.Remaining < 31 + 31)
+                    break;
+
+                var name = reader.ReadASCII(31);
+                var building = reader.ReadASCII(31);
+                towns.Add(new TownInfo(index, name, building, (0, 0, 0), 0, 0));
+            }
+        }
+
+        return towns;
     }
 }
