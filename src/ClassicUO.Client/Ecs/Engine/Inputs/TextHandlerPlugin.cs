@@ -1,25 +1,22 @@
 using Microsoft.Xna.Framework.Input;
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
 
 internal readonly struct TextHandlerPlugin : IPlugin
 {
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
-        scheduler.AddEvent<CharInputEvent>();
-
-        scheduler.OnStartup
-        (
-            (EventWriter<CharInputEvent> writer) =>
+        app
+            .AddSystem(Stage.Startup, (EventWriter<CharInputEvent> writer) =>
             {
                 TextInputEXT.TextInput += c =>
                 {
-                    writer.Enqueue(new() { Value = c });
+                    writer.Send(new() { Value = c });
                 };
                 TextInputEXT.StartTextInput();
-            }
-        );
+            });
     }
 }
 

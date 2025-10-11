@@ -2,23 +2,22 @@
 using Clay_cs;
 using Microsoft.Xna.Framework;
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
 
 internal sealed class GumpBuilder
 {
-    private readonly World _world;
     private readonly AssetsServer _assets;
 
-    public GumpBuilder(World world, AssetsServer assets)
+    public GumpBuilder(AssetsServer assets)
     {
-        _world = world;
         _assets = assets;
     }
 
-    public EntityView AddLabel(string text, Vector2? position = null, Vector2? size = null)
+    public EntityCommands AddLabel(Commands commands, string text, Vector2? position = null, Vector2? size = null)
     {
-        var ent = _world.Entity()
+        var ent = commands.Spawn()
             .CreateUINode(new UINode()
             {
                 Config = {
@@ -38,7 +37,7 @@ internal sealed class GumpBuilder
                         }
                     }
                 }
-            }).Set(new Text()
+            }).Insert(new Text()
             {
                 Value = text,
                 TextConfig = {
@@ -51,17 +50,17 @@ internal sealed class GumpBuilder
         return ent;
     }
 
-    public EntityView AddButton((ushort normal, ushort pressed, ushort over) ids, Vector3 hue, Vector2? position = null)
+    public EntityCommands AddButton(Commands commands, (ushort normal, ushort pressed, ushort over) ids, Vector3 hue, Vector2? position = null)
     {
-        return AddGump(ids.normal, hue, position)
-            .Set(new UIMouseAction())
-            .Set(new UOButton() { Normal = ids.normal, Pressed = ids.pressed, Over = ids.over });
+        return AddGump(commands, ids.normal, hue, position)
+            .Insert(new UIMouseAction())
+            .Insert(new UOButton() { Normal = ids.normal, Pressed = ids.pressed, Over = ids.over });
     }
 
-    public EntityView AddGump(ushort id, Vector3 hue, Vector2? position = null)
+    public EntityCommands AddGump(Commands commands, ushort id, Vector3 hue, Vector2? position = null)
     {
         ref readonly var gumpInfo = ref _assets.Gumps.GetGump(id);
-        var ent = _world.Entity()
+        var ent = commands.Spawn()
             .CreateUINode(new UINode()
             {
                 Config = {
@@ -91,10 +90,10 @@ internal sealed class GumpBuilder
         return ent;
     }
 
-    public EntityView AddGumpNinePatch(ushort id, Vector3 hue, Vector2? position = null, Vector2? size = null)
+    public EntityCommands AddGumpNinePatch(Commands commands, ushort id, Vector3 hue, Vector2? position = null, Vector2? size = null)
     {
         ref readonly var gumpInfo = ref _assets.Gumps.GetGump(id);
-        var ent = _world.Entity()
+        var ent = commands.Spawn()
             .CreateUINode(new UINode()
             {
                 Config = {

@@ -7,30 +7,33 @@ using ClassicUO.Utility;
 using Clay_cs;
 using Microsoft.Xna.Framework;
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
 
 internal readonly struct ContainersPlugin : IPlugin
 {
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
-        scheduler.AddEvent<ContainerOpenedEvent>();
-        scheduler.AddEvent<ContainerClosedEvent>();
-        scheduler.AddEvent<ContainerUpdateEvent>();
-
         var registerOpenContainerFn = RegisterOpenContainer;
-        scheduler.OnStartup(registerOpenContainerFn);
+        app.AddSystem(Stage.Startup, registerOpenContainerFn);
 
         var registerUpdateContainerFn = RegisterUpdateContainer;
-        scheduler.OnStartup(registerUpdateContainerFn);
+        app.AddSystem(Stage.Startup, registerUpdateContainerFn);
 
         var onOpenContainersFn = OnOpenContainers;
-        scheduler.OnUpdate(onOpenContainersFn)
-            .RunIf((EventReader<ContainerOpenedEvent> reader) => !reader.IsEmpty);
-
         var closeContainersTooFarFromPlayerFn = CloseContainersTooFarFromPlayer;
-        scheduler.OnUpdate(closeContainersTooFarFromPlayerFn)
-            .RunIf((Query<Data<WorldPosition>, With<Player>> queryPlayer) => queryPlayer.Count() > 0);
+
+        app
+            .AddSystem(onOpenContainersFn)
+            .InStage(Stage.Update)
+            .RunIf((EventReader<ContainerOpenedEvent> reader) => reader.HasEvents)
+            .Build()
+
+            .AddSystem(closeContainersTooFarFromPlayerFn)
+            .InStage(Stage.Update)
+            .RunIf((Query<Data<WorldPosition>, With<Player>> queryPlayer) => queryPlayer.Count() > 0)
+            .Build();
     }
 
 
@@ -53,19 +56,19 @@ internal readonly struct ContainersPlugin : IPlugin
                 ent.Ref.Unset<UIMouseAction>();
                 ent.Ref.Unset<UIMovable>();
 
-                hostMsgs.Enqueue(new HostMessage.ContainerClosed(serial.Ref.Value));
+                hostMsgs.Send(new HostMessage.ContainerClosed(serial.Ref.Value));
             }
         }
     }
 
     private static void OnOpenContainers(
-        World world,
+        Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
         Res<AssetsServer> assets,
         EventReader<ContainerOpenedEvent> reader
     )
     {
-        foreach (var ev in reader)
+        foreach (var ev in reader.Read())
         {
             if (ev.Graphic == 0xFFFF)
             {
@@ -78,7 +81,7 @@ internal readonly struct ContainersPlugin : IPlugin
             else
             {
                 ref readonly var gumpInfo = ref assets.Value.Gumps.GetGump(ev.Graphic);
-                var ent = entitiesMap.Value.GetOrCreate(ev.Serial)
+                var ent = entitiesMap.Value.GetOrCreate(commands, ev.Serial)
                     .CreateUINode
                     (
                         new UINode()
@@ -110,8 +113,8 @@ internal readonly struct ContainersPlugin : IPlugin
                             }
                         }
                     )
-                    .Set(new UIMouseAction())
-                    .Add<UIMovable>();
+                    .Insert(new UIMouseAction())
+                    .Insert<UIMovable>();
             }
         }
     }
@@ -130,17 +133,17 @@ internal readonly struct ContainersPlugin : IPlugin
             var serial = reader.ReadUInt32BE();
             var graphic = reader.ReadUInt16BE();
 
-            writer.Enqueue(new(serial, graphic));
-            hostMsgs.Enqueue(new HostMessage.ContainerOpened(serial, graphic));
+            writer.Send(new(serial, graphic));
+            hostMsgs.Send(new HostMessage.ContainerOpened(serial, graphic));
         };
     }
 
     private static void RegisterUpdateContainer(
+        Commands commands,
         Res<PacketsMap> packets,
         Res<GameContext> gameCtx,
         Res<NetworkEntitiesMap> entitiesMap,
         Res<AssetsServer> assets,
-        World world,
         EventWriter<ContainerUpdateEvent> writer,
         EventWriter<HostMessage> hostMsgs
     )
@@ -162,20 +165,20 @@ internal readonly struct ContainersPlugin : IPlugin
             var containerSerial = reader.ReadUInt32BE();
             var hue = reader.ReadUInt16BE();
 
-            var ent = entitiesMap.Value.GetOrCreate(serial);
-            var parentEnt = entitiesMap.Value.GetOrCreate(containerSerial)
-                .Add<IsContainer>();
+            var ent = entitiesMap.Value.GetOrCreate(commands, serial);
+            var parentEnt = entitiesMap.Value.GetOrCreate(commands, containerSerial)
+                .Insert<IsContainer>();
 
-            ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
-                .Set(new WorldPosition() { X = x, Y = y, Z = 0 })
-                .Set(new Hue() { Value = hue })
-                .Set(new Amount() { Value = amount })
-                .Add<ContainedInto>()
+            ent.Insert(new Graphic() { Value = (ushort)(graphic + graphicInc) })
+                .Insert(new WorldPosition() { X = x, Y = y, Z = 0 })
+                .Insert(new Hue() { Value = hue })
+                .Insert(new Amount() { Value = amount })
+                .Insert<ContainedInto>()
                 ;
 
             parentEnt.AddChild(ent);
 
-            hostMsgs.Enqueue(new HostMessage.ContainerItemAdded
+            hostMsgs.Send(new HostMessage.ContainerItemAdded
             (
                 containerSerial,
                 serial,
@@ -189,8 +192,8 @@ internal readonly struct ContainersPlugin : IPlugin
 
             ref readonly var artInfo = ref assets.Value.Arts.GetArt((ushort)(graphic + graphicInc));
 
-            ent.Add<UIMovable>()
-                .Set(new UIMouseAction())
+            ent.Insert<UIMovable>()
+                .Insert(new UIMouseAction())
                 .CreateUINode
                 (
                     new UINode()
@@ -246,7 +249,7 @@ internal readonly struct ContainersPlugin : IPlugin
                 var containerSerial = reader.ReadUInt32BE();
                 var hue = reader.ReadUInt16BE();
 
-                hostMsgs.Enqueue(new HostMessage.ContainerItemAdded
+                hostMsgs.Send(new HostMessage.ContainerItemAdded
                 (
                     containerSerial,
                     serial,
@@ -258,20 +261,20 @@ internal readonly struct ContainersPlugin : IPlugin
                     hue
                 ));
 
-                var parentEnt = entitiesMap.Value.GetOrCreate(containerSerial)
-                    .Add<IsContainer>();
-                var ent = entitiesMap.Value.GetOrCreate(serial);
-                ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
-                    .Set(new Hue() { Value = hue })
-                    .Set(new WorldPosition() { X = x, Y = y, Z = 0 })
-                    .Set(new Amount() { Value = amount })
-                    .Add<ContainedInto>();
+                var parentEnt = entitiesMap.Value.GetOrCreate(commands, containerSerial)
+                    .Insert<IsContainer>();
+                var ent = entitiesMap.Value.GetOrCreate(commands, serial);
+                ent.Insert(new Graphic() { Value = (ushort)(graphic + graphicInc) })
+                    .Insert(new Hue() { Value = hue })
+                    .Insert(new WorldPosition() { X = x, Y = y, Z = 0 })
+                    .Insert(new Amount() { Value = amount })
+                    .Insert<ContainedInto>();
                 parentEnt.AddChild(ent);
 
                 ref readonly var artInfo = ref assets.Value.Arts.GetArt((ushort)(graphic + graphicInc));
 
-                ent.Add<UIMovable>()
-                    .Set(new UIMouseAction())
+                ent.Insert<UIMovable>()
+                    .Insert(new UIMouseAction())
                     .CreateUINode
                     (
                         new UINode()

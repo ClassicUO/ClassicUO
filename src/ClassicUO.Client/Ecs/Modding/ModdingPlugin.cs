@@ -22,6 +22,7 @@ using Extism.Sdk;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
 
@@ -30,53 +31,56 @@ namespace ClassicUO.Ecs;
 
 internal readonly struct ModdingPlugin : IPlugin
 {
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
-        scheduler.AddEvent<HostMessage>();
-        scheduler.AddEvent<(Mod, PluginMessage)>();
-
         var setupModsFn = SetupMods;
-        scheduler.OnStartup(setupModsFn);
-
         var modInitFn = ModInitialize;
-        scheduler.OnUpdate(modInitFn);
-
         var modUpdateFn = ModUpdate;
-        scheduler.OnUpdate(modUpdateFn);
-
         var modEventsFn = ModEvents;
-        scheduler.OnUpdate(modEventsFn)
-            .RunIf((EventReader<HostMessage> reader) => !reader.IsEmpty);
-
         var modReadEventsFn = ReadModEvents;
-        scheduler.OnUpdate(modReadEventsFn)
-            .RunIf((EventReader<(Mod, PluginMessage)> reader) => !reader.IsEmpty);
+
+        app
+            .AddSystem(Stage.Startup, setupModsFn)
+
+            .AddObserver(modInitFn)
+
+            .AddSystem(Stage.Update, modUpdateFn)
+
+            .AddSystem(modEventsFn)
+            .InStage(Stage.Update)
+            .RunIf((EventReader<HostMessage> reader) => reader.HasEvents)
+            .Build()
+
+            .AddSystem(modReadEventsFn)
+            .InStage(Stage.Update)
+            .RunIf((EventReader<(Mod, PluginMessage)> reader) => reader.HasEvents)
+            .Build();
 
         foreach (var state in Enum.GetValues<GameState>())
         {
-            scheduler.OnEnter(state, static (EventWriter<HostMessage> hostMsgs, State<GameState> state)
-                => hostMsgs.Enqueue(new HostMessage.GameStateChanged(state.Current))
-            );
+            app.AddSystem((EventWriter<HostMessage> hostMsgs, Res<State<GameState>> state)
+                              => hostMsgs.Send(new HostMessage.GameStateChanged(state.Value.Current)))
+                .OnEnter(state)
+                .Build();
         }
 
-        scheduler.AddPlugin<InputPlugin>();
-        scheduler.AddPlugin<TextPlugin>();
-        scheduler.AddPlugin<UIEventsPlugin>();
+        app.AddPlugin<InputPlugin>();
+        app.AddPlugin<TextPlugin>();
+        app.AddPlugin<UIEventsPlugin>();
     }
 
 
     private static void SetupMods(
-        World world,
+        Commands commands,
         Res<NetClient> network,
         Res<Settings> settings,
-        Res<NetworkEntitiesMap> networkEntities,
-        SchedulerState schedState
+        Res<NetworkEntitiesMap> networkEntities
     )
     {
         Extism.Sdk.Plugin.ConfigureFileLogging("stdout", LogLevel.Info);
         Console.WriteLine("extism version: {0}", Extism.Sdk.Plugin.ExtismVersion());
         var requiredFunctions = new[] { "on_init", "on_update", "on_event" };
-
+return;
         foreach (var path in settings.Value.Plugins)
         {
             var isUrl = Uri.TryCreate(path, UriKind.Absolute, out var uri);
@@ -92,16 +96,16 @@ internal readonly struct ModdingPlugin : IPlugin
 
             HostFunction[] functions =
             [
-                ..Api.Functions(modRef, schedState),
-                ..bind<Graphic>("entity_graphic", networkEntities),
-                ..bind<Hue>("entity_hue", networkEntities),
-                ..bind<Facing>("entity_direction", networkEntities),
-                ..bind<WorldPosition>("entity_position", networkEntities),
-                ..bind<MobAnimation>("entity_animation", networkEntities),
-                ..bind<ServerFlags>("entity_flags", networkEntities),
-                ..bind<Hits>("entity_hp", networkEntities),
-                ..bind<Stamina>("entity_stamina", networkEntities),
-                ..bind<Mana>("entity_mana", networkEntities),
+                // ..Api.Functions(modRef, schedState),
+                // ..bind<Graphic>("entity_graphic", networkEntities.Value),
+                // ..bind<Hue>("entity_hue", networkEntities.Value),
+                // ..bind<Facing>("entity_direction", networkEntities.Value),
+                // ..bind<WorldPosition>("entity_position", networkEntities.Value),
+                // ..bind<MobAnimation>("entity_animation", networkEntities.Value),
+                // ..bind<ServerFlags>("entity_flags", networkEntities.Value),
+                // ..bind<Hits>("entity_hp", networkEntities.Value),
+                // ..bind<Stamina>("entity_stamina", networkEntities.Value),
+                // ..bind<Mana>("entity_mana", networkEntities.Value),
             ];
 
             var manifest = new Manifest(uri?.IsFile ?? true ? new PathWasmSource(path) : new UrlWasmSource(uri));
@@ -126,70 +130,69 @@ internal readonly struct ModdingPlugin : IPlugin
             }
 
             mod = new Mod(plugin);
-            world.Entity()
-                .Set(new WasmMod() { Mod = mod });
+            commands.Spawn()
+                .Insert(new WasmMod() { Mod = mod });
 
             modRef.SetTarget(mod);
         }
 
-        static IEnumerable<HostFunction> bind<T>(string postfix, NetworkEntitiesMap networkEntities)
-                where T : struct
-        {
-            var ctx = (JsonTypeInfo<T>)ModdingJsonContext.Default.GetTypeInfo(typeof(T));
-            yield return serializeProps("cuo_get_" + postfix, networkEntities, ctx);
-            yield return deserializeProps("cuo_set_" + postfix, networkEntities, ctx);
-            yield break;
-
-
-            static HostFunction serializeProps(string name, NetworkEntitiesMap networkEntities, JsonTypeInfo<T> ctx)
-            {
-                ArgumentNullException.ThrowIfNull(ctx);
-
-                return HostFunction.FromMethod(name, null, (CurrentPlugin p, long offset) =>
-                {
-                    var serial = p.ReadBytes(offset).As<uint>();
-                    var ent = networkEntities.Get(serial);
-                    if (ent == 0 || !ent.Has<T>())
-                        return p.WriteString("{}");
-
-                    var json = JsonSerializer.Serialize(ent.Get<T>(), ctx);
-                    return p.WriteString(json);
-                });
-            }
-
-            static HostFunction deserializeProps(string name, NetworkEntitiesMap networkEntities, JsonTypeInfo<T> ctx)
-            {
-                ArgumentNullException.ThrowIfNull(ctx);
-
-                return HostFunction.FromMethod(name, null, (CurrentPlugin p, long keyOffset, long valueOffset) =>
-                {
-                    var serial = p.ReadBytes(keyOffset).As<uint>();
-                    var ent = networkEntities.Get(serial);
-                    if (ent == 0)
-                        return;
-
-                    var value = p.ReadBytes(valueOffset);
-                    var val = JsonSerializer.Deserialize(value, ctx);
-                    ent.Set(val);
-                });
-            }
-        }
+        // static IEnumerable<HostFunction> bind<T>(string postfix, NetworkEntitiesMap networkEntities)
+        //         where T : struct
+        // {
+        //     var ctx = (JsonTypeInfo<T>)ModdingJsonContext.Default.GetTypeInfo(typeof(T));
+        //     yield return serializeProps("cuo_get_" + postfix, networkEntities, ctx);
+        //     yield return deserializeProps("cuo_set_" + postfix, networkEntities, ctx);
+        //     yield break;
+        //
+        //
+        //     static HostFunction serializeProps(string name, NetworkEntitiesMap networkEntities, JsonTypeInfo<T> ctx)
+        //     {
+        //         ArgumentNullException.ThrowIfNull(ctx);
+        //
+        //         return HostFunction.FromMethod(name, null, (CurrentPlugin p, long offset) =>
+        //         {
+        //             var serial = p.ReadBytes(offset).As<uint>();
+        //             var ent = networkEntities.Get(serial);
+        //             if (ent == 0 || !ent.Has<T>())
+        //                 return p.WriteString("{}");
+        //
+        //             var json = JsonSerializer.Serialize(ent.Get<T>(), ctx);
+        //             return p.WriteString(json);
+        //         });
+        //     }
+        //
+        //     static HostFunction deserializeProps(string name, NetworkEntitiesMap networkEntities, JsonTypeInfo<T> ctx)
+        //     {
+        //         ArgumentNullException.ThrowIfNull(ctx);
+        //
+        //         return HostFunction.FromMethod(name, null, (CurrentPlugin p, long keyOffset, long valueOffset) =>
+        //         {
+        //             var serial = p.ReadBytes(keyOffset).As<uint>();
+        //             var ent = networkEntities.Get(serial);
+        //             if (ent == 0)
+        //                 return;
+        //
+        //             var value = p.ReadBytes(valueOffset);
+        //             var val = JsonSerializer.Deserialize(value, ctx);
+        //             ent.Set(val);
+        //         });
+        //     }
+        // }
     }
 
-    private static void ModInitialize(Query<Data<WasmMod>, Without<WasmInitialized>> query)
+    private static void ModInitialize(OnAdd<WasmMod> trigger, Commands commands)
     {
         var pluginVersion = new WasmPluginVersion().ToJson();
 
-        foreach ((var ent, var mod) in query)
-        {
-            var result = mod.Ref.Mod.Plugin.Call("on_init", pluginVersion);
-            ent.Ref.Add<WasmInitialized>();
-        }
+        commands.Entity(trigger.EntityId)
+            .Insert<WasmInitialized>();
+
+        var result = trigger.Component.Mod.Plugin.Call("on_init", pluginVersion);
     }
 
-    private static void ModUpdate(Query<Data<WasmMod>> query, Time time)
+    private static void ModUpdate(Query<Data<WasmMod>> query, Res<Time> time)
     {
-        var timeProxy = new TimeProxy(time.Total, time.Frame).ToJson();
+        var timeProxy = new TimeProxy(time.Value.Total, time.Value.Frame).ToJson();
         foreach ((_, var mod) in query)
         {
             try
@@ -206,10 +209,15 @@ internal readonly struct ModdingPlugin : IPlugin
     private static void ModEvents(
         Query<Data<WasmMod>> query,
         EventReader<HostMessage> reader,
-        EventWriter<(Mod, PluginMessage)> writer
+        EventWriter<(Mod, PluginMessage)> writer,
+        Local<List<HostMessage>> messages
     )
     {
-        var jsonEvents = new HostMessages(reader.Values).ToJson();
+        messages.Value.Clear();
+
+        foreach (var msg in reader.Read())
+            messages.Value.Add(msg);
+        var jsonEvents = new HostMessages(messages.Value).ToJson();
 
         foreach ((_, var mod) in query)
         {
@@ -224,7 +232,6 @@ internal readonly struct ModdingPlugin : IPlugin
     }
 
     private static void ReadModEvents(
-        World world,
         Res<PacketsMap> packetMap,
         Res<AssetsServer> assets,
         Res<NetClient> network,
@@ -233,7 +240,7 @@ internal readonly struct ModdingPlugin : IPlugin
         EventReader<(Mod, PluginMessage)> reader
     )
     {
-        foreach ((var mod, var ev) in reader)
+        foreach ((var mod, var ev) in reader.Read())
         {
             switch (ev)
             {

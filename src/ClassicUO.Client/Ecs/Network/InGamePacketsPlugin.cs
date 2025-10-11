@@ -13,12 +13,14 @@ using ClassicUO.Network;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using TinyEcs;
+using TinyEcs.Bevy;
+using World = TinyEcs.World;
 
 namespace ClassicUO.Ecs;
 
 internal static class NetworkEntitiesExt
 {
-    public static EntityView CreateNetworkEntity(this EntityView ent, uint serial)
+    public static EntityCommands CreateNetworkEntity(this EntityCommands ent, uint serial)
     {
         if (SerialHelper.IsMobile(serial))
             return ent.CreateMobile(serial);
@@ -26,26 +28,26 @@ internal static class NetworkEntitiesExt
             return ent.CreateItem(serial);
     }
 
-    public static EntityView CreateMobile(this EntityView ent, uint serial)
+    public static EntityCommands CreateMobile(this EntityCommands ent, uint serial)
     {
         if (!SerialHelper.IsMobile(serial))
             throw new ArgumentException("serial is not a mobile");
 
-        ent.Set(new NetworkSerial() { Value = serial });
-        ent.Set(new MobAnimation());
-        ent.Set(new ScreenPositionOffset());
-        ent.Add<Mobiles>();
+        ent.Insert(new NetworkSerial() { Value = serial });
+        ent.Insert(new MobAnimation());
+        ent.Insert(new ScreenPositionOffset());
+        ent.Insert<Mobiles>();
 
         return ent;
     }
 
-    public static EntityView CreateItem(this EntityView ent, uint serial)
+    public static EntityCommands CreateItem(this EntityCommands ent, uint serial)
     {
         if (SerialHelper.IsMobile(serial))
             throw new ArgumentException("serial is not an item");
 
-        ent.Set(new NetworkSerial() { Value = serial });
-        ent.Add<Items>();
+        ent.Insert(new NetworkSerial() { Value = serial });
+        ent.Insert<Items>();
 
         return ent;
     }
@@ -54,160 +56,67 @@ internal static class NetworkEntitiesExt
 sealed class NetworkEntitiesMap
 {
     private readonly Dictionary<uint, ulong> _entities = new();
-    private readonly List<uint> _toRemove = new();
-    private readonly TinyEcs.World _world;
 
-    public NetworkEntitiesMap(TinyEcs.World world)
-    {
-        _world = world;
-    }
-
-    public EntityView GetOrCreate(uint serial)
+    public EntityCommands GetOrCreate(Commands commands, uint serial)
     {
         if (_entities.TryGetValue(serial, out var id))
         {
-            if (_world.Exists(id))
+            if (commands.Exists(id))
             {
-                return _world.Entity(id);
+                return commands.Entity(id);
             }
 
             _entities.Remove(serial);
         }
 
-        var ent = _world.Entity().CreateNetworkEntity(serial);
-
-        _entities.Add(serial, ent.ID);
-
-        Console.WriteLine("created: serial: 0x{0:X8} | ecsId: {1}", serial, ent.ID);
-
+        var ent = commands.Spawn().CreateNetworkEntity(serial);
+        _entities.Add(serial, ent.Id);
         return ent;
     }
 
-    public EntityView Get(uint serial)
+    public void Add(Commands commands, uint serial, ulong id)
     {
-        if (_entities.TryGetValue(serial, out var id))
+        if (_entities.TryGetValue(serial, out var entity))
         {
-            if (_world.Exists(id))
+            if (id != entity)
             {
-                return _world.Entity(id);
+                if (commands.Exists(id))
+                {
+
+                }
+
+                if (commands.Exists(entity))
+                {
+
+                }
+                //
+                // _entities[serial] = id;
             }
 
-            _entities.Remove(serial);
+            return;
         }
 
-        return EntityView.Invalid;
+        _entities.Add(serial, id);
     }
 
     public bool Remove(uint serial)
     {
-        var result = false;
-        if (_entities.Remove(serial, out var id))
+        return _entities.Remove(serial, out var id);
+    }
+
+    public EntityCommands Get(Commands commands, uint serial)
+    {
+        if (_entities.TryGetValue(serial, out var id))
         {
-            if (!_world.Exists(id))
-                return false;
-
-            //// Some entities might have a network entity associated [child].
-            //// It's needed to remove from the dict these children entities.
-            //// Filter search:
-            //// - (*, id) && (NetworkSerial)
-            //// - (id, *) && (NetworkSerial)
-            //// Suddenly the world.Delete(id) call will delete the children ecs side.
-            //var term0 = new QueryTerm(IDOp.Pair(Wildcard.ID, id), TermOp.With);
-            //var term1 = new QueryTerm(IDOp.Pair(id, Wildcard.ID), TermOp.With);
-            //var term2 = new QueryTerm(world.Entity<NetworkSerial>(), TermOp.DataAccess);
-            //// var term3 = new QueryTerm(IDOp.Pair(world.Entity<EquippedItem>(), id), TermOp.Without);
-
-            //world.BeginDeferred();
-            //using var iterator = world.GetQueryIterator([term0, term2]);
-            //while (iterator.Next(out var arch))
-            //{
-            //    var index = arch.GetComponentIndex<NetworkSerial>();
-            //    foreach (ref readonly var chunk in arch)
-            //    {
-            //        var span = chunk.GetSpan<NetworkSerial>(index);
-            //        foreach (ref var ser in span)
-            //        {
-            //            Console.WriteLine("  removing serial: 0x{0:X8} associated to 0x{1:X8}", ser.Value, serial);
-            //            _toRemove.Add(ser.Value);
-            //            // if (!Remove(world, ser.Value))
-            //            // {
-            //            //
-            //            // }
-            //        }
-            //    }
-            //}
-
-            //using var iterator2 = world.GetQueryIterator([term1, term2]);
-            //while (iterator2.Next(out var arch))
-            //{
-            //    var index = arch.GetComponentIndex<NetworkSerial>();
-            //    foreach (ref readonly var chunk in arch)
-            //    {
-            //        var span = chunk.GetSpan<NetworkSerial>(index);
-            //        foreach (ref var ser in span)
-            //        {
-            //            Console.WriteLine("  removing serial: 0x{0:X8} associated to 0x{1:X8}", ser.Value, serial);
-            //            _toRemove.Add(ser.Value);
-            //            // if (!Remove(world, ser.Value))
-            //            // {
-            //            //
-            //            // }
-            //        }
-            //    }
-            //}
-
-            if (_world.Has<EquipmentSlots>(id))
+            if (commands.Exists(id))
             {
-                ref var slots = ref _world.Get<EquipmentSlots>(id);
-                for (Layer layer = Layer.Invalid + 1; layer <= Layer.Bank; layer++)
-                {
-                    var e = slots[layer];
-                    slots[layer] = 0;
-
-                    if (e.IsValid() && _world.Exists(e) && _world.Has<NetworkSerial>(e))
-                    {
-                        ref var ser = ref _world.Get<NetworkSerial>(e);
-                        Console.WriteLine("  removing serial: 0x{0:X8} associated to 0x{1:X8}", ser.Value, serial);
-                        _toRemove.Add(ser.Value);
-                        // if (Remove(world, ser.Value))
-                        // {
-                        // }
-                    }
-                }
-            }
-            // world.EndDeferred();
-
-
-            // // we want to keep the equipments for some reason lol
-            // var term4 = new QueryTerm(IDOp.Pair(world.Entity<EquippedItem>(), id), TermOp.With);
-            // var id2 = id;
-            // var q2 = world.QueryRaw(term2, term4);
-            // q2.Each((EntityView ent, ref NetworkSerial ser) =>
-            // {
-            //     Console.WriteLine("  unsetting equipment serial: 0x{0:X8} associated to 0x{1:X8}", ser.Value, serial);
-            //     //ent.Unset<EquippedItem>(id2);
-            //     Remove(world, ser.Value);
-            // });
-
-            foreach (var s in _toRemove)
-            {
-                if (_entities.Remove(s, out var childId) && _world.Exists(childId))
-                    _world.Delete(childId);
+                return commands.Entity(id);
             }
 
-            _toRemove.Clear();
-
-            _world.Delete(id);
-            result = true;
-        }
-        else
-        {
-
+            _entities.Remove(serial);
         }
 
-        Console.WriteLine("deleted: serial: 0x{0:X8} | ecsId: {1} | result: {2}", serial, id, result);
-
-        return result;
+        return default;
     }
 
     public void Clear()
@@ -223,17 +132,62 @@ sealed class NetworkEntitiesMap
 
 readonly struct InGamePacketsPlugin : IPlugin
 {
-    public void Build(Scheduler scheduler)
-    {
-        scheduler.OnStartup((SchedulerState state, TinyEcs.World world) =>
-        {
-            state.AddResource(new NetworkEntitiesMap(world));
-        });
 
-        scheduler.OnExit(GameState.GameScreen, (
-            TinyEcs.World world,
-            Query<Data<NetworkSerial>, Filter<Without<Parent>>> query,
-            Res<NetworkEntitiesMap> entitiesMap) =>
+    private class Queries : ISystemParam
+    {
+        public Query<Data<HouseRevision>> qHouseRevision { get; } = new();
+        public Query<Data<EquipmentSlots>> qEquipmentSlots{ get; } = new();
+        public Query<Data<WorldPosition, Graphic>> qPosAndGraphic{ get; } = new();
+        public Query<Empty, With<IsMulti>> qMultis { get; } = new();
+
+        public void Initialize(World world)
+        {
+            qHouseRevision.Initialize(world);
+            qEquipmentSlots.Initialize(world);
+            qPosAndGraphic.Initialize(world);
+            qMultis.Initialize(world);
+        }
+
+        public void Fetch(World world)
+        {
+            qHouseRevision.Fetch(world);
+            qEquipmentSlots.Fetch(world);
+            qPosAndGraphic.Fetch(world);
+            qMultis.Fetch(world);
+        }
+
+        public SystemParamAccess GetAccess()
+        {
+            var access = new SystemParamAccess();
+            var houseRev = qHouseRevision.GetAccess();
+            var equipSlots = qEquipmentSlots.GetAccess();
+            var posAndGraphic = qPosAndGraphic.GetAccess();
+            var multis = qMultis.GetAccess();
+
+            foreach (var read in houseRev.ReadResources) access.ReadResources.Add(read);
+            foreach (var write in houseRev.WriteResources) access.WriteResources.Add(write);
+            foreach (var read in equipSlots.ReadResources) access.ReadResources.Add(read);
+            foreach (var write in equipSlots.WriteResources) access.WriteResources.Add(write);
+            foreach (var read in posAndGraphic.ReadResources) access.ReadResources.Add(read);
+            foreach (var write in posAndGraphic.WriteResources) access.WriteResources.Add(write);
+            foreach (var read in multis.ReadResources) access.ReadResources.Add(read);
+            foreach (var write in multis.WriteResources) access.WriteResources.Add(write);
+
+            return access;
+        }
+    }
+
+    public void Build(App app)
+    {
+        app
+            .AddSystem(Stage.Startup, (Commands commands) =>
+            {
+                commands.InsertResource(new NetworkEntitiesMap());
+            })
+
+            .AddSystem((Commands commands,
+                        Query<Data<NetworkSerial>, Filter<Without<Parent>>> query,
+                        Res<NetworkEntitiesMap> entitiesMap) =>
             {
                 foreach ((var ent, var serial) in query)
                 {
@@ -242,89 +196,91 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                 foreach ((var serial, var ent) in entitiesMap.Value)
                 {
-                    if (world.Exists(ent))
-                        world.Delete(ent);
+                    commands.Entity(ent).Despawn();
                 }
 
                 entitiesMap.Value.Clear();
+            })
+            .OnExit(GameState.GameScreen)
+            .Build()
 
-            });
-
-        scheduler.OnStartup((
-            Res<NetworkEntitiesMap> entitiesMap,
-            Res<Settings> settings,
-            Res<PacketsMap> packetsMap,
-            Res<NetClient> network,
-            Res<UOFileManager> fileManager,
-            Res<Profile> profile,
-            Res<GameContext> gameCtx,
-            Res<MultiCache> multiCache,
-            Res<DelayedAction> delayedActions,
-            State<GameState> state,
-            EventWriter<MobileQueuedStep> mobileQueuedSteps,
-            EventWriter<TextOverheadEvent> textOverHeadQueue,
-            TinyEcs.World world
-        ) =>
-        {
-            // enter world
-            packetsMap.Value[0x1B] = buffer =>
-            {
-                var reader = new StackDataReader(buffer);
-                var serial = reader.ReadUInt32BE();
-                reader.Skip(4);
-                var graphic = reader.ReadUInt16BE();
-                (var x, var y, var z) = (reader.ReadUInt16BE(), reader.ReadUInt16BE(), (sbyte)reader.ReadUInt16BE());
-                var dir = (Direction)reader.ReadUInt8();
-                reader.Skip(9);
-                var mapWidth = reader.ReadUInt16BE();
-                var mapHeight = reader.ReadUInt16BE();
-
-                if (gameCtx.Value.ClientVersion >= ClientVersion.CV_200)
+            .AddSystem(
+                (
+                    Commands commands,
+                    Res<NetworkEntitiesMap> entitiesMap,
+                    Res<Settings> settings,
+                    Res<PacketsMap> packetsMap,
+                    Res<NetClient> network,
+                    Res<UOFileManager> fileManager,
+                    Res<Profile> profile,
+                    ResMut<GameContext> gameCtx,
+                    Res<MultiCache> multiCache,
+                    Res<DelayedAction> delayedActions,
+                    ResMut<NextState<GameState>> state,
+                    EventWriter<MobileQueuedStep> mobileQueuedSteps,
+                    EventWriter<TextOverheadEvent> textOverHeadQueue,
+                    Queries queries
+                ) =>
                 {
-                    network.Value.Send_GameWindowSize(800, 400);
-                    network.Value.Send_Language(settings.Value.Language);
-                }
+                        // enter world
+                packetsMap.Value[0x1B] = buffer =>
+                {
+                    var reader = new StackDataReader(buffer);
+                    var serial = reader.ReadUInt32BE();
+                    reader.Skip(4);
+                    var graphic = reader.ReadUInt16BE();
+                    (var x, var y, var z) = (reader.ReadUInt16BE(), reader.ReadUInt16BE(), (sbyte)reader.ReadUInt16BE());
+                    var dir = (Direction)reader.ReadUInt8();
+                    reader.Skip(9);
+                    var mapWidth = reader.ReadUInt16BE();
+                    var mapHeight = reader.ReadUInt16BE();
 
-                network.Value.Send_ClientVersion(settings.Value.ClientVersion);
-                network.Value.Send_ClickRequest(serial);
-                network.Value.Send_SkillsRequest(serial);
+                    if (gameCtx.Value.ClientVersion >= ClientVersion.CV_200)
+                    {
+                        network.Value.Send_GameWindowSize(800, 400);
+                        network.Value.Send_Language(settings.Value.Language);
+                    }
 
-                if (gameCtx.Value.ClientVersion >= ClientVersion.CV_70796)
-                    network.Value.Send_ShowPublicHouseContent(true);
+                    network.Value.Send_ClientVersion(settings.Value.ClientVersion);
+                    network.Value.Send_ClickRequest(serial);
+                    network.Value.Send_SkillsRequest(serial);
 
-                gameCtx.Value.CenterX = x;
-                gameCtx.Value.CenterY = y;
-                gameCtx.Value.CenterZ = z;
-                gameCtx.Value.PlayerSerial = serial;
+                    if (gameCtx.Value.ClientVersion >= ClientVersion.CV_70796)
+                        network.Value.Send_ShowPublicHouseContent(true);
 
-                var ent = entitiesMap.Value.GetOrCreate(serial);
-                ent.Set(new Ecs.WorldPosition() { X = x, Y = y, Z = z })
-                    .Set(new Ecs.Graphic() { Value = graphic })
-                    .Set(new Facing() { Value = dir })
-                    .Set(new MobileSteps() { Index = -1 })
-                    .Add<Player>();
+                    gameCtx.Value.CenterX = x;
+                    gameCtx.Value.CenterY = y;
+                    gameCtx.Value.CenterZ = z;
+                    gameCtx.Value.PlayerSerial = serial;
 
-                state.Set(GameState.GameScreen);
-            };
+                    var ent = entitiesMap.Value.GetOrCreate(commands, serial);
+                    ent.Insert(new Ecs.WorldPosition() { X = x, Y = y, Z = z })
+                        .Insert(new Ecs.Graphic() { Value = graphic })
+                        .Insert(new Facing() { Value = dir })
+                        .Insert(new MobileSteps() { Index = -1 })
+                        .Insert<Player>();
 
-            // login complete
-            packetsMap.Value[0x55] = buffer =>
-            {
-                if (gameCtx.Value.PlayerSerial == 0)
-                    return;
+                    state.Value.Set(GameState.GameScreen);
+                };
 
-                network.Value.Send_StatusRequest(gameCtx.Value.PlayerSerial);
-                network.Value.Send_OpenChat("");
+                // login complete
+                packetsMap.Value[0x55] = buffer =>
+                {
+                    if (gameCtx.Value.PlayerSerial == 0)
+                        return;
 
-                network.Value.Send_SkillsRequest(gameCtx.Value.PlayerSerial);
-                //network.Value.Send_DoubleClick(gameCtx.Value.PlayerSerial);
+                    network.Value.Send_StatusRequest(gameCtx.Value.PlayerSerial);
+                    network.Value.Send_OpenChat("");
 
-                if (gameCtx.Value.ClientVersion >= ClientVersion.CV_306E)
-                    network.Value.Send_ClientType(gameCtx.Value.Protocol);
+                    network.Value.Send_SkillsRequest(gameCtx.Value.PlayerSerial);
+                    //network.Value.Send_DoubleClick(gameCtx.Value.PlayerSerial);
 
-                if (gameCtx.Value.ClientVersion >= ClientVersion.CV_305D)
-                    network.Value.Send_ClientViewRange(24);
-            };
+                    if (gameCtx.Value.ClientVersion >= ClientVersion.CV_306E)
+                        network.Value.Send_ClientType(gameCtx.Value.Protocol);
+
+                    if (gameCtx.Value.ClientVersion >= ClientVersion.CV_305D)
+                        network.Value.Send_ClientViewRange(24);
+                };
 
             // extended commands
             packetsMap.Value[0xBF] = buffer =>
@@ -453,15 +409,16 @@ readonly struct InGamePacketsPlugin : IPlugin
                         serial = reader.ReadUInt32BE();
                         var revision = reader.ReadUInt32BE();
 
-                        var house = entitiesMap.Value.GetOrCreate(serial);
+                        var house = entitiesMap.Value.GetOrCreate(commands, serial);
 
-                        if (house.Has<HouseRevision>())
+                        if (queries.qHouseRevision.Contains(house.Id))
                         {
-                            if (house.Get<HouseRevision>().Value == revision)
+                            (_, var houseRev) = queries.qHouseRevision.Get(house.Id);
+                            if (houseRev.Ref.Value == revision)
                                 return;
                         }
 
-                        house.Set(new HouseRevision() { Value = revision });
+                        house.Insert(new HouseRevision() { Value = revision });
 
                         delayedActions.Value.Add(() => network.Value.Send_CustomHouseDataRequest(serial), 1000);
 
@@ -545,7 +502,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                     var text = reader.ReadUnicodeBE();
                     Console.WriteLine("[0xAE] {0} says: '{1}'", name, text);
 
-                    textOverHeadQueue.Enqueue(new TextOverheadEvent()
+                    textOverHeadQueue.Send(new TextOverheadEvent()
                     {
                         Serial = serial,
                         Name = name,
@@ -572,15 +529,27 @@ readonly struct InGamePacketsPlugin : IPlugin
                 if (id == 0xD3)
                     reader.Skip(sizeof(ushort) * 3);
 
-                var parentEnt = entitiesMap.Value.GetOrCreate(serial);
+                var parentEnt = entitiesMap.Value.GetOrCreate(commands, serial);
                 parentEnt
-                    .Set(new Graphic() { Value = graphic })
+                    .Insert(new Graphic() { Value = graphic })
                     // .Set(new WorldPosition() { X = x, Y = y, Z = z })
-                    .Set(new Hue() { Value = hue })
-                    .Set(new ServerFlags() { Value = flags });
+                    .Insert(new Hue() { Value = hue })
+                    .Insert(new ServerFlags() { Value = flags });
                 //.Set(new Facing() { Value = dir });
 
-                var slots = parentEnt.Has<EquipmentSlots>() ? parentEnt.Get<EquipmentSlots>() : new EquipmentSlots();
+
+                // EquipmentSlots slots;
+                // if (qEquipmentSlots.Contains(parentEnt.Id))
+                // {
+                //     (_, var equip) = qEquipmentSlots.Get(parentEnt.Id);
+                //     slots = equip.Ref;
+                // }
+                // else
+                // {
+                //     slots = new();
+                // }
+
+                var slots = new EquipmentSlots();
 
                 uint itemSerial;
                 while ((itemSerial = reader.ReadUInt32BE()) != 0)
@@ -597,19 +566,17 @@ readonly struct InGamePacketsPlugin : IPlugin
                         itemHue = reader.ReadUInt16BE();
                     }
 
-                    var child = entitiesMap.Value.GetOrCreate(itemSerial);
-                    child.Set(new Graphic() { Value = itemGraphic })
-                        .Set(new Hue() { Value = itemHue });
+                    var child = entitiesMap.Value.GetOrCreate(commands, itemSerial);
+                    child.Insert(new Graphic() { Value = itemGraphic })
+                        .Insert(new Hue() { Value = itemHue });
                     // child.Set(new EquippedItem() { Layer = layer }, parentEnt);
 
-                    slots[layer] = child;
-
-                    Console.WriteLine("equip serial 0x{0:X8} | parentId: {1}", itemSerial, parentEnt.ID);
+                    slots[layer] = child.Id;
                 }
 
-                parentEnt.Set(slots);
+                parentEnt.Insert(slots);
 
-                mobileQueuedSteps.Enqueue(new()
+                mobileQueuedSteps.Send(new()
                 {
                     Serial = serial,
                     X = x,
@@ -657,7 +624,7 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                 Console.WriteLine("[0x1C] {0} says: '{1}'", name, text);
 
-                textOverHeadQueue.Enqueue(new TextOverheadEvent()
+                textOverHeadQueue.Send(new TextOverheadEvent()
                 {
                     Serial = serial,
                     Name = name,
@@ -752,19 +719,17 @@ readonly struct InGamePacketsPlugin : IPlugin
                     type = 2;
                 }
 
-                var ent = entitiesMap.Value.GetOrCreate(serial);
-                ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
-                    .Set(new Hue() { Value = hue })
-                    .Set(new ServerFlags() { Value = (Flags)flags });
+                var ent = entitiesMap.Value.GetOrCreate(commands, serial);
+                ent.Insert(new Graphic() { Value = (ushort)(graphic + graphicInc) })
+                    .Insert(new Hue() { Value = hue })
+                    .Insert(new ServerFlags() { Value = (Flags)flags });
 
                 if (count > 0)
-                    ent.Set(new Amount() { Value = count });
+                    ent.Insert(new Amount() { Value = count });
 
-
-
-                if (type == 2 && !ent.Has<IsMulti>())
+                if (type == 2 && !queries.qMultis.Contains(ent.Id))
                 {
-                    ent.Add<IsMulti>();
+                    ent.Insert<IsMulti>();
 
                     var multiInfo = multiCache.Value.GetMulti((ushort)(graphic + graphicInc));
                     foreach (ref readonly var block in CollectionsMarshal.AsSpan(multiInfo.Blocks))
@@ -772,15 +737,16 @@ readonly struct InGamePacketsPlugin : IPlugin
                         if (!block.IsVisible)
                             continue;
 
-                        var b = world.Entity()
-                            .Set
+                        var b = commands.Spawn()
+                            .Insert
                             (
                                 new Graphic()
                                 {
                                     Value = block.ID
                                 }
                             )
-                            .Set(new Hue()).Set
+                            .Insert(new Hue())
+                            .Insert
                             (
                                 new WorldPosition()
                                 {
@@ -789,7 +755,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                                     Z = (sbyte)(z + block.Z)
                                 }
                             )
-                            .Add<NormalMulti>();
+                            .Insert<NormalMulti>();
 
                         ent.AddChild(b);
                     }
@@ -798,7 +764,7 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                 if (SerialHelper.IsMobile(serial))
                 {
-                    mobileQueuedSteps.Enqueue(new()
+                    mobileQueuedSteps.Send(new()
                     {
                         Serial = serial,
                         X = x,
@@ -809,8 +775,8 @@ readonly struct InGamePacketsPlugin : IPlugin
                 }
                 else
                 {
-                    ent.Set(new WorldPosition() { X = x, Y = y, Z = z })
-                        .Set(new Facing() { Value = (Direction)direction });
+                    ent.Insert(new WorldPosition() { X = x, Y = y, Z = z })
+                        .Insert(new Facing() { Value = (Direction)direction });
                 }
 
             };
@@ -833,8 +799,8 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var canBeRenamed = reader.ReadBool();
                 var type = reader.ReadUInt8();
 
-                var ent = entitiesMap.Value.GetOrCreate(serial);
-                ent.Set(new Hits() { Value = hits, MaxValue = hitsMax });
+                var ent = entitiesMap.Value.GetOrCreate(commands, serial);
+                ent.Insert(new Hits() { Value = hits, MaxValue = hitsMax });
 
                 if (type > 0)
                 {
@@ -846,8 +812,8 @@ readonly struct InGamePacketsPlugin : IPlugin
                     var physicalRes = reader.ReadInt16BE();
                     var weigth = reader.ReadUInt16BE();
 
-                    ent.Set(new Stamina() { Value = stam, MaxValue = stamMax });
-                    ent.Set(new Mana() { Value = mana, MaxValue = manaMax });
+                    ent.Insert(new Stamina() { Value = stam, MaxValue = stamMax });
+                    ent.Insert(new Mana() { Value = mana, MaxValue = manaMax });
 
 
                     if (type >= 5)
@@ -935,14 +901,14 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var direction = (Direction)reader.ReadUInt8();
                 var z = reader.ReadInt8();
 
-                var ent = entitiesMap.Value.GetOrCreate(serial);
-                ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
-                    .Set(new Hue() { Value = hue })
-                    .Set(new ServerFlags() { Value = flags });
+                var ent = entitiesMap.Value.GetOrCreate(commands, serial);
+                ent.Insert(new Graphic() { Value = (ushort)(graphic + graphicInc) })
+                    .Insert(new Hue() { Value = hue })
+                    .Insert(new ServerFlags() { Value = flags });
                 //.Set(new WorldPosition() { X = x, Y = y, Z = z })
                 //.Set(new Facing() { Value = direction });
 
-                mobileQueuedSteps.Enqueue(new()
+                mobileQueuedSteps.Send(new()
                 {
                     Serial = serial,
                     X = x,
@@ -1076,10 +1042,10 @@ readonly struct InGamePacketsPlugin : IPlugin
                 (var manaMax, var mana) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
                 (var stamMax, var stam) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
 
-                entitiesMap.Value.GetOrCreate(serial)
-                    .Set(new Hits() { Value = hits, MaxValue = hitsMax })
-                    .Set(new Mana() { Value = mana, MaxValue = manaMax })
-                    .Set(new Stamina() { Value = stam, MaxValue = stamMax });
+                entitiesMap.Value.GetOrCreate(commands, serial)
+                    .Insert(new Hits() { Value = hits, MaxValue = hitsMax })
+                    .Insert(new Mana() { Value = mana, MaxValue = manaMax })
+                    .Insert(new Stamina() { Value = stam, MaxValue = stamMax });
             };
 
             // equip item
@@ -1094,16 +1060,26 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var container = reader.ReadUInt32BE();
                 var hue = reader.ReadUInt16BE();
 
-                var parentEnt = entitiesMap.Value.GetOrCreate(container);
-                var childEnt = entitiesMap.Value.GetOrCreate(serial);
-                childEnt.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
-                    .Set(new Hue() { Value = hue });
+                var parentEnt = entitiesMap.Value.GetOrCreate(commands, container);
+                var childEnt = entitiesMap.Value.GetOrCreate(commands, serial);
+                childEnt.Insert(new Graphic() { Value = (ushort)(graphic + graphicInc) })
+                    .Insert(new Hue() { Value = hue });
                 // childEnt.Set(new EquippedItem() { Layer = layer }, parentEnt);
 
-                var slots = parentEnt.Has<EquipmentSlots>() ? parentEnt.Get<EquipmentSlots>() : new EquipmentSlots();
-                slots[layer] = childEnt;
-                parentEnt.Set(slots);
-                Console.WriteLine("equip serial 0x{0:X8} | parentId: {1}", serial, parentEnt.ID);
+                EquipmentSlots slots;
+                if (queries.qEquipmentSlots.Contains(parentEnt.Id))
+                {
+                    (_, var eSlots) = queries.qEquipmentSlots.Get(parentEnt.Id);
+                    slots = eSlots.Ref;
+                }
+                else
+                {
+                    slots = new ();
+                }
+
+                // slots[layer] = childEnt;
+                parentEnt.Insert(slots);
+                Console.WriteLine("equip serial 0x{0:X8} | parentId: {1}", serial, parentEnt.Id);
                 //.Set<ContainedInto>(parentEnt);
             };
 
@@ -1433,14 +1409,14 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var flags = (Flags)reader.ReadUInt8();
                 var notoriety = (NotorietyFlag)reader.ReadUInt8();
 
-                var ent = entitiesMap.Value.GetOrCreate(serial);
-                ent.Set(new Graphic() { Value = graphic })
-                    .Set(new Hue() { Value = hue })
-                    .Set(new ServerFlags() { Value = flags });
+                var ent = entitiesMap.Value.GetOrCreate(commands, serial);
+                ent.Insert(new Graphic() { Value = graphic })
+                    .Insert(new Hue() { Value = hue })
+                    .Insert(new ServerFlags() { Value = flags });
                 // .Set(new WorldPosition() { X = x, Y = y, Z = z })
                 //.Set(new Facing() { Value = direction });
 
-                mobileQueuedSteps.Enqueue(new()
+                mobileQueuedSteps.Send(new()
                 {
                     Serial = serial,
                     X = x,
@@ -1490,22 +1466,31 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                 var serial = reader.ReadUInt32BE();
 
-                var parentEnt = entitiesMap.Value.GetOrCreate(serial);
+                var parentEnt = entitiesMap.Value.GetOrCreate(commands, serial);
 
-                var slots = parentEnt.Has<EquipmentSlots>() ? parentEnt.Get<EquipmentSlots>() : new EquipmentSlots();
+                EquipmentSlots slots;
+                if (queries.qEquipmentSlots.Contains(parentEnt.Id))
+                {
+                    (_, var eSlots) = queries.qEquipmentSlots.Get(parentEnt.Id);
+                    slots = eSlots.Ref;
+                }
+                else
+                {
+                    slots = new ();
+                }
 
                 var layer = Layer.Invalid;
                 uint itemSerial = 0;
                 while ((layer = (Layer)reader.ReadUInt8()) != Layer.Invalid &&
                      (itemSerial = reader.ReadUInt32BE()) != 0)
                 {
-                    var childEnt = entitiesMap.Value.GetOrCreate(itemSerial);
+                    var childEnt = entitiesMap.Value.GetOrCreate(commands, itemSerial);
                     // childEnt.Set(new EquippedItem() { Layer = layer }, parentEnt);
 
-                    slots[layer] = childEnt;
+                    // slots[layer] = childEnt;
                 }
 
-                parentEnt.Set(slots);
+                parentEnt.Insert(slots);
             };
 
             // show map
@@ -1634,8 +1619,8 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var serial = reader.ReadUInt32BE();
                 (var hitsMax, var hits) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
 
-                entitiesMap.Value.GetOrCreate(serial)
-                    .Set(new Hits() { Value = hits, MaxValue = hitsMax });
+                entitiesMap.Value.GetOrCreate(commands, serial)
+                    .Insert(new Hits() { Value = hits, MaxValue = hitsMax });
             };
 
             // update mana
@@ -1646,8 +1631,8 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var serial = reader.ReadUInt32BE();
                 (var manaMax, var mana) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
 
-                entitiesMap.Value.GetOrCreate(serial)
-                    .Set(new Mana() { Value = mana, MaxValue = manaMax });
+                entitiesMap.Value.GetOrCreate(commands, serial)
+                    .Insert(new Mana() { Value = mana, MaxValue = manaMax });
             };
 
             // update stam
@@ -1658,8 +1643,8 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var serial = reader.ReadUInt32BE();
                 (var stamMax, var stam) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
 
-                entitiesMap.Value.GetOrCreate(serial)
-                    .Set(new Stamina() { Value = stam, MaxValue = stamMax });
+                entitiesMap.Value.GetOrCreate(commands, serial)
+                    .Insert(new Stamina() { Value = stam, MaxValue = stamMax });
             };
 
             // open url
@@ -1868,12 +1853,20 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var revision = reader.ReadUInt32BE();
                 reader.Skip(4);
 
-                var parent = entitiesMap.Value.GetOrCreate(serial);
+                var parent = entitiesMap.Value.GetOrCreate(commands, serial);
 
                 var multiRect = Rectangle.Empty;
-                (var startX, var startY, var startZ) = parent.Get<WorldPosition>();
 
-                parent.Set
+                if (!queries.qPosAndGraphic.Contains(parent.Id))
+                {
+                    return;
+                }
+
+                (var pos, var graphic) = queries.qPosAndGraphic.Get(parent.Id);
+
+                (var startX, var startY, var startZ) = pos.Ref;
+
+                parent.Insert
                 (
                     new HouseRevision()
                     {
@@ -1881,10 +1874,10 @@ readonly struct InGamePacketsPlugin : IPlugin
                     }
                 );
 
-                if (parent.Has<Graphic>())
+                //if (parent.Has<Graphic>())
                 {
-                    ref var graphic = ref parent.Get<Graphic>();
-                    var multiInfo = multiCache.Value.GetMulti(graphic.Value);
+                    // ref var graphic = ref parent.Get<Graphic>();
+                    var multiInfo = multiCache.Value.GetMulti(graphic.Ref.Value);
                     multiRect = multiInfo.Bounds;
                 }
 
@@ -1916,16 +1909,16 @@ readonly struct InGamePacketsPlugin : IPlugin
 
                                     for (var j = 0; j < c; ++j)
                                     {
-                                        var b = world.Entity()
-                                            .Set
+                                        var b = commands.Spawn()
+                                            .Insert
                                             (
                                                 new Graphic()
                                                 {
                                                     Value = houseReader.ReadUInt16BE()
                                                 }
                                             )
-                                            .Set(new Hue())
-                                            .Set
+                                            .Insert(new Hue())
+                                            .Insert
                                             (
                                                 new WorldPosition()
                                                 {
@@ -1934,7 +1927,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                                                     Z = (sbyte)(startZ + houseReader.ReadInt8()),
                                                 }
                                             )
-                                            .Add<CustomMulti>();
+                                            .Insert<CustomMulti>();
 
                                         parent.AddChild(b);
                                     }
@@ -1951,10 +1944,10 @@ readonly struct InGamePacketsPlugin : IPlugin
                                         (var x, var y) = (houseReader.ReadInt8(), houseReader.ReadInt8());
                                         if (id != 0)
                                         {
-                                            var b = world.Entity()
-                                                .Set(new Graphic() { Value = id })
-                                                .Set(new Hue())
-                                                .Set
+                                            var b = commands.Spawn()
+                                                .Insert(new Graphic() { Value = id })
+                                                .Insert(new Hue())
+                                                .Insert
                                                 (
                                                     new WorldPosition()
                                                     {
@@ -1963,7 +1956,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                                                         Z = (sbyte)(startZ + z),
                                                     }
                                                 )
-                                                .Add<CustomMulti>();
+                                                .Insert<CustomMulti>();
 
                                             parent.AddChild(b);
                                         }
@@ -2004,15 +1997,16 @@ readonly struct InGamePacketsPlugin : IPlugin
                                         {
                                             var x = (sbyte)((j == 0 ? 0 : (j / multiHeight)) + offX);
                                             var y = (sbyte)(j % multiHeight + offY);
-                                            var b = world.Entity().Set
+                                            var b = commands.Spawn()
+                                                .Insert
                                                 (
                                                     new Graphic()
                                                     {
                                                         Value = id
                                                     }
                                                 )
-                                                .Set(new Hue())
-                                                .Set
+                                                .Insert(new Hue())
+                                                .Insert
                                                 (
                                                     new WorldPosition()
                                                     {
@@ -2021,7 +2015,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                                                         Z = (sbyte)(startZ + z),
                                                     }
                                                 )
-                                                .Add<CustomMulti>();
+                                                .Insert<CustomMulti>();
 
                                             parent.AddChild(b);
                                         }
@@ -2220,15 +2214,15 @@ readonly struct InGamePacketsPlugin : IPlugin
                 var flags = (Flags)reader.ReadUInt8();
                 var unk2 = reader.ReadUInt16BE();
 
-                var ent = entitiesMap.Value.GetOrCreate(serial);
-                ent.Set(new Graphic() { Value = (ushort)(graphic + graphicInc) })
-                    .Set(new Hue() { Value = hue })
-                    .Set(new Amount() { Value = amount })
-                    .Set(new ServerFlags() { Value = flags });
+                var ent = entitiesMap.Value.GetOrCreate(commands, serial);
+                ent.Insert(new Graphic() { Value = (ushort)(graphic + graphicInc) })
+                    .Insert(new Hue() { Value = hue })
+                    .Insert(new Amount() { Value = amount })
+                    .Insert(new ServerFlags() { Value = flags });
 
                 if (SerialHelper.IsMobile(serial))
                 {
-                    mobileQueuedSteps.Enqueue(new()
+                    mobileQueuedSteps.Send(new()
                     {
                         Serial = serial,
                         X = x,
@@ -2239,13 +2233,13 @@ readonly struct InGamePacketsPlugin : IPlugin
                 }
                 else
                 {
-                    ent.Set(new WorldPosition() { X = x, Y = y, Z = z })
-                        .Set(new Facing() { Value = dir });
+                    ent.Insert(new WorldPosition() { X = x, Y = y, Z = z })
+                        .Insert(new Facing() { Value = dir });
                 }
 
-                if (type == 2 && !ent.Has<IsMulti>())
+                if (type == 2 && !queries.qMultis.Contains(ent.Id))
                 {
-                    ent.Add<IsMulti>();
+                    ent.Insert<IsMulti>();
 
                     var multiInfo = multiCache.Value.GetMulti((ushort)(graphic + graphicInc));
                     foreach (ref readonly var block in CollectionsMarshal.AsSpan(multiInfo.Blocks))
@@ -2253,15 +2247,16 @@ readonly struct InGamePacketsPlugin : IPlugin
                         if (!block.IsVisible)
                             continue;
 
-                        var b = world.Entity()
-                            .Set
+                        var b = commands.Spawn()
+                            .Insert
                             (
                                 new Graphic()
                                 {
                                     Value = block.ID
                                 }
                             )
-                            .Set(new Hue()).Set
+                            .Insert(new Hue())
+                            .Insert
                             (
                                 new WorldPosition()
                                 {
@@ -2269,7 +2264,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                                     Y = (ushort)(y + block.Y),
                                     Z = (sbyte)(z + block.Z)
                                 }
-                            ).Add<NormalMulti>();
+                            ).Insert<NormalMulti>();
 
                         ent.AddChild(b);
                     }
@@ -2293,8 +2288,8 @@ readonly struct InGamePacketsPlugin : IPlugin
                     var entitySerial = reader.ReadUInt32BE();
                     (var entX, var entY, var entZ) = (reader.ReadUInt16BE(), reader.ReadUInt16BE(), reader.ReadUInt16BE());
 
-                    var ent = entitiesMap.Value.GetOrCreate(serial);
-                    ent.Set(new WorldPosition() { X = entX, Y = entY, Z = (sbyte)entZ });
+                    var ent = entitiesMap.Value.GetOrCreate(commands, serial);
+                    ent.Insert(new WorldPosition() { X = entX, Y = entY, Z = (sbyte)entZ });
                 }
             };
 
@@ -2316,6 +2311,8 @@ readonly struct InGamePacketsPlugin : IPlugin
                     }
                 }
             };
-        });
+                })
+            .InStage(Stage.Startup)
+            .Build();
     }
 }

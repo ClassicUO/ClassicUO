@@ -6,6 +6,7 @@ using Clay_cs;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
 
@@ -13,45 +14,54 @@ internal readonly struct GameScreenPlugin : IPlugin
 {
     const int BORDER_SIZE = 10;
 
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
-        scheduler.AddResource<RenderTarget2D>(null);
-
-
         var setupFn = Setup;
-        scheduler.OnEnter(GameState.GameScreen, setupFn);
-
         var cleanupFn = Cleanup;
-        scheduler.OnExit(GameState.GameScreen, cleanupFn);
-
-
         var updateEntitiesCountFn = UpdateEntitiesCount;
-        scheduler.OnUpdate(updateEntitiesCountFn)
-            .RunIf((SchedulerState state) => state.InState(GameState.GameScreen))
-            .RunIf((Time time, Local<float> lastAccess) =>
+        var handleButtonsPressedFn = HandleButtonsPressed;
+        var adjustCameraAndBoundsFn = AdjustCameraAndBounds;
+
+        app
+            .AddResource<RenderTarget2D>(null)
+
+            .AddSystem(setupFn)
+            .OnEnter(GameState.GameScreen)
+            .Build()
+
+            .AddSystem(cleanupFn)
+            .OnExit(GameState.GameScreen)
+            .Build()
+
+            .AddSystem(updateEntitiesCountFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
+            .RunIf((Res<Time> time, Local<float> lastAccess) =>
             {
-                if (time.Total > lastAccess.Value)
+                if (time.Value.Total > lastAccess.Value)
                 {
-                    lastAccess.Value = time.Total + 250f;
+                    lastAccess.Value = time.Value.Total + 250f;
                     return true;
                 }
                 return false;
-            });
+            })
+            .Build()
 
+            .AddSystem(handleButtonsPressedFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
+            .Build()
 
-        var handleButtonsPressedFn = HandleButtonsPressed;
-        scheduler.OnUpdate(handleButtonsPressedFn)
-            .RunIf((SchedulerState state) => state.InState(GameState.GameScreen));
-
-
-        var adjustCameraAndBoundsFn = AdjustCameraAndBounds;
-        scheduler.OnUpdate(adjustCameraAndBoundsFn)
-            .RunIf((SchedulerState state) => state.InState(GameState.GameScreen) && state.ResourceExists<Camera>());
+            .AddSystem(adjustCameraAndBoundsFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
+            .RunIf(w => w.HasResource<Camera>())
+            .Build();
     }
 
-    private static void Setup(World world, Res<GumpBuilder> gumpBuilder, Res<ClayUOCommandBuffer> clay)
+    private static void Setup(Commands commands, Res<GumpBuilder> gumpBuilder, Res<ClayUOCommandBuffer> clay)
     {
-        var root = world.Entity()
+        var root = commands.Spawn()
             .CreateUINode(new UINode()
             {
                 Config = {
@@ -66,7 +76,7 @@ internal readonly struct GameScreenPlugin : IPlugin
                     }
                 }
             })
-            .Add<GameScene>();
+            .Insert<GameScene>();
 
         var floating = new Clay_FloatingElementConfig()
         {
@@ -75,7 +85,7 @@ internal readonly struct GameScreenPlugin : IPlugin
             zIndex = -1
         };
 
-        var gameWindowBorder = world.Entity()
+        var gameWindowBorder = commands.Spawn()
             .CreateUINode(new UINode()
             {
                 Config = {
@@ -89,11 +99,11 @@ internal readonly struct GameScreenPlugin : IPlugin
                     floating = floating
                 }
             })
-            .Set(new UIMouseAction())
-            .Add<GameWindowBorderUI>()
-            .Add<GameScene>();
+            .Insert(new UIMouseAction())
+            .Insert<GameWindowBorderUI>()
+            .Insert<GameScene>();
 
-        var gameWindowBorderResize = world.Entity()
+        var gameWindowBorderResize = commands.Spawn()
             .CreateUINode(new UINode()
             {
                 Config = {
@@ -107,11 +117,11 @@ internal readonly struct GameScreenPlugin : IPlugin
                     floating = floating
                 }
             })
-            .Set(new UIMouseAction())
-            .Add<GameWindowBorderResizeUI>()
-            .Add<GameScene>();
+            .Insert(new UIMouseAction())
+            .Insert<GameWindowBorderResizeUI>()
+            .Insert<GameScene>();
 
-        var gameWindow = world.Entity()
+        var gameWindow = commands.Spawn()
             .CreateUINode(new UINode()
             {
                 Config = {
@@ -125,12 +135,12 @@ internal readonly struct GameScreenPlugin : IPlugin
                     floating = floating
                 }
             })
-            .Add<GameWindowUI>()
-            .Add<GameScene>();
+            .Insert<GameWindowUI>()
+            .Insert<GameScene>();
 
 
 
-        var menuBar = world.Entity()
+        var menuBar = commands.Spawn()
             .CreateUINode(new UINode()
             {
                 Config = {
@@ -153,9 +163,9 @@ internal readonly struct GameScreenPlugin : IPlugin
             })
             // .Set(new UIMouseAction())
             // .Add<UIMovable>()
-            .Add<GameScene>();
+            .Insert<GameScene>();
 
-        var menuBarItem = world.Entity()
+        var menuBarItem = commands.Spawn()
             .CreateUINode(new UINode()
             {
                 Config = {
@@ -173,7 +183,7 @@ internal readonly struct GameScreenPlugin : IPlugin
                     },
                 }
             })
-            .Set(new Text()
+            .Insert(new Text()
             {
                 Value = "Logout",
                 TextConfig = {
@@ -182,11 +192,11 @@ internal readonly struct GameScreenPlugin : IPlugin
                     textColor = new (1, 1, 1, 1),
                 },
             })
-            .Set(ButtonAction.Logout)
-            .Set(new UIMouseAction())
-            .Add<GameScene>();
+            .Insert(ButtonAction.Logout)
+            .Insert(new UIMouseAction())
+            .Insert<GameScene>();
 
-        var menuBarItem2 = world.Entity()
+        var menuBarItem2 = commands.Spawn()
             .CreateUINode(new UINode()
             {
                 Config = {
@@ -204,7 +214,7 @@ internal readonly struct GameScreenPlugin : IPlugin
                     },
                 }
             })
-            .Set(new Text()
+            .Insert(new Text()
             {
                 Value = "Total entities: 0",
                 TextConfig = {
@@ -213,8 +223,8 @@ internal readonly struct GameScreenPlugin : IPlugin
                     textColor = new (1, 1, 1, 1),
                 },
             })
-            .Add<GameScene>()
-            .Add<TotalEntitiesMenu>();
+            .Insert<GameScene>()
+            .Insert<TotalEntitiesMenu>();
 
 
 
@@ -233,13 +243,18 @@ internal readonly struct GameScreenPlugin : IPlugin
     }
 
 
+    class CameraBounds
+    {
+        public Rectangle Rectangle;
+    }
+
     private static void AdjustCameraAndBounds(
         Res<Camera> camera,
-        Res<RenderTarget2D> renderTarget,
+        ResMut<RenderTarget2D> renderTarget,
         Res<ImageCache> imageCache,
         Res<UltimaBatcher2D> batch,
         Res<MouseContext> mouseCtx,
-        Local<Rectangle> lastSize,
+        Local<CameraBounds> lastSize,
         Single<Data<UINode, UIMouseAction>, Filter<With<GameWindowBorderUI>, With<GameScene>>> queryGameWindowBorder,
         Single<Data<UINode, UIMouseAction>, Filter<With<GameWindowBorderResizeUI>, With<GameScene>>> queryGameWindowBorderResize,
         Single<Data<UINode>, Filter<With<GameWindowUI>, With<GameScene>>> queryGameWindow
@@ -257,7 +272,7 @@ internal readonly struct GameScreenPlugin : IPlugin
 
         if (interactionResize.Ref is { IsPressed: true, WasPressed: true, Button: MouseButtonType.Left })
         {
-            ref var newBounds = ref lastSize.Value;
+            ref var newBounds = ref lastSize.Value.Rectangle;
             newBounds.Width += (int)mouseCtx.Value.PositionOffset.X;
             newBounds.Height += (int)mouseCtx.Value.PositionOffset.Y;
 
@@ -268,7 +283,7 @@ internal readonly struct GameScreenPlugin : IPlugin
         }
         else
         {
-            lastSize.Value = camera.Value.Bounds;
+            lastSize.Value.Rectangle = camera.Value.Bounds;
         }
 
         nodeBorderResize.Ref.Config.floating.offset = new()
@@ -326,7 +341,7 @@ internal readonly struct GameScreenPlugin : IPlugin
 
     private static void HandleButtonsPressed(
         Query<Data<UINode, UIMouseAction, ButtonAction>, Changed<UIMouseAction>> query,
-        State<GameState> state
+        Res<NextState<GameState>> state
     )
     {
         foreach ((var node, var interaction, var action) in query)
@@ -337,7 +352,7 @@ internal readonly struct GameScreenPlugin : IPlugin
                 {
                     case ButtonAction.Logout:
                         Console.WriteLine("Logout button pressed");
-                        state.Set(GameState.LoginScreen);
+                        state.Value.Set(GameState.LoginScreen);
                         break;
                 }
             }
@@ -345,13 +360,13 @@ internal readonly struct GameScreenPlugin : IPlugin
     }
 
     private static void UpdateEntitiesCount(
-        World world,
+        Commands commands,
         Query<Data<UINode, Text>, With<TotalEntitiesMenu>> query,
         Query<Empty, With<IsTile>> queryTiles,
         Query<Empty, With<IsStatic>> queryStatics
     )
     {
-        var total = world.EntityCount;
+        var total = 0; // world.EntityCount;
         var countTiles = queryTiles.Count();
         var countStatics = queryStatics.Count();
         foreach ((var node, var text) in query)
@@ -360,11 +375,11 @@ internal readonly struct GameScreenPlugin : IPlugin
         }
     }
 
-    private static void Cleanup(World world, Query<Data<UINode>, Filter<Without<Parent>, With<GameScene>>> query)
+    private static void Cleanup(Commands commands, Query<Data<UINode>, Filter<Without<Parent>, With<GameScene>>> query)
     {
         Console.WriteLine("[GameScreen] cleanup start");
         foreach ((var ent, _) in query)
-            world.Delete(ent.Ref);
+            commands.Entity(ent.Ref).Despawn();
         Console.WriteLine("[GameScreen] cleanup done");
     }
 

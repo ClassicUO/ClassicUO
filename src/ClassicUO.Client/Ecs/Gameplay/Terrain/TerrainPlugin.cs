@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
 
@@ -27,55 +28,87 @@ internal readonly struct TerrainPlugin : IPlugin
     }
     internal sealed class LastPosition { public int Map = -1; public ushort? LastX, LastY; public (int, int)? LastCameraBounds; public float LastCameraZoom; }
 
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
-        scheduler.AddEvent<OnNewChunkRequest>();
-        scheduler.AddResource(new ChunksLoadedMap());
-        scheduler.AddResource(new LastPosition());
-
         var enqueueChunksRequestsFn = EnqueueChunksRequests;
-        scheduler.OnUpdate(enqueueChunksRequestsFn)
-            .RunIf((Query<Data<WorldPosition>, With<Player>> playerQuery) => playerQuery.Count() > 0);
-
         var loadChunksFn = LoadChunks;
-        scheduler.OnUpdate(loadChunksFn)
-            .RunIf((EventReader<OnNewChunkRequest> reader) => !reader.IsEmpty);
-
         var checkChunksFn = CheckChunk;
-        scheduler.OnUpdate(checkChunksFn)
-            .RunIf((Query<Data<TerrainChunk>> query, SchedulerState state)
-                => query.Count() > 0 && state.InState(GameState.GameScreen));
-
         var removeEntitiesOutOfRangeFn = RemoveEntitiesOutOfRange;
-        scheduler.OnUpdate(removeEntitiesOutOfRangeFn)
-            .RunIf((Query<Data<WorldPosition>, With<Player>> playerQuery, Local<float> timeUpdate, Time time) =>
+
+        app
+            .AddResource(new ChunksLoadedMap())
+            .AddResource(new LastPosition())
+
+            .AddSystem(enqueueChunksRequestsFn)
+            .InStage(Stage.Update)
+            .RunIf((Query<Data<WorldPosition>, With<Player>> playerQuery) => playerQuery.Count() > 0)
+            .Build()
+
+            .AddSystem(loadChunksFn)
+            .InStage(Stage.Update)
+            .RunIf((EventReader<OnNewChunkRequest> reader) => reader.HasEvents)
+            .Build()
+
+            .AddObserver((OnAdd<TerrainChunk> trigger, Res<ChunksLoadedMap> chunksLoaded, Res<Time> time) =>
             {
-                if (timeUpdate.Value > time.Total)
+                chunksLoaded.Value.Add((trigger.Component.X, trigger.Component.Y), ((uint)time.Value.Total + 5000, trigger.EntityId));
+            })
+            .AddObserver((OnAdd<Terrain> trigger, Query<Data<TerrainChunk>> query, Res<ChunksLoadedMap> chunksLoaded) =>
+            {
+                if (!query.Contains(trigger.EntityId))
+                    return;
+
+                (var ent, var chunk) = query.Get(trigger.EntityId);
+
+                if (chunksLoaded.Value.TryGetValue((chunk.Ref.X, chunk.Ref.Y), out var res))
+                {
+                    if (ent.Ref.ID != res.entity)
+                    {
+                        return;
+                    }
+
+                    ent.Ref.AddChild(trigger.EntityId);
+                }
+            })
+
+            .AddSystem(checkChunksFn)
+            .InStage(Stage.Update)
+            .RunIf((Query<Data<TerrainChunk>> query, Res<State<GameState>> state)
+                       => query.Count() > 0 && state.Value.Current == GameState.GameScreen)
+            .Build()
+
+            .AddSystem(removeEntitiesOutOfRangeFn)
+            .InStage(Stage.Update)
+            .RunIf((Query<Data<WorldPosition>, With<Player>> playerQuery, Local<float> timeUpdate, Res<Time> time) =>
+            {
+                if (timeUpdate.Value > time.Value.Total)
                     return false;
-                timeUpdate.Value = time.Total + 3000;
+                timeUpdate.Value = time.Value.Total + 3000;
                 return playerQuery.Count() > 0;
-            });
+            })
+            .Build()
 
-        scheduler.OnExit(GameState.GameScreen, (
-            Res<ChunksLoadedMap> chunksLoaded,
-            Res<GameContext> gameCtx,
-            Res<LastPosition> lastPos,
-            EventReader<OnNewChunkRequest> reader,
-            Query<Data<WorldPosition>, With<Terrain>> query
-        ) =>
-        {
-            foreach ((var ent, _) in query)
-            {
-                ent.Ref.Delete();
-            }
+            .AddSystem((
+                           Res<ChunksLoadedMap> chunksLoaded,
+                           Res<GameContext> gameCtx,
+                           Res<LastPosition> lastPos,
+                           EventReader<OnNewChunkRequest> reader,
+                           Query<Data<WorldPosition>, With<Terrain>> query
+                       ) =>
+                       {
+                           foreach ((var ent, _) in query)
+                           {
+                               ent.Ref.Delete();
+                           }
 
-            chunksLoaded.Value.Clear();
-            reader.Clear();
-            lastPos.Value.LastX = null;
-            lastPos.Value.LastY = null;
-            lastPos.Value.LastCameraBounds = null;
-            lastPos.Value.LastCameraZoom = 0f;
-        });
+                           chunksLoaded.Value.Clear();
+                           lastPos.Value.LastX = null;
+                           lastPos.Value.LastY = null;
+                           lastPos.Value.LastCameraBounds = null;
+                           lastPos.Value.LastCameraZoom = 0f;
+                       })
+            .OnExit(GameState.GameScreen)
+            .Build();
     }
 
     private static int GetCameraOffset(Camera camera)
@@ -87,7 +120,7 @@ internal readonly struct TerrainPlugin : IPlugin
     }
 
     private static void CheckChunk(
-        Time time,
+        Res<Time> time,
         Res<Camera> camera,
         Res<GameContext> gameCtx,
         Res<UOFileManager> fileManager,
@@ -115,7 +148,7 @@ internal readonly struct TerrainPlugin : IPlugin
                 ref var res = ref CollectionsMarshal.GetValueRefOrNullRef(chunksLoaded.Value, key);
                 if (!Unsafe.IsNullRef(ref res))
                 {
-                    res.Time = (uint)time.Total + 5000;
+                    res.Time = (uint)time.Value.Total + 5000;
                 }
             }
         }
@@ -157,7 +190,7 @@ internal readonly struct TerrainPlugin : IPlugin
         var endTileX = Math.Min(fileManager.Value.Maps.MapsDefaultSize[gameCtx.Value.Map, 0], pos.Ref.X + offset);
         var endTileY = Math.Min(fileManager.Value.Maps.MapsDefaultSize[gameCtx.Value.Map, 1], pos.Ref.Y + offset);
 
-        chunkRequests.Enqueue(new()
+        chunkRequests.Send(new()
         {
             Map = gameCtx.Value.Map,
             RangeStartX = startTileX,
@@ -167,18 +200,26 @@ internal readonly struct TerrainPlugin : IPlugin
         });
     }
 
+    internal sealed class StaticsBlockBuffer
+    {
+        public StaticsBlockBuffer()
+        {
+            StaticsBlock[] Buffer = new StaticsBlock[64];
+        }
+
+        public StaticsBlock[] Buffer { get; set; }
+    }
+
     private static void LoadChunks(
-        World world,
-        Time time,
+        Commands commands,
+        Res<Time> time,
         Res<UOFileManager> fileManager,
         Res<ChunksLoadedMap> chunksLoaded,
-        Local<StaticsBlock[]> staticsBlockBuffer,
+        Local<StaticsBlockBuffer> staticsBlockBuffer,
         EventReader<OnNewChunkRequest> chunkRequests
     )
     {
-        staticsBlockBuffer.Value ??= new StaticsBlock[64];
-
-        foreach (var chunkEv in chunkRequests)
+        foreach (var chunkEv in chunkRequests.Read())
         {
             for (int chunkX = chunkEv.RangeStartX; chunkX <= chunkEv.RangeEndX; chunkX += 1)
             {
@@ -192,10 +233,10 @@ internal readonly struct TerrainPlugin : IPlugin
                     if (chunksLoaded.Value.ContainsKey((chunkX, chunkY)))
                         continue;
 
-                    var chunk = world.Entity()
-                        .Set(new TerrainChunk() { X = chunkX, Y = chunkY });
+                    var chunk = commands.Spawn()
+                        .Insert(new TerrainChunk() { X = chunkX, Y = chunkY });
 
-                    chunksLoaded.Value.Add((chunkX, chunkY), ((uint)time.Total + 5000, chunk.ID));
+                    // chunksLoaded.Value.Add((chunkX, chunkY), ((uint)time.Value.Total + 5000, chunk.Id));
 
                     im.MapFile.Seek((long)im.MapAddress, System.IO.SeekOrigin.Begin);
                     var cells = im.MapFile.Read<Assets.MapBlock>().Cells;
@@ -232,8 +273,8 @@ internal readonly struct TerrainPlugin : IPlugin
 
                             if (isStretched)
                             {
-                                var e = world.Entity()
-                                    .Set(new TileStretched()
+                                var e = commands.Spawn()
+                                    .Insert(new TileStretched()
                                     {
                                         NormalTop = normalTop,
                                         NormalRight = normalRight,
@@ -243,33 +284,33 @@ internal readonly struct TerrainPlugin : IPlugin
                                         MinZ = minZ,
                                         Offset = offsets
                                     })
-                                    .Set(new WorldPosition() { X = tileX, Y = tileY, Z = z })
-                                    .Set(new Graphic() { Value = tileID })
-                                    .Add<IsTile>()
-                                    .Add<Terrain>();
+                                    .Insert(new WorldPosition() { X = tileX, Y = tileY, Z = z })
+                                    .Insert(new Graphic() { Value = tileID })
+                                    .Insert<IsTile>()
+                                    .Insert<Terrain>();
 
-                                chunk.AddChild(e);
+                                // chunk.AddChild(e);
                             }
                             else
                             {
-                                var e = world.Entity()
-                                    .Set(new WorldPosition() { X = tileX, Y = tileY, Z = z })
-                                    .Set(new Graphic() { Value = tileID })
-                                    .Add<IsTile>()
-                                    .Add<Terrain>();
+                                var e = commands.Spawn()
+                                    .Insert(new WorldPosition() { X = tileX, Y = tileY, Z = z })
+                                    .Insert(new Graphic() { Value = tileID })
+                                    .Insert<IsTile>()
+                                    .Insert<Terrain>();
 
-                                chunk.AddChild(e);
+                                // chunk.AddChild(e);
                             }
                         }
                     }
 
                     if (im.StaticAddress != 0 && im.StaticCount > 0)
                     {
-                        staticsBlockBuffer.Value ??= new StaticsBlock[im.StaticCount];
-                        if (staticsBlockBuffer.Value.Length < im.StaticCount)
-                            staticsBlockBuffer.Value = new StaticsBlock[im.StaticCount];
+                        staticsBlockBuffer.Value.Buffer ??= new StaticsBlock[im.StaticCount];
+                        if (staticsBlockBuffer.Value.Buffer.Length < im.StaticCount)
+                            staticsBlockBuffer.Value.Buffer = new StaticsBlock[im.StaticCount];
 
-                        var staticsSpan = staticsBlockBuffer.Value.AsSpan(0, (int)im.StaticCount);
+                        var staticsSpan = staticsBlockBuffer.Value.Buffer.AsSpan(0, (int)im.StaticCount);
                         im.StaticFile.Seek((long)im.StaticAddress, System.IO.SeekOrigin.Begin);
                         im.StaticFile.Read(MemoryMarshal.AsBytes(staticsSpan));
 
@@ -290,14 +331,14 @@ internal readonly struct TerrainPlugin : IPlugin
                             var staX = (ushort)(bx + sb.X);
                             var staY = (ushort)(by + sb.Y);
 
-                            var e = world.Entity()
-                                .Set(new WorldPosition() { X = staX, Y = staY, Z = sb.Z })
-                                .Set(new Graphic() { Value = sb.Color })
-                                .Set(new Hue() { Value = sb.Hue })
-                                .Add<IsStatic>()
-                                .Add<Terrain>();
+                            var e = commands.Spawn()
+                                .Insert(new WorldPosition() { X = staX, Y = staY, Z = sb.Z })
+                                .Insert(new Graphic() { Value = sb.Color })
+                                .Insert(new Hue() { Value = sb.Hue })
+                                .Insert<IsStatic>()
+                                .Insert<Terrain>();
 
-                            chunk.AddChild(e);
+                            // chunk.AddChild(e);
                         }
                     }
                 }
@@ -307,7 +348,7 @@ internal readonly struct TerrainPlugin : IPlugin
 
     private static void RemoveEntitiesOutOfRange(
        Commands commands,
-       Time time,
+       Res<Time> time,
        Res<GameContext> gameCtx,
        Res<ChunksLoadedMap> chunksLoaded,
        Res<Camera> camera,
@@ -324,10 +365,10 @@ internal readonly struct TerrainPlugin : IPlugin
 
         foreach ((var key, (var lastAccess, var entity)) in chunksLoaded.Value)
         {
-            if (time.Total > lastAccess)
+            if (time.Value.Total > lastAccess)
             {
                 toRemove.Value.Add(key);
-                commands.Entity(entity).Delete();
+                commands.Entity(entity).Despawn();
             }
         }
 
@@ -343,7 +384,7 @@ internal readonly struct TerrainPlugin : IPlugin
             var dist2 = GetDist(pos.Ref.X, pos.Ref.Y, mobPos.Ref.X, mobPos.Ref.Y);
             if (dist2 > gameCtx.Value.MaxObjectsDistance)
             {
-                entity.Ref.Delete();
+                commands.Entity(entity.Ref).Despawn();
             }
         }
 
@@ -355,7 +396,7 @@ internal readonly struct TerrainPlugin : IPlugin
 
             if (dist2 > gameCtx.Value.MaxObjectsDistance * 2 && dist22 > gameCtx.Value.MaxObjectsDistance * 2)
             {
-                entity.Ref.Delete();
+                commands.Entity(entity.Ref).Despawn();
             }
         }
     }

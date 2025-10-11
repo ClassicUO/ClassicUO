@@ -1,21 +1,29 @@
 using ClassicUO.Configuration;
 using ClassicUO.Renderer;
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
 
 internal readonly struct CameraPlugin : IPlugin
 {
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
         var updateCameraFn = UpdateCamera;
         var setCameraBoundsFn = SetCameraBounds;
 
-        scheduler.AddResource(new Camera(0.5f, 2.5f, 0.1f) { Bounds = new(0, 0, 800, 600) });
+        app
+            .AddResource(new Camera(0.5f, 2.5f, 0.1f) { Bounds = new(0, 0, 800, 600) })
 
-        scheduler.OnEnter(GameState.GameScreen, setCameraBoundsFn);
-        scheduler.OnUpdate(updateCameraFn)
-                .RunIf((SchedulerState state) => state.InState(GameState.GameScreen));
+            .AddSystem(setCameraBoundsFn)
+            .OnEnter(GameState.GameScreen)
+            .Build()
+
+            .AddSystem(updateCameraFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
+            .Build();
+
     }
 
     private static void SetCameraBounds(
@@ -32,7 +40,7 @@ internal readonly struct CameraPlugin : IPlugin
     }
 
     private static void UpdateCamera(
-        Time time,
+        Res<Time> time,
         Res<Camera> camera,
         Res<MouseContext> mouseCtx,
         Res<Profile> profile
@@ -48,6 +56,6 @@ internal readonly struct CameraPlugin : IPlugin
                 camera.Value.ZoomOut();
         }
 
-        camera.Value.Update(true, time.Total, new((int)mousePos.X, (int)mousePos.Y));
+        camera.Value.Update(true, time.Value.Total, new((int)mousePos.X, (int)mousePos.Y));
     }
 }

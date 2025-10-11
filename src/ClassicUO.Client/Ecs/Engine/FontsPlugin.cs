@@ -4,30 +4,32 @@ using ClassicUO.Resources;
 using FontStashSharp;
 using FontStashSharp.RichText;
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
 
 internal readonly struct FontsPlugin : IPlugin
 {
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
         // scheduler.AddResource(new FontCache());
 
-        scheduler.OnStartup(() =>
-        {
-            void registerFont(string name, ReadOnlySpan<byte> fontData)
+        app
+            .AddSystem(Stage.Startup, (w) =>
             {
-                var fontSystem = new FontSystem();
-                fontSystem.AddFont(fontData.ToArray());
-                FontCache.Register(name, fontSystem);
-            }
+                void registerFont(string name, ReadOnlySpan<byte> fontData)
+                {
+                    var fontSystem = new FontSystem();
+                    fontSystem.AddFont(fontData.ToArray());
+                    FontCache.Register(name, fontSystem);
+                }
 
-            registerFont("medium", TTFFontsLoader.Medium());
-            registerFont("regular", TTFFontsLoader.Regular());
-            registerFont("bold", TTFFontsLoader.Bold());
-            registerFont("bold-italic", TTFFontsLoader.BoldItalic());
-            registerFont("italic", TTFFontsLoader.MediumItalic());
-        });
+                registerFont("medium", TTFFontsLoader.Medium());
+                registerFont("regular", TTFFontsLoader.Regular());
+                registerFont("bold", TTFFontsLoader.Bold());
+                registerFont("bold-italic", TTFFontsLoader.BoldItalic());
+                registerFont("italic", TTFFontsLoader.MediumItalic());
+            });
     }
 }
 

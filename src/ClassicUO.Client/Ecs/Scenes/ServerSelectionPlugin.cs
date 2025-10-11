@@ -3,25 +3,33 @@ using ClassicUO.Network;
 using ClassicUO.Input;
 using Clay_cs;
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
 
 internal readonly struct ServerSelectionPlugin : IPlugin
 {
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
-        scheduler.AddEvent<ServerSelectionInfoEvent>();
-
         var cleanupFn = Cleanup;
         var serverInfoSetupFn = ServerInfoSetup;
         var serverSelectedFn = ServerSelected;
 
-        scheduler.OnExit(GameState.ServerSelection, cleanupFn);
-        scheduler.OnUpdate(serverInfoSetupFn)
-                 .RunIf((SchedulerState state, EventReader<ServerSelectionInfoEvent> reader)
-                    => !reader.IsEmpty && state.InState(GameState.ServerSelection));
-        scheduler.OnUpdate(serverSelectedFn)
-                 .RunIf((SchedulerState state) => state.InState(GameState.ServerSelection));
+        app
+            .AddSystem(cleanupFn)
+            .OnExit(GameState.ServerSelection)
+            .Build()
+
+            .AddSystem(serverInfoSetupFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> state, EventReader<ServerSelectionInfoEvent> reader)
+                       => reader.HasEvents && state.Value.Current == GameState.ServerSelection)
+            .Build()
+
+            .AddSystem(serverSelectedFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.ServerSelection)
+            .Build();
     }
 
 
@@ -33,12 +41,12 @@ internal readonly struct ServerSelectionPlugin : IPlugin
         }
     }
 
-    private static void ServerInfoSetup(World world, EventReader<ServerSelectionInfoEvent> reader)
+    private static void ServerInfoSetup(Commands commands, EventReader<ServerSelectionInfoEvent> reader)
     {
         var cornerRadius = Clay_CornerRadius.All(8);
 
-        var root = world.Entity()
-            .Add<ServerSelectionScene>()
+        var root = commands.Spawn()
+            .Insert<ServerSelectionScene>()
             .CreateUINode(new UINode()
             {
                 Config = {
@@ -57,8 +65,8 @@ internal readonly struct ServerSelectionPlugin : IPlugin
                 }
             });
 
-        var serverSelectionLabel = world.Entity()
-            .Add<ServerSelectionScene>()
+        var serverSelectionLabel = commands.Spawn()
+            .Insert<ServerSelectionScene>()
             .CreateUINode(new UINode()
             {
                 Config = {
@@ -79,7 +87,7 @@ internal readonly struct ServerSelectionPlugin : IPlugin
                     }
                 }
             })
-            .Set(new Text()
+            .Insert(new Text()
             {
                 Value = "Select the server",
                 TextConfig =
@@ -91,8 +99,8 @@ internal readonly struct ServerSelectionPlugin : IPlugin
                 }
             });
 
-        var menu = world.Entity()
-            .Add<ServerSelectionScene>()
+        var menu = commands.Spawn()
+            .Insert<ServerSelectionScene>()
             .CreateUINode(new UINode()
             {
                 Config = {
@@ -121,15 +129,15 @@ internal readonly struct ServerSelectionPlugin : IPlugin
         root.AddChild(menu);
 
 
-        foreach (var ev in reader)
+        foreach (var ev in reader.Read())
         {
             if (ev.Servers == null) continue;
 
             foreach (var server in ev.Servers)
             {
-                var serverEnt = world.Entity()
-                    .Add<ServerSelectionScene>()
-                    .Set(server)
+                var serverEnt = commands.Spawn()
+                    .Insert<ServerSelectionScene>()
+                    .Insert(server)
                     .CreateUINode(new UINode()
                     {
                         Config = {
@@ -150,7 +158,7 @@ internal readonly struct ServerSelectionPlugin : IPlugin
                             }
                         }
                     })
-                    .Set(new Text()
+                    .Insert(new Text()
                     {
                         Value = server.Name,
                         TextConfig =
@@ -161,7 +169,7 @@ internal readonly struct ServerSelectionPlugin : IPlugin
                             textColor = new (1f, 1f, 1f, 1),
                         }
                     })
-                    .Set(new UIMouseAction());
+                    .Insert(new UIMouseAction());
 
                 menu.AddChild(serverEnt);
             }

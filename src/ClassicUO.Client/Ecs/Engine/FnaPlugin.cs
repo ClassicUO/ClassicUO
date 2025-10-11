@@ -3,6 +3,7 @@ using System.Runtime.CompilerServices;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
 
@@ -12,55 +13,64 @@ internal readonly struct FnaPlugin : IPlugin
     public bool MouseVisible { get; init; }
     public bool VSync { get; init; }
 
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
-        scheduler.AddPlugin<TextHandlerPlugin>();
-        scheduler.AddPlugin<FontsPlugin>();
-        scheduler.AddPlugin<DelayedActionPlugin>();
-        scheduler.AddPlugin<CameraPlugin>();
+        app
+            .AddPlugin<TextHandlerPlugin>()
+            .AddPlugin<FontsPlugin>()
+            .AddPlugin<DelayedActionPlugin>()
+            .AddPlugin<CameraPlugin>()
 
+            .AddResource(new UoGame(MouseVisible, WindowResizable, VSync))
+            .AddResource(new Time())
 
-        scheduler.AddResource(new UoGame(MouseVisible, WindowResizable, VSync));
-        scheduler.AddSystemParam(new Time());
+            .AddSystem(Stage.Startup, static (Res<UoGame> game, Commands commands) =>
+            {
+                game.Value.RunOneFrame();
+                UnsafeFNAAccessor.BeforeLoop(game.Value);
+                // game.Value.RunOneFrame();
+                commands.InsertResource(game.Value.GraphicsDevice);
+                commands.InsertResource(new KeyboardContext(game.Value));
+                commands.InsertResource(new MouseContext(game.Value));
+                UnsafeFNAAccessor.GetSetRunApplication(game.Value) = true;
+            })
 
-        scheduler.OnStartup(static (Res<UoGame> game, SchedulerState schedState) =>
-        {
-            game.Value.RunOneFrame();
-            UnsafeFNAAccessor.BeforeLoop(game.Value);
-            // game.Value.RunOneFrame();
-            schedState.AddResource(game.Value.GraphicsDevice);
-            schedState.AddResource(new KeyboardContext(game));
-            schedState.AddResource(new MouseContext(game));
-            UnsafeFNAAccessor.GetSetRunApplication(game.Value) = true;
-        });
+            .AddSystem((Res<UoGame> game, Res<Time> time) =>
+            {
+                game.Value.SuppressDraw();
+                game.Value.Tick();
 
-        scheduler.OnUpdate((Res<UoGame> game, Time time) =>
-        {
-            game.Value.SuppressDraw();
-            game.Value.Tick();
+                time.Value.Frame = (float)game.Value.GameTime.ElapsedGameTime.TotalSeconds;
+                time.Value.Total += time.Value.Frame * 1000f;
 
-            time.Frame = (float)game.Value.GameTime.ElapsedGameTime.TotalSeconds;
-            time.Total += time.Frame * 1000f;
+                FrameworkDispatcher.Update();
+            })
+            .InStage(Stage.Update)
+            .RunIf((World world) => world.HasResource<UoGame>())
+            .Build()
 
-            FrameworkDispatcher.Update();
-        })
-        .RunIf((SchedulerState state) => state.ResourceExists<UoGame>());
+            .AddSystem((Res<GraphicsDevice> device) => device.Value.Clear(Color.Black))
+            .InStage(Stage.First)
+            .RunIf((World world) => world.HasResource<GraphicsDevice>())
+            .Build()
 
+            .AddSystem((Res<GraphicsDevice> device) => device.Value.Present())
+            .InStage(Stage.Last)
+            .RunIf((World world) => world.HasResource<GraphicsDevice>())
+            .Build()
 
-        scheduler.OnFrameStart((Res<GraphicsDevice> device) => device.Value.Clear(Color.Black))
-                 .RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>());
+            .AddSystem(_ => Environment.Exit(0))
+            .InStage(Stage.PostUpdate)
+            .RunIf(static (Res<UoGame> game) => !UnsafeFNAAccessor.GetSetRunApplication(game.Value))
+            .Build()
 
-        scheduler.OnFrameEnd((Res<GraphicsDevice> device) => device.Value.Present())
-                 .RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>());
-
-        scheduler.OnAfterUpdate(() => Environment.Exit(0))
-                .RunIf(static (Res<UoGame> game) => !UnsafeFNAAccessor.GetSetRunApplication(game.Value));
-
-        scheduler.OnFrameStart((Res<MouseContext> mouseCtx, Res<KeyboardContext> keyboardCtx, Time time) =>
-        {
-            mouseCtx.Value.Update(time.Total);
-            keyboardCtx.Value.Update(time.Total);
-        });
+            .AddSystem((Res<MouseContext> mouseCtx, Res<KeyboardContext> keyboardCtx, Res<Time> time) =>
+            {
+                mouseCtx.Value.Update(time.Value.Total);
+                keyboardCtx.Value.Update(time.Value.Total);
+            })
+            .InStage(Stage.First)
+            .Build();
     }
 
     private sealed class UnsafeFNAAccessor
@@ -73,20 +83,8 @@ internal readonly struct FnaPlugin : IPlugin
     }
 }
 
-internal sealed class Time : SystemParam<TinyEcs.World>, IIntoSystemParam<World>
+internal sealed class Time
 {
     public float Total { get; set; }
     public float Frame { get; set; }
-
-    public static ISystemParam<World> Generate(World arg)
-    {
-        if (arg.Entity<Placeholder<Time>>().Has<Placeholder<Time>>())
-            return arg.Entity<Placeholder<Time>>().Get<Placeholder<Time>>().Value;
-
-        var time = new Time();
-        arg.Entity<Placeholder<Time>>().Set(new Placeholder<Time>() { Value = time });
-        return time;
-    }
-
-    private struct Placeholder<T> { public T Value; }
 }

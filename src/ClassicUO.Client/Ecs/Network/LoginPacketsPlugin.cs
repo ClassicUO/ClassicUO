@@ -9,29 +9,26 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
 
 internal readonly struct LoginPacketsPlugin : IPlugin
 {
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
-        scheduler.OnStartup((
-            Res<Settings> settings,
-            Res<PacketsMap> packetsMap,
-            Res<NetClient> network,
-            Res<UOFileManager> fileMaanger,
-            Res<GameContext> gameCtx,
-            State<GameState> gameState,
-            EventWriter<ServerSelectionInfoEvent> serverWriter,
-            EventWriter<CharacterSelectionInfoEvent> characterWriter,
-            EventWriter<LoginErrorsInfoEvent> loginErrorWriter,
+        app
+            .AddSystem(
+                (
+                    Res<Settings> settings, Res<PacketsMap> packetsMap, Res<NetClient> network, Res<UOFileManager> fileMaanger, ResMut<GameContext> gameCtx,
+                    ResMut<NextState<GameState>> gameState, EventWriter<ServerSelectionInfoEvent> serverWriter, EventWriter<CharacterSelectionInfoEvent> characterWriter,
+                    EventWriter<LoginErrorsInfoEvent> loginErrorWriter,
 
-            // modding
-            EventWriter<HostMessage> hostMsgsWriter
-        ) =>
-        {
-            // server list
+                    // modding
+                    EventWriter<HostMessage> hostMsgsWriter
+                ) =>
+                {
+// server list
             packetsMap.Value[0xA8] = buffer =>
             {
                 var reader = new StackDataReader(buffer);
@@ -52,13 +49,13 @@ internal readonly struct LoginPacketsPlugin : IPlugin
                     ));
                 }
 
-                gameState.Set(GameState.ServerSelection);
-                serverWriter.Enqueue(new()
+                gameState.Value.Set(GameState.ServerSelection);
+                serverWriter.Send(new()
                 {
                     Servers = serverList
                 });
 
-                hostMsgsWriter.Enqueue(new HostMessage.ServerLoginResponse(flags, serverList));
+                hostMsgsWriter.Send(new HostMessage.ServerLoginResponse(flags, serverList));
             };
 
             // characters list
@@ -112,14 +109,14 @@ internal readonly struct LoginPacketsPlugin : IPlugin
 
                 var flags = gameCtx.Value.ClientFeatures = (CharacterListFlags)reader.ReadUInt32BE();
 
-                gameState.Set(GameState.CharacterSelection);
-                characterWriter.Enqueue(new()
+                gameState.Value.Set(GameState.CharacterSelection);
+                characterWriter.Send(new()
                 {
                     Characters = characters,
                     Towns = cities
                 });
 
-                hostMsgsWriter.Enqueue(new HostMessage.LoginResponse(flags, characters, cities));
+                hostMsgsWriter.Send(new HostMessage.LoginResponse(flags, characters, cities));
             };
 
             // server relay
@@ -151,8 +148,8 @@ internal readonly struct LoginPacketsPlugin : IPlugin
 
                 var errorMsg = ServerErrorMessages.GetError(fileMaanger.Value.Clilocs, id, code);
 
-                gameState.Set(GameState.LoginError);
-                loginErrorWriter.Enqueue(new()
+                gameState.Value.Set(GameState.LoginError);
+                loginErrorWriter.Send(new()
                 {
                     Error = new(errorMsg)
                 });
@@ -162,6 +159,8 @@ internal readonly struct LoginPacketsPlugin : IPlugin
             packetsMap.Value[0x85] = (buffer) => loginErrorsPackets(0x85, buffer);
             packetsMap.Value[0x53] = (buffer) => loginErrorsPackets(0x53, buffer);
 
-        });
+                })
+            .InStage(Stage.Startup)
+            .Build();
     }
 }

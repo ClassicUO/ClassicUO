@@ -3,26 +3,29 @@ using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
 
 internal readonly struct PickupPlugin : IPlugin
 {
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
-        scheduler.AddResource(new GrabbedItem());
-
         var packetSetup = PacketSetup;
         var pickupItemDelayedFn = PickupItem;
         var pickupItemFn = PickupItem;
         var dropItemFn = DropItem;
 
-        scheduler.OnStartup(packetSetup);
+        app
+            .AddResource(new GrabbedItem())
 
-        scheduler.OnUpdate(pickupItemDelayedFn)
-            .RunIf((SchedulerState sched) => sched.ResourceExists<SelectedEntity>() && sched.ResourceExists<GrabbedItem>())
+            .AddSystem(Stage.Startup, packetSetup)
+
+            .AddSystem(pickupItemDelayedFn)
+            .InStage(Stage.Update)
+            .RunIf(w => w.HasResource<SelectedEntity>() && w.HasResource<GrabbedItem>())
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial == 0)
-            .RunIf((Res<MouseContext> mouseCtx, Res<Camera> camera, Local<float?> delay, Time time) =>
+            .RunIf((Res<MouseContext> mouseCtx, Res<Camera> camera, Local<float?> delay, Res<Time> time) =>
             {
                 if (!camera.Value.Bounds.Contains((int)mouseCtx.Value.Position.X, (int)mouseCtx.Value.Position.Y))
                 {
@@ -41,15 +44,15 @@ internal readonly struct PickupPlugin : IPlugin
                 if (mouseCtx.Value.IsReleased(Input.MouseButtonType.Left))
                     delay.Value = null;
                 else if (mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Left))
-                    delay.Value = time.Total + 1000f;
+                    delay.Value = time.Value.Total + 1000f;
                 else if (!mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
                     return false;
 
-                if (time.Total > delay)
+                if (time.Value.Total > delay.Value)
                     return true;
 
                 if (delay.Value.HasValue)
-                    Console.WriteLine("waiting time {0}", delay - time.Total);
+                    Console.WriteLine("waiting time {0}", delay.Value - time.Value.Total);
                 return false;
             })
             .RunIf((Res<SelectedEntity> selectedEnt, Query<Data<NetworkSerial>, Filter<With<Items>>> q) =>
@@ -57,27 +60,41 @@ internal readonly struct PickupPlugin : IPlugin
                 if (!selectedEnt.Value.Entity.IsValid())
                     return false;
                 return q.Contains(selectedEnt.Value.Entity);
-            });
+            })
+            .Build()
 
-        scheduler.OnUpdate(pickupItemFn)
-            .RunIf((SchedulerState sched) => sched.ResourceExists<SelectedEntity>() && sched.ResourceExists<GrabbedItem>())
+            .AddSystem(pickupItemFn)
+            .InStage(Stage.Update)
+            .RunIf(w => w.HasResource<SelectedEntity>() && w.HasResource<GrabbedItem>())
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial == 0)
-            .RunIf((Res<MouseContext> mouseCtx, Res<Camera> camera) =>
+            .RunIf((Res<MouseContext> mouseCtx, Res<Camera> camera, Local<float?> delay, Res<Time> time) =>
             {
                 if (!camera.Value.Bounds.Contains((int)mouseCtx.Value.Position.X, (int)mouseCtx.Value.Position.Y))
                 {
                     return false;
                 }
 
-                if (!mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
+                if (!mouseCtx.Value.IsPressed(Input.MouseButtonType.Left) && !mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Left))
                 {
                     return false;
                 }
 
                 var offset = mouseCtx.Value.PositionOffset;
                 if (offset.Length() > 1)
+                    return false;
+
+                if (mouseCtx.Value.IsReleased(Input.MouseButtonType.Left))
+                    delay.Value = null;
+                else if (mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Left))
+                    delay.Value = time.Value.Total + 1000f;
+                else if (!mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
+                    return false;
+
+                if (time.Value.Total > delay.Value)
                     return true;
 
+                if (delay.Value.HasValue)
+                    Console.WriteLine("waiting time {0}", delay.Value - time.Value.Total);
                 return false;
             })
             .RunIf((Res<SelectedEntity> selectedEnt, Query<Data<NetworkSerial>, Filter<With<Items>>> q) =>
@@ -85,11 +102,12 @@ internal readonly struct PickupPlugin : IPlugin
                 if (!selectedEnt.Value.Entity.IsValid())
                     return false;
                 return q.Contains(selectedEnt.Value.Entity);
-            });
+            })
+            .Build()
 
-
-        scheduler.OnUpdate(dropItemFn)
-            .RunIf((SchedulerState sched) => sched.ResourceExists<SelectedEntity>() && sched.ResourceExists<GrabbedItem>())
+            .AddSystem(dropItemFn)
+            .InStage(Stage.Update)
+            .RunIf(w => w.HasResource<SelectedEntity>() && w.HasResource<GrabbedItem>())
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial != 0)
             .RunIf((Res<MouseContext> mouseCtx) => mouseCtx.Value.IsReleased(Input.MouseButtonType.Left));
     }
@@ -125,15 +143,13 @@ internal readonly struct PickupPlugin : IPlugin
     }
 
     static void PickupItem(
-        World world,
         Res<SelectedEntity> selectedEntity,
         Res<GrabbedItem> grabbedItem,
         Res<NetClient> network,
         Query<Data<NetworkSerial, Amount, Graphic, Hue>> q
     )
     {
-        var entity = world.Entity(selectedEntity.Value.Entity);
-        (var serial, var amount, var graphic, var hue) = q.Get(entity.ID);
+        (var serial, var amount, var graphic, var hue) = q.Get(selectedEntity.Value.Entity);
         Console.WriteLine("pickup item serial: {0} amount: {1}", serial.Ref.Value, amount.Ref.Value);
         network.Value.Send_PickUpRequest(serial.Ref.Value, (ushort)amount.Ref.Value);
 
@@ -146,7 +162,6 @@ internal readonly struct PickupPlugin : IPlugin
     }
 
     static void DropItem(
-        World world,
         Res<SelectedEntity> selectedEntity,
         Res<GrabbedItem> grabbedItem,
         Res<NetClient> network,

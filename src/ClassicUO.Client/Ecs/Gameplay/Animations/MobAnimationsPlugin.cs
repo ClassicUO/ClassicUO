@@ -9,6 +9,7 @@ using ClassicUO.Renderer.Animations;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using TinyEcs;
+using TinyEcs.Bevy;
 using static ClassicUO.Game.GameObjects.Mobile;
 using static ClassicUO.Renderer.UltimaBatcher2D;
 using static TinyEcs.Defaults;
@@ -103,63 +104,63 @@ struct MobileQueuedStep
 
 readonly struct MobAnimationsPlugin : IPlugin
 {
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
-        scheduler.AddEvent<MobileQueuedStep>();
-
         var readMobileStepsFn = ReadMobilesSteps;
-        scheduler.OnUpdate(readMobileStepsFn)
-            .RunIf((EventReader<MobileQueuedStep> stepsQueued) => !stepsQueued.IsEmpty);
-
         var handleMobileStepsFn = HandleMobileSteps;
-        scheduler.OnUpdate(handleMobileStepsFn);
-
         var processMobileAnimationsFn = ProcessMobileAnimations;
-        scheduler.OnUpdate(processMobileAnimationsFn);
+
+        app
+            .AddSystem(readMobileStepsFn)
+            .InStage(Stage.Update)
+            .RunIf((EventReader<MobileQueuedStep> stepsQueued) => stepsQueued.HasEvents)
+            .Build()
+
+            .AddSystem(Stage.Update, handleMobileStepsFn)
+            .AddSystem(Stage.Update, processMobileAnimationsFn);
     }
 
     void ReadMobilesSteps(
-        TinyEcs.World world,
-        Time time,
+        Commands commands,
+        Res<Time> time,
         EventReader<MobileQueuedStep> stepsQueued,
         Res<GameContext> gameCtx,
         Res<NetworkEntitiesMap> entitiesMap,
         Query<Data<WorldPosition, Facing, MobileSteps, MobAnimation>, With<NetworkSerial>> query
     )
     {
-        foreach (var queuedStep in stepsQueued)
+        foreach (var queuedStep in stepsQueued.Read())
         {
-            var ent = entitiesMap.Value.GetOrCreate(queuedStep.Serial);
+            var ent = entitiesMap.Value.GetOrCreate(commands, queuedStep.Serial);
 
             if (gameCtx.Value.PlayerSerial == queuedStep.Serial)
             {
-                world.Set(ent, new WorldPosition()
+                ent.Insert(new WorldPosition()
                 {
                     X = queuedStep.X,
                     Y = queuedStep.Y,
                     Z = queuedStep.Z,
                 });
-                world.Set(ent, new Facing() { Value = queuedStep.Direction });
+                ent.Insert(new Facing() { Value = queuedStep.Direction });
                 continue;
             }
 
-
-            (var position, var direction, var steps, var animation) = query.Get(ent);
-
-            if (!query.Contains(ent))
+            if (!query.Contains(ent.Id))
             {
-                ent.Set(new WorldPosition()
+                ent.Insert(new WorldPosition()
                 {
                     X = queuedStep.X,
                     Y = queuedStep.Y,
                     Z = queuedStep.Z,
                 })
-                .Set(new Facing() { Value = queuedStep.Direction })
-                .Set(new MobileSteps() { Index = -1 })
-                .Set(new MobAnimation() { Time = time.Total });
+                .Insert(new Facing() { Value = queuedStep.Direction })
+                .Insert(new MobileSteps() { Index = -1 })
+                .Insert(new MobAnimation() { Time = time.Value.Total });
 
                 continue;
             }
+
+            (var position, var direction, var steps, var animation) = query.Get(ent.Id);
 
             if (steps.Ref.Index >= MobileSteps.COUNT - 1)
             {
@@ -202,17 +203,17 @@ readonly struct MobAnimationsPlugin : IPlugin
 
             if (steps.Ref.Index < 0)
             {
-                if (steps.Ref.Time <= time.Total - Constants.WALKING_DELAY)
+                if (steps.Ref.Time <= time.Value.Total - Constants.WALKING_DELAY)
                 {
                     animation.Ref = new()
                     {
-                        Time = time.Total
+                        Time = time.Value.Total
                     };
                     // animation.Ref.Action = 0xFF;
                     // animation.Ref.Run = true;
                     // animation.Ref.Time = time.Total;
                 }
-                steps.Ref.Time = time.Total;
+                steps.Ref.Time = time.Value.Total;
             }
 
             var moveDir = DirectionHelper.CalculateDirection(endX, endY, queuedStep.X, queuedStep.Y);
@@ -251,8 +252,8 @@ readonly struct MobAnimationsPlugin : IPlugin
 
     void HandleMobileSteps
     (
-        Time time,
-        Query<TinyEcs.Data<MobileSteps, WorldPosition, Facing, MobAnimation, ScreenPositionOffset, ServerFlags>, Without<ContainedInto>> queryHandleWalking
+        Res<Time> time,
+        Query<Data<MobileSteps, WorldPosition, Facing, MobAnimation, ScreenPositionOffset, ServerFlags>, Without<ContainedInto>> queryHandleWalking
     )
     {
         foreach ((
@@ -275,7 +276,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                 //     };
                 // }
 
-                var delay = time.Total - steps.Ref.Time;
+                var delay = time.Value.Total - steps.Ref.Time;
                 var mount = animation.Ref.MountAction != 0xFF || flags.Ref.Value.HasFlag(Flags.Flying);
 
                 if (!mount && steps.Ref.Index > 0 && delay > 0)
@@ -283,7 +284,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                     mount = delay <= (step.Run ? MovementSpeed.STEP_DELAY_MOUNT_RUN : MovementSpeed.STEP_DELAY_MOUNT_WALK);
                 }
 
-                var maxDelay = MovementSpeed.TimeToCompleteMovement(step.Run, mount) - time.Frame;
+                var maxDelay = MovementSpeed.TimeToCompleteMovement(step.Run, mount) - time.Value.Frame;
                 var removeStep = delay >= maxDelay;
                 var directionChange = false;
 
@@ -354,7 +355,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                         continue;
 
                     animation.Ref.Run = true;
-                    steps.Ref.Time = time.Total;
+                    steps.Ref.Time = time.Value.Total;
                 }
 
                 break;
@@ -364,13 +365,14 @@ readonly struct MobAnimationsPlugin : IPlugin
 
     void ProcessMobileAnimations
     (
-        TinyEcs.World world,
-        Time time,
+        Commands commands,
+        Res<Time> time,
         Res<GameContext> gameCtx,
         Res<UOFileManager> fileManager,
         Res<AssetsServer> assetsServer,
-        Query<TinyEcs.Data<MobAnimation, Graphic, Facing, EquipmentSlots, ServerFlags, MobileSteps>,
-            Filter<Without<ContainedInto>, Optional<ServerFlags>, Optional<MobileSteps>>> query
+        Query<Data<MobAnimation, Graphic, Facing, EquipmentSlots, ServerFlags, MobileSteps>,
+            Filter<Without<ContainedInto>, Optional<ServerFlags>, Optional<MobileSteps>>> query,
+        Query<Data<Graphic, NetworkSerial>, With<ContainedInto>> qEquip
     )
     {
         foreach ((
@@ -393,7 +395,7 @@ readonly struct MobAnimationsPlugin : IPlugin
 
             // }
 
-            if (animation.Ref.Time >= time.Total)
+            if (animation.Ref.Time >= time.Value.Total)
                 continue;
 
             var flags = mobFlags.IsValid() ? mobFlags.Ref.Value : Flags.None;
@@ -405,7 +407,7 @@ readonly struct MobAnimationsPlugin : IPlugin
 
             if (mobSteps.IsValid())
             {
-                isWalking = mobSteps.Ref.Time > time.Total - Constants.WALKING_DELAY;
+                isWalking = mobSteps.Ref.Time > time.Value.Total - Constants.WALKING_DELAY;
 
                 if (mobSteps.Ref.Index >= 0)
                 {
@@ -428,9 +430,10 @@ readonly struct MobAnimationsPlugin : IPlugin
 
             animation.Ref.MountAction = 0xFF;
 
-            if (slots.Ref[Layer.Mount].IsValid() && world.Exists(slots.Ref[Layer.Mount]))
+            if (slots.Ref[Layer.Mount].IsValid() && qEquip.Contains(slots.Ref[Layer.Mount]))
             {
-                var mountGraphic = world.Get<Graphic>(slots.Ref[Layer.Mount]).Value;
+                (var gfx, _) = qEquip.Get(slots.Ref[Layer.Mount]);
+                var mountGraphic = gfx.Ref.Value;
                 (mountGraphic, _) = Mounts.FixMountGraphic(fileManager.Value.TileData, mountGraphic);
 
                 animation.Ref.MountAction = GetAnimationGroup(
@@ -506,7 +509,7 @@ readonly struct MobAnimationsPlugin : IPlugin
             }
 
             animation.Ref.Index = frames.IsEmpty ? 0 : frameIndex % frames.Length;
-            animation.Ref.Time = time.Total + currDelay;
+            animation.Ref.Time = time.Value.Total + currDelay;
         }
     }
 

@@ -1,22 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
 
 internal readonly struct DelayedActionPlugin : IPlugin
 {
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
-        scheduler.AddResource(new DelayedAction());
+        app
+            .AddResource(new DelayedAction())
 
-        scheduler.OnBeforeUpdate
-        (
-            (Res<DelayedAction> delayedAction, Time time) =>
+            .AddSystem(Stage.PreUpdate, (Res<DelayedAction> delayedAction, Res<Time> time) =>
             {
-                delayedAction.Value.Run(time.Total);
-            }
-        );
+                delayedAction.Value.Run(time.Value.Total);
+            });
     }
 }
 

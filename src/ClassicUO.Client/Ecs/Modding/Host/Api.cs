@@ -9,6 +9,7 @@ using ClassicUO.Ecs.Modding.UI;
 using ClassicUO.Network;
 using Extism.Sdk;
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs.Modding;
 
@@ -17,15 +18,15 @@ internal static class Api
     public static HostFunction[] Functions
     (
         WeakReference<Mod> weakRef,
-        SchedulerState schedulerState
+        World world
     )
     {
-        var tuple = (weakRef, schedulerState);
+        var tuple = (weakRef, world);
         HostFunction[] functions = [
             HostFunction.FromMethod("cuo_get_packet_size", tuple, static (CurrentPlugin p, long offset) =>
             {
-                (_, var scheduler) = p.GetUserData<(WeakReference<Mod>, SchedulerState)>();
-                var network = scheduler.GetResource<NetClient>();
+                (_, var world) = p.GetUserData<(WeakReference<Mod>, World)>();
+                var network = world.GetResource<NetClient>();
                 var span = p.ReadBytes(offset);
                 var size = network.PacketsTable.GetPacketLength(span[0]);
                 return p.WriteBytes(size.AsBytes());
@@ -33,16 +34,16 @@ internal static class Api
 
             HostFunction.FromMethod("cuo_send_to_server", tuple, static (CurrentPlugin p, long offset) =>
             {
-                (_, var scheduler) = p.GetUserData<(WeakReference<Mod>, SchedulerState)>();
-                var network = scheduler.GetResource<NetClient>();
+                (_, var world) = p.GetUserData<(WeakReference<Mod>, World)>();
+                var network = world.GetResource<NetClient>();
                 var packet = p.ReadBytes(offset);
                 network.Send(packet, true);
             }),
 
             HostFunction.FromMethod("cuo_set_packet_handler", tuple, static (CurrentPlugin p, long offset) =>
             {
-                (var modRef, var scheduler) = p.GetUserData<(WeakReference<Mod>, SchedulerState)>();
-                var packetMap = scheduler.GetResource<PacketsMap>();
+                (var modRef, var world) = p.GetUserData<(WeakReference<Mod>, World)>();
+                var packetMap = world.GetResource<PacketsMap>();
                 var handlerInfo = p.ReadString(offset).FromJson<PacketHandlerInfo>();
 
                 if (modRef.TryGetTarget(out var mod) && mod.Plugin.FunctionExists(handlerInfo.FuncName))
@@ -54,8 +55,8 @@ internal static class Api
 
             HostFunction.FromMethod("cuo_add_packet_handler", tuple, static (CurrentPlugin p, long offset) =>
             {
-                (var modRef, var scheduler) = p.GetUserData<(WeakReference<Mod>, SchedulerState)>();
-                var packetMap = scheduler.GetResource<PacketsMap>();
+                (var modRef, var world) = p.GetUserData<(WeakReference<Mod>, World)>();
+                var packetMap = world.GetResource<PacketsMap>();
 
                 var handlerInfo = p.ReadString(offset).FromJson<PacketHandlerInfo>();
 
@@ -75,9 +76,9 @@ internal static class Api
 
             HostFunction.FromMethod("cuo_set_sprite", tuple, static (CurrentPlugin p, long offset) =>
             {
-                (_, var scheduler) = p.GetUserData<(WeakReference<Mod>, SchedulerState)>();
+                (_, var world) = p.GetUserData<(WeakReference<Mod>, World)>();
 
-                var assets = scheduler.GetResource<AssetsServer>();
+                var assets = world.GetResource<AssetsServer>();
                 var spriteDesc = p.ReadString(offset).FromJson<SpriteDescription>();
                 var data = Convert.FromBase64String(spriteDesc.Base64Data);
 
@@ -106,8 +107,8 @@ internal static class Api
 
             HostFunction.FromMethod("cuo_get_sprite", tuple, static (CurrentPlugin p, long offset) =>
             {
-                (_, var scheduler) = p.GetUserData<(WeakReference<Mod>, SchedulerState)>();
-                var fileManager = scheduler.GetResource<UOFileManager>();
+                (_, var world) = p.GetUserData<(WeakReference<Mod>, World)>();
+                var fileManager = world.GetResource<UOFileManager>();
                 var spriteDesc = p.ReadString(offset).FromJson<SpriteDescription>();
 
                 switch (spriteDesc.AssetType)
@@ -148,20 +149,19 @@ internal static class Api
 
             HostFunction.FromMethod("cuo_send_events", tuple, static (CurrentPlugin p, long offset) =>
             {
-                (var modRef, var scheduler) = p.GetUserData<(WeakReference<Mod>, SchedulerState)>();
-                var writer = scheduler.GetEventWriter<(Mod, PluginMessage)>();
+                (var modRef, var world) = p.GetUserData<(WeakReference<Mod>, World)>();
                 var str = p.ReadString(offset);
                 var events = str.FromJson<PluginMessages>();
 
                 modRef.TryGetTarget(out var mod);
                 foreach (var ev in events.Messages)
-                    writer.Enqueue((mod, ev));
+                    world.SendEvent((mod, ev));
             }),
 
             HostFunction.FromMethod("cuo_get_player_serial", tuple, static p =>
             {
-                (_, var scheduler) = p.GetUserData<(WeakReference<Mod>, SchedulerState)>();
-                ref var gameCtx = ref scheduler.GetResource<GameContext>();
+                (_, var world) = p.GetUserData<(WeakReference<Mod>, World)>();
+                ref var gameCtx = ref world.GetResourceRef<GameContext>();
                 var span = gameCtx.PlayerSerial.AsBytes();
                 var addr = p.WriteBytes(span);
                 return addr;
@@ -169,107 +169,103 @@ internal static class Api
 
             HostFunction.FromMethod("cuo_ecs_spawn_entity", tuple, static (CurrentPlugin p) =>
             {
-                (var modRef, var scheduler) = p.GetUserData<(WeakReference<Mod>, SchedulerState)>();
+                (var modRef, var world) = p.GetUserData<(WeakReference<Mod>, World)>();
                 modRef.TryGetTarget(out var mod);
-                var world = scheduler.GetSystemParam<World>();
                 var ent = world.Entity().Set(new PluginEntity(mod));
                 return (long)ent.ID;
             }),
 
             HostFunction.FromMethod("cuo_ecs_delete_entity", tuple, static (CurrentPlugin p, long id) =>
             {
-                (_, var scheduler) = p.GetUserData<(WeakReference<Mod>, SchedulerState)>();
-                var world = scheduler.GetSystemParam<World>();
+                (_, var world) = p.GetUserData<(WeakReference<Mod>, World)>();
                 if (world.Exists((ulong)id))
                     world.Delete((ulong)id);
             }),
 
             HostFunction.FromMethod("cuo_ui_node", tuple, static (CurrentPlugin p, long offset) =>
             {
-                (var modRef, var scheduler) = p.GetUserData<(WeakReference<Mod>, SchedulerState)>();
-                var world = scheduler.GetSystemParam<World>();
-                var nodes = p.ReadString(offset).FromJson<UINodes>();
-
-                modRef.TryGetTarget(out var mod);
-
-                foreach (var node in nodes.Nodes)
-                {
-                    var ent = world.Entity(node.Id)
-                        .Set(new PluginEntity(mod))
-                        .CreateUINode(new UINode() {
-                            // TODO: missing some config
-                            Config = {
-                                layout = node.Config.Layout ?? default,
-                                backgroundColor = node.Config.BackgroundColor ?? default,
-                                cornerRadius = node.Config.CornerRadius ?? default,
-                                floating = node.Config.Floating ?? default,
-                                clip = node.Config.Clip ?? default,
-                                border = node.Config.Border ?? default,
-                                image = {
-                                    // imageData = node.Config.Image.Base64Data
-                                }
-                            },
-                            UOConfig = node.UOConfig ?? default
-                        });
-
-                    if (node.TextConfig is {} textCfg)
-                    {
-                        var config = new Text() {
-                            Value = textCfg.Value,
-                            TextConfig = {
-                                fontId = textCfg.TextConfig.FontId,
-                                fontSize = textCfg.TextConfig.FontSize,
-                                letterSpacing = textCfg.TextConfig.LetterSpacing,
-                                lineHeight = textCfg.TextConfig.LineHeight,
-                                textAlignment = textCfg.TextConfig.TextAlignment,
-                                textColor = textCfg.TextConfig.TextColor,
-                                wrapMode = textCfg.TextConfig.WrapMode
-                            }
-                        };
-
-                        ent.Set(config);
-                    }
-
-                    if (node.Movable)
-                        ent.Add<UIMovable>();
-
-                    // if (node.AcceptInputs)
-                    // ent.Set(new UIMouseAction());
-
-                    if (node.WidgetType == ClayWidgetType.TextInput)
-                        ent.Add<TextInput>();
-                    else if (node.WidgetType == ClayWidgetType.TextFragment)
-                        ent.Add<TextFragment>();
-                    else if (node.WidgetType == ClayWidgetType.Button)
-                    {
-                        if (node.UOButton is {} button)
-                        {
-                            ent.Set(new UOButton()
-                            {
-                                Normal = button.Normal,
-                                Over = button.Over,
-                                Pressed = button.Pressed
-                            });
-                        }
-                    }
-                }
-
-                foreach (var (child, parent) in nodes.Relations)
-                {
-                    if (!world.Exists(child))
-                        continue;
-
-                    if (!world.Exists(parent))
-                        continue;
-
-                    world.Entity(parent).AddChild(child);
-                }
+                // (var modRef, var world) = p.GetUserData<(WeakReference<Mod>, World)>();
+                // var nodes = p.ReadString(offset).FromJson<UINodes>();
+                //
+                // modRef.TryGetTarget(out var mod);
+                //
+                // foreach (var node in nodes.Nodes)
+                // {
+                //     var ent = world.Entity(node.Id)
+                //         .Set(new PluginEntity(mod))
+                //         .CreateUINode(new UINode() {
+                //             // TODO: missing some config
+                //             Config = {
+                //                 layout = node.Config.Layout ?? default,
+                //                 backgroundColor = node.Config.BackgroundColor ?? default,
+                //                 cornerRadius = node.Config.CornerRadius ?? default,
+                //                 floating = node.Config.Floating ?? default,
+                //                 clip = node.Config.Clip ?? default,
+                //                 border = node.Config.Border ?? default,
+                //                 image = {
+                //                     // imageData = node.Config.Image.Base64Data
+                //                 }
+                //             },
+                //             UOConfig = node.UOConfig ?? default
+                //         });
+                //
+                //     if (node.TextConfig is {} textCfg)
+                //     {
+                //         var config = new Text() {
+                //             Value = textCfg.Value,
+                //             TextConfig = {
+                //                 fontId = textCfg.TextConfig.FontId,
+                //                 fontSize = textCfg.TextConfig.FontSize,
+                //                 letterSpacing = textCfg.TextConfig.LetterSpacing,
+                //                 lineHeight = textCfg.TextConfig.LineHeight,
+                //                 textAlignment = textCfg.TextConfig.TextAlignment,
+                //                 textColor = textCfg.TextConfig.TextColor,
+                //                 wrapMode = textCfg.TextConfig.WrapMode
+                //             }
+                //         };
+                //
+                //         ent.Set(config);
+                //     }
+                //
+                //     if (node.Movable)
+                //         ent.Add<UIMovable>();
+                //
+                //     // if (node.AcceptInputs)
+                //     // ent.Set(new UIMouseAction());
+                //
+                //     if (node.WidgetType == ClayWidgetType.TextInput)
+                //         ent.Add<TextInput>();
+                //     else if (node.WidgetType == ClayWidgetType.TextFragment)
+                //         ent.Add<TextFragment>();
+                //     else if (node.WidgetType == ClayWidgetType.Button)
+                //     {
+                //         if (node.UOButton is {} button)
+                //         {
+                //             ent.Set(new UOButton()
+                //             {
+                //                 Normal = button.Normal,
+                //                 Over = button.Over,
+                //                 Pressed = button.Pressed
+                //             });
+                //         }
+                //     }
+                // }
+                //
+                // foreach (var (child, parent) in nodes.Relations)
+                // {
+                //     if (!world.Exists(child))
+                //         continue;
+                //
+                //     if (!world.Exists(parent))
+                //         continue;
+                //
+                //     world.Entity(parent).AddChild(child);
+                // }
             }),
 
             HostFunction.FromMethod("cuo_add_entity_to_parent", tuple, static (CurrentPlugin p, long entityId, long parentId, long index) =>
             {
-                (var modRef, var scheduler) = p.GetUserData<(WeakReference<Mod>, SchedulerState)>();
-                var world = scheduler.GetSystemParam<World>();
+                (var modRef, var world) = p.GetUserData<(WeakReference<Mod>, World)>();
                 if (!world.Exists((ulong)entityId) || !world.Exists((ulong)parentId))
                     return;
 
@@ -282,8 +278,7 @@ internal static class Api
 
             HostFunction.FromMethod("cuo_ui_add_event_listener", tuple, static (CurrentPlugin p, long offset) =>
             {
-                (var modRef, var scheduler) = p.GetUserData<(WeakReference<Mod>, SchedulerState)>();
-                var world = scheduler.GetSystemParam<World>();
+                (var modRef, var world) = p.GetUserData<(WeakReference<Mod>, World)>();
                 var addEvent = p.ReadString(offset).FromJson<UIEvent>();
 
                 if (!world.Exists(addEvent.EntityId))
@@ -301,8 +296,7 @@ internal static class Api
 
             HostFunction.FromMethod("cuo_ui_remove_event_listener", tuple, static (CurrentPlugin p, long offset) =>
             {
-                (var modRef, var scheduler) = p.GetUserData<(WeakReference<Mod>, SchedulerState)>();
-                var world = scheduler.GetSystemParam<World>();
+                (var modRef, var world) = p.GetUserData<(WeakReference<Mod>, World)>();
                 var removeEvent = p.ReadString(offset).FromJson<UIEvent>();
 
                 if (!world.Exists(removeEvent.EntityId))

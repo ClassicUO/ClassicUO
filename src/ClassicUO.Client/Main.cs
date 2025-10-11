@@ -25,6 +25,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO
 {
@@ -228,10 +229,14 @@ namespace ClassicUO
                 Console.WriteLine("FNA3D_FORCE_DRIVER: " + Environment.GetEnvironmentVariable("FNA3D_FORCE_DRIVER"));
 
                 using var ecs = new TinyEcs.World();
-                var scheduler = new Scheduler(ecs, ThreadingMode.Single);
+                var app = new App(ecs, ThreadingMode.Single);
 
-                scheduler.AddPlugin<Ecs.CuoPlugin>();
-                scheduler.Run(() => false);
+                app.AddPlugin<Ecs.CuoPlugin>();
+
+                while (true)
+                    app.Update();
+
+                // scheduler.Run(() => false);
 
                 // Client.Run(pluginHost);
             }

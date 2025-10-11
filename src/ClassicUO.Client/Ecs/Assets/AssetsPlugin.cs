@@ -5,36 +5,38 @@ using ClassicUO.Game.Data;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework.Graphics;
-using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
 
 readonly struct AssetsPlugin : IPlugin
 {
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
         var loadAssetsFn = LoadAssets;
-        scheduler.OnStartup(loadAssetsFn);
+
+        app.AddSystem(loadAssetsFn).InStage(Stage.Startup);
     }
 
     unsafe void LoadAssets
     (
-        State<GameState> state,
+        Res<State<GameState>> state,
+        ResMut<NextState<GameState>> nextState,
         Res<GraphicsDevice> device,
-        Res<GameContext> gameCtx,
+        ResMut<GameContext> gameCtx,
         Res<Settings> settings,
-        SchedulerState schedState
+        Commands commands
     )
     {
-        Fonts.Initialize(device);
+        Fonts.Initialize(device.Value);
 
         var fileManager = new UOFileManager(gameCtx.Value.ClientVersion, settings.Value.UltimaOnlineDirectory);
         fileManager.Load(false, settings.Value.Language);
 
-        schedState.AddResource(fileManager);
-        schedState.AddResource(new AssetsServer(fileManager, device));
-        schedState.AddResource(new UltimaBatcher2D(device));
-        schedState.AddResource(new MultiCache(fileManager.Multis));
+        commands.InsertResource(fileManager);
+        commands.InsertResource(new AssetsServer(fileManager, device.Value));
+        commands.InsertResource(new UltimaBatcher2D(device.Value));
+        commands.InsertResource(new MultiCache(fileManager.Multis));
 
         gameCtx.Value.Protocol = ClientFlags.CF_T2A;
 
@@ -63,8 +65,8 @@ readonly struct AssetsPlugin : IPlugin
         const int LIGHTS_TEXTURE_HEIGHT = 63;
 
         var hueSamplers = new Texture2D[2];
-        hueSamplers[0] = new Texture2D(device, TEXTURE_WIDTH, TEXTURE_HEIGHT);
-        hueSamplers[1] = new Texture2D(device, LIGHTS_TEXTURE_WIDTH, LIGHTS_TEXTURE_HEIGHT);
+        hueSamplers[0] = new Texture2D(device.Value, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+        hueSamplers[1] = new Texture2D(device.Value, LIGHTS_TEXTURE_WIDTH, LIGHTS_TEXTURE_HEIGHT);
 
         var buffer = new uint[Math.Max(
             LIGHTS_TEXTURE_WIDTH * LIGHTS_TEXTURE_HEIGHT,
@@ -93,6 +95,6 @@ readonly struct AssetsPlugin : IPlugin
         device.Value.Textures[1] = hueSamplers[0];
         device.Value.Textures[2] = hueSamplers[1];
 
-        state.Set(GameState.LoginScreen);
+        nextState.Value.Set(GameState.LoginScreen);
     }
 }

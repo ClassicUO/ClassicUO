@@ -10,6 +10,7 @@ using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TinyEcs;
+using TinyEcs.Bevy;
 using World = TinyEcs.World;
 
 namespace ClassicUO.Ecs;
@@ -27,25 +28,24 @@ internal struct TextOverheadEvent
 
 internal readonly struct TextOverheadPlugin : IPlugin
 {
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
-        scheduler.AddEvent<TextOverheadEvent>();
-        scheduler.AddResource(new TextOverHeadManager());
+        app.AddResource(new TextOverHeadManager());
 
         var readTextOverHeadFn = ReadTextOverhead;
-        scheduler.OnUpdate(readTextOverHeadFn)
-                 .RunIf((EventReader<TextOverheadEvent> texts) => !texts.IsEmpty);
+        app.AddSystem(readTextOverHeadFn)
+            .InStage(Stage.Update)
+            .RunIf((EventReader<TextOverheadEvent> texts) => texts.HasEvents);
     }
 
     private static void ReadTextOverhead(
-        TinyEcs.World world,
-        Time time,
+        Res<Time> time,
         EventReader<TextOverheadEvent> texts,
         EventWriter<Modding.Host.HostMessage> hostMsgs,
         Res<TextOverHeadManager> textOverHeadManager
     )
     {
-        foreach (var text in texts)
+        foreach (var text in texts.Read())
         {
             switch (text.MessageType)
             {
@@ -56,11 +56,11 @@ internal readonly struct TextOverheadPlugin : IPlugin
                 case MessageType.Label:
                 case MessageType.Limit3Spell:
                     var copyText = text;
-                    copyText.Time = time.Total + 5000f;
+                    copyText.Time = time.Value.Total + 5000f;
 
                     textOverHeadManager.Value.Append(copyText);
 
-                    hostMsgs.Enqueue(new Modding.Host.HostMessage.MessageReceived(
+                    hostMsgs.Send(new Modding.Host.HostMessage.MessageReceived(
                         copyText.MessageType,
                         copyText.Text,
                         copyText.Name,
@@ -103,13 +103,13 @@ internal sealed class TextOverHeadManager
         _mainLinkedList.AddLast(list);
     }
 
-    public void Update(TinyEcs.World world, Time time, NetworkEntitiesMap networkEntities)
+    public void Update(Commands commands, Time time, NetworkEntitiesMap networkEntities)
     {
         foreach ((var serial, var list) in _textOverHeadMap)
         {
-            var ent = networkEntities.Get(serial);
+            var ent = networkEntities.Get(commands, serial);
 
-            if (!ent.ID.IsValid() || list.Count == 0)
+            if (!ent.Id.IsValid() || list.Count == 0)
             {
                 _toRemove.Add(serial);
                 continue;
@@ -155,12 +155,13 @@ internal sealed class TextOverHeadManager
     }
 
     public void Render(
-        World world,
+        Commands commands,
         NetworkEntitiesMap networkEntities,
         UltimaBatcher2D batch,
         GameContext gameCtx,
         Camera camera,
-        HuesLoader huesLoader
+        HuesLoader huesLoader,
+        Query<Data<WorldPosition, ScreenPositionOffset>> query
     )
     {
         var center = Isometric.IsoToScreen(gameCtx.CenterX, gameCtx.CenterY, gameCtx.CenterZ);
@@ -193,17 +194,20 @@ internal sealed class TextOverHeadManager
             if (list.First == null)
                 continue;
 
-            var ent = networkEntities.Get(list.First.Value.Serial);
+            var ent = networkEntities.Get(commands, list.First.Value.Serial);
 
-            if (!ent.ID.IsValid())
+            if (!ent.Id.IsValid())
                 continue;
 
-            ref var worldPos = ref ent.Get<WorldPosition>();
-            ref var offset = ref ent.Get<ScreenPositionOffset>();
-            var position = Isometric.IsoToScreen(worldPos.X, worldPos.Y, worldPos.Z);
+            if (!query.Contains(ent.Id))
+                continue;
+
+            (var worldPos, var offset) = query.Get(ent.Id);
+
+            var position = Isometric.IsoToScreen(worldPos.Ref.X, worldPos.Ref.Y, worldPos.Ref.Z);
 
             if (!Unsafe.IsNullRef(ref offset))
-                position += offset.Value;
+                position += offset.Ref.Value;
             position -= center;
 
             position.X += 22f;
@@ -227,7 +231,7 @@ internal sealed class TextOverHeadManager
 
             var last = list.Last;
             var offsetY = 0f;
-            var alpha = IsOverlapped(world, networkEntities, list, FONT_SIZE) ? 0.3f : 1f;
+            var alpha = IsOverlapped(commands, networkEntities, list, FONT_SIZE, query) ? 0.3f : 1f;
 
             while (last != null)
             {
@@ -340,10 +344,11 @@ internal sealed class TextOverHeadManager
     }
 
     private bool IsOverlapped(
-        TinyEcs.World world,
+        Commands commands,
         NetworkEntitiesMap networkEntities,
         LinkedList<TextOverheadEvent> list,
-        int fontSize
+        int fontSize,
+        Query<Data<WorldPosition, ScreenPositionOffset>> query
     )
     {
         (var bounds, var totalLines) = GetBounds(list, fontSize);
@@ -354,16 +359,19 @@ internal sealed class TextOverHeadManager
         if (list.First == null)
             return false;
 
-        var mainEnt = networkEntities.Get(list.First.Value.Serial);
-        if (!mainEnt.ID.IsValid())
+        var mainEnt = networkEntities.Get(commands, list.First.Value.Serial);
+        if (!mainEnt.Id.IsValid())
             return false;
 
-        ref var worldPosMain = ref mainEnt.Get<WorldPosition>();
-        ref var offsetMain = ref mainEnt.Get<ScreenPositionOffset>();
-        var positionMain = Isometric.IsoToScreen(worldPosMain.X, worldPosMain.Y, worldPosMain.Z);
+        if (!query.Contains(mainEnt.Id))
+            return false;
+
+        (var worldPosMain, var offsetMain) = query.Get(mainEnt.Id);
+
+        var positionMain = Isometric.IsoToScreen(worldPosMain.Ref.X, worldPosMain.Ref.Y, worldPosMain.Ref.Z);
 
         if (!Unsafe.IsNullRef(ref offsetMain))
-            positionMain += offsetMain.Value;
+            positionMain += offsetMain.Ref.Value;
 
         positionMain.X += 22f;
         positionMain.Y += 22f;
@@ -396,16 +404,19 @@ internal sealed class TextOverHeadManager
 
             (var bounds2, var totalLines2) = GetBounds(current.Value, fontSize);
 
-            var ent = networkEntities.Get(current.Value.First.Value.Serial);
-            if (!ent.ID.IsValid())
+            var ent = networkEntities.Get(commands, current.Value.First.Value.Serial);
+            if (!ent.Id.IsValid())
                 continue;
 
-            ref var worldPos = ref ent.Get<WorldPosition>();
-            ref var offset = ref ent.Get<ScreenPositionOffset>();
-            var position = Isometric.IsoToScreen(worldPos.X, worldPos.Y, worldPos.Z);
+            if (!query.Contains(ent.Id))
+                continue;
+
+            (var worldPos, var offset) = query.Get(ent.Id);
+
+            var position = Isometric.IsoToScreen(worldPos.Ref.X, worldPos.Ref.Y, worldPos.Ref.Z);
 
             if (!Unsafe.IsNullRef(ref offset))
-                position += offset.Value;
+                position += offset.Ref.Value;
 
             position.X += 22f;
             position.Y += 22f;

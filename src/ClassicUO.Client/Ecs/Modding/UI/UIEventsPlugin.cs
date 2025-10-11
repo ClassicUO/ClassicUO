@@ -3,15 +3,16 @@ using ClassicUO.Ecs.Modding.Input;
 using ClassicUO.Input;
 using Microsoft.Xna.Framework;
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs.Modding.UI;
 
 internal readonly struct UIEventsPlugin : IPlugin
 {
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
         var sendUIEventsFn = SendUIEvents;
-        scheduler.OnUpdate(sendUIEventsFn);
+        app.AddSystem(Stage.Update, sendUIEventsFn);
     }
 
     private static void SendUIEvents(
@@ -107,7 +108,7 @@ internal readonly struct UIEventsPlugin : IPlugin
                 ent.Ref.ID,
                 queryEvents,
                 children,
-                mouseCtx,
+                mouseCtx.Value,
                 eventType.Value,
                 mouseAction.Ref.Button,
                 pluginEnt.Ref.Mod
@@ -124,7 +125,7 @@ internal readonly struct UIEventsPlugin : IPlugin
                     parent.Ref.Id,
                     queryEvents,
                     children,
-                    mouseCtx,
+                    mouseCtx.Value,
                     eventType.Value,
                     mouseAction.Ref.Button,
                     pluginEnt.Ref.Mod
@@ -157,7 +158,7 @@ internal readonly struct UIEventsPlugin : IPlugin
                     ent.Ref.ID,
                     queryEvents,
                     children,
-                    mouseCtx,
+                    mouseCtx.Value,
                     eventType.Value,
                     mouseAction.Ref.Button,
                     pluginEnt.Ref.Mod
@@ -174,7 +175,7 @@ internal readonly struct UIEventsPlugin : IPlugin
                         parent.Ref.Id,
                         queryEvents,
                         children,
-                        mouseCtx,
+                        mouseCtx.Value,
                         eventType.Value,
                         mouseAction.Ref.Button,
                         pluginEnt.Ref.Mod

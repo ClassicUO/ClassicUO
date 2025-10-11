@@ -11,6 +11,7 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
 
@@ -53,25 +54,28 @@ struct AcceptedStep
 
 readonly struct PlayerMovementPlugin : IPlugin
 {
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
-        scheduler.AddResource(new PlayerStepsContext());
-        scheduler.AddEvent<RejectedStep>();
-        scheduler.AddEvent<AcceptedStep>();
-
         var setupPackets = SetupPackets;
-        scheduler.OnStartup(setupPackets);
+        var enqueuePlayerStepsFn = EnqueuePlayerSteps;
+        var parseAcceptedStepsFn = ParseAcceptedSteps;
+        var parseDeniedStepsFn = ParseDeniedSteps;
 
-        scheduler.OnEnter
-        (
-            GameState.GameScreen, (Res<PlayerStepsContext> playerRequestedSteps) =>
+
+        app
+            .AddResource(new PlayerStepsContext())
+
+            .AddSystem(Stage.Startup, setupPackets)
+
+            .AddSystem((ResMut<PlayerStepsContext> playerRequestedSteps) =>
             {
                 playerRequestedSteps.Value = new PlayerStepsContext();
-            }
-        );
+            })
+            .OnEnter(GameState.GameScreen)
+            .Build()
 
-        var enqueuePlayerStepsFn = EnqueuePlayerSteps;
-        scheduler.OnUpdate(enqueuePlayerStepsFn)
+            .AddSystem(enqueuePlayerStepsFn)
+            .InStage(Stage.Update)
             .RunIf((Res<MouseContext> mouseCtx, Res<Camera> camera, Local<(float X, float Y)> clickedPos) =>
             {
                 if (mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Right))
@@ -82,38 +86,41 @@ readonly struct PlayerMovementPlugin : IPlugin
                 return camera.Value.Bounds.Contains((int)clickedPos.Value.X, (int)clickedPos.Value.Y);
             })
             .RunIf((
-                Res<MouseContext> mouseCtx,
-                Res<PlayerStepsContext> playerRequestedSteps,
-                Local<bool> autoWalk,
-                Time time,
-                Query<Data<WorldPosition, Facing, MobileSteps, MobAnimation>, With<Player>> playerQuery
-            ) =>
-            {
-                if (!autoWalk)
-                {
-                    if (mouseCtx.Value.IsPressed(Input.MouseButtonType.Right) &&
-                        mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
-                    {
-                        autoWalk.Value = true;
-                    }
-                }
-                else if (mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Right))
-                {
-                    autoWalk.Value = false;
-                }
+                       Res<MouseContext> mouseCtx,
+                       Res<PlayerStepsContext> playerRequestedSteps,
+                       Local<bool> autoWalk,
+                       Res<Time> time,
+                       Query<Data<WorldPosition, Facing, MobileSteps, MobAnimation>, With<Player>> playerQuery
+                   ) =>
+                   {
+                       if (!autoWalk.Value)
+                       {
+                           if (mouseCtx.Value.IsPressed(Input.MouseButtonType.Right) &&
+                               mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
+                           {
+                               autoWalk.Value = true;
+                           }
+                       }
+                       else if (mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Right))
+                       {
+                           autoWalk.Value = false;
+                       }
 
-                return (autoWalk || mouseCtx.Value.IsPressed(Input.MouseButtonType.Right)) &&
-                         playerRequestedSteps.Value.LastStep < time.Total && playerRequestedSteps.Value.Count < 5 &&
-                         playerQuery.Count() > 0;
-            });
+                       return (autoWalk.Value || mouseCtx.Value.IsPressed(Input.MouseButtonType.Right)) &&
+                              playerRequestedSteps.Value.LastStep < time.Value.Total && playerRequestedSteps.Value.Count < 5 &&
+                              playerQuery.Count() > 0;
+                   })
+            .Build()
 
-        var parseAcceptedStepsFn = ParseAcceptedSteps;
-        scheduler.OnUpdate(parseAcceptedStepsFn)
-            .RunIf((EventReader<AcceptedStep> responses) => !responses.IsEmpty);
+            .AddSystem(parseAcceptedStepsFn)
+            .InStage(Stage.Update)
+            .RunIf((EventReader<AcceptedStep> responses) => responses.HasEvents)
+            .Build()
 
-        var parseDeniedStepsFn = ParseDeniedSteps;
-        scheduler.OnUpdate(parseDeniedStepsFn)
-            .RunIf((EventReader<RejectedStep> responses) => !responses.IsEmpty);
+            .AddSystem(parseDeniedStepsFn)
+            .InStage(Stage.Update)
+            .RunIf((EventReader<RejectedStep> responses) => responses.HasEvents)
+            .Build();
     }
 
 
@@ -133,7 +140,7 @@ readonly struct PlayerMovementPlugin : IPlugin
             var direction = (Direction)reader.ReadUInt8();
             var z = reader.ReadInt8();
 
-            rejectedSteps.Enqueue(new()
+            rejectedSteps.Send(new()
             {
                 Sequence = sequence,
                 Direction = direction,
@@ -151,7 +158,7 @@ readonly struct PlayerMovementPlugin : IPlugin
             var sequence = reader.ReadUInt8();
             var notoriety = (NotorietyFlag)reader.ReadUInt8();
 
-            acceptedSteps.Enqueue(new()
+            acceptedSteps.Send(new()
             {
                 Sequence = sequence,
                 Notoriety = notoriety
@@ -165,7 +172,7 @@ readonly struct PlayerMovementPlugin : IPlugin
         Res<GraphicsDevice> device,
         Res<MouseContext> mouseCtx,
         Res<NetClient> network,
-        Res<PlayerStepsContext> playerRequestedSteps,
+        ResMut<PlayerStepsContext> playerRequestedSteps,
         Res<Camera> camera,
         Res<TerrainPlugin.ChunksLoadedMap> chunksLoaded,
         Res<MultiCache> multiCache,
@@ -174,7 +181,7 @@ readonly struct PlayerMovementPlugin : IPlugin
         Single<Data<WorldPosition, Facing, MobileSteps, MobAnimation, ServerFlags>, With<Player>> playerQuery,
         Query<Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tilesQuery,
         Query<Data<WorldPosition, Graphic>, Filter<With<IsStatic>, Without<IsTile>, Without<MobAnimation>>> staticsQuery,
-        Time time
+        Res<Time> time
     )
     {
         terrainList.Value ??= new();
@@ -215,9 +222,9 @@ readonly struct PlayerMovementPlugin : IPlugin
 
         var sameDir = playerDir == facing;
         var canMove = CheckMovement(
-            terrainList,
-            chunksLoaded,
-            multiCache,
+            terrainList.Value,
+            chunksLoaded.Value,
+            multiCache.Value,
             childrenQuery,
             othersQuery,
             tilesQuery,
@@ -241,9 +248,9 @@ readonly struct PlayerMovementPlugin : IPlugin
                     var testY = playerY;
                     var testZ = playerZ;
                     canMove = CheckMovement(
-                        terrainList,
-                        chunksLoaded,
-                        multiCache,
+                        terrainList.Value,
+                        chunksLoaded.Value,
+                        multiCache.Value,
                         childrenQuery,
                         othersQuery,
                         tilesQuery,
@@ -266,9 +273,9 @@ readonly struct PlayerMovementPlugin : IPlugin
                     newY = playerY;
                     newZ = playerZ;
                     canMove = CheckMovement(
-                        terrainList,
-                        chunksLoaded,
-                        multiCache,
+                        terrainList.Value,
+                        chunksLoaded.Value,
+                        multiCache.Value,
                         childrenQuery,
                         othersQuery,
                         tilesQuery,
@@ -317,7 +324,7 @@ readonly struct PlayerMovementPlugin : IPlugin
 
             playerRequestedSteps.Value.Count = Math.Min(5, playerRequestedSteps.Value.Count + 1);
             playerRequestedSteps.Value.Sequence = (byte)((playerRequestedSteps.Value.Sequence % byte.MaxValue) + 1);
-            playerRequestedSteps.Value.LastStep = time.Total + stepTime;
+            playerRequestedSteps.Value.LastStep = time.Value.Total + stepTime;
             if (run)
                 requestedStep.Direction |= Direction.Running;
 
@@ -329,17 +336,17 @@ readonly struct PlayerMovementPlugin : IPlugin
             step.Run = run;
 
             if (hasNoSteps)
-                mobSteps.Ref.Time = time.Total;
+                mobSteps.Ref.Time = time.Value.Total;
         }
     }
 
     static void ParseAcceptedSteps(
         EventReader<AcceptedStep> acceptedSteps,
-        Res<PlayerStepsContext> playerRequestedSteps,
+        ResMut<PlayerStepsContext> playerRequestedSteps,
         Res<NetClient> network
     )
     {
-        foreach (var response in acceptedSteps)
+        foreach (var response in acceptedSteps.Read())
         {
             // TODO: query for the player notoriety
             var notoriety = response.Notoriety;
@@ -399,14 +406,14 @@ readonly struct PlayerMovementPlugin : IPlugin
 
     static void ParseDeniedSteps(
         EventReader<RejectedStep> rejectedSteps,
-        Res<PlayerStepsContext> playerRequestedSteps,
+        ResMut<PlayerStepsContext> playerRequestedSteps,
         Single<Data<WorldPosition, Facing, MobileSteps>, With<Player>> playerQuery
     )
     {
         Console.WriteLine("step denied");
 
         (var pos, var dir, var steps) = playerQuery.Get();
-        foreach (var response in rejectedSteps)
+        foreach (var response in rejectedSteps.Read())
         {
             pos.Ref.X = response.X;
             pos.Ref.Y = response.Y;

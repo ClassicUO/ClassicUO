@@ -1,25 +1,33 @@
 using ClassicUO.Network;
 using Clay_cs;
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
 
 internal readonly struct LoginErrorScreenPlugin : IPlugin
 {
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
-        scheduler.AddEvent<LoginErrorsInfoEvent>();
-
         var cleanupFn = Cleanup;
         var loginErrorSetupFn = LoginErrorInfoSetup;
         var buttonHandlerFn = ButtonHandler;
 
-        scheduler.OnExit(GameState.LoginError, cleanupFn);
-        scheduler.OnUpdate(loginErrorSetupFn)
-                 .RunIf((SchedulerState state, EventReader<LoginErrorsInfoEvent> reader)
-                     => !reader.IsEmpty && state.InState(GameState.LoginError));
-        scheduler.OnUpdate(buttonHandlerFn)
-                 .RunIf((SchedulerState state) => state.InState(GameState.LoginError));
+        app
+            .AddSystem(cleanupFn)
+            .OnExit(GameState.LoginError)
+            .Build()
+
+            .AddSystem(loginErrorSetupFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> state, EventReader<LoginErrorsInfoEvent> reader)
+                       => reader.HasEvents && state.Value.Current == GameState.LoginError)
+            .Build()
+
+            .AddSystem(buttonHandlerFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.LoginError)
+            .Build();
     }
 
     private static void Cleanup(Query<Data<UINode>, Filter<With<LoginErrorScene>, Without<Parent>>> query)
@@ -30,10 +38,10 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
         }
     }
 
-    private static void LoginErrorInfoSetup(World world, EventReader<LoginErrorsInfoEvent> reader)
+    private static void LoginErrorInfoSetup(Commands commands, EventReader<LoginErrorsInfoEvent> reader)
     {
-        var root = world.Entity()
-            .Add<LoginErrorScene>()
+        var root = commands.Spawn()
+            .Insert<LoginErrorScene>()
             .CreateUINode(new UINode()
             {
                 Config = {
@@ -52,8 +60,8 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
                 }
             });
 
-        var loginErrorLabel = world.Entity()
-            .Add<LoginErrorScene>()
+        var loginErrorLabel = commands.Spawn()
+            .Insert<LoginErrorScene>()
             .CreateUINode(new UINode()
             {
                 Config = {
@@ -73,7 +81,7 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
                     }
                 }
             })
-            .Set(new Text()
+            .Insert(new Text()
             {
                 Value = "Error on login",
                 TextConfig =
@@ -85,8 +93,8 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
                 }
             });
 
-        var menu = world.Entity()
-            .Add<LoginErrorScene>()
+        var menu = commands.Spawn()
+            .Insert<LoginErrorScene>()
             .CreateUINode(new UINode()
             {
                 Config = {
@@ -107,11 +115,11 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
                 }
             });
 
-        foreach (var ev in reader)
+        foreach (var ev in reader.Read())
         {
-            var serverEnt = world.Entity()
-                .Add<LoginErrorScene>()
-                .Set(ev.Error)
+            var serverEnt = commands.Spawn()
+                .Insert<LoginErrorScene>()
+                .Insert(ev.Error)
                 .CreateUINode(new UINode()
                 {
                     Config = {
@@ -131,7 +139,7 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
                         }
                     }
                 })
-                .Set(new Text()
+                .Insert(new Text()
                 {
                     Value = ev.Error.ErrorMessage,
                     TextConfig =
@@ -142,13 +150,13 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
                         textColor = new (1f, 1f, 1f, 1),
                     }
                 })
-                .Set(new UIMouseAction());
+                .Insert(new UIMouseAction());
 
             menu.AddChild(serverEnt);
         }
 
-        var footerMenu = world.Entity()
-            .Add<LoginErrorScene>()
+        var footerMenu = commands.Spawn()
+            .Insert<LoginErrorScene>()
             .CreateUINode(new UINode()
             {
                 Config = {
@@ -169,8 +177,8 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
                 }
             });
 
-        var okButtonEntity = world.Entity()
-            .Add<LoginErrorScene>()
+        var okButtonEntity = commands.Spawn()
+            .Insert<LoginErrorScene>()
             .CreateUINode(new UINode()
             {
                 Config = {
@@ -190,7 +198,7 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
                     }
                 }
             })
-            .Set(new Text()
+            .Insert(new Text()
             {
                 Value = "OK",
                 TextConfig =
@@ -201,8 +209,8 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
                     textColor = new (1f, 1f, 1f, 1),
                 }
             })
-            .Set(LoginButtons.Ok)
-            .Set(new UIMouseAction());
+            .Insert(LoginButtons.Ok)
+            .Insert(new UIMouseAction());
 
         footerMenu.AddChild(okButtonEntity);
         menu.AddChild(footerMenu);
@@ -212,7 +220,7 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
 
     private static void ButtonHandler(
         Res<NetClient> network,
-        State<GameState> state,
+        Res<NextState<GameState>> state,
         Query<
             Data<LoginButtons, UIMouseAction>,
             Filter<Changed<UIMouseAction>, With<LoginErrorScene>>
@@ -226,7 +234,7 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
 
             if (buttonType.Ref == LoginButtons.Ok)
             {
-                state.Set(GameState.LoginScreen);
+                state.Value.Set(GameState.LoginScreen);
                 network.Value.Disconnect();
             }
         }

@@ -4,25 +4,33 @@ using ClassicUO.Input;
 using ClassicUO.Network;
 using Clay_cs;
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
 
 internal readonly struct CharacterSelectionPlugin : IPlugin
 {
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
-        scheduler.AddEvent<CharacterSelectionInfoEvent>();
-
         var cleanupFn = Cleanup;
         var characterInfoSetupFn = CharacterInfoSetup;
         var characterSelectedFn = CharacterSelected;
 
-        scheduler.OnExit(GameState.CharacterSelection, cleanupFn);
-        scheduler.OnUpdate(characterInfoSetupFn)
-                 .RunIf((SchedulerState state, EventReader<CharacterSelectionInfoEvent> reader)
-                     => !reader.IsEmpty && state.InState(GameState.CharacterSelection));
-        scheduler.OnUpdate(characterSelectedFn)
-                 .RunIf((SchedulerState state) => state.InState(GameState.CharacterSelection));
+        app
+            .AddSystem(cleanupFn)
+            .OnExit(GameState.CharacterSelection)
+            .Build()
+
+            .AddSystem(characterInfoSetupFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> state, EventReader<CharacterSelectionInfoEvent> reader)
+                       => reader.HasEvents && state.Value.Current == GameState.CharacterSelection)
+            .Build()
+
+            .AddSystem(characterSelectedFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.CharacterSelection)
+            .Build();
     }
 
     private static void Cleanup(Query<Data<UINode>, Filter<With<CharacterSelectionScene>, Without<Parent>>> query)
@@ -33,10 +41,10 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
         }
     }
 
-    private static void CharacterInfoSetup(World world, EventReader<CharacterSelectionInfoEvent> reader)
+    private static void CharacterInfoSetup(Commands commands, EventReader<CharacterSelectionInfoEvent> reader)
     {
-        var root = world.Entity()
-            .Add<CharacterSelectionScene>()
+        var root = commands.Spawn()
+            .Insert<CharacterSelectionScene>()
             .CreateUINode(new UINode()
             {
                 Config = {
@@ -55,8 +63,8 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
                 }
             });
 
-        var characterSelectionLabel = world.Entity()
-            .Add<CharacterSelectionScene>()
+        var characterSelectionLabel = commands.Spawn()
+            .Insert<CharacterSelectionScene>()
             .CreateUINode(new UINode()
             {
                 Config = {
@@ -76,7 +84,7 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
                         }
                     }
             })
-            .Set(new Text()
+            .Insert(new Text()
             {
                 Value = "Select the character",
                 TextConfig =
@@ -88,8 +96,8 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
                 }
             });
 
-        var menu = world.Entity()
-            .Add<CharacterSelectionScene>()
+        var menu = commands.Spawn()
+            .Insert<CharacterSelectionScene>()
             .CreateUINode(new UINode()
             {
                 Config = {
@@ -117,15 +125,15 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
         root.AddChild(menu);
 
 
-        foreach (var ev in reader)
+        foreach (var ev in reader.Read())
         {
             if (ev.Characters == null) continue;
 
             foreach (var character in ev.Characters)
             {
-                var characterEnt = world.Entity()
-                    .Add<CharacterSelectionScene>()
-                    .Set(character)
+                var characterEnt = commands.Spawn()
+                    .Insert<CharacterSelectionScene>()
+                    .Insert(character)
                     .CreateUINode(new UINode()
                     {
                         Config = {
@@ -145,18 +153,18 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
                             }
                         }
                     })
-                    .Set(new Text()
+                    .Insert(new Text()
                     {
                         Value = character.Name,
                         TextConfig =
                         {
-                                fontId = 0,
-                                fontSize = 24,
-                                // textAlignment = Clay_TextAlignment.CLAY_TEXT_ALIGN_CENTER,
-                                textColor = new (1f, 1f, 1f, 1),
+                            fontId = 0,
+                            fontSize = 24,
+                            // textAlignment = Clay_TextAlignment.CLAY_TEXT_ALIGN_CENTER,
+                            textColor = new (1f, 1f, 1f, 1),
                         }
                     })
-                    .Set(new UIMouseAction());
+                    .Insert(new UIMouseAction());
 
                 menu.AddChild(characterEnt);
             }

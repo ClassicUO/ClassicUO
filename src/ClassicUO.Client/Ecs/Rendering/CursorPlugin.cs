@@ -2,17 +2,21 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
 
 
 internal readonly struct CursorPlugin : IPlugin
 {
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
         var renderCursorFn = RenderCursor;
-        scheduler.OnAfterUpdate(renderCursorFn)
-            .RunIf((SchedulerState state) => state.ResourceExists<GrabbedItem>())
+
+        app
+            .AddSystem(renderCursorFn)
+            .InStage(Stage.PostUpdate)
+            .RunIf(w => w.HasResource<GrabbedItem>())
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial != 0 && grabbedItem.Value.Graphic != 0);
     }
 

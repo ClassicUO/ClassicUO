@@ -5,6 +5,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Network;
 using ClassicUO.Utility;
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
 
@@ -17,11 +18,11 @@ internal sealed class ChatOptions
 
 internal readonly struct ChatPlugin : IPlugin
 {
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
-        scheduler.AddResource(new ChatOptions());
+        app.AddResource(new ChatOptions());
 
-        scheduler.OnUpdate((
+        app.AddSystem((
             EventReader<CharInputEvent> reader,
             Local<StringBuilder> sb,
             Res<UOFileManager> fileManager,
@@ -31,9 +32,7 @@ internal readonly struct ChatPlugin : IPlugin
             Res<ChatOptions> chatOptions
         ) =>
             {
-                sb.Value ??= new StringBuilder();
-
-                foreach (var ev in reader)
+                foreach (var ev in reader.Read())
                 {
                     if (ev.Value == '\n') continue;
                     if (ev.Value == '\t') continue;
@@ -85,7 +84,9 @@ internal readonly struct ChatPlugin : IPlugin
                         sb.Value.Append(ev.Value);
                 }
             }
-        ).RunIf((EventReader<CharInputEvent> reader, Res<NetClient> network)
-            => !reader.IsEmpty && network.Value.IsConnected);
+        )
+        .InStage(Stage.Update)
+            .RunIf((EventReader<CharInputEvent> reader, Res<NetClient> network)
+            => reader.HasEvents && network.Value.IsConnected);
     }
 }

@@ -3,15 +3,16 @@ using ClassicUO.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs.Modding;
 
 internal readonly struct InputPlugin : IPlugin
 {
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
         var sendGeneralEventsFn = SendGeneralEvents;
-        scheduler.OnAfterUpdate(sendGeneralEventsFn);
+        app.AddSystem(Stage.PostUpdate, sendGeneralEventsFn);
     }
 
     private static void SendGeneralEvents(
@@ -22,29 +23,29 @@ internal readonly struct InputPlugin : IPlugin
     {
         if (mouseCtx.Value.PositionOffset != Vector2.Zero)
         {
-            writer.Enqueue(new HostMessage.MouseMove(mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y));
+            writer.Send(new HostMessage.MouseMove(mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y));
         }
 
         if (mouseCtx.Value.Wheel != 0)
         {
-            writer.Enqueue(new HostMessage.MouseWheel(mouseCtx.Value.Wheel));
+            writer.Send(new HostMessage.MouseWheel(mouseCtx.Value.Wheel));
         }
 
         for (var button = MouseButtonType.Left; button < MouseButtonType.Size; button += 1)
         {
             if (mouseCtx.Value.IsPressedOnce(button))
             {
-                writer.Enqueue(new HostMessage.MousePressed((int)button, mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y));
+                writer.Send(new HostMessage.MousePressed((int)button, mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y));
             }
 
             if (mouseCtx.Value.IsReleased(button))
             {
-                writer.Enqueue(new HostMessage.MouseReleased((int)button, mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y));
+                writer.Send(new HostMessage.MouseReleased((int)button, mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y));
             }
 
             if (mouseCtx.Value.IsPressedDouble(button))
             {
-                writer.Enqueue(new HostMessage.MouseDoubleClick((int)button, mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y));
+                writer.Send(new HostMessage.MouseDoubleClick((int)button, mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y));
             }
         }
 
@@ -52,12 +53,12 @@ internal readonly struct InputPlugin : IPlugin
         {
             if (keyboardCtx.Value.IsPressedOnce(key))
             {
-                writer.Enqueue(new HostMessage.KeyPressed(key));
+                writer.Send(new HostMessage.KeyPressed(key));
             }
 
             if (keyboardCtx.Value.IsReleased(key))
             {
-                writer.Enqueue(new HostMessage.KeyReleased(key));
+                writer.Send(new HostMessage.KeyReleased(key));
             }
         }
     }

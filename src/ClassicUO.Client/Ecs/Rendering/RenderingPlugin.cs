@@ -1,14 +1,15 @@
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
 
 
 internal readonly struct RenderingPlugin : IPlugin
 {
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
-        scheduler.AddPlugin<WorldRenderingPlugin>();
-        scheduler.AddPlugin<GuiRenderingPlugin>();
-        scheduler.AddPlugin<CursorPlugin>();
+        app.AddPlugin<WorldRenderingPlugin>();
+        app.AddPlugin<GuiRenderingPlugin>();
+        app.AddPlugin<CursorPlugin>();
     }
 }

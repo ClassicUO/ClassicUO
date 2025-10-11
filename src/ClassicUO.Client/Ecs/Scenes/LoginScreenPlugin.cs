@@ -5,37 +5,50 @@ using ClassicUO.Utility;
 using Clay_cs;
 using Microsoft.Xna.Framework;
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
 
 
 internal readonly struct LoginScreenPlugin : IPlugin
 {
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
         var setupFn = Setup;
         var buttonsHandlerFn = ButtonsHandler;
         var deleteMenuFn = DeleteMenu;
 
-        scheduler.AddState<LoginInteraction>();
 
-        scheduler.OnUpdate(buttonsHandlerFn)
-            .RunIf((SchedulerState state) => state.InState(GameState.LoginScreen))
-            .RunIf((SchedulerState state) => state.InState(LoginInteraction.None));
-        scheduler.OnEnter(GameState.LoginScreen, setupFn);
-        scheduler.OnEnter(GameState.LoginScreen, (State<LoginInteraction> state) => state.Set(LoginInteraction.None));
-        scheduler.OnExit(GameState.LoginScreen, deleteMenuFn);
+        app
+            .AddState(LoginInteraction.None)
 
+            .AddSystem(buttonsHandlerFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.LoginScreen)
+            .RunIf((Res<State<LoginInteraction>> state) => state.Value.Current == LoginInteraction.None)
+            .Build()
 
-        scheduler.AddPlugin<ServerSelectionPlugin>();
-        scheduler.AddPlugin<CharacterSelectionPlugin>();
-        scheduler.AddPlugin<LoginErrorScreenPlugin>();
+            .AddSystem(setupFn)
+            .OnEnter(GameState.LoginScreen)
+            .Build()
+
+            .AddSystem((Res<NextState<LoginInteraction>> state) => state.Value.Set(LoginInteraction.None))
+            .OnEnter(GameState.LoginScreen)
+            .Build()
+
+            .AddSystem(deleteMenuFn)
+            .OnExit(GameState.LoginScreen)
+            .Build()
+
+            .AddPlugin<ServerSelectionPlugin>()
+            .AddPlugin<CharacterSelectionPlugin>()
+            .AddPlugin<LoginErrorScreenPlugin>();
     }
 
-    private static void Setup(TinyEcs.World world, Res<GumpBuilder> gumpBuilder, Res<ClayUOCommandBuffer> clay, Res<AssetsServer> assets, Res<Settings> settings)
+    private static void Setup(Commands commands, Res<GumpBuilder> gumpBuilder, Res<ClayUOCommandBuffer> clay, Res<AssetsServer> assets, Res<Settings> settings)
     {
-        var root = world.Entity()
-            .Add<LoginScene>()
+        var root = commands.Spawn()
+            .Insert<LoginScene>()
             .CreateUINode(new UINode()
             {
                 Config = {
@@ -54,8 +67,8 @@ internal readonly struct LoginScreenPlugin : IPlugin
                 }
             });
 
-        var mainMenu = world.Entity()
-            .Add<LoginScene>()
+        var mainMenu = commands.Spawn()
+            .Insert<LoginScene>()
             .CreateUINode(new UINode()
             {
                 Config = {
@@ -72,38 +85,43 @@ internal readonly struct LoginScreenPlugin : IPlugin
 
         // background
         mainMenu.AddChild(gumpBuilder.Value.AddGump(
+            commands,
             0x014E,
             Vector3.UnitZ
-        ).Add<LoginScene>());
+        ).Insert<LoginScene>());
 
         // quit button
         mainMenu.AddChild(gumpBuilder.Value.AddButton(
+            commands,
             (0x05CA, 0x05C9, 0x05C8),
             Vector3.UnitZ,
             new(25, 240)
-        ).Set(ButtonAction.Quit).Add<LoginScene>());
+        ).Insert(ButtonAction.Quit).Insert<LoginScene>());
 
         // credit button
         mainMenu.AddChild(gumpBuilder.Value.AddButton(
+            commands,
             (0x05D0, 0x05CF, 0x5CE),
             Vector3.UnitZ,
             new(530, 125)
-        ).Set(ButtonAction.Credits).Add<LoginScene>());
+        ).Insert(ButtonAction.Credits).Insert<LoginScene>());
 
         // arrow button
         mainMenu.AddChild(gumpBuilder.Value.AddButton(
+            commands,
             (0x5CD, 0x5CC, 0x5CB),
             Vector3.UnitZ,
             new(280, 365)
-        ).Set(ButtonAction.Login).Add<LoginScene>());
+        ).Insert(ButtonAction.Login).Insert<LoginScene>());
 
         // username background
         mainMenu.AddChild(gumpBuilder.Value.AddGumpNinePatch(
+            commands,
             0x0BB8,
             Vector3.UnitZ,
             new(218, 283),
             new(210, 30))
-            .Set(new Text()
+            .Insert(new Text()
             {
                 Value = settings.Value.Username,
                 TextConfig = {
@@ -112,18 +130,19 @@ internal readonly struct LoginScreenPlugin : IPlugin
                     textColor = new (0.2f, 0.2f, 0.2f, 1),
                 },
             })
-            .Add<TextInput>()
-            .Add<LoginScene>()
-            .Add<UsernameInput>()
-            .Set(new UIMouseAction()));
+            .Insert<TextInput>()
+            .Insert<LoginScene>()
+            .Insert<UsernameInput>()
+            .Insert(new UIMouseAction()));
 
         // password background
         mainMenu.AddChild(gumpBuilder.Value.AddGumpNinePatch(
+            commands,
             0x0BB8,
             Vector3.UnitZ,
             new(218, 283 + 50),
             new(210, 30))
-            .Set(new Text()
+            .Insert(new Text()
             {
                 Value = Crypter.Decrypt(settings.Value.Password),
                 ReplaceChar = '*',
@@ -133,10 +152,10 @@ internal readonly struct LoginScreenPlugin : IPlugin
                     textColor = new (1, 1, 1, 1),
                 },
             })
-            .Add<TextInput>()
-            .Add<LoginScene>()
-            .Add<PasswordInput>()
-            .Set(new UIMouseAction()));
+            .Insert<TextInput>()
+            .Insert<LoginScene>()
+            .Insert<PasswordInput>()
+            .Insert(new UIMouseAction()));
 
         root.AddChild(mainMenu);
     }
@@ -144,7 +163,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
     private static void ButtonsHandler(
         Query<Data<UIMouseAction, ButtonAction>, Changed<UIMouseAction>> query,
         Res<Settings> settings,
-        State<LoginInteraction> state,
+        Res<NextState<LoginInteraction>> state,
         EventWriter<OnLoginRequest> writer,
         Single<Data<Text>, Filter<With<UsernameInput>, With<LoginScene>, With<TextInput>>> queryUsername,
         Single<Data<Text>, Filter<With<PasswordInput>, With<LoginScene>, With<TextInput>>> queryPassword
@@ -165,8 +184,8 @@ internal readonly struct LoginScreenPlugin : IPlugin
                 {
                     (_, var username) = queryUsername.Get();
                     (_, var password) = queryPassword.Get();
-                    Login(writer, settings, username.Ref.Value, password.Ref.Value);
-                    state.Set(LoginInteraction.LoginRequested);
+                    Login(writer, settings.Value, username.Ref.Value, password.Ref.Value);
+                    state.Value.Set(LoginInteraction.LoginRequested);
                 }
                 ,
                 _ => null
@@ -176,11 +195,11 @@ internal readonly struct LoginScreenPlugin : IPlugin
         }
     }
 
-    private static void DeleteMenu(World world, Query<Data<UINode>, Filter<Without<Parent>, With<LoginScene>>> query)
+    private static void DeleteMenu(Commands commands, Query<Data<UINode>, Filter<Without<Parent>, With<LoginScene>>> query)
     {
         Console.WriteLine("[LoginScreen] cleanup start");
         foreach ((var ent, _) in query)
-            world.Delete(ent.Ref);
+            commands.Entity(ent.Ref).Despawn();
         Console.WriteLine("[LoginScreen] cleanup done");
     }
 
@@ -197,7 +216,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
 
         Console.WriteLine("doing login");
 
-        writer.Enqueue(new()
+        writer.Send(new()
         {
             Username = settings.Username,
             Password = settings.Password,

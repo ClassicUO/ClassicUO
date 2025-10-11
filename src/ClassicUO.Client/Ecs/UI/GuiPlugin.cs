@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Clay_cs;
@@ -11,6 +12,7 @@ using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
 
@@ -21,45 +23,68 @@ internal readonly struct GuiPlugin : IPlugin
     private const FontSystemEffect FONT_EFFECT = FontSystemEffect.Stroked;
     private const int FONT_EFFECT_AMOUNT = 1;
 
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
-        scheduler.AddResource(new ClayUOCommandBuffer());
-        scheduler.AddResource(new FocusedInput());
-        scheduler.AddResource(new ImageCache());
+        var setupClayFn = SetupClay;
+        var setClayWorkspaceDimensionsFn = SetClayWorkspaceDimensions;
+        var updateUOButtonsStateFn = UpdateUOButtonsState;
+        var updateFocusedInputFn = UpdateFocusedInput;
+        var readCharInputsFn = ReadCharInputs;
+        var moveFocusedElementsByMouseFn = MoveFocusedElementsByMouse;
+        var handleNodeStatesFn = HandleNodeStates;
 
-        scheduler.OnStartup((SchedulerState state, World world, Res<AssetsServer> assets) =>
-            state.AddResource(new GumpBuilder(world, assets)));
+        app
+            .AddResource(new ClayUOCommandBuffer())
+            .AddResource(new FocusedInput())
+            .AddResource(new ImageCache())
 
+            .AddObserver((OnAdd<UINode> trigger, Query<Data<UINode>> query) =>
+            {
+                if (!query.Contains(trigger.EntityId))
+                    return;
+
+                var (ent, node) = query.Get(trigger.EntityId);
+
+                if (node.Ref.Config.id.id == 0)
+                    node.Ref.Config.id = Clay.Id(ent.Ref.ID.RealId().ToString());
+            })
+
+            .AddSystem(Stage.Startup, (Commands commands, Res<AssetsServer> assets) =>
+            {
+                commands.InsertResource(new GumpBuilder(assets.Value));
+            });
 
         var states = Enum.GetValues<GameState>();
+
         foreach (var state in states)
-            scheduler.OnExit(state, (Res<FocusedInput> focusedInput) => focusedInput.Value.Entity = 0);
+        {
+            app.AddSystem((Res<FocusedInput> focusedInput) => focusedInput.Value.Entity = 0)
+                .OnExit(state)
+                .Build();
+        }
 
-        var setupClayFn = SetupClay;
-        scheduler.OnStartup(setupClayFn);
+        app
+            .AddSystem(Stage.Startup, setupClayFn)
 
-        var setClayWorkspaceDimensionsFn = SetClayWorkspaceDimensions;
-        scheduler.OnUpdate(setClayWorkspaceDimensionsFn);
+            .AddSystem(Stage.Update, setClayWorkspaceDimensionsFn)
+            .AddSystem(Stage.Update, updateUOButtonsStateFn)
 
-        var updateUOButtonsStateFn = UpdateUOButtonsState;
-        scheduler.OnUpdate(updateUOButtonsStateFn);
+            .AddSystem(updateFocusedInputFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<KeyboardContext> keyboardCtx) => keyboardCtx.Value.IsPressedOnce(Microsoft.Xna.Framework.Input.Keys.Tab))
+            .Build()
 
-        var updateFocusedInputFn = UpdateFocusedInput;
-        scheduler.OnUpdate(updateFocusedInputFn)
-            .RunIf((Res<KeyboardContext> keyboardCtx) => keyboardCtx.Value.IsPressedOnce(Microsoft.Xna.Framework.Input.Keys.Tab));
-
-        var readCharInputsFn = ReadCharInputs;
-        scheduler.OnUpdate(readCharInputsFn)
+            .AddSystem(readCharInputsFn)
+            .InStage(Stage.Update)
             .RunIf((EventReader<CharInputEvent> reader,
                     Res<FocusedInput> focusedInput,
                     Query<Data<UINode>, Filter<With<TextInput>>> query) =>
-                        !reader.IsEmpty && focusedInput.Value.Entity != 0 && query.Count() > 0);
+                       reader.HasEvents && focusedInput.Value.Entity != 0 && query.Count() > 0)
+            .Build()
 
-        var moveFocusedElementsByMouseFn = MoveFocusedElementsByMouse;
-        scheduler.OnUpdate(moveFocusedElementsByMouseFn);
+            .AddSystem(Stage.Update, moveFocusedElementsByMouseFn)
+            .AddSystem(Stage.Last, handleNodeStatesFn);
 
-        var handleNodeStatesFn = HandleNodeStates;
-        scheduler.OnFrameEnd(handleNodeStatesFn);
 
         // scheduler.OnFrameEnd((Query<Data<UINode>, With<TESTME>> q) =>
         // {
@@ -131,7 +156,7 @@ internal readonly struct GuiPlugin : IPlugin
     private static void SetClayWorkspaceDimensions(
         Res<GraphicsDevice> device,
         Res<MouseContext> mouseCtx,
-        Time time
+        Res<Time> time
     )
     {
         Clay.SetLayoutDimensions(new()
@@ -141,7 +166,7 @@ internal readonly struct GuiPlugin : IPlugin
         });
         Clay.SetPointerState(new(mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y),
                              mouseCtx.Value.IsPressed(Input.MouseButtonType.Left));
-        Clay.UpdateScrollContainers(true, new(0, mouseCtx.Value.Wheel * 3), time.Frame);
+        Clay.UpdateScrollContainers(true, new(0, mouseCtx.Value.Wheel * 3), time.Value.Frame);
     }
 
     private static void UpdateUOButtonsState(
@@ -203,7 +228,7 @@ internal readonly struct GuiPlugin : IPlugin
 
         (_, var node) = query.Get(focusedInput.Value.Entity);
 
-        foreach (var c in reader)
+        foreach (var c in reader.Read())
             node.Ref.Value = TextComposer.Compose(node.Ref.Value, c.Value);
     }
 
@@ -358,10 +383,8 @@ internal static class GuiPluginEx
     /// <param name="ent"></param>
     /// <param name="node"></param>
     /// <returns></returns>
-    public static EntityView CreateUINode(this EntityView ent, UINode node)
+    public static EntityCommands CreateUINode(this EntityCommands commands, UINode node)
     {
-        if (node.Config.id.id == 0)
-            node.Config.id = Clay.Id(ent.ID.RealId().ToString());
-        return ent.Set(node).Set(new UIMouseAction());
+        return commands.Insert(node).Insert(new UIMouseAction());
     }
 }

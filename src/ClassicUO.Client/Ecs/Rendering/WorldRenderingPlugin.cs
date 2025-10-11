@@ -10,49 +10,52 @@ using Microsoft.Xna.Framework.Input;
 using System.Runtime.CompilerServices;
 using ClassicUO.Utility;
 using TinyEcs;
+using TinyEcs.Bevy;
 using World = TinyEcs.World;
 
 namespace ClassicUO.Ecs;
 
 internal readonly struct WorldRenderingPlugin : IPlugin
 {
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
+        var cleanupFn = Cleanup;
+        var beginRenderingFn = BeginRendering;
+        var renderingFn = Rendering;
+        var showTextOverheadFn = ShowTextOverhead;
+        var endRenderingFn = EndRendering;
+
         // TODO: find a better place to initialize this
-        scheduler.AddResource(new Profile()
+        app.AddResource(new Profile()
         {
             GameWindowPosition = new(20, 40)
         });
-        scheduler.AddResource(new SelectedEntity());
-        scheduler.AddResource(new Viewport());
+        app.AddResource(new SelectedEntity());
+        app.AddResource(new Viewport());
 
-        scheduler.OnFrameStart((
-            Res<MouseContext> mouseCtx,
-            Res<KeyboardContext> keyboardCtx,
-            Res<GameContext> gameCtx,
-            Res<Camera> camera,
-            Local<bool> canMove
-        ) =>
-        {
-            if (mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Left))
+        app
+            .AddSystem((Res<MouseContext> mouseCtx, Res<KeyboardContext> keyboardCtx, ResMut<GameContext> gameCtx, Res<Camera> camera, Local<bool> canMove) =>
             {
-                canMove.Value = camera.Value.Bounds.Contains((int)mouseCtx.Value.Position.X, (int)mouseCtx.Value.Position.Y);
-            }
+                if (mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Left))
+                {
+                    canMove.Value = camera.Value.Bounds.Contains((int)mouseCtx.Value.Position.X, (int)mouseCtx.Value.Position.Y);
+                }
 
-            if (canMove && mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
-            {
-                gameCtx.Value.CenterOffset += mouseCtx.Value.PositionOffset * camera.Value.Zoom;
-            }
+                if (canMove.Value && mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
+                {
+                    gameCtx.Value.CenterOffset += mouseCtx.Value.PositionOffset * camera.Value.Zoom;
+                }
 
-            if (keyboardCtx.Value.IsPressedOnce(Keys.Space))
-            {
-                gameCtx.Value.FreeView = !gameCtx.Value.FreeView;
-            }
-        }).RunIf((Res<UoGame> game) => game.Value.IsActive);
+                if (keyboardCtx.Value.IsPressedOnce(Keys.Space))
+                {
+                    gameCtx.Value.FreeView = !gameCtx.Value.FreeView;
+                }
+            })
+            .InStage(Stage.First)
+            .RunIf((Res<UoGame> game) => game.Value.IsActive)
+            .Build()
 
-        scheduler.OnUpdate
-        (
-            (Res<GameContext> gameCtx, Query<Data<WorldPosition, ScreenPositionOffset>, With<Player>> playerQuery) =>
+            .AddSystem((ResMut<GameContext> gameCtx, Query<Data<WorldPosition, ScreenPositionOffset>, With<Player>> playerQuery) =>
             {
                 foreach ((var position, var offset) in playerQuery)
                 {
@@ -61,46 +64,52 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                     gameCtx.Value.CenterZ = position.Ref.Z;
                     gameCtx.Value.CenterOffset = offset.Ref.Value * -1;
                 }
-            }
-        ).RunIf((Res<GameContext> gameCtx) => !gameCtx.Value.FreeView);
+            })
+            .InStage(Stage.Update)
+            .RunIf((Res<GameContext> gameCtx) => !gameCtx.Value.FreeView)
+            .Build()
 
-        var cleanupFn = Cleanup;
-        scheduler.OnExit(GameState.GameScreen, cleanupFn);
+            .AddSystem(cleanupFn)
+            .OnExit(GameState.GameScreen)
+            .Build()
 
-        scheduler.OnUpdate((
-            Query<Data<WorldPosition>, Without<ScreenPosition>> query2,
-            Query<Data<WorldPosition, ScreenPosition>, Changed<WorldPosition>> query
-        ) =>
-        {
-            foreach ((var ent, var worldPos) in query2)
+            .AddSystem((Query<Data<WorldPosition>, Without<ScreenPosition>> query2,
+                        Query<Data<WorldPosition, ScreenPosition>, Changed<WorldPosition>> query) =>
             {
-                var iso = worldPos.Ref.WorldToScreen();
-                ent.Ref.Set(new ScreenPosition() { Value = iso });
-            }
+                foreach ((var ent, var worldPos) in query2)
+                {
+                    var iso = worldPos.Ref.WorldToScreen();
+                    ent.Ref.Set(new ScreenPosition() { Value = iso });
+                }
 
-            foreach ((var worldPos, var screenPos) in query)
-            {
-                var iso = worldPos.Ref.WorldToScreen();
-                screenPos.Ref.Value = iso;
-            }
-        });
+                foreach ((var worldPos, var screenPos) in query)
+                {
+                    var iso = worldPos.Ref.WorldToScreen();
+                    screenPos.Ref.Value = iso;
+                }
+            })
+            .InStage(Stage.Update)
+            .Build()
 
-        var beginRenderingFn = BeginRendering;
-        var renderingFn = Rendering;
-        var showTextOverheadFn = ShowTextOverhead;
-        var endRenderingFn = EndRendering;
+            .AddSystem(beginRenderingFn)
+            .InStage(Stage.PostUpdate)
+            .Label("cuo:rendering:begin")
+            .Build()
 
-        var beginRenderingSystem = scheduler.OnAfterUpdate(beginRenderingFn);
-        var endRenderingSystem = scheduler.OnAfterUpdate(endRenderingFn);
-        var worldRenderingSystem = scheduler.OnAfterUpdate(renderingFn)
-                 .RunIf((SchedulerState state) => state.ResourceExists<GraphicsDevice>())
-                 .RunIf((SchedulerState state) => state.InState(GameState.GameScreen))
-                 .RunIf((Query<Data<WorldPosition>, With<Player>> playerQuery) => playerQuery.Count() > 0);
-        var textOverheadRenderingSystem = scheduler.OnAfterUpdate(showTextOverheadFn);
+            .AddSystem(renderingFn)
+            .InStage(Stage.PostUpdate)
+            .Label("cuo:rendering:rendering")
+            // .After("cuo:rendering:begin")
+            // .RunIf(w => w.HasResource<GraphicsDevice>())
+            // .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
+            // .RunIf((Query<Data<WorldPosition>, With<Player>> playerQuery) => playerQuery.Count() > 0)
+            .Build()
 
-        beginRenderingSystem.RunBefore(worldRenderingSystem);
-        worldRenderingSystem.RunBefore(endRenderingSystem);
-        textOverheadRenderingSystem.RunAfter(worldRenderingSystem);
+            .AddSystem(endRenderingFn)
+            .InStage(Stage.PostUpdate)
+            .Label("cuo:rendering:end")
+            // .After("cuo:rendering:rendering")
+            .Build();
     }
 
 
@@ -110,8 +119,9 @@ internal readonly struct WorldRenderingPlugin : IPlugin
     }
 
     private static void ShowTextOverhead(
-        World world,
-        Time time,
+        Commands commands,
+        Query<Data<WorldPosition, ScreenPositionOffset>> query,
+        Res<Time> time,
         Res<TextOverHeadManager> textOverHeadManager,
         Res<NetworkEntitiesMap> networkEntities,
         Res<UltimaBatcher2D> batcher,
@@ -119,22 +129,22 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         Res<Camera> camera,
         Res<UOFileManager> fileManager)
     {
-        textOverHeadManager.Value.Update(world, time, networkEntities);
-        textOverHeadManager.Value.Render(world, networkEntities, batcher, gameCtx, camera, fileManager.Value.Hues);
+        textOverHeadManager.Value.Update(commands, time.Value, networkEntities.Value);
+        textOverHeadManager.Value.Render(commands, networkEntities.Value, batcher.Value, gameCtx.Value, camera.Value, fileManager.Value.Hues, query);
     }
 
     private static void BeginRendering(
         Res<Camera> camera,
         Res<RenderTarget2D> renderTarget,
         Res<UltimaBatcher2D> batch,
-        Res<Viewport> viewport
+        ResMut<Viewport> viewport
     )
     {
         viewport.Value = batch.Value.GraphicsDevice.Viewport;
         var cameraViewport = camera.Value.GetViewport();
 
         batch.Value.GraphicsDevice.Viewport = cameraViewport;
-        batch.Value.GraphicsDevice.SetRenderTarget(renderTarget);
+        batch.Value.GraphicsDevice.SetRenderTarget(renderTarget.Value);
         batch.Value.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0, 0);
     }
 
@@ -142,11 +152,10 @@ internal readonly struct WorldRenderingPlugin : IPlugin
     {
         batch.Value.GraphicsDevice.SetRenderTarget(null);
         batch.Value.GraphicsDevice.Clear(ClearOptions.Target, new Color(18f / 255f, 18f / 255f, 18f / 255f, 1f), 0, 0);
-        batch.Value.GraphicsDevice.Viewport = viewport;
+        batch.Value.GraphicsDevice.Viewport = viewport.Value;
     }
 
     private static void Rendering(
-        TinyEcs.World world,
         Res<SelectedEntity> selectedEntity,
         Res<GameContext> gameCtx,
         Res<Renderer.UltimaBatcher2D> batch,
@@ -155,6 +164,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         Res<Camera> camera,
         Local<(int lastPosX, int lastPosY, int lastPosZ)?> lastPos,
         Local<MaxZInfo> workingZInfo,
+        Query<Data<Graphic, Hue>, With<ContainedInto>> qLayers,
         Single<Data<WorldPosition>, With<Player>> queryPlayer,
         Query<Data<WorldPosition, ScreenPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> queryTiles,
         Query<Data<WorldPosition, ScreenPosition, Graphic, Hue>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>>> queryStatics,
@@ -164,6 +174,9 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             Filter<Without<ContainedInto>, Optional<MobileSteps>, Optional<MobAnimation>>> queryEquipmentSlots
     )
     {
+        if (queryPlayer.Count() != 1)
+            return;
+
         // Setup rendering state
         batch.Value.Begin(null, camera.Value.ViewTransformMatrix);
         batch.Value.SetBrightlight(1.7f);
@@ -245,22 +258,22 @@ internal readonly struct WorldRenderingPlugin : IPlugin
 
         // Render each layer
         RenderTiles(
-            world, selectedEntity, gameCtx, batch, assetsServer, fileManager,
+            selectedEntity, gameCtx, batch, assetsServer, fileManager,
             camera, calculateZ, workingZInfo, playerX, playerY, playerZ16,
             backupZInfo, maxZ, center, mousePos, cameraBounds, queryTiles);
 
         RenderStatics(
-            world, selectedEntity, gameCtx, batch, assetsServer, fileManager,
+            selectedEntity, gameCtx, batch, assetsServer, fileManager,
             camera, calculateZ, workingZInfo, playerX, playerY, playerZ14,
             backupZInfo, maxZ, center, mousePos, cameraBounds, queryStatics);
 
         RenderBodies(
-            world, selectedEntity, batch, assetsServer, fileManager,
+            selectedEntity, batch, assetsServer, fileManager,
             maxZ, center, mousePos, queryBodyOnly);
 
         RenderEquipment(
-            world, selectedEntity, batch, assetsServer, fileManager,
-            maxZ, center, mousePos, queryEquipmentSlots);
+            selectedEntity, batch, assetsServer, fileManager,
+            maxZ, center, mousePos, qLayers, queryEquipmentSlots);
 
         RenderEffects();
 
@@ -272,7 +285,6 @@ internal readonly struct WorldRenderingPlugin : IPlugin
 
 
     private static void RenderTiles(
-        TinyEcs.World world,
         Res<SelectedEntity> selectedEntity,
         Res<GameContext> gameCtx,
         Res<UltimaBatcher2D> batch,
@@ -407,7 +419,6 @@ internal readonly struct WorldRenderingPlugin : IPlugin
     }
 
     private static void RenderStatics(
-        TinyEcs.World world,
         Res<SelectedEntity> selectedEntity,
         Res<GameContext> gameCtx,
         Res<UltimaBatcher2D> batch,
@@ -557,7 +568,6 @@ internal readonly struct WorldRenderingPlugin : IPlugin
     }
 
     private static void RenderBodies(
-        TinyEcs.World world,
         Res<SelectedEntity> selectedEntity,
         Res<UltimaBatcher2D> batch,
         Res<AssetsServer> assetsServer,
@@ -685,7 +695,6 @@ internal readonly struct WorldRenderingPlugin : IPlugin
     }
 
     private static void RenderEquipment(
-        TinyEcs.World world,
         Res<SelectedEntity> selectedEntity,
         Res<UltimaBatcher2D> batch,
         Res<AssetsServer> assetsServer,
@@ -693,6 +702,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         int? maxZ,
         Vector2 center,
         Vector2 mousePos,
+        Query<Data<Graphic, Hue>, With<ContainedInto>> qLayers,
         Query<Data<EquipmentSlots, ScreenPositionOffset, WorldPosition, Graphic, Facing, MobileSteps, MobAnimation>,
             Filter<Without<ContainedInto>, Optional<MobileSteps>, Optional<MobAnimation>>> queryEquipmentSlots)
     {
@@ -743,19 +753,21 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                 if (!layerEnt.IsValid())
                     continue;
 
-                if (!world.Exists(layerEnt))
+                if (!qLayers.Contains(layerEnt))
                 {
                     slots.Ref[layer] = 0;
                     continue;
                 }
 
-                if (layer != Layer.Mount && IsItemCovered2(world, ref slots.Ref, layer))
+                if (layer != Layer.Mount && IsItemCovered2(qLayers, ref slots.Ref, layer))
                     continue;
+
+                (var gfx, var hue) = qLayers.Get(layerEnt);
 
                 // Get layer data
                 byte animAction = animation.Ref.Action;
-                var graphicLayer = world.Get<Graphic>(layerEnt).Value;
-                var hueLayer = world.Get<Hue>(layerEnt).Value;
+                var graphicLayer = gfx.Ref.Value;
+                var hueLayer = hue.Ref.Value;
                 var animId = graphicLayer;
                 var offsetY = 0;
 
@@ -993,19 +1005,53 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         return (dir, mirror);
     }
 
-    private static bool IsItemCovered2(World world, ref EquipmentSlots slots, Layer layer)
+    private static bool IsItemCovered2(Query<Data<Graphic, Hue>, With<ContainedInto>> qLayer, ref EquipmentSlots slots, Layer layer)
     {
+        bool isOk(Layer l, ref EquipmentSlots s, ushort value)
+        {
+            if (qLayer.Contains(s[l]))
+            {
+                (var gfx, _) = qLayer.Get(s[l]);
+                return gfx.Ref.Value == value;
+            }
+            return false;
+        }
+
+        bool isAny(Layer l, ref EquipmentSlots s, params ReadOnlySpan<ushort> values)
+        {
+            foreach (var v in values)
+                if (isOk(l, ref s, v)) return true;
+            return false;
+        }
+
+        bool isNotAny(Layer l, ref EquipmentSlots s, params ReadOnlySpan<ushort> values)
+        {
+            if (!qLayer.Contains(s[l])) return false;
+            (var gfx, _) = qLayer.Get(s[l]);
+            foreach (var v in values)
+                if (gfx.Ref.Value == v) return false;
+            return true;
+        }
+
+        bool inRange(Layer l, ref EquipmentSlots s, ushort min, ushort max)
+        {
+            if (!qLayer.Contains(s[l])) return false;
+            (var gfx, _) = qLayer.Get(s[l]);
+            return gfx.Ref.Value >= min && gfx.Ref.Value <= max;
+        }
+
         switch (layer)
         {
             case Layer.Shoes:
                 if (slots[Layer.Legs].IsValid() ||
-                    (slots[Layer.Pants].IsValid() && world.Exists(slots[Layer.Pants]) && world.Get<Graphic>(slots[Layer.Pants]).Value == 0x1411))
+                    (slots[Layer.Pants].IsValid() && isOk(Layer.Pants, ref slots, 0x1411)))
                 {
                     return true;
                 }
-                else if (slots[Layer.Pants].IsValid() &&
-                         world.Exists(slots[Layer.Pants]) && (world.Get<Graphic>(slots[Layer.Pants]).Value is 0x0513 or 0x0514) ||
-                         (slots[Layer.Robe].IsValid() && world.Exists(slots[Layer.Robe]) && world.Get<Graphic>(slots[Layer.Robe]).Value is 0x0504))
+                else if (
+                    (slots[Layer.Pants].IsValid() && isAny(Layer.Pants, ref slots, 0x0513, 0x0514)) ||
+                    (slots[Layer.Robe].IsValid() && isOk(Layer.Robe, ref slots, 0x0504))
+                )
                 {
                     return true;
                 }
@@ -1013,41 +1059,41 @@ internal readonly struct WorldRenderingPlugin : IPlugin
 
             case Layer.Pants:
                 if (slots[Layer.Legs].IsValid() ||
-                    (slots[Layer.Robe].IsValid() && world.Exists(slots[Layer.Robe]) && world.Get<Graphic>(slots[Layer.Robe]).Value == 0x0504))
+                    (slots[Layer.Robe].IsValid() && isOk(Layer.Robe, ref slots, 0x0504)))
                 {
                     return true;
                 }
 
-                if (slots[Layer.Pants].IsValid() && world.Exists(slots[Layer.Pants]) &&
-                    world.Get<Graphic>(slots[Layer.Pants]).Value is 0x01EB or 0x03E5 or 0x03EB)
+                if (slots[Layer.Pants].IsValid() && isAny(Layer.Pants, ref slots, 0x01EB, 0x03E5, 0x03EB))
                 {
-                    if (slots[Layer.Skirt].IsValid() && world.Exists(slots[Layer.Skirt]) &&
-                        world.Get<Graphic>(slots[Layer.Skirt]).Value is not 0x01C7 and not 0x01E4)
+                    if (slots[Layer.Skirt].IsValid() && isNotAny(Layer.Skirt, ref slots, 0x01C7, 0x01E4))
                     {
                         return true;
                     }
 
-                    if (slots[Layer.Robe].IsValid() && world.Exists(slots[Layer.Robe]) &&
-                        world.Get<Graphic>(slots[Layer.Robe]).Value is not 0x0229 and not (>= 0x04E8 and <= 0x04EB))
+                    if (slots[Layer.Robe].IsValid() && qLayer.Contains(slots[Layer.Robe]))
                     {
-                        return true;
+                        (var rgfx, _) = qLayer.Get(slots[Layer.Robe]);
+                        var rv = rgfx.Ref.Value;
+                        if (rv != 0x0229 && !(rv >= 0x04E8 && rv <= 0x04EB))
+                        {
+                            return true;
+                        }
                     }
                 }
                 break;
 
             case Layer.Tunic:
-                if (slots[Layer.Robe].IsValid() && world.Exists(slots[Layer.Robe]))
+                if (slots[Layer.Robe].IsValid() && qLayer.Contains(slots[Layer.Robe]))
                 {
-                    if (world.Get<Graphic>(slots[Layer.Robe]).Value is not 0 and not 0x9985 and not 0x9986 and not 0xA412)
+                    if (isNotAny(Layer.Robe, ref slots, 0x0000, 0x9985, 0x9986, 0xA412))
                     {
                         return true;
                     }
                 }
-                else if (slots[Layer.Tunic].IsValid() && world.Exists(slots[Layer.Tunic]) &&
-                         world.Get<Graphic>(slots[Layer.Tunic]).Value == 0x0238)
+                else if (slots[Layer.Tunic].IsValid() && isOk(Layer.Tunic, ref slots, 0x0238))
                 {
-                    if (slots[Layer.Robe].IsValid() && world.Exists(slots[Layer.Robe]) &&
-                        world.Get<Graphic>(slots[Layer.Robe]).Value is not 0x9985 and not 0x9986 and not 0xA412)
+                    if (slots[Layer.Robe].IsValid() && isNotAny(Layer.Robe, ref slots, 0x9985, 0x9986, 0xA412))
                     {
                         return true;
                     }
@@ -1055,16 +1101,13 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                 break;
 
             case Layer.Torso:
-                if (slots[Layer.Robe].IsValid() && world.Exists(slots[Layer.Robe]) &&
-                    world.Get<Graphic>(slots[Layer.Robe]).Value is not 0 and not 0x9985 and not 0x9986 and not 0xA412 and not 0xA2CA)
+                if (slots[Layer.Robe].IsValid() && isNotAny(Layer.Robe, ref slots, 0x0000, 0x9985, 0x9986, 0xA412, 0xA2CA))
                 {
                     return true;
                 }
-                else if (slots[Layer.Tunic].IsValid() && world.Exists(slots[Layer.Tunic]) &&
-                         world.Get<Graphic>(slots[Layer.Tunic]).Value is not 0x1541 and not 0x1542)
+                else if (slots[Layer.Tunic].IsValid() && isNotAny(Layer.Tunic, ref slots, 0x1541, 0x1542))
                 {
-                    if (slots[Layer.Torso].IsValid() && world.Exists(slots[Layer.Torso]) &&
-                        world.Get<Graphic>(slots[Layer.Torso]).Value is 0x782A or 0x782B)
+                    if (slots[Layer.Torso].IsValid() && isAny(Layer.Torso, ref slots, 0x782A, 0x782B))
                     {
                         return true;
                     }
@@ -1072,8 +1115,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                 break;
 
             case Layer.Arms:
-                if (slots[Layer.Robe].IsValid() && world.Exists(slots[Layer.Robe]) &&
-                    world.Get<Graphic>(slots[Layer.Robe]).Value is not 0 and not 0x9985 and not 0x9986 and not 0xA412)
+                if (slots[Layer.Robe].IsValid() && isNotAny(Layer.Robe, ref slots, 0x0000, 0x9985, 0x9986, 0xA412))
                 {
                     return true;
                 }
@@ -1081,22 +1123,23 @@ internal readonly struct WorldRenderingPlugin : IPlugin
 
             case Layer.Helmet:
             case Layer.Hair:
-                if (slots[Layer.Robe].IsValid() && world.Exists(slots[Layer.Robe]))
+                if (slots[Layer.Robe].IsValid() && qLayer.Contains(slots[Layer.Robe]))
                 {
-                    ref var gfx = ref world.Get<Graphic>(slots[Layer.Robe]);
+                    (var gfx, _) = qLayer.Get(slots[Layer.Robe]);
+                    var v = gfx.Ref.Value;
 
-                    if (gfx.Value > 0x3173)
+                    if (v > 0x3173)
                     {
-                        if (gfx.Value is 0x4B9D or 0x7816)
+                        if (v is 0x4B9D or 0x7816)
                         {
                             return true;
                         }
                     }
-                    else if (gfx.Value <= 0x2687)
+                    else if (v <= 0x2687)
                     {
-                        if (gfx.Value < 0x2683)
+                        if (v < 0x2683)
                         {
-                            if (gfx.Value is >= 0x204E and <= 0x204F)
+                            if (v is >= 0x204E and <= 0x204F)
                             {
                                 return true;
                             }
@@ -1106,7 +1149,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                             return true;
                         }
                     }
-                    else if (gfx.Value is 0x2FB9 or 0x3173)
+                    else if (v is 0x2FB9 or 0x3173)
                     {
                         return true;
                     }
@@ -1117,7 +1160,9 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         return false;
     }
 
-    private struct MaxZInfo
+
+
+    private class MaxZInfo
     {
         public int? MaxZ;
         public int? MaxZGround;
@@ -1127,7 +1172,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         public bool IsTileAhead;
         public bool IsUnderStatic;
 
-        public readonly bool IsUnderRoof => IsSameTile && IsTileAhead;
+        public bool IsUnderRoof => IsSameTile && IsTileAhead;
     }
 }
 

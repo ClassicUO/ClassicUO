@@ -10,7 +10,18 @@
     <Project Path="external/FNA/FNA.Core.csproj" />
     <Project Path="external/FontStashSharp/src/XNA/FontStashSharp.FNA.Core.csproj" />
     <Project Path="external/MP3Sharp/MP3Sharp/MP3Sharp.csproj" />
-    <Project Path="external/TinyEcs/src/TinyEcs.csproj" />
+    <Project Path="external\TinyEcs\src\TinyEcs.Bevy\TinyEcs.Bevy.csproj" Type="Classic C#">
+      <Configuration Solution="Debug|x64" Project="Debug|Any CPU" />
+      <Configuration Solution="Debug|x86" Project="Debug|Any CPU" />
+      <Configuration Solution="Release|x64" Project="Release|Any CPU" />
+      <Configuration Solution="Release|x86" Project="Release|Any CPU" />
+    </Project>
+    <Project Path="external\TinyEcs\src\TinyEcs\TinyEcs.csproj" Type="Classic C#">
+      <Configuration Solution="Debug|x64" Project="Debug|Any CPU" />
+      <Configuration Solution="Debug|x86" Project="Debug|Any CPU" />
+      <Configuration Solution="Release|x64" Project="Release|Any CPU" />
+      <Configuration Solution="Release|x86" Project="Release|Any CPU" />
+    </Project>
   </Folder>
   <Folder Name="/scripts/">
     <File Path="scripts/build.cmd" />

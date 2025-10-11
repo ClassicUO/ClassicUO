@@ -1,17 +1,19 @@
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
 
 internal readonly struct GameplayPlugin : IPlugin
 {
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
-        scheduler.AddPlugin<ChatPlugin>();
-        scheduler.AddPlugin<TextOverheadPlugin>();
-        scheduler.AddPlugin<PickupPlugin>();
-        scheduler.AddPlugin<UseObjectPlugin>();
-        scheduler.AddPlugin<MobAnimationsPlugin>();
-        scheduler.AddPlugin<PlayerMovementPlugin>();
-        scheduler.AddPlugin<ContainersPlugin>();
+        app.AddPlugin<ChatPlugin>();
+        app.AddPlugin<TextOverheadPlugin>();
+        app.AddPlugin<PickupPlugin>();
+        app.AddPlugin<UseObjectPlugin>();
+        app.AddPlugin<MobAnimationsPlugin>();
+        app.AddPlugin<PlayerMovementPlugin>();
+        app.AddPlugin<ContainersPlugin>();
+        app.AddPlugin<NetworkEntitiesMapPlugin>();
     }
 }

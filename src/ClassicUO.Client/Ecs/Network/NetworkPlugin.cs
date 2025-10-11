@@ -7,6 +7,9 @@ using TinyEcs;
 using ClassicUO.Network.Encryption;
 using ClassicUO.Assets;
 using System.Runtime.InteropServices;
+using ClassicUO.Game.Data;
+using ClassicUO.IO;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
 
@@ -22,53 +25,138 @@ struct OnLoginRequest
 
 internal sealed class PacketsMap : Dictionary<byte, OnPacket>;
 
+internal sealed class PacketsMap2 : Dictionary<byte, Func<IPacket>>;
+
+
+internal interface IPacket
+{
+    byte Id { get; }
+    void Fill(StackDataReader reader);
+}
+
+
+internal struct OnEnterWorldPacket() : IPacket
+{
+    public byte Id { get; } = 0x1B;
+
+    public uint Serial { get; private set; }
+    public uint Unused0 { get; private set; }
+    public ushort Graphic { get; private set; }
+    public (ushort X, ushort Y, sbyte Z) Position { get; private set; }
+    public Direction Direction { get; private set; }
+    public uint Unused1 { get; private set; }
+    public uint Unused2 { get; private set; }
+    public byte Unused3 { get; private set; }
+    public ushort MapWidth { get; private set; }
+    public ushort MapHeight { get; private set; }
+
+    public void Fill(StackDataReader reader)
+    {
+        Serial = reader.ReadUInt32BE();
+        Unused0 = reader.ReadUInt32BE();
+        Graphic = reader.ReadUInt16BE();
+        Position = (reader.ReadUInt16BE(), reader.ReadUInt16BE(), (sbyte)reader.ReadUInt16BE());
+        Direction = (Direction) reader.ReadUInt8();
+        Unused1 = reader.ReadUInt32BE();
+        Unused2 = reader.ReadUInt32BE();
+        Unused3 = reader.ReadUInt8();
+        MapWidth = reader.ReadUInt16BE();
+        MapHeight = reader.ReadUInt16BE();
+    }
+}
+
 readonly struct NetworkPlugin : IPlugin
 {
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
-        scheduler.AddResource(new CircularBuffer());
-        scheduler.AddResource(new PacketsMap());
-        scheduler.AddEvent<OnLoginRequest>();
-
         var setupSocketFn = SetupSocket;
-        scheduler.OnStartup(setupSocketFn);
+        var handleLoginRequestsFn = HandleLoginRequests;
+        var packetReaderFn = PacketReader;
 
-        scheduler.AddPlugin<LoginPacketsPlugin>();
-        scheduler.AddPlugin<InGamePacketsPlugin>();
+        app.AddResource(new CircularBuffer());
+        app.AddResource(new PacketsMap());
+        app.AddResource(new PacketsMap2());
 
-        scheduler.OnExit(GameState.GameScreen, (Res<NetClient> network, Res<CircularBuffer> buffer, Res<GameContext> gameCtx) =>
-        {
-            gameCtx.Value.Map = -1;
-            gameCtx.Value.PlayerSerial = 0;
-            network.Value.Disconnect();
-            buffer.Value.Clear();
-        });
+        app
+            .AddSystem(Stage.Startup, setupSocketFn)
 
-        scheduler.OnUpdate((Res<NetClient> network) => network.Value.Send_Ping(0xFF))
-            .RunIf((Res<GameContext> gameCtx, Res<NetClient> network) => network.Value!.IsConnected && gameCtx.Value.PlayerSerial != 0)
-            .RunIf((Time time, Local<float> updateTime) =>
+            .AddSystem(Stage.Startup, (Res<PacketsMap2> packetsMap) =>
             {
-                if (updateTime.Value >= time.Total)
+                void create<T>() where T : IPacket, new()
+                {
+                    var stack = new Stack<IPacket>();
+                    var packet = new T();
+                    stack.Push(packet);
+                    var fn = () => (IPacket)new T();
+                    packetsMap.Value.Add(packet.Id, fn);
+                }
+
+                create<OnEnterWorldPacket>();
+            })
+
+            .AddSystem((EventReader<IPacket> reader) =>
+            {
+                foreach (var packet in reader.Read())
+                {
+                    if (packet is OnEnterWorldPacket enterWorld)
+                    {
+                        Console.WriteLine(">> OnEnterWorld: Serial 0x{0:X8} | Graphic 0x{1:X4} | Pos {2},{3},{4} | Dir {5} | MapSize {6}x{7}",
+                            enterWorld.Serial,
+                            enterWorld.Graphic,
+                            enterWorld.Position.X,
+                            enterWorld.Position.Y,
+                            enterWorld.Position.Z,
+                            enterWorld.Direction,
+                            enterWorld.MapWidth,
+                            enterWorld.MapHeight
+                        );
+                    }
+                }
+            })
+            .InStage(Stage.Update)
+            .RunIf((EventReader<IPacket> reader) => reader.HasEvents)
+            .Build()
+
+            .AddPlugin<LoginPacketsPlugin>()
+            .AddPlugin<InGamePacketsPlugin>()
+
+            .AddSystem((Res<NetClient> network, Res<CircularBuffer> buffer, ResMut<GameContext> gameCtx) =>
+            {
+                gameCtx.Value.Map = -1;
+                gameCtx.Value.PlayerSerial = 0;
+                network.Value.Disconnect();
+                buffer.Value.Clear();
+            })
+            .OnExit(GameState.GameScreen)
+            .Build()
+
+            .AddSystem((Res<NetClient> network) => network.Value.Send_Ping(0xFF))
+            .InStage(Stage.Update)
+            .RunIf((Res<GameContext> gameCtx, Res<NetClient> network) => network.Value!.IsConnected && gameCtx.Value.PlayerSerial != 0)
+            .RunIf((Res<Time> time, Local<float> updateTime) =>
+            {
+                if (updateTime.Value >= time.Value.Total)
                     return false;
 
-                updateTime.Value = time.Total + 1000f;
+                updateTime.Value = time.Value.Total + 1000f;
                 return true;
-            });
+            })
+            .Build()
 
-        var handleLoginRequestsFn = HandleLoginRequests;
-        scheduler.OnUpdate(handleLoginRequestsFn)
-            .RunIf((EventReader<OnLoginRequest> loginRequests) => !loginRequests.IsEmpty);
+            .AddSystem(handleLoginRequestsFn)
+            .InStage(Stage.Update)
+            .RunIf((EventReader<OnLoginRequest> loginRequests) => loginRequests.HasEvents)
+            .Build()
 
-        var packetReaderFn = PacketReader;
-        scheduler.OnUpdate(packetReaderFn)
-            .RunIf((Res<NetClient> network) => network.Value!.IsConnected);
+            .AddSystem(packetReaderFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<NetClient> network) => network.Value!.IsConnected)
+            .Build();
     }
 
-    void SetupSocket(Res<Settings> settings, Res<UOFileManager> fileManager, SchedulerState sched)
+    void SetupSocket(Res<Settings> settings, Res<NetClient> socket, Res<UOFileManager> fileManager, Commands commands)
     {
-        var socket = new NetClient();
-        settings.Value.Encryption = (byte)socket.Load(fileManager.Value.Version, (EncryptionType)settings.Value.Encryption);
-        sched.AddResource(socket);
+        settings.Value.Encryption = (byte)socket.Value.Load(fileManager.Value.Version, (EncryptionType)settings.Value.Encryption);
     }
 
     void HandleLoginRequests(
@@ -78,7 +166,7 @@ readonly struct NetworkPlugin : IPlugin
         Res<Settings> settings
     )
     {
-        foreach (var request in loginRequests)
+        foreach (var request in loginRequests.Read())
         {
             network.Value.Connect(request.Address, request.Port);
             Console.WriteLine("Socket is connected ? {0}", network.Value.IsConnected);
@@ -107,20 +195,25 @@ readonly struct NetworkPlugin : IPlugin
 
             break;
         }
-        loginRequests.Clear();
+    }
+
+    sealed class PacketBuffer
+    {
+        public PacketBuffer() => Buffer = new byte[1024 * 4];
+
+        public byte[] Buffer;
     }
 
     void PacketReader(
         Query<Data<WasmMod>> queryMods,
         Res<NetClient> network,
         Res<PacketsMap> packetsMap,
+        Res<PacketsMap2> packetsMap2,
         Res<CircularBuffer> buffer,
-        Local<byte[]> packetBuffer
+        Local<PacketBuffer> packetBuffer,
+        EventWriter<IPacket> queuePackets
     )
     {
-        // buffer.Value ??= new();
-        packetBuffer.Value ??= new byte[4096];
-
         var availableData = network.Value.CollectAvailableData();
         var span = availableData.AsSpan();
         if (!span.IsEmpty)
@@ -150,14 +243,14 @@ readonly struct NetworkPlugin : IPlugin
                 break;
             }
 
-            while (packetLen > packetBuffer.Value.Length)
-                Array.Resize(ref packetBuffer.Value, packetBuffer.Value.Length * 2);
+            while (packetLen > packetBuffer.Value.Buffer.Length)
+                Array.Resize(ref packetBuffer.Value.Buffer, packetBuffer.Value.Buffer.Length * 2);
 
-            _ = buffer.Value.Dequeue(packetBuffer.Value, 0, packetLen);
+            _ = buffer.Value.Dequeue(packetBuffer.Value.Buffer, 0, packetLen);
 
             // Console.WriteLine(">> packet-in: ID 0x{0:X2} | Len: {1}", packetId, packetLen);
 
-            var sp = packetBuffer.Value.AsSpan(0, packetLen + packetHeaderOffset);
+            var sp = packetBuffer.Value.Buffer.AsSpan(0, packetLen + packetHeaderOffset);
 
             foreach ((_, var mod) in queryMods)
             {
@@ -177,6 +270,15 @@ readonly struct NetworkPlugin : IPlugin
 
             if (!sp.IsEmpty && packetsMap.Value.TryGetValue(packetId, out var handler))
             {
+                if (packetsMap2.Value.TryGetValue(packetId, out var fn))
+                {
+                    var data = sp.Slice(packetHeaderOffset, packetLen - packetHeaderOffset);
+                    var reader = new StackDataReader(data);
+                    var packet = fn();
+                    packet.Fill(reader);
+                    queuePackets.Send(packet);
+                }
+
                 handler(sp.Slice(packetHeaderOffset, packetLen - packetHeaderOffset));
             }
         }

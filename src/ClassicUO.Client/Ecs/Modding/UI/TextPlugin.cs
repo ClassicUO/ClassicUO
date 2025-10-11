@@ -1,13 +1,14 @@
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs.Modding.UI;
 
 internal readonly struct TextPlugin : IPlugin
 {
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
         var propagateTextConfigFn = PropagateTextConfigToChildTextFragments;
-        scheduler.OnUpdate(propagateTextConfigFn);
+        app.AddSystem(Stage.Update, propagateTextConfigFn);
     }
 
     private static void PropagateTextConfigToChildTextFragments(

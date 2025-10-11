@@ -1,20 +1,23 @@
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
+using ClassicUO.Network;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
 
 internal readonly struct CuoPlugin : IPlugin
 {
-    public void Build(Scheduler scheduler)
+    public void Build(App app)
     {
-        scheduler.AddState(GameState.Loading);
-        scheduler.AddResource(new GameContext() { Map = -1, MaxObjectsDistance = 32 });
-        scheduler.AddResource(Settings.GlobalSettings);
+        app.AddState(GameState.Loading);
+        app.AddResource(new GameContext() { Map = -1, MaxObjectsDistance = 32 });
+        app.AddResource(Settings.GlobalSettings);
+        app.AddResource(new NetClient());
 
-        scheduler.OnStartup((Res<GameContext> gameCtx, Res<Settings> settings) =>
+        app.AddSystem(Stage.Startup, (ResMut<GameContext> gameCtx, Res<Settings> settings) =>
         {
             ClientVersionHelper.IsClientVersionValid(
                 settings.Value.ClientVersion,
@@ -22,24 +25,24 @@ internal readonly struct CuoPlugin : IPlugin
             );
         });
 
-        scheduler.AddPlugin(new FnaPlugin()
+        app.AddPlugin(new FnaPlugin()
         {
             WindowResizable = true,
             MouseVisible = true,
             VSync = true, // don't kill the gpu
         });
-        scheduler.AddPlugin<AssetsPlugin>();
-        scheduler.AddPlugin<TerrainPlugin>();
-        scheduler.AddPlugin<GuiPlugin>();
+        app.AddPlugin<AssetsPlugin>();
+        app.AddPlugin<TerrainPlugin>();
+        app.AddPlugin<GuiPlugin>();
 
-        scheduler.AddPlugin<LoginScreenPlugin>();
-        scheduler.AddPlugin<GameScreenPlugin>();
+        app.AddPlugin<LoginScreenPlugin>();
+        app.AddPlugin<GameScreenPlugin>();
 
-        scheduler.AddPlugin<NetworkPlugin>();
-        scheduler.AddPlugin<GameplayPlugin>();
-        scheduler.AddPlugin<RenderingPlugin>();
+        app.AddPlugin<NetworkPlugin>();
+        app.AddPlugin<GameplayPlugin>();
+        app.AddPlugin<RenderingPlugin>();
 
-        scheduler.AddPlugin<ModdingPlugin>();
+        app.AddPlugin<ModdingPlugin>();
     }
 }
 
