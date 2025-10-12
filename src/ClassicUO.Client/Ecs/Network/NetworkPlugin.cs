@@ -31,16 +31,6 @@ internal sealed class PacketsMap2 : Dictionary<byte, Func<IPacket>>;
 
 
 
-sealed class VersionedPacketsState
-{
-    public bool LockFeaturesPost;
-    public bool QuestPointerPost;
-    public bool UpdateContainerPost;
-    public bool UpdateContainerItemsPost;
-    public bool ShowMapPost;
-    public bool ShowMapFacetPost;
-}
-
 readonly struct NetworkPlugin : IPlugin
 {
     public void Build(App app)
@@ -52,7 +42,6 @@ readonly struct NetworkPlugin : IPlugin
         app.AddResource(new CircularBuffer());
         app.AddResource(new PacketsMap());
         app.AddResource(new PacketsMap2());
-        app.AddResource(new VersionedPacketsState());
 
         app
             .AddSystem(Stage.Startup, setupSocketFn)
@@ -316,7 +305,6 @@ readonly struct NetworkPlugin : IPlugin
         Res<PacketsMap> packetsMap,
         Res<PacketsMap2> packetsMap2,
         Res<GameContext> gameCtx,
-        Res<VersionedPacketsState> versionedPackets,
         Res<CircularBuffer> buffer,
         Local<PacketBuffer> packetBuffer,
         EventWriter<IPacket> queuePackets
@@ -329,112 +317,72 @@ readonly struct NetworkPlugin : IPlugin
 
         while (buffer.Value.Length > 0)
         {
+            var packetId = buffer.Value[0];
+            var packetLen = (int)network.Value.PacketsTable.GetPacketLength(packetId);
+            var packetHeaderOffset = sizeof(byte);
+
+            if (packetLen == -1)
             {
-                var packetId = buffer.Value[0];
-                var packetLen = (int)network.Value.PacketsTable.GetPacketLength(packetId);
-                var packetHeaderOffset = sizeof(byte);
-
-                if (packetLen == -1)
-                {
-                    if (buffer.Value.Length < 3)
-                        break;
-
-                    var b0 = buffer.Value[1];
-                    var b1 = buffer.Value[2];
-
-                    packetLen = (b0 << 8) | b1;
-                    packetHeaderOffset += sizeof(ushort);
-                }
-
-                if (buffer.Value.Length < packetLen)
-                {
-                    Console.WriteLine("needs more data for packet 0x{0:X2}", packetId);
+                if (buffer.Value.Length < 3)
                     break;
-                }
 
-                while (packetLen > packetBuffer.Value.Buffer.Length)
-                    Array.Resize(ref packetBuffer.Value.Buffer, packetBuffer.Value.Buffer.Length * 2);
+                var b0 = buffer.Value[1];
+                var b1 = buffer.Value[2];
 
-                _ = buffer.Value.Dequeue(packetBuffer.Value.Buffer, 0, packetLen);
-
-                // Console.WriteLine(">> packet-in: ID 0x{0:X2} | Len: {1}", packetId, packetLen);
-
-                var sp = packetBuffer.Value.Buffer.AsSpan(0, packetLen + packetHeaderOffset);
-
-                foreach ((_, var mod) in queryMods)
-                {
-                    if (mod.Ref.Mod.Plugin.FunctionExists("packet_recv"))
-                    {
-                        var res = mod.Ref.Mod.Plugin.Call("packet_recv", sp);
-                        if (res.IsEmpty)
-                        {
-                            sp = [];
-                        }
-                        else
-                        {
-                            res.CopyTo(sp);
-                        }
-                    }
-                }
-
-                if (sp.IsEmpty)
-                    continue;
-
-                var version = gameCtx.Value.ClientVersion;
-
-                if (!versionedPackets.Value.LockFeaturesPost && version >= ClientVersion.CV_60142)
-                {
-                    packetsMap2.Value[0xB9] = () => new OnLockFeaturesPacket_0xB9_Post60142();
-                    versionedPackets.Value.LockFeaturesPost = true;
-                }
-
-                if (!versionedPackets.Value.QuestPointerPost && version >= ClientVersion.CV_7090)
-                {
-                    packetsMap2.Value[0xBA] = () => new OnQuestPointerPacket_0xBA_Post7090();
-                    versionedPackets.Value.QuestPointerPost = true;
-                }
-
-                if (!versionedPackets.Value.UpdateContainerPost && version >= ClientVersion.CV_6017)
-                {
-                    packetsMap2.Value[0x25] = () => new OnUpdateContainerPacket_0x25_Post6017();
-                    versionedPackets.Value.UpdateContainerPost = true;
-                }
-
-                if (!versionedPackets.Value.UpdateContainerItemsPost && version >= ClientVersion.CV_6017)
-                {
-                    packetsMap2.Value[0x3C] = () => new OnUpdateContainerItemsPacket_0x3C_Post6017();
-                    versionedPackets.Value.UpdateContainerItemsPost = true;
-                }
-
-                if (!versionedPackets.Value.ShowMapPost && version >= ClientVersion.CV_308Z)
-                {
-                    packetsMap2.Value[0x90] = () => new OnShowMapPacket_0x90_Post308Z();
-                    versionedPackets.Value.ShowMapPost = true;
-                }
-
-                if (!versionedPackets.Value.ShowMapFacetPost && version >= ClientVersion.CV_308Z)
-                {
-                    packetsMap2.Value[0xF5] = () => new OnShowMapFacetPacket_0xF5_Post308Z();
-                    versionedPackets.Value.ShowMapFacetPost = true;
-                }
-
-                if (packetsMap2.Value.TryGetValue(packetId, out var fn))
-                {
-                    var payload = sp.Slice(packetHeaderOffset, packetLen - packetHeaderOffset);
-                    var reader = new StackDataReader(payload);
-                    var packet = fn();
-                    packet.Fill(reader);
-                    queuePackets.Send(packet);
-                }
-
-                // if (packetsMap.Value.TryGetValue(packetId, out var handler) && !HandledPacketIds.Contains(packetId))
-                // {
-                //     handler(payload);
-                // }
+                packetLen = (b0 << 8) | b1;
+                packetHeaderOffset += sizeof(ushort);
             }
 
-            network.Value.Flush();
+            if (buffer.Value.Length < packetLen)
+            {
+                Console.WriteLine("needs more data for packet 0x{0:X2}", packetId);
+                break;
+            }
+
+            while (packetLen > packetBuffer.Value.Buffer.Length)
+                Array.Resize(ref packetBuffer.Value.Buffer, packetBuffer.Value.Buffer.Length * 2);
+
+            _ = buffer.Value.Dequeue(packetBuffer.Value.Buffer, 0, packetLen);
+
+            // Console.WriteLine(">> packet-in: ID 0x{0:X2} | Len: {1}", packetId, packetLen);
+
+            var sp = packetBuffer.Value.Buffer.AsSpan(0, packetLen + packetHeaderOffset);
+
+            foreach ((_, var mod) in queryMods)
+            {
+                if (mod.Ref.Mod.Plugin.FunctionExists("packet_recv"))
+                {
+                    var res = mod.Ref.Mod.Plugin.Call("packet_recv", sp);
+                    if (res.IsEmpty)
+                    {
+                        sp = [];
+                    }
+                    else
+                    {
+                        res.CopyTo(sp);
+                    }
+                }
+            }
+
+            if (sp.IsEmpty)
+                continue;
+
+            if (packetsMap2.Value.TryGetValue(packetId, out var fn))
+            {
+                var payload = sp.Slice(packetHeaderOffset, packetLen - packetHeaderOffset);
+                var reader = new StackDataReader(payload);
+                var packet = fn();
+                packet.Fill(reader);
+                queuePackets.Send(packet);
+            }
+
+            // if (packetsMap.Value.TryGetValue(packetId, out var handler) && !HandledPacketIds.Contains(packetId))
+            // {
+            //     handler(payload);
+            // }
         }
+
+        network.Value.Flush();
     }
 
     sealed class InGameQueries : ISystemParam
@@ -592,11 +540,11 @@ readonly struct NetworkPlugin : IPlugin
                 return true;
 
             case OnLockFeaturesPacket_0xB9_Pre60142 lockFeaturesPre:
-                HandleLockFeatures(lockFeaturesPre.Flags, OnLockFeaturesPacket_0xB9_Pre60142.ComputeFlags(lockFeaturesPre.Flags), fileManager);
+                HandleLockFeatures(lockFeaturesPre.Flags, fileManager);
                 return true;
 
             case OnLockFeaturesPacket_0xB9_Post60142 lockFeaturesPost:
-                HandleLockFeatures(lockFeaturesPost.Flags, lockFeaturesPost.BodyConversionFlags, fileManager);
+                HandleLockFeatures(lockFeaturesPost.Flags, fileManager);
                 return true;
 
             case OnQuestPointerPacket_0xBA_Pre7090 questPointerPre:
@@ -1337,5 +1285,86 @@ readonly struct NetworkPlugin : IPlugin
     {
         var ent = entitiesMap.Value.GetOrCreate(commands, packet.Serial);
         ent.Insert(new Stamina() { Value = packet.Stamina, MaxValue = packet.StaminaMax });
+    }
+
+    static BodyConvFlags ComputeBodyConvFlags(LockedFeatureFlags flags)
+    {
+        BodyConvFlags bcFlags = 0;
+
+        if (flags.HasFlag(LockedFeatureFlags.UOR))
+            bcFlags |= BodyConvFlags.Anim1 | BodyConvFlags.Anim2;
+        if (flags.HasFlag(LockedFeatureFlags.LBR))
+            bcFlags |= BodyConvFlags.Anim1;
+        if (flags.HasFlag(LockedFeatureFlags.AOS))
+            bcFlags |= BodyConvFlags.Anim2;
+        if (flags.HasFlag(LockedFeatureFlags.SE))
+            bcFlags |= BodyConvFlags.Anim3;
+        if (flags.HasFlag(LockedFeatureFlags.ML))
+            bcFlags |= BodyConvFlags.Anim4;
+
+        return bcFlags;
+    }
+
+    static void HandleLockFeatures(
+        LockedFeatureFlags flags,
+        Res<UOFileManager> fileManager
+    )
+    {
+        var conv = ComputeBodyConvFlags(flags);
+        fileManager.Value.Animations.ProcessBodyConvDef(conv);
+    }
+
+    static void HandleQuestPointer(bool display, ushort x, ushort y, uint? serial)
+    {
+        _ = display;
+        _ = x;
+        _ = y;
+        _ = serial;
+    }
+
+    static void HandleShowMap(
+        uint serial,
+        ushort gumpId,
+        ushort startX,
+        ushort startY,
+        ushort endX,
+        ushort endY,
+        ushort width,
+        ushort height,
+        ushort? facet
+    )
+    {
+        _ = serial;
+        _ = gumpId;
+        _ = startX;
+        _ = startY;
+        _ = endX;
+        _ = endY;
+        _ = width;
+        _ = height;
+        _ = facet;
+    }
+
+    static void HandleShowMapFacet(
+        uint serial,
+        ushort gumpId,
+        ushort startX,
+        ushort startY,
+        ushort endX,
+        ushort endY,
+        ushort width,
+        ushort height,
+        ushort facet
+    )
+    {
+        _ = serial;
+        _ = gumpId;
+        _ = startX;
+        _ = startY;
+        _ = endX;
+        _ = endY;
+        _ = width;
+        _ = height;
+        _ = facet;
     }
 }
