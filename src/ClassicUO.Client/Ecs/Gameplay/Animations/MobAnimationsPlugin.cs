@@ -372,7 +372,7 @@ readonly struct MobAnimationsPlugin : IPlugin
         Res<AssetsServer> assetsServer,
         Query<Data<MobAnimation, Graphic, Facing, EquipmentSlots, ServerFlags, MobileSteps>,
             Filter<Without<ContainedInto>, Optional<ServerFlags>, Optional<MobileSteps>>> query,
-        Query<Data<Graphic, NetworkSerial>, With<ContainedInto>> qEquip
+        Query<Data<Graphic, NetworkSerial>> qEquip
     )
     {
         foreach ((
