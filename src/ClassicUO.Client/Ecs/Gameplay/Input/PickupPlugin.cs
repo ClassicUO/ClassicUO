@@ -1,5 +1,4 @@
 using System;
-using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using TinyEcs;
@@ -11,15 +10,12 @@ internal readonly struct PickupPlugin : IPlugin
 {
     public void Build(App app)
     {
-        var packetSetup = PacketSetup;
         var pickupItemDelayedFn = PickupItem;
         var pickupItemFn = PickupItem;
         var dropItemFn = DropItem;
 
         app
             .AddResource(new GrabbedItem())
-
-            .AddSystem(Stage.Startup, packetSetup)
 
             .AddSystem(pickupItemDelayedFn)
             .InStage(Stage.Update)
@@ -110,36 +106,40 @@ internal readonly struct PickupPlugin : IPlugin
             .RunIf(w => w.HasResource<SelectedEntity>() && w.HasResource<GrabbedItem>())
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial != 0)
             .RunIf((Res<MouseContext> mouseCtx) => mouseCtx.Value.IsReleased(Input.MouseButtonType.Left));
+
+        var handlePacketsFn = HandlePickupPackets;
+        app
+            .AddSystem(handlePacketsFn)
+            .InStage(Stage.Update)
+            .RunIf((EventReader<IPacket> packets) => packets.HasEvents)
+            .Build();
     }
 
 
-    static void PacketSetup(
-        Res<PacketsMap> packetsMap,
+    static void HandlePickupPackets(
+        EventReader<IPacket> packets,
         Res<GrabbedItem> grabbedItem
     )
     {
-        // deny move item
-        packetsMap.Value[0x27] = buffer =>
+        foreach (var packet in packets.Read())
         {
-            var reader = new StackDataReader(buffer);
-            var code = reader.ReadUInt8();
+            switch (packet)
+            {
+                case OnDenyMoveItemPacket_0x27 deny:
+                    grabbedItem.Value.Clear();
+                    Console.WriteLine("deny move item code: {0:X2}", deny.Code);
+                    break;
 
-            grabbedItem.Value.Clear();
-            Console.WriteLine("deny move item code: {0:X2}", code);
-        };
+                case OnEndDraggingItemPacket_0x28:
+                    grabbedItem.Value.Clear();
+                    Console.WriteLine("end dragging item");
+                    break;
 
-        // end draggin item
-        packetsMap.Value[0x28] = buffer =>
-        {
-            grabbedItem.Value.Clear();
-            Console.WriteLine("end dragging item");
-        };
-
-        // drop item ok
-        packetsMap.Value[0x29] = buffer =>
-        {
-            Console.WriteLine("drop item ok");
-        };
+                case OnDropItemOkPacket_0x29:
+                    Console.WriteLine("drop item ok");
+                    break;
+            }
+        }
     }
 
     static void PickupItem(

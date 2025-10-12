@@ -5,7 +5,6 @@ using System.Runtime.InteropServices;
 using ClassicUO.Assets;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
-using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -56,22 +55,25 @@ readonly struct PlayerMovementPlugin : IPlugin
 {
     public void Build(App app)
     {
-        var setupPackets = SetupPackets;
         var enqueuePlayerStepsFn = EnqueuePlayerSteps;
         var parseAcceptedStepsFn = ParseAcceptedSteps;
         var parseDeniedStepsFn = ParseDeniedSteps;
+        var processMovementPacketsFn = ProcessMovementPackets;
 
 
         app
             .AddResource(new PlayerStepsContext())
-
-            .AddSystem(Stage.Startup, setupPackets)
 
             .AddSystem((ResMut<PlayerStepsContext> playerRequestedSteps) =>
             {
                 playerRequestedSteps.Value = new PlayerStepsContext();
             })
             .OnEnter(GameState.GameScreen)
+            .Build()
+
+            .AddSystem(processMovementPacketsFn)
+            .InStage(Stage.Update)
+            .RunIf((EventReader<IPacket> packets) => packets.HasEvents)
             .Build()
 
             .AddSystem(enqueuePlayerStepsFn)
@@ -124,46 +126,36 @@ readonly struct PlayerMovementPlugin : IPlugin
     }
 
 
-    static void SetupPackets(
-        Res<PacketsMap> packetsMap,
+    static void ProcessMovementPackets(
+        EventReader<IPacket> packets,
         EventWriter<AcceptedStep> acceptedSteps,
         EventWriter<RejectedStep> rejectedSteps
     )
     {
-        // deny walk
-        packetsMap.Value[0x21] = buffer =>
+        foreach (var packet in packets.Read())
         {
-            var reader = new StackDataReader(buffer);
-
-            byte sequence = reader.ReadUInt8();
-            (var x, var y) = (reader.ReadUInt16BE(), reader.ReadUInt16BE());
-            var direction = (Direction)reader.ReadUInt8();
-            var z = reader.ReadInt8();
-
-            rejectedSteps.Send(new()
+            switch (packet)
             {
-                Sequence = sequence,
-                Direction = direction,
-                X = x,
-                Y = y,
-                Z = z
-            });
-        };
+                case OnDenyWalkPacket_0x21 deny:
+                    rejectedSteps.Send(new RejectedStep
+                    {
+                        Sequence = deny.Sequence,
+                        Direction = deny.Direction,
+                        X = deny.X,
+                        Y = deny.Y,
+                        Z = deny.Z
+                    });
+                    break;
 
-        // confirm walk
-        packetsMap.Value[0x22] = buffer =>
-        {
-            var reader = new StackDataReader(buffer);
-
-            var sequence = reader.ReadUInt8();
-            var notoriety = (NotorietyFlag)reader.ReadUInt8();
-
-            acceptedSteps.Send(new()
-            {
-                Sequence = sequence,
-                Notoriety = notoriety
-            });
-        };
+                case OnConfirmWalkPacket_0x22 confirm:
+                    acceptedSteps.Send(new AcceptedStep
+                    {
+                        Sequence = confirm.Sequence,
+                        Notoriety = confirm.Notoriety
+                    });
+                    break;
+            }
+        }
     }
 
     static void EnqueuePlayerSteps(

@@ -10,6 +10,8 @@ using System.Runtime.InteropServices;
 using ClassicUO.Game.Data;
 using ClassicUO.IO;
 using TinyEcs.Bevy;
+using ClassicUO.Game.Managers;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Ecs;
 
@@ -40,6 +42,7 @@ readonly struct NetworkPlugin : IPlugin
         0xAE, // OnUnicodeSpeech
         0xC8, // OnViewRange
         0x1C, // OnAsciiSpeech
+        0xBF, // OnExtendedCommand
         0x1A, // OnUpdateItem
         0x11, // OnCharacterStatus
         0xD3, // OnUpdateObject
@@ -50,7 +53,9 @@ readonly struct NetworkPlugin : IPlugin
         0x2E, // OnEquipItem
         0xA1, // OnUpdateHits
         0xA2, // OnUpdateMana
-        0xA3  // OnUpdateStamina
+        0xA3, // OnUpdateStamina
+        0xD8, // OnCustomHouse
+        0xF3  // OnUpdateItemSA
     };
 
     public void Build(App app)
@@ -70,9 +75,7 @@ readonly struct NetworkPlugin : IPlugin
             {
                 void create<T>() where T : IPacket, new()
                 {
-                    var stack = new Stack<IPacket>();
                     var packet = new T();
-                    stack.Push(packet);
                     var fn = () => (IPacket)new T();
                     packetsMap.Value.Add(packet.Id, fn);
                 }
@@ -89,6 +92,13 @@ readonly struct NetworkPlugin : IPlugin
                 create<OnUpdateItemPacket_0x1A>();
                 create<OnDamagePacket_0x0B>();
                 create<OnCharacterStatusPacket_0x11>();
+                create<OnDenyWalkPacket_0x21>();
+                create<OnConfirmWalkPacket_0x22>();
+                create<OnOpenContainerPacket_0x24>();
+                create<OnUpdateContainerPacket_0x25>();
+                create<OnDenyMoveItemPacket_0x27>();
+                create<OnEndDraggingItemPacket_0x28>();
+                create<OnDropItemOkPacket_0x29>();
                 create<OnHealthBarStatusPacket_0x16>();
                 create<OnHealthBarStatusDetailsPacket_0x17>();
                 create<OnDeleteObjectPacket_0x1D>();
@@ -100,6 +110,7 @@ readonly struct NetworkPlugin : IPlugin
                 create<OnSwingPacket_0x2F>();
                 create<OnUpdateSkillsPacket_0x3A>();
                 create<OnPathfindingPacket_0x38>();
+                create<OnUpdateContainerItemsPacket_0x3C>();
                 create<OnPlayerLightLevelPacket_0x4E>();
                 create<OnServerLightLevelPacket_0x4F>();
                 create<OnSoundEffectPacket_0x54>();
@@ -365,10 +376,10 @@ readonly struct NetworkPlugin : IPlugin
             if (sp.IsEmpty)
                 continue;
 
-            var payload = sp.Slice(packetHeaderOffset, packetLen - packetHeaderOffset);
 
             if (packetsMap2.Value.TryGetValue(packetId, out var fn))
             {
+                var payload = sp.Slice(packetHeaderOffset, packetLen - packetHeaderOffset);
                 var reader = new StackDataReader(payload);
                 var packet = fn();
                 packet.Fill(reader);
@@ -445,9 +456,7 @@ readonly struct NetworkPlugin : IPlugin
         InGameQueries queries
     )
     {
-        _ = fileManager;
         _ = profile;
-        _ = delayedActions;
 
         switch (packet)
         {
@@ -475,16 +484,37 @@ readonly struct NetworkPlugin : IPlugin
                 HandleAsciiSpeech(asciiSpeech, network, textOverHeadQueue);
                 return true;
 
+            case OnExtendedCommandPacket_0xBF extendedCommand:
+                HandleExtendedCommand(
+                    extendedCommand,
+                    commands,
+                    entitiesMap,
+                    network,
+                    settings,
+                    fileManager,
+                    gameCtx,
+                    multiCache,
+                    delayedActions,
+                    mobileQueuedSteps,
+                    textOverHeadQueue,
+                    queries
+                );
+                return true;
+
             case OnUpdateItemPacket_0x1A updateItem:
                 HandleUpdateItem(updateItem, commands, entitiesMap, multiCache, gameCtx, mobileQueuedSteps, queries);
                 return true;
 
+            case OnUpdateItemSAPacket_0xF3 updateItemSA:
+                HandleUpdateItemSA(updateItemSA, commands, entitiesMap, multiCache, mobileQueuedSteps, queries);
+                return true;
+
             case OnUpdateObjectPacket_0xD3 updateObject:
-                HandleUpdateObject(updateObject, commands, entitiesMap, mobileQueuedSteps);
+                HandleUpdateObject(updateObject, commands, entitiesMap, mobileQueuedSteps, queries);
                 return true;
 
             case OnUpdateObjectAltPacket_0x78 updateObjectAlt:
-                HandleUpdateObject(updateObjectAlt, commands, entitiesMap, mobileQueuedSteps);
+                HandleUpdateObject(updateObjectAlt, commands, entitiesMap, mobileQueuedSteps, queries);
                 return true;
 
             case OnDeleteObjectPacket_0x1D deleteObject:
@@ -517,6 +547,10 @@ readonly struct NetworkPlugin : IPlugin
 
             case OnUpdateStaminaPacket_0xA3 updateStamina:
                 HandleUpdateStamina(updateStamina, commands, entitiesMap);
+                return true;
+
+            case OnCustomHousePacket_0xD8 customHouse:
+                HandleCustomHouse(customHouse, commands, entitiesMap, multiCache, queries);
                 return true;
 
             default:
@@ -597,13 +631,13 @@ readonly struct NetworkPlugin : IPlugin
     {
         if (packet.IsSystemMessage)
         {
-            network.Value.Send(new byte[]
-            {
+            network.Value.Send(
+            [
                 0x03, 0x00, 0x28, 0x20, 0x00, 0x34, 0x00, 0x03, 0xDB, 0x13,
                 0x14, 0x3F, 0x45, 0x2C, 0x58, 0x0F, 0x5D, 0x44, 0x2E, 0x50,
                 0x11, 0xDF, 0x75, 0x5C, 0xE0, 0x3E, 0x71, 0x4F, 0x31, 0x34,
                 0x05, 0x4E, 0x18, 0x1E, 0x72, 0x0F, 0x59, 0xAD, 0xF5, 0x00
-            });
+            ]);
             return;
         }
 
@@ -649,6 +683,84 @@ readonly struct NetworkPlugin : IPlugin
         OnViewRangePacket_0xC8 packet,
         ResMut<GameContext> gameCtx
     ) => gameCtx.Value.MaxObjectsDistance = packet.Range;
+
+    static void HandleExtendedCommand(
+        OnExtendedCommandPacket_0xBF packet,
+        Commands commands,
+        Res<NetworkEntitiesMap> entitiesMap,
+        Res<NetClient> network,
+        Res<Settings> settings,
+        Res<UOFileManager> fileManager,
+        ResMut<GameContext> gameCtx,
+        Res<MultiCache> multiCache,
+        Res<DelayedAction> delayedActions,
+        EventWriter<MobileQueuedStep> mobileQueuedSteps,
+        EventWriter<TextOverheadEvent> textOverHeadQueue,
+        InGameQueries queries
+    )
+    {
+        _ = settings;
+        _ = multiCache;
+        _ = mobileQueuedSteps;
+        _ = textOverHeadQueue;
+
+        switch (packet.Command)
+        {
+            case 0x08:
+                HandleExtendedCommand_MapChange(packet, fileManager, gameCtx);
+                break;
+
+            case 0x1D:
+                HandleExtendedCommand_HouseRevision(packet, commands, entitiesMap, network, delayedActions, queries);
+                break;
+        }
+    }
+
+    static void HandleExtendedCommand_MapChange(
+        OnExtendedCommandPacket_0xBF packet,
+        Res<UOFileManager> fileManager,
+        ResMut<GameContext> gameCtx
+    )
+    {
+        if (!packet.MapIndex.HasValue)
+            return;
+
+        var mapIdx = packet.MapIndex.Value;
+        fileManager.Value.Maps.LoadMap(mapIdx);
+
+        if (gameCtx.Value.Map != mapIdx)
+        {
+            gameCtx.Value.Map = mapIdx;
+        }
+    }
+
+    static void HandleExtendedCommand_HouseRevision(
+        OnExtendedCommandPacket_0xBF packet,
+        Commands commands,
+        Res<NetworkEntitiesMap> entitiesMap,
+        Res<NetClient> network,
+        Res<DelayedAction> delayedActions,
+        InGameQueries queries
+    )
+    {
+        if (!packet.HouseRevisionSerial.HasValue || !packet.HouseRevision.HasValue)
+            return;
+
+        var serial = packet.HouseRevisionSerial.Value;
+        var revision = packet.HouseRevision.Value;
+
+        var house = entitiesMap.Value.GetOrCreate(commands, serial);
+
+        if (queries.qHouseRevision.Contains(house.Id))
+        {
+            (_, var houseRev) = queries.qHouseRevision.Get(house.Id);
+            if (houseRev.Ref.Value == revision)
+                return;
+        }
+
+        house.Insert(new HouseRevision { Value = revision });
+        delayedActions.Value.Add(() => network.Value.Send_CustomHouseDataRequest(serial), 1000);
+    }
 
     static void HandleUpdateItem(
         OnUpdateItemPacket_0x1A packet,
@@ -714,11 +826,224 @@ readonly struct NetworkPlugin : IPlugin
         }
     }
 
+    static void HandleUpdateItemSA(
+        OnUpdateItemSAPacket_0xF3 packet,
+        Commands commands,
+        Res<NetworkEntitiesMap> entitiesMap,
+        Res<MultiCache> multiCache,
+        EventWriter<MobileQueuedStep> mobileQueuedSteps,
+        InGameQueries queries
+    )
+    {
+        var finalGraphic = (ushort)(packet.Graphic + packet.GraphicIncrement);
+        var ent = entitiesMap.Value.GetOrCreate(commands, packet.Serial);
+        ent.Insert(new Graphic() { Value = finalGraphic })
+            .Insert(new Hue() { Value = packet.Hue })
+            .Insert(new Amount() { Value = packet.Amount })
+            .Insert(new ServerFlags() { Value = packet.Flags });
+
+        if (ClassicUO.Game.SerialHelper.IsMobile(packet.Serial))
+        {
+            mobileQueuedSteps.Send(new MobileQueuedStep
+            {
+                Serial = packet.Serial,
+                X = packet.X,
+                Y = packet.Y,
+                Z = packet.Z,
+                Direction = packet.Direction
+            });
+        }
+        else
+        {
+            ent.Insert(new WorldPosition() { X = packet.X, Y = packet.Y, Z = packet.Z })
+                .Insert(new Facing() { Value = packet.Direction });
+        }
+
+        if (packet.UpdateType == 2 && !queries.qMultis.Contains(ent.Id))
+        {
+            ent.Insert<IsMulti>();
+
+            var multiInfo = multiCache.Value.GetMulti(finalGraphic);
+            foreach (ref readonly var block in CollectionsMarshal.AsSpan(multiInfo.Blocks))
+            {
+                if (!block.IsVisible)
+                    continue;
+
+                var child = commands.Spawn()
+                    .Insert(new Graphic() { Value = block.ID })
+                    .Insert(new Hue())
+                    .Insert(new WorldPosition()
+                    {
+                        X = (ushort)(packet.X + block.X),
+                        Y = (ushort)(packet.Y + block.Y),
+                        Z = (sbyte)(packet.Z + block.Z)
+                    })
+                    .Insert<NormalMulti>();
+
+                ent.AddChild(child);
+            }
+        }
+    }
+
+    static void HandleCustomHouse(
+        OnCustomHousePacket_0xD8 packet,
+        Commands commands,
+        Res<NetworkEntitiesMap> entitiesMap,
+        Res<MultiCache> multiCache,
+        InGameQueries queries
+    )
+    {
+        if (packet.Planes == null || packet.Planes.Count == 0)
+            return;
+
+        var parent = entitiesMap.Value.GetOrCreate(commands, packet.Serial);
+
+        if (!queries.qPosAndGraphic.Contains(parent.Id))
+            return;
+
+        (var pos, var graphic) = queries.qPosAndGraphic.Get(parent.Id);
+        (var startX, var startY, var startZ) = pos.Ref;
+
+        parent.Insert(new HouseRevision { Value = packet.Revision });
+
+        var multiRect = multiCache.Value.GetMulti(graphic.Ref.Value).Bounds;
+
+        foreach (var plane in packet.Planes)
+        {
+            if (plane.Data == null || plane.Data.Length == 0)
+                continue;
+
+            var reader = new StackDataReader(plane.Data);
+
+            switch (plane.PlaneMode)
+            {
+                case 0:
+                    {
+                        var entries = plane.Data.Length / 5;
+                        for (var i = 0; i < entries; ++i)
+                        {
+                            var id = reader.ReadUInt16BE();
+                            var offsetX = reader.ReadInt8();
+                            var offsetY = reader.ReadInt8();
+                            var offsetZ = reader.ReadInt8();
+
+                            var child = commands.Spawn()
+                                .Insert(new Graphic() { Value = id })
+                                .Insert(new Hue())
+                                .Insert(new WorldPosition()
+                                {
+                                    X = (ushort)(startX + offsetX),
+                                    Y = (ushort)(startY + offsetY),
+                                    Z = (sbyte)(startZ + offsetZ)
+                                })
+                                .Insert<CustomMulti>();
+
+                            parent.AddChild(child);
+                        }
+
+                        break;
+                    }
+
+                case 1:
+                    {
+                        var planeZ = plane.PlaneZ;
+                        var z = planeZ > 0 ? (sbyte)(((planeZ - 1) % 4) * 20 + 7) : (sbyte)0;
+                        var entries = plane.Data.Length >> 2;
+
+                        for (var i = 0; i < entries; ++i)
+                        {
+                            var id = reader.ReadUInt16BE();
+                            var offsetX = reader.ReadInt8();
+                            var offsetY = reader.ReadInt8();
+
+                            if (id == 0)
+                                continue;
+
+                            var child = commands.Spawn()
+                                .Insert(new Graphic() { Value = id })
+                                .Insert(new Hue())
+                                .Insert(new WorldPosition()
+                                {
+                                    X = (ushort)(startX + offsetX),
+                                    Y = (ushort)(startY + offsetY),
+                                    Z = (sbyte)(startZ + z)
+                                })
+                                .Insert<CustomMulti>();
+
+                            parent.AddChild(child);
+                        }
+
+                        break;
+                    }
+
+                case 2:
+                    {
+                        var planeZ = plane.PlaneZ;
+                        var z = planeZ > 0 ? (sbyte)(((planeZ - 1) % 4) * 20 + 7) : (sbyte)0;
+
+                        short offX;
+                        short offY;
+                        short multiHeight;
+
+                        if (planeZ <= 0)
+                        {
+                            offX = (short)multiRect.X;
+                            offY = (short)multiRect.Y;
+                            multiHeight = (short)(multiRect.Height - multiRect.Y + 2);
+                        }
+                        else if (planeZ <= 4)
+                        {
+                            offX = (short)(multiRect.X + 1);
+                            offY = (short)(multiRect.Y + 1);
+                            multiHeight = (short)(multiRect.Height - multiRect.Y);
+                        }
+                        else
+                        {
+                            offX = (short)multiRect.X;
+                            offY = (short)multiRect.Y;
+                            multiHeight = (short)(multiRect.Height - multiRect.Y + 1);
+                        }
+
+                        if (multiHeight <= 0)
+                            break;
+
+                        var entries = plane.Data.Length >> 1;
+
+                        for (var i = 0; i < entries; ++i)
+                        {
+                            var id = reader.ReadUInt16BE();
+                            if (id == 0)
+                                continue;
+
+                            var relativeX = (sbyte)((i == 0 ? 0 : (i / multiHeight)) + offX);
+                            var relativeY = (sbyte)(i % multiHeight + offY);
+
+                            var child = commands.Spawn()
+                                .Insert(new Graphic() { Value = id })
+                                .Insert(new Hue())
+                                .Insert(new WorldPosition()
+                                {
+                                    X = (ushort)(startX + relativeX),
+                                    Y = (ushort)(startY + relativeY),
+                                    Z = (sbyte)(startZ + z)
+                                })
+                                .Insert<CustomMulti>();
+
+                            parent.AddChild(child);
+                        }
+
+                        break;
+                    }
+            }
+        }
+    }
+
     static void HandleUpdateObject(
         OnUpdateObjectPacket_0xD3 packet,
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
-        EventWriter<MobileQueuedStep> mobileQueuedSteps
+        EventWriter<MobileQueuedStep> mobileQueuedSteps,
+        InGameQueries queries
     )
     {
         var ent = entitiesMap.Value.GetOrCreate(commands, packet.Serial);
@@ -726,7 +1051,17 @@ readonly struct NetworkPlugin : IPlugin
             .Insert(new Hue() { Value = packet.Hue })
             .Insert(new ServerFlags() { Value = packet.Flags });
 
-        var slots = new EquipmentSlots();
+        EquipmentSlots slots;
+        if (queries.qEquipmentSlots.Contains(ent.Id))
+        {
+            (_, var existing) = queries.qEquipmentSlots.Get(ent.Id);
+            slots = existing.Ref;
+        }
+        else
+        {
+            slots = new EquipmentSlots();
+        }
+
         if (packet.Equipment != null)
         {
             foreach (var entry in packet.Equipment)
@@ -755,7 +1090,8 @@ readonly struct NetworkPlugin : IPlugin
         OnUpdateObjectAltPacket_0x78 packet,
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
-        EventWriter<MobileQueuedStep> mobileQueuedSteps
+        EventWriter<MobileQueuedStep> mobileQueuedSteps,
+        InGameQueries queries
     )
     {
         var ent = entitiesMap.Value.GetOrCreate(commands, packet.Serial);
@@ -763,7 +1099,17 @@ readonly struct NetworkPlugin : IPlugin
             .Insert(new Hue() { Value = packet.Hue })
             .Insert(new ServerFlags() { Value = packet.Flags });
 
-        var slots = new EquipmentSlots();
+        EquipmentSlots slots;
+        if (queries.qEquipmentSlots.Contains(ent.Id))
+        {
+            (_, var existing) = queries.qEquipmentSlots.Get(ent.Id);
+            slots = existing.Ref;
+        }
+        else
+        {
+            slots = new EquipmentSlots();
+        }
+
         if (packet.Equipment != null)
         {
             foreach (var entry in packet.Equipment)
