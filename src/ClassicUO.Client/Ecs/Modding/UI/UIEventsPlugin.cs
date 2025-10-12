@@ -66,7 +66,7 @@ internal readonly struct UIEventsPlugin : IPlugin
                 var json = (uiEv.Ref with
                 {
                     EntityId = id,
-                    EventId = eventId.Ref.ID,
+                    EventId = eventId.Ref,
                     X = mouseCtx.Position.X,
                     Y = mouseCtx.Position.Y,
                     Wheel = mouseCtx.Wheel,
@@ -105,7 +105,7 @@ internal readonly struct UIEventsPlugin : IPlugin
                 continue;
 
             var result = sendEventForId(
-                ent.Ref.ID,
+                ent.Ref,
                 queryEvents,
                 children,
                 mouseCtx.Value,
@@ -117,7 +117,7 @@ internal readonly struct UIEventsPlugin : IPlugin
             if (!result)
                 continue;
 
-            var parentId = ent.Ref.ID;
+            var parentId = ent.Ref;
             while (queryUIParents.Contains(parentId))
             {
                 (_, var parent) = queryUIParents.Get(parentId);
@@ -155,7 +155,7 @@ internal readonly struct UIEventsPlugin : IPlugin
                     continue;
 
                 var result = sendEventForId(
-                    ent.Ref.ID,
+                    ent.Ref,
                     queryEvents,
                     children,
                     mouseCtx.Value,
@@ -167,7 +167,7 @@ internal readonly struct UIEventsPlugin : IPlugin
                 if (!result)
                     continue;
 
-                var parentId = ent.Ref.ID;
+                var parentId = ent.Ref;
                 while (queryUIParents.Contains(parentId))
                 {
                     (_, var parent) = queryUIParents.Get(parentId);

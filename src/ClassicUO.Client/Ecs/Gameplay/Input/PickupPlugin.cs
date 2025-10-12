@@ -184,7 +184,7 @@ internal readonly struct PickupPlugin : IPlugin
         if (serial != 0xFFFF_FFFF)
             (targetX, targetY, targetZ) = (0, 0, 0);
 
-        Console.WriteLine("drop item to {0}", targetEntity.Ref.ID);
+        Console.WriteLine("drop item to {0}", targetEntity.Ref);
         network.Value.Send_DropRequest(grabbedItem.Value.Serial, targetX, targetY, targetZ, 0, serial);
 
         grabbedItem.Value.Clear();

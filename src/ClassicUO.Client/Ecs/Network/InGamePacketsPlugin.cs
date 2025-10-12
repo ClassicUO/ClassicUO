@@ -74,31 +74,6 @@ sealed class NetworkEntitiesMap
         return ent;
     }
 
-    public void Add(Commands commands, uint serial, ulong id)
-    {
-        if (_entities.TryGetValue(serial, out var entity))
-        {
-            if (id != entity)
-            {
-                if (commands.Exists(id))
-                {
-
-                }
-
-                if (commands.Exists(entity))
-                {
-
-                }
-                //
-                // _entities[serial] = id;
-            }
-
-            return;
-        }
-
-        _entities.Add(serial, id);
-    }
-
     public bool Remove(uint serial)
     {
         return _entities.Remove(serial, out var id);

@@ -168,6 +168,7 @@ readonly struct PlayerMovementPlugin : IPlugin
         Res<Camera> camera,
         Res<TerrainPlugin.ChunksLoadedMap> chunksLoaded,
         Res<MultiCache> multiCache,
+        Query<Empty, With<HouseRevision>> qHouseRevision,
         Query<Data<Children>> childrenQuery,
         Query<Data<WorldPosition, Graphic>, Filter<Without<IsTile>, Without<IsStatic>, Without<MobAnimation>>> othersQuery,
         Single<Data<WorldPosition, Facing, MobileSteps, MobAnimation, ServerFlags>, With<Player>> playerQuery,
@@ -217,6 +218,7 @@ readonly struct PlayerMovementPlugin : IPlugin
             terrainList.Value,
             chunksLoaded.Value,
             multiCache.Value,
+            qHouseRevision,
             childrenQuery,
             othersQuery,
             tilesQuery,
@@ -243,6 +245,7 @@ readonly struct PlayerMovementPlugin : IPlugin
                         terrainList.Value,
                         chunksLoaded.Value,
                         multiCache.Value,
+                        qHouseRevision,
                         childrenQuery,
                         othersQuery,
                         tilesQuery,
@@ -268,6 +271,7 @@ readonly struct PlayerMovementPlugin : IPlugin
                         terrainList.Value,
                         chunksLoaded.Value,
                         multiCache.Value,
+                        qHouseRevision,
                         childrenQuery,
                         othersQuery,
                         tilesQuery,
@@ -424,6 +428,7 @@ readonly struct PlayerMovementPlugin : IPlugin
         List<TerrainInfo> list,
         TerrainPlugin.ChunksLoadedMap chunksLoaded,
         MultiCache multiCache,
+        Query<Empty, With<HouseRevision>> qHouseRevision,
         Query<Data<Children>> childrenQuery,
         Query<Data<WorldPosition, Graphic>, Filter<Without<IsTile>, Without<IsStatic>, Without<MobAnimation>>> othersQuery,
         Query<Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tileQuery,
@@ -542,7 +547,7 @@ readonly struct PlayerMovementPlugin : IPlugin
 
             var grapicValue = graphic.Ref.Value;
             // TODO: use Optional<HouseRevision> in query
-            if (ent.Ref.Has<HouseRevision>())
+            if (qHouseRevision.Contains(ent.Ref))
             {
                 var multiInfo = multiCache.GetMulti(grapicValue);
                 if (multiInfo.Id != 0)
@@ -589,6 +594,7 @@ readonly struct PlayerMovementPlugin : IPlugin
         List<TerrainInfo> list,
         TerrainPlugin.ChunksLoadedMap chunksLoaded,
         MultiCache multiCache,
+        Query<Empty, With<HouseRevision>> qHouseRevision,
         Query<Data<Children>> childrenQuery,
         Query<Data<WorldPosition, Graphic>, Filter<Without<IsTile>, Without<IsStatic>, Without<MobAnimation>>> othersQuery,
         Query<Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tileQuery,
@@ -633,6 +639,7 @@ readonly struct PlayerMovementPlugin : IPlugin
             list,
             chunksLoaded,
             multiCache,
+            qHouseRevision,
             childrenQuery,
             othersQuery,
             tileQuery,
@@ -700,6 +707,7 @@ readonly struct PlayerMovementPlugin : IPlugin
         List<TerrainInfo> list,
         TerrainPlugin.ChunksLoadedMap chunksLoaded,
         MultiCache multiCache,
+        Query<Empty, With<HouseRevision>> qHouseRevision,
         Query<Data<Children>> childrenQuery,
         Query<Data<WorldPosition, Graphic>, Filter<Without<IsTile>, Without<IsStatic>, Without<MobAnimation>>> othersQuery,
         Query<Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tileQuery,
@@ -716,6 +724,7 @@ readonly struct PlayerMovementPlugin : IPlugin
             list,
             chunksLoaded,
             multiCache,
+            qHouseRevision,
             childrenQuery,
             othersQuery,
             tileQuery,
@@ -733,6 +742,7 @@ readonly struct PlayerMovementPlugin : IPlugin
             list,
             chunksLoaded,
             multiCache,
+            qHouseRevision,
             childrenQuery,
             othersQuery,
             tileQuery,

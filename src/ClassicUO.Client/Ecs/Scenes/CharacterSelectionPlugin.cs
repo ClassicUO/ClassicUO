@@ -33,11 +33,11 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
             .Build();
     }
 
-    private static void Cleanup(Query<Data<UINode>, Filter<With<CharacterSelectionScene>, Without<Parent>>> query)
+    private static void Cleanup(Commands commands, Query<Data<UINode>, Filter<With<CharacterSelectionScene>, Without<Parent>>> query)
     {
         foreach ((var ent, _) in query)
         {
-            ent.Ref.Delete();
+            commands.Entity(ent.Ref).Despawn();
         }
     }
 

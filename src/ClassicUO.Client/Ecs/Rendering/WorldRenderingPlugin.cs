@@ -73,13 +73,14 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             .OnExit(GameState.GameScreen)
             .Build()
 
-            .AddSystem((Query<Data<WorldPosition>, Without<ScreenPosition>> query2,
+            .AddSystem((Commands commands,
+                        Query<Data<WorldPosition>, Without<ScreenPosition>> query2,
                         Query<Data<WorldPosition, ScreenPosition>, Changed<WorldPosition>> query) =>
             {
                 foreach ((var ent, var worldPos) in query2)
                 {
                     var iso = worldPos.Ref.WorldToScreen();
-                    ent.Ref.Set(new ScreenPosition() { Value = iso });
+                    commands.Entity(ent.Ref).Insert(new ScreenPosition() { Value = iso });
                 }
 
                 foreach ((var worldPos, var screenPos) in query)
@@ -165,6 +166,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         Local<(int lastPosX, int lastPosY, int lastPosZ)?> lastPos,
         Local<MaxZInfo> workingZInfo,
         Query<Data<Graphic, Hue>> qLayers,
+        Query<Empty, With<NormalMulti>> qNormalMultis,
         Single<Data<WorldPosition>, With<Player>> queryPlayer,
         Query<Data<WorldPosition, ScreenPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> queryTiles,
         Query<Data<WorldPosition, ScreenPosition, Graphic, Hue>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>>> queryStatics,
@@ -262,7 +264,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         RenderStatics(
             selectedEntity, gameCtx, batch, assetsServer, fileManager,
             camera, calculateZ, workingZInfo, playerX, playerY, playerZ14,
-            backupZInfo, maxZ, center, mousePos, cameraBounds, queryStatics);
+            backupZInfo, maxZ, center, mousePos, cameraBounds, qNormalMultis, queryStatics);
 
         RenderBodies(
             selectedEntity, batch, assetsServer, fileManager,
@@ -432,6 +434,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         Vector2 center,
         Vector2 mousePos,
         Rectangle cameraBounds,
+        Query<Empty, With<NormalMulti>> qNormalMultis,
         Query<Data<WorldPosition, ScreenPosition, Graphic, Hue>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>>> queryStatics)
     {
         // Cache frequently accessed resources
@@ -527,7 +530,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             if (tileData.Height != 0) priorityZ += 1;
             if (tileData.IsWall) priorityZ += 2;
             if (tileData.IsMultiMovable) priorityZ += 1;
-            if (entity.Ref.Has<NormalMulti>()) priorityZ -= 1;
+            if (qNormalMultis.Contains(entity.Ref)) priorityZ -= 1;
 
             var depthZ = Isometric.GetDepthZ(worldPos.Ref.X, worldPos.Ref.Y, priorityZ);
             var color = Renderer.ShaderHueTranslator.GetHueVector(hue.Ref.Value, tileData.IsPartialHue, 1f);
@@ -1159,7 +1162,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
 
 
 
-    private class MaxZInfo
+    private struct MaxZInfo
     {
         public int? MaxZ;
         public int? MaxZGround;

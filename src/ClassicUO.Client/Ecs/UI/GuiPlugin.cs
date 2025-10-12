@@ -46,7 +46,7 @@ internal readonly struct GuiPlugin : IPlugin
                 var (ent, node) = query.Get(trigger.EntityId);
 
                 if (node.Ref.Config.id.id == 0)
-                    node.Ref.Config.id = Clay.Id(ent.Ref.ID.RealId().ToString());
+                    node.Ref.Config.id = Clay.Id(ent.Ref.RealId().ToString());
             })
 
             .AddSystem(Stage.Startup, (Commands commands, Res<AssetsServer> assets) =>
@@ -248,6 +248,7 @@ internal readonly struct GuiPlugin : IPlugin
     }
 
     private static void HandleNodeStates(
+        Commands commands,
         Res<MouseContext> mouseCtx,
         Res<FocusedInput> focusedInput,
         Query<Data<UINode, UIMouseAction>> query
@@ -297,7 +298,7 @@ internal readonly struct GuiPlugin : IPlugin
 
             if (isChanged)
             {
-                ent.Ref.Set(interaction.Ref);
+                commands.Entity(ent.Ref).Insert(interaction.Ref);
             }
         }
 

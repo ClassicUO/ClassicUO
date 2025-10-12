@@ -39,6 +39,7 @@ internal readonly struct ContainersPlugin : IPlugin
 
 
     private static void CloseContainersTooFarFromPlayer(
+        Commands commands,
         Query<Data<WorldPosition, NetworkSerial>,
              Filter<With<IsContainer>, With<UINode>, With<UIMouseAction>, With<UIMovable>>> query,
         Single<Data<WorldPosition>, With<Player>> queryPlayer,
@@ -53,9 +54,10 @@ internal readonly struct ContainersPlugin : IPlugin
             if (Math.Abs(playerPos.Ref.X - pos.Ref.X) >= MAX_CONTAINER_DIST ||
                 Math.Abs(playerPos.Ref.Y - pos.Ref.Y) >= MAX_CONTAINER_DIST)
             {
-                ent.Ref.Unset<UINode>();
-                ent.Ref.Unset<UIMouseAction>();
-                ent.Ref.Unset<UIMovable>();
+                commands.Entity(ent.Ref)
+                    .Remove<UINode>()
+                    .Remove<UIMouseAction>()
+                    .Remove<UIMovable>();
 
                 hostMsgs.Send(new HostMessage.ContainerClosed(serial.Ref.Value));
             }

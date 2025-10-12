@@ -89,6 +89,7 @@ internal readonly struct TerrainPlugin : IPlugin
             .Build()
 
             .AddSystem((
+                           Commands commands,
                            Res<ChunksLoadedMap> chunksLoaded,
                            Res<GameContext> gameCtx,
                            Res<LastPosition> lastPos,
@@ -98,7 +99,7 @@ internal readonly struct TerrainPlugin : IPlugin
                        {
                            foreach ((var ent, _) in query)
                            {
-                               ent.Ref.Delete();
+                               commands.Entity(ent.Ref).Despawn();
                            }
 
                            chunksLoaded.Value.Clear();
@@ -202,12 +203,7 @@ internal readonly struct TerrainPlugin : IPlugin
 
     internal sealed class StaticsBlockBuffer
     {
-        public StaticsBlockBuffer()
-        {
-            StaticsBlock[] Buffer = new StaticsBlock[64];
-        }
-
-        public StaticsBlock[] Buffer { get; set; }
+        public StaticsBlock[] Buffer { get; set; } = new StaticsBlock[64];
     }
 
     private static void LoadChunks(
@@ -306,7 +302,6 @@ internal readonly struct TerrainPlugin : IPlugin
 
                     if (im.StaticAddress != 0 && im.StaticCount > 0)
                     {
-                        staticsBlockBuffer.Value.Buffer ??= new StaticsBlock[im.StaticCount];
                         if (staticsBlockBuffer.Value.Buffer.Length < im.StaticCount)
                             staticsBlockBuffer.Value.Buffer = new StaticsBlock[im.StaticCount];
 
