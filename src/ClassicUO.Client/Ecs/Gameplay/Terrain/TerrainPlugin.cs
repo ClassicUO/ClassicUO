@@ -49,27 +49,27 @@ internal readonly struct TerrainPlugin : IPlugin
             .RunIf((EventReader<OnNewChunkRequest> reader) => reader.HasEvents)
             .Build()
 
-            .AddObserver((OnAdd<TerrainChunk> trigger, Res<ChunksLoadedMap> chunksLoaded, Res<Time> time) =>
-            {
-                chunksLoaded.Value.Add((trigger.Component.X, trigger.Component.Y), ((uint)time.Value.Total + 5000, trigger.EntityId));
-            })
-            .AddObserver((OnAdd<Terrain> trigger, Query<Data<TerrainChunk>> query, Res<ChunksLoadedMap> chunksLoaded) =>
-            {
-                if (!query.Contains(trigger.EntityId))
-                    return;
-
-                (var ent, var chunk) = query.Get(trigger.EntityId);
-
-                if (chunksLoaded.Value.TryGetValue((chunk.Ref.X, chunk.Ref.Y), out var res))
-                {
-                    if (ent.Ref.ID != res.entity)
-                    {
-                        return;
-                    }
-
-                    ent.Ref.AddChild(trigger.EntityId);
-                }
-            })
+            // .AddObserver((OnAdd<TerrainChunk> trigger, Res<ChunksLoadedMap> chunksLoaded, Res<Time> time) =>
+            // {
+            //     chunksLoaded.Value.Add((trigger.Component.X, trigger.Component.Y), ((uint)time.Value.Total + 5000, trigger.EntityId));
+            // })
+            // .AddObserver((OnAdd<Terrain> trigger, Query<Data<TerrainChunk>> query, Res<ChunksLoadedMap> chunksLoaded) =>
+            // {
+            //     if (!query.Contains(trigger.EntityId))
+            //         return;
+            //
+            //     (var ent, var chunk) = query.Get(trigger.EntityId);
+            //
+            //     if (chunksLoaded.Value.TryGetValue((chunk.Ref.X, chunk.Ref.Y), out var res))
+            //     {
+            //         if (ent.Ref.ID != res.entity)
+            //         {
+            //             return;
+            //         }
+            //
+            //         ent.Ref.AddChild(trigger.EntityId);
+            //     }
+            // })
 
             .AddSystem(checkChunksFn)
             .InStage(Stage.Update)
@@ -236,7 +236,7 @@ internal readonly struct TerrainPlugin : IPlugin
                     var chunk = commands.Spawn()
                         .Insert(new TerrainChunk() { X = chunkX, Y = chunkY });
 
-                    // chunksLoaded.Value.Add((chunkX, chunkY), ((uint)time.Value.Total + 5000, chunk.Id));
+                    chunksLoaded.Value.Add((chunkX, chunkY), ((uint)time.Value.Total + 5000, chunk.Id));
 
                     im.MapFile.Seek((long)im.MapAddress, System.IO.SeekOrigin.Begin);
                     var cells = im.MapFile.Read<Assets.MapBlock>().Cells;
@@ -289,7 +289,7 @@ internal readonly struct TerrainPlugin : IPlugin
                                     .Insert<IsTile>()
                                     .Insert<Terrain>();
 
-                                // chunk.AddChild(e);
+                                chunk.AddChild(e);
                             }
                             else
                             {
@@ -299,7 +299,7 @@ internal readonly struct TerrainPlugin : IPlugin
                                     .Insert<IsTile>()
                                     .Insert<Terrain>();
 
-                                // chunk.AddChild(e);
+                                chunk.AddChild(e);
                             }
                         }
                     }
@@ -338,7 +338,7 @@ internal readonly struct TerrainPlugin : IPlugin
                                 .Insert<IsStatic>()
                                 .Insert<Terrain>();
 
-                            // chunk.AddChild(e);
+                            chunk.AddChild(e);
                         }
                     }
                 }
