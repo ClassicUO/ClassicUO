@@ -99,16 +99,16 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             .AddSystem(renderingFn)
             .InStage(Stage.PostUpdate)
             .Label("cuo:rendering:rendering")
-            // .After("cuo:rendering:begin")
-            // .RunIf(w => w.HasResource<GraphicsDevice>())
-            // .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
-            // .RunIf((Query<Data<WorldPosition>, With<Player>> playerQuery) => playerQuery.Count() > 0)
+            .After("cuo:rendering:begin")
+            .RunIf(w => w.HasResource<GraphicsDevice>())
+            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
+            .RunIf((Query<Data<WorldPosition>, With<Player>> playerQuery) => playerQuery.Count() > 0)
             .Build()
 
             .AddSystem(endRenderingFn)
             .InStage(Stage.PostUpdate)
             .Label("cuo:rendering:end")
-            // .After("cuo:rendering:rendering")
+            .After("cuo:rendering:rendering")
             .Build();
     }
 
@@ -164,7 +164,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         Res<Camera> camera,
         Local<(int lastPosX, int lastPosY, int lastPosZ)?> lastPos,
         Local<MaxZInfo> workingZInfo,
-        Query<Data<Graphic, Hue>, With<ContainedInto>> qLayers,
+        Query<Data<Graphic, Hue>> qLayers,
         Single<Data<WorldPosition>, With<Player>> queryPlayer,
         Query<Data<WorldPosition, ScreenPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> queryTiles,
         Query<Data<WorldPosition, ScreenPosition, Graphic, Hue>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>>> queryStatics,
@@ -174,9 +174,6 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             Filter<Without<ContainedInto>, Optional<MobileSteps>, Optional<MobAnimation>>> queryEquipmentSlots
     )
     {
-        if (queryPlayer.Count() != 1)
-            return;
-
         // Setup rendering state
         batch.Value.Begin(null, camera.Value.ViewTransformMatrix);
         batch.Value.SetBrightlight(1.7f);
@@ -702,7 +699,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         int? maxZ,
         Vector2 center,
         Vector2 mousePos,
-        Query<Data<Graphic, Hue>, With<ContainedInto>> qLayers,
+        Query<Data<Graphic, Hue>> qLayers,
         Query<Data<EquipmentSlots, ScreenPositionOffset, WorldPosition, Graphic, Facing, MobileSteps, MobAnimation>,
             Filter<Without<ContainedInto>, Optional<MobileSteps>, Optional<MobAnimation>>> queryEquipmentSlots)
     {
@@ -755,7 +752,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
 
                 if (!qLayers.Contains(layerEnt))
                 {
-                    slots.Ref[layer] = 0;
+                    // slots.Ref[layer] = 0;
                     continue;
                 }
 
@@ -1005,7 +1002,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         return (dir, mirror);
     }
 
-    private static bool IsItemCovered2(Query<Data<Graphic, Hue>, With<ContainedInto>> qLayer, ref EquipmentSlots slots, Layer layer)
+    private static bool IsItemCovered2(Query<Data<Graphic, Hue>> qLayer, ref EquipmentSlots slots, Layer layer)
     {
         bool isOk(Layer l, ref EquipmentSlots s, ushort value)
         {
