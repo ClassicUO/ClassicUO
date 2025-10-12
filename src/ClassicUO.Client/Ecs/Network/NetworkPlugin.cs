@@ -31,33 +31,18 @@ internal sealed class PacketsMap2 : Dictionary<byte, Func<IPacket>>;
 
 
 
+sealed class VersionedPacketsState
+{
+    public bool LockFeaturesPost;
+    public bool QuestPointerPost;
+    public bool UpdateContainerPost;
+    public bool UpdateContainerItemsPost;
+    public bool ShowMapPost;
+    public bool ShowMapFacetPost;
+}
 
 readonly struct NetworkPlugin : IPlugin
 {
-    static readonly HashSet<byte> HandledPacketIds = new()
-    {
-        0x1B, // OnEnterWorld
-        0x55, // OnLoginComplete
-        0xBD, // OnClientVersion
-        0xAE, // OnUnicodeSpeech
-        0xC8, // OnViewRange
-        0x1C, // OnAsciiSpeech
-        0xBF, // OnExtendedCommand
-        0x1A, // OnUpdateItem
-        0x11, // OnCharacterStatus
-        0xD3, // OnUpdateObject
-        0x78, // OnUpdateObjectAlt
-        0x1D, // OnDeleteObject
-        0x20, // OnUpdatePlayer
-        0x2D, // OnMobileAttributes
-        0x2E, // OnEquipItem
-        0xA1, // OnUpdateHits
-        0xA2, // OnUpdateMana
-        0xA3, // OnUpdateStamina
-        0xD8, // OnCustomHouse
-        0xF3  // OnUpdateItemSA
-    };
-
     public void Build(App app)
     {
         var setupSocketFn = SetupSocket;
@@ -67,11 +52,15 @@ readonly struct NetworkPlugin : IPlugin
         app.AddResource(new CircularBuffer());
         app.AddResource(new PacketsMap());
         app.AddResource(new PacketsMap2());
+        app.AddResource(new VersionedPacketsState());
 
         app
             .AddSystem(Stage.Startup, setupSocketFn)
 
-            .AddSystem(Stage.Startup, (Res<PacketsMap2> packetsMap) =>
+            .AddSystem(Stage.Startup, (
+                Res<PacketsMap2> packetsMap,
+                Res<GameContext> gameCtx
+            ) =>
             {
                 void create<T>() where T : IPacket, new()
                 {
@@ -95,7 +84,10 @@ readonly struct NetworkPlugin : IPlugin
                 create<OnDenyWalkPacket_0x21>();
                 create<OnConfirmWalkPacket_0x22>();
                 create<OnOpenContainerPacket_0x24>();
-                create<OnUpdateContainerPacket_0x25>();
+                if (gameCtx.Value.ClientVersion < ClientVersion.CV_6017)
+                    create<OnUpdateContainerPacket_0x25_Pre6017>();
+                else
+                    create<OnUpdateContainerPacket_0x25_Post6017>();
                 create<OnDenyMoveItemPacket_0x27>();
                 create<OnEndDraggingItemPacket_0x28>();
                 create<OnDropItemOkPacket_0x29>();
@@ -110,7 +102,10 @@ readonly struct NetworkPlugin : IPlugin
                 create<OnSwingPacket_0x2F>();
                 create<OnUpdateSkillsPacket_0x3A>();
                 create<OnPathfindingPacket_0x38>();
-                create<OnUpdateContainerItemsPacket_0x3C>();
+                if (gameCtx.Value.ClientVersion < ClientVersion.CV_6017)
+                    create<OnUpdateContainerItemsPacket_0x3C_Pre6017>();
+                else
+                    create<OnUpdateContainerItemsPacket_0x3C_Post6017>();
                 create<OnPlayerLightLevelPacket_0x4E>();
                 create<OnServerLightLevelPacket_0x4F>();
                 create<OnSoundEffectPacket_0x54>();
@@ -131,8 +126,11 @@ readonly struct NetworkPlugin : IPlugin
                 create<OnOpenMenuPacket_0x7C>();
                 create<OnOpenPaperdollPacket_0x88>();
                 create<OnCorpseEquipmentPacket_0x89>();
-                create<OnShowMapPacket_0x90>();
-                create<OnShowMapFacetPacket_0xF5>();
+                create<OnShowMapPacket_0x90_Pre308Z>();
+                if (gameCtx.Value.ClientVersion < ClientVersion.CV_308Z)
+                    create<OnShowMapFacetPacket_0xF5_Pre308Z>();
+                else
+                    create<OnShowMapFacetPacket_0xF5_Post308Z>();
                 create<OnOpenBookPacket_0x93>();
                 create<OnOpenBookAltPacket_0xD4>();
                 create<OnColorPickerPacket_0x95>();
@@ -152,8 +150,16 @@ readonly struct NetworkPlugin : IPlugin
                 create<OnOpenGumpPacket_0xB0>();
                 create<OnChatMessagePacket_0xB2>();
                 create<OnOpenCharacterProfilePacket_0xB8>();
-                create<OnLockFeaturesPacket_0xB9>();
-                create<OnQuestPointerPacket_0xBA>();
+                if (gameCtx.Value.ClientVersion < ClientVersion.CV_60142)
+                    create<OnLockFeaturesPacket_0xB9_Pre60142>();
+                else
+                    create<OnLockFeaturesPacket_0xB9_Post60142>();
+
+                if (gameCtx.Value.ClientVersion < ClientVersion.CV_7090)
+                    create<OnQuestPointerPacket_0xBA_Pre7090>();
+                else
+                    create<OnQuestPointerPacket_0xBA_Post7090>();
+
                 create<OnSeasonChangePacket_0xBC>();
                 create<OnClilocMessagePacket_0xC1>();
                 create<OnClilocMessageAffixPacket_0xCC>();
@@ -210,11 +216,6 @@ readonly struct NetworkPlugin : IPlugin
                         queries))
                     {
                         continue;
-                    }
-
-                    if (HandledPacketIds.Contains(packet.Id))
-                    {
-                        Console.WriteLine("Unhandled packet event: ID 0x{0:X2}", packet.Id);
                     }
                 }
             })
@@ -314,6 +315,8 @@ readonly struct NetworkPlugin : IPlugin
         Res<NetClient> network,
         Res<PacketsMap> packetsMap,
         Res<PacketsMap2> packetsMap2,
+        Res<GameContext> gameCtx,
+        Res<VersionedPacketsState> versionedPackets,
         Res<CircularBuffer> buffer,
         Local<PacketBuffer> packetBuffer,
         EventWriter<IPacket> queuePackets
@@ -326,73 +329,112 @@ readonly struct NetworkPlugin : IPlugin
 
         while (buffer.Value.Length > 0)
         {
-            var packetId = buffer.Value[0];
-            var packetLen = (int)network.Value.PacketsTable.GetPacketLength(packetId);
-            var packetHeaderOffset = sizeof(byte);
-
-            if (packetLen == -1)
             {
-                if (buffer.Value.Length < 3)
-                    break;
+                var packetId = buffer.Value[0];
+                var packetLen = (int)network.Value.PacketsTable.GetPacketLength(packetId);
+                var packetHeaderOffset = sizeof(byte);
 
-                var b0 = buffer.Value[1];
-                var b1 = buffer.Value[2];
-
-                packetLen = (b0 << 8) | b1;
-                packetHeaderOffset += sizeof(ushort);
-            }
-
-            if (buffer.Value.Length < packetLen)
-            {
-                Console.WriteLine("needs more data for packet 0x{0:X2}", packetId);
-                break;
-            }
-
-            while (packetLen > packetBuffer.Value.Buffer.Length)
-                Array.Resize(ref packetBuffer.Value.Buffer, packetBuffer.Value.Buffer.Length * 2);
-
-            _ = buffer.Value.Dequeue(packetBuffer.Value.Buffer, 0, packetLen);
-
-            // Console.WriteLine(">> packet-in: ID 0x{0:X2} | Len: {1}", packetId, packetLen);
-
-            var sp = packetBuffer.Value.Buffer.AsSpan(0, packetLen + packetHeaderOffset);
-
-            foreach ((_, var mod) in queryMods)
-            {
-                if (mod.Ref.Mod.Plugin.FunctionExists("packet_recv"))
+                if (packetLen == -1)
                 {
-                    var res = mod.Ref.Mod.Plugin.Call("packet_recv", sp);
-                    if (res.IsEmpty)
+                    if (buffer.Value.Length < 3)
+                        break;
+
+                    var b0 = buffer.Value[1];
+                    var b1 = buffer.Value[2];
+
+                    packetLen = (b0 << 8) | b1;
+                    packetHeaderOffset += sizeof(ushort);
+                }
+
+                if (buffer.Value.Length < packetLen)
+                {
+                    Console.WriteLine("needs more data for packet 0x{0:X2}", packetId);
+                    break;
+                }
+
+                while (packetLen > packetBuffer.Value.Buffer.Length)
+                    Array.Resize(ref packetBuffer.Value.Buffer, packetBuffer.Value.Buffer.Length * 2);
+
+                _ = buffer.Value.Dequeue(packetBuffer.Value.Buffer, 0, packetLen);
+
+                // Console.WriteLine(">> packet-in: ID 0x{0:X2} | Len: {1}", packetId, packetLen);
+
+                var sp = packetBuffer.Value.Buffer.AsSpan(0, packetLen + packetHeaderOffset);
+
+                foreach ((_, var mod) in queryMods)
+                {
+                    if (mod.Ref.Mod.Plugin.FunctionExists("packet_recv"))
                     {
-                        sp = [];
-                    }
-                    else
-                    {
-                        res.CopyTo(sp);
+                        var res = mod.Ref.Mod.Plugin.Call("packet_recv", sp);
+                        if (res.IsEmpty)
+                        {
+                            sp = [];
+                        }
+                        else
+                        {
+                            res.CopyTo(sp);
+                        }
                     }
                 }
+
+                if (sp.IsEmpty)
+                    continue;
+
+                var version = gameCtx.Value.ClientVersion;
+
+                if (!versionedPackets.Value.LockFeaturesPost && version >= ClientVersion.CV_60142)
+                {
+                    packetsMap2.Value[0xB9] = () => new OnLockFeaturesPacket_0xB9_Post60142();
+                    versionedPackets.Value.LockFeaturesPost = true;
+                }
+
+                if (!versionedPackets.Value.QuestPointerPost && version >= ClientVersion.CV_7090)
+                {
+                    packetsMap2.Value[0xBA] = () => new OnQuestPointerPacket_0xBA_Post7090();
+                    versionedPackets.Value.QuestPointerPost = true;
+                }
+
+                if (!versionedPackets.Value.UpdateContainerPost && version >= ClientVersion.CV_6017)
+                {
+                    packetsMap2.Value[0x25] = () => new OnUpdateContainerPacket_0x25_Post6017();
+                    versionedPackets.Value.UpdateContainerPost = true;
+                }
+
+                if (!versionedPackets.Value.UpdateContainerItemsPost && version >= ClientVersion.CV_6017)
+                {
+                    packetsMap2.Value[0x3C] = () => new OnUpdateContainerItemsPacket_0x3C_Post6017();
+                    versionedPackets.Value.UpdateContainerItemsPost = true;
+                }
+
+                if (!versionedPackets.Value.ShowMapPost && version >= ClientVersion.CV_308Z)
+                {
+                    packetsMap2.Value[0x90] = () => new OnShowMapPacket_0x90_Post308Z();
+                    versionedPackets.Value.ShowMapPost = true;
+                }
+
+                if (!versionedPackets.Value.ShowMapFacetPost && version >= ClientVersion.CV_308Z)
+                {
+                    packetsMap2.Value[0xF5] = () => new OnShowMapFacetPacket_0xF5_Post308Z();
+                    versionedPackets.Value.ShowMapFacetPost = true;
+                }
+
+                if (packetsMap2.Value.TryGetValue(packetId, out var fn))
+                {
+                    var payload = sp.Slice(packetHeaderOffset, packetLen - packetHeaderOffset);
+                    var reader = new StackDataReader(payload);
+                    var packet = fn();
+                    packet.Fill(reader);
+                    queuePackets.Send(packet);
+                }
+
+                // if (packetsMap.Value.TryGetValue(packetId, out var handler) && !HandledPacketIds.Contains(packetId))
+                // {
+                //     handler(payload);
+                // }
             }
 
-            if (sp.IsEmpty)
-                continue;
-
-
-            if (packetsMap2.Value.TryGetValue(packetId, out var fn))
-            {
-                var payload = sp.Slice(packetHeaderOffset, packetLen - packetHeaderOffset);
-                var reader = new StackDataReader(payload);
-                var packet = fn();
-                packet.Fill(reader);
-                queuePackets.Send(packet);
-            }
-
-            // if (packetsMap.Value.TryGetValue(packetId, out var handler) && !HandledPacketIds.Contains(packetId))
-            // {
-            //     handler(payload);
-            // }
+            network.Value.Flush();
         }
-
-        network.Value.Flush();
     }
 
     sealed class InGameQueries : ISystemParam
@@ -549,6 +591,37 @@ readonly struct NetworkPlugin : IPlugin
                 HandleUpdateStamina(updateStamina, commands, entitiesMap);
                 return true;
 
+            case OnLockFeaturesPacket_0xB9_Pre60142 lockFeaturesPre:
+                HandleLockFeatures(lockFeaturesPre.Flags, OnLockFeaturesPacket_0xB9_Pre60142.ComputeFlags(lockFeaturesPre.Flags), fileManager);
+                return true;
+
+            case OnLockFeaturesPacket_0xB9_Post60142 lockFeaturesPost:
+                HandleLockFeatures(lockFeaturesPost.Flags, lockFeaturesPost.BodyConversionFlags, fileManager);
+                return true;
+
+            case OnQuestPointerPacket_0xBA_Pre7090 questPointerPre:
+                HandleQuestPointer(questPointerPre.Display, questPointerPre.X, questPointerPre.Y, null);
+                return true;
+
+            case OnQuestPointerPacket_0xBA_Post7090 questPointerPost:
+                HandleQuestPointer(questPointerPost.Display, questPointerPost.X, questPointerPost.Y, questPointerPost.Serial);
+                return true;
+
+            case OnShowMapPacket_0x90_Pre308Z showMapPre:
+                HandleShowMap(showMapPre.Serial, showMapPre.GumpId, showMapPre.StartX, showMapPre.StartY, showMapPre.EndX, showMapPre.EndY, showMapPre.Width, showMapPre.Height, null);
+                return true;
+
+            case OnShowMapPacket_0x90_Post308Z showMapPost:
+                HandleShowMap(showMapPost.Serial, showMapPost.GumpId, showMapPost.StartX, showMapPost.StartY, showMapPost.EndX, showMapPost.EndY, showMapPost.Width, showMapPost.Height, showMapPost.Facet);
+                return true;
+
+            case OnShowMapFacetPacket_0xF5_Pre308Z showFacetPre:
+                HandleShowMapFacet(showFacetPre.Serial, showFacetPre.GumpId, showFacetPre.StartX, showFacetPre.StartY, showFacetPre.EndX, showFacetPre.EndY, showFacetPre.Width, showFacetPre.Height, 0);
+                return true;
+
+            case OnShowMapFacetPacket_0xF5_Post308Z showFacetPost:
+                HandleShowMapFacet(showFacetPost.Serial, showFacetPost.GumpId, showFacetPost.StartX, showFacetPost.StartY, showFacetPost.EndX, showFacetPost.EndY, showFacetPost.Width, showFacetPost.Height, showFacetPost.Facet);
+                return true;
             case OnCustomHousePacket_0xD8 customHouse:
                 HandleCustomHouse(customHouse, commands, entitiesMap, multiCache, queries);
                 return true;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using ClassicUO.Assets;
 using ClassicUO.Ecs.Modding.Host;
 using ClassicUO.Game.Data;
@@ -122,7 +122,6 @@ internal readonly struct ContainersPlugin : IPlugin
 
     private static void ProcessContainerPackets(
         Commands commands,
-        Res<GameContext> gameCtx,
         Res<NetworkEntitiesMap> entitiesMap,
         Res<AssetsServer> assets,
         EventWriter<ContainerUpdateEvent> writer,
@@ -140,19 +139,27 @@ internal readonly struct ContainersPlugin : IPlugin
                     hostMsgs.Send(new HostMessage.ContainerOpened(open.Serial, open.Graphic));
                     break;
 
-                case OnUpdateContainerPacket_0x25 update:
-                    HandleUpdateContainer(update, commands, entitiesMap, assets, writer, hostMsgs);
+                case OnUpdateContainerPacket_0x25_Pre6017 updatePre:
+                    HandleUpdateContainer(updatePre, commands, entitiesMap, assets, writer, hostMsgs);
                     break;
 
-                case OnUpdateContainerItemsPacket_0x3C updateItems:
-                    HandleUpdateContainerItems(updateItems, commands, gameCtx, entitiesMap, assets, writer, hostMsgs);
+                case OnUpdateContainerPacket_0x25_Post6017 updatePost:
+                    HandleUpdateContainer(updatePost, commands, entitiesMap, assets, writer, hostMsgs);
+                    break;
+
+                case OnUpdateContainerItemsPacket_0x3C_Pre6017 updateItemsPre:
+                    HandleUpdateContainerItems(updateItemsPre, commands, entitiesMap, assets, writer, hostMsgs);
+                    break;
+
+                case OnUpdateContainerItemsPacket_0x3C_Post6017 updateItemsPost:
+                    HandleUpdateContainerItems(updateItemsPost, commands, entitiesMap, assets, writer, hostMsgs);
                     break;
             }
         }
     }
 
     private static void HandleUpdateContainer(
-        OnUpdateContainerPacket_0x25 packet,
+        IUpdateContainerPacket packet,
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
         Res<AssetsServer> assets,
@@ -226,9 +233,8 @@ internal readonly struct ContainersPlugin : IPlugin
     }
 
     private static void HandleUpdateContainerItems(
-        OnUpdateContainerItemsPacket_0x3C packet,
+        IUpdateContainerItemsPacket packet,
         Commands commands,
-        Res<GameContext> gameCtx,
         Res<NetworkEntitiesMap> entitiesMap,
         Res<AssetsServer> assets,
         EventWriter<ContainerUpdateEvent> writer,
@@ -239,7 +245,8 @@ internal readonly struct ContainersPlugin : IPlugin
 
         for (var i = 0; i < packet.Count; ++i)
         {
-            if (reader.Remaining < 4 + 2 + 1 + 2 + 2 + 2 + 4 + 2)
+            var required = packet.HasGridIndices ? 20 : 19;
+            if (reader.Remaining < required)
                 break;
 
             var serial = reader.ReadUInt32BE();
@@ -249,15 +256,7 @@ internal readonly struct ContainersPlugin : IPlugin
             var x = reader.ReadUInt16BE();
             var y = reader.ReadUInt16BE();
 
-            byte gridIdx = 0;
-            if (gameCtx.Value.ClientVersion >= ClientVersion.CV_6017)
-            {
-                var remainingForCurrent = reader.Remaining - (packet.Count - i - 1) * 19;
-                if (remainingForCurrent > 6)
-                {
-                    gridIdx = reader.ReadUInt8();
-                }
-            }
+            var gridIdx = packet.HasGridIndices ? reader.ReadUInt8() : (byte)0;
 
             var containerSerial = reader.ReadUInt32BE();
             var hue = reader.ReadUInt16BE();
