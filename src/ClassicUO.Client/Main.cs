@@ -229,7 +229,7 @@ namespace ClassicUO
                 Console.WriteLine("FNA3D_FORCE_DRIVER: " + Environment.GetEnvironmentVariable("FNA3D_FORCE_DRIVER"));
 
                 using var ecs = new TinyEcs.World();
-                var app = new App(ecs, ThreadingMode.Single);
+                var app = new App(ecs, ThreadingMode.Auto);
 
                 app.AddPlugin<Ecs.CuoPlugin>();
 

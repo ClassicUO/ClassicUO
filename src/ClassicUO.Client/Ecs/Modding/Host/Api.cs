@@ -48,8 +48,8 @@ internal static class Api
 
                 if (modRef.TryGetTarget(out var mod) && mod.Plugin.FunctionExists(handlerInfo.FuncName))
                 {
-                    packetMap[handlerInfo.PacketId] = buffer
-                        => mod.Plugin.Call(handlerInfo.FuncName, buffer);
+                    // packetMap[handlerInfo.PacketId] = buffer
+                    //     => mod.Plugin.Call(handlerInfo.FuncName, buffer);
                 }
             }),
 
@@ -67,10 +67,10 @@ internal static class Api
                         return;
                     }
 
-                    packetMap[handlerInfo.PacketId] = buffer => {
-                        mod.Plugin.Call(handlerInfo.FuncName, buffer);
-                        fn(buffer);
-                    };
+                    // packetMap[handlerInfo.PacketId] = buffer => {
+                    //     mod.Plugin.Call(handlerInfo.FuncName, buffer);
+                    //     fn(buffer);
+                    // };
                 }
             }),
 

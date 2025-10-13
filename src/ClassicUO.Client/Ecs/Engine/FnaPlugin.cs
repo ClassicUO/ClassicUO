@@ -24,7 +24,7 @@ internal readonly struct FnaPlugin : IPlugin
             .AddResource(new UoGame(MouseVisible, WindowResizable, VSync))
             .AddResource(new Time())
 
-            .AddSystem(Stage.Startup, static (Res<UoGame> game, Commands commands) =>
+            .AddSystem(static (Res<UoGame> game, Commands commands) =>
             {
                 game.Value.RunOneFrame();
                 UnsafeFNAAccessor.BeforeLoop(game.Value);
@@ -34,6 +34,8 @@ internal readonly struct FnaPlugin : IPlugin
                 commands.InsertResource(new MouseContext(game.Value));
                 UnsafeFNAAccessor.GetSetRunApplication(game.Value) = true;
             })
+            .InStage(Stage.Startup)
+            .Build()
 
             .AddSystem((Res<UoGame> game, Res<Time> time) =>
             {
@@ -46,21 +48,25 @@ internal readonly struct FnaPlugin : IPlugin
                 FrameworkDispatcher.Update();
             })
             .InStage(Stage.Update)
+            .SingleThreaded()
             .RunIf((World world) => world.HasResource<UoGame>())
             .Build()
 
             .AddSystem((Res<GraphicsDevice> device) => device.Value.Clear(Color.Black))
             .InStage(Stage.First)
+            .SingleThreaded()
             .RunIf((World world) => world.HasResource<GraphicsDevice>())
             .Build()
 
             .AddSystem((Res<GraphicsDevice> device) => device.Value.Present())
             .InStage(Stage.Last)
+            .SingleThreaded()
             .RunIf((World world) => world.HasResource<GraphicsDevice>())
             .Build()
 
             .AddSystem(_ => Environment.Exit(0))
             .InStage(Stage.PostUpdate)
+            .SingleThreaded()
             .RunIf(static (Res<UoGame> game) => !UnsafeFNAAccessor.GetSetRunApplication(game.Value))
             .Build()
 
@@ -70,6 +76,7 @@ internal readonly struct FnaPlugin : IPlugin
                 keyboardCtx.Value.Update(time.Value.Total);
             })
             .InStage(Stage.First)
+            .SingleThreaded()
             .Build();
     }
 

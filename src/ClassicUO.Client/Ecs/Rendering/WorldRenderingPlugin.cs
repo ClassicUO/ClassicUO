@@ -94,11 +94,13 @@ internal readonly struct WorldRenderingPlugin : IPlugin
 
             .AddSystem(beginRenderingFn)
             .InStage(Stage.PostUpdate)
+            .SingleThreaded()
             .Label("cuo:rendering:begin")
             .Build()
 
             .AddSystem(renderingFn)
             .InStage(Stage.PostUpdate)
+            .SingleThreaded()
             .Label("cuo:rendering:rendering")
             .After("cuo:rendering:begin")
             .RunIf(w => w.HasResource<GraphicsDevice>())
@@ -108,6 +110,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
 
             .AddSystem(endRenderingFn)
             .InStage(Stage.PostUpdate)
+            .SingleThreaded()
             .Label("cuo:rendering:end")
             .After("cuo:rendering:rendering")
             .Build();

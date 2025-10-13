@@ -15,7 +15,10 @@ readonly struct AssetsPlugin : IPlugin
     {
         var loadAssetsFn = LoadAssets;
 
-        app.AddSystem(loadAssetsFn).InStage(Stage.Startup);
+        app
+            .AddSystem(loadAssetsFn)
+            .InStage(Stage.Startup)
+            .Build();
     }
 
     unsafe void LoadAssets

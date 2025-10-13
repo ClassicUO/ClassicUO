@@ -401,6 +401,7 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                 }
             })
             .InStage(Stage.PostUpdate)
+            .SingleThreaded()
             .Label("cuo:gui_rendering");
     }
 }

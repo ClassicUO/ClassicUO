@@ -18,7 +18,7 @@ internal readonly struct LoginPacketsPlugin : IPlugin
     public void Build(App app)
     {
         app
-            .AddSystem(Stage.Startup, (Res<PacketsMap2> packetsMap) =>
+            .AddSystem(Stage.Startup, (Res<PacketsMap> packetsMap) =>
             {
                 void create<T>() where T : IPacket, new()
                 {

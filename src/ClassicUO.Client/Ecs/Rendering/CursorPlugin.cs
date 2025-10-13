@@ -16,6 +16,7 @@ internal readonly struct CursorPlugin : IPlugin
         app
             .AddSystem(renderCursorFn)
             .InStage(Stage.PostUpdate)
+            .SingleThreaded()
             .RunIf(w => w.HasResource<GrabbedItem>())
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial != 0 && grabbedItem.Value.Graphic != 0);
     }

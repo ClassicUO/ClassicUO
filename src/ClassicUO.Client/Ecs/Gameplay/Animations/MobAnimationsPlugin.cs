@@ -113,11 +113,19 @@ readonly struct MobAnimationsPlugin : IPlugin
         app
             .AddSystem(readMobileStepsFn)
             .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
             .RunIf((EventReader<MobileQueuedStep> stepsQueued) => stepsQueued.HasEvents)
             .Build()
 
-            .AddSystem(Stage.Update, handleMobileStepsFn)
-            .AddSystem(Stage.Update, processMobileAnimationsFn);
+            .AddSystem(handleMobileStepsFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
+            .Build()
+
+            .AddSystem(processMobileAnimationsFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
+            .Build();
     }
 
     void ReadMobilesSteps(
