@@ -69,3 +69,11 @@ This work is released under the BSD 4 license. This project does not distribute 
 Using a custom client to connect to official UO servers is strictly forbidden. We do not assume any responsibility of the usage of this client.
 
 Ultima Online(R) © 2024 Electronic Arts Inc. All Rights Reserved.
+
+# Code Signing Policy
+Free code signing provided by [SignPath.io](https://signpath.io/), certificate by [SignPath Foundation](https://signpath.org/).
+
+This program will not transfer any information to other networked systems unless specifically requested by the user or the person installing or operating it.
+
+People with direct push access:
+* [andreakarasho](https://github.com/andreakarasho)
