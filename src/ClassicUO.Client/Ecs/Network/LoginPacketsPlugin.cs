@@ -20,21 +20,12 @@ internal readonly struct LoginPacketsPlugin : IPlugin
         app
             .AddSystem(Stage.Startup, (Res<PacketsMap> packetsMap) =>
             {
-                void create<T>() where T : IPacket, new()
-                {
-                    var temp = new T();
-                    if (!packetsMap.Value.ContainsKey(temp.Id))
-                    {
-                        packetsMap.Value.Add(temp.Id, () => new T());
-                    }
-                }
-
-                create<OnServerListPacket_0xA8>();
-                create<OnCharacterListPacket_0xA9>();
-                create<OnServerRelayPacket_0x8C>();
-                create<OnLoginErrorPacket_0x82>();
-                create<OnLoginErrorPacket_0x85>();
-                create<OnLoginErrorPacket_0x53>();
+                packetsMap.Value.Add<OnServerListPacket_0xA8>();
+                packetsMap.Value.Add<OnCharacterListPacket_0xA9>();
+                packetsMap.Value.Add<OnServerRelayPacket_0x8C>();
+                packetsMap.Value.Add<OnLoginErrorPacket_0x82>();
+                packetsMap.Value.Add<OnLoginErrorPacket_0x85>();
+                packetsMap.Value.Add<OnLoginErrorPacket_0x53>();
             })
 
             .AddSystem(
