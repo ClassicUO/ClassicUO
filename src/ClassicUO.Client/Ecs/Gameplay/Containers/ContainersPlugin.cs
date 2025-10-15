@@ -1,4 +1,3 @@
-using System;
 using ClassicUO.Assets;
 using ClassicUO.Ecs.Modding.Host;
 using ClassicUO.Game.Data;
@@ -7,6 +6,7 @@ using ClassicUO.Network;
 using ClassicUO.Utility;
 using Clay_cs;
 using Microsoft.Xna.Framework;
+using System;
 using TinyEcs;
 using TinyEcs.Bevy;
 
@@ -247,51 +247,33 @@ internal readonly struct ContainersPlugin : IPlugin
         EventWriter<HostMessage> hostMsgs
     )
     {
-        var reader = new StackDataReader(packet.ItemsData);
-
-        for (var i = 0; i < packet.Count; ++i)
+        foreach (var item in packet.Items)
         {
-            var required = packet.HasGridIndices ? 20 : 19;
-            if (reader.Remaining < required)
-                break;
-
-            var serial = reader.ReadUInt32BE();
-            var graphic = reader.ReadUInt16BE();
-            var graphicInc = reader.ReadUInt8();
-            var amount = Math.Max((ushort)1, reader.ReadUInt16BE());
-            var x = reader.ReadUInt16BE();
-            var y = reader.ReadUInt16BE();
-
-            var gridIdx = packet.HasGridIndices ? reader.ReadUInt8() : (byte)0;
-
-            var containerSerial = reader.ReadUInt32BE();
-            var hue = reader.ReadUInt16BE();
-
             hostMsgs.Send(new HostMessage.ContainerItemAdded(
-                containerSerial,
-                serial,
-                (ushort)(graphic + graphicInc),
-                amount,
-                x,
-                y,
-                gridIdx,
-                hue
-            ));
+               item.ContainerSerial,
+               item.Serial,
+               (ushort)(item.Graphic + item.GraphicInc),
+               item.Amount,
+               item.X,
+               item.Y,
+               item.GridIndex,
+               item.Hue
+           ));
 
-            var parentEnt = entitiesMap.Value.GetOrCreate(commands, containerSerial)
+            var parentEnt = entitiesMap.Value.GetOrCreate(commands, item.ContainerSerial)
                 .Insert<IsContainer>();
-            var ent = entitiesMap.Value.GetOrCreate(commands, serial);
+            var ent = entitiesMap.Value.GetOrCreate(commands, item.Serial);
 
-            ent.Insert(new Graphic() { Value = (ushort)(graphic + graphicInc) })
-                .Insert(new Hue() { Value = hue })
-                .Insert(new WorldPosition() { X = x, Y = y, Z = 0 })
-                .Insert(new Amount() { Value = amount })
+            ent.Insert(new Graphic() { Value = (ushort)(item.Graphic + item.GraphicInc) })
+                .Insert(new Hue() { Value = item.Hue })
+                .Insert(new WorldPosition() { X = item.X, Y = item.Y, Z = 0 })
+                .Insert(new Amount() { Value = item.Amount })
                 .Insert<ContainedInto>();
             parentEnt.AddChild(ent);
 
-            writer.Send(new ContainerUpdateEvent(containerSerial, serial));
+            writer.Send(new ContainerUpdateEvent(item.ContainerSerial, item.Serial));
 
-            ref readonly var artInfo = ref assets.Value.Arts.GetArt((ushort)(graphic + graphicInc));
+            ref readonly var artInfo = ref assets.Value.Arts.GetArt((ushort)(item.Graphic + item.GraphicInc));
 
             ent.Insert<UIMovable>()
                 .Insert(new UIMouseAction())
@@ -316,16 +298,16 @@ internal readonly struct ContainersPlugin : IPlugin
                                 attachTo = Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT,
                                 offset =
                                 {
-                                    x = x,
-                                    y = y
+                                    x = item.X,
+                                    y = item.Y
                                 }
                             }
                         },
                         UOConfig =
                         {
                             Type = ClayUOCommandType.Art,
-                            Id = (ushort)(graphic + graphicInc),
-                            Hue = new Vector3(hue, 1, 1),
+                            Id = (ushort)(item.Graphic + item.GraphicInc),
+                            Hue = new Vector3(item.Hue, 1, 1),
                         }
                     }
                 });
