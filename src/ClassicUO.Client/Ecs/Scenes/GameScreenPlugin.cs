@@ -62,17 +62,20 @@ internal readonly struct GameScreenPlugin : IPlugin
     private static void Setup(Commands commands, Res<GumpBuilder> gumpBuilder, Res<ClayUOCommandBuffer> clay)
     {
         var root = commands.Spawn()
-            .CreateUINode(new UINode()
+            .InsertBundle(new UINodeBundle()
             {
-                Config = {
-                    backgroundColor = new (18f / 255f, 18f / 255f, 18f / 255f, 0f),
-                    layout = {
-                        sizing = {
-                            width = Clay_SizingAxis.Grow(),
-                            height = Clay_SizingAxis.Grow(),
-                        },
-                        layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
-                        padding = Clay_Padding.All(4),
+                Node = new UINode()
+                {
+                    Config = {
+                        backgroundColor = new (18f / 255f, 18f / 255f, 18f / 255f, 0f),
+                        layout = {
+                            sizing = {
+                                width = Clay_SizingAxis.Grow(),
+                                height = Clay_SizingAxis.Grow(),
+                            },
+                            layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
+                            padding = Clay_Padding.All(4),
+                        }
                     }
                 }
             })
@@ -86,145 +89,172 @@ internal readonly struct GameScreenPlugin : IPlugin
         };
 
         var gameWindowBorder = commands.Spawn()
-            .CreateUINode(new UINode()
-            {
-                Config = {
-                    backgroundColor = new (38f / 255f, 38f / 255f, 38f / 255f, 1),
-                    layout = {
-                        sizing = {
-                            width = Clay_SizingAxis.Fixed(BORDER_SIZE),
-                            height = Clay_SizingAxis.Fixed(BORDER_SIZE),
-                        },
+    .InsertBundle(new UINodeBundle()
+    {
+        Node = new UINode()
+        {
+            Config = {
+                backgroundColor = new (38f / 255f, 38f / 255f, 38f / 255f, 1),
+                layout = {
+                    sizing = {
+                        width = Clay_SizingAxis.Fixed(BORDER_SIZE),
+                        height = Clay_SizingAxis.Fixed(BORDER_SIZE),
                     },
-                    floating = floating
-                }
-            })
-            .Insert(new UIMouseAction())
-            .Insert<GameWindowBorderUI>()
-            .Insert<GameScene>();
+                },
+                floating = floating
+            }
+        }
+    })
+    .Insert(new UIMouseAction())
+    .Insert<GameWindowBorderUI>()
+    .Insert<GameScene>();
 
         var gameWindowBorderResize = commands.Spawn()
-            .CreateUINode(new UINode()
-            {
-                Config = {
-                    backgroundColor = new (1f, 0f, 0f, 1),
-                    layout = {
-                        sizing = {
-                            width = Clay_SizingAxis.Fixed(BORDER_SIZE),
-                            height = Clay_SizingAxis.Fixed(BORDER_SIZE),
-                        },
+    .InsertBundle(new UINodeBundle()
+    {
+        Node = new UINode()
+        {
+            Config = {
+                backgroundColor = new (1f, 0f, 0f, 1),
+                layout = {
+                    sizing = {
+                        width = Clay_SizingAxis.Fixed(BORDER_SIZE),
+                        height = Clay_SizingAxis.Fixed(BORDER_SIZE),
                     },
-                    floating = floating
-                }
-            })
-            .Insert(new UIMouseAction())
-            .Insert<GameWindowBorderResizeUI>()
-            .Insert<GameScene>();
+                },
+                floating = floating
+            }
+        }
+    })
+    .Insert(new UIMouseAction())
+    .Insert<GameWindowBorderResizeUI>()
+    .Insert<GameScene>();
 
         var gameWindow = commands.Spawn()
-            .CreateUINode(new UINode()
-            {
-                Config = {
-                    backgroundColor = new (1f, 1f, 1f, 1f),
-                    layout = {
-                        sizing = {
-                            width = Clay_SizingAxis.Fixed(BORDER_SIZE),
-                            height = Clay_SizingAxis.Fixed(BORDER_SIZE),
-                        },
+    .InsertBundle(new UINodeBundle()
+    {
+        Node = new UINode()
+        {
+            Config = {
+                backgroundColor = new (1f, 1f, 1f, 1f),
+                layout = {
+                    sizing = {
+                        width = Clay_SizingAxis.Fixed(BORDER_SIZE),
+                        height = Clay_SizingAxis.Fixed(BORDER_SIZE),
                     },
-                    floating = floating
-                }
-            })
-            .Insert<GameWindowUI>()
-            .Insert<GameScene>();
+                },
+                floating = floating
+            }
+        }
+    })
+    .Insert<GameWindowUI>()
+    .Insert<GameScene>();
 
 
 
         var menuBar = commands.Spawn()
-            .CreateUINode(new UINode()
-            {
-                Config = {
-                    backgroundColor = new (0f, 0f, 0f, 1),
-                    layout = {
-                        sizing = {
-                            width = Clay_SizingAxis.Grow(),
-                            height = Clay_SizingAxis.Fit(0,0),
-                        },
-                        layoutDirection = Clay_LayoutDirection.CLAY_LEFT_TO_RIGHT,
-                        childGap = 4,
-                        childAlignment = {
-                            x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_RIGHT,
-                            y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER,
-                        },
-                        padding = Clay_Padding.All(4),
+    .InsertBundle(new UINodeBundle()
+    {
+        Node = new UINode()
+        {
+            Config = {
+                backgroundColor = new(0f, 0f, 0f, 1),
+                layout =
+                {
+                    sizing =
+                    {
+                        width = Clay_SizingAxis.Grow(),
+                        height = Clay_SizingAxis.Fit(0, 0),
                     },
-                    // floating = floating
-                }
-            })
-            // .Set(new UIMouseAction())
-            // .Add<UIMovable>()
-            .Insert<GameScene>();
+                    layoutDirection = Clay_LayoutDirection.CLAY_LEFT_TO_RIGHT,
+                    childGap = 4,
+                    childAlignment =
+                    {
+                        x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_RIGHT,
+                        y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER,
+                    },
+                    padding = Clay_Padding.All(4),
+                },
+                // floating = floating
+            }
+        }
+    })
+    // .Set(new UIMouseAction())
+    // .Add<UIMovable>()
+    .Insert<GameScene>();
 
         var menuBarItem = commands.Spawn()
-            .CreateUINode(new UINode()
-            {
-                Config = {
-                    backgroundColor = new (0f, 0f, 0.5f, 1),
-                    layout = {
-                        sizing = {
-                            width = Clay_SizingAxis.Fit(0, 0),
-                            height = Clay_SizingAxis.Grow(),
-                        },
-                        childAlignment = {
-                            x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER,
-                            y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER,
-                        },
-                        padding = Clay_Padding.All(4),
+    .InsertBundle(new UINodeBundle()
+    {
+        Node = new UINode()
+        {
+            Config = {
+                backgroundColor = new(0f, 0f, 0.5f, 1),
+                layout =
+                {
+                    sizing =
+                    {
+                        width = Clay_SizingAxis.Fit(0, 0),
+                        height = Clay_SizingAxis.Grow(),
                     },
-                }
-            })
-            .Insert(new Text()
-            {
-                Value = "Logout",
-                TextConfig = {
+                    childAlignment =
+                    {
+                        x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER,
+                        y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER,
+                    },
+                    padding = Clay_Padding.All(4),
+                },
+            }
+        }
+    })
+    .Insert(new Text()
+    {
+        Value = "Logout",
+        TextConfig = {
                     fontId = 0,
                     fontSize = 18,
                     textColor = new (1, 1, 1, 1),
-                },
-            })
-            .Insert(ButtonAction.Logout)
-            .Insert(new UIMouseAction())
-            .Insert<GameScene>();
+        },
+    })
+    .Insert(ButtonAction.Logout)
+    .Insert(new UIMouseAction())
+    .Insert<GameScene>();
 
         var menuBarItem2 = commands.Spawn()
-            .CreateUINode(new UINode()
-            {
-                Config = {
-                    backgroundColor = new (0f, 0f, 0.5f, 1),
-                    layout = {
-                        sizing = {
-                            width = Clay_SizingAxis.Fit(0, 0),
-                            height = Clay_SizingAxis.Grow(),
-                        },
-                        childAlignment = {
-                            x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER,
-                            y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER,
-                        },
-                        padding = Clay_Padding.All(4),
+    .InsertBundle(new UINodeBundle()
+    {
+        Node = new UINode()
+        {
+            Config = {
+                backgroundColor = new(0f, 0f, 0.5f, 1),
+                layout =
+                {
+                    sizing =
+                    {
+                        width = Clay_SizingAxis.Fit(0, 0),
+                        height = Clay_SizingAxis.Grow(),
                     },
-                }
-            })
-            .Insert(new Text()
-            {
-                Value = "Total entities: 0",
-                TextConfig = {
+                    childAlignment =
+                    {
+                        x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER,
+                        y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER,
+                    },
+                    padding = Clay_Padding.All(4),
+                },
+            }
+        }
+    })
+    .Insert(new Text()
+    {
+        Value = "Total entities: 0",
+        TextConfig = {
                     fontId = 0,
                     fontSize = 18,
                     textColor = new (1, 1, 1, 1),
-                },
-            })
-            .Insert<GameScene>()
-            .Insert<TotalEntitiesMenu>();
+        },
+    })
+    .Insert<GameScene>()
+    .Insert<TotalEntitiesMenu>();
 
 
 

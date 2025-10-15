@@ -298,7 +298,16 @@ internal readonly struct GuiPlugin : IPlugin
 
             if (isChanged)
             {
-                commands.Entity(ent.Ref).Insert(interaction.Ref);
+                var e = commands.Entity(ent.Ref).Insert(interaction.Ref);
+
+                if (interaction.Ref.IsPressed && !interaction.Ref.WasPressed)
+                {
+                    e.EmitTrigger(new OnPressed(interaction.Ref.Button));
+                }
+                else if (!interaction.Ref.IsPressed && interaction.Ref.WasPressed)
+                {
+                    e.EmitTrigger(new OnReleased(interaction.Ref.Button));
+                }
             }
         }
 
@@ -328,6 +337,9 @@ struct UIMouseAction
     public MouseButtonType Button;
 }
 
+record struct OnPressed(MouseButtonType Button);
+record struct OnReleased(MouseButtonType Button);
+
 struct UIMovable;
 
 struct UOButton
@@ -345,7 +357,6 @@ struct Text
 struct TextInput;
 
 struct TextFragment;
-
 
 enum ClayUOCommandType : byte
 {
@@ -376,16 +387,20 @@ internal sealed class ImageCache : Dictionary<nint, Texture2D>;
 
 internal sealed class ClayUOCommandBuffer : List<ClayUOCommandData>;
 
-internal static class GuiPluginEx
+internal readonly struct UINodeBundle : IBundle
 {
-    /// <summary>
-    /// This function sets the UINode & UIMouseAction components
-    /// </summary>
-    /// <param name="ent"></param>
-    /// <param name="node"></param>
-    /// <returns></returns>
-    public static EntityCommands CreateUINode(this EntityCommands commands, UINode node)
+    public UINode Node { get; init; }
+    public UIMouseAction MouseAction { get; init; }
+
+    public void Insert(EntityView entity)
     {
-        return commands.Insert(node).Insert(new UIMouseAction());
+        entity.Set(Node);
+        entity.Set(MouseAction);
+    }
+
+    public void Insert(EntityCommands entity)
+    {
+        entity.Insert(Node);
+        entity.Insert(MouseAction);
     }
 }

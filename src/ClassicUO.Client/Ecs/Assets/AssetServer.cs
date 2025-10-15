@@ -5,12 +5,8 @@ namespace ClassicUO.Ecs;
 
 internal sealed class AssetsServer
 {
-    private readonly UOFileManager _fileManager;
-
     internal AssetsServer(UOFileManager fileManager, GraphicsDevice device)
     {
-        _fileManager = fileManager;
-
         Arts = new Renderer.Arts.Art(fileManager.Arts, fileManager.Hues, device);
         Texmaps = new Renderer.Texmaps.Texmap(fileManager.Texmaps, device);
         Animations = new Renderer.Animations.Animations(fileManager.Animations, device);

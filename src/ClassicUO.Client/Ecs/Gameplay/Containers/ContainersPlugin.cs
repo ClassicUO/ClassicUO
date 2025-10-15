@@ -85,9 +85,9 @@ internal readonly struct ContainersPlugin : IPlugin
             {
                 ref readonly var gumpInfo = ref assets.Value.Gumps.GetGump(ev.Graphic);
                 var ent = entitiesMap.Value.GetOrCreate(commands, ev.Serial)
-                    .CreateUINode
-                    (
-                        new UINode()
+                    .InsertBundle(new UINodeBundle()
+                    {
+                        Node = new UINode()
                         {
                             Config =
                             {
@@ -115,7 +115,7 @@ internal readonly struct ContainersPlugin : IPlugin
                                 Hue = Vector3.UnitZ,
                             }
                         }
-                    )
+                    })
                     .Insert(new UIMouseAction())
                     .Insert<UIMovable>();
             }
@@ -201,35 +201,39 @@ internal readonly struct ContainersPlugin : IPlugin
 
         ent.Insert<UIMovable>()
             .Insert(new UIMouseAction())
-            .CreateUINode(new UINode
+            .InsertBundle(new UINodeBundle()
             {
-                Config =
+
+                Node = new UINode
                 {
-                    layout =
+                    Config =
                     {
-                        sizing =
+                        layout =
                         {
-                            width = Clay_SizingAxis.Fixed(artInfo.UV.Width),
-                            height = Clay_SizingAxis.Fixed(artInfo.UV.Height),
+                            sizing =
+                            {
+                                width = Clay_SizingAxis.Fixed(artInfo.UV.Width),
+                                height = Clay_SizingAxis.Fixed(artInfo.UV.Height),
+                            },
+                            layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM
                         },
-                        layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM
-                    },
-                    floating =
-                    {
-                        clipTo = Clay_FloatingClipToElement.CLAY_CLIP_TO_ATTACHED_PARENT,
-                        attachTo = Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT,
-                        offset =
+                        floating =
                         {
-                            x = packet.X,
-                            y = packet.Y
+                            clipTo = Clay_FloatingClipToElement.CLAY_CLIP_TO_ATTACHED_PARENT,
+                            attachTo = Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT,
+                            offset =
+                            {
+                                x = packet.X,
+                                y = packet.Y
+                            }
                         }
+                    },
+                    UOConfig =
+                    {
+                        Type = ClayUOCommandType.Art,
+                        Id = finalGraphic,
+                        Hue = new Vector3(packet.Hue, 1, 1),
                     }
-                },
-                UOConfig =
-                {
-                    Type = ClayUOCommandType.Art,
-                    Id = finalGraphic,
-                    Hue = new Vector3(packet.Hue, 1, 1),
                 }
             });
     }
@@ -291,35 +295,38 @@ internal readonly struct ContainersPlugin : IPlugin
 
             ent.Insert<UIMovable>()
                 .Insert(new UIMouseAction())
-                .CreateUINode(new UINode
+                .InsertBundle(new UINodeBundle()
                 {
-                    Config =
+                    Node = new UINode
                     {
-                        layout =
+                        Config =
                         {
-                            sizing =
+                            layout =
                             {
-                                width = Clay_SizingAxis.Fixed(artInfo.UV.Width),
-                                height = Clay_SizingAxis.Fixed(artInfo.UV.Height),
+                                sizing =
+                                {
+                                    width = Clay_SizingAxis.Fixed(artInfo.UV.Width),
+                                    height = Clay_SizingAxis.Fixed(artInfo.UV.Height),
+                                },
+                                layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM
                             },
-                            layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM
-                        },
-                        floating =
-                        {
-                            clipTo = Clay_FloatingClipToElement.CLAY_CLIP_TO_ATTACHED_PARENT,
-                            attachTo = Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT,
-                            offset =
+                            floating =
                             {
-                                x = x,
-                                y = y
+                                clipTo = Clay_FloatingClipToElement.CLAY_CLIP_TO_ATTACHED_PARENT,
+                                attachTo = Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT,
+                                offset =
+                                {
+                                    x = x,
+                                    y = y
+                                }
                             }
+                        },
+                        UOConfig =
+                        {
+                            Type = ClayUOCommandType.Art,
+                            Id = (ushort)(graphic + graphicInc),
+                            Hue = new Vector3(hue, 1, 1),
                         }
-                    },
-                    UOConfig =
-                    {
-                        Type = ClayUOCommandType.Art,
-                        Id = (ushort)(graphic + graphicInc),
-                        Hue = new Vector3(hue, 1, 1),
                     }
                 });
         }

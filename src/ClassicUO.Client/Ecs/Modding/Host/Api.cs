@@ -193,7 +193,7 @@ internal static class Api
                 // {
                 //     var ent = world.Entity(node.Id)
                 //         .Set(new PluginEntity(mod))
-                //         .CreateUINode(new UINode() {
+                //         .InsertBundle(new UINodeBundle() { Node = new UINode() {
                 //             // TODO: missing some config
                 //             Config = {
                 //                 layout = node.Config.Layout ?? default,

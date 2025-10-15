@@ -15,18 +15,10 @@ internal readonly struct LoginScreenPlugin : IPlugin
     public void Build(App app)
     {
         var setupFn = Setup;
-        var buttonsHandlerFn = ButtonsHandler;
         var deleteMenuFn = DeleteMenu;
-
 
         app
             .AddState(LoginInteraction.None)
-
-            .AddSystem(buttonsHandlerFn)
-            .InStage(Stage.Update)
-            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.LoginScreen)
-            .RunIf((Res<State<LoginInteraction>> state) => state.Value.Current == LoginInteraction.None)
-            .Build()
 
             .AddSystem(setupFn)
             .OnEnter(GameState.LoginScreen)
@@ -49,36 +41,42 @@ internal readonly struct LoginScreenPlugin : IPlugin
     {
         var root = commands.Spawn()
             .Insert<LoginScene>()
-            .CreateUINode(new UINode()
+            .InsertBundle(new UINodeBundle()
             {
-                Config = {
-                    backgroundColor = new (0.2f, 0.2f, 0.2f, 1),
-                    layout = {
-                        sizing = {
-                            width = Clay_SizingAxis.Grow(),
-                            height = Clay_SizingAxis.Grow(),
-                        },
-                        childAlignment = {
-                            x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER,
-                            y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER,
-                        },
-                        layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
+                Node = new UINode()
+                {
+                    Config = {
+                        backgroundColor = new (0.2f, 0.2f, 0.2f, 1),
+                        layout = {
+                            sizing = {
+                                width = Clay_SizingAxis.Grow(),
+                                height = Clay_SizingAxis.Grow(),
+                            },
+                            childAlignment = {
+                                x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER,
+                                y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER,
+                            },
+                            layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
+                        }
                     }
                 }
             });
 
         var mainMenu = commands.Spawn()
             .Insert<LoginScene>()
-            .CreateUINode(new UINode()
+            .InsertBundle(new UINodeBundle()
             {
-                Config = {
-                    backgroundColor = new (0.2f, 0.2f, 0.2f, 1),
-                    layout = {
-                        sizing = {
-                            width = Clay_SizingAxis.Fit(0, 0),
-                            height = Clay_SizingAxis.Fit(0, 0),
-                        },
-                        layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
+                Node = new UINode()
+                {
+                    Config = {
+                        backgroundColor = new (0.2f, 0.2f, 0.2f, 1),
+                        layout = {
+                            sizing = {
+                                width = Clay_SizingAxis.Fit(0, 0),
+                                height = Clay_SizingAxis.Fit(0, 0),
+                            },
+                            layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
+                        }
                     }
                 }
             });
@@ -104,15 +102,41 @@ internal readonly struct LoginScreenPlugin : IPlugin
             (0x05D0, 0x05CF, 0x5CE),
             Vector3.UnitZ,
             new(530, 125)
-        ).Insert(ButtonAction.Credits).Insert<LoginScene>());
+        ).Insert(ButtonAction.Credits).Insert<LoginScene>()
+        .Observe((On<OnPressed> trigger) => Console.WriteLine("pressed button {0}", trigger.Event.Button))
+        .Observe((On<OnReleased> trigger) => Console.WriteLine("released button {0}", trigger.Event.Button))
+        );
 
         // arrow button
-        mainMenu.AddChild(gumpBuilder.Value.AddButton(
+        var arrowButton = gumpBuilder.Value.AddButton(
             commands,
             (0x5CD, 0x5CC, 0x5CB),
             Vector3.UnitZ,
             new(280, 365)
-        ).Insert(ButtonAction.Login).Insert<LoginScene>());
+        )
+        .Insert(ButtonAction.Login).Insert<LoginScene>()
+        .Observe((On<OnPressed> trigger) =>
+        {
+            Console.WriteLine("pressed button {0}", trigger.Event.Button);
+        })
+        .Observe((
+            On<OnReleased> trigger,
+            Commands commands,
+            Res<Settings> settings,
+            ResMut<NextState<LoginInteraction>> state,
+            Single<Data<Text>, Filter<With<UsernameInput>, With<LoginScene>, With<TextInput>>> queryUsername,
+            Single<Data<Text>, Filter<With<PasswordInput>, With<LoginScene>, With<TextInput>>> queryPassword
+        ) =>
+        {
+            Console.WriteLine("released button {0}", trigger.Event.Button);
+
+            (_, var username) = queryUsername.Get();
+            (_, var password) = queryPassword.Get();
+            Login(commands, settings.Value, username.Ref.Value, password.Ref.Value);
+            state.Value.Set(LoginInteraction.LoginRequested);
+        });
+
+        mainMenu.AddChild(arrowButton);
 
         // username background
         mainMenu.AddChild(gumpBuilder.Value.AddGumpNinePatch(
@@ -160,41 +184,6 @@ internal readonly struct LoginScreenPlugin : IPlugin
         root.AddChild(mainMenu);
     }
 
-    private static void ButtonsHandler(
-        Query<Data<UIMouseAction, ButtonAction>, Changed<UIMouseAction>> query,
-        Res<Settings> settings,
-        Res<NextState<LoginInteraction>> state,
-        EventWriter<OnLoginRequest> writer,
-        Single<Data<Text>, Filter<With<UsernameInput>, With<LoginScene>, With<TextInput>>> queryUsername,
-        Single<Data<Text>, Filter<With<PasswordInput>, With<LoginScene>, With<TextInput>>> queryPassword
-    )
-    {
-        foreach ((var interaction, var action) in query)
-        {
-            if (interaction.Ref is not { WasPressed: true, IsPressed: false, Button: MouseButtonType.Left })
-            {
-                continue;
-            }
-
-            Action fn = action.Ref switch
-            {
-                ButtonAction.Quit => () => Console.WriteLine("quit"),
-                ButtonAction.Credits => () => Console.WriteLine("credits"),
-                ButtonAction.Login => () =>
-                {
-                    (_, var username) = queryUsername.Get();
-                    (_, var password) = queryPassword.Get();
-                    Login(writer, settings.Value, username.Ref.Value, password.Ref.Value);
-                    state.Value.Set(LoginInteraction.LoginRequested);
-                }
-                ,
-                _ => null
-            };
-
-            fn?.Invoke();
-        }
-    }
-
     private static void DeleteMenu(Commands commands, Query<Data<UINode>, Filter<Without<Parent>, With<LoginScene>>> query)
     {
         Console.WriteLine("[LoginScreen] cleanup start");
@@ -203,7 +192,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
         Console.WriteLine("[LoginScreen] cleanup done");
     }
 
-    private static void Login(EventWriter<OnLoginRequest> writer, Settings settings, string username, string password)
+    private static void Login(Commands commands, Settings settings, string username, string password)
     {
         if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
         {
@@ -216,7 +205,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
 
         Console.WriteLine("doing login");
 
-        writer.Send(new()
+        commands.EmitTrigger(new OnLoginRequest
         {
             Username = settings.Username,
             Password = settings.Password,

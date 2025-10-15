@@ -10,7 +10,6 @@ using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
 
-delegate void OnPacket(ReadOnlySpan<byte> buffer);
 
 struct OnLoginRequest
 {
@@ -195,10 +194,7 @@ readonly struct NetworkPlugin : IPlugin
             })
             .Build()
 
-            .AddSystem(handleLoginRequestsFn)
-            .InStage(Stage.Update)
-            .RunIf((EventReader<OnLoginRequest> loginRequests) => loginRequests.HasEvents)
-            .Build()
+            .AddObserver(handleLoginRequestsFn)
 
             .AddSystem(packetReaderFn)
             .InStage(Stage.Update)
@@ -212,41 +208,36 @@ readonly struct NetworkPlugin : IPlugin
     }
 
     void HandleLoginRequests(
-        EventReader<OnLoginRequest> loginRequests,
+        On<OnLoginRequest> trigger,
         Res<NetClient> network,
         Res<GameContext> gameCtx,
         Res<Settings> settings
     )
     {
-        foreach (var request in loginRequests.Read())
+        network.Value.Connect(trigger.Event.Address, trigger.Event.Port);
+        Console.WriteLine("Socket is connected ? {0}", network.Value.IsConnected);
+
+        if (!network.Value.IsConnected)
+            return;
+
+        network.Value.Encryption?.Initialize(true, network.Value.LocalIP);
+
+        if (gameCtx.Value.ClientVersion >= ClientVersion.CV_6040)
         {
-            network.Value.Connect(request.Address, request.Port);
-            Console.WriteLine("Socket is connected ? {0}", network.Value.IsConnected);
+            // NOTE: im forcing the use of latest client just for convenience rn
+            var major = (byte)((uint)gameCtx.Value.ClientVersion >> 24);
+            var minor = (byte)((uint)gameCtx.Value.ClientVersion >> 16);
+            var build = (byte)((uint)gameCtx.Value.ClientVersion >> 8);
+            var extra = (byte)gameCtx.Value.ClientVersion;
 
-            if (!network.Value.IsConnected)
-                continue;
-
-            network.Value.Encryption?.Initialize(true, network.Value.LocalIP);
-
-            if (gameCtx.Value.ClientVersion >= ClientVersion.CV_6040)
-            {
-                // NOTE: im forcing the use of latest client just for convenience rn
-                var major = (byte)((uint)gameCtx.Value.ClientVersion >> 24);
-                var minor = (byte)((uint)gameCtx.Value.ClientVersion >> 16);
-                var build = (byte)((uint)gameCtx.Value.ClientVersion >> 8);
-                var extra = (byte)gameCtx.Value.ClientVersion;
-
-                network.Value.Send_Seed(network.Value.LocalIP, major, minor, build, extra);
-            }
-            else
-            {
-                network.Value.Send_Seed_Old(network.Value.LocalIP);
-            }
-
-            network.Value.Send_FirstLogin(request.Username, Crypter.Decrypt(request.Password));
-
-            break;
+            network.Value.Send_Seed(network.Value.LocalIP, major, minor, build, extra);
         }
+        else
+        {
+            network.Value.Send_Seed_Old(network.Value.LocalIP);
+        }
+
+        network.Value.Send_FirstLogin(trigger.Event.Username, Crypter.Decrypt(trigger.Event.Password));
     }
 
     sealed class PacketBuffer

@@ -18,9 +18,11 @@ internal sealed class GumpBuilder
     public EntityCommands AddLabel(Commands commands, string text, Vector2? position = null, Vector2? size = null)
     {
         var ent = commands.Spawn()
-            .CreateUINode(new UINode()
+            .InsertBundle(new UINodeBundle()
             {
-                Config = {
+                Node = new UINode()
+                {
+                    Config = {
                     // id = Clay.Id(ent.ID.ToString()),
                     layout = {
                         sizing = {
@@ -35,6 +37,7 @@ internal sealed class GumpBuilder
                             x = position?.X ?? 0,
                             y = position?.Y ?? 0
                         }
+                    }
                     }
                 }
             }).Insert(new Text()
@@ -61,9 +64,11 @@ internal sealed class GumpBuilder
     {
         ref readonly var gumpInfo = ref _assets.Gumps.GetGump(id);
         var ent = commands.Spawn()
-            .CreateUINode(new UINode()
+            .InsertBundle(new UINodeBundle()
             {
-                Config = {
+                Node = new UINode()
+                {
+                    Config = {
                     // id = Clay.Id(ent.ID.ToString()),
                     layout = {
                         sizing = {
@@ -80,10 +85,11 @@ internal sealed class GumpBuilder
                         }
                     }
                 },
-                UOConfig = {
-                    Type = ClayUOCommandType.Gump,
-                    Id = id,
-                    Hue = hue,
+                    UOConfig = {
+                        Type = ClayUOCommandType.Gump,
+                        Id = id,
+                        Hue = hue,
+                    }
                 }
             });
 
@@ -94,9 +100,11 @@ internal sealed class GumpBuilder
     {
         ref readonly var gumpInfo = ref _assets.Gumps.GetGump(id);
         var ent = commands.Spawn()
-            .CreateUINode(new UINode()
+            .InsertBundle(new UINodeBundle()
             {
-                Config = {
+                Node = new UINode()
+                {
+                    Config = {
                     // id = Clay.Id(ent.ID.ToString()),
                     layout = {
                         sizing = {
@@ -113,10 +121,11 @@ internal sealed class GumpBuilder
                         }
                     }
                 },
-                UOConfig = {
-                    Type = ClayUOCommandType.GumpNinePatch,
-                    Id = id,
-                    Hue = hue,
+                    UOConfig = {
+                        Type = ClayUOCommandType.GumpNinePatch,
+                        Id = id,
+                        Hue = hue,
+                    }
                 }
             });
         return ent;
