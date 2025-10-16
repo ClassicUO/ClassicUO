@@ -668,7 +668,8 @@ namespace ClassicUO.Game.UI.Gumps
                         Width,
                         Height,
                         0,
-                        0
+                        0,
+                        layerDepth + CHILD_LAYER_INCREMENT * 2
                     );
                 }
             );
