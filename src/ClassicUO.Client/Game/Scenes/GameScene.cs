@@ -976,7 +976,7 @@ namespace ClassicUO.Game.Scenes
             )
             {
                 batcher.GraphicsDevice.SetRenderTarget(renderTargets.LightRenderTarget);
-                batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.White, 0f, 0); // white = maximum light level
+                batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.Transparent, 0f, 0);
                 batcher.GraphicsDevice.SetRenderTarget(null);
 
                 return false;
