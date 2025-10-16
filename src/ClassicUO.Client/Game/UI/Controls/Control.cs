@@ -17,6 +17,7 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal abstract class Control
     {
+        protected const float CHILD_LAYER_INCREMENT = 0.01f;
         internal static int _StepsDone = 1;
         internal static int _StepChanger = 1;
 
@@ -244,7 +245,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     if (c.IsVisible)
                     {
-                        layerDepth += 0.01f;
+                        layerDepth += CHILD_LAYER_INCREMENT;
                         c.AddToRenderLists(renderLists, c.X + x, c.Y + y, ref layerDepth);
                     }
                 }
