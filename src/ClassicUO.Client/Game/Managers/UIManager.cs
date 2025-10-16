@@ -367,12 +367,12 @@ namespace ClassicUO.Game.Managers
             batcher.Begin();
             batcher.SetStencil(DepthStencilState.Default);
 
-            float layerDepth = 0;
+            float layerDepth = -10000;
 
             for (LinkedListNode<Gump> last = Gumps.Last; last != null; last = last.Previous)
             {
                 Control g = last.Value;
-                layerDepth++;
+                layerDepth+=10;
                 g.AddToRenderLists(_renderLists, g.X, g.Y, ref layerDepth);
             }
 
