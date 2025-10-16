@@ -244,7 +244,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     if (c.IsVisible)
                     {
-                        layerDepth += 0.0001f;
+                        layerDepth += 0.01f;
                         c.AddToRenderLists(renderLists, c.X + x, c.Y + y, ref layerDepth);
                     }
                 }
