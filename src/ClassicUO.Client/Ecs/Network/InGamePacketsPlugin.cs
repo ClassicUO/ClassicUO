@@ -18,38 +18,43 @@ using World = TinyEcs.World;
 
 namespace ClassicUO.Ecs;
 
-internal static class NetworkEntitiesExt
+internal readonly struct MobileBundle : IBundle
 {
-    public static EntityCommands CreateNetworkEntity(this EntityCommands ent, uint serial)
+    public NetworkSerial Serial { get; init; }
+    public MobAnimation Animation { get; init; }
+    public ScreenPositionOffset Offset { get; init; }
+
+    public void Insert(EntityView entity)
     {
-        if (SerialHelper.IsMobile(serial))
-            return ent.CreateMobile(serial);
-        else
-            return ent.CreateItem(serial);
+        entity.Set(Serial);
+        entity.Set(Animation);
+        entity.Set(Offset);
+        entity.Set<Mobiles>();
     }
 
-    public static EntityCommands CreateMobile(this EntityCommands ent, uint serial)
+    public void Insert(EntityCommands entity)
     {
-        if (!SerialHelper.IsMobile(serial))
-            throw new ArgumentException("serial is not a mobile");
+        entity.Insert(Serial);
+        entity.Insert(Animation);
+        entity.Insert(Offset);
+        entity.Insert<Mobiles>();
+    }
+}
 
-        ent.Insert(new NetworkSerial() { Value = serial });
-        ent.Insert(new MobAnimation());
-        ent.Insert(new ScreenPositionOffset());
-        ent.Insert<Mobiles>();
+internal readonly struct ItemBundle : IBundle
+{
+    public NetworkSerial Serial { get; init; }
 
-        return ent;
+    public void Insert(EntityView entity)
+    {
+        entity.Set(Serial);
+        entity.Set<Items>();
     }
 
-    public static EntityCommands CreateItem(this EntityCommands ent, uint serial)
+    public void Insert(EntityCommands entity)
     {
-        if (SerialHelper.IsMobile(serial))
-            throw new ArgumentException("serial is not an item");
-
-        ent.Insert(new NetworkSerial() { Value = serial });
-        ent.Insert<Items>();
-
-        return ent;
+        entity.Insert(Serial);
+        entity.Insert<Items>();
     }
 }
 
@@ -69,7 +74,12 @@ sealed class NetworkEntitiesMap
             _entities.Remove(serial);
         }
 
-        var ent = commands.Spawn().CreateNetworkEntity(serial);
+        var ent = commands.Spawn();
+        if (SerialHelper.IsMobile(serial))
+            ent.InsertBundle(new MobileBundle { Serial = new NetworkSerial { Value = serial } });
+        else
+            ent.InsertBundle(new ItemBundle { Serial = new NetworkSerial { Value = serial } });
+
         _entities.Add(serial, ent.Id);
         return ent;
     }

@@ -105,22 +105,22 @@ internal sealed class GumpBuilder
                 Node = new UINode()
                 {
                     Config = {
-                    // id = Clay.Id(ent.ID.ToString()),
-                    layout = {
-                        sizing = {
-                            width = Clay_SizingAxis.Fixed(size.HasValue ? size.Value.X : gumpInfo.UV.Width),
-                            height = Clay_SizingAxis.Fixed(size.HasValue ? size.Value.Y : gumpInfo.UV.Height),
+                        // id = Clay.Id(ent.ID.ToString()),
+                        layout = {
+                            sizing = {
+                                width = Clay_SizingAxis.Fixed(size.HasValue ? size.Value.X : gumpInfo.UV.Width),
+                                height = Clay_SizingAxis.Fixed(size.HasValue ? size.Value.Y : gumpInfo.UV.Height),
+                            }
+                        },
+                        floating = {
+                            clipTo = Clay_FloatingClipToElement.CLAY_CLIP_TO_ATTACHED_PARENT,
+                            attachTo = position.HasValue ? Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT : Clay_FloatingAttachToElement.CLAY_ATTACH_TO_NONE,
+                            offset = {
+                                x = position?.X ?? 0,
+                                y = position?.Y ?? 0
+                            }
                         }
                     },
-                    floating = {
-                        clipTo = Clay_FloatingClipToElement.CLAY_CLIP_TO_ATTACHED_PARENT,
-                        attachTo = position.HasValue ? Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT : Clay_FloatingAttachToElement.CLAY_ATTACH_TO_NONE,
-                        offset = {
-                            x = position?.X ?? 0,
-                            y = position?.Y ?? 0
-                        }
-                    }
-                },
                     UOConfig = {
                         Type = ClayUOCommandType.GumpNinePatch,
                         Id = id,
