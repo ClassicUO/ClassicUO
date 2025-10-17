@@ -481,6 +481,11 @@ namespace ClassicUO
             get => SDL_GetWindowDisplayScale(Window.Handle);
         }
 
+        public int ScaleWithDpi(int value)
+        {
+            return (int)(value * DpiScale);
+        }
+
         protected override bool BeginDraw()
         {
             return !_suppressedDraw && base.BeginDraw();
