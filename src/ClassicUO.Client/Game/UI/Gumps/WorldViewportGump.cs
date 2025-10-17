@@ -111,14 +111,17 @@ namespace ClassicUO.Game.UI.Gumps
                     int w = _lastSize.X + offset.X;
                     int h = _lastSize.Y + offset.Y;
 
-                    if (w < 640)
+                    int targetWidth = Client.Game.ScaleWithDpi(640);
+                    int targetHeight = Client.Game.ScaleWithDpi(480);
+
+                    if (w < targetWidth)
                     {
-                        w = 640;
+                        w = targetWidth;
                     }
 
-                    if (h < 480)
+                    if (h < targetHeight)
                     {
-                        h = 480;
+                        h = targetHeight;
                     }
 
                     if (w > Client.Game.Window.ClientBounds.Width - BORDER_WIDTH)
@@ -228,14 +231,16 @@ namespace ClassicUO.Game.UI.Gumps
 
         public Point ResizeGameWindow(Point newSize)
         {
-            if (newSize.X < 640)
+            int targetWidth = Client.Game.ScaleWithDpi(640);
+            int targetHeight = Client.Game.ScaleWithDpi(480);
+            if (newSize.X < targetWidth)
             {
-                newSize.X = 640;
+                newSize.X = targetWidth;
             }
 
-            if (newSize.Y < 480)
+            if (newSize.Y < targetHeight)
             {
-                newSize.Y = 480;
+                newSize.Y = targetHeight;
             }
 
             //Resize();

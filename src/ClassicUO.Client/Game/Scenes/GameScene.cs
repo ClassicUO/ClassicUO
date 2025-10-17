@@ -125,7 +125,7 @@ namespace ClassicUO.Game.Scenes
             _world.MessageManager.MessageReceived += ChatOnMessageReceived;
             UIManager.ContainerScale = ProfileManager.CurrentProfile.ContainersScale / 100f;
 
-            SDL.SDL_SetWindowMinimumSize(Client.Game.Window.Handle, 640, 480);
+            SDL.SDL_SetWindowMinimumSize(Client.Game.Window.Handle, Client.Game.ScaleWithDpi(640), Client.Game.ScaleWithDpi(480));
 
             if (ProfileManager.CurrentProfile.WindowBorderless)
             {
@@ -140,8 +140,8 @@ namespace ClassicUO.Game.Scenes
                 int w = Settings.GlobalSettings.WindowSize.Value.X;
                 int h = Settings.GlobalSettings.WindowSize.Value.Y;
 
-                w = Math.Max(640, w);
-                h = Math.Max(480, h);
+                w = Math.Max(Client.Game.ScaleWithDpi(640), w);
+                h = Math.Max(Client.Game.ScaleWithDpi(480), h);
 
                 Client.Game.SetWindowSize(w, h);
             }
