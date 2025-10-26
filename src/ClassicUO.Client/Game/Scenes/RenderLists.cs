@@ -85,7 +85,7 @@ namespace ClassicUO.Game.Scenes
         }
 
         /// <summary>
-        /// This is an itermediate, crappy solution. Rewriting gump rendering would be way too much at this point.
+        /// This is an intermediate, crappy solution. Rewriting gump rendering would be way too much at this point.
         /// Adding gump elements that use atlas textures for efficient rendering.
         /// </summary>
         /// <param name="toRender"></param>
@@ -95,7 +95,7 @@ namespace ClassicUO.Game.Scenes
         }
 
         /// <summary>
-        /// This is an itermediate, crappy solution. Rewriting gump rendering would be way too much at this point.
+        /// This is an intermediate, crappy solution. Rewriting gump rendering would be way too much at this point.
         /// Adding gump elements that do not use atlas textures and will be rendered separately.
         /// </summary>
         /// <param name="toRender"></param>
