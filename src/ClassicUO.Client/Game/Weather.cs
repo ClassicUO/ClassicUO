@@ -174,10 +174,11 @@ namespace ClassicUO.Game
             _windTimer = 0;
 
             ScaledCount = CalculateScaledCount(Count);
+            CurrentCount = ScaledCount;
 
-            while (CurrentCount < _effects.Length)
+            for (int i = 0; i < _effects.Length; i++)
             {
-                ref WeatherEffect effect = ref _effects[CurrentCount++];
+                ref WeatherEffect effect = ref _effects[i];
                 effect.X = RandomHelper.GetValue(0, Client.Game.Scene.Camera.Bounds.Width);
                 effect.Y = RandomHelper.GetValue(0, Client.Game.Scene.Camera.Bounds.Height);
             }
