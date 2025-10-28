@@ -1,7 +1,19 @@
 name: Deploy
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      release_tag_option:
+        description: "Release tag to upload binaries to"
+        type: choice
+        options:
+          - ClassicUO-dev-release
+          - custom
+        default: ClassicUO-dev-release
+      custom_release_tag:
+        description: "Custom tag name (used only if option is 'custom')"
+        type: string
+        required: false
   workflow_run:
     branches: [main, beta]
     workflows: [Build-Test]
@@ -27,10 +39,11 @@ jobs:
 
     env:
       CUO_ZIP_NAME: "ClassicUO-${{ matrix.target }}-release.zip"
-      # Branch/commit detection: use triggering run for workflow_run, otherwise current ref for manual dispatch
-      BRANCH_NAME: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.ref_name }}
-      COMMIT_SHA:  ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha    || github.sha }}
-      RELEASE_TAG: ClassicUO-${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.ref_name }}-release
+      # Determine the release tag:
+      # - If dispatch option == 'custom' and a custom tag is provided, use it
+      # - Else use the selected option (default 'ClassicUO-dev-release')
+      # - For workflow_run (no inputs), fallback to the default
+      RELEASE_TAG: ${{ inputs.release_tag_option == 'custom' && inputs.custom_release_tag || inputs.release_tag_option || 'ClassicUO-dev-release' }}
 
     strategy:
       matrix:
@@ -92,8 +105,7 @@ jobs:
           echo "Release tag: ${{ env.RELEASE_TAG }}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch --no-tags --prune --depth=1 origin "${{ env.BRANCH_NAME }}"
-          git tag -f "${{ env.RELEASE_TAG }}" "${{ env.COMMIT_SHA }}"
+          git tag -f "${{ env.RELEASE_TAG }}"
           git push -f origin "${{ env.RELEASE_TAG }}"
 
       - id: SignPath
@@ -143,7 +155,7 @@ jobs:
           allowUpdates: true
           tag: "${{ env.RELEASE_TAG }}"
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit: ${{ env.COMMIT_SHA }}
+          commit: ${{ github.sha }}
 
   #   - name: Repo Preparation - clone
   #     uses: actions/checkout@master
