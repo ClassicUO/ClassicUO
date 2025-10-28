@@ -2,6 +2,18 @@ name: Deploy
 
 on:
   workflow_dispatch:
+    inputs:
+      release_tag_option:
+        description: "Release tag to upload binaries to"
+        type: choice
+        options:
+          - ClassicUO-dev-release
+          - custom
+        default: ClassicUO-dev-release
+      custom_release_tag:
+        description: "Custom tag name (used only if option is 'custom')"
+        type: string
+        required: false
   workflow_run:
     branches: [main]
     workflows: [Build-Test]
@@ -27,6 +39,11 @@ jobs:
 
     env:
       CUO_ZIP_NAME: "ClassicUO-${{ matrix.target }}-release.zip"
+      # Determine the release tag:
+      # - If dispatch option == 'custom' and a custom tag is provided, use it
+      # - Else use the selected option (default 'ClassicUO-dev-release')
+      # - For workflow_run (no inputs), fallback to the default
+      RELEASE_TAG: ${{ inputs.release_tag_option == 'custom' && inputs.custom_release_tag || inputs.release_tag_option || 'ClassicUO-dev-release' }}
 
     strategy:
       matrix:
@@ -62,10 +79,10 @@ jobs:
         if: matrix.os == 'windows-latest'
         id: upload-unsigned-artifact
         uses: actions/upload-artifact@v4
-        with: 
+        with:
           name: "ClassicUO-${{ matrix.target }}-release"
           path: "${{ env.CUO_OUTPUT_PATH }}"
-          
+
       - name: Create manifest
         run: |
           dotnet run --project tools/ManifestCreator/ManifestCreator.csproj "${{ env.CUO_OUTPUT_PATH }}" "dev-preview" "${{ env.CUO_ZIP_NAME }}"
@@ -87,8 +104,8 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -f ClassicUO-dev-release
-          git push -f origin ClassicUO-dev-release
+          git tag -f "${{ env.RELEASE_TAG }}"
+          git push -f origin "${{ env.RELEASE_TAG }}"
 
       - id: SignPath
         if: matrix.os == 'windows-latest'
@@ -121,7 +138,7 @@ jobs:
           draft: false
           prerelease: true
           allowUpdates: true
-          tag: "ClassicUO-dev-release"
+          tag: "${{ env.RELEASE_TAG }}"
           token: ${{ secrets.GITHUB_TOKEN }}
           commit: ${{ github.sha }}
 
@@ -135,10 +152,9 @@ jobs:
           draft: false
           prerelease: true
           allowUpdates: true
-          tag: "ClassicUO-dev-release"
+          tag: "${{ env.RELEASE_TAG }}"
           token: ${{ secrets.GITHUB_TOKEN }}
           commit: ${{ github.sha }}
-
 
   #   - name: Repo Preparation - clone
   #     uses: actions/checkout@master
@@ -162,4 +178,3 @@ jobs:
   #       destination-repository-name: "deploy"
   #       commit-message: "release ${{ env.CUO_ASSEMBLY_VERSION }} on ${{ matrix.target }}"
   #       target-branch: main
-
