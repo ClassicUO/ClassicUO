@@ -101,6 +101,9 @@ namespace ClassicUO.Renderer
                 0f
             );
 
+            // Use LinearClamp for smoother upscaling of render targets
+            batcher.SetSampler(SamplerState.LinearClamp);
+
             batcher.Draw(
                 WorldRenderTarget,
                 _gameWorldSceneOnScreen,
@@ -120,13 +123,16 @@ namespace ClassicUO.Renderer
 
             batcher.SetBlendState(null);
 
-            // draw ui
+            // Draw UI at original window size (render target is DPI-scaled but destination is not)
             batcher.Draw(
                 UiRenderTarget,
                 _gameWindowOnScreen,
                 fullAlphaNoColor,
                 0f
             );
+            
+            // Reset sampler to default
+            batcher.SetSampler(null);
             batcher.End();
         }
     }
