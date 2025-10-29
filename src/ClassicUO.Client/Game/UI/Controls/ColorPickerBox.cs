@@ -136,21 +136,18 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            float layerDepth = layerDepthRef;
+            float colorLayerDepth = layerDepthRef += 0.001f;
+            float selectorLayerDepth = layerDepthRef += 0.001f;
+
             Texture2D texture = SolidColorTextureCache.GetTexture(Color.White);
-
-            Rectangle rect = new Rectangle(0, 0, _cellWidth, _cellHeight);
-
-            Vector3 hueVector;
 
             for (int i = 0; i < _rows; i++)
             {
                 for (int j = 0; j < _columns; j++)
                 {
-                    hueVector = ShaderHueTranslator.GetHueVector(_hues[i * _columns + j]);
+                    Vector3 hueVector = ShaderHueTranslator.GetHueVector(_hues[i * _columns + j]);
 
-                    rect.X = x + j * _cellWidth;
-                    rect.Y = y + i * _cellHeight;
+                    Rectangle rect = new(x + j * _cellWidth, y + i * _cellHeight, _cellWidth, _cellHeight);
 
                     renderLists.AddGumpNoAtlas(
                         batcher =>
@@ -160,7 +157,7 @@ namespace ClassicUO.Game.UI.Controls
                                 texture,
                                 rect,
                                 hueVector,
-                                layerDepth
+                                colorLayerDepth
                             );
                             return true;
                         }
@@ -168,14 +165,18 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            hueVector = ShaderHueTranslator.GetHueVector(0);
+                      
 
             if (_hues.Length > 1)
             {
-                rect.X = (int) (x + Width / _columns * (SelectedIndex % _columns + .5f) - 1);
-                rect.Y = (int)(y + Height / _rows * (SelectedIndex / _columns + .5f) - 1);
-                rect.Width = 2;
-                rect.Height = 2;
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
+
+                Rectangle rect = new(
+                                    (int)(x + Width / _columns * (SelectedIndex % _columns + .5f) - 1),
+                                    (int)(y + Height / _rows * (SelectedIndex / _columns + .5f) - 1),
+                                    rect.Width = 2,
+                                    rect.Height = 2
+                                    );
 
                 renderLists.AddGumpNoAtlas(
                     batcher =>
@@ -185,7 +186,7 @@ namespace ClassicUO.Game.UI.Controls
                             SolidColorTextureCache.GetTexture(Color.White),
                             rect,
                             hueVector,
-                            layerDepth
+                            selectorLayerDepth
                         );
                         return true;
                     }
