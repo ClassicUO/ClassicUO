@@ -4017,7 +4017,10 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (vp != null)
                     {
-                        n = vp.ResizeGameWindow(new Point(Client.Game.Window.ClientBounds.Width, Client.Game.Window.ClientBounds.Height));
+                        var size = new Point(Client.Game.Window.ClientBounds.Width, Client.Game.Window.ClientBounds.Height);
+                        size.X = (int)(size.X / Client.Game.DpiScale);
+                        size.Y = (int)(size.Y / Client.Game.DpiScale);
+                        n = vp.ResizeGameWindow(size);
                         vp.SetGameWindowPosition(new Point(-5, -5));
                         _currentProfile.GameWindowPosition = vp.Location;
                     }
