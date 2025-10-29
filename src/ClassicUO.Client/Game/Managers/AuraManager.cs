@@ -16,7 +16,9 @@ namespace ClassicUO.Game.Managers
             () => new BlendState
             {
                 ColorSourceBlend = Blend.SourceAlpha,
-                ColorDestinationBlend = Blend.InverseSourceAlpha
+                AlphaSourceBlend = Blend.SourceAlpha,
+                ColorDestinationBlend = Blend.InverseSourceAlpha,
+                AlphaDestinationBlend = Blend.InverseSourceAlpha
             }
         );
 
@@ -51,7 +53,7 @@ namespace ClassicUO.Game.Managers
             batcher.SetBlendState(_blend.Value);
             batcher.Draw(_texture, new Rectangle(x, y + yBump, _radius * 2, _radius - yBump), new Rectangle(0, 0, _radius * 2, _radius - yBump), hueVec, depth + 1f);
             batcher.Draw(_texture, new Rectangle(x, y + _radius, _radius * 2, _radius + yBump), new Rectangle(0, _radius - yBump, _radius * 2, _radius + yBump), hueVec, depth + 1.49f);
-            batcher.SetBlendState(null);
+            batcher.SetBlendState(BlendState.AlphaBlend);
         }
 
         private Color[] GenerateBlendedCircleColors(int radius)
