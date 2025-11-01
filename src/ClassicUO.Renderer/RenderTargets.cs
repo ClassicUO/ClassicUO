@@ -101,8 +101,8 @@ namespace ClassicUO.Renderer
                 0f
             );
 
-            // Use LinearClamp for smoother upscaling of render targets
-            batcher.SetSampler(SamplerState.LinearClamp);
+            // PointClamp looks better for pixel art compared to linear or anisotropic
+            batcher.SetSampler(SamplerState.PointClamp);
 
             batcher.Draw(
                 WorldRenderTarget,
