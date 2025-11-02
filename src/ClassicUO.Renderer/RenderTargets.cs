@@ -43,8 +43,14 @@ namespace ClassicUO.Renderer
             EnsureSize(graphicsDevice, ref _lightRenderTarget, _gameWorldSceneAfterDPI.Width, _gameWorldSceneAfterDPI.Height);
             EnsureSize(graphicsDevice, ref _worldRenderTarget, _gameWorldSceneAfterDPI.Width, _gameWorldSceneAfterDPI.Height);
 
-            if (!dpiScale.Equals(1.0f))
+            if (dpiScale == Math.Floor(dpiScale))
             {
+                // Use PointClamp for integer DPI scaling to avoid blurriness
+                _defaultSamplerState = SamplerState.PointClamp;
+            }
+            else
+            {
+                // Use LinearClamp for non-integer DPI scaling for smoother results
                 _defaultSamplerState = SamplerState.LinearClamp;
             }
         }
@@ -107,7 +113,6 @@ namespace ClassicUO.Renderer
                 0f
             );
 
-            // Use LinearClamp for smoother upscaling of render targets
             batcher.SetSampler(_defaultSamplerState);
 
             batcher.Draw(
