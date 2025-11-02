@@ -483,7 +483,7 @@ namespace ClassicUO
 
         public int ScaleWithDpi(int value)
         {
-            return (int)(value * DpiScale);
+            return (int)Math.Round(value * DpiScale);
         }
 
         protected override bool BeginDraw()

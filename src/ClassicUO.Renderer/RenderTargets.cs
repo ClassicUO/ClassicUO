@@ -20,6 +20,7 @@ namespace ClassicUO.Renderer
         private Func<BlendState> _lightsBlendState;
 
         private Texture2D _background;
+        private SamplerState _defaultSamplerState;
 
         public RenderTarget2D UiRenderTarget { get => _uiRenderTarget; }
         public RenderTarget2D LightRenderTarget { get => _lightRenderTarget; }
@@ -41,6 +42,11 @@ namespace ClassicUO.Renderer
             EnsureSize(graphicsDevice, ref _uiRenderTarget, _gameWindowAfterDPI.Width, _gameWindowAfterDPI.Height);
             EnsureSize(graphicsDevice, ref _lightRenderTarget, _gameWorldSceneAfterDPI.Width, _gameWorldSceneAfterDPI.Height);
             EnsureSize(graphicsDevice, ref _worldRenderTarget, _gameWorldSceneAfterDPI.Width, _gameWorldSceneAfterDPI.Height);
+
+            if (!dpiScale.Equals(1.0f))
+            {
+                _defaultSamplerState = SamplerState.LinearClamp;
+            }
         }
 
         private static Rectangle ScaleRectangle(Rectangle gameWindowOnScreen, float dpiScale) => new(
@@ -102,7 +108,7 @@ namespace ClassicUO.Renderer
             );
 
             // Use LinearClamp for smoother upscaling of render targets
-            batcher.SetSampler(SamplerState.LinearClamp);
+            batcher.SetSampler(_defaultSamplerState);
 
             batcher.Draw(
                 WorldRenderTarget,
