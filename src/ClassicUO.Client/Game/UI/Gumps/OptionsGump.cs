@@ -3980,7 +3980,9 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (vp != null)
                 {
-                    Point n = vp.ResizeGameWindow(new Point(gameWindowSizeWidth, gameWindowSizeHeight));
+                    var s = new Point(Client.Game.ScaleWithDpi(gameWindowSizeWidth), Client.Game.ScaleWithDpi(gameWindowSizeHeight));
+
+                    Point n = vp.ResizeGameWindow(s);
 
                     _gameWindowWidth.SetText(n.X.ToString());
                     _gameWindowHeight.SetText(n.Y.ToString());
