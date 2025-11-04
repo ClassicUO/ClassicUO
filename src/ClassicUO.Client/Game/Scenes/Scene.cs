@@ -37,6 +37,9 @@ namespace ClassicUO.Game.Scenes
             return true;
         }
 
+        public virtual void DrawUI(UltimaBatcher2D batcher)
+        {
+        }
 
         public virtual void Load()
         {

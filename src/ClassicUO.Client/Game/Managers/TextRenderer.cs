@@ -60,7 +60,7 @@ namespace ClassicUO.Game.Managers
                 int x = o.RealScreenPosition.X;
                 int y = o.RealScreenPosition.Y;
 
-                if (o.RenderedText.PixelCheck(mouseX - x - startX, mouseY - y - startY))
+                if (o.RenderedText.PixelCheck(mouseX - x, mouseY - y))
                 {
                     SelectedObject.Object = o;
                 }
