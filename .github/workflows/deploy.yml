@@ -1,21 +1,9 @@
 name: Deploy
 
 on:
-  workflow_dispatch:
-    inputs:
-      release_tag_option:
-        description: "Release tag to upload binaries to"
-        type: choice
-        options:
-          - ClassicUO-dev-release
-          - custom
-        default: ClassicUO-dev-release
-      custom_release_tag:
-        description: "Custom tag name (used only if option is 'custom')"
-        type: string
-        required: false
+  workflow_dispatch: {}
   workflow_run:
-    branches: [main]
+    branches: [main, beta]
     workflows: [Build-Test]
     types:
       - completed
@@ -34,16 +22,11 @@ env:
 
 jobs:
   build:
-    #if: ${{ github.event.workflow_run.conclusion == 'success' }} && "${{ env.GITHUB_REPOSITORY }}" == 'ClassicUO/ClassicUO'
     runs-on: ${{ matrix.os }}
 
     env:
       CUO_ZIP_NAME: "ClassicUO-${{ matrix.target }}-release.zip"
-      # Determine the release tag:
-      # - If dispatch option == 'custom' and a custom tag is provided, use it
-      # - Else use the selected option (default 'ClassicUO-dev-release')
-      # - For workflow_run (no inputs), fallback to the default
-      RELEASE_TAG: ${{ inputs.release_tag_option == 'custom' && inputs.custom_release_tag || inputs.release_tag_option || 'ClassicUO-dev-release' }}
+      RELEASE_TAG: ClassicUO-${{ github.ref_name }}-release
 
     strategy:
       matrix:
@@ -85,7 +68,7 @@ jobs:
 
       - name: Create manifest
         run: |
-          dotnet run --project tools/ManifestCreator/ManifestCreator.csproj "${{ env.CUO_OUTPUT_PATH }}" "dev-preview" "${{ env.CUO_ZIP_NAME }}"
+          dotnet run --project tools/ManifestCreator/ManifestCreator.csproj "${{ env.CUO_OUTPUT_PATH }}" "release" "${{ env.CUO_ZIP_NAME }}"
           mkdir upload
           mv manifest.xml upload
 
@@ -102,6 +85,8 @@ jobs:
 
       - name: Move tag to latest commit
         run: |
+          echo "Ref name: ${{ github.ref_name }}"
+          echo "Release tag: ${{ env.RELEASE_TAG }}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag -f "${{ env.RELEASE_TAG }}"
@@ -133,7 +118,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           artifacts: "signed/${{ env.CUO_ZIP_NAME }}"
-          name: "ClassicUO dev preview"
+          name: "ClassicUO ${{ github.ref_name }} release"
           body: "This build may not be safe: use it at your own risk."
           draft: false
           prerelease: true
@@ -147,7 +132,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           artifacts: "upload/${{ env.CUO_ZIP_NAME }}"
-          name: "ClassicUO dev preview"
+          name: "ClassicUO ${{ github.ref_name }} release"
           body: "This build may not be safe: use it at your own risk."
           draft: false
           prerelease: true
@@ -155,26 +140,3 @@ jobs:
           tag: "${{ env.RELEASE_TAG }}"
           token: ${{ secrets.GITHUB_TOKEN }}
           commit: ${{ github.sha }}
-
-  #   - name: Repo Preparation - clone
-  #     uses: actions/checkout@master
-  #     with:
-  #       repository: ClassicUO/deploy
-  #       path: deploy
-  #       ssh-key: ${{ secrets.SSH_DEPLOY_KEY }}
-  #
-  #   - name: Repo Preparation - prepare
-  #     run: |
-  #       cp -rdf ${{ env.CUO_OUTPUT_PATH }}/* deploy/client/${{ matrix.target }}/
-  #       cp upload/manifest.xml deploy/client/${{ matrix.target }}_manifest.xml
-  #
-  #   - name: Pushes to another repository
-  #     uses: cpina/github-action-push-to-another-repository@main
-  #     env:
-  #       SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
-  #     with:
-  #       source-directory: deploy/
-  #       destination-github-username: "ClassicUO"
-  #       destination-repository-name: "deploy"
-  #       commit-message: "release ${{ env.CUO_ASSEMBLY_VERSION }} on ${{ matrix.target }}"
-  #       target-branch: main
