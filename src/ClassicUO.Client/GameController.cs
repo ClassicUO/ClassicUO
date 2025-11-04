@@ -461,6 +461,11 @@ namespace ClassicUO
             SelectedObject.SelectedContainer = null;
 
             _uoSpriteBatch.Begin();
+            if (Scene != null && Scene.IsLoaded && !Scene.IsDestroyed)
+            {
+                Scene.DrawUI(_uoSpriteBatch);
+            }
+
             UO.GameCursor?.Draw(_uoSpriteBatch);
             _uoSpriteBatch.End();
 

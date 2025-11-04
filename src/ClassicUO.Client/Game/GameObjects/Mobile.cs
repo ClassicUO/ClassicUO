@@ -957,6 +957,7 @@ namespace ClassicUO.Game.GameObjects
 
             p.X += (int)Offset.X + 22;
             p.Y += (int)(Offset.Y - Offset.Z - (height + centerY + 8));
+            p = Client.Game.Scene.Camera.WorldToScreen(p, true);
 
             if (ObjectHandlesStatus == ObjectHandlesStatus.DISPLAYING)
             {
