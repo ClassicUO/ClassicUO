@@ -22,13 +22,15 @@ env:
 
 jobs:
   build:
+    #if: ${{ github.event.workflow_run.conclusion == 'success' }} && "${{ env.GITHUB_REPOSITORY }}" == 'ClassicUO/ClassicUO'
     runs-on: ${{ matrix.os }}
 
     env:
+      CUO_ZIP_NAME: "ClassicUO-${{ matrix.target }}-release.zip"
+      # Branch/commit detection: use triggering run for workflow_run, otherwise current ref for manual dispatch
       BRANCH_NAME: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.ref_name }}
       COMMIT_SHA:  ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha    || github.sha }}
       RELEASE_TAG: ClassicUO-${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.ref_name }}-release
-      CUO_ZIP_NAME: "ClassicUO-${{ matrix.target }}-release.zip"
 
     strategy:
       matrix:
@@ -43,6 +45,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          # For workflow_run, check out the triggering commit (not main)
           ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
 
       - name: Get submodules
@@ -83,7 +86,15 @@ jobs:
         run: mv "${{ env.CUO_OUTPUT_PATH }}/${{ env.CUO_ZIP_NAME }}" upload
 
       - name: Move tag to latest commit
-        run: echo "Trigger branch: ${{ env.BRANCH_NAME }}" && echo "Trigger sha: ${{ env.COMMIT_SHA }}" && echo "Release tag: ${{ env.RELEASE_TAG }}" && git config user.name "github-actions[bot]" && git config user.email "github-actions[bot]@users.noreply.github.com" && git fetch --no-tags --prune --depth=1 origin "${{ env.BRANCH_NAME }}" && git tag -f "${{ env.RELEASE_TAG }}" "${{ env.COMMIT_SHA }}" && git push -f origin "${{ env.RELEASE_TAG }}"
+        run: |
+          echo "Trigger branch: ${{ env.BRANCH_NAME }}"
+          echo "Trigger sha: ${{ env.COMMIT_SHA }}"
+          echo "Release tag: ${{ env.RELEASE_TAG }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch --no-tags --prune --depth=1 origin "${{ env.BRANCH_NAME }}"
+          git tag -f "${{ env.RELEASE_TAG }}" "${{ env.COMMIT_SHA }}"
+          git push -f origin "${{ env.RELEASE_TAG }}"
 
       - id: SignPath
         if: matrix.os == 'windows-latest'
@@ -133,3 +144,26 @@ jobs:
           tag: "${{ env.RELEASE_TAG }}"
           token: ${{ secrets.GITHUB_TOKEN }}
           commit: ${{ env.COMMIT_SHA }}
+
+  #   - name: Repo Preparation - clone
+  #     uses: actions/checkout@master
+  #     with:
+  #       repository: ClassicUO/deploy
+  #       path: deploy
+  #       ssh-key: ${{ secrets.SSH_DEPLOY_KEY }}
+  #
+  #   - name: Repo Preparation - prepare
+  #     run: |
+  #       cp -rdf ${{ env.CUO_OUTPUT_PATH }}/* deploy/client/${{ matrix.target }}/
+  #       cp upload/manifest.xml deploy/client/${{ matrix.target }}_manifest.xml
+  #
+  #   - name: Pushes to another repository
+  #     uses: cpina/github-action-push-to-another-repository@main
+  #     env:
+  #       SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
+  #     with:
+  #       source-directory: deploy/
+  #       destination-github-username: "ClassicUO"
+  #       destination-repository-name: "deploy"
+  #       commit-message: "release ${{ env.CUO_ASSEMBLY_VERSION }} on ${{ matrix.target }}"
+  #       target-branch: main
