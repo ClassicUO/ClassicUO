@@ -953,7 +953,6 @@ namespace ClassicUO.Game.Scenes
             // draw weather
             _world.Weather.Draw(batcher, 0, 0, MAX_LAYER_DEPTH - 1);
 
-            DrawOverheads(batcher, MAX_LAYER_DEPTH);
             DrawSelection(batcher, MAX_LAYER_DEPTH);
 
             batcher.SetSampler(null);
@@ -1062,9 +1061,9 @@ namespace ClassicUO.Game.Scenes
             );
         }
 
-        public void DrawOverheads(UltimaBatcher2D batcher, float layerDepth)
+        public override void DrawUI(UltimaBatcher2D batcher)
         {
-            _healthLinesManager.Draw(batcher, layerDepth);
+            _healthLinesManager.Draw(batcher, 0f);
 
             if (!UIManager.IsMouseOverWorld)
             {
@@ -1072,7 +1071,7 @@ namespace ClassicUO.Game.Scenes
             }
 
             _world.WorldTextManager.ProcessWorldText(true);
-            _world.WorldTextManager.Draw(batcher, Camera.Bounds.X, Camera.Bounds.Y, layerDepth);
+            _world.WorldTextManager.Draw(batcher, Camera.Bounds.X, Camera.Bounds.Y, 0);
         }
 
         public void DrawSelection(UltimaBatcher2D batcher, float layerDepth)
