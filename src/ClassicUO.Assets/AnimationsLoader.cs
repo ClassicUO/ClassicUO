@@ -215,6 +215,12 @@ namespace ClassicUO.Assets
         {
             if (_bodyInfos.TryGetValue(body, out var bodyInfo))
             {
+                if (body == bodyInfo.Graphic)
+                {
+                    hue = bodyInfo.Hue;
+                    return false;
+                }
+
                 body = bodyInfo.Graphic;
                 hue = bodyInfo.Hue;
 
@@ -228,6 +234,12 @@ namespace ClassicUO.Assets
         {
             if (_corpseInfos.TryGetValue(body, out var bodyInfo))
             {
+                if (body == bodyInfo.Graphic)
+                {
+                    hue = bodyInfo.Hue;
+                    return false;
+                }
+
                 body = bodyInfo.Graphic;
                 hue = bodyInfo.Hue;
 
