@@ -118,6 +118,7 @@ namespace ClassicUO.Game.Managers
                                     p1.Y += 22;
                                 }
 
+                                p1 = Client.Game.Scene.Camera.WorldToScreen(p1, true);
                                 p1.X -= (mobile.HitsTexture.Width >> 1) + 5;
                                 p1.Y -= mobile.HitsTexture.Height;
 
@@ -149,6 +150,8 @@ namespace ClassicUO.Game.Managers
                 }
 
                 p.X -= 5;
+                p = Client.Game.Scene.Camera.WorldToScreen(p, true);
+
                 p.X -= BAR_WIDTH_HALF;
                 p.Y -= BAR_HEIGHT_HALF;
 
