@@ -53,7 +53,8 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (!ProfileManager.CurrentProfile.GameWindowLock)
                 {
-                    Point n = ResizeGameWindow(_lastSize);
+                    var s = new Point(Client.Game.ScaleWithDpi(_lastSize.X), Client.Game.ScaleWithDpi(_lastSize.Y));
+                    Point n = ResizeGameWindow(s);
 
                     UIManager.GetGump<OptionsGump>()?.UpdateVideo();
 
