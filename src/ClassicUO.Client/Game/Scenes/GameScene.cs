@@ -1079,19 +1079,26 @@ namespace ClassicUO.Game.Scenes
         {
             if (_isSelectionActive)
             {
-                Vector3 selectionHue = new Vector3();
-                selectionHue.Z = 0.7f;
+                Vector3 selectionHue = new()
+                {
+                    Z = 0.7f
+                };
 
-                int minX = Math.Min(_selectionStart.X, Mouse.Position.X);
-                int maxX = Math.Max(_selectionStart.X, Mouse.Position.X);
-                int minY = Math.Min(_selectionStart.Y, Mouse.Position.Y);
-                int maxY = Math.Max(_selectionStart.Y, Mouse.Position.Y);
+                Point upperLeftInWorld = Camera.ScreenToWorld(new Point(
+                    Math.Min(_selectionStart.X, Mouse.Position.X) - Camera.Bounds.X,
+                    Math.Min(_selectionStart.Y, Mouse.Position.Y) - Camera.Bounds.Y
+                ));
+
+                Point lowerRightInWorld = Camera.ScreenToWorld(new Point(
+                    Math.Max(_selectionStart.X, Mouse.Position.X) - Camera.Bounds.X,
+                    Math.Max(_selectionStart.Y, Mouse.Position.Y) - Camera.Bounds.Y
+                ));
 
                 Rectangle selectionRect = new Rectangle(
-                    minX - Camera.Bounds.X,
-                    minY - Camera.Bounds.Y,
-                    maxX - minX,
-                    maxY - minY
+                    upperLeftInWorld.X,
+                    upperLeftInWorld.Y,
+                    lowerRightInWorld.X - upperLeftInWorld.X,
+                    lowerRightInWorld.Y - upperLeftInWorld.Y
                 );
 
                 batcher.Draw(
