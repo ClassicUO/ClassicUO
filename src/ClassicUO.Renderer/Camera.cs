@@ -94,6 +94,14 @@ namespace ClassicUO.Renderer
             return point;
         }
 
+        /// <summary>
+        ///     With the way that render targets are now used,
+        ///     everything that renders in the game world, is already correct.
+        /// 
+        ///     We ONLY need to go back and forth when drawing something in the
+        ///     UI render target that should be at a position of something in the
+        ///     world render target.
+        /// </summary>
         public Point WorldToScreen(Point point)
         {
             UpdateMatrices();
