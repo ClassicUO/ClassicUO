@@ -16,8 +16,8 @@ env:
   TARGET_FRAMEWORK: net9.0
 
   DOTNET_NOLOGO: false
-  DOTNET_CLI_TELEMETRY_OPTOUT: 1
-  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+  DOTNET_CLI_TELEMETRY_OPTOUT: "1"
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "1"
   NUGET_XMLDOC_MODE: skip
 
 jobs:
@@ -28,7 +28,7 @@ jobs:
       BRANCH_NAME: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.ref_name }}
       COMMIT_SHA:  ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha    || github.sha }}
       RELEASE_TAG: ClassicUO-${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.ref_name }}-release
-      CUO_ZIP_NAME: "ClassicUO-${{ matrix.target }}-release.zip"
+      CUO_ZIP_NAME: ClassicUO-${{ matrix.target }}-release.zip
 
     strategy:
       matrix:
@@ -61,12 +61,12 @@ jobs:
         run: dotnet publish "${{ env.CUO_PROJECT_PATH }}" -c Release -r "${{ matrix.target }}" -o "${{ env.CUO_OUTPUT_PATH }}" /p:IS_DEV_BUILD=true /p:AssemblyVersion=${{ env.CUO_ASSEMBLY_VERSION }} /p:FileVersion=${{ env.CUO_ASSEMBLY_VERSION }} /p:NativeLib=Shared /p:OutputType=Library
 
       - name: upload-unsigned-artifact
-        if: matrix.os == 'windows-latest'
+        if: ${{ matrix.os == 'windows-latest' }}
         id: upload-unsigned-artifact
         uses: actions/upload-artifact@v4
         with:
-          name: "ClassicUO-${{ matrix.target }}-release"
-          path: "${{ env.CUO_OUTPUT_PATH }}"
+          name: ClassicUO-${{ matrix.target }}-release
+          path: ${{ env.CUO_OUTPUT_PATH }}
 
       - name: Create manifest
         run: dotnet run --project tools/ManifestCreator/ManifestCreator.csproj "${{ env.CUO_OUTPUT_PATH }}" "release" "${{ env.CUO_ZIP_NAME }}" && mkdir upload && mv manifest.xml upload
@@ -74,7 +74,7 @@ jobs:
       - name: Create package
         uses: thedoctor0/zip-release@master
         with:
-          type: "zip"
+          type: zip
           directory: ${{ env.CUO_OUTPUT_PATH }}
           filename: ${{ env.CUO_ZIP_NAME }}
           exclusions: "*.zip manifest.xml"
@@ -86,50 +86,50 @@ jobs:
         run: echo "Trigger branch: ${{ env.BRANCH_NAME }}" && echo "Trigger sha: ${{ env.COMMIT_SHA }}" && echo "Release tag: ${{ env.RELEASE_TAG }}" && git config user.name "github-actions[bot]" && git config user.email "github-actions[bot]@users.noreply.github.com" && git fetch --no-tags --prune --depth=1 origin "${{ env.BRANCH_NAME }}" && git tag -f "${{ env.RELEASE_TAG }}" "${{ env.COMMIT_SHA }}" && git push -f origin "${{ env.RELEASE_TAG }}"
 
       - id: SignPath
-        if: matrix.os == 'windows-latest'
+        if: ${{ matrix.os == 'windows-latest' }}
         uses: signpath/github-action-submit-signing-request@v1
         with:
-          api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
-          organization-id: '8da8dbcb-06bc-4fd9-b049-387482dc5fb6'
-          project-slug: 'ClassicUO'
-          signing-policy-slug: 'release-signing'
-          github-artifact-id: '${{ steps.upload-unsigned-artifact.outputs.artifact-id }}'
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: 8da8dbcb-06bc-4fd9-b049-387482dc5fb6
+          project-slug: ClassicUO
+          signing-policy-slug: release-signing
+          github-artifact-id: ${{ steps.upload-unsigned-artifact.outputs.artifact-id }}
           wait-for-completion: true
-          output-artifact-directory: 'signed/'
+          output-artifact-directory: signed/
 
       - name: Create signed package
-        if: matrix.os == 'windows-latest'
+        if: ${{ matrix.os == 'windows-latest' }}
         uses: thedoctor0/zip-release@master
         with:
-          type: "zip"
+          type: zip
           directory: signed
           filename: ${{ env.CUO_ZIP_NAME }}
           exclusions: "*.zip manifest.xml"
 
       - name: Upload Release (Windows signed)
-        if: matrix.os == 'windows-latest'
+        if: ${{ matrix.os == 'windows-latest' }}
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "signed/${{ env.CUO_ZIP_NAME }}"
-          name: "ClassicUO ${{ env.BRANCH_NAME }} release"
-          body: "This build may not be safe: use it at your own risk."
+          artifacts: signed/${{ env.CUO_ZIP_NAME }}
+          name: ClassicUO ${{ env.BRANCH_NAME }} release
+          body: This build may not be safe: use it at your own risk.
           draft: false
           prerelease: true
           allowUpdates: true
-          tag: "${{ env.RELEASE_TAG }}"
+          tag: ${{ env.RELEASE_TAG }}
           token: ${{ secrets.GITHUB_TOKEN }}
           commit: ${{ env.COMMIT_SHA }}
 
       - name: Upload Release (Unsigned)
-        if: matrix.os != 'windows-latest'
+        if: ${{ matrix.os != 'windows-latest' }}
         uses: ncipollo/release-action@v1
         with:
-          artifacts: "upload/${{ env.CUO_ZIP_NAME }}"
-          name: "ClassicUO ${{ env.BRANCH_NAME }} release"
-          body: "This build may not be safe: use it at your own risk."
+          artifacts: upload/${{ env.CUO_ZIP_NAME }}
+          name: ClassicUO ${{ env.BRANCH_NAME }} release
+          body: This build may not be safe: use it at your own risk.
           draft: false
           prerelease: true
           allowUpdates: true
-          tag: "${{ env.RELEASE_TAG }}"
+          tag: ${{ env.RELEASE_TAG }}
           token: ${{ secrets.GITHUB_TOKEN }}
           commit: ${{ env.COMMIT_SHA }}
