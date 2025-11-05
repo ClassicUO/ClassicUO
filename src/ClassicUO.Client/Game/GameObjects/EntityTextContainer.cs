@@ -211,7 +211,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            p = Client.Game.Scene.Camera.WorldToScreen(p);
+            p = Client.Game.Scene.Camera.WorldToScreen(p, true);
 
             foreach (TextObject item in _messages)
             {
