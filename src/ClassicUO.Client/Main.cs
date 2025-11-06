@@ -39,7 +39,7 @@ namespace ClassicUO
         public static void Main(string[] args) => Boot(null, args);
 
 
-        public static void Boot(UnmanagedAssistantHost pluginHost, string[] args)
+        public static void Boot(IPluginHost pluginHost, string[] args)
         {
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
