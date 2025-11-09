@@ -7,6 +7,7 @@ using ClassicUO.Utility;
 using Clay_cs;
 using Microsoft.Xna.Framework;
 using System;
+using System.Collections.Generic;
 using TinyEcs;
 using TinyEcs.Bevy;
 
@@ -116,8 +117,23 @@ internal readonly struct ContainersPlugin : IPlugin
                             }
                         }
                     })
-                    .Insert(new UIMouseAction())
-                    .Insert<UIMovable>();
+                    .Insert<UIMovable>()
+                    .Observe(static (On<OnReleased> trigger, Commands commands) =>
+                    {
+                        if (trigger.Event.Button != Input.MouseButtonType.Right)
+                            return;
+
+                        commands.Entity(trigger.EntityId)
+                            .Remove<UINode>()
+                            .Remove<UIMouseAction>()
+                            .Remove<UIMovable>();
+
+                        // hostMsgs.Send(new HostMessage.ContainerClosed(serial.Ref.Value));
+                    })
+                    .Observe(static (OnDespawn trigger) =>
+                    {
+
+                    });
             }
         }
     }
