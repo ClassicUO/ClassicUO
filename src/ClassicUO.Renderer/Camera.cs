@@ -103,12 +103,15 @@ namespace ClassicUO.Renderer
         }
 
         /// <summary>
-        ///     With the way that render targets are now used,
-        ///     everything that renders in the game world, is already correct.
-        /// 
-        ///     We ONLY need to go back and forth when drawing something in the
-        ///     UI render target that should be at a position of something in the
-        ///     world render target.
+        ///     Returns screen coordinates from world coordinates.
+        ///     There are two variants for screen coordinates:
+        ///     1. Relative to the game window (withOffset = true)
+        ///     2. Relative to the camera viewport (withOffset = false)
+        ///     Because of the fact that the camera viewport content now
+        ///     fully scales with the zoom level, everything that
+        ///     is not supposed to zoom (UI, etc.) is drawn
+        ///     in the UI render target now.
+        ///     Only those aspects need to adjust for case 1 above.
         /// </summary>
         public Point WorldToScreen(Point point, bool withOffset = false)
         {
