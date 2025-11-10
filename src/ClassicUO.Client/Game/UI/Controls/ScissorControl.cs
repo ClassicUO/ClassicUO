@@ -28,20 +28,21 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            renderLists.AddGumpWithAtlas(
-                batcher =>
+            bool clipIt(Renderer.UltimaBatcher2D batcher)
+            {
+                if (DoScissor)
                 {
-                    if (DoScissor)
-                    {
-                        batcher.ClipBegin(x, y, Width, Height);
-                    }
-                    else
-                    {
-                        batcher.ClipEnd();
-                    }
-                    return true;
+                    batcher.ClipBegin(x, y, Width, Height);
                 }
-            );
+                else
+                {
+                    batcher.ClipEnd();
+                }
+                return true;
+            }
+
+            renderLists.AddGumpWithAtlas(clipIt);
+            renderLists.AddGumpNoAtlas(clipIt);
 
             return true;
         }
