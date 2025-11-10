@@ -305,11 +305,9 @@ namespace ClassicUO.Game.Data
             { 0x48D1, new (0x48D1, Ability.Feint, Ability.DoubleStrike) },
             { 0x48D0, new (0x48D0, Ability.Feint, Ability.DoubleStrike) },             // Gargish Daisho
             { 0xA289, new (0xA289, Ability.ConcussionBlow, Ability.WhirlwindAttack) }, // Barbed Whip
-            { 0xA291, new (0xA291, Ability.ConcussionBlow, Ability.WhirlwindAttack) }, // Barbed Whip (second ID)
             { 0xA28A, new (0xA28A, Ability.ArmorPierce, Ability.WhirlwindAttack) },    // Spiked Whip
             { 0xA292, new (0xA292, Ability.ArmorPierce, Ability.WhirlwindAttack) },    // Spiked Whip
             { 0xA28B, new (0xA28B, Ability.BleedAttack, Ability.WhirlwindAttack) },    // Bladed Whip
-            { 0xA293, new (0xA293, Ability.BleedAttack, Ability.WhirlwindAttack) },    // Bladed Whip (second ID)
             { 0x08FF, new (0x08FF, Ability.MysticArc, Ability.ConcussionBlow) },       // Boomerang
             { 0x0900, new (0x0900, Ability.ArmorIgnore, Ability.ParalyzingBlow) },     // Stone War Sword
             { 0x090A, new (0x090A, Ability.ArmorIgnore, Ability.MortalStrike) },       // Soul Glaive
