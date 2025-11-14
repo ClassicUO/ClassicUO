@@ -316,7 +316,13 @@ namespace ClassicUO
 
         public void SetWindowPositionBySettings()
         {
-            SDL_GetWindowBordersSize(Window.Handle, out int top, out int left, out _, out _);
+            var borderSizesRetrieved = SDL_GetWindowBordersSize(Window.Handle, out int top, out int left, out _, out _);
+
+            if (!borderSizesRetrieved)
+            {
+                top = 0;
+                left = 0;
+            }
 
             if (Settings.GlobalSettings.WindowPosition.HasValue)
             {
@@ -324,6 +330,31 @@ namespace ClassicUO
                 int y = top + Settings.GlobalSettings.WindowPosition.Value.Y;
                 x = Math.Max(0, x);
                 y = Math.Max(0, y);
+
+                SDL_Point desiredStartPoint = new() { x = x, y = y };
+                var displayId = SDL_GetDisplayForPoint(ref desiredStartPoint);
+                if (displayId <= 0)
+                {
+                    // Make sure the window is actually in view and not out of bounds
+                    SetWindowPosition(left, top);
+                }
+
+                var boundsRetrieved = SDL_GetDisplayUsableBounds(displayId, out SDL_Rect displayBounds);
+                if (!boundsRetrieved)
+                {
+                    return; // we have no clue - the user is unfortunately on their own
+                }
+
+                if (x < displayBounds.x || x >= displayBounds.x + displayBounds.w)
+                {
+                    // Make sure the window is actually in view and not out of bounds
+                    x = left + displayBounds.x;
+                }
+
+                if (y < displayBounds.y || y >= displayBounds.y + displayBounds.h)
+                {
+                    y = top + displayBounds.y;
+                }
 
                 SetWindowPosition(x, y);
             }
