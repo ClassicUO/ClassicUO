@@ -38,12 +38,12 @@ namespace ClassicUO.Game.UI.Controls
             _selectedIndex = selectedIndex;
             _fontSize = fontSize;
 
-            // Cores do tema gótico/medieval - Background vermelho escuro com texto branco
-            _baseColor = Color.DarkRed;                    // Background vermelho escuro
-            _highlightColor = new Color(180, 50, 50);      // Realce mais claro para bordas
-            _shadowColor = new Color(80, 15, 15);          // Sombra mais escura
+            // Cores do tema gótico/medieval - Background preto com texto branco
+            _baseColor = Color.Black;                      // Background preto
+            _highlightColor = new Color(100, 100, 100);    // Realce cinza claro para bordas
+            _shadowColor = new Color(50, 50, 50);          // Sombra cinza escuro
             _textColor = Color.White;                      // Texto branco para contraste
-            _textShadowColor = Color.Black;                // Sombra preta do texto
+            _textShadowColor = Color.Gray;                 // Sombra cinza do texto
 
             // Carregar fonte
             _font = TrueTypeLoader.Instance.GetFont("Arial", fontSize);
@@ -134,16 +134,16 @@ namespace ClassicUO.Game.UI.Controls
             }
             else if (_isHovered)
             {
-                // Quando hover, clarear o vermelho
+                // Quando hover, clarear o preto para cinza escuro
                 currentBaseColor = new Color(
-                    Math.Min(255, _baseColor.R + 30),
-                    Math.Min(255, _baseColor.G + 15),
-                    Math.Min(255, _baseColor.B + 10)
+                    Math.Min(255, _baseColor.R + 40),
+                    Math.Min(255, _baseColor.G + 40),
+                    Math.Min(255, _baseColor.B + 40)
                 );
                 currentHighlightColor = new Color(
-                    Math.Min(255, _highlightColor.R + 25),
-                    Math.Min(255, _highlightColor.G + 15),
-                    Math.Min(255, _highlightColor.B + 10)
+                    Math.Min(255, _highlightColor.R + 30),
+                    Math.Min(255, _highlightColor.G + 30),
+                    Math.Min(255, _highlightColor.B + 30)
                 );
             }
 
@@ -236,11 +236,11 @@ namespace ClassicUO.Game.UI.Controls
 
         private void DrawTextureEffect(UltimaBatcher2D batcher, int x, int y, int width, int height, Color baseColor)
         {
-            // Efeito de textura vermelha mais sutil
+            // Efeito de textura preta mais sutil
             var textureColor = new Color(
-                Math.Max(0, baseColor.R - 20),
-                Math.Max(0, baseColor.G - 10),
-                Math.Max(0, baseColor.B - 8)
+                Math.Max(0, baseColor.R + 20),
+                Math.Max(0, baseColor.G + 20),
+                Math.Max(0, baseColor.B + 20)
             );
 
             // Desenhar padrão de textura orgânico
@@ -380,9 +380,9 @@ namespace ClassicUO.Game.UI.Controls
                 }
 
                 // Desenhar fundo do dropdown
-                Color baseColor = new Color(0, 0, 0, (byte)(255)); // Preto com opacity 0.87
-                Color shadowColor = new Color(0, 0, 0, (byte)(255));
-                Color highlightColor = new Color(180, 50, 50);
+                Color baseColor = new Color(0, 0, 0, (byte)(255)); // Preto sólido
+                Color shadowColor = new Color(50, 50, 50); // Cinza escuro para sombra
+                Color highlightColor = new Color(100, 100, 100); // Cinza claro para bordas
 
                 // Sombra (fundo escuro atrás)
                 batcher.Draw(SolidColorTextureCache.GetTexture(shadowColor), new Rectangle(x + 2, y + 2, Width, Height), Vector3.Zero);

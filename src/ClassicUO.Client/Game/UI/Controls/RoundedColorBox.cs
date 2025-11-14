@@ -38,7 +38,7 @@ namespace ClassicUO.Game.UI.Controls
         private void DrawRoundedRectangle(UltimaBatcher2D batcher, int x, int y, int width, int height, int radius, Color color)
         {
             Texture2D texture = SolidColorTextureCache.GetTexture(color);
-            Vector3 colorVector = new Vector3(color.R / 255f, color.G / 255f, color.B / 255f);
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, Alpha);
 
             // Main rectangle (center)
             if (width > radius * 2 && height > radius * 2)
@@ -46,7 +46,7 @@ namespace ClassicUO.Game.UI.Controls
                 batcher.Draw(
                     texture,
                     new Rectangle(x + radius, y + radius, width - radius * 2, height - radius * 2),
-                    colorVector
+                    hueVector
                 );
             }
 
@@ -56,12 +56,12 @@ namespace ClassicUO.Game.UI.Controls
                 batcher.Draw(
                     texture,
                     new Rectangle(x + radius, y, width - radius * 2, radius),
-                    colorVector
+                    hueVector
                 );
                 batcher.Draw(
                     texture,
                     new Rectangle(x + radius, y + height - radius, width - radius * 2, radius),
-                    colorVector
+                    hueVector
                 );
             }
 
@@ -71,12 +71,12 @@ namespace ClassicUO.Game.UI.Controls
                 batcher.Draw(
                     texture,
                     new Rectangle(x, y + radius, radius, height - radius * 2),
-                    colorVector
+                    hueVector
                 );
                 batcher.Draw(
                     texture,
                     new Rectangle(x + width - radius, y + radius, radius, height - radius * 2),
-                    colorVector
+                    hueVector
                 );
             }
 
@@ -87,25 +87,25 @@ namespace ClassicUO.Game.UI.Controls
                 batcher.Draw(
                     texture,
                     new Rectangle(x, y, radius, radius),
-                    colorVector
+                    hueVector
                 );
                 // Top-right corner
                 batcher.Draw(
                     texture,
                     new Rectangle(x + width - radius, y, radius, radius),
-                    colorVector
+                    hueVector
                 );
                 // Bottom-left corner
                 batcher.Draw(
                     texture,
                     new Rectangle(x, y + height - radius, radius, radius),
-                    colorVector
+                    hueVector
                 );
                 // Bottom-right corner
                 batcher.Draw(
                     texture,
                     new Rectangle(x + width - radius, y + height - radius, radius, radius),
-                    colorVector
+                    hueVector
                 );
             }
         }

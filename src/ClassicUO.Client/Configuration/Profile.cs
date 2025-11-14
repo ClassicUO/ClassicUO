@@ -615,6 +615,16 @@ namespace ClassicUO.Configuration
         // ## BEGIN - END ## // MISC3 THIEFSUPREME
         // ## BEGIN - END ## // VISUALRESPONSEMANAGER
         public bool VisualResponseManager { get; set; } = false;
+        
+        // Performance Optimizations
+        public bool PerformanceOptimizations { get; set; } = true;
+        public bool PerformanceFrustumCulling { get; set; } = true;
+        public bool PerformanceBatchOptimization { get; set; } = true;
+        public bool PerformanceLODSystem { get; set; } = true;
+        public bool PerformanceTextureStreaming { get; set; } = true;
+        public bool PerformanceOcclusionCulling { get; set; } = false;
+        public int PerformanceQualityLevel { get; set; } = 2; // 0=Low, 1=Medium, 2=High, 3=Ultra
+        public bool PerformanceShowStats { get; set; } = false;
         // ## BEGIN - END ## // VISUALRESPONSEMANAGER
         // ## BEGIN - END ## // TABGRID // PKRION
         public bool TabGridGumpEnabled { get; set; } = false;

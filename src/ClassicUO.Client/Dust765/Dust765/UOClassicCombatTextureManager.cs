@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 
 using ClassicUO.Configuration;
 using ClassicUO.Game;
@@ -237,7 +238,26 @@ namespace ClassicUO.Dust765.Dust765
             if (World.Player == null)
                 return;
 
-            foreach (Mobile mobile in World.Mobiles.Values)
+            // Apply performance optimizations
+            PerformanceOptimizations.UpdatePerformanceMetrics();
+            
+            // Get visible mobiles only
+            var allMobiles = World.Mobiles.Values.ToList();
+            var visibleMobiles = allMobiles.Where(mobile => 
+                PerformanceOptimizations.IsObjectVisible(mobile, Client.Game.Scene.Camera) &&
+                PerformanceOptimizations.ShouldRenderAtLOD(mobile, Client.Game.Scene.Camera)
+            ).ToList();
+
+            // Group mobiles by type for batch optimization
+            var groupedMobiles = PerformanceOptimizations.GroupObjectsByType(visibleMobiles.Cast<Entity>());
+            
+            // Record performance metrics
+            PerformanceMonitor.RecordObjectCount(allMobiles.Count, visibleMobiles.Count);
+            PerformanceMonitor.Update();
+
+            foreach (var group in groupedMobiles)
+            {
+                foreach (Mobile mobile in group.Value.Cast<Mobile>())
             {
                 //SKIP FOR PLAYER
                 if (mobile == World.Player)
@@ -339,7 +359,11 @@ namespace ClassicUO.Dust765.Dust765
                     batcher.SetBlendState(null);
                 }
                 //ARROW TEXTURE
+                }
             }
+            
+            // Draw performance stats if enabled
+            PerformanceMonitor.Draw(batcher);
         }
     }
 }

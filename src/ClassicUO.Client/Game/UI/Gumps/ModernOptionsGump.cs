@@ -72,9 +72,8 @@ namespace ClassicUO.Game.UI.Gumps
             X = (Client.Game.Window.ClientBounds.Width >> 1) - (Width >> 1);
             Y = (Client.Game.Window.ClientBounds.Height >> 1) - (Height >> 1);
 
-            Add(new RoundedColorBox(Width, Height, Color.Black, 12) { AcceptMouseInput = true, CanMove = true, Alpha = 0.95f });
-
-            Add(new RoundedColorBox(Width, 40, Color.FromNonPremultiplied(20, 20, 20, 255), 8) { AcceptMouseInput = true, CanMove = true, Alpha = 0.95f });
+            Add(new RoundedColorBox(Width, Height, Color.Black, 12) { AcceptMouseInput = true, CanMove = true, Alpha = 1f });
+            Add(new RoundedColorBox(Width, 40, Color.FromNonPremultiplied(20, 20, 20, 255), 8) { AcceptMouseInput = true, CanMove = true, Alpha = 1f });
 
             Add(new TextBox(lang.OptionsTitle, Theme.FONT, Theme.STANDARD_TEXT_SIZE + 8, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { X = 10, Y = 7, AcceptMouseInput = false });
 
