@@ -5,6 +5,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Sockets;
 using ClassicUO.Configuration;
+// ## BEGIN - END ## // UI/GUMPS
+using ClassicUO.Dust765.External;
+using ClassicUO.Dust765.Dust765;
+// ## BEGIN - END ## // UI/GUMPS
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -149,6 +153,16 @@ namespace ClassicUO.Game.Scenes
                 Client.Game.SetWindowSize(w, h);
             }
 
+            // ## BEGIN - END ## // ONCASTINGGUMP
+            if (ProfileManager.CurrentProfile.OnCastingGump)
+            {
+                if (World.Player.OnCasting == null)
+                {
+                    UIManager.Add(World.Player.OnCasting = new OnCastingGump());
+                }
+            }
+            // ## BEGIN - END ## // ONCASTINGGUMP
+
             Plugin.OnConnected();
         }
 
@@ -263,6 +277,10 @@ namespace ClassicUO.Game.Scenes
 
                     break;
             }
+
+            // ## BEGIN - END ## // UI/GUMPS
+            World.Player?.BandageTimer.OnMessage(text, hue, name, e.IsUnicode);
+            // ## BEGIN - END ## // UI/GUMPS
 
             if (!string.IsNullOrEmpty(text))
             {

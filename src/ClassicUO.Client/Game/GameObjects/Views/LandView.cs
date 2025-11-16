@@ -55,6 +55,17 @@ namespace ClassicUO.Game.GameObjects
             }
             hueVec.Z = 1f;
 
+            // ## BEGIN - END ## // MISC2
+            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.HueImpassableView)
+            {
+                if (this.TileData.IsImpassable)
+                {
+                    hueVec.X = ProfileManager.CurrentProfile.HueImpassableViewHue;
+                    hueVec.Y = 1;
+                }
+            }
+            // ## BEGIN - END ## // MISC2
+
             if (IsStretched)
             {
                 posY += Z << 2;
@@ -62,7 +73,9 @@ namespace ClassicUO.Game.GameObjects
                 ref readonly var texmapInfo = ref Client.Game.UO.Texmaps.GetTexmap(
                     Client.Game.UO.FileManager.TileData.LandData[Graphic].TexID
                 );
-
+                //STRECHEDLAND TO DO UPDATE!!
+                //var texture = TexmapsLoader.Instance.GetLandTexture(TileDataLoader.Instance.LandData[Graphic].TexID, out var bounds, this.TileData.IsImpassable);
+                // ## BEGIN - END ## // MISC2
                 if (texmapInfo.Texture != null)
                 {
                     batcher.DrawStretchedLand(
@@ -94,6 +107,10 @@ namespace ClassicUO.Game.GameObjects
             else
             {
                 ref readonly var artInfo = ref Client.Game.UO.Arts.GetLand(Graphic);
+
+                //FLATLAND// TO DO UPDATE!!
+                //var texture = ArtLoader.Instance.GetLandTexture(Graphic, out var bounds, this.TileData.IsImpassable);
+                // ## BEGIN - END ## // MISC2
 
                 if (artInfo.Texture != null)
                 {

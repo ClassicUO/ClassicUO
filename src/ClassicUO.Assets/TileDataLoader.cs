@@ -317,7 +317,26 @@ namespace ClassicUO.Assets
 
         public bool IsAnimated => (Flags & TileFlag.Animation) != 0;
         public bool IsBridge => (Flags & TileFlag.Bridge) != 0;
-        public bool IsImpassable => (Flags & TileFlag.Impassable) != 0;
+        public bool IsImpassable
+        {
+            // GET: Verifica se o bit do flag está ligado (o mesmo que você tinha)
+            get => (Flags & TileFlag.Impassable) != 0;
+
+            // SET: Liga ou desliga o bit do flag com base no valor de 'value'
+            set
+            {
+                if (value)
+                {
+                    // Se 'value' for true, LIGA o bit usando o operador OR (|)
+                    Flags |= TileFlag.Impassable;
+                }
+                else
+                {
+                    // Se 'value' for false, DESLIGA o bit usando o operador AND com o NOT bit a bit (~&)
+                    Flags &= ~TileFlag.Impassable;
+                }
+            }
+        }
         public bool IsSurface => (Flags & TileFlag.Surface) != 0;
         public bool IsWearable => (Flags & TileFlag.Wearable) != 0;
         public bool IsInternal => (Flags & TileFlag.Internal) != 0;

@@ -44,19 +44,36 @@ namespace ClassicUO.Game.UI.Gumps
             switch ((ButtonType) buttonID)
             {
                 case ButtonType.BuffIcon:
-
-                    BuffGump gump = UIManager.GetGump<BuffGump>();
-
-                    if (gump == null)
+                    // ## BEGIN - END ## // TAZUO
+                    if (ProfileManager.CurrentProfile.UseImprovedBuffBar)
                     {
-                        UIManager.Add(new BuffGump(World, 100, 100));
+                        Gump gump = UIManager.GetGump<ImprovedBuffGump>();
+
+                        if (gump == null)
+                        {
+                            UIManager.Add(new ImprovedBuffGump());
+                        }
+                        else
+                        {
+                            gump.SetInScreen();
+                            gump.BringOnTop();
+                        }
                     }
                     else
                     {
-                        gump.SetInScreen();
-                        gump.BringOnTop();
-                    }
+                        // ## BEGIN - END ## // TAZUO
+                        BuffGump gump = UIManager.GetGump<BuffGump>();
 
+                        if (gump == null)
+                        {
+                            UIManager.Add(new BuffGump(World, 100, 100));
+                        }
+                        else
+                        {
+                            gump.SetInScreen();
+                            gump.BringOnTop();
+                        }
+                    }
                     break;
             }
         }

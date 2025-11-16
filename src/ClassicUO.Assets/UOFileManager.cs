@@ -74,8 +74,7 @@ namespace ClassicUO.Assets
         public ProfessionLoader Professions { get; }
         public TileArtLoader TileArt { get; }
         public StringDictionaryLoader StringDictionary { get; }
-
-
+        //public StringDictionaryLoader PNGLoader { get; }
 
         public void Dispose()
         {
@@ -164,6 +163,9 @@ namespace ClassicUO.Assets
             TileArt.Load();
             StringDictionary.Load();
             Verdata.Load();
+            // ## BEGIN - END ## // TAZUO
+            //PNGLoader.Load();
+             // ## BEGIN - END ## // TAZUO
 
             ReadArtDefFile();
 

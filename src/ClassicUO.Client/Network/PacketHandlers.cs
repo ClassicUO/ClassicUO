@@ -4,6 +4,11 @@ using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
+// ## BEGIN - END ## // VISUAL HELPERS
+// ## BEGIN - END ## // MISC
+using ClassicUO.Dust765.Dust765;
+// ## BEGIN - END ## // MISC
+// ## BEGIN - END ## // VISUAL HELPERS
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -364,6 +369,10 @@ namespace ClassicUO.Network
                 (TargetType)p.ReadUInt8()
             );
 
+            // ## BEGIN - END ## // ONCASTINGGUMP
+            GameActions.iscasting = false;
+            // ## BEGIN - END ## // ONCASTINGGUMP
+
             if (world.Party.PartyHealTimer < Time.Ticks && world.Party.PartyHealTarget != 0)
             {
                 world.TargetManager.Target(world.Party.PartyHealTarget);
@@ -475,6 +484,10 @@ namespace ClassicUO.Network
 
                 if (damage > 0)
                 {
+                    // ## BEGIN - END ## // ONCASTINGGUMP
+                    if (entity == World.Player)
+                        GameActions.iscasting = false;
+                    // ## BEGIN - END ## // ONCASTINGGUMP
                     world.WorldTextManager.AddDamage(entity, damage);
                 }
             }
@@ -4754,6 +4767,16 @@ namespace ClassicUO.Network
 
             string arguments = null;
 
+            // ## BEGIN - END ## // ONCASTINGGUMP
+            if (ProfileManager.CurrentProfile.OnCastingGump)
+            {
+                World.Player?.OnCasting.OnCliloc(cliloc);
+            }
+            // ## BEGIN - END ## // ONCASTINGGUMP
+            // ## BEGIN - END ## // UI/GUMPS
+            World.Player?.BandageTimer.OnCliloc(cliloc);
+            // ## BEGIN - END ## // UI/GUMPS
+
             if (cliloc == 1008092 || cliloc == 1005445) // value for "You notify them you don't want to join the party" || "You have been added to the party"
             {
                 for (LinkedListNode<Gump> g = UIManager.Gumps.Last; g != null; g = g.Previous)
@@ -5486,12 +5509,24 @@ namespace ClassicUO.Network
             if (iconID < BuffTable.Table.Length)
             {
                 BuffGump gump = UIManager.GetGump<BuffGump>();
+                // ## BEGIN - END ## // MODERNCOOLDOWNBAR
+                ECBuffGump ecbuffs = UIManager.GetGump<ECBuffGump>();
+                ECDebuffGump ecdebuffs = UIManager.GetGump<ECDebuffGump>();
+                ECStateGump ecstates = UIManager.GetGump<ECStateGump>();
+                ModernCooldownBar cooldowns = UIManager.GetGump<ModernCooldownBar>();
+                // ## BEGIN - END ## // MODERNCOOLDOWNBAR
                 ushort count = p.ReadUInt16BE();
 
                 if (count == 0)
                 {
                     world.Player.RemoveBuff(ic);
                     gump?.RequestUpdateContents();
+                    // ## BEGIN - END ## // MODERNCOOLDOWNBAR
+                    ecbuffs?.RequestUpdateContents();
+                    ecdebuffs?.RequestUpdateContents();
+                    ecstates?.RequestUpdateContents();
+                    cooldowns?.RequestUpdateContents();
+                    // ## BEGIN - END ## // MODERNCOOLDOWNBAR
                 }
                 else
                 {
@@ -5558,11 +5593,21 @@ namespace ClassicUO.Network
 
                         string text = $"<left>{title}{description}{wtf}</left>";
                         bool alreadyExists = world.Player.IsBuffIconExists(ic);
-                        world.Player.AddBuff(ic, BuffTable.Table[iconID], timer, text);
+                        // ## BEGIN - END ## // TAZUO
+                        //World.Player.AddBuff(ic, BuffTable.Table[iconID], timer, text);
+                        // ## BEGIN - END ## // TAZUO
+                        World.Player.AddBuff(ic, BuffTable.Table[iconID], timer, text, title);
+                        // ## BEGIN - END ## // TAZUO
 
                         if (!alreadyExists)
                         {
                             gump?.RequestUpdateContents();
+                            // ## BEGIN - END ## // MODERNCOOLDOWNBAR
+                            ecbuffs?.RequestUpdateContents();
+                            ecdebuffs?.RequestUpdateContents();
+                            ecstates?.RequestUpdateContents();
+                            cooldowns?.RequestUpdateContents();
+                            // ## BEGIN - END ## // MODERNCOOLDOWNBAR
                         }
                     }
                 }
@@ -5706,6 +5751,27 @@ namespace ClassicUO.Network
             ushort hue = p.ReadUInt16BE();
             Flags flags = (Flags)p.ReadUInt8();
             ushort unk2 = p.ReadUInt16BE();
+
+            // ## BEGIN - END ## // MISC
+            if (graphic == 130 & ProfileManager.CurrentProfile.BlockWoSArtForceAoS)
+            {
+                graphic = Convert.ToUInt16(ProfileManager.CurrentProfile.BlockWoSArt);
+                hue = 945;
+            }
+            if (ProfileManager.CurrentProfile.BlockEnergyFArtForceAoS)
+            {
+                if (graphic >= 14662 && graphic <= 14692) //Regular EField //graphic >= 0x3946 && graphic <= 0x3964
+                {
+                    graphic = Convert.ToUInt16(ProfileManager.CurrentProfile.BlockEnergyFArt);
+                    hue = 293;
+                }
+                if (graphic == 10408 && hue == 0x0125) //Razor CE - WallStaticID - Filters/WallStaticFilter.cs / Razor Enhanced - WallStaticID - Filters.cs / (hue: 0x0125)
+                {
+                    graphic = Convert.ToUInt16(ProfileManager.CurrentProfile.BlockEnergyFArt);
+                    hue = 293;
+                }
+            }
+            // ## BEGIN - END ## // MISC
 
             if (serial != world.Player)
             {

@@ -86,6 +86,11 @@ namespace ClassicUO.Game
         private bool _needGraphicUpdate = true;
         private readonly List<Multi> _temp = new List<Multi>();
         private readonly Tooltip _tooltip;
+        // ## BEGIN - END ## // VISUAL HELPERS
+        public static uint _spellTime { get; set; }
+        public static uint _startSpellTime { get; set; }
+        public static RenderedText _spellTimeText { get; set; }
+        // ## BEGIN - END ## // VISUAL HELPERS
         private readonly World _world;
 
         public GameCursor(World world)

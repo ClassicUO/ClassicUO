@@ -3,6 +3,10 @@
 using System;
 using System.Runtime.CompilerServices;
 using ClassicUO.Configuration;
+// ## BEGIN - END ## // MISC2
+using ClassicUO.Game.Data;
+using ClassicUO.Dust765.Dust765;
+// ## BEGIN - END ## // MISC2
 using ClassicUO.IO;
 using ClassicUO.Assets;
 using ClassicUO.Renderer;
@@ -244,6 +248,16 @@ namespace ClassicUO.Game.GameObjects
                 y -= index.Height;
 
                 Vector2 pos = new Vector2(x, y);
+
+                // ## BEGIN - END ## // MISC2
+                if (ProfileManager.CurrentProfile.IgnoreCoTEnabled)
+                {
+                    if (StaticFilters.IsIgnoreCoT(graphic) || ProfileManager.CurrentProfile.TreeType == 1 && graphic == CombatCollection.TREE_REPLACE_GRAPHIC || ProfileManager.CurrentProfile.TreeType == 2 & graphic == CombatCollection.TREE_REPLACE_GRAPHIC_TILE)
+                    {
+                        shadow = false;
+                    }
+                }
+                // ## BEGIN - END ## // MISC2
 
                 if (shadow)
                 {

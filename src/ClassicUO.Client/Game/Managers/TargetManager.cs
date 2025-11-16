@@ -1,11 +1,12 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.Dust765.Dust765;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Network;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
@@ -133,6 +134,11 @@ namespace ClassicUO.Game.Managers
             }
 
             IsTargeting = false;
+
+            // ## BEGIN - END ## // VISUAL HELPERS
+            GameActions.LastSpellIndexCursor = 0;
+            GameCursor._spellTime = 0;
+            // ## BEGIN - END ## // VISUAL HELPERS
         }
 
         public void Reset()
@@ -165,6 +171,10 @@ namespace ClassicUO.Game.Managers
             IsTargeting = cursorType < TargetType.Cancel;
             TargetingState = targeting;
             TargetingType = cursorType;
+
+            // ## BEGIN - END ## // VISUAL HELPERS
+            CombatCollection.StartSpelltime();
+            // ## BEGIN - END ## // VISUAL HELPERS
 
             if (IsTargeting)
             {
@@ -210,6 +220,11 @@ namespace ClassicUO.Game.Managers
                 NetClient.Socket.Send_TargetCancel(TargetingState, _targetCursorId, (byte)TargetingType);
                 IsTargeting = false;
             }
+
+            // ## BEGIN - END ## // VISUAL HELPERS
+            GameActions.LastSpellIndexCursor = 0;
+            GameCursor._spellTime = 0;
+            // ## BEGIN - END ## // VISUAL HELPERS
 
             Reset();
         }

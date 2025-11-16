@@ -385,6 +385,17 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 )
             );
 
+            // ## BEGIN - END ## // LOGIN
+            Add
+            (
+                new HtmlControl
+                (
+                    htmlX + 150, htmlY, 150, 15, false, false, false,
+                    "<body link=\"#FF00FF00\" vlink=\"#FF00FF00\" ><a href=\"https://github.com/mguerine/ClassicUO\">Projeto dust765 light (by Mark)",
+                    0x32, true, isunicode: true, style: FontStyle.BlackBorder
+                )
+            );
+            // ## BEGIN - END ## // LOGIN
 
             Add
             (

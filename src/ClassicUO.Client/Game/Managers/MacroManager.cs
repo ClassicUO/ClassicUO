@@ -1,12 +1,8 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Xml;
 using ClassicUO.Configuration;
+using ClassicUO.Dust765.Dust765;
+using ClassicUO.Dust765.External;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
@@ -17,6 +13,12 @@ using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using SDL3;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Xml;
 
 namespace ClassicUO.Game.Managers
 {
@@ -1182,7 +1184,8 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.CloseGump:
 
-                    UIManager.Gumps.Where(s => !(s is TopBarGump) && !(s is BuffGump) && !(s is WorldViewportGump)).ToList().ForEach(s => s.Dispose());
+                    //UIManager.Gumps.Where(s => !(s is TopBarGump) && !(s is BuffGump) && !(s is WorldViewportGump)).ToList().ForEach(s => s.Dispose());
+                    UIManager.Gumps.Where(s => !(s is TopBarGump) && !(s is BuffGump) && !(s is ImprovedBuffGump) && !(s is WorldViewportGump) && !(s is BandageGump) && !(s is ECBuffGump) && !(s is ECDebuffGump) && !(s is ECStateGump) && !(s is ModernCooldownBar)).ToList().ForEach(s => s.Dispose());
 
                     break;
 
@@ -1421,17 +1424,36 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.ToggleBuffIconGump:
-                    BuffGump buff = UIManager.GetGump<BuffGump>();
-
-                    if (buff != null)
+                    // ## BEGIN - END ## // TAZUO
+                    if (ProfileManager.CurrentProfile.UseImprovedBuffBar)
                     {
-                        buff.Dispose();
+                        ImprovedBuffGump buff = UIManager.GetGump<ImprovedBuffGump>();
+                        if (buff != null)
+                        {
+                            buff.Dispose();
+                        }
+                        else
+                        {
+                            UIManager.Add(new ImprovedBuffGump());
+                        }
                     }
                     else
                     {
-                        UIManager.Add(new BuffGump(_world, 100, 100));
-                    }
+                        // ## BEGIN - END ## // TAZUO
+                        BuffGump buff = UIManager.GetGump<BuffGump>();
 
+                        if (buff != null)
+                        {
+                            buff.Dispose();
+                        }
+                        else
+                        {
+                            UIManager.Add(new BuffGump(_world, 100, 100));
+                        }
+
+                        // ## BEGIN - END ## // TAZUO
+                    }
+                    // ## BEGIN - END ## // TAZUO
                     break;
 
                 case MacroType.InvokeVirtue:
@@ -1779,6 +1801,19 @@ namespace ClassicUO.Game.Managers
                     // handle in gamesceneinput
                     break;
 
+                // ## BEGIN - END ## // VISUAL HELPERS
+                // ## BEGIN - END ## // MISC2
+                case MacroType.ToggleTransparentHouses:
+                    ProfileManager.CurrentProfile.TransparentHousesEnabled = !ProfileManager.CurrentProfile.TransparentHousesEnabled;
+
+                    break;
+                case MacroType.ToggleInvisibleHouses:
+                    ProfileManager.CurrentProfile.InvisibleHousesEnabled = !ProfileManager.CurrentProfile.InvisibleHousesEnabled;
+
+                    break;
+                // ## BEGIN - END ## // MISC2
+                // ## BEGIN - END ## // MACROS
+
                 case MacroType.UseCounterBarSlot:
                     {
                         MacroObjectString objectString = (MacroObjectString)macro;
@@ -1790,6 +1825,63 @@ namespace ClassicUO.Game.Managers
                         }
                         break;
                     }
+                // ## BEGIN - END ## // MODERNCOOLDOWNBAR
+                case MacroType.ToggleECBuffGump:
+                    ECBuffGump ecbuffs = UIManager.GetGump<ECBuffGump>();
+
+                    if (ecbuffs != null)
+                    {
+                        ecbuffs.Dispose();
+                    }
+                    else
+                    {
+                        UIManager.Add(new ECBuffGump(100, 100));
+                    }
+
+                    break;
+
+                case MacroType.ToggleECDebuffGump:
+                    ECDebuffGump ecdebuffs = UIManager.GetGump<ECDebuffGump>();
+
+                    if (ecdebuffs != null)
+                    {
+                        ecdebuffs.Dispose();
+                    }
+                    else
+                    {
+                        UIManager.Add(new ECDebuffGump(100, 100));
+                    }
+
+                    break;
+
+                case MacroType.ToggleECStateGump:
+                    ECStateGump ecstates = UIManager.GetGump<ECStateGump>();
+
+                    if (ecstates != null)
+                    {
+                        ecstates.Dispose();
+                    }
+                    else
+                    {
+                        UIManager.Add(new ECStateGump(100, 100));
+                    }
+
+                    break;
+
+                case MacroType.ToggleModernCooldownBar:
+                    ModernCooldownBar cooldowns = UIManager.GetGump<ModernCooldownBar>();
+
+                    if (cooldowns != null)
+                    {
+                        cooldowns.Dispose();
+                    }
+                    else
+                    {
+                        UIManager.Add(new ModernCooldownBar(100, 100));
+                    }
+
+                    break;
+                    // ## BEGIN - END ## // MODERNCOOLDOWNBA
             }
 
 
@@ -2338,7 +2430,16 @@ namespace ClassicUO.Game.Managers
         CloseCorpses,
         UseObject,
         LookAtMouse,
-        UseCounterBarSlot
+        UseCounterBarSlot,
+        // ## BEGIN - END ## // MISC2
+        ToggleTransparentHouses,
+        ToggleInvisibleHouses,
+        // ## BEGIN - END ## // MISC2
+        // ## BEGIN - END ## // MODERNCOOLDOWNBAR
+        ToggleECBuffGump,
+        ToggleECDebuffGump,
+        ToggleECStateGump,
+        ToggleModernCooldownBar,
     }
 
     internal enum MacroSubType

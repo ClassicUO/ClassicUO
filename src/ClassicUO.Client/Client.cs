@@ -2,6 +2,7 @@
 
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.Dust765.Dust765;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.IO;
@@ -195,6 +196,10 @@ namespace ClassicUO
             StaticFilters.Load(FileManager.TileData);
             BuffTable.Load();
             ChairTable.Load();
+
+            // ## BEGIN - END ## // MODERNCOOLDOWNBAR
+            BuffFilters.Load();
+            // ## BEGIN - END ## // MODERNCOOLDOWNBAR
 
             //ATTENTION: you will need to enable ALSO ultimalive server-side, or this code will have absolutely no effect!
             UltimaLive.Enable();

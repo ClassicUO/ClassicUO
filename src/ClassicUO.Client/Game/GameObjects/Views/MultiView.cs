@@ -1,6 +1,9 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Configuration;
+// ## BEGIN - END ## // VISUAL HELPERS
+using ClassicUO.Dust765.Dust765;
+// ## BEGIN - END ## // VISUAL HELPERS
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
@@ -89,6 +92,20 @@ namespace ClassicUO.Game.GameObjects
 
             posX += (int)Offset.X;
             posY += (int)(Offset.Y + Offset.Z);
+
+            // ## BEGIN - END ## // MISC2
+            if (ProfileManager.CurrentProfile.TransparentHousesEnabled)
+            {
+                GameObject tile = World.Map.GetTile(X, Y);
+
+                if (tile != null)
+                {
+                    if ((Z - World.Player.Z) > ProfileManager.CurrentProfile.TransparentHousesZ && (Z - tile.Z) > ProfileManager.CurrentProfile.DontRemoveHouseBelowZ)
+                        hueVec.Z = (float)ProfileManager.CurrentProfile.TransparentHousesTransparency / 10;
+                }
+            }
+
+            // ## BEGIN - END ## // MISC2
 
             DrawStaticAnimated(batcher, graphic, posX, posY, hueVec, false, depth);
 

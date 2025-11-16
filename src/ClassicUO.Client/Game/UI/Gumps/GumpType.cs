@@ -24,7 +24,15 @@ namespace ClassicUO.Game.UI.Gumps
         SkillButton,
         RacialButton,
         WorldMap,
-
+        // ## BEGIN - END ## // UI/GUMPS
+        BandageGump,
+        // ## BEGIN - END ## // UI/GUMPS
+        // ## BEGIN - END ## // MODERNCOOLDOWNBAR
+        ECBuffGump,
+        ECDebuffGump,
+        ECStateGump,
+        ModernCooldownBar,
+        // ## BEGIN - END ## // MODERNCOOLDOWNBAR
         Debug,
         NetStats,
 

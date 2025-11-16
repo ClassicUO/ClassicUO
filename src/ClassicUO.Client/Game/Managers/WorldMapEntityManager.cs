@@ -48,6 +48,9 @@ namespace ClassicUO.Game.Managers
         private uint _lastUpdate, _lastPacketSend, _lastPacketRecv;
         private readonly List<WMapEntity> _toRemove = new List<WMapEntity>();
         private readonly World _world;
+        // ## BEGIN - END ## // TAZUO
+        public WMapEntity _corpse;
+        // ## BEGIN - END ## // TAZUO
 
         public WorldMapEntityManager(World world) { _world = world; }
 
@@ -162,6 +165,12 @@ namespace ClassicUO.Game.Managers
 
         public void RemoveUnupdatedWEntity()
         {
+            // ## BEGIN - END ## // TAZUO
+            if (_corpse != null && _corpse.LastUpdate < Time.Ticks - 1000)
+            {
+                _corpse = null;
+            }
+            // ## BEGIN - END ## // TAZUO
             if (_lastUpdate > Time.Ticks)
             {
                 return;
