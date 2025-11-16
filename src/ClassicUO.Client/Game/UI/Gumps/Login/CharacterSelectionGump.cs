@@ -42,34 +42,20 @@ using ClassicUO.Assets;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using SDL2;
-using System.Security.Cryptography;
 using ClassicUO.Renderer.Arts;
-using ClassicUO.Renderer;
 using ClassicUO.Game.GameObjects;
-using Cyotek.Drawing.BitmapFont;
 using System.IO;
 using System.Collections.Generic;
 using System.Text.Json;
-using ClassicUO.Game.UI.Controls;
 using static ClassicUO.Game.UI.Controls.PaperDollInteractable;
 using FontStashSharp.RichText;
 using Microsoft.Xna.Framework;
-using static ClassicUO.Game.UI.Gumps.Login.CharacterSelectionGump;
-using System.Reflection;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {
     internal class CharacterSelectionGump : Gump
     {
 
-        private static ushort ConvertToRGB565(Color color)
-        {
-            ushort r = (ushort)((color.R >> 3) & 0x1F); // 5 bits para R
-            ushort g = (ushort)((color.G >> 2) & 0x3F); // 6 bits para G
-            ushort b = (ushort)((color.B >> 3) & 0x1F); // 5 bits para B
-
-            return (ushort)((r << 11) | (g << 5) | b);
-        }
 
         //private const ushort SELECTED_COLOR = 0xAAF;
         private static readonly ushort SELECTED_COLOR = 0x4E9;
@@ -79,10 +65,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private GothicStyleButton buttonnew;
         private CharacterEntryGump _characterEntryGump;
         private CharacterEntryGump _lastSelectedGumpPic;
-        private static Art art { get; set; }
-
-
-
         public CharacterSelectionGump() : base(0, 0)
         {
             CanCloseWithRightClick = false;

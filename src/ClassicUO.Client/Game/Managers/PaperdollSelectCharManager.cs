@@ -1,25 +1,11 @@
 ﻿using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
-using Cyotek.Drawing.BitmapFont;
+using ClassicUO.Game.GameObjects;
+using ClassicUO.Utility;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-
-using ClassicUO.Configuration;
-using ClassicUO.Game.Data;
-using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
-using ClassicUO.Game.UI.Controls;
-using ClassicUO.Input;
-using ClassicUO.Network;
-using ClassicUO.Renderer;
-using ClassicUO.Utility;
-using Microsoft.Xna.Framework;
-using System;
-using System.Xml;
 
 namespace ClassicUO.Game.Managers
 {
@@ -38,6 +24,8 @@ namespace ClassicUO.Game.Managers
         public static PaperdollSelectCharManager Instance => instance ??= new PaperdollSelectCharManager();
 
         public Dictionary<string, PaperdollItem> items = new Dictionary<string, PaperdollItem>();
+
+        public ushort BodyId { get; private set; }
 
         //private string savePath = Path.Combine(ProfileManager.ProfilePath, "paperdollSelectCharManager.json");
 
@@ -88,10 +76,11 @@ namespace ClassicUO.Game.Managers
             try
             {
                 items.Clear();
-                Mobile mobile = World.Mobiles.Get(World.Player.Serial);
+            Mobile mobile = World.Mobiles.Get(World.Player.Serial);
 
-                if (mobile != null)
-                {
+            if (mobile != null) {
+                    BodyId = (ushort)mobile.Graphic;
+
                     foreach (Layer layer in Enum.GetValues(typeof(Layer)))
                     {
                         Item item = mobile.FindItemByLayer(layer);
@@ -138,10 +127,13 @@ namespace ClassicUO.Game.Managers
                     File.WriteAllText(savePath, string.Empty);
                 }
 
-                string json = JsonSerializer.Serialize(items, new JsonSerializerOptions
+                PaperdollSaveData saveData = new PaperdollSaveData
                 {
-                    WriteIndented = true
-                });
+                    BodyId = BodyId,
+                    Items = new Dictionary<string, PaperdollItem>(items)
+                };
+
+                string json = JsonSerializer.Serialize(saveData, new JsonSerializerOptions { WriteIndented = true });
 
                 File.WriteAllText(savePath, json);
 
@@ -162,13 +154,29 @@ namespace ClassicUO.Game.Managers
                 try
                 {
                     string json = File.ReadAllText(savePath);
+
+                    PaperdollSaveData saveData = JsonSerializer.Deserialize<PaperdollSaveData>(json);
+                    if (saveData != null && saveData.Items != null)
+                    {
+                        BodyId = saveData.BodyId;
+                        items = saveData.Items;
+                        return;
+                    }
+
                     items = JsonSerializer.Deserialize<Dictionary<string, PaperdollItem>>(json) ?? new Dictionary<string, PaperdollItem>();
+                    BodyId = 0;
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Failed to load marked tile data: {ex.Message}");
                 }
             }
+        }
+
+        private class PaperdollSaveData
+        {
+            public ushort BodyId { get; set; }
+            public Dictionary<string, PaperdollItem> Items { get; set; }
         }
     }
 }
