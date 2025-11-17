@@ -405,8 +405,9 @@ namespace ClassicUO.Game.UI.Gumps
                                         y,
                                         t.Width,
                                         t.Height + yy,
-                                        layerDepth,
-                                        -yy
+                                        0,
+                                        -yy,
+                                        layerDepth
                                     );
 
                                     t.Draw
@@ -418,8 +419,9 @@ namespace ClassicUO.Game.UI.Gumps
                                         y,
                                         t.Width,
                                         t.Height + yy,
-                                        layerDepth,
-                                        -yy
+                                        0,
+                                        -yy,
+                                        layerDepth
                                     );
 
                                     my += t.Height + yy;
@@ -447,8 +449,9 @@ namespace ClassicUO.Game.UI.Gumps
                                     y + _scrollBar.Height - yyy,
                                     t.Width,
                                     yyy,
-                                    layerDepth,
-                                    0
+                                    0,
+                                    0,
+                                    layerDepth
                                 );
 
                                 t.Draw
@@ -460,8 +463,9 @@ namespace ClassicUO.Game.UI.Gumps
                                     y + _scrollBar.Height - yyy,
                                     t.Width,
                                     yyy,
-                                    layerDepth,
-                                    0
+                                    0,
+                                    0,
+                                    layerDepth
                                 );
 
                                 // can't fit any more entries - so we break!
