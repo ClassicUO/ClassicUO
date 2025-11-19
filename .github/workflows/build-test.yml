@@ -26,10 +26,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-       os: [ macos-13, ubuntu-latest, windows-latest ]
+       os: [ macos-15-intel, ubuntu-latest, windows-latest ]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
     - name: Get submodules
       run: |
@@ -37,17 +37,17 @@ jobs:
         git submodule update --init --recursive
 
     - name: Setup dotnet
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: 9.0.x
+        dotnet-version: 10.0.x
         include-prerelease: false
 
     - name: Restore
       run: dotnet restore
 
     - name: Build
-      run: dotnet build -c Release
+      run: dotnet build
 
     - name: Test
-      run: dotnet test --verbosity normal tests/ClassicUO.UnitTests
+      run: dotnet test
 
