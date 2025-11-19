@@ -49,5 +49,5 @@ jobs:
       run: dotnet build
 
     - name: Test
-      run: dotnet test --verbosity normal tests/ClassicUO.UnitTests
+      run: dotnet test
 
