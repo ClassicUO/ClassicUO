@@ -1,21 +1,20 @@
-name: Build-Test
+name: Deploy
 
 on:
-  push:
-    branches: "*"
-    paths-ignore:
-      - '**/build-release.yml'
-      - 'appveyor.yml'
-      - '**/README.md'
-  pull_request:
-    branches: "*"
-    paths-ignore:
-      - '**/build-release.yml'
-      - 'appveyor.yml'
-      - '**/README.md'
-
+  workflow_dispatch: {}
+  workflow_run:
+    branches: [main, beta]
+    workflows: [Build-Test]
+    types:
+      - completed
 
 env:
+  CUO_ASSEMBLY_VERSION: "1.1.0.${{ github.run_number }}"
+  CUO_OUTPUT_PATH: "dist"
+  CUO_PROJECT_PATH: "src/ClassicUO.Client/ClassicUO.Client.csproj"
+  BOOT_PROJECT_PATH: "src/ClassicUO.Bootstrap/src/ClassicUO.Bootstrap.csproj"
+  TARGET_FRAMEWORK: net9.0
+
   DOTNET_NOLOGO: false
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
@@ -23,31 +22,148 @@ env:
 
 jobs:
   build:
+    #if: ${{ github.event.workflow_run.conclusion == 'success' }} && "${{ env.GITHUB_REPOSITORY }}" == 'ClassicUO/ClassicUO'
     runs-on: ${{ matrix.os }}
+
+    env:
+      CUO_ZIP_NAME: "ClassicUO-${{ matrix.target }}-release.zip"
+      # Branch/commit detection: use triggering run for workflow_run, otherwise current ref for manual dispatch
+      BRANCH_NAME: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.ref_name }}
+      COMMIT_SHA:  ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha    || github.sha }}
+      RELEASE_TAG: ClassicUO-${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_branch || github.ref_name }}-release
+
     strategy:
       matrix:
-       os: [ macos-15-intel, ubuntu-latest, windows-latest ]
+        include:
+          - os: windows-latest
+            target: win-x64
+          - os: ubuntu-22.04
+            target: linux-x64
+          - os: macos-14
+            target: osx-x64
 
     steps:
-    - uses: actions/checkout@v5
+      - uses: actions/checkout@v4
+        with:
+          # For workflow_run, check out the triggering commit (not main)
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
 
-    - name: Get submodules
-      run: |
-        git config --global url."https://".insteadOf git://
-        git submodule update --init --recursive
+      - name: Get submodules
+        run: git config --global url."https://".insteadOf git:// && git submodule update --init --recursive
 
-    - name: Setup dotnet
-      uses: actions/setup-dotnet@v5
-      with:
-        dotnet-version: 10.0.x
-        include-prerelease: false
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+          include-prerelease: false
 
-    - name: Restore
-      run: dotnet restore
+      - name: Build Bootstrap app
+        run: dotnet publish "${{ env.BOOT_PROJECT_PATH }}" -c Release -o "${{ env.CUO_OUTPUT_PATH }}" /p:AssemblyVersion=${{ env.CUO_ASSEMBLY_VERSION }} /p:FileVersion=${{ env.CUO_ASSEMBLY_VERSION }}
 
-    - name: Build
-      run: dotnet build
+      - name: Build ClassicUO
+        run: dotnet publish "${{ env.CUO_PROJECT_PATH }}" -c Release -r "${{ matrix.target }}" -o "${{ env.CUO_OUTPUT_PATH }}" /p:IS_DEV_BUILD=true /p:AssemblyVersion=${{ env.CUO_ASSEMBLY_VERSION }} /p:FileVersion=${{ env.CUO_ASSEMBLY_VERSION }} /p:NativeLib=Shared /p:OutputType=Library
 
-    - name: Test
-      run: dotnet test
+      - name: upload-unsigned-artifact
+        if: matrix.os == 'windows-latest'
+        id: upload-unsigned-artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: "ClassicUO-${{ matrix.target }}-release"
+          path: "${{ env.CUO_OUTPUT_PATH }}"
 
+      - name: Create manifest
+        run: dotnet run --project tools/ManifestCreator/ManifestCreator.csproj "${{ env.CUO_OUTPUT_PATH }}" "release" "${{ env.CUO_ZIP_NAME }}" && mkdir upload && mv manifest.xml upload
+
+      - name: Create package
+        uses: thedoctor0/zip-release@master
+        with:
+          type: "zip"
+          directory: ${{ env.CUO_OUTPUT_PATH }}
+          filename: ${{ env.CUO_ZIP_NAME }}
+          exclusions: "*.zip manifest.xml"
+
+      - name: Move output
+        run: mv "${{ env.CUO_OUTPUT_PATH }}/${{ env.CUO_ZIP_NAME }}" upload
+
+      - name: Move tag to latest commit
+        run: |
+          echo "Trigger branch: ${{ env.BRANCH_NAME }}"
+          echo "Trigger sha: ${{ env.COMMIT_SHA }}"
+          echo "Release tag: ${{ env.RELEASE_TAG }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch --no-tags --prune --depth=1 origin "${{ env.BRANCH_NAME }}"
+          git tag -f "${{ env.RELEASE_TAG }}" "${{ env.COMMIT_SHA }}"
+          git push -f origin "${{ env.RELEASE_TAG }}"
+
+      - id: SignPath
+        if: matrix.os == 'windows-latest'
+        uses: signpath/github-action-submit-signing-request@v1
+        with:
+          api-token: '${{ secrets.SIGNPATH_API_TOKEN }}'
+          organization-id: '8da8dbcb-06bc-4fd9-b049-387482dc5fb6'
+          project-slug: 'ClassicUO'
+          signing-policy-slug: 'release-signing'
+          github-artifact-id: '${{ steps.upload-unsigned-artifact.outputs.artifact-id }}'
+          wait-for-completion: true
+          output-artifact-directory: 'signed/'
+
+      - name: Create signed package
+        if: matrix.os == 'windows-latest'
+        uses: thedoctor0/zip-release@master
+        with:
+          type: "zip"
+          directory: signed
+          filename: ${{ env.CUO_ZIP_NAME }}
+          exclusions: "*.zip manifest.xml"
+
+      - name: Upload Release (Windows signed)
+        if: matrix.os == 'windows-latest'
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "signed/${{ env.CUO_ZIP_NAME }}"
+          name: "ClassicUO ${{ env.BRANCH_NAME }} release"
+          body: "This build may not be safe: use it at your own risk."
+          draft: false
+          prerelease: true
+          allowUpdates: true
+          tag: "${{ env.RELEASE_TAG }}"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit: ${{ env.COMMIT_SHA }}
+
+      - name: Upload Release (Unsigned)
+        if: matrix.os != 'windows-latest'
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "upload/${{ env.CUO_ZIP_NAME }}"
+          name: "ClassicUO ${{ env.BRANCH_NAME }} release"
+          body: "This build may not be safe: use it at your own risk."
+          draft: false
+          prerelease: true
+          allowUpdates: true
+          tag: "${{ env.RELEASE_TAG }}"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit: ${{ env.COMMIT_SHA }}
+
+  #   - name: Repo Preparation - clone
+  #     uses: actions/checkout@master
+  #     with:
+  #       repository: ClassicUO/deploy
+  #       path: deploy
+  #       ssh-key: ${{ secrets.SSH_DEPLOY_KEY }}
+  #
+  #   - name: Repo Preparation - prepare
+  #     run: |
+  #       cp -rdf ${{ env.CUO_OUTPUT_PATH }}/* deploy/client/${{ matrix.target }}/
+  #       cp upload/manifest.xml deploy/client/${{ matrix.target }}_manifest.xml
+  #
+  #   - name: Pushes to another repository
+  #     uses: cpina/github-action-push-to-another-repository@main
+  #     env:
+  #       SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
+  #     with:
+  #       source-directory: deploy/
+  #       destination-github-username: "ClassicUO"
+  #       destination-repository-name: "deploy"
+  #       commit-message: "release ${{ env.CUO_ASSEMBLY_VERSION }} on ${{ matrix.target }}"
+  #       target-branch: main
