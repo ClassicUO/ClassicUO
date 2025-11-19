@@ -21,7 +21,7 @@ on:
       - completed
 
 env:
-  CUO_ASSEMBLY_VERSION: "1.1.0.${{ github.run_number }}"
+  CUO_ASSEMBLY_VERSION: "1.1.1.${{ github.run_number }}"
   CUO_OUTPUT_PATH: "dist"
   CUO_PROJECT_PATH: "src/ClassicUO.Client/ClassicUO.Client.csproj"
   BOOT_PROJECT_PATH: "src/ClassicUO.Bootstrap/src/ClassicUO.Bootstrap.csproj"
