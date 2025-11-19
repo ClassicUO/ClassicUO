@@ -4,6 +4,7 @@
     <DebugType>Full</DebugType>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <TargetFramework>net9.0</TargetFramework>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
