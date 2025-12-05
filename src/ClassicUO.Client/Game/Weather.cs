@@ -41,7 +41,7 @@ namespace ClassicUO.Game
 
         // Ground collision thresholds for depth layers (as percentage of screen height)
         // All three layers fade across entire ground area for natural depth spread
-        private const float BACKGROUND_GROUND_THRESHOLD = 0.55f;  // 55% down screen (far particles)
+        private const float BACKGROUND_GROUND_THRESHOLD = 0.35f;  // 35% down screen (far particles)
         private const float MIDDLE_GROUND_THRESHOLD = 0.68f;      // 68% down screen (mid particles)
         private const float FOREGROUND_GROUND_THRESHOLD = 0.81f;  // 81% down screen (near particles)
         private const float FADE_DISTANCE = 0.20f;                // Fade over 20% of screen
@@ -50,8 +50,14 @@ namespace ClassicUO.Game
         // Background:  55-75% (20% fade zone) - appears most distant
         // Middle:      68-88% (20% fade zone) - overlaps with both layers
         // Foreground:  81-100% (19% fade zone) - appears closest, reaches near bottom
+        
+        // Splash effect configuration
+        private const float SPLASH_DURATION = 0.3f;     // Splash lasts 300ms (shorter, less trail)
+        private const float SPLASH_RISE_SPEED = -0.8f;   // Slower upward movement (reduces line-like appearance)
+        private const int MAX_SPLASHES_PER_FRAME = 5;   // Limit splash creation rate
 
         private readonly WeatherEffect[] _effects = new WeatherEffect[byte.MaxValue];
+        private readonly SplashEffect[] _splashes = new SplashEffect[byte.MaxValue];
         private uint _timer, _windTimer, _lastTick;
         private readonly World _world;
 
@@ -231,6 +237,36 @@ namespace ClassicUO.Game
                     effect.Depth = DepthLayer.Middle;
                 else
                     effect.Depth = DepthLayer.Foreground;
+                
+                // Assign random fade threshold based on depth layer for natural scattered depth
+                switch (effect.Depth)
+                {
+                    case DepthLayer.Background:
+                        // Background particles randomly fade in 0-30% range
+                        effect.FadeThreshold = RandomHelper.GetValue(0, 30) * 0.01f;  // 0.0 to 0.3
+                        effect.NeverFade = false;
+                        break;
+                        
+                    case DepthLayer.Middle:
+                        // Middle particles randomly fade in 31-70% range
+                        effect.FadeThreshold = 0.31f + RandomHelper.GetValue(0, 39) * 0.01f;  // 0.31 to 0.70
+                        effect.NeverFade = false;
+                        break;
+                        
+                    case DepthLayer.Foreground:
+                        // Foreground: 50% never fade, 50% fade randomly in 71-100% range
+                        if (RandomHelper.RandomBool())
+                        {
+                            effect.NeverFade = true;
+                            effect.FadeThreshold = 1.0f;  // Never reached
+                        }
+                        else
+                        {
+                            effect.NeverFade = false;
+                            effect.FadeThreshold = 0.71f + RandomHelper.GetValue(0, 29) * 0.01f;  // 0.71 to 1.0
+                        }
+                        break;
+                }
             }
         }
 
@@ -327,6 +363,45 @@ namespace ClassicUO.Game
             }
             
             return props;
+        }
+
+        private void CreateSplash(ref WeatherEffect effect, float worldX, float worldY)
+        {
+            // Find an inactive splash slot
+            for (int i = 0; i < _splashes.Length; i++)
+            {
+                ref SplashEffect splash = ref _splashes[i];
+                if (!splash.Active)
+                {
+                    splash.Active = true;
+                    splash.LifeTime = 0f;
+                    splash.Depth = effect.Depth;
+                    
+                    // Store in absolute world coordinates
+                    splash.WorldX = worldX;
+                    splash.WorldY = worldY;
+                    
+                    // Initial upward velocity
+                    splash.VelocityY = SPLASH_RISE_SPEED;
+                    
+                    // Size based on depth (smaller for background, larger for foreground)
+                    // Increased base sizes to make splashes more visible and less line-like
+                    switch (effect.Depth)
+                    {
+                        case DepthLayer.Background:
+                            splash.Size = 2f + RandomHelper.GetValue(0, 8) * 0.1f; // 2-2.8px
+                            break;
+                        case DepthLayer.Middle:
+                            splash.Size = 3f + RandomHelper.GetValue(0, 10) * 0.1f; // 3-4px
+                            break;
+                        case DepthLayer.Foreground:
+                            splash.Size = 4f + RandomHelper.GetValue(0, 12) * 0.1f; // 4-5.2px
+                            break;
+                    }
+                    
+                    break; // Found a slot, exit
+                }
+            }
         }
 
         private void PlayWind()
@@ -626,68 +701,67 @@ namespace ClassicUO.Game
                             RainRenderStyle rainStyle = GetRainRenderStyle();
                             DepthProperties rainDepthProps = GetDepthProperties(effect.Depth, Type);
                             
-                            // Calculate ground fade for background and middle layers
+                            // Calculate ground fade using per-particle random threshold
                             float groundFade = 1.0f;
                             int viewportHeight = winsize.Y;
-                            float screenProgress = (float)newY / viewportHeight;
                             
-                            // Check if particle is approaching ground based on depth layer
-                            if (effect.Depth == DepthLayer.Background)
+                            // Unified fade logic for all particles (no layer-specific if-else)
+                            // Skip fade check if particle never fades (some foreground particles)
+                            if (!effect.NeverFade)
                             {
-                                if (screenProgress >= BACKGROUND_GROUND_THRESHOLD)
+                                // Calculate particle's absolute fade position using its random threshold
+                                int particleFadeY = (int)(viewportHeight * effect.FadeThreshold);
+                                int fadeDistancePixels = (int)(viewportHeight * FADE_DISTANCE);
+                                
+                                if (newY >= particleFadeY)
                                 {
-                                    // Calculate fade (0 = fully faded, 1 = fully visible)
-                                    float fadeStart = BACKGROUND_GROUND_THRESHOLD;
-                                    float fadeEnd = BACKGROUND_GROUND_THRESHOLD + FADE_DISTANCE;
-                                    groundFade = 1f - Math.Min(1f, (screenProgress - fadeStart) / FADE_DISTANCE);
+                                    // Calculate fade progress
+                                    int fadeEnd = particleFadeY + fadeDistancePixels;
+                                    float fadeProgress = (float)(newY - particleFadeY) / fadeDistancePixels;
+                                    groundFade = 1f - Math.Max(0f, Math.Min(1f, fadeProgress));
                                     
-                                    // If fully faded, respawn at top
-                                    if (groundFade <= 0f || screenProgress >= fadeEnd)
+                                    // Create splash when particle just crosses its personal threshold
+                                    int splashWindow = 20; // 20 pixel window
+                                    if (newY >= particleFadeY && newY <= particleFadeY + splashWindow)
                                     {
-                                        int playerAbsIsoX = (tileOffX - tileOffY) * 22;
-                                        int playerAbsIsoY = (tileOffX + tileOffY) * 22;
-                                        effect.WorldX = playerAbsIsoX + RandomHelper.GetValue(-visibleRangeX, visibleRangeX);
-                                        effect.WorldY = playerAbsIsoY - visibleRangeY; // Spawn at top
-                                        continue; // Skip rendering, particle respawning
+                                        // Create splash effect at ground impact point
+                                        CreateSplash(ref effect, effect.WorldX, effect.WorldY);
                                     }
-                                }
-                            }
-                            else if (effect.Depth == DepthLayer.Middle)
-                            {
-                                if (screenProgress >= MIDDLE_GROUND_THRESHOLD)
-                                {
-                                    // Calculate fade
-                                    float fadeStart = MIDDLE_GROUND_THRESHOLD;
-                                    float fadeEnd = MIDDLE_GROUND_THRESHOLD + FADE_DISTANCE;
-                                    groundFade = 1f - Math.Min(1f, (screenProgress - fadeStart) / FADE_DISTANCE);
                                     
-                                    // If fully faded, respawn at top
-                                    if (groundFade <= 0f || screenProgress >= fadeEnd)
+                                    // If fully faded, respawn at top with new random threshold
+                                    if (newY >= fadeEnd)
                                     {
+                                        // Respawn particle at top
                                         int playerAbsIsoX = (tileOffX - tileOffY) * 22;
                                         int playerAbsIsoY = (tileOffX + tileOffY) * 22;
                                         effect.WorldX = playerAbsIsoX + RandomHelper.GetValue(-visibleRangeX, visibleRangeX);
                                         effect.WorldY = playerAbsIsoY - visibleRangeY; // Spawn at top
-                                        continue; // Skip rendering, particle respawning
-                                    }
-                                }
-                            }
-                            else if (effect.Depth == DepthLayer.Foreground)
-                            {
-                                if (screenProgress >= FOREGROUND_GROUND_THRESHOLD)
-                                {
-                                    // Calculate fade for foreground (closest particles)
-                                    float fadeStart = FOREGROUND_GROUND_THRESHOLD;
-                                    float fadeEnd = FOREGROUND_GROUND_THRESHOLD + FADE_DISTANCE;
-                                    groundFade = 1f - Math.Min(1f, (screenProgress - fadeStart) / FADE_DISTANCE);
-                                    
-                                    // If fully faded, respawn at top
-                                    if (groundFade <= 0f || screenProgress >= fadeEnd)
-                                    {
-                                        int playerAbsIsoX = (tileOffX - tileOffY) * 22;
-                                        int playerAbsIsoY = (tileOffX + tileOffY) * 22;
-                                        effect.WorldX = playerAbsIsoX + RandomHelper.GetValue(-visibleRangeX, visibleRangeX);
-                                        effect.WorldY = playerAbsIsoY - visibleRangeY; // Spawn at top
+                                        
+                                        // Re-randomize fade threshold for next cycle
+                                        switch (effect.Depth)
+                                        {
+                                            case DepthLayer.Background:
+                                                effect.FadeThreshold = RandomHelper.GetValue(0, 30) * 0.01f;
+                                                effect.NeverFade = false;
+                                                break;
+                                            case DepthLayer.Middle:
+                                                effect.FadeThreshold = 0.31f + RandomHelper.GetValue(0, 39) * 0.01f;
+                                                effect.NeverFade = false;
+                                                break;
+                                            case DepthLayer.Foreground:
+                                                if (RandomHelper.RandomBool())
+                                                {
+                                                    effect.NeverFade = true;
+                                                    effect.FadeThreshold = 1.0f;
+                                                }
+                                                else
+                                                {
+                                                    effect.NeverFade = false;
+                                                    effect.FadeThreshold = 0.71f + RandomHelper.GetValue(0, 29) * 0.01f;
+                                                }
+                                                break;
+                                        }
+                                        
                                         continue; // Skip rendering, particle respawning
                                     }
                                 }
@@ -906,6 +980,125 @@ namespace ClassicUO.Game
                 }
             }
 
+            // Render splash effects (rain hitting ground)
+            float deltaTime = passed / 1000f; // Convert milliseconds to seconds
+            float splashSpeedOffset = passed / SIMULATION_TIME; // Same calculation as particle physics
+            
+            for (int i = 0; i < _splashes.Length; i++)
+            {
+                ref SplashEffect splash = ref _splashes[i];
+                if (!splash.Active) continue;
+                
+                // Update splash lifetime
+                splash.LifeTime += deltaTime / SPLASH_DURATION;
+                
+                // Deactivate if splash animation complete
+                if (splash.LifeTime >= 1.0f)
+                {
+                    splash.Active = false;
+                    continue;
+                }
+                
+                // Apply upward movement physics in absolute world space
+                splash.WorldY += splash.VelocityY * splashSpeedOffset;
+                
+                // Convert to viewport-relative coordinates for rendering
+                splash.X = splash.WorldX - viewportOffsetX;
+                splash.Y = splash.WorldY - viewportOffsetY;
+                
+                // Check visibility
+                if (splash.X < -visibleRangeX || splash.X > visibleRangeX * 2 ||
+                    splash.Y < -visibleRangeY || splash.Y > visibleRangeY * 2)
+                {
+                    splash.Active = false;
+                    continue;
+                }
+                
+                // Animated splash properties
+                float progress = splash.LifeTime;
+                
+                // Size grows then shrinks (parabolic curve)
+                float sizeScale = 1f + (float)Math.Sin(progress * Math.PI) * 1.5f;
+                float currentSize = splash.Size * sizeScale;
+                
+                // Ensure minimum size to avoid line-like appearance
+                currentSize = Math.Max(2f, currentSize);
+                
+                // Alpha fades out linearly
+                float alpha = 1f - progress;
+                
+                // Depth-based alpha adjustment
+                switch (splash.Depth)
+                {
+                    case DepthLayer.Background:
+                        alpha *= 0.5f; // Background splashes faint but visible
+                        break;
+                    case DepthLayer.Middle:
+                        alpha *= 0.7f; // Middle splashes moderate
+                        break;
+                    case DepthLayer.Foreground:
+                        alpha *= 0.9f; // Foreground splashes very visible
+                        break;
+                }
+                
+                // Draw splash as multiple small particles to create organic appearance
+                // Use integer coordinates to avoid sub-pixel rendering issues
+                int splashSize = (int)currentSize;
+                int splashX = (int)splash.X;
+                int splashY = (int)splash.Y;
+                
+                // Splash color: light blue-white for rain impact
+                Color splashColor = Color.Lerp(Color.LightBlue, Color.White, 0.7f);
+                splashColor *= alpha;
+                
+                // Draw central splash particle
+                Rectangle centerSplash = new Rectangle(
+                    splashX - splashSize / 2,
+                    splashY - splashSize / 2,
+                    splashSize,
+                    splashSize
+                );
+                
+                batcher.Draw(
+                    SolidColorTextureCache.GetTexture(splashColor),
+                    centerSplash,
+                    Vector3.UnitZ,
+                    layerDepth
+                );
+                
+                // Draw 2-4 smaller particles around center for organic splash effect
+                // Only draw if splash is large enough (foreground/middle layers)
+                if (splashSize >= 3 && progress < 0.6f)
+                {
+                    int numParticles = splash.Depth == DepthLayer.Foreground ? 4 : 2;
+                    int particleSize = Math.Max(1, splashSize / 3);
+                    float spreadRadius = currentSize * 0.6f * progress; // Spreads outward
+                    
+                    for (int p = 0; p < numParticles; p++)
+                    {
+                        float angle = (p * (float)Math.PI * 2f / numParticles) + (progress * 2f);
+                        int offsetX = (int)(Math.Cos(angle) * spreadRadius);
+                        int offsetY = (int)(Math.Sin(angle) * spreadRadius * 0.5f); // Elliptical spread
+                        
+                        Rectangle particleRect = new Rectangle(
+                            splashX + offsetX - particleSize / 2,
+                            splashY + offsetY - particleSize / 2,
+                            particleSize,
+                            particleSize
+                        );
+                        
+                        Color particleColor = splashColor * 0.6f; // Dimmer than center
+                        
+                        batcher.Draw(
+                            SolidColorTextureCache.GetTexture(particleColor),
+                            particleRect,
+                            Vector3.UnitZ,
+                            layerDepth
+                        );
+                    }
+                }
+            }
+
             _lastTick = Time.Ticks;
         }
 
@@ -915,6 +1108,19 @@ namespace ClassicUO.Game
             public float SpeedX, SpeedY, WorldX, WorldY, X, Y, ScaleRatio, SpeedAngle, SpeedMagnitude;
             public uint ID;
             public DepthLayer Depth;  // Depth layer for 3D atmospheric effects
+            public float FadeThreshold;  // Per-particle random fade position (0.0-1.0)
+            public bool NeverFade;       // Flag for foreground particles that don't fade
+        }
+
+        private struct SplashEffect
+        {
+            public float WorldX, WorldY;        // Splash location in absolute world coordinates
+            public float X, Y;                  // Viewport-relative position (cached for rendering)
+            public float LifeTime;              // How long splash has existed (0.0 = just created, 1.0 = finished)
+            public float VelocityY;             // Upward movement velocity
+            public float Size;                  // Splash particle size
+            public DepthLayer Depth;            // Depth layer (affects splash size/alpha)
+            public bool Active;                 // Is this splash currently active
         }
     }
 }
