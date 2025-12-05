@@ -32,6 +32,13 @@ namespace ClassicUO.Game
         private const int DENSITY_SHORT_LINES = 52;
         // Above 52 = long bolts
 
+        private const float BASE_RAIN_SPEED_Y = 15.0f;
+        private const float BASE_RAIN_SPEED_X = -2.5f;
+        private const float BASE_STORM_APPROACH_SPEED_Y = 6.0f;
+        private const float BASE_STORM_APPROACH_SPEED_X = 4.0f;
+        private const float BASE_SNOW_SPEED_Y = 5.0f;
+        private const float BASE_SNOW_SPEED_X = 4.0f;
+
         private readonly WeatherEffect[] _effects = new WeatherEffect[byte.MaxValue];
         private uint _timer, _windTimer, _lastTick;
         private readonly World _world;
@@ -203,6 +210,15 @@ namespace ClassicUO.Game
                 
                 effect.ID = (uint)i;
                 effect.ScaleRatio = RandomHelper.GetValue(0, 10) * 0.1f;
+                
+                // Assign depth layer based on ScaleRatio (distribute evenly across 3 layers)
+                float depthValue = effect.ScaleRatio;  // Reuse existing 0.0-1.0 value
+                if (depthValue < 0.33f)
+                    effect.Depth = DepthLayer.Background;
+                else if (depthValue < 0.67f)
+                    effect.Depth = DepthLayer.Middle;
+                else
+                    effect.Depth = DepthLayer.Foreground;
             }
         }
 
@@ -224,6 +240,13 @@ namespace ClassicUO.Game
             LongBolts       // 53-70
         }
 
+        private enum DepthLayer
+        {
+            Background = 0,  // Far (depth 0.0-0.33)
+            Middle = 1,      // Medium (depth 0.34-0.66)
+            Foreground = 2   // Near (depth 0.67-1.0)
+        }
+
         private RainRenderStyle GetRainRenderStyle()
         {
             if (Count <= DENSITY_SMALL_DOTS)
@@ -234,6 +257,64 @@ namespace ClassicUO.Game
                 return RainRenderStyle.ShortLines;
             else
                 return RainRenderStyle.LongBolts;
+        }
+
+        private struct DepthProperties
+        {
+            public float SizeMultiplier;
+            public float SpeedMultiplier;
+            public float AlphaMultiplier;
+            public float TrailMultiplier;
+            public Color ColorTint;
+        }
+
+        private DepthProperties GetDepthProperties(DepthLayer layer, WeatherType weatherType)
+        {
+            DepthProperties props = new DepthProperties();
+            
+            switch (layer)
+            {
+                case DepthLayer.Background:
+                    props.SizeMultiplier = 0.5f + (0.25f * RandomHelper.GetValue(0, 10) * 0.1f); // 50-75%
+                    props.SpeedMultiplier = 0.5f + (0.2f * RandomHelper.GetValue(0, 10) * 0.1f); // 50-70%
+                    props.AlphaMultiplier = 0.4f + (0.2f * RandomHelper.GetValue(0, 10) * 0.1f); // 40-60%
+                    props.TrailMultiplier = 0.4f + (0.2f * RandomHelper.GetValue(0, 10) * 0.1f); // 40-60%
+                    
+                    // Atmospheric color tint (lighter for distance)
+                    if (weatherType == WeatherType.WT_RAIN || weatherType == WeatherType.WT_STORM_APPROACH)
+                        props.ColorTint = Color.Lerp(Color.LightBlue, Color.White, 0.5f);
+                    else // Snow
+                        props.ColorTint = Color.White;
+                    break;
+                    
+                case DepthLayer.Middle:
+                    props.SizeMultiplier = 0.85f + (0.15f * RandomHelper.GetValue(0, 10) * 0.1f); // 85-100%
+                    props.SpeedMultiplier = 0.8f + (0.2f * RandomHelper.GetValue(0, 10) * 0.1f);  // 80-100%
+                    props.AlphaMultiplier = 0.7f + (0.2f * RandomHelper.GetValue(0, 10) * 0.1f);  // 70-90%
+                    props.TrailMultiplier = 0.8f + (0.2f * RandomHelper.GetValue(0, 10) * 0.1f);  // 80-100%
+                    
+                    // Standard colors with subtle tint
+                    if (weatherType == WeatherType.WT_RAIN || weatherType == WeatherType.WT_STORM_APPROACH)
+                        props.ColorTint = Color.LightGray;
+                    else
+                        props.ColorTint = Color.White;
+                    break;
+                    
+                case DepthLayer.Foreground:
+                    props.SizeMultiplier = 1.1f + (0.4f * RandomHelper.GetValue(0, 10) * 0.1f); // 110-150%
+                    props.SpeedMultiplier = 1.2f + (0.3f * RandomHelper.GetValue(0, 10) * 0.1f); // 120-150%
+                    props.AlphaMultiplier = 0.9f + (0.1f * RandomHelper.GetValue(0, 10) * 0.1f); // 90-100%
+                    props.TrailMultiplier = 1.2f + (0.3f * RandomHelper.GetValue(0, 10) * 0.1f); // 120-150%
+                    
+                    // Darker/more saturated for proximity
+                    if (weatherType == WeatherType.WT_RAIN || weatherType == WeatherType.WT_STORM_APPROACH)
+                        props.ColorTint = Color.Gray;
+                    else
+                        props.ColorTint = Color.Lerp(Color.White, Color.LightGray, 0.2f);
+                    break;
+            }
+            
+            return props;
         }
 
         private void PlayWind()
@@ -416,9 +497,10 @@ namespace ClassicUO.Game
                         float scaleRatio = effect.ScaleRatio;
                         RainRenderStyle rainStyle = GetRainRenderStyle();
                         
-                        // Enhanced speed for better isometric alignment
-                        // Increased Y component to make rain fall more vertically aligned with isometric view
-                        float baseSpeedY = 8.0f;
+                        // Get depth properties for this particle
+                        DepthProperties depthProps = GetDepthProperties(effect.Depth, Type);
+                        
+                        float baseSpeedY = BASE_RAIN_SPEED_Y;
                         float densitySpeedMultiplier = 1.0f;
                         
                         // Higher density = faster speeds
@@ -428,24 +510,26 @@ namespace ClassicUO.Game
                                 densitySpeedMultiplier = 1.0f;
                                 break;
                             case RainRenderStyle.LargeDots:
-                                densitySpeedMultiplier = 1.3f;
+                                densitySpeedMultiplier = 1.5f;
                                 break;
                             case RainRenderStyle.ShortLines:
-                                densitySpeedMultiplier = 1.6f;
+                                densitySpeedMultiplier = 1.8f;
                                 break;
                             case RainRenderStyle.LongBolts:
-                                densitySpeedMultiplier = 2.0f;
+                                densitySpeedMultiplier = 2.4f;
                                 break;
                         }
                         
-                        effect.SpeedX = (-4.5f - scaleRatio) * densitySpeedMultiplier;
-                        effect.SpeedY = (baseSpeedY + scaleRatio) * densitySpeedMultiplier;
+                        // Apply depth-based speed multiplier for parallax effect
+                        effect.SpeedX = (BASE_RAIN_SPEED_X - scaleRatio) * densitySpeedMultiplier * depthProps.SpeedMultiplier;
+                        effect.SpeedY = (baseSpeedY + scaleRatio) * densitySpeedMultiplier * depthProps.SpeedMultiplier;
 
                         break;
 
                     case WeatherType.WT_STORM_BREWING:
-                        effect.SpeedX = Wind * 1.5f;
-                        effect.SpeedY = 1.5f;
+                        DepthProperties stormBrewingProps = GetDepthProperties(effect.Depth, Type);
+                        effect.SpeedX = Wind * 1.5f * stormBrewingProps.SpeedMultiplier;
+                        effect.SpeedY = 1.5f * stormBrewingProps.SpeedMultiplier;
 
                         if (windChanged)
                         {
@@ -456,6 +540,8 @@ namespace ClassicUO.Game
 
                     case WeatherType.WT_SNOW:
                     case WeatherType.WT_STORM_APPROACH:
+
+                        DepthProperties snowStormProps = GetDepthProperties(effect.Depth, Type);
 
                         if (Type == WeatherType.WT_SNOW)
                         {
@@ -492,8 +578,9 @@ namespace ClassicUO.Game
                         speedAngle += SinOscillate(0.4f, 20, Time.Ticks + effect.ID);
 
                         float rad = MathHelper.ToRadians(speedAngle);
-                        effect.SpeedX = speedMagnitude * (float) Math.Sin(rad);
-                        effect.SpeedY = speedMagnitude * (float) Math.Cos(rad);
+                        // Apply depth-based speed multiplier for parallax effect
+                        effect.SpeedX = speedMagnitude * (float) Math.Sin(rad) * snowStormProps.SpeedMultiplier;
+                        effect.SpeedY = speedMagnitude * (float) Math.Cos(rad) * snowStormProps.SpeedMultiplier;
 
                         break;
                 }
@@ -525,6 +612,7 @@ namespace ClassicUO.Game
                         if (Type == WeatherType.WT_RAIN)
                         {
                             RainRenderStyle rainStyle = GetRainRenderStyle();
+                            DepthProperties rainDepthProps = GetDepthProperties(effect.Depth, Type);
                             
                             // Calculate speed-based trail length
                             float speedMagnitude = (float)Math.Sqrt(effect.SpeedX * effect.SpeedX + effect.SpeedY * effect.SpeedY);
@@ -532,11 +620,27 @@ namespace ClassicUO.Game
                             switch (rainStyle)
                             {
                                 case RainRenderStyle.SmallDots:
-                                    // Draw small dots (1-2px rectangles)
-                                    Rectangle smallDotRect = new Rectangle(newX, newY, 2, 2);
+                                    // Apply depth-based size multiplier
+                                    int smallDotSize = (int)(2 * rainDepthProps.SizeMultiplier);
+                                    smallDotSize = Math.Max(2, smallDotSize); // Minimum 1px
+                                    
+                                    Rectangle smallDotRect = new Rectangle(
+                                        newX - smallDotSize / 2, 
+                                        newY - smallDotSize / 2, 
+                                        smallDotSize, 
+                                        smallDotSize
+                                    );
+                                    
+                                    // Apply alpha and color tint with better visibility
+                                    // Keep more of the base color (30% blend instead of 70%)
+                                    Color smallDotColor = Color.Lerp(Color.LightBlue, rainDepthProps.ColorTint, 0.3f);
+                                    // Boost alpha for visibility (minimum 60% even for background)
+                                    float smallDotAlpha = Math.Max(0.6f, rainDepthProps.AlphaMultiplier);
+                                    smallDotColor *= smallDotAlpha;
+                                    
                                     batcher.Draw
                                     (
-                                        SolidColorTextureCache.GetTexture(Color.LightBlue),
+                                        SolidColorTextureCache.GetTexture(smallDotColor),
                                         smallDotRect,
                                         Vector3.UnitZ,
                                         layerDepth
@@ -544,11 +648,27 @@ namespace ClassicUO.Game
                                     break;
                                 
                                 case RainRenderStyle.LargeDots:
-                                    // Draw large dots (2-3px rectangles) with minimal trail
-                                    Rectangle largeDotRect = new Rectangle(newX - 1, newY - 1, 2, 2);
+                                    // Apply depth-based size multiplier
+                                    int largeDotSize = (int)(2 * rainDepthProps.SizeMultiplier);
+                                    largeDotSize = Math.Max(2, largeDotSize); 
+                                    
+                                    Rectangle largeDotRect = new Rectangle(
+                                        newX - largeDotSize / 2, 
+                                        newY - largeDotSize / 2, 
+                                        largeDotSize, 
+                                        largeDotSize
+                                    );
+                                    
+                                    // Apply alpha and color tint with better visibility
+                                    // Keep more of the base color (30% blend instead of 70%)
+                                    Color largeDotColor = Color.Lerp(Color.CornflowerBlue, rainDepthProps.ColorTint, 0.3f);
+                                    // Boost alpha for visibility (minimum 60% even for background)
+                                    float largeDotAlpha = Math.Max(0.6f, rainDepthProps.AlphaMultiplier);
+                                    largeDotColor *= largeDotAlpha;
+                                    
                                     batcher.Draw
                                     (
-                                        SolidColorTextureCache.GetTexture(Color.CornflowerBlue),
+                                        SolidColorTextureCache.GetTexture(largeDotColor),
                                         largeDotRect,
                                         Vector3.UnitZ,
                                         layerDepth
@@ -556,8 +676,9 @@ namespace ClassicUO.Game
                                     break;
                                 
                                 case RainRenderStyle.ShortLines:
-                                    // Draw short lines with medium trail (0.8-1.0x speed magnitude)
-                                    float shortLineLength = speedMagnitude * 0.9f;
+                                    // Calculate depth-adjusted trail length
+                                    float shortBaseTrail = 0.9f;
+                                    float shortLineLength = speedMagnitude * shortBaseTrail * rainDepthProps.TrailMultiplier;
                                     int screenOfsx = newX - oldX;
                                     int screenOfsy = newY - oldY;
                                     
@@ -574,20 +695,31 @@ namespace ClassicUO.Game
                                     Vector2 shortStart = new Vector2(oldX, oldY);
                                     Vector2 shortEnd = new Vector2(newX, newY);
                                     
+                                    // Apply color and alpha - keep rain distinctly blue (not white like snow)
+                                    // Use CornflowerBlue base instead of Gray to maintain rain identity
+                                    Color shortLineColor = Color.Lerp(Color.Gray, rainDepthProps.ColorTint, 0.25f);
+                                    // Boost alpha for visibility
+                                    float shortLineAlpha = Math.Max(0.65f, rainDepthProps.AlphaMultiplier);
+                                    shortLineColor *= shortLineAlpha;
+                                    
+                                    // Apply line width with depth
+                                    int shortLineWidth = Math.Max(1, (int)(2 * rainDepthProps.SizeMultiplier));
+                                    
                                     batcher.DrawLine
                                     (
-                                        SolidColorTextureCache.GetTexture(Color.LightGray),
+                                        SolidColorTextureCache.GetTexture(shortLineColor),
                                         shortStart,
                                         shortEnd,
                                         Vector3.UnitZ,
-                                        2,
+                                        shortLineWidth,
                                         layerDepth
                                     );
                                     break;
                                 
                                 case RainRenderStyle.LongBolts:
-                                    // Draw long bolts with extended trail (1.5-2.0x speed magnitude)
-                                    float longBoltLength = speedMagnitude * 1.75f;
+                                    // Calculate depth-adjusted trail length
+                                    float boltBaseTrail = 1.75f;
+                                    float longBoltLength = speedMagnitude * boltBaseTrail * rainDepthProps.TrailMultiplier;
                                     int boltOfsx = newX - oldX;
                                     int boltOfsy = newY - oldY;
                                     
@@ -604,13 +736,23 @@ namespace ClassicUO.Game
                                     Vector2 boltStart = new Vector2(oldX, oldY);
                                     Vector2 boltEnd = new Vector2(newX, newY);
                                     
+                                    // Apply color and alpha - keep storm bolts blue-tinted
+                                    // Use SteelBlue for dramatic storm appearance
+                                    Color boltColor = Color.Lerp(Color.Gray, rainDepthProps.ColorTint, 0.25f);
+                                    // Boost alpha for dramatic effect
+                                    float boltAlpha = Math.Max(0.75f, rainDepthProps.AlphaMultiplier);
+                                    boltColor *= boltAlpha;
+                                    
+                                    // Apply line width with depth
+                                    int boltLineWidth = Math.Max(1, (int)(3 * rainDepthProps.SizeMultiplier));
+                                    
                                     batcher.DrawLine
                                     (
-                                        SolidColorTextureCache.GetTexture(Color.Gray),
+                                        SolidColorTextureCache.GetTexture(boltColor),
                                         boltStart,
                                         boltEnd,
                                         Vector3.UnitZ,
-                                        3,  // Thicker line for bolts
+                                        boltLineWidth,
                                         layerDepth
                                     );
                                     break;
@@ -651,6 +793,8 @@ namespace ClassicUO.Game
 
                     case WeatherType.WT_SNOW:
 
+                        DepthProperties snowDepthProps = GetDepthProperties(effect.Depth, Type);
+
                         // Apply physics in absolute isometric space
                         effect.WorldX += effect.SpeedX * speedOffset;
                         effect.WorldY += effect.SpeedY * speedOffset;
@@ -659,12 +803,23 @@ namespace ClassicUO.Game
                         int snowX = (int)(effect.WorldX - viewportOffsetX);
                         int snowY = (int)(effect.WorldY - viewportOffsetY);
 
+                        // Depth-based size
+                        int snowSize = (int)(2 * snowDepthProps.SizeMultiplier);
+                        snowSize = Math.Max(1, snowSize);
+
                         snowRect.X = snowX;
                         snowRect.Y = snowY;
+                        snowRect.Width = snowSize;
+                        snowRect.Height = snowSize;
+
+                        // Depth-based color and alpha with better visibility
+                        // Boost alpha for snow visibility (minimum 70% even for background)
+                        float snowBoostedAlpha = Math.Max(0.7f, snowDepthProps.AlphaMultiplier);
+                        Color snowColor = snowDepthProps.ColorTint * snowBoostedAlpha;
 
                         batcher.Draw
                         (
-                            SolidColorTextureCache.GetTexture(Color.White),
+                            SolidColorTextureCache.GetTexture(snowColor),
                             snowRect,
                             Vector3.UnitZ,
                             layerDepth
@@ -682,6 +837,7 @@ namespace ClassicUO.Game
         {
             public float SpeedX, SpeedY, WorldX, WorldY, X, Y, ScaleRatio, SpeedAngle, SpeedMagnitude;
             public uint ID;
+            public DepthLayer Depth;  // Depth layer for 3D atmospheric effects
         }
     }
 }
