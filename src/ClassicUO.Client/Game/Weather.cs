@@ -26,6 +26,12 @@ namespace ClassicUO.Game
         private const int MAX_WEATHER_EFFECT = 70;
         private const float SIMULATION_TIME = 37.0f;
 
+        // Density thresholds for rain visual styles
+        private const int DENSITY_SMALL_DOTS = 17;
+        private const int DENSITY_LARGE_DOTS = 35;
+        private const int DENSITY_SHORT_LINES = 52;
+        // Above 52 = long bolts
+
         private readonly WeatherEffect[] _effects = new WeatherEffect[byte.MaxValue];
         private uint _timer, _windTimer, _lastTick;
         private readonly World _world;
@@ -210,6 +216,26 @@ namespace ClassicUO.Game
             return (byte)Math.Max(1, Math.Min(byte.MaxValue, count * (Client.Game.Scene.Camera.Bounds.Width * Client.Game.Scene.Camera.Bounds.Height) / legacyWindowSize));
         }
 
+        private enum RainRenderStyle
+        {
+            SmallDots,      // 0-17
+            LargeDots,      // 18-35
+            ShortLines,     // 36-52
+            LongBolts       // 53-70
+        }
+
+        private RainRenderStyle GetRainRenderStyle()
+        {
+            if (Count <= DENSITY_SMALL_DOTS)
+                return RainRenderStyle.SmallDots;
+            else if (Count <= DENSITY_LARGE_DOTS)
+                return RainRenderStyle.LargeDots;
+            else if (Count <= DENSITY_SHORT_LINES)
+                return RainRenderStyle.ShortLines;
+            else
+                return RainRenderStyle.LongBolts;
+        }
+
         private void PlayWind()
         {
             PlaySound(RandomHelper.RandomList(0x014, 0x015, 0x016));
@@ -387,9 +413,33 @@ namespace ClassicUO.Game
                 switch (Type)
                 {
                     case WeatherType.WT_RAIN:
-                        float scaleRation = effect.ScaleRatio;
-                        effect.SpeedX = -4.5f - scaleRation;
-                        effect.SpeedY = 5.0f + scaleRation;
+                        float scaleRatio = effect.ScaleRatio;
+                        RainRenderStyle rainStyle = GetRainRenderStyle();
+                        
+                        // Enhanced speed for better isometric alignment
+                        // Increased Y component to make rain fall more vertically aligned with isometric view
+                        float baseSpeedY = 8.0f;
+                        float densitySpeedMultiplier = 1.0f;
+                        
+                        // Higher density = faster speeds
+                        switch (rainStyle)
+                        {
+                            case RainRenderStyle.SmallDots:
+                                densitySpeedMultiplier = 1.0f;
+                                break;
+                            case RainRenderStyle.LargeDots:
+                                densitySpeedMultiplier = 1.3f;
+                                break;
+                            case RainRenderStyle.ShortLines:
+                                densitySpeedMultiplier = 1.6f;
+                                break;
+                            case RainRenderStyle.LongBolts:
+                                densitySpeedMultiplier = 2.0f;
+                                break;
+                        }
+                        
+                        effect.SpeedX = (-4.5f - scaleRatio) * densitySpeedMultiplier;
+                        effect.SpeedY = (baseSpeedY + scaleRatio) * densitySpeedMultiplier;
 
                         break;
 
@@ -472,43 +522,130 @@ namespace ClassicUO.Game
                         int newX = (int)(effect.WorldX - viewportOffsetX);
                         int newY = (int)(effect.WorldY - viewportOffsetY);
 
-                        // Clamp line length for aesthetic reasons
-                        const float MAX_OFFSET_XY = 5.0f;
-
-                        int screenOfsx = newX - oldX;
-                        int screenOfsy = newY - oldY;
-
-                        if (screenOfsx >= MAX_OFFSET_XY)
+                        if (Type == WeatherType.WT_RAIN)
                         {
-                            oldX = (int) (newX - MAX_OFFSET_XY);
+                            RainRenderStyle rainStyle = GetRainRenderStyle();
+                            
+                            // Calculate speed-based trail length
+                            float speedMagnitude = (float)Math.Sqrt(effect.SpeedX * effect.SpeedX + effect.SpeedY * effect.SpeedY);
+                            
+                            switch (rainStyle)
+                            {
+                                case RainRenderStyle.SmallDots:
+                                    // Draw small dots (1-2px rectangles)
+                                    Rectangle smallDotRect = new Rectangle(newX, newY, 2, 2);
+                                    batcher.Draw
+                                    (
+                                        SolidColorTextureCache.GetTexture(Color.LightBlue),
+                                        smallDotRect,
+                                        Vector3.UnitZ,
+                                        layerDepth
+                                    );
+                                    break;
+                                
+                                case RainRenderStyle.LargeDots:
+                                    // Draw large dots (2-3px rectangles) with minimal trail
+                                    Rectangle largeDotRect = new Rectangle(newX - 1, newY - 1, 2, 2);
+                                    batcher.Draw
+                                    (
+                                        SolidColorTextureCache.GetTexture(Color.CornflowerBlue),
+                                        largeDotRect,
+                                        Vector3.UnitZ,
+                                        layerDepth
+                                    );
+                                    break;
+                                
+                                case RainRenderStyle.ShortLines:
+                                    // Draw short lines with medium trail (0.8-1.0x speed magnitude)
+                                    float shortLineLength = speedMagnitude * 0.9f;
+                                    int screenOfsx = newX - oldX;
+                                    int screenOfsy = newY - oldY;
+                                    
+                                    if (screenOfsx >= shortLineLength)
+                                        oldX = (int)(newX - shortLineLength);
+                                    else if (screenOfsx <= -shortLineLength)
+                                        oldX = (int)(newX + shortLineLength);
+                                    
+                                    if (screenOfsy >= shortLineLength)
+                                        oldY = (int)(newY - shortLineLength);
+                                    else if (screenOfsy <= -shortLineLength)
+                                        oldY = (int)(newY + shortLineLength);
+                                    
+                                    Vector2 shortStart = new Vector2(oldX, oldY);
+                                    Vector2 shortEnd = new Vector2(newX, newY);
+                                    
+                                    batcher.DrawLine
+                                    (
+                                        SolidColorTextureCache.GetTexture(Color.LightGray),
+                                        shortStart,
+                                        shortEnd,
+                                        Vector3.UnitZ,
+                                        2,
+                                        layerDepth
+                                    );
+                                    break;
+                                
+                                case RainRenderStyle.LongBolts:
+                                    // Draw long bolts with extended trail (1.5-2.0x speed magnitude)
+                                    float longBoltLength = speedMagnitude * 1.75f;
+                                    int boltOfsx = newX - oldX;
+                                    int boltOfsy = newY - oldY;
+                                    
+                                    if (boltOfsx >= longBoltLength)
+                                        oldX = (int)(newX - longBoltLength);
+                                    else if (boltOfsx <= -longBoltLength)
+                                        oldX = (int)(newX + longBoltLength);
+                                    
+                                    if (boltOfsy >= longBoltLength)
+                                        oldY = (int)(newY - longBoltLength);
+                                    else if (boltOfsy <= -longBoltLength)
+                                        oldY = (int)(newY + longBoltLength);
+                                    
+                                    Vector2 boltStart = new Vector2(oldX, oldY);
+                                    Vector2 boltEnd = new Vector2(newX, newY);
+                                    
+                                    batcher.DrawLine
+                                    (
+                                        SolidColorTextureCache.GetTexture(Color.Gray),
+                                        boltStart,
+                                        boltEnd,
+                                        Vector3.UnitZ,
+                                        3,  // Thicker line for bolts
+                                        layerDepth
+                                    );
+                                    break;
+                            }
                         }
-                        else if (screenOfsx <= -MAX_OFFSET_XY)
+                        else // WT_STORM_APPROACH
                         {
-                            oldX = (int) (newX + MAX_OFFSET_XY);
-                        }
+                            // Original storm approach rendering
+                            const float MAX_OFFSET_XY = 5.0f;
+                            int screenOfsx = newX - oldX;
+                            int screenOfsy = newY - oldY;
 
-                        if (screenOfsy >= MAX_OFFSET_XY)
-                        {
-                            oldY = (int) (newY - MAX_OFFSET_XY);
-                        }
-                        else if (screenOfsy <= -MAX_OFFSET_XY)
-                        {
-                            oldY = (int) (newY + MAX_OFFSET_XY);
-                        }
+                            if (screenOfsx >= MAX_OFFSET_XY)
+                                oldX = (int)(newX - MAX_OFFSET_XY);
+                            else if (screenOfsx <= -MAX_OFFSET_XY)
+                                oldX = (int)(newX + MAX_OFFSET_XY);
 
-                        // Draw in viewport-relative space - batcher applies camera transform
-                        Vector2 start = new Vector2(oldX, oldY);
-                        Vector2 end = new Vector2(newX, newY);
+                            if (screenOfsy >= MAX_OFFSET_XY)
+                                oldY = (int)(newY - MAX_OFFSET_XY);
+                            else if (screenOfsy <= -MAX_OFFSET_XY)
+                                oldY = (int)(newY + MAX_OFFSET_XY);
 
-                        batcher.DrawLine
-                        (
-                            SolidColorTextureCache.GetTexture(Color.Blue),
-                            start,
-                            end,
-                            Vector3.UnitZ,
-                            2,
-                            layerDepth
-                        );
+                            Vector2 start = new Vector2(oldX, oldY);
+                            Vector2 end = new Vector2(newX, newY);
+
+                            batcher.DrawLine
+                            (
+                                SolidColorTextureCache.GetTexture(Color.Blue),
+                                start,
+                                end,
+                                Vector3.UnitZ,
+                                2,
+                                layerDepth
+                            );
+                        }
 
                         break;
 
