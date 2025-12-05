@@ -176,11 +176,27 @@ namespace ClassicUO.Game
             ScaledCount = CalculateScaledCount(Count);
             CurrentCount = ScaledCount;
 
+            // Calculate player's absolute isometric pixel coordinates from tile coordinates
+            // This follows the formula: isoX = (tileX - tileY) * 22, isoY = (tileX + tileY) * 22
+            int tileOffX = _world.Player.X;
+            int tileOffY = _world.Player.Y;
+            int playerAbsIsoX = (tileOffX - tileOffY) * 22;
+            int playerAbsIsoY = (tileOffX + tileOffY) * 22;
+            
+            int spreadX = Client.Game.Scene.Camera.Bounds.Width;
+            int spreadY = Client.Game.Scene.Camera.Bounds.Height;
+
             for (int i = 0; i < _effects.Length; i++)
             {
                 ref WeatherEffect effect = ref _effects[i];
-                effect.X = RandomHelper.GetValue(0, Client.Game.Scene.Camera.Bounds.Width);
-                effect.Y = RandomHelper.GetValue(0, Client.Game.Scene.Camera.Bounds.Height);
+                
+                // Initialize particles in absolute isometric coordinates (NOT viewport-relative)
+                // These coordinates are independent of viewport offset
+                effect.WorldX = playerAbsIsoX + RandomHelper.GetValue(-spreadX, spreadX);
+                effect.WorldY = playerAbsIsoY + RandomHelper.GetValue(-spreadY, spreadY);
+                
+                effect.ID = (uint)i;
+                effect.ScaleRatio = RandomHelper.GetValue(0, 10) * 0.1f;
             }
         }
 
@@ -313,11 +329,33 @@ namespace ClassicUO.Game
 
             Rectangle snowRect = new Rectangle(0, 0, 2, 2);
 
+            // Calculate viewport offset to convert absolute isometric coordinates to viewport-relative coordinates
+            // This follows the same formula as GameSceneDrawingSorting.GetViewPort()
+            int tileOffX = _world.Player.X;
+            int tileOffY = _world.Player.Y;
+            int winGameCenterX = (winsize.X >> 1) + (_world.Player.Z << 2);
+            int winGameCenterY = (winsize.Y >> 1) + (_world.Player.Z << 2);
+            winGameCenterX -= (int)_world.Player.Offset.X;
+            winGameCenterY -= (int)(_world.Player.Offset.Y - _world.Player.Offset.Z);
+            
+            int viewportOffsetX = (tileOffX - tileOffY) * 22 - winGameCenterX;
+            int viewportOffsetY = (tileOffX + tileOffY) * 22 - winGameCenterY;
+            
+            int visibleRangeX = winsize.X;
+            int visibleRangeY = winsize.Y;
+
             for (int i = 0; i < CurrentCount; i++)
             {
                 ref WeatherEffect effect = ref _effects[i];
 
-                if (effect.X < x || effect.X > x + winsize.X || effect.Y < y || effect.Y > y + winsize.Y)
+                // Convert absolute isometric coordinates to viewport-relative coordinates
+                // by subtracting the viewport offset (same as game objects do in UpdateRealScreenPosition)
+                effect.X = effect.WorldX - viewportOffsetX;
+                effect.Y = effect.WorldY - viewportOffsetY;
+
+                // Check if particle is outside visible viewport bounds
+                if (effect.X < -visibleRangeX || effect.X > visibleRangeX * 2 || 
+                    effect.Y < -visibleRangeY || effect.Y > visibleRangeY * 2)
                 {
                     if (removeEffects)
                     {
@@ -332,11 +370,19 @@ namespace ClassicUO.Game
 
                         continue;
                     }
-
-                    effect.X = x + RandomHelper.GetValue(0, winsize.X);
-                    effect.Y = y + RandomHelper.GetValue(0, winsize.Y);
+                    
+                    // Respawn particle in visible range
+                    // Calculate absolute isometric coordinates based on current player position
+                    int playerAbsIsoX = (tileOffX - tileOffY) * 22;
+                    int playerAbsIsoY = (tileOffX + tileOffY) * 22;
+                    
+                    effect.WorldX = playerAbsIsoX + RandomHelper.GetValue(-visibleRangeX, visibleRangeX);
+                    effect.WorldY = playerAbsIsoY + RandomHelper.GetValue(-visibleRangeY, visibleRangeY);
+                    
+                    // Recalculate viewport-relative position
+                    effect.X = effect.WorldX - viewportOffsetX;
+                    effect.Y = effect.WorldY - viewportOffsetY;
                 }
-
 
                 switch (Type)
                 {
@@ -409,57 +455,75 @@ namespace ClassicUO.Game
                     case WeatherType.WT_RAIN:
                     case WeatherType.WT_STORM_APPROACH:
 
-                        int oldX = (int) effect.X;
-                        int oldY = (int) effect.Y;
+                        // Store old absolute position
+                        float oldWorldX = effect.WorldX;
+                        float oldWorldY = effect.WorldY;
 
+                        // Apply physics in absolute isometric space
                         float ofsx = effect.SpeedX * speedOffset;
                         float ofsy = effect.SpeedY * speedOffset;
 
-                        effect.X += ofsx;
-                        effect.Y += ofsy;
+                        effect.WorldX += ofsx;
+                        effect.WorldY += ofsy;
 
+                        // Convert both positions to viewport-relative coordinates for rendering
+                        int oldX = (int)(oldWorldX - viewportOffsetX);
+                        int oldY = (int)(oldWorldY - viewportOffsetY);
+                        int newX = (int)(effect.WorldX - viewportOffsetX);
+                        int newY = (int)(effect.WorldY - viewportOffsetY);
+
+                        // Clamp line length for aesthetic reasons
                         const float MAX_OFFSET_XY = 5.0f;
 
-                        if (ofsx >= MAX_OFFSET_XY)
+                        int screenOfsx = newX - oldX;
+                        int screenOfsy = newY - oldY;
+
+                        if (screenOfsx >= MAX_OFFSET_XY)
                         {
-                            oldX = (int) (effect.X - MAX_OFFSET_XY);
+                            oldX = (int) (newX - MAX_OFFSET_XY);
                         }
-                        else if (ofsx <= -MAX_OFFSET_XY)
+                        else if (screenOfsx <= -MAX_OFFSET_XY)
                         {
-                            oldX = (int) (effect.X + MAX_OFFSET_XY);
+                            oldX = (int) (newX + MAX_OFFSET_XY);
                         }
 
-                        if (ofsy >= MAX_OFFSET_XY)
+                        if (screenOfsy >= MAX_OFFSET_XY)
                         {
-                            oldY = (int) (effect.Y - MAX_OFFSET_XY);
+                            oldY = (int) (newY - MAX_OFFSET_XY);
                         }
-                        else if (oldY <= -MAX_OFFSET_XY)
+                        else if (screenOfsy <= -MAX_OFFSET_XY)
                         {
-                            oldY = (int) (effect.Y + MAX_OFFSET_XY);
+                            oldY = (int) (newY + MAX_OFFSET_XY);
                         }
 
-                        Vector2 start = new Vector2(x + oldX, y + oldY);
-                        Vector2 end = new Vector2(x + effect.X, y + effect.Y);
+                        // Draw in viewport-relative space - batcher applies camera transform
+                        Vector2 start = new Vector2(oldX, oldY);
+                        Vector2 end = new Vector2(newX, newY);
 
                         batcher.DrawLine
                         (
-                           SolidColorTextureCache.GetTexture(Color.Blue),
-                           start,
-                           end,
-                           Vector3.UnitZ,
-                           2,
-                           layerDepth
+                            SolidColorTextureCache.GetTexture(Color.Blue),
+                            start,
+                            end,
+                            Vector3.UnitZ,
+                            2,
+                            layerDepth
                         );
 
                         break;
 
                     case WeatherType.WT_SNOW:
 
-                        effect.X += effect.SpeedX * speedOffset;
-                        effect.Y += effect.SpeedY * speedOffset;
+                        // Apply physics in absolute isometric space
+                        effect.WorldX += effect.SpeedX * speedOffset;
+                        effect.WorldY += effect.SpeedY * speedOffset;
 
-                        snowRect.X = x + (int) effect.X;
-                        snowRect.Y = y + (int) effect.Y;
+                        // Convert to viewport-relative coordinates for rendering
+                        int snowX = (int)(effect.WorldX - viewportOffsetX);
+                        int snowY = (int)(effect.WorldY - viewportOffsetY);
+
+                        snowRect.X = snowX;
+                        snowRect.Y = snowY;
 
                         batcher.Draw
                         (
@@ -479,7 +543,7 @@ namespace ClassicUO.Game
 
         private struct WeatherEffect
         {
-            public float SpeedX, SpeedY, X, Y, ScaleRatio, SpeedAngle, SpeedMagnitude;
+            public float SpeedX, SpeedY, WorldX, WorldY, X, Y, ScaleRatio, SpeedAngle, SpeedMagnitude;
             public uint ID;
         }
     }
