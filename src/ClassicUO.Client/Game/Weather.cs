@@ -39,6 +39,18 @@ namespace ClassicUO.Game
         private const float BASE_SNOW_SPEED_Y = 5.0f;
         private const float BASE_SNOW_SPEED_X = 4.0f;
 
+        // Ground collision thresholds for depth layers (as percentage of screen height)
+        // All three layers fade across entire ground area for natural depth spread
+        private const float BACKGROUND_GROUND_THRESHOLD = 0.55f;  // 55% down screen (far particles)
+        private const float MIDDLE_GROUND_THRESHOLD = 0.68f;      // 68% down screen (mid particles)
+        private const float FOREGROUND_GROUND_THRESHOLD = 0.81f;  // 81% down screen (near particles)
+        private const float FADE_DISTANCE = 0.20f;                // Fade over 20% of screen
+        
+        // Creates overlapping fade zones spread across entire ground:
+        // Background:  55-75% (20% fade zone) - appears most distant
+        // Middle:      68-88% (20% fade zone) - overlaps with both layers
+        // Foreground:  81-100% (19% fade zone) - appears closest, reaches near bottom
+
         private readonly WeatherEffect[] _effects = new WeatherEffect[byte.MaxValue];
         private uint _timer, _windTimer, _lastTick;
         private readonly World _world;
@@ -614,6 +626,73 @@ namespace ClassicUO.Game
                             RainRenderStyle rainStyle = GetRainRenderStyle();
                             DepthProperties rainDepthProps = GetDepthProperties(effect.Depth, Type);
                             
+                            // Calculate ground fade for background and middle layers
+                            float groundFade = 1.0f;
+                            int viewportHeight = winsize.Y;
+                            float screenProgress = (float)newY / viewportHeight;
+                            
+                            // Check if particle is approaching ground based on depth layer
+                            if (effect.Depth == DepthLayer.Background)
+                            {
+                                if (screenProgress >= BACKGROUND_GROUND_THRESHOLD)
+                                {
+                                    // Calculate fade (0 = fully faded, 1 = fully visible)
+                                    float fadeStart = BACKGROUND_GROUND_THRESHOLD;
+                                    float fadeEnd = BACKGROUND_GROUND_THRESHOLD + FADE_DISTANCE;
+                                    groundFade = 1f - Math.Min(1f, (screenProgress - fadeStart) / FADE_DISTANCE);
+                                    
+                                    // If fully faded, respawn at top
+                                    if (groundFade <= 0f || screenProgress >= fadeEnd)
+                                    {
+                                        int playerAbsIsoX = (tileOffX - tileOffY) * 22;
+                                        int playerAbsIsoY = (tileOffX + tileOffY) * 22;
+                                        effect.WorldX = playerAbsIsoX + RandomHelper.GetValue(-visibleRangeX, visibleRangeX);
+                                        effect.WorldY = playerAbsIsoY - visibleRangeY; // Spawn at top
+                                        continue; // Skip rendering, particle respawning
+                                    }
+                                }
+                            }
+                            else if (effect.Depth == DepthLayer.Middle)
+                            {
+                                if (screenProgress >= MIDDLE_GROUND_THRESHOLD)
+                                {
+                                    // Calculate fade
+                                    float fadeStart = MIDDLE_GROUND_THRESHOLD;
+                                    float fadeEnd = MIDDLE_GROUND_THRESHOLD + FADE_DISTANCE;
+                                    groundFade = 1f - Math.Min(1f, (screenProgress - fadeStart) / FADE_DISTANCE);
+                                    
+                                    // If fully faded, respawn at top
+                                    if (groundFade <= 0f || screenProgress >= fadeEnd)
+                                    {
+                                        int playerAbsIsoX = (tileOffX - tileOffY) * 22;
+                                        int playerAbsIsoY = (tileOffX + tileOffY) * 22;
+                                        effect.WorldX = playerAbsIsoX + RandomHelper.GetValue(-visibleRangeX, visibleRangeX);
+                                        effect.WorldY = playerAbsIsoY - visibleRangeY; // Spawn at top
+                                        continue; // Skip rendering, particle respawning
+                                    }
+                                }
+                            }
+                            else if (effect.Depth == DepthLayer.Foreground)
+                            {
+                                if (screenProgress >= FOREGROUND_GROUND_THRESHOLD)
+                                {
+                                    // Calculate fade for foreground (closest particles)
+                                    float fadeStart = FOREGROUND_GROUND_THRESHOLD;
+                                    float fadeEnd = FOREGROUND_GROUND_THRESHOLD + FADE_DISTANCE;
+                                    groundFade = 1f - Math.Min(1f, (screenProgress - fadeStart) / FADE_DISTANCE);
+                                    
+                                    // If fully faded, respawn at top
+                                    if (groundFade <= 0f || screenProgress >= fadeEnd)
+                                    {
+                                        int playerAbsIsoX = (tileOffX - tileOffY) * 22;
+                                        int playerAbsIsoY = (tileOffX + tileOffY) * 22;
+                                        effect.WorldX = playerAbsIsoX + RandomHelper.GetValue(-visibleRangeX, visibleRangeX);
+                                        effect.WorldY = playerAbsIsoY - visibleRangeY; // Spawn at top
+                                        continue; // Skip rendering, particle respawning
+                                    }
+                                }
+                            }
+                            
                             // Calculate speed-based trail length
                             float speedMagnitude = (float)Math.Sqrt(effect.SpeedX * effect.SpeedX + effect.SpeedY * effect.SpeedY);
                             
@@ -622,7 +701,7 @@ namespace ClassicUO.Game
                                 case RainRenderStyle.SmallDots:
                                     // Apply depth-based size multiplier
                                     int smallDotSize = (int)(2 * rainDepthProps.SizeMultiplier);
-                                    smallDotSize = Math.Max(2, smallDotSize); // Minimum 1px
+                                    smallDotSize = Math.Max(2, smallDotSize);
                                     
                                     Rectangle smallDotRect = new Rectangle(
                                         newX - smallDotSize / 2, 
@@ -631,12 +710,12 @@ namespace ClassicUO.Game
                                         smallDotSize
                                     );
                                     
-                                    // Apply alpha and color tint with better visibility
-                                    // Keep more of the base color (30% blend instead of 70%)
-                                    Color smallDotColor = Color.Lerp(Color.LightBlue, rainDepthProps.ColorTint, 0.3f);
-                                    // Boost alpha for visibility (minimum 60% even for background)
-                                    float smallDotAlpha = Math.Max(0.6f, rainDepthProps.AlphaMultiplier);
-                                    smallDotColor *= smallDotAlpha;
+                                    // Apply alpha and color tint with proper visibility
+                                    // 10% blend towards tint
+                                    Color smallDotColor = Color.Lerp(Color.LightBlue, rainDepthProps.ColorTint, 0.1f);
+                                    // Boost alpha for visibility (minimum 80% even for background)
+                                    float smallDotAlpha = Math.Max(0.8f, rainDepthProps.AlphaMultiplier);
+                                    smallDotColor *= smallDotAlpha * groundFade; // Apply ground fade
                                     
                                     batcher.Draw
                                     (
@@ -660,11 +739,11 @@ namespace ClassicUO.Game
                                     );
                                     
                                     // Apply alpha and color tint with better visibility
-                                    // Keep more of the base color (30% blend instead of 70%)
-                                    Color largeDotColor = Color.Lerp(Color.CornflowerBlue, rainDepthProps.ColorTint, 0.3f);
-                                    // Boost alpha for visibility (minimum 60% even for background)
-                                    float largeDotAlpha = Math.Max(0.6f, rainDepthProps.AlphaMultiplier);
-                                    largeDotColor *= largeDotAlpha;
+                                    // 20% blend towards tint
+                                    Color largeDotColor = Color.Lerp(Color.CornflowerBlue, rainDepthProps.ColorTint, 0.2f);
+                                    // Boost alpha for visibility (minimum 70% even for background)
+                                    float largeDotAlpha = Math.Max(0.7f, rainDepthProps.AlphaMultiplier);
+                                    largeDotColor *= largeDotAlpha * groundFade; // Apply ground fade
                                     
                                     batcher.Draw
                                     (
@@ -695,12 +774,12 @@ namespace ClassicUO.Game
                                     Vector2 shortStart = new Vector2(oldX, oldY);
                                     Vector2 shortEnd = new Vector2(newX, newY);
                                     
-                                    // Apply color and alpha - keep rain distinctly blue (not white like snow)
-                                    // Use CornflowerBlue base instead of Gray to maintain rain identity
+                                    // Apply color and alpha - keep rain distinctly blue
+                                    // 25% blend towards tint
                                     Color shortLineColor = Color.Lerp(Color.Gray, rainDepthProps.ColorTint, 0.25f);
                                     // Boost alpha for visibility
                                     float shortLineAlpha = Math.Max(0.65f, rainDepthProps.AlphaMultiplier);
-                                    shortLineColor *= shortLineAlpha;
+                                    shortLineColor *= shortLineAlpha * groundFade; // Apply ground fade
                                     
                                     // Apply line width with depth
                                     int shortLineWidth = Math.Max(1, (int)(2 * rainDepthProps.SizeMultiplier));
@@ -736,12 +815,10 @@ namespace ClassicUO.Game
                                     Vector2 boltStart = new Vector2(oldX, oldY);
                                     Vector2 boltEnd = new Vector2(newX, newY);
                                     
-                                    // Apply color and alpha - keep storm bolts blue-tinted
-                                    // Use SteelBlue for dramatic storm appearance
                                     Color boltColor = Color.Lerp(Color.Gray, rainDepthProps.ColorTint, 0.25f);
                                     // Boost alpha for dramatic effect
                                     float boltAlpha = Math.Max(0.75f, rainDepthProps.AlphaMultiplier);
-                                    boltColor *= boltAlpha;
+                                    boltColor *= boltAlpha * groundFade; // Apply ground fade
                                     
                                     // Apply line width with depth
                                     int boltLineWidth = Math.Max(1, (int)(3 * rainDepthProps.SizeMultiplier));
