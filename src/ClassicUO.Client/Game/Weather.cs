@@ -141,6 +141,25 @@ namespace ClassicUO.Game
         // - Medium (1.5-2.0): Noticeable expand/contract ✓ RECOMMENDED
         // - Large (2.5-3.5): Dramatic size animation
         
+        // --- Splash Enable/Disable by Density ---
+        private const bool SPLASH_ENABLED_SMALL_DOTS = false;
+        // Enable splash effects for small dots (density 0-17)
+        // - false: No splashes for light drizzle (subtle, minimal effect)
+        // - true: Splashes even at lowest density
+        
+        private const bool SPLASH_ENABLED_LARGE_DOTS = true;
+        // Enable splash effects for large dots (density 18-35)
+        // - false: No splashes for moderate rain
+        // - true: Splashes appear at moderate density ✓ RECOMMENDED
+        
+        private const bool SPLASH_ENABLED_SHORT_LINES = true;
+        // Enable splash effects for short lines (density 36-52)
+        // - Always recommended to be true for heavy rain
+        
+        private const bool SPLASH_ENABLED_LONG_BOLTS = true;
+        // Enable splash effects for long bolts (density 53-70)
+        // - Always recommended to be true for storm conditions
+        
         private const int MAX_SPLASHES_PER_FRAME = 5;
         // Rate limit for splash creation (currently not enforced)
         // Can be used to prevent splash spam in extreme conditions
@@ -811,8 +830,26 @@ namespace ClassicUO.Game
                                     groundFade = 1f - Math.Max(0f, Math.Min(1f, fadeProgress));
                                     
                                     // Create splash when particle just crosses its personal threshold
+                                    // Check if splash is enabled for current density level
+                                    bool splashEnabled = false;
+                                    switch (rainStyle)
+                                    {
+                                        case RainRenderStyle.SmallDots:
+                                            splashEnabled = SPLASH_ENABLED_SMALL_DOTS;
+                                            break;
+                                        case RainRenderStyle.LargeDots:
+                                            splashEnabled = SPLASH_ENABLED_LARGE_DOTS;
+                                            break;
+                                        case RainRenderStyle.ShortLines:
+                                            splashEnabled = SPLASH_ENABLED_SHORT_LINES;
+                                            break;
+                                        case RainRenderStyle.LongBolts:
+                                            splashEnabled = SPLASH_ENABLED_LONG_BOLTS;
+                                            break;
+                                    }
+                                    
                                     int splashWindow = 20; // 20 pixel window
-                                    if (newY >= particleFadeY && newY <= particleFadeY + splashWindow)
+                                    if (splashEnabled && newY >= particleFadeY && newY <= particleFadeY + splashWindow)
                                     {
                                         // Create splash effect at ground impact point
                                         CreateSplash(ref effect, effect.WorldX, effect.WorldY);
@@ -1090,7 +1127,11 @@ namespace ClassicUO.Game
                 }
                 
                 // Apply upward movement physics in absolute world space
-                splash.WorldY += splash.VelocityY * splashSpeedOffset;
+                // When SPLASH_RISE_SPEED = 0.0, VelocityY = 0.0, so no movement occurs
+                if (splash.VelocityY != 0.0f)
+                {
+                    splash.WorldY += splash.VelocityY * splashSpeedOffset;
+                }
                 
                 // Convert to viewport-relative coordinates for rendering
                 splash.X = splash.WorldX - viewportOffsetX;
@@ -1158,29 +1199,44 @@ namespace ClassicUO.Game
                         break;
                 }
                 
-                // Draw scattered splash droplets in irregular pattern
+                // Draw scattered splash droplets with realistic physics
+                // SPREADING ANIMATION: Droplets start at impact point, spread outward (bounce effect)
+                // UPPER HEMISPHERE ONLY: Water splashes upward, not downward
                 for (int p = 0; p < numDroplets; p++)
                 {
-                    // Generate consistent random pattern using splash seed
-                    uint particleSeed = splash.SeedID + (uint)p;
+                    // Generate truly random pattern using hash function (prevents sequential angles)
+                    uint particleSeed = (splash.SeedID * 73856093u) ^ ((uint)p * 19349663u);
                     
-                    // Random angle for each droplet (0-360 degrees, not evenly spaced)
-                    float baseAngle = (float)(particleSeed % 360) * 0.017453f; // Convert to radians
-                    float angle = baseAngle + (progress * 0.5f); // Slight rotation during animation
+                    // Random angle for each droplet - UPPER HEMISPHERE ONLY (0-180 degrees)
+                    // Water splashing on ground only sprays upward, not downward
+                    // 0° = right, 90° = up, 180° = left (all above ground)
+                    float randomAngle = (float)(particleSeed % 180);  // 0-180 degrees (upper half)
+                    float angle = randomAngle * 0.017453f; // Convert to radians
                     
                     // Random spread distance per droplet (0.5-1.0 variation)
                     float randomSpread = ((particleSeed % 100) / 100f) * 0.5f + 0.5f;
-                    float spreadRadius = currentSize * randomSpread * progress * SPLASH_SPREAD_MULTIPLIER;
                     
-                    // Elliptical spread pattern using configured factors (wider than tall for ground splash)
-                    int offsetX = (int)(Math.Cos(angle) * spreadRadius * SPLASH_ELLIPSE_X);
-                    int offsetY = (int)(Math.Sin(angle) * spreadRadius * SPLASH_ELLIPSE_Y);
+                    // Calculate FINAL position (where droplet will end up)
+                    float finalSpreadRadius = splash.Size * randomSpread * SPLASH_SPREAD_MULTIPLIER;
+                    
+                    // ANIMATED SPREADING: Droplet position interpolates from center to final position
+                    // progress = 0.0: droplet at impact point (center)
+                    // progress = 0.5: droplet halfway to final position
+                    // progress = 1.0: droplet at final position
+                    // This creates realistic "bouncing outward" effect
+                    float currentSpreadRadius = finalSpreadRadius * progress;
+                    
+                    // Elliptical spread pattern using configured factors (wider than tall)
+                    int offsetX = (int)(Math.Cos(angle) * currentSpreadRadius * SPLASH_ELLIPSE_X);
+                    // Negate Y to make upward motion (sin(0-180°) is positive, screen Y increases downward)
+                    int offsetY = -(int)(Math.Sin(angle) * currentSpreadRadius * SPLASH_ELLIPSE_Y);
+                    // Now: 0° = right horizontal, 90° = straight up, 180° = left horizontal
                     
                     // Random droplet size using configured min/max range
                     int dropletSizeRange = SPLASH_MAX_DROPLET_SIZE - SPLASH_MIN_DROPLET_SIZE + 1;
                     int dropletSize = SPLASH_MIN_DROPLET_SIZE + (int)(particleSeed % (uint)dropletSizeRange);
                     
-                    // Position droplet at scattered location
+                    // Position droplet - animates from center outward as progress increases
                     Rectangle dropletRect = new Rectangle(
                         splashX + offsetX - dropletSize / 2,
                         splashY + offsetY - dropletSize / 2,
