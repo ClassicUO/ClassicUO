@@ -51,10 +51,99 @@ namespace ClassicUO.Game
         // Middle:      68-88% (20% fade zone) - overlaps with both layers
         // Foreground:  81-100% (19% fade zone) - appears closest, reaches near bottom
         
-        // Splash effect configuration
-        private const float SPLASH_DURATION = 0.3f;     // Splash lasts 300ms (shorter, less trail)
-        private const float SPLASH_RISE_SPEED = -0.8f;   // Slower upward movement (reduces line-like appearance)
-        private const int MAX_SPLASHES_PER_FRAME = 5;   // Limit splash creation rate
+        // ============================================================================
+        // SPLASH EFFECT CONFIGURATION
+        // ============================================================================
+        // These constants control the appearance of water splash effects when rain hits ground
+        
+        // --- Timing Parameters ---
+        private const float SPLASH_DURATION = 0.25f;
+        // Duration of splash animation in seconds (0.25 = 250ms)
+        // - Shorter (0.15-0.2): Quick, subtle splashes
+        // - Medium (0.25-0.35): Balanced, noticeable splashes ✓ RECOMMENDED
+        // - Longer (0.4-0.5): Slow, dramatic splashes
+        
+        private const float SPLASH_RISE_SPEED = 0.0f;
+        // Upward movement speed of splash particles (negative = upward, 0 = no movement)
+        // - Zero (0.0): No vertical movement, splashes stay at ground ✓ RECOMMENDED (prevents thread appearance)
+        // - Small (-0.1 to -0.3): Slight bounce effect
+        // - Medium (-0.5 to -0.8): Noticeable bounce, may create trails
+        // - Large (-1.0+): High bounce, creates "thread" appearance (AVOID)
+        
+        // --- Droplet Count by Depth Layer ---
+        private const int SPLASH_DROPLETS_BACKGROUND = 3;
+        // Number of water droplets in background layer splash (distant, subtle)
+        // Recommended: 2-5 droplets
+        
+        private const int SPLASH_DROPLETS_MIDDLE = 6;
+        // Number of water droplets in middle layer splash (mid-distance, moderate)
+        // Recommended: 4-8 droplets
+        
+        private const int SPLASH_DROPLETS_FOREGROUND = 10;
+        // Number of water droplets in foreground layer splash (close, dramatic)
+        // Recommended: 8-15 droplets
+        
+        // --- Spread Pattern Parameters ---
+        private const float SPLASH_SPREAD_MULTIPLIER = 1.5f;
+        // How far droplets spread from impact point (multiplier of base size)
+        // - Small (0.8-1.2): Tight, compact splash
+        // - Medium (1.5-2.0): Balanced spread ✓ RECOMMENDED
+        // - Large (2.5-3.5): Wide, explosive splash
+        
+        private const float SPLASH_ELLIPSE_X = 1.2f;
+        // Horizontal ellipse factor (1.0 = circle, >1.0 = wider horizontally)
+        // - 1.0: Perfect circle
+        // - 1.2: Slightly wider ✓ RECOMMENDED (natural ground splash)
+        // - 1.5+: Very wide, exaggerated horizontal spread
+        
+        private const float SPLASH_ELLIPSE_Y = 0.2f;
+        // Vertical ellipse factor (<1.0 = flatter)
+        // - 1.0: Perfect circle
+        // - 0.6: Flattened ✓ RECOMMENDED (ground splash)
+        // - 0.3-0.4: Very flat, pancake-like splash
+        
+        // --- Droplet Size Range ---
+        private const int SPLASH_MIN_DROPLET_SIZE = 1;
+        // Minimum size of individual splash droplets in pixels
+        // Recommended: 1-2 pixels
+        
+        private const int SPLASH_MAX_DROPLET_SIZE = 3;
+        // Maximum size of individual splash droplets in pixels
+        // Recommended: 2-4 pixels
+        
+        // --- Alpha/Visibility Parameters ---
+        private const float SPLASH_ALPHA_BACKGROUND = 0.5f;
+        // Alpha multiplier for background splashes (0.0 = invisible, 1.0 = full brightness)
+        // - Low (0.3-0.5): Subtle, distant splashes
+        // - Medium (0.5-0.7): Balanced visibility ✓ RECOMMENDED
+        // - High (0.7-1.0): Bright, prominent splashes
+        
+        private const float SPLASH_ALPHA_MIDDLE = 0.7f;
+        // Alpha multiplier for middle layer splashes
+        // Recommended: 0.6-0.8 (more visible than background)
+        
+        private const float SPLASH_ALPHA_FOREGROUND = 0.9f;
+        // Alpha multiplier for foreground splashes
+        // Recommended: 0.8-1.0 (most visible)
+        
+        private const float SPLASH_ALPHA_VARIATION_MIN = 0.6f;
+        private const float SPLASH_ALPHA_VARIATION_MAX = 1.0f;
+        // Per-droplet random alpha variation range (creates brightness variation within splash)
+        // Each droplet gets random alpha between min and max
+        // - Narrow range (0.8-1.0): Uniform brightness
+        // - Wide range (0.5-1.0): High variation, more organic ✓ RECOMMENDED
+        
+        // --- Animation Parameters ---
+        private const float SPLASH_SIZE_SCALE_MULTIPLIER = 1.5f;
+        // Size animation amplitude (how much splash expands)
+        // Formula: baseSize × (1 + sin(progress × π) × THIS_VALUE)
+        // - Small (0.5-1.0): Subtle size change
+        // - Medium (1.5-2.0): Noticeable expand/contract ✓ RECOMMENDED
+        // - Large (2.5-3.5): Dramatic size animation
+        
+        private const int MAX_SPLASHES_PER_FRAME = 5;
+        // Rate limit for splash creation (currently not enforced)
+        // Can be used to prevent splash spam in extreme conditions
 
         private readonly WeatherEffect[] _effects = new WeatherEffect[byte.MaxValue];
         private readonly SplashEffect[] _splashes = new SplashEffect[byte.MaxValue];
@@ -376,6 +465,7 @@ namespace ClassicUO.Game
                     splash.Active = true;
                     splash.LifeTime = 0f;
                     splash.Depth = effect.Depth;
+                    splash.SeedID = effect.ID + (uint)Time.Ticks; // Unique seed for random pattern
                     
                     // Store in absolute world coordinates
                     splash.WorldX = worldX;
@@ -389,13 +479,13 @@ namespace ClassicUO.Game
                     switch (effect.Depth)
                     {
                         case DepthLayer.Background:
-                            splash.Size = 2f + RandomHelper.GetValue(0, 8) * 0.1f; // 2-2.8px
+                            splash.Size = 1f + RandomHelper.GetValue(0, 3) * 0.1f; // 1-1.3px
                             break;
                         case DepthLayer.Middle:
-                            splash.Size = 3f + RandomHelper.GetValue(0, 10) * 0.1f; // 3-4px
+                            splash.Size = 1f + RandomHelper.GetValue(0, 5) * 0.1f; // 1-1.5px
                             break;
                         case DepthLayer.Foreground:
-                            splash.Size = 4f + RandomHelper.GetValue(0, 12) * 0.1f; // 4-5.2px
+                            splash.Size = 1f + RandomHelper.GetValue(0, 10) * 0.1f; // 1-2px
                             break;
                     }
                     
@@ -1017,85 +1107,98 @@ namespace ClassicUO.Game
                 // Animated splash properties
                 float progress = splash.LifeTime;
                 
-                // Size grows then shrinks (parabolic curve)
-                float sizeScale = 1f + (float)Math.Sin(progress * Math.PI) * 1.5f;
+                // Size animation: grows then shrinks (parabolic curve using sine)
+                float sizeScale = 1f + (float)Math.Sin(progress * Math.PI) * SPLASH_SIZE_SCALE_MULTIPLIER;
                 float currentSize = splash.Size * sizeScale;
                 
-                // Ensure minimum size to avoid line-like appearance
+                // Ensure minimum size to prevent invisible droplets
                 currentSize = Math.Max(2f, currentSize);
                 
-                // Alpha fades out linearly
+                // Alpha fades out linearly over animation duration
                 float alpha = 1f - progress;
                 
-                // Depth-based alpha adjustment
+                // Apply depth-based alpha adjustment using configured constants
                 switch (splash.Depth)
                 {
                     case DepthLayer.Background:
-                        alpha *= 0.5f; // Background splashes faint but visible
+                        alpha *= SPLASH_ALPHA_BACKGROUND;
                         break;
                     case DepthLayer.Middle:
-                        alpha *= 0.7f; // Middle splashes moderate
+                        alpha *= SPLASH_ALPHA_MIDDLE;
                         break;
                     case DepthLayer.Foreground:
-                        alpha *= 0.9f; // Foreground splashes very visible
+                        alpha *= SPLASH_ALPHA_FOREGROUND;
                         break;
                 }
                 
-                // Draw splash as multiple small particles to create organic appearance
-                // Use integer coordinates to avoid sub-pixel rendering issues
-                int splashSize = (int)currentSize;
+                // Draw natural water splash as scattered droplets
+                // Real water splashes have many irregular particles spreading outward
                 int splashX = (int)splash.X;
                 int splashY = (int)splash.Y;
                 
-                // Splash color: light blue-white for rain impact
-                Color splashColor = Color.Lerp(Color.LightBlue, Color.White, 0.7f);
-                splashColor *= alpha;
+                // Base splash color: light blue-white for rain impact
+                Color baseSplashColor = Color.Lerp(Color.LightBlue, Color.White, 0.7f);
+                baseSplashColor *= alpha;
                 
-                // Draw central splash particle
-                Rectangle centerSplash = new Rectangle(
-                    splashX - splashSize / 2,
-                    splashY - splashSize / 2,
-                    splashSize,
-                    splashSize
-                );
-                
-                batcher.Draw(
-                    SolidColorTextureCache.GetTexture(splashColor),
-                    centerSplash,
-                    Vector3.UnitZ,
-                    layerDepth
-                );
-                
-                // Draw 2-4 smaller particles around center for organic splash effect
-                // Only draw if splash is large enough (foreground/middle layers)
-                if (splashSize >= 3 && progress < 0.6f)
+                // Determine number of droplets based on depth layer using configured constants
+                int numDroplets;
+                switch (splash.Depth)
                 {
-                    int numParticles = splash.Depth == DepthLayer.Foreground ? 4 : 2;
-                    int particleSize = Math.Max(1, splashSize / 3);
-                    float spreadRadius = currentSize * 0.6f * progress; // Spreads outward
+                    case DepthLayer.Background:
+                        numDroplets = SPLASH_DROPLETS_BACKGROUND;
+                        break;
+                    case DepthLayer.Middle:
+                        numDroplets = SPLASH_DROPLETS_MIDDLE;
+                        break;
+                    case DepthLayer.Foreground:
+                        numDroplets = SPLASH_DROPLETS_FOREGROUND;
+                        break;
+                    default:
+                        numDroplets = SPLASH_DROPLETS_MIDDLE;
+                        break;
+                }
+                
+                // Draw scattered splash droplets in irregular pattern
+                for (int p = 0; p < numDroplets; p++)
+                {
+                    // Generate consistent random pattern using splash seed
+                    uint particleSeed = splash.SeedID + (uint)p;
                     
-                    for (int p = 0; p < numParticles; p++)
-                    {
-                        float angle = (p * (float)Math.PI * 2f / numParticles) + (progress * 2f);
-                        int offsetX = (int)(Math.Cos(angle) * spreadRadius);
-                        int offsetY = (int)(Math.Sin(angle) * spreadRadius * 0.5f); // Elliptical spread
-                        
-                        Rectangle particleRect = new Rectangle(
-                            splashX + offsetX - particleSize / 2,
-                            splashY + offsetY - particleSize / 2,
-                            particleSize,
-                            particleSize
-                        );
-                        
-                        Color particleColor = splashColor * 0.6f; // Dimmer than center
-                        
-                        batcher.Draw(
-                            SolidColorTextureCache.GetTexture(particleColor),
-                            particleRect,
-                            Vector3.UnitZ,
-                            layerDepth
-                        );
-                    }
+                    // Random angle for each droplet (0-360 degrees, not evenly spaced)
+                    float baseAngle = (float)(particleSeed % 360) * 0.017453f; // Convert to radians
+                    float angle = baseAngle + (progress * 0.5f); // Slight rotation during animation
+                    
+                    // Random spread distance per droplet (0.5-1.0 variation)
+                    float randomSpread = ((particleSeed % 100) / 100f) * 0.5f + 0.5f;
+                    float spreadRadius = currentSize * randomSpread * progress * SPLASH_SPREAD_MULTIPLIER;
+                    
+                    // Elliptical spread pattern using configured factors (wider than tall for ground splash)
+                    int offsetX = (int)(Math.Cos(angle) * spreadRadius * SPLASH_ELLIPSE_X);
+                    int offsetY = (int)(Math.Sin(angle) * spreadRadius * SPLASH_ELLIPSE_Y);
+                    
+                    // Random droplet size using configured min/max range
+                    int dropletSizeRange = SPLASH_MAX_DROPLET_SIZE - SPLASH_MIN_DROPLET_SIZE + 1;
+                    int dropletSize = SPLASH_MIN_DROPLET_SIZE + (int)(particleSeed % (uint)dropletSizeRange);
+                    
+                    // Position droplet at scattered location
+                    Rectangle dropletRect = new Rectangle(
+                        splashX + offsetX - dropletSize / 2,
+                        splashY + offsetY - dropletSize / 2,
+                        dropletSize,
+                        dropletSize
+                    );
+                    
+                    // Random alpha variation per droplet using configured range
+                    float alphaRange = SPLASH_ALPHA_VARIATION_MAX - SPLASH_ALPHA_VARIATION_MIN;
+                    float alphaVariation = SPLASH_ALPHA_VARIATION_MIN + ((particleSeed % 100) / 100f) * alphaRange;
+                    Color dropletColor = baseSplashColor * alphaVariation;
+                    
+                    batcher.Draw(
+                        SolidColorTextureCache.GetTexture(dropletColor),
+                        dropletRect,
+                        Vector3.UnitZ,
+                        layerDepth
+                    );
                 }
             }
 
@@ -1121,6 +1224,7 @@ namespace ClassicUO.Game
             public float Size;                  // Splash particle size
             public DepthLayer Depth;            // Depth layer (affects splash size/alpha)
             public bool Active;                 // Is this splash currently active
+            public uint SeedID;                 // Random seed for consistent splash pattern
         }
     }
 }
