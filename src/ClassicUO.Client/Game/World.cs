@@ -47,6 +47,7 @@ namespace ClassicUO.Game
             Macros = new MacroManager(this);
             CommandManager = new CommandManager(this);
             Weather = new Weather(this);
+            RippleEffect = new RippleEffect(this);
             InfoBars = new InfoBarManager(this);
         }
 
@@ -97,6 +98,8 @@ namespace ClassicUO.Game
         public CommandManager CommandManager { get; }
 
         public Weather Weather { get; }
+
+        public RippleEffect RippleEffect { get; }
 
         public InfoBarManager InfoBars { get; }
 

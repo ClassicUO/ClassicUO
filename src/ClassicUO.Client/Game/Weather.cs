@@ -336,6 +336,7 @@ namespace ClassicUO.Game
                 
                 effect.ID = (uint)i;
                 effect.ScaleRatio = RandomHelper.GetValue(0, 10) * 0.1f;
+                effect.RippleCreated = false; // Initialize ripple flag
                 
                 // Assign depth layer based on ScaleRatio (distribute evenly across 3 layers)
                 float depthValue = effect.ScaleRatio;  // Reuse existing 0.0-1.0 value
@@ -848,11 +849,18 @@ namespace ClassicUO.Game
                                             break;
                                     }
                                     
-                                    int splashWindow = 20; // 20 pixel window
+                                    int splashWindow = 10; // 20 pixel window
                                     if (splashEnabled && newY >= particleFadeY && newY <= particleFadeY + splashWindow)
                                     {
                                         // Create splash effect at ground impact point
                                         CreateSplash(ref effect, effect.WorldX, effect.WorldY);
+                                        
+                                        // Trigger ripple effect if rain hits water tile (only once per particle)
+                                        if (!effect.RippleCreated)
+                                        {
+                                            _world.RippleEffect.CreateRipple(effect.WorldX, effect.WorldY);
+                                            effect.RippleCreated = true; // Mark that ripple was created
+                                        }
                                     }
                                     
                                     // If fully faded, respawn at top with new random threshold
@@ -863,6 +871,7 @@ namespace ClassicUO.Game
                                         int playerAbsIsoY = (tileOffX + tileOffY) * 22;
                                         effect.WorldX = playerAbsIsoX + RandomHelper.GetValue(-visibleRangeX, visibleRangeX);
                                         effect.WorldY = playerAbsIsoY - visibleRangeY; // Spawn at top
+                                        effect.RippleCreated = false; // Reset ripple flag for respawned particle
                                         
                                         // Re-randomize fade threshold for next cycle
                                         switch (effect.Depth)
@@ -1269,6 +1278,7 @@ namespace ClassicUO.Game
             public DepthLayer Depth;  // Depth layer for 3D atmospheric effects
             public float FadeThreshold;  // Per-particle random fade position (0.0-1.0)
             public bool NeverFade;       // Flag for foreground particles that don't fade
+            public bool RippleCreated;   // Flag to track if ripple was already created for this particle
         }
 
         private struct SplashEffect
