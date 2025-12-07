@@ -57,13 +57,13 @@ namespace ClassicUO.Game
         // These constants control the appearance of water splash effects when rain hits ground
         
         // --- Timing Parameters ---
-        private const float SPLASH_DURATION = 0.25f;
+        private const float SPLASH_DURATION = 3.25f;
         // Duration of splash animation in seconds (0.25 = 250ms)
         // - Shorter (0.15-0.2): Quick, subtle splashes
         // - Medium (0.25-0.35): Balanced, noticeable splashes ✓ RECOMMENDED
         // - Longer (0.4-0.5): Slow, dramatic splashes
         
-        private const float SPLASH_RISE_SPEED = 0.0f;
+        private const float SPLASH_RISE_SPEED = -1.0f;
         // Upward movement speed of splash particles (negative = upward, 0 = no movement)
         // - Zero (0.0): No vertical movement, splashes stay at ground ✓ RECOMMENDED (prevents thread appearance)
         // - Small (-0.1 to -0.3): Slight bounce effect
@@ -811,26 +811,18 @@ namespace ClassicUO.Game
                             RainRenderStyle rainStyle = GetRainRenderStyle();
                             DepthProperties rainDepthProps = GetDepthProperties(effect.Depth, Type);
                             
-                            // Calculate ground fade using per-particle random threshold
-                            float groundFade = 1.0f;
+                            // Immediate disposal logic: particles disappear instantly when crossing fade threshold
                             int viewportHeight = winsize.Y;
                             
-                            // Unified fade logic for all particles (no layer-specific if-else)
-                            // Skip fade check if particle never fades (some foreground particles)
+                            // Skip disposal check if particle never fades (some foreground particles)
                             if (!effect.NeverFade)
                             {
                                 // Calculate particle's absolute fade position using its random threshold
                                 int particleFadeY = (int)(viewportHeight * effect.FadeThreshold);
-                                int fadeDistancePixels = (int)(viewportHeight * FADE_DISTANCE);
                                 
-                                if (newY >= particleFadeY)
+                                // Check if particle just crossed fade threshold (first crossing only)
+                                if (newY >= particleFadeY && oldY < particleFadeY)
                                 {
-                                    // Calculate fade progress
-                                    int fadeEnd = particleFadeY + fadeDistancePixels;
-                                    float fadeProgress = (float)(newY - particleFadeY) / fadeDistancePixels;
-                                    groundFade = 1f - Math.Max(0f, Math.Min(1f, fadeProgress));
-                                    
-                                    // Create splash when particle just crosses its personal threshold
                                     // Check if splash is enabled for current density level
                                     bool splashEnabled = false;
                                     switch (rainStyle)
@@ -849,57 +841,52 @@ namespace ClassicUO.Game
                                             break;
                                     }
                                     
-                                    int splashWindow = 10; // 20 pixel window
-                                    if (splashEnabled && newY >= particleFadeY && newY <= particleFadeY + splashWindow)
+                                    // Create splash at current position (if enabled)
+                                    if (splashEnabled)
                                     {
-                                        // Create splash effect at ground impact point
                                         CreateSplash(ref effect, effect.WorldX, effect.WorldY);
                                         
                                         // Trigger ripple effect if rain hits water tile (only once per particle)
                                         if (!effect.RippleCreated)
                                         {
                                             _world.RippleEffect.CreateRipple(effect.WorldX, effect.WorldY);
-                                            effect.RippleCreated = true; // Mark that ripple was created
+                                            effect.RippleCreated = true;
                                         }
                                     }
                                     
-                                    // If fully faded, respawn at top with new random threshold
-                                    if (newY >= fadeEnd)
+                                    // Immediately respawn particle at top with new random threshold
+                                    int playerAbsIsoX = (tileOffX - tileOffY) * 22;
+                                    int playerAbsIsoY = (tileOffX + tileOffY) * 22;
+                                    effect.WorldX = playerAbsIsoX + RandomHelper.GetValue(-visibleRangeX, visibleRangeX);
+                                    effect.WorldY = playerAbsIsoY - visibleRangeY; // Spawn at top
+                                    effect.RippleCreated = false; // Reset ripple flag for respawned particle
+                                    
+                                    // Re-randomize fade threshold for next cycle
+                                    switch (effect.Depth)
                                     {
-                                        // Respawn particle at top
-                                        int playerAbsIsoX = (tileOffX - tileOffY) * 22;
-                                        int playerAbsIsoY = (tileOffX + tileOffY) * 22;
-                                        effect.WorldX = playerAbsIsoX + RandomHelper.GetValue(-visibleRangeX, visibleRangeX);
-                                        effect.WorldY = playerAbsIsoY - visibleRangeY; // Spawn at top
-                                        effect.RippleCreated = false; // Reset ripple flag for respawned particle
-                                        
-                                        // Re-randomize fade threshold for next cycle
-                                        switch (effect.Depth)
-                                        {
-                                            case DepthLayer.Background:
-                                                effect.FadeThreshold = RandomHelper.GetValue(0, 30) * 0.01f;
+                                        case DepthLayer.Background:
+                                            effect.FadeThreshold = RandomHelper.GetValue(0, 30) * 0.01f;
+                                            effect.NeverFade = false;
+                                            break;
+                                        case DepthLayer.Middle:
+                                            effect.FadeThreshold = 0.31f + RandomHelper.GetValue(0, 39) * 0.01f;
+                                            effect.NeverFade = false;
+                                            break;
+                                        case DepthLayer.Foreground:
+                                            if (RandomHelper.RandomBool())
+                                            {
+                                                effect.NeverFade = true;
+                                                effect.FadeThreshold = 1.0f;
+                                            }
+                                            else
+                                            {
                                                 effect.NeverFade = false;
-                                                break;
-                                            case DepthLayer.Middle:
-                                                effect.FadeThreshold = 0.31f + RandomHelper.GetValue(0, 39) * 0.01f;
-                                                effect.NeverFade = false;
-                                                break;
-                                            case DepthLayer.Foreground:
-                                                if (RandomHelper.RandomBool())
-                                                {
-                                                    effect.NeverFade = true;
-                                                    effect.FadeThreshold = 1.0f;
-                                                }
-                                                else
-                                                {
-                                                    effect.NeverFade = false;
-                                                    effect.FadeThreshold = 0.71f + RandomHelper.GetValue(0, 29) * 0.01f;
-                                                }
-                                                break;
-                                        }
-                                        
-                                        continue; // Skip rendering, particle respawning
+                                                effect.FadeThreshold = 0.71f + RandomHelper.GetValue(0, 29) * 0.01f;
+                                            }
+                                            break;
                                     }
+                                    
+                                    continue; // Skip rendering, particle respawning
                                 }
                             }
                             
@@ -925,7 +912,7 @@ namespace ClassicUO.Game
                                     Color smallDotColor = Color.Lerp(Color.LightBlue, rainDepthProps.ColorTint, 0.1f);
                                     // Boost alpha for visibility (minimum 80% even for background)
                                     float smallDotAlpha = Math.Max(0.8f, rainDepthProps.AlphaMultiplier);
-                                    smallDotColor *= smallDotAlpha * groundFade; // Apply ground fade
+                                    smallDotColor *= smallDotAlpha;
                                     
                                     batcher.Draw
                                     (
@@ -953,7 +940,7 @@ namespace ClassicUO.Game
                                     Color largeDotColor = Color.Lerp(Color.CornflowerBlue, rainDepthProps.ColorTint, 0.2f);
                                     // Boost alpha for visibility (minimum 70% even for background)
                                     float largeDotAlpha = Math.Max(0.7f, rainDepthProps.AlphaMultiplier);
-                                    largeDotColor *= largeDotAlpha * groundFade; // Apply ground fade
+                                    largeDotColor *= largeDotAlpha;
                                     
                                     batcher.Draw
                                     (
@@ -989,7 +976,7 @@ namespace ClassicUO.Game
                                     Color shortLineColor = Color.Lerp(Color.Gray, rainDepthProps.ColorTint, 0.25f);
                                     // Boost alpha for visibility
                                     float shortLineAlpha = Math.Max(0.65f, rainDepthProps.AlphaMultiplier);
-                                    shortLineColor *= shortLineAlpha * groundFade; // Apply ground fade
+                                    shortLineColor *= shortLineAlpha;
                                     
                                     // Apply line width with depth
                                     int shortLineWidth = Math.Max(1, (int)(2 * rainDepthProps.SizeMultiplier));
@@ -1028,7 +1015,7 @@ namespace ClassicUO.Game
                                     Color boltColor = Color.Lerp(Color.Gray, rainDepthProps.ColorTint, 0.25f);
                                     // Boost alpha for dramatic effect
                                     float boltAlpha = Math.Max(0.75f, rainDepthProps.AlphaMultiplier);
-                                    boltColor *= boltAlpha * groundFade; // Apply ground fade
+                                    boltColor *= boltAlpha;
                                     
                                     // Apply line width with depth
                                     int boltLineWidth = Math.Max(1, (int)(3 * rainDepthProps.SizeMultiplier));
