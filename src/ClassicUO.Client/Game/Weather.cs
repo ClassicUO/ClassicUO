@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Effects;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
@@ -45,102 +46,12 @@ namespace ClassicUO.Game
         private const float MIDDLE_GROUND_THRESHOLD = 0.68f;      // 68% down screen (mid particles)
         private const float FOREGROUND_GROUND_THRESHOLD = 0.81f;  // 81% down screen (near particles)
         private const float FADE_DISTANCE = 0.20f;                // Fade over 20% of screen
-        
+
         // Creates overlapping fade zones spread across entire ground:
         // Background:  55-75% (20% fade zone) - appears most distant
         // Middle:      68-88% (20% fade zone) - overlaps with both layers
         // Foreground:  81-100% (19% fade zone) - appears closest, reaches near bottom
-        
-        // ============================================================================
-        // SPLASH EFFECT CONFIGURATION
-        // ============================================================================
-        // These constants control the appearance of water splash effects when rain hits ground
-        
-        // --- Timing Parameters ---
-        private const float SPLASH_DURATION = 3.25f;
-        // Duration of splash animation in seconds (0.25 = 250ms)
-        // - Shorter (0.15-0.2): Quick, subtle splashes
-        // - Medium (0.25-0.35): Balanced, noticeable splashes ✓ RECOMMENDED
-        // - Longer (0.4-0.5): Slow, dramatic splashes
-        
-        private const float SPLASH_RISE_SPEED = -1.0f;
-        // Upward movement speed of splash particles (negative = upward, 0 = no movement)
-        // - Zero (0.0): No vertical movement, splashes stay at ground ✓ RECOMMENDED (prevents thread appearance)
-        // - Small (-0.1 to -0.3): Slight bounce effect
-        // - Medium (-0.5 to -0.8): Noticeable bounce, may create trails
-        // - Large (-1.0+): High bounce, creates "thread" appearance (AVOID)
-        
-        // --- Droplet Count by Depth Layer ---
-        private const int SPLASH_DROPLETS_BACKGROUND = 3;
-        // Number of water droplets in background layer splash (distant, subtle)
-        // Recommended: 2-5 droplets
-        
-        private const int SPLASH_DROPLETS_MIDDLE = 6;
-        // Number of water droplets in middle layer splash (mid-distance, moderate)
-        // Recommended: 4-8 droplets
-        
-        private const int SPLASH_DROPLETS_FOREGROUND = 10;
-        // Number of water droplets in foreground layer splash (close, dramatic)
-        // Recommended: 8-15 droplets
-        
-        // --- Spread Pattern Parameters ---
-        private const float SPLASH_SPREAD_MULTIPLIER = 1.5f;
-        // How far droplets spread from impact point (multiplier of base size)
-        // - Small (0.8-1.2): Tight, compact splash
-        // - Medium (1.5-2.0): Balanced spread ✓ RECOMMENDED
-        // - Large (2.5-3.5): Wide, explosive splash
-        
-        private const float SPLASH_ELLIPSE_X = 1.2f;
-        // Horizontal ellipse factor (1.0 = circle, >1.0 = wider horizontally)
-        // - 1.0: Perfect circle
-        // - 1.2: Slightly wider ✓ RECOMMENDED (natural ground splash)
-        // - 1.5+: Very wide, exaggerated horizontal spread
-        
-        private const float SPLASH_ELLIPSE_Y = 0.2f;
-        // Vertical ellipse factor (<1.0 = flatter)
-        // - 1.0: Perfect circle
-        // - 0.6: Flattened ✓ RECOMMENDED (ground splash)
-        // - 0.3-0.4: Very flat, pancake-like splash
-        
-        // --- Droplet Size Range ---
-        private const int SPLASH_MIN_DROPLET_SIZE = 1;
-        // Minimum size of individual splash droplets in pixels
-        // Recommended: 1-2 pixels
-        
-        private const int SPLASH_MAX_DROPLET_SIZE = 3;
-        // Maximum size of individual splash droplets in pixels
-        // Recommended: 2-4 pixels
-        
-        // --- Alpha/Visibility Parameters ---
-        private const float SPLASH_ALPHA_BACKGROUND = 0.5f;
-        // Alpha multiplier for background splashes (0.0 = invisible, 1.0 = full brightness)
-        // - Low (0.3-0.5): Subtle, distant splashes
-        // - Medium (0.5-0.7): Balanced visibility ✓ RECOMMENDED
-        // - High (0.7-1.0): Bright, prominent splashes
-        
-        private const float SPLASH_ALPHA_MIDDLE = 0.7f;
-        // Alpha multiplier for middle layer splashes
-        // Recommended: 0.6-0.8 (more visible than background)
-        
-        private const float SPLASH_ALPHA_FOREGROUND = 0.9f;
-        // Alpha multiplier for foreground splashes
-        // Recommended: 0.8-1.0 (most visible)
-        
-        private const float SPLASH_ALPHA_VARIATION_MIN = 0.6f;
-        private const float SPLASH_ALPHA_VARIATION_MAX = 1.0f;
-        // Per-droplet random alpha variation range (creates brightness variation within splash)
-        // Each droplet gets random alpha between min and max
-        // - Narrow range (0.8-1.0): Uniform brightness
-        // - Wide range (0.5-1.0): High variation, more organic ✓ RECOMMENDED
-        
-        // --- Animation Parameters ---
-        private const float SPLASH_SIZE_SCALE_MULTIPLIER = 1.5f;
-        // Size animation amplitude (how much splash expands)
-        // Formula: baseSize × (1 + sin(progress × π) × THIS_VALUE)
-        // - Small (0.5-1.0): Subtle size change
-        // - Medium (1.5-2.0): Noticeable expand/contract ✓ RECOMMENDED
-        // - Large (2.5-3.5): Dramatic size animation
-        
+
         // --- Splash Enable/Disable by Density ---
         private const bool SPLASH_ENABLED_SMALL_DOTS = false;
         // Enable splash effects for small dots (density 0-17)
@@ -159,13 +70,8 @@ namespace ClassicUO.Game
         private const bool SPLASH_ENABLED_LONG_BOLTS = true;
         // Enable splash effects for long bolts (density 53-70)
         // - Always recommended to be true for storm conditions
-        
-        private const int MAX_SPLASHES_PER_FRAME = 5;
-        // Rate limit for splash creation (currently not enforced)
-        // Can be used to prevent splash spam in extreme conditions
 
         private readonly WeatherEffect[] _effects = new WeatherEffect[byte.MaxValue];
-        private readonly SplashEffect[] _splashes = new SplashEffect[byte.MaxValue];
         private uint _timer, _windTimer, _lastTick;
         private readonly World _world;
 
@@ -329,8 +235,8 @@ namespace ClassicUO.Game
             {
                 ref WeatherEffect effect = ref _effects[i];
                 
-                // Initialize particles in absolute isometric coordinates (NOT viewport-relative)
-                // These coordinates are independent of viewport offset
+                // Initialize particles randomly around player position (original behavior)
+                // This creates natural scattered appearance at weather start
                 effect.WorldX = playerAbsIsoX + RandomHelper.GetValue(-spreadX, spreadX);
                 effect.WorldY = playerAbsIsoY + RandomHelper.GetValue(-spreadY, spreadY);
                 
@@ -476,42 +382,30 @@ namespace ClassicUO.Game
 
         private void CreateSplash(ref WeatherEffect effect, float worldX, float worldY)
         {
-            // Find an inactive splash slot
-            for (int i = 0; i < _splashes.Length; i++)
+            // Get base water splash configuration
+            SplashConfig config = SplashConfig.WaterSplash();
+
+            // Customize based on depth layer
+            switch (effect.Depth)
             {
-                ref SplashEffect splash = ref _splashes[i];
-                if (!splash.Active)
-                {
-                    splash.Active = true;
-                    splash.LifeTime = 0f;
-                    splash.Depth = effect.Depth;
-                    splash.SeedID = effect.ID + (uint)Time.Ticks; // Unique seed for random pattern
-                    
-                    // Store in absolute world coordinates
-                    splash.WorldX = worldX;
-                    splash.WorldY = worldY;
-                    
-                    // Initial upward velocity
-                    splash.VelocityY = SPLASH_RISE_SPEED;
-                    
-                    // Size based on depth (smaller for background, larger for foreground)
-                    // Increased base sizes to make splashes more visible and less line-like
-                    switch (effect.Depth)
-                    {
-                        case DepthLayer.Background:
-                            splash.Size = 1f + RandomHelper.GetValue(0, 3) * 0.1f; // 1-1.3px
-                            break;
-                        case DepthLayer.Middle:
-                            splash.Size = 1f + RandomHelper.GetValue(0, 5) * 0.1f; // 1-1.5px
-                            break;
-                        case DepthLayer.Foreground:
-                            splash.Size = 1f + RandomHelper.GetValue(0, 10) * 0.1f; // 1-2px
-                            break;
-                    }
-                    
-                    break; // Found a slot, exit
-                }
+                case DepthLayer.Background:
+                    config.DropletCount = 3;
+                    config.BaseSize = 1.15f; // Average of 1-1.3 range
+                    config.AlphaMultiplier = 0.5f;
+                    break;
+                case DepthLayer.Middle:
+                    config.DropletCount = 6;
+                    config.BaseSize = 1.25f; // Average of 1-1.5 range
+                    config.AlphaMultiplier = 0.7f;
+                    break;
+                case DepthLayer.Foreground:
+                    config.DropletCount = 10;
+                    config.BaseSize = 1.5f; // Average of 1-2 range
+                    config.AlphaMultiplier = 0.9f;
+                    break;
             }
+
+            _world.SplashEffect.CreateSplash(worldX, worldY, config);
         }
 
         private void PlayWind()
@@ -675,13 +569,13 @@ namespace ClassicUO.Game
                         continue;
                     }
                     
-                    // Respawn particle in visible range
-                    // Calculate absolute isometric coordinates based on current player position
+                    // Respawn particle at top of viewport
+                    // Calculate viewport top in world coordinates
+                    int viewportTopY = viewportOffsetY - visibleRangeY;
                     int playerAbsIsoX = (tileOffX - tileOffY) * 22;
-                    int playerAbsIsoY = (tileOffX + tileOffY) * 22;
                     
                     effect.WorldX = playerAbsIsoX + RandomHelper.GetValue(-visibleRangeX, visibleRangeX);
-                    effect.WorldY = playerAbsIsoY + RandomHelper.GetValue(-visibleRangeY, visibleRangeY);
+                    effect.WorldY = viewportTopY; // Spawn at exact top of viewport
                     
                     // Recalculate viewport-relative position
                     effect.X = effect.WorldX - viewportOffsetX;
@@ -854,11 +748,12 @@ namespace ClassicUO.Game
                                         }
                                     }
                                     
-                                    // Immediately respawn particle at top with new random threshold
+                                    // Immediately respawn particle at top of viewport with new random threshold
+                                    // Calculate viewport top in world coordinates
+                                    int viewportTopY = viewportOffsetY - visibleRangeY;
                                     int playerAbsIsoX = (tileOffX - tileOffY) * 22;
-                                    int playerAbsIsoY = (tileOffX + tileOffY) * 22;
                                     effect.WorldX = playerAbsIsoX + RandomHelper.GetValue(-visibleRangeX, visibleRangeX);
-                                    effect.WorldY = playerAbsIsoY - visibleRangeY; // Spawn at top
+                                    effect.WorldY = viewportTopY; // Spawn at exact top of viewport
                                     effect.RippleCreated = false; // Reset ripple flag for respawned particle
                                     
                                     // Re-randomize fade threshold for next cycle
@@ -1103,156 +998,14 @@ namespace ClassicUO.Game
                 }
             }
 
-            // Render splash effects (rain hitting ground)
+            // Update and render splash effects (rain hitting ground)
             float deltaTime = passed / 1000f; // Convert milliseconds to seconds
-            float splashSpeedOffset = passed / SIMULATION_TIME; // Same calculation as particle physics
-            
-            for (int i = 0; i < _splashes.Length; i++)
-            {
-                ref SplashEffect splash = ref _splashes[i];
-                if (!splash.Active) continue;
-                
-                // Update splash lifetime
-                splash.LifeTime += deltaTime / SPLASH_DURATION;
-                
-                // Deactivate if splash animation complete
-                if (splash.LifeTime >= 1.0f)
-                {
-                    splash.Active = false;
-                    continue;
-                }
-                
-                // Apply upward movement physics in absolute world space
-                // When SPLASH_RISE_SPEED = 0.0, VelocityY = 0.0, so no movement occurs
-                if (splash.VelocityY != 0.0f)
-                {
-                    splash.WorldY += splash.VelocityY * splashSpeedOffset;
-                }
-                
-                // Convert to viewport-relative coordinates for rendering
-                splash.X = splash.WorldX - viewportOffsetX;
-                splash.Y = splash.WorldY - viewportOffsetY;
-                
-                // Check visibility
-                if (splash.X < -visibleRangeX || splash.X > visibleRangeX * 2 ||
-                    splash.Y < -visibleRangeY || splash.Y > visibleRangeY * 2)
-                {
-                    splash.Active = false;
-                    continue;
-                }
-                
-                // Animated splash properties
-                float progress = splash.LifeTime;
-                
-                // Size animation: grows then shrinks (parabolic curve using sine)
-                float sizeScale = 1f + (float)Math.Sin(progress * Math.PI) * SPLASH_SIZE_SCALE_MULTIPLIER;
-                float currentSize = splash.Size * sizeScale;
-                
-                // Ensure minimum size to prevent invisible droplets
-                currentSize = Math.Max(2f, currentSize);
-                
-                // Alpha fades out linearly over animation duration
-                float alpha = 1f - progress;
-                
-                // Apply depth-based alpha adjustment using configured constants
-                switch (splash.Depth)
-                {
-                    case DepthLayer.Background:
-                        alpha *= SPLASH_ALPHA_BACKGROUND;
-                        break;
-                    case DepthLayer.Middle:
-                        alpha *= SPLASH_ALPHA_MIDDLE;
-                        break;
-                    case DepthLayer.Foreground:
-                        alpha *= SPLASH_ALPHA_FOREGROUND;
-                        break;
-                }
-                
-                // Draw natural water splash as scattered droplets
-                // Real water splashes have many irregular particles spreading outward
-                int splashX = (int)splash.X;
-                int splashY = (int)splash.Y;
-                
-                // Base splash color: light blue-white for rain impact
-                Color baseSplashColor = Color.Lerp(Color.LightBlue, Color.White, 0.7f);
-                baseSplashColor *= alpha;
-                
-                // Determine number of droplets based on depth layer using configured constants
-                int numDroplets;
-                switch (splash.Depth)
-                {
-                    case DepthLayer.Background:
-                        numDroplets = SPLASH_DROPLETS_BACKGROUND;
-                        break;
-                    case DepthLayer.Middle:
-                        numDroplets = SPLASH_DROPLETS_MIDDLE;
-                        break;
-                    case DepthLayer.Foreground:
-                        numDroplets = SPLASH_DROPLETS_FOREGROUND;
-                        break;
-                    default:
-                        numDroplets = SPLASH_DROPLETS_MIDDLE;
-                        break;
-                }
-                
-                // Draw scattered splash droplets with realistic physics
-                // SPREADING ANIMATION: Droplets start at impact point, spread outward (bounce effect)
-                // UPPER HEMISPHERE ONLY: Water splashes upward, not downward
-                for (int p = 0; p < numDroplets; p++)
-                {
-                    // Generate truly random pattern using hash function (prevents sequential angles)
-                    uint particleSeed = (splash.SeedID * 73856093u) ^ ((uint)p * 19349663u);
-                    
-                    // Random angle for each droplet - UPPER HEMISPHERE ONLY (0-180 degrees)
-                    // Water splashing on ground only sprays upward, not downward
-                    // 0° = right, 90° = up, 180° = left (all above ground)
-                    float randomAngle = (float)(particleSeed % 180);  // 0-180 degrees (upper half)
-                    float angle = randomAngle * 0.017453f; // Convert to radians
-                    
-                    // Random spread distance per droplet (0.5-1.0 variation)
-                    float randomSpread = ((particleSeed % 100) / 100f) * 0.5f + 0.5f;
-                    
-                    // Calculate FINAL position (where droplet will end up)
-                    float finalSpreadRadius = splash.Size * randomSpread * SPLASH_SPREAD_MULTIPLIER;
-                    
-                    // ANIMATED SPREADING: Droplet position interpolates from center to final position
-                    // progress = 0.0: droplet at impact point (center)
-                    // progress = 0.5: droplet halfway to final position
-                    // progress = 1.0: droplet at final position
-                    // This creates realistic "bouncing outward" effect
-                    float currentSpreadRadius = finalSpreadRadius * progress;
-                    
-                    // Elliptical spread pattern using configured factors (wider than tall)
-                    int offsetX = (int)(Math.Cos(angle) * currentSpreadRadius * SPLASH_ELLIPSE_X);
-                    // Negate Y to make upward motion (sin(0-180°) is positive, screen Y increases downward)
-                    int offsetY = -(int)(Math.Sin(angle) * currentSpreadRadius * SPLASH_ELLIPSE_Y);
-                    // Now: 0° = right horizontal, 90° = straight up, 180° = left horizontal
-                    
-                    // Random droplet size using configured min/max range
-                    int dropletSizeRange = SPLASH_MAX_DROPLET_SIZE - SPLASH_MIN_DROPLET_SIZE + 1;
-                    int dropletSize = SPLASH_MIN_DROPLET_SIZE + (int)(particleSeed % (uint)dropletSizeRange);
-                    
-                    // Position droplet - animates from center outward as progress increases
-                    Rectangle dropletRect = new Rectangle(
-                        splashX + offsetX - dropletSize / 2,
-                        splashY + offsetY - dropletSize / 2,
-                        dropletSize,
-                        dropletSize
-                    );
-                    
-                    // Random alpha variation per droplet using configured range
-                    float alphaRange = SPLASH_ALPHA_VARIATION_MAX - SPLASH_ALPHA_VARIATION_MIN;
-                    float alphaVariation = SPLASH_ALPHA_VARIATION_MIN + ((particleSeed % 100) / 100f) * alphaRange;
-                    Color dropletColor = baseSplashColor * alphaVariation;
-                    
-                    batcher.Draw(
-                        SolidColorTextureCache.GetTexture(dropletColor),
-                        dropletRect,
-                        Vector3.UnitZ,
-                        layerDepth
-                    );
-                }
-            }
+            _world.SplashEffect.Update(deltaTime, viewportOffsetX, viewportOffsetY, visibleRangeX, visibleRangeY);
+            _world.SplashEffect.Draw(batcher, layerDepth);
+
+            // Update and render ripple effects (rain hitting water tiles)
+            _world.RippleEffect.Update(deltaTime, viewportOffsetX, viewportOffsetY, visibleRangeX, visibleRangeY);
+            _world.RippleEffect.Draw(batcher, layerDepth);
 
             _lastTick = Time.Ticks;
         }
@@ -1266,18 +1019,7 @@ namespace ClassicUO.Game
             public float FadeThreshold;  // Per-particle random fade position (0.0-1.0)
             public bool NeverFade;       // Flag for foreground particles that don't fade
             public bool RippleCreated;   // Flag to track if ripple was already created for this particle
-        }
-
-        private struct SplashEffect
-        {
-            public float WorldX, WorldY;        // Splash location in absolute world coordinates
-            public float X, Y;                  // Viewport-relative position (cached for rendering)
-            public float LifeTime;              // How long splash has existed (0.0 = just created, 1.0 = finished)
-            public float VelocityY;             // Upward movement velocity
-            public float Size;                  // Splash particle size
-            public DepthLayer Depth;            // Depth layer (affects splash size/alpha)
-            public bool Active;                 // Is this splash currently active
-            public uint SeedID;                 // Random seed for consistent splash pattern
+            public bool SplashCreated;   // Flag to track if splash was already created
         }
     }
 }

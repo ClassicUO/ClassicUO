@@ -6,7 +6,7 @@ using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using System;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Effects
 {
     /// <summary>
     /// Ripple effect system for water tiles.
@@ -61,40 +61,18 @@ namespace ClassicUO.Game
             }
         }
 
-        public void Draw(UltimaBatcher2D batcher, int x, int y, float layerDepth)
+        /// <summary>
+        /// Updates all active ripple particles.
+        /// </summary>
+        /// <param name="deltaTime">Time since last update in seconds</param>
+        /// <param name="viewportOffsetX">Viewport offset X</param>
+        /// <param name="viewportOffsetY">Viewport offset Y</param>
+        /// <param name="visibleRangeX">Visible range X for culling</param>
+        /// <param name="visibleRangeY">Visible range Y for culling</param>
+        public void Update(float deltaTime, int viewportOffsetX, int viewportOffsetY,
+                          int visibleRangeX, int visibleRangeY)
         {
-            if (_world.Player == null) return;
-
-            // Calculate viewport offset (same as weather system)
-            Point winsize = new Point(
-                Client.Game.Scene.Camera.Bounds.Width,
-                Client.Game.Scene.Camera.Bounds.Height
-            );
-
-            int tileOffX = _world.Player.X;
-            int tileOffY = _world.Player.Y;
-            int winGameCenterX = (winsize.X >> 1) + (_world.Player.Z << 2);
-            int winGameCenterY = (winsize.Y >> 1) + (_world.Player.Z << 2);
-            winGameCenterX -= (int)_world.Player.Offset.X;
-            winGameCenterY -= (int)(_world.Player.Offset.Y - _world.Player.Offset.Z);
-
-            int viewportOffsetX = (tileOffX - tileOffY) * 22 - winGameCenterX;
-            int viewportOffsetY = (tileOffX + tileOffY) * 22 - winGameCenterY;
-
-            // Calculate time delta
-            uint currentTick = Time.Ticks;
-            uint deltaTicks = currentTick - _lastTick;
-            _lastTick = currentTick;
-
-            // Cap delta to prevent large jumps (e.g., when game resumes)
-            if (deltaTicks > 7000)
-            {
-                deltaTicks = 25; // Approximate one frame at 60 FPS
-            }
-
-            float deltaTime = deltaTicks / 1000f; // Convert to seconds
-
-            // Update and render each active ripple
+            // Update and cull each active ripple
             for (int i = 0; i < _ripples.Length; i++)
             {
                 ref Ripple ripple = ref _ripples[i];
@@ -115,14 +93,27 @@ namespace ClassicUO.Game
                 ripple.Y = ripple.WorldY - viewportOffsetY;
 
                 // Check visibility (off-screen ripples can be skipped for performance)
-                int visibleRangeX = winsize.X * 2;
-                int visibleRangeY = winsize.Y * 2;
                 if (ripple.X < -visibleRangeX || ripple.X > visibleRangeX ||
                     ripple.Y < -visibleRangeY || ripple.Y > visibleRangeY)
                 {
                     ripple.Active = false; // Deactivate off-screen ripples
                     continue;
                 }
+            }
+        }
+
+        /// <summary>
+        /// Renders all active ripple particles.
+        /// </summary>
+        /// <param name="batcher">Renderer to draw with</param>
+        /// <param name="layerDepth">Layer depth for rendering</param>
+        public void Draw(UltimaBatcher2D batcher, float layerDepth)
+        {
+            // Render each active ripple
+            for (int i = 0; i < _ripples.Length; i++)
+            {
+                ref Ripple ripple = ref _ripples[i];
+                if (!ripple.Active) continue;
 
                 // Calculate ripple properties
                 float progress = ripple.LifeTime;
