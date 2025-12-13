@@ -1074,16 +1074,16 @@ namespace ClassicUO.Game
                         switch (snowStyle)
                         {
                             case SnowRenderStyle.LightFlakes:
-                                densitySizeMultiplier = 1.0f;
+                                densitySizeMultiplier = 1.5f;
                                 break;
                             case SnowRenderStyle.MediumFlakes:
-                                densitySizeMultiplier = 1.3f;
+                                densitySizeMultiplier = 1.8f;
                                 break;
                             case SnowRenderStyle.HeavyFlakes:
-                                densitySizeMultiplier = 1.6f;
+                                densitySizeMultiplier = 2.1f;
                                 break;
                             case SnowRenderStyle.Blizzard:
-                                densitySizeMultiplier = 2.0f;
+                                densitySizeMultiplier = 2.8f;
                                 break;
                         }
 
@@ -1091,22 +1091,98 @@ namespace ClassicUO.Game
                         int snowSize = (int)(2 * snowDepthProps.SizeMultiplier * densitySizeMultiplier);
                         snowSize = Math.Max(1, snowSize);
 
-                        snowRect.X = snowX;
-                        snowRect.Y = snowY;
-                        snowRect.Width = snowSize;
-                        snowRect.Height = snowSize;
-
                         // Depth-based color and alpha with better visibility
                         // Boost alpha for snow visibility (minimum 70% even for background)
                         float snowBoostedAlpha = Math.Max(0.7f, snowDepthProps.AlphaMultiplier);
-                        Color snowColor = snowDepthProps.ColorTint * snowBoostedAlpha;
+
+                        // Draw snow particle with semi-transparent edges using layered gradient
+                        // This creates a soft, circular-like fade from center to edge
+                        // Outer layer (largest, most transparent - edge)
+                        if (snowSize >= 2)
+                        {
+                            int outerSize = snowSize;
+                            float outerAlpha = snowBoostedAlpha * 0.25f; // 25% of base alpha for outer edge
+                            Color outerColor = snowDepthProps.ColorTint * outerAlpha;
+
+                            Rectangle outerRect = new Rectangle(
+                                snowX - outerSize / 2,
+                                snowY - outerSize / 2,
+                                outerSize,
+                                outerSize
+                            );
+
+                            batcher.Draw
+                            (
+                                SolidColorTextureCache.GetTexture(outerColor),
+                                outerRect,
+                                Vector3.UnitZ,
+                                layerDepth
+                            );
+                        }
+
+                        // Middle-outer layer (75% size, 45% alpha)
+                        if (snowSize >= 2)
+                        {
+                            int midOuterSize = Math.Max(1, (int)(snowSize * 0.75f));
+                            float midOuterAlpha = snowBoostedAlpha * 0.45f;
+                            Color midOuterColor = snowDepthProps.ColorTint * midOuterAlpha;
+
+                            Rectangle midOuterRect = new Rectangle(
+                                snowX - midOuterSize / 2,
+                                snowY - midOuterSize / 2,
+                                midOuterSize,
+                                midOuterSize
+                            );
+
+                            batcher.Draw
+                            (
+                                SolidColorTextureCache.GetTexture(midOuterColor),
+                                midOuterRect,
+                                Vector3.UnitZ,
+                                layerDepth + 0.0001f
+                            );
+                        }
+
+                        // Middle layer (50% size, 70% alpha)
+                        if (snowSize >= 2)
+                        {
+                            int middleSize = Math.Max(1, (int)(snowSize * 0.5f));
+                            float middleAlpha = snowBoostedAlpha * 0.70f;
+                            Color middleColor = snowDepthProps.ColorTint * middleAlpha;
+
+                            Rectangle middleRect = new Rectangle(
+                                snowX - middleSize / 2,
+                                snowY - middleSize / 2,
+                                middleSize,
+                                middleSize
+                            );
+
+                            batcher.Draw
+                            (
+                                SolidColorTextureCache.GetTexture(middleColor),
+                                middleRect,
+                                Vector3.UnitZ,
+                                layerDepth + 0.0002f
+                            );
+                        }
+
+                        // Inner core (smallest, fully opaque)
+                        int coreSize = Math.Max(1, (int)(snowSize * 0.35f));
+                        Color coreColor = snowDepthProps.ColorTint * snowBoostedAlpha;
+
+                        Rectangle coreRect = new Rectangle(
+                            snowX - coreSize / 2,
+                            snowY - coreSize / 2,
+                            coreSize,
+                            coreSize
+                        );
 
                         batcher.Draw
                         (
-                            SolidColorTextureCache.GetTexture(snowColor),
-                            snowRect,
+                            SolidColorTextureCache.GetTexture(coreColor),
+                            coreRect,
                             Vector3.UnitZ,
-                            layerDepth
+                            layerDepth + 0.0003f
                         );
 
                         break;
