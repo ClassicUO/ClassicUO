@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Effects;
@@ -303,6 +303,14 @@ namespace ClassicUO.Game
             LongBolts       // 53-70
         }
 
+        private enum SnowRenderStyle
+        {
+            LightFlakes,    // 0-17
+            MediumFlakes,   // 18-35
+            HeavyFlakes,    // 36-52
+            Blizzard        // 53-70
+        }
+
         private enum DepthLayer
         {
             Background = 0,  // Far (depth 0.0-0.33)
@@ -320,6 +328,18 @@ namespace ClassicUO.Game
                 return RainRenderStyle.ShortLines;
             else
                 return RainRenderStyle.LongBolts;
+        }
+
+        private SnowRenderStyle GetSnowRenderStyle()
+        {
+            if (Count <= DENSITY_SMALL_DOTS)
+                return SnowRenderStyle.LightFlakes;
+            else if (Count <= DENSITY_LARGE_DOTS)
+                return SnowRenderStyle.MediumFlakes;
+            else if (Count <= DENSITY_SHORT_LINES)
+                return SnowRenderStyle.HeavyFlakes;
+            else
+                return SnowRenderStyle.Blizzard;
         }
 
         private struct DepthProperties
@@ -630,20 +650,49 @@ namespace ClassicUO.Game
                         break;
 
                     case WeatherType.WT_SNOW:
+
+                        DepthProperties snowProps = GetDepthProperties(effect.Depth, Type);
+                        SnowRenderStyle snowStyle = GetSnowRenderStyle();
+
+                        float snowBaseSpeedY = BASE_SNOW_SPEED_Y;
+                        float snowDensitySpeedMultiplier = 1.0f;
+
+                        // Higher density = faster speeds
+                        switch (snowStyle)
+                        {
+                            case SnowRenderStyle.LightFlakes:
+                                snowDensitySpeedMultiplier = 1.0f;
+                                break;
+                            case SnowRenderStyle.MediumFlakes:
+                                snowDensitySpeedMultiplier = 1.2f;
+                                break;
+                            case SnowRenderStyle.HeavyFlakes:
+                                snowDensitySpeedMultiplier = 1.5f;
+                                break;
+                            case SnowRenderStyle.Blizzard:
+                                snowDensitySpeedMultiplier = 2.0f;
+                                break;
+                        }
+
+                        // Vertical fall with wind influence
+                        // Wind strength multiplier - moderate effect for natural drift
+                        float windStrengthMultiplier = 0.8f;
+                        effect.SpeedY = snowBaseSpeedY * snowDensitySpeedMultiplier * snowProps.SpeedMultiplier;
+                        effect.SpeedX = Wind * windStrengthMultiplier * snowProps.SpeedMultiplier;
+
+                        if (windChanged)
+                        {
+                            PlayWind();
+                        }
+
+                        break;
+
                     case WeatherType.WT_STORM_APPROACH:
 
                         DepthProperties snowStormProps = GetDepthProperties(effect.Depth, Type);
 
-                        if (Type == WeatherType.WT_SNOW)
-                        {
-                            effect.SpeedX = Wind;
-                            effect.SpeedY = 1.0f;
-                        }
-                        else
-                        {
-                            effect.SpeedX = Wind;
-                            effect.SpeedY = 6.0f;
-                        }
+                        effect.SpeedX = Wind;
+                        effect.SpeedY = 6.0f;
 
                         if (windChanged)
                         {
@@ -651,14 +700,7 @@ namespace ClassicUO.Game
 
                             effect.SpeedMagnitude = (float) Math.Sqrt(Math.Pow(effect.SpeedX, 2) + Math.Pow(effect.SpeedY, 2));
 
-                            if (Type == WeatherType.WT_SNOW)
-                            {
-                                PlayWind();
-                            }
-                            else
-                            {
-                                PlayThunder();
-                            }
+                            PlayThunder();
                         }
 
                         float speedAngle = effect.SpeedAngle;
@@ -704,16 +746,16 @@ namespace ClassicUO.Game
                         {
                             RainRenderStyle rainStyle = GetRainRenderStyle();
                             DepthProperties rainDepthProps = GetDepthProperties(effect.Depth, Type);
-                            
+
                             // Immediate disposal logic: particles disappear instantly when crossing fade threshold
-                            int viewportHeight = winsize.Y;
-                            
+                            int rainViewportHeight = winsize.Y;
+
                             // Skip disposal check if particle never fades (some foreground particles)
                             if (!effect.NeverFade)
                             {
                                 // Calculate particle's absolute fade position using its random threshold
-                                int particleFadeY = (int)(viewportHeight * effect.FadeThreshold);
-                                
+                                int particleFadeY = (int)(rainViewportHeight * effect.FadeThreshold);
+
                                 // Check if particle just crossed fade threshold (first crossing only)
                                 if (newY >= particleFadeY && oldY < particleFadeY)
                                 {
@@ -962,18 +1004,91 @@ namespace ClassicUO.Game
 
                     case WeatherType.WT_SNOW:
 
+                        SnowRenderStyle snowStyle = GetSnowRenderStyle();
                         DepthProperties snowDepthProps = GetDepthProperties(effect.Depth, Type);
+
+                        // Store old absolute position for fade threshold detection
+                        float oldSnowWorldX = effect.WorldX;
+                        float oldSnowWorldY = effect.WorldY;
 
                         // Apply physics in absolute isometric space
                         effect.WorldX += effect.SpeedX * speedOffset;
                         effect.WorldY += effect.SpeedY * speedOffset;
 
-                        // Convert to viewport-relative coordinates for rendering
+                        // Convert both positions to viewport-relative coordinates for rendering
+                        int oldSnowX = (int)(oldSnowWorldX - viewportOffsetX);
+                        int oldSnowY = (int)(oldSnowWorldY - viewportOffsetY);
                         int snowX = (int)(effect.WorldX - viewportOffsetX);
                         int snowY = (int)(effect.WorldY - viewportOffsetY);
 
-                        // Depth-based size
-                        int snowSize = (int)(2 * snowDepthProps.SizeMultiplier);
+                        // Immediate disposal logic: particles disappear instantly when crossing fade threshold
+                        int snowViewportHeight = winsize.Y;
+
+                        // Skip disposal check if particle never fades (some foreground particles)
+                        if (!effect.NeverFade)
+                        {
+                            // Calculate particle's absolute fade position using its random threshold
+                            int particleFadeY = (int)(snowViewportHeight * effect.FadeThreshold);
+
+                            // Check if particle just crossed fade threshold (first crossing only)
+                            if (snowY >= particleFadeY && oldSnowY < particleFadeY)
+                            {
+                                // Immediately respawn particle at top of viewport with new random fade threshold
+                                // Calculate viewport top in world coordinates
+                                int viewportTopY = viewportOffsetY - visibleRangeY;
+                                int playerAbsIsoX = (tileOffX - tileOffY) * 22;
+                                effect.WorldX = playerAbsIsoX + RandomHelper.GetValue(-visibleRangeX, visibleRangeX);
+                                effect.WorldY = viewportTopY; // Spawn at exact top of viewport
+
+                                // Re-randomize fade threshold for next cycle
+                                switch (effect.Depth)
+                                {
+                                    case DepthLayer.Background:
+                                        effect.FadeThreshold = RandomHelper.GetValue(0, 30) * 0.01f;
+                                        effect.NeverFade = false;
+                                        break;
+                                    case DepthLayer.Middle:
+                                        effect.FadeThreshold = 0.31f + RandomHelper.GetValue(0, 39) * 0.01f;
+                                        effect.NeverFade = false;
+                                        break;
+                                    case DepthLayer.Foreground:
+                                        if (RandomHelper.RandomBool())
+                                        {
+                                            effect.NeverFade = true;
+                                            effect.FadeThreshold = 1.0f;
+                                        }
+                                        else
+                                        {
+                                            effect.NeverFade = false;
+                                            effect.FadeThreshold = 0.71f + RandomHelper.GetValue(0, 29) * 0.01f;
+                                        }
+                                        break;
+                                }
+
+                                continue; // Skip rendering, particle respawning
+                            }
+                        }
+
+                        // Density-based size multiplier
+                        float densitySizeMultiplier = 1.0f;
+                        switch (snowStyle)
+                        {
+                            case SnowRenderStyle.LightFlakes:
+                                densitySizeMultiplier = 1.0f;
+                                break;
+                            case SnowRenderStyle.MediumFlakes:
+                                densitySizeMultiplier = 1.3f;
+                                break;
+                            case SnowRenderStyle.HeavyFlakes:
+                                densitySizeMultiplier = 1.6f;
+                                break;
+                            case SnowRenderStyle.Blizzard:
+                                densitySizeMultiplier = 2.0f;
+                                break;
+                        }
+
+                        // Apply both depth and density multipliers to size
+                        int snowSize = (int)(2 * snowDepthProps.SizeMultiplier * densitySizeMultiplier);
                         snowSize = Math.Max(1, snowSize);
 
                         snowRect.X = snowX;
