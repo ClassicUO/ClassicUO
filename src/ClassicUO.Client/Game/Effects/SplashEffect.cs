@@ -51,17 +51,17 @@ namespace ClassicUO.Game.Effects
         {
             return new SplashConfig
             {
-                Duration = 3.25f,
-                RiseSpeed = -1.0f,
+                Duration = 0.15f,
+                RiseSpeed = -3.0f,
                 DropletCount = 6, // Default to middle layer count
-                SpreadMultiplier = 1.5f,
-                EllipseX = 1.2f,
+                SpreadMultiplier = 1.0f,
+                EllipseX = 3.2f,
                 EllipseY = 0.2f,
-                AngleRangeMin = 0f,
-                AngleRangeMax = 180f, // Upper hemisphere only (water splashes upward)
-                BaseSize = 1.5f,
+                AngleRangeMin = 25f,
+                AngleRangeMax = 125f, // Upper hemisphere only (water splashes upward)
+                BaseSize = 1.0f,
                 MinDropletSize = 1,
-                MaxDropletSize = 3,
+                MaxDropletSize = 2,
                 SizeScaleMultiplier = 1.5f,
                 BaseColor = Color.Lerp(Color.LightBlue, Color.White, 0.7f),
                 AlphaMultiplier = 0.7f,
@@ -223,9 +223,9 @@ namespace ClassicUO.Game.Effects
                     
                     // Initial velocity
                     particle.VelocityY = config.RiseSpeed;
-                    
+
                     // Base size with some variation
-                    float sizeVariation = RandomHelper.GetValue(0, 10) * 0.1f;
+                    float sizeVariation = RandomHelper.GetValue(0, 5) * 0.1f;
                     particle.Size = config.BaseSize + sizeVariation;
                     
                     // Store configuration snapshot

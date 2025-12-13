@@ -20,6 +20,7 @@ namespace ClassicUO.Game.Effects
         private const float RIPPLE_MAX_RADIUS = 20f;
         private const float RIPPLE_ALPHA_MULTIPLIER = 0.7f;
         private const float RIPPLE_RING_SPACING = 0.3f;
+        private const float ISOMETRIC_VERTICAL_SCALE = 0.5f;
 
         private readonly Ripple[] _ripples = new Ripple[MAX_RIPPLES];
         private readonly World _world;
@@ -120,10 +121,9 @@ namespace ClassicUO.Game.Effects
                 float currentRadius = ripple.MaxRadius * progress; // Expand over time
                 float alpha = (1.0f - progress) * RIPPLE_ALPHA_MULTIPLIER; // Fade out
 
-                // Draw expanding ripple circle
                 Color rippleColor = Color.Lerp(Color.LightBlue, Color.Transparent, progress) * alpha;
 
-                DrawCircle(
+                DrawEllipse(
                     batcher,
                     new Vector2(ripple.X, ripple.Y),
                     currentRadius,
@@ -139,7 +139,7 @@ namespace ClassicUO.Game.Effects
                     float ring2Alpha = (1.0f - ring2Progress) * 0.5f;
                     Color ring2Color = Color.LightBlue * ring2Alpha;
 
-                    DrawCircle(
+                    DrawEllipse(
                         batcher,
                         new Vector2(ripple.X, ripple.Y),
                         ring2Radius,
@@ -172,11 +172,6 @@ namespace ClassicUO.Game.Effects
                 return false;
             }
 
-            // Convert absolute isometric coordinates directly to tile coordinates
-            // Forward formula: isoX = (tileX - tileY) * 22, isoY = (tileX + tileY) * 22 - (tileZ * 4)
-            // Reverse formula (ignoring Z for ground tile lookup):
-            //   tileX = (isoX + isoY) / 44
-            //   tileY = (isoY - isoX) / 44
             
             int targetTileX = (int)Math.Round((worldX + worldY) / 44f);
             int targetTileY = (int)Math.Round((worldY - worldX) / 44f);
@@ -192,24 +187,35 @@ namespace ClassicUO.Game.Effects
             return false;
         }
 
-        private void DrawCircle(UltimaBatcher2D batcher, Vector2 center, float radius, Color color, float layerDepth)
+        /// <summary>
+        /// Draws an ellipse that appears as a circle in isometric projection.
+        /// The vertical axis is compressed to match the isometric view.
+        /// </summary>
+        /// <param name="batcher">Renderer to draw with</param>
+        /// <param name="center">Center of the ellipse</param>
+        /// <param name="radius">Horizontal radius (appears as circle radius in isometric view)</param>
+        /// <param name="color">Color of the ellipse</param>
+        /// <param name="layerDepth">Layer depth for rendering</param>
+        private void DrawEllipse(UltimaBatcher2D batcher, Vector2 center, float radius, Color color, float layerDepth)
         {
             if (radius <= 0) return;
 
             const int segments = CIRCLE_SEGMENTS;
             float angleStep = (float)(Math.PI * 2.0 / segments);
 
-            Vector2 prevPoint = center + new Vector2(radius, 0);
+            float radiusX = radius;
+            float radiusY = radius * ISOMETRIC_VERTICAL_SCALE;
+
+            Vector2 prevPoint = center + new Vector2(radiusX, 0);
 
             for (int i = 1; i <= segments; i++)
             {
                 float angle = i * angleStep;
                 Vector2 currentPoint = center + new Vector2(
-                    (float)(Math.Cos(angle) * radius),
-                    (float)(Math.Sin(angle) * radius)
+                    (float)(Math.Cos(angle) * radiusX),
+                    (float)(Math.Sin(angle) * radiusY)
                 );
 
-                // Draw line segment (creates circle outline)
                 batcher.DrawLine(
                     SolidColorTextureCache.GetTexture(color),
                     prevPoint,
