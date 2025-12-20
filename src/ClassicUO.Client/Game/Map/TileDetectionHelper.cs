@@ -41,7 +41,7 @@ namespace ClassicUO.Game.Map
                 ref StaticTiles itemData = ref Client.Game.UO.FileManager.TileData.StaticData[obj.Graphic];
 
                 // Check if tile is above the player and it's not rendering
-                if (obj.Z > pz14 && obj.AlphaHue == 0)
+                if ((sbyte)obj.PriorityZ > pz14 && obj.AlphaHue == 0)
                 {
                     return true;
                 }
@@ -79,9 +79,11 @@ namespace ClassicUO.Game.Map
 
             while (obj != null)
             {
-                if (obj.Z > highestZ)
+                if ((sbyte)obj.PriorityZ > highestZ &&
+                    obj.Graphic < Client.Game.UO.FileManager.TileData.StaticData.Length &&
+                    obj.AlphaHue != 0)
                 {
-                    highestZ = obj.Z;
+                    highestZ = (sbyte)obj.PriorityZ;
                     topMostObject = obj;
                 }
                 obj = obj.TNext;
