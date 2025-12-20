@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using ClassicUO.Game.GameObjects;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using System;
 
@@ -37,11 +35,6 @@ namespace ClassicUO.Game.Effects
             if (_world.Map == null)
             {
                 return;
-            }
-
-            if (!IsWaterTileAtPosition(worldX, worldY))
-            {
-                return; 
             }
 
             // Find inactive ripple slot
@@ -156,35 +149,6 @@ namespace ClassicUO.Game.Effects
             {
                 _ripples[i].Active = false;
             }
-        }
-
-        /// <summary>
-        /// Checks if the given absolute isometric position is on a water tile.
-        /// Converts directly from absolute isometric coordinates to tile coordinates.
-        /// </summary>
-        /// <param name="worldX">Absolute isometric X coordinate.</param>
-        /// <param name="worldY">Absolute isometric Y coordinate.</param>
-        /// <returns>True if the position is on a water tile, false otherwise.</returns>
-        private bool IsWaterTileAtPosition(float worldX, float worldY)
-        {
-            if (_world.Map == null)
-            {
-                return false;
-            }
-
-            
-            int targetTileX = (int)Math.Round((worldX + worldY) / 44f);
-            int targetTileY = (int)Math.Round((worldY - worldX) / 44f);
-
-            // Check if tile is water
-            GameObject tileObj = _world.Map.GetTile(targetTileX, targetTileY, load: false);
-            if (tileObj is Land land)
-            {
-                return land.TileData.IsWet &&
-                       (land.TileData.Name?.ToLower().Contains("water") == true);
-            }
-
-            return false;
         }
 
         /// <summary>

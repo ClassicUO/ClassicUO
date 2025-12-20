@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.Assets;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Effects;
 using ClassicUO.Renderer;
@@ -8,6 +9,8 @@ using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using System;
 using MathHelper = Microsoft.Xna.Framework.MathHelper;
+using ClassicUO.Game.Map;
+using ClassicUO.Game.GameObjects;
 
 namespace ClassicUO.Game
 {
@@ -780,16 +783,23 @@ namespace ClassicUO.Game
                                     // Create splash at current position (if enabled)
                                     if (splashEnabled)
                                     {
-                                        CreateSplash(ref effect, effect.WorldX, effect.WorldY);
-                                        
+                                        if (!HasOpaqueCoveringTileAtPosition(effect.WorldX, effect.WorldY))
+                                        {
+                                            CreateSplash(ref effect, effect.WorldX, effect.WorldY);
+                                        }
+
                                         // Trigger ripple effect if rain hits water tile (only once per particle)
                                         if (!effect.RippleCreated)
                                         {
-                                            _world.RippleEffect.CreateRipple(effect.WorldX, effect.WorldY);
-                                            effect.RippleCreated = true;
+                                            var isWaterTile = IsWaterTileAtPosition(effect.WorldX, effect.WorldY);
+                                            if (isWaterTile)
+                                            {
+                                                _world.RippleEffect.CreateRipple(effect.WorldX, effect.WorldY);
+                                                effect.RippleCreated = true;
+                                            }
                                         }
                                     }
-                                    
+
                                     // Immediately respawn particle at top of viewport with new random threshold
                                     // Calculate viewport top in world coordinates
                                     int viewportTopY = viewportOffsetY - visibleRangeY;
@@ -1201,6 +1211,102 @@ namespace ClassicUO.Game
             _lastTick = Time.Ticks;
         }
 
+        /// <summary>
+        /// Checks if the given absolute isometric position is on a water tile.
+        /// Converts directly from absolute isometric coordinates to tile coordinates.
+        /// </summary>
+        /// <param name="worldX">Absolute isometric X coordinate.</param>
+        /// <param name="worldY">Absolute isometric Y coordinate.</param>
+        /// <returns>True if the position is on a water tile, false otherwise.</returns>
+        /// <remarks>
+        /// Thanks to [markdwags](https://github.com/markdwags) for the code 
+        /// in [this comment](https://github.com/ClassicUO/ClassicUO/pull/1852#issuecomment-3656749076).
+        /// </remarks>
+        private bool IsWaterTileAtPosition(float worldX, float worldY)
+        {
+            int targetTileX = (int)Math.Round((worldX + worldY) / 44f);
+            int targetTileY = (int)Math.Round((worldY - worldX) / 44f);
+
+            Chunk chunk = _world.Map.GetChunk(targetTileX, targetTileY, load: false);
+
+            if (chunk == null) return false;
+
+            // Get the first object in the tile's linked list
+            GameObject obj = chunk.Tiles[targetTileX % 8, targetTileY % 8];
+            // Find the highest Z-level object (the one that's actually visible)
+            GameObject topMostObject = null;
+            sbyte highestZ = sbyte.MinValue;
+
+            while (obj != null)
+            {
+                if (obj.Z > highestZ)
+                {
+                    highestZ = obj.Z;
+                    topMostObject = obj;
+                }
+                obj = obj.TNext;
+            }
+
+            // Now check only the top-most visible object
+            if (topMostObject != null)
+            {
+                switch (topMostObject)
+                {
+                    case Land land:
+                        return land.TileData.IsWet &&
+                            (land.TileData.Name?.ToLower().Contains("water") == true);
+                    case Static staticTile:
+                        return staticTile.ItemData.IsWet &&
+                            (staticTile.ItemData.Name?.ToLower().Contains("water") == true);
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Checks if the given absolute isometric position has a covering tile above the player.
+        /// A covering tile is a roof or other structure that blocks weather effects, even if it's not currently rendering
+        /// (e.g., hidden roof when player is inside a house).
+        /// Converts directly from absolute isometric coordinates to tile coordinates.
+        /// </summary>
+        /// <param name="worldX">Absolute isometric X coordinate.</param>
+        /// <param name="worldY">Absolute isometric Y coordinate.</param>
+        /// <returns>True if the position has a covering tile above the player, false otherwise.</returns>
+        private bool HasOpaqueCoveringTileAtPosition(float worldX, float worldY)
+        {
+            int targetTileX = (int)Math.Round((worldX + worldY) / 44f);
+            int targetTileY = (int)Math.Round((worldY - worldX) / 44f);
+
+            Chunk chunk = _world.Map.GetChunk(targetTileX, targetTileY, load: false);
+
+            if (chunk == null) return false;
+
+            int playerZ = _world.Player?.Z ?? 0;
+            int pz14 = playerZ + 14; // Threshold for detecting tiles above player
+
+            GameObject obj = chunk.GetHeadObject(targetTileX % 8, targetTileY % 8);
+
+            while (obj != null)
+            {
+                if (obj.Graphic >= Client.Game.UO.FileManager.TileData.StaticData.Length)
+                {
+                    obj = obj.TNext;
+                    continue;
+                }
+
+                ref StaticTiles itemData = ref Client.Game.UO.FileManager.TileData.StaticData[obj.Graphic];
+
+                if (obj.Z > pz14)
+                {
+                    return true;
+                }
+
+                obj = obj.TNext;
+            }
+
+            return false;
+        }
 
         private struct WeatherEffect
         {
