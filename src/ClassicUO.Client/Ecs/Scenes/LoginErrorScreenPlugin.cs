@@ -2,6 +2,9 @@ using ClassicUO.Network;
 using Clay_cs;
 using TinyEcs;
 using TinyEcs.Bevy;
+using TinyEcs.UI.Clay;
+using TinyEcs.UI.Bevy;
+using TinyEcs.UI;
 
 namespace ClassicUO.Ecs;
 
@@ -11,7 +14,6 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
     {
         var cleanupFn = Cleanup;
         var loginErrorSetupFn = LoginErrorInfoSetup;
-        var buttonHandlerFn = ButtonHandler;
 
         app
             .AddSystem(cleanupFn)
@@ -22,15 +24,10 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
             .InStage(Stage.Update)
             .RunIf((Res<State<GameState>> state, EventReader<LoginErrorsInfoEvent> reader)
                        => reader.HasEvents && state.Value.Current == GameState.LoginError)
-            .Build()
-
-            .AddSystem(buttonHandlerFn)
-            .InStage(Stage.Update)
-            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.LoginError)
             .Build();
     }
 
-    private static void Cleanup(Commands commands, Query<Data<UINode>, Filter<With<LoginErrorScene>, Without<Parent>>> query)
+    private static void Cleanup(Commands commands, Query<Data<ClayNode>, Filter<With<LoginErrorScene>, Without<Parent>>> query)
     {
         foreach ((var ent, _) in query)
         {
@@ -42,193 +39,83 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
     {
         var root = commands.Spawn()
             .Insert<LoginErrorScene>()
-            .InsertBundle(new UINodeBundle()
-            {
-                Node = new UINode()
-                {
-                    Config = {
-                    backgroundColor = new (0.2f, 0.2f, 0.2f, 1),
-                    layout = {
-                        sizing = {
-                            width = Clay_SizingAxis.Grow(),
-                            height = Clay_SizingAxis.Grow(),
-                        },
-                        layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
-                        childAlignment = {
-                            x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER,
-                            y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER,
-                        }
-                        }
-                    }
-                }
-            });
+            .Insert(ClayNode.Configure()
+                .WidthGrow()
+                .HeightGrow()
+                .Column()
+                .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER)
+                .Background(51, 51, 51, 255)
+                .Build());
 
         var loginErrorLabel = commands.Spawn()
-    .Insert<LoginErrorScene>()
-    .InsertBundle(new UINodeBundle()
-    {
-        Node = new UINode()
-        {
-            Config = {
-                backgroundColor = new (0.3f, 0.3f, 0.3f, 1),
-                layout = {
-                    sizing = {
-                        width = Clay_SizingAxis.Percent(0.5f),
-                        height = Clay_SizingAxis.Fit(0, 0),
-                    },
-                    layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
-                    childAlignment = {
-                        x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_LEFT,
-                        y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_TOP,
-                    },
-                    padding = Clay_Padding.All(8),
-                    childGap = 4
-                }
-            }
-        }
-    })
-    .Insert(new Text()
-    {
-        Value = "Error on login",
-        TextConfig =
-        {
-            fontId = 0,
-            fontSize = 28,
-            // textAlignment = Clay_TextAlignment.CLAY_TEXT_ALIGN_CENTER,
-            textColor = new (1f, 1f, 1f, 1),
-        }
-    });
+            .Insert<LoginErrorScene>()
+            .Insert(ClayNode.Configure()
+                .WidthPercent(0.5f)
+                .HeightFit()
+                .Column()
+                .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_LEFT, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_TOP)
+                .Padding(8)
+                .Gap(4)
+                .Background(76, 76, 76, 255)
+                .Text("Error on login", 28, new Clay_Color(255, 255, 255, 255))
+                .Build());
 
         var menu = commands.Spawn()
-        .Insert<LoginErrorScene>()
-        .InsertBundle(new UINodeBundle()
-        {
-            Node = new UINode()
-            {
-                Config = {
-                    backgroundColor = new (0.3f, 0.3f, 0.3f, 1),
-                    layout = {
-                        sizing = {
-                            width = Clay_SizingAxis.Percent(0.5f),
-                            height = Clay_SizingAxis.Percent(0.5f),
-                        },
-                        layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
-                        childAlignment = {
-                            x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER,
-                            y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_TOP,
-                        },
-                        padding = Clay_Padding.All(8),
-                        childGap = 4
-                    }
-                }
-            }
-        });
+            .Insert<LoginErrorScene>()
+            .Insert(ClayNode.Configure()
+                .WidthPercent(0.5f)
+                .HeightPercent(0.5f)
+                .Column()
+                .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_TOP)
+                .Padding(8)
+                .Gap(4)
+                .Background(76, 76, 76, 255)
+                .Build());
 
         foreach (var ev in reader.Read())
         {
             var serverEnt = commands.Spawn()
                 .Insert<LoginErrorScene>()
                 .Insert(ev.Error)
-                .InsertBundle(new UINodeBundle()
-                {
-                    Node = new UINode()
-                    {
-                        Config = {
-                        backgroundColor = new (0.6f, 0.6f, 0.6f, 1),
-                        layout = {
-                            sizing = {
-                                width = Clay_SizingAxis.Percent(0.8f),
-                                height = Clay_SizingAxis.Fit(0, 0),
-                            },
-                            layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
-                            childAlignment = {
-                                x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER,
-                                y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER,
-                            },
-                            padding = Clay_Padding.All(8),
-                            childGap = 4
-                            }
-                        }
-                    }
-                })
-                .Insert(new Text()
-                {
-                    Value = ev.Error.ErrorMessage,
-                    TextConfig =
-                    {
-                        fontId = 0,
-                        fontSize = 24,
-                        // textAlignment = Clay_TextAlignment.CLAY_TEXT_ALIGN_CENTER,
-                        textColor = new (1f, 1f, 1f, 1),
-                    }
-                })
-                .Insert(new UIMouseAction());
+                .Insert(ClayNode.Configure()
+                    .WidthPercent(0.8f)
+                    .HeightFit()
+                    .Column()
+                    .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER)
+                    .Padding(8)
+                    .Gap(4)
+                    .Background(153, 153, 153, 255)
+                    .Text(ev.Error.ErrorMessage, 24, new Clay_Color(255, 255, 255, 255))
+                    .Build());
 
             menu.AddChild(serverEnt);
         }
 
         var footerMenu = commands.Spawn()
             .Insert<LoginErrorScene>()
-            .InsertBundle(new UINodeBundle()
-            {
-                Node = new UINode()
-                {
-                    Config = {
-                    backgroundColor = new (0, 0, 0, 0),
-                    layout = {
-                        sizing = {
-                            width = Clay_SizingAxis.Grow(),
-                            height = Clay_SizingAxis.Grow(),
-                        },
-                        layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
-                        childAlignment = {
-                            x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER,
-                            y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_BOTTOM,
-                        },
-                        padding = Clay_Padding.All(8),
-                        childGap = 4
-                    }
-                    }
-                }
-            });
+            .Insert(ClayNode.Configure()
+                .WidthGrow()
+                .HeightGrow()
+                .Column()
+                .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_BOTTOM)
+                .Padding(8)
+                .Gap(4)
+                .Build());
 
         var okButtonEntity = commands.Spawn()
-    .Insert<LoginErrorScene>()
-    .InsertBundle(new UINodeBundle()
-    {
-        Node = new UINode()
-        {
-            Config = {
-                backgroundColor = new (0.6f, 0.6f, 0.6f, 1),
-                layout = {
-                    sizing = {
-                        width = Clay_SizingAxis.Percent(0.4f),
-                        height = Clay_SizingAxis.Fit(0, 0),
-                    },
-                    layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
-                    childAlignment = {
-                        x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER,
-                        y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER,
-                    },
-                    padding = Clay_Padding.All(8),
-                    childGap = 4
-                }
-            }
-        }
-    })
-    .Insert(new Text()
-    {
-        Value = "OK",
-        TextConfig =
-        {
-                    fontId = 0,
-                    fontSize = 24,
-                    // textAlignment = Clay_TextAlignment.CLAY_TEXT_ALIGN_CENTER,
-                    textColor = new (1f, 1f, 1f, 1),
-        }
-    })
-    .Insert(LoginButtons.Ok)
-    .Insert(new UIMouseAction());
+            .Insert<LoginErrorScene>()
+            .Insert(ClayNode.Configure()
+                .WidthPercent(0.4f)
+                .HeightFit()
+                .Column()
+                .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER)
+                .Padding(8)
+                .Gap(4)
+                .Background(153, 153, 153, 255)
+                .Text("OK", 24, new Clay_Color(255, 255, 255, 255))
+                .Build())
+            .Insert(LoginButtons.Ok)
+            .Observe<On<ClayPointerEvent>, Res<NetClient>, Res<NextState<GameState>>>(OkButtonHandler);
 
         footerMenu.AddChild(okButtonEntity);
         menu.AddChild(footerMenu);
@@ -236,26 +123,17 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
         root.AddChild(menu);
     }
 
-    private static void ButtonHandler(
+    private static void OkButtonHandler(
+        On<ClayPointerEvent> trigger,
         Res<NetClient> network,
-        Res<NextState<GameState>> state,
-        Query<
-            Data<LoginButtons, UIMouseAction>,
-            Filter<Changed<UIMouseAction>, With<LoginErrorScene>>
-        > query
+        Res<NextState<GameState>> state
     )
     {
-        foreach ((var buttonType, var interaction) in query)
-        {
-            if (!interaction.Ref.IsPressed)
-                continue;
+        if (!trigger.Event.IsLeftButton || trigger.Event.EventType != ClayPointerEventType.Click)
+            return;
 
-            if (buttonType.Ref == LoginButtons.Ok)
-            {
-                state.Value.Set(GameState.LoginScreen);
-                network.Value.Disconnect();
-            }
-        }
+        state.Value.Set(GameState.LoginScreen);
+        network.Value.Disconnect();
     }
 
     private struct LoginErrorScene;

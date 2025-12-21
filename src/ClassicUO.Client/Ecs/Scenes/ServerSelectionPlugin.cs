@@ -4,6 +4,9 @@ using ClassicUO.Input;
 using Clay_cs;
 using TinyEcs;
 using TinyEcs.Bevy;
+using TinyEcs.UI.Clay;
+using TinyEcs.UI.Bevy;
+using TinyEcs.UI;
 
 namespace ClassicUO.Ecs;
 
@@ -13,7 +16,7 @@ internal readonly struct ServerSelectionPlugin : IPlugin
     {
         var cleanupFn = Cleanup;
         var serverInfoSetupFn = ServerInfoSetup;
-        var serverSelectedFn = ServerSelected;
+        // var serverSelectedFn = ServerSelected;
 
         app
             .AddSystem(cleanupFn)
@@ -24,16 +27,17 @@ internal readonly struct ServerSelectionPlugin : IPlugin
             .InStage(Stage.Update)
             .RunIf((Res<State<GameState>> state, EventReader<ServerSelectionInfoEvent> reader)
                        => reader.HasEvents && state.Value.Current == GameState.ServerSelection)
-            .Build()
-
-            .AddSystem(serverSelectedFn)
-            .InStage(Stage.Update)
-            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.ServerSelection)
             .Build();
+
+        // TODO: Re-enable server selection handling with Clay's event system
+        // .AddSystem(serverSelectedFn)
+        // .InStage(Stage.Update)
+        // .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.ServerSelection)
+        // .Build();
     }
 
 
-    private static void Cleanup(Commands commands, Query<Data<UINode>, Filter<With<ServerSelectionScene>, Without<Parent>>> query)
+    private static void Cleanup(Commands commands, Query<Data<ClayNode>, Filter<With<ServerSelectionScene>, Without<Parent>>> query)
     {
         foreach ((var ent, _) in query)
         {
@@ -43,96 +47,47 @@ internal readonly struct ServerSelectionPlugin : IPlugin
 
     private static void ServerInfoSetup(Commands commands, EventReader<ServerSelectionInfoEvent> reader)
     {
-        var cornerRadius = Clay_CornerRadius.All(8);
-
         var root = commands.Spawn()
             .Insert<ServerSelectionScene>()
-            .InsertBundle(new UINodeBundle()
-            {
-                Node = new UINode()
-                {
-                    Config = {
-                    backgroundColor = new (0.2f, 0.2f, 0.2f, 1),
-                    layout = {
-                        sizing = {
-                            width = Clay_SizingAxis.Grow(),
-                            height = Clay_SizingAxis.Grow(),
-                        },
-                        layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
-                        childAlignment = {
-                            x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER,
-                            y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER,
-                        }
-                        }
-                    }
-                }
-            });
+            .Insert(ClayNode.Configure()
+                .WidthGrow()
+                .HeightGrow()
+                .Column()
+                .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER)
+                .Background(51, 51, 51, 255)
+                .Build());
 
         var serverSelectionLabel = commands.Spawn()
-    .Insert<ServerSelectionScene>()
-    .InsertBundle(new UINodeBundle()
-    {
-        Node = new UINode()
-        {
-            Config = {
-                cornerRadius = cornerRadius,
-                backgroundColor = new (0.3f, 0.3f, 0.3f, 1),
-                layout = {
-                    sizing = {
-                        width = Clay_SizingAxis.Percent(0.5f),
-                        height = Clay_SizingAxis.Fit(0, 0),
-                    },
-                    layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
-                    childAlignment = {
-                        x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_LEFT,
-                        y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_TOP,
-                    },
-                    padding = Clay_Padding.All(8),
-                    childGap = 4
-                }
-            }
-        }
-    })
-    .Insert(new Text()
-    {
-        Value = "Select the server",
-        TextConfig =
-        {
-                    fontId = 0,
-                    fontSize = 28,
-                    // textAlignment = Clay_TextAlignment.CLAY_TEXT_ALIGN_CENTER,
-                    textColor = new (1f, 1f, 1f, 1),
-        }
-    });
+            .Insert<ServerSelectionScene>()
+            .Insert(ClayNode.Configure()
+                .WidthPercent(0.5f)
+                .HeightFit()
+                .Column()
+                .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_LEFT, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_TOP)
+                .Padding(8)
+                .Gap(4)
+                .Background(76, 76, 76, 255)
+                .CornerRadius(8)
+                .Text("Select the server", 28, new Clay_Color(255, 255, 255, 255))
+                .Build());
+
+        var menuNode = ClayNode.Configure()
+            .WidthPercent(0.5f)
+            .HeightPercent(0.5f)
+            .Column()
+            .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_TOP)
+            .Padding(8)
+            .Gap(4)
+            .Background(76, 76, 76, 255)
+            .CornerRadius(8)
+            .Build();
+
+        menuNode.Clip = new Clay_ClipElementConfig { vertical = true };
 
         var menu = commands.Spawn()
-    .Insert<ServerSelectionScene>()
-    .InsertBundle(new UINodeBundle()
-    {
-        Node = new UINode()
-        {
-            Config = {
-                cornerRadius = cornerRadius,
-                backgroundColor = new (0.3f, 0.3f, 0.3f, 1),
-                layout = {
-                    sizing = {
-                        width = Clay_SizingAxis.Percent(0.5f),
-                        height = Clay_SizingAxis.Percent(0.5f),
-                    },
-                    layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
-                    childAlignment = {
-                        x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER,
-                        y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_TOP,
-                    },
-                    padding = Clay_Padding.All(8),
-                    childGap = 4
-                },
-                clip = {
-                    vertical = true
-                }
-            }
-        }
-    });
+            .Insert<ServerSelectionScene>()
+            .Insert(menuNode)
+            .Observe<On<ClayPointerEvent>, Res<NetClient>, Query<Data<ServerInfo>, With<ServerSelectionScene>>>(ServerSelected);
 
         root.AddChild(serverSelectionLabel);
         root.AddChild(menu);
@@ -147,41 +102,20 @@ internal readonly struct ServerSelectionPlugin : IPlugin
                 var serverEnt = commands.Spawn()
                     .Insert<ServerSelectionScene>()
                     .Insert(server)
-                    .InsertBundle(new UINodeBundle()
-                    {
-                        Node = new UINode()
-                        {
-                            Config = {
-                            cornerRadius = cornerRadius,
-                            backgroundColor = new (0.6f, 0.6f, 0.6f, 1),
-                            layout = {
-                                sizing = {
-                                    width = Clay_SizingAxis.Percent(0.8f),
-                                    height = Clay_SizingAxis.Fit(0, 0),
-                                },
-                                layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
-                                childAlignment = {
-                                    x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER,
-                                    y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER,
-                                },
-                                padding = Clay_Padding.All(8),
-                                childGap = 4
-                                }
-                            }
-                        }
-                    })
-                    .Insert(new Text()
-                    {
-                        Value = server.Name,
-                        TextConfig =
-                        {
-                            fontId = 0,
-                            fontSize = 24,
-                            // textAlignment = Clay_TextAlignment.CLAY_TEXT_ALIGN_CENTER,
-                            textColor = new (1f, 1f, 1f, 1),
-                        }
-                    })
-                    .Insert(new UIMouseAction());
+                    .Insert(ClayNode.Configure()
+                        .WidthPercent(0.8f)
+                        .HeightFit()
+                        .Column()
+                        .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER)
+                        .Padding(8)
+                        .Gap(4)
+                        .Background(153, 153, 153, 255)
+                        .CornerRadius(8)
+                        .Text(server.Name, 24, new Clay_Color(255, 255, 255, 255))
+                        .Build());
+
+                // TODO: Add interaction handling through Clay's event system
+                // For now, we'll need to handle server selection differently
 
                 menu.AddChild(serverEnt);
             }
@@ -189,19 +123,19 @@ internal readonly struct ServerSelectionPlugin : IPlugin
     }
 
     private static void ServerSelected(
+        On<ClayPointerEvent> trigger,
         Res<NetClient> network,
-        Query<
-            Data<ServerInfo, UIMouseAction>,
-            Filter<Changed<UIMouseAction>, With<ServerSelectionScene>>
-        > query)
+        Query<Data<ServerInfo>, With<ServerSelectionScene>> query
+    )
     {
-        foreach ((var serverInfo, var interaction) in query)
-        {
-            if (interaction.Ref is { WasPressed: true, IsPressed: false, Button: MouseButtonType.Left })
-            {
-                network.Value.Send_SelectServer((byte)serverInfo.Ref.Index);
-            }
-        }
+        if (!trigger.Event.IsLeftButton || trigger.Event.EventType != ClayPointerEventType.Click)
+            return;
+
+        if (!query.Contains(trigger.EntityId))
+            return;
+
+        var (_, serverInfo) = query.Get(trigger.EntityId);
+        network.Value.Send_SelectServer((byte)serverInfo.Ref.Index);
     }
 
     private struct ServerSelectionScene;

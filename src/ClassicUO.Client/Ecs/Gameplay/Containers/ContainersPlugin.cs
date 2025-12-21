@@ -10,6 +10,8 @@ using System;
 using System.Collections.Generic;
 using TinyEcs;
 using TinyEcs.Bevy;
+using TinyEcs.UI.Clay;
+using TinyEcs.UI.Clay.Widgets;
 
 namespace ClassicUO.Ecs;
 
@@ -42,7 +44,7 @@ internal readonly struct ContainersPlugin : IPlugin
     private static void CloseContainersTooFarFromPlayer(
         Commands commands,
         Query<Data<WorldPosition, NetworkSerial>,
-             Filter<With<IsContainer>, With<UINode>, With<UIMouseAction>, With<UIMovable>>> query,
+             Filter<With<IsContainer>, With<ClayNode>, With<ClayInteraction>, With<UIMovable>>> query,
         Single<Data<WorldPosition>, With<Player>> queryPlayer,
         EventWriter<HostMessage> hostMsgs
     )
@@ -56,8 +58,8 @@ internal readonly struct ContainersPlugin : IPlugin
                 Math.Abs(playerPos.Ref.Y - pos.Ref.Y) >= MAX_CONTAINER_DIST)
             {
                 commands.Entity(ent.Ref)
-                    .Remove<UINode>()
-                    .Remove<UIMouseAction>()
+                    .Remove<ClayNode>()
+                    .Remove<ClayUOCommandData>()
                     .Remove<UIMovable>();
 
                 hostMsgs.Send(new HostMessage.ContainerClosed(serial.Ref.Value));
@@ -86,46 +88,38 @@ internal readonly struct ContainersPlugin : IPlugin
             {
                 ref readonly var gumpInfo = ref assets.Value.Gumps.GetGump(ev.Graphic);
                 var ent = entitiesMap.Value.GetOrCreate(commands, ev.Serial)
-                    .InsertBundle(new UINodeBundle()
+                    .InsertBundle(new UOClayUiBundle()
                     {
-                        Node = new UINode()
+                        Node = ClayNode.Configure()
+                            .Width(gumpInfo.UV.Width)
+                            .Height(gumpInfo.UV.Height)
+                            .Column()
+                            .Floating()
+                            .FloatingOffset(0, 0)
+                            .Build(),
+                        UONodeData = new ClayUOCommandData
                         {
-                            Config =
-                            {
-                                layout =
-                                {
-                                    sizing =
-                                    {
-                                        width = Clay_SizingAxis.Fixed(gumpInfo.UV.Width),
-                                        height = Clay_SizingAxis.Fixed(gumpInfo.UV.Height),
-                                    },
-                                    layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM
-                                },
-                                floating = {
-                                    clipTo = Clay_FloatingClipToElement.CLAY_CLIP_TO_ATTACHED_PARENT,
-                                    attachTo = Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT,
-                                    offset = {
-                                        x = 0,
-                                        y = 0
-                                    }
-                                }
-                            },
-                            UOConfig = {
-                                Type = ClayUOCommandType.Gump,
-                                Id = ev.Graphic,
-                                Hue = Vector3.UnitZ,
-                            }
+                            Type = ClayUOCommandType.Gump,
+                            Id = ev.Graphic,
+                            Hue = Vector3.UnitZ,
                         }
                     })
+                     .Insert(new FloatingWindowState()
+                     {
+                         InitialX = 0,
+                         InitialY = 0,
+                         InitialWidth = gumpInfo.UV.Width,
+                         InitialHeight = gumpInfo.UV.Height
+                     })
                     .Insert<UIMovable>()
-                    .Observe(static (On<OnReleased> trigger, Commands commands) =>
+                    .Observe(static (On<ClayPointerEvent> trigger, Commands commands) =>
                     {
-                        if (trigger.Event.Button != Input.MouseButtonType.Right)
+                        if (trigger.Event.EventType != ClayPointerEventType.Released || !trigger.Event.IsRightButton)
                             return;
 
                         commands.Entity(trigger.EntityId)
-                            .Remove<UINode>()
-                            .Remove<UIMouseAction>()
+                            .Remove<ClayNode>()
+                            .Remove<ClayInteraction>()
                             .Remove<UIMovable>();
 
                         // hostMsgs.Send(new HostMessage.ContainerClosed(serial.Ref.Value));
@@ -216,41 +210,28 @@ internal readonly struct ContainersPlugin : IPlugin
         ref readonly var artInfo = ref assets.Value.Arts.GetArt(finalGraphic);
 
         ent.Insert<UIMovable>()
-            .Insert(new UIMouseAction())
-            .InsertBundle(new UINodeBundle()
+            .InsertBundle(new UOClayUiBundle()
             {
-
-                Node = new UINode
+                Node = ClayNode.Configure()
+                    .Width(artInfo.UV.Width)
+                    .Height(artInfo.UV.Height)
+                    .Column()
+                    .Floating()
+                    .FloatingOffset(packet.X, packet.Y)
+                    .Build(),
+                UONodeData = new ClayUOCommandData
                 {
-                    Config =
-                    {
-                        layout =
-                        {
-                            sizing =
-                            {
-                                width = Clay_SizingAxis.Fixed(artInfo.UV.Width),
-                                height = Clay_SizingAxis.Fixed(artInfo.UV.Height),
-                            },
-                            layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM
-                        },
-                        floating =
-                        {
-                            clipTo = Clay_FloatingClipToElement.CLAY_CLIP_TO_ATTACHED_PARENT,
-                            attachTo = Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT,
-                            offset =
-                            {
-                                x = packet.X,
-                                y = packet.Y
-                            }
-                        }
-                    },
-                    UOConfig =
-                    {
-                        Type = ClayUOCommandType.Art,
-                        Id = finalGraphic,
-                        Hue = new Vector3(packet.Hue, 1, 1),
-                    }
+                    Type = ClayUOCommandType.Art,
+                    Id = finalGraphic,
+                    Hue = new Vector3(packet.Hue, 1, 1),
                 }
+            })
+            .Insert(new FloatingWindowState()
+            {
+                InitialX = packet.X,
+                InitialY = packet.Y,
+                InitialWidth = artInfo.UV.Width,
+                InitialHeight = artInfo.UV.Height
             });
     }
 
@@ -292,39 +273,20 @@ internal readonly struct ContainersPlugin : IPlugin
             ref readonly var artInfo = ref assets.Value.Arts.GetArt((ushort)(item.Graphic + item.GraphicInc));
 
             ent.Insert<UIMovable>()
-                .Insert(new UIMouseAction())
-                .InsertBundle(new UINodeBundle()
+                .InsertBundle(new UOClayUiBundle()
                 {
-                    Node = new UINode
+                    Node = ClayNode.Configure()
+                        .Width(artInfo.UV.Width)
+                        .Height(artInfo.UV.Height)
+                        .Column()
+                        .Floating()
+                        .FloatingOffset(item.X, item.Y)
+                        .Build(),
+                    UONodeData = new ClayUOCommandData
                     {
-                        Config =
-                        {
-                            layout =
-                            {
-                                sizing =
-                                {
-                                    width = Clay_SizingAxis.Fixed(artInfo.UV.Width),
-                                    height = Clay_SizingAxis.Fixed(artInfo.UV.Height),
-                                },
-                                layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM
-                            },
-                            floating =
-                            {
-                                clipTo = Clay_FloatingClipToElement.CLAY_CLIP_TO_ATTACHED_PARENT,
-                                attachTo = Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT,
-                                offset =
-                                {
-                                    x = item.X,
-                                    y = item.Y
-                                }
-                            }
-                        },
-                        UOConfig =
-                        {
-                            Type = ClayUOCommandType.Art,
-                            Id = (ushort)(item.Graphic + item.GraphicInc),
-                            Hue = new Vector3(item.Hue, 1, 1),
-                        }
+                        Type = ClayUOCommandType.Art,
+                        Id = (ushort)(item.Graphic + item.GraphicInc),
+                        Hue = new Vector3(item.Hue, 1, 1),
                     }
                 });
         }

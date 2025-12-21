@@ -8,50 +8,58 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Clay_cs;
+using Flexbox;
 using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TinyEcs;
 using TinyEcs.Bevy;
+using TinyEcs.UI.Clay;
 
 namespace ClassicUO.Ecs;
-
-public struct TESTME;
 
 internal readonly struct GuiPlugin : IPlugin
 {
     private const FontSystemEffect FONT_EFFECT = FontSystemEffect.Stroked;
     private const int FONT_EFFECT_AMOUNT = 1;
 
-    public void Build(App app)
+    public unsafe void Build(App app)
     {
-        var setupClayFn = SetupClay;
-        var setClayWorkspaceDimensionsFn = SetClayWorkspaceDimensions;
-        var updateUOButtonsStateFn = UpdateUOButtonsState;
-        var updateFocusedInputFn = UpdateFocusedInput;
-        var readCharInputsFn = ReadCharInputs;
-        var moveFocusedElementsByMouseFn = MoveFocusedElementsByMouse;
-        var handleNodeStatesFn = HandleNodeStates;
+        var updateInputStateFn = UpdateInputState;
+        var updateUOButtonStateFn = UpdateUOButtonsState;
+        // var updateFocusedInputFn = UpdateFocusedInput;
+        // var readCharInputsFn = ReadCharInputs;
+        // var moveFocusedElementsByMouseFn = MoveFocusedElementsByMouse;
+        // var handleNodeStatesFn = HandleNodeStates;
+
+        // Add Clay UI plugin with text measurement function
+        var clayOptions = new ClayUiOptions
+        {
+            LayoutDimensions = new Clay_Dimensions(800, 600),
+            ArenaSize = 1024 * 1024 * 2, // 2MB for UI
+            EnableDebugMode = true,
+            EnableCulling = true,
+            MeasureTextFunction = OnMeasureText,
+            ErrorHandler = OnClayError
+        };
+
+        app.AddClayUi(clayOptions);
 
         app
             .AddResource(new ClayUOCommandBuffer())
             .AddResource(new FocusedInput())
             .AddResource(new ImageCache())
 
-            .AddObserver((OnAdd<UINode> trigger, Query<Data<UINode>> query) =>
+            // Initialize ClayElementId when UINode is added to an entity
+            // .AddObserver((OnAdd<UINode> trigger, Commands commands) =>
+            // {
+            //     var entityId = trigger.EntityId;
+            //     commands.Entity(entityId).Insert(new ClayElementId(Clay.Id(entityId.ToString())));
+            // })
+
+            .AddSystem(Stage.Startup, (Commands commands, Res<AssetsServer> assets, Res<ClayUOCommandBuffer> buffer) =>
             {
-                if (!query.Contains(trigger.EntityId))
-                    return;
-
-                var (ent, node) = query.Get(trigger.EntityId);
-
-                if (node.Ref.Config.id.id == 0)
-                    node.Ref.Config.id = Clay.Id(ent.Ref.RealId().ToString());
-            })
-
-            .AddSystem(Stage.Startup, (Commands commands, Res<AssetsServer> assets) =>
-            {
-                commands.InsertResource(new GumpBuilder(assets.Value));
+                commands.InsertResource(new GumpBuilder(assets.Value, buffer.Value));
             });
 
         var states = Enum.GetValues<GameState>();
@@ -64,54 +72,27 @@ internal readonly struct GuiPlugin : IPlugin
         }
 
         app
-            .AddSystem(Stage.Startup, setupClayFn)
+            .AddSystem(Stage.First, updateInputStateFn)
+            .AddSystem(Stage.Update, updateUOButtonStateFn)
 
-            .AddSystem(Stage.Update, setClayWorkspaceDimensionsFn)
-            .AddSystem(Stage.Update, updateUOButtonsStateFn)
+            // .AddSystem(Stage.Update, updateUOButtonsStateFn)
 
-            .AddSystem(updateFocusedInputFn)
-            .InStage(Stage.Update)
-            .RunIf((Res<KeyboardContext> keyboardCtx) => keyboardCtx.Value.IsPressedOnce(Microsoft.Xna.Framework.Input.Keys.Tab))
-            .Build()
+            // .AddSystem(updateFocusedInputFn)
+            // .InStage(Stage.Update)
+            // .RunIf((Res<KeyboardContext> keyboardCtx) => keyboardCtx.Value.IsPressedOnce(Microsoft.Xna.Framework.Input.Keys.Tab))
+            // .Build()
 
-            .AddSystem(readCharInputsFn)
-            .InStage(Stage.Update)
-            .RunIf((EventReader<CharInputEvent> reader,
-                    Res<FocusedInput> focusedInput,
-                    Query<Data<UINode>, Filter<With<TextInput>>> query) =>
-                       reader.HasEvents && focusedInput.Value.Entity != 0 && query.Count() > 0)
-            .Build()
+            // .AddSystem(readCharInputsFn)
+            // .InStage(Stage.Update)
+            // .RunIf((EventReader<CharInputEvent> reader,
+            //         Res<FocusedInput> focusedInput,
+            //         Query<Data<UINode>, Filter<With<TextInput>>> query) =>
+            //            reader.HasEvents && focusedInput.Value.Entity != 0 && query.Count() > 0)
+            // .Build()
 
-            .AddSystem(Stage.Update, moveFocusedElementsByMouseFn)
-            .AddSystem(Stage.Last, handleNodeStatesFn);
-
-
-        // scheduler.OnFrameEnd((Query<Data<UINode>, With<TESTME>> q) =>
-        // {
-        //     foreach (var (ent, node) in q)
-        //     {
-        //         ent.Ref.Delete();
-        //         // Console.WriteLine("3 - TESTME {0} gen: {1}", ent.Ref.ID.RealId(), ent.Ref.Generation);
-        //     }
-        // });
-
-        // scheduler.OnFrameEnd((World world) =>
-        // {
-        //     var ent = world.Entity().Add<TESTME>().SetUINode(new()
-        //     {
-        //         Config = {
-        //             backgroundColor = new(1f, 0, 0, 1f),
-        //             layout = {
-        //                 sizing = {
-        //                     width = Clay_SizingAxis.Fixed(100),
-        //                     height= Clay_SizingAxis.Fixed(100)
-        //                 }
-        //             }
-        //         }
-        //     });
-
-        //     // Console.WriteLine("1 - TESTME {0} gen: {1}", ent.ID.RealId(), ent.Generation);
-        // });
+            // .AddSystem(Stage.Update, moveFocusedElementsByMouseFn)
+            // .AddSystem(Stage.Last, handleNodeStatesFn)
+            ;
     }
 
 
@@ -135,228 +116,121 @@ internal readonly struct GuiPlugin : IPlugin
         return new Clay_Dimensions(size.X, size.Y);
     }
 
-    private static unsafe void OnClayError(Clay_ErrorData errorData)
+    private static void OnClayError(Clay_ErrorData errorData)
     {
-        var raw = new ReadOnlySpan<byte>(errorData.errorText.chars, errorData.errorText.length);
-        var text = Encoding.UTF8.GetString(raw);
-        Console.WriteLine($"Clay error: {errorData.errorType} - {text}");
-    }
-
-    private static unsafe void SetupClay()
-    {
-        var arenaHandle = Clay.CreateArena(Clay.MinMemorySize());
-        var errorFn = (nint)(delegate*<Clay_ErrorData, void>)&OnClayError;
-        var ctx = Clay.Initialize(arenaHandle, new() { width = 300, height = 300 }, errorFn);
-        var measureTextFn = (nint)(delegate*<Clay_StringSlice, Clay_TextElementConfig*, void*, Clay_Dimensions>)&OnMeasureText;
-        Clay.SetMeasureTextFunction(measureTextFn);
-
-        Clay.SetDebugModeEnabled(true);
-    }
-
-    private static void SetClayWorkspaceDimensions(
-        Res<GraphicsDevice> device,
-        Res<MouseContext> mouseCtx,
-        Res<Time> time
-    )
-    {
-        Clay.SetLayoutDimensions(new()
+        unsafe
         {
-            width = device.Value.PresentationParameters.BackBufferWidth,
-            height = device.Value.PresentationParameters.BackBufferHeight,
-        });
-        Clay.SetPointerState(new(mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y),
-                             mouseCtx.Value.IsPressed(Input.MouseButtonType.Left));
-        Clay.UpdateScrollContainers(true, new(0, mouseCtx.Value.Wheel * 3), time.Value.Frame);
+            var raw = new ReadOnlySpan<byte>(errorData.errorText.chars, errorData.errorText.length);
+            var text = Encoding.UTF8.GetString(raw);
+            Console.WriteLine($"Clay error: {errorData.errorType} - {text}");
+        }
     }
 
     private static void UpdateUOButtonsState(
-        Query<Data<UINode, UOButton, UIMouseAction>, Changed<UIMouseAction>> query
+        Query<Data<ClayUOCommandData, UOButton, ClayInteraction>, Changed<ClayInteraction>> query
     )
     {
-        foreach ((var node, var button, var interaction) in query)
+        foreach (var (data, button, interaction) in query)
         {
-            node.Ref.UOConfig.Id = interaction.Ref switch
+            data.Ref.Id = interaction.Ref switch
             {
-                { IsPressed: false, WasPressed: false, IsHovered: true } => button.Ref.Over,
-                { IsPressed: true, Button: MouseButtonType.Left } => button.Ref.Pressed,
+                { State: ClayInteractionState.Pressed } => button.Ref.Pressed,
+                { State: ClayInteractionState.Hovered } => button.Ref.Over,
                 _ => button.Ref.Normal
             };
         }
     }
 
-    private static void UpdateFocusedInput(
-        Query<Data<Text>, Filter<With<TextInput>>> query,
-        Res<FocusedInput> focusedInput
-    )
-    {
-        var ok = false;
-        var last = 0ul;
-        foreach ((var ent, var textInput) in query)
-        {
-            if (focusedInput.Value.Entity == ent.Ref)
-            {
-                ok = true;
-                continue;
-            }
-
-            if (ok)
-                last = ent.Ref;
-        }
-
-        if (ok && last == 0)
-        {
-            foreach ((var ent, var textInput) in query)
-            {
-                last = ent.Ref;
-                break;
-            }
-        }
-
-        if (last != 0)
-        {
-            focusedInput.Value.Entity = last;
-        }
-    }
-
-    private static void ReadCharInputs(
-        EventReader<CharInputEvent> reader,
-        Res<FocusedInput> focusedInput,
-        Query<Data<Text>, Filter<With<TextInput>>> query)
-    {
-        if (!query.Contains(focusedInput.Value.Entity))
-            return;
-
-        (_, var node) = query.Get(focusedInput.Value.Entity);
-
-        foreach (var c in reader.Read())
-            node.Ref.Value = TextComposer.Compose(node.Ref.Value, c.Value);
-    }
-
-    private static void MoveFocusedElementsByMouse(
+    private static void UpdateInputState(
+        Res<GraphicsDevice> device,
         Res<MouseContext> mouseCtx,
-        Query<Data<UINode, UIMouseAction>, With<UIMovable>> query
+        Res<Time> time,
+        ResMut<ClayUiState> uiState,
+        ResMut<ClayPointerState> pointerState,
+        ResMut<ClayTextInputState> textInputState,
+        EventReader<CharInputEvent> charInputReader
     )
     {
-        foreach ((var node, var interaction) in query)
+        // Update layout dimensions
+        uiState.Value.LayoutDimensions = new Clay_Dimensions
         {
-            if (interaction.Ref is { IsPressed: true, Button: MouseButtonType.Left })
-            {
-                node.Ref.Config.floating.offset.x += mouseCtx.Value.PositionOffset.X;
-                node.Ref.Config.floating.offset.y += mouseCtx.Value.PositionOffset.Y;
-            }
+            width = device.Value.PresentationParameters.BackBufferWidth,
+            height = device.Value.PresentationParameters.BackBufferHeight
+        };
+
+        // Update pointer state
+        var wasPressed = pointerState.Value.IsLeftDown;
+        var isPressed = mouseCtx.Value.IsPressed(MouseButtonType.Left);
+
+        pointerState.Value.Position = new(mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y);
+        pointerState.Value.IsLeftDown = isPressed;
+        pointerState.Value.IsLeftPressed = mouseCtx.Value.IsPressedOnce(MouseButtonType.Left);
+        pointerState.Value.IsLeftReleased = wasPressed && !isPressed;
+        pointerState.Value.ScrollDelta = new(0, mouseCtx.Value.Wheel * 3);
+        pointerState.Value.DeltaTime = time.Value.Frame;
+        pointerState.Value.EnableDragScrolling = false;
+
+        // Update text input state
+        foreach (var charEvent in charInputReader.Read())
+        {
+            textInputState.Value.AddChar(charEvent.Value);
         }
     }
 
-    private static void HandleNodeStates(
-        Commands commands,
-        Res<MouseContext> mouseCtx,
-        Res<FocusedInput> focusedInput,
-        Query<Data<UINode, UIMouseAction>> query
-    )
-    {
-        var pointerOverIds = Clay.GetPointerOverIds();
-        foreach ((var ent, var node, var interaction) in query)
-        {
-            var isHovered = containsId(in node.Ref.Config.id, pointerOverIds);
+    // private static void UpdateFocusedInput(
+    //     Query<Data<Text>, Filter<With<TextInput>>> query,
+    //     Res<FocusedInput> focusedInput
+    // )
+    // {
+    //     var ok = false;
+    //     var last = 0ul;
+    //     foreach ((var ent, var textInput) in query)
+    //     {
+    //         if (focusedInput.Value.Entity == ent.Ref)
+    //         {
+    //             ok = true;
+    //             continue;
+    //         }
 
-            interaction.Ref.WasHovered = interaction.Ref.IsHovered;
-            interaction.Ref.IsHovered = isHovered;
-            interaction.Ref.WasPressed = interaction.Ref.IsPressed;
-            var oldButton = interaction.Ref.Button;
+    //         if (ok)
+    //             last = ent.Ref;
+    //     }
 
-            MouseButtonType? buttonPressed = null;
-            for (var button = MouseButtonType.None + 1; button < MouseButtonType.Size; button++)
-            {
-                if ((isHovered && mouseCtx.Value.IsPressedOnce(button)) ||
-                    (interaction.Ref.WasPressed && mouseCtx.Value.IsPressed(button)))
-                {
-                    buttonPressed = button;
-                }
-            }
+    //     if (ok && last == 0)
+    //     {
+    //         foreach ((var ent, var textInput) in query)
+    //         {
+    //             last = ent.Ref;
+    //             break;
+    //         }
+    //     }
 
-            if (buttonPressed.HasValue)
-            {
-                interaction.Ref.IsPressed = true;
-                interaction.Ref.Button = buttonPressed.Value;
+    //     if (last != 0)
+    //     {
+    //         focusedInput.Value.Entity = last;
+    //     }
+    // }
 
-                // check the top most element
-                if (pointerOverIds.Length > 0 && pointerOverIds[^1].id == node.Ref.Config.id.id)
-                {
-                    // if the last pointer over id is the same as the current node, we set the focused input
-                    focusedInput.Value.Entity = ent.Ref; // Set focused input to the current entity
-                }
-            }
-            else
-            {
-                interaction.Ref.IsPressed = false;
-                interaction.Ref.Button = interaction.Ref.WasPressed ? interaction.Ref.Button : MouseButtonType.None;
-            }
+    // private static void ReadCharInputs(
+    //     EventReader<CharInputEvent> reader,
+    //     Res<FocusedInput> focusedInput,
+    //     Query<Data<Text>, Filter<With<TextInput>>> query)
+    // {
+    //     if (!query.Contains(focusedInput.Value.Entity))
+    //         return;
 
-            var isChanged = interaction.Ref.WasPressed != interaction.Ref.IsPressed ||
-                            interaction.Ref.WasHovered != interaction.Ref.IsHovered ||
-                            interaction.Ref.Button != oldButton;
+    //     (_, var node) = query.Get(focusedInput.Value.Entity);
 
-            if (isChanged)
-            {
-                var e = commands.Entity(ent.Ref).Insert(interaction.Ref);
-
-                if (interaction.Ref.IsPressed && !interaction.Ref.WasPressed)
-                {
-                    e.EmitTrigger(new OnPressed(interaction.Ref.Button));
-                }
-                else if (!interaction.Ref.IsPressed && interaction.Ref.WasPressed)
-                {
-                    e.EmitTrigger(new OnReleased(interaction.Ref.Button));
-                }
-            }
-        }
-
-        static bool containsId(ref readonly Clay_ElementId id, ReadOnlySpan<Clay_ElementId> pointerOverIds)
-        {
-            foreach (ref readonly var elemId in pointerOverIds)
-            {
-                if (elemId.id == id.id)
-                    return true;
-            }
-
-            return false;
-        }
-    }
+    //     foreach (var c in reader.Read())
+    //         node.Ref.Value = TextComposer.Compose(node.Ref.Value, c.Value);
+    // }
 }
 
-internal struct UINode
-{
-    public Clay_ElementDeclaration Config;
-    public ClayUOCommandData UOConfig;
-}
-
-struct UIMouseAction
-{
-    public bool WasHovered, IsHovered;
-    public bool WasPressed, IsPressed;
-    public MouseButtonType Button;
-}
-
-record struct OnPressed(MouseButtonType Button);
-record struct OnReleased(MouseButtonType Button);
-
-struct UIMovable;
 
 struct UOButton
 {
     public ushort Normal, Pressed, Over;
 }
-
-struct Text
-{
-    public string Value;
-    public char ReplaceChar;
-    public Clay_TextElementConfig TextConfig;
-}
-
-struct TextInput;
-
-struct TextFragment;
 
 enum ClayUOCommandType : byte
 {
@@ -373,10 +247,30 @@ enum ClayUOCommandType : byte
 internal struct ClayUOCommandData
 {
     public ClayUOCommandType Type;
-
     public uint Id;
     public Vector3 Hue;
 }
+
+internal struct UOClayUiBundle : IBundle
+{
+    public ClayNode Node { get; init; }
+    public ClayUOCommandData UONodeData { get; init; }
+
+    public void Insert(EntityView entity)
+    {
+        entity.Set(Node);
+        entity.Set(UONodeData);
+    }
+
+    public void Insert(EntityCommands entity)
+    {
+        entity.Insert(Node);
+        entity.Insert(UONodeData);
+    }
+}
+
+internal struct UIMovable;
+internal struct TextInput;
 
 internal sealed class FocusedInput
 {
@@ -386,21 +280,3 @@ internal sealed class FocusedInput
 internal sealed class ImageCache : Dictionary<nint, Texture2D>;
 
 internal sealed class ClayUOCommandBuffer : List<ClayUOCommandData>;
-
-internal readonly struct UINodeBundle : IBundle
-{
-    public UINode Node { get; init; }
-    public UIMouseAction MouseAction { get; init; }
-
-    public void Insert(EntityView entity)
-    {
-        entity.Set(Node);
-        entity.Set(MouseAction);
-    }
-
-    public void Insert(EntityCommands entity)
-    {
-        entity.Insert(Node);
-        entity.Insert(MouseAction);
-    }
-}

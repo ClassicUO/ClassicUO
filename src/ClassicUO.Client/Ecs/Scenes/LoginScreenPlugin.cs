@@ -6,6 +6,9 @@ using Clay_cs;
 using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
+using TinyEcs.UI.Clay;
+using TinyEcs.UI.Bevy;
+using TinyEcs.UI;
 
 namespace ClassicUO.Ecs;
 
@@ -41,45 +44,22 @@ internal readonly struct LoginScreenPlugin : IPlugin
     {
         var root = commands.Spawn()
             .Insert<LoginScene>()
-            .InsertBundle(new UINodeBundle()
-            {
-                Node = new UINode()
-                {
-                    Config = {
-                        backgroundColor = new (0.2f, 0.2f, 0.2f, 1),
-                        layout = {
-                            sizing = {
-                                width = Clay_SizingAxis.Grow(),
-                                height = Clay_SizingAxis.Grow(),
-                            },
-                            childAlignment = {
-                                x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER,
-                                y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER,
-                            },
-                            layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
-                        }
-                    }
-                }
-            });
+            .Insert(ClayNode.Configure()
+                .WidthGrow()
+                .HeightGrow()
+                .Column()
+                .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER)
+                .Background(51, 51, 51, 255)
+                .Build());
 
         var mainMenu = commands.Spawn()
             .Insert<LoginScene>()
-            .InsertBundle(new UINodeBundle()
-            {
-                Node = new UINode()
-                {
-                    Config = {
-                        backgroundColor = new (0.2f, 0.2f, 0.2f, 1),
-                        layout = {
-                            sizing = {
-                                width = Clay_SizingAxis.Fit(0, 0),
-                                height = Clay_SizingAxis.Fit(0, 0),
-                            },
-                            layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
-                        }
-                    }
-                }
-            });
+            .Insert(ClayNode.Configure()
+                .WidthFit()
+                .HeightFit()
+                .Column()
+                .Background(51, 51, 51, 255)
+                .Build());
 
         // background
         mainMenu.AddChild(gumpBuilder.Value.AddGump(
@@ -103,9 +83,13 @@ internal readonly struct LoginScreenPlugin : IPlugin
             Vector3.UnitZ,
             new(530, 125)
         ).Insert(ButtonAction.Credits).Insert<LoginScene>()
-        .Observe((On<OnPressed> trigger) => Console.WriteLine("pressed button {0}", trigger.Event.Button))
-        .Observe((On<OnReleased> trigger) => Console.WriteLine("released button {0}", trigger.Event.Button))
-        );
+        .Observe<On<ClayPointerEvent>>((On<ClayPointerEvent> trigger) =>
+        {
+            if (trigger.Event.EventType == ClayPointerEventType.Pressed)
+                Console.WriteLine("pressed button");
+            else if (trigger.Event.EventType == ClayPointerEventType.Released)
+                Console.WriteLine("released button");
+        }));
 
         // arrow button
         var arrowButton = gumpBuilder.Value.AddButton(
@@ -115,76 +99,71 @@ internal readonly struct LoginScreenPlugin : IPlugin
             new(280, 365)
         )
         .Insert(ButtonAction.Login).Insert<LoginScene>()
-        .Observe((On<OnPressed> trigger) =>
-        {
-            Console.WriteLine("pressed button {0}", trigger.Event.Button);
-        })
         .Observe((
-            On<OnReleased> trigger,
+            On<ClayPointerEvent> trigger,
             Commands commands,
             Res<Settings> settings,
-            ResMut<NextState<LoginInteraction>> state,
-            Single<Data<Text>, Filter<With<UsernameInput>, With<LoginScene>, With<TextInput>>> queryUsername,
-            Single<Data<Text>, Filter<With<PasswordInput>, With<LoginScene>, With<TextInput>>> queryPassword
+            ResMut<NextState<LoginInteraction>> state
         ) =>
         {
-            Console.WriteLine("released button {0}", trigger.Event.Button);
-
-            (_, var username) = queryUsername.Get();
-            (_, var password) = queryPassword.Get();
-            Login(commands, settings.Value, username.Ref.Value, password.Ref.Value);
-            state.Value.Set(LoginInteraction.LoginRequested);
+            if (trigger.Event is { EventType: ClayPointerEventType.Click, IsLeftButton: true })
+            {
+                Console.WriteLine("login button clicked");
+                // TODO: Get username and password from text input components once implemented
+                Login(commands, settings.Value, settings.Value.Username, Crypter.Decrypt(settings.Value.Password));
+                state.Value.Set(LoginInteraction.LoginRequested);
+            }
         });
 
         mainMenu.AddChild(arrowButton);
 
-        // username background
-        mainMenu.AddChild(gumpBuilder.Value.AddGumpNinePatch(
+        var usernameBackground = gumpBuilder.Value.AddGumpNinePatch(
             commands,
             0x0BB8,
             Vector3.UnitZ,
             new(218, 283),
             new(210, 30))
-            .Insert(new Text()
-            {
-                Value = settings.Value.Username,
-                TextConfig = {
-                    fontId = 0,
-                    fontSize = 24,
-                    textColor = new (0.2f, 0.2f, 0.2f, 1),
-                },
-            })
-            .Insert<TextInput>()
-            .Insert<LoginScene>()
-            .Insert<UsernameInput>()
-            .Insert(new UIMouseAction()));
+            .Insert<LoginScene>();
 
-        // password background
-        mainMenu.AddChild(gumpBuilder.Value.AddGumpNinePatch(
+        var usernameField = commands.Spawn()
+            .Insert<UsernameInput>()
+            .Insert<TextInput>()
+            .Insert(ClayNode.Configure()
+            .WidthFit()
+            .HeightFit()
+            .Text(settings.Value.Username, 20)
+            .Build());
+
+        usernameBackground.AddChild(usernameField);
+        mainMenu.AddChild(usernameBackground);
+
+        var passwordBackground = gumpBuilder.Value.AddGumpNinePatch(
             commands,
             0x0BB8,
             Vector3.UnitZ,
             new(218, 283 + 50),
             new(210, 30))
-            .Insert(new Text()
-            {
-                Value = Crypter.Decrypt(settings.Value.Password),
-                ReplaceChar = '*',
-                TextConfig = {
-                    fontId = 0,
-                    fontSize = 24,
-                    textColor = new (1, 1, 1, 1),
-                },
-            })
-            .Insert<TextInput>()
             .Insert<LoginScene>()
-            .Insert<PasswordInput>()
-            .Insert(new UIMouseAction()));
+            ;
+
+        var psw = Crypter.Decrypt(settings.Value.Password);
+        var masked = new string('*', psw.Length);
+        var passwordField = commands.Spawn()
+            .Insert(new PasswordInput() { Masked = masked, Real = psw })
+            .Insert<TextInput>()
+            .Insert(ClayNode.Configure()
+            .WidthFit()
+            .HeightFit()
+            .Text(masked, 20)
+            .Build());
+
+        passwordBackground.AddChild(passwordField);
+        mainMenu.AddChild(passwordBackground);
 
         root.AddChild(mainMenu);
     }
 
-    private static void DeleteMenu(Commands commands, Query<Data<UINode>, Filter<Without<Parent>, With<LoginScene>>> query)
+    private static void DeleteMenu(Commands commands, Query<Data<ClayNode>, Filter<Without<Parent>, With<LoginScene>>> query)
     {
         Console.WriteLine("[LoginScreen] cleanup start");
         foreach ((var ent, _) in query)
@@ -229,5 +208,9 @@ internal readonly struct LoginScreenPlugin : IPlugin
 
     private struct LoginScene;
     private struct UsernameInput;
-    private struct PasswordInput;
+    private struct PasswordInput
+    {
+        public string Real;
+        public string Masked;
+    }
 }

@@ -32,9 +32,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\external\Clay-cs\Clay-cs\Clay-cs.csproj" />
     <ProjectReference Include="..\..\external\FNA\FNA.Core.csproj" />
     <ProjectReference Include="..\..\external\TinyEcs\src\TinyEcs.Bevy\TinyEcs.Bevy.csproj" />
+    <ProjectReference Include="..\..\external\TinyEcs\src\TinyEcs.UI.Clay\TinyEcs.UI.Clay.csproj" />
     <ProjectReference Include="..\..\external\TinyEcs\src\TinyEcs\TinyEcs.csproj" />
     <ProjectReference Include="..\ClassicUO.Assets\ClassicUO.Assets.csproj" />
     <ProjectReference Include="..\ClassicUO.Renderer\ClassicUO.Renderer.csproj" />
@@ -90,7 +90,7 @@
       <HintPath>..\..\external\cuoapi\cuoapi.dll</HintPath>
     </Reference>
   </ItemGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="Extism.runtime.all" Version="1.12.0" />
     <PackageReference Include="Extism.Sdk" Version="1.9.1" />

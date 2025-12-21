@@ -10,8 +10,10 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TinyEcs;
 using TinyEcs.Bevy;
+using TinyEcs.UI.Clay;
 
 namespace ClassicUO.Ecs;
+
 
 internal readonly unsafe struct GuiRenderingPlugin : IPlugin
 {
@@ -26,20 +28,33 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
     public void Build(App app)
     {
         app
+            .AddSystem((Query<Data<ClayNode, ClayUOCommandData>> qNodes, ResMut<ClayUOCommandBuffer> commandBuffer) =>
+            {
+                commandBuffer.Value.Clear();
+
+                foreach (var (node, uoData) in qNodes)
+                {
+                    commandBuffer.Value.Add(uoData.Ref);
+
+                    node.Ref.Custom = new Clay_CustomElementConfig()
+                    {
+                        customData = (void*)(nint)commandBuffer.Value.Count
+                    };
+                }
+            })
+            .InStage(Stage.PostUpdate)
+            .SingleThreaded()
+            .Build()
+
             .AddSystem((
-                Local<DumbTexture> dumbTexture,
+                Local <DumbTexture> dumbTexture,
                 Local<StringBuilder> sb,
                 Res<UltimaBatcher2D> batcher,
                 Res<AssetsServer> assets,
                 Res<MouseContext> mouseCtx,
                 Res<ClayUOCommandBuffer> commandBuffer,
                 Res<ImageCache> imageCache,
-                Query<Data<UINode>, Filter<With<Text>, With<TextInput>>> queryTextInput,
-                Query<Data<UINode, UIMouseAction>> queryInteraction,
-                Query<Data<UINode, Text, UIMouseAction, Children>,
-                      Filter<Without<Parent>, Optional<Text>, Optional<UIMouseAction>, Optional<Children>>> query,
-                Query<Data<UINode, Text, UIMouseAction, Children>,
-                      Filter<With<Parent>, Optional<Text>, Optional<UIMouseAction>, Optional<Children>>> queryChildren) =>
+                Res<ClayUiState> uiState) =>
             {
                 if (dumbTexture.Value.Texture == null)
                 {
@@ -47,29 +62,12 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                     dumbTexture.Value.Texture.SetData([Color.White]);
                 }
 
-                commandBuffer.Value.Clear();
-
-                Clay.BeginLayout();
-                foreach (var (node, text, interaction, children) in query)
-                {
-                    renderNodes(
-                        ref node.Ref,
-                        ref text.Ref,
-                        ref interaction.Ref,
-                        ref children.Ref,
-                        commandBuffer.Value,
-                        queryChildren
-                    );
-                }
-
-                var cmds = Clay.EndLayout();
-
                 var b = batcher.Value;
                 b.Begin();
 
                 var uoCmdsSpan = commandBuffer.Value.AsSpan();
 
-                foreach (ref readonly var cmd in cmds)
+                foreach (ref readonly var cmd in uiState.Value.RenderCommands)
                 {
                     ref readonly var boundingBox = ref cmd.boundingBox;
 
@@ -148,6 +146,9 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                             {
                                 ref readonly var custom = ref cmd.renderData.custom;
                                 var commandIndex = ((int)custom.customData) - 1;
+
+                                if (commandIndex < 0 || commandIndex >= uoCmdsSpan.Length)
+                                    break;
                                 ref readonly var uoCommand = ref uoCmdsSpan[commandIndex];
 
                                 switch (uoCommand.Type)
@@ -313,92 +314,6 @@ internal readonly unsafe struct GuiRenderingPlugin : IPlugin
                 }
 
                 b.End();
-
-                static void renderNodes
-                (
-                    ref UINode node, ref Text text, ref UIMouseAction interaction, ref Children children,
-                    ClayUOCommandBuffer commandBuffer,
-                    Query<Data<UINode, Text, UIMouseAction, Children>,
-                          Filter<With<Parent>, Optional<Text>, Optional<UIMouseAction>, Optional<Children>>> query
-                )
-                {
-                    Clay.OpenElement();
-
-                    var config = node.Config;
-                    if (node.UOConfig.Type != ClayUOCommandType.None)
-                    {
-                        commandBuffer.Add(node.UOConfig);
-                        var count = commandBuffer.Count;
-                        config.custom.customData = (void*)(nint)count;
-                    }
-
-                    if (config.clip.horizontal || config.clip.vertical)
-                    {
-                        config.clip.childOffset = Clay.GetScrollOffset();
-                    }
-
-                    if (!Unsafe.IsNullRef(ref interaction) && interaction.IsHovered)
-                    {
-                        // config.backgroundColor.a = 0.3f;
-                        // config.backgroundColor.r = 1 * config.backgroundColor.a;
-                        // config.backgroundColor.g = 0 * config.backgroundColor.a;
-                        // config.backgroundColor.b = 0 * config.backgroundColor.a;
-                    }
-
-                    Clay.ConfigureOpenElement(config);
-
-                    if (!Unsafe.IsNullRef(ref text) && !string.IsNullOrEmpty(text.Value))
-                    {
-                        if (text.ReplaceChar != 0)
-                        {
-                            char[] rentedBuffer = null;
-                            Span<char> buffer = text.Value.Length < 256 ?
-                                stackalloc char[text.Value.Length]
-                                :
-                                rentedBuffer = ArrayPool<char>.Shared.Rent(text.Value.Length);
-
-                            try
-                            {
-                                buffer.Slice(0, text.Value.Length).Fill(text.ReplaceChar);
-                                Clay.OpenTextElement(buffer.Slice(0, text.Value.Length), text.TextConfig);
-                            }
-                            finally
-                            {
-                                if (rentedBuffer != null)
-                                    ArrayPool<char>.Shared.Return(rentedBuffer);
-                            }
-                        }
-                        else
-                        {
-                            Clay.OpenTextElement(text.Value, text.TextConfig);
-                        }
-                    }
-
-                    if (!Unsafe.IsNullRef(ref children))
-                    {
-                        foreach (var child in children)
-                        {
-                            if (!query.Contains(child))
-                                continue;
-
-                            (var childNode,
-                             var childText,
-                             var childInteraction,
-                             var childChildren) = query.Get(child);
-
-                            renderNodes(
-                                ref childNode.Ref,
-                                ref childText.Ref,
-                                ref childInteraction.Ref,
-                                ref childChildren.Ref,
-                                commandBuffer,
-                                query
-                            );
-                        }
-                    }
-
-                    Clay.CloseElement();
-                }
             })
             .InStage(Stage.PostUpdate)
             .SingleThreaded()

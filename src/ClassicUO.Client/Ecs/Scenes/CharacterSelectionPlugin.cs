@@ -5,6 +5,9 @@ using ClassicUO.Network;
 using Clay_cs;
 using TinyEcs;
 using TinyEcs.Bevy;
+using TinyEcs.UI.Clay;
+using TinyEcs.UI.Bevy;
+using TinyEcs.UI;
 
 namespace ClassicUO.Ecs;
 
@@ -14,7 +17,6 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
     {
         var cleanupFn = Cleanup;
         var characterInfoSetupFn = CharacterInfoSetup;
-        var characterSelectedFn = CharacterSelected;
 
         app
             .AddSystem(cleanupFn)
@@ -25,15 +27,10 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
             .InStage(Stage.Update)
             .RunIf((Res<State<GameState>> state, EventReader<CharacterSelectionInfoEvent> reader)
                        => reader.HasEvents && state.Value.Current == GameState.CharacterSelection)
-            .Build()
-
-            .AddSystem(characterSelectedFn)
-            .InStage(Stage.Update)
-            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.CharacterSelection)
             .Build();
     }
 
-    private static void Cleanup(Commands commands, Query<Data<UINode>, Filter<With<CharacterSelectionScene>, Without<Parent>>> query)
+    private static void Cleanup(Commands commands, Query<Data<ClayNode>, Filter<With<CharacterSelectionScene>, Without<Parent>>> query)
     {
         foreach ((var ent, _) in query)
         {
@@ -45,90 +42,42 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
     {
         var root = commands.Spawn()
             .Insert<CharacterSelectionScene>()
-            .InsertBundle(new UINodeBundle()
-            {
-                Node = new UINode()
-                {
-                    Config = {
-                        backgroundColor = new (0.2f, 0.2f, 0.2f, 1),
-                        layout = {
-                            sizing = {
-                                width = Clay_SizingAxis.Grow(),
-                                height = Clay_SizingAxis.Grow(),
-                            },
-                            layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
-                            childAlignment = {
-                                x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER,
-                                y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER,
-                            }
-                        }
-                    }
-                }
-            });
+            .Insert(ClayNode.Configure()
+                .WidthGrow()
+                .HeightGrow()
+                .Column()
+                .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER)
+                .Background(51, 51, 51, 255)
+                .Build());
 
         var characterSelectionLabel = commands.Spawn()
-        .Insert<CharacterSelectionScene>()
-        .InsertBundle(new UINodeBundle()
-        {
-            Node = new UINode()
-            {
-                Config = {
-                    backgroundColor = new (0.3f, 0.3f, 0.3f, 1),
-                    layout = {
-                        sizing = {
-                            width = Clay_SizingAxis.Percent(0.5f),
-                            height = Clay_SizingAxis.Fit(0, 0),
-                        },
-                        layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
-                        childAlignment = {
-                            x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_LEFT,
-                            y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_TOP,
-                        },
-                        padding = Clay_Padding.All(8),
-                        childGap = 4
-                    }
-                }
-            }
-        })
-        .Insert(new Text()
-        {
-            Value = "Select the character",
-            TextConfig =
-            {
-                fontId = 0,
-                fontSize = 28,
-                // textAlignment = Clay_TextAlignment.CLAY_TEXT_ALIGN_CENTER,
-                textColor = new (1f, 1f, 1f, 1),
-            }
-        });
+            .Insert<CharacterSelectionScene>()
+            .Insert(ClayNode.Configure()
+                .WidthPercent(0.5f)
+                .HeightFit()
+                .Column()
+                .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_LEFT, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_TOP)
+                .Padding(8)
+                .Gap(4)
+                .Background(76, 76, 76, 255)
+                .Text("Select the character", 28, new Clay_Color(255, 255, 255, 255))
+                .Build());
+
+        var menuNode = ClayNode.Configure()
+            .WidthPercent(0.5f)
+            .HeightPercent(0.5f)
+            .Column()
+            .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_TOP)
+            .Padding(8)
+            .Gap(4)
+            .Background(76, 76, 76, 255)
+            .Build();
+
+        menuNode.Clip = new Clay_ClipElementConfig { vertical = true };
 
         var menu = commands.Spawn()
-        .Insert<CharacterSelectionScene>()
-        .InsertBundle(new UINodeBundle()
-        {
-            Node = new UINode()
-            {
-                Config = {
-                    backgroundColor = new (0.3f, 0.3f, 0.3f, 1),
-                    layout = {
-                        sizing = {
-                            width = Clay_SizingAxis.Percent(0.5f),
-                            height = Clay_SizingAxis.Percent(0.5f),
-                        },
-                        layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
-                        childAlignment = {
-                            x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER,
-                            y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_TOP,
-                        },
-                        padding = Clay_Padding.All(8),
-                        childGap = 4,
-                    },
-                    clip = {
-                        vertical = true
-                    }
-            }
-            }
-        });
+            .Insert<CharacterSelectionScene>()
+            .Insert(menuNode);
 
         root.AddChild(characterSelectionLabel);
         root.AddChild(menu);
@@ -143,40 +92,18 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
                 var characterEnt = commands.Spawn()
                     .Insert<CharacterSelectionScene>()
                     .Insert(character)
-                    .InsertBundle(new UINodeBundle()
-                    {
-                        Node = new UINode()
-                        {
-                            Config = {
-                            backgroundColor = new (0.6f, 0.6f, 0.6f, 1),
-                            layout = {
-                                sizing = {
-                                    width = Clay_SizingAxis.Percent(0.8f),
-                                    height = Clay_SizingAxis.Fit(0, 0),
-                                },
-                                layoutDirection = Clay_LayoutDirection.CLAY_TOP_TO_BOTTOM,
-                                childAlignment = {
-                                    x = Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER,
-                                    y = Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER,
-                                },
-                                padding = Clay_Padding.All(8),
-                                childGap = 4
-                            }
-                        }
-                        }
-                    })
-                    .Insert(new Text()
-                    {
-                        Value = character.Name,
-                        TextConfig =
-                        {
-                            fontId = 0,
-                            fontSize = 24,
-                            // textAlignment = Clay_TextAlignment.CLAY_TEXT_ALIGN_CENTER,
-                            textColor = new (1f, 1f, 1f, 1),
-                        }
-                    })
-                    .Insert(new UIMouseAction());
+                    .Insert(ClayNode.Configure()
+                        .WidthPercent(0.8f)
+                        .HeightFit()
+                        .Column()
+                        .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER)
+                        .Padding(8)
+                        .Gap(4)
+                        .Background(153, 153, 153, 255)
+                        .CornerRadius(8)
+                        .Text(character.Name, 24, new Clay_Color(255, 255, 255, 255))
+                        .Build())
+                    .Observe<On<ClayPointerEvent>, Res<NetClient>, Res<GameContext>, Query<Data<CharacterInfo>, With<CharacterSelectionScene>>>(CharacterSelected);
 
                 menu.AddChild(characterEnt);
             }
@@ -184,25 +111,25 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
     }
 
     private static void CharacterSelected(
+        On<ClayPointerEvent> trigger,
         Res<NetClient> network,
         Res<GameContext> gameCtx,
-        Query<
-            Data<CharacterInfo, UIMouseAction>,
-            Filter<Changed<UIMouseAction>, With<CharacterSelectionScene>>
-        > query)
+        Query<Data<CharacterInfo>, With<CharacterSelectionScene>> query
+    )
     {
-        foreach ((var characterInfo, var interaction) in query)
-        {
-            if (interaction.Ref is { IsPressed: true, Button: MouseButtonType.Left })
-            {
-                network.Value.Send_SelectCharacter(
-                    characterInfo.Ref.Index,
-                    characterInfo.Ref.Name,
-                    network.Value.LocalIP,
-                    gameCtx.Value.Protocol
-                );
-            }
-        }
+        if (!trigger.Event.IsLeftButton || trigger.Event.EventType != ClayPointerEventType.Click)
+            return;
+
+        if (!query.Contains(trigger.EntityId))
+            return;
+
+        var (_, characterInfo) = query.Get(trigger.EntityId);
+        network.Value.Send_SelectCharacter(
+            characterInfo.Ref.Index,
+            characterInfo.Ref.Name,
+            network.Value.LocalIP,
+            gameCtx.Value.Protocol
+        );
     }
 
     private struct CharacterSelectionScene;
