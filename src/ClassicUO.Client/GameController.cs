@@ -72,7 +72,13 @@ namespace ClassicUO
         {
             get
             {
-                return Window.ClientBounds;
+                var window_rectangle = Window.ClientBounds;
+                return new Rectangle(
+                    window_rectangle.X,
+                    window_rectangle.Y,
+                    (int)((float)(window_rectangle.Width) / DpiScale),
+                    (int)((float)(window_rectangle.Height) / DpiScale)
+                );
             }
         }
 
