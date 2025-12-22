@@ -134,14 +134,14 @@ namespace ClassicUO.Game.UI.Controls
             X = Mouse.Position.X + 5;
             Y = Mouse.Position.Y - 20;
 
-            if (X + _background.Width > Client.Game.Window.ClientBounds.Width)
+            if (X + _background.Width > Client.Game.ClientBounds.Width)
             {
-                X = Client.Game.Window.ClientBounds.Width - _background.Width;
+                X = Client.Game.ClientBounds.Width - _background.Width;
             }
 
-            if (Y + _background.Height > Client.Game.Window.ClientBounds.Height)
+            if (Y + _background.Height > Client.Game.ClientBounds.Height)
             {
-                Y = Client.Game.Window.ClientBounds.Height - _background.Height;
+                Y = Client.Game.ClientBounds.Height - _background.Height;
             }
 
             foreach (ContextMenuItem mitem in FindControls<ContextMenuItem>())

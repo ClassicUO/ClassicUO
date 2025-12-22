@@ -131,9 +131,9 @@ namespace ClassicUO.Game.UI.Controls
             {
                 comboY = 0;
             }
-            else if (comboY + _maxHeight > Client.Game.Window.ClientBounds.Height)
+            else if (comboY + _maxHeight > Client.Game.ClientBounds.Height)
             {
-                comboY = Client.Game.Window.ClientBounds.Height - _maxHeight;
+                comboY = Client.Game.ClientBounds.Height - _maxHeight;
             }
 
             UIManager.Add
