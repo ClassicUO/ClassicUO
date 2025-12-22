@@ -527,7 +527,16 @@ namespace ClassicUO
             base.Draw(gameTime);
         }
 
-        public float ScreenScale { get; set; } = Settings.GlobalSettings.ScreenScale;
+        private float _screenScale = Settings.GlobalSettings.ScreenScale;
+        public float ScreenScale {
+            get => _screenScale;
+            set {
+                if (value != _screenScale) {
+                    _screenScale = value;
+                    UO.GameCursor?.CreateGraphic(DpiScale);
+                }
+            }
+        }
 
         public float DpiScale
         {
