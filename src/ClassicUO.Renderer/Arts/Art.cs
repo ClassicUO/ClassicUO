@@ -147,6 +147,8 @@ namespace ClassicUO.Renderer.Arts
                 short curY = 0;
                 Color c = default;
 
+                int dpiScaleInt = (int)Math.Ceiling(dpiScale);
+
                 while (pixels_ptr < p_img_end)
                 {
                     curX = 0;
@@ -155,20 +157,20 @@ namespace ClassicUO.Renderer.Arts
                     {
                         if (*pixels_ptr != 0 && *pixels_ptr != 0xFF_00_00_00)
                         {
-                            if (curX >= width - 1 || curY >= height - 1)
+                            if (curX >= width - dpiScaleInt || curY >= height - dpiScaleInt)
                             {
                                 *pixels_ptr = 0;
                             }
-                            else if (curX == 0 || curY == 0)
+                            else if (curX < dpiScaleInt || curY < dpiScaleInt)
                             {
                                 if (*pixels_ptr == 0xFF_00_FF_00)
                                 {
-                                    if (curX == 0)
+                                    if (curX < dpiScaleInt)
                                     {
                                         hotY = curY;
                                     }
 
-                                    if (curY == 0)
+                                    if (curY < dpiScaleInt)
                                     {
                                         hotX = curX;
                                     }
