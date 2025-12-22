@@ -417,6 +417,9 @@
   <data name="GamePlayWindowPosition" xml:space="preserve">
     <value>Game Play Window Position: </value>
   </data>
+  <data name="ScreenZoom" xml:space="preserve">
+    <value>Screen zoom:</value>
+  </data>
   <data name="DefaultZoom" xml:space="preserve">
     <value>Default zoom:</value>
   </data>
