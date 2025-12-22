@@ -13,6 +13,7 @@ using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
+using SDL3;
 using System;
 using System.IO;
 using System.Net;
@@ -90,7 +91,10 @@ namespace ClassicUO.Game.Scenes
                 Client.Game.RestoreWindow();
             }
 
-            Client.Game.SetWindowSize(Client.Game.ScaleWithDpi(640), Client.Game.ScaleWithDpi(480));
+            int width = Client.Game.ScaleWithDpi(640);
+            int height = Client.Game.ScaleWithDpi(480);
+            SDL.SDL_SetWindowMinimumSize(Client.Game.Window.Handle, width, height);
+            Client.Game.SetWindowSize(width, height);
         }
 
 
