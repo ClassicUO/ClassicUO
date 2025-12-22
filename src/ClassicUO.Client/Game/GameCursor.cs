@@ -91,6 +91,10 @@ namespace ClassicUO.Game
             _tooltip = new Tooltip(world);
             _aura = new Aura(30);
 
+            CreateGraphic(dpiScale);
+        }
+
+        public void CreateGraphic(float dpiScale) {
             for (int i = 0; i < 3; i++)
             {
                 for (int j = 0; j < 16; j++)
@@ -117,6 +121,7 @@ namespace ClassicUO.Game
                     }
                 }
             }
+            _needGraphicUpdate = true;
         }
 
         public ushort Graphic
