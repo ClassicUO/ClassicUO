@@ -325,8 +325,8 @@ namespace ClassicUO.Game.Scenes
             _world.MessageManager.MessageReceived -= ChatOnMessageReceived;
 
             Settings.GlobalSettings.WindowSize = new Point(
-                Client.Game.Window.ClientBounds.Width,
-                Client.Game.Window.ClientBounds.Height
+                Client.Game.ClientBounds.Width,
+                Client.Game.ClientBounds.Height
             );
 
             Settings.GlobalSettings.IsWindowMaximized = Client.Game.IsWindowMaximized();

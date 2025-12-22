@@ -2541,8 +2541,8 @@ namespace ClassicUO.Network
                             );
                             bulletinBoard?.Dispose();
 
-                            int x = (Client.Game.Window.ClientBounds.Width >> 1) - 245;
-                            int y = (Client.Game.Window.ClientBounds.Height >> 1) - 205;
+                            int x = (Client.Game.ClientBounds.Width >> 1) - 245;
+                            int y = (Client.Game.ClientBounds.Height >> 1) - 205;
 
                             bulletinBoard = new BulletinBoardGump(world, item, x, y, p.ReadUTF8(22, true)); //p.ReadASCII(22));
                             UIManager.Add(bulletinBoard);
@@ -3007,8 +3007,8 @@ namespace ClassicUO.Network
             {
                 GrayMenuGump gump = new GrayMenuGump(world, serial, id, name)
                 {
-                    X = (Client.Game.Window.ClientBounds.Width >> 1) - 200,
-                    Y = (Client.Game.Window.ClientBounds.Height >> 1) - ((121 + count * 21) >> 1)
+                    X = (Client.Game.ClientBounds.Width >> 1) - 200,
+                    Y = (Client.Game.ClientBounds.Height >> 1) - ((121 + count * 21) >> 1)
                 };
 
                 int offsetY = 35 + gump.Height;
@@ -3248,8 +3248,8 @@ namespace ClassicUO.Network
 
             ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(0x0906);
 
-            int x = (Client.Game.Window.ClientBounds.Width >> 1) - (gumpInfo.UV.Width >> 1);
-            int y = (Client.Game.Window.ClientBounds.Height >> 1) - (gumpInfo.UV.Height >> 1);
+            int x = (Client.Game.ClientBounds.Width >> 1) - (gumpInfo.UV.Width >> 1);
+            int y = (Client.Game.ClientBounds.Height >> 1) - (gumpInfo.UV.Height >> 1);
 
             ColorPickerGump gump = UIManager.GetGump<ColorPickerGump>(serial);
 

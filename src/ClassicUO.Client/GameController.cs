@@ -67,6 +67,15 @@ namespace ClassicUO
         public UltimaOnline UO { get; } = new UltimaOnline();
         public IPluginHost PluginHost { get; private set; }
         public GraphicsDeviceManager GraphicManager { get; }
+
+        public Rectangle ClientBounds
+        {
+            get
+            {
+                return Window.ClientBounds;
+            }
+        }
+
         public readonly uint[] FrameDelay = new uint[2];
 
         private readonly List<(uint, Action)> _queuedActions = new ();

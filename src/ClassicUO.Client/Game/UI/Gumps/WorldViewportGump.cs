@@ -125,14 +125,14 @@ namespace ClassicUO.Game.UI.Gumps
                         h = targetHeight;
                     }
 
-                    if (w > Client.Game.Window.ClientBounds.Width - BORDER_WIDTH)
+                    if (w > Client.Game.ClientBounds.Width - BORDER_WIDTH)
                     {
-                        w = Client.Game.Window.ClientBounds.Width - BORDER_WIDTH;
+                        w = Client.Game.ClientBounds.Width - BORDER_WIDTH;
                     }
 
-                    if (h > Client.Game.Window.ClientBounds.Height - BORDER_WIDTH)
+                    if (h > Client.Game.ClientBounds.Height - BORDER_WIDTH)
                     {
-                        h = Client.Game.Window.ClientBounds.Height - BORDER_WIDTH;
+                        h = Client.Game.ClientBounds.Height - BORDER_WIDTH;
                     }
 
                     _lastSize.X = w;
@@ -160,9 +160,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             Point position = Location;
 
-            if (position.X + Width - BORDER_WIDTH > Client.Game.Window.ClientBounds.Width)
+            if (position.X + Width - BORDER_WIDTH > Client.Game.ClientBounds.Width)
             {
-                position.X = Client.Game.Window.ClientBounds.Width - (Width - BORDER_WIDTH);
+                position.X = Client.Game.ClientBounds.Width - (Width - BORDER_WIDTH);
             }
 
             if (position.X < -BORDER_WIDTH)
@@ -170,9 +170,9 @@ namespace ClassicUO.Game.UI.Gumps
                 position.X = -BORDER_WIDTH;
             }
 
-            if (position.Y + Height - BORDER_WIDTH > Client.Game.Window.ClientBounds.Height)
+            if (position.Y + Height - BORDER_WIDTH > Client.Game.ClientBounds.Height)
             {
-                position.Y = Client.Game.Window.ClientBounds.Height - (Height - BORDER_WIDTH);
+                position.Y = Client.Game.ClientBounds.Height - (Height - BORDER_WIDTH);
             }
 
             if (position.Y < -BORDER_WIDTH)
