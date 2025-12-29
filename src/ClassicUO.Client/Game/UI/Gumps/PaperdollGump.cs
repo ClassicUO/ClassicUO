@@ -11,6 +11,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using System;
+using System.Collections.Generic;
 using System.Xml;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -30,7 +31,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private GumpPic _picBase;
         private GumpPic _profilePic;
-        private readonly EquipmentSlot[] _slots = new EquipmentSlot[6];
+        private readonly List<EquipmentSlot> _slots = new List<EquipmentSlot>();
         private Label _titleLabel;
         private GumpPic _virtueMenuPic;
         private Button _warModeBtn;
@@ -258,17 +259,31 @@ namespace ClassicUO.Game.UI.Gumps
             _virtueMenuPic.MouseDoubleClick += VirtueMenu_MouseDoubleClickEvent;
 
             // Equipment slots for hat/earrings/neck/ring/bracelet
-            Add(_slots[0] = new EquipmentSlot(0, 2, 75, Layer.Helmet, this));
 
-            Add(_slots[1] = new EquipmentSlot(0, 2, 75 + 21, Layer.Earrings, this));
+            // add left
+            var initialPos = new Point(2, 70);
 
-            Add(_slots[2] = new EquipmentSlot(0, 2, 75 + 21 * 2, Layer.Necklace, this));
+            _slots.Add(new EquipmentSlot(0, initialPos.X, initialPos.Y, Layer.Helmet, this));
+            _slots.Add(new EquipmentSlot(0, initialPos.X, initialPos.Y + 21, Layer.Earrings, this));
+            _slots.Add(new EquipmentSlot(0, initialPos.X, initialPos.Y + 21 * 2, Layer.Necklace, this));
+            _slots.Add(new EquipmentSlot(0, initialPos.X, initialPos.Y + 21 * 3, Layer.Ring, this));
+            _slots.Add(new EquipmentSlot(0, initialPos.X, initialPos.Y + 21 * 4, Layer.Bracelet, this));
+            _slots.Add(new EquipmentSlot(0, initialPos.X, initialPos.Y + 21 * 5, Layer.Tunic, this));
+            _slots.Add(new EquipmentSlot(0, initialPos.X, initialPos.Y + 21 * 6, Layer.OneHanded, this));
+            _slots.Add(new EquipmentSlot(0, initialPos.X, initialPos.Y + 21 * 7, Layer.TwoHanded, this));
+            _slots.Add(new EquipmentSlot(0, initialPos.X, initialPos.Y + 21 * 8, Layer.Talisman, this));
 
-            Add(_slots[3] = new EquipmentSlot(0, 2, 75 + 21 * 3, Layer.Ring, this));
+            // add right
+            initialPos.X = 160 + 2;
+            _slots.Add(new EquipmentSlot(0, initialPos.X, initialPos.Y, Layer.Robe, this));
+            _slots.Add(new EquipmentSlot(0, initialPos.X, initialPos.Y + 21, Layer.Gloves, this));
+            _slots.Add(new EquipmentSlot(0, initialPos.X, initialPos.Y + 21 * 2, Layer.Pants, this));
+            _slots.Add(new EquipmentSlot(0, initialPos.X, initialPos.Y + 21 * 3, Layer.Arms, this));
+            _slots.Add(new EquipmentSlot(0, initialPos.X, initialPos.Y + 21 * 4, Layer.Cloak, this));
+            _slots.Add(new EquipmentSlot(0, initialPos.X, initialPos.Y + 21 * 5, Layer.Shoes, this));
 
-            Add(_slots[4] = new EquipmentSlot(0, 2, 75 + 21 * 4, Layer.Bracelet, this));
-
-            Add(_slots[5] = new EquipmentSlot(0, 2, 75 + 21 * 5, Layer.Tunic, this));
+            foreach (var slot in _slots)
+                Add(slot);
 
             // Paperdoll control!
             _paperDollInteractable = new PaperDollInteractable(8, 19, LocalSerial, this);
@@ -484,7 +499,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (World.TargetManager.TargetingState == CursorTarget.SetTargetClientSide)
                         {
-                            UIManager.Add(new InspectorGump(World,item));
+                            UIManager.Add(new InspectorGump(World, item));
                         }
                     }
                     else if (!World.DelayedObjectClickManager.IsEnabled)
@@ -545,7 +560,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (mobile != null)
             {
-                for (int i = 0; i < _slots.Length; i++)
+                for (int i = 0; i < _slots.Count; i++)
                 {
                     int idx = (int)_slots[i].Layer;
 
@@ -659,7 +674,7 @@ namespace ClassicUO.Game.UI.Gumps
                             ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(0x0804);
 
                             UIManager.Add(
-                                new HealthBarGump(World,LocalSerial)
+                                new HealthBarGump(World, LocalSerial)
                                 {
                                     X = Mouse.Position.X - (gumpInfo.UV.Width >> 1),
                                     Y = Mouse.Position.Y - 5
@@ -725,6 +740,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _itemGump?.Dispose();
                     _itemGump = null;
+                    SetTooltip($"{Layer} slot");
                 }
 
                 Mobile mobile = _paperDollGump.World.Mobiles.Get(_paperDollGump.LocalSerial);
