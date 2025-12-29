@@ -9,6 +9,8 @@ using Microsoft.Xna.Framework;
 using System;
 using MathHelper = Microsoft.Xna.Framework.MathHelper;
 using ClassicUO.Game.Map;
+using ClassicUO.IO.Audio;
+using ClassicUO.Configuration;
 
 namespace ClassicUO.Game
 {
@@ -29,10 +31,10 @@ namespace ClassicUO.Game
         private const float SIMULATION_TIME = 37.0f;
 
         // Density thresholds for rain visual styles
-        private const int DENSITY_SMALL_DOTS = 17;
-        private const int DENSITY_LARGE_DOTS = 35;
-        private const int DENSITY_SHORT_LINES = 52;
-        // Above 52 = long bolts
+        private const int DENSITY_SMALL_DOTS = 10;
+        private const int DENSITY_LARGE_DOTS = 30;
+        private const int DENSITY_SHORT_LINES = 50;
+        // Above 50 = long bolts
 
         private const float BASE_RAIN_SPEED_Y = 15.0f;
         private const float BASE_RAIN_SPEED_X = -2.5f;
@@ -54,27 +56,32 @@ namespace ClassicUO.Game
         // Foreground:  81-100% (19% fade zone) - appears closest, reaches near bottom
 
         // --- Splash Enable/Disable by Density ---
-        private const bool SPLASH_ENABLED_SMALL_DOTS = false;
-        // Enable splash effects for small dots (density 0-17)
+        private const bool SPLASH_ENABLED_SMALL_DOTS = true;
+        // Enable splash effects for small dots (density 0-10)
         // - false: No splashes for light drizzle (subtle, minimal effect)
         // - true: Splashes even at lowest density
-        
+
         private const bool SPLASH_ENABLED_LARGE_DOTS = true;
-        // Enable splash effects for large dots (density 18-35)
+        // Enable splash effects for large dots (density 11-30)
         // - false: No splashes for moderate rain
         // - true: Splashes appear at moderate density ✓ RECOMMENDED
-        
+
         private const bool SPLASH_ENABLED_SHORT_LINES = true;
-        // Enable splash effects for short lines (density 36-52)
+        // Enable splash effects for short lines (density 30-50)
         // - Always recommended to be true for heavy rain
-        
+
         private const bool SPLASH_ENABLED_LONG_BOLTS = true;
-        // Enable splash effects for long bolts (density 53-70)
+        // Enable splash effects for long bolts (density 50-70)
         // - Always recommended to be true for storm conditions
+
+        private const float RAIN_VOLUME_MULTIPLIER = 0.65f;
+        private const int MINOR_RAIN_SOUND_ID = 0x011;
+        private const int HEAVY_RAIN_SOUND_ID = 0x010;
 
         private readonly WeatherEffect[] _effects = new WeatherEffect[byte.MaxValue];
         private uint _timer, _windTimer, _lastTick;
         private readonly World _world;
+        private UOSound _currentRainSound;
 
         public Weather(World world)
         {
@@ -107,6 +114,7 @@ namespace ClassicUO.Game
             Wind = 0;
             _windTimer = _timer = 0;
             CurrentWeather = null;
+            StopRainSound();
         }
 
         public void Generate(WeatherType type, byte count, byte temp)
@@ -152,6 +160,9 @@ namespace ClassicUO.Game
 
                         CurrentWeather = type;
                     }
+
+                    // Start looping rain sound
+                    UpdateRainSound();
 
                     break;
 
@@ -439,6 +450,122 @@ namespace ClassicUO.Game
            PlaySound(RandomHelper.RandomList(0x028, 0x206));
         }
 
+        private void PlayMinorRain()
+        {
+            PlayRainSoundLoop(MINOR_RAIN_SOUND_ID);
+        }
+
+        private void PlayHeavyRain()
+        {
+            PlayRainSoundLoop(HEAVY_RAIN_SOUND_ID);
+        }
+
+        private void PlayRainSoundLoop(int soundId)
+        {
+            if (!_world.InGame || _world.Player == null)
+            {
+                return;
+            }
+
+            StopRainSound();
+
+            _currentRainSound = (UOSound)Client.Game.UO.Sounds.GetSound(soundId);
+            if (_currentRainSound != null)
+            {
+                Profile currentProfile = ProfileManager.CurrentProfile;
+                if (currentProfile == null || !currentProfile.EnableSound)
+                {
+                    return;
+                }
+
+                const float SOUND_DELTA = 250.0f;
+                float volume = currentProfile.SoundVolume / SOUND_DELTA;
+
+                if (!Client.Game.IsActive && !currentProfile.ReproduceSoundsInBackground)
+                {
+                    volume = 0;
+                }
+
+                // Rain sound is quieter than normal sound effects
+                volume *= RAIN_VOLUME_MULTIPLIER;
+
+                if (volume > 0 && volume <= 1.0f)
+                {
+                    _currentRainSound.IsLooping = true;
+
+                    if (_currentRainSound.Play(Time.Ticks, volume, 0.0f))
+                    {
+                        // Submit additional buffers upfront for seamless playback (prevents gaps)
+                        // DynamicSoundEffectInstance needs at least 3 buffers for smooth playback
+                        _currentRainSound.SubmitAdditionalBuffers(2);
+
+                        _currentRainSound.X = _world.Player.X;
+                        _currentRainSound.Y = _world.Player.Y;
+                        _currentRainSound.CalculateByDistance = false;
+                    }
+                    else
+                    {
+                        // If sound failed to play, clear the reference
+                        _currentRainSound.IsLooping = false;
+                        _currentRainSound = null;
+                    }
+                }
+            }
+        }
+
+        private void StopRainSound()
+        {
+            if (_currentRainSound != null)
+            {
+                _currentRainSound.IsLooping = false;
+                _currentRainSound.Stop();
+                _currentRainSound = null;
+            }
+        }
+
+        private void UpdateRainSound()
+        {
+            if (Type != WeatherType.WT_RAIN && Type != WeatherType.WT_STORM_APPROACH)
+            {
+                StopRainSound();
+                return;
+            }
+
+
+            // Check if we need to start or restart the rain sound
+            bool shouldPlaySound = Count > 0 && CurrentCount > 0;
+
+            if (!shouldPlaySound)
+            {
+                StopRainSound();
+                return;
+            }
+
+            // Determine if rain is minor or heavy based on density
+            // Minor: Count <= DENSITY_LARGE_DOTS (SmallDots + LargeDots)
+            // Heavy: Count > DENSITY_LARGE_DOTS (ShortLines + LongBolts)
+            bool shouldPlayHeavyRain = Count > DENSITY_LARGE_DOTS;
+
+            // Determine what sound should be playing
+            int expectedSoundId = shouldPlayHeavyRain ? HEAVY_RAIN_SOUND_ID : MINOR_RAIN_SOUND_ID;
+
+            // Only restart if we need to switch between minor/heavy, or if sound is not currently playing
+            // When looping is enabled, sound will continue automatically, so we only need to check for type changes
+            bool needsRestart = _currentRainSound == null || _currentRainSound.Index != expectedSoundId;
+
+            if (needsRestart)
+            {
+                if (shouldPlayHeavyRain)
+                {
+                    PlayHeavyRain();
+                }
+                else
+                {
+                    PlayMinorRain();
+                }
+            }
+        }
+
         private void PlaySound(int sound)
         {
             // randomize the sound of the weather around the player
@@ -492,6 +619,12 @@ namespace ClassicUO.Game
             {
                 _lastTick = Time.Ticks;
                 passed = 25;
+            }
+
+            // Update rain sound looping for rain weather types
+            if (Type == WeatherType.WT_RAIN || Type == WeatherType.WT_STORM_APPROACH)
+            {
+                UpdateRainSound();
             }
 
             bool windChanged = false;
