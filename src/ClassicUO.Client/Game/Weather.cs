@@ -74,7 +74,7 @@ namespace ClassicUO.Game
         // Enable splash effects for long bolts (density 50-70)
         // - Always recommended to be true for storm conditions
 
-        private const float RAIN_VOLUME_MULTIPLIER = 0.65f;
+        private const float RAIN_VOLUME_MULTIPLIER = 0.30f;
         private const int MINOR_RAIN_SOUND_ID = 0x011;
         private const int HEAVY_RAIN_SOUND_ID = 0x010;
 
@@ -94,14 +94,14 @@ namespace ClassicUO.Game
         public byte Count { get; private set; }
         public byte ScaledCount { get; private set; }
         public byte CurrentCount { get; private set; }
-        public byte Temperature{ get; private set; }
+        public byte Temperature { get; private set; }
         public sbyte Wind { get; private set; }
 
 
 
         private static float SinOscillate(float freq, int range, uint current_tick)
         {
-            float anglef = (int) (current_tick / 2.7777f * freq) % 360;
+            float anglef = (int)(current_tick / 2.7777f * freq) % 360;
 
             return Math.Sign(MathHelper.ToRadians(anglef)) * range;
         }
@@ -127,7 +127,7 @@ namespace ClassicUO.Game
             }
 
             Type = type;
-            Count = (byte) Math.Min(MAX_WEATHER_EFFECT, (int) count);
+            Count = (byte)Math.Min(MAX_WEATHER_EFFECT, (int)count);
             Temperature = temp;
             _timer = Time.Ticks + Constants.WEATHER_TIMER;
 
@@ -239,23 +239,23 @@ namespace ClassicUO.Game
             int tileOffY = _world.Player.Y;
             int playerAbsIsoX = (tileOffX - tileOffY) * 22;
             int playerAbsIsoY = (tileOffX + tileOffY) * 22;
-            
+
             int spreadX = Client.Game.Scene.Camera.Bounds.Width;
             int spreadY = Client.Game.Scene.Camera.Bounds.Height;
 
             for (int i = 0; i < _effects.Length; i++)
             {
                 ref WeatherEffect effect = ref _effects[i];
-                
+
                 // Initialize particles randomly around player position (original behavior)
                 // This creates natural scattered appearance at weather start
                 effect.WorldX = playerAbsIsoX + RandomHelper.GetValue(-spreadX, spreadX);
                 effect.WorldY = playerAbsIsoY + RandomHelper.GetValue(-spreadY, spreadY);
-                
+
                 effect.ID = (uint)i;
                 effect.ScaleRatio = RandomHelper.GetValue(0, 10) * 0.1f;
                 effect.RippleCreated = false; // Initialize ripple flag
-                
+
                 // Assign depth layer based on ScaleRatio (distribute evenly across 3 layers)
                 float depthValue = effect.ScaleRatio;  // Reuse existing 0.0-1.0 value
                 if (depthValue < 0.33f)
@@ -264,7 +264,7 @@ namespace ClassicUO.Game
                     effect.Depth = DepthLayer.Middle;
                 else
                     effect.Depth = DepthLayer.Foreground;
-                
+
                 // Assign random fade threshold based on depth layer for natural scattered depth
                 switch (effect.Depth)
                 {
@@ -273,13 +273,13 @@ namespace ClassicUO.Game
                         effect.FadeThreshold = RandomHelper.GetValue(0, 30) * 0.01f;  // 0.0 to 0.3
                         effect.NeverFade = false;
                         break;
-                        
+
                     case DepthLayer.Middle:
                         // Middle particles randomly fade in 31-70% range
                         effect.FadeThreshold = 0.31f + RandomHelper.GetValue(0, 39) * 0.01f;  // 0.31 to 0.70
                         effect.NeverFade = false;
                         break;
-                        
+
                     case DepthLayer.Foreground:
                         // Foreground: 50% never fade, 50% fade randomly in 71-100% range
                         if (RandomHelper.RandomBool())
@@ -366,7 +366,7 @@ namespace ClassicUO.Game
         private DepthProperties GetDepthProperties(DepthLayer layer, WeatherType weatherType)
         {
             DepthProperties props = new DepthProperties();
-            
+
             switch (layer)
             {
                 case DepthLayer.Background:
@@ -374,33 +374,33 @@ namespace ClassicUO.Game
                     props.SpeedMultiplier = 0.5f + (0.2f * RandomHelper.GetValue(0, 10) * 0.1f); // 50-70%
                     props.AlphaMultiplier = 0.4f + (0.2f * RandomHelper.GetValue(0, 10) * 0.1f); // 40-60%
                     props.TrailMultiplier = 0.4f + (0.2f * RandomHelper.GetValue(0, 10) * 0.1f); // 40-60%
-                    
+
                     // Atmospheric color tint (lighter for distance)
                     if (weatherType == WeatherType.WT_RAIN || weatherType == WeatherType.WT_STORM_APPROACH)
                         props.ColorTint = Color.Lerp(Color.LightBlue, Color.White, 0.5f);
                     else // Snow
                         props.ColorTint = Color.White;
                     break;
-                    
+
                 case DepthLayer.Middle:
                     props.SizeMultiplier = 0.85f + (0.15f * RandomHelper.GetValue(0, 10) * 0.1f); // 85-100%
                     props.SpeedMultiplier = 0.8f + (0.2f * RandomHelper.GetValue(0, 10) * 0.1f);  // 80-100%
                     props.AlphaMultiplier = 0.7f + (0.2f * RandomHelper.GetValue(0, 10) * 0.1f);  // 70-90%
                     props.TrailMultiplier = 0.8f + (0.2f * RandomHelper.GetValue(0, 10) * 0.1f);  // 80-100%
-                    
+
                     // Standard colors with subtle tint
                     if (weatherType == WeatherType.WT_RAIN || weatherType == WeatherType.WT_STORM_APPROACH)
                         props.ColorTint = Color.LightGray;
                     else
                         props.ColorTint = Color.White;
                     break;
-                    
+
                 case DepthLayer.Foreground:
                     props.SizeMultiplier = 1.1f + (0.4f * RandomHelper.GetValue(0, 10) * 0.1f); // 110-150%
                     props.SpeedMultiplier = 1.2f + (0.3f * RandomHelper.GetValue(0, 10) * 0.1f); // 120-150%
                     props.AlphaMultiplier = 0.9f + (0.1f * RandomHelper.GetValue(0, 10) * 0.1f); // 90-100%
                     props.TrailMultiplier = 1.2f + (0.3f * RandomHelper.GetValue(0, 10) * 0.1f); // 120-150%
-                    
+
                     // Darker/more saturated for proximity
                     if (weatherType == WeatherType.WT_RAIN || weatherType == WeatherType.WT_STORM_APPROACH)
                         props.ColorTint = Color.Gray;
@@ -408,7 +408,7 @@ namespace ClassicUO.Game
                         props.ColorTint = Color.Lerp(Color.White, Color.LightGray, 0.2f);
                     break;
             }
-            
+
             return props;
         }
 
@@ -447,7 +447,7 @@ namespace ClassicUO.Game
 
         private void PlayThunder()
         {
-           PlaySound(RandomHelper.RandomList(0x028, 0x206));
+            PlaySound(RandomHelper.RandomList(0x028, 0x206));
         }
 
         private void PlayMinorRain()
@@ -564,6 +564,39 @@ namespace ClassicUO.Game
                     PlayMinorRain();
                 }
             }
+            else
+            {
+                // Update volume to follow system sound effect volume changes
+                UpdateRainSoundVolume();
+            }
+        }
+
+        private void UpdateRainSoundVolume()
+        {
+            if (_currentRainSound == null || !_world.InGame || _world.Player == null)
+            {
+                return;
+            }
+
+            Profile currentProfile = ProfileManager.CurrentProfile;
+            if (currentProfile == null || !currentProfile.EnableSound)
+            {
+                _currentRainSound.Volume = 0;
+                return;
+            }
+
+            const float SOUND_DELTA = 250.0f;
+            float volume = currentProfile.SoundVolume / SOUND_DELTA;
+
+            if (!Client.Game.IsActive && !currentProfile.ReproduceSoundsInBackground)
+            {
+                volume = 0;
+            }
+
+            // Rain sound is kept at 50% of system sound effect volume
+            volume *= RAIN_VOLUME_MULTIPLIER;
+
+            _currentRainSound.Volume = Math.Clamp(volume, 0f, 1.0f);
         }
 
         private void PlaySound(int sound)
@@ -636,11 +669,11 @@ namespace ClassicUO.Game
                     windChanged = true;
                 }
 
-                _windTimer = Time.Ticks + (uint) (RandomHelper.GetValue(13, 19) * 1000);
+                _windTimer = Time.Ticks + (uint)(RandomHelper.GetValue(13, 19) * 1000);
 
                 sbyte lastWind = Wind;
 
-                Wind = (sbyte) RandomHelper.GetValue(0, 4);
+                Wind = (sbyte)RandomHelper.GetValue(0, 4);
 
                 if (RandomHelper.GetValue(0, 2) != 0)
                 {
@@ -689,10 +722,10 @@ namespace ClassicUO.Game
             int winGameCenterY = (winsize.Y >> 1) + (_world.Player.Z << 2);
             winGameCenterX -= (int)_world.Player.Offset.X;
             winGameCenterY -= (int)(_world.Player.Offset.Y - _world.Player.Offset.Z);
-            
+
             int viewportOffsetX = (tileOffX - tileOffY) * 22 - winGameCenterX;
             int viewportOffsetY = (tileOffX + tileOffY) * 22 - winGameCenterY;
-            
+
             int visibleRangeX = winsize.X;
             int visibleRangeY = winsize.Y;
 
@@ -706,7 +739,7 @@ namespace ClassicUO.Game
                 effect.Y = effect.WorldY - viewportOffsetY;
 
                 // Check if particle is outside visible viewport bounds
-                if (effect.X < -visibleRangeX || effect.X > visibleRangeX * 2 || 
+                if (effect.X < -visibleRangeX || effect.X > visibleRangeX * 2 ||
                     effect.Y < -visibleRangeY || effect.Y > visibleRangeY * 2)
                 {
                     if (removeEffects)
@@ -722,15 +755,15 @@ namespace ClassicUO.Game
 
                         continue;
                     }
-                    
+
                     // Respawn particle at top of viewport
                     // Calculate viewport top in world coordinates
                     int viewportTopY = viewportOffsetY - visibleRangeY;
                     int playerAbsIsoX = (tileOffX - tileOffY) * 22;
-                    
+
                     effect.WorldX = playerAbsIsoX + RandomHelper.GetValue(-visibleRangeX, visibleRangeX);
                     effect.WorldY = viewportTopY; // Spawn at exact top of viewport
-                    
+
                     // Recalculate viewport-relative position
                     effect.X = effect.WorldX - viewportOffsetX;
                     effect.Y = effect.WorldY - viewportOffsetY;
@@ -741,13 +774,13 @@ namespace ClassicUO.Game
                     case WeatherType.WT_RAIN:
                         float scaleRatio = effect.ScaleRatio;
                         RainRenderStyle rainStyle = GetRainRenderStyle();
-                        
+
                         // Get depth properties for this particle
                         DepthProperties depthProps = GetDepthProperties(effect.Depth, Type);
-                        
+
                         float baseSpeedY = BASE_RAIN_SPEED_Y;
                         float densitySpeedMultiplier = 1.0f;
-                        
+
                         // Higher density = faster speeds
                         switch (rainStyle)
                         {
@@ -764,7 +797,7 @@ namespace ClassicUO.Game
                                 densitySpeedMultiplier = 2.4f;
                                 break;
                         }
-                        
+
                         // Apply depth-based speed multiplier for parallax effect
                         effect.SpeedX = (BASE_RAIN_SPEED_X - scaleRatio) * densitySpeedMultiplier * depthProps.SpeedMultiplier;
                         effect.SpeedY = (baseSpeedY + scaleRatio) * densitySpeedMultiplier * depthProps.SpeedMultiplier;
@@ -830,9 +863,9 @@ namespace ClassicUO.Game
 
                         if (windChanged)
                         {
-                            effect.SpeedAngle = MathHelper.ToDegrees((float) Math.Atan2(effect.SpeedX, effect.SpeedY));
+                            effect.SpeedAngle = MathHelper.ToDegrees((float)Math.Atan2(effect.SpeedX, effect.SpeedY));
 
-                            effect.SpeedMagnitude = (float) Math.Sqrt(Math.Pow(effect.SpeedX, 2) + Math.Pow(effect.SpeedY, 2));
+                            effect.SpeedMagnitude = (float)Math.Sqrt(Math.Pow(effect.SpeedX, 2) + Math.Pow(effect.SpeedY, 2));
 
                             PlayThunder();
                         }
@@ -846,8 +879,8 @@ namespace ClassicUO.Game
 
                         float rad = MathHelper.ToRadians(speedAngle);
                         // Apply depth-based speed multiplier for parallax effect
-                        effect.SpeedX = speedMagnitude * (float) Math.Sin(rad) * snowStormProps.SpeedMultiplier;
-                        effect.SpeedY = speedMagnitude * (float) Math.Cos(rad) * snowStormProps.SpeedMultiplier;
+                        effect.SpeedX = speedMagnitude * (float)Math.Sin(rad) * snowStormProps.SpeedMultiplier;
+                        effect.SpeedY = speedMagnitude * (float)Math.Cos(rad) * snowStormProps.SpeedMultiplier;
 
                         break;
                 }
@@ -910,7 +943,7 @@ namespace ClassicUO.Game
                                             splashEnabled = SPLASH_ENABLED_LONG_BOLTS;
                                             break;
                                     }
-                                    
+
                                     // Create splash at current position (if enabled)
                                     if (splashEnabled)
                                     {
@@ -938,7 +971,7 @@ namespace ClassicUO.Game
                                     effect.WorldX = playerAbsIsoX + RandomHelper.GetValue(-visibleRangeX, visibleRangeX);
                                     effect.WorldY = viewportTopY; // Spawn at exact top of viewport
                                     effect.RippleCreated = false; // Reset ripple flag for respawned particle
-                                    
+
                                     // Re-randomize fade threshold for next cycle
                                     switch (effect.Depth)
                                     {
@@ -963,35 +996,35 @@ namespace ClassicUO.Game
                                             }
                                             break;
                                     }
-                                    
+
                                     continue; // Skip rendering, particle respawning
                                 }
                             }
-                            
+
                             // Calculate speed-based trail length
                             float speedMagnitude = (float)Math.Sqrt(effect.SpeedX * effect.SpeedX + effect.SpeedY * effect.SpeedY);
-                            
+
                             switch (rainStyle)
                             {
                                 case RainRenderStyle.SmallDots:
                                     // Apply depth-based size multiplier
                                     int smallDotSize = (int)(2 * rainDepthProps.SizeMultiplier);
                                     smallDotSize = Math.Max(2, smallDotSize);
-                                    
+
                                     Rectangle smallDotRect = new Rectangle(
-                                        newX - smallDotSize / 2, 
-                                        newY - smallDotSize / 2, 
-                                        smallDotSize, 
+                                        newX - smallDotSize / 2,
+                                        newY - smallDotSize / 2,
+                                        smallDotSize,
                                         smallDotSize
                                     );
-                                    
+
                                     // Apply alpha and color tint with proper visibility
                                     // 10% blend towards tint
                                     Color smallDotColor = Color.Lerp(Color.LightBlue, rainDepthProps.ColorTint, 0.1f);
                                     // Boost alpha for visibility (minimum 80% even for background)
                                     float smallDotAlpha = Math.Max(0.8f, rainDepthProps.AlphaMultiplier);
                                     smallDotColor *= smallDotAlpha;
-                                    
+
                                     batcher.Draw
                                     (
                                         SolidColorTextureCache.GetTexture(smallDotColor),
@@ -1000,26 +1033,26 @@ namespace ClassicUO.Game
                                         layerDepth
                                     );
                                     break;
-                                
+
                                 case RainRenderStyle.LargeDots:
                                     // Apply depth-based size multiplier
                                     int largeDotSize = (int)(2 * rainDepthProps.SizeMultiplier);
-                                    largeDotSize = Math.Max(2, largeDotSize); 
-                                    
+                                    largeDotSize = Math.Max(2, largeDotSize);
+
                                     Rectangle largeDotRect = new Rectangle(
-                                        newX - largeDotSize / 2, 
-                                        newY - largeDotSize / 2, 
-                                        largeDotSize, 
+                                        newX - largeDotSize / 2,
+                                        newY - largeDotSize / 2,
+                                        largeDotSize,
                                         largeDotSize
                                     );
-                                    
+
                                     // Apply alpha and color tint with better visibility
                                     // 20% blend towards tint
                                     Color largeDotColor = Color.Lerp(Color.CornflowerBlue, rainDepthProps.ColorTint, 0.2f);
                                     // Boost alpha for visibility (minimum 70% even for background)
                                     float largeDotAlpha = Math.Max(0.7f, rainDepthProps.AlphaMultiplier);
                                     largeDotColor *= largeDotAlpha;
-                                    
+
                                     batcher.Draw
                                     (
                                         SolidColorTextureCache.GetTexture(largeDotColor),
@@ -1028,37 +1061,37 @@ namespace ClassicUO.Game
                                         layerDepth
                                     );
                                     break;
-                                
+
                                 case RainRenderStyle.ShortLines:
                                     // Calculate depth-adjusted trail length
                                     float shortBaseTrail = 0.9f;
                                     float shortLineLength = speedMagnitude * shortBaseTrail * rainDepthProps.TrailMultiplier;
                                     int screenOfsx = newX - oldX;
                                     int screenOfsy = newY - oldY;
-                                    
+
                                     if (screenOfsx >= shortLineLength)
                                         oldX = (int)(newX - shortLineLength);
                                     else if (screenOfsx <= -shortLineLength)
                                         oldX = (int)(newX + shortLineLength);
-                                    
+
                                     if (screenOfsy >= shortLineLength)
                                         oldY = (int)(newY - shortLineLength);
                                     else if (screenOfsy <= -shortLineLength)
                                         oldY = (int)(newY + shortLineLength);
-                                    
+
                                     Vector2 shortStart = new Vector2(oldX, oldY);
                                     Vector2 shortEnd = new Vector2(newX, newY);
-                                    
+
                                     // Apply color and alpha - keep rain distinctly blue
                                     // 25% blend towards tint
                                     Color shortLineColor = Color.Lerp(Color.Gray, rainDepthProps.ColorTint, 0.25f);
                                     // Boost alpha for visibility
                                     float shortLineAlpha = Math.Max(0.65f, rainDepthProps.AlphaMultiplier);
                                     shortLineColor *= shortLineAlpha;
-                                    
+
                                     // Apply line width with depth
                                     int shortLineWidth = Math.Max(1, (int)(2 * rainDepthProps.SizeMultiplier));
-                                    
+
                                     batcher.DrawLine
                                     (
                                         SolidColorTextureCache.GetTexture(shortLineColor),
@@ -1069,35 +1102,35 @@ namespace ClassicUO.Game
                                         layerDepth
                                     );
                                     break;
-                                
+
                                 case RainRenderStyle.LongBolts:
                                     // Calculate depth-adjusted trail length
                                     float boltBaseTrail = 1.75f;
                                     float longBoltLength = speedMagnitude * boltBaseTrail * rainDepthProps.TrailMultiplier;
                                     int boltOfsx = newX - oldX;
                                     int boltOfsy = newY - oldY;
-                                    
+
                                     if (boltOfsx >= longBoltLength)
                                         oldX = (int)(newX - longBoltLength);
                                     else if (boltOfsx <= -longBoltLength)
                                         oldX = (int)(newX + longBoltLength);
-                                    
+
                                     if (boltOfsy >= longBoltLength)
                                         oldY = (int)(newY - longBoltLength);
                                     else if (boltOfsy <= -longBoltLength)
                                         oldY = (int)(newY + longBoltLength);
-                                    
+
                                     Vector2 boltStart = new Vector2(oldX, oldY);
                                     Vector2 boltEnd = new Vector2(newX, newY);
-                                    
+
                                     Color boltColor = Color.Lerp(Color.Gray, rainDepthProps.ColorTint, 0.25f);
                                     // Boost alpha for dramatic effect
                                     float boltAlpha = Math.Max(0.75f, rainDepthProps.AlphaMultiplier);
                                     boltColor *= boltAlpha;
-                                    
+
                                     // Apply line width with depth
                                     int boltLineWidth = Math.Max(1, (int)(3 * rainDepthProps.SizeMultiplier));
-                                    
+
                                     batcher.DrawLine
                                     (
                                         SolidColorTextureCache.GetTexture(boltColor),
