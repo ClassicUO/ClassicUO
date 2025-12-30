@@ -469,11 +469,11 @@ namespace ClassicUO.Game
 
             StopRainSound();
 
-            _currentRainSound = (UOSound)Client.Game.UO.Sounds.GetSound(soundId);
-            if (_currentRainSound != null)
+            UOSound rainSound = (UOSound)Client.Game.UO.Sounds.GetSound(soundId);
+            if (rainSound != null)
             {
                 Profile currentProfile = ProfileManager.CurrentProfile;
-                if (currentProfile == null || !currentProfile.EnableSound)
+                if (currentProfile == null || !currentProfile.EnableSound || !currentProfile.EnableRainSound)
                 {
                     return;
                 }
@@ -491,23 +491,25 @@ namespace ClassicUO.Game
 
                 if (volume > 0 && volume <= 1.0f)
                 {
-                    _currentRainSound.IsLooping = true;
+                    rainSound.IsLooping = true;
 
-                    if (_currentRainSound.Play(Time.Ticks, volume, 0.0f))
+                    if (rainSound.Play(Time.Ticks, volume, 0.0f))
                     {
                         // Submit additional buffers upfront for seamless playback (prevents gaps)
                         // DynamicSoundEffectInstance needs at least 3 buffers for smooth playback
-                        _currentRainSound.SubmitAdditionalBuffers(2);
+                        rainSound.SubmitAdditionalBuffers(2);
 
-                        _currentRainSound.X = _world.Player.X;
-                        _currentRainSound.Y = _world.Player.Y;
-                        _currentRainSound.CalculateByDistance = false;
+                        rainSound.X = _world.Player.X;
+                        rainSound.Y = _world.Player.Y;
+                        rainSound.CalculateByDistance = false;
+
+                        // Only set _currentRainSound after successfully starting playback
+                        _currentRainSound = rainSound;
                     }
                     else
                     {
-                        // If sound failed to play, clear the reference
-                        _currentRainSound.IsLooping = false;
-                        _currentRainSound = null;
+                        // If sound failed to play, ensure reference is cleared
+                        rainSound.IsLooping = false;
                     }
                 }
             }
@@ -579,7 +581,7 @@ namespace ClassicUO.Game
             }
 
             Profile currentProfile = ProfileManager.CurrentProfile;
-            if (currentProfile == null || !currentProfile.EnableSound)
+            if (currentProfile == null || !currentProfile.EnableSound || !currentProfile.EnableRainSound)
             {
                 _currentRainSound.Volume = 0;
                 return;
@@ -945,7 +947,7 @@ namespace ClassicUO.Game
                                     }
 
                                     // Create splash at current position (if enabled)
-                                    if (splashEnabled)
+                                    if (splashEnabled && ProfileManager.CurrentProfile?.EnableWeatherEffects == true)
                                     {
                                         if (!HasNonRenderingCoveringTileAtPosition(effect.WorldX, effect.WorldY))
                                         {
@@ -1363,14 +1365,16 @@ namespace ClassicUO.Game
                 }
             }
 
-            // Update and render splash effects (rain hitting ground)
-            float deltaTime = passed / 1000f; // Convert milliseconds to seconds
-            _world.SplashEffect.Update(deltaTime, viewportOffsetX, viewportOffsetY, visibleRangeX, visibleRangeY);
-            _world.SplashEffect.Draw(batcher, layerDepth);
+            // Only update and render if weather effects are enabled
+            if (ProfileManager.CurrentProfile?.EnableWeatherEffects == true)
+            {
+                float deltaTime = passed / 1000f; // Convert milliseconds to seconds
+                _world.SplashEffect.Update(deltaTime, viewportOffsetX, viewportOffsetY, visibleRangeX, visibleRangeY);
+                _world.SplashEffect.Draw(batcher, layerDepth);
 
-            // Update and render ripple effects (rain hitting water tiles)
-            _world.RippleEffect.Update(deltaTime, viewportOffsetX, viewportOffsetY, visibleRangeX, visibleRangeY);
-            _world.RippleEffect.Draw(batcher, layerDepth);
+                _world.RippleEffect.Update(deltaTime, viewportOffsetX, viewportOffsetY, visibleRangeX, visibleRangeY);
+                _world.RippleEffect.Draw(batcher, layerDepth);
+            }
 
             _lastTick = Time.Ticks;
         }

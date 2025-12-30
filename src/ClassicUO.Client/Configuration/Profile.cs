@@ -64,6 +64,7 @@ namespace ClassicUO.Configuration
         public bool EnableMusic { get; set; } = true;
         public int MusicVolume { get; set; } = 100;
         public bool EnableFootstepsSound { get; set; } = true;
+        public bool EnableRainSound { get; set; } = true;
         public bool EnableCombatMusic { get; set; } = true;
         public bool ReproduceSoundsInBackground { get; set; }
 
@@ -238,6 +239,7 @@ namespace ClassicUO.Configuration
         public int AuraUnderFeetType { get; set; } // 0 = NO, 1 = in warmode, 2 = ctrl+shift, 3 = always
         public bool AuraOnMouse { get; set; } = true;
         public bool AnimatedWaterEffect { get; set; } = false;
+        public bool EnableWeatherEffects { get; set; } = true;
 
         public bool PartyAura { get; set; }
 
