@@ -309,18 +309,18 @@ namespace ClassicUO.Game
 
         private enum RainRenderStyle
         {
-            SmallDots,      // 0-17
-            LargeDots,      // 18-35
-            ShortLines,     // 36-52
-            LongBolts       // 53-70
+            SmallDots,      
+            LargeDots,      
+            ShortLines,     
+            LongBolts       
         }
 
         private enum SnowRenderStyle
         {
-            LightFlakes,    // 0-17
-            MediumFlakes,   // 18-35
-            HeavyFlakes,    // 36-52
-            Blizzard        // 53-70
+            LightFlakes,    
+            MediumFlakes,   
+            HeavyFlakes,    
+            Blizzard        
         }
 
         private enum DepthLayer
@@ -546,7 +546,7 @@ namespace ClassicUO.Game
             // Determine if rain is minor or heavy based on density
             // Minor: Count <= DENSITY_LARGE_DOTS (SmallDots + LargeDots)
             // Heavy: Count > DENSITY_LARGE_DOTS (ShortLines + LongBolts)
-            bool shouldPlayHeavyRain = Count > DENSITY_LARGE_DOTS;
+            bool shouldPlayHeavyRain = Count > DENSITY_SHORT_LINES;
 
             // Determine what sound should be playing
             int expectedSoundId = shouldPlayHeavyRain ? HEAVY_RAIN_SOUND_ID : MINOR_RAIN_SOUND_ID;
@@ -781,16 +781,16 @@ namespace ClassicUO.Game
                         DepthProperties depthProps = GetDepthProperties(effect.Depth, Type);
 
                         float baseSpeedY = BASE_RAIN_SPEED_Y;
-                        float densitySpeedMultiplier = 1.0f;
+                        float densitySpeedMultiplier = 1.4f;
 
                         // Higher density = faster speeds
                         switch (rainStyle)
                         {
                             case RainRenderStyle.SmallDots:
-                                densitySpeedMultiplier = 1.0f;
+                                densitySpeedMultiplier = 1.4f;
                                 break;
                             case RainRenderStyle.LargeDots:
-                                densitySpeedMultiplier = 1.5f;
+                                densitySpeedMultiplier = 1.6f;
                                 break;
                             case RainRenderStyle.ShortLines:
                                 densitySpeedMultiplier = 1.8f;
@@ -1009,58 +1009,200 @@ namespace ClassicUO.Game
                             switch (rainStyle)
                             {
                                 case RainRenderStyle.SmallDots:
-                                    // Apply depth-based size multiplier
-                                    int smallDotSize = (int)(2 * rainDepthProps.SizeMultiplier);
+                                    // Multi-layer rendering for soft, glowing rain drops
+                                    int smallDotSize = (int)(3 * rainDepthProps.SizeMultiplier);
                                     smallDotSize = Math.Max(2, smallDotSize);
 
-                                    Rectangle smallDotRect = new Rectangle(
-                                        newX - smallDotSize / 2,
-                                        newY - smallDotSize / 2,
-                                        smallDotSize,
-                                        smallDotSize
-                                    );
+                                    // Base color for small rain drops - light blue
+                                    Color smallDotBaseColor = Color.Lerp(Color.LightBlue, rainDepthProps.ColorTint, 0.1f);
+                                    // Boost alpha for visibility
+                                    float smallDotBoostedAlpha = Math.Max(0.8f, rainDepthProps.AlphaMultiplier);
 
-                                    // Apply alpha and color tint with proper visibility
-                                    // 10% blend towards tint
-                                    Color smallDotColor = Color.Lerp(Color.LightBlue, rainDepthProps.ColorTint, 0.1f);
-                                    // Boost alpha for visibility (minimum 80% even for background)
-                                    float smallDotAlpha = Math.Max(0.8f, rainDepthProps.AlphaMultiplier);
-                                    smallDotColor *= smallDotAlpha;
+                                    // Outer layer (largest, most transparent - edge)
+                                    if (smallDotSize >= 2)
+                                    {
+                                        int outerSize = smallDotSize;
+                                        float outerAlpha = smallDotBoostedAlpha * 0.25f; // 25% of base alpha for outer edge
+                                        Color outerColor = smallDotBaseColor * outerAlpha;
+
+                                        Rectangle outerRect = new Rectangle(
+                                            newX - outerSize / 2,
+                                            newY - outerSize / 2,
+                                            outerSize,
+                                            outerSize
+                                        );
+
+                                        batcher.Draw
+                                        (
+                                            SolidColorTextureCache.GetTexture(outerColor),
+                                            outerRect,
+                                            Vector3.UnitZ,
+                                            layerDepth
+                                        );
+                                    }
+
+                                    // Middle-outer layer (75% size, 45% alpha)
+                                    if (smallDotSize >= 2)
+                                    {
+                                        int midOuterSize = Math.Max(1, (int)(smallDotSize * 0.75f));
+                                        float midOuterAlpha = smallDotBoostedAlpha * 0.45f;
+                                        Color midOuterColor = smallDotBaseColor * midOuterAlpha;
+
+                                        Rectangle midOuterRect = new Rectangle(
+                                            newX - midOuterSize / 2,
+                                            newY - midOuterSize / 2,
+                                            midOuterSize,
+                                            midOuterSize
+                                        );
+
+                                        batcher.Draw
+                                        (
+                                            SolidColorTextureCache.GetTexture(midOuterColor),
+                                            midOuterRect,
+                                            Vector3.UnitZ,
+                                            layerDepth + 0.0001f
+                                        );
+                                    }
+
+                                    // Middle layer (50% size, 70% alpha)
+                                    if (smallDotSize >= 2)
+                                    {
+                                        int middleSize = Math.Max(1, (int)(smallDotSize * 0.5f));
+                                        float middleAlpha = smallDotBoostedAlpha * 0.70f;
+                                        Color middleColor = smallDotBaseColor * middleAlpha;
+
+                                        Rectangle middleRect = new Rectangle(
+                                            newX - middleSize / 2,
+                                            newY - middleSize / 2,
+                                            middleSize,
+                                            middleSize
+                                        );
+
+                                        batcher.Draw
+                                        (
+                                            SolidColorTextureCache.GetTexture(middleColor),
+                                            middleRect,
+                                            Vector3.UnitZ,
+                                            layerDepth + 0.0002f
+                                        );
+                                    }
+
+                                    // Inner core (35% size, fully opaque)
+                                    int smallCoreSize = Math.Max(1, (int)(smallDotSize * 0.35f));
+                                    Color smallCoreColor = smallDotBaseColor * smallDotBoostedAlpha;
+
+                                    Rectangle smallCoreRect = new Rectangle(
+                                        newX - smallCoreSize / 2,
+                                        newY - smallCoreSize / 2,
+                                        smallCoreSize,
+                                        smallCoreSize
+                                    );
 
                                     batcher.Draw
                                     (
-                                        SolidColorTextureCache.GetTexture(smallDotColor),
-                                        smallDotRect,
+                                        SolidColorTextureCache.GetTexture(smallCoreColor),
+                                        smallCoreRect,
                                         Vector3.UnitZ,
-                                        layerDepth
+                                        layerDepth + 0.0003f
                                     );
                                     break;
 
                                 case RainRenderStyle.LargeDots:
-                                    // Apply depth-based size multiplier
-                                    int largeDotSize = (int)(2 * rainDepthProps.SizeMultiplier);
-                                    largeDotSize = Math.Max(2, largeDotSize);
+                                    // Multi-layer rendering for soft, glowing rain drops
+                                    int largeDotSize = (int)(4 * rainDepthProps.SizeMultiplier);
+                                    largeDotSize = Math.Max(3, largeDotSize);
 
-                                    Rectangle largeDotRect = new Rectangle(
-                                        newX - largeDotSize / 2,
-                                        newY - largeDotSize / 2,
-                                        largeDotSize,
-                                        largeDotSize
+                                    // Base color for large rain drops - cornflower blue (more saturated)
+                                    Color largeDotBaseColor = Color.Lerp(Color.CornflowerBlue, rainDepthProps.ColorTint, 0.2f);
+                                    // Boost alpha for visibility (more opaque than small dots)
+                                    float largeDotBoostedAlpha = Math.Max(0.9f, rainDepthProps.AlphaMultiplier);
+
+                                    // Outer layer (largest, most transparent - edge)
+                                    if (largeDotSize >= 2)
+                                    {
+                                        int outerSize = largeDotSize;
+                                        float outerAlpha = largeDotBoostedAlpha * 0.25f; // 25% of base alpha for outer edge
+                                        Color outerColor = largeDotBaseColor * outerAlpha;
+
+                                        Rectangle outerRect = new Rectangle(
+                                            newX - outerSize / 2,
+                                            newY - outerSize / 2,
+                                            outerSize,
+                                            outerSize
+                                        );
+
+                                        batcher.Draw
+                                        (
+                                            SolidColorTextureCache.GetTexture(outerColor),
+                                            outerRect,
+                                            Vector3.UnitZ,
+                                            layerDepth
+                                        );
+                                    }
+
+                                    // Middle-outer layer (75% size, 45% alpha)
+                                    if (largeDotSize >= 2)
+                                    {
+                                        int midOuterSize = Math.Max(1, (int)(largeDotSize * 0.75f));
+                                        float midOuterAlpha = largeDotBoostedAlpha * 0.45f;
+                                        Color midOuterColor = largeDotBaseColor * midOuterAlpha;
+
+                                        Rectangle midOuterRect = new Rectangle(
+                                            newX - midOuterSize / 2,
+                                            newY - midOuterSize / 2,
+                                            midOuterSize,
+                                            midOuterSize
+                                        );
+
+                                        batcher.Draw
+                                        (
+                                            SolidColorTextureCache.GetTexture(midOuterColor),
+                                            midOuterRect,
+                                            Vector3.UnitZ,
+                                            layerDepth + 0.0001f
+                                        );
+                                    }
+
+                                    // Middle layer (50% size, 70% alpha)
+                                    if (largeDotSize >= 2)
+                                    {
+                                        int middleSize = Math.Max(1, (int)(largeDotSize * 0.5f));
+                                        float middleAlpha = largeDotBoostedAlpha * 0.70f;
+                                        Color middleColor = largeDotBaseColor * middleAlpha;
+
+                                        Rectangle middleRect = new Rectangle(
+                                            newX - middleSize / 2,
+                                            newY - middleSize / 2,
+                                            middleSize,
+                                            middleSize
+                                        );
+
+                                        batcher.Draw
+                                        (
+                                            SolidColorTextureCache.GetTexture(middleColor),
+                                            middleRect,
+                                            Vector3.UnitZ,
+                                            layerDepth + 0.0002f
+                                        );
+                                    }
+
+                                    // Inner core (35% size, fully opaque)
+                                    int largeCoreSize = Math.Max(1, (int)(largeDotSize * 0.35f));
+                                    Color largeCoreColor = largeDotBaseColor * largeDotBoostedAlpha;
+
+                                    Rectangle largeCoreRect = new Rectangle(
+                                        newX - largeCoreSize / 2,
+                                        newY - largeCoreSize / 2,
+                                        largeCoreSize,
+                                        largeCoreSize
                                     );
-
-                                    // Apply alpha and color tint with better visibility
-                                    // 20% blend towards tint
-                                    Color largeDotColor = Color.Lerp(Color.CornflowerBlue, rainDepthProps.ColorTint, 0.2f);
-                                    // Boost alpha for visibility (minimum 70% even for background)
-                                    float largeDotAlpha = Math.Max(0.7f, rainDepthProps.AlphaMultiplier);
-                                    largeDotColor *= largeDotAlpha;
 
                                     batcher.Draw
                                     (
-                                        SolidColorTextureCache.GetTexture(largeDotColor),
-                                        largeDotRect,
+                                        SolidColorTextureCache.GetTexture(largeCoreColor),
+                                        largeCoreRect,
                                         Vector3.UnitZ,
-                                        layerDepth
+                                        layerDepth + 0.0003f
                                     );
                                     break;
 
