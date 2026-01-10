@@ -6,6 +6,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using MathHelper = Microsoft.Xna.Framework.MathHelper;
 using ClassicUO.Game.Map;
@@ -83,9 +84,34 @@ namespace ClassicUO.Game
         private readonly World _world;
         private UOSound _currentRainSound;
 
+        private static Texture2D _whiteTexture;
+        private static Texture2D WhiteTexture
+        {
+            get
+            {
+                if (_whiteTexture == null)
+                {
+                    Console.WriteLine("Initializing Weather WhiteTexture");
+                    _whiteTexture = SolidColorTextureCache.GetTexture(Color.White);
+                    Console.WriteLine("Initialized Weather WhiteTexture");
+                    if (_whiteTexture == null)
+                    {
+                        throw new Exception("Failed to initialize Weather WhiteTexture");
+                    }
+                }
+
+                return _whiteTexture;
+            }
+        }
+
         public Weather(World world)
         {
             _world = world;
+        }
+
+        private static Vector3 ColorToVector3(Color color)
+        {
+            return new Vector3(color.R / 255f, color.G / 255f, color.B / 255f);
         }
 
 
@@ -1034,9 +1060,9 @@ namespace ClassicUO.Game
 
                                         batcher.Draw
                                         (
-                                            SolidColorTextureCache.GetTexture(outerColor),
+                                            WhiteTexture,
                                             outerRect,
-                                            Vector3.UnitZ,
+                                            ColorToVector3(outerColor),
                                             layerDepth
                                         );
                                     }
@@ -1057,9 +1083,9 @@ namespace ClassicUO.Game
 
                                         batcher.Draw
                                         (
-                                            SolidColorTextureCache.GetTexture(midOuterColor),
+                                            WhiteTexture,
                                             midOuterRect,
-                                            Vector3.UnitZ,
+                                            ColorToVector3(midOuterColor),
                                             layerDepth + 0.0001f
                                         );
                                     }
@@ -1080,9 +1106,9 @@ namespace ClassicUO.Game
 
                                         batcher.Draw
                                         (
-                                            SolidColorTextureCache.GetTexture(middleColor),
+                                            WhiteTexture,
                                             middleRect,
-                                            Vector3.UnitZ,
+                                            ColorToVector3(middleColor),
                                             layerDepth + 0.0002f
                                         );
                                     }
@@ -1100,9 +1126,9 @@ namespace ClassicUO.Game
 
                                     batcher.Draw
                                     (
-                                        SolidColorTextureCache.GetTexture(smallCoreColor),
+                                        WhiteTexture,
                                         smallCoreRect,
-                                        Vector3.UnitZ,
+                                        ColorToVector3(smallCoreColor),
                                         layerDepth + 0.0003f
                                     );
                                     break;
@@ -1133,9 +1159,9 @@ namespace ClassicUO.Game
 
                                         batcher.Draw
                                         (
-                                            SolidColorTextureCache.GetTexture(outerColor),
+                                            WhiteTexture,
                                             outerRect,
-                                            Vector3.UnitZ,
+                                            ColorToVector3(outerColor),
                                             layerDepth
                                         );
                                     }
@@ -1156,9 +1182,9 @@ namespace ClassicUO.Game
 
                                         batcher.Draw
                                         (
-                                            SolidColorTextureCache.GetTexture(midOuterColor),
+                                            WhiteTexture,
                                             midOuterRect,
-                                            Vector3.UnitZ,
+                                            ColorToVector3(midOuterColor),
                                             layerDepth + 0.0001f
                                         );
                                     }
@@ -1179,9 +1205,9 @@ namespace ClassicUO.Game
 
                                         batcher.Draw
                                         (
-                                            SolidColorTextureCache.GetTexture(middleColor),
+                                            WhiteTexture,
                                             middleRect,
-                                            Vector3.UnitZ,
+                                            ColorToVector3(middleColor),
                                             layerDepth + 0.0002f
                                         );
                                     }
@@ -1199,9 +1225,9 @@ namespace ClassicUO.Game
 
                                     batcher.Draw
                                     (
-                                        SolidColorTextureCache.GetTexture(largeCoreColor),
+                                        WhiteTexture,
                                         largeCoreRect,
-                                        Vector3.UnitZ,
+                                        ColorToVector3(largeCoreColor),
                                         layerDepth + 0.0003f
                                     );
                                     break;
@@ -1238,10 +1264,10 @@ namespace ClassicUO.Game
 
                                     batcher.DrawLine
                                     (
-                                        SolidColorTextureCache.GetTexture(shortLineColor),
+                                        WhiteTexture,
                                         shortStart,
                                         shortEnd,
-                                        Vector3.UnitZ,
+                                        ColorToVector3(shortLineColor),
                                         shortLineWidth,
                                         layerDepth
                                     );
@@ -1277,10 +1303,10 @@ namespace ClassicUO.Game
 
                                     batcher.DrawLine
                                     (
-                                        SolidColorTextureCache.GetTexture(boltColor),
+                                        WhiteTexture,
                                         boltStart,
                                         boltEnd,
-                                        Vector3.UnitZ,
+                                        ColorToVector3(boltColor),
                                         boltLineWidth,
                                         layerDepth
                                     );
@@ -1309,10 +1335,10 @@ namespace ClassicUO.Game
 
                             batcher.DrawLine
                             (
-                                SolidColorTextureCache.GetTexture(Color.Blue),
+                                WhiteTexture,
                                 start,
                                 end,
-                                Vector3.UnitZ,
+                                ColorToVector3(Color.Blue),
                                 2,
                                 layerDepth
                             );
@@ -1431,9 +1457,9 @@ namespace ClassicUO.Game
 
                             batcher.Draw
                             (
-                                SolidColorTextureCache.GetTexture(outerColor),
+                                WhiteTexture,
                                 outerRect,
-                                Vector3.UnitZ,
+                                ColorToVector3(outerColor),
                                 layerDepth
                             );
                         }
@@ -1454,9 +1480,9 @@ namespace ClassicUO.Game
 
                             batcher.Draw
                             (
-                                SolidColorTextureCache.GetTexture(midOuterColor),
+                                WhiteTexture,
                                 midOuterRect,
-                                Vector3.UnitZ,
+                                ColorToVector3(midOuterColor),
                                 layerDepth + 0.0001f
                             );
                         }
@@ -1477,9 +1503,9 @@ namespace ClassicUO.Game
 
                             batcher.Draw
                             (
-                                SolidColorTextureCache.GetTexture(middleColor),
+                                WhiteTexture,
                                 middleRect,
-                                Vector3.UnitZ,
+                                ColorToVector3(middleColor),
                                 layerDepth + 0.0002f
                             );
                         }
@@ -1497,9 +1523,9 @@ namespace ClassicUO.Game
 
                         batcher.Draw
                         (
-                            SolidColorTextureCache.GetTexture(coreColor),
+                            WhiteTexture,
                             coreRect,
-                            Vector3.UnitZ,
+                            ColorToVector3(coreColor),
                             layerDepth + 0.0003f
                         );
 
