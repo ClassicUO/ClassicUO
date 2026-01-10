@@ -37,7 +37,7 @@ namespace ClassicUO.Game
         private const int DENSITY_SHORT_LINES = 50;
         // Above 50 = long bolts
 
-        private const float BASE_RAIN_SPEED_Y = 15.0f;
+        private const float BASE_RAIN_SPEED_Y = 20.0f;
         private const float BASE_RAIN_SPEED_X = -2.5f;
         private const float BASE_STORM_APPROACH_SPEED_Y = 6.0f;
         private const float BASE_STORM_APPROACH_SPEED_X = 4.0f;
@@ -1036,7 +1036,7 @@ namespace ClassicUO.Game
                             {
                                 case RainRenderStyle.SmallDots:
                                     // Multi-layer rendering for soft, glowing rain drops
-                                    int smallDotSize = (int)(3 * rainDepthProps.SizeMultiplier);
+                                    int smallDotSize = (int)(2 * rainDepthProps.SizeMultiplier);
                                     smallDotSize = Math.Max(2, smallDotSize);
 
                                     // Base color for small rain drops - light blue
@@ -1135,8 +1135,8 @@ namespace ClassicUO.Game
 
                                 case RainRenderStyle.LargeDots:
                                     // Multi-layer rendering for soft, glowing rain drops
-                                    int largeDotSize = (int)(4 * rainDepthProps.SizeMultiplier);
-                                    largeDotSize = Math.Max(3, largeDotSize);
+                                    int largeDotSize = (int)(3 * rainDepthProps.SizeMultiplier);
+                                    largeDotSize = Math.Max(2, largeDotSize);
 
                                     // Base color for large rain drops - cornflower blue (more saturated)
                                     Color largeDotBaseColor = Color.Lerp(Color.CornflowerBlue, rainDepthProps.ColorTint, 0.2f);
