@@ -75,7 +75,7 @@ namespace ClassicUO.Game
         // Enable splash effects for long bolts (density 50-70)
         // - Always recommended to be true for storm conditions
 
-        private const float RAIN_VOLUME_MULTIPLIER = 0.30f;
+        private const float RAIN_VOLUME_MULTIPLIER = 0.20f;
         private const int MINOR_RAIN_SOUND_ID = 0x011;
         private const int HEAVY_RAIN_SOUND_ID = 0x010;
 
@@ -84,19 +84,41 @@ namespace ClassicUO.Game
         private readonly World _world;
         private UOSound _currentRainSound;
 
+        // White texture for RGBA drawing - lazy initialized with defensive error handling
         private static Texture2D _whiteTexture;
+        private static bool _whiteTextureInitFailed = false;
+        private static bool _whiteTextureWarningLogged = false;
+
+        /// <summary>
+        /// Gets the white texture for RGBA drawing with defensive initialization.
+        /// Returns null if initialization fails (with warning logged once).
+        /// </summary>
         private static Texture2D WhiteTexture
         {
             get
             {
+                // If we previously failed to initialize, don't keep trying
+                if (_whiteTextureInitFailed)
+                {
+                    return null;
+                }
+
                 if (_whiteTexture == null)
                 {
-                    Console.WriteLine("Initializing Weather WhiteTexture");
-                    _whiteTexture = SolidColorTextureCache.GetTexture(Color.White);
-                    Console.WriteLine("Initialized Weather WhiteTexture");
-                    if (_whiteTexture == null)
+                    try
                     {
-                        throw new Exception("Failed to initialize Weather WhiteTexture");
+                        _whiteTexture = SolidColorTextureCache.GetTexture(Color.White);
+
+                        if (_whiteTexture == null)
+                        {
+                            _whiteTextureInitFailed = true;
+                            LogWarning("Failed to initialize Weather WhiteTexture - SolidColorTextureCache returned null");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _whiteTextureInitFailed = true;
+                        LogWarning($"Exception during Weather WhiteTexture initialization: {ex.Message}");
                     }
                 }
 
@@ -109,9 +131,97 @@ namespace ClassicUO.Game
             _world = world;
         }
 
+        /// <summary>
+        /// Logs a warning message to console (only once to avoid spam).
+        /// </summary>
+        private static void LogWarning(string message)
+        {
+            if (!_whiteTextureWarningLogged)
+            {
+                Console.WriteLine($"[Weather] WARNING: {message}");
+                Console.WriteLine("[Weather] Weather effects will not render. This is a non-critical error.");
+                _whiteTextureWarningLogged = true;
+            }
+        }
+
+        /// <summary>
+        /// Converts a Color to Vector3 for RGBA drawing with validation.
+        /// Returns white color if input is invalid.
+        /// </summary>
         private static Vector3 ColorToVector3(Color color)
         {
-            return new Vector3(color.R / 255f, color.G / 255f, color.B / 255f);
+            try
+            {
+                // Defensive: clamp values to valid range [0, 1]
+                float r = Math.Clamp(color.R / 255f, 0f, 1f);
+                float g = Math.Clamp(color.G / 255f, 0f, 1f);
+                float b = Math.Clamp(color.B / 255f, 0f, 1f);
+
+                return new Vector3(r, g, b);
+            }
+            catch
+            {
+                // Fallback to white if conversion fails
+                return Vector3.One;
+            }
+        }
+
+        /// <summary>
+        /// Safely executes a draw operation with defensive checks.
+        /// Returns true if draw succeeded, false otherwise.
+        /// </summary>
+        private static bool SafeDraw(
+            UltimaBatcher2D batcher,
+            Texture2D texture,
+            Rectangle destinationRect,
+            Vector3 color,
+            float layerDepth)
+        {
+            if (texture == null || batcher == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                batcher.Draw(texture, destinationRect, color, layerDepth);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogWarning($"Draw operation failed: {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Safely executes a DrawLine operation with defensive checks.
+        /// Returns true if draw succeeded, false otherwise.
+        /// </summary>
+        private static bool SafeDrawLine(
+            UltimaBatcher2D batcher,
+            Texture2D texture,
+            Vector2 start,
+            Vector2 end,
+            Vector3 color,
+            int width,
+            float layerDepth)
+        {
+            if (texture == null || batcher == null)
+            {
+                return false;
+            }
+
+            try
+            {
+                batcher.DrawLine(texture, start, end, color, width, layerDepth);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                LogWarning($"DrawLine operation failed: {ex.Message}");
+                return false;
+            }
         }
 
 
@@ -1058,8 +1168,9 @@ namespace ClassicUO.Game
                                             outerSize
                                         );
 
-                                        batcher.Draw
+                                        SafeDraw
                                         (
+                                            batcher,
                                             WhiteTexture,
                                             outerRect,
                                             ColorToVector3(outerColor),
@@ -1081,8 +1192,9 @@ namespace ClassicUO.Game
                                             midOuterSize
                                         );
 
-                                        batcher.Draw
+                                        SafeDraw
                                         (
+                                            batcher,
                                             WhiteTexture,
                                             midOuterRect,
                                             ColorToVector3(midOuterColor),
@@ -1104,8 +1216,9 @@ namespace ClassicUO.Game
                                             middleSize
                                         );
 
-                                        batcher.Draw
+                                        SafeDraw
                                         (
+                                            batcher,
                                             WhiteTexture,
                                             middleRect,
                                             ColorToVector3(middleColor),
@@ -1124,8 +1237,9 @@ namespace ClassicUO.Game
                                         smallCoreSize
                                     );
 
-                                    batcher.Draw
+                                    SafeDraw
                                     (
+                                        batcher,
                                         WhiteTexture,
                                         smallCoreRect,
                                         ColorToVector3(smallCoreColor),
@@ -1157,8 +1271,9 @@ namespace ClassicUO.Game
                                             outerSize
                                         );
 
-                                        batcher.Draw
+                                        SafeDraw
                                         (
+                                            batcher,
                                             WhiteTexture,
                                             outerRect,
                                             ColorToVector3(outerColor),
@@ -1180,8 +1295,9 @@ namespace ClassicUO.Game
                                             midOuterSize
                                         );
 
-                                        batcher.Draw
+                                        SafeDraw
                                         (
+                                            batcher,
                                             WhiteTexture,
                                             midOuterRect,
                                             ColorToVector3(midOuterColor),
@@ -1203,8 +1319,9 @@ namespace ClassicUO.Game
                                             middleSize
                                         );
 
-                                        batcher.Draw
+                                        SafeDraw
                                         (
+                                            batcher,
                                             WhiteTexture,
                                             middleRect,
                                             ColorToVector3(middleColor),
@@ -1223,8 +1340,9 @@ namespace ClassicUO.Game
                                         largeCoreSize
                                     );
 
-                                    batcher.Draw
+                                    SafeDraw
                                     (
+                                        batcher,
                                         WhiteTexture,
                                         largeCoreRect,
                                         ColorToVector3(largeCoreColor),
@@ -1262,8 +1380,9 @@ namespace ClassicUO.Game
                                     // Apply line width with depth
                                     int shortLineWidth = Math.Max(1, (int)(2 * rainDepthProps.SizeMultiplier));
 
-                                    batcher.DrawLine
+                                    SafeDrawLine
                                     (
+                                        batcher,
                                         WhiteTexture,
                                         shortStart,
                                         shortEnd,
@@ -1301,8 +1420,9 @@ namespace ClassicUO.Game
                                     // Apply line width with depth
                                     int boltLineWidth = Math.Max(1, (int)(3 * rainDepthProps.SizeMultiplier));
 
-                                    batcher.DrawLine
+                                    SafeDrawLine
                                     (
+                                        batcher,
                                         WhiteTexture,
                                         boltStart,
                                         boltEnd,
@@ -1333,8 +1453,9 @@ namespace ClassicUO.Game
                             Vector2 start = new Vector2(oldX, oldY);
                             Vector2 end = new Vector2(newX, newY);
 
-                            batcher.DrawLine
+                            SafeDrawLine
                             (
+                                batcher,
                                 WhiteTexture,
                                 start,
                                 end,
@@ -1455,8 +1576,9 @@ namespace ClassicUO.Game
                                 outerSize
                             );
 
-                            batcher.Draw
+                            SafeDraw
                             (
+                                batcher,
                                 WhiteTexture,
                                 outerRect,
                                 ColorToVector3(outerColor),
@@ -1478,8 +1600,9 @@ namespace ClassicUO.Game
                                 midOuterSize
                             );
 
-                            batcher.Draw
+                            SafeDraw
                             (
+                                batcher,
                                 WhiteTexture,
                                 midOuterRect,
                                 ColorToVector3(midOuterColor),
@@ -1501,8 +1624,9 @@ namespace ClassicUO.Game
                                 middleSize
                             );
 
-                            batcher.Draw
+                            SafeDraw
                             (
+                                batcher,
                                 WhiteTexture,
                                 middleRect,
                                 ColorToVector3(middleColor),
@@ -1521,8 +1645,9 @@ namespace ClassicUO.Game
                             coreSize
                         );
 
-                        batcher.Draw
+                        SafeDraw
                         (
+                            batcher,
                             WhiteTexture,
                             coreRect,
                             ColorToVector3(coreColor),
