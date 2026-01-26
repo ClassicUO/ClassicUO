@@ -38,6 +38,7 @@ namespace ClassicUO
         private readonly RenderLists _renderLists = new();
         private bool _suppressedDraw;
         private bool _pluginsInitialized = false;
+        private float _displayScale;
 
         public GameController(IPluginHost pluginHost)
         {
@@ -107,6 +108,8 @@ namespace ClassicUO
             SDL_SetEventFilter(_filter, IntPtr.Zero);
 
             Microsoft.Xna.Framework.Input.TextInputEXT.StartTextInput();
+
+            _displayScale = DpiScale;
 
             base.Initialize();
         }
@@ -543,9 +546,9 @@ namespace ClassicUO
             get => SDL_GetWindowDisplayScale(Window.Handle) * ScreenScale;
         }
 
-        public int ScaleWithDpi(int value)
+        public int ScaleWithDpi(int value, float previousDpi = 1)
         {
-            return (int)Math.Round(value * DpiScale);
+            return (int)Math.Round((value / previousDpi) * DpiScale);
         }
 
         protected override bool BeginDraw()
@@ -558,7 +561,12 @@ namespace ClassicUO
             int width = Window.ClientBounds.Width;
             int height = Window.ClientBounds.Height;
 
-            if (!IsWindowMaximized())
+            WindowOnClientSizeChanged(width, height);
+        }
+
+        private void WindowOnClientSizeChanged(int width, int height)
+        {
+            if (!IsWindowMaximized() && Window.AllowUserResizing)
             {
                 if (ProfileManager.CurrentProfile != null)
                     ProfileManager.CurrentProfile.WindowClientBounds = new Point(width, height);
@@ -882,6 +890,33 @@ namespace ClassicUO
                     Mouse.ButtonRelease(buttonType);
                     Mouse.Update();
 
+                    break;
+                }
+                case SDL_EventType.SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
+                case SDL_EventType.SDL_EVENT_WINDOW_DISPLAY_CHANGED:
+                {
+                    // when starting scaled, SDL will raise the scale changed event before the window has properly loaded and the previous scale set
+                    if (_displayScale != 0 && _displayScale != DpiScale)
+                    {
+                        // The effective DPI scale has changed. SDL handles the window content automatically
+                        // but we need to make sure to resize the window properly
+                        // This is especially important when the window size is restricted, for example
+                        // in the LoginScene
+                        WindowOnClientSizeChanged(
+                            Client.Game.ScaleWithDpi(Window.ClientBounds.Width, previousDpi: _displayScale),
+                            Client.Game.ScaleWithDpi(Window.ClientBounds.Height, previousDpi: _displayScale)
+                        );
+
+                        SDL_GetWindowMinimumSize(Client.Game.Window.Handle, out int previousMinWidth, out int previousMinHeight);
+
+                        SDL_SetWindowMinimumSize(
+                            Client.Game.Window.Handle,
+                            Client.Game.ScaleWithDpi(previousMinWidth, previousDpi: _displayScale),
+                            Client.Game.ScaleWithDpi(previousMinHeight, previousDpi: _displayScale)
+                        );
+
+                        _displayScale = DpiScale;
+                    }
                     break;
                 }
             }
