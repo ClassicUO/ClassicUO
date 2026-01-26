@@ -4,7 +4,6 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Renderer.Lights;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 using System;
@@ -129,6 +128,10 @@ namespace ClassicUO.Game.UI.Gumps
                     size = MAX_SIZE;
                 }
                 _rectSize = size;
+
+                MinH = size + BoderSize * 2;
+                MinW = size + BoderSize * 2;
+
                 SnapToGrid();
                 SetupLayout();
             }
@@ -231,7 +234,7 @@ namespace ClassicUO.Game.UI.Gumps
             for (int i = 0; i < _dataBox.Children.Count; i++)
             {
                 CounterItem c = _dataBox.Children[i] as CounterItem;
-                if ( c != null && !c.IsDisposed)
+                if (c != null && !c.IsDisposed)
                 {
                     c.X = x + BORDER_LEFT;
                     c.Y = y + BORDER_TOP;
