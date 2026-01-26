@@ -4190,6 +4190,10 @@ namespace ClassicUO.Game.UI.Gumps
                     counterGump.IsEnabled = counterGump.IsVisible = _currentProfile.CounterBarEnabled;
                 }
             }
+            else if (counterGump != null)
+            {
+                counterGump.SetCellSize(_currentProfile.CounterBarCellSize);
+            }
 
             // experimental
             // Reset nested checkboxes if parent checkbox is unchecked
