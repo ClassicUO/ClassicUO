@@ -2036,7 +2036,8 @@ namespace ClassicUO.Game.UI.Gumps
                             gY,
                             halfWidth,
                             halfHeight,
-                            Zoom
+                            Zoom,
+                            layerDepth
                         );
                     }
                 }
@@ -2672,7 +2673,8 @@ namespace ClassicUO.Game.UI.Gumps
             int y,
             int width,
             int height,
-            float zoom
+            float zoom,
+            float layerDepth
         )
         {
             int sx = multiX - _center.X;
@@ -2719,7 +2721,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _flipMap ? Microsoft.Xna.Framework.MathHelper.ToRadians(45) : 0,
                 new Vector2(0.5f, 0.5f),
                 SpriteEffects.None,
-                0
+                layerDepth
             );
         }
 

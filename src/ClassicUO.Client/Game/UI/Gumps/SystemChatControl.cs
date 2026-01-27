@@ -564,8 +564,11 @@ namespace ClassicUO.Game.UI.Gumps
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
             int yy = TextBoxControl.Y + y - 20;
+            var scale = 1f;
 
             LinkedListNode<ChatLineTime> last = _textEntries.Last;
+
+            var depth = layerDepthRef;
 
             renderLists.AddGumpNoAtlas(batcher =>
             {
@@ -583,7 +586,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (yy >= y)
                         {
-                            last.Value.Draw(batcher, x + 2, yy);
+                            last.Value.Draw(batcher, x + 2, yy, depth, scale);
                         }
                     }
 
@@ -1101,9 +1104,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
 
-            public bool Draw(UltimaBatcher2D batcher, int x, int y)
+            public bool Draw(UltimaBatcher2D batcher, int x, int y, float depth, float scale = 1f)
             {
-                return !IsDisposed && _renderedText.Draw(batcher, x, y, 0f /*, ShaderHueTranslator.GetHueVector(0, false, _alpha, true)*/);
+                return !IsDisposed && _renderedText.Draw(batcher, x, y, depth, scale: scale /*, ShaderHueTranslator.GetHueVector(0, false, _alpha, true)*/);
             }
 
             public override string ToString()
