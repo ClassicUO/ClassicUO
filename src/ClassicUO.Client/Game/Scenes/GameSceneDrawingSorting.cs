@@ -325,7 +325,7 @@ namespace ClassicUO.Game.Scenes
 
         private bool ProcessAlpha(
             GameObject obj,
-            ref StaticTiles itemData,
+            ref readonly StaticTiles itemData,
             bool useCoT,
             ref Vector2 playerPos,
             int cotZ,
@@ -963,16 +963,15 @@ namespace ClassicUO.Game.Scenes
                         }
 
                     case GameEffect effect:
-                        if (
-                                            !ProcessAlpha(
-                                                obj,
-                                                ref Client.Game.UO.FileManager.TileData.StaticData[effect.Graphic],
-                                                false,
-                                                ref playerScreePos,
-                                                cotZ,
-                                                out _
-                                            )
-                                        )
+                        ref readonly var stTiles = ref (effect.Graphic < Client.Game.UO.FileManager.TileData.StaticData.Length ? ref Client.Game.UO.FileManager.TileData.StaticData[effect.Graphic] : ref StaticTiles.Invalid);
+                        if (!ProcessAlpha(
+                                obj,
+                                in stTiles,
+                                false,
+                                ref playerScreePos,
+                                cotZ,
+                                out _
+                            ))
                         {
                             continue;
                         }
