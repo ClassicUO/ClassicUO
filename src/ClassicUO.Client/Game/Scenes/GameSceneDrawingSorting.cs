@@ -963,10 +963,10 @@ namespace ClassicUO.Game.Scenes
                         }
 
                     case GameEffect effect:
-                        ref readonly var stTiles = ref (effect.Graphic < Client.Game.UO.FileManager.TileData.StaticData.Length ? ref Client.Game.UO.FileManager.TileData.StaticData[effect.Graphic] : ref StaticTiles.Invalid);
-                        if (!ProcessAlpha(
+                        if (effect is not LightningEffect &&
+                            !ProcessAlpha(
                                 obj,
-                                in stTiles,
+                                ref Client.Game.UO.FileManager.TileData.StaticData[effect.Graphic],
                                 false,
                                 ref playerScreePos,
                                 cotZ,
