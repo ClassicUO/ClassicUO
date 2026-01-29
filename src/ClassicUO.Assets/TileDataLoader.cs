@@ -47,10 +47,15 @@ namespace ClassicUO.Assets
             }
             else
             {
-                for (var i = 0; i < 512; ++i)
+                for (var i = 0; i < 512 * 32; ++i)
                 {
-                    var tiles = tileData.Read<LandGroupNew>();
-                    foreach (ref readonly var t in tiles.Tiles)
+                    if (i > 0)
+                    {
+                        var header = tileData.ReadUInt32();
+                    }
+
+                    var tiles = tileData.Read<LandTilesNewArray32>();
+                    foreach (ref readonly var t in tiles)
                     {
                         landTiles.Add(new LandTiles((ulong)t.Flags, t.TexID, Encoding.UTF8.GetString(t.Name).Trim('\0')));
                     }
