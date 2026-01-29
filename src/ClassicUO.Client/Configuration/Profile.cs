@@ -267,6 +267,10 @@ namespace ClassicUO.Configuration
 
         public bool ScaleItemsInsideContainers { get; set; }
 
+        public bool UseItemBoxesInContainers { get; set; } = false;
+
+        public byte ItemBoxPadding { get; set; } = 5;
+
         public bool DoubleClickToLootInsideContainers { get; set; }
 
         public bool UseLargeContainerGumps { get; set; } = false;
