@@ -6034,38 +6034,39 @@ namespace ClassicUO.Network
                     Console.WriteLine("ADD ITEM TO CONTAINER -- CLEAR HOLD");
                     Client.Game.UO.GameCursor.ItemHold.Clear();
                 }
-
+        
                 //else if (ItemHold.Graphic == graphic && ItemHold.Amount == amount &&
                 //         ItemHold.Container == containerSerial)
                 //{
-                //    ItemHold.Enabled = false;
+               //     ItemHold.Enabled = false;
                 //    ItemHold.Dropped = false;
                 //}
             }
-
+        
             Entity container = world.Get(containerSerial);
-
+        
             if (container == null)
             {
                 Log.Warn($"No container ({containerSerial}) found");
-
+        
                 //container = world.GetOrCreateItem(containerSerial);
                 return;
             }
-
+        
             Item item = world.Items.Get(serial);
-
+        
             if (SerialHelper.IsMobile(serial))
             {
                 world.RemoveMobile(serial, true);
                 Log.Warn("AddItemToContainer function adds mobile as Item");
             }
-
-            if (item != null && (container.Graphic != 0x2006 || item.Layer == Layer.Invalid))
+        
+            // Added item.Container != containerSerial to prevent closing containers when changing facets
+            if (item != null && item.Container != containerSerial && (container.Graphic != 0x2006 || item.Layer == Layer.Invalid))
             {
                 world.RemoveItem(item, true);
             }
-
+        
             item = world.GetOrCreateItem(serial);
             item.Graphic = graphic;
             item.CheckGraphicChange();
@@ -6074,16 +6075,22 @@ namespace ClassicUO.Network
             item.X = x;
             item.Y = y;
             item.Z = 0;
-
-            world.RemoveItemFromContainer(item);
-            item.Container = containerSerial;
+        
+            // Added item.Container != containerSerial to prevent closing containers when changing facets
+            // Should not need to remove it just to add it back in
+            if (item.Container != containerSerial)
+            {
+                world.RemoveItemFromContainer(item);
+                item.Container = containerSerial;
+            }
+        
             container.PushToBack(item);
-
+        
             if (SerialHelper.IsMobile(containerSerial))
             {
                 Mobile m = world.Mobiles.Get(containerSerial);
                 Item secureBox = m?.GetSecureTradeBox();
-
+        
                 if (secureBox != null)
                 {
                     UIManager.GetTradingGump(secureBox)?.RequestUpdateContents();
@@ -6096,62 +6103,57 @@ namespace ClassicUO.Network
             else if (SerialHelper.IsItem(containerSerial))
             {
                 Gump gump = UIManager.GetGump<BulletinBoardGump>(containerSerial);
-
+        
                 if (gump != null)
                 {
-                    NetClient.Socket.Send_BulletinBoardRequestMessageSummary(
-                        containerSerial,
-                        serial
-                    );
+                    NetClient.Socket.Send_BulletinBoardRequestMessageSummary(containerSerial, serial);
                 }
                 else
                 {
                     gump = UIManager.GetGump<SpellbookGump>(containerSerial);
-
+        
                     if (gump == null)
                     {
                         gump = UIManager.GetGump<ContainerGump>(containerSerial);
-
+        
                         if (gump != null)
                         {
                             ((ContainerGump)gump).CheckItemControlPosition(item);
                         }
-
+        
                         if (ProfileManager.CurrentProfile.GridLootType > 0)
                         {
-                            GridLootGump grid_gump = UIManager.GetGump<GridLootGump>(
-                                containerSerial
-                            );
-
-                            if (
-                                grid_gump == null
+                            GridLootGump grid_gump = UIManager.GetGump<GridLootGump>(containerSerial);
+        
+                            if (grid_gump == null
                                 && SerialHelper.IsValid(_requestedGridLoot)
-                                && _requestedGridLoot == containerSerial
-                            )
+                                && _requestedGridLoot == containerSerial)
                             {
                                 grid_gump = new GridLootGump(world, _requestedGridLoot);
                                 UIManager.Add(grid_gump);
                                 _requestedGridLoot = 0;
                             }
-
+        
                             grid_gump?.RequestUpdateContents();
                         }
                     }
-
+        
                     if (gump != null)
                     {
                         if (SerialHelper.IsItem(containerSerial))
                         {
                             ((Item)container).Opened = true;
                         }
-
+        
                         gump.RequestUpdateContents();
                     }
                 }
             }
-
+        
             UIManager.GetTradingGump(containerSerial)?.RequestUpdateContents();
         }
+
+
 
         private static void UpdateGameObject(
             World world,
