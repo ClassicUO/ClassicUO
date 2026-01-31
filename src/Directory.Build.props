@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <LangVersion>Preview</LangVersion>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
     <InvariantGlobalization>true</InvariantGlobalization>
