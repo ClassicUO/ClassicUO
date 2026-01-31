@@ -492,8 +492,6 @@ namespace ClassicUO
             _uoSpriteBatch.GraphicsDevice.SetRenderTarget(_renderTargets.UiRenderTarget);
             GraphicsDevice.Clear(Color.Transparent);
 
-            UIManager.Draw(_uoSpriteBatch);
-
             if ((UO.World?.InGame ?? false) && SelectedObject.Object is TextObject t)
             {
                 if (t.IsTextGump)
@@ -514,7 +512,11 @@ namespace ClassicUO
             {
                 Scene.DrawUI(_uoSpriteBatch);
             }
+            _uoSpriteBatch.End();
 
+            UIManager.Draw(_uoSpriteBatch);
+
+            _uoSpriteBatch.Begin();
             UO.GameCursor?.Draw(_uoSpriteBatch);
             _uoSpriteBatch.End();
 
