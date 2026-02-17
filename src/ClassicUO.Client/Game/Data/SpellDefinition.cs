@@ -229,6 +229,27 @@ namespace ClassicUO.Game.Data
 
         public static SpellDefinition FullIndexGetSpell(int fullidx)
         {
+            // Handle Vystia custom spells (1000-1383)
+            if (fullidx >= 1000)
+            {
+                if (fullidx < 1384)
+                {
+                    if (fullidx < 1031) return SpellsVystiaIceMagic.GetSpell(fullidx);
+                    if (fullidx < 1063) return SpellsVystiaNature.GetSpell(fullidx);
+                    if (fullidx < 1095) return SpellsVystiaHex.GetSpell(fullidx);
+                    if (fullidx < 1127) return SpellsVystiaElemental.GetSpell(fullidx);
+                    if (fullidx < 1159) return SpellsVystiaDark.GetSpell(fullidx);
+                    if (fullidx < 1191) return SpellsVystiaDivination.GetSpell(fullidx);
+                    if (fullidx < 1223) return SpellsVystiaNecromancy.GetSpell(fullidx);
+                    if (fullidx < 1255) return SpellsVystiaSummoning.GetSpell(fullidx);
+                    if (fullidx < 1287) return SpellsVystiaShamanic.GetSpell(fullidx);
+                    if (fullidx < 1319) return SpellsVystiaBardic.GetSpell(fullidx);
+                    if (fullidx < 1351) return SpellsVystiaEnchanting.GetSpell(fullidx);
+                    if (fullidx < 1383) return SpellsVystiaIllusion.GetSpell(fullidx);
+                }
+                return EmptySpell;
+            }
+
             if (fullidx < 1 || fullidx > 799)
             {
                 return EmptySpell;
@@ -287,52 +308,80 @@ namespace ClassicUO.Game.Data
             params Reagents[] regs
         )
         {
+            // Handle Vystia custom spells (1000-1383)
+            if (fullidx >= 1000 && fullidx < 1384)
+            {
+                SpellDefinition sd = FullIndexGetSpell(fullidx);
+
+                if (sd.ID == fullidx)
+                {
+                    if (iconid == 0) iconid = sd.GumpIconID;
+                    if (smalliconid == 0) smalliconid = sd.GumpIconSmallID;
+                    if (tithing == 0) tithing = sd.TithingCost;
+                    if (manacost == 0) manacost = sd.ManaCost;
+                    if (minskill == 0) minskill = sd.MinSkill;
+
+                    if (!string.IsNullOrEmpty(sd.PowerWords) && sd.PowerWords != words)
+                        WordToTargettype.Remove(sd.PowerWords);
+                    if (!string.IsNullOrEmpty(sd.Name) && sd.Name != name)
+                        WordToTargettype.Remove(sd.Name);
+                }
+
+                sd = new SpellDefinition(name, fullidx, iconid, smalliconid, words, manacost, minskill, tithing, target, regs);
+
+                if (fullidx < 1032)
+                    SpellsVystiaIceMagic.SetSpell(id, in sd);
+                // TODO: Add remaining Vystia spell schools when implemented
+
+                return;
+            }
+
             if (fullidx < 1 || fullidx > 799)
             {
                 return;
             }
 
-            SpellDefinition sd = FullIndexGetSpell(fullidx);
+            SpellDefinition sd2 = FullIndexGetSpell(fullidx);
 
-            if (sd.ID == fullidx) //we are not using an emptyspell spelldefinition
+            if (sd2.ID == fullidx) //we are not using an emptyspell spelldefinition
             {
                 if (iconid == 0)
                 {
-                    iconid = sd.GumpIconID;
+                    iconid = sd2.GumpIconID;
                 }
 
                 if (smalliconid == 0)
                 {
-                    smalliconid = sd.GumpIconSmallID;
+                    smalliconid = sd2.GumpIconSmallID;
                 }
 
                 if (tithing == 0)
                 {
-                    tithing = sd.TithingCost;
+                    tithing = sd2.TithingCost;
                 }
 
                 if (manacost == 0)
                 {
-                    manacost = sd.ManaCost;
+                    manacost = sd2.ManaCost;
                 }
 
                 if (minskill == 0)
                 {
-                    minskill = sd.MinSkill;
+                    minskill = sd2.MinSkill;
                 }
 
-                if (!string.IsNullOrEmpty(sd.PowerWords) && sd.PowerWords != words)
+                if (!string.IsNullOrEmpty(sd2.PowerWords) && sd2.PowerWords != words)
                 {
-                    WordToTargettype.Remove(sd.PowerWords);
+                    WordToTargettype.Remove(sd2.PowerWords);
                 }
 
-                if (!string.IsNullOrEmpty(sd.Name) && sd.Name != name)
+                if (!string.IsNullOrEmpty(sd2.Name) && sd2.Name != name)
                 {
-                    WordToTargettype.Remove(sd.Name);
+                    WordToTargettype.Remove(sd2.Name);
                 }
             }
 
-            sd = new SpellDefinition
+            sd2 = new SpellDefinition
             (
                 name,
                 fullidx,
@@ -348,35 +397,35 @@ namespace ClassicUO.Game.Data
 
             if (fullidx < 100)
             {
-                SpellsMagery.SetSpell(id, in sd);
+                SpellsMagery.SetSpell(id, in sd2);
             }
             else if (fullidx < 200)
             {
-                SpellsNecromancy.SetSpell(id, in sd);
+                SpellsNecromancy.SetSpell(id, in sd2);
             }
             else if (fullidx < 300)
             {
-                SpellsChivalry.SetSpell(id, in sd);
+                SpellsChivalry.SetSpell(id, in sd2);
             }
             else if (fullidx < 500)
             {
-                SpellsBushido.SetSpell(id, in sd);
+                SpellsBushido.SetSpell(id, in sd2);
             }
             else if (fullidx < 600)
             {
-                SpellsNinjitsu.SetSpell(id, in sd);
+                SpellsNinjitsu.SetSpell(id, in sd2);
             }
             else if (fullidx < 678)
             {
-                SpellsSpellweaving.SetSpell(id, in sd);
+                SpellsSpellweaving.SetSpell(id, in sd2);
             }
             else if (fullidx < 700)
             {
-                SpellsMysticism.SetSpell(id - 77, in sd);
+                SpellsMysticism.SetSpell(id - 77, in sd2);
             }
             else
             {
-                SpellsMastery.SetSpell(id, in sd);
+                SpellsMastery.SetSpell(id, in sd2);
             }
         }
     }
