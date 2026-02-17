@@ -27,9 +27,6 @@ namespace ClassicUO.Renderer
 
         [FileEmbed.FileEmbed("fonts/map5_font.xnb")]
         public static partial ReadOnlySpan<byte> GetMap5Font();
-
-        [FileEmbed.FileEmbed("fonts/map6_font.xnb")]
-        public static partial ReadOnlySpan<byte> GetMap6Font();
     }
 
     public static class Fonts
@@ -43,7 +40,6 @@ namespace ClassicUO.Renderer
             Map3 = SpriteFont.Create(device, FontResources.GetMap3Font());
             Map4 = SpriteFont.Create(device, FontResources.GetMap4Font());
             Map5 = SpriteFont.Create(device, FontResources.GetMap5Font());
-            Map6 = SpriteFont.Create(device, FontResources.GetMap6Font());
         }
 
         public static SpriteFont Regular { get; private set; }
@@ -53,6 +49,5 @@ namespace ClassicUO.Renderer
         public static SpriteFont Map3 { get; private set; }
         public static SpriteFont Map4 { get; private set; }
         public static SpriteFont Map5 { get; private set; }
-        public static SpriteFont Map6 { get; private set; }
     }
 }

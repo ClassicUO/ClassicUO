@@ -150,8 +150,11 @@ namespace ClassicUO.Game.UI.Controls
             {
                 body = 0xC835;
             }
-            // Vystia: Removed GM robe special handling for 0x03DB (987) - now used for male dwarf
-            // Male dwarves fall through to standard male paperdoll below
+            else if (mobile.Graphic == 0x03DB)
+            {
+                body = 0x000C;
+                hue = 0x03EA;
+            }
             else if (mobile.IsFemale)
             {
                 body = 0x000D;
@@ -164,7 +167,16 @@ namespace ClassicUO.Game.UI.Controls
             // body
             Add(new GumpPic(0, 0, body, hue) { IsPartialHue = true });
 
-            // Vystia: Removed GM robe overlay gump (0xC72B) for 0x03DB - now used for male dwarf
+            if (mobile.Graphic == 0x03DB)
+            {
+                Add(
+                    new GumpPic(0, 0, 0xC72B, mobile.Hue)
+                    {
+                        AcceptMouseInput = true,
+                        IsPartialHue = true
+                    }
+                );
+            }
 
             // equipment
             Item equipItem = mobile.FindItemByLayer(Layer.Cloak);

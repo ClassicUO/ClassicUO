@@ -245,6 +245,36 @@ namespace ClassicUO.Game.Managers
                     Add(g);
                 }
             }
+
+            // Add Vystia skill groups if not already present
+            AddVystiaGroupsIfMissing();
+        }
+
+        /// <summary>
+        /// Adds Vystia skill groups if they don't already exist in the loaded groups
+        /// </summary>
+        private void AddVystiaGroupsIfMissing()
+        {
+            // Check if Vystia Magic group exists
+            bool hasVystiaMagic = false;
+            bool hasVystiaMartial = false;
+
+            foreach (var g in Groups)
+            {
+                if (g.Name == "Vystia Magic") hasVystiaMagic = true;
+                if (g.Name == "Vystia Martial") hasVystiaMartial = true;
+            }
+
+            // Always add Vystia groups if not present (skills 58-83 are Vystia custom skills)
+            if (!hasVystiaMagic)
+            {
+                MakeDefaultVystiaMagic();
+            }
+
+            if (!hasVystiaMartial)
+            {
+                MakeDefaultVystiaMartial();
+            }
         }
 
 
@@ -286,6 +316,17 @@ namespace ClassicUO.Game.Managers
                 MakeDefaultWilderness();
                 MakeDefaultThieving();
                 MakeDefaultBard();
+            }
+
+            // Always add Vystia skill groups if the skills exist
+            int skillCount = Client.Game.UO.FileManager.Skills.SkillsCount;
+            if (skillCount > 58)
+            {
+                MakeDefaultVystiaMagic();
+            }
+            if (skillCount > 70)
+            {
+                MakeDefaultVystiaMartial();
             }
 
             foreach (SkillsGroup g in Groups)
@@ -450,6 +491,60 @@ namespace ClassicUO.Game.Managers
             g.Add(29);
             g.Add(9);
             g.Add(22);
+
+            Add(g);
+        }
+
+        /// <summary>
+        /// Vystia Magic class skills (IDs 58-69)
+        /// </summary>
+        private void MakeDefaultVystiaMagic()
+        {
+            int count = Client.Game.UO.FileManager.Skills.SkillsCount;
+            SkillsGroup g = new SkillsGroup();
+            g.Name = "Vystia Magic";
+
+            // Add skills 58-69 if they exist
+            if (count > 58) g.Add(58);  // Cryomancy
+            if (count > 59) g.Add(59);  // Demonology
+            if (count > 60) g.Add(60);  // Necromantic Arts
+            if (count > 61) g.Add(61);  // Druidism
+            if (count > 62) g.Add(62);  // Elementalism
+            if (count > 63) g.Add(63);  // Bardic Lore
+            if (count > 64) g.Add(64);  // Hexcraft
+            if (count > 65) g.Add(65);  // Divination
+            if (count > 66) g.Add(66);  // Conjuration
+            if (count > 67) g.Add(67);  // Spirit Calling
+            if (count > 68) g.Add(68);  // Runeweaving
+            if (count > 69) g.Add(69);  // Illusion Magic
+
+            Add(g);
+        }
+
+        /// <summary>
+        /// Vystia Martial class skills (IDs 70-83)
+        /// </summary>
+        private void MakeDefaultVystiaMartial()
+        {
+            int count = Client.Game.UO.FileManager.Skills.SkillsCount;
+            SkillsGroup g = new SkillsGroup();
+            g.Name = "Vystia Martial";
+
+            // Add skills 70-83 if they exist
+            if (count > 70) g.Add(70);  // Berserking
+            if (count > 71) g.Add(71);  // Subterfuge
+            if (count > 72) g.Add(72);  // Martial Arts
+            if (count > 73) g.Add(73);  // Chivalric Arts
+            if (count > 74) g.Add(74);  // Holy Devotion
+            if (count > 75) g.Add(75);  // Marksmanship
+            if (count > 76) g.Add(76);  // Combat Mastery
+            if (count > 77) g.Add(77);  // Zealotry
+            if (count > 78) g.Add(78);  // Manhunting
+            if (count > 79) g.Add(79);  // Beast Bonding
+            if (count > 80) g.Add(80);  // Engineering
+            if (count > 81) g.Add(81);  // Transmutation
+            if (count > 82) g.Add(82);  // Divine Grace
+            if (count > 83) g.Add(83);  // Arcane Studies
 
             Add(g);
         }

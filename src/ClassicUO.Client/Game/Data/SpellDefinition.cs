@@ -229,23 +229,24 @@ namespace ClassicUO.Game.Data
 
         public static SpellDefinition FullIndexGetSpell(int fullidx)
         {
-            // Handle Vystia custom spells (1000-1383)
+            // Handle Vystia custom spells (1000-1415)
             if (fullidx >= 1000)
             {
-                if (fullidx < 1384)
+                if (fullidx < 1416)
                 {
-                    if (fullidx < 1031) return SpellsVystiaIceMagic.GetSpell(fullidx);
-                    if (fullidx < 1063) return SpellsVystiaNature.GetSpell(fullidx);
-                    if (fullidx < 1095) return SpellsVystiaHex.GetSpell(fullidx);
-                    if (fullidx < 1127) return SpellsVystiaElemental.GetSpell(fullidx);
-                    if (fullidx < 1159) return SpellsVystiaDark.GetSpell(fullidx);
-                    if (fullidx < 1191) return SpellsVystiaDivination.GetSpell(fullidx);
-                    if (fullidx < 1223) return SpellsVystiaNecromancy.GetSpell(fullidx);
-                    if (fullidx < 1255) return SpellsVystiaSummoning.GetSpell(fullidx);
-                    if (fullidx < 1287) return SpellsVystiaShamanic.GetSpell(fullidx);
-                    if (fullidx < 1319) return SpellsVystiaBardic.GetSpell(fullidx);
-                    if (fullidx < 1351) return SpellsVystiaEnchanting.GetSpell(fullidx);
-                    if (fullidx < 1383) return SpellsVystiaIllusion.GetSpell(fullidx);
+                    if (fullidx < 1032) return SpellsVystiaIceMagic.GetSpell(fullidx - 999);       // 1000-1031 → 1-32 (client dict keys are 1-based)
+                    if (fullidx < 1064) return SpellsVystiaNature.GetSpell(fullidx - 1031);       // 1032-1063 → 1-32 (client dict keys are 1-based)
+                    if (fullidx < 1096) return SpellsVystiaHex.GetSpell(fullidx - 1063);           // 1064-1095 → 1-32 (client dict keys are 1-based)
+                    if (fullidx < 1128) return SpellsVystiaElemental.GetSpell(fullidx - 1095);    // 1096-1127 → 1-32 (client dict keys are 1-based)
+                    if (fullidx < 1160) return SpellsVystiaDark.GetSpell(fullidx - 1127);         // 1128-1159 → 1-32 (client dict keys are 1-based)
+                    if (fullidx < 1192) return SpellsVystiaDivination.GetSpell(fullidx - 1159);    // 1160-1191 → 1-32 (client dict keys are 1-based)
+                    if (fullidx < 1224) return SpellsVystiaNecromancy.GetSpell(fullidx - 1191);    // 1192-1223 → 1-32 (client dict keys are 1-based)
+                    if (fullidx < 1256) return SpellsVystiaSummoning.GetSpell(fullidx - 1223);     // 1224-1255 → 1-32 (client dict keys are 1-based)
+                    if (fullidx < 1288) return SpellsVystiaShamanic.GetSpell(fullidx - 1255);      // 1256-1287 → 1-32 (client dict keys are 1-based)
+                    if (fullidx < 1320) return SpellsVystiaBardic.GetSpell(fullidx - 1287);         // 1288-1319 → 1-32 (client dict keys are 1-based)
+                    if (fullidx < 1352) return SpellsVystiaEnchanting.GetSpell(fullidx - 1319);    // 1320-1351 → 1-32 (client dict keys are 1-based)
+                    if (fullidx < 1384) return SpellsVystiaIllusion.GetSpell(fullidx - 1351);      // 1352-1383 → 1-32 (client dict keys are 1-based)
+                    if (fullidx < 1416) return SpellsVystiaSongweaving.GetSpell(fullidx - 1383);   // 1384-1415 → 1-32 (client dict keys are 1-based)
                 }
                 return EmptySpell;
             }
@@ -308,8 +309,8 @@ namespace ClassicUO.Game.Data
             params Reagents[] regs
         )
         {
-            // Handle Vystia custom spells (1000-1383)
-            if (fullidx >= 1000 && fullidx < 1384)
+            // Handle Vystia custom spells (1000-1415)
+            if (fullidx >= 1000 && fullidx < 1416)
             {
                 SpellDefinition sd = FullIndexGetSpell(fullidx);
 
@@ -331,7 +332,30 @@ namespace ClassicUO.Game.Data
 
                 if (fullidx < 1032)
                     SpellsVystiaIceMagic.SetSpell(id, in sd);
-                // TODO: Add remaining Vystia spell schools when implemented
+                else if (fullidx < 1064)
+                    SpellsVystiaNature.SetSpell(id, in sd);
+                else if (fullidx < 1096)
+                    SpellsVystiaHex.SetSpell(id, in sd);
+                else if (fullidx < 1128)
+                    SpellsVystiaElemental.SetSpell(id, in sd);
+                else if (fullidx < 1160)
+                    SpellsVystiaDark.SetSpell(id, in sd);
+                else if (fullidx < 1192)
+                    SpellsVystiaDivination.SetSpell(id, in sd);
+                else if (fullidx < 1224)
+                    SpellsVystiaNecromancy.SetSpell(id, in sd);
+                else if (fullidx < 1256)
+                    SpellsVystiaSummoning.SetSpell(id, in sd);
+                else if (fullidx < 1288)
+                    SpellsVystiaShamanic.SetSpell(id, in sd);
+                else if (fullidx < 1320)
+                    SpellsVystiaBardic.SetSpell(id, in sd);
+                else if (fullidx < 1352)
+                    SpellsVystiaEnchanting.SetSpell(id, in sd);
+                else if (fullidx < 1384)
+                    SpellsVystiaIllusion.SetSpell(id, in sd);
+                else if (fullidx < 1416)
+                    SpellsVystiaSongweaving.SetSpell(id, in sd);
 
                 return;
             }

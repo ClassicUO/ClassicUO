@@ -350,6 +350,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(text);
 
 
+
             Add
             (
                 new HitBox
@@ -515,11 +516,11 @@ namespace ClassicUO.Game.UI.Gumps
                 _labels[(int) MobileStats.Gold].Text = World.Player.Gold.ToString();
 
                 _labels[(int) MobileStats.WeightCurrent].Text = $"{World.Player.Weight}/{World.Player.WeightMax}";
+
             }
 
             base.Update();
         }
-
 
         private enum MobileStats
         {
@@ -1345,6 +1346,16 @@ namespace ClassicUO.Game.UI.Gumps
 
             _labels[(int) stat] = label;
             Add(label);
+        }
+
+        private string GetBardConcentrationText()
+        {
+            return $"Conc: {World.Player.BardConcentration}/{World.Player.BardConcentrationMax}";
+        }
+
+        private string GetBardCrescendoText()
+        {
+            return $"Cresc: {World.Player.BardCrescendo}/{World.Player.BardCrescendoMax}";
         }
 
         public override void Update()

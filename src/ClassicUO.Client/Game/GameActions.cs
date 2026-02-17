@@ -628,10 +628,16 @@ namespace ClassicUO.Game
 
         public static void CastSpellFromBook(int index, uint bookSerial)
         {
+            Console.WriteLine($"[CLIENT] CastSpellFromBook called - SpellID: {index}, BookSerial: 0x{bookSerial:X8}");
             if (index >= 0)
             {
                 LastSpellIndex = index;
+                Console.WriteLine($"[CLIENT] Sending packet to server - SpellID: {index}, BookSerial: 0x{bookSerial:X8}");
                 Socket.Send_CastSpellFromBook(index, bookSerial);
+            }
+            else
+            {
+                Console.WriteLine($"[CLIENT] ERROR: Invalid spell index {index}");
             }
         }
 

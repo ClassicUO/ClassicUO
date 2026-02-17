@@ -153,6 +153,7 @@ namespace ClassicUO.Game.GameObjects
             || Graphic == 0x02B6
             || Graphic == 0x02B7
             || Graphic == 0x03DB
+            || Graphic == 0x03DC  // Vystia: Female dwarf body
             || Graphic == 0x03DF
             || Graphic == 0x03E2
             || Graphic == 0x02E8
@@ -1045,6 +1046,23 @@ namespace ClassicUO.Game.GameObjects
                 {
                     IsFemale = true;
                     Race = RaceType.GARGOYLE;
+
+                    break;
+                }
+
+                // Vystia: Custom dwarf bodies (75% scaled humans)
+                case 0x03DB: // 987 - Male Dwarf
+                {
+                    IsFemale = false;
+                    Race = RaceType.HUMAN;
+
+                    break;
+                }
+
+                case 0x03DC: // 988 - Female Dwarf
+                {
+                    IsFemale = true;
+                    Race = RaceType.HUMAN;
 
                     break;
                 }

@@ -4512,7 +4512,7 @@ namespace ClassicUO.Network
                     Item spellbook = world.GetOrCreateItem(p.ReadUInt32BE());
                     spellbook.Graphic = p.ReadUInt16BE();
                     spellbook.Clear();
-                    ushort type = p.ReadUInt16BE();
+                    ushort type = p.ReadUInt16BE(); // This is BookOffset + 1 from server
 
                     for (int j = 0; j < 2; j++)
                     {
@@ -4527,7 +4527,10 @@ namespace ClassicUO.Network
                         {
                             if ((spells & (1 << i)) != 0)
                             {
-                                ushort cc = (ushort)(j * 32 + i + 1);
+                                // Use type (BookOffset for Vystia, BookOffset+1 for standard) instead of hardcoded formula
+                                // For standard Magery: type=1, gives 1-64
+                                // For Vystia Ice Magic: type=1000, gives 1000-1031
+                                ushort cc = (ushort)(j * 32 + i + type);
                                 // FIXME: should i call Item.Create ?
                                 Item spellItem = Item.Create(world, cc); // new Item()
                                 spellItem.Serial = cc;
@@ -4724,6 +4727,24 @@ namespace ClassicUO.Network
                 case 0xBEEF: // ClassicUO commands
 
                     type = p.ReadUInt16BE();
+
+                    switch (type)
+                    {
+                        case 0x0001: // Bard resources
+                        {
+                            bool enabled = p.ReadUInt8() != 0;
+                            ushort concentration = p.ReadUInt16BE();
+                            ushort concentrationMax = p.ReadUInt16BE();
+                            ushort crescendo = p.ReadUInt16BE();
+                            ushort crescendoMax = p.ReadUInt16BE();
+
+                            if (world.Player != null)
+                            {
+                                world.Player.SetBardResources(enabled, concentration, concentrationMax, crescendo, crescendoMax);
+                            }
+                            break;
+                        }
+                    }
 
                     break;
 

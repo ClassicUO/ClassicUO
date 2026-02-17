@@ -197,14 +197,20 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
+            // Determine spell ID offset for custom spellbooks
+            int spellIdOffset = GetSpellIdOffset(_spellBookType);
+
             for (LinkedObject i = item.Items; i != null; i = i.Next)
             {
                 Item spell = (Item)i;
                 int currentCount = spell.Amount;
 
-                if (currentCount > 0 && currentCount <= maxSpellsCount)
+                // Normalize spell ID by subtracting offset (e.g., 1000-1031 becomes 0-31)
+                int normalizedId = currentCount - spellIdOffset;
+
+                if (normalizedId >= 0 && normalizedId < maxSpellsCount)
                 {
-                    _spells[currentCount - 1] = true;
+                    _spells[normalizedId] = true;
                     totalSpells++;
                 }
             }
@@ -218,7 +224,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             int currentSpellIndex = 0;
 
-            if (_spellBookType == SpellBookType.Magery)
+            if (_spellBookType == SpellBookType.Magery || IsVystiaSpellbook())
             {
                 _dataBox.Add(
                     new Button((int)ButtonCircle.Circle_1_2, 0x08B1, 0x08B1)
@@ -443,7 +449,7 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
                     }
 
-                    if (_spellBookType == SpellBookType.Magery)
+                    if (_spellBookType == SpellBookType.Magery || IsVystiaSpellbook())
                     {
                         text = new Label(
                             SpellsMagery.CircleNames[(page - 1) * 2 + j % 2],
@@ -590,7 +596,13 @@ namespace ClassicUO.Game.UI.Gumps
                 int iconX = 62;
                 int topTextX = 87;
                 int iconTextX = 112;
-                uint iconSerial = 100 + (uint)i;
+
+                // Calculate iconSerial based on spellbook type
+                // For Vystia spells, iconSerial = spellOffset + normalizedIndex
+                // Example: First spell (i=0), spellOffset=1000 → iconSerial=1000 (Frost Touch)
+                int spellOffset = GetSpellIdOffset(_spellBookType);
+                uint iconSerial = (uint)(spellOffset + i);
+                Console.WriteLine($"[SPELLBOOK] Creating icon - i: {i}, spellOffset: {spellOffset}, iconSerial: {iconSerial}");
 
                 if (spellsDone > 0)
                 {
@@ -599,7 +611,6 @@ namespace ClassicUO.Game.UI.Gumps
                         iconX = 225;
                         topTextX = 224;
                         iconTextX = 275;
-                        iconSerial = 1000 + (uint)i;
                     }
                     else
                     {
@@ -817,11 +828,20 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (e.Button == MouseButtonType.Left)
             {
-                SpellDefinition def = GetSpellDefinition((sender as Control).LocalSerial);
+                uint iconSerial = (sender as Control).LocalSerial;
+                SpellDefinition def = GetSpellDefinition(iconSerial);
+
+                Console.WriteLine($"[SPELLBOOK] OnIconDoubleClick - IconSerial: {iconSerial}, SpellbookType: {_spellBookType}, SpellbookSerial: {LocalSerial}");
 
                 if (def != null)
                 {
-                    GameActions.CastSpell(def.ID);
+                    Console.WriteLine($"[SPELLBOOK] Spell found - ID: {def.ID}, Name: {def.Name}");
+                    Console.WriteLine($"[SPELLBOOK] Calling CastSpellFromBook(spellID: {def.ID}, bookSerial: {LocalSerial})");
+                    GameActions.CastSpellFromBook(def.ID, LocalSerial);
+                }
+                else
+                {
+                    Console.WriteLine($"[SPELLBOOK] ERROR: GetSpellDefinition returned null for iconSerial {iconSerial}");
                 }
             }
         }
@@ -867,16 +887,32 @@ namespace ClassicUO.Game.UI.Gumps
 
         private SpellDefinition GetSpellDefinition(uint serial)
         {
-            int idx =
-                (int)(
-                    serial > 1000
-                        ? serial - 1000
-                        : serial >= 100
-                            ? serial - 100
-                            : serial
-                ) + 1;
+            int idx;
 
-            return GetSpellDefinition(idx);
+            // For Vystia spells (1000+), icon serial IS the server spell ID
+            // We need to convert it to dictionary key (1-based) by subtracting baseOffset and adding 1
+            if (serial >= 1000)
+            {
+                int baseOffset = GetSpellIdOffset(_spellBookType);
+                // serial is the server spell ID (e.g., 1000, 1001, 1002...)
+                // Dictionary keys are 1-based (1, 2, 3...)
+                // So: idx = (serverID - baseOffset) + 1
+                // Example: serial=1000, baseOffset=1000 → idx = (1000-1000)+1 = 1 ✓
+                idx = (int)(serial - baseOffset) + 1;
+            }
+            else if (serial >= 100)
+            {
+                idx = (int)(serial - 100) + 1;
+            }
+            else
+            {
+                idx = (int)serial + 1;
+            }
+
+            Console.WriteLine($"[SPELLBOOK] GetSpellDefinition(serial: {serial}) -> idx: {idx}, type: {_spellBookType}");
+            SpellDefinition def = GetSpellDefinition(idx);
+            Console.WriteLine($"[SPELLBOOK] GetSpellDefinition(idx: {idx}) returned: {(def != null ? $"{def.Name} (ID: {def.ID})" : "NULL")}");
+            return def;
         }
 
         private SpellDefinition GetSpellDefinition(int idx)
@@ -922,6 +958,71 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case SpellBookType.Mastery:
                     def = SpellsMastery.GetSpell(idx);
+
+                    break;
+
+                case SpellBookType.VystiaIceMagic:
+                    def = SpellsVystiaIceMagic.GetSpell(idx);
+
+                    break;
+
+                case SpellBookType.VystiaDruid:
+                    def = SpellsVystiaNature.GetSpell(idx);
+
+                    break;
+
+                case SpellBookType.VystiaWitch:
+                    def = SpellsVystiaHex.GetSpell(idx);
+
+                    break;
+
+                case SpellBookType.VystiaSorcerer:
+                    def = SpellsVystiaElemental.GetSpell(idx);
+
+                    break;
+
+                case SpellBookType.VystiaWarlock:
+                    def = SpellsVystiaDark.GetSpell(idx);
+
+                    break;
+
+                case SpellBookType.VystiaOracle:
+                    def = SpellsVystiaDivination.GetSpell(idx);
+
+                    break;
+
+                case SpellBookType.VystiaNecromancer:
+                    def = SpellsVystiaNecromancy.GetSpell(idx);
+
+                    break;
+
+                case SpellBookType.VystiaSummoner:
+                    def = SpellsVystiaSummoning.GetSpell(idx);
+
+                    break;
+
+                case SpellBookType.VystiaShaman:
+                    def = SpellsVystiaShamanic.GetSpell(idx);
+
+                    break;
+
+                case SpellBookType.VystiaBard:
+                    def = SpellsVystiaBardic.GetSpell(idx);
+
+                    break;
+
+                case SpellBookType.VystiaSongweaving:
+                    def = SpellsVystiaSongweaving.GetSpell(idx);
+
+                    break;
+
+                case SpellBookType.VystiaEnchanter:
+                    def = SpellsVystiaEnchanting.GetSpell(idx);
+
+                    break;
+
+                case SpellBookType.VystiaIllusionist:
+                    def = SpellsVystiaIllusion.GetSpell(idx);
 
                     break;
             }
@@ -1005,15 +1106,135 @@ namespace ClassicUO.Game.UI.Gumps
                     iconStartGraphic = 0x945;
 
                     break;
+
+                // Vystia Ice Magic
+                case SpellBookType.VystiaIceMagic:
+                    maxSpellsCount = SpellsVystiaIceMagic.MaxSpellCount;
+                    bookGraphic = 0x08AC; // Reuse Magery book graphic for display
+                    minimizedGraphic = 0x08BA;
+                    iconStartGraphic = 0x08C0; // Reuse Magery icons for now
+
+                    break;
+
+                case SpellBookType.VystiaDruid:
+                    maxSpellsCount = SpellsVystiaNature.MaxSpellCount;
+                    bookGraphic = 0x08AC;
+                    minimizedGraphic = 0x08BA;
+                    iconStartGraphic = 0x08C0;
+
+                    break;
+
+                case SpellBookType.VystiaWitch:
+                    maxSpellsCount = SpellsVystiaHex.MaxSpellCount;
+                    bookGraphic = 0x08AC;
+                    minimizedGraphic = 0x08BA;
+                    iconStartGraphic = 0x08C0;
+
+                    break;
+
+                case SpellBookType.VystiaSorcerer:
+                    maxSpellsCount = SpellsVystiaElemental.MaxSpellCount;
+                    bookGraphic = 0x08AC;
+                    minimizedGraphic = 0x08BA;
+                    iconStartGraphic = 0x08C0;
+
+                    break;
+
+                case SpellBookType.VystiaWarlock:
+                    maxSpellsCount = SpellsVystiaDark.MaxSpellCount;
+                    bookGraphic = 0x08AC;
+                    minimizedGraphic = 0x08BA;
+                    iconStartGraphic = 0x08C0;
+
+                    break;
+
+                case SpellBookType.VystiaOracle:
+                    maxSpellsCount = SpellsVystiaDivination.MaxSpellCount;
+                    bookGraphic = 0x08AC;
+                    minimizedGraphic = 0x08BA;
+                    iconStartGraphic = 0x08C0;
+
+                    break;
+
+                case SpellBookType.VystiaNecromancer:
+                    maxSpellsCount = SpellsVystiaNecromancy.MaxSpellCount;
+                    bookGraphic = 0x08AC;
+                    minimizedGraphic = 0x08BA;
+                    iconStartGraphic = 0x08C0;
+
+                    break;
+
+                case SpellBookType.VystiaSummoner:
+                    maxSpellsCount = SpellsVystiaSummoning.MaxSpellCount;
+                    bookGraphic = 0x08AC;
+                    minimizedGraphic = 0x08BA;
+                    iconStartGraphic = 0x08C0;
+
+                    break;
+
+                case SpellBookType.VystiaShaman:
+                    maxSpellsCount = SpellsVystiaShamanic.MaxSpellCount;
+                    bookGraphic = 0x08AC;
+                    minimizedGraphic = 0x08BA;
+                    iconStartGraphic = 0x08C0;
+
+                    break;
+
+                case SpellBookType.VystiaBard:
+                    maxSpellsCount = SpellsVystiaBardic.MaxSpellCount;
+                    bookGraphic = 0x08AC;
+                    minimizedGraphic = 0x08BA;
+                    iconStartGraphic = 0x08C0;
+
+                    break;
+
+                case SpellBookType.VystiaSongweaving:
+                    maxSpellsCount = SpellsVystiaSongweaving.MaxSpellCount;
+                    bookGraphic = 0x08AC;
+                    minimizedGraphic = 0x08BA;
+                    iconStartGraphic = 0x08C0;
+
+                    break;
+
+                case SpellBookType.VystiaEnchanter:
+                    maxSpellsCount = SpellsVystiaEnchanting.MaxSpellCount;
+                    bookGraphic = 0x08AC;
+                    minimizedGraphic = 0x08BA;
+                    iconStartGraphic = 0x08C0;
+
+                    break;
+
+                case SpellBookType.VystiaIllusionist:
+                    maxSpellsCount = SpellsVystiaIllusion.MaxSpellCount;
+                    bookGraphic = 0x08AC;
+                    minimizedGraphic = 0x08BA;
+                    iconStartGraphic = 0x08C0;
+
+                    break;
             }
 
-            spellsOnPage = Math.Min(maxSpellsCount >> 1, 8);
-            dictionaryPagesCount = (int)Math.Ceiling(maxSpellsCount / 8.0f);
-
-            if (dictionaryPagesCount % 2 != 0)
+            // Vystia spellbooks have 32 spells (4 per circle × 8 circles)
+            // They need special handling to display like Magery (8 circles, 4 pages)
+            if (IsVystiaSpellbookType(type))
             {
-                dictionaryPagesCount++;
+                spellsOnPage = 4; // 4 spells per circle
+                dictionaryPagesCount = 8; // 8 circles total (shown 2 per page = 4 index pages)
             }
+            else
+            {
+                spellsOnPage = Math.Min(maxSpellsCount >> 1, 8);
+                dictionaryPagesCount = (int)Math.Ceiling(maxSpellsCount / 8.0f);
+
+                if (dictionaryPagesCount % 2 != 0)
+                {
+                    dictionaryPagesCount++;
+                }
+            }
+        }
+
+        private static bool IsVystiaSpellbookType(SpellBookType type)
+        {
+            return type >= SpellBookType.VystiaIceMagic && type <= SpellBookType.VystiaIllusionist;
         }
 
         private void GetSpellToolTip(out int offset)
@@ -1057,6 +1278,23 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case SpellBookType.Mastery:
                     offset = 0;
+
+                    break;
+
+                case SpellBookType.VystiaIceMagic:
+                case SpellBookType.VystiaDruid:
+                case SpellBookType.VystiaWitch:
+                case SpellBookType.VystiaSorcerer:
+                case SpellBookType.VystiaWarlock:
+                case SpellBookType.VystiaOracle:
+                case SpellBookType.VystiaNecromancer:
+                case SpellBookType.VystiaSummoner:
+                case SpellBookType.VystiaShaman:
+                case SpellBookType.VystiaBard:
+                case SpellBookType.VystiaSongweaving:
+                case SpellBookType.VystiaEnchanter:
+                case SpellBookType.VystiaIllusionist:
+                    offset = 0; // No cliloc tooltips for Vystia spells yet
 
                     break;
 
@@ -1135,6 +1373,110 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case SpellBookType.Mastery:
                     def = SpellsMastery.GetSpell(offset + 1);
+                    name = def.Name;
+                    abbreviature = def.PowerWords;
+                    reagents = def.CreateReagentListString("\n");
+
+                    break;
+
+                case SpellBookType.VystiaIceMagic:
+                    def = SpellsVystiaIceMagic.GetSpell(offset + 1);
+                    name = def.Name;
+                    abbreviature = def.PowerWords;
+                    reagents = def.CreateReagentListString("\n");
+
+                    break;
+
+                case SpellBookType.VystiaDruid:
+                    def = SpellsVystiaNature.GetSpell(offset + 1);
+                    name = def.Name;
+                    abbreviature = def.PowerWords;
+                    reagents = def.CreateReagentListString("\n");
+
+                    break;
+
+                case SpellBookType.VystiaWitch:
+                    def = SpellsVystiaHex.GetSpell(offset + 1);
+                    name = def.Name;
+                    abbreviature = def.PowerWords;
+                    reagents = def.CreateReagentListString("\n");
+
+                    break;
+
+                case SpellBookType.VystiaSorcerer:
+                    def = SpellsVystiaElemental.GetSpell(offset + 1);
+                    name = def.Name;
+                    abbreviature = def.PowerWords;
+                    reagents = def.CreateReagentListString("\n");
+
+                    break;
+
+                case SpellBookType.VystiaWarlock:
+                    def = SpellsVystiaDark.GetSpell(offset + 1);
+                    name = def.Name;
+                    abbreviature = def.PowerWords;
+                    reagents = def.CreateReagentListString("\n");
+
+                    break;
+
+                case SpellBookType.VystiaOracle:
+                    def = SpellsVystiaDivination.GetSpell(offset + 1);
+                    name = def.Name;
+                    abbreviature = def.PowerWords;
+                    reagents = def.CreateReagentListString("\n");
+
+                    break;
+
+                case SpellBookType.VystiaNecromancer:
+                    def = SpellsVystiaNecromancy.GetSpell(offset + 1);
+                    name = def.Name;
+                    abbreviature = def.PowerWords;
+                    reagents = def.CreateReagentListString("\n");
+
+                    break;
+
+                case SpellBookType.VystiaSummoner:
+                    def = SpellsVystiaSummoning.GetSpell(offset + 1);
+                    name = def.Name;
+                    abbreviature = def.PowerWords;
+                    reagents = def.CreateReagentListString("\n");
+
+                    break;
+
+                case SpellBookType.VystiaShaman:
+                    def = SpellsVystiaShamanic.GetSpell(offset + 1);
+                    name = def.Name;
+                    abbreviature = def.PowerWords;
+                    reagents = def.CreateReagentListString("\n");
+
+                    break;
+
+                case SpellBookType.VystiaBard:
+                    def = SpellsVystiaBardic.GetSpell(offset + 1);
+                    name = def.Name;
+                    abbreviature = def.PowerWords;
+                    reagents = def.CreateReagentListString("\n");
+
+                    break;
+
+                case SpellBookType.VystiaSongweaving:
+                    def = SpellsVystiaSongweaving.GetSpell(offset + 1);
+                    name = def.Name;
+                    abbreviature = def.PowerWords;
+                    reagents = def.CreateReagentListString("\n");
+
+                    break;
+
+                case SpellBookType.VystiaEnchanter:
+                    def = SpellsVystiaEnchanting.GetSpell(offset + 1);
+                    name = def.Name;
+                    abbreviature = def.PowerWords;
+                    reagents = def.CreateReagentListString("\n");
+
+                    break;
+
+                case SpellBookType.VystiaIllusionist:
+                    def = SpellsVystiaIllusion.GetSpell(offset + 1);
                     name = def.Name;
                     abbreviature = def.PowerWords;
                     reagents = def.CreateReagentListString("\n");
@@ -1316,23 +1658,111 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        private static int GetSpellIdOffset(SpellBookType type)
+        {
+            switch (type)
+            {
+                case SpellBookType.Magery:
+                    return 0; // Spells 1-64
+                case SpellBookType.Necromancy:
+                    return 100; // Spells 101-117
+                case SpellBookType.Chivalry:
+                    return 200; // Spells 201-210
+                case SpellBookType.Bushido:
+                    return 400; // Spells 401-406
+                case SpellBookType.Ninjitsu:
+                    return 500; // Spells 501-508
+                case SpellBookType.Spellweaving:
+                    return 600; // Spells 601-616
+                case SpellBookType.Mysticism:
+                    return 677; // Spells 678-693
+                case SpellBookType.Mastery:
+                    return 700; // Spells 701-743
+                case SpellBookType.VystiaIceMagic:
+                    return 1000; // Spells 1000-1031
+                case SpellBookType.VystiaDruid:
+                    return 1032; // Spells 1032-1063
+                case SpellBookType.VystiaWitch:
+                    return 1064; // Spells 1064-1095
+                case SpellBookType.VystiaSorcerer:
+                    return 1096; // Spells 1096-1127
+                case SpellBookType.VystiaWarlock:
+                    return 1128; // Spells 1128-1159
+                case SpellBookType.VystiaOracle:
+                    return 1160; // Spells 1160-1191
+                case SpellBookType.VystiaNecromancer:
+                    return 1192; // Spells 1192-1223
+                case SpellBookType.VystiaSummoner:
+                    return 1224; // Spells 1224-1255
+                case SpellBookType.VystiaShaman:
+                    return 1256; // Spells 1256-1287
+                case SpellBookType.VystiaBard:
+                    return 1288; // Spells 1288-1319
+                case SpellBookType.VystiaSongweaving:
+                    return 1384; // Spells 1384-1415
+                case SpellBookType.VystiaEnchanter:
+                    return 1320; // Spells 1320-1351
+                case SpellBookType.VystiaIllusionist:
+                    return 1352; // Spells 1352-1383
+                default:
+                    return 0;
+            }
+        }
+
         private void AssignGraphic(Item item)
         {
             switch (item.Graphic)
             {
                 default:
                 case 0x0EFA:
-                    _spellBookType = SpellBookType.Magery;
+                    // Check hue to distinguish Vystia spellbooks from Magery
+                    if (item.Hue == 0x7D6) // Forest Green
+                        _spellBookType = SpellBookType.VystiaDruid;
+                    else if (item.Hue == 0x54E) // Fiery Orange
+                        _spellBookType = SpellBookType.VystiaSorcerer;
+                    else if (item.Hue == 0x482) // Crystal Blue
+                        _spellBookType = SpellBookType.VystiaOracle;
+                    else if (item.Hue == 0x555) // Deep Blue
+                        _spellBookType = SpellBookType.VystiaSummoner;
+                    else if (item.Hue == 0x501) // Storm Blue
+                        _spellBookType = SpellBookType.VystiaShaman;
+                    else if (item.Hue == 0x8A5) // Golden
+                        _spellBookType = SpellBookType.VystiaSongweaving;
+                    else if (item.Hue == 0x8FD) // Arcane Purple
+                        _spellBookType = SpellBookType.VystiaEnchanter;
+                    else if (item.Hue == 0x47E) // Silvery
+                        _spellBookType = SpellBookType.VystiaIllusionist;
+                    else
+                        _spellBookType = SpellBookType.Magery;
 
                     break;
 
                 case 0x2253:
-                    _spellBookType = SpellBookType.Necromancy;
+                    // Check hue to distinguish Vystia Necromancer (0x455) from standard Necromancy
+                    if (item.Hue == 0x455) // Void Black
+                        _spellBookType = SpellBookType.VystiaNecromancer;
+                    else
+                        _spellBookType = SpellBookType.Necromancy;
 
                     break;
 
                 case 0x2252:
-                    _spellBookType = SpellBookType.Chivalry;
+                    // Check hue to distinguish Vystia Ice Magic (0x481) from Chivalry
+                    if (item.Hue == 0x481)
+                        _spellBookType = SpellBookType.VystiaIceMagic;
+                    else
+                        _spellBookType = SpellBookType.Chivalry;
+
+                    break;
+
+                case 0xFF0:
+                    // Check hue to distinguish Vystia Witch (0x81D) and Warlock (0x455) from other books
+                    if (item.Hue == 0x81D) // Murky Green/Purple
+                        _spellBookType = SpellBookType.VystiaWitch;
+                    else if (item.Hue == 0x455) // Void Black
+                        _spellBookType = SpellBookType.VystiaWarlock;
+                    else
+                        _spellBookType = SpellBookType.Magery; // Default fallback
 
                     break;
 
@@ -1426,6 +1856,23 @@ namespace ClassicUO.Game.UI.Gumps
             Circle_3_4,
             Circle_5_6,
             Circle_7_8
+        }
+
+        /// <summary>
+        /// Checks if the spellbook type is a Vystia magic school
+        /// </summary>
+        private bool IsVystiaSpellbook()
+        {
+            return _spellBookType >= SpellBookType.VystiaIceMagic && _spellBookType <= SpellBookType.VystiaIllusionist;
+        }
+
+        /// <summary>
+        /// Gets the circle names for Vystia spellbooks (all use same circle names)
+        /// </summary>
+        private string[] GetVystiaCircleNames()
+        {
+            // All Vystia spellbooks have 8 circles with 4 spells each
+            return SpellsMagery.CircleNames; // Reuse same circle names
         }
 
         private class HueGumpPic : GumpPic

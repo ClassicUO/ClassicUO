@@ -103,6 +103,20 @@ namespace ClassicUO.Game.GameObjects
         public uint TithingPoints;
         public ushort Weight;
         public ushort WeightMax;
+        public bool BardResourceEnabled;
+        public ushort BardConcentration;
+        public ushort BardConcentrationMax;
+        public ushort BardCrescendo;
+        public ushort BardCrescendoMax;
+
+        public void SetBardResources(bool enabled, ushort concentration, ushort concentrationMax, ushort crescendo, ushort crescendoMax)
+        {
+            BardResourceEnabled = enabled;
+            BardConcentration = concentration;
+            BardConcentrationMax = concentrationMax;
+            BardCrescendo = crescendo;
+            BardCrescendoMax = crescendoMax;
+        }
 
         public Item FindBandage()
         {

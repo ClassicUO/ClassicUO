@@ -739,11 +739,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
 
-                case 6:
-                    _markerFont = Fonts.Map6;
-
-                    break;
-
                 default:
                     _markerFontIndex = 1;
                     _markerFont = Fonts.Map1;

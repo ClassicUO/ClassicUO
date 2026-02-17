@@ -724,7 +724,11 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     body = 0xC835;
                 }
-                // Vystia: Removed GM robe special handling for 0x03DB (987) - now used for male dwarf
+                else if (mobile.Graphic == 0x03DB)
+                {
+                    body = 0x000C;
+                    hue = 0x03EA;
+                }
                 else if (mobile.IsFemale)
                 {
                     body = 0x000D;

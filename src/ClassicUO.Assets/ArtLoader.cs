@@ -41,6 +41,11 @@ namespace ClassicUO.Assets
                 }
             }
 
+            if (_file == null)
+            {
+                throw new FileNotFoundException($"Art files not found. Expected 'artLegacyMUL.uop' or 'art.mul'+'artidx.mul' in UO installation directory.");
+            }
+
             _file.FillEntries();
         }
 

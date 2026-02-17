@@ -20,7 +20,7 @@ namespace ClassicUO.Assets
         private UOFileMul[] _staDifl;
 
         // cannot be a const, due to UOLive implementation
-        public static int MAPS_COUNT = 6;
+        public static int MAPS_COUNT = 10;
 
         public MapLoader(UOFileManager fileManager) : base(fileManager)
         {
@@ -33,26 +33,38 @@ namespace ClassicUO.Assets
         public int[,] MapBlocksSize { get; private set; }
 
         // ReSharper disable RedundantExplicitArraySize
-        public int[,] MapsDefaultSize { get; protected set; } = new int[6, 2]
+        public int[,] MapsDefaultSize { get; protected set; } = new int[10, 2]
             // ReSharper restore RedundantExplicitArraySize
             {
                 {
-                    7168, 4096
+                    7168, 4096  // Map 0 - Felucca
                 },
                 {
-                    7168, 4096
+                    7168, 4096  // Map 1 - Trammel
                 },
                 {
-                    2304, 1600
+                    2304, 1600  // Map 2 - Ilshenar
                 },
                 {
-                    2560, 2048
+                    2560, 2048  // Map 3 - Malas
                 },
                 {
-                    1448, 1448
+                    1448, 1448  // Map 4 - Tokuno
                 },
                 {
-                    1280, 4096
+                    1280, 4096  // Map 5 - TerMur
+                },
+                {
+                    7168, 4096  // Map 6 - placeholder
+                },
+                {
+                    7168, 4096  // Map 7 - placeholder
+                },
+                {
+                    7168, 4096  // Map 8 - placeholder
+                },
+                {
+                    7168, 4096 // Map 9 - Vystia (same as Felucca)
                 }
             };
 
