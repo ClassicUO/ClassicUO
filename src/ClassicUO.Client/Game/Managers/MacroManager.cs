@@ -602,8 +602,8 @@ namespace ClassicUO.Game.Managers
 
                                     if (party == null)
                                     {
-                                        int x = Client.Game.Window.ClientBounds.Width / 2 - 272;
-                                        int y = Client.Game.Window.ClientBounds.Height / 2 - 240;
+                                        int x = Client.Game.ClientBounds.Width / 2 - 272;
+                                        int y = Client.Game.ClientBounds.Height / 2 - 240;
                                         UIManager.Add(new PartyGump(_world, x, y, _world.Party.CanLoot));
                                     }
                                     else

@@ -1,10 +1,8 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using ClassicUO.Assets;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -23,21 +21,31 @@ namespace ClassicUO.Game.UI.Controls
 
         public ushort Hue { get;  set; }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
+            float layerDepth = layerDepthRef;
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue);
 
-            batcher.Draw
+            renderLists.AddGumpNoAtlas
             (
-                SolidColorTextureCache.GetTexture(Color.White),
-                new Rectangle
-                (
-                    x,
-                    y,
-                    Width,
-                    Height
-                ),
-                hueVector
+                (batcher) =>
+                {
+                    batcher.Draw
+                    (
+                        SolidColorTextureCache.GetTexture(Color.White),
+                        new Rectangle
+                        (
+                            x,
+                            y,
+                            Width,
+                            Height
+                        ),
+                        hueVector,
+                        layerDepth
+                    );
+
+                    return true;
+                }
             );
 
             return true;

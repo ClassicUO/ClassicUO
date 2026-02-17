@@ -80,8 +80,8 @@ namespace ClassicUO.Game
             {
                 OptionsGump optionsGump = new OptionsGump(world)
                 {
-                    X = (Client.Game.Window.ClientBounds.Width >> 1) - 300,
-                    Y = (Client.Game.Window.ClientBounds.Height >> 1) - 250
+                    X = (Client.Game.ClientBounds.Width >> 1) - 300,
+                    Y = (Client.Game.ClientBounds.Height >> 1) - 250
                 };
 
                 UIManager.Add(optionsGump);

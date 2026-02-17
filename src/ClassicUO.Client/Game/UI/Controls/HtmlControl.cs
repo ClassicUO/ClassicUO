@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using ClassicUO.Input;
 using ClassicUO.Assets;
-using ClassicUO.Renderer;
+using ClassicUO.Game.Scenes;
+using ClassicUO.Input;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -220,32 +218,43 @@ namespace ClassicUO.Game.UI.Controls
             base.Update();
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
+            float layerDepth = layerDepthRef;
             if (IsDisposed)
             {
                 return false;
             }
+            renderLists.AddGumpNoAtlas(
+                batcher =>
+                {
+                    if (batcher.ClipBegin(x, y, Width, Height))
+                    {
+                        RenderLists childRenderLists = new();
 
-            if (batcher.ClipBegin(x, y, Width, Height))
-            {
-                base.Draw(batcher, x, y);
+                        base.AddToRenderLists(childRenderLists, x, y, ref layerDepth);
 
-                int offset = HasBackground ? 4 : 0;
+                        childRenderLists.DrawRenderLists(batcher, sbyte.MaxValue);
 
-                _gameText.Draw
-                (
-                    batcher,
-                    x + offset,
-                    y + offset,
-                    ScrollX,
-                    ScrollY,
-                    Width + ScrollX,
-                    Height + ScrollY
-                );
+                        int offset = HasBackground ? 4 : 0;
 
-                batcher.ClipEnd();
-            }
+                        _gameText.Draw
+                        (
+                            batcher,
+                            x + offset,
+                            y + offset,
+                            ScrollX,
+                            ScrollY,
+                            Width + ScrollX,
+                            Height + ScrollY,
+                            layerDepth
+                        );
+
+                        batcher.ClipEnd();
+                    }
+                    return true;
+                }
+            );
 
 
             return true;

@@ -1,14 +1,13 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Runtime.InteropServices;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -135,50 +134,66 @@ namespace ClassicUO.Game.UI.Controls
             base.Update();
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
+            float colorLayerDepth = layerDepthRef += 0.001f;
+            float selectorLayerDepth = layerDepthRef += 0.001f;
+
             Texture2D texture = SolidColorTextureCache.GetTexture(Color.White);
-
-            Rectangle rect = new Rectangle(0, 0, _cellWidth, _cellHeight);
-
-            Vector3 hueVector;
 
             for (int i = 0; i < _rows; i++)
             {
                 for (int j = 0; j < _columns; j++)
                 {
-                    hueVector = ShaderHueTranslator.GetHueVector(_hues[i * _columns + j]);
+                    Vector3 hueVector = ShaderHueTranslator.GetHueVector(_hues[i * _columns + j]);
 
-                    rect.X = x + j * _cellWidth;
-                    rect.Y = y + i * _cellHeight;
+                    Rectangle rect = new(x + j * _cellWidth, y + i * _cellHeight, _cellWidth, _cellHeight);
 
-                    batcher.Draw
-                    (
-                        texture,
-                        rect,
-                        hueVector
+                    renderLists.AddGumpNoAtlas(
+                        batcher =>
+                        {
+                            batcher.Draw
+                            (
+                                texture,
+                                rect,
+                                hueVector,
+                                colorLayerDepth
+                            );
+                            return true;
+                        }
                     );
                 }
             }
 
-            hueVector = ShaderHueTranslator.GetHueVector(0);
+                      
 
             if (_hues.Length > 1)
             {
-                rect.X = (int) (x + Width / _columns * (SelectedIndex % _columns + .5f) - 1);
-                rect.Y = (int)(y + Height / _rows * (SelectedIndex / _columns + .5f) - 1);
-                rect.Width = 2;
-                rect.Height = 2;
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-                batcher.Draw
-                (
-                    SolidColorTextureCache.GetTexture(Color.White),
-                    rect,
-                    hueVector
+                Rectangle rect = new(
+                                    (int)(x + Width / _columns * (SelectedIndex % _columns + .5f) - 1),
+                                    (int)(y + Height / _rows * (SelectedIndex / _columns + .5f) - 1),
+                                    rect.Width = 2,
+                                    rect.Height = 2
+                                    );
+
+                renderLists.AddGumpNoAtlas(
+                    batcher =>
+                    {
+                        batcher.Draw
+                        (
+                            SolidColorTextureCache.GetTexture(Color.White),
+                            rect,
+                            hueVector,
+                            selectorLayerDepth
+                        );
+                        return true;
+                    }
                 );
             }
 
-            return base.Draw(batcher, x, y);
+            return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
         }
 
 

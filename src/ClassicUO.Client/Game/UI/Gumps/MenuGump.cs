@@ -1,12 +1,11 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System.Linq;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.Assets;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
-using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
+using System.Linq;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -160,18 +159,26 @@ namespace ClassicUO.Game.UI.Gumps
                 _isPartial = Client.Game.UO.FileManager.TileData.StaticData[graphic].IsPartialHue;
             }
 
-            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
             {
                 if (_graphic != 0)
                 {
-                    ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(_graphic);
+                    float layerDepth = layerDepthRef;
+                    renderLists.AddGumpWithAtlas
+                    (
+                        (batcher) =>
+                        {
+                            ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(_graphic);
 
-                    Vector3 hueVector = ShaderHueTranslator.GetHueVector(_hue, _isPartial, 1f);
+                            Vector3 hueVector = ShaderHueTranslator.GetHueVector(_hue, _isPartial, 1f);
 
-                    batcher.Draw(artInfo.Texture, new Vector2(x, y), artInfo.UV, hueVector);
+                            batcher.Draw(artInfo.Texture, new Vector2(x, y), artInfo.UV, hueVector, layerDepth);
+                            return true;
+                        }
+                    );
                 }
 
-                return base.Draw(batcher, x, y);
+                return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
             }
         }
 
@@ -199,42 +206,52 @@ namespace ClassicUO.Game.UI.Gumps
 
             public int MaxValue { get; private set; }
 
-            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
             {
-                if (batcher.ClipBegin(x, y, Width, Height))
-                {
-                    int width = 0;
-                    int maxWidth = Value + Width;
-                    bool drawOnly1 = true;
-
-                    foreach (Control child in Children)
+                float layerDepth = layerDepthRef;
+                renderLists.AddGumpNoAtlas
+                (
+                    batcher =>
                     {
-                        if (!child.IsVisible)
+                        if (batcher.ClipBegin(x, y, Width, Height))
                         {
-                            continue;
-                        }
+                            int width = 0;
+                            int maxWidth = Value + Width;
+                            bool drawOnly1 = true;
 
-                        child.X = width - Value;
-
-                        if (width + child.Width <= Value) { }
-                        else if (width + child.Width <= maxWidth)
-                        {
-                            child.Draw(batcher, child.X + x, y);
-                        }
-                        else
-                        {
-                            if (drawOnly1)
+                            RenderLists childRenderLists = new();
+                            foreach (Control child in Children)
                             {
-                                child.Draw(batcher, child.X + x, y);
-                                drawOnly1 = false;
+                                if (!child.IsVisible)
+                                {
+                                    continue;
+                                }
+
+                                child.X = width - Value;
+
+                                if (width + child.Width <= Value) { }
+                                else if (width + child.Width <= maxWidth)
+                                {
+                                    child.AddToRenderLists(childRenderLists, child.X + x, y, ref layerDepth);
+                                }
+                                else
+                                {
+                                    if (drawOnly1)
+                                    {
+                                        child.AddToRenderLists(childRenderLists, child.X + x, y, ref layerDepth);
+                                        drawOnly1 = false;
+                                    }
+                                }
+
+                                width += child.Width;
                             }
+                            childRenderLists.DrawRenderLists(batcher, sbyte.MaxValue);
+
+                            batcher.ClipEnd();
                         }
-
-                        width += child.Width;
+                        return true;
                     }
-
-                    batcher.ClipEnd();
-                }
+                );
 
                 return true; // base.Draw(batcher,position, hue);
             }

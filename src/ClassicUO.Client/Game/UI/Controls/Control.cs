@@ -1,22 +1,23 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using SDL3;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Keyboard = ClassicUO.Input.Keyboard;
-using Mouse = ClassicUO.Input.Mouse;
 
 namespace ClassicUO.Game.UI.Controls
 {
     internal abstract class Control
     {
+        protected const float CHILD_LAYER_INCREMENT = 0.01f;
         internal static int _StepsDone = 1;
         internal static int _StepChanger = 1;
 
@@ -231,9 +232,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-
-
-        public virtual bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public virtual bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepth)
         {
             if (IsDisposed)
             {
@@ -246,12 +245,13 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     if (c.IsVisible)
                     {
-                        c.Draw(batcher, c.X + x, c.Y + y);
+                        layerDepth += CHILD_LAYER_INCREMENT;
+                        c.AddToRenderLists(renderLists, c.X + x, c.Y + y, ref layerDepth);
                     }
                 }
             }
 
-            DrawDebug(batcher, x, y);
+            DrawDebug(renderLists, x, y, layerDepth);
 
             return true;
         }
@@ -325,20 +325,28 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        private void DrawDebug(UltimaBatcher2D batcher, int x, int y)
+        private void DrawDebug(RenderLists renderLists, int x, int y, float layerDepth)
         {
             if (IsVisible && CUOEnviroment.Debug)
             {
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-                batcher.DrawRectangle
+                renderLists.AddGumpNoAtlas
                 (
-                    SolidColorTextureCache.GetTexture(Color.Green),
-                    x,
-                    y,
-                    Width,
-                    Height,
-                    hueVector
+                    (batcher) =>
+                    {
+                        batcher.DrawRectangle
+                        (
+                            SolidColorTextureCache.GetTexture(Color.Green),
+                            x,
+                            y,
+                            Width,
+                            Height,
+                            hueVector,
+                            layerDepth
+                        );
+                        return true;
+                    }
                 );
             }
         }

@@ -1,18 +1,15 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.Linq;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.Managers
 {
@@ -27,7 +24,7 @@ namespace ClassicUO.Game.Managers
         private static bool _isDraggingControl;
         private static Control _keyboardFocusControl, _lastFocus;
         private static bool _needSort;
-
+        private static readonly RenderLists _renderLists = new();
 
         public static float ContainerScale { get; set; } = 1f;
 
@@ -363,16 +360,27 @@ namespace ClassicUO.Game.Managers
 
         public static void Draw(UltimaBatcher2D batcher)
         {
+            _renderLists.Clear();
+
             SortControlsByInfo();
 
             batcher.Begin();
+            batcher.SetStencil(DepthStencilState.Default);
+
+            float layerDepth = -10000;
 
             for (LinkedListNode<Gump> last = Gumps.Last; last != null; last = last.Previous)
             {
                 Control g = last.Value;
-                g.Draw(batcher, g.X, g.Y);
+                layerDepth+=10;
+                g.AddToRenderLists(_renderLists, g.X, g.Y, ref layerDepth);
             }
 
+            Profiler.EnterContext(Profiler.ProfilerContext.RENDER_FRAME_UI);
+            _renderLists.DrawRenderLists(batcher, sbyte.MaxValue);
+            Profiler.ExitContext(Profiler.ProfilerContext.RENDER_FRAME_UI);
+
+            batcher.SetStencil(null);
             batcher.End();
         }
 

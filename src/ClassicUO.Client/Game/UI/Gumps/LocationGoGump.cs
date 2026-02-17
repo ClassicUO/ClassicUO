@@ -111,8 +111,8 @@ internal partial class LocationGoGump : Gump
             }
         );
 
-        X = (Client.Game.Window.ClientBounds.Width - Width) >> 1;
-        Y = (Client.Game.Window.ClientBounds.Height - Height) >> 1;
+        X = (Client.Game.ClientBounds.Width - Width) >> 1;
+        Y = (Client.Game.ClientBounds.Height - Height) >> 1;
     }
 
     private bool ParsePoint(string text, out Point point)

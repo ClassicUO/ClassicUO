@@ -1,6 +1,5 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
@@ -35,9 +34,11 @@ namespace ClassicUO
         private double _totalElapsed, _currentFpsTime;
         private uint _totalFrames;
         private UltimaBatcher2D _uoSpriteBatch;
+        private RenderTargets _renderTargets = new();
+        private readonly RenderLists _renderLists = new();
         private bool _suppressedDraw;
-        private Texture2D _background;
         private bool _pluginsInitialized = false;
+        private float _displayScale;
 
         public GameController(IPluginHost pluginHost)
         {
@@ -67,6 +68,21 @@ namespace ClassicUO
         public UltimaOnline UO { get; } = new UltimaOnline();
         public IPluginHost PluginHost { get; private set; }
         public GraphicsDeviceManager GraphicManager { get; }
+
+        public Rectangle ClientBounds
+        {
+            get
+            {
+                var window_rectangle = Window.ClientBounds;
+                return new Rectangle(
+                    window_rectangle.X,
+                    window_rectangle.Y,
+                    (int)((float)(window_rectangle.Width) / DpiScale),
+                    (int)((float)(window_rectangle.Height) / DpiScale)
+                );
+            }
+        }
+
         public readonly uint[] FrameDelay = new uint[2];
 
         private readonly List<(uint, Action)> _queuedActions = new ();
@@ -93,6 +109,8 @@ namespace ClassicUO
 
             Microsoft.Xna.Framework.Input.TextInputEXT.StartTextInput();
 
+            _displayScale = DpiScale;
+
             base.Initialize();
         }
 
@@ -106,8 +124,7 @@ namespace ClassicUO
 
             var bytes = Loader.GetBackgroundImage().ToArray();
             using var ms = new MemoryStream(bytes);
-            _background = Texture2D.FromStream(GraphicsDevice, ms);
-
+            _renderTargets.InitializeBackground(Texture2D.FromStream(GraphicsDevice, ms));
 #if false
             SetScene(new MainScene(this));
 #else
@@ -317,7 +334,13 @@ namespace ClassicUO
 
         public void SetWindowPositionBySettings()
         {
-            SDL_GetWindowBordersSize(Window.Handle, out int top, out int left, out _, out _);
+            var borderSizesRetrieved = SDL_GetWindowBordersSize(Window.Handle, out int top, out int left, out _, out _);
+
+            if (!borderSizesRetrieved)
+            {
+                top = 0;
+                left = 0;
+            }
 
             if (Settings.GlobalSettings.WindowPosition.HasValue)
             {
@@ -326,15 +349,40 @@ namespace ClassicUO
                 x = Math.Max(0, x);
                 y = Math.Max(0, y);
 
+                SDL_Point desiredStartPoint = new() { x = x, y = y };
+                var displayId = SDL_GetDisplayForPoint(ref desiredStartPoint);
+                if (displayId <= 0)
+                {
+                    // Make sure the window is actually in view and not out of bounds
+                    SetWindowPosition(left, top);
+                }
+
+                var boundsRetrieved = SDL_GetDisplayUsableBounds(displayId, out SDL_Rect displayBounds);
+                if (!boundsRetrieved)
+                {
+                    return; // we have no clue - the user is unfortunately on their own
+                }
+
+                if (x < displayBounds.x || x >= displayBounds.x + displayBounds.w)
+                {
+                    // Make sure the window is actually in view and not out of bounds
+                    x = left + displayBounds.x;
+                }
+
+                if (y < displayBounds.y || y >= displayBounds.y + displayBounds.h)
+                {
+                    y = top + displayBounds.y;
+                }
+
                 SetWindowPosition(x, y);
             }
         }
 
         protected override void Update(GameTime gameTime)
         {
-            if (Profiler.InContext("OutOfContext"))
+            if (Profiler.InContext(Profiler.ProfilerContext.OUT_OF_CONTEXT))
             {
-                Profiler.ExitContext("OutOfContext");
+                Profiler.ExitContext(Profiler.ProfilerContext.OUT_OF_CONTEXT);
             }
 
             Time.Ticks = (uint)gameTime.TotalGameTime.TotalMilliseconds;
@@ -352,9 +400,9 @@ namespace ClassicUO
 
             if (Scene != null && Scene.IsLoaded && !Scene.IsDestroyed)
             {
-                Profiler.EnterContext("Update");
+                Profiler.EnterContext(Profiler.ProfilerContext.UPDATE_WORLD);
                 Scene.Update();
-                Profiler.ExitContext("Update");
+                Profiler.ExitContext(Profiler.ProfilerContext.UPDATE_WORLD);
             }
 
             UIManager.Update();
@@ -415,41 +463,34 @@ namespace ClassicUO
 
         protected override void Draw(GameTime gameTime)
         {
+            _renderTargets.EnsureSizes(
+                GraphicsDevice,
+                new Rectangle(0, 0, GraphicManager.PreferredBackBufferWidth, GraphicManager.PreferredBackBufferHeight),
+                Scene.Camera.Bounds,
+                DpiScale
+            );
+
             Profiler.EndFrame();
             Profiler.BeginFrame();
 
-            if (Profiler.InContext("OutOfContext"))
+            if (Profiler.InContext(Profiler.ProfilerContext.OUT_OF_CONTEXT))
             {
-                Profiler.ExitContext("OutOfContext");
+                Profiler.ExitContext(Profiler.ProfilerContext.OUT_OF_CONTEXT);
             }
 
-            Profiler.EnterContext("RenderFrame");
+            Profiler.EnterContext(Profiler.ProfilerContext.RENDER_FRAME);
 
             _totalFrames++;
 
             GraphicsDevice.Clear(Color.Black);
 
-            _uoSpriteBatch.Begin();
-            var rect = new Rectangle(
-                0,
-                0,
-                GraphicManager.PreferredBackBufferWidth,
-                GraphicManager.PreferredBackBufferHeight
-            );
-            _uoSpriteBatch.DrawTiled(
-                _background,
-                rect,
-                _background.Bounds,
-                new Vector3(0, 0, 0.1f)
-            );
-            _uoSpriteBatch.End();
-
             if (Scene != null && Scene.IsLoaded && !Scene.IsDestroyed)
             {
-                Scene.Draw(_uoSpriteBatch);
+                Scene.Draw(_uoSpriteBatch, _renderTargets);
             }
 
-            UIManager.Draw(_uoSpriteBatch);
+            _uoSpriteBatch.GraphicsDevice.SetRenderTarget(_renderTargets.UiRenderTarget);
+            GraphicsDevice.Clear(Color.Transparent);
 
             if ((UO.World?.InGame ?? false) && SelectedObject.Object is TextObject t)
             {
@@ -467,15 +508,49 @@ namespace ClassicUO
             SelectedObject.SelectedContainer = null;
 
             _uoSpriteBatch.Begin();
+            if (Scene != null && Scene.IsLoaded && !Scene.IsDestroyed)
+            {
+                Scene.DrawUI(_uoSpriteBatch);
+            }
+            _uoSpriteBatch.End();
+
+            UIManager.Draw(_uoSpriteBatch);
+
+            _uoSpriteBatch.Begin();
             UO.GameCursor?.Draw(_uoSpriteBatch);
             _uoSpriteBatch.End();
 
-            Profiler.ExitContext("RenderFrame");
-            Profiler.EnterContext("OutOfContext");
+            _uoSpriteBatch.GraphicsDevice.SetRenderTarget(null);
+
+            _renderTargets.Draw(_uoSpriteBatch);
+
+            Profiler.ExitContext(Profiler.ProfilerContext.RENDER_FRAME);
+            Profiler.EnterContext(Profiler.ProfilerContext.OUT_OF_CONTEXT);
 
             Plugin.ProcessDrawCmdList(GraphicsDevice);
 
             base.Draw(gameTime);
+        }
+
+        private float _screenScale = Settings.GlobalSettings.ScreenScale;
+        public float ScreenScale {
+            get => _screenScale;
+            set {
+                if (value != _screenScale) {
+                    _screenScale = value;
+                    UO.GameCursor?.CreateGraphic(DpiScale);
+                }
+            }
+        }
+
+        public float DpiScale
+        {
+            get => SDL_GetWindowDisplayScale(Window.Handle) * ScreenScale;
+        }
+
+        public int ScaleWithDpi(int value, float previousDpi = 1)
+        {
+            return (int)Math.Round((value / previousDpi) * DpiScale);
         }
 
         protected override bool BeginDraw()
@@ -488,7 +563,12 @@ namespace ClassicUO
             int width = Window.ClientBounds.Width;
             int height = Window.ClientBounds.Height;
 
-            if (!IsWindowMaximized())
+            WindowOnClientSizeChanged(width, height);
+        }
+
+        private void WindowOnClientSizeChanged(int width, int height)
+        {
+            if (!IsWindowMaximized() && Window.AllowUserResizing)
             {
                 if (ProfileManager.CurrentProfile != null)
                     ProfileManager.CurrentProfile.WindowClientBounds = new Point(width, height);
@@ -812,6 +892,33 @@ namespace ClassicUO
                     Mouse.ButtonRelease(buttonType);
                     Mouse.Update();
 
+                    break;
+                }
+                case SDL_EventType.SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
+                case SDL_EventType.SDL_EVENT_WINDOW_DISPLAY_CHANGED:
+                {
+                    // when starting scaled, SDL will raise the scale changed event before the window has properly loaded and the previous scale set
+                    if (_displayScale != 0 && _displayScale != DpiScale)
+                    {
+                        // The effective DPI scale has changed. SDL handles the window content automatically
+                        // but we need to make sure to resize the window properly
+                        // This is especially important when the window size is restricted, for example
+                        // in the LoginScene
+                        WindowOnClientSizeChanged(
+                            Client.Game.ScaleWithDpi(Window.ClientBounds.Width, previousDpi: _displayScale),
+                            Client.Game.ScaleWithDpi(Window.ClientBounds.Height, previousDpi: _displayScale)
+                        );
+
+                        SDL_GetWindowMinimumSize(Client.Game.Window.Handle, out int previousMinWidth, out int previousMinHeight);
+
+                        SDL_SetWindowMinimumSize(
+                            Client.Game.Window.Handle,
+                            Client.Game.ScaleWithDpi(previousMinWidth, previousDpi: _displayScale),
+                            Client.Game.ScaleWithDpi(previousMinHeight, previousDpi: _displayScale)
+                        );
+
+                        _displayScale = DpiScale;
+                    }
                     break;
                 }
             }

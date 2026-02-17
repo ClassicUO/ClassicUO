@@ -1,9 +1,5 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Xml;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -11,10 +7,12 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
+using System;
+using System.Collections.Generic;
+using System.Xml;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -1926,9 +1924,10 @@ namespace ClassicUO.Game.UI.Gumps
             /// <param name="x"></param>
             /// <param name="y"></param>
             /// <returns></returns>
-            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
             {
-                base.Draw(batcher, x, y);
+                base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
+                float layerDepth = layerDepthRef;
 
                 if (ShowEdit)
                 {
@@ -1955,11 +1954,21 @@ namespace ClassicUO.Game.UI.Gumps
                             hueVector.Y = 1;
                         }
 
-                        batcher.Draw(
-                            gumpInfo.Texture,
-                            new Vector2(x + (Width - gumpInfo.UV.Width), y),
-                            gumpInfo.UV,
-                            hueVector
+                        var texture = gumpInfo.Texture;
+                        var sourceRectangle = gumpInfo.UV;
+                        renderLists.AddGumpWithAtlas
+                        (
+                            (batcher) =>
+                            {
+                                batcher.Draw(
+                                    texture,
+                                    new Vector2(x + (Width - sourceRectangle.Width), y),
+                                    sourceRectangle,
+                                    hueVector,
+                                    layerDepth
+                                );
+                                return true;
+                            }
                         );
                     }
                 }

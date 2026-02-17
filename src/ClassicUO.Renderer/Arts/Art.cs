@@ -1,13 +1,11 @@
 using ClassicUO.Assets;
-using ClassicUO.Renderer.Lights;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SDL3;
-using SixLabors.ImageSharp.PixelFormats;
 using System;
-using static ClassicUO.Renderer.UltimaBatcher2D;
+using System.Buffers;
 
 namespace ClassicUO.Renderer.Arts
 {
@@ -100,7 +98,8 @@ namespace ClassicUO.Renderer.Arts
             int index,
             ushort customHue,
             out int hotX,
-            out int hotY
+            out int hotY,
+            float dpiScale
         )
         {
             hotX = hotY = 0;
@@ -112,80 +111,104 @@ namespace ClassicUO.Renderer.Arts
                 return IntPtr.Zero;
             }
 
-            fixed (uint* ptr = artInfo.Pixels)
+            int srcWidth = artInfo.Width;
+            int srcHeight = artInfo.Height;
+
+            // Make a copy of pixels to avoid modifying the original
+            var rentedBuffer = ArrayPool<uint>.Shared.Rent(artInfo.Pixels.Length);
+            try
             {
-                SDL.SDL_Surface* surface = (SDL.SDL_Surface*)
-                    SDL.SDL_CreateSurfaceFrom(
-                        artInfo.Width,
-                        artInfo.Height,
-                        SDL.SDL_PixelFormat.SDL_PIXELFORMAT_ABGR8888,
-                        (IntPtr)ptr,
-                        4 * artInfo.Width);
+                var pixelsCopy = rentedBuffer.AsSpan(0, artInfo.Pixels.Length);
+                artInfo.Pixels.CopyTo(pixelsCopy);
 
-                int stride = surface->pitch >> 2;
-                uint* pixels_ptr = (uint*)surface->pixels;
-                uint* p_line_end = pixels_ptr + artInfo.Width;
-                uint* p_img_end = pixels_ptr + stride * artInfo.Height;
-                int delta = stride - artInfo.Width;
-                short curX = 0;
-                short curY = 0;
-                Color c = default;
-
-                while (pixels_ptr < p_img_end)
+                // Process the copy: find hotX/Y and clear marker pixels
+                for (int y = 0; y < srcHeight; y++)
                 {
-                    curX = 0;
-
-                    while (pixels_ptr < p_line_end)
+                    for (int x = 0; x < srcWidth; x++)
                     {
-                        if (*pixels_ptr != 0 && *pixels_ptr != 0xFF_00_00_00)
+                        int idx = y * srcWidth + x;
+                        uint pixel = pixelsCopy[idx];
+
+                        if (pixel == 0)
+                            continue;
+
+                        // Clear black marker pixels
+                        if (pixel == 0xFF_00_00_00)
                         {
-                            if (curX >= artInfo.Width - 1 || curY >= artInfo.Height - 1)
-                            {
-                                *pixels_ptr = 0;
-                            }
-                            else if (curX == 0 || curY == 0)
-                            {
-                                if (*pixels_ptr == 0xFF_00_FF_00)
-                                {
-                                    if (curX == 0)
-                                    {
-                                        hotY = curY;
-                                    }
-
-                                    if (curY == 0)
-                                    {
-                                        hotX = curX;
-                                    }
-                                }
-
-                                *pixels_ptr = 0;
-                            }
-                            else if (customHue > 0)
-                            {
-                                c.PackedValue = *pixels_ptr;
-                                *pixels_ptr =
-                                    HuesHelper.Color16To32(
-                                        _huesLoader.GetColor16(
-                                            HuesHelper.ColorToHue(c),
-                                            customHue
-                                        )
-                                    ) | 0xFF_00_00_00;
-                            }
+                            pixelsCopy[idx] = 0;
+                            continue;
                         }
 
-                        ++pixels_ptr;
+                        // Check for green hotspot marker in first row/column
+                        if (pixel == 0xFF_00_FF_00)
+                        {
+                            if (x == 0)
+                                hotY = y;
+                            if (y == 0)
+                                hotX = x;
+                            pixelsCopy[idx] = 0;
+                            continue;
+                        }
 
-                        ++curX;
+                        // Clear edge pixels (first/last row and column)
+                        if (x == 0 || y == 0 || x == srcWidth - 1 || y == srcHeight - 1)
+                        {
+                            pixelsCopy[idx] = 0;
+                            continue;
+                        }
+
+                        // Apply custom hue if needed
+                        if (customHue > 0)
+                        {
+                            Color c = default;
+                            c.PackedValue = pixel;
+                            pixelsCopy[idx] = HuesHelper.Color16To32(
+                                _huesLoader.GetColor16(
+                                    HuesHelper.ColorToHue(c),
+                                    customHue
+                                )
+                            ) | 0xFF_00_00_00;
+                        }
                     }
-
-                    pixels_ptr += delta;
-                    p_line_end += stride;
-
-                    ++curY;
                 }
 
-                return (IntPtr)surface;
+                // Scale hotX/Y by dpiScale
+                hotX = (int)(hotX * dpiScale);
+                hotY = (int)(hotY * dpiScale);
+
+                // Now create the surface from cleaned pixels
+                fixed (uint* ptr = pixelsCopy)
+                {
+                    SDL.SDL_Surface* surface = (SDL.SDL_Surface*)
+                        SDL.SDL_CreateSurfaceFrom(
+                            srcWidth,
+                            srcHeight,
+                            SDL.SDL_PixelFormat.SDL_PIXELFORMAT_ABGR8888,
+                            (IntPtr)ptr,
+                            4 * srcWidth);
+
+                    if (dpiScale != 1f)
+                    {
+                        int width = (int)(srcWidth * dpiScale);
+                        int height = (int)(srcHeight * dpiScale);
+
+                        SDL.SDL_Surface* newSurface = (SDL.SDL_Surface*)SDL.SDL_ScaleSurface(
+                            (nint)surface,
+                            width,
+                            height,
+                            SDL.SDL_ScaleMode.SDL_SCALEMODE_NEAREST);
+
+                        SDL.SDL_DestroySurface((nint)surface);
+                        surface = newSurface;
+                    }
+
+                    return (IntPtr)surface;
+                }
             }
+            finally
+            {
+                ArrayPool<uint>.Shared.Return(rentedBuffer);
+            } 
         }
 
         public Rectangle GetRealArtBounds(uint idx) =>

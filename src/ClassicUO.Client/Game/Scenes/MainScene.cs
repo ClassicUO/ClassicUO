@@ -1,12 +1,12 @@
-using System;
 using ClassicUO.Configuration;
-using ClassicUO.Network.Encryption;
 using ClassicUO.Network;
+using ClassicUO.Network.Encryption;
 using ClassicUO.Renderer;
+using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using ClassicUO.Utility.Logging;
+using System;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -46,12 +46,12 @@ namespace ClassicUO.Game.Scenes
             base.Update();
         }
 
-        public override bool Draw(UltimaBatcher2D batcher)
+        public override bool Draw(UltimaBatcher2D batcher, RenderTargets renderTargets)
         {
             _spritebatch.Begin();
             _spritebatch.DrawRectangle(new Rectangle(0, 0, 100, 100), Color.Red);
             _spritebatch.End();
-            return base.Draw(batcher);
+            return base.Draw(batcher, renderTargets);
         }
 
         public override void Load()

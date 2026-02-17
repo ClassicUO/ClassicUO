@@ -1,11 +1,9 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using ClassicUO.Game.Managers;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using SDL3;
+using System;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -34,11 +32,14 @@ namespace ClassicUO.Game.Scenes
             Camera.Update(true, Time.Delta, Mouse.Position);
         }
 
-        public virtual bool Draw(UltimaBatcher2D batcher)
+        public virtual bool Draw(UltimaBatcher2D batcher, RenderTargets renderTargets)
         {
             return true;
         }
 
+        public virtual void DrawUI(UltimaBatcher2D batcher)
+        {
+        }
 
         public virtual void Load()
         {

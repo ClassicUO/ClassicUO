@@ -1,9 +1,9 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.Utility.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Utility
 {
@@ -11,7 +11,7 @@ namespace ClassicUO.Utility
     {
         public const int ProfileTimeCount = 60;
         private static readonly List<ContextAndTick> m_Context;
-        private static readonly List<Tuple<string[], double>> m_ThisFrameData;
+        private static readonly List<Tuple<ProfilerContext[], double>> m_ThisFrameData;
         private static readonly List<ProfileData> m_AllFrameData;
         private static readonly ProfileData m_TotalTimeData;
         private static readonly Stopwatch _timer;
@@ -20,7 +20,7 @@ namespace ClassicUO.Utility
         static Profiler()
         {
             m_Context = new List<ContextAndTick>();
-            m_ThisFrameData = new List<Tuple<string[], double>>();
+            m_ThisFrameData = new List<Tuple<ProfilerContext[], double>>();
             m_AllFrameData = new List<ProfileData>();
             m_TotalTimeData = new ProfileData(null, 0d);
             _timer = Stopwatch.StartNew();
@@ -32,6 +32,16 @@ namespace ClassicUO.Utility
 
         public static bool Enabled = false;
 
+        public enum ProfilerContext
+        {
+            UPDATE_WORLD,
+            RENDER_FRAME,
+            RENDER_FRAME_WORLD,
+            RENDER_FRAME_WORLD_PREPARE,
+            RENDER_FRAME_UI,
+            OUT_OF_CONTEXT
+        }
+
         public static void BeginFrame()
         {
             if (!Enabled)
@@ -41,7 +51,7 @@ namespace ClassicUO.Utility
 
             if (m_ThisFrameData.Count > 0)
             {
-                foreach (Tuple<string[], double> t in m_ThisFrameData)
+                foreach (Tuple<ProfilerContext[], double> t in m_ThisFrameData)
                 {
                     bool added = false;
 
@@ -79,7 +89,7 @@ namespace ClassicUO.Utility
             m_TotalTimeData.AddNewHitLength(LastFrameTimeMS);
         }
 
-        public static void EnterContext(string context_name)
+        public static void EnterContext(ProfilerContext context_name)
         {
             if (!Enabled)
             {
@@ -89,7 +99,7 @@ namespace ClassicUO.Utility
             m_Context.Add(new ContextAndTick(context_name, _timer.ElapsedTicks));
         }
 
-        public static void ExitContext(string context_name)
+        public static void ExitContext(ProfilerContext context_name)
         {
             if (!Enabled)
             {
@@ -101,7 +111,7 @@ namespace ClassicUO.Utility
                 Log.Error("Profiler.ExitProfiledContext: context_name does not match current context.");
             }
 
-            string[] context = new string[m_Context.Count];
+            ProfilerContext[] context = new ProfilerContext[m_Context.Count];
 
             for (int i = 0; i < m_Context.Count; i++)
             {
@@ -110,11 +120,11 @@ namespace ClassicUO.Utility
 
             double ms = (_timer.ElapsedTicks - m_Context[m_Context.Count - 1].Tick) * 1000d / Stopwatch.Frequency;
 
-            m_ThisFrameData.Add(new Tuple<string[], double>(context, ms));
+            m_ThisFrameData.Add(new Tuple<ProfilerContext[], double>(context, ms));
             m_Context.RemoveAt(m_Context.Count - 1);
         }
 
-        public static bool InContext(string context_name)
+        public static bool InContext(ProfilerContext context_name)
         {
             if (!Enabled)
             {
@@ -129,7 +139,7 @@ namespace ClassicUO.Utility
             return m_Context[m_Context.Count - 1].Name == context_name;
         }
 
-        public static ProfileData GetContext(string context_name)
+        public static ProfileData GetContext(ProfilerContext context_name)
         {
             if (!Enabled)
             {
@@ -153,7 +163,7 @@ namespace ClassicUO.Utility
             private uint m_LastIndex;
             private readonly double[] m_LastTimes = new double[ProfileTimeCount];
 
-            public ProfileData(string[] context, double time)
+            public ProfileData(ProfilerContext[] context, double time)
             {
                 Context = context;
                 m_LastIndex = 0;
@@ -178,9 +188,9 @@ namespace ClassicUO.Utility
             }
 
             public double AverageTime => TimeInContext / ProfileTimeCount;
-            public string[] Context;
+            public ProfilerContext[] Context;
 
-            public bool MatchesContext(string[] context)
+            public bool MatchesContext(ProfilerContext[] context)
             {
                 if (Context.Length != context.Length)
                 {
@@ -224,10 +234,10 @@ namespace ClassicUO.Utility
 
         private readonly struct ContextAndTick
         {
-            public readonly string Name;
+            public readonly ProfilerContext Name;
             public readonly long Tick;
 
-            public ContextAndTick(string name, long tick)
+            public ContextAndTick(ProfilerContext name, long tick)
             {
                 Name = name;
                 Tick = tick;

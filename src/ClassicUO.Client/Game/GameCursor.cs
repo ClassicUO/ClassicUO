@@ -1,7 +1,5 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -9,12 +7,11 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using SDL3;
+using System;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game
 {
@@ -88,12 +85,16 @@ namespace ClassicUO.Game
         private readonly Tooltip _tooltip;
         private readonly World _world;
 
-        public GameCursor(World world)
+        public GameCursor(World world, float dpiScale)
         {
             _world = world;
             _tooltip = new Tooltip(world);
             _aura = new Aura(30);
 
+            CreateGraphic(dpiScale);
+        }
+
+        public void CreateGraphic(float dpiScale) {
             for (int i = 0; i < 3; i++)
             {
                 for (int j = 0; j < 16; j++)
@@ -104,7 +105,8 @@ namespace ClassicUO.Game
                         id,
                         (ushort)(i == 2 ? 0x0033 : 0),
                         out int hotX,
-                        out int hotY
+                        out int hotY,
+                        dpiScale
                     );
 
                     if (surface != IntPtr.Zero)
@@ -119,6 +121,7 @@ namespace ClassicUO.Game
                     }
                 }
             }
+            _needGraphicUpdate = true;
         }
 
         public ushort Graphic
@@ -392,7 +395,8 @@ namespace ClassicUO.Game
                                 dist,
                                 Mouse.Position.X - 26,
                                 Mouse.Position.Y - 21,
-                                hue
+                                hue,
+                                0f
                             );
 
                             hue.Y = 0;
@@ -401,7 +405,8 @@ namespace ClassicUO.Game
                                 dist,
                                 Mouse.Position.X - 25,
                                 Mouse.Position.Y - 20,
-                                hue
+                                hue,
+                                0f
                             );
                         }
                     }
@@ -451,7 +456,7 @@ namespace ClassicUO.Game
                         (int)(artInfo.UV.Height * scale)
                     );
 
-                    sb.Draw(artInfo.Texture, rect, artInfo.UV, hue);
+                    sb.Draw(artInfo.Texture, rect, artInfo.UV, hue, 0f);
 
                     if (
                         ItemHold.Amount > 1
@@ -462,7 +467,7 @@ namespace ClassicUO.Game
                         rect.X += 5;
                         rect.Y += 5;
 
-                        sb.Draw(artInfo.Texture, rect, artInfo.UV, hue);
+                        sb.Draw(artInfo.Texture, rect, artInfo.UV, hue, 0f);
                     }
                 }
             }
@@ -512,7 +517,8 @@ namespace ClassicUO.Game
                     artInfo.Texture,
                     new Vector2(Mouse.Position.X - offX, Mouse.Position.Y - offY),
                     rect,
-                    hueVec
+                    hueVec,
+                    0f
                 );
             }
         }

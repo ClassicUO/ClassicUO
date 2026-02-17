@@ -1,9 +1,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -11,13 +8,16 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -28,6 +28,7 @@ namespace ClassicUO.Game.UI.Gumps
         private const int WIDTH = 700;
         private const int HEIGHT = 500;
         private const int TEXTBOX_HEIGHT = 25;
+        private const int SCREEN_ZOOM_STEPS = 20;
 
         private static Texture2D _logoTexture2D;
         private Combobox _auraType;
@@ -129,6 +130,7 @@ namespace ClassicUO.Game.UI.Gumps
         // general
         private HSliderBar _sliderFPS, _circleOfTranspRadius;
         private HSliderBar _sliderSpeechDelay;
+        private HSliderBar _sliderScreenZoom;
         private HSliderBar _sliderZoom;
         private HSliderBar _soundsVolume, _musicVolume, _loginMusicVolume;
         private ClickableColorBox _speechColorPickerBox, _emoteColorPickerBox, _yellColorPickerBox, _whisperColorPickerBox, _partyMessageColorPickerBox, _guildMessageColorPickerBox, _allyMessageColorPickerBox, _chatMessageColorPickerBox, _partyAuraColorPickerBox;
@@ -1691,6 +1693,19 @@ namespace ClassicUO.Game.UI.Gumps
 
             SettingsSection section2 = AddSettingsSection(box, "Zoom");
             section2.Y = section.Bounds.Bottom + 40;
+
+            _sliderScreenZoom = AddHSlider(
+                null,
+                -SCREEN_ZOOM_STEPS,
+                SCREEN_ZOOM_STEPS,
+                GetScreenZoom(Settings.GlobalSettings.ScreenScale),
+                startX,
+                startY,
+                250
+            );
+            section2.Add(AddLabel(null, ResGumps.ScreenZoom, startX, startY));
+            section2.AddRight(_sliderScreenZoom);
+
             section2.Add(AddLabel(null, ResGumps.DefaultZoom, startX, startY));
 
             var cameraZoomCount = (int)((camera.ZoomMax - camera.ZoomMin) / camera.ZoomStep);
@@ -3631,6 +3646,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _enableBlackWhiteEffect.IsChecked = true;
                     Client.Game.Scene.Camera.Zoom = 1f;
                     _currentProfile.DefaultScale = 1f;
+                    _sliderScreenZoom.Value = 0;
                     _lightBar.Value = 0;
                     _enableLight.IsChecked = false;
                     _lightLevelType.SelectedIndex = 0;
@@ -3944,6 +3960,12 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.EnableDeathScreen = _enableDeathScreen.IsChecked;
             _currentProfile.EnableBlackWhiteEffect = _enableBlackWhiteEffect.IsChecked;
 
+            Settings.GlobalSettings.ScreenScale = GetScreenScale(_sliderScreenZoom.Value);
+            if (Client.Game.ScreenScale != Settings.GlobalSettings.ScreenScale) {
+                Client.Game.ScreenScale = Settings.GlobalSettings.ScreenScale;
+                RecenterGump();
+            }
+
             var camera = Client.Game.Scene.Camera;
             _currentProfile.DefaultScale = camera.Zoom = (_sliderZoom.Value * camera.ZoomStep) + camera.ZoomMin;
 
@@ -3980,7 +4002,9 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (vp != null)
                 {
-                    Point n = vp.ResizeGameWindow(new Point(gameWindowSizeWidth, gameWindowSizeHeight));
+                    var s = new Point(Client.Game.ScaleWithDpi(gameWindowSizeWidth), Client.Game.ScaleWithDpi(gameWindowSizeHeight));
+
+                    Point n = vp.ResizeGameWindow(s);
 
                     _gameWindowWidth.SetText(n.X.ToString());
                     _gameWindowHeight.SetText(n.Y.ToString());
@@ -4017,7 +4041,8 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (vp != null)
                     {
-                        n = vp.ResizeGameWindow(new Point(Client.Game.Window.ClientBounds.Width, Client.Game.Window.ClientBounds.Height));
+                        var size = new Point(Client.Game.ClientBounds.Width, Client.Game.ClientBounds.Height);
+                        n = vp.ResizeGameWindow(size);
                         vp.SetGameWindowPosition(new Point(-5, -5));
                         _currentProfile.GameWindowPosition = vp.Location;
                     }
@@ -4164,6 +4189,10 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     counterGump.IsEnabled = counterGump.IsVisible = _currentProfile.CounterBarEnabled;
                 }
+            }
+            else if (counterGump != null)
+            {
+                counterGump.SetCellSize(_currentProfile.CounterBarCellSize);
             }
 
             // experimental
@@ -4331,34 +4360,41 @@ namespace ClassicUO.Game.UI.Gumps
             _gameWindowHeight.SetText(camera.Bounds.Height.ToString());
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
+            float layerDepth = layerDepthRef;
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-            batcher.Draw
-            (
-                LogoTexture,
-                new Rectangle
+            renderLists.AddGumpNoAtlas(batcher =>
+            {
+                batcher.Draw
                 (
-                    x + 190,
-                    y + 20,
-                    WIDTH - 250,
-                    400
-                ),
-                hueVector
-            );
+                    LogoTexture,
+                    new Rectangle
+                    (
+                        x + 190,
+                        y + 20,
+                        WIDTH - 250,
+                        400
+                    ),
+                    hueVector,
+                    layerDepth
+                );
 
-            batcher.DrawRectangle
-            (
-                SolidColorTextureCache.GetTexture(Color.Gray),
-                x,
-                y,
-                Width,
-                Height,
-                hueVector
-            );
+                batcher.DrawRectangle
+                (
+                    SolidColorTextureCache.GetTexture(Color.Gray),
+                    x,
+                    y,
+                    Width,
+                    Height,
+                    hueVector,
+                    layerDepth
+                );
+                return true;
+            });
 
-            return base.Draw(batcher, x, y);
+            return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
         }
 
         private InputField AddInputField
@@ -4789,15 +4825,21 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(_textbox);
             }
 
-            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
             {
-                if (batcher.ClipBegin(x, y, Width, Height))
+                float layerDepth = layerDepthRef;
+                renderLists.AddGumpNoAtlas(batcher =>
                 {
-                    base.Draw(batcher, x, y);
+                    if (batcher.ClipBegin(x, y, Width, Height))
+                    {
+                        RenderLists childRenderLists = new();
+                        base.AddToRenderLists(childRenderLists, x, y, ref layerDepth);
 
-                    batcher.ClipEnd();
-                }
-
+                        childRenderLists.DrawRenderLists(batcher, sbyte.MaxValue);
+                        batcher.ClipEnd();
+                    }
+                    return true;
+                });
                 return true;
             }
 
@@ -4821,6 +4863,36 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _textbox.SetText(text);
             }
+        }
+
+        private float GetScreenScale(int zoom_slider_value) {
+            float screen_zoom_steps = SCREEN_ZOOM_STEPS;
+            float x = zoom_slider_value;
+
+            float screen_scale;
+            if (zoom_slider_value > 0) {
+                screen_scale = x/screen_zoom_steps + 1.0f;
+            } else {
+                screen_scale = 1.0f + 0.025f * x;
+            }
+            return screen_scale;
+        }
+
+        private int GetScreenZoom(float screen_scale) {
+            float screen_zoom_steps = SCREEN_ZOOM_STEPS;
+
+            int zoom_slider_value;
+            if (screen_scale > 1f) {
+                zoom_slider_value = (int)Math.Round(screen_zoom_steps * (screen_scale - 1f));
+            } else {
+                zoom_slider_value = (int)Math.Round(-screen_zoom_steps * 2 * (1f - screen_scale));
+            }
+            return zoom_slider_value;
+        }
+
+        private void RecenterGump() {
+            X = (Client.Game.ClientBounds.Width >> 1) - WIDTH/2;
+            Y = (Client.Game.ClientBounds.Height >> 1) - HEIGHT/2;
         }
     }
 }

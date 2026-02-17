@@ -561,34 +561,41 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update();
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
             int yy = TextBoxControl.Y + y - 20;
+            var scale = 1f;
 
             LinkedListNode<ChatLineTime> last = _textEntries.Last;
 
-            while (last != null)
+            var depth = layerDepthRef;
+
+            renderLists.AddGumpNoAtlas(batcher =>
             {
-                LinkedListNode<ChatLineTime> prev = last.Previous;
-
-                if (last.Value.IsDisposed)
+                while (last != null)
                 {
-                    _textEntries.Remove(last);
-                }
-                else
-                {
-                    yy -= last.Value.TextHeight;
+                    LinkedListNode<ChatLineTime> prev = last.Previous;
 
-                    if (yy >= y)
+                    if (last.Value.IsDisposed)
                     {
-                        last.Value.Draw(batcher, x + 2, yy);
+                        _textEntries.Remove(last);
                     }
+                    else
+                    {
+                        yy -= last.Value.TextHeight;
+
+                        if (yy >= y)
+                        {
+                            last.Value.Draw(batcher, x + 2, yy, depth, scale);
+                        }
+                    }
+
+                    last = prev;
                 }
+                return true;
+            });
 
-                last = prev;
-            }
-
-            return base.Draw(batcher, x, y);
+            return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
         }
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
@@ -1097,9 +1104,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
 
-            public bool Draw(UltimaBatcher2D batcher, int x, int y)
+            public bool Draw(UltimaBatcher2D batcher, int x, int y, float depth, float scale = 1f)
             {
-                return !IsDisposed && _renderedText.Draw(batcher, x, y /*, ShaderHueTranslator.GetHueVector(0, false, _alpha, true)*/);
+                return !IsDisposed && _renderedText.Draw(batcher, x, y, depth, scale: scale /*, ShaderHueTranslator.GetHueVector(0, false, _alpha, true)*/);
             }
 
             public override string ToString()
