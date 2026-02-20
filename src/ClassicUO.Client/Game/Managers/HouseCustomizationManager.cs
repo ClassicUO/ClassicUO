@@ -115,9 +115,11 @@ namespace ClassicUO.Game.Managers
                 FloorCount = 3;
             }
 
-            int componentsOnFloor = (width - 1) * (height - 1);
+            int plotWidth = width + 1;
+            int plotHeight = height + 1;
+            int componentsOnFloor = (plotWidth - 1) * (plotHeight - 1);
 
-            MaxComponets = FloorCount * (componentsOnFloor + 2 * (width + height) - 4) - (int) (FloorCount * componentsOnFloor * -0.25) + 2 * width + 3 * height - 5;
+            MaxComponets = FloorCount * (componentsOnFloor + 2 * (plotWidth + plotHeight) - 4) - (int) (FloorCount * componentsOnFloor * -0.25) + 2 * plotWidth + 3 * plotHeight - 5;
 
             MaxFixtures = MaxComponets / 20;
         }
@@ -293,7 +295,7 @@ namespace ClassicUO.Game.Managers
 
                         mo.AlphaHue = 0xFF;
 
-                        CUSTOM_HOUSE_MULTI_OBJECT_FLAGS state = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR;
+                        CUSTOM_HOUSE_MULTI_OBJECT_FLAGS state = CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL;
 
                         if (FloorVisionState[0] == (int) CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_FLOOR)
                         {
@@ -593,6 +595,7 @@ namespace ClassicUO.Game.Managers
                 color += 5;
                 z += 20;
             }
+
         }
 
         public void OnTargetWorld(GameObject place)
@@ -654,16 +657,153 @@ namespace ClassicUO.Game.Managers
                             z = place.Z - (foundationItem.Z + z) + z;
                         }
 
-                        if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF)
+                        if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
+                        {
+                            int floorBase = foundationItem.Z;
+                            int stairFloorBase = floorBase;
+
+                            for (int f = 0; f < FloorCount; f++)
+                            {
+                                int fz = floorBase + 7 + f * 20;
+
+                                if (place.Z >= fz && place.Z < fz + 20)
+                                {
+                                    stairFloorBase = fz;
+                                    break;
+                                }
+                            }
+
+                            if (place.Z < floorBase + 7)
+                                stairFloorBase = floorBase;
+
+                            // Collect stair pieces sharing same X (N/S) or same Y (E/W) with clicked piece
+                            var sameXPieces = new List<Multi>();
+                            var sameYPieces = new List<Multi>();
+
+                            foreach (Multi comp in house.Components)
+                            {
+                                if (comp.IsDestroyed || !comp.IsCustom)
+                                    continue;
+
+                                if ((comp.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR) == 0)
+                                    continue;
+
+                                if (comp.Z < stairFloorBase || comp.Z >= stairFloorBase + 20)
+                                    continue;
+
+                                if (comp.X == place.X)
+                                    sameXPieces.Add(comp);
+
+                                if (comp.Y == place.Y)
+                                    sameYPieces.Add(comp);
+                            }
+
+                            // Determine orientation by piece count, then find exact 4-tile group
+                            var stairPieces = new List<Multi>();
+
+                            if (sameXPieces.Count >= sameYPieces.Count && sameXPieces.Count > 0)
+                            {
+                                // N/S orientation - find best 4-consecutive-Y window containing place.Y
+                                int bestCount = 0;
+                                int bestStart = place.Y;
+
+                                for (int startY = place.Y - 3; startY <= place.Y; startY++)
+                                {
+                                    int count = 0;
+
+                                    foreach (var p in sameXPieces)
+                                    {
+                                        if (p.Y >= startY && p.Y <= startY + 3)
+                                            count++;
+                                    }
+
+                                    if (count > bestCount)
+                                    {
+                                        bestCount = count;
+                                        bestStart = startY;
+                                    }
+                                }
+
+                                foreach (var p in sameXPieces)
+                                {
+                                    if (p.Y >= bestStart && p.Y <= bestStart + 3)
+                                        stairPieces.Add(p);
+                                }
+                            }
+                            else if (sameYPieces.Count > 0)
+                            {
+                                // E/W orientation - find best 4-consecutive-X window containing place.X
+                                int bestCount = 0;
+                                int bestStart = place.X;
+
+                                for (int startX = place.X - 3; startX <= place.X; startX++)
+                                {
+                                    int count = 0;
+
+                                    foreach (var p in sameYPieces)
+                                    {
+                                        if (p.X >= startX && p.X <= startX + 3)
+                                            count++;
+                                    }
+
+                                    if (count > bestCount)
+                                    {
+                                        bestCount = count;
+                                        bestStart = startX;
+                                    }
+                                }
+
+                                foreach (var p in sameYPieces)
+                                {
+                                    if (p.X >= bestStart && p.X <= bestStart + 3)
+                                        stairPieces.Add(p);
+                                }
+                            }
+
+                            // Combined staircases have pieces at multiple Z levels (0/5/10/15 offsets).
+                            // Single stairs are all at one Z. Only group-delete for combined staircases.
+                            bool isCombined = false;
+
+                            if (stairPieces.Count > 1)
+                            {
+                                int firstZ = stairPieces[0].Z;
+
+                                for (int i = 1; i < stairPieces.Count; i++)
+                                {
+                                    if (stairPieces[i].Z != firstZ)
+                                    {
+                                        isCombined = true;
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (isCombined)
+                            {
+                                foreach (Multi piece in stairPieces)
+                                {
+                                    int pz = piece.Z - (foundationItem.Z + (7 + (CurrentFloor - 1) * 20)) + (7 + (CurrentFloor - 1) * 20);
+
+                                    NetClient.Socket.Send_CustomHouseDeleteItem(_world, piece.Graphic, piece.X - foundationItem.X, piece.Y - foundationItem.Y, pz);
+                                    piece.Destroy();
+                                }
+                            }
+                            else
+                            {
+                                NetClient.Socket.Send_CustomHouseDeleteItem(_world, place.Graphic, place.X - foundationItem.X, place.Y - foundationItem.Y, z);
+                                place.Destroy();
+                            }
+                        }
+                        else if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF)
                         {
                             NetClient.Socket.Send_CustomHouseDeleteRoof(_world, place.Graphic, place.X - foundationItem.X, place.Y - foundationItem.Y, z);
+                            place.Destroy();
                         }
                         else
                         {
                             NetClient.Socket.Send_CustomHouseDeleteItem(_world, place.Graphic, place.X - foundationItem.X, place.Y - foundationItem.Y, z);
+                            place.Destroy();
                         }
-
-                        place.Destroy();
                     }
                 }
                 else if (SelectedGraphic != 0)
@@ -882,7 +1022,7 @@ namespace ClassicUO.Game.Managers
 
             if (CombinedStair)
             {
-                if (Components + 10 > MaxComponets)
+                if (Components + 10 > MaxComponets || CurrentFloor >= FloorCount)
                 {
                     return false;
                 }
@@ -1056,7 +1196,15 @@ namespace ClassicUO.Game.Managers
                         }
                     }
 
-                    if (!ValidateItemPlace(_bounds, item.Graphic, gobj.X + item.X, gobj.Y + item.Y))
+                    if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR && CombinedStair)
+                    {
+                        int tileX = gobj.X + item.X;
+                        int tileY = gobj.Y + item.Y;
+
+                        if (tileX < StartPos.X || tileX >= EndPos.X || tileY < StartPos.Y || tileY >= EndPos.Y)
+                            return false;
+                    }
+                    else if (!ValidateItemPlace(_bounds, item.Graphic, gobj.X + item.X, gobj.Y + item.Y))
                     {
                         return false;
                     }
@@ -1068,11 +1216,13 @@ namespace ClassicUO.Game.Managers
                             if (!multi.IsCustom)
                                 continue;
 
-                            if ((multi.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) == 0 && multi.Z >= minZ && multi.Z < maxZ)
+                            int collisionMaxZ = (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR && CombinedStair) ? maxZ + 20 : maxZ;
+
+                            if ((multi.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) == 0 && multi.Z >= minZ && multi.Z < collisionMaxZ)
                             {
                                 if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_STAIR)
                                 {
-                                    if ((multi.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) == 0)
+                                    if ((multi.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE)) == 0)
                                         return false;
                                 }
                                 else
@@ -1298,7 +1448,12 @@ namespace ClassicUO.Game.Managers
             }
 
 
-            if ((item.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE)) != 0)
+            if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF) != 0)
+            {
+                return true;
+            }
+
+            if ((item.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE)) != 0)
             {
                 foreach (Multi temp in house.GetMultiAt(item.X, item.Y))
                 {
@@ -1397,7 +1552,7 @@ namespace ClassicUO.Game.Managers
                         );
                     }
 
-                    if (!found)
+                    if (!found && minZ == foundationItem.Z + 7)
                     {
                         return false;
                     }
@@ -1459,7 +1614,7 @@ namespace ClassicUO.Game.Managers
                         );
                     }
 
-                    if (!found)
+                    if (!found && minZ == foundationItem.Z + 7)
                     {
                         return false;
                     }
@@ -1742,7 +1897,7 @@ namespace ClassicUO.Game.Managers
 
                 if (contains != -1)
                 {
-                    return (i, graphic);
+                    return (i, contains);
                 }
             }
 
