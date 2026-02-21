@@ -198,7 +198,9 @@ namespace ClassicUO.Game.Managers
                     ? Notoriety.GetHue(mobile.NotorietyFlag)
                     : Notoriety.GetHue(NotorietyFlag.Gray);
 
-            Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue, false, alpha);
+            //Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue, false, alpha);
+            Vector3 hueVecZero = ShaderHueTranslator.GetHueVector(0, false, alpha);
+            Vector3 hueVecNoto = ShaderHueTranslator.GetHueVector(hue, false, alpha);
 
             if (mobile == null)
             {
@@ -224,7 +226,30 @@ namespace ClassicUO.Game.Managers
 
                 uint topGump;
                 uint bottomGump;
-                uint gumpHue = 0x7570;
+                //uint gumpHue = 0x7570;
+                uint gumpHue = 0x7572; // gray
+
+                if (mobile != null)
+                {
+                    if (mobile.NotorietyFlag == NotorietyFlag.Innocent)
+                        gumpHue = 0x7570; // blue
+
+                    else if (mobile.NotorietyFlag == NotorietyFlag.Ally)
+                        gumpHue = 0x7571; // green
+
+                    else if (mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Gray)
+                        gumpHue = 0x7572; // grey
+
+                    else if (mobile.NotorietyFlag == NotorietyFlag.Enemy)
+                        gumpHue = 0x7573; // orange
+
+                    if (mobile.NotorietyFlag == NotorietyFlag.Invulnerable)
+                        gumpHue = 0x7575; // yellow
+
+                    else if (mobile.NotorietyFlag == NotorietyFlag.Murderer)
+                        gumpHue = 0x7577; // red
+                }
+
                 if (width >= 80)
                 {
                     topGump = 0x756D;
@@ -251,7 +276,7 @@ namespace ClassicUO.Game.Managers
                         newTargGumpInfo.Texture,
                         new Vector2(targetX, y - topTargetY),
                         newTargGumpInfo.UV,
-                        hueVec,
+                        hueVecZero,
                         layerDepth
                     );
 
@@ -260,7 +285,7 @@ namespace ClassicUO.Game.Managers
                         hueGumpInfo.Texture,
                         new Vector2(targetX, y - topTargetY),
                         hueGumpInfo.UV,
-                        hueVec,
+                        hueVecZero,
                         layerDepth
                     );
 
@@ -272,7 +297,7 @@ namespace ClassicUO.Game.Managers
                         newTargGumpInfo.Texture,
                         new Vector2(targetX, y - 1 - newTargGumpInfo.UV.Height / 2f),
                         newTargGumpInfo.UV,
-                        hueVec,
+                        hueVecZero,
                         layerDepth
                     );
             }
@@ -284,11 +309,11 @@ namespace ClassicUO.Game.Managers
                 gumpInfo.Texture,
                 new Rectangle(x, y, gumpInfo.UV.Width * MULTIPLER, gumpInfo.UV.Height * MULTIPLER),
                 gumpInfo.UV,
-                hueVec,
+                hueVecNoto,
                 layerDepth
             );
 
-            hueVec.X = 0x21;
+            hueVecNoto.X = 0x21;
 
             if (entity.Hits != entity.HitsMax || entity.HitsMax == 0)
             {
@@ -310,7 +335,7 @@ namespace ClassicUO.Game.Managers
                         gumpInfo.UV.Height * MULTIPLER
                     ),
                     gumpInfo.UV,
-                    hueVec,
+                    hueVecNoto,
                     layerDepth
                 );
             }
@@ -331,14 +356,14 @@ namespace ClassicUO.Game.Managers
                     }
                 }
 
-                hueVec.X = hue;
+                hueVecNoto.X = hue;
 
                 gumpInfo = ref Client.Game.UO.Gumps.GetGump(HP_GRAPHIC);
                 batcher.DrawTiled(
                     gumpInfo.Texture,
                     new Rectangle(x, y, per * MULTIPLER, gumpInfo.UV.Height * MULTIPLER),
                     gumpInfo.UV,
-                    hueVec,
+                    hueVecNoto,
                     layerDepth
                 );
             }
