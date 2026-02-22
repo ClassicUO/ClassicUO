@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -255,6 +255,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             if (ProfileManager.CurrentProfile.DisableSystemChat)
+                return;
+
+            if (ProfileManager.CurrentProfile.JournalMessagesOnlyInJournalBox)
                 return;
 
             switch (e.Type)

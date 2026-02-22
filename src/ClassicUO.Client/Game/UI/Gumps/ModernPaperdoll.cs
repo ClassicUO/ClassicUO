@@ -1,4 +1,4 @@
-﻿using ClassicUO.Assets;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -23,14 +23,17 @@ namespace ClassicUO.Game.UI.Gumps
         #region CONST
         private const int WIDTH = 250, HEIGHT = 380;
         private const int CELL_SPACING = 2, TOP_SPACING = 40;
-        private Texture2D MordernPaperdollGump = PNGLoader.Instance.EmbeddedArt["modern-paperdollgump.png"];
+        private const int SHADOW_OFFSET = 4;
+        private const int BORDER_RADIUS = 8;
         #endregion
 
         #region VARS
         private readonly Dictionary<Layer[], ItemSlot> itemLayerSlots;
         private Label titleLabel;
         private static int lastX = 100, lastY = 100;
-        private GumpPicBase backgroundImage;
+        private AlphaBlendControl shadowPanel;
+        private AlphaBlendControl mainPanel;
+        private AlphaBlendControl headerBar;
         #endregion
 
         public override GumpType GumpType => GumpType.PaperDoll;
@@ -59,7 +62,28 @@ namespace ClassicUO.Game.UI.Gumps
             itemLayerSlots = new Dictionary<Layer[], ItemSlot>();
             #endregion
 
-            Add(backgroundImage = new CustomGumpPic(0, 0, MordernPaperdollGump, ProfileManager.CurrentProfile.ModernPaperDollHue));
+            Add(shadowPanel = new AlphaBlendControl(0.35f)
+            {
+                X = SHADOW_OFFSET,
+                Y = SHADOW_OFFSET,
+                Width = WIDTH + SHADOW_OFFSET,
+                Height = HEIGHT + SHADOW_OFFSET,
+                Hue = 0x0495,
+            });
+
+            Add(mainPanel = new AlphaBlendControl((float)ProfileManager.CurrentProfile.ModernPaperdollOpacity / 100)
+            {
+                Width = WIDTH,
+                Height = HEIGHT,
+                Hue = ProfileManager.CurrentProfile.ModernPaperDollHue,
+            });
+
+            Add(headerBar = new AlphaBlendControl(0.92f)
+            {
+                Width = WIDTH,
+                Height = 36,
+                Hue = ProfileManager.CurrentProfile.ModernPaperDollHue,
+            });
 
             HitBox _menuHit = new HitBox(Width - 26, 1, 25, 16, alpha: 0f);
             Add(_menuHit);
@@ -223,7 +247,15 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void UpdateOptions()
         {
-            backgroundImage.Hue = ProfileManager.CurrentProfile.ModernPaperDollHue;
+            if (shadowPanel != null)
+                shadowPanel.Hue = 0x0495;
+            if (mainPanel != null)
+            {
+                mainPanel.Hue = ProfileManager.CurrentProfile.ModernPaperDollHue;
+                mainPanel.Alpha = (float)ProfileManager.CurrentProfile.ModernPaperdollOpacity / 100;
+            }
+            if (headerBar != null)
+                headerBar.Hue = ProfileManager.CurrentProfile.ModernPaperDollHue;
             AnchorType = ProfileManager.CurrentProfile.ModernPaperdollAnchorEnabled ? ANCHOR_TYPE.NONE : ANCHOR_TYPE.DISABLED;
             foreach (var layerSlot in itemLayerSlots)
             {
@@ -320,24 +352,20 @@ namespace ClassicUO.Game.UI.Gumps
         {
             public readonly Layer[] layers;
             private Area itemArea;
-
+            private AlphaBlendControl slotBackground;
             private AlphaBlendControl durablityBar;
 
             public ItemSlot(int width, int height, Layer[] layers)
             {
-                #region ASSIGN FIELDS
                 AcceptMouseInput = true;
                 CanMove = true;
                 CanCloseWithRightClick = false;
-                #endregion
-                #region SET VARS
                 Width = width;
                 Height = height;
-                #endregion
 
+                Add(slotBackground = new AlphaBlendControl(0.15f) { Width = Width, Height = Height, Hue = 0x0495, AcceptMouseInput = false });
                 Add(itemArea = new Area(false) { Width = Width, Height = Height, AcceptMouseInput = true, CanMove = true });
                 itemArea.SetTooltip(layers[0].ToString());
-
                 Add(durablityBar = new AlphaBlendControl(0.75f) { Width = 7, Height = Height, Hue = ProfileManager.CurrentProfile.ModernPaperDollDurabilityHue, IsVisible = false });
 
                 this.layers = layers;
@@ -383,6 +411,15 @@ namespace ClassicUO.Game.UI.Gumps
             public void ClearItems()
             {
                 itemArea.Children.Clear();
+            }
+
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            {
+                if (!base.Draw(batcher, x, y))
+                    return false;
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0x0495, false, 0.4f);
+                batcher.DrawRectangle(SolidColorTextureCache.GetTexture(Color.White), x, y, Width, Height, hueVector);
+                return true;
             }
 
             protected override void OnMouseUp(int x, int y, MouseButtonType button)

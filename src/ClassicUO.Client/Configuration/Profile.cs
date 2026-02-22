@@ -304,6 +304,8 @@ namespace ClassicUO.Configuration
 
         public bool UseXBR { get; set; } = true;
 
+        public int VisualStyle { get; set; } = 0;
+
         public bool HideChatGradient { get; set; } = false;
 
         public bool StandardSkillsGump { get; set; } = true;
@@ -476,11 +478,17 @@ namespace ClassicUO.Configuration
         public int GraphicsQuality { get; set; } = 2; // 0 = Low, 1 = Medium, 2 = High
         public bool EnableFrustumCulling { get; set; } = true;
         public bool EnableTextureCaching { get; set; } = true;
+        public bool EnableChunkPreload { get; set; } = true;
         public int MaxRenderDistance { get; set; } = 24; // Max view range
+        public bool UseRenderTarget { get; set; } = true;
+        public float RenderTargetScale { get; set; } = 1f;
+        public bool EnableLOD { get; set; } = true;
+        public int LODDistanceTiles { get; set; } = 24;
+        public int ImageRenderingMode { get; set; } = 0;
         public bool OptimizeBackgroundRendering { get; set; } = true;
         public bool ReduceParticleEffects { get; set; } = false;
         public bool EnableVSync { get; set; } = false;
-        public bool DisableFrameLimiting { get; set; } = true; // Para FPS ilimitados
+        public bool DisableFrameLimiting { get; set; } = false;
         public int SpriteBatchSize { get; set; } = 8192; // 0x2000
         // ## BEGIN - END ## // PERFORMANCE SETTINGS
         public bool UOClassicCombatLines_ToggleHMRed { get; set; } = false;
@@ -681,6 +689,7 @@ namespace ClassicUO.Configuration
         public bool CorpseSingleClickLoot { get; set; } = false;
 
         public bool DisableSystemChat { get; set; } = false;
+        public bool JournalMessagesOnlyInJournalBox { get; set; } = false;
 
         #region GRID CONTAINER
         public bool UseGridLayoutContainerGumps { get; set; } = true;
@@ -744,6 +753,7 @@ namespace ClassicUO.Configuration
         public ushort ModernPaperDollHue { get; set; } = 0;
         public ushort ModernPaperDollDurabilityHue { get; set; } = 32;
         public int ModernPaperDoll_DurabilityPercent { get; set; } = 90;
+        public int ModernPaperdollOpacity { get; set; } = 92;
         [JsonConverter(typeof(Point2Converter))] public Point ModernPaperdollPosition { get; set; } = new Point(100, 100);
         #endregion
 

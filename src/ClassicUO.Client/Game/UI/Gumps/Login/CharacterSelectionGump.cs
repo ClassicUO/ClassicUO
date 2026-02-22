@@ -67,6 +67,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private CharacterEntryGump _lastSelectedGumpPic;
         public CharacterSelectionGump() : base(0, 0)
         {
+            X = LoginLayoutHelper.ContentOffsetX;
+            Y = LoginLayoutHelper.ContentOffsetY;
             CanCloseWithRightClick = false;
 
             int posInList = 0;
@@ -107,11 +109,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             byte font = (byte)(isAsianLang ? 1 : 2);
             ushort hue = (ushort)(isAsianLang ? 0 : 0);
 
-            Add
-               (
-                   new TextBox(ClilocLoader.Instance.GetString(3000050, "Character Selection"), TrueTypeLoader.EMBEDDED_FONT, 30, 300, Color.DarkRed, strokeEffect: true) { X = 447, Y = listTitleY, AcceptMouseInput = true }
-
-               );
+            Add(new TextBox(ClilocLoader.Instance.GetString(3000050, "Character Selection"), TrueTypeLoader.EMBEDDED_FONT, 30, 300, Color.DarkRed, strokeEffect: true) { X = LoginLayoutHelper.CenterOffsetX(300), Y = LoginLayoutHelper.Y(listTitleY), AcceptMouseInput = true });
 
 
             for (int i = 0, valid = 0; i < loginScene.Characters.Length; i++)
@@ -136,12 +134,11 @@ namespace ClassicUO.Game.UI.Gumps.Login
                         }
                     }
 
-                    Add
-                    (
+                    Add(
                         _characterEntryGump = new CharacterEntryGump((uint)i, character, bodyId, SelectCharacter, LoginCharacter, SelectCharacterHover)
                         {
-                            X = 5 + posInList * 140,
-                            Y = yOffset + posInList * 3
+                            X = LoginLayoutHelper.X(5 + posInList * 140),
+                            Y = LoginLayoutHelper.Y(yOffset + posInList * 3)
                         },
                         1
                     );
@@ -160,18 +157,15 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             if (CanCreateChar(loginScene))
             {
-                Add
-                (
-
-                    buttonnew = new GothicStyleButton(
-                        x: 30,
-                        y: 180 + yBonus,
-                        width: 120,
-                        height: 40,
-                        text: "NEW",
-                        fontPath: null, // Usar fonte padrão
-                        fontSize: 16
-                    ));
+                Add(buttonnew = new GothicStyleButton(
+                    LoginLayoutHelper.X(30),
+                    LoginLayoutHelper.Y(180 + yBonus),
+                    120,
+                    40,
+                    "NEW",
+                    null,
+                    16
+                ));
 
       
            
@@ -187,14 +181,14 @@ namespace ClassicUO.Game.UI.Gumps.Login
            
 
             Add(button = new GothicStyleButton(
-                        x: 30,
-                        y: 680,
-                        width: 120,
-                        height: 40,
-                        text: "BACK",
-                        fontPath: null, // Usar fonte padrão
-                        fontSize: 16
-                    ));
+                LoginLayoutHelper.X(30),
+                LoginLayoutHelper.Y(680),
+                120,
+                40,
+                "BACK",
+                null,
+                16
+            ));
 
             button.OnClick += () =>
             {
@@ -202,14 +196,14 @@ namespace ClassicUO.Game.UI.Gumps.Login
             };
 
             Add(button = new GothicStyleButton(
-                        x: 890,
-                        y: 680,
-                        width: 120,
-                        height: 40,
-                        text: "NEXT",
-                        fontPath: null, // Usar fonte padrão
-                        fontSize: 16
-                    ));
+                LoginLayoutHelper.ContentWidth - 30 - 120,
+                LoginLayoutHelper.Y(680),
+                120,
+                40,
+                "NEXT",
+                null,
+                16
+            ));
 
             button.OnClick += () =>
             {
@@ -260,6 +254,16 @@ namespace ClassicUO.Game.UI.Gumps.Login
             }
 
             return false;
+        }
+
+        public override void Update()
+        {
+            if (!IsDisposed)
+            {
+                X = LoginLayoutHelper.ContentOffsetX;
+                Y = LoginLayoutHelper.ContentOffsetY;
+            }
+            base.Update();
         }
 
         protected override void OnControllerButtonUp(SDL.SDL_GameControllerButton button)
@@ -352,6 +356,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         }
 
         private CharacterEntryGump _lastSelectedGump;
+        private uint _lastHoveredIndex = uint.MaxValue;
 
         private void SelectCharacter(uint index)
         {
@@ -384,14 +389,20 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         private void SelectCharacterHover(uint index)
         {
-            _selectedCharacter = index;
+            uint effectiveIndex = index == uint.MaxValue ? _selectedCharacter : index;
+            if (_lastHoveredIndex == effectiveIndex)
+            {
+                return;
+            }
+            _lastHoveredIndex = effectiveIndex;
+            _selectedCharacter = effectiveIndex;
 
             foreach (CharacterEntryGump characterGump in FindControls<CharacterEntryGump>())
             {
-                characterGump.Hue = characterGump._indexCharacter == index ? SELECTED_COLOR : NORMAL_COLOR;
-                characterGump._label.Hue = characterGump._indexCharacter == index ? SELECTED_COLOR : NORMAL_COLOR;
-                characterGump.fullBlendControl.Alpha = characterGump._indexCharacter == index ? 0.2f : 0.0f;
-                characterGump.fullBlendControl.IsVisible = characterGump._indexCharacter == index ? true : false;
+                characterGump.Hue = characterGump._indexCharacter == effectiveIndex ? SELECTED_COLOR : NORMAL_COLOR;
+                characterGump._label.Hue = characterGump._indexCharacter == effectiveIndex ? SELECTED_COLOR : NORMAL_COLOR;
+                characterGump.fullBlendControl.Alpha = characterGump._indexCharacter == effectiveIndex ? 0.2f : 0.0f;
+                characterGump.fullBlendControl.IsVisible = characterGump._indexCharacter == effectiveIndex;
 
             }
         }
@@ -436,20 +447,25 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             public Dictionary<string, PaperdollItem> Load()
             {
-                if (File.Exists(savePath))
+                if (!File.Exists(savePath))
                 {
-                    try
-                    {
-                        string json = File.ReadAllText(savePath);
-                        return JsonSerializer.Deserialize<Dictionary<string, PaperdollItem>>(json) ?? new Dictionary<string, PaperdollItem>();
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Failed to load marked tile data: {ex.Message}");
-                        return null;
-                    }
+                    return null;
                 }
-                return null;
+                try
+                {
+                    string json = File.ReadAllText(savePath);
+                    var saveData = JsonSerializer.Deserialize<PaperdollSaveDataDto>(json);
+                    return saveData?.Items ?? new Dictionary<string, PaperdollItem>();
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+
+            private class PaperdollSaveDataDto
+            {
+                public Dictionary<string, PaperdollItem> Items { get; set; }
             }
 
 
@@ -470,7 +486,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Mobile mobiles = World.Mobiles.Get(LocalSerial);
 
-                if (items != null && savePath != null)
+                if (items != null && items.Count > 0)
                 {
                     var customLayerOrder = new Dictionary<Layer, int>
                     {
@@ -488,7 +504,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                         .OrderBy(i => customLayerOrder.ContainsKey(i.Layer) ? customLayerOrder[i.Layer] : 0)
                         .ThenBy(i => i.Layer))
                     {
-                        if (item.Graphic > 0 && item.Layer != Layer.Bracelet || item.Graphic > 0 && item.Layer != Layer.Ring || item.Graphic > 0 && item.Layer != Layer.Backpack) 
+                        if (item.Graphic > 0 && item.Layer != Layer.Bracelet && item.Layer != Layer.Earrings && item.Layer != Layer.Ring && item.Layer != Layer.Backpack) 
                         {
                             ushort id = GetAnimID(
                                 0x000C,
@@ -615,7 +631,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             protected override void OnMouseExit(int x, int y)
             {
-                _hoverFn(CharacterIndex);
+                _hoverFn(uint.MaxValue);
                 
             }
         }

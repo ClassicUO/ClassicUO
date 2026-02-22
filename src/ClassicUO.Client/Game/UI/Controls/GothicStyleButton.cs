@@ -116,10 +116,7 @@ namespace ClassicUO.Game.UI.Controls
                 _pixelTexture.SetData(new[] { Color.Red });
             }
 
-            // Desenhar sombra do botão (offset para baixo e direita)
             batcher.Draw(_pixelTexture, new Rectangle(x + 3, y + 3, Width, Height), Color.DarkRed.ToVector3());
-
-            // Desenhar o botão principal com degradê
             DrawGradientButton(batcher, x, y, Width, Height, currentBaseColor, currentShadowColor);
 
             // Desenhar borda com efeito 3D
@@ -155,38 +152,46 @@ namespace ClassicUO.Game.UI.Controls
 
         private void DrawGradientButton(UltimaBatcher2D batcher, int x, int y, int width, int height, Color baseColor, Color shadowColor)
         {
-            // Criar degradê vertical do vermelho escuro para vermelho mais escuro
-            int gradientSteps = height;
-            for (int i = 0; i < gradientSteps; i++)
+            for (int i = 0; i < height; i++)
             {
-                float ratio = (float)i / gradientSteps;
-                
-                // Interpolar entre a cor base e a cor de sombra
-                int r = (int)(baseColor.R + (shadowColor.R - baseColor.R) * ratio);
-                int g = (int)(baseColor.G + (shadowColor.G - baseColor.G) * ratio);
-                int b = (int)(baseColor.B + (shadowColor.B - baseColor.B) * ratio);
-                
-                Color gradientColor = new Color(r, g, b);
-                
-                batcher.Draw(_pixelTexture, new Rectangle(x, y + i, width, 1), 
-                    new Vector3(gradientColor.R / 255f, gradientColor.G / 255f, gradientColor.B / 255f));
+                float ratio = (float)i / height;
+                int cr = (int)(baseColor.R + (shadowColor.R - baseColor.R) * ratio);
+                int cg = (int)(baseColor.G + (shadowColor.G - baseColor.G) * ratio);
+                int cb = (int)(baseColor.B + (shadowColor.B - baseColor.B) * ratio);
+                batcher.Draw(_pixelTexture, new Rectangle(x, y + i, width, 1),
+                    new Vector3(cr / 255f, cg / 255f, cb / 255f));
             }
         }
 
+        private const int BORDER_RADIUS = 6;
+
         private void DrawBorder(UltimaBatcher2D batcher, int x, int y, int width, int height, Color highlightColor, Color shadowColor)
         {
-            // Desenhar bordas com efeito 3D usando retângulos
-            // Borda superior (realce)
-            batcher.Draw(_pixelTexture, new Rectangle(x, y, width, 2), new Vector3(highlightColor.R / 255f, highlightColor.G / 255f, highlightColor.B / 255f));
-            
-            // Borda esquerda (realce)
-            batcher.Draw(_pixelTexture, new Rectangle(x, y, 2, height), new Vector3(highlightColor.R / 255f, highlightColor.G / 255f, highlightColor.B / 255f));
-
-            // Borda inferior (sombra)
-            batcher.Draw(_pixelTexture, new Rectangle(x, y + height - 2, width, 2), new Vector3(shadowColor.R / 255f, shadowColor.G / 255f, shadowColor.B / 255f));
-            
-            // Borda direita (sombra)
-            batcher.Draw(_pixelTexture, new Rectangle(x + width - 2, y, 2, height), new Vector3(shadowColor.R / 255f, shadowColor.G / 255f, shadowColor.B / 255f));
+            int r = BORDER_RADIUS;
+            if (width < r * 2 || height < r * 2)
+            {
+                r = 0;
+            }
+            Vector3 highlightVec = new Vector3(highlightColor.R / 255f, highlightColor.G / 255f, highlightColor.B / 255f);
+            Vector3 shadowVec = new Vector3(shadowColor.R / 255f, shadowColor.G / 255f, shadowColor.B / 255f);
+            if (r > 0)
+            {
+                batcher.Draw(_pixelTexture, new Rectangle(x + r, y, width - r * 2, 2), highlightVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x + r, y + height - 2, width - r * 2, 2), shadowVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x, y + r, 2, height - r * 2), highlightVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x + width - 2, y + r, 2, height - r * 2), shadowVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x, y, r, r), highlightVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x + width - r, y, r, r), highlightVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x, y + height - r, r, r), shadowVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x + width - r, y + height - r, r, r), shadowVec);
+            }
+            else
+            {
+                batcher.Draw(_pixelTexture, new Rectangle(x, y, width, 2), highlightVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x, y + height - 2, width, 2), shadowVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x, y, 2, height), highlightVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x + width - 2, y, 2, height), shadowVec);
+            }
         }
 
         private void DrawTextureEffect(UltimaBatcher2D batcher, int x, int y, int width, int height, Color baseColor)

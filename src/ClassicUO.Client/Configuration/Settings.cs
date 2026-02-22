@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -75,6 +75,8 @@ namespace ClassicUO.Configuration
         [JsonPropertyName("clientversion")] public string ClientVersion { get; set; } = string.Empty;
 
         [JsonPropertyName("lang")] public string Language { get; set; } = "";
+
+        [JsonPropertyName("ui_lang")] public string UILanguage { get; set; } = "ENG";
 
         [JsonPropertyName("lastservernum")] public ushort LastServerNum { get; set; } = 1;
 

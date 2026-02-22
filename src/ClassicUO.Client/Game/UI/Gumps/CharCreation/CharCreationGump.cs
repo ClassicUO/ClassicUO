@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -53,10 +53,22 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public CharCreationGump(LoginScene scene) : base(0, 0)
         {
+            X = LoginLayoutHelper.ContentOffsetX;
+            Y = LoginLayoutHelper.ContentOffsetY;
             _loginScene = scene;
             Add(new CreateCharAppearanceGump(), 1);
             SetStep(CharCreationStep.Appearence);
             CanCloseWithRightClick = false;
+        }
+
+        public override void Update()
+        {
+            if (!IsDisposed)
+            {
+                X = LoginLayoutHelper.ContentOffsetX;
+                Y = LoginLayoutHelper.ContentOffsetY;
+            }
+            base.Update();
         }
 
         internal static int _skillsCount => Client.Version >= ClientVersion.CV_70160 ? 4 : 3;

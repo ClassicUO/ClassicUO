@@ -32,8 +32,8 @@
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Assets;
 using ClassicUO.Renderer;
@@ -57,6 +57,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private readonly GothicStyleButton _nextArrow0;
         private readonly PasswordStbTextBox _passwordFake;
         private readonly StbTextBox _textboxAccount;
+        private readonly GothicStyleCombobox _languageCombo;
 
         private float _time;
         private Texture2D LogoBackgroundImg = PNGLoader.Instance.GetImageTexture(Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "logodust.png"));
@@ -64,6 +65,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         public LoginGump(LoginScene scene) : base(0, 0)
         {
+            X = LoginLayoutHelper.ContentOffsetX;
+            Y = LoginLayoutHelper.ContentOffsetY;
             CanCloseWithRightClick = false;
 
             AcceptKeyboardInput = false;
@@ -76,33 +79,48 @@ namespace ClassicUO.Game.UI.Gumps.Login
             _buttonNormal = 0x5CD;
             _buttonOver = 0x5CB;
             UIManager.Add(new LoginBackground());
-            Add(new CustomGumpPic
-                    (
-                        276,
-                        120,
-                        LogoBackgroundImg,
-                        0
-                    ));
+            int logoW = LogoBackgroundImg?.Width ?? 400;
+            Add(new CustomGumpPic(
+                LoginLayoutHelper.CenterOffsetX(logoW),
+                LoginLayoutHelper.Y(120),
+                LogoBackgroundImg,
+                0
+            ));
 
-
-
-            Add
-               (
-                   new Label($"UO Version {Settings.GlobalSettings.ClientVersion}.", false, 0x034E, font: 9)
-                   {
-                       X = 395,
-                       Y = 700
-                   }
-               );
-
-            Add
-            (
-                new Label(string.Format("Dust765 Version {0}", CUOEnviroment.Version), false, 0x034E, font: 9)
-                {
-                    X = 395,
-                    Y = 720
-                }
+            var loginLang = Language.Instance.Login;
+            int langIndex = GetLanguageComboIndex(Settings.GlobalSettings.UILanguage);
+            _languageCombo = new GothicStyleCombobox(
+                LoginLayoutHelper.ContentWidth - 140,
+                50,
+                130,
+                30,
+                Language.SupportedUILanguages,
+                langIndex >= 0 ? langIndex : 0,
+                14
             );
+            _languageCombo.OnSelectionChanged += (s, idx) =>
+            {
+                string code = Language.SupportedUILanguages[idx];
+                Settings.GlobalSettings.UILanguage = code;
+                Language.Load(code);
+                Settings.GlobalSettings.Save();
+                UIManager.GetGump<LoginBackground>()?.Dispose();
+                UIManager.GetGump<LoginGump>()?.Dispose();
+                UIManager.Add(new LoginGump(scene));
+            };
+            Add(_languageCombo);
+
+            Add(new Label(string.Format(loginLang.UOVersionFormat, Settings.GlobalSettings.ClientVersion) + ".", false, 0x034E, font: 9)
+            {
+                X = LoginLayoutHelper.X(395),
+                Y = LoginLayoutHelper.Y(700)
+            });
+
+            Add(new Label(string.Format(loginLang.VersionFormat, CUOEnviroment.Version), false, 0x034E, font: 9)
+            {
+                X = LoginLayoutHelper.X(395),
+                Y = LoginLayoutHelper.Y(720)
+            });
 
 
             // Arrow Button
@@ -118,15 +136,14 @@ namespace ClassicUO.Game.UI.Gumps.Login
             );
             */
 
-            // Substituir o ImageButton pelo GothicStyleButton
             Add(_nextArrow0 = new GothicStyleButton(
-                x: 455,
-                y: 570,
-                width: 120,
-                height: 40,
-                text: "LOGIN",
-                fontPath: null, // Usar fonte padrão
-                fontSize: 16
+                LoginLayoutHelper.CenterOffsetX(120),
+                LoginLayoutHelper.Y(570),
+                120,
+                40,
+                loginLang.LoginButton,
+                null,
+                16
             ));
 
             _nextArrow0.OnClick += () =>
@@ -146,42 +163,36 @@ namespace ClassicUO.Game.UI.Gumps.Login
             //    fontSize: 16        // tamanho da fonte
             //));
 
-            offsetX = 370;
-            offsetY = 430;
+            offsetX = LoginLayoutHelper.X(370);
+            offsetY = LoginLayoutHelper.Y(430);
             offtextY = 40;
 
-
-            Add
-            (
-                _checkboxAutologin = new Checkbox
+            Add(_checkboxAutologin = new Checkbox
                 (
                     0x00D2,
                     0x00D3,
-                    ResGumps.Autologin,
+                    loginLang.Autologin,
                     9,
                     0x0481,
                     false
                 )
                 {
-                    X = 510,
-                    Y = 510
+                    X = LoginLayoutHelper.X(510),
+                    Y = LoginLayoutHelper.Y(510)
                 }
             );
 
-            Add
-            (
-                _checkboxSaveAccount = new Checkbox
-                (
+            Add(_checkboxSaveAccount = new Checkbox(
                     0x00D2,
                     0x00D3,
-                    ResGumps.SaveAccount,
+                    loginLang.SaveAccount,
                     9,
                     0x0481,
                     false
                 )
                 {
-                    X = 375,
-                    Y = 510
+                    X = LoginLayoutHelper.X(375),
+                    Y = LoginLayoutHelper.Y(510)
                 }
             );
 
@@ -216,18 +227,10 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             offsetX += 7;
 
-            Checkbox loginmusic_checkbox = new Checkbox
-            (
-                0x00D2,
-                0x00D3,
-                "Music",
-                font,
-                hue,
-                false
-            )
+            Checkbox loginmusic_checkbox = new Checkbox(0x00D2, 0x00D3, loginLang.Music, font, hue, false)
             {
-                X = 375,
-                Y = 535,
+                X = LoginLayoutHelper.X(375),
+                Y = LoginLayoutHelper.Y(535),
                 IsChecked = Settings.GlobalSettings.LoginMusic
             };
 
@@ -311,7 +314,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 {
                     _textboxAccount.ContextMenu.Add(new ContextMenuItemEntry(acct, () => { _textboxAccount.SetText(acct); }));
                 }
-                _textboxAccount.SetTooltip("Right click to select another account.");
+                _textboxAccount.SetTooltip(loginLang.RightClickAccountTooltip);
                 _textboxAccount.MouseUp += (s, e) => { if (e.Button == MouseButtonType.Right) _textboxAccount.ContextMenu.Show(); };
             }
 
@@ -324,7 +327,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             TextBox _;
             HitBox _hit;
 
-            Add(_ = new TextBox("Dust765 Support", TrueTypeLoader.EMBEDDED_FONT, 15, 200, Color.DarkRed, strokeEffect: false) { X = 30, Y = 660, AcceptMouseInput = true });
+            Add(_ = new TextBox(loginLang.Support, TrueTypeLoader.EMBEDDED_FONT, 15, 200, Color.DarkRed, strokeEffect: false) { X = LoginLayoutHelper.X(30), Y = LoginLayoutHelper.Y(660), AcceptMouseInput = true });
             Add(_hit = new HitBox(_.X, _.Y, _.MeasuredSize.X, _.MeasuredSize.Y));
             _hit.MouseUp += (s, e) =>
             {
@@ -342,7 +345,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 _textboxAccount.SetKeyboardFocus();
             }
 
-            _ = new TextBox("A new version of TazUO is available!\n Click to open the download page.", TrueTypeLoader.EMBEDDED_FONT, 20, 300, Color.Yellow, strokeEffect: false) { X = 10, Y = 10, AcceptMouseInput = false };
+            _ = new TextBox(loginLang.UpdateAvailable, TrueTypeLoader.EMBEDDED_FONT, 20, 300, Color.Yellow, strokeEffect: false) { X = 10, Y = 10, AcceptMouseInput = false };
             Add(_hit = new HitBox(_.X, _.Y, _.MeasuredSize.X, _.MeasuredSize.Y));
             _hit.MouseUp += (s, e) =>
             {
@@ -381,6 +384,18 @@ namespace ClassicUO.Game.UI.Gumps.Login
             }
         }
 
+        private static int GetLanguageComboIndex(string uiLang)
+        {
+            if (string.IsNullOrEmpty(uiLang)) return 0;
+            string upper = uiLang.ToUpperInvariant();
+            for (int i = 0; i < Language.SupportedUILanguages.Length; i++)
+            {
+                if (Language.SupportedUILanguages[i].Equals(upper, System.StringComparison.OrdinalIgnoreCase))
+                    return i;
+            }
+            return 0;
+        }
+
         private void SaveCheckboxStatus()
         {
             Settings.GlobalSettings.SaveAccount = _checkboxSaveAccount.IsChecked;
@@ -394,6 +409,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 return;
             }
 
+            X = LoginLayoutHelper.ContentOffsetX;
+            Y = LoginLayoutHelper.ContentOffsetY;
             base.Update();
 
             if (_time < Time.Ticks)

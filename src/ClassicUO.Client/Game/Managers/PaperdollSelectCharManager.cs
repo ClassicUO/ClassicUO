@@ -1,4 +1,4 @@
-﻿using ClassicUO.Configuration;
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Utility;
@@ -40,8 +40,7 @@ namespace ClassicUO.Game.Managers
 
         public void AddItem(string key, Layer layer, ushort graphic, ushort hue, uint serial, ushort animID, bool isPartialHue)
         {
-
-            if (layer != Layer.Bracelet || layer != Layer.Earrings || layer != Layer.Ring || layer != Layer.Backpack)
+            if (layer != Layer.Bracelet && layer != Layer.Earrings && layer != Layer.Ring && layer != Layer.Backpack)
             {
                 if (items.ContainsKey(key))
                 {
@@ -87,11 +86,11 @@ namespace ClassicUO.Game.Managers
 
                         if (item != null)
                         {
-                            if (item.Layer != Layer.Bracelet || item.Layer != Layer.Earrings || item.Layer != Layer.Ring || item.Layer != Layer.Backpack)
+                            if (item.Layer != Layer.Bracelet && item.Layer != Layer.Earrings && item.Layer != Layer.Ring && item.Layer != Layer.Backpack)
                             {
                                 if (mobile.Serial == World.Player.Serial)
                                 {
-                                    if (layer != Layer.Bracelet || layer != Layer.Earrings || layer != Layer.Ring || layer != Layer.Backpack)
+                                    if (layer != Layer.Bracelet && layer != Layer.Earrings && layer != Layer.Ring && layer != Layer.Backpack)
                                     {
                                         AddItem(item.Serial.ToString(), item.Layer, item.Graphic, item.Hue, item.Serial, item.ItemData.AnimID, item.ItemData.IsPartialHue);
                                     }

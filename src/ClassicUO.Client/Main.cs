@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -152,6 +152,8 @@ namespace ClassicUO
 
             Settings.GlobalSettings = ConfigurationResolver.Load<Settings>(globalSettingsPath, SettingsJsonContext.Default);
             CUOEnviroment.IsOutlands = Settings.GlobalSettings.ShardType == 2;
+
+            Language.Load(Settings.GlobalSettings.UILanguage ?? "ENG");
 
             ReadSettingsFromArgs(args);
 

@@ -324,6 +324,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
         private Profile _currentProfile = ProfileManager.CurrentProfile;
+        private ModernOptionsGumpLanguage _lang = Language.Instance.GetModernOptionsGumpLanguage;
 
         public OptionsGump() : base(0, 0)
         {
@@ -351,7 +352,7 @@ namespace ClassicUO.Game.UI.Gumps
                     140,
                     25,
                     ButtonAction.SwitchPage,
-                    ResGumps.General
+                    _lang.ButtonGeneral
                 )
                 { IsSelected = true, ButtonParameter = 1 }
             );
@@ -365,7 +366,7 @@ namespace ClassicUO.Game.UI.Gumps
                     140,
                     25,
                     ButtonAction.SwitchPage,
-                    ResGumps.Sound
+                    _lang.ButtonSound
                 )
                 { ButtonParameter = 2 }
             );
@@ -379,7 +380,7 @@ namespace ClassicUO.Game.UI.Gumps
                     140,
                     25,
                     ButtonAction.SwitchPage,
-                    ResGumps.Video
+                    _lang.ButtonVideo
                 )
                 { ButtonParameter = 3 }
             );
@@ -393,7 +394,7 @@ namespace ClassicUO.Game.UI.Gumps
                     140,
                     25,
                     ButtonAction.SwitchPage,
-                    ResGumps.Macros
+                    _lang.ButtonMacros
                 )
                 { ButtonParameter = 4 }
             );
@@ -407,7 +408,7 @@ namespace ClassicUO.Game.UI.Gumps
                     140,
                     25,
                     ButtonAction.SwitchPage,
-                    ResGumps.Tooltip
+                    _lang.ButtonTooltips
                 )
                 { ButtonParameter = 5 }
             );
@@ -435,7 +436,7 @@ namespace ClassicUO.Game.UI.Gumps
                     140,
                     25,
                     ButtonAction.SwitchPage,
-                    ResGumps.Speech
+                    _lang.ButtonSpeech
                 )
                 { ButtonParameter = 7 }
             );
@@ -449,7 +450,7 @@ namespace ClassicUO.Game.UI.Gumps
                     140,
                     25,
                     ButtonAction.SwitchPage,
-                    ResGumps.CombatSpells
+                    _lang.ButtonCombatSpells
                 )
                 { ButtonParameter = 8 }
             );
@@ -463,7 +464,7 @@ namespace ClassicUO.Game.UI.Gumps
                     140,
                     25,
                     ButtonAction.SwitchPage,
-                    ResGumps.Counters
+                    _lang.ButtonCounters
                 )
                 { ButtonParameter = 9 }
             );
@@ -477,7 +478,7 @@ namespace ClassicUO.Game.UI.Gumps
                     140,
                     25,
                     ButtonAction.SwitchPage,
-                    ResGumps.InfoBar
+                    _lang.ButtonInfobar
                 )
                 { ButtonParameter = 10 }
             );
@@ -491,7 +492,7 @@ namespace ClassicUO.Game.UI.Gumps
                     140,
                     25,
                     ButtonAction.SwitchPage,
-                    ResGumps.Containers
+                    _lang.ButtonContainers
                 )
                 { ButtonParameter = 11 }
             );
@@ -505,7 +506,7 @@ namespace ClassicUO.Game.UI.Gumps
                     140,
                     25,
                     ButtonAction.SwitchPage,
-                    ResGumps.Experimental
+                    _lang.ButtonExperimental
                 )
                 { ButtonParameter = 12 }
             );
@@ -519,7 +520,7 @@ namespace ClassicUO.Game.UI.Gumps
                     140,
                     25,
                     ButtonAction.Activate,
-                    ResGumps.IgnoreListManager
+                    _lang.ButtonIgnoreList
                 )
                 {
                     ButtonParameter = (int)Buttons.OpenIgnoreList
@@ -6865,8 +6866,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _windowBorderless.IsChecked = false;
                     _zoomCheckbox.IsChecked = false;
                     _restorezoomCheckbox.IsChecked = false;
-                    _gameWindowWidth.SetText("768");
-                    _gameWindowHeight.SetText("1024");
+                    _gameWindowWidth.SetText("1024");
+                    _gameWindowHeight.SetText("768");
                     _gameWindowPositionX.SetText("20");
                     _gameWindowPositionY.SetText("20");
                     _gameWindowLock.IsChecked = false;

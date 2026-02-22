@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -6,6 +6,9 @@ namespace ClassicUO.Configuration
 {
     public class Language
     {
+        public static readonly string[] SupportedUILanguages = { "ENG", "ESP", "PTB", "RUSSIA", "KOREANO", "CHINES", "POLONES" };
+
+        public LoginLanguage Login { get; set; } = new LoginLanguage();
         public ModernOptionsGumpLanguage GetModernOptionsGumpLanguage { get; set; } = new ModernOptionsGumpLanguage();
         public ErrorsLanguage ErrorsLanguage { get; set; } = new ErrorsLanguage();
         public MapLanguage MapLanguage { get; set; } = new MapLanguage();
@@ -22,16 +25,60 @@ namespace ClassicUO.Configuration
 
         public static void Load()
         {
-            if (File.Exists(languageFilePath))
+            Load(GetUILanguageCode());
+        }
+
+        public static void Load(string uiLanguageCode)
+        {
+            string path = GetLanguageFilePath(uiLanguageCode);
+            if (File.Exists(path))
+            {
+                Language f = JsonSerializer.Deserialize<Language>(File.ReadAllText(path));
+                Instance = f;
+                if (Instance.Login == null)
+                    Instance.Login = new LoginLanguage();
+                Save(path);
+            }
+            else if (File.Exists(languageFilePath))
             {
                 Language f = JsonSerializer.Deserialize<Language>(File.ReadAllText(languageFilePath));
                 Instance = f;
-                Save(); //To update language file with new additions as needed
+                if (Instance.Login == null)
+                    Instance.Login = new LoginLanguage();
+                Save(languageFilePath);
+                string langPath = GetLanguageFilePath(uiLanguageCode);
+                if (langPath != languageFilePath)
+                    Save(langPath);
             }
             else
             {
                 CreateNewLanguageFile();
             }
+        }
+
+        private static string GetUILanguageCode()
+        {
+            try
+            {
+                string code = global::ClassicUO.Configuration.Settings.GlobalSettings?.UILanguage;
+                if (!string.IsNullOrWhiteSpace(code))
+                {
+                    string upper = code.ToUpperInvariant();
+                    foreach (string supported in SupportedUILanguages)
+                    {
+                        if (supported.Equals(upper, System.StringComparison.OrdinalIgnoreCase))
+                            return supported;
+                    }
+                }
+            }
+            catch { }
+            return "ENG";
+        }
+
+        private static string GetLanguageFilePath(string uiLanguageCode)
+        {
+            string dir = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Languages");
+            return Path.Combine(dir, $"{uiLanguageCode.ToLowerInvariant()}.json");
         }
 
         private static void CreateNewLanguageFile()
@@ -42,10 +89,14 @@ namespace ClassicUO.Configuration
             File.WriteAllText(languageFilePath, defaultLanguage);
         }
 
-        private static void Save()
+        private static void Save(string path = null)
         {
+            path ??= languageFilePath;
+            string dir = Path.GetDirectoryName(path);
+            if (!string.IsNullOrEmpty(dir))
+                Directory.CreateDirectory(dir);
             string language = JsonSerializer.Serialize<Language>(Instance, new JsonSerializerOptions() { WriteIndented = true });
-            File.WriteAllText(languageFilePath, language);
+            File.WriteAllText(path, language);
         }
 
         private static string languageFilePath { get { return Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Language.json"); } }
@@ -236,6 +287,8 @@ namespace ClassicUO.Configuration
         {
             #region GameWindow
             public string FPSCap { get; set; } = "FPS Cap";
+            public string EnableVSync { get; set; } = "Enable VSync (limits FPS to monitor refresh)";
+            public string DisableFrameLimiting { get; set; } = "Unlimited FPS (ignores FPS cap)";
             public string BackgroundFPS { get; set; } = "Reduce FPS when game is not in focus";
             public string FullsizeViewport { get; set; } = "Always use fullsize game world viewport";
             public string FullScreen { get; set; } = "Fullscreen window";
@@ -269,6 +322,9 @@ namespace ClassicUO.Configuration
             public string MouseThread { get; set; } = "Run mouse in seperate thread";
             public string TargetAura { get; set; } = "Aura on mouse target";
             public string AnimWater { get; set; } = "Animated water effect";
+            public string VisualStyle { get; set; } = "Visual style";
+            public string VisualStyleClassic { get; set; } = "Classic (2D)";
+            public string VisualStyleEnhanced { get; set; } = "Enhanced (3D-like)";
             #endregion
 
             #region Shadows
@@ -450,6 +506,7 @@ namespace ClassicUO.Configuration
             public string JournalHideBorders { get; set; } = "Hide borders";
             public string HideTimestamp { get; set; } = "Hide timestamp";
             public string JournalAnchor { get; set; } = "Make anchorable";
+            public string JournalMessagesOnlyInJournalBox { get; set; } = "Journal messages only in journal box (clean game view)";
             #endregion
 
             #region ModernPaperdoll
@@ -580,6 +637,24 @@ namespace ClassicUO.Configuration
             #endregion
         }
 
+    }
+
+    public class LoginLanguage
+    {
+        public string LoginButton { get; set; } = "LOGIN";
+        public string SaveAccount { get; set; } = "Save Account";
+        public string Autologin { get; set; } = "Autologin";
+        public string Music { get; set; } = "Music";
+        public string Support { get; set; } = "Dust765 Support";
+        public string VersionFormat { get; set; } = "Dust765 Version {0}";
+        public string UOVersionFormat { get; set; } = "UO Version {0}";
+        public string LanguageLabel { get; set; } = "Language";
+        public string RightClickAccountTooltip { get; set; } = "Right click to select another account.";
+        public string UpdateAvailable { get; set; } = "A new version of TazUO is available!\n Click to open the download page.";
+        public string Back { get; set; } = "BACK";
+        public string Next { get; set; } = "NEXT";
+        public string SelectWhichShardToPlayOn { get; set; } = "Select which shard to play on.";
+        public string Latency { get; set; } = "Latency";
     }
 
     public class ErrorsLanguage

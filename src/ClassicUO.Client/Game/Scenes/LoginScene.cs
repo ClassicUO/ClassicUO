@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -109,8 +109,6 @@ namespace ClassicUO.Game.Scenes
 
             _autoLogin = Settings.GlobalSettings.AutoLogin;
 
-            UIManager.Add(new LoginBackground());
-
             if (string.IsNullOrEmpty(Settings.GlobalSettings.IP))
             {
                 UIManager.Add(new InputRequest("Please enter a server IP to connect to", "Save", "Cancel", (result, input) =>
@@ -181,9 +179,8 @@ namespace ClassicUO.Game.Scenes
             Client.Game.Audio?.StopMusic();
             Client.Game.Audio?.StopSounds();
 
-            UIManager.GetGump<LoginBackground>()?.Dispose();
-
-            _currentGump?.Dispose();
+            UIManager.Clear();
+            _currentGump = null;
 
             // UnRegistering Packet Events           
             NetClient.Socket.Connected -= OnNetClientConnected;
@@ -266,6 +263,7 @@ namespace ClassicUO.Game.Scenes
             {
                 case LoginSteps.Main:
                     PopupMessage = null;
+                    UIManager.GetGump<LoginBackground>()?.Dispose();
                     UIManager.GetGump<SelectServerBackground>()?.Dispose();
                     return new LoginGump(this);
 
@@ -289,6 +287,7 @@ namespace ClassicUO.Game.Scenes
                 case LoginSteps.CharacterSelection:
                     UIManager.GetGump<LoginBackground>()?.Dispose();
                     UIManager.GetGump<SelectServerBackground>()?.Dispose();
+                    UIManager.GetGump<CharacterSelectionBackground>()?.Dispose();
                     UIManager.Add(new CharacterSelectionBackground());
                     return new CharacterSelectionGump();
 
@@ -299,7 +298,8 @@ namespace ClassicUO.Game.Scenes
                     return new ServerSelectionGump();
 
                 case LoginSteps.CharacterCreation:
-                    _pingTime = Time.Ticks + 60000; // reset ping timer
+                    _pingTime = Time.Ticks + 60000;
+                    UIManager.GetGump<CharacterSelectionBackground>()?.Dispose();
                     UIManager.Add(new CharacterSelectionBackground());
                     return new CharCreationGump(this);
             }

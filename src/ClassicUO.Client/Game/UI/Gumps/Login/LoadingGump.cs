@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -55,6 +55,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         public LoadingGump(string labelText, LoginButtons showButtons, Action<int> buttonClick = null) : base(0, 0)
         {
+            X = LoginLayoutHelper.ContentOffsetX;
+            Y = LoginLayoutHelper.ContentOffsetY;
             _buttonClick = buttonClick;
             CanCloseWithRightClick = false;
             CanCloseWithEsc = false;
@@ -138,6 +140,16 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     }
                 );
             }
+        }
+
+        public override void Update()
+        {
+            if (!IsDisposed)
+            {
+                X = LoginLayoutHelper.ContentOffsetX;
+                Y = LoginLayoutHelper.ContentOffsetY;
+            }
+            base.Update();
         }
 
         public void SetText(string text)

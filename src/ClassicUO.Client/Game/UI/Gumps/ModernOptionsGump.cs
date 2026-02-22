@@ -1,4 +1,4 @@
-﻿using ClassicUO.Assets;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 // ## BEGIN - END ## // UI/GUMPS
@@ -30,6 +30,7 @@ namespace ClassicUO.Game.UI.Gumps
         private LeftSideMenuRightSideContent mainContent;
         private mainScrollArea mainScrollAreaContent;
         private List<SettingsOption> options = new List<SettingsOption>();
+        private static Texture2D _watermarkTexture;
 
         public static string SearchText { get; private set; } = string.Empty;
         public static event EventHandler SearchValueChanged;
@@ -66,54 +67,55 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             CanCloseWithRightClick = true;
             AcceptMouseInput = true;
-            Width = 900;
-            Height = 700;
+            Width = 960;
+            Height = 720;
 
             X = (Client.Game.Window.ClientBounds.Width >> 1) - (Width >> 1);
             Y = (Client.Game.Window.ClientBounds.Height >> 1) - (Height >> 1);
 
-            Add(new RoundedColorBox(Width, Height, Color.Black, 12) { AcceptMouseInput = true, CanMove = true, Alpha = 1f });
-            Add(new RoundedColorBox(Width, 40, Color.FromNonPremultiplied(20, 20, 20, 255), 8) { AcceptMouseInput = true, CanMove = true, Alpha = 1f });
+            Add(new RoundedColorBox(Width, Height, Theme.DARK_BG, 14) { AcceptMouseInput = true, CanMove = true, Alpha = 1f });
+            Add(new RoundedColorBox(Width, 48, Theme.HEADER_BG, 0) { X = 0, Y = 0, AcceptMouseInput = true, CanMove = true, Alpha = 1f });
+            Add(new RoundedColorBox(Width, 1, Theme.ACCENT_COLOR, 0) { X = 0, Y = 47, AcceptMouseInput = false, Alpha = 0.6f });
 
-            Add(new TextBox(lang.OptionsTitle, Theme.FONT, Theme.STANDARD_TEXT_SIZE + 8, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { X = 10, Y = 7, AcceptMouseInput = false });
+            Add(new TextBox(lang.OptionsTitle, Theme.FONT, Theme.STANDARD_TEXT_SIZE + 10, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { X = 16, Y = 12, AcceptMouseInput = false });
 
             Control c;
-            Add(c = new TextBox(lang.Search, Theme.FONT, Theme.STANDARD_TEXT_SIZE + 8, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7, AcceptMouseInput = false });
+            Add(c = new TextBox(lang.Search, Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 12, AcceptMouseInput = false });
 
             InputField search;
-            Add(search = new InputField(400, 30) { X = Width - 405, Y = 5 });
+            Add(search = new InputField(380, 32) { X = Width - 396, Y = 8 });
             search.TextChanged += (s, e) => { SearchText = search.Text; SearchValueChanged.Raise(); };
 
-            c.X = search.X - c.Width - 5;
+            c.X = search.X - c.Width - 8;
 
-            Add(mainContent = new LeftSideMenuRightSideContent(Width, Height - 40, (int)(Width * 0.23)) { Y = 40 });
+            Add(mainContent = new LeftSideMenuRightSideContent(Width, Height - 48, Theme.SIDEBAR_WIDTH) { Y = 48 });
             mainContent.RightArea.ToggleScrollBarVisibility(false);
-            mainContent.RightArea.GetScrollBar.Dispose();
+            mainContent.RightArea.GetScrollBar?.Dispose();
             mainContent.RightArea.GetScrollBar = null;
 
-            ModernButton b;
-            mainContent.AddToLeft(b = CategoryButton(lang.ButtonGeneral, (int)PAGE.General, mainContent.LeftWidth));
+            SidebarButton b;
+            mainContent.AddToLeft(b = SidebarCategoryButton(lang.ButtonGeneral, (int)PAGE.General, Theme.ICON_GENERAL));
             b.IsSelected = true;
-            mainContent.AddToLeft(CategoryButton(lang.ButtonSound, (int)PAGE.Sound, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton(lang.ButtonVideo, (int)PAGE.Video, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton(lang.ButtonMacros, (int)PAGE.Macros, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton(lang.ButtonTooltips, (int)PAGE.Tooltip, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton(lang.ButtonSpeech, (int)PAGE.Speech, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton(lang.ButtonCombatSpells, (int)PAGE.CombatSpells, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton(lang.ButtonCounters, (int)PAGE.Counters, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton(lang.ButtonInfobar, (int)PAGE.InfoBar, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton(lang.ButtonContainers, (int)PAGE.Containers, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton(lang.ButtonExperimental, (int)PAGE.Experimental, mainContent.LeftWidth));
-            mainContent.AddToLeft(b = new ModernButton(0, 0, mainContent.LeftWidth, 40, ButtonAction.Activate, lang.ButtonIgnoreList, Theme.BUTTON_FONT_COLOR) { ButtonParameter = 999 });
+            mainContent.AddToLeft(SidebarCategoryButton(lang.ButtonSound, (int)PAGE.Sound, Theme.ICON_SOUND));
+            mainContent.AddToLeft(SidebarCategoryButton(lang.ButtonVideo, (int)PAGE.Video, Theme.ICON_VIDEO));
+            mainContent.AddToLeft(SidebarCategoryButton(lang.ButtonMacros, (int)PAGE.Macros, Theme.ICON_MACROS));
+            mainContent.AddToLeft(SidebarCategoryButton(lang.ButtonTooltips, (int)PAGE.Tooltip, Theme.ICON_UI));
+            mainContent.AddToLeft(SidebarCategoryButton(lang.ButtonSpeech, (int)PAGE.Speech, Theme.ICON_UI));
+            mainContent.AddToLeft(SidebarCategoryButton(lang.ButtonCombatSpells, (int)PAGE.CombatSpells, Theme.ICON_COMBAT));
+            mainContent.AddToLeft(SidebarCategoryButton(lang.ButtonCounters, (int)PAGE.Counters, Theme.ICON_UI));
+            mainContent.AddToLeft(SidebarCategoryButton(lang.ButtonInfobar, (int)PAGE.InfoBar, Theme.ICON_UI));
+            mainContent.AddToLeft(SidebarCategoryButton(lang.ButtonContainers, (int)PAGE.Containers, Theme.ICON_UI));
+            mainContent.AddToLeft(SidebarCategoryButton(lang.ButtonNameplates, (int)PAGE.NameplateOptions, Theme.ICON_COMBAT));
+            mainContent.AddToLeft(SidebarCategoryButton(lang.ButtonCooldowns, (int)PAGE.TUOCooldowns, Theme.ICON_COMBAT));
+            mainContent.AddToLeft(SidebarCategoryButton(lang.ButtonTazUO, (int)PAGE.TUOOptions, Theme.ICON_TAZUO));
+            mainContent.AddToLeft(SidebarCategoryButton("Dust765", (int)PAGE.Dust765, Theme.ICON_DUST));
+            mainContent.AddToLeft(SidebarCategoryButton(lang.ButtonExperimental, (int)PAGE.Experimental, Theme.ICON_UI));
+            mainContent.AddToLeft(b = SidebarCategoryButton(lang.ButtonIgnoreList, 999, Theme.ICON_UI, true));
             b.MouseUp += (s, e) =>
             {
                 UIManager.GetGump<IgnoreManagerGump>()?.Dispose();
                 UIManager.Add(new IgnoreManagerGump());
             };
-            mainContent.AddToLeft(CategoryButton(lang.ButtonNameplates, (int)PAGE.NameplateOptions, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton(lang.ButtonCooldowns, (int)PAGE.TUOCooldowns, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton(lang.ButtonTazUO, (int)PAGE.TUOOptions, mainContent.LeftWidth));
-            mainContent.AddToLeft(CategoryButton("Dust765 Specific", (int)PAGE.Dust765, mainContent.LeftWidth));
 
             BuildGeneral();
             BuildSound();
@@ -509,6 +511,8 @@ namespace ClassicUO.Game.UI.Gumps
             content.AddToLeft(SubCategoryButton(lang.ButtonGameWindow, page, content.LeftWidth));
 
             content.AddToRight(new SliderWithLabel(lang.GetVideo.FPSCap, 0, Theme.SLIDER_WIDTH, Constants.MIN_FPS, Constants.MAX_FPS, Settings.GlobalSettings.FPS, (r) => { Settings.GlobalSettings.FPS = r; Client.Game.SetRefreshRate(r); }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetVideo.EnableVSync, isChecked: profile.EnableVSync, valueChanged: (b) => { profile.EnableVSync = b; Client.Game.SetVSync(b); }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetVideo.DisableFrameLimiting, isChecked: profile.DisableFrameLimiting, valueChanged: (b) => { profile.DisableFrameLimiting = b; }), true, page);
             content.Indent();
             content.AddToRight(new CheckboxWithLabel(lang.GetVideo.BackgroundFPS, isChecked: profile.ReduceFPSWhenInactive, valueChanged: (b) => { profile.ReduceFPSWhenInactive = b; }), true, page);
             content.RemoveIndent();
@@ -645,6 +649,10 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
 
             content.AddToRight(new CheckboxWithLabel(lang.GetVideo.AnimWater, isChecked: profile.AnimatedWaterEffect, valueChanged: (b) => { profile.AnimatedWaterEffect = b; }), true, page);
+
+            content.BlankLine();
+
+            content.AddToRight(new ComboBoxWithLabel(lang.GetVideo.VisualStyle, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetVideo.VisualStyleClassic, lang.GetVideo.VisualStyleEnhanced }, profile.VisualStyle, (s, n) => { profile.VisualStyle = s; }), true, page);
             #endregion
 
             #region Shadows
@@ -3436,6 +3444,11 @@ namespace ClassicUO.Game.UI.Gumps
                 profile.JournalAnchorEnabled = b;
                 ResizableJournal.UpdateJournalOptions();
             }), true, page);
+            content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel(lang.GetTazUO.JournalMessagesOnlyInJournalBox, 0, profile.JournalMessagesOnlyInJournalBox, (b) =>
+            {
+                profile.JournalMessagesOnlyInJournalBox = b;
+            }), true, page);
             #endregion
 
             #region Modern paperdoll
@@ -4103,6 +4116,11 @@ namespace ClassicUO.Game.UI.Gumps
         private ModernButton CategoryButton(string text, int page, int width, int height = 40)
         {
             return new ModernButton(0, 0, width, height, ButtonAction.SwitchPage, text, Theme.BUTTON_FONT_COLOR) { ButtonParameter = page, FullPageSwitch = true };
+        }
+
+        private SidebarButton SidebarCategoryButton(string text, int page, Color iconColor, bool activateOnly = false)
+        {
+            return new SidebarButton(0, 0, Theme.SIDEBAR_WIDTH - Theme.SCROLL_BAR_WIDTH, 42, activateOnly ? ButtonAction.Activate : ButtonAction.SwitchPage, text, iconColor) { ButtonParameter = page, FullPageSwitch = true };
         }
 
         private ModernButton SubCategoryButton(string text, int page, int width, int height = 40)
@@ -6260,11 +6278,43 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        private class WatermarkControl : Control
+        {
+            private Texture2D _texture;
+
+            public WatermarkControl(int width, int height)
+            {
+                Width = width;
+                Height = height;
+                AcceptMouseInput = false;
+                if (_watermarkTexture == null)
+                {
+                    try
+                    {
+                        _watermarkTexture = PNGLoader.Instance.GetImageTexture(Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "logodust.png"));
+                    }
+                    catch { }
+                }
+                _texture = _watermarkTexture;
+            }
+
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            {
+                if (_texture == null || _texture.IsDisposed) return true;
+                int logoW = (int)(_texture.Width * 0.65f);
+                int logoH = (int)(_texture.Height * 0.65f);
+                int cx = x + (Width - logoW) / 2;
+                int cy = y + (Height - logoH) / 2;
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, 0.18f);
+                batcher.Draw(_texture, new Rectangle(cx, cy, logoW, logoH), null, hueVector);
+                return true;
+            }
+        }
 
         private class LeftSideMenuRightSideContent : Control
         {
             private ScrollArea left, right;
-            private int leftY, rightY = Theme.TOP_PADDING, leftX, rightX;
+            private int leftY, rightY, leftX, rightX;
 
             public ScrollArea LeftArea => left;
             public ScrollArea RightArea => right;
@@ -6286,8 +6336,11 @@ namespace ClassicUO.Game.UI.Gumps
                 CanMove = true;
                 CanCloseWithRightClick = true;
                 AcceptMouseInput = true;
+                rightY = Theme.TOP_PADDING + Theme.CONTENT_MARGIN;
+                rightX = Theme.CONTENT_MARGIN;
 
-                Add(new AlphaBlendControl() { Width = leftWidth, Height = Height, CanMove = true }, page);
+                Add(new WatermarkControl(Width, Height) { X = 0, Y = 0, AcceptMouseInput = false }, 0);
+                Add(new RoundedColorBox(leftWidth, Height, Theme.PANEL_BG, 0) { X = 0, Y = 0, AcceptMouseInput = true }, page);
                 Add(left = new ScrollArea(0, 0, leftWidth, height) { CanMove = true, AcceptMouseInput = true }, page);
                 Add(right = new ScrollArea(leftWidth, 0, Width - leftWidth, height) { CanMove = true, AcceptMouseInput = true }, page);
 
@@ -6335,25 +6388,25 @@ namespace ClassicUO.Game.UI.Gumps
             public void RemoveIndent()
             {
                 rightX -= Theme.INDENT_SPACE;
-                if (rightX < 0)
+                if (rightX < Theme.CONTENT_MARGIN)
                 {
-                    rightX = 0;
+                    rightX = Theme.CONTENT_MARGIN;
                 }
             }
 
             public void ResetRightSide()
             {
-                rightY = Theme.TOP_PADDING;
-                rightX = 0;
+                rightY = Theme.TOP_PADDING + Theme.CONTENT_MARGIN;
+                rightX = Theme.CONTENT_MARGIN;
             }
 
             public void SetMatchingButton(int page)
             {
                 foreach (Control c in left.Children)
                 {
-                    if (c is ModernButton button && button.ButtonParameter == page)
+                    if (c is SearchableOption opt && c is ICategoryButton btn && btn.ButtonParameter == page)
                     {
-                        ((SearchableOption)button).OnSearchMatch();
+                        opt.OnSearchMatch();
                         int p = Parent == null ? Page : Parent.Page;
                         ModernOptionsGump.SetParentsForMatchingSearch(this, p);
                     }
@@ -6361,7 +6414,123 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private class ModernButton : HitBox, SearchableOption
+        private interface ICategoryButton
+        {
+            int ButtonParameter { get; }
+            bool IsSelected { get; set; }
+            bool FullPageSwitch { get; set; }
+        }
+
+        private class SidebarButton : HitBox, SearchableOption, ICategoryButton
+        {
+            private readonly ButtonAction _action;
+            private readonly Color _iconColor;
+            private bool _isSelected;
+            private float _hoverAlpha;
+
+            public int ButtonParameter { get; set; }
+            public bool FullPageSwitch { get; set; }
+            internal TextBox TextLabel { get; }
+
+            public SidebarButton(int x, int y, int w, int h, ButtonAction action, string text, Color iconColor) : base(x, y, w, h)
+            {
+                _action = action;
+                _iconColor = iconColor;
+                Add(TextLabel = new TextBox(text, Theme.FONT, Theme.STANDARD_TEXT_SIZE, w - 40, Theme.BUTTON_FONT_COLOR, FontStashSharp.RichText.TextHorizontalAlignment.Left, false) { X = 38 });
+                TextLabel.Y = (h - TextLabel.Height) >> 1;
+                ModernOptionsGump.SearchValueChanged += OnSearchChanged;
+            }
+
+            private void OnSearchChanged(object sender, EventArgs e)
+            {
+                if (!string.IsNullOrEmpty(ModernOptionsGump.SearchText))
+                {
+                    if (Search(ModernOptionsGump.SearchText))
+                    {
+                        OnSearchMatch();
+                        ModernOptionsGump.SetParentsForMatchingSearch(this, Page);
+                    }
+                    else
+                        TextLabel.Alpha = Theme.NO_MATCH_SEARCH;
+                }
+                else
+                    TextLabel.Alpha = 1f;
+            }
+
+            public bool IsSelectable { get; set; } = true;
+            public bool IsSelected
+            {
+                get => _isSelected && IsSelectable;
+                set
+                {
+                    if (!IsSelectable) return;
+                    _isSelected = value;
+                    if (value && Parent != null)
+                    {
+                        foreach (Control c in Parent.FindControls<SidebarButton>())
+                        {
+                            if (c != this && c is SidebarButton sb)
+                                sb.IsSelected = false;
+                        }
+                    }
+                }
+            }
+
+            public override void Update()
+            {
+                base.Update();
+                float target = MouseIsOver ? 1f : 0f;
+                _hoverAlpha += (target - _hoverAlpha) * 0.18f;
+            }
+
+            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            {
+                Texture2D tex = SolidColorTextureCache.GetTexture(_iconColor);
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, 1f);
+                batcher.Draw(tex, new Rectangle(x + 12, y + (Height - 12) / 2, 12, 12), hueVector);
+
+                if (IsSelected)
+                {
+                    tex = SolidColorTextureCache.GetTexture(Theme.ACCENT_COLOR);
+                    hueVector = ShaderHueTranslator.GetHueVector(0, false, 0.3f);
+                    batcher.Draw(tex, new Rectangle(x, y, 3, Height), hueVector);
+                    hueVector = ShaderHueTranslator.GetHueVector(0, false, 0.1f);
+                    batcher.Draw(tex, new Rectangle(x + 3, y, Width - 3, Height), hueVector);
+                }
+                else if (_hoverAlpha > 0.01f)
+                {
+                    tex = SolidColorTextureCache.GetTexture(Theme.ACCENT_COLOR);
+                    hueVector = ShaderHueTranslator.GetHueVector(0, false, _hoverAlpha * 0.08f);
+                    batcher.Draw(tex, new Rectangle(x, y, Width, Height), hueVector);
+                }
+
+                return base.Draw(batcher, x, y);
+            }
+
+            protected override void OnMouseUp(int x, int y, MouseButtonType button)
+            {
+                if (button != MouseButtonType.Left) return;
+                IsSelected = true;
+                if (_action == ButtonAction.SwitchPage)
+                {
+                    if (FullPageSwitch)
+                        ChangePage(ButtonParameter);
+                    else if (Parent != null)
+                    {
+                        Parent.ActivePage = ButtonParameter;
+                        if (Parent.Parent is LeftSideMenuRightSideContent lsc)
+                            lsc.ActivePage = ButtonParameter;
+                    }
+                }
+                else
+                    OnButtonClick(ButtonParameter);
+            }
+
+            public bool Search(string text) => TextLabel.Text.ToLower().Contains(text.ToLower());
+            public void OnSearchMatch() => TextLabel.Alpha = 1f;
+        }
+
+        private class ModernButton : HitBox, SearchableOption, ICategoryButton
         {
             private readonly ButtonAction _action;
             private readonly int _groupnumber;
@@ -6369,7 +6538,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public bool DisplayBorder;
 
-            public bool FullPageSwitch;
+            public bool FullPageSwitch { get; set; }
 
             public ModernButton
             (
@@ -6507,15 +6676,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (IsSelected)
                 {
-                    Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, Alpha);
-
-                    batcher.Draw
-                    (
-                        _texture,
-                        new Vector2(x, y),
-                        new Rectangle(0, 0, Width, Height),
-                        hueVector
-                    );
+                    Texture2D selTex = SolidColorTextureCache.GetTexture(Theme.ACCENT_COLOR);
+                    Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, 0.25f);
+                    batcher.Draw(selTex, new Rectangle(x, y, 3, Height), hueVector);
+                    hueVector = ShaderHueTranslator.GetHueVector(0, false, 0.12f);
+                    batcher.Draw(selTex, new Rectangle(x + 3, y, Width - 3, Height), hueVector);
                 }
 
                 if (DisplayBorder)
@@ -7943,35 +8108,60 @@ namespace ClassicUO.Game.UI.Gumps
             public int COMBO_BOX_WIDTH { get; set; } = 225;
             public int SCROLL_BAR_WIDTH { get; set; } = 15;
             public int INPUT_WIDTH { get; set; } = 200;
-            public int TOP_PADDING { get; set; } = 5;
+            public int TOP_PADDING { get; set; } = 8;
             public int INDENT_SPACE { get; set; } = 40;
-            public int BLANK_LINE { get; set; } = 20;
-            public int HORIZONTAL_SPACING_CONTROLS { get; set; } = 20;
+            public int BLANK_LINE { get; set; } = 22;
+            public int HORIZONTAL_SPACING_CONTROLS { get; set; } = 24;
 
-            // Reduced font size for darker theme
             public int STANDARD_TEXT_SIZE { get; set; } = 16;
 
             public float NO_MATCH_SEARCH { get; set; } = 0.3f;
 
-            // Dark theme colors
-            public ushort BACKGROUND { get; set; } = 0; // Pure black background
-            public ushort SEARCH_BACKGROUND { get; set; } = 0; // Black search background
-            public ushort CHECKBOX { get; set; } = 0; // Black checkbox
-            public int CHECKBOX_SIZE { get; set; } = 30;
+            public ushort BACKGROUND { get; set; } = 0;
+            public ushort SEARCH_BACKGROUND { get; set; } = 0;
+            public ushort CHECKBOX { get; set; } = 0;
+            public int CHECKBOX_SIZE { get; set; } = 28;
             public ushort BLACK { get; set; } = 0;
+            public int SIDEBAR_WIDTH { get; set; } = 180;
+            public int CONTENT_MARGIN { get; set; } = 24;
 
             [JsonConverter(typeof(ColorJsonConverter))]
-            public Color DROPDOWN_OPTION_NORMAL_HUE { get; set; } = Color.DarkGray;
+            public Color ICON_GENERAL { get; set; } = Color.FromNonPremultiplied(90, 130, 180, 255);
             [JsonConverter(typeof(ColorJsonConverter))]
+            public Color ICON_SOUND { get; set; } = Color.FromNonPremultiplied(100, 180, 120, 255);
+            [JsonConverter(typeof(ColorJsonConverter))]
+            public Color ICON_VIDEO { get; set; } = Color.FromNonPremultiplied(160, 120, 200, 255);
+            [JsonConverter(typeof(ColorJsonConverter))]
+            public Color ICON_MACROS { get; set; } = Color.FromNonPremultiplied(220, 160, 80, 255);
+            [JsonConverter(typeof(ColorJsonConverter))]
+            public Color ICON_UI { get; set; } = Color.FromNonPremultiplied(120, 150, 180, 255);
+            [JsonConverter(typeof(ColorJsonConverter))]
+            public Color ICON_COMBAT { get; set; } = Color.FromNonPremultiplied(200, 100, 100, 255);
+            [JsonConverter(typeof(ColorJsonConverter))]
+            public Color ICON_TAZUO { get; set; } = Color.FromNonPremultiplied(80, 170, 200, 255);
+            [JsonConverter(typeof(ColorJsonConverter))]
+            public Color ICON_DUST { get; set; } = Color.FromNonPremultiplied(180, 140, 220, 255);
 
-            public Color DROPDOWN_OPTION_HOVER_HUE { get; set; } = Color.Gray;
             [JsonConverter(typeof(ColorJsonConverter))]
-            public Color DROPDOWN_OPTION_SELECTED_HUE { get; set; } = Color.DarkSlateGray;
+            public Color DARK_BG { get; set; } = Color.FromNonPremultiplied(13, 13, 15, 255);
+            [JsonConverter(typeof(ColorJsonConverter))]
+            public Color HEADER_BG { get; set; } = Color.FromNonPremultiplied(18, 18, 22, 255);
+            [JsonConverter(typeof(ColorJsonConverter))]
+            public Color PANEL_BG { get; set; } = Color.FromNonPremultiplied(22, 22, 26, 255);
+            [JsonConverter(typeof(ColorJsonConverter))]
+            public Color ACCENT_COLOR { get; set; } = Color.FromNonPremultiplied(90, 130, 180, 255);
 
             [JsonConverter(typeof(ColorJsonConverter))]
-            public Color BUTTON_FONT_COLOR { get; set; } = Color.WhiteSmoke;
+            public Color DROPDOWN_OPTION_NORMAL_HUE { get; set; } = Color.FromNonPremultiplied(140, 140, 150, 255);
             [JsonConverter(typeof(ColorJsonConverter))]
-            public Color TEXT_FONT_COLOR { get; set; } = Color.WhiteSmoke;
+            public Color DROPDOWN_OPTION_HOVER_HUE { get; set; } = Color.FromNonPremultiplied(170, 170, 180, 255);
+            [JsonConverter(typeof(ColorJsonConverter))]
+            public Color DROPDOWN_OPTION_SELECTED_HUE { get; set; } = Color.FromNonPremultiplied(60, 90, 130, 255);
+
+            [JsonConverter(typeof(ColorJsonConverter))]
+            public Color BUTTON_FONT_COLOR { get; set; } = Color.FromNonPremultiplied(235, 235, 240, 255);
+            [JsonConverter(typeof(ColorJsonConverter))]
+            public Color TEXT_FONT_COLOR { get; set; } = Color.FromNonPremultiplied(230, 230, 235, 255);
 
             public string FONT { get; set; } = TrueTypeLoader.EMBEDDED_FONT;
         }

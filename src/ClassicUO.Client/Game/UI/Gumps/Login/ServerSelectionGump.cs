@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -61,43 +61,39 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         public ServerSelectionGump() : base(0, 0)
         {
+            X = LoginLayoutHelper.ContentOffsetX;
+            Y = LoginLayoutHelper.ContentOffsetY;
             // Background
             UIManager.Add(new LoginBackground());
 
-            Add(new CustomGumpPic
-                    (
-                        280,
-                        240,
-                        LogoBackgroundImg,
-                        0
-                    ));
-
-
-            // Substituir o ImageButton pelo GothicStyleButton
-            Add(button = new GothicStyleButton(
-                x: 30,
-                y: 680,
-                width: 120,
-                height: 40,
-                text: "BACK",
-                fontPath: null, // Usar fonte padrão
-                fontSize: 16
+            int logoW = LogoBackgroundImg?.Width ?? 400;
+            Add(new CustomGumpPic(
+                LoginLayoutHelper.CenterOffsetX(logoW),
+                LoginLayoutHelper.Y(240),
+                LogoBackgroundImg,
+                0
             ));
 
-            button.OnClick += () =>
-            {
-                OnButtonClick(0);
-            };
-
-                      // Substituir o ImageButton pelo GothicStyleButton
+            var loginLang = Language.Instance.Login;
             Add(button = new GothicStyleButton(
-                x: 890,
-                y: 680,
-                width: 120,
-                height: 40,
-                text: "NEXT",
-                fontPath: null, // Usar fonte padrão
-                fontSize: 16
+                LoginLayoutHelper.X(30),
+                LoginLayoutHelper.Y(680),
+                120,
+                40,
+                loginLang.Back,
+                null,
+                16
+            ));
+            button.OnClick += () => OnButtonClick(0);
+
+            Add(button = new GothicStyleButton(
+                LoginLayoutHelper.ContentWidth - 30 - 120,
+                LoginLayoutHelper.Y(680),
+                120,
+                40,
+                loginLang.Next,
+                null,
+                16
             ));
 
             button.OnClick += () =>
@@ -109,18 +105,11 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             if (Client.Version >= ClientVersion.CV_500A)
             {
-                Add
-                (
-                    new TextBox(ClilocLoader.Instance.GetString(1044579), TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: true) { X = 210, Y = 70, AcceptMouseInput = true }
-                 
-                ); // "Select which shard to play on:"
+                Add(new TextBox(ClilocLoader.Instance.GetString(1044579), TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: true) { X = LoginLayoutHelper.X(210), Y = LoginLayoutHelper.Y(70), AcceptMouseInput = true });
 
                 if (CUOEnviroment.NoServerPing == false)
                 {
-                    Add
-                    (
-                        new TextBox(ClilocLoader.Instance.GetString(1044577), TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: true) { X = 650, Y = 70, AcceptMouseInput = true }
-                    ); // "Latency:"
+                    Add(new TextBox(ClilocLoader.Instance.GetString(1044577), TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: true) { X = LoginLayoutHelper.X(650), Y = LoginLayoutHelper.Y(70), AcceptMouseInput = true });
                    
 
                 }
@@ -129,27 +118,15 @@ namespace ClassicUO.Game.UI.Gumps.Login
             }
             else
             {
-                Add
-                (
-     
-                    new TextBox(ResGumps.SelectWhichShardToPlayOn, TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: true) { X = 210, Y = 70, AcceptMouseInput = true }
-
-                );
-
-                Add
-                (
-                    new TextBox(ResGumps.Latency, TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: true) { X = 650, Y = 70, AcceptMouseInput = true }
-                );
-
+                Add(new TextBox(loginLang.SelectWhichShardToPlayOn, TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: true) { X = LoginLayoutHelper.X(210), Y = LoginLayoutHelper.Y(70), AcceptMouseInput = true });
+                Add(new TextBox(loginLang.Latency, TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: true) { X = LoginLayoutHelper.X(650), Y = LoginLayoutHelper.Y(70), AcceptMouseInput = true });
             }
 
-            // Sever Scroll Area
-            ScrollArea scrollArea = new ScrollArea
-            (
-                150,
-                90,
-                600,
-                500,
+            ScrollArea scrollArea = new ScrollArea(
+                LoginLayoutHelper.X(150),
+                LoginLayoutHelper.Y(90),
+                LoginLayoutHelper.W(600),
+                LoginLayoutHelper.H(500),
                 true
             );
 
@@ -170,49 +147,42 @@ namespace ClassicUO.Game.UI.Gumps.Login
             Add(scrollArea);
             scrollArea.Add(databox);
 
-            Add
-             (
-                new AlphaBlendControl
-                {
-                    X = 210,
-                    Y = 620,
-                    Width = 540,
-                    Height = 85,
-                    Hue = 0x0000 // Cor preta (0x0000)
-                }
-             );
+            Add(new AlphaBlendControl
+            {
+                X = LoginLayoutHelper.X(210),
+                Y = LoginLayoutHelper.Y(620),
+                Width = LoginLayoutHelper.W(540),
+                Height = LoginLayoutHelper.H(85),
+                Hue = 0x0000
+            });
 
+            Add(new Button((int)Buttons.Earth, 0x15E8, 0x15EA, 0x15E9)
+            {
+                X = LoginLayoutHelper.X(243),
+                Y = LoginLayoutHelper.Y(630),
+                ButtonAction = ButtonAction.Activate
+            });
 
-            // Earth
-            Add
-            (
-                new Button((int)Buttons.Earth, 0x15E8, 0x15EA, 0x15E9)
-                {
-                    X = 243,
-                    Y = 630,
-                    ButtonAction = ButtonAction.Activate
-                }
-            );
-
-            Add
-                (
-
-                     new TextBox("Last server is played:", TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: true) { X = 310, Y = 640, AcceptMouseInput = true }
-                );
-
+            Add(new TextBox("Last server is played:", TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: true) { X = LoginLayoutHelper.X(310), Y = LoginLayoutHelper.Y(640), AcceptMouseInput = true });
 
             if (loginScene.Servers.Length != 0)
             {
                 int index = loginScene.GetServerIndexFromSettings();
-
-                Add
-                (
-                    new TextBox(loginScene.Servers[index].Name, TrueTypeLoader.EMBEDDED_FONT, 20, 300, Color.DarkRed, strokeEffect: true) { X = 310, Y = 660, AcceptMouseInput = true }
-                );
+                Add(new TextBox(loginScene.Servers[index].Name, TrueTypeLoader.EMBEDDED_FONT, 20, 300, Color.DarkRed, strokeEffect: true) { X = LoginLayoutHelper.X(310), Y = LoginLayoutHelper.Y(660), AcceptMouseInput = true });
             }
 
             AcceptKeyboardInput = true;
             CanCloseWithRightClick = false;
+        }
+
+        public override void Update()
+        {
+            if (!IsDisposed)
+            {
+                X = LoginLayoutHelper.ContentOffsetX;
+                Y = LoginLayoutHelper.ContentOffsetY;
+            }
+            base.Update();
         }
 
         public override void OnButtonClick(int buttonID)

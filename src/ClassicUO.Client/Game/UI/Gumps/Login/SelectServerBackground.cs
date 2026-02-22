@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -45,33 +45,15 @@ namespace ClassicUO.Game.UI.Gumps.Login
        
         public SelectServerBackground() : base(0, 0)
         {
-           
-           
-                // Background
-                Add
-                (
-                    new CustomGumpPic
-                    (
-                        0,
-                        0,
-                        LoginBackgroundImg,
-                        0
-                    )
-                );
+            Add(new FixedSizeBackgroundControl(LoginBackgroundImg));
 
-
-
-                // Quit Button
-                Add
-                (
-                    new Button(0, 0x1589, 0x158B, 0x158A)
-                    {
-                        X = 980,
-                        Y = 0,
-                        ButtonAction = ButtonAction.Activate,
-                        AcceptKeyboardInput = false
-                    }
-                );
+            Add(new Button(0, 0x1589, 0x158B, 0x158A)
+            {
+                X = LoginLayoutHelper.WindowWidth - 44,
+                Y = 0,
+                ButtonAction = ButtonAction.Activate,
+                AcceptKeyboardInput = false
+            });
             
 
 
