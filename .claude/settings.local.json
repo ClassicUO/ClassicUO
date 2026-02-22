@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet build:*)",
+      "Bash(dotnet restore:*)",
+      "Bash(git checkout:*)",
+      "Bash(python3:*)",
+      "Bash(awk:*)"
+    ]
+  }
+}
