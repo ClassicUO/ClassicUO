@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
@@ -13,7 +13,12 @@ namespace ClassicUO.Game.UI.Gumps
     internal class NearbyItems : Gump
     {
         public const int SIZE = 75;
+        private const int PADDING = 10;
+        private const int TITLE_HEIGHT = 22;
+
         public static NearbyItems NearbyItemGump;
+        private AlphaBlendControl _panel;
+
         public NearbyItems() : base(0, 0)
         {
             if (NearbyItemGump != null)
@@ -21,7 +26,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             NearbyItemGump = this;
 
-            CanMove = false;
+            CanMove = true;
+            CanCloseWithRightClick = true;
 
             BuildGump();
 
@@ -51,28 +57,40 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             int gridSize = (int)Math.Ceiling(Math.Sqrt(items.Count));
+            int gridW = gridSize * SIZE;
+            int gridH = gridSize * SIZE;
+            int totalW = PADDING * 2 + gridW;
+            int totalH = PADDING + TITLE_HEIGHT + PADDING + gridH + PADDING;
 
+            _panel = new AlphaBlendControl(0.92f)
+            {
+                X = 0,
+                Y = 0,
+                Width = totalW,
+                Height = totalH
+            };
+            Add(_panel);
+
+            Add(new Label("Items nearby", true, 1, 0) { X = PADDING, Y = PADDING + 2 });
+
+            int gridX = PADDING;
+            int gridY = PADDING + TITLE_HEIGHT + PADDING;
             int ii = 0;
-            int nx = 0;
-            int ny = 0;
             for (int row = 0; row < gridSize; row++)
             {
                 for (int col = 0; col < gridSize; col++)
                 {
                     if (ii >= items.Count) break;
 
-                    items[ii].X = nx;
-                    items[ii].Y = ny;
+                    items[ii].X = gridX + col * SIZE;
+                    items[ii].Y = gridY + row * SIZE;
                     Add(items[ii]);
-                    nx += SIZE;
                     ii++;
                 }
-                nx = 0;
-                ny += SIZE;
             }
 
-            Width = gridSize * SIZE;
-            Height = gridSize * SIZE;
+            Width = totalW;
+            Height = totalH;
         }
 
         public override void Update()

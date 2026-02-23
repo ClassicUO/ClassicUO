@@ -2,7 +2,7 @@
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
-// 
+//
 // Redistribution and use in source and binary forms, with or without
 // modification, are permitted provided that the following conditions are met:
 // 1. Redistributions of source code must retain the above copyright
@@ -16,7 +16,7 @@
 // 4. Neither the name of the copyright holder nor the
 //    names of its contributors may be used to endorse or promote products
 //    derived from this software without specific prior written permission.
-// 
+//
 // THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS ''AS IS'' AND ANY
 // EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 // WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -32,7 +32,6 @@
 
 using System;
 using ClassicUO.Assets;
-using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using FontStashSharp.RichText;
@@ -41,34 +40,29 @@ using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {
-    [Flags]
-    internal enum LoginButtons
-    {
-        None = 1,
-        OK = 2,
-        Cancel = 4
-    }
-
-    internal class LoadingGump : Gump
+    internal class LoginMessageBoxGump : Gump
     {
         private const int ModalWidth = 460;
         private const int ModalHeight = 260;
-        private const int LabelMaxWidth = 400;
+        private const int MessageMaxWidth = 400;
         private const int ButtonWidth = 120;
         private const int ButtonHeight = 40;
         private static readonly Color ModalBgColor = Color.FromNonPremultiplied(25, 8, 8, 255);
         private static readonly Color AccentColor = Color.FromNonPremultiplied(180, 50, 50, 255);
 
-        private readonly Action<int> _buttonClick;
-        private readonly TextBox _label;
+        private readonly Action<bool> _action;
 
-        public LoadingGump(string labelText, LoginButtons showButtons, Action<int> buttonClick = null) : base(0, 0)
+        public LoginMessageBoxGump(string message, Action<bool> action = null, bool showCancel = false) : base(0, 0)
         {
             X = LoginLayoutHelper.ContentOffsetX;
             Y = LoginLayoutHelper.ContentOffsetY;
-            _buttonClick = buttonClick;
+            _action = action;
             CanCloseWithRightClick = false;
             CanCloseWithEsc = false;
+            AcceptMouseInput = true;
+            AcceptKeyboardInput = true;
+            IsModal = true;
+            LayerOrder = UILayer.Over;
 
             Add(new SquareBlendControl(0.7f)
             {
@@ -95,39 +89,52 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Alpha = 0.85f
             });
 
-            _label = new TextBox(labelText, TrueTypeLoader.EMBEDDED_FONT, 20, LabelMaxWidth, Color.White, TextHorizontalAlignment.Center, false)
+            var label = new TextBox(message, TrueTypeLoader.EMBEDDED_FONT, 18, MessageMaxWidth, Color.White, TextHorizontalAlignment.Center, false)
             {
-                X = panelX + (ModalWidth >> 1) - (LabelMaxWidth >> 1),
+                X = panelX + (ModalWidth >> 1) - (MessageMaxWidth >> 1),
                 Y = panelY + 68,
                 AcceptMouseInput = false
             };
-            Add(_label);
+            Add(label);
 
             int buttonY = panelY + ModalHeight - ButtonHeight - 24;
 
-            if (showButtons == LoginButtons.OK)
-            {
-                AddLoginButton(panelX + (ModalWidth >> 1) - (ButtonWidth >> 1), buttonY, "OK", (int)LoginButtons.OK);
-            }
-            else if (showButtons == LoginButtons.Cancel)
-            {
-                AddLoginButton(panelX + (ModalWidth >> 1) - (ButtonWidth >> 1), buttonY, "CANCEL", (int)LoginButtons.Cancel);
-            }
-            else if (showButtons == (LoginButtons.OK | LoginButtons.Cancel))
+            if (showCancel)
             {
                 int centerX = panelX + (ModalWidth >> 1);
                 int gap = 16;
                 int totalButtons = ButtonWidth * 2 + gap;
-                AddLoginButton(centerX - totalButtons / 2, buttonY, "OK", (int)LoginButtons.OK);
-                AddLoginButton(centerX - totalButtons / 2 + ButtonWidth + gap, buttonY, "CANCEL", (int)LoginButtons.Cancel);
+                AddMessageButton(centerX - totalButtons / 2, buttonY, "OK", true);
+                AddMessageButton(centerX - totalButtons / 2 + ButtonWidth + gap, buttonY, "CANCEL", false);
             }
+            else
+            {
+                AddMessageButton(panelX + (ModalWidth >> 1) - (ButtonWidth >> 1), buttonY, "OK", true);
+            }
+
+            UIManager.KeyboardFocusControl = this;
+            UIManager.KeyboardFocusControl.SetKeyboardFocus();
         }
 
-        private void AddLoginButton(int x, int y, string text, int buttonId)
+        private void AddMessageButton(int x, int y, string text, bool result)
         {
-            GothicStyleButton btn = new GothicStyleButton(x, y, ButtonWidth, ButtonHeight, text, null, 16);
-            btn.OnClick += () => OnButtonClick(buttonId);
+            var btn = new GothicStyleButton(x, y, ButtonWidth, ButtonHeight, text, null, 16);
+            btn.OnClick += () => OnButtonResult(result);
             Add(btn);
+        }
+
+        private void OnButtonResult(bool result)
+        {
+            _action?.Invoke(result);
+            Dispose();
+        }
+
+        protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
+        {
+            if (key == SDL.SDL_Keycode.SDLK_KP_ENTER || key == SDL.SDL_Keycode.SDLK_RETURN)
+            {
+                OnButtonResult(true);
+            }
         }
 
         public override void Update()
@@ -138,26 +145,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Y = LoginLayoutHelper.ContentOffsetY;
             }
             base.Update();
-        }
-
-        public void SetText(string text)
-        {
-            _label.Text = text;
-        }
-
-        protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
-        {
-            if (key == SDL.SDL_Keycode.SDLK_KP_ENTER || key == SDL.SDL_Keycode.SDLK_RETURN)
-            {
-                OnButtonClick((int) LoginButtons.OK);
-            }
-        }
-
-
-        public override void OnButtonClick(int buttonID)
-        {
-            _buttonClick?.Invoke(buttonID);
-            base.OnButtonClick(buttonID);
         }
     }
 }

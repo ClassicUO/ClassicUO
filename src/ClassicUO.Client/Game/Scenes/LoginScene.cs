@@ -219,12 +219,8 @@ namespace ClassicUO.Game.Scenes
                         Connect(Settings.GlobalSettings.Username, Crypter.Decrypt(Settings.GlobalSettings.Password));
                     }
 
-                    int timeT = Settings.GlobalSettings.ReconnectTime * 1000;
-
-                    if (timeT < 1000)
-                    {
-                        timeT = 1000;
-                    }
+                    int baseMs = Math.Max(Settings.GlobalSettings.ReconnectTime * 1000, 1000);
+                    int timeT = Math.Min(baseMs * (1 << Math.Min(_reconnectTryCounter - 1, 5)), 30000);
 
                     _reconnectTime = (long)Time.Ticks + timeT;
                     _reconnectTryCounter++;

@@ -452,7 +452,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         var c = loginScene.GetCity(i);
                         cityNames[i] = c?.City ?? $"City {i}";
                     }
-                    Add(new TextBox("Select City to start", TrueTypeLoader.EMBEDDED_FONT, 16, 120, Color.DarkRed, strokeEffect: false) { X = RIGHT_X, Y = 409, AcceptMouseInput = false });
+                    Add(new TextBox("Sele City to start", TrueTypeLoader.EMBEDDED_FONT, 16, 120, Color.DarkRed, strokeEffect: false) { X = RIGHT_X, Y = 409, AcceptMouseInput = false });
                     _cityCombobox = new GothicStyleCombobox(RIGHT_X, 429, 120, 25, cityNames, 0, 14);
                     ApplyGothicRedTheme(_cityCombobox);
                     Add(_cityCombobox, 1);
@@ -1058,7 +1058,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                     if (!charCreationGump.HasProfessionSelected)
                     {
-                        UIManager.Add(new MessageBoxGump(350, 120, "You must select a profession.", null));
+                        charCreationGump.ShowMessage("You must select a profession.");
                         break;
                     }
 

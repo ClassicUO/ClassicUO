@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -83,11 +83,11 @@ namespace ClassicUO
 
             GraphicManager.PreferredDepthStencilFormat = DepthFormat.Depth24Stencil8;
             SetVSync(false);
-            
-            // Forçar PresentInterval.Immediate para FPS ilimitados
             GraphicManager.PreparingDeviceSettings += (sender, e) =>
             {
-                e.GraphicsDeviceInformation.PresentationParameters.PresentationInterval = PresentInterval.Immediate;
+                bool useVSync = ProfileManager.CurrentProfile?.EnableVSync ?? false;
+                e.GraphicsDeviceInformation.PresentationParameters.PresentationInterval =
+                    useVSync ? PresentInterval.One : PresentInterval.Immediate;
             };
 
             Window.ClientSizeChanged += WindowOnClientSizeChanged;
@@ -302,21 +302,18 @@ namespace ClassicUO
         public void SetVSync(bool value)
         {
             GraphicManager.SynchronizeWithVerticalRetrace = value;
-            
-            // Configurar PresentInterval para controle total do VSync
-            // Só aplicar se GraphicsDevice já foi inicializado
             if (GraphicManager.GraphicsDevice != null)
             {
-                if (value)
+                GraphicManager.GraphicsDevice.PresentationParameters.PresentationInterval =
+                    value ? PresentInterval.One : PresentInterval.Immediate;
+                if (!value)
                 {
-                    GraphicManager.GraphicsDevice.PresentationParameters.PresentationInterval = PresentInterval.One;
-                }
-                else
-                {
-                    GraphicManager.GraphicsDevice.PresentationParameters.PresentationInterval = PresentInterval.Immediate;
+                    SDL_SetHint("SDL_RENDER_VSYNC", "0");
+                    PresentationParameters pp = GraphicManager.GraphicsDevice.PresentationParameters.Clone();
+                    pp.PresentationInterval = PresentInterval.Immediate;
+                    GraphicManager.GraphicsDevice.Reset(pp, GraphicManager.GraphicsDevice.Adapter);
                 }
             }
-            
             GraphicManager.ApplyChanges();
         }
 
@@ -531,6 +528,10 @@ namespace ClassicUO
             if (_currentFpsTime >= 1000)
             {
                 CUOEnviroment.CurrentRefreshRate = _totalFrames;
+                if (_totalFrames < CUOEnviroment.CurrentRefreshRateMin)
+                    CUOEnviroment.CurrentRefreshRateMin = _totalFrames;
+                if (_totalFrames > CUOEnviroment.CurrentRefreshRateMax)
+                    CUOEnviroment.CurrentRefreshRateMax = _totalFrames;
 
                 _totalFrames = 0;
                 _currentFpsTime = 0;

@@ -1,4 +1,4 @@
-﻿using ClassicUO.Game.Data;
+using ClassicUO.Game.Data;
 using Microsoft.Xna.Framework;
 using System;
 
@@ -117,6 +117,7 @@ namespace ClassicUO.Game.Managers
 
         /// <summary>
         /// This event occurs every game update, essentially the game tick. Be careful with this, it happens many many times per second.
+        /// Invocation cost is minimal (null check + delegate call only when subscribed); no performance change when no handlers are attached.
         /// </summary>
         public static GameUpdateDelegate GameUpdate;
         public delegate void GameUpdateDelegate();

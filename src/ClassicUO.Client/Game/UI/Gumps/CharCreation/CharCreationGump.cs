@@ -121,21 +121,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         skill.Lock = Lock.Locked;
                     }
 
-                    MessageBoxGump messageBox = new MessageBoxGump
-                    (
-                        400,
-                        300,
-                        ClilocLoader.Instance.GetString(1063016),
-                        null,
-                        true
-                    )
-                    {
-                        X = 470 / 2 - 400 / 2 + 100,
-                        Y = 372 / 2 - 300 / 2 + 20,
-                        CanMove = false
-                    };
-
-                    UIManager.Add(messageBox);
+                    UIManager.Add(new LoginMessageBoxGump(ClilocLoader.Instance.GetString(1063016)));
 
                     return;
                 }

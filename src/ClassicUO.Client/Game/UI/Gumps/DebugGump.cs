@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -45,13 +45,13 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class DebugGump : Gump
     {
-        private const string DEBUG_STRING_0 = "- FPS: {0} (Min={1}, Max={2}), Zoom: {3:0.00}, Total Objs: {4}\n";
+        private const string DEBUG_STRING_0 = "- FPS: {0} (Min={1}, Max={2}, Cap: {3}), Zoom: {4:0.00}, Total Objs: {5}\n";
         private const string DEBUG_STRING_1 = "- Mobiles: {0}   Items: {1}   Statics: {2}   Multi: {3}   Lands: {4}   Effects: {5}\n";
         private const string DEBUG_STRING_2 = "- CharPos: {0}\n- Mouse: {1}\n- InGamePos: {2}\n";
         private const string DEBUG_STRING_3 = "- Selected: {0}";
 
-        private const string DEBUG_STRING_SMALL = "FPS: {0}\nZoom: {1:0.00}";
-        private const string DEBUG_STRING_SMALL_NO_ZOOM = "FPS: {0}";
+        private const string DEBUG_STRING_SMALL = "FPS: {0} (Min={1}, Max={2})\nZoom: {3:0.00}";
+        private const string DEBUG_STRING_SMALL_NO_ZOOM = "FPS: {0} (Min={1}, Max={2})";
         private static Point _last_position = new Point(-1, -1);
 
         private uint _timeToUpdate;
@@ -117,18 +117,25 @@ namespace ClassicUO.Game.UI.Gumps
                 Span<char> span = stackalloc char[256];
                 ValueStringBuilder sb = new ValueStringBuilder(span);
            
+                uint minFps = CUOEnviroment.CurrentRefreshRateMin;
+                string minStr = minFps == uint.MaxValue ? "-" : minFps.ToString();
+
                 if (IsMinimized && scene != null)
                 {
-                    sb.Append
-                    (string.Format(
-                         DEBUG_STRING_0,
-                         CUOEnviroment.CurrentRefreshRate,
-                         0,
-                         0,
-                         !World.InGame ? 1f : scene.Camera.Zoom,
-                         scene.RenderedObjectsCount
-                         )
-                     );
+                    string capLabel = ProfileManager.CurrentProfile?.DisableFrameLimiting == true
+                        ? "Unlimited"
+                        : Settings.GlobalSettings.FPS.ToString();
+                    sb.Append(
+                        string.Format(
+                            DEBUG_STRING_0,
+                            CUOEnviroment.CurrentRefreshRate,
+                            minStr,
+                            CUOEnviroment.CurrentRefreshRateMax,
+                            capLabel,
+                            !World.InGame ? 1f : scene.Camera.Zoom,
+                            scene.RenderedObjectsCount
+                        )
+                    );
 
                     sb.Append($"- CUO version: {CUOEnviroment.Version}, Client version: {Settings.GlobalSettings.ClientVersion}\n");
 
@@ -175,11 +182,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (scene != null && cameraZoomIndex != 5)
                     {
-                        sb.Append(string.Format(DEBUG_STRING_SMALL, CUOEnviroment.CurrentRefreshRate, !World.InGame ? 1f : scene.Camera.Zoom));
+                        sb.Append(string.Format(DEBUG_STRING_SMALL, CUOEnviroment.CurrentRefreshRate, minStr, CUOEnviroment.CurrentRefreshRateMax, !World.InGame ? 1f : scene.Camera.Zoom));
                     }
                     else
                     {
-                        sb.Append(string.Format(DEBUG_STRING_SMALL_NO_ZOOM, CUOEnviroment.CurrentRefreshRate));
+                        sb.Append(string.Format(DEBUG_STRING_SMALL_NO_ZOOM, CUOEnviroment.CurrentRefreshRate, minStr, CUOEnviroment.CurrentRefreshRateMax));
                     }
                 }
                 
