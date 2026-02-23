@@ -1336,20 +1336,30 @@ namespace ClassicUO.Game.GameObjects
 
                 cache.LayerEffectiveAnimID[(byte)lay] = effective;
 
-                // Coverage data comes from the ORIGINAL entry, not the replacement.
-                // The replacement only changes the visual (animation body), not which
-                // body parts this item covers or is covered by.
-                if (stitchin.TryGetEntry(animID, out StitchinEntry origEntry))
+                // Coverage data comes from the EFFECTIVE entry (post-replacement).
+                // Replaced items have their own entries with updated (typically smaller)
+                // coverage — e.g. shirt 538 covers torso+arms, but its replacement
+                // 2251 (tunic-only) covers only torso.
+                ushort coverageLookupID = effective;
+                if (!stitchin.TryGetEntry(coverageLookupID, out StitchinEntry coverageEntry))
                 {
-                    cache.LayerCovers[(byte)lay] = origEntry.Covers;
-                    cache.LayerCoveredBy[(byte)lay] = origEntry.CoveredBy;
+                    // Fall back to original entry if the replacement has no entry
+                    stitchin.TryGetEntry(animID, out coverageEntry);
+                }
+
+                cache.LayerCovers[(byte)lay] = coverageEntry.Covers;
+                cache.LayerCoveredBy[(byte)lay] = coverageEntry.CoveredBy;
 
                     // "Active" entries have replace/remove directives — they
                     // actively manage equipment relationships.  Only coverage
                     // from active entries should hide other items.
+                // Use the ORIGINAL entry for this check since that's where
+                // the replace/remove directives live.
+                if (stitchin.TryGetEntry(animID, out StitchinEntry origEntry))
+                {
                     if (origEntry.Replacements != null || origEntry.Removals != null)
                     {
-                        cache.LayerActiveCovers[(byte)lay] = origEntry.Covers;
+                        cache.LayerActiveCovers[(byte)lay] = coverageEntry.Covers;
                     }
                 }
             }
@@ -1369,18 +1379,29 @@ namespace ClassicUO.Game.GameObjects
                 if (checkMask == 0)
                     continue;
 
-                // Only over-garments (Robe, Cloak) can hide items through body-part coverage.
-                // All other items rely on explicit remove/replace directives.
-                uint otherActiveCovers = 0;
+                // Check if any single other active item is a STRICT superset of
+                // this item's coverage.  Peer items with identical coverage (e.g.
+                // shirt and torso both covering TORSO+arms) must not hide each other.
+                bool isCovered = false;
                 for (byte other = (byte)Layer.OneHanded; other < (byte)Layer.Mount; other++)
                 {
-                    if (other != (byte)Layer.Robe && other != (byte)Layer.Cloak)
+                    if (other == (byte)Layer.OneHanded || other == (byte)Layer.TwoHanded)
                         continue;
-                    if (other != lay)
-                        otherActiveCovers |= cache.LayerActiveCovers[other];
+                    if (other == lay)
+                        continue;
+
+                    uint otherCovers = cache.LayerActiveCovers[other];
+                    if (otherCovers == 0)
+                        continue;
+
+                    if ((checkMask & otherCovers) == checkMask && otherCovers != checkMask)
+                    {
+                        isCovered = true;
+                        break;
+                    }
                 }
 
-                if ((checkMask & otherActiveCovers) == checkMask)
+                if (isCovered)
                     coveredMask |= 1u << lay;
             }
             cache.CoveredLayerMask = coveredMask;
