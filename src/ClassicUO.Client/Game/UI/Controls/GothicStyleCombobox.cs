@@ -120,17 +120,30 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            Color currentBaseColor = _baseColor;
-            Color currentHighlightColor = _highlightColor;
+            Color currentBaseColor = _shadowColor;
+            Color currentHighlightColor = _shadowColor;
             Color currentShadowColor = _shadowColor;
+
+            if (_isPressed || _isOpen)
+            {
+                currentBaseColor = _baseColor;
+                currentHighlightColor = _highlightColor;
+                currentShadowColor = _shadowColor;
+            }
+            else if (_isHovered)
+            {
+                currentBaseColor = _baseColor;
+                currentHighlightColor = _shadowColor;
+                currentShadowColor = _shadowColor;
+            }
 
             if (_pixelTexture == null)
             {
                 _pixelTexture = new Texture2D(batcher.GraphicsDevice, 1, 1);
-                _pixelTexture.SetData(new[] { Color.White });
+                _pixelTexture.SetData(new[] { Color.Red });
             }
 
-            batcher.Draw(_pixelTexture, new Rectangle(x + 3, y + 3, Width, Height), _shadowColor.ToVector3());
+            batcher.Draw(_pixelTexture, new Rectangle(x + 3, y + 3, Width, Height), Color.DarkRed.ToVector3());
             DrawGradientBackground(batcher, x, y, Width, Height, currentBaseColor, currentShadowColor);
             DrawBorder(batcher, x, y, Width, Height, currentHighlightColor, currentShadowColor);
             DrawTextureEffect(batcher, x, y, Width, Height, currentBaseColor);
@@ -152,10 +165,12 @@ namespace ClassicUO.Game.UI.Controls
                 _font.DrawText(batcher, new StringSegment(_selectedText), new Vector2(textX, textY), _textColor);
             }
 
-            DrawDropdownArrow(batcher, x, y, Width, Height, _textColor);
+            DrawDropdownArrow(batcher, x, y, Width, Height);
 
             return base.Draw(batcher, x, y);
         }
+
+        private static readonly Vector3 SolidHue = ShaderHueTranslator.GetHueVector(0, false, 1f);
 
         private void DrawGradientBackground(UltimaBatcher2D batcher, int x, int y, int width, int height, Color baseColor, Color shadowColor)
         {
@@ -212,24 +227,23 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     int lineHeight = height - 6 + _textureRandom.Next(-2, 3);
                     int lineY = y + 3 + _textureRandom.Next(-1, 2);
-                    var lineColor = new Vector3(textureColor.R / 255f, textureColor.G / 255f, textureColor.B / 255f);
-                    batcher.Draw(_pixelTexture, new Rectangle(lineX, lineY, 1, lineHeight), lineColor);
+                    batcher.Draw(_pixelTexture, new Rectangle(lineX, lineY, 1, lineHeight),
+                        new Vector3(textureColor.R / 255f, textureColor.G / 255f, textureColor.B / 255f));
                 }
             }
         }
 
-        private void DrawDropdownArrow(UltimaBatcher2D batcher, int x, int y, int width, int height, Color color)
+        private void DrawDropdownArrow(UltimaBatcher2D batcher, int x, int y, int width, int height)
         {
             int arrowX = x + width - 15;
             int arrowY = y + height / 2;
             int arrowSize = 6;
-            Vector3 colorVec = new Vector3(color.R / 255f, color.G / 255f, color.B / 255f);
             for (int i = 0; i < arrowSize; i++)
             {
                 int lineWidth = (i * 2) + 1;
                 int lineX = arrowX - (lineWidth / 2);
                 int lineY = arrowY - (arrowSize / 2) + i;
-                batcher.Draw(_pixelTexture, new Rectangle(lineX, lineY, lineWidth, 1), colorVec);
+                batcher.Draw(SolidColorTextureCache.GetTexture(_textColor), new Rectangle(lineX, lineY, lineWidth, 1), null, SolidHue);
             }
         }
 
@@ -296,10 +310,12 @@ namespace ClassicUO.Game.UI.Controls
             private readonly SpriteFontBase _font;
             private readonly int _fontSize;
             private int _scrollOffset;
-            private static readonly Vector3 SolidHue = ShaderHueTranslator.GetHueVector(0, false, 1f);
+            private static readonly Random _dropdownTextureRandom = new Random(12345);
+            private static readonly Vector3 OpaqueHue = ShaderHueTranslator.GetHueVector(0, false, 1f);
             private const int ItemHeight = 25;
             private const int ScrollBarWidth = 12;
             private const int Padding = 5;
+            private const int BORDER_RADIUS = 6;
 
             public GothicDropdownGump(int x, int y, int width, int height, string[] items, int fontSize, GothicStyleCombobox combobox)
                 : base(0, 0)
@@ -314,6 +330,7 @@ namespace ClassicUO.Game.UI.Controls
                 IsModal = true;
                 LayerOrder = UILayer.Over;
                 ModalClickOutsideAreaClosesThisControl = true;
+                Alpha = 1f;
 
                 _combobox = combobox;
                 _items = items;
@@ -335,48 +352,86 @@ namespace ClassicUO.Game.UI.Controls
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                Color baseColor = Color.DarkRed;
-                Color shadowColor = new Color(80, 15, 15);
-                Color highlightColor = new Color(180, 50, 50);
+                Color baseColor = _combobox.BaseColor;
+                Color shadowColor = _combobox.ShadowColor;
+                Color highlightColor = _combobox.HighlightColor;
 
-                FillRect(batcher, new Rectangle(x + 3, y + 3, Width, Height), shadowColor);
-                FillRect(batcher, new Rectangle(x, y, Width, Height), baseColor);
-                FillRect(batcher, new Rectangle(x, y, Width, 2), highlightColor);
-                FillRect(batcher, new Rectangle(x, y, 2, Height), highlightColor);
-                FillRect(batcher, new Rectangle(x, y + Height - 2, Width, 2), shadowColor);
-                FillRect(batcher, new Rectangle(x + Width - 2, y, 2, Height), shadowColor);
+                batcher.Draw(SolidColorTextureCache.GetTexture(baseColor), new Rectangle(x, y, Width, Height), OpaqueHue);
+                DrawBorder(batcher, x, y, Width, Height, highlightColor, shadowColor);
+                DrawTextureEffect(batcher, x, y, Width, Height, baseColor);
 
                 int contentWidth = Width - (HasScroll ? ScrollBarWidth + 4 : 4);
-                int contentHeight = Height - Padding * 2;
 
-                if (batcher.ClipBegin(x + 2, y + Padding, contentWidth + (HasScroll ? ScrollBarWidth + 4 : 0), contentHeight))
+                if (batcher.ClipBegin(x + 2, y + Padding, contentWidth + (HasScroll ? ScrollBarWidth + 4 : 0), Height - Padding * 2))
                 {
-                for (int i = 0; i < _items.Length; i++)
-                {
-                    int itemY = y + Padding + i * ItemHeight - _scrollOffset;
-                    if (itemY + ItemHeight <= y + Padding || itemY >= y + Height - Padding) continue;
+                    for (int i = 0; i < _items.Length; i++)
+                    {
+                        int itemY = y + Padding + i * ItemHeight - _scrollOffset;
+                        if (itemY + ItemHeight <= y + Padding || itemY >= y + Height - Padding) continue;
 
-                    bool isSelected = i == _combobox.SelectedIndex;
-                    if (isSelected)
-                        FillRect(batcher, new Rectangle(x + 2, itemY, contentWidth, ItemHeight - 2), highlightColor);
-                    if (_font != null && !string.IsNullOrEmpty(_items[i]))
-                        _font.DrawText(batcher, new StringSegment(_items[i]), new Vector2(x + 8, itemY + 4), Color.White);
-                }
-                batcher.ClipEnd();
+                        bool isSelected = i == _combobox.SelectedIndex;
+                        if (isSelected)
+                            batcher.Draw(SolidColorTextureCache.GetTexture(highlightColor), new Rectangle(x + 2, itemY, contentWidth, ItemHeight - 2), OpaqueHue);
+                        if (_font != null && !string.IsNullOrEmpty(_items[i]))
+                            _font.DrawText(batcher, new StringSegment(_items[i]), new Vector2(x + 8, itemY + 4), Color.White);
+                    }
+                    batcher.ClipEnd();
                 }
 
                 if (HasScroll)
                 {
                     int barX = x + Width - ScrollBarWidth - 2;
-                    FillRect(batcher, new Rectangle(barX, y + Padding, ScrollBarWidth, Height - Padding * 2), shadowColor);
+                    batcher.Draw(SolidColorTextureCache.GetTexture(shadowColor), new Rectangle(barX, y + Padding, ScrollBarWidth, Height - Padding * 2), OpaqueHue);
                     int trackHeight = Height - Padding * 2;
                     int thumbHeight = Math.Max(20, trackHeight * trackHeight / (_items.Length * ItemHeight + Padding * 2));
                     int maxThumbY = trackHeight - thumbHeight;
                     int thumbY = maxThumbY > 0 ? y + Padding + (maxThumbY * _scrollOffset / MaxScroll) : y + Padding;
-                    FillRect(batcher, new Rectangle(barX + 2, thumbY, ScrollBarWidth - 4, thumbHeight), highlightColor);
+                    batcher.Draw(SolidColorTextureCache.GetTexture(highlightColor), new Rectangle(barX + 2, thumbY, ScrollBarWidth - 4, thumbHeight), OpaqueHue);
                 }
 
                 return true;
+            }
+
+            private void DrawBorder(UltimaBatcher2D batcher, int x, int y, int width, int height, Color highlightColor, Color shadowColor)
+            {
+                int r = BORDER_RADIUS;
+                if (width < r * 2 || height < r * 2) r = 0;
+                Texture2D highlightTex = SolidColorTextureCache.GetTexture(highlightColor);
+                Texture2D shadowTex = SolidColorTextureCache.GetTexture(shadowColor);
+                if (r > 0)
+                {
+                    batcher.Draw(highlightTex, new Rectangle(x + r, y, width - r * 2, 2), OpaqueHue);
+                    batcher.Draw(shadowTex, new Rectangle(x + r, y + height - 2, width - r * 2, 2), OpaqueHue);
+                    batcher.Draw(highlightTex, new Rectangle(x, y + r, 2, height - r * 2), OpaqueHue);
+                    batcher.Draw(shadowTex, new Rectangle(x + width - 2, y + r, 2, height - r * 2), OpaqueHue);
+                    batcher.Draw(highlightTex, new Rectangle(x, y, r, r), OpaqueHue);
+                    batcher.Draw(highlightTex, new Rectangle(x + width - r, y, r, r), OpaqueHue);
+                    batcher.Draw(shadowTex, new Rectangle(x, y + height - r, r, r), OpaqueHue);
+                    batcher.Draw(shadowTex, new Rectangle(x + width - r, y + height - r, r, r), OpaqueHue);
+                }
+                else
+                {
+                    batcher.Draw(highlightTex, new Rectangle(x, y, width, 2), OpaqueHue);
+                    batcher.Draw(shadowTex, new Rectangle(x, y + height - 2, width, 2), OpaqueHue);
+                    batcher.Draw(highlightTex, new Rectangle(x, y, 2, height), OpaqueHue);
+                    batcher.Draw(shadowTex, new Rectangle(x + width - 2, y, 2, height), OpaqueHue);
+                }
+            }
+
+            private void DrawTextureEffect(UltimaBatcher2D batcher, int x, int y, int width, int height, Color baseColor)
+            {
+                Color textureColor = new Color(Math.Max(0, baseColor.R - 20), Math.Max(0, baseColor.G - 10), Math.Max(0, baseColor.B - 8));
+                Texture2D tex = SolidColorTextureCache.GetTexture(textureColor);
+                for (int i = 4; i < width - 4; i += 6)
+                {
+                    int lineX = x + i + _dropdownTextureRandom.Next(-2, 3);
+                    if (lineX >= x + 2 && lineX < x + width - 2)
+                    {
+                        int lineHeight = height - 6 + _dropdownTextureRandom.Next(-2, 3);
+                        int lineY = y + 3 + _dropdownTextureRandom.Next(-1, 2);
+                        batcher.Draw(tex, new Rectangle(lineX, lineY, 1, lineHeight), OpaqueHue);
+                    }
+                }
             }
 
             protected override void OnMouseUp(int x, int y, MouseButtonType button)
@@ -410,10 +465,6 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            private static void FillRect(UltimaBatcher2D batcher, Rectangle rectangle, Color color)
-            {
-                batcher.Draw(SolidColorTextureCache.GetTexture(color), rectangle, null, SolidHue);
-            }
         }
     }
 }

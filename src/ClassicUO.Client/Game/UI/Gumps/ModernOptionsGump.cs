@@ -150,7 +150,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGeneral()
         {
-            LeftSideMenuRightSideContent content = new LeftSideMenuRightSideContent(mainContent.RightWidth, mainContent.Height, (int)(mainContent.RightWidth * 0.3));
+            LeftSideMenuRightSideContent content = new LeftSideMenuRightSideContent(mainContent.RightWidth, mainContent.Height, (int)(mainContent.RightWidth * 0.3), 0, false);
             Control c;
             int page;
 
@@ -508,7 +508,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildVideo()
         {
-            LeftSideMenuRightSideContent content = new LeftSideMenuRightSideContent(mainContent.RightWidth, mainContent.Height, (int)(mainContent.RightWidth * 0.3));
+            LeftSideMenuRightSideContent content = new LeftSideMenuRightSideContent(mainContent.RightWidth, mainContent.Height, (int)(mainContent.RightWidth * 0.3), 0, false);
             #region Game window
             int page = ((int)PAGE.Video + 1000);
             content.AddToLeft(SubCategoryButton(lang.ButtonGameWindow, page, content.LeftWidth));
@@ -683,7 +683,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildMacros()
         {
-            LeftSideMenuRightSideContent content = new LeftSideMenuRightSideContent(mainContent.RightWidth, mainContent.Height, (int)(mainContent.RightWidth * 0.3));
+            LeftSideMenuRightSideContent content = new LeftSideMenuRightSideContent(mainContent.RightWidth, mainContent.Height, (int)(mainContent.RightWidth * 0.3), 0, false);
             int page = ((int)PAGE.Macros + 1000);
 
             #region New Macro
@@ -1816,7 +1816,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildNameplates()
         {
-            LeftSideMenuRightSideContent content = new LeftSideMenuRightSideContent(mainContent.RightWidth, mainContent.Height, (int)(mainContent.RightWidth * 0.3));
+            LeftSideMenuRightSideContent content = new LeftSideMenuRightSideContent(mainContent.RightWidth, mainContent.Height, (int)(mainContent.RightWidth * 0.3), 0, false);
             int page = ((int)PAGE.NameplateOptions + 1000);
 
             #region New entry
@@ -2065,14 +2065,14 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildDust765()
         {
-            LeftSideMenuRightSideContent content = new LeftSideMenuRightSideContent(mainContent.RightWidth, mainContent.Height, (int)(mainContent.RightWidth * 0.3));
+            LeftSideMenuRightSideContent content = new LeftSideMenuRightSideContent(mainContent.RightWidth, mainContent.Height, (int)(mainContent.RightWidth * 0.3), 0, false);
             Control c;
             int page;
 
             #region Dust
             page = ((int)PAGE.Dust765 + 1000);
-            content.AddToLeft(SubCategoryButton("Art / Hue Changes", page, content.LeftWidth));
-            content.AddToRight(new CheckboxWithLabel("Color stealth ON / OFF", 0, profile.ColorStealth, (b) =>
+            content.AddToLeft(SubCategoryButton(lang.GetDust765.ArtHueChanges, page, content.LeftWidth));
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.ColorStealth, 0, profile.ColorStealth, (b) =>
             {
                 profile.ColorStealth = b;
             }), true, page);
@@ -2186,16 +2186,16 @@ namespace ClassicUO.Game.UI.Gumps
             content.ResetRightSide();
 
             content.AddToLeft(SubCategoryButton("Visual Helpers", page, content.LeftWidth));
-            content.AddToRight(new CheckboxWithLabel("Highlight tiles on range", 0, profile.HighlightTileAtRange, (b) =>
+            content.AddToRight(new CheckboxWithLabel(lang.GetCombatSpells.HighlightTilesOnRange, 0, profile.HighlightTileAtRange, (b) =>
             {
                 profile.HighlightTileAtRange = b;
             }), true, page);
             content.Indent();
-            content.AddToRight(new SliderWithLabel("@ range:", 0, Theme.SLIDER_WIDTH, 1, 20, profile.HighlightTileAtRangeRange, (i) =>
+            content.AddToRight(new SliderWithLabel(lang.GetCombatSpells.AtRange, 0, Theme.SLIDER_WIDTH, 1, 20, profile.HighlightTileAtRangeRange, (i) =>
             {
                 profile.HighlightTileAtRangeRange = (byte)i;
             }), true, page);
-            content.AddToRight(new ModernColorPickerWithLabel("Tile color", profile.HighlightTileRangeHue, (h) =>
+            content.AddToRight(new ModernColorPickerWithLabel(lang.GetCombatSpells.TileColor, profile.HighlightTileRangeHue, (h) =>
             {
                 profile.HighlightTileRangeHue = h;
             }), true, page);
@@ -2203,76 +2203,87 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
             content.RemoveIndent();
 
-            content.AddToRight(new CheckboxWithLabel("Highlight tiles on range for spells", 0, profile.HighlightTileAtRangeSpell    , (b) =>
+            content.AddToRight(new CheckboxWithLabel(lang.GetCombatSpells.HighlightTilesOnRangeSpell, 0, profile.HighlightTileAtRangeSpell, (b) =>
             {
                 profile.HighlightTileAtRangeSpell = b;
             }), true, page);
             content.Indent();
-            content.AddToRight(new SliderWithLabel("@ range:", 0, Theme.SLIDER_WIDTH, 1, 20, profile.HighlightTileAtRangeRangeSpell, (i) =>
+            content.AddToRight(new SliderWithLabel(lang.GetCombatSpells.AtRange, 0, Theme.SLIDER_WIDTH, 1, 20, profile.HighlightTileAtRangeRangeSpell, (i) =>
             {
                 profile.HighlightTileAtRangeRangeSpell = (byte)i;
             }), true, page);
-            content.AddToRight(new ModernColorPickerWithLabel("Tile color", profile.HighlightTileRangeHueSpell, (h) =>
+            content.AddToRight(new ModernColorPickerWithLabel(lang.GetCombatSpells.TileColor, profile.HighlightTileRangeHueSpell, (h) =>
             {
                 profile.HighlightTileRangeHueSpell = h;
             }), true, page);
             content.RemoveIndent();
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Preview Fields", 0, profile.PreviewFields, (b) =>
+            content.AddToRight(new CheckboxWithLabel(lang.GetCombatSpells.PreviewFields, 0, profile.PreviewFields, (b) =>
             {
                 profile.PreviewFields = b;
             }), true, page);
             content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel(lang.GetCombatSpells.PreviewTeleportTiles, 0, profile.PreviewTeleportTiles, (b) =>
+            {
+                profile.PreviewTeleportTiles = b;
+            }), true, page);
+            content.Indent();
+            content.AddToRight(new ModernColorPickerWithLabel(lang.GetCombatSpells.TeleportPreviewTileColor, profile.PreviewTeleportTilesHue, (h) =>
+            {
+                profile.PreviewTeleportTilesHue = h;
+            }), true, page);
+            content.RemoveIndent();
+            content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel("Color own aura by HP (needs aura enabled)", 0, profile.OwnAuraByHP, (b) =>
+            content.AddToRight(new CheckboxWithLabel(lang.GetCombatSpells.ColorOwnAuraByHP, 0, profile.OwnAuraByHP, (b) =>
             {
                 profile.OwnAuraByHP = b;
             }), true, page);
             content.BlankLine();
 
-            content.AddToRight(new ComboBoxWithLabel("Glowing Weapons:", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Off", "White", "Pink", "Ice", "Fire", "Custom" }, profile.GlowingWeaponsType, (i, s) =>
+            content.AddToRight(new ComboBoxWithLabel(lang.GetCombatSpells.GlowingWeapons, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetCombatSpells.Off, lang.GetCombatSpells.White, lang.GetCombatSpells.Pink, lang.GetCombatSpells.Ice, lang.GetCombatSpells.Fire, lang.GetCombatSpells.Custom }, profile.GlowingWeaponsType, (i, s) =>
             {
                 profile.GlowingWeaponsType = i;
             }), true, page);
             content.Indent();
-            content.AddToRight(new ModernColorPickerWithLabel("Custom color Glowing Weapons", profile.HighlightGlowingWeaponsTypeHue, (h) =>
+            content.AddToRight(new ModernColorPickerWithLabel(lang.GetCombatSpells.CustomColorGlowingWeapons, profile.HighlightGlowingWeaponsTypeHue, (h) =>
             {
                 profile.HighlightGlowingWeaponsTypeHue = h;
             }), true, page);
             content.RemoveIndent();
             content.BlankLine();
 
-            content.AddToRight(new ComboBoxWithLabel("Highlight lasttarget:", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Off", "White", "Pink", "Ice", "Fire", "Custom" }, profile.HighlightLastTargetType, (i, s) =>
+            content.AddToRight(new ComboBoxWithLabel(lang.GetCombatSpells.HighlightLasttarget, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetCombatSpells.Off, lang.GetCombatSpells.White, lang.GetCombatSpells.Pink, lang.GetCombatSpells.Ice, lang.GetCombatSpells.Fire, lang.GetCombatSpells.Custom }, profile.HighlightLastTargetType, (i, s) =>
             {
                 profile.HighlightLastTargetType = i;
             }), true, page);
             content.Indent();
-            content.AddToRight(new ModernColorPickerWithLabel("Custom color last target", profile.HighlightLastTargetTypeHue, (h) =>
+            content.AddToRight(new ModernColorPickerWithLabel(lang.GetCombatSpells.CustomColorLastTarget, profile.HighlightLastTargetTypeHue, (h) =>
             {
                 profile.HighlightLastTargetTypeHue = h;
             }), true, page);
             content.RemoveIndent();
             content.BlankLine();
 
-            content.AddToRight(new ComboBoxWithLabel("Highlight lasttarget poisoned:", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Off", "White", "Pink", "Ice", "Fire", "Custom" }, profile.HighlightLastTargetTypePoison, (i, s) =>
+            content.AddToRight(new ComboBoxWithLabel(lang.GetCombatSpells.HighlightLasttargetPoisoned, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetCombatSpells.Off, lang.GetCombatSpells.White, lang.GetCombatSpells.Pink, lang.GetCombatSpells.Ice, lang.GetCombatSpells.Fire, lang.GetCombatSpells.Custom }, profile.HighlightLastTargetTypePoison, (i, s) =>
             {
                 profile.HighlightLastTargetTypePoison = i;
             }), true, page);
             content.Indent();
-            content.AddToRight(new ModernColorPickerWithLabel("Custom color poisoned", profile.HighlightLastTargetTypePoisonHue, (h) =>
+            content.AddToRight(new ModernColorPickerWithLabel(lang.GetCombatSpells.CustomColorPoisoned, profile.HighlightLastTargetTypePoisonHue, (h) =>
             {
                 profile.HighlightLastTargetTypePoisonHue = h;
             }), true, page);
             content.RemoveIndent();
             content.BlankLine();
 
-            content.AddToRight(new ComboBoxWithLabel("Highlight lasttarget paralyzed:", 0, Theme.COMBO_BOX_WIDTH, new string[] { "Off", "White", "Pink", "Ice", "Fire", "Custom" }, profile.HighlightLastTargetTypePara, (i, s) =>
+            content.AddToRight(new ComboBoxWithLabel(lang.GetCombatSpells.HighlightLasttargetParalyzed, 0, Theme.COMBO_BOX_WIDTH, new string[] { lang.GetCombatSpells.Off, lang.GetCombatSpells.White, lang.GetCombatSpells.Pink, lang.GetCombatSpells.Ice, lang.GetCombatSpells.Fire, lang.GetCombatSpells.Custom }, profile.HighlightLastTargetTypePara, (i, s) =>
             {
                 profile.HighlightLastTargetTypePara = i;
             }), true, page);
             content.Indent();
-            content.AddToRight(new ModernColorPickerWithLabel("Custom color paralyzed", profile.HighlightLastTargetTypeParaHue, (h) =>
+            content.AddToRight(new ModernColorPickerWithLabel(lang.GetCombatSpells.CustomColorParalyzed, profile.HighlightLastTargetTypeParaHue, (h) =>
             {
                 profile.HighlightLastTargetTypeParaHue = h;
             }), true, page);
@@ -2290,51 +2301,51 @@ namespace ClassicUO.Game.UI.Gumps
             #region Dust
             page = ((int)PAGE.Dust765 + 1002);
             
-            content.AddToLeft(SubCategoryButton("HealthBars", page, content.LeftWidth));
+            content.AddToLeft(SubCategoryButton(lang.GetDust765.HealthBars, page, content.LeftWidth));
             content.ResetRightSide();
-            content.AddToRight(new CheckboxWithLabel("Highlight LT healthbar", 0, profile.HighlightLastTargetHealthBarOutline, (b) =>
+            content.AddToRight(new CheckboxWithLabel(lang.GetCombatSpells.HighlightLTHealthbar, 0, profile.HighlightLastTargetHealthBarOutline, (b) =>
             {
                 profile.HighlightLastTargetHealthBarOutline = b;
             }), true, page);
   
-            content.AddToRight(new CheckboxWithLabel("Highlight healthbar border by state", 0, profile.HighlightHealthBarByState, (b) =>
+            content.AddToRight(new CheckboxWithLabel(lang.GetCombatSpells.HighlightHealthBarByState, 0, profile.HighlightHealthBarByState, (b) =>
             {
                 profile.HighlightHealthBarByState = b;
             }), true, page);
         
 
-            content.AddToRight(new CheckboxWithLabel("Flashing healthbar outline - self", 0, profile.FlashingHealthbarOutlineSelf, (b) =>
+            content.AddToRight(new CheckboxWithLabel(lang.GetCombatSpells.FlashingHealthbarOutlineSelf, 0, profile.FlashingHealthbarOutlineSelf, (b) =>
             {
                 profile.FlashingHealthbarOutlineSelf = b;
             }), true, page);
 
-            content.AddToRight(new CheckboxWithLabel("Flashing healthbar outline - party", 0, profile.FlashingHealthbarOutlineParty, (b) =>
+            content.AddToRight(new CheckboxWithLabel(lang.GetCombatSpells.FlashingHealthbarOutlineParty, 0, profile.FlashingHealthbarOutlineParty, (b) =>
             {
                 profile.FlashingHealthbarOutlineParty = b;
             }), true, page);
          
 
-            content.AddToRight(new CheckboxWithLabel("Flashing healthbar outline - ally", 0, profile.FlashingHealthbarOutlineGreen, (b) =>
+            content.AddToRight(new CheckboxWithLabel(lang.GetCombatSpells.FlashingHealthbarOutlineAlly, 0, profile.FlashingHealthbarOutlineGreen, (b) =>
             {
                 profile.FlashingHealthbarOutlineGreen = b;
             }), true, page);
             
-            content.AddToRight(new CheckboxWithLabel("Flashing healthbar outline - enemy", 0, profile.FlashingHealthbarOutlineOrange, (b) =>
+            content.AddToRight(new CheckboxWithLabel(lang.GetCombatSpells.FlashingHealthbarOutlineEnemy, 0, profile.FlashingHealthbarOutlineOrange, (b) =>
             {
                 profile.FlashingHealthbarOutlineOrange = b;
             }), true, page);
             
-            content.AddToRight(new CheckboxWithLabel("Flashing healthbar outline - all", 0, profile.FlashingHealthbarOutlineAll, (b) =>
+            content.AddToRight(new CheckboxWithLabel(lang.GetCombatSpells.FlashingHealthbarOutlineAll, 0, profile.FlashingHealthbarOutlineAll, (b) =>
             {
                 profile.FlashingHealthbarOutlineAll = b;
             }), true, page);
            
-            content.AddToRight(new CheckboxWithLabel("Flashing healthbar outline on negative changes only", 0, profile.FlashingHealthbarNegativeOnly, (b) =>
+            content.AddToRight(new CheckboxWithLabel(lang.GetCombatSpells.FlashingHealthbarNegativeOnly, 0, profile.FlashingHealthbarNegativeOnly, (b) =>
             {
                 profile.FlashingHealthbarNegativeOnly = b;
             }), true, page);
            
-            content.AddToRight(new SliderWithLabel("Only flash on HP change >= : ", 0, Theme.SLIDER_WIDTH, 0, 100, profile.FlashingHealthbarTreshold, (i) =>
+            content.AddToRight(new SliderWithLabel(lang.GetCombatSpells.OnlyFlashOnHPChange, 0, Theme.SLIDER_WIDTH, 0, 100, profile.FlashingHealthbarTreshold, (i) =>
             {
                 profile.FlashingHealthbarTreshold = (byte)i;
             }), true, page);
@@ -2343,9 +2354,9 @@ namespace ClassicUO.Game.UI.Gumps
             #region Dust
             page = ((int)PAGE.Dust765 + 1003);
 
-            content.AddToLeft(SubCategoryButton("Cursor", page, content.LeftWidth));
+            content.AddToLeft(SubCategoryButton(lang.GetDust765.Cursor, page, content.LeftWidth));
             content.ResetRightSide();
-            content.AddToRight(new CheckboxWithLabel("Show spells on cursor", 0, profile.SpellOnCursor, (b) =>
+            content.AddToRight(new CheckboxWithLabel(lang.GetCombatSpells.ShowSpellsOnCursor, 0, profile.SpellOnCursor, (b) =>
             {
                 profile.SpellOnCursor = b;
             }), true, page);
@@ -2368,7 +2379,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }), true, page);
             content.RemoveIndent();
-            content.AddToRight(new ModernColorPickerWithLabel("Color game cursor when targeting (hostile / friendly)", profile.HighlightLastTargetTypeParaHue, (h) =>
+            content.AddToRight(new ModernColorPickerWithLabel(lang.GetCombatSpells.ColorGameCursorWhenTargeting, profile.HighlightLastTargetTypeParaHue, (h) =>
             {
                 profile.HighlightLastTargetTypeParaHue = h;
             }), true, page);
@@ -2381,7 +2392,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.AddToLeft(SubCategoryButton("Overhead / Underchar", page, content.LeftWidth));
             content.ResetRightSide();
-            content.AddToRight(new CheckboxWithLabel("Display range in overhead (needs HP overhead enabled)", 0, profile.OverheadRange, (b) =>
+            content.AddToRight(new CheckboxWithLabel(lang.GetCombatSpells.DisplayRangeInOverhead, 0, profile.OverheadRange, (b) =>
             {
                 profile.OverheadRange = b;
             }), true, page);
@@ -2393,22 +2404,22 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.AddToLeft(SubCategoryButton("Old Healthlines", page, content.LeftWidth));
             content.ResetRightSide();
-            content.AddToRight(new CheckboxWithLabel("Use old healthlines", 0, profile.UseOldHealthBars, (b) =>
+            content.AddToRight(new CheckboxWithLabel(lang.GetCombatSpells.UseOldHealthlines, 0, profile.UseOldHealthBars, (b) =>
             {
                 profile.UseOldHealthBars = b;
             }), true, page);
             content.BlankLine();
-            content.AddToRight(new CheckboxWithLabel("Display Mana / Stam in underline for self and party (requires old healthbars)", 0, profile.MultipleUnderlinesSelfParty, (b) =>
+            content.AddToRight(new CheckboxWithLabel(lang.GetCombatSpells.DisplayManaStamInUnderline, 0, profile.MultipleUnderlinesSelfParty, (b) =>
             {
                 profile.MultipleUnderlinesSelfParty = b;
             }), true, page);
             content.BlankLine();
-            content.AddToRight(new CheckboxWithLabel("Use bigger underlines for self and party (requires old healthbars)", 0, profile.MultipleUnderlinesSelfPartyBigBars, (b) =>
+            content.AddToRight(new CheckboxWithLabel(lang.GetCombatSpells.UseBiggerUnderlines, 0, profile.MultipleUnderlinesSelfPartyBigBars, (b) =>
             {
                 profile.MultipleUnderlinesSelfPartyBigBars = b;
             }), true, page);
             content.BlankLine();
-            content.AddToRight(new SliderWithLabel("Transparency for self and party (close client completly), (requires old healthlines): ", 0, Theme.SLIDER_WIDTH, 0, 10, profile.MultipleUnderlinesSelfPartyTransparency, (i) =>
+            content.AddToRight(new SliderWithLabel(lang.GetCombatSpells.TransparencyForSelfAndParty, 0, Theme.SLIDER_WIDTH, 0, 10, profile.MultipleUnderlinesSelfPartyTransparency, (i) =>
             {
                 profile.MultipleUnderlinesSelfPartyTransparency = (byte)i;
             }), true, page);
@@ -2417,55 +2428,66 @@ namespace ClassicUO.Game.UI.Gumps
             #region Dust
             page = ((int)PAGE.Dust765 + 1006);
 
-            content.AddToLeft(SubCategoryButton("Misc", page, content.LeftWidth));
+            content.AddToLeft(SubCategoryButton(lang.GetDust765.Misc, page, content.LeftWidth));
             content.ResetRightSide();
-            content.AddToRight(new CheckboxWithLabel("Offscreen targeting (always on)", 0, profile.OffscreenTargeting, (b) =>
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.OffscreenTargeting, 0, profile.OffscreenTargeting, (b) =>
             {
                 profile.OffscreenTargeting = b;
             }), true, page);
             content.BlankLine();
-            content.AddToRight(new CheckboxWithLabel("Set target with is out range", 0, profile.SetTargetOut, (b) =>
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.SetTargetOutRange, 0, profile.SetTargetOut, (b) =>
             {
                 profile.SetTargetOut = b;
             }), true, page);
              content.BlankLine();
-            content.AddToRight(new CheckboxWithLabel("Override container open range", 0, profile.OverrideContainerOpenRange , (b) =>
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.OverrideContainerOpenRange, 0, profile.OverrideContainerOpenRange , (b) =>
             {
                 profile.OverrideContainerOpenRange = b;
             }), true, page);
             content.BlankLine();
-            content.AddToRight(new CheckboxWithLabel("Show Close Friend in WordMapGump", 0, profile.ShowMapCloseFriend , (b) =>
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.ShowCloseFriendInWordMapGump, 0, profile.ShowMapCloseFriend , (b) =>
             {
                 profile.ShowMapCloseFriend = b;
             }), true, page);
             content.BlankLine();
-            content.AddToRight(new CheckboxWithLabel("Auto avoid obstacules and mobiles", 0, profile.AutoAvoidMobiles , (b) =>
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.AutoAvoidObstaculesAndMobiles, 0, profile.AutoAvoidMobiles , (b) =>
             {
                 profile.AutoAvoidMobiles = b;
             }), true, page);
             content.BlankLine();
-            content.AddToRight(new CheckboxWithLabel("Razor * Target * to lasttarget string", 0, profile.SpecialSetLastTargetCliloc, (b) =>
+            content.AddToRight(new CheckboxWithLabel(lang.GetCombatSpells.PreviewTeleportTiles, 0, profile.PreviewTeleportTiles, (b) =>
+            {
+                profile.PreviewTeleportTiles = b;
+            }), true, page);
+            content.Indent();
+            content.AddToRight(new ModernColorPickerWithLabel(lang.GetCombatSpells.TeleportPreviewTileColor, profile.PreviewTeleportTilesHue, (h) =>
+            {
+                profile.PreviewTeleportTilesHue = h;
+            }), true, page);
+            content.RemoveIndent();
+            content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.RazorTargetToLasttargetString, 0, profile.SpecialSetLastTargetCliloc, (b) =>
             {
                 profile.SpecialSetLastTargetCliloc = b;
             }), true, page);
 
 
-            content.AddToRight(new InputFieldWithLabel("Text for Target Msg Head: ", Theme.INPUT_WIDTH, profile.SpecialSetLastTargetClilocText, false, (s, e) =>
+            content.AddToRight(new InputFieldWithLabel(lang.GetDust765.TextForTargetMsgHead, Theme.INPUT_WIDTH, profile.SpecialSetLastTargetClilocText, false, (s, e) =>
             {
                 profile.SpecialSetLastTargetClilocText = ((InputField.StbTextBox)s).Text;
             }), true, page);
             content.BlankLine();
-            content.AddToRight(new CheckboxWithLabel("Outline statics black (CURRENTLY BROKEN): ", 0, profile.BlackOutlineStatics, (b) =>
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.OutlineStaticsBlack, 0, profile.BlackOutlineStatics, (b) =>
             {
                 profile.BlackOutlineStatics = b;
             }), true, page);
             content.BlankLine();
-            content.AddToRight(new CheckboxWithLabel("Ignore stamina check", 0, profile.IgnoreStaminaCheck, (b) =>
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.IgnoreStaminaCheck, 0, profile.IgnoreStaminaCheck, (b) =>
             {
                 profile.IgnoreStaminaCheck = b;
             }), true, page);
             content.BlankLine();
-            content.AddToRight(new CheckboxWithLabel("Block Wall of Stone", 0, profile.BlockWoS, (b) =>
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.BlockWallOfStone, 0, profile.BlockWoS, (b) =>
             {
                 profile.BlockWoS = b;
                 if (b == true)
@@ -3377,7 +3399,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildTazUO()
         {
-            LeftSideMenuRightSideContent content = new LeftSideMenuRightSideContent(mainContent.RightWidth, mainContent.Height, (int)(mainContent.RightWidth * 0.3));
+            LeftSideMenuRightSideContent content = new LeftSideMenuRightSideContent(mainContent.RightWidth, mainContent.Height, (int)(mainContent.RightWidth * 0.3), 0, false);
             Control c;
             int page;
 
@@ -6292,6 +6314,9 @@ namespace ClassicUO.Game.UI.Gumps
                 CanMove = true;
                 CanCloseWithRightClick = true;
                 AcceptMouseInput = true;
+                leftX = Theme.CONTENT_MARGIN;
+                rightX = Theme.CONTENT_MARGIN;
+                rightY = Theme.TOP_PADDING + Theme.CONTENT_MARGIN;
 
                 Add(left = new ScrollArea(0, 0, leftWidth, height) { CanMove = true, AcceptMouseInput = true }, page);
 
@@ -6359,8 +6384,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             public void ResetRightSide()
             {
-                rightY = Theme.TOP_PADDING;
-                rightX = 0;
+                rightY = Theme.TOP_PADDING + Theme.CONTENT_MARGIN;
+                rightX = Theme.CONTENT_MARGIN;
             }
 
             public void SetMatchingButton(int page)
@@ -6428,7 +6453,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            public LeftSideMenuRightSideContent(int width, int height, int leftWidth, int page = 0)
+            public LeftSideMenuRightSideContent(int width, int height, int leftWidth, int page = 0, bool showWatermark = true)
             {
                 Width = width;
                 Height = height;
@@ -6438,7 +6463,8 @@ namespace ClassicUO.Game.UI.Gumps
                 rightY = Theme.TOP_PADDING + Theme.CONTENT_MARGIN;
                 rightX = Theme.CONTENT_MARGIN;
 
-                Add(new WatermarkControl(Width, Height) { X = 0, Y = 0, AcceptMouseInput = false }, 0);
+                if (showWatermark)
+                    Add(new WatermarkControl(Width, Height) { X = 0, Y = 0, AcceptMouseInput = false }, 0);
                 Add(new RoundedColorBox(leftWidth, Height, Theme.PANEL_BG, 0) { X = 0, Y = 0, AcceptMouseInput = true }, page);
                 Add(left = new ScrollArea(0, 0, leftWidth, height) { CanMove = true, AcceptMouseInput = true }, page);
                 Add(right = new ScrollArea(leftWidth, 0, Width - leftWidth, height) { CanMove = true, AcceptMouseInput = true }, page);
@@ -8248,25 +8274,25 @@ namespace ClassicUO.Game.UI.Gumps
             public Color ICON_DUST { get; set; } = Color.FromNonPremultiplied(180, 140, 220, 255);
 
             [JsonConverter(typeof(ColorJsonConverter))]
-            public Color DARK_BG { get; set; } = Color.FromNonPremultiplied(13, 13, 15, 255);
+            public Color DARK_BG { get; set; } = Color.FromNonPremultiplied(18, 5, 5, 255);
             [JsonConverter(typeof(ColorJsonConverter))]
-            public Color HEADER_BG { get; set; } = Color.FromNonPremultiplied(18, 18, 22, 255);
+            public Color HEADER_BG { get; set; } = Color.FromNonPremultiplied(45, 12, 12, 255);
             [JsonConverter(typeof(ColorJsonConverter))]
-            public Color PANEL_BG { get; set; } = Color.FromNonPremultiplied(22, 22, 26, 255);
+            public Color PANEL_BG { get; set; } = Color.FromNonPremultiplied(35, 10, 10, 255);
             [JsonConverter(typeof(ColorJsonConverter))]
-            public Color ACCENT_COLOR { get; set; } = Color.FromNonPremultiplied(90, 130, 180, 255);
+            public Color ACCENT_COLOR { get; set; } = Color.FromNonPremultiplied(180, 50, 50, 255);
 
             [JsonConverter(typeof(ColorJsonConverter))]
-            public Color DROPDOWN_OPTION_NORMAL_HUE { get; set; } = Color.FromNonPremultiplied(140, 140, 150, 255);
+            public Color DROPDOWN_OPTION_NORMAL_HUE { get; set; } = Color.FromNonPremultiplied(80, 15, 15, 255);
             [JsonConverter(typeof(ColorJsonConverter))]
-            public Color DROPDOWN_OPTION_HOVER_HUE { get; set; } = Color.FromNonPremultiplied(170, 170, 180, 255);
+            public Color DROPDOWN_OPTION_HOVER_HUE { get; set; } = Color.FromNonPremultiplied(180, 50, 50, 255);
             [JsonConverter(typeof(ColorJsonConverter))]
-            public Color DROPDOWN_OPTION_SELECTED_HUE { get; set; } = Color.FromNonPremultiplied(60, 90, 130, 255);
+            public Color DROPDOWN_OPTION_SELECTED_HUE { get; set; } = Color.DarkRed;
 
             [JsonConverter(typeof(ColorJsonConverter))]
-            public Color BUTTON_FONT_COLOR { get; set; } = Color.FromNonPremultiplied(235, 235, 240, 255);
+            public Color BUTTON_FONT_COLOR { get; set; } = Color.White;
             [JsonConverter(typeof(ColorJsonConverter))]
-            public Color TEXT_FONT_COLOR { get; set; } = Color.FromNonPremultiplied(230, 230, 235, 255);
+            public Color TEXT_FONT_COLOR { get; set; } = Color.White;
 
             public string FONT { get; set; } = TrueTypeLoader.EMBEDDED_FONT;
         }

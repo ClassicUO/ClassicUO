@@ -1,7 +1,9 @@
-﻿using ClassicUO.Configuration;
+using ClassicUO.Assets;
+using ClassicUO.Configuration;
 using ClassicUO.Dust765.Managers;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Map;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -193,39 +195,87 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
+        private const int TELEPORT_SPELL_ID = 22;
+        private const int TELEPORT_PREVIEW_RANGE = 11;
+
+        private static bool IsTileWalkableForTeleport(int x, int y)
+        {
+            Chunk chunk = World.Map?.GetChunk(x, y, false);
+            if (chunk == null) return false;
+            int cx = x % 8;
+            int cy = y % 8;
+            bool hasPassableLand = false;
+            for (GameObject obj = chunk.GetHeadObject(cx, cy); obj != null; obj = obj.TNext)
+            {
+                if (obj is Land land)
+                {
+                    if (land.TileData.IsImpassable) return false;
+                    hasPassableLand = true;
+                }
+                else if (obj is Static st)
+                {
+                    if (st.Graphic < TileDataLoader.Instance.StaticData.Length && TileDataLoader.Instance.StaticData[st.Graphic].IsImpassable)
+                        return false;
+                }
+                else if (obj is Item it && !it.IsMulti)
+                {
+                    if (it.Graphic < TileDataLoader.Instance.StaticData.Length && TileDataLoader.Instance.StaticData[it.Graphic].IsImpassable)
+                        return false;
+                }
+            }
+            return hasPassableLand;
+        }
+
         public ushort ProcessHueForTile(ushort hue, GameObject o)
         {
             if (!loaded || currentSpell == null) { return hue; }
 
-            if (currentSpell.CastRange > 0 && o.Distance <= currentSpell.CastRange)
+            var profile = ProfileManager.CurrentProfile;
+            bool isTeleportPreview = currentSpell.ID == TELEPORT_SPELL_ID && profile?.PreviewTeleportTiles == true;
+            int teleportRange = isTeleportPreview ? TELEPORT_PREVIEW_RANGE : currentSpell.CastRange;
+
+            if (isTeleportPreview)
             {
-                hue = currentSpell.Hue;
+                if (o.Distance > teleportRange) return hue;
+                if (!IsTileWalkableForTeleport(o.X, o.Y)) return hue;
+                if (o is Static st && st.Graphic < TileDataLoader.Instance.StaticData.Length && TileDataLoader.Instance.StaticData[st.Graphic].IsImpassable)
+                    return hue;
+                if (o is Item it && !it.IsMulti && it.Graphic < TileDataLoader.Instance.StaticData.Length && TileDataLoader.Instance.StaticData[it.Graphic].IsImpassable)
+                    return hue;
+            }
+            else if (o is Land land && land.TileData.IsImpassable)
+            {
+                return hue;
+            }
+
+            ushort teleportHue = (profile != null && profile.PreviewTeleportTilesHue != 0) ? profile.PreviewTeleportTilesHue : currentSpell.Hue;
+
+            if (teleportRange > 0 && o.Distance <= teleportRange)
+            {
+                hue = isTeleportPreview ? teleportHue : currentSpell.Hue;
             }
 
             int cDistance = o.DistanceFrom(LastCursorTileLoc);
 
             if (currentSpell.CursorSize > 0 && cDistance < currentSpell.CursorSize)
             {
+                ushort cursorHue = isTeleportPreview ? teleportHue : currentSpell.CursorHue;
                 if (currentSpell.IsLinear)
                 {
                     if (GetDirection(new Vector2(World.Player.X, World.Player.Y), LastCursorTileLoc) == SpellDirection.EastWest)
-                    { //X
+                    {
                         if (o.Y == LastCursorTileLoc.Y)
-                        {
-                            hue = currentSpell.CursorHue;
-                        }
+                            hue = cursorHue;
                     }
                     else
-                    { //Y
+                    {
                         if (o.X == LastCursorTileLoc.X)
-                        {
-                            hue = currentSpell.CursorHue;
-                        }
+                            hue = cursorHue;
                     }
                 }
                 else
                 {
-                    hue = currentSpell.CursorHue;
+                    hue = cursorHue;
                 }
             }
 

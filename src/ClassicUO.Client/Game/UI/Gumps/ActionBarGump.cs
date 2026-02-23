@@ -26,7 +26,6 @@ namespace ClassicUO.Game.UI.Gumps
         private const int HOTKEY_BADGE_SIZE = 22;
         private static readonly Color BgColor = Color.FromNonPremultiplied(25, 25, 35, 240);
         private static readonly Color SlotBg = Color.FromNonPremultiplied(45, 45, 60, 200);
-        private static readonly Color BorderColor = Color.FromNonPremultiplied(70, 70, 90, 255);
         private static readonly Color GlowColor = Color.FromNonPremultiplied(255, 200, 100, 200);
         private static readonly Color SelectedColor = Color.FromNonPremultiplied(100, 150, 255, 180);
         private static readonly Color HotkeyBadgeBg = Color.FromNonPremultiplied(30, 30, 40, 220);
@@ -55,9 +54,8 @@ namespace ClassicUO.Game.UI.Gumps
             Width = barWidth;
             Height = barHeight;
 
+            Add(new BorderControl(0, 0, Width, Height, BORDER));
             Add(new AlphaBlendControl(0.95f) { X = BORDER, Y = BORDER, Width = Width - BORDER * 2, Height = Height - BORDER * 2, BaseColor = BgColor });
-            Add(new Line(BORDER, BORDER, Width - BORDER * 2, 1, BorderColor.PackedValue));
-            Add(new Line(BORDER, Height - BORDER - 1, Width - BORDER * 2, 1, BorderColor.PackedValue));
 
             for (int i = 0; i < slotCount; i++)
             {
@@ -271,7 +269,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _hotkeyFullText = "";
                 }
                 string displayText = _hotkeyText.Length > 4 ? _hotkeyText.Substring(0, 4) : _hotkeyText;
-                _hotkeyRendered = string.IsNullOrEmpty(displayText) ? null : ClassicUO.Game.RenderedText.Create(displayText, 0x0481, 9, true, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER, 0);
+                _hotkeyRendered = string.IsNullOrEmpty(displayText) ? null : ClassicUO.Game.RenderedText.Create(displayText, 0x0481, 0xFF, true, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_CENTER, 0);
             }
 
             private void UpdateTooltip()

@@ -383,6 +383,8 @@ namespace ClassicUO.Configuration
         public int GlowingWeaponsType { get; set; } = 0; // 0 = off, 1 = white, 2 = pink, 3 = ice, 4 = fire, 5 = custom
         public ushort HighlightGlowingWeaponsTypeHue { get; set; } = 0x0044;
         public bool PreviewFields { get; set; }
+        public bool PreviewTeleportTiles { get; set; }
+        public ushort PreviewTeleportTilesHue { get; set; } = 0x0044;
         public bool OwnAuraByHP { get; set; }
         public int HighlightLastTargetType { get; set; } = 0; // 0 = off, 1 = white, 2 = pink, 3 = ice, 4 = fire, 5 = custom
 

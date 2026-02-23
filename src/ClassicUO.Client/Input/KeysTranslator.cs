@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -307,10 +307,13 @@ namespace ClassicUO.Input
             else
             {
                 string sKey;
-                if ((int)key < 256)
-                    sKey = $"{(char)key}";
+                int keyCode = (int)key;
+                if (keyCode < 256 && keyCode >= 32 && keyCode != 127)
+                    sKey = $"{(char)keyCode}";
+                else if (keyCode >= 256)
+                    sKey = key.ToString().Replace("SDLK_", "");
                 else
-                    sKey = $"{key}";
+                    sKey = $"#{keyCode}";
                 _keys.Add(key, sKey);
                 StringBuilder sb = new StringBuilder();
                 AddPrefix(sb, mod);

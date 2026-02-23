@@ -183,12 +183,15 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
-                foreach (Gump s in Gumps)
+                if (button == MouseButtonType.Right)
                 {
-                    if (s.IsModal && s.ModalClickOutsideAreaClosesThisControl)
+                    foreach (Gump s in Gumps)
                     {
-                        s.Dispose();
-                        Mouse.CancelDoubleClick = true;
+                        if (s.IsModal && s.ModalClickOutsideAreaClosesThisControl)
+                        {
+                            s.Dispose();
+                            Mouse.CancelDoubleClick = true;
+                        }
                     }
                 }
             }
