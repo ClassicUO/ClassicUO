@@ -1455,6 +1455,11 @@ namespace ClassicUO.Game.Scenes
 
             if (CanExecuteMacro())
             {
+                if (ActionBar != null && ActionBar.TryExecuteSlot(e.keysym.sym, Keyboard.Alt, Keyboard.Ctrl, Keyboard.Shift, out _))
+                {
+                    return;
+                }
+
                 Macro macro = Macros.FindMacro(
                     e.keysym.sym,
                     Keyboard.Alt,

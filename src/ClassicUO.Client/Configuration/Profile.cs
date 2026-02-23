@@ -51,6 +51,7 @@ namespace ClassicUO.Configuration
 {
     //[JsonSourceGenerationOptions(WriteIndented = true, PropertyNamingPolicy = JsonKnownNamingPolicy.Unspecified)]
     [JsonSerializable(typeof(Profile), GenerationMode = JsonSourceGenerationMode.Metadata)]
+    [JsonSerializable(typeof(ActionBarSlotData))]
     sealed partial class ProfileJsonContext : JsonSerializerContext
     {
         sealed class SnakeCaseNamingPolicy : JsonNamingPolicy
@@ -287,6 +288,10 @@ namespace ClassicUO.Configuration
         public int CounterBarCellSize { get; set; } = 40;
         public int CounterBarRows { get; set; } = 1;
         public int CounterBarColumns { get; set; } = 1;
+
+        public bool ActionBarEnabled { get; set; }
+        [JsonConverter(typeof(Point2Converter))] public Point ActionBarPosition { get; set; } = new Point(300, 400);
+        public List<ActionBarSlotData> ActionBarSlots { get; set; } = new List<ActionBarSlotData>();
 
         public bool ShowSkillsChangedMessage { get; set; } = true;
         public int ShowSkillsChangedDeltaValue { get; set; } = 1;
@@ -1148,6 +1153,10 @@ namespace ClassicUO.Configuration
 
                                     break;
 
+                                case GumpType.ActionBar:
+                                    gump = new ActionBarGump();
+                                    break;
+
                                 case GumpType.Journal:
                                     gump = new ResizableJournal();
                                     //x = ProfileManager.CurrentProfile.JournalPosition.X;
@@ -1365,6 +1374,9 @@ namespace ClassicUO.Configuration
                                         break;
                                     case GumpType.InfoBar:
                                         gump = new InfoBarGump();
+                                        break;
+                                    case GumpType.ActionBar:
+                                        gump = new ActionBarGump();
                                         break;
                                     case GumpType.PaperDoll:
                                         gump = new ModernPaperdoll(World.Player.Serial);

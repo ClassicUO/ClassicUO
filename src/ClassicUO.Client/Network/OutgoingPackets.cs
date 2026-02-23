@@ -42,6 +42,7 @@ using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO;
 using ClassicUO.Assets;
@@ -1129,6 +1130,7 @@ namespace ClassicUO.Network
 
             socket.Send(writer.BufferWritten);
             writer.Dispose();
+            Client.Game.GetScene<GameScene>()?.ActionBar?.NotifySpellCast(idx);
         }
 
         public static void Send_CastSpellFromBook(this NetClient socket, int idx, uint serial)
@@ -1161,6 +1163,7 @@ namespace ClassicUO.Network
 
             socket.Send(writer.BufferWritten);
             writer.Dispose();
+            Client.Game.GetScene<GameScene>()?.ActionBar?.NotifySpellCast(idx);
         }
 
         public static void Send_UseSkill(this NetClient socket, int idx)

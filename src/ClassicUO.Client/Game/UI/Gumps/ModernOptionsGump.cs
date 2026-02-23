@@ -1,5 +1,6 @@
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.Game;
 using ClassicUO.Game.Data;
 // ## BEGIN - END ## // UI/GUMPS
 using ClassicUO.Dust765.Dust765;
@@ -104,6 +105,7 @@ namespace ClassicUO.Game.UI.Gumps
             mainContent.AddToLeft(SidebarCategoryButton(lang.ButtonCombatSpells, (int)PAGE.CombatSpells, Theme.ICON_COMBAT));
             mainContent.AddToLeft(SidebarCategoryButton(lang.ButtonCounters, (int)PAGE.Counters, Theme.ICON_UI));
             mainContent.AddToLeft(SidebarCategoryButton(lang.ButtonInfobar, (int)PAGE.InfoBar, Theme.ICON_UI));
+            mainContent.AddToLeft(SidebarCategoryButton(lang.ButtonActionBar, (int)PAGE.ActionBar, Theme.ICON_COMBAT));
             mainContent.AddToLeft(SidebarCategoryButton(lang.ButtonContainers, (int)PAGE.Containers, Theme.ICON_UI));
             mainContent.AddToLeft(SidebarCategoryButton(lang.ButtonNameplates, (int)PAGE.NameplateOptions, Theme.ICON_COMBAT));
             mainContent.AddToLeft(SidebarCategoryButton(lang.ButtonCooldowns, (int)PAGE.TUOCooldowns, Theme.ICON_COMBAT));
@@ -126,6 +128,7 @@ namespace ClassicUO.Game.UI.Gumps
             BuildCombatSpells();
             BuildCounters();
             BuildInfoBar();
+            BuildActionBar();
             BuildContainers();
             BuildExperimental();
             BuildNameplates();
@@ -973,7 +976,103 @@ namespace ClassicUO.Game.UI.Gumps
                 ));
         }
 
+        private void BuildActionBar()
+        {
+            mainScrollArea content = new mainScrollArea(mainContent.RightWidth, mainContent.Height, (int)(mainContent.RightWidth * 1.0));
+            int page = (int)PAGE.ActionBar + 1000;
 
+            if (profile.ActionBarSlots.Count == 0)
+            {
+                for (int i = 0; i < ActionBarManager.SLOT_COUNT; i++)
+                    profile.ActionBarSlots.Add(new ActionBarSlotData());
+            }
+
+            void RebuildActionBarGump()
+            {
+                var g = UIManager.GetGump<ActionBarGump>();
+                if (profile.ActionBarEnabled && g != null)
+                {
+                    g.Dispose();
+                    UIManager.Add(new ActionBarGump());
+                }
+            }
+
+            content.AddToLeft(new CheckboxWithLabel(lang.GetActionBar.ShowActionBar, 0, profile.ActionBarEnabled, (b) =>
+            {
+                profile.ActionBarEnabled = b;
+                var actionBarGump = UIManager.GetGump<ActionBarGump>();
+                if (b)
+                {
+                    if (actionBarGump == null)
+                        UIManager.Add(new ActionBarGump());
+                    else
+                        actionBarGump.RefreshSlots();
+                }
+                else
+                    actionBarGump?.Dispose();
+            }));
+            PositionHelper.BlankLine();
+
+            var headerRow = new DataBox(0, 0, content.LeftWidth, 28);
+            headerRow.Add(new TextBox(lang.GetActionBar.Slot.Replace("{0}", "#"), Theme.FONT, Theme.STANDARD_TEXT_SIZE, 40, Theme.TEXT_FONT_COLOR, FontStashSharp.RichText.TextHorizontalAlignment.Center, false) { X = 0, Y = 4 });
+            headerRow.Add(new TextBox(lang.GetActionBar.DragSpellHere, Theme.FONT, Theme.STANDARD_TEXT_SIZE, 100, Theme.TEXT_FONT_COLOR, FontStashSharp.RichText.TextHorizontalAlignment.Center, false) { X = 50, Y = 4 });
+            headerRow.Add(new TextBox(lang.GetActionBar.Hotkey, Theme.FONT, Theme.STANDARD_TEXT_SIZE, 80, Theme.TEXT_FONT_COLOR, FontStashSharp.RichText.TextHorizontalAlignment.Center, false) { X = 160, Y = 4 });
+            headerRow.Add(new TextBox(lang.GetActionBar.TargetSelf + "/" + lang.GetActionBar.TargetLast, Theme.FONT, Theme.STANDARD_TEXT_SIZE, 80, Theme.TEXT_FONT_COLOR, FontStashSharp.RichText.TextHorizontalAlignment.Center, false) { X = 250, Y = 4 });
+            content.AddToLeft(headerRow);
+            PositionHelper.BlankLine();
+            content.AddToLeft(new Line(0, 0, content.LeftWidth, 1, Color.Gray.PackedValue));
+            PositionHelper.BlankLine();
+
+            var slotControlsList = new List<ActionBarSlotBuilderControl>();
+            void RemoveSlotAt(int idx)
+            {
+                if (idx < 0 || idx >= profile.ActionBarSlots.Count || profile.ActionBarSlots.Count <= 1) return;
+                profile.ActionBarSlots.RemoveAt(idx);
+                var ctrl = slotControlsList[idx];
+                slotControlsList.RemoveAt(idx);
+                ctrl.Parent?.Remove(ctrl);
+                ctrl.Dispose();
+                for (int j = idx; j < slotControlsList.Count; j++)
+                    slotControlsList[j].SetSlotIndex(j);
+                const int slotHeight = 44;
+                const int slotSpacing = 10;
+                int baseY = slotControlsList.Count > 0 ? slotControlsList.Min(c => c.Y) : 0;
+                for (int j = 0; j < slotControlsList.Count; j++)
+                    slotControlsList[j].Y = baseY + j * (slotHeight + slotSpacing);
+                content.ForceSizeUpdate();
+                RebuildActionBarGump();
+            }
+            var addRemoveRow = new DataBox(0, 0, content.LeftWidth, 36);
+            var addBtn = new ModernButton(0, 4, 80, 28, ButtonAction.Activate, "+ Add", Theme.BUTTON_FONT_COLOR);
+            addBtn.MouseUp += (s, e) =>
+            {
+                if (profile.ActionBarSlots.Count < ActionBarManager.MAX_SLOT_COUNT)
+                {
+                    profile.ActionBarSlots.Add(new ActionBarSlotData());
+                    int newIdx = profile.ActionBarSlots.Count - 1;
+                    var newSlot = new ActionBarSlotBuilderControl(newIdx, profile.ActionBarSlots[newIdx], lang, Theme, () => UIManager.GetGump<ActionBarGump>()?.RefreshSlots(), RemoveSlotAt);
+                    slotControlsList.Add(newSlot);
+                    content.AddToLeft(newSlot);
+                    PositionHelper.BlankLine();
+                    content.ForceSizeUpdate();
+                    RebuildActionBarGump();
+                }
+            };
+            addRemoveRow.Add(addBtn);
+            content.AddToLeft(addRemoveRow);
+            PositionHelper.BlankLine();
+
+            for (int i = 0; i < profile.ActionBarSlots.Count; i++)
+            {
+                var slotData = profile.ActionBarSlots[i];
+                var slotControl = new ActionBarSlotBuilderControl(i, slotData, lang, Theme, () => UIManager.GetGump<ActionBarGump>()?.RefreshSlots(), RemoveSlotAt);
+                slotControlsList.Add(slotControl);
+                content.AddToLeft(slotControl);
+                PositionHelper.BlankLine();
+            }
+
+            options.Add(new SettingsOption("", content, mainContent.RightWidth, PAGE.ActionBar));
+        }
 
         private void BuildTooltips()
         {
@@ -6759,6 +6858,12 @@ namespace ClassicUO.Game.UI.Gumps
                 base.Update();
 
                 CalculateScrollBarMaxValue();
+
+                int scrollY = _scrollBar == null ? 0 : _scrollBar.Value;
+                for (int i = 1; i < Children.Count; i++)
+                {
+                    Children[i].UpdateOffset(0, -scrollY);
+                }
             }
 
             public void Scroll(bool isup)
@@ -8209,6 +8314,136 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        private class ActionBarSlotBuilderControl : Control, IActionBarDropTarget
+        {
+            private readonly ActionBarSlotData _slotData;
+            private readonly System.Action _onChanged;
+            private readonly System.Action<int> _onRemove;
+            private GumpPic _icon;
+            private readonly AlphaBlendControl _dropZone;
+            private readonly HotkeyBox _hotkeyBox;
+            private readonly ComboBoxWithLabel _targetCombo;
+            private readonly TextBox _slotNumberBox;
+
+            public int SlotIndex { get; private set; }
+
+            public ActionBarSlotBuilderControl(int slotIndex, ActionBarSlotData slotData, ModernOptionsGumpLanguage lang, ThemeSettings theme, System.Action onChanged, System.Action<int> onRemove)
+            {
+                SlotIndex = slotIndex;
+                _slotData = slotData;
+                _onChanged = onChanged;
+                _onRemove = onRemove;
+                AcceptMouseInput = true;
+                Width = 460;
+                Height = 44;
+
+                _slotNumberBox = new TextBox((slotIndex + 1).ToString(), Theme.FONT, Theme.STANDARD_TEXT_SIZE, 40, Theme.TEXT_FONT_COLOR, FontStashSharp.RichText.TextHorizontalAlignment.Center, false) { X = 5, Y = 10 };
+                Add(_slotNumberBox);
+
+                _dropZone = new AlphaBlendControl(0.3f) { X = 50, Y = 2, Width = 44, Height = 44, BaseColor = Color.Gray };
+                _dropZone.AcceptMouseInput = true;
+                Add(_dropZone);
+                RefreshIcon();
+
+                _hotkeyBox = new HotkeyBox { X = 110, Y = 8 };
+                _hotkeyBox.HotkeyChanged += (s, e) =>
+                {
+                    bool alt = (_hotkeyBox.Mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
+                    bool ctrl = (_hotkeyBox.Mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
+                    bool shift = (_hotkeyBox.Mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
+                    _slotData.Key = (int)_hotkeyBox.Key;
+                    _slotData.Alt = alt;
+                    _slotData.Ctrl = ctrl;
+                    _slotData.Shift = shift;
+                    onChanged?.Invoke();
+                };
+                _hotkeyBox.HotkeyCancelled += (s, e) =>
+                {
+                    _slotData.Key = 0;
+                    _slotData.Alt = _slotData.Ctrl = _slotData.Shift = false;
+                    onChanged?.Invoke();
+                };
+                if (slotData.Key != 0)
+                {
+                    SDL.SDL_Keymod mod = SDL.SDL_Keymod.KMOD_NONE;
+                    if (slotData.Alt) mod |= SDL.SDL_Keymod.KMOD_ALT;
+                    if (slotData.Ctrl) mod |= SDL.SDL_Keymod.KMOD_CTRL;
+                    if (slotData.Shift) mod |= SDL.SDL_Keymod.KMOD_SHIFT;
+                    _hotkeyBox.SetKey((SDL.SDL_Keycode)slotData.Key, mod);
+                }
+                Add(_hotkeyBox);
+
+                _targetCombo = new ComboBoxWithLabel(string.Empty, 0, 100, new[] { lang.GetActionBar.TargetSelf, lang.GetActionBar.TargetLast }, slotData.TargetType, (i, s) => { _slotData.TargetType = i; onChanged?.Invoke(); }) { X = 320, Y = 8 };
+                Add(_targetCombo);
+
+                var delBtn = new ModernButton(420, 8, 32, 28, ButtonAction.Activate, "X", Theme.BUTTON_FONT_COLOR);
+                delBtn.MouseUp += (s, e) => _onRemove?.Invoke(SlotIndex);
+                Add(delBtn);
+            }
+
+            public void SetSlotIndex(int index)
+            {
+                SlotIndex = index;
+                _slotNumberBox.Text = (index + 1).ToString();
+            }
+
+            private void RefreshIcon()
+            {
+                _icon?.Dispose();
+                _icon = null;
+                if ((_slotData.SlotType == (int)ActionBarSlotType.Spell || _slotData.SlotType == 0) && _slotData.SpellID > 0)
+                {
+                    var spell = SpellDefinition.FullIndexGetSpell(_slotData.SpellID);
+                    if (spell != null && spell.GumpIconSmallID > 0)
+                    {
+                        _icon = new GumpPic(0, 0, (ushort)spell.GumpIconSmallID, 0) { X = 52, Y = 4, Width = 40, Height = 40, AcceptMouseInput = false };
+                        Add(_icon);
+                    }
+                }
+                else if (_slotData.SlotType == (int)ActionBarSlotType.Skill && _slotData.SkillIndex >= 0 && World.InGame && World.Player != null && _slotData.SkillIndex < World.Player.Skills.Length)
+                {
+                    _icon = new GumpPic(0, 0, 0x24B8, 0) { X = 52, Y = 4, Width = 40, Height = 40, AcceptMouseInput = false };
+                    Add(_icon);
+                }
+                else if (_slotData.SlotType == (int)ActionBarSlotType.Ability && _slotData.AbilityIndex > 0 && _slotData.AbilityIndex <= AbilityData.Abilities.Length)
+                {
+                    ref readonly var def = ref AbilityData.Abilities[_slotData.AbilityIndex - 1];
+                    _icon = new GumpPic(0, 0, def.Icon, 0) { X = 52, Y = 4, Width = 40, Height = 40, AcceptMouseInput = false };
+                    Add(_icon);
+                }
+            }
+
+            public void AcceptSpell(int spellId)
+            {
+                _slotData.SlotType = (int)ActionBarSlotType.Spell;
+                _slotData.SpellID = spellId;
+                _slotData.SkillIndex = -1;
+                _slotData.AbilityIndex = 0;
+                RefreshIcon();
+                _onChanged?.Invoke();
+            }
+
+            public void AcceptSkill(int skillIndex)
+            {
+                _slotData.SlotType = (int)ActionBarSlotType.Skill;
+                _slotData.SpellID = 0;
+                _slotData.SkillIndex = skillIndex;
+                _slotData.AbilityIndex = 0;
+                RefreshIcon();
+                _onChanged?.Invoke();
+            }
+
+            public void AcceptAbility(int abilityIndex)
+            {
+                _slotData.SlotType = (int)ActionBarSlotType.Ability;
+                _slotData.SpellID = 0;
+                _slotData.SkillIndex = -1;
+                _slotData.AbilityIndex = abilityIndex;
+                RefreshIcon();
+                _onChanged?.Invoke();
+            }
+        }
+
         private enum PAGE
         {
             None,
@@ -8221,6 +8456,7 @@ namespace ClassicUO.Game.UI.Gumps
             CombatSpells,
             Counters,
             InfoBar,
+            ActionBar,
             Containers,
             Experimental,
             IgnoreList,

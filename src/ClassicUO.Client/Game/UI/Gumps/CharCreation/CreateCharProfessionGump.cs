@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -168,32 +168,31 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
     internal class ProfessionInfoGump : Control
     {
         private readonly ProfessionInfo _info;
+        private readonly TextBox _professionLabel;
         private GumpPic _gumpPic;
         private static GumpPic _lastSelectedGumpPic;
+        private static readonly Color NormalColor = Color.White;
+        private static readonly Color HoverColor = new Color(255, 220, 140);
+
         public ProfessionInfoGump(ProfessionInfo info)
         {
             _info = info;
+            Width = 200;
+            Height = 52;
 
             ClilocLoader localization = ClilocLoader.Instance;
 
-           
+            _professionLabel = new TextBox(localization.GetString(info.Localization), TrueTypeLoader.EMBEDDED_FONT, 18, 300, NormalColor, strokeEffect: false) { X = 120, Y = 8, AcceptMouseInput = false };
+            Add(_professionLabel);
 
-            Add
-                (
-                    new TextBox(localization.GetString(info.Localization), TrueTypeLoader.EMBEDDED_FONT, 18, 300, Color.DarkRed, strokeEffect: false) { X = 190, Y = 8, AcceptMouseInput = false }
-
-                );
-
-
-            _gumpPic = new GumpPic(121, -12, info.Graphic, 0);
+            _gumpPic = new GumpPic(54, -12, info.Graphic, 0);
             Add(_gumpPic);
 
-            // Subscribing to events for hover effect
             _gumpPic.MouseEnter += OnGumpPicMouseEnter;
             _gumpPic.MouseExit += OnGumpPicMouseExit;
             _gumpPic.MouseUp += OnGumpPicMouseUp;
-
-
+            MouseEnter += OnControlMouseEnter;
+            MouseExit += OnControlMouseExit;
         }
 
         public Action<ProfessionInfo> Selected;
@@ -226,12 +225,24 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         private void OnGumpPicMouseEnter(object sender, EventArgs e)
         {
-            _gumpPic.Alpha = 0.5f; // Set opacity to 50% on hover
+            _gumpPic.Alpha = 0.5f;
+            _professionLabel.Fontcolor = HoverColor;
         }
 
         private void OnGumpPicMouseExit(object sender, EventArgs e)
         {
-            _gumpPic.Alpha = 1.0f; // Reset opacity to 100% when not hovered
+            _gumpPic.Alpha = 1.0f;
+            _professionLabel.Fontcolor = NormalColor;
+        }
+
+        private void OnControlMouseEnter(object sender, EventArgs e)
+        {
+            _professionLabel.Fontcolor = HoverColor;
+        }
+
+        private void OnControlMouseExit(object sender, EventArgs e)
+        {
+            _professionLabel.Fontcolor = NormalColor;
         }
     }
 }

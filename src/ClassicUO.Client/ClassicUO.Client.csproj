@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
@@ -108,6 +108,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <DataLanguageFiles Include="$(ProjectDir)..\..\Data\Languages\*.json" />
+    <DataLanguageRoot Include="$(ProjectDir)..\..\Data\Language.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.0" />
     <PackageReference Include="System.CodeDom" Version="4.7.0" />
     <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
@@ -130,6 +135,8 @@
   </ItemGroup>
   <Target Name="CopyExternalDeps_build" AfterTargets="Build">
     <Copy SourceFiles="@(DataFiles_x64)" DestinationFolder="$(TargetDir)\x64\" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(DataLanguageFiles)" DestinationFolder="$(TargetDir)\Data\Languages\" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(DataLanguageRoot)" DestinationFolder="$(TargetDir)\Data\" SkipUnchangedFiles="true" />
   </Target>
 
   <Target Name="CopyExternalDeps_publish" AfterTargets="Publish">
@@ -139,7 +146,8 @@
 
     <Copy SourceFiles="@(DataFiles_x64)" DestinationFolder="$(PublishDir)\x64\" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(MonockickstartPath)" DestinationFolder="$(PublishDir)\" SkipUnchangedFiles="true" />
-
+    <Copy SourceFiles="@(DataLanguageFiles)" DestinationFolder="$(PublishDir)\Data\Languages\" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(DataLanguageRoot)" DestinationFolder="$(PublishDir)\Data\" SkipUnchangedFiles="true" />
   </Target>
 
 </Project>

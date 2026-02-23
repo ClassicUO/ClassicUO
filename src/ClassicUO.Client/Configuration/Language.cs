@@ -116,6 +116,7 @@ namespace ClassicUO.Configuration
         public string ButtonCombatSpells { get; set; } = "Combat & Spells";
         public string ButtonCounters { get; set; } = "Counters";
         public string ButtonInfobar { get; set; } = "Infobar";
+        public string ButtonActionBar { get; set; } = "Action Bar";
         public string ButtonContainers { get; set; } = "Containers";
         public string ButtonExperimental { get; set; } = "Experimental";
         public string ButtonIgnoreList { get; set; } = "Ignore List";
@@ -143,6 +144,7 @@ namespace ClassicUO.Configuration
         public CombatSpells GetCombatSpells { get; set; } = new CombatSpells();
         public Counters GetCounters { get; set; } = new Counters();
         public InfoBars GetInfoBars { get; set; } = new InfoBars();
+        public ActionBar GetActionBar { get; set; } = new ActionBar();
         public Containers GetContainers { get; set; } = new Containers();
         public Experimental GetExperimental { get; set; } = new Experimental();
         public NamePlates GetNamePlates { get; set; } = new NamePlates();
@@ -405,6 +407,18 @@ namespace ClassicUO.Configuration
             public string GridSize { get; set; } = "Grid size";
             public string Rows { get; set; } = "Rows";
             public string Columns { get; set; } = "Columns";
+        }
+
+        public class ActionBar
+        {
+            public string ShowActionBar { get; set; } = "Show action bar";
+            public string Slot { get; set; } = "Slot {0}";
+            public string TargetSelf { get; set; } = "Self";
+            public string TargetLast { get; set; } = "Last";
+            public string DragSpellHere { get; set; } = "Drag spell here";
+            public string Hotkey { get; set; } = "Hotkey";
+            public string ResetSlot { get; set; } = "Reset slot";
+            public string SetHotkey { get; set; } = "Set Hotkey";
         }
 
         public class InfoBars

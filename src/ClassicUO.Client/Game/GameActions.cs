@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -992,6 +992,7 @@ namespace ClassicUO.Game
             if (index >= 0)
             {
                 LastSpellIndex = index;
+                Client.Game.GetScene<GameScene>()?.ActionBar?.NotifySpellCast(index);
                 // ## BEGIN - END ## // VISUAL HELPERS
                 LastSpellIndexCursor = index;
                 GameCursor._spellTime = 0;
@@ -1056,6 +1057,7 @@ namespace ClassicUO.Game
 
         public static void UseSkill(int index)
         {
+            Client.Game.GetScene<GameScene>()?.ActionBar?.NotifySkillUsed(index);
             if (index >= 0)
             {
                 LastSkillIndex = index;
@@ -1148,9 +1150,20 @@ namespace ClassicUO.Game
             else
             {
                 Socket.Send_UseCombatAbility(idx);
+                if (idx > 0)
+                    Client.Game.GetScene<GameScene>()?.ActionBar?.NotifyAbilityUsed(idx);
             }
         }
 
+
+        public static void UseCombatAbility(byte index)
+        {
+            if (index > 0 && index <= AbilityData.Abilities.Length && (World.ClientLockedFeatures.Flags & LockedFeatureFlags.AOS) != 0)
+            {
+                Socket.Send_UseCombatAbility(index);
+                Client.Game.GetScene<GameScene>()?.ActionBar?.NotifyAbilityUsed(index);
+            }
+        }
 
         public static void UsePrimaryAbility()
         {

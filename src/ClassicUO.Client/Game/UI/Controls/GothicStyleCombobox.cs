@@ -26,7 +26,8 @@ namespace ClassicUO.Game.UI.Controls
         private Color _textColor;
         private Color _textShadowColor;
         private int _fontSize;
-        private static readonly Vector3 SolidHue = ShaderHueTranslator.GetHueVector(0, false, 1f);
+        private Texture2D _pixelTexture;
+        private static readonly Random _textureRandom = new Random(12345);
 
         public GothicStyleCombobox(int x, int y, int width, int height, string[] items, int selectedIndex = -1, int fontSize = 16)
         {
@@ -38,12 +39,11 @@ namespace ClassicUO.Game.UI.Controls
             _selectedIndex = selectedIndex;
             _fontSize = fontSize;
 
-            // Cores do tema gótico/medieval - Background preto com texto branco
-            _baseColor = Color.Black;                      // Background preto
-            _highlightColor = new Color(100, 100, 100);    // Realce cinza claro para bordas
-            _shadowColor = new Color(50, 50, 50);          // Sombra cinza escuro
-            _textColor = Color.White;                      // Texto branco para contraste
-            _textShadowColor = Color.Gray;                 // Sombra cinza do texto
+            _baseColor = Color.DarkRed;
+            _highlightColor = new Color(180, 50, 50);
+            _shadowColor = new Color(80, 15, 15);
+            _textColor = Color.White;
+            _textShadowColor = Color.Black;
 
             // Carregar fonte
             _font = TrueTypeLoader.Instance.GetFont("Arial", fontSize);
@@ -124,101 +124,113 @@ namespace ClassicUO.Game.UI.Controls
             Color currentHighlightColor = _highlightColor;
             Color currentShadowColor = _shadowColor;
 
-            if (_isPressed || _isOpen)
+            if (_pixelTexture == null)
             {
-                currentHighlightColor = new Color(
-                    Math.Min(255, _highlightColor.R + 20),
-                    Math.Min(255, _highlightColor.G + 20),
-                    Math.Min(255, _highlightColor.B + 20)
-                );
-            }
-            else if (_isHovered)
-            {
-                currentHighlightColor = new Color(
-                    Math.Min(255, _highlightColor.R + 10),
-                    Math.Min(255, _highlightColor.G + 10),
-                    Math.Min(255, _highlightColor.B + 10)
-                );
+                _pixelTexture = new Texture2D(batcher.GraphicsDevice, 1, 1);
+                _pixelTexture.SetData(new[] { Color.White });
             }
 
-            // Desenhar sombra do combobox
-            FillRectangle(batcher, new Rectangle(x + 3, y + 3, Width, Height), currentShadowColor);
-
-            DrawSolidBackground(batcher, x, y, Width, Height, currentBaseColor);
-
-            // Desenhar borda com efeito 3D
+            batcher.Draw(_pixelTexture, new Rectangle(x + 3, y + 3, Width, Height), _shadowColor.ToVector3());
+            DrawGradientBackground(batcher, x, y, Width, Height, currentBaseColor, currentShadowColor);
             DrawBorder(batcher, x, y, Width, Height, currentHighlightColor, currentShadowColor);
+            DrawTextureEffect(batcher, x, y, Width, Height, currentBaseColor);
 
-            // Desenhar o texto selecionado
             if (!string.IsNullOrEmpty(_selectedText) && _font != null)
             {
                 var textSize = _font.MeasureString(_selectedText);
-                var textX = x + 8; // Margem esquerda
+                var textX = x + 8;
                 var textY = y + (Height - textSize.Y) / 2;
 
-                // Offset do texto quando pressionado
                 if (_isPressed || _isOpen)
                 {
                     textX += 1;
                     textY += 1;
                 }
 
-                // Desenhar sombra do texto
-                _font.DrawText(batcher, new StringSegment(_selectedText), new Vector2(textX + 1, textY + 1), _textShadowColor);
-
-                // Desenhar o texto principal
+                _font.DrawText(batcher, new StringSegment(_selectedText), new Vector2(textX + 2, textY + 2), _textShadowColor);
+                _font.DrawText(batcher, new StringSegment(_selectedText), new Vector2(textX + 1, textY + 1), new Color(_textShadowColor.R + 20, _textShadowColor.G + 10, _textShadowColor.B + 10));
                 _font.DrawText(batcher, new StringSegment(_selectedText), new Vector2(textX, textY), _textColor);
             }
 
-            // Desenhar seta do dropdown
             DrawDropdownArrow(batcher, x, y, Width, Height, _textColor);
 
             return base.Draw(batcher, x, y);
         }
 
-        private void DrawSolidBackground(UltimaBatcher2D batcher, int x, int y, int width, int height, Color color)
+        private void DrawGradientBackground(UltimaBatcher2D batcher, int x, int y, int width, int height, Color baseColor, Color shadowColor)
         {
-            FillRectangle(batcher, new Rectangle(x, y, width, height), color);
+            for (int i = 0; i < height; i++)
+            {
+                float ratio = (float)i / height;
+                int cr = (int)(baseColor.R + (shadowColor.R - baseColor.R) * ratio);
+                int cg = (int)(baseColor.G + (shadowColor.G - baseColor.G) * ratio);
+                int cb = (int)(baseColor.B + (shadowColor.B - baseColor.B) * ratio);
+                batcher.Draw(_pixelTexture, new Rectangle(x, y + i, width, 1), new Vector3(cr / 255f, cg / 255f, cb / 255f));
+            }
         }
+
+        private const int BORDER_RADIUS = 6;
 
         private void DrawBorder(UltimaBatcher2D batcher, int x, int y, int width, int height, Color highlightColor, Color shadowColor)
         {
-            // Desenhar bordas com efeito 3D
-            // Borda superior (realce)
-            FillRectangle(batcher, new Rectangle(x, y, width, 2), highlightColor);
-            
-            // Borda esquerda (realce)
-            FillRectangle(batcher, new Rectangle(x, y, 2, height), highlightColor);
-
-            // Borda inferior (sombra)
-            FillRectangle(batcher, new Rectangle(x, y + height - 2, width, 2), shadowColor);
-            
-            // Borda direita (sombra)
-            FillRectangle(batcher, new Rectangle(x + width - 2, y, 2, height), shadowColor);
+            int r = BORDER_RADIUS;
+            if (width < r * 2 || height < r * 2)
+                r = 0;
+            Vector3 highlightVec = new Vector3(highlightColor.R / 255f, highlightColor.G / 255f, highlightColor.B / 255f);
+            Vector3 shadowVec = new Vector3(shadowColor.R / 255f, shadowColor.G / 255f, shadowColor.B / 255f);
+            if (r > 0)
+            {
+                batcher.Draw(_pixelTexture, new Rectangle(x + r, y, width - r * 2, 2), highlightVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x + r, y + height - 2, width - r * 2, 2), shadowVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x, y + r, 2, height - r * 2), highlightVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x + width - 2, y + r, 2, height - r * 2), shadowVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x, y, r, r), highlightVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x + width - r, y, r, r), highlightVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x, y + height - r, r, r), shadowVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x + width - r, y + height - r, r, r), shadowVec);
+            }
+            else
+            {
+                batcher.Draw(_pixelTexture, new Rectangle(x, y, width, 2), highlightVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x, y + height - 2, width, 2), shadowVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x, y, 2, height), highlightVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x + width - 2, y, 2, height), shadowVec);
+            }
         }
 
+        private void DrawTextureEffect(UltimaBatcher2D batcher, int x, int y, int width, int height, Color baseColor)
+        {
+            var textureColor = new Color(
+                Math.Max(0, baseColor.R - 20),
+                Math.Max(0, baseColor.G - 10),
+                Math.Max(0, baseColor.B - 8)
+            );
+            for (int i = 4; i < width - 4; i += 6)
+            {
+                int lineX = x + i + _textureRandom.Next(-2, 3);
+                if (lineX >= x + 2 && lineX < x + width - 2)
+                {
+                    int lineHeight = height - 6 + _textureRandom.Next(-2, 3);
+                    int lineY = y + 3 + _textureRandom.Next(-1, 2);
+                    var lineColor = new Vector3(textureColor.R / 255f, textureColor.G / 255f, textureColor.B / 255f);
+                    batcher.Draw(_pixelTexture, new Rectangle(lineX, lineY, 1, lineHeight), lineColor);
+                }
+            }
+        }
 
         private void DrawDropdownArrow(UltimaBatcher2D batcher, int x, int y, int width, int height, Color color)
         {
-            // Desenhar seta do dropdown (triângulo)
             int arrowX = x + width - 15;
             int arrowY = y + height / 2;
             int arrowSize = 6;
-
-            // Triângulo apontando para baixo
+            Vector3 colorVec = new Vector3(color.R / 255f, color.G / 255f, color.B / 255f);
             for (int i = 0; i < arrowSize; i++)
             {
                 int lineWidth = (i * 2) + 1;
                 int lineX = arrowX - (lineWidth / 2);
                 int lineY = arrowY - (arrowSize / 2) + i;
-
-                FillRectangle(batcher, new Rectangle(lineX, lineY, lineWidth, 1), color);
+                batcher.Draw(_pixelTexture, new Rectangle(lineX, lineY, lineWidth, 1), colorVec);
             }
-        }
-
-        private static void FillRectangle(UltimaBatcher2D batcher, Rectangle rectangle, Color color)
-        {
-            batcher.Draw(SolidColorTextureCache.GetTexture(color), rectangle, null, SolidHue);
         }
 
         protected override void OnMouseEnter(int x, int y)
@@ -323,11 +335,11 @@ namespace ClassicUO.Game.UI.Controls
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                Color baseColor = Color.Black;
-                Color shadowColor = new Color(50, 50, 50);
-                Color highlightColor = new Color(100, 100, 100);
+                Color baseColor = Color.DarkRed;
+                Color shadowColor = new Color(80, 15, 15);
+                Color highlightColor = new Color(180, 50, 50);
 
-                FillRect(batcher, new Rectangle(x + 2, y + 2, Width, Height), shadowColor);
+                FillRect(batcher, new Rectangle(x + 3, y + 3, Width, Height), shadowColor);
                 FillRect(batcher, new Rectangle(x, y, Width, Height), baseColor);
                 FillRect(batcher, new Rectangle(x, y, Width, 2), highlightColor);
                 FillRect(batcher, new Rectangle(x, y, 2, Height), highlightColor);
@@ -356,12 +368,12 @@ namespace ClassicUO.Game.UI.Controls
                 if (HasScroll)
                 {
                     int barX = x + Width - ScrollBarWidth - 2;
-                    FillRect(batcher, new Rectangle(barX, y + Padding, ScrollBarWidth, Height - Padding * 2), new Color(60, 60, 60));
+                    FillRect(batcher, new Rectangle(barX, y + Padding, ScrollBarWidth, Height - Padding * 2), shadowColor);
                     int trackHeight = Height - Padding * 2;
                     int thumbHeight = Math.Max(20, trackHeight * trackHeight / (_items.Length * ItemHeight + Padding * 2));
                     int maxThumbY = trackHeight - thumbHeight;
                     int thumbY = maxThumbY > 0 ? y + Padding + (maxThumbY * _scrollOffset / MaxScroll) : y + Padding;
-                    FillRect(batcher, new Rectangle(barX + 2, thumbY, ScrollBarWidth - 4, thumbHeight), new Color(120, 120, 120));
+                    FillRect(batcher, new Rectangle(barX + 2, thumbY, ScrollBarWidth - 4, thumbHeight), highlightColor);
                 }
 
                 return true;

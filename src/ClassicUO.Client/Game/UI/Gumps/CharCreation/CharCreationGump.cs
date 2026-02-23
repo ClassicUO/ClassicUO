@@ -51,6 +51,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private readonly LoginScene _loginScene;
         private ProfessionInfo _selectedProfession;
 
+        public bool HasProfessionSelected => _selectedProfession != null && _selectedProfession.Type != ProfessionLoader.PROF_TYPE.CATEGORY;
+
         public CharCreationGump(LoginScene scene) : base(0, 0)
         {
             X = LoginLayoutHelper.ContentOffsetX;
@@ -79,8 +81,15 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             
         }
 
-        public void SetAttributes(bool force = false)
+        public void SetAttributes(bool force = false, int? cityFromAppearance = null)
         {
+            if (cityFromAppearance.HasValue && cityFromAppearance.Value >= 0 && _selectedProfession != null)
+            {
+                _cityIndex = cityFromAppearance.Value;
+                CreateCharacter((byte)_selectedProfession.DescriptionIndex);
+                IsVisible = false;
+                return;
+            }
             SetStep(_selectedProfession.DescriptionIndex >= 0 || force ? CharCreationStep.ChooseCity : CharCreationStep.ChooseTrade);
         }
 

@@ -27,6 +27,7 @@
     "ButtonCombatSpells": "Combat \u0026 Spells",
     "ButtonCounters": "Counters",
     "ButtonInfobar": "Infobar",
+    "ButtonActionBar": "Action Bar",
     "ButtonContainers": "Containers",
     "ButtonExperimental": "Experimental",
     "ButtonIgnoreList": "Ignore List",
@@ -262,6 +263,16 @@
       "Label": "Label",
       "Color": "Color",
       "Data": "Data"
+    },
+    "GetActionBar": {
+      "ShowActionBar": "Show action bar",
+      "Slot": "Slot {0}",
+      "TargetSelf": "Self",
+      "TargetLast": "Last",
+      "DragSpellHere": "Drag spell/skill/ability here",
+      "Hotkey": "Hotkey",
+      "ResetSlot": "Reset slot",
+      "SetHotkey": "Set Hotkey"
     },
     "GetContainers": {
       "Description": "These settings are for original container gumps, for grid container settings visit the TazUO section",

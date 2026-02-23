@@ -545,6 +545,43 @@ namespace ClassicUO.Game.Managers
             //}
         }
 
+        public static Control GetControlUnderPositionExcluding(Point position, Control exclude)
+        {
+            Control control = null;
+            IsModalOpen = IsModalControlOpen();
+
+            for (LinkedListNode<Gump> first = Gumps.First; first != null; first = first.Next)
+            {
+                Control c = first.Value;
+
+                if (IsModalOpen && !c.IsModal || !c.IsVisible || !c.IsEnabled)
+                {
+                    continue;
+                }
+
+                control = null;
+                c.HitTest(position, ref control);
+
+                if (control != null && exclude != null)
+                {
+                    var check = control;
+                    while (check != null)
+                    {
+                        if (check == exclude) break;
+                        check = check.Parent;
+                    }
+                    if (check == exclude) continue;
+                }
+
+                if (control != null)
+                {
+                    return control;
+                }
+            }
+
+            return null;
+        }
+
         private static Control GetMouseOverControl(Point position)
         {
             if (_isDraggingControl)

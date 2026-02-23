@@ -113,6 +113,7 @@ namespace ClassicUO.Game.Scenes
         public HotkeysManager Hotkeys { get; private set; }
         public MacroManager Macros { get; private set; }
         public InfoBarManager InfoBars { get; private set; }
+        public ActionBarManager ActionBar { get; private set; }
         public Weather Weather { get; private set; }
         public bool DisconnectionRequested { get; set; }
         public bool UseLights =>
@@ -175,6 +176,7 @@ namespace ClassicUO.Game.Scenes
             _animatedStaticsManager.Initialize();
             InfoBars = new InfoBarManager();
             InfoBars.Load();
+            ActionBar = new ActionBarManager();
             _healthLinesManager = new HealthLinesManager();
             Weather = new Weather();
 
@@ -518,6 +520,7 @@ namespace ClassicUO.Game.Scenes
             _useItemQueue = null;
             Hotkeys = null;
             Macros = null;
+            ActionBar = null;
             EventSink.MessageReceived -= ChatOnMessageReceived;
 
             Settings.GlobalSettings.WindowSize = new Point(
@@ -979,6 +982,7 @@ namespace ClassicUO.Game.Scenes
             }
 
             Macros.Update();
+            ActionBar?.Update();
 
             if (
                 (currentProfile.CorpseOpenOptions == 1 || currentProfile.CorpseOpenOptions == 3)
