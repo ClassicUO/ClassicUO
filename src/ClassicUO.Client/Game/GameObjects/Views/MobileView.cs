@@ -1358,18 +1358,29 @@ namespace ClassicUO.Game.GameObjects
             uint coveredMask = 0;
             for (byte lay = (byte)Layer.OneHanded; lay < (byte)Layer.Mount; lay++)
             {
-                uint coveredBy = cache.LayerCoveredBy[lay];
-                if (coveredBy == 0)
+                // Weapon layers should never be hidden by body-part coverage
+                if (lay == (byte)Layer.OneHanded || lay == (byte)Layer.TwoHanded)
                     continue;
 
+                // Use the item's own covers if available; fall back to coveredBy for
+                // items that don't cover any body parts themselves (e.g. hair, beard).
+                uint myCovers = cache.LayerCovers[lay];
+                uint checkMask = myCovers != 0 ? myCovers : cache.LayerCoveredBy[lay];
+                if (checkMask == 0)
+                    continue;
+
+                // Only over-garments (Robe, Cloak) can hide items through body-part coverage.
+                // All other items rely on explicit remove/replace directives.
                 uint otherActiveCovers = 0;
                 for (byte other = (byte)Layer.OneHanded; other < (byte)Layer.Mount; other++)
                 {
+                    if (other != (byte)Layer.Robe && other != (byte)Layer.Cloak)
+                        continue;
                     if (other != lay)
                         otherActiveCovers |= cache.LayerActiveCovers[other];
                 }
 
-                if ((coveredBy & otherActiveCovers) == coveredBy)
+                if ((checkMask & otherActiveCovers) == checkMask)
                     coveredMask |= 1u << lay;
             }
             cache.CoveredLayerMask = coveredMask;

@@ -226,6 +226,23 @@ namespace ClassicUO.Game.UI.Controls
             bool useStitchin = stitchin != null && stitchin.IsLoaded;
             Mobile.StitchinCache stCache = useStitchin ? mobile.EnsureStitchinCache() : null;
 
+            // If the torso has a stitchin replacement, its gump may visually cover
+            // the arms area. Swap draw order so arms render on top of torso.
+            if (!switch_arms_with_torso && stCache != null)
+            {
+                Item torso = mobile.FindItemByLayer(Layer.Torso);
+
+                if (torso != null)
+                {
+                    ushort torsoEffective = stCache.LayerEffectiveAnimID[(byte)Layer.Torso];
+
+                    if (torsoEffective != 0 && torsoEffective != torso.ItemData.AnimID)
+                    {
+                        switch_arms_with_torso = true;
+                    }
+                }
+            }
+
             for (int i = 0; i < layers.Length; i++)
             {
                 Layer layer = layers[i];
