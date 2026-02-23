@@ -222,6 +222,10 @@ namespace ClassicUO.Game.UI.Controls
                 layers = _layerOrder;
             }
 
+            var stitchin = Client.Game.UO.FileManager.Stitchin;
+            bool useStitchin = stitchin != null && stitchin.IsLoaded;
+            Mobile.StitchinCache stCache = useStitchin ? mobile.EnsureStitchinCache() : null;
+
             for (int i = 0; i < layers.Length; i++)
             {
                 Layer layer = layers[i];
@@ -242,6 +246,30 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (equipItem != null)
                 {
+                    ushort effectiveAnimID = equipItem.ItemData.AnimID;
+                    bool stitchinReplaced = false;
+
+                    if (stCache != null)
+                    {
+                        if (stCache.Removals.Contains(effectiveAnimID))
+                        {
+                            continue;
+                        }
+
+                        ushort stEffective = stCache.LayerEffectiveAnimID[(byte)layer];
+
+                        if (stEffective != 0 && stEffective != effectiveAnimID)
+                        {
+                            effectiveAnimID = stEffective;
+                            stitchinReplaced = true;
+                        }
+
+                        if (!stitchinReplaced && Mobile.IsStitchinCovered(stCache, layer))
+                        {
+                            continue;
+                        }
+                    }
+
                     if (Mobile.IsCovered(mobile, layer))
                     {
                         continue;
@@ -250,9 +278,24 @@ namespace ClassicUO.Game.UI.Controls
                     ushort id = GetAnimID(
                         mobile.Graphic,
                         equipItem.Graphic,
-                        equipItem.ItemData.AnimID,
+                        useStitchin ? effectiveAnimID : equipItem.ItemData.AnimID,
                         mobile.IsFemale
                     );
+
+                    // If stitchin replaced the anim and the gump doesn't exist,
+                    // fall back to the original item animation.
+                    if (stitchinReplaced)
+                    {
+                        if (Client.Game.UO.Gumps.GetGump(id).Texture == null)
+                        {
+                            id = GetAnimID(
+                                mobile.Graphic,
+                                equipItem.Graphic,
+                                equipItem.ItemData.AnimID,
+                                mobile.IsFemale
+                            );
+                        }
+                    }
 
                     Add(
                         new GumpPicEquipment(

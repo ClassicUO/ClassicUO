@@ -95,6 +95,9 @@ namespace ClassicUO.Game.GameObjects
             }
         };
 
+        internal uint _equipmentGeneration;
+        internal StitchinCache _stitchinCache;
+
         private bool _isDead;
         private bool _isSA_Poisoned;
         private long _lastAnimationIdleDelay;
