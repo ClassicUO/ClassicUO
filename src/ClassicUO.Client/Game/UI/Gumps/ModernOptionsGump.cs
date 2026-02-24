@@ -2498,6 +2498,11 @@ namespace ClassicUO.Game.UI.Gumps
                 profile.IgnoreStaminaCheck = b;
             }), true, page);
             content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel("Scale monsters (non-humanoid): select a monster on map to show [−] [+]", 0, profile.ScaleMonstersEnabled, (b) =>
+            {
+                profile.ScaleMonstersEnabled = b;
+            }), true, page);
+            content.BlankLine();
             content.AddToRight(new CheckboxWithLabel(lang.GetDust765.BlockWallOfStone, 0, profile.BlockWoS, (b) =>
             {
                 profile.BlockWoS = b;

@@ -436,6 +436,8 @@ namespace ClassicUO.Configuration
         public uint BlockEnergyFArt { get; set; } = 1872;
         public bool BlockEnergyFArtForceAoS { get; set; } = false;
         public bool BlackOutlineStatics { get; set; } = false;
+        public bool ScaleMonstersEnabled { get; set; } = false;
+        public Dictionary<int, int> MonsterScaleByGraphic { get; set; } = new Dictionary<int, int>();
         // ## BEGIN - END ## // MISC
         // ## BEGIN - END ## // MISC2
         public bool WireFrameView { get; set; } = false;

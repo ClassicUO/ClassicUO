@@ -183,6 +183,8 @@ namespace ClassicUO.Game.Scenes
             WorldViewportGump viewport = new WorldViewportGump(this);
             UIManager.Add(viewport, false);
 
+            UIManager.Add(new MobileScaleGump(), false);
+
             if (!ProfileManager.CurrentProfile.TopbarGumpIsDisabled)
             {
                 TopBarGump.Create();
