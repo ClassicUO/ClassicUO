@@ -98,7 +98,7 @@ namespace ClassicUO.Game.GameObjects
                 SpellVisualRangeManager.Instance.LastCursorTileLoc = new Vector2(X, Y);
             }
 
-            if (SpellVisualRangeManager.Instance.IsTargetingAfterCasting())
+            if (ProfileManager.CurrentProfile?.PvP_SpellRangeOnCursor == true && SpellVisualRangeManager.Instance.IsTargetingAfterCasting())
             {
                 hue = SpellVisualRangeManager.Instance.ProcessHueForTile(hue, this);
             }

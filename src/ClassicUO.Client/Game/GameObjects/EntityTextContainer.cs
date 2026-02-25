@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -161,8 +161,6 @@ namespace ClassicUO.Game.GameObjects
                     c.Destroy();
                     _messages.RemoveAt(i--);
                 }
-                //else if (delta < 250)
-                //    c.Alpha = 1f - delta / 250;
                 else if (c.TextBox != null)
                 {
                     if (_rectangle.Width < c.TextBox.Width)
@@ -206,12 +204,9 @@ namespace ClassicUO.Game.GameObjects
                     Client.Game.Animations.GetAnimationDimensions(
                         m.AnimIndex,
                         m.GetGraphicForAnimation(),
-                        /*(byte) m.GetDirectionForAnimation()*/
                         0,
-                        /*Mobile.GetGroupForAnimation(m, isParent:true)*/
                         0,
                         m.IsMounted,
-                        /*(byte) m.AnimIndex*/
                         0,
                         out int centerX,
                         out int centerY,

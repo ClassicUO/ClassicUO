@@ -151,7 +151,7 @@ namespace ClassicUO.Configuration
 
         public bool SetTargetOut { get; set; }  = false;
         // ## BEGIN - END ## // ART / HUE CHANGES
-        //public bool TreeToStumps { get; set; }
+        public bool TreeToStumps { get; set; }
         // ## BEGIN - END ## // ART / HUE CHANGES
         public bool EnableCaveBorder { get; set; }
         public bool HideVegetation { get; set; }
@@ -326,7 +326,6 @@ namespace ClassicUO.Configuration
 
         public bool OverrideAllFonts { get; set; }
         public bool OverrideAllFontsIsUnicode { get; set; } = true;
-
         public bool SallosEasyGrab { get; set; }
 
         public bool JournalDarkMode { get; set; }
@@ -439,6 +438,30 @@ namespace ClassicUO.Configuration
         public bool ScaleMonstersEnabled { get; set; } = false;
         public Dictionary<int, int> MonsterScaleByGraphic { get; set; } = new Dictionary<int, int>();
         // ## BEGIN - END ## // MISC
+        // ## BEGIN - END ## // PvM/PvP
+        public bool PvM_DamageCounterOnLastTarget { get; set; } = false;
+        public bool PvM_DamageCounterAsOverhead { get; set; } = false;
+        public bool PvM_AggroIndicatorOnHealthBar { get; set; } = false;
+        public bool PvM_CorpseFilterByNotoriety { get; set; } = false;
+        public int PvM_CorpseFilterMode { get; set; } = 0;
+        public bool PvM_LowHpAlertOnLastTarget { get; set; } = false;
+        public bool PvM_KillCountMarkerPerSession { get; set; } = false;
+        public bool PvM_LootHighlightOnCorpse { get; set; } = false;
+        public bool PvP_CriminalAttackableAlert { get; set; } = false;
+        public bool PvP_WarModeIndicator { get; set; } = false;
+        public bool PvP_GreyCriminalTimer { get; set; } = false;
+        public bool PvP_LastAttackerHighlight { get; set; } = false;
+        public bool PvP_SpellRangeOnCursor { get; set; } = true;
+        public bool PvP_QuickTargetEnemyList { get; set; } = false;
+        public bool PvX_NameOverheadProfilesByContext { get; set; } = false;
+        public int PvM_NameOverheadProfileFlags { get; set; } = (int)NameOverheadOptions.MobilesAndCorpses;
+        public int PvP_NameOverheadProfileFlags { get; set; } = (int)(NameOverheadOptions.Criminal | NameOverheadOptions.Gray | NameOverheadOptions.Enemy | NameOverheadOptions.Murderer);
+        public bool PvX_ConfigurableSoundsPerEvent { get; set; } = false;
+        public int PvX_SoundCriminalAlert { get; set; } = 0;
+        public bool PvX_BlockBeneficialOnEnemies { get; set; } = false;
+        public bool PvX_LastTargetDirectionIndicator { get; set; } = false;
+        public bool PvX_LockLastTarget { get; set; } = false;
+        // ## BEGIN - END ## // PvM/PvP
         // ## BEGIN - END ## // MISC2
         public bool WireFrameView { get; set; } = false;
         public bool HueImpassableView { get; set; } = false;

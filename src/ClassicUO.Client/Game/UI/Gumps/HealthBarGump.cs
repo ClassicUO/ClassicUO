@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -601,6 +601,7 @@ namespace ClassicUO.Game.UI.Gumps
         // ## BEGIN - END ## // HEALTHBAR
 
         private LineCHB _hpLineRed, _manaLineRed, _stamLineRed, _outline;
+        private Label _damageCounterLabel;
 
 
         private bool _oldWarMode, _normalHits, _poisoned, _yellowHits;
@@ -626,6 +627,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _background = null;
             _hpLineRed = _manaLineRed = _stamLineRed = null;
+            _damageCounterLabel = null;
 
             if (_textBox != null)
             {
@@ -1114,6 +1116,12 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
             }
+
+            if (_damageCounterLabel != null)
+                _damageCounterLabel.Text = PvMPvPManager.Instance.GetDamageCounterText(LocalSerial);
+
+            if (entity != null && !entity.IsDestroyed && (IsLastTarget || IsLastAttackBar) && entity.HitsMax > 0)
+                PvMPvPManager.Instance.CheckLowHpAlert(LocalSerial, entity.Hits, entity.HitsMax);
         }
 
         protected override void BuildGump()
@@ -1505,6 +1513,8 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     Height = HPB_HEIGHT_SINGLELINE;
+                    if ((ProfileManager.CurrentProfile?.PvM_DamageCounterOnLastTarget == true || ProfileManager.CurrentProfile?.PvM_AggroIndicatorOnHealthBar == true) && (IsLastTarget || IsLastAttackBar))
+                        Height += 14;
                     Width = HPB_WIDTH;
 
                     Add(_background = new AlphaBlendControl(0.7f) { Width = Width, Height = Height, AcceptMouseInput = true, CanMove = true });
@@ -1625,6 +1635,10 @@ namespace ClassicUO.Game.UI.Gumps
                             CanMove = true
                         }
                     );
+                    if ((ProfileManager.CurrentProfile?.PvM_DamageCounterOnLastTarget == true || ProfileManager.CurrentProfile?.PvM_AggroIndicatorOnHealthBar == true) && (IsLastTarget || IsLastAttackBar))
+                        Add(_damageCounterLabel = new Label(string.Empty, true, 1, HPB_WIDTH, 1, FontStyle.Cropped, TEXT_ALIGN_TYPE.TS_CENTER) { X = 0, Y = 16, CanMove = true });
+                    else
+                        _damageCounterLabel = null;
                 }
             }
 
@@ -1787,6 +1801,7 @@ namespace ClassicUO.Game.UI.Gumps
         private int _oldHits, _oldStam, _oldMana;
 
         private bool _oldWarMode, _normalHits, _poisoned, _yellowHits;
+        private Label _damageCounterLabel;
 
 
         public HealthBarGump(Entity entity) : base(entity)
@@ -1820,6 +1835,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _background = _hpLineRed = _manaLineRed = _stamLineRed = null;
             _buttonHeal1 = _buttonHeal2 = null;
+            _damageCounterLabel = null;
 
             if (_textBox != null)
             {
@@ -2059,6 +2075,13 @@ namespace ClassicUO.Game.UI.Gumps
                             CanMove = true
                         }
                     );
+                    if ((ProfileManager.CurrentProfile?.PvM_DamageCounterOnLastTarget == true || ProfileManager.CurrentProfile?.PvM_AggroIndicatorOnHealthBar == true) && (IsLastTarget || IsLastAttackBar))
+                    {
+                        Height += 14;
+                        Add(_damageCounterLabel = new Label(string.Empty, true, 1, 120, 1, FontStyle.Fixed, TEXT_ALIGN_TYPE.TS_CENTER) { X = 16, Y = 30, CanMove = true });
+                    }
+                    else
+                        _damageCounterLabel = null;
                 }
             }
 
@@ -2201,6 +2224,13 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         _textBox.SetText(_name);
                     }
+                }
+
+                if ((IsLastTarget || IsLastAttackBar) && entity.HitsMax > 0)
+                {
+                    if (_damageCounterLabel != null)
+                        _damageCounterLabel.Text = PvMPvPManager.Instance.GetDamageCounterText(LocalSerial);
+                    PvMPvPManager.Instance.CheckLowHpAlert(LocalSerial, entity.Hits, entity.HitsMax);
                 }
 
                 if (_outOfRange)

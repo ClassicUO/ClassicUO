@@ -129,6 +129,14 @@ mono mscorlib.dll
 - [GitHub Discussions](../../discussions) for ideas and suggestions
 - [Discord](https://discord.gg/classicuo) for real-time chat (but keep it civil)
 
+## 📚 **Documentation – Modern Options (Wiki)**
+
+Todas as opções do **Modern Options** estão documentadas item a item na wiki:
+
+- **[Índice da Wiki](docs/wiki/README.md)** – lista de secções (General, Sound, Video, Macros, Tooltips, Speech, Combat & Spells, Counters, Infobar, Action Bar, Containers, Nameplates, Cooldowns, TazUO, Dust765, Experimental).
+- Cada página descreve **cada opção** da respectiva secção: nome, tipo (checkbox, slider, combo, color picker), o que faz e como configurar.
+- **Como abrir o Modern Options:** em jogo, menu **Options** (ou atalho configurado). Use a barra de pesquisa no topo para encontrar opções por nome.
+
 ## 📜 **License**
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
@@ -556,12 +564,19 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## 🎮 How to Use
 
-### Feature Activation
+### Opening Options
 
-1. **Access Options**: Go to Options > Dust765
-2. **Navigate Categories**: Use the side menu to access different sections
-3. **Configure Options**: Adjust settings as needed
-4. **Save Settings**: Settings are saved automatically
+1. **Modern Options**: In-game, open **Options** (Modern Options gump).
+2. **Side menu**: Use the left sidebar to switch between **General**, **Sound**, **Video**, **Macros**, **Tooltips**, **Speech**, **Combat & Spells**, **Counters**, **Infobar**, **Action Bar**, **Containers**, **Nameplate Options**, **Cooldown bars**, **TazUO Specific**, **Dust765**, and **Experimental**.
+3. **Sub-sections**: Inside each category, the left panel shows sub-sections (e.g. under General: General, Mobiles, Gumps & Context, Misc, Terrain & Statics).
+4. **Search**: Use the search box at the top to find options by name.
+5. **Save**: Settings are saved automatically to your profile.
+
+### Wiki – Guia das opções
+
+Para uma explicação **item a item** de cada opção do Modern Options (o que faz e como configurar), use a wiki:
+
+- **[Wiki – Opções do cliente (Modern Options)](docs/wiki/README.md)** – índice com links para cada secção (General, Sound, Video, Dust765, PvM/PvP, etc.), com descrição detalhada de cada opção para jogadores.
 
 ### Usage Tips
 
@@ -602,7 +617,7 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 🌟 If this project helped you, consider giving it a ⭐ on the repository! 🌟
 
-"Innovation doesn't come from cliques, but from true collaboration."`
+"Innovation doesn't come from cliques, but from true collaboration."
 
 🎭 The Dust765 Project - Breaking Barriers, Building Bridges 🎭
 

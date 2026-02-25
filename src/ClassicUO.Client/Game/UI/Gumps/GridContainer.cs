@@ -1555,6 +1555,18 @@ namespace ClassicUO.Game.UI.Gumps
                                 }
                         }
                     }
+
+                    if (ProfileManager.CurrentProfile?.PvM_LootHighlightOnCorpse == true && container.IsCorpse)
+                    {
+                        foreach (var slot in gridSlots)
+                        {
+                            if (slot.Value.SlotItem == null) continue;
+                            Item si = slot.Value.SlotItem;
+                            bool isLoot = si.DisplayedGraphic == 0x0EED || si.DisplayedGraphic == 0x0EEE || si.Hue != 0;
+                            if (isLoot)
+                                slot.Value.SetHighLightBorder(0x35);
+                        }
+                    }
                 });
             }
 

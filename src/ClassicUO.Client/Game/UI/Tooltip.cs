@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -117,19 +117,10 @@ namespace ClassicUO.Game.UI
                 if (string.IsNullOrEmpty(finalString) && !string.IsNullOrEmpty(_textHTML)) //Fix for vendor search
                     finalString = Managers.ToolTipOverrideData.ProcessTooltipText(_textHTML);
 
-                string font = TrueTypeLoader.EMBEDDED_FONT;
-                int fontSize = 15;
-
-                if (ProfileManager.CurrentProfile != null)
-                {
-                    font = ProfileManager.CurrentProfile.SelectedToolTipFont;
-                    fontSize = ProfileManager.CurrentProfile.SelectedToolTipFontSize;
-                }
-
                 _textBox = new TextBox(
                     TextBox.ConvertHtmlToFontStashSharpCommand(finalString).Trim(),
-                    font,
-                    fontSize,
+                    ProfileManager.CurrentProfile.SelectedToolTipFont,
+                    ProfileManager.CurrentProfile.SelectedToolTipFontSize,
                     600,
                     hue,
                     align,

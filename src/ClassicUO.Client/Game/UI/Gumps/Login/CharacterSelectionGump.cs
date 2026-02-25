@@ -435,7 +435,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             private readonly Action<uint> _loginFn;
             private readonly Action<uint> _selectedFn;
             private readonly Action<uint> _hoverFn;
-            private readonly uint _bodyID;
+            private readonly ushort _bodyID;
             private static Art art { get; set; }
             private static PlayerMobile _character;
             private PaperDollInteractable _paperDoll;
@@ -445,7 +445,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             public FullBlendControl fullBlendControl;
             public bool visibleTn { get; set; }
 
-            public Dictionary<string, PaperdollItem> Load()
+            public PaperdollSaveDataDto Load()
             {
                 if (!File.Exists(savePath))
                 {
@@ -454,8 +454,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 try
                 {
                     string json = File.ReadAllText(savePath);
-                    var saveData = JsonSerializer.Deserialize<PaperdollSaveDataDto>(json);
-                    return saveData?.Items ?? new Dictionary<string, PaperdollItem>();
+                    return JsonSerializer.Deserialize<PaperdollSaveDataDto>(json);
                 }
                 catch
                 {
@@ -463,28 +462,56 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 }
             }
 
-            private class PaperdollSaveDataDto
+            internal class PaperdollSaveDataDto
             {
+                public ushort BodyId { get; set; }
+                public bool IsFemale { get; set; }
+                public byte Race { get; set; }
                 public Dictionary<string, PaperdollItem> Items { get; set; }
             }
 
+            private static ushort GetBodyIdFromRaceAndGender(RaceType race, bool isFemale)
+            {
+                return (race, isFemale) switch
+                {
+                    (RaceType.HUMAN, false) => 0x0190,
+                    (RaceType.HUMAN, true) => 0x0191,
+                    (RaceType.ELF, false) => 0x025D,
+                    (RaceType.ELF, true) => 0x025E,
+                    (RaceType.GARGOYLE, false) => 0x029A,
+                    (RaceType.GARGOYLE, true) => 0x029B,
+                    _ => 0x0190
+                };
+            }
 
             public CharacterEntryGump(uint index, string character, uint bodyID, Action<uint> selectedFn, Action<uint> loginFn, Action<uint> hoverFn)
             {
                 CharacterIndex = index;
                 _indexCharacter = index;
-                _bodyID = bodyID;
+                savePath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", Settings.GlobalSettings.Username, World.ServerName, character, "paperdollSelectCharManager.json");
+                var saveData = Load();
+                ushort resolvedBodyId;
+                bool isFemale;
+                if (saveData != null)
+                {
+                    isFemale = saveData.IsFemale;
+                    resolvedBodyId = saveData.BodyId != 0
+                        ? saveData.BodyId
+                        : GetBodyIdFromRaceAndGender((RaceType)(saveData.Race < (byte)RaceType.HUMAN ? (byte)RaceType.HUMAN : saveData.Race > (byte)RaceType.GARGOYLE ? (byte)RaceType.GARGOYLE : saveData.Race), saveData.IsFemale);
+                }
+                else
+                {
+                    resolvedBodyId = (ushort)bodyID;
+                    isFemale = false;
+                }
+                _bodyID = resolvedBodyId;
+                var items = saveData?.Items;
+
                 _selectedFn = selectedFn;
                 _hoverFn = hoverFn;
                 _loginFn = loginFn;
-                savePath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", Settings.GlobalSettings.Username, World.ServerName, character, "paperdollSelectCharManager.json");
-                var items = Load();
 
-
-                // Bg
                 Add(new GumpPic(0, 0, 0x000C, 0) { IsPartialHue = true }.ScaleWidthAndHeight(Scale).SetInternalScale(Scale));
-
-                Mobile mobiles = World.Mobiles.Get(LocalSerial);
 
                 if (items != null && items.Count > 0)
                 {
@@ -506,11 +533,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     {
                         if (item.Graphic > 0 && item.Layer != Layer.Bracelet && item.Layer != Layer.Earrings && item.Layer != Layer.Ring && item.Layer != Layer.Backpack) 
                         {
-                            ushort id = GetAnimID(
-                                0x000C,
-                                item.AnimID,
-                                false
-                            );
+                            ushort id = PaperDollInteractable.GetAnimID(_bodyID, item.AnimID, isFemale);
 
                             Add(new GumpPicEquipment(
                                item.Serial,

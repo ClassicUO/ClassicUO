@@ -1340,6 +1340,16 @@ namespace ClassicUO.Game.Scenes
                 UIManager.Add(new NearbyItems());
             }
 
+            if (e.keysym.sym == SDL.SDL_Keycode.SDLK_F9 && ProfileManager.CurrentProfile?.PvP_QuickTargetEnemyList == true)
+            {
+                var g = UIManager.GetGump<EnemyListGump>();
+                if (g != null)
+                    g.Dispose();
+                else
+                    UIManager.Add(new EnemyListGump());
+                return;
+            }
+
             if (UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl)
             {
                 return;

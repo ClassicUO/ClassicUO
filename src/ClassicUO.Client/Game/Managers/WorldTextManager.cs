@@ -32,8 +32,15 @@
 
 using System;
 using System.Collections.Generic;
+using ClassicUO;
+using ClassicUO.Assets;
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.UI.Controls;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Renderer;
+using FontStashSharp.RichText;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Managers
 {
@@ -43,13 +50,37 @@ namespace ClassicUO.Game.Managers
         private readonly List<Tuple<uint, uint>> _subst = new List<Tuple<uint, uint>>();
         private readonly List<uint> _toRemoveDamages = new List<uint>();
 
+        private TextBox _dpsOverheadTextBox;
+        private string _dpsOverheadLastText = string.Empty;
+        private uint _dpsOverheadLastSerial;
 
         public override void Update()
         {
             base.Update();
 
-
             UpdateDamageOverhead();
+
+            uint lastAttack = TargetManager.LastAttack;
+            string text = PvMPvPManager.Instance.GetDamageCounterTextForOverhead(lastAttack);
+            var profile = ProfileManager.CurrentProfile;
+            if (text != _dpsOverheadLastText || lastAttack != _dpsOverheadLastSerial)
+            {
+                _dpsOverheadLastText = text ?? string.Empty;
+                _dpsOverheadLastSerial = lastAttack;
+                _dpsOverheadTextBox?.Dispose();
+                _dpsOverheadTextBox = null;
+                if (!string.IsNullOrEmpty(_dpsOverheadLastText) && profile?.PvM_DamageCounterAsOverhead == true)
+                {
+                    _dpsOverheadTextBox = new TextBox(
+                        _dpsOverheadLastText,
+                        profile.OverheadChatFont,
+                        profile.OverheadChatFontSize,
+                        profile.OverheadChatWidth,
+                        profile.DamageHueLastAttck,
+                        align: TextHorizontalAlignment.Center)
+                    { AcceptMouseInput = false };
+                }
+            }
 
             if (_toRemoveDamages.Count > 0)
             {
@@ -142,6 +173,10 @@ namespace ClassicUO.Game.Managers
 
         public override void Clear()
         {
+            _dpsOverheadTextBox?.Dispose();
+            _dpsOverheadTextBox = null;
+            _dpsOverheadLastText = string.Empty;
+            _dpsOverheadLastSerial = 0;
             if (_toRemoveDamages.Count > 0)
             {
                 foreach (uint s in _toRemoveDamages)
@@ -153,8 +188,6 @@ namespace ClassicUO.Game.Managers
             }
 
             _subst.Clear();
-
-            //_staticToUpdate.Clear();
 
             base.Clear();
         }

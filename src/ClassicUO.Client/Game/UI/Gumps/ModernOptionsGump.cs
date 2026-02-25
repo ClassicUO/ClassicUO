@@ -375,7 +375,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.BlankLine();
 
-            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.ShowSkillsChangedMsg, isChecked: profile.ShowSkillsChangedMessage, valueChanged: (b) => { profile.ShowStatsChangedMessage = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.ShowSkillsChangedMsg, isChecked: profile.ShowSkillsChangedMessage, valueChanged: (b) => { profile.ShowSkillsChangedMessage = b; }), true, page);
             content.Indent();
             content.AddToRight(new SliderWithLabel(lang.GetGeneral.ChangeVolume, 0, Theme.SLIDER_WIDTH, 0, 100, profile.ShowSkillsChangedDeltaValue, (r) => { profile.ShowSkillsChangedDeltaValue = r; }), true, page);
             content.RemoveIndent();
@@ -391,15 +391,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.BlankLine();
 
-            //content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.TreesToStump, isChecked: profile.TreeToStumps, valueChanged: (b) => { profile.TreeToStumps = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.TreesToStump, isChecked: profile.TreeToStumps, valueChanged: (b) => { profile.TreeToStumps = b; }), true, page);
 
             content.BlankLine();
 
             content.AddToRight(new CheckboxWithLabel(lang.GetGeneral.HideVegetation, isChecked: profile.HideVegetation, valueChanged: (b) => { profile.HideVegetation = b; }), true, page);
 
-            //content.BlankLine();
+            content.BlankLine();
 
-            //content.AddToRight(new CheckboxWithLabel("Mark cave tiles", isChecked: profile.EnableCaveBorder, valueChanged: (b) => { profile.EnableCaveBorder = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(ResGumps.MarkCaveTiles, isChecked: profile.EnableCaveBorder, valueChanged: (b) => { profile.EnableCaveBorder = b; }), true, page);
 
             content.BlankLine();
 
@@ -2466,6 +2466,8 @@ namespace ClassicUO.Game.UI.Gumps
                 profile.AutoAvoidMobiles = b;
             }), true, page);
             content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.ShowUseLootModalOnCtrl, 0, profile.EnableNearbyItemGump, (b) => profile.EnableNearbyItemGump = b), true, page);
+            content.BlankLine();
             content.AddToRight(new CheckboxWithLabel(lang.GetCombatSpells.PreviewTeleportTiles, 0, profile.PreviewTeleportTiles, (b) =>
             {
                 profile.PreviewTeleportTiles = b;
@@ -3281,7 +3283,9 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 profile.OnCastingGump_hidden = b;
             }), true, page);
-             content.BlankLine();
+            content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel("Visual response manager ON / OFF", 0, profile.VisualResponseManager, (b) => profile.VisualResponseManager = b), true, page);
+            content.BlankLine();
             #endregion
 
             #region Dust
@@ -3400,6 +3404,58 @@ namespace ClassicUO.Game.UI.Gumps
                 // ## BEGIN - END ## // LINES
             }), true, page);
 
+            content.BlankLine();
+            #endregion
+
+            #region PvM / PvP
+            page = ((int)PAGE.Dust765 + 1015);
+            content.AddToLeft(SubCategoryButton(lang.GetDust765.PvMPvPSection, page, content.LeftWidth));
+            content.ResetRightSide();
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.PvM_DamageCounterOnLastTarget, 0, profile.PvM_DamageCounterOnLastTarget, (b) => profile.PvM_DamageCounterOnLastTarget = b), true, page);
+            content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.PvM_DamageCounterAsOverhead, 0, profile.PvM_DamageCounterAsOverhead, (b) => profile.PvM_DamageCounterAsOverhead = b), true, page);
+            content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.PvM_AggroIndicatorOnHealthBar, 0, profile.PvM_AggroIndicatorOnHealthBar, (b) => profile.PvM_AggroIndicatorOnHealthBar = b), true, page);
+            content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.PvM_CorpseFilterByNotoriety, 0, profile.PvM_CorpseFilterByNotoriety, (b) => profile.PvM_CorpseFilterByNotoriety = b), true, page);
+            content.Indent();
+            content.AddToRight(new ComboBoxWithLabel("Corpse filter mode", 0, Theme.COMBO_BOX_WIDTH, new string[] { "All", "Friendly only", "Enemy only" }, profile.PvM_CorpseFilterMode, (i, s) => profile.PvM_CorpseFilterMode = i), true, page);
+            content.RemoveIndent();
+            content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.PvM_LowHpAlertOnLastTarget, 0, profile.PvM_LowHpAlertOnLastTarget, (b) => profile.PvM_LowHpAlertOnLastTarget = b), true, page);
+            content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.PvM_KillCountMarkerPerSession, 0, profile.PvM_KillCountMarkerPerSession, (b) => profile.PvM_KillCountMarkerPerSession = b), true, page);
+            content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.PvM_LootHighlightOnCorpse, 0, profile.PvM_LootHighlightOnCorpse, (b) => profile.PvM_LootHighlightOnCorpse = b), true, page);
+            content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.PvP_CriminalAttackableAlert, 0, profile.PvP_CriminalAttackableAlert, (b) => profile.PvP_CriminalAttackableAlert = b), true, page);
+            content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.PvP_WarModeIndicator, 0, profile.PvP_WarModeIndicator, (b) => profile.PvP_WarModeIndicator = b), true, page);
+            content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.PvP_GreyCriminalTimer, 0, profile.PvP_GreyCriminalTimer, (b) => profile.PvP_GreyCriminalTimer = b), true, page);
+            content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.PvP_LastAttackerHighlight, 0, profile.PvP_LastAttackerHighlight, (b) => profile.PvP_LastAttackerHighlight = b), true, page);
+            content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.PvP_SpellRangeOnCursor, 0, profile.PvP_SpellRangeOnCursor, (b) => profile.PvP_SpellRangeOnCursor = b), true, page);
+            content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.PvP_QuickTargetEnemyList, 0, profile.PvP_QuickTargetEnemyList, (b) => profile.PvP_QuickTargetEnemyList = b), true, page);
+            content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.PvX_NameOverheadProfilesByContext, 0, profile.PvX_NameOverheadProfilesByContext, (b) => profile.PvX_NameOverheadProfilesByContext = b), true, page);
+            content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.PvX_ConfigurableSoundsPerEvent, 0, profile.PvX_ConfigurableSoundsPerEvent, (b) => profile.PvX_ConfigurableSoundsPerEvent = b), true, page);
+            content.Indent();
+            content.AddToRight(new InputFieldWithLabel("Criminal alert sound ID (0=none)", Theme.INPUT_WIDTH, profile.PvX_SoundCriminalAlert.ToString(), false, (s, e) =>
+            {
+                if (int.TryParse(((InputField.StbTextBox)s).Text, out int val) && val >= 0)
+                    profile.PvX_SoundCriminalAlert = val;
+            }), true, page);
+            content.RemoveIndent();
+            content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.PvX_BlockBeneficialOnEnemies, 0, profile.PvX_BlockBeneficialOnEnemies, (b) => profile.PvX_BlockBeneficialOnEnemies = b), true, page);
+            content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.PvX_LastTargetDirectionIndicator, 0, profile.PvX_LastTargetDirectionIndicator, (b) => profile.PvX_LastTargetDirectionIndicator = b), true, page);
+            content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.PvX_LockLastTarget, 0, profile.PvX_LockLastTarget, (b) => profile.PvX_LockLastTarget = b), true, page);
             content.BlankLine();
             #endregion
 
@@ -3899,8 +3955,6 @@ namespace ClassicUO.Game.UI.Gumps
             }), true, page);
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel(lang.GetTazUO.SOSGumpID, Theme.INPUT_WIDTH, profile.SOSGumpID.ToString(), true, (s, e) => { if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint id)) { profile.SOSGumpID = id; } }), true, page);
-            content.BlankLine();
-            content.AddToRight(new CheckboxWithLabel(lang.GetTazUO.NearbyItemGump, isChecked: profile.EnableNearbyItemGump, valueChanged: (e) => { profile.EnableNearbyItemGump = e; }), true, page);
             #endregion
 
             #region Tooltips
@@ -3941,7 +3995,6 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 profile.TextBorderSize = i;
             }), true, page);
-            content.BlankLine();
             content.BlankLine();
             content.AddToRight(GenerateFontSelector(lang.GetTazUO.InfobarFont, ProfileManager.CurrentProfile.InfoBarFont, (i, s) =>
             {

@@ -83,6 +83,18 @@ namespace ClassicUO.Game.GameObjects
 
             if (IsCorpse)
             {
+                if (ProfileManager.CurrentProfile?.PvM_CorpseFilterByNotoriety == true && ProfileManager.CurrentProfile.PvM_CorpseFilterMode != 0)
+                {
+                    NotorietyFlag? ownerNoto = World.CorpseManager.GetOwnerNotoriety(Serial);
+                    if (ownerNoto.HasValue)
+                    {
+                        int mode = ProfileManager.CurrentProfile.PvM_CorpseFilterMode;
+                        bool friendly = ownerNoto == NotorietyFlag.Innocent || ownerNoto == NotorietyFlag.Ally;
+                        bool enemy = ownerNoto == NotorietyFlag.Gray || ownerNoto == NotorietyFlag.Criminal || ownerNoto == NotorietyFlag.Enemy || ownerNoto == NotorietyFlag.Murderer;
+                        if (mode == 1 && !friendly) return false;
+                        if (mode == 2 && !enemy) return false;
+                    }
+                }
                 hueVec = ShaderHueTranslator.GetHueVector(0, false, alpha);
                 return DrawCorpse(batcher, posX, posY - 3, hueVec, depth);
             }

@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -40,7 +40,7 @@ namespace ClassicUO.Game.Managers
     {
         private readonly Deque<CorpseInfo> _corpses = new Deque<CorpseInfo>();
 
-        public void Add(uint corpse, uint obj, Direction dir, bool run)
+        public void Add(uint corpse, uint obj, Direction dir, bool run, NotorietyFlag ownerNotoriety = NotorietyFlag.Gray)
         {
             for (int i = 0; i < _corpses.Count; i++)
             {
@@ -52,7 +52,18 @@ namespace ClassicUO.Game.Managers
                 }
             }
 
-            _corpses.AddToBack(new CorpseInfo(corpse, obj, dir, run));
+            _corpses.AddToBack(new CorpseInfo(corpse, obj, dir, run, ownerNotoriety));
+        }
+
+        public NotorietyFlag? GetOwnerNotoriety(uint corpseSerial)
+        {
+            for (int i = 0; i < _corpses.Count; i++)
+            {
+                ref CorpseInfo c = ref _corpses.GetAt(i);
+                if (c.CorpseSerial == corpseSerial)
+                    return c.OwnerNotoriety;
+            }
+            return null;
         }
 
         public void Remove(uint corpse, uint obj)
@@ -120,16 +131,18 @@ namespace ClassicUO.Game.Managers
 
     public struct CorpseInfo
     {
-        public CorpseInfo(uint corpseSerial, uint objectSerial, Direction direction, bool isRunning)
+        public CorpseInfo(uint corpseSerial, uint objectSerial, Direction direction, bool isRunning, NotorietyFlag ownerNotoriety = NotorietyFlag.Gray)
         {
             CorpseSerial = corpseSerial;
             ObjectSerial = objectSerial;
             Direction = direction;
             IsRunning = isRunning;
+            OwnerNotoriety = ownerNotoriety;
         }
 
         public uint CorpseSerial, ObjectSerial;
         public Direction Direction;
         public bool IsRunning;
+        public NotorietyFlag OwnerNotoriety;
     }
 }

@@ -740,6 +740,7 @@ namespace ClassicUO.Configuration
             public string OverrideContainerOpenRange { get; set; } = "Override container open range";
             public string ShowCloseFriendInWordMapGump { get; set; } = "Show Close Friend in WordMapGump";
             public string AutoAvoidObstaculesAndMobiles { get; set; } = "Auto avoid obstacules and mobiles";
+            public string ShowUseLootModalOnCtrl { get; set; } = "Show Use/Loot modal when pressing Ctrl (nearby items)";
             public string RazorTargetToLasttargetString { get; set; } = "Razor * Target * to lasttarget string";
             public string TextForTargetMsgHead { get; set; } = "Text for Target Msg Head: ";
             public string OutlineStaticsBlack { get; set; } = "Outline statics black (CURRENTLY BROKEN): ";
@@ -768,6 +769,25 @@ namespace ClassicUO.Configuration
             public string GumpsSection { get; set; } = "Gumps";
             public string TextureManager { get; set; } = "Texture Manager";
             public string LinesUI { get; set; } = "Lines (Lines UI)";
+            public string PvMPvPSection { get; set; } = "PvM / PvP";
+            public string PvM_DamageCounterOnLastTarget { get; set; } = "Damage counter (total/DPS) on last target";
+            public string PvM_DamageCounterAsOverhead { get; set; } = "Damage counter (total/DPS) as overhead above target";
+            public string PvM_AggroIndicatorOnHealthBar { get; set; } = "Aggro indicator on health bar / overhead";
+            public string PvM_CorpseFilterByNotoriety { get; set; } = "Filter corpses by notoriety";
+            public string PvM_LowHpAlertOnLastTarget { get; set; } = "Low HP alert on last target";
+            public string PvM_KillCountMarkerPerSession { get; set; } = "Kill count marker per session";
+            public string PvM_LootHighlightOnCorpse { get; set; } = "Highlight loot on corpse";
+            public string PvP_CriminalAttackableAlert { get; set; } = "Criminal / attackable alert on screen";
+            public string PvP_WarModeIndicator { get; set; } = "War mode indicator";
+            public string PvP_GreyCriminalTimer { get; set; } = "Grey / criminal timer";
+            public string PvP_LastAttackerHighlight { get; set; } = "Highlight last attacker";
+            public string PvP_SpellRangeOnCursor { get; set; } = "Spell range on cursor";
+            public string PvP_QuickTargetEnemyList { get; set; } = "Quick-target enemy list";
+            public string PvX_NameOverheadProfilesByContext { get; set; } = "Name overhead profiles (PvM vs PvP)";
+            public string PvX_ConfigurableSoundsPerEvent { get; set; } = "Configurable sounds per event";
+            public string PvX_BlockBeneficialOnEnemies { get; set; } = "Block beneficial spells on enemies";
+            public string PvX_LastTargetDirectionIndicator { get; set; } = "Last target direction (offscreen arrow)";
+            public string PvX_LockLastTarget { get; set; } = "Lock last target";
         }
 
     }

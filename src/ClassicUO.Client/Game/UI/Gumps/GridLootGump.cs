@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -587,6 +587,16 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         originalSize.Y = rect.Height;
                         point.Y = (_hit.Height >> 1) - (originalSize.Y >> 1);
+                    }
+
+                    if (ProfileManager.CurrentProfile?.PvM_LootHighlightOnCorpse == true)
+                    {
+                        bool isLoot = item.DisplayedGraphic == 0x0EED || item.DisplayedGraphic == 0x0EEE || item.Hue != 0;
+                        if (isLoot)
+                        {
+                            var hlTex = SolidColorTextureCache.GetTexture(Microsoft.Xna.Framework.Color.Gold);
+                            batcher.Draw(hlTex, new Rectangle(x + _hit.X - 1, y + _hit.Y - 1, _hit.Width + 2, _hit.Height + 2), new Rectangle(0, 0, 1, 1), ShaderHueTranslator.GetHueVector(0x0035, false, 0.8f));
+                        }
                     }
 
                     batcher.Draw(

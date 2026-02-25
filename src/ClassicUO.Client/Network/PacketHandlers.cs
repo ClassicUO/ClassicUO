@@ -558,6 +558,9 @@ namespace ClassicUO.Network
             entity.Hits = p.ReadUInt16BE();
             entity.HitsMax = p.ReadUInt16BE();
 
+            if (entity.Hits == 0 && SerialHelper.IsMobile(serial))
+                PvMPvPManager.Instance.NotifyMobileDeath(serial);
+
             if (entity.HitsRequest == HitsRequestStatus.Pending)
             {
                 entity.HitsRequest = HitsRequestStatus.Received;
@@ -1288,6 +1291,7 @@ namespace ClassicUO.Network
             }
 
             World.Player.NotorietyFlag = (NotorietyFlag)noto;
+            PvMPvPManager.Instance.OnPlayerNotorietyChanged((NotorietyFlag)noto);
             World.Player.Walker.ConfirmWalk(seq);
 
             World.Player.AddToTile();
@@ -3030,6 +3034,8 @@ namespace ClassicUO.Network
             if (SerialHelper.IsMobile(serial) && obj is Mobile mob)
             {
                 mob.NotorietyFlag = notoriety;
+                if (mob == World.Player)
+                    PvMPvPManager.Instance.OnPlayerNotorietyChanged(notoriety);
 
                 UIManager.GetGump<PaperDollGump>(serial)?.RequestUpdateContents();
                 UIManager.GetGump<ModernPaperdoll>(serial)?.RequestUpdateContents();
@@ -3933,7 +3939,7 @@ namespace ClassicUO.Network
 
             if (SerialHelper.IsValid(corpseSerial))
             {
-                World.CorpseManager.Add(corpseSerial, serial, owner.Direction, running != 0);
+                World.CorpseManager.Add(corpseSerial, serial, owner.Direction, running != 0, owner.NotorietyFlag);
             }
 
             var gfx = owner.Graphic;
@@ -4833,6 +4839,7 @@ namespace ClassicUO.Network
                         if (damage > 0)
                         {
                             World.WorldTextManager.AddDamage(en, damage);
+                            EventSink.InvokeOnEntityDamage(en, damage);
                         }
                     }
 

@@ -241,6 +241,15 @@ namespace ClassicUO
 
             Audio?.StopMusic();
             Settings.GlobalSettings.Save();
+            if (Scene is GameScene && World.Player != null)
+            {
+                try
+                {
+                    PaperdollSelectCharManager.Instance.Save();
+                    PaperdollSelectCharManager.Instance.SaveJson();
+                }
+                catch { }
+            }
             Plugin.OnClosing();
 
             ArtLoader.Instance.Dispose();

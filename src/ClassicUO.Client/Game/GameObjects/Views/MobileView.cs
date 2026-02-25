@@ -221,10 +221,11 @@ namespace ClassicUO.Game.GameObjects
             bool isAttack = Serial == TargetManager.LastAttack;
             bool isUnderMouse =
                 TargetManager.IsTargeting && ReferenceEquals(SelectedObject.Object, this);
+            bool highlightLastAttacker = ProfileManager.CurrentProfile?.PvP_LastAttackerHighlight == true && isAttack;
 
             if (Serial != World.Player.Serial)
             {
-                if (isAttack || isUnderMouse)
+                if (highlightLastAttacker || isUnderMouse)
                 {
                     overridedHue = Notoriety.GetHue(NotorietyFlag);
                 }

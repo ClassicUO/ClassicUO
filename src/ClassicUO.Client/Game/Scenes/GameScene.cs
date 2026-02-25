@@ -294,6 +294,7 @@ namespace ClassicUO.Game.Scenes
             GameController.UpdateBackgroundHueShader();
             SpellDefinition.LoadCustomSpells();
             SpellVisualRangeManager.Instance.OnSceneLoad();
+            PvMPvPManager.Instance.OnSceneLoad();
             OnCastingGump.OnSceneLoad();
             AutoLootManager.Instance.OnSceneLoad();
             if (!UpdateManager.SkipUpdateCheck && UpdateManager.HasUpdate)
@@ -493,6 +494,7 @@ namespace ClassicUO.Game.Scenes
             TileMarkerManager.Instance.Save();
             SpellVisualRangeManager.Instance.Save();
             SpellVisualRangeManager.Instance.OnSceneUnload();
+            PvMPvPManager.Instance.OnSceneUnload();
             OnCastingGump.OnSceneUnload();
             AutoLootManager.Instance.Save();
 
@@ -500,6 +502,15 @@ namespace ClassicUO.Game.Scenes
 
             Macros.Save();
             InfoBars.Save();
+            if (World.Player != null)
+            {
+                try
+                {
+                    PaperdollSelectCharManager.Instance.Save();
+                    PaperdollSelectCharManager.Instance.SaveJson();
+                }
+                catch { }
+            }
             ProfileManager.UnLoadProfile();
 
             StaticFilters.CleanCaveTextures();

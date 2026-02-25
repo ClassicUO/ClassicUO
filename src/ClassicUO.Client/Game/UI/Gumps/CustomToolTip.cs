@@ -1,4 +1,5 @@
-﻿using ClassicUO.Configuration;
+using ClassicUO.Assets;
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
@@ -42,13 +43,14 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
+            var profile = ProfileManager.CurrentProfile;
             text = new TextBox(
                 "Loading item data...",
-                ProfileManager.CurrentProfile.SelectedToolTipFont,
-                ProfileManager.CurrentProfile.SelectedToolTipFontSize,
+                profile.SelectedToolTipFont,
+                profile.SelectedToolTipFontSize,
                 150,
                 (int)hue,
-                align: ProfileManager.CurrentProfile.LeftAlignToolTips ? FontStashSharp.RichText.TextHorizontalAlignment.Left : FontStashSharp.RichText.TextHorizontalAlignment.Center
+                align: profile?.LeftAlignToolTips == true ? FontStashSharp.RichText.TextHorizontalAlignment.Left : FontStashSharp.RichText.TextHorizontalAlignment.Center
                 );
 
             Height = text.Height;
@@ -80,13 +82,14 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     text?.Dispose();
+                    var p = ProfileManager.CurrentProfile;
                     text = new TextBox(
                         TextBox.ConvertHtmlToFontStashSharpCommand(finalString).Trim(),
-                        ProfileManager.CurrentProfile.SelectedToolTipFont,
-                        ProfileManager.CurrentProfile.SelectedToolTipFontSize,
+                        p.SelectedToolTipFont,
+                        p.SelectedToolTipFontSize,
                         600,
                         (int)hue,
-                        align: ProfileManager.CurrentProfile.LeftAlignToolTips ? FontStashSharp.RichText.TextHorizontalAlignment.Left : FontStashSharp.RichText.TextHorizontalAlignment.Center
+                        align: p?.LeftAlignToolTips == true ? FontStashSharp.RichText.TextHorizontalAlignment.Left : FontStashSharp.RichText.TextHorizontalAlignment.Center
                         );
 
                     if (text.MeasuredSize.X + 10 < 600)

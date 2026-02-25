@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -33,6 +33,9 @@
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Assets;
+using ClassicUO.Game.UI.Controls;
+using FontStyle = ClassicUO.Game.FontStyle;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility;
@@ -342,25 +345,23 @@ namespace ClassicUO.Game.Managers
                 fixedColor = 0x7FFF;
             }
 
-            //Ignored the fixedColor in the textbox creation because it seems to interfere with correct colors, but if issues arrise I left the fixColor code here
-
             textObject.TextBox = new TextBox(
-                    msg,
-                    ProfileManager.CurrentProfile.OverheadChatFont,
-                    ProfileManager.CurrentProfile.OverheadChatFontSize,
-                    ProfileManager.CurrentProfile.OverheadChatWidth,
-                    hue,
-                    FontStashSharp.RichText.TextHorizontalAlignment.Center,
-                    true
-                )
+                msg,
+                ProfileManager.CurrentProfile.OverheadChatFont,
+                ProfileManager.CurrentProfile.OverheadChatFontSize,
+                ProfileManager.CurrentProfile.OverheadChatWidth,
+                hue,
+                FontStashSharp.RichText.TextHorizontalAlignment.Center,
+                true
+            )
             { AcceptMouseInput = !ProfileManager.CurrentProfile.DisableMouseInteractionOverheadText };
 
-            textObject.Time = CalculateTimeToLive(textObject.TextBox);
+            textObject.Time = CalculateTimeToLive(msg);
 
             return textObject;
         }
 
-        private static long CalculateTimeToLive(TextBox rtext)
+        private static long CalculateTimeToLive(string msg)
         {
             Profile currentProfile = ProfileManager.CurrentProfile;
 
@@ -380,21 +381,12 @@ namespace ClassicUO.Game.Managers
                     delay = 10;
                 }
 
-                int fakeLines = 0;
-                if (rtext.Text.Length > 99)
-                    fakeLines = 3;
-                else if (rtext.Text.Length > 66)
-                    fakeLines = 2;
-                else
-                    fakeLines = 1;
-
-
+                int fakeLines = msg.Length > 99 ? 3 : msg.Length > 66 ? 2 : 1;
                 timeToLive = (long)(4000 * fakeLines * delay / 100.0f);
             }
             else
             {
                 long delay = (5497558140000 * currentProfile.SpeechDelay) >> 32 >> 5;
-
                 timeToLive = (delay >> 31) + delay;
             }
 

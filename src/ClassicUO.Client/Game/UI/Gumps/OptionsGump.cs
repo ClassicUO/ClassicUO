@@ -1552,7 +1552,7 @@ namespace ClassicUO.Game.UI.Gumps
                 (
                     null,
                     ResGumps.ShowSkillsChangedMessageBy,
-                    _currentProfile.ShowStatsChangedMessage,
+                    _currentProfile.ShowSkillsChangedMessage,
                     startX,
                     startY
                 )

@@ -26,6 +26,8 @@ namespace ClassicUO.Game.Managers
         public Dictionary<string, PaperdollItem> items = new Dictionary<string, PaperdollItem>();
 
         public ushort BodyId { get; private set; }
+        public bool IsFemale { get; private set; }
+        public byte Race { get; private set; }
 
         //private string savePath = Path.Combine(ProfileManager.ProfilePath, "paperdollSelectCharManager.json");
 
@@ -79,6 +81,8 @@ namespace ClassicUO.Game.Managers
 
             if (mobile != null) {
                     BodyId = (ushort)mobile.Graphic;
+                    IsFemale = mobile.IsFemale;
+                    Race = (byte)mobile.Race;
 
                     foreach (Layer layer in Enum.GetValues(typeof(Layer)))
                     {
@@ -129,6 +133,8 @@ namespace ClassicUO.Game.Managers
                 PaperdollSaveData saveData = new PaperdollSaveData
                 {
                     BodyId = BodyId,
+                    IsFemale = IsFemale,
+                    Race = Race,
                     Items = new Dictionary<string, PaperdollItem>(items)
                 };
 
@@ -158,12 +164,16 @@ namespace ClassicUO.Game.Managers
                     if (saveData != null && saveData.Items != null)
                     {
                         BodyId = saveData.BodyId;
+                        IsFemale = saveData.IsFemale;
+                        Race = saveData.Race;
                         items = saveData.Items;
                         return;
                     }
 
                     items = JsonSerializer.Deserialize<Dictionary<string, PaperdollItem>>(json) ?? new Dictionary<string, PaperdollItem>();
                     BodyId = 0;
+                    IsFemale = false;
+                    Race = (byte)RaceType.HUMAN;
                 }
                 catch (Exception ex)
                 {
@@ -175,6 +185,8 @@ namespace ClassicUO.Game.Managers
         private class PaperdollSaveData
         {
             public ushort BodyId { get; set; }
+            public bool IsFemale { get; set; }
+            public byte Race { get; set; }
             public Dictionary<string, PaperdollItem> Items { get; set; }
         }
     }

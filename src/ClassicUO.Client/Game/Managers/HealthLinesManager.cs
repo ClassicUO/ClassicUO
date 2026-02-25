@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -96,7 +96,8 @@ namespace ClassicUO.Game.Managers
                     camera.Bounds.Width,
                     camera.Bounds.Height
                 );
-                DrawTargetIndicator(batcher, TargetManager.LastTargetInfo.Serial);
+                if (ProfileManager.CurrentProfile?.PvX_LastTargetDirectionIndicator == true)
+                    DrawTargetIndicator(batcher, TargetManager.LastTargetInfo.Serial);
             }
 
             if (SerialHelper.IsMobile(TargetManager.SelectedTarget))
