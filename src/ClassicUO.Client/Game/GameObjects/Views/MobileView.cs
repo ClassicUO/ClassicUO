@@ -23,6 +23,18 @@ namespace ClassicUO.Game.GameObjects
         private static int _startCharacterFeetY;
         private static int _characterFrameHeight;
 
+        internal sealed class StitchinCache
+        {
+            public uint Generation = uint.MaxValue; // force first compute
+            public readonly Dictionary<ushort, ushort> Replacements = new Dictionary<ushort, ushort>();
+            public readonly HashSet<ushort> Removals = new HashSet<ushort>();
+            public readonly ushort[] LayerEffectiveAnimID = new ushort[30];
+            public readonly uint[] LayerCovers = new uint[30];
+            public readonly uint[] LayerCoveredBy = new uint[30];
+            public readonly uint[] LayerActiveCovers = new uint[30]; // covers from entries with replace/remove
+            public uint CoveredLayerMask;
+        }
+
         public override bool Draw(UltimaBatcher2D batcher, int posX, int posY, float depth)
         {
             if (IsDestroyed || !AllowedToDraw)
@@ -348,6 +360,10 @@ namespace ClassicUO.Game.GameObjects
 
             if (!IsEmpty)
             {
+                var stitchin = Client.Game.UO.FileManager.Stitchin;
+                bool useStitchin = isHuman && stitchin != null && stitchin.IsLoaded;
+                StitchinCache stCache = useStitchin ? EnsureStitchinCache() : null;
+
                 for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
                 {
                     Layer layer = LayerOrder.UsedLayers[layerDir, i];
@@ -366,14 +382,38 @@ namespace ClassicUO.Game.GameObjects
 
                     if (isHuman)
                     {
+                        ushort effectiveAnimID = item.ItemData.AnimID;
+                        bool stitchinReplaced = false;
+
+                        if (stCache != null)
+                        {
+                            if (stCache.Removals.Contains(effectiveAnimID))
+                            {
+                                continue;
+                            }
+
+                            ushort stEffective = stCache.LayerEffectiveAnimID[(byte)layer];
+
+                            if (stEffective != 0 && stEffective != effectiveAnimID)
+                            {
+                                effectiveAnimID = stEffective;
+                                stitchinReplaced = true;
+                            }
+
+                            if (!stitchinReplaced && IsStitchinCovered(stCache, layer))
+                            {
+                                continue;
+                            }
+                        }
+
                         if (IsCovered(this, layer))
                         {
                             continue;
                         }
 
-                        if (item.ItemData.AnimID != 0)
+                        if (effectiveAnimID != 0)
                         {
-                            graphic = item.ItemData.AnimID;
+                            graphic = effectiveAnimID;
 
                             if (isGargoyle)
                             {
@@ -387,10 +427,41 @@ namespace ClassicUO.Game.GameObjects
                                 )
                             )
                             {
-                                if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
+                                if (map.TryGetValue(effectiveAnimID, out EquipConvData data))
                                 {
                                     _equipConvData = data;
                                     graphic = data.Graphic;
+                                }
+                            }
+
+                            // If stitchin replaced the anim and the replacement has no
+                            // frames, fall back to the original item animation.
+                            if (stitchinReplaced)
+                            {
+                                var checkGroup = isGargoyle && seatData.Graphic == 0
+                                    ? GetGroupForAnimation(this, graphic, true)
+                                    : animGroup;
+
+                                var testFrames = Client.Game.UO.Animations.GetAnimationFrames(
+                                    graphic, checkGroup, dir, out _, out _, false, false);
+
+                                if (testFrames.Length == 0)
+                                {
+                                    effectiveAnimID = item.ItemData.AnimID;
+                                    graphic = effectiveAnimID;
+                                    stitchinReplaced = false;
+                                    _equipConvData = null;
+
+                                    if (isGargoyle)
+                                    {
+                                        FixGargoyleEquipments(ref graphic);
+                                    }
+
+                                    if (map != null && map.TryGetValue(effectiveAnimID, out var origData))
+                                    {
+                                        _equipConvData = origData;
+                                        graphic = origData.Graphic;
+                                    }
                                 }
                             }
 
@@ -411,7 +482,7 @@ namespace ClassicUO.Game.GameObjects
                                     : animGroup,
                                 dir,
                                 isHuman,
-                                true,
+                                !stitchinReplaced,
                                 false,
                                 isGargoyle,
                                 depth,
@@ -482,11 +553,13 @@ namespace ClassicUO.Game.GameObjects
             return true;
         }
 
-        private static ushort GetAnimationInfo(Mobile owner, Item item, bool isGargoyle)
+        private static ushort GetAnimationInfo(Mobile owner, Item item, bool isGargoyle, ushort overrideAnimID = 0)
         {
-            if (item.ItemData.AnimID != 0)
+            ushort animID = overrideAnimID != 0 ? overrideAnimID : item.ItemData.AnimID;
+
+            if (animID != 0)
             {
-                var graphic = item.ItemData.AnimID;
+                var graphic = animID;
 
                 if (isGargoyle)
                 {
@@ -500,7 +573,7 @@ namespace ClassicUO.Game.GameObjects
                     )
                 )
                 {
-                    if (map.TryGetValue(item.ItemData.AnimID, out EquipConvData data))
+                    if (map.TryGetValue(animID, out EquipConvData data))
                     {
                         _equipConvData = data;
                         graphic = data.Graphic;
@@ -1091,20 +1164,61 @@ namespace ClassicUO.Game.GameObjects
 
             if (!IsEmpty && isHuman)
             {
+                var stitchin = Client.Game.UO.FileManager.Stitchin;
+                bool useStitchin = stitchin != null && stitchin.IsLoaded;
+                StitchinCache stCache = useStitchin ? EnsureStitchinCache() : null;
+
                 for (Layer layer = Layer.Invalid + 1; layer < Layer.Mount; ++layer)
                 {
                     Item item = FindItemByLayer(layer);
 
-                    if (
-                        item == null
-                        || (IsDead && (layer == Layer.Hair || layer == Layer.Beard))
-                        || IsCovered(this, layer)
-                    )
+                    if (item == null || (IsDead && (layer == Layer.Hair || layer == Layer.Beard)))
                     {
                         continue;
                     }
 
+                    ushort effectiveAnimID = item.ItemData.AnimID;
+                    bool stitchinReplaced = false;
+
+                    if (stCache != null)
+                    {
+                        if (stCache.Removals.Contains(effectiveAnimID))
+                        {
+                            continue;
+                        }
+
+                        ushort stEffective = stCache.LayerEffectiveAnimID[(byte)layer];
+
+                        if (stEffective != 0 && stEffective != effectiveAnimID)
+                        {
+                            effectiveAnimID = stEffective;
+                            stitchinReplaced = true;
+                        }
+
+                        if (!stitchinReplaced && IsStitchinCovered(stCache, layer))
+                        {
+                            continue;
+                        }
+                    }
+
+                    if (IsCovered(this, layer))
+                    {
+                        continue;
+                    }
+
+                    graphic = GetAnimationInfo(this, item, isGargoyle, useStitchin ? effectiveAnimID : (ushort)0);
+
+                    // If stitchin replaced the anim and no frames exist, fall back to original
+                    if (stitchinReplaced && graphic != 0xFFFF)
+                    {
+                        var testFrames = Client.Game.UO.Animations.GetAnimationFrames(
+                            graphic, animGroupBackup, dir, out _, out _, false, false);
+
+                        if (testFrames.Length == 0)
+                        {
                     graphic = GetAnimationInfo(this, item, isGargoyle);
+                        }
+                    }
 
                     if (graphic != 0xFFFF)
                     {
@@ -1157,6 +1271,146 @@ namespace ClassicUO.Game.GameObjects
             return false;
         }
 
+        internal StitchinCache EnsureStitchinCache()
+        {
+            var cache = _stitchinCache ??= new StitchinCache();
+            if (cache.Generation == _equipmentGeneration)
+                return cache;
+
+            ComputeStitchinFull(this, cache);
+            cache.Generation = _equipmentGeneration;
+            return cache;
+        }
+
+        private static void ComputeStitchinFull(Mobile mobile, StitchinCache cache)
+        {
+            cache.Replacements.Clear();
+            cache.Removals.Clear();
+            Array.Clear(cache.LayerEffectiveAnimID, 0, cache.LayerEffectiveAnimID.Length);
+            Array.Clear(cache.LayerCovers, 0, cache.LayerCovers.Length);
+            Array.Clear(cache.LayerCoveredBy, 0, cache.LayerCoveredBy.Length);
+            Array.Clear(cache.LayerActiveCovers, 0, cache.LayerActiveCovers.Length);
+
+            var stitchin = Client.Game.UO.FileManager.Stitchin;
+
+            // First pass: collect replacements and removals from all worn items
+            for (Layer lay = Layer.OneHanded; lay < Layer.Mount; lay++)
+            {
+                Item it = mobile.FindItemByLayer(lay);
+                if (it == null || it.ItemData.AnimID == 0)
+                {
+                    continue;
+                }
+
+                if (stitchin.TryGetEntry(it.ItemData.AnimID, out StitchinEntry ent))
+                {
+                    if (ent.Replacements != null)
+                    {
+                        foreach (var kvp in ent.Replacements)
+                        {
+                            cache.Replacements.TryAdd(kvp.Key, kvp.Value);
+                        }
+                    }
+
+                    if (ent.Removals != null)
+                    {
+                        foreach (var id in ent.Removals)
+                        {
+                            cache.Removals.Add(id);
+                        }
+                    }
+                }
+            }
+
+            // Second pass: resolve effective AnimIDs and look up coverage data
+            for (Layer lay = Layer.OneHanded; lay < Layer.Mount; lay++)
+            {
+                Item it = mobile.FindItemByLayer(lay);
+                if (it == null || it.ItemData.AnimID == 0)
+                {
+                    continue;
+                }
+
+                ushort animID = it.ItemData.AnimID;
+                ushort effective = cache.Replacements.TryGetValue(animID, out ushort rep) ? rep : animID;
+
+                cache.LayerEffectiveAnimID[(byte)lay] = effective;
+
+                // Coverage data comes from the EFFECTIVE entry (post-replacement).
+                // Replaced items have their own entries with updated (typically smaller)
+                // coverage — e.g. shirt 538 covers torso+arms, but its replacement
+                // 2251 (tunic-only) covers only torso.
+                ushort coverageLookupID = effective;
+                if (!stitchin.TryGetEntry(coverageLookupID, out StitchinEntry coverageEntry))
+                {
+                    // Fall back to original entry if the replacement has no entry
+                    stitchin.TryGetEntry(animID, out coverageEntry);
+                }
+
+                cache.LayerCovers[(byte)lay] = coverageEntry.Covers;
+                cache.LayerCoveredBy[(byte)lay] = coverageEntry.CoveredBy;
+
+                    // "Active" entries have replace/remove directives — they
+                    // actively manage equipment relationships.  Only coverage
+                    // from active entries should hide other items.
+                // Use the ORIGINAL entry for this check since that's where
+                // the replace/remove directives live.
+                if (stitchin.TryGetEntry(animID, out StitchinEntry origEntry))
+                {
+                    if (origEntry.Replacements != null || origEntry.Removals != null)
+                    {
+                        cache.LayerActiveCovers[(byte)lay] = coverageEntry.Covers;
+                    }
+                }
+            }
+
+            // Precompute coverage bitmask using only active covers
+            uint coveredMask = 0;
+            for (byte lay = (byte)Layer.OneHanded; lay < (byte)Layer.Mount; lay++)
+            {
+                // Weapon layers should never be hidden by body-part coverage
+                if (lay == (byte)Layer.OneHanded || lay == (byte)Layer.TwoHanded)
+                    continue;
+
+                // Use the item's own covers if available; fall back to coveredBy for
+                // items that don't cover any body parts themselves (e.g. hair, beard).
+                uint myCovers = cache.LayerCovers[lay];
+                uint checkMask = myCovers != 0 ? myCovers : cache.LayerCoveredBy[lay];
+                if (checkMask == 0)
+                    continue;
+
+                // Check if any single other active item is a STRICT superset of
+                // this item's coverage.  Peer items with identical coverage (e.g.
+                // shirt and torso both covering TORSO+arms) must not hide each other.
+                bool isCovered = false;
+                for (byte other = (byte)Layer.OneHanded; other < (byte)Layer.Mount; other++)
+                {
+                    if (other == (byte)Layer.OneHanded || other == (byte)Layer.TwoHanded)
+                        continue;
+                    if (other == lay)
+                        continue;
+
+                    uint otherCovers = cache.LayerActiveCovers[other];
+                    if (otherCovers == 0)
+                        continue;
+
+                    if ((checkMask & otherCovers) == checkMask && otherCovers != checkMask)
+                    {
+                        isCovered = true;
+                        break;
+                    }
+                }
+
+                if (isCovered)
+                    coveredMask |= 1u << lay;
+            }
+            cache.CoveredLayerMask = coveredMask;
+        }
+
+        internal static bool IsStitchinCovered(StitchinCache cache, Layer layer)
+        {
+            return (cache.CoveredLayerMask & (1u << (byte)layer)) != 0;
+        }
         internal static bool IsCovered(Mobile mobile, Layer layer)
         {
             if (mobile.IsEmpty)
