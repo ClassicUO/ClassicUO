@@ -38,11 +38,12 @@ namespace ClassicUO.Game.UI.Gumps
         //experimental
         private Checkbox _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _disableAutoMove, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG, _saveHealthbars;
         private HSliderBar _cellSize;
-        private Checkbox _containerScaleItems, _containerDoubleClickToLoot, _relativeDragAnDropItems, _useLargeContianersGumps, _highlightContainersWhenMouseIsOver;
+        private Checkbox _containerScaleItems, _containerDoubleClickToLoot, _relativeDragAnDropItems, _useLargeContianersGumps, _highlightContainersWhenMouseIsOver, _useItemBoxesInContainers;
 
 
         // containers
         private HSliderBar _containersScale;
+        private HSliderBar _itemBoxPadding;
         private Combobox _cotType;
         private DataBox _databox;
         private HSliderBar _delay_before_display_tooltip, _tooltip_zoom, _tooltip_background_opacity;
@@ -3424,6 +3425,34 @@ namespace ClassicUO.Game.UI.Gumps
 
             startY += _relativeDragAnDropItems.Height + 2;
 
+            _useItemBoxesInContainers = AddCheckBox
+            (
+                rightArea,
+                "Expand item hitboxes in containers for easier interaction",
+                _currentProfile.UseItemBoxesInContainers,
+                startX,
+                startY
+            );
+
+            startY += _useItemBoxesInContainers.Height + 2;
+
+            text = AddLabel(rightArea, "- Item box padding size:", startX, startY);
+            startX += text.Width + 5;
+
+            _itemBoxPadding = AddHSlider
+            (
+                rightArea,
+                5,
+                20,
+                _currentProfile.ItemBoxPadding,
+                startX,
+                startY,
+                200
+            );
+
+            startX = 5;
+            startY += text.Height + 2;
+
             _highlightContainersWhenMouseIsOver = AddCheckBox
             (
                 rightArea,
@@ -4327,6 +4356,19 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.UseLargeContainerGumps = _useLargeContianersGumps.IsChecked;
             _currentProfile.DoubleClickToLootInsideContainers = _containerDoubleClickToLoot.IsChecked;
             _currentProfile.RelativeDragAndDropItems = _relativeDragAnDropItems.IsChecked;
+            
+            if (_currentProfile.UseItemBoxesInContainers != _useItemBoxesInContainers.IsChecked || 
+                _currentProfile.ItemBoxPadding != (byte)_itemBoxPadding.Value)
+            {
+                _currentProfile.UseItemBoxesInContainers = _useItemBoxesInContainers.IsChecked;
+                _currentProfile.ItemBoxPadding = (byte)_itemBoxPadding.Value;
+
+                foreach (ContainerGump containerGump in UIManager.Gumps.OfType<ContainerGump>())
+                {
+                    containerGump.RequestUpdateContents();
+                }
+            }
+            
             _currentProfile.HighlightContainerWhenSelected = _highlightContainersWhenMouseIsOver.IsChecked;
             _currentProfile.HueContainerGumps = _hueContainerGumps.IsChecked;
 
