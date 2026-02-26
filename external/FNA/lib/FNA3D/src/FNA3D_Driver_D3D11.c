@@ -4794,8 +4794,8 @@ static FNA3D_Device* D3D11_CreateDevice(
 
 try_create_device:
 	res = D3D11CreateDeviceFunc(
-		NULL, /* FIXME: Should be renderer->adapter! */
-		D3D_DRIVER_TYPE_HARDWARE,
+		(IDXGIAdapter*) renderer->adapter,
+		D3D_DRIVER_TYPE_UNKNOWN,
 		NULL,
 		flags,
 		levels,
