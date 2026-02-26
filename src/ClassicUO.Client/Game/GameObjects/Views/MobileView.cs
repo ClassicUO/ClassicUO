@@ -235,8 +235,8 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            // ## BEGIN - END ## // VISUAL HELPERS
-            if (ProfileManager.CurrentProfile.HighlightLastTargetType != 0 && World.Get(TargetManager.LastTargetInfo.Serial) == this)
+            bool isLastTarget = World.Get(TargetManager.LastTargetInfo.Serial) == this;
+            if (ProfileManager.CurrentProfile.HighlightLastTargetType != 0 && (isLastTarget || isAttack))
             {
                 overridedHue = CombatCollection.LastTargetHue(this, overridedHue);
                 hueVec.Y = 1;

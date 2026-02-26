@@ -339,7 +339,7 @@ namespace ClassicUO.Game.Managers
 
                         if (entity != World.Player)
                         {
-                            if (!ProfileManager.CurrentProfile.PvX_LockLastTarget || serial != 0 || !LastTargetInfo.IsEntity)
+                            if (ProfileManager.CurrentProfile == null || !ProfileManager.CurrentProfile.PvX_LockLastTarget || serial != 0 || !LastTargetInfo.IsEntity)
                                 LastTargetInfo.SetEntity(serial);
                         }
 
@@ -349,7 +349,7 @@ namespace ClassicUO.Game.Managers
 
                             if (mobile != null)
                             {
-                                if (TargetingType == TargetType.Beneficial && ProfileManager.CurrentProfile.PvX_BlockBeneficialOnEnemies
+                                if (TargetingType == TargetType.Beneficial && ProfileManager.CurrentProfile?.PvX_BlockBeneficialOnEnemies == true
                                     && (mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Gray || mobile.NotorietyFlag == NotorietyFlag.Enemy || mobile.NotorietyFlag == NotorietyFlag.Murderer))
                                 {
                                     GameActions.Print("Cannot cast beneficial on enemy.", 0x0026);
@@ -651,7 +651,7 @@ namespace ClassicUO.Game.Managers
 
                         if (serial != World.Player.Serial)
                         {
-                            if (!ProfileManager.CurrentProfile.PvX_LockLastTarget || serial != 0 || !LastTargetInfo.IsEntity)
+                            if (ProfileManager.CurrentProfile == null || !ProfileManager.CurrentProfile.PvX_LockLastTarget || serial != 0 || !LastTargetInfo.IsEntity)
                                 LastTargetInfo.SetEntity(serial);
                         }
 

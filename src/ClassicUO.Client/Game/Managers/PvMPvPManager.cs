@@ -211,13 +211,13 @@ namespace ClassicUO.Game.Managers
             string aggro = profile.PvM_AggroIndicatorOnHealthBar ? "Aggro" : string.Empty;
             int total = GetTotalDamage(serial);
             double dps = GetDPS(serial);
-            string dmg = total > 0 ? $"{total} | {dps:F1} DPS" : string.Empty;
+            string dmg = total > 0 ? $"{total} | {dps:F1} DPS" : "0 | 0 DPS";
             string kills = profile.PvM_KillCountMarkerPerSession && SessionKillCount > 0
-                ? (string.IsNullOrEmpty(dmg) ? $"Kills: {SessionKillCount}" : $" | Kills: {SessionKillCount}")
+                ? $" | Kills: {SessionKillCount}"
                 : string.Empty;
             string line = dmg + kills;
             if (!string.IsNullOrEmpty(aggro))
-                line = string.IsNullOrEmpty(line) ? aggro : aggro + " | " + line;
+                line = aggro + " | " + line;
             return line;
         }
     }

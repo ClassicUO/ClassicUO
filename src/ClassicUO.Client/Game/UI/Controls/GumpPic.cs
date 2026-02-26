@@ -109,16 +109,37 @@ namespace ClassicUO.Game.UI.Controls
         public int Height { get; }
         public ushort Hue { get; set; }
 
+        private readonly Rectangle? _sourceRect;
+
         public CustomGumpPic(int x, int y, Texture2D texture, ushort hue = 0)
         {
             X = x;
             Y = y;
             _customTexture = texture;
             Hue = hue;
-            
-            if(_customTexture != null){
+            _sourceRect = null;
+            if (_customTexture != null)
+            {
                 Width = _customTexture.Width;
                 Height = _customTexture.Height;
+            }
+        }
+
+        public CustomGumpPic(int x, int y, Texture2D texture, int displayWidth, int displayHeight, ushort hue = 0)
+        {
+            X = x;
+            Y = y;
+            _customTexture = texture;
+            Hue = hue;
+            if (_customTexture != null)
+            {
+                _sourceRect = new Rectangle(0, 0, _customTexture.Width, _customTexture.Height);
+                Width = displayWidth;
+                Height = displayHeight;
+            }
+            else
+            {
+                _sourceRect = null;
             }
         }
 
@@ -130,13 +151,15 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, false, Alpha, true);
-
-            // Desenha a textura customizada
-            batcher.Draw(
-                _customTexture,
-                new Rectangle(x, y, Width, Height),
-                hueVector
-            );
+            Rectangle dest = new Rectangle(x, y, Width, Height);
+            if (_sourceRect.HasValue)
+            {
+                batcher.Draw(_customTexture, dest, _sourceRect, hueVector);
+            }
+            else
+            {
+                batcher.Draw(_customTexture, dest, hueVector);
+            }
 
             return base.Draw(batcher, x, y);
         }

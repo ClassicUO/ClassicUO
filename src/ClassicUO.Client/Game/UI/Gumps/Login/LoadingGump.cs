@@ -31,12 +31,15 @@
 #endregion
 
 using System;
+using System.IO;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Utility;
 using FontStashSharp.RichText;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using SDL2;
 
 namespace ClassicUO.Game.UI.Gumps.Login
@@ -56,17 +59,23 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private const int LabelMaxWidth = 400;
         private const int ButtonWidth = 120;
         private const int ButtonHeight = 40;
+        private const uint LoadingDotIntervalMs = 400;
         private static readonly Color ModalBgColor = Color.FromNonPremultiplied(25, 8, 8, 255);
         private static readonly Color AccentColor = Color.FromNonPremultiplied(180, 50, 50, 255);
 
         private readonly Action<int> _buttonClick;
         private readonly TextBox _label;
+        private readonly Texture2D _logoTexture;
+        private string _baseLabelText;
+        private uint _lastDotTicks;
+        private int _loadingDotPhase;
 
         public LoadingGump(string labelText, LoginButtons showButtons, Action<int> buttonClick = null) : base(0, 0)
         {
             X = LoginLayoutHelper.ContentOffsetX;
             Y = LoginLayoutHelper.ContentOffsetY;
             _buttonClick = buttonClick;
+            _baseLabelText = string.IsNullOrEmpty(labelText) ? "Loading" : labelText.TrimEnd('.');
             CanCloseWithRightClick = false;
             CanCloseWithEsc = false;
 
@@ -88,6 +97,20 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Y = panelY
             });
 
+            const int LogoMaxWidth = 180;
+            const int LogoMaxHeight = 40;
+            string logoPath = Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "logodust.png");
+            _logoTexture = PNGLoader.Instance.GetImageTexture(logoPath);
+            if (_logoTexture != null)
+            {
+                float scale = Math.Min((float)LogoMaxWidth / _logoTexture.Width, (float)LogoMaxHeight / _logoTexture.Height);
+                int logoW = (int)(_logoTexture.Width * scale);
+                int logoH = (int)(_logoTexture.Height * scale);
+                int logoX = panelX + ((ModalWidth - logoW) >> 1);
+                int logoY = panelY + 12;
+                Add(new CustomGumpPic(logoX, logoY, _logoTexture, logoW, logoH, 0));
+            }
+
             Add(new RoundedColorBox(ModalWidth, 2, AccentColor, 0)
             {
                 X = panelX,
@@ -95,13 +118,16 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Alpha = 0.85f
             });
 
-            _label = new TextBox(labelText, TrueTypeLoader.EMBEDDED_FONT, 20, LabelMaxWidth, Color.White, TextHorizontalAlignment.Center, false)
+            string initialLabel = _baseLabelText + ".";
+            _label = new TextBox(initialLabel, TrueTypeLoader.EMBEDDED_FONT, 20, LabelMaxWidth, Color.White, TextHorizontalAlignment.Center, false)
             {
                 X = panelX + (ModalWidth >> 1) - (LabelMaxWidth >> 1),
                 Y = panelY + 68,
                 AcceptMouseInput = false
             };
             Add(_label);
+            _lastDotTicks = Time.Ticks;
+            _loadingDotPhase = 1;
 
             int buttonY = panelY + ModalHeight - ButtonHeight - 24;
 
@@ -136,13 +162,21 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 X = LoginLayoutHelper.ContentOffsetX;
                 Y = LoginLayoutHelper.ContentOffsetY;
+                uint now = Time.Ticks;
+                if (now - _lastDotTicks >= LoadingDotIntervalMs)
+                {
+                    _lastDotTicks = now;
+                    _loadingDotPhase = (_loadingDotPhase % 3) + 1;
+                    _label.Text = _baseLabelText + new string('.', _loadingDotPhase);
+                }
             }
             base.Update();
         }
 
         public void SetText(string text)
         {
-            _label.Text = text;
+            _baseLabelText = string.IsNullOrEmpty(text) ? "Loading" : text.TrimEnd('.');
+            _label.Text = _baseLabelText + new string('.', _loadingDotPhase);
         }
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)

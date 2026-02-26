@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -88,7 +88,7 @@ namespace ClassicUO.Game.UI.Controls
                 (
                     0,
                     _hotkeyBox.Height + 3,
-                    150,
+                    180,
                     25,
                     ButtonAction.Activate,
                     ResGumps.CreateMacroButton,
@@ -100,7 +100,7 @@ namespace ClassicUO.Game.UI.Controls
             (
                 new NiceButton
                 (
-                    170,
+                    195,
                     _hotkeyBox.Height + 3,
                     150,
                     25,

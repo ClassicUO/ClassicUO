@@ -7252,7 +7252,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(_hotkeyBox);
 
                 Control c;
-                Add(c = new ModernButton(0, _hotkeyBox.Height + 3, 200, 40, ButtonAction.Activate, ResGumps.CreateMacroButton, Theme.BUTTON_FONT_COLOR) { ButtonParameter = (int)buttonsOption.CreateNewMacro, IsSelectable = true, IsSelected = true });
+                Add(c = new ModernButton(0, _hotkeyBox.Height + 3, 220, 40, ButtonAction.Activate, ResGumps.CreateMacroButton, Theme.BUTTON_FONT_COLOR) { ButtonParameter = (int)buttonsOption.CreateNewMacro, IsSelectable = true, IsSelected = true });
                 Add(c = new ModernButton(c.Width + c.X + 10, c.Y, 200, 40, ButtonAction.Activate, ResGumps.MacroButtonEditor, Theme.BUTTON_FONT_COLOR) { ButtonParameter = (int)buttonsOption.OpenButtonEditor, IsSelectable = true, IsSelected = true });
 
                 Add(c = new Line(0, c.Y + c.Height + 5, 325, 1, Color.Gray.PackedValue));
@@ -8368,7 +8368,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private static class PositionHelper
         {
-            public static int X, Y = Theme.TOP_PADDING, LAST_Y = Theme.TOP_PADDING;
+            public static int X = Theme.CONTENT_MARGIN, Y = Theme.TOP_PADDING + Theme.CONTENT_MARGIN, LAST_Y = Theme.TOP_PADDING + Theme.CONTENT_MARGIN;
 
             public static void BlankLine()
             {
@@ -8383,7 +8383,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public static void RemoveIndent()
             {
-                X -= Theme.INDENT_SPACE;
+                X = Math.Max(Theme.CONTENT_MARGIN, X - Theme.INDENT_SPACE);
             }
 
             public static void PositionControl(Control c)
@@ -8403,8 +8403,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             public static void Reset()
             {
-                X = 0;
-                Y = Theme.TOP_PADDING;
+                X = Theme.CONTENT_MARGIN;
+                Y = Theme.TOP_PADDING + Theme.CONTENT_MARGIN;
                 LAST_Y = Y;
             }
         }
