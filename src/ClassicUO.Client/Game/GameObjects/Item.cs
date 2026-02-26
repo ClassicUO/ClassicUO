@@ -338,14 +338,7 @@ namespace ClassicUO.Game.GameObjects
 
                             for (int i = 0; i < count; i++)
                             {
-                                MultiBlockNew* block = (MultiBlockNew*)(
-                                    reader.PositionAddress + i * sizeOf
-                                );
-
-                                if (block->Unknown != 0)
-                                {
-                                    reader.Skip((int)(block->Unknown * 4));
-                                }
+                                MultiBlockNew* block = (MultiBlockNew*)reader.PositionAddress;
 
                                 if (block->X < minX)
                                 {
@@ -396,6 +389,10 @@ namespace ClassicUO.Game.GameObjects
                                 {
                                     MultiGraphic = block->ID;
                                 }
+
+                                reader.Skip(sizeOf);
+                                if (block->Unknown != 0)
+                                    reader.Skip((int)(block->Unknown * 4));
                             }
 
                             reader.Release();

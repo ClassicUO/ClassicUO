@@ -44,10 +44,12 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildGump()
         {
             var profile = ProfileManager.CurrentProfile;
+            string font = profile?.SelectedToolTipFont ?? "Roboto-Regular";
+            int fontSize = profile?.SelectedToolTipFontSize ?? 20;
             text = new TextBox(
                 "Loading item data...",
-                profile.SelectedToolTipFont,
-                profile.SelectedToolTipFontSize,
+                font,
+                fontSize,
                 150,
                 (int)hue,
                 align: profile?.LeftAlignToolTips == true ? FontStashSharp.RichText.TextHorizontalAlignment.Left : FontStashSharp.RichText.TextHorizontalAlignment.Center
@@ -83,10 +85,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                     text?.Dispose();
                     var p = ProfileManager.CurrentProfile;
+                    string font = p?.SelectedToolTipFont ?? "Roboto-Regular";
+                    int fontSize = p?.SelectedToolTipFontSize ?? 20;
                     text = new TextBox(
                         TextBox.ConvertHtmlToFontStashSharpCommand(finalString).Trim(),
-                        p.SelectedToolTipFont,
-                        p.SelectedToolTipFontSize,
+                        font,
+                        fontSize,
                         600,
                         (int)hue,
                         align: p?.LeftAlignToolTips == true ? FontStashSharp.RichText.TextHorizontalAlignment.Left : FontStashSharp.RichText.TextHorizontalAlignment.Center

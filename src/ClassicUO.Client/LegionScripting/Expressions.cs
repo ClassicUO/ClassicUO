@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System;
 using ClassicUO.Game;
 using LScript;
@@ -299,6 +299,8 @@ namespace ClassicUO.LegionScripting
         {
             if (args.Length < 1)
                 throw new RunTimeError(null, "Usage: buffexists 'name'");
+            if (World.Player == null)
+                return false;
 
             string bufftext = args[0].AsString().ToLower();
 
@@ -411,6 +413,48 @@ namespace ClassicUO.LegionScripting
                 return m.HitsMax - m.Hits;
 
             return 0;
+        }
+        public static int DiffStam(string expression, Argument[] args, bool quiet)
+        {
+            uint serial = World.Player.Serial;
+            if (args.Length > 0)
+                serial = args[0].AsSerial();
+            if (World.Mobiles.TryGetValue(serial, out var m))
+                return m.StaminaMax - m.Stamina;
+            return 0;
+        }
+        public static int DiffMana(string expression, Argument[] args, bool quiet)
+        {
+            uint serial = World.Player.Serial;
+            if (args.Length > 0)
+                serial = args[0].AsSerial();
+            if (World.Mobiles.TryGetValue(serial, out var m))
+                return m.ManaMax - m.Mana;
+            return 0;
+        }
+        public static bool NearestCorpse(string expression, Argument[] args, bool quiet)
+        {
+            int maxDist = args.Length > 0 ? args[0].AsInt() : 12;
+            Item nearest = null;
+            int bestDist = int.MaxValue;
+            foreach (Item item in World.Items.Values)
+            {
+                if (item == null || item.IsDestroyed || !item.IsCorpse || Interpreter.InIgnoreList(item))
+                    continue;
+                if (item.Distance > maxDist)
+                    continue;
+                if (item.Distance < bestDist)
+                {
+                    bestDist = item.Distance;
+                    nearest = item;
+                }
+            }
+            if (nearest != null)
+            {
+                Interpreter.SetAlias(Constants.FOUND, nearest);
+                return true;
+            }
+            return false;
         }
         public static bool FindTypeList(string expression, Argument[] args, bool quiet)
         {

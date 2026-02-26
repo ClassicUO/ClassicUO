@@ -444,19 +444,18 @@ namespace ClassicUO.Game.GameObjects
                 color = newHue;
             }
 
-            if (frames.Length == 0)
+            if (frames == null || frames.Length == 0)
             {
                 return;
             }
 
             int fc = frames.Length;
-
+            if (animIndex < 0)
+                animIndex = 0;
             if (fc > 0 && animIndex >= fc)
-            {
                 animIndex = (byte)(fc - 1);
-            }
 
-            if (animIndex < frames.Length)
+            if (animIndex >= 0 && animIndex < frames.Length)
             {
                 ref var spriteInfo = ref frames[animIndex];
 
@@ -748,37 +747,46 @@ namespace ClassicUO.Game.GameObjects
                         animIndex = (byte)(animIndex % frames.Length);
                     }
 
-                    ref var spriteInfo = ref frames[animIndex];
+                    if (animIndex < 0 || animIndex >= frames.Length)
+                        continue;
 
-                    if (spriteInfo.Texture != null)
+                    try
                     {
-                        int x =
-                            position.X
-                            - (
-                                IsFlipped
-                                    ? spriteInfo.UV.Width - spriteInfo.Center.X
-                                    : spriteInfo.Center.X
-                            );
-                        int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);
+                        ref var spriteInfo = ref frames[animIndex];
 
-                        if (
-                            Client.Game.Animations.PixelCheck(
-                                graphic,
-                                group,
-                                direction,
-                                isUOP,
-                                animIndex,
-                                IsFlipped
-                                    ? x
-                                        + spriteInfo.UV.Width
-                                        - SelectedObject.TranslatedMousePositionByViewport.X
-                                    : SelectedObject.TranslatedMousePositionByViewport.X - x,
-                                SelectedObject.TranslatedMousePositionByViewport.Y - y
-                            )
-                        )
+                        if (spriteInfo.Texture != null)
                         {
-                            return true;
+                            int x =
+                                position.X
+                                - (
+                                    IsFlipped
+                                        ? spriteInfo.UV.Width - spriteInfo.Center.X
+                                        : spriteInfo.Center.X
+                                );
+                            int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);
+
+                            if (
+                                Client.Game.Animations.PixelCheck(
+                                    graphic,
+                                    group,
+                                    direction,
+                                    isUOP,
+                                    animIndex,
+                                    IsFlipped
+                                        ? x
+                                            + spriteInfo.UV.Width
+                                            - SelectedObject.TranslatedMousePositionByViewport.X
+                                        : SelectedObject.TranslatedMousePositionByViewport.X - x,
+                                    SelectedObject.TranslatedMousePositionByViewport.Y - y
+                                )
+                            )
+                            {
+                                return true;
+                            }
                         }
+                    }
+                    catch (Exception)
+                    {
                     }
                 }
             }

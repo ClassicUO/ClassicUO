@@ -534,6 +534,7 @@ namespace ClassicUO.Configuration
             public string PositionX { get; set; } = "Position X";
             public string PositionY { get; set; } = "Position Y";
             public string UseLastMovedBarPosition { get; set; } = "Use last moved bar position";
+            public string LockCooldownBar { get; set; } = "Lock cooldown bar position";
             public string Conditions { get; set; } = "Conditions";
             public string AddCondition { get; set; } = "+ Add condition";
         }

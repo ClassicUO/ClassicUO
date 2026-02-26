@@ -51,6 +51,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
+using SDL2;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -238,6 +239,13 @@ namespace ClassicUO.Game.Scenes
 
                 _pingTime = Time.Ticks + 60000;
             }
+        }
+
+        internal override void OnControllerButtonDown(SDL.SDL_ControllerButtonEvent e)
+        {
+            if (CurrentLoginStep == LoginSteps.Main && (SDL.SDL_GameControllerButton)e.button == SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_A)
+                UIManager.GetGump<LoginGump>()?.TrySubmitFromController();
+            base.OnControllerButtonDown(e);
         }
 
         private Gump GetGumpForStep()

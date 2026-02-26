@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -382,6 +382,15 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 ls.Connect(_textboxAccount.Text, _passwordFake.RealText);
             }
+        }
+
+        internal void TrySubmitFromController()
+        {
+            LoginScene ls = Client.Game.GetScene<LoginScene>();
+            if (ls == null || ls.CurrentLoginStep != LoginSteps.Main || IsDisposed || _textboxAccount == null || _passwordFake == null)
+                return;
+            SaveCheckboxStatus();
+            ls.Connect(_textboxAccount.Text, _passwordFake.RealText);
         }
 
         private static int GetLanguageComboIndex(string uiLang)

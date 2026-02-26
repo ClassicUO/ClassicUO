@@ -265,33 +265,26 @@ namespace ClassicUO.Game.UI.Controls
 
         private void DrawSlider(UltimaBatcher2D batcher, int x, int y, int sliderX, int height, Color sliderColor)
         {
-            int sliderWidth = 12; // Largura do indicador do slider
-            int sliderHeight = height - 4; // Altura do indicador (um pouco menor que a barra)
-            int sliderY = y + 2; // Centralizar verticalmente
+            const int SliderWidth = 12;
+            int sliderHeight = height - 4;
+            int sliderY = y + 2;
 
-            // Desenhar sombra do slider
-            batcher.Draw(_pixelTexture, new Rectangle(x + sliderX + 1, sliderY + 1, sliderWidth, sliderHeight), 
+            batcher.Draw(_pixelTexture, new Rectangle(x + sliderX + 1, sliderY + 1, SliderWidth, sliderHeight),
                 new Vector3(_shadowColor.R / 255f, _shadowColor.G / 255f, _shadowColor.B / 255f));
 
-            // Desenhar o slider principal
-            batcher.Draw(_pixelTexture, new Rectangle(x + sliderX, sliderY, sliderWidth, sliderHeight), 
+            batcher.Draw(_pixelTexture, new Rectangle(x + sliderX, sliderY, SliderWidth, sliderHeight),
                 new Vector3(sliderColor.R / 255f, sliderColor.G / 255f, sliderColor.B / 255f));
 
-            // Desenhar bordas do slider
-            // Borda superior (realce)
-            batcher.Draw(_pixelTexture, new Rectangle(x + sliderX, sliderY, sliderWidth, 2), 
-                new Vector3(_highlightColor.R / 255f, _highlightColor.G / 255f, _highlightColor.B / 255f));
-            
-            // Borda esquerda (realce)
-            batcher.Draw(_pixelTexture, new Rectangle(x + sliderX, sliderY, 2, sliderHeight), 
+            batcher.Draw(_pixelTexture, new Rectangle(x + sliderX, sliderY, SliderWidth, 2),
                 new Vector3(_highlightColor.R / 255f, _highlightColor.G / 255f, _highlightColor.B / 255f));
 
-            // Borda inferior (sombra)
-            batcher.Draw(_pixelTexture, new Rectangle(x + sliderX, sliderY + sliderHeight - 2, sliderWidth, 2), 
+            batcher.Draw(_pixelTexture, new Rectangle(x + sliderX, sliderY, 2, sliderHeight),
+                new Vector3(_highlightColor.R / 255f, _highlightColor.G / 255f, _highlightColor.B / 255f));
+
+            batcher.Draw(_pixelTexture, new Rectangle(x + sliderX, sliderY + sliderHeight - 2, SliderWidth, 2),
                 new Vector3(_shadowColor.R / 255f, _shadowColor.G / 255f, _shadowColor.B / 255f));
-            
-            // Borda direita (sombra)
-            batcher.Draw(_pixelTexture, new Rectangle(x + sliderX + sliderWidth - 2, sliderY, 2, sliderHeight), 
+
+            batcher.Draw(_pixelTexture, new Rectangle(x + sliderX + SliderWidth - 2, sliderY, 2, sliderHeight),
                 new Vector3(_shadowColor.R / 255f, _shadowColor.G / 255f, _shadowColor.B / 255f));
         }
 

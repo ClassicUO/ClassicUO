@@ -117,10 +117,14 @@ namespace ClassicUO.Game.UI
                 if (string.IsNullOrEmpty(finalString) && !string.IsNullOrEmpty(_textHTML)) //Fix for vendor search
                     finalString = Managers.ToolTipOverrideData.ProcessTooltipText(_textHTML);
 
+                var profile = ProfileManager.CurrentProfile;
+                string font = profile?.SelectedToolTipFont ?? "Roboto-Regular";
+                int fontSize = profile?.SelectedToolTipFontSize ?? 20;
+
                 _textBox = new TextBox(
                     TextBox.ConvertHtmlToFontStashSharpCommand(finalString).Trim(),
-                    ProfileManager.CurrentProfile.SelectedToolTipFont,
-                    ProfileManager.CurrentProfile.SelectedToolTipFontSize,
+                    font,
+                    fontSize,
                     600,
                     hue,
                     align,

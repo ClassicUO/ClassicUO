@@ -1,6 +1,7 @@
-﻿using ClassicUO.Configuration;
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
+using ClassicUO.LegionScripting;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -45,9 +46,10 @@ namespace ClassicUO.Game.Managers
                         lootTaskRunning = true;
                         if (lootItems != null && !lootItems.IsEmpty)
                         {
-                            if(ProfileManager.CurrentProfile.EnableAutoLootProgressBar && (progressBarGump == null || progressBarGump.IsDisposed))
+                            int totalToLoot = Math.Max(1, currentLootTotalCount);
+                            if (ProfileManager.CurrentProfile.EnableAutoLootProgressBar && (progressBarGump == null || progressBarGump.IsDisposed))
                             {
-                                progressBarGump = new ProgressBarGump("Auto looting...", 0) { 
+                                progressBarGump = new ProgressBarGump("Auto looting...", 0) {
                                     Y = (ProfileManager.CurrentProfile.GameWindowPosition.Y + ProfileManager.CurrentProfile.GameWindowSize.Y) - 150
                                 };
                                 progressBarGump.CenterXInViewPort();
@@ -58,7 +60,17 @@ namespace ClassicUO.Game.Managers
                             {
                                 if (progressBarGump != null && !progressBarGump.IsDisposed)
                                 {
-                                    progressBarGump.CurrentPercentage = 1 - ((double)lootItems.Count / (double)currentLootTotalCount);
+                                    int remaining = lootItems.Count;
+                                    int done = totalToLoot - remaining;
+                                    double pct = 1.0 - ((double)remaining / (double)totalToLoot);
+                                    MainThreadQueue.EnqueueAction(() =>
+                                    {
+                                        if (progressBarGump != null && !progressBarGump.IsDisposed)
+                                        {
+                                            progressBarGump.CurrentPercentage = Math.Max(0, Math.Min(1, pct));
+                                            progressBarGump.SetTitle($"Auto looting... ({done}/{totalToLoot})");
+                                        }
+                                    });
                                 }
 
                                 Item m = World.Items.Get(moveItem);
@@ -70,14 +82,14 @@ namespace ClassicUO.Game.Managers
                             }
                         }
                         lootTaskRunning = false;
-                        progressBarGump?.Dispose();
-                        currentLootTotalCount = lootItems.Count;
+                        MainThreadQueue.EnqueueAction(() => { progressBarGump?.Dispose(); progressBarGump = null; });
+                        currentLootTotalCount = 0;
                     }
                     catch
                     {
                         lootTaskRunning = false;
-                        progressBarGump?.Dispose();
-                        currentLootTotalCount = lootItems.Count;
+                        MainThreadQueue.EnqueueAction(() => { progressBarGump?.Dispose(); progressBarGump = null; });
+                        currentLootTotalCount = 0;
                     }
                 });
             }
@@ -156,6 +168,8 @@ namespace ClassicUO.Game.Managers
                 {
                     CheckAndLoot((Item)i);
                 }
+                if (ProfileManager.CurrentProfile.HueCorpseAfterAutoloot)
+                    corpse.Hue = 73;
                 StartLooting();
             }
         }

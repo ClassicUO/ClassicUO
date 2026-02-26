@@ -213,6 +213,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             AcceptKeyboardInput = true;
             ChangePage(1);
+            SelectCharacter(_selectedCharacter);
         }
 
         private void OnGumpPicMouseUp(object sender, MouseEventArgs e)
@@ -270,9 +271,28 @@ namespace ClassicUO.Game.UI.Gumps.Login
         {
             base.OnControllerButtonUp(button);
 
-            if (button == SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_A)
+            LoginScene loginScene = Client.Game.GetScene<LoginScene>();
+            int count = loginScene?.Characters?.Length ?? 0;
+            if (count == 0)
+                return;
+
+            switch (button)
             {
-                LoginCharacter(_selectedCharacter);
+                case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_UP:
+                    uint prev = _selectedCharacter == 0 ? (uint)(count - 1) : _selectedCharacter - 1;
+                    for (int i = 0; i < count && string.IsNullOrEmpty(loginScene.Characters[prev]); i++)
+                        prev = prev == 0 ? (uint)(count - 1) : prev - 1;
+                    SelectCharacter(prev);
+                    return;
+                case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_DOWN:
+                    uint next = (uint)((_selectedCharacter + 1) % count);
+                    for (int i = 0; i < count && string.IsNullOrEmpty(loginScene.Characters[next]); i++)
+                        next = (uint)((next + 1) % count);
+                    SelectCharacter(next);
+                    return;
+                case SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_A:
+                    LoginCharacter(_selectedCharacter);
+                    break;
             }
         }
 

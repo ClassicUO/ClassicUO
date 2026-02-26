@@ -180,13 +180,13 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private void DisplayProfessionSkills(ProfessionInfo info)
         {
             _displayedProfession = info;
-            int y = SKILLS_SECTION_Y;
+            int posY = SKILLS_SECTION_Y;
             int n = CharCreationGump._skillsCount;
             int availableWidth = CENTER_PANEL_WIDTH - SECTION_PADDING * 2;
             int slotWidth = availableWidth / n;
-            const int comboWidth = 92;
-            int firstOffset = (slotWidth - comboWidth) / 2;
-            int x = CENTER_X + SECTION_PADDING + firstOffset;
+            const int ComboWidth = 92;
+            int firstOffset = (slotWidth - ComboWidth) / 2;
+            int posXBase = CENTER_X + SECTION_PADDING + firstOffset;
 
             for (int i = 0; i < n; i++)
             {
@@ -194,16 +194,15 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 int skillValue = info.SkillDefVal[i, 1];
                 var skillEntry = SkillsLoader.Instance.Skills.Find(s => s.Index == skillIndex);
                 string skillName = skillEntry?.Name ?? $"Skill {skillIndex}";
-                int posX = x + i * slotWidth;
-                int posY = y;
+                int posX = posXBase + i * slotWidth;
 
-                var combo = new GothicStyleCombobox(posX, posY, comboWidth, 22, new[] { skillName }, 0, 11);
+                var combo = new GothicStyleCombobox(posX, posY, ComboWidth, 22, new[] { skillName }, 0, 11);
                 ApplyGothicRedTheme(combo);
                 combo.AcceptMouseInput = false;
                 Add(combo);
                 _professionSkillsLabels.Add(combo);
 
-                var valueLabel = new TextBox($"{skillValue}", TrueTypeLoader.EMBEDDED_FONT, 11, 28, Color.White, strokeEffect: false) { X = posX + comboWidth + 4, Y = posY + 4, AcceptMouseInput = false };
+                var valueLabel = new TextBox($"{skillValue}", TrueTypeLoader.EMBEDDED_FONT, 11, 28, Color.White, strokeEffect: false) { X = posX + ComboWidth + 4, Y = posY + 4, AcceptMouseInput = false };
                 Add(valueLabel);
                 _professionSkillsLabels.Add(valueLabel);
             }
@@ -229,15 +228,15 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             if (_showSkills)
             {
-                int y = SKILLS_SECTION_Y;
+                int skillY = SKILLS_SECTION_Y;
                 int n = CharCreationGump._skillsCount;
                 int availableWidth = CENTER_PANEL_WIDTH - SECTION_PADDING * 2;
                 int slotWidth = availableWidth / n;
-                const int comboWidth = 92;
-                const int labelHeight = 30;
-                const int sliderWidth = 88;
-                int firstOffset = (slotWidth - comboWidth) / 2;
-                int x = CENTER_X + SECTION_PADDING + firstOffset;
+                const int ComboWidth = 92;
+                const int LabelHeight = 30;
+                const int SliderWidth = 88;
+                int firstOffset = (slotWidth - ComboWidth) / 2;
+                int skillX = CENTER_X + SECTION_PADDING + firstOffset;
 
                 _skillSliders = new GothicStyleSliderBar[n];
                 _skillsCombobox = new GothicStyleCombobox[n];
@@ -245,12 +244,12 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 for (int i = 0; i < n; i++)
                 {
-                    int posX = x + i * slotWidth;
-                    var combo = new GothicStyleCombobox(posX, y, comboWidth, 22, skillNames, -1, 11);
+                    int posX = skillX + i * slotWidth;
+                    var combo = new GothicStyleCombobox(posX, skillY, ComboWidth, 22, skillNames, -1, 11);
                     ApplyGothicRedTheme(combo);
                     _skillsCombobox[i] = combo;
                     Add(combo);
-                    Add(_skillSliders[i] = new GothicStyleSliderBar(posX, y + labelHeight, sliderWidth, 0, 50, ProfessionInfo._VoidSkills[i, 1], 11, true));
+                    Add(_skillSliders[i] = new GothicStyleSliderBar(posX, skillY + LabelHeight, SliderWidth, 0, 50, ProfessionInfo._VoidSkills[i, 1], 11, true));
                 }
 
                 for (int i = 0; i < _skillSliders.Length; i++)
@@ -296,13 +295,12 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 );
             }
 
-            const int nameInputWidth = 219;
-            const int nameLabelWidth = 175;
-            const int nameLabelHeight = 40;
-            Add(new TextBox("Character Name", TrueTypeLoader.EMBEDDED_FONT, 28, 300, Color.DarkRed, strokeEffect: true) { X = CENTER_PANEL_MID - nameLabelWidth / 2, Y = 44, AcceptMouseInput = false });
-            Add(new RoundedColorBox(221, 26, new Color(80, 20, 20), 6) { X = CENTER_PANEL_MID - nameInputWidth / 2 - 1, Y = 71 });
-            Add(new RoundedColorBox(217, 22, new Color(28, 28, 28), 4) { X = CENTER_PANEL_MID - nameInputWidth / 2 + 1, Y = 73 });
-            Add(new FullBlendControl { X = CENTER_PANEL_MID - nameInputWidth / 2 + 2, Y = 74, Width = nameInputWidth - 4, Height = 20, Hue = 0x801 });
+            const int NameInputWidth = 219;
+            const int NameLabelWidth = 175;
+            Add(new TextBox("Character Name", TrueTypeLoader.EMBEDDED_FONT, 28, 300, Color.DarkRed, strokeEffect: true) { X = CENTER_PANEL_MID - NameLabelWidth / 2, Y = 44, AcceptMouseInput = false });
+            Add(new RoundedColorBox(221, 26, new Color(80, 20, 20), 6) { X = CENTER_PANEL_MID - NameInputWidth / 2 - 1, Y = 71 });
+            Add(new RoundedColorBox(217, 22, new Color(28, 28, 28), 4) { X = CENTER_PANEL_MID - NameInputWidth / 2 + 1, Y = 73 });
+            Add(new FullBlendControl { X = CENTER_PANEL_MID - NameInputWidth / 2 + 2, Y = 74, Width = NameInputWidth - 4, Height = 20, Hue = 0x801 });
 
             Add(_nextButton = new GothicStyleButton(30, NEXT_BUTTON_Y, 120, 40, "BACK", null, 16));
             _nextButton.OnClick += () => OnButtonClick(5);
@@ -310,27 +308,27 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             Add(button = new GothicStyleButton(NEXT_BUTTON_X, NEXT_BUTTON_Y, 120, 40, "NEXT", null, 16));
             button.OnClick += () => OnButtonClick(6);
 
-            Add(_nameTextBox = new StbTextBox(5, 16, 200, false, hue: 0x0481, style: FontStyle.Fixed) { X = CENTER_PANEL_MID - nameInputWidth / 2 + 2, Y = 74, Width = nameInputWidth - 4, Height = 20 }, 1);
+            Add(_nameTextBox = new StbTextBox(5, 16, 200, false, hue: 0x0481, style: FontStyle.Fixed) { X = CENTER_PANEL_MID - NameInputWidth / 2 + 2, Y = 74, Width = NameInputWidth - 4, Height = 20 }, 1);
 
-            const int raceX = CENTER_X + SECTION_PADDING;
-            const int raceY2 = RACE_SECTION_Y + 26 + RACE_BUTTON_MARGIN;
-            const int raceY3 = raceY2 + 26 + RACE_BUTTON_MARGIN;
-            const int raceBtnW = 100;
-            Add(buttonHuman = new GothicStyleButton(raceX, RACE_SECTION_Y, raceBtnW, 26, "HUMAN", null, 14));
+            const int RaceX = CENTER_X + SECTION_PADDING;
+            const int RaceY2 = RACE_SECTION_Y + 26 + RACE_BUTTON_MARGIN;
+            const int RaceY3 = RaceY2 + 26 + RACE_BUTTON_MARGIN;
+            const int RaceBtnW = 100;
+            Add(buttonHuman = new GothicStyleButton(RaceX, RACE_SECTION_Y, RaceBtnW, 26, "HUMAN", null, 14));
             buttonHuman.OnClick += () => OnButtonClick(2);
-            Add(buttonElf = new GothicStyleButton(raceX, raceY2, raceBtnW, 26, "ELF", null, 14));
+            Add(buttonElf = new GothicStyleButton(RaceX, RaceY2, RaceBtnW, 26, "ELF", null, 14));
             buttonElf.OnClick += () => OnButtonClick(3);
             if (Client.Version >= ClientVersion.CV_60144)
             {
-                Add(buttonGargolye = new GothicStyleButton(raceX, raceY3, raceBtnW, 26, "GARGOLYE", null, 14));
+                Add(buttonGargolye = new GothicStyleButton(RaceX, RaceY3, RaceBtnW, 26, "GARGOLYE", null, 14));
                 buttonGargolye.OnClick += () => OnButtonClick(4);
             }
 
-            const int genderBtnW = 95;
-            const int genderGap = 12;
-            Add(buttonMale = new GothicStyleButton(CENTER_PANEL_MID - genderBtnW - genderGap / 2, GENDER_SECTION_Y, genderBtnW, 28, "MALE ♂", null, 14));
+            const int GenderBtnW = 95;
+            const int GenderGap = 12;
+            Add(buttonMale = new GothicStyleButton(CENTER_PANEL_MID - GenderBtnW - GenderGap / 2, GENDER_SECTION_Y, GenderBtnW, 28, "MALE ♂", null, 14));
             buttonMale.OnClick += () => OnButtonClick(0);
-            Add(buttonFemale = new GothicStyleButton(CENTER_PANEL_MID + genderGap / 2, GENDER_SECTION_Y, genderBtnW, 28, "FEMALE ♀", null, 14));
+            Add(buttonFemale = new GothicStyleButton(CENTER_PANEL_MID + GenderGap / 2, GENDER_SECTION_Y, GenderBtnW, 28, "FEMALE ♀", null, 14));
             buttonFemale.OnClick += () => OnButtonClick(1);
 
             if (!CUOEnviroment.IsOutlands)
@@ -351,22 +349,22 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 }
             }
 
-            const int attrLabelY = ATTR_SECTION_Y;
-            const int attrSliderY = ATTR_SECTION_Y + 22;
-            const int attrSliderW = 100;
-            const int attrSlotWidth = (CENTER_PANEL_WIDTH - SECTION_PADDING * 2) / 3;
-            const int attrOffset = (attrSlotWidth - attrSliderW) / 2;
-            const int attrX1 = CENTER_X + SECTION_PADDING + attrOffset;
-            const int attrX2 = attrX1 + attrSlotWidth;
-            const int attrX3 = attrX2 + attrSlotWidth;
-            Add(new TextBox(ClilocLoader.Instance.GetString(3000111), TrueTypeLoader.EMBEDDED_FONT, 16, 120, Color.DarkRed, strokeEffect: false) { X = attrX1, Y = attrLabelY, AcceptMouseInput = false });
-            Add(new TextBox(ClilocLoader.Instance.GetString(3000112), TrueTypeLoader.EMBEDDED_FONT, 16, 120, Color.DarkRed, strokeEffect: false) { X = attrX2, Y = attrLabelY, AcceptMouseInput = false });
-            Add(new TextBox(ClilocLoader.Instance.GetString(3000113), TrueTypeLoader.EMBEDDED_FONT, 16, 120, Color.DarkRed, strokeEffect: false) { X = attrX3, Y = attrLabelY, AcceptMouseInput = false });
+            const int AttrLabelY = ATTR_SECTION_Y;
+            const int AttrSliderY = ATTR_SECTION_Y + 22;
+            const int AttrSliderW = 100;
+            const int AttrSlotWidth = (CENTER_PANEL_WIDTH - SECTION_PADDING * 2) / 3;
+            const int AttrOffset = (AttrSlotWidth - AttrSliderW) / 2;
+            const int AttrX1 = CENTER_X + SECTION_PADDING + AttrOffset;
+            const int AttrX2 = AttrX1 + AttrSlotWidth;
+            const int AttrX3 = AttrX2 + AttrSlotWidth;
+            Add(new TextBox(ClilocLoader.Instance.GetString(3000111), TrueTypeLoader.EMBEDDED_FONT, 16, 120, Color.DarkRed, strokeEffect: false) { X = AttrX1, Y = AttrLabelY, AcceptMouseInput = false });
+            Add(new TextBox(ClilocLoader.Instance.GetString(3000112), TrueTypeLoader.EMBEDDED_FONT, 16, 120, Color.DarkRed, strokeEffect: false) { X = AttrX2, Y = AttrLabelY, AcceptMouseInput = false });
+            Add(new TextBox(ClilocLoader.Instance.GetString(3000113), TrueTypeLoader.EMBEDDED_FONT, 16, 120, Color.DarkRed, strokeEffect: false) { X = AttrX3, Y = AttrLabelY, AcceptMouseInput = false });
 
             _attributeSliders = new GothicStyleSliderBar[3];
-            Add(_attributeSliders[0] = new GothicStyleSliderBar(attrX1, attrSliderY, attrSliderW, 10, 60, ProfessionInfo._VoidStats[0], 14, true));
-            Add(_attributeSliders[1] = new GothicStyleSliderBar(attrX2, attrSliderY, attrSliderW, 10, 60, ProfessionInfo._VoidStats[1], 14, true));
-            Add(_attributeSliders[2] = new GothicStyleSliderBar(attrX3, attrSliderY, attrSliderW, 10, 60, ProfessionInfo._VoidStats[2], 14, true));
+            Add(_attributeSliders[0] = new GothicStyleSliderBar(AttrX1, AttrSliderY, AttrSliderW, 10, 60, ProfessionInfo._VoidStats[0], 14, true));
+            Add(_attributeSliders[1] = new GothicStyleSliderBar(AttrX2, AttrSliderY, AttrSliderW, 10, 60, ProfessionInfo._VoidStats[1], 14, true));
+            Add(_attributeSliders[2] = new GothicStyleSliderBar(AttrX3, AttrSliderY, AttrSliderW, 10, 60, ProfessionInfo._VoidStats[2], 14, true));
 
             var clientFlags = World.ClientLockedFeatures.Flags;
             
@@ -420,13 +418,6 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
            
 
             var skillNames = _skillList.Select(s => s.Name).ToArray();
-
-            int y = 612;
-            int x = 370;
-            const int spacingX = 200; 
-            const int spacingY = 70;  
-          
-            
 
             for (int i = 0; i < _attributeSliders.Length; i++)
             {

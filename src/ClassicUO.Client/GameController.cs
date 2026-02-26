@@ -95,8 +95,8 @@ namespace ClassicUO
             Window.Title = $"Dust 2.0 - {CUOEnviroment.Version}";
             IsMouseVisible = Settings.GlobalSettings.RunMouseInASeparateThread;
 
-            IsFixedTimeStep = false; // Settings.GlobalSettings.FixedTimeStep;
-            TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0 / Settings.GlobalSettings.FPS);
+            IsFixedTimeStep = false;
+            TargetElapsedTime = TimeSpan.FromMilliseconds(1);
             InactiveSleepTime = TimeSpan.Zero;
         }
 
@@ -356,9 +356,9 @@ namespace ClassicUO
 
             _intervalFixedUpdate[0] = frameDelay;
             _intervalFixedUpdate[1] = 217; // 5 FPS
-            
-            // Atualizar TargetElapsedTime para refletir o novo FPS
-            TargetElapsedTime = TimeSpan.FromMilliseconds(frameDelay);
+
+            bool unlimitedFps = ProfileManager.CurrentProfile?.DisableFrameLimiting == true;
+            TargetElapsedTime = unlimitedFps ? TimeSpan.FromMilliseconds(1) : TimeSpan.FromMilliseconds(frameDelay);
         }
 
         private void SetWindowPosition(int x, int y)

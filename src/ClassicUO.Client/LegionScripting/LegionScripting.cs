@@ -1,12 +1,17 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
+using ClassicUO.Utility.Logging;
 using LScript;
+using Microsoft.Scripting.Hosting;
 using static ClassicUO.LegionScripting.Commands;
 using static ClassicUO.LegionScripting.Expressions;
 
@@ -23,12 +28,14 @@ namespace ClassicUO.LegionScripting
         private static LScriptSettings lScriptSettings;
 
         public static List<ScriptFile> LoadedScripts = new List<ScriptFile>();
+        public static Dictionary<int, ScriptFile> PyThreads = new Dictionary<int, ScriptFile>();
 
         public static event EventHandler<ScriptInfoEvent> ScriptStartedEvent;
         public static event EventHandler<ScriptInfoEvent> ScriptStoppedEvent;
 
         public static void Init()
         {
+            Task.Factory.StartNew(() => Python.CreateEngine());
             ScriptPath = Path.GetFullPath(Path.Combine(CUOEnviroment.ExecutablePath, "LegionScripts"));
 
             CommandManager.Register("lscript", (args) =>
@@ -38,6 +45,9 @@ namespace ClassicUO.LegionScripting
                     UIManager.Add(new ScriptManagerGump());
                 }
             });
+
+            CommandManager.Register("scriptrecorder", (args) => UIManager.Add(new ScriptRecordingGump()));
+            CommandManager.Register("scriptinfo", (args) => ScriptingInfoGump.Show());
 
             CommandManager.Register("lscriptfile", (args) =>
             {
@@ -59,6 +69,67 @@ namespace ClassicUO.LegionScripting
                 }
             });
 
+            CommandManager.Register("playlscript", (args) =>
+            {
+                if (args.Length < 2)
+                {
+                    GameActions.Print("Usage: playlscript <scriptname>");
+                    return;
+                }
+                string name = string.Join(" ", args.Skip(1));
+                foreach (ScriptFile f in LoadedScripts)
+                {
+                    if (f.FileName == name)
+                    {
+                        PlayScript(f);
+                        return;
+                    }
+                }
+            });
+
+            CommandManager.Register("stoplscript", (args) =>
+            {
+                if (args.Length < 2)
+                {
+                    GameActions.Print("Usage: stoplscript <scriptname>");
+                    return;
+                }
+                string name = string.Join(" ", args.Skip(1));
+                foreach (ScriptFile sf in runningScripts)
+                {
+                    if (sf.FileName == name)
+                    {
+                        StopScript(sf);
+                        return;
+                    }
+                }
+            });
+
+            CommandManager.Register("togglelscript", (args) =>
+            {
+                if (args.Length < 2)
+                {
+                    GameActions.Print("Usage: togglelscript <scriptname>");
+                    return;
+                }
+                string name = string.Join(" ", args.Skip(1));
+                foreach (ScriptFile sf in runningScripts)
+                {
+                    if (sf.FileName == name)
+                    {
+                        StopScript(sf);
+                        return;
+                    }
+                }
+                foreach (ScriptFile f in LoadedScripts)
+                {
+                    if (f.FileName == name)
+                    {
+                        PlayScript(f);
+                        return;
+                    }
+                }
+            });
 
             if (!_loaded)
             {
@@ -70,15 +141,23 @@ namespace ClassicUO.LegionScripting
 
             LoadScriptsFromFile();
             LoadLScriptSettings();
+            PersistentVars.Load();
             AutoPlayGlobal();
             AutoPlayChar();
             _enabled = true;
         }
         private static void EventSink_JournalEntryAdded(object sender, JournalEntry e)
         {
+            if (e == null)
+                return;
             foreach (ScriptFile script in runningScripts)
             {
-                script.GetScript.JournalEntryAdded(e);
+                if (script == null)
+                    continue;
+                if (script.ScriptType == ScriptType.LegionScript)
+                    script.GetScript?.JournalEntryAdded(e);
+                else
+                    script.scopedAPI?.JournalEntries.Enqueue(e);
             }
         }
         public static void LoadScriptsFromFile()
@@ -121,7 +200,10 @@ namespace ClassicUO.LegionScripting
             List<string> groups = new List<string>();
             foreach (string file in Directory.EnumerateFileSystemEntries(path))
             {
-                if (file.EndsWith(".lscript"))
+                string fname = Path.GetFileName(file);
+                if (fname == "API.py" || fname.StartsWith("_"))
+                    continue;
+                if (file.EndsWith(".lscript") || file.EndsWith(".py"))
                 {
                     if (loadedScripts.Contains(file)) continue;
                     AddScriptFromFile(file);
@@ -238,10 +320,19 @@ namespace ClassicUO.LegionScripting
                 if (File.Exists(path))
                 {
                     lScriptSettings = JsonSerializer.Deserialize<LScriptSettings>(File.ReadAllText(path));
+                    for (int i = 0; i < lScriptSettings.CharAutoStartScripts.Count; i++)
+                    {
+                        var val = lScriptSettings.CharAutoStartScripts.ElementAt(i);
+                        val.Value.RemoveAll(script => !LoadedScripts.Any(s => s.FileName == script));
+                    }
+                    lScriptSettings.GlobalAutoStartScripts.RemoveAll(script => !LoadedScripts.Any(s => s.FileName == script));
                     return;
                 }
             }
-            catch (Exception e) { }
+            catch (Exception ex)
+            {
+                Log.Error($"Unexpected error loading lscript settings: {ex}");
+            }
 
             lScriptSettings = new LScriptSettings();
         }
@@ -254,7 +345,10 @@ namespace ClassicUO.LegionScripting
             {
                 File.WriteAllText(path, json);
             }
-            catch (Exception e) { }
+            catch (Exception ex)
+            {
+                Log.Error($"Error saving lscript settings: {ex}");
+            }
         }
         public static void Unload()
         {
@@ -262,8 +356,10 @@ namespace ClassicUO.LegionScripting
                 StopScript(runningScripts[0]);
 
             Interpreter.ClearAllLists();
+            PyThreads.Clear();
 
             SaveScriptSettings();
+            PersistentVars.Unload();
 
             _enabled = false;
         }
@@ -272,8 +368,12 @@ namespace ClassicUO.LegionScripting
             if (!_enabled || !World.InGame)
                 return;
 
+            MainThreadQueue.Process();
+
             foreach (ScriptFile script in runningScripts)
             {
+                if (script.ScriptType == ScriptType.Python)
+                    continue;
                 try
                 {
                     if (!Interpreter.ExecuteScript(script.GetScript))
@@ -284,7 +384,10 @@ namespace ClassicUO.LegionScripting
                 catch (Exception e)
                 {
                     removeRunningScripts.Add(script);
-                    LScriptError($"Execution of script failed. -> [{e.Message}]");
+                    string msg = e.Message;
+                    if (e.InnerException != null)
+                        msg += " -> " + e.InnerException.Message;
+                    LScriptError($"Execution of script failed. -> [{msg}]");
                 }
             }
 
@@ -298,30 +401,85 @@ namespace ClassicUO.LegionScripting
         }
         public static void PlayScript(ScriptFile script)
         {
-            if (script != null)
+            if (script == null)
+                return;
+            if (runningScripts.Contains(script))
+                return;
+
+            if (script.ScriptType == ScriptType.LegionScript)
             {
-                if (runningScripts.Contains(script)) //Already playing
-                    return;
-
                 script.GenerateScript();
-                runningScripts.Add(script);
+                if (script.GetScript == null)
+                {
+                    LScriptError("Unable to play script, it is likely malformed and we were unable to generate the script from your file.");
+                    return;
+                }
                 script.GetScript.IsPlaying = true;
-
-                ScriptStartedEvent?.Invoke(null, new ScriptInfoEvent(script));
             }
+            else if (script.ScriptType == ScriptType.Python)
+            {
+                if (script.PythonThread == null || !script.PythonThread.IsAlive)
+                {
+                    script.ReadFromFile();
+                    script.PythonThread = new Thread(() => ExecutePythonScript(script));
+                    PyThreads[script.PythonThread.ManagedThreadId] = script;
+                    script.PythonThread.Start();
+                }
+            }
+
+            runningScripts.Add(script);
+            ScriptStartedEvent?.Invoke(null, new ScriptInfoEvent(script));
+        }
+
+        private static void ExecutePythonScript(ScriptFile script)
+        {
+            script.SetupPythonEngine();
+            script.SetupPythonScope();
+            try
+            {
+                script.pythonEngine.Execute(script.FileContentsJoined, script.pythonScope);
+            }
+            catch (ThreadAbortException)
+            {
+            }
+            catch (Exception e)
+            {
+                var eo = script.pythonEngine.GetService<Microsoft.Scripting.Hosting.ExceptionOperations>();
+                string error = eo?.FormatException(e) ?? e.ToString();
+                GameActions.Print("Python Script Error:");
+                GameActions.Print(error);
+            }
+            MainThreadQueue.EnqueueAction(() => StopScript(script));
         }
         public static void StopScript(ScriptFile script)
         {
-            if (script != null)
-            {
-                if (runningScripts.Contains(script))
-                    runningScripts.Remove(script);
+            if (script == null)
+                return;
+            if (runningScripts.Contains(script))
+                runningScripts.Remove(script);
 
+            if (script.ScriptType == ScriptType.LegionScript && script.GetScript != null)
+            {
                 script.GetScript.Reset();
                 script.GetScript.IsPlaying = false;
-
-                ScriptStoppedEvent?.Invoke(null, new ScriptInfoEvent(script));
             }
+            else if (script.ScriptType == ScriptType.Python)
+            {
+                if (script.PythonThread != null)
+                {
+                    try
+                    {
+                        PyThreads.Remove(script.PythonThread.ManagedThreadId);
+                        script.PythonThread.Abort();
+                    }
+                    catch { }
+                    script.PythonThread = null;
+                }
+                if (script.scopedAPI != null || script.pythonScope != null)
+                    script.PythonScriptStopped();
+            }
+
+            ScriptStoppedEvent?.Invoke(null, new ScriptInfoEvent(script));
         }
         private static uint DefaultAlias(string alias)
         {
@@ -415,6 +573,8 @@ namespace ClassicUO.LegionScripting
             Interpreter.RegisterCommandHandler("follow", Follow);
             Interpreter.RegisterCommandHandler("pathfind", Pathfind);
             Interpreter.RegisterCommandHandler("cancelpathfind", CancelPathfind);
+            Interpreter.RegisterCommandHandler("addcooldown", AddCoolDown);
+            Interpreter.RegisterCommandHandler("togglescript", ToggleScript);
             #endregion
 
             #region Expressions
@@ -445,6 +605,9 @@ namespace ClassicUO.LegionScripting
             Interpreter.RegisterExpressionHandler("primaryabilityactive", PrimaryAbilityActive);
             Interpreter.RegisterExpressionHandler("secondaryabilityactive", SecondaryAbilityActive);
             Interpreter.RegisterExpressionHandler("pathfinding", IsPathfinding);
+            Interpreter.RegisterExpressionHandler("nearestcorpse", NearestCorpse);
+            Interpreter.RegisterExpressionHandler("diffstam", DiffStam);
+            Interpreter.RegisterExpressionHandler("diffmana", DiffMana);
             #endregion
 
             #region Player Values
@@ -514,6 +677,12 @@ namespace ClassicUO.LegionScripting
         }
     }
 
+    internal enum ScriptType
+    {
+        LegionScript,
+        Python
+    }
+
     internal class ScriptFile
     {
         public string Path;
@@ -523,6 +692,22 @@ namespace ClassicUO.LegionScripting
         public string SubGroup = string.Empty;
         public Script GetScript;
         public string[] FileContents;
+        public string FileContentsJoined;
+        public ScriptType ScriptType = ScriptType.LegionScript;
+        public Thread PythonThread;
+        public ScriptEngine pythonEngine;
+        public ScriptScope pythonScope;
+        public API scopedAPI;
+
+        public bool IsPlaying
+        {
+            get
+            {
+                if (ScriptType == ScriptType.LegionScript && GetScript != null)
+                    return GetScript.IsPlaying;
+                return PythonThread != null;
+            }
+        }
 
         public ScriptFile(string path, string fileName)
         {
@@ -534,7 +719,7 @@ namespace ClassicUO.LegionScripting
 
             if (cleanPath.Length > 0)
             {
-                var paths = cleanPath.Split(['/'], StringSplitOptions.RemoveEmptyEntries);
+                var paths = cleanPath.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries);
                 if (paths.Length > 0)
                     Group = paths[0];
                 if (paths.Length > 1)
@@ -543,8 +728,11 @@ namespace ClassicUO.LegionScripting
 
             FileName = fileName;
             FullPath = System.IO.Path.Combine(Path, FileName);
-            FileContents = File.ReadAllLines(FullPath);
-            GenerateScript();
+            FileContents = ReadFromFile();
+            if (FileName.EndsWith(".py", StringComparison.OrdinalIgnoreCase))
+                ScriptType = ScriptType.Python;
+            if (ScriptType == ScriptType.LegionScript)
+                GenerateScript();
         }
 
         public ScriptFile(string path, string source, string fileName)
@@ -556,8 +744,45 @@ namespace ClassicUO.LegionScripting
             GetScript = new Script(Lexer.Lex(FileContents));
         }
 
+        public void ReloadFromFile()
+        {
+            FileContents = ReadFromFile();
+            GenerateScript();
+        }
+
+        public string[] ReadFromFile()
+        {
+            try
+            {
+                var c = File.ReadAllLines(FullPath);
+                FileContentsJoined = string.Join("\n", c);
+                if (ScriptType == ScriptType.Python)
+                {
+                    FileContentsJoined = System.Text.RegularExpressions.Regex.Replace(
+                        FileContentsJoined,
+                        @"^\s*(?:from\s+[\w.]+\s+import\s+API|import\s+API)\s*$",
+                        string.Empty,
+                        System.Text.RegularExpressions.RegexOptions.Multiline);
+                }
+                return c;
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Error reading script file: {ex}");
+                return new string[0];
+            }
+        }
+
+        public bool IsPython => ScriptType == ScriptType.Python;
+
         public void GenerateScript()
         {
+            LegionScripting.StopScript(this);
+            if (IsPython)
+            {
+                GetScript = null;
+                return;
+            }
             try
             {
                 if (GetScript == null)
@@ -565,10 +790,38 @@ namespace ClassicUO.LegionScripting
                 else
                     GetScript.UpdateScript(Lexer.Lex(FullPath));
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                Console.WriteLine(e.ToString());
+                Log.Error($"Error generating script: {ex}");
             }
+        }
+
+        public void SetupPythonEngine()
+        {
+            if (pythonEngine != null)
+                return;
+            pythonEngine = Python.CreateEngine();
+            string dir = System.IO.Path.GetDirectoryName(FullPath);
+            var paths = pythonEngine.GetSearchPaths();
+            paths.Add(System.IO.Path.Combine(CUOEnviroment.ExecutablePath, "LegionScripts"));
+            if (!string.IsNullOrWhiteSpace(dir))
+                paths.Add(dir);
+            pythonEngine.SetSearchPaths(paths);
+        }
+
+        public void SetupPythonScope()
+        {
+            pythonScope = pythonEngine.CreateScope();
+            var api = new API(pythonEngine);
+            scopedAPI = api;
+            pythonScope.SetVariable("API", api);
+        }
+
+        public void PythonScriptStopped()
+        {
+            scopedAPI?.CloseGumps();
+            pythonScope = null;
+            scopedAPI = null;
         }
 
         public bool FileExists()

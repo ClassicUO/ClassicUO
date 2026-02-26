@@ -217,6 +217,7 @@ namespace ClassicUO.Game.Scenes
 
         private void DoDragSelect()
         {
+            Keyboard.Refresh();
             bool ctrl = Keyboard.Ctrl;
             bool shift = Keyboard.Shift;
             bool alt = Keyboard.Alt;

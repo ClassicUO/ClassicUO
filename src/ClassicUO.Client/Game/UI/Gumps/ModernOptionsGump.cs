@@ -519,7 +519,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.AddToRight(new SliderWithLabel(lang.GetVideo.FPSCap, 0, Theme.SLIDER_WIDTH, Constants.MIN_FPS, Constants.MAX_FPS, Settings.GlobalSettings.FPS, (r) => { Settings.GlobalSettings.FPS = r; Client.Game.SetRefreshRate(r); }), true, page);
             content.AddToRight(new CheckboxWithLabel(lang.GetVideo.EnableVSync, isChecked: profile.EnableVSync, valueChanged: (b) => { profile.EnableVSync = b; Client.Game.SetVSync(b); }), true, page);
-            content.AddToRight(new CheckboxWithLabel(lang.GetVideo.DisableFrameLimiting, isChecked: profile.DisableFrameLimiting, valueChanged: (b) => { profile.DisableFrameLimiting = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel(lang.GetVideo.DisableFrameLimiting, isChecked: profile.DisableFrameLimiting, valueChanged: (b) => { profile.DisableFrameLimiting = b; Client.Game.SetRefreshRate(Settings.GlobalSettings.FPS); }), true, page);
             content.Indent();
             content.AddToRight(new CheckboxWithLabel(lang.GetVideo.BackgroundFPS, isChecked: profile.ReduceFPSWhenInactive, valueChanged: (b) => { profile.ReduceFPSWhenInactive = b; }), true, page);
             content.RemoveIndent();
@@ -2012,6 +2012,13 @@ namespace ClassicUO.Game.UI.Gumps
             options.Add(s = new SettingsOption(
                 string.Empty,
                 new CheckboxWithLabel(lang.GetCooldowns.UseLastMovedBarPosition, 0, profile.UseLastMovedCooldownPosition, (b) => { profile.UseLastMovedCooldownPosition = b; }),
+                mainContent.RightWidth,
+                PAGE.TUOCooldowns
+            ));
+            PositionHelper.PositionControl(s.FullControl);
+            options.Add(s = new SettingsOption(
+                string.Empty,
+                new CheckboxWithLabel(lang.GetCooldowns.LockCooldownBar, 0, profile.CoolDownBarLocked, (b) => { profile.CoolDownBarLocked = b; }),
                 mainContent.RightWidth,
                 PAGE.TUOCooldowns
             ));
@@ -4939,15 +4946,15 @@ namespace ClassicUO.Game.UI.Gumps
             private Combobox _comboBox;
             private readonly string[] options;
 
-            public ComboBoxWithLabel(string label, int labelWidth, int comboWidth, string[] options, int selectedIndex, Action<int, string> onOptionSelected = null)
+            public ComboBoxWithLabel(string label, int labelWidth, int ComboWidth, string[] options, int selectedIndex, Action<int, string> onOptionSelected = null)
             {
                 AcceptMouseInput = true;
                 CanMove = true;
 
                 Add(_label = new TextBox(label, Theme.FONT, Theme.STANDARD_TEXT_SIZE, labelWidth > 0 ? labelWidth : null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { AcceptMouseInput = false });
-                Add(_comboBox = new Combobox(comboWidth, options, selectedIndex, onOptionSelected: onOptionSelected) { X = _label.MeasuredSize.X + _label.X + 5 });
+                Add(_comboBox = new Combobox(ComboWidth, options, selectedIndex, onOptionSelected: onOptionSelected) { X = _label.MeasuredSize.X + _label.X + 5 });
 
-                Width = labelWidth + comboWidth + 5;
+                Width = labelWidth + ComboWidth + 5;
                 Height = Math.Max(_label.MeasuredSize.Y, _comboBox.Height);
 
                 ModernOptionsGump.SearchValueChanged += ModernOptionsGump_SearchValueChanged;

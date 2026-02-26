@@ -1392,9 +1392,9 @@ namespace ClassicUO.Game.GameObjects
                             return false;
                         bool covers = robe.Graphic != 0x9985
                             && robe.Graphic != 0x9986
-                            && robe.Graphic != 0xA412;
-                        if (World.ServerName.IndexOf("Demise", StringComparison.OrdinalIgnoreCase) >= 0)
-                            covers = covers && robe.Graphic != 0xA2CB;
+                            && robe.Graphic != 0xA412
+                            && robe.Graphic != 0xA2CB
+                            && robe.Graphic != 0xA2CA;
                         return covers;
                     }
 
@@ -1438,13 +1438,13 @@ namespace ClassicUO.Game.GameObjects
 
                 case Layer.Arms:
                     robe = mobile.FindItemByLayer(Layer.Robe);
-                    bool armsDemise = World.ServerName.IndexOf("Demise", StringComparison.OrdinalIgnoreCase) >= 0;
                     return robe != null
                         && robe.Graphic != 0
                         && robe.Graphic != 0x9985
                         && robe.Graphic != 0x9986
                         && robe.Graphic != 0xA412
-                        && (!armsDemise || robe.Graphic != 0xA2CB);
+                        && robe.Graphic != 0xA2CB
+                        && robe.Graphic != 0xA2CA;
 
                 case Layer.Helmet:
                 case Layer.Hair:

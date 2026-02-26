@@ -1,4 +1,4 @@
-﻿using ClassicUO.Assets;
+using ClassicUO.Assets;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -12,7 +12,9 @@ namespace ClassicUO.Game.UI.Gumps
         public double CurrentPercentage { get; set; }
         public Color ForegrouneColor { get; set; } = Color.Blue;
 
-        private Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, 0.6f);
+        private readonly TextBox _titleLabel;
+        private readonly Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, 0.6f);
+
         public ProgressBarGump(string title, double startPercentage = 1.0, int width = 200, int height = 20) : base(0, 0)
         {
             CanCloseWithRightClick = true;
@@ -26,9 +28,19 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (!string.IsNullOrEmpty(title))
             {
-                TextBox t = new TextBox(title, TrueTypeLoader.EMBEDDED_FONT, 20, width, Color.White, FontStashSharp.RichText.TextHorizontalAlignment.Center, false);
-                Add(t);
+                _titleLabel = new TextBox(title, TrueTypeLoader.EMBEDDED_FONT, 20, width, Color.White, FontStashSharp.RichText.TextHorizontalAlignment.Center, false);
+                Add(_titleLabel);
             }
+            else
+            {
+                _titleLabel = null;
+            }
+        }
+
+        public void SetTitle(string text)
+        {
+            if (_titleLabel != null && !string.IsNullOrEmpty(text))
+                _titleLabel.Text = text;
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)

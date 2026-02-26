@@ -263,10 +263,23 @@ namespace ClassicUO.Game.Managers
 
         public static void OnMouseWheel(bool isup)
         {
-            if (MouseOverControl != null && MouseOverControl.AcceptMouseInput)
+            MouseEventType delta = isup ? MouseEventType.WheelScrollUp : MouseEventType.WheelScrollDown;
+            Control scrollTarget = null;
+            if (KeyboardFocusControl != null)
             {
-                MouseOverControl.InvokeMouseWheel(isup ? MouseEventType.WheelScrollUp : MouseEventType.WheelScrollDown);
+                for (Control c = KeyboardFocusControl; c != null; c = c.Parent)
+                {
+                    if (c is ScrollArea)
+                    {
+                        scrollTarget = c;
+                        break;
+                    }
+                }
             }
+            if (scrollTarget != null)
+                scrollTarget.InvokeMouseWheel(delta);
+            else if (MouseOverControl != null && MouseOverControl.AcceptMouseInput)
+                MouseOverControl.InvokeMouseWheel(delta);
         }
 
         public static Control LastControlMouseDown(MouseButtonType button)

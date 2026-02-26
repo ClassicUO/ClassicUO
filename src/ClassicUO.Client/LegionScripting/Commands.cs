@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
@@ -912,6 +912,45 @@ namespace ClassicUO.LegionScripting
         {
             Pathfinder.StopAutoWalk();
             return true;
+        }
+        public static bool AddCoolDown(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length < 2)
+                throw new RunTimeError(null, "Usage: addcooldown 'text' 'duration milliseconds' 'hue'");
+
+            string text = args[0].AsString();
+            if (string.IsNullOrEmpty(text))
+                throw new RunTimeError(null, "Cooldown text cannot be empty.");
+
+            ushort hue = 7;
+            if (args.Length >= 3)
+                hue = args[2].AsUShort();
+
+            CoolDownBarManager.AddCoolDownBar(TimeSpan.FromMilliseconds(args[1].AsUInt()), text, hue, false);
+            return true;
+        }
+        public static bool ToggleScript(string command, Argument[] args, bool quiet, bool force)
+        {
+            if (args.Length < 1)
+                throw new RunTimeError(null, "Usage: togglescript 'scriptname'");
+
+            string name = args[0].AsString();
+            if (string.IsNullOrEmpty(name))
+                throw new RunTimeError(null, "Script name cannot be empty.");
+
+            foreach (ScriptFile script in LegionScripting.LoadedScripts)
+            {
+                if (script.FileName == name)
+                {
+                    if (script.IsPlaying)
+                        LegionScripting.StopScript(script);
+                    else
+                        LegionScripting.PlayScript(script);
+                    return true;
+                }
+            }
+
+            throw new RunTimeError(null, "Script could not be found.");
         }
     }
 }

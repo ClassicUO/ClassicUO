@@ -349,6 +349,8 @@ namespace ClassicUO.Game
 
             foreach (PathObject obj in list)
             {
+                if (obj == null)
+                    continue;
                 GameObject o = obj.Object;
                 int averageZ = obj.AverageZ;
 
@@ -479,6 +481,8 @@ namespace ClassicUO.Game
             for (int i = 0; i < list.Count; i++)
             {
                 PathObject obj = list[i];
+                if (obj == null)
+                    continue;
 
                 if ((obj.Flags & (uint)PATH_OBJECT_FLAGS.POF_NO_DIAGONAL) != 0 && stepState == (int)PATH_STEP_STATE.PSS_FLYING)
                 {
@@ -502,6 +506,8 @@ namespace ClassicUO.Game
                         for (int j = i - 1; j >= 0; j--)
                         {
                             PathObject tempObj = list[j];
+                            if (tempObj == null)
+                                continue;
 
                             if ((tempObj.Flags & (uint)(PATH_OBJECT_FLAGS.POF_SURFACE | PATH_OBJECT_FLAGS.POF_BRIDGE)) != 0)
                             {

@@ -878,6 +878,7 @@ namespace ClassicUO.Configuration
         public bool EnableSpellIndicators { get; set; } = true;
 
         public bool EnableAutoLoot { get; set; } = false;
+        public bool HueCorpseAfterAutoloot { get; set; } = false;
 
         public static uint GumpsVersion { get; private set; }
 
@@ -920,6 +921,7 @@ namespace ClassicUO.Configuration
         };
 
         public bool UseLastMovedCooldownPosition { get; set; } = false;
+        public bool CoolDownBarLocked { get; set; } = false;
         public bool CloseHealthBarIfAnchored { get; set; } = false;
 
         [JsonConverter(typeof(Point2Converter))]

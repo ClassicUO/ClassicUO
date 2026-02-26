@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using System.ComponentModel;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
@@ -224,5 +224,20 @@ namespace ClassicUO.LegionScripting
             }
         }
 
+        public static string GetDirectionString(Direction direction)
+        {
+            switch (direction)
+            {
+                case Direction.North: return "north";
+                case Direction.Right: return "right";
+                case Direction.East: return "east";
+                case Direction.Down: return "down";
+                case Direction.South: return "south";
+                case Direction.Left: return "left";
+                case Direction.West: return "west";
+                case Direction.Up: return "up";
+                default: return "north";
+            }
+        }
     }
 }

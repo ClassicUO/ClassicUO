@@ -1160,6 +1160,12 @@ namespace ClassicUO.Game.GameObjects
 
                                 goto done;
 
+                            case 0x4071:
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.ParalyzingBlow;
+
+                                goto done;
+
                             case 0x8FE:
                             case 0x4072: // Blood Blade
                                 Abilities[0] = Ability.BleedAttack;

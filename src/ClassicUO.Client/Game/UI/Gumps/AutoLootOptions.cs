@@ -1,4 +1,4 @@
-﻿using ClassicUO.Assets;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
@@ -47,6 +47,11 @@ namespace ClassicUO.Game.UI.Gumps
             Checkbox enablepb;
             topSecion.AddRight(enablepb = new Checkbox(0x00D2, 0x00D3, "", 0xff, 0xffff) { IsChecked = ProfileManager.CurrentProfile.EnableAutoLootProgressBar });
             enablepb.ValueChanged += (e, v) => { ProfileManager.CurrentProfile.EnableAutoLootProgressBar = enablepb.IsChecked; };
+
+            topSecion.Add(new TextBox("Hue corpse after processing", TrueTypeLoader.EMBEDDED_FONT, 18, null, Color.White, strokeEffect: false) { AcceptMouseInput = true });
+            Checkbox hueCorpse;
+            topSecion.AddRight(hueCorpse = new Checkbox(0x00D2, 0x00D3, "", 0xff, 0xffff) { IsChecked = ProfileManager.CurrentProfile.HueCorpseAfterAutoloot });
+            hueCorpse.ValueChanged += (e, v) => { ProfileManager.CurrentProfile.HueCorpseAfterAutoloot = hueCorpse.IsChecked; };
 
             NiceButton addEntry;
             topSecion.Add(addEntry = new NiceButton(0, 0, 100, 25, ButtonAction.Activate, "Add entry") { IsSelectable = false });
