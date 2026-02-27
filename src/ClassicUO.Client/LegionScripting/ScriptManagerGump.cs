@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -243,7 +243,10 @@ namespace ClassicUO.LegionScripting
                                 string gPath = parentGroup == "" ? group : Path.Combine(parentGroup, group);
                                 if (!File.Exists(Path.Combine(LegionScripting.ScriptPath, gPath, s + ".lscript")))
                                 {
-                                    File.WriteAllText(Path.Combine(LegionScripting.ScriptPath, gPath, s + ".lscript"), "// My script");
+                                    File.WriteAllText(
+                                        Path.Combine(LegionScripting.ScriptPath, gPath, s + ".lscript"),
+                                        "// LegionScript sample\nmsg HelloWorldFromLegionScript\npause 1000\nloop"
+                                    );
                                     ScriptManagerGump.RefreshContent = true;
                                 }
                             }
@@ -408,8 +411,8 @@ namespace ClassicUO.LegionScripting
             {
                 get
                 {
-                    if (Script != null && Script.GetScript != null)
-                        return Script.GetScript.IsPlaying ? "Stop" : "Play";
+                    if (Script != null && Script.IsPlaying)
+                        return "Stop";
                     return "Play";
                 }
             }
@@ -423,7 +426,7 @@ namespace ClassicUO.LegionScripting
 
                 Add(background = new AlphaBlendControl(0.35f) { Height = Height, Width = Width });
 
-                Add(label = new TextBox(script.FileName.Substring(0, script.FileName.IndexOf('.')), TrueTypeLoader.EMBEDDED_FONT, 16, w - 130, Color.White, strokeEffect: false) { AcceptMouseInput = false });
+                Add(label = new TextBox(System.IO.Path.GetFileNameWithoutExtension(script.FileName), TrueTypeLoader.EMBEDDED_FONT, 16, w - 130, Color.White, strokeEffect: false) { AcceptMouseInput = false });
                 label.Y = (Height - label.MeasuredSize.Y) / 2;
                 label.X = 5;
 

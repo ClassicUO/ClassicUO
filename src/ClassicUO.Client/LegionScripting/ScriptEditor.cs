@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using ClassicUO.Assets;
 using ClassicUO.Game;
@@ -16,7 +16,7 @@ namespace ClassicUO.LegionScripting
         private ScrollArea scrollArea;
         private TextBox title;
         private bool built;
-        private TTFTextInputField textArea;
+        private LineNumberEditor editorPanel;
         public ScriptEditor(ScriptFile scriptFile) : base(600, 400, 600, 400, 0, 0)
         {
             ScriptFile = scriptFile;
@@ -34,13 +34,13 @@ namespace ClassicUO.LegionScripting
 
             Add(scrollArea);
 
-            int width = Width - scrollArea.ScrollBarWidth() - 4;
+            int editorW = Width - scrollArea.ScrollBarWidth() - LineNumberEditor.GutterWidth - 12;
 
-            scrollArea.Add(textArea = new TTFTextInputField(width, Height - 50, text: string.Join("\n", scriptFile.FileContents), multiline: true, convertHtmlColors: false) { X = BorderControl.BorderSize, Y = BorderControl.BorderSize });
-            textArea.TextChanged += (s, e) =>
+            scrollArea.Add(editorPanel = new LineNumberEditor(editorW, Height - 60, string.Join("\n", scriptFile.FileContents)) { X = BorderControl.BorderSize, Y = BorderControl.BorderSize });
+            editorPanel.TextChanged += (s, e) =>
             {
-                int h = textArea.TextBox.TotalHeight > scrollArea.Height ? textArea.TextBox.TotalHeight : scrollArea.Height;
-                textArea.UpdateSize(scrollArea.Width - scrollArea.ScrollBarWidth() - 5, h);
+                int h = editorPanel.Editor.TextBox.TotalHeight > scrollArea.Height ? editorPanel.Editor.TextBox.TotalHeight : scrollArea.Height;
+                editorPanel.UpdateSize(scrollArea.Width - scrollArea.ScrollBarWidth() - LineNumberEditor.GutterWidth - 12, h);
             };
             built = true;
             OnResize();
@@ -66,17 +66,19 @@ namespace ClassicUO.LegionScripting
             scrollArea.Width = Width - (BorderControl.BorderSize * 2);
             scrollArea.Height = Height - (BorderControl.BorderSize * 2) - 50;
             scrollArea.UpdateScrollbarPosition();
-            int h = textArea.TextBox.TotalHeight > scrollArea.Height ? textArea.TextBox.TotalHeight : scrollArea.Height;
-            textArea.UpdateSize(scrollArea.Width - scrollArea.ScrollBarWidth() - 5, h);
+            int h = editorPanel.Editor.TextBox.TotalHeight > scrollArea.Height ? editorPanel.Editor.TextBox.TotalHeight : scrollArea.Height;
+            editorPanel.UpdateSize(scrollArea.Width - scrollArea.ScrollBarWidth() - LineNumberEditor.GutterWidth - 12, h);
         }
 
         private void Save_MouseUp(object sender, MouseEventArgs e)
         {
-            string sb = textArea.Text;
-
+            string sb = editorPanel.Text;
             try
             {
                 File.WriteAllText(ScriptFile.FullPath, sb);
+                ScriptFile.ReadFromFile();
+                if (ScriptFile.IsUOScript)
+                    ScriptFile.GenerateUOScript();
                 GameActions.Print($"Saved {ScriptFile.FileName}.");
             }
             catch (Exception ex)

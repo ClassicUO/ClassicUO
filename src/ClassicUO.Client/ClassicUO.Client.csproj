@@ -54,6 +54,7 @@
     <EmbeddedResource Include="arrow_yellow.png" />
     <EmbeddedResource Include="arrow_yellow2.png" />
     <EmbeddedResource Include="arrow_orange.png" />
+    <EmbeddedResource Include="LegionScripting\LScript.md" />
   </ItemGroup>
 <!-- // ## BEGIN - END ## // TEXTUREMANAGER // -->
 
@@ -67,6 +68,7 @@
   <ItemGroup>
     <PackageReference Include="IronPython" Version="2.7.12" />
     <ProjectReference Include="..\..\external\FNA\FNA.Core.csproj" />
+    <ProjectReference Include="..\..\external\UOSteam\UOScript\UOScript.SDK.csproj" />
     <ProjectReference Include="..\ClassicUO.Assets\ClassicUO.Assets.csproj" />
     <ProjectReference Include="..\ClassicUO.Renderer\ClassicUO.Renderer.csproj" />
     <ProjectReference Include="..\ClassicUO.Utility\ClassicUO.Utility.csproj" />

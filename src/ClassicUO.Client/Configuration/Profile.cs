@@ -453,6 +453,8 @@ namespace ClassicUO.Configuration
         public bool PvP_LastAttackerHighlight { get; set; } = false;
         public bool PvP_SpellRangeOnCursor { get; set; } = true;
         public bool PvP_QuickTargetEnemyList { get; set; } = false;
+        public bool PvP_OptimizedMode { get; set; } = true;
+        public int PvP_OptimizedRenderDistance { get; set; } = 18;
         public bool PvX_NameOverheadProfilesByContext { get; set; } = false;
         public int PvM_NameOverheadProfileFlags { get; set; } = (int)NameOverheadOptions.MobilesAndCorpses;
         public int PvP_NameOverheadProfileFlags { get; set; } = (int)(NameOverheadOptions.Criminal | NameOverheadOptions.Gray | NameOverheadOptions.Enemy | NameOverheadOptions.Murderer);
@@ -1307,6 +1309,12 @@ namespace ClassicUO.Configuration
                                     break;
                                 case GumpType.ScriptManager:
                                     gump = new LegionScripting.ScriptManagerGump();
+                                    break;
+                                case GumpType.LegionScriptStudio:
+                                    gump = new LegionScripting.LegionScriptStudioGump();
+                                    break;
+                                case GumpType.RunningScripts:
+                                    gump = new LegionScripting.RunningScriptsGump();
                                     break;
                             }
 

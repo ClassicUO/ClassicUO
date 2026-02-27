@@ -28,6 +28,8 @@ namespace ClassicUO.LegionScripting
         private static LScriptSettings lScriptSettings;
 
         public static List<ScriptFile> LoadedScripts = new List<ScriptFile>();
+        public static IReadOnlyList<ScriptFile> GetRunningScripts() => runningScripts;
+        public static bool IsScriptRunning(ScriptFile script) => script != null && runningScripts.Contains(script);
         public static Dictionary<int, ScriptFile> PyThreads = new Dictionary<int, ScriptFile>();
 
         public static event EventHandler<ScriptInfoEvent> ScriptStartedEvent;
@@ -35,6 +37,7 @@ namespace ClassicUO.LegionScripting
 
         public static void Init()
         {
+            UOSBridge.Register();
             Task.Factory.StartNew(() => Python.CreateEngine());
             ScriptPath = Path.GetFullPath(Path.Combine(CUOEnviroment.ExecutablePath, "LegionScripts"));
 
@@ -171,12 +174,42 @@ namespace ClassicUO.LegionScripting
 
             List<string> subgroups = new List<string>();
 
-            //First level directory(groups)
             foreach (string file in groups)
                 subgroups.AddRange(HandleScriptsInDirectory(file));
 
             foreach (string file in subgroups)
-                HandleScriptsInDirectory(file); //No third level supported, ignore directories
+                HandleScriptsInDirectory(file);
+        }
+
+        public static void LoadScriptsFromDirectory(string rootPath)
+        {
+            if (string.IsNullOrWhiteSpace(rootPath))
+                return;
+            try
+            {
+                rootPath = Path.GetFullPath(rootPath);
+                if (!Directory.Exists(rootPath))
+                    return;
+            }
+            catch
+            {
+                return;
+            }
+
+            var toProcess = new List<string> { rootPath };
+            while (toProcess.Count > 0)
+            {
+                string dir = toProcess[0];
+                toProcess.RemoveAt(0);
+                try
+                {
+                    var subdirs = HandleScriptsInDirectory(dir);
+                    toProcess.AddRange(subdirs);
+                }
+                catch
+                {
+                }
+            }
         }
         private static void AddScriptFromFile(string path)
         {
@@ -203,7 +236,7 @@ namespace ClassicUO.LegionScripting
                 string fname = Path.GetFileName(file);
                 if (fname == "API.py" || fname.StartsWith("_"))
                     continue;
-                if (file.EndsWith(".lscript") || file.EndsWith(".py"))
+                if (file.EndsWith(".lscript") || file.EndsWith(".py") || file.EndsWith(".uos"))
                 {
                     if (loadedScripts.Contains(file)) continue;
                     AddScriptFromFile(file);
@@ -376,9 +409,15 @@ namespace ClassicUO.LegionScripting
                     continue;
                 try
                 {
-                    if (!Interpreter.ExecuteScript(script.GetScript))
+                    if (script.ScriptType == ScriptType.UOScript)
                     {
-                        removeRunningScripts.Add(script);
+                        if (!global::UOScript.Interpreter.ExecuteScript(script.UOScript))
+                            removeRunningScripts.Add(script);
+                    }
+                    else if (script.ScriptType == ScriptType.LegionScript)
+                    {
+                        if (!LScript.Interpreter.ExecuteScript(script.GetScript))
+                            removeRunningScripts.Add(script);
                     }
                 }
                 catch (Exception e)
@@ -415,6 +454,20 @@ namespace ClassicUO.LegionScripting
                     return;
                 }
                 script.GetScript.IsPlaying = true;
+            }
+            else if (script.ScriptType == ScriptType.UOScript)
+            {
+                script.GenerateUOScript();
+                if (script.UOScript == null)
+                {
+                    LScriptError("Unable to play UOScript, it is likely malformed.");
+                    return;
+                }
+                if (!global::UOScript.Interpreter.StartScript(script.UOScript))
+                {
+                    LScriptError("Unable to start UOScript.");
+                    return;
+                }
             }
             else if (script.ScriptType == ScriptType.Python)
             {
@@ -462,6 +515,10 @@ namespace ClassicUO.LegionScripting
             {
                 script.GetScript.Reset();
                 script.GetScript.IsPlaying = false;
+            }
+            else if (script.ScriptType == ScriptType.UOScript && script.UOScript != null)
+            {
+                global::UOScript.Interpreter.StopScript(script.UOScript);
             }
             else if (script.ScriptType == ScriptType.Python)
             {
@@ -680,7 +737,8 @@ namespace ClassicUO.LegionScripting
     internal enum ScriptType
     {
         LegionScript,
-        Python
+        Python,
+        UOScript
     }
 
     internal class ScriptFile
@@ -690,7 +748,8 @@ namespace ClassicUO.LegionScripting
         public string FullPath;
         public string Group = string.Empty;
         public string SubGroup = string.Empty;
-        public Script GetScript;
+        public LScript.Script GetScript;
+        public global::UOScript.Script UOScript;
         public string[] FileContents;
         public string FileContentsJoined;
         public ScriptType ScriptType = ScriptType.LegionScript;
@@ -705,6 +764,8 @@ namespace ClassicUO.LegionScripting
             {
                 if (ScriptType == ScriptType.LegionScript && GetScript != null)
                     return GetScript.IsPlaying;
+                if (ScriptType == ScriptType.UOScript)
+                    return LegionScripting.IsScriptRunning(this);
                 return PythonThread != null;
             }
         }
@@ -731,8 +792,12 @@ namespace ClassicUO.LegionScripting
             FileContents = ReadFromFile();
             if (FileName.EndsWith(".py", StringComparison.OrdinalIgnoreCase))
                 ScriptType = ScriptType.Python;
+            else if (FileName.EndsWith(".uos", StringComparison.OrdinalIgnoreCase))
+                ScriptType = ScriptType.UOScript;
             if (ScriptType == ScriptType.LegionScript)
                 GenerateScript();
+            else if (ScriptType == ScriptType.UOScript)
+                GenerateUOScript();
         }
 
         public ScriptFile(string path, string source, string fileName)
@@ -741,13 +806,16 @@ namespace ClassicUO.LegionScripting
             FileName = fileName;
             FullPath = System.IO.Path.Combine(Path, FileName);
             FileContents = source.Split(new[] { '\n' }, StringSplitOptions.None);
-            GetScript = new Script(Lexer.Lex(FileContents));
+            GetScript = new LScript.Script(LScript.Lexer.Lex(FileContents));
         }
 
         public void ReloadFromFile()
         {
             FileContents = ReadFromFile();
-            GenerateScript();
+            if (ScriptType == ScriptType.UOScript)
+                GenerateUOScript();
+            else
+                GenerateScript();
         }
 
         public string[] ReadFromFile()
@@ -774,11 +842,26 @@ namespace ClassicUO.LegionScripting
         }
 
         public bool IsPython => ScriptType == ScriptType.Python;
+        public bool IsUOScript => ScriptType == ScriptType.UOScript;
+
+        public void GenerateUOScript()
+        {
+            LegionScripting.StopScript(this);
+            try
+            {
+                UOScript = new global::UOScript.Script(global::UOScript.Lexer.Lex(FullPath));
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Error parsing UOScript {FileName}: {ex}");
+                UOScript = null;
+            }
+        }
 
         public void GenerateScript()
         {
             LegionScripting.StopScript(this);
-            if (IsPython)
+            if (IsPython || IsUOScript)
             {
                 GetScript = null;
                 return;
@@ -786,9 +869,9 @@ namespace ClassicUO.LegionScripting
             try
             {
                 if (GetScript == null)
-                    GetScript = new Script(Lexer.Lex(FullPath));
+                    GetScript = new LScript.Script(LScript.Lexer.Lex(FullPath));
                 else
-                    GetScript.UpdateScript(Lexer.Lex(FullPath));
+                    GetScript.UpdateScript(LScript.Lexer.Lex(FullPath));
             }
             catch (Exception ex)
             {
@@ -815,6 +898,50 @@ namespace ClassicUO.LegionScripting
             var api = new API(pythonEngine);
             scopedAPI = api;
             pythonScope.SetVariable("API", api);
+            InjectClassicAssistGlobals(api, pythonScope);
+        }
+
+        private static void InjectClassicAssistGlobals(API api, Microsoft.Scripting.Hosting.ScriptScope scope)
+        {
+            scope.SetVariable("Msg", new Action<string>(api.Msg));
+            scope.SetVariable("Say", new Action<string>(api.Say));
+            scope.SetVariable("HeadMsg", new Action<string, uint>((msg, serial) => api.HeadMsg(msg, serial)));
+            scope.SetVariable("SysMessage", new Action<string>(msg => api.SysMessage(msg)));
+            scope.SetVariable("SysMsg", new Action<string>(msg => api.SysMsg(msg)));
+            scope.SetVariable("PartyMsg", new Action<string>(api.PartyMsg));
+            scope.SetVariable("GuildMsg", new Action<string>(api.GuildMsg));
+            scope.SetVariable("AllyMsg", new Action<string>(api.AllyMsg));
+            scope.SetVariable("WhisperMsg", new Action<string>(api.WhisperMsg));
+            scope.SetVariable("YellMsg", new Action<string>(api.YellMsg));
+            scope.SetVariable("EmoteMsg", new Action<string>(api.EmoteMsg));
+            scope.SetVariable("Pause", new Action<double>(api.Pause));
+            scope.SetVariable("UseObject", new Action<uint>(s => api.UseObject(s)));
+            scope.SetVariable("ClickObject", new Action<uint>(api.ClickObject));
+            scope.SetVariable("BandageSelf", new Func<bool>(api.BandageSelf));
+            scope.SetVariable("Attack", new Action<uint>(api.Attack));
+            scope.SetVariable("Target", new Action<uint>(api.Target));
+            scope.SetVariable("WaitForTarget", new Action<int>(api.WaitForTarget));
+            scope.SetVariable("RequestTarget", new Func<uint>(api.RequestTarget));
+            scope.SetVariable("FindType", new Func<uint, dynamic>(g => api.FindType(g)));
+            scope.SetVariable("FindLayer", new Func<string, dynamic>(layer => api.FindLayer(layer)));
+            scope.SetVariable("MoveItem", new Action<uint, uint>((s, d) => api.MoveItem(s, d)));
+            scope.SetVariable("UseSkill", new Action<string>(api.UseSkill));
+            scope.SetVariable("Cast", new Action<string>(api.Cast));
+            scope.SetVariable("CastSpell", new Action<string>(api.CastSpell));
+            scope.SetVariable("ClearJournal", new Action(api.ClearJournal));
+            scope.SetVariable("InJournal", new Func<string, bool>(api.InJournal));
+            scope.SetVariable("WaitForJournal", new Func<string, double, bool>(api.WaitForJournal));
+            scope.SetVariable("SetAlias", new Action<string, uint>(api.SetAlias));
+            scope.SetVariable("GetAlias", new Func<string, uint>(api.GetAlias));
+            scope.SetVariable("EquipItem", new Action<uint>(api.EquipItem));
+            scope.SetVariable("ContextMenu", new Action<uint, ushort>(api.ContextMenu));
+            scope.SetVariable("UseType", new Action<uint>(g => api.UseType(g)));
+            scope.SetVariable("IgnoreObject", new Action<uint>(api.IgnoreObject));
+            scope.SetVariable("ClearIgnoreList", new Action(api.ClearIgnoreList));
+            scope.SetVariable("Pathfind", new Func<int, int, int, int, bool, int, bool>(api.Pathfind));
+            scope.SetVariable("CancelPathfinding", new Action(api.CancelPathfinding));
+            scope.SetVariable("Backpack", new Func<uint>(() => api.Backpack));
+            scope.SetVariable("LastTarget", new Func<uint>(() => api.LastTargetSerial));
         }
 
         public void PythonScriptStopped()

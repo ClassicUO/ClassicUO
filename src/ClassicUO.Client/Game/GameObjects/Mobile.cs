@@ -760,21 +760,6 @@ namespace ClassicUO.Game.GameObjects
                         || IsFlying;
                     bool run = step.Run;
 
-                    // Client auto movements sync.
-                    // When server sends more than 1 packet in an amount of time less than 100ms if mounted (or 200ms if walking mount)
-                    // we need to remove the "teleport" effect.
-                    // When delay == 0 means that we received multiple movement packets in a single frame, so the patch becomes quite useless.
-                    if (!mounted && Serial != World.Player && Steps.Count > 1 && delay > 0)
-                    {
-                        mounted =
-                            delay
-                            <= (
-                                run
-                                    ? MovementSpeed.STEP_DELAY_MOUNT_RUN
-                                    : MovementSpeed.STEP_DELAY_MOUNT_WALK
-                            );
-                    }
-
                     int maxDelay =
                         MovementSpeed.TimeToCompleteMovement(run, mounted)
                         - (int)Client.Game.FrameDelay[1];

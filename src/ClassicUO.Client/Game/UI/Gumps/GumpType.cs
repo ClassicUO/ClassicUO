@@ -90,6 +90,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         NameOverHeadHandler,
         ScriptManager,
+        LegionScriptStudio,
+        RunningScripts,
         MacroButtonEditor = 6464,
         DurabilityGump = 6465,
         GridContainer = 8787,

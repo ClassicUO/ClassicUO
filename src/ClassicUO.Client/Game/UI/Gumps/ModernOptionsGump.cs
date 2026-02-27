@@ -3447,6 +3447,8 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
             content.AddToRight(new CheckboxWithLabel(lang.GetDust765.PvP_QuickTargetEnemyList, 0, profile.PvP_QuickTargetEnemyList, (b) => profile.PvP_QuickTargetEnemyList = b), true, page);
             content.BlankLine();
+            content.AddToRight(new CheckboxWithLabel(lang.GetDust765.PvP_OptimizedMode, 0, profile.PvP_OptimizedMode, (b) => profile.PvP_OptimizedMode = b), true, page);
+            content.BlankLine();
             content.AddToRight(new CheckboxWithLabel(lang.GetDust765.PvX_NameOverheadProfilesByContext, 0, profile.PvX_NameOverheadProfilesByContext, (b) => profile.PvX_NameOverheadProfilesByContext = b), true, page);
             content.BlankLine();
             content.AddToRight(new CheckboxWithLabel(lang.GetDust765.PvX_ConfigurableSoundsPerEvent, 0, profile.PvX_ConfigurableSoundsPerEvent, (b) => profile.PvX_ConfigurableSoundsPerEvent = b), true, page);

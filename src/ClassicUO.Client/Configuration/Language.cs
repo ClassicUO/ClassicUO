@@ -784,6 +784,7 @@ namespace ClassicUO.Configuration
             public string PvP_LastAttackerHighlight { get; set; } = "Highlight last attacker";
             public string PvP_SpellRangeOnCursor { get; set; } = "Spell range on cursor";
             public string PvP_QuickTargetEnemyList { get; set; } = "Quick-target enemy list";
+            public string PvP_OptimizedMode { get; set; } = "PvP optimized mode (auto-reduce graphics in combat)";
             public string PvX_NameOverheadProfilesByContext { get; set; } = "Name overhead profiles (PvM vs PvP)";
             public string PvX_ConfigurableSoundsPerEvent { get; set; } = "Configurable sounds per event";
             public string PvX_BlockBeneficialOnEnemies { get; set; } = "Block beneficial spells on enemies";

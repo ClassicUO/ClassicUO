@@ -2,3 +2,6 @@
 	path = external/FNA
 	url = https://github.com/FNA-XNA/FNA.git
 	branch = master
+[submodule "external/UOSteam"]
+	path = external/UOSteam
+	url = https://github.com/jaedan/steam-engine.git

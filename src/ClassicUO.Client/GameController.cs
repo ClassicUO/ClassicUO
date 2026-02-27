@@ -525,6 +525,9 @@ namespace ClassicUO
             UIManager.Update();
             LegionScripting.LegionScripting.OnUpdate();
 
+            if (World.InGame)
+                PerformanceOptimizer.UpdatePvPMode();
+
             if (Time.Ticks >= _nextSlowUpdate)
             {
                 _nextSlowUpdate = Time.Ticks + 500;

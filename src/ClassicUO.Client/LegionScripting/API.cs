@@ -174,6 +174,7 @@ namespace ClassicUO.LegionScripting
         });
 
         public void CastSpell(string spellName) => MainThreadQueue.EnqueueAction(() => GameActions.CastSpellByName(spellName));
+        public void Cast(string spellName) => CastSpell(spellName);
 
         public bool BuffExists(string buffName) => MainThreadQueue.InvokeOnMainThread(() =>
         {
@@ -190,6 +191,7 @@ namespace ClassicUO.LegionScripting
         });
 
         public void SysMsg(string message, ushort hue = 946) => MainThreadQueue.EnqueueAction(() => GameActions.Print(message, hue));
+        public void SysMessage(string message, ushort hue = 946) => SysMsg(message, hue);
         public void Msg(string message) => MainThreadQueue.EnqueueAction(() => GameActions.Say(message, ProfileManager.CurrentProfile.SpeechHue));
         public void Say(string message) => Msg(message);
 
@@ -200,6 +202,7 @@ namespace ClassicUO.LegionScripting
             if (hue == ushort.MaxValue) hue = ProfileManager.CurrentProfile.SpeechHue;
             MessageManager.HandleMessage(e, message, "", hue, MessageType.Label, 3, TextType.OBJECT);
         });
+        public void HeadMsg(string message, uint serial) => HeadMsg(message, serial, ushort.MaxValue);
 
         public void PartyMsg(string message) => MainThreadQueue.EnqueueAction(() => GameActions.SayParty(message));
         public void GuildMsg(string message) => MainThreadQueue.EnqueueAction(() => GameActions.Say(message, ProfileManager.CurrentProfile.GuildMessageHue, MessageType.Guild));
@@ -236,10 +239,12 @@ namespace ClassicUO.LegionScripting
                     if (i.Amount >= minamount && !_ignoreList.Contains(i.Serial))
                     {
                         Found = i.Serial;
+                        LScript.Interpreter.SetAlias("found", i.Serial);
                         return new PyItem(i);
                     }
                 }
                 Found = 0;
+                LScript.Interpreter.SetAlias("found", uint.MaxValue);
                 return null;
             });
 
@@ -363,6 +368,14 @@ namespace ClassicUO.LegionScripting
             }
             return found;
         }
+
+        public void ClearJournal()
+        {
+            while (_journalEntries.TryDequeue(out _)) { }
+        }
+
+        public uint GetAlias(string name) => LScript.Interpreter.GetAlias(name);
+        public void SetAlias(string name, uint serial) => LScript.Interpreter.SetAlias(name, serial);
 
         public PyItem NearestCorpse(int range = 12) => MainThreadQueue.InvokeOnMainThread(() =>
         {
