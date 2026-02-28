@@ -1,0 +1,42 @@
+This is the SPIR-V dumping tool for FNA3D traces and D3D9 Effect files.
+
+About
+-----
+Traces are made with a custom FNA3D binary that writes the entire call stream,
+including texture and buffer data, and contains no backend information of any
+kind. This ensures that traces made from any platform can be played back on
+every other platform, and can be rendered with any backend that FNA3D provides.
+
+In the context of dumpspirv, this allows us to take D3D9 Effects and generate
+working SPIR-V offline, by combining both the incoming bytecode as well as any
+vertex declarations used with those shaders, so that all known permutations of
+the IR are generated.
+
+For example, D3D9 bytecode generally assumes that all input types are floats,
+while modern APIs are more specific about vertex types, meaning the renderer
+needs SPIR-V that properly reads the input and converts to float for the rest
+of the shader asm to work. Additionally, vertex shader output and pixel shader
+output needs to be linked properly, so we're effectively generating fully linked
+shader program IR that can be directly compiled without further modification,
+while retaining compatibility with a typical D3D9 graphics call stream.
+
+How to Use
+----------
+While generating SPIR-V with Effects binaries directly is possible, it is
+strongly recommended that you use a trace instead. Follow the instructions for
+the FNA3D Replay tool, then pass the resulting FNA3D_Trace.bin to `dumpspirv`.
+It will take some time to run, so you will probably want to do this in the
+background.
+
+When the tool is finished you should have an FNA3D_Trace.bin.spirv folder, use
+this data however you like. We wrote this to support console platforms that
+don't have online compilation; we take the SPIR-V and generate a console shader
+cache that the SDL_GPU renderer will use as a lookup table where SPIR-V hashes
+are the keys.
+
+Found an issue?
+---------------
+Like with FNA3D, tracing issues should be reported via GitHub, but if you want
+to diagnose crashes yourself, the easiest way is to simply printf the `mark`
+value right before the big giant switch statement, then you can work your way
+from there once you know which API call caused the problem.

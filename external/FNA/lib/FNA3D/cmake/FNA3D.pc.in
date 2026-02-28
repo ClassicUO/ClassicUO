@@ -1,0 +1,13 @@
+prefix=@CMAKE_INSTALL_PREFIX@
+exec_prefix=${prefix}
+libdir=@FNA3D_PKGCONF_LIBDIR@
+includedir=@FNA3D_PKGCONF_INCLUDEDIR@
+
+Name: @PROJECT_NAME@
+URL: https://github.com/FNA-XNA/FNA3D
+Description: 3D Graphics Library for FNA
+Version: @LIB_VERSION@
+@PC_REQUIRES_PRIVATE@
+
+Libs: -L${libdir} -l@PROJECT_NAME@
+Cflags: -I${includedir} @PLATFORM_CFLAGS@

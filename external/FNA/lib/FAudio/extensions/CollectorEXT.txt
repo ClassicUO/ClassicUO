@@ -1,0 +1,71 @@
+CollectorEXT - Allow asynchronously capturing samples via an effect chain
+
+About
+-----
+By default if you want to do sophisticated monitoring of mixed samples in XAudio, you need to author a custom FAPO and insert it into an effect chain. Doing this correctly can be somewhat tricky, and for developers using garbage collected languages this can introduce the potential for a GC pause on the mixer thread (causing audio dropouts).
+This extension introduces a new built-in FAPO called "Collector" that captures samples into a user-provided ring buffer.
+
+Dependencies
+------------
+This extension does not interact with any non-standard XAudio features.
+
+New Defines
+-----------
+
+New Types
+---------
+typedef struct FAudioFXCollectorState
+{
+	uint32_t WriteOffset;
+} FAudioFXCollectorState;
+
+New Procedures and Functions
+----------------------------
+FAUDIOAPI uint32_t FAudioCreateCollectorEXT(
+	FAPO** ppApo, 
+	uint32_t Flags, 
+	float* pBuffer, 
+	uint32_t bufferLength
+);
+
+FAUDIOAPI uint32_t FAudioCreateCollectorWithCustomAllocatorEXT(
+	FAPO** ppApo,
+	uint32_t Flags,
+	float* pBuffer, 
+	uint32_t bufferLength, 
+	FAudioMallocFunc customMalloc,
+	FAudioFreeFunc customFree,
+	FAudioReallocFunc customRealloc
+);
+
+How to Use
+----------
+Allocate a sufficiently large ring buffer and pass it in to FAudioCreateCollectorEXT. Then take the resulting FAPO and add it to an effect chain, i.e.
+
+var buffer = new float[1024];
+var handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+
+FAudio.FAudioCreateCollector(
+    out var pCollector,
+    0, handle.AddrOfPinnedObject(), (uint)buffer.Length
+);
+
+FAudio.FAudioEffectDescriptor effectDescriptor = new() {
+    OutputChannels = 2,
+    pEffect = pCollector
+};
+FAudio.FAudioEffectChain effectChain = new() {
+    EffectCount = 1,
+    pEffectDescriptors = (IntPtr)Unsafe.AsPointer(ref effectDescriptor)
+};
+
+
+FAQ
+---
+Q. How do I avoid processing the same samples twice, or missing samples, if my game is running faster/slower than the mixer?
+A. Allocate a sufficiently large ring buffer and use GetParameters to determine the current write position of the mixer, then read the N most recent samples before the write position. The write position is updated once per block of processed samples instead of once per sample so it doesn't change that often. i.e.
+
+FAudio.FAudioFXCollectorState parameters = default;
+FAudio.FAudioVoice_GetEffectParameters(
+    Voice, 0, (IntPtr)(&parameters), (uint)sizeof(FAudio.FAudioFXCollectorState)
+);

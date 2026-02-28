@@ -95,10 +95,10 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                Task.Factory.StartNew(() =>
+                Task.Run(async () =>
                 {
-                    Task.Delay(1500).Wait();
-                    LoadOPLData(attempt++);
+                    await Task.Delay(1500);
+                    LoadOPLData(attempt + 1);
                 });
             }
 

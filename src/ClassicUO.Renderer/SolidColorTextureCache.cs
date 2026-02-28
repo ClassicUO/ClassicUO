@@ -42,10 +42,21 @@ namespace ClassicUO.Renderer
 
         private static GraphicsDevice _device;
 
+        private static readonly Color[] _commonColors = new[]
+        {
+            Color.Black, Color.White, Color.Gray, Color.Transparent,
+            new Color(128, 128, 128), new Color(255, 255, 255, 128),
+            new Color(0, 0, 0, 128), new Color(180, 50, 50), new Color(80, 15, 15)
+        };
+
         public static void Initialize(GraphicsDevice device)
         {
             _device = device;
             _textures.Clear();
+            foreach (Color c in _commonColors)
+            {
+                GetTexture(c);
+            }
         }
 
         public static Texture2D GetTexture(Color color)

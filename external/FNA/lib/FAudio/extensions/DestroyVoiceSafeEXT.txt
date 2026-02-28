@@ -1,0 +1,22 @@
+DestroyVoiceSafeEXT - Expose whether or not a voice was actually destroyed
+
+About
+-----
+XAudio's function for exporting voices has the ability to fail - however, the
+function declaration does not have a return value, so there is no way to safely
+determine on the client side whether or not a voice was actually destroyed.
+This extension adds a function that is otherwise identical, but includes a
+result code to allow checking for failures.
+
+Dependencies
+------------
+This extension does not interact with any non-standard XAudio features.
+
+New Procedures and Functions
+----------------------------
+FAUDIOAPI uint32_t FAudioVoice_DestroyVoiceSafeEXT(FAudioVoice *voice);
+
+How to Use
+----------
+This extension acts identially to the existing DestroyVoice, but with and added
+return value - it will return 0 on success or non-0 on failure.

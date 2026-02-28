@@ -105,6 +105,23 @@ O fork [dust765/ClassicUO_old](https://github.com/dust765/ClassicUO_old/commits/
 
 ---
 
+## Otimizações de GPU/Render (implementadas)
+
+### Batcher – evitar `Array.Resize`
+- **Problema:** `EnsureSize` usava `Array.Resize` sempre que `_numSprites >= _vertexInfo.Length`, gerando alocações e pressão de GC.
+- **Solução:** Flush quando `_numSprites >= MAX_SPRITES` em vez de redimensionar. Arrays permanecem em 8192 sprites, sem alocações dinâmicas.
+
+### SolidColorTextureCache – pre-cache
+- **Problema:** Cores novas geravam `Texture2D` na primeira vez, com alocação e upload para a GPU.
+- **Solução:** Pré-carregar cores comuns (Black, White, Gray, etc.) em `Initialize()` para evitar alocações no primeiro uso.
+
+### Opções de performance (já funcionais)
+- `PerformanceDisableCombatLinesOverlay`: pula `_UOClassicCombatLines.Draw`.
+- `PerformanceDisableHealthLinesOverlay`: pula `_healthLinesManager.Draw`.
+- `PerformanceDisableLightsRenderTarget`: `PrepareLightsRendering` retorna sem usar o render target de luzes.
+
+---
+
 ## Referências
 
 - **dust765 ClassicUO_old** – [main branch GameController](https://raw.githubusercontent.com/dust765/ClassicUO_old/main/src/ClassicUO.Client/GameController.cs)

@@ -1,0 +1,67 @@
+FilterWetDryMixEXT - Allow voice/send filters to apply a wet/dry mix
+
+About
+-----
+The default XAudio specification allows for applying filters and effects. While
+effects have the capability of applying wet/dry mixes to their processing,
+filters do not have this feature. Filters are, for the most part, just another
+effect that's very clearly defined, so adding a wet/dry calculation to the
+existing filter algorithm is trivial.
+
+Dependencies
+------------
+This extension does not interact with any non-standard XAudio features.
+
+New Defines
+-----------
+#define FAUDIO_DEFAULT_FILTER_WETDRYMIX_EXT	1.0f
+
+New Types
+---------
+typedef struct FAudioFilterParametersEXT
+{
+	FAudioFilterType Type;
+	float Frequency;	/* [0, FAUDIO_MAX_FILTER_FREQUENCY] */
+	float OneOverQ;		/* [0, FAUDIO_MAX_FILTER_ONEOVERQ] */
+	float WetDryMix;	/* [0, 1] */
+} FAudioFilterParametersEXT;
+
+New Procedures and Functions
+----------------------------
+FAUDIOAPI uint32_t FAudioVoice_SetFilterParametersEXT(
+	FAudioVoice* voice,
+	const FAudioFilterParametersEXT* pParameters,
+	uint32_t OperationSet
+);
+
+FAUDIOAPI void FAudioVoice_GetFilterParametersEXT(
+	FAudioVoice* voice,
+	FAudioFilterParametersEXT* pParameters
+);
+
+FAUDIOAPI uint32_t FAudioVoice_SetOutputFilterParametersEXT(
+	FAudioVoice* voice,
+	FAudioVoice* pDestinationVoice,
+	const FAudioFilterParametersEXT* pParameters,
+	uint32_t OperationSet
+);
+
+FAUDIOAPI void FAudioVoice_GetOutputFilterParametersEXT(
+	FAudioVoice* voice,
+	FAudioVoice* pDestinationVoice,
+	FAudioFilterParametersEXT* pParameters
+);
+
+How to Use
+----------
+This extension acts identially to the existing FAudioFilterParameters, but with
+an added WetDryMix structure member - set this value to apply a wet/dry mix.
+
+FAQ
+---
+Q: Does the behavior of the stock filter functions change?
+A: No. Calls to the original functions will apply a WetDryMix value of 1, so as
+   to sound as the function would have originally intended. This is subject to
+   change in future revisions; in the current implementation, preserving the
+   current wet/dry value would have required additional mutex activity, which
+   could degrade performance for users of the stock API.

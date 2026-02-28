@@ -1,0 +1,26 @@
+name: Build
+
+on: [push, pull_request]
+
+jobs:
+  Build:
+    name: ${{ matrix.platform.name }}
+    runs-on: ${{ matrix.platform.os }}
+    strategy:
+      matrix:
+        platform:
+        - { name: Linux,   os: ubuntu-latest, flags: -GNinja }
+        - { name: Windows, os: windows-latest }
+        - { name: MacOS,   os: macos-latest }
+    steps:
+    - name: Set up SDL
+      id: sdl
+      uses: libsdl-org/setup-sdl@main
+      with:
+        version: sdl2-latest
+    - name: Get MojoShader sources
+      uses: actions/checkout@v3
+    - name: Configure CMake
+      run: cmake -B build ${{ matrix.platform.flags }}
+    - name: Build
+      run: cmake --build build/

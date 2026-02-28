@@ -36,6 +36,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public static string SearchText { get; private set; } = string.Empty;
         public static event EventHandler SearchValueChanged;
+        private const uint SEARCH_DEBOUNCE_MS = 150;
+        private bool _searchDebouncePending;
+        private uint _searchDebounceTicks;
         private Profile profile;
         private ModernOptionsGumpLanguage lang;
 
@@ -86,7 +89,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             InputField search;
             Add(search = new InputField(380, 32) { X = Width - 396, Y = 8 });
-            search.TextChanged += (s, e) => { SearchText = search.Text; SearchValueChanged.Raise(); };
+            search.TextChanged += (s, e) =>
+            {
+                SearchText = search.Text;
+                _searchDebouncePending = true;
+                _searchDebounceTicks = ClassicUO.Time.Ticks;
+            };
 
             c.X = search.X - c.Width - 8;
 
@@ -4326,7 +4334,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private ModernButton SubCategoryButton(string text, int page, int width, int height = 40)
         {
-            return new ModernButton(0, 0, width, height, ButtonAction.SwitchPage, text, Theme.BUTTON_FONT_COLOR) { ButtonParameter = page };
+            return new ModernButton(0, 0, width, height, ButtonAction.SwitchPage, text, Theme.BUTTON_FONT_COLOR, 0, FontStashSharp.RichText.TextHorizontalAlignment.Left, Theme.ICON_UI) { ButtonParameter = page };
         }
 
         public Control GenConditionControl(int key, int width, bool createIfNotExists)
@@ -4422,6 +4430,16 @@ namespace ClassicUO.Game.UI.Gumps
             _background.Width = width;
             _background.Height = main.Height;
             return main;
+        }
+
+        public override void Update()
+        {
+            base.Update();
+            if (_searchDebouncePending && ClassicUO.Time.Ticks - _searchDebounceTicks >= SEARCH_DEBOUNCE_MS)
+            {
+                _searchDebouncePending = false;
+                SearchValueChanged?.Invoke(this, EventArgs.Empty);
+            }
         }
 
         public override void OnPageChanged()
@@ -5898,10 +5916,15 @@ namespace ClassicUO.Game.UI.Gumps
             public void OnSearchMatch() => TextLabel.Alpha = 1f;
         }
 
+        private const int SUB_BUTTON_ICON_SIZE = 12;
+        private const int SUB_BUTTON_ICON_MARGIN = 10;
+        private const int SUB_BUTTON_TEXT_MARGIN = 8;
+
         private class ModernButton : HitBox, SearchableOption, ICategoryButton
         {
             private readonly ButtonAction _action;
             private readonly int _groupnumber;
+            private readonly Color? _iconColor;
             private bool _isSelected;
 
             public bool DisplayBorder;
@@ -5918,14 +5941,24 @@ namespace ClassicUO.Game.UI.Gumps
                 string text,
                 Color fontColor,
                 int groupnumber = 0,
-                FontStashSharp.RichText.TextHorizontalAlignment align = FontStashSharp.RichText.TextHorizontalAlignment.Center
+                FontStashSharp.RichText.TextHorizontalAlignment align = FontStashSharp.RichText.TextHorizontalAlignment.Center,
+                Color? iconColor = null
             ) : base(x, y, w, h)
             {
                 _action = action;
+                _iconColor = iconColor;
+
+                int textX = SUB_BUTTON_TEXT_MARGIN;
+                int textWidth = w - SUB_BUTTON_TEXT_MARGIN * 2;
+                if (_iconColor.HasValue)
+                {
+                    textX = SUB_BUTTON_ICON_MARGIN + SUB_BUTTON_ICON_SIZE + SUB_BUTTON_TEXT_MARGIN;
+                    textWidth = w - textX - SUB_BUTTON_TEXT_MARGIN;
+                }
 
                 Add
                 (
-                    TextLabel = new UOLabel(text, Theme.FONT, 0x0481, Assets.TEXT_ALIGN_TYPE.TS_LEFT, w, FontStyle.None)
+                    TextLabel = new UOLabel(text, Theme.FONT, 0x0481, Assets.TEXT_ALIGN_TYPE.TS_LEFT, Math.Max(textWidth, 1), FontStyle.None) { X = textX }
                 );
 
                 TextLabel.Y = (h - TextLabel.Height) >> 1;
@@ -6042,6 +6075,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
+                if (_iconColor.HasValue)
+                {
+                    Texture2D tex = SolidColorTextureCache.GetTexture(_iconColor.Value);
+                    Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, 1f);
+                    batcher.Draw(tex, new Rectangle(x + SUB_BUTTON_ICON_MARGIN, y + (Height - SUB_BUTTON_ICON_SIZE) / 2, SUB_BUTTON_ICON_SIZE, SUB_BUTTON_ICON_SIZE), hueVector);
+                }
+
                 if (IsSelected)
                 {
                     Texture2D selTex = SolidColorTextureCache.GetTexture(Theme.ACCENT_COLOR);

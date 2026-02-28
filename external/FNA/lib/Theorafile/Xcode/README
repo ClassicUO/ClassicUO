@@ -1,0 +1,8 @@
+Building Theorafile for macOS/iOS/tvOS
+--------------------------------
+Theorafile uses Xcode to build on macOS, iOS, and tvOS.
+
+Compiling
+---------
+1. Build theorafile.xcodeproj
+2. Grab the output libtheorafile.a / libtheorafile.dylib, ship it!

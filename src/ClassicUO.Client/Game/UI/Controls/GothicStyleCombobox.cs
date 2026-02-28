@@ -1,5 +1,6 @@
 using ClassicUO.Assets;
 using ClassicUO.Game;
+using ClassicUO;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
@@ -26,7 +27,6 @@ namespace ClassicUO.Game.UI.Controls
         private Color _textColor;
         private Color _textShadowColor;
         private Texture2D _pixelTexture;
-        private static readonly Random _textureRandom = new Random(12345);
 
         public GothicStyleCombobox(int x, int y, int width, int height, string[] items, int selectedIndex = -1)
         {
@@ -53,6 +53,12 @@ namespace ClassicUO.Game.UI.Controls
                 _selectedIndex = _items.Length > 0 ? 0 : -1;
             }
             _renderedText = RenderedText.Create(_selectedText ?? string.Empty, 0x0481, 1, true, FontStyle.BlackBorder);
+
+            if (Client.Game?.GraphicsDevice != null)
+            {
+                _pixelTexture = new Texture2D(Client.Game.GraphicsDevice, 1, 1);
+                _pixelTexture.SetData(new[] { Color.Red });
+            }
 
             AcceptMouseInput = true;
         }
@@ -166,15 +172,18 @@ namespace ClassicUO.Game.UI.Controls
 
         private static readonly Vector3 SolidHue = ShaderHueTranslator.GetHueVector(0, false, 1f);
 
+        private const int GRADIENT_STRIP_HEIGHT = 4;
+
         private void DrawGradientBackground(UltimaBatcher2D batcher, int x, int y, int width, int height, Color baseColor, Color shadowColor)
         {
-            for (int i = 0; i < height; i++)
+            for (int i = 0; i < height; i += GRADIENT_STRIP_HEIGHT)
             {
-                float ratio = (float)i / height;
+                int stripHeight = Math.Min(GRADIENT_STRIP_HEIGHT, height - i);
+                float ratio = (float)(i + stripHeight / 2f) / height;
                 int cr = (int)(baseColor.R + (shadowColor.R - baseColor.R) * ratio);
                 int cg = (int)(baseColor.G + (shadowColor.G - baseColor.G) * ratio);
                 int cb = (int)(baseColor.B + (shadowColor.B - baseColor.B) * ratio);
-                batcher.Draw(_pixelTexture, new Rectangle(x, y + i, width, 1), new Vector3(cr / 255f, cg / 255f, cb / 255f));
+                batcher.Draw(_pixelTexture, new Rectangle(x, y + i, width, stripHeight), new Vector3(cr / 255f, cg / 255f, cb / 255f));
             }
         }
 
@@ -214,15 +223,18 @@ namespace ClassicUO.Game.UI.Controls
                 Math.Max(0, baseColor.G - 10),
                 Math.Max(0, baseColor.B - 8)
             );
+            Vector3 texVec = new Vector3(textureColor.R / 255f, textureColor.G / 255f, textureColor.B / 255f);
             for (int i = 4; i < width - 4; i += 6)
             {
-                int lineX = x + i + _textureRandom.Next(-2, 3);
+                int offsetX = ((i * 7 + 11) % 5) - 2;
+                int lineX = x + i + offsetX;
                 if (lineX >= x + 2 && lineX < x + width - 2)
                 {
-                    int lineHeight = height - 6 + _textureRandom.Next(-2, 3);
-                    int lineY = y + 3 + _textureRandom.Next(-1, 2);
-                    batcher.Draw(_pixelTexture, new Rectangle(lineX, lineY, 1, lineHeight),
-                        new Vector3(textureColor.R / 255f, textureColor.G / 255f, textureColor.B / 255f));
+                    int offsetH = ((i * 3) % 5) - 2;
+                    int lineHeight = Math.Max(1, height - 6 + offsetH);
+                    int offsetY = ((i * 2) % 3) - 1;
+                    int lineY = y + 3 + offsetY;
+                    batcher.Draw(_pixelTexture, new Rectangle(lineX, lineY, 1, lineHeight), texVec);
                 }
             }
         }
@@ -315,7 +327,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             private const int ELEMENT_HEIGHT = 25;
             private const int BORDER_RADIUS = 6;
-            private static readonly Random _dropdownRandom = new Random(12345);
+            private const int GRADIENT_STRIP_HEIGHT = 4;
             private readonly GothicStyleCombobox _combobox;
             private Texture2D _pixelTexture;
 
@@ -330,6 +342,12 @@ namespace ClassicUO.Game.UI.Controls
                 LayerOrder = UILayer.Over;
                 ModalClickOutsideAreaClosesThisControl = true;
                 _combobox = combobox;
+
+                if (Client.Game?.GraphicsDevice != null)
+                {
+                    _pixelTexture = new Texture2D(Client.Game.GraphicsDevice, 1, 1);
+                    _pixelTexture.SetData(new[] { Color.Red });
+                }
 
                 var labels = new HoveredLabel[items.Length];
                 for (int i = 0; i < items.Length; i++)
@@ -389,13 +407,14 @@ namespace ClassicUO.Game.UI.Controls
             {
                 Color baseColor = _combobox.BaseColor;
                 Color shadowColor = _combobox.ShadowColor;
-                for (int i = 0; i < h; i++)
+                for (int i = 0; i < h; i += GRADIENT_STRIP_HEIGHT)
                 {
-                    float ratio = (float)i / h;
+                    int stripHeight = Math.Min(GRADIENT_STRIP_HEIGHT, h - i);
+                    float ratio = (float)(i + stripHeight / 2f) / h;
                     int cr = (int)(baseColor.R + (shadowColor.R - baseColor.R) * ratio);
                     int cg = (int)(baseColor.G + (shadowColor.G - baseColor.G) * ratio);
                     int cb = (int)(baseColor.B + (shadowColor.B - baseColor.B) * ratio);
-                    batcher.Draw(_pixelTexture, new Rectangle(x, y + i, w, 1), new Vector3(cr / 255f, cg / 255f, cb / 255f));
+                    batcher.Draw(_pixelTexture, new Rectangle(x, y + i, w, stripHeight), new Vector3(cr / 255f, cg / 255f, cb / 255f));
                 }
             }
 
@@ -436,11 +455,14 @@ namespace ClassicUO.Game.UI.Controls
                 Vector3 texVec = new Vector3(textureColor.R / 255f, textureColor.G / 255f, textureColor.B / 255f);
                 for (int i = 4; i < w - 4; i += 6)
                 {
-                    int lineX = x + i + _dropdownRandom.Next(-2, 3);
+                    int offsetX = ((i * 7 + 11) % 5) - 2;
+                    int lineX = x + i + offsetX;
                     if (lineX >= x + 2 && lineX < x + w - 2)
                     {
-                        int lineHeight = h - 6 + _dropdownRandom.Next(-2, 3);
-                        int lineY = y + 3 + _dropdownRandom.Next(-1, 2);
+                        int offsetH = ((i * 3) % 5) - 2;
+                        int lineHeight = Math.Max(1, h - 6 + offsetH);
+                        int offsetY = ((i * 2) % 3) - 1;
+                        int lineY = y + 3 + offsetY;
                         batcher.Draw(_pixelTexture, new Rectangle(lineX, lineY, 1, lineHeight), texVec);
                     }
                 }

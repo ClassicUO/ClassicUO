@@ -1,0 +1,176 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  linux:
+    name: Steam Linux Runtime
+    runs-on: ubuntu-latest
+    container:
+      image: registry.gitlab.steamos.cloud/steamrt/sniper/sdk:latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Build
+      run: |
+        make
+        strip -S libtheorafile.so
+
+    - name: Archive build result
+      uses: actions/upload-artifact@v4
+      with:
+        name: Theorafile-lib64
+        path: libtheorafile.so
+
+  linux-aarch64:
+    name: Steam Linux Runtime (AArch64)
+    runs-on: ubuntu-24.04-arm
+    container:
+      image: registry.gitlab.steamos.cloud/steamrt/sniper/sdk/arm64:latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Build
+      run: |
+        make
+        strip -S libtheorafile.so
+
+    - name: Archive build result
+      uses: actions/upload-artifact@v4
+      with:
+        name: Theorafile-libaarch64
+        path: libtheorafile.so
+
+  linux-mingw:
+    name: Fedora Linux MinGW
+    runs-on: ubuntu-latest
+    container:
+      image: fedora
+    steps:
+    - name: Install toolchain
+      run: |
+        dnf update -y
+        dnf install -y git cmake ninja-build mingw32-gcc mingw64-gcc
+
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Build
+      run: |
+        mingw32-make
+        mkdir x86
+        mv libtheorafile.dll x86/
+        mingw64-make
+        mkdir x64
+        mv libtheorafile.dll x64/
+
+    - name: Archive x86 build result
+      uses: actions/upload-artifact@v4
+      with:
+        name: Theorafile-x86
+        path: x86/libtheorafile.dll
+
+    - name: Archive x64 build result
+      uses: actions/upload-artifact@v4
+      with:
+        name: Theorafile-x64
+        path: x64/libtheorafile.dll
+
+  freebsd:
+    runs-on: ubuntu-latest
+    name: FreeBSD
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+    - name: Build
+      uses: cross-platform-actions/action@v0.29.0
+      with:
+        operating_system: freebsd
+        version: '14.3'
+        run: |
+          sudo pkg update
+          sudo pkg install -y gmake
+          gmake
+
+  macos:
+    name: macOS
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+
+    - name: Build Intel
+      run: |
+        CC="cc -arch x86_64" make
+        mv libtheorafile.dylib libtheorafile_x64.dylib
+
+    - name: Build ARM
+      run: |
+        CC="cc -arch arm64" make
+        mv libtheorafile.dylib libtheorafile_arm64.dylib
+
+    - name: Lipo universal
+      run: lipo -create -output libtheorafile.dylib libtheorafile_x64.dylib libtheorafile_arm64.dylib
+
+    - name: Archive build result
+      uses: actions/upload-artifact@v4
+      with:
+        name: Theorafile-osx
+        path: libtheorafile.dylib
+
+  ios-tvos:
+    name: iOS/tvOS
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        include:
+          - platform: iOS
+            sdk: iphoneos
+          - platform: iOS
+            sdk: iphonesimulator
+          - platform: tvOS
+            sdk: appletvos
+          - platform: tvOS
+            sdk: appletvsimulator
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: true
+
+    - name: Build
+      run: xcodebuild -project Xcode/theorafile.xcodeproj -target theorafile-${{ matrix.platform }} -config Release -sdk ${{ matrix.sdk }}
+
+    - name: Archive build result
+      uses: actions/upload-artifact@v4
+      with:
+        name: Theorafile-${{ matrix.sdk }}
+        path: Xcode/build/Release-${{ matrix.sdk }}/libtheorafile.a
+
+  linux-ppc:
+    name: Debian Linux PPC
+    runs-on: ubuntu-latest
+    container:
+      image: dockcross/linux-ppc:latest
+    steps:
+    - name: Install chrpath
+      run: apt install -y chrpath
+
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Build
+      run: |
+        make
+    - name: Archive build result
+      uses: actions/upload-artifact@v4
+      with:
+        name: Theorafile-libpowerpc
+        path: libtheorafile.so

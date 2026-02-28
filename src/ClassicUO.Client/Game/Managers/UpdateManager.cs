@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -16,50 +16,57 @@ namespace ClassicUO.Game.Managers
         {
             if (!SkipUpdateCheck)
             {
-                Task.Factory.StartNew(() =>
+                Task.Run(CheckForUpdatesAsync);
+            }
+        }
+
+        private static async Task CheckForUpdatesAsync()
+        {
+            try
+            {
+                HttpRequestMessage restApi = new HttpRequestMessage()
                 {
-                    try
+                    Method = HttpMethod.Get,
+                    RequestUri = new Uri("https://api.github.com/repos/jsebold666/TazUO/releases/latest"),
+                };
+                restApi.Headers.Add("X-GitHub-Api-Version", "2022-11-28");
+                restApi.Headers.Add("User-Agent", "Public");
+                using (var httpClient = new HttpClient())
+                {
+                    var response = await httpClient.SendAsync(restApi);
+                    string jsonResponse = await response.Content.ReadAsStringAsync();
+                    MainReleaseData = JsonSerializer.Deserialize<GitHubReleaseData>(jsonResponse);
+                }
+
+                if (MainReleaseData != null)
+                {
+                    if (MainReleaseData.tag_name.StartsWith("v"))
                     {
-                        HttpRequestMessage restApi = new HttpRequestMessage()
+                        MainReleaseData.tag_name = MainReleaseData.tag_name.Substring(1);
+                    }
+
+                    if (Version.TryParse(MainReleaseData.tag_name, out var version))
+                    {
+                        if (version > CUOEnviroment.Version)
                         {
-                            Method = HttpMethod.Get,
-                            RequestUri = new Uri("https://api.github.com/repos/jsebold666/TazUO/releases/latest"),
-                        };
-                        restApi.Headers.Add("X-GitHub-Api-Version", "2022-11-28");
-                        restApi.Headers.Add("User-Agent", "Public");
-                        string jsonResponse = new HttpClient().SendAsync(restApi).Result.Content.ReadAsStringAsync().Result;
-
-                        MainReleaseData = JsonSerializer.Deserialize<GitHubReleaseData>(jsonResponse);
-
-                        if (MainReleaseData != null)
-                        {
-                            if (MainReleaseData.tag_name.StartsWith("v"))
-                            {
-                                MainReleaseData.tag_name = MainReleaseData.tag_name.Substring(1);
-                            }
-
-                            if (Version.TryParse(MainReleaseData.tag_name, out var version))
-                            {
-                                if(version > CUOEnviroment.Version)
-                                {
-                                    HasUpdate = true;
-                                    UpdateStatusChanged?.Invoke(null, EventArgs.Empty);
-                                }
-                            }
+                            HasUpdate = true;
+                            UpdateStatusChanged?.Invoke(null, EventArgs.Empty);
                         }
                     }
-                    catch { }
-                });
+                }
             }
+            catch { }
         }
 
         public static void SendDelayedUpdateMessage()
         {
-            Task.Factory.StartNew(() =>
-            {
-                Task.Delay(30000).Wait();
-                GameActions.Print("Dust765.4 has an update available, please visit https://github.com/dust765/ClassicUO to get the most recent version.", 32);
-            });
+            Task.Run(SendDelayedUpdateMessageAsync);
+        }
+
+        private static async Task SendDelayedUpdateMessageAsync()
+        {
+            await Task.Delay(30000);
+            GameActions.Print("Dust765.4 has an update available, please visit https://github.com/dust765/ClassicUO to get the most recent version.", 32);
         }
     }
 
