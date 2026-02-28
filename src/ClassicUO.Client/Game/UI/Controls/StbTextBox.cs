@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -114,6 +114,11 @@ namespace ClassicUO.Game.UI.Controls
 
             Height = _rendererCaret.Height;
             LoseFocusOnEscapeKey = true;
+        }
+
+        public StbTextBox(int max_char_count, int maxWidth, bool multiline) : this(1, max_char_count, maxWidth, true, FontStyle.None, 0)
+        {
+            Multiline = multiline;
         }
 
         public StbTextBox(List<string> parts, string[] lines) : this
@@ -246,6 +251,12 @@ namespace ClassicUO.Game.UI.Controls
 
                 return h;
             }
+        }
+
+        public void UpdateSize(int width, int height)
+        {
+            Width = width;
+            Height = height;
         }
 
         public string Text
@@ -502,8 +513,7 @@ namespace ClassicUO.Game.UI.Controls
                 case SDL.SDL_Keycode.SDLK_TAB:
                     if (AllowTAB)
                     {
-                        // UO does not support '\t' char in its fonts
-                        OnTextInput("   ");
+                        OnTextInput("    ");
                     }
                     else
                     {
@@ -1015,6 +1025,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (button == MouseButtonType.Left && IsEditable)
             {
+                SetKeyboardFocus();
                 if (!NoSelection)
                 {
                     _leftWasDown = true;

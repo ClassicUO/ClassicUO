@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2024, andreakarasho
 // All rights reserved.
@@ -1642,19 +1642,24 @@ namespace ClassicUO.Assets
                 }
             }
 
-            if (oldWidth == 0 && RecalculateWidthByInfo)
+            if (RecalculateWidthByInfo)
             {
                 MultilinesFontInfo ptr1 = info;
-                width = 0;
+                int contentWidth = 0;
 
                 while (ptr1 != null)
                 {
-                    if (ptr1.Width > width)
+                    if (ptr1.Width > contentWidth)
                     {
-                        width = ptr1.Width;
+                        contentWidth = ptr1.Width;
                     }
 
                     ptr1 = ptr1.Next;
+                }
+
+                if (oldWidth == 0 || contentWidth < width)
+                {
+                    width = contentWidth;
                 }
             }
 

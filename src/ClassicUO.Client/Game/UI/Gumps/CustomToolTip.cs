@@ -1,6 +1,7 @@
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
+using FontStyle = ClassicUO.Game.FontStyle;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -15,7 +16,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly string prepend;
         private readonly string append;
         private readonly Item compareTo;
-        private TextBox text;
+        private UOLabel text;
         private readonly uint hue = 0xFFFF;
 
         public event FinishedLoadingEvent OnOPLLoaded;
@@ -44,16 +45,9 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildGump()
         {
             var profile = ProfileManager.CurrentProfile;
-            string font = profile?.SelectedToolTipFont ?? "Roboto-Regular";
-            int fontSize = profile?.SelectedToolTipFontSize ?? 20;
-            text = new TextBox(
-                "Loading item data...",
-                font,
-                fontSize,
-                150,
-                (int)hue,
-                align: profile?.LeftAlignToolTips == true ? FontStashSharp.RichText.TextHorizontalAlignment.Left : FontStashSharp.RichText.TextHorizontalAlignment.Center
-                );
+            byte font = profile?.SelectedToolTipFont ?? 1;
+            TEXT_ALIGN_TYPE align = profile?.LeftAlignToolTips == true ? TEXT_ALIGN_TYPE.TS_LEFT : TEXT_ALIGN_TYPE.TS_CENTER;
+            text = new UOLabel("Loading item data...", font, (ushort)hue, align, 150, FontStyle.BlackBorder, true, true);
 
             Height = text.Height;
             Width = text.Width;
@@ -83,21 +77,16 @@ namespace ClassicUO.Game.UI.Gumps
                             finalString = FormatTooltip(name, data);
                     }
 
+                    string displayText = HtmlTextHelper.ConvertUoColorCodesToHtml(finalString ?? string.Empty).Trim();
+
                     text?.Dispose();
                     var p = ProfileManager.CurrentProfile;
-                    string font = p?.SelectedToolTipFont ?? "Roboto-Regular";
-                    int fontSize = p?.SelectedToolTipFontSize ?? 20;
-                    text = new TextBox(
-                        TextBox.ConvertHtmlToFontStashSharpCommand(finalString).Trim(),
-                        font,
-                        fontSize,
-                        600,
-                        (int)hue,
-                        align: p?.LeftAlignToolTips == true ? FontStashSharp.RichText.TextHorizontalAlignment.Left : FontStashSharp.RichText.TextHorizontalAlignment.Center
-                        );
+                    byte font = p?.SelectedToolTipFont ?? 1;
+                    TEXT_ALIGN_TYPE align = p?.LeftAlignToolTips == true ? TEXT_ALIGN_TYPE.TS_LEFT : TEXT_ALIGN_TYPE.TS_CENTER;
+                    text = new UOLabel(displayText, font, (ushort)hue, align, 600, FontStyle.BlackBorder, true, true);
 
-                    if (text.MeasuredSize.X + 10 < 600)
-                        text.Width = text.MeasuredSize.X + 10;
+                    if (text.Width + 10 < 600)
+                        text.Width = text.Width + 10;
 
                     Height = text.Height;
                     Width = text.Width;

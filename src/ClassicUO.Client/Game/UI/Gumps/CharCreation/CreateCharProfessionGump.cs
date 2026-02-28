@@ -33,6 +33,7 @@
 using System;
 using ClassicUO.Configuration;
 using System.Collections.Generic;
+using ClassicUO.Game;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -168,7 +169,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
     internal class ProfessionInfoGump : Control
     {
         private readonly ProfessionInfo _info;
-        private readonly TextBox _professionLabel;
+        private readonly UOLabel _professionLabel;
         private GumpPic _gumpPic;
         private static GumpPic _lastSelectedGumpPic;
         private static readonly Color NormalColor = Color.White;
@@ -182,7 +183,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             ClilocLoader localization = ClilocLoader.Instance;
 
-            _professionLabel = new TextBox(localization.GetString(info.Localization), TrueTypeLoader.EMBEDDED_FONT, 18, 300, NormalColor, strokeEffect: false) { X = 120, Y = 8, AcceptMouseInput = false };
+            _professionLabel = new UOLabel(localization.GetString(info.Localization), 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 300) { X = 120, Y = 8 };
             Add(_professionLabel);
 
             _gumpPic = new GumpPic(54, -12, info.Graphic, 0);
@@ -226,23 +227,23 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private void OnGumpPicMouseEnter(object sender, EventArgs e)
         {
             _gumpPic.Alpha = 0.5f;
-            _professionLabel.Fontcolor = HoverColor;
+            _professionLabel.Hue = UOLabelHue.Hover;
         }
 
         private void OnGumpPicMouseExit(object sender, EventArgs e)
         {
             _gumpPic.Alpha = 1.0f;
-            _professionLabel.Fontcolor = NormalColor;
+            _professionLabel.Hue = UOLabelHue.Text;
         }
 
         private void OnControlMouseEnter(object sender, EventArgs e)
         {
-            _professionLabel.Fontcolor = HoverColor;
+            _professionLabel.Hue = UOLabelHue.Hover;
         }
 
         private void OnControlMouseExit(object sender, EventArgs e)
         {
-            _professionLabel.Fontcolor = NormalColor;
+            _professionLabel.Hue = UOLabelHue.Text;
         }
     }
 }

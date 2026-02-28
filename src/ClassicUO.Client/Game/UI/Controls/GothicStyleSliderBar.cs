@@ -1,7 +1,7 @@
 using ClassicUO.Assets;
+using ClassicUO.Game;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
-using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -14,14 +14,13 @@ namespace ClassicUO.Game.UI.Controls
         private bool _clicked;
         private int _sliderX;
         private int _value = -1;
-        private SpriteFontBase _font;
+        private RenderedText _renderedText;
         private Color _baseColor;
         private Color _highlightColor;
         private Color _shadowColor;
         private Color _textColor;
         private Color _sliderColor;
         private Texture2D _pixelTexture;
-        private int _fontSize;
         private bool _showText;
         private bool _isUpdatingPairedValues = false;
 
@@ -32,7 +31,6 @@ namespace ClassicUO.Game.UI.Controls
             int min,
             int max,
             int value,
-            int fontSize = 14,
             bool showText = true
         )
         {
@@ -42,18 +40,16 @@ namespace ClassicUO.Game.UI.Controls
             Height = 20; // Altura fixa para o slider
             MinValue = min;
             MaxValue = max;
-            _fontSize = fontSize;
             _showText = showText;
 
             // Cores do tema gótico/medieval
             _baseColor = Color.DarkRed;                    // Background vermelho escuro
             _highlightColor = new Color(180, 50, 50);      // Realce mais claro para bordas
             _shadowColor = new Color(80, 15, 15);          // Sombra mais escura
-            _textColor = Color.White;                      // Texto branco para contraste
-            _sliderColor = new Color(220, 100, 100);       // Cor do slider (mais claro)
+            _textColor = Color.White;
+            _sliderColor = new Color(220, 100, 100);
 
-            // Carregar fonte
-            _font = TrueTypeLoader.Instance.GetFont("Arial", fontSize);
+            _renderedText = RenderedText.Create(Value.ToString(), 0, 1, true, FontStyle.BlackBorder);
 
             AcceptMouseInput = true;
             Value = value;
@@ -172,19 +168,12 @@ namespace ClassicUO.Game.UI.Controls
             // Desenhar o slider (indicador)
             DrawSlider(batcher, x, y, _sliderX, Height, _sliderColor);
 
-            // Desenhar texto do valor se habilitado
-            if (_showText && _font != null)
+            if (_showText)
             {
-                string valueText = Value.ToString();
-                var textSize = _font.MeasureString(valueText);
-                var textX = x + Width + 10; // Posição à direita do slider
-                var textY = y + (Height - textSize.Y) / 2;
-
-                // Desenhar sombra do texto
-                _font.DrawText(batcher, new StringSegment(valueText), new Vector2(textX + 1, textY + 1), _shadowColor);
-
-                // Desenhar o texto principal
-                _font.DrawText(batcher, new StringSegment(valueText), new Vector2(textX, textY), _textColor);
+                _renderedText.Text = Value.ToString();
+                var textX = x + Width + 10;
+                var textY = y + (Height - _renderedText.Height) / 2;
+                _renderedText.Draw(batcher, textX, textY);
             }
 
             return base.Draw(batcher, x, y);
@@ -427,6 +416,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Dispose()
         {
+            _renderedText?.Destroy();
             _pixelTexture?.Dispose();
             base.Dispose();
         }

@@ -5466,7 +5466,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
                 section.Add(AddLabel(null, "Journal text font", 0, 0));
-                section.AddRight(_journalFontSelection = GenerateFontSelector(_currentProfile.SelectedTTFJournalFont));
+                section.AddRight(_journalFontSelection = GenerateFontSelector(_currentProfile.SelectedJournalFont));
 
                 section.PushIndent();
                 section.Add(AddLabel(null, "Journal font size", 0, 0));
@@ -5649,16 +5649,11 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public Combobox GenerateFontSelector(string selectedFont = "")
+        public Combobox GenerateFontSelector(byte selectedFont)
         {
-            string[] fontArray = TrueTypeLoader.Instance.Fonts;
-            int selectedFontInd = Array.IndexOf(fontArray, selectedFont);
-            return AddCombobox(
-                null,
-                fontArray,
-                selectedFontInd < 0 ? 0 : selectedFontInd,
-                0, 0, 200
-                );
+            var fontLabels = Enumerable.Range(0, 20).Select(i => $"Font {i}").ToArray();
+            int idx = Math.Max(0, Math.Min(19, (int)selectedFont));
+            return AddCombobox(null, fontLabels, idx, 0, 0, 200);
         }
 
         public Control GenConditionControl(int key, int width, bool createIfNotExists)
@@ -7023,9 +7018,10 @@ namespace ClassicUO.Game.UI.Gumps
                 GameController.UpdateBackgroundHueShader();
             }
 
-            if (_currentProfile.SelectedTTFJournalFont != TrueTypeLoader.Instance.Fonts[_journalFontSelection.SelectedIndex])
+            byte journalFont = (byte)Math.Max(0, Math.Min(19, _journalFontSelection.SelectedIndex));
+            if (_currentProfile.SelectedJournalFont != journalFont)
             {
-                _currentProfile.SelectedTTFJournalFont = TrueTypeLoader.Instance.Fonts[_journalFontSelection.SelectedIndex];
+                _currentProfile.SelectedJournalFont = journalFont;
                 Gump g = UIManager.GetGump<ResizableJournal>();
                 if (g != null)
                 {
@@ -7047,7 +7043,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.CloseHealthBarIfAnchored = _closeHPBarWhenAnchored.IsChecked;
             _currentProfile.UseLastMovedCooldownPosition = _uselastCooldownPosition.IsChecked;
 
-            _currentProfile.InfoBarFont = TrueTypeLoader.Instance.Fonts[_infoBarFont.SelectedIndex];
+            _currentProfile.InfoBarFont = (byte)Math.Max(0, Math.Min(19, _infoBarFont.SelectedIndex));
             _currentProfile.InfoBarFontSize = _infoBarFontSize.Value;
 
             _currentProfile.PlayerConstantAlpha = _regularPlayerAlpha.Value;
@@ -7080,14 +7076,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             _currentProfile.UseModernShopGump = _useModernShop.IsChecked;
 
-            _currentProfile.OverheadChatFont = TrueTypeLoader.Instance.Fonts[_overheadFont.SelectedIndex];
+            _currentProfile.OverheadChatFont = (byte)Math.Max(0, Math.Min(19, _overheadFont.SelectedIndex));
             _currentProfile.OverheadChatFontSize = _overheadFontSize.Value;
             _currentProfile.OverheadChatWidth = _overheadTextWidth.Value;
 
-            _currentProfile.GameWindowSideChatFont = TrueTypeLoader.Instance.Fonts[_gameWindowSideChatFont.SelectedIndex];
+            _currentProfile.GameWindowSideChatFont = (byte)Math.Max(0, Math.Min(19, _gameWindowSideChatFont.SelectedIndex));
             _currentProfile.GameWindowSideChatFontSize = _gameWindowSideChatFontSize.Value;
 
-            _currentProfile.SelectedToolTipFont = TrueTypeLoader.Instance.Fonts[_tooltipFontSelect.SelectedIndex];
+            _currentProfile.SelectedToolTipFont = (byte)Math.Max(0, Math.Min(19, _tooltipFontSelect.SelectedIndex));
             _currentProfile.SelectedToolTipFontSize = _tooltipFontSize.Value;
 
             _currentProfile.EnableAlphaScrollingOnGumps = _enableAlphaScrollWheel.IsChecked;

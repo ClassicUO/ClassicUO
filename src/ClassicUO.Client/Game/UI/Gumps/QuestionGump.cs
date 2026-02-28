@@ -54,7 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
             Width = gumpInfo.UV.Width;
             Height = gumpInfo.UV.Height;
 
-            Add(new Label(message, false, 0x0386, 165, font: 1) { X = 33, Y = 30 });
+            Add(new Label(message, false, 0x0481, 165, font: 1) { X = 33, Y = 30 });
 
             Add(
                 new Button((int)Buttons.Cancel, 0x817, 0x818, 0x0819)

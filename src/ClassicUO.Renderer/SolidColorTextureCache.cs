@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -45,13 +45,19 @@ namespace ClassicUO.Renderer
         public static void Initialize(GraphicsDevice device)
         {
             _device = device;
+            _textures.Clear();
         }
 
         public static Texture2D GetTexture(Color color)
         {
-            if (_textures.TryGetValue(color, out Texture2D texture))
+            if (_textures.TryGetValue(color, out Texture2D texture) && texture != null && !texture.IsDisposed)
             {
                 return texture;
+            }
+
+            if (texture != null && texture.IsDisposed)
+            {
+                _textures.Remove(color);
             }
 
             texture = new Texture2D

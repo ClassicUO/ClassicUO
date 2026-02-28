@@ -30,13 +30,12 @@
 
 #endregion
 
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Assets;
 using ClassicUO.Game.UI.Controls;
 using FontStyle = ClassicUO.Game.FontStyle;
-using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility;
 using System;
@@ -345,14 +344,13 @@ namespace ClassicUO.Game.Managers
                 fixedColor = 0x7FFF;
             }
 
-            textObject.TextBox = new TextBox(
+            textObject.TextBox = new UOLabel(
                 msg,
                 ProfileManager.CurrentProfile.OverheadChatFont,
-                ProfileManager.CurrentProfile.OverheadChatFontSize,
-                ProfileManager.CurrentProfile.OverheadChatWidth,
                 hue,
-                FontStashSharp.RichText.TextHorizontalAlignment.Center,
-                true
+                TEXT_ALIGN_TYPE.TS_CENTER,
+                ProfileManager.CurrentProfile.OverheadChatWidth,
+                FontStyle.BlackBorder
             )
             { AcceptMouseInput = !ProfileManager.CurrentProfile.DisableMouseInteractionOverheadText };
 

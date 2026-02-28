@@ -36,19 +36,19 @@ namespace ClassicUO.Game.UI.Gumps
 
             SettingsSection topSecion = new SettingsSection("Simple Auto Loot", Width);
 
-            topSecion.Add(new TextBox("Enable auto loot", TrueTypeLoader.EMBEDDED_FONT, 18, null, Color.White, strokeEffect: false) { AcceptMouseInput = true });
+            topSecion.Add(new UOLabel("Enable auto loot", 1, 0, ClassicUO.Assets.TEXT_ALIGN_TYPE.TS_LEFT, 0, ClassicUO.Game.FontStyle.None));
 
             Checkbox enable;
             topSecion.AddRight(enable = new Checkbox(0x00D2, 0x00D3, "", 0xff, 0xffff) { IsChecked = ProfileManager.CurrentProfile.EnableAutoLoot });
             enable.ValueChanged += (e, v) => { ProfileManager.CurrentProfile.EnableAutoLoot = enable.IsChecked; };
 
-            topSecion.Add(new TextBox("Show progress bar while looting", TrueTypeLoader.EMBEDDED_FONT, 18, null, Color.White, strokeEffect: false) { AcceptMouseInput = true });
+            topSecion.Add(new UOLabel("Show progress bar while looting", 1, 0, ClassicUO.Assets.TEXT_ALIGN_TYPE.TS_LEFT, 0, ClassicUO.Game.FontStyle.None));
 
             Checkbox enablepb;
             topSecion.AddRight(enablepb = new Checkbox(0x00D2, 0x00D3, "", 0xff, 0xffff) { IsChecked = ProfileManager.CurrentProfile.EnableAutoLootProgressBar });
             enablepb.ValueChanged += (e, v) => { ProfileManager.CurrentProfile.EnableAutoLootProgressBar = enablepb.IsChecked; };
 
-            topSecion.Add(new TextBox("Hue corpse after processing", TrueTypeLoader.EMBEDDED_FONT, 18, null, Color.White, strokeEffect: false) { AcceptMouseInput = true });
+            topSecion.Add(new UOLabel("Hue corpse after processing", 1, 0, ClassicUO.Assets.TEXT_ALIGN_TYPE.TS_LEFT, 0, ClassicUO.Game.FontStyle.None));
             Checkbox hueCorpse;
             topSecion.AddRight(hueCorpse = new Checkbox(0x00D2, 0x00D3, "", 0xff, 0xffff) { IsChecked = ProfileManager.CurrentProfile.HueCorpseAfterAutoloot });
             hueCorpse.ValueChanged += (e, v) => { ProfileManager.CurrentProfile.HueCorpseAfterAutoloot = hueCorpse.IsChecked; };

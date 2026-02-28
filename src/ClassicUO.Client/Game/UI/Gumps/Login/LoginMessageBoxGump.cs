@@ -32,9 +32,9 @@
 
 using System;
 using ClassicUO.Assets;
+using ClassicUO.Game;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
-using FontStashSharp.RichText;
 using Microsoft.Xna.Framework;
 using SDL2;
 
@@ -89,11 +89,10 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Alpha = 0.85f
             });
 
-            var label = new TextBox(message, TrueTypeLoader.EMBEDDED_FONT, 18, MessageMaxWidth, Color.White, TextHorizontalAlignment.Center, false)
+            var label = new UOLabel(message, 1, 0x0481, TEXT_ALIGN_TYPE.TS_CENTER, MessageMaxWidth)
             {
                 X = panelX + (ModalWidth >> 1) - (MessageMaxWidth >> 1),
-                Y = panelY + 68,
-                AcceptMouseInput = false
+                Y = panelY + 68
             };
             Add(label);
 

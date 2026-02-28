@@ -524,6 +524,9 @@ namespace ClassicUO.Configuration
         public bool EnableVSync { get; set; } = false;
         public bool DisableFrameLimiting { get; set; } = false;
         public int SpriteBatchSize { get; set; } = 8192; // 0x2000
+        public bool PerformanceDisableCombatLinesOverlay { get; set; } = false;
+        public bool PerformanceDisableHealthLinesOverlay { get; set; } = false;
+        public bool PerformanceDisableLightsRenderTarget { get; set; } = false;
         // ## BEGIN - END ## // PERFORMANCE SETTINGS
         public bool UOClassicCombatLines_ToggleHMRed { get; set; } = false;
         public bool UOClassicCombatLines_ToggleHMOrange { get; set; } = false;
@@ -822,20 +825,25 @@ namespace ClassicUO.Configuration
 
         public bool DisplayPartyChatOverhead { get; set; } = true;
 
-        public string SelectedTTFJournalFont { get; set; } = "avadonian";
+        [JsonConverter(typeof(Json.UOFontIndexConverter))]
+        public byte SelectedJournalFont { get; set; } = 1;
         public int SelectedJournalFontSize { get; set; } = 20;
 
-        public string SelectedToolTipFont { get; set; } = "Roboto-Regular";
+        [JsonConverter(typeof(Json.UOFontIndexConverter))]
+        public byte SelectedToolTipFont { get; set; } = 1;
         public int SelectedToolTipFontSize { get; set; } = 20;
 
-        public string GameWindowSideChatFont { get; set; } = "avadonian";
+        [JsonConverter(typeof(Json.UOFontIndexConverter))]
+        public byte GameWindowSideChatFont { get; set; } = 1;
         public int GameWindowSideChatFontSize { get; set; } = 20;
 
-        public string OverheadChatFont { get; set; } = "avadonian";
+        [JsonConverter(typeof(Json.UOFontIndexConverter))]
+        public byte OverheadChatFont { get; set; } = 1;
         public int OverheadChatFontSize { get; set; } = 20;
         public int OverheadChatWidth { get; set; } = 200;
 
-        public string NamePlateFont { get; set; } = "avadonian";
+        [JsonConverter(typeof(Json.UOFontIndexConverter))]
+        public byte NamePlateFont { get; set; } = 1;
         public int NamePlateFontSize { get; set; } = 20;
 
         public string DefaultTTFFont { get; set; } = "Roboto-Regular";
@@ -887,7 +895,8 @@ namespace ClassicUO.Configuration
         [JsonConverter(typeof(Point2Converter))]
         public Point InfoBarSize { get; set; } = new Point(400, 20);
         public bool InfoBarLocked { get; set; } = false;
-        public string InfoBarFont { get; set; } = "Roboto-Regular";
+        [JsonConverter(typeof(Json.UOFontIndexConverter))]
+        public byte InfoBarFont { get; set; } = 1;
         public int InfoBarFontSize { get; set; } = 18;
 
         public int LastJournalTab { get; set; } = 0;

@@ -14,7 +14,7 @@ namespace ClassicUO.LegionScripting
         private NiceButton save;
         private AlphaBlendControl background;
         private ScrollArea scrollArea;
-        private TextBox title;
+        private UOLabel title;
         private bool built;
         private LineNumberEditor editorPanel;
         public ScriptEditor(ScriptFile scriptFile) : base(600, 400, 600, 400, 0, 0)
@@ -25,7 +25,7 @@ namespace ClassicUO.LegionScripting
 
             Add(background = new AlphaBlendControl());
 
-            Add(title = new TextBox(scriptFile.FileName, TrueTypeLoader.EMBEDDED_FONT, 24, Width - 100, color: Color.White, strokeEffect: false));
+            Add(title = new UOLabel(scriptFile.FileName, 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_LEFT, Width - 100) { AcceptMouseInput = false });
 
             Add(save = new NiceButton(Width - 50, 0, 50, 50, ButtonAction.Default, "Save"));
             save.MouseUp += Save_MouseUp;

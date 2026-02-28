@@ -1392,8 +1392,9 @@ namespace ClassicUO.Game.Scenes
         private bool PrepareLightsRendering(UltimaBatcher2D batcher, ref Matrix matrix)
         {
             if (
-                !UseLights && !UseAltLights
-                || World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect
+                ProfileManager.CurrentProfile?.PerformanceDisableLightsRenderTarget == true
+                || !UseLights && !UseAltLights
+                || World.Player.IsDead && ProfileManager.CurrentProfile?.EnableBlackWhiteEffect == true
                 || _lightRenderTarget == null
             )
             {
@@ -1468,13 +1469,12 @@ namespace ClassicUO.Game.Scenes
 
         public void DrawOverheads(UltimaBatcher2D batcher)
         {
-            // ## BEGIN - END ## // TEXTUREMANAGER
             _textureManager.Draw(batcher);
-            // ## BEGIN - END ## // TEXTUREMANAGER
-            // ## BEGIN - END ## // LINES
-            _UOClassicCombatLines.Draw(batcher);
-            // ## BEGIN - END ## // LINES
-            _healthLinesManager.Draw(batcher);
+            var profile = ProfileManager.CurrentProfile;
+            if (profile == null || !profile.PerformanceDisableCombatLinesOverlay)
+                _UOClassicCombatLines.Draw(batcher);
+            if (profile == null || !profile.PerformanceDisableHealthLinesOverlay)
+                _healthLinesManager.Draw(batcher);
 
             if (!UIManager.IsMouseOverWorld)
             {

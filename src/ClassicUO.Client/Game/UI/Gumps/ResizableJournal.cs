@@ -523,14 +523,6 @@ namespace ClassicUO.Game.UI.Gumps
                     lastWidth = Width;
                     lastHeight = Height;
 
-                    foreach (JournalData _ in journalDatas)
-                    {
-                        if (_.EntryControl is TextBox tb)
-                        {
-                            tb.Width = Width - BORDER_WIDTH - (ProfileManager.CurrentProfile.HideJournalTimestamp ? 0 : _.TimeStampControl.Width);
-                            tb.Update();
-                        }
-                    }
 
                     CalculateScrollBarMaxValue();
                 }
@@ -576,9 +568,9 @@ namespace ClassicUO.Game.UI.Gumps
                 while (journalDatas.Count > (profile == null ? 200 : profile.MaxJournalEntries))
                     journalDatas.RemoveFromFront().Destroy();
 
-                var timeS = new TextBox($"{time:t}", profile.SelectedTTFJournalFont, profile.SelectedJournalFontSize - 2, null, 1150, strokeEffect: false);
+                var timeS = new UOLabel($"{time:t}", profile.SelectedJournalFont, 1150, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 0, Game.FontStyle.None);
                 int entryWidth = Width - (profile.HideJournalTimestamp ? 0 : timeS.Width);
-                var entryControl = new TextBox(text, profile.SelectedTTFJournalFont, profile.SelectedJournalFontSize, entryWidth, hue, strokeEffect: false);
+                var entryControl = new UOLabel(text ?? "", profile.SelectedJournalFont, hue, Assets.TEXT_ALIGN_TYPE.TS_LEFT, entryWidth, Game.FontStyle.None);
 
                 journalDatas.AddToBack(new JournalData(entryControl, timeS, text, text_type, messageType));
 

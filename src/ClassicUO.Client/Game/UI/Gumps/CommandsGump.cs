@@ -1,5 +1,6 @@
-﻿using ClassicUO.Assets;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.Game;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using Microsoft.Xna.Framework;
@@ -31,8 +32,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(bc);
 
-            TextBox t;
-            Add(t = new TextBox(Language.Instance.CommandGump, TrueTypeLoader.EMBEDDED_FONT, 28, Width, Color.Gold, FontStashSharp.RichText.TextHorizontalAlignment.Center) { Y = 5 });
+            UOLabel t;
+            Add(t = new UOLabel(Language.Instance.CommandGump, 1, UOLabelHue.Hover, Assets.TEXT_ALIGN_TYPE.TS_CENTER, Width) { Y = 5 });
 
             ScrollArea scroll = new ScrollArea(10, 10 + t.Height, Width - 20, Height - t.Height - 40, true) { ScrollbarBehaviour = ScrollbarBehaviour.ShowAlways };
 
@@ -48,7 +49,7 @@ namespace ClassicUO.Game.UI.Gumps
             int y = 0;
             foreach (var command in CommandManager.Commands)
             {
-                TextBox t = new TextBox(command.Key, TrueTypeLoader.EMBEDDED_FONT, 18, scroll.Width, Color.White) { Y = y, AcceptMouseInput = false };
+                UOLabel t = new UOLabel(command.Key, 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_LEFT, scroll.Width) { Y = y };
                 scroll.Add(t);
                 y += t.Height + 10;
             }

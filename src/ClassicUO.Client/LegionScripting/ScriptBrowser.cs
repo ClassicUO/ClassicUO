@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
@@ -144,8 +144,8 @@ namespace ClassicUO.LegionScripting
                 }
 
                 var tb = GenTextBox(gHFileObject.name, 20);
-                tb.X = Width - tb.MeasuredSize.X - 5;
-                tb.Y = (Height - tb.MeasuredSize.Y) / 2;
+                tb.X = Width - tb.Width - 5;
+                tb.Y = (Height - tb.Height) / 2;
                 Add(tb);
             }
 
@@ -166,14 +166,12 @@ namespace ClassicUO.LegionScripting
                 });
             }
 
-            private TextBox GenTextBox(string text, int fontsize, int x = 0, int y = 0)
+            private UOLabel GenTextBox(string text, int fontsize, int x = 0, int y = 0)
             {
-
-                TextBox tb = new TextBox(text, TrueTypeLoader.EMBEDDED_FONT, fontsize, null, Microsoft.Xna.Framework.Color.White, strokeEffect: false);
-                tb.X = x;
-                tb.Y = y;
-                tb.AcceptMouseInput = false;
-                return tb;
+                var lbl = new UOLabel(text ?? "", 1, 0, ClassicUO.Assets.TEXT_ALIGN_TYPE.TS_LEFT, 0, ClassicUO.Game.FontStyle.None);
+                lbl.X = x;
+                lbl.Y = y;
+                return lbl;
             }
 
             public GHFileObject GHFileObject { get; }

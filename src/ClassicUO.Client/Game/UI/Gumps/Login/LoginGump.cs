@@ -95,8 +95,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 130,
                 30,
                 Language.SupportedUILanguages,
-                langIndex >= 0 ? langIndex : 0,
-                14
+                langIndex >= 0 ? langIndex : 0
             );
             _languageCombo.OnSelectionChanged += (s, idx) =>
             {
@@ -324,11 +323,11 @@ namespace ClassicUO.Game.UI.Gumps.Login
             _checkboxAutologin.IsChecked = Settings.GlobalSettings.AutoLogin;
 
 
-            TextBox _;
+            UOLabel _;
             HitBox _hit;
 
-            Add(_ = new TextBox(loginLang.Support, TrueTypeLoader.EMBEDDED_FONT, 15, 200, Color.DarkRed, strokeEffect: false) { X = LoginLayoutHelper.X(30), Y = LoginLayoutHelper.Y(660), AcceptMouseInput = true });
-            Add(_hit = new HitBox(_.X, _.Y, _.MeasuredSize.X, _.MeasuredSize.Y));
+            Add(_ = new UOLabel(loginLang.Support, 1, 32, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 200) { X = LoginLayoutHelper.X(30), Y = LoginLayoutHelper.Y(660) });
+            Add(_hit = new HitBox(_.X, _.Y, _.Width, _.Height));
             _hit.MouseUp += (s, e) =>
             {
                 Utility.Platforms.PlatformHelper.LaunchBrowser("https://github.com/bittiez/ClassicUO/wiki");

@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -425,11 +425,11 @@ namespace ClassicUO.Renderer
             PushSprite(texture);
         }
 
-        public void DrawShadow(Texture2D texture, Vector2 position, Rectangle sourceRect, bool flip, float depth)
+        public void DrawShadow(Texture2D texture, Vector2 position, Rectangle sourceRect, bool flip, float depth, float scale = 1f)
         {
-            float width = sourceRect.Width;
-            float height = sourceRect.Height * 0.5f;
-            float translatedY = position.Y + height - 10;
+            float width = sourceRect.Width * scale;
+            float height = sourceRect.Height * 0.5f * scale;
+            float translatedY = position.Y + height - 10f * scale;
             float ratio = height / width;
 
             EnsureSize();

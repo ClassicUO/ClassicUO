@@ -30,10 +30,13 @@
 
 #endregion
 
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
+using FontStyle = ClassicUO.Game.FontStyle;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Collections;
 using Microsoft.Xna.Framework;
@@ -122,7 +125,7 @@ namespace ClassicUO.Game.GameObjects
                     hue = ProfileManager.CurrentProfile == null ? (ushort)0x1F : ProfileManager.CurrentProfile.DamageHueLastAttck;
             }
 
-            text_obj.TextBox = new UI.Controls.TextBox(damage.ToString(), ProfileManager.CurrentProfile.OverheadChatFont, ProfileManager.CurrentProfile.OverheadChatFontSize, ProfileManager.CurrentProfile.OverheadChatWidth, hue, align: FontStashSharp.RichText.TextHorizontalAlignment.Center) { AcceptMouseInput = !ProfileManager.CurrentProfile.DisableMouseInteractionOverheadText };
+            text_obj.TextBox = new UOLabel(damage.ToString(), ProfileManager.CurrentProfile.OverheadChatFont, hue, TEXT_ALIGN_TYPE.TS_CENTER, ProfileManager.CurrentProfile.OverheadChatWidth, FontStyle.BlackBorder) { AcceptMouseInput = !ProfileManager.CurrentProfile.DisableMouseInteractionOverheadText };
 
             text_obj.Time = Time.Ticks + 1500;
 

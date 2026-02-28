@@ -65,6 +65,7 @@ namespace ClassicUO
         private readonly float[] _intervalFixedUpdate = new float[2];
         private double _totalElapsed, _currentFpsTime, _nextSlowUpdate;
         private uint _totalFrames;
+        private uint _lastLegionScriptingUpdate;
         private UltimaBatcher2D _uoSpriteBatch;
         private bool _suppressedDraw;
         private Texture2D _background;
@@ -96,7 +97,7 @@ namespace ClassicUO
             IsMouseVisible = Settings.GlobalSettings.RunMouseInASeparateThread;
 
             IsFixedTimeStep = false;
-            TargetElapsedTime = TimeSpan.FromMilliseconds(1);
+            TargetElapsedTime = TimeSpan.FromMilliseconds(1000.0 / 250.0);
             InactiveSleepTime = TimeSpan.Zero;
         }
 
@@ -358,7 +359,7 @@ namespace ClassicUO
             _intervalFixedUpdate[1] = 217; // 5 FPS
 
             bool unlimitedFps = ProfileManager.CurrentProfile?.DisableFrameLimiting == true;
-            TargetElapsedTime = unlimitedFps ? TimeSpan.FromMilliseconds(1) : TimeSpan.FromMilliseconds(frameDelay);
+            TargetElapsedTime = unlimitedFps ? TimeSpan.FromMilliseconds(1000.0 / 250.0) : TimeSpan.FromMilliseconds(frameDelay);
         }
 
         private void SetWindowPosition(int x, int y)
@@ -523,7 +524,11 @@ namespace ClassicUO
             }
 
             UIManager.Update();
-            LegionScripting.LegionScripting.OnUpdate();
+            if (Time.Ticks - _lastLegionScriptingUpdate >= 50)
+            {
+                _lastLegionScriptingUpdate = Time.Ticks;
+                LegionScripting.LegionScripting.OnUpdate();
+            }
 
             if (World.InGame)
                 PerformanceOptimizer.UpdatePvPMode();

@@ -34,10 +34,10 @@ using System;
 using System.IO;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.Game;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Utility;
-using FontStashSharp.RichText;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using SDL2;
@@ -64,7 +64,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private static readonly Color AccentColor = Color.FromNonPremultiplied(180, 50, 50, 255);
 
         private readonly Action<int> _buttonClick;
-        private readonly TextBox _label;
+        private readonly UOLabel _label;
         private readonly Texture2D _logoTexture;
         private string _baseLabelText;
         private uint _lastDotTicks;
@@ -79,7 +79,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             CanCloseWithRightClick = false;
             CanCloseWithEsc = false;
 
-            Add(new SquareBlendControl(0.7f)
+            Add(new SquareBlendControl(1f)
             {
                 X = 0,
                 Y = 0,
@@ -119,11 +119,10 @@ namespace ClassicUO.Game.UI.Gumps.Login
             });
 
             string initialLabel = _baseLabelText + ".";
-            _label = new TextBox(initialLabel, TrueTypeLoader.EMBEDDED_FONT, 20, LabelMaxWidth, Color.White, TextHorizontalAlignment.Center, false)
+            _label = new UOLabel(initialLabel, 1, 0x0481, TEXT_ALIGN_TYPE.TS_CENTER, LabelMaxWidth)
             {
                 X = panelX + (ModalWidth >> 1) - (LabelMaxWidth >> 1),
-                Y = panelY + 68,
-                AcceptMouseInput = false
+                Y = panelY + 68
             };
             Add(_label);
             _lastDotTicks = Time.Ticks;

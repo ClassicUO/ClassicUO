@@ -54,6 +54,8 @@ namespace ClassicUO.Network
         public event EventHandler<SocketError> OnError;
 
 
+        private const int ConnectTimeoutMs = 10000;
+
         public void Connect(string ip, int port)
         {
             if (IsConnected) return;
@@ -63,7 +65,16 @@ namespace ClassicUO.Network
 
             try
             {
-                _socket.Connect(ip, port);
+                var result = _socket.BeginConnect(ip, port, null, null);
+                if (!result.AsyncWaitHandle.WaitOne(ConnectTimeoutMs))
+                {
+                    Disconnect();
+                    Log.Error($"connection timeout to {ip}:{port}");
+                    OnError?.Invoke(this, SocketError.TimedOut);
+                    return;
+                }
+
+                _socket.EndConnect(result);
 
                 if (!IsConnected)
                 {
@@ -82,7 +93,7 @@ namespace ClassicUO.Network
             {
                 Log.Error($"error while connecting {ex}");
                 OnError?.Invoke(this, SocketError.SocketError);
-            }  
+            }
         }
 
         public void Send(byte[] buffer, int offset, int count)

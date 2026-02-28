@@ -34,6 +34,7 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using ClassicUO.Configuration;
+using ClassicUO.Game;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -105,11 +106,11 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             if (Client.Version >= ClientVersion.CV_500A)
             {
-                Add(new TextBox(ClilocLoader.Instance.GetString(1044579), TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: true) { X = LoginLayoutHelper.X(210), Y = LoginLayoutHelper.Y(70), AcceptMouseInput = true });
+                Add(new UOLabel(ClilocLoader.Instance.GetString(1044579), 1, 32, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 300, FontStyle.BlackBorder) { X = LoginLayoutHelper.X(210), Y = LoginLayoutHelper.Y(70) });
 
                 if (CUOEnviroment.NoServerPing == false)
                 {
-                    Add(new TextBox(ClilocLoader.Instance.GetString(1044577), TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: true) { X = LoginLayoutHelper.X(650), Y = LoginLayoutHelper.Y(70), AcceptMouseInput = true });
+                    Add(new UOLabel(ClilocLoader.Instance.GetString(1044577), 1, 32, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 300, FontStyle.BlackBorder) { X = LoginLayoutHelper.X(650), Y = LoginLayoutHelper.Y(70) });
                    
 
                 }
@@ -118,8 +119,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
             }
             else
             {
-                Add(new TextBox(loginLang.SelectWhichShardToPlayOn, TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: true) { X = LoginLayoutHelper.X(210), Y = LoginLayoutHelper.Y(70), AcceptMouseInput = true });
-                Add(new TextBox(loginLang.Latency, TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: true) { X = LoginLayoutHelper.X(650), Y = LoginLayoutHelper.Y(70), AcceptMouseInput = true });
+                Add(new UOLabel(loginLang.SelectWhichShardToPlayOn, 1, 32, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 300, FontStyle.BlackBorder) { X = LoginLayoutHelper.X(210), Y = LoginLayoutHelper.Y(70) });
+                Add(new UOLabel(loginLang.Latency, 1, 32, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 300, FontStyle.BlackBorder) { X = LoginLayoutHelper.X(650), Y = LoginLayoutHelper.Y(70) });
             }
 
             ScrollArea scrollArea = new ScrollArea(
@@ -163,12 +164,12 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 ButtonAction = ButtonAction.Activate
             });
 
-            Add(new TextBox("Last server is played:", TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: true) { X = LoginLayoutHelper.X(310), Y = LoginLayoutHelper.Y(640), AcceptMouseInput = true });
+            Add(new UOLabel("Last server is played:", 1, 32, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 300, FontStyle.BlackBorder) { X = LoginLayoutHelper.X(310), Y = LoginLayoutHelper.Y(640) });
 
             if (loginScene.Servers.Length != 0)
             {
                 int index = loginScene.GetServerIndexFromSettings();
-                Add(new TextBox(loginScene.Servers[index].Name, TrueTypeLoader.EMBEDDED_FONT, 20, 300, Color.DarkRed, strokeEffect: true) { X = LoginLayoutHelper.X(310), Y = LoginLayoutHelper.Y(660), AcceptMouseInput = true });
+                Add(new UOLabel(loginScene.Servers[index].Name, 1, 32, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 300, FontStyle.BlackBorder) { X = LoginLayoutHelper.X(310), Y = LoginLayoutHelper.Y(660) });
             }
 
             AcceptKeyboardInput = true;
@@ -269,8 +270,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
         {
             private readonly int _buttonId;
             private readonly ServerListEntry _entry;
-            private readonly TextBox _server_ping;
-            private TextBox _serverName;
+            private readonly UOLabel _server_ping;
+            private UOLabel _serverName;
             private AlphaBlendControl _alphaBlendControl;
             private uint _pingCheckTime = 0;
 
@@ -294,13 +295,13 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    _serverName = new TextBox(entry.Name, TrueTypeLoader.EMBEDDED_FONT, 18, 300, Color.DarkRed, strokeEffect: false) { X = 74, Y = 6, AcceptMouseInput = true }
+                    _serverName = new UOLabel(entry.Name, 1, 32, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 300) { X = 74, Y = 6 }
                     
                 );
 
                 Add
                 (
-                    _server_ping = new TextBox(CUOEnviroment.NoServerPing ? string.Empty : "-", TrueTypeLoader.EMBEDDED_FONT, 18, 70, Color.DarkRed, strokeEffect: false) { X = 500, Y = 6, AcceptMouseInput = true }
+                    _server_ping = new UOLabel(CUOEnviroment.NoServerPing ? string.Empty : "-", 1, 32, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 70) { X = 500, Y = 6 }
         
                 );
 
@@ -317,8 +318,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 base.OnMouseEnter(x, y);
                 _alphaBlendControl.Hue = 0x7EA; // Cor preta original
-                _serverName.IsFocused = true;
-                _server_ping.IsFocused = true;
             }
 
             protected override void OnMouseExit(int x, int y)
@@ -326,8 +325,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 base.OnMouseExit(x, y);
 
                 _alphaBlendControl.Hue = 0x0000; // Cor preta original
-                _serverName.IsFocused = false;
-                _server_ping.IsFocused = false;
             }
 
             protected override void OnMouseUp(int x, int y, MouseButtonType button)

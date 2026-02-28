@@ -39,7 +39,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Renderer;
-using FontStashSharp.RichText;
+using FontStyle = ClassicUO.Game.FontStyle;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Managers
@@ -50,7 +50,7 @@ namespace ClassicUO.Game.Managers
         private readonly List<Tuple<uint, uint>> _subst = new List<Tuple<uint, uint>>();
         private readonly List<uint> _toRemoveDamages = new List<uint>();
 
-        private TextBox _dpsOverheadTextBox;
+        private UOLabel _dpsOverheadTextBox;
         private string _dpsOverheadLastText = string.Empty;
         private uint _dpsOverheadLastSerial;
 
@@ -71,14 +71,7 @@ namespace ClassicUO.Game.Managers
                 _dpsOverheadTextBox = null;
                 if (!string.IsNullOrEmpty(_dpsOverheadLastText) && profile?.PvM_DamageCounterAsOverhead == true)
                 {
-                    _dpsOverheadTextBox = new TextBox(
-                        _dpsOverheadLastText,
-                        profile.OverheadChatFont,
-                        profile.OverheadChatFontSize,
-                        profile.OverheadChatWidth,
-                        profile.DamageHueLastAttck,
-                        align: TextHorizontalAlignment.Center)
-                    { AcceptMouseInput = false };
+                    _dpsOverheadTextBox = new UOLabel(_dpsOverheadLastText, profile.OverheadChatFont, profile.DamageHueLastAttck, TEXT_ALIGN_TYPE.TS_CENTER, profile.OverheadChatWidth, FontStyle.BlackBorder) { AcceptMouseInput = false };
                 }
             }
 

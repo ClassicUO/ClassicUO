@@ -1,4 +1,5 @@
 using ClassicUO.Assets;
+using ClassicUO.Game;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -12,7 +13,7 @@ namespace ClassicUO.Game.UI.Gumps
         public double CurrentPercentage { get; set; }
         public Color ForegrouneColor { get; set; } = Color.Blue;
 
-        private readonly TextBox _titleLabel;
+        private readonly UOLabel _titleLabel;
         private readonly Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, 0.6f);
 
         public ProgressBarGump(string title, double startPercentage = 1.0, int width = 200, int height = 20) : base(0, 0)
@@ -28,7 +29,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (!string.IsNullOrEmpty(title))
             {
-                _titleLabel = new TextBox(title, TrueTypeLoader.EMBEDDED_FONT, 20, width, Color.White, FontStashSharp.RichText.TextHorizontalAlignment.Center, false);
+                _titleLabel = new UOLabel(title, 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_CENTER, width);
                 Add(_titleLabel);
             }
             else

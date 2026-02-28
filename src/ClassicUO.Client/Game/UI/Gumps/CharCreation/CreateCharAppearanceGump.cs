@@ -34,6 +34,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ClassicUO.Configuration;
+using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -62,7 +63,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private PlayerMobile _character;
         private CharacterInfo _characterInfo;
         private GothicStyleCombobox _hairCombobox, _facialCombobox;
-        private TextBox _hairLabel, _facialLabel;
+        private UOLabel _hairLabel, _facialLabel;
         private readonly StbTextBox _nameTextBox;
         private PaperDollInteractable _paperDoll;
         private readonly GothicStyleButton _nextButton;
@@ -196,13 +197,13 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 string skillName = skillEntry?.Name ?? $"Skill {skillIndex}";
                 int posX = posXBase + i * slotWidth;
 
-                var combo = new GothicStyleCombobox(posX, posY, ComboWidth, 22, new[] { skillName }, 0, 11);
+                var combo = new GothicStyleCombobox(posX, posY, ComboWidth, 22, new[] { skillName }, 0);
                 ApplyGothicRedTheme(combo);
                 combo.AcceptMouseInput = false;
                 Add(combo);
                 _professionSkillsLabels.Add(combo);
 
-                var valueLabel = new TextBox($"{skillValue}", TrueTypeLoader.EMBEDDED_FONT, 11, 28, Color.White, strokeEffect: false) { X = posX + ComboWidth + 4, Y = posY + 4, AcceptMouseInput = false };
+                var valueLabel = new UOLabel($"{skillValue}", 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 28) { X = posX + ComboWidth + 4, Y = posY + 4 };
                 Add(valueLabel);
                 _professionSkillsLabels.Add(valueLabel);
             }
@@ -245,11 +246,11 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 for (int i = 0; i < n; i++)
                 {
                     int posX = skillX + i * slotWidth;
-                    var combo = new GothicStyleCombobox(posX, skillY, ComboWidth, 22, skillNames, -1, 11);
+                    var combo = new GothicStyleCombobox(posX, skillY, ComboWidth, 22, skillNames, -1);
                     ApplyGothicRedTheme(combo);
                     _skillsCombobox[i] = combo;
                     Add(combo);
-                    Add(_skillSliders[i] = new GothicStyleSliderBar(posX, skillY + LabelHeight, SliderWidth, 0, 50, ProfessionInfo._VoidSkills[i, 1], 11, true));
+                    Add(_skillSliders[i] = new GothicStyleSliderBar(posX, skillY + LabelHeight, SliderWidth, 0, 50, ProfessionInfo._VoidSkills[i, 1], true));
                 }
 
                 for (int i = 0; i < _skillSliders.Length; i++)
@@ -297,7 +298,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             const int NameInputWidth = 219;
             const int NameLabelWidth = 175;
-            Add(new TextBox("Character Name", TrueTypeLoader.EMBEDDED_FONT, 28, 300, Color.DarkRed, strokeEffect: true) { X = CENTER_PANEL_MID - NameLabelWidth / 2, Y = 44, AcceptMouseInput = false });
+            Add(new UOLabel("Character Name", 1, UOLabelHue.Accent, Assets.TEXT_ALIGN_TYPE.TS_CENTER, 300, FontStyle.BlackBorder) { X = CENTER_PANEL_MID - NameLabelWidth / 2, Y = 44 });
             Add(new RoundedColorBox(221, 26, new Color(80, 20, 20), 6) { X = CENTER_PANEL_MID - NameInputWidth / 2 - 1, Y = 71 });
             Add(new RoundedColorBox(217, 22, new Color(28, 28, 28), 4) { X = CENTER_PANEL_MID - NameInputWidth / 2 + 1, Y = 73 });
             Add(new FullBlendControl { X = CENTER_PANEL_MID - NameInputWidth / 2 + 2, Y = 74, Width = NameInputWidth - 4, Height = 20, Hue = 0x801 });
@@ -342,8 +343,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         var c = loginScene.GetCity(i);
                         cityNames[i] = c?.City ?? $"City {i}";
                     }
-                    Add(new TextBox("Sele City to start", TrueTypeLoader.EMBEDDED_FONT, 16, 120, Color.DarkRed, strokeEffect: false) { X = RIGHT_X, Y = 409, AcceptMouseInput = false });
-                    _cityCombobox = new GothicStyleCombobox(RIGHT_X, 429, 120, 25, cityNames, 0, 14);
+                    Add(new UOLabel("Sele City to start", 1, UOLabelHue.Accent, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 120) { X = RIGHT_X, Y = 409 });
+                    _cityCombobox = new GothicStyleCombobox(RIGHT_X, 429, 120, 25, cityNames, 0);
                     ApplyGothicRedTheme(_cityCombobox);
                     Add(_cityCombobox, 1);
                 }
@@ -357,14 +358,14 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             const int AttrX1 = CENTER_X + SECTION_PADDING + AttrOffset;
             const int AttrX2 = AttrX1 + AttrSlotWidth;
             const int AttrX3 = AttrX2 + AttrSlotWidth;
-            Add(new TextBox(ClilocLoader.Instance.GetString(3000111), TrueTypeLoader.EMBEDDED_FONT, 16, 120, Color.DarkRed, strokeEffect: false) { X = AttrX1, Y = AttrLabelY, AcceptMouseInput = false });
-            Add(new TextBox(ClilocLoader.Instance.GetString(3000112), TrueTypeLoader.EMBEDDED_FONT, 16, 120, Color.DarkRed, strokeEffect: false) { X = AttrX2, Y = AttrLabelY, AcceptMouseInput = false });
-            Add(new TextBox(ClilocLoader.Instance.GetString(3000113), TrueTypeLoader.EMBEDDED_FONT, 16, 120, Color.DarkRed, strokeEffect: false) { X = AttrX3, Y = AttrLabelY, AcceptMouseInput = false });
+            Add(new UOLabel(ClilocLoader.Instance.GetString(3000111), 1, UOLabelHue.Accent, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 120) { X = AttrX1, Y = AttrLabelY });
+            Add(new UOLabel(ClilocLoader.Instance.GetString(3000112), 1, UOLabelHue.Accent, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 120) { X = AttrX2, Y = AttrLabelY });
+            Add(new UOLabel(ClilocLoader.Instance.GetString(3000113), 1, UOLabelHue.Accent, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 120) { X = AttrX3, Y = AttrLabelY });
 
             _attributeSliders = new GothicStyleSliderBar[3];
-            Add(_attributeSliders[0] = new GothicStyleSliderBar(AttrX1, AttrSliderY, AttrSliderW, 10, 60, ProfessionInfo._VoidStats[0], 14, true));
-            Add(_attributeSliders[1] = new GothicStyleSliderBar(AttrX2, AttrSliderY, AttrSliderW, 10, 60, ProfessionInfo._VoidStats[1], 14, true));
-            Add(_attributeSliders[2] = new GothicStyleSliderBar(AttrX3, AttrSliderY, AttrSliderW, 10, 60, ProfessionInfo._VoidStats[2], 14, true));
+            Add(_attributeSliders[0] = new GothicStyleSliderBar(AttrX1, AttrSliderY, AttrSliderW, 10, 60, ProfessionInfo._VoidStats[0], true));
+            Add(_attributeSliders[1] = new GothicStyleSliderBar(AttrX2, AttrSliderY, AttrSliderW, 10, 60, ProfessionInfo._VoidStats[1], true));
+            Add(_attributeSliders[2] = new GothicStyleSliderBar(AttrX3, AttrSliderY, AttrSliderW, 10, 60, ProfessionInfo._VoidStats[2], true));
 
             var clientFlags = World.ClientLockedFeatures.Flags;
             
@@ -683,7 +684,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             ushort hue = (ushort)(isAsianLang ? 0xFFFF : 0);
 
 
-            Add(_hairLabel = new TextBox(ClilocLoader.Instance.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: true) { X = RIGHT_X, Y = RIGHT_LABEL_Y_HAIR, AcceptMouseInput = false });
+            Add(_hairLabel = new UOLabel(ClilocLoader.Instance.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), 1, UOLabelHue.Accent, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 300, FontStyle.BlackBorder) { X = RIGHT_X, Y = RIGHT_LABEL_Y_HAIR });
             _hairCombobox = new GothicStyleCombobox(RIGHT_X, RIGHT_COMBO_Y_HAIR, RIGHT_COMBO_WIDTH, 25, content.Labels, CurrentOption[Layer.Hair]);
             ApplyGothicRedTheme(_hairCombobox);
             Add(_hairCombobox, 1);
@@ -694,7 +695,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             {
                 content = CharacterCreationValues.GetFacialHairComboContent(race);
 
-                Add(_facialLabel = new TextBox(ClilocLoader.Instance.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: true) { X = RIGHT_X, Y = RIGHT_LABEL_Y_FACIAL, AcceptMouseInput = false });
+                Add(_facialLabel = new UOLabel(ClilocLoader.Instance.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), 1, UOLabelHue.Accent, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 300, FontStyle.BlackBorder) { X = RIGHT_X, Y = RIGHT_LABEL_Y_FACIAL });
                 _facialCombobox = new GothicStyleCombobox(RIGHT_X, RIGHT_COMBO_Y_FACIAL, RIGHT_COMBO_WIDTH, 25, content.Labels, CurrentOption[Layer.Beard]);
                 ApplyGothicRedTheme(_facialCombobox);
                 Add(_facialCombobox, 1);
@@ -1258,11 +1259,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
 
 
-                 Add
-                 (
-                     new TextBox(ClilocLoader.Instance.GetString(label), TrueTypeLoader.EMBEDDED_FONT, 16, 300, Color.DarkRed, strokeEffect: true) { X = 0, Y = 0, AcceptMouseInput = false }
-
-                 );
+                Add(new UOLabel(ClilocLoader.Instance.GetString(label), 1, 32, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 300, Game.FontStyle.BlackBorder) { X = 0, Y = 0 });
 
 
                 Add

@@ -1,8 +1,6 @@
-﻿using ClassicUO.Assets;
-using ClassicUO.Game.UI.Controls;
+using ClassicUO.Assets;
+using ClassicUO.Game;
 using ClassicUO.Renderer;
-using ClassicUO.Renderer.Lights;
-using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -14,13 +12,13 @@ namespace ClassicUO.Game.UI.Controls
         private string _text;
         private bool _isHovered;
         private bool _isPressed;
+        private RenderedText _renderedText;
 
         private ushort _gumpNormal;
         private ushort _gumpHover;
         private ushort _gumpPressed;
-        private SpriteFontBase _font;
 
-        public DarkRedButton(int x, int y, string text, ushort gumpNormal, ushort gumpHover, ushort gumpPressed, string fontPath, int fontSize)
+        public DarkRedButton(int x, int y, string text, ushort gumpNormal, ushort gumpHover, ushort gumpPressed)
         {
             X = x;
             Y = y;
@@ -30,10 +28,8 @@ namespace ClassicUO.Game.UI.Controls
             _gumpHover = gumpHover;
             _gumpPressed = gumpPressed;
 
-            // Carregar a fonte TrueType
-            _font = TrueTypeLoader.Instance.GetFont(fontPath, fontSize);
+            _renderedText = RenderedText.Create(text ?? string.Empty, 0, 1, true, FontStyle.BlackBorder);
 
-            // Pega tamanho do botão
             var texture = GumpsLoader.Instance.GetGumpTexture(_gumpNormal, out Rectangle bounds);
             Width = bounds.Width;
             Height = bounds.Height;
@@ -42,7 +38,11 @@ namespace ClassicUO.Game.UI.Controls
         public string Text
         {
             get => _text;
-            set => _text = value;
+            set
+            {
+                _text = value;
+                _renderedText.Text = value ?? string.Empty;
+            }
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -63,13 +63,10 @@ namespace ClassicUO.Game.UI.Controls
 
             if (!string.IsNullOrEmpty(_text))
             {
-                var textSize = _font.MeasureString(_text); // retorna Vector2
-                var textPos = new Vector2(
-                    x + (Width - textSize.X) / 2,
-                    y + (Height - textSize.Y) / 2
-                );
-
-                _font.DrawText(batcher, new StringSegment(_text), textPos, Color.White);
+                _renderedText.Text = _text;
+                var textX = x + (Width - _renderedText.Width) / 2;
+                var textY = y + (Height - _renderedText.Height) / 2;
+                _renderedText.Draw(batcher, textX, textY);
             }
 
             return base.Draw(batcher, x, y);
@@ -86,6 +83,12 @@ namespace ClassicUO.Game.UI.Controls
         public void Click()
         {
             OnClick.Invoke();
+        }
+
+        public override void Dispose()
+        {
+            _renderedText?.Destroy();
+            base.Dispose();
         }
     }
 }

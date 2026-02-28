@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -131,7 +132,7 @@ namespace ClassicUO.Game.UI.Gumps
             itemSpriteInfo = Client.Game.Arts.GetArt((uint)(item.DisplayedGraphic));
 
             HitBox loot = new HitBox(0, 0, Width, Height / 2);
-            loot.Add(new TextBox("Loot", TrueTypeLoader.EMBEDDED_FONT, 16, Width, Color.White, FontStashSharp.RichText.TextHorizontalAlignment.Center, false));
+            loot.Add(new UOLabel("Loot", 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_CENTER, Width));
             loot.MouseDown += (s, e) =>
             {
                 GameActions.GrabItem(item, item.Amount);
@@ -140,9 +141,9 @@ namespace ClassicUO.Game.UI.Gumps
             Add(loot);
 
             HitBox use = new HitBox(0, Height / 2, Width, Height / 2);
-            TextBox tb;
-            use.Add(tb = new TextBox("Use", TrueTypeLoader.EMBEDDED_FONT, 16, Width, Color.White, FontStashSharp.RichText.TextHorizontalAlignment.Center, false));
-            tb.Y = use.Height - tb.MeasuredSize.Y;
+            UOLabel tb;
+            use.Add(tb = new UOLabel("Use", 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_CENTER, Width));
+            tb.Y = use.Height - tb.Height;
             use.MouseDown += (s, e) =>
             {
                 GameActions.DoubleClick(item);

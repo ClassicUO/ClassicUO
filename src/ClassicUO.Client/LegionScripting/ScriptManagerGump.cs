@@ -5,6 +5,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Xml;
 using ClassicUO.Assets;
+using ClassicUO.Game;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
@@ -18,7 +19,7 @@ namespace ClassicUO.LegionScripting
         private AlphaBlendControl background;
         private ScrollArea scrollArea;
         private NiceButton refresh;
-        private TextBox title;
+        private UOLabel title;
         internal const int GROUPINDENT = 10;
         internal const int V_SPACING = 2;
         private HashSet<string> groups = new HashSet<string>();
@@ -40,7 +41,7 @@ namespace ClassicUO.LegionScripting
 
             Add(background = new AlphaBlendControl(0.77f) { X = BorderControl.BorderSize, Y = BorderControl.BorderSize });
 
-            Add(title = new TextBox("Script Manager", TrueTypeLoader.EMBEDDED_FONT, 18, Width, Color.DarkOrange, FontStashSharp.RichText.TextHorizontalAlignment.Center, false) { Y = BorderControl.BorderSize, AcceptMouseInput = false });
+            Add(title = new UOLabel("Script Manager", 1, UOLabelHue.Accent, Assets.TEXT_ALIGN_TYPE.TS_CENTER, Width, FontStyle.BlackBorder) { Y = BorderControl.BorderSize });
 
             Add(refresh = new NiceButton(Width - 75 - BorderControl.BorderSize, BorderControl.BorderSize, 75, 25, ButtonAction.Default, "Refresh") { 
                 IsSelectable = false
@@ -193,7 +194,7 @@ namespace ClassicUO.LegionScripting
 
             private readonly AlphaBlendControl background;
             private readonly NiceButton expand, options;
-            private readonly TextBox label;
+            private readonly UOLabel label;
             private readonly DataBox dataBox;
             private readonly string group;
             private readonly string parentGroup;
@@ -222,7 +223,7 @@ namespace ClassicUO.LegionScripting
                 expand = new NiceButton(0, 0, 25, HEIGHT, ButtonAction.Default, expandShrink) { IsSelectable = false };
                 expand.MouseDown += Expand_MouseDown;
 
-                label = new TextBox(group + "  ", TrueTypeLoader.EMBEDDED_FONT, 16, null, Color.White) { AcceptMouseInput = false };
+                label = new UOLabel(group + "  ", 1, UOLabelHue.Text) { AcceptMouseInput = false };
                 label.X = expand.X + expand.Width;
                 label.Y = (HEIGHT - label.Height) / 2;
 
@@ -402,7 +403,7 @@ namespace ClassicUO.LegionScripting
         internal class ScriptControl : Control
         {
             private readonly AlphaBlendControl background;
-            private readonly TextBox label;
+            private readonly UOLabel label;
             private NiceButton playstop, menu;
 
             public ScriptFile Script { get; }
@@ -426,8 +427,8 @@ namespace ClassicUO.LegionScripting
 
                 Add(background = new AlphaBlendControl(0.35f) { Height = Height, Width = Width });
 
-                Add(label = new TextBox(System.IO.Path.GetFileNameWithoutExtension(script.FileName), TrueTypeLoader.EMBEDDED_FONT, 16, w - 130, Color.White, strokeEffect: false) { AcceptMouseInput = false });
-                label.Y = (Height - label.MeasuredSize.Y) / 2;
+                Add(label = new UOLabel(System.IO.Path.GetFileNameWithoutExtension(script.FileName), 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_LEFT, w - 130) { AcceptMouseInput = false });
+                label.Y = (Height - label.Height) / 2;
                 label.X = 5;
 
                 Add(playstop = new NiceButton(w - 75, 0, 50, Height, ButtonAction.Default, playStopText) { IsSelectable = false });

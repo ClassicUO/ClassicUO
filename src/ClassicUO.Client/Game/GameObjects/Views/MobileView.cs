@@ -835,6 +835,11 @@ namespace ClassicUO.Game.GameObjects
 
             y -= spriteInfo.UV.Height + spriteInfo.Center.Y;
 
+            if (drawScale != 1f)
+            {
+                y += (int)(spriteInfo.UV.Height * (1f - drawScale));
+            }
+
             SKIP:
 
             if (hasShadow)
@@ -844,7 +849,8 @@ namespace ClassicUO.Game.GameObjects
                     new Vector2(x, y),
                     spriteInfo.UV,
                     mirror,
-                    depth
+                    depth,
+                    drawScale
                 );
             }
             else

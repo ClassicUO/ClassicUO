@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -92,7 +92,7 @@ namespace ClassicUO.Game.UI.Gumps
                 (
                     message,
                     false,
-                    0x0386,
+                    0x0481,
                     Width - 90,
                     1
                 )
@@ -212,7 +212,7 @@ namespace ClassicUO.Game.UI.Gumps
                 (
                     message,
                     false,
-                    0x0386,
+                    0x0481,
                     Width - 90,
                     1
                 )
@@ -241,7 +241,8 @@ namespace ClassicUO.Game.UI.Gumps
                 -1,
                 ww,
                 true,
-                FontStyle.BlackBorder | FontStyle.Fixed
+                FontStyle.BlackBorder | FontStyle.Fixed,
+                0x0481
             )
             {
                 X = 42,

@@ -1,9 +1,9 @@
 using ClassicUO.Assets;
+using ClassicUO.Game;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
-using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -19,17 +19,16 @@ namespace ClassicUO.Game.UI.Controls
         private bool _isHovered;
         private bool _isPressed;
         private bool _isOpen;
-        private SpriteFontBase _font;
+        private RenderedText _renderedText;
         private Color _baseColor;
         private Color _highlightColor;
         private Color _shadowColor;
         private Color _textColor;
         private Color _textShadowColor;
-        private int _fontSize;
         private Texture2D _pixelTexture;
         private static readonly Random _textureRandom = new Random(12345);
 
-        public GothicStyleCombobox(int x, int y, int width, int height, string[] items, int selectedIndex = -1, int fontSize = 16)
+        public GothicStyleCombobox(int x, int y, int width, int height, string[] items, int selectedIndex = -1)
         {
             X = x;
             Y = y;
@@ -37,7 +36,6 @@ namespace ClassicUO.Game.UI.Controls
             Height = height;
             _items = items ?? new string[0];
             _selectedIndex = selectedIndex;
-            _fontSize = fontSize;
 
             _baseColor = Color.DarkRed;
             _highlightColor = new Color(180, 50, 50);
@@ -45,10 +43,6 @@ namespace ClassicUO.Game.UI.Controls
             _textColor = Color.White;
             _textShadowColor = Color.Black;
 
-            // Carregar fonte
-            _font = TrueTypeLoader.Instance.GetFont("Arial", fontSize);
-
-            // Definir texto inicial
             if (_selectedIndex >= 0 && _selectedIndex < _items.Length)
             {
                 _selectedText = _items[_selectedIndex];
@@ -58,6 +52,7 @@ namespace ClassicUO.Game.UI.Controls
                 _selectedText = _items.Length > 0 ? _items[0] : "";
                 _selectedIndex = _items.Length > 0 ? 0 : -1;
             }
+            _renderedText = RenderedText.Create(_selectedText ?? string.Empty, 0x0481, 1, true, FontStyle.BlackBorder);
 
             AcceptMouseInput = true;
         }
@@ -72,6 +67,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     _selectedIndex = _items.Length > 0 ? 0 : -1;
                     _selectedText = _items.Length > 0 ? _items[0] : "";
+                    _renderedText.Text = _selectedText ?? string.Empty;
                 }
             }
         }
@@ -85,6 +81,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     _selectedIndex = value;
                     _selectedText = _items[value];
+                    _renderedText.Text = _selectedText;
                     OnSelectionChanged?.Invoke(this, value);
                 }
             }
@@ -137,8 +134,9 @@ namespace ClassicUO.Game.UI.Controls
                 currentShadowColor = _shadowColor;
             }
 
-            if (_pixelTexture == null)
+            if (_pixelTexture == null || _pixelTexture.IsDisposed)
             {
+                _pixelTexture?.Dispose();
                 _pixelTexture = new Texture2D(batcher.GraphicsDevice, 1, 1);
                 _pixelTexture.SetData(new[] { Color.Red });
             }
@@ -148,21 +146,17 @@ namespace ClassicUO.Game.UI.Controls
             DrawBorder(batcher, x, y, Width, Height, currentHighlightColor, currentShadowColor);
             DrawTextureEffect(batcher, x, y, Width, Height, currentBaseColor);
 
-            if (!string.IsNullOrEmpty(_selectedText) && _font != null)
+            if (!string.IsNullOrEmpty(_selectedText))
             {
-                var textSize = _font.MeasureString(_selectedText);
+                _renderedText.Text = _selectedText;
                 var textX = x + 8;
-                var textY = y + (Height - textSize.Y) / 2;
-
+                var textY = y + (Height - _renderedText.Height) / 2;
                 if (_isPressed || _isOpen)
                 {
                     textX += 1;
                     textY += 1;
                 }
-
-                _font.DrawText(batcher, new StringSegment(_selectedText), new Vector2(textX + 2, textY + 2), _textShadowColor);
-                _font.DrawText(batcher, new StringSegment(_selectedText), new Vector2(textX + 1, textY + 1), new Color(_textShadowColor.R + 20, _textShadowColor.G + 10, _textShadowColor.B + 10));
-                _font.DrawText(batcher, new StringSegment(_selectedText), new Vector2(textX, textY), _textColor);
+                _renderedText.Draw(batcher, textX, textY);
             }
 
             DrawDropdownArrow(batcher, x, y, Width, Height);
@@ -285,13 +279,19 @@ namespace ClassicUO.Game.UI.Controls
 
             _isOpen = true;
 
+            const int maxHeight = 200;
+            int comboY = ScreenCoordinateY + Height;
+            if (comboY < 0)
+                comboY = 0;
+            else if (comboY + maxHeight > Client.Game.Window.ClientBounds.Height)
+                comboY = Client.Game.Window.ClientBounds.Height - maxHeight;
+
             var dropdownGump = new GothicDropdownGump(
                 ScreenCoordinateX,
-                ScreenCoordinateY + Height,
+                comboY,
                 Width,
-                200,
+                maxHeight,
                 _items,
-                _fontSize,
                 this
             );
 
@@ -303,168 +303,174 @@ namespace ClassicUO.Game.UI.Controls
             _isOpen = false;
         }
 
+        public override void Dispose()
+        {
+            _renderedText?.Destroy();
+            _pixelTexture?.Dispose();
+            _pixelTexture = null;
+            base.Dispose();
+        }
+
         private class GothicDropdownGump : Gump
         {
-            private readonly GothicStyleCombobox _combobox;
-            private readonly string[] _items;
-            private readonly SpriteFontBase _font;
-            private readonly int _fontSize;
-            private int _scrollOffset;
-            private static readonly Random _dropdownTextureRandom = new Random(12345);
-            private static readonly Vector3 OpaqueHue = ShaderHueTranslator.GetHueVector(0, false, 1f);
-            private const int ItemHeight = 25;
-            private const int ScrollBarWidth = 12;
-            private const int Padding = 5;
+            private const int ELEMENT_HEIGHT = 25;
             private const int BORDER_RADIUS = 6;
+            private static readonly Random _dropdownRandom = new Random(12345);
+            private readonly GothicStyleCombobox _combobox;
+            private Texture2D _pixelTexture;
 
-            public GothicDropdownGump(int x, int y, int width, int height, string[] items, int fontSize, GothicStyleCombobox combobox)
+            public GothicDropdownGump(int x, int y, int width, int height, string[] items, GothicStyleCombobox combobox)
                 : base(0, 0)
             {
                 CanMove = false;
                 AcceptMouseInput = true;
                 X = x;
                 Y = y;
-                Width = width;
-                Height = height;
-
                 IsModal = true;
                 LayerOrder = UILayer.Over;
                 ModalClickOutsideAreaClosesThisControl = true;
-                Alpha = 1f;
-
                 _combobox = combobox;
-                _items = items;
-                _fontSize = fontSize;
-                _font = TrueTypeLoader.Instance.GetFont("Arial", fontSize);
+
+                var labels = new HoveredLabel[items.Length];
+                for (int i = 0; i < items.Length; i++)
+                {
+                    string item = items[i] ?? string.Empty;
+                    var label = new HoveredLabel(item, true, 0x0481, 0x0481, 0x0481, font: 1)
+                    {
+                        X = 2,
+                        Y = i * ELEMENT_HEIGHT,
+                        DrawBackgroundCurrentIndex = true,
+                        IsVisible = item.Length != 0,
+                        Tag = i
+                    };
+                    label.MouseUp += (s, e) =>
+                    {
+                        if (e.Button == MouseButtonType.Left)
+                        {
+                            _combobox.SelectedIndex = (int)((Label)s).Tag;
+                            _combobox.CloseDropdown();
+                            Dispose();
+                        }
+                    };
+                    labels[i] = label;
+                }
+
+                int totalHeight = Math.Min(height, items.Length * ELEMENT_HEIGHT);
+                int maxWidth = Math.Max(width, labels.Max(o => o.X + o.Width));
+
+                var area = new ScrollArea(0, 0, maxWidth + 15, totalHeight, true);
+                foreach (var label in labels)
+                {
+                    label.Width = maxWidth;
+                    area.Add(label);
+                }
+                Add(area);
+
+                Width = maxWidth;
+                Height = totalHeight;
+
+                for (int i = 0; i < labels.Length; i++)
+                {
+                    labels[i].IsSelected = i == _combobox.SelectedIndex;
+                }
             }
 
-            private int MaxScroll => Math.Max(0, _items.Length * ItemHeight + Padding * 2 - Height);
-            private bool HasScroll => _items.Length * ItemHeight + Padding * 2 > Height;
-
-            protected override void OnMouseWheel(MouseEventType delta)
+            private void EnsurePixelTexture(GraphicsDevice device)
             {
-                if (!HasScroll) return;
-                if (delta == MouseEventType.WheelScrollUp)
-                    _scrollOffset = Math.Max(0, _scrollOffset - ItemHeight);
+                if (_pixelTexture == null || _pixelTexture.IsDisposed)
+                {
+                    _pixelTexture?.Dispose();
+                    _pixelTexture = new Texture2D(device, 1, 1);
+                    _pixelTexture.SetData(new[] { Color.Red });
+                }
+            }
+
+            private void DrawGradientBackground(UltimaBatcher2D batcher, int x, int y, int w, int h)
+            {
+                Color baseColor = _combobox.BaseColor;
+                Color shadowColor = _combobox.ShadowColor;
+                for (int i = 0; i < h; i++)
+                {
+                    float ratio = (float)i / h;
+                    int cr = (int)(baseColor.R + (shadowColor.R - baseColor.R) * ratio);
+                    int cg = (int)(baseColor.G + (shadowColor.G - baseColor.G) * ratio);
+                    int cb = (int)(baseColor.B + (shadowColor.B - baseColor.B) * ratio);
+                    batcher.Draw(_pixelTexture, new Rectangle(x, y + i, w, 1), new Vector3(cr / 255f, cg / 255f, cb / 255f));
+                }
+            }
+
+            private static readonly Vector3 SolidHue = ShaderHueTranslator.GetHueVector(0, false, 1f);
+
+            private void DrawBorder(UltimaBatcher2D batcher, int x, int y, int w, int h)
+            {
+                Color highlightColor = _combobox.HighlightColor;
+                Color shadowColor = _combobox.ShadowColor;
+                var highlightTex = SolidColorTextureCache.GetTexture(highlightColor);
+                var shadowTex = SolidColorTextureCache.GetTexture(shadowColor);
+                int r = BORDER_RADIUS;
+                if (w < r * 2 || h < r * 2) r = 0;
+                if (r > 0)
+                {
+                    batcher.Draw(shadowTex, new Rectangle(x + r, y, w - r * 2, 2), null, SolidHue);
+                    batcher.Draw(shadowTex, new Rectangle(x + r, y + h - 2, w - r * 2, 2), null, SolidHue);
+                    batcher.Draw(shadowTex, new Rectangle(x, y + r, 2, h - r * 2), null, SolidHue);
+                    batcher.Draw(shadowTex, new Rectangle(x + w - 2, y + r, 2, h - r * 2), null, SolidHue);
+                    batcher.Draw(shadowTex, new Rectangle(x, y, r, r), null, SolidHue);
+                    batcher.Draw(shadowTex, new Rectangle(x + w - r, y, r, r), null, SolidHue);
+                    batcher.Draw(shadowTex, new Rectangle(x, y + h - r, r, r), null, SolidHue);
+                    batcher.Draw(shadowTex, new Rectangle(x + w - r, y + h - r, r, r), null, SolidHue);
+                }
                 else
-                    _scrollOffset = Math.Min(MaxScroll, _scrollOffset + ItemHeight);
+                {
+                    batcher.Draw(shadowTex, new Rectangle(x, y, w, 2), null, SolidHue);
+                    batcher.Draw(shadowTex, new Rectangle(x, y + h - 2, w, 2), null, SolidHue);
+                    batcher.Draw(shadowTex, new Rectangle(x, y, 2, h), null, SolidHue);
+                    batcher.Draw(shadowTex, new Rectangle(x + w - 2, y, 2, h), null, SolidHue);
+                }
+            }
+
+            private void DrawTextureEffect(UltimaBatcher2D batcher, int x, int y, int w, int h)
+            {
+                Color baseColor = _combobox.BaseColor;
+                Color textureColor = new Color(Math.Max(0, baseColor.R - 20), Math.Max(0, baseColor.G - 10), Math.Max(0, baseColor.B - 8));
+                Vector3 texVec = new Vector3(textureColor.R / 255f, textureColor.G / 255f, textureColor.B / 255f);
+                for (int i = 4; i < w - 4; i += 6)
+                {
+                    int lineX = x + i + _dropdownRandom.Next(-2, 3);
+                    if (lineX >= x + 2 && lineX < x + w - 2)
+                    {
+                        int lineHeight = h - 6 + _dropdownRandom.Next(-2, 3);
+                        int lineY = y + 3 + _dropdownRandom.Next(-1, 2);
+                        batcher.Draw(_pixelTexture, new Rectangle(lineX, lineY, 1, lineHeight), texVec);
+                    }
+                }
             }
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                Color baseColor = _combobox.BaseColor;
-                Color shadowColor = _combobox.ShadowColor;
-                Color highlightColor = _combobox.HighlightColor;
+                EnsurePixelTexture(batcher.GraphicsDevice);
+                if (_pixelTexture == null || _pixelTexture.IsDisposed)
+                    return true;
 
-                batcher.Draw(SolidColorTextureCache.GetTexture(baseColor), new Rectangle(x, y, Width, Height), OpaqueHue);
-                DrawBorder(batcher, x, y, Width, Height, highlightColor, shadowColor);
-                DrawTextureEffect(batcher, x, y, Width, Height, baseColor);
+                DrawGradientBackground(batcher, x, y, Width, Height);
+                DrawTextureEffect(batcher, x, y, Width, Height);
 
-                int contentWidth = Width - (HasScroll ? ScrollBarWidth + 4 : 4);
-
-                if (batcher.ClipBegin(x + 2, y + Padding, contentWidth + (HasScroll ? ScrollBarWidth + 4 : 0), Height - Padding * 2))
+                if (batcher.ClipBegin(x, y, Width, Height))
                 {
-                    for (int i = 0; i < _items.Length; i++)
-                    {
-                        int itemY = y + Padding + i * ItemHeight - _scrollOffset;
-                        if (itemY + ItemHeight <= y + Padding || itemY >= y + Height - Padding) continue;
-
-                        bool isSelected = i == _combobox.SelectedIndex;
-                        if (isSelected)
-                            batcher.Draw(SolidColorTextureCache.GetTexture(highlightColor), new Rectangle(x + 2, itemY, contentWidth, ItemHeight - 2), OpaqueHue);
-                        if (_font != null && !string.IsNullOrEmpty(_items[i]))
-                            _font.DrawText(batcher, new StringSegment(_items[i]), new Vector2(x + 8, itemY + 4), Color.White);
-                    }
+                    base.Draw(batcher, x, y);
                     batcher.ClipEnd();
                 }
 
-                if (HasScroll)
-                {
-                    int barX = x + Width - ScrollBarWidth - 2;
-                    batcher.Draw(SolidColorTextureCache.GetTexture(shadowColor), new Rectangle(barX, y + Padding, ScrollBarWidth, Height - Padding * 2), OpaqueHue);
-                    int trackHeight = Height - Padding * 2;
-                    int thumbHeight = Math.Max(20, trackHeight * trackHeight / (_items.Length * ItemHeight + Padding * 2));
-                    int maxThumbY = trackHeight - thumbHeight;
-                    int thumbY = maxThumbY > 0 ? y + Padding + (maxThumbY * _scrollOffset / MaxScroll) : y + Padding;
-                    batcher.Draw(SolidColorTextureCache.GetTexture(highlightColor), new Rectangle(barX + 2, thumbY, ScrollBarWidth - 4, thumbHeight), OpaqueHue);
-                }
-
+                DrawBorder(batcher, x, y, Width, Height);
                 return true;
             }
 
-            private void DrawBorder(UltimaBatcher2D batcher, int x, int y, int width, int height, Color highlightColor, Color shadowColor)
+            public override void Dispose()
             {
-                int r = BORDER_RADIUS;
-                if (width < r * 2 || height < r * 2) r = 0;
-                Texture2D highlightTex = SolidColorTextureCache.GetTexture(highlightColor);
-                Texture2D shadowTex = SolidColorTextureCache.GetTexture(shadowColor);
-                if (r > 0)
-                {
-                    batcher.Draw(highlightTex, new Rectangle(x + r, y, width - r * 2, 2), OpaqueHue);
-                    batcher.Draw(shadowTex, new Rectangle(x + r, y + height - 2, width - r * 2, 2), OpaqueHue);
-                    batcher.Draw(highlightTex, new Rectangle(x, y + r, 2, height - r * 2), OpaqueHue);
-                    batcher.Draw(shadowTex, new Rectangle(x + width - 2, y + r, 2, height - r * 2), OpaqueHue);
-                    batcher.Draw(highlightTex, new Rectangle(x, y, r, r), OpaqueHue);
-                    batcher.Draw(highlightTex, new Rectangle(x + width - r, y, r, r), OpaqueHue);
-                    batcher.Draw(shadowTex, new Rectangle(x, y + height - r, r, r), OpaqueHue);
-                    batcher.Draw(shadowTex, new Rectangle(x + width - r, y + height - r, r, r), OpaqueHue);
-                }
-                else
-                {
-                    batcher.Draw(highlightTex, new Rectangle(x, y, width, 2), OpaqueHue);
-                    batcher.Draw(shadowTex, new Rectangle(x, y + height - 2, width, 2), OpaqueHue);
-                    batcher.Draw(highlightTex, new Rectangle(x, y, 2, height), OpaqueHue);
-                    batcher.Draw(shadowTex, new Rectangle(x + width - 2, y, 2, height), OpaqueHue);
-                }
+                _pixelTexture?.Dispose();
+                _pixelTexture = null;
+                base.Dispose();
             }
-
-            private void DrawTextureEffect(UltimaBatcher2D batcher, int x, int y, int width, int height, Color baseColor)
-            {
-                Color textureColor = new Color(Math.Max(0, baseColor.R - 20), Math.Max(0, baseColor.G - 10), Math.Max(0, baseColor.B - 8));
-                Texture2D tex = SolidColorTextureCache.GetTexture(textureColor);
-                for (int i = 4; i < width - 4; i += 6)
-                {
-                    int lineX = x + i + _dropdownTextureRandom.Next(-2, 3);
-                    if (lineX >= x + 2 && lineX < x + width - 2)
-                    {
-                        int lineHeight = height - 6 + _dropdownTextureRandom.Next(-2, 3);
-                        int lineY = y + 3 + _dropdownTextureRandom.Next(-1, 2);
-                        batcher.Draw(tex, new Rectangle(lineX, lineY, 1, lineHeight), OpaqueHue);
-                    }
-                }
-            }
-
-            protected override void OnMouseUp(int x, int y, MouseButtonType button)
-            {
-                if (button != MouseButtonType.Left) return;
-
-                int contentWidth = Width - (HasScroll ? ScrollBarWidth + 4 : 4);
-                if (x >= contentWidth + 4)
-                {
-                    if (HasScroll && x >= Width - ScrollBarWidth - 2)
-                    {
-                        int trackHeight = Height - Padding * 2;
-                        int relY = y - Padding;
-                        int thumbHeight = Math.Max(20, trackHeight * trackHeight / (_items.Length * ItemHeight + Padding * 2));
-                        int maxThumbY = trackHeight - thumbHeight;
-                        if (maxThumbY > 0)
-                        {
-                            int thumbCenterY = Math.Max(thumbHeight / 2, Math.Min(relY, trackHeight - thumbHeight / 2));
-                            _scrollOffset = MaxScroll * (thumbCenterY - thumbHeight / 2) / maxThumbY;
-                        }
-                    }
-                    return;
-                }
-
-                int itemIndex = (y - Padding + _scrollOffset) / ItemHeight;
-                if (itemIndex >= 0 && itemIndex < _items.Length)
-                {
-                    _combobox.SelectedIndex = itemIndex;
-                    _combobox.CloseDropdown();
-                    Dispose();
-                }
-            }
-
         }
     }
 }

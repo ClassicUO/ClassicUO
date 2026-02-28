@@ -1,7 +1,7 @@
 using ClassicUO.Assets;
+using ClassicUO.Game;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
-using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -13,7 +13,7 @@ namespace ClassicUO.Game.UI.Controls
         private string _text;
         private bool _isHovered;
         private bool _isPressed;
-        private SpriteFontBase _font;
+        private RenderedText _renderedText;
         private Color _baseColor;
         private Color _highlightColor;
         private Color _shadowColor;
@@ -36,32 +36,18 @@ namespace ClassicUO.Game.UI.Controls
             _textColor = Color.White;                      // Texto branco para contraste
             _textShadowColor = Color.Black;                // Sombra preta do texto
 
-            // Carregar fonte gótica se disponível, senão usar fonte padrão
-            if (!string.IsNullOrEmpty(fontPath))
-            {
-                try
-                {
-                    _font = TrueTypeLoader.Instance.GetFont(fontPath, fontSize);
-                }
-                catch
-                {
-                    _font = null;
-                }
-            }
-
-            if (_font == null)
-            {
-                // Usar fonte padrão do sistema
-                _font = TrueTypeLoader.Instance.GetFont("Arial", fontSize);
-            }
-
+            _renderedText = RenderedText.Create(_text, 0x0481, 1, true, FontStyle.BlackBorder);
             AcceptMouseInput = true;
         }
 
         public string Text
         {
             get => _text;
-            set => _text = value;
+            set
+            {
+                _text = value;
+                _renderedText.Text = value;
+            }
         }
 
         public Color BaseColor
@@ -125,26 +111,16 @@ namespace ClassicUO.Game.UI.Controls
             // Desenhar textura/rugosidade
             DrawTextureEffect(batcher, x, y, Width, Height, currentBaseColor);
 
-            // Desenhar o texto
-            if (!string.IsNullOrEmpty(_text) && _font != null)
+            if (!string.IsNullOrEmpty(_text))
             {
-                var textSize = _font.MeasureString(_text);
-                var textX = x + (Width - textSize.X) / 2;
-                var textY = y + (Height - textSize.Y) / 2;
-
-                // Offset do texto quando pressionado
+                var textX = x + (Width - _renderedText.Width) / 2;
+                var textY = y + (Height - _renderedText.Height) / 2;
                 if (_isPressed)
                 {
                     textX += 1;
                     textY += 1;
                 }
-
-                // Desenhar múltiplas sombras para efeito de inscrição
-                _font.DrawText(batcher, new StringSegment(_text), new Vector2(textX + 2, textY + 2), _textShadowColor);
-                _font.DrawText(batcher, new StringSegment(_text), new Vector2(textX + 1, textY + 1), new Color(_textShadowColor.R + 20, _textShadowColor.G + 10, _textShadowColor.B + 10));
-
-                // Desenhar o texto principal com efeito de realce
-                _font.DrawText(batcher, new StringSegment(_text), new Vector2(textX, textY), _textColor);
+                _renderedText.Draw(batcher, textX, textY);
             }
 
             return base.Draw(batcher, x, y);
@@ -260,5 +236,11 @@ namespace ClassicUO.Game.UI.Controls
         }
 
         public event Action OnClick = delegate { };
+
+        public override void Dispose()
+        {
+            _renderedText?.Destroy();
+            base.Dispose();
+        }
     }
 }

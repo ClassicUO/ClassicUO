@@ -32,6 +32,7 @@
 
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using FontStyle = ClassicUO.Game.FontStyle;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -54,7 +55,7 @@ namespace ClassicUO.Game.UI.Gumps
             _leftMouseIsDown,
             _isLastTarget,
             _needsNameUpdate;
-        private TextBox _text;
+        private UOLabel _text;
         private Texture2D _borderColor = SolidColorTextureCache.GetTexture(Color.Black);
         private Vector2 _textDrawOffset = Vector2.Zero;
         private static int currentHeight = 22;
@@ -91,7 +92,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            _text = new TextBox(string.Empty, ProfileManager.CurrentProfile.NamePlateFont, ProfileManager.CurrentProfile.NamePlateFontSize, 100, entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort)0x0481, FontStashSharp.RichText.TextHorizontalAlignment.Center);
+            _text = new UOLabel(string.Empty, ProfileManager.CurrentProfile.NamePlateFont, entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort)0x0481, TEXT_ALIGN_TYPE.TS_CENTER, 100, FontStyle.BlackBorder);
 
             SetTooltip(entity);
 
@@ -142,7 +143,7 @@ namespace ClassicUO.Game.UI.Gumps
                     return false;
                 }
 
-                _text.UpdateText(t);
+                _text.Text = t;
 
                 Width = _background.Width = Math.Max(60, _text.Width) + 4;
                 Height = _background.Height = CurrentHeight = Math.Max(Constants.OBJECT_HANDLES_GUMP_HEIGHT, _text.Height) + 4;
@@ -157,7 +158,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 string t = entity.Name;
 
-                _text.UpdateText(t);
+                _text.Text = t;
 
                 Width = _background.Width = Math.Max(60, _text.Width) + 4;
                 Height = _background.Height = Math.Max(Constants.OBJECT_HANDLES_GUMP_HEIGHT, _text.Height) + 4;

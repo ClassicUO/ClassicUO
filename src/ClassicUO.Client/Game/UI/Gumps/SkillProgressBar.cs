@@ -1,5 +1,7 @@
-﻿using ClassicUO.Configuration;
+using ClassicUO.Assets;
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
+using FontStyle = ClassicUO.Game.FontStyle;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using Microsoft.Xna.Framework;
@@ -54,15 +56,9 @@ namespace ClassicUO.Game.UI.Gumps
             if (World.Player.Skills.Length > skillIndex)
             {
                 Skill s = World.Player.Skills[skillIndex];
-                TextBox tb;
-                Add(tb = new TextBox(
-                    string.Format(ProfileManager.CurrentProfile.SkillBarFormat, s.Name, s.Value, s.Cap),
-                    ProfileManager.CurrentProfile.GameWindowSideChatFont,
-                    ProfileManager.CurrentProfile.GameWindowSideChatFontSize,
-                    null,
-                    Color.White));
-
-                tb.X = (Width / 2) - (tb.MeasuredSize.X / 2);
+                UOLabel tb;
+                Add(tb = new UOLabel(string.Format(ProfileManager.CurrentProfile.SkillBarFormat, s.Name, s.Value, s.Cap), ProfileManager.CurrentProfile.GameWindowSideChatFont, 0, TEXT_ALIGN_TYPE.TS_LEFT, 0, FontStyle.BlackBorder));
+                tb.X = (Width / 2) - (tb.Width / 2);
 
                 Rectangle barBounds = Client.Game.Gumps.GetGump(0x0805).UV;
 

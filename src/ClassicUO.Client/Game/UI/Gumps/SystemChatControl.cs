@@ -32,6 +32,7 @@
 
 using System;
 using System.Collections.Generic;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
@@ -891,11 +892,11 @@ namespace ClassicUO.Game.UI.Gumps
         private class ChatLineTime
         {
             private uint _createdTime;
-            private TextBox textBox;
+            private UOLabel textBox;
 
             public ChatLineTime(string text, byte font, bool isunicode, ushort hue)
             {
-                textBox = new TextBox(text, ProfileManager.CurrentProfile.GameWindowSideChatFont, ProfileManager.CurrentProfile.GameWindowSideChatFontSize, 320, hue, strokeEffect: true);
+                textBox = new UOLabel(text, font, hue, TEXT_ALIGN_TYPE.TS_LEFT, 320, FontStyle.BlackBorder, isunicode);
                 _createdTime = Time.Ticks + Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT;
             }
 
@@ -912,7 +913,6 @@ namespace ClassicUO.Game.UI.Gumps
                     Destroy();
                 }
             }
-
 
             public bool Draw(UltimaBatcher2D batcher, int x, int y)
             {

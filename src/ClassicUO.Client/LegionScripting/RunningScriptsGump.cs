@@ -18,7 +18,7 @@ namespace ClassicUO.LegionScripting
         private const int MIN_HEIGHT = 200;
         private AlphaBlendControl _bg;
         private ScrollArea _scroll;
-        private TextBox _title;
+        private UOLabel _title;
         private NiceButton _createBtn;
         private static int _lastX = -1;
         private static int _lastY = -1;
@@ -40,7 +40,7 @@ namespace ClassicUO.LegionScripting
             int headerH = 40;
 
             Add(_bg = new AlphaBlendControl(0.77f) { X = border, Y = border });
-            Add(_title = new TextBox("Scripts Running", TrueTypeLoader.EMBEDDED_FONT, 18, Width, Color.DarkOrange, FontStashSharp.RichText.TextHorizontalAlignment.Center, false) { Y = border, AcceptMouseInput = false });
+            Add(_title = new UOLabel("Scripts Running", 1, UOLabelHue.Accent, Assets.TEXT_ALIGN_TYPE.TS_CENTER, Width, FontStyle.BlackBorder) { Y = border });
             Add(_createBtn = new NiceButton(border, headerH - 32, 80, 26, ButtonAction.Default, "Create New") { IsSelectable = false });
             _createBtn.MouseUp += OnCreate;
             Add(_scroll = new ScrollArea(border, headerH + border, Width - border * 2, Height - headerH - border * 2, true) { ScrollbarBehaviour = ScrollbarBehaviour.ShowAlways });

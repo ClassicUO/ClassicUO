@@ -18,7 +18,6 @@ namespace ClassicUO.LegionScripting
     internal class LegionScriptStudioGump : ResizableGump
     {
         private const int LEFT_WIDTH = 220;
-        private const int RIGHT_WIDTH = 280;
         private const int MIN_WIDTH = 900;
         private const int MIN_HEIGHT = 500;
 
@@ -28,22 +27,21 @@ namespace ClassicUO.LegionScripting
         private static readonly Color ACCENT_COLOR = Color.FromNonPremultiplied(180, 50, 50, 255);
         private static readonly Color TEXT_COLOR = Color.White;
 
+        private const int EXPLORER_GROUP_INDENT = 12;
+        private const int EXPLORER_V_SPACING = 2;
         private AlphaBlendControl _leftBg;
         private ScrollArea _leftScroll;
+        private UOLabel _statusLabel;
         private AlphaBlendControl _centerBg;
         private ScrollArea _centerScroll;
         private LineNumberEditor _editorPanel;
-        private AlphaBlendControl _rightBg;
-        private ScrollArea _rightScroll;
-        private TextBox _docLabel;
-        private bool _showRunningPanel = true;
-        private NiceButton _saveBtn;
-        private NiceButton _playBtn;
-        private NiceButton _stopBtn;
-        private NiceButton _deleteBtn;
-        private NiceButton _moveBtn;
-        private NiceButton _runningBtn;
-        private TextBox _titleLabel;
+        private GothicStyleButton _saveBtn;
+        private GothicStyleButton _playBtn;
+        private GothicStyleButton _stopBtn;
+        private GothicStyleButton _deleteBtn;
+        private GothicStyleButton _moveBtn;
+        private GothicStyleButton _docsBtn;
+        private UOLabel _titleLabel;
         private RoundedColorBox _backgroundBox;
         private RoundedColorBox _headerBox;
         private RoundedColorBox _headerAccent;
@@ -96,15 +94,15 @@ namespace ClassicUO.LegionScripting
 
             int btnY = border + headerH - 35;
             int gap = 6;
-            int runWidth = 75;
+            int docsWidth = 50;
             int moveWidth = 65;
             int delWidth = 55;
             int stdWidth = 60;
             int rightMargin = border + 16;
             int xRight = Width - rightMargin;
 
-            int xRun = xRight - runWidth;
-            int xMove = xRun - gap - moveWidth;
+            int xDocs = xRight - docsWidth;
+            int xMove = xDocs - gap - moveWidth;
             int xDel = xMove - gap - delWidth;
             int xStop = xDel - gap - stdWidth;
             int xPlay = xStop - gap - stdWidth;
@@ -113,43 +111,37 @@ namespace ClassicUO.LegionScripting
             int titleLeft = border + 16;
             int titleMaxWidth = Math.Max(120, xSave - titleLeft - gap);
 
-            Add(_titleLabel = new TextBox("Legion Script Studio", TrueTypeLoader.EMBEDDED_FONT, 20, titleMaxWidth, TEXT_COLOR, FontStashSharp.RichText.TextHorizontalAlignment.Left, false)
-            {
-                X = titleLeft,
-                Y = border + 12,
-                AcceptMouseInput = false
-            });
+            Add(_titleLabel = new UOLabel("Legion Script Studio", 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_LEFT, titleMaxWidth) { X = titleLeft, Y = border + 10 });
+            Add(_docsBtn = new GothicStyleButton(xDocs, btnY, docsWidth, 28, "Docs", null, 12));
+            _docsBtn.OnClick += () => UIManager.Add(new DocumentationModalGump(
+                "Documentation" + (_currentScript != null ? $" - {_currentScript.FileName}" : ""),
+                LoadDocForType(_currentScript?.ScriptType)));
+            Add(_statusLabel = new UOLabel("Ready", 1, 0x035F, Assets.TEXT_ALIGN_TYPE.TS_LEFT, titleMaxWidth) { X = titleLeft, Y = border + 28 });
 
-            Add(_saveBtn = new NiceButton(xSave, btnY, stdWidth, 28, ButtonAction.Default, "Save") { IsSelectable = false });
-            _saveBtn.MouseUp += OnSave;
+            var saveBtn = new GothicStyleButton(xSave, btnY, stdWidth, 28, "Save", null, 12);
+            saveBtn.OnClick += () => OnSave(null, new MouseEventArgs(0, 0, MouseButtonType.Left));
+            Add(_saveBtn = saveBtn);
 
-            Add(_playBtn = new NiceButton(xPlay, btnY, stdWidth, 28, ButtonAction.Default, "Play") { IsSelectable = false });
-            _playBtn.MouseUp += OnPlay;
+            var playBtn = new GothicStyleButton(xPlay, btnY, stdWidth, 28, "Play", null, 12);
+            playBtn.OnClick += () => OnPlay(null, new MouseEventArgs(0, 0, MouseButtonType.Left));
+            Add(_playBtn = playBtn);
 
-            Add(_stopBtn = new NiceButton(xStop, btnY, stdWidth, 28, ButtonAction.Default, "Stop") { IsSelectable = false });
-            _stopBtn.MouseUp += OnStop;
+            var stopBtn = new GothicStyleButton(xStop, btnY, stdWidth, 28, "Stop", null, 12);
+            stopBtn.OnClick += () => OnStop(null, new MouseEventArgs(0, 0, MouseButtonType.Left));
+            Add(_stopBtn = stopBtn);
 
-            Add(_deleteBtn = new NiceButton(xDel, btnY, delWidth, 28, ButtonAction.Default, "Delete") { IsSelectable = false });
-            _deleteBtn.MouseUp += OnDelete;
+            var deleteBtn = new GothicStyleButton(xDel, btnY, delWidth, 28, "Delete", null, 12);
+            deleteBtn.OnClick += () => OnDelete(null, new MouseEventArgs(0, 0, MouseButtonType.Left));
+            Add(_deleteBtn = deleteBtn);
 
-            Add(_moveBtn = new NiceButton(xMove, btnY, moveWidth, 28, ButtonAction.Default, "Move") { IsSelectable = false });
-            _moveBtn.MouseUp += OnMove;
-
-            Add(_runningBtn = new NiceButton(xRun, btnY, runWidth, 28, ButtonAction.Default, "Running") { IsSelectable = true, IsSelected = true });
-            _runningBtn.MouseUp += (s, e) =>
-            {
-                if (e.Button != MouseButtonType.Left) return;
-                _showRunningPanel = !_showRunningPanel;
-                _runningBtn.IsSelected = _showRunningPanel;
-                RebuildRightPanel();
-            };
+            var moveBtn = new GothicStyleButton(xMove, btnY, moveWidth, 28, "Move", null, 12);
+            moveBtn.OnClick += () => OnMove(null, new MouseEventArgs(0, 0, MouseButtonType.Left));
+            Add(_moveBtn = moveBtn);
 
             int leftX = border;
             int leftW = LEFT_WIDTH;
             int centerX = leftX + leftW + 4;
-            int centerW = Width - leftW - RIGHT_WIDTH - border * 2 - 8;
-            int rightX = centerX + centerW + 4;
-            int rightW = RIGHT_WIDTH;
+            int centerW = Width - leftW - border * 2 - 8;
             int contentY = border + headerH;
             int contentH = Height - contentY - border;
 
@@ -203,7 +195,7 @@ namespace ClassicUO.LegionScripting
                         string defaultContent = ext == ".py" ? "# My script" : ext == ".uos" ? "// My UOS script" : "// My script";
                         File.WriteAllText(fullPath, defaultContent);
                         LegionScripting.LoadScriptsFromFile();
-                        BuildScriptList();
+                        BuildScriptTree();
                         var sf = LegionScripting.LoadedScripts.FirstOrDefault(x => string.Equals(x.FullPath, fullPath, StringComparison.OrdinalIgnoreCase));
                         if (sf != null) SelectScript(sf);
                         GameActions.Print($"Created {fileName}");
@@ -236,7 +228,7 @@ namespace ClassicUO.LegionScripting
                             "// LegionScript sample\nmsg HelloWorldFromLegionScript\npause 1000\nloop"
                         );
                         LegionScripting.LoadScriptsFromFile();
-                        BuildScriptList();
+                        BuildScriptTree();
                     }
                 });
                 req.CenterXInScreen();
@@ -256,7 +248,7 @@ namespace ClassicUO.LegionScripting
                     try
                     {
                         LegionScripting.LoadScriptsFromDirectory(input);
-                        BuildScriptList();
+                        BuildScriptTree();
                         GameActions.Print($"Loaded scripts from: {input}");
                     }
                     catch (Exception ex)
@@ -275,12 +267,12 @@ namespace ClassicUO.LegionScripting
             {
                 if (e.Button != MouseButtonType.Left) return;
                 LegionScripting.LoadScriptsFromFile();
-                BuildScriptList();
+                BuildScriptTree();
                 GameActions.Print("Script list refreshed.");
             };
             _leftScroll.Add(refreshBtn);
 
-            BuildScriptList();
+            BuildScriptTree();
 
             Add(_centerBg = new AlphaBlendControl(0.3f) { X = centerX, Y = contentY, Width = centerW, Height = contentH, BaseColor = PANEL_BG });
             Add(_centerScroll = new ScrollArea(centerX, contentY, centerW, contentH, true) { ScrollbarBehaviour = ScrollbarBehaviour.ShowAlways });
@@ -292,13 +284,11 @@ namespace ClassicUO.LegionScripting
                 _editorPanel.UpdateSize(_centerScroll.Width - _centerScroll.ScrollBarWidth() - LineNumberEditor.GutterWidth - 12, h);
             };
 
-            Add(_rightBg = new AlphaBlendControl(0.5f) { X = rightX, Y = contentY, Width = rightW, Height = contentH, BaseColor = PANEL_BG });
-            Add(_rightScroll = new ScrollArea(rightX, contentY, rightW, contentH, true) { ScrollbarBehaviour = ScrollbarBehaviour.ShowAlways });
-            _docLabel = new TextBox(LoadDocForType(null), TrueTypeLoader.EMBEDDED_FONT, 12, rightW - 24, 0xFFFF, strokeEffect: false) { X = 4, Y = 4, AcceptMouseInput = false };
             RebuildRightPanel();
 
             LegionScripting.ScriptStartedEvent += OnScriptStarted;
             LegionScripting.ScriptStoppedEvent += OnScriptStopped;
+            UpdatePlayStopState();
 
             if (_lastX == -1 && _lastY == -1)
             {
@@ -340,103 +330,69 @@ namespace ClassicUO.LegionScripting
             };
         }
 
-        private void BuildScriptList()
+        private void BuildScriptTree()
         {
             while (_leftScroll.Children.Count > 5)
                 _leftScroll.Remove(_leftScroll.Children[5]);
-            var flat = new List<(string path, ScriptFile sf)>();
-            foreach (ScriptFile sf in LegionScripting.LoadedScripts.OrderBy(s => Path.Combine(s.Group, s.SubGroup, s.FileName)))
+            var groupsMap = new Dictionary<string, Dictionary<string, List<ScriptFile>>>
             {
-                string display = string.IsNullOrEmpty(sf.SubGroup) ? sf.FileName : $"{sf.SubGroup}/{sf.FileName}";
-                if (!string.IsNullOrEmpty(sf.Group) && sf.Group != ScriptManagerGump.NOGROUPTEXT)
-                    display = $"{sf.Group}/{display}";
-                flat.Add((display, sf));
+                { "", new Dictionary<string, List<ScriptFile>> { { "", new List<ScriptFile>() } } }
+            };
+            foreach (ScriptFile sf in LegionScripting.LoadedScripts)
+            {
+                string g = string.IsNullOrEmpty(sf.Group) || sf.Group == ScriptManagerGump.NOGROUPTEXT ? "" : sf.Group;
+                if (!groupsMap.ContainsKey(g))
+                    groupsMap[g] = new Dictionary<string, List<ScriptFile>>();
+                string sg = sf.SubGroup ?? "";
+                if (!groupsMap[g].ContainsKey(sg))
+                    groupsMap[g][sg] = new List<ScriptFile>();
+                groupsMap[g][sg].Add(sf);
             }
             int y = 60;
-            int w = _leftScroll.Width - (_leftScroll.ScrollBarWidth() > 0 ? _leftScroll.ScrollBarWidth() : 14) - 8;
-            foreach (var (path, sf) in flat)
+            int w = Math.Max(100, _leftScroll.Width - (_leftScroll.ScrollBarWidth() > 0 ? _leftScroll.ScrollBarWidth() : 14) - 12);
+            foreach (var group in groupsMap)
             {
-                var btn = new Label(path, true, 0xFFFF, w, font: 1) { X = 4, Y = y, AcceptMouseInput = true };
-                btn.MouseUp += (s, e) =>
-                {
-                    if (e.Button == MouseButtonType.Left)
-                        SelectScript(sf);
-                };
-                _leftScroll.Add(btn);
-                y += btn.Height + 2;
+                var gc = new ScriptExplorerGroupControl(
+                    group.Key == "" ? "Scripts" : group.Key,
+                    w,
+                    "",
+                    (sf) => SelectScript(sf),
+                    () => BuildScriptTree());
+                gc.GroupExpandedShrunk += OnExplorerGroupExpanded;
+                gc.AddGroups(group.Value);
+                gc.X = 4;
+                gc.Y = y;
+                _leftScroll.Add(gc);
+                y += gc.Height + EXPLORER_V_SPACING;
             }
+        }
+
+        private void OnExplorerGroupExpanded(object sender, EventArgs e)
+        {
+            RepositionExplorer();
+        }
+
+        private void RepositionExplorer()
+        {
+            int y = 60;
+            int sbW = _leftScroll.ScrollBarWidth() > 0 ? _leftScroll.ScrollBarWidth() : 14;
+            int w = Math.Max(100, _leftScroll.Width - sbW - 12);
+            foreach (Control c in _leftScroll.Children)
+            {
+                if (c is ScrollBarBase || c is NiceButton || c is GothicStyleButton)
+                    continue;
+                if (c is ScriptExplorerGroupControl gc)
+                {
+                    gc.Y = y;
+                    gc.UpdateSize(w);
+                    y += gc.Height + EXPLORER_V_SPACING;
+                }
+            }
+            _leftScroll.UpdateScrollbarPosition();
         }
 
         private void RebuildRightPanel()
         {
-            if (_rightScroll == null)
-                return;
-
-            while (_rightScroll.Children.Count > 1)
-                _rightScroll.Remove(_rightScroll.Children[1]);
-
-            int y = 4;
-
-            if (_showRunningPanel)
-            {
-                var runningTitle = new TextBox("Running Scripts", TrueTypeLoader.EMBEDDED_FONT, 14, _rightScroll.Width - 24, 0xFFFF, strokeEffect: false)
-                {
-                    X = 4,
-                    Y = y,
-                    AcceptMouseInput = false
-                };
-                _rightScroll.Add(runningTitle);
-                y += runningTitle.Height + 4;
-
-                var running = LegionScripting.GetRunningScripts();
-                foreach (var sf in running)
-                {
-                    string name = sf.FileName;
-                    var label = new Label(name, true, 0xFFFF, _rightScroll.Width - 90, font: 1)
-                    {
-                        X = 4,
-                        Y = y,
-                        AcceptMouseInput = true
-                    };
-                    label.MouseUp += (s, e) =>
-                    {
-                        if (e.Button == MouseButtonType.Left)
-                            SelectScript(sf);
-                    };
-                    _rightScroll.Add(label);
-
-                    var stop = new NiceButton(_rightScroll.Width - 70, y - 2, 60, 22, ButtonAction.Default, "Stop")
-                    {
-                        IsSelectable = false
-                    };
-                    stop.MouseUp += (s, e) =>
-                    {
-                        if (e.Button != MouseButtonType.Left) return;
-                        LegionScripting.StopScript(sf);
-                        RebuildRightPanel();
-                    };
-                    _rightScroll.Add(stop);
-
-                    y += label.Height + 4;
-                }
-                y += 8;
-            }
-
-            var docTitle = new TextBox("Documentation", TrueTypeLoader.EMBEDDED_FONT, 14, _rightScroll.Width - 24, 0xFFFF, strokeEffect: false)
-            {
-                X = 4,
-                Y = y,
-                AcceptMouseInput = false
-            };
-            _rightScroll.Add(docTitle);
-            y += docTitle.Height + 4;
-
-            if (_docLabel != null)
-            {
-                _docLabel.X = 4;
-                _docLabel.Y = y;
-                _rightScroll.Add(_docLabel);
-            }
         }
 
         private static string GetLanguageBadge(ScriptType type) => type switch
@@ -461,7 +417,6 @@ namespace ClassicUO.LegionScripting
             _currentScript = sf;
             _editorPanel.SetText(string.Join("\n", sf.FileContents));
             _titleLabel.Text = $"Legion Script Studio - {sf.FileName}{GetLanguageBadge(sf.ScriptType)}";
-            _docLabel.Text = LoadDocForType(sf.ScriptType);
             UpdatePlayStopState();
             int h = _editorPanel.Editor.TextBox.TotalHeight > _centerScroll.Height ? _editorPanel.Editor.TextBox.TotalHeight : _centerScroll.Height;
             _editorPanel.UpdateSize(_centerScroll.Width - _centerScroll.ScrollBarWidth() - LineNumberEditor.GutterWidth - 12, h);
@@ -481,7 +436,7 @@ namespace ClassicUO.LegionScripting
                 File.WriteAllText(_currentScript.FullPath, _editorPanel.Text);
                 _currentScript.ReadFromFile();
                 LegionScripting.LoadScriptsFromFile();
-                BuildScriptList();
+                BuildScriptTree();
                 GameActions.Print($"Saved {_currentScript.FileName}.");
             }
             catch (Exception ex)
@@ -530,9 +485,8 @@ namespace ClassicUO.LegionScripting
                     _currentScript = null;
                     _editorPanel.SetText("// Select a script or create new (.lscript .py .uos)");
                     _titleLabel.Text = "Legion Script Studio";
-                    _docLabel.Text = LoadDocForType(null);
                     LegionScripting.LoadScriptsFromFile();
-                    BuildScriptList();
+                    BuildScriptTree();
                     UpdatePlayStopState();
                     GameActions.Print("Script deleted.");
                 }
@@ -577,7 +531,7 @@ namespace ClassicUO.LegionScripting
                     }
                     File.Move(_currentScript.FullPath, newPath);
                     LegionScripting.LoadScriptsFromFile();
-                    BuildScriptList();
+                    BuildScriptTree();
                     var sf = LegionScripting.LoadedScripts.FirstOrDefault(x => string.Equals(x.FullPath, newPath, StringComparison.OrdinalIgnoreCase));
                     if (sf != null)
                         SelectScript(sf);
@@ -596,22 +550,23 @@ namespace ClassicUO.LegionScripting
         private void OnScriptStarted(object sender, ScriptInfoEvent ev)
         {
             UpdatePlayStopState();
-            if (_showRunningPanel)
-                RebuildRightPanel();
         }
 
         private void OnScriptStopped(object sender, ScriptInfoEvent ev)
         {
             UpdatePlayStopState();
-            if (_showRunningPanel)
-                RebuildRightPanel();
         }
 
         private void UpdatePlayStopState()
         {
             bool playing = _currentScript != null && _currentScript.IsPlaying;
-            _playBtn.IsEnabled = _currentScript != null && !playing;
-            _stopBtn.IsEnabled = playing;
+            _playBtn.IsEnabled = _currentScript != null;
+            _stopBtn.IsEnabled = _currentScript != null && playing;
+            _playBtn.Alpha = _playBtn.IsEnabled ? 1f : 0.5f;
+            _stopBtn.Alpha = _stopBtn.IsEnabled ? 1f : 0.5f;
+            var running = LegionScripting.GetRunningScripts();
+            if (_statusLabel != null)
+                _statusLabel.Text = running.Count > 0 ? $"● {running.Count} running" : "Ready";
         }
 
         public override void OnResize()
@@ -621,12 +576,10 @@ namespace ClassicUO.LegionScripting
             int border = BorderControl.BorderSize;
             int headerH = 48;
             int leftW = LEFT_WIDTH;
-            int centerW = Width - leftW - RIGHT_WIDTH - border * 2 - 8;
-            int rightW = RIGHT_WIDTH;
+            int centerW = Width - leftW - border * 2 - 8;
             int contentY = border + headerH;
             int contentH = Height - contentY - border;
             int centerX = border + leftW + 4;
-            int rightX = centerX + centerW + 4;
 
             if (_backgroundBox != null)
             {
@@ -654,15 +607,15 @@ namespace ClassicUO.LegionScripting
 
             int btnY = border + headerH - 35;
             int gap = 6;
-            int runWidth = 75;
+            int docsWidth = 50;
             int moveWidth = 65;
             int delWidth = 55;
             int stdWidth = 60;
             int rightMargin = border + 16;
             int xRight = Width - rightMargin;
 
-            int xRun = xRight - runWidth;
-            int xMove = xRun - gap - moveWidth;
+            int xDocs = xRight - docsWidth;
+            int xMove = xDocs - gap - moveWidth;
             int xDel = xMove - gap - delWidth;
             int xStop = xDel - gap - stdWidth;
             int xPlay = xStop - gap - stdWidth;
@@ -672,6 +625,12 @@ namespace ClassicUO.LegionScripting
             int titleMaxWidth = Math.Max(120, xSave - titleLeft - gap);
             _titleLabel.X = titleLeft;
             _titleLabel.Width = titleMaxWidth;
+            if (_statusLabel != null)
+            {
+                _statusLabel.X = titleLeft;
+                _statusLabel.Y = border + 28;
+                _statusLabel.Width = titleMaxWidth;
+            }
 
             if (_saveBtn != null)
             {
@@ -698,12 +657,11 @@ namespace ClassicUO.LegionScripting
                 _moveBtn.X = xMove;
                 _moveBtn.Y = btnY;
             }
-            if (_runningBtn != null)
+            if (_docsBtn != null)
             {
-                _runningBtn.X = xRun;
-                _runningBtn.Y = btnY;
+                _docsBtn.X = xDocs;
+                _docsBtn.Y = btnY;
             }
-
             _leftBg.X = border;
             _leftBg.Y = contentY;
             _leftBg.Width = leftW;
@@ -730,19 +688,6 @@ namespace ClassicUO.LegionScripting
             int editH = contentH > 50 ? contentH - 20 : 200;
             if (_editorPanel != null && _editorPanel.Editor.TextBox.TotalHeight > editH) editH = _editorPanel.Editor.TextBox.TotalHeight;
             _editorPanel?.UpdateSize(editW, editH);
-
-            _rightBg.X = rightX;
-            _rightBg.Y = contentY;
-            _rightBg.Width = rightW;
-            _rightBg.Height = contentH;
-
-            _rightScroll.X = rightX;
-            _rightScroll.Y = contentY;
-            _rightScroll.Width = rightW;
-            _rightScroll.Height = contentH;
-            _rightScroll.UpdateScrollbarPosition();
-
-            _docLabel.Width = rightW - 24;
         }
 
         protected override void OnMove(int x, int y)
@@ -783,6 +728,251 @@ namespace ClassicUO.LegionScripting
                 catch { }
             }
             base.Dispose();
+        }
+
+        private sealed class ScriptExplorerGroupControl : Control
+        {
+            public event EventHandler GroupExpandedShrunk;
+            private readonly NiceButton _expand;
+            private readonly UOLabel _label;
+            private readonly DataBox _dataBox;
+            private readonly string _group;
+            private readonly string _parentGroup;
+            private readonly Action<ScriptFile> _onSelect;
+            private readonly Action _onFolderChanged;
+            private const int HEIGHT = 22;
+
+            public ScriptExplorerGroupControl(string group, int width, string parentGroup, Action<ScriptFile> onSelect, Action onFolderChanged = null)
+            {
+                Width = width;
+                Height = HEIGHT;
+                _group = group;
+                _parentGroup = parentGroup;
+                _onSelect = onSelect;
+                _onFolderChanged = onFolderChanged;
+                CanMove = false;
+                AcceptMouseInput = true;
+                _dataBox = new DataBox(0, HEIGHT, width, 0);
+                _dataBox.IsVisible = parentGroup == ""
+                    ? !LegionScripting.IsGroupCollapsed(group == "Scripts" ? "" : group)
+                    : !LegionScripting.IsGroupCollapsed(parentGroup, group);
+
+                _expand = new NiceButton(0, 0, 22, HEIGHT, ButtonAction.Default, _dataBox.IsVisible ? "−" : "+") { IsSelectable = false };
+                _expand.MouseDown += (s, e) =>
+                {
+                    if (e.Button != MouseButtonType.Left) return;
+                    _dataBox.IsVisible = !_dataBox.IsVisible;
+                    string gKey = group == "Scripts" ? "" : group;
+                    if (parentGroup == "")
+                        LegionScripting.SetGroupCollapsed(gKey, expanded: _dataBox.IsVisible);
+                    else
+                        LegionScripting.SetGroupCollapsed(parentGroup, group, _dataBox.IsVisible);
+                    _expand.TextLabel.Text = _dataBox.IsVisible ? "−" : "+";
+                    ForceSizeUpdate(false);
+                    GroupExpandedShrunk?.Invoke(this, EventArgs.Empty);
+                };
+
+                _label = new UOLabel(group + "  ", 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_LEFT, width - 30) { AcceptMouseInput = false };
+                _label.X = _expand.Width;
+                _label.Y = (HEIGHT - _label.Height) / 2;
+
+                Add(new AlphaBlendControl(0.35f) { Height = HEIGHT, Width = width });
+                Add(_expand);
+                Add(_label);
+                Add(_dataBox);
+
+                bool isRoot = group == "Scripts" || (parentGroup == "" && (group == "" || group == ScriptManagerGump.NOGROUPTEXT));
+                if (!isRoot && onFolderChanged != null)
+                {
+                    ContextMenu = new ContextMenuControl();
+                    ContextMenu.Add(new ContextMenuItemEntry("Rename folder", () =>
+                    {
+                        string fullPath = GetFolderFullPath();
+                        string currentName = Path.GetFileName(fullPath);
+                        UIManager.Add(new RenameFolderModalGump(currentName, (input) =>
+                        {
+                            if (string.IsNullOrWhiteSpace(input)) return;
+                            input = input.Trim().Replace("/", "").Replace("\\", "");
+                            if (string.IsNullOrEmpty(input)) return;
+                            string parentDir = Path.GetDirectoryName(fullPath);
+                            string newPath = Path.Combine(parentDir ?? "", input);
+                            if (Directory.Exists(newPath))
+                            {
+                                GameActions.Print("A folder with this name already exists.");
+                                return;
+                            }
+                            try
+                            {
+                                Directory.Move(fullPath, newPath);
+                                LegionScripting.LoadScriptsFromFile();
+                                _onFolderChanged?.Invoke();
+                                GameActions.Print($"Folder renamed to {input}");
+                            }
+                            catch (Exception ex)
+                            {
+                                GameActions.Print(ex.Message);
+                            }
+                        }));
+                    }));
+                    ContextMenu.Add(new ContextMenuItemEntry("Delete folder", () =>
+                    {
+                        var q = new QuestionGump("Delete this folder and all scripts inside?", (r) =>
+                        {
+                            if (!r) return;
+                            try
+                            {
+                                string fullPath = GetFolderFullPath();
+                                foreach (var sf in LegionScripting.LoadedScripts.ToList())
+                                    if (sf.FullPath.StartsWith(fullPath, StringComparison.OrdinalIgnoreCase))
+                                        LegionScripting.StopScript(sf);
+                                Directory.Delete(fullPath, true);
+                                LegionScripting.LoadScriptsFromFile();
+                                _onFolderChanged?.Invoke();
+                                GameActions.Print("Folder deleted.");
+                            }
+                            catch (Exception ex)
+                            {
+                                GameActions.Print(ex.Message);
+                            }
+                        });
+                        UIManager.Add(q);
+                    }));
+                    MouseDown += (s, e) =>
+                    {
+                        if (e.Button == MouseButtonType.Right)
+                            ContextMenu.Show();
+                    };
+                }
+
+                ForceSizeUpdate();
+            }
+
+            private string GetFolderFullPath()
+            {
+                string g = _group == "Scripts" ? "" : _group;
+                string rel = string.IsNullOrEmpty(_parentGroup) ? g : Path.Combine(_parentGroup, g);
+                return string.IsNullOrEmpty(rel) ? LegionScripting.ScriptPath : Path.Combine(LegionScripting.ScriptPath, rel);
+            }
+
+            public void UpdateSize(int width)
+            {
+                Width = width;
+                foreach (Control c in _dataBox.Children)
+                {
+                    if (c is ScriptExplorerGroupControl gc)
+                        gc.UpdateSize(width - EXPLORER_GROUP_INDENT);
+                    else if (c is ScriptExplorerItemControl ic)
+                        ic.UpdateSize(width);
+                }
+                _dataBox.ForceSizeUpdate(false);
+                ForceSizeUpdate(false);
+            }
+
+            public void AddGroups(Dictionary<string, List<ScriptFile>> groups)
+            {
+                string gKey = _group == "Scripts" ? "" : _group;
+                foreach (var obj in groups)
+                {
+                    if (!string.IsNullOrEmpty(obj.Key))
+                    {
+                        var subG = new ScriptExplorerGroupControl(obj.Key, Width - EXPLORER_GROUP_INDENT, gKey, _onSelect, _onFolderChanged)
+                        { X = EXPLORER_GROUP_INDENT };
+                        subG.AddItems(obj.Value);
+                        subG.GroupExpandedShrunk += (s, e) =>
+                        {
+                            _dataBox.ReArrangeChildren(EXPLORER_V_SPACING);
+                            _dataBox.ForceSizeUpdate(false);
+                            ForceSizeUpdate(false);
+                            GroupExpandedShrunk?.Invoke(this, EventArgs.Empty);
+                        };
+                        _dataBox.Add(subG);
+                    }
+                    else
+                    {
+                        AddItems(obj.Value);
+                    }
+                }
+                _dataBox.ReArrangeChildren(EXPLORER_V_SPACING);
+                _dataBox.ForceSizeUpdate();
+                ForceSizeUpdate();
+            }
+
+            public void AddItems(List<ScriptFile> files)
+            {
+                foreach (ScriptFile file in files)
+                    _dataBox.Add(new ScriptExplorerItemControl(Width, file, _onSelect));
+                _dataBox.ReArrangeChildren(EXPLORER_V_SPACING);
+                _dataBox.ForceSizeUpdate();
+                ForceSizeUpdate();
+            }
+        }
+
+        private sealed class ScriptExplorerItemControl : Control
+        {
+            private readonly AlphaBlendControl _bg;
+            private readonly UOLabel _label;
+            private readonly ScriptFile _script;
+            private readonly Action<ScriptFile> _onSelect;
+            private const int HEIGHT = 20;
+
+            public ScriptExplorerItemControl(int w, ScriptFile script, Action<ScriptFile> onSelect)
+            {
+                Width = w;
+                Height = HEIGHT;
+                _script = script;
+                _onSelect = onSelect;
+                CanMove = false;
+                AcceptMouseInput = true;
+                _bg = new AlphaBlendControl(0.3f) { Height = HEIGHT, Width = w };
+                Add(_bg);
+                _label = new UOLabel(Path.GetFileNameWithoutExtension(script.FileName), 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_LEFT, w - 24) { AcceptMouseInput = false };
+                _label.X = 20;
+                _label.Y = (HEIGHT - _label.Height) / 2;
+                Add(_label);
+                MouseUp += (s, e) =>
+                {
+                    if (e.Button == MouseButtonType.Left)
+                        _onSelect?.Invoke(_script);
+                };
+                ContextMenu = new ContextMenuControl();
+                ContextMenu.Add(new ContextMenuItemEntry("Edit", () => _onSelect?.Invoke(_script)));
+                ContextMenu.Add(new ContextMenuItemEntry("Run", () => { if (_script.GetScript != null && !LegionScripting.IsScriptRunning(_script)) LegionScripting.PlayScript(_script); }));
+                ContextMenu.Add(new ContextMenuItemEntry("Stop", () => { if (LegionScripting.IsScriptRunning(_script)) LegionScripting.StopScript(_script); }));
+                MouseDown += (s, e) =>
+                {
+                    if (e.Button == MouseButtonType.Right)
+                        ContextMenu?.Show();
+                };
+                LegionScripting.ScriptStartedEvent += OnScriptStateChanged;
+                LegionScripting.ScriptStoppedEvent += OnScriptStateChanged;
+                UpdateRunningState();
+            }
+
+            private void OnScriptStateChanged(object sender, ScriptInfoEvent e)
+            {
+                UpdateRunningState();
+            }
+
+            private void UpdateRunningState()
+            {
+                bool running = LegionScripting.IsScriptRunning(_script);
+                _bg.BaseColor = running ? Color.FromNonPremultiplied(30, 80, 30, 255) : Color.FromNonPremultiplied(25, 25, 30, 255);
+            }
+
+            public void UpdateSize(int w)
+            {
+                Width = w;
+                _bg.Width = w;
+                _label.Width = w - 24;
+                UpdateRunningState();
+            }
+
+            public override void Dispose()
+            {
+                LegionScripting.ScriptStartedEvent -= OnScriptStateChanged;
+                LegionScripting.ScriptStoppedEvent -= OnScriptStateChanged;
+                base.Dispose();
+            }
         }
     }
 }

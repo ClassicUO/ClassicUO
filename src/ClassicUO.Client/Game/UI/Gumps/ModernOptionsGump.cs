@@ -1,5 +1,6 @@
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.Configuration.Json;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 // ## BEGIN - END ## // UI/GUMPS
@@ -78,10 +79,10 @@ namespace ClassicUO.Game.UI.Gumps
             Add(new RoundedColorBox(Width, 48, Theme.HEADER_BG, 0) { X = 0, Y = 0, AcceptMouseInput = true, CanMove = true, Alpha = 1f });
             Add(new RoundedColorBox(Width, 1, Theme.ACCENT_COLOR, 0) { X = 0, Y = 47, AcceptMouseInput = false, Alpha = 0.6f });
 
-            Add(new TextBox(lang.OptionsTitle, Theme.FONT, Theme.STANDARD_TEXT_SIZE + 10, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { X = 16, Y = 12, AcceptMouseInput = false });
+            Add(new UOLabel(lang.OptionsTitle, 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_LEFT) { X = 16, Y = 12 });
 
             Control c;
-            Add(c = new TextBox(lang.Search, Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 12, AcceptMouseInput = false });
+            Add(c = new UOLabel(lang.Search, 1, UOLabelHue.Text) { Y = 12 });
 
             InputField search;
             Add(search = new InputField(380, 32) { X = Width - 396, Y = 8 });
@@ -520,6 +521,9 @@ namespace ClassicUO.Game.UI.Gumps
             content.AddToRight(new SliderWithLabel(lang.GetVideo.FPSCap, 0, Theme.SLIDER_WIDTH, Constants.MIN_FPS, Constants.MAX_FPS, Settings.GlobalSettings.FPS, (r) => { Settings.GlobalSettings.FPS = r; Client.Game.SetRefreshRate(r); }), true, page);
             content.AddToRight(new CheckboxWithLabel(lang.GetVideo.EnableVSync, isChecked: profile.EnableVSync, valueChanged: (b) => { profile.EnableVSync = b; Client.Game.SetVSync(b); }), true, page);
             content.AddToRight(new CheckboxWithLabel(lang.GetVideo.DisableFrameLimiting, isChecked: profile.DisableFrameLimiting, valueChanged: (b) => { profile.DisableFrameLimiting = b; Client.Game.SetRefreshRate(Settings.GlobalSettings.FPS); }), true, page);
+            content.AddToRight(new CheckboxWithLabel("Disable combat lines overlay (performance)", isChecked: profile.PerformanceDisableCombatLinesOverlay, valueChanged: (b) => { profile.PerformanceDisableCombatLinesOverlay = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel("Disable health lines overlay (performance)", isChecked: profile.PerformanceDisableHealthLinesOverlay, valueChanged: (b) => { profile.PerformanceDisableHealthLinesOverlay = b; }), true, page);
+            content.AddToRight(new CheckboxWithLabel("Disable lights render target (performance)", isChecked: profile.PerformanceDisableLightsRenderTarget, valueChanged: (b) => { profile.PerformanceDisableLightsRenderTarget = b; }), true, page);
             content.Indent();
             content.AddToRight(new CheckboxWithLabel(lang.GetVideo.BackgroundFPS, isChecked: profile.ReduceFPSWhenInactive, valueChanged: (b) => { profile.ReduceFPSWhenInactive = b; }), true, page);
             content.RemoveIndent();
@@ -931,9 +935,9 @@ namespace ClassicUO.Game.UI.Gumps
                 content.ForceSizeUpdate();
             };
             content.BlankLine();
-            content.AddToLeftText(new TextBox(lang.GetInfoBars.Label, Theme.FONT, Theme.STANDARD_TEXT_SIZE, 100, Theme.TEXT_FONT_COLOR, FontStashSharp.RichText.TextHorizontalAlignment.Center, false), 0, 135);
-            content.AddToLeftText(new TextBox(lang.GetInfoBars.Color, Theme.FONT, Theme.STANDARD_TEXT_SIZE, 100, Theme.TEXT_FONT_COLOR, FontStashSharp.RichText.TextHorizontalAlignment.Center, false), 120, 135);
-            content.AddToLeftText(new TextBox(lang.GetInfoBars.Data, Theme.FONT, Theme.STANDARD_TEXT_SIZE, 100, Theme.TEXT_FONT_COLOR, FontStashSharp.RichText.TextHorizontalAlignment.Center, false), 180, 135);
+            content.AddToLeftText(new UOLabel(lang.GetInfoBars.Label, 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_CENTER, 100), 0, 135);
+            content.AddToLeftText(new UOLabel(lang.GetInfoBars.Color, 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_CENTER, 100), 120, 135);
+            content.AddToLeftText(new UOLabel(lang.GetInfoBars.Data, 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_CENTER, 100), 180, 135);
             content.AddToLine(new Line(0, 10, content.LeftWidth, 1, Color.Gray.PackedValue), 0, 160);
             content.BlankLine();
             InfoBarManager ibmanager = Client.Game.GetScene<GameScene>().InfoBars;
@@ -1025,10 +1029,10 @@ namespace ClassicUO.Game.UI.Gumps
             PositionHelper.BlankLine();
 
             var headerRow = new DataBox(0, 0, content.LeftWidth, 28);
-            headerRow.Add(new TextBox(lang.GetActionBar.Slot.Replace("{0}", "#"), Theme.FONT, Theme.STANDARD_TEXT_SIZE, 40, Theme.TEXT_FONT_COLOR, FontStashSharp.RichText.TextHorizontalAlignment.Center, false) { X = 0, Y = 4 });
-            headerRow.Add(new TextBox(lang.GetActionBar.DragSpellHere, Theme.FONT, Theme.STANDARD_TEXT_SIZE, 100, Theme.TEXT_FONT_COLOR, FontStashSharp.RichText.TextHorizontalAlignment.Center, false) { X = 50, Y = 4 });
-            headerRow.Add(new TextBox(lang.GetActionBar.Hotkey, Theme.FONT, Theme.STANDARD_TEXT_SIZE, 80, Theme.TEXT_FONT_COLOR, FontStashSharp.RichText.TextHorizontalAlignment.Center, false) { X = 160, Y = 4 });
-            headerRow.Add(new TextBox(lang.GetActionBar.TargetSelf + "/" + lang.GetActionBar.TargetLast, Theme.FONT, Theme.STANDARD_TEXT_SIZE, 80, Theme.TEXT_FONT_COLOR, FontStashSharp.RichText.TextHorizontalAlignment.Center, false) { X = 250, Y = 4 });
+            headerRow.Add(new UOLabel(lang.GetActionBar.Slot.Replace("{0}", "#"), 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_CENTER, 40) { X = 0, Y = 4 });
+            headerRow.Add(new UOLabel(lang.GetActionBar.DragSpellHere, 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_CENTER, 100) { X = 50, Y = 4 });
+            headerRow.Add(new UOLabel(lang.GetActionBar.Hotkey, 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_CENTER, 80) { X = 160, Y = 4 });
+            headerRow.Add(new UOLabel(lang.GetActionBar.TargetSelf + "/" + lang.GetActionBar.TargetLast, 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_CENTER, 80) { X = 250, Y = 4 });
             content.AddToLeft(headerRow);
             PositionHelper.BlankLine();
             content.AddToLeft(new Line(0, 0, content.LeftWidth, 1, Color.Gray.PackedValue));
@@ -1544,7 +1548,7 @@ namespace ClassicUO.Game.UI.Gumps
                     lang.GetCounters.AbbreviateIfAmountExceeds,
                     new InputField(100, 40, text: profile.CounterBarAbbreviatedAmount.ToString(), numbersOnly: true, onTextChanges: (s, e) =>
                     {
-                        if (int.TryParse(((InputField.StbTextBox)s).Text, out int v))
+                        if (int.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out int v))
                         {
                             profile.CounterBarAbbreviatedAmount = v;
                         }
@@ -1568,7 +1572,7 @@ namespace ClassicUO.Game.UI.Gumps
                 lang.GetCounters.HighlightRedIfAmountIsBelow,
                 new InputField(100, 40, text: profile.CounterBarHighlightAmount.ToString(), numbersOnly: true, onTextChanges: (s, e) =>
                 {
-                    if (int.TryParse(((InputField.StbTextBox)s).Text, out int v))
+                    if (int.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out int v))
                     {
                         profile.CounterBarHighlightAmount = v;
                     }
@@ -1609,7 +1613,7 @@ namespace ClassicUO.Game.UI.Gumps
                 lang.GetCounters.Rows,
                 new InputField(100, 40, text: profile.CounterBarRows.ToString(), numbersOnly: true, onTextChanges: (s, e) =>
                 {
-                    if (int.TryParse(((InputField.StbTextBox)s).Text, out int v))
+                    if (int.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out int v))
                     {
                         profile.CounterBarRows = v;
                         UIManager.GetGump<CounterBarGump>()?.SetLayout(profile.CounterBarCellSize, profile.CounterBarRows, profile.CounterBarColumns);
@@ -1625,7 +1629,7 @@ namespace ClassicUO.Game.UI.Gumps
                 lang.GetCounters.Columns,
                 new InputField(100, 40, text: profile.CounterBarColumns.ToString(), numbersOnly: true, onTextChanges: (s, e) =>
                 {
-                    if (int.TryParse(((InputField.StbTextBox)s).Text, out int v))
+                    if (int.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out int v))
                     {
                         profile.CounterBarColumns = v;
                         UIManager.GetGump<CounterBarGump>()?.SetLayout(profile.CounterBarCellSize, profile.CounterBarRows, profile.CounterBarColumns);
@@ -1985,7 +1989,7 @@ namespace ClassicUO.Game.UI.Gumps
                 lang.GetCooldowns.PositionX,
                 new InputField(100, 40, text: profile.CoolDownX.ToString(), numbersOnly: true, onTextChanges: (s, e) =>
                 {
-                    if (int.TryParse(((InputField.StbTextBox)s).Text, out int v))
+                    if (int.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out int v))
                     {
                         profile.CoolDownX = v;
                     }
@@ -1999,7 +2003,7 @@ namespace ClassicUO.Game.UI.Gumps
                 lang.GetCooldowns.PositionY,
                 new InputField(100, 40, text: profile.CoolDownY.ToString(), numbersOnly: true, onTextChanges: (s, e) =>
                 {
-                    if (int.TryParse(((InputField.StbTextBox)s).Text, out int v))
+                    if (int.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out int v))
                     {
                         profile.CoolDownY = v;
                     }
@@ -2307,10 +2311,10 @@ namespace ClassicUO.Game.UI.Gumps
             }), true, page);
             content.RemoveIndent();
             content.BlankLine();
-            content.AddToRight(new TextBox("----- FEATURES ----- ", Theme.FONT, Theme.STANDARD_TEXT_SIZE + 2, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new UOLabel("----- FEATURES ----- ", 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_LEFT) { Y = 7 }, true, page);
             content.Indent();
 
-            content.AddToRight(new TextBox("HighlightTileAtRange (toggle HighlightTileAtRange on / off)", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new UOLabel("HighlightTileAtRange (toggle HighlightTileAtRange on / off)", 1, UOLabelHue.Text) { Y = 7 }, true, page);
 
             content.RemoveIndent();
             content.BlankLine();
@@ -2379,11 +2383,11 @@ namespace ClassicUO.Game.UI.Gumps
                 profile.SpellOnCursor = b;
             }), true, page);
 
-            content.AddToRight(new TextBox("Spellicon offset:", Theme.FONT, Theme.STANDARD_TEXT_SIZE + 2, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new UOLabel("Spellicon offset:", 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_LEFT) { Y = 7 }, true, page);
             content.Indent();
             content.AddToRight(new InputFieldWithLabel("X", Theme.INPUT_WIDTH, profile.SpellOnCursorOffset.X.ToString(), false, (s, e) =>
             {
-                if (int.TryParse(((InputField.StbTextBox)s).Text, out int xValue))
+                if (int.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out int xValue))
                 {
                     profile.SpellOnCursorOffset = new Point(xValue, profile.SpellOnCursorOffset.Y);
                 }
@@ -2391,7 +2395,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.AddToRight(new InputFieldWithLabel("Y", Theme.INPUT_WIDTH, profile.SpellOnCursorOffset.Y.ToString(), false, (s, e) =>
             {
-                if (int.TryParse(((InputField.StbTextBox)s).Text, out int yValue))
+                if (int.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out int yValue))
                 {
                     profile.SpellOnCursorOffset = new Point(profile.SpellOnCursorOffset.X, yValue);
                 }
@@ -2494,7 +2498,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.AddToRight(new InputFieldWithLabel(lang.GetDust765.TextForTargetMsgHead, Theme.INPUT_WIDTH, profile.SpecialSetLastTargetClilocText, false, (s, e) =>
             {
-                profile.SpecialSetLastTargetClilocText = ((InputField.StbTextBox)s).Text;
+                profile.SpecialSetLastTargetClilocText = ((ClassicUO.Game.UI.Controls.StbTextBox)s).Text;
             }), true, page);
             content.BlankLine();
             content.AddToRight(new CheckboxWithLabel(lang.GetDust765.OutlineStaticsBlack, 0, profile.BlackOutlineStatics, (b) =>
@@ -2544,7 +2548,7 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("Wall of Stone Art (-info -> DisplayedGraphic): ", Theme.INPUT_WIDTH, profile.BlockWoSArt.ToString(), false, (s, e) =>
             {
-                if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint result))
+                if (uint.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out uint result))
                 {
     
                     profile.BlockWoSArt = result;
@@ -2608,7 +2612,7 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("Energy Field Art (-info -> DisplayedGraphic): ", Theme.INPUT_WIDTH, profile.BlockEnergyFArt.ToString(), false, (s, e) =>
             {
-                if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint result))
+                if (uint.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out uint result))
                 {
 
                     profile.BlockEnergyFArt = result;
@@ -2676,7 +2680,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 profile.InvisibleHousesZ = (byte)i;
             }), true, page);
-            content.AddToRight(new TextBox("Dont make Invisible or Transparent below (Z level):", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new UOLabel("Dont make Invisible or Transparent below (Z level):", 1, UOLabelHue.Text) { Y = 7 }, true, page);
             content.BlankLine();
             content.AddToRight(new SliderWithLabel("Z level ", 0, Theme.SLIDER_WIDTH, 0, 100, profile.DontRemoveHouseBelowZ, (i) =>
             {
@@ -2700,11 +2704,11 @@ namespace ClassicUO.Game.UI.Gumps
                 profile.ShowDeathOnWorldmap = b;
             }), true, page);
             content.BlankLine();
-            content.AddToRight(new TextBox("----- FEATURES ----- ", Theme.FONT, Theme.STANDARD_TEXT_SIZE + 2, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new UOLabel("----- FEATURES ----- ", 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_LEFT) { Y = 7 }, true, page);
             content.Indent();
 
-            content.AddToRight(new TextBox("ToggleTransparentHouses (toggle ToggleTransparentHouses on / off)", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
-            content.AddToRight(new TextBox("ToggleInvisibleHouses (toggle ToggleInvisibleHouses on / off)", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new UOLabel("ToggleTransparentHouses (toggle ToggleTransparentHouses on / off)", 1, UOLabelHue.Text) { Y = 7 }, true, page);
+            content.AddToRight(new UOLabel("ToggleInvisibleHouses (toggle ToggleInvisibleHouses on / off)", 1, UOLabelHue.Text) { Y = 7 }, true, page);
 
 
             content.BlankLine();
@@ -2782,14 +2786,14 @@ namespace ClassicUO.Game.UI.Gumps
             }), true, page);
 
             content.BlankLine();
-            content.AddToRight(new TextBox("----- SETTINGS (AL) ----- ", Theme.FONT, Theme.STANDARD_TEXT_SIZE + 2, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new UOLabel("----- SETTINGS (AL) ----- ", 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_LEFT) { Y = 7 }, true, page);
             content.BlankLine();
-            content.AddToRight(new TextBox("----- DISABLE / ENABLE AL ON CHANGES BELOW ----- ", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new UOLabel("----- DISABLE / ENABLE AL ON CHANGES BELOW ----- ", 1, UOLabelHue.Text) { Y = 7 }, true, page);
             content.BlankLine();
 
             content.AddToRight(new InputFieldWithLabel("Time between looting two items(ms) ", Theme.INPUT_WIDTH, profile.UOClassicCombatAL_LootDelay.ToString(), false, (s, e) =>
             {
-                if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint xValue))
+                if (uint.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out uint xValue))
                 {
                     profile.UOClassicCombatAL_LootDelay = xValue;
                 }
@@ -2797,7 +2801,7 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("Time to purge the queue of old items (ms) ", Theme.INPUT_WIDTH, profile.UOClassicCombatAL_PurgeDelay.ToString(), false, (s, e) =>
             {
-                if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint xValue))
+                if (uint.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out uint xValue))
                 {
                     profile.UOClassicCombatAL_PurgeDelay = xValue;
                 }
@@ -2805,7 +2809,7 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("Time between processing the queue (ms)", Theme.INPUT_WIDTH, profile.UOClassicCombatAL_QueueSpeed.ToString(), false, (s, e) =>
             {
-                if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint xValue))
+                if (uint.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out uint xValue))
                 {
                     profile.UOClassicCombatAL_QueueSpeed = xValue;
                 }
@@ -2813,7 +2817,7 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("Loot above ID", Theme.INPUT_WIDTH, profile.UOClassicCombatAL_LootAboveID.ToString(), false, (s, e) =>
             {
-                if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint xValue))
+                if (uint.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out uint xValue))
                 {
                     profile.UOClassicCombatAL_LootAboveID = xValue;
                 }
@@ -2821,7 +2825,7 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("Gray corpse color", Theme.INPUT_WIDTH, profile.UOClassicCombatAL_SL_Gray.ToString(), false, (s, e) =>
             {
-                if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint xValue))
+                if (uint.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out uint xValue))
                 {
                     profile.UOClassicCombatAL_SL_Gray = xValue;
                 }
@@ -2829,7 +2833,7 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("Blue corpse color", Theme.INPUT_WIDTH, profile.UOClassicCombatAL_SL_Blue.ToString(), false, (s, e) =>
             {
-                if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint xValue))
+                if (uint.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out uint xValue))
                 {
                     profile.UOClassicCombatAL_SL_Blue = xValue;
                 }
@@ -2838,7 +2842,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.AddToRight(new InputFieldWithLabel("Green corpse color", Theme.INPUT_WIDTH, profile.UOClassicCombatAL_SL_Green.ToString(), false, (s, e) =>
             {
-                if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint xValue))
+                if (uint.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out uint xValue))
                 {
                     profile.UOClassicCombatAL_SL_Green = xValue;
                 }
@@ -2847,7 +2851,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.AddToRight(new InputFieldWithLabel("Red corpse color", Theme.INPUT_WIDTH, profile.UOClassicCombatAL_SL_Red.ToString(), false, (s, e) =>
             {
-                if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint xValue))
+                if (uint.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out uint xValue))
                 {
                     profile.UOClassicCombatAL_SL_Red = xValue;
                 }
@@ -2891,7 +2895,7 @@ namespace ClassicUO.Game.UI.Gumps
             }), true, page);
 
             content.BlankLine();
-            content.AddToRight(new TextBox("----- DISABLE / ENABLE BUFFBAR ON CHANGES BELOW ----- ", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new UOLabel("----- DISABLE / ENABLE BUFFBAR ON CHANGES BELOW ----- ", 1, UOLabelHue.Text) { Y = 7 }, true, page);
             content.BlankLine();
             content.AddToRight(new CheckboxWithLabel("Show Swing Line", 0, profile.UOClassicCombatBuffbar_SwingEnabled, (b) =>
             {
@@ -2963,11 +2967,11 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }), true, page);
             content.BlankLine();
-            content.AddToRight(new TextBox("-----SETTINGS (BUFFBAR AND SELF)-----", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new UOLabel("-----SETTINGS (BUFFBAR AND SELF)-----", 1, UOLabelHue.Text) { Y = 7 }, true, page);
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("General cooldown when you get disarmed (ms)", Theme.INPUT_WIDTH, profile.UOClassicCombatSelf_DisarmedCooldown.ToString(), false, (s, e) =>
             {
-                if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint xValue))
+                if (uint.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out uint xValue))
                 {
                     profile.UOClassicCombatSelf_DisarmedCooldown = xValue;
                 }
@@ -2975,7 +2979,7 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("Cooldown after successfull disarm (ms)", Theme.INPUT_WIDTH, profile.UOClassicCombatSelf_DisarmStrikeCooldown.ToString(), false, (s, e) =>
             {
-                if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint xValue))
+                if (uint.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out uint xValue))
                 {
                     profile.UOClassicCombatSelf_DisarmStrikeCooldown = xValue;
                 }
@@ -2983,7 +2987,7 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("Cooldown after failed disarm (ms)", Theme.INPUT_WIDTH, profile.UOClassicCombatSelf_DisarmAttemptCooldown.ToString(), false, (s, e) =>
             {
-                if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint xValue))
+                if (uint.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out uint xValue))
                 {
                     profile.UOClassicCombatSelf_DisarmAttemptCooldown = xValue;
                 }
@@ -3025,7 +3029,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             }), true, page);
             content.BlankLine();
-            content.AddToRight(new TextBox("-----SETTINGS (SELF)-----", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new UOLabel("-----SETTINGS (SELF)-----", 1, UOLabelHue.Text) { Y = 7 }, true, page);
             content.BlankLine();
             content.AddToRight(new CheckboxWithLabel("Are trapped pouches colored from server?", 0, profile.UOClassicCombatSelf_ColoredPouches, (b) =>
             {
@@ -3035,17 +3039,17 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("Color (decimal not hex): ", Theme.INPUT_WIDTH, profile.UOClassicCombatSelf_ColoredPouchesColor.ToString(), false, (s, e) =>
             {
-                if (ushort.TryParse(((InputField.StbTextBox)s).Text, out ushort xValue))
+                if (ushort.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out ushort xValue))
                 {
                     profile.UOClassicCombatSelf_ColoredPouchesColor = xValue;
                 }
             }), true, page);
             content.BlankLine();
-            content.AddToRight(new TextBox("-----SETTINGS (COOLDOWNS)-----", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new UOLabel("-----SETTINGS (COOLDOWNS)-----", 1, UOLabelHue.Text) { Y = 7 }, true, page);
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("ActionCooldown (ms): ", Theme.INPUT_WIDTH, profile.UOClassicCombatSelf_ActionCooldown.ToString(), false, (s, e) =>
             {
-                if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint xValue))
+                if (uint.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out uint xValue))
                 {
                     profile.UOClassicCombatSelf_ActionCooldown = xValue;
                 }
@@ -3053,7 +3057,7 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("Repeated Pouche Cooldown (ms): ", Theme.INPUT_WIDTH, profile.UOClassicCombatSelf_PoucheCooldown.ToString(), false, (s, e) =>
             {
-                if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint xValue))
+                if (uint.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out uint xValue))
                 {
                     profile.UOClassicCombatSelf_PoucheCooldown = xValue;
                 }
@@ -3061,7 +3065,7 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("Repeated Curepot Cooldown (ms): ", Theme.INPUT_WIDTH, profile.UOClassicCombatSelf_CurepotCooldown.ToString(), false, (s, e) =>
             {
-                if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint xValue))
+                if (uint.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out uint xValue))
                 {
                     profile.UOClassicCombatSelf_CurepotCooldown = xValue;
                 }
@@ -3069,7 +3073,7 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("Repeated Healpot Cooldown (ms): ", Theme.INPUT_WIDTH, profile.UOClassicCombatSelf_HealpotCooldown.ToString(), false, (s, e) =>
             {
-                if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint xValue))
+                if (uint.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out uint xValue))
                 {
                     profile.UOClassicCombatSelf_HealpotCooldown = xValue;
                 }
@@ -3077,7 +3081,7 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("Repeated Refreshpot Cooldown (ms): ", Theme.INPUT_WIDTH, profile.UOClassicCombatSelf_RefreshpotCooldown.ToString(), false, (s, e) =>
             {
-                if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint xValue))
+                if (uint.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out uint xValue))
                 {
                     profile.UOClassicCombatSelf_RefreshpotCooldown = xValue;
                 }
@@ -3085,7 +3089,7 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("WaitForTarget (oldBandies) (ms): ", Theme.INPUT_WIDTH, profile.UOClassicCombatSelf_WaitForTarget.ToString(), false, (s, e) =>
             {
-                if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint xValue))
+                if (uint.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out uint xValue))
                 {
                     profile.UOClassicCombatSelf_WaitForTarget = xValue;
                 }
@@ -3093,18 +3097,18 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("Enhanced Apple Cooldown (ms): ", Theme.INPUT_WIDTH, profile.UOClassicCombatSelf_EAppleCooldown.ToString(), false, (s, e) =>
             {
-                if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint xValue))
+                if (uint.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out uint xValue))
                 {
                     profile.UOClassicCombatSelf_EAppleCooldown = xValue;
                 }
             }), true, page);
             content.BlankLine();
 
-            content.AddToRight(new TextBox("-----SETTINGS (TRESHOLDS)-----", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new UOLabel("-----SETTINGS (TRESHOLDS)-----", 1, UOLabelHue.Text) { Y = 7 }, true, page);
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("Bandies treshold (diffhits >= ):", Theme.INPUT_WIDTH, profile.UOClassicCombatSelf_BandiesHPTreshold.ToString(), false, (s, e) =>
             {
-                if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint xValue))
+                if (uint.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out uint xValue))
                 {
                     profile.UOClassicCombatSelf_BandiesHPTreshold = xValue;
                 }
@@ -3112,7 +3116,7 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("Curepot HP treshold (diffhits >= ):", Theme.INPUT_WIDTH, profile.UOClassicCombatSelf_CurepotHPTreshold.ToString(), false, (s, e) =>
             {
-                if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint xValue))
+                if (uint.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out uint xValue))
                 {
                     profile.UOClassicCombatSelf_CurepotHPTreshold = xValue;
                 }
@@ -3120,7 +3124,7 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("HP treshold (diffhits >= ):", Theme.INPUT_WIDTH, profile.UOClassicCombatSelf_HealpotHPTreshold.ToString(), false, (s, e) =>
             {
-                if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint xValue))
+                if (uint.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out uint xValue))
                 {
                     profile.UOClassicCombatSelf_HealpotHPTreshold = xValue;
                 }
@@ -3128,17 +3132,17 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("Refreshpot Stam treshold (diffstam >= ): ", Theme.INPUT_WIDTH, profile.UOClassicCombatSelf_RefreshpotStamTreshold.ToString(), false, (s, e) =>
             {
-                if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint xValue))
+                if (uint.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out uint xValue))
                 {
                     profile.UOClassicCombatSelf_RefreshpotStamTreshold = xValue;
                 }
             }), true, page);
             content.BlankLine();
-            content.AddToRight(new TextBox("-----SETTINGS (MISC)-----", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new UOLabel("-----SETTINGS (MISC)-----", 1, UOLabelHue.Text) { Y = 7 }, true, page);
 
             content.AddToRight(new InputFieldWithLabel("Auto rearm weps held before got disarmeded (ms)", Theme.INPUT_WIDTH, profile.UOClassicCombatSelf_RefreshpotStamTreshold.ToString(), false, (s, e) =>
             {
-                if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint xValue))
+                if (uint.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out uint xValue))
                 {
                     profile.UOClassicCombatSelf_RefreshpotStamTreshold = xValue;
                 }
@@ -3158,7 +3162,7 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("Strength Pot Cooldown (ms)", Theme.INPUT_WIDTH, profile.UOClassicCombatSelf_StrengthPotCooldown.ToString(), false, (s, e) =>
             {
-                if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint xValue))
+                if (uint.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out uint xValue))
                 {
                     profile.UOClassicCombatSelf_StrengthPotCooldown = xValue;
                 }
@@ -3166,7 +3170,7 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("Agility Pot Cooldown (ms)", Theme.INPUT_WIDTH, profile.UOClassicCombatSelf_DexPotCooldown.ToString(), false, (s, e) =>
             {
-                if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint xValue))
+                if (uint.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out uint xValue))
                 {
                     profile.UOClassicCombatSelf_DexPotCooldown = xValue;
                 }
@@ -3174,7 +3178,7 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("Min RNG (ms)", Theme.INPUT_WIDTH, profile.UOClassicCombatSelf_MinRNG.ToString(), false, (s, e) =>
             {
-                if (int.TryParse(((InputField.StbTextBox)s).Text, out int xValue))
+                if (int.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out int xValue))
                 {
                     profile.UOClassicCombatSelf_MinRNG = xValue;
                 }
@@ -3182,7 +3186,7 @@ namespace ClassicUO.Game.UI.Gumps
             content.BlankLine();
             content.AddToRight(new InputFieldWithLabel("Max RNG (ms)", Theme.INPUT_WIDTH, profile.UOClassicCombatSelf_MaxRNG.ToString(), false, (s, e) =>
             {
-                if (int.TryParse(((InputField.StbTextBox)s).Text, out int xValue))
+                if (int.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out int xValue))
                 {
                     profile.UOClassicCombatSelf_MaxRNG = xValue;
                 }
@@ -3195,7 +3199,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             content.AddToLeft(SubCategoryButton("Macros", page, content.LeftWidth));
             content.ResetRightSide();
-            content.AddToRight(new TextBox("LastTargetRC (last target with custom range check)", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new UOLabel("LastTargetRC (last target with custom range check)", 1, UOLabelHue.Text) { Y = 7 }, true, page);
             content.Indent();
             content.AddToRight(new SliderWithLabel("LastTargetRC - Range:", 0, Theme.SLIDER_WIDTH, 1, 30, profile.LastTargetRange, (i) =>
             {
@@ -3203,22 +3207,22 @@ namespace ClassicUO.Game.UI.Gumps
             }), true, page);
             content.RemoveIndent();
             content.BlankLine();
-            content.AddToRight(new TextBox("ObjectInfo (macro for -info command)", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new UOLabel("ObjectInfo (macro for -info command)", 1, UOLabelHue.Text) { Y = 7 }, true, page);
             content.BlankLine();
-            content.AddToRight(new TextBox("HideX (remove landtile, entity, mobile or item)", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
-            content.BlankLine();
-
-            content.AddToRight(new TextBox("HealOnHPChange (keep pressed, casts heal on own hp change", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new UOLabel("HideX (remove landtile, entity, mobile or item)", 1, UOLabelHue.Text) { Y = 7 }, true, page);
             content.BlankLine();
 
-            content.AddToRight(new TextBox("HarmOnSwing (keep pressed, casts harm on next own swing animation)", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
-            content.BlankLine();
-            content.AddToRight(new TextBox("CureGH (if poisoned cure, else greater heal)", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
-            content.BlankLine();
-            content.AddToRight(new TextBox("SetTargetClientSide (set target client side only)", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new UOLabel("HealOnHPChange (keep pressed, casts heal on own hp change", 1, UOLabelHue.Text) { Y = 7 }, true, page);
             content.BlankLine();
 
-            content.AddToRight(new TextBox("OpenCorpses (opens 0x2006 corpses within 2 tiles)", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new UOLabel("HarmOnSwing (keep pressed, casts harm on next own swing animation)", 1, UOLabelHue.Text) { Y = 7 }, true, page);
+            content.BlankLine();
+            content.AddToRight(new UOLabel("CureGH (if poisoned cure, else greater heal)", 1, UOLabelHue.Text) { Y = 7 }, true, page);
+            content.BlankLine();
+            content.AddToRight(new UOLabel("SetTargetClientSide (set target client side only)", 1, UOLabelHue.Text) { Y = 7 }, true, page);
+            content.BlankLine();
+
+            content.AddToRight(new UOLabel("OpenCorpses (opens 0x2006 corpses within 2 tiles)", 1, UOLabelHue.Text) { Y = 7 }, true, page);
             content.BlankLine();
 
             #endregion
@@ -3254,7 +3258,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }), true, page);
             content.BlankLine();
-            content.AddToRight(new TextBox("(Doubleklick to lock in place)", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { Y = 7 }, true, page);
+            content.AddToRight(new UOLabel("(Doubleklick to lock in place)", 1, UOLabelHue.Text) { Y = 7 }, true, page);
             content.BlankLine();
             content.AddToRight(new CheckboxWithLabel("Show gump when using bandages ", 0, profile.BandageGump, (b) =>
             {
@@ -3263,14 +3267,14 @@ namespace ClassicUO.Game.UI.Gumps
             content.Indent();
             content.AddToRight(new InputFieldWithLabel("X ", Theme.INPUT_WIDTH, profile.BandageGumpOffset.X.ToString(), false, (s, e) =>
             {
-                if (int.TryParse(((InputField.StbTextBox)s).Text, out int xValue))
+                if (int.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out int xValue))
                 {
                     profile.BandageGumpOffset = new Point(xValue, profile.BandageGumpOffset.Y);
                 }
             }), true, page);
             content.AddToRight(new InputFieldWithLabel("Y ", Theme.INPUT_WIDTH, profile.BandageGumpOffset.Y.ToString(), false, (s, e) =>
             {
-                if (int.TryParse(((InputField.StbTextBox)s).Text, out int yValue))
+                if (int.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out int yValue))
                 {
                     profile.BandageGumpOffset = new Point(profile.BandageGumpOffset.X, yValue);
                 }
@@ -3455,7 +3459,7 @@ namespace ClassicUO.Game.UI.Gumps
             content.Indent();
             content.AddToRight(new InputFieldWithLabel("Criminal alert sound ID (0=none)", Theme.INPUT_WIDTH, profile.PvX_SoundCriminalAlert.ToString(), false, (s, e) =>
             {
-                if (int.TryParse(((InputField.StbTextBox)s).Text, out int val) && val >= 0)
+                if (int.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out int val) && val >= 0)
                     profile.PvX_SoundCriminalAlert = val;
             }), true, page);
             content.RemoveIndent();
@@ -3894,7 +3898,7 @@ namespace ClassicUO.Game.UI.Gumps
             content.Indent();
             content.AddToRight(new InputFieldWithLabel(lang.GetTazUO.TextFormat, Theme.INPUT_WIDTH, profile.SkillBarFormat, false, (s, e) =>
             {
-                profile.SkillBarFormat = ((InputField.StbTextBox)s).Text;
+                profile.SkillBarFormat = ((ClassicUO.Game.UI.Controls.StbTextBox)s).Text;
             }), true, page);
             content.RemoveIndent();
             content.BlankLine();
@@ -3963,7 +3967,7 @@ namespace ClassicUO.Game.UI.Gumps
                 profile.UseLandTextures = b;
             }), true, page);
             content.BlankLine();
-            content.AddToRight(new InputFieldWithLabel(lang.GetTazUO.SOSGumpID, Theme.INPUT_WIDTH, profile.SOSGumpID.ToString(), true, (s, e) => { if (uint.TryParse(((InputField.StbTextBox)s).Text, out uint id)) { profile.SOSGumpID = id; } }), true, page);
+            content.AddToRight(new InputFieldWithLabel(lang.GetTazUO.SOSGumpID, Theme.INPUT_WIDTH, profile.SOSGumpID.ToString(), true, (s, e) => { if (uint.TryParse(((ClassicUO.Game.UI.Controls.StbTextBox)s).Text, out uint id)) { profile.SOSGumpID = id; } }), true, page);
             #endregion
 
             #region Tooltips
@@ -3986,12 +3990,17 @@ namespace ClassicUO.Game.UI.Gumps
                 profile.ToolTipBGHue = h;
             }), true, page);
             content.BlankLine();
-            content.AddToRight(new InputFieldWithLabel(lang.GetTazUO.HeaderFormatItemName, Theme.INPUT_WIDTH, profile.TooltipHeaderFormat, false, (s, e) =>
+            content.AddToRight(new ModernColorPickerWithLabel(lang.GetToolTips.ToolTipFont, profile.TooltipTextHue, (h) =>
             {
-                profile.TooltipHeaderFormat = ((InputField.StbTextBox)s).Text;
+                profile.TooltipTextHue = h;
             }), true, page);
             content.BlankLine();
-            content.AddToRight(c = new ModernButton(0, 0, 200, 40, ButtonAction.Activate, lang.GetTazUO.TooltipOverrideSettings, Theme.BUTTON_FONT_COLOR) { IsSelectable = true, IsSelected = true }, true, page);
+            content.AddToRight(new InputFieldWithLabel(lang.GetTazUO.HeaderFormatItemName, 140, profile.TooltipHeaderFormat, false, (s, e) =>
+            {
+                profile.TooltipHeaderFormat = ((ClassicUO.Game.UI.Controls.StbTextBox)s).Text;
+            }), true, page);
+            content.BlankLine();
+            content.AddToRight(c = new ModernButton(0, 0, 150, 40, ButtonAction.Activate, lang.GetTazUO.TooltipOverrideSettings, Theme.BUTTON_FONT_COLOR) { IsSelectable = true, IsSelected = true }, true, page);
             c.MouseUp += (s, e) => { UIManager.GetGump<ToolTipOverideMenu>()?.Dispose(); UIManager.Add(new ToolTipOverideMenu()); };
 
             #endregion
@@ -4005,9 +4014,9 @@ namespace ClassicUO.Game.UI.Gumps
                 profile.TextBorderSize = i;
             }), true, page);
             content.BlankLine();
-            content.AddToRight(GenerateFontSelector(lang.GetTazUO.InfobarFont, ProfileManager.CurrentProfile.InfoBarFont, (i, s) =>
+            content.AddToRight(GenerateFontSelector(lang.GetTazUO.InfobarFont, ProfileManager.CurrentProfile.InfoBarFont, (i, b) =>
             {
-                ProfileManager.CurrentProfile.InfoBarFont = s;
+                ProfileManager.CurrentProfile.InfoBarFont = b;
                 InfoBarGump.UpdateAllOptions();
             }), true, page);
             content.Indent();
@@ -4018,9 +4027,9 @@ namespace ClassicUO.Game.UI.Gumps
             }), true, page);
             content.RemoveIndent();
             content.BlankLine();
-            content.AddToRight(GenerateFontSelector(lang.GetTazUO.SystemChatFont, ProfileManager.CurrentProfile.GameWindowSideChatFont, (i, s) =>
+            content.AddToRight(GenerateFontSelector(lang.GetTazUO.SystemChatFont, ProfileManager.CurrentProfile.GameWindowSideChatFont, (i, b) =>
             {
-                ProfileManager.CurrentProfile.GameWindowSideChatFont = s;
+                ProfileManager.CurrentProfile.GameWindowSideChatFont = b;
             }), true, page);
             content.Indent();
             content.AddToRight(new SliderWithLabel(lang.GetTazUO.SharedSize, 0, Theme.SLIDER_WIDTH, 5, 40, profile.GameWindowSideChatFontSize, (i) =>
@@ -4029,9 +4038,9 @@ namespace ClassicUO.Game.UI.Gumps
             }), true, page);
             content.RemoveIndent();
             content.BlankLine();
-            content.AddToRight(GenerateFontSelector(lang.GetTazUO.TooltipFont, ProfileManager.CurrentProfile.SelectedToolTipFont, (i, s) =>
+            content.AddToRight(GenerateFontSelector(lang.GetTazUO.TooltipFont, ProfileManager.CurrentProfile.SelectedToolTipFont, (i, b) =>
             {
-                ProfileManager.CurrentProfile.SelectedToolTipFont = s;
+                ProfileManager.CurrentProfile.SelectedToolTipFont = b;
             }), true, page);
             content.Indent();
             content.AddToRight(new SliderWithLabel(lang.GetTazUO.SharedSize, 0, Theme.SLIDER_WIDTH, 5, 40, profile.SelectedToolTipFontSize, (i) =>
@@ -4040,9 +4049,9 @@ namespace ClassicUO.Game.UI.Gumps
             }), true, page);
             content.RemoveIndent();
             content.BlankLine();
-            content.AddToRight(GenerateFontSelector(lang.GetTazUO.OverheadFont, ProfileManager.CurrentProfile.OverheadChatFont, (i, s) =>
+            content.AddToRight(GenerateFontSelector(lang.GetTazUO.OverheadFont, ProfileManager.CurrentProfile.OverheadChatFont, (i, b) =>
             {
-                ProfileManager.CurrentProfile.OverheadChatFont = s;
+                ProfileManager.CurrentProfile.OverheadChatFont = b;
             }), true, page);
             content.Indent();
             content.AddToRight(new SliderWithLabel(lang.GetTazUO.SharedSize, 0, Theme.SLIDER_WIDTH, 5, 40, profile.OverheadChatFontSize, (i) =>
@@ -4051,9 +4060,9 @@ namespace ClassicUO.Game.UI.Gumps
             }), true, page);
             content.RemoveIndent();
             content.BlankLine();
-            content.AddToRight(GenerateFontSelector(lang.GetTazUO.JournalFont, ProfileManager.CurrentProfile.SelectedTTFJournalFont, (i, s) =>
+            content.AddToRight(GenerateFontSelector(lang.GetTazUO.JournalFont, ProfileManager.CurrentProfile.SelectedJournalFont, (i, b) =>
             {
-                ProfileManager.CurrentProfile.SelectedTTFJournalFont = s;
+                ProfileManager.CurrentProfile.SelectedJournalFont = b;
             }), true, page);
             content.Indent();
             content.AddToRight(new SliderWithLabel(lang.GetTazUO.SharedSize, 0, Theme.SLIDER_WIDTH, 5, 40, profile.SelectedJournalFontSize, (i) =>
@@ -4062,9 +4071,9 @@ namespace ClassicUO.Game.UI.Gumps
             }), true, page);
             content.RemoveIndent();
             content.BlankLine();
-            content.AddToRight(GenerateFontSelector(lang.GetTazUO.NameplateFont, ProfileManager.CurrentProfile.NamePlateFont, (i, s) =>
+            content.AddToRight(GenerateFontSelector(lang.GetTazUO.NameplateFont, ProfileManager.CurrentProfile.NamePlateFont, (i, b) =>
             {
-                ProfileManager.CurrentProfile.NamePlateFont = s;
+                ProfileManager.CurrentProfile.NamePlateFont = b;
             }), true, page);
             content.Indent();
             content.AddToRight(new SliderWithLabel(lang.GetTazUO.SharedSize, 0, Theme.SLIDER_WIDTH, 5, 40, profile.NamePlateFontSize, (i) =>
@@ -4121,14 +4130,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            content.AddToRight(new TextBox(
-                string.Format(lang.GetTazUO.SettingsWarning, locations.Count),
-                Theme.FONT,
-                Theme.STANDARD_TEXT_SIZE,
-                content.RightWidth - 20,
-                Theme.TEXT_FONT_COLOR,
-                FontStashSharp.RichText.TextHorizontalAlignment.Center,
-                false), true, page);
+            content.AddToRight(new UOLabel(string.Format(lang.GetTazUO.SettingsWarning, locations.Count), Theme.FONT, 0x0481, Assets.TEXT_ALIGN_TYPE.TS_CENTER, content.RightWidth - 20, FontStyle.None), true, page);
 
             content.AddToRight(c = new ModernButton(0, 0, content.RightWidth - 20, 40, ButtonAction.Activate, string.Format(lang.GetTazUO.OverrideAll, locations.Count - 1), Theme.BUTTON_FONT_COLOR) { IsSelectable = true, IsSelected = true }, true, page);
             c.MouseUp += (s, e) =>
@@ -4156,7 +4158,7 @@ namespace ClassicUO.Game.UI.Gumps
             content.AddToLeft(SubCategoryButton(lang.GetTazUO.GumpScaling, page, content.LeftWidth));
             content.ResetRightSide();
 
-            content.AddToRight(new TextBox(lang.GetTazUO.ScalingInfo, Theme.FONT, Theme.STANDARD_TEXT_SIZE, content.RightWidth - 20, Theme.TEXT_FONT_COLOR, FontStashSharp.RichText.TextHorizontalAlignment.Center, false), true, page);
+            content.AddToRight(new UOLabel(lang.GetTazUO.ScalingInfo, 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_CENTER, content.RightWidth - 20), true, page);
 
             content.BlankLine();
 
@@ -4181,7 +4183,7 @@ namespace ClassicUO.Game.UI.Gumps
             page = ((int)PAGE.TUOOptions + 1011);
             content.AddToLeft(SubCategoryButton(lang.GetTazUO.VisibleLayers, page, content.LeftWidth));
             content.ResetRightSide();
-            content.AddToRight(new TextBox(lang.GetTazUO.VisLayersInfo, Theme.FONT, Theme.STANDARD_TEXT_SIZE, content.RightWidth - 20, Theme.TEXT_FONT_COLOR, FontStashSharp.RichText.TextHorizontalAlignment.Center, false) { AcceptMouseInput = false }, true, page);
+            content.AddToRight(new UOLabel(lang.GetTazUO.VisLayersInfo, 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_CENTER, content.RightWidth - 20), true, page);
             content.BlankLine();
             content.AddToRight(new CheckboxWithLabel(lang.GetTazUO.OnlyForYourself, 0, profile.HideLayersForSelf, (b) =>
             {
@@ -4305,11 +4307,11 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private ComboBoxWithLabel GenerateFontSelector(string label, string selectedFont = "", Action<int, string> onSelect = null)
+        private ComboBoxWithLabel GenerateFontSelector(string label, byte selectedFont, Action<int, byte> onSelect = null)
         {
-            string[] fontArray = TrueTypeLoader.Instance.Fonts;
-            int selectedFontInd = Array.IndexOf(fontArray, selectedFont);
-            return new ComboBoxWithLabel(label, 0, Theme.COMBO_BOX_WIDTH, fontArray, selectedFontInd, onSelect);
+            var fontLabels = Enumerable.Range(0, 20).Select(i => $"Font {i}").ToArray();
+            int idx = Math.Max(0, Math.Min(19, (int)selectedFont));
+            return new ComboBoxWithLabel(label, 0, Theme.COMBO_BOX_WIDTH, fontLabels, idx, (i, s) => onSelect?.Invoke(i, (byte)i));
         }
 
         private ModernButton CategoryButton(string text, int page, int width, int height = 40)
@@ -4360,7 +4362,7 @@ namespace ClassicUO.Game.UI.Gumps
             main.Add(_delete);
 
 
-            TextBox _hueLabel = new TextBox("Hue:", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.BUTTON_FONT_COLOR, strokeEffect: false);
+            UOLabel _hueLabel = new UOLabel("Hue:", Theme.FONT, 0x0481, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 0, FontStyle.None);
             _hueLabel.X = _delete.X + _delete.Width + 5;
             _hueLabel.Y = 10;
             main.Add(_hueLabel);
@@ -4373,7 +4375,7 @@ namespace ClassicUO.Game.UI.Gumps
             main.Add(_name);
 
 
-            TextBox _cooldownLabel = new TextBox("Cooldown:", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.BUTTON_FONT_COLOR, strokeEffect: false);
+            UOLabel _cooldownLabel = new UOLabel("Cooldown:", Theme.FONT, 0x0481, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 0, FontStyle.None);
             _cooldownLabel.X = _name.X + _name.Width + 10;
             _cooldownLabel.Y = 10;
             main.Add(_cooldownLabel);
@@ -4450,7 +4452,7 @@ namespace ClassicUO.Game.UI.Gumps
         #region Custom Controls For Options
         private class ModernColorPickerWithLabel : Control, SearchableOption
         {
-            private TextBox _label;
+            private UOLabel _label;
             private ModernColorPicker.HueDisplay _colorPicker;
 
             public ModernColorPickerWithLabel(string text, ushort hue, Action<ushort> hueSelected = null, int maxWidth = 0)
@@ -4461,10 +4463,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(_colorPicker = new ModernColorPicker.HueDisplay(hue, hueSelected, true));
 
-                Add(_label = new TextBox(text, Theme.FONT, Theme.STANDARD_TEXT_SIZE, maxWidth > 0 ? maxWidth : null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { X = _colorPicker.Width + 5 });
+                Add(_label = new UOLabel(text, Theme.FONT, 0x0481, Assets.TEXT_ALIGN_TYPE.TS_LEFT, maxWidth > 0 ? maxWidth : 0, FontStyle.None) { X = _colorPicker.Width + 5 });
 
                 Width = _label.Width + _colorPicker.Width + 5;
-                Height = Math.Max(_colorPicker.Height, _label.MeasuredSize.Y);
+                Height = Math.Max(_colorPicker.Height, _label.Height);
 
                 ModernOptionsGump.SearchValueChanged += ModernOptionsGump_SearchValueChanged;
             }
@@ -4505,9 +4507,9 @@ namespace ClassicUO.Game.UI.Gumps
         private class CheckboxWithLabel : Control, SearchableOption
         {
             private bool _isChecked;
-            private readonly TextBox _text;
+            private readonly UOLabel _text;
 
-            public TextBox TextLabel => _text;
+            public UOLabel TextLabel => _text;
 
             private Vector3 hueVector = ShaderHueTranslator.GetHueVector(Theme.CHECKBOX, false, 0.9f);
 
@@ -4520,10 +4522,10 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _isChecked = isChecked;
                 ValueChanged = valueChanged;
-                _text = new TextBox(text, Theme.FONT, Theme.STANDARD_TEXT_SIZE, maxWidth == 0 ? null : maxWidth, Theme.TEXT_FONT_COLOR, strokeEffect: false) { X = Theme.CHECKBOX_SIZE + 5, AcceptMouseInput = false };
+                _text = new UOLabel(text, Theme.FONT, 0x0481, Assets.TEXT_ALIGN_TYPE.TS_LEFT, maxWidth == 0 ? 0 : maxWidth, FontStyle.None) { X = Theme.CHECKBOX_SIZE + 5, AcceptMouseInput = false };
 
                 Width = Theme.CHECKBOX_SIZE + 5 + _text.Width;
-                Height = Math.Max(Theme.CHECKBOX_SIZE, _text.MeasuredSize.Y);
+                Height = Math.Max(Theme.CHECKBOX_SIZE, _text.Height);
 
                 _text.Y = (Height / 2) - (_text.Height / 2);
 
@@ -4682,7 +4684,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class SliderWithLabel : Control, SearchableOption
         {
-            private readonly TextBox _label;
+            private readonly UOLabel _label;
             private readonly Slider _slider;
 
             public SliderWithLabel(string label, int textWidth, int barWidth, int min, int max, int value, Action<int> valueChanged = null)
@@ -4690,7 +4692,7 @@ namespace ClassicUO.Game.UI.Gumps
                 AcceptMouseInput = true;
                 CanMove = true;
 
-                Add(_label = new TextBox(label, Theme.FONT, Theme.STANDARD_TEXT_SIZE, textWidth > 0 ? textWidth : null, Theme.TEXT_FONT_COLOR, strokeEffect: false));
+                Add(_label = new UOLabel(label, Theme.FONT, 0x0481, Assets.TEXT_ALIGN_TYPE.TS_LEFT, textWidth > 0 ? textWidth : 0, FontStyle.None));
                 Add(_slider = new Slider(barWidth, min, max, value, valueChanged) { X = _label.X + _label.Width + 5 });
 
                 Width = textWidth + barWidth + 5;
@@ -4735,7 +4737,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 private bool _clicked;
                 private int _sliderX;
-                private readonly TextBox _text;
+                private readonly UOLabel _text;
                 private int _value = -1;
 
                 public Slider(
@@ -4746,7 +4748,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Action<int> valueChanged = null
                 )
                 {
-                    _text = new TextBox(string.Empty, Theme.FONT, Theme.STANDARD_TEXT_SIZE, barWidth, Theme.TEXT_FONT_COLOR, strokeEffect: false);
+                    _text = new UOLabel(string.Empty, Theme.FONT, 0x0481, Assets.TEXT_ALIGN_TYPE.TS_LEFT, barWidth, FontStyle.None);
 
                     MinValue = min;
                     MaxValue = max;
@@ -4754,7 +4756,7 @@ namespace ClassicUO.Game.UI.Gumps
                     AcceptMouseInput = true;
                     AcceptKeyboardInput = true;
                     Width = barWidth;
-                    Height = Math.Max(_text.MeasuredSize.Y, 15);
+                    Height = Math.Max(_text.Height, 15);
 
                     CalculateOffset();
 
@@ -4944,7 +4946,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class ComboBoxWithLabel : Control, SearchableOption
         {
-            private TextBox _label;
+            private UOLabel _label;
             private Combobox _comboBox;
             private readonly string[] options;
 
@@ -4953,11 +4955,11 @@ namespace ClassicUO.Game.UI.Gumps
                 AcceptMouseInput = true;
                 CanMove = true;
 
-                Add(_label = new TextBox(label, Theme.FONT, Theme.STANDARD_TEXT_SIZE, labelWidth > 0 ? labelWidth : null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { AcceptMouseInput = false });
-                Add(_comboBox = new Combobox(ComboWidth, options, selectedIndex, onOptionSelected: onOptionSelected) { X = _label.MeasuredSize.X + _label.X + 5 });
+                Add(_label = new UOLabel(label, Theme.FONT, 0x0481, Assets.TEXT_ALIGN_TYPE.TS_LEFT, labelWidth > 0 ? labelWidth : 0, FontStyle.None) { AcceptMouseInput = false });
+                Add(_comboBox = new Combobox(ComboWidth, options, selectedIndex, onOptionSelected: onOptionSelected) { X = _label.Width + _label.X + 5 });
 
                 Width = labelWidth + ComboWidth + 5;
-                Height = Math.Max(_label.MeasuredSize.Y, _comboBox.Height);
+                Height = Math.Max(_label.Height, _comboBox.Height);
 
                 ModernOptionsGump.SearchValueChanged += ModernOptionsGump_SearchValueChanged;
                 this.options = options;
@@ -5012,7 +5014,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 private readonly string[] _items;
                 private readonly int _maxHeight;
-                private TextBox _label;
+                private UOLabel _label;
                 private int _selectedIndex;
 
                 public Combobox
@@ -5038,7 +5040,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     Add
                     (
-                        _label = new TextBox(initialText, Theme.FONT, Theme.STANDARD_TEXT_SIZE, width, Theme.TEXT_FONT_COLOR, strokeEffect: false)
+                        _label = new UOLabel(initialText, Theme.FONT, 0x0481, Assets.TEXT_ALIGN_TYPE.TS_LEFT, width, FontStyle.None)
                         {
                             X = 2
                         }
@@ -5196,7 +5198,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         private readonly Color _overHue, _normalHue, _selectedHue;
 
-                        private readonly TextBox _label;
+                        private readonly UOLabel _label;
 
                         public HoveredLabel
                         (
@@ -5212,9 +5214,9 @@ namespace ClassicUO.Game.UI.Gumps
                             _selectedHue = selectedHue;
                             AcceptMouseInput = true;
 
-                            _label = new TextBox(text, Theme.FONT, Theme.STANDARD_TEXT_SIZE, maxwidth > 0 ? maxwidth : null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { AcceptMouseInput = true };
-                            Height = _label.MeasuredSize.Y;
-                            Width = Math.Max(_label.MeasuredSize.X, maxwidth);
+                            _label = new UOLabel(text, Theme.FONT, 0x0481, Assets.TEXT_ALIGN_TYPE.TS_LEFT, maxwidth > 0 ? maxwidth : 0, FontStyle.None) { AcceptMouseInput = true };
+                            Height = _label.Height;
+                            Width = Math.Max(_label.Width, maxwidth);
 
                             IsVisible = !string.IsNullOrEmpty(text);
                         }
@@ -5231,7 +5233,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 if (Hue != _selectedHue)
                                 {
                                     Hue = _selectedHue;
-                                    _label.Fontcolor = Hue;
+                                    _label.Hue = 0x0481;
                                 }
                             }
                             else if (MouseIsOver || ForceHover)
@@ -5239,13 +5241,13 @@ namespace ClassicUO.Game.UI.Gumps
                                 if (Hue != _overHue)
                                 {
                                     Hue = _overHue;
-                                    _label.Fontcolor = Hue;
+                                    _label.Hue = 0x0481;
                                 }
                             }
                             else if (Hue != _normalHue)
                             {
                                 Hue = _normalHue;
-                                _label.Fontcolor = Hue;
+                                _label.Hue = 0x0481;
                             }
                             base.Update();
                         }
@@ -5282,14 +5284,14 @@ namespace ClassicUO.Game.UI.Gumps
         private class InputFieldWithLabel : Control, SearchableOption
         {
             private readonly InputField _inputField;
-            private readonly TextBox _label;
+            private readonly UOLabel _label;
 
             public InputFieldWithLabel(string label, int inputWidth, string inputText, bool numbersonly = false, EventHandler onTextChange = null)
             {
                 AcceptMouseInput = true;
                 CanMove = true;
 
-                Add(_label = new TextBox(label, Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { AcceptMouseInput = false });
+                Add(_label = new UOLabel(label, Theme.FONT, 0x0481, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 0, FontStyle.None) { AcceptMouseInput = false });
 
                 Add(_inputField = new InputField(inputWidth, 40, 0, -1, inputText, numbersonly, onTextChange) { X = _label.Width + _label.X + 5 });
 
@@ -5339,7 +5341,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public class InputField : Control
         {
-            private readonly StbTextBox _textbox;
+            private readonly ClassicUO.Game.UI.Controls.StbTextBox _textbox;
 
             private AlphaBlendControl _background;
 
@@ -5361,11 +5363,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = width;
                 Height = height;
 
-                _textbox = new StbTextBox
-                (
-                    maxCharsCount,
-                    maxWidthText
-                )
+                _textbox = new ClassicUO.Game.UI.Controls.StbTextBox(Theme.FONT, maxCharsCount, maxWidthText, true, FontStyle.None, 0x0481, Assets.TEXT_ALIGN_TYPE.TS_LEFT)
                 {
                     X = 4,
                     Width = width - 8,
@@ -5420,839 +5418,6 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _textbox.SetText(text);
             }
-
-
-            internal class StbTextBox : Control, ITextEditHandler
-            {
-                protected static readonly Color SELECTION_COLOR = new Color() { PackedValue = 0x80a06020 };
-                private const int FONT_SIZE = 20;
-                private readonly int _maxCharCount = -1;
-
-
-                public StbTextBox
-                (
-                    int max_char_count = -1,
-                    int maxWidth = 0
-                )
-                {
-                    AcceptKeyboardInput = true;
-                    AcceptMouseInput = true;
-                    CanMove = false;
-                    IsEditable = true;
-
-                    _maxCharCount = max_char_count;
-
-                    Stb = new TextEdit(this);
-                    Stb.SingleLine = true;
-
-                    _rendererText = new TextBox(string.Empty, Theme.FONT, FONT_SIZE, maxWidth > 0 ? maxWidth : null, Theme.TEXT_FONT_COLOR, strokeEffect: false, supportsCommands: false, ignoreColorCommands: true, calculateGlyphs: true);
-                    _rendererCaret = new TextBox("_", Theme.FONT, FONT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false, supportsCommands: false, ignoreColorCommands: true);
-
-                    Height = _rendererCaret.Height;
-                    LoseFocusOnEscapeKey = true;
-                }
-
-                protected TextEdit Stb { get; }
-
-                public override bool AcceptKeyboardInput => base.AcceptKeyboardInput && IsEditable;
-
-                public bool AllowTAB { get; set; }
-                public bool NoSelection { get; set; }
-
-                public bool LoseFocusOnEscapeKey { get; set; }
-
-                public int CaretIndex
-                {
-                    get => Stb.CursorIndex;
-                    set
-                    {
-                        Stb.CursorIndex = value;
-                        UpdateCaretScreenPosition();
-                    }
-                }
-
-                public bool Multiline
-                {
-                    get => !Stb.SingleLine;
-                    set => Stb.SingleLine = !value;
-                }
-
-                public bool NumbersOnly { get; set; }
-
-                public int SelectionStart
-                {
-                    get => Stb.SelectStart;
-                    set
-                    {
-                        if (AllowSelection)
-                        {
-                            Stb.SelectStart = value;
-                        }
-                    }
-                }
-
-                public int SelectionEnd
-                {
-                    get => Stb.SelectEnd;
-                    set
-                    {
-                        if (AllowSelection)
-                        {
-                            Stb.SelectEnd = value;
-                        }
-                    }
-                }
-
-                public bool AllowSelection { get; set; } = true;
-
-                internal int TotalHeight
-                {
-                    get
-                    {
-                        return _rendererText.Height;
-                    }
-                }
-
-                public string Text
-                {
-                    get => _rendererText.Text;
-
-                    set
-                    {
-                        if (_maxCharCount > 0)
-                        {
-                            if (value != null && value.Length > _maxCharCount)
-                            {
-                                value = value.Substring(0, _maxCharCount);
-                            }
-                        }
-
-                        _rendererText.Text = value;
-
-                        if (!_is_writing)
-                        {
-                            OnTextChanged();
-                        }
-                    }
-                }
-
-                public int Length => Text?.Length ?? 0;
-
-                public float GetWidth(int index)
-                {
-                    if (Text != null)
-                    {
-                        if (index < _rendererText.Text.Length)
-                        {
-                            var glyphRender = _rendererText.RTL.GetGlyphInfoByIndex(index);
-                            if (glyphRender != null)
-                            {
-                                return glyphRender.Value.Bounds.Width;
-                            }
-                        }
-                    }
-                    return 0;
-                }
-
-                public TextEditRow LayoutRow(int startIndex)
-                {
-                    TextEditRow r = new TextEditRow() { num_chars = _rendererText.Text.Length };
-
-                    int sx = ScreenCoordinateX;
-                    int sy = ScreenCoordinateY;
-
-                    r.x0 += sx;
-                    r.x1 += sx;
-                    r.ymin += sy;
-                    r.ymax += sy;
-
-                    return r;
-                }
-
-                protected Point _caretScreenPosition;
-                protected bool _is_writing;
-                protected bool _leftWasDown, _fromServer;
-                protected TextBox _rendererText, _rendererCaret;
-
-                public event EventHandler TextChanged;
-
-                public void SelectAll()
-                {
-                    if (AllowSelection)
-                    {
-                        Stb.SelectStart = 0;
-                        Stb.SelectEnd = Length;
-                    }
-                }
-
-                protected void UpdateCaretScreenPosition()
-                {
-                    _caretScreenPosition = GetCoordsForIndex(Stb.CursorIndex);
-                }
-
-                protected Point GetCoordsForIndex(int index)
-                {
-                    int x = 0, y = 0;
-
-                    if (Text != null)
-                    {
-                        if (index < Text.Length)
-                        {
-                            var glyphRender = _rendererText.RTL.GetGlyphInfoByIndex(index);
-                            if (glyphRender != null)
-                            {
-                                x += glyphRender.Value.Bounds.Left;
-                                y += glyphRender.Value.LineTop;
-                            }
-                        }
-                        else if (_rendererText.RTL.Lines != null && _rendererText.RTL.Lines.Count > 0)
-                        {
-                            // After last glyph
-                            var lastLine = _rendererText.RTL.Lines[_rendererText.RTL.Lines.Count - 1];
-                            if (lastLine.Count > 0)
-                            {
-                                var glyphRender = lastLine.GetGlyphInfoByIndex(lastLine.Count - 1);
-
-                                x += glyphRender.Value.Bounds.Right;
-                                y += glyphRender.Value.LineTop;
-                            }
-                            else if (_rendererText.RTL.Lines.Count > 1)
-                            {
-                                var previousLine = _rendererText.RTL.Lines[_rendererText.RTL.Lines.Count - 2];
-                                if (previousLine.Count > 0)
-                                {
-                                    var glyphRender = previousLine.GetGlyphInfoByIndex(0);
-                                    y += glyphRender.Value.LineTop + lastLine.Size.Y + _rendererText.RTL.VerticalSpacing;
-                                }
-                            }
-                        }
-                    }
-
-                    return new Point(x, y);
-                }
-
-                protected int GetIndexFromCoords(Point coords)
-                {
-                    if (Text != null)
-                    {
-                        var line = _rendererText.RTL.GetLineByY(coords.Y);
-                        if (line != null)
-                        {
-                            int? index = line.GetGlyphIndexByX(coords.X);
-                            if (index != null)
-                            {
-                                return (int)index;
-                            }
-                        }
-                    }
-                    return 0;
-                }
-
-                protected Point GetCoordsForClick(Point clicked)
-                {
-                    if (Text != null)
-                    {
-                        var line = _rendererText.RTL.GetLineByY(clicked.Y);
-                        if (line != null)
-                        {
-                            int? index = line.GetGlyphIndexByX(clicked.X);
-                            if (index != null)
-                            {
-                                return GetCoordsForIndex((int)index);
-                            }
-                        }
-                    }
-                    return Point.Zero;
-                }
-
-                private ControlKeys ApplyShiftIfNecessary(ControlKeys k)
-                {
-                    if (Keyboard.Shift && !NoSelection)
-                    {
-                        k |= ControlKeys.Shift;
-                    }
-
-                    return k;
-                }
-
-                private bool IsMaxCharReached(int count)
-                {
-                    return _maxCharCount >= 0 && Length + count >= _maxCharCount;
-                }
-
-                protected virtual void OnTextChanged()
-                {
-                    TextChanged?.Raise(this);
-
-                    UpdateCaretScreenPosition();
-                }
-
-                internal override void OnFocusEnter()
-                {
-                    base.OnFocusEnter();
-                    CaretIndex = Text?.Length ?? 0;
-                }
-
-                internal override void OnFocusLost()
-                {
-                    if (Stb != null)
-                    {
-                        Stb.SelectStart = Stb.SelectEnd = 0;
-                    }
-
-                    base.OnFocusLost();
-                }
-
-                protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
-                {
-                    ControlKeys? stb_key = null;
-                    bool update_caret = false;
-
-                    switch (key)
-                    {
-                        case SDL.SDL_Keycode.SDLK_TAB:
-                            if (AllowTAB)
-                            {
-                                // UO does not support '\t' char in its fonts
-                                OnTextInput("   ");
-                            }
-                            else
-                            {
-                                Parent?.KeyboardTabToNextFocus(this);
-                            }
-
-                            break;
-
-                        case SDL.SDL_Keycode.SDLK_a when Keyboard.Ctrl && !NoSelection:
-                            SelectAll();
-
-                            break;
-
-                        case SDL.SDL_Keycode.SDLK_ESCAPE:
-                            if (LoseFocusOnEscapeKey && SelectionStart == SelectionEnd)
-                            {
-                                UIManager.KeyboardFocusControl = null;
-                            }
-                            SelectionStart = 0;
-                            SelectionEnd = 0;
-                            break;
-
-                        case SDL.SDL_Keycode.SDLK_INSERT when IsEditable:
-                            stb_key = ControlKeys.InsertMode;
-
-                            break;
-
-                        case SDL.SDL_Keycode.SDLK_c when Keyboard.Ctrl && !NoSelection:
-                            int selectStart = Math.Min(Stb.SelectStart, Stb.SelectEnd);
-                            int selectEnd = Math.Max(Stb.SelectStart, Stb.SelectEnd);
-
-                            if (selectStart < selectEnd && selectStart >= 0 && selectEnd - selectStart <= Text.Length)
-                            {
-                                SDL.SDL_SetClipboardText(Text.Substring(selectStart, selectEnd - selectStart));
-                            }
-
-                            break;
-
-                        case SDL.SDL_Keycode.SDLK_x when Keyboard.Ctrl && !NoSelection:
-                            selectStart = Math.Min(Stb.SelectStart, Stb.SelectEnd);
-                            selectEnd = Math.Max(Stb.SelectStart, Stb.SelectEnd);
-
-                            if (selectStart < selectEnd && selectStart >= 0 && selectEnd - selectStart <= Text.Length)
-                            {
-                                SDL.SDL_SetClipboardText(Text.Substring(selectStart, selectEnd - selectStart));
-
-                                if (IsEditable)
-                                {
-                                    Stb.Cut();
-                                }
-                            }
-
-                            break;
-
-                        case SDL.SDL_Keycode.SDLK_v when Keyboard.Ctrl && IsEditable:
-                            OnTextInput(StringHelper.GetClipboardText(Multiline));
-
-                            break;
-
-                        case SDL.SDL_Keycode.SDLK_z when Keyboard.Ctrl && IsEditable:
-                            stb_key = ControlKeys.Undo;
-
-                            break;
-
-                        case SDL.SDL_Keycode.SDLK_y when Keyboard.Ctrl && IsEditable:
-                            stb_key = ControlKeys.Redo;
-
-                            break;
-
-                        case SDL.SDL_Keycode.SDLK_LEFT:
-                            if (Keyboard.Ctrl && Keyboard.Shift)
-                            {
-                                if (!NoSelection)
-                                {
-                                    stb_key = ControlKeys.Shift | ControlKeys.WordLeft;
-                                }
-                            }
-                            else if (Keyboard.Shift)
-                            {
-                                if (!NoSelection)
-                                {
-                                    stb_key = ControlKeys.Shift | ControlKeys.Left;
-                                }
-                            }
-                            else if (Keyboard.Ctrl)
-                            {
-                                stb_key = ControlKeys.WordLeft;
-                            }
-                            else
-                            {
-                                stb_key = ControlKeys.Left;
-                            }
-
-                            update_caret = true;
-
-                            break;
-
-                        case SDL.SDL_Keycode.SDLK_RIGHT:
-                            if (Keyboard.Ctrl && Keyboard.Shift)
-                            {
-                                if (!NoSelection)
-                                {
-                                    stb_key = ControlKeys.Shift | ControlKeys.WordRight;
-                                }
-                            }
-                            else if (Keyboard.Shift)
-                            {
-                                if (!NoSelection)
-                                {
-                                    stb_key = ControlKeys.Shift | ControlKeys.Right;
-                                }
-                            }
-                            else if (Keyboard.Ctrl)
-                            {
-                                stb_key = ControlKeys.WordRight;
-                            }
-                            else
-                            {
-                                stb_key = ControlKeys.Right;
-                            }
-
-                            update_caret = true;
-
-                            break;
-
-                        case SDL.SDL_Keycode.SDLK_UP:
-                            stb_key = ApplyShiftIfNecessary(ControlKeys.Up);
-                            update_caret = true;
-
-                            break;
-
-                        case SDL.SDL_Keycode.SDLK_DOWN:
-                            stb_key = ApplyShiftIfNecessary(ControlKeys.Down);
-                            update_caret = true;
-
-                            break;
-
-                        case SDL.SDL_Keycode.SDLK_BACKSPACE when IsEditable:
-                            stb_key = ApplyShiftIfNecessary(ControlKeys.BackSpace);
-                            update_caret = true;
-
-                            break;
-
-                        case SDL.SDL_Keycode.SDLK_DELETE when IsEditable:
-                            stb_key = ApplyShiftIfNecessary(ControlKeys.Delete);
-                            update_caret = true;
-
-                            break;
-
-                        case SDL.SDL_Keycode.SDLK_HOME:
-                            if (Keyboard.Ctrl && Keyboard.Shift)
-                            {
-                                if (!NoSelection)
-                                {
-                                    stb_key = ControlKeys.Shift | ControlKeys.TextStart;
-                                }
-                            }
-                            else if (Keyboard.Shift)
-                            {
-                                if (!NoSelection)
-                                {
-                                    stb_key = ControlKeys.Shift | ControlKeys.LineStart;
-                                }
-                            }
-                            else if (Keyboard.Ctrl)
-                            {
-                                stb_key = ControlKeys.TextStart;
-                            }
-                            else
-                            {
-                                stb_key = ControlKeys.LineStart;
-                            }
-
-                            update_caret = true;
-
-                            break;
-
-                        case SDL.SDL_Keycode.SDLK_END:
-                            if (Keyboard.Ctrl && Keyboard.Shift)
-                            {
-                                if (!NoSelection)
-                                {
-                                    stb_key = ControlKeys.Shift | ControlKeys.TextEnd;
-                                }
-                            }
-                            else if (Keyboard.Shift)
-                            {
-                                if (!NoSelection)
-                                {
-                                    stb_key = ControlKeys.Shift | ControlKeys.LineEnd;
-                                }
-                            }
-                            else if (Keyboard.Ctrl)
-                            {
-                                stb_key = ControlKeys.TextEnd;
-                            }
-                            else
-                            {
-                                stb_key = ControlKeys.LineEnd;
-                            }
-
-                            update_caret = true;
-
-                            break;
-
-                        case SDL.SDL_Keycode.SDLK_KP_ENTER:
-                        case SDL.SDL_Keycode.SDLK_RETURN:
-                            if (IsEditable)
-                            {
-                                if (Multiline)
-                                {
-                                    if (!_fromServer && !IsMaxCharReached(0))
-                                    {
-                                        OnTextInput("\n");
-                                    }
-                                }
-                                else
-                                {
-                                    Parent?.OnKeyboardReturn(0, Text);
-
-                                    if (UIManager.SystemChat != null && UIManager.SystemChat.TextBoxControl != null && IsFocused)
-                                    {
-                                        if (!IsFromServer || !UIManager.SystemChat.TextBoxControl.IsVisible)
-                                        {
-                                            OnFocusLost();
-                                            OnFocusEnter();
-                                        }
-                                        else if (UIManager.KeyboardFocusControl == null || UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl)
-                                        {
-                                            UIManager.SystemChat.TextBoxControl.SetKeyboardFocus();
-                                        }
-                                    }
-                                }
-                            }
-
-                            break;
-                    }
-
-                    if (stb_key != null)
-                    {
-                        Stb.Key(stb_key.Value);
-                    }
-
-                    if (update_caret)
-                    {
-                        UpdateCaretScreenPosition();
-                    }
-
-                    base.OnKeyDown(key, mod);
-                }
-
-                public void SetText(string text)
-                {
-                    if (string.IsNullOrEmpty(text))
-                    {
-                        ClearText();
-                    }
-                    else
-                    {
-                        if (_maxCharCount > 0)
-                        {
-                            if (text.Length > _maxCharCount)
-                            {
-                                text = text.Substring(0, _maxCharCount);
-                            }
-                        }
-
-                        Stb.ClearState(!Multiline);
-                        Text = text;
-
-                        Stb.CursorIndex = Length;
-
-                        if (!_is_writing)
-                        {
-                            OnTextChanged();
-                        }
-                    }
-                }
-
-                public void ClearText()
-                {
-                    if (Length != 0)
-                    {
-                        SelectionStart = 0;
-                        SelectionEnd = 0;
-                        Stb.Delete(0, Length);
-
-                        if (!_is_writing)
-                        {
-                            OnTextChanged();
-                        }
-                    }
-                }
-
-                public void AppendText(string text)
-                {
-                    Stb.Paste(text);
-                }
-
-                protected override void OnTextInput(string c)
-                {
-                    if (c == null || !IsEditable)
-                    {
-                        return;
-                    }
-
-                    _is_writing = true;
-
-                    if (SelectionStart != SelectionEnd)
-                    {
-                        Stb.DeleteSelection();
-                    }
-
-                    int count;
-
-                    if (_maxCharCount > 0)
-                    {
-                        int remains = _maxCharCount - Length;
-
-                        if (remains <= 0)
-                        {
-                            _is_writing = false;
-
-                            return;
-                        }
-
-                        count = Math.Min(remains, c.Length);
-
-                        if (remains < c.Length && count > 0)
-                        {
-                            c = c.Substring(0, count);
-                        }
-                    }
-                    else
-                    {
-                        count = c.Length;
-                    }
-
-                    if (count > 0)
-                    {
-                        if (NumbersOnly)
-                        {
-                            for (int i = 0; i < count; i++)
-                            {
-                                if (!char.IsNumber(c[i]))
-                                {
-                                    _is_writing = false;
-
-                                    return;
-                                }
-                            }
-
-                            if (_maxCharCount > 0 && int.TryParse(Stb.text + c, out int val))
-                            {
-                                if (val > _maxCharCount)
-                                {
-                                    _is_writing = false;
-                                    SetText(_maxCharCount.ToString());
-
-                                    return;
-                                }
-                            }
-                        }
-
-
-                        if (count > 1)
-                        {
-                            Stb.Paste(c);
-                            OnTextChanged();
-                        }
-                        else
-                        {
-                            Stb.InputChar(c[0]);
-                            OnTextChanged();
-                        }
-                    }
-
-                    _is_writing = false;
-                }
-
-                private int GetXOffset()
-                {
-                    if (_caretScreenPosition.X > Width)
-                    {
-                        return _caretScreenPosition.X - Width + 5;
-                    }
-
-                    return 0;
-                }
-
-                public void Click(Point pos)
-                {
-                    pos = new Point((pos.X - ScreenCoordinateX), pos.Y - ScreenCoordinateY);
-                    CaretIndex = GetIndexFromCoords(pos);
-                    SelectionStart = 0;
-                    SelectionEnd = 0;
-                    Stb.HasPreferredX = false;
-                }
-
-                public void Drag(Point pos)
-                {
-                    pos = new Point((pos.X - ScreenCoordinateX), pos.Y - ScreenCoordinateY);
-
-                    if (SelectionStart == SelectionEnd)
-                    {
-                        SelectionStart = CaretIndex;
-                    }
-
-                    CaretIndex = SelectionEnd = GetIndexFromCoords(pos);
-                }
-
-                private protected void DrawSelection(UltimaBatcher2D batcher, int x, int y)
-                {
-                    if (!AllowSelection)
-                    {
-                        return;
-                    }
-
-                    int selectStart = Math.Min(SelectionStart, SelectionEnd);
-                    int selectEnd = Math.Max(SelectionStart, SelectionEnd);
-
-                    if (selectStart < selectEnd)
-                    { //Show selection
-                        Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, 0.5f);
-
-                        Point start = GetCoordsForIndex(selectStart);
-                        Point size = GetCoordsForIndex(selectEnd);
-                        size = new Point(size.X - start.X, _rendererText.Height);
-
-                        batcher.Draw
-                        (
-                            SolidColorTextureCache.GetTexture(SELECTION_COLOR),
-                            new Rectangle
-                            (
-                                x + start.X,
-                                y + start.Y,
-                                size.X,
-                                size.Y
-                            ),
-                            hueVector
-                        );
-                    }
-                }
-
-                public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-                {
-                    int slideX = x - GetXOffset();
-
-                    if (batcher.ClipBegin(x, y, Width, Height))
-                    {
-                        base.Draw(batcher, x, y);
-                        DrawSelection(batcher, slideX, y);
-                        _rendererText.Draw(batcher, slideX, y);
-                        DrawCaret(batcher, slideX, y);
-                        batcher.ClipEnd();
-                    }
-
-                    return true;
-                }
-
-                protected virtual void DrawCaret(UltimaBatcher2D batcher, int x, int y)
-                {
-                    if (HasKeyboardFocus)
-                    {
-                        _rendererCaret.Draw(batcher, x + _caretScreenPosition.X, y + _caretScreenPosition.Y);
-                    }
-                }
-
-                protected override void OnMouseDown(int x, int y, MouseButtonType button)
-                {
-                    if (button == MouseButtonType.Left && IsEditable)
-                    {
-                        if (!NoSelection)
-                        {
-                            _leftWasDown = true;
-                        }
-
-                        Click(new Point(x + ScreenCoordinateX + GetXOffset(), y + ScreenCoordinateY));
-                    }
-
-                    base.OnMouseDown(x, y, button);
-                }
-
-                protected override void OnMouseUp(int x, int y, MouseButtonType button)
-                {
-                    if (button == MouseButtonType.Left)
-                    {
-                        _leftWasDown = false;
-                    }
-
-                    base.OnMouseUp(x, y, button);
-                }
-
-                protected override void OnMouseOver(int x, int y)
-                {
-                    base.OnMouseOver(x, y);
-
-                    if (!_leftWasDown)
-                    {
-                        return;
-                    }
-
-                    Drag(new Point(x + ScreenCoordinateX + GetXOffset(), y + ScreenCoordinateY));
-                }
-
-                public override void Dispose()
-                {
-                    _rendererText?.Dispose();
-                    _rendererCaret?.Dispose();
-
-                    base.Dispose();
-                }
-
-                protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
-                {
-                    if (!NoSelection && CaretIndex < Text.Length && CaretIndex >= 0 && !char.IsWhiteSpace(Text[CaretIndex]))
-                    {
-                        int idx = CaretIndex;
-
-                        if (idx - 1 >= 0 && char.IsWhiteSpace(Text[idx - 1]))
-                        {
-                            ++idx;
-                        }
-
-                        SelectionStart = Stb.MoveToPreviousWord(idx);
-                        SelectionEnd = Stb.MoveToNextWord(idx);
-
-                        if (SelectionEnd < Text.Length)
-                        {
-                            --SelectionEnd;
-                        }
-
-                        return true;
-                    }
-
-                    return base.OnMouseDoubleClick(x, y, button);
-                }
-            }
         }
 
         private class InfoBarBuilderControl : Control
@@ -6264,7 +5429,7 @@ namespace ClassicUO.Game.UI.Gumps
             public InfoBarBuilderControl(InfoBarItem item, mainScrollArea content)
             {
                 AcceptMouseInput = true;
-                infoLabel = new InputField(130, 40, text: item.label, onTextChanges: (s, e) => { item.label = ((InputField.StbTextBox)s).Text; UIManager.GetGump<InfoBarGump>()?.ResetItems(); }) { X = 5 };
+                infoLabel = new InputField(130, 40, text: item.label, onTextChanges: (s, e) => { item.label = infoLabel.Text; UIManager.GetGump<InfoBarGump>()?.ResetItems(); }) { X = 5 };
 
                 string[] dataVars = InfoBarManager.GetVars();
 
@@ -6633,13 +5798,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             public int ButtonParameter { get; set; }
             public bool FullPageSwitch { get; set; }
-            internal TextBox TextLabel { get; }
+            internal UOLabel TextLabel { get; }
 
             public SidebarButton(int x, int y, int w, int h, ButtonAction action, string text, Color iconColor) : base(x, y, w, h)
             {
                 _action = action;
                 _iconColor = iconColor;
-                Add(TextLabel = new TextBox(text, Theme.FONT, Theme.STANDARD_TEXT_SIZE, w - 40, Theme.BUTTON_FONT_COLOR, FontStashSharp.RichText.TextHorizontalAlignment.Left, false) { X = 38 });
+                Add(TextLabel = new UOLabel(text, Theme.FONT, 0x0481, Assets.TEXT_ALIGN_TYPE.TS_LEFT, w - 40, FontStyle.None) { X = 38 });
                 TextLabel.Y = (h - TextLabel.Height) >> 1;
                 ModernOptionsGump.SearchValueChanged += OnSearchChanged;
             }
@@ -6760,7 +5925,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add
                 (
-                    TextLabel = new TextBox(text, Theme.FONT, Theme.STANDARD_TEXT_SIZE + 4, w, fontColor, align, false)
+                    TextLabel = new UOLabel(text, Theme.FONT, 0x0481, Assets.TEXT_ALIGN_TYPE.TS_LEFT, w, FontStyle.None)
                 );
 
                 TextLabel.Y = (h - TextLabel.Height) >> 1;
@@ -6789,7 +5954,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            internal TextBox TextLabel { get; }
+            internal UOLabel TextLabel { get; }
 
             public int ButtonParameter { get; set; }
 
@@ -7249,8 +6414,8 @@ namespace ClassicUO.Game.UI.Gumps
             public MacroControl(string name)
             {
                 CanMove = true;
-                TextBox _keyBinding;
-                Add(_keyBinding = new TextBox("Hotkey", Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false));
+                UOLabel _keyBinding;
+                Add(_keyBinding = new UOLabel("Hotkey", Theme.FONT, 0x0481, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 0, FontStyle.None));
 
                 _hotkeyBox = new HotkeyBox();
                 _hotkeyBox.HotkeyChanged += BoxOnHotkeyChanged;
@@ -7663,7 +6828,7 @@ namespace ClassicUO.Game.UI.Gumps
                             {
                                 if (obj.HasString())
                                 {
-                                    ((MacroObjectString)obj).Text = ((InputField.StbTextBox)s).Text;
+                                    ((MacroObjectString)obj).Text = ((ClassicUO.Game.UI.Controls.StbTextBox)s).Text;
                                 }
                             })
                             {
@@ -7740,7 +6905,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private bool _actived;
             private readonly ModernButton _buttonOK, _buttonCancel;
-            private readonly TextBox _label;
+            private readonly UOLabel _label;
 
             public HotkeyBox()
             {
@@ -7755,7 +6920,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(bg);
                 bg.MouseUp += LabelOnMouseUp;
 
-                Add(_label = new TextBox("None", Theme.FONT, Theme.STANDARD_TEXT_SIZE, 150, Theme.TEXT_FONT_COLOR, align: FontStashSharp.RichText.TextHorizontalAlignment.Center, strokeEffect: false));
+                Add(_label = new UOLabel("None", Theme.FONT, 0x0481, Assets.TEXT_ALIGN_TYPE.TS_CENTER, 150, FontStyle.None));
                 _label.Y = (bg.Height >> 1) - (_label.Height >> 1);
 
                 _label.MouseUp += LabelOnMouseUp;
@@ -8082,9 +7247,9 @@ namespace ClassicUO.Game.UI.Gumps
                 cb.TextLabel.Hue = ProfileManager.CurrentProfile.InvulnerableHue;
             }
 
-            private TextBox AddLabel(string name)
+            private UOLabel AddLabel(string name)
             {
-                var label = new TextBox(name, Theme.FONT, Theme.STANDARD_TEXT_SIZE, null, Theme.TEXT_FONT_COLOR, strokeEffect: false);
+                var label = new UOLabel(name, Theme.FONT, 0x0481, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 0, FontStyle.None);
 
                 Add(label);
 
@@ -8240,7 +7405,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (!string.IsNullOrEmpty(OptionLabel))
                 {
-                    Control labelTextBox = new TextBox(OptionLabel, Theme.FONT, Theme.STANDARD_TEXT_SIZE + 4, null, Theme.TEXT_FONT_COLOR, strokeEffect: false) { AcceptMouseInput = false };
+                    Control labelTextBox = new UOLabel(OptionLabel, Theme.FONT, 0x0481, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 0, FontStyle.None) { AcceptMouseInput = false };
                     FullControl.Add(labelTextBox, (int)optionsPage);
 
                     if (labelTextBox.Width > maxTotalWidth)
@@ -8372,7 +7537,8 @@ namespace ClassicUO.Game.UI.Gumps
             [JsonConverter(typeof(ColorJsonConverter))]
             public Color TEXT_FONT_COLOR { get; set; } = Color.White;
 
-            public string FONT { get; set; } = TrueTypeLoader.EMBEDDED_FONT;
+            [JsonConverter(typeof(UOFontIndexConverter))]
+            public byte FONT { get; set; } = 1;
         }
 
         private static class PositionHelper
@@ -8427,7 +7593,7 @@ namespace ClassicUO.Game.UI.Gumps
             private readonly AlphaBlendControl _dropZone;
             private readonly HotkeyBox _hotkeyBox;
             private readonly ComboBoxWithLabel _targetCombo;
-            private readonly TextBox _slotNumberBox;
+            private readonly UOLabel _slotNumberBox;
 
             public int SlotIndex { get; private set; }
 
@@ -8441,7 +7607,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = 460;
                 Height = 44;
 
-                _slotNumberBox = new TextBox((slotIndex + 1).ToString(), Theme.FONT, Theme.STANDARD_TEXT_SIZE, 40, Theme.TEXT_FONT_COLOR, FontStashSharp.RichText.TextHorizontalAlignment.Center, false) { X = 5, Y = 10 };
+                _slotNumberBox = new UOLabel((slotIndex + 1).ToString(), Theme.FONT, 0x0481, Assets.TEXT_ALIGN_TYPE.TS_CENTER, 40, FontStyle.None) { X = 5, Y = 10 };
                 Add(_slotNumberBox);
 
                 _dropZone = new AlphaBlendControl(0.3f) { X = 50, Y = 2, Width = 44, Height = 44, BaseColor = Color.Gray };

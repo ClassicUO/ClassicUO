@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -116,7 +116,6 @@ namespace ClassicUO.Assets
                 SoundsLoader.Instance.Load(),
                 MultiMapLoader.Instance.Load(),
                 PNGLoader.Instance.Load(),
-                TrueTypeLoader.Instance.Load()
             };
 
             if (!Task.WhenAll(tasks).Wait(TimeSpan.FromSeconds(15)))

@@ -1,5 +1,6 @@
-﻿using ClassicUO.Assets;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -57,14 +58,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new AlphaBlendControl(0.65f) { Width = Width, Height = 75, Hue = 997 });
 
-            TextBox _;
-            Add(_ = new TextBox(isPurchaseGump ? "Shop Inventory" : "Your Inventory", TrueTypeLoader.EMBEDDED_FONT, 30, Width, Color.LightBlue, FontStashSharp.RichText.TextHorizontalAlignment.Center, false) { AcceptMouseInput = false });
-            _.Y = (50 - _.MeasuredSize.Y) / 2;
+            UOLabel _;
+            Add(_ = new UOLabel(isPurchaseGump ? "Shop Inventory" : "Your Inventory", 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_CENTER, Width));
+            _.Y = (50 - _.Height) / 2;
 
-            Add(_ = new TextBox("Item", TrueTypeLoader.EMBEDDED_FONT, 20, 75, Color.White, strokeEffect: false) { X = 5, AcceptMouseInput = false });
+            Add(_ = new UOLabel("Item", 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 75) { X = 5 });
             _.Y = 55 - _.Height;
 
-            Add(_ = new TextBox("/c[white]Avail.\n/cdPrice per item", TrueTypeLoader.EMBEDDED_FONT, 20, 150, Color.Gold, FontStashSharp.RichText.TextHorizontalAlignment.Right, false) { AcceptMouseInput = false });
+            Add(_ = new UOLabel("Avail.\nPrice per item", 1, UOLabelHue.Hover, Assets.TEXT_ALIGN_TYPE.TS_RIGHT, 150));
             _.Y = 55 - _.Height;
             _.X = Width - 1 - _.Width - 5;
 
@@ -195,7 +196,8 @@ namespace ClassicUO.Game.UI.Gumps
             BuySellButton buySellButton;
             private readonly bool isPurchase;
             private readonly uint gumpSerial;
-            TextBox textBoxName;
+            UOLabel textBoxName;
+            UOLabel countTB;
 
             public ShopItem(uint serial, ushort graphic, ushort hue, int count, uint price, string name, int width, int height, bool isPurchase, uint gumpSerial)
             {
@@ -222,21 +224,22 @@ namespace ClassicUO.Game.UI.Gumps
                 purchaseSell = new Area(false) { Width = Width - Height, Height = Height, X = Height, AcceptMouseInput = false, IsVisible = false };
 
                 #region ITEM INFO
-                TextBox _;
-                itemInfo.Add(textBoxName = new TextBox(Name, TrueTypeLoader.EMBEDDED_FONT, 25, ITEM_DESCPTION_WIDTH - Height, Color.White, strokeEffect: false) { AcceptMouseInput = false });
-                textBoxName.Y = (itemInfo.Height - textBoxName.MeasuredSize.Y) / 2;
+                textBoxName = new UOLabel(Name, 2, 0, Assets.TEXT_ALIGN_TYPE.TS_LEFT, ITEM_DESCPTION_WIDTH - Height, Game.FontStyle.None);
+                textBoxName.Y = (itemInfo.Height - textBoxName.Height) / 2;
+                itemInfo.Add(textBoxName);
 
-                TextBox countTB;
-                itemInfo.Add(countTB = new TextBox($"x{count}", TrueTypeLoader.EMBEDDED_FONT, 20, ITEM_DESCPTION_WIDTH - Height, Color.WhiteSmoke, FontStashSharp.RichText.TextHorizontalAlignment.Right, false) { Y = 3, AcceptMouseInput = false });
+                countTB = new UOLabel($"x{count}", 1, 0, Assets.TEXT_ALIGN_TYPE.TS_RIGHT, ITEM_DESCPTION_WIDTH - Height, Game.FontStyle.None) { Y = 3 };
                 countTB.X = itemInfo.Width - countTB.Width - 3;
+                itemInfo.Add(countTB);
 
-                itemInfo.Add(_ = new TextBox($"{price}gp", TrueTypeLoader.EMBEDDED_FONT, 25, ITEM_DESCPTION_WIDTH - Height, Color.Gold, FontStashSharp.RichText.TextHorizontalAlignment.Right, false) { AcceptMouseInput = false });
-                _.Y = itemInfo.Height - _.Height - 3;
-                _.X = itemInfo.Width - _.Width - 3;
+                var priceLabel = new UOLabel($"{price}gp", 2, 37, Assets.TEXT_ALIGN_TYPE.TS_RIGHT, ITEM_DESCPTION_WIDTH - Height, Game.FontStyle.None);
+                priceLabel.Y = itemInfo.Height - priceLabel.Height - 3;
+                priceLabel.X = itemInfo.Width - priceLabel.Width - 3;
+                itemInfo.Add(priceLabel);
                 #endregion
 
                 #region PURCHASE OR SELL
-                purchaseSell.Add(new TextBox($"How many would you like to {(isPurchase ? "buy" : "sell")} at /c[gold]{price}gp /cdeach?", TrueTypeLoader.EMBEDDED_FONT, 18, purchaseSell.Width - 76, Color.White, strokeEffect: false) { AcceptMouseInput = false });
+                purchaseSell.Add(new UOLabel($"How many would you like to {(isPurchase ? "buy" : "sell")} at {price}gp each?", 1, 0, Assets.TEXT_ALIGN_TYPE.TS_LEFT, purchaseSell.Width - 76, Game.FontStyle.None));
 
                 AlphaBlendControl sliderBG;
                 purchaseSell.Add(sliderBG = new AlphaBlendControl(0.5f) { Width = purchaseSell.Width - 78, Height = 5, Hue = 148, BaseColor = Color.White });
@@ -463,7 +466,7 @@ namespace ClassicUO.Game.UI.Gumps
             private class BuySellButton : Control
             {
                 private readonly bool isPurchase;
-                private TextBox text;
+                private UOLabel text;
 
                 public BuySellButton(bool isPurchase, int quantity, int price)
                 {
@@ -485,12 +488,12 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (text == null)
                     {
-                        text = new TextBox($"{(isPurchase ? "Buy" : "Sell")}\n{quantity}\n/c[Gold]{price * quantity}", TrueTypeLoader.EMBEDDED_FONT, 17, Width, Color.White, FontStashSharp.RichText.TextHorizontalAlignment.Center, true) { AcceptMouseInput = false };
+                        text = new UOLabel($"{(isPurchase ? "Buy" : "Sell")}\n{quantity}\n{price * quantity}", 1, 37, Assets.TEXT_ALIGN_TYPE.TS_CENTER, Width, Game.FontStyle.None);
                         Add(text);
                     }
                     else
                     {
-                        text.Text = $"{(isPurchase ? "Buy" : "Sell")}\n{quantity}\n/c[Gold]{price * quantity}";
+                        text.Text = $"{(isPurchase ? "Buy" : "Sell")}\n{quantity}\n{price * quantity}";
                     }
                 }
 

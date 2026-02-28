@@ -30,12 +30,14 @@
 
 #endregion
 
+using System;
+using System.Text.RegularExpressions;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
+using FontStyle = ClassicUO.Game.FontStyle;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
@@ -45,11 +47,11 @@ namespace ClassicUO.Game.UI
     {
         private uint _hash;
         private uint _lastHoverTime;
-        private TextBox _textBox;
+        private RenderedText _renderedText;
         private string _textHTML;
-        private bool _dirty = false;
+        private bool _dirty;
 
-        public static bool IsEnabled = false;
+        public static bool IsEnabled;
 
         public static int X, Y;
         public static int Width, Height;
@@ -69,124 +71,99 @@ namespace ClassicUO.Game.UI
             }
 
             if (string.IsNullOrEmpty(Text))
-            {
                 return false;
-            }
 
             if (_lastHoverTime > Time.Ticks)
-            {
                 return false;
-            }
 
             float alpha = 0.7f;
-            ushort hue = 0xFFFF;
-            float zoom = 1;
+            float zoom = 1f;
+            byte font = 1;
+            TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_CENTER;
 
             if (ProfileManager.CurrentProfile != null)
             {
                 alpha = ProfileManager.CurrentProfile.TooltipBackgroundOpacity / 100f;
-
                 if (float.IsNaN(alpha))
-                {
                     alpha = 0f;
-                }
-
-                hue = ProfileManager.CurrentProfile.TooltipTextHue;
                 zoom = ProfileManager.CurrentProfile.TooltipDisplayZoom / 100f;
+                font = ProfileManager.CurrentProfile.SelectedToolTipFont;
+                if (ProfileManager.CurrentProfile.LeftAlignToolTips)
+                    align = TEXT_ALIGN_TYPE.TS_LEFT;
+                if (SerialHelper.IsMobile(Serial) && ProfileManager.CurrentProfile.ForceCenterAlignTooltipMobiles)
+                    align = TEXT_ALIGN_TYPE.TS_CENTER;
             }
 
-
-            if (_textBox == null || _dirty)
+            string finalString = _textHTML;
+            if (SerialHelper.IsItem(Serial))
             {
-                FontStashSharp.RichText.TextHorizontalAlignment align = FontStashSharp.RichText.TextHorizontalAlignment.Center;
-                if (ProfileManager.CurrentProfile != null)
-                {
-                    if (ProfileManager.CurrentProfile.LeftAlignToolTips)
-                        align = FontStashSharp.RichText.TextHorizontalAlignment.Left;
-                    if (SerialHelper.IsMobile(Serial) && ProfileManager.CurrentProfile.ForceCenterAlignTooltipMobiles)
-                        align = FontStashSharp.RichText.TextHorizontalAlignment.Center;
-                }
+                finalString = Managers.ToolTipOverrideData.ProcessTooltipText(Serial);
+                finalString ??= _textHTML;
+            }
 
-                string finalString = _textHTML;
-                if (SerialHelper.IsItem(Serial))
-                {
-                    finalString = Managers.ToolTipOverrideData.ProcessTooltipText(Serial);
-                    finalString ??= _textHTML;
-                }
+            if (string.IsNullOrEmpty(finalString) && !string.IsNullOrEmpty(_textHTML))
+                finalString = Managers.ToolTipOverrideData.ProcessTooltipText(_textHTML);
 
-                if (string.IsNullOrEmpty(finalString) && !string.IsNullOrEmpty(_textHTML)) //Fix for vendor search
-                    finalString = Managers.ToolTipOverrideData.ProcessTooltipText(_textHTML);
+            string displayText = Regex.Replace(finalString ?? string.Empty, @"/c\[(black|#000000|#000)\]", "/c[white]", RegexOptions.IgnoreCase);
+            displayText = HtmlTextHelper.ConvertUoColorCodesToHtml(displayText).Trim();
+            displayText = Regex.Replace(displayText, @"color\s*=\s*[\""']?(black|#000000|#000)[\""']?", "color=\"#FFFFFF\"", RegexOptions.IgnoreCase);
+            if (!displayText.StartsWith("<basefont", StringComparison.OrdinalIgnoreCase) && !displayText.StartsWith("<font", StringComparison.OrdinalIgnoreCase) && !displayText.StartsWith("/c["))
+                displayText = "<basefont color=\"#FFFFFF\">" + displayText;
 
-                var profile = ProfileManager.CurrentProfile;
-                string font = profile?.SelectedToolTipFont ?? "Roboto-Regular";
-                int fontSize = profile?.SelectedToolTipFontSize ?? 20;
+            ushort hue = 0xFFFF;
+            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.TooltipTextHue != 0xFFFF)
+                hue = ProfileManager.CurrentProfile.TooltipTextHue;
 
-                _textBox = new TextBox(
-                    TextBox.ConvertHtmlToFontStashSharpCommand(finalString).Trim(),
-                    font,
-                    fontSize,
-                    600,
+            if (_renderedText == null || _dirty)
+            {
+                _renderedText?.Destroy();
+                _renderedText = RenderedText.Create
+                (
+                    displayText,
                     hue,
+                    font,
+                    isunicode: true,
+                    style: FontStyle.BlackBorder,
                     align,
-                    true
+                    maxWidth: 600,
+                    cell: 5,
+                    isHTML: true,
+                    recalculateWidthByInfo: true
                 );
-                _textBox.Width = _textBox.MeasuredSize.X + 10;
-                if (_textBox.Width > 600)
-                    _textBox.Width = 600;
-
+                _renderedText.HTMLColor = 0xFFFFFFFF;
+                _dirty = false;
                 IsEnabled = true;
             }
-
-            if (_textBox == null || _textBox.IsDisposed)
+            else if (_renderedText.Text != displayText)
             {
+                _renderedText.MaxWidth = 600;
+                _renderedText.Font = font;
+                _renderedText.Hue = hue;
+                _renderedText.Text = displayText;
+            }
+
+            if (_renderedText == null || _renderedText.Texture == null || _renderedText.Texture.IsDisposed)
                 return false;
-            }
 
-            int z_width = _textBox.Width + 8;
-            int z_height = _textBox.Height + 8;
+            int z_width = _renderedText.Width + 8;
+            int z_height = _renderedText.Height + 8;
 
-            if (x < 0)
-            {
-                x = 0;
-            }
-            else if (x > Client.Game.Window.ClientBounds.Width - z_width)
-            {
-                x = Client.Game.Window.ClientBounds.Width - z_width;
-            }
-
-            if (y < 0)
-            {
-                y = 0;
-            }
-            else if (y > Client.Game.Window.ClientBounds.Height - z_height)
-            {
-                y = Client.Game.Window.ClientBounds.Height - z_height;
-            }
+            if (x < 0) x = 0;
+            else if (x > Client.Game.Window.ClientBounds.Width - z_width) x = Client.Game.Window.ClientBounds.Width - z_width;
+            if (y < 0) y = 0;
+            else if (y > Client.Game.Window.ClientBounds.Height - z_height) y = Client.Game.Window.ClientBounds.Height - z_height;
 
             X = x - 4;
             Y = y - 2;
             Width = (int)(z_width * zoom) + 1;
             Height = (int)(z_height * zoom) + 1;
 
-            Vector3 hue_vec = ShaderHueTranslator.GetHueVector(1, false, alpha);
-
-            if (ProfileManager.CurrentProfile != null)
-                hue_vec.X = ProfileManager.CurrentProfile.ToolTipBGHue - 1;
-
             batcher.Draw
             (
-                SolidColorTextureCache.GetTexture(Color.White),
-                new Rectangle
-                (
-                    x - 4,
-                    y - 2,
-                    (int)(z_width * zoom),
-                    (int)(z_height * zoom)
-                ),
-                hue_vec
+                SolidColorTextureCache.GetTexture(Color.Black),
+                new Rectangle(x - 4, y - 2, (int)(z_width * zoom), (int)(z_height * zoom)),
+                ShaderHueTranslator.GetHueVector(0, false, alpha)
             );
-
-            hue_vec = ShaderHueTranslator.GetHueVector(0, false, alpha);
 
             batcher.DrawRectangle
             (
@@ -195,10 +172,16 @@ namespace ClassicUO.Game.UI
                 y - 2,
                 (int)(z_width * zoom),
                 (int)(z_height * zoom),
-                hue_vec
+                ShaderHueTranslator.GetHueVector(0, false, alpha)
             );
 
-            _textBox.Draw(batcher, x, y);
+            batcher.Draw
+            (
+                _renderedText.Texture,
+                new Rectangle(x + 4, y + 4, (int)(_renderedText.Width * zoom), (int)(_renderedText.Height * zoom)),
+                null,
+                ShaderHueTranslator.GetHueVector(0, false, 1f)
+            );
 
             return true;
         }
@@ -208,8 +191,8 @@ namespace ClassicUO.Game.UI
             Serial = 0;
             _hash = 0;
             _textHTML = Text = null;
-            _textBox?.Dispose();
-            _textBox = null;
+            _renderedText?.Destroy();
+            _renderedText = null;
             IsEnabled = false;
         }
 
@@ -224,7 +207,7 @@ namespace ClassicUO.Game.UI
                     Serial = serial;
                     _hash = revision2;
                     Text = ReadProperties(serial, out _textHTML);
-                    _textBox?.Dispose();
+                    _renderedText?.Destroy();
                     _dirty = true;
 
                     _lastHoverTime = (uint)(Time.Ticks + (ProfileManager.CurrentProfile != null ? ProfileManager.CurrentProfile.TooltipDelayBeforeDisplay : 250));
@@ -306,8 +289,8 @@ namespace ClassicUO.Game.UI
 
             _lastHoverTime = (uint)(Time.Ticks + (ProfileManager.CurrentProfile != null ? ProfileManager.CurrentProfile.TooltipDelayBeforeDisplay : 250));
 
-            _textBox?.Dispose();
-            _textBox = null;
+            _renderedText?.Destroy();
+            _renderedText = null;
         }
     }
 }

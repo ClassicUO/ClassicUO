@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
@@ -18,7 +18,6 @@
     <None Remove="gumpartassets\modern-paperdollgump.png" />
     <None Remove="gumpartassets\loginbg.png" />
     <None Remove="gumpartassets\logodust.png" />
-    <None Remove="Roboto-Regular.ttf" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,7 +34,6 @@
     <EmbeddedResource Include="gumpartassets\modern-paperdollgump.png" />
     <EmbeddedResource Include="gumpartassets\loginbg.png" />
     <EmbeddedResource Include="gumpartassets\logodust.png" />
-    <EmbeddedResource Include="Roboto-Regular.ttf" />
   </ItemGroup>
 
   <ItemGroup>

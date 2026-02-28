@@ -33,6 +33,7 @@
 using System;
 using System.Linq;
 using ClassicUO.Configuration;
+using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -109,7 +110,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             byte font = (byte)(isAsianLang ? 1 : 2);
             ushort hue = (ushort)(isAsianLang ? 0 : 0);
 
-            Add(new TextBox(ClilocLoader.Instance.GetString(3000050, "Character Selection"), TrueTypeLoader.EMBEDDED_FONT, 30, 300, Color.DarkRed, strokeEffect: true) { X = LoginLayoutHelper.CenterOffsetX(300), Y = LoginLayoutHelper.Y(listTitleY), AcceptMouseInput = true });
+            Add(new UOLabel(ClilocLoader.Instance.GetString(3000050, "Character Selection"), 1, 32, TEXT_ALIGN_TYPE.TS_CENTER, 300, FontStyle.BlackBorder) { X = LoginLayoutHelper.CenterOffsetX(300), Y = LoginLayoutHelper.Y(listTitleY) });
 
 
             for (int i = 0, valid = 0; i < loginScene.Characters.Length; i++)
@@ -451,7 +452,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         public class CharacterEntryGump : Control
         {
-            public TextBox _label;
+            public UOLabel _label;
             private readonly Action<uint> _loginFn;
             private readonly Action<uint> _selectedFn;
             private readonly Action<uint> _hoverFn;
@@ -585,7 +586,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 // Char Name
                 Add
                (
-                   _label = new TextBox(character, TrueTypeLoader.EMBEDDED_FONT, 16, 190, Color.DarkRed, align: TextHorizontalAlignment.Center, strokeEffect: true) { AcceptMouseInput = true }
+                   _label = new UOLabel(character, 1, 32, TEXT_ALIGN_TYPE.TS_CENTER, 190, FontStyle.BlackBorder)
 
                );
 
