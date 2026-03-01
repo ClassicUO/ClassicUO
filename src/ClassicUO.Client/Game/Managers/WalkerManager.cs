@@ -97,6 +97,8 @@ namespace ClassicUO.Game.Managers
 
                 _player.SetInWorldTile((ushort) x, (ushort) y, z);
             }
+
+            _player.SyncServerDirection();
         }
 
         public void ConfirmWalk(byte sequence)
