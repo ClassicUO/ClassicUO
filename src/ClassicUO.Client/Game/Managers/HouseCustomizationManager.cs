@@ -563,6 +563,64 @@ namespace ClassicUO.Game.Managers
                         }
                     }
                 }
+
+                // After both validation passes, flood-fill propagate correctness
+                // from walls with direct support to connected same-floor walls.
+                // This fixes processing-order dependency in same-floor propagation.
+                if (i > 0)
+                {
+                    var propagationQueue = new Queue<Multi>();
+
+                    const CUSTOM_HOUSE_MULTI_OBJECT_FLAGS excludeMask =
+                        CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR |
+                        CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR |
+                        CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF |
+                        CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE |
+                        CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL;
+
+                    // Seed: all wall-type items on this floor that are validated and correct.
+                    for (int x = _bounds.X; x < EndPos.X + 1; x++)
+                    {
+                        for (int y = _bounds.Y; y < EndPos.Y + 1; y++)
+                        {
+                            foreach (Multi item in house.GetMultiAt(x, y))
+                            {
+                                if (item.IsCustom &&
+                                    item.Z >= minZ && item.Z < maxZ &&
+                                    (item.State & excludeMask) == 0 &&
+                                    (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0 &&
+                                    (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0)
+                                {
+                                    propagationQueue.Enqueue(item);
+                                }
+                            }
+                        }
+                    }
+
+                    int[] pdx = { -1, 1, 0, 0 };
+                    int[] pdy = { 0, 0, -1, 1 };
+
+                    while (propagationQueue.Count > 0)
+                    {
+                        Multi seed = propagationQueue.Dequeue();
+
+                        for (int d = 0; d < 4; d++)
+                        {
+                            foreach (Multi neighbor in house.GetMultiAt(seed.X + pdx[d], seed.Y + pdy[d]))
+                            {
+                                if (neighbor.IsCustom &&
+                                    neighbor.Z >= minZ && neighbor.Z < maxZ &&
+                                    (neighbor.State & excludeMask) == 0 &&
+                                    (neighbor.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0 &&
+                                    (neighbor.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) != 0)
+                                {
+                                    neighbor.State &= ~CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE;
+                                    propagationQueue.Enqueue(neighbor);
+                                }
+                            }
+                        }
+                    }
+                }
             }
 
             z = foundationItem.Z + 7 + 20;
@@ -1620,26 +1678,98 @@ namespace ClassicUO.Game.Managers
                     }
                 }
 
-                // if ((item.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR |
-                //                    CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF |
-                //                    CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR |
-                //                    CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE)) == 0)
-                // {
-                //     var multis = house.GetMultiAt(item.X, item.Y).Where(s => s.IsCustom && s.Z < item.Z - 20);
-                //
-                //     if (multis.Any())
-                //     {
-                //         if (multis.Any(s => (s.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) != 0))
-                //             return false;
-                //
-                //         if (!multis.Any
-                //             (
-                //                 s => (s.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF |
-                //                                  CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_DONT_REMOVE)) == 0
-                //             ))
-                //             return false;
-                //     }
-                // }
+            }
+
+            if (minZ > foundationItem.Z + 7)
+            {
+                int belowMinZ = minZ - 20;
+
+                // 1) Check same position on the floor below for wall-type support.
+                bool foundAnyWallBelow = false;
+                bool hasFloorTileBelow = false;
+
+                foreach (Multi below in house.GetMultiAt(item.X, item.Y))
+                {
+                    if (below.IsCustom && below.Z >= belowMinZ && below.Z < minZ)
+                    {
+                        if ((below.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0 &&
+                            (below.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) == 0)
+                        {
+                            hasFloorTileBelow = true;
+                        }
+
+                        if ((below.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR |
+                                           CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR |
+                                           CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF |
+                                           CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE |
+                                           CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL)) == 0)
+                        {
+                            foundAnyWallBelow = true;
+
+                            if ((below.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0)
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+
+                if (foundAnyWallBelow)
+                {
+                    return false;
+                }
+
+                // 2) No wall at same position below. If there's a floor tile below,
+                //    check ±1 adjacent positions on the floor below for wall support.
+                if (hasFloorTileBelow)
+                {
+                    int[] adx = { -1, 1, 0, 0 };
+                    int[] ady = { 0, 0, -1, 1 };
+
+                    for (int d = 0; d < 4; d++)
+                    {
+                        foreach (Multi adj in house.GetMultiAt(item.X + adx[d], item.Y + ady[d]))
+                        {
+                            if (adj.IsCustom &&
+                                adj.Z >= belowMinZ && adj.Z < minZ &&
+                                (adj.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR |
+                                             CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR |
+                                             CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF |
+                                             CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE |
+                                             CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL)) == 0 &&
+                                (adj.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0)
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+
+                // 3) No below-support. Check if there's a validated same-floor wall
+                //    neighbor (propagation from walls that do have below-support).
+                int[] dx = { -1, 1, 0, 0 };
+                int[] dy = { 0, 0, -1, 1 };
+
+                for (int d = 0; d < 4; d++)
+                {
+                    foreach (Multi neighbor in house.GetMultiAt(item.X + dx[d], item.Y + dy[d]))
+                    {
+                        if (neighbor.IsCustom &&
+                            neighbor.Z >= minZ && neighbor.Z < maxZ &&
+                            (neighbor.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR |
+                                              CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR |
+                                              CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF |
+                                              CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE |
+                                              CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL)) == 0 &&
+                            (neighbor.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0 &&
+                            (neighbor.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0)
+                        {
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
             }
 
             return true;
