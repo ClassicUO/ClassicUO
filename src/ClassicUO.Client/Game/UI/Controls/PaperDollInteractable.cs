@@ -226,19 +226,28 @@ namespace ClassicUO.Game.UI.Controls
             bool useStitchin = stitchin != null && stitchin.IsLoaded;
             Mobile.StitchinCache stCache = useStitchin ? mobile.EnsureStitchinCache() : null;
 
-            // If the torso has a stitchin replacement, its gump may visually cover
-            // the arms area. Swap draw order so arms render on top of torso.
-            if (!switch_arms_with_torso && stCache != null)
+            // If the torso's stitchin entry replaces the shirt AND the torso's
+            // coveredBy extends beyond its covers, it's a smaller garment (e.g.
+            // female bustier 923) that should be drawn underneath the shirt
+            // sleeves.  Full garments (e.g. leather tunic 542) where coveredBy
+            // equals covers keep the default order (torso on top).
+            bool switch_shirt_with_torso = false;
+            if (stCache != null)
             {
-                Item torso = mobile.FindItemByLayer(Layer.Torso);
+                Item torsoItem = mobile.FindItemByLayer(Layer.Torso);
+                Item shirtItem = mobile.FindItemByLayer(Layer.Shirt);
 
-                if (torso != null)
+                if (torsoItem != null && shirtItem != null)
                 {
-                    ushort torsoEffective = stCache.LayerEffectiveAnimID[(byte)Layer.Torso];
+                    ushort torsoAnim = torsoItem.ItemData.AnimID;
+                    ushort shirtAnim = shirtItem.ItemData.AnimID;
 
-                    if (torsoEffective != 0 && torsoEffective != torso.ItemData.AnimID)
+                    if (stitchin.TryGetEntry(torsoAnim, out StitchinEntry torsoSt)
+                        && torsoSt.Replacements != null
+                        && torsoSt.Replacements.ContainsKey(shirtAnim)
+                        && (torsoSt.CoveredBy & ~torsoSt.Covers) != 0)
                     {
-                        switch_arms_with_torso = true;
+                        switch_shirt_with_torso = true;
                     }
                 }
             }
@@ -247,7 +256,18 @@ namespace ClassicUO.Game.UI.Controls
             {
                 Layer layer = layers[i];
 
-                if (switch_arms_with_torso)
+                if (switch_shirt_with_torso)
+                {
+                    // Paperdoll order is Shirt(1) < Arms(5) < Torso(6).
+                    // We need Torso < Shirt < Arms, so do a 3-way rotation.
+                    if (layer == Layer.Shirt)
+                        layer = Layer.Torso;
+                    else if (layer == Layer.Arms)
+                        layer = Layer.Shirt;
+                    else if (layer == Layer.Torso)
+                        layer = Layer.Arms;
+                }
+                else if (switch_arms_with_torso)
                 {
                     if (layer == Layer.Arms)
                     {

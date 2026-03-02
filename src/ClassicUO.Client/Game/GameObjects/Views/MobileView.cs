@@ -364,9 +364,41 @@ namespace ClassicUO.Game.GameObjects
                 bool useStitchin = isHuman && stitchin != null && stitchin.IsLoaded;
                 StitchinCache stCache = useStitchin ? EnsureStitchinCache() : null;
 
+                // If the torso's stitchin entry replaces the shirt AND the torso's
+                // coveredBy extends beyond its covers, it's a smaller garment (e.g.
+                // female bustier 923) that should be drawn underneath the shirt
+                // sleeves.  Full garments (e.g. leather tunic 542) where coveredBy
+                // equals covers keep the default order (torso on top).
+                bool switchShirtWithTorso = false;
+                if (stCache != null)
+                {
+                    Item torsoItem = FindItemByLayer(Layer.Torso);
+                    Item shirtItem = FindItemByLayer(Layer.Shirt);
+                    if (torsoItem != null && shirtItem != null)
+                    {
+                        ushort torsoAnim = torsoItem.ItemData.AnimID;
+                        ushort shirtAnim = shirtItem.ItemData.AnimID;
+                        if (stitchin.TryGetEntry(torsoAnim, out StitchinEntry torsoSt)
+                            && torsoSt.Replacements != null
+                            && torsoSt.Replacements.ContainsKey(shirtAnim)
+                            && (torsoSt.CoveredBy & ~torsoSt.Covers) != 0)
+                        {
+                            switchShirtWithTorso = true;
+                        }
+                    }
+                }
+
                 for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
                 {
                     Layer layer = LayerOrder.UsedLayers[layerDir, i];
+
+                    if (switchShirtWithTorso)
+                    {
+                        if (layer == Layer.Shirt)
+                            layer = Layer.Torso;
+                        else if (layer == Layer.Torso)
+                            layer = Layer.Shirt;
+                    }
 
                     Item item = FindItemByLayer(layer);
 
