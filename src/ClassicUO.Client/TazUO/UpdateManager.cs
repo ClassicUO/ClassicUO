@@ -2,8 +2,10 @@ using System;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using ClassicUO;
+using ClassicUO.Game;
 
-namespace ClassicUO.Game.Managers
+namespace ClassicUO.TazUO
 {
     internal static class UpdateManager
     {
@@ -152,6 +154,5 @@ namespace ClassicUO.Game.Managers
             public string type { get; set; }
             public bool site_admin { get; set; }
         }
-
     }
 }

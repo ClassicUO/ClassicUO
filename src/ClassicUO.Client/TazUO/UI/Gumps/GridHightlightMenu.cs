@@ -1,6 +1,10 @@
-﻿using ClassicUO.Configuration;
+using ClassicUO.Configuration;
+using ClassicUO.Game;
 using ClassicUO.Game.Managers;
+using ClassicUO.Input;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Game.UI.Gumps;
+using OptionsGump = ClassicUO.Game.UI.Gumps.OptionsGump;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
@@ -10,22 +14,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
-using static ClassicUO.Game.UI.Gumps.OptionsGump;
 
-namespace ClassicUO.Game.UI.Gumps
+namespace ClassicUO.TazUO.UI.Gumps
 {
     internal class GridHightlightMenu : Gump
     {
         private const int WIDTH = 350, HEIGHT = 500;
         private AlphaBlendControl background;
-        private SettingsSection highlightSection;
+        private OptionsGump.SettingsSection highlightSection;
         private ScrollArea highlightSectionScroll;
 
         public GridHightlightMenu(int x = 100, int y = 100) : base(0, 0)
         {
-            #region SET VARS
             Width = WIDTH;
             Height = HEIGHT;
             CanMove = true;
@@ -33,59 +34,49 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
             X = x;
             Y = y;
-            #endregion
-
             BuildGump();
         }
 
         private void BuildGump()
         {
-            {
-                background = new AlphaBlendControl(0.85f);
-                background.Width = WIDTH;
-                background.Height = HEIGHT;
-                Add(background);
-            }//Background
+            background = new AlphaBlendControl(0.85f);
+            background.Width = WIDTH;
+            background.Height = HEIGHT;
+            Add(background);
             int y = 0;
+            OptionsGump.SettingsSection section = new OptionsGump.SettingsSection("Grid highlighting settings", WIDTH);
+            section.Add(new Label("You can add object properties that you would like the grid to be highlighted for here.", true, 0xffff, WIDTH));
+
+            NiceButton _;
+            section.Add(_ = new NiceButton(0, 0, 40, 20, ButtonAction.Activate, "Add +") { IsSelectable = false });
+            _.MouseUp += (s, e) =>
             {
-                SettingsSection section = new SettingsSection("Grid highlighting settings", WIDTH);
-                section.Add(new Label("You can add object properties that you would like the grid to be highlighted for here.", true, 0xffff, WIDTH));
-
-                NiceButton _;
-                section.Add(_ = new NiceButton(0, 0, 40, 20, ButtonAction.Activate, "Add +") { IsSelectable = false });
-                _.MouseUp += (s, e) =>
+                if (e.Button == Input.MouseButtonType.Left)
                 {
-                    if (e.Button == Input.MouseButtonType.Left)
-                    {
-                        highlightSectionScroll?.Add(NewAreaSection(ProfileManager.CurrentProfile.GridHighlight_Name.Count, y));
-                        y += 21;
-                    }
-                };
+                    highlightSectionScroll?.Add(NewAreaSection(ProfileManager.CurrentProfile.GridHighlight_Name.Count, y));
+                    y += 21;
+                }
+            };
 
-                section.AddRight(_ = new NiceButton(0, 0, 60, 20, ButtonAction.Activate, "Export") { IsSelectable = false });
-                _.MouseUp += (s, e) =>
-                {
-                    if (e.Button == Input.MouseButtonType.Left)
-                    {
-                        ExportGridHightlightSettings();
-                    }
-                };
+            section.AddRight(_ = new NiceButton(0, 0, 60, 20, ButtonAction.Activate, "Export") { IsSelectable = false });
+            _.MouseUp += (s, e) =>
+            {
+                if (e.Button == Input.MouseButtonType.Left)
+                    ExportGridHightlightSettings();
+            };
 
-                section.AddRight(_ = new NiceButton(0, 0, 60, 20, ButtonAction.Activate, "Import") { IsSelectable = false });
-                _.MouseUp += (s, e) =>
-                {
-                    if (e.Button == Input.MouseButtonType.Left)
-                    {
-                        ImportGridHighlightSettings();
-                    }
-                };
+            section.AddRight(_ = new NiceButton(0, 0, 60, 20, ButtonAction.Activate, "Import") { IsSelectable = false });
+            _.MouseUp += (s, e) =>
+            {
+                if (e.Button == Input.MouseButtonType.Left)
+                    ImportGridHighlightSettings();
+            };
 
-                Add(section);
-                y = section.Y + section.Height;
-            }//Top section
+            Add(section);
+            y = section.Y + section.Height;
 
-            highlightSection = new SettingsSection("", WIDTH) { Y = y };
-            highlightSection.Add(highlightSectionScroll = new ScrollArea(0, 0, WIDTH - 20, Height - y - 10, true) { ScrollbarBehaviour = ScrollbarBehaviour.ShowAlways }); ;
+            highlightSection = new OptionsGump.SettingsSection("", WIDTH) { Y = y };
+            highlightSection.Add(highlightSectionScroll = new ScrollArea(0, 0, WIDTH - 20, Height - y - 10, true) { ScrollbarBehaviour = ScrollbarBehaviour.ShowAlways });
 
             y = 0;
             for (int i = 0; i < ProfileManager.CurrentProfile.GridHighlight_Name.Count; i++)
@@ -93,7 +84,6 @@ namespace ClassicUO.Game.UI.Gumps
                 highlightSectionScroll.Add(NewAreaSection(i, y));
                 y += 21;
             }
-
             Add(highlightSection);
         }
 
@@ -126,8 +116,8 @@ namespace ClassicUO.Game.UI.Gumps
                 area.Add(new FadingLabel(10, "Saved", true, 0xff) { X = hueDisplay.X - 40, Y = hueDisplay.Y });
             };
 
-            InputField _name;
-            area.Add(_name = new InputField(0x0BB8, 0xFF, 0xFFFF, true, 120, 20) { X = 25, Y = y, AcceptKeyboardInput = true });
+            OptionsGump.InputField _name;
+            area.Add(_name = new OptionsGump.InputField(0x0BB8, 0xFF, 0xFFFF, true, 120, 20) { X = 25, Y = y, AcceptKeyboardInput = true });
             _name.SetText(data.Name);
 
             _name.TextChanged += (s, e) =>
@@ -158,7 +148,6 @@ namespace ClassicUO.Game.UI.Gumps
             };
 
             y += 20;
-
             return area;
         }
 
@@ -166,16 +155,13 @@ namespace ClassicUO.Game.UI.Gumps
         {
             List<GridHighlightData> data = new List<GridHighlightData>();
             for (int i = 0; i < ProfileManager.CurrentProfile.GridHighlight_Name.Count; i++)
-            {
                 data.Add(GridHighlightData.GetGridHighlightData(i));
-            }
             return data.ToArray();
         }
 
         public static async void ExportGridHightlightSettings()
         {
             GridHighlightData[] allData = GetAllGridHighlightData();
-
             try
             {
                 var fileName = await CrossPlatformFileDialog.ShowSaveFileDialog(
@@ -183,7 +169,6 @@ namespace ClassicUO.Game.UI.Gumps
                     "Json files (*.json)|*.json|All files (*.*)|*.*",
                     Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client")
                 );
-
                 if (!string.IsNullOrEmpty(fileName))
                 {
                     string result = JsonSerializer.Serialize(allData);
@@ -205,18 +190,14 @@ namespace ClassicUO.Game.UI.Gumps
                     "Json files (*.json)|*.json|All files (*.*)|*.*",
                     Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client")
                 );
-
                 if (!string.IsNullOrEmpty(fileName) && File.Exists(fileName))
                 {
                     try
                     {
                         string result = File.ReadAllText(fileName);
-
                         GridHighlightData[] imported = JsonSerializer.Deserialize<GridHighlightData[]>(result);
-
                         foreach (GridHighlightData importedData in imported)
                             importedData.Save();
-
                         UIManager.GetGump<GridHightlightMenu>()?.Dispose();
                         UIManager.Add(new GridHightlightMenu());
                     }
@@ -236,14 +217,12 @@ namespace ClassicUO.Game.UI.Gumps
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             base.Draw(batcher, x, y);
-
             batcher.DrawRectangle(
                 SolidColorTextureCache.GetTexture(Color.LightGray),
                 x - 1, y - 1,
                 WIDTH + 1, HEIGHT + 1,
                 new Vector3(0, 0, 1)
-                );
-
+            );
             return true;
         }
 
@@ -258,13 +237,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             public GridHighlightData()
             {
-
             }
 
             private GridHighlightData(int keyLoc)
             {
                 this.keyLoc = keyLoc;
-                if (ProfileManager.CurrentProfile.GridHighlight_Name.Count > keyLoc) //Key exists?
+                if (ProfileManager.CurrentProfile.GridHighlight_Name.Count > keyLoc)
                 {
                     Name = ProfileManager.CurrentProfile.GridHighlight_Name[keyLoc];
                     Hue = ProfileManager.CurrentProfile.GridHighlight_Hue[keyLoc];
@@ -280,8 +258,6 @@ namespace ClassicUO.Game.UI.Gumps
                     PropMinVal = new List<int>();
                     ProfileManager.CurrentProfile.GridHighlight_PropMinVal.Add(PropMinVal);
                 }
-
-                this.keyLoc = keyLoc;
             }
 
             public void Save()
@@ -344,7 +320,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private int lastYitem = 0;
             private ScrollArea scrollArea;
-            GridHighlightData data;
+            private GridHighlightData data;
             private readonly int keyLoc;
 
             public GridHightlightProperties(int keyLoc, int x, int y) : base(0, 0)
@@ -367,7 +343,6 @@ namespace ClassicUO.Game.UI.Gumps
                     if (e.Button == Input.MouseButtonType.Left)
                     {
                         AddProperty(data.Properties.Count);
-
                         lastYitem += 20;
                     }
                 };
@@ -376,7 +351,6 @@ namespace ClassicUO.Game.UI.Gumps
 
                 scrollArea.Add(new Label("Property name", true, 0xffff, 120) { X = 0, Y = lastYitem });
                 scrollArea.Add(new Label("Min value", true, 0xffff, 120) { X = 180, Y = lastYitem });
-
                 lastYitem += 20;
 
                 for (int i = 0; i < data.Properties.Count; i++)
@@ -384,7 +358,6 @@ namespace ClassicUO.Game.UI.Gumps
                     AddProperty(i);
                     lastYitem += 20;
                 }
-
                 this.keyLoc = keyLoc;
             }
 
@@ -394,11 +367,10 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     data.Properties.Add("");
                     data.PropMinVal.Add(-1);
-
                 }
                 data.Save();
-                InputField propInput, valInput;
-                scrollArea.Add(propInput = new InputField(0x0BB8, 0xFF, 0xFFFF, true, 150, 20) { Y = lastYitem });
+                OptionsGump.InputField propInput, valInput;
+                scrollArea.Add(propInput = new OptionsGump.InputField(0x0BB8, 0xFF, 0xFFFF, true, 150, 20) { Y = lastYitem });
                 propInput.SetText(data.Properties[subKeyLoc]);
                 propInput.TextChanged += (s, e) =>
                 {
@@ -415,7 +387,7 @@ namespace ClassicUO.Game.UI.Gumps
                     });
                 };
 
-                scrollArea.Add(valInput = new InputField(0x0BB8, 0xFF, 0xFFFF, true, 100, 20) { X = 180, Y = lastYitem, NumbersOnly = true });
+                scrollArea.Add(valInput = new OptionsGump.InputField(0x0BB8, 0xFF, 0xFFFF, true, 100, 20) { X = 180, Y = lastYitem, NumbersOnly = true });
                 valInput.SetText(data.PropMinVal[subKeyLoc].ToString());
                 valInput.TextChanged += (s, e) =>
                 {
@@ -458,14 +430,12 @@ namespace ClassicUO.Game.UI.Gumps
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
                 base.Draw(batcher, x, y);
-
                 batcher.DrawRectangle(
                     SolidColorTextureCache.GetTexture(Color.LightGray),
                     x - 1, y - 1,
                     WIDTH + 2, HEIGHT + 2,
                     new Vector3(0, 0, 1)
-                    );
-
+                );
                 return true;
             }
         }

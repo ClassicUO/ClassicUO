@@ -57,6 +57,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Reflection;
 using ClassicUO.Dust765.Autos;
+using ClassicUO.TazUO.Managers;
 
 namespace ClassicUO.Network
 {

@@ -490,6 +490,8 @@ namespace ClassicUO.Game.UI.Gumps
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             int yy = TextBoxControl.Y + y - 20;
+            float depth = 0f;
+            float scale = 1f;
 
             LinkedListNode<ChatLineTime> last = _textEntries.Last;
 
@@ -507,7 +509,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (yy >= y)
                     {
-                        last.Value.Draw(batcher, x + 2, yy);
+                        last.Value.Draw(batcher, x + 2, yy, depth, scale);
                     }
                 }
 
@@ -914,7 +916,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            public bool Draw(UltimaBatcher2D batcher, int x, int y)
+            public bool Draw(UltimaBatcher2D batcher, int x, int y, float depth = 0f, float scale = 1f)
             {
                 return !IsDisposed && textBox.Draw(batcher, x, y);
             }

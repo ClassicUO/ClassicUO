@@ -1,4 +1,4 @@
-﻿using ClassicUO.Configuration;
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
@@ -195,7 +195,7 @@ namespace ClassicUO.Game.Managers
                             //GameActions.Print(importedData.searchText);
                             new ToolTipOverrideData(ProfileManager.CurrentProfile.ToolTipOverride_SearchText.Count, importedData.searchText, importedData.FormattedText, importedData.Min1, importedData.Max1, importedData.Min2, importedData.Max2, (byte)importedData.ItemLayer).Save();
 
-                        ToolTipOverideMenu.Reopen = true;
+                        ClassicUO.TazUO.UI.Gumps.ToolTipOverideMenu.Reopen = true;
                     }
                     catch (Exception e)
                     {

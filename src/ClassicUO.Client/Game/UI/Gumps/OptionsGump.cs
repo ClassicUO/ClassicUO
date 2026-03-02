@@ -42,6 +42,8 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.TazUO.Managers;
+using ClassicUO.TazUO.Options;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Assets;
@@ -4964,8 +4966,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _.IsSelectable = false;
                     _.MouseUp += (s, e) =>
                     {
-                        UIManager.GetGump<GridHightlightMenu>()?.Dispose();
-                        UIManager.Add(new GridHightlightMenu());
+                        UIManager.GetGump<ClassicUO.TazUO.UI.Gumps.GridHightlightMenu>()?.Dispose();
+                        UIManager.Add(new ClassicUO.TazUO.UI.Gumps.GridHightlightMenu());
                     };
 
                     gridSection.Add(AddLabel(null, "Grid highlight line size", 0, 0));
@@ -5397,7 +5399,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 NiceButton ttipO = new NiceButton(0, 0, 250, TEXTBOX_HEIGHT, ButtonAction.Activate, "Open tooltip override settings") { IsSelectable = false, DisplayBorder = true };
                 ttipO.SetTooltip("Warning: This is an advanced feature.");
-                ttipO.MouseUp += (s, e) => { UIManager.GetGump<ToolTipOverideMenu>()?.Dispose(); UIManager.Add(new ToolTipOverideMenu()); };
+                ttipO.MouseUp += (s, e) => { UIManager.GetGump<ClassicUO.TazUO.UI.Gumps.ToolTipOverideMenu>()?.Dispose(); UIManager.Add(new ClassicUO.TazUO.UI.Gumps.ToolTipOverideMenu()); };
 
                 section.Add(ttipO);
 
@@ -5512,8 +5514,8 @@ namespace ClassicUO.Game.UI.Gumps
                     rootpath = Settings.GlobalSettings.ProfilesPath;
                 }
 
-                List<ProfileLocationData> locations = new List<ProfileLocationData>();
-                List<ProfileLocationData> sameServerLocations = new List<ProfileLocationData>();
+                List<ProfileTransferHelper.ProfileLocationData> locations = new List<ProfileTransferHelper.ProfileLocationData>();
+                List<ProfileTransferHelper.ProfileLocationData> sameServerLocations = new List<ProfileTransferHelper.ProfileLocationData>();
                 string[] allAccounts = Directory.GetDirectories(rootpath);
 
                 foreach (string account in allAccounts)
@@ -5524,10 +5526,10 @@ namespace ClassicUO.Game.UI.Gumps
                         string[] allCharacters = Directory.GetDirectories(server);
                         foreach (string character in allCharacters)
                         {
-                            locations.Add(new ProfileLocationData(server, account, character));
+                            locations.Add(new ProfileTransferHelper.ProfileLocationData(server, account, character));
                             if(_currentProfile.ServerName == Path.GetFileName(server))
                             {
-                                sameServerLocations.Add(new ProfileLocationData(server, account, character));
+                                sameServerLocations.Add(new ProfileTransferHelper.ProfileLocationData(server, account, character));
                             }
                         }
                     }
@@ -5547,7 +5549,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (e.Button == MouseButtonType.Left)
                     {
-                        OverrideAllProfiles(locations);
+                        ProfileTransferHelper.OverrideAllProfiles(locations);
                         section.BaseAdd(new FadingLabel(7, $"{locations.Count - 1} profiles overriden.", true, 0xff) { X = overrideButton.X, Y = overrideButton.Y });
                     }
                 };
@@ -5558,7 +5560,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (e.Button == MouseButtonType.Left)
                     {
-                        OverrideAllProfiles(sameServerLocations);
+                        ProfileTransferHelper.OverrideAllProfiles(sameServerLocations);
                         section.BaseAdd(new FadingLabel(7, $"{sameServerLocations.Count - 1} profiles overriden.", true, 0xff) { X = overrideButton.X, Y = overrideButton.Y });
                     }
                 };
@@ -5619,33 +5621,6 @@ namespace ClassicUO.Game.UI.Gumps
                             rightArea.Children[i].Y += diff;
                     section.Children[2].IsVisible = !section.Children[2].IsVisible;
                 }
-            }
-        }
-
-        private class ProfileLocationData
-        {
-            public readonly DirectoryInfo Server;
-            public readonly DirectoryInfo Username;
-            public readonly DirectoryInfo Character;
-
-            public ProfileLocationData(string server, string username, string character)
-            {
-                this.Server = new DirectoryInfo(server);
-                this.Username = new DirectoryInfo(username);
-                this.Character = new DirectoryInfo(character);
-            }
-
-            public override string ToString()
-            {
-                return Character.ToString();
-            }
-        }
-
-        private void OverrideAllProfiles(List<ProfileLocationData> allProfiles)
-        {
-            foreach (var profile in allProfiles)
-            {
-                ProfileManager.CurrentProfile.Save(profile.ToString(), false);
             }
         }
 

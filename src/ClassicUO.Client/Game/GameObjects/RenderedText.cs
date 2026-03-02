@@ -560,7 +560,7 @@ namespace ClassicUO.Game
             return true;
         }
 
-        public bool Draw(UltimaBatcher2D batcher, int x, int y, float alpha = 1, ushort hue = 0)
+        public bool Draw(UltimaBatcher2D batcher, int x, int y, float alpha = 1, ushort hue = 0, float depth = 0f, float scale = 1f)
         {
             if (string.IsNullOrEmpty(Text) || Texture == null || IsDestroyed || Texture.IsDisposed)
             {
@@ -599,7 +599,9 @@ namespace ClassicUO.Game
                 hueVector.Y = 0;
             }
 
-            batcher.Draw(Texture, new Rectangle(x, y, Width, Height), hueVector);
+            int scaleWidth = (int)(Width * scale);
+            int scaleHeight = (int)(Height * scale);
+            batcher.Draw(Texture, new Rectangle(x, y, scaleWidth, scaleHeight), hueVector, depth);
 
             return true;
         }

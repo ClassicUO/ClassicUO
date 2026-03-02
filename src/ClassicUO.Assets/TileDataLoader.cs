@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -423,7 +423,7 @@ namespace ClassicUO.Assets
     {
         public uint Flags;
         public ushort TexID;
-        [MarshalAs(UnmanagedType.LPStr, SizeConst = 20)]
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 20)]
         public string Name;
     }
 
@@ -446,7 +446,7 @@ namespace ClassicUO.Assets
         public ushort Hue;
         public ushort LightIndex;
         public byte Height;
-        [MarshalAs(UnmanagedType.LPStr, SizeConst = 20)]
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 20)]
         public string Name;
     }
 
@@ -465,7 +465,7 @@ namespace ClassicUO.Assets
     {
         public TileFlag Flags;
         public ushort TexID;
-        [MarshalAs(UnmanagedType.LPStr, SizeConst = 20)]
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 20)]
         public string Name;
     }
 
@@ -488,7 +488,7 @@ namespace ClassicUO.Assets
         public ushort Hue;
         public ushort LightIndex;
         public byte Height;
-        [MarshalAs(UnmanagedType.LPStr, SizeConst = 20)]
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 20)]
         public string Name;
     }
 

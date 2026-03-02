@@ -4,15 +4,15 @@ using ClassicUO.Game;
 using ClassicUO.Game.UI.Controls;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.UI.Gumps
+namespace ClassicUO.TazUO.UI.Gumps
 {
-    internal class VersionHistory : Gump
+    internal class VersionHistory : ClassicUO.Game.UI.Gumps.Gump
     {
         private static string[] updateTexts = {
             "/c[white][2.0.9]/cd\n" +
                 "- Welcome\n" +
                 "- Auto Avoid Obstacules\n"  +
-                "- Defende Party\n" 
+                "- Defende Party\n"
         };
 
         public VersionHistory() : base(0, 0)
@@ -24,7 +24,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
             CanMove = true;
 
-            BorderControl bc = new BorderControl(0, 0, Width, Height, 36);
+            ClassicUO.Game.UI.Gumps.BorderControl bc = new ClassicUO.Game.UI.Gumps.BorderControl(0, 0, Width, Height, 36);
             bc.T_Left = 39925;
             bc.H_Border = 39926;
             bc.T_Right = 39927;
@@ -54,7 +54,6 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             Add(scroll);
-
 
             HitBox _hit;
             Add(_ = new UOLabel(Language.Instance.TazUOWiki, 1, UOLabelHue.Accent, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 200) { X = 25, Y = Height - 20 });

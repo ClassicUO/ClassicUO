@@ -858,12 +858,6 @@ namespace ClassicUO.Game.GameObjects
                         X = (ushort)step.X;
                         Y = (ushort)step.Y;
                         Z = step.Z;
-                        UpdateScreenPosition();
-
-                        if (World.InGame && Serial == World.Player)
-                        {
-                            World.Player.CloseRangedGumps();
-                        }
 
                         Direction = (Direction)step.Direction;
                         IsRunning = step.Run;
@@ -883,6 +877,13 @@ namespace ClassicUO.Game.GameObjects
                         if (TNext != null || TPrevious != null)
                         {
                             AddToTile();
+                        }
+
+                        UpdateScreenPosition();
+
+                        if (World.InGame && Serial == World.Player)
+                        {
+                            World.Player.CloseRangedGumps();
                         }
 
                         LastStepTime = Time.Ticks;

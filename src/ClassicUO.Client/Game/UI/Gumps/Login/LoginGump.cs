@@ -33,6 +33,7 @@
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.TazUO;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Assets;
@@ -107,7 +108,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 UIManager.GetGump<LoginGump>()?.Dispose();
                 UIManager.Add(new LoginGump(scene));
             };
-            Add(_languageCombo);
 
             Add(new Label(string.Format(loginLang.UOVersionFormat, Settings.GlobalSettings.ClientVersion) + ".", false, 0x034E, font: 9)
             {

@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -52,6 +52,7 @@ namespace ClassicUO.Game.UI.Gumps
         private GumpDirection _direction;
         private ushort _graphic;
         private DataBox _box;
+        private int _shiftX, _shiftY;
 
         public BuffGump() : base(0, 0)
         {
@@ -77,6 +78,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
+            X -= _shiftX;
+            Y -= _shiftY;
+            _shiftX = 0;
+            _shiftY = 0;
+
             WantUpdateSize = true;
 
             _box?.Clear();
@@ -140,7 +146,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Save(XmlTextWriter writer)
         {
+            X -= _shiftX;
+            Y -= _shiftY;
             base.Save(writer);
+            X += _shiftX;
+            Y += _shiftY;
             writer.WriteAttributeString("graphic", _graphic.ToString());
             writer.WriteAttributeString("direction", ((int)_direction).ToString());
         }
@@ -161,7 +171,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void UpdateElements()
         {
-            for (int i = 0, offset = 0; i < _box.Children.Count; i++, offset += 31)
+            int count = _box.Children.Count;
+
+            for (int i = 0, offset = 0; i < count; i++, offset += 31)
             {
                 Control e = _box.Children[i];
 
@@ -192,6 +204,59 @@ namespace ClassicUO.Game.UI.Gumps
                         break;
                 }
             }
+
+            int minX = 0, minY = 0;
+
+            for (int i = 0; i < count; i++)
+            {
+                Control e = _box.Children[i];
+
+                if (e.X < minX)
+                    minX = e.X;
+
+                if (e.Y < minY)
+                    minY = e.Y;
+            }
+
+            if (minX < 0 || minY < 0)
+            {
+                int shiftX = minX < 0 ? -minX : 0;
+                int shiftY = minY < 0 ? -minY : 0;
+
+                for (int i = 0; i < count; i++)
+                {
+                    _box.Children[i].X += shiftX;
+                    _box.Children[i].Y += shiftY;
+                }
+
+                _background.X += shiftX;
+                _background.Y += shiftY;
+                _button.X += shiftX;
+                _button.Y += shiftY;
+
+                _shiftX = -shiftX;
+                _shiftY = -shiftY;
+                X += _shiftX;
+                Y += _shiftY;
+            }
+
+            int boxW = 0, boxH = 0;
+
+            for (int i = 0; i < count; i++)
+            {
+                Control e = _box.Children[i];
+                int right = e.X + e.Width;
+                int bottom = e.Y + e.Height;
+
+                if (right > boxW)
+                    boxW = right;
+
+                if (bottom > boxH)
+                    boxH = bottom;
+            }
+
+            _box.Width = boxW;
+            _box.Height = boxH;
         }
 
         public override void OnButtonClick(int buttonID)

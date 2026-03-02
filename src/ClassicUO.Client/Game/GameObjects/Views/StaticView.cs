@@ -38,6 +38,7 @@ using ClassicUO.Dust765.Dust765;
 // ## BEGIN - END ## // ART / HUE CHANGES
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.TazUO.Managers;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 

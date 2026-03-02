@@ -1,5 +1,6 @@
-﻿using ClassicUO.Assets;
-using ClassicUO.Game.Managers;
+using ClassicUO;
+using ClassicUO.Assets;
+using ClassicUO.Game;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -7,13 +8,12 @@ using Microsoft.Xna.Framework.Graphics;
 using System.IO;
 using System.Linq;
 
-namespace ClassicUO.Game.UI.Gumps
+namespace ClassicUO.TazUO.UI.Gumps
 {
-    internal class Supporters : Gump
+    internal class Supporters : ClassicUO.Game.UI.Gumps.Gump
     {
         private const int WIDTH = 512;
         private const int HEIGHT = 512;
-
 
         private static readonly string[] SUPPORTERS = {
             "TazmanianTad - Developer",

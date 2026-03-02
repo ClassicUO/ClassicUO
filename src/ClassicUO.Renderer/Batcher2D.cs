@@ -977,6 +977,17 @@ namespace ClassicUO.Renderer
             Vector3 color
         )
         {
+            Draw(texture, destinationRectangle, color, 0f);
+        }
+
+        public void Draw
+        (
+            Texture2D texture,
+            Rectangle destinationRectangle,
+            Vector3 color,
+            float depth
+        )
+        {
             AddSprite(
                 texture,
                 0.0f,
@@ -992,7 +1003,7 @@ namespace ClassicUO.Renderer
                 0.0f,
                 0.0f,
                 1.0f,
-                0.0f,
+                depth,
                 0
             );
         }

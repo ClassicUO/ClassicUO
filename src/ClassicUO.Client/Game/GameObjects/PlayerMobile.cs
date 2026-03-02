@@ -36,6 +36,7 @@ using ClassicUO.Dust765.External;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.TazUO.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
 using ClassicUO.Utility;
@@ -48,6 +49,14 @@ namespace ClassicUO.Game.GameObjects
     public class PlayerMobile : Mobile
     {
         private readonly Dictionary<BuffIconType, BuffIcon> _buffIcons = new Dictionary<BuffIconType, BuffIcon>();
+
+        private Direction _serverDirection;
+        private bool _serverDirectionInitialized;
+
+        internal void SyncServerDirection()
+        {
+            _serverDirection = Direction;
+        }
 
         private static SpellVisualRangeManager.CastTimerProgressBar castTimer;
 
@@ -1712,7 +1721,14 @@ namespace ClassicUO.Game.GameObjects
                 int x = X;
                 int y = Y;
                 sbyte z = Z;
-                Direction oldDirection = Direction;
+
+                if (!_serverDirectionInitialized)
+                {
+                    _serverDirection = Direction;
+                    _serverDirectionInitialized = true;
+                }
+
+                Direction oldDirection = _serverDirection;
 
                 bool emptyStack = Steps.Count == 0;
 
@@ -1808,6 +1824,14 @@ namespace ClassicUO.Game.GameObjects
                     direction = newDir;
                 }
 
+                if (walkTime == Constants.TURN_DELAY && Walker.UnacceptedPacketsCount >= 3)
+                {
+                    Direction = direction;
+                    Walker.LastStepRequestTime = Time.Ticks + walkTime;
+
+                    return true;
+                }
+
                 CloseBank();
 
                 if (emptyStack)
@@ -1854,6 +1878,8 @@ namespace ClassicUO.Game.GameObjects
                 );
 
                 NetClient.Socket.Send_WalkRequest(direction, Walker.WalkSequence, run, Walker.FastWalkStack.GetValue());
+
+                _serverDirection = direction;
 
                 if (Walker.WalkSequence == 0xFF)
                 {
@@ -1931,7 +1957,14 @@ namespace ClassicUO.Game.GameObjects
             int x = X;
             int y = Y;
             sbyte z = Z;
-            Direction oldDirection = Direction;
+
+            if (!_serverDirectionInitialized)
+            {
+                _serverDirection = Direction;
+                _serverDirectionInitialized = true;
+            }
+
+            Direction oldDirection = _serverDirection;
 
             bool emptyStack = Steps.Count == 0;
 
@@ -2003,6 +2036,14 @@ namespace ClassicUO.Game.GameObjects
                 direction = newDir;
             }
 
+            if (walkTime == Constants.TURN_DELAY && Walker.UnacceptedPacketsCount >= 3)
+            {
+                Direction = direction;
+                Walker.LastStepRequestTime = Time.Ticks + walkTime;
+
+                return true;
+            }
+
             CloseBank();
 
             if (emptyStack)
@@ -2044,6 +2085,7 @@ namespace ClassicUO.Game.GameObjects
 
             NetClient.Socket.Send_WalkRequest(direction, Walker.WalkSequence, run, Walker.FastWalkStack.GetValue());
 
+            _serverDirection = direction;
 
             if (Walker.WalkSequence == 0xFF)
             {

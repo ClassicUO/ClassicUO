@@ -1,4 +1,4 @@
-﻿using ClassicUO.Configuration;
+using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
@@ -10,7 +10,7 @@ using System;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using System.Threading.Tasks;
-using static ClassicUO.Game.Managers.SpellVisualRangeManager;
+using static ClassicUO.TazUO.Managers.SpellVisualRangeManager;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;

@@ -40,6 +40,7 @@ using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Renderer;
+using ClassicUO.TazUO.Managers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
