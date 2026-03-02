@@ -8,6 +8,7 @@ using ClassicUO.IO;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
+using ClassicUO.ECS;
 using Microsoft.Xna.Framework.Graphics;
 using SDL3;
 using System;
@@ -27,6 +28,7 @@ namespace ClassicUO
         public Renderer.Sounds.Sound Sounds { get; private set; }
         public World World { get; private set; }
         public GameCursor GameCursor { get; private set; }
+        public EcsRuntimeHost EcsRuntime { get; private set; }
 
         public ClientVersion Version { get; private set; }
         public ClientFlags Protocol { get; set; }
@@ -91,12 +93,23 @@ namespace ClassicUO
             LightColors.LoadLights();
 
             World = new World();
+
+            bool useEcsRuntime = Settings.GlobalSettings.UseEcsRuntime || Environment.GetEnvironmentVariable("CUO_USE_ECS") == "1";
+
+            if (useEcsRuntime)
+            {
+                EcsRuntime = EcsRuntimeHost.Create();
+                Log.Trace("ECS runtime bootstrap enabled.");
+            }
+
             GameCursor = new GameCursor(World, game.DpiScale);
         }
 
         public void Unload()
         {
             FileManager.Dispose();
+            EcsRuntime?.Dispose();
+            EcsRuntime = null;
             World?.Map?.Destroy();
         }
 

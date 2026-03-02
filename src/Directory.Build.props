@@ -23,6 +23,11 @@
     <DefineConstants>$(DefineConstants);DEV_BUILD</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <FlecsNetRoot Condition="'$(FlecsNetRoot)' == '' and Exists('$(MSBuildThisFileDirectory)..\external\Flecs.NET\src\Flecs.NET\Flecs.NET.csproj')">$(MSBuildThisFileDirectory)..\external\Flecs.NET</FlecsNetRoot>
+    <FlecsNetProject Condition="'$(FlecsNetRoot)' != ''">$(FlecsNetRoot)\src\Flecs.NET\Flecs.NET.csproj</FlecsNetProject>
+  </PropertyGroup>
+
   <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.*" PrivateAssets="All" />
     <PackageReference Include="System.Buffers" Version="4.5.1" />

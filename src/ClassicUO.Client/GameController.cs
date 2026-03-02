@@ -390,6 +390,8 @@ namespace ClassicUO
 
             Mouse.Update();
 
+            UO.EcsRuntime?.ResetCommandSequence();
+
             var data = NetClient.Socket.CollectAvailableData();
             var packetsCount = PacketHandlers.Handler.ParsePackets(NetClient.Socket, UO.World, data);
 
@@ -401,6 +403,8 @@ namespace ClassicUO
             if (Scene != null && Scene.IsLoaded && !Scene.IsDestroyed)
             {
                 Profiler.EnterContext(Profiler.ProfilerContext.UPDATE_WORLD);
+                UO.EcsRuntime?.SetFrameTiming(Time.Ticks, Time.Delta);
+                UO.EcsRuntime?.Progress(Time.Delta);
                 Scene.Update();
                 Profiler.ExitContext(Profiler.ProfilerContext.UPDATE_WORLD);
             }

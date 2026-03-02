@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>ClassicUO.ECS</RootNamespace>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="$(FlecsNetProject)" Condition="'$(FlecsNetProject)' != '' and Exists('$(FlecsNetProject)')" />
+  </ItemGroup>
+
+  <Target Name="EnsureFlecsNetDependency" BeforeTargets="Build" Condition="!Exists('$(FlecsNetProject)')">
+    <Error Text="Flecs.NET source dependency not found. Add external/Flecs.NET submodule or build with /p:FlecsNetRoot=C:\path\to\Flecs.NET." />
+  </Target>
+
+</Project>

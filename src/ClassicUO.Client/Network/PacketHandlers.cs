@@ -15,6 +15,7 @@ using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
+using ClassicUO.ECS;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
@@ -25,6 +26,12 @@ namespace ClassicUO.Network
     sealed class PacketHandlers
     {
         public delegate void OnPacketBufferReader(World world, ref StackDataReader p);
+
+        /// <summary>
+        /// Get the ECS runtime host if enabled. Returns null when ECS is disabled.
+        /// Used by packet handlers to emit ECS commands alongside legacy mutations.
+        /// </summary>
+        private static EcsRuntimeHost Ecs => Client.Game?.UO?.EcsRuntime;
 
         private static uint _requestedGridLoot;
 
@@ -878,6 +885,20 @@ namespace ClassicUO.Network
                 type,
                 1
             );
+
+            Ecs?.EnqueueCommand(new CmdCreateOrUpdateItem
+            {
+                Serial = serial,
+                Graphic = (ushort)(graphic + graphicInc),
+                Hue = hue,
+                Amount = count,
+                X = x,
+                Y = y,
+                Z = z,
+                Direction = direction,
+                Flags = flags,
+                ItemType = type
+            });
         }
 
         private static void EnterWorld(World world, ref StackDataReader p)
@@ -1152,6 +1173,8 @@ namespace ClassicUO.Network
                     world.Player.UpdateAbilities();
                 }
             }
+
+            Ecs?.EnqueueCommand(new CmdDeleteEntity { Serial = serial });
         }
 
         private static void UpdatePlayer(World world, ref StackDataReader p)
@@ -1173,6 +1196,19 @@ namespace ClassicUO.Network
             sbyte z = p.ReadInt8();
 
             UpdatePlayer(world, serial, graphic, graphic_inc, hue, flags, x, y, z, serverID, direction);
+
+            Ecs?.EnqueueCommand(new CmdCreateOrUpdateMobile
+            {
+                Serial = serial,
+                Graphic = (ushort)(graphic + graphic_inc),
+                Hue = hue,
+                Flags = (uint)flags,
+                X = x,
+                Y = y,
+                Z = z,
+                Direction = (byte)direction,
+                IsPlayer = true
+            });
         }
 
         private static void DenyWalk(World world, ref StackDataReader p)
@@ -1193,6 +1229,15 @@ namespace ClassicUO.Network
             world.Player.Direction = direction;
 
             world.Weather.Reset();
+
+            Ecs?.EnqueueCommand(new CmdDenyWalk
+            {
+                Sequence = seq,
+                X = x,
+                Y = y,
+                Z = z,
+                Direction = (byte)direction
+            });
         }
 
         private static void ConfirmWalk(World world, ref StackDataReader p)
@@ -1214,6 +1259,12 @@ namespace ClassicUO.Network
             world.Player.Walker.ConfirmWalk(seq);
 
             world.Player.AddToTile();
+
+            Ecs?.EnqueueCommand(new CmdConfirmWalk
+            {
+                Sequence = seq,
+                Notoriety = noto
+            });
         }
 
         private static void DragAnimation(World world, ref StackDataReader p)
@@ -1579,6 +1630,17 @@ namespace ClassicUO.Network
             ushort hue = p.ReadUInt16BE();
 
             AddItemToContainer(world, serial, graphic, amount, x, y, hue, containerSerial);
+
+            Ecs?.EnqueueCommand(new CmdContainedItem
+            {
+                Serial = serial,
+                Graphic = graphic,
+                Amount = amount,
+                X = x,
+                Y = y,
+                ContainerSerial = containerSerial,
+                Hue = hue
+            });
         }
 
         private static void DenyMoveItem(World world, ref StackDataReader p)
@@ -1861,6 +1923,15 @@ namespace ClassicUO.Network
             //    ItemHold.Enabled = false;
             //    ItemHold.Dropped = true;
             //}
+
+            Ecs?.EnqueueCommand(new CmdEquipItem
+            {
+                Serial = serial,
+                Graphic = item.Graphic,
+                Layer = (byte)item.Layer,
+                ContainerSerial = item.Container,
+                Hue = item.Hue
+            });
         }
 
         private static void Swing(World world, ref StackDataReader p)
@@ -2094,6 +2165,7 @@ namespace ClassicUO.Network
             }
 
             ushort count = p.ReadUInt16BE();
+            uint firstContainerSerial = 0;
 
             for (int i = 0; i < count; i++)
             {
@@ -2113,15 +2185,33 @@ namespace ClassicUO.Network
 
                 if (i == 0)
                 {
+                    firstContainerSerial = containerSerial;
                     Entity container = world.Get(containerSerial);
 
                     if (container != null)
                     {
                         ClearContainerAndRemoveItems(world, container, container.Graphic == 0x2006);
                     }
+
+                    Ecs?.EnqueueCommand(new CmdClearContainer
+                    {
+                        ContainerSerial = containerSerial,
+                        KeepEquipped = container?.Graphic == 0x2006
+                    });
                 }
 
                 AddItemToContainer(world, serial, graphic, amount, x, y, hue, containerSerial);
+
+                Ecs?.EnqueueCommand(new CmdContainedItem
+                {
+                    Serial = serial,
+                    Graphic = graphic,
+                    Amount = amount,
+                    X = x,
+                    Y = y,
+                    ContainerSerial = containerSerial,
+                    Hue = hue
+                });
             }
         }
 
@@ -2822,6 +2912,20 @@ namespace ClassicUO.Network
             {
                 UpdateGameObject(world, serial, graphic, 0, 0, x, y, z, direction, hue, flags, 0, 1, 1);
             }
+
+            Ecs?.EnqueueCommand(new CmdCreateOrUpdateMobile
+            {
+                Serial = serial,
+                Graphic = graphic,
+                Hue = hue,
+                Flags = (uint)flags,
+                X = x,
+                Y = y,
+                Z = z,
+                Direction = (byte)direction,
+                Notoriety = (byte)notoriety,
+                IsPlayer = serial == world.Player
+            });
         }
 
         private static void UpdateObject(World world, ref StackDataReader p)
@@ -3272,6 +3376,12 @@ namespace ClassicUO.Network
 
             Direction direction = (Direction)p.ReadUInt8();
             world.Player.Walk(direction & Direction.Mask, (direction & Direction.Running) != 0);
+
+            Ecs?.EnqueueCommand(new CmdMovePlayer
+            {
+                Direction = (byte)(direction & Direction.Mask),
+                Running = (direction & Direction.Running) != 0
+            });
         }
 
         private static void UpdateName(World world, ref StackDataReader p)
