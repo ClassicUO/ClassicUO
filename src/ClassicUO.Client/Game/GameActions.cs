@@ -174,7 +174,7 @@ namespace ClassicUO.Game
         /// <returns>False if no settings are open</returns>
         public static bool CloseSettings()
         {
-            Gump g = UIManager.GetGump<ModernOptionsGump>();
+            Gump g = UIManager.GetGump<OptionsGump>();
 
             if (g != null)
             {
@@ -187,11 +187,11 @@ namespace ClassicUO.Game
 
         public static void OpenSettings(int page = 0)
         {
-            ModernOptionsGump opt = UIManager.GetGump<ModernOptionsGump>();
+            OptionsGump opt = UIManager.GetGump<OptionsGump>();
 
             if (opt == null)
             {
-                ModernOptionsGump optionsGump = new ModernOptionsGump();
+                OptionsGump optionsGump = new OptionsGump();
 
                 UIManager.Add(optionsGump);
                 optionsGump.ChangePage(page);

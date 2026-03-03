@@ -240,7 +240,7 @@ namespace ClassicUO.Game.Managers
 
             Register("optlink", (s) =>
             {
-                ModernOptionsGump g = UIManager.GetGump<ModernOptionsGump>();
+                OptionsGump g = UIManager.GetGump<OptionsGump>();
                 if (s.Length > 1)
                 {
                     if (g != null)
@@ -249,7 +249,7 @@ namespace ClassicUO.Game.Managers
                     }
                     else
                     {
-                        UIManager.Add(g = new ModernOptionsGump());
+                        UIManager.Add(g = new OptionsGump());
                         g.GoToPage(s[1]);
                     }
                 }

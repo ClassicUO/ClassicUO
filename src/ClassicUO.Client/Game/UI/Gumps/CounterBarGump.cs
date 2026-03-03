@@ -476,6 +476,9 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 base.Update();
 
+                if (!ProfileManager.CurrentProfile.CounterBarEnabled)
+                    return;
+
                 if (Parent != null && Parent.IsEnabled && _time < Time.Ticks)
                 {
                     _time = Time.Ticks + 100;

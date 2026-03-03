@@ -1,4 +1,4 @@
-﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -223,84 +223,76 @@ namespace ClassicUO.Assets
                 });
         }
 
+        private static readonly string[] EmbeddedGumpArtFileNames = new[]
+        {
+            "40303.png", "40304.png", "40305.png", "40306.png", "40307.png",
+            "40308.png", "40309.png", "40310.png", "40311.png", "40312.png",
+            "modern-paperdollgump.png", "loginbg.png", "logodust.png"
+        };
+
         public Task LoadResourceAssets()
         {
             return Task.Run(
                 () =>
                 {
                     var assembly = GetType().Assembly;
+                    string resourcePrefix = assembly.GetName().Name + ".gumpartassets.";
 
-                    //Load the custom gump art included with TUO
                     for (uint i = 40303; i <= 40312; i++)
                     {
-                        //Check if the art already exists
                         var gumpInfo = LoadGumpTexture(i);
 
                         if (gumpInfo.Pixels == null || gumpInfo.Pixels.IsEmpty)
                         {
                             gumpInfo = GumpsLoader.Instance.GetGump(i);
                             if (gumpInfo.Pixels != null && !gumpInfo.Pixels.IsEmpty)
-                            {
                                 continue;
-                            }
                         }
                         else
-                        {
                             continue;
-                        }
 
-                        var resourceName = assembly.GetName().Name + $".gumpartassets.{i}.png";
+                        string resourceName = resourcePrefix + i + ".png";
                         try
                         {
-                            Stream stream = assembly.GetManifestResourceStream(resourceName);
-                            if (stream != null)
+                            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
                             {
-                                Texture2D texture = Texture2D.FromStream(GraphicsDevice, stream);
-                                FixPNGAlpha(ref texture);
-                                gump_textureCache.Add(i, texture);
-
-
-                                //Increase available gump id's
-                                if (gump_availableIDs != null)
+                                if (stream != null && GraphicsDevice != null)
                                 {
-                                    uint[] availableIDs = new uint[gump_availableIDs.Length + 1];
-                                    gump_availableIDs.CopyTo(availableIDs, 0);
-                                    availableIDs[availableIDs.Length - 1] = i;
-                                    gump_availableIDs = availableIDs;
-                                }
-                                else
-                                {
-                                    gump_availableIDs = [i];
-                                }
+                                    Texture2D texture = Texture2D.FromStream(GraphicsDevice, stream);
+                                    FixPNGAlpha(ref texture);
+                                    gump_textureCache.Add(i, texture);
 
-                                stream.Dispose();
+                                    if (gump_availableIDs != null)
+                                    {
+                                        uint[] availableIDs = new uint[gump_availableIDs.Length + 1];
+                                        gump_availableIDs.CopyTo(availableIDs, 0);
+                                        availableIDs[availableIDs.Length - 1] = i;
+                                        gump_availableIDs = availableIDs;
+                                    }
+                                    else
+                                        gump_availableIDs = new[] { i };
+                                }
                             }
                         }
                         catch (Exception e) { Console.WriteLine(e.Message); }
                     }
 
-                    //Load all embedded art in gumpartassets folder
-                    var resourceNames = assembly.GetManifestResourceNames();
-                    foreach (var resourceName in resourceNames)
+                    foreach (string fileName in EmbeddedGumpArtFileNames)
                     {
-                        string path = assembly.GetName().Name + ".gumpartassets.";
-                        if (resourceName.IndexOf(path) == 0 && resourceName.EndsWith(".png"))
+                        string resourceName = resourcePrefix + fileName;
+                        try
                         {
-                            var fName = resourceName.Substring(path.Length);
-                            Console.WriteLine(fName);
-                            try
+                            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
                             {
-                                Stream stream = assembly.GetManifestResourceStream(resourceName);
-                                if (stream != null)
+                                if (stream != null && GraphicsDevice != null)
                                 {
                                     Texture2D texture = Texture2D.FromStream(GraphicsDevice, stream);
                                     FixPNGAlpha(ref texture);
-                                    EmbeddedArt.Add(fName, texture);
-                                    stream.Dispose();
+                                    EmbeddedArt.Add(fileName, texture);
                                 }
                             }
-                            catch (Exception e) { Console.WriteLine(e.Message); }
                         }
+                        catch (Exception e) { Console.WriteLine(e.Message); }
                     }
                 });
         }

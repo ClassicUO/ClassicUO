@@ -13,7 +13,8 @@ namespace ClassicUO.Configuration
         public static readonly string[] SupportedUILanguages = { "ENG", "ESP", "PTB", "RUSSIA", "KOREANO", "CHINES", "POLONES" };
 
         public LoginLanguage Login { get; set; } = new LoginLanguage();
-        public ModernOptionsGumpLanguage GetModernOptionsGumpLanguage { get; set; } = new ModernOptionsGumpLanguage();
+        [JsonPropertyName("GetModernOptionsGumpLanguage")]
+        public OptionsGumpLanguage GetOptionsGumpLanguage { get; set; } = new OptionsGumpLanguage();
         public ErrorsLanguage ErrorsLanguage { get; set; } = new ErrorsLanguage();
         public MapLanguage MapLanguage { get; set; } = new MapLanguage();
         public TopBarGumpLanguage TopBarGump { get; set; } = new TopBarGumpLanguage();
@@ -43,7 +44,7 @@ namespace ClassicUO.Configuration
                 Instance = f;
                 if (Instance.Login == null)
                     Instance.Login = new LoginLanguage();
-                Instance.GetTazUO.ButtonTazUO = Instance.GetModernOptionsGumpLanguage?.ButtonTazUO ?? Instance.GetTazUO.ButtonTazUO;
+                Instance.GetTazUO.ButtonTazUO = Instance.GetOptionsGumpLanguage?.ButtonTazUO ?? Instance.GetTazUO.ButtonTazUO;
                 Save(path);
             }
             else if (File.Exists(languageFilePath))
@@ -53,7 +54,7 @@ namespace ClassicUO.Configuration
                 Instance = f;
                 if (Instance.Login == null)
                     Instance.Login = new LoginLanguage();
-                Instance.GetTazUO.ButtonTazUO = Instance.GetModernOptionsGumpLanguage?.ButtonTazUO ?? Instance.GetTazUO.ButtonTazUO;
+                Instance.GetTazUO.ButtonTazUO = Instance.GetOptionsGumpLanguage?.ButtonTazUO ?? Instance.GetTazUO.ButtonTazUO;
                 Save(languageFilePath);
                 string langPath = GetLanguageFilePath(uiLanguageCode);
                 if (langPath != languageFilePath)
@@ -114,7 +115,7 @@ namespace ClassicUO.Configuration
             string dir = Path.GetDirectoryName(path);
             if (!string.IsNullOrEmpty(dir))
                 Directory.CreateDirectory(dir);
-            Instance.GetModernOptionsGumpLanguage.ButtonTazUO = Instance.GetTazUO.ButtonTazUO;
+            Instance.GetOptionsGumpLanguage.ButtonTazUO = Instance.GetTazUO.ButtonTazUO;
             string language = JsonSerializer.Serialize(Instance, GetJsonOptions());
             File.WriteAllText(path, language, Encoding.UTF8);
         }
@@ -122,7 +123,7 @@ namespace ClassicUO.Configuration
         private static string languageFilePath { get { return Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Language.json"); } }
     }
 
-    public class ModernOptionsGumpLanguage
+    public class OptionsGumpLanguage
     {
         public string OptionsTitle { get; set; } = "Options";
         public string Search { get; set; } = "Search";

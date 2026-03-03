@@ -160,8 +160,8 @@ namespace ClassicUO.Game.UI.Gumps
             bool hasAction = (slot.SlotType == (int)ActionBarSlotType.Spell || slot.SlotType == 0) && slot.SpellID > 0
                 || slot.SlotType == (int)ActionBarSlotType.Skill && slot.SkillIndex >= 0
                 || slot.SlotType == (int)ActionBarSlotType.Ability && slot.AbilityIndex > 0;
-            menu.Add(Language.Instance?.GetModernOptionsGumpLanguage?.GetActionBar?.ResetSlot ?? "Reset slot", () => ClearSlot(slotIndex));
-            menu.Add(Language.Instance?.GetModernOptionsGumpLanguage?.GetActionBar?.SetHotkey ?? "Set Hotkey", () => StartListeningForHotkey(slotIndex));
+            menu.Add(Language.Instance?.GetOptionsGumpLanguage?.GetActionBar?.ResetSlot ?? "Reset slot", () => ClearSlot(slotIndex));
+            menu.Add(Language.Instance?.GetOptionsGumpLanguage?.GetActionBar?.SetHotkey ?? "Set Hotkey", () => StartListeningForHotkey(slotIndex));
         }
 
         private class ActionBarSlotControl : Control, IActionBarDropTarget

@@ -265,7 +265,7 @@
       "Data": "Data"
     },
     "GetActionBar": {
-      "ShowActionBar": "Show action bar",
+      "ShowActionBar": "Action Bar",
       "Slot": "Slot {0}",
       "TargetSelf": "Self",
       "TargetLast": "Last",

@@ -1051,10 +1051,10 @@ namespace ClassicUO
                     }
                     else if (sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_START && World.InGame)
                     {
-                        Gump g = UIManager.GetGump<ModernOptionsGump>();
+                        Gump g = UIManager.GetGump<OptionsGump>();
                         if (g == null)
                         {
-                            UIManager.Add(new ModernOptionsGump());
+                            UIManager.Add(new OptionsGump());
                         }
                         else
                         {
