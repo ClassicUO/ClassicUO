@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using System;
+using ClassicUO.ECS;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Assets;
@@ -214,7 +215,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            if (_originalText != _textBox.Text && World.Player != null && !World.Player.IsDestroyed && NetClient.Socket.IsConnected)
+            var ecsP = Client.Game?.UO?.EcsRuntime;
+            bool useEcsP = ecsP != null && ecsP.GetCutoverFlags().UseEcsUiData;
+            bool playerAlive = useEcsP ? ecsP.GetStatusSnapshot().IsValid : (World.Player != null && !World.Player.IsDestroyed);
+            if (_originalText != _textBox.Text && playerAlive && NetClient.Socket.IsConnected)
             {
                 NetClient.Socket.Send_ProfileUpdate(LocalSerial, _textBox.Text);
             }

@@ -2,6 +2,7 @@
 
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
@@ -303,6 +304,8 @@ namespace ClassicUO.Game.GameObjects
                     Log.Warn($"Could not update abilities ${weapon.Graphic} \"${weapon.Name}\" has no GraphicToAbilitiesMap[graphic] data");
                 }
             }
+
+            Client.Game?.UO?.EcsRuntime?.SetPlayerAbilities((ushort)Abilities[0], (ushort)Abilities[1]);
 
             for (LinkedListNode<Gump> gump = UIManager.Gumps.First; gump != null; gump = gump.Next)
             {

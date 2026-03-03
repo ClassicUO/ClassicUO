@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Configuration;
+using ClassicUO.ECS;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -103,7 +104,22 @@ namespace ClassicUO.Game.UI.Gumps
                     sb.Append($"- CUO version: {CUOEnviroment.Version}, Client version: {Settings.GlobalSettings.ClientVersion}\n");
 
                     //_sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);
-                    sb.Append(string.Format(DEBUG_STRING_2, World.InGame ? $"{World.Player.X}, {World.Player.Y}, {World.Player.Z}" : "0xFFFF, 0xFFFF, 0", Mouse.Position, SelectedObject.Object is GameObject gobj ? $"{gobj.X}, {gobj.Y}, {gobj.Z}" : "0xFFFF, 0xFFFF, 0"));
+                    string charPos = "0xFFFF, 0xFFFF, 0";
+                    if (World.InGame)
+                    {
+                        var ecs = Client.Game?.UO?.EcsRuntime;
+                        bool useEcs = ecs != null && ecs.GetCutoverFlags().UseEcsUiData;
+                        if (useEcs)
+                        {
+                            var snap = ecs.GetPlayerSnapshot();
+                            charPos = $"{snap.X}, {snap.Y}, {snap.Z}";
+                        }
+                        else
+                        {
+                            charPos = $"{World.Player.X}, {World.Player.Y}, {World.Player.Z}";
+                        }
+                    }
+                    sb.Append(string.Format(DEBUG_STRING_2, charPos, Mouse.Position, SelectedObject.Object is GameObject gobj ? $"{gobj.X}, {gobj.Y}, {gobj.Z}" : "0xFFFF, 0xFFFF, 0"));
 
                     sb.Append(string.Format(DEBUG_STRING_3, ReadObject(SelectedObject.Object)));
 

@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using System;
+using ClassicUO.ECS;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
@@ -386,6 +387,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
+            var ecsT = Client.Game?.UO?.EcsRuntime;
+            bool useEcsT = ecsT != null && ecsT.GetCutoverFlags().UseEcsUiData;
+            string playerName = useEcsT ? ecsT.GetEntityName(ecsT.GetStatusSnapshot().Serial) : World.Player.Name;
+
             int mydbX,
                 mydbY,
                 opdbX,
@@ -395,7 +400,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Add(new GumpPic(0, 0, 0x088A, 0));
 
-                Add(new Label(World.Player.Name, false, 0x0481, font: 3) { X = 73, Y = 32 });
+                Add(new Label(playerName, false, 0x0481, font: 3) { X = 73, Y = 32 });
 
                 int fontWidth = 250 - Client.Game.UO.FileManager.Fonts.GetWidthASCII(3, _name);
 
@@ -536,7 +541,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Add(new GumpPic(0, 0, 0x0866, 0));
 
-                Add(new Label(World.Player.Name, false, 0x0386, font: 1) { X = 84, Y = 40 });
+                Add(new Label(playerName, false, 0x0386, font: 1) { X = 84, Y = 40 });
 
                 int fontWidth = 260 - Client.Game.UO.FileManager.Fonts.GetWidthASCII(1, _name);
 

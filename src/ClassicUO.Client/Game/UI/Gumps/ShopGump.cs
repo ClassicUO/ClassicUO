@@ -2,6 +2,7 @@
 
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.ECS;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -184,7 +185,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (isBuyGump)
             {
-                _playerGoldLabel = new Label(World.Player.Gold.ToString(), true, 0x0386, 0, 1)
+                var ecsInit = Client.Game?.UO?.EcsRuntime;
+                bool useEcsInit = ecsInit != null && ecsInit.GetCutoverFlags().UseEcsUiData;
+                uint initGold = useEcsInit ? ecsInit.GetStatusSnapshot().Stats.Gold : World.Player.Gold;
+                _playerGoldLabel = new Label(initGold.ToString(), true, 0x0386, 0, 1)
                 {
                     X = _totalLabel.X + 120,
                     Y = _totalLabel.Y
@@ -450,7 +454,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_playerGoldLabel != null)
             {
-                _playerGoldLabel.Text = World.Player.Gold.ToString();
+                var ecs = Client.Game?.UO?.EcsRuntime;
+                bool useEcs = ecs != null && ecs.GetCutoverFlags().UseEcsUiData;
+                uint gold = useEcs ? ecs.GetStatusSnapshot().Stats.Gold : World.Player.Gold;
+                _playerGoldLabel.Text = gold.ToString();
             }
 
             base.Update();

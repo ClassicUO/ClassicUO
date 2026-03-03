@@ -2,6 +2,7 @@
 
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -713,11 +714,35 @@ namespace ClassicUO.Game.Scenes
                 _timePing = (long)Time.Ticks + 1000;
             }
 
-            _world.Update();
+            var ecsScene = Client.Game?.UO?.EcsRuntime;
+            bool ecsOnlyNet = ecsScene != null && ecsScene.GetCutoverFlags().EcsOnlyNetwork;
+
+            if (!ecsOnlyNet)
+            {
+                _world.Update();
+            }
+            else
+            {
+                // ECS pipeline (Sim_ systems) already ran via EcsRuntime.Progress().
+                // Flush WorldMap tracking updates to legacy WMapManager.
+                var wmList = ecsScene.GetWorldMapUpdateList();
+                int mapIdx = ecsScene.GetCurrentMapIndex();
+                for (int i = 0; i < wmList.Count; i++)
+                {
+                    var e = wmList.Get(i);
+                    string name = e.NameIndex >= 0 ? ecsScene.GetString(e.NameIndex) : null;
+                    _world.WMapManager.AddOrUpdate(e.Serial, e.X, e.Y, e.HpPercent, mapIdx, e.IsGuild, name);
+                }
+            }
+
             _animatedStaticsManager.Process();
             _world.BoatMovingManager.Update();
             _world.Player.Pathfinder.ProcessAutoWalk();
-            _world.DelayedObjectClickManager.Update();
+
+            if (!ecsOnlyNet)
+            {
+                _world.DelayedObjectClickManager.Update();
+            }
 
             if (!MoveCharacterByMouseInput() && !currentProfile.DisableArrowBtn)
             {

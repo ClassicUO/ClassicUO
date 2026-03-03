@@ -2,6 +2,7 @@
 
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -51,9 +52,18 @@ namespace ClassicUO.Game.Scenes
 
         public void UpdateMaxDrawZ(bool force = false)
         {
-            int playerX = _world.Player.X;
-            int playerY = _world.Player.Y;
-            int playerZ = _world.Player.Z;
+            var ecsDs = Client.Game?.UO?.EcsRuntime;
+            bool useEcsDs = ecsDs != null && ecsDs.GetCutoverFlags().UseEcsUiData;
+            int playerX, playerY, playerZ;
+            if (useEcsDs)
+            {
+                var snap = ecsDs.GetPlayerSnapshot();
+                playerX = snap.X; playerY = snap.Y; playerZ = snap.Z;
+            }
+            else
+            {
+                playerX = _world.Player.X; playerY = _world.Player.Y; playerZ = _world.Player.Z;
+            }
 
             if (
                 playerX == _oldPlayerX && playerY == _oldPlayerY && playerZ == _oldPlayerZ && !force
@@ -282,15 +292,15 @@ namespace ClassicUO.Game.Scenes
                 {
                     sbyte index = 0;
 
-                    bool check = _world.Player.X <= obj.X && _world.Player.Y <= obj.Y;
+                    bool check = _oldPlayerX <= obj.X && _oldPlayerY <= obj.Y;
 
                     if (!check)
                     {
-                        check = _world.Player.Y <= obj.Y && _world.Player.X <= obj.X + 1;
+                        check = _oldPlayerY <= obj.Y && _oldPlayerX <= obj.X + 1;
 
                         if (!check)
                         {
-                            check = _world.Player.X <= obj.X && _world.Player.Y <= obj.Y + 1;
+                            check = _oldPlayerX <= obj.X && _oldPlayerY <= obj.Y + 1;
                         }
                     }
 
@@ -510,8 +520,11 @@ namespace ClassicUO.Game.Scenes
 
         private bool HasSurfaceOverhead(Entity obj)
         {
+            var ecsSo = Client.Game?.UO?.EcsRuntime;
+            uint soPlayerSerial = ecsSo != null && ecsSo.GetCutoverFlags().UseEcsUiData
+                ? ecsSo.GetPlayerSerial() : _world.Player?.Serial ?? 0;
             if (
-                obj.Serial == _world.Player.Serial /* || _maxZ == _maxGroundZ*/
+                obj.Serial == soPlayerSerial /* || _maxZ == _maxGroundZ*/
             )
             {
                 return false;
@@ -1011,12 +1024,29 @@ namespace ClassicUO.Game.Scenes
             int winGameWidth = Camera.Bounds.Width;
             int winGameHeight = Camera.Bounds.Height;
             int winGameCenterX = winGamePosX + (winGameWidth >> 1);
-            int winGameCenterY = winGamePosY + (winGameHeight >> 1) + (_world.Player.Z << 2);
-            winGameCenterX -= (int)_world.Player.Offset.X;
-            winGameCenterY -= (int)(_world.Player.Offset.Y - _world.Player.Offset.Z);
+            var ecsVp = Client.Game?.UO?.EcsRuntime;
+            bool useEcsVp = ecsVp != null && ecsVp.GetCutoverFlags().UseEcsUiData;
+            int vpPlayerX, vpPlayerY, vpPlayerZ;
+            float vpOffX, vpOffY, vpOffZ;
+            if (useEcsVp)
+            {
+                var snap = ecsVp.GetPlayerSnapshot();
+                vpPlayerX = snap.X; vpPlayerY = snap.Y; vpPlayerZ = snap.Z;
+                if (!ecsVp.GetPlayerOffset(out vpOffX, out vpOffY, out vpOffZ))
+                { vpOffX = 0; vpOffY = 0; vpOffZ = 0; }
+            }
+            else
+            {
+                vpPlayerX = _world.Player.X; vpPlayerY = _world.Player.Y; vpPlayerZ = _world.Player.Z;
+                vpOffX = _world.Player.Offset.X; vpOffY = _world.Player.Offset.Y; vpOffZ = _world.Player.Offset.Z;
+            }
 
-            int tileOffX = _world.Player.X;
-            int tileOffY = _world.Player.Y;
+            int winGameCenterY = winGamePosY + (winGameHeight >> 1) + (vpPlayerZ << 2);
+            winGameCenterX -= (int)vpOffX;
+            winGameCenterY -= (int)(vpOffY - vpOffZ);
+
+            int tileOffX = vpPlayerX;
+            int tileOffY = vpPlayerY;
 
             int winDrawOffsetX = (tileOffX - tileOffY) * 22 - winGameCenterX;
             int winDrawOffsetY = (tileOffX + tileOffY) * 22 - winGameCenterY;

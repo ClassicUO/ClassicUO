@@ -17,6 +17,7 @@ namespace ClassicUO.ECS.Systems
     {
         public static void Register(World world)
         {
+            RegisterApplyEnterWorld(world);
             RegisterApplyCreateOrUpdateMobile(world);
             RegisterApplyCreateOrUpdateItem(world);
             RegisterApplyDeleteEntity(world);
@@ -25,19 +26,54 @@ namespace ClassicUO.ECS.Systems
             RegisterApplyEquipItem(world);
             RegisterApplyUpdateVitals(world);
             RegisterApplySetWarmode(world);
+            RegisterApplyDisplayDeath(world);
+            RegisterApplyDeathScreen(world);
+            RegisterApplyCorpseEquipment(world);
+            RegisterApplyDenyMoveItem(world);
+            RegisterApplyEndDragging(world);
+            RegisterApplyDropItemAccepted(world);
             RegisterCommandCleanup(world);
+        }
+
+        // ── Enter world (player bootstrap) ────────────────────────
+
+        private static void RegisterApplyEnterWorld(World world)
+        {
+            world.System<CmdEnterWorld, MapIndex, NetDebugCounters>("NetApply_EnterWorld")
+                .Kind(Phases.NetApply)
+                .With<NetworkCommand>()
+                .TermAt(1).Singleton()
+                .TermAt(2).Singleton()
+                .Each((Entity cmdEntity, ref CmdEnterWorld cmd, ref MapIndex mapIdx, ref NetDebugCounters counters) =>
+                {
+                    Entity player = SerialRegistry.FindOrCreate(cmdEntity.CsWorld(), cmd.Serial);
+
+                    if (!player.Has<MobileTag>())
+                        player.Add<MobileTag>();
+                    if (!player.Has<PlayerTag>())
+                        player.Add<PlayerTag>();
+
+                    player.Set(new WorldPosition(cmd.X, cmd.Y, cmd.Z));
+                    player.Set(new DirectionComponent(cmd.Direction));
+                    player.Set(new GraphicComponent(cmd.Graphic));
+
+                    mapIdx = new MapIndex(cmd.MapIndex);
+
+                    counters = counters with { CommandsApplied = counters.CommandsApplied + 1 };
+                });
         }
 
         // ── Mobile creation / update ────────────────────────────────
 
         private static void RegisterApplyCreateOrUpdateMobile(World world)
         {
-            world.System<CmdCreateOrUpdateMobile>("NetApply_CreateOrUpdateMobile")
+            world.System<CmdCreateOrUpdateMobile, NetDebugCounters>("NetApply_CreateOrUpdateMobile")
                 .Kind(Phases.NetApply)
                 .With<NetworkCommand>()
-                .Each((Entity cmdEntity, ref CmdCreateOrUpdateMobile cmd) =>
+                .TermAt(1).Singleton()
+                .Each((Entity cmdEntity, ref CmdCreateOrUpdateMobile cmd, ref NetDebugCounters counters) =>
                 {
-                    Entity target = FindOrCreate(cmdEntity.CsWorld(), cmd.Serial);
+                    Entity target = SerialRegistry.FindOrCreate(cmdEntity.CsWorld(), cmd.Serial);
 
                     if (!target.Has<MobileTag>())
                         target.Add<MobileTag>();
@@ -52,20 +88,80 @@ namespace ClassicUO.ECS.Systems
                     target.Set(new FlagsComponent(cmd.Flags));
                     target.Set(new NotorietyComponent(cmd.Notoriety));
 
-                    IncrementApplied(cmdEntity.CsWorld());
+                    // Decode flags into individual tags for ECS queries and rendering.
+                    // EntityFlags: Frozen=0x01, Female=0x02, Poisoned/Flying=0x04,
+                    //              YellowBar=0x08, WarMode=0x40, Hidden=0x80
+                    uint flags = cmd.Flags;
+                    bool isGargoyle = cmd.Graphic == 0x029A || cmd.Graphic == 0x029B;
+
+                    SetOrRemoveTag<FrozenTag>(target, (flags & 0x01) != 0);
+                    SetOrRemoveTag<FemaleTag>(target, (flags & 0x02) != 0);
+
+                    // Bit 0x04 is Poisoned for non-gargoyles, Flying for gargoyles
+                    if (isGargoyle)
+                    {
+                        SetOrRemoveTag<FlyingTag>(target, (flags & 0x04) != 0);
+                        if (target.Has<PoisonedTag>()) target.Remove<PoisonedTag>();
+                    }
+                    else
+                    {
+                        SetOrRemoveTag<PoisonedTag>(target, (flags & 0x04) != 0);
+                        if (target.Has<FlyingTag>()) target.Remove<FlyingTag>();
+                    }
+
+                    SetOrRemoveTag<YellowHitsTag>(target, (flags & 0x08) != 0);
+                    SetOrRemoveTag<WarModeTag>(target, (flags & 0x40) != 0);
+                    SetOrRemoveTag<HiddenTag>(target, (flags & 0x80) != 0);
+
+                    // Graphic-derived tags
+                    SetOrRemoveTag<IsGargoyleTag>(target, isGargoyle);
+                    SetOrRemoveTag<IsHumanTag>(target, IsHumanGraphic(cmd.Graphic));
+
+                    counters = counters with { CommandsApplied = counters.CommandsApplied + 1 };
                 });
+        }
+
+        /// <summary>Add tag if condition is true, remove if false. Safe for missing tags.</summary>
+        private static void SetOrRemoveTag<T>(Entity entity, bool condition) where T : struct
+        {
+            if (condition)
+            {
+                if (!entity.Has<T>()) entity.Add<T>();
+            }
+            else
+            {
+                if (entity.Has<T>()) entity.Remove<T>();
+            }
+        }
+
+        /// <summary>
+        /// Check if a graphic ID corresponds to a human/elf body type.
+        /// Matches legacy Mobile.IsHuman property ranges.
+        /// </summary>
+        private static bool IsHumanGraphic(ushort graphic)
+        {
+            return (graphic >= 0x0190 && graphic <= 0x0193)
+                || (graphic >= 0x00B7 && graphic <= 0x00BA)
+                || (graphic >= 0x025D && graphic <= 0x0260)
+                || graphic == 0x029A || graphic == 0x029B
+                || graphic == 0x02B6 || graphic == 0x02B7
+                || graphic == 0x03DB || graphic == 0x03DF
+                || graphic == 0x03E2
+                || graphic == 0x02E8 || graphic == 0x02E9
+                || graphic == 0x04E5;
         }
 
         // ── Item creation / update ──────────────────────────────────
 
         private static void RegisterApplyCreateOrUpdateItem(World world)
         {
-            world.System<CmdCreateOrUpdateItem>("NetApply_CreateOrUpdateItem")
+            world.System<CmdCreateOrUpdateItem, NetDebugCounters>("NetApply_CreateOrUpdateItem")
                 .Kind(Phases.NetApply)
                 .With<NetworkCommand>()
-                .Each((Entity cmdEntity, ref CmdCreateOrUpdateItem cmd) =>
+                .TermAt(1).Singleton()
+                .Each((Entity cmdEntity, ref CmdCreateOrUpdateItem cmd, ref NetDebugCounters counters) =>
                 {
-                    Entity target = FindOrCreate(cmdEntity.CsWorld(), cmd.Serial);
+                    Entity target = SerialRegistry.FindOrCreate(cmdEntity.CsWorld(), cmd.Serial);
 
                     if (!target.Has<ItemTag>())
                         target.Add<ItemTag>();
@@ -87,7 +183,7 @@ namespace ClassicUO.ECS.Systems
                     if (cmd.ItemType == 2 && !target.Has<MultiTag>())
                         target.Add<MultiTag>();
 
-                    IncrementApplied(cmdEntity.CsWorld());
+                    counters = counters with { CommandsApplied = counters.CommandsApplied + 1 };
                 });
         }
 
@@ -95,16 +191,17 @@ namespace ClassicUO.ECS.Systems
 
         private static void RegisterApplyDeleteEntity(World world)
         {
-            world.System<CmdDeleteEntity>("NetApply_DeleteEntity")
+            world.System<CmdDeleteEntity, NetDebugCounters>("NetApply_DeleteEntity")
                 .Kind(Phases.NetApply)
                 .With<NetworkCommand>()
-                .Each((Entity cmdEntity, ref CmdDeleteEntity cmd) =>
+                .TermAt(1).Singleton()
+                .Each((Entity cmdEntity, ref CmdDeleteEntity cmd, ref NetDebugCounters counters) =>
                 {
-                    Entity target = FindBySerial(cmdEntity.CsWorld(), cmd.Serial);
+                    Entity target = SerialRegistry.FindBySerial(cmd.Serial);
                     if (target != 0 && target.IsAlive())
                         target.Destruct();
 
-                    IncrementApplied(cmdEntity.CsWorld());
+                    counters = counters with { CommandsApplied = counters.CommandsApplied + 1 };
                 });
         }
 
@@ -112,13 +209,14 @@ namespace ClassicUO.ECS.Systems
 
         private static void RegisterApplyContainedItem(World world)
         {
-            world.System<CmdContainedItem>("NetApply_ContainedItem")
+            world.System<CmdContainedItem, NetDebugCounters>("NetApply_ContainedItem")
                 .Kind(Phases.NetApply)
                 .With<NetworkCommand>()
-                .Each((Entity cmdEntity, ref CmdContainedItem cmd) =>
+                .TermAt(1).Singleton()
+                .Each((Entity cmdEntity, ref CmdContainedItem cmd, ref NetDebugCounters counters) =>
                 {
                     var w = cmdEntity.CsWorld();
-                    Entity item = FindOrCreate(w, cmd.Serial);
+                    Entity item = SerialRegistry.FindOrCreate(w, cmd.Serial);
 
                     if (!item.Has<ItemTag>())
                         item.Add<ItemTag>();
@@ -128,15 +226,16 @@ namespace ClassicUO.ECS.Systems
                     item.Set(new AmountComponent(cmd.Amount));
                     item.Set(new ContainerLink(cmd.ContainerSerial));
                     item.Set(new WorldPosition(cmd.X, cmd.Y, 0));
+                    item.Set(new ContainerPosition(cmd.X, cmd.Y, 0));
 
                     if (item.Has<OnGroundTag>())
                         item.Remove<OnGroundTag>();
 
-                    Entity container = FindBySerial(w, cmd.ContainerSerial);
+                    Entity container = SerialRegistry.FindBySerial(cmd.ContainerSerial);
                     if (container != 0 && container.IsAlive())
                         item.ChildOf(container);
 
-                    IncrementApplied(w);
+                    counters = counters with { CommandsApplied = counters.CommandsApplied + 1 };
                 });
         }
 
@@ -144,16 +243,17 @@ namespace ClassicUO.ECS.Systems
 
         private static void RegisterApplyClearContainer(World world)
         {
-            world.System<CmdClearContainer>("NetApply_ClearContainer")
+            world.System<CmdClearContainer, NetDebugCounters>("NetApply_ClearContainer")
                 .Kind(Phases.NetApply)
                 .With<NetworkCommand>()
-                .Each((Entity cmdEntity, ref CmdClearContainer cmd) =>
+                .TermAt(1).Singleton()
+                .Each((Entity cmdEntity, ref CmdClearContainer cmd, ref NetDebugCounters counters) =>
                 {
                     var w = cmdEntity.CsWorld();
-                    Entity container = FindBySerial(w, cmd.ContainerSerial);
+                    Entity container = SerialRegistry.FindBySerial(cmd.ContainerSerial);
                     if (container == 0 || !container.IsAlive())
                     {
-                        IncrementApplied(w);
+                        counters = counters with { CommandsApplied = counters.CommandsApplied + 1 };
                         return;
                     }
 
@@ -187,7 +287,7 @@ namespace ClassicUO.ECS.Systems
                             e.Destruct();
                     }
 
-                    IncrementApplied(w);
+                    counters = counters with { CommandsApplied = counters.CommandsApplied + 1 };
                 });
         }
 
@@ -195,13 +295,14 @@ namespace ClassicUO.ECS.Systems
 
         private static void RegisterApplyEquipItem(World world)
         {
-            world.System<CmdEquipItem>("NetApply_EquipItem")
+            world.System<CmdEquipItem, NetDebugCounters>("NetApply_EquipItem")
                 .Kind(Phases.NetApply)
                 .With<NetworkCommand>()
-                .Each((Entity cmdEntity, ref CmdEquipItem cmd) =>
+                .TermAt(1).Singleton()
+                .Each((Entity cmdEntity, ref CmdEquipItem cmd, ref NetDebugCounters counters) =>
                 {
                     var w = cmdEntity.CsWorld();
-                    Entity item = FindOrCreate(w, cmd.Serial);
+                    Entity item = SerialRegistry.FindOrCreate(w, cmd.Serial);
 
                     if (!item.Has<ItemTag>())
                         item.Add<ItemTag>();
@@ -215,14 +316,14 @@ namespace ClassicUO.ECS.Systems
                     if (item.Has<OnGroundTag>())
                         item.Remove<OnGroundTag>();
 
-                    Entity mobile = FindBySerial(w, cmd.ContainerSerial);
+                    Entity mobile = SerialRegistry.FindBySerial(cmd.ContainerSerial);
                     if (mobile != 0 && mobile.IsAlive())
                     {
                         item.Add<EquippedOn>(mobile);
                         item.ChildOf(mobile);
                     }
 
-                    IncrementApplied(w);
+                    counters = counters with { CommandsApplied = counters.CommandsApplied + 1 };
                 });
         }
 
@@ -230,16 +331,16 @@ namespace ClassicUO.ECS.Systems
 
         private static void RegisterApplyUpdateVitals(World world)
         {
-            world.System<CmdUpdateVitals>("NetApply_UpdateVitals")
+            world.System<CmdUpdateVitals, NetDebugCounters>("NetApply_UpdateVitals")
                 .Kind(Phases.NetApply)
                 .With<NetworkCommand>()
-                .Each((Entity cmdEntity, ref CmdUpdateVitals cmd) =>
+                .TermAt(1).Singleton()
+                .Each((Entity cmdEntity, ref CmdUpdateVitals cmd, ref NetDebugCounters counters) =>
                 {
-                    var w = cmdEntity.CsWorld();
-                    Entity target = FindBySerial(w, cmd.Serial);
+                    Entity target = SerialRegistry.FindBySerial(cmd.Serial);
                     if (target == 0 || !target.IsAlive())
                     {
-                        IncrementApplied(w);
+                        counters = counters with { CommandsApplied = counters.CommandsApplied + 1 };
                         return;
                     }
 
@@ -256,7 +357,7 @@ namespace ClassicUO.ECS.Systems
                         StaminaMax: (cmd.ValidFields & 4) != 0 ? cmd.StaminaMax : current.StaminaMax
                     ));
 
-                    IncrementApplied(w);
+                    counters = counters with { CommandsApplied = counters.CommandsApplied + 1 };
                 });
         }
 
@@ -264,16 +365,16 @@ namespace ClassicUO.ECS.Systems
 
         private static void RegisterApplySetWarmode(World world)
         {
-            world.System<CmdSetWarmode>("NetApply_SetWarmode")
+            world.System<CmdSetWarmode, NetDebugCounters>("NetApply_SetWarmode")
                 .Kind(Phases.NetApply)
                 .With<NetworkCommand>()
-                .Each((Entity cmdEntity, ref CmdSetWarmode cmd) =>
+                .TermAt(1).Singleton()
+                .Each((Entity cmdEntity, ref CmdSetWarmode cmd, ref NetDebugCounters counters) =>
                 {
-                    var w = cmdEntity.CsWorld();
-                    Entity target = FindBySerial(w, cmd.Serial);
+                    Entity target = SerialRegistry.FindBySerial(cmd.Serial);
                     if (target == 0 || !target.IsAlive())
                     {
-                        IncrementApplied(w);
+                        counters = counters with { CommandsApplied = counters.CommandsApplied + 1 };
                         return;
                     }
 
@@ -288,7 +389,181 @@ namespace ClassicUO.ECS.Systems
                             target.Remove<WarModeTag>();
                     }
 
-                    IncrementApplied(w);
+                    counters = counters with { CommandsApplied = counters.CommandsApplied + 1 };
+                });
+        }
+
+        // ── Display death ─────────────────────────────────────────
+
+        private static void RegisterApplyDisplayDeath(World world)
+        {
+            world.System<CmdDisplayDeath, NetDebugCounters>("NetApply_DisplayDeath")
+                .Kind(Phases.NetApply)
+                .With<NetworkCommand>()
+                .TermAt(1).Singleton()
+                .Each((Entity cmdEntity, ref CmdDisplayDeath cmd, ref NetDebugCounters counters) =>
+                {
+                    var w = cmdEntity.CsWorld();
+
+                    // Find the dying mobile and add DeadTag.
+                    Entity mobile = SerialRegistry.FindBySerial(cmd.Serial);
+                    if (mobile != 0 && mobile.IsAlive())
+                    {
+                        if (!mobile.Has<DeadTag>())
+                            mobile.Add<DeadTag>();
+                    }
+
+                    // Create corpse entity if a valid corpse serial was provided.
+                    if (cmd.CorpseSerial != 0)
+                    {
+                        Entity corpse = SerialRegistry.FindOrCreate(w, cmd.CorpseSerial);
+
+                        if (!corpse.Has<ItemTag>())
+                            corpse.Add<ItemTag>();
+                        if (!corpse.Has<CorpseTag>())
+                            corpse.Add<CorpseTag>();
+                        if (!corpse.Has<OnGroundTag>())
+                            corpse.Add<OnGroundTag>();
+
+                        corpse.Set(new GraphicComponent(0x2006)); // corpse graphic
+                        corpse.Set(new CorpseOwnerLink(cmd.Serial));
+
+                        // Copy position from dying mobile to corpse.
+                        if (mobile != 0 && mobile.IsAlive() && mobile.Has<WorldPosition>())
+                        {
+                            ref readonly var pos = ref mobile.Get<WorldPosition>();
+                            corpse.Set(new WorldPosition(pos.X, pos.Y, pos.Z));
+
+                            if (mobile.Has<DirectionComponent>())
+                            {
+                                ref readonly var dir = ref mobile.Get<DirectionComponent>();
+                                corpse.Set(new DirectionComponent(dir.Direction));
+                            }
+                        }
+                    }
+
+                    counters = counters with { CommandsApplied = counters.CommandsApplied + 1 };
+                });
+        }
+
+        // ── Death screen (player death) ──────────────────────────
+
+        private static void RegisterApplyDeathScreen(World world)
+        {
+            world.System<CmdDeathScreen, NetDebugCounters>("NetApply_DeathScreen")
+                .Kind(Phases.NetApply)
+                .With<NetworkCommand>()
+                .TermAt(1).Singleton()
+                .Each((Entity cmdEntity, ref CmdDeathScreen cmd, ref NetDebugCounters counters) =>
+                {
+                    if (cmd.Action != 1)
+                    {
+                        // Player died — add DeadTag to player entity.
+                        Entity player = SerialRegistry.FindPlayer(cmdEntity.CsWorld());
+                        if (player != 0 && player.IsAlive())
+                        {
+                            if (!player.Has<DeadTag>())
+                                player.Add<DeadTag>();
+                        }
+                    }
+
+                    counters = counters with { CommandsApplied = counters.CommandsApplied + 1 };
+                });
+        }
+
+        // ── Corpse equipment ──────────────────────────────────────
+
+        private static void RegisterApplyCorpseEquipment(World world)
+        {
+            world.System<CmdCorpseEquipment, NetDebugCounters>("NetApply_CorpseEquipment")
+                .Kind(Phases.NetApply)
+                .With<NetworkCommand>()
+                .TermAt(1).Singleton()
+                .Each((Entity cmdEntity, ref CmdCorpseEquipment cmd, ref NetDebugCounters counters) =>
+                {
+                    var w = cmdEntity.CsWorld();
+                    Entity corpse = SerialRegistry.FindBySerial(cmd.CorpseSerial);
+                    if (corpse == 0 || !corpse.IsAlive())
+                    {
+                        counters = counters with { CommandsApplied = counters.CommandsApplied + 1 };
+                        return;
+                    }
+
+                    Entity item = SerialRegistry.FindOrCreate(w, cmd.ItemSerial);
+
+                    if (!item.Has<ItemTag>())
+                        item.Add<ItemTag>();
+
+                    item.Set(new LayerComponent(cmd.Layer));
+                    item.Set(new ContainerLink(cmd.CorpseSerial));
+
+                    if (item.Has<OnGroundTag>())
+                        item.Remove<OnGroundTag>();
+
+                    item.Add<EquippedOn>(corpse);
+                    item.ChildOf(corpse);
+
+                    counters = counters with { CommandsApplied = counters.CommandsApplied + 1 };
+                });
+        }
+
+        // ── Item Hold: Deny Move (NetApply) ─────────────────────────
+
+        private static void RegisterApplyDenyMoveItem(World world)
+        {
+            world.System<CmdDenyMoveItem, ItemHoldState, NetDebugCounters>("NetApply_DenyMoveItem")
+                .Kind(Phases.NetApply)
+                .With<NetworkCommand>()
+                .TermAt(1).Singleton()
+                .TermAt(2).Singleton()
+                .Each((Entity cmdEntity, ref CmdDenyMoveItem cmd, ref ItemHoldState hold, ref NetDebugCounters counters) =>
+                {
+                    // Server denied the item move — reset cursor hold state.
+                    hold = default;
+                    counters = counters with { CommandsApplied = counters.CommandsApplied + 1 };
+                });
+        }
+
+        // ── Item Hold: End Dragging (NetApply) ──────────────────────
+
+        private static void RegisterApplyEndDragging(World world)
+        {
+            world.System("NetApply_EndDragging")
+                .Kind(Phases.NetApply)
+                .With<CmdEndDragging>()
+                .With<NetworkCommand>()
+                .Run((Iter it) =>
+                {
+                    while (it.Next())
+                    {
+                        ref var hold = ref it.World().GetMut<ItemHoldState>();
+                        ref var counters = ref it.World().GetMut<NetDebugCounters>();
+
+                        hold.Enabled = false;
+                        hold.Dropped = false;
+                        counters = counters with { CommandsApplied = counters.CommandsApplied + it.Count() };
+                    }
+                });
+        }
+
+        // ── Item Hold: Drop Accepted (NetApply) ─────────────────────
+
+        private static void RegisterApplyDropItemAccepted(World world)
+        {
+            world.System("NetApply_DropItemAccepted")
+                .Kind(Phases.NetApply)
+                .With<CmdDropItemAccepted>()
+                .With<NetworkCommand>()
+                .Run((Iter it) =>
+                {
+                    while (it.Next())
+                    {
+                        ref var hold = ref it.World().GetMut<ItemHoldState>();
+                        ref var counters = ref it.World().GetMut<NetDebugCounters>();
+
+                        hold = default;
+                        counters = counters with { CommandsApplied = counters.CommandsApplied + it.Count() };
+                    }
                 });
         }
 
@@ -310,35 +585,5 @@ namespace ClassicUO.ECS.Systems
                 });
         }
 
-        // ── Helpers ─────────────────────────────────────────────────
-
-        private static Entity FindBySerial(World world, uint serial)
-        {
-            using var q = world.QueryBuilder<SerialComponent>().Build();
-
-            Entity found = default;
-            q.Each((Entity e, ref SerialComponent s) =>
-            {
-                if (s.Serial == serial)
-                    found = e;
-            });
-            return found;
-        }
-
-        private static Entity FindOrCreate(World world, uint serial)
-        {
-            Entity found = FindBySerial(world, serial);
-            if (found != 0 && found.IsAlive())
-                return found;
-
-            return world.Entity()
-                .Set(new SerialComponent(serial));
-        }
-
-        private static void IncrementApplied(World world)
-        {
-            ref var c = ref world.GetMut<NetDebugCounters>();
-            c = c with { CommandsApplied = c.CommandsApplied + 1 };
-        }
     }
 }

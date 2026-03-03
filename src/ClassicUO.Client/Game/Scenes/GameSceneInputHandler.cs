@@ -3,6 +3,7 @@
 using System;
 using System.Linq;
 using ClassicUO.Configuration;
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -65,7 +66,19 @@ namespace ClassicUO.Game.Scenes
 
                 bool run = mouseRange >= 190;
 
-                if (_world.Player.IsDrivingBoat)
+                var ecsDrv = Client.Game?.UO?.EcsRuntime;
+                bool isDriving;
+                if (ecsDrv != null && ecsDrv.GetCutoverFlags().UseEcsUiData)
+                {
+                    uint mountSerial = ecsDrv.GetEquippedItemSerial(ecsDrv.GetPlayerSerial(), (byte)Layer.Mount);
+                    isDriving = mountSerial != 0 && ecsDrv.GetItemSnapshot(mountSerial).Graphic == 0x3E96;
+                }
+                else
+                {
+                    isDriving = _world.Player.IsDrivingBoat;
+                }
+
+                if (isDriving)
                 {
                     if (!_boatIsMoving || _boatRun != run || _lastBoatDirection != facing - 1)
                     {
@@ -777,8 +790,12 @@ namespace ClassicUO.Game.Scenes
 
                 case Mobile mob:
                     result = true;
+                    var ecsMob = Client.Game?.UO?.EcsRuntime;
+                    bool useEcsMob = ecsMob != null && ecsMob.GetCutoverFlags().UseEcsUiData;
+                    bool mobInWar = useEcsMob ? ecsMob.GetPlayerSnapshot().InWarMode : _world.Player.InWarMode;
+                    bool mobIsPlayer = useEcsMob ? mob.Serial == ecsMob.GetPlayerSerial() : mob == _world.Player;
 
-                    if (_world.Player.InWarMode && _world.Player != mob)
+                    if (mobInWar && !mobIsPlayer)
                     {
                         GameActions.Attack(_world, mob);
                     }
@@ -846,7 +863,11 @@ namespace ClassicUO.Game.Scenes
             if (_boatIsMoving)
             {
                 _boatIsMoving = false;
-                _world.BoatMovingManager.MoveRequest(_world.Player.Direction, 0);
+                var ecsBoat = Client.Game?.UO?.EcsRuntime;
+                byte boatDir = ecsBoat != null && ecsBoat.GetCutoverFlags().UseEcsUiData
+                    ? ecsBoat.GetPlayerSnapshot().Direction
+                    : (byte)_world.Player.Direction;
+                _world.BoatMovingManager.MoveRequest((Direction)boatDir, 0);
             }
 
             return UIManager.IsMouseOverWorld;
@@ -1073,7 +1094,11 @@ namespace ClassicUO.Game.Scenes
                             );
                             customgump?.Dispose();
 
-                            if (obj == _world.Player && ProfileManager.CurrentProfile.StatusGumpBarMutuallyExclusive)
+                            var ecsHb = Client.Game?.UO?.EcsRuntime;
+                            bool isPlayerObj = ecsHb != null && ecsHb.GetCutoverFlags().UseEcsUiData
+                                ? obj.Serial == ecsHb.GetPlayerSerial()
+                                : obj == _world.Player;
+                            if (isPlayerObj && ProfileManager.CurrentProfile.StatusGumpBarMutuallyExclusive)
                             {
                                 StatusGumpBase.GetStatusGump()?.Dispose();
                             }
@@ -1161,8 +1186,12 @@ namespace ClassicUO.Game.Scenes
                         if (!_requestedWarMode)
                         {
                             _requestedWarMode = true;
+                            var ecsTab = Client.Game?.UO?.EcsRuntime;
+                            bool tabInWar = ecsTab != null && ecsTab.GetCutoverFlags().UseEcsUiData
+                                ? ecsTab.GetPlayerSnapshot().InWarMode
+                                : _world.Player.InWarMode;
 
-                            if (!_world.Player.InWarMode)
+                            if (!tabInWar)
                             {
                                 NetClient.Socket.Send_ChangeWarMode(true);
                             }

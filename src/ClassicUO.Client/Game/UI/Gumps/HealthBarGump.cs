@@ -2,6 +2,7 @@
 
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -101,7 +102,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (LocalSerial == World.Player)
             {
-                _name = World.Player.Name;
+                var ecsRst = Client.Game?.UO?.EcsRuntime;
+                _name = ecsRst != null && ecsRst.GetCutoverFlags().UseEcsUiData
+                    ? ecsRst.GetEntityName(LocalSerial)
+                    : World.Player.Name;
                 BuildGump();
             }
             else if (ProfileManager.CurrentProfile.SaveHealthbars)
@@ -232,7 +236,10 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (entity != World.Player)
                 {
-                    if (World.Player.InWarMode)
+                    var ecsClick = Client.Game?.UO?.EcsRuntime;
+                    bool useEcsClick = ecsClick != null && ecsClick.GetCutoverFlags().UseEcsUiData;
+                    bool clickWarMode = useEcsClick ? ecsClick.GetPlayerSnapshot().InWarMode : World.Player.InWarMode;
+                    if (clickWarMode)
                     {
                         GameActions.Attack(World, entity);
                     }
@@ -661,11 +668,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (LocalSerial == World.Player)
             {
-                if (World.Player.InWarMode != _oldWarMode)
+                var ecsWar = Client.Game?.UO?.EcsRuntime;
+                bool useEcsWar = ecsWar != null && ecsWar.GetCutoverFlags().UseEcsUiData;
+                bool currentWarMode = useEcsWar ? ecsWar.GetPlayerSnapshot().InWarMode : World.Player.InWarMode;
+
+                if (currentWarMode != _oldWarMode)
                 {
                     _oldWarMode = !_oldWarMode;
 
-                    if (World.Player.InWarMode)
+                    if (currentWarMode)
                     {
                         _border[0].LineColor = HPB_COLOR_RED;
 
@@ -704,6 +715,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (LocalSerial == World.Player)
                 {
+                    var ecsNoto = Client.Game?.UO?.EcsRuntime;
+                    ushort notoHue = ecsNoto != null && ecsNoto.GetCutoverFlags().UseEcsUiData
+                        ? Notoriety.GetHue((NotorietyFlag)ecsNoto.GetNotoriety(LocalSerial))
+                        : Notoriety.GetHue(World.Player.NotorietyFlag);
                     Add
                     (
                         _textBox = new StbTextBox
@@ -713,7 +728,7 @@ namespace ClassicUO.Game.UI.Gumps
                             HPB_WIDTH,
                             true,
                             FontStyle.Cropped | FontStyle.BlackBorder,
-                            Notoriety.GetHue(World.Player.NotorietyFlag),
+                            notoHue,
                             TEXT_ALIGN_TYPE.TS_CENTER
                         )
                         {
@@ -885,7 +900,9 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (LocalSerial == World.Player)
                 {
-                    _oldWarMode = World.Player.InWarMode;
+                    var ecsInit = Client.Game?.UO?.EcsRuntime;
+                    bool useEcsInit = ecsInit != null && ecsInit.GetCutoverFlags().UseEcsUiData;
+                    _oldWarMode = useEcsInit ? ecsInit.GetPlayerSnapshot().InWarMode : World.Player.InWarMode;
                     Height = HPB_HEIGHT_MULTILINE;
                     Width = HPB_WIDTH;
 
@@ -1354,6 +1371,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (LocalSerial == World.Player)
                 {
+                    var ecsNoto2 = Client.Game?.UO?.EcsRuntime;
+                    ushort notoHue2 = ecsNoto2 != null && ecsNoto2.GetCutoverFlags().UseEcsUiData
+                        ? Notoriety.GetHue((NotorietyFlag)ecsNoto2.GetNotoriety(LocalSerial))
+                        : Notoriety.GetHue(World.Player.NotorietyFlag);
                     Add
                     (
                         _textBox = new StbTextBox
@@ -1363,7 +1384,7 @@ namespace ClassicUO.Game.UI.Gumps
                             120,
                             false,
                             FontStyle.Fixed,
-                            Notoriety.GetHue(World.Player.NotorietyFlag)
+                            notoHue2
                         )
                         {
                             X = 0,
@@ -1449,7 +1470,9 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (LocalSerial == World.Player)
                 {
-                    _oldWarMode = World.Player.InWarMode;
+                    var ecsInit2 = Client.Game?.UO?.EcsRuntime;
+                    bool useEcsInit2 = ecsInit2 != null && ecsInit2.GetCutoverFlags().UseEcsUiData;
+                    _oldWarMode = useEcsInit2 ? ecsInit2.GetPlayerSnapshot().InWarMode : World.Player.InWarMode;
 
                     Add(_background = new GumpPic(0, 0, _oldWarMode ? BACKGROUND_WAR : BACKGROUND_NORMAL, 0) { ContainsByBounds = true });
 
@@ -1865,11 +1888,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (LocalSerial == World.Player)
             {
-                if (World.Player.InWarMode != _oldWarMode)
+                var ecsWar2 = Client.Game?.UO?.EcsRuntime;
+                bool useEcsWar2 = ecsWar2 != null && ecsWar2.GetCutoverFlags().UseEcsUiData;
+                bool currentWarMode2 = useEcsWar2 ? ecsWar2.GetPlayerSnapshot().InWarMode : World.Player.InWarMode;
+
+                if (currentWarMode2 != _oldWarMode)
                 {
                     _oldWarMode = !_oldWarMode;
 
-                    _background.Graphic = World.Player.InWarMode ? BACKGROUND_WAR : BACKGROUND_NORMAL;
+                    _background.Graphic = currentWarMode2 ? BACKGROUND_WAR : BACKGROUND_NORMAL;
                 }
             }
         }

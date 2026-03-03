@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using System;
+using ClassicUO.ECS;
 using ClassicUO.Game.Managers;
 using Microsoft.Xna.Framework;
 
@@ -80,9 +81,17 @@ namespace ClassicUO.Game.GameObjects
                 TargetZ = Target.Z;
             }
 
-            int playerX = World.Player.X;
-            int playerY = World.Player.Y;
-            int playerZ = World.Player.Z;
+            int playerX, playerY, playerZ;
+            var ecsME = Client.Game?.UO?.EcsRuntime;
+            if (ecsME != null && ecsME.GetCutoverFlags().UseEcsUiData)
+            {
+                var snap = ecsME.GetPlayerSnapshot();
+                playerX = snap.X; playerY = snap.Y; playerZ = snap.Z;
+            }
+            else
+            {
+                playerX = World.Player.X; playerY = World.Player.Y; playerZ = World.Player.Z;
+            }
 
             (int sX, int sY, int sZ) = GetSource();
             int offsetSourceX = sX - playerX;

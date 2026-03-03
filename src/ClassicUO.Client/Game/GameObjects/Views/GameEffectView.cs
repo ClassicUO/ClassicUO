@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ClassicUO.Configuration;
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Assets;
@@ -110,7 +111,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 hue = Constants.OUT_RANGE_COLOR;
             }
-            else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
+            else if ((Client.Game?.UO?.EcsRuntime is { } ecsGe && ecsGe.GetCutoverFlags().UseEcsUiData ? ecsGe.GetPlayerSnapshot().IsDead : World.Player.IsDead) && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
             {
                 hue = Constants.DEAD_RANGE_COLOR;
             }

@@ -2,6 +2,7 @@
 
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Renderer;
@@ -30,6 +31,24 @@ namespace ClassicUO.Game.GameObjects
                 return false;
             }
 
+            // ── ECS render data bridge ─────────────────────────────
+            // When UseEcsRenderer is active, read state from ECS components
+            // instead of legacy Mobile properties.
+            var ecsRuntime = Client.Game?.UO?.EcsRuntime;
+            bool useEcs = ecsRuntime != null && ecsRuntime.GetCutoverFlags().UseEcsRenderer;
+            var ecsData = useEcs ? ecsRuntime.GetMobileRenderData(Serial) : default;
+            if (useEcs && !ecsData.Exists)
+                return false;
+
+            // Bridge locals: prefer ECS when active, fallback to legacy
+            bool bHidden = useEcs ? ecsData.IsHidden : IsHidden;
+            bool bDead = useEcs ? ecsData.IsDead : IsDead;
+            bool bPoisoned = useEcs ? ecsData.IsPoisoned : IsPoisoned;
+            bool bFrozen = useEcs ? ecsData.IsFrozen : IsParalyzed;
+            bool bYellowHits = useEcs ? ecsData.IsYellowHits : IsYellowHits;
+            byte bAlphaHue = useEcs ? ecsData.AlphaHue : AlphaHue;
+            NotorietyFlag bNotoriety = useEcs ? (NotorietyFlag)ecsData.Notoriety : NotorietyFlag;
+
             bool charSitting = false;
             ushort overridedHue = 0;
 
@@ -47,7 +66,7 @@ namespace ClassicUO.Game.GameObjects
             drawX += 22;
             drawY += 22;
 
-            bool hasShadow = !IsDead && !IsHidden && ProfileManager.CurrentProfile.ShadowsEnabled;
+            bool hasShadow = !bDead && !bHidden && ProfileManager.CurrentProfile.ShadowsEnabled;
 
             if (World.AuraManager.IsEnabled)
             {
@@ -57,18 +76,19 @@ namespace ClassicUO.Game.GameObjects
                     drawY,
                     ProfileManager.CurrentProfile.PartyAura && World.Party.Contains(this)
                         ? ProfileManager.CurrentProfile.PartyAuraHue
-                        : Notoriety.GetHue(NotorietyFlag),
+                        : Notoriety.GetHue(bNotoriety),
                     depth
                 );
             }
 
-            bool isHuman = IsHuman;
+            bool isHuman = useEcs ? ecsData.IsHuman : IsHuman;
 
-            bool isGargoyle =
-                Client.Game.UO.Version >= ClientVersion.CV_7000
-                && (Graphic == 666 || Graphic == 667 || Graphic == 0x02B7 || Graphic == 0x02B6);
+            bool isGargoyle = useEcs
+                ? ecsData.IsGargoyle
+                : Client.Game.UO.Version >= ClientVersion.CV_7000
+                  && (Graphic == 666 || Graphic == 667 || Graphic == 0x02B7 || Graphic == 0x02B6);
 
-            Vector3 hueVec = ShaderHueTranslator.GetHueVector(0, false, AlphaHue / 255f);
+            Vector3 hueVec = ShaderHueTranslator.GetHueVector(0, false, bAlphaHue / 255f);
 
             if (
                 ProfileManager.CurrentProfile.HighlightGameObjects
@@ -80,7 +100,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else if (SelectedObject.HealthbarObject == this)
             {
-                overridedHue = Notoriety.GetHue(NotorietyFlag);
+                overridedHue = Notoriety.GetHue(bNotoriety);
             }
             else if (
                 ProfileManager.CurrentProfile.NoColorObjectsOutOfRange
@@ -90,12 +110,12 @@ namespace ClassicUO.Game.GameObjects
                 overridedHue = Constants.OUT_RANGE_COLOR;
                 hueVec.Y = 1;
             }
-            else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
+            else if ((Client.Game?.UO?.EcsRuntime is { } ecsMob && ecsMob.GetCutoverFlags().UseEcsUiData ? ecsMob.GetPlayerSnapshot().IsDead : World.Player.IsDead) && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
             {
                 overridedHue = Constants.DEAD_RANGE_COLOR;
                 hueVec.Y = 1;
             }
-            else if (IsHidden)
+            else if (bHidden)
             {
                 overridedHue = 0x038E;
             }
@@ -103,7 +123,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 overridedHue = 0;
 
-                if (IsDead)
+                if (bDead)
                 {
                     if (!isHuman)
                     {
@@ -114,21 +134,21 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (ProfileManager.CurrentProfile.HighlightMobilesByPoisoned)
                     {
-                        if (IsPoisoned)
+                        if (bPoisoned)
                         {
                             overridedHue = ProfileManager.CurrentProfile.PoisonHue;
                         }
                     }
                     if (ProfileManager.CurrentProfile.HighlightMobilesByParalize)
                     {
-                        if (IsParalyzed && NotorietyFlag != NotorietyFlag.Invulnerable)
+                        if (bFrozen && bNotoriety != NotorietyFlag.Invulnerable)
                         {
                             overridedHue = ProfileManager.CurrentProfile.ParalyzedHue;
                         }
                     }
                     if (ProfileManager.CurrentProfile.HighlightMobilesByInvul)
                     {
-                        if (NotorietyFlag != NotorietyFlag.Invulnerable && IsYellowHits)
+                        if (bNotoriety != NotorietyFlag.Invulnerable && bYellowHits)
                         {
                             overridedHue = ProfileManager.CurrentProfile.InvulnerableHue;
                         }
@@ -144,7 +164,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (isAttack || isUnderMouse)
                 {
-                    overridedHue = Notoriety.GetHue(NotorietyFlag);
+                    overridedHue = Notoriety.GetHue(bNotoriety);
                 }
             }
 
@@ -287,7 +307,7 @@ namespace ClassicUO.Game.GameObjects
                             animGroup = 25;
                         }
                     }
-                    else if (IsGargoyle)
+                    else if (isGargoyle)
                     {
                         animGroup = 42;
                     }
@@ -359,7 +379,7 @@ namespace ClassicUO.Game.GameObjects
                         continue;
                     }
 
-                    if (IsDead && (layer == Layer.Hair || layer == Layer.Beard))
+                    if (bDead && (layer == Layer.Hair || layer == Layer.Beard))
                     {
                         continue;
                     }

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Configuration;
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -60,9 +61,12 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _isMinimized = value;
 
+                    var ecsPdMin = Client.Game?.UO?.EcsRuntime;
+                    uint pdMinPlayer = ecsPdMin != null && ecsPdMin.GetCutoverFlags().UseEcsUiData
+                        ? ecsPdMin.GetPlayerSerial() : World.Player?.Serial ?? 0;
                     _picBase.Graphic = value
                         ? (ushort)0x7EE
-                        : (ushort)(0x07d0 + (LocalSerial == World.Player ? 0 : 1));
+                        : (ushort)(0x07d0 + (LocalSerial == pdMinPlayer ? 0 : 1));
 
                     foreach (Control c in Children)
                     {
@@ -81,7 +85,10 @@ namespace ClassicUO.Game.UI.Gumps
         {
             UIManager.SavePosition(LocalSerial, Location);
 
-            if (LocalSerial == World.Player)
+            var ecsPdDisp = Client.Game?.UO?.EcsRuntime;
+            uint pdDispPlayer = ecsPdDisp != null && ecsPdDisp.GetCutoverFlags().UseEcsUiData
+                ? ecsPdDisp.GetPlayerSerial() : World.Player?.Serial ?? 0;
+            if (LocalSerial == pdDispPlayer)
             {
                 if (_virtueMenuPic != null)
                 {
@@ -111,12 +118,15 @@ namespace ClassicUO.Game.UI.Gumps
             _picBase?.Dispose();
             _hitBox?.Dispose();
 
+            var ecsPdBuild = Client.Game?.UO?.EcsRuntime;
+            uint pdBuildPlayer = ecsPdBuild != null && ecsPdBuild.GetCutoverFlags().UseEcsUiData
+                ? ecsPdBuild.GetPlayerSerial() : World.Player?.Serial ?? 0;
             var showPaperdollBooks =
-                LocalSerial == World.Player && World.ClientFeatures.PaperdollBooks;
+                LocalSerial == pdBuildPlayer && World.ClientFeatures.PaperdollBooks;
             var showRacialAbilitiesBook =
                 showPaperdollBooks && Client.Game.UO.Version >= ClientVersion.CV_7000;
 
-            if (LocalSerial == World.Player)
+            if (LocalSerial == pdBuildPlayer)
             {
                 Add(_picBase = new GumpPic(0, 0, 0x07d0, 0));
                 _picBase.MouseDoubleClick += _picBase_MouseDoubleClick;
@@ -393,7 +403,10 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             // This is to update the state of the war mode button.
-            if (mobile != null && _isWarMode != mobile.InWarMode && LocalSerial == World.Player)
+            var ecsPd = Client.Game?.UO?.EcsRuntime;
+            uint pdPlayerSerial = ecsPd != null && ecsPd.GetCutoverFlags().UseEcsUiData
+                ? ecsPd.GetPlayerSerial() : World.Player?.Serial ?? 0;
+            if (mobile != null && _isWarMode != mobile.InWarMode && LocalSerial == pdPlayerSerial)
             {
                 _isWarMode = mobile.InWarMode;
                 ushort[] btngumps = _isWarMode ? WarModeBtnGumps : PeaceModeBtnGumps;
@@ -404,7 +417,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             base.Update();
 
-            if (_paperDollInteractable != null && (CanLift || LocalSerial == World.Player.Serial))
+            if (_paperDollInteractable != null && (CanLift || LocalSerial == pdPlayerSerial))
             {
                 bool force_false =
                     SelectedObject.Object is Item item
@@ -451,9 +464,13 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Mobile container = World.Mobiles.Get(LocalSerial);
 
+                var ecsPdMu = Client.Game?.UO?.EcsRuntime;
+                uint pdMuPlayerSerial = ecsPdMu != null && ecsPdMu.GetCutoverFlags().UseEcsUiData
+                    ? ecsPdMu.GetPlayerSerial() : World.Player?.Serial ?? 0;
+
                 if (Client.Game.UO.GameCursor.ItemHold.Enabled)
                 {
-                    if (CanLift || LocalSerial == World.Player.Serial)
+                    if (CanLift || LocalSerial == pdMuPlayerSerial)
                     {
                         if (
                             SelectedObject.Object is Item item
@@ -481,7 +498,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 if (equipment == null)
                                 {
                                     GameActions.Equip(World,
-                                        LocalSerial != World.Player ? container : World.Player
+                                        LocalSerial != pdMuPlayerSerial ? container : pdMuPlayerSerial
                                     );
                                     Mouse.CancelDoubleClick = true;
                                 }
@@ -532,7 +549,10 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Restore(xml);
 
-            if (LocalSerial == World.Player)
+            var ecsPdR = Client.Game?.UO?.EcsRuntime;
+            uint pdRPlayerSerial = ecsPdR != null && ecsPdR.GetCutoverFlags().UseEcsUiData
+                ? ecsPdR.GetPlayerSerial() : World.Player?.Serial ?? 0;
+            if (LocalSerial == pdRPlayerSerial)
             {
                 BuildGump();
 
@@ -624,8 +644,10 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.Status:
-
-                    if (LocalSerial == World.Player)
+                    var ecsPdS = Client.Game?.UO?.EcsRuntime;
+                    uint pdSPlayerSerial = ecsPdS != null && ecsPdS.GetCutoverFlags().UseEcsUiData
+                        ? ecsPdS.GetPlayerSerial() : World.Player?.Serial ?? 0;
+                    if (LocalSerial == pdSPlayerSerial)
                     {
                         UIManager.GetGump<BaseHealthBarGump>(LocalSerial)?.Dispose();
 
@@ -774,7 +796,9 @@ namespace ClassicUO.Game.UI.Gumps
                                     CanPickUp =
                                         _paperDollGump.World.InGame
                                         && (
-                                            _paperDollGump.World.Player.Serial == _paperDollGump.LocalSerial
+                                            (Client.Game?.UO?.EcsRuntime is { } ecsPdE && ecsPdE.GetCutoverFlags().UseEcsUiData
+                                                ? ecsPdE.GetPlayerSerial() == _paperDollGump.LocalSerial
+                                                : _paperDollGump.World.Player.Serial == _paperDollGump.LocalSerial)
                                             || _paperDollGump.CanLift
                                         )
                                 }

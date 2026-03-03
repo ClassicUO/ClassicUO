@@ -43,21 +43,22 @@ namespace ClassicUO.ECS.Systems
 
         private static void RegisterProcessSteps(World world)
         {
-            world.System<StepBuffer, MovementTiming, WorldPosition, WorldOffset, DirectionComponent>(
+            world.System<StepBuffer, MovementTiming, WorldPosition, WorldOffset, DirectionComponent, FrameTiming>(
                     "Sim_ProcessSteps")
                 .Kind(Phases.Simulation)
                 .With<MobileTag>()
+                .TermAt(5).Singleton()
                 .Each((Entity entity,
                     ref StepBuffer buffer,
                     ref MovementTiming timing,
                     ref WorldPosition pos,
                     ref WorldOffset offset,
-                    ref DirectionComponent dir) =>
+                    ref DirectionComponent dir,
+                    ref FrameTiming frameTiming) =>
                 {
                     if (buffer.IsEmpty)
                         return;
 
-                    ref readonly var frameTiming = ref entity.CsWorld().Get<FrameTiming>();
                     long ticks = (long)frameTiming.Ticks;
 
                     ProcessStepQueue(entity, ref buffer, ref timing, ref pos, ref offset, ref dir, ticks);
@@ -155,7 +156,7 @@ namespace ClassicUO.ECS.Systems
                 {
                     var w = cmdEntity.CsWorld();
                     // ConfirmWalk applies to the local player.
-                    Entity player = FindPlayer(w);
+                    Entity player = SerialRegistry.FindPlayer(w);
                     if (player == 0 || !player.IsAlive())
                         return;
 
@@ -174,7 +175,7 @@ namespace ClassicUO.ECS.Systems
                 .Each((Entity cmdEntity, ref CmdDenyWalk cmd) =>
                 {
                     var w = cmdEntity.CsWorld();
-                    Entity player = FindPlayer(w);
+                    Entity player = SerialRegistry.FindPlayer(w);
                     if (player == 0 || !player.IsAlive())
                         return;
 
@@ -202,7 +203,7 @@ namespace ClassicUO.ECS.Systems
                 .Each((Entity cmdEntity, ref CmdMovePlayer cmd) =>
                 {
                     var w = cmdEntity.CsWorld();
-                    Entity player = FindPlayer(w);
+                    Entity player = SerialRegistry.FindPlayer(w);
                     if (player == 0 || !player.IsAlive())
                         return;
 
@@ -277,18 +278,5 @@ namespace ClassicUO.ECS.Systems
             }
         }
 
-        private static Entity FindPlayer(World world)
-        {
-            Entity found = default;
-            using var q = world.QueryBuilder<WorldPosition>()
-                .With<PlayerTag>()
-                .Build();
-
-            q.Each((Entity e, ref WorldPosition _) =>
-            {
-                found = e;
-            });
-            return found;
-        }
     }
 }

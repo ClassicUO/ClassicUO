@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Configuration;
+using ClassicUO.ECS;
 using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -33,7 +34,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 hue = Constants.OUT_RANGE_COLOR;
             }
-            else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
+            else if ((Client.Game?.UO?.EcsRuntime is { } ecsLv && ecsLv.GetCutoverFlags().UseEcsUiData ? ecsLv.GetPlayerSnapshot().IsDead : World.Player.IsDead) && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
             {
                 hue = Constants.DEAD_RANGE_COLOR;
             }

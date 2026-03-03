@@ -13,6 +13,8 @@ namespace ClassicUO.ECS.Systems
     ///   - Every 50ms, check entity distance from player using Chebyshev metric
     ///   - Entities beyond ClientViewRange get PendingRemovalTag
     ///   - PendingRemovalTag entities are destructed in PostSim cleanup
+    ///   - Optional 1-frame delay via PendingRemovalDelay
+    ///   - EntityRemovedEvent emitted for UI bridge consumption
     /// </summary>
     public static class LifecycleSystems
     {
@@ -21,6 +23,8 @@ namespace ClassicUO.ECS.Systems
         public static void Register(World world)
         {
             RegisterViewRangePrune(world);
+            RegisterRemovalObserver(world);
+            RegisterDelayedRemoval(world);
             RegisterDeferredDestroy(world);
         }
 
@@ -51,7 +55,7 @@ namespace ClassicUO.ECS.Systems
                     pt = new PruneTimer(timing.Ticks + PRUNE_INTERVAL_MS);
 
                     byte viewRange = w.Get<ViewRange>().Range;
-                    var playerPos = GetPlayerPosition(w);
+                    var playerPos = SerialRegistry.GetPlayerPosition(w);
                     if (playerPos.X == 0 && playerPos.Y == 0)
                     {
                         while (it.Next()) { }
@@ -86,13 +90,6 @@ namespace ClassicUO.ECS.Systems
                     ref readonly var timing = ref w.Get<FrameTiming>();
                     ref readonly var pruneTimer = ref w.Get<PruneTimer>();
 
-                    // Use same 50ms window as mobile prune — if PruneMobiles already
-                    // reset the timer this frame, NextPruneTick > current ticks,
-                    // so we still run because both systems share the same frame.
-                    // The timer was already advanced by PruneMobiles above,
-                    // but both systems run within the same frame's ticks value.
-                    // We check against (ticks + PRUNE_INTERVAL) to see if we're
-                    // within the same frame window.
                     if (timing.Ticks + PRUNE_INTERVAL_MS < pruneTimer.NextPruneTick)
                     {
                         while (it.Next()) { }
@@ -100,7 +97,7 @@ namespace ClassicUO.ECS.Systems
                     }
 
                     byte viewRange = w.Get<ViewRange>().Range;
-                    var playerPos = GetPlayerPosition(w);
+                    var playerPos = SerialRegistry.GetPlayerPosition(w);
                     if (playerPos.X == 0 && playerPos.Y == 0)
                     {
                         while (it.Next()) { }
@@ -123,13 +120,84 @@ namespace ClassicUO.ECS.Systems
                 });
         }
 
+        // ── Removal observer (emit EntityRemovedEvent on PendingRemovalTag) ──
+
+        private static void RegisterRemovalObserver(World world)
+        {
+            // When PendingRemovalTag is added, emit an EntityRemovedEvent
+            // for UI bridge consumption and mark equipped items for recalc.
+            world.Observer("OnAdd_PendingRemoval")
+                .With<PendingRemovalTag>()
+                .Event(Ecs.OnAdd)
+                .Run((Iter it) =>
+                {
+                    while (it.Next())
+                    {
+                        var w = it.World();
+                        for (int i = 0; i < it.Count(); i++)
+                        {
+                            var entity = it.Entity(i);
+                            if (!entity.IsAlive())
+                                continue;
+
+                            // Emit removal event if entity has a serial.
+                            if (entity.Has<SerialComponent>())
+                            {
+                                ref readonly var serial = ref entity.Get<SerialComponent>();
+                                w.Entity()
+                                    .Set(new EntityRemovedEvent(serial.Serial))
+                                    .Add<PendingRemovalTag>();
+                            }
+
+                            // If an equipped item is being removed, flag parent for recalc.
+                            if (entity.Has<ItemTag>() && entity.Has<ContainerLink>())
+                            {
+                                ref readonly var link = ref entity.Get<ContainerLink>();
+                                Entity parent = SerialRegistry.FindBySerial(link.ContainerSerial);
+                                if (parent != 0 && parent.IsAlive() && parent.Has<MobileTag>())
+                                {
+                                    if (!parent.Has<RecalcAbilitiesTag>())
+                                        parent.Add<RecalcAbilitiesTag>();
+                                }
+                            }
+                        }
+                    }
+                });
+        }
+
+        // ── Delayed removal (PostSim) ─────────────────────────────────
+
+        private static void RegisterDelayedRemoval(World world)
+        {
+            // Entities with PendingRemovalDelay get their counter decremented.
+            // When it reaches 0, the delay component is removed and they proceed
+            // to normal deferred destroy.
+            world.System<PendingRemovalDelay>("PostSim_DelayedRemoval")
+                .Kind(Phases.PostSim)
+                .With<PendingRemovalTag>()
+                .Each((Entity entity, ref PendingRemovalDelay delay) =>
+                {
+                    if (delay.FramesRemaining > 1)
+                    {
+                        delay = delay with { FramesRemaining = (byte)(delay.FramesRemaining - 1) };
+                    }
+                    else
+                    {
+                        entity.Remove<PendingRemovalDelay>();
+                    }
+                });
+        }
+
         // ── Deferred destruction (PostSim) ───────────────────────────
 
         private static void RegisterDeferredDestroy(World world)
         {
+            // Destroy entities that have PendingRemovalTag but NOT PendingRemovalDelay.
             world.System("PostSim_DeferredDestroy")
                 .Kind(Phases.PostSim)
                 .With<PendingRemovalTag>()
+                .Without<PendingRemovalDelay>()
+                .Without<EntityRemovedEvent>()
                 .Run((Iter it) =>
                 {
                     while (it.Next())
@@ -145,20 +213,6 @@ namespace ClassicUO.ECS.Systems
         }
 
         // ── Helpers ──────────────────────────────────────────────────
-
-        private static WorldPosition GetPlayerPosition(World world)
-        {
-            WorldPosition result = default;
-            using var q = world.QueryBuilder<WorldPosition>()
-                .With<PlayerTag>()
-                .Build();
-
-            q.Each((Entity _, ref WorldPosition pos) =>
-            {
-                result = pos;
-            });
-            return result;
-        }
 
         /// <summary>Chebyshev (L-infinity) distance, matching legacy Distance property.</summary>
         private static int ChebyshevDistance(ushort x1, ushort y1, ushort x2, ushort y2)

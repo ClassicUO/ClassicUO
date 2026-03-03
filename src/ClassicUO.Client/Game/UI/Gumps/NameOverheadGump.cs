@@ -2,6 +2,7 @@
 
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -277,7 +278,10 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (SerialHelper.IsMobile(LocalSerial))
                 {
-                    if (World.Player.InWarMode)
+                    var ecs = Client.Game?.UO?.EcsRuntime;
+                    bool useEcs = ecs != null && ecs.GetCutoverFlags().UseEcsUiData;
+                    bool inWarMode = useEcs ? ecs.GetPlayerSnapshot().InWarMode : World.Player.InWarMode;
+                    if (inWarMode)
                     {
                         GameActions.Attack(World, LocalSerial);
                     }

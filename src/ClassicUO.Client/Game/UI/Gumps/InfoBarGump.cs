@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Configuration;
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -234,65 +235,106 @@ namespace ClassicUO.Game.UI.Gumps
 
         private string GetVarData(InfoBarVars var)
         {
-            switch (var)
+            var ecs = Client.Game?.UO?.EcsRuntime;
+            bool useEcs = ecs != null && ecs.GetCutoverFlags().UseEcsUiData;
+
+            if (useEcs)
             {
-                case InfoBarVars.HP: return $"{_gump.World.Player.Hits}/{_gump.World.Player.HitsMax}";
-
-                case InfoBarVars.Mana: return $"{_gump.World.Player.Mana}/{_gump.World.Player.ManaMax}";
-
-                case InfoBarVars.Stamina: return $"{_gump.World.Player.Stamina}/{_gump.World.Player.StaminaMax}";
-
-                case InfoBarVars.Weight: return $"{_gump.World.Player.Weight}/{_gump.World.Player.WeightMax}";
-
-                case InfoBarVars.Followers: return $"{_gump.World.Player.Followers}/{_gump.World.Player.FollowersMax}";
-
-                case InfoBarVars.Gold: return _gump.World.Player.Gold.ToString();
-
-                case InfoBarVars.Damage: return $"{_gump.World.Player.DamageMin}-{_gump.World.Player.DamageMax}";
-
-                case InfoBarVars.Armor: return _gump.World.Player.PhysicalResistance.ToString();
-
-                case InfoBarVars.Luck: return _gump.World.Player.Luck.ToString();
-
-                case InfoBarVars.FireResist: return _gump.World.Player.FireResistance.ToString();
-
-                case InfoBarVars.ColdResist: return _gump.World.Player.ColdResistance.ToString();
-
-                case InfoBarVars.PoisonResist: return _gump.World.Player.PoisonResistance.ToString();
-
-                case InfoBarVars.EnergyResist: return _gump.World.Player.EnergyResistance.ToString();
-
-                case InfoBarVars.LowerReagentCost: return _gump.World.Player.LowerReagentCost.ToString();
-
-                case InfoBarVars.SpellDamageInc: return _gump.World.Player.SpellDamageIncrease.ToString();
-
-                case InfoBarVars.FasterCasting: return _gump.World.Player.FasterCasting.ToString();
-
-                case InfoBarVars.FasterCastRecovery: return _gump.World.Player.FasterCastRecovery.ToString();
-
-                case InfoBarVars.HitChanceInc: return _gump.World.Player.HitChanceIncrease.ToString();
-
-                case InfoBarVars.DefenseChanceInc: return _gump.World.Player.DefenseChanceIncrease.ToString();
-
-                case InfoBarVars.LowerManaCost: return _gump.World.Player.LowerManaCost.ToString();
-
-                case InfoBarVars.DamageChanceInc: return _gump.World.Player.DamageIncrease.ToString();
-
-                case InfoBarVars.SwingSpeedInc: return _gump.World.Player.SwingSpeedIncrease.ToString();
-
-                case InfoBarVars.StatsCap: return _gump.World.Player.StatsCap.ToString();
-
-                case InfoBarVars.NameNotoriety: return _gump.World.Player.Name;
-
-                case InfoBarVars.TithingPoints: return _gump.World.Player.TithingPoints.ToString();
-
-                default: return "";
+                var snap = ecs.GetStatusSnapshot();
+                if (!snap.IsValid) return "";
+                return var switch
+                {
+                    InfoBarVars.HP => $"{snap.Vitals.Hits}/{snap.Vitals.HitsMax}",
+                    InfoBarVars.Mana => $"{snap.Vitals.Mana}/{snap.Vitals.ManaMax}",
+                    InfoBarVars.Stamina => $"{snap.Vitals.Stamina}/{snap.Vitals.StaminaMax}",
+                    InfoBarVars.Weight => $"{snap.Stats.Weight}/{snap.Stats.WeightMax}",
+                    InfoBarVars.Followers => $"{snap.Stats.Followers}/{snap.Stats.FollowersMax}",
+                    InfoBarVars.Gold => snap.Stats.Gold.ToString(),
+                    InfoBarVars.Damage => $"{snap.Stats.DamageMin}-{snap.Stats.DamageMax}",
+                    InfoBarVars.Armor => snap.Stats.PhysResist.ToString(),
+                    InfoBarVars.Luck => snap.Stats.Luck.ToString(),
+                    InfoBarVars.FireResist => snap.Stats.FireResist.ToString(),
+                    InfoBarVars.ColdResist => snap.Stats.ColdResist.ToString(),
+                    InfoBarVars.PoisonResist => snap.Stats.PoisonResist.ToString(),
+                    InfoBarVars.EnergyResist => snap.Stats.EnergyResist.ToString(),
+                    InfoBarVars.LowerReagentCost => snap.Stats.LowerReagentCost.ToString(),
+                    InfoBarVars.SpellDamageInc => snap.Stats.SpellDamageInc.ToString(),
+                    InfoBarVars.FasterCasting => snap.Stats.FasterCasting.ToString(),
+                    InfoBarVars.FasterCastRecovery => snap.Stats.FasterCastRecovery.ToString(),
+                    InfoBarVars.HitChanceInc => snap.Stats.HitChanceInc.ToString(),
+                    InfoBarVars.DefenseChanceInc => snap.Stats.DefenseChanceInc.ToString(),
+                    InfoBarVars.LowerManaCost => snap.Stats.LowerManaCost.ToString(),
+                    InfoBarVars.DamageChanceInc => snap.Stats.DamageInc.ToString(),
+                    InfoBarVars.SwingSpeedInc => snap.Stats.SwingSpeedInc.ToString(),
+                    InfoBarVars.StatsCap => snap.Stats.StatsCap.ToString(),
+                    InfoBarVars.NameNotoriety => ecs.GetEntityName(snap.Serial),
+                    InfoBarVars.TithingPoints => snap.Stats.TithingPoints.ToString(),
+                    _ => ""
+                };
             }
+
+            return var switch
+            {
+                InfoBarVars.HP => $"{_gump.World.Player.Hits}/{_gump.World.Player.HitsMax}",
+                InfoBarVars.Mana => $"{_gump.World.Player.Mana}/{_gump.World.Player.ManaMax}",
+                InfoBarVars.Stamina => $"{_gump.World.Player.Stamina}/{_gump.World.Player.StaminaMax}",
+                InfoBarVars.Weight => $"{_gump.World.Player.Weight}/{_gump.World.Player.WeightMax}",
+                InfoBarVars.Followers => $"{_gump.World.Player.Followers}/{_gump.World.Player.FollowersMax}",
+                InfoBarVars.Gold => _gump.World.Player.Gold.ToString(),
+                InfoBarVars.Damage => $"{_gump.World.Player.DamageMin}-{_gump.World.Player.DamageMax}",
+                InfoBarVars.Armor => _gump.World.Player.PhysicalResistance.ToString(),
+                InfoBarVars.Luck => _gump.World.Player.Luck.ToString(),
+                InfoBarVars.FireResist => _gump.World.Player.FireResistance.ToString(),
+                InfoBarVars.ColdResist => _gump.World.Player.ColdResistance.ToString(),
+                InfoBarVars.PoisonResist => _gump.World.Player.PoisonResistance.ToString(),
+                InfoBarVars.EnergyResist => _gump.World.Player.EnergyResistance.ToString(),
+                InfoBarVars.LowerReagentCost => _gump.World.Player.LowerReagentCost.ToString(),
+                InfoBarVars.SpellDamageInc => _gump.World.Player.SpellDamageIncrease.ToString(),
+                InfoBarVars.FasterCasting => _gump.World.Player.FasterCasting.ToString(),
+                InfoBarVars.FasterCastRecovery => _gump.World.Player.FasterCastRecovery.ToString(),
+                InfoBarVars.HitChanceInc => _gump.World.Player.HitChanceIncrease.ToString(),
+                InfoBarVars.DefenseChanceInc => _gump.World.Player.DefenseChanceIncrease.ToString(),
+                InfoBarVars.LowerManaCost => _gump.World.Player.LowerManaCost.ToString(),
+                InfoBarVars.DamageChanceInc => _gump.World.Player.DamageIncrease.ToString(),
+                InfoBarVars.SwingSpeedInc => _gump.World.Player.SwingSpeedIncrease.ToString(),
+                InfoBarVars.StatsCap => _gump.World.Player.StatsCap.ToString(),
+                InfoBarVars.NameNotoriety => _gump.World.Player.Name,
+                InfoBarVars.TithingPoints => _gump.World.Player.TithingPoints.ToString(),
+                _ => ""
+            };
         }
 
         private ushort GetVarHue(InfoBarVars var)
         {
             float percent;
+
+            var ecs = Client.Game?.UO?.EcsRuntime;
+            bool useEcs = ecs != null && ecs.GetCutoverFlags().UseEcsUiData;
+
+            if (useEcs)
+            {
+                var snap = ecs.GetStatusSnapshot();
+                if (!snap.IsValid) return 0x0481;
+
+                switch (var)
+                {
+                    case InfoBarVars.HP:
+                        percent = snap.Vitals.HitsMax > 0 ? snap.Vitals.Hits / (float)snap.Vitals.HitsMax : 1f;
+                        return percent <= 0.25f ? (ushort)0x0021 : percent <= 0.5f ? (ushort)0x0030 : percent <= 0.75f ? (ushort)0x0035 : (ushort)0x0481;
+                    case InfoBarVars.Mana:
+                        percent = snap.Vitals.ManaMax > 0 ? snap.Vitals.Mana / (float)snap.Vitals.ManaMax : 1f;
+                        return percent <= 0.25f ? (ushort)0x0021 : percent <= 0.5f ? (ushort)0x0030 : percent <= 0.75f ? (ushort)0x0035 : (ushort)0x0481;
+                    case InfoBarVars.Stamina:
+                        percent = snap.Vitals.StaminaMax > 0 ? snap.Vitals.Stamina / (float)snap.Vitals.StaminaMax : 1f;
+                        return percent <= 0.25f ? (ushort)0x0021 : percent <= 0.5f ? (ushort)0x0030 : percent <= 0.75f ? (ushort)0x0035 : (ushort)0x0481;
+                    case InfoBarVars.Weight:
+                        percent = snap.Stats.WeightMax > 0 ? snap.Stats.Weight / (float)snap.Stats.WeightMax : 0f;
+                        return percent >= 1f ? (ushort)0x0021 : percent >= 0.75f ? (ushort)0x0030 : percent >= 0.5f ? (ushort)0x0035 : (ushort)0x0481;
+                    case InfoBarVars.NameNotoriety:
+                        return Notoriety.GetHue((NotorietyFlag)ecs.GetNotoriety(snap.Serial));
+                    default: return 0x0481;
+                }
+            }
 
             switch (var)
             {

@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using ClassicUO.Configuration;
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -929,7 +930,11 @@ namespace ClassicUO.Game
 
         public bool WalkTo(int x, int y, int z, int distance)
         {
-            if (_world.Player == null /*|| World.Player.Stamina == 0*/ || _world.Player.IsParalyzed)
+            var ecsPf = Client.Game?.UO?.EcsRuntime;
+            bool isParalyzed = ecsPf != null && ecsPf.GetCutoverFlags().UseEcsUiData
+                ? (ecsPf.GetPlayerSnapshot().Flags & (uint)Flags.Frozen) != 0
+                : _world.Player?.IsParalyzed ?? true;
+            if (_world.Player == null /*|| World.Player.Stamina == 0*/ || isParalyzed)
             {
                 return false;
             }

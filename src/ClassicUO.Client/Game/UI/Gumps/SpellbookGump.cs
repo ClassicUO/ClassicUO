@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Configuration;
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -308,7 +309,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (page == 1 && _spellBookType == SpellBookType.Chivalry)
                     {
                         Label label = new Label(
-                            ResGumps.TithingPointsAvailable + World.Player.TithingPoints,
+                            ResGumps.TithingPointsAvailable + (Client.Game?.UO?.EcsRuntime is { } ecsTP && ecsTP.GetCutoverFlags().UseEcsUiData ? ecsTP.GetStatusSnapshot().Stats.TithingPoints : World.Player.TithingPoints),
                             false,
                             0x0288,
                             font: 6

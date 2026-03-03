@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using System.Xml;
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
@@ -41,7 +42,10 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
-            if (Graphic == 0x5DDA && World.Player.Race == RaceType.GARGOYLE)
+            var ecsRace = Client.Game?.UO?.EcsRuntime;
+            bool useEcsRace = ecsRace != null && ecsRace.GetCutoverFlags().UseEcsUiData;
+            RaceType race = useEcsRace ? (RaceType)ecsRace.GetPlayerRace() : World.Player.Race;
+            if (Graphic == 0x5DDA && race == RaceType.GARGOYLE)
             {
                 NetClient.Socket.Send_ToggleGargoyleFlying();
 

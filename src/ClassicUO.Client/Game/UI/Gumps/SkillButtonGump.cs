@@ -3,6 +3,7 @@
 using System.IO;
 using System.Xml;
 using ClassicUO.Configuration;
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -118,9 +119,21 @@ namespace ClassicUO.Game.UI.Gumps
             base.Restore(xml);
             int index = int.Parse(xml.GetAttribute("id"));
 
-            if (index >= 0 && index < World.Player.Skills.Length)
+            var ecsSk = Client.Game?.UO?.EcsRuntime;
+            bool useEcsSk = ecsSk != null && ecsSk.GetCutoverFlags().UseEcsUiData;
+            int skillCount = useEcsSk ? Client.Game.UO.FileManager.Skills.SkillsCount : World.Player.Skills.Length;
+
+            if (index >= 0 && index < skillCount)
             {
-                _skill = World.Player.Skills[index];
+                if (useEcsSk)
+                {
+                    var entry = Client.Game.UO.FileManager.Skills.Skills[index];
+                    _skill = new Skill(entry.Name, index, entry.HasAction);
+                }
+                else
+                {
+                    _skill = World.Player.Skills[index];
+                }
                 BuildGump();
             }
             else

@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Configuration;
+using ClassicUO.ECS;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -119,7 +120,13 @@ namespace ClassicUO.Game.Managers
                     default:
                     case 0: return false;
 
-                    case 1 when _world.Player != null && _world.Player.InWarMode: return true;
+                    case 1:
+                        var ecsAura = Client.Game?.UO?.EcsRuntime;
+                        bool auraInWar = ecsAura != null && ecsAura.GetCutoverFlags().UseEcsUiData
+                            ? ecsAura.GetPlayerSnapshot().InWarMode
+                            : _world.Player != null && _world.Player.InWarMode;
+                        if (auraInWar) return true;
+                        return false;
                     case 2 when Keyboard.Ctrl && Keyboard.Shift: return true;
                     case 3: return true;
                 }

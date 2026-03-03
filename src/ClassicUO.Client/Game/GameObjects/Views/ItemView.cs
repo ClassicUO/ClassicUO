@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using ClassicUO.Configuration;
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -26,6 +27,13 @@ namespace ClassicUO.Game.GameObjects
                 return false;
             }
 
+            // ── ECS render data bridge ─────────────────────────────
+            var ecsRuntime = Client.Game?.UO?.EcsRuntime;
+            bool useEcs = ecsRuntime != null && ecsRuntime.GetCutoverFlags().UseEcsRenderer;
+            var ecsItemData = useEcs ? ecsRuntime.GetItemRenderData(Serial) : default;
+            if (useEcs && !ecsItemData.Exists)
+                return false;
+
             if (
                 ItemData.IsLight
                 || DisplayedGraphic >= 0x3E02 && DisplayedGraphic <= 0x3E0B
@@ -46,7 +54,11 @@ namespace ClassicUO.Game.GameObjects
             posX += (int)Offset.X;
             posY += (int)(Offset.Y + Offset.Z);
 
-            float alpha = AlphaHue / 255f;
+            // Bridge locals: prefer ECS when active, fallback to legacy
+            byte bAlphaHue = useEcs && ecsItemData.Exists ? ecsItemData.AlphaHue : AlphaHue;
+            bool bIsHidden = useEcs && ecsItemData.Exists ? ecsItemData.IsHidden : IsHidden;
+
+            float alpha = bAlphaHue / 255f;
 
             if (IsCorpse)
             {
@@ -54,7 +66,7 @@ namespace ClassicUO.Game.GameObjects
                 return DrawCorpse(batcher, posX, posY - 3, hueVec, depth);
             }
 
-            ushort hue = Hue;
+            ushort hue = useEcs && ecsItemData.Exists ? ecsItemData.Hue : Hue;
             ushort graphic = DisplayedGraphic;
             bool partial = ItemData.IsPartialHue;
 
@@ -114,7 +126,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 hue = Constants.OUT_RANGE_COLOR;
             }
-            else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
+            else if ((Client.Game?.UO?.EcsRuntime is { } ecsIv1 && ecsIv1.GetCutoverFlags().UseEcsUiData ? ecsIv1.GetPlayerSnapshot().IsDead : World.Player.IsDead) && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
             {
                 hue = Constants.DEAD_RANGE_COLOR;
             }
@@ -126,7 +138,7 @@ namespace ClassicUO.Game.GameObjects
                     //isPartial = ItemData.Weight == 0xFF;
                     hue = 0x0035;
                 }
-                else if (IsHidden)
+                else if (bIsHidden)
                 {
                     hue = 0x038E;
                 }
@@ -372,7 +384,7 @@ namespace ClassicUO.Game.GameObjects
                     );
                 }
                 else if (
-                    World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect
+                    (Client.Game?.UO?.EcsRuntime is { } ecsIv2 && ecsIv2.GetCutoverFlags().UseEcsUiData ? ecsIv2.GetPlayerSnapshot().IsDead : World.Player.IsDead) && ProfileManager.CurrentProfile.EnableBlackWhiteEffect
                 )
                 {
                     hueVec = ShaderHueTranslator.GetHueVector(

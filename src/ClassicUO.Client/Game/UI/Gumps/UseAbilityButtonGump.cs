@@ -1,5 +1,6 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -33,7 +34,19 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildGump()
         {
             Clear();
-            Index = ((byte)World.Player.Abilities[IsPrimary ? 0 : 1] & 0x7F);
+            var ecsAb = Client.Game?.UO?.EcsRuntime;
+            bool useEcsAb = ecsAb != null && ecsAb.GetCutoverFlags().UseEcsUiData;
+            ushort rawAbility;
+            if (useEcsAb)
+            {
+                var ab = ecsAb.GetPlayerAbilities();
+                rawAbility = IsPrimary ? ab.Primary : ab.Secondary;
+            }
+            else
+            {
+                rawAbility = (ushort)World.Player.Abilities[IsPrimary ? 0 : 1];
+            }
+            Index = ((byte)rawAbility & 0x7F);
 
             ref readonly AbilityDefinition def = ref AbilityData.Abilities[Index - 1];
 
@@ -86,7 +99,18 @@ namespace ClassicUO.Game.UI.Gumps
                 return false;
             }
 
-            byte index = (byte) World.Player.Abilities[IsPrimary ? 0 : 1];
+            var ecsRnd = Client.Game?.UO?.EcsRuntime;
+            bool useEcsRnd = ecsRnd != null && ecsRnd.GetCutoverFlags().UseEcsUiData;
+            byte index;
+            if (useEcsRnd)
+            {
+                var ab = ecsRnd.GetPlayerAbilities();
+                index = (byte)(IsPrimary ? ab.Primary : ab.Secondary);
+            }
+            else
+            {
+                index = (byte)World.Player.Abilities[IsPrimary ? 0 : 1];
+            }
 
             if ((index & 0x80) != 0)
             {

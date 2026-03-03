@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Configuration;
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
@@ -258,12 +259,19 @@ namespace ClassicUO.Game.Managers
                     case CursorTarget.HueCommandTarget:
                     case CursorTarget.SetTargetClientSide:
 
-                        if (entity != _world.Player)
+                        var ecsTm = Client.Game?.UO?.EcsRuntime;
+                        bool useEcsTm = ecsTm != null && ecsTm.GetCutoverFlags().UseEcsUiData;
+                        uint tmPlayerSerial = useEcsTm ? ecsTm.GetPlayerSerial() : _world.Player?.Serial ?? 0;
+
+                        if (serial != tmPlayerSerial)
                         {
                             LastTargetInfo.SetEntity(serial);
                         }
 
-                        if (SerialHelper.IsMobile(serial) && serial != _world.Player && (_world.Player.NotorietyFlag == NotorietyFlag.Innocent || _world.Player.NotorietyFlag == NotorietyFlag.Ally))
+                        byte tmPlayerNoto = useEcsTm
+                            ? ecsTm.GetPlayerSnapshot().Notoriety
+                            : (byte)(_world.Player?.NotorietyFlag ?? 0);
+                        if (SerialHelper.IsMobile(serial) && serial != tmPlayerSerial && (tmPlayerNoto == (byte)NotorietyFlag.Innocent || tmPlayerNoto == (byte)NotorietyFlag.Ally))
                         {
                             Mobile mobile = entity as Mobile;
 

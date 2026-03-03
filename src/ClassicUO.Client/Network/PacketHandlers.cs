@@ -474,7 +474,8 @@ namespace ClassicUO.Network
                 return;
             }
 
-            Entity entity = world.Get(p.ReadUInt32BE());
+            uint serial = p.ReadUInt32BE();
+            Entity entity = world.Get(serial);
 
             if (entity != null)
             {
@@ -483,6 +484,12 @@ namespace ClassicUO.Network
                 if (damage > 0)
                 {
                     world.WorldTextManager.AddDamage(entity, damage);
+
+                    Ecs?.EnqueueCommand(new CmdDamage
+                    {
+                        Serial = serial,
+                        Amount = damage
+                    });
                 }
             }
         }
@@ -701,9 +708,68 @@ namespace ClassicUO.Network
 
                 if (mobile == world.Player)
                 {
+                    // ECS: forward full character status to ECS.
+                    Ecs?.EnqueueCommand(new CmdCharacterStatus
+                    {
+                        Serial = serial,
+                        StatusType = type,
+                        Hits = world.Player.Hits,
+                        HitsMax = world.Player.HitsMax,
+                        Mana = world.Player.Mana,
+                        ManaMax = world.Player.ManaMax,
+                        Stamina = world.Player.Stamina,
+                        StaminaMax = world.Player.StaminaMax,
+                        Str = world.Player.Strength,
+                        Dex = world.Player.Dexterity,
+                        Int = world.Player.Intelligence,
+                        Gold = world.Player.Gold,
+                        Weight = world.Player.Weight,
+                        WeightMax = world.Player.WeightMax,
+                        Race = (byte)world.Player.Race,
+                        PhysResist = (ushort)world.Player.PhysicalResistance,
+                        FireResist = (ushort)world.Player.FireResistance,
+                        ColdResist = (ushort)world.Player.ColdResistance,
+                        PoisonResist = (ushort)world.Player.PoisonResistance,
+                        EnergyResist = (ushort)world.Player.EnergyResistance,
+                        Luck = (short)world.Player.Luck,
+                        DamageMin = (ushort)world.Player.DamageMin,
+                        DamageMax = (ushort)world.Player.DamageMax,
+                        TithingPoints = world.Player.TithingPoints,
+                        StatsCap = (ushort)world.Player.StatsCap,
+                        Followers = world.Player.Followers,
+                        FollowersMax = world.Player.FollowersMax,
+                        // Type >= 6 extended combat stats
+                        MaxPhysResist = world.Player.MaxPhysicResistence,
+                        MaxFireResist = world.Player.MaxFireResistence,
+                        MaxColdResist = world.Player.MaxColdResistence,
+                        MaxPoisonResist = world.Player.MaxPoisonResistence,
+                        MaxEnergyResist = world.Player.MaxEnergyResistence,
+                        DefenseChanceInc = world.Player.DefenseChanceIncrease,
+                        MaxDefenseChanceInc = world.Player.MaxDefenseChanceIncrease,
+                        HitChanceInc = world.Player.HitChanceIncrease,
+                        SwingSpeedInc = world.Player.SwingSpeedIncrease,
+                        DamageInc = world.Player.DamageIncrease,
+                        LowerReagentCost = world.Player.LowerReagentCost,
+                        SpellDamageInc = world.Player.SpellDamageIncrease,
+                        FasterCastRecovery = world.Player.FasterCastRecovery,
+                        FasterCasting = world.Player.FasterCasting,
+                        LowerManaCost = world.Player.LowerManaCost
+                    });
+
                     world.UoAssist.SignalHits();
                     world.UoAssist.SignalStamina();
                     world.UoAssist.SignalMana();
+                }
+                else
+                {
+                    // Non-player: sync hits only.
+                    Ecs?.EnqueueCommand(new CmdCharacterStatus
+                    {
+                        Serial = serial,
+                        StatusType = 0,
+                        Hits = entity.Hits,
+                        HitsMax = entity.HitsMax
+                    });
                 }
             }
         }
@@ -726,7 +792,8 @@ namespace ClassicUO.Network
                 return;
             }
 
-            Mobile mobile = world.Mobiles.Get(p.ReadUInt32BE());
+            uint mobileSerial = p.ReadUInt32BE();
+            Mobile mobile = world.Mobiles.Get(mobileSerial);
 
             if (mobile == null)
             {
@@ -739,6 +806,13 @@ namespace ClassicUO.Network
             {
                 ushort type = p.ReadUInt16BE();
                 bool enabled = p.ReadBool();
+
+                Ecs?.EnqueueCommand(new CmdHealthBarUpdate
+                {
+                    Serial = mobileSerial,
+                    Type = type,
+                    Enabled = enabled
+                });
 
                 if (type == 1)
                 {
@@ -920,9 +994,21 @@ namespace ClassicUO.Network
             }
 
             world.Player.SetInWorldTile(x, y, z);
-            world.Player.Direction = (Direction)(p.ReadUInt8() & 0x7);
+            byte direction = (byte)(p.ReadUInt8() & 0x7);
+            world.Player.Direction = (Direction)direction;
             world.RangeSize.X = x;
             world.RangeSize.Y = y;
+
+            Ecs?.EnqueueCommand(new CmdEnterWorld
+            {
+                Serial = serial,
+                Graphic = world.Player.Graphic,
+                X = x,
+                Y = y,
+                Z = z,
+                Direction = direction,
+                MapIndex = (byte)(world.Map != null ? world.MapIndex : 0)
+            });
 
             if (
                 ProfileManager.CurrentProfile != null
@@ -1031,6 +1117,20 @@ namespace ClassicUO.Network
             }
 
             world.MessageManager.HandleMessage(entity, text, name, hue, type, (byte)font, text_type);
+
+            if (Ecs != null)
+            {
+                Ecs.EnqueueCommand(new CmdSpeech
+                {
+                    Serial = serial,
+                    Graphic = graphic,
+                    Type = (byte)type,
+                    Hue = hue,
+                    Font = font,
+                    TextIndex = Ecs.RegisterString(text),
+                    NameIndex = Ecs.RegisterString(name)
+                });
+            }
         }
 
         private static void DeleteObject(World world, ref StackDataReader p)
@@ -1343,6 +1443,18 @@ namespace ClassicUO.Network
                 GraphicEffectBlendMode.Normal
             );
 
+            Ecs?.EnqueueCommand(new CmdDragEffect
+            {
+                Graphic = graphic,
+                Hue = hue,
+                FromX = sourceX,
+                FromY = sourceY,
+                FromZ = sourceZ,
+                ToX = destX,
+                ToY = destY,
+                ToZ = destZ
+            });
+
             //if (effect.AnimDataFrame.FrameCount != 0)
             //{
             //    effect.IntervalInMs = (uint) (effect.AnimDataFrame.FrameInterval * 45);
@@ -1362,6 +1474,12 @@ namespace ClassicUO.Network
 
             uint serial = p.ReadUInt32BE();
             ushort graphic = p.ReadUInt16BE();
+
+            Ecs?.EnqueueCommand(new CmdOpenContainer
+            {
+                Serial = serial,
+                Graphic = graphic
+            });
 
             if (graphic == 0xFFFF)
             {
@@ -1766,6 +1884,8 @@ namespace ClassicUO.Network
 
             byte code = p.ReadUInt8();
 
+            Ecs?.EnqueueCommand(new CmdDenyMoveItem { Reason = code });
+
             if (code < 5)
             {
                 world.MessageManager.HandleMessage(
@@ -1789,6 +1909,8 @@ namespace ClassicUO.Network
 
             Client.Game.UO.GameCursor.ItemHold.Enabled = false;
             Client.Game.UO.GameCursor.ItemHold.Dropped = false;
+
+            Ecs?.EnqueueCommand(new CmdEndDragging());
         }
 
         private static void DropItemAccepted(World world, ref StackDataReader p)
@@ -1800,6 +1922,8 @@ namespace ClassicUO.Network
 
             Client.Game.UO.GameCursor.ItemHold.Enabled = false;
             Client.Game.UO.GameCursor.ItemHold.Dropped = false;
+
+            Ecs?.EnqueueCommand(new CmdDropItemAccepted());
 
             Console.WriteLine("PACKET - ITEM DROP OK!");
         }
@@ -1822,6 +1946,8 @@ namespace ClassicUO.Network
 
                 GameActions.RequestWarMode(world.Player, false);
             }
+
+            Ecs?.EnqueueCommand(new CmdDeathScreen { Action = action });
         }
 
         private static void MobileAttributes(World world, ref StackDataReader p)
@@ -1985,6 +2111,12 @@ namespace ClassicUO.Network
                     }
                 }
             }
+
+            Ecs?.EnqueueCommand(new CmdSwing
+            {
+                AttackerSerial = attackers,
+                DefenderSerial = defenders
+            });
         }
 
         private static void Unknown_0x32(World world, ref StackDataReader p) { }
@@ -2130,6 +2262,16 @@ namespace ClassicUO.Network
                             skill.CapFixed = cap;
                             skill.Lock = locked;
 
+                            // ECS: forward skill update.
+                            Ecs?.EnqueueCommand(new CmdUpdateSkill
+                            {
+                                SkillId = id,
+                                Value = realVal,
+                                Base = baseVal,
+                                Cap = cap,
+                                Lock = (byte)locked
+                            });
+
                             standard?.Update(id);
                             advanced?.ForceUpdate();
                         }
@@ -2153,6 +2295,8 @@ namespace ClassicUO.Network
             ushort x = p.ReadUInt16BE();
             ushort y = p.ReadUInt16BE();
             ushort z = p.ReadUInt16BE();
+
+            Ecs?.EnqueueCommand(new CmdPathfind { X = x, Y = y, Z = z });
 
             world.Player.Pathfinder.WalkTo(x, y, z, 0);
         }
@@ -2249,6 +2393,8 @@ namespace ClassicUO.Network
                 {
                     world.Light.Personal = level;
                 }
+
+                Ecs?.EnqueueCommand(new CmdSetPersonalLight { Level = level });
             }
         }
 
@@ -2278,6 +2424,8 @@ namespace ClassicUO.Network
                         ? Math.Min(level, ProfileManager.CurrentProfile.LightLevel)
                         : level;
             }
+
+            Ecs?.EnqueueCommand(new CmdSetOverallLight { Level = level });
         }
 
         private static void PlaySoundEffect(World world, ref StackDataReader p)
@@ -2296,6 +2444,8 @@ namespace ClassicUO.Network
             short z = (short)p.ReadUInt16BE();
 
             Client.Game.Audio.PlaySoundWithDistance(world, index, x, y);
+
+            Ecs?.EnqueueCommand(new CmdPlaySound { SoundId = index, X = x, Y = y, Z = z });
         }
 
         private static void PlayMusic(World world, ref StackDataReader p)
@@ -2309,16 +2459,19 @@ namespace ClassicUO.Network
                 if (cmd == 0x1F && index == 0xFF)
                 {
                     Client.Game.Audio.StopMusic();
+                    Ecs?.EnqueueCommand(new CmdPlayMusic { MusicId = 0xFFFF });
                 }
                 else
                 {
                     Client.Game.Audio.PlayMusic(index);
+                    Ecs?.EnqueueCommand(new CmdPlayMusic { MusicId = index });
                 }
             }
             else
             {
                 ushort index = p.ReadUInt16BE();
                 Client.Game.Audio.PlayMusic(index);
+                Ecs?.EnqueueCommand(new CmdPlayMusic { MusicId = index });
             }
         }
 
@@ -2427,6 +2580,8 @@ namespace ClassicUO.Network
                 byte count = p.ReadUInt8();
                 byte temp = p.ReadUInt8();
 
+                Ecs?.EnqueueCommand(new CmdSetWeather { Type = (byte)type, Count = count, Temperature = temp });
+
                 world.Weather.Generate(type, count, temp);
             }
         }
@@ -2497,7 +2652,8 @@ namespace ClassicUO.Network
 
         private static void CharacterAnimation(World world, ref StackDataReader p)
         {
-            Mobile mobile = world.Mobiles.Get(p.ReadUInt32BE());
+            uint serial = p.ReadUInt32BE();
+            Mobile mobile = world.Mobiles.Get(serial);
 
             if (mobile == null)
             {
@@ -2520,6 +2676,17 @@ namespace ClassicUO.Network
                 forward,
                 true
             );
+
+            Ecs?.EnqueueCommand(new CmdCharacterAnimation
+            {
+                Serial = serial,
+                Action = action,
+                FrameCount = (byte)frame_count,
+                RepeatCount = (byte)repeat_count,
+                Forward = forward,
+                Repeat = repeat,
+                Delay = delay
+            });
         }
 
         private static void GraphicEffect(World world, ref StackDataReader p)
@@ -2602,11 +2769,34 @@ namespace ClassicUO.Network
                 false,
                 blendmode
             );
+
+            Ecs?.EnqueueCommand(new CmdSpawnEffect
+            {
+                Type = (byte)type,
+                SourceSerial = source,
+                TargetSerial = target,
+                Graphic = graphic,
+                Hue = (ushort)hue,
+                SourceX = srcX,
+                SourceY = srcY,
+                SourceZ = srcZ,
+                TargetX = targetX,
+                TargetY = targetY,
+                TargetZ = targetZ,
+                Speed = speed,
+                Duration = duration,
+                FixedDirection = fixedDirection,
+                Explode = doesExplode,
+                RenderMode = (uint)blendmode
+            });
         }
 
         private static void ClientViewRange(World world, ref StackDataReader p)
         {
-            world.ClientViewRange = p.ReadUInt8();
+            byte range = p.ReadUInt8();
+            world.ClientViewRange = range;
+
+            Ecs?.EnqueueCommand(new CmdSetViewRange { Range = range });
         }
 
         private static void BulletinBoardData(World world, ref StackDataReader p)
@@ -2757,6 +2947,12 @@ namespace ClassicUO.Network
             }
 
             world.Player.InWarMode = p.ReadBool();
+
+            Ecs?.EnqueueCommand(new CmdSetWarmode
+            {
+                Serial = world.Player,
+                WarMode = world.Player.InWarMode
+            });
         }
 
         private static void Ping(World world, ref StackDataReader p)
@@ -2960,6 +3156,24 @@ namespace ClassicUO.Network
                 UpdateGameObject(world, serial, graphic, 0, 0, x, y, z, direction, hue, flags, 0, 0, 1);
             }
 
+            // ECS: create/update the mobile in ECS.
+            if (SerialHelper.IsMobile(serial))
+            {
+                Ecs?.EnqueueCommand(new CmdCreateOrUpdateMobile
+                {
+                    Serial = serial,
+                    Graphic = graphic,
+                    Hue = hue,
+                    Flags = (uint)flags,
+                    X = x,
+                    Y = y,
+                    Z = z,
+                    Direction = (byte)direction,
+                    Notoriety = (byte)notoriety,
+                    IsPlayer = serial == world.Player
+                });
+            }
+
             Entity obj = world.Get(serial);
 
             if (obj == null)
@@ -3029,6 +3243,16 @@ namespace ClassicUO.Network
                 item.CheckGraphicChange();
 
                 obj.PushToBack(item);
+
+                // ECS: forward equipped item to ECS.
+                Ecs?.EnqueueCommand(new CmdEquipItem
+                {
+                    Serial = itemSerial,
+                    Graphic = itemGraphic,
+                    Layer = layer,
+                    ContainerSerial = serial,
+                    Hue = item_hue
+                });
 
                 itemSerial = p.ReadUInt32BE();
             }
@@ -3240,6 +3464,14 @@ namespace ClassicUO.Network
                     item.Container = serial;
                     item.Layer = layer - 1;
                     corpse.PushToBack(item);
+
+                    // ECS: forward corpse equipment assignment.
+                    Ecs?.EnqueueCommand(new CmdCorpseEquipment
+                    {
+                        CorpseSerial = serial,
+                        Layer = (byte)(layer - 1),
+                        ItemSerial = item_serial
+                    });
                 }
 
                 layer = (Layer)p.ReadUInt8();
@@ -3394,6 +3626,13 @@ namespace ClassicUO.Network
             uint serial = p.ReadUInt32BE();
             string name = p.ReadASCII();
 
+            if (Ecs != null && !string.IsNullOrEmpty(name))
+            {
+                int nameIdx = Ecs.RegisterString(name);
+                Ecs.SetEntityName(serial, name);
+                Ecs.EnqueueCommand(new CmdUpdateName { Serial = serial, NameTableIndex = nameIdx });
+            }
+
             WMapEntity wme = world.WMapManager.GetEntity(serial);
 
             if (wme != null && !string.IsNullOrEmpty(name))
@@ -3511,7 +3750,8 @@ namespace ClassicUO.Network
 
         private static void UpdateHitpoints(World world, ref StackDataReader p)
         {
-            Entity entity = world.Get(p.ReadUInt32BE());
+            uint serial = p.ReadUInt32BE();
+            Entity entity = world.Get(serial);
 
             if (entity == null)
             {
@@ -3530,11 +3770,20 @@ namespace ClassicUO.Network
             {
                 world.UoAssist.SignalHits();
             }
+
+            Ecs?.EnqueueCommand(new CmdUpdateVitals
+            {
+                Serial = serial,
+                Hits = entity.Hits,
+                HitsMax = entity.HitsMax,
+                ValidFields = 1
+            });
         }
 
         private static void UpdateMana(World world, ref StackDataReader p)
         {
-            Mobile mobile = world.Mobiles.Get(p.ReadUInt32BE());
+            uint serial = p.ReadUInt32BE();
+            Mobile mobile = world.Mobiles.Get(serial);
 
             if (mobile == null)
             {
@@ -3548,11 +3797,20 @@ namespace ClassicUO.Network
             {
                 world.UoAssist.SignalMana();
             }
+
+            Ecs?.EnqueueCommand(new CmdUpdateVitals
+            {
+                Serial = serial,
+                Mana = mobile.Mana,
+                ManaMax = mobile.ManaMax,
+                ValidFields = 2
+            });
         }
 
         private static void UpdateStamina(World world, ref StackDataReader p)
         {
-            Mobile mobile = world.Mobiles.Get(p.ReadUInt32BE());
+            uint serial = p.ReadUInt32BE();
+            Mobile mobile = world.Mobiles.Get(serial);
 
             if (mobile == null)
             {
@@ -3566,6 +3824,14 @@ namespace ClassicUO.Network
             {
                 world.UoAssist.SignalStamina();
             }
+
+            Ecs?.EnqueueCommand(new CmdUpdateVitals
+            {
+                Serial = serial,
+                Stamina = mobile.Stamina,
+                StaminaMax = mobile.StaminaMax,
+                ValidFields = 4
+            });
         }
 
         private static void OpenUrl(World world, ref StackDataReader p)
@@ -3616,6 +3882,8 @@ namespace ClassicUO.Network
             GameActions.SendCloseStatus(world, world.TargetManager.LastAttack);
             world.TargetManager.LastAttack = serial;
             GameActions.RequestMobileStatus(world, serial);
+
+            Ecs?.EnqueueCommand(new CmdAttackTarget { TargetSerial = serial });
         }
 
         private static void TextEntryDialog(World world, ref StackDataReader p)
@@ -3798,6 +4066,20 @@ namespace ClassicUO.Network
                 true,
                 lang
             );
+
+            if (Ecs != null)
+            {
+                Ecs.EnqueueCommand(new CmdSpeech
+                {
+                    Serial = serial,
+                    Graphic = graphic,
+                    Type = (byte)type,
+                    Hue = hue,
+                    Font = font,
+                    TextIndex = Ecs.RegisterString(text),
+                    NameIndex = Ecs.RegisterString(name)
+                });
+            }
         }
 
         private static void DisplayDeath(World world, ref StackDataReader p)
@@ -3810,6 +4092,14 @@ namespace ClassicUO.Network
             uint serial = p.ReadUInt32BE();
             uint corpseSerial = p.ReadUInt32BE();
             uint running = p.ReadUInt32BE();
+
+            // ECS: forward death event before serial is mutated.
+            Ecs?.EnqueueCommand(new CmdDisplayDeath
+            {
+                Serial = serial,
+                CorpseSerial = corpseSerial,
+                WasRunning = running != 0
+            });
 
             Mobile owner = world.Mobiles.Get(serial);
 
@@ -4147,6 +4437,8 @@ namespace ClassicUO.Network
                 bcFlags |= BodyConvFlags.Anim4;
 
             Client.Game.UO.Animations.UpdateAnimationTable(bcFlags);
+
+            Ecs?.EnqueueCommand(new CmdSetLockedFeatures { Flags = (ulong)flags });
         }
 
         private static void DisplayQuestArrow(World world, ref StackDataReader p)
@@ -4215,6 +4507,12 @@ namespace ClassicUO.Network
             }
 
             world.ChangeSeason((Season)season, music);
+
+            Ecs?.EnqueueCommand(new CmdChangeSeason
+            {
+                Season = season,
+                MusicIndex = music
+            });
         }
 
         private static void ClientVersion(World world, ref StackDataReader p)
@@ -4302,12 +4600,29 @@ namespace ClassicUO.Network
                 case 6: //party
                     world.Party.ParsePacket(ref p);
 
+                    // Sync party state to ECS after legacy processing.
+                    if (Ecs != null)
+                    {
+                        Ecs.EnqueueCommand(new CmdPartyDisband());
+                        for (int pi = 0; pi < world.Party.Members.Length; pi++)
+                        {
+                            var member = world.Party.Members[pi];
+                            if (member != null && member.Serial != 0)
+                            {
+                                Ecs.EnqueueCommand(new CmdPartyAddMember { Serial = member.Serial });
+                            }
+                        }
+                    }
+
                     break;
 
                 //===========================================================================================
                 //===========================================================================================
                 case 8: // map change
-                    world.MapIndex = p.ReadUInt8();
+                    byte mapIdx = p.ReadUInt8();
+                    world.MapIndex = mapIdx;
+
+                    Ecs?.EnqueueCommand(new CmdSetMap { MapIndex = mapIdx });
 
                     break;
 
@@ -4557,6 +4872,14 @@ namespace ClassicUO.Network
                             bool dead = p.ReadBool();
                             bonded.IsDead = dead;
 
+                            // ECS: bonded pet death status.
+                            Ecs?.EnqueueCommand(new CmdExtendedStats
+                            {
+                                Serial = serial,
+                                SubType = 4,
+                                BondedDead = dead
+                            });
+
                             break;
 
                         case 2:
@@ -4569,6 +4892,23 @@ namespace ClassicUO.Network
                                 world.Player.StrLock = (Lock)((state >> 4) & 3);
                                 world.Player.DexLock = (Lock)((state >> 2) & 3);
                                 world.Player.IntLock = (Lock)(state & 3);
+
+                                // ECS: stat lock update — emit 3 commands, one per stat.
+                                Ecs?.EnqueueCommand(new CmdExtendedStats
+                                {
+                                    Serial = serial, SubType = 2,
+                                    StatIndex = 0, LockValue = (byte)((state >> 4) & 3)
+                                });
+                                Ecs?.EnqueueCommand(new CmdExtendedStats
+                                {
+                                    Serial = serial, SubType = 2,
+                                    StatIndex = 1, LockValue = (byte)((state >> 2) & 3)
+                                });
+                                Ecs?.EnqueueCommand(new CmdExtendedStats
+                                {
+                                    Serial = serial, SubType = 2,
+                                    StatIndex = 2, LockValue = (byte)(state & 3)
+                                });
 
                                 StatusGumpBase.GetStatusGump()?.RequestUpdateContents();
                             }
@@ -4658,6 +4998,8 @@ namespace ClassicUO.Network
                 case 0x1D: // house revision state
                     serial = p.ReadUInt32BE();
                     uint revision = p.ReadUInt32BE();
+
+                    Ecs?.EnqueueCommand(new CmdHouseRevision { Serial = serial, Revision = revision });
 
                     Item multi = world.Items.Get(serial);
 
@@ -4801,6 +5143,8 @@ namespace ClassicUO.Network
                     }
 
                     world.Player.SpeedMode = (CharacterSpeedType)val;
+
+                    Ecs?.EnqueueCommand(new CmdSetSpeedMode { Mode = val });
 
                     break;
 
@@ -4955,6 +5299,21 @@ namespace ClassicUO.Network
                 text_type,
                 true
             );
+
+            if (Ecs != null)
+            {
+                Ecs.EnqueueCommand(new CmdSpeech
+                {
+                    Serial = serial,
+                    Graphic = graphic,
+                    Type = (byte)type,
+                    Hue = hue,
+                    Font = font,
+                    ClilocId = cliloc,
+                    TextIndex = Ecs.RegisterString(text),
+                    NameIndex = Ecs.RegisterString(name)
+                });
+            }
         }
 
         private static void UnicodePrompt(World world, ref StackDataReader p)
@@ -5023,6 +5382,9 @@ namespace ClassicUO.Network
             p.Skip(2);
 
             uint revision = p.ReadUInt32BE();
+
+            // ECS: track OPL revision.
+            Ecs?.EnqueueCommand(new CmdOplRevision { Serial = serial, Revision = revision });
 
             Entity entity = world.Mobiles.Get(serial);
 
@@ -5357,6 +5719,8 @@ namespace ClassicUO.Network
             Item foundation = world.Items.Get(serial);
             uint revision = p.ReadUInt32BE();
 
+            Ecs?.EnqueueCommand(new CmdHouseRevision { Serial = serial, Revision = revision });
+
             if (foundation == null)
             {
                 return;
@@ -5568,11 +5932,19 @@ namespace ClassicUO.Network
         {
             uint serial = p.ReadUInt32BE();
             byte status = p.ReadUInt8();
+            uint attackerSerial = 0;
 
             if (status == 1)
             {
-                uint attackerSerial = p.ReadUInt32BE();
+                attackerSerial = p.ReadUInt32BE();
             }
+
+            Ecs?.EnqueueCommand(new CmdMobileStatus
+            {
+                Serial = serial,
+                Status = status,
+                AttackerSerial = attackerSerial
+            });
         }
 
         private static void BuffDebuff(World world, ref StackDataReader p)
@@ -5600,6 +5972,12 @@ namespace ClassicUO.Network
 
                 if (count == 0)
                 {
+                    Ecs?.EnqueueCommand(new CmdRemoveBuff
+                    {
+                        Serial = serial,
+                        IconId = iconID
+                    });
+
                     world.Player.RemoveBuff(ic);
                     gump?.RequestUpdateContents();
                 }
@@ -5670,6 +6048,15 @@ namespace ClassicUO.Network
                         bool alreadyExists = world.Player.IsBuffIconExists(ic);
                         world.Player.AddBuff(ic, BuffTable.Table[iconID], timer, text);
 
+                        Ecs?.EnqueueCommand(new CmdAddBuff
+                        {
+                            Serial = serial,
+                            IconId = iconID,
+                            Duration = timer,
+                            TitleCliloc = titleCliloc,
+                            DescriptionCliloc = descriptionCliloc
+                        });
+
                         if (!alreadyExists)
                         {
                             gump?.RequestUpdateContents();
@@ -5686,7 +6073,8 @@ namespace ClassicUO.Network
                 return;
             }
 
-            Mobile mobile = world.Mobiles.Get(p.ReadUInt32BE());
+            uint serial = p.ReadUInt32BE();
+            Mobile mobile = world.Mobiles.Get(serial);
 
             if (mobile == null)
             {
@@ -5705,6 +6093,14 @@ namespace ClassicUO.Network
                 forward: true,
                 fromServer: true
             );
+
+            Ecs?.EnqueueCommand(new CmdNewCharacterAnimation
+            {
+                Serial = serial,
+                AnimationType = type,
+                Action = action,
+                Mode = mode
+            });
         }
 
         private static void KREncryptionResponse(World world, ref StackDataReader p) { }
@@ -5862,6 +6258,15 @@ namespace ClassicUO.Network
             ushort y = p.ReadUInt16BE();
             ushort z = p.ReadUInt16BE();
 
+            Ecs?.EnqueueCommand(new CmdBoatMoving
+            {
+                BoatSerial = serial,
+                Speed = boatSpeed,
+                MovingDirection = (byte)movingDirection,
+                FacingDirection = (byte)facingDirection,
+                X = x, Y = y, Z = (short)z
+            });
+
             Item multi = world.Items.Get(serial);
 
             if (multi == null)
@@ -5929,6 +6334,12 @@ namespace ClassicUO.Network
                 ushort cx = p.ReadUInt16BE();
                 ushort cy = p.ReadUInt16BE();
                 ushort cz = p.ReadUInt16BE();
+
+                Ecs?.EnqueueCommand(new CmdBoatEntityUpdate
+                {
+                    Serial = cSerial,
+                    X = cx, Y = cy, Z = (short)cz
+                });
 
                 if (cSerial == world.Player)
                 {

@@ -1,5 +1,6 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -162,9 +163,25 @@ namespace ClassicUO.Game.UI.Gumps
             _skillListEntries.Clear();
 
             PropertyInfo pi = typeof(Skill).GetProperty(_sortField);
-            List<Skill> sortSkills = new List<Skill>(
-                World.Player.Skills.OrderBy(x => pi.GetValue(x, null))
-            );
+            List<Skill> sortSkills;
+            var ecsAdv = Client.Game?.UO?.EcsRuntime;
+            if (ecsAdv != null && ecsAdv.GetCutoverFlags().UseEcsUiData)
+            {
+                var sc = ecsAdv.GetPlayerSkills();
+                sortSkills = new List<Skill>(sc.SkillCount);
+                for (int i = 0; i < sc.SkillCount; i++)
+                {
+                    var s = StandardSkillsGump.GetSkillFromEcs(ecsAdv, i);
+                    if (s != null) sortSkills.Add(s);
+                }
+                sortSkills = new List<Skill>(sortSkills.OrderBy(x => pi.GetValue(x, null)));
+            }
+            else
+            {
+                sortSkills = new List<Skill>(
+                    World.Player.Skills.OrderBy(x => pi.GetValue(x, null))
+                );
+            }
 
             if (_sortAsc)
             {

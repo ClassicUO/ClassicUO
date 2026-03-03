@@ -1,5 +1,6 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
@@ -27,6 +28,7 @@ namespace ClassicUO.Game.UI.Gumps
         private int _pagesCount = 3;
         private int _tooltipOffset = 1112198;
         private int _enqueuePage = -1;
+        private readonly RaceType _race;
 
         public RacialAbilitiesBookGump(World world, int x, int y) : base(world, 0, 0)
         {
@@ -34,6 +36,10 @@ namespace ClassicUO.Game.UI.Gumps
             Y = y;
             CanMove = true;
             CanCloseWithRightClick = true;
+
+            var ecs = Client.Game?.UO?.EcsRuntime;
+            bool useEcs = ecs != null && ecs.GetCutoverFlags().UseEcsUiData;
+            _race = useEcs ? (RaceType)ecs.GetPlayerRace() : _race;
 
             BuildGump();
         }
@@ -190,7 +196,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     pic.MouseDoubleClick += (sender, e) =>
                     {
-                        if ((ushort) ((GumpPic) sender).LocalSerial == 0x5DDA && World.Player.Race == RaceType.GARGOYLE)
+                        if ((ushort) ((GumpPic) sender).LocalSerial == 0x5DDA && _race == RaceType.GARGOYLE)
                         {
                             NetClient.Socket.Send_ToggleGargoyleFlying();
                             e.Result = true;
@@ -241,7 +247,7 @@ namespace ClassicUO.Game.UI.Gumps
             _dictionaryPagesCount = 2;
             abilityOnPage = 3;
 
-            switch (World.Player.Race)
+            switch (_race)
             {
                 case RaceType.HUMAN:
                     _abilityCount = 4;
@@ -271,7 +277,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             passive = true;
 
-            switch (World.Player.Race)
+            switch (_race)
             {
                 case RaceType.HUMAN: return _humanNames[offset];
                 case RaceType.ELF: return _elfNames[offset];

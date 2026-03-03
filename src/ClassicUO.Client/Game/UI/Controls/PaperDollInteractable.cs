@@ -2,6 +2,7 @@
 
 using System.Collections.Generic;
 using ClassicUO.Configuration;
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -269,7 +270,7 @@ namespace ClassicUO.Game.UI.Controls
                             IsPartialHue = equipItem.ItemData.IsPartialHue,
                             CanLift =
                                 _paperDollGump.World.InGame
-                                && !_paperDollGump.World.Player.IsDead
+                                && !(Client.Game?.UO?.EcsRuntime is { } ecsPdi && ecsPdi.GetCutoverFlags().UseEcsUiData ? ecsPdi.GetPlayerSnapshot().IsDead : _paperDollGump.World.Player.IsDead)
                                 && layer != Layer.Beard
                                 && layer != Layer.Hair
                                 && (_paperDollGump.CanLift || LocalSerial == _paperDollGump.World.Player)

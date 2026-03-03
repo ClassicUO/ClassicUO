@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
@@ -44,12 +45,28 @@ namespace ClassicUO.Game.UI.Gumps
             SetActivePage(1);
         }
 
+        private void GetAbilities(out ushort primary, out ushort secondary)
+        {
+            var ecs = Client.Game?.UO?.EcsRuntime;
+            if (ecs != null && ecs.GetCutoverFlags().UseEcsUiData)
+            {
+                var ab = ecs.GetPlayerAbilities();
+                primary = ab.Primary;
+                secondary = ab.Secondary;
+            }
+            else
+            {
+                primary = (ushort)World.Player.Abilities[0];
+                secondary = (ushort)World.Player.Abilities[1];
+            }
+        }
+
         private void BuildGump()
         {
             Clear();
             _primAbility = null;
             _secAbility = null;
-            
+
             Add(new GumpPic(0, 0, 0x2B02, 0));
 
             Add(_pageCornerLeft = new GumpPic(50, 8, 0x08BB, 0));
@@ -125,10 +142,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (spellsOnPage == 4)
                     {
+                        GetAbilities(out ushort abPrim, out ushort abSec);
+
                         if(_primAbility == null)
                         {
-                            byte bab1 = (byte)(((byte)World.Player.PrimaryAbility & 0x7F) - 1);
-                            _primAbility = new GumpPic(215, 105, (ushort)(0x5200 + bab1), (ushort)(((byte)World.Player.PrimaryAbility & 0x80) != 0 ? 38 : 0));
+                            byte bab1 = (byte)(((byte)abPrim & 0x7F) - 1);
+                            _primAbility = new GumpPic(215, 105, (ushort)(0x5200 + bab1), (ushort)(((byte)abPrim & 0x80) != 0 ? 38 : 0));
                             _primAbility.SetTooltip(Client.Game.UO.FileManager.Clilocs.GetString(1028838 + bab1));
                             _primAbility.DragBegin += OnGumpicDragBeginPrimary;
                             _primAbility.MouseDoubleClick += PrimaryAbilityMouseDoubleClick;
@@ -149,8 +168,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (_secAbility == null)
                         {
-                            byte bab2 = (byte)(((byte)World.Player.SecondaryAbility & 0x7F) - 1);
-                            _secAbility = new GumpPic(215, 150, (ushort)(0x5200 + bab2), (ushort)(((byte)World.Player.SecondaryAbility & 0x80) != 0 ? 38 : 0));
+                            byte bab2 = (byte)(((byte)abSec & 0x7F) - 1);
+                            _secAbility = new GumpPic(215, 150, (ushort)(0x5200 + bab2), (ushort)(((byte)abSec & 0x80) != 0 ? 38 : 0));
                             _secAbility.SetTooltip(Client.Game.UO.FileManager.Clilocs.GetString(1028838 + bab2));
                             _secAbility.DragBegin += OnGumpicDragBeginSecondary;
                             _secAbility.MouseDoubleClick += SecondaryAbilityMouseDoubleClick;
@@ -303,7 +322,8 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            ref readonly AbilityDefinition def = ref AbilityData.Abilities[((byte) World.Player.PrimaryAbility & 0x7F) - 1];
+            GetAbilities(out ushort primDrag, out _);
+            ref readonly AbilityDefinition def = ref AbilityData.Abilities[((byte)primDrag & 0x7F) - 1];
 
             GetSpellFloatingButton(def.Index)?.Dispose();
 
@@ -324,7 +344,8 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            ref readonly AbilityDefinition def = ref AbilityData.Abilities[((byte) World.Player.SecondaryAbility & 0x7F) - 1];
+            GetAbilities(out _, out ushort secDrag);
+            ref readonly AbilityDefinition def = ref AbilityData.Abilities[((byte)secDrag & 0x7F) - 1];
 
             GetSpellFloatingButton(def.Index)?.Dispose();
 
@@ -361,7 +382,8 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
 
-            byte index = (byte)World.Player.Abilities[0];
+            GetAbilities(out ushort updPrim, out ushort updSec);
+            byte index = (byte)updPrim;
             ref readonly AbilityDefinition def = ref AbilityData.Abilities[(index & 0x7F) - 1];
 
             if ((index & 0x80) != 0)
@@ -378,7 +400,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _primAbility.Graphic = def.Icon;
             }
 
-            index = (byte)World.Player.Abilities[1];
+            index = (byte)updSec;
             def = ref AbilityData.Abilities[(index & 0x7F) - 1];
 
             if ((index & 0x80) != 0)

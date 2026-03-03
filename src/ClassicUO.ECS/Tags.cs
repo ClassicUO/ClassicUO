@@ -49,6 +49,18 @@ namespace ClassicUO.ECS
     /// <summary>Mobile is renamable.</summary>
     public struct RenamableTag;
 
+    /// <summary>Mobile is frozen/paralyzed (Flags bit 0x01).</summary>
+    public struct FrozenTag;
+
+    /// <summary>Mobile has yellow health bar (invulnerable/NPC flag, Flags bit 0x08).</summary>
+    public struct YellowHitsTag;
+
+    /// <summary>Mobile graphic is a human or elf body type. Derived from Graphic at creation.</summary>
+    public struct IsHumanTag;
+
+    /// <summary>Mobile graphic is a gargoyle body type. Derived from Graphic at creation.</summary>
+    public struct IsGargoyleTag;
+
     /// <summary>Item is on the ground (not in a container).</summary>
     public struct OnGroundTag;
 
@@ -70,6 +82,42 @@ namespace ClassicUO.ECS
 
     /// <summary>Mobile is flying (gargoyle flight, affects movement speed).</summary>
     public struct FlyingTag;
+
+    // ── Boat Tags ──────────────────────────────────────────────────────
+
+    /// <summary>Entity is currently on a boat.</summary>
+    public struct OnBoatTag;
+
+    // ── Social Tags ────────────────────────────────────────────────────
+
+    /// <summary>Mobile is a member of the player's party.</summary>
+    public struct PartyTag;
+
+    /// <summary>Entity is an overhead text entry.</summary>
+    public struct OverheadTextTag;
+
+    // ── Buff Tags ──────────────────────────────────────────────────────
+
+    /// <summary>Entity is a buff/debuff child of a mobile.</summary>
+    public struct BuffTag;
+
+    // ── Corpse Tags ──────────────────────────────────────────────────────
+
+    /// <summary>Corpse should auto-open when player is within range.</summary>
+    public struct AutoOpenCorpseTag;
+
+    // ── Effect Tags ─────────────────────────────────────────────────────
+
+    /// <summary>Effect should spawn an explosion when it expires (moving effects with Explode flag).</summary>
+    public struct ExplodeOnExpiryTag;
+
+    // ── Selection Tags ────────────────────────────────────────────────────
+
+    /// <summary>Entity is under the mouse cursor this frame.</summary>
+    public struct MouseOverTag;
+
+    /// <summary>Entity is explicitly selected (e.g., clicked).</summary>
+    public struct SelectedTag;
 
     // ── Render Tags ──────────────────────────────────────────────────────
 

@@ -4,6 +4,7 @@ using System.IO;
 using System.Text;
 using System.Xml;
 using ClassicUO.Configuration;
+using ClassicUO.ECS;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Resources;
@@ -37,7 +38,10 @@ namespace ClassicUO.Game.Managers
         /// <param name="entity">Targeted Entity</param>
         public void AddIgnoredTarget(Entity entity)
         {
-            if (entity is Mobile m && !m.IsYellowHits && m.Serial != _world.Player.Serial)
+            var ecsIgn = Client.Game?.UO?.EcsRuntime;
+            uint ignPlayerSerial = ecsIgn != null && ecsIgn.GetCutoverFlags().UseEcsUiData
+                ? ecsIgn.GetPlayerSerial() : _world.Player?.Serial ?? 0;
+            if (entity is Mobile m && !m.IsYellowHits && m.Serial != ignPlayerSerial)
             {
                 var charName = m.Name;
 

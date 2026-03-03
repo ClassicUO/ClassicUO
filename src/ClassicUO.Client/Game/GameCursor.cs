@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Configuration;
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -206,8 +207,12 @@ namespace ClassicUO.Game
                         id -= 0x206A;
                     }
 
+                    var ecsCur1 = Client.Game?.UO?.EcsRuntime;
+                    bool curInWar1 = ecsCur1 != null && ecsCur1.GetCutoverFlags().UseEcsUiData
+                        ? ecsCur1.GetPlayerSnapshot().InWarMode
+                        : _world.Player?.InWarMode ?? false;
                     int war =
-                        _world.InGame && _world.Player.InWarMode
+                        _world.InGame && curInWar1
                             ? 1
                             : _world.InGame && _world.MapIndex != 0
                                 ? 2
@@ -324,10 +329,14 @@ namespace ClassicUO.Game
                                 {
                                     var item = _componentsList[i];
 
+                                    var ecsCurZ = Client.Game?.UO?.EcsRuntime;
+                                    sbyte playerZ = ecsCurZ != null && ecsCurZ.GetCutoverFlags().UseEcsUiData
+                                        ? (sbyte)ecsCurZ.GetPlayerSnapshot().Z
+                                        : (sbyte)(_world.Player?.Z ?? 0);
                                     _temp[i].SetInWorldTile(
                                         (ushort)(selectedObj.X + item.X),
                                         (ushort)(selectedObj.Y + item.Y),
-                                        (sbyte)(_world.Player.Z + item.Z)
+                                        (sbyte)(playerZ + item.Z)
                                     );
                                 }
                             }
@@ -494,7 +503,11 @@ namespace ClassicUO.Game
 
                 Vector3 hueVec;
 
-                if (_world.InGame && _world.MapIndex != 0 && !_world.Player.InWarMode)
+                var ecsCur2 = Client.Game?.UO?.EcsRuntime;
+                bool curInWar2 = ecsCur2 != null && ecsCur2.GetCutoverFlags().UseEcsUiData
+                    ? ecsCur2.GetPlayerSnapshot().InWarMode
+                    : _world.Player?.InWarMode ?? false;
+                if (_world.InGame && _world.MapIndex != 0 && !curInWar2)
                 {
                     hueVec = ShaderHueTranslator.GetHueVector(0x0033);
                 }
@@ -612,7 +625,11 @@ namespace ClassicUO.Game
 
         private ushort AssignGraphicByState()
         {
-            int war = _world.InGame && _world.Player.InWarMode ? 1 : 0;
+            var ecsCur3 = Client.Game?.UO?.EcsRuntime;
+            bool curInWar3 = ecsCur3 != null && ecsCur3.GetCutoverFlags().UseEcsUiData
+                ? ecsCur3.GetPlayerSnapshot().InWarMode
+                : _world.Player?.InWarMode ?? false;
+            int war = _world.InGame && curInWar3 ? 1 : 0;
 
             if (_world.TargetManager.IsTargeting)
             {

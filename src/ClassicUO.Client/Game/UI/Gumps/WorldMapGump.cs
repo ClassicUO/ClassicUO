@@ -2,6 +2,7 @@
 
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -59,6 +60,8 @@ namespace ClassicUO.Game.UI.Gumps
         private Map.Map _map = null;
 
         private Point _center, _lastScroll, _mouseCenter, _scroll;
+        private ushort _bridgedPlayerX, _bridgedPlayerY;
+        private sbyte _bridgedPlayerZ;
         private Point? _lastMousePosition = null;
         private bool _flipMap = true;
         private bool _freeView;
@@ -1787,11 +1790,26 @@ namespace ClassicUO.Game.UI.Gumps
                 GameActions.Print(World, ResGumps.InvalidMarkerName, 0x2A);
             }
 
+            var ecs = Client.Game?.UO?.EcsRuntime;
+            bool useEcs = ecs != null && ecs.GetCutoverFlags().UseEcsUiData;
+            ushort markerPX, markerPY;
+            if (useEcs)
+            {
+                var snap = ecs.GetPlayerSnapshot();
+                markerPX = snap.X;
+                markerPY = snap.Y;
+            }
+            else
+            {
+                markerPX = World.Player.X;
+                markerPY = World.Player.Y;
+            }
+
             var markerColor = "blue";
             var markerIcon = "";
             var markerZoomLevel = 3;
 
-            var markerCsv = $"{World.Player.X},{World.Player.Y},{_map.Index},{markerName},{markerIcon},{markerColor},{markerZoomLevel}";
+            var markerCsv = $"{markerPX},{markerPY},{_map.Index},{markerName},{markerIcon},{markerColor},{markerZoomLevel}";
 
             using (var fileStream = File.Open(UserMarkersFilePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.Write))
             using (var streamWriter = new StreamWriter(fileStream))
@@ -1802,8 +1820,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             var mapMarker = new WMapMarker
             {
-                X = World.Player.X,
-                Y = World.Player.Y,
+                X = markerPX,
+                Y = markerPY,
                 Color = GetColor(markerColor),
                 ColorName = markerColor,
                 MapId = _map.Index,
@@ -1880,10 +1898,26 @@ namespace ClassicUO.Game.UI.Gumps
                 return false;
             }
 
+            var ecs = Client.Game?.UO?.EcsRuntime;
+            bool useEcs = ecs != null && ecs.GetCutoverFlags().UseEcsUiData;
+            if (useEcs)
+            {
+                var snap = ecs.GetPlayerSnapshot();
+                _bridgedPlayerX = snap.X;
+                _bridgedPlayerY = snap.Y;
+                _bridgedPlayerZ = snap.Z;
+            }
+            else
+            {
+                _bridgedPlayerX = World.Player.X;
+                _bridgedPlayerY = World.Player.Y;
+                _bridgedPlayerZ = World.Player.Z;
+            }
+
             if (!_isScrolling && !_freeView)
             {
-                _center.X = World.Player.X;
-                _center.Y = World.Player.Y;
+                _center.X = _bridgedPlayerX;
+                _center.Y = _bridgedPlayerY;
             }
 
             float layerDepth = layerDepthRef;
@@ -2276,9 +2310,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_showCoordinates)
             {
-                string text = $"{World.Player.X}, {World.Player.Y} ({World.Player.Z}) [{_zoomIndex}]";
+                string text = $"{_bridgedPlayerX}, {_bridgedPlayerY} ({_bridgedPlayerZ}) [{_zoomIndex}]";
 
-                if (_showSextantCoordinates && Sextant.FormatString(new Point(World.Player.X, World.Player.Y), _map, out var sextantCoords))
+                if (_showSextantCoordinates && Sextant.FormatString(new Point(_bridgedPlayerX, _bridgedPlayerY), _map, out var sextantCoords))
                     text += "\n" + sextantCoords;
 
                 Vector3 hueVector = new(0f, 1f, 1f);

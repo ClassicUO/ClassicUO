@@ -1,5 +1,6 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -80,7 +81,7 @@ namespace ClassicUO.Game.UI.Gumps
             (
                 _skillsLabelSum = new Label
                 (
-                    World.Player.Skills.Sum(s => s.Value).ToString("F1"),
+                    GetInitialSkillSum(),
                     false,
                     600,
                     0,
@@ -251,7 +252,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void LoadSkills()
         {
-            if (World.Player != null)
+            bool playerReady = UseEcsSkills(out _) || World.Player != null;
+            if (playerReady)
             {
                 foreach (SkillsGroup g in World.SkillsGroupManager.Groups)
                 {
@@ -350,9 +352,71 @@ namespace ClassicUO.Game.UI.Gumps
             _scrollArea.Height = _scrollArea.SpecialHeight = int.Parse(xml.GetAttribute("height"));
         }
 
+        private string GetInitialSkillSum()
+        {
+            if (UseEcsSkills(out var ecs))
+            {
+                var sc = ecs.GetPlayerSkills();
+                float total = 0;
+                for (int i = 0; i < sc.SkillCount; i++)
+                    total += sc.Skills[i].Value / 10.0f;
+                return total.ToString("F1");
+            }
+            return World.Player.Skills.Sum(s => s.Value).ToString("F1");
+        }
+
+        private static bool UseEcsSkills(out EcsRuntimeHost ecs)
+        {
+            ecs = Client.Game?.UO?.EcsRuntime;
+            return ecs != null && ecs.GetCutoverFlags().UseEcsUiData;
+        }
+
+        internal static Skill GetSkillFromEcs(EcsRuntimeHost ecs, int index)
+        {
+            var sc = ecs.GetPlayerSkills();
+            if (index < 0 || index >= sc.SkillCount) return null;
+            var se = sc.Skills[index];
+            var entry = Client.Game.UO.FileManager.Skills.Skills[index];
+            var skill = new Skill(entry.Name, index, entry.HasAction);
+            skill.ValueFixed = se.Value;
+            skill.BaseFixed = se.Base;
+            skill.CapFixed = se.Cap;
+            skill.Lock = (Lock)se.Lock;
+            return skill;
+        }
+
+        internal Skill GetSkillBridged(int index)
+        {
+            if (UseEcsSkills(out var ecs))
+                return GetSkillFromEcs(ecs, index);
+            if (World.Player == null || index < 0 || index >= World.Player.Skills.Length)
+                return null;
+            return World.Player.Skills[index];
+        }
+
+        internal int GetSkillCountBridged()
+        {
+            if (UseEcsSkills(out var ecs))
+                return ecs.GetPlayerSkills().SkillCount;
+            return World.Player?.Skills?.Length ?? 0;
+        }
+
         private void SumTotalSkills()
         {
-            _skillsLabelSum.Text = World.Player.Skills.Sum(s => _checkReal.IsChecked ? s.Base : s.Value).ToString("F1");
+            if (UseEcsSkills(out var ecs))
+            {
+                var sc = ecs.GetPlayerSkills();
+                float total = 0;
+                for (int i = 0; i < sc.SkillCount; i++)
+                {
+                    total += (_checkReal.IsChecked ? sc.Skills[i].Base : sc.Skills[i].Value) / 10.0f;
+                }
+                _skillsLabelSum.Text = total.ToString("F1");
+            }
+            else
+            {
+                _skillsLabelSum.Text = World.Player.Skills.Sum(s => _checkReal.IsChecked ? s.Base : s.Value).ToString("F1");
+            }
         }
 
 
@@ -540,9 +604,9 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 foreach (SkillItemControl c in _skills)
                 {
-                    if (c.Index == index && index >= 0 && index < _gump.World.Player.Skills.Length)
+                    if (c.Index == index && index >= 0 && index < _gump.GetSkillCountBridged())
                     {
-                        Skill skill = _gump.World.Player.Skills[index];
+                        Skill skill = _gump.GetSkillBridged(index);
 
                         if (skill == null)
                         {
@@ -787,7 +851,7 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
                 }
 
-                Skill skill = gump.World.Player.Skills[Index];
+                Skill skill = gump.GetSkillBridged(Index);
 
                 if (skill != null)
                 {
@@ -849,12 +913,13 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (buttonID == 1) // change status
                 {
-                    if (_gump.World.Player == null)
+                    Skill skill = _gump.GetSkillBridged(Index);
+
+                    if (skill == null)
                     {
                         return;
                     }
 
-                    Skill skill = _gump.World.Player.Skills[Index];
                     byte newStatus = (byte) skill.Lock;
 
                     if (newStatus < 2)
@@ -885,12 +950,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             public void UpdateValueText(bool showReal, bool showCap)
             {
-                if (_gump.World.Player == null || Index < 0 || Index >= _gump.World.Player.Skills.Length)
+                if (Index < 0 || Index >= _gump.GetSkillCountBridged())
                 {
                     return;
                 }
 
-                Skill skill = _gump.World.Player.Skills[Index];
+                Skill skill = _gump.GetSkillBridged(Index);
 
                 if (skill != null)
                 {
@@ -932,15 +997,16 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Client.Game.UO.GameCursor.IsDraggingCursorForced = false;
 
-                if (UIManager.LastControlMouseDown(MouseButtonType.Left) == this && _gump.World.Player.Skills[Index].IsClickable)
+                Skill dragSkill = _gump.GetSkillBridged(Index);
+                if (UIManager.LastControlMouseDown(MouseButtonType.Left) == this && dragSkill != null && dragSkill.IsClickable)
                 {
                     if (UIManager.MouseOverControl == null || UIManager.MouseOverControl.RootParent != RootParent)
                     {
                         GetSpellFloatingButton(Index)?.Dispose();
 
-                        if (Index >= 0 && Index < _gump.World.Player.Skills.Length)
+                        if (Index >= 0 && Index < _gump.GetSkillCountBridged())
                         {
-                            UIManager.Add(new SkillButtonGump(_gump.World, _gump.World.Player.Skills[Index], Mouse.Position.X - 44, Mouse.Position.Y - 22));
+                            UIManager.Add(new SkillButtonGump(_gump.World, dragSkill, Mouse.Position.X - 44, Mouse.Position.Y - 22));
                         }
                     }
                 }

@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Assets;
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
@@ -123,6 +124,21 @@ namespace ClassicUO.Game.UI.Gumps
             }
             float layerDepth = layerDepthRef;
 
+            var ecs = Client.Game?.UO?.EcsRuntime;
+            bool useEcs = ecs != null && ecs.GetCutoverFlags().UseEcsUiData;
+            ushort playerX, playerY;
+            if (useEcs)
+            {
+                var snap = ecs.GetPlayerSnapshot();
+                playerX = snap.X;
+                playerY = snap.Y;
+            }
+            else
+            {
+                playerX = World.Player.X;
+                playerY = World.Player.Y;
+            }
+
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
             renderLists.AddGumpNoAtlas(
@@ -159,8 +175,8 @@ namespace ClassicUO.Game.UI.Gumps
                                 continue;
                             }
 
-                            int xx = mob.X - World.Player.X;
-                            int yy = mob.Y - World.Player.Y;
+                            int xx = mob.X - playerX;
+                            int yy = mob.Y - playerY;
 
                             int gx = xx - yy;
                             int gy = xx + yy;
@@ -216,8 +232,20 @@ namespace ClassicUO.Game.UI.Gumps
             bool force = false
         )
         {
-            ushort lastX = World.Player.X;
-            ushort lastY = World.Player.Y;
+            var ecs = Client.Game?.UO?.EcsRuntime;
+            bool useEcs = ecs != null && ecs.GetCutoverFlags().UseEcsUiData;
+            ushort lastX, lastY;
+            if (useEcs)
+            {
+                var snap = ecs.GetPlayerSnapshot();
+                lastX = snap.X;
+                lastY = snap.Y;
+            }
+            else
+            {
+                lastX = World.Player.X;
+                lastY = World.Player.Y;
+            }
 
             if (_x != lastX || _y != lastY)
             {

@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Configuration;
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -51,10 +52,35 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
+            var ecs = Client.Game?.UO?.EcsRuntime;
+            bool useEcs = ecs != null && ecs.GetCutoverFlags().UseEcsUiData;
+
+            int playerX, playerY;
+            sbyte playerZ;
+            float offsetX, offsetY, offsetZ;
+
+            if (useEcs)
+            {
+                var snap = ecs.GetPlayerSnapshot();
+                playerX = snap.X;
+                playerY = snap.Y;
+                playerZ = snap.Z;
+                ecs.GetPlayerOffset(out offsetX, out offsetY, out offsetZ);
+            }
+            else
+            {
+                playerX = World.Player.X;
+                playerY = World.Player.Y;
+                playerZ = World.Player.Z;
+                offsetX = World.Player.Offset.X;
+                offsetY = World.Player.Offset.Y;
+                offsetZ = World.Player.Offset.Z;
+            }
+
             Direction dir = (Direction) GameCursor.GetMouseDirection
             (
-                World.Player.X,
-                World.Player.Y,
+                playerX,
+                playerY,
                 _mx,
                 _my,
                 0
@@ -79,16 +105,16 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = _arrow.Height;
             }
 
-            int gox = World.Player.X - _mx;
-            int goy = World.Player.Y - _my;
+            int gox = playerX - _mx;
+            int goy = playerY - _my;
 
 
             int x = (Client.Game.Scene.Camera.Bounds.Width >> 1) - (gox - goy) * 22;
             int y = (Client.Game.Scene.Camera.Bounds.Height >> 1) - (gox + goy) * 22;
 
-            x -= (int) World.Player.Offset.X;
-            y -= (int) (World.Player.Offset.Y - World.Player.Offset.Z);
-            y += World.Player.Z << 2;
+            x -= (int) offsetX;
+            y -= (int) (offsetY - offsetZ);
+            y += playerZ << 2;
 
 
             switch (dir)

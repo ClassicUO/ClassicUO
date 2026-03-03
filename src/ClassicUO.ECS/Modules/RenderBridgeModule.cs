@@ -16,6 +16,7 @@ namespace ClassicUO.ECS.Modules
         {
             world.Module<RenderBridgeModule>();
             RenderExtractSystems.Register(world);
+            UiExtractSystems.Register(world);
         }
     }
 }

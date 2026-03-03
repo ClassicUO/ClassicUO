@@ -2,6 +2,7 @@
 
 using System;
 using ClassicUO.Configuration;
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -24,12 +25,20 @@ namespace ClassicUO.Game
 
         public static void ToggleWarMode(PlayerMobile player)
         {
-            RequestWarMode(player, !player.InWarMode);
+            var ecsWar = Client.Game?.UO?.EcsRuntime;
+            bool inWarMode = ecsWar != null && ecsWar.GetCutoverFlags().UseEcsUiData
+                ? ecsWar.GetPlayerSnapshot().InWarMode
+                : player.InWarMode;
+            RequestWarMode(player, !inWarMode);
         }
 
         public static void RequestWarMode(PlayerMobile player, bool war)
         {
-            if (!player.IsDead)
+            var ecsWr = Client.Game?.UO?.EcsRuntime;
+            bool isDead = ecsWr != null && ecsWr.GetCutoverFlags().UseEcsUiData
+                ? ecsWr.GetPlayerSnapshot().IsDead
+                : player.IsDead;
+            if (!isDead)
             {
                 if (war && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableMusic)
                 {
@@ -142,7 +151,10 @@ namespace ClassicUO.Game
             else
             {
                 world.SkillsRequested = true;
-                Socket.Send_SkillsRequest(world.Player.Serial);
+                var ecsSkl = Client.Game?.UO?.EcsRuntime;
+                uint sklSerial = ecsSkl != null && ecsSkl.GetCutoverFlags().UseEcsUiData
+                    ? ecsSkl.GetPlayerSerial() : world.Player.Serial;
+                Socket.Send_SkillsRequest(sklSerial);
             }
         }
 
@@ -217,11 +229,18 @@ namespace ClassicUO.Game
                 return false;
             }
 
-            Item item = world.Items.Get(serial);
+            var ecsCorpse = Client.Game?.UO?.EcsRuntime;
+            bool useEcsCorpse = ecsCorpse != null && ecsCorpse.GetCutoverFlags().UseEcsUiData;
 
-            if (item == null || !item.IsCorpse || item.IsDestroyed)
+            if (useEcsCorpse)
             {
-                return false;
+                var snap = ecsCorpse.GetItemSnapshot(serial);
+                if (!snap.Exists || !snap.IsCorpse) return false;
+            }
+            else
+            {
+                Item item = world.Items.Get(serial);
+                if (item == null || !item.IsCorpse || item.IsDestroyed) return false;
             }
 
             world.Player.ManualOpenedCorpses.Add(serial);
@@ -232,18 +251,27 @@ namespace ClassicUO.Game
 
         public static bool OpenBackpack(World world)
         {
-            Item backpack = world.Player.FindItemByLayer(Layer.Backpack);
+            var ecsBp = Client.Game?.UO?.EcsRuntime;
+            bool useEcsBp = ecsBp != null && ecsBp.GetCutoverFlags().UseEcsUiData;
 
-            if (backpack == null)
+            uint backpackSerial;
+            if (useEcsBp)
             {
-                return false;
+                backpackSerial = ecsBp.GetEquippedItemSerial(ecsBp.GetPlayerSerial(), (byte)Layer.Backpack);
+                if (backpackSerial == 0) return false;
+            }
+            else
+            {
+                Item backpack = world.Player.FindItemByLayer(Layer.Backpack);
+                if (backpack == null) return false;
+                backpackSerial = backpack.Serial;
             }
 
-            ContainerGump backpackGump = UIManager.GetGump<ContainerGump>(backpack);
+            ContainerGump backpackGump = UIManager.GetGump<ContainerGump>(backpackSerial);
 
             if (backpackGump == null)
             {
-                DoubleClick(world,backpack);
+                DoubleClick(world, backpackSerial);
             }
             else
             {
@@ -263,9 +291,30 @@ namespace ClassicUO.Game
         {
             if (ProfileManager.CurrentProfile.EnabledCriminalActionQuery)
             {
-                Mobile m = world.Mobiles.Get(serial);
+                var ecsAtk = Client.Game?.UO?.EcsRuntime;
+                bool useEcsAtk = ecsAtk != null && ecsAtk.GetCutoverFlags().UseEcsUiData;
 
-                if (m != null && (world.Player.NotorietyFlag == NotorietyFlag.Innocent || world.Player.NotorietyFlag == NotorietyFlag.Ally) && m.NotorietyFlag == NotorietyFlag.Innocent && m != world.Player)
+                bool isCriminalTarget;
+                if (useEcsAtk)
+                {
+                    var playerSnap = ecsAtk.GetPlayerSnapshot();
+                    byte playerNoto = playerSnap.Notoriety;
+                    byte targetNoto = ecsAtk.GetNotoriety(serial);
+                    isCriminalTarget = ecsAtk.IsMobile(serial)
+                        && (playerNoto == (byte)NotorietyFlag.Innocent || playerNoto == (byte)NotorietyFlag.Ally)
+                        && targetNoto == (byte)NotorietyFlag.Innocent
+                        && serial != playerSnap.Serial;
+                }
+                else
+                {
+                    Mobile m = world.Mobiles.Get(serial);
+                    isCriminalTarget = m != null
+                        && (world.Player.NotorietyFlag == NotorietyFlag.Innocent || world.Player.NotorietyFlag == NotorietyFlag.Ally)
+                        && m.NotorietyFlag == NotorietyFlag.Innocent
+                        && m != world.Player;
+                }
+
+                if (isCriminalTarget)
                 {
                     QuestionGump messageBox = new QuestionGump
                     (
@@ -298,17 +347,24 @@ namespace ClassicUO.Game
 
         public static void DoubleClick(World world, uint serial)
         {
-            if (serial != world.Player && SerialHelper.IsMobile(serial) && world.Player.InWarMode)
+            var ecsDc = Client.Game?.UO?.EcsRuntime;
+            bool useEcsDc = ecsDc != null && ecsDc.GetCutoverFlags().UseEcsUiData;
+
+            bool inWarMode = useEcsDc ? ecsDc.GetPlayerSnapshot().InWarMode : world.Player.InWarMode;
+            uint playerSerial = useEcsDc ? ecsDc.GetPlayerSerial() : world.Player.Serial;
+
+            if (serial != playerSerial && SerialHelper.IsMobile(serial) && inWarMode)
             {
                 RequestMobileStatus(world,serial);
                 Attack(world, serial);
             }
             else
-            {   
+            {
                 Socket.Send_DoubleClick(serial);
             }
 
-            if (SerialHelper.IsItem(serial) || (SerialHelper.IsMobile(serial) && (world.Mobiles.Get(serial)?.IsHuman ?? false)))
+            bool isHuman = useEcsDc ? ecsDc.IsHumanMobile(serial) : (world.Mobiles.Get(serial)?.IsHuman ?? false);
+            if (SerialHelper.IsItem(serial) || (SerialHelper.IsMobile(serial) && isHuman))
             {
                 if (SerialHelper.IsMobile(serial))
                 {
@@ -327,11 +383,14 @@ namespace ClassicUO.Game
             // add  request context menu
             Socket.Send_ClickRequest(serial);
 
-            Entity entity = world.Get(serial);
-
-            if (entity != null)
+            var ecsSc = Client.Game?.UO?.EcsRuntime;
+            if (ecsSc == null || !ecsSc.GetCutoverFlags().UseEcsUiData)
             {
-                entity.IsClicked = true;
+                Entity entity = world.Get(serial);
+                if (entity != null)
+                {
+                    entity.IsClicked = true;
+                }
             }
         }
 
@@ -423,7 +482,11 @@ namespace ClassicUO.Game
 
         public static void RequestPartyQuit(PlayerMobile player)
         {
-            Socket.Send_PartyRemoveRequest(player.Serial);
+            var ecsParty = Client.Game?.UO?.EcsRuntime;
+            uint serial = ecsParty != null && ecsParty.GetCutoverFlags().UseEcsUiData
+                ? ecsParty.GetPlayerSerial()
+                : player.Serial;
+            Socket.Send_PartyRemoveRequest(serial);
         }
 
         public static void RequestPartyInviteByTarget()
@@ -447,16 +510,28 @@ namespace ClassicUO.Game
             bool is_gump = false
         )
         {
-            if (world.Player.IsDead || Client.Game.UO.GameCursor.ItemHold.Enabled)
+            var ecsPu = Client.Game?.UO?.EcsRuntime;
+            bool useEcsPu = ecsPu != null && ecsPu.GetCutoverFlags().UseEcsUiData;
+
+            bool playerDead = useEcsPu ? ecsPu.GetPlayerSnapshot().IsDead : world.Player.IsDead;
+            if (playerDead || Client.Game.UO.GameCursor.ItemHold.Enabled)
             {
                 return false;
             }
 
             Item item = world.Items.Get(serial);
 
-            if (item == null || item.IsDestroyed || item.IsMulti || item.OnGround && (item.IsLocked || item.Distance > Constants.DRAG_ITEMS_DISTANCE))
+            if (useEcsPu)
             {
-                return false;
+                var snap = ecsPu.GetItemSnapshot(serial);
+                if (!snap.Exists || snap.IsMulti) return false;
+                if (snap.OnGround && (snap.IsLocked || ecsPu.DistanceToPlayer(serial) > Constants.DRAG_ITEMS_DISTANCE))
+                    return false;
+            }
+            else
+            {
+                if (item == null || item.IsDestroyed || item.IsMulti || item.OnGround && (item.IsLocked || item.Distance > Constants.DRAG_ITEMS_DISTANCE))
+                    return false;
             }
 
             if (amount <= -1 && item.Amount > 1 && item.ItemData.IsStackable)
@@ -538,7 +613,10 @@ namespace ClassicUO.Game
             {
                 if (!SerialHelper.IsValid(container))
                 {
-                    container = world.Player.Serial;
+                    var ecsEq = Client.Game?.UO?.EcsRuntime;
+                    container = ecsEq != null && ecsEq.GetCutoverFlags().UseEcsUiData
+                        ? ecsEq.GetPlayerSerial()
+                        : world.Player.Serial;
                 }
 
                 Socket.Send_EquipRequest(Client.Game.UO.GameCursor.ItemHold.Serial, (Layer)Client.Game.UO.GameCursor.ItemHold.ItemData.Layer, container);
@@ -581,29 +659,39 @@ namespace ClassicUO.Game
         {
             if (world.InGame)
             {
-                Entity ent = world.Get(serial);
+                var ecsSt = Client.Game?.UO?.EcsRuntime;
+                bool useEcsSt = ecsSt != null && ecsSt.GetCutoverFlags().UseEcsUiData;
 
-                if (ent != null)
+                if (useEcsSt)
                 {
-                    if (force)
-                    {
-                        if (ent.HitsRequest >= HitsRequestStatus.Pending)
-                        {
-                            SendCloseStatus(world, serial);
-                        }
-                    }
-
-                    if (ent.HitsRequest < HitsRequestStatus.Received)
-                    {
-                        ent.HitsRequest = HitsRequestStatus.Pending;
+                    // ECS path: skip HitsRequest throttling, just send if forced or entity exists
+                    if (!force && ecsSt.IsEntityAlive(serial))
                         force = true;
+                }
+                else
+                {
+                    Entity ent = world.Get(serial);
+
+                    if (ent != null)
+                    {
+                        if (force)
+                        {
+                            if (ent.HitsRequest >= HitsRequestStatus.Pending)
+                            {
+                                SendCloseStatus(world, serial);
+                            }
+                        }
+
+                        if (ent.HitsRequest < HitsRequestStatus.Received)
+                        {
+                            ent.HitsRequest = HitsRequestStatus.Pending;
+                            force = true;
+                        }
                     }
                 }
 
                 if (force && SerialHelper.IsValid(serial))
                 {
-                    //ent = ent ?? World.Player;
-                    //ent.AddMessage(MessageType.Regular, $"PACKET SENT: 0x{serial:X8}", 3, 0x34, true, TextType.OBJECT);
                     Socket.Send_StatusRequest(serial);
                 }
             }
@@ -613,18 +701,28 @@ namespace ClassicUO.Game
         {
             if (Client.Game.UO.Version >= ClientVersion.CV_200 && world.InGame)
             {
-                Entity ent = world.Get(serial);
+                var ecsCl = Client.Game?.UO?.EcsRuntime;
+                bool useEcsCl = ecsCl != null && ecsCl.GetCutoverFlags().UseEcsUiData;
 
-                if (ent != null && ent.HitsRequest >= HitsRequestStatus.Pending)
+                if (useEcsCl)
                 {
-                    ent.HitsRequest = HitsRequestStatus.None;
-                    force = true;
+                    // ECS path: always close if entity alive
+                    if (ecsCl.IsEntityAlive(serial))
+                        force = true;
+                }
+                else
+                {
+                    Entity ent = world.Get(serial);
+
+                    if (ent != null && ent.HitsRequest >= HitsRequestStatus.Pending)
+                    {
+                        ent.HitsRequest = HitsRequestStatus.None;
+                        force = true;
+                    }
                 }
 
                 if (force && SerialHelper.IsValid(serial))
                 {
-                    //ent = ent ?? World.Player;
-                    //ent.AddMessage(MessageType.Regular, $"PACKET REMOVED SENT: 0x{serial:X8}", 3, 0x34 + 10, true, TextType.OBJECT);
                     Socket.Send_CloseStatusBarGump(serial);
                 }
             }
@@ -711,19 +809,39 @@ namespace ClassicUO.Game
 
         public static void AllNames(World world)
         {
-            foreach (Mobile mobile in world.Mobiles.Values)
-            {
-                if (mobile != world.Player)
-                {
-                    Socket.Send_ClickRequest(mobile.Serial);
-                }
-            }
+            var ecsAll = Client.Game?.UO?.EcsRuntime;
+            bool useEcsAll = ecsAll != null && ecsAll.GetCutoverFlags().UseEcsUiData;
 
-            foreach (Item item in world.Items.Values)
+            if (useEcsAll)
             {
-                if (item.IsCorpse)
+                uint playerSerial = ecsAll.GetPlayerSerial();
+                ecsAll.ForEachMobile(snap =>
                 {
-                    Socket.Send_ClickRequest(item.Serial);
+                    if (snap.Serial != playerSerial)
+                        Socket.Send_ClickRequest(snap.Serial);
+                });
+                ecsAll.ForEachItem(snap =>
+                {
+                    if (snap.IsCorpse)
+                        Socket.Send_ClickRequest(snap.Serial);
+                });
+            }
+            else
+            {
+                foreach (Mobile mobile in world.Mobiles.Values)
+                {
+                    if (mobile != world.Player)
+                    {
+                        Socket.Send_ClickRequest(mobile.Serial);
+                    }
+                }
+
+                foreach (Item item in world.Items.Values)
+                {
+                    if (item.IsCorpse)
+                    {
+                        Socket.Send_ClickRequest(item.Serial);
+                    }
                 }
             }
         }
@@ -820,23 +938,32 @@ namespace ClassicUO.Game
         {
             //Socket.Send(new PPickUpRequest(serial, amount));
 
-            Item backpack = world.Player.FindItemByLayer(Layer.Backpack);
+            var ecsGrab = Client.Game?.UO?.EcsRuntime;
+            bool useEcsGrab = ecsGrab != null && ecsGrab.GetCutoverFlags().UseEcsUiData;
 
-            if (backpack == null)
+            uint backpackSerial;
+            if (useEcsGrab)
             {
-                return;
+                backpackSerial = ecsGrab.GetEquippedItemSerial(ecsGrab.GetPlayerSerial(), (byte)Layer.Backpack);
+                if (backpackSerial == 0) return;
+            }
+            else
+            {
+                Item backpack = world.Player.FindItemByLayer(Layer.Backpack);
+                if (backpack == null) return;
+                backpackSerial = backpack.Serial;
             }
 
             if (bag == 0)
             {
-                bag = ProfileManager.CurrentProfile.GrabBagSerial == 0 ? backpack.Serial : ProfileManager.CurrentProfile.GrabBagSerial;
+                bag = ProfileManager.CurrentProfile.GrabBagSerial == 0 ? backpackSerial : ProfileManager.CurrentProfile.GrabBagSerial;
             }
 
-            if (!world.Items.Contains(bag))
+            if (useEcsGrab ? !ecsGrab.IsItem(bag) : !world.Items.Contains(bag))
             {
                 Print(world, ResGeneral.GrabBagNotFound);
                 ProfileManager.CurrentProfile.GrabBagSerial = 0;
-                bag = backpack.Serial;
+                bag = backpackSerial;
             }
 
             PickUp(world, serial, 0, 0, amount);

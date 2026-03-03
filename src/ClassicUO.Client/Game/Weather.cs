@@ -1,5 +1,6 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
@@ -219,7 +220,18 @@ namespace ClassicUO.Game
                 randY *= -1;
             }
 
-            Client.Game.Audio.PlaySoundWithDistance(_world, sound, _world.Player.X + randX, _world.Player.Y + randY);
+            var ecsWx = Client.Game?.UO?.EcsRuntime;
+            int wxPlayerX, wxPlayerY;
+            if (ecsWx != null && ecsWx.GetCutoverFlags().UseEcsUiData)
+            {
+                var snap = ecsWx.GetPlayerSnapshot();
+                wxPlayerX = snap.X; wxPlayerY = snap.Y;
+            }
+            else
+            {
+                wxPlayerX = _world.Player.X; wxPlayerY = _world.Player.Y;
+            }
+            Client.Game.Audio.PlaySoundWithDistance(_world, sound, wxPlayerX + randX, wxPlayerY + randY);
         }
 
         public void Draw(UltimaBatcher2D batcher, int x, int y, float layerDepth)

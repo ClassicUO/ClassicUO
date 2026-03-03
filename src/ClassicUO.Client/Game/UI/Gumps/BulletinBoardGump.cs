@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using ClassicUO.ECS;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -58,7 +59,9 @@ namespace ClassicUO.Game.UI.Gumps
                         world,
                         LocalSerial,
                         0,
-                        World.Player.Name,
+                        Client.Game?.UO?.EcsRuntime is { } ecsBB && ecsBB.GetCutoverFlags().UseEcsUiData
+                            ? ecsBB.GetEntityName(ecsBB.GetStatusSnapshot().Serial)
+                            : World.Player.Name,
                         string.Empty,
                         ResGumps.DateTime,
                         string.Empty,
@@ -433,7 +436,9 @@ namespace ClassicUO.Game.UI.Gumps
                             World,
                             LocalSerial,
                             _msgSerial,
-                            World.Player.Name,
+                            Client.Game?.UO?.EcsRuntime is { } ecsBBR && ecsBBR.GetCutoverFlags().UseEcsUiData
+                                ? ecsBBR.GetEntityName(ecsBBR.GetStatusSnapshot().Serial)
+                                : World.Player.Name,
                             ResGumps.RE + _subjectTextbox.Text,
                             _datatime,
                             string.Empty,

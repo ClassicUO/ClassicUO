@@ -2,6 +2,7 @@
 
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.ECS;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -98,7 +99,22 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_box = new DataBox(0, 0, 0, 0) { WantUpdateSize = true });
 
-            if (World.Player != null)
+            var ecsBuf = Client.Game?.UO?.EcsRuntime;
+            if (ecsBuf != null && ecsBuf.GetCutoverFlags().UseEcsUiData)
+            {
+                var snap = ecsBuf.GetBuffBarSnapshot();
+                for (int i = 0; i < snap.Count; i++)
+                {
+                    var be = snap.Icons[i];
+                    ushort graphic = be.IconId < BuffTable.Table.Length ? BuffTable.Table[be.IconId] : (ushort)0;
+                    long timer = be.Duration <= 0 ? 0xFFFF_FFFF : be.StartTick + be.Duration * 1000;
+                    string title = be.TitleCliloc != 0 ? Client.Game.UO.FileManager.Clilocs.GetString((int)be.TitleCliloc) : string.Empty;
+                    string desc = be.DescriptionCliloc != 0 ? ("\n" + Client.Game.UO.FileManager.Clilocs.GetString((int)be.DescriptionCliloc)) : string.Empty;
+                    string text = $"<left>{title}{desc}</left>";
+                    _box.Add(new BuffControlEntry(new BuffIcon((BuffIconType)be.IconId, graphic, timer, text)));
+                }
+            }
+            else if (World.Player != null)
             {
                 foreach (var k in World.Player.BuffIcons)
                 {
