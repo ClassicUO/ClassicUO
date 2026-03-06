@@ -1,6 +1,6 @@
 /* FNA3D - 3D Graphics Library for FNA
  *
- * Copyright (c) 2020-2021 Ethan Lee
+ * Copyright (c) 2020-2024 Ethan Lee
  *
  * This software is provided 'as-is', without any express or implied warranty.
  * In no event will the authors be held liable for any damages arising from
@@ -27,29 +27,27 @@
 #include "FNA3D_Driver.h"
 #include "FNA3D_Tracing.h"
 
+#ifdef USE_SDL3
+#include <SDL3/SDL.h>
+#else
 #include <SDL.h>
+#endif
 
-#if !SDL_VERSION_ATLEAST(2, 0, 12)
-#error "SDL version older than 2.0.12"
+#if !SDL_VERSION_ATLEAST(2, 26, 0)
+#error "SDL version older than 2.26.0"
 #endif /* !SDL_VERSION_ATLEAST */
 
 /* Drivers */
 
 static const FNA3D_Driver *drivers[] = {
+#if FNA3D_DRIVER_SDL
+	&SDLGPUDriver,
+#endif
 #if FNA3D_DRIVER_D3D11
 	&D3D11Driver,
 #endif
 #if FNA3D_DRIVER_OPENGL
 	&OpenGLDriver,
-#endif
-#if FNA3D_DRIVER_METAL /* This could be above OpenGL but Apple playin */
-	&MetalDriver,
-#endif
-#if FNA3D_DRIVER_VULKAN /* TODO: Bump this to the top when Vulkan is done! */
-	&VulkanDriver,
-#endif
-#if FNA3D_DRIVER_GNMX
-	&GNMXDriver,
 #endif
 	NULL
 };
@@ -147,11 +145,53 @@ uint32_t FNA3D_PrepareWindowAttributes(void)
 	uint32_t result = 0;
 	uint32_t i;
 	const char *hint = SDL_GetHint("FNA3D_FORCE_DRIVER");
+	const char *gpuhint;
+
+	/* We used to have our own Vulkan renderer, but that work is now in SDL
+	 * instead. For maximum compatibility, alias this to SDL_GPU!
+	 *
+	 * And hey, since we're here, let's do this for D3D12/Metal too.
+	 * -flibit
+	 */
+#ifdef USE_SDL3
+	if (hint != NULL)
+	{
+		gpuhint = NULL;
+		if (SDL_strcasecmp(hint, "Vulkan") == 0)
+		{
+#ifdef __APPLE__
+			/* We were using MoltenVK anyway, so just skip the middle man */
+			gpuhint = "metal";
+#else
+			gpuhint = "vulkan";
+#endif
+		}
+		else if (SDL_strcasecmp(hint, "D3D12") == 0)
+		{
+			gpuhint = "direct3d12";
+		}
+		else if (SDL_strcasecmp(hint, "Metal") == 0)
+		{
+			gpuhint = "metal";
+		}
+
+		if (gpuhint != NULL)
+		{
+			hint = "SDLGPU";
+			SDL_SetHintWithPriority(
+				SDL_HINT_GPU_DRIVER,
+				gpuhint,
+				SDL_HINT_OVERRIDE
+			);
+		}
+	}
+#endif
+
 	for (i = 0; drivers[i] != NULL; i += 1)
 	{
 		if (hint != NULL)
 		{
-			if (SDL_strcmp(hint, drivers[i]->Name) != 0)
+			if (SDL_strcasecmp(hint, drivers[i]->Name) != 0)
 			{
 				continue;
 			}
@@ -174,13 +214,7 @@ uint32_t FNA3D_PrepareWindowAttributes(void)
 
 FNA3DAPI void FNA3D_GetDrawableSize(void* window, int32_t *w, int32_t *h)
 {
-	if (selectedDriver < 0)
-	{
-		FNA3D_LogError("Call FNA3D_PrepareWindowAttributes first!");
-		return;
-	}
-
-	drivers[selectedDriver]->GetDrawableSize(window, w, h);
+	SDL_GetWindowSizeInPixels((SDL_Window*) window, w, h);
 }
 
 /* Init/Quit */
@@ -1396,6 +1430,16 @@ uint8_t FNA3D_SupportsS3TC(FNA3D_Device *device)
 	return device->SupportsS3TC(device->driverData);
 }
 
+uint8_t FNA3D_SupportsBC7(FNA3D_Device *device)
+{
+	/* Not traced! */
+	if (device == NULL)
+	{
+		return 0;
+	}
+	return device->SupportsBC7(device->driverData);
+}
+
 uint8_t FNA3D_SupportsHardwareInstancing(FNA3D_Device *device)
 {
 	/* Not traced! */
@@ -1414,6 +1458,17 @@ uint8_t FNA3D_SupportsNoOverwrite(FNA3D_Device *device)
 		return 0;
 	}
 	return device->SupportsNoOverwrite(device->driverData);
+}
+
+
+uint8_t FNA3D_SupportsSRGBRenderTargets(FNA3D_Device *device)
+{
+	/* Not traced! */
+	if (device == NULL)
+	{
+		return 0;
+	}
+	return device->SupportsSRGBRenderTargets(device->driverData);
 }
 
 void FNA3D_GetMaxTextureSlots(
@@ -1462,6 +1517,18 @@ void FNA3D_SetStringMarker(FNA3D_Device *device, const char *text)
 	device->SetStringMarker(device->driverData, text);
 }
 
+void FNA3D_SetTextureName(FNA3D_Device* device, FNA3D_Texture* texture, const char* text)
+{
+	TRACE_SETTEXTURENAME
+	if ((device == NULL) || (texture == NULL))
+	{
+		return;
+	}
+
+	SDL_assert(text);
+
+	device->SetTextureName(device->driverData, texture, text);
+}
 /* External Interop */
 
 void FNA3D_GetSysRendererEXT(

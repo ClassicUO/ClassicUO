@@ -3,7 +3,7 @@
 
 #include "oscillator.h"
 #include "audio.h"
-#include <SDL.h>
+#include <SDL3/SDL.h>
 
 class AudioPlayer
 {

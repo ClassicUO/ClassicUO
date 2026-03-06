@@ -1,6 +1,6 @@
 /* FNA3D - 3D Graphics Library for FNA
  *
- * Copyright (c) 2020-2021 Ethan Lee
+ * Copyright (c) 2020-2024 Ethan Lee
  *
  * This software is provided 'as-is', without any express or implied warranty.
  * In no event will the authors be held liable for any damages arising from
@@ -24,7 +24,20 @@
  *
  */
 
+#ifdef USE_SDL3
+#include <SDL3/SDL.h>
+#define SDL_WINDOW_FULLSCREEN_DESKTOP SDL_WINDOW_FULLSCREEN
+#else
 #include <SDL.h>
+#define SDL_Mutex SDL_mutex
+#define SDL_IOStream SDL_RWops
+#define SDL_IOFromFile SDL_RWFromFile
+#define SDL_ReadIO(a, b, c) SDL_RWread(a, b, c, 1)
+#define SDL_CloseIO SDL_RWclose
+#define SDL_CreateWindow(a, b, c, d) \
+	SDL_CreateWindow(a, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, b, c, d)
+#define SDL_EVENT_QUIT SDL_QUIT
+#endif
 #include <mojoshader.h>
 #include <FNA3D.h>
 
@@ -85,13 +98,79 @@
 #define MARK_QUERYEND				54
 #define MARK_QUERYPIXELCOUNT			55
 #define MARK_SETSTRINGMARKER			56
+#define MARK_SETTEXTURENAME			57
 
-static uint8_t replay(const char *filename)
+typedef enum
 {
-	#define READ(val) ops->read(ops, &val, sizeof(val), 1)
+	VSYNC_DEFAULT,
+	VSYNC_FORCE_ON,
+	VSYNC_FORCE_OFF
+} VSyncMode;
 
+/* #define TOO_MUCH_RAM */
+#ifdef TOO_MUCH_RAM
+typedef struct FAKEIO
+{
+	uint8_t *buffer;
+	uint8_t *current;
+} FAKEIO;
+static FAKEIO* FAKE_IOFromFile(const char *file, const char *mode)
+{
+	size_t len;
+	void *blob;
+
+	FAKEIO *io = (FAKEIO*) SDL_malloc(sizeof(io));
+	if (io == NULL)
+	{
+		return NULL;
+	}
+
+	blob = SDL_LoadFile(file, &len);
+	if (blob == NULL)
+	{
+		SDL_free(io);
+		return NULL;
+	}
+
+	io->buffer = (uint8_t*) blob;
+	io->current = io->buffer;
+	return io;
+}
+
+static bool FAKE_CloseIO(FAKEIO *io)
+{
+	SDL_free(io->buffer);
+	SDL_free(io);
+	return true;
+}
+
+static size_t FAKE_ReadIO(FAKEIO *io, void *ptr, size_t size)
+{
+	/* Size checks? Where we're going we don't need size checks */
+	SDL_memcpy(ptr, io->current, size);
+	io->current += size;
+}
+
+#define SDL_IOStream FAKEIO
+#define SDL_IOFromFile FAKE_IOFromFile
+#define SDL_CloseIO FAKE_CloseIO
+#define SDL_ReadIO FAKE_ReadIO
+#endif /* TOO_MUCH_RAM */
+
+static uint8_t replay(
+	const char *filename,
+	uint8_t forceDebugMode,
+	VSyncMode vsync,
+	uint8_t fullscreen,
+	uint32_t delayMS
+) {
+	#define READ(val) SDL_ReadIO(ops, &val, sizeof(val))
+
+#ifdef USE_SDL3
+	const SDL_DisplayMode *mode;
+#endif
 	SDL_WindowFlags flags;
-	SDL_RWops *ops;
+	SDL_IOStream *ops;
 	SDL_Event evt;
 	uint8_t mark, run;
 
@@ -231,7 +310,7 @@ static uint8_t replay(const char *filename)
 		if (i == trace##array##Count) \
 		{ \
 			trace##array##Count += 1; \
-			trace##array = SDL_realloc( \
+			trace##array = (FNA3D_##type**) SDL_realloc( \
 				trace##array, \
 				sizeof(FNA3D_##type*) * trace##array##Count \
 			); \
@@ -239,7 +318,7 @@ static uint8_t replay(const char *filename)
 		}
 
 	/* Check for the trace file */
-	ops = SDL_RWFromFile(filename, "rb");
+	ops = SDL_IOFromFile(filename, "rb");
 	if (ops == NULL)
 	{
 		SDL_Log("%s not found!", filename);
@@ -251,7 +330,7 @@ static uint8_t replay(const char *filename)
 	if (mark != MARK_CREATEDEVICE)
 	{
 		SDL_Log("%s is a bad trace!", filename);
-		ops->close(ops);
+		SDL_CloseIO(ops);
 		return 0;
 	}
 	READ(presentationParameters.backBufferWidth);
@@ -265,21 +344,40 @@ static uint8_t replay(const char *filename)
 	READ(presentationParameters.renderTargetUsage);
 	READ(debugMode);
 
+	if (vsync == VSYNC_FORCE_ON)
+	{
+		presentationParameters.presentationInterval = FNA3D_PRESENTINTERVAL_ONE;
+	}
+	else if (vsync == VSYNC_FORCE_OFF)
+	{
+		presentationParameters.presentationInterval = FNA3D_PRESENTINTERVAL_IMMEDIATE;
+	}
+
+	presentationParameters.isFullScreen |= fullscreen;
+
 	/* Create a window alongside the device */
-	flags = SDL_WINDOW_SHOWN | FNA3D_PrepareWindowAttributes();
+	flags = FNA3D_PrepareWindowAttributes();
 	if (presentationParameters.isFullScreen)
 	{
 		flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
 	}
+#ifdef USE_SDL3
+	flags |= SDL_WINDOW_HIGH_PIXEL_DENSITY;
+	mode = SDL_GetDesktopDisplayMode(SDL_GetPrimaryDisplay());
+	SDL_Log("Pixel density is %f", mode->pixel_density);
+#endif
 	presentationParameters.deviceWindowHandle = SDL_CreateWindow(
 		"FNA3D Replay",
-		SDL_WINDOWPOS_CENTERED,
-		SDL_WINDOWPOS_CENTERED,
+#ifdef USE_SDL3
+		(int) (presentationParameters.backBufferWidth / mode->pixel_density),
+		(int) (presentationParameters.backBufferHeight / mode->pixel_density),
+#else
 		presentationParameters.backBufferWidth,
 		presentationParameters.backBufferHeight,
+#endif
 		flags
 	);
-	device = FNA3D_CreateDevice(&presentationParameters, debugMode);
+	device = FNA3D_CreateDevice(&presentationParameters, debugMode || forceDebugMode);
 
 	/* Go through all the calls, let vsync do the timing if applicable */
 	run = 1;
@@ -313,10 +411,14 @@ static uint8_t replay(const char *filename)
 			);
 			while (SDL_PollEvent(&evt) > 0)
 			{
-				if (evt.type == SDL_QUIT)
+				if (evt.type == SDL_EVENT_QUIT)
 				{
 					run = 0;
 				}
+			}
+			if (delayMS > 0)
+			{
+				SDL_Delay(delayMS);
 			}
 			break;
 		case MARK_CLEAR:
@@ -670,6 +772,15 @@ static uint8_t replay(const char *filename)
 			READ(presentationParameters.presentationInterval);
 			READ(presentationParameters.displayOrientation);
 			READ(presentationParameters.renderTargetUsage);
+			if (vsync == VSYNC_FORCE_ON)
+			{
+				presentationParameters.presentationInterval = FNA3D_PRESENTINTERVAL_ONE;
+			}
+			else if (vsync == VSYNC_FORCE_OFF)
+			{
+				presentationParameters.presentationInterval = FNA3D_PRESENTINTERVAL_IMMEDIATE;
+			}
+			presentationParameters.isFullScreen |= fullscreen;
 			SDL_SetWindowFullscreen(
 				presentationParameters.deviceWindowHandle,
 				presentationParameters.isFullScreen ?
@@ -678,8 +789,13 @@ static uint8_t replay(const char *filename)
 			);
 			SDL_SetWindowSize(
 				presentationParameters.deviceWindowHandle,
+#ifdef USE_SDL3
+				(int) (presentationParameters.backBufferWidth / mode->pixel_density),
+				(int) (presentationParameters.backBufferHeight / mode->pixel_density)
+#else
 				presentationParameters.backBufferWidth,
 				presentationParameters.backBufferHeight
+#endif
 			);
 			FNA3D_ResetBackbuffer(device, &presentationParameters);
 			break;
@@ -761,7 +877,7 @@ static uint8_t replay(const char *filename)
 			READ(level);
 			READ(dataLength);
 			miscBuffer = SDL_malloc(dataLength);
-			ops->read(ops, miscBuffer, dataLength, 1);
+			SDL_ReadIO(ops, miscBuffer, dataLength);
 			FNA3D_SetTextureData2D(
 				device,
 				traceTexture[i],
@@ -786,7 +902,7 @@ static uint8_t replay(const char *filename)
 			READ(level);
 			READ(dataLength);
 			miscBuffer = SDL_malloc(dataLength);
-			ops->read(ops, miscBuffer, dataLength, 1);
+			SDL_ReadIO(ops, miscBuffer, dataLength);
 			FNA3D_SetTextureData3D(
 				device,
 				traceTexture[i],
@@ -812,7 +928,7 @@ static uint8_t replay(const char *filename)
 			READ(level);
 			READ(dataLength);
 			miscBuffer = SDL_malloc(dataLength);
-			ops->read(ops, miscBuffer, dataLength, 1);
+			SDL_ReadIO(ops, miscBuffer, dataLength);
 			FNA3D_SetTextureDataCube(
 				device,
 				traceTexture[i],
@@ -837,7 +953,7 @@ static uint8_t replay(const char *filename)
 			READ(h);
 			READ(dataLength);
 			miscBuffer = SDL_malloc(dataLength);
-			ops->read(ops, miscBuffer, dataLength, 1);
+			SDL_ReadIO(ops, miscBuffer, dataLength);
 			FNA3D_SetTextureDataYUV(
 				device,
 				traceTexture[i],
@@ -999,7 +1115,7 @@ static uint8_t replay(const char *filename)
 			READ(vertexStride);
 			READ(dataOptions);
 			miscBuffer = SDL_malloc(vertexStride * elementCount);
-			ops->read(ops, miscBuffer, vertexStride * elementCount, 1);
+			SDL_ReadIO(ops, miscBuffer, vertexStride * elementCount);
 			FNA3D_SetVertexBufferData(
 				device,
 				traceVertexBuffer[i],
@@ -1056,7 +1172,7 @@ static uint8_t replay(const char *filename)
 			READ(dataLength);
 			READ(dataOptions);
 			miscBuffer = SDL_malloc(dataLength);
-			ops->read(ops, miscBuffer, dataLength, 1);
+			SDL_ReadIO(ops, miscBuffer, dataLength);
 			FNA3D_SetIndexBufferData(
 				device,
 				traceIndexBuffer[i],
@@ -1084,7 +1200,7 @@ static uint8_t replay(const char *filename)
 		case MARK_CREATEEFFECT:
 			READ(dataLength);
 			miscBuffer = SDL_malloc(dataLength);
-			ops->read(ops, miscBuffer, dataLength, 1);
+			SDL_ReadIO(ops, miscBuffer, dataLength);
 			FNA3D_CreateEffect(
 				device,
 				(uint8_t*) miscBuffer,
@@ -1105,11 +1221,11 @@ static uint8_t replay(const char *filename)
 			if (i == traceEffectCount)
 			{
 				traceEffectCount += 1;
-				traceEffect = SDL_realloc(
+				traceEffect = (FNA3D_Effect**) SDL_realloc(
 					traceEffect,
 					sizeof(FNA3D_Effect*) * traceEffectCount
 				);
-				traceEffectData = SDL_realloc(
+				traceEffectData = (MOJOSHADER_effect**) SDL_realloc(
 					traceEffectData,
 					sizeof(MOJOSHADER_effect*) * traceEffectCount
 				);
@@ -1137,11 +1253,11 @@ static uint8_t replay(const char *filename)
 			if (i == traceEffectCount)
 			{
 				traceEffectCount += 1;
-				traceEffect = SDL_realloc(
+				traceEffect = (FNA3D_Effect**) SDL_realloc(
 					traceEffect,
 					sizeof(FNA3D_Effect*) * traceEffectCount
 				);
-				traceEffectData = SDL_realloc(
+				traceEffectData = (MOJOSHADER_effect**) SDL_realloc(
 					traceEffectData,
 					sizeof(MOJOSHADER_effect*) * traceEffectCount
 				);
@@ -1170,11 +1286,10 @@ static uint8_t replay(const char *filename)
 			effectData = traceEffectData[i];
 			for (vi = 0; vi < effectData->param_count; vi += 1)
 			{
-				ops->read(
+				SDL_ReadIO(
 					ops,
 					effectData->params[vi].value.values,
-					effectData->params[vi].value.value_count * 4,
-					1
+					effectData->params[vi].value.value_count * 4
 				);
 			}
 			FNA3D_ApplyEffect(
@@ -1224,9 +1339,12 @@ static uint8_t replay(const char *filename)
 		case MARK_SETSTRINGMARKER:
 			READ(dataLength);
 			miscBuffer = SDL_malloc(dataLength);
-			ops->read(ops, miscBuffer, dataLength, 1);
+			SDL_ReadIO(ops, miscBuffer, dataLength);
 			FNA3D_SetStringMarker(device, (char*) miscBuffer);
 			SDL_free(miscBuffer);
+			break;
+		case MARK_SETTEXTURENAME:
+			SDL_assert(0 && "Not implemented: SETTEXTURENAME");
 			break;
 		case MARK_CREATEDEVICE:
 		case MARK_DESTROYDEVICE:
@@ -1240,7 +1358,7 @@ static uint8_t replay(const char *filename)
 	}
 
 	/* Clean up. We out. */
-	ops->close(ops);
+	SDL_CloseIO(ops);
 	#define FREE_TRACES(type) \
 		if (trace##type##Count > 0) \
 		{ \
@@ -1281,21 +1399,66 @@ static uint8_t replay(const char *filename)
 int main(int argc, char **argv)
 {
 	int i;
+	uint8_t forceDebugMode = 0;
+	uint8_t forceFullscreen = 0;
+	VSyncMode vsync = VSYNC_DEFAULT;
+	uint32_t delayMS = 0;
 
 	SDL_Init(SDL_INIT_VIDEO);
 
 	/* Make sure we don't recursively trace... */
 	SDL_SetHint("FNA3D_DISABLE_TRACING", "1");
 
-	if (argc < 2)
+	for (i = 1; i < argc; i += 1)
 	{
-		replay("FNA3D_Trace.bin");
-	}
-	else for (i = 1; i < argc; i += 1)
-	{
-		if (replay(argv[i]))
+		if (SDL_strcmp(argv[i], "-debug") == 0)
 		{
+			forceDebugMode = 1;
+		}
+		else if (SDL_strcmp(argv[i], "-vsync") == 0)
+		{
+			vsync = VSYNC_FORCE_ON;
+		}
+		else if (SDL_strcmp(argv[i], "-novsync") == 0)
+		{
+			vsync = VSYNC_FORCE_OFF;
+		}
+		else if (SDL_strcmp(argv[i], "-fullscreen") == 0)
+		{
+			forceFullscreen = 1;
+		}
+		else if (SDL_strstr(argv[i], "-delayms=") == argv[i])
+		{
+			delayMS = SDL_atoi(argv[i] + SDL_strlen("-delayms="));
+		}
+		else
+		{
+			/* Unrecognized, assume we're looking at traces now */
 			break;
+		}
+	}
+
+	if (i == argc)
+	{
+		const char *defaultName = "FNA3D_Trace.bin";
+		const char *rootPath = SDL_GetBasePath();
+		size_t pathLen = SDL_strlen(rootPath) + SDL_strlen(defaultName) + 1;
+		char *path = (char*) SDL_malloc(pathLen);
+		SDL_snprintf(path, pathLen, "%s%s", rootPath, defaultName);
+#ifndef USE_SDL3
+		SDL_free(rootPath);
+#endif
+		replay(path, forceDebugMode, vsync, forceFullscreen, delayMS);
+		SDL_free(path);
+	}
+	else
+	{
+		for (; i < argc; i += 1)
+		{
+			if (replay(argv[i], forceDebugMode, vsync, forceFullscreen, delayMS))
+			{
+				break;
+			}
 		}
 	}
 

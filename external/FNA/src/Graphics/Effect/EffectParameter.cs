@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -57,14 +57,26 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public EffectParameterCollection Elements
 		{
-			get;
-			private set;
+			get
+			{
+				if ((elements == null))
+				{
+					BuildElementList();
+				}
+				return elements;
+			}
 		}
 
 		public EffectParameterCollection StructureMembers
 		{
-			get;
-			private set;
+			get
+			{
+				if (members == null)
+				{
+					BuildMemberList();
+				}
+				return members;
+			}
 		}
 
 		public EffectAnnotationCollection Annotations
@@ -78,9 +90,22 @@ namespace Microsoft.Xna.Framework.Graphics
 		#region Internal Variables
 
 		internal Texture texture;
+		internal string cachedString = string.Empty;
 
 		internal IntPtr values;
 		internal uint valuesSizeBytes;
+
+		internal IntPtr mojoType;
+
+		internal int elementCount;
+		internal EffectParameterCollection elements;
+		internal EffectParameterCollection members;
+		#endregion
+
+		#region Private Variables
+
+		// Ugly as all heck, but I had to do it for structures. - MrSoup678
+		private Effect outer;
 
 		#endregion
 
@@ -94,10 +119,11 @@ namespace Microsoft.Xna.Framework.Graphics
 			int elementCount,
 			EffectParameterClass parameterClass,
 			EffectParameterType parameterType,
-			EffectParameterCollection structureMembers,
+			IntPtr mojoType,
 			EffectAnnotationCollection annotations,
 			IntPtr data,
-			uint dataSizeBytes
+			uint dataSizeBytes,
+			Effect effect
 		) {
 			if (data == IntPtr.Zero)
 			{
@@ -108,71 +134,119 @@ namespace Microsoft.Xna.Framework.Graphics
 			Semantic = semantic ?? string.Empty;
 			RowCount = rowCount;
 			ColumnCount = columnCount;
-			if (elementCount > 0)
-			{
-				int curOffset = 0;
-				List<EffectParameter> elements = new List<EffectParameter>(elementCount);
-				for (int i = 0; i < elementCount; i += 1)
-				{
-					EffectParameterCollection elementMembers = null;
-					if (structureMembers != null)
-					{
-						List<EffectParameter> memList = new List<EffectParameter>();
-						for (int j = 0; j < structureMembers.Count; j += 1)
-						{
-							int memElems = 0;
-							if (structureMembers[j].Elements != null)
-							{
-								memElems = structureMembers[j].Elements.Count;
-							}
-							int memSize = structureMembers[j].RowCount * 4;
-							if (memElems > 0)
-							{
-								memSize *= memElems;
-							}
-							memList.Add(new EffectParameter(
-								structureMembers[j].Name,
-								structureMembers[j].Semantic,
-								structureMembers[j].RowCount,
-								structureMembers[j].ColumnCount,
-								memElems,
-								structureMembers[j].ParameterClass,
-								structureMembers[j].ParameterType,
-								null, // FIXME: Nested structs! -flibit
-								structureMembers[j].Annotations,
-								new IntPtr(data.ToInt64() + curOffset),
-								(uint) memSize * 4
-							));
-							curOffset += memSize * 4;
-						}
-						elementMembers = new EffectParameterCollection(memList);
-					}
-					// FIXME: Probably incomplete? -flibit
-					elements.Add(new EffectParameter(
-						null,
-						null,
-						rowCount,
-						columnCount,
-						0,
-						ParameterClass,
-						parameterType,
-						elementMembers,
-						null,
-						new IntPtr(
-							data.ToInt64() + (i * rowCount * 16)
-						),
-						// FIXME: Not obvious to me how to compute this -kg
-						0
-					));
-				}
-				Elements = new EffectParameterCollection(elements);
-			}
+			this.elementCount = elementCount;
 			ParameterClass = parameterClass;
 			ParameterType = parameterType;
-			StructureMembers = structureMembers;
+			this.mojoType = mojoType;
 			Annotations = annotations;
 			values = data;
 			valuesSizeBytes = dataSizeBytes;
+			outer = effect;
+		}
+
+		internal EffectParameter(
+			string name,
+			string semantic,
+			int rowCount,
+			int columnCount,
+			int elementCount,
+			EffectParameterClass parameterClass,
+			EffectParameterType parameterType,
+			EffectParameterCollection structureMembers,
+			EffectAnnotationCollection annotations,
+			IntPtr data,
+			uint dataSizeBytes,
+			Effect effect
+		) {
+			if (data == IntPtr.Zero)
+			{
+				throw new ArgumentNullException("data");
+			}
+
+			Name = name;
+			Semantic = semantic ?? string.Empty;
+			RowCount = rowCount;
+			ColumnCount = columnCount;
+			this.elementCount = elementCount;
+			ParameterClass = parameterClass;
+			ParameterType = parameterType;
+			members = structureMembers;
+			Annotations = annotations;
+			values = data;
+			valuesSizeBytes = dataSizeBytes;
+			outer = effect;
+		}
+
+		#endregion
+
+		#region Allocation Optimizations
+
+		internal void BuildMemberList()
+		{
+			members = Effect.INTERNAL_readEffectParameterStructureMembers(this, mojoType, outer);
+		}
+
+		internal void BuildElementList()
+		{
+			int curOffset = 0;
+			List<EffectParameter> elements = new List<EffectParameter>(elementCount);
+			EffectParameterCollection structureMembers = StructureMembers;
+			for (int i = 0; i < elementCount; i += 1)
+			{
+				EffectParameterCollection elementMembers = null;
+				if (structureMembers != null)
+				{
+					List<EffectParameter> memList = new List<EffectParameter>();
+					for (int j = 0; j < structureMembers.Count; j += 1)
+					{
+						int memElems = 0;
+						if (structureMembers[j].Elements != null)
+						{
+							memElems = structureMembers[j].Elements.Count;
+						}
+						int memSize = structureMembers[j].RowCount * 4;
+						if (memElems > 0)
+						{
+							memSize *= memElems;
+						}
+						memList.Add(new EffectParameter(
+							structureMembers[j].Name,
+							structureMembers[j].Semantic,
+							structureMembers[j].RowCount,
+							structureMembers[j].ColumnCount,
+							memElems,
+							structureMembers[j].ParameterClass,
+							structureMembers[j].ParameterType,
+							IntPtr.Zero, // FIXME: Nested structs! -flibit
+							structureMembers[j].Annotations,
+							new IntPtr(values.ToInt64() + curOffset),
+							(uint) memSize * 4,
+							outer
+						));
+						curOffset += memSize * 4;
+					}
+					elementMembers = new EffectParameterCollection(memList);
+				}
+				// FIXME: Probably incomplete? -flibit
+				elements.Add(new EffectParameter(
+					null,
+					null,
+					RowCount,
+					ColumnCount,
+					0,
+					ParameterClass,
+					ParameterType,
+					elementMembers,
+					null,
+					new IntPtr(
+						values.ToInt64() + (i * RowCount * 16)
+					),
+					// FIXME: Not obvious to me how to compute this -kg
+					0,
+					outer
+				));
+			}
+			this.elements = new EffectParameterCollection(elements);
 		}
 
 		#endregion
@@ -393,11 +467,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public string GetValueString()
 		{
-			/* FIXME: This requires digging into the effect->objects list.
-			 * We've got the data, we just need to hook it up to FNA.
-			 * -flibit
-			 */
-			throw new NotImplementedException("effect->objects[?]");
+			return cachedString;
 		}
 
 		public Texture2D GetValueTexture2D()
@@ -562,6 +632,9 @@ namespace Microsoft.Xna.Framework.Graphics
 		public void SetValueTranspose(Matrix value)
 		{
 			// FIXME: All Matrix sizes... this will get ugly. -flibit
+#if DEBUG
+			value.CheckForNaNs();
+#endif
 			unsafe
 			{
 				float* dstPtr = (float*) values;
@@ -654,6 +727,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				{
 					for (int i = 0; i < value.Length; i += 1, dstPtr += 16)
 					{
+#if DEBUG
+						value[i].CheckForNaNs();
+#endif
 						dstPtr[0] = value[i].M11;
 						dstPtr[1] = value[i].M12;
 						dstPtr[2] = value[i].M13;
@@ -676,6 +752,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				{
 					for (int i = 0; i < value.Length; i += 1, dstPtr += 12)
 					{
+#if DEBUG
+						value[i].CheckForNaNs();
+#endif
 						dstPtr[0] = value[i].M11;
 						dstPtr[1] = value[i].M12;
 						dstPtr[2] = value[i].M13;
@@ -691,6 +770,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				{
 					for (int i = 0; i < value.Length; i += 1, dstPtr += 16)
 					{
+#if DEBUG
+						value[i].CheckForNaNs();
+#endif
 						dstPtr[0] = value[i].M11;
 						dstPtr[1] = value[i].M12;
 						dstPtr[2] = value[i].M13;
@@ -709,6 +791,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				{
 					for (int i = 0; i < value.Length; i += 1, dstPtr += 12)
 					{
+#if DEBUG
+						value[i].CheckForNaNs();
+#endif
 						dstPtr[0] = value[i].M11;
 						dstPtr[1] = value[i].M12;
 						dstPtr[2] = value[i].M13;
@@ -727,6 +812,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				{
 					for (int i = 0; i < value.Length; i += 1, dstPtr += 8)
 					{
+#if DEBUG
+						value[i].CheckForNaNs();
+#endif
 						dstPtr[0] = value[i].M11;
 						dstPtr[1] = value[i].M12;
 						dstPtr[4] = value[i].M21;
@@ -747,6 +835,9 @@ namespace Microsoft.Xna.Framework.Graphics
 		public void SetValue(Matrix value)
 		{
 			// FIXME: All Matrix sizes... this will get ugly. -flibit
+#if DEBUG
+			value.CheckForNaNs();
+#endif
 			unsafe
 			{
 				float* dstPtr = (float*) values;
@@ -839,6 +930,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				{
 					for (int i = 0; i < value.Length; i += 1, dstPtr += 16)
 					{
+#if DEBUG
+						value[i].CheckForNaNs();
+#endif
 						dstPtr[0] = value[i].M11;
 						dstPtr[1] = value[i].M21;
 						dstPtr[2] = value[i].M31;
@@ -861,6 +955,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				{
 					for (int i = 0; i < value.Length; i += 1, dstPtr += 12)
 					{
+#if DEBUG
+						value[i].CheckForNaNs();
+#endif
 						dstPtr[0] = value[i].M11;
 						dstPtr[1] = value[i].M21;
 						dstPtr[2] = value[i].M31;
@@ -876,6 +973,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				{
 					for (int i = 0; i < value.Length; i += 1, dstPtr += 12)
 					{
+#if DEBUG
+						value[i].CheckForNaNs();
+#endif
 						dstPtr[0] = value[i].M11;
 						dstPtr[1] = value[i].M21;
 						dstPtr[2] = value[i].M31;
@@ -894,6 +994,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				{
 					for (int i = 0; i < value.Length; i += 1, dstPtr += 16)
 					{
+#if DEBUG
+						value[i].CheckForNaNs();
+#endif
 						dstPtr[0] = value[i].M11;
 						dstPtr[1] = value[i].M21;
 						dstPtr[2] = value[i].M31;
@@ -912,6 +1015,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				{
 					for (int i = 0; i < value.Length; i += 1, dstPtr += 8)
 					{
+#if DEBUG
+						value[i].CheckForNaNs();
+#endif
 						dstPtr[0] = value[i].M11;
 						dstPtr[1] = value[i].M21;
 						dstPtr[4] = value[i].M12;
@@ -931,6 +1037,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public void SetValue(Quaternion value)
 		{
+#if DEBUG
+			value.CheckForNaNs();
+#endif
 			unsafe
 			{
 				float* dstPtr = (float*) values;
@@ -948,6 +1057,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				float* dstPtr = (float*) values;
 				for (int i = 0; i < value.Length; i += 1, dstPtr += 4)
 				{
+#if DEBUG
+					value[i].CheckForNaNs();
+#endif
 					dstPtr[0] = value[i].X;
 					dstPtr[1] = value[i].Y;
 					dstPtr[2] = value[i].Z;
@@ -958,6 +1070,12 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public void SetValue(float value)
 		{
+#if DEBUG
+			if (float.IsNaN(value))
+			{
+				throw new InvalidOperationException("Effect parameter is NaN!");
+			}
+#endif
 			unsafe
 			{
 				float* dstPtr = (float*) values;
@@ -967,6 +1085,15 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public void SetValue(float[] value)
 		{
+#if DEBUG
+			foreach (float f in value)
+			{
+				if (float.IsNaN(f))
+				{
+					throw new InvalidOperationException("Effect parameter contains NaN!");
+				}
+			}
+#endif
 			for (int i = 0, j = 0; i < value.Length; i += ColumnCount, j += 16)
 			{
 				Marshal.Copy(value, i, values + j, ColumnCount);
@@ -989,6 +1116,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public void SetValue(Vector2 value)
 		{
+#if DEBUG
+			value.CheckForNaNs();
+#endif
 			unsafe
 			{
 				float* dstPtr = (float*) values;
@@ -1004,6 +1134,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				float* dstPtr = (float*) values;
 				for (int i = 0; i < value.Length; i += 1, dstPtr += 4)
 				{
+#if DEBUG
+					value[i].CheckForNaNs();
+#endif
 					dstPtr[0] = value[i].X;
 					dstPtr[1] = value[i].Y;
 				}
@@ -1012,6 +1145,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public void SetValue(Vector3 value)
 		{
+#if DEBUG
+			value.CheckForNaNs();
+#endif
 			unsafe
 			{
 				float* dstPtr = (float*) values;
@@ -1028,6 +1164,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				float* dstPtr = (float*) values;
 				for (int i = 0; i < value.Length; i += 1, dstPtr += 4)
 				{
+#if DEBUG
+					value[i].CheckForNaNs();
+#endif
 					dstPtr[0] = value[i].X;
 					dstPtr[1] = value[i].Y;
 					dstPtr[2] = value[i].Z;
@@ -1037,6 +1176,9 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		public void SetValue(Vector4 value)
 		{
+#if DEBUG
+			value.CheckForNaNs();
+#endif
 			unsafe
 			{
 				float* dstPtr = (float*) values;
@@ -1054,6 +1196,9 @@ namespace Microsoft.Xna.Framework.Graphics
 				float* dstPtr = (float*) values;
 				for (int i = 0; i < value.Length; i += 1, dstPtr += 4)
 				{
+#if DEBUG
+					value[i].CheckForNaNs();
+#endif
 					dstPtr[0] = value[i].X;
 					dstPtr[1] = value[i].Y;
 					dstPtr[2] = value[i].Z;

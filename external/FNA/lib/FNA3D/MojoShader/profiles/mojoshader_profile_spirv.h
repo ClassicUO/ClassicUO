@@ -13,8 +13,8 @@
 #if SUPPORT_PROFILE_SPIRV
 
 #define MOJOSHADER_SPIRV_VS_SAMPLER_SET 0
-#define MOJOSHADER_SPIRV_PS_SAMPLER_SET 1
-#define MOJOSHADER_SPIRV_VS_UNIFORM_SET 2
+#define MOJOSHADER_SPIRV_VS_UNIFORM_SET 1
+#define MOJOSHADER_SPIRV_PS_SAMPLER_SET 2
 #define MOJOSHADER_SPIRV_PS_UNIFORM_SET 3
 
 // For baked-in constants in SPIR-V we want to store scalar values that we can
@@ -166,6 +166,7 @@ typedef struct SpirvContext
     uint32 id_vs_main_end;
 #endif // SUPPORT_PROFILE_GLSPIRV
     SpirvMode mode;
+    uint32 hasdepth;
     // ext. glsl instructions have been imported
     uint32 idext;
     uint32 idmax;

@@ -15,7 +15,7 @@ library via FAudio#, which you can find in the 'csharp/' directory.
 
 Dependencies
 ------------
-FAudio depends solely on SDL 2.0.9 or newer.
+FAudio depends solely on SDL 3.2.0 or newer.
 FAudio never explicitly uses the C runtime.
 
 Building FAudio
@@ -29,9 +29,9 @@ For *nix platforms, use cmake.
 
 For Windows, see the 'visualc/' directory.
 
-For Xbox One, see the 'visualc-winrt/' directory.
+For Xbox GDK, see the 'visualc-gdk/' directory.
 
-For iOS/tvOS, see the 'Xcode-iOS/' directory.
+For iOS/tvOS and macOS universal binaries, see the 'Xcode/' directory.
 
 Unit tests
 ----------

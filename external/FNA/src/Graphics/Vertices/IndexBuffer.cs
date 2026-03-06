@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -9,6 +9,7 @@
 
 #region Using Statements
 using System;
+using System.Threading;
 using System.Runtime.InteropServices;
 #endregion
 
@@ -128,10 +129,14 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			if (!IsDisposed)
 			{
-				FNA3D.FNA3D_AddDisposeIndexBuffer(
-					GraphicsDevice.GLDevice,
-					buffer
-				);
+				IntPtr toDispose = Interlocked.Exchange(ref buffer, IntPtr.Zero);
+				if (toDispose != IntPtr.Zero)
+				{
+					FNA3D.FNA3D_AddDisposeIndexBuffer(
+						GraphicsDevice.GLDevice,
+						toDispose
+					);
+				}
 			}
 			base.Dispose(disposing);
 		}
@@ -185,7 +190,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				);
 			}
 
-			int elementSizeInBytes = Marshal.SizeOf(typeof(T));
+			int elementSizeInBytes = MarshalHelper.SizeOf<T>();
 			GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
 			FNA3D.FNA3D_GetIndexBufferData(
 				GraphicsDevice.GLDevice,
@@ -209,7 +214,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				buffer,
 				0,
 				handle.AddrOfPinnedObject(),
-				data.Length * Marshal.SizeOf(typeof(T)),
+				data.Length * MarshalHelper.SizeOf<T>(),
 				SetDataOptions.None
 			);
 			handle.Free();
@@ -227,8 +232,8 @@ namespace Microsoft.Xna.Framework.Graphics
 				GraphicsDevice.GLDevice,
 				buffer,
 				0,
-				handle.AddrOfPinnedObject() + (startIndex * Marshal.SizeOf(typeof(T))),
-				elementCount * Marshal.SizeOf(typeof(T)),
+				handle.AddrOfPinnedObject() + (startIndex * MarshalHelper.SizeOf<T>()),
+				elementCount * MarshalHelper.SizeOf<T>(),
 				SetDataOptions.None
 			);
 			handle.Free();
@@ -247,8 +252,8 @@ namespace Microsoft.Xna.Framework.Graphics
 				GraphicsDevice.GLDevice,
 				buffer,
 				offsetInBytes,
-				handle.AddrOfPinnedObject() + (startIndex * Marshal.SizeOf(typeof(T))),
-				elementCount * Marshal.SizeOf(typeof(T)),
+				handle.AddrOfPinnedObject() + (startIndex * MarshalHelper.SizeOf<T>()),
+				elementCount * MarshalHelper.SizeOf<T>(),
 				SetDataOptions.None
 			);
 			handle.Free();

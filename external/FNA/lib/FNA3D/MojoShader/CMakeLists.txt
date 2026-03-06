@@ -1,66 +1,72 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+CMAKE_MINIMUM_REQUIRED(VERSION 3.12.0)
 PROJECT(MojoShader)
+
+# !!! FIXME: can we lowercase this file, if nothing else?
+
+INCLUDE(CheckIncludeFile)
+CHECK_INCLUDE_FILE(d3d11.h HAS_D3D11_H)
 
 OPTION(BUILD_SHARED_LIBS "Build MojoShader as a shared library" OFF)
 OPTION(PROFILE_D3D "Build MojoShader with support for the D3D profile" ON)
 OPTION(PROFILE_BYTECODE "Build MojoShader with support for the BYTECODE profile" ON)
-OPTION(PROFILE_HLSL "Build MojoShader with support for the HLSL profile" ON)
+OPTION(PROFILE_HLSL "Build MojoShader with support for the HLSL profile" HAS_D3D11_H)
 OPTION(PROFILE_GLSL120 "Build MojoShader with support for the GLSL120 profile" ON)
 OPTION(PROFILE_GLSLES "Build MojoShader with support for the GLSLES profile" ON)
 OPTION(PROFILE_GLSL "Build MojoShader with support for the GLSL profile" ON)
 OPTION(PROFILE_ARB1 "Build MojoShader with support for the ARB1 profile" ON)
 OPTION(PROFILE_ARB1_NV "Build MojoShader with support for the ARB1_NV profile" ON)
-OPTION(PROFILE_METAL "Build MojoShader with support for the Metal profile" ON)
+OPTION(PROFILE_METAL "Build MojoShader with support for the Metal profile" APPLE)
 OPTION(PROFILE_SPIRV "Build MojoShader with support for the SPIR-V profile" ON)
 OPTION(PROFILE_GLSPIRV "Build MojoShader with support for the ARB_gl_spirv profile" ON)
 OPTION(EFFECT_SUPPORT "Build MojoShader with support for Effect framework files" ON)
-OPTION(COMPILER_SUPPORT "Build MojoShader with support for HLSL source files" ON)
 OPTION(FLIP_VIEWPORT "Build MojoShader with the ability to flip the GL viewport" OFF)
 OPTION(DEPTH_CLIPPING "Build MojoShader with the ability to simulate [0, 1] depth clipping" OFF)
 OPTION(XNA4_VERTEXTEXTURE "Build MojoShader with XNA4 vertex texturing behavior" OFF)
 
 INCLUDE_DIRECTORIES(.)
 
-# If Mercurial is installed and we are in a mercurial repository, include the rev# and changeset as version information.
-FIND_PROGRAM(HG hg DOC "Path to hg command line app: http://www.selenic.com/mercurial/")
-IF(NOT HG)
-    MESSAGE(STATUS "Mercurial (hg) not found. You can go on, but version info will be wrong.")
-    SET(MOJOSHADER_VERSION -1)
-    SET(MOJOSHADER_CHANGESET "???")
-ELSE(NOT HG)
-    MARK_AS_ADVANCED(HG)
+# This was a Mercurial thing. In Git, it's always -1.
+SET(MOJOSHADER_VERSION -1)
 
-    # See if we are in an hg repository.
+# If Git is installed and we are in a git repository, include the changeset as version information.
+FIND_PROGRAM(GIT git DOC "Path to git command line app: https://git-scm.com/")
+IF(NOT GIT)
+    MESSAGE(STATUS "Git not found. You can go on, but version info will be wrong.")
+    SET(MOJOSHADER_CHANGESET "???")
+ELSE(NOT GIT)
+    MARK_AS_ADVANCED(GIT)
+
+    # !!! FIXME: this didn't actually use the GIT variable...
+
+    # See if we are in a git repository.
     EXECUTE_PROCESS(
-        COMMAND hg root
+        COMMAND git rev-parse --show-toplevel
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-        RESULT_VARIABLE HGVERSION_RC
+        OUTPUT_VARIABLE MOJOSHADER_GIT_TOPLEVEL_DIR
+        RESULT_VARIABLE GITVERSION_RC
         ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
     )
-    IF(NOT HGVERSION_RC EQUAL 0)
-        MESSAGE(STATUS "Mercurial (hg) repository not found. You can go on, but version info will be wrong.")
-        SET(MOJOSHADER_VERSION -1)
+    IF(NOT GITVERSION_RC EQUAL 0)
+        MESSAGE(STATUS "Git repository not found. You can go on, but version info will be wrong.")
         SET(MOJOSHADER_CHANGESET "???")
-    ELSE(NOT HGVERSION_RC EQUAL 0)
-        # Query the rev and changeset.
+    ELSE(NOT GITVERSION_RC EQUAL 0)
+        # Query the changeset.
         EXECUTE_PROCESS(
-            COMMAND hg tip --template {rev}
+            COMMAND git rev-list HEAD~..
             WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-            RESULT_VARIABLE HGVERSION_RC
-            OUTPUT_VARIABLE MOJOSHADER_VERSION
+            RESULT_VARIABLE GITVERSION_RC
+            OUTPUT_VARIABLE MOJOSHADER_GIT_CHANGESET
             ERROR_QUIET
             OUTPUT_STRIP_TRAILING_WHITESPACE
         )
-        EXECUTE_PROCESS(
-            COMMAND hg tip --template hg-{rev}:{node|short}
-            WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-            RESULT_VARIABLE HGVERSION_RC
-            OUTPUT_VARIABLE MOJOSHADER_CHANGESET
-            ERROR_QUIET
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
-    ENDIF(NOT HGVERSION_RC EQUAL 0)
-ENDIF(NOT HG)
+        IF(NOT GITVERSION_RC EQUAL 0)
+            SET(MOJOSHADER_CHANGESET "???")
+        ELSE(NOT GITVERSION_RC EQUAL 0)
+            SET(MOJOSHADER_CHANGESET "git-${MOJOSHADER_GIT_CHANGESET}")
+        ENDIF(NOT GITVERSION_RC EQUAL 0)
+    ENDIF(NOT GITVERSION_RC EQUAL 0)
+ENDIF(NOT GIT)
 
 WRITE_FILE(
     "${CMAKE_CURRENT_SOURCE_DIR}/mojoshader_version.h"
@@ -84,19 +90,6 @@ IF(MSVC)
     ADD_DEFINITIONS(-TP)  # force .c files to compile as C++.
 ENDIF(MSVC)
 
-# We build lemon, then use it to generate parser C code.
-IF(COMPILER_SUPPORT)
-    ADD_EXECUTABLE(lemon "misc/lemon.c")
-    GET_TARGET_PROPERTY(LEMON lemon LOCATION)
-    ADD_CUSTOM_COMMAND(
-        OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/mojoshader_parser_hlsl.h"
-        MAIN_DEPENDENCY "${CMAKE_CURRENT_SOURCE_DIR}/mojoshader_parser_hlsl.lemon"
-        DEPENDS lemon "${CMAKE_CURRENT_SOURCE_DIR}/misc/lempar.c"
-        COMMAND "${LEMON}"
-        ARGS -q "-T${CMAKE_CURRENT_SOURCE_DIR}/misc/lempar.c" "${CMAKE_CURRENT_SOURCE_DIR}/mojoshader_parser_hlsl.lemon"
-    )
-ENDIF(COMPILER_SUPPORT)
-
 IF(APPLE)
     IF(NOT IOS)
         find_library(CARBON_FRAMEWORK Carbon)  # Stupid Gestalt.
@@ -118,6 +111,9 @@ ENDIF(NOT PROFILE_GLSL120)
 IF(NOT PROFILE_GLSLES)
     ADD_DEFINITIONS(-DSUPPORT_PROFILE_GLSLES=0)
 ENDIF(NOT PROFILE_GLSLES)
+IF(NOT PROFILE_GLSLES3)
+    ADD_DEFINITIONS(-DSUPPORT_PROFILE_GLSLES3=0)
+ENDIF(NOT PROFILE_GLSLES3)
 IF(NOT PROFILE_GLSL)
     ADD_DEFINITIONS(-DSUPPORT_PROFILE_GLSL=0)
 ENDIF(NOT PROFILE_GLSL)
@@ -162,9 +158,8 @@ ADD_LIBRARY(mojoshader
     mojoshader.c
     mojoshader_common.c
     mojoshader_opengl.c
-    mojoshader_metal.c
     mojoshader_d3d11.c
-    mojoshader_vulkan.c
+    mojoshader_sdlgpu.c
     profiles/mojoshader_profile_arb1.c
     profiles/mojoshader_profile_bytecode.c
     profiles/mojoshader_profile_d3d.c
@@ -179,64 +174,29 @@ IF(EFFECT_SUPPORT)
         mojoshader_effects.c
     )
 ENDIF(EFFECT_SUPPORT)
-IF(COMPILER_SUPPORT)
-    TARGET_SOURCES(mojoshader PRIVATE
-        mojoshader_compiler.c
-        mojoshader_preprocessor.c
-        mojoshader_lexer.c
-        mojoshader_assembler.c
-    )
-ENDIF(COMPILER_SUPPORT)
 IF(BUILD_SHARED_LIBS)
     TARGET_LINK_LIBRARIES(mojoshader ${LIBM} ${LOBJC} ${CARBON_FRAMEWORK})
 ENDIF(BUILD_SHARED_LIBS)
 
+# These are fallback paths for D3D11, try to have this on the system instead!
 TARGET_INCLUDE_DIRECTORIES(mojoshader PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../Vulkan-Headers/include>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../dxvk-native/include/native/directx>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../dxvk-native/include/native/windows>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../dxvk-native/include/native/wsi>
 )
 
-SET_SOURCE_FILES_PROPERTIES(
-    mojoshader_compiler.c
-    PROPERTIES OBJECT_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/mojoshader_parser_hlsl.h"
-)
-
-FIND_PROGRAM(RE2C re2c DOC "Path to re2c command line app: http://re2c.org/")
-IF(NOT RE2C)
-    MESSAGE(STATUS "re2c missing. You can go on, but can't rebuild the lexer.")
-ELSE(NOT RE2C)
-    MARK_AS_ADVANCED(RE2C)
-    ADD_CUSTOM_COMMAND(
-        OUTPUT "${CMAKE_CURRENT_SOURCE_DIR}/mojoshader_lexer.c"
-        DEPENDS mojoshader_lexer.re
-        COMMAND "${RE2C}"
-        ARGS -is --no-generation-date -o "${CMAKE_CURRENT_SOURCE_DIR}/mojoshader_lexer.c" "${CMAKE_CURRENT_SOURCE_DIR}/mojoshader_lexer.re"
-    )
-ENDIF(NOT RE2C)
-
-find_path(SDL2_INCLUDE_DIR SDL.h PATH_SUFFIXES include/SDL2)
-find_library(SDL2 NAMES SDL2 PATH_SUFFIXES lib)
-IF(SDL2)
-    INCLUDE_DIRECTORIES(${SDL2_INCLUDE_DIR})
+find_package(SDL2)
+IF(SDL2_FOUND)
+    INCLUDE_DIRECTORIES(${SDL2_INCLUDE_DIRS})
     ADD_EXECUTABLE(glcaps utils/glcaps.c)
-    TARGET_LINK_LIBRARIES(glcaps ${SDL2} ${LIBM} ${LOBJC} ${CARBON_FRAMEWORK})
+    TARGET_LINK_LIBRARIES(glcaps ${SDL2_LIBRARIES} ${LIBM} ${LOBJC} ${CARBON_FRAMEWORK})
     ADD_EXECUTABLE(bestprofile utils/bestprofile.c)
-    TARGET_LINK_LIBRARIES(bestprofile mojoshader ${SDL2} ${LIBM} ${LOBJC} ${CARBON_FRAMEWORK})
+    TARGET_LINK_LIBRARIES(bestprofile mojoshader ${SDL2_LIBRARIES} ${LIBM} ${LOBJC} ${CARBON_FRAMEWORK})
     ADD_EXECUTABLE(availableprofiles utils/availableprofiles.c)
-    TARGET_LINK_LIBRARIES(availableprofiles mojoshader ${SDL2} ${LIBM} ${LOBJC} ${CARBON_FRAMEWORK})
+    TARGET_LINK_LIBRARIES(availableprofiles mojoshader ${SDL2_LIBRARIES} ${LIBM} ${LOBJC} ${CARBON_FRAMEWORK})
     ADD_EXECUTABLE(testglcompile utils/testglcompile.c)
-    TARGET_LINK_LIBRARIES(testglcompile mojoshader ${SDL2} ${LIBM} ${LOBJC} ${CARBON_FRAMEWORK})
-ENDIF(SDL2)
-
-IF(COMPILER_SUPPORT)
-    ADD_EXECUTABLE(finderrors utils/finderrors.c)
-    TARGET_LINK_LIBRARIES(finderrors mojoshader ${SDL2} ${LIBM} ${LOBJC} ${CARBON_FRAMEWORK})
-    IF(SDL2)
-        SET_SOURCE_FILES_PROPERTIES(
-            utils/finderrors.c
-            PROPERTIES COMPILE_FLAGS "-DFINDERRORS_COMPILE_SHADERS=1"
-        )
-    ENDIF(SDL2)
-ENDIF(COMPILER_SUPPORT)
+    TARGET_LINK_LIBRARIES(testglcompile mojoshader ${SDL2_LIBRARIES} ${LIBM} ${LOBJC} ${CARBON_FRAMEWORK})
+ENDIF(SDL2_FOUND)
 
 FIND_PATH(SPIRV_TOOLS_INCLUDE_DIR "spirv-tools/libspirv.h" PATH_SUFFIXES "include")
 FIND_LIBRARY(SPIRV_TOOLS_LIBRARY NAMES SPIRV-Tools-shared)
@@ -252,22 +212,6 @@ IF(SPIRV_TOOLS_INCLUDE_DIR AND SPIRV_TOOLS_LIBRARY)
 ENDIF(SPIRV_TOOLS_INCLUDE_DIR AND SPIRV_TOOLS_LIBRARY)
 ADD_EXECUTABLE(testoutput utils/testoutput.c)
 TARGET_LINK_LIBRARIES(testoutput mojoshader ${LIBM} ${LOBJC} ${CARBON_FRAMEWORK})
-IF(COMPILER_SUPPORT)
-    ADD_EXECUTABLE(mojoshader-compiler utils/mojoshader-compiler.c)
-    TARGET_LINK_LIBRARIES(mojoshader-compiler mojoshader ${LIBM} ${LOBJC} ${CARBON_FRAMEWORK})
-ENDIF(COMPILER_SUPPORT)
-
-# Unit tests...
-IF(COMPILER_SUPPORT)
-    ADD_CUSTOM_TARGET(
-        test
-        COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/unit_tests/run_tests.pl"
-        WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
-        DEPENDS mojoshader-compiler
-        COMMENT "Running unit tests..."
-        VERBATIM
-    )
-ENDIF(COMPILER_SUPPORT)
 
 # End of CMakeLists.txt ...
 

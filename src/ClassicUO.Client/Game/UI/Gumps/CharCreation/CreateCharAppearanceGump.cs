@@ -181,23 +181,28 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private void DisplayProfessionSkills(ProfessionInfo info)
         {
             _displayedProfession = info;
-            int posY = SKILLS_SECTION_Y;
             int n = CharCreationGump._skillsCount;
-            int availableWidth = CENTER_PANEL_WIDTH - SECTION_PADDING * 2;
-            int slotWidth = availableWidth / n;
-            const int ComboWidth = 92;
-            int firstOffset = (slotWidth - ComboWidth) / 2;
-            int posXBase = CENTER_X + SECTION_PADDING + firstOffset;
+            const int ComboWidth = 120;
+            const int ComboHeight = 26;
+            const int RowGap = 10;
+            const int ColGap = 24;
+            int colsPerRow = 2;
+            int totalWidth = colsPerRow * ComboWidth + (colsPerRow - 1) * ColGap;
+            int posXBase = CENTER_X + (CENTER_PANEL_WIDTH - totalWidth) / 2;
 
             for (int i = 0; i < n; i++)
             {
+                int row = i / 2;
+                int col = i % 2;
+                int posY = SKILLS_SECTION_Y + row * (ComboHeight + RowGap);
+                int posX = posXBase + col * (ComboWidth + ColGap);
+
                 int skillIndex = info.SkillDefVal[i, 0];
                 int skillValue = info.SkillDefVal[i, 1];
                 var skillEntry = SkillsLoader.Instance.Skills.Find(s => s.Index == skillIndex);
                 string skillName = skillEntry?.Name ?? $"Skill {skillIndex}";
-                int posX = posXBase + i * slotWidth;
 
-                var combo = new GothicStyleCombobox(posX, posY, ComboWidth, 22, new[] { skillName }, 0);
+                var combo = new GothicStyleCombobox(posX, posY, ComboWidth, ComboHeight, new[] { skillName }, 0);
                 ApplyGothicRedTheme(combo);
                 combo.AcceptMouseInput = false;
                 Add(combo);
@@ -229,15 +234,16 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             if (_showSkills)
             {
-                int skillY = SKILLS_SECTION_Y;
                 int n = CharCreationGump._skillsCount;
-                int availableWidth = CENTER_PANEL_WIDTH - SECTION_PADDING * 2;
-                int slotWidth = availableWidth / n;
-                const int ComboWidth = 92;
-                const int LabelHeight = 30;
-                const int SliderWidth = 88;
-                int firstOffset = (slotWidth - ComboWidth) / 2;
-                int skillX = CENTER_X + SECTION_PADDING + firstOffset;
+                const int ComboWidth = 140;
+                const int ComboHeight = 26;
+                const int LabelHeight = 32;
+                const int SliderWidth = 120;
+                const int RowGap = 12;
+                const int ColGap = 24;
+                int colsPerRow = (n + 1) / 2;
+                int totalComboWidth = colsPerRow * ComboWidth + (colsPerRow - 1) * ColGap;
+                int skillXBase = CENTER_X + (CENTER_PANEL_WIDTH - totalComboWidth) / 2;
 
                 _skillSliders = new GothicStyleSliderBar[n];
                 _skillsCombobox = new GothicStyleCombobox[n];
@@ -245,12 +251,15 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 for (int i = 0; i < n; i++)
                 {
-                    int posX = skillX + i * slotWidth;
-                    var combo = new GothicStyleCombobox(posX, skillY, ComboWidth, 22, skillNames, -1);
+                    int row = i / 2;
+                    int col = i % 2;
+                    int skillY = SKILLS_SECTION_Y + row * (ComboHeight + LabelHeight + RowGap);
+                    int posX = skillXBase + col * (ComboWidth + ColGap);
+                    var combo = new GothicStyleCombobox(posX, skillY, ComboWidth, ComboHeight, skillNames, -1);
                     ApplyGothicRedTheme(combo);
                     _skillsCombobox[i] = combo;
                     Add(combo);
-                    Add(_skillSliders[i] = new GothicStyleSliderBar(posX, skillY + LabelHeight, SliderWidth, 0, 50, ProfessionInfo._VoidSkills[i, 1], true));
+                    Add(_skillSliders[i] = new GothicStyleSliderBar(posX, skillY + ComboHeight + 4, SliderWidth, 0, 50, ProfessionInfo._VoidSkills[i, 1], true));
                 }
 
                 for (int i = 0; i < _skillSliders.Length; i++)
@@ -297,8 +306,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }
 
             const int NameInputWidth = 219;
-            const int NameLabelWidth = 175;
-            Add(new UOLabel("Character Name", 1, UOLabelHue.Accent, Assets.TEXT_ALIGN_TYPE.TS_CENTER, 300, FontStyle.BlackBorder) { X = CENTER_PANEL_MID - NameLabelWidth / 2, Y = 44 });
+            Add(new UOLabel("Character Name", 1, UOLabelHue.Accent, Assets.TEXT_ALIGN_TYPE.TS_CENTER, NameInputWidth, FontStyle.BlackBorder) { X = CENTER_PANEL_MID - NameInputWidth / 2, Y = 44 });
             Add(new RoundedColorBox(221, 26, new Color(80, 20, 20), 6) { X = CENTER_PANEL_MID - NameInputWidth / 2 - 1, Y = 71 });
             Add(new RoundedColorBox(217, 22, new Color(28, 28, 28), 4) { X = CENTER_PANEL_MID - NameInputWidth / 2 + 1, Y = 73 });
             Add(new FullBlendControl { X = CENTER_PANEL_MID - NameInputWidth / 2 + 2, Y = 74, Width = NameInputWidth - 4, Height = 20, Hue = 0x801 });
@@ -309,7 +317,18 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             Add(button = new GothicStyleButton(NEXT_BUTTON_X, NEXT_BUTTON_Y, 120, 40, "NEXT", null, 16));
             button.OnClick += () => OnButtonClick(6);
 
-            Add(_nameTextBox = new StbTextBox(5, 16, 200, false, hue: 0x0481, style: FontStyle.Fixed) { X = CENTER_PANEL_MID - NameInputWidth / 2 + 2, Y = 74, Width = NameInputWidth - 4, Height = 20 }, 1);
+            Add(_nameTextBox = new StbTextBox(5, 16, NameInputWidth - 4, false, hue: 0x0481, style: FontStyle.Fixed, align: Assets.TEXT_ALIGN_TYPE.TS_CENTER) { X = CENTER_PANEL_MID - NameInputWidth / 2 + 2, Y = 74, Width = NameInputWidth - 4, Height = 20 }, 1);
+
+            var quitButton = new Button(0, 0x1589, 0x158B, 0x158A)
+            {
+                X = LoginLayoutHelper.WindowWidth - 44,
+                Y = 0,
+                ButtonAction = ButtonAction.Activate,
+                AcceptKeyboardInput = false,
+                LocalSerial = 100
+            };
+            quitButton.MouseUp += (s, e) => { if (e.Button == MouseButtonType.Left) Client.Game.Exit(); };
+            Add(quitButton);
 
             const int RaceX = CENTER_X + SECTION_PADDING;
             const int RaceY2 = RACE_SECTION_Y + 26 + RACE_BUTTON_MARGIN;

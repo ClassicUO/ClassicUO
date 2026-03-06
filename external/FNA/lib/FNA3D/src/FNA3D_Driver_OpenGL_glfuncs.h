@@ -1,6 +1,6 @@
 /* FNA3D - 3D Graphics Library for FNA
  *
- * Copyright (c) 2020-2021 Ethan Lee
+ * Copyright (c) 2020-2024 Ethan Lee
  *
  * This software is provided 'as-is', without any express or implied warranty.
  * In no event will the authors be held liable for any damages arising from
@@ -43,6 +43,7 @@ GL_EXT(ARB_instanced_arrays)
 GL_EXT(ARB_draw_elements_base_vertex)
 GL_EXT(EXT_draw_buffers2)
 GL_EXT(ARB_texture_multisample)
+GL_EXT(ARB_map_buffer_range)
 GL_EXT(KHR_debug)
 GL_EXT(GREMEDY_string_marker)
 
@@ -55,6 +56,7 @@ GL_PROC(BaseGL, void, glBlendEquationSeparate, (GLenum a, GLenum b))
 GL_PROC(BaseGL, void, glBlendFuncSeparate, (GLenum a, GLenum b, GLenum c, GLenum d))
 GL_PROC(BaseGL, void, glBufferData, (GLenum a, GLsizeiptr b, const GLvoid *c, GLenum d))
 GL_PROC(BaseGL, void, glBufferSubData, (GLenum a, GLintptr b, GLsizeiptr c, const GLvoid *d))
+GL_PROC(BaseGL, GLboolean, glUnmapBuffer, (GLenum a))
 GL_PROC(BaseGL, void, glClear, (GLbitfield a))
 GL_PROC(BaseGL, void, glClearColor, (GLclampf a, GLclampf b, GLclampf c, GLclampf d))
 GL_PROC(BaseGL, void, glClearStencil, (GLint s))
@@ -166,6 +168,9 @@ GL_PROC(EXT_draw_buffers2, void, glColorMaski, (GLuint a, GLboolean b, GLboolean
 
 /* Probably used by nobody, honestly */
 GL_PROC(ARB_texture_multisample, void, glSampleMaski, (GLuint a, GLuint b))
+
+/* Technically UnmapBuffer is core, but useless without MapBufferRange */
+GL_PROC_EXT(ARB_map_buffer_range, EXT, GLvoid*, glMapBufferRange, (GLenum a, GLintptr b, GLsizeiptr c, GLbitfield d))
 
 /* "NOTE: when implemented in an OpenGL ES context, all entry points defined
  * by this extension must have a "KHR" suffix. When implemented in an

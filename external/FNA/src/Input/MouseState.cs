@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -144,7 +144,9 @@ namespace Microsoft.Xna.Framework.Input
 					left.LeftButton == right.LeftButton &&
 					left.MiddleButton == right.MiddleButton &&
 					left.RightButton == right.RightButton &&
-					left.ScrollWheelValue == right.ScrollWheelValue	);
+					left.ScrollWheelValue == right.ScrollWheelValue &&
+					left.XButton1 == right.XButton1 &&
+					left.XButton2 == right.XButton2 );
 		}
 
 		/// <summary>

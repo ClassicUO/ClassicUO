@@ -209,6 +209,7 @@ struct MOJOSHADER_glContext
     int have_opengl_2;  // different entry points than ARB extensions.
     int have_opengl_3;  // different extension query.
     int have_opengl_es; // different extension requirements
+    int have_opengl_es3; // different shader synxtax and attributes
     int have_GL_ARB_vertex_program;
     int have_GL_ARB_fragment_program;
     int have_GL_NV_vertex_program2_option;
@@ -308,8 +309,17 @@ struct MOJOSHADER_glContext
     void (*profileToggleProgramPointSize)(int enable);
 };
 
+#ifdef MOJOSHADER_NO_THREAD_LOCAL
+#define MOJOSHADER_THREADLOCAL
+#elif defined(_WIN32)
+#define MOJOSHADER_THREADLOCAL __declspec(thread)
+#elif defined(__GNUC__) || defined(__clang__)
+#define MOJOSHADER_THREADLOCAL __thread
+#else
+#error Please define your platform.
+#endif
 
-static MOJOSHADER_glContext *ctx = NULL;
+static MOJOSHADER_THREADLOCAL MOJOSHADER_glContext *ctx = NULL;
 
 // Error state...
 static char error_buffer[1024] = { '\0' };
@@ -519,7 +529,7 @@ static GLuint impl_SPIRV_LinkProgram(MOJOSHADER_glShader *vshader,
     // other shader stages to assign final uniform/attrib locations before
     // compilation.
 
-    MOJOSHADER_spirv_link_attributes(vshader->parseData, pshader->parseData);
+    MOJOSHADER_spirv_link_attributes(vshader->parseData, pshader->parseData, 1);
 
     if (vshader)
     {
@@ -1404,6 +1414,11 @@ static void load_extensions(MOJOSHADER_glGetProcAddress lookup, void *d)
         }
         parse_opengl_version_str(str, &ctx->opengl_major, &ctx->opengl_minor);
 
+        if (opengl_version_atleast(3, 0) && ctx->have_opengl_es)
+        {
+            ctx->have_opengl_es3 = 1;
+        }
+
         if ((ctx->have_opengl_3) && (opengl_version_atleast(3, 0)))
         {
             GLint i;
@@ -1558,6 +1573,13 @@ static int valid_profile(const char *profile)
     #endif
 
     #if SUPPORT_PROFILE_GLSLES
+    else if (strcmp(profile, MOJOSHADER_PROFILE_GLSLES3) == 0)
+    {
+        MUST_HAVE_GLSL(MOJOSHADER_PROFILE_GLSLES3, 3, 00);
+    } // else if
+    #endif
+
+    #if SUPPORT_PROFILE_GLSLES
     else if (strcmp(profile, MOJOSHADER_PROFILE_GLSLES) == 0)
     {
         MUST_HAVE_GLSL(MOJOSHADER_PROFILE_GLSLES, 1, 00);
@@ -1630,6 +1652,14 @@ int MOJOSHADER_glAvailableProfiles(MOJOSHADER_glGetProcAddress lookup,
     ctx->malloc_data = malloc_d;
 
     load_extensions(lookup, lookup_d);
+
+#if SUPPORT_PROFILE_GLSLES3
+    if (ctx->have_opengl_es3)
+    {
+        profs[0] = MOJOSHADER_PROFILE_GLSLES3;
+        return 1;
+    } // if
+#endif
 
 #if SUPPORT_PROFILE_GLSLES
     if (ctx->have_opengl_es)
@@ -1754,7 +1784,8 @@ MOJOSHADER_glContext *MOJOSHADER_glCreateContext(const char *profile,
 #if SUPPORT_PROFILE_GLSL
     else if ( (strcmp(profile, MOJOSHADER_PROFILE_GLSL) == 0) ||
               (strcmp(profile, MOJOSHADER_PROFILE_GLSL120) == 0) ||
-              (strcmp(profile, MOJOSHADER_PROFILE_GLSLES) == 0) )
+              (strcmp(profile, MOJOSHADER_PROFILE_GLSLES) == 0) ||
+              (strcmp(profile, MOJOSHADER_PROFILE_GLSLES3) == 0) )
     {
         ctx->profileMaxUniforms = impl_GLSL_MaxUniforms;
         ctx->profileCompileShader = impl_GLSL_CompileShader;
@@ -1771,7 +1802,7 @@ MOJOSHADER_glContext *MOJOSHADER_glCreateContext(const char *profile,
         ctx->profilePushSampler = impl_GLSL_PushSampler;
         ctx->profileMustPushConstantArrays = impl_GLSL_MustPushConstantArrays;
         ctx->profileMustPushSamplers = impl_GLSL_MustPushSamplers;
-        if (strcmp(profile, MOJOSHADER_PROFILE_GLSLES) == 0)
+        if (strcmp(profile, MOJOSHADER_PROFILE_GLSLES) == 0 || strcmp(profile, MOJOSHADER_PROFILE_GLSLES3) == 0)
             ctx->profileToggleProgramPointSize = impl_NOOP_ToggleProgramPointSize;
         else
             ctx->profileToggleProgramPointSize = impl_REAL_ToggleProgramPointSize;
@@ -2369,8 +2400,9 @@ static int match_shaders(const void *_a, const void *_b, void *data)
     return 1;
 } // match_shaders
 
-static void nuke_shaders(const void *key, const void *value, void *data)
+static void nuke_shaders(const void *_ctx, const void *key, const void *value, void *data)
 {
+    (void) _ctx;
     (void) data;
     Free((void *) key);  // this was a BoundShaders struct.
     MOJOSHADER_glDeleteProgram((MOJOSHADER_glProgram *) value);
@@ -2967,7 +2999,7 @@ void MOJOSHADER_glDeleteShader(MOJOSHADER_glShader *shader)
             if ((shaders->vertex == shader) || (shaders->fragment == shader))
             {
                 // Deletes the linked program, which will unref the shader.
-                hash_remove(ctx->linker_cache, shaders);
+                hash_remove(ctx->linker_cache, shaders, ctx);
             } // if
         } // while
     } // if
@@ -2982,7 +3014,7 @@ void MOJOSHADER_glDestroyContext(MOJOSHADER_glContext *_ctx)
     ctx = _ctx;
     MOJOSHADER_glBindProgram(NULL);
     if (ctx->linker_cache)
-        hash_destroy(ctx->linker_cache);
+        hash_destroy(ctx->linker_cache, ctx);
     lookup_entry_points(NULL, NULL);   // !!! FIXME: is there a value to this?
     Free(ctx);
     ctx = ((current_ctx == _ctx) ? NULL : current_ctx);

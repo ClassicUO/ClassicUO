@@ -42,7 +42,7 @@ using ClassicUO.Assets;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-using SDL2;
+using SDL3;
 using Microsoft.Xna.Framework.Graphics;
 using System.IO;
 using ClassicUO.Game.Managers;
@@ -223,10 +223,10 @@ namespace ClassicUO.Game.UI.Gumps.Login
             }
         }
 
-        protected override void OnControllerButtonUp(SDL.SDL_GameControllerButton button)
+        protected override void OnControllerButtonUp(SDL.SDL_GamepadButton button)
         {
             base.OnControllerButtonUp(button);
-            if (button == SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_A)
+            if (button == SDL.SDL_GamepadButton.SDL_GAMEPAD_BUTTON_SOUTH)
             {
                 LoginScene loginScene = Client.Game.GetScene<LoginScene>();
 

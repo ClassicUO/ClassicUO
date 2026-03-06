@@ -13,7 +13,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using SDL2;
+using SDL3;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -104,9 +104,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (_listeningForHotkeySlot >= 0)
             {
-                bool alt = (mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
-                bool ctrl = (mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
-                bool shift = (mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
+                bool alt = (mod & SDL.SDL_Keymod.SDL_KMOD_ALT) != SDL.SDL_Keymod.SDL_KMOD_NONE;
+                bool ctrl = (mod & SDL.SDL_Keymod.SDL_KMOD_CTRL) != SDL.SDL_Keymod.SDL_KMOD_NONE;
+                bool shift = (mod & SDL.SDL_Keymod.SDL_KMOD_SHIFT) != SDL.SDL_Keymod.SDL_KMOD_NONE;
                 var profile = ProfileManager.CurrentProfile;
                 if (profile?.ActionBarSlots != null && _listeningForHotkeySlot < profile.ActionBarSlots.Count)
                 {
@@ -249,16 +249,16 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (slot.Key != 0 && slot.Key != (int)SDL.SDL_Keycode.SDLK_UNKNOWN)
                 {
-                    SDL.SDL_Keymod mod = SDL.SDL_Keymod.KMOD_NONE;
-                    if (slot.Alt) mod |= SDL.SDL_Keymod.KMOD_ALT;
-                    if (slot.Ctrl) mod |= SDL.SDL_Keymod.KMOD_CTRL;
-                    if (slot.Shift) mod |= SDL.SDL_Keymod.KMOD_SHIFT;
+                    SDL.SDL_Keymod mod = SDL.SDL_Keymod.SDL_KMOD_NONE;
+                    if (slot.Alt) mod |= SDL.SDL_Keymod.SDL_KMOD_ALT;
+                    if (slot.Ctrl) mod |= SDL.SDL_Keymod.SDL_KMOD_CTRL;
+                    if (slot.Shift) mod |= SDL.SDL_Keymod.SDL_KMOD_SHIFT;
                     string full = KeysTranslator.TryGetKey((SDL.SDL_Keycode)slot.Key, mod);
                     var sb = new System.Text.StringBuilder();
                     if (slot.Ctrl) sb.Append("C");
                     if (slot.Alt) sb.Append("A");
                     if (slot.Shift) sb.Append("S");
-                    string keyPart = KeysTranslator.TryGetKey((SDL.SDL_Keycode)slot.Key, SDL.SDL_Keymod.KMOD_NONE);
+                    string keyPart = KeysTranslator.TryGetKey((SDL.SDL_Keycode)slot.Key, SDL.SDL_Keymod.SDL_KMOD_NONE);
                     if (!string.IsNullOrEmpty(keyPart)) sb.Append(keyPart.Replace(" ", ""));
                     _hotkeyText = sb.ToString();
                     _hotkeyFullText = full ?? _hotkeyText;

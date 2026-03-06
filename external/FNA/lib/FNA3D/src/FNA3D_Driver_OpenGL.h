@@ -1,6 +1,6 @@
 /* FNA3D - 3D Graphics Library for FNA
  *
- * Copyright (c) 2020-2021 Ethan Lee
+ * Copyright (c) 2020-2024 Ethan Lee
  *
  * This software is provided 'as-is', without any express or implied warranty.
  * In no event will the authors be held liable for any damages arising from
@@ -26,8 +26,6 @@
 
 #ifndef FNA3D_DRIVER_OPENGL_H
 #define FNA3D_DRIVER_OPENGL_H
-
-#include <stdint.h>
 
 /* Types */
 typedef unsigned int	GLenum;
@@ -194,6 +192,21 @@ typedef unsigned char	GLboolean;
 #define GL_COMPRESSED_RGBA_S3TC_DXT1_EXT		0x83F1
 #define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT		0x83F2
 #define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT		0x83F3
+#define GL_SRGB_EXT					0x8C40
+#define GL_SRGB8_EXT					0x8C41
+#define GL_SRGB_ALPHA_EXT				0x8C42
+#define GL_SRGB8_ALPHA8_EXT				0x8C43
+#define GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT		0x8C4F
+#define GL_COMPRESSED_RGBA_BPTC_UNORM_EXT		0x8E8C
+#define GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM_EXT		0x8E8D
+#define GL_R8UI                           0x8232
+#define GL_R16UI                          0x8234
+#define GL_R8                             0x8229
+#define GL_R16                            0x822A
+
+/* EXT_framebuffer_sRGB */
+#define GL_FRAMEBUFFER_SRGB_EXT				0x8DB9
+#define GL_FRAMEBUFFER_SRGB_CAPABLE_EXT			0x8DBA
 
 /* Texture Internal Formats */
 #define GL_DEPTH_COMPONENT				0x1902
@@ -222,6 +235,10 @@ typedef unsigned char	GLboolean;
 #define GL_STREAM_DRAW  				0x88E0
 #define GL_STATIC_DRAW  				0x88E4
 #define GL_MAX_VERTEX_ATTRIBS				0x8869
+
+/* NoOverwrite Uploads */
+#define GL_MAP_WRITE_BIT				0x0002
+#define GL_MAP_UNSYNCHRONIZED_BIT			0x0020
 
 /* Render targets */
 #define GL_FRAMEBUFFER  				0x8D40

@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -136,7 +136,10 @@ namespace Microsoft.Xna.Framework.Audio
 			base.Play();
 			lock (FrameworkDispatcher.Streams)
 			{
-				FrameworkDispatcher.Streams.Add(this);
+				if (!FrameworkDispatcher.Streams.Contains(this))
+				{
+					FrameworkDispatcher.Streams.Add(this);
+				}
 			}
 		}
 
@@ -147,7 +150,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 		public void SubmitBuffer(byte[] buffer, int offset, int count)
 		{
-			IntPtr next = Marshal.AllocHGlobal(count);
+			IntPtr next = FNAPlatform.Malloc(count);
 			Marshal.Copy(buffer, offset, next, count);
 			lock (queuedBuffers)
 			{
@@ -197,7 +200,7 @@ namespace Microsoft.Xna.Framework.Audio
 			format.nBlockAlign = (ushort) (4 * format.nChannels);
 			format.nAvgBytesPerSec = format.nBlockAlign * format.nSamplesPerSec;
 
-			IntPtr next = Marshal.AllocHGlobal(count * sizeof(float));
+			IntPtr next = FNAPlatform.Malloc(count * sizeof(float));
 			Marshal.Copy(buffer, offset, next, count);
 			lock (queuedBuffers)
 			{
@@ -269,7 +272,7 @@ namespace Microsoft.Xna.Framework.Audio
 			{
 				foreach (IntPtr buf in queuedBuffers)
 				{
-					Marshal.FreeHGlobal(buf);
+					FNAPlatform.Free(buf);
 				}
 				queuedBuffers.Clear();
 				queuedSizes.Clear();
@@ -295,7 +298,7 @@ namespace Microsoft.Xna.Framework.Audio
 				while (PendingBufferCount > state.BuffersQueued)
 				lock (queuedBuffers)
 				{
-					Marshal.FreeHGlobal(queuedBuffers[0]);
+					FNAPlatform.Free(queuedBuffers[0]);
 					queuedBuffers.RemoveAt(0);
 				}
 			}

@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -165,6 +165,14 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#endregion
 
+		#region Private Static Variables
+
+		private static readonly float maxFreqRatio = Environment.GetEnvironmentVariable(
+			"FNA_SOUNDEFFECT_UNCAPPED_PITCH"
+		) == "1" ? FAudio.FAUDIO_MAX_FREQ_RATIO : FAudio.FAUDIO_DEFAULT_FREQ_RATIO;
+
+		#endregion
+
 		#region Internal Constructor
 
 		internal SoundEffectInstance(SoundEffect parent = null)
@@ -195,7 +203,7 @@ namespace Microsoft.Xna.Framework.Audio
 
 		~SoundEffectInstance()
 		{
-			if (!IsDisposed && State == SoundState.Playing)
+			if (!SoundEffect.FAudioContext.ProgramExiting && !IsDisposed && State == SoundState.Playing)
 			{
 				// STOP LEAKING YOUR INSTANCES, ARGH
 				GC.ReRegisterForFinalize(this);
@@ -297,7 +305,7 @@ namespace Microsoft.Xna.Framework.Audio
 					out handle,
 					ref (this as DynamicSoundEffectInstance).format,
 					FAudio.FAUDIO_VOICE_USEFILTER,
-					FAudio.FAUDIO_DEFAULT_FREQ_RATIO,
+					maxFreqRatio,
 					IntPtr.Zero,
 					IntPtr.Zero,
 					IntPtr.Zero
@@ -310,7 +318,7 @@ namespace Microsoft.Xna.Framework.Audio
 					out handle,
 					parentEffect.formatPtr,
 					FAudio.FAUDIO_VOICE_USEFILTER,
-					FAudio.FAUDIO_DEFAULT_FREQ_RATIO,
+					maxFreqRatio,
 					IntPtr.Zero,
 					IntPtr.Zero,
 					IntPtr.Zero
@@ -320,6 +328,7 @@ namespace Microsoft.Xna.Framework.Audio
 			{
 				return; /* What */
 			}
+			FAudio.FAudio_AddRef(dev.Handle);
 
 			/* Apply current properties */
 			FAudio.FAudioVoice_SetVolume(handle, INTERNAL_volume, 0);
@@ -409,6 +418,7 @@ namespace Microsoft.Xna.Framework.Audio
 				FAudio.FAudioSourceVoice_Stop(handle, 0, 0);
 				FAudio.FAudioSourceVoice_FlushSourceBuffers(handle);
 				FAudio.FAudioVoice_DestroyVoice(handle);
+				FAudio.FAudio_Release(SoundEffect.Device().Handle);
 				handle = IntPtr.Zero;
 				usingReverb = false;
 				INTERNAL_state = SoundState.Stopped;
@@ -448,7 +458,7 @@ namespace Microsoft.Xna.Framework.Audio
 					parentEffect.Instances.Remove(selfReference);
 				}
 				selfReference = null;
-				Marshal.FreeHGlobal(dspSettings.pMatrixCoefficients);
+				FNAPlatform.Free(dspSettings.pMatrixCoefficients);
 				IsDisposed = true;
 			}
 		}
@@ -469,7 +479,7 @@ namespace Microsoft.Xna.Framework.Audio
 				(int) dspSettings.SrcChannelCount *
 				(int) dspSettings.DstChannelCount
 			);
-			dspSettings.pMatrixCoefficients = Marshal.AllocHGlobal(memsize);
+			dspSettings.pMatrixCoefficients = FNAPlatform.Malloc(memsize);
 			unsafe
 			{
 				byte* memPtr = (byte*) dspSettings.pMatrixCoefficients;

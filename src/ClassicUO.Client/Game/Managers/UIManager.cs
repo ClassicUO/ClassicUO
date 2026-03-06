@@ -91,11 +91,21 @@ namespace ClassicUO.Game.Managers
             {
                 if (_keyboardFocusControl != value)
                 {
+                    if (_keyboardFocusControl != null && Microsoft.Xna.Framework.Input.TextInputEXT.WindowHandle != System.IntPtr.Zero)
+                    {
+                        Microsoft.Xna.Framework.Input.TextInputEXT.StopTextInput();
+                    }
+
                     _keyboardFocusControl?.OnFocusLost();
                     _keyboardFocusControl = value;
 
                     if (value != null && value.AcceptKeyboardInput)
                     {
+                        if (Microsoft.Xna.Framework.Input.TextInputEXT.WindowHandle != System.IntPtr.Zero)
+                        {
+                            Microsoft.Xna.Framework.Input.TextInputEXT.StartTextInput();
+                        }
+
                         if (!value.IsFocused)
                         {
                             value.OnFocusEnter();

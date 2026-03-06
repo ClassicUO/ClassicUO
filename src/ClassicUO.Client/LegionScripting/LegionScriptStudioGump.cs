@@ -405,7 +405,7 @@ namespace ClassicUO.LegionScripting
 
         private void SelectScript(ScriptFile sf)
         {
-            if (_currentScript != null && _editorPanel.Text != string.Join(Environment.NewLine, _currentScript.FileContents))
+            if (_currentScript != null && _editorPanel.Text != string.Join("\n", _currentScript.FileContents ?? Array.Empty<string>()))
             {
                 try
                 {
@@ -415,7 +415,7 @@ namespace ClassicUO.LegionScripting
                 catch { }
             }
             _currentScript = sf;
-            _editorPanel.SetText(string.Join("\n", sf.FileContents));
+            _editorPanel.SetText(string.Join("\n", sf.FileContents ?? Array.Empty<string>()));
             _titleLabel.Text = $"Legion Script Studio - {sf.FileName}{GetLanguageBadge(sf.ScriptType)}";
             UpdatePlayStopState();
             int h = _editorPanel.Editor.TextBox.TotalHeight > _centerScroll.Height ? _editorPanel.Editor.TextBox.TotalHeight : _centerScroll.Height;
@@ -719,7 +719,7 @@ namespace ClassicUO.LegionScripting
         {
             LegionScripting.ScriptStartedEvent -= OnScriptStarted;
             LegionScripting.ScriptStoppedEvent -= OnScriptStopped;
-            if (_currentScript != null && _editorPanel != null && _editorPanel.Text != string.Join("\n", _currentScript.FileContents))
+            if (_currentScript != null && _editorPanel != null && _currentScript.FileContents != null && _editorPanel.Text != string.Join("\n", _currentScript.FileContents))
             {
                 try
                 {

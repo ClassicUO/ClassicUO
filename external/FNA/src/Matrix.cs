@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -484,6 +484,34 @@ namespace Microsoft.Xna.Framework
 
 		#endregion
 
+		#region Internal Methods
+
+		[Conditional("DEBUG")]
+		internal void CheckForNaNs()
+		{
+			if (	float.IsNaN(M11) ||
+				float.IsNaN(M12) ||
+				float.IsNaN(M13) ||
+				float.IsNaN(M14) ||
+				float.IsNaN(M21) ||
+				float.IsNaN(M22) ||
+				float.IsNaN(M23) ||
+				float.IsNaN(M24) ||
+				float.IsNaN(M31) ||
+				float.IsNaN(M32) ||
+				float.IsNaN(M33) ||
+				float.IsNaN(M34) ||
+				float.IsNaN(M41) ||
+				float.IsNaN(M42) ||
+				float.IsNaN(M43) ||
+				float.IsNaN(M44)	)
+			{
+				throw new InvalidOperationException("Matrix contains NaNs!");
+			}
+		}
+
+		#endregion
+
 		#region Public Static Methods
 
 		/// <summary>
@@ -582,41 +610,38 @@ namespace Microsoft.Xna.Framework
 			Vector3? cameraForwardVector,
 			out Matrix result
 		) {
-			Vector3 vector;
-			Vector3 vector2;
-			Vector3 vector3;
-			vector.X = objectPosition.X - cameraPosition.X;
-			vector.Y = objectPosition.Y - cameraPosition.Y;
-			vector.Z = objectPosition.Z - cameraPosition.Z;
-			float num = vector.LengthSquared();
+			Vector3 cameraDir = objectPosition - cameraPosition;
+
+			// Normalize cameraDir
+			float num = cameraDir.LengthSquared();
 			if (num < 0.0001f)
 			{
-				vector = cameraForwardVector.HasValue ?
+				cameraDir = cameraForwardVector.HasValue ?
 					-cameraForwardVector.Value :
 					Vector3.Forward;
 			}
 			else
 			{
 				Vector3.Multiply(
-					ref vector,
+					ref cameraDir,
 					(float) (1f / ((float) Math.Sqrt((double) num))),
-					out vector
+					out cameraDir
 				);
 			}
-			Vector3.Cross(ref cameraUpVector, ref vector, out vector3);
-			vector3.Normalize();
-			Vector3.Cross(ref vector, ref vector3, out vector2);
-			result.M11 = vector3.X;
-			result.M12 = vector3.Y;
-			result.M13 = vector3.Z;
+
+			Vector3 right = Vector3.Normalize(Vector3.Cross(cameraUpVector, cameraDir));
+			Vector3 up = Vector3.Cross(cameraDir, right);
+			result.M11 = right.X;
+			result.M12 = right.Y;
+			result.M13 = right.Z;
 			result.M14 = 0;
-			result.M21 = vector2.X;
-			result.M22 = vector2.Y;
-			result.M23 = vector2.Z;
+			result.M21 = up.X;
+			result.M22 = up.Y;
+			result.M23 = up.Z;
 			result.M24 = 0;
-			result.M31 = vector.X;
-			result.M32 = vector.Y;
-			result.M33 = vector.Z;
+			result.M31 = cameraDir.X;
+			result.M32 = cameraDir.Y;
+			result.M33 = cameraDir.Z;
 			result.M34 = 0;
 			result.M41 = objectPosition.X;
 			result.M42 = objectPosition.Y;
@@ -1747,23 +1772,22 @@ namespace Microsoft.Xna.Framework
 		/// <returns>The result of dividing a matrix by a scalar.</returns>
 		public static Matrix Divide(Matrix matrix1, float divider)
 		{
-			float num = 1f / divider;
-			matrix1.M11 = matrix1.M11 * num;
-			matrix1.M12 = matrix1.M12 * num;
-			matrix1.M13 = matrix1.M13 * num;
-			matrix1.M14 = matrix1.M14 * num;
-			matrix1.M21 = matrix1.M21 * num;
-			matrix1.M22 = matrix1.M22 * num;
-			matrix1.M23 = matrix1.M23 * num;
-			matrix1.M24 = matrix1.M24 * num;
-			matrix1.M31 = matrix1.M31 * num;
-			matrix1.M32 = matrix1.M32 * num;
-			matrix1.M33 = matrix1.M33 * num;
-			matrix1.M34 = matrix1.M34 * num;
-			matrix1.M41 = matrix1.M41 * num;
-			matrix1.M42 = matrix1.M42 * num;
-			matrix1.M43 = matrix1.M43 * num;
-			matrix1.M44 = matrix1.M44 * num;
+			matrix1.M11 = matrix1.M11 / divider;
+			matrix1.M12 = matrix1.M12 / divider;
+			matrix1.M13 = matrix1.M13 / divider;
+			matrix1.M14 = matrix1.M14 / divider;
+			matrix1.M21 = matrix1.M21 / divider;
+			matrix1.M22 = matrix1.M22 / divider;
+			matrix1.M23 = matrix1.M23 / divider;
+			matrix1.M24 = matrix1.M24 / divider;
+			matrix1.M31 = matrix1.M31 / divider;
+			matrix1.M32 = matrix1.M32 / divider;
+			matrix1.M33 = matrix1.M33 / divider;
+			matrix1.M34 = matrix1.M34 / divider;
+			matrix1.M41 = matrix1.M41 / divider;
+			matrix1.M42 = matrix1.M42 / divider;
+			matrix1.M43 = matrix1.M43 / divider;
+			matrix1.M44 = matrix1.M44 / divider;
 			return matrix1;
 		}
 
@@ -1775,23 +1799,22 @@ namespace Microsoft.Xna.Framework
 		/// <param name="result">The result of dividing a matrix by a scalar as an output parameter.</param>
 		public static void Divide(ref Matrix matrix1, float divider, out Matrix result)
 		{
-			float num = 1f / divider;
-			result.M11 = matrix1.M11 * num;
-			result.M12 = matrix1.M12 * num;
-			result.M13 = matrix1.M13 * num;
-			result.M14 = matrix1.M14 * num;
-			result.M21 = matrix1.M21 * num;
-			result.M22 = matrix1.M22 * num;
-			result.M23 = matrix1.M23 * num;
-			result.M24 = matrix1.M24 * num;
-			result.M31 = matrix1.M31 * num;
-			result.M32 = matrix1.M32 * num;
-			result.M33 = matrix1.M33 * num;
-			result.M34 = matrix1.M34 * num;
-			result.M41 = matrix1.M41 * num;
-			result.M42 = matrix1.M42 * num;
-			result.M43 = matrix1.M43 * num;
-			result.M44 = matrix1.M44 * num;
+			result.M11 = matrix1.M11 / divider;
+			result.M12 = matrix1.M12 / divider;
+			result.M13 = matrix1.M13 / divider;
+			result.M14 = matrix1.M14 / divider;
+			result.M21 = matrix1.M21 / divider;
+			result.M22 = matrix1.M22 / divider;
+			result.M23 = matrix1.M23 / divider;
+			result.M24 = matrix1.M24 / divider;
+			result.M31 = matrix1.M31 / divider;
+			result.M32 = matrix1.M32 / divider;
+			result.M33 = matrix1.M33 / divider;
+			result.M34 = matrix1.M34 / divider;
+			result.M41 = matrix1.M41 / divider;
+			result.M42 = matrix1.M42 / divider;
+			result.M43 = matrix1.M43 / divider;
+			result.M44 = matrix1.M44 / divider;
 		}
 
 		/// <summary>

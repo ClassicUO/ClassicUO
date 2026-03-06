@@ -1,14 +1,21 @@
 # CMake Project for FAudio
 # Written by @NeroBurner
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.10)
 project(FAudio C)
 
+if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
+  set(FAUDIO_MAINPROJECT ON)
+else()
+  set(FAUDIO_MAINPROJECT OFF)
+endif()
+
 # Options
-option(GSTREAMER "Enable GStreamer support (WMA, XMA)" OFF)
 option(BUILD_UTILS "Build utils/ folder" OFF)
 option(BUILD_TESTS "Build tests/ folder for unit tests to be executed on the host against FAudio" OFF)
+option(BUILD_SDL3 "Build against SDL 3.0" ON)
 if(WIN32)
-option(BUILD_CPP "Build cpp/ folder (COM wrapper for XAudio2)" OFF)
+option(PLATFORM_WIN32 "Enable native Win32 platform instead of SDL" OFF)
+option(WMA_DECODING "Enable WMA decoding support" ${PLATFORM_WIN32})
 endif()
 option(XNASONG "Build with XNA_Song.c" ON)
 option(LOG_ASSERTIONS "Bind FAudio_assert to log, instead of platform's assert" OFF)
@@ -18,6 +25,7 @@ option(BUILD_SHARED_LIBS "Build shared library" ON)
 if(WIN32)
 option(INSTALL_MINGW_DEPENDENCIES "Add dependent libraries to MinGW install target" OFF)
 endif()
+option(FAUDIO_INSTALL "Enable installation of FAudio" ${FAUDIO_MAINPROJECT})
 
 # C99 Requirement
 if(${CMAKE_VERSION} VERSION_LESS "3.1.3")
@@ -29,8 +37,8 @@ endif()
 
 # Version
 SET(LIB_MAJOR_VERSION "0")
-SET(LIB_MINOR_VERSION "21")
-SET(LIB_REVISION "06")
+SET(LIB_MINOR_VERSION "26")
+SET(LIB_REVISION "03")
 SET(LIB_VERSION "${LIB_MAJOR_VERSION}.${LIB_MINOR_VERSION}.${LIB_REVISION}")
 
 # Build Type
@@ -64,8 +72,14 @@ if(INSTALL_MINGW_DEPENDENCIES)
 	include(cmake/install_shared_libs.cmake)
 endif()
 
+set(target FAudio-shared)
+
+if(NOT BUILD_SHARED_LIBS)
+	set(target FAudio-static)
+endif()
+
 # Source lists
-add_library(FAudio
+add_library(${target}
 	# Public Headers
 	include/F3DAudio.h
 	include/FACT3D.h
@@ -80,6 +94,7 @@ add_library(FAudio
 	src/FAudio_internal.h
 	src/stb.h
 	src/stb_vorbis.h
+	src/qoa_decoder.h
 	# Source Files
 	src/F3DAudio.c
 	src/FACT3D.c
@@ -93,87 +108,118 @@ add_library(FAudio
 	src/FAPOFX_reverb.c
 	src/FAudio.c
 	src/FAudioFX_reverb.c
+	src/FAudioFX_collector.c
 	src/FAudioFX_volumemeter.c
 	src/FAudio_internal.c
 	src/FAudio_internal_simd.c
 	src/FAudio_operationset.c
 	src/FAudio_platform_sdl2.c
+	src/FAudio_platform_sdl3.c
+	src/FAudio_platform_win32.c
+	src/FAudio_platform_win32_wmadec.c
 	# Optional source files
 	src/XNA_Song.c
-	src/FAudio_gstreamer.c
 )
+
+if(WMA_DECODING)
+	target_compile_definitions(${target} PRIVATE HAVE_WMADEC=1)
+	target_link_libraries(${target} PRIVATE ole32 mfplat mfuuid)
+endif()
+
+if(PLATFORM_WIN32)
+	target_link_libraries(${target} PRIVATE dxguid uuid winmm ole32 advapi32 user32 mfplat mfreadwrite mfuuid propsys)
+	target_compile_definitions(${target} PUBLIC FAUDIO_WIN32_PLATFORM)
+	set(PLATFORM_CFLAGS "-DFAUDIO_WIN32_PLATFORM")
+	set(XNASONG OFF)
+else()
+	if(BUILD_SDL3)
+		target_compile_definitions(${target} PUBLIC FAUDIO_SDL3_PLATFORM)
+		set(PLATFORM_CFLAGS "-DFAUDIO_SDL3_PLATFORM")
+	else()
+		set(PLATFORM_CFLAGS)
+	endif()
+endif()
 
 # Only disable DebugConfiguration in release builds
 if(NOT FORCE_ENABLE_DEBUGCONFIGURATION)
-	target_compile_definitions(FAudio PRIVATE $<$<CONFIG:Release>:FAUDIO_DISABLE_DEBUGCONFIGURATION>)
+	target_compile_definitions(${target} PRIVATE $<$<CONFIG:Release>:FAUDIO_DISABLE_DEBUGCONFIGURATION>)
 endif()
 
 # FAudio_assert Customization
 if(LOG_ASSERTIONS)
-	target_compile_definitions(FAudio PUBLIC FAUDIO_LOG_ASSERTIONS)
+	target_compile_definitions(${target} PUBLIC FAUDIO_LOG_ASSERTIONS)
 endif()
 
 # FAudio folders as includes, for other targets to consume
-target_include_directories(FAudio PUBLIC
+target_include_directories(${target} PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 )
 
 # MinGW builds should statically link libgcc
 if(MINGW)
-	target_link_libraries(FAudio PRIVATE -static-libgcc)
+	target_link_libraries(${target} PRIVATE -static-libgcc)
 endif()
 
 # Soname
-set_target_properties(FAudio PROPERTIES OUTPUT_NAME "FAudio"
+set_target_properties(${target} PROPERTIES OUTPUT_NAME "FAudio"
 	VERSION ${LIB_VERSION}
 	SOVERSION ${LIB_MAJOR_VERSION}
 )
 
 # XNA_Song Support
 if(NOT XNASONG)
-	target_compile_definitions(FAudio PRIVATE DISABLE_XNASONG)
+	target_compile_definitions(${target} PRIVATE DISABLE_XNASONG)
 endif()
-
-# GStreamer Support
-if(GSTREAMER)
-	# Requires for gstreamer in the pkgconfig file
-	set(FAUDIO_GSTREAMER_DEPS " gstreamer-app-1.0 gstreamer-audio-1.0")
-
-	# Add the extra definition...
-	target_compile_definitions(FAudio PRIVATE HAVE_GSTREAMER=1)
-
-	# Find GStreamer
-	find_package(PkgConfig)
-	pkg_check_modules(GST REQUIRED gstreamer-1.0>=1.9.2)
-	pkg_check_modules(GSTAUDIO REQUIRED gstreamer-audio-1.0>=1.9.2)
-	pkg_check_modules(GSTAPP REQUIRED gstreamer-app-1.0>=1.9.2)
-
-	# Include/Link GStreamer...
-	target_include_directories(FAudio PRIVATE
-		${GST_INCLUDE_DIRS}
-		${GSTAUDIO_INCLUDE_DIRS}
-		${GSTAPP_INCLUDE_DIRS}
-	)
-	target_link_libraries(FAudio PRIVATE
-            ${GST_LDFLAGS}
-            ${GSTAUDIO_LDFLAGS}
-            ${GSTAPP_LDFLAGS}
-        )
-else()
-	set(FAUDIO_GSTREAMER_DEPS "")
-endif(GSTREAMER)
 
 # Dump source voices to RIFF WAVE files
 if(DUMP_VOICES)
-	target_compile_definitions(FAudio PRIVATE FAUDIO_DUMP_VOICES)
+	target_compile_definitions(${target} PRIVATE FAUDIO_DUMP_VOICES)
 endif()
 
-# SDL2 Dependency
-if (DEFINED SDL2_INCLUDE_DIRS AND DEFINED SDL2_LIBRARIES)
+# SDL Dependency
+set(FAUDIO_USING_SDL2_PACKAGE OFF)
+set(FAUDIO_USING_SDL3_PACKAGE OFF)
+if (PLATFORM_WIN32)
+	message(STATUS "not using SDL")
+elseif (BUILD_SDL3)
+	if (DEFINED SDL3_INCLUDE_DIRS AND DEFINED SDL3_LIBRARIES)
+		message(STATUS "using pre-defined SDL3 variables SDL3_INCLUDE_DIRS and SDL3_LIBRARIES")
+		target_include_directories(${target} PUBLIC "$<BUILD_INTERFACE:${SDL3_INCLUDE_DIRS}>")
+		target_link_libraries(${target} PUBLIC ${SDL3_LIBRARIES})
+		if(INSTALL_MINGW_DEPENDENCIES)
+			install_shared_libs(${SDL3_LIBRARIES} DESTINATION bin NO_INSTALL_SYMLINKS)
+		endif()
+	else()
+		# Only try to autodetect if both SDL3 variables aren't explicitly set
+		find_package(SDL3 CONFIG)
+		if (TARGET SDL3::SDL3)
+			message(STATUS "using TARGET SDL3::SDL3")
+			set(FAUDIO_USING_SDL3_PACKAGE ON)
+			target_link_libraries(${target} PUBLIC SDL3::SDL3)
+			if(INSTALL_MINGW_DEPENDENCIES)
+				install_shared_libs(TARGETS SDL3::SDL3 DESTINATION bin NO_INSTALL_SYMLINKS REQUIRED)
+			endif()
+		elseif (TARGET SDL3)
+			message(STATUS "using TARGET SDL3")
+			set(FAUDIO_USING_SDL3_PACKAGE ON)
+			target_link_libraries(${target} PUBLIC SDL3)
+			if(INSTALL_MINGW_DEPENDENCIES)
+				install_shared_libs(TARGETS SDL3 DESTINATION bin NO_INSTALL_SYMLINKS REQUIRED)
+			endif()
+		else()
+			message(STATUS "no TARGET SDL3::SDL3, or SDL3, using variables")
+			target_include_directories(${target} PUBLIC "$<BUILD_INTERFACE:${SDL3_INCLUDE_DIRS}>")
+			target_link_libraries(${target} PUBLIC ${SDL3_LIBRARIES})
+			if(INSTALL_MINGW_DEPENDENCIES)
+				install_shared_libs(${SDL3_LIBRARIES} DESTINATION bin NO_INSTALL_SYMLINKS)
+			endif()
+		endif()
+	endif()
+elseif (DEFINED SDL2_INCLUDE_DIRS AND DEFINED SDL2_LIBRARIES)
 	message(STATUS "using pre-defined SDL2 variables SDL2_INCLUDE_DIRS and SDL2_LIBRARIES")
-	target_include_directories(FAudio PUBLIC "$<BUILD_INTERFACE:${SDL2_INCLUDE_DIRS}>")
-	target_link_libraries(FAudio PUBLIC ${SDL2_LIBRARIES})
+	target_include_directories(${target} PUBLIC "$<BUILD_INTERFACE:${SDL2_INCLUDE_DIRS}>")
+	target_link_libraries(${target} PUBLIC ${SDL2_LIBRARIES})
 	if(INSTALL_MINGW_DEPENDENCIES)
 		install_shared_libs(${SDL2_LIBRARIES} DESTINATION bin NO_INSTALL_SYMLINKS)
 	endif()
@@ -182,20 +228,22 @@ else()
 	find_package(SDL2 CONFIG)
 	if (TARGET SDL2::SDL2)
 		message(STATUS "using TARGET SDL2::SDL2")
-		target_link_libraries(FAudio PUBLIC SDL2::SDL2)
+		set(FAUDIO_USING_SDL2_PACKAGE ON)
+		target_link_libraries(${target} PUBLIC SDL2::SDL2)
 		if(INSTALL_MINGW_DEPENDENCIES)
 			install_shared_libs(TARGETS SDL2::SDL2 DESTINATION bin NO_INSTALL_SYMLINKS REQUIRED)
 		endif()
 	elseif (TARGET SDL2)
 		message(STATUS "using TARGET SDL2")
-		target_link_libraries(FAudio PUBLIC SDL2)
+		set(FAUDIO_USING_SDL2_PACKAGE ON)
+		target_link_libraries(${target} PUBLIC SDL2)
 		if(INSTALL_MINGW_DEPENDENCIES)
 			install_shared_libs(TARGETS SDL2 DESTINATION bin NO_INSTALL_SYMLINKS REQUIRED)
 		endif()
 	else()
 		message(STATUS "no TARGET SDL2::SDL2, or SDL2, using variables")
-		target_include_directories(FAudio PUBLIC "$<BUILD_INTERFACE:${SDL2_INCLUDE_DIRS}>")
-		target_link_libraries(FAudio PUBLIC ${SDL2_LIBRARIES})
+		target_include_directories(${target} PUBLIC "$<BUILD_INTERFACE:${SDL2_INCLUDE_DIRS}>")
+		target_link_libraries(${target} PUBLIC ${SDL2_LIBRARIES})
 		if(INSTALL_MINGW_DEPENDENCIES)
 			install_shared_libs(${SDL2_LIBRARIES} DESTINATION bin NO_INSTALL_SYMLINKS)
 		endif()
@@ -209,9 +257,6 @@ if(BUILD_UTILS)
 	# Shared ImGui Framework
 	add_library(uicommon STATIC
 		utils/uicommon/FAudioUI_main.cpp
-		utils/uicommon/FAudioUI_ui.cpp
-		utils/uicommon/glfuncs.h
-		utils/uicommon/glmacros.h
 		utils/uicommon/imconfig.h
 		utils/uicommon/imgui.cpp
 		utils/uicommon/imgui_demo.cpp
@@ -223,7 +268,7 @@ if(BUILD_UTILS)
 		utils/uicommon/imstb_textedit.h
 		utils/uicommon/imstb_truetype.h
 	)
-	target_link_libraries(uicommon PUBLIC FAudio)
+	target_link_libraries(uicommon PUBLIC ${target})
 
 	# Shared WAV Resources
 	add_library(wavs STATIC utils/wavcommon/wavs.cpp)
@@ -233,11 +278,11 @@ if(BUILD_UTILS)
 
 	# These tools do NOT use uicommon
 	add_executable(testparse utils/testparse/testparse.c)
-	target_link_libraries(testparse PRIVATE FAudio)
+	target_link_libraries(testparse PRIVATE ${target})
 	add_executable(testxwma utils/testxwma/testxwma.cpp)
-	target_link_libraries(testxwma PRIVATE FAudio)
+	target_link_libraries(testxwma PRIVATE ${target})
 	add_executable(showriffheader utils/showriffheader/showriffheader.cpp)
-	target_link_libraries(showriffheader PRIVATE FAudio)
+	target_link_libraries(showriffheader PRIVATE ${target})
 
 	# These tools use uicommon, but NOT wavs
 	add_executable(facttool utils/facttool/facttool.cpp)
@@ -270,6 +315,10 @@ if(BUILD_UTILS)
 		utils/testvolumemeter/testvolumemeter.cpp
 	)
 	target_link_libraries(testvolumemeter PRIVATE uicommon wavs)
+	add_executable(voicepool
+		utils/voicepool/voicepool.cpp
+	)
+	target_link_libraries(voicepool PRIVATE uicommon wavs)
 endif()
 
 # define install directories
@@ -286,193 +335,76 @@ else()
 	set(FAudio_INSTALL_LIBDIR ${CMAKE_INSTALL_LIBDIR})
 endif()
 
-# cpp/ Folder
-if(BUILD_CPP)
-	enable_language(CXX)
-
-	# XAPOBase, used by XAudio2 and XAPOFX
-	add_library(XAPOBase STATIC
-		cpp/XAPOBase.cpp
-	)
-	target_compile_definitions(XAPOBase PRIVATE
-		FAUDIOCPP_EXPORTS
-		_WIN32_WINNT=0x0600
-	)
-	target_link_libraries(XAPOBase PRIVATE FAudio)
-	if(MINGW)
-		target_link_libraries(XAPOBase PRIVATE
-			"-Wl,--enable-stdcall-fixup"
-		)
-		# Enable various compiler warnings
-		target_link_libraries(XAPOBase PRIVATE
-			-Wall -pedantic
-			-Wsign-compare
-			-Wshadow
-		)
-	endif()
-
-	# We're about to make a whole bunch of DLLs...
-	set(FAudio_CPP_libs "")
-
-	# XAudio2 2.0-2.7
-	foreach(lib_version RANGE 0 7)
-		set(faudio_cpp_target "xaudio2_${lib_version}")
-		add_library(${faudio_cpp_target} SHARED
-			cpp/com_utils.cpp
-			cpp/xaudio2.cpp
-			cpp/XAudio2fx.cpp
-			cpp/win_registry.cpp
-		)
-		target_compile_definitions(${faudio_cpp_target} PRIVATE
-			"XAUDIO2_VERSION=${lib_version}"
-		)
-		target_link_libraries(${faudio_cpp_target} PRIVATE XAPOBase)
-		list(APPEND FAudio_CPP_libs ${faudio_cpp_target})
-	endforeach()
-
-	# XAudio2 2.8-2.9
-	foreach(lib_version RANGE 8 9)
-		set(faudio_cpp_target "xaudio2_${lib_version}")
-		add_library(${faudio_cpp_target} SHARED
-			cpp/com_utils.cpp
-			cpp/xaudio2.cpp
-			cpp/XAudio2fx.cpp
-			cpp/win_device.cpp
-			cpp/X3DAudio.cpp
-			cpp/XAPOFX.cpp
-		)
-		target_compile_definitions(${faudio_cpp_target} PRIVATE
-			"XAUDIO2_VERSION=${lib_version}"
-			UNICODE
-		)
-		target_link_libraries(${faudio_cpp_target} PRIVATE XAPOBase setupapi)
-		list(APPEND FAudio_CPP_libs ${faudio_cpp_target})
-	endforeach()
-
-	# X3DAudio 1.3-1.7
-	foreach(lib_version RANGE 3 7)
-		set(faudio_cpp_target "x3daudio1_${lib_version}")
-		add_library(${faudio_cpp_target} SHARED cpp/X3DAudio.cpp)
-		list(APPEND FAudio_CPP_libs ${faudio_cpp_target})
-	endforeach()
-
-	# XAPOFX 1.1-1.5
-	foreach(lib_version RANGE 1 5)
-		set(faudio_cpp_target "xapofx1_${lib_version}")
-		add_library(${faudio_cpp_target} SHARED
-			cpp/com_utils_xapofx.cpp
-			cpp/XAPOFX.cpp
-		)
-		target_link_libraries(${faudio_cpp_target} PRIVATE XAPOBase)
-		list(APPEND FAudio_CPP_libs ${faudio_cpp_target})
-	endforeach()
-
-	# XACTEngine3 3.0-3.7
-	foreach(lib_version RANGE 0 7)
-		set(faudio_cpp_target "xactengine3_${lib_version}")
-		add_library(${faudio_cpp_target} SHARED
-			cpp/com_utils_xact.cpp
-			cpp/xact3.cpp
-			cpp/win_registry.cpp
-		)
-		target_compile_definitions(${faudio_cpp_target} PRIVATE
-			"XACT3_VERSION=${lib_version}"
-		)
-		list(APPEND FAudio_CPP_libs ${faudio_cpp_target})
-	endforeach()
-
-	# Common Libraries/Definitions
-	foreach(faudio_cpp_target ${FAudio_CPP_libs})
-		target_link_libraries(${faudio_cpp_target} PRIVATE
-			ole32
-			FAudio
-		)
-		target_compile_definitions(${faudio_cpp_target} PRIVATE
-			FAUDIOCPP_EXPORTS
-			_WIN32_WINNT=0x0600
-		)
-
-		# MinGW builds should statically link libgcc/libstdc++
-		if(MINGW)
-			target_link_libraries(${faudio_cpp_target} PRIVATE
-				"-Wl,--enable-stdcall-fixup"
-				"-static-libgcc -static-libstdc++"
-			)
-			# Enable various compiler warnings
-			target_link_libraries(${faudio_cpp_target} PRIVATE
-				-Wall -pedantic
-				-Wsign-compare
-				-Wshadow
-			)
-		endif()
-	endforeach()
-
-	# Add libraries to install target
-	install(TARGETS ${FAudio_CPP_libs}
-		RUNTIME DESTINATION ${FAudio_INSTALL_BINDIR}
-		LIBRARY DESTINATION ${FAudio_INSTALL_LIBDIR}
-		ARCHIVE DESTINATION ${FAudio_INSTALL_LIBDIR}
-	)
-	# Add Wine install script to install target
-	install(PROGRAMS cpp/scripts/wine_setup_native
-		DESTINATION ${FAudio_INSTALL_BINDIR}
-	)
-	# Install runtime dependencies
-	if(INSTALL_MINGW_DEPENDENCIES)
-		install_shared_libs(-lwinpthread-1 -lwinpthread -liconv DESTINATION bin NO_INSTALL_SYMLINKS)
-	endif()
-endif()
-
 # tests/ Folder
 if(BUILD_TESTS)
 	add_executable(faudio_tests tests/xaudio2.c)
-	target_link_libraries(faudio_tests PRIVATE FAudio)
+	target_compile_definitions(faudio_tests PRIVATE _DEFAULT_SOURCE _BSD_SOURCE)
+	target_link_libraries(faudio_tests PRIVATE ${target})
 endif()
 
 # Installation
 
-# Public Headers...
-install(
-	DIRECTORY include/
-	DESTINATION ${FAudio_INSTALL_INCLUDEDIR}
-)
-# Libraries...
-install(
-	TARGETS ${PROJECT_NAME}
-	EXPORT ${PROJECT_NAME}-targets
-	INCLUDES DESTINATION ${FAudio_INSTALL_INCLUDEDIR}
-	RUNTIME DESTINATION ${FAudio_INSTALL_BINDIR}
-	LIBRARY DESTINATION ${FAudio_INSTALL_LIBDIR}
-	ARCHIVE DESTINATION ${FAudio_INSTALL_LIBDIR}
-)
+if(FAUDIO_INSTALL)
 
-# Generate a pkgconfig file
-include(cmake/JoinPaths.cmake)
-join_paths(FAUDIO_PKGCONF_LIBDIR "\${prefix}" "${CMAKE_INSTALL_LIBDIR}")
-join_paths(FAUDIO_PKGCONF_INCLUDEDIR "\${prefix}" "${CMAKE_INSTALL_INCLUDEDIR}")
-configure_file(
-	"${PROJECT_SOURCE_DIR}/cmake/${PROJECT_NAME}.pc.in"
-	${PROJECT_BINARY_DIR}/generated/${PROJECT_NAME}.pc
-	@ONLY
-)
-install(
-	FILES ${CMAKE_CURRENT_BINARY_DIR}/generated/${PROJECT_NAME}.pc
-	DESTINATION ${FAudio_INSTALL_LIBDIR}/pkgconfig
-)
+	# Public Headers...
+	install(
+		DIRECTORY include/
+		DESTINATION ${FAudio_INSTALL_INCLUDEDIR}
+	)
+	# Libraries...
+	set(export ${PROJECT_NAME}-targets-shared)
 
-# Generate cmake-config file, install CMake files
-include(CMakePackageConfigHelpers)
-configure_package_config_file(
-	cmake/config.cmake.in
-	${CMAKE_CURRENT_BINARY_DIR}/generated/${PROJECT_NAME}-config.cmake
-	INSTALL_DESTINATION ${FAudio_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
-)
-install(
-	FILES ${CMAKE_CURRENT_BINARY_DIR}/generated/${PROJECT_NAME}-config.cmake
-	DESTINATION ${FAudio_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
-)
-install(
-	EXPORT ${PROJECT_NAME}-targets
-	NAMESPACE ${PROJECT_NAME}::
-	DESTINATION ${FAudio_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
-)
+	if(NOT BUILD_SHARED_LIBS)
+		set(export ${PROJECT_NAME}-targets-static)
+	endif()
+
+	install(
+		TARGETS ${target}
+		EXPORT ${export}
+		INCLUDES DESTINATION ${FAudio_INSTALL_INCLUDEDIR}
+		RUNTIME DESTINATION ${FAudio_INSTALL_BINDIR}
+		LIBRARY DESTINATION ${FAudio_INSTALL_LIBDIR}
+		ARCHIVE DESTINATION ${FAudio_INSTALL_LIBDIR}
+	)
+
+	# Generate a pkgconfig file
+	include(cmake/JoinPaths.cmake)
+	join_paths(FAUDIO_PKGCONF_LIBDIR "\${prefix}" "${FAudio_INSTALL_LIBDIR}")
+	join_paths(FAUDIO_PKGCONF_INCLUDEDIR "\${prefix}" "${FAudio_INSTALL_INCLUDEDIR}")
+
+	if(NOT PLATFORM_WIN32)
+		if(BUILD_SDL3)
+			set(PC_REQUIRES_PRIVATE "Requires.private: sdl3")
+		else()
+			set(PC_REQUIRES_PRIVATE "Requires.private: sdl2")
+		endif()
+	endif()
+
+	configure_file(
+		"${PROJECT_SOURCE_DIR}/cmake/${PROJECT_NAME}.pc.in"
+		${PROJECT_BINARY_DIR}/generated/${PROJECT_NAME}.pc
+		@ONLY
+	)
+	install(
+		FILES ${CMAKE_CURRENT_BINARY_DIR}/generated/${PROJECT_NAME}.pc
+		DESTINATION ${FAudio_INSTALL_LIBDIR}/pkgconfig
+	)
+
+	# Generate cmake-config file, install CMake files
+	include(CMakePackageConfigHelpers)
+	configure_package_config_file(
+		cmake/config.cmake.in
+		${CMAKE_CURRENT_BINARY_DIR}/generated/${PROJECT_NAME}Config.cmake
+		INSTALL_DESTINATION ${FAudio_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+	)
+	install(
+		FILES ${CMAKE_CURRENT_BINARY_DIR}/generated/${PROJECT_NAME}Config.cmake
+		DESTINATION ${FAudio_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+	)
+
+	install(
+		EXPORT ${export}
+		NAMESPACE ${PROJECT_NAME}::
+		DESTINATION ${FAudio_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+	)
+endif()

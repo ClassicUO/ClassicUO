@@ -785,9 +785,37 @@ static uint32 spv_access_uniform(Context *ctx, SpirvTypeIdx sti_ptr, RegisterTyp
     return id_access;
 } // spv_access_uniform
 
+static void spv_add_attrib_fixup(Context *ctx, RegisterList *r, unsigned int type_offset, unsigned int opcode_offset)
+{
+    uint32* next_types;
+    uint32* next_opcodes;
+
+    assert(r != NULL);
+    #define TYPE_LOAD_OFFSET ctx->spirv.patch_table.attrib_type_load_offsets[r->usage][r->index]
+
+    next_types = (uint32*) Malloc(ctx, sizeof(uint32) * (TYPE_LOAD_OFFSET.num_loads + 1));
+    next_opcodes = (uint32*) Malloc(ctx, sizeof(uint32) * (TYPE_LOAD_OFFSET.num_loads + 1));
+
+    memcpy(next_types, TYPE_LOAD_OFFSET.load_types, sizeof(uint32) * TYPE_LOAD_OFFSET.num_loads);
+    memcpy(next_opcodes, TYPE_LOAD_OFFSET.load_opcodes, sizeof(uint32) * TYPE_LOAD_OFFSET.num_loads);
+
+    Free(ctx, TYPE_LOAD_OFFSET.load_types);
+    Free(ctx, TYPE_LOAD_OFFSET.load_opcodes);
+
+    TYPE_LOAD_OFFSET.load_types = next_types;
+    TYPE_LOAD_OFFSET.load_opcodes = next_opcodes;
+
+    TYPE_LOAD_OFFSET.load_types[TYPE_LOAD_OFFSET.num_loads] = type_offset;
+    TYPE_LOAD_OFFSET.load_opcodes[TYPE_LOAD_OFFSET.num_loads] = opcode_offset;
+
+    TYPE_LOAD_OFFSET.num_loads += 1;
+    #undef TYPE_LOAD_OFFSET
+} // spv_add_attrib_fixup
+
 static SpirvResult spv_loadreg(Context *ctx, RegisterList *r)
 {
     const RegisterType regtype = r->regtype;
+    uint32 copy_id;
 
     spv_check_read_reg_id(ctx, r);
 
@@ -839,7 +867,26 @@ static SpirvResult spv_loadreg(Context *ctx, RegisterList *r)
 
     push_output(ctx, &ctx->mainline);
     spv_emit(ctx, 4, SpvOpLoad, result.tid, result.id, id_src);
-    pop_output(ctx);
+    if (shader_is_vertex(ctx) && regtype == REG_TYPE_INPUT)
+    {
+        copy_id = spv_bumpid(ctx);
+        spv_emit(ctx, 4, SpvOpCopyObject, result.tid, copy_id, result.id);
+        result.id = copy_id;
+        pop_output(ctx);
+
+        // Store the offsets of:
+        // - OpLoad's type id, to change the input type
+        // - OpCopyObject's opcode, to change to OpConvert if needed
+        spv_add_attrib_fixup(ctx,
+                             reglist_find(&ctx->attributes, r->regtype, r->regnum),
+                             (buffer_size(ctx->mainline) >> 2) - 7,
+                             (buffer_size(ctx->mainline) >> 2) - 4);
+    } // if
+    else
+    {
+        // Nothing left to do for this register
+        pop_output(ctx);
+    } // else
 
     return result;
 } // spv_loadreg
@@ -1206,11 +1253,17 @@ static void spv_assign_destarg(Context *ctx, SpirvResult value)
 
     if (arg->result_mod & MOD_SATURATE)
     {
-        uint32 new_value = spv_bumpid(ctx);
+        uint32 ext, zero, one, new_value;
+
+        // Don't inline these, compilers will run the varargs in different orders
+        new_value = spv_bumpid(ctx);
+        one = spv_get_one(ctx, value.tid);
+        zero = spv_get_zero(ctx, value.tid);
+        ext = spv_getext(ctx);
+
         push_output(ctx, &ctx->mainline);
         spv_emit(ctx, 5 + 3, SpvOpExtInst,
-            value.tid, new_value, spv_getext(ctx), GLSLstd450FClamp,
-            value.id, spv_get_zero(ctx, value.tid), spv_get_one(ctx, value.tid)
+            value.tid, new_value, ext, GLSLstd450FClamp, value.id, zero, one
         );
         pop_output(ctx);
         value.id = new_value;
@@ -1677,6 +1730,7 @@ static void spv_link_ps_attributes(Context *ctx, uint32 id, RegisterType regtype
             break;
         case REG_TYPE_DEPTHOUT:
             spv_output_builtin(ctx, id, SpvBuiltInFragDepth);
+            ctx->spirv.hasdepth = 1;
             break;
         case REG_TYPE_MISCTYPE:
             // inputs
@@ -1705,7 +1759,7 @@ static void spv_link_ps_attributes(Context *ctx, uint32 id, RegisterType regtype
                     uint32 tid_pvec4p = spv_get_type(ctx, STI_PTR_VEC4_P);
 
                     uint32 id_1_0 = spv_getscalarf(ctx, 1.0f);
-                    uint32 id_0_0 = spv_getscalarf(ctx, 0.0f);
+                    uint32 id_n1_0 = spv_getscalarf(ctx, -1.0f);
 
                     uint32 id_var_frontfacing = spv_bumpid(ctx);
                     uint32 id_var_vface = id;
@@ -1723,7 +1777,7 @@ static void spv_link_ps_attributes(Context *ctx, uint32 id, RegisterType regtype
 
                     push_output(ctx, &ctx->mainline_top);
                     spv_emit(ctx, 4, SpvOpLoad, tid_bool, id_frontfacing, id_var_frontfacing);
-                    spv_emit(ctx, 6, SpvOpSelect, tid_float, id_tmp, id_frontfacing, id_1_0, id_0_0);
+                    spv_emit(ctx, 6, SpvOpSelect, tid_float, id_tmp, id_frontfacing, id_1_0, id_n1_0);
                     spv_emit(ctx, 3 + 4, SpvOpCompositeConstruct, tid_vec4, id_vface, id_tmp, id_tmp, id_tmp, id_tmp);
                     spv_emit(ctx, 3, SpvOpStore, id_var_vface, id_vface);
                     pop_output(ctx);
@@ -2212,11 +2266,19 @@ void emit_SPIRV_attribute(Context *ctx, RegisterType regtype, int regnum,
         {
             case REG_TYPE_INPUT:
             {
+                ctx->spirv.patch_table.tid_vec4_p = spv_get_type(ctx, STI_PTR_VEC4_I);
+                ctx->spirv.patch_table.tid_ivec4_p = spv_get_type(ctx, STI_PTR_IVEC4_I);
+                ctx->spirv.patch_table.tid_uvec4_p = spv_get_type(ctx, STI_PTR_UVEC4_I);
+                ctx->spirv.patch_table.tid_vec4 = spv_get_type(ctx, STI_VEC4);
+                ctx->spirv.patch_table.tid_ivec4 = spv_get_type(ctx, STI_IVEC4);
+                ctx->spirv.patch_table.tid_uvec4 = spv_get_type(ctx, STI_UVEC4);
+
                 push_output(ctx, &ctx->mainline_intro);
-                SpirvTypeIdx sti = STI_PTR_VEC4_I;
-                tid = spv_get_type(ctx, sti);
+                tid = spv_get_type(ctx, STI_PTR_VEC4_I);
                 spv_emit(ctx, 4, SpvOpVariable, tid, r->spirv.iddecl, SpvStorageClassInput);
                 pop_output(ctx);
+
+                ctx->spirv.patch_table.attrib_type_offsets[usage][index] = (buffer_size(ctx->mainline_intro) >> 2) - 3;
 
                 // hnn: generate location decorators for the input
                 spv_output_location(ctx, r->spirv.iddecl, regnum);
@@ -2378,7 +2440,7 @@ static void spv_emit_uniform_constant_array(Context *ctx,
 
 void emit_SPIRV_finalize(Context *ctx)
 {
-    size_t i, j, max;
+    size_t i, j, k, max;
 
     /* The generator's magic number, this could be registered with Khronos
      * if we wanted to. 0 is fine though, so use that for now. */
@@ -2611,6 +2673,10 @@ void emit_SPIRV_finalize(Context *ctx)
         // vk semantics = default origin is upper left
         // gl semantics = default origin is lower left
         spv_emit(ctx, 3, SpvOpExecutionMode, ctx->spirv.idmain, SpvExecutionModeOriginUpperLeft);
+
+        // This must be explicitly marked when FragDepth is in use!
+        if (ctx->spirv.hasdepth)
+            spv_emit(ctx, 3, SpvOpExecutionMode, ctx->spirv.idmain, SpvExecutionModeDepthReplacing);
     } // if
 
     pop_output(ctx);
@@ -2693,6 +2759,11 @@ void emit_SPIRV_finalize(Context *ctx)
     if (table->pointcoord_var_offset)
         table->pointcoord_var_offset += base_offset;
 
+    for (i = 0; i < MOJOSHADER_USAGE_TOTAL; i++)
+        for (j = 0; j < 16; j++)
+            if (table->attrib_type_offsets[i][j])
+                table->attrib_type_offsets[i][j] += base_offset;
+
     base_offset <<= 2;
     if (ctx->mainline_intro)     base_offset += buffer_size(ctx->mainline_intro);
     if (ctx->mainline_arguments) base_offset += buffer_size(ctx->mainline_arguments);
@@ -2700,6 +2771,19 @@ void emit_SPIRV_finalize(Context *ctx)
 
     if (table->pointcoord_load_offset)
         table->pointcoord_load_offset += base_offset;
+
+    base_offset <<= 2;
+    if (ctx->mainline_top) base_offset += buffer_size(ctx->mainline_top);
+    base_offset >>= 2;
+
+    for (i = 0; i < MOJOSHADER_USAGE_TOTAL; i++)
+        for (j = 0; j < 16; j++)
+            if (table->attrib_type_offsets[i][j])
+                for (k = 0; k < table->attrib_type_load_offsets[i][j].num_loads; k++)
+                {
+                     table->attrib_type_load_offsets[i][j].load_types[k] += base_offset;
+                     table->attrib_type_load_offsets[i][j].load_opcodes[k] += base_offset;
+                } // for
 
     push_output(ctx, &ctx->postflight);
     buffer_append(ctx->output, &ctx->spirv.patch_table, sizeof(ctx->spirv.patch_table));
@@ -3599,6 +3683,12 @@ void emit_SPIRV_TEXLD(Context *ctx)
         {
             if ((TextureType) sampler_reg->index == TEXTURE_TYPE_CUBE)
                 fail(ctx, "TEXLDP on a cubemap");  // !!! FIXME: is this legal?
+            else if ((TextureType) sampler_reg->index == TEXTURE_TYPE_2D)
+            {
+                // Need to move w to z, z can be discarded entirely
+                uint32 vec3_tid = spv_get_type(ctx, STI_VEC3);
+                texcoord = spv_emit_swizzle(ctx, texcoord, vec3_tid, (0 << 0) | (1 << 2) | (3 << 4), 0x7);
+            }
             opcode = SpvOpImageSampleProjImplicitLod;
         } // if
         else

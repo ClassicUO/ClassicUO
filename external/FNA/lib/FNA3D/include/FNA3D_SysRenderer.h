@@ -1,6 +1,6 @@
 /* FNA3D - 3D Graphics Library for FNA
  *
- * Copyright (c) 2020-2021 Ethan Lee
+ * Copyright (c) 2020-2024 Ethan Lee
  *
  * This software is provided 'as-is', without any express or implied warranty.
  * In no event will the authors be held liable for any damages arising from
@@ -44,9 +44,10 @@ extern "C" {
 typedef enum FNA3D_SysRendererTypeEXT
 {
 	FNA3D_RENDERER_TYPE_OPENGL_EXT,
-	FNA3D_RENDERER_TYPE_VULKAN_EXT,
+	FNA3D_RENDERER_TYPE_VULKAN_EXT, /* REMOVED, DO NOT USE */
 	FNA3D_RENDERER_TYPE_D3D11_EXT,
-	FNA3D_RENDERER_TYPE_METAL_EXT
+	FNA3D_RENDERER_TYPE_METAL_EXT, /* REMOVED, DO NOT USE */
+	FNA3D_RENDERER_TYPE_SDL_GPU_EXT,
 } FNA3D_SysRendererTypeEXT;
 
 typedef struct FNA3D_SysRendererEXT

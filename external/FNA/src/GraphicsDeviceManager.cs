@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -21,7 +21,7 @@ namespace Microsoft.Xna.Framework
 		#region Public Properties
 
 		public GraphicsProfile GraphicsProfile
-		{ 
+		{
 			get;
 			set;
 		}
@@ -239,6 +239,8 @@ namespace Microsoft.Xna.Framework
 		{
 			if (!disposed)
 			{
+				game.Services.RemoveService(typeof(IGraphicsDeviceManager));
+				game.Services.RemoveService(typeof(IGraphicsDeviceService));
 				if (disposing)
 				{
 					if (graphicsDevice != null)
@@ -279,6 +281,10 @@ namespace Microsoft.Xna.Framework
 			 */
 			if (graphicsDevice == null)
 			{
+				#if DEBUG
+				FNALoggerEXT.LogWarn("Forcing CreateDevice! Avoid calling ApplyChanges before Game.Run!");
+				#endif
+
 				(this as IGraphicsDeviceManager).CreateDevice();
 				return;
 			}
@@ -397,14 +403,19 @@ namespace Microsoft.Xna.Framework
 
 		private void INTERNAL_OnClientSizeChanged(object sender, EventArgs e)
 		{
-			Rectangle size = (sender as GameWindow).ClientBounds;
+			GameWindow window = (sender as GameWindow);
+
+			Rectangle size = window.ClientBounds;
 			resizedBackBufferWidth = size.Width;
 			resizedBackBufferHeight = size.Height;
-			if (Environment.GetEnvironmentVariable("FNA_GRAPHICS_ENABLE_HIGHDPI") == "1")
-			{
-				resizedBackBufferWidth *= 2;
-				resizedBackBufferHeight *= 2;
-			}
+
+			FNAPlatform.ScaleForWindow(
+				window.Handle,
+				true,
+				ref resizedBackBufferWidth,
+				ref resizedBackBufferHeight
+			);
+
 			useResizedBackBuffer = true;
 			ApplyChanges();
 		}

@@ -1,6 +1,6 @@
 /* FNA3D - 3D Graphics Library for FNA
  *
- * Copyright (c) 2020-2021 Ethan Lee
+ * Copyright (c) 2020-2024 Ethan Lee
  *
  * This software is provided 'as-is', without any express or implied warranty.
  * In no event will the authors be held liable for any damages arising from
@@ -33,6 +33,12 @@
 #else
 #define FNA3DAPI
 #define FNA3DCALL
+#endif
+
+#ifdef _MSC_VER
+#define FNA3DDEPRECATED(msg) __declspec(deprecated(msg))
+#else
+#define FNA3DDEPRECATED(msg) __attribute__((deprecated(msg)))
 #endif
 
 /* -Wpedantic nameless union/struct silencing */
@@ -132,7 +138,13 @@ typedef enum FNA3D_SurfaceFormat
 	FNA3D_SURFACEFORMAT_HALFVECTOR2,
 	FNA3D_SURFACEFORMAT_HALFVECTOR4,
 	FNA3D_SURFACEFORMAT_HDRBLENDABLE,
-	FNA3D_SURFACEFORMAT_COLORBGRA_EXT
+	FNA3D_SURFACEFORMAT_COLORBGRA_EXT,
+	FNA3D_SURFACEFORMAT_COLORSRGB_EXT,
+	FNA3D_SURFACEFORMAT_DXT5SRGB_EXT,
+	FNA3D_SURFACEFORMAT_BC7_EXT,
+	FNA3D_SURFACEFORMAT_BC7SRGB_EXT,
+	FNA3D_SURFACEFORMAT_BYTE_EXT,
+	FNA3D_SURFACEFORMAT_USHORT_EXT,
 } FNA3D_SurfaceFormat;
 
 typedef enum FNA3D_DepthFormat
@@ -458,8 +470,8 @@ typedef struct FNA3D_RenderTargetBinding
 /* Version API */
 
 #define FNA3D_ABI_VERSION	 0
-#define FNA3D_MAJOR_VERSION	21
-#define FNA3D_MINOR_VERSION	 6
+#define FNA3D_MAJOR_VERSION	26
+#define FNA3D_MINOR_VERSION	 3
 #define FNA3D_PATCH_VERSION	 0
 
 #define FNA3D_COMPILED_VERSION ( \
@@ -498,12 +510,19 @@ FNA3DAPI void FNA3D_HookLogFunctions(
  */
 FNA3DAPI uint32_t FNA3D_PrepareWindowAttributes(void);
 
-/* After your window is created, call this to check for high-DPI support.
+/* After your device is created, call this to check for high-DPI support.
+ *
+ * NOTE: This call is now deprecated, in favor of SDL_GetWindowSizeInPixels!
+ *
+ * Note that this will NOT work if it's called after the window is created but
+ * before the device! Not all platforms create drawable surfaces at the same
+ * time as the window!
  *
  * window:	The OS window handle, typically an SDL_Window*.
  * w:		Filled with the width of the window's drawable canvas.
  * h:		Filled with the height of the window's drawable canvas.
  */
+FNA3DDEPRECATED("Use SDL_GetWindowSizeInPixels instead!")
 FNA3DAPI void FNA3D_GetDrawableSize(void* window, int32_t *w, int32_t *h);
 
 /* Creates a rendering context for use on the calling thread.
@@ -1472,11 +1491,17 @@ FNA3DAPI uint8_t FNA3D_SupportsDXT1(FNA3D_Device *device);
 /* Returns 1 if the renderer natively supports S3TC texture data. */
 FNA3DAPI uint8_t FNA3D_SupportsS3TC(FNA3D_Device *device);
 
+/* Returns 1 if the renderer natively supports BC7 texture data. */
+FNA3DAPI uint8_t FNA3D_SupportsBC7(FNA3D_Device *device);
+
 /* Returns 1 if the renderer natively supports hardware instancing. */
 FNA3DAPI uint8_t FNA3D_SupportsHardwareInstancing(FNA3D_Device *device);
 
 /* Returns 1 if the renderer natively supports asynchronous buffer writing. */
 FNA3DAPI uint8_t FNA3D_SupportsNoOverwrite(FNA3D_Device *device);
+
+/* Returns 1 if the renderer natively supports SRGB render targets. */
+FNA3DAPI uint8_t FNA3D_SupportsSRGBRenderTargets(FNA3D_Device *device);
 
 /* Returns the number of sampler slots supported by the renderer. */
 FNA3DAPI void FNA3D_GetMaxTextureSlots(
@@ -1506,6 +1531,14 @@ FNA3DAPI int32_t FNA3D_GetMaxMultiSampleCount(
  * text: The string constant to mark in the API call stream.
  */
 FNA3DAPI void FNA3D_SetStringMarker(FNA3D_Device *device, const char *text);
+
+/* Sets an arbitrary string constant to be stored in a rendering API trace,
+ * useful for labeling textures for debugging purposes.
+ *
+ * texture: The texture to attach the name to.
+ * text: The string constant to mark as the name of the texture.
+ */
+FNA3DAPI void FNA3D_SetTextureName(FNA3D_Device *device, FNA3D_Texture *texture, const char *text);
 
 #ifdef __cplusplus
 }

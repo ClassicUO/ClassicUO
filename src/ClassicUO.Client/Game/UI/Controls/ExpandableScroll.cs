@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -42,19 +42,21 @@ namespace ClassicUO.Game.UI.Controls
     {
         private const int c_ExpandableScrollHeight_Min = 274;
         private const int c_ExpandableScrollHeight_Max = 800;
-        private const int c_GumplingExpanderY_Offset = 2; // this is the gap between the pixels of the btm Control texture and the height of the btm Control texture.
+        private const int c_ExpandableScroll_DefaultWidth = 408;
+        private const int c_GumplingExpanderY_Offset = 2;
         private const int c_GumplingExpander_ButtonID = 0x7FBEEF;
-        private readonly GumpPic _gumpBottom;
+        private GumpPic _gumpBottom;
         private Button _gumpExpander;
         private GumpPic _gumplingTitle;
         private int _gumplingTitleGumpID;
         private bool _gumplingTitleGumpIDDelta;
-        private readonly GumpPicTiled _gumpMiddle;
-        private readonly GumpPicTiled _gumpRight;
-        private readonly GumpPic _gumpTop;
+        private GumpPicTiled _gumpMiddle;
+        private GumpPicTiled _gumpRight;
+        private GumpPic _gumpTop;
         private bool _isExpanding;
         private readonly bool _isResizable = true;
         private Point _lastExpanderPosition;
+        private bool _useFallbackBackground;
 
         public ExpandableScroll(int x, int y, int height, ushort graphic, bool isResizable = true)
         {
@@ -71,15 +73,15 @@ namespace ClassicUO.Game.UI.Controls
                 w1 = 0,
                 w3 = 0;
 
+            bool hasNullTexture = false;
             for (int i = 0; i < 4; i++)
             {
                 ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump((ushort)(graphic + i));
 
                 if (gumpInfo.Texture == null)
                 {
-                    Dispose();
-
-                    return;
+                    hasNullTexture = true;
+                    break;
                 }
 
                 if (gumpInfo.UV.Width > width)
@@ -99,6 +101,16 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     w3 = gumpInfo.UV.Width;
                 }
+            }
+
+            if (hasNullTexture)
+            {
+                _useFallbackBackground = true;
+                width = width > 0 ? width : c_ExpandableScroll_DefaultWidth;
+                Add(new AlphaBlendControl(0.95f) { BaseColor = Color.White, Width = width, Height = height });
+                Width = width;
+                WantUpdateSize = true;
+                return;
             }
 
             Add(_gumpTop = new GumpPic(0, 0, graphic, 0));
@@ -137,13 +149,17 @@ namespace ClassicUO.Game.UI.Controls
             WantUpdateSize = true;
         }
 
-        private int _gumplingMidY => _gumpTop.Height;
+        private int _gumplingMidY => _gumpTop != null ? _gumpTop.Height : 0;
 
         private int _gumplingMidHeight =>
-            SpecialHeight - _gumpTop.Height - _gumpBottom.Height - (_gumpExpander?.Height ?? 0);
+            _gumpTop != null && _gumpBottom != null
+                ? SpecialHeight - _gumpTop.Height - _gumpBottom.Height - (_gumpExpander?.Height ?? 0)
+                : SpecialHeight;
 
         private int _gumplingBottomY =>
-            SpecialHeight - _gumpBottom.Height - (_gumpExpander?.Height ?? 0);
+            _gumpBottom != null
+                ? SpecialHeight - _gumpBottom.Height - (_gumpExpander?.Height ?? 0)
+                : 0;
 
         private int _gumplingExpanderX => (Width - (_gumpExpander?.Width ?? 0)) >> 1;
 
@@ -163,8 +179,14 @@ namespace ClassicUO.Game.UI.Controls
 
         public ushort Hue
         {
-            get => _gumpTop.Hue;
-            set => _gumpTop.Hue = _gumpBottom.Hue = _gumpMiddle.Hue = _gumpRight.Hue = value;
+            get => _gumpTop != null ? _gumpTop.Hue : (ushort)0;
+            set
+            {
+                if (_gumpTop != null) _gumpTop.Hue = value;
+                if (_gumpBottom != null) _gumpBottom.Hue = value;
+                if (_gumpMiddle != null) _gumpMiddle.Hue = value;
+                if (_gumpRight != null) _gumpRight.Hue = value;
+            }
         }
 
         public override void Dispose()
@@ -182,6 +204,11 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
+            if (_useFallbackBackground)
+            {
+                return base.Contains(x, y);
+            }
+
             x += ScreenCoordinateX;
             y += ScreenCoordinateY;
 
@@ -215,7 +242,10 @@ namespace ClassicUO.Game.UI.Controls
                 return true;
             }
 
-            _gumpExpander.HitTest(x, y, ref c);
+            if (_gumpExpander != null)
+            {
+                _gumpExpander.HitTest(x, y, ref c);
+            }
 
             if (c != null)
             {
@@ -227,6 +257,12 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Update()
         {
+            if (_useFallbackBackground)
+            {
+                base.Update();
+                return;
+            }
+
             if (Mouse.LButtonPressed && _isExpanding)
             {
                 SpecialHeight += Mouse.Position.Y - _lastExpanderPosition.Y;
@@ -253,28 +289,23 @@ namespace ClassicUO.Game.UI.Controls
                 Add(_gumplingTitle = new GumpPic(0, 0, (ushort)_gumplingTitleGumpID, 0));
             }
 
-            //if (!IsVisible)
-            //    IsVisible = true;
-            //TOP
             _gumpTop.X = 0;
             _gumpTop.Y = 0;
             _gumpTop.WantUpdateSize = true;
-            //MIDDLE
             _gumpRight.Y = _gumpMiddle.Y = _gumplingMidY;
             _gumpRight.Height = _gumpMiddle.Height = _gumplingMidHeight;
             _gumpRight.WantUpdateSize = _gumpMiddle.WantUpdateSize = true;
-            //BOTTOM
             _gumpBottom.Y = _gumplingBottomY;
             _gumpBottom.WantUpdateSize = true;
 
-            if (_isResizable)
+            if (_isResizable && _gumpExpander != null)
             {
                 _gumpExpander.X = _gumplingExpanderX;
                 _gumpExpander.Y = _gumplingExpanderY;
                 _gumpExpander.WantUpdateSize = true;
             }
 
-            if (_gumplingTitle != null)
+            if (_gumplingTitle != null && _gumpTop != null)
             {
                 _gumplingTitle.X = (_gumpTop.Width - _gumplingTitle.Width) >> 1;
                 _gumplingTitle.Y = (_gumpTop.Height - _gumplingTitle.Height) >> 1;

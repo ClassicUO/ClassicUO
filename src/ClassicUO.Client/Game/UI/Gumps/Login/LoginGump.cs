@@ -41,7 +41,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
-using SDL2;
+using SDL3;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Xna.Framework;

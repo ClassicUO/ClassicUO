@@ -40,7 +40,7 @@ using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
-using SDL2;
+using SDL3;
 using System;
 using System.Diagnostics;
 using System.IO;

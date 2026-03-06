@@ -47,7 +47,8 @@ namespace ClassicUO.Game.UI.Gumps
             var profile = ProfileManager.CurrentProfile;
             byte font = profile?.SelectedToolTipFont ?? 1;
             TEXT_ALIGN_TYPE align = profile?.LeftAlignToolTips == true ? TEXT_ALIGN_TYPE.TS_LEFT : TEXT_ALIGN_TYPE.TS_CENTER;
-            text = new UOLabel("Loading item data...", font, (ushort)hue, align, 150, FontStyle.BlackBorder, true, true);
+            FontStyle textStyle = (profile != null && profile.TooltipTextHue != 0xFFFF) ? FontStyle.None : FontStyle.BlackBorder;
+            text = new UOLabel("Loading item data...", font, (ushort)hue, align, 150, textStyle, true, true);
 
             Height = text.Height;
             Width = text.Width;
@@ -70,7 +71,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (World.OPL.TryGetNameAndData(item.Serial, out string name, out string data))
                 {
                     string finalString = FormatTooltip(name, data);
-                    if (SerialHelper.IsItem(item.Serial))
+                    if (SerialHelper.IsItem(item.Serial) && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableTooltipOverride)
                     {
                         finalString = Managers.ToolTipOverrideData.ProcessTooltipText(item.Serial, compareTo == null ? uint.MinValue : compareTo.Serial);
                         if (finalString == null)
@@ -83,7 +84,8 @@ namespace ClassicUO.Game.UI.Gumps
                     var p = ProfileManager.CurrentProfile;
                     byte font = p?.SelectedToolTipFont ?? 1;
                     TEXT_ALIGN_TYPE align = p?.LeftAlignToolTips == true ? TEXT_ALIGN_TYPE.TS_LEFT : TEXT_ALIGN_TYPE.TS_CENTER;
-                    text = new UOLabel(displayText, font, (ushort)hue, align, 600, FontStyle.BlackBorder, true, true);
+                    FontStyle textStyle = (p != null && p.TooltipTextHue != 0xFFFF) ? FontStyle.None : FontStyle.BlackBorder;
+                    text = new UOLabel(displayText, font, (ushort)hue, align, 600, textStyle, true, true);
 
                     if (text.Width + 10 < 600)
                         text.Width = text.Width + 10;
@@ -124,6 +126,11 @@ namespace ClassicUO.Game.UI.Gumps
             base.Draw(batcher, x, y);
             if (IsDisposed)
                 return false;
+            if (ProfileManager.CurrentProfile != null && !ProfileManager.CurrentProfile.UseTooltip)
+            {
+                Dispose();
+                return false;
+            }
             if (hoverReference != null && !hoverReference.MouseIsOver)
             {
                 Dispose();

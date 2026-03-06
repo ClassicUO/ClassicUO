@@ -1,6 +1,6 @@
 /* FAudio - XAudio Reimplementation for FNA
  *
- * Copyright (c) 2011-2021 Ethan Lee, Luigi Auriemma, and the MonoGame Team
+ * Copyright (c) 2011-2024 Ethan Lee, Luigi Auriemma, and the MonoGame Team
  *
  * This software is provided 'as-is', without any express or implied warranty.
  * In no event will the authors be held liable for any damages arising from
@@ -27,20 +27,26 @@
 #include "FAudio.h"
 #include "FAPOBase.h"
 #include <stdarg.h>
+#include <stdbool.h>
 
-#ifdef FAUDIO_UNKNOWN_PLATFORM
+
+#ifdef FAUDIO_WIN32_PLATFORM
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <malloc.h>
 #include <math.h>
 #include <assert.h>
 #include <inttypes.h>
 
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+
 #define FAudio_malloc malloc
 #define FAudio_realloc realloc
 #define FAudio_free free
-#define FAudio_alloca(x) alloca(uint8_t, x)
-#define FAudio_dealloca(x) dealloca(x)
+#define FAudio_alloca(x) alloca(x)
+#define FAudio_dealloca(x) (void)(x)
 #define FAudio_zero(ptr, size) memset(ptr, '\0', size)
 #define FAudio_memset(ptr, val, size) memset(ptr, val, size)
 #define FAudio_memcpy(dst, src, size) memcpy(dst, src, size)
@@ -49,9 +55,11 @@
 
 #define FAudio_strlen(ptr) strlen(ptr)
 #define FAudio_strcmp(str1, str2) strcmp(str1, str2)
-#define FAudio_strlcpy(ptr1, ptr2, size) strlcpy(ptr1, ptr2, size)
+#define FAudio_strncmp(str1, str2, size) strncmp(str1, str2, size)
+#define FAudio_strlcpy(ptr1, ptr2, size) lstrcpynA(ptr1, ptr2, size)
 
 #define FAudio_pow(x, y) pow(x, y)
+#define FAudio_powf(x, y) powf(x, y)
 #define FAudio_log(x) log(x)
 #define FAudio_log10(x) log10(x)
 #define FAudio_sin(x) sin(x)
@@ -76,10 +84,11 @@
 #define FAudio_assert assert
 #define FAudio_snprintf snprintf
 #define FAudio_vsnprintf vsnprintf
-#define FAudio_Log(msg) fprintf(stderr, "%s\n", msg)
 #define FAudio_getenv getenv
 #define FAudio_PRIu64 PRIu64
 #define FAudio_PRIx64 PRIx64
+
+extern void FAudio_Log(char const *msg);
 
 /* FIXME: Assuming little-endian! */
 #define FAudio_swap16LE(x) (x)
@@ -103,10 +112,43 @@
 	((x << 24)	& 0x00FF000000000000) | \
 	((x << 32)	& 0xFF00000000000000)
 #else
+
+#ifdef FAUDIO_SDL3_PLATFORM
+#include <SDL3/SDL_stdinc.h>
+#include <SDL3/SDL_assert.h>
+#include <SDL3/SDL_endian.h>
+#include <SDL3/SDL_log.h>
+
+#define FAudio_swap16LE(x) SDL_Swap16LE(x)
+#define FAudio_swap16BE(x) SDL_Swap16BE(x)
+#define FAudio_swap32LE(x) SDL_Swap32LE(x)
+#define FAudio_swap32BE(x) SDL_Swap32BE(x)
+#define FAudio_swap64LE(x) SDL_Swap64LE(x)
+#define FAudio_swap64BE(x) SDL_Swap64BE(x)
+
+/* SDL3 allows memcpy/memset for compiler optimization reasons */
+#ifdef SDL_SLOW_MEMCPY
+#define STB_MEMCPY_OVERRIDE
+#endif
+#ifdef SDL_SLOW_MEMSET
+#define STB_MEMSET_OVERRIDE
+#endif
+#else
 #include <SDL_stdinc.h>
 #include <SDL_assert.h>
 #include <SDL_endian.h>
 #include <SDL_log.h>
+
+#define FAudio_swap16LE(x) SDL_SwapLE16(x)
+#define FAudio_swap16BE(x) SDL_SwapBE16(x)
+#define FAudio_swap32LE(x) SDL_SwapLE32(x)
+#define FAudio_swap32BE(x) SDL_SwapBE32(x)
+#define FAudio_swap64LE(x) SDL_SwapLE64(x)
+#define FAudio_swap64BE(x) SDL_SwapBE64(x)
+
+#define STB_MEMCPY_OVERRIDE
+#define STB_MEMSET_OVERRIDE
+#endif
 
 #define FAudio_malloc SDL_malloc
 #define FAudio_realloc SDL_realloc
@@ -121,9 +163,11 @@
 
 #define FAudio_strlen(ptr) SDL_strlen(ptr)
 #define FAudio_strcmp(str1, str2) SDL_strcmp(str1, str2)
+#define FAudio_strncmp(str1, str2, size) SDL_strncmp(str1, str1, size)
 #define FAudio_strlcpy(ptr1, ptr2, size) SDL_strlcpy(ptr1, ptr2, size)
 
 #define FAudio_pow(x, y) SDL_pow(x, y)
+#define FAudio_powf(x, y) SDL_powf(x, y)
 #define FAudio_log(x) SDL_log(x)
 #define FAudio_log10(x) SDL_log10(x)
 #define FAudio_sin(x) SDL_sin(x)
@@ -164,13 +208,6 @@
 #define FAudio_getenv SDL_getenv
 #define FAudio_PRIu64 SDL_PRIu64
 #define FAudio_PRIx64 SDL_PRIx64
-
-#define FAudio_swap16LE(x) SDL_SwapLE16(x)
-#define FAudio_swap16BE(x) SDL_SwapBE16(x)
-#define FAudio_swap32LE(x) SDL_SwapLE32(x)
-#define FAudio_swap32BE(x) SDL_SwapBE32(x)
-#define FAudio_swap64LE(x) SDL_SwapLE64(x)
-#define FAudio_swap64BE(x) SDL_SwapBE64(x)
 #endif
 
 /* Easy Macros */
@@ -201,6 +238,15 @@
 /* C++ does not have restrict (though VS2012+ does have __restrict) */
 #if defined(__cplusplus) && !defined(restrict)
 #define restrict
+#endif
+
+/* Alignment macro for gcc/clang/msvc */
+#if defined(__clang__) || defined(__GNUC__)
+#define ALIGN(type, boundary) type __attribute__((aligned(boundary)))
+#elif defined(_MSC_VER)
+#define ALIGN(type, boundary) __declspec(align(boundary)) type
+#else
+#define ALIGN(type, boundary) type
 #endif
 
 /* Threading Types */
@@ -316,13 +362,13 @@ void FAudio_OPERATIONSET_QueueSetEffectParameters(
 );
 void FAudio_OPERATIONSET_QueueSetFilterParameters(
 	FAudioVoice *voice,
-	const FAudioFilterParameters *pParameters,
+	const FAudioFilterParametersEXT *pParameters,
 	uint32_t OperationSet
 );
 void FAudio_OPERATIONSET_QueueSetOutputFilterParameters(
 	FAudioVoice *voice,
 	FAudioVoice *pDestinationVoice,
-	const FAudioFilterParameters *pParameters,
+	const FAudioFilterParametersEXT *pParameters,
 	uint32_t OperationSet
 );
 void FAudio_OPERATIONSET_QueueSetVolume(
@@ -426,7 +472,7 @@ struct FAudioVoice
 	float **sendCoefficients;
 	float **mixCoefficients;
 	FAudioMixCallback *sendMix;
-	FAudioFilterParameters *sendFilter;
+	FAudioFilterParametersEXT *sendFilter;
 	FAudioFilterState **sendFilterState;
 	struct
 	{
@@ -438,7 +484,7 @@ struct FAudioVoice
 		uint8_t *parameterUpdates;
 		uint8_t *inPlaceProcessing;
 	} effects;
-	FAudioFilterParameters filter;
+	FAudioFilterParametersEXT filter;
 	FAudioFilterState *filterState;
 	FAudioMutex sendLock;
 	FAudioMutex effectLock;
@@ -464,10 +510,10 @@ struct FAudioVoice
 			uint64_t curBufferOffsetDec;
 			uint32_t curBufferOffset;
 
-			/* GStreamer */
-#ifdef HAVE_GSTREAMER
-			struct FAudioGSTREAMER *gstreamer;
-#endif /* HAVE_GSTREAMER*/
+			/* WMA decoding */
+#ifdef HAVE_WMADEC
+			struct FAudioWMADEC *wmadec;
+#endif /* HAVE_WMADEC*/
 
 			/* Read-only */
 			float maxFreqRatio;
@@ -611,10 +657,10 @@ void FAudio_INTERNAL_debug_fmt(
 #define LOG_FUNC_ENTER(engine) PRINT_DEBUG(engine, FUNC_CALLS, "FUNC Enter", "%s", __func__)
 #define LOG_FUNC_EXIT(engine) PRINT_DEBUG(engine, FUNC_CALLS, "FUNC Exit", "%s", __func__)
 /* TODO: LOG_TIMING */
-#define LOG_MUTEX_CREATE(engine, mutex) PRINT_DEBUG(engine, LOCKS, "Mutex Create", "%p", mutex)
-#define LOG_MUTEX_DESTROY(engine, mutex) PRINT_DEBUG(engine, LOCKS, "Mutex Destroy", "%p", mutex)
-#define LOG_MUTEX_LOCK(engine, mutex) PRINT_DEBUG(engine, LOCKS, "Mutex Lock", "%p", mutex)
-#define LOG_MUTEX_UNLOCK(engine, mutex) PRINT_DEBUG(engine, LOCKS, "Mutex Unlock", "%p", mutex)
+#define LOG_MUTEX_CREATE(engine, mutex) PRINT_DEBUG(engine, LOCKS, "Mutex Create", "%p (%s)", mutex, #mutex)
+#define LOG_MUTEX_DESTROY(engine, mutex) PRINT_DEBUG(engine, LOCKS, "Mutex Destroy", "%p (%s)", mutex, #mutex)
+#define LOG_MUTEX_LOCK(engine, mutex) PRINT_DEBUG(engine, LOCKS, "Mutex Lock", "%p (%s)", mutex, #mutex)
+#define LOG_MUTEX_UNLOCK(engine, mutex) PRINT_DEBUG(engine, LOCKS, "Mutex Unlock", "%p (%s)", mutex, #mutex)
 /* TODO: LOG_MEMORY */
 /* TODO: LOG_STREAMING */
 
@@ -732,13 +778,13 @@ DECODE_FUNC(StereoMSADPCM)
 DECODE_FUNC(WMAERROR)
 #undef DECODE_FUNC
 
-/* GStreamer */
+/* WMA decoding */
 
-#ifdef HAVE_GSTREAMER
-uint32_t FAudio_GSTREAMER_init(FAudioSourceVoice *pSourceVoice, uint32_t type);
-void FAudio_GSTREAMER_free(FAudioSourceVoice *voice);
-void FAudio_GSTREAMER_end_buffer(FAudioSourceVoice *voice);
-#endif /* HAVE_GSTREAMER */
+#ifdef HAVE_WMADEC
+uint32_t FAudio_WMADEC_init(FAudioSourceVoice *pSourceVoice, uint32_t type);
+void FAudio_WMADEC_free(FAudioSourceVoice *voice);
+void FAudio_WMADEC_end_buffer(FAudioSourceVoice *voice);
+#endif /* HAVE_WMADEC */
 
 /* Platform Functions */
 
@@ -790,7 +836,7 @@ static inline uint32_t GetMask(uint16_t channels)
 	if (channels == 4) return SPEAKER_QUAD;
 	if (channels == 5) return SPEAKER_4POINT1;
 	if (channels == 6) return SPEAKER_5POINT1;
-	if (channels == 8) return SPEAKER_7POINT1;
+	if (channels == 8) return SPEAKER_7POINT1_SURROUND;
 	FAudio_assert(0 && "Unrecognized speaker layout!");
 	return 0;
 }

@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -89,12 +89,12 @@ namespace Microsoft.Xna.Framework.Audio
 			dspSettings = new FAudio.F3DAUDIO_DSP_SETTINGS();
 			dspSettings.SrcChannelCount = 1;
 			dspSettings.DstChannelCount = engine.channels;
-			dspSettings.pMatrixCoefficients = Marshal.AllocHGlobal(
+			dspSettings.pMatrixCoefficients = FNAPlatform.Malloc(
 				4 *
 				(int) dspSettings.SrcChannelCount *
 				(int) dspSettings.DstChannelCount
 			);
-			engine.RegisterSoundBank(handle, selfReference);
+			engine.RegisterPointer(handle, selfReference);
 			IsDisposed = false;
 		}
 
@@ -146,9 +146,7 @@ namespace Microsoft.Xna.Framework.Audio
 					// If this is disposed, stop leaking memory!
 					if (!engine.IsDisposed)
 					{
-						engine.UnregisterSoundBank(handle);
 						FAudio.FACTSoundBank_Destroy(handle);
-						Marshal.FreeHGlobal(dspSettings.pMatrixCoefficients);
 					}
 					OnSoundBankDestroyed();
 				}
@@ -274,6 +272,11 @@ namespace Microsoft.Xna.Framework.Audio
 			IsDisposed = true;
 			handle = IntPtr.Zero;
 			selfReference = null;
+			if (dspSettings.pMatrixCoefficients != IntPtr.Zero)
+			{
+				FNAPlatform.Free(dspSettings.pMatrixCoefficients);
+				dspSettings.pMatrixCoefficients = IntPtr.Zero;
+			}
 		}
 
 		#endregion

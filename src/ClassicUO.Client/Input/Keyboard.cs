@@ -30,7 +30,7 @@
 
 #endregion
 
-using SDL2;
+using SDL3;
 
 namespace ClassicUO.Input
 {
@@ -38,7 +38,7 @@ namespace ClassicUO.Input
     {
         private static SDL.SDL_Keycode _code;
 
-        public static SDL.SDL_Keymod IgnoreKeyMod { get; } = SDL.SDL_Keymod.KMOD_CAPS | SDL.SDL_Keymod.KMOD_NUM | SDL.SDL_Keymod.KMOD_MODE | SDL.SDL_Keymod.KMOD_RESERVED;
+        public static SDL.SDL_Keymod IgnoreKeyMod { get; } = SDL.SDL_Keymod.SDL_KMOD_CAPS | SDL.SDL_Keymod.SDL_KMOD_NUM | SDL.SDL_Keymod.SDL_KMOD_MODE | SDL.SDL_Keymod.SDL_KMOD_SCROLL;
 
         public static bool Alt { get; private set; }
         public static bool Shift { get; private set; }
@@ -47,35 +47,35 @@ namespace ClassicUO.Input
         public static void OnKeyUp(SDL.SDL_KeyboardEvent e)
         {
             ApplyFilter(ref e);
-            UpdateModifiers(e.keysym.mod);
+            UpdateModifiers(e.mod);
             _code = SDL.SDL_Keycode.SDLK_UNKNOWN;
         }
 
         public static void OnKeyDown(SDL.SDL_KeyboardEvent e)
         {
             ApplyFilter(ref e);
-            UpdateModifiers(e.keysym.mod);
-            if (e.keysym.sym != SDL.SDL_Keycode.SDLK_UNKNOWN)
-                _code = e.keysym.sym;
+            UpdateModifiers(e.mod);
+            if ((SDL.SDL_Keycode)e.key != SDL.SDL_Keycode.SDLK_UNKNOWN)
+                _code = (SDL.SDL_Keycode)e.key;
         }
 
         private static void ApplyFilter(ref SDL.SDL_KeyboardEvent e)
         {
-            if ((e.keysym.mod & (SDL.SDL_Keymod.KMOD_RALT | SDL.SDL_Keymod.KMOD_LCTRL)) == (SDL.SDL_Keymod.KMOD_RALT | SDL.SDL_Keymod.KMOD_LCTRL))
+            if ((e.mod & (SDL.SDL_Keymod.SDL_KMOD_RALT | SDL.SDL_Keymod.SDL_KMOD_LCTRL)) == (SDL.SDL_Keymod.SDL_KMOD_RALT | SDL.SDL_Keymod.SDL_KMOD_LCTRL))
             {
-                e.keysym.sym = SDL.SDL_Keycode.SDLK_UNKNOWN;
-                e.keysym.mod = SDL.SDL_Keymod.KMOD_NONE;
+                e.key = (uint)SDL.SDL_Keycode.SDLK_UNKNOWN;
+                e.mod = SDL.SDL_Keymod.SDL_KMOD_NONE;
             }
         }
 
         private static void UpdateModifiers(SDL.SDL_Keymod mod)
         {
             SDL.SDL_Keymod m = mod & ~IgnoreKeyMod;
-            if ((m & (SDL.SDL_Keymod.KMOD_RALT | SDL.SDL_Keymod.KMOD_LCTRL)) == (SDL.SDL_Keymod.KMOD_RALT | SDL.SDL_Keymod.KMOD_LCTRL))
-                m = SDL.SDL_Keymod.KMOD_NONE;
-            Shift = (m & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
-            Alt = (m & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
-            Ctrl = (m & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
+            if ((m & (SDL.SDL_Keymod.SDL_KMOD_RALT | SDL.SDL_Keymod.SDL_KMOD_LCTRL)) == (SDL.SDL_Keymod.SDL_KMOD_RALT | SDL.SDL_Keymod.SDL_KMOD_LCTRL))
+                m = SDL.SDL_Keymod.SDL_KMOD_NONE;
+            Shift = (m & SDL.SDL_Keymod.SDL_KMOD_SHIFT) != SDL.SDL_Keymod.SDL_KMOD_NONE;
+            Alt = (m & SDL.SDL_Keymod.SDL_KMOD_ALT) != SDL.SDL_Keymod.SDL_KMOD_NONE;
+            Ctrl = (m & SDL.SDL_Keymod.SDL_KMOD_CTRL) != SDL.SDL_Keymod.SDL_KMOD_NONE;
         }
 
         public static void Refresh()

@@ -9,13 +9,25 @@
 //  http://msdn.microsoft.com/en-us/library/ff569705.aspx
 
 #ifdef MOJOSHADER_USE_SDL_STDLIB
+#ifdef USE_SDL3 /* Private define, for now */
+#include <SDL3/SDL_assert.h>
+#include <SDL3/SDL_endian.h>
+#include <SDL3/SDL_stdinc.h>
+#include <SDL3/SDL_loadso.h>
+#else
 #include <SDL_assert.h>
+#include <SDL_endian.h>
 #include <SDL_stdinc.h>
+#include <SDL_loadso.h>
+#endif
 #include <math.h> /* Needed for isinf/isnan :( */
 
 /* FIXME: These includes are needed for alloca :( */
 #include <stdlib.h>
-#ifndef __APPLE__
+#if defined(__linux__) || defined(__sun)
+#include <alloca.h>
+#endif
+#ifdef _MSC_VER
 #include <malloc.h>
 #endif
 
@@ -50,7 +62,7 @@ typedef Uint64 uint64;
 #define asin SDL_asin
 #define atan SDL_atan
 #define atan2 SDL_atan2
-#define cos SDL_acos
+#define cos SDL_cos
 #define exp SDL_exp
 #define floor SDL_floor
 #define log SDL_log
@@ -100,22 +112,43 @@ typedef Uint64 uint64;
 #endif
 /* TODO: Move MojoShader away from strcpy! This len is awful! */
 #define strcpy(dst, src) SDL_strlcpy(dst, src, SDL_strlen(src) + 1)
+
+/* ctype.h */
+#ifdef isalnum
+#undef isalnum
+#endif
+#define isalnum SDL_isalnum
+
+/* endian.h */
+#define MOJOSHADER_BIG_ENDIAN (SDL_BYTEORDER == SDL_BIG_ENDIAN)
+
+/* dlfcn.h */
+#define dlopen(a, b) SDL_LoadObject(a)
+#define dlclose SDL_UnloadObject
+#define dlsym SDL_LoadFunction
 #else /* MOJOSHADER_USE_SDL_STDLIB */
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <assert.h>
+
+#ifdef __BYTE_ORDER__
+#define MOJOSHADER_BIG_ENDIAN (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
+#elif defined(__linux__)
+#include <endian.h>
+#define MOJOSHADER_BIG_ENDIAN (__BYTE_ORDER == __BIG_ENDIAN)
+#else
+/* TODO: Detect little endian PowerPC? */
+#if defined(__POWERPC__) || defined(__powerpc__)
+#define MOJOSHADER_BIG_ENDIAN 1
+#else
+#define MOJOSHADER_BIG_ENDIAN 0
+#endif
+#endif
 #endif /* MOJOSHADER_USE_SDL_STDLIB */
 
 #include "mojoshader.h"
-
-#define DEBUG_LEXER 0
-#define DEBUG_PREPROCESSOR 0
-#define DEBUG_ASSEMBLER_PARSER 0
-#define DEBUG_COMPILER_PARSER 0
-#define DEBUG_TOKENIZER \
-    (DEBUG_PREPROCESSOR || DEBUG_ASSEMBLER_PARSER || DEBUG_LEXER)
 
 // This is the highest shader version we currently support.
 
@@ -150,6 +183,10 @@ typedef Uint64 uint64;
 #define SUPPORT_PROFILE_GLSLES 1
 #endif
 
+#ifndef SUPPORT_PROFILE_GLSLES3
+#define SUPPORT_PROFILE_GLSLES3 1
+#endif
+
 #ifndef SUPPORT_PROFILE_ARB1
 #define SUPPORT_PROFILE_ARB1 1
 #endif
@@ -182,6 +219,11 @@ typedef Uint64 uint64;
 #error glsles profile requires glsl profile. Fix your build.
 #endif
 
+#if SUPPORT_PROFILE_GLSLES3 && !SUPPORT_PROFILE_GLSLES
+#error glsles3 profile requires glsles profile. Fix your build.
+#endif
+
+
 #if SUPPORT_PROFILE_GLSPIRV && !SUPPORT_PROFILE_SPIRV
 #error glspirv profile requires spirv profile. Fix your build.
 #endif
@@ -190,12 +232,6 @@ typedef Uint64 uint64;
 //  like you'd expect a C preprocessor to function.
 #ifndef MATCH_MICROSOFT_PREPROCESSOR
 #define MATCH_MICROSOFT_PREPROCESSOR 1
-#endif
-
-// Other stuff you can disable...
-
-#ifdef MOJOSHADER_EFFECT_SUPPORT
-void MOJOSHADER_runPreshader(const MOJOSHADER_preshader*, float*);
 #endif
 
 
@@ -253,10 +289,6 @@ typedef int32_t int32;
 typedef int64_t int64;
 typedef uint64_t uint64;
 #endif
-
-#ifdef sun
-#include <alloca.h>
-#endif
 #endif /* MOJOSHADER_USE_SDL_STDLIB */
 
 #ifdef __GNUC__
@@ -270,7 +302,7 @@ typedef uint64_t uint64;
 
 // Byteswap magic...
 
-#if ((defined __GNUC__) && (defined __POWERPC__))
+#if (defined(__GNUC__) && MOJOSHADER_BIG_ENDIAN && (defined(__POWERPC__) || defined(__powerpc__)))
     static inline uint32 SWAP32(uint32 x)
     {
         __asm__ __volatile__("lwbrx %0,0,%1" : "=r" (x) : "r" (&x));
@@ -281,7 +313,7 @@ typedef uint64_t uint64;
         __asm__ __volatile__("lhbrx %0,0,%1" : "=r" (x) : "r" (&x));
         return x;
     } // SWAP16
-#elif defined(__POWERPC__)
+#elif MOJOSHADER_BIG_ENDIAN
     static inline uint32 SWAP32(uint32 x)
     {
         return ( (((x) >> 24) & 0x000000FF) | (((x) >>  8) & 0x0000FF00) |
@@ -309,16 +341,16 @@ static inline int Min(const int a, const int b)
 typedef struct HashTable HashTable;
 typedef uint32 (*HashTable_HashFn)(const void *key, void *data);
 typedef int (*HashTable_KeyMatchFn)(const void *a, const void *b, void *data);
-typedef void (*HashTable_NukeFn)(const void *key, const void *value, void *data);
+typedef void (*HashTable_NukeFn)(const void *ctx, const void *key, const void *value, void *data);
 
 HashTable *hash_create(void *data, const HashTable_HashFn hashfn,
                        const HashTable_KeyMatchFn keymatchfn,
                        const HashTable_NukeFn nukefn,
                        const int stackable,
                        MOJOSHADER_malloc m, MOJOSHADER_free f, void *d);
-void hash_destroy(HashTable *table);
+void hash_destroy(HashTable *table, const void *ctx);
 int hash_insert(HashTable *table, const void *key, const void *value);
-int hash_remove(HashTable *table, const void *key);
+int hash_remove(HashTable *table, const void *key, const void *ctx);
 int hash_find(const HashTable *table, const void *key, const void **_value);
 int hash_iter(const HashTable *table, const void *key, const void **_value, void **iter);
 int hash_iter_keys(const HashTable *table, const void **_key, void **iter);
@@ -435,21 +467,6 @@ void buffer_patch(Buffer *buffer, const size_t start,
 #else
 void * MOJOSHADERCALL MOJOSHADER_internal_malloc(int bytes, void *d);
 void MOJOSHADERCALL MOJOSHADER_internal_free(void *ptr, void *d);
-#endif
-
-#if MOJOSHADER_FORCE_INCLUDE_CALLBACKS
-#define MOJOSHADER_internal_include_open NULL
-#define MOJOSHADER_internal_include_close NULL
-#else
-int MOJOSHADER_internal_include_open(MOJOSHADER_includeType inctype,
-                                     const char *fname, const char *parent,
-                                     const char **outdata,
-                                     unsigned int *outbytes,
-                                     MOJOSHADER_malloc m, MOJOSHADER_free f,
-                                     void *d);
-
-void MOJOSHADER_internal_include_close(const char *data, MOJOSHADER_malloc m,
-                                       MOJOSHADER_free f, void *d);
 #endif
 
 
@@ -583,152 +600,6 @@ extern MOJOSHADER_error MOJOSHADER_out_of_mem_error;
 extern MOJOSHADER_parseData MOJOSHADER_out_of_mem_data;
 
 
-// preprocessor stuff.
-
-typedef enum
-{
-    TOKEN_UNKNOWN = 256,  // start past ASCII character values.
-
-    // These are all C-like constructs. Tokens < 256 may be single
-    //  chars (like '+' or whatever). These are just multi-char sequences
-    //  (like "+=" or whatever).
-    TOKEN_IDENTIFIER,
-    TOKEN_INT_LITERAL,
-    TOKEN_FLOAT_LITERAL,
-    TOKEN_STRING_LITERAL,
-    TOKEN_RSHIFTASSIGN,
-    TOKEN_LSHIFTASSIGN,
-    TOKEN_ADDASSIGN,
-    TOKEN_SUBASSIGN,
-    TOKEN_MULTASSIGN,
-    TOKEN_DIVASSIGN,
-    TOKEN_MODASSIGN,
-    TOKEN_XORASSIGN,
-    TOKEN_ANDASSIGN,
-    TOKEN_ORASSIGN,
-    TOKEN_INCREMENT,
-    TOKEN_DECREMENT,
-    TOKEN_RSHIFT,
-    TOKEN_LSHIFT,
-    TOKEN_ANDAND,
-    TOKEN_OROR,
-    TOKEN_LEQ,
-    TOKEN_GEQ,
-    TOKEN_EQL,
-    TOKEN_NEQ,
-    TOKEN_HASH,
-    TOKEN_HASHHASH,
-
-    // This is returned if the preprocessor isn't stripping comments. Note
-    //  that in asm files, the ';' counts as a single-line comment, same as
-    //  "//". Note that both eat newline tokens: all of the ones inside a
-    //  multiline comment, and the ending newline on a single-line comment.
-    TOKEN_MULTI_COMMENT,
-    TOKEN_SINGLE_COMMENT,
-
-    // This is returned at the end of input...no more to process.
-    TOKEN_EOI,
-
-    // This is returned for char sequences we think are bogus. You'll have
-    //  to judge for yourself. In most cases, you'll probably just fail with
-    //  bogus syntax without explicitly checking for this token.
-    TOKEN_BAD_CHARS,
-
-    // This is returned if there's an error condition (the error is returned
-    //  as a NULL-terminated string from preprocessor_nexttoken(), instead
-    //  of actual token data). You can continue getting tokens after this
-    //  is reported. It happens for things like missing #includes, etc.
-    TOKEN_PREPROCESSING_ERROR,
-
-    // These are all caught by the preprocessor. Caller won't ever see them,
-    //  except TOKEN_PP_PRAGMA.
-    //  They control the preprocessor (#includes new files, etc).
-    TOKEN_PP_INCLUDE,
-    TOKEN_PP_LINE,
-    TOKEN_PP_DEFINE,
-    TOKEN_PP_UNDEF,
-    TOKEN_PP_IF,
-    TOKEN_PP_IFDEF,
-    TOKEN_PP_IFNDEF,
-    TOKEN_PP_ELSE,
-    TOKEN_PP_ELIF,
-    TOKEN_PP_ENDIF,
-    TOKEN_PP_ERROR,  // caught, becomes TOKEN_PREPROCESSING_ERROR
-    TOKEN_PP_PRAGMA,
-    TOKEN_INCOMPLETE_COMMENT,  // caught, becomes TOKEN_PREPROCESSING_ERROR
-    TOKEN_PP_UNARY_MINUS,  // used internally, never returned.
-    TOKEN_PP_UNARY_PLUS,   // used internally, never returned.
-} Token;
-
-
-// This is opaque.
-struct Preprocessor;
-typedef struct Preprocessor Preprocessor;
-
-typedef struct Conditional
-{
-    Token type;
-    int linenum;
-    int skipping;
-    int chosen;
-    struct Conditional *next;
-} Conditional;
-
-typedef struct Define
-{
-    const char *identifier;
-    const char *definition;
-    const char *original;
-    const char **parameters;
-    int paramcount;
-    struct Define *next;
-} Define;
-
-typedef struct IncludeState
-{
-    const char *filename;
-    const char *source_base;
-    const char *source;
-    const char *token;
-    unsigned int tokenlen;
-    Token tokenval;
-    int pushedback;
-    const unsigned char *lexer_marker;
-    int report_whitespace;
-    int report_comments;
-    int asm_comments;
-    unsigned int orig_length;
-    unsigned int bytes_left;
-    unsigned int line;
-    Conditional *conditional_stack;
-    MOJOSHADER_includeClose close_callback;
-    struct IncludeState *next;
-} IncludeState;
-
-Token preprocessor_lexer(IncludeState *s);
-
-// This will only fail if the allocator fails, so it doesn't return any
-//  error code...NULL on failure.
-Preprocessor *preprocessor_start(const char *fname, const char *source,
-                            unsigned int sourcelen,
-                            MOJOSHADER_includeOpen open_callback,
-                            MOJOSHADER_includeClose close_callback,
-                            const MOJOSHADER_preprocessorDefine *defines,
-                            unsigned int define_count, int asm_comments,
-                            MOJOSHADER_malloc m, MOJOSHADER_free f, void *d);
-
-void preprocessor_end(Preprocessor *pp);
-int preprocessor_outofmemory(Preprocessor *pp);
-const char *preprocessor_nexttoken(Preprocessor *_ctx,
-                                   unsigned int *_len, Token *_token);
-const char *preprocessor_sourcepos(Preprocessor *pp, unsigned int *pos);
-
-
-void MOJOSHADER_print_debug_token(const char *subsystem, const char *token,
-                                  const unsigned int tokenlen,
-                                  const Token tokenval);
-
-
 #if SUPPORT_PROFILE_SPIRV
 // Patching SPIR-V binaries before linking is needed to ensure locations do not
 // overlap between shader stages. Unfortunately, OpDecorate takes Literal, so we
@@ -761,7 +632,23 @@ typedef struct SpirvPatchTable
     uint32 tid_pvec2i;
     uint32 tid_vec2;
     uint32 tid_pvec4i;
+
+    /// Patches for TEXCOORD0 and vertex attribute types
     uint32 tid_vec4;
+    uint32 tid_ivec4;
+    uint32 tid_uvec4;
+
+    // Patches for vertex attribute types
+    uint32 tid_vec4_p;
+    uint32 tid_ivec4_p;
+    uint32 tid_uvec4_p;
+    uint32 attrib_type_offsets[MOJOSHADER_USAGE_TOTAL][16];
+    struct
+    {
+        uint32 num_loads;
+        uint32 *load_types;
+        uint32 *load_opcodes;
+    } attrib_type_load_offsets[MOJOSHADER_USAGE_TOTAL][16];
 
     // Patches for linking vertex output/pixel input
     uint32 attrib_offsets[MOJOSHADER_USAGE_TOTAL][16];
@@ -769,7 +656,8 @@ typedef struct SpirvPatchTable
 } SpirvPatchTable;
 
 void MOJOSHADER_spirv_link_attributes(const MOJOSHADER_parseData *vertex,
-                                      const MOJOSHADER_parseData *pixel);
+                                      const MOJOSHADER_parseData *pixel,
+                                      int is_glspirv);
 #endif
 
 #endif  // _INCLUDE_MOJOSHADER_INTERNAL_H_

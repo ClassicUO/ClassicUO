@@ -52,7 +52,7 @@ using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using static SDL2.SDL;
+using static SDL3.SDL;
 
 namespace ClassicUO
 {
@@ -138,8 +138,8 @@ namespace ClassicUO
             _filter = HandleSdlEvent;
             SDL_SetEventFilter(_filter, IntPtr.Zero);
 
-            // Otimizações SDL2 para FPS alto
-            OptimizeSDL2ForHighFPS();
+            // SDL optimizations for high FPS
+            OptimizeSDLForHighFPS();
 
             base.Initialize();
         }
@@ -384,10 +384,9 @@ namespace ClassicUO
             GraphicManager.ApplyChanges();
         }
 
-        private void OptimizeSDL2ForHighFPS()
+        private void OptimizeSDLForHighFPS()
         {
-            // Configurar hints SDL2 para máxima performance
-            SDL_SetHint("SDL_RENDER_VSYNC", "0"); // Desabilitar VSync no SDL2
+            SDL_SetHint("SDL_RENDER_VSYNC", "0");
             SDL_SetHint("SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS", "0"); // Não minimizar ao perder foco
             SDL_SetHint("SDL_TIMER_RESOLUTION", "1"); // Resolução de timer de 1ms para FPS alto
             
@@ -401,7 +400,7 @@ namespace ClassicUO
             // Configurar timer de alta resolução
             SDL_SetHint("SDL_HINT_TIMER_RESOLUTION", "1");
             
-            Log.Trace("SDL2 otimizado para FPS alto");
+            Log.Trace("SDL optimized for high FPS");
         }
 
         public void SetWindowBorderless(bool borderless)
@@ -418,23 +417,18 @@ namespace ClassicUO
                 return;
             }
 
-            SDL_SetWindowBordered(
-                Window.Handle,
-                borderless ? SDL_bool.SDL_FALSE : SDL_bool.SDL_TRUE
-            );
-            SDL_GetCurrentDisplayMode(
-                SDL_GetWindowDisplayIndex(Window.Handle),
-                out SDL_DisplayMode displayMode
-            );
+            SDL_SetWindowBordered(Window.Handle, !borderless);
 
-            int width = displayMode.w;
-            int height = displayMode.h;
+            uint displayId = SDL_GetDisplayForWindow(Window.Handle);
+            SDL_DisplayMode* displayModePtr = (SDL_DisplayMode*)SDL_GetCurrentDisplayMode(displayId);
+            int width = displayModePtr->w;
+            int height = displayModePtr->h;
 
             if (borderless)
             {
                 SetWindowSize(width, height);
                 SDL_GetDisplayUsableBounds(
-                    SDL_GetWindowDisplayIndex(Window.Handle),
+                    SDL_GetDisplayForWindow(Window.Handle),
                     out SDL_Rect rect
                 );
                 SDL_SetWindowPosition(Window.Handle, rect.x, rect.y);
@@ -681,13 +675,22 @@ namespace ClassicUO
             }
         }
 
-        private int HandleSdlEvent(IntPtr userData, IntPtr ptr)
+        private bool HandleSdlEvent(IntPtr userData, SDL_Event* sdlEvent)
         {
-            SDL_Event* sdlEvent = (SDL_Event*)ptr;
+            SDL_EventType eventType = (SDL_EventType)sdlEvent->type;
+            bool isKeyEvent =
+                eventType == SDL_EventType.SDL_EVENT_KEY_DOWN
+                || eventType == SDL_EventType.SDL_EVENT_KEY_UP;
 
-            if (Plugin.ProcessWndProc(sdlEvent) != 0)
+            int wndProcResult = 0;
+            if (!isKeyEvent)
             {
-                if (sdlEvent->type == SDL_EventType.SDL_MOUSEMOTION)
+                wndProcResult = Plugin.ProcessWndProc(sdlEvent);
+            }
+
+            if (wndProcResult != 0)
+            {
+                if (eventType == SDL_EventType.SDL_EVENT_MOUSE_MOTION)
                 {
                     if (GameCursor != null)
                     {
@@ -695,56 +698,45 @@ namespace ClassicUO
                     }
                 }
 
-                return 1;
+                return true;
             }
 
-            switch (sdlEvent->type)
+            switch (eventType)
             {
-                case SDL_EventType.SDL_AUDIODEVICEADDED:
+                case SDL_EventType.SDL_EVENT_AUDIO_DEVICE_ADDED:
                     Console.WriteLine("AUDIO ADDED: {0}", sdlEvent->adevice.which);
 
                     break;
 
-                case SDL_EventType.SDL_AUDIODEVICEREMOVED:
+                case SDL_EventType.SDL_EVENT_AUDIO_DEVICE_REMOVED:
                     Console.WriteLine("AUDIO REMOVED: {0}", sdlEvent->adevice.which);
 
                     break;
 
-                case SDL_EventType.SDL_WINDOWEVENT:
-
-                    switch (sdlEvent->window.windowEvent)
-                    {
-                        case SDL_WindowEventID.SDL_WINDOWEVENT_ENTER:
-                            Mouse.MouseInWindow = true;
-
-                            break;
-
-                        case SDL_WindowEventID.SDL_WINDOWEVENT_LEAVE:
-                            Mouse.MouseInWindow = false;
-
-                            break;
-
-                        case SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_GAINED:
-                            Plugin.OnFocusGained();
-
-                            break;
-
-                        case SDL_WindowEventID.SDL_WINDOWEVENT_FOCUS_LOST:
-                            Plugin.OnFocusLost();
-
-                            break;
-                    }
-
+                case SDL_EventType.SDL_EVENT_WINDOW_MOUSE_ENTER:
+                    Mouse.MouseInWindow = true;
                     break;
 
-                case SDL_EventType.SDL_KEYDOWN:
+                case SDL_EventType.SDL_EVENT_WINDOW_MOUSE_LEAVE:
+                    Mouse.MouseInWindow = false;
+                    break;
+
+                case SDL_EventType.SDL_EVENT_WINDOW_FOCUS_GAINED:
+                    Plugin.OnFocusGained();
+                    break;
+
+                case SDL_EventType.SDL_EVENT_WINDOW_FOCUS_LOST:
+                    Plugin.OnFocusLost();
+                    break;
+
+                case SDL_EventType.SDL_EVENT_KEY_DOWN:
 
                     Keyboard.OnKeyDown(sdlEvent->key);
 
                     if (
                         Plugin.ProcessHotkeys(
-                            (int)sdlEvent->key.keysym.sym,
-                            (int)sdlEvent->key.keysym.mod,
+                            (int)(SDL_Keycode)sdlEvent->key.key,
+                            (int)sdlEvent->key.mod,
                             true
                         )
                     )
@@ -752,8 +744,8 @@ namespace ClassicUO
                         _ignoreNextTextInput = false;
 
                         UIManager.KeyboardFocusControl?.InvokeKeyDown(
-                            sdlEvent->key.keysym.sym,
-                            sdlEvent->key.keysym.mod
+                            (SDL_Keycode)sdlEvent->key.key,
+                            sdlEvent->key.mod
                         );
 
                         Scene.OnKeyDown(sdlEvent->key);
@@ -765,17 +757,17 @@ namespace ClassicUO
 
                     break;
 
-                case SDL_EventType.SDL_KEYUP:
+                case SDL_EventType.SDL_EVENT_KEY_UP:
 
                     Keyboard.OnKeyUp(sdlEvent->key);
                     UIManager.KeyboardFocusControl?.InvokeKeyUp(
-                        sdlEvent->key.keysym.sym,
-                        sdlEvent->key.keysym.mod
+                        (SDL_Keycode)sdlEvent->key.key,
+                        sdlEvent->key.mod
                     );
                     Scene.OnKeyUp(sdlEvent->key);
                     Plugin.ProcessHotkeys(0, 0, false);
 
-                    if (sdlEvent->key.keysym.sym == SDL_Keycode.SDLK_PRINTSCREEN)
+                    if ((SDL_Keycode)sdlEvent->key.key == SDL_Keycode.SDLK_PRINTSCREEN)
                     {
                         if (Keyboard.Ctrl)
                         {
@@ -808,24 +800,14 @@ namespace ClassicUO
 
                     break;
 
-                case SDL_EventType.SDL_TEXTINPUT:
+                case SDL_EventType.SDL_EVENT_TEXT_INPUT:
 
                     if (_ignoreNextTextInput)
                     {
                         break;
                     }
 
-                    // Fix for linux OS: https://github.com/andreakarasho/ClassicUO/pull/1263
-                    // Fix 2: SDL owns this behaviour. Cheating is not a real solution.
-                    /*if (!Utility.Platforms.PlatformHelper.IsWindows)
-                    {
-                        if (Keyboard.Alt || Keyboard.Ctrl)
-                        {
-                            break;
-                        }
-                    }*/
-
-                    string s = UTF8_ToManaged((IntPtr)sdlEvent->text.text, false);
+                    string s = Utf8PtrToString((IntPtr)sdlEvent->text.text);
 
                     if (!string.IsNullOrEmpty(s))
                     {
@@ -835,7 +817,7 @@ namespace ClassicUO
 
                     break;
 
-                case SDL_EventType.SDL_MOUSEMOTION:
+                case SDL_EventType.SDL_EVENT_MOUSE_MOTION:
 
                     if (GameCursor != null && !GameCursor.AllowDrawSDLCursor)
                     {
@@ -855,11 +837,11 @@ namespace ClassicUO
 
                     break;
 
-                case SDL_EventType.SDL_MOUSEWHEEL:
+                case SDL_EventType.SDL_EVENT_MOUSE_WHEEL:
                     Mouse.Update();
                     bool isScrolledUp = sdlEvent->wheel.y > 0;
 
-                    Plugin.ProcessMouse(0, sdlEvent->wheel.y);
+                    Plugin.ProcessMouse(0, (int)sdlEvent->wheel.y);
 
                     if (!Scene.OnMouseWheel(isScrolledUp))
                     {
@@ -868,7 +850,7 @@ namespace ClassicUO
 
                     break;
 
-                case SDL_EventType.SDL_MOUSEBUTTONDOWN:
+                case SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN:
                     {
                         SDL_MouseButtonEvent mouse = sdlEvent->button;
 
@@ -968,7 +950,7 @@ namespace ClassicUO
                         break;
                     }
 
-                case SDL_EventType.SDL_MOUSEBUTTONUP:
+                case SDL_EventType.SDL_EVENT_MOUSE_BUTTON_UP:
                     {
                         SDL_MouseButtonEvent mouse = sdlEvent->button;
 
@@ -1017,39 +999,39 @@ namespace ClassicUO
                         break;
                     }
 
-                case SDL_EventType.SDL_CONTROLLERBUTTONDOWN:
+                case SDL_EventType.SDL_EVENT_GAMEPAD_BUTTON_DOWN:
                     if (!IsActive)
                     {
                         break;
                     }
-                    Controller.OnButtonDown(sdlEvent->cbutton);
-                    UIManager.KeyboardFocusControl?.InvokeControllerButtonDown((SDL_GameControllerButton)sdlEvent->cbutton.button);
-                    Scene.OnControllerButtonDown(sdlEvent->cbutton);
+                    Controller.OnButtonDown(sdlEvent->gbutton);
+                    UIManager.KeyboardFocusControl?.InvokeControllerButtonDown((SDL_GamepadButton)sdlEvent->gbutton.button);
+                    Scene.OnControllerButtonDown(sdlEvent->gbutton);
 
-                    if (sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_DOWN)
+                    if (sdlEvent->gbutton.button == (byte)SDL_GamepadButton.SDL_GAMEPAD_BUTTON_DPAD_DOWN)
                     {
                         UIManager.OnMouseWheel(false);
                     }
-                    else if (sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_DPAD_UP)
+                    else if (sdlEvent->gbutton.button == (byte)SDL_GamepadButton.SDL_GAMEPAD_BUTTON_DPAD_UP)
                     {
                         UIManager.OnMouseWheel(true);
                     }
 
-                    if (sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_RIGHTSTICK)
+                    if (sdlEvent->gbutton.button == (byte)SDL_GamepadButton.SDL_GAMEPAD_BUTTON_RIGHT_STICK)
                     {
                         SDL_Event e = new SDL_Event();
-                        e.type = SDL_EventType.SDL_MOUSEBUTTONDOWN;
+                        e.type = (uint)SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN;
                         e.button.button = (byte)MouseButtonType.Left;
-                        SDL2.SDL.SDL_PushEvent(ref e);
+                        SDL3.SDL.SDL_PushEvent(ref e);
                     }
-                    else if (sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_LEFTSTICK)
+                    else if (sdlEvent->gbutton.button == (byte)SDL_GamepadButton.SDL_GAMEPAD_BUTTON_LEFT_STICK)
                     {
                         SDL_Event e = new SDL_Event();
-                        e.type = SDL_EventType.SDL_MOUSEBUTTONDOWN;
+                        e.type = (uint)SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN;
                         e.button.button = (byte)MouseButtonType.Right;
-                        SDL2.SDL.SDL_PushEvent(ref e);
+                        SDL3.SDL.SDL_PushEvent(ref e);
                     }
-                    else if (sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_START && World.InGame)
+                    else if (sdlEvent->gbutton.button == (byte)SDL_GamepadButton.SDL_GAMEPAD_BUTTON_START && World.InGame)
                     {
                         Gump g = UIManager.GetGump<OptionsGump>();
                         if (g == null)
@@ -1063,62 +1045,61 @@ namespace ClassicUO
                     }
                     break;
 
-                case SDL_EventType.SDL_CONTROLLERBUTTONUP:
+                case SDL_EventType.SDL_EVENT_GAMEPAD_BUTTON_UP:
                     if (!IsActive)
                     {
                         break;
                     }
-                    Controller.OnButtonUp(sdlEvent->cbutton);
-                    UIManager.KeyboardFocusControl?.InvokeControllerButtonUp((SDL_GameControllerButton)sdlEvent->cbutton.button);
-                    Scene.OnControllerButtonUp(sdlEvent->cbutton);
+                    Controller.OnButtonUp(sdlEvent->gbutton);
+                    UIManager.KeyboardFocusControl?.InvokeControllerButtonUp((SDL_GamepadButton)sdlEvent->gbutton.button);
+                    Scene.OnControllerButtonUp(sdlEvent->gbutton);
 
-                    if (sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_RIGHTSTICK)
+                    if (sdlEvent->gbutton.button == (byte)SDL_GamepadButton.SDL_GAMEPAD_BUTTON_RIGHT_STICK)
                     {
                         SDL_Event e = new SDL_Event();
-                        e.type = SDL_EventType.SDL_MOUSEBUTTONUP;
+                        e.type = (uint)SDL_EventType.SDL_EVENT_MOUSE_BUTTON_UP;
                         e.button.button = (byte)MouseButtonType.Left;
-                        SDL2.SDL.SDL_PushEvent(ref e);
+                        SDL3.SDL.SDL_PushEvent(ref e);
                     }
-                    else if (sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_LEFTSTICK)
+                    else if (sdlEvent->gbutton.button == (byte)SDL_GamepadButton.SDL_GAMEPAD_BUTTON_LEFT_STICK)
                     {
                         SDL_Event e = new SDL_Event();
-                        e.type = SDL_EventType.SDL_MOUSEBUTTONUP;
+                        e.type = (uint)SDL_EventType.SDL_EVENT_MOUSE_BUTTON_UP;
                         e.button.button = (byte)MouseButtonType.Right;
-                        SDL2.SDL.SDL_PushEvent(ref e);
+                        SDL3.SDL.SDL_PushEvent(ref e);
                     }
                     break;
 
-                case SDL_EventType.SDL_CONTROLLERAXISMOTION: //Work around because sdl doesn't see trigger buttons as buttons, they are axis probably for pressure support
-                                                             //GameActions.Print(typeof(SDL_GameControllerButton).GetEnumName((SDL_GameControllerButton)sdlEvent->cbutton.button));
+                case SDL_EventType.SDL_EVENT_GAMEPAD_AXIS_MOTION:
                     if (!IsActive)
                     {
                         break;
                     }
-                    if (sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_BACK || sdlEvent->cbutton.button == (byte)SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_GUIDE) //Left trigger BACK Right trigger GUIDE
+                    if (sdlEvent->gbutton.button == (byte)SDL_GamepadButton.SDL_GAMEPAD_BUTTON_BACK || sdlEvent->gbutton.button == (byte)SDL_GamepadButton.SDL_GAMEPAD_BUTTON_GUIDE)
                     {
-                        if (sdlEvent->caxis.axisValue > 32000)
+                        if (sdlEvent->gaxis.value > 32000)
                         {
                             if (
-                                ((SDL_GameControllerButton)sdlEvent->cbutton.button == SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_BACK && !Controller.Button_LeftTrigger)
-                                || ((SDL_GameControllerButton)sdlEvent->cbutton.button == SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_GUIDE && !Controller.Button_RightTrigger)
+                                ((SDL_GamepadButton)sdlEvent->gbutton.button == SDL_GamepadButton.SDL_GAMEPAD_BUTTON_BACK && !Controller.Button_LeftTrigger)
+                                || ((SDL_GamepadButton)sdlEvent->gbutton.button == SDL_GamepadButton.SDL_GAMEPAD_BUTTON_GUIDE && !Controller.Button_RightTrigger)
                                 )
                             {
-                                Controller.OnButtonDown(sdlEvent->cbutton);
-                                UIManager.KeyboardFocusControl?.InvokeControllerButtonDown((SDL_GameControllerButton)sdlEvent->cbutton.button);
-                                Scene.OnControllerButtonDown(sdlEvent->cbutton);
+                                Controller.OnButtonDown(sdlEvent->gbutton);
+                                UIManager.KeyboardFocusControl?.InvokeControllerButtonDown((SDL_GamepadButton)sdlEvent->gbutton.button);
+                                Scene.OnControllerButtonDown(sdlEvent->gbutton);
                             }
                         }
-                        else if (sdlEvent->caxis.axisValue < 5000)
+                        else if (sdlEvent->gaxis.value < 5000)
                         {
-                            Controller.OnButtonUp(sdlEvent->cbutton);
-                            UIManager.KeyboardFocusControl?.InvokeControllerButtonUp((SDL_GameControllerButton)sdlEvent->cbutton.button);
-                            Scene.OnControllerButtonUp(sdlEvent->cbutton);
+                            Controller.OnButtonUp(sdlEvent->gbutton);
+                            UIManager.KeyboardFocusControl?.InvokeControllerButtonUp((SDL_GamepadButton)sdlEvent->gbutton.button);
+                            Scene.OnControllerButtonUp(sdlEvent->gbutton);
                         }
                     }
                     break;
             }
 
-            return 1;
+            return true;
         }
 
         protected override void OnExiting(object sender, EventArgs args)
@@ -1208,6 +1189,16 @@ namespace ClassicUO
                     GameActions.Print(message, 0x44, MessageType.System);
                 }
             }
+        }
+
+        private static unsafe string Utf8PtrToString(IntPtr ptr)
+        {
+            if (ptr == IntPtr.Zero) return null;
+            byte* p = (byte*)ptr;
+            int len = 0;
+            while (p[len] != 0) len++;
+            if (len == 0) return string.Empty;
+            return System.Text.Encoding.UTF8.GetString(p, len);
         }
     }
 }

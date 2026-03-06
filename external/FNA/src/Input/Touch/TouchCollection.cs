@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -24,6 +24,8 @@ namespace Microsoft.Xna.Framework.Input.Touch
 		{
 			get
 			{
+				if (touches == null)
+					return 0;
 				return touches.Count;
 			}
 		}
@@ -48,6 +50,8 @@ namespace Microsoft.Xna.Framework.Input.Touch
 		{
 			get
 			{
+				if (touches == null)
+					throw new ArgumentOutOfRangeException();
 				return touches[index];
 			}
 			set
@@ -93,22 +97,29 @@ namespace Microsoft.Xna.Framework.Input.Touch
 
 		public bool Contains(TouchLocation item)
 		{
+			if (touches == null)
+				return false;
 			return touches.Contains(item);
 		}
 
 		public void CopyTo(TouchLocation[] array, int arrayIndex)
 		{
+			if (touches == null)
+				return;
 			touches.CopyTo(array, arrayIndex);
 		}
 
 		public bool FindById(int id, out TouchLocation touchLocation)
 		{
-			foreach (TouchLocation touch in touches)
+			if (touches != null)
 			{
-				if (touch.Id == id)
+				foreach (TouchLocation touch in touches)
 				{
-					touchLocation = touch;
-					return true;
+					if (touch.Id == id)
+					{
+						touchLocation = touch;
+						return true;
+					}
 				}
 			}
 			touchLocation = new TouchLocation(
@@ -126,6 +137,8 @@ namespace Microsoft.Xna.Framework.Input.Touch
 
 		public int IndexOf(TouchLocation item)
 		{
+			if (touches == null)
+				return -1;
 			return touches.IndexOf(item);
 		}
 

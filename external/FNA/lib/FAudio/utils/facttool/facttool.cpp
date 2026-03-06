@@ -1,6 +1,6 @@
 /* FAudio - XAudio Reimplementation for FNA
  *
- * Copyright (c) 2011-2021 Ethan Lee, Luigi Auriemma, and the MonoGame Team
+ * Copyright (c) 2011-2024 Ethan Lee, Luigi Auriemma, and the MonoGame Team
  *
  * This software is provided 'as-is', without any express or implied warranty.
  * In no event will the authors be held liable for any damages arising from
@@ -30,7 +30,7 @@
 
 #include "../uicommon/imgui.h"
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
 #include <vector>
 #include <string>
 
@@ -54,11 +54,6 @@ std::vector<std::string> wavebankNames;
 std::vector<bool> wavebankShows;
 
 std::vector<FACTWave*> waves;
-
-void FAudioTool_Init()
-{
-	/* Nothing to do... */
-}
 
 void FAudioTool_Quit()
 {
@@ -149,25 +144,32 @@ void FAudioTool_Update()
 			)) {
 				/* Load up file... */
 				buf = (uint8_t*) SDL_LoadFile(enginename, &len);
-				FACTRuntimeParameters params;
-				SDL_memset(
-					&params,
-					'\0',
-					sizeof(FACTRuntimeParameters)
-				);
-				params.pGlobalSettingsBuffer = buf;
-				params.globalSettingsBufferSize = len;
+				if (buf != NULL)
+				{
+					FACTRuntimeParameters params;
+					SDL_memset(
+						&params,
+						'\0',
+						sizeof(FACTRuntimeParameters)
+					);
+					params.pGlobalSettingsBuffer = buf;
+					params.globalSettingsBufferSize = len;
 
-				/* Create engine... */
-				FACTAudioEngine *engine;
-				FACTCreateEngine(0, &engine);
-				FACTAudioEngine_Initialize(engine, &params);
-				SDL_free(buf);
+					/* Create engine... */
+					FACTAudioEngine *engine;
+					FACTCreateEngine(0, &engine);
+					FACTAudioEngine_Initialize(engine, &params);
+					SDL_free(buf);
 
-				/* Add to UI... */
-				engines.push_back(engine);
-				engineNames.push_back(enginename);
-				engineShows.push_back(true);
+					/* Add to UI... */
+					engines.push_back(engine);
+					engineNames.push_back(enginename);
+					engineShows.push_back(true);
+				}
+				else
+				{
+					SDL_Log("Failed to load %s", enginename);
+				}
 			}
 		}
 		ImGui::End();
@@ -349,24 +351,31 @@ void FAudioTool_Update()
 				/* Load up file... */
 				buf = (uint8_t*) SDL_LoadFile(soundbankname, &len);
 
-				/* Create SoundBank... */
-				FACTSoundBank *sb;
-				FACTAudioEngine_CreateSoundBank(
-					engines[i],
-					buf,
-					len,
-					0,
-					0,
-					&sb
-				);
-				SDL_free(buf);
+				if (buf != NULL)
+				{
+					/* Create SoundBank... */
+					FACTSoundBank *sb;
+					FACTAudioEngine_CreateSoundBank(
+						engines[i],
+						buf,
+						len,
+						0,
+						0,
+						&sb
+					);
+					SDL_free(buf);
 
-				/* Add to UI... */
-				soundBanks.push_back(sb);
-				soundbankNames.push_back(
-					"SoundBank: " + std::string(sb->name)
-				);
-				soundbankShows.push_back(true);
+					/* Add to UI... */
+					soundBanks.push_back(sb);
+					soundbankNames.push_back(
+						"SoundBank: " + std::string(sb->name)
+					);
+					soundbankShows.push_back(true);
+				}
+				else
+				{
+					SDL_Log("Failed to load %s", soundbankname);
+				}
 			}
 
 			/* Open WaveBank */
@@ -379,24 +388,31 @@ void FAudioTool_Update()
 				/* Load up file... */
 				buf = (uint8_t*) SDL_LoadFile(wavebankname, &len);
 
-				/* Create WaveBank... */
-				FACTWaveBank *wb;
-				FACTAudioEngine_CreateInMemoryWaveBank(
-					engines[i],
-					buf,
-					len,
-					0,
-					0,
-					&wb
-				);
+				if (buf != NULL)
+				{
+					/* Create WaveBank... */
+					FACTWaveBank *wb;
+					FACTAudioEngine_CreateInMemoryWaveBank(
+						engines[i],
+						buf,
+						len,
+						0,
+						0,
+						&wb
+					);
 
-				/* Add to UI... */
-				waveBanks.push_back(wb);
-				wavebankMems.push_back(buf);
-				wavebankNames.push_back(
-					"WaveBank: " + std::string(wb->name)
-				);
-				wavebankShows.push_back(true);
+					/* Add to UI... */
+					waveBanks.push_back(wb);
+					wavebankMems.push_back(buf);
+					wavebankNames.push_back(
+						"WaveBank: " + std::string(wb->name)
+					);
+					wavebankShows.push_back(true);
+				}
+				else
+				{
+					SDL_Log("Failed to load %s", wavebankname);
+				}
 			}
 
 			ImGui::Separator();
@@ -575,7 +591,7 @@ void FAudioTool_Update()
 				);
 				ImGui::Text(
 					"RPC Code Count: %d",
-					soundBanks[i]->sounds[j].rpcCodeCount
+					soundBanks[i]->sounds[j].rpc_codes.count
 				);
 				ImGui::Text(
 					"DSP Preset Code Count: %d",
@@ -587,11 +603,11 @@ void FAudioTool_Update()
 				);
 				if (ImGui::TreeNode("RPC Codes"))
 				{
-					for (uint8_t k = 0; k < soundBanks[i]->sounds[j].rpcCodeCount; k += 1)
+					for (uint8_t k = 0; k < soundBanks[i]->sounds[j].rpc_codes.count; k += 1)
 					{
 						ImGui::Text(
 							"%d",
-							soundBanks[i]->sounds[j].rpcCodes[k]
+							soundBanks[i]->sounds[j].rpc_codes.codes[k]
 						);
 					}
 					ImGui::TreePop();
@@ -607,7 +623,7 @@ void FAudioTool_Update()
 					}
 					ImGui::TreePop();
 				}
-				if (ImGui::TreeNode("Tracks"))
+				if (ImGui::TreeNode("Waves"))
 				{
 					for (uint8_t k = 0; k < soundBanks[i]->sounds[j].trackCount; k += 1)
 					if (ImGui::TreeNode(
@@ -633,7 +649,7 @@ void FAudioTool_Update()
 						);
 						ImGui::Text(
 							"RPC Code Count: %d",
-							soundBanks[i]->sounds[j].tracks[k].rpcCodeCount
+							soundBanks[i]->sounds[j].tracks[k].rpc_codes.count
 						);
 						ImGui::Text(
 							"Event Count: %d",
@@ -641,11 +657,11 @@ void FAudioTool_Update()
 						);
 						if (ImGui::TreeNode("RPC Codes"))
 						{
-							for (uint8_t l = 0; l < soundBanks[i]->sounds[j].tracks[k].rpcCodeCount; l += 1)
+							for (uint8_t l = 0; l < soundBanks[i]->sounds[j].tracks[k].rpc_codes.count; l += 1)
 							{
 								ImGui::Text(
 									"%d",
-									soundBanks[i]->sounds[j].tracks[k].rpcCodes[l]
+									soundBanks[i]->sounds[j].tracks[k].rpc_codes.codes[l]
 								);
 							}
 							ImGui::TreePop();
@@ -702,24 +718,24 @@ void FAudioTool_Update()
 									if (evt->wave.isComplex)
 									{
 										ImGui::Text(
-											"Track Variation Type: %d",
-											evt->wave.complex.variation
+											"Wave Variation Type: %d",
+											evt->wave.complex.variation_type
 										);
 										ImGui::Text(
-											"Track Count: %d",
-											evt->wave.complex.trackCount
+											"Wave Count: %d",
+											evt->wave.complex.wave_count
 										);
-										if (ImGui::TreeNode("Tracks"))
+										if (ImGui::TreeNode("Waves"))
 										{
-											for (uint16_t m = 0; m < evt->wave.complex.trackCount; m += 1)
+											for (uint16_t m = 0; m < evt->wave.complex.wave_count; m += 1)
 											if (ImGui::TreeNode(
 												(void*) (intptr_t) m,
 												"Track #%d",
 												m
 											)) {
 												ImGui::Text(
-													"Track Index: %d",
-													evt->wave.complex.tracks[m]
+													"Wave Index: %d",
+													evt->wave.complex.wave_indices[m]
 												);
 												ImGui::Text(
 													"WaveBank Index: %d",
@@ -737,8 +753,8 @@ void FAudioTool_Update()
 									else
 									{
 										ImGui::Text(
-											"Track Index: %d",
-											evt->wave.simple.track
+											"Wave Index: %d",
+											evt->wave.simple.wave_index
 										);
 										ImGui::Text(
 											"WaveBank Index: %d",
@@ -882,11 +898,11 @@ void FAudioTool_Update()
 		if (ImGui::TreeNode(
 			(void*) (intptr_t) j,
 			"Code #%d",
-			soundBanks[i]->variationCodes[j]
+			soundBanks[i]->variations[j].code
 		)) {
 			ImGui::Text(
-				"Flags: %X",
-				soundBanks[i]->variations[j].flags
+				"Type: %X",
+				soundBanks[i]->variations[j].type
 			);
 			ImGui::Text(
 				"Interactive Variable Index: %d",
@@ -924,14 +940,28 @@ void FAudioTool_Update()
 							soundBanks[i]->variations[j].entries[k].simple.wavebank
 						);
 					}
-					ImGui::Text(
-						"Min Weight: %f",
-						soundBanks[i]->variations[j].entries[k].minWeight
-					);
-					ImGui::Text(
-						"Max Weight: %f",
-						soundBanks[i]->variations[j].entries[k].maxWeight
-					);
+					if (soundBanks[i]->variations[j].type == VARIATION_TABLE_TYPE_INTERACTIVE)
+					{
+						ImGui::Text(
+							"Min Range: %f",
+							soundBanks[i]->variations[j].entries[k].interactive.var_min
+						);
+						ImGui::Text(
+							"Max Range: %f",
+							soundBanks[i]->variations[j].entries[k].interactive.var_max
+						);
+					}
+					else
+					{
+						ImGui::Text(
+							"Min Weight: %f",
+							soundBanks[i]->variations[j].entries[k].noninteractive.weight_min
+						);
+						ImGui::Text(
+							"Max Weight: %f",
+							soundBanks[i]->variations[j].entries[k].noninteractive.weight_max
+						);
+					}
 					ImGui::TreePop();
 				}
 				ImGui::TreePop();

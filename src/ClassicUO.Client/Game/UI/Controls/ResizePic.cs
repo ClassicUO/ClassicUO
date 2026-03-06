@@ -283,6 +283,17 @@ namespace ClassicUO.Game.UI.Controls
         private void DrawInternal(UltimaBatcher2D batcher, int x, int y, Vector3 color)
         {
             var texture0 = GetTexture(0, out var bounds0);
+            if (IsFromServer && texture0 == null)
+            {
+                batcher.Draw(
+                    SolidColorTextureCache.GetTexture(Color.White),
+                    new Rectangle(x, y, Width, Height),
+                    null,
+                    color
+                );
+                return;
+            }
+
             var texture1 = GetTexture(1, out var bounds1);
             var texture2 = GetTexture(2, out var bounds2);
             var texture3 = GetTexture(3, out var bounds3);

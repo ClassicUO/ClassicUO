@@ -1,4 +1,4 @@
-﻿using ClassicUO.Game.UI.Controls;
+using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Gumps
@@ -40,23 +40,22 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void RepositionTooltips()
         {
-            int x = 0, totalWidth = 0, totalHeight = 0;
+            int y = 0;
+            int maxWidth = 0;
+            const int gap = 6;
             for (int i = 0; i < toolTips.Length; i++)
             {
                 if (toolTips[i] == null)
                     continue;
-                toolTips[i].X = x;
-                toolTips[i].Y = 0;
+                toolTips[i].X = 0;
+                toolTips[i].Y = y;
                 toolTips[i].RemoveHoverReference();
-                totalWidth += toolTips[i].Width;
-
-                x += toolTips[i].Width + 14;
-
-                if (totalHeight < toolTips[i].Height)
-                    totalHeight = toolTips[i].Height;
+                y += toolTips[i].Height + gap;
+                if (toolTips[i].Width > maxWidth)
+                    maxWidth = toolTips[i].Width;
             }
             ForceSizeUpdate();
-            SSWidth = Width + 9;
+            SSWidth = maxWidth + 9;
             SSHeight = Height + 9;
         }
 

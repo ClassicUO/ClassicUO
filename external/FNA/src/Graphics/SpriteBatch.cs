@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -30,6 +30,12 @@ namespace Microsoft.Xna.Framework.Graphics
 		private const int MAX_SPRITES = 2048;
 		private const int MAX_VERTICES = MAX_SPRITES * 4;
 		private const int MAX_INDICES = MAX_SPRITES * 6;
+
+		/* This is the largest array size for a VertexBuffer using VertexPositionColorTexture.
+		 * Note that we do NOT change the GPU buffer size since that would break XNA accuracy,
+		 * but if you want to optimize your batching you can make this change in a custom SpriteBatch.
+		 */
+		private const int MAX_ARRAYSIZE = 0x3FFFFFF / 96;
 
 		// Used to quickly flip text for DrawString
 		private static readonly float[] axisDirectionX = new float[]
@@ -271,7 +277,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			DepthStencilState depthStencilState,
 			RasterizerState rasterizerState,
 			Effect effect,
-			Matrix transformationMatrix
+			Matrix transformMatrix
 		) {
 			if (beginCalled)
 			{
@@ -292,7 +298,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			this.rasterizerState = rasterizerState ?? RasterizerState.CullCounterClockwise;
 
 			customEffect = effect;
-			transformMatrix = transformationMatrix;
+			this.transformMatrix = transformMatrix;
 
 			if (sortMode == SpriteSortMode.Immediate)
 			{
@@ -1067,17 +1073,29 @@ namespace Microsoft.Xna.Framework.Graphics
 		) {
 			if (numSprites >= vertexInfo.Length)
 			{
-				/* We're out of room, add another batch max
-				 * to the total array size. This is required for
-				 * sprite sorting accuracy; note that we do NOT
-				 * increase the graphics buffer sizes!
-				 * -flibit
-				 */
-				int newMax = vertexInfo.Length + MAX_SPRITES;
-				Array.Resize(ref vertexInfo, newMax);
-				Array.Resize(ref textureInfo, newMax);
-				Array.Resize(ref spriteInfos, newMax);
-				Array.Resize(ref sortedSpriteInfos, newMax);
+				if (vertexInfo.Length >= MAX_ARRAYSIZE)
+				{
+					/* FIXME: We're doing this for safety but it's possible that
+					 * XNA just keeps expanding and crashes with OutOfMemory.
+					 * Since GraphicsProfile has a buffer cap, we use that for safety.
+					 * This might change if someone depends on running out of memory(?!).
+					 */
+					FlushBatch();
+				}
+				else
+				{
+					/* We're out of room, add another batch max
+					 * to the total array size. This is required for
+					 * sprite sorting accuracy; note that we do NOT
+					 * increase the graphics buffer sizes!
+					 * -flibit
+					 */
+					int newMax = Math.Min(vertexInfo.Length * 2, MAX_ARRAYSIZE);
+					Array.Resize(ref vertexInfo, newMax);
+					Array.Resize(ref textureInfo, newMax);
+					Array.Resize(ref spriteInfos, newMax);
+					Array.Resize(ref sortedSpriteInfos, newMax);
+				}
 			}
 
 			if (sortMode == SpriteSortMode.Immediate)
@@ -1444,12 +1462,13 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		private void DrawPrimitives(Texture texture, int baseSprite, int batchSize)
 		{
-			GraphicsDevice.Textures[0] = texture;
 			if (customEffect != null)
 			{
 				foreach (EffectPass pass in customEffect.CurrentTechnique.Passes)
 				{
 					pass.Apply();
+					// Set this _after_ Apply, otherwise EffectParameters override it!
+					GraphicsDevice.Textures[0] = texture;
 					GraphicsDevice.DrawIndexedPrimitives(
 						PrimitiveType.TriangleList,
 						baseSprite * 4,
@@ -1462,6 +1481,7 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 			else
 			{
+				GraphicsDevice.Textures[0] = texture;
 				GraphicsDevice.DrawIndexedPrimitives(
 					PrimitiveType.TriangleList,
 					baseSprite * 4,

@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -92,7 +92,8 @@ namespace Microsoft.Xna.Framework
 
 		#region Private Static Variables
 
-		private static readonly Quaternion identity = new Quaternion(0, 0, 0, 1);
+		// This is NOT readonly, for weird performance reasons -flibit
+		private static Quaternion identity = new Quaternion(0, 0, 0, 1);
 
 		#endregion
 
@@ -237,6 +238,22 @@ namespace Microsoft.Xna.Framework
 				" W:" + W.ToString() +
 				"}"
 			);
+		}
+
+		#endregion
+
+		#region Internal Methods
+
+		[Conditional("DEBUG")]
+		internal void CheckForNaNs()
+		{
+			if (	float.IsNaN(X) ||
+				float.IsNaN(Y) ||
+				float.IsNaN(Z) ||
+				float.IsNaN(W)	)
+			{
+				throw new InvalidOperationException("Quaternion contains NaNs!");
+			}
 		}
 
 		#endregion
@@ -949,7 +966,7 @@ namespace Microsoft.Xna.Framework
 		/// <summary>
 		/// Multiplies the components of quaternion by a scalar.
 		/// </summary>
-		/// <param name="quaternion1">Source <see cref="Vector3"/> on the left of the mul sign.</param>
+		/// <param name="quaternion1">Source <see cref="Quaternion"/> on the left of the mul sign.</param>
 		/// <param name="scaleFactor">Scalar value on the right of the mul sign.</param>
 		/// <returns>Result of the quaternion multiplication with a scalar.</returns>
 		public static Quaternion operator *(Quaternion quaternion1, float scaleFactor)
@@ -962,8 +979,8 @@ namespace Microsoft.Xna.Framework
 		/// <summary>
 		/// Subtracts a <see cref="Quaternion"/> from a <see cref="Quaternion"/>.
 		/// </summary>
-		/// <param name="quaternion1">Source <see cref="Vector3"/> on the left of the sub sign.</param>
-		/// <param name="quaternion2">Source <see cref="Vector3"/> on the right of the sub sign.</param>
+		/// <param name="quaternion1">Source <see cref="Quaternion"/> on the left of the sub sign.</param>
+		/// <param name="quaternion2">Source <see cref="Quaternion"/> on the right of the sub sign.</param>
 		/// <returns>Result of the quaternion subtraction.</returns>
 		public static Quaternion operator -(Quaternion quaternion1, Quaternion quaternion2)
 		{

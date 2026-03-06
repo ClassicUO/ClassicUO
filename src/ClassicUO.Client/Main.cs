@@ -39,7 +39,7 @@ using ClassicUO.Network;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-using SDL2;
+using SDL3;
 using System;
 using System.Globalization;
 using System.IO;
@@ -275,12 +275,18 @@ namespace ClassicUO
                 {
                     case 1: // OpenGL
                         Environment.SetEnvironmentVariable("FNA3D_FORCE_DRIVER", "OpenGL");
-
                         break;
 
-                    case 2: // Vulkan
+                    case 2: // Vulkan (via SDL GPU)
                         Environment.SetEnvironmentVariable("FNA3D_FORCE_DRIVER", "Vulkan");
+                        break;
 
+                    case 3: // D3D11
+                        Environment.SetEnvironmentVariable("FNA3D_FORCE_DRIVER", "D3D11");
+                        break;
+
+                    case 4: // SDL GPU
+                        Environment.SetEnvironmentVariable("FNA3D_FORCE_DRIVER", "SDLGPU");
                         break;
                 }
 

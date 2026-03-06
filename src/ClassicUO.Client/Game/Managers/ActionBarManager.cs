@@ -3,7 +3,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
-using SDL2;
+using SDL3;
 using System.Collections.Generic;
 
 namespace ClassicUO.Game.Managers

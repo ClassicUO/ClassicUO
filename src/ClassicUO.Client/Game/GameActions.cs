@@ -494,6 +494,8 @@ namespace ClassicUO.Game
             return false;
         }
 
+        public static bool ForceNormalContainerForNextOpen { get; set; }
+
         public static bool OpenBackpack()
         {
             Item backpack = World.Player.FindItemByLayer(Layer.Backpack);
@@ -525,6 +527,26 @@ namespace ClassicUO.Game
                 backpackGump.SetInScreen();
                 backpackGump.BringOnTop();
             }
+            return true;
+        }
+
+        public static bool OpenBackpackNormal()
+        {
+            Item backpack = World.Player.FindItemByLayer(Layer.Backpack);
+            if (backpack == null) return false;
+
+            UIManager.GetGump<GridContainer>(backpack)?.Dispose();
+            var existing = UIManager.GetGump<ContainerGump>(backpack);
+            if (existing != null)
+            {
+                ((ContainerGump)existing).IsMinimized = false;
+                existing.SetInScreen();
+                existing.BringOnTop();
+                return true;
+            }
+
+            ForceNormalContainerForNextOpen = true;
+            DoubleClick(backpack);
             return true;
         }
 

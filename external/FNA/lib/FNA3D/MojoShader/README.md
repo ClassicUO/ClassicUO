@@ -32,3 +32,12 @@ To use this in your project:
 - If you don't have cmake to generate mojoshader_version.h, you can either
   add a blank file with that name, or add MOJOSHADER_NO_VERSION_INCLUDE to
   your preprocessor definitions.
+
+## MojoShader_assembler
+
+This library used to have an preprocessor, parser, and assembler for
+low-level D3D shader assembly language. These have been removed from
+MojoShader, and moved over to a new repo for those that need it:
+
+https://github.com/icculus/mojoshader_assembler
+

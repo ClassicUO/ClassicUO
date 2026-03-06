@@ -1,6 +1,6 @@
 /* FNA3D - 3D Graphics Library for FNA
  *
- * Copyright (c) 2020-2021 Ethan Lee
+ * Copyright (c) 2020-2024 Ethan Lee
  *
  * This software is provided 'as-is', without any express or implied warranty.
  * In no event will the authors be held liable for any damages arising from
@@ -29,7 +29,20 @@
 #include "FNA3D_Driver.h"
 #include "FNA3D_Driver_OpenGL.h"
 
+#ifdef USE_SDL3
+#include <SDL3/SDL.h>
+#else
 #include <SDL.h>
+static inline SDL_threadID SDL_GetCurrentThreadID()
+{
+	return SDL_ThreadID();
+}
+#define SDL_ThreadID SDL_threadID
+#define SDL_Mutex SDL_mutex
+#define SDL_Semaphore SDL_sem
+#define SDL_SignalSemaphore SDL_SemPost
+#define SDL_WaitSemaphore SDL_SemWait
+#endif
 
 /* We only use this to detect UIKit, for backbuffer creation */
 #ifdef SDL_VIDEO_DRIVER_UIKIT
@@ -105,6 +118,7 @@ struct OpenGLBuffer /* Cast from FNA3D_Buffer* */
 struct OpenGLRenderbuffer /* Cast from FNA3D_Renderbuffer* */
 {
 	GLuint handle;
+	FNA3D_SurfaceFormat format;
 	OpenGLRenderbuffer *next; /* linked list */
 };
 
@@ -126,6 +140,7 @@ typedef struct OpenGLBackbuffer
 	#define BACKBUFFER_TYPE_OPENGL 1
 	uint8_t type;
 
+	uint8_t isSrgb;
 	int32_t width;
 	int32_t height;
 	FNA3D_DepthFormat depthFormat;
@@ -168,6 +183,7 @@ typedef struct OpenGLRenderer /* Cast from FNA3D_Renderer* */
 	GLenum backbufferScaleMode;
 	GLuint realBackbufferFBO;
 	GLuint realBackbufferRBO;
+	uint8_t srgbEnabled;
 
 	/* VAO for Core Profile */
 	GLuint vao;
@@ -175,8 +191,12 @@ typedef struct OpenGLRenderer /* Cast from FNA3D_Renderer* */
 	/* Capabilities */
 	uint8_t supports_s3tc;
 	uint8_t supports_dxt1;
+	uint8_t supports_anisotropic_filtering;
+	uint8_t supports_srgb_rendertarget;
+	uint8_t supports_bc7;
 	int32_t maxMultiSampleCount;
 	int32_t maxMultiSampleCountFormat[21];
+	int32_t windowSampleCount;
 
 	/* Blend State */
 	uint8_t alphaBlendEnable;
@@ -280,21 +300,21 @@ typedef struct OpenGLRenderer /* Cast from FNA3D_Renderer* */
 	uint8_t togglePointSprite;
 
 	/* Threading */
-	SDL_threadID threadID;
+	SDL_ThreadID threadID;
 	FNA3D_Command *commands;
-	SDL_mutex *commandsLock;
+	SDL_Mutex *commandsLock;
 	OpenGLTexture *disposeTextures;
-	SDL_mutex *disposeTexturesLock;
+	SDL_Mutex *disposeTexturesLock;
 	OpenGLRenderbuffer *disposeRenderbuffers;
-	SDL_mutex *disposeRenderbuffersLock;
+	SDL_Mutex *disposeRenderbuffersLock;
 	OpenGLBuffer *disposeVertexBuffers;
-	SDL_mutex *disposeVertexBuffersLock;
+	SDL_Mutex *disposeVertexBuffersLock;
 	OpenGLBuffer *disposeIndexBuffers;
-	SDL_mutex *disposeIndexBuffersLock;
+	SDL_Mutex *disposeIndexBuffersLock;
 	OpenGLEffect *disposeEffects;
-	SDL_mutex *disposeEffectsLock;
+	SDL_Mutex *disposeEffectsLock;
 	OpenGLQuery *disposeQueries;
-	SDL_mutex *disposeQueriesLock;
+	SDL_Mutex *disposeQueriesLock;
 
 	/* GL entry points */
 	glfntype_glGetString glGetString; /* Loaded early! */
@@ -332,6 +352,12 @@ static int32_t XNAToGL_TextureFormat[] =
 	GL_RGBA,			/* SurfaceFormat.HalfVector4 */
 	GL_RGBA,			/* SurfaceFormat.HdrBlendable */
 	GL_BGRA,			/* SurfaceFormat.ColorBgraEXT */
+	GL_RGBA,			/* SurfaceFormat.ColorSrgbEXT */
+	GL_COMPRESSED_TEXTURE_FORMATS,	/* SurfaceFormat.Dxt5SrgbEXT */
+	GL_COMPRESSED_TEXTURE_FORMATS,	/* SurfaceFormat.Bc7EXT */
+	GL_COMPRESSED_TEXTURE_FORMATS,	/* SurfaceFormat.Bc7SrgbEXT */
+	GL_RED,				/* SurfaceFormat.NormalizedByteEXT */
+	GL_RED,				/* SurfaceFormat.NormalizedUShortEXT */
 };
 
 static int32_t XNAToGL_TextureInternalFormat[] =
@@ -356,7 +382,13 @@ static int32_t XNAToGL_TextureInternalFormat[] =
 	GL_RG16F,				/* SurfaceFormat.HalfVector2 */
 	GL_RGBA16F,				/* SurfaceFormat.HalfVector4 */
 	GL_RGBA16F,				/* SurfaceFormat.HdrBlendable */
-	GL_RGBA8				/* SurfaceFormat.ColorBgraEXT */
+	GL_RGBA8,				/* SurfaceFormat.ColorBgraEXT */
+	GL_SRGB_ALPHA_EXT,			/* SurfaceFormat.ColorSrgbEXT */
+	GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT,	/* SurfaceFormat.Dxt5SrgbEXT */
+	GL_COMPRESSED_RGBA_BPTC_UNORM_EXT,	/* SurfaceFormat.BC7EXT */
+	GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM_EXT,/* SurfaceFormat.BC7SrgbEXT */
+	GL_R8,				/* SurfaceFormat.NormalizedByteEXT */
+	GL_R16,				/* SurfaceFormat.NormalizedUShortEXT */
 };
 
 static int32_t XNAToGL_TextureDataType[] =
@@ -381,7 +413,13 @@ static int32_t XNAToGL_TextureDataType[] =
 	GL_HALF_FLOAT,			/* SurfaceFormat.HalfVector2 */
 	GL_HALF_FLOAT,			/* SurfaceFormat.HalfVector4 */
 	GL_HALF_FLOAT,			/* SurfaceFormat.HdrBlendable */
-	GL_UNSIGNED_BYTE		/* SurfaceFormat.ColorBgraEXT */
+	GL_UNSIGNED_BYTE,		/* SurfaceFormat.ColorBgraEXT */
+	GL_UNSIGNED_BYTE,		/* SurfaceFormat.ColorSrgbEXT */
+	GL_ZERO,			/* NOPE */
+	GL_ZERO,			/* NOPE */
+	GL_ZERO,			/* NOPE */
+	GL_UNSIGNED_BYTE,		/* SurfaceFormat.NormalizedByteEXT */
+	GL_UNSIGNED_SHORT,		/* SurfaceFormat.NormalizedUShortEXT */
 };
 
 static int32_t XNAToGL_BlendMode[] =
@@ -795,7 +833,7 @@ struct FNA3D_Command
 			FNA3D_Renderbuffer *retval;
 		} genDepthStencilRenderbuffer;
 	};
-	SDL_sem *semaphore;
+	SDL_Semaphore *semaphore;
 	FNA3D_Command *next;
 };
 
@@ -1108,6 +1146,17 @@ static inline void ToggleGLState(
 	}
 }
 
+static inline void ApplySRGBFlag(OpenGLRenderer *renderer, uint8_t state)
+{
+	if (state == renderer->srgbEnabled)
+	{
+		return;
+	}
+
+	renderer->srgbEnabled = state;
+	ToggleGLState(renderer, GL_FRAMEBUFFER_SRGB_EXT, state);
+}
+
 static inline void ForceToMainThread(
 	OpenGLRenderer *renderer,
 	FNA3D_Command *command
@@ -1119,7 +1168,7 @@ static inline void ForceToMainThread(
 	LinkedList_Add(renderer->commands, command, curr);
 	SDL_UnlockMutex(renderer->commandsLock);
 
-	SDL_SemWait(command->semaphore);
+	SDL_WaitSemaphore(command->semaphore);
 	SDL_DestroySemaphore(command->semaphore);
 }
 
@@ -1199,7 +1248,11 @@ static void OPENGL_DestroyDevice(FNA3D_Device *device)
 	SDL_DestroyMutex(renderer->disposeEffectsLock);
 	SDL_DestroyMutex(renderer->disposeQueriesLock);
 
+#ifdef USE_SDL3
+	SDL_GL_DestroyContext(renderer->context);
+#else
 	SDL_GL_DeleteContext(renderer->context);
+#endif
 
 	SDL_free(renderer);
 	SDL_free(device);
@@ -1220,7 +1273,7 @@ static inline void ExecuteCommands(OpenGLRenderer *renderer)
 			cmd
 		);
 		next = cmd->next;
-		SDL_SemPost(cmd->semaphore);
+		SDL_SignalSemaphore(cmd->semaphore);
 		cmd = next;
 	}
 	renderer->commands = NULL; /* No heap memory to free! -caleb */
@@ -1299,7 +1352,7 @@ static void OPENGL_SwapBuffers(
 		{
 			dstX = 0;
 			dstY = 0;
-			SDL_GL_GetDrawableSize(
+			SDL_GetWindowSizeInPixels(
 				(SDL_Window*) overrideWindowHandle,
 				&dstW,
 				&dstH
@@ -1546,6 +1599,7 @@ static void OPENGL_DrawIndexedPrimitives(
 	if (tps)
 	{
 		renderer->glEnable(GL_POINT_SPRITE);
+		renderer->glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
 	}
 
 	/* Draw! */
@@ -1575,6 +1629,7 @@ static void OPENGL_DrawIndexedPrimitives(
 
 	if (tps)
 	{
+		renderer->glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_FALSE);
 		renderer->glDisable(GL_POINT_SPRITE);
 	}
 }
@@ -1606,6 +1661,7 @@ static void OPENGL_DrawInstancedPrimitives(
 	if (tps)
 	{
 		renderer->glEnable(GL_POINT_SPRITE);
+		renderer->glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
 	}
 
 	/* Draw! */
@@ -1633,6 +1689,7 @@ static void OPENGL_DrawInstancedPrimitives(
 
 	if (tps)
 	{
+		renderer->glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_FALSE);
 		renderer->glDisable(GL_POINT_SPRITE);
 	}
 }
@@ -1651,6 +1708,7 @@ static void OPENGL_DrawPrimitives(
 	if (tps)
 	{
 		renderer->glEnable(GL_POINT_SPRITE);
+		renderer->glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
 	}
 
 	/* Draw! */
@@ -1662,6 +1720,7 @@ static void OPENGL_DrawPrimitives(
 
 	if (tps)
 	{
+		renderer->glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_FALSE);
 		renderer->glDisable(GL_POINT_SPRITE);
 	}
 }
@@ -2308,13 +2367,16 @@ static void OPENGL_VerifySampler(
 				XNAToGL_MinMipFilter[tex->filter] :
 				XNAToGL_MinFilter[tex->filter]
 		);
-		renderer->glTexParameterf(
-			tex->target,
-			GL_TEXTURE_MAX_ANISOTROPY_EXT,
-			(tex->filter == FNA3D_TEXTUREFILTER_ANISOTROPIC) ?
-				SDL_max(tex->anisotropy, 1.0f) :
-				1.0f
-		);
+		if (renderer->supports_anisotropic_filtering)
+		{
+			renderer->glTexParameterf(
+				tex->target,
+				GL_TEXTURE_MAX_ANISOTROPY_EXT,
+				(tex->filter == FNA3D_TEXTUREFILTER_ANISOTROPIC) ?
+					SDL_max(tex->anisotropy, 1.0f) :
+					1.0f
+			);
+		}
 	}
 	if (sampler->maxMipLevel != tex->maxMipmapLevel)
 	{
@@ -2519,6 +2581,7 @@ static void OPENGL_SetRenderTargets(
 ) {
 	OpenGLRenderer *renderer = (OpenGLRenderer*) driverData;
 	OpenGLRenderbuffer *rb = (OpenGLRenderbuffer*) depthStencilBuffer;
+	uint8_t isSrgb = 0;
 	FNA3D_RenderTargetBinding *rt;
 	int32_t i;
 	GLuint handle;
@@ -2533,6 +2596,7 @@ static void OPENGL_SetRenderTargets(
 				renderer->realBackbufferFBO
 		);
 		renderer->renderTargetBound = 0;
+		ApplySRGBFlag(renderer, renderer->backbuffer->isSrgb);
 		return;
 	}
 	else
@@ -2548,6 +2612,7 @@ static void OPENGL_SetRenderTargets(
 		{
 			renderer->attachments[i] = ((OpenGLRenderbuffer*) rt->colorBuffer)->handle;
 			renderer->attachmentTypes[i] = GL_RENDERBUFFER;
+			isSrgb |= (((OpenGLRenderbuffer*)rt->colorBuffer)->format == FNA3D_SURFACEFORMAT_COLORSRGB_EXT);
 		}
 		else
 		{
@@ -2560,38 +2625,55 @@ static void OPENGL_SetRenderTargets(
 			{
 				renderer->attachmentTypes[i] = GL_TEXTURE_CUBE_MAP_POSITIVE_X + rt->cube.face;
 			}
+			isSrgb |= (((OpenGLTexture*) rt->texture)->format == FNA3D_SURFACEFORMAT_COLORSRGB_EXT);
 		}
 	}
+
+	ApplySRGBFlag(renderer, isSrgb);
 
 	/* Update the color attachments, DrawBuffers state */
 	for (i = 0; i < numRenderTargets; i += 1)
 	{
-		if (renderer->attachments[i] != renderer->currentAttachments[i])
+		const uint8_t handleChange = renderer->attachments[i] != renderer->currentAttachments[i];
+		const uint8_t typeChange = renderer->attachmentTypes[i] != renderer->currentAttachmentTypes[i];
+		const uint8_t renderbuffersInvolved = (
+			renderer->attachmentTypes[i] == GL_RENDERBUFFER ||
+			renderer->currentAttachmentTypes[i] == GL_RENDERBUFFER
+		);
+
+		/* Only detach the previous attachment here if all of the following are met:
+		 * - There must be an attachment to unset in the first place
+		 * - The type of the attachment index must be changing in some way
+		 * - Either the handles must be different, or a renderbuffer is involved
+		 *   and therefore a GL handle collision has occurred (WTF)
+		 */
+		if (	typeChange &&
+			renderer->currentAttachments[i] != 0 &&
+			(handleChange || renderbuffersInvolved)	)
 		{
-			if (renderer->currentAttachments[i] != 0)
+			if (renderer->currentAttachmentTypes[i] == GL_RENDERBUFFER)
 			{
-				if (	renderer->attachmentTypes[i] != GL_RENDERBUFFER &&
-					renderer->currentAttachmentTypes[i] == GL_RENDERBUFFER	)
-				{
-					renderer->glFramebufferRenderbuffer(
-						GL_FRAMEBUFFER,
-						GL_COLOR_ATTACHMENT0 + i,
-						GL_RENDERBUFFER,
-						0
-					);
-				}
-				else if (	renderer->attachmentTypes[i] == GL_RENDERBUFFER &&
-						renderer->currentAttachmentTypes[i] != GL_RENDERBUFFER	)
-				{
-					renderer->glFramebufferTexture2D(
-						GL_FRAMEBUFFER,
-						GL_COLOR_ATTACHMENT0 + i,
-						renderer->currentAttachmentTypes[i],
-						0,
-						0
-					);
-				}
+				renderer->glFramebufferRenderbuffer(
+					GL_FRAMEBUFFER,
+					GL_COLOR_ATTACHMENT0 + i,
+					GL_RENDERBUFFER,
+					0
+				);
 			}
+			else
+			{
+				renderer->glFramebufferTexture2D(
+					GL_FRAMEBUFFER,
+					GL_COLOR_ATTACHMENT0 + i,
+					renderer->currentAttachmentTypes[i],
+					0,
+					0
+				);
+			}
+		}
+
+		if (handleChange || typeChange)
+		{
 			if (renderer->attachmentTypes[i] == GL_RENDERBUFFER)
 			{
 				renderer->glFramebufferRenderbuffer(
@@ -2612,18 +2694,6 @@ static void OPENGL_SetRenderTargets(
 				);
 			}
 			renderer->currentAttachments[i] = renderer->attachments[i];
-			renderer->currentAttachmentTypes[i] = renderer->attachmentTypes[i];
-		}
-		else if (renderer->attachmentTypes[i] != renderer->currentAttachmentTypes[i])
-		{
-			/* Texture cube face change! */
-			renderer->glFramebufferTexture2D(
-				GL_FRAMEBUFFER,
-				GL_COLOR_ATTACHMENT0 + i,
-				renderer->attachmentTypes[i],
-				renderer->attachments[i],
-				0
-			);
 			renderer->currentAttachmentTypes[i] = renderer->attachmentTypes[i];
 		}
 	}
@@ -2801,7 +2871,7 @@ static void OPENGL_INTERNAL_CreateBackbuffer(
 ) {
 	int32_t useFauxBackbuffer;
 	int32_t drawX, drawY;
-	SDL_GL_GetDrawableSize(
+	SDL_GetWindowSizeInPixels(
 		(SDL_Window*) parameters->deviceWindowHandle,
 		&drawX,
 		&drawY
@@ -2836,6 +2906,7 @@ static void OPENGL_INTERNAL_CreateBackbuffer(
 			renderer->backbuffer->width = parameters->backBufferWidth;
 			renderer->backbuffer->height = parameters->backBufferHeight;
 			renderer->backbuffer->depthFormat = parameters->depthStencilFormat;
+			renderer->backbuffer->isSrgb = parameters->backBufferFormat == FNA3D_SURFACEFORMAT_COLORSRGB_EXT;
 			renderer->backbuffer->multiSampleCount = parameters->multiSampleCount;
 			renderer->backbuffer->opengl.texture = 0;
 
@@ -2955,6 +3026,7 @@ static void OPENGL_INTERNAL_CreateBackbuffer(
 		{
 			renderer->backbuffer->width = parameters->backBufferWidth;
 			renderer->backbuffer->height = parameters->backBufferHeight;
+			renderer->backbuffer->isSrgb = parameters->backBufferFormat == FNA3D_SURFACEFORMAT_COLORSRGB_EXT;
 			renderer->backbuffer->multiSampleCount = parameters->multiSampleCount;
 			if (renderer->backbuffer->opengl.texture != 0)
 			{
@@ -3129,7 +3201,13 @@ static void OPENGL_INTERNAL_CreateBackbuffer(
 		renderer->backbuffer->width = parameters->backBufferWidth;
 		renderer->backbuffer->height = parameters->backBufferHeight;
 		renderer->backbuffer->depthFormat = renderer->windowDepthFormat;
+		renderer->backbuffer->isSrgb = parameters->backBufferFormat == FNA3D_SURFACEFORMAT_COLORSRGB_EXT;
 		renderer->backbuffer->multiSampleCount = 0;
+	}
+
+	if (renderer->backbuffer)
+	{
+		ApplySRGBFlag(renderer, renderer->backbuffer->isSrgb);
 	}
 }
 
@@ -3227,22 +3305,26 @@ static void OPENGL_INTERNAL_SetPresentationInterval(
 	FNA3D_PresentInterval presentInterval,
 	uint8_t isEGL
 ) {
-	int32_t disableLateSwapTear;
+	int32_t enableLateSwapTear;
 
 	if (	presentInterval == FNA3D_PRESENTINTERVAL_DEFAULT ||
 		presentInterval == FNA3D_PRESENTINTERVAL_ONE	)
 	{
-		disableLateSwapTear = (
-			isEGL ||
-			SDL_GetHintBoolean("FNA3D_DISABLE_LATESWAPTEAR", 0)
+		enableLateSwapTear = (
+			!isEGL &&
+			SDL_GetHintBoolean("FNA3D_ENABLE_LATESWAPTEAR", 0)
 		);
-		if (disableLateSwapTear)
+		if (!enableLateSwapTear)
 		{
 			SDL_GL_SetSwapInterval(1);
 		}
 		else
 		{
+#ifdef USE_SDL3
+			if (SDL_GL_SetSwapInterval(-1))
+#else
 			if (SDL_GL_SetSwapInterval(-1) != -1)
+#endif
 			{
 				FNA3D_LogInfo(
 					"Using EXT_swap_control_tear VSync!"
@@ -3473,13 +3555,16 @@ static inline OpenGLTexture* OPENGL_INTERNAL_CreateTexture(
 			XNAToGL_MinMipFilter[result->filter] :
 			XNAToGL_MinFilter[result->filter]
 	);
-	renderer->glTexParameterf(
-		result->target,
-		GL_TEXTURE_MAX_ANISOTROPY_EXT,
-		(result->filter == FNA3D_TEXTUREFILTER_ANISOTROPIC) ?
-			SDL_max(result->anisotropy, 1.0f) :
-			1.0f
-	);
+	if (renderer->supports_anisotropic_filtering)
+	{
+		renderer->glTexParameterf(
+			result->target,
+			GL_TEXTURE_MAX_ANISOTROPY_EXT,
+			(result->filter == FNA3D_TEXTUREFILTER_ANISOTROPIC) ?
+				SDL_max(result->anisotropy, 1.0f) :
+				1.0f
+		);
+	}
 	renderer->glTexParameteri(
 		result->target,
 		GL_TEXTURE_BASE_LEVEL,
@@ -3518,10 +3603,11 @@ static FNA3D_Texture* OPENGL_CreateTexture2D(
 	OpenGLRenderer *renderer = (OpenGLRenderer*) driverData;
 	OpenGLTexture *result;
 	GLenum glFormat, glInternalFormat, glType;
-	int32_t levelWidth, levelHeight, i;
+	int32_t blockSize, levelWidth, levelHeight, i;
+	uint32_t requiredBytes;
 	FNA3D_Command cmd;
 
-	if (renderer->threadID != SDL_ThreadID())
+	if (renderer->threadID != SDL_GetCurrentThreadID())
 	{
 		cmd.type = FNA3D_COMMAND_CREATETEXTURE2D;
 		cmd.createTexture2D.format = format;
@@ -3551,6 +3637,12 @@ static FNA3D_Texture* OPENGL_CreateTexture2D(
 		{
 			levelWidth = SDL_max(width >> i, 1);
 			levelHeight = SDL_max(height >> i, 1);
+			blockSize = Texture_GetBlockSize(format);
+			requiredBytes =
+				(int32_t) ((levelWidth + (blockSize-1)) / blockSize) *
+				(int32_t) ((levelHeight + (blockSize-1)) / blockSize) *
+				Texture_GetFormatSize(format);
+
 			renderer->glCompressedTexImage2D(
 				GL_TEXTURE_2D,
 				i,
@@ -3558,7 +3650,7 @@ static FNA3D_Texture* OPENGL_CreateTexture2D(
 				levelWidth,
 				levelHeight,
 				0,
-				((levelWidth + 3) / 4) * ((levelHeight + 3) / 4) * Texture_GetFormatSize(format),
+				requiredBytes,
 				NULL
 			);
 		}
@@ -3601,7 +3693,7 @@ static FNA3D_Texture* OPENGL_CreateTexture3D(
 
 	SDL_assert(renderer->supports_3DTexture);
 
-	if (renderer->threadID != SDL_ThreadID())
+	if (renderer->threadID != SDL_GetCurrentThreadID())
 	{
 		cmd.type = FNA3D_COMMAND_CREATETEXTURE3D;
 		cmd.createTexture3D.format = format;
@@ -3651,10 +3743,11 @@ static FNA3D_Texture* OPENGL_CreateTextureCube(
 	OpenGLRenderer *renderer = (OpenGLRenderer*) driverData;
 	OpenGLTexture *result;
 	GLenum glFormat, glInternalFormat;
-	int32_t levelSize, i, l;
+	int32_t blockSize, levelSize, i, l;
+	uint32_t requiredBytes;
 	FNA3D_Command cmd;
 
-	if (renderer->threadID != SDL_ThreadID())
+	if (renderer->threadID != SDL_GetCurrentThreadID())
 	{
 		cmd.type = FNA3D_COMMAND_CREATETEXTURECUBE;
 		cmd.createTextureCube.format = format;
@@ -3683,6 +3776,12 @@ static FNA3D_Texture* OPENGL_CreateTextureCube(
 			for (l = 0; l < levelCount; l += 1)
 			{
 				levelSize = SDL_max(size >> l, 1);
+				blockSize = Texture_GetBlockSize(format);
+				requiredBytes =
+					(int32_t) ((levelSize + (blockSize-1)) / blockSize) *
+					(int32_t) ((levelSize + (blockSize-1)) / blockSize) *
+					Texture_GetFormatSize(format);
+
 				renderer->glCompressedTexImage2D(
 					GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
 					l,
@@ -3690,7 +3789,7 @@ static FNA3D_Texture* OPENGL_CreateTextureCube(
 					levelSize,
 					levelSize,
 					0,
-					((levelSize + 3) / 4) * ((levelSize + 3) / 4) * Texture_GetFormatSize(format),
+					requiredBytes,
 					NULL
 				);
 			}
@@ -3758,7 +3857,7 @@ static void OPENGL_AddDisposeTexture(
 	OpenGLTexture *glTexture = (OpenGLTexture*) texture;
 	OpenGLTexture *curr;
 
-	if (renderer->threadID == SDL_ThreadID())
+	if (renderer->threadID == SDL_GetCurrentThreadID())
 	{
 		OPENGL_INTERNAL_DestroyTexture(renderer, glTexture);
 	}
@@ -3787,7 +3886,7 @@ static void OPENGL_SetTextureData2D(
 	int32_t packSize;
 	FNA3D_Command cmd;
 
-	if (renderer->threadID != SDL_ThreadID())
+	if (renderer->threadID != SDL_GetCurrentThreadID())
 	{
 		cmd.type = FNA3D_COMMAND_SETTEXTUREDATA2D;
 		cmd.setTextureData2D.texture = texture;
@@ -3879,7 +3978,7 @@ static void OPENGL_SetTextureData3D(
 
 	SDL_assert(renderer->supports_3DTexture);
 
-	if (renderer->threadID != SDL_ThreadID())
+	if (renderer->threadID != SDL_GetCurrentThreadID())
 	{
 		cmd.type = FNA3D_COMMAND_SETTEXTUREDATA3D;
 		cmd.setTextureData3D.texture = texture;
@@ -3930,7 +4029,7 @@ static void OPENGL_SetTextureDataCube(
 	GLenum glFormat;
 	FNA3D_Command cmd;
 
-	if (renderer->threadID != SDL_ThreadID())
+	if (renderer->threadID != SDL_GetCurrentThreadID())
 	{
 		cmd.type = FNA3D_COMMAND_SETTEXTUREDATACUBE;
 		cmd.setTextureDataCube.texture = texture;
@@ -4065,7 +4164,7 @@ static void OPENGL_GetTextureData2D(
 
 	SDL_assert(renderer->supports_NonES3);
 
-	if (renderer->threadID != SDL_ThreadID())
+	if (renderer->threadID != SDL_GetCurrentThreadID())
 	{
 		cmd.type = FNA3D_COMMAND_GETTEXTUREDATA2D;
 		cmd.getTextureData2D.texture = texture;
@@ -4197,7 +4296,7 @@ static void OPENGL_GetTextureDataCube(
 
 	SDL_assert(renderer->supports_NonES3);
 
-	if (renderer->threadID != SDL_ThreadID())
+	if (renderer->threadID != SDL_GetCurrentThreadID())
 	{
 		cmd.type = FNA3D_COMMAND_GETTEXTUREDATACUBE;
 		cmd.getTextureDataCube.texture = texture;
@@ -4285,7 +4384,7 @@ static FNA3D_Renderbuffer* OPENGL_GenColorRenderbuffer(
 	OpenGLRenderbuffer *renderbuffer;
 	FNA3D_Command cmd;
 
-	if (renderer->threadID != SDL_ThreadID())
+	if (renderer->threadID != SDL_GetCurrentThreadID())
 	{
 		cmd.type = FNA3D_COMMAND_GENCOLORRENDERBUFFER;
 		cmd.genColorRenderbuffer.width = width;
@@ -4301,6 +4400,7 @@ static FNA3D_Renderbuffer* OPENGL_GenColorRenderbuffer(
 		sizeof(OpenGLRenderbuffer)
 	);
 	renderbuffer->next = NULL;
+	renderbuffer->format = format;
 
 	renderer->glGenRenderbuffers(1, &renderbuffer->handle);
 	renderer->glBindRenderbuffer(GL_RENDERBUFFER, renderbuffer->handle);
@@ -4339,7 +4439,7 @@ static FNA3D_Renderbuffer* OPENGL_GenDepthStencilRenderbuffer(
 	OpenGLRenderbuffer *renderbuffer;
 	FNA3D_Command cmd;
 
-	if (renderer->threadID != SDL_ThreadID())
+	if (renderer->threadID != SDL_GetCurrentThreadID())
 	{
 		cmd.type = FNA3D_COMMAND_GENDEPTHRENDERBUFFER;
 		cmd.genDepthStencilRenderbuffer.width = width;
@@ -4416,7 +4516,7 @@ static void OPENGL_AddDisposeRenderbuffer(
 	OpenGLRenderbuffer *buffer = (OpenGLRenderbuffer*) renderbuffer;
 	OpenGLRenderbuffer *curr;
 
-	if (renderer->threadID == SDL_ThreadID())
+	if (renderer->threadID == SDL_GetCurrentThreadID())
 	{
 		OPENGL_INTERNAL_DestroyRenderbuffer(renderer, buffer);
 	}
@@ -4441,7 +4541,7 @@ static FNA3D_Buffer* OPENGL_GenVertexBuffer(
 	GLuint handle;
 	FNA3D_Command cmd;
 
-	if (renderer->threadID != SDL_ThreadID())
+	if (renderer->threadID != SDL_GetCurrentThreadID())
 	{
 		cmd.type = FNA3D_COMMAND_GENVERTEXBUFFER;
 		cmd.genVertexBuffer.dynamic = dynamic;
@@ -4502,7 +4602,7 @@ static void OPENGL_AddDisposeVertexBuffer(
 	OpenGLBuffer *glBuffer = (OpenGLBuffer*) buffer;
 	OpenGLBuffer *curr;
 
-	if (renderer->threadID == SDL_ThreadID())
+	if (renderer->threadID == SDL_GetCurrentThreadID())
 	{
 		OPENGL_INTERNAL_DestroyVertexBuffer(renderer, glBuffer);
 	}
@@ -4528,7 +4628,7 @@ static void OPENGL_SetVertexBufferData(
 	OpenGLBuffer *glBuffer = (OpenGLBuffer*) buffer;
 	FNA3D_Command cmd;
 
-	if (renderer->threadID != SDL_ThreadID())
+	if (renderer->threadID != SDL_GetCurrentThreadID())
 	{
 		cmd.type = FNA3D_COMMAND_SETVERTEXBUFFERDATA;
 		cmd.setVertexBufferData.buffer = buffer;
@@ -4545,6 +4645,23 @@ static void OPENGL_SetVertexBufferData(
 	BindVertexBuffer(renderer, glBuffer->handle);
 
 	/* FIXME: Staging buffer for elementSizeInBytes < vertexStride! */
+
+	if (	options == FNA3D_SETDATAOPTIONS_NOOVERWRITE &&
+		renderer->supports_ARB_map_buffer_range	)
+	{
+		void *ptr = renderer->glMapBufferRange(
+			GL_ARRAY_BUFFER,
+			(GLintptr) offsetInBytes,
+			(GLsizeiptr) (elementCount * vertexStride),
+			GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT
+		);
+		if (ptr != NULL)
+		{
+			SDL_memcpy(ptr, data, (elementCount * vertexStride));
+			renderer->glUnmapBuffer(GL_ARRAY_BUFFER);
+		}
+		return;
+	}
 
 	if (options == FNA3D_SETDATAOPTIONS_DISCARD)
 	{
@@ -4582,7 +4699,7 @@ static void OPENGL_GetVertexBufferData(
 
 	SDL_assert(renderer->supports_NonES3);
 
-	if (renderer->threadID != SDL_ThreadID())
+	if (renderer->threadID != SDL_GetCurrentThreadID())
 	{
 		cmd.type = FNA3D_COMMAND_GETVERTEXBUFFERDATA;
 		cmd.getVertexBufferData.buffer = buffer;
@@ -4642,7 +4759,7 @@ static FNA3D_Buffer* OPENGL_GenIndexBuffer(
 	GLuint handle;
 	FNA3D_Command cmd;
 
-	if (renderer->threadID != SDL_ThreadID())
+	if (renderer->threadID != SDL_GetCurrentThreadID())
 	{
 		cmd.type = FNA3D_COMMAND_GENINDEXBUFFER;
 		cmd.genIndexBuffer.dynamic = dynamic;
@@ -4692,7 +4809,7 @@ static void OPENGL_AddDisposeIndexBuffer(
 	OpenGLBuffer *glBuffer = (OpenGLBuffer*) buffer;
 	OpenGLBuffer *curr;
 
-	if (renderer->threadID == SDL_ThreadID())
+	if (renderer->threadID == SDL_GetCurrentThreadID())
 	{
 		OPENGL_INTERNAL_DestroyIndexBuffer(renderer, glBuffer);
 	}
@@ -4716,7 +4833,7 @@ static void OPENGL_SetIndexBufferData(
 	OpenGLBuffer *glBuffer = (OpenGLBuffer*) buffer;
 	FNA3D_Command cmd;
 
-	if (renderer->threadID != SDL_ThreadID())
+	if (renderer->threadID != SDL_GetCurrentThreadID())
 	{
 		cmd.type = FNA3D_COMMAND_SETINDEXBUFFERDATA;
 		cmd.setIndexBufferData.buffer = buffer;
@@ -4729,6 +4846,23 @@ static void OPENGL_SetIndexBufferData(
 	}
 
 	BindIndexBuffer(renderer, glBuffer->handle);
+
+	if (	options == FNA3D_SETDATAOPTIONS_NOOVERWRITE &&
+		renderer->supports_ARB_map_buffer_range	)
+	{
+		void *ptr = renderer->glMapBufferRange(
+			GL_ELEMENT_ARRAY_BUFFER,
+			(GLintptr) offsetInBytes,
+			(GLsizeiptr) dataLength,
+			GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT
+		);
+		if (ptr != NULL)
+		{
+			SDL_memcpy(ptr, data, dataLength);
+			renderer->glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+		}
+		return;
+	}
 
 	if (options == FNA3D_SETDATAOPTIONS_DISCARD)
 	{
@@ -4761,7 +4895,7 @@ static void OPENGL_GetIndexBufferData(
 
 	SDL_assert(renderer->supports_NonES3);
 
-	if (renderer->threadID != SDL_ThreadID())
+	if (renderer->threadID != SDL_GetCurrentThreadID())
 	{
 		cmd.type = FNA3D_COMMAND_GETINDEXBUFFERDATA;
 		cmd.getIndexBufferData.buffer = buffer;
@@ -4785,6 +4919,7 @@ static void OPENGL_GetIndexBufferData(
 /* Effects */
 
 static void* MOJOSHADERCALL OPENGL_INTERNAL_CompileShader(
+	const void *ctx,
 	const char *mainfn,
 	const unsigned char *tokenbuf,
 	const unsigned int bufsize,
@@ -4803,6 +4938,54 @@ static void* MOJOSHADERCALL OPENGL_INTERNAL_CompileShader(
 	);
 }
 
+static void MOJOSHADERCALL OPENGL_INTERNAL_DeleteShader(
+	const void *ctx,
+	void *shader
+) {
+	MOJOSHADER_glShader *glShader = (MOJOSHADER_glShader*) shader;
+	MOJOSHADER_glDeleteShader(glShader);
+}
+
+static void MOJOSHADERCALL OPENGL_INTERNAL_BindShaders(
+	const void *ctx,
+	void *vshader,
+	void *pshader
+) {
+	MOJOSHADER_glShader *glVShader = (MOJOSHADER_glShader*) vshader;
+	MOJOSHADER_glShader *glPShader = (MOJOSHADER_glShader*) pshader;
+
+	MOJOSHADER_glBindShaders(glVShader, glPShader);
+}
+
+static void MOJOSHADERCALL OPENGL_INTERNAL_GetBoundShaders(
+	const void *ctx,
+	void **vshader,
+	void **pshader
+) {
+	MOJOSHADER_glShader **glVShader = (MOJOSHADER_glShader**) vshader;
+	MOJOSHADER_glShader **glPShader = (MOJOSHADER_glShader**) pshader;
+	MOJOSHADER_glGetBoundShaders(glVShader, glPShader);
+}
+
+static void MOJOSHADERCALL OPENGL_INTERNAL_MapUniformBufferMemory(
+	const void *ctx,
+	float **vsf, int **vsi, unsigned char **vsb,
+	float **psf, int **psi, unsigned char **psb
+) {
+	MOJOSHADER_glMapUniformBufferMemory(vsf, vsi, vsb, psf, psi, psb);
+}
+
+static void MOJOSHADERCALL OPENGL_INTERNAL_UnmapUniformBufferMemory(
+	const void *ctx
+) {
+	MOJOSHADER_glUnmapUniformBufferMemory();
+}
+
+static const char* MOJOSHADERCALL OPENGL_INTERNAL_GetShaderError(const void *ctx)
+{
+	return MOJOSHADER_glGetError();
+}
+
 static void OPENGL_CreateEffect(
 	FNA3D_Renderer *driverData,
 	uint8_t *effectCode,
@@ -4816,7 +4999,7 @@ static void OPENGL_CreateEffect(
 	FNA3D_Command cmd;
 	MOJOSHADER_effectShaderContext shaderBackend;
 
-	if (renderer->threadID != SDL_ThreadID())
+	if (renderer->threadID != SDL_GetCurrentThreadID())
 	{
 		cmd.type = FNA3D_COMMAND_CREATEEFFECT;
 		cmd.createEffect.effectCode = effectCode;
@@ -4827,15 +5010,16 @@ static void OPENGL_CreateEffect(
 		return;
 	}
 
+	shaderBackend.shaderContext = renderer->shaderContext;
 	shaderBackend.compileShader = OPENGL_INTERNAL_CompileShader;
 	shaderBackend.shaderAddRef = (MOJOSHADER_shaderAddRefFunc) MOJOSHADER_glShaderAddRef;
-	shaderBackend.deleteShader = (MOJOSHADER_deleteShaderFunc) MOJOSHADER_glDeleteShader;
+	shaderBackend.deleteShader = OPENGL_INTERNAL_DeleteShader;
 	shaderBackend.getParseData = (MOJOSHADER_getParseDataFunc) MOJOSHADER_glGetShaderParseData;
-	shaderBackend.bindShaders = (MOJOSHADER_bindShadersFunc) MOJOSHADER_glBindShaders;
-	shaderBackend.getBoundShaders = (MOJOSHADER_getBoundShadersFunc) MOJOSHADER_glGetBoundShaders;
-	shaderBackend.mapUniformBufferMemory = MOJOSHADER_glMapUniformBufferMemory;
-	shaderBackend.unmapUniformBufferMemory = MOJOSHADER_glUnmapUniformBufferMemory;
-	shaderBackend.getError = MOJOSHADER_glGetError;
+	shaderBackend.bindShaders = OPENGL_INTERNAL_BindShaders;
+	shaderBackend.getBoundShaders = OPENGL_INTERNAL_GetBoundShaders;
+	shaderBackend.mapUniformBufferMemory = OPENGL_INTERNAL_MapUniformBufferMemory;
+	shaderBackend.unmapUniformBufferMemory = OPENGL_INTERNAL_UnmapUniformBufferMemory;
+	shaderBackend.getError = OPENGL_INTERNAL_GetShaderError;
 	shaderBackend.m = NULL;
 	shaderBackend.f = NULL;
 	shaderBackend.malloc_data = renderer;
@@ -4875,7 +5059,7 @@ static void OPENGL_CloneEffect(
 	OpenGLEffect *result;
 	FNA3D_Command cmd;
 
-	if (renderer->threadID != SDL_ThreadID())
+	if (renderer->threadID != SDL_GetCurrentThreadID())
 	{
 		cmd.type = FNA3D_COMMAND_CLONEEFFECT;
 		cmd.cloneEffect.cloneSource = cloneSource;
@@ -4925,7 +5109,7 @@ static void OPENGL_AddDisposeEffect(
 	OpenGLEffect *fnaEffect = (OpenGLEffect*) effect;
 	OpenGLEffect *curr;
 
-	if (renderer->threadID == SDL_ThreadID())
+	if (renderer->threadID == SDL_GetCurrentThreadID())
 	{
 		OPENGL_INTERNAL_DestroyEffect(renderer, fnaEffect);
 	}
@@ -5060,7 +5244,7 @@ static void OPENGL_AddDisposeQuery(
 
 	SDL_assert(renderer->supports_ARB_occlusion_query);
 
-	if (renderer->threadID == SDL_ThreadID())
+	if (renderer->threadID == SDL_GetCurrentThreadID())
 	{
 		OPENGL_INTERNAL_DestroyQuery(renderer, glQuery);
 	}
@@ -5147,6 +5331,12 @@ static uint8_t OPENGL_SupportsS3TC(FNA3D_Renderer *driverData)
 	return renderer->supports_s3tc;
 }
 
+static uint8_t OPENGL_SupportsBC7(FNA3D_Renderer *driverData)
+{
+	OpenGLRenderer *renderer = (OpenGLRenderer*) driverData;
+	return renderer->supports_bc7;
+}
+
 static uint8_t OPENGL_SupportsHardwareInstancing(FNA3D_Renderer *driverData)
 {
 	OpenGLRenderer *renderer = (OpenGLRenderer*) driverData;
@@ -5156,7 +5346,14 @@ static uint8_t OPENGL_SupportsHardwareInstancing(FNA3D_Renderer *driverData)
 
 static uint8_t OPENGL_SupportsNoOverwrite(FNA3D_Renderer *driverData)
 {
-	return 0;
+	OpenGLRenderer *renderer = (OpenGLRenderer*) driverData;
+	return renderer->supports_ARB_map_buffer_range;
+}
+
+static uint8_t OPENGL_SupportsSRGBRenderTargets(FNA3D_Renderer *driverData)
+{
+	OpenGLRenderer *renderer = (OpenGLRenderer*) driverData;
+	return renderer->supports_srgb_rendertarget;
 }
 
 static void OPENGL_GetMaxTextureSlots(
@@ -5186,6 +5383,14 @@ static int32_t OPENGL_GetMaxMultiSampleCount(
 		/* This number isn't very good, but it's all we have... */
 		maxSamples = renderer->maxMultiSampleCount;
 	}
+	if (renderer->windowSampleCount > 0)
+	{
+		/* Desperate attempt to align multisample count with the window
+		 * sample count, otherwise glBlitFramebuffer will return
+		 * GL_INVALID_OPERATION
+		 */
+		maxSamples = SDL_min(maxSamples, renderer->windowSampleCount);
+	}
 	return SDL_min(maxSamples, multiSampleCount);
 }
 
@@ -5198,6 +5403,12 @@ static void OPENGL_SetStringMarker(FNA3D_Renderer *driverData, const char *text)
 	{
 		renderer->glStringMarkerGREMEDY(SDL_strlen(text), text);
 	}
+}
+
+static void OPENGL_SetTextureName(FNA3D_Renderer* driverData, FNA3D_Texture* texture, const char* text)
+{
+	/* No OpenGL API for this that I'm aware of -kg */
+	return;
 }
 
 static const char *debugSourceStr[] = {
@@ -5216,12 +5427,19 @@ static const char *debugTypeStr[] = {
 	"GL_DEBUG_TYPE_PERFORMANCE",
 	"GL_DEBUG_TYPE_OTHER"
 };
-static const char *debugSeverityStr[] = {
-	"GL_DEBUG_SEVERITY_HIGH",
-	"GL_DEBUG_SEVERITY_MEDIUM",
-	"GL_DEBUG_SEVERITY_LOW",
-	"GL_DEBUG_SEVERITY_NOTIFICATION"
-};
+/* Debug severity values are disjointed */
+static inline const char *GetSeverityString(GLenum severity)
+{
+	switch (severity)
+	{
+	case GL_DEBUG_SEVERITY_HIGH: return "GL_DEBUG_SEVERITY_HIGH";
+	case GL_DEBUG_SEVERITY_MEDIUM: return "GL_DEBUG_SEVERITY_MEDIUM";
+	case GL_DEBUG_SEVERITY_LOW: return "GL_DEBUG_SEVERITY_LOW";
+	case GL_DEBUG_SEVERITY_NOTIFICATION: return "GL_DEBUG_SEVERITY_NOTIFICATION";
+	default:
+		return "FNA3D_UNKNOWN_SEVERITY";
+	}
+}
 
 static void GLAPIENTRY DebugCall(
 	GLenum source,
@@ -5239,7 +5457,7 @@ static void GLAPIENTRY DebugCall(
 			message,
 			debugSourceStr[source - GL_DEBUG_SOURCE_API],
 			debugTypeStr[type - GL_DEBUG_TYPE_ERROR],
-			debugSeverityStr[severity - GL_DEBUG_SEVERITY_HIGH]
+			GetSeverityString(severity)
 		);
 	}
 	else
@@ -5249,7 +5467,7 @@ static void GLAPIENTRY DebugCall(
 			message,
 			debugSourceStr[source - GL_DEBUG_SOURCE_API],
 			debugTypeStr[type - GL_DEBUG_TYPE_ERROR],
-			debugSeverityStr[severity - GL_DEBUG_SEVERITY_HIGH]
+			GetSeverityString(severity)
 		);
 	}
 }
@@ -5462,6 +5680,12 @@ static inline void LoadEntryPoints(
 		}
 	}
 
+	/* MAP_UNSYNCHRONIZED _should_ be faster, but on threaded drivers it can stall hard */
+	if (!SDL_GetHintBoolean("FNA3D_OPENGL_ALLOW_MAP_UNSYNCHRONIZED", 0))
+	{
+		renderer->supports_ARB_map_buffer_range = 0;
+	}
+
 	/* Everything below this check is for debug contexts */
 	if (!debugMode)
 	{
@@ -5513,19 +5737,35 @@ static inline void LoadEntryPoints(
 
 static void* MOJOSHADERCALL GLGetProcAddress(const char *ep, void* d)
 {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 	return SDL_GL_GetProcAddress(ep);
+#pragma GCC diagnostic pop
 }
 
 static inline void CheckExtensions(
 	const char *ext,
 	uint8_t *supportsS3tc,
-	uint8_t *supportsDxt1
+	uint8_t *supportsDxt1,
+	uint8_t *supportsAnisotropicFiltering,
+	uint8_t *supportsSRGBRenderTargets,
+	uint8_t *supportsBC7
 ) {
 	uint8_t s3tc = (
 		SDL_strstr(ext, "GL_EXT_texture_compression_s3tc") ||
 		SDL_strstr(ext, "GL_OES_texture_compression_S3TC") ||
 		SDL_strstr(ext, "GL_EXT_texture_compression_dxt3") ||
 		SDL_strstr(ext, "GL_EXT_texture_compression_dxt5")
+	);
+	uint8_t bc7 = (
+		SDL_strstr(ext, "GL_ARB_texture_compression_bptc") != NULL
+	);
+	uint8_t anisotropicFiltering = (
+		SDL_strstr(ext, "GL_EXT_texture_filter_anisotropic") ||
+		SDL_strstr(ext, "GL_ARB_texture_filter_anisotropic")
+	);
+	uint8_t srgbFrameBuffer = (
+		SDL_strstr(ext, "GL_EXT_framebuffer_sRGB") != NULL
 	);
 
 	if (s3tc)
@@ -5535,6 +5775,18 @@ static inline void CheckExtensions(
 	if (s3tc || SDL_strstr(ext, "GL_EXT_texture_compression_dxt1"))
 	{
 		*supportsDxt1 = 1;
+	}
+	if (anisotropicFiltering)
+	{
+		*supportsAnisotropicFiltering = 1;
+	}
+	if (srgbFrameBuffer)
+	{
+		*supportsSRGBRenderTargets = 1;
+	}
+	if (bc7)
+	{
+		*supportsBC7 = 1;
 	}
 }
 
@@ -5555,7 +5807,6 @@ static uint8_t OPENGL_PrepareWindowAttributes(uint32_t *flags)
 	/* Some platforms are GLES only */
 	osVersion = SDL_GetPlatform();
 	forceES3 |= (
-		(SDL_strcmp(osVersion, "WinRT") == 0) ||
 		(SDL_strcmp(osVersion, "iOS") == 0) ||
 		(SDL_strcmp(osVersion, "tvOS") == 0) ||
 		(SDL_strcmp(osVersion, "Stadia") == 0) ||
@@ -5569,22 +5820,22 @@ static uint8_t OPENGL_PrepareWindowAttributes(uint32_t *flags)
 	depthFormatHint = SDL_GetHint("FNA3D_OPENGL_WINDOW_DEPTHSTENCILFORMAT");
 	if (depthFormatHint != NULL)
 	{
-		if (SDL_strcmp(depthFormatHint, "None") == 0)
+		if (SDL_strcasecmp(depthFormatHint, "None") == 0)
 		{
 			depthSize = 0;
 			stencilSize = 0;
 		}
-		else if (SDL_strcmp(depthFormatHint, "Depth16") == 0)
+		else if (SDL_strcasecmp(depthFormatHint, "Depth16") == 0)
 		{
 			depthSize = 16;
 			stencilSize = 0;
 		}
-		else if (SDL_strcmp(depthFormatHint, "Depth24") == 0)
+		else if (SDL_strcasecmp(depthFormatHint, "Depth24") == 0)
 		{
 			depthSize = 24;
 			stencilSize = 0;
 		}
-		else if (SDL_strcmp(depthFormatHint, "Depth24Stencil8") == 0)
+		else if (SDL_strcasecmp(depthFormatHint, "Depth24Stencil8") == 0)
 		{
 			depthSize = 24;
 			stencilSize = 8;
@@ -5595,23 +5846,7 @@ static uint8_t OPENGL_PrepareWindowAttributes(uint32_t *flags)
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);
-	if (SDL_strcmp(SDL_GetCurrentVideoDriver(), "wayland") == 0)
-	{
-		/* FIXME: For Wayland we have to violate spec and discard alpha.
-		 * XNA backbuffers should be RGBA, but Wayland will literally
-		 * make your window transparent, which is not what we want.
-		 * Thankfully glReadPixels can still return 4-channel data, but
-		 * alpha will be missing and it wastes cycles converting. Blech.
-		 *
-		 * TODO: Ask for an EGL version of VkCompositeAlphaFlagBitsKHR.
-		 * -flibit
-		 */
-		SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 0);
-	}
-	else
-	{
-		SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
-	}
+	SDL_GL_SetAttribute(SDL_GL_ALPHA_SIZE, 8);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, depthSize);
 	SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, stencilSize);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
@@ -5650,29 +5885,17 @@ static uint8_t OPENGL_PrepareWindowAttributes(uint32_t *flags)
 	 * which GL library actually gets loaded (desktop vs ES, for example).
 	 * -flibit
 	 */
+#ifdef USE_SDL3
+	if (!SDL_GL_LoadLibrary(NULL))
+#else
 	if (SDL_GL_LoadLibrary(NULL) < 0)
+#endif
 	{
 		return 0;
 	}
 
 	*flags = SDL_WINDOW_OPENGL;
 	return 1;
-}
-
-void OPENGL_GetDrawableSize(void* window, int32_t *w, int32_t *h)
-{
-	/* When using OpenGL, iOS and tvOS require an active GL context to get
-	 * the drawable size of the screen.
-	 */
-#if defined(__IPHONEOS__) || defined(__TVOS__)
-	SDL_GLContext tempContext = SDL_GL_CreateContext(window);
-#endif
-
-	SDL_GL_GetDrawableSize((SDL_Window*) window, w, h);
-
-#if defined(__IPHONEOS__) || defined(__TVOS__)
-	SDL_GL_DeleteContext(tempContext);
-#endif
 }
 
 FNA3D_Device* OPENGL_CreateDevice(
@@ -5767,6 +5990,15 @@ FNA3D_Device* OPENGL_CreateDevice(
 		renderer->windowDepthFormat = FNA3D_DEPTHFORMAT_D24S8;
 	}
 
+	/* Lastly, check for backbuffer multisampling. This is extremely rare,
+	 * but Xwayland may try to introduce it (maybe because of DPI scaling?)
+	 */
+	SDL_GL_GetAttribute(SDL_GL_MULTISAMPLESAMPLES, &renderer->windowSampleCount);
+	if (renderer->windowSampleCount > 1)
+	{
+		FNA3D_LogWarn("Window surface is multisampled! This is an OS bug!");
+	}
+
 	/* Set the swap interval now that we know enough about the GL context */
 	OPENGL_INTERNAL_SetPresentationInterval(
 		presentationParameters->presentationInterval,
@@ -5814,12 +6046,6 @@ FNA3D_Device* OPENGL_CreateDevice(
 	);
 	LoadEntryPoints(renderer, driverInfo, debugMode);
 
-	/* FIXME: REMOVE ME ASAP! TERRIBLE HACK FOR ANGLE! */
-	if (SDL_strstr(rendererStr, "Direct3D11") != NULL)
-	{
-		renderer->supports_ARB_draw_elements_base_vertex = 0;
-	}
-
 	/* Initialize shader context */
 	renderer->shaderProfile = SDL_GetHint("FNA3D_MOJOSHADER_PROFILE");
 	if (renderer->shaderProfile == NULL || renderer->shaderProfile[0] == '\0')
@@ -5833,7 +6059,7 @@ FNA3D_Device* OPENGL_CreateDevice(
 		);
 
 		/* SPIR-V is very new and not really necessary. */
-		if (	(SDL_strcmp(renderer->shaderProfile, "glspirv") == 0) &&
+		if (	(SDL_strcasecmp(renderer->shaderProfile, "glspirv") == 0) &&
 			!renderer->useCoreProfile	)
 		{
 			renderer->shaderProfile = "glsl120";
@@ -5858,6 +6084,9 @@ FNA3D_Device* OPENGL_CreateDevice(
 	/* Load the extension list, initialize extension-dependent components */
 	renderer->supports_s3tc = 0;
 	renderer->supports_dxt1 = 0;
+	renderer->supports_anisotropic_filtering = 0;
+	renderer->supports_srgb_rendertarget = 0;
+	renderer->supports_bc7 = 0;
 	if (renderer->useCoreProfile)
 	{
 		renderer->glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
@@ -5866,10 +6095,13 @@ FNA3D_Device* OPENGL_CreateDevice(
 			CheckExtensions(
 				(const char*) renderer->glGetStringi(GL_EXTENSIONS, i),
 				&renderer->supports_s3tc,
-				&renderer->supports_dxt1
+				&renderer->supports_dxt1,
+				&renderer->supports_anisotropic_filtering,
+				&renderer->supports_srgb_rendertarget,
+				&renderer->supports_bc7
 			);
 
-			if (renderer->supports_s3tc && renderer->supports_dxt1)
+			if (renderer->supports_s3tc && renderer->supports_dxt1 && renderer->supports_srgb_rendertarget && renderer->supports_bc7)
 			{
 				/* No need to look further. */
 				break;
@@ -5881,7 +6113,10 @@ FNA3D_Device* OPENGL_CreateDevice(
 		CheckExtensions(
 			(const char*) renderer->glGetString(GL_EXTENSIONS),
 			&renderer->supports_s3tc,
-			&renderer->supports_dxt1
+			&renderer->supports_dxt1,
+			&renderer->supports_anisotropic_filtering,
+			&renderer->supports_srgb_rendertarget,
+			&renderer->supports_bc7
 		);
 	}
 
@@ -5979,20 +6214,22 @@ FNA3D_Device* OPENGL_CreateDevice(
 	else if (!renderer->useES3)
 	{
 		/* Compatibility contexts require that point sprites be enabled
-		 * explicitly. However, Apple's drivers have a blatant spec
-		 * violation that disallows a simple glEnable. So, here we are.
+		 * explicitly. However, drivers (and the Steam overlay) are
+		 * really fucking bad at not knowing that point sprite state
+		 * should only affect point rendering. So, here we are.
 		 * -flibit
 		 */
-		renderer->togglePointSprite = 0;
-		if (SDL_strcmp(SDL_GetPlatform(), "Mac OS X") == 0)
+		const char *os = SDL_GetPlatform();
+		if (	(SDL_strcmp(os, "Mac OS X") == 0) || /* Mainly Intel */
+			(SDL_strcmp(os, "Linux") == 0)	) /* Mainly Gallium */
 		{
 			renderer->togglePointSprite = 1;
 		}
 		else
 		{
 			renderer->glEnable(GL_POINT_SPRITE);
+			renderer->glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, GL_TRUE);
 		}
-		renderer->glTexEnvi(GL_POINT_SPRITE, GL_COORD_REPLACE, 1);
 	}
 
 	/* Initialize renderer members not covered by SDL_memset('\0') */
@@ -6010,7 +6247,7 @@ FNA3D_Device* OPENGL_CreateDevice(
 	renderer->currentClearDepth = 1.0f;
 
 	/* The creation thread will be the "main" thread */
-	renderer->threadID = SDL_ThreadID();
+	renderer->threadID = SDL_GetCurrentThreadID();
 	renderer->commandsLock = SDL_CreateMutex();
 	renderer->disposeTexturesLock = SDL_CreateMutex();
 	renderer->disposeRenderbuffersLock = SDL_CreateMutex();
@@ -6026,7 +6263,6 @@ FNA3D_Device* OPENGL_CreateDevice(
 FNA3D_Driver OpenGLDriver = {
 	"OpenGL",
 	OPENGL_PrepareWindowAttributes,
-	OPENGL_GetDrawableSize,
 	OPENGL_CreateDevice
 };
 

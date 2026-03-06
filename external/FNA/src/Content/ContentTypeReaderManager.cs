@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -217,6 +217,20 @@ namespace Microsoft.Xna.Framework.Content
 										"Failed to get default constructor for ContentTypeReader. " +
 										"To work around, add a creation function to ContentTypeReaderManager.AddTypeCreator() " +
 										"with the following failed type string: " + originalReaderTypeString,
+										ex
+									);
+								}
+								catch (NullReferenceException ex)
+								{
+									/* If you are getting here, you are
+									 * probably using .NET AOT and have
+									 * an incomplete rd.xml, to aid with
+									 * this, show a helpful exception
+									 */
+									throw new InvalidOperationException(
+										"Failed to get default constructor for ContentTypeReader. " +
+										"If you're using .NET Native AOT, ensure your rd.xml contains the following type: " +
+										originalReaderTypeString,
 										ex
 									);
 								}

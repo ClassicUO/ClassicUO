@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -109,6 +109,14 @@ namespace Microsoft.Xna.Framework.Graphics
 		#region Internal FNA3D Variables
 
 		internal FNA3D.FNA3D_RasterizerState state;
+
+		internal protected override bool IsHarmlessToLeakInstance
+		{
+			get
+			{
+				return true;
+			}
+		}
 
 		#endregion
 

@@ -9,7 +9,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Assets;
 using Microsoft.Xna.Framework;
-using SDL2;
+using SDL3;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -49,7 +49,24 @@ namespace ClassicUO.Game.UI.Gumps
             startY += headerLabel.Height + 5;
 
             _actionBarSlotControls = new List<OptionsGumpActionBarSlotControl>();
-            _actionBarSlotsDataBox = new DataBox(startX, startY, rightArea.Width - 15, 1) { WantUpdateSize = true };
+            _actionBarSlotsDataBox = new DataBox(startX, startY + 33, rightArea.Width - 15, 1) { WantUpdateSize = true };
+
+            var addBtn = new NiceButton(startX, startY, 80, 25, ButtonAction.Activate, "+ Add");
+            addBtn.MouseUp += (s, e) =>
+            {
+                if (profile.ActionBarSlots.Count >= ActionBarManager.MAX_SLOT_COUNT) return;
+                profile.ActionBarSlots.Add(new ActionBarSlotData());
+                int newIdx = profile.ActionBarSlots.Count - 1;
+                var newSlot = new OptionsGumpActionBarSlotControl(newIdx, profile.ActionBarSlots[newIdx], _lang, () => UIManager.GetGump<ActionBarGump>()?.RefreshSlots(), RemoveSlotAt);
+                newSlot.Y = newIdx * (44 + 8);
+                _actionBarSlotControls.Add(newSlot);
+                _actionBarSlotsDataBox.Add(newSlot);
+                for (int j = 0; j < _actionBarSlotControls.Count; j++)
+                    _actionBarSlotControls[j].Y = j * (44 + 8);
+                _actionBarSlotsDataBox.WantUpdateSize = true;
+                RefreshActionBarGump();
+            };
+            rightArea.Add(addBtn);
             rightArea.Add(_actionBarSlotsDataBox);
 
             void RemoveSlotAt(int idx)
@@ -91,22 +108,6 @@ namespace ClassicUO.Game.UI.Gumps
                 _actionBarSlotsDataBox.Add(slotControl);
             }
 
-            var addBtn = new NiceButton(0, _actionBarSlotControls.Count * (44 + 8) + 5, 80, 25, ButtonAction.Activate, "+ Add");
-            addBtn.MouseUp += (s, e) =>
-            {
-                if (profile.ActionBarSlots.Count >= ActionBarManager.MAX_SLOT_COUNT) return;
-                profile.ActionBarSlots.Add(new ActionBarSlotData());
-                int newIdx = profile.ActionBarSlots.Count - 1;
-                var newSlot = new OptionsGumpActionBarSlotControl(newIdx, profile.ActionBarSlots[newIdx], _lang, () => UIManager.GetGump<ActionBarGump>()?.RefreshSlots(), RemoveSlotAt);
-                newSlot.Y = newIdx * (44 + 8);
-                _actionBarSlotControls.Add(newSlot);
-                _actionBarSlotsDataBox.Add(newSlot);
-                addBtn.Y = (newIdx + 1) * (44 + 8) + 5;
-                _actionBarSlotsDataBox.WantUpdateSize = true;
-                RefreshActionBarGump();
-            };
-            _actionBarSlotsDataBox.Add(addBtn);
-
             Add(rightArea, ACTION_BAR_PAGE);
         }
 
@@ -144,9 +145,9 @@ namespace ClassicUO.Game.UI.Gumps
                 _hotkeyBox = new HotkeyBox { X = 110, Y = 8 };
                 _hotkeyBox.HotkeyChanged += (s, e) =>
                 {
-                    bool alt = (_hotkeyBox.Mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
-                    bool ctrl = (_hotkeyBox.Mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
-                    bool shift = (_hotkeyBox.Mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
+                    bool alt = (_hotkeyBox.Mod & SDL.SDL_Keymod.SDL_KMOD_ALT) != SDL.SDL_Keymod.SDL_KMOD_NONE;
+                    bool ctrl = (_hotkeyBox.Mod & SDL.SDL_Keymod.SDL_KMOD_CTRL) != SDL.SDL_Keymod.SDL_KMOD_NONE;
+                    bool shift = (_hotkeyBox.Mod & SDL.SDL_Keymod.SDL_KMOD_SHIFT) != SDL.SDL_Keymod.SDL_KMOD_NONE;
                     _slotData.Key = (int)_hotkeyBox.Key;
                     _slotData.Alt = alt;
                     _slotData.Ctrl = ctrl;
@@ -161,10 +162,10 @@ namespace ClassicUO.Game.UI.Gumps
                 };
                 if (slotData.Key != 0)
                 {
-                    SDL.SDL_Keymod mod = SDL.SDL_Keymod.KMOD_NONE;
-                    if (slotData.Alt) mod |= SDL.SDL_Keymod.KMOD_ALT;
-                    if (slotData.Ctrl) mod |= SDL.SDL_Keymod.KMOD_CTRL;
-                    if (slotData.Shift) mod |= SDL.SDL_Keymod.KMOD_SHIFT;
+                    SDL.SDL_Keymod mod = SDL.SDL_Keymod.SDL_KMOD_NONE;
+                    if (slotData.Alt) mod |= SDL.SDL_Keymod.SDL_KMOD_ALT;
+                    if (slotData.Ctrl) mod |= SDL.SDL_Keymod.SDL_KMOD_CTRL;
+                    if (slotData.Shift) mod |= SDL.SDL_Keymod.SDL_KMOD_SHIFT;
                     _hotkeyBox.SetKey((SDL.SDL_Keycode)slotData.Key, mod);
                 }
                 Add(_hotkeyBox);

@@ -93,7 +93,7 @@ namespace ClassicUO
             {
                 MapDictionary = new Dictionary<string, string>
                 {
-                    { "SDL2", "SDL2.dll" },
+                    { "SDL3", "SDL3.dll" },
                     { "SDL_image", "SDL_image.dll" },
                     { "FAudio", "FAudio.dll" }
                 };

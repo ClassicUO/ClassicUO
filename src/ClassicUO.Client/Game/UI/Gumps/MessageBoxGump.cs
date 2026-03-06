@@ -34,7 +34,7 @@ using System;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
-using SDL2;
+using SDL3;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -212,9 +212,10 @@ namespace ClassicUO.Game.UI.Gumps
                 (
                     message,
                     false,
-                    0x0481,
+                    0x0386,
                     Width - 90,
-                    1
+                    1,
+                    FontStyle.None
                 )
                 {
                     X = 40,
@@ -241,8 +242,8 @@ namespace ClassicUO.Game.UI.Gumps
                 -1,
                 ww,
                 true,
-                FontStyle.BlackBorder | FontStyle.Fixed,
-                0x0481
+                FontStyle.None | FontStyle.Fixed,
+                0x0386
             )
             {
                 X = 42,

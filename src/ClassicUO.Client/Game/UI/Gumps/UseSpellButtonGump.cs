@@ -105,7 +105,7 @@ namespace ClassicUO.Game.UI.Gumps
                         hotKeyString += "Alt ";
                     if (macro.Shift)
                         hotKeyString += "Shift ";
-                    if (macro.Key != SDL2.SDL.SDL_Keycode.SDLK_UNKNOWN)
+                    if (macro.Key != SDL3.SDL.SDL_Keycode.SDLK_UNKNOWN)
                     {
                         hotKeyString += (char)macro.Key;
                     }

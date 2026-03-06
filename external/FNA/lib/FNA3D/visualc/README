@@ -6,15 +6,15 @@ TODO: REMOVE C RUNTIME DEPENDENCY!
 
 Dependencies
 ------------
-Before building, download SDL2's VC development libraries from SDL's website:
+Before building, download SDL3's VC development libraries from the latest tag:
 
-http://libsdl.org/download-2.0.php
+https://github.com/libsdl-org/SDL/releases/latest
 
-Extract the ZIP file's SDL2 directory (called something like 'SDL2-2.0.8') as
-a sibling to your FNA3D checkout and rename it to 'SDL2', so that you have
-directories named 'FNA3D' and 'SDL2' next to each other.
+Extract the ZIP file's SDL3 directory (called something like 'SDL3-3.4.0') as
+a sibling to your FNA3D checkout and rename it to 'SDL3', so that you have
+directories named 'FNA3D' and 'SDL3' next to each other.
 
 Compiling
 ---------
 1. Build FNA3D.sln
-2. Grab the output DLL along with SDL2.dll, ship it!
+2. Grab the output DLL along with SDL3.dll, ship it!

@@ -16,8 +16,8 @@
 #include <math.h>
 #endif /* MOJOSHADER_USE_SDL_STDLIB */
 
-void MOJOSHADER_runPreshader(const MOJOSHADER_preshader *preshader,
-                             float *outregs)
+static void run_preshader(const MOJOSHADER_preshader *preshader,
+                          float *outregs)
 {
     const float *inregs = preshader->registers;
 
@@ -208,7 +208,7 @@ void MOJOSHADER_runPreshader(const MOJOSHADER_preshader *preshader,
                 outregs[operand->index + i] = (float) dst[i];
         } // else
     } // for
-} // MOJOSHADER_runPreshader
+} // run_preshader
 
 static MOJOSHADER_effect MOJOSHADER_out_of_mem_effect = {
     1, &MOJOSHADER_out_of_mem_error, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -239,6 +239,18 @@ static void push_errors(ErrorList *list, MOJOSHADER_error *errors, int len)
         errorlist_add(list, errors[i].filename, errors[i].error_position, errors[i].error);
 } // push_errors
 
+static void read_version_token(const uint8 **_ptr, uint32 *_len, uint16 *magic, uint8 *version_major, uint8 *version_minor)
+{
+    const uint32 *ptr = (const uint32 *) *_ptr;
+    const uint32 token = SWAP32(*ptr);
+    *_ptr += sizeof (token);
+    *_len -= sizeof (token);
+
+    *magic = ((token >> 16) & 0xFFFF);
+    *version_major = (uint8) ((token >> 8) & 0xFF);
+    *version_minor = (uint8) (token & 0xFF);
+} // read_version_token
+
 static uint32 readui32(const uint8 **_ptr, uint32 *_len)
 {
     uint32 retval = 0;
@@ -261,13 +273,18 @@ static char *readstring(const uint8 *base,
 {
     // !!! FIXME: sanity checks!
     // !!! FIXME: verify this doesn't go past EOF looking for a null.
-    const char *str = ((const char *) base) + offset;
-    const uint32 len = *((const uint32 *) str);
-    char *strptr = NULL;
+    uint8 *pair = (uint8 *) (base + offset);
+    const uint32 *lenptr = (const uint32 *) pair;
+    char *strptr = (char *) (pair + sizeof(uint32));
+
+    const uint32 len = SWAP32(*lenptr);
+    char *result = NULL;
+
     if (len == 0) return NULL; /* No length? No string. */
-    strptr = (char *) m(len, d);
-    memcpy(strptr, str + 4, len);
-    return strptr;
+
+    result = (char *) m(len, d);
+    memcpy(result, strptr, len);
+    return result;
 } // readstring
 
 static int findparameter(const MOJOSHADER_effectParam *params,
@@ -381,7 +398,12 @@ static void readvalue(const uint8 *base,
             const uint32 siz = 4 * numobjects;
             value->values = m(siz, d);
             memcpy(value->values, valptr, siz);
-
+            #if MOJOSHADER_BIG_ENDIAN
+            int valI;
+            for (valI=0;valI < (value->value_count);valI++) {
+                value->valuesI[valI] = SWAP32(value->valuesI[valI]);
+            }
+            #endif
             for (i = 0; i < value->value_count; i++)
                 objects[value->valuesI[i]].type = (MOJOSHADER_symbolType) type;
         } // else
@@ -683,13 +705,14 @@ static void readsmallobjects(const uint32 numsmallobjects,
             snprintf(mainfn, sizeof(mainfn), "ShaderFunction%u", (unsigned int) index);
             object->shader.technique = -1;
             object->shader.pass = -1;
-            object->shader.shader = effect->ctx.compileShader(mainfn, *ptr, length,
+            object->shader.shader = effect->ctx.compileShader(effect->ctx.shaderContext,
+                                                              mainfn, *ptr, length,
                                                               swiz, swizcount,
                                                               smap, smapcount);
             if (object->shader.shader == NULL)
             {
                 // Bail ASAP, so we can get the error to the application
-                errorlist_add(errors, NULL, 0, effect->ctx.getError());
+                errorlist_add(errors, NULL, 0, effect->ctx.getError(effect->ctx.shaderContext));
                 return;
             } // if
             pd = effect->ctx.getParseData(object->shader.shader);
@@ -819,13 +842,14 @@ static void readlargeobjects(const uint32 numlargeobjects,
             {
                 char mainfn[32];
                 snprintf(mainfn, sizeof (mainfn), "ShaderFunction%u", (unsigned int) objectIndex);
-                object->shader.shader = effect->ctx.compileShader(mainfn, *ptr, length,
+                object->shader.shader = effect->ctx.compileShader(effect->ctx.shaderContext,
+                                                                  mainfn, *ptr, length,
                                                                   swiz, swizcount,
                                                                   smap, smapcount);
                 if (object->shader.shader == NULL)
                 {
                     // Bail ASAP, so we can get the error to the application
-                    errorlist_add(errors, NULL, 0, effect->ctx.getError());
+                    errorlist_add(errors, NULL, 0, effect->ctx.getError(effect->ctx.shaderContext));
                     return;
                 } // if
                 pd = effect->ctx.getParseData(object->shader.shader);
@@ -953,8 +977,11 @@ MOJOSHADER_effect *MOJOSHADER_compileEffect(const unsigned char *buf,
 
     /* Read in header magic, seek to initial offset */
     const uint8 *base = NULL;
-    uint32 header = readui32(&ptr, &len);
-    if (header == 0xBCF00BCF)
+    uint16 magic;
+    uint8 version_major;
+    uint8 version_minor;
+    read_version_token(&ptr, &len, &magic, &version_major, &version_minor);
+    if ((magic == 0xBCF0) && (version_major == 0x0B) && (version_minor == 0xCF))
     {
         /* The Effect compiler provided with XNA4 adds some extra mess at the
          * beginning of the file. It's useless though, so just skip it.
@@ -963,9 +990,9 @@ MOJOSHADER_effect *MOJOSHADER_compileEffect(const unsigned char *buf,
         const uint32 skip = readui32(&ptr, &len) - 8;
         ptr += skip;
         len += skip;
-        header = readui32(&ptr, &len);
+        read_version_token(&ptr, &len, &magic, &version_major, &version_minor);
     } // if
-    if (header != 0xFEFF0901)
+    if (!((magic == 0xFEFF) && (version_major == 0x09) && (version_minor == 0x01)))
     {
         MOJOSHADER_deleteEffect(retval);
         return &MOJOSHADER_not_an_effect_effect;
@@ -1149,7 +1176,7 @@ void MOJOSHADER_deleteEffect(const MOJOSHADER_effect *_effect)
             if (object->shader.is_preshader)
                 MOJOSHADER_freePreshader(object->shader.preshader);
             else
-                effect->ctx.deleteShader(object->shader.shader);
+                effect->ctx.deleteShader(effect->ctx.shaderContext, object->shader.shader);
             f((void *) object->shader.params, d);
             f((void *) object->shader.samplers, d);
             f((void *) object->shader.preshader_params, d);
@@ -1502,7 +1529,9 @@ MOJOSHADER_effect *MOJOSHADER_cloneEffect(const MOJOSHADER_effect *effect)
                       m, d);
     } // for
 
-    /* Copy the current technique/pass */
+    /* Copy the current technique, but do NOT copy the pass, pass >= 0 just
+     * means that the effect we're cloning is currently active
+     */
     for (i = 0; i < effect->technique_count; i++)
         if (&effect->techniques[i] == effect->current_technique)
         {
@@ -1510,8 +1539,7 @@ MOJOSHADER_effect *MOJOSHADER_cloneEffect(const MOJOSHADER_effect *effect)
             break;
         } // if
     assert(clone->current_technique != NULL);
-    clone->current_pass = effect->current_pass;
-    assert(clone->current_pass == -1);
+    clone->current_pass = -1;
 
     /* Copy object table */
     siz = sizeof (MOJOSHADER_effectObject) * effect->object_count;
@@ -1677,7 +1705,8 @@ void MOJOSHADER_effectBegin(MOJOSHADER_effect *effect,
 
     if (effect->restore_shader_state)
     {
-        effect->ctx.getBoundShaders(&effect->prev_vertex_shader,
+        effect->ctx.getBoundShaders(effect->ctx.shaderContext,
+                                    &effect->prev_vertex_shader,
                                     &effect->prev_pixel_shader);
     } // if
 } // MOJOSHADER_effectBegin
@@ -1693,7 +1722,8 @@ void MOJOSHADER_effectBeginPass(MOJOSHADER_effect *effect,
     MOJOSHADER_effectShader *rawPixl = effect->current_pixl_raw;
     int has_preshader = 0;
 
-    effect->ctx.getBoundShaders(&effect->current_vert,
+    effect->ctx.getBoundShaders(effect->ctx.shaderContext,
+                                &effect->current_vert,
                                 &effect->current_pixl);
 
     assert(effect->current_pass == -1);
@@ -1734,7 +1764,8 @@ void MOJOSHADER_effectBeginPass(MOJOSHADER_effect *effect,
      */
     if (!has_preshader)
     {
-        effect->ctx.bindShaders(effect->current_vert,
+        effect->ctx.bindShaders(effect->ctx.shaderContext,
+                                effect->current_vert,
                                 effect->current_pixl);
         if (effect->current_vert_raw != NULL)
         {
@@ -1847,7 +1878,7 @@ void MOJOSHADER_effectCommitChanges(MOJOSHADER_effect *effect)
                            param->valuesI + (j << 2), \
                            param->type.columns << 2); \
             } while (++i < raw->preshader->symbol_count); \
-            MOJOSHADER_runPreshader(raw->preshader, &selector); \
+            run_preshader(raw->preshader, &selector); \
             shader_object = effect->params[raw->params[0]].value.valuesI[(int) selector]; \
             raw = &effect->objects[shader_object].shader; \
             gls = raw->shader; \
@@ -1858,7 +1889,8 @@ void MOJOSHADER_effectCommitChanges(MOJOSHADER_effect *effect)
     #undef SELECT_SHADER_FROM_PRESHADER
     if (selector_ran)
     {
-        effect->ctx.bindShaders(effect->current_vert,
+        effect->ctx.bindShaders(effect->ctx.shaderContext,
+                                effect->current_vert,
                                 effect->current_pixl);
         if (effect->current_vert_raw != NULL)
         {
@@ -1874,14 +1906,14 @@ void MOJOSHADER_effectCommitChanges(MOJOSHADER_effect *effect)
 
     /* This is where parameters are copied into the constant buffers.
      * If you're looking for where things slow down immensely, look at
-     * the copy_parameter_data() and MOJOSHADER_runPreshader() functions.
+     * the copy_parameter_data() and run_preshader() functions.
      * -flibit
      */
     // !!! FIXME: We're just copying everything every time. Blech. -flibit
     // !!! FIXME: We're just running the preshaders every time. Blech. -flibit
     // !!! FIXME: Will the preshader ever want int/bool registers? -flibit
     #define COPY_PARAMETER_DATA(raw, stage) \
-        if (raw != NULL) \
+        if (raw != NULL && raw->shader != NULL) \
         { \
             pd = effect->ctx.getParseData(raw->shader); \
             copy_parameter_data(effect->params, raw->params, \
@@ -1898,14 +1930,15 @@ void MOJOSHADER_effectCommitChanges(MOJOSHADER_effect *effect)
                                     pd->preshader->registers, \
                                     NULL, \
                                     NULL); \
-                MOJOSHADER_runPreshader(pd->preshader, stage##_reg_file_f); \
+                run_preshader(pd->preshader, stage##_reg_file_f); \
             } \
         }
-    effect->ctx.mapUniformBufferMemory(&vs_reg_file_f, &vs_reg_file_i, &vs_reg_file_b,
+    effect->ctx.mapUniformBufferMemory(effect->ctx.shaderContext,
+                                       &vs_reg_file_f, &vs_reg_file_i, &vs_reg_file_b,
                                        &ps_reg_file_f, &ps_reg_file_i, &ps_reg_file_b);
     COPY_PARAMETER_DATA(rawVert, vs)
     COPY_PARAMETER_DATA(rawPixl, ps)
-    effect->ctx.unmapUniformBufferMemory();
+    effect->ctx.unmapUniformBufferMemory(effect->ctx.shaderContext);
     #undef COPY_PARAMETER_DATA
 } // MOJOSHADER_effectCommitChanges
 
@@ -1922,7 +1955,8 @@ void MOJOSHADER_effectEnd(MOJOSHADER_effect *effect)
     if (effect->restore_shader_state)
     {
         effect->restore_shader_state = 0;
-        effect->ctx.bindShaders(effect->prev_vertex_shader,
+        effect->ctx.bindShaders(effect->ctx.shaderContext,
+                                effect->prev_vertex_shader,
                                 effect->prev_pixel_shader);
     } // if
 

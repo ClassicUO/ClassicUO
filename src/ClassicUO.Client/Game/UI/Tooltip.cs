@@ -50,6 +50,7 @@ namespace ClassicUO.Game.UI
         private RenderedText _renderedText;
         private string _textHTML;
         private bool _dirty;
+        private ushort _lastTooltipHue = 0xFFFF;
 
         public static bool IsEnabled;
 
@@ -64,6 +65,9 @@ namespace ClassicUO.Game.UI
 
         public bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
+            if (ProfileManager.CurrentProfile != null && !ProfileManager.CurrentProfile.UseTooltip)
+                return false;
+
             if (SerialHelper.IsValid(Serial) && World.OPL.TryGetRevision(Serial, out uint revision) && _hash != revision)
             {
                 _hash = revision;
@@ -95,13 +99,13 @@ namespace ClassicUO.Game.UI
             }
 
             string finalString = _textHTML;
-            if (SerialHelper.IsItem(Serial))
+            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableTooltipOverride && SerialHelper.IsItem(Serial))
             {
                 finalString = Managers.ToolTipOverrideData.ProcessTooltipText(Serial);
                 finalString ??= _textHTML;
             }
 
-            if (string.IsNullOrEmpty(finalString) && !string.IsNullOrEmpty(_textHTML))
+            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableTooltipOverride && string.IsNullOrEmpty(finalString) && !string.IsNullOrEmpty(_textHTML))
                 finalString = Managers.ToolTipOverrideData.ProcessTooltipText(_textHTML);
 
             string displayText = Regex.Replace(finalString ?? string.Empty, @"/c\[(black|#000000|#000)\]", "/c[white]", RegexOptions.IgnoreCase);
@@ -114,6 +118,14 @@ namespace ClassicUO.Game.UI
             if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.TooltipTextHue != 0xFFFF)
                 hue = ProfileManager.CurrentProfile.TooltipTextHue;
 
+            if (_lastTooltipHue != hue)
+            {
+                _lastTooltipHue = hue;
+                _dirty = true;
+            }
+
+            FontStyle textStyle = (hue != 0xFFFF) ? FontStyle.None : FontStyle.BlackBorder;
+
             if (_renderedText == null || _dirty)
             {
                 _renderedText?.Destroy();
@@ -123,7 +135,7 @@ namespace ClassicUO.Game.UI
                     hue,
                     font,
                     isunicode: true,
-                    style: FontStyle.BlackBorder,
+                    style: textStyle,
                     align,
                     maxWidth: 600,
                     cell: 5,
@@ -158,11 +170,17 @@ namespace ClassicUO.Game.UI
             Width = (int)(z_width * zoom) + 1;
             Height = (int)(z_height * zoom) + 1;
 
+            int bgHue = ProfileManager.CurrentProfile != null ? ProfileManager.CurrentProfile.ToolTipBGHue : 0;
+            bool useBgHue = bgHue > 0;
+            Vector3 bgHueVec = useBgHue
+                ? ShaderHueTranslator.GetHueVector(bgHue, false, alpha, true)
+                : ShaderHueTranslator.GetHueVector(0, false, alpha);
             batcher.Draw
             (
-                SolidColorTextureCache.GetTexture(Color.Black),
+                SolidColorTextureCache.GetTexture(useBgHue ? Color.White : Color.Black),
                 new Rectangle(x - 4, y - 2, (int)(z_width * zoom), (int)(z_height * zoom)),
-                ShaderHueTranslator.GetHueVector(0, false, alpha)
+                null,
+                bgHueVec
             );
 
             batcher.DrawRectangle
@@ -180,7 +198,7 @@ namespace ClassicUO.Game.UI
                 _renderedText.Texture,
                 new Rectangle(x + 4, y + 4, (int)(_renderedText.Width * zoom), (int)(_renderedText.Height * zoom)),
                 null,
-                ShaderHueTranslator.GetHueVector(0, false, 1f)
+                ShaderHueTranslator.GetHueVector(0, false, 1f, true)
             );
 
             return true;

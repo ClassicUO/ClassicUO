@@ -109,6 +109,7 @@
 
   <ItemGroup>
     <DataFiles_x64 Include="$(ProjectDir)..\..\external\x64\*.*" />
+    <NativeLibs Include="$(ProjectDir)..\..\external\x64\SDL3.dll;$(ProjectDir)..\..\external\x64\FNA3D.dll;$(ProjectDir)..\..\external\x64\FAudio.dll;$(ProjectDir)..\..\external\x64\libtheorafile.dll" />
   </ItemGroup>
 
   <ItemGroup>
@@ -139,6 +140,7 @@
   </ItemGroup>
   <Target Name="CopyExternalDeps_build" AfterTargets="Build">
     <Copy SourceFiles="@(DataFiles_x64)" DestinationFolder="$(TargetDir)\x64\" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(NativeLibs)" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(DataLanguageFiles)" DestinationFolder="$(TargetDir)\Data\Languages\" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(DataLanguageRoot)" DestinationFolder="$(TargetDir)\Data\" SkipUnchangedFiles="true" />
   </Target>

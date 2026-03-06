@@ -23,11 +23,6 @@ int next_window_dims(int y_pos, int height)
 	return y_pos + height;
 }
 
-void FAudioTool_Init()
-{
-	/* Nothing to do... */
-}
-
 void FAudioTool_Quit()
 {
 	/* Nothing to do... */

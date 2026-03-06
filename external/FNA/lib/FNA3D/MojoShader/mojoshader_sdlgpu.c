@@ -714,6 +714,11 @@ void MOJOSHADER_sdlDeleteShader(
             shader->refcount--;
         else
         {
+            if (shader == ctx->bound_vshader_data)
+                ctx->bound_vshader_data = NULL;
+            else if (shader == ctx->bound_pshader_data)
+                ctx->bound_pshader_data = NULL;
+
             // See if this was bound as an unlinked program anywhere...
             if (ctx->linker_cache)
             {
@@ -770,7 +775,6 @@ void MOJOSHADER_sdlBindShaders(
     MOJOSHADER_sdlShaderData *vshader,
     MOJOSHADER_sdlShaderData *pshader
 ) {
-    MOJOSHADER_sdlProgram *program = NULL;
     ctx->bound_vshader_data = vshader;
     ctx->bound_pshader_data = pshader;
 } // MOJOSHADER_sdlBindShaders

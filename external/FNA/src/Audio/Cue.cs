@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -126,7 +126,7 @@ namespace Microsoft.Xna.Framework.Audio
 			bank = soundBank;
 
 			selfReference = new WeakReference(this, true);
-			bank.engine.RegisterCue(handle, selfReference);
+			bank.engine.RegisterPointer(handle, selfReference);
 		}
 
 		#endregion
@@ -293,7 +293,6 @@ namespace Microsoft.Xna.Framework.Audio
 					// If this is Disposed, stop leaking memory!
 					if (!bank.engine.IsDisposed)
 					{
-						bank.engine.UnregisterCue(handle);
 						FAudio.FACTCue_Destroy(handle);
 					}
 					OnCueDestroyed();

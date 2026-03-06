@@ -58,6 +58,10 @@ extern "C" {
  *    const int linked_against = MOJOSHADER_version();
  *
  * The version is a single integer that increments, not a major/minor value.
+ *
+ * Please note that since moving to git, this function always returns -1;
+ *  when hosted in Mercurial, this number meant something, but even
+ *  there it wasn't reliable. With git, this number no longer exists at all.
  */
 DECLSPEC int MOJOSHADER_version(void);
 
@@ -706,6 +710,11 @@ typedef struct MOJOSHADER_parseData
 #define MOJOSHADER_PROFILE_GLSLES "glsles"
 
 /*
+ * Profile string for GLSL ES: changes to GLSL output for ES 3.x compliance.
+ */
+#define MOJOSHADER_PROFILE_GLSLES3 "glsles3"
+
+/*
  * Profile string for OpenGL ARB 1.0 shaders: GL_ARB_(vertex|fragment)_program.
  */
 #define MOJOSHADER_PROFILE_ARB1 "arb1"
@@ -883,1577 +892,47 @@ DECLSPEC const MOJOSHADER_preshader *MOJOSHADER_parsePreshader(const unsigned ch
 DECLSPEC void MOJOSHADER_freePreshader(const MOJOSHADER_preshader *preshader);
 
 
-/* Preprocessor interface... */
+/* SPIR-V interface... */
 
-/*
- * Structure used to pass predefined macros. Maps to D3DXMACRO.
- *  You can have macro arguments: set identifier to "a(b, c)" or whatever.
- */
-typedef struct MOJOSHADER_preprocessorDefine
-{
-    const char *identifier;
-    const char *definition;
-} MOJOSHADER_preprocessorDefine;
-
-/*
- * Used with the MOJOSHADER_includeOpen callback. Maps to D3DXINCLUDE_TYPE.
- */
 typedef enum
 {
-    MOJOSHADER_INCLUDETYPE_LOCAL,   /* local header: #include "blah.h" */
-    MOJOSHADER_INCLUDETYPE_SYSTEM   /* system header: #include <blah.h> */
-} MOJOSHADER_includeType;
+    MOJOSHADER_VERTEXELEMENTFORMAT_SINGLE,
+    MOJOSHADER_VERTEXELEMENTFORMAT_VECTOR2,
+    MOJOSHADER_VERTEXELEMENTFORMAT_VECTOR3,
+    MOJOSHADER_VERTEXELEMENTFORMAT_VECTOR4,
+    MOJOSHADER_VERTEXELEMENTFORMAT_COLOR,
+    MOJOSHADER_VERTEXELEMENTFORMAT_BYTE4,
+    MOJOSHADER_VERTEXELEMENTFORMAT_SHORT2,
+    MOJOSHADER_VERTEXELEMENTFORMAT_SHORT4,
+    MOJOSHADER_VERTEXELEMENTFORMAT_NORMALIZEDSHORT2,
+    MOJOSHADER_VERTEXELEMENTFORMAT_NORMALIZEDSHORT4,
+    MOJOSHADER_VERTEXELEMENTFORMAT_HALFVECTOR2,
+    MOJOSHADER_VERTEXELEMENTFORMAT_HALFVECTOR4
+} MOJOSHADER_vertexElementFormat;
 
-
-/*
- * Structure used to return data from preprocessing of a shader...
- */
-/* !!! FIXME: most of these ints should be unsigned. */
-typedef struct MOJOSHADER_preprocessData
+typedef struct MOJOSHADER_vertexAttribute
 {
-    /*
-     * The number of elements pointed to by (errors).
-     */
-    int error_count;
-
-    /*
-     * (error_count) elements of data that specify errors that were generated
-     *  by parsing this shader.
-     * This can be NULL if there were no errors or if (error_count) is zero.
-     */
-    MOJOSHADER_error *errors;
-
-    /*
-     * Bytes of output from preprocessing. This is a UTF-8 string. We
-     *  guarantee it to be NULL-terminated. Will be NULL on error.
-     */
-    const char *output;
-
-    /*
-     * Byte count for output, not counting any null terminator.
-     *  Will be 0 on error.
-     */
-    int output_len;
-
-    /*
-     * This is the malloc implementation you passed to MOJOSHADER_parse().
-     */
-    MOJOSHADER_malloc malloc;
-
-    /*
-     * This is the free implementation you passed to MOJOSHADER_parse().
-     */
-    MOJOSHADER_free free;
-
-    /*
-     * This is the pointer you passed as opaque data for your allocator.
-     */
-    void *malloc_data;
-} MOJOSHADER_preprocessData;
-
-
-/*
- * This callback allows an app to handle #include statements for the
- *  preprocessor. When the preprocessor sees an #include, it will call this
- *  function to obtain the contents of the requested file. This is optional;
- *  the preprocessor will open files directly if no callback is supplied, but
- *  this allows an app to retrieve data from something other than the
- *  traditional filesystem (for example, headers packed in a .zip file or
- *  headers generated on-the-fly).
- *
- * This function maps to ID3DXInclude::Open()
- *
- * (inctype) specifies the type of header we wish to include.
- * (fname) specifies the name of the file specified on the #include line.
- * (parent) is a string of the entire source file containing the include, in
- *  its original, not-yet-preprocessed state. Note that this is just the
- *  contents of the specific file, not all source code that the preprocessor
- *  has seen through other includes, etc.
- * (outdata) will be set by the callback to a pointer to the included file's
- *  contents. The callback is responsible for allocating this however they
- *  see fit (we provide allocator functions, but you may ignore them). This
- *  pointer must remain valid until the includeClose callback runs. This
- *  string does not need to be NULL-terminated.
- * (outbytes) will be set by the callback to the number of bytes pointed to
- *  by (outdata).
- * (m),(f), and (d) are the allocator details that the application passed to
- *  MojoShader. If these were NULL, MojoShader may have replaced them with its
- *  own internal allocators.
- *
- * The callback returns zero on error, non-zero on success.
- *
- * If you supply an includeOpen callback, you must supply includeClose, too.
- */
-typedef int (MOJOSHADERCALL *MOJOSHADER_includeOpen)(MOJOSHADER_includeType inctype,
-                            const char *fname, const char *parent,
-                            const char **outdata, unsigned int *outbytes,
-                            MOJOSHADER_malloc m, MOJOSHADER_free f, void *d);
-
-/*
- * This callback allows an app to clean up the results of a previous
- *  includeOpen callback.
- *
- * This function maps to ID3DXInclude::Close()
- *
- * (data) is the data that was returned from a previous call to includeOpen.
- *  It is now safe to deallocate this data.
- * (m),(f), and (d) are the same allocator details that were passed to your
- *  includeOpen callback.
- *
- * If you supply an includeClose callback, you must supply includeOpen, too.
- */
-typedef void (MOJOSHADERCALL *MOJOSHADER_includeClose)(const char *data,
-                            MOJOSHADER_malloc m, MOJOSHADER_free f, void *d);
-
-
-/*
- * This function is optional. Even if you are dealing with shader source
- *  code, you don't need to explicitly use the preprocessor, as the compiler
- *  and assembler will use it behind the scenes. In fact, you probably never
- *  need this function unless you are debugging a custom tool (or debugging
- *  MojoShader itself).
- *
- * Preprocessing roughly follows the syntax of an ANSI C preprocessor, as
- *  Microsoft's Direct3D assembler and HLSL compiler use this syntax. Please
- *  note that we try to match the output you'd get from Direct3D's
- *  preprocessor, which has some quirks if you're expecting output that matches
- *  a generic C preprocessor.
- *
- * This function maps to D3DXPreprocessShader().
- *
- * (filename) is a NULL-terminated UTF-8 filename. It can be NULL. We do not
- *  actually access this file, as we obtain our data from (source). This
- *  string is copied when we need to report errors while processing (source),
- *  as opposed to errors in a file referenced via the #include directive in
- *  (source). If this is NULL, then errors will report the filename as NULL,
- *  too.
- *
- * (source) is an string of UTF-8 text to preprocess. It does not need to be
- *  NULL-terminated.
- *
- * (sourcelen) is the length of the string pointed to by (source), in bytes.
- *
- * (defines) points to (define_count) preprocessor definitions, and can be
- *  NULL. These are treated by the preprocessor as if the source code started
- *  with one #define for each entry you pass in here.
- *
- * (include_open) and (include_close) let the app control the preprocessor's
- *  behaviour for #include statements. Both are optional and can be NULL, but
- *  both must be specified if either is specified.
- *
- * This will return a MOJOSHADER_preprocessorData. You should pass this
- *  return value to MOJOSHADER_freePreprocessData() when you are done with
- *  it.
- *
- * This function will never return NULL, even if the system is completely
- *  out of memory upon entry (in which case, this function returns a static
- *  MOJOSHADER_preprocessData object, which is still safe to pass to
- *  MOJOSHADER_freePreprocessData()).
- *
- * As preprocessing requires some memory to be allocated, you may provide a
- *  custom allocator to this function, which will be used to allocate/free
- *  memory. They function just like malloc() and free(). We do not use
- *  realloc(). If you don't care, pass NULL in for the allocator functions.
- *  If your allocator needs instance-specific data, you may supply it with the
- *  (d) parameter. This pointer is passed as-is to your (m) and (f) functions.
- *
- * This function is thread safe, so long as the various callback functions
- *  are, too, and that the parameters remains intact for the duration of the
- *  call. This allows you to preprocess several shaders on separate CPU cores
- *  at the same time.
- */
-DECLSPEC const MOJOSHADER_preprocessData *MOJOSHADER_preprocess(const char *filename,
-                             const char *source, unsigned int sourcelen,
-                             const MOJOSHADER_preprocessorDefine *defines,
-                             unsigned int define_count,
-                             MOJOSHADER_includeOpen include_open,
-                             MOJOSHADER_includeClose include_close,
-                             MOJOSHADER_malloc m, MOJOSHADER_free f, void *d);
-
-
-/*
- * Call this to dispose of preprocessing results when you are done with them.
- *  This will call the MOJOSHADER_free function you provided to
- *  MOJOSHADER_preprocess() multiple times, if you provided one.
- *  Passing a NULL here is a safe no-op.
- *
- * This function is thread safe, so long as any allocator you passed into
- *  MOJOSHADER_preprocess() is, too.
- */
-DECLSPEC void MOJOSHADER_freePreprocessData(const MOJOSHADER_preprocessData *data);
-
-
-/* Assembler interface... */
-
-/*
- * This function is optional. Use this to convert Direct3D shader assembly
- *  language into bytecode, which can be handled by MOJOSHADER_parse().
- *
- * (filename) is a NULL-terminated UTF-8 filename. It can be NULL. We do not
- *  actually access this file, as we obtain our data from (source). This
- *  string is copied when we need to report errors while processing (source),
- *  as opposed to errors in a file referenced via the #include directive in
- *  (source). If this is NULL, then errors will report the filename as NULL,
- *  too.
- *
- * (source) is an UTF-8 string of valid Direct3D shader assembly source code.
- *  It does not need to be NULL-terminated.
- *
- * (sourcelen) is the length of the string pointed to by (source), in bytes.
- *
- * (comments) points to (comment_count) NULL-terminated UTF-8 strings, and
- *  can be NULL. These strings are inserted as comments in the bytecode.
- *
- * (symbols) points to (symbol_count) symbol structs, and can be NULL. These
- *  become a CTAB field in the bytecode. This is optional, but
- *  MOJOSHADER_parse() needs CTAB data for all arrays used in a program, or
- *  relative addressing will not be permitted, so you'll want to at least
- *  provide symbol information for those. The symbol data is 100% trusted
- *  at this time; it will not be checked to see if it matches what was
- *  assembled in any way whatsoever.
- *
- * (defines) points to (define_count) preprocessor definitions, and can be
- *  NULL. These are treated by the preprocessor as if the source code started
- *  with one #define for each entry you pass in here.
- *
- * (include_open) and (include_close) let the app control the preprocessor's
- *  behaviour for #include statements. Both are optional and can be NULL, but
- *  both must be specified if either is specified.
- *
- * This will return a MOJOSHADER_parseData, like MOJOSHADER_parse() would,
- *  except the profile will be MOJOSHADER_PROFILE_BYTECODE and the output
- *  will be the assembled bytecode instead of some other language. This output
- *  can be pushed back through MOJOSHADER_parseData() with a different profile.
- *
- * This function will never return NULL, even if the system is completely
- *  out of memory upon entry (in which case, this function returns a static
- *  MOJOSHADER_parseData object, which is still safe to pass to
- *  MOJOSHADER_freeParseData()).
- *
- * As assembling requires some memory to be allocated, you may provide a
- *  custom allocator to this function, which will be used to allocate/free
- *  memory. They function just like malloc() and free(). We do not use
- *  realloc(). If you don't care, pass NULL in for the allocator functions.
- *  If your allocator needs instance-specific data, you may supply it with the
- *  (d) parameter. This pointer is passed as-is to your (m) and (f) functions.
- *
- * This function is thread safe, so long as the various callback functions
- *  are, too, and that the parameters remains intact for the duration of the
- *  call. This allows you to assemble several shaders on separate CPU cores
- *  at the same time.
- */
-DECLSPEC const MOJOSHADER_parseData *MOJOSHADER_assemble(const char *filename,
-                             const char *source, unsigned int sourcelen,
-                             const char **comments, unsigned int comment_count,
-                             const MOJOSHADER_symbol *symbols,
-                             unsigned int symbol_count,
-                             const MOJOSHADER_preprocessorDefine *defines,
-                             unsigned int define_count,
-                             MOJOSHADER_includeOpen include_open,
-                             MOJOSHADER_includeClose include_close,
-                             MOJOSHADER_malloc m, MOJOSHADER_free f, void *d);
-
-
-/* High level shading language support... */
-
-/*
- * Source profile strings for HLSL: Direct3D High Level Shading Language.
- */
-#define MOJOSHADER_SRC_PROFILE_HLSL_VS_1_1 "hlsl_vs_1_1"
-#define MOJOSHADER_SRC_PROFILE_HLSL_VS_2_0 "hlsl_vs_2_0"
-#define MOJOSHADER_SRC_PROFILE_HLSL_VS_3_0 "hlsl_vs_3_0"
-#define MOJOSHADER_SRC_PROFILE_HLSL_PS_1_1 "hlsl_ps_1_1"
-#define MOJOSHADER_SRC_PROFILE_HLSL_PS_1_2 "hlsl_ps_1_2"
-#define MOJOSHADER_SRC_PROFILE_HLSL_PS_1_3 "hlsl_ps_1_3"
-#define MOJOSHADER_SRC_PROFILE_HLSL_PS_1_4 "hlsl_ps_1_4"
-#define MOJOSHADER_SRC_PROFILE_HLSL_PS_2_0 "hlsl_ps_2_0"
-#define MOJOSHADER_SRC_PROFILE_HLSL_PS_3_0 "hlsl_ps_3_0"
-
-
-/* Abstract Syntax Tree interface... */
-
-/*
- * ATTENTION: This adds a lot of stuff to the API, but almost everyone can
- *  ignore this section. Seriously, go ahead and skip over anything that has
- *  "AST" in it, unless you know why you'd want to use it.
- *
- * ALSO: This API is still evolving! We make no promises at this time to keep
- *  source or binary compatibility for the AST pieces.
- *
- * Important notes:
- *  - ASTs are the result of parsing the source code: a program that fails to
- *    compile will often parse successfully. Undeclared variables,
- *    type incompatibilities, etc, aren't detected at this point.
- *  - Vector swizzles (the ".xyzw" part of "MyVec4.xyzw") will look like
- *    structure dereferences. We don't realize these are actually swizzles
- *    until semantic analysis.
- *  - MOJOSHADER_astDataType info is not reliable when returned from
- *    MOJOSHADER_parseAst()! Most of the datatype info will be missing or have
- *    inaccurate data types. We sort these out during semantic analysis, which
- *    happens after the AST parsing is complete. A few are filled in, or can
- *    be deduced fairly trivially by processing several pieces into one.
- *    It's enough that you can reproduce the original source code, more or
- *    less, from the AST.
- */
-
-/* High-level datatypes for AST nodes. */
-typedef enum MOJOSHADER_astDataTypeType
-{
-    MOJOSHADER_AST_DATATYPE_NONE,
-    MOJOSHADER_AST_DATATYPE_BOOL,
-    MOJOSHADER_AST_DATATYPE_INT,
-    MOJOSHADER_AST_DATATYPE_UINT,
-    MOJOSHADER_AST_DATATYPE_FLOAT,
-    MOJOSHADER_AST_DATATYPE_FLOAT_SNORM,
-    MOJOSHADER_AST_DATATYPE_FLOAT_UNORM,
-    MOJOSHADER_AST_DATATYPE_HALF,
-    MOJOSHADER_AST_DATATYPE_DOUBLE,
-    MOJOSHADER_AST_DATATYPE_STRING,
-    MOJOSHADER_AST_DATATYPE_SAMPLER_1D,
-    MOJOSHADER_AST_DATATYPE_SAMPLER_2D,
-    MOJOSHADER_AST_DATATYPE_SAMPLER_3D,
-    MOJOSHADER_AST_DATATYPE_SAMPLER_CUBE,
-    MOJOSHADER_AST_DATATYPE_SAMPLER_STATE,
-    MOJOSHADER_AST_DATATYPE_SAMPLER_COMPARISON_STATE,
-    MOJOSHADER_AST_DATATYPE_STRUCT,
-    MOJOSHADER_AST_DATATYPE_ARRAY,
-    MOJOSHADER_AST_DATATYPE_VECTOR,
-    MOJOSHADER_AST_DATATYPE_MATRIX,
-    MOJOSHADER_AST_DATATYPE_BUFFER,
-    MOJOSHADER_AST_DATATYPE_FUNCTION,
-    MOJOSHADER_AST_DATATYPE_USER
-} MOJOSHADER_astDataTypeType;
-#define MOJOSHADER_AST_DATATYPE_CONST (1 << 31)
-
-typedef union MOJOSHADER_astDataType MOJOSHADER_astDataType;
-
-/* This is just part of DataTypeStruct, never appears outside of it. */
-typedef struct MOJOSHADER_astDataTypeStructMember
-{
-    const MOJOSHADER_astDataType *datatype;
-    const char *identifier;
-} MOJOSHADER_astDataTypeStructMember;
-
-typedef struct MOJOSHADER_astDataTypeStruct
-{
-    MOJOSHADER_astDataTypeType type;
-    const MOJOSHADER_astDataTypeStructMember *members;
-    int member_count;
-} MOJOSHADER_astDataTypeStruct;
-
-typedef struct MOJOSHADER_astDataTypeArray
-{
-    MOJOSHADER_astDataTypeType type;
-    const MOJOSHADER_astDataType *base;
-    int elements;
-} MOJOSHADER_astDataTypeArray;
-
-typedef MOJOSHADER_astDataTypeArray MOJOSHADER_astDataTypeVector;
-
-typedef struct MOJOSHADER_astDataTypeMatrix
-{
-    MOJOSHADER_astDataTypeType type;
-    const MOJOSHADER_astDataType *base;
-    int rows;
-    int columns;
-} MOJOSHADER_astDataTypeMatrix;
-
-typedef struct MOJOSHADER_astDataTypeBuffer
-{
-    MOJOSHADER_astDataTypeType type;
-    const MOJOSHADER_astDataType *base;
-} MOJOSHADER_astDataTypeBuffer;
-
-typedef struct MOJOSHADER_astDataTypeFunction
-{
-    MOJOSHADER_astDataTypeType type;
-    const MOJOSHADER_astDataType *retval;
-    const MOJOSHADER_astDataType **params;
-    int num_params;
-    int intrinsic;  /* non-zero for built-in functions */
-} MOJOSHADER_astDataTypeFunction;
-
-typedef struct MOJOSHADER_astDataTypeUser
-{
-    MOJOSHADER_astDataTypeType type;
-    const MOJOSHADER_astDataType *details;
-    const char *name;
-} MOJOSHADER_astDataTypeUser;
-
-union MOJOSHADER_astDataType
-{
-    MOJOSHADER_astDataTypeType type;
-    MOJOSHADER_astDataTypeArray array;
-    MOJOSHADER_astDataTypeStruct structure;
-    MOJOSHADER_astDataTypeVector vector;
-    MOJOSHADER_astDataTypeMatrix matrix;
-    MOJOSHADER_astDataTypeBuffer buffer;
-    MOJOSHADER_astDataTypeUser user;
-    MOJOSHADER_astDataTypeFunction function;
-};
-
-/* Structures that make up the parse tree... */
-
-typedef enum MOJOSHADER_astNodeType
-{
-    MOJOSHADER_AST_OP_START_RANGE,         /* expression operators. */
-
-    MOJOSHADER_AST_OP_START_RANGE_UNARY,   /* unary operators. */
-    MOJOSHADER_AST_OP_PREINCREMENT,
-    MOJOSHADER_AST_OP_PREDECREMENT,
-    MOJOSHADER_AST_OP_NEGATE,
-    MOJOSHADER_AST_OP_COMPLEMENT,
-    MOJOSHADER_AST_OP_NOT,
-    MOJOSHADER_AST_OP_POSTINCREMENT,
-    MOJOSHADER_AST_OP_POSTDECREMENT,
-    MOJOSHADER_AST_OP_CAST,
-    MOJOSHADER_AST_OP_END_RANGE_UNARY,
-
-    MOJOSHADER_AST_OP_START_RANGE_BINARY,  /* binary operators. */
-    MOJOSHADER_AST_OP_COMMA,
-    MOJOSHADER_AST_OP_MULTIPLY,
-    MOJOSHADER_AST_OP_DIVIDE,
-    MOJOSHADER_AST_OP_MODULO,
-    MOJOSHADER_AST_OP_ADD,
-    MOJOSHADER_AST_OP_SUBTRACT,
-    MOJOSHADER_AST_OP_LSHIFT,
-    MOJOSHADER_AST_OP_RSHIFT,
-    MOJOSHADER_AST_OP_LESSTHAN,
-    MOJOSHADER_AST_OP_GREATERTHAN,
-    MOJOSHADER_AST_OP_LESSTHANOREQUAL,
-    MOJOSHADER_AST_OP_GREATERTHANOREQUAL,
-    MOJOSHADER_AST_OP_EQUAL,
-    MOJOSHADER_AST_OP_NOTEQUAL,
-    MOJOSHADER_AST_OP_BINARYAND,
-    MOJOSHADER_AST_OP_BINARYXOR,
-    MOJOSHADER_AST_OP_BINARYOR,
-    MOJOSHADER_AST_OP_LOGICALAND,
-    MOJOSHADER_AST_OP_LOGICALOR,
-    MOJOSHADER_AST_OP_ASSIGN,
-    MOJOSHADER_AST_OP_MULASSIGN,
-    MOJOSHADER_AST_OP_DIVASSIGN,
-    MOJOSHADER_AST_OP_MODASSIGN,
-    MOJOSHADER_AST_OP_ADDASSIGN,
-    MOJOSHADER_AST_OP_SUBASSIGN,
-    MOJOSHADER_AST_OP_LSHIFTASSIGN,
-    MOJOSHADER_AST_OP_RSHIFTASSIGN,
-    MOJOSHADER_AST_OP_ANDASSIGN,
-    MOJOSHADER_AST_OP_XORASSIGN,
-    MOJOSHADER_AST_OP_ORASSIGN,
-    MOJOSHADER_AST_OP_DEREF_ARRAY,
-    MOJOSHADER_AST_OP_END_RANGE_BINARY,
-
-    MOJOSHADER_AST_OP_START_RANGE_TERNARY,  /* ternary operators. */
-    MOJOSHADER_AST_OP_CONDITIONAL,
-    MOJOSHADER_AST_OP_END_RANGE_TERNARY,
-
-    MOJOSHADER_AST_OP_START_RANGE_DATA,     /* expression operands. */
-    MOJOSHADER_AST_OP_IDENTIFIER,
-    MOJOSHADER_AST_OP_INT_LITERAL,
-    MOJOSHADER_AST_OP_FLOAT_LITERAL,
-    MOJOSHADER_AST_OP_STRING_LITERAL,
-    MOJOSHADER_AST_OP_BOOLEAN_LITERAL,
-    MOJOSHADER_AST_OP_END_RANGE_DATA,
-
-    MOJOSHADER_AST_OP_START_RANGE_MISC,     /* other expression things. */
-    MOJOSHADER_AST_OP_DEREF_STRUCT,
-    MOJOSHADER_AST_OP_CALLFUNC,
-    MOJOSHADER_AST_OP_CONSTRUCTOR,
-    MOJOSHADER_AST_OP_END_RANGE_MISC,
-    MOJOSHADER_AST_OP_END_RANGE,
-
-    MOJOSHADER_AST_COMPUNIT_START_RANGE,    /* things in global scope. */
-    MOJOSHADER_AST_COMPUNIT_FUNCTION,
-    MOJOSHADER_AST_COMPUNIT_TYPEDEF,
-    MOJOSHADER_AST_COMPUNIT_STRUCT,
-    MOJOSHADER_AST_COMPUNIT_VARIABLE,
-    MOJOSHADER_AST_COMPUNIT_END_RANGE,
-
-    MOJOSHADER_AST_STATEMENT_START_RANGE,   /* statements in function scope. */
-    MOJOSHADER_AST_STATEMENT_EMPTY,
-    MOJOSHADER_AST_STATEMENT_BREAK,
-    MOJOSHADER_AST_STATEMENT_CONTINUE,
-    MOJOSHADER_AST_STATEMENT_DISCARD,
-    MOJOSHADER_AST_STATEMENT_BLOCK,
-    MOJOSHADER_AST_STATEMENT_EXPRESSION,
-    MOJOSHADER_AST_STATEMENT_IF,
-    MOJOSHADER_AST_STATEMENT_SWITCH,
-    MOJOSHADER_AST_STATEMENT_FOR,
-    MOJOSHADER_AST_STATEMENT_DO,
-    MOJOSHADER_AST_STATEMENT_WHILE,
-    MOJOSHADER_AST_STATEMENT_RETURN,
-    MOJOSHADER_AST_STATEMENT_TYPEDEF,
-    MOJOSHADER_AST_STATEMENT_STRUCT,
-    MOJOSHADER_AST_STATEMENT_VARDECL,
-    MOJOSHADER_AST_STATEMENT_END_RANGE,
-
-    MOJOSHADER_AST_MISC_START_RANGE,        /* misc. syntactic glue. */
-    MOJOSHADER_AST_FUNCTION_PARAMS,
-    MOJOSHADER_AST_FUNCTION_SIGNATURE,
-    MOJOSHADER_AST_SCALAR_OR_ARRAY,
-    MOJOSHADER_AST_TYPEDEF,
-    MOJOSHADER_AST_PACK_OFFSET,
-    MOJOSHADER_AST_VARIABLE_LOWLEVEL,
-    MOJOSHADER_AST_ANNOTATION,
-    MOJOSHADER_AST_VARIABLE_DECLARATION,
-    MOJOSHADER_AST_STRUCT_DECLARATION,
-    MOJOSHADER_AST_STRUCT_MEMBER,
-    MOJOSHADER_AST_SWITCH_CASE,
-    MOJOSHADER_AST_ARGUMENTS,
-    MOJOSHADER_AST_MISC_END_RANGE,
-
-    MOJOSHADER_AST_END_RANGE
-} MOJOSHADER_astNodeType;
-
-typedef struct MOJOSHADER_astNodeInfo
-{
-    MOJOSHADER_astNodeType type;
-    const char *filename;
-    unsigned int line;
-} MOJOSHADER_astNodeInfo;
-
-typedef enum MOJOSHADER_astVariableAttributes
-{
-    MOJOSHADER_AST_VARATTR_EXTERN = (1 << 0),
-    MOJOSHADER_AST_VARATTR_NOINTERPOLATION = (1 << 1),
-    MOJOSHADER_AST_VARATTR_SHARED = (1 << 2),
-    MOJOSHADER_AST_VARATTR_STATIC = (1 << 3),
-    MOJOSHADER_AST_VARATTR_UNIFORM = (1 << 4),
-    MOJOSHADER_AST_VARATTR_VOLATILE = (1 << 5),
-    MOJOSHADER_AST_VARATTR_CONST = (1 << 6),
-    MOJOSHADER_AST_VARATTR_ROWMAJOR = (1 << 7),
-    MOJOSHADER_AST_VARATTR_COLUMNMAJOR = (1 << 8)
-} MOJOSHADER_astVariableAttributes;
-
-typedef enum MOJOSHADER_astIfAttributes
-{
-    MOJOSHADER_AST_IFATTR_NONE,
-    MOJOSHADER_AST_IFATTR_BRANCH,
-    MOJOSHADER_AST_IFATTR_FLATTEN,
-    MOJOSHADER_AST_IFATTR_IFALL,
-    MOJOSHADER_AST_IFATTR_IFANY,
-    MOJOSHADER_AST_IFATTR_PREDICATE,
-    MOJOSHADER_AST_IFATTR_PREDICATEBLOCK
-} MOJOSHADER_astIfAttributes;
-
-typedef enum MOJOSHADER_astSwitchAttributes
-{
-    MOJOSHADER_AST_SWITCHATTR_NONE,
-    MOJOSHADER_AST_SWITCHATTR_FLATTEN,
-    MOJOSHADER_AST_SWITCHATTR_BRANCH,
-    MOJOSHADER_AST_SWITCHATTR_FORCECASE,
-    MOJOSHADER_AST_SWITCHATTR_CALL
-} MOJOSHADER_astSwitchAttributes;
-
-/* You can cast any AST node pointer to this. */
-typedef struct MOJOSHADER_astGeneric
-{
-    MOJOSHADER_astNodeInfo ast;
-} MOJOSHADER_astGeneric;
-
-typedef struct MOJOSHADER_astExpression
-{
-    MOJOSHADER_astNodeInfo ast;
-    const MOJOSHADER_astDataType *datatype;
-} MOJOSHADER_astExpression;
-
-typedef struct MOJOSHADER_astArguments
-{
-    MOJOSHADER_astNodeInfo ast;  /* Always MOJOSHADER_AST_ARGUMENTS */
-    MOJOSHADER_astExpression *argument;
-    struct MOJOSHADER_astArguments *next;
-} MOJOSHADER_astArguments;
-
-typedef struct MOJOSHADER_astExpressionUnary
-{
-    MOJOSHADER_astNodeInfo ast;
-    const MOJOSHADER_astDataType *datatype;
-    MOJOSHADER_astExpression *operand;
-} MOJOSHADER_astExpressionUnary;
-
-typedef struct MOJOSHADER_astExpressionBinary
-{
-    MOJOSHADER_astNodeInfo ast;
-    const MOJOSHADER_astDataType *datatype;
-    MOJOSHADER_astExpression *left;
-    MOJOSHADER_astExpression *right;
-} MOJOSHADER_astExpressionBinary;
-
-typedef struct MOJOSHADER_astExpressionTernary
-{
-    MOJOSHADER_astNodeInfo ast;
-    const MOJOSHADER_astDataType *datatype;
-    MOJOSHADER_astExpression *left;
-    MOJOSHADER_astExpression *center;
-    MOJOSHADER_astExpression *right;
-} MOJOSHADER_astExpressionTernary;
-
-/* Identifier indexes aren't available until semantic analysis phase completes.
- *  It provides a unique id for this identifier's variable.
- *  It will be negative for global scope, positive for function scope
- *  (global values are globally unique, function values are only
- *  unique within the scope of the given function). There's a different
- *  set of indices if this identifier is a function (positive for
- *  user-defined functions, negative for intrinsics).
- *  May be zero for various reasons (unknown identifier, etc).
- */
-typedef struct MOJOSHADER_astExpressionIdentifier
-{
-    MOJOSHADER_astNodeInfo ast;  /* Always MOJOSHADER_AST_OP_IDENTIFIER */
-    const MOJOSHADER_astDataType *datatype;
-    const char *identifier;
-    int index;
-} MOJOSHADER_astExpressionIdentifier;
-
-typedef struct MOJOSHADER_astExpressionIntLiteral
-{
-    MOJOSHADER_astNodeInfo ast;  /* Always MOJOSHADER_AST_OP_INT_LITERAL */
-    const MOJOSHADER_astDataType *datatype;  /* always AST_DATATYPE_INT */
-    int value;
-} MOJOSHADER_astExpressionIntLiteral;
-
-typedef struct MOJOSHADER_astExpressionFloatLiteral
-{
-    MOJOSHADER_astNodeInfo ast;  /* Always MOJOSHADER_AST_OP_FLOAT_LITERAL */
-    const MOJOSHADER_astDataType *datatype;  /* always AST_DATATYPE_FLOAT */
-    double value;
-} MOJOSHADER_astExpressionFloatLiteral;
-
-typedef struct MOJOSHADER_astExpressionStringLiteral
-{
-    MOJOSHADER_astNodeInfo ast;  /* Always MOJOSHADER_AST_OP_STRING_LITERAL */
-    const MOJOSHADER_astDataType *datatype;  /* always AST_DATATYPE_STRING */
-    const char *string;
-} MOJOSHADER_astExpressionStringLiteral;
-
-typedef struct MOJOSHADER_astExpressionBooleanLiteral
-{
-    MOJOSHADER_astNodeInfo ast;  /* Always MOJOSHADER_AST_OP_BOOLEAN_LITERAL */
-    const MOJOSHADER_astDataType *datatype;  /* always AST_DATATYPE_BOOL */
-    int value;  /* Always 1 or 0. */
-} MOJOSHADER_astExpressionBooleanLiteral;
-
-typedef struct MOJOSHADER_astExpressionConstructor
-{
-    MOJOSHADER_astNodeInfo ast;  /* Always MOJOSHADER_AST_OP_CONSTRUCTOR */
-    const MOJOSHADER_astDataType *datatype;
-    MOJOSHADER_astArguments *args;
-} MOJOSHADER_astExpressionConstructor;
-
-typedef struct MOJOSHADER_astExpressionDerefStruct
-{
-    MOJOSHADER_astNodeInfo ast;  /* Always MOJOSHADER_AST_OP_DEREF_STRUCT */
-    const MOJOSHADER_astDataType *datatype;
-    /* !!! FIXME:
-     *  "identifier" is misnamed; this might not be an identifier at all:
-     *    x = FunctionThatReturnsAStruct().SomeMember;
-     */
-    MOJOSHADER_astExpression *identifier;
-    const char *member;
-    int isswizzle;  /* Always 1 or 0. Never set by parseAst()! */
-    int member_index;  /* Never set by parseAst()! */
-} MOJOSHADER_astExpressionDerefStruct;
-
-typedef struct MOJOSHADER_astExpressionCallFunction
-{
-    MOJOSHADER_astNodeInfo ast;  /* Always MOJOSHADER_AST_OP_CALLFUNC */
-    const MOJOSHADER_astDataType *datatype;
-    MOJOSHADER_astExpressionIdentifier *identifier;
-    MOJOSHADER_astArguments *args;
-} MOJOSHADER_astExpressionCallFunction;
-
-typedef struct MOJOSHADER_astExpressionCast
-{
-    MOJOSHADER_astNodeInfo ast;  /* Always MOJOSHADER_AST_OP_CAST */
-    const MOJOSHADER_astDataType *datatype;
-    MOJOSHADER_astExpression *operand;
-} MOJOSHADER_astExpressionCast;
-
-typedef struct MOJOSHADER_astCompilationUnit
-{
-    MOJOSHADER_astNodeInfo ast;
-    struct MOJOSHADER_astCompilationUnit *next;
-} MOJOSHADER_astCompilationUnit;
-
-typedef enum MOJOSHADER_astFunctionStorageClass
-{
-    MOJOSHADER_AST_FNSTORECLS_NONE,
-    MOJOSHADER_AST_FNSTORECLS_INLINE
-} MOJOSHADER_astFunctionStorageClass;
-
-typedef enum MOJOSHADER_astInputModifier
-{
-    MOJOSHADER_AST_INPUTMOD_NONE,
-    MOJOSHADER_AST_INPUTMOD_IN,
-    MOJOSHADER_AST_INPUTMOD_OUT,
-    MOJOSHADER_AST_INPUTMOD_INOUT,
-    MOJOSHADER_AST_INPUTMOD_UNIFORM
-} MOJOSHADER_astInputModifier;
-
-typedef enum MOJOSHADER_astInterpolationModifier
-{
-    MOJOSHADER_AST_INTERPMOD_NONE,
-    MOJOSHADER_AST_INTERPMOD_LINEAR,
-    MOJOSHADER_AST_INTERPMOD_CENTROID,
-    MOJOSHADER_AST_INTERPMOD_NOINTERPOLATION,
-    MOJOSHADER_AST_INTERPMOD_NOPERSPECTIVE,
-    MOJOSHADER_AST_INTERPMOD_SAMPLE
-} MOJOSHADER_astInterpolationModifier;
-
-typedef struct MOJOSHADER_astFunctionParameters
-{
-    MOJOSHADER_astNodeInfo ast;
-    const MOJOSHADER_astDataType *datatype;
-    MOJOSHADER_astInputModifier input_modifier;
-    const char *identifier;
-    const char *semantic;
-    MOJOSHADER_astInterpolationModifier interpolation_modifier;
-    MOJOSHADER_astExpression *initializer;
-    struct MOJOSHADER_astFunctionParameters *next;
-} MOJOSHADER_astFunctionParameters;
-
-typedef struct MOJOSHADER_astFunctionSignature
-{
-    MOJOSHADER_astNodeInfo ast;
-    const MOJOSHADER_astDataType *datatype;
-    const char *identifier;
-    MOJOSHADER_astFunctionParameters *params;
-    MOJOSHADER_astFunctionStorageClass storage_class;
-    const char *semantic;
-} MOJOSHADER_astFunctionSignature;
-
-typedef struct MOJOSHADER_astScalarOrArray
-{
-    MOJOSHADER_astNodeInfo ast;
-    const char *identifier;
-    int isarray;  /* boolean: 1 or 0 */
-    MOJOSHADER_astExpression *dimension;
-} MOJOSHADER_astScalarOrArray;
-
-typedef struct MOJOSHADER_astAnnotations
-{
-    MOJOSHADER_astNodeInfo ast;
-    const MOJOSHADER_astDataType *datatype;
-    MOJOSHADER_astExpression *initializer;
-    struct MOJOSHADER_astAnnotations *next;
-} MOJOSHADER_astAnnotations;
-
-typedef struct MOJOSHADER_astPackOffset
-{
-    MOJOSHADER_astNodeInfo ast;
-    const char *ident1;   /* !!! FIXME: rename this. */
-    const char *ident2;
-} MOJOSHADER_astPackOffset;
-
-typedef struct MOJOSHADER_astVariableLowLevel
-{
-    MOJOSHADER_astNodeInfo ast;
-    MOJOSHADER_astPackOffset *packoffset;
-    const char *register_name;
-} MOJOSHADER_astVariableLowLevel;
-
-typedef struct MOJOSHADER_astStructMembers
-{
-    MOJOSHADER_astNodeInfo ast;
-    const MOJOSHADER_astDataType *datatype;
-    const char *semantic;
-    MOJOSHADER_astScalarOrArray *details;
-    MOJOSHADER_astInterpolationModifier interpolation_mod;
-    struct MOJOSHADER_astStructMembers *next;
-} MOJOSHADER_astStructMembers;
-
-typedef struct MOJOSHADER_astStructDeclaration
-{
-    MOJOSHADER_astNodeInfo ast;
-    const MOJOSHADER_astDataType *datatype;
-    const char *name;
-    MOJOSHADER_astStructMembers *members;
-} MOJOSHADER_astStructDeclaration;
-
-typedef struct MOJOSHADER_astVariableDeclaration
-{
-    MOJOSHADER_astNodeInfo ast;
-    int attributes;
-    const MOJOSHADER_astDataType *datatype;
-    MOJOSHADER_astStructDeclaration *anonymous_datatype;
-    MOJOSHADER_astScalarOrArray *details;
-    const char *semantic;
-    MOJOSHADER_astAnnotations *annotations;
-    MOJOSHADER_astExpression *initializer;
-    MOJOSHADER_astVariableLowLevel *lowlevel;
-    struct MOJOSHADER_astVariableDeclaration *next;
-} MOJOSHADER_astVariableDeclaration;
-
-typedef struct MOJOSHADER_astStatement
-{
-    MOJOSHADER_astNodeInfo ast;
-    struct MOJOSHADER_astStatement *next;
-} MOJOSHADER_astStatement;
-
-typedef MOJOSHADER_astStatement MOJOSHADER_astEmptyStatement;
-typedef MOJOSHADER_astStatement MOJOSHADER_astBreakStatement;
-typedef MOJOSHADER_astStatement MOJOSHADER_astContinueStatement;
-typedef MOJOSHADER_astStatement MOJOSHADER_astDiscardStatement;
-
-/* something enclosed in "{}" braces. */
-typedef struct MOJOSHADER_astBlockStatement
-{
-    MOJOSHADER_astNodeInfo ast;
-    MOJOSHADER_astStatement *next;
-    MOJOSHADER_astStatement *statements;  /* list of child statements. */
-} MOJOSHADER_astBlockStatement;
-
-typedef struct MOJOSHADER_astReturnStatement
-{
-    MOJOSHADER_astNodeInfo ast;
-    MOJOSHADER_astStatement *next;
-    MOJOSHADER_astExpression *expr;
-} MOJOSHADER_astReturnStatement;
-
-typedef struct MOJOSHADER_astExpressionStatement
-{
-    MOJOSHADER_astNodeInfo ast;
-    MOJOSHADER_astStatement *next;
-    MOJOSHADER_astExpression *expr;
-} MOJOSHADER_astExpressionStatement;
-
-typedef struct MOJOSHADER_astIfStatement
-{
-    MOJOSHADER_astNodeInfo ast;
-    MOJOSHADER_astStatement *next;
-    int attributes;
-    MOJOSHADER_astExpression *expr;
-    MOJOSHADER_astStatement *statement;
-    MOJOSHADER_astStatement *else_statement;
-} MOJOSHADER_astIfStatement;
-
-typedef struct MOJOSHADER_astSwitchCases
-{
-    MOJOSHADER_astNodeInfo ast;
-    MOJOSHADER_astExpression *expr;
-    MOJOSHADER_astStatement *statement;
-    struct MOJOSHADER_astSwitchCases *next;
-} MOJOSHADER_astSwitchCases;
-
-typedef struct MOJOSHADER_astSwitchStatement
-{
-    MOJOSHADER_astNodeInfo ast;
-    MOJOSHADER_astStatement *next;
-    int attributes;
-    MOJOSHADER_astExpression *expr;
-    MOJOSHADER_astSwitchCases *cases;
-} MOJOSHADER_astSwitchStatement;
-
-typedef struct MOJOSHADER_astWhileStatement
-{
-    MOJOSHADER_astNodeInfo ast;
-    MOJOSHADER_astStatement *next;
-    int unroll;  /* # times to unroll, 0 to loop, < 0 == compiler's choice. */
-    MOJOSHADER_astExpression *expr;
-    MOJOSHADER_astStatement *statement;
-} MOJOSHADER_astWhileStatement;
-
-typedef MOJOSHADER_astWhileStatement MOJOSHADER_astDoStatement;
-
-typedef struct MOJOSHADER_astForStatement
-{
-    MOJOSHADER_astNodeInfo ast;
-    MOJOSHADER_astStatement *next;
-    int unroll;  /* # times to unroll, 0 to loop, < 0 == compiler's choice. */
-    MOJOSHADER_astVariableDeclaration *var_decl;  /* either this ... */
-    MOJOSHADER_astExpression *initializer;        /*  ... or this will used. */
-    MOJOSHADER_astExpression *looptest;
-    MOJOSHADER_astExpression *counter;
-    MOJOSHADER_astStatement *statement;
-} MOJOSHADER_astForStatement;
-
-typedef struct MOJOSHADER_astTypedef
-{
-    MOJOSHADER_astNodeInfo ast;
-    const MOJOSHADER_astDataType *datatype;
-    int isconst;  /* boolean: 1 or 0 */
-    MOJOSHADER_astScalarOrArray *details;
-} MOJOSHADER_astTypedef;
-
-typedef struct MOJOSHADER_astTypedefStatement
-{
-    MOJOSHADER_astNodeInfo ast;
-    MOJOSHADER_astStatement *next;
-    MOJOSHADER_astTypedef *type_info;
-} MOJOSHADER_astTypedefStatement;
-
-typedef struct MOJOSHADER_astVarDeclStatement
-{
-    MOJOSHADER_astNodeInfo ast;
-    MOJOSHADER_astStatement *next;
-    MOJOSHADER_astVariableDeclaration *declaration;
-} MOJOSHADER_astVarDeclStatement;
-
-typedef struct MOJOSHADER_astStructStatement
-{
-    MOJOSHADER_astNodeInfo ast;
-    MOJOSHADER_astStatement *next;
-    MOJOSHADER_astStructDeclaration *struct_info;
-} MOJOSHADER_astStructStatement;
-
-typedef struct MOJOSHADER_astCompilationUnitFunction
-{
-    MOJOSHADER_astNodeInfo ast;
-    MOJOSHADER_astCompilationUnit *next;
-    MOJOSHADER_astFunctionSignature *declaration;
-    MOJOSHADER_astStatement *definition;
-    int index;  /* unique id. Will be 0 until semantic analysis runs. */
-} MOJOSHADER_astCompilationUnitFunction;
-
-typedef struct MOJOSHADER_astCompilationUnitTypedef
-{
-    MOJOSHADER_astNodeInfo ast;
-    MOJOSHADER_astCompilationUnit *next;
-    MOJOSHADER_astTypedef *type_info;
-} MOJOSHADER_astCompilationUnitTypedef;
-
-typedef struct MOJOSHADER_astCompilationUnitStruct
-{
-    MOJOSHADER_astNodeInfo ast;
-    MOJOSHADER_astCompilationUnit *next;
-    MOJOSHADER_astStructDeclaration *struct_info;
-} MOJOSHADER_astCompilationUnitStruct;
-
-typedef struct MOJOSHADER_astCompilationUnitVariable
-{
-    MOJOSHADER_astNodeInfo ast;
-    MOJOSHADER_astCompilationUnit *next;
-    MOJOSHADER_astVariableDeclaration *declaration;
-} MOJOSHADER_astCompilationUnitVariable;
-
-
-/* this is way cleaner than all the nasty typecasting. */
-typedef union MOJOSHADER_astNode
-{
-    MOJOSHADER_astNodeInfo ast;
-    MOJOSHADER_astGeneric generic;
-    MOJOSHADER_astExpression expression;
-    MOJOSHADER_astArguments arguments;
-    MOJOSHADER_astExpressionUnary unary;
-    MOJOSHADER_astExpressionBinary binary;
-    MOJOSHADER_astExpressionTernary ternary;
-    MOJOSHADER_astExpressionIdentifier identifier;
-    MOJOSHADER_astExpressionIntLiteral intliteral;
-    MOJOSHADER_astExpressionFloatLiteral floatliteral;
-    MOJOSHADER_astExpressionStringLiteral stringliteral;
-    MOJOSHADER_astExpressionBooleanLiteral boolliteral;
-    MOJOSHADER_astExpressionConstructor constructor;
-    MOJOSHADER_astExpressionDerefStruct derefstruct;
-    MOJOSHADER_astExpressionCallFunction callfunc;
-    MOJOSHADER_astExpressionCast cast;
-    MOJOSHADER_astCompilationUnit compunit;
-    MOJOSHADER_astFunctionParameters params;
-    MOJOSHADER_astFunctionSignature funcsig;
-    MOJOSHADER_astScalarOrArray soa;
-    MOJOSHADER_astAnnotations annotations;
-    MOJOSHADER_astPackOffset packoffset;
-    MOJOSHADER_astVariableLowLevel varlowlevel;
-    MOJOSHADER_astStructMembers structmembers;
-    MOJOSHADER_astStructDeclaration structdecl;
-    MOJOSHADER_astVariableDeclaration vardecl;
-    MOJOSHADER_astStatement stmt;
-    MOJOSHADER_astEmptyStatement emptystmt;
-    MOJOSHADER_astBreakStatement breakstmt;
-    MOJOSHADER_astContinueStatement contstmt;
-    MOJOSHADER_astDiscardStatement discardstmt;
-    MOJOSHADER_astBlockStatement blockstmt;
-    MOJOSHADER_astReturnStatement returnstmt;
-    MOJOSHADER_astExpressionStatement exprstmt;
-    MOJOSHADER_astIfStatement ifstmt;
-    MOJOSHADER_astSwitchCases cases;
-    MOJOSHADER_astSwitchStatement switchstmt;
-    MOJOSHADER_astWhileStatement whilestmt;
-    MOJOSHADER_astDoStatement dostmt;
-    MOJOSHADER_astForStatement forstmt;
-    MOJOSHADER_astTypedef typdef;
-    MOJOSHADER_astTypedefStatement typedefstmt;
-    MOJOSHADER_astVarDeclStatement vardeclstmt;
-    MOJOSHADER_astStructStatement structstmt;
-    MOJOSHADER_astCompilationUnitFunction funcunit;
-    MOJOSHADER_astCompilationUnitTypedef typedefunit;
-    MOJOSHADER_astCompilationUnitStruct structunit;
-    MOJOSHADER_astCompilationUnitVariable varunit;
-} MOJOSHADER_astNode;
-
-
-/*
- * Structure used to return data from parsing of a shader into an AST...
- */
-/* !!! FIXME: most of these ints should be unsigned. */
-typedef struct MOJOSHADER_astData
-{
-    /*
-     * The number of elements pointed to by (errors).
-     */
-    int error_count;
-
-    /*
-     * (error_count) elements of data that specify errors that were generated
-     *  by parsing this shader.
-     * This can be NULL if there were no errors or if (error_count) is zero.
-     *  Note that this will only produce errors for syntax problems. Most of
-     *  the things we expect a compiler to produce errors for--incompatible
-     *  types, unknown identifiers, etc--are not checked at all during
-     *  initial generation of the syntax tree...bogus programs that would
-     *  fail to compile will pass here without error, if they are syntactically
-     *  correct!
-     */
-    MOJOSHADER_error *errors;
-
-    /*
-     * The name of the source profile used to parse the shader. Will be NULL
-     *  on error.
-     */
-    const char *source_profile;
-
-    /*
-     * The actual syntax tree. You are responsible for walking it yourself.
-     *  CompilationUnits are always the top of the tree (functions, typedefs,
-     *  global variables, etc). Will be NULL on error.
-     */
-    const MOJOSHADER_astNode *ast;
-
-    /*
-     * This is the malloc implementation you passed to MOJOSHADER_parse().
-     */
-    MOJOSHADER_malloc malloc;
-
-    /*
-     * This is the free implementation you passed to MOJOSHADER_parse().
-     */
-    MOJOSHADER_free free;
-
-    /*
-     * This is the pointer you passed as opaque data for your allocator.
-     */
-    void *malloc_data;
-
-    /*
-     * This is internal data, and not for the application to touch.
-     */
-    void *opaque;
-} MOJOSHADER_astData;
-
+    MOJOSHADER_usage usage;
+    MOJOSHADER_vertexElementFormat vertexElementFormat;
+    int usageIndex;
+} MOJOSHADER_vertexAttribute;
 
 /*
  * You almost certainly don't need this function, unless you absolutely know
- *  why you need it without hesitation. This is almost certainly only good for
- *  building code analysis tools on top of.
+ *  why you need it without hesitation. This is useful if you're doing
+ *  extremely low-level shader work or building specialized tools.
  *
- * This is intended to parse HLSL source code, turning it into an abstract
- *  syntax tree.
+ * Call this to patch SPIR-V output returned from MOJOSHADER_parse to correctly
+ *  interpret vertex input and link vertex shader output to pixel shader input.
  *
- * (srcprofile) specifies the source language of the shader. You can specify
- *  a shader model with this, too. See MOJOSHADER_SRC_PROFILE_* constants.
- *
- * (filename) is a NULL-terminated UTF-8 filename. It can be NULL. We do not
- *  actually access this file, as we obtain our data from (source). This
- *  string is copied when we need to report errors while processing (source),
- *  as opposed to errors in a file referenced via the #include directive in
- *  (source). If this is NULL, then errors will report the filename as NULL,
- *  too.
- *
- * (source) is an UTF-8 string of valid high-level shader source code.
- *  It does not need to be NULL-terminated.
- *
- * (sourcelen) is the length of the string pointed to by (source), in bytes.
- *
- * (defines) points to (define_count) preprocessor definitions, and can be
- *  NULL. These are treated by the preprocessor as if the source code started
- *  with one #define for each entry you pass in here.
- *
- * (include_open) and (include_close) let the app control the preprocessor's
- *  behaviour for #include statements. Both are optional and can be NULL, but
- *  both must be specified if either is specified.
- *
- * This will return a MOJOSHADER_astData. The data supplied here gives the
- *  application a tree-like structure they can walk to see the layout of
- *  a given program. When you are done with this data, pass it to
- *  MOJOSHADER_freeCompileData() to deallocate resources.
- *
- * This function will never return NULL, even if the system is completely
- *  out of memory upon entry (in which case, this function returns a static
- *  MOJOSHADER_astData object, which is still safe to pass to
- *  MOJOSHADER_freeAstData()).
- *
- * As parsing requires some memory to be allocated, you may provide a
- *  custom allocator to this function, which will be used to allocate/free
- *  memory. They function just like malloc() and free(). We do not use
- *  realloc(). If you don't care, pass NULL in for the allocator functions.
- *  If your allocator needs instance-specific data, you may supply it with the
- *  (d) parameter. This pointer is passed as-is to your (m) and (f) functions.
- *
- * This function is thread safe, so long as the various callback functions
- *  are, too, and that the parameters remains intact for the duration of the
- *  call. This allows you to parse several shaders on separate CPU cores
- *  at the same time.
+ * On success, this returns the size of the shaders' internal "patch table",
+ *  which should be subtracted from the parseData's output_len when passing the
+ *  final SPIR-V to your shader compiler.
  */
-DECLSPEC const MOJOSHADER_astData *MOJOSHADER_parseAst(const char *srcprofile,
-                                    const char *filename, const char *source,
-                                    unsigned int sourcelen,
-                                    const MOJOSHADER_preprocessorDefine *defs,
-                                    unsigned int define_count,
-                                    MOJOSHADER_includeOpen include_open,
-                                    MOJOSHADER_includeClose include_close,
-                                    MOJOSHADER_malloc m, MOJOSHADER_free f,
-                                    void *d);
-
-
-/* !!! FIXME: expose semantic analysis to the public API? */
-
-
-/*
- * Call this to dispose of AST parsing results when you are done with them.
- *  This will call the MOJOSHADER_free function you provided to
- *  MOJOSHADER_parseAst() multiple times, if you provided one.
- *  Passing a NULL here is a safe no-op.
- *
- * This function is thread safe, so long as any allocator you passed into
- *  MOJOSHADER_parseAst() is, too.
- */
-DECLSPEC void MOJOSHADER_freeAstData(const MOJOSHADER_astData *data);
-
-
-/* Intermediate Representation interface... */
-/* !!! FIXME: there is currently no way to access the IR via the public API. */
-typedef enum MOJOSHADER_irNodeType
-{
-    MOJOSHADER_IR_START_RANGE_EXPR,
-    MOJOSHADER_IR_CONSTANT,
-    MOJOSHADER_IR_TEMP,
-    MOJOSHADER_IR_BINOP,
-    MOJOSHADER_IR_MEMORY,
-    MOJOSHADER_IR_CALL,
-    MOJOSHADER_IR_ESEQ,
-    MOJOSHADER_IR_ARRAY,
-    MOJOSHADER_IR_CONVERT,
-    MOJOSHADER_IR_SWIZZLE,
-    MOJOSHADER_IR_CONSTRUCT,
-    MOJOSHADER_IR_END_RANGE_EXPR,
-
-    MOJOSHADER_IR_START_RANGE_STMT,
-    MOJOSHADER_IR_MOVE,
-    MOJOSHADER_IR_EXPR_STMT,
-    MOJOSHADER_IR_JUMP,
-    MOJOSHADER_IR_CJUMP,
-    MOJOSHADER_IR_SEQ,
-    MOJOSHADER_IR_LABEL,
-    MOJOSHADER_IR_DISCARD,
-    MOJOSHADER_IR_END_RANGE_STMT,
-
-    MOJOSHADER_IR_START_RANGE_MISC,
-    MOJOSHADER_IR_EXPRLIST,
-    MOJOSHADER_IR_END_RANGE_MISC,
-
-    MOJOSHADER_IR_END_RANGE
-} MOJOSHADER_irNodeType;
-
-typedef struct MOJOSHADER_irNodeInfo
-{
-    MOJOSHADER_irNodeType type;
-    const char *filename;
-    unsigned int line;
-} MOJOSHADER_irNodeInfo;
-
-typedef struct MOJOSHADER_irExprList MOJOSHADER_irExprList;
-
-/*
- * IR nodes are categorized into Expressions, Statements, and Everything Else.
- *  You can cast any of them to MOJOSHADER_irGeneric, but this split is
- *  useful for slightly better type-checking (you can't cleanly assign
- *  something that doesn't return a value to something that wants one, etc).
- * These broader categories are just unions of the simpler types, so the
- *  real definitions are below all the things they contain (but these
- *  predeclarations are because the simpler types refer to the broader
- *  categories).
- */
-typedef union MOJOSHADER_irExpression MOJOSHADER_irExpression;  /* returns a value. */
-typedef union MOJOSHADER_irStatement MOJOSHADER_irStatement;   /* no returned value. */
-typedef union MOJOSHADER_irMisc MOJOSHADER_irMisc;        /* Everything Else. */
-typedef union MOJOSHADER_irNode MOJOSHADER_irNode;        /* Generic uber-wrapper. */
-
-/* You can cast any IR node pointer to this. */
-typedef struct MOJOSHADER_irGeneric
-{
-    MOJOSHADER_irNodeInfo ir;
-} MOJOSHADER_irGeneric;
-
-
-/* These are used for MOJOSHADER_irBinOp */
-typedef enum MOJOSHADER_irBinOpType
-{
-    MOJOSHADER_IR_BINOP_ADD,
-    MOJOSHADER_IR_BINOP_SUBTRACT,
-    MOJOSHADER_IR_BINOP_MULTIPLY,
-    MOJOSHADER_IR_BINOP_DIVIDE,
-    MOJOSHADER_IR_BINOP_MODULO,
-    MOJOSHADER_IR_BINOP_AND,
-    MOJOSHADER_IR_BINOP_OR,
-    MOJOSHADER_IR_BINOP_XOR,
-    MOJOSHADER_IR_BINOP_LSHIFT,
-    MOJOSHADER_IR_BINOP_RSHIFT,
-    MOJOSHADER_IR_BINOP_UNKNOWN
-} MOJOSHADER_irBinOpType;
-
-typedef enum MOJOSHADER_irConditionType
-{
-    MOJOSHADER_IR_COND_EQL,
-    MOJOSHADER_IR_COND_NEQ,
-    MOJOSHADER_IR_COND_LT,
-    MOJOSHADER_IR_COND_GT,
-    MOJOSHADER_IR_COND_LEQ,
-    MOJOSHADER_IR_COND_GEQ,
-    MOJOSHADER_IR_COND_UNKNOWN
-} MOJOSHADER_irConditionType;
-
-
-/* MOJOSHADER_irExpression types... */
-
-typedef struct MOJOSHADER_irExprInfo
-{
-    MOJOSHADER_irNodeInfo ir;
-    MOJOSHADER_astDataTypeType type;
-    int elements;
-} MOJOSHADER_irExprInfo;
-
-typedef struct MOJOSHADER_irConstant    /* Constant value */
-{
-    MOJOSHADER_irExprInfo info;  /* Always MOJOSHADER_IR_CONSTANT */
-    union
-    {
-        int ival[16];
-        float fval[16];
-    } value;
-} MOJOSHADER_irConstant;
-
-typedef struct MOJOSHADER_irTemp /* temp value (not necessarily a register). */
-{
-    MOJOSHADER_irExprInfo info;  /* Always MOJOSHADER_IR_TEMP */
-    int index;
-} MOJOSHADER_irTemp;
-
-typedef struct MOJOSHADER_irBinOp  /* binary operator (+, -, etc) */
-{
-    MOJOSHADER_irExprInfo info;  /* Always MOJOSHADER_IR_BINOP */
-    MOJOSHADER_irBinOpType op;
-    MOJOSHADER_irExpression *left;
-    MOJOSHADER_irExpression *right;
-} MOJOSHADER_irBinOp;
-
-typedef struct MOJOSHADER_irMemory
-{
-    MOJOSHADER_irExprInfo info;  /* Always MOJOSHADER_IR_MEMORY */
-    int index;  /* not final addresses, just a unique identifier. */
-} MOJOSHADER_irMemory;
-
-typedef struct MOJOSHADER_irCall
-{
-    MOJOSHADER_irExprInfo info;  /* Always MOJOSHADER_IR_CALL */
-    int index;
-    MOJOSHADER_irExprList *args;
-} MOJOSHADER_irCall;
-
-typedef struct MOJOSHADER_irESeq  /* statement with result */
-{
-    MOJOSHADER_irExprInfo info;  /* Always MOJOSHADER_IR_ESEQ */
-    MOJOSHADER_irStatement *stmt;  /* execute this for side-effects, then... */
-    MOJOSHADER_irExpression *expr; /* ...use this for the result. */
-} MOJOSHADER_irESeq;
-
-typedef struct MOJOSHADER_irArray  /* Array dereference. */
-{
-    MOJOSHADER_irExprInfo info;  /* Always MOJOSHADER_IR_ARRAY */
-    MOJOSHADER_irExpression *array;
-    MOJOSHADER_irExpression *element;
-} MOJOSHADER_irArray;
-
-typedef struct MOJOSHADER_irConvert  /* casting between datatypes */
-{
-    MOJOSHADER_irExprInfo info;  /* Always MOJOSHADER_IR_CONVERT */
-    MOJOSHADER_irExpression *expr;
-} MOJOSHADER_irConvert;
-
-typedef struct MOJOSHADER_irSwizzle  /* vector swizzle */
-{
-    MOJOSHADER_irExprInfo info;  /* Always MOJOSHADER_IR_SWIZZLE */
-    MOJOSHADER_irExpression *expr;
-    char channels[4];
-} MOJOSHADER_irSwizzle;
-
-typedef struct MOJOSHADER_irConstruct  /* vector construct from discrete items */
-{
-    MOJOSHADER_irExprInfo info;  /* Always MOJOSHADER_IR_CONTSTRUCT */
-    MOJOSHADER_irExprList *args;
-} MOJOSHADER_irConstruct;
-
-/* Wrap the whole category in a union for type "safety." */
-union MOJOSHADER_irExpression
-{
-    MOJOSHADER_irNodeInfo ir;
-    MOJOSHADER_irExprInfo info;
-    MOJOSHADER_irConstant constant;
-    MOJOSHADER_irTemp temp;
-    MOJOSHADER_irBinOp binop;
-    MOJOSHADER_irMemory memory;
-    MOJOSHADER_irCall call;
-    MOJOSHADER_irESeq eseq;
-    MOJOSHADER_irArray array;
-    MOJOSHADER_irConvert convert;
-    MOJOSHADER_irSwizzle swizzle;
-    MOJOSHADER_irConstruct construct;
-};
-
-/* MOJOSHADER_irStatement types. */
-
-typedef struct MOJOSHADER_irMove  /* load/store. */
-{
-    MOJOSHADER_irNodeInfo ir;  /* Always MOJOSHADER_IR_MOVE */
-    MOJOSHADER_irExpression *dst; /* must result in a temp or mem! */
-    MOJOSHADER_irExpression *src;
-    int writemask;  /* for write-masking vector channels. */
-} MOJOSHADER_irMove;
-
-typedef struct MOJOSHADER_irExprStmt  /* evaluate expression, throw it away. */
-{
-    MOJOSHADER_irNodeInfo ir;  /* Always MOJOSHADER_IR_EXPR_STMT */
-    MOJOSHADER_irExpression *expr;
-} MOJOSHADER_irExprStmt;
-
-typedef struct MOJOSHADER_irJump  /* unconditional jump */
-{
-    MOJOSHADER_irNodeInfo ir;  /* Always MOJOSHADER_IR_JUMP */
-    int label;
-    /* !!! FIXME: possible label list, for further optimization passes. */
-} MOJOSHADER_irJump;
-
-typedef struct MOJOSHADER_irCJump  /* conditional jump */
-{
-    MOJOSHADER_irNodeInfo ir;  /* Always MOJOSHADER_IR_CJUMP */
-    MOJOSHADER_irConditionType cond;
-    MOJOSHADER_irExpression *left;  /* if (left cond right) */
-    MOJOSHADER_irExpression *right;
-    int iftrue;  /* label id for true case. */
-    int iffalse; /* label id for false case. */
-} MOJOSHADER_irCJump;
-
-typedef struct MOJOSHADER_irSeq  /* statement without side effects */
-{
-    MOJOSHADER_irNodeInfo ir;  /* Always MOJOSHADER_IR_SEQ */
-    MOJOSHADER_irStatement *first;
-    MOJOSHADER_irStatement *next;
-} MOJOSHADER_irSeq;
-
-typedef struct MOJOSHADER_irLabel  /* like a label in assembly language. */
-{
-    MOJOSHADER_irNodeInfo ir;  /* Always MOJOSHADER_IR_LABEL */
-    int index;
-} MOJOSHADER_irLabel;
-
-typedef MOJOSHADER_irGeneric MOJOSHADER_irDiscard;  /* discard statement. */
-
-
-/* Wrap the whole category in a union for type "safety." */
-union MOJOSHADER_irStatement
-{
-    MOJOSHADER_irNodeInfo ir;
-    MOJOSHADER_irGeneric generic;
-    MOJOSHADER_irMove move;
-    MOJOSHADER_irExprStmt expr;
-    MOJOSHADER_irJump jump;
-    MOJOSHADER_irCJump cjump;
-    MOJOSHADER_irSeq seq;
-    MOJOSHADER_irLabel label;
-    MOJOSHADER_irDiscard discard;
-};
-
-/* MOJOSHADER_irMisc types. */
-
-struct MOJOSHADER_irExprList
-{
-    MOJOSHADER_irNodeInfo ir;  /* Always MOJOSHADER_IR_EXPRLIST */
-    MOJOSHADER_irExpression *expr;
-    MOJOSHADER_irExprList *next;
-};
-
-/* Wrap the whole category in a union for type "safety." */
-union MOJOSHADER_irMisc
-{
-    MOJOSHADER_irNodeInfo ir;
-    MOJOSHADER_irGeneric generic;
-    MOJOSHADER_irExprList exprlist;
-};
-
-/* This is a catchall for all your needs. :) */
-union MOJOSHADER_irNode
-{
-    MOJOSHADER_irNodeInfo ir;
-    MOJOSHADER_irGeneric generic;
-    MOJOSHADER_irExpression expr;
-    MOJOSHADER_irStatement stmt;
-    MOJOSHADER_irMisc misc;
-};
-
-
-/* Compiler interface... */
-
-/*
- * Structure used to return data from parsing of a shader...
- */
-/* !!! FIXME: most of these ints should be unsigned. */
-typedef struct MOJOSHADER_compileData
-{
-    /*
-     * The number of elements pointed to by (errors).
-     */
-    int error_count;
-
-    /*
-     * (error_count) elements of data that specify errors that were generated
-     *  by compiling this shader.
-     * This can be NULL if there were no errors or if (error_count) is zero.
-     */
-    MOJOSHADER_error *errors;
-
-    /*
-     * The number of elements pointed to by (warnings).
-     */
-    int warning_count;
-
-    /*
-     * (warning_count) elements of data that specify errors that were
-     *  generated by compiling this shader.
-     * This can be NULL if there were no errors or if (warning_count) is zero.
-     */
-    MOJOSHADER_error *warnings;
-
-    /*
-     * The name of the source profile used to compile the shader. Will be NULL
-     *  on error.
-     */
-    const char *source_profile;
-
-    /*
-     * Bytes of output from compiling. This will be a null-terminated ASCII
-     *  string of D3D assembly source code.
-     */
-    const char *output;
-
-    /*
-     * Byte count for output, not counting any null terminator.
-     *  Will be 0 on error.
-     */
-    int output_len;
-
-    /*
-     * The number of elements pointed to by (symbols).
-     */
-    int symbol_count;
-
-    /*
-     * (symbol_count) elements of data that specify high-level symbol data
-     *  for the shader. This can be used by MOJOSHADER_assemble() to
-     *  generate a CTAB section in bytecode, which is needed by
-     *  MOJOSHADER_parseData() to handle some shaders. This can be NULL on
-     *  error or if (symbol_count) is zero.
-     */
-    MOJOSHADER_symbol *symbols;
-
-    /*
-     * This is the malloc implementation you passed to MOJOSHADER_parse().
-     */
-    MOJOSHADER_malloc malloc;
-
-    /*
-     * This is the free implementation you passed to MOJOSHADER_parse().
-     */
-    MOJOSHADER_free free;
-
-    /*
-     * This is the pointer you passed as opaque data for your allocator.
-     */
-    void *malloc_data;
-} MOJOSHADER_compileData;
-
-
-/*
- * This function is optional. Use this to compile high-level shader programs.
- *
- * This is intended to turn HLSL source code into D3D assembly code, which
- *  can then be passed to MOJOSHADER_assemble() to convert it to D3D bytecode
- *  (which can then be used with MOJOSHADER_parseData() to support other
- *  shading targets).
- *
- * (srcprofile) specifies the source language of the shader. You can specify
- *  a shader model with this, too. See MOJOSHADER_SRC_PROFILE_* constants.
- *
- * (filename) is a NULL-terminated UTF-8 filename. It can be NULL. We do not
- *  actually access this file, as we obtain our data from (source). This
- *  string is copied when we need to report errors while processing (source),
- *  as opposed to errors in a file referenced via the #include directive in
- *  (source). If this is NULL, then errors will report the filename as NULL,
- *  too.
- *
- * (source) is an UTF-8 string of valid high-level shader source code.
- *  It does not need to be NULL-terminated.
- *
- * (sourcelen) is the length of the string pointed to by (source), in bytes.
- *
- * (defines) points to (define_count) preprocessor definitions, and can be
- *  NULL. These are treated by the preprocessor as if the source code started
- *  with one #define for each entry you pass in here.
- *
- * (include_open) and (include_close) let the app control the preprocessor's
- *  behaviour for #include statements. Both are optional and can be NULL, but
- *  both must be specified if either is specified.
- *
- * This will return a MOJOSHADER_compileData. The data supplied here is
- *  sufficient to supply to MOJOSHADER_assemble() for further processing.
- *  When you are done with this data, pass it to MOJOSHADER_freeCompileData()
- *  to deallocate resources.
- *
- * This function will never return NULL, even if the system is completely
- *  out of memory upon entry (in which case, this function returns a static
- *  MOJOSHADER_compileData object, which is still safe to pass to
- *  MOJOSHADER_freeCompileData()).
- *
- * As compiling requires some memory to be allocated, you may provide a
- *  custom allocator to this function, which will be used to allocate/free
- *  memory. They function just like malloc() and free(). We do not use
- *  realloc(). If you don't care, pass NULL in for the allocator functions.
- *  If your allocator needs instance-specific data, you may supply it with the
- *  (d) parameter. This pointer is passed as-is to your (m) and (f) functions.
- *
- * This function is thread safe, so long as the various callback functions
- *  are, too, and that the parameters remains intact for the duration of the
- *  call. This allows you to compile several shaders on separate CPU cores
- *  at the same time.
- */
-DECLSPEC const MOJOSHADER_compileData *MOJOSHADER_compile(const char *srcprofile,
-                                    const char *filename, const char *source,
-                                    unsigned int sourcelen,
-                                    const MOJOSHADER_preprocessorDefine *defs,
-                                    unsigned int define_count,
-                                    MOJOSHADER_includeOpen include_open,
-                                    MOJOSHADER_includeClose include_close,
-                                    MOJOSHADER_malloc m, MOJOSHADER_free f,
-                                    void *d);
-
-
-/*
- * Call this to dispose of compile results when you are done with them.
- *  This will call the MOJOSHADER_free function you provided to
- *  MOJOSHADER_compile() multiple times, if you provided one.
- *  Passing a NULL here is a safe no-op.
- *
- * This function is thread safe, so long as any allocator you passed into
- *  MOJOSHADER_compile() is, too.
- */
-DECLSPEC void MOJOSHADER_freeCompileData(const MOJOSHADER_compileData *data);
+DECLSPEC int MOJOSHADER_linkSPIRVShaders(const MOJOSHADER_parseData *vertex_spirv,
+                                         const MOJOSHADER_parseData *pixel_spirv,
+                                         const MOJOSHADER_vertexAttribute *vertexAttributes,
+                                         const int vertexAttributeCount);
 
 
 /* OpenGL interface... */
@@ -2622,6 +1101,13 @@ DECLSPEC MOJOSHADER_glContext *MOJOSHADER_glCreateContext(const char *profile,
  *
  * It is legal to call this with a NULL pointer to make no context current,
  *  but you need a valid context to be current to use most of MojoShader.
+ *
+ * In current times, this allows one context to be current _per thread_,
+ *  as the internal state inside MojoShader is marked thread local. Each
+ *  new thread should call this function before using the context, even if
+ *  other threads have previously set it current. You _also_ have to set
+ *  the OpenGL context itself current for each thread (and have an OpenGL
+ *  implementation that allows that in the first place).
  */
 DECLSPEC void MOJOSHADER_glMakeContextCurrent(MOJOSHADER_glContext *ctx);
 
@@ -3321,580 +1807,9 @@ DECLSPEC void MOJOSHADER_glDeleteShader(MOJOSHADER_glShader *shader);
 DECLSPEC void MOJOSHADER_glDestroyContext(MOJOSHADER_glContext *ctx);
 
 
-/* Metal interface... */
-
-typedef struct MOJOSHADER_mtlContext MOJOSHADER_mtlContext;
-typedef struct MOJOSHADER_mtlShader MOJOSHADER_mtlShader;
-
-/*
- * Prepare MojoShader to manage Metal shaders.
- *
- * This is really just for the effects framework. Don't call this unless
- *  you know for sure that you need it.
- *
- * You must call this only once, AFTER you have created your MTLDevice.
- *  This function will lookup the Objective-C selectors it needs, after which
- *  it may call them at any time until you call MOJOSHADER_mtlDestroyContext().
- *
- * (device) refers to the active MTLDevice, cast from id<MTLDevice> to void*.
- *
- * As MojoShader requires some memory to be allocated, you may provide a
- *  custom allocator to this function, which will be used to allocate/free
- *  memory. They function just like malloc() and free(). We do not use
- *  realloc(). If you don't care, pass NULL in for the allocator functions.
- *  If your allocator needs instance-specific data, you may supply it with the
- *  (malloc_d) parameter. This pointer is passed as-is to your (m) and (f)
- *  functions.
- *
- * Returns a new context on success, NULL on error. If you get a new context,
- *  you need to make it current before using it with
- *  MOJOSHADER_mtlMakeContextCurrent().
- */
-DECLSPEC MOJOSHADER_mtlContext *MOJOSHADER_mtlCreateContext(void *mtlDevice,
-                                        MOJOSHADER_malloc m, MOJOSHADER_free f,
-                                        void *malloc_d);
-
-/*
- * You must call this before using the context that you got from
- *  MOJOSHADER_mtlCreateContext(), and must use it when you switch to a new
- *  context.
- *
- * It is legal to call this with a NULL pointer to make no context current,
- *  but you need a valid context to be current to use most of MojoShader.
- */
-DECLSPEC void MOJOSHADER_mtlMakeContextCurrent(MOJOSHADER_mtlContext *ctx);
-
-/*
- * Transform a buffer of Direct3D shader bytecode into a struct containing
- *  Metal shader metadata.
- *
- * This function is only for convenience, specifically for compatibility with
- *  the effects API.
- *
- * Despite the name, this does NOT compile a shader! The actual compilation
- *  happens inside MOJOSHADER_mtlCompileLibrary, which batch-compiles an effect
- *  into a single MTLLibrary.
- *
- *   (mainfn) is the name of the shader's main function.
- *   (tokenbuf) is a buffer of Direct3D shader bytecode.
- *   (bufsize) is the size, in bytes, of the bytecode buffer.
- *   (swiz), (swizcount), (smap), and (smapcount) are passed to
- *   MOJOSHADER_parse() unmolested.
- *
- * Returns NULL on error, or a shader handle on success.
- *
- * This call requires a valid MOJOSHADER_mtlContext to have been made current,
- *  or it will crash your program. See MOJOSHADER_mtlMakeContextCurrent().
- */
-DECLSPEC MOJOSHADER_mtlShader *MOJOSHADER_mtlCompileShader(const char *mainfn,
-                                                const unsigned char *tokenbuf,
-                                                const unsigned int bufsize,
-                                                const MOJOSHADER_swizzle *swiz,
-                                                const unsigned int swizcount,
-                                                const MOJOSHADER_samplerMap *smap,
-                                                const unsigned int smapcount);
-
-/*
- * Increments a shader's internal refcount. To decrement the refcount, call
- *  MOJOSHADER_mtlDeleteShader().
- */
-DECLSPEC void MOJOSHADER_mtlShaderAddRef(MOJOSHADER_mtlShader *shader);
-
-/*
- * Get the MOJOSHADER_parseData structure that was produced from the
- *  call to MOJOSHADER_mtlCompileShader().
- *
- * This data is read-only, and you should NOT attempt to free it. This
- *  pointer remains valid until the shader is deleted.
- */
-DECLSPEC const MOJOSHADER_parseData *MOJOSHADER_mtlGetShaderParseData(
-                                                MOJOSHADER_mtlShader *shader);
-
-/*
- * This "binds" individual shaders, which effectively means the context
- *  will store these shaders for later retrieval. No actual binding or
- *  pipeline creation is performed.
- *
- * This function is only for convenience, specifically for compatibility with
- *  the effects API.
- *
- * This call requires a valid MOJOSHADER_mtlContext to have been made current,
- *  or it will crash your program. See MOJOSHADER_mtlMakeContextCurrent().
- */
-DECLSPEC void MOJOSHADER_mtlBindShaders(MOJOSHADER_mtlShader *vshader,
-                                        MOJOSHADER_mtlShader *pshader);
-
-/*
- * This queries for the shaders currently bound to the active context.
- *
- * This function is only for convenience, specifically for compatibility with
- *  the effects API.
- *
- * This call requires a valid MOJOSHADER_mtlContext to have been created,
- *  or it will crash your program. See MOJOSHADER_mtlMakeContextCurrent().
- */
-DECLSPEC void MOJOSHADER_mtlGetBoundShaders(MOJOSHADER_mtlShader **vshader,
-                                            MOJOSHADER_mtlShader **pshader);
-
-/*
- * Fills register pointers with pointers that are directly used to push uniform
- *  data to the Metal shader context.
- *
- * This function is really just for the effects API, you should NOT be using
- *  this unless you know every single line of MojoShader from memory.
- *
- * This call requires a valid MOJOSHADER_mtlContext to have been made current,
- *  or it will crash your program. See MOJOSHADER_mtlMakeContextCurrent().
- */
-DECLSPEC void MOJOSHADER_mtlMapUniformBufferMemory(float **vsf, int **vsi, unsigned char **vsb,
-                                                   float **psf, int **psi, unsigned char **psb);
-
-/*
- * Tells the context that you are done with the memory mapped by
- *  MOJOSHADER_mtlMapUniformBufferMemory().
- *
- * This call requires a valid MOJOSHADER_mtlContext to have been made current,
- *  or it will crash your program. See MOJOSHADER_mtlMakeContextCurrent().
- */
-DECLSPEC void MOJOSHADER_mtlUnmapUniformBufferMemory();
-
-/*
- * This queries for the uniform buffer and byte offsets for each of the
- *  currently bound shaders.
- *
- * This function is only for convenience, specifically for compatibility with
- *  the effects API.
- *
- * This call requires a valid MOJOSHADER_mtlContext to have been made current,
- *  or it will crash your program. See MOJOSHADER_mtlMakeContextCurrent().
- */
-DECLSPEC void MOJOSHADER_mtlGetUniformData(void **buf, int *voff, int *poff);
-
-/*
- * Get the MTLFunction* from the given MOJOSHADER_mtlShader.
- */
-DECLSPEC void *MOJOSHADER_mtlGetFunctionHandle(MOJOSHADER_mtlShader *shader);
-
-/*
- * Resets buffer offsets to prepare for the next frame.
- *
- * Always call this after submitting the final command buffer for a frame!
- */
-DECLSPEC void MOJOSHADER_mtlEndFrame(void);
-
-/*
- * Return the location of a vertex attribute for the given shader.
- *
- * (usage) and (index) map to Direct3D vertex declaration values: COLOR1 would
- *  be MOJOSHADER_USAGE_COLOR and 1.
- *
- * The return value is the index of the attribute to be used to create
- *  a MTLVertexAttributeDescriptor, or -1 if the stream is not used.
- */
-DECLSPEC int MOJOSHADER_mtlGetVertexAttribLocation(MOJOSHADER_mtlShader *vert,
-                                          MOJOSHADER_usage usage, int index);
-
-/*
- * Get any error state we might have picked up, such as failed shader
- *  compilation.
- *
- * Returns a human-readable string. This string is for debugging purposes, and
- *  not guaranteed to be localized, coherent, or user-friendly in any way.
- *  It's for programmers!
- *
- * The latest error may remain between calls. New errors replace any existing
- *  error. Don't check this string for a sign that an error happened, check
- *  return codes instead and use this for explanation when debugging.
- *
- * This call does NOT require a valid MOJOSHADER_mtlContext to have been made
- *  current. The error buffer is shared between contexts, so you can get
- *  error results from a failed MOJOSHADER_mtlCreateContext().
- *
- * Do not free the returned string: it's a pointer to a static internal
- *  buffer. Do not keep the pointer around, either, as it's likely to become
- *  invalid as soon as you call into MojoShader again.
- */
-DECLSPEC const char *MOJOSHADER_mtlGetError(void);
-
-/*
- * Release the given MTLLibrary and all MTLFunctions it contains.
- *
- * This does NOT free MOJOSHADER_mtlShaders! Call MOJOSHADER_mtlDeleteShader()
- *  on all the shaders of the library before you call this.
- *
- * This call requires a valid MOJOSHADER_mtlContext to have been made current,
- *  or it will crash your program. See MOJOSHADER_mtlMakeContextCurrent().
- */
-DECLSPEC void MOJOSHADER_mtlDeleteLibrary(void *library);
-
-/*
- * Free the resources of a compiled shader. This will delete the MojoShader
- *  shader struct and free memory.
- *
- * This does NOT release the actual shader! The shader data belongs to an
- *  MTLLibrary that must be deleted with MOJOSHADER_mtlDeleteLibrary().
- *
- * This call requires a valid MOJOSHADER_mtlContext to have been made current,
- *  or it will crash your program. See MOJOSHADER_mtlMakeContextCurrent().
- */
-DECLSPEC void MOJOSHADER_mtlDeleteShader(MOJOSHADER_mtlShader *shader);
-
-/*
- * Deinitialize MojoShader's Metal shader management.
- *
- * This should be the last MOJOSHADER_mtl* function you call until you've
- *  prepared a context again.
- *
- * This will clean up resources previously allocated, and may call into Metal.
- *
- * This will not clean up shaders and libraries you created! Please call
- *  MOJOSHADER_mtlDeleteShader() and MOJOSHADER_mtlDeleteLibrary() to clean
- *  those up before calling this function!
- *
- * This function destroys the MOJOSHADER_mtlContext you pass it. If it's the
- *  current context, then no context will be current upon return.
- */
-DECLSPEC void MOJOSHADER_mtlDestroyContext(MOJOSHADER_mtlContext *_ctx);
-
-/* Vulkan interface */
-
-/* Avoid including vulkan.h, don't define handles if it's already included */
-#ifdef VULKAN_H_
-#define NO_MOJOSHADER_VULKAN_TYPEDEFS
-#endif
-#ifndef NO_MOJOSHADER_VULKAN_TYPEDEFS
-#ifdef _WIN32
-#define VKAPI_CALL __stdcall
-#define VKAPI_PTR VKAPI_CALL
-#else
-#define VKAPI_CALL
-#define VKAPI_PTR
-#endif
-#define VK_DEFINE_HANDLE(object) typedef struct object##_T* object;
-
-#if defined(__LP64__) || defined(_WIN64) || defined(__x86_64__) || defined(_M_X64) || defined(__ia64) || defined (_M_IA64) || defined(__aarch64__) || defined(__powerpc64__)
-#define VK_DEFINE_NON_DISPATCHABLE_HANDLE(object) typedef struct object##_T *object;
-#else
-#define VK_DEFINE_NON_DISPATCHABLE_HANDLE(object) typedef unsigned long long object;
-#endif
-
-VK_DEFINE_HANDLE(VkInstance)
-VK_DEFINE_HANDLE(VkDevice)
-VK_DEFINE_HANDLE(VkPhysicalDevice)
-VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkBuffer)
-VK_DEFINE_NON_DISPATCHABLE_HANDLE(VkShaderModule)
-
-#endif /* !NO_MOJOSHADER_VULKAN_TYPEDEFS */
-
-typedef void (VKAPI_PTR *PFN_MOJOSHADER_vkVoidFunction)(void);
-typedef PFN_MOJOSHADER_vkVoidFunction (VKAPI_PTR *PFN_MOJOSHADER_vkGetDeviceProcAddr)(
-	VkDevice device,
-	const char* pName
-);
-typedef PFN_MOJOSHADER_vkVoidFunction (VKAPI_PTR *PFN_MOJOSHADER_vkGetInstanceProcAddr)(
-	VkInstance instance,
-	const char* pName
-);
-
-typedef struct MOJOSHADER_vkContext MOJOSHADER_vkContext;
-typedef struct MOJOSHADER_vkShader MOJOSHADER_vkShader;
-typedef struct MOJOSHADER_vkProgram MOJOSHADER_vkProgram;
-
-/*
- * Prepares a context to manage Vulkan shaders.
- *
- * Don't call this unless you know for sure that you need it.
- *
- * You must call this after creating VkDevice and VkInstance.
- *
- * (instance) refers to VkInstance, cast to void*.
- *
- * (device) refers to VkDevice, cast to void*.
- *
- * (frames_in_flight) refers to the maximum number of frames that can be
- * processed simultaneously.
- *
- * (lookup) refers to PFN_vkGetDeviceProcAddr, a function pointer that
- * is used to dynamically link required Vulkan functions.
- *
- * You must pass in the graphics queue family index and the memory type index
- * you will be using with your Vulkan instance.
- *
- * As MojoShader requires some memory to be allocated, you may provide a
- *  custom allocator to this function, which will be used to allocate/free
- *  memory. They function just like malloc() and free(). We do not use
- *  realloc(). If you don't care, pass NULL in for the allocator functions.
- *  If your allocator needs instance-specific data, you may supply it with the
- *  (malloc_d) parameter. This pointer is passed as-is to your (m) and (f)
- *  functions.
- *
- * The context created by this function will automatically become the current
- *  context. No further action is needed by the caller.
- *
- * Returns 0 on success or -1 on failure.
- */
-
-DECLSPEC MOJOSHADER_vkContext *MOJOSHADER_vkCreateContext(VkInstance *instance,
-                                                          VkPhysicalDevice *physical_device,
-                                                          VkDevice *logical_device,
-                                                          PFN_MOJOSHADER_vkGetInstanceProcAddr instance_lookup,
-                                                          PFN_MOJOSHADER_vkGetDeviceProcAddr lookup,
-                                                          unsigned int graphics_queue_family_index,
-                                                          unsigned int max_uniform_buffer_range,
-                                                          unsigned int min_uniform_buffer_offset_alignment,
-                                                          MOJOSHADER_malloc m, MOJOSHADER_free f,
-                                                          void *malloc_d);
-
-/*
- * You must call this before using the context that you got from
- *  MOJOSHADER_vkCreateContext(), and must use it when you switch to a new GL
- *  context.
- *
- * You can only have one MOJOSHADER_vkContext per actual Vulkan context, or
- *  undefined behaviour will result.
- *
- * It is legal to call this with a NULL pointer to make no context current,
- *  but you need a valid context to be current to use most of MojoShader.
- */
-DECLSPEC void MOJOSHADER_vkMakeContextCurrent(MOJOSHADER_vkContext *_ctx);
-
-/*
- * Get any error state we might have picked up.
- *
- * Returns a human-readable string. This string is for debugging purposes, and
- *  not guaranteed to be localized, coherent, or user-friendly in any way.
- *  It's for programmers!
- *
- * The latest error may remain between calls. New errors replace any existing
- *  error. Don't check this string for a sign that an error happened, check
- *  return codes instead and use this for explanation when debugging.
- *
- * Do not free the returned string: it's a pointer to a static internal
- *  buffer. Do not keep the pointer around, either, as it's likely to become
- *  invalid as soon as you call into MojoShader again.
- *
- * This call does NOT require a valid MOJOSHADER_vkContext to have been made
- *  current. The error buffer is shared between contexts, so you can get
- *  error results from a failed MOJOSHADER_vkCreateContext().
- */
-DECLSPEC const char *MOJOSHADER_vkGetError();
-
-/*
- * Deinitialize MojoShader's Vulkan shader management.
- *
- * You must call this once, while your Vulkan context (not MojoShader context) is
- *  still current, if you previously had a successful call to
- *  MOJOSHADER_vkCreateContext(). This should be the last MOJOSHADER_vk*
- *  function you call until you've prepared a context again.
- *
- * This will clean up resources previously allocated, and may call into Vulkan.
- *
- * This will not clean up shaders and programs you created! Please call
- *  MOJOSHADER_vkDeleteShader() and MOJOSHADER_vkDeleteProgram() to clean
- *  those up before calling this function!
- *
- * This function destroys the MOJOSHADER_vkContext you pass it. If it's the
- *  current context, then no context will be current upon return.
- */
-DECLSPEC void MOJOSHADER_vkDestroyContext(MOJOSHADER_vkContext *ctx);
-
-/*
- * Compile a buffer of Direct3D shader bytecode into a Vulkan shader module.
- *
- *   (tokenbuf) is a buffer of Direct3D shader bytecode.
- *   (bufsize) is the size, in bytes, of the bytecode buffer.
- *   (swiz), (swizcount), (smap), and (smapcount) are passed to
- *   MOJOSHADER_parse() unmolested.
- *
- * Returns NULL on error, or a shader handle on success.
- *
- * This call requires a valid MOJOSHADER_vkContext to have been made current,
- *  or it will crash your program. See MOJOSHADER_vkMakeContextCurrent().
- *
- * Compiled shaders from this function may not be shared between contexts.
- */
-DECLSPEC MOJOSHADER_vkShader *MOJOSHADER_vkCompileShader(const char *mainfn,
-                                                         const unsigned char *tokenbuf,
-                                                         const unsigned int bufsize,
-                                                         const MOJOSHADER_swizzle *swiz,
-                                                         const unsigned int swizcount,
-                                                         const MOJOSHADER_samplerMap *smap,
-                                                         const unsigned int smapcount);
-
-/*
- * Increments a shader's internal refcount.
- *
- * To decrement the refcount, call
- *  MOJOSHADER_vkDeleteShader().
- *
- * This call requires a valid MOJOSHADER_vkContext to have been made current,
- *  or it will crash your program. See MOJOSHADER_vkMakeContextCurrent().
- */
-DECLSPEC void MOJOSHADER_vkShaderAddRef(MOJOSHADER_vkShader *shader);
-
-/*
- * Increments a shader's internal refcount.
- *
- * To decrement the refcount, call MOJOSHADER_vkDeleteShader().
- *
- * This call requires a valid MOJOSHADER_vkContext to have been made current,
- *  or it will crash your program. See MOJOSHADER_vkMakeContextCurrent().
- */
-DECLSPEC void MOJOSHADER_vkDeleteShader(MOJOSHADER_vkShader *shader);
-
-/*
- * Get the MOJOSHADER_parseData structure that was produced from the
- *  call to MOJOSHADER_vkCompileShader().
- *
- * This data is read-only, and you should NOT attempt to free it. This
- *  pointer remains valid until the shader is deleted.
- */
-DECLSPEC const MOJOSHADER_parseData *MOJOSHADER_vkGetShaderParseData(
-                                                MOJOSHADER_vkShader *shader);
-
-/*
- * Link a vertex and pixel shader into a working Vulkan shader program.
- *  (vshader) or (pshader) can NOT be NULL, unlike OpenGL.
- *
- * You can reuse shaders in various combinations across
- *  multiple programs, by relinking different pairs.
- *
- * It is illegal to give a vertex shader for (pshader) or a pixel shader
- *  for (vshader).
- *
- * Once you have successfully linked a program, you may render with it.
- *
- * Returns NULL on error, or a program handle on success.
- *
- * This call requires a valid MOJOSHADER_vkContext to have been made current,
- *  or it will crash your program. See MOJOSHADER_vkMakeContextCurrent().
- */
-DECLSPEC MOJOSHADER_vkProgram *MOJOSHADER_vkLinkProgram(MOJOSHADER_vkShader *vshader,
-                                                        MOJOSHADER_vkShader *pshader);
-
-/*
- * This binds the program to the active context, and does nothing particularly
- * special until you start working with uniform buffers or shader modules.
- *
- * After binding a program, you should update any uniforms you care about
- *  with MOJOSHADER_vkMapUniformBufferMemory() (etc), set any vertex arrays
- *  using MOJOSHADER_vkGetVertexAttribLocation(), and finally call
- *  MOJOSHADER_vkGetShaderModules() to get the final modules. Then you may
- *  begin building your pipeline state objects.
- *
- * This call requires a valid MOJOSHADER_vkContext to have been made current,
- *  or it will crash your program. See MOJOSHADER_vkMakeContextCurrent().
- */
-DECLSPEC void MOJOSHADER_vkBindProgram(MOJOSHADER_vkProgram *program);
-
-/*
- * Free the resources of a linked program. This will delete the shader modules
- *  and free memory.
- *
- * If the program is currently bound by MOJOSHADER_vkBindProgram(), it will
- *  be deleted as soon as it becomes unbound.
- *
- * This call requires a valid MOJOSHADER_vkContext to have been made current,
- *  or it will crash your program. See MOJOSHADER_vkMakeContextCurrent().
- */
-DECLSPEC void MOJOSHADER_vkDeleteProgram(MOJOSHADER_vkProgram *program);
-
-/*
- * This "binds" individual shaders, which effectively means the context
- *  will store these shaders for later retrieval. No actual binding or
- *  pipeline creation is performed.
- *
- * This function is only for convenience, specifically for compatibility
- *  with the effects API.
- *
- * This call requires a valid MOJOSHADER_vkContext to have been made current,
- *  or it will crash your program. See MOJOSHADER_vkMakeContextCurrent().
- */
-DECLSPEC void MOJOSHADER_vkBindShaders(MOJOSHADER_vkShader *vshader,
-                                       MOJOSHADER_vkShader *pshader);
-
-/*
- * This queries for the shaders currently bound to the active context.
- *
- * This function is only for convenience, specifically for compatibility
- *  with the effects API.
- *
- * This call requires a valid MOJOSHADER_vkContext to have been made current,
- *  or it will crash your program. See MOJOSHADER_vkMakeContextCurrent().
- */
-DECLSPEC void MOJOSHADER_vkGetBoundShaders(MOJOSHADER_vkShader **vshader,
-                                           MOJOSHADER_vkShader **pshader);
-
-/*
- * Fills register pointers with pointers that are directly used to push uniform
- *  data to the Vulkan shader context.
- *
- * This function is really just for the effects API, you should NOT be using
- *  this unless you know every single line of MojoShader from memory.
- *
- * This call requires a valid MOJOSHADER_vkContext to have been made current,
- *  or it will crash your program. See MOJOSHADER_vkMakeContextCurrent().
- */
-DECLSPEC void MOJOSHADER_vkMapUniformBufferMemory(float **vsf, int **vsi, unsigned char **vsb,
-                                                  float **psf, int **psi, unsigned char **psb);
-
-/*
- * Tells the context that you are done with the memory mapped by
- *  MOJOSHADER_vkMapUniformBufferMemory().
- *
- * This call requires a valid MOJOSHADER_vkContext to have been made current,
- *  or it will crash your program. See MOJOSHADER_vkMakeContextCurrent().
- */
-DECLSPEC void MOJOSHADER_vkUnmapUniformBufferMemory();
-
-/*
- * This queries for the uniform buffer, byte offset and byte size for each of the
- *  currently bound shaders.
- *
- * This function is only for convenience, specifically for compatibility with
- *  the effects API.
- *
- * This call requires a valid MOJOSHADER_vkContext to have been made current,
- *  or it will crash your program. See MOJOSHADER_vkMakeContextCurrent().
- */
-DECLSPEC void MOJOSHADER_vkGetUniformBuffers(VkBuffer *vbuf,
-                                             unsigned long long *voff,
-                                             unsigned long long *vsize,
-                                             VkBuffer *pbuf,
-                                             unsigned long long *poff,
-                                             unsigned long long *psize);
-
-/*
- * Prepares uniform buffers for reuse.
- *
- * Always call this after submitting the final command buffer for a frame!
- */
-DECLSPEC void MOJOSHADER_vkEndFrame();
-
-/*
- * Return the location of a vertex attribute for the given shader.
- *
- * (usage) and (index) map to Direct3D vertex declaration values: COLOR1 would
- *  be MOJOSHADER_USAGE_COLOR and 1.
- *
- * The return value is the index of the attribute to be used to create
- *  a VkVertexInputAttributeDescription, or -1 if the stream is not used.
- *
- *  This call requires a valid MOJOSHADER_vkContext to have been made current,
- *  or it will crash your program. See MOJOSHADER_vkMakeContextCurrent().
- */
-DECLSPEC int MOJOSHADER_vkGetVertexAttribLocation(MOJOSHADER_vkShader *vert,
-                                                  MOJOSHADER_usage usage,
-                                                  int index);
-
-/*
- * Get the VkShaderModules from the currently bound shader program.
- */
-DECLSPEC void MOJOSHADER_vkGetShaderModules(VkShaderModule *vmodule,
-                                            VkShaderModule *pmodule);
-
 /* D3D11 interface... */
 
+typedef struct MOJOSHADER_d3d11Context MOJOSHADER_d3d11Context;
 typedef struct MOJOSHADER_d3d11Shader MOJOSHADER_d3d11Shader;
 
 /*
@@ -3916,9 +1831,11 @@ typedef struct MOJOSHADER_d3d11Shader MOJOSHADER_d3d11Shader;
  *  context from multiple threads, you must protect this call with whatever
  *  thread synchronization technique you have for your other D3D calls.
  */
-DECLSPEC int MOJOSHADER_d3d11CreateContext(void *device, void *deviceContext,
-                                           MOJOSHADER_malloc m, MOJOSHADER_free f,
-                                           void *malloc_d);
+DECLSPEC MOJOSHADER_d3d11Context *MOJOSHADER_d3d11CreateContext(void *device,
+                                                                void *deviceContext,
+                                                                MOJOSHADER_malloc m,
+                                                                MOJOSHADER_free f,
+                                                                void *malloc_d);
 
 /*
  * Get any error state we might have picked up, such as failed shader
@@ -3936,7 +1853,7 @@ DECLSPEC int MOJOSHADER_d3d11CreateContext(void *device, void *deviceContext,
  *  buffer. Do not keep the pointer around, either, as it's likely to become
  *  invalid as soon as you call into MojoShader again.
  */
-DECLSPEC const char *MOJOSHADER_d3d11GetError(void);
+DECLSPEC const char *MOJOSHADER_d3d11GetError(MOJOSHADER_d3d11Context *context);
 
 /*
  * Compile a buffer of Direct3D 9 shader bytecode into a Direct3D 11 shader.
@@ -3954,7 +1871,8 @@ DECLSPEC const char *MOJOSHADER_d3d11GetError(void);
  *  context from multiple threads, you must protect this call with whatever
  *  thread synchronization technique you have for your other D3D calls.
  */
-DECLSPEC MOJOSHADER_d3d11Shader *MOJOSHADER_d3d11CompileShader(const char *mainfn,
+DECLSPEC MOJOSHADER_d3d11Shader *MOJOSHADER_d3d11CompileShader(MOJOSHADER_d3d11Context *context,
+                                                               const char *mainfn,
                                                                const unsigned char *tokenbuf,
                                                                const unsigned int bufsize,
                                                                const MOJOSHADER_swizzle *swiz,
@@ -3990,7 +1908,8 @@ DECLSPEC const MOJOSHADER_parseData *MOJOSHADER_d3d11GetShaderParseData(
  *  context from multiple threads, you must protect this call with whatever
  *  thread synchronization technique you have for your other D3D calls.
  */
-DECLSPEC void MOJOSHADER_d3d11BindShaders(MOJOSHADER_d3d11Shader *vshader,
+DECLSPEC void MOJOSHADER_d3d11BindShaders(MOJOSHADER_d3d11Context *context,
+                                          MOJOSHADER_d3d11Shader *vshader,
                                           MOJOSHADER_d3d11Shader *pshader);
 
 /*
@@ -4003,7 +1922,8 @@ DECLSPEC void MOJOSHADER_d3d11BindShaders(MOJOSHADER_d3d11Shader *vshader,
  *  context from multiple threads, you must protect this call with whatever
  *  thread synchronization technique you have for your other D3D calls.
  */
-DECLSPEC void MOJOSHADER_d3d11GetBoundShaders(MOJOSHADER_d3d11Shader **vshader,
+DECLSPEC void MOJOSHADER_d3d11GetBoundShaders(MOJOSHADER_d3d11Context *context,
+                                              MOJOSHADER_d3d11Shader **vshader,
                                               MOJOSHADER_d3d11Shader **pshader);
 
 /*
@@ -4017,7 +1937,8 @@ DECLSPEC void MOJOSHADER_d3d11GetBoundShaders(MOJOSHADER_d3d11Shader **vshader,
  *  context from multiple threads, you must protect this call with whatever
  *  thread synchronization technique you have for your other D3D calls.
  */
-DECLSPEC void MOJOSHADER_d3d11MapUniformBufferMemory(float **vsf, int **vsi, unsigned char **vsb,
+DECLSPEC void MOJOSHADER_d3d11MapUniformBufferMemory(MOJOSHADER_d3d11Context *context,
+                                                     float **vsf, int **vsi, unsigned char **vsb,
                                                      float **psf, int **psi, unsigned char **psb);
 
 /*
@@ -4028,7 +1949,7 @@ DECLSPEC void MOJOSHADER_d3d11MapUniformBufferMemory(float **vsf, int **vsi, uns
  *  context from multiple threads, you must protect this call with whatever
  *  thread synchronization technique you have for your other D3D calls.
  */
-DECLSPEC void MOJOSHADER_d3d11UnmapUniformBufferMemory();
+DECLSPEC void MOJOSHADER_d3d11UnmapUniformBufferMemory(MOJOSHADER_d3d11Context *context);
 
 /*
  * Return the location of a vertex attribute for the given vertex shader.
@@ -4053,13 +1974,16 @@ DECLSPEC int MOJOSHADER_d3d11GetVertexAttribLocation(MOJOSHADER_d3d11Shader *ver
  *  entries. (bytecode) and (bytecodeLength) will be filled with the final
  *  compiled D3D11 vertex shader.
  *
+ * Returns 0 on success, nonzero on error.
+ *
  * This call is only as thread safe as your D3D11 context! If you call your
  *  context from multiple threads, you must protect this call with whatever
  *  thread synchronization technique you have for your other D3D calls.
  */
-DECLSPEC void MOJOSHADER_d3d11CompileVertexShader(unsigned long long inputLayoutHash,
-                                                  void *elements, int elementCount,
-                                                  void **bytecode, int *bytecodeLength);
+DECLSPEC int MOJOSHADER_d3d11CompileVertexShader(MOJOSHADER_d3d11Context *ctx,
+                                                 unsigned long long inputLayoutHash,
+                                                 void *elements, int elementCount,
+                                                 void **bytecode, int *bytecodeLength);
 
 /*
  * Inform MojoShader that it should commit any pending state and prepare the
@@ -4069,11 +1993,14 @@ DECLSPEC void MOJOSHADER_d3d11CompileVertexShader(unsigned long long inputLayout
  *  drawing, so any outstanding changes made to the shared constants array (etc)
  *  can propagate to the shader during this call.
  *
+ * Returns 0 on success, nonzero on error.
+ *
  * This call is only as thread safe as your D3D11 context! If you call your
  *  context from multiple threads, you must protect this call with whatever
  *  thread synchronization technique you have for your other D3D calls.
  */
-DECLSPEC void MOJOSHADER_d3d11ProgramReady(unsigned long long inputLayoutHash);
+DECLSPEC int MOJOSHADER_d3d11ProgramReady(MOJOSHADER_d3d11Context *context,
+                                          unsigned long long inputLayoutHash);
 
 /*
  * Free the resources of a compiled shader. This will delete the shader object
@@ -4083,7 +2010,8 @@ DECLSPEC void MOJOSHADER_d3d11ProgramReady(unsigned long long inputLayoutHash);
  *  context from multiple threads, you must protect this call with whatever
  *  thread synchronization technique you have for your other D3D calls.
  */
-DECLSPEC void MOJOSHADER_d3d11DeleteShader(MOJOSHADER_d3d11Shader *shader);
+DECLSPEC void MOJOSHADER_d3d11DeleteShader(MOJOSHADER_d3d11Context *context,
+                                           MOJOSHADER_d3d11Shader *shader);
 
 /*
  * Deinitialize MojoShader's D3D11 shader management.
@@ -4093,11 +2021,1126 @@ DECLSPEC void MOJOSHADER_d3d11DeleteShader(MOJOSHADER_d3d11Shader *shader);
  * This will NOT clean up shaders you created! Please destroy all shaders
  *  before calling this function.
  */
-DECLSPEC void MOJOSHADER_d3d11DestroyContext(void);
+DECLSPEC void MOJOSHADER_d3d11DestroyContext(MOJOSHADER_d3d11Context *context);
+
+
+/* SDL_GPU interface... */
+
+typedef struct MOJOSHADER_sdlContext MOJOSHADER_sdlContext;
+typedef struct MOJOSHADER_sdlShaderData MOJOSHADER_sdlShaderData;
+typedef struct MOJOSHADER_sdlProgram MOJOSHADER_sdlProgram;
+
+#ifndef SDL_GPU_H
+typedef struct SDL_GPUDevice SDL_GPUDevice;
+typedef struct SDL_GPUShader SDL_GPUShader;
+typedef struct SDL_GPUCommandBuffer SDL_GPUCommandBuffer;
+#endif /* SDL_GPU_H */
+
+/*
+ * Call this function to get the 'formatFlags' parameter for
+ *  SDL_CreateGPUDevice.
+ *
+ * Returns the SDL_GPUShaderFormatFlagBits for creating the SDL_GPUDevice.
+ */
+DECLSPEC unsigned int MOJOSHADER_sdlGetShaderFormats(void);
+
+/*
+ * Prepares a context to manage SDL_gpu shaders.
+ *
+ * You do not need to call this if all you want is MOJOSHADER_parse().
+ *
+ * (device) refers to the SDL_GPUDevice.
+ *
+ * You can only have one MOJOSHADER_sdlContext per actual SDL_gpu context, or
+ *  undefined behaviour will result.
+ *
+ * As MojoShader requires some memory to be allocated, you may provide a
+ *  custom allocator to this function, which will be used to allocate/free
+ *  memory. They function just like malloc() and free(). We do not use
+ *  realloc(). If you don't care, pass NULL in for the allocator functions.
+ *  If your allocator needs instance-specific data, you may supply it with the
+ *  (malloc_d) parameter. This pointer is passed as-is to your (m) and (f)
+ *  functions.
+ *
+ * Returns a new context on success, NULL on error.
+ */
+DECLSPEC MOJOSHADER_sdlContext *MOJOSHADER_sdlCreateContext(SDL_GPUDevice *device,
+                                                            MOJOSHADER_malloc m,
+                                                            MOJOSHADER_free f,
+                                                            void *malloc_d);
+
+/*
+ * Get any error state we might have picked up.
+ *
+ * Returns a human-readable string. This string is for debugging purposes, and
+ *  not guaranteed to be localized, coherent, or user-friendly in any way.
+ *  It's for programmers!
+ *
+ * The latest error may remain between calls. New errors replace any existing
+ *  error. Don't check this string for a sign that an error happened, check
+ *  return codes instead and use this for explanation when debugging.
+ *
+ * Do not free the returned string: it's a pointer to a static internal
+ *  buffer. Do not keep the pointer around, either, as it's likely to become
+ *  invalid as soon as you call into MojoShader again.
+ *
+ * This call does NOT require a valid MOJOSHADER_sdlContext to have been made
+ *  current. The error buffer is shared between contexts, so you can get
+ *  error results from a failed MOJOSHADER_sdlCreateContext().
+ */
+DECLSPEC const char *MOJOSHADER_sdlGetError(MOJOSHADER_sdlContext *ctx);
+
+/*
+ * Deinitialize MojoShader's SDL_gpu shader management.
+ *
+ * You must call this once, while your SDL_GPUDevice is still valid. This should
+ * be the last MOJOSHADER_sdl* function you call until you've prepared a context
+ * again.
+ *
+ * This will clean up resources previously allocated, and may call into SDL_gpu.
+ *
+ * This will not clean up shaders and programs you created! Please call
+ *  MOJOSHADER_sdlDeleteShader() and MOJOSHADER_sdlDeleteProgram() to clean
+ *  those up before calling this function!
+ *
+ * This function destroys the MOJOSHADER_sdlContext you pass it.
+ */
+DECLSPEC void MOJOSHADER_sdlDestroyContext(MOJOSHADER_sdlContext *ctx);
+
+/*
+ * Compile a buffer of Direct3D shader bytecode into an SDL_gpu shader module.
+ *
+ *   (tokenbuf) is a buffer of Direct3D shader bytecode.
+ *   (bufsize) is the size, in bytes, of the bytecode buffer.
+ *   (swiz), (swizcount), (smap), and (smapcount) are passed to
+ *   MOJOSHADER_parse() unmolested.
+ *
+ * Returns NULL on error, or a shader handle on success.
+ *
+ * Compiled shaders from this function may not be shared between contexts.
+ */
+DECLSPEC MOJOSHADER_sdlShaderData *MOJOSHADER_sdlCompileShader(MOJOSHADER_sdlContext *ctx,
+                                                           const char *mainfn,
+                                                           const unsigned char *tokenbuf,
+                                                           const unsigned int bufsize,
+                                                           const MOJOSHADER_swizzle *swiz,
+                                                           const unsigned int swizcount,
+                                                           const MOJOSHADER_samplerMap *smap,
+                                                           const unsigned int smapcount);
+
+/*
+ * Increments a shader's internal refcount.
+ *
+ * To decrement the refcount, call MOJOSHADER_sdlDeleteShader().
+ */
+DECLSPEC void MOJOSHADER_sdlShaderAddRef(MOJOSHADER_sdlShaderData *shader);
+
+/*
+ * Decrements a shader's internal refcount, and deletes if the refcount is zero.
+ *
+ * To increment the refcount, call MOJOSHADER_sdlShaderAddRef().
+ */
+DECLSPEC void MOJOSHADER_sdlDeleteShader(MOJOSHADER_sdlContext *ctx,
+                                         MOJOSHADER_sdlShaderData *shader);
+
+/*
+ * Get the MOJOSHADER_parseData structure that was produced from the
+ *  call to MOJOSHADER_sdlCompileShader().
+ *
+ * This data is read-only, and you should NOT attempt to free it. This
+ *  pointer remains valid until the shader is deleted.
+ */
+DECLSPEC const MOJOSHADER_parseData *MOJOSHADER_sdlGetShaderParseData(
+                                                  MOJOSHADER_sdlShaderData *shader);
+
+/*
+ * Link bound vertex and pixel shader into a working SDL_gpu shader program.
+ *  (vshader) or (pshader) can NOT be NULL, unlike OpenGL.
+ *
+ * You can reuse shaders in various combinations across
+ *  multiple programs, by relinking different pairs.
+ *
+ * Requires vertex element data for patches.
+ *
+ * It is illegal to give a vertex shader for (pshader) or a pixel shader
+ *  for (vshader).
+ *
+ * Once you have successfully linked a program, you may render with it.
+ *
+ * Returns NULL on error, or a program handle on success.
+ */
+DECLSPEC MOJOSHADER_sdlProgram *MOJOSHADER_sdlLinkProgram(MOJOSHADER_sdlContext *context,
+                                                          MOJOSHADER_vertexAttribute *vertexAttributes,
+                                                          int vertexAttributeCount);
+
+/*
+ * This binds the program to the active context, and does nothing particularly
+ * special until you start working with uniform buffers or shader modules.
+ *
+ * After binding a program, you should update any uniforms you care about
+ *  with MOJOSHADER_sdlMapUniformBufferMemory() (etc), set any vertex arrays
+ *  using MOJOSHADER_sdlGetVertexAttribLocation(), and finally call
+ *  MOJOSHADER_sdlGetShaders() to get the final modules. Then you may
+ *  begin building your pipeline state objects.
+ */
+DECLSPEC void MOJOSHADER_sdlBindProgram(MOJOSHADER_sdlContext *context,
+                                        MOJOSHADER_sdlProgram *program);
+
+/*
+ * Free the resources of a linked program. This will delete the shader modules
+ *  and free memory.
+ *
+ * If the program is currently bound by MOJOSHADER_sdlBindProgram(), it will
+ *  be deleted as soon as it becomes unbound.
+ */
+DECLSPEC void MOJOSHADER_sdlDeleteProgram(MOJOSHADER_sdlContext *context,
+                                          MOJOSHADER_sdlProgram *program);
+
+/*
+ * This "binds" individual shaders, which effectively means the context
+ *  will store these shaders for later retrieval. No actual binding or
+ *  pipeline creation is performed.
+ *
+ * This function is only for convenience, specifically for compatibility
+ *  with the effects API.
+ */
+DECLSPEC void MOJOSHADER_sdlBindShaders(MOJOSHADER_sdlContext *ctx,
+                                        MOJOSHADER_sdlShaderData *vshader,
+                                        MOJOSHADER_sdlShaderData *pshader);
+
+/*
+ * This queries for the shaders currently bound to the active context.
+ *
+ * This function is only for convenience, specifically for compatibility
+ *  with the effects API.
+ */
+DECLSPEC void MOJOSHADER_sdlGetBoundShaderData(MOJOSHADER_sdlContext *ctx,
+                                            MOJOSHADER_sdlShaderData **vshader,
+                                            MOJOSHADER_sdlShaderData **pshader);
+
+/*
+ * Fills register pointers with pointers that are directly used to push uniform
+ *  data to the SDL3 shader context.
+ *
+ * This function is really just for the effects API, you should NOT be using
+ *  this unless you know every single line of MojoShader from memory.
+ */
+DECLSPEC void MOJOSHADER_sdlMapUniformBufferMemory(MOJOSHADER_sdlContext *ctx,
+                                                   float **vsf, int **vsi, unsigned char **vsb,
+                                                   float **psf, int **psi, unsigned char **psb);
+
+/*
+ * Tells the context that you are done with the memory mapped by
+ *  MOJOSHADER_sdlMapUniformBufferMemory().
+ */
+DECLSPEC void MOJOSHADER_sdlUnmapUniformBufferMemory(MOJOSHADER_sdlContext *ctx);
+
+/*
+ * Returns the minimum required size of the uniform buffer for this shader.
+ *  You will need this to fill out the SDL_GPUGraphicsPipelineCreateInfo struct.
+ */
+DECLSPEC int MOJOSHADER_sdlGetUniformBufferSize(MOJOSHADER_sdlShaderData *shader);
+
+/*
+ * Pushes the uniform buffer updates for the currently bound program.
+ *
+ * This function will record calls to SDL_GPUPush*ShaderUniforms into the
+ *  passed command buffer.
+ */
+DECLSPEC void MOJOSHADER_sdlUpdateUniformBuffers(MOJOSHADER_sdlContext *ctx,
+                                                 SDL_GPUCommandBuffer *cb);
+
+/*
+ * Return the location of a vertex attribute for the given shader.
+ *
+ * (usage) and (index) map to Direct3D vertex declaration values: COLOR1 would
+ *  be MOJOSHADER_USAGE_COLOR and 1.
+ *
+ * The return value is the index of the attribute to be used to create
+ *  an SDL_GPUVertexAttribute, or -1 if the stream is not used.
+ */
+DECLSPEC int MOJOSHADER_sdlGetVertexAttribLocation(MOJOSHADER_sdlShaderData *vert,
+                                                   MOJOSHADER_usage usage,
+                                                   int index);
+
+/*
+ * Get the SDL_GPUShaderModules from the currently bound shader program.
+ */
+DECLSPEC void MOJOSHADER_sdlGetShaders(MOJOSHADER_sdlContext *ctx,
+                                             SDL_GPUShader **vshader,
+                                             SDL_GPUShader **pshader);
+
+/*
+ * Gets the number of sampler slots needed by a given shader module.
+ */
+DECLSPEC unsigned int MOJOSHADER_sdlGetSamplerSlots(MOJOSHADER_sdlShaderData *shader);
 
 
 /* Effects interface... */
-#include "mojoshader_effects.h"
+
+#ifdef MOJOSHADER_EFFECT_SUPPORT
+
+/* MOJOSHADER_effectState types... */
+
+typedef enum MOJOSHADER_renderStateType
+{
+    /* Note that we are NOT using the actual RS values from D3D here.
+     * For some reason, in the binary data, it's 0-based.
+     * Even worse, it doesn't even seem to be in order.
+     * Here is the list of changes compared to the real D3DRS enum:
+     * - All of the RS_WRAP values are in a row, not separate!
+     *
+     * -flibit
+     */
+    MOJOSHADER_RS_ZENABLE,
+    MOJOSHADER_RS_FILLMODE,
+    MOJOSHADER_RS_SHADEMODE,
+    MOJOSHADER_RS_ZWRITEENABLE,
+    MOJOSHADER_RS_ALPHATESTENABLE,
+    MOJOSHADER_RS_LASTPIXEL,
+    MOJOSHADER_RS_SRCBLEND,
+    MOJOSHADER_RS_DESTBLEND,
+    MOJOSHADER_RS_CULLMODE,
+    MOJOSHADER_RS_ZFUNC,
+    MOJOSHADER_RS_ALPHAREF,
+    MOJOSHADER_RS_ALPHAFUNC,
+    MOJOSHADER_RS_DITHERENABLE,
+    MOJOSHADER_RS_ALPHABLENDENABLE,
+    MOJOSHADER_RS_FOGENABLE,
+    MOJOSHADER_RS_SPECULARENABLE,
+    MOJOSHADER_RS_FOGCOLOR,
+    MOJOSHADER_RS_FOGTABLEMODE,
+    MOJOSHADER_RS_FOGSTART,
+    MOJOSHADER_RS_FOGEND,
+    MOJOSHADER_RS_FOGDENSITY,
+    MOJOSHADER_RS_RANGEFOGENABLE,
+    MOJOSHADER_RS_STENCILENABLE,
+    MOJOSHADER_RS_STENCILFAIL,
+    MOJOSHADER_RS_STENCILZFAIL,
+    MOJOSHADER_RS_STENCILPASS,
+    MOJOSHADER_RS_STENCILFUNC,
+    MOJOSHADER_RS_STENCILREF,
+    MOJOSHADER_RS_STENCILMASK,
+    MOJOSHADER_RS_STENCILWRITEMASK,
+    MOJOSHADER_RS_TEXTUREFACTOR,
+    MOJOSHADER_RS_WRAP0,
+    MOJOSHADER_RS_WRAP1,
+    MOJOSHADER_RS_WRAP2,
+    MOJOSHADER_RS_WRAP3,
+    MOJOSHADER_RS_WRAP4,
+    MOJOSHADER_RS_WRAP5,
+    MOJOSHADER_RS_WRAP6,
+    MOJOSHADER_RS_WRAP7,
+    MOJOSHADER_RS_WRAP8,
+    MOJOSHADER_RS_WRAP9,
+    MOJOSHADER_RS_WRAP10,
+    MOJOSHADER_RS_WRAP11,
+    MOJOSHADER_RS_WRAP12,
+    MOJOSHADER_RS_WRAP13,
+    MOJOSHADER_RS_WRAP14,
+    MOJOSHADER_RS_WRAP15,
+    MOJOSHADER_RS_CLIPPING,
+    MOJOSHADER_RS_LIGHTING,
+    MOJOSHADER_RS_AMBIENT,
+    MOJOSHADER_RS_FOGVERTEXMODE,
+    MOJOSHADER_RS_COLORVERTEX,
+    MOJOSHADER_RS_LOCALVIEWER,
+    MOJOSHADER_RS_NORMALIZENORMALS,
+    MOJOSHADER_RS_DIFFUSEMATERIALSOURCE,
+    MOJOSHADER_RS_SPECULARMATERIALSOURCE,
+    MOJOSHADER_RS_AMBIENTMATERIALSOURCE,
+    MOJOSHADER_RS_EMISSIVEMATERIALSOURCE,
+    MOJOSHADER_RS_VERTEXBLEND,
+    MOJOSHADER_RS_CLIPPLANEENABLE,
+    MOJOSHADER_RS_POINTSIZE,
+    MOJOSHADER_RS_POINTSIZE_MIN,
+    MOJOSHADER_RS_POINTSPRITEENABLE,
+    MOJOSHADER_RS_POINTSCALEENABLE,
+    MOJOSHADER_RS_POINTSCALE_A,
+    MOJOSHADER_RS_POINTSCALE_B,
+    MOJOSHADER_RS_POINTSCALE_C,
+    MOJOSHADER_RS_MULTISAMPLEANTIALIAS,
+    MOJOSHADER_RS_MULTISAMPLEMASK,
+    MOJOSHADER_RS_PATCHEDGESTYLE,
+    MOJOSHADER_RS_DEBUGMONITORTOKEN,
+    MOJOSHADER_RS_POINTSIZE_MAX,
+    MOJOSHADER_RS_INDEXEDVERTEXBLENDENABLE,
+    MOJOSHADER_RS_COLORWRITEENABLE,
+    MOJOSHADER_RS_TWEENFACTOR,
+    MOJOSHADER_RS_BLENDOP,
+    MOJOSHADER_RS_POSITIONDEGREE,
+    MOJOSHADER_RS_NORMALDEGREE,
+    MOJOSHADER_RS_SCISSORTESTENABLE,
+    MOJOSHADER_RS_SLOPESCALEDEPTHBIAS,
+    MOJOSHADER_RS_ANTIALIASEDLINEENABLE,
+    MOJOSHADER_RS_MINTESSELLATIONLEVEL,
+    MOJOSHADER_RS_MAXTESSELLATIONLEVEL,
+    MOJOSHADER_RS_ADAPTIVETESS_X,
+    MOJOSHADER_RS_ADAPTIVETESS_Y,
+    MOJOSHADER_RS_ADAPTIVETESS_Z,
+    MOJOSHADER_RS_ADAPTIVETESS_W,
+    MOJOSHADER_RS_ENABLEADAPTIVETESSELLATION,
+    MOJOSHADER_RS_TWOSIDEDSTENCILMODE,
+    MOJOSHADER_RS_CCW_STENCILFAIL,
+    MOJOSHADER_RS_CCW_STENCILZFAIL,
+    MOJOSHADER_RS_CCW_STENCILPASS,
+    MOJOSHADER_RS_CCW_STENCILFUNC,
+    MOJOSHADER_RS_COLORWRITEENABLE1,
+    MOJOSHADER_RS_COLORWRITEENABLE2,
+    MOJOSHADER_RS_COLORWRITEENABLE3,
+    MOJOSHADER_RS_BLENDFACTOR,
+    MOJOSHADER_RS_SRGBWRITEENABLE,
+    MOJOSHADER_RS_DEPTHBIAS,
+    MOJOSHADER_RS_SEPARATEALPHABLENDENABLE,
+    MOJOSHADER_RS_SRCBLENDALPHA,
+    MOJOSHADER_RS_DESTBLENDALPHA,
+    MOJOSHADER_RS_BLENDOPALPHA,
+
+    /* These aren't really "states", but these numbers are
+     * referred to by MOJOSHADER_effectStateType as such.
+     */
+    MOJOSHADER_RS_VERTEXSHADER = 146,
+    MOJOSHADER_RS_PIXELSHADER = 147
+} MOJOSHADER_renderStateType;
+
+typedef enum MOJOSHADER_zBufferType
+{
+    MOJOSHADER_ZB_FALSE,
+    MOJOSHADER_ZB_TRUE,
+    MOJOSHADER_ZB_USEW
+} MOJOSHADER_zBufferType;
+
+typedef enum MOJOSHADER_fillMode
+{
+    MOJOSHADER_FILL_POINT     = 1,
+    MOJOSHADER_FILL_WIREFRAME = 2,
+    MOJOSHADER_FILL_SOLID     = 3
+} MOJOSHADER_fillMode;
+
+typedef enum MOJOSHADER_shadeMode
+{
+    MOJOSHADER_SHADE_FLAT    = 1,
+    MOJOSHADER_SHADE_GOURAUD = 2,
+    MOJOSHADER_SHADE_PHONG   = 3
+} MOJOSHADER_shadeMode;
+
+typedef enum MOJOSHADER_blendMode
+{
+    MOJOSHADER_BLEND_ZERO            = 1,
+    MOJOSHADER_BLEND_ONE             = 2,
+    MOJOSHADER_BLEND_SRCCOLOR        = 3,
+    MOJOSHADER_BLEND_INVSRCCOLOR     = 4,
+    MOJOSHADER_BLEND_SRCALPHA        = 5,
+    MOJOSHADER_BLEND_INVSRCALPHA     = 6,
+    MOJOSHADER_BLEND_DESTALPHA       = 7,
+    MOJOSHADER_BLEND_INVDESTALPHA    = 8,
+    MOJOSHADER_BLEND_DESTCOLOR       = 9,
+    MOJOSHADER_BLEND_INVDESTCOLOR    = 10,
+    MOJOSHADER_BLEND_SRCALPHASAT     = 11,
+    MOJOSHADER_BLEND_BOTHSRCALPHA    = 12,
+    MOJOSHADER_BLEND_BOTHINVSRCALPHA = 13,
+    MOJOSHADER_BLEND_BLENDFACTOR     = 14,
+    MOJOSHADER_BLEND_INVBLENDFACTOR  = 15,
+    MOJOSHADER_BLEND_SRCCOLOR2       = 16,
+    MOJOSHADER_BLEND_INVSRCCOLOR2    = 17
+} MOJOSHADER_blendMode;
+
+typedef enum MOJOSHADER_cullMode
+{
+    MOJOSHADER_CULL_NONE = 1,
+    MOJOSHADER_CULL_CW   = 2,
+    MOJOSHADER_CULL_CCW  = 3
+} MOJOSHADER_cullMode;
+
+typedef enum MOJOSHADER_compareFunc
+{
+    MOJOSHADER_CMP_NEVER        = 1,
+    MOJOSHADER_CMP_LESS         = 2,
+    MOJOSHADER_CMP_EQUAL        = 3,
+    MOJOSHADER_CMP_LESSEQUAL    = 4,
+    MOJOSHADER_CMP_GREATER      = 5,
+    MOJOSHADER_CMP_NOTEQUAL     = 6,
+    MOJOSHADER_CMP_GREATEREQUAL = 7,
+    MOJOSHADER_CMP_ALWAYS       = 8
+} MOJOSHADER_compareFunc;
+
+typedef enum MOJOSHADER_fogMode
+{
+    MOJOSHADER_FOG_NONE,
+    MOJOSHADER_FOG_EXP,
+    MOJOSHADER_FOG_EXP2,
+    MOJOSHADER_FOG_LINEAR
+} MOJOSHADER_fogMode;
+
+typedef enum MOJOSHADER_stencilOp
+{
+    MOJOSHADER_STENCILOP_KEEP    = 1,
+    MOJOSHADER_STENCILOP_ZERO    = 2,
+    MOJOSHADER_STENCILOP_REPLACE = 3,
+    MOJOSHADER_STENCILOP_INCRSAT = 4,
+    MOJOSHADER_STENCILOP_DECRSAT = 5,
+    MOJOSHADER_STENCILOP_INVERT  = 6,
+    MOJOSHADER_STENCILOP_INCR    = 7,
+    MOJOSHADER_STENCILOP_DECR    = 8
+} MOJOSHADER_stencilOp;
+
+typedef enum MOJOSHADER_materialColorSource
+{
+    MOJOSHADER_MCS_MATERIAL,
+    MOJOSHADER_MCS_COLOR1,
+    MOJOSHADER_MCS_COLOR2
+} MOJOSHADER_materialColorSource;
+
+typedef enum MOJOSHADER_vertexBlendFlags
+{
+    MOJOSHADER_VBF_DISABLE  = 0,
+    MOJOSHADER_VBF_1WEIGHTS = 1,
+    MOJOSHADER_VBF_2WEIGHTS = 2,
+    MOJOSHADER_VBF_3WEIGHTS = 3,
+    MOJOSHADER_VBF_TWEENING = 255,
+    MOJOSHADER_VBF_0WEIGHTS = 256
+} MOJOSHADER_vertexBlendFlags;
+
+typedef enum MOJOSHADER_patchedEdgeStyle
+{
+    MOJOSHADER_PATCHEDGE_DISCRETE,
+    MOJOSHADER_PATCHEDGE_CONTINUOUS
+} MOJOSHADER_patchedEdgeStyle;
+
+typedef enum MOJOSHADER_debugMonitorTokens
+{
+    MOJOSHADER_DMT_ENABLE,
+    MOJOSHADER_DMT_DISABLE
+} MOJOSHADER_debugMonitorTokens;
+
+typedef enum MOJOSHADER_blendOp
+{
+    MOJOSHADER_BLENDOP_ADD         = 1,
+    MOJOSHADER_BLENDOP_SUBTRACT    = 2,
+    MOJOSHADER_BLENDOP_REVSUBTRACT = 3,
+    MOJOSHADER_BLENDOP_MIN         = 4,
+    MOJOSHADER_BLENDOP_MAX         = 5
+} MOJOSHADER_blendOp;
+
+typedef enum MOJOSHADER_degreeType
+{
+    MOJOSHADER_DEGREE_LINEAR    = 1,
+    MOJOSHADER_DEGREE_QUADRATIC = 2,
+    MOJOSHADER_DEGREE_CUBIC     = 3,
+    MOJOSHADER_DEGREE_QUINTIC   = 5
+} MOJOSHADER_degreeType;
+
+
+/* MOJOSHADER_effectSamplerState types... */
+
+typedef enum MOJOSHADER_samplerStateType
+{
+    MOJOSHADER_SAMP_UNKNOWN0      = 0,
+    MOJOSHADER_SAMP_UNKNOWN1      = 1,
+    MOJOSHADER_SAMP_UNKNOWN2      = 2,
+    MOJOSHADER_SAMP_UNKNOWN3      = 3,
+    MOJOSHADER_SAMP_TEXTURE       = 4,
+    MOJOSHADER_SAMP_ADDRESSU      = 5,
+    MOJOSHADER_SAMP_ADDRESSV      = 6,
+    MOJOSHADER_SAMP_ADDRESSW      = 7,
+    MOJOSHADER_SAMP_BORDERCOLOR   = 8,
+    MOJOSHADER_SAMP_MAGFILTER     = 9,
+    MOJOSHADER_SAMP_MINFILTER     = 10,
+    MOJOSHADER_SAMP_MIPFILTER     = 11,
+    MOJOSHADER_SAMP_MIPMAPLODBIAS = 12,
+    MOJOSHADER_SAMP_MAXMIPLEVEL   = 13,
+    MOJOSHADER_SAMP_MAXANISOTROPY = 14,
+    MOJOSHADER_SAMP_SRGBTEXTURE   = 15,
+    MOJOSHADER_SAMP_ELEMENTINDEX  = 16,
+    MOJOSHADER_SAMP_DMAPOFFSET    = 17
+} MOJOSHADER_samplerStateType;
+
+typedef enum MOJOSHADER_textureAddress
+{
+    MOJOSHADER_TADDRESS_WRAP       = 1,
+    MOJOSHADER_TADDRESS_MIRROR     = 2,
+    MOJOSHADER_TADDRESS_CLAMP      = 3,
+    MOJOSHADER_TADDRESS_BORDER     = 4,
+    MOJOSHADER_TADDRESS_MIRRORONCE = 5
+} MOJOSHADER_textureAddress;
+
+typedef enum MOJOSHADER_textureFilterType
+{
+    MOJOSHADER_TEXTUREFILTER_NONE,
+    MOJOSHADER_TEXTUREFILTER_POINT,
+    MOJOSHADER_TEXTUREFILTER_LINEAR,
+    MOJOSHADER_TEXTUREFILTER_ANISOTROPIC,
+    MOJOSHADER_TEXTUREFILTER_PYRAMIDALQUAD,
+    MOJOSHADER_TEXTUREFILTER_GAUSSIANQUAD,
+    MOJOSHADER_TEXTUREFILTER_CONVOLUTIONMONO
+} MOJOSHADER_textureFilterType;
+
+
+/* Effect value types... */
+
+typedef struct MOJOSHADER_effectSamplerState MOJOSHADER_effectSamplerState;
+
+typedef struct MOJOSHADER_effectValue
+{
+    const char *name;
+    const char *semantic;
+    MOJOSHADER_symbolTypeInfo type;
+    unsigned int value_count;
+    MOJOSHADERNAMELESS union
+    {
+         /* Raw value types */
+        void                           *values;
+        int                            *valuesI;
+        float                          *valuesF;
+        /* As used by MOJOSHADER_effectState */
+        MOJOSHADER_zBufferType         *valuesZBT;
+        MOJOSHADER_fillMode            *valuesFiM;
+        MOJOSHADER_shadeMode           *valuesSM;
+        MOJOSHADER_blendMode           *valuesBM;
+        MOJOSHADER_cullMode            *valuesCM;
+        MOJOSHADER_compareFunc         *valuesCF;
+        MOJOSHADER_fogMode             *valuesFoM;
+        MOJOSHADER_stencilOp           *valuesSO;
+        MOJOSHADER_materialColorSource *valuesMCS;
+        MOJOSHADER_vertexBlendFlags    *valuesVBF;
+        MOJOSHADER_patchedEdgeStyle    *valuesPES;
+        MOJOSHADER_debugMonitorTokens  *valuesDMT;
+        MOJOSHADER_blendOp             *valuesBO;
+        MOJOSHADER_degreeType          *valuesDT;
+        /* As used by MOJOSHADER_effectSamplerState */
+        MOJOSHADER_textureAddress      *valuesTA;
+        MOJOSHADER_textureFilterType   *valuesTFT;
+        /* As used by MOJOSHADER_effectParameter */
+        MOJOSHADER_effectSamplerState  *valuesSS;
+    };
+} MOJOSHADER_effectValue;
+
+typedef struct MOJOSHADER_effectState
+{
+    MOJOSHADER_renderStateType type;
+    MOJOSHADER_effectValue value;
+} MOJOSHADER_effectState;
+
+struct MOJOSHADER_effectSamplerState
+{
+    MOJOSHADER_samplerStateType type;
+    MOJOSHADER_effectValue value;
+};
+
+typedef MOJOSHADER_effectValue MOJOSHADER_effectAnnotation;
+
+
+/* Effect interface structures... */
+
+typedef struct MOJOSHADER_effectParam
+{
+    MOJOSHADER_effectValue value;
+    unsigned int annotation_count;
+    MOJOSHADER_effectAnnotation *annotations;
+} MOJOSHADER_effectParam;
+
+typedef struct MOJOSHADER_effectPass
+{
+    const char *name;
+    unsigned int state_count;
+    MOJOSHADER_effectState *states;
+    unsigned int annotation_count;
+    MOJOSHADER_effectAnnotation* annotations;
+} MOJOSHADER_effectPass;
+
+typedef struct MOJOSHADER_effectTechnique
+{
+    const char *name;
+    unsigned int pass_count;
+    MOJOSHADER_effectPass *passes;
+    unsigned int annotation_count;
+    MOJOSHADER_effectAnnotation* annotations;
+} MOJOSHADER_effectTechnique;
+
+
+/* Effect "objects"... */
+
+/* Defined later in the state change types... */
+typedef struct MOJOSHADER_samplerStateRegister MOJOSHADER_samplerStateRegister;
+
+typedef struct MOJOSHADER_effectShader
+{
+    MOJOSHADER_symbolType type;
+    unsigned int technique;
+    unsigned int pass;
+    unsigned int is_preshader;
+    unsigned int preshader_param_count;
+    unsigned int *preshader_params;
+    unsigned int param_count;
+    unsigned int *params;
+    unsigned int sampler_count;
+    MOJOSHADER_samplerStateRegister *samplers;
+    MOJOSHADERNAMELESS union
+    {
+        void *shader; /* glShader, mtlShader, etc. */
+        const MOJOSHADER_preshader *preshader;
+    };
+} MOJOSHADER_effectShader;
+
+typedef struct MOJOSHADER_effectSamplerMap
+{
+    MOJOSHADER_symbolType type;
+    const char *name;
+} MOJOSHADER_effectSamplerMap;
+
+typedef struct MOJOSHADER_effectString
+{
+    MOJOSHADER_symbolType type;
+    const char *string;
+} MOJOSHADER_effectString;
+
+typedef struct MOJOSHADER_effectTexture
+{
+    MOJOSHADER_symbolType type;
+    /* FIXME: Does this even do anything? */
+} MOJOSHADER_effectTexture;
+
+typedef union MOJOSHADER_effectObject
+{
+    MOJOSHADER_symbolType type;
+    MOJOSHADERNAMELESS union
+    {
+        MOJOSHADER_effectShader shader;
+        MOJOSHADER_effectSamplerMap mapping;
+        MOJOSHADER_effectString string;
+        MOJOSHADER_effectTexture texture;
+    };
+} MOJOSHADER_effectObject;
+
+
+/* Effect state change types... */
+
+/* Used to store sampler states with accompanying sampler registers */
+struct MOJOSHADER_samplerStateRegister
+{
+    const char *sampler_name;
+    unsigned int sampler_register;
+    unsigned int sampler_state_count;
+    const MOJOSHADER_effectSamplerState *sampler_states;
+};
+
+/*
+ * Used to acquire the desired render state by the effect pass.
+ */
+typedef struct MOJOSHADER_effectStateChanges
+{
+    /* Render state changes caused by effect technique */
+    unsigned int render_state_change_count;
+    const MOJOSHADER_effectState *render_state_changes;
+
+    /* Sampler state changes caused by effect technique */
+    unsigned int sampler_state_change_count;
+    const MOJOSHADER_samplerStateRegister *sampler_state_changes;
+
+    /* Vertex sampler state changes caused by effect technique */
+    unsigned int vertex_sampler_state_change_count;
+    const MOJOSHADER_samplerStateRegister *vertex_sampler_state_changes;
+} MOJOSHADER_effectStateChanges;
+
+
+/*
+ * VTable system for building/running effect shaders...
+ */
+
+typedef void* (MOJOSHADERCALL * MOJOSHADER_compileShaderFunc)(
+    const void *ctx,
+    const char *mainfn,
+    const unsigned char *tokenbuf,
+    const unsigned int bufsize,
+    const MOJOSHADER_swizzle *swiz,
+    const unsigned int swizcount,
+    const MOJOSHADER_samplerMap *smap,
+    const unsigned int smapcount
+);
+typedef void (MOJOSHADERCALL * MOJOSHADER_shaderAddRefFunc)(void* shader);
+typedef void (MOJOSHADERCALL * MOJOSHADER_deleteShaderFunc)(
+    const void *ctx,
+    void* shader
+);
+typedef MOJOSHADER_parseData* (MOJOSHADERCALL * MOJOSHADER_getParseDataFunc)(
+    void *shader
+);
+typedef void (MOJOSHADERCALL * MOJOSHADER_bindShadersFunc)(
+    const void *ctx,
+    void *vshader,
+    void *pshader
+);
+typedef void (MOJOSHADERCALL * MOJOSHADER_getBoundShadersFunc)(
+    const void *ctx,
+    void **vshader,
+    void **pshader
+);
+typedef void (MOJOSHADERCALL * MOJOSHADER_mapUniformBufferMemoryFunc)(
+    const void *ctx,
+    float **vsf, int **vsi, unsigned char **vsb,
+    float **psf, int **psi, unsigned char **psb
+);
+typedef void (MOJOSHADERCALL * MOJOSHADER_unmapUniformBufferMemoryFunc)(
+    const void *ctx
+);
+typedef const char* (MOJOSHADERCALL * MOJOSHADER_getErrorFunc)(
+    const void *ctx
+);
+
+typedef struct MOJOSHADER_effectShaderContext
+{
+    /* Shader Backend */
+    MOJOSHADER_compileShaderFunc compileShader;
+    MOJOSHADER_shaderAddRefFunc shaderAddRef;
+    MOJOSHADER_deleteShaderFunc deleteShader;
+    MOJOSHADER_getParseDataFunc getParseData;
+    MOJOSHADER_bindShadersFunc bindShaders;
+    MOJOSHADER_getBoundShadersFunc getBoundShaders;
+    MOJOSHADER_mapUniformBufferMemoryFunc mapUniformBufferMemory;
+    MOJOSHADER_unmapUniformBufferMemoryFunc unmapUniformBufferMemory;
+    MOJOSHADER_getErrorFunc getError;
+
+    /* Shader context */
+    const void *shaderContext;
+
+    /* Allocator */
+    MOJOSHADER_malloc m;
+    MOJOSHADER_free f;
+    void *malloc_data;
+} MOJOSHADER_effectShaderContext;
+
+
+/*
+ * Structure used to return data from parsing of an effect file...
+ */
+/* !!! FIXME: most of these ints should be unsigned. */
+typedef struct MOJOSHADER_effect
+{
+    /*
+     * Public members. These are the fields your application cares about!
+     */
+
+    /*
+     * The number of elements pointed to by (errors).
+     */
+    int error_count;
+
+    /*
+     * (error_count) elements of data that specify errors that were generated
+     *  by parsing this shader.
+     * This can be NULL if there were no errors or if (error_count) is zero.
+     */
+    MOJOSHADER_error *errors;
+
+    /*
+     * The number of params pointed to by (params).
+     */
+    int param_count;
+
+    /*
+     * (param_count) elements of data that specify parameter bind points for
+     *  this effect.
+     * This can be NULL on error or if (param_count) is zero.
+     */
+    MOJOSHADER_effectParam *params;
+
+    /*
+     * The number of elements pointed to by (techniques).
+     */
+    int technique_count;
+
+    /*
+     * (technique_count) elements of data that specify techniques used in
+     *  this effect. Each technique contains a series of passes, and each pass
+     *  specifies state and shaders that affect rendering.
+     * This can be NULL on error or if (technique_count) is zero.
+     */
+    MOJOSHADER_effectTechnique *techniques;
+
+    /*
+     * The number of elements pointed to by (objects).
+     */
+    int object_count;
+
+    /*
+     * (object_count) elements of data that specify objects used in
+     *  this effect.
+     * This can be NULL on error or if (object_count) is zero.
+     */
+    MOJOSHADER_effectObject *objects;
+
+    /*
+     * Semi-public members. These might be useful, but are better to access from
+     * a function, not directly.
+     */
+
+    /*
+     * The technique currently being rendered by this effect.
+     */
+    const MOJOSHADER_effectTechnique *current_technique;
+
+    /*
+     * The index of the current pass being rendered by this effect.
+     */
+    int current_pass;
+
+    /*
+     * Private Members. Do not touch anything below this line!
+     */
+
+    /*
+     * Value used to determine whether or not to restore the previous shader
+     * state after rendering an effect, as requested by application.
+     */
+    int restore_shader_state;
+
+    /*
+     * The structure provided by the appliation to store the state changes.
+     */
+    MOJOSHADER_effectStateChanges *state_changes;
+
+    /*
+     * Values used to store the current shader state during execution.
+     */
+    MOJOSHADER_effectShader *current_vert_raw;
+    MOJOSHADER_effectShader *current_pixl_raw;
+    void *current_vert;
+    void *current_pixl;
+
+    /*
+     * Values used to restore shader state after the effect has ended.
+     */
+    void *prev_vertex_shader;
+    void *prev_pixel_shader;
+
+    /*
+     * This is the shader implementation you passed to MOJOSHADER_compileEffect().
+     */
+    MOJOSHADER_effectShaderContext ctx;
+} MOJOSHADER_effect;
+
+
+/* Effect compiling interface... */
+
+/* Fully compile/link the shaders found within the effect.
+ *
+ *   (tokenbuf) is a buffer of Direct3D shader bytecode.
+ *   (bufsize) is the size, in bytes, of the bytecode buffer.
+ *   (swiz), (swizcount), (smap), and (smapcount) are passed to
+ *   MOJOSHADER_parse() unmolested.
+ *   (ctx) contains all the function pointers needed to create and bind shaders
+ *   for a specific backend (OpenGL, Metal, etc).
+ *
+ * This function returns a MOJOSHADER_effect*, containing effect data which
+ *  includes shaders usable with the provided backend.
+ *
+ * This call is only as thread safe as the backend functions!
+ */
+DECLSPEC MOJOSHADER_effect *MOJOSHADER_compileEffect(const unsigned char *tokenbuf,
+                                                     const unsigned int bufsize,
+                                                     const MOJOSHADER_swizzle *swiz,
+                                                     const unsigned int swizcount,
+                                                     const MOJOSHADER_samplerMap *smap,
+                                                     const unsigned int smapcount,
+                                                     const MOJOSHADER_effectShaderContext *ctx);
+
+/* Delete the shaders that were allocated for an effect.
+ *
+ * (effect) is a MOJOSHADER_effect* obtained from MOJOSHADER_compileEffect().
+ *
+ * This call is only as thread safe as the backend functions!
+ */
+DECLSPEC void MOJOSHADER_deleteEffect(const MOJOSHADER_effect *effect);
+
+/* Copies an effect, including current parameter/technique data.
+ *
+ * (effect) is a MOJOSHADER_effect* obtained from MOJOSHADER_compileEffect().
+ *
+ * This function returns a MOJOSHADER_effect*, containing effect data which
+ *  includes shaders usable with the provided backend.
+ *
+ * This call is only as thread safe as the backend functions!
+ */
+DECLSPEC MOJOSHADER_effect *MOJOSHADER_cloneEffect(const MOJOSHADER_effect *effect);
+
+
+/* Effect parameter interface... */
+
+/* Set the constant value for the specified effect parameter.
+ *
+ * This function maps to ID3DXEffect::SetRawValue.
+ *
+ * (parameter) is a parameter obtained from a MOJOSHADER_effect*.
+ * (data) is the constant values to be applied to the parameter.
+ * (offset) is the offset, in bytes, of the parameter data being modified.
+ * (len) is the size, in bytes, of the data buffer being applied.
+ *
+ * This function is thread safe.
+ */
+DECLSPEC void MOJOSHADER_effectSetRawValueHandle(const MOJOSHADER_effectParam *parameter,
+                                                 const void *data,
+                                                 const unsigned int offset,
+                                                 const unsigned int len);
+
+/* Set the constant value for the effect parameter, specified by name.
+ *  Note: this function is slower than MOJOSHADER_effectSetRawValueHandle(),
+ *  but we still provide it to fully map to ID3DXEffect.
+ *
+ * This function maps to ID3DXEffect::SetRawValue.
+ *
+ * (effect) is a MOJOSHADER_effect* obtained from MOJOSHADER_compileEffect().
+ * (name) is the human-readable name of the parameter being modified.
+ * (data) is the constant values to be applied to the parameter.
+ * (offset) is the offset, in bytes, of the parameter data being modified.
+ * (len) is the size, in bytes, of the data buffer being applied.
+ *
+ * This function is thread safe.
+ */
+DECLSPEC void MOJOSHADER_effectSetRawValueName(const MOJOSHADER_effect *effect,
+                                               const char *name,
+                                               const void *data,
+                                               const unsigned int offset,
+                                               const unsigned int len);
+
+
+/* Effect technique interface... */
+
+/* Get the current technique in use by an effect.
+ *
+ * This function maps to ID3DXEffect::GetCurrentTechnique.
+ *
+ * (effect) is a MOJOSHADER_effect* obtained from MOJOSHADER_compileEffect().
+ *
+ * This function returns the technique currently used by the given effect.
+ *
+ * This function is thread safe.
+ */
+DECLSPEC const MOJOSHADER_effectTechnique *MOJOSHADER_effectGetCurrentTechnique(const MOJOSHADER_effect *effect);
+
+/* Set the current technique to be used an effect.
+ *
+ * This function maps to ID3DXEffect::SetTechnique.
+ *
+ * (effect) is a MOJOSHADER_effect* obtained from MOJOSHADER_compileEffect().
+ * (technique) is the technique to be used by the effect when rendered.
+ *
+ * This function is thread safe.
+ */
+DECLSPEC void MOJOSHADER_effectSetTechnique(MOJOSHADER_effect *effect,
+                                            const MOJOSHADER_effectTechnique *technique);
+
+/* Get the next technique in an effect's list.
+ *
+ * This function maps to ID3DXEffect::FindNextValidTechnique.
+ *
+ * (effect) is a MOJOSHADER_effect* obtained from MOJOSHADER_compileEffect().
+ * (technique) can either be a technique found in the given effect, or NULL to
+ *  find the first technique in the given effect.
+ *
+ * This function returns either the next technique after the passed technique,
+ *  or the first technique if the passed technique is NULL.
+ *
+ * This function is thread safe.
+ */
+DECLSPEC const MOJOSHADER_effectTechnique *MOJOSHADER_effectFindNextValidTechnique(const MOJOSHADER_effect *effect,
+                                                                                   const MOJOSHADER_effectTechnique *technique);
+
+
+/* Effect rendering interface... */
+
+/* Prepare the effect for rendering with the currently applied technique.
+ *
+ * This function maps to ID3DXEffect::Begin.
+ *
+ * In addition to the expected Begin parameters, we also include a parameter
+ *  to pass in a MOJOSHADER_effectRenderState. Rather than change the render
+ *  state within MojoShader itself we will simply provide what the effect wants
+ *  and allow you to use this information with your own renderer.
+ *  MOJOSHADER_effectBeginPass will update with the render state desired by
+ *  the current effect pass.
+ *
+ * Note that we only provide the ability to preserve the shader state, but NOT
+ * the ability to preserve the render/sampler states. You are expected to
+ * track your own GL state and restore these states as needed for your
+ * application.
+ *
+ * (effect) is a MOJOSHADER_effect* obtained from MOJOSHADER_compileEffect().
+ * (numPasses) will be filled with the number of passes that this technique
+ *  will need to fully render.
+ * (saveShaderState) is a boolean value informing the effect whether or not to
+ *  restore the shader bindings after calling MOJOSHADER_effectEnd.
+ * (renderState) will be filled by the effect to inform you of the render state
+ *  changes introduced by the technique and its passes.
+ *
+ * This call is only as thread safe as the backend functions!
+ */
+DECLSPEC void MOJOSHADER_effectBegin(MOJOSHADER_effect *effect,
+                                     unsigned int *numPasses,
+                                     int saveShaderState,
+                                     MOJOSHADER_effectStateChanges *stateChanges);
+
+/* Begin an effect pass from the currently applied technique.
+ *
+ * This function maps to ID3DXEffect::BeginPass.
+ *
+ * (effect) is a MOJOSHADER_effect* obtained from MOJOSHADER_compileEffect().
+ * (pass) is the index of the effect pass as found in the current technique.
+ *
+ * This call is only as thread safe as the backend functions!
+ */
+DECLSPEC void MOJOSHADER_effectBeginPass(MOJOSHADER_effect *effect,
+                                         unsigned int pass);
+
+/* Push render state changes that occurred within an actively rendering pass.
+ *
+ * This function maps to ID3DXEffect::CommitChanges.
+ *
+ * (effect) is a MOJOSHADER_effect* obtained from MOJOSHADER_compileEffect().
+ *
+ * This call is only as thread safe as the backend functions!
+ */
+DECLSPEC void MOJOSHADER_effectCommitChanges(MOJOSHADER_effect *effect);
+
+/* End an effect pass from the currently applied technique.
+ *
+ * This function maps to ID3DXEffect::EndPass.
+ *
+ * (effect) is a MOJOSHADER_effect* obtained from MOJOSHADER_compileEffect().
+ *
+ * This call is only as thread safe as the backend functions!
+ */
+DECLSPEC void MOJOSHADER_effectEndPass(MOJOSHADER_effect *effect);
+
+/* Complete rendering the effect technique, and restore the render state.
+ *
+ * This function maps to ID3DXEffect::End.
+ *
+ * (effect) is a MOJOSHADER_effect* obtained from MOJOSHADER_compileEffect().
+ *
+ * This call is only as thread safe as the backend functions!
+ */
+DECLSPEC void MOJOSHADER_effectEnd(MOJOSHADER_effect *effect);
+
+
+/* Profile-specific functions... */
+
+/*
+ * Compile a MTLLibrary that contains all shaders of the given effect.
+ *
+ * This call requires a valid MOJOSHADER_mtlContext to have been created,
+ *  or it will crash your program. See MOJOSHADER_mtlCreateContext().
+ *
+ * Returns NULL on error, the generated MTLLibrary on success.
+ */
+DECLSPEC void *MOJOSHADER_mtlCompileLibrary(MOJOSHADER_effect *effect);
+
+/*
+ * Free the MTLLibrary given by (library).
+ */
+DECLSPEC void MOJOSHADER_mtlDeleteLibrary(void *library);
+
+
+#endif /* MOJOSHADER_EFFECT_SUPPORT */
 
 
 #ifdef __cplusplus

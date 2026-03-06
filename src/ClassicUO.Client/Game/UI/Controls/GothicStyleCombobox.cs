@@ -61,6 +61,7 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             AcceptMouseInput = true;
+            Alpha = 1f;
         }
 
         public string[] Items
@@ -144,13 +145,15 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _pixelTexture?.Dispose();
                 _pixelTexture = new Texture2D(batcher.GraphicsDevice, 1, 1);
-                _pixelTexture.SetData(new[] { Color.Red });
+                _pixelTexture.SetData(new[] { Color.White });
             }
 
-            batcher.Draw(_pixelTexture, new Rectangle(x + 3, y + 3, Width, Height), Color.DarkRed.ToVector3());
-            DrawGradientBackground(batcher, x, y, Width, Height, currentBaseColor, currentShadowColor);
-            DrawBorder(batcher, x, y, Width, Height, currentHighlightColor, currentShadowColor);
-            DrawTextureEffect(batcher, x, y, Width, Height, currentBaseColor);
+            Vector3 opaqueHue = ShaderHueTranslator.GetHueVector(0, false, 1f);
+            Color solidBg = new Color(currentBaseColor.R, currentBaseColor.G, currentBaseColor.B, 255);
+            batcher.Draw(SolidColorTextureCache.GetTexture(solidBg), new Rectangle(x, y, Width, Height), null, opaqueHue);
+            DrawGradientBackground(batcher, x, y, Width, Height, currentBaseColor, currentShadowColor, opaqueHue);
+            DrawBorder(batcher, x, y, Width, Height, currentHighlightColor, currentShadowColor, opaqueHue);
+            DrawTextureEffect(batcher, x, y, Width, Height, currentBaseColor, opaqueHue);
 
             if (!string.IsNullOrEmpty(_selectedText))
             {
@@ -174,7 +177,7 @@ namespace ClassicUO.Game.UI.Controls
 
         private const int GRADIENT_STRIP_HEIGHT = 4;
 
-        private void DrawGradientBackground(UltimaBatcher2D batcher, int x, int y, int width, int height, Color baseColor, Color shadowColor)
+        private void DrawGradientBackground(UltimaBatcher2D batcher, int x, int y, int width, int height, Color baseColor, Color shadowColor, Vector3 hue)
         {
             for (int i = 0; i < height; i += GRADIENT_STRIP_HEIGHT)
             {
@@ -183,47 +186,49 @@ namespace ClassicUO.Game.UI.Controls
                 int cr = (int)(baseColor.R + (shadowColor.R - baseColor.R) * ratio);
                 int cg = (int)(baseColor.G + (shadowColor.G - baseColor.G) * ratio);
                 int cb = (int)(baseColor.B + (shadowColor.B - baseColor.B) * ratio);
-                batcher.Draw(_pixelTexture, new Rectangle(x, y + i, width, stripHeight), new Vector3(cr / 255f, cg / 255f, cb / 255f));
+                var stripColor = new Color((byte)cr, (byte)cg, (byte)cb, 255);
+                batcher.Draw(SolidColorTextureCache.GetTexture(stripColor), new Rectangle(x, y + i, width, stripHeight), null, hue);
             }
         }
 
         private const int BORDER_RADIUS = 6;
 
-        private void DrawBorder(UltimaBatcher2D batcher, int x, int y, int width, int height, Color highlightColor, Color shadowColor)
+        private void DrawBorder(UltimaBatcher2D batcher, int x, int y, int width, int height, Color highlightColor, Color shadowColor, Vector3 hue)
         {
             int r = BORDER_RADIUS;
             if (width < r * 2 || height < r * 2)
                 r = 0;
-            Vector3 highlightVec = new Vector3(highlightColor.R / 255f, highlightColor.G / 255f, highlightColor.B / 255f);
-            Vector3 shadowVec = new Vector3(shadowColor.R / 255f, shadowColor.G / 255f, shadowColor.B / 255f);
+            var highlightTex = SolidColorTextureCache.GetTexture(highlightColor);
+            var shadowTex = SolidColorTextureCache.GetTexture(shadowColor);
             if (r > 0)
             {
-                batcher.Draw(_pixelTexture, new Rectangle(x + r, y, width - r * 2, 2), highlightVec);
-                batcher.Draw(_pixelTexture, new Rectangle(x + r, y + height - 2, width - r * 2, 2), shadowVec);
-                batcher.Draw(_pixelTexture, new Rectangle(x, y + r, 2, height - r * 2), highlightVec);
-                batcher.Draw(_pixelTexture, new Rectangle(x + width - 2, y + r, 2, height - r * 2), shadowVec);
-                batcher.Draw(_pixelTexture, new Rectangle(x, y, r, r), highlightVec);
-                batcher.Draw(_pixelTexture, new Rectangle(x + width - r, y, r, r), highlightVec);
-                batcher.Draw(_pixelTexture, new Rectangle(x, y + height - r, r, r), shadowVec);
-                batcher.Draw(_pixelTexture, new Rectangle(x + width - r, y + height - r, r, r), shadowVec);
+                batcher.Draw(highlightTex, new Rectangle(x + r, y, width - r * 2, 2), null, hue);
+                batcher.Draw(shadowTex, new Rectangle(x + r, y + height - 2, width - r * 2, 2), null, hue);
+                batcher.Draw(highlightTex, new Rectangle(x, y + r, 2, height - r * 2), null, hue);
+                batcher.Draw(shadowTex, new Rectangle(x + width - 2, y + r, 2, height - r * 2), null, hue);
+                batcher.Draw(highlightTex, new Rectangle(x, y, r, r), null, hue);
+                batcher.Draw(highlightTex, new Rectangle(x + width - r, y, r, r), null, hue);
+                batcher.Draw(shadowTex, new Rectangle(x, y + height - r, r, r), null, hue);
+                batcher.Draw(shadowTex, new Rectangle(x + width - r, y + height - r, r, r), null, hue);
             }
             else
             {
-                batcher.Draw(_pixelTexture, new Rectangle(x, y, width, 2), highlightVec);
-                batcher.Draw(_pixelTexture, new Rectangle(x, y + height - 2, width, 2), shadowVec);
-                batcher.Draw(_pixelTexture, new Rectangle(x, y, 2, height), highlightVec);
-                batcher.Draw(_pixelTexture, new Rectangle(x + width - 2, y, 2, height), shadowVec);
+                batcher.Draw(highlightTex, new Rectangle(x, y, width, 2), null, hue);
+                batcher.Draw(shadowTex, new Rectangle(x, y + height - 2, width, 2), null, hue);
+                batcher.Draw(highlightTex, new Rectangle(x, y, 2, height), null, hue);
+                batcher.Draw(shadowTex, new Rectangle(x + width - 2, y, 2, height), null, hue);
             }
         }
 
-        private void DrawTextureEffect(UltimaBatcher2D batcher, int x, int y, int width, int height, Color baseColor)
+        private void DrawTextureEffect(UltimaBatcher2D batcher, int x, int y, int width, int height, Color baseColor, Vector3 hue)
         {
             var textureColor = new Color(
-                Math.Max(0, baseColor.R - 20),
-                Math.Max(0, baseColor.G - 10),
-                Math.Max(0, baseColor.B - 8)
+                (byte)Math.Max(0, baseColor.R - 20),
+                (byte)Math.Max(0, baseColor.G - 10),
+                (byte)Math.Max(0, baseColor.B - 8),
+                255
             );
-            Vector3 texVec = new Vector3(textureColor.R / 255f, textureColor.G / 255f, textureColor.B / 255f);
+            var textureTex = SolidColorTextureCache.GetTexture(textureColor);
             for (int i = 4; i < width - 4; i += 6)
             {
                 int offsetX = ((i * 7 + 11) % 5) - 2;
@@ -234,7 +239,7 @@ namespace ClassicUO.Game.UI.Controls
                     int lineHeight = Math.Max(1, height - 6 + offsetH);
                     int offsetY = ((i * 2) % 3) - 1;
                     int lineY = y + 3 + offsetY;
-                    batcher.Draw(_pixelTexture, new Rectangle(lineX, lineY, 1, lineHeight), texVec);
+                    batcher.Draw(textureTex, new Rectangle(lineX, lineY, 1, lineHeight), null, hue);
                 }
             }
         }
@@ -405,7 +410,9 @@ namespace ClassicUO.Game.UI.Controls
 
             private void DrawGradientBackground(UltimaBatcher2D batcher, int x, int y, int w, int h)
             {
-                Color baseColor = _combobox.BaseColor;
+                Vector3 opaqueHue = ShaderHueTranslator.GetHueVector(0, false, 1f);
+                Color baseColor = new Color(_combobox.BaseColor.R, _combobox.BaseColor.G, _combobox.BaseColor.B, 255);
+                batcher.Draw(SolidColorTextureCache.GetTexture(baseColor), new Rectangle(x, y, w, h), null, opaqueHue);
                 Color shadowColor = _combobox.ShadowColor;
                 for (int i = 0; i < h; i += GRADIENT_STRIP_HEIGHT)
                 {
@@ -414,7 +421,8 @@ namespace ClassicUO.Game.UI.Controls
                     int cr = (int)(baseColor.R + (shadowColor.R - baseColor.R) * ratio);
                     int cg = (int)(baseColor.G + (shadowColor.G - baseColor.G) * ratio);
                     int cb = (int)(baseColor.B + (shadowColor.B - baseColor.B) * ratio);
-                    batcher.Draw(_pixelTexture, new Rectangle(x, y + i, w, stripHeight), new Vector3(cr / 255f, cg / 255f, cb / 255f));
+                    var stripColor = new Color((byte)cr, (byte)cg, (byte)cb, 255);
+                    batcher.Draw(SolidColorTextureCache.GetTexture(stripColor), new Rectangle(x, y + i, w, stripHeight), null, opaqueHue);
                 }
             }
 
@@ -450,9 +458,10 @@ namespace ClassicUO.Game.UI.Controls
 
             private void DrawTextureEffect(UltimaBatcher2D batcher, int x, int y, int w, int h)
             {
+                Vector3 opaqueHue = ShaderHueTranslator.GetHueVector(0, false, 1f);
                 Color baseColor = _combobox.BaseColor;
-                Color textureColor = new Color(Math.Max(0, baseColor.R - 20), Math.Max(0, baseColor.G - 10), Math.Max(0, baseColor.B - 8));
-                Vector3 texVec = new Vector3(textureColor.R / 255f, textureColor.G / 255f, textureColor.B / 255f);
+                Color textureColor = new Color((byte)Math.Max(0, baseColor.R - 20), (byte)Math.Max(0, baseColor.G - 10), (byte)Math.Max(0, baseColor.B - 8), 255);
+                var textureTex = SolidColorTextureCache.GetTexture(textureColor);
                 for (int i = 4; i < w - 4; i += 6)
                 {
                     int offsetX = ((i * 7 + 11) % 5) - 2;
@@ -463,7 +472,7 @@ namespace ClassicUO.Game.UI.Controls
                         int lineHeight = Math.Max(1, h - 6 + offsetH);
                         int offsetY = ((i * 2) % 3) - 1;
                         int lineY = y + 3 + offsetY;
-                        batcher.Draw(_pixelTexture, new Rectangle(lineX, lineY, 1, lineHeight), texVec);
+                        batcher.Draw(textureTex, new Rectangle(lineX, lineY, 1, lineHeight), null, opaqueHue);
                     }
                 }
             }

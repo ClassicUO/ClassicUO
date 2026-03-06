@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -142,12 +142,13 @@ namespace Microsoft.Xna.Framework
 
 		#region Private Static Fields
 
-		private static Vector4 zero = new Vector4(); // Not readonly for performance -flibit
-		private static readonly Vector4 unit = new Vector4(1f, 1f, 1f, 1f);
-		private static readonly Vector4 unitX = new Vector4(1f, 0f, 0f, 0f);
-		private static readonly Vector4 unitY = new Vector4(0f, 1f, 0f, 0f);
-		private static readonly Vector4 unitZ = new Vector4(0f, 0f, 1f, 0f);
-		private static readonly Vector4 unitW = new Vector4(0f, 0f, 0f, 1f);
+		// These are NOT readonly, for weird performance reasons -flibit
+		private static Vector4 zero = new Vector4();
+		private static Vector4 unit = new Vector4(1f, 1f, 1f, 1f);
+		private static Vector4 unitX = new Vector4(1f, 0f, 0f, 0f);
+		private static Vector4 unitY = new Vector4(0f, 1f, 0f, 0f);
+		private static Vector4 unitZ = new Vector4(0f, 0f, 1f, 0f);
+		private static Vector4 unitW = new Vector4(0f, 0f, 0f, 1f);
 
 		#endregion
 
@@ -286,6 +287,22 @@ namespace Microsoft.Xna.Framework
 				" Z:" + Z.ToString() +
 				" W:" + W.ToString() + "}"
 			);
+		}
+
+		#endregion
+
+		#region Internal Methods
+
+		[Conditional("DEBUG")]
+		internal void CheckForNaNs()
+		{
+			if (	float.IsNaN(X) ||
+				float.IsNaN(Y) ||
+				float.IsNaN(Z) ||
+				float.IsNaN(W)	)
+			{
+				throw new InvalidOperationException("Vector4 contains NaNs!");
+			}
 		}
 
 		#endregion
@@ -533,11 +550,10 @@ namespace Microsoft.Xna.Framework
 		/// <returns>The result of dividing a vector by a scalar.</returns>
 		public static Vector4 Divide(Vector4 value1, float divider)
 		{
-			float factor = 1f / divider;
-			value1.W *= factor;
-			value1.X *= factor;
-			value1.Y *= factor;
-			value1.Z *= factor;
+			value1.W /= divider;
+			value1.X /= divider;
+			value1.Y /= divider;
+			value1.Z /= divider;
 			return value1;
 		}
 
@@ -549,11 +565,10 @@ namespace Microsoft.Xna.Framework
 		/// <param name="result">The result of dividing a vector by a scalar as an output parameter.</param>
 		public static void Divide(ref Vector4 value1, float divider, out Vector4 result)
 		{
-			float factor = 1f / divider;
-			result.W = value1.W * factor;
-			result.X = value1.X * factor;
-			result.Y = value1.Y * factor;
-			result.Z = value1.Z * factor;
+			result.W = value1.W / divider;
+			result.X = value1.X / divider;
+			result.Y = value1.Y / divider;
+			result.Z = value1.Z / divider;
 		}
 
 		/// <summary>
@@ -1466,11 +1481,10 @@ namespace Microsoft.Xna.Framework
 
 		public static Vector4 operator /(Vector4 value1, float divider)
 		{
-			float factor = 1f / divider;
-			value1.W *= factor;
-			value1.X *= factor;
-			value1.Y *= factor;
-			value1.Z *= factor;
+			value1.W /= divider;
+			value1.X /= divider;
+			value1.Y /= divider;
+			value1.Z /= divider;
 			return value1;
 		}
 

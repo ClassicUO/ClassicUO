@@ -558,7 +558,7 @@ void emit_METAL_finalize(Context *ctx)
         output_line(ctx, "};");
         pop_output(ctx);
 
-        output_line(ctx, "constant %s_Uniforms &uniforms [[buffer(16)]]%s", ctx->mainfn, commas ? "," : "");
+        output_line(ctx, "constant %s_Uniforms &uniforms [[buffer(0)]]%s", ctx->mainfn, commas ? "," : "");
         commas--;
     } // if
 

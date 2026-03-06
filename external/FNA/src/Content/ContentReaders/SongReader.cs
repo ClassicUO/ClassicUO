@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -18,18 +18,9 @@ namespace Microsoft.Xna.Framework.Content
 {
 	internal class SongReader : ContentTypeReader<Song>
 	{
-		#region Private Supported File Extensions Variable
+		#region Private Static Supported File Extensions Variable
 
-		static string[] supportedExtensions = new string[] { ".ogg", ".oga" };
-
-		#endregion
-
-		#region Internal Filename Normalizer Method
-
-		internal static string Normalize(string fileName)
-		{
-			return Normalize(fileName, supportedExtensions);
-		}
+		internal static readonly string[] supportedExtensions = new string[] { ".ogg", ".oga", ".qoa" };
 
 		#endregion
 
@@ -48,15 +39,37 @@ namespace Microsoft.Xna.Framework.Content
 			/* The path string includes the ".wma" extension. Let's see if this
 			 * file exists in a format we actually support...
 			 */
-			path = Normalize(path.Substring(0, path.Length - 4));
-			if (String.IsNullOrEmpty(path))
+			string realPath = Normalize(path.Substring(0, path.Length - 4));
+			if (!String.IsNullOrEmpty(realPath))
 			{
-				throw new ContentLoadException();
+				path = realPath;
 			}
 
 			int durationMs = input.ReadInt32();
 
-			return new Song(path, durationMs);
+			return new Song(path, input.AssetName, durationMs);
+		}
+
+		#endregion
+
+		#region Private Static Extension Check Method
+
+		private static string Normalize(string fileName)
+		{
+			if (File.Exists(fileName))
+			{
+				return fileName;
+			}
+			foreach (string ext in supportedExtensions)
+			{
+				// Concatenate the file name with valid extensions.
+				string fileNamePlusExt = fileName + ext;
+				if (File.Exists(fileNamePlusExt))
+				{
+					return fileNamePlusExt;
+				}
+			}
+			return null;
 		}
 
 		#endregion

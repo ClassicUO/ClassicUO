@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -29,22 +29,55 @@ namespace Microsoft.Xna.Framework.Input
 		/// <summary>
 		/// This event notifies you of in-progress text composition happening in an IME or other tool
 		///  and allows you to display the draft text appropriately before it has become input.
-		/// For more information, see SDL's tutorial: https://wiki.libsdl.org/Tutorials/TextInput
+		/// For more information, see SDL's tutorial: https://wiki.libsdl.org/Tutorials-TextInput
 		/// </summary>
 		public static event Action<string, int, int> TextEditing;
 
 		#endregion
 
+		#region Public Properties
+
+		public static IntPtr WindowHandle
+		{
+			get;
+			set;
+		}
+
+		#endregion
+
 		#region Public Static Methods
+
+		/// <summary>
+		/// Returns if text input state is active
+		///
+		/// Note: For on-screen keyboard, this may remain true on
+		/// some platforms if an external event closed the keyboard.
+		/// In this case, check IsScreenKeyboardShow instead.
+		/// </summary>
+		/// <returns>True if text input state is active</returns>
+		public static bool IsTextInputActive()
+		{
+			return FNAPlatform.IsTextInputActive(WindowHandle);
+		}
+
+		public static bool IsScreenKeyboardShown()
+		{
+			return FNAPlatform.IsScreenKeyboardShown(WindowHandle);
+		}
+
+		public static bool IsScreenKeyboardShown(IntPtr window)
+		{
+			return FNAPlatform.IsScreenKeyboardShown(window);
+		}
 
 		public static void StartTextInput()
 		{
-			FNAPlatform.StartTextInput();
+			FNAPlatform.StartTextInput(WindowHandle);
 		}
 
 		public static void StopTextInput()
 		{
-			FNAPlatform.StopTextInput();
+			FNAPlatform.StopTextInput(WindowHandle);
 		}
 
 		/// <summary>
@@ -54,7 +87,7 @@ namespace Microsoft.Xna.Framework.Input
 		/// <param name="rectangle">Text input location relative to GameWindow.ClientBounds</param>
 		public static void SetInputRectangle(Rectangle rectangle)
 		{
-			FNAPlatform.SetTextInputRectangle(rectangle);
+			FNAPlatform.SetTextInputRectangle(WindowHandle, rectangle);
 		}
 
 		#endregion

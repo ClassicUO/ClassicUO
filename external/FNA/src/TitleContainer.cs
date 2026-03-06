@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -38,7 +38,10 @@ namespace Microsoft.Xna.Framework
 			{
 				safeName = GetCaseName(safeName);
 			}
-			safeName = GetCaseName(Path.Combine(TitleLocation.Path, safeName));
+			else
+			{
+				safeName = GetCaseName(Path.Combine(TitleLocation.Path, safeName));
+			}
 #endif
 			if (Path.IsPathRooted(safeName))
 			{
@@ -60,13 +63,25 @@ namespace Microsoft.Xna.Framework
 			{
 				safeName = GetCaseName(safeName);
 			}
-			safeName = GetCaseName(Path.Combine(TitleLocation.Path, safeName));
+			else
+			{
+				safeName = GetCaseName(Path.Combine(TitleLocation.Path, safeName));
+			}
 #endif
+			string realName;
 			if (Path.IsPathRooted(safeName))
 			{
-				return FNAPlatform.ReadFileToPointer(safeName, out size);
+				realName = safeName;
 			}
-			return FNAPlatform.ReadFileToPointer(Path.Combine(TitleLocation.Path, safeName), out size);
+			else
+			{
+				realName = Path.Combine(TitleLocation.Path, safeName);
+			}
+			if (!File.Exists(realName))
+			{
+				throw new FileNotFoundException(realName);
+			}
+			return FNAPlatform.ReadFileToPointer(realName, out size);
 		}
 
 		#endregion

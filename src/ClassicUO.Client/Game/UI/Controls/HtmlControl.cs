@@ -179,7 +179,15 @@ namespace ClassicUO.Game.UI.Controls
 
             if (HasBackground)
             {
-                
+                Add
+                (
+                    new ResizePic(0x2486)
+                    {
+                        Width = Width - (HasScrollbar ? 16 : 0),
+                        Height = Height,
+                        AcceptMouseInput = false
+                    }
+                );
             }
 
             if (HasScrollbar)

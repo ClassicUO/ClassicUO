@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -16,6 +16,13 @@ namespace Microsoft.Xna.Framework.Graphics
 {
 	public sealed class EffectAnnotationCollection : IEnumerable<EffectAnnotation>, IEnumerable
 	{
+		#region Allocation optimization
+
+		internal static readonly EffectAnnotationCollection Empty =
+			new EffectAnnotationCollection(new List<EffectAnnotation>());
+
+		#endregion
+
 		#region Public Properties
 
 		public int Count

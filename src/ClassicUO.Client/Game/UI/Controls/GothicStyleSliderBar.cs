@@ -49,7 +49,7 @@ namespace ClassicUO.Game.UI.Controls
             _textColor = Color.White;
             _sliderColor = new Color(220, 100, 100);
 
-            _renderedText = RenderedText.Create(Value.ToString(), 0, 1, true, FontStyle.BlackBorder);
+            _renderedText = RenderedText.Create(Value.ToString(), 0x0481, 1, true, FontStyle.BlackBorder);
 
             AcceptMouseInput = true;
             Value = value;

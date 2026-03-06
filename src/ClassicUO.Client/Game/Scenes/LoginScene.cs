@@ -51,7 +51,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
-using SDL2;
+using SDL3;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -241,9 +241,9 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        internal override void OnControllerButtonDown(SDL.SDL_ControllerButtonEvent e)
+        internal override void OnControllerButtonDown(SDL.SDL_GamepadButtonEvent e)
         {
-            if (CurrentLoginStep == LoginSteps.Main && (SDL.SDL_GameControllerButton)e.button == SDL.SDL_GameControllerButton.SDL_CONTROLLER_BUTTON_A)
+            if (CurrentLoginStep == LoginSteps.Main && (SDL.SDL_GamepadButton)e.button == SDL.SDL_GamepadButton.SDL_GAMEPAD_BUTTON_SOUTH)
                 UIManager.GetGump<LoginGump>()?.TrySubmitFromController();
             base.OnControllerButtonDown(e);
         }

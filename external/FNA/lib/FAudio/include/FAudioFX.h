@@ -1,6 +1,6 @@
 /* FAudio - XAudio Reimplementation for FNA
  *
- * Copyright (c) 2011-2021 Ethan Lee, Luigi Auriemma, and the MonoGame Team
+ * Copyright (c) 2011-2024 Ethan Lee, Luigi Auriemma, and the MonoGame Team
  *
  * This software is provided 'as-is', without any express or implied warranty.
  * In no event will the authors be held liable for any damages arising from
@@ -55,6 +55,11 @@ typedef struct FAudioFXVolumeMeterLevels
 	float *pRMSLevels;
 	uint32_t ChannelCount;
 } FAudioFXVolumeMeterLevels;
+
+typedef struct FAudioFXCollectorState
+{
+	uint32_t WriteOffset;
+} FAudioFXCollectorState;
 
 typedef struct FAudioFXReverbParameters
 {
@@ -262,11 +267,21 @@ typedef struct FAudioFXReverbI3DL2Parameters
 
 /* Functions */
 
+FAUDIOAPI uint32_t FAudioCreateCollectorEXT(FAPO** ppApo, uint32_t Flags, float* pBuffer, uint32_t bufferLength);
 FAUDIOAPI uint32_t FAudioCreateVolumeMeter(FAPO** ppApo, uint32_t Flags);
 FAUDIOAPI uint32_t FAudioCreateReverb(FAPO** ppApo, uint32_t Flags);
 FAUDIOAPI uint32_t FAudioCreateReverb9(FAPO** ppApo, uint32_t Flags);
 
 /* See "extensions/CustomAllocatorEXT.txt" for more information. */
+FAUDIOAPI uint32_t FAudioCreateCollectorWithCustomAllocatorEXT(
+	FAPO** ppApo,
+	uint32_t Flags,
+	float* pBuffer, 
+	uint32_t bufferLength, 
+	FAudioMallocFunc customMalloc,
+	FAudioFreeFunc customFree,
+	FAudioReallocFunc customRealloc
+);
 FAUDIOAPI uint32_t FAudioCreateVolumeMeterWithCustomAllocatorEXT(
 	FAPO** ppApo,
 	uint32_t Flags,

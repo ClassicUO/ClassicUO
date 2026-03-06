@@ -30,6 +30,22 @@ namespace ClassicUO.LegionScripting
         public static List<ScriptFile> LoadedScripts = new List<ScriptFile>();
         public static IReadOnlyList<ScriptFile> GetRunningScripts() => runningScripts;
         public static bool IsScriptRunning(ScriptFile script) => script != null && runningScripts.Contains(script);
+
+        public static ScriptFile FindScriptByName(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return null;
+            string n = name.Trim();
+            foreach (ScriptFile s in LoadedScripts)
+            {
+                if (string.Equals(s.FileName, n, StringComparison.OrdinalIgnoreCase))
+                    return s;
+                string noExt = System.IO.Path.GetFileNameWithoutExtension(s.FileName);
+                if (string.Equals(noExt, n, StringComparison.OrdinalIgnoreCase))
+                    return s;
+            }
+            return null;
+        }
         public static Dictionary<int, ScriptFile> PyThreads = new Dictionary<int, ScriptFile>();
 
         public static event EventHandler<ScriptInfoEvent> ScriptStartedEvent;
@@ -460,7 +476,8 @@ namespace ClassicUO.LegionScripting
                 script.GenerateUOScript();
                 if (script.UOScript == null)
                 {
-                    LScriptError("Unable to play UOScript, it is likely malformed.");
+                    string detail = string.IsNullOrEmpty(script.LastUOScriptParseError) ? "" : $" ({script.LastUOScriptParseError})";
+                    LScriptError("Unable to play UOScript, it is likely malformed." + detail);
                     return;
                 }
                 if (!global::UOScript.Interpreter.StartScript(script.UOScript))
@@ -716,11 +733,13 @@ namespace ClassicUO.LegionScripting
         }
         public static void LScriptError(string msg)
         {
-            GameActions.Print($"[{Interpreter.ActiveScript.CurrentLine}][LScript Error]" + msg);
+            string prefix = Interpreter.ActiveScript != null ? $"[{Interpreter.ActiveScript.CurrentLine}]" : "";
+            GameActions.Print($"{prefix}[LScript Error]{msg}");
         }
         public static void LScriptWarning(string msg)
         {
-            GameActions.Print($"[{Interpreter.ActiveScript.CurrentLine}][LScript Warning]" + msg);
+            string prefix = Interpreter.ActiveScript != null ? $"[{Interpreter.ActiveScript.CurrentLine}]" : "";
+            GameActions.Print($"{prefix}[LScript Warning]{msg}");
         }
     }
 
@@ -750,6 +769,7 @@ namespace ClassicUO.LegionScripting
         public string SubGroup = string.Empty;
         public LScript.Script GetScript;
         public global::UOScript.Script UOScript;
+        public string LastUOScriptParseError;
         public string[] FileContents;
         public string FileContentsJoined;
         public ScriptType ScriptType = ScriptType.LegionScript;
@@ -823,6 +843,7 @@ namespace ClassicUO.LegionScripting
             try
             {
                 var c = File.ReadAllLines(FullPath);
+                FileContents = c;
                 FileContentsJoined = string.Join("\n", c);
                 if (ScriptType == ScriptType.Python)
                 {
@@ -847,12 +868,14 @@ namespace ClassicUO.LegionScripting
         public void GenerateUOScript()
         {
             LegionScripting.StopScript(this);
+            LastUOScriptParseError = null;
             try
             {
                 UOScript = new global::UOScript.Script(global::UOScript.Lexer.Lex(FullPath));
             }
             catch (Exception ex)
             {
+                LastUOScriptParseError = ex.Message;
                 Log.Error($"Error parsing UOScript {FileName}: {ex}");
                 UOScript = null;
             }

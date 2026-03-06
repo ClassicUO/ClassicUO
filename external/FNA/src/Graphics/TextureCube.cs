@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -49,20 +49,39 @@ namespace Microsoft.Xna.Framework.Graphics
 			LevelCount = mipMap ? CalculateMipLevels(size) : 1;
 
 			// TODO: Use QueryRenderTargetFormat!
-			if (	this is IRenderTarget &&
-				format != SurfaceFormat.Color &&
-				format != SurfaceFormat.Rgba1010102 &&
-				format != SurfaceFormat.Rg32 &&
-				format != SurfaceFormat.Rgba64 &&
-				format != SurfaceFormat.Single &&
-				format != SurfaceFormat.Vector2 &&
-				format != SurfaceFormat.Vector4 &&
-				format != SurfaceFormat.HalfSingle &&
-				format != SurfaceFormat.HalfVector2 &&
-				format != SurfaceFormat.HalfVector4 &&
-				format != SurfaceFormat.HdrBlendable	)
+			if (this is IRenderTarget)
 			{
-				Format = SurfaceFormat.Color;
+				if (format == SurfaceFormat.ColorSrgbEXT)
+				{
+					if (FNA3D.FNA3D_SupportsSRGBRenderTargets(GraphicsDevice.GLDevice) == 0)
+					{
+						// Renderable but not on this device
+						Format = SurfaceFormat.Color;
+					}
+					else
+					{
+						Format = format;
+					}
+				}
+				else if (	format != SurfaceFormat.Color &&
+						format != SurfaceFormat.Rgba1010102 &&
+						format != SurfaceFormat.Rg32 &&
+						format != SurfaceFormat.Rgba64 &&
+						format != SurfaceFormat.Single &&
+						format != SurfaceFormat.Vector2 &&
+						format != SurfaceFormat.Vector4 &&
+						format != SurfaceFormat.HalfSingle &&
+						format != SurfaceFormat.HalfVector2 &&
+						format != SurfaceFormat.HalfVector4 &&
+						format != SurfaceFormat.HdrBlendable	)
+				{
+					// Not a renderable format period
+					Format = SurfaceFormat.Color;
+				}
+				else
+				{
+					Format = format;
+				}
 			}
 			else
 			{
@@ -141,7 +160,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				height = Math.Max(1, Size >> level);
 			}
 
-			int elementSizeInBytes = Marshal.SizeOf(typeof(T));
+			int elementSizeInBytes = MarshalHelper.SizeOf<T>();
 			GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
 			FNA3D.FNA3D_SetTextureDataCube(
 				GraphicsDevice.GLDevice,
@@ -269,7 +288,7 @@ namespace Microsoft.Xna.Framework.Graphics
 				subH = rect.Value.Height;
 			}
 
-			int elementSizeInBytes = Marshal.SizeOf(typeof(T));
+			int elementSizeInBytes = MarshalHelper.SizeOf<T>();
 			ValidateGetDataFormat(Format, elementSizeInBytes);
 
 			GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
@@ -302,7 +321,8 @@ namespace Microsoft.Xna.Framework.Graphics
 			using (BinaryReader reader = new BinaryReader(stream))
 			{
 
-			int width, height, levels, levelSize, blockSize;
+			int width, height, levels;
+			bool isCube;
 			SurfaceFormat format;
 			Texture.ParseDDS(
 				reader,
@@ -310,9 +330,13 @@ namespace Microsoft.Xna.Framework.Graphics
 				out width,
 				out height,
 				out levels,
-				out levelSize,
-				out blockSize
+				out isCube
 			);
+
+			if (!isCube)
+			{
+				throw new FormatException("This file does not contain cube data!");
+			}
 
 			// Allocate/Load texture
 			result = new TextureCube(
@@ -328,9 +352,13 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				for (int face = 0; face < 6; face += 1)
 				{
-					int mipLevelSize = levelSize;
 					for (int i = 0; i < levels; i += 1)
 					{
+						int mipLevelSize = Texture.CalculateDDSLevelSize(
+							width >> i,
+							width >> i,
+							format
+						);
 						result.SetData(
 							(CubeMapFace) face,
 							i,
@@ -343,10 +371,6 @@ namespace Microsoft.Xna.Framework.Graphics
 							mipLevelSize,
 							SeekOrigin.Current
 						);
-						mipLevelSize = Math.Max(
-							mipLevelSize >> 2,
-							blockSize
-						);
 					}
 				}
 			}
@@ -354,10 +378,13 @@ namespace Microsoft.Xna.Framework.Graphics
 			{
 				for (int face = 0; face < 6; face += 1)
 				{
-					int mipLevelSize = levelSize;
 					for (int i = 0; i < levels; i += 1)
 					{
-						tex = reader.ReadBytes(mipLevelSize);
+						tex = reader.ReadBytes(Texture.CalculateDDSLevelSize(
+							width >> i,
+							width >> i,
+							format
+						));
 						result.SetData(
 							(CubeMapFace) face,
 							i,
@@ -365,10 +392,6 @@ namespace Microsoft.Xna.Framework.Graphics
 							tex,
 							0,
 							tex.Length
-						);
-						mipLevelSize = Math.Max(
-							mipLevelSize >> 2,
-							blockSize
 						);
 					}
 				}

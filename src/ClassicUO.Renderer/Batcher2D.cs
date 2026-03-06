@@ -1322,10 +1322,23 @@ namespace ClassicUO.Renderer
             //Matrix halfPixelOffset = Matrix.CreateTranslation(-0.5f, -0.5f, 0);
             //Matrix.Multiply(ref halfPixelOffset, ref matrix, out matrix);
 
-            _basicUOEffect.WorldMatrix.SetValue(Matrix.Identity);
-            _basicUOEffect.Viewport.SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
-            _basicUOEffect.MatrixTransform.SetValue(matrix);
-            _basicUOEffect.Pass.Apply();
+            var viewportVec = new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+            if (_customEffect != null)
+            {
+                if (_customEffect.Parameters["MatrixTransform"] != null)
+                    _customEffect.Parameters["MatrixTransform"].SetValue(matrix);
+                if (_customEffect.Parameters["WorldMatrix"] != null)
+                    _customEffect.Parameters["WorldMatrix"].SetValue(Matrix.Identity);
+                if (_customEffect.Parameters["Viewport"] != null)
+                    _customEffect.Parameters["Viewport"].SetValue(viewportVec);
+            }
+            else
+            {
+                _basicUOEffect.WorldMatrix.SetValue(Matrix.Identity);
+                _basicUOEffect.Viewport.SetValue(viewportVec);
+                _basicUOEffect.MatrixTransform.SetValue(matrix);
+                _basicUOEffect.Pass.Apply();
+            }
         }
 
         private void Flush()
@@ -1596,5 +1609,8 @@ namespace ClassicUO.Renderer
 
         [EmbedResourceCSharp.FileEmbed("shaders/xBR.fxc")]
         public static partial ReadOnlySpan<byte> GetXBRShader();
+
+        [EmbedResourceCSharp.FileEmbed("shaders/OutlineGlow.fxc")]
+        public static partial ReadOnlySpan<byte> GetOutlineGlowShader();
     }
 }

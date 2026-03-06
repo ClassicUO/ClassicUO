@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -173,17 +173,18 @@ namespace Microsoft.Xna.Framework
 
 		#region Private Static Fields
 
-		private static Vector3 zero = new Vector3(0f, 0f, 0f); // Not readonly for performance -flibit
-		private static readonly Vector3 one = new Vector3(1f, 1f, 1f);
-		private static readonly Vector3 unitX = new Vector3(1f, 0f, 0f);
-		private static readonly Vector3 unitY = new Vector3(0f, 1f, 0f);
-		private static readonly Vector3 unitZ = new Vector3(0f, 0f, 1f);
-		private static readonly Vector3 up = new Vector3(0f, 1f, 0f);
-		private static readonly Vector3 down = new Vector3(0f, -1f, 0f);
-		private static readonly Vector3 right = new Vector3(1f, 0f, 0f);
-		private static readonly Vector3 left = new Vector3(-1f, 0f, 0f);
-		private static readonly Vector3 forward = new Vector3(0f, 0f, -1f);
-		private static readonly Vector3 backward = new Vector3(0f, 0f, 1f);
+		// These are NOT readonly, for weird performance reasons -flibit
+		private static Vector3 zero = new Vector3(0f, 0f, 0f);
+		private static Vector3 one = new Vector3(1f, 1f, 1f);
+		private static Vector3 unitX = new Vector3(1f, 0f, 0f);
+		private static Vector3 unitY = new Vector3(0f, 1f, 0f);
+		private static Vector3 unitZ = new Vector3(0f, 0f, 1f);
+		private static Vector3 up = new Vector3(0f, 1f, 0f);
+		private static Vector3 down = new Vector3(0f, -1f, 0f);
+		private static Vector3 right = new Vector3(1f, 0f, 0f);
+		private static Vector3 left = new Vector3(-1f, 0f, 0f);
+		private static Vector3 forward = new Vector3(0f, 0f, -1f);
+		private static Vector3 backward = new Vector3(0f, 0f, 1f);
 
 		#endregion
 
@@ -328,6 +329,21 @@ namespace Microsoft.Xna.Framework
 			sb.Append(this.Z);
 			sb.Append("}");
 			return sb.ToString();
+		}
+
+		#endregion
+
+		#region Internal Methods
+
+		[Conditional("DEBUG")]
+		internal void CheckForNaNs()
+		{
+			if (	float.IsNaN(X) ||
+				float.IsNaN(Y) ||
+				float.IsNaN(Z)	)
+			{
+				throw new InvalidOperationException("Vector3 contains NaNs!");
+			}
 		}
 
 		#endregion
@@ -608,10 +624,9 @@ namespace Microsoft.Xna.Framework
 		/// <returns>The result of dividing a vector by a scalar.</returns>
 		public static Vector3 Divide(Vector3 value1, float value2)
 		{
-			float factor = 1 / value2;
-			value1.X *= factor;
-			value1.Y *= factor;
-			value1.Z *= factor;
+			value1.X /= value2;
+			value1.Y /= value2;
+			value1.Z /= value2;
 			return value1;
 		}
 
@@ -623,10 +638,9 @@ namespace Microsoft.Xna.Framework
 		/// <param name="result">The result of dividing a vector by a scalar as an output parameter.</param>
 		public static void Divide(ref Vector3 value1, float value2, out Vector3 result)
 		{
-			float factor = 1 / value2;
-			result.X = value1.X * factor;
-			result.Y = value1.Y * factor;
-			result.Z = value1.Z * factor;
+			result.X = value1.X / value2;
+			result.Y = value1.Y / value2;
+			result.Z = value1.Z / value2;
 		}
 
 		/// <summary>
@@ -1497,10 +1511,9 @@ namespace Microsoft.Xna.Framework
 		/// <returns>The result of dividing a vector by a scalar.</returns>
 		public static Vector3 operator /(Vector3 value, float divider)
 		{
-			float factor = 1 / divider;
-			value.X *= factor;
-			value.Y *= factor;
-			value.Z *= factor;
+			value.X /= divider;
+			value.Y /= divider;
+			value.Z /= divider;
 			return value;
 		}
 

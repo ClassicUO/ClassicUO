@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -60,29 +60,6 @@ namespace Microsoft.Xna.Framework.Content
 		protected ContentTypeReader(Type targetType)
 		{
 			this.targetType = targetType;
-		}
-
-		#endregion
-
-		#region Protected Internal Filename Normalizer Method
-
-		protected internal static string Normalize(string fileName, string[] extensions)
-		{
-			if (File.Exists(fileName))
-			{
-				return fileName;
-			}
-
-			foreach (string ext in extensions)
-			{
-				// Concatenate the file name with valid extensions.
-				string fileNamePlusExt = fileName + ext;
-				if (File.Exists(fileNamePlusExt))
-				{
-					return fileNamePlusExt;
-				}
-			}
-			return null;
 		}
 
 		#endregion

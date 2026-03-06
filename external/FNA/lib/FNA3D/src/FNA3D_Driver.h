@@ -1,6 +1,6 @@
 /* FNA3D - 3D Graphics Library for FNA
  *
- * Copyright (c) 2020-2021 Ethan Lee
+ * Copyright (c) 2020-2024 Ethan Lee
  *
  * This software is provided 'as-is', without any express or implied warranty.
  * In no event will the authors be held liable for any damages arising from
@@ -36,11 +36,17 @@
 #define inline __inline
 #endif
 
+#ifdef __cplusplus
+#define FNA3D_SHAREDINTERNAL extern "C"
+#else
+#define FNA3D_SHAREDINTERNAL extern
+#endif
+
 /* Logging */
 
-extern void FNA3D_LogInfo(const char *fmt, ...);
-extern void FNA3D_LogWarn(const char *fmt, ...);
-extern void FNA3D_LogError(const char *fmt, ...);
+FNA3D_SHAREDINTERNAL void FNA3D_LogInfo(const char *fmt, ...);
+FNA3D_SHAREDINTERNAL void FNA3D_LogWarn(const char *fmt, ...);
+FNA3D_SHAREDINTERNAL void FNA3D_LogError(const char *fmt, ...);
 
 /* Internal Helper Utilities */
 
@@ -87,6 +93,48 @@ extern void FNA3D_LogError(const char *fmt, ...);
 		SDL_assert(0 && "LinkedList element not found!"); \
 	} \
 
+static inline int32_t Texture_GetBlockSize(
+	FNA3D_SurfaceFormat format
+) {
+	switch (format)
+	{
+	case FNA3D_SURFACEFORMAT_DXT1:
+	case FNA3D_SURFACEFORMAT_DXT3:
+	case FNA3D_SURFACEFORMAT_DXT5:
+	case FNA3D_SURFACEFORMAT_DXT5SRGB_EXT:
+	case FNA3D_SURFACEFORMAT_BC7_EXT:
+	case FNA3D_SURFACEFORMAT_BC7SRGB_EXT:
+		return 4;
+	case FNA3D_SURFACEFORMAT_ALPHA8:
+	case FNA3D_SURFACEFORMAT_BGR565:
+	case FNA3D_SURFACEFORMAT_BGRA4444:
+	case FNA3D_SURFACEFORMAT_BGRA5551:
+	case FNA3D_SURFACEFORMAT_HALFSINGLE:
+	case FNA3D_SURFACEFORMAT_NORMALIZEDBYTE2:
+	case FNA3D_SURFACEFORMAT_COLOR:
+	case FNA3D_SURFACEFORMAT_SINGLE:
+	case FNA3D_SURFACEFORMAT_RG32:
+	case FNA3D_SURFACEFORMAT_HALFVECTOR2:
+	case FNA3D_SURFACEFORMAT_NORMALIZEDBYTE4:
+	case FNA3D_SURFACEFORMAT_RGBA1010102:
+	case FNA3D_SURFACEFORMAT_COLORBGRA_EXT:
+	case FNA3D_SURFACEFORMAT_COLORSRGB_EXT:
+	case FNA3D_SURFACEFORMAT_HALFVECTOR4:
+	case FNA3D_SURFACEFORMAT_RGBA64:
+	case FNA3D_SURFACEFORMAT_VECTOR2:
+	case FNA3D_SURFACEFORMAT_HDRBLENDABLE:
+	case FNA3D_SURFACEFORMAT_VECTOR4:
+	case FNA3D_SURFACEFORMAT_USHORT_EXT:
+	case FNA3D_SURFACEFORMAT_BYTE_EXT:
+		return 1;
+	default:
+		FNA3D_LogError(
+			"Unrecognized SurfaceFormat!"
+		);
+		return 0;
+	}
+}
+
 static inline int32_t Texture_GetFormatSize(
 	FNA3D_SurfaceFormat format
 ) {
@@ -96,14 +144,19 @@ static inline int32_t Texture_GetFormatSize(
 			return 8;
 		case FNA3D_SURFACEFORMAT_DXT3:
 		case FNA3D_SURFACEFORMAT_DXT5:
+		case FNA3D_SURFACEFORMAT_DXT5SRGB_EXT:
+		case FNA3D_SURFACEFORMAT_BC7_EXT:
+		case FNA3D_SURFACEFORMAT_BC7SRGB_EXT:
 			return 16;
 		case FNA3D_SURFACEFORMAT_ALPHA8:
+		case FNA3D_SURFACEFORMAT_BYTE_EXT:
 			return 1;
 		case FNA3D_SURFACEFORMAT_BGR565:
 		case FNA3D_SURFACEFORMAT_BGRA4444:
 		case FNA3D_SURFACEFORMAT_BGRA5551:
 		case FNA3D_SURFACEFORMAT_HALFSINGLE:
 		case FNA3D_SURFACEFORMAT_NORMALIZEDBYTE2:
+		case FNA3D_SURFACEFORMAT_USHORT_EXT:
 			return 2;
 		case FNA3D_SURFACEFORMAT_COLOR:
 		case FNA3D_SURFACEFORMAT_SINGLE:
@@ -112,6 +165,7 @@ static inline int32_t Texture_GetFormatSize(
 		case FNA3D_SURFACEFORMAT_NORMALIZEDBYTE4:
 		case FNA3D_SURFACEFORMAT_RGBA1010102:
 		case FNA3D_SURFACEFORMAT_COLORBGRA_EXT:
+		case FNA3D_SURFACEFORMAT_COLORSRGB_EXT:
 			return 4;
 		case FNA3D_SURFACEFORMAT_HALFVECTOR4:
 		case FNA3D_SURFACEFORMAT_RGBA64:
@@ -199,12 +253,11 @@ static inline int32_t BytesPerRow(
 	FNA3D_SurfaceFormat format
 ) {
 	int32_t blocksPerRow = width;
+	int32_t blockSize = Texture_GetBlockSize(format);
 
-	if (	format == FNA3D_SURFACEFORMAT_DXT1 ||
-		format == FNA3D_SURFACEFORMAT_DXT3 ||
-		format == FNA3D_SURFACEFORMAT_DXT5	)
+	if (blockSize > 1)
 	{
-		blocksPerRow = (width + 3) / 4;
+		blocksPerRow = (width + blockSize - 1) / blockSize;
 	}
 
 	return blocksPerRow * Texture_GetFormatSize(format);
@@ -217,13 +270,12 @@ static inline int32_t BytesPerImage(
 ) {
 	int32_t blocksPerRow = width;
 	int32_t blocksPerColumn = height;
+	int32_t blockSize = Texture_GetBlockSize(format);
 
-	if (	format == FNA3D_SURFACEFORMAT_DXT1 ||
-		format == FNA3D_SURFACEFORMAT_DXT3 ||
-		format == FNA3D_SURFACEFORMAT_DXT5	)
+	if (blockSize > 1)
 	{
-		blocksPerRow = (width + 3) / 4;
-		blocksPerColumn = (height + 3) / 4;
+		blocksPerRow = (width + blockSize - 1) / blockSize;
+		blocksPerColumn = (height + blockSize - 1) / blockSize;
 	}
 
 	return blocksPerRow * blocksPerColumn * Texture_GetFormatSize(format);
@@ -651,8 +703,10 @@ struct FNA3D_Device
 
 	uint8_t (*SupportsDXT1)(FNA3D_Renderer *driverData);
 	uint8_t (*SupportsS3TC)(FNA3D_Renderer *driverData);
+	uint8_t (*SupportsBC7)(FNA3D_Renderer *driverData);
 	uint8_t (*SupportsHardwareInstancing)(FNA3D_Renderer *driverData);
 	uint8_t (*SupportsNoOverwrite)(FNA3D_Renderer *driverData);
+	uint8_t (*SupportsSRGBRenderTargets)(FNA3D_Renderer *driverData);
 
 	void (*GetMaxTextureSlots)(
 		FNA3D_Renderer *driverData,
@@ -668,6 +722,7 @@ struct FNA3D_Device
 	/* Debugging */
 
 	void (*SetStringMarker)(FNA3D_Renderer *driverData, const char *text);
+	void (*SetTextureName)(FNA3D_Renderer *driverData, FNA3D_Texture *texture, const char *text);
 
 	/* External Interop */
 
@@ -753,11 +808,14 @@ struct FNA3D_Device
 	ASSIGN_DRIVER_FUNC(QueryPixelCount, name) \
 	ASSIGN_DRIVER_FUNC(SupportsDXT1, name) \
 	ASSIGN_DRIVER_FUNC(SupportsS3TC, name) \
+	ASSIGN_DRIVER_FUNC(SupportsBC7, name) \
 	ASSIGN_DRIVER_FUNC(SupportsHardwareInstancing, name) \
 	ASSIGN_DRIVER_FUNC(SupportsNoOverwrite, name) \
+	ASSIGN_DRIVER_FUNC(SupportsSRGBRenderTargets, name) \
 	ASSIGN_DRIVER_FUNC(GetMaxTextureSlots, name) \
 	ASSIGN_DRIVER_FUNC(GetMaxMultiSampleCount, name) \
 	ASSIGN_DRIVER_FUNC(SetStringMarker, name) \
+	ASSIGN_DRIVER_FUNC(SetTextureName, name) \
 	ASSIGN_DRIVER_FUNC(GetSysRenderer, name) \
 	ASSIGN_DRIVER_FUNC(CreateSysTexture, name)
 
@@ -765,18 +823,15 @@ typedef struct FNA3D_Driver
 {
 	const char *Name;
 	uint8_t (*PrepareWindowAttributes)(uint32_t *flags);
-	void (*GetDrawableSize)(void* window, int32_t *w, int32_t *h);
 	FNA3D_Device* (*CreateDevice)(
 		FNA3D_PresentationParameters *presentationParameters,
 		uint8_t debugMode
 	);
 } FNA3D_Driver;
 
-extern FNA3D_Driver VulkanDriver;
-extern FNA3D_Driver D3D11Driver;
-extern FNA3D_Driver MetalDriver;
-extern FNA3D_Driver OpenGLDriver;
-extern FNA3D_Driver GNMXDriver;
+FNA3D_SHAREDINTERNAL FNA3D_Driver D3D11Driver;
+FNA3D_SHAREDINTERNAL FNA3D_Driver OpenGLDriver;
+FNA3D_SHAREDINTERNAL FNA3D_Driver SDLGPUDriver;
 
 #endif /* FNA3D_DRIVER_H */
 

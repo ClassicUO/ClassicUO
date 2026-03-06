@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -102,6 +102,19 @@ namespace Microsoft.Xna.Framework.Graphics
 			}
 		}
 
+		/* This Effect is used by the AV1 VideoPlayer. */
+		public static byte[] YUVToRGBAEffectR
+		{
+			get
+			{
+				if (yuvToRGBAEffectR == null)
+				{
+					yuvToRGBAEffectR = GetResource("YUVToRGBAEffectR");
+				}
+				return yuvToRGBAEffectR;
+			}
+		}
+
 		#endregion
 
 		#region Private Static Variables
@@ -113,6 +126,7 @@ namespace Microsoft.Xna.Framework.Graphics
 		private static byte[] skinnedEffect;
 		private static byte[] spriteEffect;
 		private static byte[] yuvToRGBAEffect;
+		private static byte[] yuvToRGBAEffectR;
 
 		#endregion
 

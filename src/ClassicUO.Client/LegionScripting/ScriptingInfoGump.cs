@@ -8,7 +8,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using Microsoft.Xna.Framework;
-using static SDL2.SDL;
+using static SDL3.SDL;
 
 namespace ClassicUO.LegionScripting
 {

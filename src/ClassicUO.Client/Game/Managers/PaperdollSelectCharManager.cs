@@ -135,6 +135,7 @@ namespace ClassicUO.Game.Managers
                     BodyId = BodyId,
                     IsFemale = IsFemale,
                     Race = Race,
+                    NameHue = World.Player != null ? Notoriety.GetHue(World.Player.NotorietyFlag) : (ushort)0,
                     Items = new Dictionary<string, PaperdollItem>(items)
                 };
 
@@ -187,6 +188,7 @@ namespace ClassicUO.Game.Managers
             public ushort BodyId { get; set; }
             public bool IsFemale { get; set; }
             public byte Race { get; set; }
+            public ushort NameHue { get; set; }
             public Dictionary<string, PaperdollItem> Items { get; set; }
         }
     }

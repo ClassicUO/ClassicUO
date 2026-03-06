@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -109,10 +109,11 @@ namespace Microsoft.Xna.Framework
 
 		#region Private Static Fields
 
-		private static readonly Vector2 zeroVector = new Vector2(0f, 0f);
-		private static readonly Vector2 unitVector = new Vector2(1f, 1f);
-		private static readonly Vector2 unitXVector = new Vector2(1f, 0f);
-		private static readonly Vector2 unitYVector = new Vector2(0f, 1f);
+		// These are NOT readonly, for weird performance reasons -flibit
+		private static Vector2 zeroVector = new Vector2(0f, 0f);
+		private static Vector2 unitVector = new Vector2(1f, 1f);
+		private static Vector2 unitXVector = new Vector2(1f, 0f);
+		private static Vector2 unitYVector = new Vector2(0f, 1f);
 
 		#endregion
 
@@ -213,6 +214,19 @@ namespace Microsoft.Xna.Framework
 				" Y:" + Y.ToString() +
 				"}"
 			);
+		}
+
+		#endregion
+
+		#region Internal Methods
+
+		[Conditional("DEBUG")]
+		internal void CheckForNaNs()
+		{
+			if (float.IsNaN(X) || float.IsNaN(Y))
+			{
+				throw new InvalidOperationException("Vector2 contains NaNs!");
+			}
 		}
 
 		#endregion
@@ -448,9 +462,8 @@ namespace Microsoft.Xna.Framework
 		/// <returns>The result of dividing a vector by a scalar.</returns>
 		public static Vector2 Divide(Vector2 value1, float divider)
 		{
-			float factor = 1 / divider;
-			value1.X *= factor;
-			value1.Y *= factor;
+			value1.X /= divider;
+			value1.Y /= divider;
 			return value1;
 		}
 
@@ -462,9 +475,8 @@ namespace Microsoft.Xna.Framework
 		/// <param name="result">The result of dividing a vector by a scalar as an output parameter.</param>
 		public static void Divide(ref Vector2 value1, float divider, out Vector2 result)
 		{
-			float factor = 1 / divider;
-			result.X = value1.X * factor;
-			result.Y = value1.Y * factor;
+			result.X = value1.X / divider;
+			result.Y = value1.Y / divider;
 		}
 
 		/// <summary>
@@ -1156,9 +1168,8 @@ namespace Microsoft.Xna.Framework
 		/// <returns>The result of dividing a vector by a scalar.</returns>
 		public static Vector2 operator /(Vector2 value1, float divider)
 		{
-			float factor = 1 / divider;
-			value1.X *= factor;
-			value1.Y *= factor;
+			value1.X /= divider;
+			value1.Y /= divider;
 			return value1;
 		}
 

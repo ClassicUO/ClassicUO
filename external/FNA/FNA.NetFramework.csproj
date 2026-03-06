@@ -328,8 +328,12 @@
 		<Compile Include="src\Media\SongCollection.cs" />
 		<Compile Include="src\Media\VideoSoundtrackType.cs" />
 		<Compile Include="src\Media\VisualizationData.cs" />
-		<Compile Include="src\Media\Xiph\Video.cs" />
-		<Compile Include="src\Media\Xiph\VideoPlayer.cs" />
+		<Compile Include="src\Media\Video\BaseYUVPlayer.cs" />
+		<Compile Include="src\Media\Video\IVideoPlayerCodec.cs" />
+		<Compile Include="src\Media\Video\Video.cs" />
+		<Compile Include="src\Media\Video\VideoPlayer.cs" />
+		<Compile Include="src\Media\Video\VideoPlayerAV1.cs" />
+		<Compile Include="src\Media\Video\VideoPlayerTheora.cs" />
 		<Compile Include="src\NamespaceDocs.cs" />
 		<Compile Include="src\Plane.cs" />
 		<Compile Include="src\PlaneIntersectionType.cs" />
@@ -358,6 +362,7 @@
 		<Compile Include="lib\SDL3-CS\SDL3\SDL3.Legacy.cs" />
 		<Compile Include="lib\FAudio\csharp\FAudio.cs" />
 		<Compile Include="lib\Theorafile\csharp\Theorafile.cs" />
+		<Compile Include="lib\dav1dfile\csharp\dav1dfile.Legacy.cs" />
 	</ItemGroup>
 	<ItemGroup>
 		<None Include="app.config" />
@@ -383,6 +388,9 @@
 		</EmbeddedResource>
 		<EmbeddedResource Include="src\Graphics\Effect\YUVToRGBA\YUVToRGBAEffect.fxb">
 			<LogicalName>Microsoft.Xna.Framework.Graphics.Effect.Resources.YUVToRGBAEffect.fxb</LogicalName>
+		</EmbeddedResource>
+		<EmbeddedResource Include="src\Graphics\Effect\YUVToRGBA\YUVToRGBAEffectR.fxb">
+			<LogicalName>Microsoft.Xna.Framework.Graphics.Effect.Resources.YUVToRGBAEffectR.fxb</LogicalName>
 		</EmbeddedResource>
 	</ItemGroup>
 </Project>

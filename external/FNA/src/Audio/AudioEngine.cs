@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -119,6 +119,40 @@ namespace Microsoft.Xna.Framework.Audio
 				throw new ArgumentNullException("settingsFile");
 			}
 
+			// Allocate (but don't initialize just yet!)
+			FAudio.FACTCreateEngine(0, out handle);
+
+			// Grab RendererDetails
+			ushort rendererCount;
+			FAudio.FACTAudioEngine_GetRendererCount(
+				handle,
+				out rendererCount
+			);
+			if (rendererCount == 0)
+			{
+				FAudio.FACTAudioEngine_Release(handle);
+				throw new NoAudioHardwareException();
+			}
+			rendererDetails = new RendererDetail[rendererCount];
+			byte[] converted = new byte[0xFF * sizeof(short)];
+			for (ushort i = 0; i < rendererCount; i += 1)
+			{
+				FAudio.FACTRendererDetails details;
+				FAudio.FACTAudioEngine_GetRendererDetails(
+					handle,
+					i,
+					out details
+				);
+				unsafe
+				{
+					Marshal.Copy((IntPtr) details.displayName, converted, 0, converted.Length);
+					string name = System.Text.Encoding.Unicode.GetString(converted).TrimEnd('\0');
+					Marshal.Copy((IntPtr) details.rendererID, converted, 0, converted.Length);
+					string id = System.Text.Encoding.Unicode.GetString(converted).TrimEnd('\0');
+					rendererDetails[i] = new RendererDetail(name, id);
+				}
+			}
+
 			// Read entire file into memory, let FACT manage the pointer
 			IntPtr bufferLen;
 			IntPtr buffer = TitleContainer.ReadToPointer(settingsFile, out bufferLen);
@@ -142,7 +176,6 @@ namespace Microsoft.Xna.Framework.Audio
 			}
 
 			// Init engine, finally
-			FAudio.FACTCreateEngine(0, out handle);
 			if (FAudio.FACTAudioEngine_Initialize(handle, ref settings) != 0)
 			{
 				throw new InvalidOperationException(
@@ -154,37 +187,6 @@ namespace Microsoft.Xna.Framework.Audio
 			if (settings.pRendererID != IntPtr.Zero)
 			{
 				Marshal.FreeHGlobal(settings.pRendererID);
-			}
-
-			// Grab RendererDetails
-			ushort rendererCount;
-			FAudio.FACTAudioEngine_GetRendererCount(
-				handle,
-				out rendererCount
-			);
-			if (rendererCount == 0)
-			{
-				Dispose();
-				throw new NoAudioHardwareException();
-			}
-			rendererDetails = new RendererDetail[rendererCount];
-			byte[] converted = new byte[0xFF * sizeof(short)];
-			for (ushort i = 0; i < rendererCount; i += 1)
-			{
-				FAudio.FACTRendererDetails details;
-				FAudio.FACTAudioEngine_GetRendererDetails(
-					handle,
-					i,
-					out details
-				);
-				unsafe
-				{
-					Marshal.Copy((IntPtr) details.displayName, converted, 0, converted.Length);
-					string name = System.Text.Encoding.Unicode.GetString(converted).TrimEnd('\0');
-					Marshal.Copy((IntPtr) details.rendererID, converted, 0, converted.Length);
-					string id = System.Text.Encoding.Unicode.GetString(converted).TrimEnd('\0');
-					rendererDetails[i] = new RendererDetail(name, id);
-				}
 			}
 
 			// Init 3D audio
@@ -204,6 +206,31 @@ namespace Microsoft.Xna.Framework.Audio
 
 			// All XACT references have to go through here...
 			notificationDesc = new FAudio.FACTNotificationDescription();
+			notificationDesc.flags = FAudio.FACT_FLAG_NOTIFICATION_PERSIST;
+			notificationDesc.type = FAudio.FACTNOTIFICATIONTYPE_WAVEBANKDESTROYED;
+			FAudio.FACTAudioEngine_RegisterNotification(
+				handle,
+				ref notificationDesc
+			);
+			notificationDesc.type = FAudio.FACTNOTIFICATIONTYPE_SOUNDBANKDESTROYED;
+			FAudio.FACTAudioEngine_RegisterNotification(
+				handle,
+				ref notificationDesc
+			);
+			notificationDesc.type = FAudio.FACTNOTIFICATIONTYPE_CUEDESTROYED;
+			FAudio.FACTAudioEngine_RegisterNotification(
+				handle,
+				ref notificationDesc
+			);
+		}
+
+		#endregion
+
+		#region Static Constructor
+
+		static AudioEngine()
+		{
+			AppDomain.CurrentDomain.ProcessExit += ProgramExit;
 		}
 
 		#endregion
@@ -326,6 +353,7 @@ namespace Microsoft.Xna.Framework.Audio
 					}
 
 					FAudio.FACTAudioEngine_ShutDown(handle);
+					FAudio.FACTAudioEngine_Release(handle);
 					rendererDetails = null;
 
 					IsDisposed = true;
@@ -337,105 +365,13 @@ namespace Microsoft.Xna.Framework.Audio
 
 		#region Internal Methods
 
-		internal void RegisterWaveBank(
+		internal void RegisterPointer(
 			IntPtr ptr,
 			WeakReference reference
 		) {
-			notificationDesc.type = FAudio.FACTNOTIFICATIONTYPE_WAVEBANKDESTROYED;
-			notificationDesc.pWaveBank = ptr;
-			FAudio.FACTAudioEngine_RegisterNotification(
-				handle,
-				ref notificationDesc
-			);
 			lock (xactPtrs)
 			{
-				xactPtrs.Add(ptr, reference);
-			}
-		}
-
-		internal void RegisterSoundBank(
-			IntPtr ptr,
-			WeakReference reference
-		) {
-			notificationDesc.type = FAudio.FACTNOTIFICATIONTYPE_SOUNDBANKDESTROYED;
-			notificationDesc.pSoundBank = ptr;
-			FAudio.FACTAudioEngine_RegisterNotification(
-				handle,
-				ref notificationDesc
-			);
-			lock (xactPtrs)
-			{
-				xactPtrs.Add(ptr, reference);
-			}
-		}
-
-		internal void RegisterCue(
-			IntPtr ptr,
-			WeakReference reference
-		) {
-			notificationDesc.type = FAudio.FACTNOTIFICATIONTYPE_CUEDESTROYED;
-			notificationDesc.pCue = ptr;
-			FAudio.FACTAudioEngine_RegisterNotification(
-				handle,
-				ref notificationDesc
-			);
-			lock (xactPtrs)
-			{
-				xactPtrs.Add(ptr, reference);
-			}
-		}
-
-		internal void UnregisterWaveBank(IntPtr ptr)
-		{
-			lock (xactPtrs)
-			{
-				if (!xactPtrs.ContainsKey(ptr))
-				{
-					return;
-				}
-				notificationDesc.type = FAudio.FACTNOTIFICATIONTYPE_WAVEBANKDESTROYED;
-				notificationDesc.pWaveBank = ptr;
-				FAudio.FACTAudioEngine_UnRegisterNotification(
-					handle,
-					ref notificationDesc
-				);
-				xactPtrs.Remove(ptr);
-			}
-		}
-
-		internal void UnregisterSoundBank(IntPtr ptr)
-		{
-			lock (xactPtrs)
-			{
-				if (!xactPtrs.ContainsKey(ptr))
-				{
-					return;
-				}
-				notificationDesc.type = FAudio.FACTNOTIFICATIONTYPE_SOUNDBANKDESTROYED;
-				notificationDesc.pSoundBank = ptr;
-				FAudio.FACTAudioEngine_UnRegisterNotification(
-					handle,
-					ref notificationDesc
-				);
-				xactPtrs.Remove(ptr);
-			}
-		}
-
-		internal void UnregisterCue(IntPtr ptr)
-		{
-			lock (xactPtrs)
-			{
-				if (!xactPtrs.ContainsKey(ptr))
-				{
-					return;
-				}
-				notificationDesc.type = FAudio.FACTNOTIFICATIONTYPE_CUEDESTROYED;
-				notificationDesc.pCue = ptr;
-				FAudio.FACTAudioEngine_UnRegisterNotification(
-					handle,
-					ref notificationDesc
-				);
-				xactPtrs.Remove(ptr);
+				xactPtrs[ptr] = reference;
 			}
 		}
 
@@ -493,6 +429,15 @@ namespace Microsoft.Xna.Framework.Audio
 					xactPtrs.Remove(target);
 				}
 			}
+		}
+
+		#endregion
+
+		#region Internal Static Methods
+
+		internal static void ProgramExit(object sender, EventArgs e)
+		{
+			ProgramExiting = true;
 		}
 
 		#endregion

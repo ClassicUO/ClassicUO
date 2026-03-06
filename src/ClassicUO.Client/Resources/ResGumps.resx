@@ -345,6 +345,9 @@
   <data name="TextAlphaFading" xml:space="preserve">
     <value>Text alpha fading</value>
   </data>
+   <data name="AutoAvoidObstacules" xml:space="preserve">
+    <value>Auto-avoid obstacules</value>
+  </data>
   <data name="TreesStumps" xml:space="preserve">
     <value>Trees to stumps</value>
   </data>

@@ -730,6 +730,7 @@ static const char *effect_profile = NULL;
 
 
 static void* MOJOSHADERCALL effect_compile_shader(
+    const void *ctx,
     const char *mainfn,
     const unsigned char *tokenbuf,
     const unsigned int bufsize,
@@ -746,7 +747,7 @@ static void* MOJOSHADERCALL effect_compile_shader(
 } // effect_compile_shader
 
 
-static void MOJOSHADERCALL effect_delete_shader(void *shader)
+static void MOJOSHADERCALL effect_delete_shader(const void *ctx, void *shader)
 {
     MOJOSHADER_freeParseData((MOJOSHADER_parseData*) shader);
 } // effect_delete_shader

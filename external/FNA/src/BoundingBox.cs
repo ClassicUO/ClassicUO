@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -54,8 +54,9 @@ namespace Microsoft.Xna.Framework
 
 		#region Private Static Variables
 
-		private static readonly Vector3 MaxVector3 = new Vector3(float.MaxValue);
-		private static readonly Vector3 MinVector3 = new Vector3(float.MinValue);
+		// These are NOT readonly, for weird performance reasons -flibit
+		private static Vector3 MaxVector3 = new Vector3(float.MaxValue);
+		private static Vector3 MinVector3 = new Vector3(float.MinValue);
 
 		#endregion
 
@@ -390,41 +391,38 @@ namespace Microsoft.Xna.Framework
 				return true;
 			}
 
+			float radiusSq = sphere.Radius * sphere.Radius;
+
 			double dmin = 0;
 
-			if (sphere.Center.X - Min.X <= sphere.Radius)
+			if (sphere.Center.X < Min.X)
 			{
 				dmin += (sphere.Center.X - Min.X) * (sphere.Center.X - Min.X);
 			}
-			else if (Max.X - sphere.Center.X <= sphere.Radius)
+			else if (sphere.Center.X > Max.X)
 			{
 				dmin += (sphere.Center.X - Max.X) * (sphere.Center.X - Max.X);
 			}
 
-			if (sphere.Center.Y - Min.Y <= sphere.Radius)
+			if (sphere.Center.Y < Min.Y)
 			{
 				dmin += (sphere.Center.Y - Min.Y) * (sphere.Center.Y - Min.Y);
 			}
-			else if (Max.Y - sphere.Center.Y <= sphere.Radius)
+			else if (sphere.Center.Y > Max.Y)
 			{
 				dmin += (sphere.Center.Y - Max.Y) * (sphere.Center.Y - Max.Y);
 			}
 
-			if (sphere.Center.Z - Min.Z <= sphere.Radius)
+			if (sphere.Center.Z < Min.Z)
 			{
 				dmin += (sphere.Center.Z - Min.Z) * (sphere.Center.Z - Min.Z);
 			}
-			else if (Max.Z - sphere.Center.Z <= sphere.Radius)
+			else if (sphere.Center.Z > Max.Z)
 			{
 				dmin += (sphere.Center.Z - Max.Z) * (sphere.Center.Z - Max.Z);
 			}
 
-			if (dmin <= sphere.Radius * sphere.Radius)
-			{
-				return true;
-			}
-
-			return false;
+			return (dmin <= radiusSq);
 		}
 
 		public void Intersects(ref Plane plane, out PlaneIntersectionType result)

@@ -1,6 +1,6 @@
 /* FAudio - XAudio Reimplementation for FNA
  *
- * Copyright (c) 2011-2021 Ethan Lee, Luigi Auriemma, and the MonoGame Team
+ * Copyright (c) 2011-2024 Ethan Lee, Luigi Auriemma, and the MonoGame Team
  *
  * This software is provided 'as-is', without any express or implied warranty.
  * In no event will the authors be held liable for any damages arising from
@@ -25,7 +25,8 @@
  */
 
 #include <FACT_internal.h> /* DO NOT INCLUDE THIS IN REAL CODE! */
-#include <SDL.h>
+#include <stdio.h> /* printf */
+#include <SDL3/SDL.h>
 
 static void print_soundbank(FACTAudioEngine *engine, uint8_t *buf, size_t len)
 {
@@ -85,9 +86,9 @@ static void print_soundbank(FACTAudioEngine *engine, uint8_t *buf, size_t len)
 			sb->sounds[i].priority
 		);
 		printf("\t\tRPC Codes:");
-		for (j = 0; j < sb->sounds[i].rpcCodeCount; j += 1)
+		for (j = 0; j < sb->sounds[i].rpc_codes.count; j += 1)
 		{
-			printf(" %d", sb->sounds[i].rpcCodes[j]);
+			printf(" %d", sb->sounds[i].rpc_codes.codes[j]);
 		}
 		printf("\n");
 		printf("\t\tDSP Preset Codes:");
@@ -112,11 +113,11 @@ static void print_soundbank(FACTAudioEngine *engine, uint8_t *buf, size_t len)
 				sb->sounds[i].tracks[j].frequency
 			);
 			printf("\t\t\t\tRPC Codes:");
-			for (k = 0; k < sb->sounds[i].tracks[j].rpcCodeCount; k += 1)
+			for (k = 0; k < sb->sounds[i].tracks[j].rpc_codes.count; k += 1)
 			{
 				printf(
 					" %d",
-					sb->sounds[i].tracks[j].rpcCodes[k]
+					sb->sounds[i].tracks[j].rpc_codes.codes[k]
 				);
 			}
 			printf("\n");
@@ -162,20 +163,20 @@ static void print_soundbank(FACTAudioEngine *engine, uint8_t *buf, size_t len)
 					if (evt->wave.isComplex)
 					{
 						printf(
-							"\t\t\t\t\t\tTrack Variation Type: %d\n"
-							"\t\t\t\t\t\tTrack Count: %d\n",
-							evt->wave.complex.variation,
-							evt->wave.complex.trackCount
+							"\t\t\t\t\t\tWave Variation Type: %d\n"
+							"\t\t\t\t\t\twave Count: %d\n",
+							evt->wave.complex.variation_type,
+							evt->wave.complex.wave_count
 						);
-						for (l = 0; l < evt->wave.complex.trackCount; l += 1)
+						for (l = 0; l < evt->wave.complex.wave_count; l += 1)
 						{
 							printf(
-								"\t\t\t\t\t\t\tTrack %d:\n"
-								"\t\t\t\t\t\t\t\tTrack Index: %d\n"
+								"\t\t\t\t\t\t\tWave %d:\n"
+								"\t\t\t\t\t\t\t\tWave Index: %d\n"
 								"\t\t\t\t\t\t\t\tWaveBank Index: %d\n"
 								"\t\t\t\t\t\t\t\tWeight: %d\n",
 								l,
-								evt->wave.complex.tracks[l],
+								evt->wave.complex.wave_indices[l],
 								evt->wave.complex.wavebanks[l],
 								evt->wave.complex.weights[l]
 							);
@@ -184,9 +185,9 @@ static void print_soundbank(FACTAudioEngine *engine, uint8_t *buf, size_t len)
 					else
 					{
 						printf(
-							"\t\t\t\t\t\tTrack Index: %d\n"
+							"\t\t\t\t\t\tWave Index: %d\n"
 							"\t\t\t\t\t\tWaveBank Index: %d\n",
-							evt->wave.simple.track,
+							evt->wave.simple.wave_index,
 							evt->wave.simple.wavebank
 						);
 					}
@@ -297,12 +298,12 @@ static void print_soundbank(FACTAudioEngine *engine, uint8_t *buf, size_t len)
 	{
 		printf(
 			"\tVariation %d, Code %d:\n"
-			"\t\tFlags: %X\n"
+			"\t\tType: %X\n"
 			"\t\tInteractive Variable Index: %d\n"
 			"\t\tEntry Count: %d\n",
 			i,
-			sb->variationCodes[i],
-			sb->variations[i].flags,
+			sb->variations[i].code,
+			sb->variations[i].type,
 			sb->variations[i].variable,
 			sb->variations[i].entryCount
 		);
@@ -328,12 +329,24 @@ static void print_soundbank(FACTAudioEngine *engine, uint8_t *buf, size_t len)
 					sb->variations[i].entries[j].simple.wavebank
 				);
 			}
-			printf(
-				"\t\t\t\tMin Weight: %f\n"
-				"\t\t\t\tMax Weight: %f\n",
-				sb->variations[i].entries[j].minWeight,
-				sb->variations[i].entries[j].maxWeight
-			);
+			if (sb->variations[i].type == VARIATION_TABLE_TYPE_INTERACTIVE)
+			{
+				printf(
+					"\t\t\t\tMin Range: %f\n"
+					"\t\t\t\tMax Range: %f\n",
+					sb->variations[i].entries[j].interactive.var_min,
+					sb->variations[i].entries[j].interactive.var_max
+				);
+			}
+			else
+			{
+				printf(
+					"\t\t\t\tMin Weight: %f\n"
+					"\t\t\t\tMax Weight: %f\n",
+					sb->variations[i].entries[j].noninteractive.weight_min,
+					sb->variations[i].entries[j].noninteractive.weight_max
+				);
+			}
 		}
 	}
 	for (i = 0; i < sb->transitionCount; i += 1)

@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -10,6 +10,7 @@
 #region Using Statements
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 #endregion
 
 namespace Microsoft.Xna.Framework.Graphics
@@ -36,15 +37,17 @@ namespace Microsoft.Xna.Framework.Graphics
 				 * lifetime. But only one GraphicsDevice should
 				 * retain ownership.
 				 */
-				if (graphicsDevice != null && selfReference != null)
+				if (graphicsDevice != null && selfReference.IsAllocated)
 				{
-					graphicsDevice.RemoveResourceReference(selfReference);
-					selfReference = null;
+					if (graphicsDevice.RemoveResourceReference(selfReference))
+					{
+						selfReference.Free();
+					}
 				}
 
 				graphicsDevice = value;
 
-				selfReference = new WeakReference(this);
+				selfReference = GCHandle.Alloc(this, GCHandleType.Weak);
 				graphicsDevice.AddResourceReference(selfReference);
 			}
 		}
@@ -55,10 +58,18 @@ namespace Microsoft.Xna.Framework.Graphics
 			private set;
 		}
 
-		public string Name
+		protected string _Name;
+
+		public virtual string Name
 		{
-			get;
-			set;
+			get
+			{
+				return _Name;
+			}
+			set
+			{
+				_Name = value;
+			}
 		}
 
 		public Object Tag
@@ -71,7 +82,7 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		#region Private Variables
 
-		private WeakReference selfReference;
+		private GCHandle selfReference;
 
 		private GraphicsDevice graphicsDevice;
 
@@ -91,7 +102,25 @@ namespace Microsoft.Xna.Framework.Graphics
 
 		~GraphicsResource()
 		{
-			// FIXME: We really should call Dispose() here! -flibit
+			if (!IsDisposed && (graphicsDevice != null && !graphicsDevice.IsDisposed))
+			{
+#if DEBUG
+				// If the graphics device associated with this resource was already disposed, we assume
+				//  that your game is in the middle of shutting down, and you don't care about leaks of stray
+				//  resources like SamplerStates or other odds and ends.
+				// We also ignore leaks of resources with no graphicsDevice yet, because they don't have
+				//  any way to have native memory associated with them yet.
+				// We also ignore leaks of resources with no associated native memory (via IsHarmlessToLeakInstance).
+				if (!IsHarmlessToLeakInstance)
+				{
+					// If you see this log message, you leaked a graphics resource without disposing it!
+					// This means your game may eventually run out of native memory for mysterious reasons.
+					// To troubleshoot this, try setting a Name and/or Tag on your resources to identify them. -kg
+					FNALoggerEXT.LogWarn(string.Format("A resource of type {0} with tag {1} and name {2} was not Disposed.", GetType().Name, Tag, Name));
+				}
+#endif
+				Dispose(false);
+			}
 		}
 
 		#endregion
@@ -130,6 +159,14 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 		}
 
+		internal protected virtual bool IsHarmlessToLeakInstance
+		{
+			get
+			{
+				return false;
+			}
+		}
+
 		#endregion
 
 		#region Protected Dispose Method
@@ -154,10 +191,12 @@ namespace Microsoft.Xna.Framework.Graphics
 				}
 
 				// Remove from the list of graphics resources
-				if (graphicsDevice != null && selfReference != null)
+				if (graphicsDevice != null && selfReference.IsAllocated)
 				{
-					graphicsDevice.RemoveResourceReference(selfReference);
-					selfReference = null;
+					if (graphicsDevice.RemoveResourceReference(selfReference))
+					{
+						selfReference.Free();
+					}
 				}
 
 				IsDisposed = true;

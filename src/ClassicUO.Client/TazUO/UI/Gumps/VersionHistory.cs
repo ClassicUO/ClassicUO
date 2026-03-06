@@ -1,74 +1,106 @@
-using ClassicUO.Assets;
-using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.Game.UI.Gumps;
+using ClassicUO.Renderer;
+using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.TazUO.UI.Gumps
 {
-    internal class VersionHistory : ClassicUO.Game.UI.Gumps.Gump
+    internal class VersionHistory : Gump
     {
-        private static string[] updateTexts = {
-            "/c[white][2.0.9]/cd\n" +
-                "- Welcome\n" +
-                "- Auto Avoid Obstacules\n"  +
-                "- Defende Party\n"
-        };
+        private const string WIKI_URL = "https://github.com/dust765/ClassicUO/wiki/Dust765-%E2%80%90-ClassicUO-Features";
+        private const string DISCORD_URL = "https://discord.gg/kjzFEEyD";
 
         public VersionHistory() : base(0, 0)
         {
-            X = 300;
-            Y = 200;
-            Width = 400;
+            X = (Client.Game.Window.ClientBounds.Width - 420) >> 1;
+            Y = (Client.Game.Window.ClientBounds.Height - 500) >> 1;
+            Width = 420;
             Height = 500;
             CanCloseWithRightClick = true;
             CanMove = true;
 
-            ClassicUO.Game.UI.Gumps.BorderControl bc = new ClassicUO.Game.UI.Gumps.BorderControl(0, 0, Width, Height, 36);
-            bc.T_Left = 39925;
-            bc.H_Border = 39926;
-            bc.T_Right = 39927;
-            bc.V_Border = 39928;
-            bc.V_Right_Border = 39930;
-            bc.B_Left = 39931;
-            bc.B_Right = 39933;
-            bc.H_Bottom_Border = 39932;
+            Add(new AlphaBlendControl(0.85f) { Width = Width, Height = Height });
 
-            Add(new GumpPicTiled(39929) { X = bc.BorderSize, Y = bc.BorderSize, Width = Width - (bc.BorderSize * 2), Height = Height - (bc.BorderSize * 2) });
+            Add(new ResizePic(0x0A28) { Width = Width, Height = Height });
 
-            Add(bc);
+            int yPos = 15;
 
-            UOLabel _;
-            Add(_ = new UOLabel(Language.Instance.TazuoVersionHistory, 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_CENTER, Width) { Y = 10 });
-            Add(_ = new UOLabel(Language.Instance.CurrentVersion + CUOEnviroment.Version.ToString(), 1, UOLabelHue.Accent, Assets.TEXT_ALIGN_TYPE.TS_CENTER, Width) { Y = _.Y + _.Height + 5 });
-
-            ScrollArea scroll = new ScrollArea(10, _.Y + _.Height, Width - 20, Height - (_.Y + _.Height) - 20, true) { ScrollbarBehaviour = ScrollbarBehaviour.ShowAlways };
-
-            Add(new AlphaBlendControl(0.45f) { Width = scroll.Width, Height = scroll.Height, X = scroll.X, Y = scroll.Y });
-
-            int y = 0;
-            foreach (string s in updateTexts)
+            Label title = new Label("Dust765", false, 0x0481, Width - 30, 2, FontStyle.None)
             {
-                scroll.Add(_ = new UOLabel(s, 1, UOLabelHue.Accent, Assets.TEXT_ALIGN_TYPE.TS_LEFT, scroll.Width - scroll.ScrollBarWidth()) { Y = y });
-                y += _.Height + 10;
+                X = 15,
+                Y = yPos
+            };
+            Add(title);
+            yPos += title.Height + 5;
+
+            Label version = new Label($"Version: {CUOEnviroment.Version}", false, 0x0386, Width - 30, 1, FontStyle.None)
+            {
+                X = 15,
+                Y = yPos
+            };
+            Add(version);
+            yPos += version.Height + 15;
+
+            ScrollArea scroll = new ScrollArea(15, yPos, Width - 30, Height - yPos - 60, true)
+            {
+                ScrollbarBehaviour = ScrollbarBehaviour.ShowAlways
+            };
+
+            int scrollY = 0;
+
+            string[] sections = {
+                "/c[yellow]v2.0.9/cd",
+                "- Welcome",
+                "- Auto Avoid Obstacles",
+                "- Defend Party",
+                "",
+                "/c[yellow]Features/cd",
+                "- Dust765 visual helpers and combat tools",
+                "- Legion Script Studio",
+                "- UOScript support",
+                "- Grid containers",
+                "- Cooldown bars",
+                "- Custom tooltip override",
+                "- Name overhead filters",
+                "- Save settings as default"
+            };
+
+            foreach (string line in sections)
+            {
+                if (string.IsNullOrEmpty(line))
+                {
+                    scrollY += 8;
+                    continue;
+                }
+
+                Label lbl = new Label(line, true, 0xFFFF, scroll.Width - 20, 1, FontStyle.None)
+                {
+                    Y = scrollY
+                };
+                scroll.Add(lbl);
+                scrollY += lbl.Height + 2;
             }
 
             Add(scroll);
 
-            HitBox _hit;
-            Add(_ = new UOLabel(Language.Instance.TazUOWiki, 1, UOLabelHue.Accent, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 200) { X = 25, Y = Height - 20 });
-            Add(_hit = new HitBox(_.X, _.Y, _.Width, _.Height));
-            _hit.MouseUp += (s, e) =>
-            {
-                Utility.Platforms.PlatformHelper.LaunchBrowser("https://github.com/bittiez/ClassicUO/wiki");
-            };
+            int btnY = Height - 40;
+            int btnWidth = 160;
 
-            Add(_ = new UOLabel(Language.Instance.TazUOWiki, 1, UOLabelHue.Accent, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 200) { X = 280, Y = Height - 20 });
-            Add(_hit = new HitBox(_.X, _.Y, _.Width, _.Height));
-            _hit.MouseUp += (s, e) =>
+            NiceButton wikiBtn = new NiceButton(15, btnY, btnWidth, 25, ButtonAction.Activate, "Dust765 Wiki")
             {
-                Utility.Platforms.PlatformHelper.LaunchBrowser("https://discord.gg/SqwtB5g95H");
+                IsSelectable = false
             };
+            wikiBtn.MouseUp += (s, e) => PlatformHelper.LaunchBrowser(WIKI_URL);
+            Add(wikiBtn);
+
+            NiceButton discordBtn = new NiceButton(Width - btnWidth - 15, btnY, btnWidth, 25, ButtonAction.Activate, "Discord")
+            {
+                IsSelectable = false
+            };
+            discordBtn.MouseUp += (s, e) => PlatformHelper.LaunchBrowser(DISCORD_URL);
+            Add(discordBtn);
         }
     }
 }

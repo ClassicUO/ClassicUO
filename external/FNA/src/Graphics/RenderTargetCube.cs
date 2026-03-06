@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -9,6 +9,7 @@
 
 #region Using Statements
 using System;
+using System.Threading;
 #endregion
 
 namespace Microsoft.Xna.Framework.Graphics
@@ -223,19 +224,29 @@ namespace Microsoft.Xna.Framework.Graphics
 		{
 			if (!IsDisposed)
 			{
-				if (glColorBuffer != IntPtr.Zero)
+				for (int i = 0; i < GraphicsDevice.renderTargetCount; i += 1)
+				{
+					if (GraphicsDevice.renderTargetBindings[i].RenderTarget == this)
+					{
+						throw new InvalidOperationException("Disposing target that is still bound");
+					}
+				}
+
+				IntPtr toDispose = Interlocked.Exchange(ref glColorBuffer, IntPtr.Zero);
+				if (toDispose != IntPtr.Zero)
 				{
 					FNA3D.FNA3D_AddDisposeRenderbuffer(
 						GraphicsDevice.GLDevice,
-						glColorBuffer
+						toDispose
 					);
 				}
 
-				if (glDepthStencilBuffer != IntPtr.Zero)
+				toDispose = Interlocked.Exchange(ref glDepthStencilBuffer, IntPtr.Zero);
+				if (toDispose != IntPtr.Zero)
 				{
 					FNA3D.FNA3D_AddDisposeRenderbuffer(
 						GraphicsDevice.GLDevice,
-						glDepthStencilBuffer
+						toDispose
 					);
 				}
 			}

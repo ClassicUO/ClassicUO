@@ -1,6 +1,6 @@
 #region License
 /* FNA - XNA4 Reimplementation for Desktop Platforms
- * Copyright 2009-2021 Ethan Lee and the MonoGame Team
+ * Copyright 2009-2024 Ethan Lee and the MonoGame Team
  *
  * Released under the Microsoft Public License.
  * See LICENSE for details.
@@ -70,7 +70,7 @@ namespace Microsoft.Xna.Framework.Input
 			{
 				foreach (Keys k in keys)
 				{
-					InternalSetKey(k);
+					AddPressedKey((int) k);
 				}
 			}
 		}
@@ -98,7 +98,7 @@ namespace Microsoft.Xna.Framework.Input
 			{
 				foreach (Keys k in keys)
 				{
-					InternalSetKey(k);
+					AddPressedKey((int) k);
 				}
 			}
 		}
@@ -213,10 +213,14 @@ namespace Microsoft.Xna.Framework.Input
 			return (element & mask) != 0;
 		}
 
-		void InternalSetKey(Keys key)
+		/* Nuclex.Input uses reflection to get this method.
+		 * Keep this name as it is for XNA4 accuracy!
+		 * -flibit
+		 */
+		void AddPressedKey(int key)
 		{
-			uint mask = (uint) 1 << (((int) key) & 0x1f);
-			switch (((int) key) >> 5)
+			uint mask = (uint) 1 << (key & 0x1f);
+			switch (key >> 5)
 			{
 				case 0: keys0 |= mask; break;
 				case 1: keys1 |= mask; break;
@@ -229,10 +233,14 @@ namespace Microsoft.Xna.Framework.Input
 			}
 		}
 
-		void InternalClearKey(Keys key)
+		/* Nuclex.Input uses reflection to get this method.
+		 * Keep this name as it is for XNA4 accuracy!
+		 * -flibit
+		 */
+		void RemovePressedKey(int key)
 		{
-			uint mask = (uint) 1 << (((int) key) & 0x1f);
-			switch (((int) key) >> 5)
+			uint mask = (uint) 1 << (key & 0x1f);
+			switch (key >> 5)
 			{
 				case 0: keys0 &= ~mask; break;
 				case 1: keys1 &= ~mask; break;
@@ -243,18 +251,6 @@ namespace Microsoft.Xna.Framework.Input
 				case 6: keys6 &= ~mask; break;
 				case 7: keys7 &= ~mask; break;
 			}
-		}
-
-		void InternalClearAllKeys()
-		{
-			keys0 = 0;
-			keys1 = 0;
-			keys2 = 0;
-			keys3 = 0;
-			keys4 = 0;
-			keys5 = 0;
-			keys6 = 0;
-			keys7 = 0;
 		}
 
 		#endregion

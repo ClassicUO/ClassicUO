@@ -425,10 +425,30 @@ namespace ClassicUO.LegionScripting
         private static bool UOS_PlayMacro(string cmd, UOScript.Argument[] args, bool quiet, bool force)
         {
             if (args.Length < 1) return true;
+            string name = args[0].AsString();
+            if (string.IsNullOrWhiteSpace(name)) return true;
+            var scriptFile = LegionScripting.FindScriptByName(name);
+            if (scriptFile != null && scriptFile.ScriptType == ScriptType.UOScript)
+            {
+                var currentScript = UOScript.Interpreter.GetActiveScript();
+                if (currentScript != null)
+                {
+                    foreach (var sf in LegionScripting.GetRunningScripts())
+                    {
+                        if (sf.ScriptType == ScriptType.UOScript && sf.UOScript == currentScript)
+                        {
+                            LegionScripting.StopScript(sf);
+                            break;
+                        }
+                    }
+                }
+                LegionScripting.PlayScript(scriptFile);
+                return true;
+            }
             var mm = MacroManager.TryGetMacroManager();
             if (mm != null)
             {
-                var macro = mm.FindMacro(args[0].AsString());
+                var macro = mm.FindMacro(name);
                 if (macro != null)
                     mm.SetMacroToExecute(macro.Items as MacroObject);
             }

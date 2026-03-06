@@ -44,14 +44,14 @@ using ClassicUO.Network;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-using SDL2;
+using SDL3;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml;
-using static SDL2.SDL;
+using static SDL3.SDL;
 
 namespace ClassicUO.Game.Managers
 {
@@ -325,7 +325,7 @@ namespace ClassicUO.Game.Managers
             return macros;
         }
 
-        public Macro FindMacro(SDL_GameControllerButton button)
+        public Macro FindMacro(SDL_GamepadButton button)
         {
             Macro obj = (Macro)Items;
 
@@ -2128,6 +2128,11 @@ namespace ClassicUO.Game.Managers
 
                     break;
 
+                case MacroType.OpenJournal2:
+                    GameActions.OpenBackpackNormal();
+
+                    break;
+
                 case MacroType.SetTargetClientSide:
                     TargetManager.SetTargeting(CursorTarget.SetTargetClientSide, CursorType.Target, TargetType.Neutral);
 
@@ -2338,7 +2343,7 @@ namespace ClassicUO.Game.Managers
 
         public string Name { get; }
 
-        public SDL.SDL_GameControllerButton[] ControllerButtons { get; set; }
+        public SDL.SDL_GamepadButton[] ControllerButtons { get; set; }
         public SDL.SDL_Keycode Key { get; set; }
         public MouseButtonType MouseButton { get; set; }
         public bool WheelScroll { get; set; }
@@ -2544,14 +2549,14 @@ namespace ClassicUO.Game.Managers
 
             if (buttons != null)
             {
-                List<SDL.SDL_GameControllerButton> savedButtons = new List<SDL_GameControllerButton>();
+                List<SDL.SDL_GamepadButton> savedButtons = new List<SDL_GamepadButton>();
                 foreach (XmlElement buttonNum in buttons.GetElementsByTagName("button"))
                 {
                     if (int.TryParse(buttonNum.InnerText, out int b))
                     {
-                        if (Enum.IsDefined(typeof(SDL_GameControllerButton), b))
+                        if (Enum.IsDefined(typeof(SDL_GamepadButton), b))
                         {
-                            savedButtons.Add((SDL_GameControllerButton)b);
+                            savedButtons.Add((SDL_GamepadButton)b);
                         }
                     }
                 }

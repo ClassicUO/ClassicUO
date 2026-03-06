@@ -196,6 +196,9 @@ typedef struct Context
 #if SUPPORT_PROFILE_GLSLES
     int profile_supports_glsles;
 #endif
+#if SUPPORT_PROFILE_GLSLES3
+    int profile_supports_glsles3;
+#endif
 
 #if SUPPORT_PROFILE_METAL
     int metal_need_header_common;
@@ -236,8 +239,14 @@ typedef struct Context
 #define support_glsl120(ctx) (0)
 #endif
 
+#if SUPPORT_PROFILE_GLSLES3
+#define support_glsles3(ctx) ((ctx)->profile_supports_glsles3)
+#else
+#define support_glsles3(ctx) (0)
+#endif
+
 #if SUPPORT_PROFILE_GLSLES
-#define support_glsles(ctx) ((ctx)->profile_supports_glsles)
+#define support_glsles(ctx) ((ctx)->profile_supports_glsles || support_glsles3(ctx))
 #else
 #define support_glsles(ctx) (0)
 #endif

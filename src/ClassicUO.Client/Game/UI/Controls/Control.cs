@@ -36,7 +36,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using SDL2;
+using SDL3;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -593,7 +593,7 @@ namespace ClassicUO.Game.UI.Controls
 
         internal event EventHandler<KeyboardEventArgs> KeyDown, KeyUp;
 
-        internal event EventHandler<SDL.SDL_GameControllerButton> ControllerButtonUp, ControllerButtonDown;
+        internal event EventHandler<SDL.SDL_GamepadButton> ControllerButtonUp, ControllerButtonDown;
 
 
         public void HitTest(int x, int y, ref Control res)
@@ -804,9 +804,9 @@ namespace ClassicUO.Game.UI.Controls
             KeyUp?.Raise(arg);
         }
 
-        public void InvokeControllerButtonUp(SDL.SDL_GameControllerButton button) { OnControllerButtonUp(button); ControllerButtonUp?.Raise(button); }
+        public void InvokeControllerButtonUp(SDL.SDL_GamepadButton button) { OnControllerButtonUp(button); ControllerButtonUp?.Raise(button); }
 
-        public void InvokeControllerButtonDown(SDL.SDL_GameControllerButton button) { OnControllerButtonDown(button); ControllerButtonDown?.Raise(button); }
+        public void InvokeControllerButtonDown(SDL.SDL_GamepadButton button) { OnControllerButtonDown(button); ControllerButtonDown?.Raise(button); }
 
         public void InvokeMouseWheel(MouseEventType delta)
         {
@@ -897,9 +897,9 @@ namespace ClassicUO.Game.UI.Controls
             Parent?.OnKeyUp(key, mod);
         }
 
-        protected virtual void OnControllerButtonUp(SDL.SDL_GameControllerButton button) { }
+        protected virtual void OnControllerButtonUp(SDL.SDL_GamepadButton button) { }
 
-        protected virtual void OnControllerButtonDown(SDL.SDL_GameControllerButton button) { }
+        protected virtual void OnControllerButtonDown(SDL.SDL_GamepadButton button) { }
 
         public virtual bool Contains(int x, int y)
         {

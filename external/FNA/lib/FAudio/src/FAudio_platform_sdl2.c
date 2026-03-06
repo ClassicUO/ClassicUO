@@ -1,6 +1,6 @@
 /* FAudio - XAudio Reimplementation for FNA
  *
- * Copyright (c) 2011-2021 Ethan Lee, Luigi Auriemma, and the MonoGame Team
+ * Copyright (c) 2011-2024 Ethan Lee, Luigi Auriemma, and the MonoGame Team
  *
  * This software is provided 'as-is', without any express or implied warranty.
  * In no event will the authors be held liable for any damages arising from
@@ -24,12 +24,14 @@
  *
  */
 
+#if !defined(FAUDIO_WIN32_PLATFORM) && !defined(FAUDIO_SDL3_PLATFORM)
+
 #include "FAudio_internal.h"
 
 #include <SDL.h>
 
-#if !SDL_VERSION_ATLEAST(2, 0, 9)
-#error "SDL version older than 2.0.9"
+#if !SDL_VERSION_ATLEAST(2, 24, 0)
+#error "SDL version older than 2.24.0"
 #endif /* !SDL_VERSION_ATLEAST */
 
 /* Mixer Thread */
@@ -50,8 +52,70 @@ static void FAudio_INTERNAL_MixCallback(void *userdata, Uint8 *stream, int len)
 
 /* Platform Functions */
 
+static void FAudio_INTERNAL_PrioritizeDirectSound()
+{
+	int numdrivers, i, wasapi, directsound;
+	void *dll, *proc;
+
+	if (SDL_GetHint("SDL_AUDIODRIVER") != NULL)
+	{
+		/* Already forced to something, ignore */
+		return;
+	}
+
+	/* Windows 10+ decided to break version detection, so instead of doing
+	 * it the right way we have to do something dumb like search for an
+	 * export that's only in Windows 10 or newer.
+	 * -flibit
+	 */
+	if (SDL_strcmp(SDL_GetPlatform(), "Windows") != 0)
+	{
+		return;
+	}
+	dll = SDL_LoadObject("USER32.DLL");
+	if (dll == NULL)
+	{
+		return;
+	}
+	proc = SDL_LoadFunction(dll, "SetProcessDpiAwarenessContext");
+	SDL_UnloadObject(dll); /* We aren't really using this, unload now */
+	if (proc != NULL)
+	{
+		/* OS is new enough to trust WASAPI, bail */
+		return;
+	}
+
+	/* Check to see if we have both Windows drivers in the list */
+	numdrivers = SDL_GetNumAudioDrivers();
+	wasapi = -1;
+	directsound = -1;
+	for (i = 0; i < numdrivers; i += 1)
+	{
+		const char *driver = SDL_GetAudioDriver(i);
+		if (SDL_strcmp(driver, "wasapi") == 0)
+		{
+			wasapi = i;
+		}
+		else if (SDL_strcmp(driver, "directsound") == 0)
+		{
+			directsound = i;
+		}
+	}
+
+	/* We force if and only if both drivers exist and wasapi is earlier */
+	if ((wasapi > -1) && (directsound > -1))
+	{
+		if (wasapi < directsound)
+		{
+			SDL_SetHint("SDL_AUDIODRIVER", "directsound");
+		}
+	}
+}
+
 void FAudio_PlatformAddRef()
 {
+	FAudio_INTERNAL_PrioritizeDirectSound();
+
 	/* SDL tracks ref counts for each subsystem */
 	if (SDL_InitSubSystem(SDL_INIT_AUDIO) < 0)
 	{
@@ -79,16 +143,15 @@ void FAudio_PlatformInit(
 ) {
 	SDL_AudioDeviceID device;
 	SDL_AudioSpec want, have;
-	const char *driver;
-	int changes = 0;
 
 	FAudio_assert(mixFormat != NULL);
 	FAudio_assert(updateSize != NULL);
+	FAudio_assert((mixFormat->Format.nChannels <= 255) && "mixFormat->Format.nChannels out of range!");
 
 	/* Build the device spec */
 	want.freq = mixFormat->Format.nSamplesPerSec;
-	want.format = AUDIO_F32;
-	want.channels = mixFormat->Format.nChannels;
+	want.format = AUDIO_F32SYS;
+	want.channels = (Uint8)(mixFormat->Format.nChannels);
 	want.silence = 0;
 	want.callback = FAudio_INTERNAL_MixCallback;
 	want.userdata = audio;
@@ -106,48 +169,6 @@ void FAudio_PlatformInit(
 		want.samples = want.freq / 100;
 	}
 
-	/* FIXME: SDL bug!
-	 * The PulseAudio backend does this annoying thing where it halves the
-	 * buffer size to prevent latency issues:
-	 *
-	 * https://hg.libsdl.org/SDL/file/df343364c6c5/src/audio/pulseaudio/SDL_pulseaudio.c#l577
-	 *
-	 * To get the _actual_ quantum size we want, we just double the buffer
-	 * size and allow SDL to set the quantum size back to normal.
-	 * -flibit
-	 */
-	driver = SDL_GetCurrentAudioDriver();
-	if (SDL_strcmp(driver, "pulseaudio") == 0)
-	{
-		want.samples *= 2;
-		changes = SDL_AUDIO_ALLOW_SAMPLES_CHANGE;
-	}
-
-	/* FIXME: SDL bug!
-	 * The most common backends support varying samples values, but many
-	 * require a power-of-two value, which XAudio2 is not a fan of.
-	 * Normally SDL creates an intermediary stream to handle this, but this
-	 * has not been written yet:
-	 * https://bugzilla.libsdl.org/show_bug.cgi?id=5136
-	 * -flibit
-	 */
-	else if (	SDL_strcmp(driver, "emscripten") == 0 ||
-			SDL_strcmp(driver, "dsp") == 0	)
-	{
-		want.samples -= 1;
-		want.samples |= want.samples >> 1;
-		want.samples |= want.samples >> 2;
-		want.samples |= want.samples >> 4;
-		want.samples |= want.samples >> 8;
-		want.samples |= want.samples >> 16;
-		want.samples += 1;
-		SDL_Log(
-			"Forcing FAudio quantum to a power-of-two.\n"
-			"You don't actually want this, it's technically a bug:\n"
-			"https://bugzilla.libsdl.org/show_bug.cgi?id=5136"
-		);
-	}
-
 	/* Open the device (or at least try to) */
 iosretry:
 	device = SDL_OpenAudioDevice(
@@ -155,7 +176,7 @@ iosretry:
 		0,
 		&want,
 		&have,
-		changes
+		0
 	);
 	if (device == 0)
 	{
@@ -222,7 +243,7 @@ uint32_t FAudio_PlatformGetDeviceDetails(
 	const char *name, *envvar;
 	int channels, rate;
 	SDL_AudioSpec spec;
-	uint32_t devcount, i;
+	uint32_t devcount;
 
 	FAudio_zero(details, sizeof(FAudioDeviceDetails));
 
@@ -263,7 +284,7 @@ uint32_t FAudio_PlatformGetDeviceDetails(
 	);
 
 	/* Environment variables take precedence over all possible values */
-	envvar = SDL_getenv("SDL_AUDIO_FREQUENCY");
+	envvar = SDL_GetHint("SDL_AUDIO_FREQUENCY");
 	if (envvar != NULL)
 	{
 		rate = SDL_atoi(envvar);
@@ -272,7 +293,7 @@ uint32_t FAudio_PlatformGetDeviceDetails(
 	{
 		rate = 0;
 	}
-	envvar = SDL_getenv("SDL_AUDIO_CHANNELS");
+	envvar = SDL_GetHint("SDL_AUDIO_CHANNELS");
 	if (envvar != NULL)
 	{
 		channels = SDL_atoi(envvar);
@@ -282,85 +303,27 @@ uint32_t FAudio_PlatformGetDeviceDetails(
 		channels = 0;
 	}
 
-#if SDL_VERSION_ATLEAST(2, 0, 15)
+	/* Get the device format from the OS */
 	if (index == 0)
 	{
-		/* Okay, so go grab something from the liquor cabinet and get
-		 * ready, because this loop is a bit of a trip:
-		 *
-		 * We can't get the spec for the default device, because in
-		 * audio land a "default device" is a completely foreign idea,
-		 * some APIs support it but in reality you just have to pass
-		 * NULL as a driver string and the sound server figures out the
-		 * rest. In some psychotic universe the device can even be a
-		 * network address. No, seriously.
-		 *
-		 * So what do we do? Well, at least in my experience shipping
-		 * for the PC, the easiest thing to do is assume that the
-		 * highest spec in the list is what you should target, even if
-		 * it turns out that's not the default at the time you create
-		 * your device.
-		 *
-		 * Consider a laptop that has built-in stereo speakers, but is
-		 * connected to a home theater system with 5.1 audio. It may be
-		 * the case that the stereo audio is active, but the user may
-		 * at some point move audio to 5.1, at which point the server
-		 * will simply move the endpoint from underneath us and move our
-		 * output stream to the new device. At that point, you _really_
-		 * want to already be pushing out 5.1, because if not the user
-		 * will be stuck recreating the whole program, which on many
-		 * platforms is an instant cert failure. The tradeoff is that
-		 * you're potentially downmixing a 5.1 stream to stereo, which
-		 * is a bit wasteful, but presumably the hardware can handle it
-		 * if they were able to use a 5.1 system to begin with.
-		 *
-		 * So, we just aim for the highest channel count on the system.
-		 * We also do this with sample rate to a lesser degree; we try
-		 * to use a single device spec at a time, so it may be that
-		 * the sample rate you get isn't the highest from the list if
-		 * another device had a higher channel count.
-		 *
-		 * Lastly, if you set SDL_AUDIO_CHANNELS but not
-		 * SDL_AUDIO_FREQUENCY, we don't bother checking for a sample
-		 * rate, we fall through to the hardcoded value at the bottom of
-		 * this function.
-		 *
-		 * I'm so tired.
-		 *
-		 * -flibit
-		 */
-		if (channels <= 0)
+		/* TODO: Do we want to squeeze the name into the output? */
+		if (SDL_GetDefaultAudioInfo(NULL, &spec, 0) < 0)
 		{
-			const uint8_t setRate = (rate <= 0);
-			devcount -= 1; /* Subtracting the default index */
-			for (i = 0; i < devcount; i += 1)
-			{
-				SDL_GetAudioDeviceSpec(i, 0, &spec);
-				if (spec.channels > channels)
-				{
-					channels = spec.channels;
-					if (setRate)
-					{
-						/* May be 0! That's okay! */
-						rate = spec.freq;
-					}
-				}
-			}
+			SDL_zero(spec);
 		}
 	}
 	else
 	{
 		SDL_GetAudioDeviceSpec(index - 1, 0, &spec);
-		if ((spec.freq > 0) && (rate <= 0))
-		{
-			rate = spec.freq;
-		}
-		if ((spec.channels > 0) && (channels <= 0))
-		{
-			channels = spec.channels;
-		}
 	}
-#endif /* SDL >= 2.0.15 */
+	if ((spec.freq > 0) && (rate <= 0))
+	{
+		rate = spec.freq;
+	}
+	if ((spec.channels > 0) && (spec.channels < 9) && (channels <= 0))
+	{
+		channels = spec.channels;
+	}
 
 	/* If we make it all the way here with no format, hardcode a sane one */
 	if (rate <= 0)
@@ -704,3 +667,9 @@ void FAudio_UTF8_To_UTF16(const char *src, uint16_t *dst, size_t len)
 }
 
 /* vim: set noexpandtab shiftwidth=8 tabstop=8: */
+
+#else
+
+extern int this_tu_is_empty;
+
+#endif /* !defined(FAUDIO_WIN32_PLATFORM) && !defined(FAUDIO_SDL3_PLATFORM) */

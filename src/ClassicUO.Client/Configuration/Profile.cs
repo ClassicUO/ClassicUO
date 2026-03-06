@@ -174,6 +174,7 @@ namespace ClassicUO.Configuration
 
         // tooltip
         public bool UseTooltip { get; set; } = true;
+        public bool EnableTooltipOverride { get; set; } = false;
         public ushort TooltipTextHue { get; set; } = 0xFFFF;
         public int TooltipDelayBeforeDisplay { get; set; } = 250;
         public int TooltipDisplayZoom { get; set; } = 100;
@@ -885,7 +886,7 @@ namespace ClassicUO.Configuration
         public int DisplayRadiusDistance { get; set; } = 10;
         public ushort DisplayRadiusHue { get; set; } = 22;
 
-        public bool EnableSpellIndicators { get; set; } = true;
+        public bool EnableSpellIndicators { get; set; } = false;
 
         public bool EnableAutoLoot { get; set; } = false;
         public bool HueCorpseAfterAutoloot { get; set; } = false;
@@ -965,7 +966,7 @@ namespace ClassicUO.Configuration
         public bool EnableGumpCloseAnimation { get; set; } = true;
 
         public bool EnableAutoLootProgressBar { get; set; } = true;
-        public bool EnableNearbyItemGump {  get; set; } = true;
+        public bool EnableNearbyItemGump { get; set; } = false;
 
 
         public void Save(string path, bool saveGumps = true)

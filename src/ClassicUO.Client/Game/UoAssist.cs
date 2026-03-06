@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -40,7 +40,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Utility.Logging;
-using SDL2;
+using SDL3;
 
 namespace ClassicUO.Utility.Platforms
 {
@@ -107,16 +107,8 @@ namespace ClassicUO.Utility.Platforms
 
             public CustomWindow(string class_name)
             {
-                SDL.SDL_SysWMinfo info = new SDL.SDL_SysWMinfo();
-                SDL.SDL_VERSION(out info.version);
-                SDL.SDL_GetWindowWMInfo(Client.Game.Window.Handle, ref info);
-
-                IntPtr hwnd = IntPtr.Zero;
-
-                if (info.subsystem == SDL.SDL_SYSWM_TYPE.SDL_SYSWM_WINDOWS)
-                {
-                    hwnd = info.info.win.window;
-                }
+                uint props = SDL.SDL_GetWindowProperties(Client.Game.Window.Handle);
+                IntPtr hwnd = SDL.SDL_GetPointerProperty(props, SDL.SDL_PROP_WINDOW_WIN32_HWND_POINTER, IntPtr.Zero);
 
                 if (class_name == null)
                 {
@@ -395,16 +387,8 @@ namespace ClassicUO.Utility.Platforms
                     case UOAMessage.ADD_USER_2_PARTY: break;
 
                     case UOAMessage.GET_UO_HWND:
-                        SDL.SDL_SysWMinfo info = new SDL.SDL_SysWMinfo();
-                        SDL.SDL_VERSION(out info.version);
-                        SDL.SDL_GetWindowWMInfo(SDL.SDL_GL_GetCurrentWindow(), ref info);
-
-                        IntPtr hwnd = IntPtr.Zero;
-
-                        if (info.subsystem == SDL.SDL_SYSWM_TYPE.SDL_SYSWM_WINDOWS)
-                        {
-                            hwnd = info.info.win.window;
-                        }
+                        uint hwndProps = SDL.SDL_GetWindowProperties(SDL.SDL_GL_GetCurrentWindow());
+                        IntPtr hwnd = SDL.SDL_GetPointerProperty(hwndProps, SDL.SDL_PROP_WINDOW_WIN32_HWND_POINTER, IntPtr.Zero);
 
                         return (int) hwnd;
 
