@@ -161,7 +161,7 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            if ((CurrentLoginStep == LoginSteps.CharacterCreation || CurrentLoginStep == LoginSteps.CharacterSelection) && Time.Ticks > _pingTime)
+            if ((CurrentLoginStep == LoginSteps.CharacterCreation || CurrentLoginStep == LoginSteps.CharacterSelection || CurrentLoginStep == LoginSteps.ServerSelection) && Time.Ticks > _pingTime)
             {
                 // Note that this will not be an ICMP ping, so it's better that this *not* be affected by -no_server_ping.
 
@@ -170,7 +170,7 @@ namespace ClassicUO.Game.Scenes
                     NetClient.Socket.Statistics.SendPing();
                 }
 
-                _pingTime = Time.Ticks + 60000;
+                _pingTime = Time.Ticks + 10000;
             }
         }
 
@@ -209,12 +209,12 @@ namespace ClassicUO.Game.Scenes
                 case LoginSteps.CharacterSelection: return new CharacterSelectionGump(_world);
 
                 case LoginSteps.ServerSelection:
-                    _pingTime = Time.Ticks + 60000; // reset ping timer
+                    _pingTime = Time.Ticks + 10000; // reset ping timer
 
                     return new ServerSelectionGump(_world);
 
                 case LoginSteps.CharacterCreation:
-                    _pingTime = Time.Ticks + 60000; // reset ping timer
+                    _pingTime = Time.Ticks + 10000; // reset ping timer
 
                     return new CharCreationGump(_world,this);
             }
