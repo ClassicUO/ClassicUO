@@ -1,7 +1,6 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using System;
-using ClassicUO.Assets;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using Microsoft.Xna.Framework;
@@ -73,29 +72,38 @@ namespace ClassicUO.Game.GameObjects
 
         private void ApplyProjectileOffset(Mobile mobile, byte layer)
         {
+            if (layer != 1 && layer != 0xFF)
+                return;
+
             var dir = mobile.Direction & Direction.Mask;
-            var animGroup = mobile.AnimationGroup;
             float ox, oy;
 
-            switch (layer)
+            // Detect projectile type by effect graphic (animation group is unreliable
+            // because the animation packet arrives after the effect packet)
+            switch (Graphic)
             {
-                default: return;
-
-                // Explicit RightHand from 0xC7 packet
-                case 1:
-
-                // No layer info (0xC0 packet) — heuristic
-                case 0xFF:
-                    (ox, oy) = animGroup switch
-                    {
-                        (byte)PeopleAnimationGroup.AttackBow => GetRangedAttackOffset(dir, false),
-                        (byte)PeopleAnimationGroup.OnmountAttackBow => GetRangedAttackOffset(dir, true),
-                        (byte)PeopleAnimationGroup.AttackCrossbow => GetRangedXBowAttackOffset(dir, false),
-                        (byte)PeopleAnimationGroup.OnmountAttackCrossbow => GetRangedXBowAttackOffset(dir, true),
-                        (byte)PeopleAnimationGroup.CastDirected => GetSpellCastOffset(dir),
-                        _ => (0, 0)
-                    };
+                case 0x36E4: // Magic Arrow
+                case 0x36D4: // Fireball
+                case 0x379F: // Energy Bolt
+                    (ox, oy) = GetSpellCastOffset(dir);
                     break;
+
+                case 0xF42:  // Arrow (Bow, Composite, Elven Composite, Magical Shortbow, Yumi)
+                    if (layer != 1)
+                        return;
+
+                    (ox, oy) = GetRangedAttackOffset(dir, mobile.IsMounted);
+                    break;
+
+                case 0x1BFE: // Bolt (Crossbow, Heavy Crossbow, Repeating Crossbow)
+                    if (layer != 1)
+                        return;
+
+                    (ox, oy) = GetRangedXBowAttackOffset(dir, mobile.IsMounted);
+                    break;
+
+                default:
+                    return;
             }
 
             Offset.X += ox;

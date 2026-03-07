@@ -351,6 +351,7 @@ namespace ClassicUO.Game.GameObjects
             bool fromServer = false
         )
         {
+            Console.WriteLine($"{this} is doing animation {id}");
             _animationGroup = id;
             AnimIndex = (byte)(forward ? 0 : frameCount);
             _animationInterval = interval;
