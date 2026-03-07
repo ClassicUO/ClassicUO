@@ -5357,7 +5357,7 @@ namespace ClassicUO.Game.UI.Gumps
             section2.Add(AddLabel(null, "HarmOnSwing (keep pressed, casts harm on next own swing animation)", startX, startY));
             section2.Add(AddLabel(null, "CureGH (if poisoned cure, else greater heal)", startX, startY));
             section2.Add(AddLabel(null, "SetTargetClientSide (set target client side only)", startX, startY));
-            section2.Add(AddLabel(null, "OpenJournal2 (opens backpack without grid container)", startX, startY));
+            section2.Add(AddLabel(null, "OpenJournal2 (opens second backpack view - normal + grid)", startX, startY));
             section2.Add(AddLabel(null, "OpenCorpses (opens 0x2006 corpses within 2 tiles)", startX, startY));
             // ## BEGIN - END ## // MACROS
             // ## BEGIN - END ## // ADVMACROS

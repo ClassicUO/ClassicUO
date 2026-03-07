@@ -550,6 +550,33 @@ namespace ClassicUO.Game
             return true;
         }
 
+        public static bool OpenBackpackSecond()
+        {
+            Item backpack = World.Player.FindItemByLayer(Layer.Backpack);
+            if (backpack == null) return false;
+
+            var existing = UIManager.GetGump<ContainerGump>(backpack);
+            if (existing != null)
+            {
+                ((ContainerGump)existing).IsMinimized = false;
+                existing.SetInScreen();
+                existing.BringOnTop();
+                return true;
+            }
+
+            ushort graphic = backpack.DisplayedGraphic;
+            if (graphic == 0) graphic = 0x003C;
+            ContainerManager.CalculateContainerPosition(backpack.Serial, graphic);
+            var gump = new ContainerGump(backpack.Serial, graphic, false)
+            {
+                X = ContainerManager.X,
+                Y = ContainerManager.Y,
+                InvalidateContents = true
+            };
+            UIManager.Add(gump);
+            return true;
+        }
+
         public static void Attack(uint serial)
         {
             if (ProfileManager.CurrentProfile.EnabledCriminalActionQuery)

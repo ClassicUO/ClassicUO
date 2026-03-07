@@ -2129,7 +2129,7 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.OpenJournal2:
-                    GameActions.OpenBackpackNormal();
+                    GameActions.OpenBackpackSecond();
 
                     break;
 
