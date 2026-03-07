@@ -147,7 +147,7 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 For a full list of features and options (Art/Hue changes, Visual Helpers, HealthBars, Cursor, Macros, Gumps, Auto Loot, Buffbar, and more), see:
 
-- **[Dust765 - ClassicUO Features](https://github.com/dust765/ClassicUO/blob/featuare/migration-legacy/WIKI_CONTENT.md)**
+- **[Dust765 Wiki](https://github.com/dust765/ClassicUO/wiki)**
 
 ### How to Use Options
 

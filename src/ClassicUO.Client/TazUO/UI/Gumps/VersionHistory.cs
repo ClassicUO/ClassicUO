@@ -10,7 +10,7 @@ namespace ClassicUO.TazUO.UI.Gumps
 {
     internal class VersionHistory : Gump
     {
-        private const string WIKI_URL = "https://github.com/dust765/ClassicUO/wiki/Dust765-%E2%80%90-ClassicUO-Features";
+        private const string WIKI_URL = "https://github.com/dust765/ClassicUO/wiki";
         private const string DISCORD_URL = "https://discord.gg/RG9kAkmW";
         private const int WIDTH = 480;
         private const int HEIGHT = 520;
