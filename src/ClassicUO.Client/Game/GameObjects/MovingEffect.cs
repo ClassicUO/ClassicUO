@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using System;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using Microsoft.Xna.Framework;
 
@@ -24,7 +25,8 @@ namespace ClassicUO.Game.GameObjects
             ushort hue,
             bool fixedDir,
             int duration,
-            byte speed
+            byte speed,
+            byte layer = 0xFF
         ) : base(world, manager, graphic, hue, 0, speed)
         {
             FixedDir = fixedDir;
@@ -48,6 +50,11 @@ namespace ClassicUO.Game.GameObjects
                 SetSource(xSource, ySource, zSource);
             }
 
+            // Apply hand offset for projectiles (ranged weapons + directed spells)
+            if (source is Mobile mobile)
+            {
+                ApplyProjectileOffset(mobile, layer);
+            }
 
             Entity target = World.Get(trg);
 
@@ -63,6 +70,125 @@ namespace ClassicUO.Game.GameObjects
 
         public readonly bool FixedDir;
 
+        private void ApplyProjectileOffset(Mobile mobile, byte layer)
+        {
+            if (layer != 1 && layer != 0xFF)
+                return;
+
+            var dir = mobile.Direction & Direction.Mask;
+            float ox, oy;
+
+            // Detect projectile type by effect graphic (animation group is unreliable
+            // because the animation packet arrives after the effect packet)
+            switch (Graphic)
+            {
+                case 0x36E4: // Magic Arrow
+                case 0x36D4: // Fireball
+                case 0x379F: // Energy Bolt
+                    (ox, oy) = GetSpellCastOffset(dir);
+                    break;
+
+                case 0xF42:  // Arrow (Bow, Composite, Elven Composite, Magical Shortbow, Yumi)
+                    if (layer != 1)
+                        return;
+
+                    (ox, oy) = GetRangedAttackOffset(dir, mobile.IsMounted);
+                    break;
+
+                case 0x1BFE: // Bolt (Crossbow, Heavy Crossbow, Repeating Crossbow)
+                    if (layer != 1)
+                        return;
+
+                    (ox, oy) = GetRangedXBowAttackOffset(dir, mobile.IsMounted);
+                    break;
+
+                default:
+                    return;
+            }
+
+            Offset.X += ox;
+            Offset.Y += oy;
+        }
+
+        private static (float x, float y) GetRangedXBowAttackOffset(Direction dir, bool mounted)
+        {
+            if (mounted)
+            {
+                return dir switch
+                {
+                    Direction.North => (-10, -57),
+                    Direction.Right => (-17, -62),
+                    Direction.East  => (-16, -68),
+                    Direction.Down  => (-5, -73),
+                    Direction.South => (8, -73),
+                    Direction.Left  => (5, -73),
+                    Direction.West  => (16, -68),
+                    Direction.Up    => (17, -62),
+                    _ => (0, 0)
+                };
+            }
+
+            return dir switch
+            {
+                Direction.North => (-1, -36),
+                Direction.Right => (-10, -39),
+                Direction.East  => (-13, -43),
+                Direction.Down  => (-9, -48),
+                Direction.South => (1, -50),
+                Direction.Left  => (9, -48),
+                Direction.West  => (13, -43),
+                Direction.Up    => (10, -39),
+                _ => (0, 0)
+            };
+        }
+
+        private static (float x, float y) GetRangedAttackOffset(Direction dir, bool mounted)
+        {
+            if (mounted)
+            {
+                return dir switch
+                {
+                    Direction.North => (4, -61),
+                    Direction.Right => (-8, -52),
+                    Direction.East  => (-23, -57),
+                    Direction.Down  => (-25, -68),
+                    Direction.South => (-11, -75),
+                    Direction.Left  => (25, -68),
+                    Direction.West  => (23, -57),
+                    Direction.Up    => (8, -52),
+                    _ => (0, 0)
+                };
+            }
+
+            return dir switch
+            {
+                Direction.North => (-3, -40),
+                Direction.Right => (-15, -39),
+                Direction.East  => (-20, -44),
+                Direction.Down  => (-12, -48),
+                Direction.South => (4, -50),
+                Direction.Left  => (12, -48),
+                Direction.West  => (20, -44),
+                Direction.Up    => (15, -39),
+                _ => (0, 0)
+            };
+        }
+
+        private static (float x, float y) GetSpellCastOffset(Direction dir)
+        {
+            return dir switch
+            {
+                Direction.North => (0, -15),
+                Direction.Right => (-28, -23),  // NE
+                Direction.East  => (-38, -36),
+                Direction.Down  => (-25, -48),  // SE
+                Direction.South => (1, -50),
+                Direction.Left  => (25, -48),   // SW
+                Direction.West  => (38, -36),
+                Direction.Up    => (28, -23),   // NW
+                _ => (0, 0)
+            };
+        }
 
         public override void Update()
         {

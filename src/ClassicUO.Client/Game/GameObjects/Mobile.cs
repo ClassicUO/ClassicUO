@@ -100,6 +100,7 @@ namespace ClassicUO.Game.GameObjects
         private long _lastAnimationIdleDelay;
         private bool _isAnimationForwardDirection;
         private byte _animationGroup = 0xFF;
+        public byte AnimationGroup => _animationGroup;
         private byte _animationInterval;
         private bool _animationRepeat;
         private ushort _animationRepeateMode = 1;
@@ -350,6 +351,7 @@ namespace ClassicUO.Game.GameObjects
             bool fromServer = false
         )
         {
+            Console.WriteLine($"{this} is doing animation {id}");
             _animationGroup = id;
             AnimIndex = (byte)(forward ? 0 : frameCount);
             _animationInterval = interval;
