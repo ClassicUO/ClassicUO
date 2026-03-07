@@ -101,21 +101,18 @@ namespace ClassicUO.Game.Managers
                 var flags = World.Player.InWarMode ? profile.PvP_NameOverheadProfileFlags : profile.PvM_NameOverheadProfileFlags;
                 NameOverHeadManager.ActiveOverheadOptions = (NameOverheadOptions)flags;
             }
-            if (profile?.PvP_GreyCriminalTimer == true)
+            var flag = World.Player.NotorietyFlag;
+            if (flag == NotorietyFlag.Gray || flag == NotorietyFlag.Criminal)
             {
-                var flag = World.Player.NotorietyFlag;
-                if (flag == NotorietyFlag.Gray || flag == NotorietyFlag.Criminal)
-                {
-                    if (_greyCriminalStartTicks == 0)
-                        _greyCriminalStartTicks = Time.Ticks;
-                    ulong elapsed = (Time.Ticks - _greyCriminalStartTicks) / 1000;
-                    GreyCriminalSecondsRemaining = Math.Max(0, GREY_CRIMINAL_DURATION_SEC - (int)elapsed);
-                }
-                else
-                {
-                    _greyCriminalStartTicks = 0;
-                    GreyCriminalSecondsRemaining = 0;
-                }
+                if (_greyCriminalStartTicks == 0)
+                    _greyCriminalStartTicks = Time.Ticks;
+                ulong elapsed = (Time.Ticks - _greyCriminalStartTicks) / 1000;
+                GreyCriminalSecondsRemaining = Math.Max(0, GREY_CRIMINAL_DURATION_SEC - (int)elapsed);
+            }
+            else
+            {
+                _greyCriminalStartTicks = 0;
+                GreyCriminalSecondsRemaining = 0;
             }
         }
 

@@ -714,7 +714,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (_logoTexture2D == null || _logoTexture2D.IsDisposed)
                 {
-                    string logoPath = Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "logodust.png");
+                    string logoPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client", "logodust.png");
                     _logoTexture2D = PNGLoader.Instance.GetImageTexture(logoPath);
 
                     if (_logoTexture2D == null || _logoTexture2D.IsDisposed)
@@ -4958,11 +4958,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             section4.Add(_colorGameCursor = AddCheckBox(null, "Color game cursor when targeting (hostile / friendly)", _currentProfile.ColorGameCursor, startX, startY));
             startY += _colorGameCursor.Height + 2;
-            section4.Add(AddLabel(null, Language.Instance?.GetOptionsGumpLanguage?.GetGeneral?.CursorRange ?? "Show target range indicator", startX, startY));
-            section4.AddRight(_showTargetRangeIndicator = AddCheckBox(null, "", _currentProfile.ShowTargetRangeIndicator, 0, 0));
+            section4.Add(_showTargetRangeIndicator = AddCheckBox(null, "", _currentProfile.ShowTargetRangeIndicator, 0, 0));
+            section4.AddRight(AddLabel(null, Language.Instance?.GetOptionsGumpLanguage?.GetGeneral?.CursorRange ?? "Show target range indicator (shows range circle when targeting)", 0, 0));
             startY += _showTargetRangeIndicator.Height + 2;
-            section4.Add(new Label("Shows range circle when targeting.", true, 0x0386, 320, font: 1) { X = startX, Y = startY });
-            startY += 18;
             // ## BEGIN - END ## // CURSOR
             // ## BEGIN - END ## // OVERHEAD / UNDERCHAR
             SettingsSection section5 = AddSettingsSection(box, "-----OVERHEAD / UNDERFEET-----");
@@ -5357,7 +5355,8 @@ namespace ClassicUO.Game.UI.Gumps
             section2.Add(AddLabel(null, "HarmOnSwing (keep pressed, casts harm on next own swing animation)", startX, startY));
             section2.Add(AddLabel(null, "CureGH (if poisoned cure, else greater heal)", startX, startY));
             section2.Add(AddLabel(null, "SetTargetClientSide (set target client side only)", startX, startY));
-            section2.Add(AddLabel(null, "OpenJournal2 (opens second backpack view - normal + grid)", startX, startY));
+            section2.Add(AddLabel(null, "OpenJournal2 (opens second journal)", startX, startY));
+            section2.Add(AddLabel(null, "OpenBackpack2 (opens second backpack, normal view)", startX, startY));
             section2.Add(AddLabel(null, "OpenCorpses (opens 0x2006 corpses within 2 tiles)", startX, startY));
             // ## BEGIN - END ## // MACROS
             // ## BEGIN - END ## // ADVMACROS

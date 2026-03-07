@@ -12,17 +12,19 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup .NET Framework 4.8
+        with:
+          submodules: recursive
+      - name: Setup .NET 8
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '4.8.x'
+          dotnet-version: '8.0.x'
       - name: Restore dependencies
         run: dotnet restore src/ClassicUO.Client/ClassicUO.Client.csproj
       - name: Build with .NET Framework 4.8
         run: dotnet build src/ClassicUO.Client/ClassicUO.Client.csproj -c Release
       - name: Copy build artifacts
         run: |
-          mkdir -p build/win-x64
+          New-Item -ItemType Directory -Force -Path build\win-x64
           xcopy /E /I bin\Release\* build\win-x64\
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -34,10 +36,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Mono for .NET Framework 4.8
+        with:
+          submodules: recursive
+      - name: Setup Mono for .NET 8
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '4.8.x'
+          dotnet-version: '8.0.x'
       - name: Install Mono
         run: |
           sudo apt-get update
@@ -60,10 +64,12 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Mono for .NET Framework 4.8
+        with:
+          submodules: recursive
+      - name: Setup Mono for .NET 8
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '4.8.x'
+          dotnet-version: '8.0.x'
       - name: Install Mono
         run: |
           brew install mono
@@ -81,3 +87,42 @@ jobs:
         with:
           name: Dust765-macos
           path: build/osx-x64
+
+  release:
+    needs: [build-windows, build-linux, build-macos]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Dust765-windows
+          path: artifacts/windows
+      - name: Download Linux artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Dust765-linux
+          path: artifacts/linux
+      - name: Download macOS artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Dust765-macos
+          path: artifacts/macos
+      - name: Create Windows archive
+        run: zip -r ClassicUO-Windows-x64.zip artifacts/windows -x "*.DS_Store"
+      - name: Create Linux archive
+        run: tar -czvf ClassicUO-Linux-x64.tar.gz -C artifacts/linux .
+      - name: Create macOS archive
+        run: tar -czvf ClassicUO-macOS-x64.tar.gz -C artifacts/macos .
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ github.run_number }}
+          name: Release v${{ github.run_number }}
+          draft: true
+          files: |
+            ClassicUO-Windows-x64.zip
+            ClassicUO-Linux-x64.tar.gz
+            ClassicUO-macOS-x64.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

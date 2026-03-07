@@ -144,11 +144,7 @@ namespace ClassicUO
 
             if (!Directory.Exists(Path.GetDirectoryName(globalSettingsPath)) || !File.Exists(globalSettingsPath))
             {
-                // settings specified in path does not exists, make new one
-                {
-                    // TODO: 
-                    Settings.GlobalSettings.Save();
-                }
+                Settings.GlobalSettings.Save();
             }
 
             Settings.GlobalSettings = ConfigurationResolver.Load<Settings>(globalSettingsPath, SettingsJsonContext.Default);
@@ -160,7 +156,6 @@ namespace ClassicUO
 
             UpdateManager.CheckForUpdates();
 
-            // still invalid, cannot load settings
             if (Settings.GlobalSettings == null)
             {
                 Settings.GlobalSettings = new Settings();
@@ -273,25 +268,24 @@ namespace ClassicUO
             {
                 switch (Settings.GlobalSettings.ForceDriver)
                 {
-                    case 1: // OpenGL
+                    case 1:
                         Environment.SetEnvironmentVariable("FNA3D_FORCE_DRIVER", "OpenGL");
                         break;
 
-                    case 2: // Vulkan (via SDL GPU)
+                    case 2:
                         Environment.SetEnvironmentVariable("FNA3D_FORCE_DRIVER", "Vulkan");
                         break;
 
-                    case 3: // D3D11
+                    case 3:
                         Environment.SetEnvironmentVariable("FNA3D_FORCE_DRIVER", "D3D11");
                         break;
 
-                    case 4: // SDL GPU
+                    case 4:
                         Environment.SetEnvironmentVariable("FNA3D_FORCE_DRIVER", "SDLGPU");
                         break;
                 }
 
                 Client.Run();
-
             }
 
             Log.Trace("Closing...");

@@ -105,9 +105,9 @@ namespace ClassicUO.Game.UI.Controls
     internal class CustomGumpPic : GumpPicBase
     {
         private Texture2D _customTexture;
-        public int Width { get; }
-        public int Height { get; }
-        public ushort Hue { get; set; }
+        public new int Width { get; }
+        public new int Height { get; }
+        public new ushort Hue { get; set; }
 
         private readonly Rectangle? _sourceRect;
 

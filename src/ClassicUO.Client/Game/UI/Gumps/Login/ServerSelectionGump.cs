@@ -58,7 +58,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private const ushort SELECTED_COLOR = 0x0481;
         private const ushort NORMAL_COLOR = 0x0481;
         private GothicStyleButton button;
-        private Texture2D LogoBackgroundImg = PNGLoader.Instance.GetImageTexture(Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "logodust.png"));
+        private Texture2D LogoBackgroundImg = PNGLoader.Instance.GetImageTexture(Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client", "logodust.png"));
 
         public ServerSelectionGump() : base(0, 0)
         {
@@ -67,13 +67,22 @@ namespace ClassicUO.Game.UI.Gumps.Login
             // Background
             UIManager.Add(new LoginBackground());
 
-            int logoW = LogoBackgroundImg?.Width ?? 400;
-            Add(new CustomGumpPic(
-                LoginLayoutHelper.CenterOffsetX(logoW),
-                LoginLayoutHelper.Y(240),
-                LogoBackgroundImg,
-                0
-            ));
+            const int LogoMaxWidth = 800;
+            const int LogoMaxHeight = 140;
+            if (LogoBackgroundImg != null)
+            {
+                float scale = Math.Min((float)LogoMaxWidth / LogoBackgroundImg.Width, (float)LogoMaxHeight / LogoBackgroundImg.Height);
+                int logoW = (int)(LogoBackgroundImg.Width * scale);
+                int logoH = (int)(LogoBackgroundImg.Height * scale);
+                Add(new CustomGumpPic(
+                    LoginLayoutHelper.CenterOffsetX(logoW),
+                    LoginLayoutHelper.Y(240),
+                    LogoBackgroundImg,
+                    logoW,
+                    logoH,
+                    0
+                ));
+            }
 
             var loginLang = Language.Instance.Login;
             Add(button = new GothicStyleButton(

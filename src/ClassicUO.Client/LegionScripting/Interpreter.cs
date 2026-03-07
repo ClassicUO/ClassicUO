@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using ClassicUO;
@@ -257,6 +257,11 @@ namespace LScript
                 return false;
 
             return (other._node.Lexeme == _node.Lexeme);
+        }
+
+        public override int GetHashCode()
+        {
+            return _node?.Lexeme?.GetHashCode() ?? 0;
         }
     }
 

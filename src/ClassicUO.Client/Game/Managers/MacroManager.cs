@@ -2129,6 +2129,11 @@ namespace ClassicUO.Game.Managers
                     break;
 
                 case MacroType.OpenJournal2:
+                    GameActions.OpenJournal();
+
+                    break;
+
+                case MacroType.OpenBackpack2:
                     GameActions.OpenBackpackSecond();
 
                     break;
@@ -2907,7 +2912,8 @@ namespace ClassicUO.Game.Managers
         SetMimic_PlayerSerial,
         OpenCorpsesSafe,
         // ## BEGIN - END ## // ADVMACROS
-        OpenJournal2, // ## BEGIN - END ## // MACROS        OpenJournal2, // ## BEGIN - END ## // MACROS
+        OpenJournal2,
+        OpenBackpack2,
         // ## BEGIN - END ## // BASICSETUP
         ToggleDrawRoofs,
         ToggleTreeStumps,

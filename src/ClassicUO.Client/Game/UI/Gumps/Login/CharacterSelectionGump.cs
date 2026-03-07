@@ -53,7 +53,6 @@ using FontStashSharp.RichText;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ClassicUO.Renderer;
-using ClassicUO.Renderer.Effects;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {
@@ -369,7 +368,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 characterGump.Hue = isSelected ? SELECTED_COLOR : characterGump.NameHueNormal;
                 characterGump._label.Hue = isSelected ? SELECTED_COLOR : characterGump.NameHueNormal;
-                characterGump.Alpha = isSelected ? 1.0f : 0.9f;
+                characterGump.Alpha = isSelected ? 1.0f : 0.6f;
                 characterGump._slideLifted = isSelected;
                 characterGump._isSelected = isSelected;
                 characterGump.buttonDelete.IsVisible = isSelected;
@@ -396,7 +395,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 characterGump.Hue = isHovered || isSelected ? SELECTED_COLOR : characterGump.NameHueNormal;
                 characterGump._label.Hue = isHovered || isSelected ? SELECTED_COLOR : characterGump.NameHueNormal;
-                characterGump.Alpha = isHovered || isSelected ? 1.0f : 0.9f;
+                characterGump.Alpha = isHovered || isSelected ? 1.0f : 0.6f;
                 characterGump._slideLifted = isSelected || isHovered;
                 characterGump._isSelected = isSelected;
             }
@@ -445,14 +444,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private int _baseY;
         private bool _baseYSet;
         private const int SLIDE_UP_PIXELS = 14;
-        private const int OUTLINE_PAD = 8;
-        private static readonly Color OutlineRed = new Color(160, 0, 0);
         private GumpPic _paperdollBg;
-        private OutlineGlowEffect _outlineEffect;
-        private RenderTarget2D _rtBody;
-        private RenderTarget2D _outlineResult;
-        private bool _outlineDirty = true;
-        private bool _lastSlideLifted;
 
             public PaperdollSaveDataDto Load()
             {
@@ -622,89 +614,13 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
-                if (!_slideLifted || Width <= 0 || Height <= 0)
-                {
-                    _outlineDirty = true;
-                    return base.Draw(batcher, x, y);
-                }
-
-                var gd = batcher.GraphicsDevice;
-                if (_outlineEffect == null)
-                    _outlineEffect = OutlineGlowEffect.Create(gd);
-                if (_outlineEffect == null)
-                    return base.Draw(batcher, x, y);
-
-                int rtW = Width + OUTLINE_PAD * 2;
-                int rtH = Height + OUTLINE_PAD * 2;
-                if (_rtBody == null || _rtBody.IsDisposed || _rtBody.Width != rtW || _rtBody.Height != rtH)
-                {
-                    _rtBody?.Dispose();
-                    _outlineResult?.Dispose();
-                    _rtBody = new RenderTarget2D(gd, rtW, rtH, false, SurfaceFormat.Color, DepthFormat.None);
-                    _outlineResult = new RenderTarget2D(gd, rtW, rtH, false, SurfaceFormat.Color, DepthFormat.None);
-                }
-
-                if (_outlineDirty)
-                {
-                    _outlineDirty = false;
-                    RenderTargetBinding[] bindings = gd.GetRenderTargets();
-                    RenderTarget2D prevTarget = (bindings != null && bindings.Length > 0 && bindings[0].RenderTarget is RenderTarget2D rt2d) ? rt2d : null;
-                    Viewport prevViewport = gd.Viewport;
-                    try
-                    {
-                        batcher.End();
-                        gd.SetRenderTarget(_rtBody);
-                        gd.Viewport = new Viewport(0, 0, rtW, rtH);
-                        gd.Clear(Color.Transparent);
-                        batcher.Begin();
-                        for (int i = 0; i < Children.Count; i++)
-                        {
-                            Control c = Children[i];
-                            if (c == null || c == buttonDelete || (c.Page != 0 && c.Page != ActivePage) || !c.IsVisible)
-                                continue;
-                            c.Draw(batcher, c.X + OUTLINE_PAD, c.Y + OUTLINE_PAD);
-                        }
-                        batcher.End();
-                        gd.SetRenderTarget(_outlineResult);
-                        gd.Viewport = new Viewport(0, 0, rtW, rtH);
-                        gd.Clear(Color.Transparent);
-                        _outlineEffect.SpriteTexture?.SetValue(_rtBody);
-                        _outlineEffect.OutlineColor?.SetValue(new Vector4(OutlineRed.R / 255f, OutlineRed.G / 255f, OutlineRed.B / 255f, OutlineRed.A / 255f));
-                        _outlineEffect.OutlineThickness?.SetValue(2.5f);
-                        _outlineEffect.TextureSize?.SetValue(new Vector2(rtW, rtH));
-                        _outlineEffect.Viewport?.SetValue(new Vector2(rtW, rtH));
-                        batcher.Begin(_outlineEffect);
-                        batcher.Draw(_rtBody, new Rectangle(0, 0, rtW, rtH), new Vector3(0, 0, 1f), 1f);
-                        batcher.End();
-                    }
-                    finally
-                    {
-                        gd.SetRenderTarget(prevTarget);
-                        gd.Viewport = prevViewport;
-                        batcher.Begin();
-                    }
-                }
-
-                base.Draw(batcher, x, y);
-
-                if (_outlineResult != null && !_outlineResult.IsDisposed)
-                {
-                    Vector3 hue = ShaderHueTranslator.GetHueVector(0, false, 1f);
-                    batcher.Draw(_outlineResult, new Rectangle(x - OUTLINE_PAD, y - OUTLINE_PAD, rtW, rtH), hue, 0f);
-                }
-
-                return true;
+                return base.Draw(batcher, x, y);
             }
 
             public override void Update()
             {
                 float target = _slideLifted ? SLIDE_UP_PIXELS : 0f;
                 _slideOffsetY += (target - _slideOffsetY) * 0.28f;
-                if (_slideLifted != _lastSlideLifted)
-                {
-                    _outlineDirty = true;
-                    _lastSlideLifted = _slideLifted;
-                }
                 if (!_baseYSet)
                 {
                     _baseY = Y + (int)_slideOffsetY;

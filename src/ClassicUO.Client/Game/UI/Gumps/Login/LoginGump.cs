@@ -30,6 +30,7 @@
 
 #endregion
 
+using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
@@ -41,11 +42,10 @@ using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using SDL3;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {
@@ -61,7 +61,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private readonly GothicStyleCombobox _languageCombo;
 
         private float _time;
-        private Texture2D LogoBackgroundImg = PNGLoader.Instance.GetImageTexture(Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "logodust.png"));
+        private Texture2D LogoBackgroundImg = PNGLoader.Instance.GetImageTexture(Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client", "logodust.png"));
 
 
         public LoginGump(LoginScene scene) : base(0, 0)
@@ -80,13 +80,22 @@ namespace ClassicUO.Game.UI.Gumps.Login
             _buttonNormal = 0x5CD;
             _buttonOver = 0x5CB;
             UIManager.Add(new LoginBackground());
-            int logoW = LogoBackgroundImg?.Width ?? 400;
-            Add(new CustomGumpPic(
-                LoginLayoutHelper.CenterOffsetX(logoW),
-                LoginLayoutHelper.Y(120),
-                LogoBackgroundImg,
-                0
-            ));
+            const int LogoMaxWidth = 800;
+            const int LogoMaxHeight = 200;
+            if (LogoBackgroundImg != null)
+            {
+                float scale = Math.Min((float)LogoMaxWidth / LogoBackgroundImg.Width, (float)LogoMaxHeight / LogoBackgroundImg.Height);
+                int logoW = (int)(LogoBackgroundImg.Width * scale);
+                int logoH = (int)(LogoBackgroundImg.Height * scale);
+                Add(new CustomGumpPic(
+                    LoginLayoutHelper.CenterOffsetX(logoW),
+                    LoginLayoutHelper.Y(240),
+                    LogoBackgroundImg,
+                    logoW,
+                    logoH,
+                    0
+                ));
+            }
 
             var loginLang = Language.Instance.Login;
             int langIndex = GetLanguageComboIndex(Settings.GlobalSettings.UILanguage);

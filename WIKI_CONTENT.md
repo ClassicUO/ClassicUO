@@ -6,23 +6,81 @@ The **Dust765** section is a comprehensive collection of advanced features devel
 
 ---
 
+## 🗂️ Options Menu (Sidebar)
+
+The Options gump sidebar lists all categories in this order:
+
+| Order | Button | Description |
+|-------|--------|-------------|
+| 1 | General | General game settings |
+| 2 | Sound | Sound and music |
+| 3 | Video | Video and graphics |
+| 4 | Macros | Macro management |
+| 5 | Tooltips | Tooltip settings |
+| 6 | Fonts | Font selection |
+| 7 | Speech | Speech and chat |
+| 8 | Combat & Spells | Combat and spell colors |
+| 9 | Counters | Counter bars |
+| 10 | Infobar | Info bar items |
+| 11 | Action Bar | Action bar |
+| 12 | Containers | Container and grid options |
+| 13 | Experimental | Experimental features |
+| 14 | Ignore List | Opens ignore list |
+| 15 | **Dust** | Dust765 visual and misc options (page 16) |
+| 16 | **765** | Dust765 macros and automations (page 17) |
+| 17 | **Mods** | UCC gumps, lines, auto loot, buffbar (page 18) |
+| 18 | Nameplate Options | Nameplate and overhead |
+| 19 | Cooldowns | Cooldown bar settings |
+| 20 | Grid Container | Grid container options |
+| 21 | Profiles | Profile management |
+
+---
+
 ## 📋 Table of Contents
 
+Options are grouped in three tabs: **Dust**, **765**, **Mods**.
+
+### Dust tab
 1. [Art / Hue Changes](#art--hue-changes)
 2. [Visual Helpers](#visual-helpers)
 3. [HealthBars](#healthbars)
 4. [Cursor](#cursor)
-5. [Overhead / Underchar](#overhead--underchar)
+5. [Overhead / Underfeet](#overhead--underfeet)
 6. [Old Healthlines](#old-healthlines)
 7. [Misc](#misc)
 8. [Misc2](#misc2)
-9. [Auto Loot](#auto-loot)
-10. [Buffbar UCC](#buffbar-ucc)
-11. [Self Automations](#self-automations)
-12. [Macros](#macros)
-13. [Gumps](#gumps)
-14. [Texture Manager](#texture-manager)
-15. [Lines (Lines UI)](#lines-lines-ui)
+9. [Name Overhead](#name-overhead)
+10. [Status Gump](#status-gump)
+11. [Misc3](#misc3)
+
+### Dust tab (continued)
+12. [Journal](#journal-dust)
+13. [Nameplates (Dust)](#nameplates-dust)
+14. [Mobiles (Dust)](#mobiles-dust)
+15. [Misc (Dust page)](#misc-dust-page)
+
+### 765 tab
+16. [Features Macros](#features-macros)
+17. [Simple Macros](#simple-macros)
+18. [Advanced Macros](#advanced-macros)
+19. [Automations](#automations)
+20. [Misc (765)](#misc-765)
+21. [Lobby](#lobby)
+
+### Mods tab
+22. [UI / Gumps](#ui--gumps)
+23. [Lines (Lines UI)](#lines-lines-ui)
+24. [Auto Loot (AL UI)](#auto-loot-mods)
+25. [Buffbar UCC](#buffbar-ucc)
+26. [Settings (Buffbar and Self)](#settings-buffbar-and-self)
+27. [Settings (Thresholds)](#settings-thresholds)
+28. [Settings (Misc Self)](#settings-misc-self)
+29. [TabGrid](#tabgrid)
+
+### Other sidebar pages
+30. [Cooldowns](#cooldowns-page)
+31. [Grid Container](#grid-container-page)
+32. [Profiles](#profiles-page)
 
 ---
 
@@ -97,13 +155,18 @@ The **Dust765** section is a comprehensive collection of advanced features devel
 - **Functionality**: Highlights the last attacked target
 - **Custom color** available
 
-#### **Highlight Last Target Poisoned**
+#### **Highlight Friends Guild Mobiles**
 - **Options**: Off, White, Pink, Ice, Fire, Custom
+- **Functionality**: Highlights friends/guild mobiles
+- **Custom color** available
+
+#### **Highlight Last Target Poisoned**
+- **Options**: Off, White, Pink, Ice, Fire, Special, Custom
 - **Functionality**: Highlights last target when poisoned
 - **Custom color** available
 
 #### **Highlight Last Target Paralyzed**
-- **Options**: Off, White, Pink, Ice, Fire, Custom
+- **Options**: Off, White, Pink, Ice, Fire, Special, Custom
 - **Functionality**: Highlights last target when paralyzed
 - **Custom color** available
 
@@ -146,9 +209,12 @@ The **Dust765** section is a comprehensive collection of advanced features devel
 #### **Color Game Cursor**
 - **Functionality**: Colors cursor based on target type (hostile/friendly)
 
+#### **Show Target Range Indicator**
+- **Functionality**: Shows range circle when targeting (cursor range indicator)
+
 ---
 
-## 📊 Overhead / Underchar
+## 📊 Overhead / Underfeet
 
 ### Additional Information
 
@@ -187,9 +253,6 @@ The **Dust765** section is a comprehensive collection of advanced features devel
 
 #### **Show Close Friend in WorldMapGump**
 - **Functionality**: Shows close friends on world map
-
-#### **Auto Avoid Obstacles and Mobiles**
-- **Functionality**: Automatically avoids obstacles and mobiles
 
 #### **Razor Target to LastTarget String**
 - **Functionality**: Converts Razor target commands to lasttarget
@@ -252,28 +315,152 @@ The **Dust765** section is a comprehensive collection of advanced features devel
 #### **Show Death Location on World Map**
 - **Functionality**: Shows death location on world map for 5 minutes
 
+#### **Auto Avoid Obstacles and Mobiles**
+- **Functionality**: Automatically avoids obstacles and mobiles
+
+#### **Scale Monsters**
+- **Functionality**: Scale monsters (Ctrl+Shift over monster: +/- to scale)
+
 ---
 
-## 🎒 Auto Loot
+## 📌 Name Overhead
 
-### Automatic Loot System
+#### **Show HP Line in NameOverheadGump**
+- **Functionality**: Shows HP line in name overhead gump
+
+---
+
+## 📋 Status Gump
+
+#### **Use Razor Enhanced Status Gump**
+- **Functionality**: Uses Razor-like enhanced status gump
+
+---
+
+## 🔩 Misc3
+
+#### **Show All Equipment Layers on Mobiles**
+- **Functionality**: Show all equipment layers on mobiles ON/OFF
+
+#### **Show All Equipment Layers on Paperdoll**
+- **Functionality**: Show all equipment layers on paperdoll ON/OFF
+- **Settings**: Paperdoll X offset
+
+#### **Override Container Open Range**
+- **Functionality**: Ignores range limitations for opening containers
+
+---
+
+## 📓 Journal (Dust)
+
+Options on the Dust page for journal and nameplates.
+
+#### **Max Journal Entries**
+- **Range**: 200–2000
+
+#### **Journal Opacity**
+- **Range**: 0–100
+
+#### **Journal Background**
+- **Custom color** for journal background
+
+#### **Journal Style**
+- **Border style** options
+
+#### **Hide Gump Border / Hide Timestamp**
+- Toggle journal border and timestamp visibility
+
+---
+
+## 📛 Nameplates (Dust)
+
+#### **Name Plates Also Act as Health Bar**
+- **Functionality**: Nameplates act as health bar
+- **HP Opacity**: 0–100
+- **Hide nameplates above 100% HP**: Option; **Only while in warmode** sub-option
+- **Border opacity** and **Name plate background opacity**: 0–100
+
+---
+
+## 👥 Mobiles (Dust)
+
+#### **Damage Hues**
+- **Damage to self / others / pets / allies / last attack**: Color picker for each
+
+#### **Display Party Chat Overhead**
+- **Functionality**: Display party chat over players' heads
+
+#### **Overhead Text Width**
+- **Range**: 100–600
+
+#### **Below Mobile Health Line Size**
+- **Multiplier**: 1–5
+
+#### **Open Health Bar Gump for Last Attack Automatically**
+- **Functionality**: Opens health bar for last attack automatically
+
+---
+
+## 🔧 Misc (Dust page)
+
+Options at the bottom of the Dust page.
+
+#### **Disable System Chat**
+- **Functionality**: Disable system chat
+
+#### **Hidden Body Opacity / Hue**
+- **Opacity**: 0–100; **Custom hue** for hidden body
+
+#### **Regular Player Opacity**
+- **Range**: 0–100
+
+#### **Enable Improved Buff Gump**
+- **Functionality**: Improved buff bar with **custom hue**
+
+#### **Main Game Window Background Hue**
+- **Functionality**: Custom hue for main window background
+
+#### **Enable Health Indicator**
+- **Only show below HP %** and **Size** settings
+
+#### **Spell Icon Scale**
+- **Range**: 50–300%
+
+#### **Spell Icon Hotkeys**
+- **Display matching macro hotkeys on spell icons**; **Hotkey text hue**
+
+#### **Enable Opacity Adjustment via Alt + Scroll**
+- **Functionality**: Adjust gump opacity with Alt + Scroll
+
+#### **Use Advanced Shop Gump**
+- **Functionality**: Use modern shop gump
+
+#### **Display Skill Progress Bar on Skill Changes**
+- **Skill progress bar format** configurable
+
+#### **Close Anchored Healthbars When Auto-Closing**
+- **Functionality**: Close anchored healthbars when automatically closing healthbars
+
+#### **Open Auto Loot Options**
+- **Button**: Opens auto loot options gump
+
+#### **Show Use/Loot Modal When Pressing Ctrl**
+- **Functionality**: Show nearby items modal when pressing Ctrl
+
+---
+
+## 🎒 Auto Loot (Mods)
+
+(Mods tab – AUTOLOOT AL UI section. See also Auto Loot options opened via "Open auto loot options" on Dust page.)
 
 #### **Enable UCC - AL**
 - **Functionality**: Activates UOClassicCombat Auto Loot system
 
-#### **Grid Loot Coloring**
+#### **Enable GridLootColoring**
 - **Functionality**: Colors grid based on available loot
 
-#### **Loot Above ID**
-- **Functionality**: Loots only items above certain ID
-
-#### **Timing Settings**
-- **Loot Delay**: Time between looting two items (ms)
-- **Purge Delay**: Time to clear queue of old items (ms)
-- **Queue Speed**: Time between processing queue (ms)
-
-#### **Corpse Colors**
-- **Gray, Blue, Green, Red**: Configurable colors for different corpse types
+#### **Enable LootAboveID**
+- **Functionality**: Loots only items above a certain ID
 
 ---
 
@@ -294,6 +481,52 @@ The **Dust765** section is a comprehensive collection of advanced features devel
 - **General Cooldown**: General cooldown when disarmed (ms)
 - **Disarm Strike Cooldown**: Cooldown after successful disarm (ms)
 - **Disarm Attempt Cooldown**: Cooldown after disarm attempt (ms)
+
+---
+
+## ⚙️ Settings (Buffbar and Self)
+
+(Mods page – cooldowns for buffbar and self automations.)
+
+- **General cooldown when you get disarmed** (ms)
+- **Cooldown after successful disarm** (ms)
+- **Cooldown after failed disarm** (ms)
+
+---
+
+## 📐 Settings (Thresholds)
+
+(Mods page – threshold values for self automations.)
+
+- **Bandies threshold** (diffhits >= )
+- **Bandies when poisoned**: Checkbox
+- **Curepot HP threshold** (diffhits >= )
+- **Healpot HP threshold** (diffhits >= )
+- **Refreshpot Stam threshold** (diffstam >= )
+
+---
+
+## 🔩 Settings (Misc Self)
+
+(Mods page – misc self/UCC settings.)
+
+- **Auto rearm weps held before got disarmed** (ms)
+- **Use Cliloc Triggers**: Up time on cliloc and UOC hotkey
+- **Use Macro Triggers**: Change UOC hotkey to disarm/pot/rearm by UCC
+- **Strength Pot Cooldown** (ms)
+- **Agility Pot Cooldown** (ms)
+- **Min RNG** (ms) / **Max RNG** (ms)
+
+---
+
+## 📑 TabGrid
+
+(Mods page – tab grid gump.)
+
+- **Enable TabGrid Gump**: Activates tab grid
+- **Grid Rows**: Number of rows
+- **Number of Tabs**: Number of tabs
+- **List of Tab Names**: Format-defined list of tab names
 
 ---
 
@@ -333,13 +566,28 @@ The **Dust765** section is a comprehensive collection of advanced features devel
 
 ---
 
-## ⌨️ Macros
+## 🎛️ Features Macros (765)
 
-### Special Macros
+Toggle macros (enable/disable via macro or chat):
+- **HighlightTileAtRange**: Toggle highlight tiles on range
+- **ToggleTransparentHouses**: Toggle transparent houses
+- **ToggleInvisibleHouses**: Toggle invisible houses
+- **UCCLinesToggleLT**: Toggle UCC Lines LastTarget
+- **UCCLinesToggleHM**: Toggle UCC Lines Hunting Mode
+- **AutoMeditate**: Toggle automed
+- **Using AIBOT**: Toggle usingBot
+- **ToggleECBuffGump**: Toggle EC-like buff gump
+- **ToggleECDebuffGump**: Toggle EC-like debuff gump
+- **ToggleECStateGump**: Toggle EC-like state gump
+- **ToggleModernCooldownBar**: Toggle modern cooldown bar
+
+---
+
+## ⌨️ Simple Macros (765)
 
 #### **LastTargetRC**
 - **Functionality**: Last target with custom range check
-- **Range**: Configurable range (1-30)
+- **Range**: Configurable (1-30)
 
 #### **ObjectInfo**
 - **Functionality**: Macro for -info command
@@ -359,12 +607,87 @@ The **Dust765** section is a comprehensive collection of advanced features devel
 #### **SetTargetClientSide**
 - **Functionality**: Sets target only on client side
 
+#### **OpenJournal2**
+- **Functionality**: Opens second journal
+
+#### **OpenBackpack2**
+- **Functionality**: Opens second backpack (normal view)
+
 #### **OpenCorpses**
 - **Functionality**: Opens 0x2006 corpses within 2 tiles
 
 ---
 
-## 🖼️ Gumps
+## 🔧 Advanced Macros (765)
+
+#### **OpenCorpsesSafeLoot**
+- **Functionality**: Opens non-blue 0x2006 corpses within 2 tiles
+
+#### **EquipManager**
+- **Functionality**: Equip an item (macro to run once)
+
+#### **SetMimic_PlayerSerial**
+- **Functionality**: Set master or custom serial for EquipManager
+
+#### **AutoPot**
+- **Functionality**: Disarm 2h layer; heal pot below 85%; pouch if paralyzed; cure if poisoned and not full HP; refresh if below 23; str pot if str below 100; agi pot if dex above 89
+
+#### **DefendPartyKey**
+- **Functionality**: If ally/party in 12 tiles and hits < 64: target them or cast gheal; if own hits < 64: target self and use gheal pot or cast gheal
+
+#### **DefendSelfKey**
+- **Functionality**: If own hits < 64, target self and use gheal pot or cast gheal
+
+#### **CustomInterrupt**
+- **Functionality**: Fast macro to interrupt active spellcasting
+
+#### **GrabFriendlyBars / GrabEnemyBars / GrabPartyAllyBars**
+- **Functionality**: Grab health bars (innocent; criminal/enemy/gray/murderer; ally/party)
+- **Settings**: X, Y and final location FX, FY for each group
+
+---
+
+## 🤖 Automations (765)
+
+Chat or macro to enable/disable (runs in background until disabled):
+- **-automed** or macro **AutoMeditate**: Auto meditates (2.5s delay, not targeting)
+- **-aibot** or macro **aibot**: Auto bot
+- **-engange**: Auto engage and pathfind to last target
+
+---
+
+## 📝 Misc (765)
+
+Chat commands and options:
+- **-mimic**: Mimic harmful spells 1:1; on beneficial use macro defendSelf/defendParty
+- **Macro SetMimic_PlayerSerial**: Define the player to mimic
+- **-marker X Y**: Place dot and line to X Y on world map; **-marker** to remove
+- **Auto add marker for MapGumps**: Auto add marker for T-Maps etc.
+- **-df**: GreaterHeal cursor; if you or party hit by EB/Explo/FS and condition met, cast gheal (conditions: poisoned + HP < random 65–80; or HP < random 40–70)
+- **-autorange**: Show range depending on archery equipment (configure in autorange.txt)
+- **Always have -autorange ON**: Option to keep autorange always on
+- **Autorange Hue**: Color for autorange display
+
+---
+
+## 🌐 Lobby (765)
+
+Chat commands:
+- **-lobby help**: Show help menu
+- **-lobby status**: Show status
+- **-lobby connect &lt;IP&gt;**: Connect to IP
+- **-lobby disconnect**: Disconnect
+- **-lobby target**: Send your last target to everyone
+- **-lobby cast &lt;SPELLNAME&gt;**: Everyone casts spell
+- **-lobby drop**: Drop everyone's spell on last target
+- **-lobby attack**: Send last target and everyone attacks
+- **-autohid**: (When lobby connected) Broadcast position when hidden
+
+**Macro LobbyConnect**: Connect to IP and Port (settings: Lobby IP, Lobby Port)
+
+---
+
+## 🖼️ UI / Gumps (Mods)
 
 ### Graphical Interface
 
@@ -382,38 +705,54 @@ The **Dust765** section is a comprehensive collection of advanced features devel
 - **Functionality**: Anti-rubberbanding gump on mouse
 - **Hide Option**: Option to hide the gump
 
----
-
-## 🎨 Texture Manager
-
-### Texture Manager
-
-#### **Enable TextureManager**
-- **Functionality**: Activates texture manager
-
-#### **Halos**
-- **Enable Halos**: Activates halos
-- **Humans Only**: Humans only
-- **Color Options**:
-  - Purple (last attack/target)
-  - Green (allies/party)
-  - Red (criminal/gray/murderer)
-  - Orange (enemy)
-  - Blue (innocent)
-
-#### **Arrows**
-- **Enable Arrows**: Activates arrows
-- **Humans Only**: Only humans see arrows
-- **Color Options**: Same colors as halos
+#### **Visual Response Manager**
+- **Functionality**: Visual response manager ON/OFF
 
 ---
 
-## 📏 Lines (Lines UI)
-
-### Lines Interface
+## 📏 Lines (Lines UI) (Mods)
 
 #### **Enable UCC - Lines**
 - **Functionality**: Activates UOClassicCombat lines interface
+
+---
+
+## ⏱️ Cooldowns page
+
+(Sidebar: Cooldowns.)
+
+- **Position**: X, Y and **Use last moved bar position**
+- **Condition**: Add conditions (hue, label, cooldown, message type: All/Self/Other, trigger text, replace if exists)
+
+---
+
+## 📦 Grid Container page
+
+(Sidebar: Grid Container.)
+
+- **Use grid containers**: Toggle grid layout
+- **Grid container scale**: 50–200%
+- **Also scale items**: Scale items inside grid
+- **Border opacity** (0–100) and **Border hue**
+- **Background opacity** (0–100) and **Background hue**
+- **Override hue with container's hue**
+- **Search Style**: Only show / Highlight
+- **Enable container preview**
+- **Make anchorable**: Anchor to other containers/world map/journal
+- **Container Style**: Border style options
+- **Hide border around gump**
+- **Default grid rows x columns**
+- **Grid highlight settings** (button) and **Grid highlight line size** (1–10)
+
+---
+
+## 👤 Profiles page
+
+(Sidebar: Profiles.)
+
+- **Save current settings as DEFAULT for new characters**: Creates default.json for new characters
+- **Override ALL other profiles**: Copy current settings to every character profile
+- **Override profiles on same server**: Copy current settings only to profiles on the same server
 
 ---
 
@@ -421,10 +760,11 @@ The **Dust765** section is a comprehensive collection of advanced features devel
 
 ### Feature Activation
 
-1. **Access Options**: Go to Options > Dust765
-2. **Navigate Categories**: Use the side menu to access different sections
-3. **Configure Options**: Adjust settings as needed
-4. **Save Settings**: Settings are saved automatically
+1. **Access Options**: Open the Options gump (e.g. from game menu or hotkey).
+2. **Navigate Categories**: Use the sidebar to open **General**, **Sound**, **Video**, **Macros**, **Tooltips**, **Fonts**, **Speech**, **Combat & Spells**, **Counters**, **Infobar**, **Action Bar**, **Containers**, **Experimental**, **Dust**, **765**, **Mods**, **Nameplate Options**, **Cooldowns**, **Grid Container**, or **Profiles**.
+3. **Dust765 options**: Click **Dust** (visual/helpers/misc), **765** (macros/automations), or **Mods** (UCC gumps, lines, auto loot, buffbar).
+4. **Configure Options**: Adjust settings as needed.
+5. **Save Settings**: Settings are saved automatically.
 
 ### Usage Tips
 

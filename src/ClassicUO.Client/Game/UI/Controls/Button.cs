@@ -351,7 +351,7 @@ namespace ClassicUO.Game.UI.Controls
         private bool _isPressed;
         private bool _isHovered;
 
-        public event Action OnButtonClick;
+        public new event Action OnButtonClick;
 
         public ImageButton(int x, int y, string normalPath, string pressedPath = null, string overPath = null)
         {

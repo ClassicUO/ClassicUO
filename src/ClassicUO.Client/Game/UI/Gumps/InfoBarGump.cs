@@ -326,6 +326,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case InfoBarVars.NameNotoriety: return World.Player.Name;
 
+                case InfoBarVars.CriminalTimer:
+                    int sec = PvMPvPManager.Instance.GreyCriminalSecondsRemaining;
+                    return sec > 0 ? $"{sec / 60}:{sec % 60:D2}" : "";
+
                 case InfoBarVars.TithingPoints: return World.Player.TithingPoints.ToString();
 
                 default: return "";
@@ -419,6 +423,11 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                 case InfoBarVars.NameNotoriety: return Notoriety.GetHue(World.Player.NotorietyFlag);
+
+                case InfoBarVars.CriminalTimer:
+                    return PvMPvPManager.Instance.GreyCriminalSecondsRemaining > 0
+                        ? Notoriety.GetHue(World.Player.NotorietyFlag)
+                        : (ushort)0x0481;
 
                 default: return 0x0481;
             }

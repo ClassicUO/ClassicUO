@@ -3,12 +3,11 @@
   <PropertyGroup>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <TargetFramework>net48</TargetFramework>
-    <OutputType>Exe</OutputType>
     <ApplicationIcon>cuoicon.ico</ApplicationIcon>
     <AssemblyName>ClassicUO</AssemblyName>
     <RootNamespace>ClassicUO</RootNamespace>
-    <AssemblyVersion>2.0.9</AssemblyVersion>
-    <FileVersion>2.0.9</FileVersion>
+    <AssemblyVersion>2.0.11</AssemblyVersion>
+    <FileVersion>2.0.11</FileVersion>
     <Copyright>Dust765.4</Copyright>
     <StartupObject></StartupObject>
     <PlatformTarget>x64</PlatformTarget>
@@ -18,11 +17,13 @@
     <OutputPath>$(ProjectDir)..\..\bin\Release\</OutputPath>
     <PublishDir>$(ProjectDir)..\..\bin\dist\</PublishDir>
     <Optimize>true</Optimize>
+    <OutputType>WinExe</OutputType>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
     <OutputPath>$(ProjectDir)..\..\bin\Debug\</OutputPath>
     <DefineConstants>$(DefineConstants)TRACE</DefineConstants>
+    <OutputType>Exe</OutputType>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IS_DEV_BUILD)' == 'true'">
@@ -138,11 +139,26 @@
     <None Remove="Dust765\" />
     <None Remove="Dust765\Dust765\" />
   </ItemGroup>
+  <ItemGroup>
+    <DataClientImages Include="$(ProjectDir)..\ClassicUO.Assets\gumpartassets\loginbg.png" />
+    <DataClientImages Include="$(ProjectDir)..\ClassicUO.Assets\gumpartassets\logodust.png" />
+  </ItemGroup>
+
+  <Target Name="CopyDataClientImages_build" AfterTargets="Build">
+    <MakeDir Directories="$(TargetDir)Data\Client" />
+    <Copy SourceFiles="@(DataClientImages)" DestinationFolder="$(TargetDir)Data\Client\" SkipUnchangedFiles="true" />
+  </Target>
+
   <Target Name="CopyExternalDeps_build" AfterTargets="Build">
     <Copy SourceFiles="@(DataFiles_x64)" DestinationFolder="$(TargetDir)\x64\" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(NativeLibs)" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(DataLanguageFiles)" DestinationFolder="$(TargetDir)\Data\Languages\" SkipUnchangedFiles="true" />
     <Copy SourceFiles="@(DataLanguageRoot)" DestinationFolder="$(TargetDir)\Data\" SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="CopyDataClientImages_publish" AfterTargets="Publish">
+    <MakeDir Directories="$(PublishDir)Data\Client" />
+    <Copy SourceFiles="@(DataClientImages)" DestinationFolder="$(PublishDir)Data\Client\" SkipUnchangedFiles="true" />
   </Target>
 
   <Target Name="CopyExternalDeps_publish" AfterTargets="Publish">

@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -148,6 +148,7 @@ namespace ClassicUO.Game.Managers
             infoBarItems.Clear();
 
             infoBarItems.Add(new InfoBarItem("", InfoBarVars.NameNotoriety, 0x3D2));
+            infoBarItems.Add(new InfoBarItem("Crim", InfoBarVars.CriminalTimer, 0x3B2));
             infoBarItems.Add(new InfoBarItem(ResGeneral.Hits, InfoBarVars.HP, 0x1B6));
             infoBarItems.Add(new InfoBarItem(ResGeneral.Mana, InfoBarVars.Mana, 0x1ED));
             infoBarItems.Add(new InfoBarItem(ResGeneral.Stam, InfoBarVars.Stamina, 0x22E));
@@ -181,6 +182,7 @@ namespace ClassicUO.Game.Managers
         SwingSpeedInc,
         StatsCap,
         NameNotoriety,
+        CriminalTimer,
         TithingPoints
     }
 

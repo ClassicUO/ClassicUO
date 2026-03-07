@@ -99,7 +99,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             const int LogoMaxWidth = 180;
             const int LogoMaxHeight = 40;
-            string logoPath = Path.Combine(CUOEnviroment.ExecutablePath, "ExternalImages", "logodust.png");
+            string logoPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client", "logodust.png");
             _logoTexture = PNGLoader.Instance.GetImageTexture(logoPath);
             if (_logoTexture != null)
             {
