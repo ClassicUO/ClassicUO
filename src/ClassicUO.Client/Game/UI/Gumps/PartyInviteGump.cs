@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -46,7 +46,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Mobile mobile = World.Mobiles.Get(inviter);
 
-            var nameWidthAdjustment = mobile == null || mobile.Name.Length < 10 ? 0 : mobile.Name.Length * 5;
+            var nameWidthAdjustment = mobile == null || string.IsNullOrEmpty(mobile.Name) || mobile.Name.Length < 10 ? 0 : mobile.Name.Length * 5;
 
             AlphaBlendControl partyGumpBackground = new AlphaBlendControl
             {

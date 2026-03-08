@@ -183,7 +183,7 @@ namespace ClassicUO.Game.UI.Gumps
         private ModernColorPicker.HueDisplay _tooltip_font_hue;
         private FontSelector _tooltip_font_selector;
         private HSliderBar _dragSelectStartX, _dragSelectStartY;
-        private Checkbox _dragSelectAsAnchor, _namePlateHealthBar, _disableSystemChat, _namePlateShowAtFullHealth;
+        private Checkbox _dragSelectAsAnchor, _namePlateHealthBar, _disableSystemChat, _journalMessagesOnlyInJournalBox, _namePlateShowAtFullHealth;
         private HSliderBar _journalOpacity, _namePlateOpacity, _namePlateHealthBarOpacity;
         private ModernColorPicker.HueDisplay _journalBackgroundColor;
         private Combobox _journalStyle;
@@ -5239,6 +5239,8 @@ namespace ClassicUO.Game.UI.Gumps
             sectionMiscTaz.Y = sectionMobiles.Bounds.Bottom + 40;
             sectionMiscTaz.Add(_disableSystemChat = AddCheckBox(null, "", _currentProfile.DisableSystemChat, 0, 0));
             sectionMiscTaz.AddRight(AddLabel(null, "Disable system chat", 0, 0));
+            sectionMiscTaz.Add(_journalMessagesOnlyInJournalBox = AddCheckBox(null, "", _currentProfile.JournalMessagesOnlyInJournalBox, 0, 0));
+            sectionMiscTaz.AddRight(AddLabel(null, Language.Instance?.GetTazUO?.JournalMessagesOnlyInJournalBox ?? "Journal messages only in journal box (clean game view)", 0, 0));
             sectionMiscTaz.Add(AddLabel(null, "Hidden Body Opacity", 0, 0));
             sectionMiscTaz.AddRight(_hiddenBodyAlpha = AddHSlider(null, 0, 100, _currentProfile.HiddenBodyAlpha, 0, 0, 200), 2);
             sectionMiscTaz.PushIndent();
@@ -6197,6 +6199,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.ImprovedBuffBarHue = _improvedBuffBarHue.Hue;
 
             _currentProfile.DisableSystemChat = _disableSystemChat.IsChecked;
+            _currentProfile.JournalMessagesOnlyInJournalBox = _journalMessagesOnlyInJournalBox.IsChecked;
             _currentProfile.GridBorderAlpha = (byte)_gridBorderOpacity.Value;
             _currentProfile.GridBorderHue = _gridBorderHue.Hue;
             _currentProfile.GridContainersScale = (byte)_gridContainerScale.Value;
