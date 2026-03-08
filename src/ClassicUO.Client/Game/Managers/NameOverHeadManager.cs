@@ -260,7 +260,6 @@ namespace ClassicUO.Game.Managers
             {
                 Log.Trace("No nameoverhead.xml file. Creating a default file.");
 
-
                 Options.Clear();
                 CreateDefaultEntries();
                 Save();
@@ -328,9 +327,9 @@ namespace ClassicUO.Game.Managers
                 new[]
                 {
                     new NameOverheadOption("All", int.MaxValue),
-                    new NameOverheadOption("Mobiles only", (int)NameOverheadOptions.AllMobiles),
-                    new NameOverheadOption("Items only", (int)NameOverheadOptions.AllItems),
-                    new NameOverheadOption("Mobiles & Corpses only", (int)NameOverheadOptions.MobilesAndCorpses),
+                    new NameOverheadOption("Mobiles only", int.MaxValue),
+                    new NameOverheadOption("Items only", int.MaxValue),
+                    new NameOverheadOption("Mobiles & Corpses only", int.MaxValue),
                 }
             );
         }
