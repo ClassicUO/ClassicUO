@@ -55,7 +55,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private readonly ushort _buttonOver;
         private readonly Checkbox _checkboxAutologin;
         private readonly Checkbox _checkboxSaveAccount;
-        private readonly GothicStyleButton _nextArrow0;
+        private readonly GothicStyleButtonLogin _nextArrow0;
         private readonly PasswordStbTextBox _passwordFake;
         private readonly StbTextBox _textboxAccount;
         private readonly GothicStyleCombobox _languageCombo;
@@ -144,7 +144,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             );
             */
 
-            Add(_nextArrow0 = new GothicStyleButton(
+            Add(_nextArrow0 = new GothicStyleButtonLogin(
                 LoginLayoutHelper.CenterOffsetX(120),
                 LoginLayoutHelper.Y(570),
                 120,
@@ -339,10 +339,17 @@ namespace ClassicUO.Game.UI.Gumps.Login
             Add(_hit = new HitBox(_.X, _.Y, _.Width, _.Height));
             _hit.MouseUp += (s, e) =>
             {
-                Utility.Platforms.PlatformHelper.LaunchBrowser("https://github.com/bittiez/ClassicUO/wiki");
+                Utility.Platforms.PlatformHelper.LaunchBrowser("https://github.com/dust765/ClassicUO/wiki");
             };
 
-
+            var updateLabel = new UOLabel("Update available - click to download and install", 1, 0x0035, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 350) { X = LoginLayoutHelper.X(30), Y = LoginLayoutHelper.Y(630), IsVisible = UpdateManager.HasUpdate };
+            var updateHitBox = new HitBox(updateLabel.X, updateLabel.Y, updateLabel.Width, updateLabel.Height) { IsVisible = UpdateManager.HasUpdate };
+            updateHitBox.MouseUp += (s, e) =>
+            {
+                UpdateManager.StartUpdateAndExit();
+            };
+            Add(updateLabel);
+            Add(updateHitBox);
 
             if (!string.IsNullOrEmpty(_textboxAccount.Text))
             {
@@ -359,8 +366,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 {
                     if (UpdateManager.HasUpdate)
                     {
-                        _.IsVisible = true;
-                        _hit.IsVisible = true;
+                        updateLabel.IsVisible = true;
+                        updateHitBox.IsVisible = true;
                     }
                 };
             }

@@ -36,7 +36,6 @@ using ClassicUO.Dust765.External;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.TazUO.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
 using ClassicUO.Utility;
@@ -57,8 +56,6 @@ namespace ClassicUO.Game.GameObjects
         {
             _serverDirection = Direction;
         }
-
-        private static SpellVisualRangeManager.CastTimerProgressBar castTimer;
 
         // ## BEGIN - END ## // MISC2
         public int DeathX = 0;
@@ -81,6 +78,8 @@ namespace ClassicUO.Game.GameObjects
             UIManager.Add(OnCasting = new OnCastingGump());
             // ## BEGIN - END ## // ONCASTINGGUMP
 
+            UIManager.Add(new OnCastingGump.CastTimerProgressBar());
+
             Skills = new Skill[SkillsLoader.Instance.SkillsCount];
 
             for (int i = 0; i < Skills.Length; i++)
@@ -96,8 +95,6 @@ namespace ClassicUO.Game.GameObjects
                     SkillProgressBar.QueManager.AddSkill(e.Index);
                 }
             };
-
-            UIManager.Add(castTimer = new SpellVisualRangeManager.CastTimerProgressBar());
         }
 
         public Skill[] Skills { get; }
@@ -1544,7 +1541,6 @@ namespace ClassicUO.Game.GameObjects
                 //{
                 switch (gump)
                 {
-                    case ModernPaperdoll _:
                     case PaperDollGump _:
                     case MapGump _:
                     case SpellbookGump _:

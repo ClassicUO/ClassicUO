@@ -66,14 +66,14 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private UOLabel _hairLabel, _facialLabel;
         private readonly StbTextBox _nameTextBox;
         private PaperDollInteractable _paperDoll;
-        private readonly GothicStyleButton _nextButton;
+        private readonly GothicStyleButtonLogin _nextButton;
         private readonly Dictionary<Layer, Tuple<int, ushort>> CurrentColorOption = new Dictionary<Layer, Tuple<int, ushort>>();
-        private GothicStyleButton button;
-        private GothicStyleButton buttonMale;
-        private GothicStyleButton buttonFemale;
-        private GothicStyleButton buttonHuman;
-        private GothicStyleButton buttonElf;
-        private GothicStyleButton buttonGargolye;
+        private GothicStyleButtonLogin button;
+        private GothicStyleButtonLogin buttonMale;
+        private GothicStyleButtonLogin buttonFemale;
+        private GothicStyleButtonLogin buttonHuman;
+        private GothicStyleButtonLogin buttonElf;
+        private GothicStyleButtonLogin buttonGargolye;
         private readonly ProfessionInfo _Parent;
         private GothicStyleSliderBar[] _attributeSliders;
         private bool _showSkills = false;
@@ -311,10 +311,10 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             Add(new RoundedColorBox(217, 22, new Color(28, 28, 28), 4) { X = CENTER_PANEL_MID - NameInputWidth / 2 + 1, Y = 73 });
             Add(new FullBlendControl { X = CENTER_PANEL_MID - NameInputWidth / 2 + 2, Y = 74, Width = NameInputWidth - 4, Height = 20, Hue = 0x801 });
 
-            Add(_nextButton = new GothicStyleButton(30, NEXT_BUTTON_Y, 120, 40, "BACK", null, 16));
+            Add(_nextButton = new GothicStyleButtonLogin(30, NEXT_BUTTON_Y, 120, 40, "BACK", null, 16));
             _nextButton.OnClick += () => OnButtonClick(5);
 
-            Add(button = new GothicStyleButton(NEXT_BUTTON_X, NEXT_BUTTON_Y, 120, 40, "NEXT", null, 16));
+            Add(button = new GothicStyleButtonLogin(NEXT_BUTTON_X, NEXT_BUTTON_Y, 120, 40, "NEXT", null, 16));
             button.OnClick += () => OnButtonClick(6);
 
             Add(_nameTextBox = new StbTextBox(5, 16, NameInputWidth - 4, false, hue: 0x0481, style: FontStyle.Fixed, align: Assets.TEXT_ALIGN_TYPE.TS_CENTER) { X = CENTER_PANEL_MID - NameInputWidth / 2 + 2, Y = 74, Width = NameInputWidth - 4, Height = 20 }, 1);
@@ -334,21 +334,21 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             const int RaceY2 = RACE_SECTION_Y + 26 + RACE_BUTTON_MARGIN;
             const int RaceY3 = RaceY2 + 26 + RACE_BUTTON_MARGIN;
             const int RaceBtnW = 100;
-            Add(buttonHuman = new GothicStyleButton(RaceX, RACE_SECTION_Y, RaceBtnW, 26, "HUMAN", null, 14));
+            Add(buttonHuman = new GothicStyleButtonLogin(RaceX, RACE_SECTION_Y, RaceBtnW, 26, "HUMAN", null, 14));
             buttonHuman.OnClick += () => OnButtonClick(2);
-            Add(buttonElf = new GothicStyleButton(RaceX, RaceY2, RaceBtnW, 26, "ELF", null, 14));
+            Add(buttonElf = new GothicStyleButtonLogin(RaceX, RaceY2, RaceBtnW, 26, "ELF", null, 14));
             buttonElf.OnClick += () => OnButtonClick(3);
             if (Client.Version >= ClientVersion.CV_60144)
             {
-                Add(buttonGargolye = new GothicStyleButton(RaceX, RaceY3, RaceBtnW, 26, "GARGOLYE", null, 14));
+                Add(buttonGargolye = new GothicStyleButtonLogin(RaceX, RaceY3, RaceBtnW, 26, "GARGOLYE", null, 14));
                 buttonGargolye.OnClick += () => OnButtonClick(4);
             }
 
             const int GenderBtnW = 95;
             const int GenderGap = 12;
-            Add(buttonMale = new GothicStyleButton(CENTER_PANEL_MID - GenderBtnW - GenderGap / 2, GENDER_SECTION_Y, GenderBtnW, 28, "MALE ♂", null, 14));
+            Add(buttonMale = new GothicStyleButtonLogin(CENTER_PANEL_MID - GenderBtnW - GenderGap / 2, GENDER_SECTION_Y, GenderBtnW, 28, "MALE ♂", null, 14));
             buttonMale.OnClick += () => OnButtonClick(0);
-            Add(buttonFemale = new GothicStyleButton(CENTER_PANEL_MID + GenderGap / 2, GENDER_SECTION_Y, GenderBtnW, 28, "FEMALE ♀", null, 14));
+            Add(buttonFemale = new GothicStyleButtonLogin(CENTER_PANEL_MID + GenderGap / 2, GENDER_SECTION_Y, GenderBtnW, 28, "FEMALE ♀", null, 14));
             buttonFemale.OnClick += () => OnButtonClick(1);
 
             if (!CUOEnviroment.IsOutlands)

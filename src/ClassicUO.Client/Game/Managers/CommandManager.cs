@@ -227,15 +227,7 @@ namespace ClassicUO.Game.Managers
 
             Register("paperdoll", (s) =>
             {
-                if (ProfileManager.CurrentProfile.UseModernPaperdoll)
-                {
-                    UIManager.Add(new PaperDollGump(World.Player, true));
-                }
-                else
-                {
-                    UIManager.Add(new ModernPaperdoll(World.Player));
-                }
-
+                UIManager.Add(new PaperDollGump(World.Player.Serial, true));
             });
 
             Register("optlink", (s) =>

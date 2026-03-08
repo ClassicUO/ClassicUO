@@ -45,15 +45,6 @@ namespace ClassicUO.TazUO
         public string JournalMessagesOnlyInJournalBox { get; set; } = "Journal messages only in journal box (clean game view)";
         #endregion
 
-        #region ModernPaperdoll
-        public string ModernPaperdoll { get; set; } = "Modern paperdoll";
-        public string EnableModernPaperdoll { get; set; } = "Enable modern paperdoll";
-        public string PaperdollHue { get; set; } = "Paperdoll hue";
-        public string DurabilityBarHue { get; set; } = "Durability bar hue";
-        public string ShowDurabilityBarBelow { get; set; } = "Show durability bar below %";
-        public string PaperdollAnchor { get; set; } = "Make anchorable";
-        #endregion
-
         #region Nameplates
         public string Nameplates { get; set; } = "Nameplates";
         public string NameplatesAlsoActAsHealthBars { get; set; } = "Nameplates also act as health bars";

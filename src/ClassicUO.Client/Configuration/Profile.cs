@@ -220,9 +220,6 @@ namespace ClassicUO.Configuration
         public byte JournalOpacity { get; set; } = 50;
         public int JournalStyle { get; set; } = 0;
         public bool HideScreenshotStoredInMessage { get; set; }
-        public bool UseModernPaperdoll { get; set; } = false;
-        public bool OpenModernPaperdollAtMinimizeLoc { get; set; } = false;
-
         // Experimental
         public bool CastSpellsByOneClick { get; set; }
         public bool BuffBarTime { get; set; }
@@ -655,6 +652,8 @@ namespace ClassicUO.Configuration
         public bool ShowAllLayers { get; set; }
         public bool ShowAllLayersPaperdoll { get; set; }
         public int ShowAllLayersPaperdoll_X { get; set; } = 166;
+        public bool ColorPaperdollByDurability { get; set; }
+        public bool UseModernDurabilityGump { get; set; } = true;
         // ## BEGIN - END ## // MISC3 SHOWALLLAYERS
         // ## BEGIN - END ## // MISC3 THIEFSUPREME
         public bool OverrideContainerOpenRange { get; set; }
@@ -709,8 +708,6 @@ namespace ClassicUO.Configuration
         public bool WorldMapShowGridIfZoomed { get; set; } = true;
         public bool WorldMapAllowPositionalTarget { get; set; } = true;
 
-        public int AutoFollowDistance { get; set; } = 2;
-        public bool DisableAutoFollowAlt { get; set; } = false;
         [JsonConverter(typeof(Point2Converter))] public Point ResizeJournalSize { get; set; } = new Point(410, 350);
         public bool FollowingMode { get; set; } = false;
         public uint FollowingTarget { get; set; }
@@ -785,14 +782,6 @@ namespace ClassicUO.Configuration
         public List<List<int>> GridHighlight_PropMinVal { get; set; } = new List<List<int>>();
         public bool GridHighlight_CorpseOnly { get; set; } = false;
         public int GridHightlightSize { get; set; } = 1;
-        #endregion
-
-        #region Modern paperdoll
-        public ushort ModernPaperDollHue { get; set; } = 0;
-        public ushort ModernPaperDollDurabilityHue { get; set; } = 32;
-        public int ModernPaperDoll_DurabilityPercent { get; set; } = 90;
-        public int ModernPaperdollOpacity { get; set; } = 92;
-        [JsonConverter(typeof(Point2Converter))] public Point ModernPaperdollPosition { get; set; } = new Point(100, 100);
         #endregion
 
         #region Health indicator
@@ -961,7 +950,6 @@ namespace ClassicUO.Configuration
 
         public uint SOSGumpID { get; set; } = 1915258020;
 
-        public bool ModernPaperdollAnchorEnabled { get; set; } = false;
         public bool JournalAnchorEnabled { get; set; } = false;
         public bool EnableGumpCloseAnimation { get; set; } = true;
 
@@ -1224,18 +1212,9 @@ namespace ClassicUO.Configuration
                                         break;
                                     }
 
-                                    if (ProfileManager.CurrentProfile.UseModernPaperdoll && serial == World.Player.Serial)
-                                    {
-                                        gump = new ModernPaperdoll(serial);
-                                        x = ProfileManager.CurrentProfile.ModernPaperdollPosition.X;
-                                        y = ProfileManager.CurrentProfile.ModernPaperdollPosition.Y;
-                                    }
-                                    else
-                                    {
-                                        gump = new PaperDollGump(serial, serial == World.Player.Serial);
-                                        x = ProfileManager.CurrentProfile.PaperdollPosition.X;
-                                        y = ProfileManager.CurrentProfile.PaperdollPosition.Y;
-                                    }
+                                    gump = new PaperDollGump(serial, serial == World.Player.Serial);
+                                    x = ProfileManager.CurrentProfile.PaperdollPosition.X;
+                                    y = ProfileManager.CurrentProfile.PaperdollPosition.Y;
                                     pdolc++;
 
                                     break;
@@ -1426,7 +1405,6 @@ namespace ClassicUO.Configuration
                                         gump = new ActionBarGump();
                                         break;
                                     case GumpType.PaperDoll:
-                                        gump = new ModernPaperdoll(World.Player.Serial);
                                         break;
                                 }
 

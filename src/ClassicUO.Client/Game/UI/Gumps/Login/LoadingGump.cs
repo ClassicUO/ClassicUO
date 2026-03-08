@@ -150,7 +150,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         private void AddLoginButton(int x, int y, string text, int buttonId)
         {
-            GothicStyleButton btn = new GothicStyleButton(x, y, ButtonWidth, ButtonHeight, text, null, 16);
+            GothicStyleButtonLogin btn = new GothicStyleButtonLogin(x, y, ButtonWidth, ButtonHeight, text, null, 16);
             btn.OnClick += () => OnButtonClick(buttonId);
             Add(btn);
         }

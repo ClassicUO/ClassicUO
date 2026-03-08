@@ -40,7 +40,6 @@ using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Renderer;
-using ClassicUO.TazUO.Managers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
@@ -74,15 +73,6 @@ namespace ClassicUO.Game.GameObjects
             else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
             {
                 hue = Constants.DEAD_RANGE_COLOR;
-            }
-
-            if (SelectedObject.Object == this)
-            {
-                SpellVisualRangeManager.Instance.LastCursorTileLoc = new Vector2(X, Y);
-            }
-            if (ProfileManager.CurrentProfile?.PvP_SpellRangeOnCursor == true && SpellVisualRangeManager.Instance.IsTargetingAfterCasting())
-            {
-                hue = SpellVisualRangeManager.Instance.ProcessHueForTile(hue, this);
             }
 
             if (TileMarkerManager.Instance.IsTileMarked(X, Y, World.Map.Index, out var nhue))

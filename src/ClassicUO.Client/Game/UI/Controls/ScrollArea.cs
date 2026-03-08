@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -236,11 +236,10 @@ namespace ClassicUO.Game.UI.Controls
             if (height > 0)
             {
                 _scrollBar.MaxValue = height;
-
-                if (maxValue)
-                {
+                if (_scrollBar.Value > _scrollBar.MaxValue)
                     _scrollBar.Value = _scrollBar.MaxValue;
-                }
+                if (maxValue)
+                    _scrollBar.Value = _scrollBar.MaxValue;
             }
             else
             {

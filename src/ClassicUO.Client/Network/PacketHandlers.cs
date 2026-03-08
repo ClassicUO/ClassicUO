@@ -57,7 +57,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Reflection;
 using ClassicUO.Dust765.Autos;
-using ClassicUO.TazUO.Managers;
 
 namespace ClassicUO.Network
 {
@@ -1142,7 +1141,6 @@ namespace ClassicUO.Network
                     if (it.Layer != Layer.Invalid)
                     {
                         UIManager.GetGump<PaperDollGump>(cont)?.RequestUpdateContents();
-                        UIManager.GetGump<ModernPaperdoll>(cont)?.RequestUpdateContents();
                     }
 
                     UIManager.GetGump<ContainerGump>(cont)?.RequestUpdateContents();
@@ -1218,7 +1216,6 @@ namespace ClassicUO.Network
                     if (item.Layer != Layer.Invalid)
                     {
                         UIManager.GetGump<PaperDollGump>(cont)?.RequestUpdateContents();
-                        UIManager.GetGump<ModernPaperdoll>(cont)?.RequestUpdateContents();
                     }
                 }
                 else if (item.IsMulti)
@@ -1785,7 +1782,6 @@ namespace ClassicUO.Network
                                     item.Container = container.Serial;
                                      
                                     UIManager.GetGump<PaperDollGump>(item.Container)?.RequestUpdateContents();
-                                    UIManager.GetGump<ModernPaperdoll>(item.Container)?.RequestUpdateContents();
                                 }
                                 else
                                 {
@@ -1971,7 +1967,6 @@ namespace ClassicUO.Network
                 UIManager.GetGump<ContainerGump>(item.Container)?.RequestUpdateContents();
 
                 UIManager.GetGump<PaperDollGump>(item.Container)?.RequestUpdateContents();
-                UIManager.GetGump<ModernPaperdoll>(item.Container)?.RequestUpdateContents();
             }
 
             item.Graphic = (ushort)(p.ReadUInt16BE() + p.ReadInt8());
@@ -1991,7 +1986,6 @@ namespace ClassicUO.Network
             else if (SerialHelper.IsValid(item.Container) && item.Layer < Layer.Mount)
             {
                 UIManager.GetGump<PaperDollGump>(item.Container)?.RequestUpdateContents();
-                UIManager.GetGump<ModernPaperdoll>(item.Container)?.RequestUpdateContents();
             }
 
             if (
@@ -3039,7 +3033,6 @@ namespace ClassicUO.Network
                     PvMPvPManager.Instance.OnPlayerNotorietyChanged(notoriety);
 
                 UIManager.GetGump<PaperDollGump>(serial)?.RequestUpdateContents();
-                UIManager.GetGump<ModernPaperdoll>(serial)?.RequestUpdateContents();
             }
 
             if (p[0] != 0x78)
@@ -3103,7 +3096,6 @@ namespace ClassicUO.Network
                 }
 
                 UIManager.GetGump<PaperDollGump>(serial)?.RequestUpdateContents();
-                UIManager.GetGump<ModernPaperdoll>(serial)?.RequestUpdateContents();
 
                 World.Player.UpdateAbilities();
             }
@@ -3225,49 +3217,32 @@ namespace ClassicUO.Network
             byte flags = p.ReadUInt8();
 
             mobile.Title = text;
-            if (ProfileManager.CurrentProfile.UseModernPaperdoll && mobile.Serial == World.Player.Serial)
+            PaperDollGump paperdoll = UIManager.GetGump<PaperDollGump>(mobile);
+
+            if (paperdoll == null)
             {
-                ModernPaperdoll modernPaperdoll = UIManager.GetGump<ModernPaperdoll>(mobile.Serial);
-                if (modernPaperdoll != null)
+                if (!UIManager.GetGumpCachePosition(mobile, out Point location))
                 {
-                    modernPaperdoll.UpdateTitle(text);
-                    modernPaperdoll.SetInScreen();
-                    modernPaperdoll.BringOnTop();
+                    location = new Point(100, 100);
                 }
-                else
-                {
-                    UIManager.Add(new ModernPaperdoll(mobile.Serial));
-                }
+
+                UIManager.Add(new PaperDollGump(mobile, (flags & 0x02) != 0) { Location = location });
             }
             else
             {
-                PaperDollGump paperdoll = UIManager.GetGump<PaperDollGump>(mobile);
+                bool old = paperdoll.CanLift;
+                bool newLift = (flags & 0x02) != 0;
 
-                if (paperdoll == null)
+                paperdoll.CanLift = newLift;
+                paperdoll.UpdateTitle(text);
+
+                if (old != newLift)
                 {
-                    if (!UIManager.GetGumpCachePosition(mobile, out Point location))
-                    {
-                        location = new Point(100, 100);
-                    }
-
-                    UIManager.Add(new PaperDollGump(mobile, (flags & 0x02) != 0) { Location = location });
+                    paperdoll.RequestUpdateContents();
                 }
-                else
-                {
-                    bool old = paperdoll.CanLift;
-                    bool newLift = (flags & 0x02) != 0;
 
-                    paperdoll.CanLift = newLift;
-                    paperdoll.UpdateTitle(text);
-
-                    if (old != newLift)
-                    {
-                        paperdoll.RequestUpdateContents();
-                    }
-
-                    paperdoll.SetInScreen();
-                    paperdoll.BringOnTop();
-                }
+                paperdoll.SetInScreen();
+                paperdoll.BringOnTop();
             }
         }
 
@@ -3626,7 +3601,6 @@ namespace ClassicUO.Network
             if (entity == World.Player)
             {
                 UoAssist.SignalHits();
-                SpellVisualRangeManager.Instance.ClearCasting();
             }
         }
 
@@ -4555,7 +4529,6 @@ namespace ClassicUO.Network
                     {
                         case 1: // paperdoll
                             UIManager.GetGump<PaperDollGump>(serial)?.Dispose();
-                            UIManager.GetGump<ModernPaperdoll>(serial)?.Dispose();
 
                             break;
 
@@ -4949,7 +4922,6 @@ namespace ClassicUO.Network
 
             string arguments = null;
 
-            SpellVisualRangeManager.Instance.OnClilocReceived((int)cliloc);
             // ## BEGIN - END ## // ONCASTINGGUMP
             if (ProfileManager.CurrentProfile.OnCastingGump)
             {
@@ -6371,7 +6343,6 @@ namespace ClassicUO.Network
                 else
                 {
                     UIManager.GetGump<PaperDollGump>(containerSerial)?.RequestUpdateContents();
-                    UIManager.GetGump<ModernPaperdoll>(containerSerial)?.RequestUpdateContents();
                 }
             }
             else if (SerialHelper.IsItem(containerSerial))
@@ -6478,7 +6449,6 @@ namespace ClassicUO.Network
                     else
                     {
                         UIManager.GetGump<PaperDollGump>(Client.Game.GameCursor.ItemHold.Container)?.RequestUpdateContents();
-                        UIManager.GetGump<ModernPaperdoll>(Client.Game.GameCursor.ItemHold.Container)?.RequestUpdateContents();
                     }
                 }
 

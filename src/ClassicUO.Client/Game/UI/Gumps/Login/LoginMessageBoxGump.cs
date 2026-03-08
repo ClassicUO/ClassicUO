@@ -117,7 +117,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         private void AddMessageButton(int x, int y, string text, bool result)
         {
-            var btn = new GothicStyleButton(x, y, ButtonWidth, ButtonHeight, text, null, 16);
+            var btn = new GothicStyleButtonLogin(x, y, ButtonWidth, ButtonHeight, text, null, 16);
             btn.OnClick += () => OnButtonResult(result);
             Add(btn);
         }

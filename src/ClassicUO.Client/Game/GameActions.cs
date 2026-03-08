@@ -35,7 +35,6 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
-using ClassicUO.TazUO.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Network;
@@ -89,13 +88,17 @@ namespace ClassicUO.Game
         public static bool CloseDurabilityGump()
         {
             Gump g = UIManager.GetGump<DurabilitysGump>();
-
             if (g != null)
             {
                 g.Dispose();
                 return true;
             }
-
+            g = UIManager.GetGump<DurabilitysGumpOld>();
+            if (g != null)
+            {
+                g.Dispose();
+                return true;
+            }
             return false;
         }
 
@@ -120,11 +123,7 @@ namespace ClassicUO.Game
         public static bool ClosePaperdoll(uint? serial = null)
         {
             serial ??= World.Player.Serial;
-            Gump g;
-            if (ProfileManager.CurrentProfile.UseModernPaperdoll)
-                g = UIManager.GetGump<ModernPaperdoll>(serial);
-            else
-                g = UIManager.GetGump<PaperDollGump>(serial);
+            Gump g = UIManager.GetGump<PaperDollGump>(serial);
 
             if (g != null)
             {
@@ -136,35 +135,21 @@ namespace ClassicUO.Game
 
         public static void OpenPaperdoll(uint serial)
         {
-            if (ProfileManager.CurrentProfile.UseModernPaperdoll && serial == World.Player.Serial)
+            PaperDollGump paperDollGump = UIManager.GetGump<PaperDollGump>(serial);
+
+            if (paperDollGump == null)
             {
-                ModernPaperdoll modernPaperdoll = UIManager.GetGump<ModernPaperdoll>(serial);
-                if (modernPaperdoll == null)
-                    UIManager.Add(new ModernPaperdoll(serial));
-                else
-                {
-                    modernPaperdoll.SetInScreen();
-                    modernPaperdoll.BringOnTop();
-                }
+                DoubleClick(serial | 0x80000000);
             }
             else
             {
-                PaperDollGump paperDollGump = UIManager.GetGump<PaperDollGump>(serial);
-
-                if (paperDollGump == null)
+                if (paperDollGump.IsMinimized)
                 {
-                    DoubleClick(serial | 0x80000000);
+                    paperDollGump.IsMinimized = false;
                 }
-                else
-                {
-                    if (paperDollGump.IsMinimized)
-                    {
-                        paperDollGump.IsMinimized = false;
-                    }
 
-                    paperDollGump.SetInScreen();
-                    paperDollGump.BringOnTop();
-                }
+                paperDollGump.SetInScreen();
+                paperDollGump.BringOnTop();
             }
         }
 
@@ -1040,7 +1025,6 @@ namespace ClassicUO.Game
                         World.Player.OnCasting.Start((uint) index);
                 }
                 // ## BEGIN - END ## // ONCASTINGGUMP
-                SpellVisualRangeManager.Instance.ClearCasting();
                 Socket.Send_CastSpellFromBook(index, bookSerial);
             }
         }
@@ -1062,7 +1046,6 @@ namespace ClassicUO.Game
                         World.Player.OnCasting.Start((uint) index);
                 }
                 // ## BEGIN - END ## // ONCASTINGGUMP
-                SpellVisualRangeManager.Instance.ClearCasting();
                 Socket.Send_CastSpell(index);
             }
         }

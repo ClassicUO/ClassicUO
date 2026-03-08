@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -267,7 +267,6 @@ namespace ClassicUO.Game
                             if (SerialHelper.IsMobile(container.Serial))
                             {
                                 UIManager.GetGump<PaperDollGump>(container.Serial)?.RequestUpdateContents();
-                                UIManager.GetGump<ModernPaperdoll>(container.Serial)?.RequestUpdateContents();
                             }
                             else if (SerialHelper.IsItem(container.Serial))
                             {
@@ -493,7 +492,6 @@ namespace ClassicUO.Game
                 if (SerialHelper.IsMobile(containerSerial))
                 {
                     UIManager.GetGump<PaperDollGump>(containerSerial)?.RequestUpdateContents();
-                    UIManager.GetGump<ModernPaperdoll>(containerSerial)?.RequestUpdateContents();
                 }
                 else if (SerialHelper.IsItem(containerSerial))
                 {

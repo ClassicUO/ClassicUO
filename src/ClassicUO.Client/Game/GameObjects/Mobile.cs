@@ -1091,7 +1091,6 @@ namespace ClassicUO.Game.GameObjects
             if (!(this is PlayerMobile))
             {
                 UIManager.GetGump<PaperDollGump>(serial)?.Dispose();
-                UIManager.GetGump<ModernPaperdoll>(serial)?.Dispose();
 
                 _pool.ReturnOne(this);
             }

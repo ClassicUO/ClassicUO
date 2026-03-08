@@ -64,10 +64,11 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private static readonly ushort SELECTED_COLOR = 0x4E9;
         private static readonly ushort NORMAL_COLOR = 0x4EB;
         private uint _selectedCharacter;
-        private GothicStyleButton button;
-        private GothicStyleButton buttonnew;
+        private GothicStyleButtonLogin button;
+        private GothicStyleButtonLogin buttonnew;
         private CharacterEntryGump _characterEntryGump;
         private CharacterEntryGump _lastSelectedGumpPic;
+        private HitBox _deleteHitBox;
         public CharacterSelectionGump() : base(0, 0)
         {
             X = LoginLayoutHelper.ContentOffsetX;
@@ -138,20 +139,13 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     }
 
                     Add(
-                        _characterEntryGump = new CharacterEntryGump((uint)i, character, bodyId, SelectCharacter, LoginCharacter, SelectCharacterHover)
+                        _characterEntryGump = new CharacterEntryGump((uint)i, character, bodyId, SelectCharacter, LoginCharacter, SelectCharacterHover, () => DeleteCharacter(loginScene))
                         {
                             X = LoginLayoutHelper.X(5 + posInList * 140),
-                            Y = LoginLayoutHelper.Y(yOffset + posInList * 3)
+                            Y = LoginLayoutHelper.Y(yOffset)
                         },
                         1
                     );
-
-                    _characterEntryGump.buttonDelete.OnClick += () =>
-                    {
-                        var gump = _characterEntryGump.Parent as CharacterSelectionGump;
-                        if (gump != null)
-                            gump.OnButtonClick((int)Buttons.Delete);
-                    };
 
 
 
@@ -161,9 +155,9 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             if (CanCreateChar(loginScene))
             {
-                Add(buttonnew = new GothicStyleButton(
+                Add(buttonnew = new GothicStyleButtonLogin(
                     LoginLayoutHelper.X(30),
-                    LoginLayoutHelper.Y(180 + yBonus),
+                    LoginLayoutHelper.Y(140 + yBonus),
                     120,
                     40,
                     "NEW",
@@ -184,7 +178,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
            
 
-            Add(button = new GothicStyleButton(
+            Add(button = new GothicStyleButtonLogin(
                 LoginLayoutHelper.X(30),
                 LoginLayoutHelper.Y(680),
                 120,
@@ -199,7 +193,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 OnButtonClick(3);
             };
 
-            Add(button = new GothicStyleButton(
+            Add(button = new GothicStyleButtonLogin(
                 LoginLayoutHelper.ContentWidth - 30 - 120,
                 LoginLayoutHelper.Y(680),
                 120,
@@ -214,6 +208,15 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 OnButtonClick(2);
             };
 
+            LoginScene ls = Client.Game.GetScene<LoginScene>();
+            _deleteHitBox = new HitBox(0, 0, 120, 25, null, 0f);
+            _deleteHitBox.IsVisible = false;
+            _deleteHitBox.MouseUp += (s, e) =>
+            {
+                if (e.Button == MouseButtonType.Left)
+                    DeleteCharacter(ls);
+            };
+            Add(_deleteHitBox);
 
             AcceptKeyboardInput = true;
             ChangePage(1);
@@ -323,35 +326,22 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             if (!string.IsNullOrEmpty(charName))
             {
-                LoadingGump existing = Children.OfType<LoadingGump>().FirstOrDefault();
-
-                if (existing != null)
-                {
-                    Remove(existing);
-                }
-
-                Add
+                var selectedIndex = _selectedCharacter;
+                LoadingGump modal = null;
+                modal = new LoadingGump
                 (
-                    new LoadingGump
-                    (
-                        string.Format(ResGumps.PermanentlyDelete0, charName),
-                        LoginButtons.OK | LoginButtons.Cancel,
-                        buttonID =>
+                    string.Format(ResGumps.PermanentlyDelete0, charName),
+                    LoginButtons.OK | LoginButtons.Cancel,
+                    buttonID =>
+                    {
+                        if (buttonID == (int)LoginButtons.OK)
                         {
-                            if (buttonID == (int)LoginButtons.OK)
-                            {
-                                loginScene.DeleteCharacter(_selectedCharacter);
-                            }
-                            else
-                            {
-                                ChangePage(1);
-                            }
+                            loginScene.DeleteCharacter(selectedIndex);
                         }
-                    ),
-                    2
+                        modal?.Dispose();
+                    }
                 );
-
-                ChangePage(2);
+                UIManager.Add(modal);
             }
         }
 
@@ -361,6 +351,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private void SelectCharacter(uint index)
         {
             _selectedCharacter = index;
+            _lastSelectedGump = null;
 
             foreach (CharacterEntryGump characterGump in FindControls<CharacterEntryGump>())
             {
@@ -368,16 +359,23 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 characterGump.Hue = isSelected ? SELECTED_COLOR : characterGump.NameHueNormal;
                 characterGump._label.Hue = isSelected ? SELECTED_COLOR : characterGump.NameHueNormal;
-                characterGump.Alpha = isSelected ? 1.0f : 0.6f;
+                characterGump.Alpha = 1.0f;
                 characterGump._slideLifted = isSelected;
                 characterGump._isSelected = isSelected;
                 characterGump.buttonDelete.IsVisible = isSelected;
                 characterGump.buttonDelete.Alpha = isSelected ? 1.0f : 0.0f;
+                characterGump._hitBoxDelete.IsVisible = false;
                 characterGump.visibleTn = isSelected;
 
                 if (isSelected)
+                {
                     _lastSelectedGump = characterGump;
+                    _deleteHitBox.X = characterGump.X + 35;
+                    _deleteHitBox.Y = characterGump.Y + 240;
+                    _deleteHitBox.IsVisible = true;
+                }
             }
+            _deleteHitBox.IsVisible = _lastSelectedGump != null;
         }
 
         private void SelectCharacterHover(uint index)
@@ -395,7 +393,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 characterGump.Hue = isHovered || isSelected ? SELECTED_COLOR : characterGump.NameHueNormal;
                 characterGump._label.Hue = isHovered || isSelected ? SELECTED_COLOR : characterGump.NameHueNormal;
-                characterGump.Alpha = isHovered || isSelected ? 1.0f : 0.6f;
+                characterGump.Alpha = 1.0f;
                 characterGump._slideLifted = isSelected || isHovered;
                 characterGump._isSelected = isSelected;
             }
@@ -429,21 +427,19 @@ namespace ClassicUO.Game.UI.Gumps.Login
             private readonly Action<uint> _loginFn;
             private readonly Action<uint> _selectedFn;
             private readonly Action<uint> _hoverFn;
+            private readonly Action _deleteFn;
             private readonly ushort _bodyID;
             private static Art art { get; set; }
             private static PlayerMobile _character;
             private PaperDollInteractable _paperDoll;
             private readonly string savePath;
         public uint _indexCharacter;
-        public GothicStyleButton buttonDelete;
+        public GothicStyleButtonLogin buttonDelete;
+        internal HitBox _hitBoxDelete;
         public bool visibleTn { get; set; }
         public ushort NameHueNormal { get; private set; }
         internal bool _slideLifted;
         internal bool _isSelected;
-        private float _slideOffsetY;
-        private int _baseY;
-        private bool _baseYSet;
-        private const int SLIDE_UP_PIXELS = 14;
         private GumpPic _paperdollBg;
 
             public PaperdollSaveDataDto Load()
@@ -486,7 +482,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 };
             }
 
-            public CharacterEntryGump(uint index, string character, uint bodyID, Action<uint> selectedFn, Action<uint> loginFn, Action<uint> hoverFn)
+            public CharacterEntryGump(uint index, string character, uint bodyID, Action<uint> selectedFn, Action<uint> loginFn, Action<uint> hoverFn, Action deleteFn)
             {
                 CharacterIndex = index;
                 _indexCharacter = index;
@@ -513,6 +509,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 _selectedFn = selectedFn;
                 _hoverFn = hoverFn;
                 _loginFn = loginFn;
+                _deleteFn = deleteFn;
 
                 Add(_paperdollBg = new GumpPic(0, 0, 0x000C, 0) { IsPartialHue = true, AcceptMouseInput = false });
                 _paperdollBg.ScaleWidthAndHeight(Scale);
@@ -587,20 +584,29 @@ namespace ClassicUO.Game.UI.Gumps.Login
                    1
                 );
 
-                Add(buttonDelete = new GothicStyleButton(
-                      x: 75,
-                      y: 245,
-                      width: 20,
-                      height: 20,
-                      text: "X",
+                Add(buttonDelete = new GothicStyleButtonLogin(
+                      x: 35,
+                      y: 240,
+                      width: 120,
+                      height: 25,
+                      text: "DELETE",
                       fontPath: null,
                       fontSize: 22
                   ));
-                buttonDelete.Priority = ClickPriority.High;
+                buttonDelete.AcceptMouseInput = false;
                 visibleTn = true;
+                _hitBoxDelete = new HitBox(35, 240, 120, 25, null, 0f);
+                _hitBoxDelete.MouseUp += (s, e) =>
+                {
+                    if (e.Button == MouseButtonType.Left)
+                        _deleteFn?.Invoke();
+                };
+                Add(_hitBoxDelete);
                 buttonDelete.IsVisible = visibleTn;
                 buttonDelete.Alpha = 0.0f;
 
+                Width = 155;
+                Height = 270;
                 AcceptMouseInput = true;
             }
 
@@ -612,21 +618,37 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 set => _label.Hue = (ushort)value;
             }
 
+            private const int LINE_HEIGHT = 30;
+
             public override bool Draw(UltimaBatcher2D batcher, int x, int y)
             {
+                if (_slideLifted)
+                {
+                    var hue = ShaderHueTranslator.GetHueVector(0, false, 0.85f);
+                    batcher.DrawRectangle(
+                        SolidColorTextureCache.GetTexture(new Color(80, 15, 15)),
+                        x + 35,
+                        y - 5,
+                        120,
+                        LINE_HEIGHT,
+                        hue
+                    );
+
+                    batcher.DrawRectangle(
+                        SolidColorTextureCache.GetTexture(new Color(80, 15, 15)),
+                        x + 35,
+                        y + 230,
+                        120,
+                        1,
+                        hue
+                    );
+                }
+
                 return base.Draw(batcher, x, y);
             }
 
             public override void Update()
             {
-                float target = _slideLifted ? SLIDE_UP_PIXELS : 0f;
-                _slideOffsetY += (target - _slideOffsetY) * 0.28f;
-                if (!_baseYSet)
-                {
-                    _baseY = Y + (int)_slideOffsetY;
-                    _baseYSet = true;
-                }
-                Y = _baseY - (int)_slideOffsetY;
                 base.Update();
             }
 
@@ -636,7 +658,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 for (int i = 0; i < Children.Count; i++)
                 {
                     Control c = Children[i];
-                    if (c != null && c != buttonDelete)
+                    if (c != null && c != buttonDelete && c != _hitBoxDelete)
                         c.Alpha = newValue;
                 }
             }
@@ -654,10 +676,17 @@ namespace ClassicUO.Game.UI.Gumps.Login
             }
 
 
+            private static readonly Rectangle DELETE_BUTTON_BOUNDS = new(35, 240, 120, 25);
+
             protected override void OnMouseUp(int x, int y, MouseButtonType button)
             {
                 if (button == MouseButtonType.Left)
                 {
+                    if (_isSelected && DELETE_BUTTON_BOUNDS.Contains(x, y))
+                    {
+                        _deleteFn?.Invoke();
+                        return;
+                    }
                     _selectedFn(CharacterIndex);
                     buttonDelete.IsVisible = true;
                     buttonDelete.Alpha = 1.0f;

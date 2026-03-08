@@ -86,7 +86,7 @@ namespace ClassicUO.Game.Managers
                             }
 
                             UIManager.GetGump<DurabilitysGump>()?.RequestUpdateContents();
-                            UIManager.GetGump<ModernPaperdoll>()?.RequestUpdateContents();
+                            UIManager.GetGump<DurabilitysGumpOld>()?.RequestUpdateContents();
                         }
                     }
                 }

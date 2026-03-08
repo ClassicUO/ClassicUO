@@ -8,7 +8,7 @@ using System;
 
 namespace ClassicUO.Game.UI.Controls
 {
-    public class GothicStyleButton : Control
+    public class GothicStyleButtonLogin : Control
     {
         private string _text;
         private bool _isHovered;
@@ -19,9 +19,9 @@ namespace ClassicUO.Game.UI.Controls
         private Color _shadowColor;
         private Color _textColor;
         private Color _textShadowColor;
-        private static readonly Vector3 _hueVector = ShaderHueTranslator.GetHueVector(0, false, 1f);
+        private Texture2D _pixelTexture;
 
-        public GothicStyleButton(int x, int y, int width, int height, string text, string fontPath = null, int fontSize = 16)
+        public GothicStyleButtonLogin(int x, int y, int width, int height, string text, string fontPath = null, int fontSize = 16)
         {
             X = x;
             Y = y;
@@ -30,9 +30,9 @@ namespace ClassicUO.Game.UI.Controls
             _text = text;
 
             // Cores do tema gótico/medieval - Background vermelho escuro com texto branco
-            _baseColor = Color.DarkRed;
-            _highlightColor = new Color(180, 50, 50);
-            _shadowColor = new Color(80, 15, 15);
+            _baseColor = Color.DarkRed;                    // Background vermelho escuro
+            _highlightColor = new Color(180, 50, 50);      // Realce mais claro para bordas
+            _shadowColor = new Color(80, 15, 15);          // Sombra mais escura
             _textColor = Color.White;                      // Texto branco para contraste
             _textShadowColor = Color.Black;                // Sombra preta do texto
 
@@ -76,44 +76,39 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
-            Color currentBaseColor = _baseColor;
-            Color currentHighlightColor = _highlightColor;
+            // Ajustar cores baseado no estado
+            Color currentBaseColor = _shadowColor;
+            Color currentHighlightColor = _shadowColor;
             Color currentShadowColor = _shadowColor;
 
             if (_isPressed)
             {
-                currentBaseColor = new Color(
-                    Math.Max(0, _baseColor.R - 25),
-                    Math.Max(0, _baseColor.G - 25),
-                    Math.Max(0, _baseColor.B - 25));
-                currentHighlightColor = new Color(
-                    Math.Max(0, _highlightColor.R - 35),
-                    Math.Max(0, _highlightColor.G - 35),
-                    Math.Max(0, _highlightColor.B - 35));
+                // Quando pressionado, inverter as cores para dar efeito de "pressionado"
+                currentBaseColor = _baseColor;
+                currentHighlightColor = _highlightColor;
+                currentShadowColor = _shadowColor;
             }
             else if (_isHovered)
             {
-                int boost = 22;
-                currentBaseColor = new Color(
-                    Math.Min(255, _baseColor.R + boost),
-                    Math.Min(255, _baseColor.G + boost),
-                    Math.Min(255, _baseColor.B + boost));
-                currentHighlightColor = new Color(
-                    Math.Min(255, _highlightColor.R + boost),
-                    Math.Min(255, _highlightColor.G + boost),
-                    Math.Min(255, _highlightColor.B + boost));
-            }
-            else
-            {
-                currentHighlightColor = new Color(
-                    (_baseColor.R + _highlightColor.R) / 2,
-                    (_baseColor.G + _highlightColor.G) / 2,
-                    (_baseColor.B + _highlightColor.B) / 2);
+                currentBaseColor = _baseColor;
+                currentHighlightColor = _shadowColor;
+                currentShadowColor = _shadowColor;
             }
 
-            batcher.Draw(SolidColorTextureCache.GetTexture(_shadowColor), new Rectangle(x + 3, y + 3, Width, Height), _hueVector);
+            // Criar textura de pixel se não existir
+            if (_pixelTexture == null)
+            {
+                _pixelTexture = new Texture2D(batcher.GraphicsDevice, 1, 1);
+                _pixelTexture.SetData(new[] { Color.Red });
+            }
+
+            batcher.Draw(_pixelTexture, new Rectangle(x + 3, y + 3, Width, Height), Color.DarkRed.ToVector3());
             DrawGradientButton(batcher, x, y, Width, Height, currentBaseColor, currentShadowColor);
+
+            // Desenhar borda com efeito 3D
             DrawBorder(batcher, x, y, Width, Height, currentHighlightColor, currentShadowColor);
+
+            // Desenhar textura/rugosidade
             DrawTextureEffect(batcher, x, y, Width, Height, currentBaseColor);
 
             if (!string.IsNullOrEmpty(_text))
@@ -139,8 +134,8 @@ namespace ClassicUO.Game.UI.Controls
                 int cr = (int)(baseColor.R + (shadowColor.R - baseColor.R) * ratio);
                 int cg = (int)(baseColor.G + (shadowColor.G - baseColor.G) * ratio);
                 int cb = (int)(baseColor.B + (shadowColor.B - baseColor.B) * ratio);
-                var gradColor = new Color(cr, cg, cb, 255);
-                batcher.Draw(SolidColorTextureCache.GetTexture(gradColor), new Rectangle(x, y + i, width, 1), _hueVector);
+                batcher.Draw(_pixelTexture, new Rectangle(x, y + i, width, 1),
+                    new Vector3(cr / 255f, cg / 255f, cb / 255f));
             }
         }
 
@@ -150,47 +145,61 @@ namespace ClassicUO.Game.UI.Controls
         {
             int r = BORDER_RADIUS;
             if (width < r * 2 || height < r * 2)
+            {
                 r = 0;
-            var highlightTex = SolidColorTextureCache.GetTexture(highlightColor);
-            var shadowTex = SolidColorTextureCache.GetTexture(shadowColor);
+            }
+            Vector3 highlightVec = new Vector3(highlightColor.R / 255f, highlightColor.G / 255f, highlightColor.B / 255f);
+            Vector3 shadowVec = new Vector3(shadowColor.R / 255f, shadowColor.G / 255f, shadowColor.B / 255f);
             if (r > 0)
             {
-                batcher.Draw(highlightTex, new Rectangle(x + r, y, width - r * 2, 2), _hueVector);
-                batcher.Draw(shadowTex, new Rectangle(x + r, y + height - 2, width - r * 2, 2), _hueVector);
-                batcher.Draw(highlightTex, new Rectangle(x, y + r, 2, height - r * 2), _hueVector);
-                batcher.Draw(shadowTex, new Rectangle(x + width - 2, y + r, 2, height - r * 2), _hueVector);
-                batcher.Draw(highlightTex, new Rectangle(x, y, r, r), _hueVector);
-                batcher.Draw(highlightTex, new Rectangle(x + width - r, y, r, r), _hueVector);
-                batcher.Draw(shadowTex, new Rectangle(x, y + height - r, r, r), _hueVector);
-                batcher.Draw(shadowTex, new Rectangle(x + width - r, y + height - r, r, r), _hueVector);
+                batcher.Draw(_pixelTexture, new Rectangle(x + r, y, width - r * 2, 2), highlightVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x + r, y + height - 2, width - r * 2, 2), shadowVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x, y + r, 2, height - r * 2), highlightVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x + width - 2, y + r, 2, height - r * 2), shadowVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x, y, r, r), highlightVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x + width - r, y, r, r), highlightVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x, y + height - r, r, r), shadowVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x + width - r, y + height - r, r, r), shadowVec);
             }
             else
             {
-                batcher.Draw(highlightTex, new Rectangle(x, y, width, 2), _hueVector);
-                batcher.Draw(shadowTex, new Rectangle(x, y + height - 2, width, 2), _hueVector);
-                batcher.Draw(highlightTex, new Rectangle(x, y, 2, height), _hueVector);
-                batcher.Draw(shadowTex, new Rectangle(x + width - 2, y, 2, height), _hueVector);
+                batcher.Draw(_pixelTexture, new Rectangle(x, y, width, 2), highlightVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x, y + height - 2, width, 2), shadowVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x, y, 2, height), highlightVec);
+                batcher.Draw(_pixelTexture, new Rectangle(x + width - 2, y, 2, height), shadowVec);
             }
         }
 
         private void DrawTextureEffect(UltimaBatcher2D batcher, int x, int y, int width, int height, Color baseColor)
         {
+            // Efeito de textura vermelha mais sutil
             var textureColor = new Color(
-                Math.Max(0, baseColor.R - 20),
-                Math.Max(0, baseColor.G - 10),
-                Math.Max(0, baseColor.B - 8),
-                255
+                Math.Max(0, baseColor.R - 20),    // Vermelho mais escuro para textura
+                Math.Max(0, baseColor.G - 10),    // Verde reduzido
+                Math.Max(0, baseColor.B - 8)      // Azul reduzido
             );
-            var textureTex = SolidColorTextureCache.GetTexture(textureColor);
-            var random = new Random(12345);
+
+            // Desenhar padrão de textura mais orgânico (não uniforme)
+            Random random = new Random(12345); // Seed fixo para consistência
+            
             for (int i = 4; i < width - 4; i += 6)
             {
-                int lineX = x + i + random.Next(-2, 3);
+                int lineX = x + i + random.Next(-2, 3); // Variação sutil na posição
                 if (lineX >= x + 2 && lineX < x + width - 2)
                 {
-                    int lineHeight = height - 6 + random.Next(-2, 3);
-                    int lineY = y + 3 + random.Next(-1, 2);
-                    batcher.Draw(textureTex, new Rectangle(lineX, lineY, 1, lineHeight), _hueVector);
+                    int lineHeight = height - 6 + random.Next(-2, 3); // Variação na altura
+                    int lineY = y + 3 + random.Next(-1, 2); // Variação na posição Y
+                    
+                    // Linha com variação de opacidade
+                    var lineColor = new Color(
+                        textureColor.R,
+                        textureColor.G,
+                        textureColor.B,
+                        (byte)(180 + random.Next(-30, 31)) // Variação de opacidade
+                    );
+                    
+                    batcher.Draw(_pixelTexture, new Rectangle(lineX, lineY, 1, lineHeight), 
+                        new Vector3(lineColor.R / 255f, lineColor.G / 255f, lineColor.B / 255f));
                 }
             }
         }

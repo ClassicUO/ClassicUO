@@ -846,6 +846,7 @@ namespace ClassicUO.Game.UI.Gumps
         private class EquipmentSlot : Control
         {
             private ItemGumpFixed _itemGump;
+            private Label _durabilityExclamation;
             private readonly PaperDollGump _paperDollGump;
 
             private Control bg, border;
@@ -943,6 +944,24 @@ namespace ClassicUO.Game.UI.Gumps
                             _itemGump.ScaleWidthAndHeight(forcedScale).ScaleXAndY(forcedScale);
                         }
                     }
+                }
+
+                _durabilityExclamation?.Dispose();
+                _durabilityExclamation = null;
+                item = World.Items.Get(LocalSerial);
+                if (item != null
+                    && ProfileManager.CurrentProfile?.ColorPaperdollByDurability == true
+                    && World.DurabilityManager != null
+                    && World.DurabilityManager.TryGetDurability(LocalSerial, out var dur)
+                    && dur.MaxDurabilty > 0
+                    && dur.Percentage < 0.7f)
+                {
+                    Add(_durabilityExclamation = new Label("!", true, 0x0020, font: 1)
+                    {
+                        X = 12,
+                        Y = -1,
+                        AcceptMouseInput = false
+                    });
                 }
 
                 base.Update();

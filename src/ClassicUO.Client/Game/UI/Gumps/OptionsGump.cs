@@ -42,7 +42,6 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
-using ClassicUO.TazUO.Managers;
 using ClassicUO.TazUO.Options;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -290,7 +289,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _onCastingGump, _onCastingGump_hidden;
         // ## BEGIN - END ## // ONCASTINGGUMP
         // ## BEGIN - END ## // MISC3 SHOWALLLAYERS
-        private Checkbox _showAllLayers, _showAllLayersPaperdoll;
+        private Checkbox _showAllLayers, _showAllLayersPaperdoll, _colorPaperdollByDurability;
         private InputField _showAllLayersPaperdoll_X;
         // ## BEGIN - END ## // MISC3 SHOWALLLAYERS
         // ## BEGIN - END ## // MISC3 THIEFSUPREME
@@ -634,47 +633,37 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            int btnY = HEIGHT - 40;
+            const int BTN_WIDTH = 90;
+            const int BTN_HEIGHT = 20;
+            int btnY = HEIGHT - BTN_HEIGHT - 15;
 
-            Add
-            (
-                new Button((int)Buttons.Cancel, 0x00F3, 0x00F1, 0x00F2)
-                {
-                    X = 154 + offsetX,
-                    Y = btnY,
-                    ButtonAction = ButtonAction.Activate
-                }
-            );
+            var cancelBtn = new GothicStyleButton(154 + offsetX, btnY, BTN_WIDTH, BTN_HEIGHT, "Cancel");
+            cancelBtn.BaseColor = new Color(130, 55, 55);
+            cancelBtn.HighlightColor = new Color(165, 90, 90);
+            cancelBtn.ShadowColor = new Color(90, 35, 35);
+            cancelBtn.OnClick += () => OnButtonClick((int)Buttons.Cancel);
+            Add(cancelBtn);
 
-            Add
-            (
-                new Button((int)Buttons.Apply, 0x00EF, 0x00F0, 0x00EE)
-                {
-                    X = 248 + offsetX,
-                    Y = btnY,
-                    ButtonAction = ButtonAction.Activate
-                }
-            );
+            var applyBtn = new GothicStyleButton(248 + offsetX, btnY, BTN_WIDTH, BTN_HEIGHT, "Apply");
+            applyBtn.BaseColor = new Color(40, 115, 40);
+            applyBtn.HighlightColor = new Color(70, 155, 70);
+            applyBtn.ShadowColor = new Color(25, 75, 25);
+            applyBtn.OnClick += () => OnButtonClick((int)Buttons.Apply);
+            Add(applyBtn);
 
-            Add
-            (
-                new Button((int)Buttons.Default, 0x00F6, 0x00F4, 0x00F5)
-                {
-                    X = 346 + offsetX,
-                    Y = btnY,
-                    ButtonAction = ButtonAction.Activate
-                }
-            );
+            var defaultBtn = new GothicStyleButton(346 + offsetX, btnY, BTN_WIDTH, BTN_HEIGHT, "Default");
+            defaultBtn.BaseColor = new Color(100, 100, 100);
+            defaultBtn.HighlightColor = new Color(155, 155, 155);
+            defaultBtn.ShadowColor = new Color(60, 60, 60);
+            defaultBtn.OnClick += () => OnButtonClick((int)Buttons.Default);
+            Add(defaultBtn);
 
-            Add
-            (
-                new Button((int)Buttons.Ok, 0x00F9, 0x00F8, 0x00F7)
-                {
-                    X = 443 + offsetX,
-                    Y = btnY,
-                    ButtonAction = ButtonAction.Activate
-                }
-            );
+            var okBtn = new GothicStyleButton(443 + offsetX, btnY, BTN_WIDTH, BTN_HEIGHT, "Okay");
+            okBtn.BaseColor = new Color(165, 130, 50);
+            okBtn.HighlightColor = new Color(210, 175, 90);
+            okBtn.ShadowColor = new Color(115, 90, 30);
+            okBtn.OnClick += () => OnButtonClick((int)Buttons.Ok);
+            Add(okBtn);
 
             Width = WIDTH;
             Height = HEIGHT;
@@ -778,7 +767,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            section.AddRight
+            section.Add
             (
                 _useShiftPathfind = AddCheckBox
                 (
@@ -790,7 +779,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            section.AddRight
+            section.Add
             (
                 _pathFindSingleClick = AddCheckBox
                 (
@@ -814,7 +803,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            section.AddRight
+            section.Add
             (
                 _alwaysRunUnlessHidden = AddCheckBox
                 (
@@ -838,7 +827,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            section.AddRight
+            section.Add
             (
                 _smoothDoors = AddCheckBox
                 (
@@ -2737,9 +2726,8 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
                 }
 
-                ushort speechHue = (ushort)RandomHelper.GetValue(2, 0x03b2); //this seems to be the acceptable hue range for chat messages,
-
-                ushort emoteHue = (ushort)RandomHelper.GetValue(2, 0x03b2); //taken from POL source code.
+                ushort speechHue = (ushort)RandomHelper.GetValue(2, 0x03b2);
+                ushort emoteHue = (ushort)RandomHelper.GetValue(2, 0x03b2);
                 ushort yellHue = (ushort)RandomHelper.GetValue(2, 0x03b2);
                 ushort whisperHue = (ushort)RandomHelper.GetValue(2, 0x03b2);
                 _currentProfile.SpeechHue = speechHue;
@@ -2754,7 +2742,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             rightArea.Add(_randomizeColorsButton);
             startY += _randomizeColorsButton.Height + 2 + 20;
-
 
             _speechColorPickerBox = AddHueDisplay
             (
@@ -4328,7 +4315,7 @@ namespace ClassicUO.Game.UI.Gumps
                     ));
                 _coolDownY.SetText(_currentProfile.CoolDownY.ToString());
 
-                _coolDowns.AddRight(_uselastCooldownPosition = AddCheckBox(null, "Use last moved bar position", _currentProfile.UseLastMovedCooldownPosition, 0, 0));
+                _coolDowns.Add(_uselastCooldownPosition = AddCheckBox(null, "Use last moved bar position", _currentProfile.UseLastMovedCooldownPosition, 0, 0));
 
             }//Cooldown position
             rightArea.Add(_coolDowns);
@@ -4492,7 +4479,7 @@ namespace ClassicUO.Game.UI.Gumps
                         ));
 
                 gridSection.Add(AddLabel(null, "Hide border around gump", 0, 0));
-                gridSection.AddRight(_gridHideBorder = AddCheckBox(null, "", _currentProfile.Grid_HideBorder, 0, 0));
+                gridSection.Add(_gridHideBorder = AddCheckBox(null, "", _currentProfile.Grid_HideBorder, 0, 0));
 
                 gridSection.Add(AddLabel(null, "Default grid rows x columns", 0, 0));
                     gridSection.AddRight(_gridDefaultRows = AddInputField(null, 0, 0, 25, TEXTBOX_HEIGHT, null, 0, false, true));
@@ -4578,9 +4565,8 @@ namespace ClassicUO.Game.UI.Gumps
             _hueLabel.Y = 1;
             main.Add(_hueLabel);
 
-            ClickableColorBox _hueSelector = new ClickableColorBox(_hueLabel.X + _hueLabel.Width + 2, 1, 13, 14, data.hue);
+            var _hueSelector = new ModernColorPicker.HueDisplay(data.hue, null, true) { X = _hueLabel.X + _hueLabel.Width + 2, Y = 1 };
             main.Add(_hueSelector);
-
 
             InputField _name = AddInputField(null, _hueSelector.X + _hueSelector.Width + 10, 1, 100, TEXTBOX_HEIGHT);
             _name.SetText(data.label);
@@ -5165,6 +5151,8 @@ namespace ClassicUO.Game.UI.Gumps
             startY += _showAllLayers.Height + 2;
             section11.Add(_showAllLayersPaperdoll = AddCheckBox(null, "Show all equipment layers on paperdoll ON / OFF", _currentProfile.ShowAllLayersPaperdoll, startX, startY));
             startY += _showAllLayersPaperdoll.Height + 2;
+            section11.Add(_colorPaperdollByDurability = AddCheckBox(null, "Color paperdoll items by low durability (yellow/red)", _currentProfile.ColorPaperdollByDurability, startX, startY));
+            startY += _colorPaperdollByDurability.Height + 2;
 
             section11.Add
             (
@@ -5203,9 +5191,9 @@ namespace ClassicUO.Game.UI.Gumps
             sectionJournal.Add(AddLabel(null, "Journal style", 0, 0));
             sectionJournal.AddRight(_journalStyle = AddCombobox(null, Enum.GetNames(typeof(ResizableJournal.BorderStyle)), _currentProfile.JournalStyle, 0, 0, 150));
             sectionJournal.Add(AddLabel(null, "Hide gump border", 0, 0));
-            sectionJournal.AddRight(_hideJournalBorder = AddCheckBox(null, "", _currentProfile.HideJournalBorder, 0, 0));
+            sectionJournal.Add(_hideJournalBorder = AddCheckBox(null, "", _currentProfile.HideJournalBorder, 0, 0));
             sectionJournal.Add(AddLabel(null, "Hide timestamp", 0, 0));
-            sectionJournal.AddRight(_hideJournalTimestamp = AddCheckBox(null, "", _currentProfile.HideJournalTimestamp, 0, 0));
+            sectionJournal.Add(_hideJournalTimestamp = AddCheckBox(null, "", _currentProfile.HideJournalTimestamp, 0, 0));
 
             SettingsSection sectionNameplates = AddSettingsSection(box, "Nameplates");
             sectionNameplates.Y = sectionJournal.Bounds.Bottom + 40;
@@ -5244,8 +5232,8 @@ namespace ClassicUO.Game.UI.Gumps
             sectionMobiles.AddRight(_overheadTextWidth = AddHSlider(null, 100, 600, _currentProfile.OverheadChatWidth, 0, 0, 200));
             sectionMobiles.Add(AddLabel(null, "Below mobile health line size", 0, 0));
             sectionMobiles.AddRight(_healthLineSizeMultiplier = AddHSlider(null, 1, 5, _currentProfile.HealthLineSizeMultiplier, 0, 0, 150));
-            sectionMobiles.Add(AddLabel(null, "Open health bar gump for last attack automatically", 0, 0));
-            sectionMobiles.AddRight(_openHealthBarForLastAttack = AddCheckBox(null, "", _currentProfile.OpenHealthBarForLastAttack, 0, 0));
+            sectionMobiles.Add(_openHealthBarForLastAttack = AddCheckBox(null, "", _currentProfile.OpenHealthBarForLastAttack, 0, 0));
+            sectionMobiles.AddRight(AddLabel(null, "Open health bar gump for last attack automatically", 0, 0));
 
             SettingsSection sectionMiscTaz = AddSettingsSection(box, "Misc");
             sectionMiscTaz.Y = sectionMobiles.Bounds.Bottom + 40;
@@ -5274,28 +5262,28 @@ namespace ClassicUO.Game.UI.Gumps
             sectionMiscTaz.PopIndent();
             sectionMiscTaz.Add(AddLabel(null, "Spell Icon Scale", 0, 0));
             sectionMiscTaz.AddRight(_spellIconScale = AddHSlider(null, 50, 300, _currentProfile.SpellIconScale, 0, 0, 200));
-            sectionMiscTaz.Add(AddLabel(null, "Display matching macro hotkeys on spell icons", 0, 0));
-            sectionMiscTaz.AddRight(_spellIconDisplayHotkey = AddCheckBox(null, "", _currentProfile.SpellIcon_DisplayHotkey, 0, 0));
+            sectionMiscTaz.Add(_spellIconDisplayHotkey = AddCheckBox(null, "", _currentProfile.SpellIcon_DisplayHotkey, 0, 0));
+            sectionMiscTaz.AddRight(AddLabel(null, "Display matching macro hotkeys on spell icons", 0, 0));
             sectionMiscTaz.PushIndent();
             sectionMiscTaz.Add(AddLabel(null, "Hotkey text hue", 0, 0));
             sectionMiscTaz.AddRight(_spellIconHotkeyHue = new ModernColorPicker.HueDisplay(_currentProfile.SpellIcon_HotkeyHue, null, true));
             sectionMiscTaz.PopIndent();
-            sectionMiscTaz.Add(AddLabel(null, "Enable opacity adjustment via Alt + Scroll", 0, 0));
-            sectionMiscTaz.AddRight(_enableAlphaScrollWheel = AddCheckBox(null, "", _currentProfile.EnableAlphaScrollingOnGumps, 0, 0));
-            sectionMiscTaz.Add(AddLabel(null, "Use advanced shop gump", 0, 0));
-            sectionMiscTaz.AddRight(_useModernShop = AddCheckBox(null, "", _currentProfile.UseModernShopGump, 0, 0));
-            sectionMiscTaz.Add(AddLabel(null, "Display skill progress bar on skill changes", 0, 0));
-            sectionMiscTaz.AddRight(_skillProgressBarOnChange = AddCheckBox(null, "", _currentProfile.DisplaySkillBarOnChange, 0, 0));
+            sectionMiscTaz.Add(_enableAlphaScrollWheel = AddCheckBox(null, "", _currentProfile.EnableAlphaScrollingOnGumps, 0, 0));
+            sectionMiscTaz.AddRight(AddLabel(null, "Enable opacity adjustment via Alt + Scroll", 0, 0));
+            sectionMiscTaz.Add(_useModernShop = AddCheckBox(null, "", _currentProfile.UseModernShopGump, 0, 0));
+            sectionMiscTaz.AddRight(AddLabel(null, "Use advanced shop gump", 0, 0));
+            sectionMiscTaz.Add(_skillProgressBarOnChange = AddCheckBox(null, "", _currentProfile.DisplaySkillBarOnChange, 0, 0));
+            sectionMiscTaz.AddRight(AddLabel(null, "Display skill progress bar on skill changes", 0, 0));
             sectionMiscTaz.Add(AddLabel(null, "Skill progress bar format", 0, 0));
             sectionMiscTaz.AddRight(_skillProgressBarFormat = AddInputField(null, 0, 0, 250, TEXTBOX_HEIGHT));
             _skillProgressBarFormat.SetText(_currentProfile.SkillBarFormat);
-            sectionMiscTaz.Add(AddLabel(null, "Close anchored healthbars when automatically closing healthbars", 0, 0));
-            sectionMiscTaz.AddRight(_closeHPBarWhenAnchored = AddCheckBox(null, "", _currentProfile.CloseHealthBarIfAnchored, 0, 0));
+            sectionMiscTaz.Add(_closeHPBarWhenAnchored = AddCheckBox(null, "", _currentProfile.CloseHealthBarIfAnchored, 0, 0));
+            sectionMiscTaz.AddRight(AddLabel(null, "Close anchored healthbars when automatically closing healthbars", 0, 0));
             var autoLootBtn = new NiceButton(0, 0, 150, TEXTBOX_HEIGHT, ButtonAction.Activate, "Open auto loot options") { IsSelectable = false, DisplayBorder = true };
             autoLootBtn.MouseUp += (s, e) => { if (e.Button == MouseButtonType.Left) AutoLootOptions.AddToUI(); };
             sectionMiscTaz.Add(autoLootBtn);
-            sectionMiscTaz.Add(AddLabel(null, Language.Instance?.GetTazUO?.ShowUseLootModalOnCtrl ?? "Show Use/Loot modal when pressing Ctrl (nearby items)", 0, 0));
-            sectionMiscTaz.AddRight(_enableNearbyItemGump = AddCheckBox(null, "", _currentProfile.EnableNearbyItemGump, 0, 0));
+            sectionMiscTaz.Add(_enableNearbyItemGump = AddCheckBox(null, "", _currentProfile.EnableNearbyItemGump, 0, 0));
+            sectionMiscTaz.AddRight(AddLabel(null, Language.Instance?.GetTazUO?.ShowUseLootModalOnCtrl ?? "Show Use/Loot modal when pressing Ctrl (nearby items)", 0, 0));
 
             Add(rightArea, PAGE);
         }
@@ -6813,7 +6801,6 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _currentProfile.BackpackStyle = _backpackStyle.SelectedIndex;
                 UIManager.GetGump<PaperDollGump>(World.Player.Serial)?.RequestUpdateContents();
-                UIManager.GetGump<ModernPaperdoll>(World.Player.Serial)?.RequestUpdateContents();
                 Item backpack = World.Player.FindItemByLayer(Layer.Backpack);
                 GameActions.DoubleClick(backpack);
             }
@@ -7202,6 +7189,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.ShowAllLayers = _showAllLayers.IsChecked;
             _currentProfile.ShowAllLayersPaperdoll = _showAllLayersPaperdoll.IsChecked;
             _currentProfile.ShowAllLayersPaperdoll_X = int.Parse(_showAllLayersPaperdoll_X.Text);
+            _currentProfile.ColorPaperdollByDurability = _colorPaperdollByDurability.IsChecked;
             // ## BEGIN - END ## // MISC3 SHOWALLLAYERS
             // ## BEGIN - END ## // MISC3 THIEFSUPREME
             _currentProfile.OverrideContainerOpenRange = _overrideContainerOpenRange.IsChecked;

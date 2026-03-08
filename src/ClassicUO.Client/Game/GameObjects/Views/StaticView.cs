@@ -38,7 +38,6 @@ using ClassicUO.Dust765.Dust765;
 // ## BEGIN - END ## // ART / HUE CHANGES
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
-using ClassicUO.TazUO.Managers;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -92,16 +91,6 @@ namespace ClassicUO.Game.GameObjects
             {
                 hue = Constants.DEAD_RANGE_COLOR;
                 partial = false;
-            }
-
-            if (SelectedObject.Object == this)
-            {
-                SpellVisualRangeManager.Instance.LastCursorTileLoc = new Vector2(X, Y);
-            }
-
-            if (ProfileManager.CurrentProfile?.PvP_SpellRangeOnCursor == true && SpellVisualRangeManager.Instance.IsTargetingAfterCasting())
-            {
-                hue = SpellVisualRangeManager.Instance.ProcessHueForTile(hue, this);
             }
 
             if (TileMarkerManager.Instance.IsTileMarked(X, Y, World.Map.Index, out var nhue))

@@ -41,7 +41,6 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI;
 using ClassicUO.TazUO;
-using ClassicUO.TazUO.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Network;
@@ -295,7 +294,6 @@ namespace ClassicUO.Game.Scenes
             EventSink.InvokeOnConnected(null);
             GameController.UpdateBackgroundHueShader();
             SpellDefinition.LoadCustomSpells();
-            SpellVisualRangeManager.Instance.OnSceneLoad();
             PvMPvPManager.Instance.OnSceneLoad();
             OnCastingGump.OnSceneLoad();
             AutoLootManager.Instance.OnSceneLoad();
@@ -494,8 +492,6 @@ namespace ClassicUO.Game.Scenes
 
             ProfileManager.CurrentProfile?.Save(ProfileManager.ProfilePath);
             TileMarkerManager.Instance.Save();
-            SpellVisualRangeManager.Instance.Save();
-            SpellVisualRangeManager.Instance.OnSceneUnload();
             PvMPvPManager.Instance.OnSceneUnload();
             OnCastingGump.OnSceneUnload();
             AutoLootManager.Instance.Save();
@@ -984,9 +980,9 @@ namespace ClassicUO.Game.Scenes
                     {
                         StopFollowing();
                     }
-                    else if (distance > currentProfile.AutoFollowDistance)
+                    else if (distance > 2)
                     {
-                        Pathfinder.WalkTo(follow.X, follow.Y, follow.Z, currentProfile.AutoFollowDistance);
+                        Pathfinder.WalkTo(follow.X, follow.Y, follow.Z, 2);
                     }
                 }
                 // ## BEGIN - END ## // TAZUO
