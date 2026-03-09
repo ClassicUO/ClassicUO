@@ -93,7 +93,7 @@ namespace ClassicUO
 
             Window.ClientSizeChanged += WindowOnClientSizeChanged;
             Window.AllowUserResizing = true;
-            Window.Title = $"Dust 2.0 - {CUOEnviroment.Version}";
+            Window.Title = $"Dust 3.0 - {CUOEnviroment.Version}";
             IsMouseVisible = Settings.GlobalSettings.RunMouseInASeparateThread;
 
             IsFixedTimeStep = false;
@@ -283,7 +283,7 @@ namespace ClassicUO
 #if DEV_BUILD
                 Window.Title = $"ClassicUO [dev] - {CUOEnviroment.Version}";
 #else
-                Window.Title = $"[Dust765.4 {CUOEnviroment.Version}]";
+                Window.Title = $"[Dust765.3.0 {CUOEnviroment.Version}]";
 #endif
             }
             else
@@ -291,7 +291,7 @@ namespace ClassicUO
 #if DEV_BUILD
                 Window.Title = $"{title} - ClassicUO [dev] - {CUOEnviroment.Version}";
 #else
-                Window.Title = $"{title} - [Dust765.4 {CUOEnviroment.Version}]";
+                Window.Title = $"{title} - [Dust765.3.0 {CUOEnviroment.Version}]";
 #endif
             }
         }
