@@ -2,6 +2,15 @@
 	path = external/FNA
 	url = https://github.com/FNA-XNA/FNA.git
 	branch = master
+[submodule "external/FNA/lib/SDL3-CS"]
+	path = external/FNA/lib/SDL3-CS
+	url = https://github.com/flibitijibibo/SDL3-CS.git
+[submodule "external/FNA/lib/dav1dfile"]
+	path = external/FNA/lib/dav1dfile
+	url = https://github.com/MoonsideGames/dav1dfile
+[submodule "external/MP3Sharp"]
+	path = external/MP3Sharp
+	url = https://github.com/ZaneDubya/MP3Sharp.git
 [submodule "external/UOSteam"]
 	path = external/UOSteam
 	url = https://github.com/jaedan/steam-engine.git

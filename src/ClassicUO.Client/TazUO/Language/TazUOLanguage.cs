@@ -2,7 +2,7 @@ namespace ClassicUO.TazUO
 {
     public class TazUOLanguage
     {
-        public string TazuoVersionHistory { get; set; } = "Dust765.4 Version History";
+        public string TazuoVersionHistory { get; set; } = "Dust765 3.0 Version History";
         public string CurrentVersion { get; set; } = "Current Version: ";
         public string TazUOWiki { get; set; } = "TazUO Wiki";
         public string TazUODiscord { get; set; } = "TazUO Discord";

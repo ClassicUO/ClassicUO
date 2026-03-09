@@ -67,6 +67,11 @@ namespace ClassicUO.TazUO.UI.Gumps
             int contentY = 0;
             string[] sections =
             {
+                "/c[yellow]v3.0.0/cd",
+                "",
+                "/c[yellow]Options (Dust)/cd",
+                "- JournalMessagesOnlyInJournalBox exposed in Misc; default false",
+                "",
                 "/c[yellow]v2.0.11/cd",
                 "",
                 "/c[yellow]Macros/cd",
