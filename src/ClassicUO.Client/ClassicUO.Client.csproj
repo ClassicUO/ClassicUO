@@ -69,7 +69,7 @@
   <ItemGroup>
     <PackageReference Include="IronPython" Version="2.7.12" />
     <ProjectReference Include="..\..\external\FNA\FNA.Core.csproj" />
-    <ProjectReference Include="..\..\external\UOSteam\UOScript\UOScript.SDK.csproj" />
+    <ProjectReference Include="..\..\external\UOSteam\UOScript\UOScript.csproj" />
     <ProjectReference Include="..\ClassicUO.Assets\ClassicUO.Assets.csproj" />
     <ProjectReference Include="..\ClassicUO.Renderer\ClassicUO.Renderer.csproj" />
     <ProjectReference Include="..\ClassicUO.Utility\ClassicUO.Utility.csproj" />
