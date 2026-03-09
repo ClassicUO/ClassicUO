@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -32,7 +32,7 @@
 
 using System;
 using System.Runtime.InteropServices;
-using SDL2;
+using SDL3;
 
 namespace ClassicUO.Utility.Platforms
 {
@@ -77,6 +77,7 @@ namespace ClassicUO.Utility.Platforms
 
         private class WinNativeLoader : NativeLoader
         {
+#if WINDOWS
             [DllImport("kernel32", EntryPoint = "LoadLibrary")]
             private static extern IntPtr LoadLibrary_WIN(string fileName);
 
@@ -85,6 +86,11 @@ namespace ClassicUO.Utility.Platforms
 
             [DllImport("kernel32", EntryPoint = "FreeLibrary")]
             private static extern int FreeLibrary_WIN(IntPtr module);
+#else
+            private static IntPtr LoadLibrary_WIN(string fileName) => IntPtr.Zero;
+            private static IntPtr GetProcAddress_WIN(IntPtr module, string procName) => IntPtr.Zero;
+            private static int FreeLibrary_WIN(IntPtr module) => 0;
+#endif
 
 
             public override IntPtr LoadLibrary(string name)

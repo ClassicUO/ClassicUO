@@ -1,0 +1,387 @@
+name: CI
+
+on: [push, pull_request]
+
+env:
+  SDL2_VERSION: 2.30.11
+  SDL3_VERSION: 3.2.0
+
+jobs:
+  linux-SDL2:
+    name: Steam Linux Runtime (SDL2)
+    runs-on: ubuntu-latest
+    container:
+      image: registry.gitlab.steamos.cloud/steamrt/sniper/sdk:latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: CMake configure (Debug)
+      run: cmake -B debug -G Ninja . -DCMAKE_BUILD_TYPE=Debug -DBUILD_SDL3=OFF
+
+    - name: Build (Debug)
+      run: ninja -C debug
+
+    - name: CMake configure (Release)
+      run: cmake -B release -G Ninja . -DCMAKE_BUILD_TYPE=Release -DBUILD_SDL3=OFF
+
+    - name: Build (Release)
+      run: |
+        ninja -C release
+
+  linux:
+    name: Steam Linux Runtime
+    runs-on: ubuntu-latest
+    container:
+      image: registry.gitlab.steamos.cloud/steamrt/sniper/sdk:latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+    - name: Install chrpath
+      run: apt install -y chrpath
+
+    - name: CMake configure (Debug)
+      run: cmake -B debug -G Ninja . -DCMAKE_BUILD_TYPE=Debug
+
+    - name: Build (Debug)
+      run: ninja -C debug
+
+    - name: CMake configure (Release)
+      run: cmake -B release -G Ninja . -DCMAKE_BUILD_TYPE=Release
+
+    - name: Build (Release)
+      run: |
+        ninja -C release
+        chrpath -d release/libFNA3D.so.0
+        strip -S release/libFNA3D.so.0
+
+    - name: Archive build result
+      uses: actions/upload-artifact@v4
+      with:
+        name: FNA3D-lib64
+        path: release/libFNA3D.so.0
+
+  linux-aarch64:
+    name: Steam Linux Runtime (AArch64)
+    runs-on: ubuntu-24.04-arm
+    container:
+      image: registry.gitlab.steamos.cloud/steamrt/sniper/sdk/arm64:latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+    - name: Install chrpath
+      run: apt install -y chrpath
+
+    - name: CMake configure (Debug)
+      run: cmake -B debug -G Ninja . -DCMAKE_BUILD_TYPE=Debug
+
+    - name: Build (Debug)
+      run: ninja -C debug
+
+    - name: CMake configure (Release)
+      run: cmake -B release -G Ninja . -DCMAKE_BUILD_TYPE=Release
+
+    - name: Build (Release)
+      run: |
+        ninja -C release
+        chrpath -d release/libFNA3D.so.0
+        strip -S release/libFNA3D.so.0
+
+    - name: Archive build result
+      uses: actions/upload-artifact@v4
+      with:
+        name: FNA3D-libaarch64
+        path: release/libFNA3D.so.0
+
+  linux-ppc:
+    name: Debian Linux PPC
+    runs-on: ubuntu-latest
+    container:
+      image: dockcross/linux-ppc:latest
+    steps:
+    - name: Install chrpath
+      run: apt install -y chrpath
+
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Clone SDL3
+      run: git clone --depth 1 --branch release-$SDL3_VERSION https://github.com/libsdl-org/SDL.git
+
+    - name: Build SDL3 (Debug)
+      run: |
+        cd SDL
+        cmake -B debug -G Ninja . -DCMAKE_BUILD_TYPE=Debug -DSDL_UNIX_CONSOLE_BUILD=ON
+        ninja -C debug
+        cd ..
+
+    - name: CMake configure (Debug)
+      run: cmake -B debug -G Ninja . -DCMAKE_BUILD_TYPE=Debug -DSDL3_DIR=${GITHUB_WORKSPACE}/SDL/debug
+
+    - name: Build (Debug)
+      run: |
+        ninja -C debug
+        # Temporary, remove when Release builds work
+        chrpath -d debug/libFNA3D.so.0
+        powerpc-unknown-linux-gnu-strip -S debug/libFNA3D.so.0
+
+    - name: CMake configure (Release)
+      run: cmake -B release -G Ninja . -DCMAKE_BUILD_TYPE=Release -DSDL3_DIR=${GITHUB_WORKSPACE}/SDL/debug
+
+    #- name: Build (Release)
+    #  run: |
+    #    ninja -C release
+    #    chrpath -d release/libFNA3D.so.0
+    #    powerpc-unknown-linux-gnu-strip -S release/libFNA3D.so.0
+        
+    - name: Archive build result
+      uses: actions/upload-artifact@v4
+      with:
+        name: FNA3D-libpowerpc
+    #    path: release/libFNA3D.so.0 # Fails to compile shaders
+        path: debug/libFNA3D.so.0
+
+  linux-mingw:
+    name: Fedora Linux MinGW
+    runs-on: ubuntu-latest
+    container:
+      image: fedora
+    steps:
+      - name: Install toolchain
+        run: |
+          dnf update -y
+          dnf install -y git cmake ninja-build mingw32-gcc mingw64-gcc mingw32-SDL3 mingw64-SDL3
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: CMake configure 32-bit (Release)
+        run: mingw32-cmake -B release-x86 -G Ninja . -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build 32-bit (Release)
+        run: ninja -C release-x86
+
+      - name: CMake configure 64-bit (Release)
+        run: mingw64-cmake -B release-x64 -G Ninja . -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build 64-bit (Release)
+        run: ninja -C release-x64
+
+      - name: Archive build result 32-bit
+        uses: actions/upload-artifact@v4
+        with:
+          name: FNA3D-x86
+          path: release-x86/FNA3D.dll
+
+      - name: Archive build result 64-bit
+        uses: actions/upload-artifact@v4
+        with:
+          name: FNA3D-x64
+          path: release-x64/FNA3D.dll
+
+  linux-mingw-tracing:
+    name: Fedora Linux MinGW (Tracing)
+    runs-on: ubuntu-latest
+    container:
+      image: fedora
+    steps:
+      - name: Install toolchain
+        run: |
+          dnf update -y
+          dnf install -y git cmake ninja-build mingw32-gcc mingw64-gcc mingw32-SDL3 mingw64-SDL3
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: CMake configure 32-bit (Release)
+        run: mingw32-cmake -B release-x86 -G Ninja . -DCMAKE_BUILD_TYPE=Release -DTRACING_SUPPORT=ON
+
+      - name: Build 32-bit (Release)
+        run: ninja -C release-x86
+
+      - name: CMake configure 64-bit (Release)
+        run: mingw64-cmake -B release-x64 -G Ninja . -DCMAKE_BUILD_TYPE=Release -DTRACING_SUPPORT=ON
+
+      - name: Build 64-bit (Release)
+        run: ninja -C release-x64
+
+      - name: Archive build result 32-bit
+        uses: actions/upload-artifact@v4
+        with:
+          name: FNA3D-Tracing-x86
+          path: |
+            release-x86/FNA3D.dll
+            release-x86/fna3d_replay.exe
+            release-x86/fna3d_dumpspirv.exe
+
+      - name: Archive build result 64-bit
+        uses: actions/upload-artifact@v4
+        with:
+          name: FNA3D-Tracing-x64
+          path: |
+            release-x64/FNA3D.dll
+            release-x64/fna3d_replay.exe
+            release-x64/fna3d_dumpspirv.exe
+
+  macos:
+    name: macOS (Universal)
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Clone SDL3
+      run: git clone --depth 1 --branch release-$SDL3_VERSION https://github.com/libsdl-org/SDL.git
+
+    - name: Install dependencies
+      run: brew install ninja
+
+    - name: Build SDL3 (Debug)
+      run: |
+        cd SDL
+        cmake -B debug -G Ninja . -DCMAKE_BUILD_TYPE=Debug -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0
+        ninja -C debug
+        cd ..
+
+    - name: CMake configure (Debug)
+      run: cmake -B debug -G Ninja . -DCMAKE_BUILD_TYPE=Debug -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 -DSDL3_DIR=${GITHUB_WORKSPACE}/SDL/debug
+
+    - name: Build (Debug)
+      run: ninja -C debug
+
+    - name: CMake configure (Release)
+      run: cmake -B release -G Ninja . -DCMAKE_BUILD_TYPE=Release -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 -DSDL3_DIR=${GITHUB_WORKSPACE}/SDL/debug
+
+    - name: Build (Release)
+      run: ninja -C release
+
+    - name: Archive build result
+      uses: actions/upload-artifact@v4
+      with:
+        name: FNA3D-osx
+        path: release/libFNA3D.0.dylib
+
+  ios-tvos:
+    name: iOS/tvOS
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        include:
+          - platform: iOS
+            sdk: iphoneos
+            architectures: arm64
+          - platform: iOS
+            sdk: iphonesimulator
+            architectures: x86_64;arm64
+          - platform: tvOS
+            sdk: appletvos
+            architectures: arm64
+          - platform: tvOS
+            sdk: appletvsimulator
+            architectures: x86_64;arm64
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Clone SDL3
+      run: git clone --depth 1 --branch release-$SDL3_VERSION https://github.com/libsdl-org/SDL.git
+
+    - name: Install dependencies
+      run: brew install ninja
+
+    - name: Build SDL3 (Debug)
+      run: |
+        cd SDL
+        cmake -B debug -G Ninja . -DCMAKE_BUILD_TYPE=Debug -DCMAKE_SYSTEM_NAME=${{ matrix.platform }} -DCMAKE_OSX_ARCHITECTURES="${{ matrix.architectures }}" -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0 -DCMAKE_OSX_SYSROOT=`xcodebuild -version -sdk ${{ matrix.sdk }} Path`
+        ninja -C debug
+        cd ..
+
+    - name: CMake configure (Debug)
+      run: cmake -B debug -G Ninja . -DCMAKE_BUILD_TYPE=Debug -DCMAKE_SYSTEM_NAME=${{ matrix.platform }} -DCMAKE_OSX_ARCHITECTURES="${{ matrix.architectures }}" -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0 -DCMAKE_OSX_SYSROOT=`xcodebuild -version -sdk ${{ matrix.sdk }} Path` -DSDL3_DIR=${GITHUB_WORKSPACE}/SDL/debug -DBUILD_SHARED_LIBS=OFF -DMOJOSHADER_STATIC_SPIRVCROSS=ON
+
+    - name: Build (Debug)
+      run: ninja -C debug
+
+    - name: CMake configure (Release)
+      run: cmake -B release -G Ninja . -DCMAKE_BUILD_TYPE=Release -DCMAKE_SYSTEM_NAME=${{ matrix.platform }} -DCMAKE_OSX_ARCHITECTURES="${{ matrix.architectures }}" -DCMAKE_OSX_DEPLOYMENT_TARGET=13.0 -DCMAKE_OSX_SYSROOT=`xcodebuild -version -sdk ${{ matrix.sdk }} Path` -DSDL3_DIR=${GITHUB_WORKSPACE}/SDL/debug -DBUILD_SHARED_LIBS=OFF -DMOJOSHADER_STATIC_SPIRVCROSS=ON
+
+    - name: Build (Release)
+      run: ninja -C release
+
+    - name: Archive build result
+      uses: actions/upload-artifact@v4
+      with:
+        name: FNA3D-${{ matrix.sdk }}
+        path: release/*.a
+
+  windows-msvc:
+    name: Windows MSVC
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    - name: Cache SDL
+      uses: actions/cache@v4
+      env:
+        cache-name: cache-sdl
+      with:
+        path: C:\SDL
+        key: ${{ runner.os }}-build-${{ env.cache-name }}
+
+    - name: Download SDL if not cached
+      run: |
+        if (-Not (Test-Path C:\SDL))
+        {
+            Invoke-WebRequest "https://github.com/libsdl-org/SDL/releases/download/release-$env:SDL3_VERSION/SDL3-devel-$env:SDL3_VERSION-VC.zip" -OutFile C:\SDL.zip
+            Expand-Archive C:\SDL.zip -DestinationPath C:\
+        }
+
+    - name: CMake configure (Debug)
+      run: |
+        $env:LDFLAGS =  "/LIBPATH:C:\SDL3-$env:SDL3_VERSION\lib\x86 "
+        cmake -B debug -G "Visual Studio 17 2022" . -DCMAKE_BUILD_TYPE=Debug `
+          -A Win32 `
+          -DSDL3_INCLUDE_DIRS="C:\SDL3-$env:SDL3_VERSION\include" `
+          -DSDL3_LIBRARIES="SDL3"
+
+    - name: Build (Debug)
+      run: cmake --build debug
+
+    - name: CMake configure (Release)
+      run: |
+        $env:LDFLAGS =  "/LIBPATH:C:\SDL3-$env:SDL3_VERSION\lib\x86 "
+        cmake -B release -G "Visual Studio 17 2022" . -DCMAKE_BUILD_TYPE=Release `
+          -A Win32 `
+          -DSDL3_INCLUDE_DIRS="C:\SDL3-$env:SDL3_VERSION\include" `
+          -DSDL3_LIBRARIES="SDL3"
+
+    - name: Build (Release)
+      run: cmake --build release
+
+  freebsd:
+    name: FreeBSD
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+    - name: Build
+      uses: cross-platform-actions/action@v0.29.0
+      with:
+        operating_system: freebsd
+        version: '14.3'
+        run: |
+          sudo pkg update
+          sudo pkg install -y cmake ninja sdl3
+          cmake -B build -G Ninja .
+          cmake --build build --verbose -- -j`sysctl -n hw.ncpu`

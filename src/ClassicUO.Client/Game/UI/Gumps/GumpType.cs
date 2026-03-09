@@ -86,7 +86,12 @@ namespace ClassicUO.Game.UI.Gumps
         ModernCooldownBar,
         // ## BEGIN - END ## // MODERNCOOLDOWNBAR
 
+        ActionBar,
+
         NameOverHeadHandler,
+        ScriptManager,
+        LegionScriptStudio,
+        RunningScripts,
         MacroButtonEditor = 6464,
         DurabilityGump = 6465,
         GridContainer = 8787,

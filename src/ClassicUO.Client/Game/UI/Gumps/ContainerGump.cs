@@ -625,6 +625,13 @@ namespace ClassicUO.Game.UI.Gumps
                     continue;
                 }
 
+                // ## BEGIN - END ## // MISC3 THIEFSUPREME
+                if (item.AllowedToDraw == false)
+                {
+                    continue;
+                }
+                // ## BEGIN - END ## // MISC3 THIEFSUPREME
+
                 var layer = (Layer)item.ItemData.Layer;
 
                 if (is_corpse && item.Layer > 0 && !Constants.BAD_CONTAINER_LAYERS[(int)layer])
@@ -777,6 +784,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (child.Container == item)
                     {
                         UIManager.GetGump<ContainerGump>(child)?.Dispose();
+                        
                     }
                 }
             }

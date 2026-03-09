@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -58,13 +58,9 @@ namespace ClassicUO.Game.Managers
             switch (speed)
             {
                 case 0x02: return SLOW_INTERVAL;
-
-                default:
                 case 0x03: return NORMAL_INTERVAL;
-
                 case 0x04: return FAST_INTERVAL;
-
-                case > 0x04: return speed * 10;
+                default: return speed > 0x04 ? speed * 10 : NORMAL_INTERVAL;
             }
         }
 

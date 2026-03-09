@@ -1,4 +1,4 @@
-﻿using ClassicUO.Configuration;
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
@@ -36,7 +36,7 @@ namespace ClassicUO.Game.UI.Gumps
             expire = DateTime.Now + _duration;
             duration = _duration;
             CanCloseWithRightClick = true;
-            CanMove = true;
+            CanMove = !(ProfileManager.CurrentProfile?.CoolDownBarLocked ?? false);
             AcceptMouseInput = true;
             buffIconType = type;
             this.isBuffBar = isBuffBar;
@@ -90,12 +90,25 @@ namespace ClassicUO.Game.UI.Gumps
             Add(foreground);
             Add(textLabel);
             Add(cooldownLabel);
+            _tooltipHitBox = new HitBox(0, 0, COOL_DOWN_WIDTH, COOL_DOWN_HEIGHT, null, 0f);
+            Add(_tooltipHitBox);
             #endregion
         }
+
+        private readonly HitBox _tooltipHitBox;
 
         public override void Update()
         {
             base.Update();
+            CanMove = !(ProfileManager.CurrentProfile?.CoolDownBarLocked ?? false);
+
+            if (_tooltipHitBox != null && !IsDisposed)
+            {
+                var remaining = expire - DateTime.Now;
+                int secs = remaining > TimeSpan.Zero ? (int)remaining.TotalSeconds : 0;
+                string name = textLabel?.Text ?? "";
+                _tooltipHitBox.SetTooltip(string.IsNullOrEmpty(name) ? $"{secs}s remaining" : $"{name} - {secs}s remaining");
+            }
 
             if (
                 !isBuffBar &&

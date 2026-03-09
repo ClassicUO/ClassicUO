@@ -1,6 +1,6 @@
 ﻿#region license
 
-// Copyright (c) 2021, andreakarasho
+// Copyright (c) 2024, andreakarasho
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -101,9 +101,8 @@ namespace ClassicUO.Assets
         public int[] MapPatchCount { get; private set; }
         public int[] StaticPatchCount { get; private set; }
 
-        protected UOFileMul[] _filesIdxStatics;
-        protected UOFile[] _filesMap;
-        protected UOFileMul[] _filesStatics;
+        protected UOFileMul[] _filesStatics, _filesIdxStatics, _filesStaticsX, _filesIdxStaticsX;
+        protected UOFile[] _filesMap, _filesMapX;
 
         protected static UOFile GetMapFile(int map)
         {
@@ -115,6 +114,11 @@ namespace ClassicUO.Assets
             _filesMap = new UOFile[MAPS_COUNT];
             _filesStatics = new UOFileMul[MAPS_COUNT];
             _filesIdxStatics = new UOFileMul[MAPS_COUNT];
+
+            _filesMapX = new UOFile[MAPS_COUNT];
+            _filesStaticsX = new UOFileMul[MAPS_COUNT];
+            _filesIdxStaticsX = new UOFileMul[MAPS_COUNT];
+
 
             MapPatchCount = new int[MAPS_COUNT];
             StaticPatchCount = new int[MAPS_COUNT];
@@ -176,11 +180,16 @@ namespace ClassicUO.Assets
 
                     for (var i = 0; i < MAPS_COUNT; ++i)
                     {
-                        string path = UOFileManager.GetUOFilePath($"map{i}LegacyMUL.uop");
+                        var path = UOFileManager.GetUOFilePath($"map{i}LegacyMUL.uop");
 
                         if (UOFileManager.IsUOPInstallation && File.Exists(path))
                         {
                             _filesMap[i] = new UOFileUop(path, $"build/map{i}legacymul/{{0:D8}}.dat");
+                            path = UOFileManager.GetUOFilePath($"map{i}xLegacyMUL.uop");
+                            if (File.Exists(path))
+                            {
+                                _filesMapX[i] = new UOFileUop(path, $"build/map{i}legacymul/{{0:D8}}.dat");
+                            }
                             foundOneMap = true;
                         }
                         else
@@ -191,6 +200,11 @@ namespace ClassicUO.Assets
                             {
                                 _filesMap[i] = new UOFileMul(path);
 
+                                path = UOFileManager.GetUOFilePath($"map{i}x.mul");
+                                if (File.Exists(path))
+                                {
+                                    _filesMapX[i] = new UOFileMul(path);
+                                }
                                 foundOneMap = true;
                             }
 
@@ -219,6 +233,17 @@ namespace ClassicUO.Assets
                         {
                             _filesIdxStatics[i] = new UOFileMul(path);
                         }
+
+                        path = UOFileManager.GetUOFilePath($"statics{i}x.mul");
+                        if (File.Exists(path))
+                        {
+                            _filesStaticsX[i] = new UOFileMul(path);
+                        }
+                        path = UOFileManager.GetUOFilePath($"staidx{i}x.mul");
+                        if (File.Exists(path))
+                        {
+                            _filesIdxStaticsX[i] = new UOFileMul(path);
+                        }
                     }
 
                     if (!foundOneMap)
@@ -242,27 +267,43 @@ namespace ClassicUO.Assets
                         _filesIdxStatics[1] = _filesIdxStatics[0];
                     }
 
-                    var res = Parallel.For(0, MAPS_COUNT, i =>
+                    if (_filesMapX[1] == null || _filesMapX[1].Length == 0)
                     {
-                        MapBlocksSize[i, 0] = MapsDefaultSize[i, 0] >> 3;
-                        MapBlocksSize[i, 1] = MapsDefaultSize[i, 1] >> 3;
-                        LoadMap(i);
-                    });          
+                        _filesMapX[1] = _filesMapX[0];
+                        _filesStaticsX[1] = _filesStaticsX[0];
+                        _filesIdxStaticsX[1] = _filesIdxStaticsX[0];
+                    };          
                 }
             );
         }
 
-        public unsafe void LoadMap(int i)
+        public unsafe void LoadMap(int i, bool useXFiles = false)
         {
             if (i < 0 || i + 1 > MAPS_COUNT || _filesMap[i] == null)
             {
                 i = 0;
             }
 
-            if (BlockData[i] != null || _filesMap[i] == null)
+            if (BlockData[i] != null)
             {
                 return;
             }
+
+            if (useXFiles)
+            {
+                if (_filesMapX[i] != null)
+                    _filesMap[i] = _filesMapX[i];
+                if (_filesIdxStaticsX[i] != null)
+                    _filesIdxStatics[i] = _filesIdxStaticsX[i];
+                if (_filesStaticsX[i] != null)
+                    _filesStatics[i] = _filesStaticsX[i];
+            }
+            if (_filesMap[i] == null)
+            {
+                return;
+            }
+            MapBlocksSize[i, 0] = MapsDefaultSize[i, 0] >> 3;
+            MapBlocksSize[i, 1] = MapsDefaultSize[i, 1] >> 3;
 
             int mapblocksize = sizeof(MapBlock);
             int staticidxblocksize = sizeof(StaidxBlock);

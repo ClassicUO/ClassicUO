@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -189,17 +189,7 @@ namespace ClassicUO.Game.GameObjects
         public bool IsCorpse => /*MathHelper.InRange(Graphic, 0x0ECA, 0x0ED2) ||*/
             Graphic == 0x2006;
 
-        public bool IsHumanCorpse => IsCorpse && 
-            MathHelper.InRange(Amount, 0x0190, 0x0193) || 
-            MathHelper.InRange(Amount, 0x00B7, 0x00BA) || 
-            MathHelper.InRange(Amount, 0x025D, 0x0260) || 
-            MathHelper.InRange(Amount, 0x029A, 0x029B) || 
-            MathHelper.InRange(Amount, 0x02B6, 0x02B7) || 
-            Amount == 0x03DB || 
-            Amount == 0x03DF || 
-            Amount == 0x03E2 || 
-            Amount == 0x02E8 || 
-            Amount == 0x02E9;
+        public bool IsHumanCorpse => IsCorpse && MathHelper.InRange(Amount, 0x0190, 0x0193) || MathHelper.InRange(Amount, 0x00B7, 0x00BA) || MathHelper.InRange(Amount, 0x025D, 0x0260) || MathHelper.InRange(Amount, 0x029A, 0x029B) || MathHelper.InRange(Amount, 0x02B6, 0x02B7) || Amount == 0x03DB || Amount == 0x03DF || Amount == 0x03E2 || Amount == 0x02E8 || Amount == 0x02E9;
 
         public bool OnGround => !SerialHelper.IsValid(Container);
 
@@ -348,14 +338,7 @@ namespace ClassicUO.Game.GameObjects
 
                             for (int i = 0; i < count; i++)
                             {
-                                MultiBlockNew* block = (MultiBlockNew*)(
-                                    reader.PositionAddress + i * sizeOf
-                                );
-
-                                if (block->Unknown != 0)
-                                {
-                                    reader.Skip((int)(block->Unknown * 4));
-                                }
+                                MultiBlockNew* block = (MultiBlockNew*)reader.PositionAddress;
 
                                 if (block->X < minX)
                                 {
@@ -406,6 +389,10 @@ namespace ClassicUO.Game.GameObjects
                                 {
                                     MultiGraphic = block->ID;
                                 }
+
+                                reader.Skip(sizeOf);
+                                if (block->Unknown != 0)
+                                    reader.Skip((int)(block->Unknown * 4));
                             }
 
                             reader.Release();

@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -41,9 +41,9 @@ namespace ClassicUO.Assets
 {
     public class TileDataLoader : UOFileLoader
     {
-        private static TileDataLoader _instance;
+        public static TileDataLoader _instance;
 
-        private static StaticTiles[] _staticData;
+        public static StaticTiles[] _staticData;
         private static LandTiles[] _landData;
 
         private TileDataLoader()
@@ -398,6 +398,14 @@ namespace ClassicUO.Assets
         public bool IsWeapon => (Flags & TileFlag.Weapon) != 0;
         public bool IsMultiMovable => (Flags & TileFlag.MultiMovable) != 0;
         public bool IsWindow => (Flags & TileFlag.Window) != 0;
+
+        public void SetImpassable(bool value)
+        {
+            if (value)
+                Flags |= TileFlag.Impassable;
+            else
+                Flags &= ~TileFlag.Impassable;
+        }
     }
 
     // old
@@ -415,7 +423,7 @@ namespace ClassicUO.Assets
     {
         public uint Flags;
         public ushort TexID;
-        [MarshalAs(UnmanagedType.LPStr, SizeConst = 20)]
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 20)]
         public string Name;
     }
 
@@ -438,7 +446,7 @@ namespace ClassicUO.Assets
         public ushort Hue;
         public ushort LightIndex;
         public byte Height;
-        [MarshalAs(UnmanagedType.LPStr, SizeConst = 20)]
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 20)]
         public string Name;
     }
 
@@ -457,7 +465,7 @@ namespace ClassicUO.Assets
     {
         public TileFlag Flags;
         public ushort TexID;
-        [MarshalAs(UnmanagedType.LPStr, SizeConst = 20)]
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 20)]
         public string Name;
     }
 
@@ -480,7 +488,7 @@ namespace ClassicUO.Assets
         public ushort Hue;
         public ushort LightIndex;
         public byte Height;
-        [MarshalAs(UnmanagedType.LPStr, SizeConst = 20)]
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 20)]
         public string Name;
     }
 

@@ -1,0 +1,18 @@
+[submodule "lib/SDL2-CS"]
+	path = lib/SDL2-CS
+	url = https://github.com/flibitijibibo/SDL2-CS
+[submodule "lib/FAudio"]
+	path = lib/FAudio
+	url = https://github.com/FNA-XNA/FAudio
+[submodule "lib/FNA3D"]
+	path = lib/FNA3D
+	url = https://github.com/FNA-XNA/FNA3D
+[submodule "lib/Theorafile"]
+	path = lib/Theorafile
+	url = https://github.com/FNA-XNA/Theorafile
+[submodule "lib/SDL3-CS"]
+	path = lib/SDL3-CS
+	url = https://github.com/flibitijibibo/SDL3-CS.git
+[submodule "lib/dav1dfile"]
+	path = lib/dav1dfile
+	url = https://github.com/MoonsideGames/dav1dfile

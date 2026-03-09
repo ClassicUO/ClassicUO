@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -32,10 +32,12 @@
 
 using System.Xml;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Assets;
 using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -88,6 +90,25 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void UpdateContents()
         {
             BuildGump();
+        }
+
+        protected override void OnDragEnd(int x, int y)
+        {
+            if (Index > 0)
+            {
+                var pos = Mouse.Position;
+                var ctrl = UIManager.GetControlUnderPositionExcluding(pos, this);
+                while (ctrl != null)
+                {
+                    if (ctrl is IActionBarDropTarget target)
+                    {
+                        target.AcceptAbility(Index);
+                        break;
+                    }
+                    ctrl = ctrl.Parent;
+                }
+            }
+            base.OnDragEnd(x, y);
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)

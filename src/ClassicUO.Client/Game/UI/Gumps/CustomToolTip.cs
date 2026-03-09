@@ -1,5 +1,7 @@
-﻿using ClassicUO.Configuration;
+using ClassicUO.Assets;
+using ClassicUO.Configuration;
 using ClassicUO.Game.GameObjects;
+using FontStyle = ClassicUO.Game.FontStyle;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -14,7 +16,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly string prepend;
         private readonly string append;
         private readonly Item compareTo;
-        private TextBox text;
+        private UOLabel text;
         private readonly uint hue = 0xFFFF;
 
         public event FinishedLoadingEvent OnOPLLoaded;
@@ -42,14 +44,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
-            text = new TextBox(
-                "Loading item data...",
-                ProfileManager.CurrentProfile.SelectedToolTipFont,
-                ProfileManager.CurrentProfile.SelectedToolTipFontSize,
-                150,
-                (int)hue,
-                align: ProfileManager.CurrentProfile.LeftAlignToolTips ? FontStashSharp.RichText.TextHorizontalAlignment.Left : FontStashSharp.RichText.TextHorizontalAlignment.Center
-                );
+            var profile = ProfileManager.CurrentProfile;
+            byte font = profile?.SelectedToolTipFont ?? 1;
+            TEXT_ALIGN_TYPE align = profile?.LeftAlignToolTips == true ? TEXT_ALIGN_TYPE.TS_LEFT : TEXT_ALIGN_TYPE.TS_CENTER;
+            FontStyle textStyle = (profile != null && profile.TooltipTextHue != 0xFFFF) ? FontStyle.None : FontStyle.BlackBorder;
+            text = new UOLabel("Loading item data...", font, (ushort)hue, align, 150, textStyle, true, true);
 
             Height = text.Height;
             Width = text.Width;
@@ -72,25 +71,24 @@ namespace ClassicUO.Game.UI.Gumps
                 if (World.OPL.TryGetNameAndData(item.Serial, out string name, out string data))
                 {
                     string finalString = FormatTooltip(name, data);
-                    if (SerialHelper.IsItem(item.Serial))
+                    if (SerialHelper.IsItem(item.Serial) && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.EnableTooltipOverride)
                     {
                         finalString = Managers.ToolTipOverrideData.ProcessTooltipText(item.Serial, compareTo == null ? uint.MinValue : compareTo.Serial);
                         if (finalString == null)
                             finalString = FormatTooltip(name, data);
                     }
 
-                    text?.Dispose();
-                    text = new TextBox(
-                        TextBox.ConvertHtmlToFontStashSharpCommand(finalString).Trim(),
-                        ProfileManager.CurrentProfile.SelectedToolTipFont,
-                        ProfileManager.CurrentProfile.SelectedToolTipFontSize,
-                        600,
-                        (int)hue,
-                        align: ProfileManager.CurrentProfile.LeftAlignToolTips ? FontStashSharp.RichText.TextHorizontalAlignment.Left : FontStashSharp.RichText.TextHorizontalAlignment.Center
-                        );
+                    string displayText = HtmlTextHelper.ConvertUoColorCodesToHtml(finalString ?? string.Empty).Trim();
 
-                    if (text.MeasuredSize.X + 10 < 600)
-                        text.Width = text.MeasuredSize.X + 10;
+                    text?.Dispose();
+                    var p = ProfileManager.CurrentProfile;
+                    byte font = p?.SelectedToolTipFont ?? 1;
+                    TEXT_ALIGN_TYPE align = p?.LeftAlignToolTips == true ? TEXT_ALIGN_TYPE.TS_LEFT : TEXT_ALIGN_TYPE.TS_CENTER;
+                    FontStyle textStyle = (p != null && p.TooltipTextHue != 0xFFFF) ? FontStyle.None : FontStyle.BlackBorder;
+                    text = new UOLabel(displayText, font, (ushort)hue, align, 600, textStyle, true, true);
+
+                    if (text.Width + 10 < 600)
+                        text.Width = text.Width + 10;
 
                     Height = text.Height;
                     Width = text.Width;
@@ -99,10 +97,10 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                Task.Factory.StartNew(() =>
+                Task.Run(async () =>
                 {
-                    Task.Delay(1500).Wait();
-                    LoadOPLData(attempt++);
+                    await Task.Delay(1500);
+                    LoadOPLData(attempt + 1);
                 });
             }
 
@@ -128,6 +126,11 @@ namespace ClassicUO.Game.UI.Gumps
             base.Draw(batcher, x, y);
             if (IsDisposed)
                 return false;
+            if (ProfileManager.CurrentProfile != null && !ProfileManager.CurrentProfile.UseTooltip)
+            {
+                Dispose();
+                return false;
+            }
             if (hoverReference != null && !hoverReference.MouseIsOver)
             {
                 Dispose();

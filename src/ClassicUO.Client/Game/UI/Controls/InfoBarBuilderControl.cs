@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -32,6 +32,7 @@
 
 using ClassicUO.Game.Managers;
 using ClassicUO.Assets;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Resources;
 
 namespace ClassicUO.Game.UI.Controls
@@ -39,7 +40,7 @@ namespace ClassicUO.Game.UI.Controls
     internal class InfoBarBuilderControl : Control
     {
         private readonly StbTextBox infoLabel;
-        private readonly ClickableColorBox labelColor;
+        private readonly ModernColorPicker.HueDisplay labelColor;
         private readonly Combobox varStat;
 
         public InfoBarBuilderControl(InfoBarItem item)
@@ -58,15 +59,7 @@ namespace ClassicUO.Game.UI.Controls
                 (int) item.var
             );
 
-
-            labelColor = new ClickableColorBox
-            (
-                150,
-                0,
-                13,
-                14,
-                item.hue
-            );
+            labelColor = new ModernColorPicker.HueDisplay(item.hue, null, true) { X = 150, Y = (26 - 18) / 2 };
 
             NiceButton deleteButton = new NiceButton
             (

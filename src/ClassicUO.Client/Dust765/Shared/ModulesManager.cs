@@ -21,8 +21,10 @@
 
 #endregion
 using ClassicUO.Dust765.Autos;
+using ClassicUO.Game.Cheats.AIBot;
 // ## BEGIN - END ## // LOBBY
 using ClassicUO.Dust765.Lobby;
+using ClassicUO.Dust765.Dust765;
 // ## BEGIN - END ## // LOBBY
 
 namespace ClassicUO.Game.Managers // only exception to not being in the 'InteropServices.Runtime' namespace
@@ -35,6 +37,7 @@ namespace ClassicUO.Game.Managers // only exception to not being in the 'Interop
             AutoMeditate.Initialize();  //AUTOMEDITATE##//
             AutoEngage.Initialize();  //AUTOENGAGE##//
             AutoMimic.Initialize();  //##AUTO MIMIC##//
+            Automation.Initialize();
             //AutoWorldMapMarker.LoadCommands();
             Defender.Initialize();
             // ## BEGIN - END ## // LOBBY
@@ -43,6 +46,9 @@ namespace ClassicUO.Game.Managers // only exception to not being in the 'Interop
             // ## BEGIN - END ## // LOBBY
 
             GameActions.Print("Project dust765 Enabled.", 95);
+            
+            // Load performance optimization commands
+            LoadPerformanceCommands();
         }
 
         public static void Unload()
@@ -50,6 +56,35 @@ namespace ClassicUO.Game.Managers // only exception to not being in the 'Interop
             // ## BEGIN - END ## // LOBBY
             Lobby.Disconnect();
             // ## BEGIN - END ## // LOBBY
+        }
+        
+        private static void LoadPerformanceCommands()
+        {
+            // Register performance test commands
+            CommandManager.Register("perftest", (args) => {
+                PerformanceTest.RunPerformanceTest();
+            });
+            
+            CommandManager.Register("perfstats", (args) => {
+                PerformanceTest.TogglePerformanceStats();
+            });
+            
+            CommandManager.Register("perfquality", (args) => {
+                if (args.Length > 0 && int.TryParse(args[0], out int level))
+                {
+                    PerformanceTest.SetQualityLevel(level);
+                }
+                else
+                {
+                    GameActions.Print("Usage: .perfquality <0-3> (0=Low, 1=Medium, 2=High, 3=Ultra)", 63);
+                }
+            });
+            
+            CommandManager.Register("perfclear", (args) => {
+                PerformanceOptimizations.ClearCaches();
+                PerformanceMonitor.Reset();
+                GameActions.Print("Performance caches cleared.", 63);
+            });
         }
 
         /// <summary>
@@ -62,6 +97,7 @@ namespace ClassicUO.Game.Managers // only exception to not being in the 'Interop
             AutoMeditate.Update();  //AUTOMEDITATE##//
             AutoEngage.Update();  //AUTOENGAGE##//
             Defender.Update();
+            Automation.Update();
             // ## BEGIN - END ## // LOBBY
             Lobby.Update();
             AutoLobbyStealthPosition.Update();

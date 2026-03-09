@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -64,14 +64,14 @@ namespace ClassicUO.Game.UI.Gumps
             GumpPic background = new GumpPic(0, 0, 0x0474, 0);
             Add(background);
 
-            Label label = new Label(text, false, 0x0386, font: 2, maxwidth: background.Width - 110)
+            Label label = new Label(text, false, 0x0000, font: 2, maxwidth: background.Width - 110, style: FontStyle.None)
             {
                 X = 60, Y = 50
             };
 
             Add(label);
 
-            label = new Label(description, false, 0x0386, font: 2, maxwidth: background.Width - 110)
+            label = new Label(description, false, 0x0000, font: 2, maxwidth: background.Width - 110, style: FontStyle.None)
             {
                 X = 60,
                 Y = 108
@@ -81,7 +81,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(new GumpPic(60, 130, 0x0477, 0));
 
-            _textBox = new StbTextBox(1, isunicode: false, hue: 0x0386, max_char_count: maxlen)
+            _textBox = new StbTextBox(1, isunicode: false, hue: 0x0000, max_char_count: maxlen)
             {
                 X = 71, Y = 137,
                 Width = 250,

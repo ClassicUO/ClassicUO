@@ -51,6 +51,7 @@ namespace ClassicUO.Configuration
 {
     //[JsonSourceGenerationOptions(WriteIndented = true, PropertyNamingPolicy = JsonKnownNamingPolicy.Unspecified)]
     [JsonSerializable(typeof(Profile), GenerationMode = JsonSourceGenerationMode.Metadata)]
+    [JsonSerializable(typeof(ActionBarSlotData))]
     sealed partial class ProfileJsonContext : JsonSerializerContext
     {
         sealed class SnakeCaseNamingPolicy : JsonNamingPolicy
@@ -143,13 +144,14 @@ namespace ClassicUO.Configuration
         public bool HighlightMobilesByInvul { get; set; } = true;
         public bool ShowMobilesHP { get; set; }
         public bool ShowTargetIndicator { get; set; }
+        public bool AutoAvoidObstacules { get; set; } = true;
         public int MobileHPType { get; set; }     // 0 = %, 1 = line, 2 = both
         public int MobileHPShowWhen { get; set; } // 0 = Always, 1 - <100%
         public bool DrawRoofs { get; set; } = true;
 
         public bool SetTargetOut { get; set; }  = false;
         // ## BEGIN - END ## // ART / HUE CHANGES
-        //public bool TreeToStumps { get; set; }
+        public bool TreeToStumps { get; set; }
         // ## BEGIN - END ## // ART / HUE CHANGES
         public bool EnableCaveBorder { get; set; }
         public bool HideVegetation { get; set; }
@@ -172,6 +174,7 @@ namespace ClassicUO.Configuration
 
         // tooltip
         public bool UseTooltip { get; set; } = true;
+        public bool EnableTooltipOverride { get; set; } = false;
         public ushort TooltipTextHue { get; set; } = 0xFFFF;
         public int TooltipDelayBeforeDisplay { get; set; } = 250;
         public int TooltipDisplayZoom { get; set; } = 100;
@@ -179,24 +182,24 @@ namespace ClassicUO.Configuration
         public byte TooltipFont { get; set; } = 1;
 
         // movements
-        public bool EnablePathfind { get; set; }
+        public bool EnablePathfind { get; set; } = true;
         public bool UseShiftToPathfind { get; set; }
         public bool PathfindSingleClick { get; set; }
-        public bool AlwaysRun { get; set; }
-        public bool AlwaysRunUnlessHidden { get; set; }
+        public bool AlwaysRun { get; set; } = true;
+        public bool AlwaysRunUnlessHidden { get; set; } = true;
         public bool SmoothMovements { get; set; } = true;
         public bool HoldDownKeyTab { get; set; } = true;
         public bool HoldShiftForContext { get; set; } = false;
         public bool HoldShiftToSplitStack { get; set; } = false;
 
         // general
-        [JsonConverter(typeof(Point2Converter))] public Point WindowClientBounds { get; set; } = new Point(600, 480);
+        [JsonConverter(typeof(Point2Converter))] public Point WindowClientBounds { get; set; } = new Point(1024, 768);
         [JsonConverter(typeof(Point2Converter))] public Point ContainerDefaultPosition { get; set; } = new Point(24, 24);
         [JsonConverter(typeof(Point2Converter))] public Point GameWindowPosition { get; set; } = new Point(10, 10);
         public bool GameWindowLock { get; set; }
         public bool GameWindowFullSize { get; set; }
         public bool WindowBorderless { get; set; } = false;
-        [JsonConverter(typeof(Point2Converter))] public Point GameWindowSize { get; set; } = new Point(600, 480);
+        [JsonConverter(typeof(Point2Converter))] public Point GameWindowSize { get; set; } = new Point(1024, 768);
         [JsonConverter(typeof(Point2Converter))] public Point TopbarGumpPosition { get; set; } = new Point(0, 0);
         public bool TopbarGumpIsMinimized { get; set; }
         public bool TopbarGumpIsDisabled { get; set; }
@@ -217,16 +220,13 @@ namespace ClassicUO.Configuration
         public byte JournalOpacity { get; set; } = 50;
         public int JournalStyle { get; set; } = 0;
         public bool HideScreenshotStoredInMessage { get; set; }
-        public bool UseModernPaperdoll { get; set; } = false;
-        public bool OpenModernPaperdollAtMinimizeLoc { get; set; } = false;
-
         // Experimental
         public bool CastSpellsByOneClick { get; set; }
         public bool BuffBarTime { get; set; }
         public bool FastSpellsAssign { get; set; }
-        public bool AutoOpenDoors { get; set; }
-        public bool SmoothDoors { get; set; }
-        public bool AutoOpenCorpses { get; set; }
+        public bool AutoOpenDoors { get; set; } = true;
+        public bool SmoothDoors { get; set; } = true;
+        public bool AutoOpenCorpses { get; set; } = true;
         public int AutoOpenCorpseRange { get; set; } = 2;
         public int CorpseOpenOptions { get; set; } = 3;
         public bool SkipEmptyCorpse { get; set; }
@@ -287,6 +287,10 @@ namespace ClassicUO.Configuration
         public int CounterBarRows { get; set; } = 1;
         public int CounterBarColumns { get; set; } = 1;
 
+        public bool ActionBarEnabled { get; set; }
+        [JsonConverter(typeof(Point2Converter))] public Point ActionBarPosition { get; set; } = new Point(300, 400);
+        public List<ActionBarSlotData> ActionBarSlots { get; set; } = new List<ActionBarSlotData>();
+
         public bool ShowSkillsChangedMessage { get; set; } = true;
         public int ShowSkillsChangedDeltaValue { get; set; } = 1;
         public bool ShowStatsChangedMessage { get; set; } = true;
@@ -303,6 +307,8 @@ namespace ClassicUO.Configuration
 
         public bool UseXBR { get; set; } = true;
 
+        public int VisualStyle { get; set; } = 0;
+
         public bool HideChatGradient { get; set; } = false;
 
         public bool StandardSkillsGump { get; set; } = true;
@@ -318,7 +324,6 @@ namespace ClassicUO.Configuration
 
         public bool OverrideAllFonts { get; set; }
         public bool OverrideAllFontsIsUnicode { get; set; } = true;
-
         public bool SallosEasyGrab { get; set; }
 
         public bool JournalDarkMode { get; set; }
@@ -375,6 +380,8 @@ namespace ClassicUO.Configuration
         public int GlowingWeaponsType { get; set; } = 0; // 0 = off, 1 = white, 2 = pink, 3 = ice, 4 = fire, 5 = custom
         public ushort HighlightGlowingWeaponsTypeHue { get; set; } = 0x0044;
         public bool PreviewFields { get; set; }
+        public bool PreviewTeleportTiles { get; set; }
+        public ushort PreviewTeleportTilesHue { get; set; } = 0x0044;
         public bool OwnAuraByHP { get; set; }
         public int HighlightLastTargetType { get; set; } = 0; // 0 = off, 1 = white, 2 = pink, 3 = ice, 4 = fire, 5 = custom
 
@@ -426,7 +433,35 @@ namespace ClassicUO.Configuration
         public uint BlockEnergyFArt { get; set; } = 1872;
         public bool BlockEnergyFArtForceAoS { get; set; } = false;
         public bool BlackOutlineStatics { get; set; } = false;
+        public bool ScaleMonstersEnabled { get; set; } = false;
+        public Dictionary<int, int> MonsterScaleByGraphic { get; set; } = new Dictionary<int, int>();
         // ## BEGIN - END ## // MISC
+        // ## BEGIN - END ## // PvM/PvP
+        public bool PvM_DamageCounterOnLastTarget { get; set; } = false;
+        public bool PvM_DamageCounterAsOverhead { get; set; } = false;
+        public bool PvM_AggroIndicatorOnHealthBar { get; set; } = false;
+        public bool PvM_CorpseFilterByNotoriety { get; set; } = false;
+        public int PvM_CorpseFilterMode { get; set; } = 0;
+        public bool PvM_LowHpAlertOnLastTarget { get; set; } = false;
+        public bool PvM_KillCountMarkerPerSession { get; set; } = false;
+        public bool PvM_LootHighlightOnCorpse { get; set; } = false;
+        public bool PvP_CriminalAttackableAlert { get; set; } = false;
+        public bool PvP_WarModeIndicator { get; set; } = false;
+        public bool PvP_GreyCriminalTimer { get; set; } = false;
+        public bool PvP_LastAttackerHighlight { get; set; } = false;
+        public bool PvP_SpellRangeOnCursor { get; set; } = true;
+        public bool PvP_QuickTargetEnemyList { get; set; } = false;
+        public bool PvP_OptimizedMode { get; set; } = true;
+        public int PvP_OptimizedRenderDistance { get; set; } = 18;
+        public bool PvX_NameOverheadProfilesByContext { get; set; } = false;
+        public int PvM_NameOverheadProfileFlags { get; set; } = (int)NameOverheadOptions.MobilesAndCorpses;
+        public int PvP_NameOverheadProfileFlags { get; set; } = (int)(NameOverheadOptions.Criminal | NameOverheadOptions.Gray | NameOverheadOptions.Enemy | NameOverheadOptions.Murderer);
+        public bool PvX_ConfigurableSoundsPerEvent { get; set; } = false;
+        public int PvX_SoundCriminalAlert { get; set; } = 0;
+        public bool PvX_BlockBeneficialOnEnemies { get; set; } = false;
+        public bool PvX_LastTargetDirectionIndicator { get; set; } = false;
+        public bool PvX_LockLastTarget { get; set; } = false;
+        // ## BEGIN - END ## // PvM/PvP
         // ## BEGIN - END ## // MISC2
         public bool WireFrameView { get; set; } = false;
         public bool HueImpassableView { get; set; } = false;
@@ -441,7 +476,8 @@ namespace ClassicUO.Configuration
         public bool IgnoreCoTEnabled { get; set; } = false;
         public bool ShowDeathOnWorldmap { get; set; } = false;
 
-        public bool ShowMapCloseFriend { get; set; }
+        public bool ShowMapCloseFriend { get; set; } = true;
+        public bool AutoAvoidMobiles { get; set; } = false;
         // ## BEGIN - END ## // MISC2
         // ## BEGIN - END ## // MACROS
         public int LastTargetRange { get; set; }
@@ -469,6 +505,27 @@ namespace ClassicUO.Configuration
         public bool UOClassicCombatLines_ToggleLastTarget { get; set; } = false;
         public bool UOClassicCombatLines_ToggleHuntingMmode { get; set; } = false;
         public bool UOClassicCombatLines_ToggleHMBlue { get; set; } = false;
+        
+        // ## BEGIN - END ## // PERFORMANCE SETTINGS
+        public int GraphicsQuality { get; set; } = 2; // 0 = Low, 1 = Medium, 2 = High
+        public bool EnableFrustumCulling { get; set; } = true;
+        public bool EnableTextureCaching { get; set; } = true;
+        public bool EnableChunkPreload { get; set; } = true;
+        public int MaxRenderDistance { get; set; } = 24; // Max view range
+        public bool UseRenderTarget { get; set; } = true;
+        public float RenderTargetScale { get; set; } = 1f;
+        public bool EnableLOD { get; set; } = true;
+        public int LODDistanceTiles { get; set; } = 24;
+        public int ImageRenderingMode { get; set; } = 0;
+        public bool OptimizeBackgroundRendering { get; set; } = true;
+        public bool ReduceParticleEffects { get; set; } = false;
+        public bool EnableVSync { get; set; } = false;
+        public bool DisableFrameLimiting { get; set; } = false;
+        public int SpriteBatchSize { get; set; } = 8192; // 0x2000
+        public bool PerformanceDisableCombatLinesOverlay { get; set; } = false;
+        public bool PerformanceDisableHealthLinesOverlay { get; set; } = false;
+        public bool PerformanceDisableLightsRenderTarget { get; set; } = false;
+        // ## BEGIN - END ## // PERFORMANCE SETTINGS
         public bool UOClassicCombatLines_ToggleHMRed { get; set; } = false;
         public bool UOClassicCombatLines_ToggleHMOrange { get; set; } = false;
         public bool UOClassicCombatLines_ToggleHMCriminal { get; set; } = false;
@@ -595,12 +652,24 @@ namespace ClassicUO.Configuration
         public bool ShowAllLayers { get; set; }
         public bool ShowAllLayersPaperdoll { get; set; }
         public int ShowAllLayersPaperdoll_X { get; set; } = 166;
+        public bool ColorPaperdollByDurability { get; set; }
+        public bool UseModernDurabilityGump { get; set; } = true;
         // ## BEGIN - END ## // MISC3 SHOWALLLAYERS
         // ## BEGIN - END ## // MISC3 THIEFSUPREME
         public bool OverrideContainerOpenRange { get; set; }
         // ## BEGIN - END ## // MISC3 THIEFSUPREME
         // ## BEGIN - END ## // VISUALRESPONSEMANAGER
         public bool VisualResponseManager { get; set; } = false;
+        
+        // Performance Optimizations
+        public bool PerformanceOptimizations { get; set; } = true;
+        public bool PerformanceFrustumCulling { get; set; } = true;
+        public bool PerformanceBatchOptimization { get; set; } = true;
+        public bool PerformanceLODSystem { get; set; } = true;
+        public bool PerformanceTextureStreaming { get; set; } = true;
+        public bool PerformanceOcclusionCulling { get; set; } = false;
+        public int PerformanceQualityLevel { get; set; } = 2; // 0=Low, 1=Medium, 2=High, 3=Ultra
+        public bool PerformanceShowStats { get; set; } = false;
         // ## BEGIN - END ## // VISUALRESPONSEMANAGER
         // ## BEGIN - END ## // TABGRID // PKRION
         public bool TabGridGumpEnabled { get; set; } = false;
@@ -639,8 +708,6 @@ namespace ClassicUO.Configuration
         public bool WorldMapShowGridIfZoomed { get; set; } = true;
         public bool WorldMapAllowPositionalTarget { get; set; } = true;
 
-        public int AutoFollowDistance { get; set; } = 2;
-        public bool DisableAutoFollowAlt { get; set; } = false;
         [JsonConverter(typeof(Point2Converter))] public Point ResizeJournalSize { get; set; } = new Point(410, 350);
         public bool FollowingMode { get; set; } = false;
         public uint FollowingTarget { get; set; }
@@ -657,6 +724,7 @@ namespace ClassicUO.Configuration
         public bool CorpseSingleClickLoot { get; set; } = false;
 
         public bool DisableSystemChat { get; set; } = false;
+        public bool JournalMessagesOnlyInJournalBox { get; set; } = false;
 
         #region GRID CONTAINER
         public bool UseGridLayoutContainerGumps { get; set; } = true;
@@ -716,13 +784,6 @@ namespace ClassicUO.Configuration
         public int GridHightlightSize { get; set; } = 1;
         #endregion
 
-        #region Modern paperdoll
-        public ushort ModernPaperDollHue { get; set; } = 0;
-        public ushort ModernPaperDollDurabilityHue { get; set; } = 32;
-        public int ModernPaperDoll_DurabilityPercent { get; set; } = 90;
-        [JsonConverter(typeof(Point2Converter))] public Point ModernPaperdollPosition { get; set; } = new Point(100, 100);
-        #endregion
-
         #region Health indicator
         public float ShowHealthIndicatorBelow { get; set; } = 0.9f;
         public bool EnableHealthIndicator { get; set; } = true;
@@ -754,20 +815,25 @@ namespace ClassicUO.Configuration
 
         public bool DisplayPartyChatOverhead { get; set; } = true;
 
-        public string SelectedTTFJournalFont { get; set; } = "avadonian";
+        [JsonConverter(typeof(Json.UOFontIndexConverter))]
+        public byte SelectedJournalFont { get; set; } = 1;
         public int SelectedJournalFontSize { get; set; } = 20;
 
-        public string SelectedToolTipFont { get; set; } = "Roboto-Regular";
+        [JsonConverter(typeof(Json.UOFontIndexConverter))]
+        public byte SelectedToolTipFont { get; set; } = 1;
         public int SelectedToolTipFontSize { get; set; } = 20;
 
-        public string GameWindowSideChatFont { get; set; } = "avadonian";
+        [JsonConverter(typeof(Json.UOFontIndexConverter))]
+        public byte GameWindowSideChatFont { get; set; } = 1;
         public int GameWindowSideChatFontSize { get; set; } = 20;
 
-        public string OverheadChatFont { get; set; } = "avadonian";
+        [JsonConverter(typeof(Json.UOFontIndexConverter))]
+        public byte OverheadChatFont { get; set; } = 1;
         public int OverheadChatFontSize { get; set; } = 20;
         public int OverheadChatWidth { get; set; } = 200;
 
-        public string NamePlateFont { get; set; } = "avadonian";
+        [JsonConverter(typeof(Json.UOFontIndexConverter))]
+        public byte NamePlateFont { get; set; } = 1;
         public int NamePlateFontSize { get; set; } = 20;
 
         public string DefaultTTFFont { get; set; } = "Roboto-Regular";
@@ -809,16 +875,18 @@ namespace ClassicUO.Configuration
         public int DisplayRadiusDistance { get; set; } = 10;
         public ushort DisplayRadiusHue { get; set; } = 22;
 
-        public bool EnableSpellIndicators { get; set; } = true;
+        public bool EnableSpellIndicators { get; set; } = false;
 
         public bool EnableAutoLoot { get; set; } = false;
+        public bool HueCorpseAfterAutoloot { get; set; } = false;
 
         public static uint GumpsVersion { get; private set; }
 
         [JsonConverter(typeof(Point2Converter))]
         public Point InfoBarSize { get; set; } = new Point(400, 20);
         public bool InfoBarLocked { get; set; } = false;
-        public string InfoBarFont { get; set; } = "Roboto-Regular";
+        [JsonConverter(typeof(Json.UOFontIndexConverter))]
+        public byte InfoBarFont { get; set; } = 1;
         public int InfoBarFontSize { get; set; } = 18;
 
         public int LastJournalTab { get; set; } = 0;
@@ -854,6 +922,7 @@ namespace ClassicUO.Configuration
         };
 
         public bool UseLastMovedCooldownPosition { get; set; } = false;
+        public bool CoolDownBarLocked { get; set; } = false;
         public bool CloseHealthBarIfAnchored { get; set; } = false;
 
         [JsonConverter(typeof(Point2Converter))]
@@ -881,9 +950,11 @@ namespace ClassicUO.Configuration
 
         public uint SOSGumpID { get; set; } = 1915258020;
 
-        public bool ModernPaperdollAnchorEnabled { get; set; } = false;
         public bool JournalAnchorEnabled { get; set; } = false;
         public bool EnableGumpCloseAnimation { get; set; } = true;
+
+        public bool EnableAutoLootProgressBar { get; set; } = true;
+        public bool EnableNearbyItemGump { get; set; } = false;
 
 
         public void Save(string path, bool saveGumps = true)
@@ -1111,6 +1182,10 @@ namespace ClassicUO.Configuration
 
                                     break;
 
+                                case GumpType.ActionBar:
+                                    gump = new ActionBarGump();
+                                    break;
+
                                 case GumpType.Journal:
                                     gump = new ResizableJournal();
                                     //x = ProfileManager.CurrentProfile.JournalPosition.X;
@@ -1137,18 +1212,9 @@ namespace ClassicUO.Configuration
                                         break;
                                     }
 
-                                    if (ProfileManager.CurrentProfile.UseModernPaperdoll && serial == World.Player.Serial)
-                                    {
-                                        gump = new ModernPaperdoll(serial);
-                                        x = ProfileManager.CurrentProfile.ModernPaperdollPosition.X;
-                                        y = ProfileManager.CurrentProfile.ModernPaperdollPosition.Y;
-                                    }
-                                    else
-                                    {
-                                        gump = new PaperDollGump(serial, serial == World.Player.Serial);
-                                        x = ProfileManager.CurrentProfile.PaperdollPosition.X;
-                                        y = ProfileManager.CurrentProfile.PaperdollPosition.Y;
-                                    }
+                                    gump = new PaperDollGump(serial, serial == World.Player.Serial);
+                                    x = ProfileManager.CurrentProfile.PaperdollPosition.X;
+                                    y = ProfileManager.CurrentProfile.PaperdollPosition.Y;
                                     pdolc++;
 
                                     break;
@@ -1229,6 +1295,15 @@ namespace ClassicUO.Configuration
                                     break;
                                 case GumpType.DurabilityGump:
                                     gump = new DurabilitysGump();
+                                    break;
+                                case GumpType.ScriptManager:
+                                    gump = new LegionScripting.ScriptManagerGump();
+                                    break;
+                                case GumpType.LegionScriptStudio:
+                                    gump = new LegionScripting.LegionScriptStudioGump();
+                                    break;
+                                case GumpType.RunningScripts:
+                                    gump = new LegionScripting.RunningScriptsGump();
                                     break;
                             }
 
@@ -1326,8 +1401,10 @@ namespace ClassicUO.Configuration
                                     case GumpType.InfoBar:
                                         gump = new InfoBarGump();
                                         break;
+                                    case GumpType.ActionBar:
+                                        gump = new ActionBarGump();
+                                        break;
                                     case GumpType.PaperDoll:
-                                        gump = new ModernPaperdoll(World.Player.Serial);
                                         break;
                                 }
 

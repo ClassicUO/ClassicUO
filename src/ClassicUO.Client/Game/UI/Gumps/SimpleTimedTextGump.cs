@@ -1,4 +1,5 @@
-﻿using ClassicUO.Assets;
+using ClassicUO.Assets;
+using ClassicUO.Game;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -10,30 +11,21 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private readonly DateTime expireAt;
 
-        public SimpleTimedTextGump(string text, Color color, TimeSpan duration) : base(0, 0)
+        public SimpleTimedTextGump(string text, Color color, TimeSpan duration) : this(text, 0x0059, duration)
         {
-            expireAt = DateTime.Now.Add(duration);
-
-            Add(new TextBox(text, TrueTypeLoader.EMBEDDED_FONT, 20, null, color));
-            
-            WantUpdateSize = true;
         }
 
         public SimpleTimedTextGump(string text, uint hue, TimeSpan duration) : base(0, 0)
         {
             expireAt = DateTime.Now.Add(duration);
-
-            Add(new TextBox(text, TrueTypeLoader.EMBEDDED_FONT, 20, null, (int)hue));
-
+            Add(new UOLabel(text ?? "", 1, (ushort)hue, TEXT_ALIGN_TYPE.TS_LEFT, 0, FontStyle.BlackBorder));
             WantUpdateSize = true;
         }
 
         public SimpleTimedTextGump(string text, uint hue, TimeSpan duration, int width) : base(0, 0)
         {
             expireAt = DateTime.Now.Add(duration);
-
-            Add(new TextBox(text, TrueTypeLoader.EMBEDDED_FONT, 20, width, (int)hue));
-
+            Add(new UOLabel(text ?? "", 1, (ushort)hue, TEXT_ALIGN_TYPE.TS_LEFT, width, FontStyle.BlackBorder));
             WantUpdateSize = true;
         }
 

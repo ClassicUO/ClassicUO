@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -34,10 +34,12 @@ using System.IO;
 using System.Xml;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Assets;
 using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -114,6 +116,24 @@ namespace ClassicUO.Game.UI.Gumps
             label.Y = (Height >> 1) - (label.Height >> 1);
         }
 
+        protected override void OnDragEnd(int x, int y)
+        {
+            if (_skill != null && _skill.IsClickable)
+            {
+                var pos = Mouse.Position;
+                var ctrl = UIManager.GetControlUnderPositionExcluding(pos, this);
+                while (ctrl != null)
+                {
+                    if (ctrl is IActionBarDropTarget target)
+                    {
+                        target.AcceptSkill(SkillID);
+                        break;
+                    }
+                    ctrl = ctrl.Parent;
+                }
+            }
+            base.OnDragEnd(x, y);
+        }
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {

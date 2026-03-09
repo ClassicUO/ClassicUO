@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -51,12 +51,26 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private readonly LoginScene _loginScene;
         private ProfessionInfo _selectedProfession;
 
+        public bool HasProfessionSelected => _selectedProfession != null && _selectedProfession.Type != ProfessionLoader.PROF_TYPE.CATEGORY;
+
         public CharCreationGump(LoginScene scene) : base(0, 0)
         {
+            X = LoginLayoutHelper.ContentOffsetX;
+            Y = LoginLayoutHelper.ContentOffsetY;
             _loginScene = scene;
             Add(new CreateCharAppearanceGump(), 1);
             SetStep(CharCreationStep.Appearence);
             CanCloseWithRightClick = false;
+        }
+
+        public override void Update()
+        {
+            if (!IsDisposed)
+            {
+                X = LoginLayoutHelper.ContentOffsetX;
+                Y = LoginLayoutHelper.ContentOffsetY;
+            }
+            base.Update();
         }
 
         internal static int _skillsCount => Client.Version >= ClientVersion.CV_70160 ? 4 : 3;
@@ -64,11 +78,18 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         public void SetCharacter(PlayerMobile character)
         {
             _character = character;
-            SetStep(CharCreationStep.ChooseProfession);
+            
         }
 
-        public void SetAttributes(bool force = false)
+        public void SetAttributes(bool force = false, int? cityFromAppearance = null)
         {
+            if (cityFromAppearance.HasValue && cityFromAppearance.Value >= 0 && _selectedProfession != null)
+            {
+                _cityIndex = cityFromAppearance.Value;
+                CreateCharacter((byte)_selectedProfession.DescriptionIndex);
+                IsVisible = false;
+                return;
+            }
             SetStep(_selectedProfession.DescriptionIndex >= 0 || force ? CharCreationStep.ChooseCity : CharCreationStep.ChooseTrade);
         }
 
@@ -82,7 +103,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             for (int i = 0; i < _skillsCount; i++)
             {
                 int skillIndex = info.SkillDefVal[i, 0];
-
+                 
                 if (skillIndex >= _character.Skills.Length)
                 {
                     continue;
@@ -100,21 +121,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         skill.Lock = Lock.Locked;
                     }
 
-                    MessageBoxGump messageBox = new MessageBoxGump
-                    (
-                        400,
-                        300,
-                        ClilocLoader.Instance.GetString(1063016),
-                        null,
-                        true
-                    )
-                    {
-                        X = 470 / 2 - 400 / 2 + 100,
-                        Y = 372 / 2 - 300 / 2 + 20,
-                        CanMove = false
-                    };
-
-                    UIManager.Add(messageBox);
+                    UIManager.Add(new LoginMessageBoxGump(ClilocLoader.Instance.GetString(1063016)));
 
                     return;
                 }
@@ -131,9 +138,11 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             _character.Intelligence = (ushort) _selectedProfession.StatsVal[1];
             _character.Dexterity = (ushort) _selectedProfession.StatsVal[2];
 
-            SetAttributes();
+            
 
-            SetStep(_selectedProfession.DescriptionIndex > 0 ? CharCreationStep.ChooseCity : CharCreationStep.ChooseTrade);
+            //SetAttributes();
+
+            //SetStep(_selectedProfession.DescriptionIndex > 0 ? CharCreationStep.ChooseCity : CharCreationStep.ChooseTrade);
         }
 
         public void CreateCharacter(byte profession)

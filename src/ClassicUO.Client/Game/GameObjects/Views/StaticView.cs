@@ -93,16 +93,6 @@ namespace ClassicUO.Game.GameObjects
                 partial = false;
             }
 
-            if (SelectedObject.Object == this)
-            {
-                SpellVisualRangeManager.Instance.LastCursorTileLoc = new Vector2(X, Y);
-            }
-
-            if (SpellVisualRangeManager.Instance.IsTargetingAfterCasting())
-            {
-                hue = SpellVisualRangeManager.Instance.ProcessHueForTile(hue, this);
-            }
-
             if (TileMarkerManager.Instance.IsTileMarked(X, Y, World.Map.Index, out var nhue))
                 hue = nhue;
 

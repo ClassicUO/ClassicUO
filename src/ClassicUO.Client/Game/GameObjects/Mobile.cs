@@ -41,6 +41,7 @@ using ClassicUO.Utility.Collections;
 using Microsoft.Xna.Framework;
 using ClassicUO.Utility.Logging;
 using System;
+using ClassicUO.Game.Cheats.AIBot;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -104,6 +105,7 @@ namespace ClassicUO.Game.GameObjects
                 mobile.HitsRequest = HitsRequestStatus.None;
                 mobile.CalculateRandomIdleTime();
                 mobile.IsParalyzed = false;
+
             }
         );
 
@@ -147,6 +149,9 @@ namespace ClassicUO.Game.GameObjects
         public uint FlashTimeTick { get; set; } = 0;
         public ushort OldHits { get; set; } = 0;
         // ## BEGIN - END ## // HEALTHBAR
+
+        public SpellTimer Spell { get; set; } = new SpellTimer();
+        public PoisonTimer Poison { get; set; } = new PoisonTimer();
 
         public Mobile() : base(0) { }
 
@@ -755,21 +760,6 @@ namespace ClassicUO.Game.GameObjects
                         || IsFlying;
                     bool run = step.Run;
 
-                    // Client auto movements sync.
-                    // When server sends more than 1 packet in an amount of time less than 100ms if mounted (or 200ms if walking mount)
-                    // we need to remove the "teleport" effect.
-                    // When delay == 0 means that we received multiple movement packets in a single frame, so the patch becomes quite useless.
-                    if (!mounted && Serial != World.Player && Steps.Count > 1 && delay > 0)
-                    {
-                        mounted =
-                            delay
-                            <= (
-                                run
-                                    ? MovementSpeed.STEP_DELAY_MOUNT_RUN
-                                    : MovementSpeed.STEP_DELAY_MOUNT_WALK
-                            );
-                    }
-
                     int maxDelay =
                         MovementSpeed.TimeToCompleteMovement(run, mounted)
                         - (int)Client.Game.FrameDelay[1];
@@ -868,12 +858,6 @@ namespace ClassicUO.Game.GameObjects
                         X = (ushort)step.X;
                         Y = (ushort)step.Y;
                         Z = step.Z;
-                        UpdateScreenPosition();
-
-                        if (World.InGame && Serial == World.Player)
-                        {
-                            World.Player.CloseRangedGumps();
-                        }
 
                         Direction = (Direction)step.Direction;
                         IsRunning = step.Run;
@@ -893,6 +877,13 @@ namespace ClassicUO.Game.GameObjects
                         if (TNext != null || TPrevious != null)
                         {
                             AddToTile();
+                        }
+
+                        UpdateScreenPosition();
+
+                        if (World.InGame && Serial == World.Player)
+                        {
+                            World.Player.CloseRangedGumps();
                         }
 
                         LastStepTime = Time.Ticks;
@@ -1100,7 +1091,6 @@ namespace ClassicUO.Game.GameObjects
             if (!(this is PlayerMobile))
             {
                 UIManager.GetGump<PaperDollGump>(serial)?.Dispose();
-                UIManager.GetGump<ModernPaperdoll>(serial)?.Dispose();
 
                 _pool.ReturnOne(this);
             }

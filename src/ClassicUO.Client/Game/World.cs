@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -145,7 +145,7 @@ namespace ClassicUO.Game
                         {
                             value = 0;
                         }
-
+                        MapLoader.Instance.LoadMap(value, ClientFeatures.Flags.HasFlag(CharacterListFlags.CLF_UNLOCK_FELUCCA_AREAS));
                         Map = new Map.Map(value);
 
                         Player.SetInWorldTile(x, y, z);
@@ -153,6 +153,7 @@ namespace ClassicUO.Game
                     }
                     else
                     {
+                        MapLoader.Instance.LoadMap(value, ClientFeatures.Flags.HasFlag(CharacterListFlags.CLF_UNLOCK_FELUCCA_AREAS));
                         Map = new Map.Map(value);
                     }
 
@@ -266,12 +267,12 @@ namespace ClassicUO.Game
                             if (SerialHelper.IsMobile(container.Serial))
                             {
                                 UIManager.GetGump<PaperDollGump>(container.Serial)?.RequestUpdateContents();
-                                UIManager.GetGump<ModernPaperdoll>(container.Serial)?.RequestUpdateContents();
                             }
                             else if (SerialHelper.IsItem(container.Serial))
                             {
                                 UIManager.GetGump<ContainerGump>(container.Serial)?.RequestUpdateContents();
                                 #region GridContainer
+                               
                                 UIManager.GetGump<GridContainer>(container.Serial)?.RequestUpdateContents();
                                 #endregion
 
@@ -306,7 +307,8 @@ namespace ClassicUO.Game
                     }
                     else
                     {
-                        if (mob.NotorietyFlag == NotorietyFlag.Ally)
+                        WMapEntity wme = WMapManager.GetEntity(mob.Serial);
+                        if (mob.NotorietyFlag == NotorietyFlag.Ally || wme != null && wme.IsGuild && ProfileManager.CurrentProfile.ShowMapCloseFriend)
                         {
                             WMapManager.AddOrUpdate
                             (
@@ -490,12 +492,12 @@ namespace ClassicUO.Game
                 if (SerialHelper.IsMobile(containerSerial))
                 {
                     UIManager.GetGump<PaperDollGump>(containerSerial)?.RequestUpdateContents();
-                    UIManager.GetGump<ModernPaperdoll>(containerSerial)?.RequestUpdateContents();
                 }
                 else if (SerialHelper.IsItem(containerSerial))
                 {
                     UIManager.GetGump<ContainerGump>(containerSerial)?.RequestUpdateContents();
                     #region GridContainer
+                    
                     UIManager.GetGump<GridContainer>(containerSerial)?.RequestUpdateContents();
                     #endregion
                 }
@@ -789,7 +791,7 @@ namespace ClassicUO.Game
             }
 
             UIManager.GetGump<BaseHealthBarGump>(Player.Serial)?.Dispose();
-
+           
             GridContainer.ClearInstance();
 
             ObjectToRemove = 0;

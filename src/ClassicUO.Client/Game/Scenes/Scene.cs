@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -35,7 +35,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Input;
 using ClassicUO.Assets;
 using ClassicUO.Renderer;
-using SDL2;
+using SDL3;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -87,8 +87,8 @@ namespace ClassicUO.Game.Scenes
         internal virtual bool OnMouseWheel(bool up) => false;
         internal virtual bool OnMouseDragging() => false;
 
-        internal virtual void OnControllerButtonDown(SDL.SDL_ControllerButtonEvent e) { }
-        internal virtual void OnControllerButtonUp(SDL.SDL_ControllerButtonEvent e) { }
+        internal virtual void OnControllerButtonDown(SDL.SDL_GamepadButtonEvent e) { }
+        internal virtual void OnControllerButtonUp(SDL.SDL_GamepadButtonEvent e) { }
 
         internal virtual void OnTextInput(string text)
         {

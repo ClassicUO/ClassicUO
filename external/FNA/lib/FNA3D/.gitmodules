@@ -1,0 +1,4 @@
+[submodule "MojoShader"]
+	path = MojoShader
+	url = https://github.com/icculus/mojoshader
+	branch = main

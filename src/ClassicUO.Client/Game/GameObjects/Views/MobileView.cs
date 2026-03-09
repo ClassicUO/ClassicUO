@@ -110,6 +110,13 @@ namespace ClassicUO.Game.GameObjects
 
             bool isHuman = IsHuman;
 
+            float drawScale = 1f;
+            if (!isHuman && ProfileManager.CurrentProfile.ScaleMonstersEnabled)
+            {
+                var dict = ProfileManager.CurrentProfile.MonsterScaleByGraphic;
+                drawScale = (dict != null && dict.TryGetValue(Graphic, out int scale) ? scale : 100) / 100f;
+            }
+
             bool isGargoyle =
                 Client.Version >= ClientVersion.CV_7000
                 && (Graphic == 666 || Graphic == 667 || Graphic == 0x02B7 || Graphic == 0x02B6);
@@ -214,10 +221,11 @@ namespace ClassicUO.Game.GameObjects
             bool isAttack = Serial == TargetManager.LastAttack;
             bool isUnderMouse =
                 TargetManager.IsTargeting && ReferenceEquals(SelectedObject.Object, this);
+            bool highlightLastAttacker = ProfileManager.CurrentProfile?.PvP_LastAttackerHighlight == true && isAttack;
 
             if (Serial != World.Player.Serial)
             {
-                if (isAttack || isUnderMouse)
+                if (highlightLastAttacker || isUnderMouse)
                 {
                     overridedHue = Notoriety.GetHue(NotorietyFlag);
                 }
@@ -227,8 +235,8 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            // ## BEGIN - END ## // VISUAL HELPERS
-            if (ProfileManager.CurrentProfile.HighlightLastTargetType != 0 && World.Get(TargetManager.LastTargetInfo.Serial) == this)
+            bool isLastTarget = World.Get(TargetManager.LastTargetInfo.Serial) == this;
+            if (ProfileManager.CurrentProfile.HighlightLastTargetType != 0 && (isLastTarget || isAttack))
             {
                 overridedHue = CombatCollection.LastTargetHue(this, overridedHue);
                 hueVec.Y = 1;
@@ -289,7 +297,8 @@ namespace ClassicUO.Game.GameObjects
                             depth,
                             mountOffsetY,
                             overridedHue,
-                            charSitting
+                            charSitting,
+                            drawScale
                         );
 
                         animGroupMount = GetGroupForAnimation(this, mountGraphic);
@@ -314,7 +323,8 @@ namespace ClassicUO.Game.GameObjects
                             depth,
                             mountOffsetY,
                             overridedHue,
-                            charSitting
+                            charSitting,
+                            drawScale
                         );
                     }
                     else
@@ -342,7 +352,8 @@ namespace ClassicUO.Game.GameObjects
                         depth,
                         mountOffsetY,
                         overridedHue,
-                        charSitting
+                        charSitting,
+                        drawScale
                     );
 
                     drawY += mountOffsetY;
@@ -410,7 +421,8 @@ namespace ClassicUO.Game.GameObjects
                         depth,
                         mountOffsetY,
                         overridedHue,
-                        charSitting
+                        charSitting,
+                        drawScale
                     );
                 }
             }
@@ -435,7 +447,8 @@ namespace ClassicUO.Game.GameObjects
                 depth,
                 mountOffsetY,
                 overridedHue,
-                charSitting
+                charSitting,
+                drawScale
             );
 
             if (!IsEmpty)
@@ -522,7 +535,8 @@ namespace ClassicUO.Game.GameObjects
                                 depth,
                                 mountOffsetY,
                                 overridedHue,
-                                charSitting
+                                charSitting,
+                                drawScale
                             );
                         }
                         else
@@ -759,7 +773,8 @@ namespace ClassicUO.Game.GameObjects
             float depth,
             sbyte mountOffset,
             ushort overridedHue,
-            bool charIsSitting
+            bool charIsSitting,
+            float drawScale = 1f
         )
         {
             if (id >= Client.Game.Animations.MaxAnimationCount || owner == null)
@@ -820,6 +835,11 @@ namespace ClassicUO.Game.GameObjects
 
             y -= spriteInfo.UV.Height + spriteInfo.Center.Y;
 
+            if (drawScale != 1f)
+            {
+                y += (int)(spriteInfo.UV.Height * (1f - drawScale));
+            }
+
             SKIP:
 
             if (hasShadow)
@@ -829,7 +849,8 @@ namespace ClassicUO.Game.GameObjects
                     new Vector2(x, y),
                     spriteInfo.UV,
                     mirror,
-                    depth
+                    depth,
+                    drawScale
                 );
             }
             else
@@ -911,7 +932,7 @@ namespace ClassicUO.Game.GameObjects
                                 hueVec,
                                 0f,
                                 Vector2.Zero,
-                                1f,
+                                drawScale,
                                 mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
                                 depth + 1f + (i * tiles)
                             );
@@ -1080,9 +1101,27 @@ namespace ClassicUO.Game.GameObjects
             return mod;
         }
 
+
+
         public override bool CheckMouseSelection()
         {
+            // Verifica se RealScreenPosition e Offset foram inicializados
+            if (RealScreenPosition == null)
+            {
+                GameActions.Print("RealScreenPosition not inicizalided");
+                return false; // Saia da fun??o se n?o estiver inicializado
+            }
+
+            if (Offset == null)
+            {
+                GameActions.Print("Offset no started!");
+                return false; // Saia da fun??o se n?o estiver inicializado
+            }
+
+            // Se tudo estiver inicializado corretamente, continue com o c?lculo
             Point position = RealScreenPosition;
+
+            // Realiza ajustes na posi??o
             position.Y -= 3;
             position.X += (int)Offset.X + 22;
             position.Y += (int)(Offset.Y - Offset.Z) + 22;
@@ -1091,6 +1130,7 @@ namespace ClassicUO.Game.GameObjects
             r.X = position.X - r.X;
             r.Y = position.Y - r.Y;
 
+            // Supondo que aqui voc? continue a verifica??o
             if (!r.Contains(SelectedObject.TranslatedMousePositionByViewport))
             {
                 return false;
@@ -1354,10 +1394,14 @@ namespace ClassicUO.Game.GameObjects
                     else*/
                     if (tunic != null && tunic.Graphic == 0x0238)
                     {
-                        return robe != null
-                            && robe.Graphic != 0x9985
+                        if (robe == null)
+                            return false;
+                        bool covers = robe.Graphic != 0x9985
                             && robe.Graphic != 0x9986
-                            && robe.Graphic != 0xA412;
+                            && robe.Graphic != 0xA412
+                            && robe.Graphic != 0xA2CB
+                            && robe.Graphic != 0xA2CA;
+                        return covers;
                     }
 
                     break;
@@ -1365,6 +1409,7 @@ namespace ClassicUO.Game.GameObjects
                 case Layer.Torso:
                     robe = mobile.FindItemByLayer(Layer.Robe);
 
+                    bool isDemise = World.ServerName.IndexOf("Demise", StringComparison.OrdinalIgnoreCase) >= 0;
                     if (
                         robe != null
                         && robe.Graphic != 0
@@ -1372,6 +1417,7 @@ namespace ClassicUO.Game.GameObjects
                         && robe.Graphic != 0x9986
                         && robe.Graphic != 0xA412
                         && robe.Graphic != 0xA2CA
+                        && (!isDemise || robe.Graphic != 0xA2CB)
                     )
                     {
                         return true;
@@ -1398,12 +1444,13 @@ namespace ClassicUO.Game.GameObjects
 
                 case Layer.Arms:
                     robe = mobile.FindItemByLayer(Layer.Robe);
-
                     return robe != null
                         && robe.Graphic != 0
                         && robe.Graphic != 0x9985
                         && robe.Graphic != 0x9986
-                        && robe.Graphic != 0xA412;
+                        && robe.Graphic != 0xA412
+                        && robe.Graphic != 0xA2CB
+                        && robe.Graphic != 0xA2CA;
 
                 case Layer.Helmet:
                 case Layer.Hair:

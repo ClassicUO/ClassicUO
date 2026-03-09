@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -33,8 +33,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
+using FontStyle = ClassicUO.Game.FontStyle;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -157,8 +159,8 @@ namespace ClassicUO.Game.UI.Gumps
 
     internal class InfoBarControl : Control
     {
-        private readonly TextBox _data;
-        private readonly TextBox _label;
+        private readonly UOLabel _data;
+        private readonly UOLabel _label;
         private readonly ResizableStaticPic _pic;
         private ushort _warningLinesHue;
 
@@ -169,14 +171,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = false;
             Hue = hue;
 
-            _label = new TextBox(
-                label,
-                ProfileManager.CurrentProfile.InfoBarFont,
-                ProfileManager.CurrentProfile.InfoBarFontSize,
-                null,
-                hue,
-                strokeEffect: false
-                );
+            _label = new UOLabel(label, ProfileManager.CurrentProfile.InfoBarFont, hue, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 0, FontStyle.None);
             if (label.StartsWith(@"\"))
             {
                 if (ushort.TryParse(label.Substring(1), out ushort gphc))
@@ -188,14 +183,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Var = var;
 
-            _data = new TextBox(
-                "",
-                ProfileManager.CurrentProfile.InfoBarFont,
-                ProfileManager.CurrentProfile.InfoBarFontSize,
-                null,
-                0x0481,
-                strokeEffect: false
-                )
+            _data = new UOLabel("", ProfileManager.CurrentProfile.InfoBarFont, 0x0481, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 0, FontStyle.None)
             { X = _label.IsVisible ? _label.Width + 3 : _pic.Width };
 
             Add(_label);
@@ -222,7 +210,7 @@ namespace ClassicUO.Game.UI.Gumps
                 string newData = GetVarData(Var) ?? string.Empty;
                 if (!newData.Equals(_data.Text))
                 {
-                    _data.UpdateText(newData);
+                    _data.Text = newData;
                     _data.WantUpdateSize = true;
                     WantUpdateSize = true;
                 }
@@ -338,6 +326,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case InfoBarVars.NameNotoriety: return World.Player.Name;
 
+                case InfoBarVars.CriminalTimer:
+                    int sec = PvMPvPManager.Instance.GreyCriminalSecondsRemaining;
+                    return sec > 0 ? $"{sec / 60}:{sec % 60:D2}" : "";
+
                 case InfoBarVars.TithingPoints: return World.Player.TithingPoints.ToString();
 
                 default: return "";
@@ -431,6 +423,11 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                 case InfoBarVars.NameNotoriety: return Notoriety.GetHue(World.Player.NotorietyFlag);
+
+                case InfoBarVars.CriminalTimer:
+                    return PvMPvPManager.Instance.GreyCriminalSecondsRemaining > 0
+                        ? Notoriety.GetHue(World.Player.NotorietyFlag)
+                        : (ushort)0x0481;
 
                 default: return 0x0481;
             }

@@ -1,0 +1,513 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		7B8B6CBC24452690001C08D6 /* mojoshader_metal.c in Sources */ = {isa = PBXBuildFile; fileRef = 7B8B6CB724452690001C08D6 /* mojoshader_metal.c */; };
+		7B8B6CBD24452690001C08D6 /* mojoshader_metal.c in Sources */ = {isa = PBXBuildFile; fileRef = 7B8B6CB724452690001C08D6 /* mojoshader_metal.c */; };
+		7B8B6CBE24452690001C08D6 /* mojoshader_common.c in Sources */ = {isa = PBXBuildFile; fileRef = 7B8B6CB824452690001C08D6 /* mojoshader_common.c */; };
+		7B8B6CBF24452690001C08D6 /* mojoshader_common.c in Sources */ = {isa = PBXBuildFile; fileRef = 7B8B6CB824452690001C08D6 /* mojoshader_common.c */; };
+		7B8B6CC024452690001C08D6 /* mojoshader_opengl.c in Sources */ = {isa = PBXBuildFile; fileRef = 7B8B6CB924452690001C08D6 /* mojoshader_opengl.c */; };
+		7B8B6CC124452690001C08D6 /* mojoshader_opengl.c in Sources */ = {isa = PBXBuildFile; fileRef = 7B8B6CB924452690001C08D6 /* mojoshader_opengl.c */; };
+		7B8B6CC224452690001C08D6 /* mojoshader.c in Sources */ = {isa = PBXBuildFile; fileRef = 7B8B6CBA24452690001C08D6 /* mojoshader.c */; };
+		7B8B6CC324452690001C08D6 /* mojoshader.c in Sources */ = {isa = PBXBuildFile; fileRef = 7B8B6CBA24452690001C08D6 /* mojoshader.c */; };
+		7B8B6CC424452690001C08D6 /* mojoshader_effects.c in Sources */ = {isa = PBXBuildFile; fileRef = 7B8B6CBB24452690001C08D6 /* mojoshader_effects.c */; };
+		7B8B6CC524452690001C08D6 /* mojoshader_effects.c in Sources */ = {isa = PBXBuildFile; fileRef = 7B8B6CBB24452690001C08D6 /* mojoshader_effects.c */; };
+		7B8B6CC9244526A7001C08D6 /* mojoshader_profile_common.c in Sources */ = {isa = PBXBuildFile; fileRef = 7B8B6CC6244526A7001C08D6 /* mojoshader_profile_common.c */; };
+		7B8B6CCA244526A7001C08D6 /* mojoshader_profile_common.c in Sources */ = {isa = PBXBuildFile; fileRef = 7B8B6CC6244526A7001C08D6 /* mojoshader_profile_common.c */; };
+		7B8B6CCB244526A7001C08D6 /* mojoshader_profile_glsl.c in Sources */ = {isa = PBXBuildFile; fileRef = 7B8B6CC7244526A7001C08D6 /* mojoshader_profile_glsl.c */; };
+		7B8B6CCC244526A7001C08D6 /* mojoshader_profile_glsl.c in Sources */ = {isa = PBXBuildFile; fileRef = 7B8B6CC7244526A7001C08D6 /* mojoshader_profile_glsl.c */; };
+		7B8B6CCD244526A7001C08D6 /* mojoshader_profile_metal.c in Sources */ = {isa = PBXBuildFile; fileRef = 7B8B6CC8244526A7001C08D6 /* mojoshader_profile_metal.c */; };
+		7B8B6CCE244526A7001C08D6 /* mojoshader_profile_metal.c in Sources */ = {isa = PBXBuildFile; fileRef = 7B8B6CC8244526A7001C08D6 /* mojoshader_profile_metal.c */; };
+		7BF820702445254300736AB0 /* FNA3D.c in Sources */ = {isa = PBXBuildFile; fileRef = 7BF820682445254300736AB0 /* FNA3D.c */; };
+		7BF820712445254300736AB0 /* FNA3D.c in Sources */ = {isa = PBXBuildFile; fileRef = 7BF820682445254300736AB0 /* FNA3D.c */; };
+		7BF820722445254300736AB0 /* FNA3D_Driver_OpenGL.c in Sources */ = {isa = PBXBuildFile; fileRef = 7BF820692445254300736AB0 /* FNA3D_Driver_OpenGL.c */; };
+		7BF820732445254300736AB0 /* FNA3D_Driver_OpenGL.c in Sources */ = {isa = PBXBuildFile; fileRef = 7BF820692445254300736AB0 /* FNA3D_Driver_OpenGL.c */; };
+		7BF820762445254300736AB0 /* FNA3D_Driver_Metal.c in Sources */ = {isa = PBXBuildFile; fileRef = 7BF8206B2445254300736AB0 /* FNA3D_Driver_Metal.c */; };
+		7BF820772445254300736AB0 /* FNA3D_Driver_Metal.c in Sources */ = {isa = PBXBuildFile; fileRef = 7BF8206B2445254300736AB0 /* FNA3D_Driver_Metal.c */; };
+		7BF820782445254300736AB0 /* FNA3D_Image.c in Sources */ = {isa = PBXBuildFile; fileRef = 7BF8206C2445254300736AB0 /* FNA3D_Image.c */; };
+		7BF820792445254300736AB0 /* FNA3D_Image.c in Sources */ = {isa = PBXBuildFile; fileRef = 7BF8206C2445254300736AB0 /* FNA3D_Image.c */; };
+		7BF8207C2445254300736AB0 /* FNA3D_PipelineCache.c in Sources */ = {isa = PBXBuildFile; fileRef = 7BF8206E2445254300736AB0 /* FNA3D_PipelineCache.c */; };
+		7BF8207D2445254300736AB0 /* FNA3D_PipelineCache.c in Sources */ = {isa = PBXBuildFile; fileRef = 7BF8206E2445254300736AB0 /* FNA3D_PipelineCache.c */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		7B1CDD432190C0A200175C7B /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7B7E140B2190E0CB00616654 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		7B1CDD452190C0A200175C7B /* libFNA3D.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libFNA3D.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		7B7E140D2190E0CB00616654 /* libFNA3D.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libFNA3D.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		7B8B6CB724452690001C08D6 /* mojoshader_metal.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mojoshader_metal.c; path = ../MojoShader/mojoshader_metal.c; sourceTree = "<group>"; };
+		7B8B6CB824452690001C08D6 /* mojoshader_common.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mojoshader_common.c; path = ../MojoShader/mojoshader_common.c; sourceTree = "<group>"; };
+		7B8B6CB924452690001C08D6 /* mojoshader_opengl.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mojoshader_opengl.c; path = ../MojoShader/mojoshader_opengl.c; sourceTree = "<group>"; };
+		7B8B6CBA24452690001C08D6 /* mojoshader.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mojoshader.c; path = ../MojoShader/mojoshader.c; sourceTree = "<group>"; };
+		7B8B6CBB24452690001C08D6 /* mojoshader_effects.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mojoshader_effects.c; path = ../MojoShader/mojoshader_effects.c; sourceTree = "<group>"; };
+		7B8B6CC6244526A7001C08D6 /* mojoshader_profile_common.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mojoshader_profile_common.c; path = ../MojoShader/profiles/mojoshader_profile_common.c; sourceTree = "<group>"; };
+		7B8B6CC7244526A7001C08D6 /* mojoshader_profile_glsl.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mojoshader_profile_glsl.c; path = ../MojoShader/profiles/mojoshader_profile_glsl.c; sourceTree = "<group>"; };
+		7B8B6CC8244526A7001C08D6 /* mojoshader_profile_metal.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mojoshader_profile_metal.c; path = ../MojoShader/profiles/mojoshader_profile_metal.c; sourceTree = "<group>"; };
+		7BF820652445251D00736AB0 /* FNA3D_SysRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FNA3D_SysRenderer.h; path = ../include/FNA3D_SysRenderer.h; sourceTree = "<group>"; };
+		7BF820662445251D00736AB0 /* FNA3D_Image.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FNA3D_Image.h; path = ../include/FNA3D_Image.h; sourceTree = "<group>"; };
+		7BF820672445251D00736AB0 /* FNA3D.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FNA3D.h; path = ../include/FNA3D.h; sourceTree = "<group>"; };
+		7BF820682445254300736AB0 /* FNA3D.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = FNA3D.c; path = ../src/FNA3D.c; sourceTree = "<group>"; };
+		7BF820692445254300736AB0 /* FNA3D_Driver_OpenGL.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = FNA3D_Driver_OpenGL.c; path = ../src/FNA3D_Driver_OpenGL.c; sourceTree = "<group>"; };
+		7BF8206B2445254300736AB0 /* FNA3D_Driver_Metal.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = FNA3D_Driver_Metal.c; path = ../src/FNA3D_Driver_Metal.c; sourceTree = "<group>"; };
+		7BF8206C2445254300736AB0 /* FNA3D_Image.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = FNA3D_Image.c; path = ../src/FNA3D_Image.c; sourceTree = "<group>"; };
+		7BF8206E2445254300736AB0 /* FNA3D_PipelineCache.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = FNA3D_PipelineCache.c; path = ../src/FNA3D_PipelineCache.c; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		7B1CDD422190C0A200175C7B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7B7E140A2190E0CB00616654 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		7B1CDD3C2190C0A200175C7B = {
+			isa = PBXGroup;
+			children = (
+				7B8B6CB624452656001C08D6 /* MojoShader */,
+				7B1CDDA72190C52900175C7B /* Public Headers */,
+				7B1CDDA62190C50300175C7B /* Library Source */,
+				7B1CDD462190C0A200175C7B /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		7B1CDD462190C0A200175C7B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				7B1CDD452190C0A200175C7B /* libFNA3D.a */,
+				7B7E140D2190E0CB00616654 /* libFNA3D.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		7B1CDDA62190C50300175C7B /* Library Source */ = {
+			isa = PBXGroup;
+			children = (
+				7BF8206B2445254300736AB0 /* FNA3D_Driver_Metal.c */,
+				7BF820692445254300736AB0 /* FNA3D_Driver_OpenGL.c */,
+				7BF8206C2445254300736AB0 /* FNA3D_Image.c */,
+				7BF8206E2445254300736AB0 /* FNA3D_PipelineCache.c */,
+				7BF820682445254300736AB0 /* FNA3D.c */,
+			);
+			name = "Library Source";
+			sourceTree = "<group>";
+		};
+		7B1CDDA72190C52900175C7B /* Public Headers */ = {
+			isa = PBXGroup;
+			children = (
+				7BF820652445251D00736AB0 /* FNA3D_SysRenderer.h */,
+				7BF820662445251D00736AB0 /* FNA3D_Image.h */,
+				7BF820672445251D00736AB0 /* FNA3D.h */,
+			);
+			name = "Public Headers";
+			sourceTree = "<group>";
+		};
+		7B8B6CB624452656001C08D6 /* MojoShader */ = {
+			isa = PBXGroup;
+			children = (
+				7B8B6CC6244526A7001C08D6 /* mojoshader_profile_common.c */,
+				7B8B6CC7244526A7001C08D6 /* mojoshader_profile_glsl.c */,
+				7B8B6CC8244526A7001C08D6 /* mojoshader_profile_metal.c */,
+				7B8B6CB824452690001C08D6 /* mojoshader_common.c */,
+				7B8B6CBB24452690001C08D6 /* mojoshader_effects.c */,
+				7B8B6CB724452690001C08D6 /* mojoshader_metal.c */,
+				7B8B6CB924452690001C08D6 /* mojoshader_opengl.c */,
+				7B8B6CBA24452690001C08D6 /* mojoshader.c */,
+			);
+			name = MojoShader;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		7B1CDD442190C0A200175C7B /* FNA3D */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7B1CDD4E2190C0A200175C7B /* Build configuration list for PBXNativeTarget "FNA3D" */;
+			buildPhases = (
+				7B1CDD412190C0A200175C7B /* Sources */,
+				7B1CDD422190C0A200175C7B /* Frameworks */,
+				7B1CDD432190C0A200175C7B /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = FNA3D;
+			productName = "FAudio-iOS";
+			productReference = 7B1CDD452190C0A200175C7B /* libFNA3D.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		7B7E140C2190E0CB00616654 /* FNA3D-tv */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7B7E14132190E0CB00616654 /* Build configuration list for PBXNativeTarget "FNA3D-tv" */;
+			buildPhases = (
+				7B7E14092190E0CB00616654 /* Sources */,
+				7B7E140A2190E0CB00616654 /* Frameworks */,
+				7B7E140B2190E0CB00616654 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "FNA3D-tv";
+			productName = "FAudio-tv";
+			productReference = 7B7E140D2190E0CB00616654 /* libFNA3D.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		7B1CDD3D2190C0A200175C7B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1010;
+				ORGANIZATIONNAME = "";
+				TargetAttributes = {
+					7B1CDD442190C0A200175C7B = {
+						CreatedOnToolsVersion = 10.1;
+					};
+					7B7E140C2190E0CB00616654 = {
+						CreatedOnToolsVersion = 10.1;
+					};
+				};
+			};
+			buildConfigurationList = 7B1CDD402190C0A200175C7B /* Build configuration list for PBXProject "FNA3D" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 7B1CDD3C2190C0A200175C7B;
+			productRefGroup = 7B1CDD462190C0A200175C7B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				7B1CDD442190C0A200175C7B /* FNA3D */,
+				7B7E140C2190E0CB00616654 /* FNA3D-tv */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		7B1CDD412190C0A200175C7B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7B8B6CC9244526A7001C08D6 /* mojoshader_profile_common.c in Sources */,
+				7B8B6CC224452690001C08D6 /* mojoshader.c in Sources */,
+				7B8B6CC424452690001C08D6 /* mojoshader_effects.c in Sources */,
+				7BF820702445254300736AB0 /* FNA3D.c in Sources */,
+				7B8B6CBC24452690001C08D6 /* mojoshader_metal.c in Sources */,
+				7B8B6CCB244526A7001C08D6 /* mojoshader_profile_glsl.c in Sources */,
+				7B8B6CBE24452690001C08D6 /* mojoshader_common.c in Sources */,
+				7B8B6CCD244526A7001C08D6 /* mojoshader_profile_metal.c in Sources */,
+				7BF820762445254300736AB0 /* FNA3D_Driver_Metal.c in Sources */,
+				7BF8207C2445254300736AB0 /* FNA3D_PipelineCache.c in Sources */,
+				7BF820722445254300736AB0 /* FNA3D_Driver_OpenGL.c in Sources */,
+				7B8B6CC024452690001C08D6 /* mojoshader_opengl.c in Sources */,
+				7BF820782445254300736AB0 /* FNA3D_Image.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7B7E14092190E0CB00616654 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7B8B6CCA244526A7001C08D6 /* mojoshader_profile_common.c in Sources */,
+				7B8B6CC324452690001C08D6 /* mojoshader.c in Sources */,
+				7B8B6CC524452690001C08D6 /* mojoshader_effects.c in Sources */,
+				7BF820712445254300736AB0 /* FNA3D.c in Sources */,
+				7B8B6CBD24452690001C08D6 /* mojoshader_metal.c in Sources */,
+				7B8B6CCC244526A7001C08D6 /* mojoshader_profile_glsl.c in Sources */,
+				7B8B6CBF24452690001C08D6 /* mojoshader_common.c in Sources */,
+				7B8B6CCE244526A7001C08D6 /* mojoshader_profile_metal.c in Sources */,
+				7BF820772445254300736AB0 /* FNA3D_Driver_Metal.c in Sources */,
+				7BF8207D2445254300736AB0 /* FNA3D_PipelineCache.c in Sources */,
+				7BF820732445254300736AB0 /* FNA3D_Driver_OpenGL.c in Sources */,
+				7B8B6CC124452690001C08D6 /* mojoshader_opengl.c in Sources */,
+				7BF820792445254300736AB0 /* FNA3D_Image.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		7B1CDD4C2190C0A200175C7B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					FNA3D_DRIVER_METAL,
+					MOJOSHADER_NO_VERSION_INCLUDE,
+					MOJOSHADER_USE_SDL_STDLIB,
+					MOJOSHADER_EFFECT_SUPPORT,
+					MOJOSHADER_DEPTH_CLIPPING,
+					MOJOSHADER_FLIP_RENDERTARGET,
+					MOJOSHADER_XNA4_VERTEX_TEXTURES,
+					"COMPILER_SUPPORT=0",
+					"SUPPORT_PROFILE_ARB1=0",
+					"SUPPORT_PROFILE_ARB1_NV=0",
+					"SUPPORT_PROFILE_BYTECODE=0",
+					"SUPPORT_PROFILE_D3D=0",
+					"SUPPORT_PROFILE_GLSPIRV=0",
+					"SUPPORT_PROFILE_METAL=1",
+					"SUPPORT_PROFILE_SPIRV=0",
+					"SUPPORT_PROFILE_HLSL=0",
+					"SUPPORT_PROFILE_GLSL=0",
+					"SUPPORT_PROFILE_GLSL120=0",
+					"SUPPORT_PROFILE_GLSLES=0",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					../../SDL2/include,
+					../mojoshader/,
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos appletvos appletvsimulator";
+				TVOS_DEPLOYMENT_TARGET = 9.0;
+			};
+			name = Debug;
+		};
+		7B1CDD4D2190C0A200175C7B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					FNA3D_DRIVER_METAL,
+					MOJOSHADER_NO_VERSION_INCLUDE,
+					MOJOSHADER_USE_SDL_STDLIB,
+					MOJOSHADER_EFFECT_SUPPORT,
+					MOJOSHADER_DEPTH_CLIPPING,
+					MOJOSHADER_FLIP_RENDERTARGET,
+					MOJOSHADER_XNA4_VERTEX_TEXTURES,
+					"COMPILER_SUPPORT=0",
+					"SUPPORT_PROFILE_ARB1=0",
+					"SUPPORT_PROFILE_ARB1_NV=0",
+					"SUPPORT_PROFILE_BYTECODE=0",
+					"SUPPORT_PROFILE_D3D=0",
+					"SUPPORT_PROFILE_GLSPIRV=0",
+					"SUPPORT_PROFILE_METAL=1",
+					"SUPPORT_PROFILE_SPIRV=0",
+					"SUPPORT_PROFILE_HLSL=0",
+					"SUPPORT_PROFILE_GLSL=0",
+					"SUPPORT_PROFILE_GLSL120=0",
+					"SUPPORT_PROFILE_GLSLES=0",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					../../SDL2/include,
+					../mojoshader/,
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos appletvos appletvsimulator";
+				TVOS_DEPLOYMENT_TARGET = 9.0;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		7B1CDD4F2190C0A200175C7B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		7B1CDD502190C0A200175C7B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		7B7E14142190E0CB00616654 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = FNA3D;
+				SDKROOT = appletvos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "appletvsimulator appletvos";
+				TARGETED_DEVICE_FAMILY = 3;
+			};
+			name = Debug;
+		};
+		7B7E14152190E0CB00616654 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = FNA3D;
+				SDKROOT = appletvos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "appletvsimulator appletvos";
+				TARGETED_DEVICE_FAMILY = 3;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		7B1CDD402190C0A200175C7B /* Build configuration list for PBXProject "FNA3D" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7B1CDD4C2190C0A200175C7B /* Debug */,
+				7B1CDD4D2190C0A200175C7B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7B1CDD4E2190C0A200175C7B /* Build configuration list for PBXNativeTarget "FNA3D" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7B1CDD4F2190C0A200175C7B /* Debug */,
+				7B1CDD502190C0A200175C7B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		7B7E14132190E0CB00616654 /* Build configuration list for PBXNativeTarget "FNA3D-tv" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7B7E14142190E0CB00616654 /* Debug */,
+				7B7E14152190E0CB00616654 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 7B1CDD3D2190C0A200175C7B /* Project object */;
+}

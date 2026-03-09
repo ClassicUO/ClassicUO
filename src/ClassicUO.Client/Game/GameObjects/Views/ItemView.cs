@@ -83,6 +83,18 @@ namespace ClassicUO.Game.GameObjects
 
             if (IsCorpse)
             {
+                if (ProfileManager.CurrentProfile?.PvM_CorpseFilterByNotoriety == true && ProfileManager.CurrentProfile.PvM_CorpseFilterMode != 0)
+                {
+                    NotorietyFlag? ownerNoto = World.CorpseManager.GetOwnerNotoriety(Serial);
+                    if (ownerNoto.HasValue)
+                    {
+                        int mode = ProfileManager.CurrentProfile.PvM_CorpseFilterMode;
+                        bool friendly = ownerNoto == NotorietyFlag.Innocent || ownerNoto == NotorietyFlag.Ally;
+                        bool enemy = ownerNoto == NotorietyFlag.Gray || ownerNoto == NotorietyFlag.Criminal || ownerNoto == NotorietyFlag.Enemy || ownerNoto == NotorietyFlag.Murderer;
+                        if (mode == 1 && !friendly) return false;
+                        if (mode == 2 && !enemy) return false;
+                    }
+                }
                 hueVec = ShaderHueTranslator.GetHueVector(0, false, alpha);
                 return DrawCorpse(batcher, posX, posY - 3, hueVec, depth);
             }
@@ -90,6 +102,21 @@ namespace ClassicUO.Game.GameObjects
             ushort hue = Hue;
             ushort graphic = DisplayedGraphic;
             bool partial = ItemData.IsPartialHue;
+            if (ProfileManager.CurrentProfile.AutoAvoidObstacules) {
+                if  (StaticFilters.isHumanAndMonster(graphic))
+                {
+                    if (StaticFilters.IsOutStamina())
+                    {
+                        TileDataLoader.Instance.StaticData[Graphic].SetImpassable(true);
+
+                    }
+                    else
+                    {
+                        TileDataLoader.Instance.StaticData[Graphic].SetImpassable(false);
+                    }
+                        
+                }
+            }
 
             // ## BEGIN - END ## // ART / HUE CHANGES
             if (CombatCollection.IsStealthArt(Graphic))
@@ -99,6 +126,23 @@ namespace ClassicUO.Game.GameObjects
             }
             // ## BEGIN - END ## // ART / HUE CHANGES
             // ## BEGIN - END ## // MISC
+            // ## BEGIN - END ## // MISC
+            if (ProfileManager.CurrentProfile.AutoAvoidMobiles) {
+                if  (StaticFilters.isHumanAndMonster(graphic))
+                {
+                    if (StaticFilters.IsOutStamina())
+                    {
+                        TileDataLoader.Instance.StaticData[Graphic].Flags  = TileFlag.Impassable;
+
+                    }
+                    else
+                    {
+                        TileDataLoader.Instance.StaticData[Graphic].Flags = TileFlag.Impassable;
+                    }
+                        
+                }
+            }
+            
             if (ProfileManager.CurrentProfile.BlockWoS)
             {
                 if (StaticFilters.IsWallOfStone(Graphic) || Graphic == ProfileManager.CurrentProfile.BlockWoSArt)
@@ -247,6 +291,8 @@ namespace ClassicUO.Game.GameObjects
 
             return true;
         }
+
+
 
         private bool DrawCorpse(
             UltimaBatcher2D batcher,
@@ -398,19 +444,18 @@ namespace ClassicUO.Game.GameObjects
                 color = newHue;
             }
 
-            if (frames.Length == 0)
+            if (frames == null || frames.Length == 0)
             {
                 return;
             }
 
             int fc = frames.Length;
-
+            if (animIndex < 0)
+                animIndex = 0;
             if (fc > 0 && animIndex >= fc)
-            {
                 animIndex = (byte)(fc - 1);
-            }
 
-            if (animIndex < frames.Length)
+            if (animIndex >= 0 && animIndex < frames.Length)
             {
                 ref var spriteInfo = ref frames[animIndex];
 
@@ -702,37 +747,46 @@ namespace ClassicUO.Game.GameObjects
                         animIndex = (byte)(animIndex % frames.Length);
                     }
 
-                    ref var spriteInfo = ref frames[animIndex];
+                    if (animIndex < 0 || animIndex >= frames.Length)
+                        continue;
 
-                    if (spriteInfo.Texture != null)
+                    try
                     {
-                        int x =
-                            position.X
-                            - (
-                                IsFlipped
-                                    ? spriteInfo.UV.Width - spriteInfo.Center.X
-                                    : spriteInfo.Center.X
-                            );
-                        int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);
+                        ref var spriteInfo = ref frames[animIndex];
 
-                        if (
-                            Client.Game.Animations.PixelCheck(
-                                graphic,
-                                group,
-                                direction,
-                                isUOP,
-                                animIndex,
-                                IsFlipped
-                                    ? x
-                                        + spriteInfo.UV.Width
-                                        - SelectedObject.TranslatedMousePositionByViewport.X
-                                    : SelectedObject.TranslatedMousePositionByViewport.X - x,
-                                SelectedObject.TranslatedMousePositionByViewport.Y - y
-                            )
-                        )
+                        if (spriteInfo.Texture != null)
                         {
-                            return true;
+                            int x =
+                                position.X
+                                - (
+                                    IsFlipped
+                                        ? spriteInfo.UV.Width - spriteInfo.Center.X
+                                        : spriteInfo.Center.X
+                                );
+                            int y = position.Y - (spriteInfo.UV.Height + spriteInfo.Center.Y);
+
+                            if (
+                                Client.Game.Animations.PixelCheck(
+                                    graphic,
+                                    group,
+                                    direction,
+                                    isUOP,
+                                    animIndex,
+                                    IsFlipped
+                                        ? x
+                                            + spriteInfo.UV.Width
+                                            - SelectedObject.TranslatedMousePositionByViewport.X
+                                        : SelectedObject.TranslatedMousePositionByViewport.X - x,
+                                    SelectedObject.TranslatedMousePositionByViewport.Y - y
+                                )
+                            )
+                            {
+                                return true;
+                            }
                         }
+                    }
+                    catch (Exception)
+                    {
                     }
                 }
             }

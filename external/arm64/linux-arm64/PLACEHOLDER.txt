@@ -1,0 +1,23 @@
+# Linux ARM64 Native Libraries Placeholder
+
+This directory should contain the following ARM64 native libraries for Linux:
+
+## Required Files:
+- libFAudio.so.0
+- libFNA3D.so.0
+- libSDL2-2.0.so.0
+- libtheorafile.so
+
+## How to Obtain:
+1. Build FNA from source for Linux ARM64
+2. Download pre-built ARM64 libraries from FNA releases
+3. Use cross-compilation tools (gcc-aarch64-linux-gnu)
+
+## Notes:
+- These must be ARM64 (aarch64) libraries, not x86_64
+- Libraries should be compatible with the FNA version used in ClassicUO
+- See external/arm64/README.md for detailed instructions
+
+## Verification:
+Use `file library.so` to verify the architecture shows "aarch64"
+Use `ldd library.so` to check dependencies

@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -33,12 +33,13 @@
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Managers;
+using ClassicUO.TazUO;
 using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-using SDL2;
+using SDL3;
 using System;
 using System.Globalization;
 using System.IO;
@@ -49,9 +50,13 @@ namespace ClassicUO
 {
     internal static class Bootstrap
     {
+#if WINDOWS
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetDllDirectory(string lpPathName);
+#else
+        private static bool SetDllDirectory(string lpPathName) => false;
+#endif
 
         [STAThread]
         public static void Main(string[] args)
@@ -139,21 +144,18 @@ namespace ClassicUO
 
             if (!Directory.Exists(Path.GetDirectoryName(globalSettingsPath)) || !File.Exists(globalSettingsPath))
             {
-                // settings specified in path does not exists, make new one
-                {
-                    // TODO: 
-                    Settings.GlobalSettings.Save();
-                }
+                Settings.GlobalSettings.Save();
             }
 
             Settings.GlobalSettings = ConfigurationResolver.Load<Settings>(globalSettingsPath, SettingsJsonContext.Default);
             CUOEnviroment.IsOutlands = Settings.GlobalSettings.ShardType == 2;
 
+            Language.Load(Settings.GlobalSettings.UILanguage ?? "ENG");
+
             ReadSettingsFromArgs(args);
 
             UpdateManager.CheckForUpdates();
 
-            // still invalid, cannot load settings
             if (Settings.GlobalSettings == null)
             {
                 Settings.GlobalSettings = new Settings();
@@ -164,7 +166,9 @@ namespace ClassicUO
             {
                 string libsPath = Path.Combine(CUOEnviroment.ExecutablePath, Environment.Is64BitProcess ? "x64" : "x86");
 
+#if WINDOWS
                 SetDllDirectory(libsPath);
+#endif
             }
 
             if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.Language))
@@ -206,23 +210,19 @@ namespace ClassicUO
                 bool foundFolder = false;
                 if (!CUOEnviroment.IsUnix)
                 {
-                    using (var fbd = new System.Windows.Forms.FolderBrowserDialog())
+                    // Substituir diálogo por input de texto
+                    Console.WriteLine("Por favor, digite o caminho para o diretório do Ultima Online (ex: C:/UO):");
+                    string inputPath = Console.ReadLine();
+                    if (!string.IsNullOrWhiteSpace(inputPath))
                     {
-                        fbd.Description = "Please select your Ultima Online directory.";
-                        System.Windows.Forms.DialogResult result = fbd.ShowDialog();
-
-                        if (result == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(fbd.SelectedPath))
+                        if (Directory.Exists(inputPath) && File.Exists(Path.Combine(inputPath, "tiledata.mul")))
                         {
-                            if (Directory.Exists(fbd.SelectedPath) && File.Exists(Path.Combine(fbd.SelectedPath, "tiledata.mul")))
-                            {
-                                Settings.GlobalSettings.UltimaOnlineDirectory = fbd.SelectedPath;
-                                Settings.GlobalSettings.Save();
-                                foundFolder = true;
-                            }
+                            Settings.GlobalSettings.UltimaOnlineDirectory = inputPath;
+                            Settings.GlobalSettings.Save();
+                            foundFolder = true;
                         }
                     }
                 }
-
                 if (!foundFolder)
                 {
                     flags |= INVALID_UO_DIRECTORY;
@@ -268,19 +268,24 @@ namespace ClassicUO
             {
                 switch (Settings.GlobalSettings.ForceDriver)
                 {
-                    case 1: // OpenGL
+                    case 1:
                         Environment.SetEnvironmentVariable("FNA3D_FORCE_DRIVER", "OpenGL");
-
                         break;
 
-                    case 2: // Vulkan
+                    case 2:
                         Environment.SetEnvironmentVariable("FNA3D_FORCE_DRIVER", "Vulkan");
+                        break;
 
+                    case 3:
+                        Environment.SetEnvironmentVariable("FNA3D_FORCE_DRIVER", "D3D11");
+                        break;
+
+                    case 4:
+                        Environment.SetEnvironmentVariable("FNA3D_FORCE_DRIVER", "SDLGPU");
                         break;
                 }
 
                 Client.Run();
-
             }
 
             Log.Trace("Closing...");

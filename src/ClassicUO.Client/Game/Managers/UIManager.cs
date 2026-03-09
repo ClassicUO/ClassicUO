@@ -91,11 +91,21 @@ namespace ClassicUO.Game.Managers
             {
                 if (_keyboardFocusControl != value)
                 {
+                    if (_keyboardFocusControl != null && Microsoft.Xna.Framework.Input.TextInputEXT.WindowHandle != System.IntPtr.Zero)
+                    {
+                        Microsoft.Xna.Framework.Input.TextInputEXT.StopTextInput();
+                    }
+
                     _keyboardFocusControl?.OnFocusLost();
                     _keyboardFocusControl = value;
 
                     if (value != null && value.AcceptKeyboardInput)
                     {
+                        if (Microsoft.Xna.Framework.Input.TextInputEXT.WindowHandle != System.IntPtr.Zero)
+                        {
+                            Microsoft.Xna.Framework.Input.TextInputEXT.StartTextInput();
+                        }
+
                         if (!value.IsFocused)
                         {
                             value.OnFocusEnter();
@@ -183,12 +193,15 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
-                foreach (Gump s in Gumps)
+                if (button == MouseButtonType.Right)
                 {
-                    if (s.IsModal && s.ModalClickOutsideAreaClosesThisControl)
+                    foreach (Gump s in Gumps)
                     {
-                        s.Dispose();
-                        Mouse.CancelDoubleClick = true;
+                        if (s.IsModal && s.ModalClickOutsideAreaClosesThisControl)
+                        {
+                            s.Dispose();
+                            Mouse.CancelDoubleClick = true;
+                        }
                     }
                 }
             }
@@ -260,10 +273,23 @@ namespace ClassicUO.Game.Managers
 
         public static void OnMouseWheel(bool isup)
         {
-            if (MouseOverControl != null && MouseOverControl.AcceptMouseInput)
+            MouseEventType delta = isup ? MouseEventType.WheelScrollUp : MouseEventType.WheelScrollDown;
+            Control scrollTarget = null;
+            if (KeyboardFocusControl != null)
             {
-                MouseOverControl.InvokeMouseWheel(isup ? MouseEventType.WheelScrollUp : MouseEventType.WheelScrollDown);
+                for (Control c = KeyboardFocusControl; c != null; c = c.Parent)
+                {
+                    if (c is ScrollArea)
+                    {
+                        scrollTarget = c;
+                        break;
+                    }
+                }
             }
+            if (scrollTarget != null)
+                scrollTarget.InvokeMouseWheel(delta);
+            else if (MouseOverControl != null && MouseOverControl.AcceptMouseInput)
+                MouseOverControl.InvokeMouseWheel(delta);
         }
 
         public static Control LastControlMouseDown(MouseButtonType button)
@@ -337,6 +363,21 @@ namespace ClassicUO.Game.Managers
                 Control c = last.Value;
 
                 if (!c.IsDisposed && c.LocalSerial == serial)
+                {
+                    return c as Gump;
+                }
+            }
+
+            return null;
+        }
+
+        public static Gump GetGumpServer(uint serial)
+        {
+            for (LinkedListNode<Gump> last = Gumps.Last; last != null; last = last.Previous)
+            {
+                Control c = last.Value;
+
+                if (!c.IsDisposed && c.ServerSerial == serial)
                 {
                     return c as Gump;
                 }
@@ -528,6 +569,43 @@ namespace ClassicUO.Game.Managers
             //        _mouseDownControls[i].InvokeMouseOver(Mouse.Position);
             //    }
             //}
+        }
+
+        public static Control GetControlUnderPositionExcluding(Point position, Control exclude)
+        {
+            Control control = null;
+            IsModalOpen = IsModalControlOpen();
+
+            for (LinkedListNode<Gump> first = Gumps.First; first != null; first = first.Next)
+            {
+                Control c = first.Value;
+
+                if (IsModalOpen && !c.IsModal || !c.IsVisible || !c.IsEnabled)
+                {
+                    continue;
+                }
+
+                control = null;
+                c.HitTest(position, ref control);
+
+                if (control != null && exclude != null)
+                {
+                    var check = control;
+                    while (check != null)
+                    {
+                        if (check == exclude) break;
+                        check = check.Parent;
+                    }
+                    if (check == exclude) continue;
+                }
+
+                if (control != null)
+                {
+                    return control;
+                }
+            }
+
+            return null;
         }
 
         private static Control GetMouseOverControl(Point position)

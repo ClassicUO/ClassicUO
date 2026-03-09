@@ -48,7 +48,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool ContainsByBounds { get; set; }
 
-        public void ReArrangeChildren()
+        public void ReArrangeChildren(int vspacing = 0)
         {
             for (int i = 0, height = 0; i < Children.Count; ++i)
             {
@@ -58,7 +58,7 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     c.Y = height;
 
-                    height += c.Height;
+                    height += c.Height + vspacing;
                 }
             }
 

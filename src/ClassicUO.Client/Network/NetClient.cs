@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -34,8 +34,10 @@ using ClassicUO.Network.Encryption;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using System;
+using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
 
 namespace ClassicUO.Network
 {
@@ -52,6 +54,8 @@ namespace ClassicUO.Network
         public event EventHandler<SocketError> OnError;
 
 
+        private const int ConnectTimeoutMs = 10000;
+
         public void Connect(string ip, int port)
         {
             if (IsConnected) return;
@@ -61,7 +65,16 @@ namespace ClassicUO.Network
 
             try
             {
-                _socket.Connect(ip, port);
+                var result = _socket.BeginConnect(ip, port, null, null);
+                if (!result.AsyncWaitHandle.WaitOne(ConnectTimeoutMs))
+                {
+                    Disconnect();
+                    Log.Error($"connection timeout to {ip}:{port}");
+                    OnError?.Invoke(this, SocketError.TimedOut);
+                    return;
+                }
+
+                _socket.EndConnect(result);
 
                 if (!IsConnected)
                 {
@@ -80,7 +93,7 @@ namespace ClassicUO.Network
             {
                 Log.Error($"error while connecting {ex}");
                 OnError?.Invoke(this, SocketError.SocketError);
-            }  
+            }
         }
 
         public void Send(byte[] buffer, int offset, int count)
@@ -94,21 +107,23 @@ namespace ClassicUO.Network
         {
             if (!IsConnected) return 0;
 
-            var available = Math.Min(buffer.Length, _socket.Available);
-            var done = 0;
+            var available = _socket.Available;
+            if (available == 0)
+                return -1;
 
+            available = Math.Min(buffer.Length, available);
+            var done = 0;
             var stream = _socket.GetStream();
 
             while (done < available)
             {
                 var toRead = Math.Min(buffer.Length, available - done);
                 var read = stream.Read(buffer, done, toRead);
-                
+
                 if (read <= 0)
                 {
                     OnDisconnected?.Invoke(this, EventArgs.Empty);
                     Disconnect();
-
                     return 0;
                 }
 
@@ -120,29 +135,44 @@ namespace ClassicUO.Network
 
         public void Disconnect()
         {
-            _socket?.Close();
-            Dispose();
+            var s = _socket;
+            _socket = null;
+            if (s == null) return;
+            try
+            {
+                if (s.Client?.Connected == true)
+                    s.Close();
+            }
+            catch { }
+            try { s.Dispose(); } catch { }
         }
 
         public void Dispose()
         {
-            _socket?.Dispose();
+            Disconnect();
         }
     }
 
     internal sealed class NetClient
     {
         private const int BUFF_SIZE = 0x10000;
+        private const int RECEIVE_DRAIN_SIZE = 32768;
 
         private readonly byte[] _compressedBuffer = new byte[4096];
         private readonly byte[] _uncompressedBuffer = new byte[BUFF_SIZE];
         private readonly byte[] _sendingBuffer = new byte[4096];
+        private readonly byte[] _receiveDrainBuffer = new byte[RECEIVE_DRAIN_SIZE];
+        private readonly byte[] _networkReadBuffer = new byte[4096];
         private readonly Huffman _huffman = new Huffman();
         private bool _isCompressionEnabled;
         private readonly SocketWrapper _socket;
         private uint? _localIP;
         private readonly CircularBuffer _sendStream;
-
+        private readonly ConcurrentQueue<byte[]> _receiveQueue = new ConcurrentQueue<byte[]>();
+        private Thread _networkThread;
+        private volatile bool _networkRunning;
+        private volatile bool _pendingDisconnect;
+        private SocketError _pendingDisconnectError;
 
         public NetClient()
         {
@@ -150,13 +180,110 @@ namespace ClassicUO.Network
             _sendStream = new CircularBuffer();
 
             _socket = new SocketWrapper();
-            _socket.OnConnected += (o, e) => 
+            _socket.OnConnected += (o, e) =>
             {
                 Statistics.Reset();
+                _pendingDisconnect = false;
+                _networkRunning = true;
+                _networkThread = new Thread(NetworkLoop) { IsBackground = true };
+                _networkThread.Start();
                 Connected?.Invoke(this, EventArgs.Empty);
             };
-            _socket.OnDisconnected += (o, e) => Disconnected?.Invoke(this, SocketError.Success);
-            _socket.OnError += (o, e) => Disconnected?.Invoke(this, SocketError.SocketError);
+            _socket.OnDisconnected += (o, e) => RaiseDisconnectedOnGameThread(SocketError.Success);
+            _socket.OnError += (o, e) => RaiseDisconnectedOnGameThread(e);
+        }
+
+        private void RaiseDisconnectedOnGameThread(SocketError e)
+        {
+            _pendingDisconnect = true;
+            _pendingDisconnectError = e;
+        }
+
+        private void NetworkLoop()
+        {
+            while (_networkRunning && _socket.IsConnected)
+            {
+                try
+                {
+                    int n = _socket.Read(_networkReadBuffer);
+                    if (n > 0)
+                    {
+                        Statistics.TotalBytesReceived += (uint)n;
+                        var copy = new byte[n];
+                        Array.Copy(_networkReadBuffer, copy, n);
+                        _receiveQueue.Enqueue(copy);
+                    }
+                    else if (n == 0)
+                    {
+                        break;
+                    }
+                    else
+                    {
+                        Thread.Sleep(1);
+                    }
+                }
+                catch (SocketException ex)
+                {
+                    Log.Error("socket error in network thread:\n" + ex);
+                    RaiseDisconnectedOnGameThread(ex.SocketErrorCode);
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    if (ex.InnerException is SocketException socketEx)
+                    {
+                        Log.Error("socket error in network thread:\n" + socketEx);
+                        RaiseDisconnectedOnGameThread(socketEx.SocketErrorCode);
+                    }
+                    else
+                    {
+                        Log.Error("network thread error:\n" + ex);
+                        RaiseDisconnectedOnGameThread(SocketError.SocketError);
+                    }
+                    break;
+                }
+
+                ProcessSendFromQueue();
+                if (_receiveQueue.IsEmpty && _sendStream.Length == 0)
+                    Thread.Sleep(0);
+            }
+            _networkRunning = false;
+        }
+
+        private void ProcessSendFromQueue()
+        {
+            if (!_socket.IsConnected) return;
+            try
+            {
+                while (true)
+                {
+                    int read;
+                    lock (_sendStream)
+                    {
+                        read = _sendStream.Dequeue(_sendingBuffer, 0, _sendingBuffer.Length);
+                    }
+                    if (read <= 0) break;
+                    _socket.Send(_sendingBuffer, 0, read);
+                }
+            }
+            catch (SocketException ex)
+            {
+                Log.Error("socket error when sending (network thread):\n" + ex);
+                RaiseDisconnectedOnGameThread(ex.SocketErrorCode);
+            }
+            catch (Exception ex)
+            {
+                if (ex.InnerException is SocketException socketEx)
+                {
+                    Log.Error("socket error when sending:\n" + socketEx);
+                    RaiseDisconnectedOnGameThread(socketEx.SocketErrorCode);
+                }
+                else
+                {
+                    Log.Error("send error in network thread:\n" + ex);
+                    RaiseDisconnectedOnGameThread(SocketError.SocketError);
+                }
+            }
         }
 
 
@@ -208,14 +335,17 @@ namespace ClassicUO.Network
         public void Connect(string ip, ushort port)
         {
             _sendStream.Clear();
+            while (_receiveQueue.TryDequeue(out _)) { }
             _huffman.Reset();
             Statistics.Reset();
+            _pendingDisconnect = false;
 
             _socket.Connect(ip, port);
         }
 
         public void Disconnect()
         {
+            _networkRunning = false;
             _isCompressionEnabled = false;
             Statistics.Reset();
             _socket.Disconnect();
@@ -230,27 +360,46 @@ namespace ClassicUO.Network
 
         public Span<byte> CollectAvailableData()
         {
+            if (_pendingDisconnect)
+            {
+                _pendingDisconnect = false;
+                Disconnect();
+                Disconnected?.Invoke(this, _pendingDisconnectError);
+                return Span<byte>.Empty;
+            }
+
             try
             {
-                var size = _socket.Read(_compressedBuffer);
-
-                if (size <= 0)
+                int totalLen = 0;
+                var overflow = default(System.Collections.Generic.List<byte[]>);
+                while (_receiveQueue.TryDequeue(out byte[] chunk))
                 {
-                    return Span<byte>.Empty;
+                    if (totalLen + chunk.Length <= _receiveDrainBuffer.Length)
+                    {
+                        Array.Copy(chunk, 0, _receiveDrainBuffer, totalLen, chunk.Length);
+                        totalLen += chunk.Length;
+                    }
+                    else
+                    {
+                        (overflow ??= new System.Collections.Generic.List<byte[]>()).Add(chunk);
+                    }
+                }
+                if (overflow != null)
+                {
+                    foreach (var c in overflow)
+                        _receiveQueue.Enqueue(c);
                 }
 
-                Statistics.TotalBytesReceived += (uint)size;
+                if (totalLen <= 0)
+                    return Span<byte>.Empty;
 
-                var span = _compressedBuffer.AsSpan(0, size);
-
+                var span = _receiveDrainBuffer.AsSpan(0, totalLen);
                 ProcessEncryption(span);
-
                 return DecompressBuffer(span);
             }
             catch (SocketException ex)
             {
-                Log.Error("socket error when receving:\n" + ex);
-
+                Log.Error("socket error when receiving:\n" + ex);
                 Disconnect();
                 Disconnected?.Invoke(this, ex.SocketErrorCode);
             }
@@ -258,19 +407,15 @@ namespace ClassicUO.Network
             {
                 if (ex.InnerException is SocketException socketEx)
                 {
-                    Log.Error("main exception:\n" + ex);
-                    Log.Error("socket error when receving:\n" + socketEx);
-
+                    Log.Error("socket error when receiving:\n" + socketEx);
                     Disconnect();
                     Disconnected?.Invoke(this, socketEx.SocketErrorCode);
                 }
                 else
                 {
-                    Log.Error("fatal error when receving:\n" + ex);
-
+                    Log.Error("fatal error when receiving:\n" + ex);
                     Disconnect();
                     Disconnected?.Invoke(this, SocketError.SocketError);
-
                     throw;
                 }
             }
@@ -280,7 +425,13 @@ namespace ClassicUO.Network
 
         public void Flush()
         {
-            ProcessSend();
+            if (_pendingDisconnect)
+            {
+                _pendingDisconnect = false;
+                Disconnect();
+                Disconnected?.Invoke(this, _pendingDisconnectError);
+                return;
+            }
             Statistics.Update();
         }
 
@@ -320,55 +471,6 @@ namespace ClassicUO.Network
             if (!_isCompressionEnabled) return;
 
             EncryptionHelper.Decrypt(buffer, buffer, buffer.Length);
-        }
-
-        private void ProcessSend()
-        {
-            if (!IsConnected) return;
-
-            try
-            {
-                lock (_sendStream)
-                {
-                    while (_sendStream.Length > 0)
-                    {
-                        var read = _sendStream.Dequeue(_sendingBuffer, 0, _sendingBuffer.Length);
-                        if (read <= 0)
-                        {
-                            break;
-                        }
-
-                        _socket.Send(_sendingBuffer, 0, read);
-                    }
-                }
-            }
-            catch (SocketException ex)
-            {
-                Log.Error("socket error when sending:\n" + ex);
-
-                Disconnect();
-                Disconnected?.Invoke(this, ex.SocketErrorCode);
-            }
-            catch (Exception ex)
-            {
-                if (ex.InnerException is SocketException socketEx)
-                {
-                    Log.Error("main exception:\n" + ex);
-                    Log.Error("socket error when sending:\n" + socketEx);
-                   
-                    Disconnect();
-                    Disconnected?.Invoke(this, socketEx.SocketErrorCode);
-                }
-                else
-                {
-                    Log.Error("fatal error when sending:\n" + ex);
-
-                    Disconnect();
-                    Disconnected?.Invoke(this, SocketError.SocketError);
-
-                    throw;
-                }
-            }
         }
 
         private Span<byte> DecompressBuffer(Span<byte> buffer)

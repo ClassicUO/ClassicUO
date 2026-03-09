@@ -1,0 +1,8 @@
+Building Theorafile for UWP
+---------------------------
+Theorafile uses Visual Studio 2017 to build on Xbox One.
+
+Compiling
+---------
+1. Build Theorafile/visualc-winrt/libtheorafile.sln
+2. Grab the output DLL, ship it!

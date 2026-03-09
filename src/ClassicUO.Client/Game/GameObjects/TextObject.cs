@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -74,7 +74,7 @@ namespace ClassicUO.Game.GameObjects
         public bool IsTransparent;
         public GameObject Owner;
 
-        public TextBox TextBox;
+        public Control TextBox;
         public long Time, SecondTime;
         public MessageType Type;
         public int X, Y, OffsetY;

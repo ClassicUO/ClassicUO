@@ -1,4 +1,5 @@
-﻿using ClassicUO.Assets;
+using ClassicUO.Assets;
+using ClassicUO.Game;
 using ClassicUO.Game.UI.Controls;
 using System;
 using static ClassicUO.Game.UI.Gumps.OptionsGump;
@@ -16,14 +17,14 @@ namespace ClassicUO.Game.UI.Gumps
             Add(bg = new AlphaBlendControl(0.75f));
 
             Control _;
-            Add(_ = new TextBox(message, TrueTypeLoader.EMBEDDED_FONT, 25, Width, Microsoft.Xna.Framework.Color.White, FontStashSharp.RichText.TextHorizontalAlignment.Center, false));
+            Add(_ = new UOLabel(message, 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_CENTER, Width) { X = 0 });
             Height += _.Height;
 
             InputField input = new InputField
             (
                 0x0BB8,
                 0xFF,
-                0xFFF,
+                0x0481,
                 true,
                 Width,
                 30

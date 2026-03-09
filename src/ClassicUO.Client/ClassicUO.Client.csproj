@@ -1,28 +1,33 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFramework>net48</TargetFramework>
     <ApplicationIcon>cuoicon.ico</ApplicationIcon>
     <AssemblyName>ClassicUO</AssemblyName>
     <RootNamespace>ClassicUO</RootNamespace>
-    <AssemblyVersion>2.0.0</AssemblyVersion>
-    <FileVersion>2.0.0</FileVersion>
-    <Copyright>Tazuo Vs Dust765</Copyright>
+    <AssemblyVersion>2.0.11</AssemblyVersion>
+    <FileVersion>2.0.11</FileVersion>
+    <Copyright>Dust765.4</Copyright>
+    <StartupObject></StartupObject>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
     <OutputPath>$(ProjectDir)..\..\bin\Release\</OutputPath>
     <PublishDir>$(ProjectDir)..\..\bin\dist\</PublishDir>
     <Optimize>true</Optimize>
+    <OutputType>WinExe</OutputType>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
     <OutputPath>$(ProjectDir)..\..\bin\Debug\</OutputPath>
     <DefineConstants>$(DefineConstants)TRACE</DefineConstants>
+    <OutputType>Exe</OutputType>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IS_DEV_BUILD)' == 'true'">
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -50,12 +55,10 @@
     <EmbeddedResource Include="arrow_yellow.png" />
     <EmbeddedResource Include="arrow_yellow2.png" />
     <EmbeddedResource Include="arrow_orange.png" />
+    <EmbeddedResource Include="LegionScripting\LScript.md" />
   </ItemGroup>
 <!-- // ## BEGIN - END ## // TEXTUREMANAGER // -->
 
-  <ItemGroup Condition="$(TargetFramework.StartsWith('net4'))">
-    <Reference Include="System.IO.Compression" />
-  </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Dust765\External\" />
@@ -64,7 +67,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="IronPython" Version="2.7.12" />
     <ProjectReference Include="..\..\external\FNA\FNA.Core.csproj" />
+    <ProjectReference Include="..\..\external\UOSteam\UOScript\UOScript.SDK.csproj" />
     <ProjectReference Include="..\ClassicUO.Assets\ClassicUO.Assets.csproj" />
     <ProjectReference Include="..\ClassicUO.Renderer\ClassicUO.Renderer.csproj" />
     <ProjectReference Include="..\ClassicUO.Utility\ClassicUO.Utility.csproj" />
@@ -105,38 +110,55 @@
 
   <ItemGroup>
     <DataFiles_x64 Include="$(ProjectDir)..\..\external\x64\*.*" />
-    <DataFiles_lib64 Include="$(ProjectDir)..\..\external\lib64\*.*" />
-    <DataFiles_osx Include="$(ProjectDir)..\..\external\osx\*.*" />
-    <DataFiles_vulkan Include="$(ProjectDir)..\..\external\vulkan\icd.d\*.*" />
+    <NativeLibs Include="$(ProjectDir)..\..\external\x64\SDL3.dll;$(ProjectDir)..\..\external\x64\FNA3D.dll;$(ProjectDir)..\..\external\x64\FAudio.dll;$(ProjectDir)..\..\external\x64\libtheorafile.dll" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeDom.Providers.DotNetCompilerPlatform" Version="4.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="7.0.0" />
+    <DataLanguageFiles Include="$(ProjectDir)..\..\Data\Languages\*.json" />
+    <DataLanguageRoot Include="$(ProjectDir)..\..\Data\Language.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
+    <PackageReference Include="System.CodeDom" Version="4.7.0" />
+    <PackageReference Include="System.Drawing.Common" Version="6.0.0" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="2.1.13" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="cuoapi">
       <HintPath>..\..\external\cuoapi\cuoapi.dll</HintPath>
     </Reference>
-    <Reference Include="System.Net.Http">
-      <HintPath>..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Net.Http.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Windows.Forms">
-      <HintPath>..\..\..\..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Windows.Forms.dll</HintPath>
-    </Reference>
   </ItemGroup>
-
+  <ItemGroup>
+    <PackageReference Update="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
 
   <ItemGroup>
     <None Remove="Dust765\" />
     <None Remove="Dust765\Dust765\" />
   </ItemGroup>
+  <ItemGroup>
+    <DataClientImages Include="$(ProjectDir)..\ClassicUO.Assets\gumpartassets\loginbg.png" />
+    <DataClientImages Include="$(ProjectDir)..\ClassicUO.Assets\gumpartassets\logodust.png" />
+  </ItemGroup>
+
+  <Target Name="CopyDataClientImages_build" AfterTargets="Build">
+    <MakeDir Directories="$(TargetDir)Data\Client" />
+    <Copy SourceFiles="@(DataClientImages)" DestinationFolder="$(TargetDir)Data\Client\" SkipUnchangedFiles="true" />
+  </Target>
+
   <Target Name="CopyExternalDeps_build" AfterTargets="Build">
     <Copy SourceFiles="@(DataFiles_x64)" DestinationFolder="$(TargetDir)\x64\" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(DataFiles_lib64)" DestinationFolder="$(TargetDir)\lib64\" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(DataFiles_osx)" DestinationFolder="$(TargetDir)\osx\" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(DataFiles_vulkan)" DestinationFolder="$(TargetDir)\vulkan\icd.d\" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(NativeLibs)" DestinationFolder="$(TargetDir)" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(DataLanguageFiles)" DestinationFolder="$(TargetDir)\Data\Languages\" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(DataLanguageRoot)" DestinationFolder="$(TargetDir)\Data\" SkipUnchangedFiles="true" />
+  </Target>
+
+  <Target Name="CopyDataClientImages_publish" AfterTargets="Publish">
+    <MakeDir Directories="$(PublishDir)Data\Client" />
+    <Copy SourceFiles="@(DataClientImages)" DestinationFolder="$(PublishDir)Data\Client\" SkipUnchangedFiles="true" />
   </Target>
 
   <Target Name="CopyExternalDeps_publish" AfterTargets="Publish">
@@ -145,12 +167,9 @@
     </ItemGroup>
 
     <Copy SourceFiles="@(DataFiles_x64)" DestinationFolder="$(PublishDir)\x64\" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(DataFiles_lib64)" DestinationFolder="$(PublishDir)\lib64\" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(DataFiles_osx)" DestinationFolder="$(PublishDir)\osx\" SkipUnchangedFiles="true" />
-    <Copy SourceFiles="@(DataFiles_vulkan)" DestinationFolder="$(PublishDir)\vulkan\icd.d\" SkipUnchangedFiles="true" />
-
-    <Copy SourceFiles="@(MonockickstartPath)" DestinationFolder="$(PublishDir)\" SkipUnchangedFiles="true" Condition="$(TargetFramework.StartsWith('net4'))" />
-
+    <Copy SourceFiles="@(MonockickstartPath)" DestinationFolder="$(PublishDir)\" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(DataLanguageFiles)" DestinationFolder="$(PublishDir)\Data\Languages\" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="@(DataLanguageRoot)" DestinationFolder="$(PublishDir)\Data\" SkipUnchangedFiles="true" />
   </Target>
 
 </Project>

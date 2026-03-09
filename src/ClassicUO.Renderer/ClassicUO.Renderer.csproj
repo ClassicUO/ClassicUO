@@ -11,4 +11,8 @@
     <ProjectReference Include="..\..\external\FNA\FNA.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Update="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+
 </Project>

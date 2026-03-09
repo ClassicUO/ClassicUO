@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -105,7 +105,7 @@ namespace ClassicUO.Game.UI.Gumps
                         hotKeyString += "Alt ";
                     if (macro.Shift)
                         hotKeyString += "Shift ";
-                    if (macro.Key != SDL2.SDL.SDL_Keycode.SDLK_UNKNOWN)
+                    if (macro.Key != SDL3.SDL.SDL_Keycode.SDLK_UNKNOWN)
                     {
                         hotKeyString += (char)macro.Key;
                     }
@@ -260,6 +260,25 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 GameActions.CastSpell(_spell.ID);
             }
+        }
+
+        protected override void OnDragEnd(int x, int y)
+        {
+            if (_spell != null)
+            {
+                var pos = Mouse.Position;
+                var ctrl = UIManager.GetControlUnderPositionExcluding(pos, this);
+                while (ctrl != null)
+                {
+                    if (ctrl is ISpellDropTarget target)
+                    {
+                        target.AcceptSpell(SpellID);
+                        break;
+                    }
+                    ctrl = ctrl.Parent;
+                }
+            }
+            base.OnDragEnd(x, y);
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)

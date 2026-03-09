@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -44,7 +44,7 @@ using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using SDL2;
+using SDL3;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -1043,16 +1043,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                     bi_height >>= 1;
 
-                    surface = (SDL.SDL_Surface*)SDL.SDL_CreateRGBSurface
+                    surface = (SDL.SDL_Surface*)SDL.SDL_CreateSurface
                     (
-                        0,
                         (int)bi_width,
                         (int)bi_height,
-                        32,
-                        0x00FF0000,
-                        0x0000FF00,
-                        0x000000FF,
-                        0xFF000000
+                        SDL.SDL_PixelFormat.SDL_PIXELFORMAT_ABGR8888
                     );
 
                     if (bi_bit_count <= 8)
@@ -1196,7 +1191,7 @@ namespace ClassicUO.Game.UI.Gumps
                     Texture2D texture = new Texture2D(Client.Game.GraphicsDevice, surface->w, surface->h);
                     texture.SetDataPointerEXT(0, new Rectangle(0, 0, surface->w, surface->h), surface->pixels, len);
 
-                    SDL.SDL_FreeSurface((IntPtr)surface);
+                    SDL.SDL_DestroySurface((IntPtr)surface);
 
                     reader.Release();
 
@@ -1212,14 +1207,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 IntPtr result = surface;
                 SDL.SDL_Surface* surPtr = (SDL.SDL_Surface*)surface;
-                SDL.SDL_PixelFormat* pixelFormatPtr = (SDL.SDL_PixelFormat*)surPtr->format;
 
-                // SurfaceFormat.Color is SDL_PIXELFORMAT_ABGR8888
-                if (pixelFormatPtr->format != SDL.SDL_PIXELFORMAT_ABGR8888)
+                if (surPtr->format != SDL.SDL_PixelFormat.SDL_PIXELFORMAT_ABGR8888)
                 {
-                    // Create a properly formatted copy, free the old surface
-                    result = SDL.SDL_ConvertSurfaceFormat(surface, SDL.SDL_PIXELFORMAT_ABGR8888, 0);
-                    SDL.SDL_FreeSurface(surface);
+                    result = SDL.SDL_ConvertSurface(surface, SDL.SDL_PixelFormat.SDL_PIXELFORMAT_ABGR8888);
+                    SDL.SDL_DestroySurface(surface);
                 }
 
                 return result;
@@ -2610,7 +2602,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             WMapEntity wme = World.WMapManager.GetEntity(partyMember.Serial);
 
-                            if (wme != null && !wme.IsGuild)
+                            if (wme != null)
                             {
                                 DrawWMEntity
                                 (
@@ -2661,24 +2653,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
             }
-
-            if (Pathfinder.AutoWalking && Pathfinder.PathSize > 0)
-            {
-                Point end = RotatePoint(Pathfinder.EndPoint.X - _center.X, Pathfinder.EndPoint.Y - _center.Y, Zoom, 1, _flipMap ? 45f : 0f);
-                end.X += gX + halfWidth;
-                end.Y += gY + halfHeight;
-                Point start = RotatePoint(World.Player.X - _center.X, World.Player.Y - _center.Y, Zoom, 1, _flipMap ? 45f : 0f);
-                start.X += gX + halfWidth;
-                start.Y += gY + halfHeight;
-
-                batcher.DrawLine(
-                    SolidColorTextureCache.GetTexture(Color.Green),
-                    new Vector2(end.X - 2, end.Y - 2),
-                    new Vector2(start.X, start.Y),
-                    ShaderHueTranslator.GetHueVector(0),
-                    1
-                    );
-            }
+            
 
             // ## BEGIN - END ## // MISC2
             //DEATH

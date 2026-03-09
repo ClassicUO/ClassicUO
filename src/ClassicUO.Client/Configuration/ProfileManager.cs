@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -30,7 +30,9 @@
 
 #endregion
 
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
@@ -41,30 +43,79 @@ namespace ClassicUO.Configuration
         public static Profile CurrentProfile { get; private set; }
         public static string ProfilePath { get; private set; }
 
+        private static string _rootPath;
+        private static string RootPath
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_rootPath))
+                {
+                    _rootPath = string.IsNullOrWhiteSpace(Settings.GlobalSettings.ProfilesPath)
+                        ? Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles")
+                        : Settings.GlobalSettings.ProfilesPath;
+                }
+                return _rootPath;
+            }
+        }
+
+        public static void SetProfileAsDefault(Profile profile)
+        {
+            ConfigurationResolver.Save(profile, Path.Combine(RootPath, "default.json"), ProfileJsonContext.DefaultToUse);
+        }
+
+        public static Profile NewFromDefault()
+        {
+            return ConfigurationResolver.Load<Profile>(Path.Combine(RootPath, "default.json"), ProfileJsonContext.DefaultToUse) ?? new Profile();
+        }
+
+        public static List<string> GetAllProfilePaths()
+        {
+            var results = new List<string>();
+            if (!Directory.Exists(RootPath))
+                return results;
+
+            foreach (string dir in Directory.GetDirectories(RootPath, "*", SearchOption.AllDirectories))
+            {
+                string profileFile = Path.Combine(dir, "profile.json");
+                if (File.Exists(profileFile) && !dir.Equals(ProfilePath, System.StringComparison.OrdinalIgnoreCase))
+                    results.Add(dir);
+            }
+            return results;
+        }
+
+        public static List<string> GetSameServerProfilePaths()
+        {
+            if (CurrentProfile == null || string.IsNullOrEmpty(CurrentProfile.ServerName))
+                return new List<string>();
+
+            return GetAllProfilePaths()
+                .Where(p => p.IndexOf(CurrentProfile.ServerName, System.StringComparison.OrdinalIgnoreCase) >= 0)
+                .ToList();
+        }
+
+        public static void OverrideProfiles(Profile profile, List<string> targetPaths)
+        {
+            foreach (string path in targetPaths)
+            {
+                ConfigurationResolver.Save(profile, Path.Combine(path, "profile.json"), ProfileJsonContext.DefaultToUse);
+            }
+        }
+
         public static void Load(string servername, string username, string charactername)
         {
-            string rootpath;
-
-            if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.ProfilesPath))
-            {
-                rootpath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles");
-            }
-            else
-            {
-                rootpath = Settings.GlobalSettings.ProfilesPath;
-            }
-
-            string path = FileSystemHelper.CreateFolderIfNotExists(rootpath, username, servername, charactername);
+            string path = FileSystemHelper.CreateFolderIfNotExists(RootPath, username, servername, charactername);
             string fileToLoad = Path.Combine(path, "profile.json");
 
             ProfilePath = path;
-            CurrentProfile = ConfigurationResolver.Load<Profile>(fileToLoad, ProfileJsonContext.DefaultToUse) ?? new Profile();
+            CurrentProfile = ConfigurationResolver.Load<Profile>(fileToLoad, ProfileJsonContext.DefaultToUse) ?? NewFromDefault();
 
             CurrentProfile.Username = username;
             CurrentProfile.ServerName = servername;
             CurrentProfile.CharacterName = charactername;
 
             ValidateFields(CurrentProfile);
+
+            ClassicUO.Game.Managers.IgnoreManager.Initialize();
         }
 
 
@@ -90,14 +141,14 @@ namespace ClassicUO.Configuration
                 throw new InvalidDataException();
             }
 
-            if (profile.WindowClientBounds.X < 600)
+            if (profile.WindowClientBounds.X < 1024)
             {
-                profile.WindowClientBounds = new Point(600, profile.WindowClientBounds.Y);
+                profile.WindowClientBounds = new Point(1024, profile.WindowClientBounds.Y);
             }
 
-            if (profile.WindowClientBounds.Y < 480)
+            if (profile.WindowClientBounds.Y < 768)
             {
-                profile.WindowClientBounds = new Point(profile.WindowClientBounds.X, 480);
+                profile.WindowClientBounds = new Point(profile.WindowClientBounds.X, 768);
             }
         }
 

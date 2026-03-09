@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -34,6 +34,7 @@ using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
+using ClassicUO.TazUO.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Resources;
@@ -182,6 +183,38 @@ namespace ClassicUO.Game.UI.Gumps
             );
             supporters.MouseUp += (s, e) => { UIManager.Add(new Supporters()); };
 
+            RighClickableButton legionScriptBtn;
+            Add
+            (legionScriptBtn =
+                new RighClickableButton
+                (
+                    998876,
+                    0x098D,
+                    0x098D,
+                    0x098D,
+                    "Legion Script",
+                    1,
+                    true,
+                    0,
+                    0x0036
+                )
+                {
+                    ButtonAction = ButtonAction.Activate,
+                    X = startX,
+                    Y = 1,
+                    FontCenter = true
+                },
+                1
+            );
+            legionScriptBtn.MouseUp += (s, e) =>
+            {
+                if (UIManager.GetGump<LegionScripting.LegionScriptStudioGump>() != null)
+                    UIManager.GetGump<LegionScripting.LegionScriptStudioGump>().SetInScreen();
+                else
+                    UIManager.Add(new LegionScripting.LegionScriptStudioGump());
+            };
+            startX += largeWidth + 1;
+
             RighClickableButton moreMenu;
             Add
             (moreMenu =
@@ -252,6 +285,16 @@ namespace ClassicUO.Game.UI.Gumps
             }));
             moreMenu.ContextMenu.Add(new ContextMenuItemEntry(cliloc.GetString(3000134, ResGumps.Help), () => { GameActions.RequestHelp(); }));
             moreMenu.ContextMenu.Add(new ContextMenuItemEntry("Open boat control", () => { UIManager.Add(new BoatControl() { X = 200, Y = 200 }); }));
+
+            moreMenu.ContextMenu.Add(new ContextMenuItemEntry("Toggle nameplates", () => { NameOverHeadManager.ToggleOverheads(); }));
+            
+            moreMenu.ContextMenu.Add(new ContextMenuItemEntry("Legion Scripting", () => { UIManager.Add(new LegionScripting.ScriptManagerGump()); }));
+            moreMenu.ContextMenu.Add(new ContextMenuItemEntry("Scripts Running", () =>
+            {
+                var g = UIManager.GetGump<LegionScripting.RunningScriptsGump>();
+                if (g != null) g.SetInScreen();
+                else UIManager.Add(new LegionScripting.RunningScriptsGump());
+            }));
 
             startX += largeWidth + 1;
 

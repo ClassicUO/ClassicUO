@@ -1,0 +1,24 @@
+@PACKAGE_INIT@
+
+if(NOT "@PLATFORM_WIN32@")
+	include(CMakeFindDependencyMacro)
+	find_dependency(SDL2 CONFIG)
+endif()
+
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/@CMAKE_PROJECT_NAME@-targets-shared.cmake")
+	include("${CMAKE_CURRENT_LIST_DIR}/@CMAKE_PROJECT_NAME@-targets-shared.cmake")
+	set(shared_target TRUE)
+endif()
+
+if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/@CMAKE_PROJECT_NAME@-targets-static.cmake")
+	include("${CMAKE_CURRENT_LIST_DIR}/@CMAKE_PROJECT_NAME@-targets-static.cmake")
+endif()
+
+if(shared_target)
+	add_library(@CMAKE_PROJECT_NAME@::@CMAKE_PROJECT_NAME@ ALIAS @CMAKE_PROJECT_NAME@::@CMAKE_PROJECT_NAME@-shared)
+else()
+	add_library(@CMAKE_PROJECT_NAME@::@CMAKE_PROJECT_NAME@ ALIAS @CMAKE_PROJECT_NAME@::@CMAKE_PROJECT_NAME@-static)
+endif()
+
+check_required_components("@CMAKE_PROJECT_NAME@")
+

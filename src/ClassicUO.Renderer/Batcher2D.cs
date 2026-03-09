@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -48,7 +48,7 @@ namespace ClassicUO.Renderer
         private static readonly float[] _cornerOffsetX = new float[] { 0.0f, 1.0f, 0.0f, 1.0f };
         private static readonly float[] _cornerOffsetY = new float[] { 0.0f, 0.0f, 1.0f, 1.0f };
 
-        private const int MAX_SPRITES = 0x800;
+        private const int MAX_SPRITES = 0x2000;
         private const int MAX_VERTICES = MAX_SPRITES * 4;
         private const int MAX_INDICES = MAX_SPRITES * 6;
         private BlendState _blendState;
@@ -425,11 +425,11 @@ namespace ClassicUO.Renderer
             PushSprite(texture);
         }
 
-        public void DrawShadow(Texture2D texture, Vector2 position, Rectangle sourceRect, bool flip, float depth)
+        public void DrawShadow(Texture2D texture, Vector2 position, Rectangle sourceRect, bool flip, float depth, float scale = 1f)
         {
-            float width = sourceRect.Width;
-            float height = sourceRect.Height * 0.5f;
-            float translatedY = position.Y + height - 10;
+            float width = sourceRect.Width * scale;
+            float height = sourceRect.Height * 0.5f * scale;
+            float translatedY = position.Y + height - 10f * scale;
             float ratio = height / width;
 
             EnsureSize();
@@ -977,6 +977,17 @@ namespace ClassicUO.Renderer
             Vector3 color
         )
         {
+            Draw(texture, destinationRectangle, color, 0f);
+        }
+
+        public void Draw
+        (
+            Texture2D texture,
+            Rectangle destinationRectangle,
+            Vector3 color,
+            float depth
+        )
+        {
             AddSprite(
                 texture,
                 0.0f,
@@ -992,7 +1003,7 @@ namespace ClassicUO.Renderer
                 0.0f,
                 0.0f,
                 1.0f,
-                0.0f,
+                depth,
                 0
             );
         }
@@ -1256,18 +1267,9 @@ namespace ClassicUO.Renderer
         {
             EnsureStarted();
 
-            //if (_numSprites >= MAX_SPRITES)
-            //{
-            //    Flush();
-            //}
-
-            if (_numSprites >= _vertexInfo.Length)
+            if (_numSprites >= MAX_SPRITES)
             {
-                //Flush();
-
-                int newMax = _vertexInfo.Length + MAX_SPRITES;
-                Array.Resize(ref _vertexInfo, newMax);
-                Array.Resize(ref _textureInfo, newMax);
+                Flush();
             }
         }
 
@@ -1320,10 +1322,23 @@ namespace ClassicUO.Renderer
             //Matrix halfPixelOffset = Matrix.CreateTranslation(-0.5f, -0.5f, 0);
             //Matrix.Multiply(ref halfPixelOffset, ref matrix, out matrix);
 
-            _basicUOEffect.WorldMatrix.SetValue(Matrix.Identity);
-            _basicUOEffect.Viewport.SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
-            _basicUOEffect.MatrixTransform.SetValue(matrix);
-            _basicUOEffect.Pass.Apply();
+            var viewportVec = new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height);
+            if (_customEffect != null)
+            {
+                if (_customEffect.Parameters["MatrixTransform"] != null)
+                    _customEffect.Parameters["MatrixTransform"].SetValue(matrix);
+                if (_customEffect.Parameters["WorldMatrix"] != null)
+                    _customEffect.Parameters["WorldMatrix"].SetValue(Matrix.Identity);
+                if (_customEffect.Parameters["Viewport"] != null)
+                    _customEffect.Parameters["Viewport"].SetValue(viewportVec);
+            }
+            else
+            {
+                _basicUOEffect.WorldMatrix.SetValue(Matrix.Identity);
+                _basicUOEffect.Viewport.SetValue(viewportVec);
+                _basicUOEffect.MatrixTransform.SetValue(matrix);
+                _basicUOEffect.Pass.Apply();
+            }
         }
 
         private void Flush()
@@ -1594,5 +1609,8 @@ namespace ClassicUO.Renderer
 
         [EmbedResourceCSharp.FileEmbed("shaders/xBR.fxc")]
         public static partial ReadOnlySpan<byte> GetXBRShader();
+
+        [EmbedResourceCSharp.FileEmbed("shaders/OutlineGlow.fxc")]
+        public static partial ReadOnlySpan<byte> GetOutlineGlowShader();
     }
 }

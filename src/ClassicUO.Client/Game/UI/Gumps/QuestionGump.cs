@@ -44,6 +44,9 @@ namespace ClassicUO.Game.UI.Gumps
         public QuestionGump(string message, Action<bool> result) : base(0, 0)
         {
             CanCloseWithRightClick = true;
+            AlphaBlendControl ab = new AlphaBlendControl(0.15f) { Width = Client.Game.Window.ClientBounds.Width, Height = Client.Game.Window.ClientBounds.Height };
+            Add(ab);
+
             Add(new GumpPic(0, 0, 0x0816, 0));
 
             ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(0x0816);
@@ -51,7 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
             Width = gumpInfo.UV.Width;
             Height = gumpInfo.UV.Height;
 
-            Add(new Label(message, false, 0x0386, 165, font: 1) { X = 33, Y = 30 });
+            Add(new Label(message, false, 0x0386, 165, font: 1, style: FontStyle.None) { X = 33, Y = 30 });
 
             Add(
                 new Button((int)Buttons.Cancel, 0x817, 0x818, 0x0819)
@@ -76,6 +79,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             X = (Client.Game.Window.ClientBounds.Width - Width) >> 1;
             Y = (Client.Game.Window.ClientBounds.Height - Height) >> 1;
+
+            ab.X = -X;
+            ab.Y = -Y;
 
             WantUpdateSize = false;
             _result = result;

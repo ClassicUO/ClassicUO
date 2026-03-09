@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -40,7 +40,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Utility.Logging;
-using SDL2;
+using SDL3;
 
 namespace ClassicUO.Utility.Platforms
 {
@@ -50,7 +50,7 @@ namespace ClassicUO.Utility.Platforms
 
         public static void Start()
         {
-            if (Environment.OSVersion.Platform != PlatformID.Win32NT)
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 Log.Warn("This OS does not support the UOAssist API");
 
@@ -107,16 +107,8 @@ namespace ClassicUO.Utility.Platforms
 
             public CustomWindow(string class_name)
             {
-                SDL.SDL_SysWMinfo info = new SDL.SDL_SysWMinfo();
-                SDL.SDL_VERSION(out info.version);
-                SDL.SDL_GetWindowWMInfo(Client.Game.Window.Handle, ref info);
-
-                IntPtr hwnd = IntPtr.Zero;
-
-                if (info.subsystem == SDL.SDL_SYSWM_TYPE.SDL_SYSWM_WINDOWS)
-                {
-                    hwnd = info.info.win.window;
-                }
+                uint props = SDL.SDL_GetWindowProperties(Client.Game.Window.Handle);
+                IntPtr hwnd = SDL.SDL_GetPointerProperty(props, SDL.SDL_PROP_WINDOW_WIN32_HWND_POINTER, IntPtr.Zero);
 
                 if (class_name == null)
                 {
@@ -177,6 +169,7 @@ namespace ClassicUO.Utility.Platforms
                 GC.SuppressFinalize(this);
             }
 
+#if WINDOWS
             [DllImport("user32.dll")]
             internal static extern uint PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam);
 
@@ -217,6 +210,17 @@ namespace ClassicUO.Utility.Platforms
 
             [DllImport("user32.dll", SetLastError = true)]
             private static extern bool DestroyWindow(IntPtr hWnd);
+#else
+            internal static uint PostMessage(IntPtr hWnd, uint Msg, IntPtr wParam, IntPtr lParam) => 0;
+            internal static ushort GlobalAddAtom(string str) => 0;
+            internal static ushort GlobalDeleteAtom(ushort atom) => 0;
+            internal static uint GlobalGetAtomName(ushort atom, StringBuilder buff, int bufLen) => 0;
+            private static bool ShowWindow(IntPtr hWnd, int nCmdShow) => false;
+            private static ushort RegisterClassW([In] ref WNDCLASS lpWndClass) => 0;
+            private static IntPtr CreateWindowExW(uint dwExStyle, string lpClassName, string lpWindowName, uint dwStyle, int x, int y, int nWidth, int nHeight, IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance, IntPtr lpParam) => IntPtr.Zero;
+            private static IntPtr DefWindowProcW(IntPtr hWnd, uint msg, IntPtr wParam, IntPtr lParam) => IntPtr.Zero;
+            private static bool DestroyWindow(IntPtr hWnd) => false;
+#endif
 
             private void Dispose(bool disposing)
             {
@@ -383,16 +387,8 @@ namespace ClassicUO.Utility.Platforms
                     case UOAMessage.ADD_USER_2_PARTY: break;
 
                     case UOAMessage.GET_UO_HWND:
-                        SDL.SDL_SysWMinfo info = new SDL.SDL_SysWMinfo();
-                        SDL.SDL_VERSION(out info.version);
-                        SDL.SDL_GetWindowWMInfo(SDL.SDL_GL_GetCurrentWindow(), ref info);
-
-                        IntPtr hwnd = IntPtr.Zero;
-
-                        if (info.subsystem == SDL.SDL_SYSWM_TYPE.SDL_SYSWM_WINDOWS)
-                        {
-                            hwnd = info.info.win.window;
-                        }
+                        uint hwndProps = SDL.SDL_GetWindowProperties(SDL.SDL_GL_GetCurrentWindow());
+                        IntPtr hwnd = SDL.SDL_GetPointerProperty(hwndProps, SDL.SDL_PROP_WINDOW_WIN32_HWND_POINTER, IntPtr.Zero);
 
                         return (int) hwnd;
 

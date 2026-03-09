@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -36,7 +36,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Utility.Logging;
-using SDL2;
+using SDL3;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -60,7 +60,7 @@ namespace ClassicUO.Game.Managers
 
         // Corpses
         MonsterCorpses = 1 << 5,
-        HumanoidCorpses = 1 << 6,
+        HumanoidCorpses = 1 << 7,
         OwnCorpses = 1 << 7,
 
         // Mobiles (type)
@@ -88,7 +88,7 @@ namespace ClassicUO.Game.Managers
     {
         private static NameOverHeadHandlerGump _gump;
         private static SDL.SDL_Keycode _lastKeySym = SDL.SDL_Keycode.SDLK_UNKNOWN;
-        private static SDL.SDL_Keymod _lastKeyMod = SDL.SDL_Keymod.KMOD_NONE;
+        private static SDL.SDL_Keymod _lastKeyMod = SDL.SDL_Keymod.SDL_KMOD_NONE;
 
         public static string LastActiveNameOverheadOption
         {
@@ -260,7 +260,6 @@ namespace ClassicUO.Game.Managers
             {
                 Log.Trace("No nameoverhead.xml file. Creating a default file.");
 
-
                 Options.Clear();
                 CreateDefaultEntries();
                 Save();
@@ -328,9 +327,9 @@ namespace ClassicUO.Game.Managers
                 new[]
                 {
                     new NameOverheadOption("All", int.MaxValue),
-                    new NameOverheadOption("Mobiles only", (int)NameOverheadOptions.AllMobiles),
-                    new NameOverheadOption("Items only", (int)NameOverheadOptions.AllItems),
-                    new NameOverheadOption("Mobiles & Corpses only", (int)NameOverheadOptions.MobilesAndCorpses),
+                    new NameOverheadOption("Mobiles only", int.MaxValue),
+                    new NameOverheadOption("Items only", int.MaxValue),
+                    new NameOverheadOption("Mobiles & Corpses only", int.MaxValue),
                 }
             );
         }
@@ -359,19 +358,19 @@ namespace ClassicUO.Game.Managers
 
         public static List<NameOverheadOption> GetAllOptions() => Options;
 
-        public static void RegisterKeyDown(SDL.SDL_Keysym key)
+        public static void RegisterKeyDown(SDL.SDL_Keycode keySym, SDL.SDL_Keymod keyMod)
         {
-            if (_lastKeySym == key.sym && _lastKeyMod == key.mod)
+            if (_lastKeySym == keySym && _lastKeyMod == keyMod)
                 return;
 
-            _lastKeySym = key.sym;
-            _lastKeyMod = key.mod;
+            _lastKeySym = keySym;
+            _lastKeyMod = keyMod;
 
-            bool shift = (key.mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
-            bool alt = (key.mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
-            bool ctrl = (key.mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
+            bool shift = (keyMod & SDL.SDL_Keymod.SDL_KMOD_SHIFT) != SDL.SDL_Keymod.SDL_KMOD_NONE;
+            bool alt = (keyMod & SDL.SDL_Keymod.SDL_KMOD_ALT) != SDL.SDL_Keymod.SDL_KMOD_NONE;
+            bool ctrl = (keyMod & SDL.SDL_Keymod.SDL_KMOD_CTRL) != SDL.SDL_Keymod.SDL_KMOD_NONE;
 
-            var option = FindOptionByHotkey(key.sym, alt, ctrl, shift);
+            var option = FindOptionByHotkey(keySym, alt, ctrl, shift);
 
             if (option == null)
                 return;
@@ -381,9 +380,9 @@ namespace ClassicUO.Game.Managers
             IsTemporarilyShowing = true;
         }
 
-        public static void RegisterKeyUp(SDL.SDL_Keysym key)
+        public static void RegisterKeyUp(SDL.SDL_Keycode keySym)
         {
-            if (key.sym != _lastKeySym)
+            if (keySym != _lastKeySym)
                 return;
 
             _lastKeySym = SDL.SDL_Keycode.SDLK_UNKNOWN;

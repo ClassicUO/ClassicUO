@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -32,6 +32,7 @@
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
 using System.Collections.Generic;
 
 namespace ClassicUO.Renderer
@@ -42,16 +43,34 @@ namespace ClassicUO.Renderer
 
         private static GraphicsDevice _device;
 
+        private static readonly Color[] _commonColors = new[]
+        {
+            Color.Black, Color.White, Color.Gray, Color.Transparent,
+            new Color(128, 128, 128), new Color(255, 255, 255, 128),
+            new Color(0, 0, 0, 128), new Color(180, 50, 50), new Color(80, 15, 15)
+        };
+
         public static void Initialize(GraphicsDevice device)
         {
             _device = device;
+            _textures.Clear();
+            _roundedTextures.Clear();
+            foreach (Color c in _commonColors)
+            {
+                GetTexture(c);
+            }
         }
 
         public static Texture2D GetTexture(Color color)
         {
-            if (_textures.TryGetValue(color, out Texture2D texture))
+            if (_textures.TryGetValue(color, out Texture2D texture) && texture != null && !texture.IsDisposed)
             {
                 return texture;
+            }
+
+            if (texture != null && texture.IsDisposed)
+            {
+                _textures.Remove(color);
             }
 
             texture = new Texture2D
@@ -65,6 +84,50 @@ namespace ClassicUO.Renderer
 
             texture.SetData(new[] { color });
             _textures[color] = texture;
+
+            return texture;
+        }
+
+        private static readonly Dictionary<(int, int, int, int), Texture2D> _roundedTextures = new Dictionary<(int, int, int, int), Texture2D>();
+
+        public static Texture2D GetRoundedRectTexture(int width, int height, int radius, Color color)
+        {
+            int r = Math.Min(radius, Math.Min(width, height) / 2);
+            var key = (width, height, r, (int)color.PackedValue);
+            if (_roundedTextures.TryGetValue(key, out Texture2D texture) && texture != null && !texture.IsDisposed)
+            {
+                return texture;
+            }
+
+            if (texture != null && texture.IsDisposed)
+                _roundedTextures.Remove(key);
+
+            var pixels = new Color[width * height];
+            int rSq = r * r;
+
+            for (int py = 0; py < height; py++)
+            {
+                for (int px = 0; px < width; px++)
+                {
+                    bool inside = false;
+                    if (px >= r && px < width - r && py >= r && py < height - r)
+                        inside = true;
+                    else if (px < r && py < r)
+                        inside = (px - r) * (px - r) + (py - r) * (py - r) <= rSq;
+                    else if (px >= width - r && py < r)
+                        inside = (px - (width - 1 - r)) * (px - (width - 1 - r)) + (py - r) * (py - r) <= rSq;
+                    else if (px < r && py >= height - r)
+                        inside = (px - r) * (px - r) + (py - (height - 1 - r)) * (py - (height - 1 - r)) <= rSq;
+                    else if (px >= width - r && py >= height - r)
+                        inside = (px - (width - 1 - r)) * (px - (width - 1 - r)) + (py - (height - 1 - r)) * (py - (height - 1 - r)) <= rSq;
+
+                    pixels[py * width + px] = inside ? color : Color.Transparent;
+                }
+            }
+
+            texture = new Texture2D(_device, width, height, false, SurfaceFormat.Color);
+            texture.SetData(pixels);
+            _roundedTextures[key] = texture;
 
             return texture;
         }

@@ -1,0 +1,16 @@
+*.o
+*.so
+*.dll
+*.dylib
+.vs/
+obj/
+Debug/
+Release/
+*.vcxproj.user
+.vscode/
+*.suo
+.DS_Store
+xcuserdata/
+*.xcworkspace/
+*.xcscheme
+build/

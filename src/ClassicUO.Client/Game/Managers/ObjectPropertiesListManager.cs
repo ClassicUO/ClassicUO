@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -33,6 +33,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using ClassicUO.Assets;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Network;
@@ -204,7 +205,7 @@ namespace ClassicUO.Game.Managers
 
         private void processData()
         {
-            string formattedData = TextBox.ConvertHtmlToFontStashSharpCommand(RawData);
+            string formattedData = HtmlTextHelper.ConvertHtmlToPlain(RawData);
 
             RawLines = formattedData.Split(new string[] { "\n", "<br>" }, StringSplitOptions.None);
 
@@ -274,7 +275,7 @@ namespace ClassicUO.Game.Managers
                             finalTooltip += $" {thisItem.FirstValue}";
                             if (diff != 0)
                             {
-                                finalTooltip += $"({(diff >= 0 ? "/c[green]+" : "/c[red]")} {diff}/cd)";
+                                finalTooltip += $" ({(diff >= 0 ? "+" : "")}{diff})";
                             }
                         }
 
@@ -284,7 +285,7 @@ namespace ClassicUO.Game.Managers
                             finalTooltip += $" {thisItem.SecondValue}";
                             if (diff != 0)
                             {
-                                finalTooltip += $"({(diff >= 0 ? "/c[green]+" : "/c[red]")}{diff}/cd)";
+                                finalTooltip += $" ({(diff >= 0 ? "+" : "")}{diff})";
                             }
                         }
 

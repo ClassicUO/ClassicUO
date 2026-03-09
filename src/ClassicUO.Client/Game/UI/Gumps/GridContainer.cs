@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -48,7 +48,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
-using static ClassicUO.Game.UI.Gumps.GridHightlightMenu;
+using static ClassicUO.TazUO.UI.Gumps.GridHightlightMenu;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -188,7 +188,7 @@ namespace ClassicUO.Game.UI.Gumps
             #endregion
 
             #region TOP BAR AREA
-            containerNameLabel = new Label(GetContainerName(), true, 0x0481)
+            containerNameLabel = new Label(GetContainerName(), true, 0x0481, ishtml: true)
             {
                 X = borderWidth,
                 Y = -20
@@ -491,8 +491,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (autoSortContainer) overrideSort = true;
 
-            List<Item> sortedContents = (ProfileManager.CurrentProfile is null || ProfileManager.CurrentProfile.GridContainerSearchMode == 0) ? gridSlotManager.SearchResults(searchBox.Text) : GridSlotManager.GetItemsInContainer(container);
-            gridSlotManager.RebuildContainer(sortedContents, searchBox.Text, overrideSort);
+            string searchText = searchBox.Text?.Trim() ?? "";
+            List<Item> sortedContents = (ProfileManager.CurrentProfile is null || ProfileManager.CurrentProfile.GridContainerSearchMode == 0) ? gridSlotManager.SearchResults(searchText) : GridSlotManager.GetItemsInContainer(container);
+            gridSlotManager.RebuildContainer(sortedContents, searchText, overrideSort);
 
             InvalidateContents = false;
         }
@@ -556,6 +557,7 @@ namespace ClassicUO.Game.UI.Gumps
                             if (child.Container == _c)
                             {
                                 UIManager.GetGump<GridContainer>(child)?.Dispose();
+                                
                                 UIManager.GetGump<ContainerGump>(child)?.Dispose();
                             }
                         }
@@ -1374,14 +1376,17 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
+                bool hideMode = ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.GridContainerSearchMode == 0;
+                bool highlightMode = ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.GridContainerSearchMode == 1;
+                string searchTermLower = (searchText ?? "").Trim().ToLowerInvariant();
                 foreach (var slot in gridSlots)
                 {
-                    slot.Value.IsVisible = !(!string.IsNullOrWhiteSpace(searchText) && ProfileManager.CurrentProfile.GridContainerSearchMode == 0);
-                    if (slot.Value.SlotItem != null && !string.IsNullOrWhiteSpace(searchText))
+                    slot.Value.IsVisible = !(!string.IsNullOrWhiteSpace(searchText) && hideMode);
+                    if (slot.Value.SlotItem != null && !string.IsNullOrEmpty(searchTermLower))
                     {
-                        if (SearchItemNameAndProps(searchText, slot.Value.SlotItem))
+                        if (SearchItemNameAndProps(searchTermLower, slot.Value.SlotItem))
                         {
-                            slot.Value.Hightlight = ProfileManager.CurrentProfile.GridContainerSearchMode == 1;
+                            slot.Value.Hightlight = highlightMode;
                             slot.Value.IsVisible = true;
                         }
                     }
@@ -1432,42 +1437,38 @@ namespace ClassicUO.Game.UI.Gumps
             /// <returns>List of items matching the search result, or all items if search is blank/profile does has hide search mode disabled</returns>
             public List<Item> SearchResults(string search)
             {
-                UpdateItems(); //Why is this here? Because the server sends the container before it sends the data with it so sometimes we get empty containers without reloading the contents
-                if (search != "")
+                UpdateItems();
+                if (string.IsNullOrWhiteSpace(search))
+                    return containerContents;
+                if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.GridContainerSearchMode != 0)
+                    return containerContents;
+                List<Item> filteredContents = new List<Item>();
+                string term = search.Trim().ToLowerInvariant();
+                foreach (Item i in containerContents)
                 {
-                    if (ProfileManager.CurrentProfile.GridContainerSearchMode == 0) //Hide search mode
-                    {
-                        List<Item> filteredContents = new List<Item>();
-                        foreach (Item i in containerContents)
-                        {
-                            if (SearchItemNameAndProps(search, i))
-                                filteredContents.Add(i);
-                        }
-                        return filteredContents;
-                    }
+                    if (SearchItemNameAndProps(term, i))
+                        filteredContents.Add(i);
                 }
-                return containerContents;
+                return filteredContents;
             }
 
-            private bool SearchItemNameAndProps(string search, Item item)
+            private bool SearchItemNameAndProps(string searchTermLower, Item item)
             {
-                if (item == null)
+                if (item == null || string.IsNullOrEmpty(searchTermLower))
                     return false;
 
                 if (World.OPL.TryGetNameAndData(item.Serial, out string name, out string data))
                 {
-                    if (name != null && name.ToLower().Contains(search.ToLower()))
+                    if (name != null && name.ToLowerInvariant().Contains(searchTermLower))
                         return true;
-                    if (data != null)
-                        if (data.ToLower().Contains(search.ToLower()))
-                            return true;
+                    if (data != null && data.ToLowerInvariant().Contains(searchTermLower))
+                        return true;
                 }
                 else
                 {
-                    if (item.Name != null && item.Name.ToLower().Contains(search.ToLower()))
+                    if (item.Name != null && item.Name.ToLowerInvariant().Contains(searchTermLower))
                         return true;
-
-                    if (item.ItemData.Name.ToLower().Contains(search.ToLower()))
+                    if (item.ItemData.Name != null && item.ItemData.Name.ToLowerInvariant().Contains(searchTermLower))
                         return true;
                 }
 
@@ -1552,6 +1553,18 @@ namespace ClassicUO.Game.UI.Gumps
                                     }
                                     if (fullMatch) item.Value.SetHighLightBorder(configData.Hue);
                                 }
+                        }
+                    }
+
+                    if (ProfileManager.CurrentProfile?.PvM_LootHighlightOnCorpse == true && container.IsCorpse)
+                    {
+                        foreach (var slot in gridSlots)
+                        {
+                            if (slot.Value.SlotItem == null) continue;
+                            Item si = slot.Value.SlotItem;
+                            bool isLoot = si.DisplayedGraphic == 0x0EED || si.DisplayedGraphic == 0x0EEE || si.Hue != 0;
+                            if (isLoot)
+                                slot.Value.SetHighLightBorder(0x35);
                         }
                     }
                 });

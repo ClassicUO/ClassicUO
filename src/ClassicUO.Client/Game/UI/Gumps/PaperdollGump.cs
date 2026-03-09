@@ -61,8 +61,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         private GumpPic _picBase;
         private GumpPic _profilePic;
-        private readonly EquipmentSlot[] _slots = new EquipmentSlot[6];
-        private readonly EquipmentSlot[] _slots_right = new EquipmentSlot[6];
+        private readonly EquipmentSlot[] _slots = new EquipmentSlot[9];
+        private readonly EquipmentSlot[] _slots_right = new EquipmentSlot[8];
         private Label _titleLabel;
         private GumpPic _virtueMenuPic;
         private Button _warModeBtn;
@@ -350,6 +350,9 @@ namespace ClassicUO.Game.UI.Gumps
                     Graphic = settings.Graphic_Button_Durability
                 }.ScaleWidthAndHeight(Scale).ScaleXAndY(Scale).SetInternalScale(Scale));
 
+            Mobile mobiles = World.Mobiles.Get(LocalSerial);
+            Item twoHandedItem = mobiles.FindItemByLayer(Layer.TwoHanded);
+
             // Equipment slots for hat/earrings/neck/ring/bracelet
             Add(_slots[0] = new EquipmentSlot(0, settings.Position_X_LeftSlots, settings.Position_Y_LeftSlots, Layer.Helmet, this));
 
@@ -363,23 +366,35 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_slots[5] = new EquipmentSlot(0, settings.Position_X_LeftSlots, settings.Position_Y_LeftSlots + settings.Size_Height_LeftSlots * 5, Layer.Tunic, this));
 
+            Add(_slots[6] = new EquipmentSlot(0, settings.Position_X_LeftSlots, settings.Position_Y_LeftSlots + settings.Size_Height_LeftSlots * 6, Layer.OneHanded, this));
+
+            Add(_slots[7] = new EquipmentSlot(0, settings.Position_X_LeftSlots, settings.Position_Y_LeftSlots + settings.Size_Height_LeftSlots * 7, Layer.TwoHanded, this));
+
+            Add(_slots[8] = new EquipmentSlot(0, settings.Position_X_LeftSlots, settings.Position_Y_LeftSlots + settings.Size_Height_LeftSlots * 8, Layer.Talisman, this));
+
+
             foreach (var slot in _slots)
             {
                 slot.ScaleWidthAndHeight(Scale).ScaleXAndY(Scale).SetInternalScale(Scale);
             }
 
             // Right side equip slots
-            Add(_slots_right[0] = new EquipmentSlot(0, settings.Position_X_RightSlots, settings.Position_Y_RightSlots, Layer.Torso, this));
 
-            Add(_slots_right[1] = new EquipmentSlot(0, settings.Position_X_RightSlots, settings.Position_Y_RightSlots + settings.Size_Height_RightSlots, Layer.Arms, this));
+            Add(_slots_right[0] = new EquipmentSlot(0, settings.Position_X_RightSlots, settings.Position_Y_RightSlots, Layer.Robe, this));
 
-            Add(_slots_right[2] = new EquipmentSlot(0, settings.Position_X_RightSlots, settings.Position_Y_RightSlots + settings.Size_Height_RightSlots * 2, Layer.Shirt, this));
+            Add(_slots_right[1] = new EquipmentSlot(0, settings.Position_X_RightSlots, settings.Position_Y_RightSlots + settings.Size_Height_RightSlots, Layer.Gloves, this));
 
-            Add(_slots_right[3] = new EquipmentSlot(0, settings.Position_X_RightSlots, settings.Position_Y_RightSlots + settings.Size_Height_RightSlots * 3, Layer.Pants, this));
+            Add(_slots_right[2] = new EquipmentSlot(0, settings.Position_X_RightSlots, settings.Position_Y_RightSlots + settings.Size_Height_RightSlots * 2, Layer.Torso, this));
 
-            Add(_slots_right[4] = new EquipmentSlot(0, settings.Position_X_RightSlots, settings.Position_Y_RightSlots + settings.Size_Height_RightSlots * 4, Layer.Skirt, this));
+            Add(_slots_right[3] = new EquipmentSlot(0, settings.Position_X_RightSlots, settings.Position_Y_RightSlots + settings.Size_Height_RightSlots * 3, Layer.Arms, this));
 
-            Add(_slots_right[5] = new EquipmentSlot(0, settings.Position_X_RightSlots, settings.Position_Y_RightSlots + settings.Size_Height_RightSlots * 5, Layer.Shoes, this));
+            Add(_slots_right[4] = new EquipmentSlot(0, settings.Position_X_RightSlots, settings.Position_Y_RightSlots + settings.Size_Height_RightSlots * 4, Layer.Pants, this));
+
+            Add(_slots_right[5] = new EquipmentSlot(0, settings.Position_X_RightSlots, settings.Position_Y_RightSlots + settings.Size_Height_RightSlots * 5, Layer.Cloak, this));
+
+            Add(_slots_right[6] = new EquipmentSlot(0, settings.Position_X_RightSlots, settings.Position_Y_RightSlots + settings.Size_Height_RightSlots * 6, Layer.Waist, this));
+
+            Add(_slots_right[7] = new EquipmentSlot(0, settings.Position_X_RightSlots, settings.Position_Y_RightSlots + settings.Size_Height_RightSlots * 7, Layer.Shoes, this));
 
             foreach (var slot in _slots_right)
             {
@@ -686,6 +701,8 @@ namespace ClassicUO.Game.UI.Gumps
                     int idx = (int)_slots[i].Layer;
 
                     _slots[i].LocalSerial = mobile.FindItemByLayer((Layer)idx)?.Serial ?? 0;
+                   
+                   
                 }
 
                 for (int i = 0; i < _slots_right.Length; i++)
@@ -693,6 +710,7 @@ namespace ClassicUO.Game.UI.Gumps
                     int idx = (int)_slots_right[i].Layer;
 
                     _slots_right[i].LocalSerial = mobile.FindItemByLayer((Layer)idx)?.Serial ?? 0;
+                    
                 }
             }
         }
@@ -722,6 +740,8 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case Buttons.LogOut:
+                    PaperdollSelectCharManager.Instance.Save();
+                    PaperdollSelectCharManager.Instance.SaveJson();
                     Client.Game.GetScene<GameScene>()?.RequestQuitGame();
 
                     break;
@@ -826,6 +846,7 @@ namespace ClassicUO.Game.UI.Gumps
         private class EquipmentSlot : Control
         {
             private ItemGumpFixed _itemGump;
+            private Label _durabilityExclamation;
             private readonly PaperDollGump _paperDollGump;
 
             private Control bg, border;
@@ -925,6 +946,24 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                 }
 
+                _durabilityExclamation?.Dispose();
+                _durabilityExclamation = null;
+                item = World.Items.Get(LocalSerial);
+                if (item != null
+                    && ProfileManager.CurrentProfile?.ColorPaperdollByDurability == true
+                    && World.DurabilityManager != null
+                    && World.DurabilityManager.TryGetDurability(LocalSerial, out var dur)
+                    && dur.MaxDurabilty > 0
+                    && dur.Percentage < 0.7f)
+                {
+                    Add(_durabilityExclamation = new Label("!", true, 0x0020, font: 1)
+                    {
+                        X = 12,
+                        Y = -1,
+                        AcceptMouseInput = false
+                    });
+                }
+
                 base.Update();
             }
 
@@ -1003,6 +1042,7 @@ namespace ClassicUO.Game.UI.Gumps
                     );
 
                     ref readonly var artInfo = ref Client.Game.Arts.GetArt(item.DisplayedGraphic);
+                    
 
                     if (artInfo.Texture != null)
                     {

@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -31,6 +31,7 @@
 #endregion
 
 using ClassicUO.Configuration;
+using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
@@ -39,6 +40,7 @@ using ClassicUO.Assets;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
+using ClassicUO.TazUO.UI.Gumps;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -48,6 +50,9 @@ namespace ClassicUO.Game.UI.Gumps
     internal class WorldViewportGump : Gump
     {
         public const int BORDER_WIDTH = 5;
+        private static readonly RenderedText _warModeText = RenderedText.Create("WAR", 0x0021, 1, true, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_LEFT);
+        private static readonly RenderedText _criminalAlertText = RenderedText.Create("!", 0x0026, 3, true, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_RIGHT);
+        private readonly RenderedText _greyTimerText = RenderedText.Create("0:00", 0x0021, 1, true, FontStyle.BlackBorder, TEXT_ALIGN_TYPE.TS_RIGHT);
         private readonly BorderControl _borderControl;
         private readonly Button _button;
         private bool _clicked;
@@ -151,14 +156,14 @@ namespace ClassicUO.Game.UI.Gumps
                     int w = _lastSize.X + offset.X;
                     int h = _lastSize.Y + offset.Y;
 
-                    if (w < 640)
+                    if (w < 1024)
                     {
-                        w = 640;
+                        w = 1024;
                     }
 
-                    if (h < 480)
+                    if (h < 768)
                     {
-                        h = 480;
+                        h = 768;
                     }
 
                     if (w > Client.Game.Window.ClientBounds.Width - BORDER_WIDTH)
@@ -268,14 +273,14 @@ namespace ClassicUO.Game.UI.Gumps
 
         public Point ResizeGameWindow(Point newSize)
         {
-            if (newSize.X < 640)
+            if (newSize.X < 1024)
             {
-                newSize.X = 640;
+                newSize.X = 1024;
             }
 
-            if (newSize.Y < 480)
+            if (newSize.Y < 768)
             {
-                newSize.Y = 480;
+                newSize.Y = 768;
             }
 
             //Resize();
@@ -355,6 +360,23 @@ namespace ClassicUO.Game.UI.Gumps
                         DamageWindowOutlineHue
                         );
                 }
+            }
+
+            if (World.InGame && ProfileManager.CurrentProfile?.PvP_WarModeIndicator == true && World.Player != null && World.Player.InWarMode)
+                _warModeText.Draw(batcher, x + BORDER_WIDTH + 4, y + BORDER_WIDTH + 4);
+
+            if (World.InGame && ProfileManager.CurrentProfile?.PvP_CriminalAttackableAlert == true && PvMPvPManager.Instance.CriminalOrAttackableNearby)
+            {
+                _criminalAlertText.Draw(batcher, x + Width - BORDER_WIDTH - _criminalAlertText.Width - 4, y + BORDER_WIDTH + 4);
+            }
+
+            if (World.InGame && ProfileManager.CurrentProfile?.PvP_GreyCriminalTimer == true && PvMPvPManager.Instance.GreyCriminalSecondsRemaining > 0)
+            {
+                int sec = PvMPvPManager.Instance.GreyCriminalSecondsRemaining;
+                string timerStr = $"{sec / 60}:{sec % 60:D2}";
+                if (_greyTimerText.Text != timerStr)
+                    _greyTimerText.Text = timerStr;
+                _greyTimerText.Draw(batcher, x + Width - BORDER_WIDTH - _greyTimerText.Width - 4, y + BORDER_WIDTH + 20);
             }
 
             return res;

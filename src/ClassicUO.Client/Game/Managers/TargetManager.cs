@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -45,6 +45,7 @@ using ClassicUO.Utility;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace ClassicUO.Game.Managers
 {
@@ -338,15 +339,26 @@ namespace ClassicUO.Game.Managers
 
                         if (entity != World.Player)
                         {
-                            LastTargetInfo.SetEntity(serial);
+                            if (ProfileManager.CurrentProfile == null || !ProfileManager.CurrentProfile.PvX_LockLastTarget || serial != 0 || !LastTargetInfo.IsEntity)
+                                LastTargetInfo.SetEntity(serial);
                         }
 
-                        if (SerialHelper.IsMobile(serial) && serial != World.Player && (World.Player.NotorietyFlag == NotorietyFlag.Innocent || World.Player.NotorietyFlag == NotorietyFlag.Ally))
+                        if (SerialHelper.IsMobile(serial) && serial != World.Player)
                         {
                             Mobile mobile = entity as Mobile;
 
                             if (mobile != null)
                             {
+                                if (TargetingType == TargetType.Beneficial && ProfileManager.CurrentProfile?.PvX_BlockBeneficialOnEnemies == true
+                                    && (mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Gray || mobile.NotorietyFlag == NotorietyFlag.Enemy || mobile.NotorietyFlag == NotorietyFlag.Murderer))
+                                {
+                                    GameActions.Print("Cannot cast beneficial on enemy.", 0x0026);
+                                    ClearTargetingWithoutTargetCancelPacket();
+                                    return;
+                                }
+
+                                if ((World.Player.NotorietyFlag == NotorietyFlag.Innocent || World.Player.NotorietyFlag == NotorietyFlag.Ally))
+                                {
                                 bool showCriminalQuery = false;
 
                                 if (TargetingType == TargetType.Harmful && ProfileManager.CurrentProfile.EnabledCriminalActionQuery && mobile.NotorietyFlag == NotorietyFlag.Innocent)
@@ -388,6 +400,7 @@ namespace ClassicUO.Game.Managers
                                     UIManager.Add(messageBox);
 
                                     return;
+                                }
                                 }
                             }
                         }
@@ -638,7 +651,8 @@ namespace ClassicUO.Game.Managers
 
                         if (serial != World.Player.Serial)
                         {
-                            LastTargetInfo.SetEntity(serial);
+                            if (ProfileManager.CurrentProfile == null || !ProfileManager.CurrentProfile.PvX_LockLastTarget || serial != 0 || !LastTargetInfo.IsEntity)
+                                LastTargetInfo.SetEntity(serial);
                         }
 
 

@@ -43,6 +43,8 @@ namespace ClassicUO.Game
         public const int CHARACTER_ANIMATION_DELAY = 80;
         public const int ITEM_EFFECT_ANIMATION_DELAY = 50;
 
+        public const int ALLOWED_Z_DIFFERENCE = 10;
+
         public const int MAX_STEP_COUNT = 5;
         public const int TURN_DELAY = 100; // original client 12.5 fps = 80ms delay. Edit --> it causes throttling
         public const int TURN_DELAY_FAST = 45;

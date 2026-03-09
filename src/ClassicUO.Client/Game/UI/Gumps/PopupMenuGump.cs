@@ -40,12 +40,21 @@ using Microsoft.Xna.Framework;
 namespace ClassicUO.Game.UI.Gumps
 {
     public class PopupMenuGump : Gump
-    {
+    {   
+        public static uint CloseNext = uint.MaxValue;
+
         private ushort _selectedItem;
         private readonly PopupMenuData _data;
 
         public PopupMenuGump(PopupMenuData data) : base(0, 0)
         {
+            if (CloseNext != uint.MaxValue && data.Serial == CloseNext)
+            {                
+                Dispose();
+                CloseNext = uint.MaxValue;
+                return;
+            }
+
             CanMove = false;
             CanCloseWithRightClick = true;
             _data = data;
@@ -148,6 +157,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButtonType.Left)
             {
+                if (CUOEnviroment.Debug)
+                    GameActions.Print($"Popup menu [{_data.Serial}] response: {_selectedItem}");
+
                 GameActions.ResponsePopupMenu(_data.Serial, _selectedItem);
                 Dispose();
             }

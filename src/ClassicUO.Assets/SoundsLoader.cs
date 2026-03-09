@@ -79,7 +79,7 @@ namespace ClassicUO.Assets
 
                         if (File.Exists(path) && File.Exists(idxpath))
                         {
-                            _file = new UOFileMul(path, idxpath, MAX_SOUND_DATA_INDEX_COUNT);
+                            _file = new UOFileMul(path, idxpath);
                         }
                         else
                         {

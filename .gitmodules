@@ -1,6 +1,7 @@
 [submodule "external/FNA"]
 	path = external/FNA
 	url = https://github.com/FNA-XNA/FNA.git
-[submodule "external/MP3Sharp"]
-	path = external/MP3Sharp
-	url = https://github.com/andreakarasho/MP3Sharp.git
+	branch = master
+[submodule "external/UOSteam"]
+	path = external/UOSteam
+	url = https://github.com/jaedan/steam-engine.git

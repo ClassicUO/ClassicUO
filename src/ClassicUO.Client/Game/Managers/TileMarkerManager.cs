@@ -2,7 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace ClassicUO.Game.Managers
 {
@@ -12,13 +13,18 @@ namespace ClassicUO.Game.Managers
 
         private Dictionary<string, ushort> markedTiles = new Dictionary<string, ushort>();
 
-        private TileMarkerManager() { Load(); }
+        private TileMarkerManager() { LoadSync(); }
 
         private string savePath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", "TileMarkers.bin");
 
         public void AddTile(int x, int y, int map, ushort hue)
         {
-            markedTiles.Add(FormatLocKey(x, y, map), hue);
+            if (markedTiles.TryGetValue(FormatLocKey(x, y, map), out hue)) {
+                markedTiles.Add(FormatLocKey(x, y, map), hue);
+            } else
+            {
+                markedTiles.Add(FormatLocKey(x, y, map), hue);
+            }
         }
 
         public void RemoveTile(int x, int y, int map)
@@ -38,29 +44,34 @@ namespace ClassicUO.Game.Managers
             return $"{x}.{y}.{map}";
         }
 
-        public void Save()
+        public async void Save()
         {
             try
             {
-                using (FileStream fs = new FileStream(savePath, FileMode.Create, FileAccess.Write))
-                {
-                    BinaryFormatter bf = new BinaryFormatter();
-                    bf.Serialize(fs, markedTiles);
-                }
+                string json = JsonSerializer.Serialize(markedTiles);
+                File.WriteAllText(savePath, json);
             }
             catch { Console.WriteLine("Failed to save marked tile data."); }
         }
 
-        private void Load()
+        private void LoadSync()
         {
             if(File.Exists(savePath))
                 try
                 {
-                    using (FileStream fs = File.OpenRead(savePath))
-                    {
-                        BinaryFormatter bf = new BinaryFormatter();
-                        markedTiles = (Dictionary<string, ushort>)bf.Deserialize(fs);
-                    }
+                    string json = File.ReadAllText(savePath);
+                    markedTiles = JsonSerializer.Deserialize<Dictionary<string, ushort>>(json) ?? new Dictionary<string, ushort>();
+                }
+                catch { }
+        }
+
+        private async void Load()
+        {
+            if(File.Exists(savePath))
+                try
+                {
+                    string json = File.ReadAllText(savePath);
+                    markedTiles = JsonSerializer.Deserialize<Dictionary<string, ushort>>(json) ?? new Dictionary<string, ushort>();
                 }
                 catch { }
         }

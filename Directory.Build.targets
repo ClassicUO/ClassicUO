@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup>
+    <!-- Define platform-specific constants -->
+    <DefineConstants Condition="'$(OS)' == 'Windows_NT'">$(DefineConstants);WINDOWS</DefineConstants>
+    <DefineConstants Condition="'$(OS)' == 'Unix' AND '$(RuntimeIdentifier)' == 'osx-x64'">$(DefineConstants);MACOS</DefineConstants>
+    <DefineConstants Condition="'$(OS)' == 'Unix' AND '$(RuntimeIdentifier)' == 'osx-arm64'">$(DefineConstants);MACOS</DefineConstants>
+    <DefineConstants Condition="'$(OS)' == 'Unix' AND '$(RuntimeIdentifier)' == 'linux-x64'">$(DefineConstants);LINUX</DefineConstants>
+    <DefineConstants Condition="'$(OS)' == 'Unix' AND '$(RuntimeIdentifier)' == 'linux-arm64'">$(DefineConstants);LINUX</DefineConstants>
+  </PropertyGroup>
+</Project>

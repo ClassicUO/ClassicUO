@@ -1,4 +1,5 @@
-﻿using ClassicUO.Configuration;
+using ClassicUO.Configuration;
+using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -404,6 +405,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (journalEntry == null)
                 return;
+            if (!string.IsNullOrEmpty(journalEntry.Name) && IgnoreManager.IgnoredCharsList.Contains(journalEntry.Name))
+                return;
             _journalArea.AddEntry($"{journalEntry.Name}: {journalEntry.Text}", journalEntry.Hue, journalEntry.Time, journalEntry.TextType, journalEntry.MessageType);
         }
 
@@ -487,19 +490,19 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     foreach (JournalData journalEntry in journalDatas)
                     {
-                        if (journalEntry == null || string.IsNullOrEmpty(journalEntry.EntryText.Text))
+                        if (journalEntry == null || string.IsNullOrEmpty(journalEntry.EntryTextContent))
                             continue;
 
                         if (!CanBeDrawn(journalEntry.TextType, journalEntry.MessageType))
                             continue;
 
-                        if (my + journalEntry.EntryText.Height - y >= _scrollBar.Value && my - y <= _scrollBar.Value + _scrollBar.Height)
+                        if (my + journalEntry.EntryControl.Height - y >= _scrollBar.Value && my - y <= _scrollBar.Value + _scrollBar.Height)
                         {
                             if (!hideTimestamp)
-                                journalEntry.TimeStamp.Draw(batcher, x, my - _scrollBar.Value);
-                            journalEntry.EntryText.Draw(batcher, hideTimestamp ? x : x + (journalEntry.TimeStamp.Width + 5), my - _scrollBar.Value);
+                                journalEntry.TimeStampControl.Draw(batcher, x, my - _scrollBar.Value);
+                            journalEntry.EntryControl.Draw(batcher, hideTimestamp ? x : x + (journalEntry.TimeStampControl.Width + 5), my - _scrollBar.Value);
                         }
-                        my += journalEntry.EntryText.Height;
+                        my += journalEntry.EntryControl.Height;
                     }
 
                     batcher.ClipEnd();
@@ -520,11 +523,6 @@ namespace ClassicUO.Game.UI.Gumps
                     lastWidth = Width;
                     lastHeight = Height;
 
-                    foreach (JournalData _ in journalDatas)
-                    {
-                        _.EntryText.Width = Width - BORDER_WIDTH - (ProfileManager.CurrentProfile.HideJournalTimestamp ? 0 : _.TimeStamp.Width);
-                        _.EntryText.Update();
-                    }
 
                     CalculateScrollBarMaxValue();
                 }
@@ -540,7 +538,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (_ != null)
                         if (CanBeDrawn(_.TextType, _.MessageType))
-                            height += _.EntryText.Height;
+                            height += _.EntryControl.Height;
                 }
 
 
@@ -565,24 +563,19 @@ namespace ClassicUO.Game.UI.Gumps
             public void AddEntry(string text, ushort hue, DateTime time, TextType text_type, MessageType messageType)
             {
                 bool maxScroll = _scrollBar.Value == _scrollBar.MaxValue;
+                var profile = ProfileManager.CurrentProfile;
 
-                while (journalDatas.Count > (ProfileManager.CurrentProfile == null ? 200 : ProfileManager.CurrentProfile.MaxJournalEntries))
+                while (journalDatas.Count > (profile == null ? 200 : profile.MaxJournalEntries))
                     journalDatas.RemoveFromFront().Destroy();
 
-                TextBox timeS = new TextBox($"{time:t}", ProfileManager.CurrentProfile.SelectedTTFJournalFont, ProfileManager.CurrentProfile.SelectedJournalFontSize - 2, null, 1150, strokeEffect: false);
+                var timeS = new UOLabel($"{time:t}", profile.SelectedJournalFont, 1150, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 0, Game.FontStyle.None);
+                int entryWidth = Width - (profile.HideJournalTimestamp ? 0 : timeS.Width);
+                var entryControl = new UOLabel(text ?? "", profile.SelectedJournalFont, hue, Assets.TEXT_ALIGN_TYPE.TS_LEFT, entryWidth, Game.FontStyle.None);
 
-                journalDatas.AddToBack(
-                    new JournalData(
-                        new TextBox(text, ProfileManager.CurrentProfile.SelectedTTFJournalFont, ProfileManager.CurrentProfile.SelectedJournalFontSize, Width - (ProfileManager.CurrentProfile.HideJournalTimestamp ? 0 : timeS.Width), hue, strokeEffect: false),
-                        timeS,
-                        text_type,
-                        messageType
-                    ));
+                journalDatas.AddToBack(new JournalData(entryControl, timeS, text, text_type, messageType));
 
                 if (maxScroll)
-                {
                     _scrollBar.Value = _scrollBar.MaxValue;
-                }
                 CalculateScrollBarMaxValue();
             }
 
@@ -629,22 +622,24 @@ namespace ClassicUO.Game.UI.Gumps
 
             public class JournalData
             {
-                public JournalData(TextBox textBox, TextBox timeStamp, TextType textType, MessageType messageType)
+                public JournalData(Control entryControl, Control timeStampControl, string entryTextContent, TextType textType, MessageType messageType)
                 {
-                    EntryText = textBox;
-                    TimeStamp = timeStamp;
+                    EntryControl = entryControl;
+                    TimeStampControl = timeStampControl;
+                    EntryTextContent = entryTextContent;
                     TextType = textType;
                     MessageType = messageType;
                 }
 
                 public void Destroy()
                 {
-                    EntryText?.Dispose();
-                    TimeStamp?.Dispose();
+                    EntryControl?.Dispose();
+                    TimeStampControl?.Dispose();
                 }
 
-                public TextBox EntryText { get; }
-                public TextBox TimeStamp { get; }
+                public Control EntryControl { get; }
+                public Control TimeStampControl { get; }
+                public string EntryTextContent { get; }
                 public TextType TextType { get; }
                 public MessageType MessageType { get; }
             }

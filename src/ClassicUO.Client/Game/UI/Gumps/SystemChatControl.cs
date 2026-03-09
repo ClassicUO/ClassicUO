@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -32,6 +32,7 @@
 
 using System;
 using System.Collections.Generic;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
@@ -43,7 +44,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility.Collections;
 using ClassicUO.Utility.Platforms;
-using SDL2;
+using SDL3;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -255,6 +256,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             if (ProfileManager.CurrentProfile.DisableSystemChat)
+                return;
+
+            if (ProfileManager.CurrentProfile.JournalMessagesOnlyInJournalBox)
                 return;
 
             switch (e.Type)
@@ -486,6 +490,8 @@ namespace ClassicUO.Game.UI.Gumps
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
         {
             int yy = TextBoxControl.Y + y - 20;
+            float depth = 0f;
+            float scale = 1f;
 
             LinkedListNode<ChatLineTime> last = _textEntries.Last;
 
@@ -503,7 +509,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (yy >= y)
                     {
-                        last.Value.Draw(batcher, x + 2, yy);
+                        last.Value.Draw(batcher, x + 2, yy, depth, scale);
                     }
                 }
 
@@ -517,7 +523,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             switch (key)
             {
-                case SDL.SDL_Keycode.SDLK_q when Keyboard.Ctrl && _messageHistoryIndex > -1 && !ProfileManager.CurrentProfile.DisableCtrlQWBtn:
+                case SDL.SDL_Keycode.SDLK_Q when Keyboard.Ctrl && _messageHistoryIndex > -1 && !ProfileManager.CurrentProfile.DisableCtrlQWBtn:
 
                     GameScene scene = Client.Game.GetScene<GameScene>();
 
@@ -547,7 +553,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
 
-                case SDL.SDL_Keycode.SDLK_w when Keyboard.Ctrl && !ProfileManager.CurrentProfile.DisableCtrlQWBtn:
+                case SDL.SDL_Keycode.SDLK_W when Keyboard.Ctrl && !ProfileManager.CurrentProfile.DisableCtrlQWBtn:
 
                     scene = Client.Game.GetScene<GameScene>();
 
@@ -888,11 +894,11 @@ namespace ClassicUO.Game.UI.Gumps
         private class ChatLineTime
         {
             private uint _createdTime;
-            private TextBox textBox;
+            private UOLabel textBox;
 
             public ChatLineTime(string text, byte font, bool isunicode, ushort hue)
             {
-                textBox = new TextBox(text, ProfileManager.CurrentProfile.GameWindowSideChatFont, ProfileManager.CurrentProfile.GameWindowSideChatFontSize, 320, hue, strokeEffect: true);
+                textBox = new UOLabel(text, font, hue, TEXT_ALIGN_TYPE.TS_LEFT, 320, FontStyle.BlackBorder, isunicode);
                 _createdTime = Time.Ticks + Constants.TIME_DISPLAY_SYSTEM_MESSAGE_TEXT;
             }
 
@@ -910,8 +916,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-
-            public bool Draw(UltimaBatcher2D batcher, int x, int y)
+            public bool Draw(UltimaBatcher2D batcher, int x, int y, float depth = 0f, float scale = 1f)
             {
                 return !IsDisposed && textBox.Draw(batcher, x, y);
             }

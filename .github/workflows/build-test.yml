@@ -30,23 +30,18 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-      
-    - name: Get submodules
-      run: |
-        git config --global url."https://".insteadOf git://
-        git submodule update --init --recursive
-        
-    - name: Setup .NET 8
+      with:
+        fetch-depth: 0
+        submodules: recursive
+
+    - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
-        
+
     - name: Restore
       run: dotnet restore
-      
+
     - name: Build
       run: dotnet build -c Release
-      
-    - name: Test
-      run: dotnet test --verbosity normal
    

@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -43,7 +43,7 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Assets
 {
-    public static class UOFileManager
+    public class UOFileManager
     {
         public static string GetUOFilePath(string file)
         {
@@ -116,7 +116,6 @@ namespace ClassicUO.Assets
                 SoundsLoader.Instance.Load(),
                 MultiMapLoader.Instance.Load(),
                 PNGLoader.Instance.Load(),
-                TrueTypeLoader.Instance.Load()
             };
 
             if (!Task.WhenAll(tasks).Wait(TimeSpan.FromSeconds(15)))
@@ -178,6 +177,7 @@ namespace ClassicUO.Assets
                                 (uint) verdata.Length,
                                 vh.Position,
                                 (int) vh.Length,
+                                0,
                                 0,
                                 (short) (vh.GumpData >> 16),
                                 (short) (vh.GumpData & 0xFFFF)

@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -34,6 +34,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ClassicUO.Configuration;
+using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -42,6 +43,12 @@ using ClassicUO.Input;
 using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Gumps.Login;
+using System.IO;
+using Microsoft.Xna.Framework;
+using Cyotek.Drawing.BitmapFont;
+using ClassicUO.Resources;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
 {
@@ -55,14 +62,21 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         private PlayerMobile _character;
         private CharacterInfo _characterInfo;
-        private readonly Button _humanRadio, _elfRadio, _gargoyleRadio;
-        private readonly Button _maleRadio, _femaleRadio;
-        private Combobox _hairCombobox, _facialCombobox;
-        private Label _hairLabel, _facialLabel;
+        private GothicStyleCombobox _hairCombobox, _facialCombobox;
+        private UOLabel _hairLabel, _facialLabel;
         private readonly StbTextBox _nameTextBox;
         private PaperDollInteractable _paperDoll;
-        private readonly Button _nextButton;
+        private readonly GothicStyleButtonLogin _nextButton;
         private readonly Dictionary<Layer, Tuple<int, ushort>> CurrentColorOption = new Dictionary<Layer, Tuple<int, ushort>>();
+        private GothicStyleButtonLogin button;
+        private GothicStyleButtonLogin buttonMale;
+        private GothicStyleButtonLogin buttonFemale;
+        private GothicStyleButtonLogin buttonHuman;
+        private GothicStyleButtonLogin buttonElf;
+        private GothicStyleButtonLogin buttonGargolye;
+        private readonly ProfessionInfo _Parent;
+        private GothicStyleSliderBar[] _attributeSliders;
+        private bool _showSkills = false;
         private readonly Dictionary<Layer, int> CurrentOption = new Dictionary<Layer, int>
         {
             {
@@ -72,185 +86,411 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 Layer.Beard, 0
             }
         };
+        private GothicStyleCombobox[] _skillsCombobox;
+        private GothicStyleSliderBar[] _skillSliders;
+        private List<SkillEntry> _skillList;
+        private List<Control> _professionSkillsLabels = new List<Control>();
+        private ProfessionInfo _displayedProfession;
+        private GothicStyleCombobox _cityCombobox;
+        private const int SECTION_PADDING = 16;
+        private const int CENTER_PANEL_X = 260;
+        private const int CENTER_PANEL_WIDTH = 558;
+        private const int CENTER_PANEL_MID = CENTER_PANEL_X + CENTER_PANEL_WIDTH / 2;
+        private const int CENTER_X = CENTER_PANEL_X;
+        private const int RIGHT_X = 845;
+        private const int PAPERDOLL_WIDTH = 150;
+        private const int RACE_PAPERDOLL_MARGIN = 16;
+        private const int RACE_SECTION_Y = 165;
+        private const int PAPERDOLL_OFFSET_RIGHT = 56;
+        private const int PAPERDOLL_X = CENTER_X + SECTION_PADDING + 100 + RACE_PAPERDOLL_MARGIN + PAPERDOLL_OFFSET_RIGHT;
+        private const int PAPERDOLL_Y = RACE_SECTION_Y;
+        private const int RACE_BUTTON_MARGIN = 12;
+        private const int GENDER_SECTION_Y = 428;
+        private const int ATTR_SECTION_Y = 468;
+        private const int SKILLS_BELOW_ATTR_GAP = 14;
+        private const int SKILLS_SECTION_Y = ATTR_SECTION_Y + 22 + 30 + SKILLS_BELOW_ATTR_GAP;
+        private const int NEXT_BUTTON_X = 874;
+        private const int NEXT_BUTTON_Y = 680;
+        private const int RIGHT_COMBO_WIDTH = 120;
+        private const int RIGHT_LABEL_Y_HAIR = 91;
+        private const int RIGHT_COMBO_Y_HAIR = 111;
+        private const int RIGHT_LABEL_Y_FACIAL = 141;
+        private const int RIGHT_COMBO_Y_FACIAL = 161;
+        private const int RIGHT_COLOR_BASE = 191;
+        private const int RIGHT_COLOR_STEP = 42;
+
+        public void SelectProfession(ProfessionInfo info)
+        {
+
+            if (info.Type == ProfessionLoader.PROF_TYPE.CATEGORY && ProfessionLoader.Instance.Professions.TryGetValue(info, out List<ProfessionInfo> list) && list != null)
+            {
+                Parent.Add(new CreateCharProfessionGump(info));
+                Parent.Remove(this);
+            }
+            else
+            {
+                CharCreationGump charCreationGump = UIManager.GetGump<CharCreationGump>();
+                charCreationGump?.SetCharacter(_character);
+
+                charCreationGump?.SetProfession(info);
+                
+            }
+
+            if (!_showSkills && info.Name == "Advanced")
+            {
+                _showSkills = true;
+                DisplaySkills();
+
+            }
+
+            if (_showSkills && info.Name != "Advanced")
+            {
+                _showSkills = false;
+                RemoveSkillControls();
+            }
+
+            if (info.Type != ProfessionLoader.PROF_TYPE.CATEGORY && info.Name != "Advanced")
+            {
+                ClearProfessionSkillsDisplay();
+                DisplayProfessionSkills(info);
+            }
+            else
+            {
+                ClearProfessionSkillsDisplay();
+            }
+
+            InputStatus(0, (int)_character.Strength);
+            InputStatus(1, (int)_character.Intelligence);
+            InputStatus(2, (int)_character.Dexterity);
+          
+        }
+
+        public void InputStatus(int array, int value)
+        {
+            _attributeSliders[array].Value = value;
+        }
+
+        private void ClearProfessionSkillsDisplay()
+        {
+            foreach (var c in _professionSkillsLabels)
+                c?.Dispose();
+            _professionSkillsLabels.Clear();
+            _displayedProfession = null;
+        }
+
+        private void DisplayProfessionSkills(ProfessionInfo info)
+        {
+            _displayedProfession = info;
+            int n = CharCreationGump._skillsCount;
+            const int ComboWidth = 120;
+            const int ComboHeight = 26;
+            const int RowGap = 10;
+            const int ColGap = 24;
+            int colsPerRow = 2;
+            int totalWidth = colsPerRow * ComboWidth + (colsPerRow - 1) * ColGap;
+            int posXBase = CENTER_X + (CENTER_PANEL_WIDTH - totalWidth) / 2;
+
+            for (int i = 0; i < n; i++)
+            {
+                int row = i / 2;
+                int col = i % 2;
+                int posY = SKILLS_SECTION_Y + row * (ComboHeight + RowGap);
+                int posX = posXBase + col * (ComboWidth + ColGap);
+
+                int skillIndex = info.SkillDefVal[i, 0];
+                int skillValue = info.SkillDefVal[i, 1];
+                var skillEntry = SkillsLoader.Instance.Skills.Find(s => s.Index == skillIndex);
+                string skillName = skillEntry?.Name ?? $"Skill {skillIndex}";
+
+                var combo = new GothicStyleCombobox(posX, posY, ComboWidth, ComboHeight, new[] { skillName }, 0);
+                ApplyGothicRedTheme(combo);
+                combo.AcceptMouseInput = false;
+                Add(combo);
+                _professionSkillsLabels.Add(combo);
+
+                var valueLabel = new UOLabel($"{skillValue}", 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 28) { X = posX + ComboWidth + 4, Y = posY + 4 };
+                Add(valueLabel);
+                _professionSkillsLabels.Add(valueLabel);
+            }
+        }
+
+        private void RemoveSkillControls()
+        {
+            if (_skillsCombobox != null)
+            {
+                foreach (var c in _skillsCombobox)
+                    c?.Dispose();
+            }
+            if (_skillSliders != null)
+            {
+                foreach (var s in _skillSliders)
+                    s?.Dispose();
+            }
+            _skillsCombobox = null;
+            _skillSliders = null;
+        }
+
+        public void DisplaySkills()
+        {
+            if (_showSkills)
+            {
+                int n = CharCreationGump._skillsCount;
+                const int ComboWidth = 140;
+                const int ComboHeight = 26;
+                const int LabelHeight = 32;
+                const int SliderWidth = 120;
+                const int RowGap = 12;
+                const int ColGap = 24;
+                int colsPerRow = (n + 1) / 2;
+                int totalComboWidth = colsPerRow * ComboWidth + (colsPerRow - 1) * ColGap;
+                int skillXBase = CENTER_X + (CENTER_PANEL_WIDTH - totalComboWidth) / 2;
+
+                _skillSliders = new GothicStyleSliderBar[n];
+                _skillsCombobox = new GothicStyleCombobox[n];
+                var skillNames = _skillList.Select(s => s.Name).ToArray();
+
+                for (int i = 0; i < n; i++)
+                {
+                    int row = i / 2;
+                    int col = i % 2;
+                    int skillY = SKILLS_SECTION_Y + row * (ComboHeight + LabelHeight + RowGap);
+                    int posX = skillXBase + col * (ComboWidth + ColGap);
+                    var combo = new GothicStyleCombobox(posX, skillY, ComboWidth, ComboHeight, skillNames, -1);
+                    ApplyGothicRedTheme(combo);
+                    _skillsCombobox[i] = combo;
+                    Add(combo);
+                    Add(_skillSliders[i] = new GothicStyleSliderBar(posX, skillY + ComboHeight + 4, SliderWidth, 0, 50, ProfessionInfo._VoidSkills[i, 1], true));
+                }
+
+                for (int i = 0; i < _skillSliders.Length; i++)
+                {
+                    for (int j = 0; j < _skillSliders.Length; j++)
+                    {
+                        if (i != j)
+                            _skillSliders[i].AddParisSlider(_skillSliders[j]);
+                    }
+                }
+            }
+        }
+
 
         public CreateCharAppearanceGump() : base(0, 0)
         {
-            Add
-            (
-                new ResizePic(0x0E10)
-                {
-                    X = 82, Y = 125, Width = 151, Height = 310
-                },
-                1
-            );
+            ProfessionInfo parent = null;
+            _Parent = parent;
 
-            Add(new GumpPic(280, 53, 0x0709, 0), 1);
-            Add(new GumpPic(240, 73, 0x070A, 0), 1);
+            if (parent == null || !ProfessionLoader.Instance.Professions.TryGetValue(parent, out List<ProfessionInfo> professions) || professions == null)
+            {
+                professions = new List<ProfessionInfo>(ProfessionLoader.Instance.Professions.Keys);
+            }
 
-            Add
-            (
-                new GumpPicTiled
-                (
-                    248,
-                    73,
-                    215,
-                    16,
-                    0x070B
-                ),
-                1
-            );
+            Color panelBg = Color.Black;
+            Color centerBg = Color.Black;
+            Color rightBg = Color.Black;
 
-            Add(new GumpPic(463, 73, 0x070C, 0), 1);
-            Add(new GumpPic(238, 98, 0x0708, 0), 1);
+            Add(new RoundedColorBox(220, 768, panelBg, 14) { X = 30, Y = 0 });
+            Add(new RoundedColorBox(558, 768, centerBg, 14) { X = 260, Y = 0 });
+            Add(new RoundedColorBox(160, 768, rightBg, 14) { X = 829, Y = 0 });
 
-            Add
-            (
-                new ResizePic(0x0E10)
-                {
-                    X = 475, Y = 125, Width = 151, Height = 310
-                },
-                1
-            );
-
-            // Male/Female Radios
-            Add
-            (
-                _maleRadio = new Button((int)Buttons.MaleButton, 0x0768, 0x0767)
-                {
-                    X = 425, Y = 435, ButtonAction = ButtonAction.Activate
-                },
-                1
-            );
-
-            Add
-            (
-                _femaleRadio = new Button((int)Buttons.FemaleButton, 0x0768, 0x0767)
-                {
-                    X = 425, Y = 455, ButtonAction = ButtonAction.Activate
-                },
-                1
-            );
-
-            Add
-            (
-                new Button((int) Buttons.MaleButton, 0x0710, 0x0712, 0x0711)
-                {
-                    X = 445, Y = 435, ButtonAction = ButtonAction.Activate
-                },
-                1
-            );
-
-            Add
-            (
-                new Button((int) Buttons.FemaleButton, 0x070D, 0x070F, 0x070E)
-                {
-                    X = 445, Y = 455, ButtonAction = ButtonAction.Activate
-                },
-                1
-            );
-
-            Add
-            (
-                _nameTextBox = new StbTextBox
-                (
-                    5,
-                    16,
-                    200,
-                    false,
-                    hue: 1,
-                    style: FontStyle.Fixed
-                )
-                {
-                    X = 257, Y = 65, Width = 200, Height = 20
-                    //ValidationRules = (uint) (TEXT_ENTRY_RULES.LETTER | TEXT_ENTRY_RULES.SPACE)
-                },
-                1
-            );
-
-            // Races
-            Add
-            (
-                _humanRadio = new Button((int)Buttons.HumanButton, 0x0768, 0x0767)
-                {
-                    X = 180, Y = 435, ButtonAction = ButtonAction.Activate
-                },
-                1
-            );
-
-            Add
-            (
-                new Button((int) Buttons.HumanButton, 0x0702, 0x0704, 0x0703)
-                {
-                    X = 200, Y = 435, ButtonAction = ButtonAction.Activate
-                },
-                1
-            );
-
-            Add
-            (
-                _elfRadio = new Button((int)Buttons.ElfButton, 0x0768, 0x0767, 0x0768)
-                {
-                    X = 180, Y = 455, ButtonAction = ButtonAction.Activate
-                },
-                1
-            );
-
-            Add
-            (
-                new Button((int) Buttons.ElfButton, 0x0705, 0x0707, 0x0706)
-                {
-                    X = 200, Y = 455, ButtonAction = ButtonAction.Activate
-                },
-                1
-            );
-
-            if (Client.Version >= ClientVersion.CV_60144)
+            for (int i = 0; i < professions.Count; i++)
             {
                 Add
                 (
-                    _gargoyleRadio = new Button((int)Buttons.GargoyleButton, 0x0768, 0x0767)
+                    new ProfessionInfoGump(professions[i])
                     {
-                        X = 60, Y = 435, ButtonAction = ButtonAction.Activate
-                    },
-                    1
-                );
-
-                Add
-                (
-                    new Button((int) Buttons.GargoyleButton, 0x07D3, 0x07D5, 0x07D4)
-                    {
-                        X = 80, Y = 435, ButtonAction = ButtonAction.Activate
-                    },
-                    1
+                        X = 0,
+                        Y = 78 + i * 70,
+                        Selected = SelectProfession
+                    }
                 );
             }
 
-            // Prev/Next
-            Add
-            (
-                new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
-                {
-                    X = 586, Y = 445, ButtonAction = ButtonAction.Activate
-                },
-                1
-            );
+            const int NameInputWidth = 219;
+            Add(new UOLabel("Character Name", 1, UOLabelHue.Accent, Assets.TEXT_ALIGN_TYPE.TS_CENTER, NameInputWidth, FontStyle.BlackBorder) { X = CENTER_PANEL_MID - NameInputWidth / 2, Y = 44 });
+            Add(new RoundedColorBox(221, 26, new Color(80, 20, 20), 6) { X = CENTER_PANEL_MID - NameInputWidth / 2 - 1, Y = 71 });
+            Add(new RoundedColorBox(217, 22, new Color(28, 28, 28), 4) { X = CENTER_PANEL_MID - NameInputWidth / 2 + 1, Y = 73 });
+            Add(new FullBlendControl { X = CENTER_PANEL_MID - NameInputWidth / 2 + 2, Y = 74, Width = NameInputWidth - 4, Height = 20, Hue = 0x801 });
 
-            Add
-            (
-                _nextButton = new Button((int) Buttons.Next, 0x15A4, 0x15A6, 0x15A5)
-                {
-                    X = 610, Y = 445, ButtonAction = ButtonAction.Activate
-                },
-                1
-            );
+            Add(_nextButton = new GothicStyleButtonLogin(30, NEXT_BUTTON_Y, 120, 40, "BACK", null, 16));
+            _nextButton.OnClick += () => OnButtonClick(5);
 
-            _maleRadio.IsClicked = true;
-            _humanRadio.IsClicked = true;
+            Add(button = new GothicStyleButtonLogin(NEXT_BUTTON_X, NEXT_BUTTON_Y, 120, 40, "NEXT", null, 16));
+            button.OnClick += () => OnButtonClick(6);
+
+            Add(_nameTextBox = new StbTextBox(5, 16, NameInputWidth - 4, false, hue: 0x0481, style: FontStyle.Fixed, align: Assets.TEXT_ALIGN_TYPE.TS_CENTER) { X = CENTER_PANEL_MID - NameInputWidth / 2 + 2, Y = 74, Width = NameInputWidth - 4, Height = 20 }, 1);
+
+            var quitButton = new Button(0, 0x1589, 0x158B, 0x158A)
+            {
+                X = LoginLayoutHelper.WindowWidth - 44,
+                Y = 0,
+                ButtonAction = ButtonAction.Activate,
+                AcceptKeyboardInput = false,
+                LocalSerial = 100
+            };
+            quitButton.MouseUp += (s, e) => { if (e.Button == MouseButtonType.Left) Client.Game.Exit(); };
+            Add(quitButton);
+
+            const int RaceX = CENTER_X + SECTION_PADDING;
+            const int RaceY2 = RACE_SECTION_Y + 26 + RACE_BUTTON_MARGIN;
+            const int RaceY3 = RaceY2 + 26 + RACE_BUTTON_MARGIN;
+            const int RaceBtnW = 100;
+            Add(buttonHuman = new GothicStyleButtonLogin(RaceX, RACE_SECTION_Y, RaceBtnW, 26, "HUMAN", null, 14));
+            buttonHuman.OnClick += () => OnButtonClick(2);
+            Add(buttonElf = new GothicStyleButtonLogin(RaceX, RaceY2, RaceBtnW, 26, "ELF", null, 14));
+            buttonElf.OnClick += () => OnButtonClick(3);
+            if (Client.Version >= ClientVersion.CV_60144)
+            {
+                Add(buttonGargolye = new GothicStyleButtonLogin(RaceX, RaceY3, RaceBtnW, 26, "GARGOLYE", null, 14));
+                buttonGargolye.OnClick += () => OnButtonClick(4);
+            }
+
+            const int GenderBtnW = 95;
+            const int GenderGap = 12;
+            Add(buttonMale = new GothicStyleButtonLogin(CENTER_PANEL_MID - GenderBtnW - GenderGap / 2, GENDER_SECTION_Y, GenderBtnW, 28, "MALE ♂", null, 14));
+            buttonMale.OnClick += () => OnButtonClick(0);
+            Add(buttonFemale = new GothicStyleButtonLogin(CENTER_PANEL_MID + GenderGap / 2, GENDER_SECTION_Y, GenderBtnW, 28, "FEMALE ♀", null, 14));
+            buttonFemale.OnClick += () => OnButtonClick(1);
+
+            if (!CUOEnviroment.IsOutlands)
+            {
+                var loginScene = Client.Game.GetScene<LoginScene>();
+                if (loginScene?.Cities != null && loginScene.Cities.Length > 0)
+                {
+                    var cityNames = new string[loginScene.Cities.Length];
+                    for (int i = 0; i < loginScene.Cities.Length; i++)
+                    {
+                        var c = loginScene.GetCity(i);
+                        cityNames[i] = c?.City ?? $"City {i}";
+                    }
+                    Add(new UOLabel("Sele City to start", 1, UOLabelHue.Accent, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 120) { X = RIGHT_X, Y = 409 });
+                    _cityCombobox = new GothicStyleCombobox(RIGHT_X, 429, 120, 25, cityNames, 0);
+                    ApplyGothicRedTheme(_cityCombobox);
+                    Add(_cityCombobox, 1);
+                }
+            }
+
+            const int AttrLabelY = ATTR_SECTION_Y;
+            const int AttrSliderY = ATTR_SECTION_Y + 22;
+            const int AttrSliderW = 100;
+            const int AttrSlotWidth = (CENTER_PANEL_WIDTH - SECTION_PADDING * 2) / 3;
+            const int AttrOffset = (AttrSlotWidth - AttrSliderW) / 2;
+            const int AttrX1 = CENTER_X + SECTION_PADDING + AttrOffset;
+            const int AttrX2 = AttrX1 + AttrSlotWidth;
+            const int AttrX3 = AttrX2 + AttrSlotWidth;
+            Add(new UOLabel(ClilocLoader.Instance.GetString(3000111), 1, UOLabelHue.Accent, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 120) { X = AttrX1, Y = AttrLabelY });
+            Add(new UOLabel(ClilocLoader.Instance.GetString(3000112), 1, UOLabelHue.Accent, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 120) { X = AttrX2, Y = AttrLabelY });
+            Add(new UOLabel(ClilocLoader.Instance.GetString(3000113), 1, UOLabelHue.Accent, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 120) { X = AttrX3, Y = AttrLabelY });
+
+            _attributeSliders = new GothicStyleSliderBar[3];
+            Add(_attributeSliders[0] = new GothicStyleSliderBar(AttrX1, AttrSliderY, AttrSliderW, 10, 60, ProfessionInfo._VoidStats[0], true));
+            Add(_attributeSliders[1] = new GothicStyleSliderBar(AttrX2, AttrSliderY, AttrSliderW, 10, 60, ProfessionInfo._VoidStats[1], true));
+            Add(_attributeSliders[2] = new GothicStyleSliderBar(AttrX3, AttrSliderY, AttrSliderW, 10, 60, ProfessionInfo._VoidStats[2], true));
+
+            var clientFlags = World.ClientLockedFeatures.Flags;
+            
+            _skillList = SkillsLoader.Instance.SortedSkills
+                         .Where(s =>
+                                     // All standard client versions ignore these skills by defualt
+                                     //s.Index != 26 && // MagicResist
+                                     s.Index != 47 && // Stealth
+                                     s.Index != 48 && // RemoveTrap
+                                     s.Index != 54 && // Spellweaving
+                                     (_character != null && _character.Race == RaceType.GARGOYLE || s.Index != 57) // Throwing for gargoyle only
+                                 )
+                          .Where(s =>
+                                    clientFlags.HasFlag(LockedFeatureFlags.ExpansionAOS) ||
+                                    (
+                                        s.Index != 51 && // Chivlary
+                                        s.Index != 50 && // Focus
+                                        s.Index != 49    // Necromancy
+                                    )
+                                )
+
+                          .Where(s =>
+                                    clientFlags.HasFlag(LockedFeatureFlags.ExpansionSE) ||
+                                    (
+                                        s.Index != 52 && // Bushido
+                                        s.Index != 53    // Ninjitsu
+                                    )
+                                )
+
+                          .Where(s =>
+                                    clientFlags.HasFlag(LockedFeatureFlags.ExpansionSA) ||
+                                    (
+                                        s.Index != 55 && // Mysticism
+                                        s.Index != 56    // Imbuing
+                                    )
+                                )
+                         .ToList();
+             // do not include archer if it's a gargoyle
+            if (_character != null && _character.Race == RaceType.GARGOYLE)
+            {
+                var archeryEntry = _skillList.FirstOrDefault(s => s.Index == 31);
+                if (archeryEntry != null)
+                {
+                    _skillList.Remove(archeryEntry);
+                }
+            }
+             
+
+            _skillList = SkillsLoader.Instance.SortedSkills.ToList();
+
+           
+
+            var skillNames = _skillList.Select(s => s.Name).ToArray();
+
+            for (int i = 0; i < _attributeSliders.Length; i++)
+            {
+                for (int j = 0; j < _attributeSliders.Length; j++)
+                {
+                    if (i != j)
+                    {
+                        _attributeSliders[i].AddParisSlider(_attributeSliders[j]);
+                    }
+                }
+            }
+
+
             _characterInfo.IsFemale = false;
             _characterInfo.Race = RaceType.HUMAN;
 
             HandleGenreChange();
             HandleRaceChanged();
+
+            _character.Name = _nameTextBox.Text;
+            CharCreationGump charCreationGump = UIManager.GetGump<CharCreationGump>();
+
+            if (ValidateCharacter(_character))
+            {
+                charCreationGump.SetCharacter(_character);
+            }
+        }
+
+
+        private const int MIN_ADVANCED_SKILLS = 3;
+
+        private bool ValidateValues()
+        {
+            if (_skillsCombobox == null || _skillsCombobox.Length == 0)
+                return true;
+            var selected = _skillsCombobox.Where(s => s.SelectedIndex >= 0).Select(s => s.SelectedIndex).ToList();
+            if (selected.Count < MIN_ADVANCED_SKILLS)
+            {
+                UIManager.GetGump<CharCreationGump>()?.ShowMessage(Client.Version <= ClientVersion.CV_5090 ? ResGumps.YouMustHaveThreeUniqueSkillsChosen : ClilocLoader.Instance.GetString(1080032));
+                return false;
+            }
+            if (selected.Count > CharCreationGump._skillsCount)
+            {
+                UIManager.GetGump<CharCreationGump>()?.ShowMessage(ClilocLoader.Instance.GetString(1080032));
+                return false;
+            }
+            int distinctCount = selected.Distinct().Count();
+            if (distinctCount != selected.Count)
+            {
+                UIManager.GetGump<CharCreationGump>()?.ShowMessage(ClilocLoader.Instance.GetString(1080032));
+                return false;
+            }
+            return true;
         }
 
         private void CreateCharacter(bool isFemale, RaceType race)
@@ -403,18 +643,23 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             if (race == RaceType.ELF && !allowElf)
             {
                 _nextButton.IsEnabled = false;
-                _nextButton.Hue = 944;
             }
             else if (race == RaceType.GARGOYLE && !allowGarg)
             {
                 _nextButton.IsEnabled = false;
-                _nextButton.Hue = 944;
             }
             else
             {
                 _nextButton.IsEnabled = true;
-                _nextButton.Hue = 0;
             }
+        }
+
+        private static void ApplyGothicRedTheme(GothicStyleCombobox combo)
+        {
+            combo.BaseColor = Color.DarkRed;
+            combo.HighlightColor = new Color(180, 50, 50);
+            combo.ShadowColor = new Color(80, 15, 15);
+            combo.TextColor = Color.White;
         }
 
         private void HandleGenreChange()
@@ -457,58 +702,24 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             byte font = (byte)(isAsianLang ? 3 : 9);
             ushort hue = (ushort)(isAsianLang ? 0xFFFF : 0);
 
-            Add
-            (
-                _hairLabel = new Label(ClilocLoader.Instance.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), unicode, hue, font: font)
-                {
-                    X = 98, Y = 140
-                },
-                1
-            );
 
-            Add
-            (
-                _hairCombobox = new Combobox
-                (
-                    97,
-                    155,
-                    120,
-                    content.Labels,
-                    CurrentOption[Layer.Hair]
-                ),
-                1
-            );
+            Add(_hairLabel = new UOLabel(ClilocLoader.Instance.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), 1, UOLabelHue.Accent, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 300, FontStyle.BlackBorder) { X = RIGHT_X, Y = RIGHT_LABEL_Y_HAIR });
+            _hairCombobox = new GothicStyleCombobox(RIGHT_X, RIGHT_COMBO_Y_HAIR, RIGHT_COMBO_WIDTH, 25, content.Labels, CurrentOption[Layer.Hair]);
+            ApplyGothicRedTheme(_hairCombobox);
+            Add(_hairCombobox, 1);
 
-            _hairCombobox.OnOptionSelected += Hair_OnOptionSelected;
+            _hairCombobox.OnSelectionChanged += (sender, index) => Hair_OnOptionSelected(sender, index);
 
-            // Facial Hair
             if (!_characterInfo.IsFemale && race != RaceType.ELF)
             {
                 content = CharacterCreationValues.GetFacialHairComboContent(race);
 
-                Add
-                (
-                    _facialLabel = new Label(ClilocLoader.Instance.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), unicode, hue, font: font)
-                    {
-                        X = 98, Y = 184
-                    },
-                    1
-                );
+                Add(_facialLabel = new UOLabel(ClilocLoader.Instance.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), 1, UOLabelHue.Accent, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 300, FontStyle.BlackBorder) { X = RIGHT_X, Y = RIGHT_LABEL_Y_FACIAL });
+                _facialCombobox = new GothicStyleCombobox(RIGHT_X, RIGHT_COMBO_Y_FACIAL, RIGHT_COMBO_WIDTH, 25, content.Labels, CurrentOption[Layer.Beard]);
+                ApplyGothicRedTheme(_facialCombobox);
+                Add(_facialCombobox, 1);
 
-                Add
-                (
-                    _facialCombobox = new Combobox
-                    (
-                        97,
-                        199,
-                        120,
-                        content.Labels,
-                        CurrentOption[Layer.Beard]
-                    ),
-                    1
-                );
-
-                _facialCombobox.OnOptionSelected += Facial_OnOptionSelected;
+                _facialCombobox.OnSelectionChanged += (sender, index) => Facial_OnOptionSelected(sender, index);
             }
             else
             {
@@ -519,10 +730,12 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             // Skin
             ushort[] pallet = CharacterCreationValues.GetSkinPallet(race);
 
+            
+
             AddCustomColorPicker
             (
-                489,
-                141,
+                RIGHT_X,
+                RIGHT_COLOR_BASE,
                 pallet,
                 Layer.Invalid,
                 3000183,
@@ -530,11 +743,10 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 pallet.Length >> 3
             );
 
-            // Shirt Color
             AddCustomColorPicker
             (
-                489,
-                183,
+                RIGHT_X,
+                RIGHT_COLOR_BASE + RIGHT_COLOR_STEP,
                 null,
                 Layer.Shirt,
                 3000440,
@@ -542,13 +754,12 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 20
             );
 
-            // Pants Color
             if (race != RaceType.GARGOYLE)
             {
                 AddCustomColorPicker
                 (
-                    489,
-                    225,
+                    RIGHT_X,
+                    RIGHT_COLOR_BASE + RIGHT_COLOR_STEP * 2,
                     null,
                     Layer.Pants,
                     3000441,
@@ -557,13 +768,11 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 );
             }
 
-            // Hair
             pallet = CharacterCreationValues.GetHairPallet(race);
-
             AddCustomColorPicker
             (
-                489,
-                267,
+                RIGHT_X,
+                RIGHT_COLOR_BASE + RIGHT_COLOR_STEP * 3,
                 pallet,
                 Layer.Hair,
                 race == RaceType.GARGOYLE ? 1112322 : 3000184,
@@ -573,13 +782,11 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             if (!_characterInfo.IsFemale && race != RaceType.ELF)
             {
-                // Facial
                 pallet = CharacterCreationValues.GetHairPallet(race);
-
                 AddCustomColorPicker
                 (
-                    489,
-                    309,
+                    RIGHT_X,
+                    RIGHT_COLOR_BASE + RIGHT_COLOR_STEP * 4,
                     pallet,
                     Layer.Beard,
                     race == RaceType.GARGOYLE ? 1112512 : 3000446,
@@ -592,14 +799,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             UpdateEquipments();
 
-            Add
-            (
-                _paperDoll = new PaperDollInteractable(262, 135, _character, null)
-                {
-                    AcceptMouseInput = false
-                },
-                1
-            );
+            Add(_paperDoll = new PaperDollInteractable(PAPERDOLL_X, PAPERDOLL_Y, _character, null) { AcceptMouseInput = false }, 1);
 
             _paperDoll.RequestUpdate();
         }
@@ -701,8 +901,6 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             switch ((Buttons) buttonID)
             {
                 case Buttons.FemaleButton:
-                    _femaleRadio.IsClicked = true;
-                    _maleRadio.IsClicked = false;
                     _characterInfo.IsFemale = true;
 
                     HandleGenreChange();
@@ -710,8 +908,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     break;
 
                 case Buttons.MaleButton:
-                    _maleRadio.IsClicked = true;
-                    _femaleRadio.IsClicked = false;
+
                     _characterInfo.IsFemale = false;
 
                     HandleGenreChange();
@@ -722,22 +919,10 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                     _characterInfo.Race = RaceType.HUMAN;
 
-                    if (!_humanRadio.IsClicked)
-                    {
-                        _humanRadio.IsClicked = true;
+                    
 
-                        if (_elfRadio != null)
-                        {
-                            _elfRadio.IsClicked = false;
-                        }
-
-                        if (_gargoyleRadio != null)
-                        {
-                            _gargoyleRadio.IsClicked = false;
-                        }
-
-                        HandleRaceChanged();
-                    }
+                    HandleRaceChanged();
+                    
 
                     break;
 
@@ -745,18 +930,10 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                     _characterInfo.Race = RaceType.ELF;
 
-                    if (!_elfRadio.IsClicked)
-                    {
-                        _elfRadio.IsClicked = true;
-                        _humanRadio.IsClicked = false;
+                    
 
-                        if (_gargoyleRadio != null)
-                        {
-                            _gargoyleRadio.IsClicked = false;
-                        }
-
-                        HandleRaceChanged();
-                    }
+                     HandleRaceChanged();
+                    
 
                     break;
 
@@ -764,24 +941,55 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                     _characterInfo.Race = RaceType.GARGOYLE;
 
-                    if (!_gargoyleRadio.IsClicked)
-                    {
-                        _gargoyleRadio.IsClicked = true;
-                        _elfRadio.IsClicked = false;
-                        _humanRadio.IsClicked = false;
-
-                        HandleRaceChanged();
-                    }
+                    
+                     HandleRaceChanged();
+                    
 
                     break;
 
                 case Buttons.Next:
-                    _character.Name = _nameTextBox.Text;
+                    _character.Name = _nameTextBox.Text.Trim();
 
-                    if (ValidateCharacter(_character))
+                    if (!charCreationGump.HasProfessionSelected)
                     {
-                        charCreationGump.SetCharacter(_character);
+                        charCreationGump.ShowMessage("You must select a profession.");
+                        break;
                     }
+
+                    if (!ValidateCharacter(_character))
+                    {
+                        break;
+                    }
+
+                    charCreationGump.SetCharacter(_character);
+
+                    if (_showSkills)
+                    {
+                        if (ValidateValues())
+                        {
+                            for (int i = 0; i < _skillsCombobox.Length; i++)
+                            {
+                                if (_skillsCombobox[i].SelectedIndex != -1)
+                                {
+                                    Skill skill = _character.Skills[_skillList[_skillsCombobox[i].SelectedIndex].Index];
+                                    skill.ValueFixed = (ushort)_skillSliders[i].Value;
+                                    skill.BaseFixed = 0;
+                                    skill.CapFixed = 0;
+                                    skill.Lock = Lock.Locked;
+                                }
+                            }
+                        }
+
+                    }
+
+                    _character.Strength = (ushort)_attributeSliders[0].Value;
+                    _character.Intelligence = (ushort)_attributeSliders[1].Value;
+                    _character.Dexterity = (ushort)_attributeSliders[2].Value;
+
+                    int? cityIndex = null;
+                    if (_cityCombobox != null && _cityCombobox.SelectedIndex >= 0)
+                        cityIndex = _cityCombobox.SelectedIndex;
+                    charCreationGump.SetAttributes(true, cityIndex);
 
                     break;
 
@@ -999,15 +1207,12 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 return null;
             }
 
-            // This is a workaround to avoid to see naked guy
-            // We are simulating server objects into World.Items map.
-            Item item = World.GetOrCreateItem(0x4000_0000 + (uint) layer); // use layer as unique Serial
+            Item item = World.GetOrCreateItem(0x4000_0000 + (uint) layer);
             _character.Remove(item);
             item.Graphic = (ushort) id;
             item.Hue = hue;
             item.Layer = layer;
             item.Container = _character;
-            //
 
             return item;
         }
@@ -1043,7 +1248,6 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         private class CustomColorPicker : Control
         {
-            //private readonly ColorBox _box;
             private readonly int _cellH;
             private readonly int _cellW;
             private readonly ColorBox _colorPicker;
@@ -1055,7 +1259,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             public CustomColorPicker(Layer layer, int label, ushort[] pallet, int rows, int columns)
             {
-                Width = 121;
+                Width = 50;
                 Height = 25;
                 _cellW = 125 / columns;
                 _cellH = 280 / rows;
@@ -1072,21 +1276,17 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 byte font = (byte)(isAsianLang ? 3 : 9);
                 ushort hue = (ushort)(isAsianLang ? 0xFFFF : 0);
 
-                Add
-                (
-                    new Label(ClilocLoader.Instance.GetString(label), unicode, hue, font: font)
-                    {
-                        X = 0,
-                        Y = 0
-                    }
-                );
+
+
+                Add(new UOLabel(ClilocLoader.Instance.GetString(label), 1, 32, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 300, Game.FontStyle.BlackBorder) { X = 0, Y = 0 });
+
 
                 Add
                 (
                     _colorPicker = new ColorBox(121, 23, (ushort) ((pallet?[0] ?? 1) + 1))
                     {
                         X = 1,
-                        Y = 15
+                        Y = 17
                     }
                 );
 
@@ -1139,8 +1339,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     {
                         _colorPickerBox = new ColorPickerBox
                         (
-                            489,
-                            141,
+                            RIGHT_X,
+                            420,
                             _rows,
                             _columns,
                             _cellW,

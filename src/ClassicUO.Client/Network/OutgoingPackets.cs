@@ -42,6 +42,7 @@ using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.IO;
 using ClassicUO.Assets;
@@ -1129,6 +1130,7 @@ namespace ClassicUO.Network
 
             socket.Send(writer.BufferWritten);
             writer.Dispose();
+            Client.Game.GetScene<GameScene>()?.ActionBar?.NotifySpellCast(idx);
         }
 
         public static void Send_CastSpellFromBook(this NetClient socket, int idx, uint serial)
@@ -1161,6 +1163,7 @@ namespace ClassicUO.Network
 
             socket.Send(writer.BufferWritten);
             writer.Dispose();
+            Client.Game.GetScene<GameScene>()?.ActionBar?.NotifySpellCast(idx);
         }
 
         public static void Send_UseSkill(this NetClient socket, int idx)
@@ -1348,6 +1351,9 @@ namespace ClassicUO.Network
 
             socket.Send(writer.BufferWritten);
             writer.Dispose();
+
+            if (World.Player != null)            
+                World.Player.HasGump = false;            
         }
 
         public static void Send_VirtueGumpResponse(this NetClient socket, uint serial, uint code)
@@ -3515,7 +3521,7 @@ namespace ClassicUO.Network
             if (length < 0)
             {
                 writer.Seek(1, SeekOrigin.Begin);
-                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
             }
             else
             {

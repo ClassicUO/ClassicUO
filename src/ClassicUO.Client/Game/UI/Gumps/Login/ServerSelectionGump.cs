@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -34,6 +34,7 @@ using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using ClassicUO.Configuration;
+using ClassicUO.Game;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -41,163 +42,101 @@ using ClassicUO.Assets;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-using SDL2;
+using SDL3;
+using Microsoft.Xna.Framework.Graphics;
+using System.IO;
+using ClassicUO.Game.Managers;
+using Microsoft.Xna.Framework;
+using ClassicUO.Game.GameObjects;
+using System;
+
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {
     internal class ServerSelectionGump : Gump
     {
-        private const ushort SELECTED_COLOR = 0x0021;
-        private const ushort NORMAL_COLOR = 0x034F;
+        private const ushort SELECTED_COLOR = 0x0481;
+        private const ushort NORMAL_COLOR = 0x0481;
+        private GothicStyleButtonLogin button;
+        private Texture2D LogoBackgroundImg = PNGLoader.Instance.GetImageTexture(Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client", "logodust.png"));
 
         public ServerSelectionGump() : base(0, 0)
         {
-            //AddChildren(new LoginBackground(true));
+            X = LoginLayoutHelper.ContentOffsetX;
+            Y = LoginLayoutHelper.ContentOffsetY;
+            // Background
+            UIManager.Add(new LoginBackground());
 
-            Add
-            (
-                new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
-                {
-                    X = 586, Y = 445, ButtonAction = ButtonAction.Activate
-                }
-            );
+            const int LogoMaxWidth = 800;
+            const int LogoMaxHeight = 140;
+            if (LogoBackgroundImg != null)
+            {
+                float scale = Math.Min((float)LogoMaxWidth / LogoBackgroundImg.Width, (float)LogoMaxHeight / LogoBackgroundImg.Height);
+                int logoW = (int)(LogoBackgroundImg.Width * scale);
+                int logoH = (int)(LogoBackgroundImg.Height * scale);
+                Add(new CustomGumpPic(
+                    LoginLayoutHelper.CenterOffsetX(logoW),
+                    LoginLayoutHelper.Y(240),
+                    LogoBackgroundImg,
+                    logoW,
+                    logoH,
+                    0
+                ));
+            }
 
-            Add
-            (
-                new Button((int) Buttons.Next, 0x15A4, 0x15A6, 0x15A5)
-                {
-                    X = 610, Y = 445, ButtonAction = ButtonAction.Activate
-                }
-            );
+            var loginLang = Language.Instance.Login;
+            Add(button = new GothicStyleButtonLogin(
+                LoginLayoutHelper.X(30),
+                LoginLayoutHelper.Y(680),
+                120,
+                40,
+                loginLang.Back,
+                null,
+                16
+            ));
+            button.OnClick += () => OnButtonClick(0);
+
+            Add(button = new GothicStyleButtonLogin(
+                LoginLayoutHelper.ContentWidth - 30 - 120,
+                LoginLayoutHelper.Y(680),
+                120,
+                40,
+                loginLang.Next,
+                null,
+                16
+            ));
+
+            button.OnClick += () =>
+            {
+                OnButtonClick(1);
+            };
+
+
 
             if (Client.Version >= ClientVersion.CV_500A)
             {
-                ushort textColor = 0xFFFF;
-
-                Add
-                (
-                    new Label(ClilocLoader.Instance.GetString(1044579), true, textColor, font: 1)
-                    {
-                        X = 155, Y = 70
-                    }
-                ); // "Select which shard to play on:"
+                Add(new UOLabel(ClilocLoader.Instance.GetString(1044579), 1, 32, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 300, FontStyle.BlackBorder) { X = LoginLayoutHelper.X(210), Y = LoginLayoutHelper.Y(70) });
 
                 if (CUOEnviroment.NoServerPing == false)
                 {
-                    Add
-                    (
-                        new Label(ClilocLoader.Instance.GetString(1044577), true, textColor, font: 1)
-                        {
-                            X = 400, Y = 70
-                        }
-                    ); // "Latency:"
+                    Add(new UOLabel(ClilocLoader.Instance.GetString(1044577), 1, 32, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 300, FontStyle.BlackBorder) { X = LoginLayoutHelper.X(650), Y = LoginLayoutHelper.Y(70) });
+                   
 
-                    Add
-                    (
-                        new Label(ClilocLoader.Instance.GetString(1044578), true, textColor, font: 1)
-                        {
-                            X = 470, Y = 70
-                        }
-                    ); // "Packet Loss:"
                 }
 
-                Add
-                (
-                    new Label(ClilocLoader.Instance.GetString(1044580), true, textColor, font: 1)
-                    {
-                        X = 153, Y = 368
-                    }
-                ); // "Sort by:"
+
             }
             else
             {
-                ushort textColor = 0x0481;
-
-                Add
-                (
-                    new Label(ResGumps.SelectWhichShardToPlayOn, false, textColor, font: 9)
-                    {
-                        X = 155, Y = 70
-                    }
-                );
-
-                Add
-                (
-                    new Label(ResGumps.Latency, false, textColor, font: 9)
-                    {
-                        X = 400, Y = 70
-                    }
-                );
-
-                Add
-                (
-                    new Label(ResGumps.PacketLoss, false, textColor, font: 9)
-                    {
-                        X = 470, Y = 70
-                    }
-                );
-
-                Add
-                (
-                    new Label(ResGumps.SortBy, false, textColor, font: 9)
-                    {
-                        X = 153, Y = 368
-                    }
-                );
+                Add(new UOLabel(loginLang.SelectWhichShardToPlayOn, 1, 32, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 300, FontStyle.BlackBorder) { X = LoginLayoutHelper.X(210), Y = LoginLayoutHelper.Y(70) });
+                Add(new UOLabel(loginLang.Latency, 1, 32, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 300, FontStyle.BlackBorder) { X = LoginLayoutHelper.X(650), Y = LoginLayoutHelper.Y(70) });
             }
 
-            Add
-            (
-                new Button((int) Buttons.SortTimeZone, 0x093B, 0x093C, 0x093D)
-                {
-                    X = 230, Y = 366
-                }
-            );
-
-            Add
-            (
-                new Button((int) Buttons.SortFull, 0x093E, 0x093F, 0x0940)
-                {
-                    X = 338, Y = 366
-                }
-            );
-
-            Add
-            (
-                new Button((int) Buttons.SortConnection, 0x0941, 0x0942, 0x0943)
-                {
-                    X = 446, Y = 366
-                }
-            );
-
-            // World Pic Bg
-            Add(new GumpPic(150, 390, 0x0589, 0));
-
-            // Earth
-            Add
-            (
-                new Button((int) Buttons.Earth, 0x15E8, 0x15EA, 0x15E9)
-                {
-                    X = 160, Y = 400, ButtonAction = ButtonAction.Activate
-                }
-            );
-
-            // Sever Scroll Area Bg
-            Add
-            (
-                new ResizePic(0x0DAC)
-                {
-                    X = 150, Y = 90, Width = 393 - 14, Height = 271
-                }
-            );
-
-            // Sever Scroll Area
-            ScrollArea scrollArea = new ScrollArea
-            (
-                150,
-                90,
-                393,
-                271,
+            ScrollArea scrollArea = new ScrollArea(
+                LoginLayoutHelper.X(150),
+                LoginLayoutHelper.Y(90),
+                LoginLayoutHelper.W(600),
+                LoginLayoutHelper.H(500),
                 true
             );
 
@@ -218,22 +157,42 @@ namespace ClassicUO.Game.UI.Gumps.Login
             Add(scrollArea);
             scrollArea.Add(databox);
 
+            Add(new AlphaBlendControl
+            {
+                X = LoginLayoutHelper.X(210),
+                Y = LoginLayoutHelper.Y(620),
+                Width = LoginLayoutHelper.W(540),
+                Height = LoginLayoutHelper.H(85),
+                Hue = 0x0000
+            });
+
+            Add(new Button((int)Buttons.Earth, 0x15E8, 0x15EA, 0x15E9)
+            {
+                X = LoginLayoutHelper.X(243),
+                Y = LoginLayoutHelper.Y(630),
+                ButtonAction = ButtonAction.Activate
+            });
+
+            Add(new UOLabel("Last server is played:", 1, 32, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 300, FontStyle.BlackBorder) { X = LoginLayoutHelper.X(310), Y = LoginLayoutHelper.Y(640) });
+
             if (loginScene.Servers.Length != 0)
             {
                 int index = loginScene.GetServerIndexFromSettings();
-
-                Add
-                (
-                    new Label(loginScene.Servers[index].Name, false, 0x0481, font: 9)
-                    {
-                        X = 243,
-                        Y = 420
-                    }
-                );
+                Add(new UOLabel(loginScene.Servers[index].Name, 1, 32, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 300, FontStyle.BlackBorder) { X = LoginLayoutHelper.X(310), Y = LoginLayoutHelper.Y(660) });
             }
 
             AcceptKeyboardInput = true;
             CanCloseWithRightClick = false;
+        }
+
+        public override void Update()
+        {
+            if (!IsDisposed)
+            {
+                X = LoginLayoutHelper.ContentOffsetX;
+                Y = LoginLayoutHelper.ContentOffsetY;
+            }
+            base.Update();
         }
 
         public override void OnButtonClick(int buttonID)
@@ -258,13 +217,33 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                             loginScene.SelectServer((byte) loginScene.Servers[index].Index);
                         }
+                        UIManager.GetGump<SelectServerBackground>()?.Dispose();
+                        UIManager.Add(new CharacterSelectionBackground());
 
                         break;
 
                     case Buttons.Prev:
+                        UIManager.GetGump<SelectServerBackground>()?.Dispose();
+                        UIManager.GetGump<CharacterSelectionBackground>()?.Dispose();
                         loginScene.StepBack();
 
                         break;
+                }
+            }
+        }
+
+        protected override void OnControllerButtonUp(SDL.SDL_GamepadButton button)
+        {
+            base.OnControllerButtonUp(button);
+            if (button == SDL.SDL_GamepadButton.SDL_GAMEPAD_BUTTON_SOUTH)
+            {
+                LoginScene loginScene = Client.Game.GetScene<LoginScene>();
+
+                if (loginScene.Servers?.Any(s => s != null) ?? false)
+                {
+                    int index = loginScene.GetServerIndexFromSettings();
+
+                    loginScene.SelectServer((byte)loginScene.Servers[index].Index);
                 }
             }
         }
@@ -295,13 +274,14 @@ namespace ClassicUO.Game.UI.Gumps.Login
             Server = 99
         }
 
+
         private class ServerEntryGump : Control
         {
             private readonly int _buttonId;
             private readonly ServerListEntry _entry;
-            private readonly HoveredLabel _server_packet_loss;
-            private readonly HoveredLabel _server_ping;
-            private readonly HoveredLabel _serverName;
+            private readonly UOLabel _server_ping;
+            private UOLabel _serverName;
+            private AlphaBlendControl _alphaBlendControl;
             private uint _pingCheckTime = 0;
 
             public ServerEntryGump(ServerListEntry entry, byte font, ushort normal_hue, ushort selected_hue)
@@ -311,60 +291,34 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 _buttonId = entry.Index;
 
                 Add
+               (
+                  _alphaBlendControl = new AlphaBlendControl
+                  {
+                      X = 30,
+                      Width = 640,
+                      Height = 30,
+                      Hue = 0 // Cor preta (0x0000)
+                  }
+               );
+
+
+                Add
                 (
-                    _serverName = new HoveredLabel
-                    (
-                        entry.Name,
-                        false,
-                        normal_hue,
-                        selected_hue,
-                        selected_hue,
-                        font: font
-                    )
-                    {
-                        X = 74,
-                        AcceptMouseInput = false
-                    }
+                    _serverName = new UOLabel(entry.Name, 1, 32, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 300) { X = 74, Y = 6 }
+                    
                 );
 
                 Add
                 (
-                    _server_ping = new HoveredLabel
-                    (
-                        CUOEnviroment.NoServerPing ? string.Empty : "-",
-                        false,
-                        normal_hue,
-                        selected_hue,
-                        selected_hue,
-                        font: font
-                    )
-                    {
-                        X = 250,
-                        AcceptMouseInput = false
-                    }
+                    _server_ping = new UOLabel(CUOEnviroment.NoServerPing ? string.Empty : "-", 1, 32, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 70) { X = 500, Y = 6 }
+        
                 );
 
-                Add
-                (
-                    _server_packet_loss = new HoveredLabel
-                    (
-                        CUOEnviroment.NoServerPing ? string.Empty : "-",
-                        false,
-                        normal_hue,
-                        selected_hue,
-                        selected_hue,
-                        font: font
-                    )
-                    {
-                        X = 320,
-                        AcceptMouseInput = false
-                    }
-                );
 
 
                 AcceptMouseInput = true;
-                Width = 370;
-                Height = 25;
+                Width = 620;
+                Height = 31;
 
                 WantUpdateSize = false;
             }
@@ -372,19 +326,14 @@ namespace ClassicUO.Game.UI.Gumps.Login
             protected override void OnMouseEnter(int x, int y)
             {
                 base.OnMouseEnter(x, y);
-
-                _serverName.IsSelected = true;
-                _server_packet_loss.IsSelected = true;
-                _server_ping.IsSelected = true;
+                _alphaBlendControl.Hue = 0x7EA; // Cor preta original
             }
 
             protected override void OnMouseExit(int x, int y)
             {
                 base.OnMouseExit(x, y);
 
-                _serverName.IsSelected = false;
-                _server_packet_loss.IsSelected = false;
-                _server_ping.IsSelected = false;
+                _alphaBlendControl.Hue = 0x0000; // Cor preta original
             }
 
             protected override void OnMouseUp(int x, int y, MouseButtonType button)
@@ -431,7 +380,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
                             break;
                     }
 
-                    _server_packet_loss.Text = $"{_entry.PacketLoss}%";
                 }
             }
         }

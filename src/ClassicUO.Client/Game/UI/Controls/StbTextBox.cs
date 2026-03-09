@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -40,7 +40,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
-using SDL2;
+using SDL3;
 using StbTextEditSharp;
 
 namespace ClassicUO.Game.UI.Controls
@@ -100,6 +100,8 @@ namespace ClassicUO.Game.UI.Controls
                 maxWidth
             );
 
+
+
             _rendererCaret = RenderedText.Create
             (
                 "_",
@@ -114,13 +116,18 @@ namespace ClassicUO.Game.UI.Controls
             LoseFocusOnEscapeKey = true;
         }
 
+        public StbTextBox(int max_char_count, int maxWidth, bool multiline) : this(1, max_char_count, maxWidth, true, FontStyle.None, 0)
+        {
+            Multiline = multiline;
+        }
+
         public StbTextBox(List<string> parts, string[] lines) : this
         (
             1,
             parts[0] == "textentrylimited" ? int.Parse(parts[8]) : byte.MaxValue,
             int.Parse(parts[3]),
             style: FontStyle.BlackBorder | FontStyle.CropTexture,
-            hue: (ushort) (UInt16Converter.Parse(parts[5]) + 1)
+            hue: (ushort)(UInt16Converter.Parse(parts[5]) + 1)
         )
         {
             X = int.Parse(parts[1]);
@@ -246,6 +253,12 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        public void UpdateSize(int width, int height)
+        {
+            Width = width;
+            Height = height;
+        }
+
         public string Text
         {
             get => _rendererText.Text;
@@ -263,7 +276,7 @@ namespace ClassicUO.Game.UI.Controls
                         value = value.Substring(0, _maxCharCount);
                     }
                 }
-                
+
                 //Sanitize(ref value);
 
                 _rendererText.Text = value;
@@ -314,7 +327,7 @@ namespace ClassicUO.Game.UI.Controls
                     text,
                     text.Length,
                     _rendererText.Align,
-                    (ushort) _rendererText.FontStyle,
+                    (ushort)_rendererText.FontStyle,
                     _rendererText.MaxWidth,
                     countret
                 );
@@ -326,7 +339,7 @@ namespace ClassicUO.Game.UI.Controls
                 text,
                 text.Length,
                 _rendererText.Align,
-                (ushort) _rendererText.FontStyle,
+                (ushort)_rendererText.FontStyle,
                 _rendererText.MaxWidth,
                 countret
             );
@@ -500,8 +513,7 @@ namespace ClassicUO.Game.UI.Controls
                 case SDL.SDL_Keycode.SDLK_TAB:
                     if (AllowTAB)
                     {
-                        // UO does not support '\t' char in its fonts
-                        OnTextInput("   ");
+                        OnTextInput("    ");
                     }
                     else
                     {
@@ -510,7 +522,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     break;
 
-                case SDL.SDL_Keycode.SDLK_a when Keyboard.Ctrl && !NoSelection:
+                case SDL.SDL_Keycode.SDLK_A when Keyboard.Ctrl && !NoSelection:
                     SelectAll();
 
                     break;
@@ -521,7 +533,7 @@ namespace ClassicUO.Game.UI.Controls
                         UIManager.KeyboardFocusControl = null;
                     }
                     SelectionStart = 0;
-                    SelectionEnd = 0;                    
+                    SelectionEnd = 0;
                     break;
 
                 case SDL.SDL_Keycode.SDLK_INSERT when IsEditable:
@@ -529,7 +541,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     break;
 
-                case SDL.SDL_Keycode.SDLK_c when Keyboard.Ctrl && !NoSelection:
+                case SDL.SDL_Keycode.SDLK_C when Keyboard.Ctrl && !NoSelection:
                     int selectStart = Math.Min(Stb.SelectStart, Stb.SelectEnd);
                     int selectEnd = Math.Max(Stb.SelectStart, Stb.SelectEnd);
 
@@ -540,7 +552,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     break;
 
-                case SDL.SDL_Keycode.SDLK_x when Keyboard.Ctrl && !NoSelection:
+                case SDL.SDL_Keycode.SDLK_X when Keyboard.Ctrl && !NoSelection:
                     selectStart = Math.Min(Stb.SelectStart, Stb.SelectEnd);
                     selectEnd = Math.Max(Stb.SelectStart, Stb.SelectEnd);
 
@@ -556,17 +568,17 @@ namespace ClassicUO.Game.UI.Controls
 
                     break;
 
-                case SDL.SDL_Keycode.SDLK_v when Keyboard.Ctrl && IsEditable:
+                case SDL.SDL_Keycode.SDLK_V when Keyboard.Ctrl && IsEditable:
                     OnTextInput(StringHelper.GetClipboardText(Multiline));
 
                     break;
 
-                case SDL.SDL_Keycode.SDLK_z when Keyboard.Ctrl && IsEditable:
+                case SDL.SDL_Keycode.SDLK_Z when Keyboard.Ctrl && IsEditable:
                     stb_key = ControlKeys.Undo;
 
                     break;
 
-                case SDL.SDL_Keycode.SDLK_y when Keyboard.Ctrl && IsEditable:
+                case SDL.SDL_Keycode.SDLK_Y when Keyboard.Ctrl && IsEditable:
                     stb_key = ControlKeys.Redo;
 
                     break;
@@ -753,6 +765,15 @@ namespace ClassicUO.Game.UI.Controls
             base.OnKeyDown(key, mod);
         }
 
+        protected override void OnControllerButtonDown(SDL.SDL_GamepadButton button)
+        {
+            base.OnControllerButtonDown(button);
+            if (button == SDL.SDL_GamepadButton.SDL_GAMEPAD_BUTTON_SOUTH)
+            {
+                Parent?.InvokeControllerButtonDown(button);
+            }
+        }
+
         public void SetText(string text)
         {
             if (string.IsNullOrEmpty(text))
@@ -898,7 +919,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 batcher.ClipEnd();
             }
-            
+
             return true;
         }
 
@@ -1004,6 +1025,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (button == MouseButtonType.Left && IsEditable)
             {
+                SetKeyboardFocus();
                 if (!NoSelection)
                 {
                     _leftWasDown = true;

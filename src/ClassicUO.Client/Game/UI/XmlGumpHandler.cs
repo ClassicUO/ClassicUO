@@ -1,4 +1,5 @@
-﻿using ClassicUO.Assets;
+using ClassicUO.Assets;
+using FontStyle = ClassicUO.Game.FontStyle;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -645,10 +646,10 @@ namespace ClassicUO.Game.UI
 
         private static void HandleTextTag(XmlGump gump, XmlNode textNode)
         {
-            string font = TrueTypeLoader.EMBEDDED_FONT;
-            int x = 0, y = 0, fontSize = 16, width = 0, hue = 997;
+            byte font = 1;
+            int x = 0, y = 0, width = 0, hue = 997;
             bool needsUpdates = false;
-            FontStashSharp.RichText.TextHorizontalAlignment align = FontStashSharp.RichText.TextHorizontalAlignment.Left;
+            Assets.TEXT_ALIGN_TYPE align = Assets.TEXT_ALIGN_TYPE.TS_LEFT;
 
             foreach (XmlAttribute attr in textNode.Attributes)
             {
@@ -661,10 +662,7 @@ namespace ClassicUO.Game.UI
                         int.TryParse(attr.Value, out y);
                         break;
                     case "font":
-                        font = attr.Value;
-                        break;
-                    case "size":
-                        int.TryParse(attr.Value, out fontSize);
+                        byte.TryParse(attr.Value, out font);
                         break;
                     case "width":
                         int.TryParse(attr.Value, out width);
@@ -679,26 +677,25 @@ namespace ClassicUO.Game.UI
                         switch (attr.Value.ToLower())
                         {
                             case "left":
-                                align = FontStashSharp.RichText.TextHorizontalAlignment.Left;
+                                align = Assets.TEXT_ALIGN_TYPE.TS_LEFT;
                                 break;
                             case "center":
-                                align = FontStashSharp.RichText.TextHorizontalAlignment.Center;
+                                align = Assets.TEXT_ALIGN_TYPE.TS_CENTER;
                                 break;
                             case "right":
-                                align = FontStashSharp.RichText.TextHorizontalAlignment.Right;
+                                align = Assets.TEXT_ALIGN_TYPE.TS_RIGHT;
                                 break;
                         }
                         break;
                 }
             }
-            TextBox t;
+            UOLabel t;
 
-
-            gump.Add(t = new TextBox(FormatText(textNode.InnerText), font, fontSize, width > 0 ? width : null, hue, align, false) { X = x, Y = y, AcceptMouseInput = false });
+            gump.Add(t = new UOLabel(FormatText(textNode.InnerText), font, (ushort)hue, align, width > 0 ? width : 0, FontStyle.None) { X = x, Y = y, AcceptMouseInput = false });
 
             if (needsUpdates)
             {
-                gump.TextBoxUpdates.Add(new Tuple<TextBox, Tuple<string, int>>(t, new Tuple<string, int>(textNode.InnerText, width)));
+                gump.LabelUpdates.Add(new Tuple<UOLabel, Tuple<string, int>>(t, new Tuple<string, int>(textNode.InnerText, width)));
             }
         }
 
@@ -812,7 +809,7 @@ namespace ClassicUO.Game.UI
         /// </summary>
         public static uint UpdateFrequency { get; set; } = 250;
 
-        public List<Tuple<TextBox, Tuple<string, int>>> TextBoxUpdates { get; set; } = new List<Tuple<TextBox, Tuple<string, int>>>();
+        public List<Tuple<UOLabel, Tuple<string, int>>> LabelUpdates { get; set; } = new List<Tuple<UOLabel, Tuple<string, int>>>();
         public List<XmlProgressBarInfo> ProgressBarUpdates { get; set; } = new List<XmlProgressBarInfo>();
         public List<XmlProgressBarInfo> VerticalProgressBarUpdates { get; set; } = new List<XmlProgressBarInfo>();
         public bool SavePosition { get; set; } = false;
@@ -833,21 +830,14 @@ namespace ClassicUO.Game.UI
 
             if (Time.Ticks >= nextUpdate)
             {
-                foreach (var t in TextBoxUpdates)
+                foreach (var t in LabelUpdates)
                 {
                     if (t.Item1 != null && !t.Item1.IsDisposed)
                     {
                         string newString = XmlGumpHandler.FormatText(t.Item2.Item1);
                         if (t.Item1.Text != newString)
                         {
-                            if (t.Item2.Item2 < 1)
-                            {
-                                t.Item1.UpdateText(newString);
-                            }
-                            else
-                            {
-                                t.Item1.Text = newString;
-                            }
+                            t.Item1.Text = newString;
                         }
                     }
                 }

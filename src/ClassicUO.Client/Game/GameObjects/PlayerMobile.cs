@@ -1,4 +1,4 @@
-  #region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -49,7 +49,13 @@ namespace ClassicUO.Game.GameObjects
     {
         private readonly Dictionary<BuffIconType, BuffIcon> _buffIcons = new Dictionary<BuffIconType, BuffIcon>();
 
-        private static SpellVisualRangeManager.CastTimerProgressBar castTimer;
+        private Direction _serverDirection;
+        private bool _serverDirectionInitialized;
+
+        internal void SyncServerDirection()
+        {
+            _serverDirection = Direction;
+        }
 
         // ## BEGIN - END ## // MISC2
         public int DeathX = 0;
@@ -59,20 +65,22 @@ namespace ClassicUO.Game.GameObjects
         // ## BEGIN - END ## // UI/GUMPS
         public BandageGump BandageTimer;
         // ## BEGIN - END ## // UI/GUMPS
-    // ## BEGIN - END ## // ONCASTINGGUMP
+        // ## BEGIN - END ## // ONCASTINGGUMP
         public OnCastingGump OnCasting;
         // ## BEGIN - END ## // ONCASTINGGUMP
 
         public PlayerMobile(uint serial) : base(serial)
         {
-            Skills = new Skill[SkillsLoader.Instance.SkillsCount];
-
             // ## BEGIN - END ## // UI/GUMPS
             UIManager.Add(BandageTimer = new BandageGump());
             // ## BEGIN - END ## // UI/GUMPS
             // ## BEGIN - END ## // ONCASTINGGUMP
             UIManager.Add(OnCasting = new OnCastingGump());
             // ## BEGIN - END ## // ONCASTINGGUMP
+
+            UIManager.Add(new OnCastingGump.CastTimerProgressBar());
+
+            Skills = new Skill[SkillsLoader.Instance.SkillsCount];
 
             for (int i = 0; i < Skills.Length; i++)
             {
@@ -87,8 +95,6 @@ namespace ClassicUO.Game.GameObjects
                     SkillProgressBar.QueManager.AddSkill(e.Index);
                 }
             };
-        
-            UIManager.Add(castTimer = new SpellVisualRangeManager.CastTimerProgressBar());
         }
 
         public Skill[] Skills { get; }
@@ -98,6 +104,9 @@ namespace ClassicUO.Game.GameObjects
         public ref Ability PrimaryAbility => ref Abilities[0];
         public ref Ability SecondaryAbility => ref Abilities[1];
         protected override bool IsWalking => LastStepTime > Time.Ticks - Constants.PLAYER_WALKING_DELAY;
+
+        public bool HasGump { get; set; }
+        public uint LastGumpID { get; set; }
 
         internal WalkerManager Walker { get; } = new WalkerManager();
         public Ability[] Abilities = new Ability[2]
@@ -1157,6 +1166,12 @@ namespace ClassicUO.Game.GameObjects
 
                                 goto done;
 
+                            case 0x4071:
+                                Abilities[0] = Ability.ArmorIgnore;
+                                Abilities[1] = Ability.ParalyzingBlow;
+
+                                goto done;
+
                             case 0x8FE:
                             case 0x4072: // Blood Blade
                                 Abilities[0] = Ability.BleedAttack;
@@ -1348,7 +1363,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                done:;
+            done:;
             }
 
 
@@ -1526,7 +1541,6 @@ namespace ClassicUO.Game.GameObjects
                 //{
                 switch (gump)
                 {
-                    case ModernPaperdoll _:
                     case PaperDollGump _:
                     case MapGump _:
                     case SpellbookGump _:
@@ -1628,7 +1642,14 @@ namespace ClassicUO.Game.GameObjects
 
                         if (distance > Constants.MAX_CONTAINER_OPENED_ON_GROUND_RANGE)
                         {
-                            gump.Dispose();
+                            // ## BEGIN - END ## // MISC3 THIEFSUPREME
+                            //gump.Dispose();
+                            // ## BEGIN - END ## // MISC3 THIEFSUPREME
+                            if (!ProfileManager.CurrentProfile.OverrideContainerOpenRange)
+                            {
+                                gump.Dispose();
+                            }
+                            // ## BEGIN - END ## // MISC3 THIEFSUPREME
                         }
 
                         break;
@@ -1670,27 +1691,277 @@ namespace ClassicUO.Game.GameObjects
         //}
         // #############################################
 
-        public bool Walk(Direction direction, bool run)
+         public bool Walk(Direction direction, bool run)
         {
-            if (Walker.WalkingFailed || Walker.LastStepRequestTime > Time.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT)
+            if (!ProfileManager.CurrentProfile.AutoAvoidObstacules)
+            {
+
+                return WalkNotAvoid(direction, run);
+            }
+
+            else
+            {
+
+                if (Walker.WalkingFailed || Walker.LastStepRequestTime > Time.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT || Client.Version >= ClientVersion.CV_60142 && IsParalyzed)
+                {
+                    return false;
+                }
+
+                run |= ProfileManager.CurrentProfile.AlwaysRun;
+
+                if (SpeedMode >= CharacterSpeedType.CantRun || Stamina <= 1 && !IsDead || IsHidden && ProfileManager.CurrentProfile.AlwaysRunUnlessHidden)
+                {
+                    run = false;
+                }
+
+                int x = X;
+                int y = Y;
+                sbyte z = Z;
+
+                if (!_serverDirectionInitialized)
+                {
+                    _serverDirection = Direction;
+                    _serverDirectionInitialized = true;
+                }
+
+                Direction oldDirection = _serverDirection;
+
+                bool emptyStack = Steps.Count == 0;
+
+                if (!emptyStack)
+                {
+                    ref Step walkStep = ref Steps.Back();
+                    x = walkStep.X;
+                    y = walkStep.Y;
+                    z = walkStep.Z;
+                    oldDirection = (Direction)walkStep.Direction;
+                }
+
+                sbyte oldZ = z;
+                ushort walkTime = Constants.TURN_DELAY;
+
+                // L�gica de verifica��o para contornar obst�culos em dire��es cardeais
+                if (IsCardinalDirection(direction))
+                {
+                    if (IsObstacle(direction, x, y, z))
+                    {
+                        // Tenta evitar o obst�culo
+                        Direction newDir = TryToAvoid(direction, x, y, z);
+
+                        if (!IsObstacle(newDir, x, y, z))
+                        {
+                            direction = newDir;
+                            World.Player.ClearSteps();
+
+                            World.Player.SetInWorldTile((ushort)x, (ushort)y, z);
+                            //NetClient.Socket.Send_Resync();
+                        }
+                        else
+                        {
+                            return false; // N�o pode evitar o obst�culo
+                        }
+                    }
+                }
+
+                if ((oldDirection & Direction.Mask) == (direction & Direction.Mask))
+                {
+                    // ## BEGIN - END ## // ONCASTINGGUMP
+                    if (GameActions.iscasting) return false;
+                    // ## BEGIN - END ## // ONCASTINGGUMP
+
+                    Direction newDir = direction;
+                    int newX = x;
+                    int newY = y;
+                    sbyte newZ = z;
+
+                    if (!Pathfinder.CanWalkObstacules(ref newDir, ref newX, ref newY, ref newZ))
+                    {
+                        return false;
+                    }
+
+                    if ((direction & Direction.Mask) != newDir)
+                    {
+                        direction = newDir;
+                    }
+                    else
+                    {
+                        direction = newDir;
+                        x = newX;
+                        y = newY;
+                        z = newZ;
+
+                        walkTime = (ushort)MovementSpeed.TimeToCompleteMovement(run, IsMounted || SpeedMode == CharacterSpeedType.FastUnmount || SpeedMode == CharacterSpeedType.FastUnmountAndCantRun || IsFlying);
+                    }
+                }
+                else
+                {
+                    Direction newDir = direction;
+                    int newX = x;
+                    int newY = y;
+                    sbyte newZ = z;
+
+                    if (!Pathfinder.CanWalkObstacules(ref newDir, ref newX, ref newY, ref newZ))
+                    {
+                        if ((oldDirection & Direction.Mask) == newDir)
+                        {
+                            return false;
+                        }
+                    }
+
+                    if ((oldDirection & Direction.Mask) == newDir)
+                    {
+                        x = newX;
+                        y = newY;
+                        z = newZ;
+
+                        walkTime = (ushort)MovementSpeed.TimeToCompleteMovement(run, IsMounted || SpeedMode == CharacterSpeedType.FastUnmount || SpeedMode == CharacterSpeedType.FastUnmountAndCantRun || IsFlying);
+                    }
+
+                    direction = newDir;
+                }
+
+                if (walkTime == Constants.TURN_DELAY && Walker.UnacceptedPacketsCount >= 3)
+                {
+                    Direction = direction;
+                    Walker.LastStepRequestTime = Time.Ticks + walkTime;
+
+                    return true;
+                }
+
+                CloseBank();
+
+                if (emptyStack)
+                {
+                    if (!IsWalking)
+                    {
+                        SetAnimation(0xFF);
+                    }
+
+                    LastStepTime = Time.Ticks;
+                }
+                if (Walker.StepsCount == -1)
+                {
+                    Walker.StepsCount = 1;
+                }
+
+
+                var item = Walker.StepsCount;
+
+                ref StepInfo step = ref Walker.StepInfos[item];
+                step.Sequence = Walker.WalkSequence;
+                step.Accepted = false;
+                step.Running = run;
+                step.OldDirection = (byte)(oldDirection & Direction.Mask);
+                step.Direction = (byte)direction;
+                step.Timer = Time.Ticks;
+                step.X = (ushort)x;
+                step.Y = (ushort)y;
+                step.Z = z;
+                step.NoRotation = step.OldDirection == (byte)direction && oldZ - z >= 11;
+
+                Walker.StepsCount++;
+
+                Steps.AddToBack
+                (
+                    new Step
+                    {
+                        X = x,
+                        Y = y,
+                        Z = z,
+                        Direction = (byte)direction,
+                        Run = run
+                    }
+                );
+
+                NetClient.Socket.Send_WalkRequest(direction, Walker.WalkSequence, run, Walker.FastWalkStack.GetValue());
+
+                _serverDirection = direction;
+
+                if (Walker.WalkSequence == 0xFF)
+                {
+                    Walker.WalkSequence = 1;
+                }
+                else
+                {
+                    Walker.WalkSequence++;
+                }
+
+                Walker.UnacceptedPacketsCount++;
+
+                AddToTile();
+
+                int nowDelta = 0;
+
+                Walker.LastStepRequestTime = Time.Ticks + walkTime - nowDelta;
+                GetGroupForAnimation(this, 0, true);
+
+                return true;
+            }
+
+        }
+
+        // Funções auxiliares para contornar obstáculos
+        bool IsCardinalDirection(Direction direction)
+        {
+            return direction == Direction.North || direction == Direction.South ||
+                   direction == Direction.East || direction == Direction.West;
+        }
+
+        bool IsObstacle(Direction direction, int x, int y, sbyte z)
+        {
+            // Verifica se há um obstáculo usando a função de caminho
+            return !Pathfinder.CanWalkObstacules(ref direction, ref x, ref y, ref z);
+        }
+
+        Direction TryToAvoid(Direction direction, int x, int y, sbyte z)
+        {
+            // Tenta contornar o obstáculo movendo-se lateralmente
+            switch (direction)
+            {
+                case Direction.North:
+                    return IsObstacle(Direction.East, x, y, z) ? Direction.West : Direction.East;
+                case Direction.South:
+                    return IsObstacle(Direction.East, x, y, z) ? Direction.West : Direction.East;
+                case Direction.East:
+                    return IsObstacle(Direction.North, x, y, z) ? Direction.South : Direction.North;
+                case Direction.West:
+                    return IsObstacle(Direction.North, x, y, z) ? Direction.South : Direction.North;
+                default:
+                    return direction;
+            }
+        }
+
+        public bool WalkNotAvoid(Direction direction, bool run, bool swing = false)
+        {
+            if (Walker.WalkingFailed || Walker.LastStepRequestTime > Time.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT || Client.Version >= ClientVersion.CV_60142 && IsParalyzed)
             {
                 return false;
             }
 
-            run |= ProfileManager.CurrentProfile.AlwaysRun;
+
+            if (!swing)
+            {
+                run |= ProfileManager.CurrentProfile.AlwaysRun;
+            }
+           
 
             if (SpeedMode >= CharacterSpeedType.CantRun || Stamina <= 1 && !IsDead || IsHidden && ProfileManager.CurrentProfile.AlwaysRunUnlessHidden)
             {
                 run = false;
             }
 
-            
-
             int x = X;
             int y = Y;
             sbyte z = Z;
-            Direction oldDirection = Direction;
-            bool isFrozeSet = World.Player.IsParalyzed;
+
+            if (!_serverDirectionInitialized)
+            {
+                _serverDirection = Direction;
+                _serverDirectionInitialized = true;
+            }
+
+            Direction oldDirection = _serverDirection;
+
             bool emptyStack = Steps.Count == 0;
 
             if (!emptyStack)
@@ -1699,28 +1970,23 @@ namespace ClassicUO.Game.GameObjects
                 x = walkStep.X;
                 y = walkStep.Y;
                 z = walkStep.Z;
-                oldDirection = (Direction)walkStep.Direction;
+                oldDirection = (Direction) walkStep.Direction;
             }
 
             sbyte oldZ = z;
             ushort walkTime = Constants.TURN_DELAY;
 
-  
-
             if ((oldDirection & Direction.Mask) == (direction & Direction.Mask))
             {
-                if (isFrozeSet || Client.Version >= ClientVersion.CV_60142 && IsParalyzed) return false;
 
-                // ## BEGIN - END ## // ONCASTINGGUMP
                 if (GameActions.iscasting) return false;
-                // ## BEGIN - END ## // ONCASTINGGUMP
-                
+                if (swing) return false;
                 Direction newDir = direction;
                 int newX = x;
                 int newY = y;
                 sbyte newZ = z;
 
-                if (!Pathfinder.CanWalk(ref newDir, ref newX, ref newY, ref newZ))
+                if (!Pathfinder.CanWalkObstacules(ref newDir, ref newX, ref newY, ref newZ))
                 {
                     return false;
                 }
@@ -1736,7 +2002,7 @@ namespace ClassicUO.Game.GameObjects
                     y = newY;
                     z = newZ;
 
-                    walkTime = (ushort)MovementSpeed.TimeToCompleteMovement(run, IsMounted || SpeedMode == CharacterSpeedType.FastUnmount || SpeedMode == CharacterSpeedType.FastUnmountAndCantRun || IsFlying);
+                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement(run, IsMounted || SpeedMode == CharacterSpeedType.FastUnmount || SpeedMode == CharacterSpeedType.FastUnmountAndCantRun || IsFlying);
                 }
             }
             else
@@ -1746,7 +2012,7 @@ namespace ClassicUO.Game.GameObjects
                 int newY = y;
                 sbyte newZ = z;
 
-                if (!Pathfinder.CanWalk(ref newDir, ref newX, ref newY, ref newZ))
+                if (!Pathfinder.CanWalkObstacules(ref newDir, ref newX, ref newY, ref newZ))
                 {
                     if ((oldDirection & Direction.Mask) == newDir)
                     {
@@ -1760,10 +2026,18 @@ namespace ClassicUO.Game.GameObjects
                     y = newY;
                     z = newZ;
 
-                    walkTime = (ushort)MovementSpeed.TimeToCompleteMovement(run, IsMounted || SpeedMode == CharacterSpeedType.FastUnmount || SpeedMode == CharacterSpeedType.FastUnmountAndCantRun || IsFlying);
+                    walkTime = (ushort) MovementSpeed.TimeToCompleteMovement(run, IsMounted || SpeedMode == CharacterSpeedType.FastUnmount || SpeedMode == CharacterSpeedType.FastUnmountAndCantRun || IsFlying);
                 }
 
                 direction = newDir;
+            }
+
+            if (walkTime == Constants.TURN_DELAY && Walker.UnacceptedPacketsCount >= 3)
+            {
+                Direction = direction;
+                Walker.LastStepRequestTime = Time.Ticks + walkTime;
+
+                return true;
             }
 
             CloseBank();
@@ -1782,13 +2056,13 @@ namespace ClassicUO.Game.GameObjects
             step.Sequence = Walker.WalkSequence;
             step.Accepted = false;
             step.Running = run;
-            step.OldDirection = (byte)(oldDirection & Direction.Mask);
-            step.Direction = (byte)direction;
+            step.OldDirection = (byte) (oldDirection & Direction.Mask);
+            step.Direction = (byte) direction;
             step.Timer = Time.Ticks;
-            step.X = (ushort)x;
-            step.Y = (ushort)y;
+            step.X = (ushort) x;
+            step.Y = (ushort) y;
             step.Z = z;
-            step.NoRotation = step.OldDirection == (byte)direction && oldZ - z >= 11;
+            step.NoRotation = step.OldDirection == (byte) direction && oldZ - z >= 11;
 
             Walker.StepsCount++;
 
@@ -1799,7 +2073,7 @@ namespace ClassicUO.Game.GameObjects
                     X = x,
                     Y = y,
                     Z = z,
-                    Direction = (byte)direction,
+                    Direction = (byte) direction,
                     Run = run
                 }
             );
@@ -1807,6 +2081,7 @@ namespace ClassicUO.Game.GameObjects
 
             NetClient.Socket.Send_WalkRequest(direction, Walker.WalkSequence, run, Walker.FastWalkStack.GetValue());
 
+            _serverDirection = direction;
 
             if (Walker.WalkSequence == 0xFF)
             {

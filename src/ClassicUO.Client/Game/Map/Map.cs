@@ -1,6 +1,6 @@
 #region license
 
-// Copyright (c) 2021, andreakarasho
+// Copyright (c) 2024, andreakarasho
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -40,42 +40,22 @@ namespace ClassicUO.Game.Map
 {
     public sealed class Map
     {
-        private static readonly Chunk[] _terrainChunks;
+        private static Chunk[] _terrainChunks;
         private static readonly bool[] _blockAccessList = new bool[0x1000];
         private readonly LinkedList<int> _usedIndices = new LinkedList<int>();
 
-        static Map()
-        {
-            int maxX = -1, maxY = -1;
-
-            for (int i = 0; i < MapLoader.Instance.MapBlocksSize.GetLength(0); i++)
-            {
-                if (maxX < MapLoader.Instance.MapBlocksSize[i, 0])
-                {
-                    maxX = MapLoader.Instance.MapBlocksSize[i, 0];
-                }
-
-                if (maxY < MapLoader.Instance.MapBlocksSize[i, 1])
-                {
-                    maxY = MapLoader.Instance.MapBlocksSize[i, 1];
-                }
-            }
-
-
-            _terrainChunks = new Chunk[maxX * maxY];
-        }
 
         public Map(int index)
         {
             Index = index;
             BlocksCount = MapLoader.Instance.MapBlocksSize[Index, 0] * MapLoader.Instance.MapBlocksSize[Index, 1];
+            if (_terrainChunks == null || BlocksCount > _terrainChunks.Length)
+                _terrainChunks = new Chunk[BlocksCount];
             ClearBockAccess();
         }
 
         public readonly int BlocksCount;
         public readonly int Index;
-
-
 
 
         public Chunk GetChunk(int block)
@@ -99,7 +79,7 @@ namespace ClassicUO.Game.Map
             int cellY = y >> 3;
             int block = GetBlock(cellX, cellY);
 
-            if (block >= BlocksCount)
+            if (block >= BlocksCount || block >= _terrainChunks.Length)
             {
                 return null;
             }
@@ -283,6 +263,34 @@ namespace ClassicUO.Game.Map
             {
                 yield return GetChunk(i);
             }
+        }
+
+        public int PreloadChunksAround(int centerX, int centerY, int radius, int maxPerCall = 4)
+        {
+            int loaded = 0;
+            int startBlockX = Math.Max(0, (centerX >> 3) - radius);
+            int startBlockY = Math.Max(0, (centerY >> 3) - radius);
+            int endBlockX = Math.Min(MapLoader.Instance.MapBlocksSize[Index, 0] - 1, (centerX >> 3) + radius);
+            int endBlockY = Math.Min(MapLoader.Instance.MapBlocksSize[Index, 1] - 1, (centerY >> 3) + radius);
+
+            for (int bx = startBlockX; bx <= endBlockX && loaded < maxPerCall; bx++)
+            {
+                for (int by = startBlockY; by <= endBlockY && loaded < maxPerCall; by++)
+                {
+                    int block = GetBlock(bx, by);
+                    if (block < 0 || block >= BlocksCount || block >= _terrainChunks.Length)
+                        continue;
+                    if (_terrainChunks[block] != null && !_terrainChunks[block].IsDestroyed)
+                        continue;
+
+                    int worldX = bx << 3;
+                    int worldY = by << 3;
+                    GetChunk(worldX, worldY, true);
+                    loaded++;
+                }
+            }
+
+            return loaded;
         }
 
 

@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -33,6 +33,7 @@
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
+using ClassicUO.Renderer;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
@@ -74,6 +75,33 @@ namespace ClassicUO.Game.UI.Controls
         };
 
         private static readonly Layer[] _layerOrder_quiver_fix =
+        {
+            Layer.Shirt,
+            Layer.Pants,
+            Layer.Shoes,
+            Layer.Legs,
+            Layer.Arms,
+            Layer.Torso,
+            Layer.Tunic,
+            Layer.Ring,
+            Layer.Bracelet,
+            Layer.Face,
+            Layer.Gloves,
+            Layer.Skirt,
+            Layer.Robe,
+            Layer.Cloak,
+            Layer.Waist,
+            Layer.Necklace,
+            Layer.Hair,
+            Layer.Beard,
+            Layer.Earrings,
+            Layer.Helmet,
+            Layer.OneHanded,
+            Layer.TwoHanded,
+            Layer.Talisman
+        };
+
+        private static readonly Layer[] _layerOrder_parrot_fix =
         {
             Layer.Shirt,
             Layer.Pants,
@@ -250,7 +278,10 @@ namespace ClassicUO.Game.UI.Controls
             }
             else
             {
-                layers = _layerOrder;
+                Item robe = mobile.FindItemByLayer(Layer.Robe);
+                layers = (robe != null && (robe.Graphic == 0xA2CA || robe.Graphic == 0xA2CB))
+                    ? _layerOrder_parrot_fix
+                    : _layerOrder;
             }
 
             for (int i = 0; i < layers.Length; i++)
@@ -410,7 +441,7 @@ namespace ClassicUO.Game.UI.Controls
             _updateUI = true;
         }
 
-        protected static ushort GetAnimID(ushort graphic, ushort animID, bool isfemale)
+        public static ushort GetAnimID(ushort graphic, ushort animID, bool isfemale)
         {
             int offset = isfemale ? Constants.FEMALE_GUMP_OFFSET : Constants.MALE_GUMP_OFFSET;
 
@@ -468,7 +499,7 @@ namespace ClassicUO.Game.UI.Controls
             return (ushort)(animID + offset);
         }
 
-        protected class GumpPicEquipment : GumpPic
+        public class GumpPicEquipment : GumpPic
         {
             private readonly Layer _layer;
 
@@ -554,5 +585,7 @@ namespace ClassicUO.Game.UI.Controls
                 SelectedObject.Object = World.Get(LocalSerial);
             }
         }
+
+
     }
 }

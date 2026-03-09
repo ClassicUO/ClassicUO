@@ -1,0 +1,24 @@
+# Windows ARM64 Native Libraries Placeholder
+
+This directory should contain the following ARM64 native libraries for Windows:
+
+## Required Files:
+- FAudio.dll
+- FNA3D.dll
+- libtheorafile.dll
+- SDL2.dll
+- vcruntime140.dll
+- zlib.dll
+
+## How to Obtain:
+1. Build FNA from source for ARM64
+2. Download pre-built ARM64 libraries from FNA releases
+3. Use cross-compilation tools
+
+## Notes:
+- These must be ARM64 (aarch64) libraries, not x64
+- Libraries should be compatible with the FNA version used in ClassicUO
+- See external/arm64/README.md for detailed instructions
+
+## Verification:
+Use `dumpbin /headers library.dll` to verify the architecture shows "machine (ARM64)"

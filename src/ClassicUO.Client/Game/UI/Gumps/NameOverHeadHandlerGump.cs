@@ -95,43 +95,6 @@ namespace ClassicUO.Game.UI.Gumps
             stayActive.ValueChanged += (sender, e) => { NameOverHeadManager.SetOverheadToggled(stayActive.IsChecked); CanCloseWithRightClick = stayActive.IsChecked; };
 
 
-            Checkbox hideFullHp;
-            Add
-            (
-                hideFullHp = new Checkbox
-                (
-                    0x00D2,
-                    0x00D3,
-                    color: 0xFFFF
-                )
-                {
-                    IsChecked = ProfileManager.CurrentProfile.NamePlateHideAtFullHealth,
-                    X = stayActive.Width + stayActive.X + 5
-                }
-            );
-            hideFullHp.SetTooltip("Hide nameplates above 100% health.");
-            hideFullHp.ValueChanged += (sender, e) => { ProfileManager.CurrentProfile.NamePlateHideAtFullHealth = hideFullHp.IsChecked; };
-
-
-            Checkbox hideInWarmode;
-            Add
-            (
-                hideInWarmode = new Checkbox
-                (
-                    0x00D2,
-                    0x00D3,
-                    color: 0xFFFF
-                )
-                {
-                    IsChecked = ProfileManager.CurrentProfile.NamePlateHideAtFullHealthInWarmode,
-                    X = hideFullHp.Width + hideFullHp.X + 5
-                }
-            );
-            hideInWarmode.SetTooltip("Only hide 100% hp nameplates in warmode.");
-            hideInWarmode.ValueChanged += (sender, e) => { ProfileManager.CurrentProfile.NamePlateHideAtFullHealthInWarmode = hideInWarmode.IsChecked; };
-
-
-
             Add(new AlphaBlendControl() { Y = stayActive.Height + stayActive.Y, Width = 150, Height = 20, Hue = 0x0481 });
             Add(searchBox = new StbTextBox(0, -1, 150, hue: 0xFFFF) { Y = stayActive.Height + stayActive.Y, Width = 150, Height = 20 });
             searchBox.Text = NameOverHeadManager.Search;
@@ -144,7 +107,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             foreach (var button in _overheadButtons)
             {
-                button.IsChecked = NameOverHeadManager.LastActiveNameOverheadOption == button.Text;
+                button.IsChecked = NameOverHeadManager.LastActiveNameOverheadOption.Replace("\\u0026", "&") == button.Text;
             }
         }
 
@@ -186,7 +149,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
                 {
                     Y = 20 * index + 44,
-                    IsChecked = NameOverHeadManager.LastActiveNameOverheadOption == option.Name,
+                    IsChecked = NameOverHeadManager.LastActiveNameOverheadOption.Replace("\\u0026", "&") == option.Name,
                 }
             );
 

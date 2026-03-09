@@ -36,6 +36,7 @@ using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -98,6 +99,75 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             return false;
+        }
+    }
+
+    internal class CustomGumpPic : GumpPicBase
+    {
+        private Texture2D _customTexture;
+        public new int Width { get; }
+        public new int Height { get; }
+        public new ushort Hue { get; set; }
+
+        private readonly Rectangle? _sourceRect;
+
+        public CustomGumpPic(int x, int y, Texture2D texture, ushort hue = 0)
+        {
+            X = x;
+            Y = y;
+            _customTexture = texture;
+            Hue = hue;
+            _sourceRect = null;
+            if (_customTexture != null)
+            {
+                Width = _customTexture.Width;
+                Height = _customTexture.Height;
+            }
+        }
+
+        public CustomGumpPic(int x, int y, Texture2D texture, int displayWidth, int displayHeight, ushort hue = 0)
+        {
+            X = x;
+            Y = y;
+            _customTexture = texture;
+            Hue = hue;
+            if (_customTexture != null)
+            {
+                _sourceRect = new Rectangle(0, 0, _customTexture.Width, _customTexture.Height);
+                Width = displayWidth;
+                Height = displayHeight;
+            }
+            else
+            {
+                _sourceRect = null;
+            }
+        }
+
+        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        {
+            if (IsDisposed || _customTexture == null)
+            {
+                return false;
+            }
+
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, false, Alpha, true);
+            Rectangle dest = new Rectangle(x, y, Width, Height);
+            if (_sourceRect.HasValue)
+            {
+                batcher.Draw(_customTexture, dest, _sourceRect, hueVector);
+            }
+            else
+            {
+                batcher.Draw(_customTexture, dest, hueVector);
+            }
+
+            return base.Draw(batcher, x, y);
+        }
+
+        public override void Dispose()
+        {
+            base.Dispose();
+            _customTexture?.Dispose();
         }
     }
 

@@ -1,6 +1,6 @@
 ﻿#region license
 
-// Copyright (c) 2021, andreakarasho
+// Copyright (c) 2024, andreakarasho
 // All rights reserved.
 // 
 // Redistribution and use in source and binary forms, with or without
@@ -36,7 +36,7 @@ using ClassicUO.Utility;
 namespace ClassicUO.Game.Data
 {
     [Flags]
-    public enum CharacterListFlags
+    public enum CharacterListFlags: uint
     {
         CLF_UNKNOWN = 0x01,
         CLF_OWERWRITE_CONFIGURATION_BUTTON = 0x02,

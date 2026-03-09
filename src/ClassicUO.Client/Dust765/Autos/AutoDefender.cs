@@ -65,7 +65,7 @@ namespace ClassicUO.Dust765.Autos
         private static long _timer;
         private static Random _rand = new Random(0);
 
-        private static Mobile mob = null; // ## BEGIN - END ## //
+        public static Mobile mob = null; // ## BEGIN - END ## //
 
         static Defender()
         {
@@ -78,7 +78,7 @@ namespace ClassicUO.Dust765.Autos
             if (!IsEnabled || World.Player.IsDead)
                 return;
 
-            if (_timer <= 125)
+            if (_timer <= 110)
             {
                 if (TargetManager.IsTargeting)
                 {
@@ -88,7 +88,7 @@ namespace ClassicUO.Dust765.Autos
                     SpellAction spell = SpellManager.LastSpell;
 
                     if (spell == SpellAction.Unknown)
-                        spell = (SpellAction) GameActions.LastSpellIndexCursor;
+                        spell = (SpellAction)GameActions.LastSpellIndexCursor;
 
                     int h1 = 0;
                     int h2 = 0;
@@ -97,13 +97,16 @@ namespace ClassicUO.Dust765.Autos
                     {
                         GameActions.Print($"{h2}");
                         TargetManager.Target(mob);
-                        _timer += 250;
+                        _timer = 0;
                     }
                 }
+
+                if (mob != null)
+                    mob = null;
             }
 
-            if (mob != null)
-                mob = null;
+           
+
         }
 
         //// ## BEGIN - END ## //
@@ -122,10 +125,10 @@ namespace ClassicUO.Dust765.Autos
                     if (pm == null)
                         continue;
 
-                    Mobile mob = World.Mobiles.Get(pm.Serial);
-                    if (triggerMobile == mob)
+                    Mobile mobs = World.Mobiles.Get(pm.Serial);
+                    if (pm.Serial == mobs.Serial && World.Player.Serial != pm.Serial)
                     {
-                        return mob;
+                        return mobs;
                     }
                 }
             }
@@ -141,6 +144,10 @@ namespace ClassicUO.Dust765.Autos
             switch (graphic)
             {
                 case 14013:
+                case 14154:
+                    _timer += 10;
+                    mob = Scan(target);
+                    break;
                 case 14089:
                     _timer += 10;
                     mob = Scan(source);
@@ -148,7 +155,7 @@ namespace ClassicUO.Dust765.Autos
 
                 case 14239://
                 case 14027://     
-                    _timer += 100;
+                    _timer += 10;
                     mob = Scan(target);
 
                     break;

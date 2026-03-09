@@ -32,6 +32,7 @@
 
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using FontStyle = ClassicUO.Game.FontStyle;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -54,7 +55,7 @@ namespace ClassicUO.Game.UI.Gumps
             _leftMouseIsDown,
             _isLastTarget,
             _needsNameUpdate;
-        private TextBox _text;
+        private UOLabel _text;
         private Texture2D _borderColor = SolidColorTextureCache.GetTexture(Color.Black);
         private Vector2 _textDrawOffset = Vector2.Zero;
         private static int currentHeight = 22;
@@ -91,7 +92,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            _text = new TextBox(string.Empty, ProfileManager.CurrentProfile.NamePlateFont, ProfileManager.CurrentProfile.NamePlateFontSize, 100, entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort)0x0481, FontStashSharp.RichText.TextHorizontalAlignment.Center);
+            _text = new UOLabel(string.Empty, ProfileManager.CurrentProfile.NamePlateFont, entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort)0x0481, TEXT_ALIGN_TYPE.TS_CENTER, 100, FontStyle.BlackBorder);
 
             SetTooltip(entity);
 
@@ -142,7 +143,7 @@ namespace ClassicUO.Game.UI.Gumps
                     return false;
                 }
 
-                _text.UpdateText(t);
+                _text.Text = t;
 
                 Width = _background.Width = Math.Max(60, _text.Width) + 4;
                 Height = _background.Height = CurrentHeight = Math.Max(Constants.OBJECT_HANDLES_GUMP_HEIGHT, _text.Height) + 4;
@@ -157,12 +158,20 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 string t = entity.Name;
 
-                _text.UpdateText(t);
+                _text.Text = t;
 
+                int baseHeight = Math.Max(Constants.OBJECT_HANDLES_GUMP_HEIGHT, _text.Height) + 4;
+                bool isSelfOrParty = entity is Mobile mob && (mob.Equals(World.Player) || World.Party.Contains(mob.Serial));
+                bool hasOtherBarBelow = entity is Mobile m2 && !m2.Equals(World.Player) && !World.Party.Contains(m2.Serial)
+                    && m2.NotorietyFlag != NotorietyFlag.Invulnerable
+                    && ProfileManager.CurrentProfile.NamePlateHealthBar;
+                bool hasSelfBarsBelow = isSelfOrParty && ProfileManager.CurrentProfile.NamePlateHealthBar;
+                int barExtra = hasOtherBarBelow ? 8 : hasSelfBarsBelow ? 20 : 0;
                 Width = _background.Width = Math.Max(60, _text.Width) + 4;
-                Height = _background.Height = Math.Max(Constants.OBJECT_HANDLES_GUMP_HEIGHT, _text.Height) + 4;
+                Height = _background.Height = baseHeight + barExtra;
+                CurrentHeight = Height;
                 _textDrawOffset.X = (Width - _text.Width - 4) >> 1;
-                _textDrawOffset.Y = (Height - _text.Height) >> 1;
+                _textDrawOffset.Y = hasOtherBarBelow || hasSelfBarsBelow ? 2 : (Height - _text.Height) >> 1;
                 WantUpdateSize = false;
 
                 return true;
@@ -748,85 +757,77 @@ namespace ClassicUO.Game.UI.Gumps
                 Mobile m = World.Mobiles.Get(LocalSerial);
                 var isPlayer = m is PlayerMobile;
                 var isInParty = World.Party.Contains(m.Serial);
-
                 var _alpha = ProfileManager.CurrentProfile.NamePlateHealthBarOpacity / 100f;
-                DrawResourceBar(batcher, m, x, y, Height / (isPlayer || isInParty ? 3 : 1), m =>
+
+                if (isPlayer || isInParty)
                 {
-                    var hpPercent = (double)m.Hits / (double)m.HitsMax;
-                    var _baseHue = hpPercent switch
-                    {
-                        1 => (m is PlayerMobile || World.Party.Contains(m.Serial)) ? 0x0058 : Notoriety.GetHue(m.NotorietyFlag),
-                        > .8 => 0x0058,
-                        > .4 => 0x0030,
-                        _ => 0x0021
-                    };
-                    Vector3 hueVec = ShaderHueTranslator.GetHueVector(_baseHue, false, _alpha);
-
-                    if (m.IsPoisoned)
-                    {
-                        hueVec = ShaderHueTranslator.GetHueVector(63, false, _alpha);
-                    }
-                    else if (m.IsYellowHits || m.IsParalyzed)
-                    {
-                        hueVec = ShaderHueTranslator.GetHueVector(353, false, _alpha);
-                    }
-                    return (hueVec, hpPercent);
-                }, out var nY);
-
-                if (m is PlayerMobile || isInParty)
+                    DrawSelfBarsBelowName(batcher, m, x, y, _alpha);
+                }
+                else if (m.NotorietyFlag != NotorietyFlag.Invulnerable)
                 {
-                    DrawResourceBar(batcher, m, x, nY, Height / 3, m =>
-                    {
-                        var mpPercent = (double)m.Mana / (double)m.ManaMax;
-                        var _baseHue = mpPercent switch
-                        {
-                            > .6 => 0x0058,
-                            > .2 => 0x0030,
-                            _ => 0x0021
-                        };
-                        Vector3 hueVec = ShaderHueTranslator.GetHueVector(_baseHue, false, _alpha);
-                        return (hueVec, mpPercent);
-                    }, out nY);
-
-                    DrawResourceBar(batcher, m, x, nY, Height / 3, m =>
-                    {
-                        var spPercent = (double)m.Stamina / (double)m.StaminaMax;
-                        var _baseHue = spPercent switch
-                        {
-                            > .8 => 0x0058,
-                            > .5 => 0x0030,
-                            _ => 0x0021
-                        };
-                        Vector3 hueVec = ShaderHueTranslator.GetHueVector(_baseHue, false, _alpha);
-                        return (hueVec, spPercent);
-                    }, out nY);
-                    y += 20;
+                    DrawHpBarBelowName(batcher, m, x, y, _alpha);
                 }
             }
 
             return _text.Draw(batcher, (int)(x + 2 + _textDrawOffset.X), (int)(y + 2 + _textDrawOffset.Y));
         }
 
-        private void DrawResourceBar(UltimaBatcher2D batcher, Mobile m, int x, int y, int height, Func<Mobile, (Vector3, double)> getHueVector, out int nY)
+        private const int HP_BAR_HEIGHT = 4;
+        private const int BAR_GAP = 2;
+
+        private void DrawSelfBarsBelowName(UltimaBatcher2D batcher, Mobile m, int x, int y, float alpha)
         {
-            var data = getHueVector == null ? (ShaderHueTranslator.GetHueVector(0x0058), 0) : getHueVector(m);
-            batcher.DrawRectangle
-            (
-                _borderColor,
-                x,
-                y,
-                Width,
-                height,
-                ShaderHueTranslator.GetHueVector(0)
+            int barWidth = Width;
+            int startY = y + Height - (HP_BAR_HEIGHT * 3 + BAR_GAP * 2 + 2);
+            Vector3 barHue = ShaderHueTranslator.GetHueVector(0, false, alpha, true);
+            Vector3 borderHue = ShaderHueTranslator.GetHueVector(0, false, 0.9f, true);
+
+            double hpPercent = (double)m.Hits / m.HitsMax;
+            Color hpColor = hpPercent > 0.6 ? Color.Green : hpPercent > 0.3 ? Color.Yellow : Color.Red;
+            DrawColoredBar(batcher, x, startY, barWidth, SolidColorTextureCache.GetTexture(hpColor), hpColor, barHue, borderHue, hpPercent);
+
+            startY += HP_BAR_HEIGHT + BAR_GAP;
+            double mpPercent = (double)m.Mana / m.ManaMax;
+            Color manaColor = Color.Blue;
+            DrawColoredBar(batcher, x, startY, barWidth, SolidColorTextureCache.GetTexture(manaColor), manaColor, barHue, borderHue, mpPercent);
+
+            startY += HP_BAR_HEIGHT + BAR_GAP;
+            double spPercent = (double)m.Stamina / m.StaminaMax;
+            Color staminaColor = Color.Red;
+            DrawColoredBar(batcher, x, startY, barWidth, SolidColorTextureCache.GetTexture(staminaColor), staminaColor, barHue, borderHue, spPercent);
+        }
+
+        private void DrawColoredBar(UltimaBatcher2D batcher, int x, int barY, int barWidth, Texture2D texture, Color barColor, Vector3 barHue, Vector3 borderHue, double percent)
+        {
+            Color borderColor = new Color(
+                Math.Max(0, barColor.R - 80),
+                Math.Max(0, barColor.G - 80),
+                Math.Max(0, barColor.B - 80)
             );
-            batcher.Draw
-            (
-                SolidColorTextureCache.GetTexture(Color.White),
-                new Vector2(x + 1, y + 1),
-                new Rectangle(x, y, Math.Min((int)((Width - 1) * data.Item2), Width - 1), height - 1),
-                data.Item1
+            batcher.DrawRectangle(
+                SolidColorTextureCache.GetTexture(borderColor),
+                x + 1,
+                barY,
+                barWidth - 2,
+                HP_BAR_HEIGHT + 2,
+                borderHue
             );
-            nY = y + height;
+            int fillWidth = Math.Max(0, (int)((barWidth - 4) * percent));
+            if (fillWidth > 0)
+            {
+                batcher.Draw(texture, new Vector2(x + 2, barY + 1), new Rectangle(0, 0, fillWidth, HP_BAR_HEIGHT), barHue);
+            }
+        }
+
+        private void DrawHpBarBelowName(UltimaBatcher2D batcher, Mobile m, int x, int y, float alpha)
+        {
+            int barY = y + Height - HP_BAR_HEIGHT - 2;
+            int barWidth = Width;
+            double hpPercent = (double)m.Hits / m.HitsMax;
+            Color barColor = hpPercent > 0.6 ? Color.Green : hpPercent > 0.3 ? Color.Yellow : Color.Red;
+            Vector3 barHue = ShaderHueTranslator.GetHueVector(0, false, alpha, true);
+            Vector3 borderHue = ShaderHueTranslator.GetHueVector(0, false, 0.9f, true);
+            DrawColoredBar(batcher, x, barY, barWidth, SolidColorTextureCache.GetTexture(barColor), barColor, barHue, borderHue, hpPercent);
         }
 
         public override void Dispose()

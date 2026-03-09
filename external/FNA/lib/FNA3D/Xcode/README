@@ -1,0 +1,18 @@
+Building FNA3D for macOS/iOS/tvOS
+---------------------------
+FNA3D uses Xcode to build on macOS, iOS, and tvOS.
+
+Dependencies
+------------
+Before building, download SDL2's source code from SDL's website:
+
+http://libsdl.org/download-2.0.php
+
+After extracting the zip file, be sure to rename the directory to remove the
+version number (for example, 'SDL2-2.0.8' should be 'SDL2').
+
+Compiling
+---------
+1. Build SDL2/Xcode/SDL/SDL.xcodeproj
+2. Build FNA3D.xcodeproj
+3. Grab libFNA3D.a and libSDL2.a (or libFNA3D.dylib and libSDL2.dylib on macOS), ship it!

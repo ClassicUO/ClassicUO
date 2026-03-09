@@ -60,6 +60,8 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly bool[] _spells = new bool[64];
         private int _enqueuePage = -1;
 
+        public SpellBookType SpellBookType => _spellBookType;
+
         public SpellbookGump(uint item) : this()
         {
             LocalSerial = item;

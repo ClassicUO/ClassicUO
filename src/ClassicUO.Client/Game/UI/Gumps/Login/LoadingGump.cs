@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -31,10 +31,16 @@
 #endregion
 
 using System;
-using ClassicUO.Configuration;
-using ClassicUO.Game.UI.Controls;
+using System.IO;
 using ClassicUO.Assets;
-using SDL2;
+using ClassicUO.Configuration;
+using ClassicUO.Game;
+using ClassicUO.Game.Managers;
+using ClassicUO.Game.UI.Controls;
+using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using SDL3;
 
 namespace ClassicUO.Game.UI.Gumps.Login
 {
@@ -48,92 +54,128 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
     internal class LoadingGump : Gump
     {
+        private const int ModalWidth = 460;
+        private const int ModalHeight = 260;
+        private const int LabelMaxWidth = 400;
+        private const int ButtonWidth = 120;
+        private const int ButtonHeight = 40;
+        private const uint LoadingDotIntervalMs = 400;
+        private static readonly Color ModalBgColor = Color.FromNonPremultiplied(25, 8, 8, 255);
+        private static readonly Color AccentColor = Color.FromNonPremultiplied(180, 50, 50, 255);
+
         private readonly Action<int> _buttonClick;
-        private readonly Label _label;
+        private readonly UOLabel _label;
+        private readonly Texture2D _logoTexture;
+        private string _baseLabelText;
+        private uint _lastDotTicks;
+        private int _loadingDotPhase;
 
         public LoadingGump(string labelText, LoginButtons showButtons, Action<int> buttonClick = null) : base(0, 0)
         {
+            X = LoginLayoutHelper.ContentOffsetX;
+            Y = LoginLayoutHelper.ContentOffsetY;
             _buttonClick = buttonClick;
+            _baseLabelText = string.IsNullOrEmpty(labelText) ? "Loading" : labelText.TrimEnd('.');
             CanCloseWithRightClick = false;
             CanCloseWithEsc = false;
 
-            bool isAsianLang = string.Compare(Settings.GlobalSettings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 || 
-                string.Compare(Settings.GlobalSettings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
-                string.Compare(Settings.GlobalSettings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
-
-            bool unicode = isAsianLang;
-            byte font = (byte)(isAsianLang ? 1 : 2);
-            ushort hue = (ushort)(isAsianLang ? 0xFFFF : 0x0386);
-            
-            _label = new Label
-            (
-                labelText,
-                unicode,
-                hue,
-                326,
-                font,
-                align: TEXT_ALIGN_TYPE.TS_CENTER
-            )
+            Add(new SquareBlendControl(1f)
             {
-                X = 162,
-                Y = 178
+                X = 0,
+                Y = 0,
+                Width = LoginLayoutHelper.ContentWidth,
+                Height = LoginLayoutHelper.ContentHeight,
+                BaseColor = Color.Black
+            });
+
+            int panelX = LoginLayoutHelper.CenterOffsetX(ModalWidth);
+            int panelY = LoginLayoutHelper.CenterOffsetY(ModalHeight);
+
+            Add(new RoundedColorBox(ModalWidth, ModalHeight, ModalBgColor, 12)
+            {
+                X = panelX,
+                Y = panelY
+            });
+
+            const int LogoMaxWidth = 180;
+            const int LogoMaxHeight = 40;
+            string logoPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client", "logodust.png");
+            _logoTexture = PNGLoader.Instance.GetImageTexture(logoPath);
+            if (_logoTexture != null)
+            {
+                float scale = Math.Min((float)LogoMaxWidth / _logoTexture.Width, (float)LogoMaxHeight / _logoTexture.Height);
+                int logoW = (int)(_logoTexture.Width * scale);
+                int logoH = (int)(_logoTexture.Height * scale);
+                int logoX = panelX + ((ModalWidth - logoW) >> 1);
+                int logoY = panelY + 12;
+                Add(new CustomGumpPic(logoX, logoY, _logoTexture, logoW, logoH, 0));
+            }
+
+            Add(new RoundedColorBox(ModalWidth, 2, AccentColor, 0)
+            {
+                X = panelX,
+                Y = panelY + 52,
+                Alpha = 0.85f
+            });
+
+            string initialLabel = _baseLabelText + ".";
+            _label = new UOLabel(initialLabel, 1, 0x0481, TEXT_ALIGN_TYPE.TS_CENTER, LabelMaxWidth)
+            {
+                X = panelX + (ModalWidth >> 1) - (LabelMaxWidth >> 1),
+                Y = panelY + 68
             };
-
-            Add
-            (
-                new ResizePic(0x0A28)
-                {
-                    X = 142, Y = 134, Width = 366, Height = 212
-                }
-            );
-
             Add(_label);
+            _lastDotTicks = Time.Ticks;
+            _loadingDotPhase = 1;
+
+            int buttonY = panelY + ModalHeight - ButtonHeight - 24;
 
             if (showButtons == LoginButtons.OK)
             {
-                Add
-                (
-                    new Button((int) LoginButtons.OK, 0x0481, 0x0483, 0x0482)
-                    {
-                        X = 306, Y = 304, ButtonAction = ButtonAction.Activate
-                    }
-                );
+                AddLoginButton(panelX + (ModalWidth >> 1) - (ButtonWidth >> 1), buttonY, "OK", (int)LoginButtons.OK);
             }
             else if (showButtons == LoginButtons.Cancel)
             {
-                Add
-                (
-                    new Button((int) LoginButtons.Cancel, 0x047E, 0x0480, 0x047F)
-                    {
-                        X = 306,
-                        Y = 304,
-                        ButtonAction = ButtonAction.Activate
-                    }
-                );
+                AddLoginButton(panelX + (ModalWidth >> 1) - (ButtonWidth >> 1), buttonY, "CANCEL", (int)LoginButtons.Cancel);
             }
             else if (showButtons == (LoginButtons.OK | LoginButtons.Cancel))
             {
-                Add
-                (
-                    new Button((int) LoginButtons.OK, 0x0481, 0x0483, 0x0482)
-                    {
-                        X = 264, Y = 304, ButtonAction = ButtonAction.Activate
-                    }
-                );
-
-                Add
-                (
-                    new Button((int) LoginButtons.Cancel, 0x047E, 0x0480, 0x047F)
-                    {
-                        X = 348, Y = 304, ButtonAction = ButtonAction.Activate
-                    }
-                );
+                int centerX = panelX + (ModalWidth >> 1);
+                int gap = 16;
+                int totalButtons = ButtonWidth * 2 + gap;
+                AddLoginButton(centerX - totalButtons / 2, buttonY, "OK", (int)LoginButtons.OK);
+                AddLoginButton(centerX - totalButtons / 2 + ButtonWidth + gap, buttonY, "CANCEL", (int)LoginButtons.Cancel);
             }
+        }
+
+        private void AddLoginButton(int x, int y, string text, int buttonId)
+        {
+            GothicStyleButtonLogin btn = new GothicStyleButtonLogin(x, y, ButtonWidth, ButtonHeight, text, null, 16);
+            btn.OnClick += () => OnButtonClick(buttonId);
+            Add(btn);
+        }
+
+        public override void Update()
+        {
+            if (!IsDisposed)
+            {
+                X = LoginLayoutHelper.ContentOffsetX;
+                Y = LoginLayoutHelper.ContentOffsetY;
+                uint now = Time.Ticks;
+                if (now - _lastDotTicks >= LoadingDotIntervalMs)
+                {
+                    _lastDotTicks = now;
+                    _loadingDotPhase = (_loadingDotPhase % 3) + 1;
+                    _label.Text = _baseLabelText + new string('.', _loadingDotPhase);
+                }
+            }
+            base.Update();
         }
 
         public void SetText(string text)
         {
-            _label.Text = text;
+            _baseLabelText = string.IsNullOrEmpty(text) ? "Loading" : text.TrimEnd('.');
+            _label.Text = _baseLabelText + new string('.', _loadingDotPhase);
         }
 
         protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)

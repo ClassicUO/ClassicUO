@@ -73,10 +73,11 @@ namespace ClassicUO.Game.UI.Controls
         {
             X = x;
             Y = y;
-
+   
             if (hasText)
             {
-                _text = RenderedText.Create(string.Empty, color, font, unicode);
+                
+                _text = RenderedText.Create(string.Empty, 0xAAF, font, unicode);
                 _drawUp = drawUp;
             }
 

@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -40,7 +40,7 @@ using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
-using SDL2;
+using SDL3;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -58,6 +58,8 @@ namespace ClassicUO
         public static void Run()
         {
             Debug.Assert(Game == null);
+
+            SDL.SDL_SetHint(SDL.SDL_HINT_RENDER_VSYNC, "0");
 
             ScriptCompiler.InvokeAfterCompiling("Configure");
 

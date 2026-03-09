@@ -1386,9 +1386,13 @@ namespace ClassicUO.Dust765.Dust765
         {
             if (ProfileManager.CurrentProfile.OverheadRange)
             {
-                if (mobile.Distance >= 0)
+                if (mobile != null)
                 {
-                    UpdateRange(mobile);
+                    if (mobile.Distance >= 0)
+                    {
+                        UpdateRange(mobile);
+                    }
+                    
                 }
             }
         }

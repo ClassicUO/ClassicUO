@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\src\FNA3D.c" />
+    <ClCompile Include="..\src\FNA3D_Driver_OpenGL.c" />
+    <ClCompile Include="..\MojoShader\mojoshader.c">
+      <Filter>mojoshader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\MojoShader\mojoshader_common.c">
+      <Filter>mojoshader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\MojoShader\mojoshader_effects.c">
+      <Filter>mojoshader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\MojoShader\mojoshader_opengl.c">
+      <Filter>mojoshader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\MojoShader\profiles\mojoshader_profile_common.c">
+      <Filter>mojoshader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\MojoShader\profiles\mojoshader_profile_glsl.c">
+      <Filter>mojoshader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\MojoShader\profiles\mojoshader_profile_metal.c">
+      <Filter>mojoshader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\MojoShader\profiles\mojoshader_profile_spirv.c">
+      <Filter>mojoshader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\FNA3D_Image.c" />
+    <ClCompile Include="..\src\FNA3D_PipelineCache.c" />
+    <ClCompile Include="..\MojoShader\mojoshader_d3d11.c">
+      <Filter>mojoshader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\MojoShader\profiles\mojoshader_profile_hlsl.c">
+      <Filter>mojoshader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\FNA3D_Driver_D3D11.c" />
+    <ClCompile Include="..\MojoShader\mojoshader_sdlgpu.c">
+      <Filter>mojoshader</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\FNA3D_Driver_SDL.c" />
+    <ClCompile Include="..\src\FNA3D_Tracing.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\FNA3D.h" />
+    <ClInclude Include="..\src\FNA3D_Driver.h" />
+    <ClInclude Include="..\src\FNA3D_Driver_OpenGL.h" />
+    <ClInclude Include="..\src\FNA3D_Driver_OpenGL_glfuncs.h" />
+    <ClInclude Include="..\include\FNA3D_Image.h" />
+    <ClInclude Include="..\src\FNA3D_PipelineCache.h" />
+    <ClInclude Include="..\src\FNA3D_Driver_D3D11.h" />
+    <ClInclude Include="..\src\FNA3D_Tracing.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="mojoshader">
+      <UniqueIdentifier>{622c740d-4374-4129-8a11-23bf8075b42c}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

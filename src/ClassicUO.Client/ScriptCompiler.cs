@@ -211,9 +211,9 @@ namespace ClassicUO
             DeleteFiles("Scripts.CS*.dll");
 
 #if !MONO
-            using CodeDomProvider provider = new Microsoft.CodeDom.Providers.DotNetCompilerPlatform.CSharpCodeProvider();
+            using CodeDomProvider provider = new Microsoft.CSharp.CSharpCodeProvider();
 #else
-            using CSharpCodeProvider provider = new Microsoft.CodeDom.Providers.DotNetCompilerPlatform.CSharpCodeProvider();
+            using CSharpCodeProvider provider = new Microsoft.CSharp.CSharpCodeProvider();
 #endif
 
             var path = GetUnusedPath("Scripts.CS");
@@ -279,6 +279,7 @@ namespace ClassicUO
             return true;
         }
 
+#if WINDOWS
         public static void Display(CompilerResults results)
         {
             if (results.Errors.Count > 0)
@@ -402,8 +403,11 @@ namespace ClassicUO
             catch
             { }
         }
+#endif
 
+#if WINDOWS
         private delegate CompilerResults Compiler(bool debug);
+#endif
 
         public static void Compile()
         {

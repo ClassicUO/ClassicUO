@@ -54,6 +54,7 @@ namespace ClassicUO.Dust765.Lobby.Networking
             }
 
         }
+        
         private static void HiddenPosition(NetState ns, PacketReader pvSrc)
         {
             const ushort blueHue = 89;

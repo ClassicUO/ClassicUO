@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -51,6 +51,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Text;
+using SDL3;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -90,6 +91,17 @@ namespace ClassicUO.Game.Scenes
         public bool CanAutologin => _autoLogin || Reconnect;
 
 
+        public uint GetCharacterBodyID(int index)
+        {
+            // Obtenha o ID do corpo para o personagem indexado.
+            return index switch
+            {
+                0 => 0x190, // Exemplo: Humano masculino
+                1 => 0x191, // Exemplo: Humano feminino
+                _ => 0x190  // Default
+            };
+        }
+
         public override void Load()
         {
             base.Load();
@@ -97,8 +109,6 @@ namespace ClassicUO.Game.Scenes
             Client.Game.Window.AllowUserResizing = false;
 
             _autoLogin = Settings.GlobalSettings.AutoLogin;
-
-            UIManager.Add(new LoginBackground());
 
             if (string.IsNullOrEmpty(Settings.GlobalSettings.IP))
             {
@@ -156,7 +166,7 @@ namespace ClassicUO.Game.Scenes
                 Client.Game.RestoreWindow();
             }
 
-            Client.Game.SetWindowSize(640, 480);
+            Client.Game.SetWindowSize(1024, 768);
         }
 
 
@@ -170,9 +180,8 @@ namespace ClassicUO.Game.Scenes
             Client.Game.Audio?.StopMusic();
             Client.Game.Audio?.StopSounds();
 
-            UIManager.GetGump<LoginBackground>()?.Dispose();
-
-            _currentGump?.Dispose();
+            UIManager.Clear();
+            _currentGump = null;
 
             // UnRegistering Packet Events           
             NetClient.Socket.Connected -= OnNetClientConnected;
@@ -211,12 +220,8 @@ namespace ClassicUO.Game.Scenes
                         Connect(Settings.GlobalSettings.Username, Crypter.Decrypt(Settings.GlobalSettings.Password));
                     }
 
-                    int timeT = Settings.GlobalSettings.ReconnectTime * 1000;
-
-                    if (timeT < 1000)
-                    {
-                        timeT = 1000;
-                    }
+                    int baseMs = Math.Max(Settings.GlobalSettings.ReconnectTime * 1000, 1000);
+                    int timeT = Math.Min(baseMs * (1 << Math.Min(_reconnectTryCounter - 1, 5)), 30000);
 
                     _reconnectTime = (long)Time.Ticks + timeT;
                     _reconnectTryCounter++;
@@ -234,6 +239,13 @@ namespace ClassicUO.Game.Scenes
 
                 _pingTime = Time.Ticks + 60000;
             }
+        }
+
+        internal override void OnControllerButtonDown(SDL.SDL_GamepadButtonEvent e)
+        {
+            if (CurrentLoginStep == LoginSteps.Main && (SDL.SDL_GamepadButton)e.button == SDL.SDL_GamepadButton.SDL_GAMEPAD_BUTTON_SOUTH)
+                UIManager.GetGump<LoginGump>()?.TrySubmitFromController();
+            base.OnControllerButtonDown(e);
         }
 
         private Gump GetGumpForStep()
@@ -255,29 +267,44 @@ namespace ClassicUO.Game.Scenes
             {
                 case LoginSteps.Main:
                     PopupMessage = null;
-
+                    UIManager.GetGump<LoginBackground>()?.Dispose();
+                    UIManager.GetGump<SelectServerBackground>()?.Dispose();
                     return new LoginGump(this);
 
                 case LoginSteps.Connecting:
                 case LoginSteps.VerifyingAccount:
                 case LoginSteps.LoginInToServer:
                 case LoginSteps.EnteringBritania:
-                case LoginSteps.PopUpMessage:
-                case LoginSteps.CharacterCreationDone:
+                    UIManager.GetGump<LoginBackground>()?.Dispose();
+                    UIManager.GetGump<SelectServerBackground>()?.Dispose();
+                    UIManager.GetGump<CharacterSelectionBackground>()?.Dispose();
                     Client.Game.GameCursor.IsLoading = CurrentLoginStep != LoginSteps.PopUpMessage;
 
                     return GetLoadingScreen();
+                case LoginSteps.PopUpMessage:
+                case LoginSteps.CharacterCreationDone:
+                    Client.Game.GameCursor.IsLoading = CurrentLoginStep != LoginSteps.PopUpMessage;
+                    UIManager.GetGump<LoginBackground>()?.Dispose();
+                    
+                    return GetLoadingScreen();
 
-                case LoginSteps.CharacterSelection: return new CharacterSelectionGump();
+                case LoginSteps.CharacterSelection:
+                    UIManager.GetGump<LoginBackground>()?.Dispose();
+                    UIManager.GetGump<SelectServerBackground>()?.Dispose();
+                    UIManager.GetGump<CharacterSelectionBackground>()?.Dispose();
+                    UIManager.Add(new CharacterSelectionBackground());
+                    return new CharacterSelectionGump();
 
                 case LoginSteps.ServerSelection:
                     _pingTime = Time.Ticks + 60000; // reset ping timer
-
+                    UIManager.GetGump<LoginBackground>()?.Dispose();
+                    UIManager.GetGump<CharacterSelectionBackground>()?.Dispose();
                     return new ServerSelectionGump();
 
                 case LoginSteps.CharacterCreation:
-                    _pingTime = Time.Ticks + 60000; // reset ping timer
-
+                    _pingTime = Time.Ticks + 60000;
+                    UIManager.GetGump<CharacterSelectionBackground>()?.Dispose();
+                    UIManager.Add(new CharacterSelectionBackground());
                     return new CharCreationGump(this);
             }
 
@@ -320,7 +347,7 @@ namespace ClassicUO.Game.Scenes
 
                     case LoginSteps.EnteringBritania:
                         labelText = ClilocLoader.Instance.GetString(3000001, ResGeneral.EnteringBritannia); // Entering Britania...
-
+                        UIManager.GetGump<SelectServerBackground>()?.Dispose();
                         break;
 
                     case LoginSteps.CharacterCreationDone:
@@ -329,7 +356,7 @@ namespace ClassicUO.Game.Scenes
                         break;
                 }
             }
-
+            UIManager.GetGump<SelectServerBackground>()?.Dispose();
             return new LoadingGump(labelText, showButtons, OnLoadingGumpButtonClick);
         }
 

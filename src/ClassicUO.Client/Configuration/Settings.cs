@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -76,6 +76,8 @@ namespace ClassicUO.Configuration
 
         [JsonPropertyName("lang")] public string Language { get; set; } = "";
 
+        [JsonPropertyName("ui_lang")] public string UILanguage { get; set; } = "ENG";
+
         [JsonPropertyName("lastservernum")] public ushort LastServerNum { get; set; } = 1;
 
         [JsonPropertyName("last_server_name")] public string LastServerName { get; set; } = string.Empty;
@@ -87,7 +89,7 @@ namespace ClassicUO.Configuration
 
         [JsonPropertyName("is_win_maximized")] public bool IsWindowMaximized { get; set; } = true;
 
-        [JsonPropertyName("saveaccount")] public bool SaveAccount { get; set; }
+        [JsonPropertyName("saveaccount")] public bool SaveAccount { get; set; } = true;
 
         [JsonPropertyName("autologin")] public bool AutoLogin { get; set; }
 

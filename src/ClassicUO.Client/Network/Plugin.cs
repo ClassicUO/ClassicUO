@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -33,6 +33,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using ClassicUO.Configuration;
@@ -48,7 +49,7 @@ using ClassicUO.Utility.Platforms;
 using CUO_API;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using SDL2;
+using SDL3;
 
 namespace ClassicUO.Network
 {
@@ -147,9 +148,30 @@ namespace ClassicUO.Network
 
         public bool IsValid { get; private set; }
 
+        private static bool IsLikelyWindowsSpecificPlugin(string path)
+        {
+            string fileName = Path.GetFileName(path).ToLowerInvariant();
+            
+            // Check for known Windows-specific plugin names or patterns
+            var windowsSpecificPatterns = new[]
+            {
+                "assistant", "razor", "steam", "windows", "wpf", "winforms", "system.windows",
+                "classicassist", "uoassistant", "razorenhanced", "steamworks", "discord",
+                "system.drawing", "system.windows.forms", "system.windows.presentation",
+                "presentationcore", "presentationframework", "windowsbase"
+            };
+            
+            return windowsSpecificPatterns.Any(pattern => fileName.Contains(pattern));
+        }
+
+
+#if WINDOWS
         [DllImport("kernel32", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool DeleteFile(string name);
+#else
+        public static bool DeleteFile(string name) => File.Exists(name) && File.Delete(name);
+#endif
 
         public static Plugin Create(string path)
         {
@@ -166,12 +188,16 @@ namespace ClassicUO.Network
 
             Log.Trace($"Loading plugin: {path}");
 
+            Log.Info($"Loading plugin: {Path.GetFileName(path)}");
+
+
+
             Plugin p = new Plugin(path);
             p.Load();
 
             if (!p.IsValid)
             {
-                Log.Warn($"Invalid plugin: {path}");
+                Log.Warn($"Plugin '{Path.GetFileName(path)}' could not be loaded. It may be incompatible with the current platform or .NET version.");
 
                 return null;
             }
@@ -199,16 +225,8 @@ namespace ClassicUO.Network
             _get_tile_data = GetTileData;
             _get_cliloc = GetCliloc;
 
-            SDL.SDL_SysWMinfo info = new SDL.SDL_SysWMinfo();
-            SDL.SDL_VERSION(out info.version);
-            SDL.SDL_GetWindowWMInfo(Client.Game.Window.Handle, ref info);
-
-            IntPtr hwnd = IntPtr.Zero;
-
-            if (info.subsystem == SDL.SDL_SYSWM_TYPE.SDL_SYSWM_WINDOWS)
-            {
-                hwnd = info.info.win.window;
-            }
+            uint props = SDL.SDL_GetWindowProperties(Client.Game.Window.Handle);
+            IntPtr hwnd = SDL.SDL_GetPointerProperty(props, SDL.SDL_PROP_WINDOW_WIN32_HWND_POINTER, IntPtr.Zero);
 
             PluginHeader header = new PluginHeader
             {
@@ -271,7 +289,14 @@ namespace ClassicUO.Network
             {
                 try
                 {
-                    Assembly asm = Assembly.LoadFile(PluginPath);
+                    Assembly asm = LoadPlugin(PluginPath);
+                    
+                    if (asm == null)
+                    {
+                        Log.Error($"Failed to load plugin assembly: {Path.GetFileName(PluginPath)}");
+                        return;
+                    }
+
                     Type type = asm.GetType("Assistant.Engine");
 
                     if (type == null)
@@ -301,9 +326,24 @@ namespace ClassicUO.Network
                 }
                 catch (Exception err)
                 {
-                    Log.Error(
-                        $"Plugin threw an error during Initialization. {err.Message} {err.StackTrace} {err.InnerException?.Message} {err.InnerException?.StackTrace}"
-                    );
+                    // Check for specific compatibility issues
+                    if (err is TypeLoadException || 
+                        (err.InnerException is TypeLoadException) ||
+                        err.Message.Contains("WindowsBase") ||
+                        err.Message.Contains("System.Windows.Threading.Dispatcher"))
+                    {
+                        Log.Warn(
+                            $"Plugin '{Path.GetFileName(PluginPath)}' requires Windows-specific assemblies and cannot run on this platform. " +
+                            $"This plugin is designed for .NET Framework or Windows-specific .NET versions. " +
+                            $"Plugin will be skipped. Error: {err.Message}"
+                        );
+                    }
+                    else
+                    {
+                        Log.Error(
+                            $"Plugin '{Path.GetFileName(PluginPath)}' threw an error during Initialization. {err.Message} {err.StackTrace} {err.InnerException?.Message} {err.InnerException?.StackTrace}"
+                        );
+                    }
 
                     return;
                 }
@@ -660,16 +700,7 @@ namespace ClassicUO.Network
 
         internal static bool ProcessHotkeys(int key, int mod, bool ispressed)
         {
-            if (
-                !World.InGame
-                || UIManager.SystemChat != null
-                    && (
-                        ProfileManager.CurrentProfile != null
-                            && ProfileManager.CurrentProfile.ActivateChatAfterEnter
-                            && UIManager.SystemChat.IsActive
-                        || UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl
-                    )
-            )
+            if (!World.InGame)
             {
                 return true;
             }
@@ -752,10 +783,7 @@ namespace ClassicUO.Network
 
         private static bool OnPluginRecv(ref byte[] data, ref int length)
         {
-            lock (PacketHandlers.Handler)
-            {
-                PacketHandlers.Handler.Append(data.AsSpan(0, length), true);
-            }
+            PacketHandlers.Handler.Append(data.AsSpan(0, length), true);
 
             return true;
         }
@@ -1405,6 +1433,20 @@ namespace ClassicUO.Network
             public IntPtr GetStaticData;
             public IntPtr GetTileData;
             public IntPtr GetCliloc;
+        }
+
+        private static Assembly LoadPlugin(string pluginPath)
+        {
+            try
+            {
+                Log.Info($"Loading plugin: {Path.GetFileName(pluginPath)}");
+                return Assembly.LoadFrom(pluginPath);
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Failed to load plugin '{Path.GetFileName(pluginPath)}': {ex.Message}");
+                return null;
+            }
         }
     }
 }

@@ -56,8 +56,8 @@ namespace ClassicUO.Assets
         [ThreadStatic]
         private static byte[] _decompressedData;
 
-        private readonly UOFileMul[] _files = new UOFileMul[5];
-        private readonly UOFileUop[] _filesUop = new UOFileUop[4];
+        private readonly List<UOFileMul> _files = new();
+        private readonly List<UOFileUop> _filesUop = new();
 
         private readonly Dictionary<ushort, Dictionary<ushort, EquipConvData>> _equipConv = new Dictionary<ushort, Dictionary<ushort, EquipConvData>>();
         private readonly Dictionary<int, MobTypeInfo> _mobTypes = new Dictionary<int, MobTypeInfo>();
@@ -83,38 +83,26 @@ namespace ClassicUO.Assets
         private unsafe void LoadInternal()
         {
             bool loaduop = false;
-            int[] un = { 0x40000, 0x10000, 0x20000, 0x20000, 0x20000 };
+            
 
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 10; i++)
             {
-                string pathmul = UOFileManager.GetUOFilePath(
-                    "anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".mul"
-                );
-
-                string pathidx = UOFileManager.GetUOFilePath(
-                    "anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".idx"
-                );
+                var pathmul = UOFileManager.GetUOFilePath("anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".mul");
+                var pathidx = UOFileManager.GetUOFilePath("anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".idx");
 
                 if (File.Exists(pathmul) && File.Exists(pathidx))
                 {
-                    _files[i] = new UOFileMul(pathmul, pathidx, un[i], i == 0 ? 6 : -1);
+                    _files.Add(new UOFileMul(pathmul, pathidx));
                 }
 
-                if (i > 0 && UOFileManager.IsUOPInstallation)
+                if (UOFileManager.IsUOPInstallation)
                 {
-                    string pathuop = UOFileManager.GetUOFilePath($"AnimationFrame{i}.uop");
+                    var pathuop = UOFileManager.GetUOFilePath($"AnimationFrame{i}.uop");
 
                     if (File.Exists(pathuop))
                     {
-                        _filesUop[i - 1] = new UOFileUop(
-                            pathuop,
-                            "build/animationlegacyframe/{0:D6}/{0:D2}.bin"
-                        );
-
-                        if (!loaduop)
-                        {
-                            loaduop = true;
-                        }
+                        _filesUop.Add(new UOFileUop(pathuop, "build/animationlegacyframe/{0:D6}/{0:D2}.bin"));
+                        loaduop = true;
                     }
                 }
             }
@@ -325,7 +313,7 @@ namespace ClassicUO.Assets
                     var hashString = $"build/animationlegacyframe/{body:D6}/{action:D2}.bin";
                     var hash = UOFileUop.CreateHash(hashString);
 
-                    for (int index = 0; index < _filesUop.Length; ++index)
+                    for (int index = 0; index < _filesUop.Count; ++index)
                     {
                         if (_filesUop[index] != null && _filesUop[index].TryGetUOPData(hash, out var data))
                         {
@@ -617,7 +605,7 @@ namespace ClassicUO.Assets
                             }
                         }
 
-                        if (i >= _files.Length || _files[i] == null)
+                        if (i >= _files.Count || _files[i] == null)
                         {
                             continue;
                         }
@@ -1288,7 +1276,7 @@ namespace ClassicUO.Assets
             AnimationsLoader.AnimIdxBlock index
         )
         {
-            if (fileIndex < 0 || fileIndex >= _filesUop.Length)
+            if (fileIndex < 0 || fileIndex >= _filesUop.Count)
             {
                 return Span<FrameInfo>.Empty;
             }
@@ -1436,7 +1424,7 @@ namespace ClassicUO.Assets
 
         public Span<FrameInfo> ReadMULAnimationFrames(int fileIndex, AnimIdxBlock index)
         {
-            if (fileIndex < 0 || fileIndex >= _files.Length)
+            if (fileIndex < 0 || fileIndex >= _files.Count)
             {
                 return Span<FrameInfo>.Empty;
             }

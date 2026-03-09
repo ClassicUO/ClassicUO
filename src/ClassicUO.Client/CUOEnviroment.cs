@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -47,6 +47,8 @@ namespace ClassicUO
         public static bool Debug;
         public static bool IsHighDPI;
         public static uint CurrentRefreshRate;
+        public static uint CurrentRefreshRateMin = uint.MaxValue;
+        public static uint CurrentRefreshRateMax;
         public static bool SkipLoginScreen;
         public static bool IsOutlands;
         public static bool NoServerPing;

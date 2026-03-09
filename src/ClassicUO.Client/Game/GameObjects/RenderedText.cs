@@ -34,6 +34,7 @@ using ClassicUO.IO;
 using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
+using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StbTextEditSharp;
@@ -559,7 +560,7 @@ namespace ClassicUO.Game
             return true;
         }
 
-        public bool Draw(UltimaBatcher2D batcher, int x, int y, float alpha = 1, ushort hue = 0)
+        public bool Draw(UltimaBatcher2D batcher, int x, int y, float alpha = 1, ushort hue = 0, float depth = 0f, float scale = 1f)
         {
             if (string.IsNullOrEmpty(Text) || Texture == null || IsDestroyed || Texture.IsDisposed)
             {
@@ -598,12 +599,14 @@ namespace ClassicUO.Game
                 hueVector.Y = 0;
             }
 
-            batcher.Draw(Texture, new Rectangle(x, y, Width, Height), hueVector);
+            int scaleWidth = (int)(Width * scale);
+            int scaleHeight = (int)(Height * scale);
+            batcher.Draw(Texture, new Rectangle(x, y, scaleWidth, scaleHeight), hueVector, depth);
 
             return true;
         }
 
-        public unsafe void CreateTexture()
+        public void CreateTexture()
         {
             if (Texture != null && !Texture.IsDisposed)
             {
@@ -664,13 +667,20 @@ namespace ClassicUO.Game
 
             if (isValid && (Texture == null || Texture.IsDisposed))
             {
-                Texture = new Texture2D(
-                    Client.Game.GraphicsDevice,
-                    fi.Width,
-                    fi.Height,
-                    false,
-                    SurfaceFormat.Color
-                );
+                try
+                {
+                    Texture = new Texture2D(
+                        Client.Game.GraphicsDevice,
+                        fi.Width,
+                        fi.Height,
+                        false,
+                        SurfaceFormat.Color
+                    );
+                }
+                catch (Exception)
+                {
+                    isValid = false;
+                }
             }
 
             Links.Clear();
@@ -686,18 +696,16 @@ namespace ClassicUO.Game
 
             if (Texture != null && isValid)
             {
-                fixed (uint* dataPtr = fi.Data)
+                try
                 {
-                    Texture.SetDataPointerEXT(
-                        0,
-                        null,
-                        (IntPtr)dataPtr,
-                        fi.Width * fi.Height * sizeof(uint)
-                    );
+                    Texture.SetData(0, null, fi.Data, 0, fi.Data.Length);
+                    Width = Texture.Width;
+                    Height = Texture.Height;
                 }
-
-                Width = Texture.Width;
-                Height = Texture.Height;
+                catch (Exception e)
+                {
+                    Log.Error($"RenderedText.CreateTexture SetData failed: {e}");
+                }
             }
 
             if (IsHTML)

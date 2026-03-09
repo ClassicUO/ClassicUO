@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Library</OutputType>
@@ -15,7 +15,9 @@
     <None Remove="gumpartassets\40310.png" />
     <None Remove="gumpartassets\40311.png" />
     <None Remove="gumpartassets\40312.png" />
-    <None Remove="Roboto-Regular.ttf" />
+    <None Remove="gumpartassets\modern-paperdollgump.png" />
+    <None Remove="gumpartassets\loginbg.png" />
+    <None Remove="gumpartassets\logodust.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,7 +31,9 @@
     <EmbeddedResource Include="gumpartassets\40310.png" />
     <EmbeddedResource Include="gumpartassets\40311.png" />
     <EmbeddedResource Include="gumpartassets\40312.png" />
-    <EmbeddedResource Include="Roboto-Regular.ttf" />
+    <EmbeddedResource Include="gumpartassets\modern-paperdollgump.png" />
+    <EmbeddedResource Include="gumpartassets\loginbg.png" />
+    <EmbeddedResource Include="gumpartassets\logodust.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -37,5 +41,22 @@
     <ProjectReference Include="..\ClassicUO.IO\ClassicUO.IO.csproj" />
     <ProjectReference Include="..\ClassicUO.Utility\ClassicUO.Utility.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+
+  <Target Name="CopyExternalImages" AfterTargets="Build">
+    <ItemGroup>
+      <ExternalImages Include="gumpartassets\loginbg.png" />
+      <ExternalImages Include="gumpartassets\logodust.png" />
+    </ItemGroup>
+    
+    <MakeDir Directories="$(OutputPath)ExternalImages" />
+    
+    <Copy SourceFiles="@(ExternalImages)" 
+          DestinationFiles="@(ExternalImages->'$(OutputPath)ExternalImages\%(Filename)%(Extension)')" 
+          SkipUnchangedFiles="true" />
+  </Target>
 
 </Project>

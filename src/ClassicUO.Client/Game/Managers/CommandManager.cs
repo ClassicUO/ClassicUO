@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -34,6 +34,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
+using ClassicUO.TazUO.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Resources;
 using ClassicUO.Utility.Logging;
@@ -226,20 +227,12 @@ namespace ClassicUO.Game.Managers
 
             Register("paperdoll", (s) =>
             {
-                if (ProfileManager.CurrentProfile.UseModernPaperdoll)
-                {
-                    UIManager.Add(new PaperDollGump(World.Player, true));
-                }
-                else
-                {
-                    UIManager.Add(new ModernPaperdoll(World.Player));
-                }
-
+                UIManager.Add(new PaperDollGump(World.Player.Serial, true));
             });
 
             Register("optlink", (s) =>
             {
-                ModernOptionsGump g = UIManager.GetGump<ModernOptionsGump>();
+                OptionsGump g = UIManager.GetGump<OptionsGump>();
                 if (s.Length > 1)
                 {
                     if (g != null)
@@ -248,7 +241,7 @@ namespace ClassicUO.Game.Managers
                     }
                     else
                     {
-                        UIManager.Add(g = new ModernOptionsGump());
+                        UIManager.Add(g = new OptionsGump());
                         g.GoToPage(s[1]);
                     }
                 }
@@ -264,6 +257,19 @@ namespace ClassicUO.Game.Managers
             Register("genspelldef", (s) =>
             {
                 Task.Run(SpellDefinition.SaveAllSpellsToJson);
+            });
+
+            Register("setinscreen", (s) =>
+            {
+                for (LinkedListNode<Gump> last = UIManager.Gumps.Last; last != null; last = last.Previous)
+                {
+                    Gump c = last.Value;
+
+                    if (!c.IsDisposed)
+                    {
+                        c.SetInScreen();   
+                    }
+                }
             });
         }
 

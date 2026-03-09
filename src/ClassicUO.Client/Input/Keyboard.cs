@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -30,7 +30,7 @@
 
 #endregion
 
-using SDL2;
+using SDL3;
 
 namespace ClassicUO.Input
 {
@@ -38,61 +38,49 @@ namespace ClassicUO.Input
     {
         private static SDL.SDL_Keycode _code;
 
-
-        public static SDL.SDL_Keymod IgnoreKeyMod { get; } = SDL.SDL_Keymod.KMOD_CAPS | SDL.SDL_Keymod.KMOD_NUM | SDL.SDL_Keymod.KMOD_MODE | SDL.SDL_Keymod.KMOD_RESERVED;
+        public static SDL.SDL_Keymod IgnoreKeyMod { get; } = SDL.SDL_Keymod.SDL_KMOD_CAPS | SDL.SDL_Keymod.SDL_KMOD_NUM | SDL.SDL_Keymod.SDL_KMOD_MODE | SDL.SDL_Keymod.SDL_KMOD_SCROLL;
 
         public static bool Alt { get; private set; }
         public static bool Shift { get; private set; }
         public static bool Ctrl { get; private set; }
 
-
-        //public static bool IsKeyPressed(SDL.SDL_Keycode code)
-        //{
-        //    return code != SDL.SDL_Keycode.SDLK_UNKNOWN && _code == code;
-        //}
-
-        //public static bool IsModPressed(SDL.SDL_Keymod mod, SDL.SDL_Keymod tocheck)
-        //{
-        //    mod ^= mod & IgnoreKeyMod;
-
-        //    return tocheck == mod || mod != SDL.SDL_Keymod.KMOD_NONE && (mod & tocheck) != 0;
-        //}
-
         public static void OnKeyUp(SDL.SDL_KeyboardEvent e)
         {
-            SDL.SDL_Keymod mod = e.keysym.mod & ~IgnoreKeyMod;
-
-            if ((mod & (SDL.SDL_Keymod.KMOD_RALT | SDL.SDL_Keymod.KMOD_LCTRL)) == (SDL.SDL_Keymod.KMOD_RALT | SDL.SDL_Keymod.KMOD_LCTRL))
-            {
-                e.keysym.sym = SDL.SDL_Keycode.SDLK_UNKNOWN;
-                e.keysym.mod = SDL.SDL_Keymod.KMOD_NONE;
-            }
-
-            Shift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
-            Alt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
-            Ctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
-
+            ApplyFilter(ref e);
+            UpdateModifiers(e.mod);
             _code = SDL.SDL_Keycode.SDLK_UNKNOWN;
         }
 
         public static void OnKeyDown(SDL.SDL_KeyboardEvent e)
         {
-            SDL.SDL_Keymod mod = e.keysym.mod & ~IgnoreKeyMod;
+            ApplyFilter(ref e);
+            UpdateModifiers(e.mod);
+            if ((SDL.SDL_Keycode)e.key != SDL.SDL_Keycode.SDLK_UNKNOWN)
+                _code = (SDL.SDL_Keycode)e.key;
+        }
 
-            if ((mod & (SDL.SDL_Keymod.KMOD_RALT | SDL.SDL_Keymod.KMOD_LCTRL)) == (SDL.SDL_Keymod.KMOD_RALT | SDL.SDL_Keymod.KMOD_LCTRL))
+        private static void ApplyFilter(ref SDL.SDL_KeyboardEvent e)
+        {
+            if ((e.mod & (SDL.SDL_Keymod.SDL_KMOD_RALT | SDL.SDL_Keymod.SDL_KMOD_LCTRL)) == (SDL.SDL_Keymod.SDL_KMOD_RALT | SDL.SDL_Keymod.SDL_KMOD_LCTRL))
             {
-                e.keysym.sym = SDL.SDL_Keycode.SDLK_UNKNOWN;
-                e.keysym.mod = SDL.SDL_Keymod.KMOD_NONE;
+                e.key = (uint)SDL.SDL_Keycode.SDLK_UNKNOWN;
+                e.mod = SDL.SDL_Keymod.SDL_KMOD_NONE;
             }
+        }
 
-            Shift = (e.keysym.mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
-            Alt = (e.keysym.mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
-            Ctrl = (e.keysym.mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
+        private static void UpdateModifiers(SDL.SDL_Keymod mod)
+        {
+            SDL.SDL_Keymod m = mod & ~IgnoreKeyMod;
+            if ((m & (SDL.SDL_Keymod.SDL_KMOD_RALT | SDL.SDL_Keymod.SDL_KMOD_LCTRL)) == (SDL.SDL_Keymod.SDL_KMOD_RALT | SDL.SDL_Keymod.SDL_KMOD_LCTRL))
+                m = SDL.SDL_Keymod.SDL_KMOD_NONE;
+            Shift = (m & SDL.SDL_Keymod.SDL_KMOD_SHIFT) != SDL.SDL_Keymod.SDL_KMOD_NONE;
+            Alt = (m & SDL.SDL_Keymod.SDL_KMOD_ALT) != SDL.SDL_Keymod.SDL_KMOD_NONE;
+            Ctrl = (m & SDL.SDL_Keymod.SDL_KMOD_CTRL) != SDL.SDL_Keymod.SDL_KMOD_NONE;
+        }
 
-            if (e.keysym.sym != SDL.SDL_Keycode.SDLK_UNKNOWN)
-            {
-                _code = e.keysym.sym;
-            }
+        public static void Refresh()
+        {
+            UpdateModifiers(SDL.SDL_GetModState());
         }
     }
 }

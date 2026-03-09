@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -311,8 +311,15 @@ namespace ClassicUO.Game.Map
             while (o != null)
             {
                 int testPriorityZ = o.PriorityZ;
+                bool shouldInsertBefore = testPriorityZ > priorityZ
+                    || (testPriorityZ == priorityZ && (state == 0 || state == 1 && !(o is Land)));
 
-                if (testPriorityZ > priorityZ || testPriorityZ == priorityZ && (state == 0 || state == 1 && !(o is Land)))
+                if (obj is Entity objEntity && o is Entity existingEntity && testPriorityZ == priorityZ && !shouldInsertBefore)
+                {
+                    shouldInsertBefore = existingEntity.Serial > objEntity.Serial;
+                }
+
+                if (shouldInsertBefore)
                 {
                     break;
                 }

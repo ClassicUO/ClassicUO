@@ -1,4 +1,4 @@
-﻿using ClassicUO.Configuration;
+using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
@@ -9,13 +9,13 @@ using ClassicUO.Dust765.Managers;
 using System;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
-using System.Threading.Tasks;
-using static ClassicUO.Game.Managers.SpellVisualRangeManager;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using ClassicUO.Game.GameObjects;
-using System.Threading;
 
 namespace ClassicUO.Dust765.External
 {
@@ -30,7 +30,19 @@ namespace ClassicUO.Dust765.External
         private static Label _text;
         //private TextureControl _icon;
         private StaticPic _icon;
-        static private Dictionary<string, SpellRangeInfo> spellRangePowerWordCache = new Dictionary<string, SpellRangeInfo>();
+        private static Dictionary<string, SpellRangeInfo> spellRangePowerWordCache = new Dictionary<string, SpellRangeInfo>();
+
+        private static string RemoveContentInBrackets(string input)
+        {
+            return Regex.Replace(input, @"\[.*?\]", "").Trim();
+        }
+
+        private class SpellRangeInfo
+        {
+            public int ID { get; set; } = -1;
+            public string Name { get; set; } = "";
+            public string PowerWords { get; set; } = "";
+        }
         private AlphaBlendControl _loadingBar;
         private Timer _loadingTimer;
         private int _loadingProgress;
@@ -94,7 +106,6 @@ namespace ClassicUO.Dust765.External
                 }
                 _endTime = _startTime + 400 + (circle + protection_delay) * 250 + _re; // (0.5+ 0.25 * circle) * 1000
                 GameActions.iscasting = true;
-                GameActions.spellCircle = spell;
             }
             catch
             {
@@ -137,9 +148,6 @@ namespace ClassicUO.Dust765.External
         {
             GameActions.iscasting = false;
             IsVisible = false;
-            GameActions.spellCircle = 0;
-
-
         }
 
         public static void OnSceneLoad()

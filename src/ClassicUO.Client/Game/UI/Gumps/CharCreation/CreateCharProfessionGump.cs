@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -33,10 +33,13 @@
 using System;
 using ClassicUO.Configuration;
 using System.Collections.Generic;
+using ClassicUO.Game;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Assets;
+using Microsoft.Xna.Framework;
+using Cyotek.Drawing.BitmapFont;
 
 namespace ClassicUO.Game.UI.Gumps.CharCreation
 {
@@ -166,33 +169,31 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
     internal class ProfessionInfoGump : Control
     {
         private readonly ProfessionInfo _info;
+        private readonly UOLabel _professionLabel;
+        private GumpPic _gumpPic;
+        private static GumpPic _lastSelectedGumpPic;
+        private static readonly Color NormalColor = Color.White;
+        private static readonly Color HoverColor = new Color(255, 220, 140);
 
         public ProfessionInfoGump(ProfessionInfo info)
         {
             _info = info;
+            Width = 200;
+            Height = 52;
 
             ClilocLoader localization = ClilocLoader.Instance;
 
-            ResizePic background = new ResizePic(3000)
-            {
-                Width = 175,
-                Height = 34
-            };
+            _professionLabel = new UOLabel(localization.GetString(info.Localization), 1, UOLabelHue.Text, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 300) { X = 120, Y = 8 };
+            Add(_professionLabel);
 
-            background.SetTooltip(localization.GetString(info.Description), 250);
+            _gumpPic = new GumpPic(54, -12, info.Graphic, 0);
+            Add(_gumpPic);
 
-            Add(background);
-
-            Add
-            (
-                new Label(localization.GetString(info.Localization), true, 0x00, font: 1)
-                {
-                    X = 7,
-                    Y = 8
-                }
-            );
-
-            Add(new GumpPic(121, -12, info.Graphic, 0));
+            _gumpPic.MouseEnter += OnGumpPicMouseEnter;
+            _gumpPic.MouseExit += OnGumpPicMouseExit;
+            _gumpPic.MouseUp += OnGumpPicMouseUp;
+            MouseEnter += OnControlMouseEnter;
+            MouseExit += OnControlMouseExit;
         }
 
         public Action<ProfessionInfo> Selected;
@@ -205,6 +206,44 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             {
                 Selected?.Invoke(_info);
             }
+        }
+
+        private void OnGumpPicMouseUp(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtonType.Left)
+            {
+                // Se existir um GumpPic previamente selecionado, restaura sua opacidade
+                if (_lastSelectedGumpPic != null)
+                {
+                    _lastSelectedGumpPic.Alpha = 1.0f; // Restaura opacidade total
+                }
+
+                // Define o novo GumpPic clicado como selecionado
+                _gumpPic.Alpha = 0.5f; // Define opacidade reduzida (50%)
+                _lastSelectedGumpPic = _gumpPic; // Atualiza o GumpPic selecionado globalmente
+            }
+        }
+
+        private void OnGumpPicMouseEnter(object sender, EventArgs e)
+        {
+            _gumpPic.Alpha = 0.5f;
+            _professionLabel.Hue = UOLabelHue.Hover;
+        }
+
+        private void OnGumpPicMouseExit(object sender, EventArgs e)
+        {
+            _gumpPic.Alpha = 1.0f;
+            _professionLabel.Hue = UOLabelHue.Text;
+        }
+
+        private void OnControlMouseEnter(object sender, EventArgs e)
+        {
+            _professionLabel.Hue = UOLabelHue.Hover;
+        }
+
+        private void OnControlMouseExit(object sender, EventArgs e)
+        {
+            _professionLabel.Hue = UOLabelHue.Text;
         }
     }
 }

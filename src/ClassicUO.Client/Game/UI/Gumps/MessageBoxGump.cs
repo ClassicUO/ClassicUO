@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -34,7 +34,7 @@ using System;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
-using SDL2;
+using SDL3;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -92,7 +92,7 @@ namespace ClassicUO.Game.UI.Gumps
                 (
                     message,
                     false,
-                    0x0386,
+                    0x0481,
                     Width - 90,
                     1
                 )
@@ -214,7 +214,8 @@ namespace ClassicUO.Game.UI.Gumps
                     false,
                     0x0386,
                     Width - 90,
-                    1
+                    1,
+                    FontStyle.None
                 )
                 {
                     X = 40,
@@ -241,7 +242,8 @@ namespace ClassicUO.Game.UI.Gumps
                 -1,
                 ww,
                 true,
-                FontStyle.BlackBorder | FontStyle.Fixed
+                FontStyle.None | FontStyle.Fixed,
+                0x0386
             )
             {
                 X = 42,

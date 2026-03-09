@@ -81,7 +81,7 @@ namespace ClassicUO.Game.UI.Gumps
                         if (c.Alpha > 1) c.Alpha = 1;
                     }
                 }
-                else if(Alpha > 0.1)
+                else if (Alpha > 0.1)
                 {
                     AlphaOffset -= 0.02f;
                     Alpha -= 0.02f;
@@ -143,7 +143,7 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
             base.OnMouseUp(x, y, button);
-            if (CanBeLocked && Keyboard.Ctrl && Keyboard.Alt && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
+            if (CanBeLocked && ((Keyboard.Ctrl && Keyboard.Alt) || Controller.Button_LeftTrigger) && UIManager.MouseOverControl != null && (UIManager.MouseOverControl == this || UIManager.MouseOverControl.RootParent == this))
             {
                 IsLocked ^= true;
             }
@@ -158,6 +158,30 @@ namespace ClassicUO.Game.UI.Gumps
             writer.WriteAttributeString("serverSerial", ServerSerial.ToString());
             writer.WriteAttributeString("isLocked", isLocked.ToString());
             writer.WriteAttributeString("alphaOffset", AlphaOffset.ToString());
+        }
+
+        public void CenterXInScreen()
+        {
+            Rectangle windowBounds = Client.Game.Window.ClientBounds;
+            X = (windowBounds.Width - Width) / 2;
+        }
+
+        public void CenterYInScreen()
+        {
+            Rectangle windowBounds = Client.Game.Window.ClientBounds;
+            Y = (windowBounds.Height - Height) / 2;
+        }
+
+        public void CenterXInViewPort()
+        {
+            var camera = Client.Game.Scene.Camera;
+            X = camera.Bounds.X + ((camera.Bounds.Width - Width) / 2);;
+        }
+
+        public void CenterYInViewPort()
+        {
+            var camera = Client.Game.Scene.Camera;
+            Y = camera.Bounds.Y + ((camera.Bounds.Height - Height) / 2);
         }
 
         public void SetInScreen()
