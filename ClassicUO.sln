@@ -76,7 +76,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MP3Sharp", "external\MP3Sha
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FontStashSharp.FNA.Core", "external\FontStashSharp\src\XNA\FontStashSharp.FNA.Core.csproj", "{5ACA68DA-A282-434D-919F-B243A801D4C3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UOScript.SDK", "external\UOSteam\UOScript\UOScript.SDK.csproj", "{569EABF7-8980-4A3B-BF3A-6321C4B1DA78}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UOScript.SDK", "external\UOSteam\UOScript\UOScript.csproj", "{569EABF7-8980-4A3B-BF3A-6321C4B1DA78}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -33,19 +33,19 @@ jobs:
           path: build/win-x64
 
   build-linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-      - name: Setup Mono for .NET 8
+      - name: Setup .NET 8
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
       - name: Install Mono
         run: |
           sudo apt-get update
-          sudo apt-get install -y mono-complete msbuild
+          sudo apt-get install -y mono-complete
       - name: Restore dependencies
         run: dotnet restore src/ClassicUO.Client/ClassicUO.Client.csproj
       - name: Build with Mono
@@ -71,9 +71,7 @@ jobs:
         with:
           dotnet-version: '8.0.x'
       - name: Install Mono
-        run: |
-          brew install mono
-          brew install msbuild
+        run: brew install mono
       - name: Restore dependencies
         run: dotnet restore src/ClassicUO.Client/ClassicUO.Client.csproj
       - name: Build with Mono
