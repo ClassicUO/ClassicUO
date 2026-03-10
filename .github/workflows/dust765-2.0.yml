@@ -133,7 +133,8 @@ jobs:
           tag_name: ${{ github.ref == 'refs/heads/developer' && format('pre-v{0}', github.run_number) || format('v{0}', github.run_number) }}
           name: ${{ github.ref == 'refs/heads/developer' && format('Pre-Release v{0}', github.run_number) || format('Release v{0}', github.run_number) }}
           draft: true
-          prerelease: ${{ github.ref == 'refs/heads/developer' }}
+          prerelease: ${{ github.ref == 'refs/heads/developer' && 'true' || 'false' }}
+          make_latest: ${{ github.ref == 'refs/heads/main' && 'true' || 'false' }}
           files: |
             ClassicUO-Windows-x64.zip
             ClassicUO-Linux-x64.tar.gz
