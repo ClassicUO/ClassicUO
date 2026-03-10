@@ -42,6 +42,11 @@
     <DefineConstants>$(DefineConstants);WINDOWS</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'UOScript'">
+    <BaseOutputPath Condition="'$(BaseOutputPath)' == ''">$(MSBuildProjectDirectory)/bin/</BaseOutputPath>
+    <OutputPath Condition="'$(OutputPath)' == ''">$(BaseOutputPath)$(Configuration)/</OutputPath>
+  </PropertyGroup>
+
   <ItemGroup Condition="'$(MSBuildProjectName)' != 'UOScript'">
     <PackageReference Include="System.Text.Json" Version="8.0.5" />
   </ItemGroup>
