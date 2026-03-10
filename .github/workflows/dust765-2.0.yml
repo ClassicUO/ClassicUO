@@ -17,6 +17,8 @@ jobs:
           fetch-depth: 0
       - name: Init submodules
         run: git submodule update --init --recursive
+      - name: Override UOScript.csproj for net48
+        run: copy .github\UOScript.csproj external\UOSteam\UOScript\UOScript.csproj
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v4
         with:
@@ -44,6 +46,8 @@ jobs:
           fetch-depth: 0
       - name: Init submodules
         run: git submodule update --init --recursive
+      - name: Override UOScript.csproj for net48
+        run: cp .github/UOScript.csproj external/UOSteam/UOScript/UOScript.csproj
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v4
         with:
@@ -75,6 +79,8 @@ jobs:
           fetch-depth: 0
       - name: Init submodules
         run: git submodule update --init --recursive
+      - name: Override UOScript.csproj for net48
+        run: cp .github/UOScript.csproj external/UOSteam/UOScript/UOScript.csproj
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v4
         with:

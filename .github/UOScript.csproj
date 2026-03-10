@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <RootNamespace>UOScript</RootNamespace>
+    <AssemblyName>UOScript</AssemblyName>
+    <OutputType>Library</OutputType>
+    <LangVersion>latest</LangVersion>
+    <Platforms>AnyCPU;x64;ARM64</Platforms>
+  </PropertyGroup>
+</Project>
