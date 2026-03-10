@@ -138,7 +138,8 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 ## 🙏 **Acknowledgments**
 
 - **andreakarasho** - Original creator of ClassicUO (the real MVP)
-- **gaetchi** - Best cheater
+- **Gaechti** - Best cheater
+- Supoorts Marcos Guerine and Lissandro
 - **FNA Team** - Cross-platform graphics engine (the unsung heroes)
 - **UO Community** - For the feedback and support (even the toxic parts)
 - **Contributors** - Everyone who helped make this project possible
