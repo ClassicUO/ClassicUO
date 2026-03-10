@@ -141,14 +141,14 @@ namespace ClassicUO.Configuration
                 throw new InvalidDataException();
             }
 
-            if (profile.WindowClientBounds.X < 1024)
+            if (profile.WindowClientBounds.X < ClassicUO.Game.Constants.MIN_GAME_WINDOW_WIDTH)
             {
-                profile.WindowClientBounds = new Point(1024, profile.WindowClientBounds.Y);
+                profile.WindowClientBounds = new Point(ClassicUO.Game.Constants.MIN_GAME_WINDOW_WIDTH, profile.WindowClientBounds.Y);
             }
 
-            if (profile.WindowClientBounds.Y < 768)
+            if (profile.WindowClientBounds.Y < ClassicUO.Game.Constants.MIN_GAME_WINDOW_HEIGHT)
             {
-                profile.WindowClientBounds = new Point(profile.WindowClientBounds.X, 768);
+                profile.WindowClientBounds = new Point(profile.WindowClientBounds.X, ClassicUO.Game.Constants.MIN_GAME_WINDOW_HEIGHT);
             }
         }
 

@@ -188,7 +188,6 @@ namespace ClassicUO.Game.Managers
 
         public static readonly LastTargetInfo LastTargetInfo = new LastTargetInfo();
 
-
         public static MultiTargetInfo MultiTargetInfo { get; private set; }
 
         public static CursorTarget TargetingState { get; private set; } = CursorTarget.Invalid;

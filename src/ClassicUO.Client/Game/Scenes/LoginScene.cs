@@ -166,7 +166,9 @@ namespace ClassicUO.Game.Scenes
                 Client.Game.RestoreWindow();
             }
 
-            Client.Game.SetWindowSize(1024, 768);
+            var mode = Client.Game.GraphicsDevice.Adapter.CurrentDisplayMode;
+            LoginLayoutHelper.Initialize(mode.Width, mode.Height);
+            Client.Game.SetWindowSize(LoginLayoutHelper.WindowWidth, LoginLayoutHelper.WindowHeight);
         }
 
 

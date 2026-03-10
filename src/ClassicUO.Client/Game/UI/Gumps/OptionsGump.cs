@@ -38,10 +38,12 @@ using ClassicUO.Configuration;
 // ## BEGIN - END ## // UI/GUMPS
 using ClassicUO.Dust765.Dust765;
 // ## BEGIN - END ## // UI/GUMPS
+using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Gumps.Login;
 using ClassicUO.TazUO.Options;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
@@ -61,15 +63,8 @@ namespace ClassicUO.Game.UI.Gumps
     {
         private const byte FONT = 0xFF;
         private const ushort HUE_FONT = 0xFFFF;
-        private const int WIDTH = 700;
-        // ## BEGIN - END ## // NAMEOVERHEAD
-        //private const int HEIGHT = 500;
-        // ## BEGIN - END ## // NAMEOVERHEAD
-        //private const int HEIGHT = 550;
-        // ## BEGIN - END ## // NAMEOVERHEAD
-        // ## BEGIN - END ## // TAZUO
-        private const int HEIGHT = 720;
-        // ## BEGIN - END ## // TAZUO
+        private static int WIDTH => LoginLayoutHelper.OptionsWidth;
+        private static int HEIGHT => LoginLayoutHelper.OptionsHeight;
         private const int TEXTBOX_HEIGHT = 25;
 
         private static Texture2D _logoTexture2D;
@@ -345,7 +340,7 @@ namespace ClassicUO.Game.UI.Gumps
                     140,
                     25,
                     ButtonAction.SwitchPage,
-                    _lang.ButtonGeneral
+                    ResGumps.General
                 )
                 { IsSelected = true, ButtonParameter = 1 }
             );
@@ -723,9 +718,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollArea rightArea = new ScrollArea
             (
-                190,
+                165,
                 20,
-                WIDTH - 210,
+                WIDTH - 185,
                 HEIGHT - 80,
                 true
             );
@@ -767,7 +762,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            section.Add
+            section.AddRight
             (
                 _useShiftPathfind = AddCheckBox
                 (
@@ -803,7 +798,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            section.Add
+            section.AddRight
             (
                 _alwaysRunUnlessHidden = AddCheckBox
                 (
@@ -827,7 +822,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            section.Add
+            section.AddRight
             (
                 _smoothDoors = AddCheckBox
                 (
@@ -1667,9 +1662,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollArea rightArea = new ScrollArea
             (
-                190,
+                165,
                 20,
-                WIDTH - 210,
+                WIDTH - 185,
                 HEIGHT - 80,
                 true
             );
@@ -1788,9 +1783,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollArea rightArea = new ScrollArea
             (
-                190,
+                165,
                 20,
-                WIDTH - 210,
+                WIDTH - 185,
                 HEIGHT - 80,
                 true
             );
@@ -2185,7 +2180,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             const int PAGE = 4;
 
-            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, HEIGHT - 80, true);
+            ScrollArea rightArea = new ScrollArea(165, 20, WIDTH - 185, HEIGHT - 80, true);
             rightArea.ScrollbarBehaviour = ScrollbarBehaviour.ShowAlways;
 
             int startX = 5;
@@ -2426,9 +2421,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollArea rightArea = new ScrollArea
             (
-                190,
+                165,
                 20,
-                WIDTH - 210,
+                WIDTH - 185,
                 HEIGHT - 80,
                 true
             );
@@ -2518,9 +2513,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollArea rightArea = new ScrollArea
             (
-                190,
+                165,
                 20,
-                WIDTH - 210,
+                WIDTH - 185,
                 HEIGHT - 80,
                 true
             );
@@ -2588,9 +2583,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollArea rightArea = new ScrollArea
             (
-                190,
+                165,
                 20,
-                WIDTH - 210,
+                WIDTH - 185,
                 HEIGHT - 80,
                 true
             );
@@ -2844,9 +2839,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollArea rightArea = new ScrollArea
             (
-                190,
+                165,
                 20,
-                WIDTH - 210,
+                WIDTH - 185,
                 HEIGHT - 80,
                 true
             );
@@ -3077,9 +3072,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollArea rightArea = new ScrollArea
             (
-                190,
+                165,
                 20,
-                WIDTH - 210,
+                WIDTH - 185,
                 HEIGHT - 80,
                 true
             );
@@ -3243,9 +3238,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollArea rightArea = new ScrollArea
             (
-                190,
+                165,
                 20,
-                WIDTH - 210,
+                WIDTH - 185,
                 HEIGHT - 80,
                 true
             );
@@ -3319,9 +3314,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollArea rightArea = new ScrollArea
             (
-                190,
+                165,
                 20,
-                WIDTH - 210,
+                WIDTH - 185,
                 HEIGHT - 80,
                 true
             );
@@ -3450,9 +3445,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollArea rightArea = new ScrollArea
             (
-                190,
+                165,
                 20,
-                WIDTH - 210,
+                WIDTH - 185,
                 HEIGHT - 80,
                 true
             );
@@ -3635,10 +3630,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollArea rightArea = new ScrollArea
             (
-                190,
+                165,
                 52 + 25 + 4,
                 150,
-                360,
+                HEIGHT - 101,
                 true
             );
 
@@ -3646,9 +3641,9 @@ namespace ClassicUO.Game.UI.Gumps
             (
                 new Line
                 (
-                    190,
+                    165,
                     52 + 25 + 2,
-                    150,
+                    WIDTH - 165,
                     1,
                     Color.Gray.PackedValue
                 ),
@@ -3659,10 +3654,10 @@ namespace ClassicUO.Game.UI.Gumps
             (
                 new Line
                 (
-                    191 + 150,
+                    165 + 150,
                     21,
                     1,
-                    418,
+                    HEIGHT - 41,
                     Color.Gray.PackedValue
                 ),
                 PAGE
@@ -3670,7 +3665,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             NiceButton addButton = new NiceButton
             (
-                190,
+                165,
                 20,
                 130,
                 20,
@@ -3683,7 +3678,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             NiceButton delButton = new NiceButton
             (
-                190,
+                165,
                 52,
                 130,
                 20,
@@ -3743,7 +3738,7 @@ namespace ClassicUO.Game.UI.Gumps
                         NameOverHeadManager.AddOption(option);
                         _nameOverheadControl = new NameOverheadAssignControl(option)
                         {
-                            X = 400,
+                            X = 325,
                             Y = 20
                         };
                         Add(_nameOverheadControl, PAGE);
@@ -3752,7 +3747,7 @@ namespace ClassicUO.Game.UI.Gumps
                             _nameOverheadControl?.Dispose();
                             _nameOverheadControl = new NameOverheadAssignControl(option)
                             {
-                                X = 400,
+                                X = 325,
                                 Y = 20
                             };
                             Add(_nameOverheadControl, PAGE);
@@ -3827,7 +3822,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _nameOverheadControl?.Dispose();
                     _nameOverheadControl = new NameOverheadAssignControl(option)
                     {
-                        X = 400,
+                        X = 325,
                         Y = 20
                     };
                     Add(_nameOverheadControl, PAGE);
@@ -3845,7 +3840,7 @@ namespace ClassicUO.Game.UI.Gumps
             // ## BEGIN - END ## // TAZUO
             //ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
             // ## BEGIN - END ## // TAZUO
-            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, HEIGHT - 80, true);
+            ScrollArea rightArea = new ScrollArea(165, 20, WIDTH - 185, HEIGHT - 80, true);
             rightArea.ScrollbarBehaviour = ScrollbarBehaviour.ShowAlways;
             // ## BEGIN - END ## // TAZUO
 
@@ -4289,9 +4284,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             ScrollArea rightArea = new ScrollArea
             (
-                190,
+                165,
                 20,
-                WIDTH - 210,
+                WIDTH - 185,
                 HEIGHT - 80,
                 true
             );
@@ -4354,7 +4349,7 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildGridContainer()
         {
             const int PAGE = 8788;
-            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, HEIGHT - 80, true);
+            ScrollArea rightArea = new ScrollArea(165, 20, WIDTH - 185, HEIGHT - 80, true);
             rightArea.ScrollbarBehaviour = ScrollbarBehaviour.ShowAlways;
 
             SettingsSection gridSection = new SettingsSection("Grid Containers", rightArea.Width);
@@ -4625,7 +4620,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             const int PAGE = 8789;
 
-            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, HEIGHT - 80, true);
+            ScrollArea rightArea = new ScrollArea(165, 20, WIDTH - 185, HEIGHT - 80, true);
             rightArea.ScrollbarBehaviour = ScrollbarBehaviour.ShowAlways;
 
             int startX = 5;
@@ -4706,7 +4701,7 @@ namespace ClassicUO.Game.UI.Gumps
             // ## BEGIN - END ## // TAZUO
             //ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
             // ## BEGIN - END ## // TAZUO
-            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, HEIGHT - 80, true);
+            ScrollArea rightArea = new ScrollArea(165, 20, WIDTH - 185, HEIGHT - 80, true);
             rightArea.ScrollbarBehaviour = ScrollbarBehaviour.ShowAlways;
             // ## BEGIN - END ## // TAZUO
 
@@ -5295,7 +5290,7 @@ namespace ClassicUO.Game.UI.Gumps
             // ## BEGIN - END ## // TAZUO
             //ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, 420, true);
             // ## BEGIN - END ## // TAZUO
-            ScrollArea rightArea = new ScrollArea(190, 20, WIDTH - 210, HEIGHT - 80, true);
+            ScrollArea rightArea = new ScrollArea(165, 20, WIDTH - 185, HEIGHT - 80, true);
             rightArea.ScrollbarBehaviour = ScrollbarBehaviour.ShowAlways;
             // ## BEGIN - END ## // TAZUO
 
@@ -5940,8 +5935,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _windowBorderless.IsChecked = false;
                     _zoomCheckbox.IsChecked = false;
                     _restorezoomCheckbox.IsChecked = false;
-                    _gameWindowWidth.SetText("1024");
-                    _gameWindowHeight.SetText("768");
+                    _gameWindowWidth.SetText(Constants.MIN_GAME_WINDOW_WIDTH.ToString());
+                    _gameWindowHeight.SetText(Constants.MIN_GAME_WINDOW_HEIGHT.ToString());
                     _gameWindowPositionX.SetText("20");
                     _gameWindowPositionY.SetText("20");
                     _gameWindowLock.IsChecked = false;
@@ -6488,7 +6483,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (vp != null)
                     {
-                        n = vp.ResizeGameWindow(new Point(1024, 768));
+                        n = vp.ResizeGameWindow(new Point(Constants.MIN_GAME_WINDOW_WIDTH, Constants.MIN_GAME_WINDOW_HEIGHT));
                         vp.SetGameWindowPosition(new Point(20, 20));
                         _currentProfile.GameWindowPosition = vp.Location;
                     }
@@ -7238,7 +7233,7 @@ namespace ClassicUO.Game.UI.Gumps
                 LogoTexture,
                 new Rectangle
                 (
-                    x + 190,
+                    x + 165,
                     y + 20,
                     WIDTH - 250,
                     400

@@ -570,6 +570,12 @@ namespace ClassicUO.Game
             return true;
         }
 
+        public static void SetLastTarget(uint serial)
+        {
+            if (World.InGame && serial != 0)
+                TargetManager.LastTargetInfo.SetEntity(serial);
+        }
+
         public static void Attack(uint serial)
         {
             if (ProfileManager.CurrentProfile.EnabledCriminalActionQuery)

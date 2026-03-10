@@ -80,8 +80,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
             _buttonNormal = 0x5CD;
             _buttonOver = 0x5CB;
             UIManager.Add(new LoginBackground());
-            const int LogoMaxWidth = 800;
-            const int LogoMaxHeight = 200;
+            const int LogoMaxWidth = 750;
+            const int LogoMaxHeight = 188;
             if (LogoBackgroundImg != null)
             {
                 float scale = Math.Min((float)LogoMaxWidth / LogoBackgroundImg.Width, (float)LogoMaxHeight / LogoBackgroundImg.Height);
@@ -342,14 +342,21 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Utility.Platforms.PlatformHelper.LaunchBrowser("https://github.com/dust765/ClassicUO/wiki");
             };
 
-            var updateLabel = new UOLabel("Update available - click to download and install", 1, 0x0035, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 350) { X = LoginLayoutHelper.X(30), Y = LoginLayoutHelper.Y(630), IsVisible = UpdateManager.HasUpdate };
-            var updateHitBox = new HitBox(updateLabel.X, updateLabel.Y, updateLabel.Width, updateLabel.Height) { IsVisible = UpdateManager.HasUpdate };
-            updateHitBox.MouseUp += (s, e) =>
+            var updateBtn = new GothicStyleButtonLogin(
+                LoginLayoutHelper.X(30),
+                LoginLayoutHelper.Y(628),
+                320,
+                24,
+                "Update available - click to download and install",
+                null,
+                12
+            )
             {
-                UpdateManager.StartUpdateAndExit();
+                IsVisible = UpdateManager.HasUpdate,
+                TextColor = new Color(0, 150, 255)
             };
-            Add(updateLabel);
-            Add(updateHitBox);
+            updateBtn.OnClick += () => UpdateManager.StartUpdateAndExit();
+            Add(updateBtn);
 
             if (!string.IsNullOrEmpty(_textboxAccount.Text))
             {
@@ -365,10 +372,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 UpdateManager.UpdateStatusChanged += (s, e) =>
                 {
                     if (UpdateManager.HasUpdate)
-                    {
-                        updateLabel.IsVisible = true;
-                        updateHitBox.IsVisible = true;
-                    }
+                        updateBtn.IsVisible = true;
                 };
             }
 

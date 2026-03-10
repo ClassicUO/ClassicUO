@@ -31,6 +31,7 @@
 #endregion
 
 using ClassicUO.Assets;
+using ClassicUO.Game;
 using ClassicUO.Configuration;
 // ## BEGIN - END ## // UI/GUMPS
 using ClassicUO.Dust765.External;
@@ -196,7 +197,7 @@ namespace ClassicUO.Game.Scenes
             EventSink.MessageReceived += ChatOnMessageReceived;
             UIManager.ContainerScale = ProfileManager.CurrentProfile.ContainersScale / 100f;
 
-            SDL.SDL_SetWindowMinimumSize(Client.Game.Window.Handle, 1024, 768);
+            SDL.SDL_SetWindowMinimumSize(Client.Game.Window.Handle, Constants.MIN_GAME_WINDOW_WIDTH, Constants.MIN_GAME_WINDOW_HEIGHT);
 
             if (ProfileManager.CurrentProfile.WindowBorderless)
             {
@@ -211,8 +212,8 @@ namespace ClassicUO.Game.Scenes
                 int w = Settings.GlobalSettings.WindowSize.Value.X;
                 int h = Settings.GlobalSettings.WindowSize.Value.Y;
 
-                w = Math.Max(1024, w);
-                h = Math.Max(768, h);
+                w = Math.Max(Constants.MIN_GAME_WINDOW_WIDTH, w);
+                h = Math.Max(Constants.MIN_GAME_WINDOW_HEIGHT, h);
 
                 Client.Game.SetWindowSize(w, h);
             }

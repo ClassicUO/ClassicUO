@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -35,6 +35,9 @@ namespace ClassicUO.Game
     internal static class Constants
     {
         public const string WIKI_LINK = "https://github.com/ClassicUO/ClassicUO/wiki";
+
+        public const int MIN_GAME_WINDOW_WIDTH = 640;
+        public const int MIN_GAME_WINDOW_HEIGHT = 480;
 
         public const int MIN_FPS = 12;
         public const int MAX_FPS = 250;

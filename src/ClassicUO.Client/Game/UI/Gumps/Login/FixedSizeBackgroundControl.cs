@@ -14,16 +14,14 @@ namespace ClassicUO.Game.UI.Gumps.Login
 {
     internal class FixedSizeBackgroundControl : Control
     {
-        private const int REF_WIDTH = 1024;
-        private const int REF_HEIGHT = 768;
         private readonly Texture2D _texture;
 
         public FixedSizeBackgroundControl(Texture2D texture)
         {
             _texture = texture;
             AcceptMouseInput = false;
-            Width = REF_WIDTH;
-            Height = REF_HEIGHT;
+            Width = LoginLayoutHelper.WindowWidth;
+            Height = LoginLayoutHelper.WindowHeight;
         }
 
         public override bool Draw(UltimaBatcher2D batcher, int x, int y)
@@ -35,14 +33,14 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             batcher.Draw(
                 SolidColorTextureCache.GetTexture(Color.Black),
-                new Rectangle(x, y, REF_WIDTH, REF_HEIGHT),
+                new Rectangle(x, y, Width, Height),
                 blackHue
             );
 
             if (_texture != null)
             {
                 Vector3 texHue = ShaderHueTranslator.GetHueVector(0, false, Alpha, true);
-                batcher.Draw(_texture, new Rectangle(x, y, REF_WIDTH, REF_HEIGHT), texHue);
+                batcher.Draw(_texture, new Rectangle(x, y, Width, Height), texHue);
             }
 
             return true;
