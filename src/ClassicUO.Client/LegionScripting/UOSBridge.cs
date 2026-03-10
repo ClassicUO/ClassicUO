@@ -430,18 +430,6 @@ namespace ClassicUO.LegionScripting
             var scriptFile = LegionScripting.FindScriptByName(name);
             if (scriptFile != null && scriptFile.ScriptType == ScriptType.UOScript)
             {
-                var currentScript = UOScript.Interpreter.GetActiveScript();
-                if (currentScript != null)
-                {
-                    foreach (var sf in LegionScripting.GetRunningScripts())
-                    {
-                        if (sf.ScriptType == ScriptType.UOScript && sf.UOScript == currentScript)
-                        {
-                            LegionScripting.StopScript(sf);
-                            break;
-                        }
-                    }
-                }
                 LegionScripting.PlayScript(scriptFile);
                 return true;
             }

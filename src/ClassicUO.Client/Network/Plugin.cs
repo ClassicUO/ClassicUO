@@ -170,7 +170,13 @@ namespace ClassicUO.Network
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool DeleteFile(string name);
 #else
-        public static bool DeleteFile(string name) => File.Exists(name) && File.Delete(name);
+        public static bool DeleteFile(string name)
+        {
+            if (!File.Exists(name))
+                return false;
+            File.Delete(name);
+            return true;
+        }
 #endif
 
         public static Plugin Create(string path)
@@ -705,19 +711,12 @@ namespace ClassicUO.Network
                 return true;
             }
 
-            bool result = true;
-
             foreach (Plugin plugin in Plugins)
             {
-                if (
-                    plugin._onHotkeyPressed != null && !plugin._onHotkeyPressed(key, mod, ispressed)
-                )
-                {
-                    result = false;
-                }
+                plugin._onHotkeyPressed?.Invoke(key, mod, ispressed);
             }
 
-            return result;
+            return true;
         }
 
         internal static void ProcessMouse(int button, int wheel)

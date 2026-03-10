@@ -1,4 +1,4 @@
-﻿#region References
+#region References
 using ClassicUO.Utility.Logging;
 using System;
 using System.CodeDom.Compiler;
@@ -370,6 +370,46 @@ namespace ClassicUO
             {
                 Console.WriteLine("Finished with: 0 errors, 0 warnings");
             }
+        }
+
+        public static string GetUnusedPath(string name)
+        {
+            var path = Path.Combine(CUOEnviroment.ExecutablePath, String.Format("Scripts/Output/{0}.dll", name));
+
+            for (var i = 2; File.Exists(path) && i <= 1000; ++i)
+            {
+                path = Path.Combine(CUOEnviroment.ExecutablePath, String.Format("Scripts/Output/{0}.{1}.dll", name, i));
+            }
+
+            return path;
+        }
+
+        public static void DeleteFiles(string mask)
+        {
+            try
+            {
+                var files = Directory.GetFiles(Path.Combine(CUOEnviroment.ExecutablePath, "Scripts/Output"), mask);
+
+                foreach (var file in files)
+                {
+                    try
+                    {
+                        File.Delete(file);
+                    }
+                    catch
+                    { }
+                }
+            }
+            catch
+            { }
+        }
+#else
+        public static void Display(CompilerResults results)
+        {
+            if (results.Errors.Count > 0)
+                Console.WriteLine("ScriptCompiler: {0} errors, {1} warnings", results.Errors.Count, results.Warnings.Count);
+            else
+                Console.WriteLine("Finished with: 0 errors, 0 warnings");
         }
 
         public static string GetUnusedPath(string name)
