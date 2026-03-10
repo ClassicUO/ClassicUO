@@ -10,6 +10,7 @@ using ClassicUO.Utility;
 using ClassicUO.Utility.Collections;
 using Microsoft.Xna.Framework;
 using System;
+using ClassicUO.Renderer.Animations;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -351,7 +352,6 @@ namespace ClassicUO.Game.GameObjects
             bool fromServer = false
         )
         {
-            Console.WriteLine($"{this} is doing animation {id}");
             _animationGroup = id;
             AnimIndex = (byte)(forward ? 0 : frameCount);
             _animationInterval = interval;
@@ -579,7 +579,7 @@ namespace ClassicUO.Game.GameObjects
             byte action = GetGroupForAnimation(this, id, true);
 
             bool mirror = false;
-            animations.GetAnimDirection(ref dir, ref mirror);
+            Animations.GetAnimDirection(ref dir, ref mirror);
             int currentDelay = Constants.CHARACTER_ANIMATION_DELAY;
 
             if (id < animations.MaxAnimationCount && dir < 5)

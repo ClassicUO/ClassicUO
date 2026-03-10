@@ -5,6 +5,8 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using Microsoft.Xna.Framework;
 
+using MathF = System.MathF;
+
 namespace ClassicUO.Game.GameObjects
 {
     internal sealed class MovingEffect : GameEffect
@@ -50,12 +52,6 @@ namespace ClassicUO.Game.GameObjects
                 SetSource(xSource, ySource, zSource);
             }
 
-            // Apply hand offset for projectiles (ranged weapons + directed spells)
-            if (source is Mobile mobile)
-            {
-                ApplyProjectileOffset(mobile, layer);
-            }
-
             Entity target = World.Get(trg);
 
             if (SerialHelper.IsValid(trg) && target != null)
@@ -66,126 +62,214 @@ namespace ClassicUO.Game.GameObjects
             {
                 SetTarget(xTarget, yTarget, zTarget);
             }
+
+            // Apply hand offset for projectiles (ranged weapons + directed spells).
+            // Must be after SetTarget so we can compute the actual angle to target.
+            if (source is Mobile mobile)
+            {
+                ushort tgtX = target != null ? target.X : xTarget;
+                ushort tgtY = target != null ? target.Y : yTarget;
+                ApplyProjectileOffset(mobile, layer, tgtX, tgtY);
+            }
+
+            // Compute target center offset so the arrow flies to chest level
+            // rather than feet. MobileView draws at RSP.Y + 19, so target center
+            // in effect space = 19 - (Height + CenterY) / 2.
+            if (target is Mobile targetMobile)
+            {
+                Client.Game.UO.Animations.GetAnimationDimensions(
+                    0,
+                    targetMobile.GetGraphicForAnimation(),
+                    0, 0,
+                    targetMobile.IsMounted,
+                    0,
+                    out _,
+                    out int tCenterY,
+                    out _,
+                    out int tHeight
+                );
+                
+                _targetOffsetY = 19 - (tHeight + tCenterY) / 2f;
+            }
         }
 
         public readonly bool FixedDir;
 
-        private void ApplyProjectileOffset(Mobile mobile, byte layer)
+        // Y offset applied to the target position so the arrow flies to
+        // the target's center/chest rather than their feet (tile anchor).
+        private float _targetOffsetY;
+
+        private void ApplyProjectileOffset(Mobile mobile, byte layer, ushort targetX, ushort targetY)
         {
             if (layer != 1 && layer != 0xFF)
                 return;
 
             var dir = mobile.Direction & Direction.Mask;
-            float ox, oy;
+            float ax, ay;
 
-            // Detect projectile type by effect graphic (animation group is unreliable
-            // because the animation packet arrives after the effect packet)
+            // Graphic-based detection (animation group is unreliable because
+            // the animation packet arrives after the effect packet).
             switch (Graphic)
             {
                 case 0x36E4: // Magic Arrow
                 case 0x36D4: // Fireball
                 case 0x379F: // Energy Bolt
-                    (ox, oy) = GetSpellCastOffset(dir);
+                    (ax, ay) = GetSpellCastOffset(dir);
                     break;
 
-                case 0xF42:  // Arrow (Bow, Composite, Elven Composite, Magical Shortbow, Yumi)
-                    if (layer != 1)
-                        return;
+                case 0xF42:  // Arrow (all bows)
+                case 0x1BFE: // Bolt (all crossbows)
+                {
+                    bool isBow = Graphic == 0xF42;
 
-                    (ox, oy) = GetRangedAttackOffset(dir, mobile.IsMounted);
+                    if (isBow)
+                        (ax, ay) = GetRangedAttackOffset(dir, mobile.IsMounted);
+                    else
+                        (ax, ay) = GetRangedXBowAttackOffset(dir, mobile.IsMounted);
+
+                    // Rotation compensation: place the sprite reference point at
+                    // the grip. The sprite rotates around its top-left anchor, so
+                    // the reference ends up at anchor + rotated(refX, refY).
+                    // Solve: anchor = grip - rotated(refX, refY).
+                    //
+                    // Reference point in unrotated sprite coords (44x44).
+                    // At angle=0 (Left dir) the arrowhead is at (0,22).
+                    const float refX = 0f;
+                    const float refY = 22f;
+
+                    // Actual angle from source→target so compensation stays
+                    // accurate even when targets move off-angle.
+                    float dTileX = targetX - mobile.X;
+                    float dTileY = targetY - mobile.Y;
+                    float screenDX = (dTileX - dTileY) * 22f;
+                    float screenDY = (dTileX + dTileY) * 22f;
+                    float angle = MathF.Atan2(-screenDY, -screenDX);
+
+                    float rotRefX = refX * MathF.Cos(angle) - refY * MathF.Sin(angle);
+                    float rotRefY = refX * MathF.Sin(angle) + refY * MathF.Cos(angle);
+                    ax -= rotRefX;
+                    ay -= rotRefY;
                     break;
-
-                case 0x1BFE: // Bolt (Crossbow, Heavy Crossbow, Repeating Crossbow)
-                    if (layer != 1)
-                        return;
-
-                    (ox, oy) = GetRangedXBowAttackOffset(dir, mobile.IsMounted);
-                    break;
+                }
 
                 default:
-                    return;
+                    // Unknown projectile — fall back to generic head anchor.
+                    Client.Game.UO.Animations.GetAnimationDimensions(
+                        0,
+                        mobile.GetGraphicForAnimation(),
+                        0, 0,
+                        mobile.IsMounted,
+                        0,
+                        out _,
+                        out int headCenterY,
+                        out _,
+                        out int headHeight
+                    );
+
+                    ax = 0;
+                    ay = -(headHeight + headCenterY);
+                    break;
             }
 
-            Offset.X += ox;
-            Offset.Y += oy;
+            Offset.X += ax;
+            Offset.Y += ay;
         }
 
+        /// <summary>
+        /// Per-direction (X, Y) offsets for crossbow/heavy-xbow projectiles.
+        /// Same NOCK-BASED convention as bow offsets.
+        /// Computed analytically: ax = gripX, ay = gripY + 19.
+        /// </summary>
         private static (float x, float y) GetRangedXBowAttackOffset(Direction dir, bool mounted)
         {
             if (mounted)
             {
+                // MountedShootXBow (group 28)
                 return dir switch
                 {
-                    Direction.North => (-10, -57),
-                    Direction.Right => (-17, -62),
-                    Direction.East  => (-16, -68),
-                    Direction.Down  => (-5, -73),
-                    Direction.South => (8, -73),
-                    Direction.Left  => (5, -73),
-                    Direction.West  => (16, -68),
-                    Direction.Up    => (17, -62),
+                    Direction.North => (25, -64),
+                    Direction.Right => (36, -49),
+                    Direction.East  => (27, -23),
+                    Direction.Down  => (-10, -18),
+                    Direction.South => (-37, -28),
+                    Direction.Left  => (-36, -49),
+                    Direction.West  => (-25, -64),
+                    Direction.Up    => (8, -54),
                     _ => (0, 0)
                 };
             }
 
+            // ShootXBow (group 19)
             return dir switch
             {
-                Direction.North => (-1, -36),
-                Direction.Right => (-10, -39),
-                Direction.East  => (-13, -43),
-                Direction.Down  => (-9, -48),
-                Direction.South => (1, -50),
-                Direction.Left  => (9, -48),
-                Direction.West  => (13, -43),
-                Direction.Up    => (10, -39),
+                Direction.North => (9, -29),
+                Direction.Right => (13, -24),
+                Direction.East  => (10, -20),
+                Direction.Down  => (-1, 3),
+                Direction.South => (-10, -20),
+                Direction.Left  => (-13, -24),
+                Direction.West  => (-9, -29),
+                Direction.Up    => (1, -31),
                 _ => (0, 0)
             };
         }
 
+        /// <summary>
+        /// Per-direction (X, Y) offsets for bow projectiles.
+        /// NOCK-BASED: (ax, ay) = desired screen position of the arrow nock relative
+        /// to the source tile anchor. Rotation compensation applied automatically.
+        /// Computed analytically: ax = gripX, ay = gripY + 19 (MobileView gap).
+        /// Grip data from AnimFrameAnalyzer averaged across all bow types.
+        /// CUO dir → Analyzer dir remap: (d+5)%8.
+        /// Mirror pairs: North↔West, Right↔Left, East↔South (negate X, same Y).
+        /// </summary>
         private static (float x, float y) GetRangedAttackOffset(Direction dir, bool mounted)
         {
             if (mounted)
             {
+                // MountedShootBow (group 27)
                 return dir switch
                 {
-                    Direction.North => (4, -61),
-                    Direction.Right => (-8, -52),
-                    Direction.East  => (-23, -57),
-                    Direction.Down  => (-25, -68),
-                    Direction.South => (-11, -75),
-                    Direction.Left  => (25, -68),
-                    Direction.West  => (23, -57),
-                    Direction.Up    => (8, -52),
+                    Direction.North => (25, -49),
+                    Direction.Right => (23, -38),
+                    Direction.East  => (8, -33),
+                    Direction.Down  => (9, -22),
+                    Direction.South => (-8, -33),
+                    Direction.Left  => (-23, -38),
+                    Direction.West  => (-25, -49),
+                    Direction.Up    => (-11, -56),
                     _ => (0, 0)
                 };
             }
 
+            // ShootBow (group 18)
             return dir switch
             {
-                Direction.North => (-3, -40),
-                Direction.Right => (-15, -39),
-                Direction.East  => (-20, -44),
-                Direction.Down  => (-12, -48),
-                Direction.South => (4, -50),
-                Direction.Left  => (12, -48),
-                Direction.West  => (20, -44),
-                Direction.Up    => (15, -39),
+                Direction.North => (12, -29),
+                Direction.Right => (20, -25),
+                Direction.East  => (15, -20),
+                Direction.Down  => (-3, 4),
+                Direction.South => (-15, -20),
+                Direction.Left  => (-20, -25),
+                Direction.West  => (-12, -29),
+                Direction.Up    => (4, -31),
                 _ => (0, 0)
             };
         }
 
         private static (float x, float y) GetSpellCastOffset(Direction dir)
         {
+            // CastDirected (group 16) — remapped: CUO dir → Analyzer dir (d+5)%8
             return dir switch
             {
-                Direction.North => (0, -15),
-                Direction.Right => (-28, -23),  // NE
-                Direction.East  => (-38, -36),
-                Direction.Down  => (-25, -48),  // SE
-                Direction.South => (1, -50),
-                Direction.Left  => (25, -48),   // SW
-                Direction.West  => (38, -36),
-                Direction.Up    => (28, -23),   // NW
+                Direction.North => (25, -48),
+                Direction.Right => (38, -36),
+                Direction.East  => (28, -23),
+                Direction.Down  => (0, -15),
+                Direction.South => (-28, -23),
+                Direction.Left  => (-38, -36),
+                Direction.West  => (-25, -48),
+                Direction.Up    => (1, -50),
                 _ => (0, 0)
             };
         }
@@ -226,6 +310,8 @@ namespace ClassicUO.Game.GameObjects
             source.Y += Offset.Y;
 
             Vector2 target = new Vector2((offsetTargetX - offsetTargetY) * 22, (offsetTargetX + offsetTargetY) * 22 - offsetTargetZ * 4);
+
+            target.Y += _targetOffsetY;
 
             var offset = target - source;
             var distance = offset.Length();
