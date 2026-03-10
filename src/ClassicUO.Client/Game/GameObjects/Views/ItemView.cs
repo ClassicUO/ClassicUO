@@ -9,6 +9,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.Assets;
 using ClassicUO.Renderer;
+using ClassicUO.Renderer.Animations;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using MathHelper = ClassicUO.Utility.MathHelper;
@@ -170,7 +171,7 @@ namespace ClassicUO.Game.GameObjects
             posY += 22;
 
             byte direction = (byte)((byte)Layer & 0x7F & 7);
-            Client.Game.UO.Animations.GetAnimDirection(ref direction, ref IsFlipped);
+            Animations.GetAnimDirection(ref direction, ref IsFlipped);
 
             byte animIndex = (byte)AnimIndex;
             ushort graphic = GetGraphicForAnimation();
@@ -533,7 +534,7 @@ namespace ClassicUO.Game.GameObjects
                 position.Y += 22;
 
                 byte direction = (byte)((byte)Layer & 0x7F & 7);
-                animations.GetAnimDirection(ref direction, ref IsFlipped);
+                Animations.GetAnimDirection(ref direction, ref IsFlipped);
                 byte animIndex = AnimIndex;
                 bool ishuman =
                     MathHelper.InRange(Amount, 0x0190, 0x0193)

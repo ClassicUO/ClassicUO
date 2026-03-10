@@ -595,7 +595,8 @@ namespace ClassicUO.Game
             bool fixedDir,
             bool doesExplode,
             bool hasparticles,
-            GraphicEffectBlendMode blendmode
+            GraphicEffectBlendMode blendmode,
+            byte layer = 0xFF
         )
         {
             _effectManager.CreateEffect
@@ -616,7 +617,8 @@ namespace ClassicUO.Game
                 fixedDir,
                 doesExplode,
                 hasparticles,
-                blendmode
+                blendmode,
+                layer
             );
         }
 
