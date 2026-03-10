@@ -127,28 +127,18 @@ namespace ClassicUO.Game.GameObjects
                     else
                         (ax, ay) = GetRangedXBowAttackOffset(dir, mobile.IsMounted);
 
-                    // Rotation compensation: place the sprite reference point at
-                    // the grip. The sprite rotates around its top-left anchor, so
-                    // the reference ends up at anchor + rotated(refX, refY).
-                    // Solve: anchor = grip - rotated(refX, refY).
-                    //
-                    // Reference point in unrotated sprite coords (44x44).
-                    // At angle=0 (Left dir) the arrowhead is at (0,22).
-                    const float refX = 0f;
-                    const float refY = 22f;
-
-                    // Actual angle from source→target so compensation stays
-                    // accurate even when targets move off-angle.
+                    // Rotation compensation: the sprite rotates around its top-left
+                    // anchor. The reference point (0,22) in unrotated coords lands at
+                    // anchor + rotated(0,22) after rotation. Solve for anchor = grip - rotated.
+                    // Since refX=0, rotation simplifies to (-22*sin, 22*cos).
                     float dTileX = targetX - mobile.X;
                     float dTileY = targetY - mobile.Y;
                     float screenDX = (dTileX - dTileY) * 22f;
                     float screenDY = (dTileX + dTileY) * 22f;
                     float angle = MathF.Atan2(-screenDY, -screenDX);
 
-                    float rotRefX = refX * MathF.Cos(angle) - refY * MathF.Sin(angle);
-                    float rotRefY = refX * MathF.Sin(angle) + refY * MathF.Cos(angle);
-                    ax -= rotRefX;
-                    ay -= rotRefY;
+                    ax += 22f * MathF.Sin(angle);
+                    ay -= 22f * MathF.Cos(angle);
                     break;
                 }
 
@@ -176,9 +166,44 @@ namespace ClassicUO.Game.GameObjects
         }
 
         /// <summary>
+        /// Per-direction (X, Y) offsets for bow projectiles.
+        /// </summary>
+        private static (float x, float y) GetRangedAttackOffset(Direction dir, bool mounted)
+        {
+            if (mounted)
+            {
+                // MountedShootBow (group 27)
+                return dir switch
+                {
+                    Direction.North => (25, -49),
+                    Direction.Right => (23, -38),
+                    Direction.East  => (8, -33),
+                    Direction.Down  => (9, -22),
+                    Direction.South => (-8, -33),
+                    Direction.Left  => (-23, -38),
+                    Direction.West  => (-25, -49),
+                    Direction.Up    => (-11, -56),
+                    _               => (0, 0)
+                };
+            }
+
+            // ShootBow (group 18)
+            return dir switch
+            {
+                Direction.North => (12, -29),
+                Direction.Right => (20, -25),
+                Direction.East  => (15, -20),
+                Direction.Down  => (-3, 4),
+                Direction.South => (-15, -20),
+                Direction.Left  => (-20, -25),
+                Direction.West  => (-12, -29),
+                Direction.Up    => (4, -31),
+                _               => (0, 0)
+            };
+        }
+
+        /// <summary>
         /// Per-direction (X, Y) offsets for crossbow/heavy-xbow projectiles.
-        /// Same NOCK-BASED convention as bow offsets.
-        /// Computed analytically: ax = gripX, ay = gripY + 19.
         /// </summary>
         private static (float x, float y) GetRangedXBowAttackOffset(Direction dir, bool mounted)
         {
@@ -214,52 +239,9 @@ namespace ClassicUO.Game.GameObjects
             };
         }
 
-        /// <summary>
-        /// Per-direction (X, Y) offsets for bow projectiles.
-        /// NOCK-BASED: (ax, ay) = desired screen position of the arrow nock relative
-        /// to the source tile anchor. Rotation compensation applied automatically.
-        /// Computed analytically: ax = gripX, ay = gripY + 19 (MobileView gap).
-        /// Grip data from AnimFrameAnalyzer averaged across all bow types.
-        /// CUO dir → Analyzer dir remap: (d+5)%8.
-        /// Mirror pairs: North↔West, Right↔Left, East↔South (negate X, same Y).
-        /// </summary>
-        private static (float x, float y) GetRangedAttackOffset(Direction dir, bool mounted)
-        {
-            if (mounted)
-            {
-                // MountedShootBow (group 27)
-                return dir switch
-                {
-                    Direction.North => (25, -49),
-                    Direction.Right => (23, -38),
-                    Direction.East  => (8, -33),
-                    Direction.Down  => (9, -22),
-                    Direction.South => (-8, -33),
-                    Direction.Left  => (-23, -38),
-                    Direction.West  => (-25, -49),
-                    Direction.Up    => (-11, -56),
-                    _ => (0, 0)
-                };
-            }
-
-            // ShootBow (group 18)
-            return dir switch
-            {
-                Direction.North => (12, -29),
-                Direction.Right => (20, -25),
-                Direction.East  => (15, -20),
-                Direction.Down  => (-3, 4),
-                Direction.South => (-15, -20),
-                Direction.Left  => (-20, -25),
-                Direction.West  => (-12, -29),
-                Direction.Up    => (4, -31),
-                _ => (0, 0)
-            };
-        }
-
         private static (float x, float y) GetSpellCastOffset(Direction dir)
         {
-            // CastDirected (group 16) — remapped: CUO dir → Analyzer dir (d+5)%8
+            // CastDirected (group 16)
             return dir switch
             {
                 Direction.North => (25, -48),
@@ -279,7 +261,6 @@ namespace ClassicUO.Game.GameObjects
             base.Update();
             UpdateOffset();
         }
-
 
         private void UpdateOffset()
         {
