@@ -407,7 +407,14 @@ namespace ClassicUO
         public static void Display(CompilerResults results)
         {
             if (results.Errors.Count > 0)
-                Console.WriteLine("ScriptCompiler: {0} errors, {1} warnings", results.Errors.Count, results.Warnings.Count);
+            {
+                int errors = 0, warnings = 0;
+                foreach (CompilerError e in results.Errors)
+                {
+                    if (e.IsWarning) warnings++; else errors++;
+                }
+                Console.WriteLine("ScriptCompiler: {0} errors, {1} warnings", errors, warnings);
+            }
             else
                 Console.WriteLine("Finished with: 0 errors, 0 warnings");
         }
