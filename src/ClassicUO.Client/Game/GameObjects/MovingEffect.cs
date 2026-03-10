@@ -107,58 +107,60 @@ namespace ClassicUO.Game.GameObjects
             var dir = mobile.Direction & Direction.Mask;
             float ax, ay;
 
-            // Graphic-based detection (animation group is unreliable because
-            // the animation packet arrives after the effect packet).
-            switch (Graphic)
+            if (Graphic is 0xF42 or 0x1BFE)
             {
-                case 0x36E4: // Magic Arrow
-                case 0x36D4: // Fireball
-                case 0x379F: // Energy Bolt
-                    (ax, ay) = GetSpellCastOffset(dir);
-                    break;
+                // Arrow (0xF42) or Bolt (0x1BFE) — use per-direction grip offsets.
+                if (Graphic == 0xF42)
+                    (ax, ay) = GetRangedAttackOffset(dir, mobile.IsMounted);
+                else
+                    (ax, ay) = GetRangedXBowAttackOffset(dir, mobile.IsMounted);
 
-                case 0xF42:  // Arrow (all bows)
-                case 0x1BFE: // Bolt (all crossbows)
+                // Rotation compensation: the sprite rotates around its top-left
+                // anchor. The reference point (0,22) in unrotated coords lands at
+                // anchor + rotated(0,22) after rotation. Solve for anchor = grip - rotated.
+                // Since refX=0, rotation simplifies to (-22*sin, 22*cos).
+                float dTileX = targetX - mobile.X;
+                float dTileY = targetY - mobile.Y;
+                float screenDX = (dTileX - dTileY) * 22f;
+                float screenDY = (dTileX + dTileY) * 22f;
+                float angle = MathF.Atan2(-screenDY, -screenDX);
+
+                ax += 22f * MathF.Sin(angle);
+                ay -= 22f * MathF.Cos(angle);
+            }
+            else
+            {
+                // All other projectiles (spells, etc.) — head-level anchor.
+                // Character is idle when spells fire, so no pose-specific offset.
+                Client.Game.UO.Animations.GetAnimationDimensions(
+                    0,
+                    mobile.GetGraphicForAnimation(),
+                    0, 0,
+                    mobile.IsMounted,
+                    0,
+                    out _,
+                    out int headCenterY,
+                    out _,
+                    out int headHeight
+                );
+
+                ax = 0;
+                ay = -(headHeight + headCenterY) + 19;
+
+                // Push the sprite forward along the flight path so the tail
+                // starts at the head rather than the head starting there.
+                const float SpellForwardShift = 25f;
+                float dTileX = targetX - mobile.X;
+                float dTileY = targetY - mobile.Y;
+                float screenDX = (dTileX - dTileY) * 22f;
+                float screenDY = (dTileX + dTileY) * 22f;
+                float dist = MathF.Sqrt(screenDX * screenDX + screenDY * screenDY);
+
+                if (dist > 0f)
                 {
-                    bool isBow = Graphic == 0xF42;
-
-                    if (isBow)
-                        (ax, ay) = GetRangedAttackOffset(dir, mobile.IsMounted);
-                    else
-                        (ax, ay) = GetRangedXBowAttackOffset(dir, mobile.IsMounted);
-
-                    // Rotation compensation: the sprite rotates around its top-left
-                    // anchor. The reference point (0,22) in unrotated coords lands at
-                    // anchor + rotated(0,22) after rotation. Solve for anchor = grip - rotated.
-                    // Since refX=0, rotation simplifies to (-22*sin, 22*cos).
-                    float dTileX = targetX - mobile.X;
-                    float dTileY = targetY - mobile.Y;
-                    float screenDX = (dTileX - dTileY) * 22f;
-                    float screenDY = (dTileX + dTileY) * 22f;
-                    float angle = MathF.Atan2(-screenDY, -screenDX);
-
-                    ax += 22f * MathF.Sin(angle);
-                    ay -= 22f * MathF.Cos(angle);
-                    break;
+                    ax += screenDX / dist * SpellForwardShift;
+                    ay += screenDY / dist * SpellForwardShift;
                 }
-
-                default:
-                    // Unknown projectile — fall back to generic head anchor.
-                    Client.Game.UO.Animations.GetAnimationDimensions(
-                        0,
-                        mobile.GetGraphicForAnimation(),
-                        0, 0,
-                        mobile.IsMounted,
-                        0,
-                        out _,
-                        out int headCenterY,
-                        out _,
-                        out int headHeight
-                    );
-
-                    ax = 0;
-                    ay = -(headHeight + headCenterY);
-                    break;
             }
 
             Offset.X += ax;
@@ -235,23 +237,6 @@ namespace ClassicUO.Game.GameObjects
                 Direction.Left  => (-13, -24),
                 Direction.West  => (-9, -29),
                 Direction.Up    => (1, -31),
-                _ => (0, 0)
-            };
-        }
-
-        private static (float x, float y) GetSpellCastOffset(Direction dir)
-        {
-            // CastDirected (group 16)
-            return dir switch
-            {
-                Direction.North => (25, -48),
-                Direction.Right => (38, -36),
-                Direction.East  => (28, -23),
-                Direction.Down  => (0, -15),
-                Direction.South => (-28, -23),
-                Direction.Left  => (-38, -36),
-                Direction.West  => (-25, -48),
-                Direction.Up    => (1, -50),
                 _ => (0, 0)
             };
         }
