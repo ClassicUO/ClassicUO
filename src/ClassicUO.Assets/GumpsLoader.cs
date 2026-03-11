@@ -231,26 +231,51 @@ namespace ClassicUO.Assets
             var w = newFileFormat ? reader.ReadUInt32LE() : (uint)entry.Width;
             var h = newFileFormat ? reader.ReadUInt32LE() : (uint)entry.Height;
 
+            if (w == 0 || h == 0 || w > 0x4000 || h > 0x4000)
+            {
+                return default;
+            }
+
+            ulong pixelCount = (ulong)w * h;
+
+            if (pixelCount > int.MaxValue)
+            {
+                return default;
+            }
+
             IntPtr dataStart = reader.PositionAddress;
-            var pixels = new uint[w * h];
+            var pixels = new uint[(int)pixelCount];
             int* lookuplist = (int*)dataStart;
             int gsize;
             var len = reader.Remaining;
 
+            if (len < (int)(h * sizeof(int)))
+            {
+                return default;
+            }
+
             for (int y = 0, half_len = len >> 2; y < h; y++)
             {
+                int rowLookup = lookuplist[y];
+
                 if (y < h - 1)
                 {
-                    gsize = lookuplist[y + 1] - lookuplist[y];
+                    gsize = lookuplist[y + 1] - rowLookup;
                 }
                 else
                 {
-                    gsize = half_len - lookuplist[y];
+                    gsize = half_len - rowLookup;
                 }
 
-                GumpBlock* gmul = (GumpBlock*)(dataStart + (lookuplist[y] << 2));
+                if (rowLookup < 0 || rowLookup > half_len || gsize < 0 || rowLookup + gsize > half_len)
+                {
+                    return default;
+                }
+
+                GumpBlock* gmul = (GumpBlock*)(dataStart + (rowLookup << 2));
 
                 var pos = y * w;
+                var rowEnd = pos + w;
 
                 for (int i = 0; i < gsize; i++)
                 {
@@ -268,8 +293,24 @@ namespace ClassicUO.Assets
                     }
 
                     var count = gmul[i].Run;
+
+                    if (count == 0)
+                    {
+                        continue;
+                    }
+
+                    if (pos + count > rowEnd || pos + count > (uint)pixels.Length)
+                    {
+                        return default;
+                    }
+
                     pixels.AsSpan().Slice((int)pos, count).Fill(val);
                     pos += count;
+                }
+
+                if (pos != rowEnd)
+                {
+                    return default;
                 }
             }
 

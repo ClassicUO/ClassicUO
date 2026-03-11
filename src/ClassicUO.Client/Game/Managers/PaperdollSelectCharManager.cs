@@ -35,6 +35,11 @@ namespace ClassicUO.Game.Managers
 
         private static PaperdollSelectCharManager instance;
 
+        public static void Reset()
+        {
+            instance = null;
+        }
+
         private PaperdollSelectCharManager()
         {
             Load();
@@ -154,7 +159,11 @@ namespace ClassicUO.Game.Managers
 
         public void Load()
         {
-            
+            if (World.Player != null && !string.IsNullOrEmpty(World.Player.Name))
+            {
+                savePath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles", Settings.GlobalSettings.Username, World.ServerName, World.Player.Name, "paperdollSelectCharManager.json");
+            }
+
             if (File.Exists(savePath))
             {
                 try

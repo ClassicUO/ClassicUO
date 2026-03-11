@@ -96,6 +96,10 @@ namespace ClassicUO.Game.Managers
 
     public class LastTargetInfo
     {
+        // optional name supplied by external code (scripts/plugins) via reflection
+        // the UCC last-target bar will display this if the world entity cannot provide a name
+        public string Name;
+
         public bool IsEntity => SerialHelper.IsValid(Serial);
         public bool IsStatic => !IsEntity && Graphic != 0 && Graphic != 0xFFFF;
         public bool IsLand => !IsStatic;
@@ -111,6 +115,7 @@ namespace ClassicUO.Game.Managers
             Graphic = 0xFFFF;
             X = Y = 0xFFFF;
             Z = sbyte.MinValue;
+            Name = null;
         }
 
         public void SetStatic(ushort graphic, ushort x, ushort y, sbyte z)
@@ -120,6 +125,7 @@ namespace ClassicUO.Game.Managers
             X = x;
             Y = y;
             Z = z;
+            Name = null;
         }
 
         public void SetLand(ushort x, ushort y, sbyte z)
@@ -129,6 +135,7 @@ namespace ClassicUO.Game.Managers
             X = x;
             Y = y;
             Z = z;
+            Name = null;
         }
 
         public void Clear()
@@ -137,6 +144,7 @@ namespace ClassicUO.Game.Managers
             Graphic = 0xFFFF;
             X = Y = 0xFFFF;
             Z = sbyte.MinValue;
+            Name = null;
         }
     }
 
@@ -153,9 +161,48 @@ namespace ClassicUO.Game.Managers
             set
             {
                 _lastAttack = value;
-                if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.OpenHealthBarForLastAttack)
+
+                Profile profile = ProfileManager.CurrentProfile;
+
+                // while UCC LTBar is enabled, it is the only UI that should reflect last target
+                // (do not spawn extra HealthBarGump instances)
+                if (profile == null || profile.UOClassicCombatLTBar)
                 {
-                    if (ProfileManager.CurrentProfile.UseOneHPBarForLastAttack)
+                    if (profile != null && profile.UOClassicCombatLTBar)
+                    {
+                        if (SerialHelper.IsValid(value))
+                        {
+                            LastTargetInfo.SetEntity(value);
+                            LastTargetInfo.Name = World.Get(value)?.Name;
+                        }
+                        else
+                            LastTargetInfo.Clear();
+
+                        if (UIManager.GetGump<UOClassicCombatLTBar>() == null)
+                        {
+                            UIManager.Add
+                            (
+                                new UOClassicCombatLTBar
+                                {
+                                    X = profile.UOClassicCombatLTBarLocation.X,
+                                    Y = profile.UOClassicCombatLTBarLocation.Y
+                                }
+                            );
+                        }
+                    }
+
+                    if (BaseHealthBarGump.LastAttackBar != null && !BaseHealthBarGump.LastAttackBar.IsDisposed)
+                    {
+                        BaseHealthBarGump.LastAttackBar.Dispose();
+                        BaseHealthBarGump.LastAttackBar = null;
+                    }
+
+                    return;
+                }
+
+                if (profile.OpenHealthBarForLastAttack)
+                {
+                    if (profile.UseOneHPBarForLastAttack)
                     {
                         if (BaseHealthBarGump.LastAttackBar != null && !BaseHealthBarGump.LastAttackBar.IsDisposed)
                         {
@@ -166,20 +213,20 @@ namespace ClassicUO.Game.Managers
                         }
                         else
                         {
-                            if (ProfileManager.CurrentProfile.CustomBarsToggled)
-                                UIManager.Add(BaseHealthBarGump.LastAttackBar = new HealthBarGumpCustom(value) { Location = ProfileManager.CurrentProfile.LastTargetHealthBarPos, IsLastTarget = true });
+                            if (profile.CustomBarsToggled)
+                                UIManager.Add(BaseHealthBarGump.LastAttackBar = new HealthBarGumpCustom(value) { Location = profile.LastTargetHealthBarPos, IsLastTarget = true });
                             else
-                                UIManager.Add(BaseHealthBarGump.LastAttackBar = new HealthBarGump(value) { Location = ProfileManager.CurrentProfile.LastTargetHealthBarPos, IsLastTarget = true });
+                                UIManager.Add(BaseHealthBarGump.LastAttackBar = new HealthBarGump(value) { Location = profile.LastTargetHealthBarPos, IsLastTarget = true });
                         }
                     }
                     else
                     {
                         if (UIManager.GetGump<BaseHealthBarGump>(value) == null)
                         {
-                            if (ProfileManager.CurrentProfile.CustomBarsToggled)
-                                UIManager.Add(new HealthBarGumpCustom(value) { Location = ProfileManager.CurrentProfile.LastTargetHealthBarPos, IsLastTarget = true });
+                            if (profile.CustomBarsToggled)
+                                UIManager.Add(new HealthBarGumpCustom(value) { Location = profile.LastTargetHealthBarPos, IsLastTarget = true });
                             else
-                                UIManager.Add(new HealthBarGump(value) { Location = ProfileManager.CurrentProfile.LastTargetHealthBarPos, IsLastTarget = true });
+                                UIManager.Add(new HealthBarGump(value) { Location = profile.LastTargetHealthBarPos, IsLastTarget = true });
                         }
                     }
                 }

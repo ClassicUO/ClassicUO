@@ -186,7 +186,9 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (IsPoisoned || _isSA_Poisoned)
                         {
-                            overridedHue = CombatCollection.LastTargetHue(this, ProfileManager.CurrentProfile.PoisonHue);
+                            // use the configured poison hue directly; avoid calling LastTargetHue which mixes in
+                            // the last-target color options and can override our desired poison color.
+                            overridedHue = ProfileManager.CurrentProfile.PoisonHue;
                             hueVec.Y = 1;
                         }
                     } 
@@ -194,7 +196,8 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (IsParalyzed && NotorietyFlag != NotorietyFlag.Invulnerable) 
                         {
-                            overridedHue = CombatCollection.LastTargetHue(this, ProfileManager.CurrentProfile.ParalyzedHue);
+                            // show the configured paralyze hue directly
+                            overridedHue = ProfileManager.CurrentProfile.ParalyzedHue;
                             hueVec.Y = 1;
                         }
                     }
@@ -203,7 +206,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (IsParalyzed && NotorietyFlag != NotorietyFlag.Invulnerable)
                         {
-                            overridedHue = CombatCollection.LastTargetHue(this, ProfileManager.CurrentProfile.ParalyzedHue);
+                            overridedHue = ProfileManager.CurrentProfile.ParalyzedHue;
                             hueVec.Y = 1;
                         }
                     }

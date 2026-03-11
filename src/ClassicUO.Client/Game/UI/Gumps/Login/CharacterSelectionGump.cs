@@ -1,4 +1,4 @@
-#region license
+﻿#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -500,7 +500,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 else
                 {
                     resolvedBodyId = (ushort)bodyID;
-                    isFemale = false;
+                    isFemale = resolvedBodyId == 0x0191 || resolvedBodyId == 0x025E || resolvedBodyId == 0x029B;
                 }
                 _bodyID = resolvedBodyId;
                 var items = saveData?.Items;

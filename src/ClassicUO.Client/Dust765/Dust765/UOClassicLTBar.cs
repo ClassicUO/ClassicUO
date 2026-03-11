@@ -31,6 +31,7 @@ using Microsoft.Xna.Framework;
 using ClassicUO.Input;
 using ClassicUO.Game;
 using ClassicUO.Game.Managers;
+using ClassicUO.Network;
 using ClassicUO.Assets;
 
 using ClassicUO.Renderer;
@@ -140,6 +141,8 @@ namespace ClassicUO.Dust765.Dust765
 
         //LTSERIAL
         private uint LTSerial = 0;
+        // serial for which we already sent a name-request so we don't spam
+        private uint _nameRequestedForSerial = 0;
         //private Entity LTEntity = null;
 
         //UCCLTBarS
@@ -171,6 +174,13 @@ namespace ClassicUO.Dust765.Dust765
 
         public UOClassicCombatLTBar() : base(0, 0)
         {
+            UOClassicCombatLTBar existing;
+
+            while ((existing = UIManager.GetGump<UOClassicCombatLTBar>()) != null)
+            {
+                existing.Dispose();
+            }
+
             CanMove = true;
             CanCloseWithEsc = false;
             CanCloseWithRightClick = false;
@@ -247,8 +257,18 @@ namespace ClassicUO.Dust765.Dust765
         //MAIN
         public override void Update()
         {
-            if (World.Player == null || World.Player.IsDestroyed /*|| World.Player.IsDead*/)
+            // if the feature was disabled while the gump is still open, self-dispose and stop
+            if (ProfileManager.CurrentProfile == null || !ProfileManager.CurrentProfile.UOClassicCombatLTBar)
+            {
+                Dispose();
                 return;
+            }
+
+            if (World.Player == null || World.Player.IsDestroyed /*|| World.Player.IsDead*/)
+            {
+                base.Update();
+                return;
+            }
 
             Entity entity = World.Get(TargetManager.LastTargetInfo.Serial);
 
@@ -256,9 +276,25 @@ namespace ClassicUO.Dust765.Dust765
             {
 
                 LTSerial = TargetManager.LastTargetInfo.Serial;
-                //LTEntity = entity;
 
-                _textBoxLT.Text = entity.Name;
+                // prefer an externally-supplied name (scripts/plugins)…
+                string name = !string.IsNullOrEmpty(TargetManager.LastTargetInfo.Name)
+                    ? TargetManager.LastTargetInfo.Name
+                    : entity.Name;
+
+                // if the name is still empty (0x2D arrived but 0x11 with name didn't yet),
+                // use Send_StatusRequest (0x34) directly — no side effects, no popup menus
+                // only once per serial to avoid spam; guard against zero/invalid serial
+                if (string.IsNullOrEmpty(name) && LTSerial != 0 && SerialHelper.IsMobile(LTSerial))
+                {
+                    if (_nameRequestedForSerial != LTSerial)
+                    {
+                        _nameRequestedForSerial = LTSerial;
+                        NetClient.Socket.Send_StatusRequest(LTSerial);
+                    }
+                }
+
+                _textBoxLT.Text = name;
                 _textBoxLT.Hue = Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray);
 
                 int hits = CalculatePercents(entity.HitsMax, entity.Hits, HPB_BAR_WIDTH);
@@ -266,7 +302,10 @@ namespace ClassicUO.Dust765.Dust765
                 Mobile mobile = entity as Mobile;
 
                 if (mobile == null)
+                {
+                    base.Update();
                     return;
+                }
 
                 if (mobile.IsDead || mobile.IsDestroyed || mobile.Hits == 0)
                     hits = 0;
@@ -338,6 +377,13 @@ namespace ClassicUO.Dust765.Dust765
             }
             else
             {
+                // no world entity – if a name was provided externally, show it
+                _textBoxLT.Text = TargetManager.LastTargetInfo.Name ?? string.Empty;
+                _textBoxLT.Hue = Notoriety.GetHue(NotorietyFlag.Gray);
+
+                // reset so next time the entity appears we request the name again if needed
+                _nameRequestedForSerial = 0;
+
                 _barsLT[0].LineWidth = 0;
 
                 _barsLT[0].LineColor = LINE_COLOR_DRAW_BLUE;
@@ -374,6 +420,11 @@ namespace ClassicUO.Dust765.Dust765
         }
         protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
+            if (ProfileManager.CurrentProfile == null || !ProfileManager.CurrentProfile.UOClassicCombatLTBar)
+            {
+                return;
+            }
+
             if (button != MouseButtonType.Left)
             {
                 return;
@@ -403,6 +454,12 @@ namespace ClassicUO.Dust765.Dust765
         }
         protected override void OnMouseOver(int x, int y)
         {
+            if (ProfileManager.CurrentProfile == null || !ProfileManager.CurrentProfile.UOClassicCombatLTBar)
+            {
+                base.OnMouseOver(x, y);
+                return;
+            }
+
             Entity entity = World.Get(LTSerial);
 
             if (entity != null)
@@ -415,6 +472,11 @@ namespace ClassicUO.Dust765.Dust765
         }
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
+            if (ProfileManager.CurrentProfile == null || !ProfileManager.CurrentProfile.UOClassicCombatLTBar)
+            {
+                return false;
+            }
+
             if (button != MouseButtonType.Left)
             {
                 return false;

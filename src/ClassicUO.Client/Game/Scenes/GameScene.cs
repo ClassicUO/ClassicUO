@@ -516,6 +516,7 @@ namespace ClassicUO.Game.Scenes
                 }
                 catch { }
             }
+            PaperdollSelectCharManager.Reset();
             ProfileManager.UnLoadProfile();
 
             StaticFilters.CleanCaveTextures();

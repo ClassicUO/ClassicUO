@@ -115,9 +115,11 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             cx = x + TEXT_LEFT;
-            _titleText.Draw(batcher, cx, cy + (ICON_SIZE - _titleText.Height) / 2, Alpha);
+            int titleWidth = _titleText?.Width ?? 0;
+            if (_titleText != null)
+                _titleText.Draw(batcher, cx, cy + (ICON_SIZE - _titleText.Height) / 2, Alpha);
 
-            int statsLeft = cx + _titleText.Width + 12;
+            int statsLeft = cx + titleWidth + 12;
             int statsRight = Width - TITLEBAR_BUTTONS_WIDTH;
             int statsWidth = statsRight - statsLeft;
             bool showStats = ProfileManager.CurrentProfile?.EnableTitleBarStats == true && World.Player != null;

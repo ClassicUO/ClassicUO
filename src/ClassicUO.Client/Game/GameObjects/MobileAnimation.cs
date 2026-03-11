@@ -1184,17 +1184,6 @@ namespace ClassicUO.Game.GameObjects
                                         result = 25;
                                     }
                                 }
-                                else if (mobile.IsGargoyle && mobile.IsFlying) // TODO: what's up when it is dead?
-                                {
-                                    if (mobile.InWarMode)
-                                    {
-                                        result = 65;
-                                    }
-                                    else
-                                    {
-                                        result = 64;
-                                    }
-                                }
                                 else if (!mobile.InWarMode || mobile.IsDead)
                                 {
                                     if (haveLightAtHand2)
@@ -1285,10 +1274,6 @@ namespace ClassicUO.Game.GameObjects
                                                     }
                                                 }
                                             }
-                                            else if (mobile.IsGargoyle && mobile.IsFlying)
-                                            {
-                                                result = 64;
-                                            }
                                             else
                                             {
                                                 result = 7;
@@ -1322,18 +1307,6 @@ namespace ClassicUO.Game.GameObjects
                             if ((flags & AnimationFlags.UseUopAnimation) != 0)
                             {
                                 // i'm not sure here if it's necessary the isgargoyle
-                                if (mobile.IsGargoyle && mobile.IsFlying)
-                                {
-                                    if (isRun)
-                                    {
-                                        result = 63;
-                                    }
-                                    else
-                                    {
-                                        result = 62;
-                                    }
-                                }
-                                else
                                 {
                                     if (isRun && Client.Game.Animations.AnimationExists(graphic, 24))
                                     {
@@ -1397,27 +1370,13 @@ namespace ClassicUO.Game.GameObjects
 
                                 if (hand2Graphic < 0x0240 || hand2Graphic > 0x03E1)
                                 {
-                                    if (mobile.IsGargoyle && mobile.IsFlying)
+                                    if (isRun)
                                     {
-                                        if (isRun)
-                                        {
-                                            result = 63;
-                                        }
-                                        else
-                                        {
-                                            result = 62;
-                                        }
+                                        result = 3;
                                     }
                                     else
                                     {
-                                        if (isRun)
-                                        {
-                                            result = 3;
-                                        }
-                                        else
-                                        {
-                                            result = 1;
-                                        }
+                                        result = 1;
                                     }
                                 }
                                 else
@@ -1426,27 +1385,13 @@ namespace ClassicUO.Game.GameObjects
                                     {
                                         if (HAND2_BASE_ANIMID[i] == hand2Graphic)
                                         {
-                                            if (mobile.IsGargoyle && mobile.IsFlying)
+                                            if (isRun)
                                             {
-                                                if (isRun)
-                                                {
-                                                    result = 63;
-                                                }
-                                                else
-                                                {
-                                                    result = 62;
-                                                }
+                                                result = 3;
                                             }
                                             else
                                             {
-                                                if (isRun)
-                                                {
-                                                    result = 3;
-                                                }
-                                                else
-                                                {
-                                                    result = 1;
-                                                }
+                                                result = 1;
                                             }
 
                                             break;
@@ -1454,10 +1399,6 @@ namespace ClassicUO.Game.GameObjects
                                     }
                                 }
                             }
-                        }
-                        else if (mobile.IsGargoyle && mobile.IsFlying)
-                        {
-                            result = 62;
                         }
                         else
                         {

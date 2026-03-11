@@ -29,6 +29,16 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_statusBarControl);
         }
 
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
+        {
+            if (button == MouseButtonType.Left && x < Width - TopStatusBarControl.TITLEBAR_BUTTONS_WIDTH)
+            {
+                Client.Game.MaximizeOrRestoreWindow();
+                return true;
+            }
+            return base.OnMouseDoubleClick(x, y, button);
+        }
+
         protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
             if (button == MouseButtonType.Left && x < Width - TopStatusBarControl.TITLEBAR_BUTTONS_WIDTH)

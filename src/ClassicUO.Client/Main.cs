@@ -108,6 +108,13 @@ namespace ClassicUO
                 sb.AppendLine();
                 sb.AppendLine();
 
+                HtmlCrashLogGen.Generate
+                (
+                    sb.ToString(),
+                    "Dust765 Crash Report",
+                    "Oh no! Dust765 crashed."
+                );
+
                 System.Threading.Tasks.Task reportCrash = System.Threading.Tasks.Task.Factory.StartNew(() =>
                 {
                     string s = "CV: " + Settings.GlobalSettings.ClientVersion + " - TUO: " + CUOEnviroment.Version.ToString() + "\n" + e.ExceptionObject.ToString();

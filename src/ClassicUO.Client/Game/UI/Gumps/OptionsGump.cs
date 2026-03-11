@@ -606,18 +606,6 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
 
-            Add
-            (
-                new Line
-                (
-                    160,
-                    5,
-                    1,
-                    HEIGHT - 10,
-                    Color.Gray.PackedValue
-                )
-            );
-
             int offsetX = 60;
             int offsetY = 60;
 
@@ -853,7 +841,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            section.AddRight
+            section.Add
             (
                 _autoOpenCorpse = AddCheckBox
                 (
@@ -3658,13 +3646,15 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildNameOverhead()
         {
             const int PAGE = 13;
+            int topButtonY = 52 + 25 + 4;
+            int bottomSeparatorY = HEIGHT - 51;
 
             ScrollArea rightArea = new ScrollArea
             (
                 165,
-                52 + 25 + 4,
+                topButtonY,
                 150,
-                HEIGHT - 101,
+                bottomSeparatorY - topButtonY,
                 true
             );
 
@@ -3688,7 +3678,7 @@ namespace ClassicUO.Game.UI.Gumps
                     165 + 150,
                     21,
                     1,
-                    HEIGHT - 41,
+                    bottomSeparatorY - 21,
                     Color.Gray.PackedValue
                 ),
                 PAGE
@@ -7080,23 +7070,16 @@ namespace ClassicUO.Game.UI.Gumps
             if (_currentProfile.UOClassicCombatLTBar != _uccEnableLTBar.IsChecked)
             {
                 UOClassicCombatLTBar UOClassicCombatLTBar = UIManager.GetGump<UOClassicCombatLTBar>();
+                UIManager.Gumps.OfType<UOClassicCombatLTBar>().ToList().ForEach(g => g.Dispose());
 
                 if (_uccEnableLTBar.IsChecked)
                 {
-                    if (UOClassicCombatLTBar != null)
-                        UOClassicCombatLTBar.Dispose();
-
                     UOClassicCombatLTBar = new UOClassicCombatLTBar
                     {
                         X = _currentProfile.UOClassicCombatLTBarLocation.X,
                         Y = _currentProfile.UOClassicCombatLTBarLocation.Y
                     };
                     UIManager.Add(UOClassicCombatLTBar);
-                }
-                else
-                {
-                    if (UOClassicCombatLTBar != null)
-                        UOClassicCombatLTBar.Dispose();
                 }
 
                 _currentProfile.UOClassicCombatLTBar = _uccEnableLTBar.IsChecked;

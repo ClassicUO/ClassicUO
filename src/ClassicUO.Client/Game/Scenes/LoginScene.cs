@@ -93,13 +93,35 @@ namespace ClassicUO.Game.Scenes
 
         public uint GetCharacterBodyID(int index)
         {
-            // Obtenha o ID do corpo para o personagem indexado.
-            return index switch
+            if (index < 0 || Characters == null || index >= Characters.Length)
+                return 0x0190;
+
+            string character = Characters[index];
+            if (string.IsNullOrEmpty(character))
+                return 0x0190;
+
+            try
             {
-                0 => 0x190, // Exemplo: Humano masculino
-                1 => 0x191, // Exemplo: Humano feminino
-                _ => 0x190  // Default
-            };
+                string path = Path.Combine(
+                    CUOEnviroment.ExecutablePath, "Data", "Profiles",
+                    Settings.GlobalSettings.Username, World.ServerName, character,
+                    "paperdollSelectCharManager.json");
+
+                if (File.Exists(path))
+                {
+                    string json = File.ReadAllText(path);
+                    using var doc = System.Text.Json.JsonDocument.Parse(json);
+                    if (doc.RootElement.TryGetProperty("BodyId", out var bodyIdEl))
+                    {
+                        uint saved = bodyIdEl.GetUInt16();
+                        if (saved != 0)
+                            return saved;
+                    }
+                }
+            }
+            catch { }
+
+            return 0x0190;
         }
 
         public override void Load()
