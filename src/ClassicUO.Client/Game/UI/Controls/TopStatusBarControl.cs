@@ -12,7 +12,7 @@ namespace ClassicUO.Game.UI.Controls
 {
     public class TopStatusBarControl : Control
     {
-        private const int ROW_HEIGHT = 6;
+        private const int ROW_HEIGHT = 8;
         private const int BAR_HEIGHT = 8;
         private const int LABEL_BAR_GAP = 2;
         private const int ROW_GAP = 1;
@@ -140,7 +140,8 @@ namespace ClassicUO.Game.UI.Controls
                         ushort staminaMax = player?.StaminaMax ?? 1;
 
                         // HP, then Mana, then Stamina – keep ordering consistent with other UI elements
-                        DrawBar(batcher, statsLeft + LABEL_BAR_GAP, rowY, barAreaWidth, BAR_HEIGHT, hits, hitsMax, ColorLifeBg, ColorLifeFill);
+                        // HP bar uses dynamic colour based on percent
+                        DrawBar(batcher, statsLeft + LABEL_BAR_GAP, rowY, barAreaWidth, BAR_HEIGHT, hits, hitsMax, ColorLifeBg, TitleBarStatsManager.GetHealthColor(hits, hitsMax));
                         rowY += ROW_HEIGHT + ROW_GAP;
                         DrawBar(batcher, statsLeft + LABEL_BAR_GAP, rowY, barAreaWidth, BAR_HEIGHT, mana, manaMax, ColorManaBg, ColorManaFill);
                         rowY += ROW_HEIGHT + ROW_GAP;

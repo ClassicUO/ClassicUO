@@ -84,7 +84,7 @@ namespace ClassicUO.Game.UI.Gumps
             int ox = x + PADDING + LABEL_WIDTH;
             int oy = y + PADDING;
 
-            DrawBar(batcher, ox, oy, BAR_WIDTH, BAR_HEIGHT, hits, hitsMax, ColorLifeBg, ColorLifeFill);
+            DrawBar(batcher, ox, oy, BAR_WIDTH, BAR_HEIGHT, hits, hitsMax, ColorLifeBg, TitleBarStatsManager.GetHealthColor(hits, hitsMax));
             oy += BAR_HEIGHT + BAR_GAP;
             DrawBar(batcher, ox, oy, BAR_WIDTH, BAR_HEIGHT, mana, manaMax, ColorManaBg, ColorManaFill);
             oy += BAR_HEIGHT + BAR_GAP;

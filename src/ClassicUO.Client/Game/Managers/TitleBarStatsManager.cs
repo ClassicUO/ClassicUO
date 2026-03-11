@@ -1,4 +1,5 @@
 using ClassicUO.Configuration;
+using Microsoft.Xna.Framework;
 using System;
 
 namespace ClassicUO.Game.Managers
@@ -89,6 +90,21 @@ namespace ClassicUO.Game.Managers
         }
 
         public static void ForceUpdate() => UpdateTitleBar();
+
+        /// <summary>
+        /// Health bar colour similar to nameplates: green when high, orange at mid and red when low.
+        /// </summary>
+        public static Color GetHealthColor(ushort current, ushort max)
+        {
+            if (max == 0)
+                return new Color(50, 180, 50); // default green
+            float pct = (float)current / max;
+            if (pct <= 0.25f)
+                return Color.Red;
+            if (pct <= 0.5f)
+                return Color.Orange;
+            return new Color(50, 180, 50);
+        }
 
         public static string GetPreviewText()
         {

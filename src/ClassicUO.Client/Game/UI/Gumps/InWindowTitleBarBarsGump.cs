@@ -103,7 +103,7 @@ namespace ClassicUO.Game.UI.Gumps
             int ox = x + PADDING_H;
             int oy = y + PADDING_V;
 
-            DrawBar(batcher, ox, oy, barWidth, BAR_HEIGHT, World.Player.Hits, World.Player.HitsMax, ColorLifeBg, ColorLifeFill, ShaderHueTranslator.GetHueVector(HueLife, false, 1f));
+            DrawBar(batcher, ox, oy, barWidth, BAR_HEIGHT, World.Player.Hits, World.Player.HitsMax, ColorLifeBg, TitleBarStatsManager.GetHealthColor(World.Player.Hits, World.Player.HitsMax), ShaderHueTranslator.GetHueVector(HueLife, false, 1f));
             oy += BAR_HEIGHT + BAR_GAP;
             DrawBar(batcher, ox, oy, barWidth, BAR_HEIGHT, World.Player.Mana, World.Player.ManaMax, ColorManaBg, ColorManaFill, ShaderHueTranslator.GetHueVector(HueMana, false, 1f));
             oy += BAR_HEIGHT + BAR_GAP;
