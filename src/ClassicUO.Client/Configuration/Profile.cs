@@ -187,6 +187,7 @@ namespace ClassicUO.Configuration
         public bool PathfindSingleClick { get; set; }
         public bool AlwaysRun { get; set; } = true;
         public bool AlwaysRunUnlessHidden { get; set; } = true;
+        public bool FastRotation { get; set; } = false;
         public bool SmoothMovements { get; set; } = true;
         public bool HoldDownKeyTab { get; set; } = true;
         public bool HoldShiftForContext { get; set; } = false;
@@ -227,9 +228,20 @@ namespace ClassicUO.Configuration
         public bool AutoOpenDoors { get; set; } = true;
         public bool SmoothDoors { get; set; } = true;
         public bool AutoOpenCorpses { get; set; } = true;
+        public bool AutoOpenOwnCorpse { get; set; }
         public int AutoOpenCorpseRange { get; set; } = 2;
         public int CorpseOpenOptions { get; set; } = 3;
         public bool SkipEmptyCorpse { get; set; }
+        public float CameraSmoothingFactor { get; set; }
+        public bool EnablePetScaling { get; set; }
+        public int MinGumpMoveDistance { get; set; }
+        public bool QueueManualItemMoves { get; set; }
+        public bool QueueManualItemUses { get; set; }
+        public bool AutoUnequipForActions { get; set; }
+        public bool DisableWeather { get; set; }
+        public int QuickHealSpell { get; set; }
+        public int QuickCureSpell { get; set; }
+        public ushort TurnDelay { get; set; } = 100;
         public bool DisableDefaultHotkeys { get; set; }
         public bool DisableArrowBtn { get; set; }
         public bool DisableTabBtn { get; set; }
@@ -275,6 +287,9 @@ namespace ClassicUO.Configuration
         public bool CBBlackBGToggled { get; set; }
 
         public bool ShowInfoBar { get; set; }
+        public bool ShowHPInTitleBar { get; set; } = true;
+        public bool EnableTitleBarStats { get; set; }
+        public TitleBarStatsMode TitleBarStatsMode { get; set; } = TitleBarStatsMode.Text;
         public int InfoBarHighlightType { get; set; } // 0 = text colour changes, 1 = underline
 
         public bool CounterBarEnabled { get; set; }

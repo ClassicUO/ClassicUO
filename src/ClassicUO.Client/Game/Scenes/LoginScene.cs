@@ -107,6 +107,8 @@ namespace ClassicUO.Game.Scenes
             base.Load();
 
             Client.Game.Window.AllowUserResizing = false;
+            Client.Game.HideNativeTitleBar();
+            TopStatusBarGump.Create();
 
             _autoLogin = Settings.GlobalSettings.AutoLogin;
 

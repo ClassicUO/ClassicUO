@@ -675,6 +675,9 @@ when amount is or exceeds</value>
   <data name="ShowInfoBar" xml:space="preserve">
     <value>Show Info Bar</value>
   </data>
+  <data name="ShowHPInTitleBar" xml:space="preserve">
+    <value>Show HP in title bar</value>
+  </data>
   <data name="DataHighlightType" xml:space="preserve">
     <value>Data highlight type:</value>
   </data>
@@ -1377,6 +1380,9 @@ Client version: '{0}'</value>
   </data>
   <data name="FasterCastRecovery" xml:space="preserve">
     <value>Faster Cast Recovery</value>
+  </data>
+  <data name="FastRotation" xml:space="preserve">
+    <value>Fast rotation (turn speed)</value>
   </data>
   <data name="PhysicalResistance" xml:space="preserve">
     <value>Physical Resistance</value>

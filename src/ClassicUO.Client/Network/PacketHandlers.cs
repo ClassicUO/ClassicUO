@@ -585,7 +585,8 @@ namespace ClassicUO.Network
                     if (mobile == World.Player)
                     {
                         if (
-                            !string.IsNullOrEmpty(World.Player.Name) && oldName != World.Player.Name
+                            !string.IsNullOrEmpty(World.Player.Name)
+                            && (oldName != World.Player.Name || ProfileManager.CurrentProfile?.ShowHPInTitleBar == true)
                         )
                         {
                             Client.Game.SetWindowTitle(World.Player.Name);
@@ -1940,6 +1941,8 @@ namespace ClassicUO.Network
                     UoAssist.SignalHits();
                     UoAssist.SignalStamina();
                     UoAssist.SignalMana();
+                    if (ProfileManager.CurrentProfile?.ShowHPInTitleBar == true)
+                        Client.Game.SetWindowTitle(World.Player.Name);
                 }
             }
         }
@@ -3601,6 +3604,8 @@ namespace ClassicUO.Network
             if (entity == World.Player)
             {
                 UoAssist.SignalHits();
+                if (ProfileManager.CurrentProfile?.ShowHPInTitleBar == true)
+                    Client.Game.SetWindowTitle(World.Player.Name);
             }
         }
 

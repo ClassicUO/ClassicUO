@@ -33,6 +33,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using ClassicUO.Game;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
@@ -115,6 +116,7 @@ namespace ClassicUO.Configuration
 
             ValidateFields(CurrentProfile);
 
+            Pathfinder.FastRotation = CurrentProfile.FastRotation;
             ClassicUO.Game.Managers.IgnoreManager.Initialize();
         }
 

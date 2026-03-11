@@ -276,9 +276,19 @@ namespace ClassicUO
             base.UnloadContent();
         }
 
-        public void SetWindowTitle(string title)
+        public void SetWindowTitle(string title, bool skipStats = false)
         {
-            if (string.IsNullOrEmpty(title))
+            // only apply title bar stats when the player is fully logged in (World.InGame)
+            if (!skipStats && ProfileManager.CurrentProfile?.EnableTitleBarStats == true && World.Player != null && World.InGame)
+            {
+                TitleBarStatsManager.UpdateTitleBar();
+                return;
+            }
+
+            string baseTitle = title;
+            if (!skipStats && !string.IsNullOrEmpty(baseTitle) && ProfileManager.CurrentProfile?.ShowHPInTitleBar == true && World.Player != null && World.InGame)
+                baseTitle = $"{baseTitle} | HP {World.Player.Hits}/{World.Player.HitsMax}";
+            if (string.IsNullOrEmpty(baseTitle))
             {
 #if DEV_BUILD
                 Window.Title = $"ClassicUO [dev] - {CUOEnviroment.Version}";
@@ -289,9 +299,9 @@ namespace ClassicUO
             else
             {
 #if DEV_BUILD
-                Window.Title = $"{title} - ClassicUO [dev] - {CUOEnviroment.Version}";
+                Window.Title = $"{baseTitle} - ClassicUO [dev] - {CUOEnviroment.Version}";
 #else
-                Window.Title = $"{title} - [Dust765.3.0 {CUOEnviroment.Version}]";
+                Window.Title = $"{baseTitle} - [Dust765.3.0 {CUOEnviroment.Version}]";
 #endif
             }
         }
@@ -362,9 +372,21 @@ namespace ClassicUO
             TargetElapsedTime = unlimitedFps ? TimeSpan.FromMilliseconds(1000.0 / 250.0) : TimeSpan.FromMilliseconds(frameDelay);
         }
 
-        private void SetWindowPosition(int x, int y)
+        public void SetWindowPosition(int x, int y)
         {
             SDL_SetWindowPosition(Window.Handle, x, y);
+        }
+
+        public Point GetWindowPosition()
+        {
+            SDL_GetWindowPosition(Window.Handle, out int wx, out int wy);
+            return new Point(wx, wy);
+        }
+
+        public Point GetGlobalMousePosition()
+        {
+            SDL_GetGlobalMouseState(out float gx, out float gy);
+            return new Point((int)gx, (int)gy);
         }
 
         public void SetWindowSize(int width, int height)
@@ -401,6 +423,29 @@ namespace ClassicUO
             SDL_SetHint("SDL_HINT_TIMER_RESOLUTION", "1");
             
             Log.Trace("SDL optimized for high FPS");
+        }
+
+        public void HideNativeTitleBar()
+        {
+            SDL_SetWindowBordered(Window.Handle, false);
+        }
+
+        public void ShowNativeTitleBar()
+        {
+            SDL_SetWindowBordered(Window.Handle, true);
+        }
+
+        public void MinimizeWindow()
+        {
+            SDL_MinimizeWindow(Window.Handle);
+        }
+
+        public void MaximizeOrRestoreWindow()
+        {
+            if (IsWindowMaximized())
+                RestoreWindow();
+            else
+                MaximizeWindow();
         }
 
         public void SetWindowBorderless(bool borderless)

@@ -116,6 +116,7 @@ namespace ClassicUO.Game.UI.Gumps
                          _pathFindSingleClick,
                          _alwaysRun,
                          _alwaysRunUnlessHidden,
+                         _fastRotation,
                          _showHpMobile,
                          _highlightByPoisoned,
                          _highlightByParalyzed,
@@ -162,6 +163,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _scaleSpeechDelay, _saveJournalCheckBox;
         private Checkbox _showHouseContent;
         private Checkbox _showInfoBar;
+        private Checkbox _showHPInTitleBar;
         private Checkbox _actionBarEnabled;
         private Checkbox _ignoreAllianceMessages;
         private Checkbox _ignoreGuildMessages;
@@ -195,6 +197,11 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _showStatsMessage, _showSkillsMessage, _displayPartyChatOverhead;
         private HSliderBar _showSkillsMessageDelta;
         // ## BEGIN - END ## // BASICSETUP
+        // ## BEGIN - END ## // TITLE BAR
+        private Checkbox _enableTitleBarStats;
+        private Checkbox _titleBarStatsModeText;
+        private Checkbox _titleBarStatsModePercent;
+        private Checkbox _titleBarStatsModeProgressBar;
         // ## BEGIN - END ## // ART / HUE CHANGES
         private Checkbox _colorStealth, _colorEnergyBolt, _colorGold, _colorTreeTile, _colorBlockerTile;
         private ModernColorPicker.HueDisplay _stealthColorPickerBox, _energyBoltColorPickerBox, _goldColorPickerBox, _treeTileColorPickerBox, _blockerTileColorPickerBox;
@@ -835,6 +842,18 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             section.Add
+            (
+                _fastRotation = AddCheckBox
+                (
+                    null,
+                    ResGumps.FastRotation,
+                    _currentProfile.FastRotation,
+                    startX,
+                    startY
+                )
+            );
+
+            section.AddRight
             (
                 _autoOpenCorpse = AddCheckBox
                 (
@@ -3337,6 +3356,18 @@ namespace ClassicUO.Game.UI.Gumps
             startX += 40;
             startY += _showInfoBar.Height + 2;
 
+            _showHPInTitleBar = AddCheckBox
+            (
+                rightArea,
+                ResGumps.ShowHPInTitleBar,
+                _currentProfile.ShowHPInTitleBar,
+                startX,
+                startY
+            );
+
+            startX += 40;
+            startY += _showHPInTitleBar.Height + 2;
+
             Label text = AddLabel(rightArea, ResGumps.DataHighlightType, startX, startY);
 
             startX += text.Width + 5;
@@ -4791,11 +4822,44 @@ namespace ClassicUO.Game.UI.Gumps
 
             section.AddRight(AddLabel(null, "Stump or tile color", 0, 0), 2);
             // ## BEGIN - END ## // ART / HUE CHANGES
+            // ## BEGIN - END ## // TITLE BAR
+            SettingsSection sectionTitleBar = AddSettingsSection(box, "-----TITLE BAR-----");
+            sectionTitleBar.Y = section.Bounds.Bottom + 80;
+            startY = section.Bounds.Bottom + 80;
+
+            sectionTitleBar.Add(_enableTitleBarStats = AddCheckBox(null, "Enable title bar stats (HP, Mana, Stamina)", _currentProfile.EnableTitleBarStats, startX, startY));
+            startY += _enableTitleBarStats.Height + 2;
+
+            sectionTitleBar.Add(AddLabel(null, "Display mode (choose one):", startX, startY));
+            startY += 20;
+
+            sectionTitleBar.Add(_titleBarStatsModeText = AddCheckBox(null, "Text (HP 85/100, MP 42/50, SP 95/100)", _currentProfile.TitleBarStatsMode == TitleBarStatsMode.Text, startX, startY));
+            startY += _titleBarStatsModeText.Height + 2;
+
+            sectionTitleBar.Add(_titleBarStatsModePercent = AddCheckBox(null, "Percent (HP 85%, MP 84%, SP 95%)", _currentProfile.TitleBarStatsMode == TitleBarStatsMode.Percent, startX, startY));
+            startY += _titleBarStatsModePercent.Height + 2;
+
+            sectionTitleBar.Add(_titleBarStatsModeProgressBar = AddCheckBox(null, "Progress Bar (colored bars below each other)", _currentProfile.TitleBarStatsMode == TitleBarStatsMode.ProgressBar, startX, startY));
+            startY += _titleBarStatsModeProgressBar.Height + 2;
+
+            void UncheckOtherTitleBarModes(Checkbox selected)
+            {
+                if (!selected.IsChecked) return;
+                if (_titleBarStatsModeText != null && _titleBarStatsModeText != selected) _titleBarStatsModeText.IsChecked = false;
+                if (_titleBarStatsModePercent != null && _titleBarStatsModePercent != selected) _titleBarStatsModePercent.IsChecked = false;
+                if (_titleBarStatsModeProgressBar != null && _titleBarStatsModeProgressBar != selected) _titleBarStatsModeProgressBar.IsChecked = false;
+            }
+            _titleBarStatsModeText.ValueChanged += (s, e) => UncheckOtherTitleBarModes(_titleBarStatsModeText);
+            _titleBarStatsModePercent.ValueChanged += (s, e) => UncheckOtherTitleBarModes(_titleBarStatsModePercent);
+            _titleBarStatsModeProgressBar.ValueChanged += (s, e) => UncheckOtherTitleBarModes(_titleBarStatsModeProgressBar);
+
+    
+            // ## BEGIN - END ## // TITLE BAR
             // ## BEGIN - END ## // VISUAL HELPERS
             SettingsSection section2 = AddSettingsSection(box, "-----VISUAL HELPERS-----");
-            section2.Y = section.Bounds.Bottom + 80;
+            section2.Y = sectionTitleBar.Bounds.Bottom + 40;
 
-            startY = section.Bounds.Bottom + 80;
+            startY = sectionTitleBar.Bounds.Bottom + 40;
 
             section2.Add(_highlightTileRange = AddCheckBox(null, "Highlight tiles on range", _currentProfile.HighlightTileAtRange, startX, startY));
             startY += _highlightTileRange.Height + 2;
@@ -5857,6 +5921,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _useShiftPathfind.IsChecked = false;
                     _alwaysRun.IsChecked = false;
                     _alwaysRunUnlessHidden.IsChecked = false;
+                    if (_fastRotation != null) _fastRotation.IsChecked = false;
                     _showHpMobile.IsChecked = false;
                     _hpComboBox.SelectedIndex = 0;
                     _hpComboBoxShowWhen.SelectedIndex = 0;
@@ -6221,6 +6286,8 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.UseShiftToPathfind = _useShiftPathfind.IsChecked;
             _currentProfile.AlwaysRun = _alwaysRun.IsChecked;
             _currentProfile.AlwaysRunUnlessHidden = _alwaysRunUnlessHidden.IsChecked;
+            _currentProfile.FastRotation = _fastRotation?.IsChecked ?? _currentProfile.FastRotation;
+            Pathfinder.FastRotation = _currentProfile.FastRotation;
             _currentProfile.ShowMobilesHP = _showHpMobile.IsChecked;
             _currentProfile.HighlightMobilesByPoisoned = _highlightByPoisoned.IsChecked;
             _currentProfile.HighlightMobilesByParalize = _highlightByParalyzed.IsChecked;
@@ -6500,7 +6567,11 @@ namespace ClassicUO.Game.UI.Gumps
             if (_currentProfile.WindowBorderless != _windowBorderless.IsChecked)
             {
                 _currentProfile.WindowBorderless = _windowBorderless.IsChecked;
-                Client.Game.SetWindowBorderless(_windowBorderless.IsChecked);
+                if (_windowBorderless.IsChecked)
+                    Client.Game.HideNativeTitleBar();
+                else
+                    Client.Game.ShowNativeTitleBar();
+                InWindowTitleBarBarsGump.UpdateVisibility();
             }
 
             _currentProfile.UseAlternativeLights = _altLights.IsChecked;
@@ -6714,7 +6785,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             // infobar
             _currentProfile.ShowInfoBar = _showInfoBar.IsChecked;
+            _currentProfile.ShowHPInTitleBar = _showHPInTitleBar?.IsChecked ?? _currentProfile.ShowHPInTitleBar;
             _currentProfile.InfoBarHighlightType = _infoBarHighlightType.SelectedIndex;
+            if (World.InGame && World.Player != null)
+                Client.Game.SetWindowTitle(World.Player.Name);
 
             if (_actionBarEnabled != null)
                 _currentProfile.ActionBarEnabled = _actionBarEnabled.IsChecked;
@@ -6814,6 +6888,23 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.TooltipFont = _tooltip_font_selector.GetSelectedFont();
 
             // ## BEGIN - END ## // BASICSETUP
+            // ## BEGIN - END ## // TITLE BAR
+            _currentProfile.EnableTitleBarStats = _enableTitleBarStats?.IsChecked ?? _currentProfile.EnableTitleBarStats;
+            if (_titleBarStatsModeProgressBar != null && _titleBarStatsModeProgressBar.IsChecked)
+                _currentProfile.TitleBarStatsMode = TitleBarStatsMode.ProgressBar;
+            else if (_titleBarStatsModePercent != null && _titleBarStatsModePercent.IsChecked)
+                _currentProfile.TitleBarStatsMode = TitleBarStatsMode.Percent;
+            else if (_titleBarStatsModeText != null && _titleBarStatsModeText.IsChecked)
+                _currentProfile.TitleBarStatsMode = TitleBarStatsMode.Text;
+            if (World.Player != null)
+            {
+                if (_currentProfile.EnableTitleBarStats)
+                    TitleBarStatsManager.ForceUpdate();
+                else
+                    Client.Game.SetWindowTitle(World.Player.Name);
+            }
+            TitleBarStatsBarsGump.UpdateVisibility();
+            InWindowTitleBarBarsGump.UpdateVisibility();
             // ## BEGIN - END ## // ART / HUE CHANGES
             _currentProfile.ColorStealth = _colorStealth.IsChecked;
             _currentProfile.StealthHue = _stealthColorPickerBox.Hue;

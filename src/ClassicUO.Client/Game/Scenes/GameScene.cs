@@ -187,10 +187,16 @@ namespace ClassicUO.Game.Scenes
 
             UIManager.Add(new MobileScaleGump(), false);
 
+            Client.Game.HideNativeTitleBar();
+            TopStatusBarGump.Create();
+
             if (!ProfileManager.CurrentProfile.TopbarGumpIsDisabled)
             {
                 TopBarGump.Create();
             }
+
+            TitleBarStatsBarsGump.Create();
+            InWindowTitleBarBarsGump.UpdateVisibility();
 
             CommandManager.Initialize();
             NetClient.Socket.Disconnected += SocketOnDisconnected;
@@ -201,7 +207,7 @@ namespace ClassicUO.Game.Scenes
 
             if (ProfileManager.CurrentProfile.WindowBorderless)
             {
-                Client.Game.SetWindowBorderless(true);
+                Client.Game.HideNativeTitleBar();
             }
             else if (Settings.GlobalSettings.IsWindowMaximized)
             {
@@ -541,7 +547,6 @@ namespace ClassicUO.Game.Scenes
             );
 
             Settings.GlobalSettings.IsWindowMaximized = Client.Game.IsWindowMaximized();
-            Client.Game.SetWindowBorderless(false);
 
             base.Unload();
         }
