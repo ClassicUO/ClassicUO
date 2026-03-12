@@ -33,6 +33,8 @@ namespace ClassicUO.Game.UI.Controls
         private static readonly Color ColorStaminaFill = new Color(220, 120, 40);
         private static readonly Color ColorManaBg = new Color(20, 25, 50);
         private static readonly Color ColorManaFill = new Color(60, 80, 220);
+        private static readonly Color ColorUosBarFrame = new Color(90, 78, 44, 255);
+        private static readonly Color ColorUosBarBackdrop = new Color(12, 12, 12, 235);
 
         private static readonly Vector3 HueNone = ShaderHueTranslator.GetHueVector(0);
 
@@ -132,6 +134,7 @@ namespace ClassicUO.Game.UI.Controls
                     int barAreaWidth = 65; // fixed width for bars, since they are more compact than text
                     if (barAreaWidth > 40)
                     {
+                        bool useUosBarBackdrop = ProfileManager.CurrentProfile?.GetEffectiveWindowTitleStyle() == WindowTitleBarStyle.UOS;
                         int rowY = cy;
                         Mobile player = World.Player;
                         ushort hits = player?.Hits ?? 0;
@@ -143,11 +146,11 @@ namespace ClassicUO.Game.UI.Controls
 
                         // HP, then Mana, then Stamina – keep ordering consistent with other UI elements
                         // HP bar uses dynamic colour based on percent
-                        DrawBar(batcher, statsLeft + LABEL_BAR_GAP, rowY, barAreaWidth, BAR_HEIGHT, hits, hitsMax, ColorLifeBg, TitleBarStatsManager.GetHealthColor(hits, hitsMax));
+                        DrawBar(batcher, statsLeft + LABEL_BAR_GAP, rowY, barAreaWidth, BAR_HEIGHT, hits, hitsMax, ColorLifeBg, TitleBarStatsManager.GetHealthColor(hits, hitsMax), useUosBarBackdrop);
                         rowY += ROW_HEIGHT + ROW_GAP;
-                        DrawBar(batcher, statsLeft + LABEL_BAR_GAP, rowY, barAreaWidth, BAR_HEIGHT, mana, manaMax, ColorManaBg, ColorManaFill);
+                        DrawBar(batcher, statsLeft + LABEL_BAR_GAP, rowY, barAreaWidth, BAR_HEIGHT, mana, manaMax, ColorManaBg, ColorManaFill, useUosBarBackdrop);
                         rowY += ROW_HEIGHT + ROW_GAP;
-                        DrawBar(batcher, statsLeft + LABEL_BAR_GAP, rowY, barAreaWidth, BAR_HEIGHT, stamina, staminaMax, ColorStaminaBg, ColorStaminaFill);
+                        DrawBar(batcher, statsLeft + LABEL_BAR_GAP, rowY, barAreaWidth, BAR_HEIGHT, stamina, staminaMax, ColorStaminaBg, ColorStaminaFill, useUosBarBackdrop);
                     }
                 }
                 else
@@ -216,8 +219,23 @@ namespace ClassicUO.Game.UI.Controls
         }
 
         private static void DrawBar(UltimaBatcher2D batcher, int x, int y, int w, int h,
-            ushort current, ushort max, Color colorBg, Color colorFill)
+            ushort current, ushort max, Color colorBg, Color colorFill, bool useUosBarBackdrop)
         {
+            if (useUosBarBackdrop)
+            {
+                batcher.Draw(
+                    SolidColorTextureCache.GetTexture(ColorUosBarFrame),
+                    new Rectangle(x - 1, y - 1, w + 2, h + 2),
+                    HueNone,
+                    0f);
+
+                batcher.Draw(
+                    SolidColorTextureCache.GetTexture(ColorUosBarBackdrop),
+                    new Rectangle(x, y, w, h),
+                    HueNone,
+                    0f);
+            }
+
             batcher.Draw(
                 SolidColorTextureCache.GetTexture(colorBg),
                 new Rectangle(x, y, w, h),

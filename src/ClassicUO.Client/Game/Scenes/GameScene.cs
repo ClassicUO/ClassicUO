@@ -81,6 +81,7 @@ namespace ClassicUO.Game.Scenes
         });
 
         private uint _time_cleanup = Time.Ticks + 5000;
+        private uint _timeToUpdateNativeTitleStats;
         private static XBREffect _xbr;
         private bool _alphaChanged;
         private long _alphaTimer;
@@ -187,8 +188,16 @@ namespace ClassicUO.Game.Scenes
 
             UIManager.Add(new MobileScaleGump(), false);
 
-            Client.Game.HideNativeTitleBar();
-            TopStatusBarGump.Create();
+            if (ProfileManager.CurrentProfile.UsesCustomWindowTitleBar())
+            {
+                Client.Game.HideNativeTitleBar();
+                TopStatusBarGump.Create();
+            }
+            else
+            {
+                Client.Game.ShowNativeTitleBar();
+                UIManager.GetGump<TopStatusBarGump>()?.Dispose();
+            }
 
             if (!ProfileManager.CurrentProfile.TopbarGumpIsDisabled)
             {
@@ -197,6 +206,7 @@ namespace ClassicUO.Game.Scenes
 
             TitleBarStatsBarsGump.Create();
             InWindowTitleBarBarsGump.UpdateVisibility();
+            WindowBorderFrameGump.UpdateVisibility();
 
             CommandManager.Initialize();
             NetClient.Socket.Disconnected += SocketOnDisconnected;
@@ -205,7 +215,7 @@ namespace ClassicUO.Game.Scenes
 
             SDL.SDL_SetWindowMinimumSize(Client.Game.Window.Handle, Constants.MIN_GAME_WINDOW_WIDTH, Constants.MIN_GAME_WINDOW_HEIGHT);
 
-            if (ProfileManager.CurrentProfile.WindowBorderless)
+            if (ProfileManager.CurrentProfile.UsesCustomWindowTitleBar())
             {
                 Client.Game.HideNativeTitleBar();
             }
@@ -215,6 +225,7 @@ namespace ClassicUO.Game.Scenes
             }
             else if (Settings.GlobalSettings.WindowSize.HasValue)
             {
+                Client.Game.ShowNativeTitleBar();
                 int w = Settings.GlobalSettings.WindowSize.Value.X;
                 int h = Settings.GlobalSettings.WindowSize.Value.Y;
 
@@ -222,6 +233,10 @@ namespace ClassicUO.Game.Scenes
                 h = Math.Max(Constants.MIN_GAME_WINDOW_HEIGHT, h);
 
                 Client.Game.SetWindowSize(w, h);
+            }
+            else
+            {
+                Client.Game.ShowNativeTitleBar();
             }
 
             // ## BEGIN - END ## // UI/GUMPS

@@ -1679,7 +1679,7 @@ namespace ClassicUO.Dust765.Dust765
                         }
                     }
 
-                    var curepotion = World.Player.FindItemByGraphic(0x0F07);
+                    var curepotion = FindPotionByGraphicOrCliloc(0x0F07, stackalloc int[3] { 1041317, 1041316, 1041315 });
 
                     if (curepotion != null)
                     {
@@ -1708,11 +1708,6 @@ namespace ClassicUO.Dust765.Dust765
                     }
                     else
                     {
-                        UCCS_AutoCurepot = false;
-                        ProfileManager.CurrentProfile.UOClassicCombatSelf_AutoCurepot = false;
-
-                        UpdateVars();
-
                         _lastMacroPot = 0;
                     }
                 }
@@ -1742,7 +1737,7 @@ namespace ClassicUO.Dust765.Dust765
                         }
                     }
 
-                    var healpotion = World.Player.FindItemByGraphic(0x0F0C);
+                    var healpotion = FindPotionByGraphicOrCliloc(0x0F0C, stackalloc int[3] { 1041330, 1041329, 1041328 });
                     if (healpotion != null)
                     {
                         if ((_tickLastActionTime + UCCS_ActionCooldown) <= Time.Ticks && (_tickStartAutoHealpot + UCCS_HealpotCooldown) <= Time.Ticks)
@@ -1770,11 +1765,6 @@ namespace ClassicUO.Dust765.Dust765
                     }
                     else
                     {
-                        UCCS_AutoHealpot = false;
-                        ProfileManager.CurrentProfile.UOClassicCombatSelf_AutoHealpot = false;
-
-                        UpdateVars();
-
                         _lastMacroPot = 0;
                     }
                 }
@@ -1804,7 +1794,7 @@ namespace ClassicUO.Dust765.Dust765
                         }
                     }
 
-                    var refreshpotion = World.Player.FindItemByGraphic(0xF0B);
+                    var refreshpotion = FindPotionByGraphicOrCliloc(0xF0B, stackalloc int[2] { 1041327, 1041326 });
                     if (refreshpotion != null)
                     {
                         if ((_tickLastActionTime + UCCS_ActionCooldown) <= Time.Ticks && (_tickStartAutoRefreshpot + UCCS_RefreshpotCooldown) <= Time.Ticks)
@@ -1832,11 +1822,6 @@ namespace ClassicUO.Dust765.Dust765
                     }
                     else
                     {
-                        UCCS_AutoRefreshpot = false;
-                        ProfileManager.CurrentProfile.UOClassicCombatSelf_AutoRefreshpot = false;
-
-                        UpdateVars();
-
                         _lastMacroPot = 0;
                     }
                 }
@@ -2634,6 +2619,19 @@ namespace ClassicUO.Dust765.Dust765
                     break;
             }
         }
+
+        private static Item FindPotionByGraphicOrCliloc(ushort graphic, Span<int> clilocs)
+        {
+            Item potion = World.Player.FindItemByGraphic(graphic);
+
+            if (potion != null)
+            {
+                return potion;
+            }
+
+            return World.Player.FindPreferredItemByCliloc(clilocs);
+        }
+
         //MISC
         // Generate a random number between two numbers  
         public int RandomNumber(int min, int max)

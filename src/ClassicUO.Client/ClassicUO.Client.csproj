@@ -68,6 +68,7 @@
 
   <ItemGroup>
     <PackageReference Include="IronPython" Version="2.7.12" />
+    <PackageReference Include="Sentry" Version="6.1.0" />
     <ProjectReference Include="..\..\external\FNA\FNA.Core.csproj" />
     <ProjectReference Include="..\..\external\UOSteam\UOScript\UOScript.csproj" />
     <ProjectReference Include="..\ClassicUO.Assets\ClassicUO.Assets.csproj" />

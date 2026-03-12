@@ -40,6 +40,7 @@ using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using SDL3;
+using Sentry;
 using System;
 using System.Globalization;
 using System.IO;
@@ -61,6 +62,20 @@ namespace ClassicUO
         [STAThread]
         public static void Main(string[] args)
         {
+            // Initialize Sentry for crash reporting
+            string sentrydDsn = Environment.GetEnvironmentVariable("SENTRY_DSN");
+            if (!string.IsNullOrWhiteSpace(sentrydDsn))
+            {
+                SentrySdk.Init(options =>
+                {
+                    options.Dsn = sentrydDsn;
+                    options.Environment = Environment.GetEnvironmentVariable("SENTRY_ENV") ?? "production";
+                    options.TracesSampleRate = 1.0;
+                    options.Debug = false;
+                    options.StackTraceMode = StackTraceMode.Enhanced;
+                });
+            }
+
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
             Language.Load();
 #if !NETFRAMEWORK
@@ -108,6 +123,12 @@ namespace ClassicUO
                 sb.AppendLine();
                 sb.AppendLine();
 
+                // Send to Sentry
+                if (e.ExceptionObject is Exception ex)
+                {
+                    SentrySdk.CaptureException(ex);
+                }
+
                 HtmlCrashLogGen.Generate
                 (
                     sb.ToString(),
@@ -132,6 +153,9 @@ namespace ClassicUO
                     crashfile.WriteAsync(sb.ToString()).RunSynchronously();
                 }
                 reportCrash.Wait();
+                
+                // Flush Sentry before exit
+                SentrySdk.Close();
             };
 #endif
             ReadSettingsFromArgs(args);
@@ -542,6 +566,21 @@ namespace ClassicUO
 
                         PacketLogger.Default.Enabled = true;
                         PacketLogger.Default.CreateFile();
+
+                        if (!string.IsNullOrEmpty(value))
+                        {
+                            string[] vals = value.Split(',');
+
+                            foreach (string val in vals)
+                            {
+                                string hex = val.Trim().StartsWith("0x", StringComparison.OrdinalIgnoreCase)
+                                    ? val.Trim().Substring(2)
+                                    : val.Trim();
+
+                                if (byte.TryParse(hex, NumberStyles.HexNumber, null, out byte res2))
+                                    PacketLogger.Default.LogPacketID.Add(res2);
+                            }
+                        }
 
                         break;
 

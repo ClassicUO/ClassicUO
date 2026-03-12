@@ -119,45 +119,7 @@ namespace ClassicUO.Game.Managers
                 case MessageType.System:
                     break;
                 case MessageType.Party:
-                    {
-                        if (!ProfileManager.CurrentProfile.DisplayPartyChatOverhead)
-                            break;
-                        if (parent == null)
-                        {
-                            bool handled = false;
-                            foreach (PartyMember member in World.Party.Members)
-                                if (member != null)
-                                    if (member.Name == name)
-                                    {
-                                        Mobile m = World.Mobiles.Get(member.Serial);
-                                        if (m != null)
-                                        {
-                                            parent = m;
-                                            handled = true;
-                                            break;
-                                        }
-
-                                    }
-                            if (!handled) break;
-                        }
-
-                        // If person who send that message is in ignores list - but filter out Spell Text
-                        if (IgnoreManager.IgnoredCharsList.Contains(parent.Name) && type != MessageType.Spell)
-                            break;
-
-                        TextObject msg = CreateMessage
-                        (
-                            text,
-                            hue,
-                            font,
-                            unicode,
-                            type,
-                            textType
-                        );
-
-                        parent.AddMessage(msg);
-                        break;
-                    }
+                    break;
                 case MessageType.Guild:
                     if (currentProfile.IgnoreGuildMessages) return;
                     break;

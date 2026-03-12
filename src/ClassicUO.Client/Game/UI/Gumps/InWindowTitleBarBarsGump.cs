@@ -30,6 +30,8 @@ namespace ClassicUO.Game.UI.Gumps
         private static readonly Color ColorStaminaFill = new Color(200, 120, 40);
         private static readonly Color ColorStaminaBg = new Color(60, 40, 20);
         private static readonly Color ColorStripBg = new Color(30, 30, 30, 240);
+        private static readonly Color ColorUosBarFrame = new Color(90, 78, 44, 255);
+        private static readonly Color ColorUosBarBackdrop = new Color(12, 12, 12, 235);
 
         private static readonly Vector3 HueNone = ShaderHueTranslator.GetHueVector(0);
 
@@ -66,7 +68,11 @@ namespace ClassicUO.Game.UI.Gumps
             if (ProfileManager.CurrentProfile == null)
                 return;
 
-            bool shouldShow = false;
+            // Colored bar strip only for UOS/Orion custom title + ProgressBar mode.
+            // CUO native shows stats in the OS window title text instead.
+            bool shouldShow = ProfileManager.CurrentProfile.UsesCustomWindowTitleBar()
+                              && ProfileManager.CurrentProfile.EnableTitleBarStats
+                              && ProfileManager.CurrentProfile.TitleBarStatsMode == TitleBarStatsMode.ProgressBar;
 
             InWindowTitleBarBarsGump existing = UIManager.GetGump<InWindowTitleBarBarsGump>();
 
@@ -102,19 +108,35 @@ namespace ClassicUO.Game.UI.Gumps
                 barWidth = MAX_BAR_WIDTH;
             int ox = x + PADDING_H;
             int oy = y + PADDING_V;
+            bool useUosBarBackdrop = ProfileManager.CurrentProfile?.GetEffectiveWindowTitleStyle() == WindowTitleBarStyle.UOS;
 
-            DrawBar(batcher, ox, oy, barWidth, BAR_HEIGHT, World.Player.Hits, World.Player.HitsMax, ColorLifeBg, TitleBarStatsManager.GetHealthColor(World.Player.Hits, World.Player.HitsMax), ShaderHueTranslator.GetHueVector(HueLife, false, 1f));
+            DrawBar(batcher, ox, oy, barWidth, BAR_HEIGHT, World.Player.Hits, World.Player.HitsMax, ColorLifeBg, TitleBarStatsManager.GetHealthColor(World.Player.Hits, World.Player.HitsMax), ShaderHueTranslator.GetHueVector(HueLife, false, 1f), useUosBarBackdrop);
             oy += BAR_HEIGHT + BAR_GAP;
-            DrawBar(batcher, ox, oy, barWidth, BAR_HEIGHT, World.Player.Mana, World.Player.ManaMax, ColorManaBg, ColorManaFill, ShaderHueTranslator.GetHueVector(HueMana, false, 1f));
+            DrawBar(batcher, ox, oy, barWidth, BAR_HEIGHT, World.Player.Mana, World.Player.ManaMax, ColorManaBg, ColorManaFill, ShaderHueTranslator.GetHueVector(HueMana, false, 1f), useUosBarBackdrop);
             oy += BAR_HEIGHT + BAR_GAP;
-            DrawBar(batcher, ox, oy, barWidth, BAR_HEIGHT, World.Player.Stamina, World.Player.StaminaMax, ColorStaminaBg, ColorStaminaFill, ShaderHueTranslator.GetHueVector(HueStamina, false, 1f));
+            DrawBar(batcher, ox, oy, barWidth, BAR_HEIGHT, World.Player.Stamina, World.Player.StaminaMax, ColorStaminaBg, ColorStaminaFill, ShaderHueTranslator.GetHueVector(HueStamina, false, 1f), useUosBarBackdrop);
 
             return true;
         }
 
         private static void DrawBar(UltimaBatcher2D batcher, int x, int y, int w, int h,
-            ushort current, ushort max, Color colorBg, Color colorFill, Vector3 fillHue)
+            ushort current, ushort max, Color colorBg, Color colorFill, Vector3 fillHue, bool useUosBarBackdrop)
         {
+            if (useUosBarBackdrop)
+            {
+                batcher.Draw(
+                    SolidColorTextureCache.GetTexture(ColorUosBarFrame),
+                    new Rectangle(x - 1, y - 1, w + 2, h + 2),
+                    HueNone,
+                    0f);
+
+                batcher.Draw(
+                    SolidColorTextureCache.GetTexture(ColorUosBarBackdrop),
+                    new Rectangle(x, y, w, h),
+                    HueNone,
+                    0f);
+            }
+
             if (_texBarBg != null && !_texBarBg.IsDisposed)
             {
                 batcher.Draw(_texBarBg, new Rectangle(x, y, w, h), null, HueNone);

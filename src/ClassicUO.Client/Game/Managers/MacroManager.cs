@@ -1487,7 +1487,16 @@ namespace ClassicUO.Game.Managers
 
                 case MacroType.TargetSystemOnOff:
 
-                    GameActions.Print(ResGeneral.TargetSystemNotImplemented);
+                    if (ProfileManager.CurrentProfile.UseNewTargetSystem)
+                    {
+                        ProfileManager.CurrentProfile.UseNewTargetSystem = false;
+                        GameActions.Print("Target System: Off");
+                    }
+                    else
+                    {
+                        ProfileManager.CurrentProfile.UseNewTargetSystem = true;
+                        GameActions.Print("Target System: On");
+                    }
 
                     break;
 
@@ -2289,6 +2298,7 @@ namespace ClassicUO.Game.Managers
                     {
                         GameActions.MessageOverhead(string.Format(ResGeneral.Target0, ent.Name), Notoriety.GetHue(((Mobile)ent).NotorietyFlag), World.Player);
 
+                        TargetManager.NewTargetSystemSerial = serial;
                         TargetManager.SelectedTarget = serial;
                         TargetManager.LastTargetInfo.SetEntity(serial);
 

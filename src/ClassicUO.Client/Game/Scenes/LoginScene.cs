@@ -129,8 +129,18 @@ namespace ClassicUO.Game.Scenes
             base.Load();
 
             Client.Game.Window.AllowUserResizing = false;
-            Client.Game.HideNativeTitleBar();
-            TopStatusBarGump.Create();
+            bool useCustomWindowTitleBar = ProfileManager.CurrentProfile?.UsesCustomWindowTitleBar() != false;
+
+            if (useCustomWindowTitleBar)
+            {
+                Client.Game.HideNativeTitleBar();
+                TopStatusBarGump.Create();
+            }
+            else
+            {
+                Client.Game.ShowNativeTitleBar();
+                UIManager.GetGump<TopStatusBarGump>()?.Dispose();
+            }
 
             _autoLogin = Settings.GlobalSettings.AutoLogin;
 

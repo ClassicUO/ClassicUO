@@ -149,11 +149,11 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (ProfileManager.CurrentProfile.BlockWoSFelOnly && World.MapIndex != 0)
                     {
-                        TileDataLoader.Instance.StaticData[Graphic].Flags = TileFlag.Impassable;
+                        TileDataLoader.Instance.StaticData[Graphic].Flags &= ~TileFlag.Impassable;
                     }
                     else
                     {
-                        TileDataLoader.Instance.StaticData[Graphic].Flags = TileFlag.Impassable;
+                        TileDataLoader.Instance.StaticData[Graphic].Flags |= TileFlag.Impassable;
                     }
                 }
             }
@@ -163,11 +163,11 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (ProfileManager.CurrentProfile.BlockEnergyFFelOnly && World.MapIndex != 0)
                     {
-                        TileDataLoader.Instance.StaticData[Graphic].Flags = TileFlag.Impassable;
+                        TileDataLoader.Instance.StaticData[Graphic].Flags &= ~TileFlag.Impassable;
                     }
                     else
                     {
-                        TileDataLoader.Instance.StaticData[Graphic].Flags = TileFlag.Impassable;
+                        TileDataLoader.Instance.StaticData[Graphic].Flags |= TileFlag.Impassable;
                     }
                 }
             }

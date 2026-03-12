@@ -58,6 +58,8 @@ namespace ClassicUO
 {
     internal unsafe class GameController : Microsoft.Xna.Framework.Game
     {
+        private const int MAX_PACKETS_PER_FRAME = 25;
+
         private SDL_EventFilter _filter;
 
         private readonly Texture2D[] _hueSamplers = new Texture2D[3];
@@ -544,9 +546,40 @@ namespace ClassicUO
 
             Mouse.Update();
 
-            var data = NetClient.Socket.CollectAvailableData();
-            var packetsCount = PacketHandlers.Handler.ParsePackets(data);
-            NetClient.Socket.Statistics.TotalPacketsReceived += (uint)packetsCount;
+            long queuedBytes = NetClient.Socket.QueuedReceiveBytes;
+            int packetBudget = MAX_PACKETS_PER_FRAME;
+
+            if (queuedBytes >= 2 * 1024 * 1024)
+            {
+                packetBudget = MAX_PACKETS_PER_FRAME * 4;
+            }
+            else if (queuedBytes >= 512 * 1024)
+            {
+                packetBudget = MAX_PACKETS_PER_FRAME * 2;
+            }
+
+            while (packetBudget > 0 && NetClient.Socket.TryDequeuePacket(out byte[] message))
+            {
+                int parsed = PacketHandlers.Handler.ParsePackets(message, packetBudget);
+                NetClient.Socket.Statistics.TotalPacketsReceived += (uint)parsed;
+
+                if (parsed > 0)
+                {
+                    packetBudget -= parsed;
+                }
+            }
+
+            if (packetBudget > 0)
+            {
+                int parsedBuffered = PacketHandlers.Handler.ParsePackets(Span<byte>.Empty, packetBudget);
+                NetClient.Socket.Statistics.TotalPacketsReceived += (uint)parsedBuffered;
+
+                if (parsedBuffered > 0)
+                {
+                    packetBudget -= parsedBuffered;
+                }
+            }
+
             NetClient.Socket.Flush();
 
             Plugin.Tick();

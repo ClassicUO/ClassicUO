@@ -51,8 +51,7 @@ namespace ClassicUO.Game.Managers
                     string hpBar = GenerateProgressBar(World.Player.Hits, World.Player.HitsMax);
                     string mpBar = GenerateProgressBar(World.Player.Mana, World.Player.ManaMax);
                     string spBar = GenerateProgressBar(World.Player.Stamina, World.Player.StaminaMax);
-                    // bars only - omit HP/MP/SP labels
-                    return $"[{hpBar}] [{mpBar}] [{spBar}]";
+                    return $"HP[{hpBar}] {World.Player.Hits}/{World.Player.HitsMax}, MP[{mpBar}] {World.Player.Mana}/{World.Player.ManaMax}, SP[{spBar}] {World.Player.Stamina}/{World.Player.StaminaMax}";
                 default:
                     return $"HP {World.Player.Hits}/{World.Player.HitsMax}, MP {World.Player.Mana}/{World.Player.ManaMax}, SP {World.Player.Stamina}/{World.Player.StaminaMax}";
             }
@@ -120,8 +119,7 @@ namespace ClassicUO.Game.Managers
                     case TitleBarStatsMode.Percent:
                         return "PlayerName - HP 85%, MP 84%, SP 95%";
                     case TitleBarStatsMode.ProgressBar:
-                        // preview with bars only, no labels
-                        return "PlayerName - [||||\\   ] [||||\\   ] [||||\\   ]";
+                        return "PlayerName - HP[||||\\   ] 85/100, MP[||||\\   ] 42/50, SP[||||\\   ] 95/100";
                     default:
                         return "PlayerName - HP 85/100, MP 42/50, SP 95/100";
                 }

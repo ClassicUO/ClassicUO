@@ -154,6 +154,7 @@ namespace ClassicUO.Game.Managers
         private static readonly byte[] _lastDataBuffer = new byte[19];
 
         public static uint SelectedTarget;
+        public static uint NewTargetSystemSerial;
 
         public static uint LastAttack
         {
@@ -267,10 +268,6 @@ namespace ClassicUO.Game.Managers
             _targetCursorId = 0;
             MultiTargetInfo = null;
             TargetingType = 0;
-
-            // ## BEGIN - END ## // VISUAL HELPERS
-            CombatCollection.StartSpelltime();
-            // ## BEGIN - END ## // VISUAL HELPERS
         }
 
         public static void SetTargeting(CursorTarget targeting, uint cursorID, TargetType cursorType)
@@ -284,6 +281,17 @@ namespace ClassicUO.Game.Managers
             IsTargeting = cursorType < TargetType.Cancel;
             TargetingState = targeting;
             TargetingType = cursorType;
+
+            // ## BEGIN - END ## // VISUAL HELPERS
+            CombatCollection.StartSpelltime();
+
+            if (GameActions.LastSpellIndexCursor <= 0 && GameActions.LastSpellIndex > 0)
+            {
+                GameActions.LastSpellIndexCursor = GameActions.LastSpellIndex;
+            }
+
+            GameCursor._spellTime = 30;
+            // ## BEGIN - END ## // VISUAL HELPERS
 
             if (IsTargeting)
             {

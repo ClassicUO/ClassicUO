@@ -122,6 +122,17 @@ namespace ClassicUO.Game.Managers
                 DrawTargetIndicator(batcher, TargetManager.LastAttack);
             }
 
+            if (ProfileManager.CurrentProfile?.UseNewTargetSystem == true && SerialHelper.IsMobile(TargetManager.NewTargetSystemSerial))
+            {
+                DrawHealthLineWithMath(
+                    batcher,
+                    TargetManager.NewTargetSystemSerial,
+                    camera.Bounds.Width,
+                    camera.Bounds.Height,
+                    true
+                );
+            }
+
             if (!IsEnabled)
             {
                 return;
@@ -229,6 +240,7 @@ namespace ClassicUO.Game.Managers
                     mobile.Serial == TargetManager.LastTargetInfo.Serial
                     || mobile.Serial == TargetManager.SelectedTarget
                     || mobile.Serial == TargetManager.LastAttack
+                    || mobile.Serial == TargetManager.NewTargetSystemSerial
                 )
                 {
                     continue;
@@ -269,7 +281,7 @@ namespace ClassicUO.Game.Managers
                     }
                     else
                     {
-                        DrawHealthLine(batcher, mobile, p.X, p.Y, mobile.Serial != World.Player.Serial);
+                        DrawHealthLine(batcher, mobile, p.X, p.Y, mobile.Serial != World.Player.Serial, false);
                     }
                     // ## BEGIN - END ## // OLDHEALTHLINES
                 }
@@ -313,7 +325,8 @@ namespace ClassicUO.Game.Managers
             UltimaBatcher2D batcher,
             uint serial,
             int screenW,
-            int screenH
+            int screenH,
+            bool newTargetSystem = false
         )
         {
             Entity entity = World.Get(serial);
@@ -354,7 +367,7 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
-                DrawHealthLine(batcher, entity, p.X, p.Y, false);
+                DrawHealthLine(batcher, entity, p.X, p.Y, false, newTargetSystem);
             }
             // ## BEGIN - END ## // OLDHEALTHLINES
         }
@@ -364,7 +377,8 @@ namespace ClassicUO.Game.Managers
             Entity entity,
             int x,
             int y,
-            bool passive
+            bool passive,
+            bool newTargetSystem
         )
         {
             if (entity == null)
@@ -386,13 +400,14 @@ namespace ClassicUO.Game.Managers
 
             Mobile mobile = entity as Mobile;
 
-            float alpha = passive ? 0.5f : 1.0f;
+            float alpha = passive && !newTargetSystem ? 0.5f : 1.0f;
             ushort hue =
                 mobile != null
                     ? Notoriety.GetHue(mobile.NotorietyFlag)
                     : Notoriety.GetHue(NotorietyFlag.Gray);
 
-            Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue, false, alpha);
+            Vector3 hueVecZero = ShaderHueTranslator.GetHueVector(0, false, alpha);
+            Vector3 hueVecNoto = ShaderHueTranslator.GetHueVector(hue, false, alpha);
 
             if (mobile == null)
             {
@@ -401,7 +416,94 @@ namespace ClassicUO.Game.Managers
 
 
             ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump(BACKGROUND_GRAPHIC);
-            Rectangle bounds = gumpInfo.UV;
+
+            if (newTargetSystem && mobile != null && mobile.Serial != World.Player.Serial)
+            {
+                Client.Game.Animations.GetAnimationDimensions(
+                    mobile.AnimIndex,
+                    mobile.GetGraphicForAnimation(),
+                    (byte)mobile.GetDirectionForAnimation(),
+                    Mobile.GetGroupForAnimation(mobile, isParent: true),
+                    mobile.IsMounted,
+                    0,
+                    out int centerX,
+                    out int centerY,
+                    out int width,
+                    out int height
+                );
+
+                uint topGump;
+                uint bottomGump;
+                uint gumpHue = 0x7572;
+
+                if (mobile.NotorietyFlag == NotorietyFlag.Innocent)
+                    gumpHue = 0x7570;
+                else if (mobile.NotorietyFlag == NotorietyFlag.Ally)
+                    gumpHue = 0x7571;
+                else if (mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Gray)
+                    gumpHue = 0x7572;
+                else if (mobile.NotorietyFlag == NotorietyFlag.Enemy)
+                    gumpHue = 0x7573;
+
+                if (mobile.NotorietyFlag == NotorietyFlag.Invulnerable)
+                    gumpHue = 0x7575;
+                else if (mobile.NotorietyFlag == NotorietyFlag.Murderer)
+                    gumpHue = 0x7577;
+
+                if (width >= 80)
+                {
+                    topGump = 0x756D;
+                    bottomGump = 0x756A;
+                }
+                else if (width >= 40)
+                {
+                    topGump = 0x756E;
+                    bottomGump = 0x756B;
+                }
+                else
+                {
+                    topGump = 0x756F;
+                    bottomGump = 0x756C;
+                }
+
+                ref readonly var hueGumpInfo = ref Client.Game.Gumps.GetGump((ushort)gumpHue);
+                var targetX = x + BAR_WIDTH_HALF - hueGumpInfo.UV.Width / 2f;
+                var topTargetY = height + centerY + 8 + 22;
+
+                ref readonly var newTargGumpInfo = ref Client.Game.Gumps.GetGump((ushort)topGump);
+                if (newTargGumpInfo.Texture != null)
+                {
+                    batcher.Draw(
+                        newTargGumpInfo.Texture,
+                        new Vector2(targetX, y - topTargetY),
+                        newTargGumpInfo.UV,
+                        hueVecZero
+                    );
+                }
+
+                if (hueGumpInfo.Texture != null)
+                {
+                    batcher.Draw(
+                        hueGumpInfo.Texture,
+                        new Vector2(targetX, y - topTargetY),
+                        hueGumpInfo.UV,
+                        hueVecZero
+                    );
+                }
+
+                y += 7 + newTargGumpInfo.UV.Height / 2 - centerY;
+
+                ref readonly var bottomGumpInfo = ref Client.Game.Gumps.GetGump((ushort)bottomGump);
+                if (bottomGumpInfo.Texture != null)
+                {
+                    batcher.Draw(
+                        bottomGumpInfo.Texture,
+                        new Vector2(targetX, y - 1 - bottomGumpInfo.UV.Height / 2f),
+                        bottomGumpInfo.UV,
+                        hueVecZero
+                    );
+                }
+            }
 
             if (multiplier > 1)
                 x -= (int)(((BAR_WIDTH * multiplier) / 2) - (BAR_WIDTH / 2));
@@ -410,34 +512,54 @@ namespace ClassicUO.Game.Managers
                 gumpInfo.Texture,
                 new Rectangle(x, y, gumpInfo.UV.Width * multiplier, gumpInfo.UV.Height * multiplier),
                 gumpInfo.UV,
-                hueVec
+                hueVecNoto
             );
 
-            hueVec.X = 90;
+            hueVecNoto.X = 0x21;
+
+            if (entity.Hits != entity.HitsMax || entity.HitsMax == 0)
+            {
+                ref readonly var hpGumpInfo = ref Client.Game.Gumps.GetGump(HP_GRAPHIC);
+
+                batcher.DrawTiled(
+                    hpGumpInfo.Texture,
+                    new Rectangle(
+                        x + per * multiplier - offset,
+                        y,
+                        (BAR_WIDTH - per) * multiplier - offset / 2,
+                        hpGumpInfo.UV.Height * multiplier
+                    ),
+                    hpGumpInfo.UV,
+                    hueVecNoto
+                );
+            }
+
+            hue = 90;
 
             if (mobile != null)
             {
                 if (mobile.IsPoisoned)
                 {
-                    hueVec.X = 63;
+                    hue = 63;
                 }
                 else if (mobile.IsYellowHits)
                 {
-                    hueVec.X = 53;
+                    hue = 53;
                 }
             }
 
-            float hitPerecentage = (float)entity.Hits / (float)entity.HitsMax;
+            if (per > 0)
+            {
+                hueVecNoto.X = hue;
 
-            if (entity.HitsMax == 0)
-                hitPerecentage = 1;
-
-            batcher.Draw(
-                SolidColorTextureCache.GetTexture(Color.White),
-                new Vector2(x + (3 * multiplier), y + (4 * multiplier)),
-                new Rectangle(0, 0, (int)(((BAR_WIDTH * multiplier) - (6 * multiplier)) * hitPerecentage), (bounds.Height * multiplier) - (6 * multiplier)),
-                hueVec
+                ref readonly var hpGumpInfo = ref Client.Game.Gumps.GetGump(HP_GRAPHIC);
+                batcher.DrawTiled(
+                    hpGumpInfo.Texture,
+                    new Rectangle(x, y, per * multiplier, hpGumpInfo.UV.Height * multiplier),
+                    hpGumpInfo.UV,
+                    hueVecNoto
                 );
+            }
         }
         // ## BEGIN - END ## // OLDHEALTHLINES
         // -- CODE BELOW IS 1:1 LIKE DrawHealthLine()

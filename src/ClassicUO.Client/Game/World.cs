@@ -807,6 +807,7 @@ namespace ClassicUO.Game
             ClientLockedFeatures.SetFlags(0);
             Party?.Clear();
             TargetManager.LastAttack = 0;
+            TargetManager.NewTargetSystemSerial = 0;
             MessageManager.PromptData = default;
             _effectManager.Clear();
             _toRemove.Clear();

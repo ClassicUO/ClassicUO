@@ -27,6 +27,9 @@ jobs:
         run: dotnet restore src/ClassicUO.Client/ClassicUO.Client.csproj
       - name: Build with .NET Framework 4.8
         run: dotnet build src/ClassicUO.Client/ClassicUO.Client.csproj -c Release
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          SENTRY_ENV: production
       - name: Copy build artifacts
         run: |
           New-Item -ItemType Directory -Force -Path build\win-x64
@@ -60,6 +63,9 @@ jobs:
         run: dotnet restore src/ClassicUO.Client/ClassicUO.Client.csproj
       - name: Build with Mono
         run: dotnet build src/ClassicUO.Client/ClassicUO.Client.csproj -c Release
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          SENTRY_ENV: production
       - name: Copy build artifacts
         run: |
           mkdir -p build/linux-x64
@@ -91,6 +97,9 @@ jobs:
         run: dotnet restore src/ClassicUO.Client/ClassicUO.Client.csproj
       - name: Build with Mono
         run: dotnet build src/ClassicUO.Client/ClassicUO.Client.csproj -c Release
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          SENTRY_ENV: production
       - name: Copy build artifacts
         run: |
           mkdir -p build/osx-x64
