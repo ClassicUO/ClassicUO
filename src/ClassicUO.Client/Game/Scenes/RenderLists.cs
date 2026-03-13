@@ -1,5 +1,7 @@
-﻿// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: BSD-2-Clause
+using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Map;
 using ClassicUO.Renderer;
 using System;
 using System.Collections.Generic;
@@ -74,11 +76,11 @@ namespace ClassicUO.Game.Scenes
                         _statics.Add(toRender);
                     }
                     break;
-                
+
                 case GameEffect:
                     _effects.Add(toRender);
                     break;
-         
+
                 default:
                     break;
             }
@@ -114,6 +116,61 @@ namespace ClassicUO.Game.Scenes
 
             if (_transparentObjects.Count > 0 || _gumpSprites.Count > 0 || _gumpTexts.Count > 0)
             {
+                result += DrawRenderList(batcher, _transparentObjects, maxGroundZ);
+                result += DrawRenderListWithAtlas(batcher, _gumpSprites);
+                result += DrawRenderListNoAtlas(batcher, _gumpTexts);
+            }
+
+            return result;
+        }
+
+        public int DrawRenderLists(UltimaBatcher2D batcher, sbyte maxGroundZ, List<Chunk> visibleChunks, int offsetX, int offsetY)
+        {
+            int result = 0;
+
+            // Build visible indices for all chunks (skip rebuild if visibility unchanged)
+            foreach (var chunk in visibleChunks)
+            {
+                var mesh = chunk.Mesh;
+                if (mesh.Land.Count > 0)
+                    mesh.Land.BuildVisibleIndices();
+                if (mesh.Statics.Count > 0)
+                    mesh.Statics.BuildVisibleIndices();
+            }
+
+            // Draw chunk mesh land tiles from GPU buffers with per-frame visibility
+            batcher.SetWorldOffset(offsetX, offsetY);
+            foreach (var chunk in visibleChunks)
+                result += DrawMeshLayer(batcher, chunk.Mesh.Land);
+            batcher.ResetWorldOffset();
+
+            // Draw excluded land tiles (animated water, etc.)
+            result += DrawRenderList(batcher, _tiles, maxGroundZ);
+            result += DrawRenderList(batcher, _stretchedTiles, maxGroundZ);
+
+            // Draw chunk mesh statics from GPU buffers with per-frame visibility
+            batcher.SetWorldOffset(offsetX, offsetY);
+            foreach (var chunk in visibleChunks)
+                result += DrawMeshLayer(batcher, chunk.Mesh.Statics);
+            batcher.ResetWorldOffset();
+
+            // Draw excluded statics + animations + effects
+            result += DrawRenderList(batcher, _statics, maxGroundZ) +
+                   DrawRenderList(batcher, _animations, maxGroundZ) +
+                   DrawRenderList(batcher, _effects, maxGroundZ);
+
+            // Draw selected object highlight on top if it's in a chunk mesh
+            if (SelectedObject.Object is GameObject selectedObj && selectedObj.InChunkMesh)
+            {
+                float depth = selectedObj.CalculateDepthZ();
+                if (selectedObj.Draw(batcher, selectedObj.RealScreenPosition.X, selectedObj.RealScreenPosition.Y, depth))
+                {
+                    result++;
+                }
+            }
+
+            if (_transparentObjects.Count > 0 || _gumpSprites.Count > 0 || _gumpTexts.Count > 0)
+            {
                 //batcher.SetStencil(DepthStencilState.DepthRead);
                 result += DrawRenderList(batcher, _transparentObjects, maxGroundZ);
                 result += DrawRenderListWithAtlas(batcher, _gumpSprites);
@@ -122,6 +179,28 @@ namespace ClassicUO.Game.Scenes
             }
 
             return result;
+        }
+
+        private static int DrawMeshLayer(UltimaBatcher2D batcher, MeshLayer layer)
+        {
+            if (layer.VisibleSpriteCount == 0 || layer.VertexBuffer == null || layer.VertexBuffer.IsDisposed)
+                return 0;
+
+            layer.FlushAlphaChanges();
+
+            var indexBuffer = batcher.GetDynamicIndexBuffer(layer.VisibleSpriteCount * 6);
+            layer.UploadVisibleIndices(indexBuffer);
+
+            batcher.GraphicsDevice.SetVertexBuffer(layer.VertexBuffer);
+            batcher.GraphicsDevice.Indices = indexBuffer;
+
+            for (int i = 0; i < layer.VisibleRunCount; i++)
+            {
+                ref var run = ref layer.VisibleRuns[i];
+                batcher.DrawDirectIndexed(run.Texture, run.Start * 6, run.Count * 2, layer.Count * 4);
+            }
+
+            return layer.VisibleSpriteCount;
         }
 
         private static int DrawRenderList(UltimaBatcher2D batcher, List<GameObject> renderList, sbyte maxGroundZ)
