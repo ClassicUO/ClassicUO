@@ -97,6 +97,13 @@ namespace ClassicUO.Game.GameObjects
 
         private bool _isDead;
         private bool _isSA_Poisoned;
+
+        //
+        internal bool _surfaceOverheadCache;
+        internal ushort _surfaceOverheadCacheX = ushort.MaxValue;
+        internal ushort _surfaceOverheadCacheY = ushort.MaxValue;
+        internal int _surfaceOverheadCacheMaxZ = int.MinValue;
+
         private long _lastAnimationIdleDelay;
         private bool _isAnimationForwardDirection;
         private byte _animationGroup = 0xFF;
