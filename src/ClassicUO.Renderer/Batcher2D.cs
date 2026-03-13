@@ -1267,9 +1267,11 @@ namespace ClassicUO.Renderer
         {
             EnsureStarted();
 
-            if (_numSprites >= MAX_SPRITES)
+            if (_numSprites >= _vertexInfo.Length)
             {
-                Flush();
+                int newMax = _vertexInfo.Length + MAX_SPRITES;
+                Array.Resize(ref _vertexInfo, newMax);
+                Array.Resize(ref _textureInfo, newMax);
             }
         }
 

@@ -753,7 +753,7 @@ namespace ClassicUO.Game.Managers
 
         private static bool IsTopReservedAreaExempt(Gump gump)
         {
-            return gump is TopStatusBarGump || gump is InWindowTitleBarBarsGump || gump is WorldViewportGump;
+            return gump is TopStatusBarGump || gump is InWindowTitleBarBarsGump || gump is WorldViewportGump || gump is WindowBorderFrameGump;
         }
 
         private static void ClampGumpToTopReservedArea(Gump gump)

@@ -6617,15 +6617,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             bool useCustomWindowTitleBar = _currentProfile.UsesCustomWindowTitleBar();
 
+            // Dispose existing custom title bar before switching
+            UIManager.GetGump<TopStatusBarGump>()?.Dispose();
+
+            // SetWindowBorderless handles border toggle + window resize/reposition
+            Client.Game.SetWindowBorderless(useCustomWindowTitleBar);
+
             if (useCustomWindowTitleBar)
             {
-                Client.Game.HideNativeTitleBar();
                 TopStatusBarGump.Create();
-            }
-            else
-            {
-                Client.Game.ShowNativeTitleBar();
-                UIManager.GetGump<TopStatusBarGump>()?.Dispose();
             }
 
             if (wasUsingCustomWindowTitleBar != useCustomWindowTitleBar)
@@ -7526,35 +7526,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             _syncingWindowTitleStyleControls = false;
             UpdateTitleBarStatsControlsAvailability();
-
-            // Apply immediately — don't wait for OK/Apply button
-            if (ProfileManager.CurrentProfile != null)
-            {
-                ProfileManager.CurrentProfile.WindowBorderless = useCustomWindowTitle;
-                ProfileManager.CurrentProfile.EnableWindowBorderFrame = useCustomWindowTitle;
-                ProfileManager.CurrentProfile.WindowTitleStyle = style;
-
-                if (!useCustomWindowTitle)
-                {
-                    ProfileManager.CurrentProfile.EnableTitleBarStats = true;
-                }
-
-                if (useCustomWindowTitle)
-                {
-                    Client.Game.HideNativeTitleBar();
-                    TopStatusBarGump.Create();
-                }
-                else
-                {
-                    Client.Game.ShowNativeTitleBar();
-                    UIManager.GetGump<TopStatusBarGump>()?.Dispose();
-                }
-
-                TitleBarStatsManager.ForceUpdate();
-
-                InWindowTitleBarBarsGump.UpdateVisibility();
-                WindowBorderFrameGump.UpdateVisibility();
-            }
         }
 
         private void SyncWindowTitleStyleFromWindowOptions()

@@ -15,7 +15,8 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class WindowBorderFrameGump : Gump
     {
-        private const int BORDER_THICKNESS = 5;
+        private const int BORDER_THICKNESS = 2;
+        private const int SIDE_BORDER_THICKNESS = 2;
         private const int RESIZE_GRIP_SIZE = 8;
         private const int TOP_RESIZE_THICKNESS = 3;
 
@@ -256,18 +257,12 @@ namespace ClassicUO.Game.UI.Gumps
                 // Bottom
                 batcher.Draw(_texBorder, new Rectangle(x, y + Height - BORDER_THICKNESS, Width, BORDER_THICKNESS), null, HueNone);
                 // Left
-                batcher.Draw(_texBorder, new Rectangle(x, y, BORDER_THICKNESS, Height), null, HueNone);
+                batcher.Draw(_texBorder, new Rectangle(x, y, SIDE_BORDER_THICKNESS, Height), null, HueNone);
                 // Right
-                batcher.Draw(_texBorder, new Rectangle(x + Width - BORDER_THICKNESS, y, BORDER_THICKNESS, Height), null, HueNone);
+                batcher.Draw(_texBorder, new Rectangle(x + Width - SIDE_BORDER_THICKNESS, y, SIDE_BORDER_THICKNESS, Height), null, HueNone);
             }
             else
             {
-                batcher.Draw(
-                    SolidColorTextureCache.GetTexture(bottomAccentColor),
-                    new Rectangle(x, y + Height - BORDER_THICKNESS - 1, Width, 1),
-                    HueNone,
-                    0f);
-
                 // Bottom
                 batcher.Draw(
                     SolidColorTextureCache.GetTexture(bottomColor),
@@ -278,14 +273,14 @@ namespace ClassicUO.Game.UI.Gumps
                 // Left
                 batcher.Draw(
                     SolidColorTextureCache.GetTexture(leftColor),
-                    new Rectangle(x, y, BORDER_THICKNESS, Height),
+                    new Rectangle(x, y, SIDE_BORDER_THICKNESS, Height),
                     HueNone,
                     0f);
 
                 // Right
                 batcher.Draw(
                     SolidColorTextureCache.GetTexture(rightColor),
-                    new Rectangle(x + Width - BORDER_THICKNESS, y, BORDER_THICKNESS, Height),
+                    new Rectangle(x + Width - SIDE_BORDER_THICKNESS, y, SIDE_BORDER_THICKNESS, Height),
                     HueNone,
                     0f);
             }

@@ -473,11 +473,11 @@ namespace ClassicUO
 
             if (borderless)
             {
-                SetWindowSize(width, height);
                 SDL_GetDisplayUsableBounds(
                     SDL_GetDisplayForWindow(Window.Handle),
                     out SDL_Rect rect
                 );
+                SetWindowSize(rect.w, rect.h);
                 SDL_SetWindowPosition(Window.Handle, rect.x, rect.y);
             }
             else
@@ -492,7 +492,25 @@ namespace ClassicUO
 
             if (viewport != null && ProfileManager.CurrentProfile.GameWindowFullSize)
             {
-                viewport.ResizeGameWindow(new Point(width, height));
+                int vpW = borderless ? 0 : width;
+                int vpH = borderless ? 0 : height;
+
+                if (borderless)
+                {
+                    SDL_GetDisplayUsableBounds(
+                        SDL_GetDisplayForWindow(Window.Handle),
+                        out SDL_Rect usable
+                    );
+                    vpW = usable.w;
+                    vpH = usable.h;
+                }
+                else
+                {
+                    vpW = width;
+                    vpH = height;
+                }
+
+                viewport.ResizeGameWindow(new Point(vpW, vpH));
                 viewport.X = -5;
                 viewport.Y = -5;
             }

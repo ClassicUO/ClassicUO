@@ -129,18 +129,13 @@ namespace ClassicUO.Game.Scenes
             base.Load();
 
             Client.Game.Window.AllowUserResizing = false;
-            bool useCustomWindowTitleBar = ProfileManager.CurrentProfile?.UsesCustomWindowTitleBar() != false;
 
-            if (useCustomWindowTitleBar)
-            {
-                Client.Game.HideNativeTitleBar();
-                TopStatusBarGump.Create();
-            }
-            else
-            {
-                Client.Game.ShowNativeTitleBar();
-                UIManager.GetGump<TopStatusBarGump>()?.Dispose();
-            }
+            // Always use native title bar on login/server/character screens
+            Client.Game.ShowNativeTitleBar();
+            UIManager.GetGump<TopStatusBarGump>()?.Dispose();
+
+            // Clear any leftover character info from the title bar
+            Client.Game.SetWindowTitle(string.Empty);
 
             _autoLogin = Settings.GlobalSettings.AutoLogin;
 
@@ -234,6 +229,18 @@ namespace ClassicUO.Game.Scenes
             if (_lastLoginStep != CurrentLoginStep)
             {
                 Client.Game.GameCursor.IsLoading = false;
+
+                // Switch title bar: custom for EnteringBritania, native for all other login steps
+                if (CurrentLoginStep == LoginSteps.EnteringBritania && ProfileManager.CurrentProfile?.UsesCustomWindowTitleBar() == true)
+                {
+                    Client.Game.HideNativeTitleBar();
+                    TopStatusBarGump.Create();
+                }
+                else if (_lastLoginStep == LoginSteps.EnteringBritania)
+                {
+                    UIManager.GetGump<TopStatusBarGump>()?.Dispose();
+                    Client.Game.ShowNativeTitleBar();
+                }
 
                 // this trick avoid the flickering
                 Gump g = _currentGump;
