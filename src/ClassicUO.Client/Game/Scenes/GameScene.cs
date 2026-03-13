@@ -45,7 +45,6 @@ namespace ClassicUO.Game.Scenes
 
         private const float MAX_LAYER_DEPTH = 0x8000;
         private uint _time_cleanup = Time.Ticks + 5000;
-        private static XBREffect _xbr;
         private bool _alphaChanged;
         private long _alphaTimer;
         private bool _forceStopScene;
@@ -180,6 +179,7 @@ namespace ClassicUO.Game.Scenes
                     break;
 
                 case MessageType.System:
+                case MessageType.GmChat:
                     name =
                         string.IsNullOrEmpty(e.Name)
                         || string.Equals(
@@ -544,6 +544,7 @@ namespace ClassicUO.Game.Scenes
         private void FillGameObjectList()
         {
             _renderLists.Clear();
+            _visibleChunks.Clear();
 
             _foliageCount = 0;
 
@@ -557,6 +558,17 @@ namespace ClassicUO.Game.Scenes
             if (_alphaChanged)
             {
                 _alphaTimer = Time.Ticks + Constants.ALPHA_TIME;
+            }
+
+            if (ProfileManager.CurrentProfile.UseCircleOfTransparency)
+            {
+                float r = ProfileManager.CurrentProfile.CircleOfTransparencyRadius;
+                _cotRadiusSq = r * r;
+                _cotPlayerScreenPos = _world.Player.GetScreenPosition();
+            }
+            else
+            {
+                _cotRadiusSq = 0;
             }
 
             FoliageIndex++;
@@ -603,10 +615,6 @@ namespace ClassicUO.Game.Scenes
             int maxY = _maxTile.Y;
             Map.Map map = _world.Map;
             bool use_handles = _useObjectHandles;
-            int maxCotZ = _world.Player.Z + 5;
-            Vector2 playerPos = _world.Player.GetScreenPosition();
-
-
             (var minChunkX, var minChunkY) = (minX >> 3, minY >> 3);
             (var maxChunkX, var maxChunkY) = (maxX >> 3, maxY >> 3);
 
@@ -617,6 +625,20 @@ namespace ClassicUO.Game.Scenes
                     var chunk = map.GetChunk2(chunkX, chunkY, true);
                     if (chunk == null || chunk.IsDestroyed)
                         continue;
+
+                    // Build chunk mesh if dirty
+                    if (chunk.Mesh.IsDirty)
+                    {
+                        chunk.Mesh.Build(chunk, _world, Client.Game.GraphicsDevice);
+                    }
+
+                    // Reset visibility and alpha for this frame
+                    chunk.Mesh.Land.ResetVisibility();
+                    chunk.Mesh.Land.ResetAlpha();
+                    chunk.Mesh.Statics.ResetVisibility();
+                    chunk.Mesh.Statics.ResetAlpha();
+
+                    _visibleChunks.Add(chunk);
 
                     for (var x = 0; x < 8; x++)
                     {
@@ -630,8 +652,7 @@ namespace ClassicUO.Game.Scenes
                                 firstObj,
                                 use_handles,
                                 150,
-                                maxCotZ,
-                                ref playerPos
+                                chunk
                             );
                         }
                     }
@@ -927,12 +948,26 @@ namespace ClassicUO.Game.Scenes
             batcher.Begin(null, matrix);
             batcher.SetBrightlight(ProfileManager.CurrentProfile.TerrainShadowsLevel * 0.1f);
 
+            if (ProfileManager.CurrentProfile.UseCircleOfTransparency)
+            {
+                batcher.SetCircleOfTransparencyRadius(
+                    (float)ProfileManager.CurrentProfile.CircleOfTransparencyRadius / Camera.Zoom
+                );
+            }
+            else
+            {
+                batcher.SetCircleOfTransparencyRadius(0f);
+            }
+
             // https://shawnhargreaves.com/blog/depth-sorting-alpha-blended-objects.html
             batcher.SetStencil(DepthStencilState.Default);
 
             RenderedObjectsCount = _renderLists.DrawRenderLists(
                 batcher,
-                _maxGroundZ
+                _maxGroundZ,
+                _visibleChunks,
+                _offset.X,
+                _offset.Y
             );
 
 
@@ -957,6 +992,7 @@ namespace ClassicUO.Game.Scenes
 
             batcher.SetSampler(null);
             batcher.SetStencil(null);
+            batcher.SetCircleOfTransparencyRadius(0f);
             batcher.End();
 
             int flushes = batcher.FlushesDone;
