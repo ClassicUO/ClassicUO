@@ -186,7 +186,9 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (IsPoisoned || _isSA_Poisoned)
                         {
-                            overridedHue = CombatCollection.LastTargetHue(this, ProfileManager.CurrentProfile.PoisonHue);
+                            // use the configured poison hue directly; avoid calling LastTargetHue which mixes in
+                            // the last-target color options and can override our desired poison color.
+                            overridedHue = ProfileManager.CurrentProfile.PoisonHue;
                             hueVec.Y = 1;
                         }
                     } 
@@ -194,7 +196,8 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (IsParalyzed && NotorietyFlag != NotorietyFlag.Invulnerable) 
                         {
-                            overridedHue = CombatCollection.LastTargetHue(this, ProfileManager.CurrentProfile.ParalyzedHue);
+                            // show the configured paralyze hue directly
+                            overridedHue = ProfileManager.CurrentProfile.ParalyzedHue;
                             hueVec.Y = 1;
                         }
                     }
@@ -203,7 +206,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (IsParalyzed && NotorietyFlag != NotorietyFlag.Invulnerable)
                         {
-                            overridedHue = CombatCollection.LastTargetHue(this, ProfileManager.CurrentProfile.ParalyzedHue);
+                            overridedHue = ProfileManager.CurrentProfile.ParalyzedHue;
                             hueVec.Y = 1;
                         }
                     }
@@ -236,6 +239,11 @@ namespace ClassicUO.Game.GameObjects
             }
 
             bool isLastTarget = World.Get(TargetManager.LastTargetInfo.Serial) == this;
+            if (ProfileManager.CurrentProfile.HighlighFriendsGuildType != 0)
+            {
+                overridedHue = CombatCollection.LastFriendHue(this, overridedHue);
+                hueVec.Y = 1;
+            }
             if (ProfileManager.CurrentProfile.HighlightLastTargetType != 0 && (isLastTarget || isAttack))
             {
                 overridedHue = CombatCollection.LastTargetHue(this, overridedHue);
@@ -486,7 +494,7 @@ namespace ClassicUO.Game.GameObjects
                             // ## BEGIN - END ## // VISUAL HELPERS
                             if (ProfileManager.CurrentProfile.GlowingWeaponsType != 0)
                             {
-                                if (graphic >= 0x263 && graphic <= 0x28D) // all weps
+                                if (item.ItemData.AnimID >= 0x263 && item.ItemData.AnimID <= 0x28D)
                                     item.Hue = CombatCollection.WeaponsHue(item.Hue);
                             }
                             // ## BEGIN - END ## // VISUAL HELPERS
@@ -885,7 +893,7 @@ namespace ClassicUO.Game.GameObjects
                 // ## BEGIN - END ## // VISUAL HELPERS
                 if (ProfileManager.CurrentProfile.GlowingWeaponsType != 0)
                 {
-                    if (id >= 0x263 && id <= 0x28D) // all weps
+                    if (id >= 0x263 && id <= 0x28D)
                         hue = CombatCollection.WeaponsHue(hue);
                 }
                 // ## BEGIN - END ## // VISUAL HELPERS

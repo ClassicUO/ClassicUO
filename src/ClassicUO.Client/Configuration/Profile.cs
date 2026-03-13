@@ -49,6 +49,14 @@ using System.Xml;
 
 namespace ClassicUO.Configuration
 {
+    public enum WindowTitleBarStyle
+    {
+        Auto = -1,
+        CUO = 0,
+        UOS = 1,
+        Orion = 2
+    }
+
     //[JsonSourceGenerationOptions(WriteIndented = true, PropertyNamingPolicy = JsonKnownNamingPolicy.Unspecified)]
     [JsonSerializable(typeof(Profile), GenerationMode = JsonSourceGenerationMode.Metadata)]
     [JsonSerializable(typeof(ActionBarSlotData))]
@@ -143,6 +151,7 @@ namespace ClassicUO.Configuration
         public bool HighlightMobilesByPoisoned { get; set; } = true;
         public bool HighlightMobilesByInvul { get; set; } = true;
         public bool ShowMobilesHP { get; set; }
+        public bool UseNewTargetSystem { get; set; }
         public bool ShowTargetIndicator { get; set; }
         public bool AutoAvoidObstacules { get; set; } = true;
         public int MobileHPType { get; set; }     // 0 = %, 1 = line, 2 = both
@@ -187,6 +196,7 @@ namespace ClassicUO.Configuration
         public bool PathfindSingleClick { get; set; }
         public bool AlwaysRun { get; set; } = true;
         public bool AlwaysRunUnlessHidden { get; set; } = true;
+        public bool FastRotation { get; set; } = false;
         public bool SmoothMovements { get; set; } = true;
         public bool HoldDownKeyTab { get; set; } = true;
         public bool HoldShiftForContext { get; set; } = false;
@@ -199,6 +209,8 @@ namespace ClassicUO.Configuration
         public bool GameWindowLock { get; set; }
         public bool GameWindowFullSize { get; set; }
         public bool WindowBorderless { get; set; } = false;
+        public bool EnableWindowBorderFrame { get; set; } = false;
+        public WindowTitleBarStyle WindowTitleStyle { get; set; } = WindowTitleBarStyle.Auto;
         [JsonConverter(typeof(Point2Converter))] public Point GameWindowSize { get; set; } = new Point(1024, 768);
         [JsonConverter(typeof(Point2Converter))] public Point TopbarGumpPosition { get; set; } = new Point(0, 0);
         public bool TopbarGumpIsMinimized { get; set; }
@@ -227,9 +239,20 @@ namespace ClassicUO.Configuration
         public bool AutoOpenDoors { get; set; } = true;
         public bool SmoothDoors { get; set; } = true;
         public bool AutoOpenCorpses { get; set; } = true;
+        public bool AutoOpenOwnCorpse { get; set; }
         public int AutoOpenCorpseRange { get; set; } = 2;
         public int CorpseOpenOptions { get; set; } = 3;
         public bool SkipEmptyCorpse { get; set; }
+        public float CameraSmoothingFactor { get; set; }
+        public bool EnablePetScaling { get; set; }
+        public int MinGumpMoveDistance { get; set; }
+        public bool QueueManualItemMoves { get; set; }
+        public bool QueueManualItemUses { get; set; }
+        public bool AutoUnequipForActions { get; set; }
+        public bool DisableWeather { get; set; }
+        public int QuickHealSpell { get; set; }
+        public int QuickCureSpell { get; set; }
+        public ushort TurnDelay { get; set; } = 100;
         public bool DisableDefaultHotkeys { get; set; }
         public bool DisableArrowBtn { get; set; }
         public bool DisableTabBtn { get; set; }
@@ -275,6 +298,9 @@ namespace ClassicUO.Configuration
         public bool CBBlackBGToggled { get; set; }
 
         public bool ShowInfoBar { get; set; }
+        public bool ShowHPInTitleBar { get; set; } = true;
+        public bool EnableTitleBarStats { get; set; }
+        public TitleBarStatsMode TitleBarStatsMode { get; set; } = TitleBarStatsMode.Text;
         public int InfoBarHighlightType { get; set; } // 0 = text colour changes, 1 = underline
 
         public bool CounterBarEnabled { get; set; }
@@ -294,6 +320,26 @@ namespace ClassicUO.Configuration
         public bool ShowSkillsChangedMessage { get; set; } = true;
         public int ShowSkillsChangedDeltaValue { get; set; } = 1;
         public bool ShowStatsChangedMessage { get; set; } = true;
+
+        public WindowTitleBarStyle GetEffectiveWindowTitleStyle()
+        {
+            if (WindowTitleStyle == WindowTitleBarStyle.Auto)
+            {
+                return WindowBorderless && EnableWindowBorderFrame ? WindowTitleBarStyle.Orion : WindowTitleBarStyle.CUO;
+            }
+
+            if (WindowTitleStyle == WindowTitleBarStyle.CUO)
+            {
+                return WindowTitleBarStyle.CUO;
+            }
+
+            return WindowBorderless && EnableWindowBorderFrame ? WindowTitleStyle : WindowTitleBarStyle.CUO;
+        }
+
+        public bool UsesCustomWindowTitleBar()
+        {
+            return GetEffectiveWindowTitleStyle() != WindowTitleBarStyle.CUO;
+        }
 
 
         public bool ShadowsEnabled { get; set; } = true;
@@ -394,6 +440,10 @@ namespace ClassicUO.Configuration
         public ushort HighlightLastTargetTypePoisonHue { get; set; } = 0x0044;
         public int HighlightLastTargetTypePara { get; set; } = 0; // 0 = off, 1 = white, 2 = pink, 3 = ice, 4 = fire, 5 = special, 6 = custom
         public ushort HighlightLastTargetTypeParaHue { get; set; } = 0x0044;
+        public int HighlightLastTargetTypeStunned { get; set; } = 0; // 0 = off, 1 = white, 2 = pink, 3 = ice, 4 = fire, 5 = special, 6 = custom
+        public ushort HighlightLastTargetTypeStunnedHue { get; set; } = 0x0044;
+        public int HighlightLastTargetTypeMortalled { get; set; } = 0; // 0 = off, 1 = white, 2 = pink, 3 = ice, 4 = fire, 5 = special, 6 = custom
+        public ushort HighlightLastTargetTypeMortalledHue { get; set; } = 0x0044;
         // ## BEGIN - END ## // VISUAL HELPERS
         // ## BEGIN - END ## // HEALTHBAR
         public bool HighlightHealthBarByState { get; set; } //## Highlights mobiles healthbars if they're poisoned or para

@@ -606,7 +606,15 @@ namespace ClassicUO.Dust765.Dust765
                 }
                 */
                 int index = WeaponsList.IndexOf(_tempItem.Graphic);
-                SwingCooldown = WeaponsList[index + 1];
+
+                if (index >= 0 && index + 1 < WeaponsList.Count)
+                {
+                    SwingCooldown = WeaponsList[index + 1];
+                }
+                else
+                {
+                    SwingCooldown = 2000;
+                }
 
                 //CALC =MIN(MAX((ROUNDDOWN(60000/((STAM+100)*SPEED),0))*0.25,1.25),10)
                 //source: http://forums.uosecondage.com/viewtopic.php?f=9&t=43574

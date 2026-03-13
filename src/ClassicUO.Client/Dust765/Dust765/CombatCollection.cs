@@ -297,6 +297,30 @@ namespace ClassicUO.Dust765.Dust765
 
             return color;
         }
+        public static ushort LastFriendHue(Mobile mobile, ushort hue)
+        {
+            WMapEntity wme = World.WMapManager.GetEntity(mobile.Serial);
+
+            bool isFriendOrGuild = mobile.NotorietyFlag == NotorietyFlag.Ally || World.Party.Contains(mobile.Serial) || (wme != null && wme.IsGuild);
+
+            if (!isFriendOrGuild)
+            {
+                return hue;
+            }
+
+            if (ProfileManager.CurrentProfile.HighlighFriendsGuildType == 1)
+                hue = BRIGHT_WHITE_COLOR;
+            else if (ProfileManager.CurrentProfile.HighlighFriendsGuildType == 2)
+                hue = BRIGHT_PINK_COLOR;
+            else if (ProfileManager.CurrentProfile.HighlighFriendsGuildType == 3)
+                hue = BRIGHT_ICE_COLOR;
+            else if (ProfileManager.CurrentProfile.HighlighFriendsGuildType == 4)
+                hue = BRIGHT_FIRE_COLOR;
+            else if (ProfileManager.CurrentProfile.HighlighFriendsGuildType == 5)
+                hue = ProfileManager.CurrentProfile.HighlighFriendsGuildTypeHue;
+
+            return hue;
+        }
         public static ushort WeaponsHue(ushort hue)
         {
             if (ProfileManager.CurrentProfile.GlowingWeaponsType == 1)
@@ -355,6 +379,38 @@ namespace ClassicUO.Dust765.Dust765
                     hue = BRIGHT_PARALYZE_COLOR;
                 else if (ProfileManager.CurrentProfile.HighlightLastTargetTypePara == 6)
                     hue = ProfileManager.CurrentProfile.HighlightLastTargetTypeParaHue;
+            }
+
+            if (mobile.IsParalyzed)
+            {
+                if (ProfileManager.CurrentProfile.HighlightLastTargetTypeStunned == 1)
+                    hue = BRIGHT_WHITE_COLOR;
+                else if (ProfileManager.CurrentProfile.HighlightLastTargetTypeStunned == 2)
+                    hue = BRIGHT_PINK_COLOR;
+                else if (ProfileManager.CurrentProfile.HighlightLastTargetTypeStunned == 3)
+                    hue = BRIGHT_ICE_COLOR;
+                else if (ProfileManager.CurrentProfile.HighlightLastTargetTypeStunned == 4)
+                    hue = BRIGHT_FIRE_COLOR;
+                else if (ProfileManager.CurrentProfile.HighlightLastTargetTypeStunned == 5)
+                    hue = BRIGHT_PARALYZE_COLOR;
+                else if (ProfileManager.CurrentProfile.HighlightLastTargetTypeStunned == 6)
+                    hue = ProfileManager.CurrentProfile.HighlightLastTargetTypeStunnedHue;
+            }
+
+            if (mobile.IsYellowHits)
+            {
+                if (ProfileManager.CurrentProfile.HighlightLastTargetTypeMortalled == 1)
+                    hue = BRIGHT_WHITE_COLOR;
+                else if (ProfileManager.CurrentProfile.HighlightLastTargetTypeMortalled == 2)
+                    hue = BRIGHT_PINK_COLOR;
+                else if (ProfileManager.CurrentProfile.HighlightLastTargetTypeMortalled == 3)
+                    hue = BRIGHT_ICE_COLOR;
+                else if (ProfileManager.CurrentProfile.HighlightLastTargetTypeMortalled == 4)
+                    hue = BRIGHT_FIRE_COLOR;
+                else if (ProfileManager.CurrentProfile.HighlightLastTargetTypeMortalled == 5)
+                    hue = 0x0035;
+                else if (ProfileManager.CurrentProfile.HighlightLastTargetTypeMortalled == 6)
+                    hue = ProfileManager.CurrentProfile.HighlightLastTargetTypeMortalledHue;
             }
 
             return hue;

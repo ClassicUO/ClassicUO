@@ -58,6 +58,8 @@ namespace ClassicUO
 {
     internal unsafe class GameController : Microsoft.Xna.Framework.Game
     {
+        private const int MAX_PACKETS_PER_FRAME = 25;
+
         private SDL_EventFilter _filter;
 
         private readonly Texture2D[] _hueSamplers = new Texture2D[3];
@@ -276,9 +278,19 @@ namespace ClassicUO
             base.UnloadContent();
         }
 
-        public void SetWindowTitle(string title)
+        public void SetWindowTitle(string title, bool skipStats = false)
         {
-            if (string.IsNullOrEmpty(title))
+            // only apply title bar stats when the player is fully logged in (World.InGame)
+            if (!skipStats && ProfileManager.CurrentProfile?.EnableTitleBarStats == true && World.Player != null && World.InGame)
+            {
+                TitleBarStatsManager.UpdateTitleBar();
+                return;
+            }
+
+            string baseTitle = title;
+            if (!skipStats && !string.IsNullOrEmpty(baseTitle) && ProfileManager.CurrentProfile?.ShowHPInTitleBar == true && World.Player != null && World.InGame)
+                baseTitle = $"{baseTitle} | HP {World.Player.Hits}/{World.Player.HitsMax}";
+            if (string.IsNullOrEmpty(baseTitle))
             {
 #if DEV_BUILD
                 Window.Title = $"ClassicUO [dev] - {CUOEnviroment.Version}";
@@ -289,9 +301,9 @@ namespace ClassicUO
             else
             {
 #if DEV_BUILD
-                Window.Title = $"{title} - ClassicUO [dev] - {CUOEnviroment.Version}";
+                Window.Title = $"{baseTitle} - ClassicUO [dev] - {CUOEnviroment.Version}";
 #else
-                Window.Title = $"{title} - [Dust765.3.0 {CUOEnviroment.Version}]";
+                Window.Title = $"{baseTitle} - [Dust765.3.0 {CUOEnviroment.Version}]";
 #endif
             }
         }
@@ -362,9 +374,21 @@ namespace ClassicUO
             TargetElapsedTime = unlimitedFps ? TimeSpan.FromMilliseconds(1000.0 / 250.0) : TimeSpan.FromMilliseconds(frameDelay);
         }
 
-        private void SetWindowPosition(int x, int y)
+        public void SetWindowPosition(int x, int y)
         {
             SDL_SetWindowPosition(Window.Handle, x, y);
+        }
+
+        public Point GetWindowPosition()
+        {
+            SDL_GetWindowPosition(Window.Handle, out int wx, out int wy);
+            return new Point(wx, wy);
+        }
+
+        public Point GetGlobalMousePosition()
+        {
+            SDL_GetGlobalMouseState(out float gx, out float gy);
+            return new Point((int)gx, (int)gy);
         }
 
         public void SetWindowSize(int width, int height)
@@ -403,6 +427,29 @@ namespace ClassicUO
             Log.Trace("SDL optimized for high FPS");
         }
 
+        public void HideNativeTitleBar()
+        {
+            SDL_SetWindowBordered(Window.Handle, false);
+        }
+
+        public void ShowNativeTitleBar()
+        {
+            SDL_SetWindowBordered(Window.Handle, true);
+        }
+
+        public void MinimizeWindow()
+        {
+            SDL_MinimizeWindow(Window.Handle);
+        }
+
+        public void MaximizeOrRestoreWindow()
+        {
+            if (IsWindowMaximized())
+                RestoreWindow();
+            else
+                MaximizeWindow();
+        }
+
         public void SetWindowBorderless(bool borderless)
         {
             SDL_WindowFlags flags = (SDL_WindowFlags)SDL_GetWindowFlags(Window.Handle);
@@ -426,11 +473,11 @@ namespace ClassicUO
 
             if (borderless)
             {
-                SetWindowSize(width, height);
                 SDL_GetDisplayUsableBounds(
                     SDL_GetDisplayForWindow(Window.Handle),
                     out SDL_Rect rect
                 );
+                SetWindowSize(rect.w, rect.h);
                 SDL_SetWindowPosition(Window.Handle, rect.x, rect.y);
             }
             else
@@ -445,7 +492,25 @@ namespace ClassicUO
 
             if (viewport != null && ProfileManager.CurrentProfile.GameWindowFullSize)
             {
-                viewport.ResizeGameWindow(new Point(width, height));
+                int vpW = borderless ? 0 : width;
+                int vpH = borderless ? 0 : height;
+
+                if (borderless)
+                {
+                    SDL_GetDisplayUsableBounds(
+                        SDL_GetDisplayForWindow(Window.Handle),
+                        out SDL_Rect usable
+                    );
+                    vpW = usable.w;
+                    vpH = usable.h;
+                }
+                else
+                {
+                    vpW = width;
+                    vpH = height;
+                }
+
+                viewport.ResizeGameWindow(new Point(vpW, vpH));
                 viewport.X = -5;
                 viewport.Y = -5;
             }
@@ -499,9 +564,40 @@ namespace ClassicUO
 
             Mouse.Update();
 
-            var data = NetClient.Socket.CollectAvailableData();
-            var packetsCount = PacketHandlers.Handler.ParsePackets(data);
-            NetClient.Socket.Statistics.TotalPacketsReceived += (uint)packetsCount;
+            long queuedBytes = NetClient.Socket.QueuedReceiveBytes;
+            int packetBudget = MAX_PACKETS_PER_FRAME;
+
+            if (queuedBytes >= 2 * 1024 * 1024)
+            {
+                packetBudget = MAX_PACKETS_PER_FRAME * 4;
+            }
+            else if (queuedBytes >= 512 * 1024)
+            {
+                packetBudget = MAX_PACKETS_PER_FRAME * 2;
+            }
+
+            while (packetBudget > 0 && NetClient.Socket.TryDequeuePacket(out byte[] message))
+            {
+                int parsed = PacketHandlers.Handler.ParsePackets(message, packetBudget);
+                NetClient.Socket.Statistics.TotalPacketsReceived += (uint)parsed;
+
+                if (parsed > 0)
+                {
+                    packetBudget -= parsed;
+                }
+            }
+
+            if (packetBudget > 0)
+            {
+                int parsedBuffered = PacketHandlers.Handler.ParsePackets(Span<byte>.Empty, packetBudget);
+                NetClient.Socket.Statistics.TotalPacketsReceived += (uint)parsedBuffered;
+
+                if (parsedBuffered > 0)
+                {
+                    packetBudget -= parsedBuffered;
+                }
+            }
+
             NetClient.Socket.Flush();
 
             Plugin.Tick();

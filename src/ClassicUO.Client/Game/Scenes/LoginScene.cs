@@ -93,13 +93,35 @@ namespace ClassicUO.Game.Scenes
 
         public uint GetCharacterBodyID(int index)
         {
-            // Obtenha o ID do corpo para o personagem indexado.
-            return index switch
+            if (index < 0 || Characters == null || index >= Characters.Length)
+                return 0x0190;
+
+            string character = Characters[index];
+            if (string.IsNullOrEmpty(character))
+                return 0x0190;
+
+            try
             {
-                0 => 0x190, // Exemplo: Humano masculino
-                1 => 0x191, // Exemplo: Humano feminino
-                _ => 0x190  // Default
-            };
+                string path = Path.Combine(
+                    CUOEnviroment.ExecutablePath, "Data", "Profiles",
+                    Settings.GlobalSettings.Username, World.ServerName, character,
+                    "paperdollSelectCharManager.json");
+
+                if (File.Exists(path))
+                {
+                    string json = File.ReadAllText(path);
+                    using var doc = System.Text.Json.JsonDocument.Parse(json);
+                    if (doc.RootElement.TryGetProperty("BodyId", out var bodyIdEl))
+                    {
+                        uint saved = bodyIdEl.GetUInt16();
+                        if (saved != 0)
+                            return saved;
+                    }
+                }
+            }
+            catch { }
+
+            return 0x0190;
         }
 
         public override void Load()
@@ -107,6 +129,13 @@ namespace ClassicUO.Game.Scenes
             base.Load();
 
             Client.Game.Window.AllowUserResizing = false;
+
+            // Always use native title bar on login/server/character screens
+            Client.Game.ShowNativeTitleBar();
+            UIManager.GetGump<TopStatusBarGump>()?.Dispose();
+
+            // Clear any leftover character info from the title bar
+            Client.Game.SetWindowTitle(string.Empty);
 
             _autoLogin = Settings.GlobalSettings.AutoLogin;
 
@@ -166,7 +195,9 @@ namespace ClassicUO.Game.Scenes
                 Client.Game.RestoreWindow();
             }
 
-            Client.Game.SetWindowSize(1024, 768);
+            var mode = Client.Game.GraphicsDevice.Adapter.CurrentDisplayMode;
+            LoginLayoutHelper.Initialize(mode.Width, mode.Height);
+            Client.Game.SetWindowSize(LoginLayoutHelper.WindowWidth, LoginLayoutHelper.WindowHeight);
         }
 
 
@@ -198,6 +229,18 @@ namespace ClassicUO.Game.Scenes
             if (_lastLoginStep != CurrentLoginStep)
             {
                 Client.Game.GameCursor.IsLoading = false;
+
+                // Switch title bar: custom for EnteringBritania, native for all other login steps
+                if (CurrentLoginStep == LoginSteps.EnteringBritania && ProfileManager.CurrentProfile?.UsesCustomWindowTitleBar() == true)
+                {
+                    Client.Game.HideNativeTitleBar();
+                    TopStatusBarGump.Create();
+                }
+                else if (_lastLoginStep == LoginSteps.EnteringBritania)
+                {
+                    UIManager.GetGump<TopStatusBarGump>()?.Dispose();
+                    Client.Game.ShowNativeTitleBar();
+                }
 
                 // this trick avoid the flickering
                 Gump g = _currentGump;

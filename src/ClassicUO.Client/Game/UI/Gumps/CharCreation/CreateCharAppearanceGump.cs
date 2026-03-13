@@ -93,31 +93,31 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private ProfessionInfo _displayedProfession;
         private GothicStyleCombobox _cityCombobox;
         private const int SECTION_PADDING = 16;
-        private const int CENTER_PANEL_X = 260;
-        private const int CENTER_PANEL_WIDTH = 558;
-        private const int CENTER_PANEL_MID = CENTER_PANEL_X + CENTER_PANEL_WIDTH / 2;
-        private const int CENTER_X = CENTER_PANEL_X;
-        private const int RIGHT_X = 845;
+        private static readonly int CENTER_PANEL_X = LoginLayoutHelper.X(260);
+        private static readonly int CENTER_PANEL_WIDTH = LoginLayoutHelper.W(558);
+        private static readonly int CENTER_PANEL_MID = CENTER_PANEL_X + CENTER_PANEL_WIDTH / 2;
+        private static readonly int CENTER_X = CENTER_PANEL_X;
+        private static readonly int RIGHT_X = LoginLayoutHelper.X(845);
         private const int PAPERDOLL_WIDTH = 150;
         private const int RACE_PAPERDOLL_MARGIN = 16;
-        private const int RACE_SECTION_Y = 165;
+        private static readonly int RACE_SECTION_Y = LoginLayoutHelper.Y(165);
         private const int PAPERDOLL_OFFSET_RIGHT = 56;
-        private const int PAPERDOLL_X = CENTER_X + SECTION_PADDING + 100 + RACE_PAPERDOLL_MARGIN + PAPERDOLL_OFFSET_RIGHT;
-        private const int PAPERDOLL_Y = RACE_SECTION_Y;
+        private static readonly int PAPERDOLL_X = CENTER_X + SECTION_PADDING + 100 + RACE_PAPERDOLL_MARGIN + PAPERDOLL_OFFSET_RIGHT;
+        private static readonly int PAPERDOLL_Y = RACE_SECTION_Y;
         private const int RACE_BUTTON_MARGIN = 12;
-        private const int GENDER_SECTION_Y = 428;
-        private const int ATTR_SECTION_Y = 468;
+        private static readonly int GENDER_SECTION_Y = LoginLayoutHelper.Y(428);
+        private static readonly int ATTR_SECTION_Y = LoginLayoutHelper.Y(468);
         private const int SKILLS_BELOW_ATTR_GAP = 14;
-        private const int SKILLS_SECTION_Y = ATTR_SECTION_Y + 22 + 30 + SKILLS_BELOW_ATTR_GAP;
-        private const int NEXT_BUTTON_X = 874;
-        private const int NEXT_BUTTON_Y = 680;
+        private static readonly int SKILLS_SECTION_Y = ATTR_SECTION_Y + 22 + 30 + SKILLS_BELOW_ATTR_GAP;
+        private static readonly int NEXT_BUTTON_X = LoginLayoutHelper.X(874);
+        private static readonly int NEXT_BUTTON_Y = LoginLayoutHelper.Y(680);
         private const int RIGHT_COMBO_WIDTH = 120;
-        private const int RIGHT_LABEL_Y_HAIR = 91;
-        private const int RIGHT_COMBO_Y_HAIR = 111;
-        private const int RIGHT_LABEL_Y_FACIAL = 141;
-        private const int RIGHT_COMBO_Y_FACIAL = 161;
-        private const int RIGHT_COLOR_BASE = 191;
-        private const int RIGHT_COLOR_STEP = 42;
+        private static readonly int RIGHT_LABEL_Y_HAIR = LoginLayoutHelper.Y(91);
+        private static readonly int RIGHT_COMBO_Y_HAIR = LoginLayoutHelper.Y(111);
+        private static readonly int RIGHT_LABEL_Y_FACIAL = LoginLayoutHelper.Y(141);
+        private static readonly int RIGHT_COMBO_Y_FACIAL = LoginLayoutHelper.Y(161);
+        private static readonly int RIGHT_COLOR_BASE = LoginLayoutHelper.Y(191);
+        private static readonly int RIGHT_COLOR_STEP = LoginLayoutHelper.H(42);
 
         public void SelectProfession(ProfessionInfo info)
         {
@@ -288,9 +288,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             Color centerBg = Color.Black;
             Color rightBg = Color.Black;
 
-            Add(new RoundedColorBox(220, 768, panelBg, 14) { X = 30, Y = 0 });
-            Add(new RoundedColorBox(558, 768, centerBg, 14) { X = 260, Y = 0 });
-            Add(new RoundedColorBox(160, 768, rightBg, 14) { X = 829, Y = 0 });
+            Add(new RoundedColorBox(LoginLayoutHelper.W(220), LoginLayoutHelper.H(768), panelBg, 14) { X = LoginLayoutHelper.X(30), Y = 0 });
+            Add(new RoundedColorBox(LoginLayoutHelper.W(558), LoginLayoutHelper.H(768), centerBg, 14) { X = LoginLayoutHelper.X(260), Y = 0 });
+            Add(new RoundedColorBox(LoginLayoutHelper.W(160), LoginLayoutHelper.H(768), rightBg, 14) { X = LoginLayoutHelper.X(829), Y = 0 });
 
             for (int i = 0; i < professions.Count; i++)
             {
@@ -299,25 +299,25 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     new ProfessionInfoGump(professions[i])
                     {
                         X = 0,
-                        Y = 78 + i * 70,
+                        Y = LoginLayoutHelper.Y(78 + i * 70),
                         Selected = SelectProfession
                     }
                 );
             }
 
-            const int NameInputWidth = 219;
-            Add(new UOLabel("Character Name", 1, UOLabelHue.Accent, Assets.TEXT_ALIGN_TYPE.TS_CENTER, NameInputWidth, FontStyle.BlackBorder) { X = CENTER_PANEL_MID - NameInputWidth / 2, Y = 44 });
-            Add(new RoundedColorBox(221, 26, new Color(80, 20, 20), 6) { X = CENTER_PANEL_MID - NameInputWidth / 2 - 1, Y = 71 });
-            Add(new RoundedColorBox(217, 22, new Color(28, 28, 28), 4) { X = CENTER_PANEL_MID - NameInputWidth / 2 + 1, Y = 73 });
-            Add(new FullBlendControl { X = CENTER_PANEL_MID - NameInputWidth / 2 + 2, Y = 74, Width = NameInputWidth - 4, Height = 20, Hue = 0x801 });
+            int NameInputWidth = LoginLayoutHelper.W(219);
+            Add(new UOLabel("Character Name", 1, UOLabelHue.Accent, Assets.TEXT_ALIGN_TYPE.TS_CENTER, NameInputWidth, FontStyle.BlackBorder) { X = CENTER_PANEL_MID - NameInputWidth / 2, Y = LoginLayoutHelper.Y(44) });
+            Add(new RoundedColorBox(LoginLayoutHelper.W(221), LoginLayoutHelper.H(26), new Color(80, 20, 20), 6) { X = CENTER_PANEL_MID - NameInputWidth / 2 - 1, Y = LoginLayoutHelper.Y(71) });
+            Add(new RoundedColorBox(LoginLayoutHelper.W(217), LoginLayoutHelper.H(22), new Color(28, 28, 28), 4) { X = CENTER_PANEL_MID - NameInputWidth / 2 + 1, Y = LoginLayoutHelper.Y(73) });
+            Add(new FullBlendControl { X = CENTER_PANEL_MID - NameInputWidth / 2 + 2, Y = LoginLayoutHelper.Y(74), Width = NameInputWidth - 4, Height = LoginLayoutHelper.H(20), Hue = 0x801 });
 
-            Add(_nextButton = new GothicStyleButtonLogin(30, NEXT_BUTTON_Y, 120, 40, "BACK", null, 16));
+            Add(_nextButton = new GothicStyleButtonLogin(LoginLayoutHelper.X(30), NEXT_BUTTON_Y, LoginLayoutHelper.W(120), LoginLayoutHelper.H(40), "BACK", null, 16));
             _nextButton.OnClick += () => OnButtonClick(5);
 
-            Add(button = new GothicStyleButtonLogin(NEXT_BUTTON_X, NEXT_BUTTON_Y, 120, 40, "NEXT", null, 16));
+            Add(button = new GothicStyleButtonLogin(NEXT_BUTTON_X, NEXT_BUTTON_Y, LoginLayoutHelper.W(120), LoginLayoutHelper.H(40), "NEXT", null, 16));
             button.OnClick += () => OnButtonClick(6);
 
-            Add(_nameTextBox = new StbTextBox(5, 16, NameInputWidth - 4, false, hue: 0x0481, style: FontStyle.Fixed, align: Assets.TEXT_ALIGN_TYPE.TS_CENTER) { X = CENTER_PANEL_MID - NameInputWidth / 2 + 2, Y = 74, Width = NameInputWidth - 4, Height = 20 }, 1);
+            Add(_nameTextBox = new StbTextBox(5, 16, NameInputWidth - 4, false, hue: 0x0481, style: FontStyle.Fixed, align: Assets.TEXT_ALIGN_TYPE.TS_CENTER) { X = CENTER_PANEL_MID - NameInputWidth / 2 + 2, Y = LoginLayoutHelper.Y(74), Width = NameInputWidth - 4, Height = LoginLayoutHelper.H(20) }, 1);
 
             var quitButton = new Button(0, 0x1589, 0x158B, 0x158A)
             {
@@ -330,9 +330,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             quitButton.MouseUp += (s, e) => { if (e.Button == MouseButtonType.Left) Client.Game.Exit(); };
             Add(quitButton);
 
-            const int RaceX = CENTER_X + SECTION_PADDING;
-            const int RaceY2 = RACE_SECTION_Y + 26 + RACE_BUTTON_MARGIN;
-            const int RaceY3 = RaceY2 + 26 + RACE_BUTTON_MARGIN;
+            int RaceX = CENTER_X + SECTION_PADDING;
+            int RaceY2 = RACE_SECTION_Y + 26 + RACE_BUTTON_MARGIN;
+            int RaceY3 = RaceY2 + 26 + RACE_BUTTON_MARGIN;
             const int RaceBtnW = 100;
             Add(buttonHuman = new GothicStyleButtonLogin(RaceX, RACE_SECTION_Y, RaceBtnW, 26, "HUMAN", null, 14));
             buttonHuman.OnClick += () => OnButtonClick(2);
@@ -369,14 +369,14 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 }
             }
 
-            const int AttrLabelY = ATTR_SECTION_Y;
-            const int AttrSliderY = ATTR_SECTION_Y + 22;
+            int AttrLabelY = ATTR_SECTION_Y;
+            int AttrSliderY = ATTR_SECTION_Y + 22;
             const int AttrSliderW = 100;
-            const int AttrSlotWidth = (CENTER_PANEL_WIDTH - SECTION_PADDING * 2) / 3;
-            const int AttrOffset = (AttrSlotWidth - AttrSliderW) / 2;
-            const int AttrX1 = CENTER_X + SECTION_PADDING + AttrOffset;
-            const int AttrX2 = AttrX1 + AttrSlotWidth;
-            const int AttrX3 = AttrX2 + AttrSlotWidth;
+            int AttrSlotWidth = (CENTER_PANEL_WIDTH - SECTION_PADDING * 2) / 3;
+            int AttrOffset = (AttrSlotWidth - AttrSliderW) / 2;
+            int AttrX1 = CENTER_X + SECTION_PADDING + AttrOffset;
+            int AttrX2 = AttrX1 + AttrSlotWidth;
+            int AttrX3 = AttrX2 + AttrSlotWidth;
             Add(new UOLabel(ClilocLoader.Instance.GetString(3000111), 1, UOLabelHue.Accent, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 120) { X = AttrX1, Y = AttrLabelY });
             Add(new UOLabel(ClilocLoader.Instance.GetString(3000112), 1, UOLabelHue.Accent, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 120) { X = AttrX2, Y = AttrLabelY });
             Add(new UOLabel(ClilocLoader.Instance.GetString(3000113), 1, UOLabelHue.Accent, Assets.TEXT_ALIGN_TYPE.TS_LEFT, 120) { X = AttrX3, Y = AttrLabelY });

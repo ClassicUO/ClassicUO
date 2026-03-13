@@ -847,11 +847,8 @@ namespace ClassicUO.Game.Scenes
                     // ## BEGIN - END ## // ART / HUE CHANGES
                     //if (itemData.IsFoliage && ProfileManager.CurrentProfile.TreeToStumps)
                     // ## BEGIN - END ## // ART / HUE CHANGES
-                    if (itemData.IsFoliage && ProfileManager.CurrentProfile.TreeType != 0)
+                    // ArtloaderFilters handles tree type conversion, so we don't skip foliage here
                     // ## BEGIN - END ## // ART / HUE CHANGES
-                    {
-                        continue;
-                    }
 
                     if (
                         !itemData.IsMultiMovable
@@ -941,11 +938,8 @@ namespace ClassicUO.Game.Scenes
                         // ## BEGIN - END ## // ART / HUE CHANGES
                         //if (itemData.IsFoliage && ProfileManager.CurrentProfile.TreeToStumps)
                         // ## BEGIN - END ## // ART / HUE CHANGES
-                        if (itemData.IsFoliage && ProfileManager.CurrentProfile.TreeType != 0)
+                        // ArtloaderFilters handles tree type conversion, so we don't skip foliage here
                         // ## BEGIN - END ## // ART / HUE CHANGES
-                        {
-                            continue;
-                        }
 
                         if (multi.IsVegetation && ProfileManager.CurrentProfile.HideVegetation)
                         {
@@ -1090,11 +1084,9 @@ namespace ClassicUO.Game.Scenes
                     // ## BEGIN - END ## // ART / HUE CHANGES
                     //if (!itemData.IsMultiMovable && itemData.IsFoliage && ProfileManager.CurrentProfile.TreeToStumps)
                     // ## BEGIN - END ## // ART / HUE CHANGES
-                    if (!itemData.IsMultiMovable && itemData.IsFoliage && ProfileManager.CurrentProfile.TreeType != 0)
                     // ## BEGIN - END ## // ART / HUE CHANGES
-                    {
-                        continue;
-                    }
+                    // ArtloaderFilters handles tree type conversion, so we don't skip foliage here
+                    // ## BEGIN - END ## // ART / HUE CHANGES
 
                     byte height = 0;
 

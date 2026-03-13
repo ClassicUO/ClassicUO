@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2024, andreakarasho
 // All rights reserved.
@@ -130,15 +130,25 @@ namespace ClassicUO.Assets
                         byte flag = reader.ReadByte();
                         int length = reader.ReadInt16();
 
-                        if (length > buffer.Length)
+                        if (length < 0 || length > 1024 * 1024)
+                        {
+                            break;
+                        }
+
+                        int count = Math.Max(0, length);
+                        if (count > buffer.Length)
                         {
                             System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
 
-                            buffer = System.Buffers.ArrayPool<byte>.Shared.Rent((length + 1023) & ~1023);
+                            buffer = System.Buffers.ArrayPool<byte>.Shared.Rent((count + 1023) & ~1023);
                         }
 
-                        reader.Read(buffer, 0, length);
-                        string text = string.Intern(Encoding.UTF8.GetString(buffer, 0, length));
+                        if (count > 0)
+                        {
+                            reader.Read(buffer, 0, count);
+                        }
+
+                        string text = string.Intern(Encoding.UTF8.GetString(buffer, 0, count));
 
                         _entries[number] = text;
                     }

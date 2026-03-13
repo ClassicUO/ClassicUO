@@ -413,6 +413,11 @@ namespace ClassicUO.Game.Managers
 
                 g.Update();
 
+                if (!g.IsDisposed && g is Gump gg)
+                {
+                    ClampGumpToTopReservedArea(gg);
+                }
+
                 if (g.IsDisposed)
                 {
                     Gumps.Remove(first);
@@ -467,6 +472,8 @@ namespace ClassicUO.Game.Managers
         {
             if (!gump.IsDisposed)
             {
+                ClampGumpToTopReservedArea(gump);
+
                 if (front)
                 {
                     Gumps.AddFirst(gump);
@@ -715,7 +722,52 @@ namespace ClassicUO.Game.Managers
                     }
                 }
 
+                TopStatusBarGump topStatusBar = GetGump<TopStatusBarGump>();
+
+                if (topStatusBar != null)
+                {
+                    LinkedListNode<Gump> node = Gumps.Find(topStatusBar);
+
+                    if (node != null)
+                    {
+                        Gumps.Remove(node);
+                        Gumps.AddFirst(node);
+                    }
+                }
+
                 _needSort = false;
+            }
+        }
+
+        private static int GetTopReservedAreaHeight()
+        {
+            TopStatusBarGump topStatusBar = GetGump<TopStatusBarGump>();
+
+            if (topStatusBar == null || topStatusBar.IsDisposed || !topStatusBar.IsVisible)
+            {
+                return 0;
+            }
+
+            return topStatusBar.Height;
+        }
+
+        private static bool IsTopReservedAreaExempt(Gump gump)
+        {
+            return gump is TopStatusBarGump || gump is InWindowTitleBarBarsGump || gump is WorldViewportGump || gump is WindowBorderFrameGump;
+        }
+
+        private static void ClampGumpToTopReservedArea(Gump gump)
+        {
+            if (gump == null || gump.IsDisposed || IsTopReservedAreaExempt(gump))
+            {
+                return;
+            }
+
+            int topReserved = GetTopReservedAreaHeight();
+
+            if (topReserved > 0 && gump.Y < topReserved)
+            {
+                gump.Y = topReserved;
             }
         }
 
@@ -770,9 +822,18 @@ namespace ClassicUO.Game.Managers
 
             Point delta = Mouse.Position - _dragOrigin;
 
+            int oldX = DraggingControl.X;
+            int oldY = DraggingControl.Y;
+
             DraggingControl.X += delta.X;
             DraggingControl.Y += delta.Y;
-            DraggingControl.InvokeMove(delta.X, delta.Y);
+
+            if (DraggingControl is Gump draggingGump)
+            {
+                ClampGumpToTopReservedArea(draggingGump);
+            }
+
+            DraggingControl.InvokeMove(DraggingControl.X - oldX, DraggingControl.Y - oldY);
             _dragOrigin = Mouse.Position;
         }
 

@@ -31,6 +31,7 @@
 #endregion
 
 using ClassicUO.Configuration;
+using ClassicUO.Game;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -156,14 +157,14 @@ namespace ClassicUO.Game.UI.Gumps
                     int w = _lastSize.X + offset.X;
                     int h = _lastSize.Y + offset.Y;
 
-                    if (w < 1024)
+                    if (w < Constants.MIN_GAME_WINDOW_WIDTH)
                     {
-                        w = 1024;
+                        w = Constants.MIN_GAME_WINDOW_WIDTH;
                     }
 
-                    if (h < 768)
+                    if (h < Constants.MIN_GAME_WINDOW_HEIGHT)
                     {
-                        h = 768;
+                        h = Constants.MIN_GAME_WINDOW_HEIGHT;
                     }
 
                     if (w > Client.Game.Window.ClientBounds.Width - BORDER_WIDTH)
@@ -273,14 +274,14 @@ namespace ClassicUO.Game.UI.Gumps
 
         public Point ResizeGameWindow(Point newSize)
         {
-            if (newSize.X < 1024)
+            if (newSize.X < Constants.MIN_GAME_WINDOW_WIDTH)
             {
-                newSize.X = 1024;
+                newSize.X = Constants.MIN_GAME_WINDOW_WIDTH;
             }
 
-            if (newSize.Y < 768)
+            if (newSize.Y < Constants.MIN_GAME_WINDOW_HEIGHT)
             {
-                newSize.Y = 768;
+                newSize.Y = Constants.MIN_GAME_WINDOW_HEIGHT;
             }
 
             //Resize();

@@ -74,8 +74,13 @@ namespace ClassicUO.TazUO
 
         public static void StartUpdateAndExit()
         {
-            if (IsUpdating || MainReleaseData?.assets == null || MainReleaseData.assets.Length == 0)
+            if (IsUpdating)
                 return;
+            if (MainReleaseData?.assets == null || MainReleaseData.assets.Length == 0)
+            {
+                PlatformHelper.LaunchBrowser(MainReleaseData?.html_url ?? "https://github.com/dust765/ClassicUO/releases");
+                return;
+            }
             var zipAsset = MainReleaseData.assets.FirstOrDefault(a => a.name?.EndsWith(".zip", StringComparison.OrdinalIgnoreCase) == true);
             if (zipAsset == null)
             {

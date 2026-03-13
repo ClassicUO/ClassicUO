@@ -20,8 +20,10 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #endregion
+using System;
 using ClassicUO.Dust765.Autos;
 using ClassicUO.Game.Cheats.AIBot;
+using ClassicUO.Network;
 // ## BEGIN - END ## // LOBBY
 using ClassicUO.Dust765.Lobby;
 using ClassicUO.Dust765.Dust765;
@@ -84,6 +86,15 @@ namespace ClassicUO.Game.Managers // only exception to not being in the 'Interop
                 PerformanceOptimizations.ClearCaches();
                 PerformanceMonitor.Reset();
                 GameActions.Print("Performance caches cleared.", 63);
+            });
+
+            CommandManager.Register("snapstats", (args) => {
+                WalkerManager.GetSnapLastMinute(out int denyPerMinute, out int resyncPerMinute);
+
+                uint ping = NetClient.Socket?.Statistics?.Ping ?? 0;
+                long queuedBytes = NetClient.Socket?.QueuedReceiveBytes ?? 0;
+
+                GameActions.Print($"SnapStats -> Ping:{ping}ms Deny:{denyPerMinute}/m Resync:{resyncPerMinute}/m Queue:{NetStatistics.GetSizeAdaptive((uint)Math.Min(uint.MaxValue, Math.Max(0, queuedBytes)))}", 63);
             });
         }
 

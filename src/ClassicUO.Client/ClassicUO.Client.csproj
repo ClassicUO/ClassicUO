@@ -6,8 +6,8 @@
     <ApplicationIcon>cuoicon.ico</ApplicationIcon>
     <AssemblyName>ClassicUO</AssemblyName>
     <RootNamespace>ClassicUO</RootNamespace>
-    <AssemblyVersion>3.0.0</AssemblyVersion>
-    <FileVersion>3.0.0</FileVersion>
+    <AssemblyVersion>3.0.1</AssemblyVersion>
+    <FileVersion>3.0.1</FileVersion>
     <Copyright>Dust765.3.0</Copyright>
     <StartupObject></StartupObject>
     <PlatformTarget>x64</PlatformTarget>
@@ -68,6 +68,7 @@
 
   <ItemGroup>
     <PackageReference Include="IronPython" Version="2.7.12" />
+    <PackageReference Include="Sentry" Version="6.1.0" />
     <ProjectReference Include="..\..\external\FNA\FNA.Core.csproj" />
     <ProjectReference Include="..\..\external\UOSteam\UOScript\UOScript.csproj" />
     <ProjectReference Include="..\ClassicUO.Assets\ClassicUO.Assets.csproj" />

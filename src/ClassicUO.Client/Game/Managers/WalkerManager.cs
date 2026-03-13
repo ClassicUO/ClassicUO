@@ -92,6 +92,72 @@ namespace ClassicUO.Game.Managers
 
     internal class WalkerManager
     {
+        private struct SnapBucket
+        {
+            public long Second;
+            public int DenyCount;
+            public int ResyncCount;
+        }
+
+        private const int SNAP_WINDOW_SECONDS = 60;
+        private static readonly SnapBucket[] _snapBuckets = new SnapBucket[SNAP_WINDOW_SECONDS];
+        private static readonly object _snapSync = new object();
+
+        public static int SnapDenyTotal { get; private set; }
+        public static int SnapResyncTotal { get; private set; }
+
+        public static void GetSnapLastMinute(out int denyPerMinute, out int resyncPerMinute)
+        {
+            long nowSecond = Time.Ticks / 1000;
+            int deny = 0;
+            int resync = 0;
+
+            lock (_snapSync)
+            {
+                for (int i = 0; i < _snapBuckets.Length; i++)
+                {
+                    long age = nowSecond - _snapBuckets[i].Second;
+
+                    if (age >= 0 && age < SNAP_WINDOW_SECONDS)
+                    {
+                        deny += _snapBuckets[i].DenyCount;
+                        resync += _snapBuckets[i].ResyncCount;
+                    }
+                }
+            }
+
+            denyPerMinute = deny;
+            resyncPerMinute = resync;
+        }
+
+        private static void RecordSnapEvent(bool deny, bool resync)
+        {
+            long nowSecond = Time.Ticks / 1000;
+            int index = (int)(nowSecond % SNAP_WINDOW_SECONDS);
+
+            lock (_snapSync)
+            {
+                if (_snapBuckets[index].Second != nowSecond)
+                {
+                    _snapBuckets[index].Second = nowSecond;
+                    _snapBuckets[index].DenyCount = 0;
+                    _snapBuckets[index].ResyncCount = 0;
+                }
+
+                if (deny)
+                {
+                    _snapBuckets[index].DenyCount++;
+                    SnapDenyTotal++;
+                }
+
+                if (resync)
+                {
+                    _snapBuckets[index].ResyncCount++;
+                    SnapResyncTotal++;
+                }
+            }
+        }
+
         public FastWalkStack FastWalkStack { get; } = new FastWalkStack();
         public ushort CurrentPlayerZ;
         public byte CurrentWalkSequence;
@@ -107,6 +173,11 @@ namespace ClassicUO.Game.Managers
 
         public void DenyWalk(byte sequence, int x, int y, sbyte z)
         {
+            if (x != -1)
+            {
+                RecordSnapEvent(deny: true, resync: false);
+            }
+
             World.Player.ClearSteps();
 
             Reset();
@@ -118,8 +189,6 @@ namespace ClassicUO.Game.Managers
 
                 World.Player.SetInWorldTile((ushort) x, (ushort) y, z);
             }
-
-            World.Player.SyncServerDirection();
         }
 
         public void ConfirmWalk(byte sequence)
@@ -178,6 +247,7 @@ namespace ClassicUO.Game.Managers
                 {
                     NetClient.Socket.Send_Resync();
                     ResendPacketResync = true;
+                    RecordSnapEvent(deny: false, resync: true);
                 }
 
                 WalkingFailed = true;

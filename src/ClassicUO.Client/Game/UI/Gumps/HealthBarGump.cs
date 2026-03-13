@@ -892,7 +892,7 @@ namespace ClassicUO.Game.UI.Gumps
                         // ## BEGIN - END ## // HEALTHBAR
                         if (LTBorder || HLBorder) //##FOR BORDER COLORS
                         {
-                            if ((mobile == TargetManager.LastTargetInfo.Serial && LTBorder) || HLBorder && (mobile.IsPoisoned || mobile.IsParalyzed || mobile.IsYellowHits || mobile.IsRenamable))
+                            if ((mobile.Serial == TargetManager.LastTargetInfo.Serial && LTBorder) || HLBorder && (mobile.IsPoisoned || mobile.IsParalyzed || mobile.IsYellowHits || mobile.IsRenamable))
                             {
                                 //not in an else if as we want it blue but also overwritten when poisoned
                                 if (mobile.IsRenamable)
@@ -947,7 +947,7 @@ namespace ClassicUO.Game.UI.Gumps
                                     _border[1].LineColor = _border[2].LineColor = _border[3].LineColor = HPB_COLOR_RED;
                                 }
                             }
-                            else if (mobile != TargetManager.LastTargetInfo.Serial) //&& mobile != World.Player)
+                            else if (mobile.Serial != TargetManager.LastTargetInfo.Serial) //&& mobile != World.Player)
                             {
                                 _border[0].LineColor = HPB_COLOR_BLACK;
 

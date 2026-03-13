@@ -542,7 +542,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                if (entity == TargetManager.LastTargetInfo.Serial)
+                if (entity.Serial == TargetManager.LastTargetInfo.Serial)
                 {
                     if (!_isLastTarget) //Only set this if it was not already last target
                     {
@@ -553,16 +553,13 @@ namespace ClassicUO.Game.UI.Gumps
                         _isLastTarget = true;
                     }
                 }
-                else
+                else if (_isLastTarget)
                 {
-                    if (_isLastTarget)//If we make it here, it is no longer the last target so we update colors and set this to false.
-                    {
-                        _borderColor = SolidColorTextureCache.GetTexture(Color.Black);
-                        _background.Hue = (ushort)(_text.Hue = entity is Mobile m
-                            ? Notoriety.GetHue(m.NotorietyFlag)
-                            : (ushort)0x0481);
-                        _isLastTarget = false;
-                    }
+                    _borderColor = SolidColorTextureCache.GetTexture(Color.Black);
+                    _background.Hue = (ushort)(_text.Hue = entity is Mobile m
+                        ? Notoriety.GetHue(m.NotorietyFlag)
+                        : (ushort)0x0481);
+                    _isLastTarget = false;
                 }
 
                 if (_needsNameUpdate)

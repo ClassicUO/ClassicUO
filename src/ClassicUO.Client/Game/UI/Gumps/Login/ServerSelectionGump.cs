@@ -67,8 +67,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
             // Background
             UIManager.Add(new LoginBackground());
 
-            const int LogoMaxWidth = 800;
-            const int LogoMaxHeight = 140;
+            const int LogoMaxWidth = 750;
+            const int LogoMaxHeight = 131;
             if (LogoBackgroundImg != null)
             {
                 float scale = Math.Min((float)LogoMaxWidth / LogoBackgroundImg.Width, (float)LogoMaxHeight / LogoBackgroundImg.Height);
@@ -144,8 +144,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             databox.WantUpdateSize = true;
             LoginScene loginScene = Client.Game.GetScene<LoginScene>();
 
-            scrollArea.ScissorRectangle.Y = 16;
-            scrollArea.ScissorRectangle.Height = -32;
+            scrollArea.ScissorRectangle = new Rectangle(0, 16, 0, -32);
 
             foreach (ServerListEntry server in loginScene.Servers)
             {

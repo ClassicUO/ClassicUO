@@ -570,6 +570,12 @@ namespace ClassicUO.Game
             return true;
         }
 
+        public static void SetLastTarget(uint serial)
+        {
+            if (World.InGame && serial != 0)
+                TargetManager.LastTargetInfo.SetEntity(serial);
+        }
+
         public static void Attack(uint serial)
         {
             if (ProfileManager.CurrentProfile.EnabledCriminalActionQuery)
@@ -601,6 +607,8 @@ namespace ClassicUO.Game
 
                 if (m != null && m != World.Player)
                 {
+                    TargetManager.NewTargetSystemSerial = serial;
+                    TargetManager.LastAttack = serial;
 
                     Socket.Send_AttackRequest(serial);
 
@@ -633,6 +641,8 @@ namespace ClassicUO.Game
 
                 if (m != null && m != World.Player)
                 {
+                    TargetManager.NewTargetSystemSerial = serial;
+                    TargetManager.LastAttack = serial;
 
                     Socket.Send_AttackRequest(serial);
 
@@ -679,6 +689,11 @@ namespace ClassicUO.Game
 
             if (SerialHelper.IsItem(serial) || (SerialHelper.IsMobile(serial) && (World.Mobiles.Get(serial)?.IsHuman ?? false)))
             {
+                if (SerialHelper.IsMobile(serial))
+                {
+                    TargetManager.NewTargetSystemSerial = serial;
+                }
+
                 World.LastObject = serial;
             }
             else

@@ -31,6 +31,7 @@
 #endregion
 
 using ClassicUO.Assets;
+using ClassicUO.Game;
 using ClassicUO.Configuration;
 // ## BEGIN - END ## // UI/GUMPS
 using ClassicUO.Dust765.External;
@@ -39,6 +40,7 @@ using ClassicUO.Dust765.Dust765;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Map;
 using ClassicUO.Game.UI;
 using ClassicUO.TazUO;
 using ClassicUO.Game.UI.Gumps;
@@ -80,6 +82,7 @@ namespace ClassicUO.Game.Scenes
         });
 
         private uint _time_cleanup = Time.Ticks + 5000;
+        private uint _timeToUpdateNativeTitleStats;
         private static XBREffect _xbr;
         private bool _alphaChanged;
         private long _alphaTimer;
@@ -186,21 +189,36 @@ namespace ClassicUO.Game.Scenes
 
             UIManager.Add(new MobileScaleGump(), false);
 
+            if (ProfileManager.CurrentProfile.UsesCustomWindowTitleBar())
+            {
+                Client.Game.HideNativeTitleBar();
+                TopStatusBarGump.Create();
+            }
+            else
+            {
+                Client.Game.ShowNativeTitleBar();
+                UIManager.GetGump<TopStatusBarGump>()?.Dispose();
+            }
+
             if (!ProfileManager.CurrentProfile.TopbarGumpIsDisabled)
             {
                 TopBarGump.Create();
             }
+
+            TitleBarStatsBarsGump.Create();
+            InWindowTitleBarBarsGump.UpdateVisibility();
+            WindowBorderFrameGump.UpdateVisibility();
 
             CommandManager.Initialize();
             NetClient.Socket.Disconnected += SocketOnDisconnected;
             EventSink.MessageReceived += ChatOnMessageReceived;
             UIManager.ContainerScale = ProfileManager.CurrentProfile.ContainersScale / 100f;
 
-            SDL.SDL_SetWindowMinimumSize(Client.Game.Window.Handle, 1024, 768);
+            SDL.SDL_SetWindowMinimumSize(Client.Game.Window.Handle, Constants.MIN_GAME_WINDOW_WIDTH, Constants.MIN_GAME_WINDOW_HEIGHT);
 
-            if (ProfileManager.CurrentProfile.WindowBorderless)
+            if (ProfileManager.CurrentProfile.UsesCustomWindowTitleBar())
             {
-                Client.Game.SetWindowBorderless(true);
+                Client.Game.HideNativeTitleBar();
             }
             else if (Settings.GlobalSettings.IsWindowMaximized)
             {
@@ -208,13 +226,18 @@ namespace ClassicUO.Game.Scenes
             }
             else if (Settings.GlobalSettings.WindowSize.HasValue)
             {
+                Client.Game.ShowNativeTitleBar();
                 int w = Settings.GlobalSettings.WindowSize.Value.X;
                 int h = Settings.GlobalSettings.WindowSize.Value.Y;
 
-                w = Math.Max(1024, w);
-                h = Math.Max(768, h);
+                w = Math.Max(Constants.MIN_GAME_WINDOW_WIDTH, w);
+                h = Math.Max(Constants.MIN_GAME_WINDOW_HEIGHT, h);
 
                 Client.Game.SetWindowSize(w, h);
+            }
+            else
+            {
+                Client.Game.ShowNativeTitleBar();
             }
 
             // ## BEGIN - END ## // UI/GUMPS
@@ -509,6 +532,7 @@ namespace ClassicUO.Game.Scenes
                 }
                 catch { }
             }
+            PaperdollSelectCharManager.Reset();
             ProfileManager.UnLoadProfile();
 
             StaticFilters.CleanCaveTextures();
@@ -540,7 +564,6 @@ namespace ClassicUO.Game.Scenes
             );
 
             Settings.GlobalSettings.IsWindowMaximized = Client.Game.IsWindowMaximized();
-            Client.Game.SetWindowBorderless(false);
 
             base.Unload();
         }
@@ -829,42 +852,43 @@ namespace ClassicUO.Game.Scenes
             int maxCotZ = World.Player.Z + 5;
             Vector2 playerPos = World.Player.GetScreenPosition();
 
-            for (int i = 0; i < 2; ++i)
+            int minChunkX = minX >> 3;
+            int minChunkY = minY >> 3;
+            int maxChunkX = maxX >> 3;
+            int maxChunkY = maxY >> 3;
+
+            for (int chunkX = minChunkX; chunkX <= maxChunkX; chunkX++)
             {
-                int minValue = minY;
-                int maxValue = maxY;
-
-                if (i != 0)
+                for (int chunkY = minChunkY; chunkY <= maxChunkY; chunkY++)
                 {
-                    minValue = minX;
-                    maxValue = maxX;
-                }
+                    Chunk chunk = map.GetChunk2(chunkX, chunkY, true);
+                    if (chunk == null || chunk.IsDestroyed)
+                        continue;
 
-                for (int lead = minValue; lead < maxValue; ++lead)
-                {
-                    int x = minX;
-                    int y = lead;
-
-                    if (i != 0)
+                    for (int x = 0; x < 8; x++)
                     {
-                        x = lead;
-                        y = maxY;
-                    }
+                        for (int y = 0; y < 8; y++)
+                        {
+                            int worldX = (chunkX << 3) + x;
+                            int worldY = (chunkY << 3) + y;
 
-                    while (x >= minX && x <= maxX && y >= minY && y <= maxY)
-                    {
-                        AddTileToRenderList(
-                            map.GetTile(x, y),
-                            x,
-                            y,
-                            use_handles,
-                            150,
-                            maxCotZ,
-                            ref playerPos
-                        );
+                            if (worldX < minX || worldX > maxX || worldY < minY || worldY > maxY)
+                                continue;
 
-                        ++x;
-                        --y;
+                            GameObject firstObj = chunk.GetHeadObject(x, y);
+                            if (firstObj == null || firstObj.IsDestroyed)
+                                continue;
+
+                            AddTileToRenderList(
+                                firstObj,
+                                worldX,
+                                worldY,
+                                use_handles,
+                                150,
+                                maxCotZ,
+                                ref playerPos
+                            );
+                        }
                     }
                 }
             }
@@ -920,6 +944,12 @@ namespace ClassicUO.Game.Scenes
             {
                 World.Map?.ClearUnusedBlocks();
                 _time_cleanup = Time.Ticks + 500;
+            }
+
+            // Preload chunks around the player for smoother rendering after teleport
+            if (World.InGame && World.Map != null && World.Player != null)
+            {
+                World.Map.PreloadChunksAround(World.Player.X, World.Player.Y, 3, 8);
             }
 
             PacketHandlers.SendMegaClilocRequests();
@@ -1245,13 +1275,6 @@ namespace ClassicUO.Game.Scenes
         {
             SelectedObject.Object = null;
             FillGameObjectList();
-            
-            // Aplicar otimizações de performance
-            PerformanceOptimizer.UpdateViewport(
-                Camera.Bounds, 
-                new Vector2(Camera.Bounds.X + Camera.Bounds.Width / 2, Camera.Bounds.Y + Camera.Bounds.Height / 2),
-                PerformanceOptimizer.GetEffectiveMaxRenderDistance()
-            );
 
             if (use_render_target)
             {
@@ -1264,18 +1287,7 @@ namespace ClassicUO.Game.Scenes
             }
 
             batcher.Begin(null, matrix);
-            
-            // Melhoria: Sistema de iluminação mais realista
-            float baseLight = ProfileManager.CurrentProfile.TerrainShadowsLevel * 0.1f;
-            
-            // Adicionar variação de iluminação baseada na hora do dia
-            float timeOfDay = GetTimeOfDayLighting();
-            float dynamicLight = baseLight + (timeOfDay * 0.3f);
-            
-            // Limitar valores para evitar extremos
-            dynamicLight = System.Math.Max(0.1f, System.Math.Min(1.0f, dynamicLight));
-            
-            batcher.SetBrightlight(dynamicLight);
+            batcher.SetBrightlight(ProfileManager.CurrentProfile.TerrainShadowsLevel * 0.1f);
 
             // https://shawnhargreaves.com/blog/depth-sorting-alpha-blended-objects.html
             batcher.SetStencil(DepthStencilState.Default);
@@ -1589,24 +1601,5 @@ namespace ClassicUO.Game.Scenes
         /// <summary>
         /// Calcula a iluminação baseada na hora do dia para efeito mais realista
         /// </summary>
-        private float GetTimeOfDayLighting()
-        {
-            if (World.Player == null)
-                return 0.5f; // Iluminação neutra se não houver jogador
-            
-            // Simular hora do dia baseada no tempo de jogo
-            // 0.0 = meia-noite (escuro), 0.5 = meio-dia (claro), 1.0 = meia-noite (escuro)
-            float gameTime = (Time.Ticks % 24000) / 24000f; // Ciclo de 24 horas em ticks
-            
-            // Calcular iluminação baseada na hora
-            if (gameTime < 0.25f) // 00:00 - 06:00 (noite)
-                return 0.2f + (gameTime / 0.25f) * 0.3f; // Escuro para menos escuro
-            else if (gameTime < 0.5f) // 06:00 - 12:00 (manhã)
-                return 0.5f + ((gameTime - 0.25f) / 0.25f) * 0.5f; // Menos escuro para claro
-            else if (gameTime < 0.75f) // 12:00 - 18:00 (tarde)
-                return 1.0f - ((gameTime - 0.5f) / 0.25f) * 0.3f; // Claro para menos claro
-            else // 18:00 - 24:00 (noite)
-                return 0.7f - ((gameTime - 0.75f) / 0.25f) * 0.5f; // Menos claro para escuro
-        }
     }
 }

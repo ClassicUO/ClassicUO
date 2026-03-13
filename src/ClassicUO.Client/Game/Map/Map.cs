@@ -77,7 +77,13 @@ namespace ClassicUO.Game.Map
 
             int cellX = x >> 3;
             int cellY = y >> 3;
-            int block = GetBlock(cellX, cellY);
+
+            return GetChunk2(cellX, cellY, load);
+        }
+
+        public Chunk GetChunk2(int chunkX, int chunkY, bool load = true)
+        {
+            int block = GetBlock(chunkX, chunkY);
 
             if (block >= BlocksCount || block >= _terrainChunks.Length)
             {
@@ -94,7 +100,7 @@ namespace ClassicUO.Game.Map
                 }
 
                 LinkedListNode<int> node = _usedIndices.AddLast(block);
-                chunk = Chunk.Create(cellX, cellY);
+                chunk = Chunk.Create(chunkX, chunkY);
                 chunk.Load(Index);
                 chunk.Node = node;
             }
@@ -107,8 +113,8 @@ namespace ClassicUO.Game.Map
                 }
 
                 LinkedListNode<int> node = _usedIndices.AddLast(block);
-                chunk.X = cellX;
-                chunk.Y = cellY;
+                chunk.X = chunkX;
+                chunk.Y = chunkY;
                 chunk.Load(Index);
                 chunk.Node = node;
             }

@@ -32,6 +32,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -128,6 +129,9 @@ namespace ClassicUO.Network
 
         [MarshalAs(UnmanagedType.FunctionPtr)]
         private RequestMove _requestMove;
+
+        private Assembly _managedPluginAssembly;
+        private bool _classicAssistMacroGumpSafetyApplied;
         private readonly Dictionary<IntPtr, GraphicsResource> _resources =
             new Dictionary<IntPtr, GraphicsResource>();
 
@@ -170,7 +174,13 @@ namespace ClassicUO.Network
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool DeleteFile(string name);
 #else
-        public static bool DeleteFile(string name) => File.Exists(name) && File.Delete(name);
+        public static bool DeleteFile(string name)
+        {
+            if (!File.Exists(name))
+                return false;
+            File.Delete(name);
+            return true;
+        }
 #endif
 
         public static Plugin Create(string path)
@@ -210,6 +220,8 @@ namespace ClassicUO.Network
 
         public void Load()
         {
+            Assembly managedPluginAssembly = null;
+
             _recv = OnPluginRecv;
             _send = OnPluginSend;
             _recv_new = OnPluginRecv_new;
@@ -296,6 +308,9 @@ namespace ClassicUO.Network
                         Log.Error($"Failed to load plugin assembly: {Path.GetFileName(PluginPath)}");
                         return;
                     }
+
+                    managedPluginAssembly = asm;
+                    _managedPluginAssembly = asm;
 
                     Type type = asm.GetType("Assistant.Engine");
 
@@ -454,6 +469,8 @@ namespace ClassicUO.Network
 
             IsValid = true;
 
+            TrySanitizeRazorEnhancedGeneralSettings(managedPluginAssembly, PluginPath);
+
             if (_onInitialize != null)
             {
                 _onInitialize();
@@ -562,6 +579,8 @@ namespace ClassicUO.Network
         {
             foreach (Plugin t in Plugins)
             {
+                t.TryApplyClassicAssistMacroGumpSafety();
+
                 if (t._tick != null)
                 {
                     t._tick();
@@ -709,9 +728,7 @@ namespace ClassicUO.Network
 
             foreach (Plugin plugin in Plugins)
             {
-                if (
-                    plugin._onHotkeyPressed != null && !plugin._onHotkeyPressed(key, mod, ispressed)
-                )
+                if (plugin._onHotkeyPressed != null && !plugin._onHotkeyPressed(key, mod, ispressed))
                 {
                     result = false;
                 }
@@ -1437,15 +1454,315 @@ namespace ClassicUO.Network
 
         private static Assembly LoadPlugin(string pluginPath)
         {
+            string fullPath = Path.GetFullPath(pluginPath);
+
             try
             {
                 Log.Info($"Loading plugin: {Path.GetFileName(pluginPath)}");
-                return Assembly.LoadFrom(pluginPath);
+                return Assembly.LoadFile(fullPath);
+            }
+            catch (BadImageFormatException ex)
+            {
+                string binaryInfo = DescribePortableExecutable(fullPath);
+                string hostArchitecture = Environment.Is64BitProcess ? "x64" : "x86";
+
+                Log.Error($"Failed to load plugin '{Path.GetFileName(pluginPath)}': {ex.Message}");
+                Log.Warn(
+                    $"Plugin '{Path.GetFileName(pluginPath)}' binary info: {binaryInfo}. Host process architecture: {hostArchitecture}. "
+                    + "This usually means architecture mismatch (x86/x64) or an incompatible native dependency."
+                );
+
+                return null;
             }
             catch (Exception ex)
             {
                 Log.Error($"Failed to load plugin '{Path.GetFileName(pluginPath)}': {ex.Message}");
                 return null;
+            }
+        }
+
+        private static void TrySanitizeRazorEnhancedGeneralSettings(Assembly pluginAssembly, string pluginPath)
+        {
+            try
+            {
+                if (pluginAssembly == null)
+                {
+                    return;
+                }
+
+                string fileName = Path.GetFileName(pluginPath);
+
+                if (string.IsNullOrEmpty(fileName) || fileName.IndexOf("razorenhanced", StringComparison.OrdinalIgnoreCase) < 0)
+                {
+                    return;
+                }
+
+                Type settingsType = pluginAssembly.GetType("RazorEnhanced.Settings", throwOnError: false);
+
+                if (settingsType == null)
+                {
+                    return;
+                }
+
+                object dataSetObject = null;
+                PropertyInfo datasetProperty = settingsType.GetProperty("Dataset", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+
+                if (datasetProperty != null)
+                {
+                    dataSetObject = datasetProperty.GetValue(null);
+                }
+
+                if (dataSetObject == null)
+                {
+                    FieldInfo datasetField = settingsType.GetField("m_Dataset", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+
+                    if (datasetField != null)
+                    {
+                        dataSetObject = datasetField.GetValue(null);
+                    }
+                }
+
+                if (!(dataSetObject is DataSet dataset) || dataset.Tables.Count == 0)
+                {
+                    return;
+                }
+
+                DataTable general = null;
+
+                if (dataset.Tables.Contains("GENERAL"))
+                {
+                    general = dataset.Tables["GENERAL"];
+                }
+                else if (dataset.Tables.Contains("General"))
+                {
+                    general = dataset.Tables["General"];
+                }
+
+                if (general == null || general.Rows.Count == 0)
+                {
+                    return;
+                }
+
+                DataRow row = general.Rows[0];
+                int repairedValues = 0;
+
+                foreach (DataColumn column in general.Columns)
+                {
+                    if (!row.IsNull(column))
+                    {
+                        continue;
+                    }
+
+                    Type columnType = column.DataType;
+                    object defaultValue;
+
+                    if (columnType == typeof(string))
+                    {
+                        defaultValue = string.Empty;
+                    }
+                    else if (columnType.IsValueType)
+                    {
+                        defaultValue = Activator.CreateInstance(columnType);
+                    }
+                    else
+                    {
+                        continue;
+                    }
+
+                    row[column] = defaultValue;
+                    repairedValues++;
+                }
+
+                if (repairedValues > 0)
+                {
+                    MethodInfo saveMethod = settingsType.GetMethod("Save", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+                    saveMethod?.Invoke(null, null);
+
+                    Log.Warn($"Plugin '{fileName}' had {repairedValues} null GENERAL settings converted to defaults to avoid runtime crashes.");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Warn($"RazorEnhanced settings compatibility patch failed: {ex.Message}");
+            }
+        }
+
+        private static string DescribePortableExecutable(string filePath)
+        {
+            if (!TryReadPortableExecutableInfo(filePath, out ushort machine, out ushort optionalHeaderMagic))
+            {
+                return "unable to read PE header";
+            }
+
+            string machineName;
+
+            switch (machine)
+            {
+                case 0x014C:
+                    machineName = "I386 (x86 or AnyCPU IL)";
+                    break;
+                case 0x8664:
+                    machineName = "AMD64 (x64)";
+                    break;
+                case 0xAA64:
+                    machineName = "ARM64";
+                    break;
+                case 0x01C4:
+                    machineName = "ARM";
+                    break;
+                case 0x0200:
+                    machineName = "IA64";
+                    break;
+                default:
+                    machineName = $"0x{machine:X4}";
+                    break;
+            }
+
+            string peFormat;
+
+            switch (optionalHeaderMagic)
+            {
+                case 0x10B:
+                    peFormat = "PE32";
+                    break;
+                case 0x20B:
+                    peFormat = "PE32+";
+                    break;
+                default:
+                    peFormat = $"0x{optionalHeaderMagic:X4}";
+                    break;
+            }
+
+            return $"machine={machineName}, format={peFormat}";
+        }
+
+        private static bool TryReadPortableExecutableInfo(
+            string filePath,
+            out ushort machine,
+            out ushort optionalHeaderMagic
+        )
+        {
+            machine = 0;
+            optionalHeaderMagic = 0;
+
+            try
+            {
+                using (FileStream stream = File.OpenRead(filePath))
+                using (BinaryReader reader = new BinaryReader(stream))
+                {
+                    if (stream.Length < 0x40)
+                    {
+                        return false;
+                    }
+
+                    ushort mz = reader.ReadUInt16();
+
+                    if (mz != 0x5A4D)
+                    {
+                        return false;
+                    }
+
+                    stream.Seek(0x3C, SeekOrigin.Begin);
+                    int peOffset = reader.ReadInt32();
+
+                    if (peOffset <= 0 || peOffset + 26 > stream.Length)
+                    {
+                        return false;
+                    }
+
+                    stream.Seek(peOffset, SeekOrigin.Begin);
+                    uint peSignature = reader.ReadUInt32();
+
+                    if (peSignature != 0x00004550)
+                    {
+                        return false;
+                    }
+
+                    machine = reader.ReadUInt16();
+
+                    stream.Seek(peOffset + 24, SeekOrigin.Begin);
+                    optionalHeaderMagic = reader.ReadUInt16();
+
+                    return true;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private void TryApplyClassicAssistMacroGumpSafety()
+        {
+            try
+            {
+                if (_classicAssistMacroGumpSafetyApplied)
+                {
+                    return;
+                }
+
+                if (_managedPluginAssembly == null)
+                {
+                    return;
+                }
+
+                string fileName = Path.GetFileName(PluginPath);
+
+                if (string.IsNullOrEmpty(fileName) || fileName.IndexOf("classicassist", StringComparison.OrdinalIgnoreCase) < 0)
+                {
+                    _classicAssistMacroGumpSafetyApplied = true;
+                    return;
+                }
+
+                Type optionsType = _managedPluginAssembly.GetType("ClassicAssist.Data.Options", throwOnError: false);
+
+                if (optionsType == null)
+                {
+                    return;
+                }
+
+                PropertyInfo currentOptionsProperty = optionsType.GetProperty("CurrentOptions", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+
+                if (currentOptionsProperty == null)
+                {
+                    return;
+                }
+
+                object currentOptions = currentOptionsProperty.GetValue(null);
+
+                if (currentOptions == null)
+                {
+                    return;
+                }
+
+                PropertyInfo macrosGumpProperty = optionsType.GetProperty("MacrosGump", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+
+                if (macrosGumpProperty == null || macrosGumpProperty.PropertyType != typeof(bool) || !macrosGumpProperty.CanRead)
+                {
+                    _classicAssistMacroGumpSafetyApplied = true;
+                    return;
+                }
+
+                bool macrosGumpEnabled = (bool)macrosGumpProperty.GetValue(currentOptions);
+
+                if (macrosGumpEnabled)
+                {
+                    if (macrosGumpProperty.CanWrite)
+                    {
+                        macrosGumpProperty.SetValue(currentOptions, false);
+                    }
+
+                    MethodInfo saveMethod = optionsType.GetMethod("Save", BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic, null, new[] { optionsType }, null);
+                    saveMethod?.Invoke(null, new[] { currentOptions });
+
+                    Log.Warn($"ClassicAssist compatibility: disabled MacrosGump to avoid concurrent enumeration crash in MacrosGump.ResendGump.");
+                }
+
+                _classicAssistMacroGumpSafetyApplied = true;
+            }
+            catch (Exception ex)
+            {
+                Log.Warn($"ClassicAssist compatibility patch failed: {ex.Message}");
             }
         }
     }

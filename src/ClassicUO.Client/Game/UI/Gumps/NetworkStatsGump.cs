@@ -33,6 +33,7 @@
 using System;
 using System.Text;
 using System.Xml;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Network;
@@ -47,6 +48,7 @@ namespace ClassicUO.Game.UI.Gumps
         private static Point _last_position = new Point(-1, -1);
 
         private uint _ping, _deltaBytesReceived, _deltaBytesSent;
+        private int _snapDenyPerMinute, _snapResyncPerMinute;
         private uint _time_to_update;
         private readonly AlphaBlendControl _trans;
         private string _cacheText = string.Empty;
@@ -111,6 +113,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _ping = NetClient.Socket.Statistics.Ping;
                     _deltaBytesReceived = NetClient.Socket.Statistics.DeltaBytesReceived;
                     _deltaBytesSent = NetClient.Socket.Statistics.DeltaBytesSent;
+                    WalkerManager.GetSnapLastMinute(out _snapDenyPerMinute, out _snapResyncPerMinute);
                 }
 
                 Span<char> span = stackalloc char[128];
@@ -118,11 +121,11 @@ namespace ClassicUO.Game.UI.Gumps
               
                 if (IsMinimized)
                 {
-                    sb.Append($"Ping: {_ping} ms");
+                    sb.Append($"Ping: {_ping} ms | Snap D:{_snapDenyPerMinute}/m R:{_snapResyncPerMinute}/m");
                 }
                 else
                 {
-                    sb.Append($"Ping: {_ping} ms\n{"In:"} {NetStatistics.GetSizeAdaptive(_deltaBytesReceived),-6} {"Out:"} {NetStatistics.GetSizeAdaptive(_deltaBytesSent),-6}");
+                    sb.Append($"Ping: {_ping} ms\n{"In:"} {NetStatistics.GetSizeAdaptive(_deltaBytesReceived),-6} {"Out:"} {NetStatistics.GetSizeAdaptive(_deltaBytesSent),-6}\nSnap D:{_snapDenyPerMinute}/m R:{_snapResyncPerMinute}/m");
                 }
 
                 _cacheText = sb.ToString();

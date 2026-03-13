@@ -2,9 +2,9 @@ name: Dust765
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, developer ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, developer ]
   workflow_dispatch:
 
 jobs:
@@ -14,6 +14,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
+      - name: Init submodules
+        run: git submodule update --init --recursive
+      - name: Override UOScript.csproj for net48
+        run: Copy-Item -Path .github\UOScript.csproj -Destination external\UOSteam\UOScript\UOScript.csproj -Force
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v4
         with:
@@ -22,6 +27,9 @@ jobs:
         run: dotnet restore src/ClassicUO.Client/ClassicUO.Client.csproj
       - name: Build with .NET Framework 4.8
         run: dotnet build src/ClassicUO.Client/ClassicUO.Client.csproj -c Release
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          SENTRY_ENV: production
       - name: Copy build artifacts
         run: |
           New-Item -ItemType Directory -Force -Path build\win-x64
@@ -38,6 +46,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
+      - name: Init submodules
+        run: git submodule update --init --recursive
+      - name: Override UOScript.csproj for net48
+        run: cp -f .github/UOScript.csproj external/UOSteam/UOScript/UOScript.csproj
       - name: Setup .NET 8
         uses: actions/setup-dotnet@v4
         with:
@@ -50,6 +63,9 @@ jobs:
         run: dotnet restore src/ClassicUO.Client/ClassicUO.Client.csproj
       - name: Build with Mono
         run: dotnet build src/ClassicUO.Client/ClassicUO.Client.csproj -c Release
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          SENTRY_ENV: production
       - name: Copy build artifacts
         run: |
           mkdir -p build/linux-x64
@@ -66,7 +82,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
-      - name: Setup Mono for .NET 8
+          fetch-depth: 0
+      - name: Init submodules
+        run: git submodule update --init --recursive
+      - name: Override UOScript.csproj for net48
+        run: cp -f .github/UOScript.csproj external/UOSteam/UOScript/UOScript.csproj
+      - name: Setup .NET 8
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
@@ -76,6 +97,9 @@ jobs:
         run: dotnet restore src/ClassicUO.Client/ClassicUO.Client.csproj
       - name: Build with Mono
         run: dotnet build src/ClassicUO.Client/ClassicUO.Client.csproj -c Release
+        env:
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+          SENTRY_ENV: production
       - name: Copy build artifacts
         run: |
           mkdir -p build/osx-x64
@@ -88,8 +112,12 @@ jobs:
 
   release:
     needs: [build-windows, build-linux, build-macos]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/developer')
     runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ format('v{0}', github.run_number) }}
+      BETA: ${{ github.ref == 'refs/heads/developer' && 'beta-' || '' }}
+      TAG: ${{ github.ref == 'refs/heads/developer' && format('pre-v{0}', github.run_number) || format('v{0}', github.run_number) }}
     steps:
       - name: Download Windows artifact
         uses: actions/download-artifact@v4
@@ -107,20 +135,22 @@ jobs:
           name: Dust765-macos
           path: artifacts/macos
       - name: Create Windows archive
-        run: zip -r ClassicUO-Windows-x64.zip artifacts/windows -x "*.DS_Store"
+        run: zip -r Dust765-${{ env.VERSION }}-${{ env.BETA }}Windows-x64.zip artifacts/windows -x "*.DS_Store"
       - name: Create Linux archive
-        run: tar -czvf ClassicUO-Linux-x64.tar.gz -C artifacts/linux .
+        run: cd artifacts/linux && zip -r ../../Dust765-${{ env.VERSION }}-${{ env.BETA }}linux.zip . -x "*.DS_Store" && cd ../..
       - name: Create macOS archive
-        run: tar -czvf ClassicUO-macOS-x64.tar.gz -C artifacts/macos .
+        run: cd artifacts/macos && zip -r ../../Dust765-${{ env.VERSION }}-${{ env.BETA }}mac.zip . -x "*.DS_Store" && cd ../..
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ github.run_number }}
-          name: Release v${{ github.run_number }}
+          tag_name: ${{ env.TAG }}
+          name: ${{ github.ref == 'refs/heads/developer' && format('Pre-Release v{0}', github.run_number) || format('Release v{0}', github.run_number) }}
           draft: true
+          prerelease: ${{ github.ref == 'refs/heads/developer' && 'true' || 'false' }}
+          make_latest: ${{ github.ref == 'refs/heads/main' && 'true' || 'false' }}
           files: |
-            ClassicUO-Windows-x64.zip
-            ClassicUO-Linux-x64.tar.gz
-            ClassicUO-macOS-x64.tar.gz
+            Dust765-${{ env.VERSION }}-${{ env.BETA }}Windows-x64.zip
+            Dust765-${{ env.VERSION }}-${{ env.BETA }}linux.zip
+            Dust765-${{ env.VERSION }}-${{ env.BETA }}mac.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,4 +1,4 @@
-﻿#region license
+#region license
 
 // Copyright (c) 2021, andreakarasho
 // All rights reserved.
@@ -45,34 +45,31 @@ namespace ClassicUO.Renderer
 
         public static bool PushScissors(GraphicsDevice device, Rectangle scissor)
         {
-            if (_scissors.Count > 0)
+            Rectangle parent = _scissors.Count > 0 ? _scissors.Peek() : device.Viewport.Bounds;
+            int scissorRight = scissor.X + scissor.Width;
+            int scissorBottom = scissor.Y + scissor.Height;
+            if (scissor.Width < 0)
             {
-                Rectangle parent = _scissors.Peek();
-                int minX = Math.Max(parent.X, scissor.X);
-                int maxX = Math.Min(parent.X + parent.Width, scissor.X + scissor.Width);
-
-                if (maxX - minX < 1)
-                {
-                    return false;
-                }
-
-                int minY = Math.Max(parent.Y, scissor.Y);
-                int maxY = Math.Min(parent.Y + parent.Height, scissor.Y + scissor.Height);
-
-                if (maxY - minY < 1)
-                {
-                    return false;
-                }
-
-                scissor.X = minX;
-                scissor.Y = minY;
-                scissor.Width = maxX - minX;
-                scissor.Height = Math.Max(1, maxY - minY);
+                (scissor.X, scissorRight) = (scissorRight, scissor.X);
             }
-
+            if (scissor.Height < 0)
+            {
+                (scissor.Y, scissorBottom) = (scissorBottom, scissor.Y);
+            }
+            int minX = Math.Max(parent.X, scissor.X);
+            int maxX = Math.Min(parent.X + parent.Width, scissorRight);
+            int minY = Math.Max(parent.Y, scissor.Y);
+            int maxY = Math.Min(parent.Y + parent.Height, scissorBottom);
+            if (maxX - minX < 1 || maxY - minY < 1)
+            {
+                return false;
+            }
+            scissor.X = minX;
+            scissor.Y = minY;
+            scissor.Width = maxX - minX;
+            scissor.Height = Math.Max(1, maxY - minY);
             _scissors.Push(scissor);
             device.ScissorRectangle = scissor;
-
             return true;
         }
 

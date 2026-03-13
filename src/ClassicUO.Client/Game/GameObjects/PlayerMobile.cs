@@ -1738,7 +1738,8 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 sbyte oldZ = z;
-                ushort walkTime = Constants.TURN_DELAY;
+                int turnDelay = ProfileManager.CurrentProfile?.FastRotation == true ? Constants.TURN_DELAY_FAST : Constants.TURN_DELAY;
+                ushort walkTime = (ushort)turnDelay;
 
                 // L�gica de verifica��o para contornar obst�culos em dire��es cardeais
                 if (IsCardinalDirection(direction))
@@ -1820,7 +1821,7 @@ namespace ClassicUO.Game.GameObjects
                     direction = newDir;
                 }
 
-                if (walkTime == Constants.TURN_DELAY && Walker.UnacceptedPacketsCount >= 3)
+                if (walkTime == turnDelay && Walker.UnacceptedPacketsCount >= 3)
                 {
                     Direction = direction;
                     Walker.LastStepRequestTime = Time.Ticks + walkTime;
@@ -1974,7 +1975,8 @@ namespace ClassicUO.Game.GameObjects
             }
 
             sbyte oldZ = z;
-            ushort walkTime = Constants.TURN_DELAY;
+            int turnDelay = ProfileManager.CurrentProfile?.FastRotation == true ? Constants.TURN_DELAY_FAST : Constants.TURN_DELAY;
+            ushort walkTime = (ushort)turnDelay;
 
             if ((oldDirection & Direction.Mask) == (direction & Direction.Mask))
             {
@@ -2032,7 +2034,7 @@ namespace ClassicUO.Game.GameObjects
                 direction = newDir;
             }
 
-            if (walkTime == Constants.TURN_DELAY && Walker.UnacceptedPacketsCount >= 3)
+            if (walkTime == turnDelay && Walker.UnacceptedPacketsCount >= 3)
             {
                 Direction = direction;
                 Walker.LastStepRequestTime = Time.Ticks + walkTime;

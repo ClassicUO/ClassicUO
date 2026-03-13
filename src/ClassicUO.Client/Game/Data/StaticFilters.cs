@@ -441,7 +441,9 @@ namespace ClassicUO.Game.Data
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsWallOfStone(ushort g)
         {
-            return g == 0x038A;
+            // Main art + common shard variants (0x0389-0x038B covers art + animations)
+            // If your shard uses different art, configure via Options > Block Wall of Stone Art field
+            return g >= 0x0389 && g <= 0x038B;
         }
         // ## BEGIN - END ## // MISC2
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

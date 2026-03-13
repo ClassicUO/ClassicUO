@@ -210,6 +210,11 @@ namespace ClassicUO.Game
         public bool IsDraggingCursorForced { get; set; }
         public bool AllowDrawSDLCursor { get; set; } = true;
 
+        public void ForceUpdateSDLCursor()
+        {
+            _needGraphicUpdate = true;
+        }
+
         public ItemHold ItemHold { get; } = new ItemHold();
 
         private ushort GetDraggingItemGraphic()
@@ -507,8 +512,8 @@ namespace ClassicUO.Game
                     Vector3 _spellIconVector;
                     _spellIconVector = ShaderHueTranslator.GetHueVector(_spellIconHue);
 
-                   // if (ProfileManager.CurrentProfile.SpellOnCursor) { }
-                        //sb.Draw(GumpsLoader.Instance.GetGumpTexture((ushort) def.GumpIconSmallID, out var bounds), new Rectangle(Mouse.Position.X + ProfileManager.CurrentProfile.SpellOnCursorOffset.X, Mouse.Position.Y + ProfileManager.CurrentProfile.SpellOnCursorOffset.Y, 20, 20), bounds, _spellIconVector);
+                    if (ProfileManager.CurrentProfile.SpellOnCursor)
+                        sb.Draw(GumpsLoader.Instance.GetGumpTexture((ushort) def.GumpIconSmallID, out var bounds), new Rectangle(Mouse.Position.X + ProfileManager.CurrentProfile.SpellOnCursorOffset.X, Mouse.Position.Y + ProfileManager.CurrentProfile.SpellOnCursorOffset.Y, 20, 20), bounds, _spellIconVector);
                     // ## BEGIN - END ## // CURSOR
                 }
                 // ## BEGIN - END ## // VISUAL HELPERS

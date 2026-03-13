@@ -92,14 +92,22 @@ namespace ClassicUO.Network
         private readonly CircularBuffer _buffer = new CircularBuffer();
         private readonly CircularBuffer _pluginsBuffer = new CircularBuffer();
 
-        public int ParsePackets(Span<byte> data)
+        public int ParsePackets(Span<byte> data, int maxPackets = int.MaxValue)
         {
             Append(data, false);
 
-            return ParsePackets(_buffer, true) + ParsePackets(_pluginsBuffer, false);
+            int budget = maxPackets <= 0 ? int.MaxValue : maxPackets;
+            int parsed = ParsePackets(_buffer, true, ref budget);
+
+            if (budget > 0)
+            {
+                parsed += ParsePackets(_pluginsBuffer, false, ref budget);
+            }
+
+            return parsed;
         }
 
-        private int ParsePackets(CircularBuffer stream, bool allowPlugins)
+        private int ParsePackets(CircularBuffer stream, bool allowPlugins, ref int budget)
         {
             var packetsCount = 0;
 
@@ -107,7 +115,7 @@ namespace ClassicUO.Network
             {
                 ref var packetBuffer = ref _readingBuffer;
 
-                while (stream.Length > 0)
+                while (stream.Length > 0 && budget > 0)
                 {
                     if (
                         !GetPacketInfo(
@@ -154,6 +162,8 @@ namespace ClassicUO.Network
 
                         ++packetsCount;
                     }
+
+                    --budget;
                 }
             }
 
@@ -585,7 +595,8 @@ namespace ClassicUO.Network
                     if (mobile == World.Player)
                     {
                         if (
-                            !string.IsNullOrEmpty(World.Player.Name) && oldName != World.Player.Name
+                            !string.IsNullOrEmpty(World.Player.Name)
+                            && (oldName != World.Player.Name || ProfileManager.CurrentProfile?.ShowHPInTitleBar == true)
                         )
                         {
                             Client.Game.SetWindowTitle(World.Player.Name);
@@ -1291,8 +1302,6 @@ namespace ClassicUO.Network
             World.Player.NotorietyFlag = (NotorietyFlag)noto;
             PvMPvPManager.Instance.OnPlayerNotorietyChanged((NotorietyFlag)noto);
             World.Player.Walker.ConfirmWalk(seq);
-
-            World.Player.AddToTile();
         }
 
         private static void DragAnimation(ref StackDataReader p)
@@ -1940,6 +1949,8 @@ namespace ClassicUO.Network
                     UoAssist.SignalHits();
                     UoAssist.SignalStamina();
                     UoAssist.SignalMana();
+                    if (ProfileManager.CurrentProfile?.ShowHPInTitleBar == true)
+                        Client.Game.SetWindowTitle(World.Player.Name);
                 }
             }
         }
@@ -2021,27 +2032,6 @@ namespace ClassicUO.Network
             }
 
             uint defenders = p.ReadUInt32BE();
-
-            const int TIME_TURN_TO_LASTTARGET = 2000;
-
-            if (TargetManager.LastAttack == defenders && World.Player.InWarMode && World.Player.Walker.LastStepRequestTime + TIME_TURN_TO_LASTTARGET < Time.Ticks && World.Player.Steps.Count == 0)
-            {
-                Mobile enemy = World.Mobiles.Get(defenders);
-
-                if (enemy != null)
-                {
-                    Direction pdir = DirectionHelper.GetDirectionAB(World.Player.X, World.Player.Y, enemy.X, enemy.Y);
-
-                    int x = World.Player.X;
-                    int y = World.Player.Y;
-                    sbyte z = World.Player.Z;
-
-                    if (Pathfinder.CanWalkObstacules(ref pdir, ref x, ref y, ref z) && World.Player.Direction != pdir)
-                    {
-                        World.Player.Walk(pdir, false);
-                    }
-                }
-            }
         }
 
         private static void Unknown_0x32(ref StackDataReader p) { }
@@ -3601,6 +3591,8 @@ namespace ClassicUO.Network
             if (entity == World.Player)
             {
                 UoAssist.SignalHits();
+                if (ProfileManager.CurrentProfile?.ShowHPInTitleBar == true)
+                    Client.Game.SetWindowTitle(World.Player.Name);
             }
         }
 
@@ -5497,19 +5489,26 @@ namespace ClassicUO.Network
                     continue;
                 }
 
-                ReadUnsafeCustomHouseData(
-                    p.Buffer,
-                    p.Position,
-                    dlen,
-                    clen,
-                    planeZ,
-                    planeMode,
-                    minX,
-                    minY,
-                    maxY,
-                    foundation,
-                    house
-                );
+                try
+                {
+                    ReadUnsafeCustomHouseData(
+                        p.Buffer,
+                        p.Position,
+                        dlen,
+                        clen,
+                        planeZ,
+                        planeMode,
+                        minX,
+                        minY,
+                        maxY,
+                        foundation,
+                        house
+                    );
+                }
+                catch (Exception e)
+                {
+                    Log.Error($"Failed to read custom house data: {e}");
+                }
 
                 p.Skip(clen);
             }

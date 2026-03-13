@@ -419,32 +419,32 @@ namespace ClassicUO.LegionScripting
 
             MainThreadQueue.Process();
 
-            foreach (ScriptFile script in runningScripts)
-            {
-                if (script.ScriptType == ScriptType.Python)
-                    continue;
-                try
+                foreach (ScriptFile script in runningScripts)
                 {
-                    if (script.ScriptType == ScriptType.UOScript)
+                    if (script.ScriptType == ScriptType.Python)
+                        continue;
+                    try
                     {
-                        if (!global::UOScript.Interpreter.ExecuteScript(script.UOScript))
-                            removeRunningScripts.Add(script);
+                        if (script.ScriptType == ScriptType.UOScript)
+                        {
+                            if (!global::UOScript.Interpreter.ExecuteScript())
+                                removeRunningScripts.Add(script);
+                        }
+                        else if (script.ScriptType == ScriptType.LegionScript)
+                        {
+                            if (!LScript.Interpreter.ExecuteScript(script.GetScript))
+                                removeRunningScripts.Add(script);
+                        }
                     }
-                    else if (script.ScriptType == ScriptType.LegionScript)
+                    catch (Exception e)
                     {
-                        if (!LScript.Interpreter.ExecuteScript(script.GetScript))
-                            removeRunningScripts.Add(script);
+                        removeRunningScripts.Add(script);
+                        string msg = e.Message;
+                        if (e.InnerException != null)
+                            msg += " -> " + e.InnerException.Message;
+                        LScriptError($"Execution of script failed. -> [{msg}]");
                     }
                 }
-                catch (Exception e)
-                {
-                    removeRunningScripts.Add(script);
-                    string msg = e.Message;
-                    if (e.InnerException != null)
-                        msg += " -> " + e.InnerException.Message;
-                    LScriptError($"Execution of script failed. -> [{msg}]");
-                }
-            }
 
             if (removeRunningScripts.Count > 0)
             {
@@ -535,7 +535,7 @@ namespace ClassicUO.LegionScripting
             }
             else if (script.ScriptType == ScriptType.UOScript && script.UOScript != null)
             {
-                global::UOScript.Interpreter.StopScript(script.UOScript);
+                global::UOScript.Interpreter.StopScript();
             }
             else if (script.ScriptType == ScriptType.Python)
             {
