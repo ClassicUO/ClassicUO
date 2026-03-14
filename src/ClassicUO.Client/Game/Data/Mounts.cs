@@ -65,7 +65,7 @@ internal static class Mounts
         _mounts[0x3ED2] = new(0x05F6, 0x3ED2, 9); // war boar
         _mounts[0x3ECD] = new(0x0580, 0x3ECD, 0); // Palomino
         _mounts[0x3ECF] = new(0x05A0, 0x3ECF, 9); // Eowmu
-        _mounts[0x3ED3] = new(0x05F7, 0x3ED3, 18); // capybara
+        _mounts[0x3ED3] = new(0x05F7, 0x3ED3, 11); // capybara
         _mounts[0x3ED4] = new(0x060A, 0x3ED4, 0); // (no description provided)
         _mounts[0x3ED5] = new(0x060B, 0x3ED5, 0); // a wolf
         _mounts[0x3ED6] = new(0x060C, 0x3ED6, 0); // an orange dog 2?
@@ -73,8 +73,8 @@ internal static class Mounts
         _mounts[0x3ED8] = new(0x060F, 0x3ED8, 0); // a black dog?
         _mounts[0x3ED9] = new(0x0610, 0x3ED9, 0); // a doberman?
         _mounts[0x3EDA] = new(0x0590, 0x3EDA, 9); // Frostmites Beetles
-        _mounts[0x3EDB] = new(0x0611, 0x3EDB, 0); // Manticore
-        _mounts[0x3EDC] = new(0x0666, 0x3EDC, 0); // Bear Zombie
+        _mounts[0x3EDB] = new(0x0611, 0x3EDB, 14); // Manticore
+        _mounts[0x3EDC] = new(0x0666, 0x3EDC, 12); // Bear Zombie
         _mounts[0x3EDD] = new(0x0581, 0x3EDD, 0); // Dragon_Hildebrandt
         _mounts[0x3EDE] = new(0x0673, 0x3EDE, 0); // Horse_Clydesdale
         _mounts[0x3EDF] = new(0x0674, 0x3EDF, 0); // Horse_Elemental_Earth

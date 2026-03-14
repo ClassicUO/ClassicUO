@@ -778,17 +778,27 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else
                     {
-                        int diffY = (spriteInfo.UV.Height + spriteInfo.Center.Y) - mountOffset;
+                        // Some mounted creature bodies do not render correctly with ClassicUO's
+                        // default vertical slice-based depth layering used for mount occlusion.
+                        // On these bodies, the generic depth slicing can cause rider legs or other
+                        // character parts to clip through the mount torso due to the artwork not
+                        // matching the assumptions of the standard mounted depth model.
+                        //
+                        // For the listed mounted body IDs, draw the mount as a single layer instead.
+                        // This avoids incorrect rider/mount occlusion while leaving normal mount
+                        // rendering behavior unchanged for all other bodies.
+                        bool drawMountAsSingleLayer =
+                            isMount &&
+                            (
+                                id == 0x04E6 || // tiger
+                                id == 0x04E7 || // tiger
+                                id == 0x0611 || // Manticore
+                                id == 0x05F7 || // capybara
+                                id == 0x0666 || // Bear Zombie
+                                id == 0x05A1 // cat skeleton
+                            );
 
-                        int value = Math.Max(1, diffY);
-                        int count = Math.Max((spriteInfo.UV.Height / value) + 1, 2);
-
-                        rect.Height = Math.Min(value, rect.Height);
-                        int remains = spriteInfo.UV.Height - rect.Height;
-
-                        int tiles = (byte)owner.Direction % 2 == 0 ? 2 : 2;
-
-                        for (int i = 0; i < count; ++i)
+                        if (drawMountAsSingleLayer)
                         {
                             batcher.Draw(
                                 spriteInfo.Texture,
@@ -799,13 +809,40 @@ namespace ClassicUO.Game.GameObjects
                                 Vector2.Zero,
                                 1f,
                                 mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
-                                depth + 1f + (i * tiles)
+                                depth + 1f
                             );
+                        }
+                        else
+                        {
+                            int diffY = (spriteInfo.UV.Height + spriteInfo.Center.Y) - mountOffset;
 
-                            pos.Y += rect.Height;
-                            rect.Y += rect.Height;
-                            rect.Height = remains;
-                            remains -= rect.Height;
+                            int value = Math.Max(1, diffY);
+                            int count = Math.Max((spriteInfo.UV.Height / value) + 1, 2);
+
+                            rect.Height = Math.Min(value, rect.Height);
+                            int remains = spriteInfo.UV.Height - rect.Height;
+
+                            int tiles = (byte)owner.Direction % 2 == 0 ? 2 : 2;
+
+                            for (int i = 0; i < count; ++i)
+                            {
+                                batcher.Draw(
+                                    spriteInfo.Texture,
+                                    pos,
+                                    rect,
+                                    hueVec,
+                                    0f,
+                                    Vector2.Zero,
+                                    1f,
+                                    mirror ? SpriteEffects.FlipHorizontally : SpriteEffects.None,
+                                    depth + 1f + (i * tiles)
+                                );
+
+                                pos.Y += rect.Height;
+                                rect.Y += rect.Height;
+                                rect.Height = remains;
+                                remains -= rect.Height;
+                            }
                         }
                     }
 
