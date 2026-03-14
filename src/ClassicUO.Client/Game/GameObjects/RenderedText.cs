@@ -577,6 +577,19 @@ namespace ClassicUO.Game
                         }
                     }
 
+                    // Match GeneratePixelsUnicode: skip black border when text color is near-black.
+                    // A black border on near-black text is invisible and produces artifacts.
+                    if (charBorder && IsUnicode && charColor != 0)
+                    {
+                        bool isBlackPixel =
+                            ((charColor >> 0) & 0xFF) <= 8
+                            && ((charColor >> 8) & 0xFF) <= 8
+                            && ((charColor >> 16) & 0xFF) <= 8;
+
+                        if (isBlackPixel)
+                            charBorder = false;
+                    }
+
                     // Get glyph from atlas
                     GlyphAtlasEntry entry;
                     if (charColor != 0)
