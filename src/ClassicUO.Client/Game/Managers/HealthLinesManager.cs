@@ -124,8 +124,11 @@ namespace ClassicUO.Game.Managers
 
                                 if (mobile.ObjectHandlesStatus == ObjectHandlesStatus.DISPLAYING)
                                 {
-                                    p1.Y -= Constants.OBJECT_HANDLES_GUMP_HEIGHT + 5;
-                                    offsetY += Constants.OBJECT_HANDLES_GUMP_HEIGHT + 5;
+                                    int ohHeight = Constants.OBJECT_HANDLES_GUMP_HEIGHT
+                                        + (ProfileManager.CurrentProfile.NameOverheadShowHpBar
+                                            ? Constants.OBJECT_HANDLES_HP_BAR_HEIGHT + 1 : 0);
+                                    p1.Y -= ohHeight + 5;
+                                    offsetY += ohHeight + 5;
                                 }
 
                                 if (

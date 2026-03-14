@@ -36,9 +36,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             LayerOrder = UILayer.Over;
 
-            RadioButton all, mobiles, items, mobilesCorpses;
             AlphaBlendControl alpha;
-            Checkbox stayActive;
+            Checkbox stayActive, cbAll, cbItems, cbCorpses, cbInnocent, cbAlly, cbGray, cbCriminal, cbEnemy, cbMurderer, cbInvulnerable;
 
             Add
             (
@@ -63,107 +62,95 @@ namespace ClassicUO.Game.UI.Gumps
             );
             stayActive.ValueChanged += (sender, e) => world.NameOverHeadManager.IsToggled = stayActive.IsChecked;
 
-            Add
-            (
-                all = new RadioButton
-                (
-                    0,
-                    0x00D0,
-                    0x00D1,
-                    ResGumps.All,
-                    color: 0xFFFF
-                )
-                {
-                    IsChecked = World.NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.All,
-                    Y = stayActive.Y + stayActive.Height
-                }
-            );
+            var typeAllowed = World.NameOverHeadManager.TypeAllowed;
 
-            Add
-            (
-                mobiles = new RadioButton
-                (
-                    0,
-                    0x00D0,
-                    0x00D1,
-                    ResGumps.MobilesOnly,
-                    color: 0xFFFF
-                )
-                {
-                    Y = all.Y + all.Height,
-                    IsChecked = World.NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.Mobiles
-                }
-            );
+            int currentY = stayActive.Y + stayActive.Height;
+            int maxWidth = stayActive.Width;
 
-            Add
-            (
-                items = new RadioButton
-                (
-                    0,
-                    0x00D0,
-                    0x00D1,
-                    ResGumps.ItemsOnly,
-                    color: 0xFFFF
-                )
+            Checkbox MakeCheckbox(string label, bool isChecked, ref int y)
+            {
+                var cb = new Checkbox(0x00D2, 0x00D3, label, color: 0xFFFF)
                 {
-                    Y = mobiles.Y + mobiles.Height,
-                    IsChecked = World.NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.Items
-                }
-            );
+                    IsChecked = isChecked,
+                    Y = y
+                };
+                y += cb.Height;
+                if (cb.Width > maxWidth)
+                    maxWidth = cb.Width;
+                return cb;
+            }
 
-            Add
-            (
-                mobilesCorpses = new RadioButton
-                (
-                    0,
-                    0x00D0,
-                    0x00D1,
-                    ResGumps.MobilesAndCorpsesOnly,
-                    color: 0xFFFF
-                )
-                {
-                    Y = items.Y + items.Height,
-                    IsChecked = World.NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.MobilesCorpses
-                }
-            );
+            Add(cbAll = MakeCheckbox(ResGumps.All, typeAllowed == NameOverheadTypeAllowed.All, ref currentY));
+            Add(cbItems = MakeCheckbox("Items", typeAllowed.HasFlag(NameOverheadTypeAllowed.Items), ref currentY));
+            Add(cbCorpses = MakeCheckbox("Corpses", typeAllowed.HasFlag(NameOverheadTypeAllowed.Corpses), ref currentY));
+            Add(cbInnocent = MakeCheckbox("Innocent", typeAllowed.HasFlag(NameOverheadTypeAllowed.Innocent), ref currentY));
+            Add(cbAlly = MakeCheckbox("Ally", typeAllowed.HasFlag(NameOverheadTypeAllowed.Ally), ref currentY));
+            Add(cbGray = MakeCheckbox("Gray", typeAllowed.HasFlag(NameOverheadTypeAllowed.Gray), ref currentY));
+            Add(cbCriminal = MakeCheckbox("Criminal", typeAllowed.HasFlag(NameOverheadTypeAllowed.Criminal), ref currentY));
+            Add(cbEnemy = MakeCheckbox("Enemy", typeAllowed.HasFlag(NameOverheadTypeAllowed.Enemy), ref currentY));
+            Add(cbMurderer = MakeCheckbox("Murderer", typeAllowed.HasFlag(NameOverheadTypeAllowed.Murderer), ref currentY));
+            Add(cbInvulnerable = MakeCheckbox("Invulnerable", typeAllowed.HasFlag(NameOverheadTypeAllowed.Invulnerable), ref currentY));
 
-            alpha.Width = Math.Max(mobilesCorpses.Width, Math.Max(items.Width, Math.Max(all.Width, mobiles.Width)));
-            alpha.Height = stayActive.Height + all.Height + mobiles.Height + items.Height + mobilesCorpses.Height;
+            alpha.Width = maxWidth;
+            alpha.Height = currentY;
 
             Width = alpha.Width;
             Height = alpha.Height;
 
-            all.ValueChanged += (sender, e) =>
+            // Track individual checkboxes for "All" logic
+            var individualBoxes = new[]
             {
-                if (all.IsChecked)
-                {
-                    World.NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.All;
-                }
+                (cb: cbItems, flag: NameOverheadTypeAllowed.Items),
+                (cb: cbCorpses, flag: NameOverheadTypeAllowed.Corpses),
+                (cb: cbInnocent, flag: NameOverheadTypeAllowed.Innocent),
+                (cb: cbAlly, flag: NameOverheadTypeAllowed.Ally),
+                (cb: cbGray, flag: NameOverheadTypeAllowed.Gray),
+                (cb: cbCriminal, flag: NameOverheadTypeAllowed.Criminal),
+                (cb: cbEnemy, flag: NameOverheadTypeAllowed.Enemy),
+                (cb: cbMurderer, flag: NameOverheadTypeAllowed.Murderer),
+                (cb: cbInvulnerable, flag: NameOverheadTypeAllowed.Invulnerable),
             };
 
-            mobiles.ValueChanged += (sender, e) =>
+            bool suppressCascade = false;
+
+            cbAll.ValueChanged += (sender, e) =>
             {
-                if (mobiles.IsChecked)
+                if (suppressCascade)
+                    return;
+
+                suppressCascade = true;
+
+                foreach (var (cb, _) in individualBoxes)
                 {
-                    World.NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.Mobiles;
+                    cb.IsChecked = cbAll.IsChecked;
                 }
+
+                World.NameOverHeadManager.TypeAllowed = cbAll.IsChecked
+                    ? NameOverheadTypeAllowed.All
+                    : NameOverheadTypeAllowed.None;
+
+                suppressCascade = false;
             };
 
-            items.ValueChanged += (sender, e) =>
+            foreach (var (cb, flag) in individualBoxes)
             {
-                if (items.IsChecked)
+                cb.ValueChanged += (sender, e) =>
                 {
-                    World.NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.Items;
-                }
-            };
+                    if (suppressCascade)
+                        return;
 
-            mobilesCorpses.ValueChanged += (sender, e) =>
-            {
-                if (mobilesCorpses.IsChecked)
-                {
-                    World.NameOverHeadManager.TypeAllowed = NameOverheadTypeAllowed.MobilesCorpses;
-                }
-            };
+                    suppressCascade = true;
+
+                    if (cb.IsChecked)
+                        World.NameOverHeadManager.TypeAllowed |= flag;
+                    else
+                        World.NameOverHeadManager.TypeAllowed &= ~flag;
+
+                    cbAll.IsChecked = World.NameOverHeadManager.TypeAllowed == NameOverheadTypeAllowed.All;
+
+                    suppressCascade = false;
+                };
+            }
         }
 
 

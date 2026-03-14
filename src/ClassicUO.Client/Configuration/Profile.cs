@@ -212,6 +212,8 @@ namespace ClassicUO.Configuration
         public bool DragSelectAsAnchor { get; set; } = false;
         public NameOverheadTypeAllowed NameOverheadTypeAllowed { get; set; } = NameOverheadTypeAllowed.All;
         public bool NameOverheadToggled { get; set; } = false;
+        public bool NameOverheadShowGump { get; set; } = true;
+        public bool NameOverheadShowHpBar { get; set; } = true;
         public bool ShowTargetRangeIndicator { get; set; }
         public bool PartyInviteGump { get; set; }
         public bool CustomBarsToggled { get; set; }

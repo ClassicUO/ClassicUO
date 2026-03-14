@@ -969,7 +969,9 @@ namespace ClassicUO.Game.GameObjects
 
             if (ObjectHandlesStatus == ObjectHandlesStatus.DISPLAYING)
             {
-                p.Y -= Constants.OBJECT_HANDLES_GUMP_HEIGHT;
+                p.Y -= Constants.OBJECT_HANDLES_GUMP_HEIGHT
+                    + (ProfileManager.CurrentProfile.NameOverheadShowHpBar
+                        ? Constants.OBJECT_HANDLES_HP_BAR_HEIGHT + 1 : 0);
             }
 
             if (
