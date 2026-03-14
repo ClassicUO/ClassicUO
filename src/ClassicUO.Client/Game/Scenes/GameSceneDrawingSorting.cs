@@ -47,6 +47,7 @@ namespace ClassicUO.Game.Scenes
         private int _foliageCount;
         private float _cotRadiusSq;
         private Vector2 _cotPlayerScreenPos;
+        private bool _cotGradientMode;
 
         private readonly RenderLists _renderLists = new();
         private readonly List<Map.Chunk> _visibleChunks = new();
@@ -380,6 +381,20 @@ namespace ClassicUO.Game.Scenes
             return true;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private byte GetGradientCotAlpha(GameObject obj)
+        {
+            float dx = obj.RealScreenPosition.X - _cotPlayerScreenPos.X;
+            float dy = (obj.RealScreenPosition.Y - 44) - _cotPlayerScreenPos.Y;
+            float distSq = dx * dx + dy * dy;
+
+            if (distSq >= _cotRadiusSq)
+                return 0xFF;
+
+            float ratio = (float)Math.Sqrt(distSq / _cotRadiusSq);
+            return (byte)(ratio * ratio * ratio * 255f);
+        }
+
         private static bool CalculateAlpha(ref byte alphaHue, int maxAlpha)
         {
             if (
@@ -562,6 +577,15 @@ namespace ClassicUO.Game.Scenes
             {
                 bool cot = ProfileManager.CurrentProfile.UseCircleOfTransparency
                     && obj.TransparentTest(_world.Player.Z + 5);
+
+                if (cot && _cotGradientMode)
+                {
+                    obj.AlphaHue = GetGradientCotAlpha(obj);
+                    if (obj.AlphaHue > 0)
+                        PushToRenderQueue(obj, true, allowSelection);
+                    return 0;
+                }
+
                 mesh.Statics.SetVisible(obj.MeshSpriteIndex, obj.AlphaHue, cot);
                 ApplyMeshHue(obj, mesh.Statics);
 
@@ -837,6 +861,17 @@ namespace ClassicUO.Game.Scenes
 
                     bool meshCot = ProfileManager.CurrentProfile.UseCircleOfTransparency
                         && obj.TransparentTest(_world.Player.Z + 5);
+
+                    // Gradient CoT: set alpha on CPU and route to transparent list
+                    // so depth buffer doesn't block mobiles underneath.
+                    if (meshCot && _cotGradientMode)
+                    {
+                        obj.AlphaHue = GetGradientCotAlpha(obj);
+                        if (obj.AlphaHue > 0)
+                            PushToRenderQueue(obj, true, meshAllowSelection);
+                        continue;
+                    }
+
                     mesh.Statics.SetVisible(obj.MeshSpriteIndex, obj.AlphaHue, meshCot);
                     ApplyMeshHue(obj, mesh.Statics);
                     TrySelectObject(obj, meshAllowSelection && !(meshCot && IsMouseInsideCotCircle()));

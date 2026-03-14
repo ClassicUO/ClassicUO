@@ -565,10 +565,12 @@ namespace ClassicUO.Game.Scenes
                 float r = ProfileManager.CurrentProfile.CircleOfTransparencyRadius;
                 _cotRadiusSq = r * r;
                 _cotPlayerScreenPos = _world.Player.GetScreenPosition();
+                _cotGradientMode = ProfileManager.CurrentProfile.CircleOfTransparencyType == 1;
             }
             else
             {
                 _cotRadiusSq = 0;
+                _cotGradientMode = false;
             }
 
             FoliageIndex++;
