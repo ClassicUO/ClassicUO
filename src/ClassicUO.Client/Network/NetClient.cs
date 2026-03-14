@@ -34,6 +34,7 @@ using ClassicUO.Network.Encryption;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using System;
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Sockets;
@@ -237,16 +238,19 @@ namespace ClassicUO.Network
                     if (n > 0)
                     {
                         Statistics.TotalBytesReceived += (uint)n;
-                        var copy = new byte[n];
+                        var copy = ArrayPool<byte>.Shared.Rent(n);
                         Array.Copy(_networkReadBuffer, copy, n);
 
-                        Span<byte> span = copy.AsSpan();
+                        Span<byte> span = copy.AsSpan(0, n);
                         ProcessEncryption(span);
                         Span<byte> decompressed = DecompressBuffer(span);
 
+                        ArrayPool<byte>.Shared.Return(copy);
+
                         if (!decompressed.IsEmpty)
                         {
-                            byte[] message = decompressed.ToArray();
+                            byte[] message = new byte[decompressed.Length];
+                            decompressed.CopyTo(message.AsSpan());
                             _receiveQueue.Enqueue(message);
                             Interlocked.Add(ref _queuedReceiveBytes, message.Length);
                             Interlocked.Increment(ref _queuedReceiveMessages);
@@ -258,7 +262,7 @@ namespace ClassicUO.Network
                     }
                     else
                     {
-                        Thread.Sleep(1);
+                        Thread.SpinWait(100);
                     }
                 }
                 catch (SocketException ex)
@@ -284,7 +288,7 @@ namespace ClassicUO.Network
 
                 ProcessSendFromQueue();
                 if (_receiveQueue.IsEmpty && _sendStream.Length == 0)
-                    Thread.Sleep(0);
+                    Thread.SpinWait(50);
             }
             _networkRunning = false;
         }

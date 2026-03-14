@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using ClassicUO;
 using ClassicUO.Utility.Platforms;
 
-namespace ClassicUO.TazUO
+namespace ClassicUO.Dust765
 {
     internal static class UpdateManager
     {

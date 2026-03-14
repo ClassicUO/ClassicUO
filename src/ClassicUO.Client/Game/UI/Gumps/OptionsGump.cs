@@ -44,7 +44,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps.Login;
-using ClassicUO.TazUO.Options;
+using ClassicUO.Dust765.Options;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Assets;
@@ -240,7 +240,7 @@ namespace ClassicUO.Game.UI.Gumps
         private InputField _SpecialSetLastTargetClilocText, _blockWoSArt, _blockEnergyFArt;
         // ## BEGIN - END ## // MISC
         // ## BEGIN - END ## // MISC2
-        private Checkbox _wireframeView, _hueImpassableView, _transparentHouses, _invisibleHouses, _ignoreCoT, _showDeathOnWorldmap, _showMapCloseFriend, _drawMobilesWithSurfaceOverhead, _autoAvoidMobiles, _scaleMonstersEnabled;
+        private Checkbox _wireframeView, _hueImpassableView, _transparentHouses, _invisibleHouses, _ignoreCoT, _showDeathOnWorldmap, _showMapCloseFriend, _drawMobilesWithSurfaceOverhead, _autoAvoidMobiles, _scaleMonstersEnabled, _forceGargoyleWalk;
         private HSliderBar _transparentHousesZ, _transparentHousesTransparency, _invisibleHousesZ, _dontRemoveHouseBelowZ;
         // ## BEGIN - END ## // MISC2
         // ## BEGIN - END ## // MACROS
@@ -2515,7 +2515,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             var ttipOverrideBtn = new NiceButton(startX, startY, 250, TEXTBOX_HEIGHT, ButtonAction.Activate, "Open tooltip override settings") { IsSelectable = false };
             ttipOverrideBtn.SetTooltip("Warning: This is an advanced feature.");
-            ttipOverrideBtn.MouseUp += (s, e) => { UIManager.GetGump<ClassicUO.TazUO.UI.Gumps.ToolTipOverideMenu>()?.Dispose(); UIManager.Add(new ClassicUO.TazUO.UI.Gumps.ToolTipOverideMenu()); };
+            ttipOverrideBtn.MouseUp += (s, e) => { UIManager.GetGump<ClassicUO.Dust765.UI.Gumps.ToolTipOverideMenu>()?.Dispose(); UIManager.Add(new ClassicUO.Dust765.UI.Gumps.ToolTipOverideMenu()); };
             rightArea.Add(ttipOverrideBtn);
 
             void SetTooltipOptionsEnabled(bool enabled)
@@ -4531,8 +4531,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _.IsSelectable = false;
                     _.MouseUp += (s, e) =>
                     {
-                        UIManager.GetGump<ClassicUO.TazUO.UI.Gumps.GridHightlightMenu>()?.Dispose();
-                        UIManager.Add(new ClassicUO.TazUO.UI.Gumps.GridHightlightMenu());
+                        UIManager.GetGump<ClassicUO.Dust765.UI.Gumps.GridHightlightMenu>()?.Dispose();
+                        UIManager.Add(new ClassicUO.Dust765.UI.Gumps.GridHightlightMenu());
                     };
 
                 gridSection.Add(AddLabel(null, "Grid highlight line size", 0, 0));
@@ -5221,6 +5221,9 @@ namespace ClassicUO.Game.UI.Gumps
             section8.Add(_scaleMonstersEnabled = AddCheckBox(null, "Scale monsters (Ctrl+Shift over monster: +/- to scale)", _currentProfile.ScaleMonstersEnabled, startX, startY));
             startY += _scaleMonstersEnabled.Height + 2;
 
+            section8.Add(_forceGargoyleWalk = AddCheckBox(null, "Force gargoyle to walk instead of fly", _currentProfile.ForceGargoyleWalk, startX, startY));
+            startY += _forceGargoyleWalk.Height + 2;
+
             // ## BEGIN - END ## // MISC2
             // ## BEGIN - END ## // NAMEOVERHEAD
             SettingsSection section9 = AddSettingsSection(box, "-----NAMEOVERHEAD-----");
@@ -5338,7 +5341,7 @@ namespace ClassicUO.Game.UI.Gumps
             sectionMiscTaz.Add(_disableSystemChat = AddCheckBox(null, "", _currentProfile.DisableSystemChat, 0, 0));
             sectionMiscTaz.AddRight(AddLabel(null, "Disable system chat", 0, 0));
             sectionMiscTaz.Add(_journalMessagesOnlyInJournalBox = AddCheckBox(null, "", _currentProfile.JournalMessagesOnlyInJournalBox, 0, 0));
-            sectionMiscTaz.AddRight(AddLabel(null, Language.Instance?.GetTazUO?.JournalMessagesOnlyInJournalBox ?? "Journal messages only in journal box (clean game view)", 0, 0));
+            sectionMiscTaz.AddRight(AddLabel(null, Language.Instance?.GetDust765?.JournalMessagesOnlyInJournalBox ?? "Journal messages only in journal box (clean game view)", 0, 0));
             sectionMiscTaz.Add(AddLabel(null, "Hidden Body Opacity", 0, 0));
             sectionMiscTaz.AddRight(_hiddenBodyAlpha = AddHSlider(null, 0, 100, _currentProfile.HiddenBodyAlpha, 0, 0, 200), 2);
             sectionMiscTaz.PushIndent();
@@ -5383,7 +5386,7 @@ namespace ClassicUO.Game.UI.Gumps
             autoLootBtn.MouseUp += (s, e) => { if (e.Button == MouseButtonType.Left) AutoLootOptions.AddToUI(); };
             sectionMiscTaz.Add(autoLootBtn);
             sectionMiscTaz.Add(_enableNearbyItemGump = AddCheckBox(null, "", _currentProfile.EnableNearbyItemGump, 0, 0));
-            sectionMiscTaz.AddRight(AddLabel(null, Language.Instance?.GetTazUO?.ShowUseLootModalOnCtrl ?? "Show Use/Loot modal when pressing Ctrl (nearby items)", 0, 0));
+            sectionMiscTaz.AddRight(AddLabel(null, Language.Instance?.GetDust765?.ShowUseLootModalOnCtrl ?? "Show Use/Loot modal when pressing Ctrl (nearby items)", 0, 0));
 
             Add(rightArea, PAGE);
         }
@@ -7127,6 +7130,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.DrawMobilesWithSurfaceOverhead = _drawMobilesWithSurfaceOverhead.IsChecked;
             _currentProfile.IgnoreCoTEnabled = _ignoreCoT.IsChecked;
             _currentProfile.ShowDeathOnWorldmap = _showDeathOnWorldmap.IsChecked;
+            _currentProfile.ForceGargoyleWalk = _forceGargoyleWalk.IsChecked;
             // ## BEGIN - END ## // MISC2
             // ## BEGIN - END ## // MACROS
             _currentProfile.LastTargetRange = _lastTargetRange.Value;

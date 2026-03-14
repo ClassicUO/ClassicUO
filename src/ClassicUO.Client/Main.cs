@@ -33,7 +33,7 @@
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Managers;
-using ClassicUO.TazUO;
+using ClassicUO.Dust765;
 using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Resources;

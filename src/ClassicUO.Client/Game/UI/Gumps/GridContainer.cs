@@ -48,7 +48,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
-using static ClassicUO.TazUO.UI.Gumps.GridHightlightMenu;
+using static ClassicUO.Dust765.UI.Gumps.GridHightlightMenu;
 
 namespace ClassicUO.Game.UI.Gumps
 {

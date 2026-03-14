@@ -8,7 +8,35 @@ on:
   workflow_dispatch:
 
 jobs:
+  # ──────────────────────────────────────────────────────────────
+  # PR check: fast build-only, runs on every pull_request event
+  # ──────────────────────────────────────────────────────────────
+  build-test:
+    if: github.event_name == 'pull_request'
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+      - name: Init submodules
+        run: git submodule update --init --recursive
+      - name: Override UOScript.csproj for net48
+        run: Copy-Item -Path .github\UOScript.csproj -Destination external\UOSteam\UOScript\UOScript.csproj -Force
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Restore dependencies
+        run: dotnet restore src/ClassicUO.Client/ClassicUO.Client.csproj
+      - name: Build (PR check)
+        run: dotnet build src/ClassicUO.Client/ClassicUO.Client.csproj -c Release --no-restore
+
+  # ──────────────────────────────────────────────────────────────
+  # Full build + artifact upload: runs only after merge (push)
+  # ──────────────────────────────────────────────────────────────
   build-windows:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -41,6 +69,7 @@ jobs:
           path: build/win-x64
 
   build-linux:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
@@ -77,6 +106,7 @@ jobs:
           path: build/linux-x64
 
   build-macos:
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4

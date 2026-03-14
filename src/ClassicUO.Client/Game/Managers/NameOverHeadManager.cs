@@ -132,7 +132,8 @@ namespace ClassicUO.Game.Managers
             if (mobile == null)
                 return false;
 
-            if (mobile.Equals(World.Player) && ActiveOverheadOptions.HasFlag(NameOverheadOptions.ExcludeSelf))
+            if (mobile.Equals(World.Player) && ActiveOverheadOptions.HasFlag(NameOverheadOptions.ExcludeSelf)
+                && !ActiveOverheadOptions.HasFlag(NameOverheadOptions.Self))
                 return false;
 
             // Mobile types
@@ -326,10 +327,10 @@ namespace ClassicUO.Game.Managers
             (
                 new[]
                 {
-                    new NameOverheadOption("All", int.MaxValue),
-                    new NameOverheadOption("Mobiles only", int.MaxValue),
-                    new NameOverheadOption("Items only", int.MaxValue),
-                    new NameOverheadOption("Mobiles & Corpses only", int.MaxValue),
+                    new NameOverheadOption("All", (int)(NameOverheadOptions.AllItems | NameOverheadOptions.MobilesAndCorpses | NameOverheadOptions.Innocent | NameOverheadOptions.Ally | NameOverheadOptions.Gray | NameOverheadOptions.Criminal | NameOverheadOptions.Enemy | NameOverheadOptions.Murderer | NameOverheadOptions.Invulnerable)),
+                    new NameOverheadOption("Mobiles only", (int)(NameOverheadOptions.AllMobiles | NameOverheadOptions.Innocent | NameOverheadOptions.Ally | NameOverheadOptions.Gray | NameOverheadOptions.Criminal | NameOverheadOptions.Enemy | NameOverheadOptions.Murderer | NameOverheadOptions.Invulnerable)),
+                    new NameOverheadOption("Items only", (int)NameOverheadOptions.AllItems),
+                    new NameOverheadOption("Mobiles & Corpses only", (int)(NameOverheadOptions.MobilesAndCorpses | NameOverheadOptions.Innocent | NameOverheadOptions.Ally | NameOverheadOptions.Gray | NameOverheadOptions.Criminal | NameOverheadOptions.Enemy | NameOverheadOptions.Murderer | NameOverheadOptions.Invulnerable)),
                 }
             );
         }

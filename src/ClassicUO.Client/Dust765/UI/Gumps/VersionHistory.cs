@@ -6,7 +6,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.TazUO.UI.Gumps
+namespace ClassicUO.Dust765.UI.Gumps
 {
     internal class VersionHistory : Gump
     {

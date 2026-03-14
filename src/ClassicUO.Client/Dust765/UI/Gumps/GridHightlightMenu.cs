@@ -16,7 +16,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace ClassicUO.TazUO.UI.Gumps
+namespace ClassicUO.Dust765.UI.Gumps
 {
     internal class GridHightlightMenu : Gump
     {

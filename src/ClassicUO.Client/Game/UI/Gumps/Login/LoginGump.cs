@@ -34,7 +34,7 @@ using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.TazUO;
+using ClassicUO.Dust765;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Assets;

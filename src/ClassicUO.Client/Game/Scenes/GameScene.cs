@@ -42,7 +42,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
 using ClassicUO.Game.UI;
-using ClassicUO.TazUO;
+using ClassicUO.Dust765;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Network;
@@ -774,22 +774,10 @@ namespace ClassicUO.Game.Scenes
 
         private void FillGameObjectList()
         {
-            _renderListStaticsHead = null;
-            _renderList = null;
             _renderListStaticsCount = 0;
-
-            _renderListTransparentObjectsHead = null;
-            _renderListTransparentObjects = null;
             _renderListTransparentObjectsCount = 0;
-
-            _renderListAnimationsHead = null;
-            _renderListAnimations = null;
             _renderListAnimationCount = 0;
-
-            _renderListEffectsHead = null;
-            _renderListEffects = null;
             _renderListEffectCount = 0;
-
             _foliageCount = 0;
 
             if (!World.InGame)
@@ -910,17 +898,18 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            UpdateTextServerEntities(World.Mobiles.Values, true);
-            UpdateTextServerEntities(World.Items.Values, false);
+            UpdateTextServerEntities(World.Mobiles, true);
+            UpdateTextServerEntities(World.Items, false);
 
             UpdateDrawPosition = false;
         }
 
-        private void UpdateTextServerEntities<T>(IEnumerable<T> entities, bool force)
+        private void UpdateTextServerEntities<T>(Dictionary<uint, T> dict, bool force)
             where T : Entity
         {
-            foreach (T e in entities)
+            foreach (var kvp in dict)
             {
+                T e = kvp.Value;
                 if (
                     e.TextContainer != null
                     && !e.TextContainer.IsEmpty
@@ -1295,17 +1284,17 @@ namespace ClassicUO.Game.Scenes
             RenderedObjectsCount = 0;
             RenderedObjectsCount += DrawRenderList(
                 batcher,
-                _renderListStaticsHead,
+                _renderListStaticsArray,
                 _renderListStaticsCount
             );
             RenderedObjectsCount += DrawRenderList(
                 batcher,
-                _renderListAnimationsHead,
+                _renderListAnimationsArray,
                 _renderListAnimationCount
             );
             RenderedObjectsCount += DrawRenderList(
                 batcher,
-                _renderListEffectsHead,
+                _renderListEffectsArray,
                 _renderListEffectCount
             );
 
@@ -1314,7 +1303,7 @@ namespace ClassicUO.Game.Scenes
                 batcher.SetStencil(DepthStencilState.DepthRead);
                 RenderedObjectsCount += DrawRenderList(
                     batcher,
-                    _renderListTransparentObjectsHead,
+                    _renderListTransparentArray,
                     _renderListTransparentObjectsCount
                 );
             }
@@ -1377,12 +1366,14 @@ namespace ClassicUO.Game.Scenes
             //batcher.End();
         }
 
-        private int DrawRenderList(UltimaBatcher2D batcher, GameObject obj, int count)
+        private int DrawRenderList(UltimaBatcher2D batcher, GameObject[] renderList, int count)
         {
             int done = 0;
 
-            for (int i = 0; i < count; obj = obj.RenderListNext, ++i)
+            for (int i = 0; i < count; ++i)
             {
+                var obj = renderList[i];
+
                 if (obj.Z <= _maxGroundZ)
                 {
                     float depth = obj.CalculateDepthZ();

@@ -513,7 +513,13 @@ namespace ClassicUO.Game
                     _spellIconVector = ShaderHueTranslator.GetHueVector(_spellIconHue);
 
                     if (ProfileManager.CurrentProfile.SpellOnCursor)
-                        sb.Draw(GumpsLoader.Instance.GetGumpTexture((ushort) def.GumpIconSmallID, out var bounds), new Rectangle(Mouse.Position.X + ProfileManager.CurrentProfile.SpellOnCursorOffset.X, Mouse.Position.Y + ProfileManager.CurrentProfile.SpellOnCursorOffset.Y, 20, 20), bounds, _spellIconVector);
+                    {
+                        ref readonly var gumpInfo = ref Client.Game.Gumps.GetGump((uint)def.GumpIconSmallID);
+                        if (gumpInfo.Texture != null)
+                        {
+                            sb.Draw(gumpInfo.Texture, new Rectangle(Mouse.Position.X + ProfileManager.CurrentProfile.SpellOnCursorOffset.X, Mouse.Position.Y + ProfileManager.CurrentProfile.SpellOnCursorOffset.Y, 20, 20), gumpInfo.UV, _spellIconVector);
+                        }
+                    }
                     // ## BEGIN - END ## // CURSOR
                 }
                 // ## BEGIN - END ## // VISUAL HELPERS

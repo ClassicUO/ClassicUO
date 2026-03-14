@@ -34,7 +34,6 @@ using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.TazUO.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Resources;
@@ -157,31 +156,6 @@ namespace ClassicUO.Game.UI.Gumps
                 startX += (textTable[i][0] != 0 ? largeWidth : smallWidth) + 1;
                 background.Width = startX;
             }
-
-            RighClickableButton supporters;
-            Add
-            (supporters =
-                new RighClickableButton
-                (
-                    998877,
-                    0x098D,
-                    0x098D,
-                    0x098D,
-                    "Supporters",
-                    1,
-                    true,
-                    0,
-                    0x0036
-                )
-                {
-                    ButtonAction = ButtonAction.Activate,
-                    X = startX,
-                    Y = 1,
-                    FontCenter = true
-                },
-                1
-            );
-            supporters.MouseUp += (s, e) => { UIManager.Add(new Supporters()); };
 
             RighClickableButton legionScriptBtn;
             Add
