@@ -1451,7 +1451,7 @@ namespace ClassicUO.Dust765.Dust765
                                     _tickWaitForTarget = 0;
                                     GameActions.Print("UCC Self: Old Bandies applyed to self.");
                                     // ## BEGIN - END ## // VISUALRESPONSEMANAGER
-                                    //World.VisualResponseManager.DrawArt(0x0E21);
+                                    World.VisualResponseManager.DrawArt(0x0E21);
                                     // ## BEGIN - END ## // VISUALRESPONSEMANAGER
                                 }
                             }
@@ -1468,7 +1468,7 @@ namespace ClassicUO.Dust765.Dust765
                                         _tickLastActionTime = Time.Ticks;
                                         GameActions.Print("UCC Self: Old Bandies applyed to self.");
                                         // ## BEGIN - END ## // VISUALRESPONSEMANAGER
-                                        //World.VisualResponseManager.DrawArt(0x0E21);
+                                        World.VisualResponseManager.DrawArt(0x0E21);
                                         // ## BEGIN - END ## // VISUALRESPONSEMANAGER
                                     }
                                 }
@@ -1493,7 +1493,7 @@ namespace ClassicUO.Dust765.Dust765
                                     _tickLastActionTime = Time.Ticks;
                                     GameActions.Print("UCC Self: Bandies applyed to self.");
                                     // ## BEGIN - END ## // VISUALRESPONSEMANAGER
-                                    //World.VisualResponseManager.DrawArt(0x0E21);
+                                    World.VisualResponseManager.DrawArt(0x0E21);
                                     // ## BEGIN - END ## // VISUALRESPONSEMANAGER
                                 }
                             }
@@ -1531,7 +1531,7 @@ namespace ClassicUO.Dust765.Dust765
                         GameActions.DoubleClick(apple);
                         GameActions.Print("UCC Self: Apple Enhanced Used.");
                         // ## BEGIN - END ## // VISUALRESPONSEMANAGER
-                        //World.VisualResponseManager.DrawArt(0x2fd8);
+                        World.VisualResponseManager.DrawArt(0x2fd8);
                         // ## BEGIN - END ## // VISUALRESPONSEMANAGER
                         _tickLastActionTime = Time.Ticks;
                         //_tickStartAutoEApple = Time.Ticks;  //triggered from cliloc as you can fail
@@ -1636,7 +1636,7 @@ namespace ClassicUO.Dust765.Dust765
                             GameActions.DoubleClick(redpouche);
                             GameActions.Print("UCC Self: Pouche used.");
                             // ## BEGIN - END ## // VISUALRESPONSEMANAGER
-                            //World.VisualResponseManager.DrawArt(0x0E79);
+                            World.VisualResponseManager.DrawArt(0x0E79);
                             // ## BEGIN - END ## // VISUALRESPONSEMANAGER
                             _tickLastActionTime = Time.Ticks;
                             _tickStartAutoPouche = Time.Ticks;
@@ -1696,7 +1696,7 @@ namespace ClassicUO.Dust765.Dust765
                             GameActions.DoubleClick(curepotion);
                             GameActions.Print("UCC Self: Curing Poison.");
                             // ## BEGIN - END ## // VISUALRESPONSEMANAGER
-                            //World.VisualResponseManager.DrawArt(0x0F07);
+                            World.VisualResponseManager.DrawArt(0x0F07);
                             // ## BEGIN - END ## // VISUALRESPONSEMANAGER
                             _tickLastActionTime = Time.Ticks;
                             _tickStartAutoCurepot = Time.Ticks;
@@ -1753,7 +1753,7 @@ namespace ClassicUO.Dust765.Dust765
                             GameActions.DoubleClick(healpotion);
                             GameActions.Print("UCC Self: Healing Damage.");
                             // ## BEGIN - END ## // VISUALRESPONSEMANAGER
-                           // World.VisualResponseManager.DrawArt(0x0F0C);
+                            World.VisualResponseManager.DrawArt(0x0F0C);
                             // ## BEGIN - END ## // VISUALRESPONSEMANAGER
                             _tickLastActionTime = Time.Ticks;
                             _tickStartAutoHealpot = Time.Ticks;
@@ -1810,7 +1810,7 @@ namespace ClassicUO.Dust765.Dust765
                             GameActions.DoubleClick(refreshpotion);
                             GameActions.Print("UCC Self: Refresh Potion.");
                             // ## BEGIN - END ## // VISUALRESPONSEMANAGER
-                            //World.VisualResponseManager.DrawArt(0xF0B);
+                            World.VisualResponseManager.DrawArt(0xF0B);
                             // ## BEGIN - END ## // VISUALRESPONSEMANAGER
                             _tickLastActionTime = Time.Ticks;
                             _tickStartAutoRefreshpot = Time.Ticks;
@@ -1868,7 +1868,7 @@ namespace ClassicUO.Dust765.Dust765
                             GameActions.DoubleClick(strengthpotion);
                             GameActions.Print("UCC Self: Strength Potion.");
                             // ## BEGIN - END ## // VISUALRESPONSEMANAGER
-                            //World.VisualResponseManager.DrawArt(0x0F09);
+                            World.VisualResponseManager.DrawArt(0x0F09);
                             // ## BEGIN - END ## // VISUALRESPONSEMANAGER
                             _tickLastActionTime = Time.Ticks;
                             _tickStartStrengthpot = Time.Ticks;
@@ -1928,7 +1928,7 @@ namespace ClassicUO.Dust765.Dust765
                             GameActions.DoubleClick(dexpotion);
                             GameActions.Print("UCC Self: Agility Potion.");
                             // ## BEGIN - END ## // VISUALRESPONSEMANAGER
-                            //World.VisualResponseManager.DrawArt(0x0F08);
+                            World.VisualResponseManager.DrawArt(0x0F08);
                             // ## BEGIN - END ## // VISUALRESPONSEMANAGER
                             _tickLastActionTime = Time.Ticks;
                             _tickStartDexpot = Time.Ticks;

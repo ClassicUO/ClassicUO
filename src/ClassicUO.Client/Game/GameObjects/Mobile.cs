@@ -184,7 +184,8 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public bool IsFlying =>
-            Client.Version >= ClientVersion.CV_7000 && (Flags & Flags.Poisoned) != 0;
+            Client.Version >= ClientVersion.CV_7000 && (Flags & Flags.Poisoned) != 0
+            && !(IsGargoyle && ProfileManager.CurrentProfile?.ForceGargoyleWalk == true);
 
         public virtual bool InWarMode
         {

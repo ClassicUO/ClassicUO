@@ -107,6 +107,10 @@ namespace ClassicUO.Game
         public static ClilocTriggers GetClilocTriggers { get; } = new ClilocTriggers();
         // ## BEGIN - END ## // BUFFBAR/UCCSETTINGS
 
+        // ## BEGIN - END ## // VISUALRESPONSEMANAGER
+        internal static VisualResponseManager VisualResponseManager { get; } = new VisualResponseManager();
+        // ## BEGIN - END ## // VISUALRESPONSEMANAGER
+
         // ## BEGIN - END ## // BUFFBAR/UCCSETTINGS
        
         // ## BEGIN - END ## // BUFFBAR/UCCSETTINGS
@@ -292,8 +296,9 @@ namespace ClassicUO.Game
                     _timeToDelete = Time.Ticks + 50;
                 }
 
-                foreach (Mobile mob in Mobiles.Values)
+                foreach (var kvp in Mobiles)
                 {
+                    Mobile mob = kvp.Value;
                     mob.Update();
 
                     if (do_delete && mob.Distance > ClientViewRange /*CheckToRemove(mob, ClientViewRange)*/)
@@ -347,8 +352,9 @@ namespace ClassicUO.Game
                     _toRemove.Clear();
                 }
 
-                foreach (Item item in Items.Values)
+                foreach (var kvp in Items)
                 {
+                    Item item = kvp.Value;
                     item.Update();
 
                     if (do_delete && item.OnGround && item.Distance > ClientViewRange /*CheckToRemove(item, ClientViewRange)*/)

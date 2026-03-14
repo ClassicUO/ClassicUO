@@ -2,7 +2,7 @@ using ClassicUO.Configuration;
 using System.Collections.Generic;
 using System.IO;
 
-namespace ClassicUO.TazUO.Options
+namespace ClassicUO.Dust765.Options
 {
     public static class ProfileTransferHelper
     {

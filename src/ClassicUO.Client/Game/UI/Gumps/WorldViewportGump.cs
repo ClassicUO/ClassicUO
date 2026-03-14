@@ -41,7 +41,7 @@ using ClassicUO.Assets;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
-using ClassicUO.TazUO.UI.Gumps;
+using ClassicUO.Dust765.UI.Gumps;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;

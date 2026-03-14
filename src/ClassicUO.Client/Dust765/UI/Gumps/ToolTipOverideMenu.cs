@@ -11,7 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace ClassicUO.TazUO.UI.Gumps
+namespace ClassicUO.Dust765.UI.Gumps
 {
     internal class ToolTipOverideMenu : Gump
     {

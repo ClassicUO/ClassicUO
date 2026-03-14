@@ -58,7 +58,7 @@ namespace ClassicUO.Game.UI.Gumps
         private UOLabel _text;
         private Texture2D _borderColor = SolidColorTextureCache.GetTexture(Color.Black);
         private Vector2 _textDrawOffset = Vector2.Zero;
-        private static int currentHeight = 22;
+        private static int currentHeight = 18;
 
         public static int CurrentHeight
         {
@@ -92,7 +92,7 @@ namespace ClassicUO.Game.UI.Gumps
                 return;
             }
 
-            _text = new UOLabel(string.Empty, ProfileManager.CurrentProfile.NamePlateFont, entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort)0x0481, TEXT_ALIGN_TYPE.TS_CENTER, 100, FontStyle.BlackBorder);
+            _text = new UOLabel(string.Empty, ProfileManager.CurrentProfile.NamePlateFont, entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort)0x0481, TEXT_ALIGN_TYPE.TS_CENTER, 0, FontStyle.BlackBorder);
 
             SetTooltip(entity);
 
@@ -145,8 +145,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _text.Text = t;
 
-                Width = _background.Width = Math.Max(60, _text.Width) + 4;
-                Height = _background.Height = CurrentHeight = Math.Max(Constants.OBJECT_HANDLES_GUMP_HEIGHT, _text.Height) + 4;
+                Width = _background.Width = _text.Width + 4;
+                Height = _background.Height = CurrentHeight = _text.Height;
                 _textDrawOffset.X = (Width - _text.Width - 4) >> 1;
                 _textDrawOffset.Y = (Height - _text.Height) >> 1;
                 WantUpdateSize = false;
@@ -160,18 +160,18 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _text.Text = t;
 
-                int baseHeight = Math.Max(Constants.OBJECT_HANDLES_GUMP_HEIGHT, _text.Height) + 4;
+                int baseHeight = _text.Height;
                 bool isSelfOrParty = entity is Mobile mob && (mob.Equals(World.Player) || World.Party.Contains(mob.Serial));
                 bool hasOtherBarBelow = entity is Mobile m2 && !m2.Equals(World.Player) && !World.Party.Contains(m2.Serial)
                     && m2.NotorietyFlag != NotorietyFlag.Invulnerable
                     && ProfileManager.CurrentProfile.NamePlateHealthBar;
                 bool hasSelfBarsBelow = isSelfOrParty && ProfileManager.CurrentProfile.NamePlateHealthBar;
                 int barExtra = hasOtherBarBelow ? 8 : hasSelfBarsBelow ? 20 : 0;
-                Width = _background.Width = Math.Max(60, _text.Width) + 4;
+                Width = _background.Width = _text.Width + 4;
                 Height = _background.Height = baseHeight + barExtra;
                 CurrentHeight = Height;
                 _textDrawOffset.X = (Width - _text.Width - 4) >> 1;
-                _textDrawOffset.Y = hasOtherBarBelow || hasSelfBarsBelow ? 2 : (Height - _text.Height) >> 1;
+                _textDrawOffset.Y = hasOtherBarBelow || hasSelfBarsBelow ? 0 : (Height - _text.Height) >> 1;
                 WantUpdateSize = false;
 
                 return true;
@@ -483,37 +483,6 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 _positionLocked = true;
-
-                Client.Game.Animations.GetAnimationDimensions(
-                    m.AnimIndex,
-                    m.GetGraphicForAnimation(),
-                    /*(byte) m.GetDirectionForAnimation()*/
-                    0,
-                    /*Mobile.GetGroupForAnimation(m, isParent:true)*/
-                    0,
-                    m.IsMounted,
-                    /*(byte) m.AnimIndex*/
-                    0,
-                    out int centerX,
-                    out int centerY,
-                    out int width,
-                    out int height
-                );
-
-                _lockedPosition.X = (int)(m.RealScreenPosition.X + m.Offset.X + 22 + 5);
-
-                _lockedPosition.Y = (int)(
-                    m.RealScreenPosition.Y
-                    + (m.Offset.Y - m.Offset.Z)
-                    - (height + centerY + 15)
-                    + (
-                        m.IsGargoyle && m.IsFlying
-                            ? -22
-                            : !m.IsMounted
-                                ? 22
-                                : 0
-                    )
-                );
             }
 
             base.OnMouseOver(x, y);
@@ -542,7 +511,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                if (entity.Serial == TargetManager.LastTargetInfo.Serial)
+                if (entity.Serial == TargetManager.LastTargetInfo.Serial && !entity.Equals(World.Player))
                 {
                     if (!_isLastTarget) //Only set this if it was not already last target
                     {
@@ -634,43 +603,36 @@ namespace ClassicUO.Game.UI.Gumps
 
                 }
 
-                if (_positionLocked)
-                {
-                    x = _lockedPosition.X;
-                    y = _lockedPosition.Y;
-                }
-                else
-                {
-                    Client.Game.Animations.GetAnimationDimensions(
-                        m.AnimIndex,
-                        m.GetGraphicForAnimation(),
-                        /*(byte) m.GetDirectionForAnimation()*/
-                        0,
-                        /*Mobile.GetGroupForAnimation(m, isParent:true)*/
-                        0,
-                        m.IsMounted,
-                        /*(byte) m.AnimIndex*/
-                        0,
-                        out int centerX,
-                        out int centerY,
-                        out int width,
-                        out int height
-                    );
+                Client.Game.Animations.GetAnimationDimensions(
+                    m.AnimIndex,
+                    m.GetGraphicForAnimation(),
+                    /*(byte) m.GetDirectionForAnimation())*/
+                    0,
+                    /*Mobile.GetGroupForAnimation(m, isParent:true)*/
+                    0,
+                    m.IsMounted,
+                    /*(byte) m.AnimIndex*/
+                    0,
+                    out int centerX,
+                    out int centerY,
+                    out int width,
+                    out int height
+                );
 
-                    x = (int)(m.RealScreenPosition.X + m.Offset.X + 22 + 5);
-                    y = (int)(
-                        m.RealScreenPosition.Y
-                        + (m.Offset.Y - m.Offset.Z)
-                        - (height + centerY + 15)
-                        + (
-                            m.IsGargoyle && m.IsFlying
-                                ? -22
-                                : !m.IsMounted
-                                    ? 22
-                                    : 0
-                        )
-                    );
-                }
+                x = (int)(m.RealScreenPosition.X + m.Offset.X + 22 + 5);
+                y = (int)(
+                    m.RealScreenPosition.Y
+                    + (m.Offset.Y - m.Offset.Z)
+                    - (height + centerY + 15)
+                    + (
+                        m.IsGargoyle && m.IsFlying
+                            ? -22
+                            : !m.IsMounted
+                                ? 22
+                                : 0
+                    )
+                    + 8
+                );
             }
             else if (SerialHelper.IsItem(LocalSerial))
             {
@@ -766,11 +728,39 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
+            if (_isLastTarget && _isMobile)
+            {
+                Mobile m = World.Mobiles.Get(LocalSerial);
+                if (m != null && !m.Equals(World.Player))
+                    DrawDistanceBar(batcher, m, x, y);
+            }
+
             return _text.Draw(batcher, (int)(x + 2 + _textDrawOffset.X), (int)(y + 2 + _textDrawOffset.Y));
         }
 
-        private const int HP_BAR_HEIGHT = 4;
+        private const int DIST_BAR_HEIGHT = 5;
+        private const int DIST_BAR_GAP = 2;
+
+        private void DrawDistanceBar(UltimaBatcher2D batcher, Mobile m, int x, int y)
+        {
+            int dist = m.Distance;
+            Color barColor = dist <= 6 ? Color.Green : dist <= 12 ? Color.Yellow : Color.Red;
+            float fillFraction = dist <= 6 ? 1f : dist <= 12 ? (12f - dist) / 6f : 0.15f;
+            int barWidth = Width;
+            int barY = y + Height + DIST_BAR_GAP;
+            Vector3 alpha = ShaderHueTranslator.GetHueVector(0, false, 0.85f, true);
+            Vector3 border = ShaderHueTranslator.GetHueVector(0, false, 0.9f, true);
+            Color borderColor = new Color(
+                Math.Max(0, barColor.R - 80),
+                Math.Max(0, barColor.G - 80),
+                Math.Max(0, barColor.B - 80)
+            );
+            batcher.DrawRectangle(SolidColorTextureCache.GetTexture(borderColor), x + 1, barY, barWidth - 2, DIST_BAR_HEIGHT + 2, border);
+            int fillW = Math.Max(1, (int)((barWidth - 4) * fillFraction));
+            batcher.Draw(SolidColorTextureCache.GetTexture(barColor), new Vector2(x + 2, barY + 1), new Rectangle(0, 0, fillW, DIST_BAR_HEIGHT), alpha);
+        }
         private const int BAR_GAP = 2;
+        private const int HP_BAR_HEIGHT = 4;
 
         private void DrawSelfBarsBelowName(UltimaBatcher2D batcher, Mobile m, int x, int y, float alpha)
         {

@@ -1053,7 +1053,7 @@ namespace ClassicUO.Network
             // ## BEGIN - END ## // AUTOLOOT
             // ## BEGIN - END ## // AUTOMATIONS
             if (serial == ProfileManager.CurrentProfile.Mimic_PlayerSerial && type == MessageType.Spell && !string.IsNullOrEmpty(text))
-                //AutoMimic.SyncByClilocString(serial, text);
+                AutoMimic.SyncByClilocString(serial, text);
             // ## BEGIN - END ## // AUTOMATIONS
             // ## BEGIN - END ## // VISUAL HELPERS
             if (serial == World.Player.Serial && type == MessageType.Spell && !string.IsNullOrEmpty(text))
@@ -1094,6 +1094,16 @@ namespace ClassicUO.Network
                     entity.Name = string.IsNullOrEmpty(name) ? text : name;
                 }
             }
+
+            // ## BEGIN - END ## // VISUALRESPONSEMANAGER
+            if (
+                ProfileManager.CurrentProfile.VisualResponseManager
+                && (type == MessageType.System || serial == 0xFFFF_FFFF || serial == 0 || name.ToLower() == "system" && entity == null)
+            )
+            {
+                World.VisualResponseManager.OnServerText(text);
+            }
+            // ## BEGIN - END ## // VISUALRESPONSEMANAGER
 
             MessageManager.HandleMessage(entity, text, name, hue, type, (byte)font, text_type);
         }
@@ -3854,6 +3864,16 @@ namespace ClassicUO.Network
                 }
             }
 
+            // ## BEGIN - END ## // VISUALRESPONSEMANAGER
+            if (
+                ProfileManager.CurrentProfile.VisualResponseManager
+                && (type == MessageType.System || serial == 0xFFFF_FFFF || serial == 0 || name.ToLower() == "system" && entity == null)
+            )
+            {
+                World.VisualResponseManager.OnServerText(text);
+            }
+            // ## BEGIN - END ## // VISUALRESPONSEMANAGER
+
             // ## BEGIN - END ## // MISC
             if (text.StartsWith(ProfileManager.CurrentProfile.SpecialSetLastTargetClilocText.ToString()))
                 CombatCollection.SpecialSetLastTargetCliloc(serial);
@@ -4917,11 +4937,18 @@ namespace ClassicUO.Network
             // ## BEGIN - END ## // ONCASTINGGUMP
             if (ProfileManager.CurrentProfile.OnCastingGump)
             {
-                World.Player?.OnCasting.OnCliloc(cliloc);
+                World.Player?.OnCasting?.OnCliloc(cliloc);
             }
 
+            // ## BEGIN - END ## // VISUALRESPONSEMANAGER
+            if (ProfileManager.CurrentProfile.VisualResponseManager)
+            {
+                World.VisualResponseManager.OnCliloc(cliloc);
+            }
+            // ## BEGIN - END ## // VISUALRESPONSEMANAGER
+
             // ## BEGIN - END ## // UI/GUMPS
-            World.Player?.BandageTimer.OnCliloc(cliloc);
+            World.Player?.BandageTimer?.OnCliloc(cliloc);
             // ## BEGIN - END ## // UI/GUMPS
             // ## BEGIN - END ## // AUTOLOOT
             Item item = World.Items.Get(serial);

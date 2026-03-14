@@ -152,12 +152,12 @@ namespace ClassicUO.Assets
             });
         }
 
-        const int ATLAS_SIZE = 1024 * 4;
-        private TextureAtlas _atlas;
-
         public void CreateAtlas(GraphicsDevice device)
         {
-            _atlas = new TextureAtlas(device, ATLAS_SIZE, ATLAS_SIZE, SurfaceFormat.Color);
+            // Atlas rendering uses TextureAtlas.Shared; just ensure _spriteInfos is sized correctly
+            int needed = Math.Max(Entries?.Length ?? 0, MAX_GUMP_DATA_INDEX_COUNT);
+            if (needed > _spriteInfos.Length)
+                Array.Resize(ref _spriteInfos, needed);
         }
 
         struct SpriteInfo
@@ -166,14 +166,12 @@ namespace ClassicUO.Assets
             public Rectangle UV;
         }
 
-        private SpriteInfo[] _spriteInfos;
+        private SpriteInfo[] _spriteInfos = new SpriteInfo[MAX_GUMP_DATA_INDEX_COUNT];
 
         public Texture2D GetGumpTexture(ushort graphic, out Rectangle bounds)
         {
-            PNGLoader pngLoader = new PNGLoader(/* parâmetros do construtor, se houver */);
-
             // ## BEGIN - END ## // TAZUO
-            Texture2D png = pngLoader.LoadGumpTexture2d(graphic);
+            Texture2D png = PNGLoader.Instance.LoadGumpTexture2d(graphic);
             if (png != null)
             {
                 bounds = png.Bounds;
@@ -181,11 +179,17 @@ namespace ClassicUO.Assets
             }
             // ## BEGIN - END ## // TAZUO
 
+            if (graphic >= _spriteInfos.Length || TextureAtlas.Shared == null)
+            {
+                bounds = Rectangle.Empty;
+                return null;
+            }
+
             ref var spriteInfo = ref _spriteInfos[graphic];
 
             if (spriteInfo.Texture == null)
             {
-                AddSpriteToAtlas(_atlas, graphic);
+                AddSpriteToAtlas(graphic);
             }
 
             bounds = spriteInfo.UV;
@@ -324,86 +328,24 @@ namespace ClassicUO.Assets
 
        
 
-        private unsafe void AddSpriteToAtlas(TextureAtlas atlas, uint index)
+        private void AddSpriteToAtlas(uint index)
         {
-            ref UOFileIndex entry = ref GetValidRefEntry((int)index);
+            var gumpInfo = GetGump(index);
 
-            if (entry.Width <= 0 && entry.Height <= 0)
+            if (gumpInfo.Pixels.IsEmpty)
             {
                 return;
             }
 
-            ushort color = entry.Hue;
-
-            _file.SetData(entry.Address, entry.FileSize);
-            _file.Seek(entry.Offset);
-
-            IntPtr dataStart = _file.PositionAddress;
-
-            uint[] buffer = null;
-
-            Span<uint> pixels = entry.Width * entry.Height <= 1024 ? stackalloc uint[1024] : (buffer = System.Buffers.ArrayPool<uint>.Shared.Rent(entry.Width * entry.Height));
-
-            try
-            {
-                int* lookuplist = (int*)dataStart;
-
-                int gsize;
-
-                for (int y = 0, half_len = entry.Length >> 2; y < entry.Height; y++)
-                {
-                    if (y < entry.Height - 1)
-                    {
-                        gsize = lookuplist[y + 1] - lookuplist[y];
-                    }
-                    else
-                    {
-                        gsize = half_len - lookuplist[y];
-                    }
-
-                    GumpBlock* gmul = (GumpBlock*)(dataStart + (lookuplist[y] << 2));
-
-                    int pos = y * entry.Width;
-
-                    for (int i = 0; i < gsize; i++)
-                    {
-                        uint val = gmul[i].Value;
-
-                        if (color != 0 && val != 0)
-                        {
-                            val = HuesLoader.Instance.GetPartialHueColor(gmul[i].Value, color);
-                        }
-
-                        if (val != 0)
-                        {
-                            //val = 0x8000 | val;
-                            val = HuesHelper.Color16To32(gmul[i].Value) | 0xFF_00_00_00;
-                        }
-
-                        int count = gmul[i].Run;
-
-                        for (int j = 0; j < count; j++)
-                        {
-                            pixels[pos++] = val;
-                        }
-                    }
-                }
-
-                ref var spriteInfo = ref _spriteInfos[index];
-
-
-                Microsoft.Xna.Framework.Rectangle uvRectangle;
-                spriteInfo.Texture = atlas.AddSprite(pixels, entry.Width, entry.Height, out uvRectangle);
-                spriteInfo.UV = new Microsoft.Xna.Framework.Rectangle(uvRectangle.X, uvRectangle.Y, uvRectangle.Width, uvRectangle.Height);
-                _picker.Set(index, entry.Width, entry.Height, pixels);
-            }
-            finally
-            {
-                if (buffer != null)
-                {
-                    System.Buffers.ArrayPool<uint>.Shared.Return(buffer, true);
-                }
-            }
+            ref var spriteInfo = ref _spriteInfos[index];
+            spriteInfo.Texture = TextureAtlas.Shared.AddSprite(
+                gumpInfo.Pixels,
+                gumpInfo.Width,
+                gumpInfo.Height,
+                out var uvRectangle
+            );
+            spriteInfo.UV = uvRectangle;
+            _picker.Set(index, gumpInfo.Width, gumpInfo.Height, gumpInfo.Pixels);
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]

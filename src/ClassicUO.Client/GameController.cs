@@ -434,7 +434,9 @@ namespace ClassicUO
 
         public void ShowNativeTitleBar()
         {
-            SDL_SetWindowBordered(Window.Handle, true);
+            SDL_WindowFlags flags = (SDL_WindowFlags)SDL_GetWindowFlags(Window.Handle);
+            if ((flags & SDL_WindowFlags.SDL_WINDOW_BORDERLESS) != 0)
+                SDL_SetWindowBordered(Window.Handle, true);
         }
 
         public void MinimizeWindow()

@@ -88,7 +88,7 @@ namespace ClassicUO.Game.UI.Controls
                 ) { ButtonParameter = (int)ButtonType.CheckAll, IsSelectable = false }
             );
 
-            Add(checkBoxScroll = new ScrollArea(0, 60, 300, 350, true));
+            Add(checkBoxScroll = new ScrollArea(0, 60, 300, 400, true));
 
             SetupOptionCheckboxes();
 
