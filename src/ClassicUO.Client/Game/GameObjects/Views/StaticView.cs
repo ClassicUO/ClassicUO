@@ -60,9 +60,11 @@ namespace ClassicUO.Game.GameObjects
                 partial = false;
             }
 
-            Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue, partial, AlphaHue / 255f);
-
             bool isTree = StaticFilters.IsTree(graphic, out _);
+
+            // Trees and foliage stay visible inside CoT circle
+            bool cot = !isTree && !ItemData.IsFoliage && TransparentTest(World.Player.Z + 5);
+            Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue, partial, AlphaHue / 255f, circletrans: cot);
 
             if (isTree && ProfileManager.CurrentProfile.TreeToStumps)
             {

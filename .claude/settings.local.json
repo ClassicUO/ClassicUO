@@ -5,7 +5,12 @@
       "Bash(dotnet restore:*)",
       "Bash(git checkout:*)",
       "Bash(python3:*)",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(git add:*)",
+      "Bash(find /c/dev/cuo/xxx/ClassicUO/src -type f -name \"*.cs\" | xargs grep -l \"ASCIIFont\\\\|UniFont\\\\|UOFont\" | head -20)",
+      "Bash(find /c/dev/cuo/xxx/ClassicUO/src -type f -name \"*.cs\" | xargs grep -l \"class.*Font\" | grep -v \".Renderer\" | head -20)",
+      "Bash(grep:*)",
+      "Bash(cd:*)"
     ]
   }
 }

@@ -373,7 +373,7 @@ namespace ClassicUO.Game.Scenes
                     CalculateAlpha(ref obj.AlphaHue, 178);
                 }
             }
-            else if (_alphaChanged && obj.AlphaHue != 0xFF)
+            else if (_alphaChanged && obj.AlphaHue != 0xFF && !itemData.IsFoliage)
             {
                 CalculateAlpha(ref obj.AlphaHue, 0xFF);
             }
@@ -608,6 +608,16 @@ namespace ClassicUO.Game.Scenes
             }
 
             CheckIfBehindATree(obj, ref itemData);
+
+            // Gradient CoT for non-mesh objects (trees, foliage, animated statics)
+            if (_cotGradientMode && ProfileManager.CurrentProfile.UseCircleOfTransparency
+                && obj.TransparentTest(_world.Player.Z + 5))
+            {
+                obj.AlphaHue = GetGradientCotAlpha(obj);
+                if (obj.AlphaHue > 0)
+                    PushToRenderQueue(obj, true, allowSelection);
+                return 0;
+            }
 
             // hacky way to render shadows without z-fight
             bool isShadow =

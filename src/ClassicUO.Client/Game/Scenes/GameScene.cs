@@ -960,7 +960,8 @@ namespace ClassicUO.Game.Scenes
             batcher.Begin(null, matrix);
             batcher.SetBrightlight(ProfileManager.CurrentProfile.TerrainShadowsLevel * 0.1f);
 
-            if (ProfileManager.CurrentProfile.UseCircleOfTransparency)
+            if (ProfileManager.CurrentProfile.UseCircleOfTransparency
+                && ProfileManager.CurrentProfile.CircleOfTransparencyType != 1) // gradient mode uses CPU alpha, not shader
             {
                 batcher.SetCircleOfTransparencyRadius(
                     (float)ProfileManager.CurrentProfile.CircleOfTransparencyRadius / Camera.Zoom

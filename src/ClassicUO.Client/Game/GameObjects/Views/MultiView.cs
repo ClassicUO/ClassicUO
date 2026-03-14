@@ -80,7 +80,8 @@ namespace ClassicUO.Game.GameObjects
                 partial = false;
             }
 
-            Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue, partial, AlphaHue / 255f);
+            bool cot = TransparentTest(World.Player.Z + 5);
+            Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue, partial, AlphaHue / 255f, circletrans: cot);
 
             if (IsHousePreview)
             {
