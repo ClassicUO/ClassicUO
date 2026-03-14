@@ -560,7 +560,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             sbyte oldZ = z;
-            ushort walkTime = Constants.TURN_DELAY;
+            ushort walkTime = (ushort)MovementSpeed.TurnDelay;
 
             if ((oldDirection & Direction.Mask) == (direction & Direction.Mask))
             {
@@ -618,7 +618,7 @@ namespace ClassicUO.Game.GameObjects
             // Adaptive coalescing: only suppress direction-only packets when the server
             // is falling behind (3+ unconfirmed packets). This allows full-speed spinning
             // when the connection is healthy and automatically backs off under congestion.
-            if (walkTime == Constants.TURN_DELAY && Walker.UnacceptedPacketsCount >= 3)
+            if (walkTime == (ushort)MovementSpeed.TurnDelay && Walker.UnacceptedPacketsCount >= 3)
             {
                 Direction = direction;
                 Walker.LastStepRequestTime = Time.Ticks + walkTime;
@@ -683,26 +683,7 @@ namespace ClassicUO.Game.GameObjects
 
             AddToTile();
 
-            int nowDelta = 0;
-
-            //if (_lastDir == (int) direction && _lastMount == IsMounted && _lastRun == run)
-            //{
-            //    nowDelta = (int) (Time.Ticks - _lastStepTime - walkTime + _lastDelta);
-
-            //    if (Math.Abs(nowDelta) > 70)
-            //        nowDelta = 0;
-            //    _lastDelta = nowDelta;
-            //}
-            //else
-            //    _lastDelta = 0;
-
-            //_lastStepTime = (int) Time.Ticks;
-            //_lastRun = run;
-            //_lastMount = IsMounted;
-            //_lastDir = (int) direction;
-
-
-            Walker.LastStepRequestTime = Time.Ticks + walkTime - nowDelta;
+            Walker.LastStepRequestTime = Time.Ticks + walkTime;
             GetGroupForAnimation(this, 0, true);
 
             return true;

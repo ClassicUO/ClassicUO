@@ -80,6 +80,7 @@ namespace ClassicUO.Game.UI.Gumps
                          _useShiftPathfind,
                          _alwaysRun,
                          _alwaysRunUnlessHidden,
+                         _fastRotation,
                          _showHpMobile,
                          _highlightByPoisoned,
                          _highlightByParalyzed,
@@ -517,6 +518,18 @@ namespace ClassicUO.Game.UI.Gumps
                     null,
                     ResGumps.AlwaysRunHidden,
                     _currentProfile.AlwaysRunUnlessHidden,
+                    startX,
+                    startY
+                )
+            );
+
+            section.Add
+            (
+                _fastRotation = AddCheckBox
+                (
+                    null,
+                    "Fast rotation",
+                    _currentProfile.FastRotation,
                     startX,
                     startY
                 )
@@ -3789,6 +3802,8 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.UseShiftToPathfind = _useShiftPathfind.IsChecked;
             _currentProfile.AlwaysRun = _alwaysRun.IsChecked;
             _currentProfile.AlwaysRunUnlessHidden = _alwaysRunUnlessHidden.IsChecked;
+            _currentProfile.FastRotation = _fastRotation.IsChecked;
+            MovementSpeed.FastRotation = _fastRotation.IsChecked;
             _currentProfile.ShowMobilesHP = _showHpMobile.IsChecked;
             _currentProfile.HighlightMobilesByPoisoned = _highlightByPoisoned.IsChecked;
             _currentProfile.HighlightMobilesByParalize = _highlightByParalyzed.IsChecked;
