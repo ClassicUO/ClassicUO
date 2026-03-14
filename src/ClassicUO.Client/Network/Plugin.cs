@@ -728,9 +728,16 @@ namespace ClassicUO.Network
 
             foreach (Plugin plugin in Plugins)
             {
-                if (plugin._onHotkeyPressed != null && !plugin._onHotkeyPressed(key, mod, ispressed))
+                try
                 {
-                    result = false;
+                    if (plugin._onHotkeyPressed != null && !plugin._onHotkeyPressed(key, mod, ispressed))
+                    {
+                        result = false;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error($"Plugin hotkey exception: {ex}");
                 }
             }
 

@@ -78,7 +78,7 @@ namespace ClassicUO.Game.GameObjects
             UIManager.Add(OnCasting = new OnCastingGump());
             // ## BEGIN - END ## // ONCASTINGGUMP
 
-            UIManager.Add(new OnCastingGump.CastTimerProgressBar());
+            //UIManager.Add(new OnCastingGump.CastTimerProgressBar());
 
             Skills = new Skill[SkillsLoader.Instance.SkillsCount];
 

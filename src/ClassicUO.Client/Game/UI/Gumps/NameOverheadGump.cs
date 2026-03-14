@@ -58,7 +58,7 @@ namespace ClassicUO.Game.UI.Gumps
         private UOLabel _text;
         private Texture2D _borderColor = SolidColorTextureCache.GetTexture(Color.Black);
         private Vector2 _textDrawOffset = Vector2.Zero;
-        private static int currentHeight = 22;
+        private static int currentHeight = 18;
 
         public static int CurrentHeight
         {
@@ -145,8 +145,8 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _text.Text = t;
 
-                Width = _background.Width = Math.Max(60, _text.Width) + 4;
-                Height = _background.Height = CurrentHeight = _text.Height + 2;
+                Width = _background.Width = _text.Width + 4;
+                Height = _background.Height = CurrentHeight = _text.Height;
                 _textDrawOffset.X = (Width - _text.Width - 4) >> 1;
                 _textDrawOffset.Y = (Height - _text.Height) >> 1;
                 WantUpdateSize = false;
@@ -160,18 +160,18 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _text.Text = t;
 
-                int baseHeight = _text.Height + 2;
+                int baseHeight = _text.Height;
                 bool isSelfOrParty = entity is Mobile mob && (mob.Equals(World.Player) || World.Party.Contains(mob.Serial));
                 bool hasOtherBarBelow = entity is Mobile m2 && !m2.Equals(World.Player) && !World.Party.Contains(m2.Serial)
                     && m2.NotorietyFlag != NotorietyFlag.Invulnerable
                     && ProfileManager.CurrentProfile.NamePlateHealthBar;
                 bool hasSelfBarsBelow = isSelfOrParty && ProfileManager.CurrentProfile.NamePlateHealthBar;
                 int barExtra = hasOtherBarBelow ? 8 : hasSelfBarsBelow ? 20 : 0;
-                Width = _background.Width = Math.Max(60, _text.Width) + 4;
+                Width = _background.Width = _text.Width + 4;
                 Height = _background.Height = baseHeight + barExtra;
                 CurrentHeight = Height;
                 _textDrawOffset.X = (Width - _text.Width - 4) >> 1;
-                _textDrawOffset.Y = hasOtherBarBelow || hasSelfBarsBelow ? 2 : (Height - _text.Height) >> 1;
+                _textDrawOffset.Y = hasOtherBarBelow || hasSelfBarsBelow ? 0 : (Height - _text.Height) >> 1;
                 WantUpdateSize = false;
 
                 return true;
@@ -483,37 +483,6 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 _positionLocked = true;
-
-                Client.Game.Animations.GetAnimationDimensions(
-                    m.AnimIndex,
-                    m.GetGraphicForAnimation(),
-                    /*(byte) m.GetDirectionForAnimation()*/
-                    0,
-                    /*Mobile.GetGroupForAnimation(m, isParent:true)*/
-                    0,
-                    m.IsMounted,
-                    /*(byte) m.AnimIndex*/
-                    0,
-                    out int centerX,
-                    out int centerY,
-                    out int width,
-                    out int height
-                );
-
-                _lockedPosition.X = (int)(m.RealScreenPosition.X + m.Offset.X + 22 + 5);
-
-                _lockedPosition.Y = (int)(
-                    m.RealScreenPosition.Y
-                    + (m.Offset.Y - m.Offset.Z)
-                    - (height + centerY + 15)
-                    + (
-                        m.IsGargoyle && m.IsFlying
-                            ? -22
-                            : !m.IsMounted
-                                ? 22
-                                : 0
-                    )
-                );
             }
 
             base.OnMouseOver(x, y);
@@ -634,43 +603,36 @@ namespace ClassicUO.Game.UI.Gumps
 
                 }
 
-                if (_positionLocked)
-                {
-                    x = _lockedPosition.X;
-                    y = _lockedPosition.Y;
-                }
-                else
-                {
-                    Client.Game.Animations.GetAnimationDimensions(
-                        m.AnimIndex,
-                        m.GetGraphicForAnimation(),
-                        /*(byte) m.GetDirectionForAnimation()*/
-                        0,
-                        /*Mobile.GetGroupForAnimation(m, isParent:true)*/
-                        0,
-                        m.IsMounted,
-                        /*(byte) m.AnimIndex*/
-                        0,
-                        out int centerX,
-                        out int centerY,
-                        out int width,
-                        out int height
-                    );
+                Client.Game.Animations.GetAnimationDimensions(
+                    m.AnimIndex,
+                    m.GetGraphicForAnimation(),
+                    /*(byte) m.GetDirectionForAnimation())*/
+                    0,
+                    /*Mobile.GetGroupForAnimation(m, isParent:true)*/
+                    0,
+                    m.IsMounted,
+                    /*(byte) m.AnimIndex*/
+                    0,
+                    out int centerX,
+                    out int centerY,
+                    out int width,
+                    out int height
+                );
 
-                    x = (int)(m.RealScreenPosition.X + m.Offset.X + 22 + 5);
-                    y = (int)(
-                        m.RealScreenPosition.Y
-                        + (m.Offset.Y - m.Offset.Z)
-                        - (height + centerY + 15)
-                        + (
-                            m.IsGargoyle && m.IsFlying
-                                ? -22
-                                : !m.IsMounted
-                                    ? 22
-                                    : 0
-                        )
-                    );
-                }
+                x = (int)(m.RealScreenPosition.X + m.Offset.X + 22 + 5);
+                y = (int)(
+                    m.RealScreenPosition.Y
+                    + (m.Offset.Y - m.Offset.Z)
+                    - (height + centerY + 15)
+                    + (
+                        m.IsGargoyle && m.IsFlying
+                            ? -22
+                            : !m.IsMounted
+                                ? 22
+                                : 0
+                    )
+                    + 8
+                );
             }
             else if (SerialHelper.IsItem(LocalSerial))
             {

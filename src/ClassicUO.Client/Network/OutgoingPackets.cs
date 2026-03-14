@@ -154,6 +154,10 @@ namespace ClassicUO.Network
         {
             const byte ID = 0x06;
 
+            // ## BEGIN - END ## // VISUALRESPONSEMANAGER
+            World.VisualResponseManager.OnItemUse(serial);
+            // ## BEGIN - END ## // VISUALRESPONSEMANAGER
+
             int length = PacketsTable.GetPacketLength(ID);
 
             var writer = new StackDataWriter(length < 0 ? 64 : length);

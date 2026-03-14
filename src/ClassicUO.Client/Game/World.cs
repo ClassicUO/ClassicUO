@@ -107,6 +107,10 @@ namespace ClassicUO.Game
         public static ClilocTriggers GetClilocTriggers { get; } = new ClilocTriggers();
         // ## BEGIN - END ## // BUFFBAR/UCCSETTINGS
 
+        // ## BEGIN - END ## // VISUALRESPONSEMANAGER
+        internal static VisualResponseManager VisualResponseManager { get; } = new VisualResponseManager();
+        // ## BEGIN - END ## // VISUALRESPONSEMANAGER
+
         // ## BEGIN - END ## // BUFFBAR/UCCSETTINGS
        
         // ## BEGIN - END ## // BUFFBAR/UCCSETTINGS

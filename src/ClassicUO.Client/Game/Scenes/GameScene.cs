@@ -224,21 +224,6 @@ namespace ClassicUO.Game.Scenes
             {
                 Client.Game.MaximizeWindow();
             }
-            else if (Settings.GlobalSettings.WindowSize.HasValue)
-            {
-                Client.Game.ShowNativeTitleBar();
-                int w = Settings.GlobalSettings.WindowSize.Value.X;
-                int h = Settings.GlobalSettings.WindowSize.Value.Y;
-
-                w = Math.Max(Constants.MIN_GAME_WINDOW_WIDTH, w);
-                h = Math.Max(Constants.MIN_GAME_WINDOW_HEIGHT, h);
-
-                Client.Game.SetWindowSize(w, h);
-            }
-            else
-            {
-                Client.Game.ShowNativeTitleBar();
-            }
 
             // ## BEGIN - END ## // UI/GUMPS
             if (ProfileManager.CurrentProfile.UOClassicCombatLTBar)
@@ -252,7 +237,10 @@ namespace ClassicUO.Game.Scenes
             }
             if (ProfileManager.CurrentProfile.BandageGump)
             {
-                UIManager.Add(new BandageGump());
+                if (World.Player.BandageTimer == null || World.Player.BandageTimer.IsDisposed)
+                {
+                    UIManager.Add(World.Player.BandageTimer = new BandageGump());
+                }
             }
             // ## BEGIN - END ## // UI/GUMPS
             // ## BEGIN - END ## // LINES
@@ -1474,6 +1462,11 @@ namespace ClassicUO.Game.Scenes
             var profile = ProfileManager.CurrentProfile;
             if (profile == null || !profile.PerformanceDisableCombatLinesOverlay)
                 _UOClassicCombatLines.Draw(batcher);
+
+            // ## BEGIN - END ## // VISUALRESPONSEMANAGER
+            World.VisualResponseManager.Draw(batcher);
+            // ## BEGIN - END ## // VISUALRESPONSEMANAGER
+
             if (profile == null || !profile.PerformanceDisableHealthLinesOverlay)
                 _healthLinesManager.Draw(batcher);
 

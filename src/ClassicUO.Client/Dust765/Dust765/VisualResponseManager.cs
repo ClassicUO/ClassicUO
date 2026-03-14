@@ -89,8 +89,14 @@ namespace ClassicUO.Dust765.Dust765
                 }
 
                 
-                ref readonly var texture = ref Client.Game.Gumps.GetGump(entry.Graphic);
+                ref readonly var texture = ref Client.Game.Arts.GetArt(entry.Graphic);
 
+                // Skip if texture is invalid
+                if (texture.Texture == null)
+                {
+                    _actions.RemoveAt(i--);
+                    continue;
+                }
 
                 Point pm = CombatCollection.CalcUnderChar(World.Player);
                 pm.X -= texture.UV.Width;
@@ -179,6 +185,16 @@ namespace ClassicUO.Dust765.Dust765
             //str = 0xF09
             //agi = 0xF08
 
+            for (int i = 0; i < _actions.Count; i++)
+            {
+                VREntry entry = _actions[i];
+
+                if (entry.Graphic == graphic && Time.Ticks - entry.Time <= 250)
+                {
+                    return;
+                }
+            }
+
             VREntry newEntry = new VREntry
             {
                 Graphic = graphic,
@@ -186,15 +202,135 @@ namespace ClassicUO.Dust765.Dust765
             };
             Add(newEntry);
         }
+
+        public void OnItemUse(uint serial)
+        {
+            if (!IsEnabled || !SerialHelper.IsItem(serial))
+            {
+                return;
+            }
+
+            Item item = World.Items.Get(serial);
+
+            if (item == null)
+            {
+                return;
+            }
+
+            switch (item.Graphic)
+            {
+                case 0x0E21: // bandage
+                case 0x0F07: // cure pot
+                case 0x0F0C: // heal pot
+                case 0x0F0B: // refresh pot
+                case 0x0F09: // str pot
+                case 0x0F08: // agi pot
+                    DrawArt(item.Graphic);
+                    break;
+            }
+        }
+
+        public void OnServerText(string text)
+        {
+            if (!IsEnabled || string.IsNullOrWhiteSpace(text))
+            {
+                return;
+            }
+
+            string normalized = text.ToLowerInvariant();
+
+            if (normalized.Contains("you feel better") || normalized.Contains("feel better"))
+            {
+                DrawArt(0x0F0C);
+                return;
+            }
+
+            if (normalized.Contains("you feel cured of poison") || normalized.Contains("cured of poison"))
+            {
+                DrawArt(0x0F07);
+                return;
+            }
+
+            if (normalized.Contains("you feel rejuvenated") || normalized.Contains("feel rejuvenated"))
+            {
+                DrawArt(0x0F0B);
+                return;
+            }
+
+            if (normalized.Contains("you feel stronger") || normalized.Contains("feel stronger"))
+            {
+                DrawArt(0x0F09);
+                return;
+            }
+
+            if (normalized.Contains("you feel more agile") || normalized.Contains("feel more agile"))
+            {
+                DrawArt(0x0F08);
+            }
+        }
+
         //HANDLE CLILOCS
         public void OnCliloc(uint cliloc)
         {
+            if (!IsEnabled)
+                return;
+
             //START BANDIES TIMER
             for (int i = 0; i < _startBandiesAtClilocs.Length; i++)
             {
                 if (_startBandiesAtClilocs[i] == cliloc)
                 {
                     DrawArt(0x0E21);
+                    return;
+                }
+            }
+
+            //HEAL POTION
+            for (int i = 0; i < _healPotionClilocs.Length; i++)
+            {
+                if (_healPotionClilocs[i] == cliloc)
+                {
+                    DrawArt(0x0F0C);
+                    return;
+                }
+            }
+
+            //CURE POTION
+            for (int i = 0; i < _curePotionClilocs.Length; i++)
+            {
+                if (_curePotionClilocs[i] == cliloc)
+                {
+                    DrawArt(0x0F07);
+                    return;
+                }
+            }
+
+            //REFRESH POTION
+            for (int i = 0; i < _refreshPotionClilocs.Length; i++)
+            {
+                if (_refreshPotionClilocs[i] == cliloc)
+                {
+                    DrawArt(0x0F0B);
+                    return;
+                }
+            }
+
+            //STRENGTH POTION
+            for (int i = 0; i < _strengthPotionClilocs.Length; i++)
+            {
+                if (_strengthPotionClilocs[i] == cliloc)
+                {
+                    DrawArt(0x0F09);
+                    return;
+                }
+            }
+
+            //AGILITY POTION
+            for (int i = 0; i < _agilityPotionClilocs.Length; i++)
+            {
+                if (_agilityPotionClilocs[i] == cliloc)
+                {
+                    DrawArt(0x0F08);
                     return;
                 }
             }
@@ -212,11 +348,41 @@ namespace ClassicUO.Dust765.Dust765
         //CLILOCS
         private static int[] _startBandiesAtClilocs = new int[]
         {
-            500956,
-            500957,
-            500958,
-            500959,
-            500960
+            500956, //You begin applying the bandages.
+            500957, //You begin applying the bandages.
+            500958, //You begin applying the bandages.
+            500959, //You begin applying the bandages.
+            500960  //You begin applying the bandages.
+        };
+        private static int[] _healPotionClilocs = new int[]
+        {
+            500235, //You feel better!
+            500236, //You feel better!
+            500237  //You feel better!
+        };
+        private static int[] _curePotionClilocs = new int[]
+        {
+            1010052, //You feel cured of poison!
+            1042000, //The poison was too strong, you are still poisoned (partial cure)
+            500231,  //You feel cured of poison!
+            500232   //That potion was not strong enough to cure your poison!
+        };
+        private static int[] _refreshPotionClilocs = new int[]
+        {
+            500240, //You feel rejuvenated!
+            500241  //You feel rejuvenated!
+        };
+        private static int[] _strengthPotionClilocs = new int[]
+        {
+            1060847, //You feel stronger!
+            500118,  //You feel stronger!
+            1008095  //You are already under a similar effect.
+        };
+        private static int[] _agilityPotionClilocs = new int[]
+        {
+            1060844, //You feel more agile!
+            500115,  //You feel more agile!
+            1008095  //You are already under a similar effect.
         };
         private static int[] _resistingMagicAtClilocs = new int[]
         {
