@@ -168,5 +168,25 @@ namespace ClassicUO.IO.Audio
 
             AfterStop();
         }
+
+        /// <summary>
+        /// Submits additional buffers for seamless looping playback.
+        /// Should be called after Play() when looping is desired.
+        /// </summary>
+        /// <param name="bufferCount">Number of additional buffers to submit (recommended: 2-3 for smooth playback)</param>
+        public void SubmitAdditionalBuffers(int bufferCount)
+        {
+            if (SoundInstance != null && !SoundInstance.IsDisposed && SoundInstance.State == SoundState.Playing)
+            {
+                var buffer = GetBuffer();
+                if (buffer.Count > 0)
+                {
+                    for (int i = 0; i < bufferCount; i++)
+                    {
+                        SoundInstance.SubmitBuffer(buffer.Array, buffer.Offset, buffer.Count);
+                    }
+                }
+            }
+        }
     }
 }
