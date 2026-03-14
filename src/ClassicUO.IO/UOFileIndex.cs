@@ -54,7 +54,7 @@ namespace ClassicUO.IO
 
         public bool Equals(UOFileIndex other)
         {
-            return (File, Offset, Length, DecompressedLength) == (File, other.Offset, other.Length, other.DecompressedLength);
+            return (File, Offset, Length, DecompressedLength) == (other.File, other.Offset, other.Length, other.DecompressedLength);
         }
     }
 

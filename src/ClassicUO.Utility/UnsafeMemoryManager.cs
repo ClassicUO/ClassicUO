@@ -25,13 +25,23 @@ namespace ClassicUO.Utility
 
         public static void Memset(void* ptr, byte value, int count)
         {
+            // Fill the 8-byte pattern with the value in every byte
+            long fill = (long)value * 0x0101010101010101L;
+
             long* c = (long*) ptr;
+            int longCount = count / 8;
 
-            count /= 8;
-
-            for (int i = 0; i < count; ++i)
+            for (int i = 0; i < longCount; ++i)
             {
-                *c++ = (long) value;
+                *c++ = fill;
+            }
+
+            // Handle trailing bytes
+            byte* tail = (byte*) c;
+            int remaining = count % 8;
+            for (int i = 0; i < remaining; ++i)
+            {
+                *tail++ = value;
             }
         }
 

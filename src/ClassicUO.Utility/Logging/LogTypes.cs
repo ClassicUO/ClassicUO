@@ -14,7 +14,7 @@ namespace ClassicUO.Utility.Logging
         Warning = 0x08,
         Error = 0x10,
         Panic = 0x20,
-        Table = 0x30,
+        Table = 0x40,
         All = byte.MaxValue
     }
 }

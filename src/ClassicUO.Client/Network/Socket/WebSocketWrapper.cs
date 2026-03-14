@@ -32,8 +32,24 @@ sealed class WebSocketWrapper : SocketWrapper
 
     public override void Connect(Uri uri) => ConnectAsync(uri, _tokenSource).Wait();
 
-    public override void Send(byte[] buffer, int offset, int count) =>
-        _webSocket.SendAsync(buffer.AsMemory().Slice(offset, count), WebSocketMessageType.Binary, true, _tokenSource.Token);
+    public override void Send(byte[] buffer, int offset, int count)
+    {
+        var copy = Shared.Rent(count);
+        Buffer.BlockCopy(buffer, offset, copy, 0, count);
+        SendCopyAsync(copy, count);
+    }
+
+    private async void SendCopyAsync(byte[] copy, int count)
+    {
+        try
+        {
+            await _webSocket.SendAsync(copy.AsMemory().Slice(0, count), WebSocketMessageType.Binary, true, _tokenSource.Token);
+        }
+        finally
+        {
+            Shared.Return(copy);
+        }
+    }
 
     public override int Read(byte[] buffer)
     {
@@ -195,8 +211,15 @@ sealed class WebSocketWrapper : SocketWrapper
         if (!IsConnected)
             return;
 
-        _tokenSource?.Cancel();
-        _webSocket?.CloseAsync(WebSocketCloseStatus.NormalClosure, "Disconnect", _tokenSource?.Token ?? default);
+        try
+        {
+            _webSocket?.CloseAsync(WebSocketCloseStatus.NormalClosure, "Disconnect", CancellationToken.None)
+                .ContinueWith(_ => _tokenSource?.Cancel());
+        }
+        catch
+        {
+            _tokenSource?.Cancel();
+        }
     }
 
     public override void Dispose()
