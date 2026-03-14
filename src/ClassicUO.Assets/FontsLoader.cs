@@ -421,6 +421,7 @@ namespace ClassicUO.Assets
 
             public int LineCount;
             public FastList<WebLinkRect> Links;
+            public uint HtmlBackgroundColor;
 
             public static FontInfo Empty = new FontInfo() { Data = null };
         }
@@ -2242,6 +2243,9 @@ namespace ClassicUO.Assets
                 fi.Height = height;
                 fi.Data = pData;
                 fi.Links = links;
+                fi.HtmlBackgroundColor = (IsUsingHTML && _htmlStatus.IsHtmlBackgroundColored && _htmlStatus.BackgroundColor != 0)
+                    ? HuesHelper.RgbaToArgb(_htmlStatus.BackgroundColor | 0xFF)
+                    : 0;
                 return fi;
             }
             finally
@@ -3692,6 +3696,268 @@ namespace ClassicUO.Assets
             }
 
             return (x, y);
+        }
+
+        // ── Single-glyph rendering for atlas-based text ──
+
+        public struct SingleGlyphInfo
+        {
+            public uint[] Data;
+            public int Width;
+            public int Height;
+            public int BearingX;
+            public int BearingY;
+            public int AdvanceWidth;
+
+            public static readonly SingleGlyphInfo Empty = new SingleGlyphInfo();
+        }
+
+        /// <summary>
+        /// Renders a single ASCII glyph into a pixel buffer with hue applied per-pixel.
+        /// Matches the original GeneratePixelsASCII hue logic (GetPartialHueColor or GetColor).
+        /// </summary>
+        public SingleGlyphInfo RenderSingleGlyphASCII(byte font, char c, ushort hue = 0)
+        {
+            if (font >= FontCount)
+                return SingleGlyphInfo.Empty;
+
+            int index = GetASCIIIndex(c);
+            ref FontCharacterData fcd = ref _fontDataASCII[font, index];
+
+            int dw = fcd.Width;
+            int dh = fcd.Height;
+
+            if (dw <= 0 || dh <= 0 || fcd.Data == null)
+            {
+                return new SingleGlyphInfo
+                {
+                    Data = null,
+                    Width = 0,
+                    Height = 0,
+                    BearingX = 0,
+                    BearingY = GetFontOffsetY(font, (byte)c),
+                    AdvanceWidth = dw
+                };
+            }
+
+            bool isPartial = font != 5 && font != 8 && !UnusePartialHue;
+            uint[] pData = new uint[dw * dh];
+
+            for (int y = 0; y < dh; y++)
+            {
+                for (int x = 0; x < dw; x++)
+                {
+                    ushort pic = fcd.Data[y * dw + x];
+                    if (pic != 0)
+                    {
+                        uint pcl;
+                        if (isPartial)
+                            pcl = FileManager.Hues.GetPartialHueColor(pic, hue);
+                        else
+                            pcl = FileManager.Hues.GetColor(pic, hue);
+
+                        pData[y * dw + x] = pcl | 0xFF_00_00_00;
+                    }
+                }
+            }
+
+            return new SingleGlyphInfo
+            {
+                Data = pData,
+                Width = dw,
+                Height = dh,
+                BearingX = 0,
+                BearingY = GetFontOffsetY(font, (byte)c),
+                AdvanceWidth = dw
+            };
+        }
+
+        /// <summary>
+        /// Renders a single Unicode glyph into a pixel buffer, optionally with border, solid, and/or italic effects.
+        /// When charcolor is 0, renders as white (0xFEFFFFFF) for shader-based coloring.
+        /// When charcolor is non-zero, bakes that specific ARGB color into the glyph pixels (used for HTML per-char colors).
+        /// </summary>
+        public SingleGlyphInfo RenderSingleGlyphUnicode(byte font, char c, bool hasBorder, bool isSolid, bool isItalic = false, uint charcolor = 0)
+        {
+            if (font >= 20 || _unicodeFontAddress[font] == null)
+                return SingleGlyphInfo.Empty;
+
+            if (c == ' ')
+            {
+                return new SingleGlyphInfo
+                {
+                    Data = null,
+                    Width = 0,
+                    Height = 0,
+                    BearingX = 0,
+                    BearingY = 0,
+                    AdvanceWidth = UNICODE_SPACE_WIDTH
+                };
+            }
+
+            ref var ch = ref GetCharUni(font, c);
+
+            if (ch.Data == null)
+            {
+                return SingleGlyphInfo.Empty;
+            }
+
+            int dw = ch.Width;
+            int dh = ch.Height;
+
+            if (dw <= 0 || dh <= 0)
+                return SingleGlyphInfo.Empty;
+
+            // Calculate italic extra width
+            int italicExtra = isItalic ? (int)(dh / ITALIC_FONT_KOEFFICIENT) : 0;
+
+            // Add padding for border: 1px on each side
+            int pad = hasBorder ? 1 : 0;
+            int solidShift = isSolid ? 1 : 0;
+            int bufW = dw + italicExtra + solidShift + pad * 2;
+            int bufH = dh + pad * 2;
+
+            uint[] pData = new uint[bufW * bufH];
+            if (charcolor == 0)
+                charcolor = 0xFEFFFFFF; // neutral white, will be recolored by shader
+            uint blackColor = 0xFF010101;
+
+            // Render glyph pixels with italic offset and solid shift
+            int scanlineCount = ((dw - 1) >> 3) + 1;
+            int scanLineOff = 0;
+
+            for (int y = 0; y < dh; y++, scanLineOff += scanlineCount)
+            {
+                int italicOffset = isItalic ? (int)((dh - y) / ITALIC_FONT_KOEFFICIENT) : 0;
+
+                for (int sc = 0; sc < scanlineCount; sc++)
+                {
+                    int coff = sc << 3;
+                    for (int j = 0; j < 8; j++)
+                    {
+                        int x = coff + j;
+                        if (x >= dw)
+                            break;
+
+                        byte cl = (byte)(ch.Data[scanLineOff + sc] & (1 << (7 - j)));
+                        if (cl != 0)
+                        {
+                            pData[(y + pad) * bufW + (x + italicOffset + solidShift + pad)] = charcolor;
+                        }
+                    }
+                }
+            }
+
+            // Apply solid effect (outline with solidColor, then overwrite interior back to charcolor)
+            if (isSolid)
+            {
+                uint solidColor = blackColor;
+                if (solidColor == charcolor)
+                    solidColor++;
+
+                // First pass: add solid outline pixels (matching original's neighbor check)
+                for (int cy = 0; cy < dh; cy++)
+                {
+                    int italicOffset = isItalic ? (int)((dh - cy) / ITALIC_FONT_KOEFFICIENT) : 0;
+                    int minXOk = -1; // solid always has room on the left (solidShift or pad)
+                    int maxXOk = dw + 1;
+
+                    for (int cx = minXOk; cx < maxXOk; cx++)
+                    {
+                        int bx = cx + italicOffset + solidShift + pad;
+                        int by = cy + pad;
+
+                        if (bx < 0 || bx >= bufW || by < 0 || by >= bufH)
+                            continue;
+
+                        int block = by * bufW + bx;
+                        if (pData[block] == 0 && pData[block] != solidColor)
+                        {
+                            int endX = cx < dw ? 2 : 1;
+                            if (endX == 2 && bx + 1 >= bufW)
+                                endX--;
+
+                            for (int x = 0; x < endX; x++)
+                            {
+                                int nowX = bx + x;
+                                int testBlock = by * bufW + nowX;
+
+                                if (testBlock >= 0 && testBlock < pData.Length
+                                    && pData[testBlock] != 0
+                                    && pData[testBlock] != solidColor)
+                                {
+                                    pData[block] = solidColor;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // Second pass: restore interior pixels to charcolor
+                for (int cy = 0; cy < dh; cy++)
+                {
+                    int italicOffset = isItalic ? (int)((dh - cy) / ITALIC_FONT_KOEFFICIENT) : 0;
+                    for (int cx = 0; cx < dw; cx++)
+                    {
+                        int bx = cx + italicOffset + solidShift + pad;
+                        int by = cy + pad;
+                        int block = by * bufW + bx;
+                        if (block >= 0 && block < pData.Length && pData[block] == solidColor)
+                        {
+                            pData[block] = charcolor;
+                        }
+                    }
+                }
+            }
+
+            // Apply black border effect
+            if (hasBorder)
+            {
+                for (int cy = 0; cy < bufH; cy++)
+                {
+                    for (int cx = 0; cx < bufW; cx++)
+                    {
+                        int block = cy * bufW + cx;
+
+                        if (pData[block] == 0)
+                        {
+                            // Check if any neighbor has a non-zero, non-black pixel
+                            bool found = false;
+
+                            int startY = cy > 0 ? -1 : 0;
+                            int endY = cy < bufH - 1 ? 2 : 1;
+                            int startX = cx > 0 ? -1 : 0;
+                            int endX = cx < bufW - 1 ? 2 : 1;
+
+                            for (int ny = startY; ny < endY && !found; ny++)
+                            {
+                                for (int nx = startX; nx < endX && !found; nx++)
+                                {
+                                    int testBlock = (cy + ny) * bufW + (cx + nx);
+                                    if (testBlock >= 0 && testBlock < pData.Length
+                                        && pData[testBlock] != 0
+                                        && pData[testBlock] != blackColor)
+                                    {
+                                        pData[block] = blackColor;
+                                        found = true;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return new SingleGlyphInfo
+            {
+                Data = pData,
+                Width = bufW,
+                Height = bufH,
+                BearingX = ch.OffsetX + 1 - solidShift - pad,
+                BearingY = ch.OffsetY - pad,
+                AdvanceWidth = dw + ch.OffsetX + 1 + solidShift
+            };
         }
     }
 

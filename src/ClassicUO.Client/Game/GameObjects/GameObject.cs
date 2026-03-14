@@ -252,7 +252,7 @@ namespace ClassicUO.Game.GameObjects
                 if (
                     item.RenderedText == null
                     || item.RenderedText.IsDestroyed
-                    || item.RenderedText.Texture == null
+                    || !item.RenderedText.HasContent
                     || item.Time < Time.Ticks
                 )
                 {
