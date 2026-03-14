@@ -37,6 +37,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         //experimental
         private Checkbox _autoOpenDoors, _autoOpenCorpse, _skipEmptyCorpse, _disableTabBtn, _disableCtrlQWBtn, _disableDefaultHotkeys, _disableArrowBtn, _disableAutoMove, _overrideContainerLocation, _smoothDoors, _showTargetRangeIndicator, _customBars, _customBarsBBG, _saveHealthbars;
+        private Checkbox _nameOverheadAlwaysOn, _nameOverheadShowHpBar;
         private HSliderBar _cellSize;
         private Checkbox _containerScaleItems, _containerDoubleClickToLoot, _relativeDragAnDropItems, _useLargeContianersGumps, _highlightContainersWhenMouseIsOver;
 
@@ -1202,6 +1203,30 @@ namespace ClassicUO.Game.UI.Gumps
                     null,
                     ResGumps.ShowTarRangeIndic,
                     _currentProfile.ShowTargetRangeIndicator,
+                    startX,
+                    startY
+                )
+            );
+
+            section4.Add
+            (
+                _nameOverheadAlwaysOn = AddCheckBox
+                (
+                    null,
+                    "Always show name overheads",
+                    _currentProfile.NameOverheadToggled,
+                    startX,
+                    startY
+                )
+            );
+
+            section4.Add
+            (
+                _nameOverheadShowHpBar = AddCheckBox
+                (
+                    null,
+                    "Show HP bar on name overheads",
+                    _currentProfile.NameOverheadShowHpBar,
                     startX,
                     startY
                 )
@@ -3606,6 +3631,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _dragSelectHumanoidsOnly.IsChecked = false;
                     _dragSelectHostileOnly.IsChecked = false;
                     _showTargetRangeIndicator.IsChecked = false;
+                    _nameOverheadAlwaysOn.IsChecked = false;
+                    _nameOverheadShowHpBar.IsChecked = true;
                     _customBars.IsChecked = false;
                     _customBarsBBG.IsChecked = false;
                     _autoOpenCorpse.IsChecked = false;
@@ -4250,6 +4277,8 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.OverrideContainerLocationSetting = _overrideContainerLocationSetting.SelectedIndex;
 
             _currentProfile.ShowTargetRangeIndicator = _showTargetRangeIndicator.IsChecked;
+            _currentProfile.NameOverheadToggled = _nameOverheadAlwaysOn.IsChecked;
+            _currentProfile.NameOverheadShowHpBar = _nameOverheadShowHpBar.IsChecked;
 
 
             bool updateHealthBars = _currentProfile.CustomBarsToggled != _customBars.IsChecked;

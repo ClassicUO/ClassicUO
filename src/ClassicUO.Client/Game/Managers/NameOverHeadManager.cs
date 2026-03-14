@@ -1,7 +1,8 @@
-﻿// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: BSD-2-Clause
 
 using System;
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
 
@@ -10,11 +11,18 @@ namespace ClassicUO.Game.Managers
     [Flags]
     internal enum NameOverheadTypeAllowed
     {
-        All,
-        Mobiles,
-        Items,
-        Corpses,
-        MobilesCorpses = Mobiles | Corpses
+        None = 0,
+        Items = 1 << 0,
+        Corpses = 1 << 1,
+        Innocent = 1 << 2,
+        Ally = 1 << 3,
+        Gray = 1 << 4,
+        Criminal = 1 << 5,
+        Enemy = 1 << 6,
+        Murderer = 1 << 7,
+        Invulnerable = 1 << 8,
+        AllMobiles = Innocent | Ally | Gray | Criminal | Enemy | Murderer | Invulnerable,
+        All = Items | Corpses | AllMobiles
     }
 
     internal sealed class NameOverHeadManager
@@ -36,31 +44,34 @@ namespace ClassicUO.Game.Managers
             set => ProfileManager.CurrentProfile.NameOverheadToggled = value;
         }
 
-        public bool IsAllowed(Entity serial)
+        public bool IsAllowed(Entity entity)
         {
-            if (serial == null)
+            if (entity == null)
             {
                 return false;
             }
 
-            if (TypeAllowed == NameOverheadTypeAllowed.All)
+            if (SerialHelper.IsItem(entity.Serial))
             {
-                return true;
+                if (entity is Item item && item.IsCorpse)
+                    return TypeAllowed.HasFlag(NameOverheadTypeAllowed.Corpses);
+
+                return TypeAllowed.HasFlag(NameOverheadTypeAllowed.Items);
             }
 
-            if (SerialHelper.IsItem(serial.Serial) && TypeAllowed == NameOverheadTypeAllowed.Items)
+            if (SerialHelper.IsMobile(entity.Serial) && entity is Mobile mobile)
             {
-                return true;
-            }
-
-            if (SerialHelper.IsMobile(serial.Serial) && TypeAllowed.HasFlag(NameOverheadTypeAllowed.Mobiles))
-            {
-                return true;
-            }
-
-            if (TypeAllowed.HasFlag(NameOverheadTypeAllowed.Corpses) && SerialHelper.IsItem(serial.Serial) && _world.Items.Get(serial)?.IsCorpse == true)
-            {
-                return true;
+                return mobile.NotorietyFlag switch
+                {
+                    NotorietyFlag.Innocent => TypeAllowed.HasFlag(NameOverheadTypeAllowed.Innocent),
+                    NotorietyFlag.Ally => TypeAllowed.HasFlag(NameOverheadTypeAllowed.Ally),
+                    NotorietyFlag.Gray => TypeAllowed.HasFlag(NameOverheadTypeAllowed.Gray),
+                    NotorietyFlag.Criminal => TypeAllowed.HasFlag(NameOverheadTypeAllowed.Criminal),
+                    NotorietyFlag.Enemy => TypeAllowed.HasFlag(NameOverheadTypeAllowed.Enemy),
+                    NotorietyFlag.Murderer => TypeAllowed.HasFlag(NameOverheadTypeAllowed.Murderer),
+                    NotorietyFlag.Invulnerable => TypeAllowed.HasFlag(NameOverheadTypeAllowed.Invulnerable),
+                    _ => true
+                };
             }
 
             return false;
@@ -76,6 +87,14 @@ namespace ClassicUO.Game.Managers
 
             _gump.IsEnabled = true;
             _gump.IsVisible = true;
+        }
+
+        public void SetMenuVisible(bool visible)
+        {
+            if (_gump != null && !_gump.IsDisposed)
+            {
+                _gump.IsVisible = visible;
+            }
         }
 
         public void Close()
