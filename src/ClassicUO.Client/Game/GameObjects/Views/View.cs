@@ -242,6 +242,11 @@ namespace ClassicUO.Game.GameObjects
                 index.Width = (short)((artInfo.UV.Width >> 1) - 22);
                 index.Height = (short)(artInfo.UV.Height - 44);
 
+                if (index.Width > 0)
+                {
+                    depth += index.Width / 22f;
+                }
+
                 x -= index.Width;
                 y -= index.Height;
 
