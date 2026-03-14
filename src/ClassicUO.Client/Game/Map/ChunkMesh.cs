@@ -382,8 +382,7 @@ namespace ClassicUO.Game.Map
             if (itemData.IsInternal)
                 return true;
 
-            ref UOFileIndex index = ref Client.Game.UO.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
-            if (index.AnimOffset != 0)
+            if (itemData.IsAnimated)
                 return true;
 
             if (itemData.IsFoliage)

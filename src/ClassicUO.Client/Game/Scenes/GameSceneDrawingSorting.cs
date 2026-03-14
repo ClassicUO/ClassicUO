@@ -589,6 +589,11 @@ namespace ClassicUO.Game.Scenes
                 mesh.Statics.SetVisible(obj.MeshSpriteIndex, obj.AlphaHue, cot);
                 ApplyMeshHue(obj, mesh.Statics);
 
+                if (itemData.IsLight)
+                {
+                    AddLight(obj, obj, obj.RealScreenPosition.X + 22, obj.RealScreenPosition.Y + 22);
+                }
+
                 if (allowSelection && !(cot && IsMouseInsideCotCircle()) && obj.AllowedToDraw && obj.CheckMouseSelection())
                 {
                     if (SelectedObject.Object is GameObject prev)
@@ -874,6 +879,12 @@ namespace ClassicUO.Game.Scenes
 
                     mesh.Statics.SetVisible(obj.MeshSpriteIndex, obj.AlphaHue, meshCot);
                     ApplyMeshHue(obj, mesh.Statics);
+
+                    if (meshItemData.IsLight)
+                    {
+                        AddLight(obj, obj, obj.RealScreenPosition.X + 22, obj.RealScreenPosition.Y + 22);
+                    }
+
                     TrySelectObject(obj, meshAllowSelection && !(meshCot && IsMouseInsideCotCircle()));
                     continue;
                 }
