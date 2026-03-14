@@ -137,8 +137,8 @@ namespace ClassicUO.Game
                                 Align,
                                 (ushort)FontStyle,
                                 MaxWidth > 0 ? MaxWidth : Width,
-                                true,
-                                true
+                                countret: false,
+                                countspaces: false
                             );
                         }
                         else
@@ -150,8 +150,8 @@ namespace ClassicUO.Game
                                 Align,
                                 (ushort)FontStyle,
                                 MaxWidth > 0 ? MaxWidth : Width,
-                                true,
-                                true
+                                countret: false,
+                                countspaces: false
                             );
                         }
 
@@ -475,22 +475,19 @@ namespace ClassicUO.Game
             // For Unicode: Hue=0xFFFF → white (0), otherwise GetPolygoneColor result (ARGB).
             // For ASCII: the Hue index itself is passed to RenderSingleGlyphASCII for per-pixel hue.
             uint baseColor = 0;
-            if (!IsHTML)
+            if (IsUnicode)
             {
-                if (IsUnicode)
+                if (Hue != 0xFFFF)
                 {
-                    if (Hue != 0xFFFF)
-                    {
-                        baseColor = HuesHelper.RgbaToArgb(
-                            (Client.Game.UO.FileManager.Hues.GetPolygoneColor(Cell, Hue) << 8) | 0xFF
-                        );
-                    }
+                    baseColor = HuesHelper.RgbaToArgb(
+                        (Client.Game.UO.FileManager.Hues.GetPolygoneColor(Cell, Hue) << 8) | 0xFF
+                    );
                 }
-                else
-                {
-                    // For ASCII, pass hue index as the color key (cast to uint)
-                    baseColor = Hue;
-                }
+            }
+            else if (!IsHTML)
+            {
+                // For ASCII, pass hue index as the color key (cast to uint)
+                baseColor = Hue;
             }
 
             // Hue vector: no shader hue by default (color is baked).
