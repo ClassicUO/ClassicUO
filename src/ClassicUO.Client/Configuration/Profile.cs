@@ -148,6 +148,7 @@ namespace ClassicUO.Configuration
         public bool UseShiftToPathfind { get; set; }
         public bool AlwaysRun { get; set; }
         public bool AlwaysRunUnlessHidden { get; set; }
+        public bool FastRotation { get; set; }
         public bool SmoothMovements { get; set; } = true;
         public bool HoldDownKeyTab { get; set; } = true;
         public bool HoldShiftForContext { get; set; } = false;
