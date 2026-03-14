@@ -36,11 +36,11 @@ namespace ClassicUO.IO
                     _file = new BinaryReader(new UnmanagedMemoryStream(ptr, Length));
                 }
             }
-            catch
+            catch (Exception ex)
             {
                 _accessor.SafeMemoryMappedViewHandle.ReleasePointer();
 
-                throw new Exception("Something went wrong...");
+                throw new InvalidOperationException("Failed to acquire memory-mapped file pointer.", ex);
             }
         }
 

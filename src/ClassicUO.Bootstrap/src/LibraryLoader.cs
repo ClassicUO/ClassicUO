@@ -138,7 +138,7 @@ namespace ClassicUO
 
             public override int FreeLibrary(IntPtr module)
             {
-                return m_useLibdl1 ? Libdl1.dlerror() : Libdl2.dlerror();
+                return m_useLibdl1 ? Libdl1.dlclose(module) : Libdl2.dlclose(module);
             }
         }
     }

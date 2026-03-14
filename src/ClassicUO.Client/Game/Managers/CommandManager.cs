@@ -123,10 +123,13 @@ namespace ClassicUO.Game.Managers
             if (entity != null)
             {
                 _world.TargetManager.Target(entity);
+                Mouse.LastLeftButtonClickTime = 0;
+                GameActions.Print(_world, string.Format(ResGeneral.ItemID0Hue1, entity.Graphic, entity.Hue));
             }
-
-            Mouse.LastLeftButtonClickTime = 0;
-            GameActions.Print(_world, string.Format(ResGeneral.ItemID0Hue1, entity.Graphic, entity.Hue));
+            else
+            {
+                Mouse.LastLeftButtonClickTime = 0;
+            }
         }
     }
 }

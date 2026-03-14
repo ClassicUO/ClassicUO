@@ -71,12 +71,13 @@ namespace ClassicUO.Utility.Collections
                 return;
             }
 
+            int previousCount = Count;
             Count = 0;
 
             // non-primitive types are cleared so the garbage collector can release them
             if (!_isPrimitive)
             {
-                Array.Clear(_items, 0, Count);
+                Array.Clear(_items, 0, previousCount);
             }
         }
 
