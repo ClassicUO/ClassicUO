@@ -112,11 +112,16 @@ start """" ""{2}""
 del ""{3}""
 ", exeDir, tempZip, exePath, batchPath);
                     File.WriteAllText(batchPath, batchContent);
+                    // Use cmd.exe /c instead of ShellExecute on the .bat directly.
+                    // ShellExecute on a .bat from %TEMP% triggers SmartScreen on Windows 11
+                    // and returns ERROR_CANCELLED (1223 "operation canceled by user").
                     Process.Start(new ProcessStartInfo
                     {
-                        FileName = batchPath,
-                        UseShellExecute = true,
+                        FileName = "cmd.exe",
+                        Arguments = $"/c \"{batchPath}\"",
+                        UseShellExecute = false,
                         CreateNoWindow = true,
+                        WindowStyle = ProcessWindowStyle.Hidden,
                         WorkingDirectory = exeDir
                     });
                     await Task.Delay(500);
