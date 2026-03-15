@@ -1,4 +1,4 @@
-name: Dust765
+﻿name: Dust765
 
 on:
   push:
@@ -8,9 +8,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  # ──────────────────────────────────────────────────────────────
+  # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   # PR check: fast build-only, runs on every pull_request event
-  # ──────────────────────────────────────────────────────────────
+  # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   build-test:
     if: github.event_name == 'pull_request'
     runs-on: windows-latest
@@ -32,9 +32,9 @@ jobs:
       - name: Build (PR check)
         run: dotnet build src/ClassicUO.Client/ClassicUO.Client.csproj -c Release --no-restore
 
-  # ──────────────────────────────────────────────────────────────
+  # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   # Full build + artifact upload: runs only after merge (push)
-  # ──────────────────────────────────────────────────────────────
+  # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   build-windows:
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: windows-latest
@@ -140,11 +140,11 @@ jobs:
           name: Dust765-macos
           path: build/osx-x64
 
-  # ──────────────────────────────────────────────────────────────
+  # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   # Release: auto version from git tags (semver 3.x.x)
-  #   developer → v3.0.N-beta  (pre-release, published immediately)
-  #   main      → v3.0.N       (stable, promotes latest beta tag)
-  # ──────────────────────────────────────────────────────────────
+  #   developer â†’ v3.0.N-beta  (pre-release, published immediately)
+  #   main      â†’ v3.0.N       (stable, promotes latest beta tag)
+  # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   release:
     needs: [build-windows, build-linux, build-macos]
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
@@ -223,178 +223,5 @@ jobs:
             Dust765-${{ steps.ver.outputs.tag }}-Windows-x64.zip
             Dust765-${{ steps.ver.outputs.tag }}-linux.zip
             Dust765-${{ steps.ver.outputs.tag }}-mac.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    if: github.event_name == 'pull_request'
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 0
-      - name: Init submodules
-        run: git submodule update --init --recursive
-      - name: Override UOScript.csproj for net48
-        run: Copy-Item -Path .github\UOScript.csproj -Destination external\UOSteam\UOScript\UOScript.csproj -Force
-      - name: Setup .NET 8
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-      - name: Restore dependencies
-        run: dotnet restore src/ClassicUO.Client/ClassicUO.Client.csproj
-      - name: Build (PR check)
-        run: dotnet build src/ClassicUO.Client/ClassicUO.Client.csproj -c Release --no-restore
-
-  # ──────────────────────────────────────────────────────────────
-  # Full build + artifact upload: runs only after merge (push)
-  # ──────────────────────────────────────────────────────────────
-  build-windows:
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 0
-      - name: Init submodules
-        run: git submodule update --init --recursive
-      - name: Override UOScript.csproj for net48
-        run: Copy-Item -Path .github\UOScript.csproj -Destination external\UOSteam\UOScript\UOScript.csproj -Force
-      - name: Setup .NET 8
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-      - name: Restore dependencies
-        run: dotnet restore src/ClassicUO.Client/ClassicUO.Client.csproj
-      - name: Build with .NET Framework 4.8
-        run: dotnet build src/ClassicUO.Client/ClassicUO.Client.csproj -c Release
-        env:
-          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-          SENTRY_ENV: production
-      - name: Copy build artifacts
-        run: |
-          New-Item -ItemType Directory -Force -Path build\win-x64
-          xcopy /E /I bin\Release\* build\win-x64\
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Dust765-windows
-          path: build/win-x64
-
-  build-linux:
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 0
-      - name: Init submodules
-        run: git submodule update --init --recursive
-      - name: Override UOScript.csproj for net48
-        run: cp -f .github/UOScript.csproj external/UOSteam/UOScript/UOScript.csproj
-      - name: Setup .NET 8
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-      - name: Install Mono
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y mono-complete
-      - name: Restore dependencies
-        run: dotnet restore src/ClassicUO.Client/ClassicUO.Client.csproj
-      - name: Build with Mono
-        run: dotnet build src/ClassicUO.Client/ClassicUO.Client.csproj -c Release
-        env:
-          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-          SENTRY_ENV: production
-      - name: Copy build artifacts
-        run: |
-          mkdir -p build/linux-x64
-          cp -r bin/Release/* build/linux-x64/
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Dust765-linux
-          path: build/linux-x64
-
-  build-macos:
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 0
-      - name: Init submodules
-        run: git submodule update --init --recursive
-      - name: Override UOScript.csproj for net48
-        run: cp -f .github/UOScript.csproj external/UOSteam/UOScript/UOScript.csproj
-      - name: Setup .NET 8
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '8.0.x'
-      - name: Install Mono
-        run: brew install mono
-      - name: Restore dependencies
-        run: dotnet restore src/ClassicUO.Client/ClassicUO.Client.csproj
-      - name: Build with Mono
-        run: dotnet build src/ClassicUO.Client/ClassicUO.Client.csproj -c Release
-        env:
-          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-          SENTRY_ENV: production
-      - name: Copy build artifacts
-        run: |
-          mkdir -p build/osx-x64
-          cp -r bin/Release/* build/osx-x64/
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: Dust765-macos
-          path: build/osx-x64
-
-  release:
-    needs: [build-windows, build-linux, build-macos]
-    if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/developer') ||
-      github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    env:
-      TAG: ${{ github.event_name == 'workflow_dispatch' && format('v{0}', github.event.inputs.version) || format('v{0}-beta', github.run_number) }}
-      IS_RELEASE: ${{ github.event_name == 'workflow_dispatch' }}
-    steps:
-      - name: Download Windows artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: Dust765-windows
-          path: artifacts/windows
-      - name: Download Linux artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: Dust765-linux
-          path: artifacts/linux
-      - name: Download macOS artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: Dust765-macos
-          path: artifacts/macos
-      - name: Create Windows archive
-        run: zip -r Dust765-${{ env.TAG }}-Windows-x64.zip artifacts/windows -x "*.DS_Store"
-      - name: Create Linux archive
-        run: cd artifacts/linux && zip -r ../../Dust765-${{ env.TAG }}-linux.zip . -x "*.DS_Store" && cd ../..
-      - name: Create macOS archive
-        run: cd artifacts/macos && zip -r ../../Dust765-${{ env.TAG }}-mac.zip . -x "*.DS_Store" && cd ../..
-      - name: Create Release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ env.TAG }}
-          name: ${{ env.IS_RELEASE == 'true' && format('Release {0}', env.TAG) || format('Beta {0}', env.TAG) }}
-          draft: ${{ env.IS_RELEASE == 'true' && 'true' || 'false' }}
-          prerelease: ${{ env.IS_RELEASE != 'true' && 'true' || 'false' }}
-          make_latest: ${{ env.IS_RELEASE == 'true' && 'true' || 'false' }}
-          files: |
-            Dust765-${{ env.TAG }}-Windows-x64.zip
-            Dust765-${{ env.TAG }}-linux.zip
-            Dust765-${{ env.TAG }}-mac.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
