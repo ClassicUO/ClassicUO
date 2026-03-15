@@ -67,7 +67,7 @@ namespace ClassicUO.Dust765.UI.Gumps
             int contentY = 0;
             string[] sections =
             {
-                "/c[yellow]v3.0.2/cd",
+                "/c[yellow]v3.0.3/cd",
                 "",
                 "/c[yellow]Features/cd",
                 "- Add flag to override gargoyle fly state",
