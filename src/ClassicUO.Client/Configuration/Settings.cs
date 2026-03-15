@@ -5,6 +5,7 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using ClassicUO.Configuration.Json;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Configuration
@@ -120,6 +121,10 @@ namespace ClassicUO.Configuration
             {
                 settingsToSave.Username = string.Empty;
                 settingsToSave.Password = string.Empty;
+            }
+            else
+            {
+                settingsToSave.Password = Crypter.SanitizeForStorage(settingsToSave.Password);
             }
 
             settingsToSave.ProfilesPath = string.Empty;
