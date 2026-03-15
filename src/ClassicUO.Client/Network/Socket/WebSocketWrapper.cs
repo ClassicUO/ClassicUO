@@ -22,15 +22,18 @@ sealed class WebSocketWrapper : SocketWrapper
 
     private ClientWebSocket _webSocket;
     private TcpSocket _rawSocket;
+    private Task _receiveTask;
+    private readonly object _disposeLock = new();
+    private bool _disposed;
 
     public override bool IsConnected => _webSocket?.State is WebSocketState.Connecting or WebSocketState.Open;
     public override EndPoint LocalEndPoint => _rawSocket?.LocalEndPoint;
-    public bool IsCanceled => _tokenSource.IsCancellationRequested;
+    public bool IsCanceled => _tokenSource?.IsCancellationRequested ?? true;
 
     private CancellationTokenSource _tokenSource = new();
     private CircularBuffer _receiveStream;
 
-    public override void Connect(Uri uri) => ConnectAsync(uri, _tokenSource).Wait();
+    public override void Connect(Uri uri) => ConnectAsync(uri).Wait();
 
     public override void Send(byte[] buffer, int offset, int count)
     {
@@ -53,6 +56,9 @@ sealed class WebSocketWrapper : SocketWrapper
 
     public override int Read(byte[] buffer)
     {
+        if (_receiveStream == null)
+            return 0;
+
         lock (_receiveStream)
         {
             return _receiveStream.Dequeue(buffer, 0, buffer.Length);
@@ -64,7 +70,17 @@ sealed class WebSocketWrapper : SocketWrapper
         if (IsConnected)
             return;
 
-        _tokenSource = tokenSource ?? new CancellationTokenSource();
+        if (tokenSource == null)
+        {
+            _tokenSource?.Dispose();
+            _tokenSource = new CancellationTokenSource();
+        }
+        else if (!ReferenceEquals(tokenSource, _tokenSource))
+        {
+            _tokenSource?.Dispose();
+            _tokenSource = tokenSource;
+        }
+
         _receiveStream = new CircularBuffer();
 
         try
@@ -137,7 +153,7 @@ sealed class WebSocketWrapper : SocketWrapper
         Log.Trace($"Connected WebSocket: {uri}");
 
         // Kicks off the async receiving loop 
-        StartReceiveAsync().ConfigureAwait(false);
+        _receiveTask = StartReceiveAsync();
     }
 
     private async Task StartReceiveAsync()
@@ -163,6 +179,11 @@ sealed class WebSocketWrapper : SocketWrapper
                 if (!receiveResult.EndOfMessage)
                     continue;
 
+                if (_receiveStream == null)
+                {
+                    break;
+                }
+
                 lock (_receiveStream)
                 {
                     _receiveStream.Enqueue(buffer, 0, position);
@@ -185,7 +206,7 @@ sealed class WebSocketWrapper : SocketWrapper
             Shared.Return(buffer);
         }
 
-        if (!IsCanceled)
+        if (!IsCanceled && !_disposed)
             InvokeOnError(SocketError.ConnectionReset);
     }
 
@@ -193,6 +214,9 @@ sealed class WebSocketWrapper : SocketWrapper
     // We peek the raw tcp socket available bytes, grow if the frame is bigger, we're naively assuming no compression.
     private void GrowReceiveBufferIfNeeded(ref byte[] buffer, ref Memory<byte> memory)
     {
+        if (_rawSocket == null)
+            return;
+
         if (_rawSocket.Available <= buffer.Length)
             return;
 
@@ -208,21 +232,81 @@ sealed class WebSocketWrapper : SocketWrapper
 
     public override void Disconnect()
     {
-        if (!IsConnected)
-            return;
-
-        try
-        {
-            _webSocket?.CloseAsync(WebSocketCloseStatus.NormalClosure, "Disconnect", CancellationToken.None)
-                .ContinueWith(_ => _tokenSource?.Cancel());
-        }
-        catch
-        {
-            _tokenSource?.Cancel();
-        }
+        DisposeCore();
     }
 
     public override void Dispose()
     {
+        DisposeCore();
+    }
+
+    private void DisposeCore()
+    {
+        lock (_disposeLock)
+        {
+            if (_disposed)
+                return;
+
+            _disposed = true;
+        }
+
+        var webSocket = _webSocket;
+        _webSocket = null;
+
+        var rawSocket = _rawSocket;
+        _rawSocket = null;
+
+        var tokenSource = _tokenSource;
+        _tokenSource = null;
+
+        var receiveTask = _receiveTask;
+        _receiveTask = null;
+
+        try
+        {
+            tokenSource?.Cancel();
+        }
+        catch
+        {
+        }
+
+        if (webSocket != null)
+        {
+            try
+            {
+                if (webSocket.State is WebSocketState.Open or WebSocketState.CloseReceived)
+                {
+                    webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Disconnect", CancellationToken.None).GetAwaiter().GetResult();
+                }
+                else if (webSocket.State == WebSocketState.Connecting)
+                {
+                    webSocket.Abort();
+                }
+            }
+            catch
+            {
+            }
+            finally
+            {
+                webSocket.Dispose();
+            }
+        }
+
+        if (receiveTask != null)
+        {
+            try
+            {
+                receiveTask.GetAwaiter().GetResult();
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch
+            {
+            }
+        }
+
+        rawSocket?.Dispose();
+        tokenSource?.Dispose();
     }
 }
