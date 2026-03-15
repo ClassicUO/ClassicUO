@@ -133,7 +133,7 @@ namespace ClassicUO.Game.Managers
                     Point p = new Point(entity.RealScreenPosition.X, entity.RealScreenPosition.Y);
                     if (entity is Mobile m)
                     {
-                        if (m.IsGargoyle && m.IsFlying)
+                        if (m.IsGargoyle && m.IsFlyingVisual)
                             offY += 22;
                         else if (!m.IsMounted)
                             offY = -22;

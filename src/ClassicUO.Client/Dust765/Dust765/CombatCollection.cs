@@ -1596,7 +1596,7 @@ namespace ClassicUO.Dust765.Dust765
             Point p1 = p;
 
             p1.X = (int) (mobile.RealScreenPosition.X + mobile.Offset.X + 22);
-            p1.Y = (int) (mobile.RealScreenPosition.Y + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8 + 22) + (mobile.IsGargoyle && mobile.IsFlying ? -22 : !mobile.IsMounted ? 22 : 0));
+            p1.Y = (int) (mobile.RealScreenPosition.Y + (mobile.Offset.Y - mobile.Offset.Z) - (height + centerY + 8 + 22) + (mobile.IsGargoyle && mobile.IsFlyingVisual ? -22 : !mobile.IsMounted ? 22 : 0));
 
             if (mobile.ObjectHandlesStatus == ObjectHandlesStatus.DISPLAYING)
             {
