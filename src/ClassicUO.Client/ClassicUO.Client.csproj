@@ -6,9 +6,9 @@
     <ApplicationIcon>cuoicon.ico</ApplicationIcon>
     <AssemblyName>ClassicUO</AssemblyName>
     <RootNamespace>ClassicUO</RootNamespace>
-    <AssemblyVersion>3.0.1</AssemblyVersion>
-    <FileVersion>3.0.1</FileVersion>
-    <Copyright>Dust765.3.0</Copyright>
+    <AssemblyVersion>3.0.3</AssemblyVersion>
+    <FileVersion>3.0.3</FileVersion>
+    <Copyright>Dust765</Copyright>
     <StartupObject></StartupObject>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
