@@ -156,7 +156,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else
             {
-                if (mobile.IsFlying)
+                if (mobile.IsFlyingVisual)
                 {
                     result = 19;
                 }
@@ -1632,7 +1632,7 @@ namespace ClassicUO.Game.GameObjects
                         default:
                             if (
                                 mobile.IsGargoyle
-                                && mobile.IsFlying
+                                && mobile.IsFlyingVisual
                                 && Client.Game.Animations.AnimationExists(mobile.Graphic, 71)
                             )
                             {
@@ -1657,7 +1657,7 @@ namespace ClassicUO.Game.GameObjects
                         case 7:
                             if (
                                 mobile.IsGargoyle
-                                && mobile.IsFlying
+                                && mobile.IsFlyingVisual
                                 && Client.Game.Animations.AnimationExists(mobile.Graphic, 72)
                             )
                             {
@@ -1786,7 +1786,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (
                         mobile.IsGargoyle
-                        && mobile.IsFlying
+                        && mobile.IsFlyingVisual
                         && Client.Game.Animations.AnimationExists(mobile.Graphic, 77)
                     )
                     {
@@ -2019,7 +2019,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         case 1:
                         case 2:
-                            if (mobile.IsGargoyle && mobile.IsFlying)
+                            if (mobile.IsGargoyle && mobile.IsFlyingVisual)
                             {
                                 return 76;
                             }
@@ -2027,7 +2027,7 @@ namespace ClassicUO.Game.GameObjects
                             return 17;
                     }
 
-                    if (mobile.IsGargoyle && mobile.IsFlying)
+                    if (mobile.IsGargoyle && mobile.IsFlyingVisual)
                     {
                         return 75;
                     }
