@@ -161,8 +161,8 @@ jobs:
           IS_DEV=$([[ "${{ github.ref }}" == "refs/heads/developer" ]] && echo "true" || echo "false")
 
           if [ "$IS_DEV" == "true" ]; then
-            # Beta branch: increment patch from latest beta tag, or start at 3.0.2
-            LATEST_BETA=$(git tag -l 'v3.*.*-beta' | sort -V | tail -1)
+            # Beta branch: increment patch from latest v3.0.x-beta only
+            LATEST_BETA=$(git tag -l 'v3.0.*-beta' | sort -V | tail -1)
             if [ -z "$LATEST_BETA" ]; then
               NEXT="3.0.2"
             else
@@ -173,13 +173,13 @@ jobs:
             echo "tag=v${NEXT}-beta" >> "$GITHUB_OUTPUT"
             echo "is_release=false" >> "$GITHUB_OUTPUT"
           else
-            # Main branch: promote latest beta to stable
-            LATEST_BETA=$(git tag -l 'v3.*.*-beta' | sort -V | tail -1)
+            # Main branch: promote latest v3.0.x-beta to stable
+            LATEST_BETA=$(git tag -l 'v3.0.*-beta' | sort -V | tail -1)
             if [ -n "$LATEST_BETA" ]; then
               STABLE="${LATEST_BETA%-beta}"
             else
-              # No beta exists yet, increment from latest stable
-              LATEST=$(git tag -l 'v3.*.*' | grep -Ev '\-beta' | sort -V | tail -1)
+              # No beta exists yet, start at v3.0.2
+              LATEST=$(git tag -l 'v3.0.*' | grep -Ev '\-beta' | sort -V | tail -1)
               if [ -z "$LATEST" ]; then
                 STABLE="v3.0.2"
               else
