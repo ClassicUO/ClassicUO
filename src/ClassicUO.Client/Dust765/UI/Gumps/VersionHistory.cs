@@ -88,6 +88,7 @@ namespace ClassicUO.Dust765.UI.Gumps
                 "- Custom house rendering adjustments",
                 "",
                 "/c[yellow]Fixes/cd",
+                "- Fix manifest for run from razor enhanced plugin",
                 "- Fixed options not applying correctly in Dust menu",
                 "- Removed party chat display overhead",
                 "- Fixed UCC self-cast not working",

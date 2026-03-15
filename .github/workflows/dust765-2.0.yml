@@ -164,7 +164,7 @@ jobs:
             # Beta branch: increment patch from latest v3.0.x-beta only
             LATEST_BETA=$(git tag -l 'v3.0.*-beta' | sort -V | tail -1)
             if [ -z "$LATEST_BETA" ]; then
-              NEXT="3.0.2"
+              NEXT="3.0.3"
             else
               VER="${LATEST_BETA%-beta}"
               IFS='.' read -r maj min pat <<< "${VER#v}"
@@ -178,10 +178,10 @@ jobs:
             if [ -n "$LATEST_BETA" ]; then
               STABLE="${LATEST_BETA%-beta}"
             else
-              # No beta exists yet, start at v3.0.2
+              # No beta exists yet, start at v3.0.3
               LATEST=$(git tag -l 'v3.0.*' | grep -Ev '\-beta' | sort -V | tail -1)
               if [ -z "$LATEST" ]; then
-                STABLE="v3.0.2"
+                STABLE="v3.0.3"
               else
                 IFS='.' read -r maj min pat <<< "${LATEST#v}"
                 STABLE="v${maj}.${min}.$((pat + 1))"
