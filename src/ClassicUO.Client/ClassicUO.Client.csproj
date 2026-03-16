@@ -68,6 +68,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="IronPython" Version="2.7.12" />
     <PackageReference Include="Sentry" Version="6.1.0" />
     <ProjectReference Include="..\..\external\FNA\FNA.Core.csproj" />
