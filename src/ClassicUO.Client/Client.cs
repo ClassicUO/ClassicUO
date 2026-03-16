@@ -32,6 +32,7 @@
 
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.Dust765;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Network;
@@ -63,9 +64,15 @@ namespace ClassicUO
 
             ScriptCompiler.InvokeAfterCompiling("Configure");
 
+            // Mostra splash ANTES de carregar os arquivos do UO
+            SplashScreenManager.Show();
+            SplashScreenManager.SetStatus("Loading client files...");
+
             Load();
 
             Log.Trace("Running game...");
+
+            SplashScreenManager.SetStatus("Starting up...");
 
             using (Game = new GameController())
             {
@@ -89,6 +96,9 @@ namespace ClassicUO
                 UoAssist.Start();
 
                 ScriptCompiler.InvokeAfterCompiling("Initialize");
+
+                // Fecha o splash antes de exibir a janela do jogo
+                SplashScreenManager.Close();
 
                 Game.Run();
             }
