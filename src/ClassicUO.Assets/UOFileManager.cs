@@ -48,6 +48,7 @@ namespace ClassicUO.Assets
             Professions = new ProfessionLoader(this);
             TileArt = new TileArtLoader(this);
             StringDictionary = new StringDictionaryLoader(this);
+            Stitchin = new Stitchin();
         }
 
         public ClientVersion Version { get; }
@@ -74,6 +75,7 @@ namespace ClassicUO.Assets
         public ProfessionLoader Professions { get; }
         public TileArtLoader TileArt { get; }
         public StringDictionaryLoader StringDictionary { get; }
+        public Stitchin Stitchin { get; }
 
 
 
@@ -164,6 +166,7 @@ namespace ClassicUO.Assets
             TileArt.Load();
             StringDictionary.Load();
             Verdata.Load();
+            Stitchin.Load(this);
 
             ReadArtDefFile();
 
