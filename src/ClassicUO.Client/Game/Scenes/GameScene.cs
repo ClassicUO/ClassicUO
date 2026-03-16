@@ -156,8 +156,15 @@ namespace ClassicUO.Game.Scenes
             Client.Game.Window.AllowUserResizing = true;
 
             Camera.Zoom = ProfileManager.CurrentProfile.DefaultScale;
-            Camera.Bounds.X = Math.Max(0, ProfileManager.CurrentProfile.GameWindowPosition.X);
-            Camera.Bounds.Y = Math.Max(0, ProfileManager.CurrentProfile.GameWindowPosition.Y);
+            // When not in fullsize mode the WorldViewportGump starts at (Camera.X - BORDER_WIDTH,
+            // Camera.Y - BORDER_WIDTH).  Ensure Camera is at least BORDER_WIDTH so the UO border
+            // is always on-screen.  Fullsize mode explicitly positions the viewport at -BORDER_WIDTH
+            // via SetGameWindowPosition, so that path stays unrestricted.
+            int minCamPos = ProfileManager.CurrentProfile.GameWindowFullSize
+                ? 0
+                : Game.UI.Gumps.WorldViewportGump.BORDER_WIDTH;
+            Camera.Bounds.X = Math.Max(minCamPos, ProfileManager.CurrentProfile.GameWindowPosition.X);
+            Camera.Bounds.Y = Math.Max(minCamPos, ProfileManager.CurrentProfile.GameWindowPosition.Y);
             Camera.Bounds.Width = Math.Max(0, ProfileManager.CurrentProfile.GameWindowSize.X);
             Camera.Bounds.Height = Math.Max(0, ProfileManager.CurrentProfile.GameWindowSize.Y);
 

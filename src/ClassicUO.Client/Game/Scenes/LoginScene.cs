@@ -35,7 +35,6 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Dust765.UI.Gumps;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Game.UI.Gumps.CharCreation;
 using ClassicUO.Game.UI.Gumps.Login;
@@ -529,9 +528,6 @@ namespace ClassicUO.Game.Scenes
                 LastCharacterManager.Save(Account, World.ServerName, Characters[index]);
 
                 CurrentLoginStep = LoginSteps.EnteringBritania;
-
-                // Mostra loading screen enquanto o mundo carrega
-                WorldLoadingScreenGump.Show();
 
                 NetClient.Socket.Send_SelectCharacter(index, Characters[index], NetClient.Socket.LocalIP);
             }

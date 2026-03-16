@@ -44,7 +44,7 @@ namespace ClassicUO.Dust765.UI.Gumps
             });
             startY += 22;
 
-            Add(new Label($"Version: {CUOEnviroment.Version}", false, HUE_TEXT, WIDTH - 30, 1, FontStyle.None)
+            Add(new Label($"Version: {CUOEnviroment.Version}", true, HUE_TITLE, WIDTH - 30, 1, FontStyle.None)
             {
                 X = 20,
                 Y = startY

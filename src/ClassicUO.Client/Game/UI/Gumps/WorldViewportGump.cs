@@ -207,9 +207,14 @@ namespace ClassicUO.Game.UI.Gumps
                 position.X = Client.Game.Window.ClientBounds.Width - (Width - BORDER_WIDTH);
             }
 
-            if (position.X < -BORDER_WIDTH)
+            // In fullsize mode the viewport sits at -BORDER_WIDTH so the UO border is intentionally
+            // off-screen (game content fills the full window).  In normal mode we clamp to 0 so the
+            // UO border is always visible on-screen.
+            int minPos = ProfileManager.CurrentProfile.GameWindowFullSize ? -BORDER_WIDTH : 0;
+
+            if (position.X < minPos)
             {
-                position.X = -BORDER_WIDTH;
+                position.X = minPos;
             }
 
             if (position.Y + Height - BORDER_WIDTH > Client.Game.Window.ClientBounds.Height)
@@ -217,9 +222,9 @@ namespace ClassicUO.Game.UI.Gumps
                 position.Y = Client.Game.Window.ClientBounds.Height - (Height - BORDER_WIDTH);
             }
 
-            if (position.Y < -BORDER_WIDTH)
+            if (position.Y < minPos)
             {
-                position.Y = -BORDER_WIDTH;
+                position.Y = minPos;
             }
 
             Location = position;
