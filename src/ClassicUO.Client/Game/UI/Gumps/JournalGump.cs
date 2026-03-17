@@ -29,11 +29,11 @@ namespace ClassicUO.Game.UI.Gumps
             Height = 300;
             CanMove = true;
             CanCloseWithRightClick = true;
-            Add(_gumpPic = new GumpPic(160, 0, 0x82D, 0));
+            Add(_gumpPic = new GumpPic(160, 0, 0x82D, 0, World.Context));
 
             Add
             (
-                _background = new ExpandableScroll(0, DIFF_Y, Height - DIFF_Y, 0x1F40)
+                _background = new ExpandableScroll(0, DIFF_Y, Height - DIFF_Y, 0x1F40, World.Context)
                 {
                     TitleGumpID = 0x82A
                 }
@@ -42,14 +42,14 @@ namespace ClassicUO.Game.UI.Gumps
             const ushort DARK_MODE_JOURNAL_HUE = 903;
 
             string str = ResGumps.DarkMode;
-            int width = Client.Game.UO.FileManager.Fonts.GetWidthASCII(6, str);
+            int width = World.Context.Game.UO.FileManager.Fonts.GetWidthASCII(6, str);
 
             Checkbox darkMode;
 
             Add
             (
                 darkMode = new Checkbox
-                (
+                (World.Context, 
                     0x00D2,
                     0x00D3,
                     str,
@@ -60,24 +60,25 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     X = _background.Width - width - 2,
                     Y = DIFF_Y + 7,
-                    IsChecked = ProfileManager.CurrentProfile.JournalDarkMode
+                    IsChecked = World.Profile.CurrentProfile.JournalDarkMode
                 }
             );
 
-            Hue = (ushort) (ProfileManager.CurrentProfile.JournalDarkMode ? DARK_MODE_JOURNAL_HUE : 0);
+            Hue = (ushort) (World.Profile.CurrentProfile.JournalDarkMode ? DARK_MODE_JOURNAL_HUE : 0);
 
             darkMode.ValueChanged += (sender, e) =>
             {
-                bool ok = ProfileManager.CurrentProfile.JournalDarkMode = !ProfileManager.CurrentProfile.JournalDarkMode;
+                bool ok = World.Profile.CurrentProfile.JournalDarkMode = !World.Profile.CurrentProfile.JournalDarkMode;
                 Hue = (ushort) (ok ? DARK_MODE_JOURNAL_HUE : 0);
             };
 
-            _scrollBar = new ScrollFlag(-25, DIFF_Y + 36, Height - DIFF_Y, true);
+            _scrollBar = new ScrollFlag(-25, DIFF_Y + 36, Height - DIFF_Y, true, World.Context);
 
             Add
             (
                 _journalEntries = new RenderedTextList
                 (
+                    this,
                     25,
                     DIFF_Y + 36,
                     _background.Width - (_scrollBar.Width >> 1) - 5,
@@ -88,7 +89,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_scrollBar);
 
-            Add(_hitBox = new HitBox(160, 0, 23, 24));
+            Add(_hitBox = new HitBox(World.Context, 160, 0, 23, 24));
             _hitBox.MouseUp += _hitBox_MouseUp;
             _gumpPic.MouseDoubleClick += _gumpPic_MouseDoubleClick;
 
@@ -97,7 +98,7 @@ namespace ClassicUO.Game.UI.Gumps
             byte font = 6; // 1
 
             _filters_chekboxes[0] = new Checkbox
-            (
+            (World.Context, 
                 0x00D2,
                 0x00D3,
                 "System",
@@ -108,11 +109,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 X = cx,
                 LocalSerial = 1,
-                IsChecked = ProfileManager.CurrentProfile.ShowJournalSystem
+                IsChecked = World.Profile.CurrentProfile.ShowJournalSystem
             };
 
             _filters_chekboxes[1] = new Checkbox
-            (
+            (World.Context, 
                 0x00D2,
                 0x00D3,
                 "Objects",
@@ -123,11 +124,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 X = cx + dist,
                 LocalSerial = 2,
-                IsChecked = ProfileManager.CurrentProfile.ShowJournalObjects
+                IsChecked = World.Profile.CurrentProfile.ShowJournalObjects
             };
 
             _filters_chekboxes[2] = new Checkbox
-            (
+            (World.Context, 
                 0x00D2,
                 0x00D3,
                 "Client",
@@ -138,11 +139,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 X = cx + dist * 2,
                 LocalSerial = 0,
-                IsChecked = ProfileManager.CurrentProfile.ShowJournalClient
+                IsChecked = World.Profile.CurrentProfile.ShowJournalClient
             };
 
             _filters_chekboxes[3] = new Checkbox
-            (
+            (World.Context, 
                 0x00D2,
                 0x00D3,
                 "Guild",
@@ -153,7 +154,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 X = cx + dist * 3,
                 LocalSerial = 3,
-                IsChecked = ProfileManager.CurrentProfile.ShowJournalGuildAlly
+                IsChecked = World.Profile.CurrentProfile.ShowJournalGuildAlly
             };
 
             void on_check_box(object sender, EventArgs e)
@@ -165,22 +166,22 @@ namespace ClassicUO.Game.UI.Gumps
                     switch ((TextType) c.LocalSerial)
                     {
                         case TextType.CLIENT:
-                            ProfileManager.CurrentProfile.ShowJournalClient = c.IsChecked;
+                            World.Profile.CurrentProfile.ShowJournalClient = c.IsChecked;
 
                             break;
 
                         case TextType.SYSTEM:
-                            ProfileManager.CurrentProfile.ShowJournalSystem = c.IsChecked;
+                            World.Profile.CurrentProfile.ShowJournalSystem = c.IsChecked;
 
                             break;
 
                         case TextType.OBJECT:
-                            ProfileManager.CurrentProfile.ShowJournalObjects = c.IsChecked;
+                            World.Profile.CurrentProfile.ShowJournalObjects = c.IsChecked;
 
                             break;
 
                         case TextType.GUILD_ALLY:
-                            ProfileManager.CurrentProfile.ShowJournalGuildAlly = c.IsChecked;
+                            World.Profile.CurrentProfile.ShowJournalGuildAlly = c.IsChecked;
 
                             break;
                     }
@@ -194,9 +195,10 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(_filters_chekboxes[i]);
             }
 
-            InitializeJournalEntries();
             World.Journal.EntryAdded += AddJournalEntry;
         }
+
+        private bool _journalInitialized;
 
         public override GumpType GumpType => GumpType.Journal;
 
@@ -251,6 +253,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Update()
         {
+            if (!_journalInitialized && _journalEntries.Width > 0)
+            {
+                _journalInitialized = true;
+                InitializeJournalEntries();
+            }
+
             base.Update();
 
             WantUpdateSize = true;
@@ -333,12 +341,14 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class RenderedTextList : Control
         {
+            private readonly JournalGump _gump;
             private readonly Deque<RenderedText> _entries, _hours;
             private readonly ScrollBarBase _scrollBar;
             private readonly Deque<TextType> _text_types;
 
-            public RenderedTextList(int x, int y, int width, int height, ScrollBarBase scrollBarControl)
+            public RenderedTextList(JournalGump gump, int x, int y, int width, int height, ScrollBarBase scrollBarControl) : base(gump.World.Context)
             {
+                _gump = gump;
                 _scrollBar = scrollBarControl;
                 _scrollBar.IsVisible = false;
                 AcceptMouseInput = true;
@@ -548,6 +558,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 RenderedText h = RenderedText.Create
                 (
+                    Context.Game.UO,
                     $"{time:t} ",
                     1150,
                     1,
@@ -557,14 +568,17 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _hours.AddToBack(h);
 
+                int maxWidth = Width - (18 + h.Width);
+
                 RenderedText rtext = RenderedText.Create
                 (
+                    Context.Game.UO,
                     text,
                     hue,
                     (byte) font,
                     isUnicode,
                     FontStyle.Indention | FontStyle.BlackBorder,
-                    maxWidth: Width - (18 + h.Width)
+                    maxWidth: maxWidth
                 );
 
                 _entries.AddToBack(rtext);
@@ -579,24 +593,26 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            private static bool CanBeDrawn(TextType type)
+            private bool CanBeDrawn(TextType type, Profile currentProfile = null)
             {
-                if (type == TextType.CLIENT && !ProfileManager.CurrentProfile.ShowJournalClient)
+                currentProfile ??= _gump.World.Profile.CurrentProfile;
+
+                if (type == TextType.CLIENT && !currentProfile.ShowJournalClient)
                 {
                     return false;
                 }
 
-                if (type == TextType.SYSTEM && !ProfileManager.CurrentProfile.ShowJournalSystem)
+                if (type == TextType.SYSTEM && !currentProfile.ShowJournalSystem)
                 {
                     return false;
                 }
 
-                if (type == TextType.OBJECT && !ProfileManager.CurrentProfile.ShowJournalObjects)
+                if (type == TextType.OBJECT && !currentProfile.ShowJournalObjects)
                 {
                     return false;
                 }
 
-                if (type == TextType.GUILD_ALLY && !ProfileManager.CurrentProfile.ShowJournalGuildAlly)
+                if (type == TextType.GUILD_ALLY && !currentProfile.ShowJournalGuildAlly)
                 {
                     return false;
                 }

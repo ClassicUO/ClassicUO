@@ -1,5 +1,6 @@
-﻿// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.Game;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -7,7 +8,7 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class RadioButton : Checkbox
     {
-        public RadioButton(int group, List<string> parts, string[] lines) : base(parts, lines)
+        public RadioButton(int group, List<string> parts, string[] lines, GameContext context) : base(parts, lines, context)
         {
             GroupIndex = group;
             IsFromServer = true;
@@ -15,6 +16,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public RadioButton
         (
+            GameContext context,
             int group,
             ushort inactive,
             ushort active,
@@ -25,6 +27,7 @@ namespace ClassicUO.Game.UI.Controls
             int maxWidth = 0
         ) : base
         (
+            context,
             inactive,
             active,
             text,
@@ -49,12 +52,6 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
         }
-
-        //protected override void OnMouseClick(int x, int y, MouseButton button)
-        //{
-        //    if (Parent?.FindControls<RadioButton>().Any( s => s.GroupIndex == GroupIndex && s.IsChecked && s != this) == true)
-        //        base.OnMouseClick(x, y, button);
-        //}
 
         private bool HandleClick()
         {

@@ -32,17 +32,17 @@ namespace ClassicUO.Game.UI.Gumps
             X = x;
             Y = y;
 
-            GumpPic background = new GumpPic(0, 0, 0x0474, 0);
+            GumpPic background = new GumpPic(0, 0, 0x0474, 0, World.Context);
             Add(background);
 
-            Label label = new Label(text, false, 0x0386, font: 2, maxwidth: background.Width - 110)
+            Label label = new Label(World.Context, text, false, 0x0386, font: 2, maxwidth: background.Width - 110)
             {
                 X = 60, Y = 50
             };
 
             Add(label);
 
-            label = new Label(description, false, 0x0386, font: 2, maxwidth: background.Width - 110)
+            label = new Label(World.Context, description, false, 0x0386, font: 2, maxwidth: background.Width - 110)
             {
                 X = 60,
                 Y = 108
@@ -50,9 +50,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(label);
 
-            Add(new GumpPic(60, 130, 0x0477, 0));
+            Add(new GumpPic(60, 130, 0x0477, 0, World.Context));
 
-            _textBox = new StbTextBox(1, isunicode: false, hue: 0x0386, max_char_count: maxlen)
+            _textBox = new StbTextBox(World.Context, 1, isunicode: false, hue: 0x0386, max_char_count: maxlen)
             {
                 X = 71, Y = 137,
                 Width = 250,
@@ -63,7 +63,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new Button((int) ButtonType.Ok, 0x047B, 0x047C, 0x047D)
+                new Button(World.Context, (int) ButtonType.Ok, 0x047B, 0x047C, 0x047D)
                 {
                     X = 117,
                     Y = 190,
@@ -73,7 +73,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new Button((int) ButtonType.Cancel, 0x0478, 0x0478, 0x047A)
+                new Button(World.Context, (int) ButtonType.Cancel, 0x0478, 0x0478, 0x047A)
                 {
                     X = 204,
                     Y = 190,
@@ -84,7 +84,7 @@ namespace ClassicUO.Game.UI.Gumps
             ButtonID = buttonid;
             ParentID = parentid;
 
-            UIManager.KeyboardFocusControl = _textBox;
+            World.Context.UI.KeyboardFocusControl = _textBox;
             _textBox.SetKeyboardFocus();
         }
 
@@ -96,7 +96,7 @@ namespace ClassicUO.Game.UI.Gumps
             switch ((ButtonType) buttonID)
             {
                 case ButtonType.Ok:
-                    NetClient.Socket.Send_TextEntryDialogResponse(LocalSerial,
+                    World.Network.Send_TextEntryDialogResponse(LocalSerial,
                                                                   ParentID,
                                                                   ButtonID,
                                                                   _textBox.Text,
@@ -107,7 +107,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case ButtonType.Cancel:
-                    NetClient.Socket.Send_TextEntryDialogResponse(LocalSerial,
+                    World.Network.Send_TextEntryDialogResponse(LocalSerial,
                                                                   ParentID,
                                                                   ButtonID,
                                                                   _textBox.Text,

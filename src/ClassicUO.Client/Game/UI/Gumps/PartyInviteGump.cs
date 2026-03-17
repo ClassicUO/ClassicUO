@@ -18,24 +18,25 @@ namespace ClassicUO.Game.UI.Gumps
 
             var nameWidthAdjustment = mobile == null || mobile.Name.Length < 10 ? 0 : mobile.Name.Length * 5;
 
-            AlphaBlendControl partyGumpBackground = new AlphaBlendControl
+            AlphaBlendControl partyGumpBackground = new AlphaBlendControl(World.Context)
             {
                 Width = 270 + nameWidthAdjustment,
                 Height = 80,
-                X = Client.Game.Scene.Camera.Bounds.Width / 2 - 125,
+                X = World.Context.Game.Scene.Camera.Bounds.Width / 2 - 125,
                 Y = 150,
                 Alpha = 0.8f
             };
 
-            Label text = new Label(string.Format(ResGumps.P0HasInvitedYouToParty, mobile == null || string.IsNullOrEmpty(mobile.Name) ? ResGumps.NoName : mobile.Name), true, 15)
+            Label text = new Label(World.Context, string.Format(ResGumps.P0HasInvitedYouToParty, mobile == null || string.IsNullOrEmpty(mobile.Name) ? ResGumps.NoName : mobile.Name), true, 15)
             {
-                X = Client.Game.Scene.Camera.Bounds.Width / 2 - 115,
+                X = World.Context.Game.Scene.Camera.Bounds.Width / 2 - 115,
                 Y = 165
             };
 
             NiceButton acceptButton = new NiceButton
             (
-                Client.Game.Scene.Camera.Bounds.Width / 2 + 99 + nameWidthAdjustment,
+                World.Context,
+                World.Context.Game.Scene.Camera.Bounds.Width / 2 + 99 + nameWidthAdjustment,
                 205,
                 45,
                 25,
@@ -45,7 +46,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             NiceButton declineButton = new NiceButton
             (
-                Client.Game.Scene.Camera.Bounds.Width / 2 + 39 + nameWidthAdjustment,
+                World.Context,
+                World.Context.Game.Scene.Camera.Bounds.Width / 2 + 39 + nameWidthAdjustment,
                 205,
                 45,
                 25,
@@ -62,7 +64,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (World.Party.Inviter != 0 && World.Party.Leader == 0)
                 {
-                    GameActions.RequestPartyAccept(World.Party.Inviter);
+                    GameActions.RequestPartyAccept(World, World.Party.Inviter);
                     World.Party.Leader = World.Party.Inviter;
                     World.Party.Inviter = 0;
                 }
@@ -74,7 +76,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (World.Party.Inviter != 0 && World.Party.Leader == 0)
                 {
-                    NetClient.Socket.Send_PartyDecline(World.Party.Inviter);
+                    World.Network.Send_PartyDecline(World.Party.Inviter);
                     World.Party.Inviter = 0;
                 }
 

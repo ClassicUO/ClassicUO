@@ -176,7 +176,7 @@ namespace ClassicUO.Game.Managers
             {
                 if (!ResendPacketResync)
                 {
-                    NetClient.Socket.Send_Resync();
+                    _player.World.Network.Send_Resync();
                     ResendPacketResync = true;
                 }
 

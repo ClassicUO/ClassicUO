@@ -10,9 +10,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             CanMove = true;
             CanCloseWithRightClick = true;
-            var camera = Client.Game.Scene.Camera;
+            var camera = World.Context.Game.Scene.Camera;
 
-            AlphaBlendControl macroGumpBackground = new AlphaBlendControl
+            AlphaBlendControl macroGumpBackground = new AlphaBlendControl(World.Context)
             {
                 Width = 260,
                 Height = 200,
@@ -21,7 +21,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Alpha = 0.8f
             };
 
-            Label text = new Label($"Edit macro: {name}", true, 15)
+            Label text = new Label(World.Context, $"Edit macro: {name}", true, 15)
             {
                 X = camera.Bounds.Width / 2 - 105,
                 Y = macroGumpBackground.Y + 2

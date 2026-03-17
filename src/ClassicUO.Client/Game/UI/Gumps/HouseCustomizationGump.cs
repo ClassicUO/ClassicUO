@@ -36,9 +36,9 @@ namespace ClassicUO.Game.UI.Gumps
             World.CustomHouseManager = _customHouseManager;
             SetOtherHousesState(false);
 
-            Add(new GumpPicTiled(121, 36, 397, 120, 0x0E14));
+            Add(new GumpPicTiled(121, 36, 397, 120, 0x0E14, World.Context));
 
-            _dataBox = new DataBox(0, 0, 0, 0)
+            _dataBox = new DataBox(World.Context, 0, 0, 0, 0)
             {
                 WantUpdateSize = true,
                 CanMove = false,
@@ -47,19 +47,19 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_dataBox);
 
-            Add(new GumpPic(0, 17, 0x55F0, 0));
+            Add(new GumpPic(0, 17, 0x55F0, 0, World.Context));
 
             _gumpPic = new GumpPic(
                 486,
                 17,
                 (ushort)(_customHouseManager.FloorCount == 4 ? 0x55F2 : 0x55F9),
-                0
+                0, World.Context
             );
             Add(_gumpPic);
 
-            Add(new GumpPicTiled(153, 17, 333, 154, 0x55F1));
+            Add(new GumpPicTiled(153, 17, 333, 154, 0x55F1, World.Context));
 
-            Button button = new Button(
+            Button button = new Button(World.Context, 
                 (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_WALL,
                 0x5654,
                 0x5656,
@@ -74,7 +74,7 @@ namespace ClassicUO.Game.UI.Gumps
             button.SetTooltip(ResGumps.Walls);
             Add(button);
 
-            button = new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_DOOR, 0x5657, 0x5659, 0x5658)
+            button = new Button(World.Context, (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_DOOR, 0x5657, 0x5659, 0x5658)
             {
                 X = 39,
                 Y = 40,
@@ -84,7 +84,7 @@ namespace ClassicUO.Game.UI.Gumps
             button.SetTooltip(ResGumps.Doors);
             Add(button);
 
-            button = new Button(
+            button = new Button(World.Context, 
                 (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_FLOOR,
                 0x565A,
                 0x565C,
@@ -99,7 +99,7 @@ namespace ClassicUO.Game.UI.Gumps
             button.SetTooltip(ResGumps.Floors);
             Add(button);
 
-            button = new Button(
+            button = new Button(World.Context, 
                 (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_STAIR,
                 0x565D,
                 0x565F,
@@ -114,7 +114,7 @@ namespace ClassicUO.Game.UI.Gumps
             button.SetTooltip(ResGumps.Stairs);
             Add(button);
 
-            button = new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_ROOF, 0x5788, 0x578A, 0x5789)
+            button = new Button(World.Context, (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_ROOF, 0x5788, 0x578A, 0x5789)
             {
                 X = 39,
                 Y = 72,
@@ -124,7 +124,7 @@ namespace ClassicUO.Game.UI.Gumps
             button.SetTooltip(ResGumps.Roofs);
             Add(button);
 
-            button = new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_MISC, 0x5663, 0x5665, 0x5664)
+            button = new Button(World.Context, (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_MISC, 0x5663, 0x5665, 0x5664)
             {
                 X = 69,
                 Y = 72,
@@ -134,7 +134,7 @@ namespace ClassicUO.Game.UI.Gumps
             button.SetTooltip(ResGumps.Miscellaneous);
             Add(button);
 
-            button = new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_MENU, 0x566C, 0x566E, 0x566D)
+            button = new Button(World.Context, (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_MENU, 0x566C, 0x566E, 0x566D)
             {
                 X = 69,
                 Y = 100,
@@ -144,7 +144,7 @@ namespace ClassicUO.Game.UI.Gumps
             button.SetTooltip(ResGumps.SystemMenu);
             Add(button);
 
-            _textComponents = new Label(string.Empty, false, 0x0481, font: 9)
+            _textComponents = new Label(World.Context, string.Empty, false, 0x0481, font: 9)
             {
                 X = 82,
                 Y = 142,
@@ -153,11 +153,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_textComponents);
 
-            Label text = new Label(":", false, 0x0481, font: 9) { X = 84, Y = 142 };
+            Label text = new Label(World.Context, ":", false, 0x0481, font: 9) { X = 84, Y = 142 };
 
             Add(text);
 
-            _textFixtures = new Label(string.Empty, false, 0x0481, font: 9)
+            _textFixtures = new Label(World.Context, string.Empty, false, 0x0481, font: 9)
             {
                 X = 94,
                 Y = 142,
@@ -166,7 +166,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_textFixtures);
 
-            _textCost = new Label(string.Empty, false, 0x0481, font: 9)
+            _textCost = new Label(World.Context, string.Empty, false, 0x0481, font: 9)
             {
                 X = 524,
                 Y = 142,
@@ -188,7 +188,7 @@ namespace ClassicUO.Game.UI.Gumps
             //};
             //Add(box);
 
-            _dataBoxGUI = new DataBox(0, 0, 0, 0)
+            _dataBoxGUI = new DataBox(World.Context, 0, 0, 0, 0)
             {
                 WantUpdateSize = true,
                 CanMove = false,
@@ -220,7 +220,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _gumpPic.Graphic = (ushort)(_customHouseManager.FloorCount == 4 ? 0x55F2 : 0x55F9);
 
-            Button button = new Button(
+            Button button = new Button(World.Context, 
                 (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_ERASE,
                 (ushort)(0x5666 + (_customHouseManager.Erasing ? 1 : 0)),
                 0x5668,
@@ -235,7 +235,7 @@ namespace ClassicUO.Game.UI.Gumps
             button.SetTooltip(ResGumps.Erase);
             _dataBoxGUI.Add(button);
 
-            button = new Button(
+            button = new Button(World.Context, 
                 (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_EYEDROPPER,
                 (ushort)(0x5669 + (_customHouseManager.SeekTile ? 1 : 0)),
                 0x566B,
@@ -263,7 +263,7 @@ namespace ClassicUO.Game.UI.Gumps
             int graphicOffset = _customHouseManager.CurrentFloor == 1 ? 3 : 0;
             int graphicOffset2 = _customHouseManager.CurrentFloor == 1 ? 4 : 0;
 
-            button = new Button(
+            button = new Button(World.Context, 
                 (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_1,
                 floorVisionGraphic,
                 (ushort)(floorVisionGraphic + 2),
@@ -278,7 +278,7 @@ namespace ClassicUO.Game.UI.Gumps
             button.SetTooltip(string.Format(ResGumps.Store0Visibility, 1));
             _dataBoxGUI.Add(button);
 
-            button = new Button(
+            button = new Button(World.Context, 
                 (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_1,
                 (ushort)(0x56CD + graphicOffset2),
                 0x56D1,
@@ -293,7 +293,7 @@ namespace ClassicUO.Game.UI.Gumps
             button.SetTooltip(string.Format(ResGumps.GoToStory0, 1));
             _dataBoxGUI.Add(button);
 
-            button = new Button(
+            button = new Button(World.Context, 
                 (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_1,
                 (ushort)(0x56F6 + graphicOffset),
                 (ushort)(0x56F8 + graphicOffset),
@@ -314,7 +314,7 @@ namespace ClassicUO.Game.UI.Gumps
             graphicOffset = _customHouseManager.CurrentFloor == 2 ? 3 : 0;
             graphicOffset2 = _customHouseManager.CurrentFloor == 2 ? 4 : 0;
 
-            button = new Button(
+            button = new Button(World.Context, 
                 (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_2,
                 floorVisionGraphic,
                 (ushort)(floorVisionGraphic + 2),
@@ -329,7 +329,7 @@ namespace ClassicUO.Game.UI.Gumps
             button.SetTooltip(string.Format(ResGumps.Store0Visibility, 2));
             _dataBoxGUI.Add(button);
 
-            button = new Button(
+            button = new Button(World.Context, 
                 (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_2,
                 (ushort)(0x56CE + graphicOffset2),
                 0x56D2,
@@ -344,7 +344,7 @@ namespace ClassicUO.Game.UI.Gumps
             button.SetTooltip(string.Format(ResGumps.GoToStory0, 2));
             _dataBoxGUI.Add(button);
 
-            button = new Button(
+            button = new Button(World.Context, 
                 (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_2,
                 (ushort)(0x56F0 + graphicOffset),
                 (ushort)(0x56F2 + graphicOffset),
@@ -368,7 +368,7 @@ namespace ClassicUO.Game.UI.Gumps
                     associateGraphicTable[_customHouseManager.FloorVisionState[2]]
                 ];
 
-                button = new Button(
+                button = new Button(World.Context, 
                     (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_3,
                     floorVisionGraphic,
                     (ushort)(floorVisionGraphic + 2),
@@ -383,7 +383,7 @@ namespace ClassicUO.Game.UI.Gumps
                 button.SetTooltip(string.Format(ResGumps.Store0Visibility, 3));
                 _dataBoxGUI.Add(button);
 
-                button = new Button(
+                button = new Button(World.Context, 
                     (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_3,
                     (ushort)(0x56CE + graphicOffset2),
                     0x56D2,
@@ -398,7 +398,7 @@ namespace ClassicUO.Game.UI.Gumps
                 button.SetTooltip(string.Format(ResGumps.GoToStory0, 3));
                 _dataBoxGUI.Add(button);
 
-                button = new Button(
+                button = new Button(World.Context, 
                     (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_3,
                     (ushort)(0x56F0 + graphicOffset),
                     (ushort)(0x56F2 + graphicOffset),
@@ -420,7 +420,7 @@ namespace ClassicUO.Game.UI.Gumps
                 graphicOffset = _customHouseManager.CurrentFloor == 4 ? 3 : 0;
                 graphicOffset2 = _customHouseManager.CurrentFloor == 4 ? 4 : 0;
 
-                button = new Button(
+                button = new Button(World.Context, 
                     (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_4,
                     floorVisionGraphic,
                     (ushort)(floorVisionGraphic + 2),
@@ -435,7 +435,7 @@ namespace ClassicUO.Game.UI.Gumps
                 button.SetTooltip(string.Format(ResGumps.Store0Visibility, 4));
                 _dataBoxGUI.Add(button);
 
-                button = new Button(
+                button = new Button(World.Context, 
                     (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_4,
                     (ushort)(0x56D0 + graphicOffset2),
                     0x56D4,
@@ -450,7 +450,7 @@ namespace ClassicUO.Game.UI.Gumps
                 button.SetTooltip(string.Format(ResGumps.GoToStory0, 4));
                 _dataBoxGUI.Add(button);
 
-                button = new Button(
+                button = new Button(World.Context, 
                     (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_4,
                     (ushort)(0x56EA + graphicOffset),
                     (ushort)(0x56EC + graphicOffset),
@@ -471,7 +471,7 @@ namespace ClassicUO.Game.UI.Gumps
                     associateGraphicTable[_customHouseManager.FloorVisionState[2]]
                 ];
 
-                button = new Button(
+                button = new Button(World.Context, 
                     (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_VISIBILITY_STORY_3,
                     floorVisionGraphic,
                     (ushort)(floorVisionGraphic + 2),
@@ -486,7 +486,7 @@ namespace ClassicUO.Game.UI.Gumps
                 button.SetTooltip(string.Format(ResGumps.Store0Visibility, 3));
                 _dataBoxGUI.Add(button);
 
-                button = new Button(
+                button = new Button(World.Context, 
                     (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_3,
                     (ushort)(0x56D0 + graphicOffset2),
                     0x56D4,
@@ -501,7 +501,7 @@ namespace ClassicUO.Game.UI.Gumps
                 button.SetTooltip(string.Format(ResGumps.GoToStory0, 3));
                 _dataBoxGUI.Add(button);
 
-                button = new Button(
+                button = new Button(World.Context, 
                     (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_3,
                     (ushort)(0x56EA + graphicOffset),
                     (ushort)(0x56EC + graphicOffset),
@@ -557,7 +557,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_customHouseManager.MaxPage > 1)
             {
-                button = new Button(
+                button = new Button(World.Context, 
                     (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_LIST_LEFT,
                     0x5625,
                     0x5627,
@@ -572,7 +572,7 @@ namespace ClassicUO.Game.UI.Gumps
                 button.SetTooltip(ResGumps.PreviousPage);
                 _dataBoxGUI.Add(button);
 
-                button = new Button(
+                button = new Button(World.Context, 
                     (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_LIST_RIGHT,
                     0x5628,
                     0x562A,
@@ -644,7 +644,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _textFixtures.Text = _customHouseManager.Fixtures.ToString();
 
-            string tooltip = Client.Game.UO.FileManager.Clilocs.Translate(
+            string tooltip = World.Context.Game.UO.FileManager.Clilocs.Translate(
                 1061039,
                 $"{_customHouseManager.MaxComponets}\t{_customHouseManager.MaxFixtures}",
                 true
@@ -759,7 +759,7 @@ namespace ClassicUO.Game.UI.Gumps
                     endCategory = World.CustomHouseManager.Walls.Count;
                 }
 
-                _dataBox.Add(new ScissorControl(true, 121, 36, 384, 60));
+                _dataBox.Add(new ScissorControl(World.Context, true, 121, 36, 384, 60));
 
                 for (int i = startCategory; i < endCategory; i++)
                 {
@@ -770,12 +770,12 @@ namespace ClassicUO.Game.UI.Gumps
                         continue;
                     }
 
-                    ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt((uint)vec[0].East1);
+                    ref readonly var artInfo = ref World.Context.Game.UO.Arts.GetArt((uint)vec[0].East1);
 
                     int offsetX = x + 121 + (48 - artInfo.UV.Width) / 2;
                     int offsetY = y + 36;
 
-                    StaticPic pic = new StaticPic((ushort)vec[0].East1, 0)
+                    StaticPic pic = new StaticPic((ushort)vec[0].East1, 0, World.Context)
                     {
                         X = offsetX,
                         Y = offsetY,
@@ -797,14 +797,14 @@ namespace ClassicUO.Game.UI.Gumps
                         x = 0;
                         y += 60;
 
-                        _dataBox.Add(new ScissorControl(false));
+                        _dataBox.Add(new ScissorControl(World.Context, false));
 
-                        _dataBox.Add(new ScissorControl(true, 121, 96, 384, 60));
+                        _dataBox.Add(new ScissorControl(World.Context, true, 121, 96, 384, 60));
                     }
                 }
 
                 // disable scissor
-                _dataBox.Add(new ScissorControl(false));
+                _dataBox.Add(new ScissorControl(World.Context, false));
             }
             else if (
                 _customHouseManager.Category >= 0
@@ -820,7 +820,7 @@ namespace ClassicUO.Game.UI.Gumps
                     CustomHouseWall item = vec[Page];
 
                     // add scissor
-                    _dataBox.Add(new ScissorControl(true, 121, 36, 384, 120));
+                    _dataBox.Add(new ScissorControl(World.Context, true, 121, 36, 384, 120));
 
                     for (int i = 0; i < 8; i++)
                     {
@@ -830,12 +830,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (graphic != 0)
                         {
-                            ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(graphic);
+                            ref readonly var artInfo = ref World.Context.Game.UO.Arts.GetArt(graphic);
 
                             int offsetX = x + 130 + (48 - artInfo.UV.Width) / 2;
                             int offsetY = y + 36 + (120 - artInfo.UV.Height) / 2;
 
-                            StaticPic pic = new StaticPic(graphic, 0)
+                            StaticPic pic = new StaticPic(graphic, 0, World.Context)
                             {
                                 X = offsetX,
                                 Y = offsetY,
@@ -855,12 +855,12 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     // remove scissor
-                    _dataBox.Add(new ScissorControl(false));
+                    _dataBox.Add(new ScissorControl(World.Context, false));
                 }
 
-                _dataBoxGUI.Add(new GumpPic(152, 0, 0x55F3, 0));
+                _dataBoxGUI.Add(new GumpPic(152, 0, 0x55F3, 0, World.Context));
 
-                Button button = new Button(
+                Button button = new Button(World.Context, 
                     (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_CATEGORY,
                     0x5622,
                     0x5624,
@@ -875,11 +875,11 @@ namespace ClassicUO.Game.UI.Gumps
                 button.SetTooltip(ResGumps.ToCustomHouseManagerCategory);
                 _dataBoxGUI.Add(button);
 
-                _dataBoxGUI.Add(new GumpPic(218, 4, 0x55F4, 0));
+                _dataBoxGUI.Add(new GumpPic(218, 4, 0x55F4, 0, World.Context));
 
                 if (_customHouseManager.ShowWindow)
                 {
-                    button = new Button(
+                    button = new Button(World.Context, 
                         (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_WALL_SHOW_WINDOW,
                         0x562E,
                         0x5630,
@@ -896,7 +896,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    button = new Button(
+                    button = new Button(World.Context, 
                         (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_WALL_SHOW_WINDOW,
                         0x562B,
                         0x562D,
@@ -924,7 +924,7 @@ namespace ClassicUO.Game.UI.Gumps
                     y = 0;
 
                 // add scissor
-                _dataBox.Add(new ScissorControl(true, 138, 36, 384, 120));
+                _dataBox.Add(new ScissorControl(World.Context, true, 138, 36, 384, 120));
 
                 for (int i = 0; i < 8; i++)
                 {
@@ -932,7 +932,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (graphic != 0)
                     {
-                        ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(graphic);
+                        ref readonly var artInfo = ref World.Context.Game.UO.Arts.GetArt(graphic);
 
                         int offsetX = x + 138 + (48 - artInfo.UV.Width) / 2;
 
@@ -943,7 +943,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         int offsetY = y + 36 + (120 - artInfo.UV.Height) / 2;
 
-                        StaticPic pic = new StaticPic(graphic, 0)
+                        StaticPic pic = new StaticPic(graphic, 0, World.Context)
                         {
                             X = offsetX,
                             Y = offsetY,
@@ -1004,54 +1004,54 @@ namespace ClassicUO.Game.UI.Gumps
                 switch (direction)
                 {
                     case 0:
-                        _dataBox.Add(new GumpPic(151, 39, 0x5780, 0));
-                        _dataBox.Add(new GumpPic(196, 39, 0x5781, 0));
-                        _dataBox.Add(new GumpPic(219, 133, 0x5782, 0));
-                        _dataBox.Add(new GumpPic(266, 136, 0x5783, 0));
-                        _dataBox.Add(new GumpPic(357, 136, 0x5784, 0));
-                        _dataBox.Add(new GumpPic(404, 133, 0x5785, 0));
-                        _dataBox.Add(new GumpPic(431, 39, 0x5786, 0));
-                        _dataBox.Add(new GumpPic(474, 39, 0x5787, 0));
+                        _dataBox.Add(new GumpPic(151, 39, 0x5780, 0, World.Context));
+                        _dataBox.Add(new GumpPic(196, 39, 0x5781, 0, World.Context));
+                        _dataBox.Add(new GumpPic(219, 133, 0x5782, 0, World.Context));
+                        _dataBox.Add(new GumpPic(266, 136, 0x5783, 0, World.Context));
+                        _dataBox.Add(new GumpPic(357, 136, 0x5784, 0, World.Context));
+                        _dataBox.Add(new GumpPic(404, 133, 0x5785, 0, World.Context));
+                        _dataBox.Add(new GumpPic(431, 39, 0x5786, 0, World.Context));
+                        _dataBox.Add(new GumpPic(474, 39, 0x5787, 0, World.Context));
 
                         break;
 
                     case 1:
-                        _dataBox.Add(new GumpPic(245, 39, 0x5785, 0));
-                        _dataBox.Add(new GumpPic(290, 39, 0x5787, 0));
-                        _dataBox.Add(new GumpPic(337, 39, 0x5780, 0));
-                        _dataBox.Add(new GumpPic(380, 39, 0x5782, 0));
+                        _dataBox.Add(new GumpPic(245, 39, 0x5785, 0, World.Context));
+                        _dataBox.Add(new GumpPic(290, 39, 0x5787, 0, World.Context));
+                        _dataBox.Add(new GumpPic(337, 39, 0x5780, 0, World.Context));
+                        _dataBox.Add(new GumpPic(380, 39, 0x5782, 0, World.Context));
 
                         break;
 
                     case 2:
-                        _dataBox.Add(new GumpPic(219, 133, 0x5782, 0));
-                        _dataBox.Add(new GumpPic(404, 133, 0x5785, 0));
+                        _dataBox.Add(new GumpPic(219, 133, 0x5782, 0, World.Context));
+                        _dataBox.Add(new GumpPic(404, 133, 0x5785, 0, World.Context));
 
                         break;
 
                     case 3:
-                        _dataBox.Add(new GumpPic(245, 39, 0x5780, 0));
-                        _dataBox.Add(new GumpPic(290, 39, 0x5781, 0));
-                        _dataBox.Add(new GumpPic(337, 39, 0x5786, 0));
-                        _dataBox.Add(new GumpPic(380, 39, 0x5787, 0));
+                        _dataBox.Add(new GumpPic(245, 39, 0x5780, 0, World.Context));
+                        _dataBox.Add(new GumpPic(290, 39, 0x5781, 0, World.Context));
+                        _dataBox.Add(new GumpPic(337, 39, 0x5786, 0, World.Context));
+                        _dataBox.Add(new GumpPic(380, 39, 0x5787, 0, World.Context));
 
                         break;
 
                     case 4:
-                        _dataBox.Add(new GumpPic(151, 39, 0x5780, 0));
-                        _dataBox.Add(new GumpPic(196, 39, 0x5781, 0));
-                        _dataBox.Add(new GumpPic(245, 39, 0x5780, 0));
-                        _dataBox.Add(new GumpPic(290, 39, 0x5781, 0));
-                        _dataBox.Add(new GumpPic(337, 39, 0x5786, 0));
-                        _dataBox.Add(new GumpPic(380, 39, 0x5787, 0));
-                        _dataBox.Add(new GumpPic(431, 39, 0x5786, 0));
-                        _dataBox.Add(new GumpPic(474, 39, 0x5787, 0));
+                        _dataBox.Add(new GumpPic(151, 39, 0x5780, 0, World.Context));
+                        _dataBox.Add(new GumpPic(196, 39, 0x5781, 0, World.Context));
+                        _dataBox.Add(new GumpPic(245, 39, 0x5780, 0, World.Context));
+                        _dataBox.Add(new GumpPic(290, 39, 0x5781, 0, World.Context));
+                        _dataBox.Add(new GumpPic(337, 39, 0x5786, 0, World.Context));
+                        _dataBox.Add(new GumpPic(380, 39, 0x5787, 0, World.Context));
+                        _dataBox.Add(new GumpPic(431, 39, 0x5786, 0, World.Context));
+                        _dataBox.Add(new GumpPic(474, 39, 0x5787, 0, World.Context));
 
                         break;
                 }
 
                 // remove scissor
-                _dataBox.Add(new ScissorControl(false));
+                _dataBox.Add(new ScissorControl(World.Context, false));
             }
         }
 
@@ -1065,7 +1065,7 @@ namespace ClassicUO.Game.UI.Gumps
                     y = 0;
 
                 // add scissor
-                _dataBox.Add(new ScissorControl(true, 123, 36, 384, 120));
+                _dataBox.Add(new ScissorControl(World.Context, true, 123, 36, 384, 120));
 
                 int index = 0;
 
@@ -1077,12 +1077,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (graphic != 0)
                         {
-                            ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(graphic);
+                            ref readonly var artInfo = ref World.Context.Game.UO.Arts.GetArt(graphic);
 
                             int offsetX = x + 123 + (48 - artInfo.UV.Width) / 2;
                             int offsetY = y + 36 + (60 - artInfo.UV.Height) / 2;
 
-                            StaticPic pic = new StaticPic(graphic, 0)
+                            StaticPic pic = new StaticPic(graphic, 0, World.Context)
                             {
                                 X = offsetX,
                                 Y = offsetY,
@@ -1109,7 +1109,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 // remove scissor
-                _dataBox.Add(new ScissorControl(false));
+                _dataBox.Add(new ScissorControl(World.Context, false));
             }
         }
 
@@ -1125,10 +1125,11 @@ namespace ClassicUO.Game.UI.Gumps
                     int y = j != 0 ? 60 : 0;
 
                     // add scissor
-                    _dataBox.Add(new ScissorControl(true, 121, 36 + y, 384, 60));
+                    _dataBox.Add(new ScissorControl(World.Context, true, 121, 36 + y, 384, 60));
 
                     Label text = new Label(
-                        Client.Game.UO.FileManager.Clilocs.GetString(1062113 + j),
+                        World.Context,
+                        World.Context.Game.UO.FileManager.Clilocs.GetString(1062113 + j),
                         true,
                         0xFFFF,
                         90,
@@ -1151,12 +1152,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (graphic != 0)
                         {
-                            ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(graphic);
+                            ref readonly var artInfo = ref World.Context.Game.UO.Arts.GetArt(graphic);
 
                             int offsetX = x + 123 + (48 - artInfo.UV.Width) / 2;
                             int offsetY = y + 36 + (60 - artInfo.UV.Height) / 2;
 
-                            StaticPic pic = new StaticPic(graphic, 0)
+                            StaticPic pic = new StaticPic(graphic, 0, World.Context)
                             {
                                 X = offsetX,
                                 Y = offsetY,
@@ -1178,10 +1179,10 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     // remove scissor
-                    _dataBox.Add(new ScissorControl(false));
+                    _dataBox.Add(new ScissorControl(World.Context, false));
                 }
 
-                _dataBox.Add(new ColorBox(384, 2, 0) { X = 123, Y = 96 });
+                _dataBox.Add(new ColorBox(World.Context, 384, 2, 0) { X = 123, Y = 96 });
             }
         }
 
@@ -1201,7 +1202,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 // push scissor
-                _dataBox.Add(new ScissorControl(true, 121, 36, 384, 60));
+                _dataBox.Add(new ScissorControl(World.Context, true, 121, 36, 384, 60));
 
                 for (int i = startCategory; i < endCategory; i++)
                 {
@@ -1212,12 +1213,12 @@ namespace ClassicUO.Game.UI.Gumps
                         continue;
                     }
 
-                    ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt((uint)vec[0].NSCrosspiece);
+                    ref readonly var artInfo = ref World.Context.Game.UO.Arts.GetArt((uint)vec[0].NSCrosspiece);
 
                     int offsetX = x + 121 + (48 - artInfo.UV.Width) / 2;
                     int offsetY = y + 36;
 
-                    StaticPic pic = new StaticPic((ushort)vec[0].NSCrosspiece, 0)
+                    StaticPic pic = new StaticPic((ushort)vec[0].NSCrosspiece, 0, World.Context)
                     {
                         X = offsetX,
                         Y = offsetY,
@@ -1242,14 +1243,14 @@ namespace ClassicUO.Game.UI.Gumps
                         // pop scissor,
                         // push scissor
 
-                        _dataBox.Add(new ScissorControl(false));
+                        _dataBox.Add(new ScissorControl(World.Context, false));
 
-                        _dataBox.Add(new ScissorControl(true, 121, 96, 384, 60));
+                        _dataBox.Add(new ScissorControl(World.Context, true, 121, 96, 384, 60));
                     }
                 }
 
                 // pop scissor
-                _dataBox.Add(new ScissorControl(false));
+                _dataBox.Add(new ScissorControl(World.Context, false));
             }
             else if (
                 _customHouseManager.Category >= 0
@@ -1265,7 +1266,7 @@ namespace ClassicUO.Game.UI.Gumps
                     CustomHouseRoof item = vec[Page];
 
                     // push scissor
-                    _dataBox.Add(new ScissorControl(true, 130, 44, 384, 120));
+                    _dataBox.Add(new ScissorControl(World.Context, true, 130, 44, 384, 120));
 
                     int index = 0;
 
@@ -1277,12 +1278,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (graphic != 0)
                             {
-                                ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(graphic);
+                                ref readonly var artInfo = ref World.Context.Game.UO.Arts.GetArt(graphic);
 
                                 int offsetX = x + 130 + (48 - artInfo.UV.Width) / 2;
                                 int offsetY = y + 44 + (60 - artInfo.UV.Height) / 2;
 
-                                StaticPic pic = new StaticPic(graphic, 0)
+                                StaticPic pic = new StaticPic(graphic, 0, World.Context)
                                 {
                                     X = offsetX,
                                     Y = offsetY,
@@ -1309,12 +1310,12 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     // pop scissor
-                    _dataBox.Add(new ScissorControl(false));
+                    _dataBox.Add(new ScissorControl(World.Context, false));
                 }
 
-                _dataBoxGUI.Add(new GumpPic(152, 0, 0x55F3, 0));
+                _dataBoxGUI.Add(new GumpPic(152, 0, 0x55F3, 0, World.Context));
 
-                Button button = new Button(
+                Button button = new Button(World.Context, 
                     (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_CATEGORY,
                     0x5622,
                     0x5624,
@@ -1329,7 +1330,7 @@ namespace ClassicUO.Game.UI.Gumps
                 button.SetTooltip(ResGumps.ToCustomHouseManagerCategory);
                 _dataBoxGUI.Add(button);
 
-                button = new Button(
+                button = new Button(World.Context, 
                     (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_ROOF_Z_DOWN,
                     0x578B,
                     0x578D,
@@ -1344,7 +1345,7 @@ namespace ClassicUO.Game.UI.Gumps
                 button.SetTooltip(ResGumps.LowerRoofPlacementLevel);
                 _dataBoxGUI.Add(button);
 
-                button = new Button(
+                button = new Button(World.Context, 
                     (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_ROOF_Z_UP,
                     0x578E,
                     0x5790,
@@ -1359,9 +1360,9 @@ namespace ClassicUO.Game.UI.Gumps
                 button.SetTooltip(ResGumps.RaiseRoofPlacementLevel);
                 _dataBoxGUI.Add(button);
 
-                _dataBoxGUI.Add(new GumpPic(583, 4, 0x55F4, 0));
+                _dataBoxGUI.Add(new GumpPic(583, 4, 0x55F4, 0, World.Context));
 
-                Label text = new Label(_customHouseManager.RoofZ.ToString(), false, 0x04E9, font: 3)
+                Label text = new Label(World.Context, _customHouseManager.RoofZ.ToString(), false, 0x04E9, font: 3)
                 {
                     X = 405,
                     Y = 15
@@ -1387,7 +1388,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 // push scissor
-                _dataBox.Add(new ScissorControl(true, 121, 36, 384, 60));
+                _dataBox.Add(new ScissorControl(World.Context, true, 121, 36, 384, 60));
 
                 for (int i = startCategory; i < endCategory; i++)
                 {
@@ -1398,12 +1399,12 @@ namespace ClassicUO.Game.UI.Gumps
                         continue;
                     }
 
-                    ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt((uint)vec[0].Piece5);
+                    ref readonly var artInfo = ref World.Context.Game.UO.Arts.GetArt((uint)vec[0].Piece5);
 
                     int offsetX = x + 121 + (48 - artInfo.UV.Width) / 2;
                     int offsetY = y + 36;
 
-                    StaticPic pic = new StaticPic((ushort)vec[0].Piece5, 0)
+                    StaticPic pic = new StaticPic((ushort)vec[0].Piece5, 0, World.Context)
                     {
                         X = offsetX,
                         Y = offsetY,
@@ -1428,14 +1429,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                         // pop scissor
                         // push scissor
-                        _dataBox.Add(new ScissorControl(false));
+                        _dataBox.Add(new ScissorControl(World.Context, false));
 
-                        _dataBox.Add(new ScissorControl(true, 121, 96, 384, 60));
+                        _dataBox.Add(new ScissorControl(World.Context, true, 121, 96, 384, 60));
                     }
                 }
 
                 // pop scissor
-                _dataBox.Add(new ScissorControl(false));
+                _dataBox.Add(new ScissorControl(World.Context, false));
             }
             else if (
                 _customHouseManager.Category >= 0
@@ -1451,7 +1452,7 @@ namespace ClassicUO.Game.UI.Gumps
                     CustomHouseMisc item = vec[Page];
 
                     // push scissor
-                    _dataBox.Add(new ScissorControl(true, 130, 44, 384, 120));
+                    _dataBox.Add(new ScissorControl(World.Context, true, 130, 44, 384, 120));
 
                     for (int i = 0; i < 8; i++)
                     {
@@ -1459,12 +1460,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (graphic != 0)
                         {
-                            ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(graphic);
+                            ref readonly var artInfo = ref World.Context.Game.UO.Arts.GetArt(graphic);
 
                             int offsetX = x + 130 + (48 - artInfo.UV.Width) / 2;
                             int offsetY = y + 44 + (120 - artInfo.UV.Height) / 2;
 
-                            StaticPic pic = new StaticPic(graphic, 0)
+                            StaticPic pic = new StaticPic(graphic, 0, World.Context)
                             {
                                 X = offsetX,
                                 Y = offsetY,
@@ -1484,13 +1485,13 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     // pop scissor
-                    _dataBox.Add(new ScissorControl(false));
+                    _dataBox.Add(new ScissorControl(World.Context, false));
                 }
 
-                _dataBoxGUI.Add(new GumpPic(152, 0, 0x55F3, 0));
+                _dataBoxGUI.Add(new GumpPic(152, 0, 0x55F3, 0, World.Context));
 
                 _dataBoxGUI.Add(
-                    new Button((int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_CATEGORY, 0x5622, 0x5624, 0x5623)
+                    new Button(World.Context, (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_CATEGORY, 0x5622, 0x5624, 0x5623)
                     {
                         X = 167,
                         Y = 5,
@@ -1502,7 +1503,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void AddMenu()
         {
-            Button button = new Button(
+            Button button = new Button(World.Context, 
                 (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_BACKUP,
                 0x098D,
                 0x098D,
@@ -1523,7 +1524,7 @@ namespace ClassicUO.Game.UI.Gumps
             button.SetTooltip(ResGumps.StoreDesignInProgress);
             _dataBox.Add(button);
 
-            button = new Button(
+            button = new Button(World.Context, 
                 (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_RESTORE,
                 0x098D,
                 0x098D,
@@ -1544,7 +1545,7 @@ namespace ClassicUO.Game.UI.Gumps
             button.SetTooltip(ResGumps.RestoreYourDesign);
             _dataBox.Add(button);
 
-            button = new Button(
+            button = new Button(World.Context, 
                 (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_SYNCH,
                 0x098D,
                 0x098D,
@@ -1565,7 +1566,7 @@ namespace ClassicUO.Game.UI.Gumps
             button.SetTooltip(ResGumps.SynchronizeDesignStateWithServer);
             _dataBox.Add(button);
 
-            button = new Button(
+            button = new Button(World.Context, 
                 (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_CLEAR,
                 0x098D,
                 0x098D,
@@ -1586,7 +1587,7 @@ namespace ClassicUO.Game.UI.Gumps
             button.SetTooltip(ResGumps.ClearAllChanges);
             _dataBox.Add(button);
 
-            button = new Button(
+            button = new Button(World.Context, 
                 (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_COMMIT,
                 0x098D,
                 0x098D,
@@ -1607,7 +1608,7 @@ namespace ClassicUO.Game.UI.Gumps
             button.SetTooltip(ResGumps.SaveExistingChanges);
             _dataBox.Add(button);
 
-            button = new Button(
+            button = new Button(World.Context, 
                 (int)ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_REVERT,
                 0x098D,
                 0x098D,
@@ -1929,7 +1930,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_1:
                     _customHouseManager.CurrentFloor = 1;
-                    NetClient.Socket.Send_CustomHouseGoToFloor(World, 1);
+                    World.Network.Send_CustomHouseGoToFloor(World, 1);
 
                     for (int i = 0; i < _customHouseManager.FloorVisionState.Length; i++)
                     {
@@ -1943,7 +1944,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_2:
                     _customHouseManager.CurrentFloor = 2;
-                    NetClient.Socket.Send_CustomHouseGoToFloor(World, 2);
+                    World.Network.Send_CustomHouseGoToFloor(World, 2);
 
                     for (int i = 0; i < _customHouseManager.FloorVisionState.Length; i++)
                     {
@@ -1957,7 +1958,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_3:
                     _customHouseManager.CurrentFloor = 3;
-                    NetClient.Socket.Send_CustomHouseGoToFloor(World, 3);
+                    World.Network.Send_CustomHouseGoToFloor(World, 3);
 
                     for (int i = 0; i < _customHouseManager.FloorVisionState.Length; i++)
                     {
@@ -1971,7 +1972,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_GO_FLOOR_4:
                     _customHouseManager.CurrentFloor = 4;
-                    NetClient.Socket.Send_CustomHouseGoToFloor(World, 4);
+                    World.Network.Send_CustomHouseGoToFloor(World, 4);
 
                     for (int i = 0; i < _customHouseManager.FloorVisionState.Length; i++)
                     {
@@ -2013,32 +2014,32 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_BACKUP:
-                    NetClient.Socket.Send_CustomHouseBackup(World);
+                    World.Network.Send_CustomHouseBackup(World);
 
                     break;
 
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_RESTORE:
-                    NetClient.Socket.Send_CustomHouseRestore(World);
+                    World.Network.Send_CustomHouseRestore(World);
 
                     break;
 
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_SYNCH:
-                    NetClient.Socket.Send_CustomHouseSync(World);
+                    World.Network.Send_CustomHouseSync(World);
 
                     break;
 
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_CLEAR:
-                    NetClient.Socket.Send_CustomHouseClear(World);
+                    World.Network.Send_CustomHouseClear(World);
 
                     break;
 
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_COMMIT:
-                    NetClient.Socket.Send_CustomHouseCommit(World);
+                    World.Network.Send_CustomHouseCommit(World);
 
                     break;
 
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_REVERT:
-                    NetClient.Socket.Send_CustomHouseRevert(World);
+                    World.Network.Send_CustomHouseRevert(World);
 
                     break;
 
@@ -2083,7 +2084,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             SetOtherHousesState(true);
             World.CustomHouseManager = null;
-            NetClient.Socket.Send_CustomHouseBuildingExit(World);
+            World.Network.Send_CustomHouseBuildingExit(World);
             World.TargetManager.CancelTarget();
 
             base.Dispose();

@@ -532,7 +532,9 @@ namespace ClassicUO.Game.GameObjects
                 graphic = mobile.GetGraphicForAnimation();
             }
 
-            var animations = Client.Game.UO.Animations;
+            var uo = mobile.World.Context.Game.UO;
+            var animations = uo.Animations;
+            var animationsLoader = uo.FileManager.Animations;
             if (graphic >= animations.MaxAnimationCount)
             {
                 return 0;
@@ -586,7 +588,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (type == AnimationGroupsType.Animal)
                         {
-                            if (IsReplacedObjectAnimation(0, v13))
+                            if (IsReplacedObjectAnimation(animationsLoader, 0, v13))
                             {
                                 originalType = AnimationGroupsType.Unknown;
                             }
@@ -645,7 +647,7 @@ namespace ClassicUO.Game.GameObjects
                         }
                         else
                         {
-                            if (IsReplacedObjectAnimation(1, v13))
+                            if (IsReplacedObjectAnimation(animationsLoader, 1, v13))
                             {
                                 // LABEL_190:
 
@@ -657,7 +659,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else
                     {
-                        if (IsReplacedObjectAnimation(3, v13))
+                        if (IsReplacedObjectAnimation(animationsLoader, 3, v13))
                         {
                             originalType = AnimationGroupsType.Unknown;
                         }
@@ -670,7 +672,7 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else
                 {
-                    if (IsReplacedObjectAnimation(2, v13))
+                    if (IsReplacedObjectAnimation(animationsLoader, 2, v13))
                     {
                         originalType = AnimationGroupsType.Unknown;
                     }
@@ -1438,11 +1440,11 @@ namespace ClassicUO.Game.GameObjects
             return result;
         }
 
-        public static bool IsReplacedObjectAnimation(byte anim, ushort v13)
+        public static bool IsReplacedObjectAnimation(AnimationsLoader animationsLoader, byte anim, ushort v13)
         {
-            if (anim < Client.Game.UO.FileManager.Animations.GroupReplaces.Length)
+            if (anim < animationsLoader.GroupReplaces.Length)
             {
-                foreach (var tuple in Client.Game.UO.FileManager.Animations.GroupReplaces[anim])
+                foreach (var tuple in animationsLoader.GroupReplaces[anim])
                 {
                     if (tuple.Item1 == v13)
                     {
@@ -1454,7 +1456,7 @@ namespace ClassicUO.Game.GameObjects
             return false;
         }
 
-        public static byte GetReplacedObjectAnimation(ushort graphic, ushort index)
+        public static byte GetReplacedObjectAnimation(AnimationsLoader animationsLoader, Renderer.Animations.Animations animations, ushort graphic, ushort index)
         {
             ushort getReplacedGroup(List<(ushort, byte)> list, ushort idx, ushort walkIdx)
             {
@@ -1474,16 +1476,16 @@ namespace ClassicUO.Game.GameObjects
                 return idx;
             }
 
-            AnimationGroups group = Client.Game.UO.FileManager.Animations.GetGroupIndex(
+            AnimationGroups group = animationsLoader.GetGroupIndex(
                 graphic,
-                Client.Game.UO.Animations.GetAnimType(graphic)
+                animations.GetAnimType(graphic)
             );
 
             if (group == AnimationGroups.Low)
             {
                 return (byte)(
                     getReplacedGroup(
-                        Client.Game.UO.FileManager.Animations.GroupReplaces[0],
+                        animationsLoader.GroupReplaces[0],
                         index,
                         (ushort)LowAnimationGroup.Walk
                     ) % (ushort)LowAnimationGroup.AnimationCount
@@ -1494,7 +1496,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 return (byte)(
                     getReplacedGroup(
-                        Client.Game.UO.FileManager.Animations.GroupReplaces[1],
+                        animationsLoader.GroupReplaces[1],
                         index,
                         (ushort)PeopleAnimationGroup.WalkUnarmed
                     ) % (ushort)PeopleAnimationGroup.AnimationCount
@@ -1512,7 +1514,7 @@ namespace ClassicUO.Game.GameObjects
             byte mode
         )
         {
-            var animations = Client.Game.UO.Animations;
+            var animations = mobile.World.Context.Game.UO.Animations;
             if (mobile.Graphic >= animations.MaxAnimationCount)
             {
                 return 0;

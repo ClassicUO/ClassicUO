@@ -179,19 +179,20 @@ namespace ClassicUO.Game
             for (int i = 0; i < _effects.Length; i++)
             {
                 ref WeatherEffect effect = ref _effects[i];
-                effect.X = RandomHelper.GetValue(0, Client.Game.Scene.Camera.Bounds.Width);
-                effect.Y = RandomHelper.GetValue(0, Client.Game.Scene.Camera.Bounds.Height);
+                effect.X = RandomHelper.GetValue(0, _world.Context.Game.Scene.Camera.Bounds.Width);
+                effect.Y = RandomHelper.GetValue(0, _world.Context.Game.Scene.Camera.Bounds.Height);
             }
         }
 
-        private static byte CalculateScaledCount(byte count)
+        private byte CalculateScaledCount(byte count)
         {
             if (count <= 0)
             {
                 return 0;
             }
             float legacyWindowSize = 640 * 480;
-            return (byte)Math.Max(1, Math.Min(byte.MaxValue, count * (Client.Game.Scene.Camera.Bounds.Width * Client.Game.Scene.Camera.Bounds.Height) / legacyWindowSize));
+            var bounds = _world.Context.Game.Scene.Camera.Bounds;
+            return (byte)Math.Max(1, Math.Min(byte.MaxValue, count * (bounds.Width * bounds.Height) / legacyWindowSize));
         }
 
         private void PlayWind()
@@ -219,7 +220,7 @@ namespace ClassicUO.Game
                 randY *= -1;
             }
 
-            Client.Game.Audio.PlaySoundWithDistance(_world, sound, _world.Player.X + randX, _world.Player.Y + randY);
+            _world.Context.Game.Audio.PlaySoundWithDistance(_world, sound, _world.Player.X + randX, _world.Player.Y + randY);
         }
 
         public void Draw(UltimaBatcher2D batcher, int x, int y, float layerDepth)
@@ -308,8 +309,8 @@ namespace ClassicUO.Game
             //        break;
             //}
 
-            //Point winpos = ProfileManager.CurrentProfile.GameWindowPosition;
-            Point winsize = new Point(Client.Game.Scene.Camera.Bounds.Width, Client.Game.Scene.Camera.Bounds.Height);
+            //Point winpos = _world.Profile.CurrentProfile.GameWindowPosition;
+            Point winsize = new Point(_world.Context.Game.Scene.Camera.Bounds.Width, _world.Context.Game.Scene.Camera.Bounds.Height);
 
             Rectangle snowRect = new Rectangle(0, 0, 2, 2);
 

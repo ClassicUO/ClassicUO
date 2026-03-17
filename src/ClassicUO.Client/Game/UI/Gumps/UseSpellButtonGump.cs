@@ -23,7 +23,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly MacroManager _mm;
 
         public bool ShowEdit =>
-            Keyboard.Ctrl && Keyboard.Alt && ProfileManager.CurrentProfile.FastSpellsAssign;
+            Keyboard.Ctrl && Keyboard.Alt && World.Profile.CurrentProfile.FastSpellsAssign;
 
         public UseSpellButtonGump(World world) : base(world,0, 0)
         {
@@ -52,7 +52,7 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildGump()
         {
             Add(
-                _background = new GumpPic(0, 0, (ushort)_spell.GumpIconSmallID, 0)
+                _background = new GumpPic(0, 0, (ushort)_spell.GumpIconSmallID, 0, World.Context)
                 {
                     AcceptMouseInput = false
                 }
@@ -62,7 +62,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (cliloc != 0)
             {
-                SetTooltip(Client.Game.UO.FileManager.Clilocs.GetString(cliloc), 80);
+                SetTooltip(World.Context.Game.UO.FileManager.Clilocs.GetString(cliloc), 80);
             }
 
             WantUpdateSize = true;
@@ -81,15 +81,15 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(LOCK_GRAPHIC);
+                ref readonly var gumpInfo = ref World.Context.Game.UO.Gumps.GetGump(LOCK_GRAPHIC);
 
                 if (gumpInfo.Texture != null)
                 {
                     if (
-                        UIManager.MouseOverControl != null
+                        World.Context.UI.MouseOverControl != null
                         && (
-                            UIManager.MouseOverControl == this
-                            || UIManager.MouseOverControl.RootParent == this
+                            World.Context.UI.MouseOverControl == this
+                            || World.Context.UI.MouseOverControl.RootParent == this
                         )
                     )
                     {
@@ -202,24 +202,24 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             if (
-                ProfileManager.CurrentProfile.CastSpellsByOneClick
+                World.Profile.CurrentProfile.CastSpellsByOneClick
                 && button == MouseButtonType.Left
                 && Math.Abs(offset.X) < 5
                 && Math.Abs(offset.Y) < 5
             )
             {
-                GameActions.CastSpell(_spell.ID);
+                GameActions.CastSpell(World, _spell.ID);
             }
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
             if (
-                !ProfileManager.CurrentProfile.CastSpellsByOneClick
+                !World.Profile.CurrentProfile.CastSpellsByOneClick
                 && button == MouseButtonType.Left
             )
             {
-                GameActions.CastSpell(_spell.ID);
+                GameActions.CastSpell(World, _spell.ID);
 
                 return true;
             }

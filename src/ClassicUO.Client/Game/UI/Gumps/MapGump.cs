@@ -36,18 +36,18 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new ResizePic(0x1432)
+                new ResizePic(0x1432, World.Context)
                 {
                     Width = width + 44, Height = height + 61
                 }
             );
 
 
-            Add(_buttons[0] = new Button((int) ButtonType.PlotCourse, 0x1398, 0x1398) { X = (width - 100) >> 1, Y = 5, ButtonAction = ButtonAction.Activate });
+            Add(_buttons[0] = new Button(World.Context, (int) ButtonType.PlotCourse, 0x1398, 0x1398) { X = (width - 100) >> 1, Y = 5, ButtonAction = ButtonAction.Activate });
 
-            Add(_buttons[1] = new Button((int) ButtonType.StopPlotting, 0x1399, 0x1399) { X = (width - 70) >> 1, Y = 5, ButtonAction = ButtonAction.Activate });
+            Add(_buttons[1] = new Button(World.Context, (int) ButtonType.StopPlotting, 0x1399, 0x1399) { X = (width - 70) >> 1, Y = 5, ButtonAction = ButtonAction.Activate });
 
-            Add(_buttons[2] = new Button((int) ButtonType.ClearCourse, 0x139A, 0x139A) { X = (width - 66) >> 1, Y = height + 37, ButtonAction = ButtonAction.Activate });
+            Add(_buttons[2] = new Button(World.Context, (int) ButtonType.ClearCourse, 0x139A, 0x139A) { X = (width - 66) >> 1, Y = height + 37, ButtonAction = ButtonAction.Activate });
 
             _buttons[0].IsVisible = _buttons[0].IsEnabled = PlotState == 0;
 
@@ -57,12 +57,12 @@ namespace ClassicUO.Game.UI.Gumps
 
 
 
-            _hit = new HitBox(24, 31, width, height, null, 0f);
+            _hit = new HitBox(World.Context, 24, 31, width, height, null, 0f);
             Add(_hit);
 
             _hit.MouseUp += TextureControlOnMouseUp;
 
-            Add(new GumpPic(width - 20, height - 20, 0x0139D, 0));
+            Add(new GumpPic(width - 20, height - 20, 0x0139D, 0, World.Context));
         }
 
 
@@ -81,7 +81,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void AddPin(int x, int y)
         {
-            PinControl c = new PinControl(x, y);
+            PinControl c = new PinControl(World.Context, x, y);
             c.X += c.Width + 5;
             c.Y += c.Height;
             c.NumberText = (_container.Count + 1).ToString();
@@ -118,7 +118,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 case ButtonType.PlotCourse:
                 case ButtonType.StopPlotting:
-                    NetClient.Socket.Send_MapMessage(LocalSerial,
+                    World.Network.Send_MapMessage(LocalSerial,
                                                      6,
                                                      (byte)PlotState,
                                                      unchecked((ushort)-24),
@@ -129,7 +129,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case ButtonType.ClearCourse:
-                    NetClient.Socket.Send_MapMessage(LocalSerial,
+                    World.Network.Send_MapMessage(LocalSerial,
                                                      5,
                                                      0,
                                                      unchecked((ushort)-24),
@@ -188,7 +188,7 @@ namespace ClassicUO.Game.UI.Gumps
                     ushort x = (ushort) (e.X + 5);
                     ushort y = (ushort) e.Y;
 
-                    NetClient.Socket.Send_MapMessage(LocalSerial,
+                    World.Network.Send_MapMessage(LocalSerial,
                                                      1,
                                                      0,
                                                      x,
@@ -265,7 +265,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             _pinTimer = Time.Ticks + 300;
 
-            if (PlotState != 0 && UIManager.MouseOverControl is PinControl pin)
+            if (PlotState != 0 && World.Context.UI.MouseOverControl is PinControl pin)
             {
                 _currentPin = pin;
             }
@@ -376,17 +376,15 @@ namespace ClassicUO.Game.UI.Gumps
         private class PinControl : Control
         {
             private readonly GumpPic _pic;
-            private readonly RenderedText _text;
+            private RenderedText _text;
+            private bool _textInitialized;
 
-            public PinControl(int x, int y)
+            public PinControl(GameContext context, int x, int y) : base(context)
             {
                 X = x;
                 Y = y;
 
-
-                _text = RenderedText.Create(string.Empty, font: 0, isunicode: false);
-
-                _pic = new GumpPic(0, 0, 0x139B, 0);
+                _pic = new GumpPic(0, 0, 0x139B, 0, Context);
                 Add(_pic);
 
                 WantUpdateSize = false;
@@ -410,15 +408,29 @@ namespace ClassicUO.Game.UI.Gumps
             //    return _pic.Contains(x, y);
             //}
 
+            private void EnsureText()
+            {
+                if (_textInitialized)
+                    return;
+
+                var uo = Context?.Game?.UO;
+                if (uo == null)
+                    return;
+
+                _textInitialized = true;
+                _text = RenderedText.Create(uo, string.Empty, font: 0, isunicode: false);
+            }
+
             public string NumberText
             {
-                get => _text.Text;
-                set => _text.Text = value;
+                get { EnsureText(); return _text?.Text ?? string.Empty; }
+                set { EnsureText(); if (_text != null) _text.Text = value; }
             }
 
 
             public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
             {
+                EnsureText();
                 if (MouseIsOver)
                 {
                     _pic.Hue = 0x35;
@@ -431,14 +443,17 @@ namespace ClassicUO.Game.UI.Gumps
                 base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
                 float layerDepth = layerDepthRef;
 
-                renderLists.AddGumpNoAtlas
-                (
-                    batcher =>
-                    {
-                        _text.Draw(batcher, x - _text.Width - 1, y, layerDepth);
-                        return true;
-                    }
-                );
+                if (_text != null)
+                {
+                    renderLists.AddGumpNoAtlas
+                    (
+                        batcher =>
+                        {
+                            _text.Draw(batcher, x - _text.Width - 1, y, layerDepth);
+                            return true;
+                        }
+                    );
+                }
                 return true;
             }
 

@@ -5,13 +5,15 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+using ClassicUO.Game;
+
 namespace ClassicUO.Game.UI.Controls
 {
     internal class Line : Control
     {
         private readonly Texture2D _texture;
 
-        public Line(int x, int y, int w, int h, uint color)
+        public Line(GameContext context, int x, int y, int w, int h, uint color) : base(context)
         {
             X = x;
             Y = y;

@@ -88,8 +88,8 @@ namespace ClassicUO.Game
                         return;
                     }
 
-                    int mapWidthInBlocks = Client.Game.UO.FileManager.Maps.MapBlocksSize[mapId, 0];
-                    int mapHeightInBlocks = Client.Game.UO.FileManager.Maps.MapBlocksSize[mapId, 1];
+                    int mapWidthInBlocks = world.Context.Game.UO.FileManager.Maps.MapBlocksSize[mapId, 0];
+                    int mapHeightInBlocks = world.Context.Game.UO.FileManager.Maps.MapBlocksSize[mapId, 1];
                     int blocks = mapWidthInBlocks * mapHeightInBlocks;
 
                     if (block < 0 || block >= blocks)
@@ -164,7 +164,7 @@ namespace ClassicUO.Game
                         }
                     }
 
-                    NetClient.Socket.Send_UOLive_HashResponse((uint) block, (byte) mapId, checkSumsToBeSent.AsSpan(0, CRC_LENGTH));
+                    world.Network.Send_UOLive_HashResponse((uint) block, (byte) mapId, checkSumsToBeSent.AsSpan(0, CRC_LENGTH));
 
                     break;
                 }
@@ -211,7 +211,7 @@ namespace ClassicUO.Game
                     p.Buffer.Slice(p.Position, totalLength).CopyTo(staticsData);
 
 
-                    if (block >= 0 && block < Client.Game.UO.FileManager.Maps.MapBlocksSize[mapId, 0] * Client.Game.UO.FileManager.Maps.MapBlocksSize[mapId, 1])
+                    if (block >= 0 && block < world.Context.Game.UO.FileManager.Maps.MapBlocksSize[mapId, 0] * world.Context.Game.UO.FileManager.Maps.MapBlocksSize[mapId, 1])
                     {
                         int index = block * 12;
 
@@ -303,9 +303,9 @@ namespace ClassicUO.Game
                         }
 
 
-                        UIManager.GetGump<MiniMapGump>()?.RequestUpdateContents();
+                        world.Context.UI.GetGump<MiniMapGump>()?.RequestUpdateContents();
 
-                        //UIManager.GetGump<WorldMapGump>()?.UpdateMap();
+                        //world.Context.UI.GetGump<WorldMapGump>()?.UpdateMap();
                         //instead of recalculating the CRC block 2 times, in case of terrain + statics update, we only set the actual block to ushort maxvalue, so it will be recalculated on next hash query
                         //also the server should always send FIRST the landdata packet, and only AFTER land the statics packet
                         _UL.MapCRCs[mapId][block] = ushort.MaxValue;
@@ -362,9 +362,9 @@ namespace ClassicUO.Game
                         int mapNumber = p.ReadUInt8();
                         validMaps.Add(mapNumber);
 
-                        _UL.MapSizeWrapSize[mapNumber, 0] = Math.Min((ushort) Client.Game.UO.FileManager.Maps.MapsDefaultSize[0, 0], p.ReadUInt16BE());
+                        _UL.MapSizeWrapSize[mapNumber, 0] = Math.Min((ushort) world.Context.Game.UO.FileManager.Maps.MapsDefaultSize[0, 0], p.ReadUInt16BE());
 
-                        _UL.MapSizeWrapSize[mapNumber, 1] = Math.Min((ushort) Client.Game.UO.FileManager.Maps.MapsDefaultSize[0, 1], p.ReadUInt16BE());
+                        _UL.MapSizeWrapSize[mapNumber, 1] = Math.Min((ushort) world.Context.Game.UO.FileManager.Maps.MapsDefaultSize[0, 1], p.ReadUInt16BE());
 
                         _UL.MapSizeWrapSize[mapNumber, 2] = Math.Min(p.ReadUInt16BE(), _UL.MapSizeWrapSize[mapNumber, 0]);
                         _UL.MapSizeWrapSize[mapNumber, 3] = Math.Min(p.ReadUInt16BE(), _UL.MapSizeWrapSize[mapNumber, 1]);
@@ -375,7 +375,7 @@ namespace ClassicUO.Game
                     {
                         _UL._ValidMaps = validMaps;
                         MapLoader.MAPS_COUNT = sbyte.MaxValue;
-                        var mapLoader = new ULMapLoader(Client.Game.UO.FileManager, (uint)MapLoader.MAPS_COUNT);
+                        var mapLoader = new ULMapLoader(world.Context.Game.UO.FileManager, (uint)MapLoader.MAPS_COUNT);
 
                         //for (int i = 0; i < maps; i++)
                         for (int i = 0; i < validMaps.Count; i++)
@@ -462,8 +462,8 @@ namespace ClassicUO.Game
                 return;
             }
 
-            ushort mapWidthInBlocks = (ushort) Client.Game.UO.FileManager.Maps.MapBlocksSize[mapId, 0];
-            ushort mapHeightInBlocks = (ushort) Client.Game.UO.FileManager.Maps.MapBlocksSize[mapId, 1];
+            ushort mapWidthInBlocks = (ushort) world.Context.Game.UO.FileManager.Maps.MapBlocksSize[mapId, 0];
+            ushort mapHeightInBlocks = (ushort) world.Context.Game.UO.FileManager.Maps.MapBlocksSize[mapId, 1];
 
             if (block >= 0 && block < mapWidthInBlocks * mapHeightInBlocks)
             {
@@ -532,9 +532,9 @@ namespace ClassicUO.Game
                     }
                 }
 
-                UIManager.GetGump<MiniMapGump>()?.RequestUpdateContents();
+                world.Context.UI.GetGump<MiniMapGump>()?.RequestUpdateContents();
 
-                //UIManager.GetGump<WorldMapGump>()?.UpdateMap();
+                //world.Context.UI.GetGump<WorldMapGump>()?.UpdateMap();
             }
         }
 
@@ -635,11 +635,13 @@ namespace ClassicUO.Game
         {
             private readonly BinaryReader _reader;
             private readonly BinaryWriter _writer;
+            private readonly UOFileManager _fileManager;
 
-            public ULFileMul(FileStream stream) : base(stream)
+            public ULFileMul(FileStream stream, UOFileManager fileManager = null) : base(stream)
             {
                 _reader = new BinaryReader(stream);
                 _writer = new BinaryWriter(stream);
+                _fileManager = fileManager;
             }
 
             public override BinaryReader Reader => _reader;
@@ -654,7 +656,7 @@ namespace ClassicUO.Game
             public override void Dispose()
             {
                 base.Dispose();
-                Client.Game.UO.FileManager.Maps.Dispose();
+                _fileManager?.Maps?.Dispose();
             }
         }
 
@@ -673,7 +675,7 @@ namespace ClassicUO.Game
 
         //     public override void Dispose()
         //     {
-        //         Client.Game.UO.FileManager.Maps.Dispose();
+        //         Maps.Dispose();
         //     }
 
         //     public void WriteArray(long position, byte[] array)
@@ -752,13 +754,13 @@ namespace ClassicUO.Game
 
             public override void Load()
             {
-                if (Client.Game.UO.FileManager.Maps is ULMapLoader)
+                if (FileManager.Maps is ULMapLoader)
                 {
                     return;
                 }
 
-                Client.Game.UO.FileManager.Maps?.Dispose();
-                Client.Game.UO.FileManager.Maps = this;
+                FileManager.Maps?.Dispose();
+                FileManager.Maps = this;
 
                 _UL._EOF = new uint[NumMaps];
                 _filesStaticsStream = new FileStream[NumMaps];
@@ -771,7 +773,7 @@ namespace ClassicUO.Game
 
                     if (File.Exists(path))
                     {
-                        _filesMap[i] = new ULFileMul(File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite));
+                        _filesMap[i] = new ULFileMul(File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite), FileManager);
                         foundOneMap = true;
                     }
 
@@ -784,7 +786,7 @@ namespace ClassicUO.Game
                         break;
                     }
 
-                    _filesStatics[i] = new ULFileMul(File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite));
+                    _filesStatics[i] = new ULFileMul(File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite), FileManager);
 
                     _filesStaticsStream[i] = File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite);
 
@@ -799,7 +801,7 @@ namespace ClassicUO.Game
                         break;
                     }
 
-                    _filesIdxStatics[i] = new ULFileMul(File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite));
+                    _filesIdxStatics[i] = new ULFileMul(File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite), FileManager);
                 }
 
                 if (!foundOneMap)

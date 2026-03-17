@@ -18,7 +18,7 @@ namespace ClassicUO.Game.UI.Gumps
         private const ushort GUMP_WIDTH = 300;
         private const ushort GUMP_HEIGHT = 400;
 
-        private readonly int _gumpPosX = Client.Game.Scene.Camera.Bounds.Width / 2 - 125;
+        private readonly int _gumpPosX;
         private readonly int _gumpPosY = 100;
 
         private static ScrollArea _scrollArea;
@@ -32,11 +32,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         public IgnoreManagerGump(World world) : base(world, 0, 0)
         {
+            _gumpPosX = World.Context.Game.Scene.Camera.Bounds.Width / 2 - 125;
             CanMove = true;
 
             Add
             (
-                new AlphaBlendControl(0.95f)
+                new AlphaBlendControl(World.Context, 0.95f)
                 {
                     X = _gumpPosX,
                     Y = _gumpPosY,
@@ -53,7 +54,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new Line
-                (
+                (World.Context, 
                     _gumpPosX,
                     _gumpPosY,
                     GUMP_WIDTH,
@@ -65,7 +66,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new Line
-                (
+                (World.Context, 
                     _gumpPosX,
                     _gumpPosY,
                     1,
@@ -77,7 +78,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new Line
-                (
+                (World.Context, 
                     _gumpPosX,
                     GUMP_HEIGHT + _gumpPosY,
                     GUMP_WIDTH,
@@ -89,7 +90,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new Line
-                (
+                (World.Context, 
                     GUMP_WIDTH + _gumpPosX,
                     _gumpPosY,
                     1,
@@ -103,14 +104,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             #region Legend
 
-            Add(new Label(ResGumps.IgnoreListName, true, HUE_FONT, 185, 255, FontStyle.BlackBorder) { X = _gumpPosX + 10, Y = initY });
+            Add(new Label(World.Context, ResGumps.IgnoreListName, true, HUE_FONT, 185, 255, FontStyle.BlackBorder) { X = _gumpPosX + 10, Y = initY });
 
-            Add(new Label(ResGumps.Remove, true, HUE_FONT, 185, 255, FontStyle.BlackBorder) { X = _gumpPosX + 210, Y = initY });
+            Add(new Label(World.Context, ResGumps.Remove, true, HUE_FONT, 185, 255, FontStyle.BlackBorder) { X = _gumpPosX + 210, Y = initY });
 
             Add
             (
                 new Line
-                (
+                (World.Context, 
                     _gumpPosX,
                     initY + 20,
                     GUMP_WIDTH,
@@ -124,7 +125,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new NiceButton
-                (
+                (World.Context, 
                     _gumpPosX + 20, _gumpPosY + GUMP_HEIGHT - 30, GUMP_WIDTH - 40, 25,
                     ButtonAction.Activate, ResGumps.IgnoreListAddButton
                 )
@@ -154,7 +155,7 @@ namespace ClassicUO.Game.UI.Gumps
         private void DrawArea()
         {
             _scrollArea = new ScrollArea
-            (
+            (World.Context, 
                 _gumpPosX + 10, _gumpPosY + 40, GUMP_WIDTH - 20, GUMP_HEIGHT - 80,
                 true
             );
@@ -213,7 +214,7 @@ namespace ClassicUO.Game.UI.Gumps
             public event EventHandler RemoveMarkerEvent;
             private readonly IgnoreManagerGump _gump;
 
-            public IgnoreListControl(IgnoreManagerGump gump, string chName)
+            public IgnoreListControl(IgnoreManagerGump gump, string chName) : base(gump.World.Context)
             {
                 _gump = gump;
                 CanMove = true;
@@ -221,9 +222,9 @@ namespace ClassicUO.Game.UI.Gumps
                 CanCloseWithRightClick = true;
                 _chName = chName;
 
-                Add(new Label(chName, true, HUE_FONT, 290) { X = 10 });
+                Add(new Label(Context, chName, true, HUE_FONT, 290) { X = 10 });
 
-                Add(new Button(1, 0xFAB, 0xFAC) { X = 220, ButtonAction = ButtonAction.Activate });
+                Add(new Button(Context, 1, 0xFAB, 0xFAC) { X = 220, ButtonAction = ButtonAction.Activate });
             }
 
             public override void OnButtonClick(int buttonId)

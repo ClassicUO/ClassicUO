@@ -1,5 +1,6 @@
-﻿// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.Game;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -10,13 +11,13 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ButtonTileArt : Button
     {
-        private readonly ushort _hue;
-        private readonly bool _isPartial;
+        private ushort _hue;
+        private bool _isPartial;
         private readonly int _tileX,
             _tileY;
         private ushort _graphic;
 
-        public ButtonTileArt(List<string> gparams) : base(gparams)
+        public ButtonTileArt(List<string> gparams, GameContext context) : base(gparams, context)
         {
             X = int.Parse(gparams[1]);
             Y = int.Parse(gparams[2]);
@@ -27,26 +28,29 @@ namespace ClassicUO.Game.UI.Controls
             ContainsByBounds = true;
             IsFromServer = true;
 
-            ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(_graphic);
-
-            if (artInfo.Texture == null)
+            var uo = Context?.Game?.UO;
+            if (uo != null)
             {
-                Dispose();
-
-                return;
+                ref readonly var artInfo = ref uo.Arts.GetArt(_graphic);
+                if (artInfo.Texture != null)
+                {
+                    _isPartial = uo.FileManager.TileData.StaticData[_graphic].IsPartialHue;
+                }
             }
-
-            _isPartial = Client.Game.UO.FileManager.TileData.StaticData[_graphic].IsPartialHue;
         }
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
             base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
+
+            if (Context?.Game?.UO == null)
+                return false;
+
             float layerDepth = layerDepthRef;
 
             var hueVector = ShaderHueTranslator.GetHueVector(_hue, _isPartial, 1f);
 
-            ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(_graphic);
+            ref readonly var artInfo = ref Context.Game.UO.Arts.GetArt(_graphic);
 
             if (artInfo.Texture != null)
             {

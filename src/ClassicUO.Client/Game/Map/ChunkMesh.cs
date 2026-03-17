@@ -108,6 +108,7 @@ namespace ClassicUO.Game.Map
         public bool IsDirty = true;
 
         private bool _animatedWaterEffect;
+        private World _world;
         private TextureBucketTracker _landBuckets = new(16);
         private TextureBucketTracker _staticsBuckets = new(32);
 
@@ -120,11 +121,12 @@ namespace ClassicUO.Game.Map
 
         public void Build(Chunk chunk, World world, GraphicsDevice graphicsDevice)
         {
+            _world = world;
             Land.Reset();
             Statics.Reset();
             IsDirty = false;
 
-            var profile = ProfileManager.CurrentProfile;
+            var profile = world.Profile.CurrentProfile;
             if (profile == null)
                 return;
 
@@ -232,15 +234,15 @@ namespace ClassicUO.Game.Map
             Texture2D texture;
             if (land.IsStretched)
             {
-                ref readonly var texmapInfo = ref Client.Game.UO.Texmaps.GetTexmap(
-                    Client.Game.UO.FileManager.TileData.LandData[land.Graphic].TexID
+                ref readonly var texmapInfo = ref _world.Context.Game.UO.Texmaps.GetTexmap(
+                    _world.Context.Game.UO.FileManager.TileData.LandData[land.Graphic].TexID
                 );
 
                 if (texmapInfo.Texture != null)
                     texture = texmapInfo.Texture;
                 else
                 {
-                    ref readonly var artInfo = ref Client.Game.UO.Arts.GetLand(land.Graphic);
+                    ref readonly var artInfo = ref _world.Context.Game.UO.Arts.GetLand(land.Graphic);
                     if (artInfo.Texture == null)
                         return;
                     texture = artInfo.Texture;
@@ -248,7 +250,7 @@ namespace ClassicUO.Game.Map
             }
             else
             {
-                ref readonly var artInfo = ref Client.Game.UO.Arts.GetLand(land.Graphic);
+                ref readonly var artInfo = ref _world.Context.Game.UO.Arts.GetLand(land.Graphic);
                 if (artInfo.Texture == null)
                     return;
                 texture = artInfo.Texture;
@@ -281,7 +283,7 @@ namespace ClassicUO.Game.Map
             if (IsStaticExcludedFromMesh(graphic, ref itemData))
                 return;
 
-            ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(graphic);
+            ref readonly var artInfo = ref _world.Context.Game.UO.Arts.GetArt(graphic);
             if (artInfo.Texture == null)
                 return;
 
@@ -324,8 +326,8 @@ namespace ClassicUO.Game.Map
 
             if (land.IsStretched)
             {
-                ref readonly var texmapInfo = ref Client.Game.UO.Texmaps.GetTexmap(
-                    Client.Game.UO.FileManager.TileData.LandData[land.Graphic].TexID
+                ref readonly var texmapInfo = ref _world.Context.Game.UO.Texmaps.GetTexmap(
+                    _world.Context.Game.UO.FileManager.TileData.LandData[land.Graphic].TexID
                 );
 
                 if (texmapInfo.Texture != null)
@@ -350,7 +352,7 @@ namespace ClassicUO.Game.Map
                 }
                 else
                 {
-                    ref readonly var artInfo = ref Client.Game.UO.Arts.GetLand(land.Graphic);
+                    ref readonly var artInfo = ref _world.Context.Game.UO.Arts.GetLand(land.Graphic);
                     if (artInfo.Texture != null)
                     {
                         int idx = _landBuckets.GetNextIndex(artInfo.Texture);
@@ -363,7 +365,7 @@ namespace ClassicUO.Game.Map
             }
             else
             {
-                ref readonly var artInfo = ref Client.Game.UO.Arts.GetLand(land.Graphic);
+                ref readonly var artInfo = ref _world.Context.Game.UO.Arts.GetLand(land.Graphic);
                 if (artInfo.Texture != null)
                 {
                     int idx = _landBuckets.GetNextIndex(artInfo.Texture);
@@ -424,11 +426,11 @@ namespace ClassicUO.Game.Map
             int baseX = (obj.X - obj.Y) * 22 - 22;
             int baseY = (obj.X + obj.Y) * 22 - (obj.Z << 2) - 22;
 
-            ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(graphic);
+            ref readonly var artInfo = ref _world.Context.Game.UO.Arts.GetArt(graphic);
             if (artInfo.Texture == null)
                 return;
 
-            ref var artIndex = ref Client.Game.UO.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
+            ref var artIndex = ref _world.Context.Game.UO.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
             artIndex.Width = (short)((artInfo.UV.Width >> 1) - 22);
             artIndex.Height = (short)(artInfo.UV.Height - 44);
 

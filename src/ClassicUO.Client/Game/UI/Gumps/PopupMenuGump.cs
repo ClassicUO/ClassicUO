@@ -20,7 +20,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
             _data = data;
 
-            ResizePic pic = new ResizePic(0x0A3C)
+            ResizePic pic = new ResizePic(0x0A3C, World.Context)
             {
                 Alpha = 0.75f
             };
@@ -34,7 +34,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 ref PopupMenuItem item = ref data.Items[i];
 
-                string text = Client.Game.UO.FileManager.Clilocs.GetString(item.Cliloc);
+                string text = World.Context.Game.UO.FileManager.Clilocs.GetString(item.Cliloc);
 
                 ushort hue = item.Hue;
 
@@ -42,18 +42,18 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     uint h = (HuesHelper.Color16To32(item.ReplacedHue) << 8) | 0xFF;
 
-                    Client.Game.UO.FileManager.Fonts.SetUseHTML(true, h);
+                    World.Context.Game.UO.FileManager.Fonts.SetUseHTML(true, h);
                 }
 
-                Label label = new Label(text, true, hue, font: 1)
+                Label label = new Label(World.Context, text, true, hue, font: 1)
                 {
                     X = 10,
                     Y = offsetY
                 };
 
-                Client.Game.UO.FileManager.Fonts.SetUseHTML(false);
+                World.Context.Game.UO.FileManager.Fonts.SetUseHTML(false);
 
-                HitBox box = new HitBox(10, offsetY, label.Width, label.Height)
+                HitBox box = new HitBox(World.Context, 10, offsetY, label.Width, label.Height)
                 {
                     Tag = item.Index
                 };
@@ -73,7 +73,7 @@ namespace ClassicUO.Game.UI.Gumps
                     // TODO: wat?
                     Add
                     (
-                        new Button(0, 0x15E6, 0x15E2, 0x15E2)
+                        new Button(World.Context, 0, 0x15E6, 0x15E2, 0x15E2)
                         {
                             X = 20,
                             Y = offsetY
@@ -118,7 +118,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButtonType.Left)
             {
-                GameActions.ResponsePopupMenu(_data.Serial, _selectedItem);
+                GameActions.ResponsePopupMenu(World, _data.Serial, _selectedItem);
                 Dispose();
             }
         }

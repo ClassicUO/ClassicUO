@@ -32,7 +32,7 @@ namespace ClassicUO.Game.GameObjects
                 || DisplayedGraphic >= 0x3914 && DisplayedGraphic <= 0x3929
             )
             {
-                Client.Game.GetScene<GameScene>().AddLight(this, this, posX + 22, posY + 22);
+                World.Context.Game.GetScene<GameScene>().AddLight(this, this, posX + 22, posY + 22);
             }
 
             if (!AllowedToDraw)
@@ -62,7 +62,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (ItemData.IsAnimated)
                 {
-                    if (ProfileManager.CurrentProfile.FieldsType == 2)
+                    if (World.Profile.CurrentProfile.FieldsType == 2)
                     {
                         if (StaticFilters.IsFireField(Graphic))
                         {
@@ -100,7 +100,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             if (
-                ProfileManager.CurrentProfile.HighlightGameObjects
+                World.Profile.CurrentProfile.HighlightGameObjects
                 && ReferenceEquals(SelectedObject.Object, this)
             )
             {
@@ -108,13 +108,13 @@ namespace ClassicUO.Game.GameObjects
                 partial = false;
             }
             else if (
-                ProfileManager.CurrentProfile.NoColorObjectsOutOfRange
+                World.Profile.CurrentProfile.NoColorObjectsOutOfRange
                 && Distance > World.ClientViewRange
             )
             {
                 hue = Constants.OUT_RANGE_COLOR;
             }
-            else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
+            else if (World.Player.IsDead && World.Profile.CurrentProfile.EnableBlackWhiteEffect)
             {
                 hue = Constants.DEAD_RANGE_COLOR;
             }
@@ -136,7 +136,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (!IsMulti && !IsCoin && Amount > 1 && ItemData.IsStackable)
             {
-                DrawStaticAnimated(batcher, graphic, posX - 5, posY - 5, hueVec, false, depth);
+                DrawStaticAnimated(batcher, World.Context.Game.UO, graphic, posX - 5, posY - 5, hueVec, false, depth);
             }
 
             if (
@@ -148,7 +148,7 @@ namespace ClassicUO.Game.GameObjects
                 hueVec.Z = 0.5f;
             }
 
-            DrawStaticAnimated(batcher, graphic, posX, posY, hueVec, false, depth);
+            DrawStaticAnimated(batcher, World.Context.Game.UO, graphic, posX, posY, hueVec, false, depth);
 
             return true;
         }
@@ -170,15 +170,15 @@ namespace ClassicUO.Game.GameObjects
             posY += 22;
 
             byte direction = (byte)((byte)Layer & 0x7F & 7);
-            Client.Game.UO.Animations.GetAnimDirection(ref direction, ref IsFlipped);
+            World.Context.Game.UO.Animations.GetAnimDirection(ref direction, ref IsFlipped);
 
             byte animIndex = (byte)AnimIndex;
             ushort graphic = GetGraphicForAnimation();
 
-            Client.Game.UO.Animations.ConvertBodyIfNeeded(ref graphic, isCorpse: IsCorpse);
-            var animGroup = Client.Game.UO.Animations.GetAnimType(graphic);
-            var animFlags = Client.Game.UO.Animations.GetAnimFlags(graphic);
-            byte group = Client.Game.UO.FileManager.Animations.GetDeathAction(
+            World.Context.Game.UO.Animations.ConvertBodyIfNeeded(ref graphic, isCorpse: IsCorpse);
+            var animGroup = World.Context.Game.UO.Animations.GetAnimType(graphic);
+            var animFlags = World.Context.Game.UO.Animations.GetAnimFlags(graphic);
+            byte group = World.Context.Game.UO.FileManager.Animations.GetDeathAction(
                 graphic,
                 animFlags,
                 animGroup,
@@ -278,7 +278,7 @@ namespace ClassicUO.Game.GameObjects
                 ispartialhue = itemEquip.ItemData.IsPartialHue;
 
                 if (
-                    Client.Game.UO.FileManager.Animations.EquipConversions.TryGetValue(
+                    World.Context.Game.UO.FileManager.Animations.EquipConversions.TryGetValue(
                         graphic,
                         out Dictionary<ushort, EquipConvData> map
                     )
@@ -298,7 +298,7 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            var frames = Client.Game.UO.Animations.GetAnimationFrames(
+            var frames = World.Context.Game.UO.Animations.GetAnimationFrames(
                 graphic,
                 animGroup,
                 dir,
@@ -361,7 +361,7 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 if (
-                    ProfileManager.CurrentProfile.NoColorObjectsOutOfRange
+                    World.Profile.CurrentProfile.NoColorObjectsOutOfRange
                     && owner.Distance > World.ClientViewRange
                 )
                 {
@@ -372,7 +372,7 @@ namespace ClassicUO.Game.GameObjects
                     );
                 }
                 else if (
-                    World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect
+                    World.Player.IsDead && World.Profile.CurrentProfile.EnableBlackWhiteEffect
                 )
                 {
                     hueVec = ShaderHueTranslator.GetHueVector(
@@ -384,14 +384,14 @@ namespace ClassicUO.Game.GameObjects
                 else
                 {
                     if (
-                        ProfileManager.CurrentProfile.GridLootType > 0
+                        World.Profile.CurrentProfile.GridLootType > 0
                         && SelectedObject.CorpseObject == owner
                     )
                     {
                         color = 0x0034;
                     }
                     else if (
-                        ProfileManager.CurrentProfile.HighlightGameObjects
+                        World.Profile.CurrentProfile.HighlightGameObjects
                         && ReferenceEquals(SelectedObject.Object, owner)
                     )
                     {
@@ -457,7 +457,7 @@ namespace ClassicUO.Game.GameObjects
                 if (OnGround && ItemData.IsAnimated)
                 {
                     if (
-                        ProfileManager.CurrentProfile.FieldsType == 2
+                        World.Profile.CurrentProfile.FieldsType == 2
                         && (
                             StaticFilters.IsFireField(Graphic)
                             || StaticFilters.IsParalyzeField(Graphic)
@@ -471,7 +471,7 @@ namespace ClassicUO.Game.GameObjects
                     }
                     else
                     {
-                        ref UOFileIndex index = ref Client.Game.UO.FileManager.Arts.File.GetValidRefEntry(
+                        ref UOFileIndex index = ref World.Context.Game.UO.FileManager.Arts.File.GetValidRefEntry(
                             graphic + 0x4000
                         );
 
@@ -479,9 +479,9 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                if (Client.Game.UO.Arts.GetArt(graphic).Texture != null)
+                if (World.Context.Game.UO.Arts.GetArt(graphic).Texture != null)
                 {
-                    ref var index = ref Client.Game.UO.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
+                    ref var index = ref World.Context.Game.UO.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
 
                     Point position = RealScreenPosition;
                     position.X += (int)Offset.X;
@@ -490,7 +490,7 @@ namespace ClassicUO.Game.GameObjects
                     position.Y -= index.Height;
 
                     if (
-                        Client.Game.UO.Arts.PixelCheck(
+                        World.Context.Game.UO.Arts.PixelCheck(
                             graphic,
                             SelectedObject.TranslatedMousePositionByViewport.X - position.X,
                             SelectedObject.TranslatedMousePositionByViewport.Y - position.Y
@@ -502,7 +502,7 @@ namespace ClassicUO.Game.GameObjects
                     else if (!IsMulti && !IsCoin && Amount > 1 && ItemData.IsStackable)
                     {
                         if (
-                            Client.Game.UO.Arts.PixelCheck(
+                            World.Context.Game.UO.Arts.PixelCheck(
                                 graphic,
                                 SelectedObject.TranslatedMousePositionByViewport.X - position.X + 5,
                                 SelectedObject.TranslatedMousePositionByViewport.Y - position.Y + 5
@@ -526,7 +526,7 @@ namespace ClassicUO.Game.GameObjects
                     return true;
                 }
 
-                var animations = Client.Game.UO.Animations;
+                var animations = World.Context.Game.UO.Animations;
 
                 Point position = RealScreenPosition;
                 position.X += 22;
@@ -570,7 +570,7 @@ namespace ClassicUO.Game.GameObjects
                         graphic = itemEquip.ItemData.AnimID;
 
                         if (
-                            Client.Game.UO.FileManager.Animations.EquipConversions.TryGetValue(
+                            World.Context.Game.UO.FileManager.Animations.EquipConversions.TryGetValue(
                                 graphic,
                                 out Dictionary<ushort, EquipConvData> map
                             )
@@ -591,7 +591,7 @@ namespace ClassicUO.Game.GameObjects
                     animations.ConvertBodyIfNeeded(ref graphic, isCorpse: IsCorpse);
                     var animGroup = animations.GetAnimType(graphic);
                     var animFlags = animations.GetAnimFlags(graphic);
-                    byte group = Client.Game.UO.FileManager.Animations.GetDeathAction(
+                    byte group = World.Context.Game.UO.FileManager.Animations.GetDeathAction(
                         graphic,
                         animFlags,
                         animGroup,

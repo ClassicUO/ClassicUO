@@ -26,7 +26,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             Add
             (
-                new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
+                new Button(World.Context, (int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
                 {
                     X = 586, Y = 445, ButtonAction = ButtonAction.Activate
                 }
@@ -34,19 +34,19 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             Add
             (
-                new Button((int) Buttons.Next, 0x15A4, 0x15A6, 0x15A5)
+                new Button(World.Context, (int) Buttons.Next, 0x15A4, 0x15A6, 0x15A5)
                 {
                     X = 610, Y = 445, ButtonAction = ButtonAction.Activate
                 }
             );
 
-            if (Client.Game.UO.Version >= ClientVersion.CV_500A)
+            if (World.Context.Game.UO.Version >= ClientVersion.CV_500A)
             {
                 ushort textColor = 0xFFFF;
 
                 Add
                 (
-                    new Label(Client.Game.UO.FileManager.Clilocs.GetString(1044579), true, textColor, font: 1)
+                    new Label(World.Context, World.Context.Game.UO.FileManager.Clilocs.GetString(1044579), true, textColor, font: 1)
                     {
                         X = 155, Y = 70
                     }
@@ -56,7 +56,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 {
                     Add
                     (
-                        new Label(Client.Game.UO.FileManager.Clilocs.GetString(1044577), true, textColor, font: 1)
+                        new Label(World.Context, World.Context.Game.UO.FileManager.Clilocs.GetString(1044577), true, textColor, font: 1)
                         {
                             X = 400, Y = 70
                         }
@@ -64,7 +64,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                     Add
                     (
-                        new Label(Client.Game.UO.FileManager.Clilocs.GetString(1044578), true, textColor, font: 1)
+                        new Label(World.Context, World.Context.Game.UO.FileManager.Clilocs.GetString(1044578), true, textColor, font: 1)
                         {
                             X = 470, Y = 70
                         }
@@ -73,7 +73,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    new Label(Client.Game.UO.FileManager.Clilocs.GetString(1044580), true, textColor, font: 1)
+                    new Label(World.Context, World.Context.Game.UO.FileManager.Clilocs.GetString(1044580), true, textColor, font: 1)
                     {
                         X = 153, Y = 368
                     }
@@ -85,7 +85,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    new Label(ResGumps.SelectWhichShardToPlayOn, false, textColor, font: 9)
+                    new Label(World.Context, ResGumps.SelectWhichShardToPlayOn, false, textColor, font: 9)
                     {
                         X = 155, Y = 70
                     }
@@ -93,7 +93,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    new Label(ResGumps.Latency, false, textColor, font: 9)
+                    new Label(World.Context, ResGumps.Latency, false, textColor, font: 9)
                     {
                         X = 400, Y = 70
                     }
@@ -101,7 +101,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    new Label(ResGumps.PacketLoss, false, textColor, font: 9)
+                    new Label(World.Context, ResGumps.PacketLoss, false, textColor, font: 9)
                     {
                         X = 470, Y = 70
                     }
@@ -109,7 +109,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    new Label(ResGumps.SortBy, false, textColor, font: 9)
+                    new Label(World.Context, ResGumps.SortBy, false, textColor, font: 9)
                     {
                         X = 153, Y = 368
                     }
@@ -118,7 +118,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             Add
             (
-                new Button((int) Buttons.SortTimeZone, 0x093B, 0x093C, 0x093D)
+                new Button(World.Context, (int) Buttons.SortTimeZone, 0x093B, 0x093C, 0x093D)
                 {
                     X = 230, Y = 366
                 }
@@ -126,7 +126,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             Add
             (
-                new Button((int) Buttons.SortFull, 0x093E, 0x093F, 0x0940)
+                new Button(World.Context, (int) Buttons.SortFull, 0x093E, 0x093F, 0x0940)
                 {
                     X = 338, Y = 366
                 }
@@ -134,19 +134,19 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             Add
             (
-                new Button((int) Buttons.SortConnection, 0x0941, 0x0942, 0x0943)
+                new Button(World.Context, (int) Buttons.SortConnection, 0x0941, 0x0942, 0x0943)
                 {
                     X = 446, Y = 366
                 }
             );
 
             // World Pic Bg
-            Add(new GumpPic(150, 390, 0x0589, 0));
+            Add(new GumpPic(150, 390, 0x0589, 0, World.Context));
 
             // Earth
             Add
             (
-                new Button((int) Buttons.Earth, 0x15E8, 0x15EA, 0x15E9)
+                new Button(World.Context, (int) Buttons.Earth, 0x15E8, 0x15EA, 0x15E9)
                 {
                     X = 160, Y = 400, ButtonAction = ButtonAction.Activate
                 }
@@ -155,7 +155,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             // Sever Scroll Area Bg
             Add
             (
-                new ResizePic(0x0DAC)
+                new ResizePic(0x0DAC, World.Context)
                 {
                     X = 150, Y = 90, Width = 393 - 14, Height = 271
                 }
@@ -163,7 +163,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             // Sever Scroll Area
             ScrollArea scrollArea = new ScrollArea
-            (
+            (World.Context, 
                 150,
                 90,
                 393,
@@ -171,16 +171,16 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 true
             );
 
-            DataBox databox = new DataBox(0, 0, 1, 1);
+            DataBox databox = new DataBox(World.Context, 0, 0, 1, 1);
             databox.WantUpdateSize = true;
-            LoginScene loginScene = Client.Game.GetScene<LoginScene>();
+            LoginScene loginScene = World.Context.Game.GetScene<LoginScene>();
 
             scrollArea.ScissorRectangle.Y = 16;
             scrollArea.ScissorRectangle.Height = -32;
 
             foreach (ServerListEntry server in loginScene.Servers)
             {
-                databox.Add(new ServerEntryGump(server, 5, NORMAL_COLOR, SELECTED_COLOR));
+                databox.Add(new ServerEntryGump(World.Context, server, 5, NORMAL_COLOR, SELECTED_COLOR));
             }
 
             databox.ReArrangeChildren();
@@ -194,7 +194,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    new Label(loginScene.Servers[index].Name, false, 0x0481, font: 9)
+                    new Label(World.Context, loginScene.Servers[index].Name, false, 0x0481, font: 9)
                     {
                         X = 243,
                         Y = 420
@@ -208,7 +208,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         public override void OnButtonClick(int buttonID)
         {
-            LoginScene loginScene = Client.Game.GetScene<LoginScene>();
+            LoginScene loginScene = World.Context.Game.GetScene<LoginScene>();
 
             if (buttonID >= (int) Buttons.Server)
             {
@@ -243,7 +243,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         {
             if (key == SDL.SDL_Keycode.SDLK_RETURN || key == SDL.SDL_Keycode.SDLK_KP_ENTER)
             {
-                LoginScene loginScene = Client.Game.GetScene<LoginScene>();
+                LoginScene loginScene = World.Context.Game.GetScene<LoginScene>();
 
                 if (loginScene.Servers?.Any(s => s != null) ?? false)
                 {
@@ -274,7 +274,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             private readonly HoveredLabel _serverName;
             private uint _pingCheckTime = 0;
 
-            public ServerEntryGump(ServerListEntry entry, byte font, ushort normal_hue, ushort selected_hue)
+            public ServerEntryGump(GameContext context, ServerListEntry entry, byte font, ushort normal_hue, ushort selected_hue) : base(context)
             {
                 _entry = entry;
 
@@ -283,7 +283,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Add
                 (
                     _serverName = new HoveredLabel
-                    (
+                    (Context, 
                         entry.Name,
                         false,
                         normal_hue,
@@ -300,7 +300,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Add
                 (
                     _server_ping = new HoveredLabel
-                    (
+                    (Context, 
                         CUOEnviroment.NoServerPing ? string.Empty : "-",
                         false,
                         normal_hue,
@@ -317,7 +317,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Add
                 (
                     _server_packet_loss = new HoveredLabel
-                    (
+                    (Context, 
                         CUOEnviroment.NoServerPing ? string.Empty : "-",
                         false,
                         normal_hue,

@@ -10,6 +10,12 @@ namespace ClassicUO.Game
     sealed class ItemHold
     {
         private bool _enabled;
+        private readonly TileDataLoader _tileData;
+
+        public ItemHold(TileDataLoader tileData)
+        {
+            _tileData = tileData;
+        }
 
         public Point MouseOffset;
 
@@ -55,7 +61,7 @@ namespace ClassicUO.Game
 
         public bool Dropped { get; set; }
         public bool UpdatedInWorld { get; set; }
-        public ref StaticTiles ItemData => ref Client.Game.UO.FileManager.TileData.StaticData[Graphic];
+        public ref StaticTiles ItemData => ref _tileData.StaticData[Graphic];
 
         public void Set(Item item, ushort amount, Point? offset = null)
         {

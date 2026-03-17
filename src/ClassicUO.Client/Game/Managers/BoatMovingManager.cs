@@ -46,7 +46,7 @@ namespace ClassicUO.Game.Managers
 
         public void MoveRequest(Direction direciton, byte speed)
         {
-            NetClient.Socket.Send_MultiBoatMoveRequest(_world.Player, direciton, speed);
+            _world.Network.Send_MultiBoatMoveRequest(_world.Player, direciton, speed);
             _timePacket = Time.Ticks;
         }
 
@@ -228,7 +228,7 @@ namespace ClassicUO.Game.Managers
                     }
 
                     bool drift = step.MovingDir != step.FacingDir;
-                    int maxDelay = step.TimeDiff /*- (int) Client.Game.FrameDelay[1]*/;
+                    int maxDelay = step.TimeDiff;
 
                     int delay = (int) Time.Ticks - (int) item.LastStepTime;
                     bool removeStep = delay >= maxDelay;

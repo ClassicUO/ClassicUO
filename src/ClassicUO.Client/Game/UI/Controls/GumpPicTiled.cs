@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.Game;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -12,14 +13,16 @@ namespace ClassicUO.Game.UI.Controls
     {
         private ushort _graphic;
 
-        public GumpPicTiled(ushort graphic)
+        public GumpPicTiled(ushort graphic, GameContext context) : base(context)
         {
             CanMove = true;
             AcceptMouseInput = true;
-            Graphic = graphic;
+            _graphic = graphic;
+
+            InitializeSize();
         }
 
-        public GumpPicTiled(int x, int y, int width, int heigth, ushort graphic) : this(graphic)
+        public GumpPicTiled(int x, int y, int width, int heigth, ushort graphic, GameContext context) : this(graphic, context)
         {
             X = x;
             Y = y;
@@ -35,7 +38,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public GumpPicTiled(List<string> parts) : this(UInt16Converter.Parse(parts[5]))
+        public GumpPicTiled(List<string> parts, GameContext context) : this(UInt16Converter.Parse(parts[5]), context)
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -52,34 +55,46 @@ namespace ClassicUO.Game.UI.Controls
                 if (_graphic != value && value != 0xFFFF)
                 {
                     _graphic = value;
-
-                    ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(_graphic);
-
-                    if (gumpInfo.Texture == null)
-                    {
-                        Dispose();
-
-                        return;
-                    }
-
-                    Width = gumpInfo.UV.Width;
-                    Height = gumpInfo.UV.Height;
+                    InitializeSize();
                 }
             }
+        }
+
+        private void InitializeSize()
+        {
+            var uo = Context?.Game?.UO;
+            if (uo == null)
+                return;
+
+            ref readonly var gumpInfo = ref uo.Gumps.GetGump(_graphic);
+
+            if (gumpInfo.Texture == null)
+            {
+                Dispose();
+                return;
+            }
+
+            if (Width == 0)
+                Width = gumpInfo.UV.Width;
+            if (Height == 0)
+                Height = gumpInfo.UV.Height;
         }
 
         public ushort Hue { get; set; }
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
+            if (IsDisposed || Context?.Game?.UO == null)
+                return false;
+
             float layerDepth = layerDepthRef;
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, false, Alpha, true);
 
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(Graphic);
+            ref readonly var gumpInfo = ref Context.Game.UO.Gumps.GetGump(Graphic);
 
             var texture = gumpInfo.Texture;
             if (texture != null)
-            {                
+            {
                 var sourceRectangle = gumpInfo.UV;
                 renderLists.AddGumpWithAtlas
                 (
@@ -108,7 +123,7 @@ namespace ClassicUO.Game.UI.Controls
             x -= Offset.X;
             y -= Offset.Y;
 
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(Graphic);
+            ref readonly var gumpInfo = ref Context.Game.UO.Gumps.GetGump(Graphic);
 
             if (gumpInfo.Texture == null)
             {
@@ -142,7 +157,7 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            return Client.Game.UO.Gumps.PixelCheck(Graphic, x, y);
+            return Context.Game.UO.Gumps.PixelCheck(Graphic, x, y);
         }
     }
 }

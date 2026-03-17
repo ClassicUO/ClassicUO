@@ -39,7 +39,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                _trans = new AlphaBlendControl(.7f)
+                _trans = new AlphaBlendControl(World.Context, .7f)
                 {
                     Width = Width,
                     Height = Height
@@ -76,11 +76,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _time_to_update = Time.Ticks + 100;
 
-                if (NetClient.Socket.IsConnected)
+                if (World.Network.IsConnected)
                 {
-                    _ping = NetClient.Socket.Statistics.Ping;
-                    _deltaBytesReceived = NetClient.Socket.Statistics.DeltaBytesReceived;
-                    _deltaBytesSent = NetClient.Socket.Statistics.DeltaBytesSent;
+                    _ping = World.Network.Statistics.Ping;
+                    _deltaBytesReceived = World.Network.Statistics.DeltaBytesReceived;
+                    _deltaBytesSent = World.Network.Statistics.DeltaBytesSent;
                 }
 
                 Span<char> span = stackalloc char[128];

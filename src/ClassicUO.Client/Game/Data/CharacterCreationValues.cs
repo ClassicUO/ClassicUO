@@ -144,7 +144,7 @@ namespace ClassicUO.Game.Data
             };
         }
 
-        public static ComboContent GetHairComboContent(bool isFemale, RaceType race)
+        public static ComboContent GetHairComboContent(ClilocLoader clilocs, bool isFemale, RaceType race)
         {
             switch (race)
             {
@@ -152,38 +152,39 @@ namespace ClassicUO.Game.Data
 
                     if (isFemale)
                     {
-                        return new ComboContent(HumanFemaleHairLabels, HumanFemaleHairGraphics);
+                        return new ComboContent(clilocs, HumanFemaleHairLabels, HumanFemaleHairGraphics);
                     }
                     else
                     {
-                        return new ComboContent(HumanHairLabels, HumanHairGraphics);
+                        return new ComboContent(clilocs, HumanHairLabels, HumanHairGraphics);
                     }
 
                 case RaceType.ELF:
 
                     if (isFemale)
                     {
-                        return new ComboContent(ElfFemaleHairLabels, ElfFemaleHairGraphics);
+                        return new ComboContent(clilocs, ElfFemaleHairLabels, ElfFemaleHairGraphics);
                     }
                     else
                     {
-                        return new ComboContent(ElfHairLabels, ElfHairGraphics);
+                        return new ComboContent(clilocs, ElfHairLabels, ElfHairGraphics);
                     }
 
                 case RaceType.GARGOYLE:
 
                     if (isFemale)
                     {
-                        return new ComboContent(GargoyleFemaleHairLabels, GargoyleFemaleHairGraphics);
+                        return new ComboContent(clilocs, GargoyleFemaleHairLabels, GargoyleFemaleHairGraphics);
                     }
                     else
                     {
-                        return new ComboContent(GargoyleHairLabels, GargoyleHairGraphics);
+                        return new ComboContent(clilocs, GargoyleHairLabels, GargoyleHairGraphics);
                     }
             }
 
             return new ComboContent
             (
+                clilocs,
                 new int[]
                 {
                 },
@@ -193,17 +194,18 @@ namespace ClassicUO.Game.Data
             );
         }
 
-        public static ComboContent GetFacialHairComboContent(RaceType race)
+        public static ComboContent GetFacialHairComboContent(ClilocLoader clilocs, RaceType race)
         {
             switch (race)
             {
-                case RaceType.HUMAN: return new ComboContent(HumanFacialLabels, HumanFacialGraphics);
+                case RaceType.HUMAN: return new ComboContent(clilocs, HumanFacialLabels, HumanFacialGraphics);
 
-                case RaceType.GARGOYLE: return new ComboContent(GargoyleFacialLabels, GargoyleFacialGraphics);
+                case RaceType.GARGOYLE: return new ComboContent(clilocs, GargoyleFacialLabels, GargoyleFacialGraphics);
             }
 
             return new ComboContent
             (
+                clilocs,
                 new int[]
                 {
                 },
@@ -217,11 +219,11 @@ namespace ClassicUO.Game.Data
         {
             private readonly int[] _ids;
 
-            public ComboContent(int[] labels, int[] ids)
+            public ComboContent(ClilocLoader clilocs, int[] labels, int[] ids)
             {
                 _ids = ids;
 
-                Labels = labels.Select(o => Client.Game.UO.FileManager.Clilocs.GetString(o)).ToArray();
+                Labels = labels.Select(o => clilocs.GetString(o)).ToArray();
             }
 
             public string[] Labels { get; }

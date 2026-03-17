@@ -28,12 +28,13 @@ namespace ClassicUO.Game.Scenes
             if (keyboardState.IsKeyDown(Keys.A))
             {
                 _controller.UO.Load(_controller);
-                Settings.GlobalSettings.Encryption = (byte)NetClient.Socket.Load(_controller.UO.FileManager.Version, (EncryptionType)Settings.GlobalSettings.Encryption);
+                var settings = _controller.UO.World.Settings;
+                settings.Encryption = (byte)_controller.UO.World.Network.Load(_controller.UO.FileManager.Version, (EncryptionType)settings.Encryption);
 
                 Log.Trace("Loading plugins...");
                 _controller.PluginHost?.Initialize();
 
-                foreach (string p in Settings.GlobalSettings.Plugins)
+                foreach (string p in settings.Plugins)
                 {
                     Plugin.Create(p);
                 }

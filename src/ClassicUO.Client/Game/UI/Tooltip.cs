@@ -51,27 +51,28 @@ namespace ClassicUO.Game.UI
             ushort hue = 0xFFFF;
             float zoom = 1;
 
-            if (ProfileManager.CurrentProfile != null)
+            if (_world.Profile.CurrentProfile != null)
             {
-                font = ProfileManager.CurrentProfile.TooltipFont;
-                alpha = ProfileManager.CurrentProfile.TooltipBackgroundOpacity / 100f;
+                font = _world.Profile.CurrentProfile.TooltipFont;
+                alpha = _world.Profile.CurrentProfile.TooltipBackgroundOpacity / 100f;
 
                 if (float.IsNaN(alpha))
                 {
                     alpha = 0f;
                 }
 
-                hue = ProfileManager.CurrentProfile.TooltipTextHue;
-                zoom = ProfileManager.CurrentProfile.TooltipDisplayZoom / 100f;
+                hue = _world.Profile.CurrentProfile.TooltipTextHue;
+                zoom = _world.Profile.CurrentProfile.TooltipDisplayZoom / 100f;
             }
 
-            Client.Game.UO.FileManager.Fonts.SetUseHTML(true);
-            Client.Game.UO.FileManager.Fonts.RecalculateWidthByInfo = true;
+            _world.Context.Game.UO.FileManager.Fonts.SetUseHTML(true);
+            _world.Context.Game.UO.FileManager.Fonts.RecalculateWidthByInfo = true;
 
             if (_renderedText == null)
             {
                 _renderedText = RenderedText.Create
                 (
+                    _world.Context.Game.UO,
                     null,
                     font: font,
                     isunicode: true,
@@ -88,14 +89,14 @@ namespace ClassicUO.Game.UI
             {
                 if (_maxWidth == 0)
                 {
-                    int width = Client.Game.UO.FileManager.Fonts.GetWidthUnicode(font, Text);
+                    int width = _world.Context.Game.UO.FileManager.Fonts.GetWidthUnicode(font, Text);
 
                     if (width > 600)
                     {
                         width = 600;
                     }
 
-                    width = Client.Game.UO.FileManager.Fonts.GetWidthExUnicode
+                    width = _world.Context.Game.UO.FileManager.Fonts.GetWidthExUnicode
                     (
                         font,
                         Text,
@@ -121,8 +122,8 @@ namespace ClassicUO.Game.UI
                 _renderedText.Text = _textHTML;
             }
 
-            Client.Game.UO.FileManager.Fonts.RecalculateWidthByInfo = false;
-            Client.Game.UO.FileManager.Fonts.SetUseHTML(false);
+            _world.Context.Game.UO.FileManager.Fonts.RecalculateWidthByInfo = false;
+            _world.Context.Game.UO.FileManager.Fonts.SetUseHTML(false);
 
             if (!_renderedText.HasContent)
             {
@@ -136,18 +137,18 @@ namespace ClassicUO.Game.UI
             {
                 x = 0;
             }
-            else if (x > Client.Game.ClientBounds.Width - z_width)
+            else if (x > _world.Context.Game.ClientBounds.Width - z_width)
             {
-                x = Client.Game.ClientBounds.Width - z_width;
+                x = _world.Context.Game.ClientBounds.Width - z_width;
             }
 
             if (y < 0)
             {
                 y = 0;
             }
-            else if (y > Client.Game.ClientBounds.Height - z_height)
+            else if (y > _world.Context.Game.ClientBounds.Height - z_height)
             {
-                y = Client.Game.ClientBounds.Height - z_height;
+                y = _world.Context.Game.ClientBounds.Height - z_height;
             }
 
 
@@ -205,7 +206,7 @@ namespace ClassicUO.Game.UI
                     _hash = revision2;
                     Text = ReadProperties(serial, out _textHTML);
 
-                    _lastHoverTime = (uint) (Time.Ticks + (ProfileManager.CurrentProfile != null ? ProfileManager.CurrentProfile.TooltipDelayBeforeDisplay : 250));
+                    _lastHoverTime = (uint) (Time.Ticks + (_world.Profile.CurrentProfile != null ? _world.Profile.CurrentProfile.TooltipDelayBeforeDisplay : 250));
                 }
             }
         }
@@ -272,7 +273,7 @@ namespace ClassicUO.Game.UI
 
         public void SetText(string text, int maxWidth = 0)
         {
-            if (ProfileManager.CurrentProfile != null && !ProfileManager.CurrentProfile.UseTooltip)
+            if (_world.Profile.CurrentProfile != null && !_world.Profile.CurrentProfile.UseTooltip)
             {
                 return;
             }
@@ -283,7 +284,7 @@ namespace ClassicUO.Game.UI
                 Serial = 0;
                 Text = _textHTML = text;
 
-                _lastHoverTime = (uint) (Time.Ticks + (ProfileManager.CurrentProfile != null ? ProfileManager.CurrentProfile.TooltipDelayBeforeDisplay : 250));
+                _lastHoverTime = (uint) (Time.Ticks + (_world.Profile.CurrentProfile != null ? _world.Profile.CurrentProfile.TooltipDelayBeforeDisplay : 250));
             }
         }
     }

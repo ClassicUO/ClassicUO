@@ -69,11 +69,11 @@ namespace ClassicUO.Game.Managers
         {
             if (PromptData.Prompt == ConsolePrompt.ASCII)
             {
-                NetClient.Socket.Send_ASCIIPromptResponse(_world, text, text.Length < 1);
+                _world.Network.Send_ASCIIPromptResponse(_world, text, text.Length < 1);
             }
             else if (PromptData.Prompt == ConsolePrompt.Unicode)
             {
-                NetClient.Socket.Send_UnicodePromptResponse(_world, text, Settings.GlobalSettings.Language, text.Length < 1);
+                _world.Network.Send_UnicodePromptResponse(_world, text, _world.Settings.Language, text.Length < 1);
             }
 
             PromptData = default;
@@ -97,7 +97,7 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            Profile currentProfile = ProfileManager.CurrentProfile;
+            Profile currentProfile = _world.Profile.CurrentProfile;
 
             if (currentProfile != null && currentProfile.OverrideAllFonts)
             {
@@ -226,7 +226,7 @@ namespace ClassicUO.Game.Managers
                         msg.IsTextGump = true;
                         bool found = false;
 
-                        for (LinkedListNode<UI.Gumps.Gump> gump = UIManager.Gumps.Last; gump != null; gump = gump.Previous)
+                        for (LinkedListNode<UI.Gumps.Gump> gump = _world.Context.UI.Gumps.Last; gump != null; gump = gump.Previous)
                         {
                             Control g = gump.Value;
 
@@ -299,18 +299,18 @@ namespace ClassicUO.Game.Managers
             TextType textType
         )
         {
-            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.OverrideAllFonts)
+            if (_world.Profile.CurrentProfile != null && _world.Profile.CurrentProfile.OverrideAllFonts)
             {
-                font = ProfileManager.CurrentProfile.ChatFont;
-                isunicode = ProfileManager.CurrentProfile.OverrideAllFontsIsUnicode;
+                font = _world.Profile.CurrentProfile.ChatFont;
+                isunicode = _world.Profile.CurrentProfile.OverrideAllFontsIsUnicode;
             }
 
-            int width = isunicode ? Client.Game.UO.FileManager.Fonts.GetWidthUnicode(font, msg) : Client.Game.UO.FileManager.Fonts.GetWidthASCII(font, msg);
+            int width = isunicode ? _world.Context.Game.UO.FileManager.Fonts.GetWidthUnicode(font, msg) : _world.Context.Game.UO.FileManager.Fonts.GetWidthASCII(font, msg);
 
             if (width > 200)
             {
                 width = isunicode ?
-                    Client.Game.UO.FileManager.Fonts.GetWidthExUnicode
+                    _world.Context.Game.UO.FileManager.Fonts.GetWidthExUnicode
                     (
                         font,
                         msg,
@@ -318,7 +318,7 @@ namespace ClassicUO.Game.Managers
                         TEXT_ALIGN_TYPE.TS_LEFT,
                         (ushort) FontStyle.BlackBorder
                     ) :
-                    Client.Game.UO.FileManager.Fonts.GetWidthExASCII
+                    _world.Context.Game.UO.FileManager.Fonts.GetWidthExASCII
                     (
                         font,
                         msg,
@@ -362,6 +362,7 @@ namespace ClassicUO.Game.Managers
 
             textObject.RenderedText = RenderedText.Create
             (
+                _world.Context.Game.UO,
                 msg,
                 fixedColor,
                 font,
@@ -381,9 +382,9 @@ namespace ClassicUO.Game.Managers
             return textObject;
         }
 
-        private static long CalculateTimeToLive(RenderedText rtext)
+        private long CalculateTimeToLive(RenderedText rtext)
         {
-            Profile currentProfile = ProfileManager.CurrentProfile;
+            Profile currentProfile = _world.Profile.CurrentProfile;
 
             if (currentProfile == null)
             {

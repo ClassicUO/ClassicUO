@@ -145,7 +145,7 @@ namespace ClassicUO.Game.Managers
 
         private void CalculateAlpha(TextObject msg)
         {
-            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.TextFading)
+            if (World.Profile.CurrentProfile != null && World.Profile.CurrentProfile.TextFading)
             {
                 int delta = (int) (msg.Time - ClassicUO.Time.Ticks);
 

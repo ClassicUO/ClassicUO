@@ -65,7 +65,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public ShopGump(World world, uint serial, bool isBuyGump, int x, int y) : base(world, serial, 0) //60 is the base height, original size
         {
-            int height = ProfileManager.CurrentProfile.VendorGumpHeight;
+            int height = World.Profile.CurrentProfile.VendorGumpHeight;
 
             X = x;
             Y = y;
@@ -89,23 +89,23 @@ namespace ClassicUO.Game.UI.Gumps
             ushort graphicLeft = isBuyGump ? BUY_GRAPHIC_LEFT : SELL_GRAPHIC_LEFT;
             ushort graphicRight = isBuyGump ? BUY_GRAPHIC_RIGHT : SELL_GRAPHIC_RIGHT;
 
-            ref readonly var artInfoLeft = ref Client.Game.UO.Gumps.GetGump(graphicLeft);
-            ref readonly var artInfoRight = ref Client.Game.UO.Gumps.GetGump(graphicRight);
+            ref readonly var artInfoLeft = ref World.Context.Game.UO.Gumps.GetGump(graphicLeft);
+            ref readonly var artInfoRight = ref World.Context.Game.UO.Gumps.GetGump(graphicRight);
 
             Rectangle offset = new Rectangle(0, 0, artInfoLeft.UV.Width, LEFT_TOP_HEIGHT);
-            GumpPicTexture leftTop = new GumpPicTexture(graphicLeft, 0, 0, offset, false);
+            GumpPicTexture leftTop = new GumpPicTexture(World.Context, graphicLeft, 0, 0, offset, false);
             Add(leftTop);
 
             offset.Y += LEFT_TOP_HEIGHT;
             offset.Height = artInfoLeft.UV.Height - (LEFT_BOTTOM_HEIGHT + LEFT_TOP_HEIGHT);
-            _leftMiddle = new GumpPicTexture(graphicLeft, 0, LEFT_TOP_HEIGHT, offset, true);
+            _leftMiddle = new GumpPicTexture(World.Context, graphicLeft, 0, LEFT_TOP_HEIGHT, offset, true);
             int diff = height - _leftMiddle.Height;
             _leftMiddle.Height = height;
             Add(_leftMiddle);
 
             offset.Y += offset.Height;
             offset.Height = LEFT_BOTTOM_HEIGHT;
-            _leftBottom = new GumpPicTexture(
+            _leftBottom = new GumpPicTexture(World.Context, 
                 graphicLeft,
                 0,
                 _leftMiddle.Y + _leftMiddle.Height,
@@ -117,7 +117,7 @@ namespace ClassicUO.Game.UI.Gumps
             int rightX = artInfoLeft.UV.Width - RIGHT_OFFSET;
             int rightY = artInfoLeft.UV.Height / 2 - RIGHT_OFFSET;
             offset = new Rectangle(0, 0, artInfoRight.UV.Width, LEFT_TOP_HEIGHT);
-            GumpPicTexture rightTop = new GumpPicTexture(
+            GumpPicTexture rightTop = new GumpPicTexture(World.Context, 
                 graphicRight,
                 rightX,
                 rightY,
@@ -128,7 +128,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             offset.Y += LEFT_TOP_HEIGHT;
             offset.Height = artInfoRight.UV.Height - (RIGHT_BOTTOM_HEIGHT + LEFT_TOP_HEIGHT);
-            _rightMiddle = new GumpPicTexture(
+            _rightMiddle = new GumpPicTexture(World.Context, 
                 graphicRight,
                 rightX,
                 rightY + LEFT_TOP_HEIGHT,
@@ -140,7 +140,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             offset.Y += offset.Height;
             offset.Height = RIGHT_BOTTOM_HEIGHT;
-            _rightBottom = new GumpPicTexture(
+            _rightBottom = new GumpPicTexture(World.Context, 
                 graphicRight,
                 rightX,
                 _rightMiddle.Y + _rightMiddle.Height,
@@ -149,7 +149,7 @@ namespace ClassicUO.Game.UI.Gumps
             );
             Add(_rightBottom);
 
-            _shopScrollArea = new ScrollArea(
+            _shopScrollArea = new ScrollArea(World.Context, 
                 RIGHT_OFFSET,
                 _leftMiddle.Y,
                 artInfoLeft.UV.Width - RIGHT_OFFSET * 2 + 5,
@@ -160,7 +160,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_shopScrollArea);
 
-            _transactionScrollArea = new ScrollArea(
+            _transactionScrollArea = new ScrollArea(World.Context, 
                 RIGHT_OFFSET / 2 + rightTop.X,
                 LEFT_TOP_HEIGHT + rightTop.Y,
                 artInfoRight.UV.Width - RIGHT_OFFSET * 2 + RIGHT_OFFSET / 2 + 5,
@@ -170,11 +170,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_transactionScrollArea);
 
-            _transactionDataBox = new DataBox(0, 0, 1, 1);
+            _transactionDataBox = new DataBox(World.Context, 0, 0, 1, 1);
             _transactionDataBox.WantUpdateSize = true;
             _transactionScrollArea.Add(_transactionDataBox);
 
-            _totalLabel = new Label("0", true, 0x0386, 0, 1)
+            _totalLabel = new Label(World.Context, "0", true, 0x0386, 0, 1)
             {
                 X = RIGHT_OFFSET + rightTop.X + 32 + 4,
                 Y = _rightBottom.Y + _rightBottom.Height - 32 * 3 + 15,
@@ -184,7 +184,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (isBuyGump)
             {
-                _playerGoldLabel = new Label(World.Player.Gold.ToString(), true, 0x0386, 0, 1)
+                _playerGoldLabel = new Label(World.Context, World.Player.Gold.ToString(), true, 0x0386, 0, 1)
                 {
                     X = _totalLabel.X + 120,
                     Y = _totalLabel.Y
@@ -197,7 +197,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _totalLabel.X = (rightTop.X + rightTop.Width) - RIGHT_OFFSET * 3;
             }
 
-            _expander = new Button(2, 0x082E, 0x82F)
+            _expander = new Button(World.Context, 2, 0x082E, 0x82F)
             {
                 ButtonAction = ButtonAction.Activate,
                 X = artInfoLeft.UV.Width / 2 - 10,
@@ -208,7 +208,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             const float ALPHA_HIT_BUTTON = 0f;
 
-            _accept = new HitBox(
+            _accept = new HitBox(World.Context, 
                 RIGHT_OFFSET + rightTop.X,
                 (_rightBottom.Y + _rightBottom.Height) - 50,
                 34,
@@ -216,7 +216,7 @@ namespace ClassicUO.Game.UI.Gumps
                 "Accept",
                 ALPHA_HIT_BUTTON
             );
-            _clear = new HitBox(_accept.X + 175, _accept.Y, 20, 20, "Clear", ALPHA_HIT_BUTTON);
+            _clear = new HitBox(World.Context, _accept.X + 175, _accept.Y, 20, 20, "Clear", ALPHA_HIT_BUTTON);
             _accept.MouseUp += (sender, e) =>
             {
                 OnButtonClick((int)Buttons.Accept);
@@ -228,7 +228,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_accept);
             Add(_clear);
 
-            HitBox leftUp = new HitBox(
+            HitBox leftUp = new HitBox(World.Context, 
                 (leftTop.X + leftTop.Width) - 50,
                 (leftTop.Y + leftTop.Height) - 18,
                 18,
@@ -236,7 +236,7 @@ namespace ClassicUO.Game.UI.Gumps
                 "Scroll Up",
                 ALPHA_HIT_BUTTON
             );
-            _leftDown = new HitBox(
+            _leftDown = new HitBox(World.Context, 
                 leftUp.X,
                 _leftBottom.Y,
                 18,
@@ -245,7 +245,7 @@ namespace ClassicUO.Game.UI.Gumps
                 ALPHA_HIT_BUTTON
             );
 
-            HitBox rightUp = new HitBox(
+            HitBox rightUp = new HitBox(World.Context, 
                 (rightTop.X + rightTop.Width - 50),
                 (rightTop.Y + rightTop.Height) - 18,
                 18,
@@ -253,7 +253,7 @@ namespace ClassicUO.Game.UI.Gumps
                 "Scroll Up",
                 ALPHA_HIT_BUTTON
             );
-            _rightDown = new HitBox(
+            _rightDown = new HitBox(World.Context, 
                 rightUp.X,
                 _rightBottom.Y,
                 18,
@@ -321,7 +321,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         //        if (fromcliloc)
         //        {
-        //            shopItem.SetName(Client.Game.UO.FileManager.Clilocs.Translate(it.Name, $"\t{it.Amount}\t{it.ItemData.Name}", true));
+        //            shopItem.SetName(World.Context.Game.UO.FileManager.Clilocs.Translate(it.Name, $"\t{it.Amount}\t{it.ItemData.Name}", true));
         //        }
         //    }
         //}
@@ -401,7 +401,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _rightMiddle.Height = 640 - LEFT_TOP_HEIGHT;
                 }
 
-                ProfileManager.CurrentProfile.VendorGumpHeight = _leftMiddle.Height;
+                World.Profile.CurrentProfile.VendorGumpHeight = _leftMiddle.Height;
 
                 _leftBottom.Y = _leftMiddle.Y + _leftMiddle.Height;
                 _expander.Y = _leftBottom.Y + _leftBottom.Height - 5;
@@ -507,6 +507,7 @@ namespace ClassicUO.Game.UI.Gumps
             else
             {
                 transactionItem = new TransactionItem(
+                    World.Context,
                     shopItem.LocalSerial,
                     shopItem.Graphic,
                     shopItem.Hue,
@@ -598,11 +599,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (IsBuyGump)
                     {
-                        NetClient.Socket.Send_BuyRequest(LocalSerial, items);
+                        World.Network.Send_BuyRequest(LocalSerial, items);
                     }
                     else
                     {
-                        NetClient.Socket.Send_SellRequest(LocalSerial, items);
+                        World.Network.Send_SellRequest(LocalSerial, items);
                     }
 
                     Dispose();
@@ -640,7 +641,7 @@ namespace ClassicUO.Game.UI.Gumps
                 int count,
                 uint price,
                 string name
-            )
+            ) : base(gump.World.Context)
             {
                 _gump = gump;
                 LocalSerial = serial;
@@ -649,7 +650,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Price = price;
                 Name = name;
 
-                ResizePicLine line = new ResizePicLine(0x39) { X = 10, Width = 190 };
+                ResizePicLine line = new ResizePicLine(Context, 0x39) { X = 10, Width = 190 };
                 Add(line);
 
                 int offY = 15;
@@ -664,7 +665,7 @@ namespace ClassicUO.Game.UI.Gumps
                 string subname = string.Format(ResGumps.Item0Price1, itemName, Price);
 
                 Add(
-                    _name = new Label(
+                    _name = new Label(Context, 
                         subname,
                         true,
                         0x219,
@@ -684,11 +685,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (SerialHelper.IsItem(serial))
                 {
-                    height = Math.Max(Client.Game.UO.FileManager.TileData.StaticData[graphic].Height, height);
+                    height = Math.Max(_gump.World.Context.Game.UO.FileManager.TileData.StaticData[graphic].Height, height);
                 }
 
                 Add(
-                    _amountLabel = new Label(
+                    _amountLabel = new Label(Context, 
                         count.ToString(),
                         true,
                         0x0219,
@@ -744,10 +745,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             public bool InBuyGump { get; set; }
 
-            private static byte GetAnimGroup(Animations animations, ushort graphic)
+            private static byte GetAnimGroup(Animations animations, AnimationsLoader animationsLoader, ushort graphic)
             {
                 var groupType = animations.GetAnimType(graphic);
-                switch (Client.Game.UO.FileManager.Animations.GetGroupIndex(graphic, groupType))
+                switch (animationsLoader.GetGroupIndex(graphic, groupType))
                 {
                     case AnimationGroups.Low:
                         return (byte)LowAnimationGroup.Stand;
@@ -782,7 +783,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (InBuyGump && SerialHelper.IsMobile(LocalSerial))
                 {
-                    var animations = Client.Game.UO.Animations;
+                    var animations = _gump.World.Context.Game.UO.Animations;
                     ushort graphic = Graphic;
 
                     if (graphic >= animations.MaxAnimationCount)
@@ -790,7 +791,7 @@ namespace ClassicUO.Game.UI.Gumps
                         graphic = 0;
                     }
 
-                    byte group = GetAnimGroup(animations, graphic);
+                    byte group = GetAnimGroup(animations, _gump.World.Context.Game.UO.FileManager.Animations, graphic);
 
                     var frames = animations.GetAnimationFrames(
                         graphic,
@@ -805,7 +806,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         hueVector = ShaderHueTranslator.GetHueVector(
                             hue2,
-                            Client.Game.UO.FileManager.TileData.StaticData[Graphic].IsPartialHue,
+                            _gump.World.Context.Game.UO.FileManager.TileData.StaticData[Graphic].IsPartialHue,
                             1f
                         );
 
@@ -839,14 +840,14 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(Graphic);
+                    ref readonly var artInfo = ref _gump.World.Context.Game.UO.Arts.GetArt(Graphic);
                     hueVector = ShaderHueTranslator.GetHueVector(
                         Hue,
-                        Client.Game.UO.FileManager.TileData.StaticData[Graphic].IsPartialHue,
+                        _gump.World.Context.Game.UO.FileManager.TileData.StaticData[Graphic].IsPartialHue,
                         1f
                     );
 
-                    var rect = Client.Game.UO.Arts.GetRealArtBounds(Graphic);
+                    var rect = _gump.World.Context.Game.UO.Arts.GetRealArtBounds(Graphic);
 
                     const int RECT_SIZE = 50;
 
@@ -902,13 +903,14 @@ namespace ClassicUO.Game.UI.Gumps
             private readonly Label _amountLabel;
 
             public TransactionItem(
+                GameContext context,
                 uint serial,
                 ushort graphic,
                 ushort hue,
                 int amount,
                 uint price,
                 string realname
-            )
+            ) : base(context)
             {
                 LocalSerial = serial;
                 Graphic = graphic;
@@ -918,7 +920,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Label l;
 
                 Add(
-                    l = new Label(
+                    l = new Label(Context, 
                         realname,
                         true,
                         0x021F,
@@ -935,7 +937,7 @@ namespace ClassicUO.Game.UI.Gumps
                 );
 
                 Add(
-                    _amountLabel = new Label(
+                    _amountLabel = new Label(Context, 
                         amount.ToString(),
                         true,
                         0x021F,
@@ -953,7 +955,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Button buttonAdd;
 
                 Add(
-                    buttonAdd = new Button(0, 0x37, 0x37)
+                    buttonAdd = new Button(Context, 0, 0x37, 0x37)
                     {
                         X = 190,
                         Y = 5,
@@ -1009,7 +1011,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Button buttonRemove;
 
                 Add(
-                    buttonRemove = new Button(1, 0x38, 0x38)
+                    buttonRemove = new Button(Context, 1, 0x38, 0x38)
                     {
                         X = 210,
                         Y = 5,
@@ -1101,15 +1103,15 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private readonly ushort _graphic;
 
-            public ResizePicLine(ushort graphic)
+            public ResizePicLine(GameContext context, ushort graphic) : base(context)
             {
                 _graphic = graphic;
                 CanMove = true;
                 CanCloseWithRightClick = true;
 
-                ref readonly var gumpInfo0 = ref Client.Game.UO.Gumps.GetGump(_graphic);
-                ref readonly var gumpInfo1 = ref Client.Game.UO.Gumps.GetGump((uint)(_graphic + 1));
-                ref readonly var gumpInfo2 = ref Client.Game.UO.Gumps.GetGump((uint)(_graphic + 2));
+                ref readonly var gumpInfo0 = ref Context.Game.UO.Gumps.GetGump(_graphic);
+                ref readonly var gumpInfo1 = ref Context.Game.UO.Gumps.GetGump((uint)(_graphic + 1));
+                ref readonly var gumpInfo2 = ref Context.Game.UO.Gumps.GetGump((uint)(_graphic + 2));
 
                 Height = Math.Max(
                     gumpInfo0.UV.Height,
@@ -1124,9 +1126,9 @@ namespace ClassicUO.Game.UI.Gumps
                 (
                     batcher =>
                     {
-                        ref readonly var gumpInfo0 = ref Client.Game.UO.Gumps.GetGump(_graphic);
-                        ref readonly var gumpInfo1 = ref Client.Game.UO.Gumps.GetGump((uint)(_graphic + 1));
-                        ref readonly var gumpInfo2 = ref Client.Game.UO.Gumps.GetGump((uint)(_graphic + 2));
+                        ref readonly var gumpInfo0 = ref Context.Game.UO.Gumps.GetGump(_graphic);
+                        ref readonly var gumpInfo1 = ref Context.Game.UO.Gumps.GetGump((uint)(_graphic + 1));
+                        ref readonly var gumpInfo2 = ref Context.Game.UO.Gumps.GetGump((uint)(_graphic + 2));
 
                         var hueVector = ShaderHueTranslator.GetHueVector(0, false, Alpha, true);
 
@@ -1162,7 +1164,7 @@ namespace ClassicUO.Game.UI.Gumps
             private readonly ushort _graphic;
             private readonly Rectangle _rect;
 
-            public GumpPicTexture(ushort graphic, int x, int y, Rectangle bounds, bool tiled)
+            public GumpPicTexture(GameContext context, ushort graphic, int x, int y, Rectangle bounds, bool tiled) : base(context)
             {
                 CanMove = true;
                 AcceptMouseInput = true;
@@ -1180,7 +1182,7 @@ namespace ClassicUO.Game.UI.Gumps
             public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
             {
                 float layerDepth = layerDepthRef;
-                var gumpInfo = Client.Game.UO.Gumps.GetGump(_graphic);
+                var gumpInfo = Context.Game.UO.Gumps.GetGump(_graphic);
                 var hueVector = ShaderHueTranslator.GetHueVector(0);
 
                 renderLists.AddGumpWithAtlas(batcher =>

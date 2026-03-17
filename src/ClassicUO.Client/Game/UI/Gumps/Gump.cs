@@ -13,7 +13,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class Gump : Control
     {
-        public Gump(World world, uint local, uint server)
+        public Gump(World world, uint local, uint server) : base(world?.Context)
         {
             World = world;
             LocalSerial = local;
@@ -72,7 +72,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void SetInScreen()
         {
-            Rectangle windowBounds = Client.Game.ClientBounds;
+            Rectangle windowBounds = World.Context.Game.ClientBounds;
             Rectangle bounds = Bounds;
             bounds.X += windowBounds.X;
             bounds.Y += windowBounds.Y;
@@ -115,14 +115,14 @@ namespace ClassicUO.Game.UI.Gumps
                 position.Y = -halfHeight;
             }
 
-            if (X > Client.Game.ClientBounds.Width - (Width - halfWidth))
+            if (X > World.Context.Game.ClientBounds.Width - (Width - halfWidth))
             {
-                position.X = Client.Game.ClientBounds.Width - (Width - halfWidth);
+                position.X = World.Context.Game.ClientBounds.Width - (Width - halfWidth);
             }
 
-            if (Y > Client.Game.ClientBounds.Height - (Height - halfHeight))
+            if (Y > World.Context.Game.ClientBounds.Height - (Height - halfHeight))
             {
-                position.Y = Client.Game.ClientBounds.Height - (Height - halfHeight);
+                position.Y = World.Context.Game.ClientBounds.Height - (Height - halfHeight);
             }
 
             Location = position;
@@ -158,6 +158,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 GameActions.ReplyGump
                 (
+                    World,
                     LocalSerial,
                     // Seems like MasterGump serial does not work as expected.
                     /*MasterGumpSerial != 0 ? MasterGumpSerial :*/ ServerSerial,
@@ -168,11 +169,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (CanMove)
                 {
-                    UIManager.SavePosition(ServerSerial, Location);
+                    World.Context.UI.SavePosition(ServerSerial, Location);
                 }
                 else
                 {
-                    UIManager.RemovePosition(ServerSerial);
+                    World.Context.UI.RemovePosition(ServerSerial);
                 }
 
                 Dispose();

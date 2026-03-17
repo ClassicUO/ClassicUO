@@ -43,10 +43,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             Height = 200 + _diffY;
 
-            Add(_gumpPic = new GumpPic(160, 0, 0x82D, 0));
+            Add(_gumpPic = new GumpPic(160, 0, 0x82D, 0, World.Context));
             _gumpPic.MouseDoubleClick += _picBase_MouseDoubleClick;
 
-            _scrollArea = new ExpandableScroll(0, _diffY, Height, 0x1F40)
+            _scrollArea = new ExpandableScroll(0, _diffY, Height, 0x1F40, World.Context)
             {
                 TitleGumpID = 0x0834,
                 AcceptMouseInput = true
@@ -54,12 +54,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_scrollArea);
 
-            Add(new GumpPic(50, 35 + _diffY, 0x082B, 0));
-            Add(_bottomLine = new GumpPic(50, Height - 98, 0x082B, 0));
-            Add(_bottomComment = new GumpPic(25, Height - 85, 0x0836, 0));
+            Add(new GumpPic(50, 35 + _diffY, 0x082B, 0, World.Context));
+            Add(_bottomLine = new GumpPic(50, Height - 98, 0x082B, 0, World.Context));
+            Add(_bottomComment = new GumpPic(25, Height - 85, 0x0836, 0, World.Context));
 
             _area = new ScrollArea
-            (
+            (World.Context, 
                 22,
                 45 + _diffY + _bottomLine.Height - 10,
                 _scrollArea.Width - 14,
@@ -69,7 +69,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_area);
 
-            _container = new DataBox(0, 0, 1, 1);
+            _container = new DataBox(World.Context, 0, 0, 1, 1);
             _container.WantUpdateSize = true;
             _container.AcceptMouseInput = true;
             _container.CanMove = true;
@@ -79,7 +79,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 _skillsLabelSum = new Label
-                (
+                (World.Context, 
                     World.Player.Skills.Sum(s => s.Value).ToString("F1"),
                     false,
                     600,
@@ -93,7 +93,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                _newGroupButton = new Button(0, 0x083A, 0x083A, 0x083A)
+                _newGroupButton = new Button(World.Context, 0, 0x083A, 0x083A, 0x083A)
                 {
                     X = x,
                     Y = Height,
@@ -105,7 +105,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 _checkReal = new Checkbox
-                (
+                (World.Context, 
                     0x938,
                     0x939,
                     ResGumps.ShowReal,
@@ -118,7 +118,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 _checkCaps = new Checkbox
-                (
+                (World.Context, 
                     0x938,
                     0x939,
                     ResGumps.ShowCaps,
@@ -134,7 +134,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             LoadSkills();
 
-            Add(_resetGroups = new NiceButton(_scrollArea.X + 25, _scrollArea.Y + 7, 100, 18,
+            Add(_resetGroups = new NiceButton(World.Context, _scrollArea.X + 25, _scrollArea.Y + 7, 100, 18,
                                               ButtonAction.Activate, ResGumps.ResetGroups,
                                               unicode: false,
                                               font: 6)
@@ -144,7 +144,7 @@ namespace ClassicUO.Game.UI.Gumps
                 //Alpha = 1f
             });
 
-            _hitBox = new HitBox(160, 0, 23, 24);
+            _hitBox = new HitBox(World.Context, 160, 0, 23, 24);
             Add(_hitBox);
             _hitBox.MouseUp += _hitBox_MouseUp;
 
@@ -227,7 +227,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else if (buttonID == 1) // reset
             {
-                UIManager.Add(
+                World.Context.UI.Add(
                     new MessageBoxGump(World, 300, 200,
                                        "Skills will be placed in default groups.\nDo you want reset all groups?",
                                                b =>
@@ -267,7 +267,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         byte index = g.GetSkill(i);
 
-                        if (index < Client.Game.UO.FileManager.Skills.SkillsCount)
+                        if (index < World.Context.Game.UO.FileManager.Skills.SkillsCount)
                         {
                             control.AddSkill(index, 0, 17 + i * 17);
                         }
@@ -369,7 +369,7 @@ namespace ClassicUO.Game.UI.Gumps
             private byte _status;
             private readonly StbTextBox _textbox;
 
-            public SkillsGroupControl(StandardSkillsGump gump, SkillsGroup group, int x, int y)
+            public SkillsGroupControl(StandardSkillsGump gump, SkillsGroup group, int x, int y) : base(gump.World.Context)
             {
                 _gump = gump;
                 CanMove = false;
@@ -384,7 +384,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _group = group;
 
-                _button = new Button(1000, 0x0827, 0x0827, 0x0827)
+                _button = new Button(Context, 1000, 0x0827, 0x0827, 0x0827)
                 {
                     ButtonAction = ButtonAction.Activate,
                     ContainsByBounds = true,
@@ -393,12 +393,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(_button);
 
-                int width = Client.Game.UO.FileManager.Fonts.GetWidthASCII(6, group.Name);
+                int width = _gump.World.Context.Game.UO.FileManager.Fonts.GetWidthASCII(6, group.Name);
 
                 Add
                 (
                     _textbox = new StbTextBox
-                    (
+                    (Context, 
                         6,
                         -1,
                         200,
@@ -418,7 +418,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 int xx = width + 11 + 16;
 
-                _gumpPic = new GumpPicTiled(0x0835)
+                _gumpPic = new GumpPicTiled(0x0835, Context)
                 {
                     X = xx,
                     Y = 5,
@@ -428,7 +428,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(_gumpPic);
 
-                Add(_box = new DataBox(0, 0, 0, 0));
+                Add(_box = new DataBox(Context, 0, 0, 0, 0));
 
                 _textbox.IsEditable = false;
 
@@ -453,8 +453,8 @@ namespace ClassicUO.Game.UI.Gumps
                             _gumpPic.IsVisible = true;
                             _textbox.IsEditable = false;
                             _textbox.AllowSelection = false;
-                            UIManager.KeyboardFocusControl = this;
-                            UIManager.SystemChat.SetFocus();
+                            _gump.World.Context.UI.KeyboardFocusControl = this;
+                            _gump.World.Context.UI.SystemChat.SetFocus();
 
                             break;
 
@@ -462,16 +462,16 @@ namespace ClassicUO.Game.UI.Gumps
                             _gumpPic.IsVisible = true;
                             _textbox.IsEditable = false;
                             _textbox.AllowSelection = false;
-                            UIManager.KeyboardFocusControl = this;
+                            _gump.World.Context.UI.KeyboardFocusControl = this;
 
-                            //UIManager.SystemChat.SetFocus();
+                            //_gump.World.Context.UI.SystemChat.SetFocus();
                             break;
 
                         case 2:
                             _gumpPic.IsVisible = false;
                             _textbox.IsEditable = true;
                             _textbox.AllowSelection = true;
-                            UIManager.KeyboardFocusControl = _textbox;
+                            _gump.World.Context.UI.KeyboardFocusControl = _textbox;
                             _textbox.SetKeyboardFocus();
 
                             break;
@@ -484,8 +484,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _gumpPic.IsVisible = true;
                     _textbox.IsEditable = false;
                     _textbox.AllowSelection = false;
-                    UIManager.KeyboardFocusControl = null;
-                    UIManager.SystemChat.SetFocus();
+                    _gump.World.Context.UI.KeyboardFocusControl = null;
+                    _gump.World.Context.UI.SystemChat.SetFocus();
                 };
             }
 
@@ -562,7 +562,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             protected override void OnMouseOver(int x, int y)
             {
-                if (UIManager.LastControlMouseDown(MouseButtonType.Left) is SkillItemControl skillControl)
+                if (_gump.World.Context.UI.LastControlMouseDown(MouseButtonType.Left) is SkillItemControl skillControl)
                 {
                     if (skillControl.Parent // databox
                                     .Parent // skillgruop
@@ -582,7 +582,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 // update groups
                                 originalGroup._group.Remove(index);
                                 _group.Add(index);
-                                _group.Sort();
+                                _group.Sort(Context.Game.UO.FileManager);
 
                                 originalGroup._button.IsVisible = originalGroup._skills.Count != 0;
 
@@ -624,7 +624,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _textbox.SetText(text);
                 }
 
-                int width = Client.Game.UO.FileManager.Fonts.GetWidthASCII(6, text);
+                int width = _gump.World.Context.Game.UO.FileManager.Fonts.GetWidthASCII(6, text);
                 int xx = width + 11 + 16;
 
                 if (xx > 0)
@@ -638,8 +638,8 @@ namespace ClassicUO.Game.UI.Gumps
                     _gumpPic.IsVisible = false;
                 }
 
-                UIManager.KeyboardFocusControl = null;
-                UIManager.SystemChat.SetFocus();
+                _gump.World.Context.UI.KeyboardFocusControl = null;
+                _gump.World.Context.UI.SystemChat.SetFocus();
 
                 _group.Name = text;
 
@@ -773,14 +773,14 @@ namespace ClassicUO.Game.UI.Gumps
             private readonly Label _value;
 
 
-            public SkillItemControl(StandardSkillsGump gump, int index, int x, int y)
+            public SkillItemControl(StandardSkillsGump gump, int index, int x, int y) : base(gump.World.Context)
             {
                 _gump = gump;
                 Index = index;
                 X = x;
                 Y = y;
 
-                if (index < 0 || index >= Client.Game.UO.FileManager.Skills.Skills.Count)
+                if (index < 0 || index >= _gump.World.Context.Game.UO.FileManager.Skills.Skills.Count)
                 {
                     Dispose();
 
@@ -793,7 +793,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (skill.IsClickable)
                     {
-                        Button buttonUse = new Button(0, 0x0837, 0x0838, 0x0838)
+                        Button buttonUse = new Button(Context, 0, 0x0837, 0x0838, 0x0838)
                         {
                             ButtonAction = ButtonAction.Activate,
                             X = 8
@@ -806,7 +806,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     ushort graphic = GetStatusButtonGraphic();
 
-                    _buttonStatus = new Button(1, graphic, graphic, graphic)
+                    _buttonStatus = new Button(Context, 1, graphic, graphic, graphic)
                     {
                         ButtonAction = ButtonAction.Activate,
                         X = 251,
@@ -816,10 +816,10 @@ namespace ClassicUO.Game.UI.Gumps
                     Add(_buttonStatus);
 
                     Label name;
-                    Add(name = new Label(skill.Name, false, 0x0288, font: 9));
+                    Add(name = new Label(Context, skill.Name, false, 0x0288, font: 9));
                     name.X = 22;
 
-                    Add(_value = new Label("", false, 0x0288, font: 9));
+                    Add(_value = new Label(Context, "", false, 0x0288, font: 9));
 
                     UpdateValueText(false, false);
                 }
@@ -845,7 +845,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (buttonID == 0) // use
                 {
-                    GameActions.UseSkill(Index);
+                    GameActions.UseSkill(_gump.World, Index);
                 }
                 else if (buttonID == 1) // change status
                 {
@@ -866,7 +866,7 @@ namespace ClassicUO.Game.UI.Gumps
                         newStatus = 0;
                     }
 
-                    NetClient.Socket.Send_SkillStatusChangeRequest((ushort)Index, newStatus);
+                    _gump.World.Network.Send_SkillStatusChangeRequest((ushort)Index, newStatus);
 
                     skill.Lock = (Lock) newStatus;
                     SetStatus((Lock) newStatus);
@@ -930,25 +930,25 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
                 }
 
-                Client.Game.UO.GameCursor.IsDraggingCursorForced = false;
+                _gump.World.Context.Game.UO.GameCursor.IsDraggingCursorForced = false;
 
-                if (UIManager.LastControlMouseDown(MouseButtonType.Left) == this && _gump.World.Player.Skills[Index].IsClickable)
+                if (_gump.World.Context.UI.LastControlMouseDown(MouseButtonType.Left) == this && _gump.World.Player.Skills[Index].IsClickable)
                 {
-                    if (UIManager.MouseOverControl == null || UIManager.MouseOverControl.RootParent != RootParent)
+                    if (_gump.World.Context.UI.MouseOverControl == null || _gump.World.Context.UI.MouseOverControl.RootParent != RootParent)
                     {
                         GetSpellFloatingButton(Index)?.Dispose();
 
                         if (Index >= 0 && Index < _gump.World.Player.Skills.Length)
                         {
-                            UIManager.Add(new SkillButtonGump(_gump.World, _gump.World.Player.Skills[Index], Mouse.Position.X - 44, Mouse.Position.Y - 22));
+                            _gump.World.Context.UI.Add(new SkillButtonGump(_gump.World, _gump.World.Player.Skills[Index], Mouse.Position.X - 44, Mouse.Position.Y - 22));
                         }
                     }
                 }
             }
 
-            private static SkillButtonGump GetSpellFloatingButton(int id)
+            private SkillButtonGump GetSpellFloatingButton(int id)
             {
-                for (LinkedListNode<Gump> i = UIManager.Gumps.Last; i != null; i = i.Previous)
+                for (LinkedListNode<Gump> i = _gump.World.Context.UI.Gumps.Last; i != null; i = i.Previous)
                 {
                     if (i.Value is SkillButtonGump g && g.SkillID == id)
                     {
@@ -963,7 +963,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (button == MouseButtonType.Left)
                 {
-                    Client.Game.UO.GameCursor.IsDraggingCursorForced = true;
+                    _gump.World.Context.Game.UO.GameCursor.IsDraggingCursorForced = true;
                 }
             }
 
@@ -971,7 +971,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-                if (UIManager.LastControlMouseDown(MouseButtonType.Left) == this)
+                if (_gump.World.Context.UI.LastControlMouseDown(MouseButtonType.Left) == this)
                 {
                     float layerDepth = layerDepthRef;
                     renderLists.AddGumpNoAtlas

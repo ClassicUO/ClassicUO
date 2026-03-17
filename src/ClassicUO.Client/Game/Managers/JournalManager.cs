@@ -14,6 +14,12 @@ namespace ClassicUO.Game.Managers
     {
         private StreamWriter _fileWriter;
         private bool _writerHasException;
+        private readonly IProfileProvider _profileProvider;
+
+        public JournalManager(IProfileProvider profileProvider)
+        {
+            _profileProvider = profileProvider;
+        }
 
         public static Deque<JournalEntry> Entries { get; } = new Deque<JournalEntry>(Constants.MAX_JOURNAL_HISTORY_COUNT);
 
@@ -26,10 +32,10 @@ namespace ClassicUO.Game.Managers
 
             byte font = (byte) (isunicode ? 0 : 9);
 
-            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.OverrideAllFonts)
+            if (_profileProvider.CurrentProfile != null && _profileProvider.CurrentProfile.OverrideAllFonts)
             {
-                font = ProfileManager.CurrentProfile.ChatFont;
-                isunicode = ProfileManager.CurrentProfile.OverrideAllFontsIsUnicode;
+                font = _profileProvider.CurrentProfile.ChatFont;
+                isunicode = _profileProvider.CurrentProfile.OverrideAllFontsIsUnicode;
             }
 
             DateTime timeNow = DateTime.Now;
@@ -43,7 +49,7 @@ namespace ClassicUO.Game.Managers
             entry.TextType = type;
             entry.MessageType = messageType;
 
-            if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ForceUnicodeJournal)
+            if (_profileProvider.CurrentProfile != null && _profileProvider.CurrentProfile.ForceUnicodeJournal)
             {
                 entry.Font = 0;
                 entry.IsUnicode = true;
@@ -57,7 +63,7 @@ namespace ClassicUO.Game.Managers
                 CreateWriter();
             }
 
-            bool saveSerial = ProfileManager.GlobalProfile != null && ProfileManager.GlobalProfile.JournalFileWithSerial;
+            bool saveSerial = _profileProvider.GlobalProfile != null && _profileProvider.GlobalProfile.JournalFileWithSerial;
             string serialText = saveSerial && serial.HasValue ? $"<0x{serial.Value:X8}> " : string.Empty;
 
             string output = $"[{timeNow:G}]  {serialText}{name}: {text}";
@@ -72,13 +78,13 @@ namespace ClassicUO.Game.Managers
 
         private void CreateWriter()
         {
-            if (_fileWriter == null && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.SaveJournalToFile)
+            if (_fileWriter == null && _profileProvider.CurrentProfile != null && _profileProvider.CurrentProfile.SaveJournalToFile)
             {
                 try
                 {
                     string path = FileSystemHelper.CreateFolderIfNotExists(Path.Combine(CUOEnviroment.ExecutablePath, "Data"), "Client", "JournalLogs");
 
-                    int maxJournalFiles = ProfileManager.GlobalProfile?.MaxJournalFiles ?? -1;
+                    int maxJournalFiles = _profileProvider.GlobalProfile?.MaxJournalFiles ?? -1;
 
                     if (maxJournalFiles >= 0)
                     {

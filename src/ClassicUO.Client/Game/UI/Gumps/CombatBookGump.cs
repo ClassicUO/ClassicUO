@@ -27,9 +27,9 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             CanCloseWithRightClick = true;
 
-            if (Client.Game.UO.Version < ClientVersion.CV_7000)
+            if (World.Context.Game.UO.Version < ClientVersion.CV_7000)
             {
-                if (Client.Game.UO.Version < ClientVersion.CV_500A)
+                if (World.Context.Game.UO.Version < ClientVersion.CV_500A)
                 {
                     _abilityCount = 29;
                 }
@@ -50,14 +50,14 @@ namespace ClassicUO.Game.UI.Gumps
             _primAbility = null;
             _secAbility = null;
             
-            Add(new GumpPic(0, 0, 0x2B02, 0));
+            Add(new GumpPic(0, 0, 0x2B02, 0, World.Context));
 
-            Add(_pageCornerLeft = new GumpPic(50, 8, 0x08BB, 0));
+            Add(_pageCornerLeft = new GumpPic(50, 8, 0x08BB, 0, World.Context));
             _pageCornerLeft.LocalSerial = 0;
             _pageCornerLeft.Page = int.MaxValue;
             _pageCornerLeft.MouseUp += PageCornerOnMouseClick;
             _pageCornerLeft.MouseDoubleClick += PageCornerOnMouseDoubleClick;
-            Add(_pageCornerRight = new GumpPic(321, 8, 0x08BC, 0));
+            Add(_pageCornerRight = new GumpPic(321, 8, 0x08BC, 0, World.Context));
             _pageCornerRight.LocalSerial = 1;
             _pageCornerRight.Page = 1;
             _pageCornerRight.MouseUp += PageCornerOnMouseClick;
@@ -83,7 +83,7 @@ namespace ClassicUO.Game.UI.Gumps
                         spellsOnPage = 4;
                     }
 
-                    Label text = new Label(ResGumps.Index, false, 0x0288, font: 6) { X = indexX, Y = 6 };
+                    Label text = new Label(World.Context, ResGumps.Index, false, 0x0288, font: 6) { X = indexX, Y = 6 };
                     Add(text, page);
 
                     for (int i = 0; i < spellsOnPage; i++)
@@ -94,7 +94,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
 
                         text = new HoveredLabel
-                        (
+                        (World.Context, 
                             AbilityData.Abilities[offs].Name,
                             false,
                             0x0288,
@@ -117,7 +117,7 @@ namespace ClassicUO.Game.UI.Gumps
                         };
 
                         Add(text, page);
-                        text.SetTooltip(Client.Game.UO.FileManager.Clilocs.GetString(1061693 + offs), 150);
+                        text.SetTooltip(World.Context.Game.UO.FileManager.Clilocs.GetString(1061693 + offs), 150);
 
                         y += 15;
                         offs++;
@@ -128,14 +128,14 @@ namespace ClassicUO.Game.UI.Gumps
                         if(_primAbility == null)
                         {
                             byte bab1 = (byte)(((byte)World.Player.PrimaryAbility & 0x7F) - 1);
-                            _primAbility = new GumpPic(215, 105, (ushort)(0x5200 + bab1), (ushort)(((byte)World.Player.PrimaryAbility & 0x80) != 0 ? 38 : 0));
-                            _primAbility.SetTooltip(Client.Game.UO.FileManager.Clilocs.GetString(1028838 + bab1));
+                            _primAbility = new GumpPic(215, 105, (ushort)(0x5200 + bab1), (ushort)(((byte)World.Player.PrimaryAbility & 0x80) != 0 ? 38 : 0), World.Context);
+                            _primAbility.SetTooltip(World.Context.Game.UO.FileManager.Clilocs.GetString(1028838 + bab1));
                             _primAbility.DragBegin += OnGumpicDragBeginPrimary;
                             _primAbility.MouseDoubleClick += PrimaryAbilityMouseDoubleClick;
                         }
 
                         text = new Label
-                        (
+                        (World.Context, 
                             ResGumps.PrimaryAbilityIcon,
                             false,
                             0x0288,
@@ -150,14 +150,14 @@ namespace ClassicUO.Game.UI.Gumps
                         if (_secAbility == null)
                         {
                             byte bab2 = (byte)(((byte)World.Player.SecondaryAbility & 0x7F) - 1);
-                            _secAbility = new GumpPic(215, 150, (ushort)(0x5200 + bab2), (ushort)(((byte)World.Player.SecondaryAbility & 0x80) != 0 ? 38 : 0));
-                            _secAbility.SetTooltip(Client.Game.UO.FileManager.Clilocs.GetString(1028838 + bab2));
+                            _secAbility = new GumpPic(215, 150, (ushort)(0x5200 + bab2), (ushort)(((byte)World.Player.SecondaryAbility & 0x80) != 0 ? 38 : 0), World.Context);
+                            _secAbility.SetTooltip(World.Context.Game.UO.FileManager.Clilocs.GetString(1028838 + bab2));
                             _secAbility.DragBegin += OnGumpicDragBeginSecondary;
                             _secAbility.MouseDoubleClick += SecondaryAbilityMouseDoubleClick;
                         }
 
                         text = new Label
-                        (
+                        (World.Context, 
                             ResGumps.SecondaryAbilityIcon,
                             false,
                             0x0288,
@@ -184,12 +184,12 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
                 }
 
-                GumpPic icon = new GumpPic(62, 40, (ushort) (0x5200 + i), 0);
+                GumpPic icon = new GumpPic(62, 40, (ushort) (0x5200 + i), 0, World.Context);
                 Add(icon, pageW);
-                icon.SetTooltip(Client.Game.UO.FileManager.Clilocs.GetString(1061693 + i), 150);
+                icon.SetTooltip(World.Context.Game.UO.FileManager.Clilocs.GetString(1061693 + i), 150);
 
                 Label text = new Label
-                (
+                (World.Context, 
                     StringHelper.CapitalizeAllWords(AbilityData.Abilities[i].Name),
                     false,
                     0x0288,
@@ -205,7 +205,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add
                 (
-                    new GumpPicTiled(0x0835)
+                    new GumpPicTiled(0x0835, World.Context)
                     {
                         X = 62,
                         Y = 88,
@@ -216,7 +216,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
                 List<ushort> list = GetItemsList((byte) i);
-                int maxStaticCount = Client.Game.UO.FileManager.TileData.StaticData.Length;
+                int maxStaticCount = World.Context.Game.UO.FileManager.TileData.StaticData.Length;
 
                 int textX = 62;
                 int textY = 98;
@@ -237,7 +237,7 @@ namespace ClassicUO.Game.UI.Gumps
                         continue;
                     }
 
-                    text = new Label(StringHelper.CapitalizeAllWords(Client.Game.UO.FileManager.TileData.StaticData[id].Name), false, 0x0288, font: 9)
+                    text = new Label(World.Context, StringHelper.CapitalizeAllWords(World.Context.Game.UO.FileManager.TileData.StaticData[id].Name), false, 0x0288, font: 9)
                     {
                         X = textX,
                         Y = textY
@@ -278,9 +278,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragBegin(int x, int y)
         {
-            if (UIManager.MouseOverControl?.RootParent == this)
+            if (World.Context.UI.MouseOverControl?.RootParent == this)
             {
-                UIManager.MouseOverControl.InvokeDragBegin(new Point(x, y));
+                World.Context.UI.MouseOverControl.InvokeDragBegin(new Point(x, y));
             }
 
             base.OnDragBegin(x, y);
@@ -288,9 +288,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragEnd(int x, int y)
         {
-            if (UIManager.MouseOverControl?.RootParent == this)
+            if (World.Context.UI.MouseOverControl?.RootParent == this)
             {
-                UIManager.MouseOverControl.InvokeDragEnd(new Point(x, y));
+                World.Context.UI.MouseOverControl.InvokeDragEnd(new Point(x, y));
             }
 
             base.OnDragEnd(x, y);
@@ -298,7 +298,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void OnGumpicDragBeginPrimary(object sender, EventArgs e)
         {
-            if (UIManager.DraggingControl != this || UIManager.MouseOverControl != sender)
+            if (World.Context.UI.DraggingControl != this || World.Context.UI.MouseOverControl != sender)
             {
                 return;
             }
@@ -313,13 +313,13 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = Mouse.LClickPosition.Y - 22
             };
 
-            UIManager.Add(gump);
-            UIManager.AttemptDragControl(gump, true);
+            World.Context.UI.Add(gump);
+            World.Context.UI.AttemptDragControl(gump, true);
         }
 
         private void OnGumpicDragBeginSecondary(object sender, EventArgs e)
         {
-            if (UIManager.DraggingControl != this || UIManager.MouseOverControl != sender)
+            if (World.Context.UI.DraggingControl != this || World.Context.UI.MouseOverControl != sender)
             {
                 return;
             }
@@ -334,13 +334,13 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = Mouse.LClickPosition.Y - 22
             };
 
-            UIManager.Add(gump);
-            UIManager.AttemptDragControl(gump, true);
+            World.Context.UI.Add(gump);
+            World.Context.UI.AttemptDragControl(gump, true);
         }
 
-        private static UseAbilityButtonGump GetSpellFloatingButton(int id)
+        private UseAbilityButtonGump GetSpellFloatingButton(int id)
         {
-            for (LinkedListNode<Gump> i = UIManager.Gumps.Last; i != null; i = i.Previous)
+            for (LinkedListNode<Gump> i = World.Context.UI.Gumps.Last; i != null; i = i.Previous)
             {
                 if (i.Value is UseAbilityButtonGump g && g.Index == id)
                 {
@@ -445,7 +445,7 @@ namespace ClassicUO.Game.UI.Gumps
             _primAbility.IsVisible = _secAbility.IsVisible = page <= _dictionaryPagesCount - _abilityCount;
 
             if(playSound)
-                Client.Game.Audio.PlaySound(0x0055);
+                World.Context.Game.Audio.PlaySound(0x0055);
         }
 
 

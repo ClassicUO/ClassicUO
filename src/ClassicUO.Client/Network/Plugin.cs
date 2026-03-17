@@ -160,7 +160,7 @@ namespace ClassicUO.Network
             _send_new = OnPluginSend_new;
             _getPacketLength = OnGetPacketLength;
             _getPlayerPosition = GetPlayerPosition;
-            _castSpell = GameActions.CastSpell;
+            _castSpell = (index) => GameActions.CastSpell(Client.Game.UO.World, index);
             _getStaticImage = GetStaticImage;
             _getUoFilePath = GetUOFilePath;
             _requestMove = RequestMove;
@@ -400,7 +400,7 @@ namespace ClassicUO.Network
 
         private static string GetUOFilePath()
         {
-            return Settings.GlobalSettings.UltimaOnlineDirectory;
+            return Client.Game.UO.World.Settings.UltimaOnlineDirectory;
         }
 
         private static void SetWindowTitle(string str)
@@ -650,11 +650,12 @@ namespace ClassicUO.Network
 
         internal static bool ProcessHotkeys(int key, int mod, bool ispressed)
         {
-            if ((!Client.Game.UO.World?.InGame ?? false) || UIManager.SystemChat != null && (
-                        ProfileManager.CurrentProfile != null
-                            && ProfileManager.CurrentProfile.ActivateChatAfterEnter
-                            && UIManager.SystemChat.IsActive
-                        || UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl
+            var ui = Client.Game.UO.World?.Context?.UI;
+            if ((!Client.Game.UO.World?.InGame ?? false) || ui?.SystemChat != null && (
+                        Client.Game.UO.World?.Profile?.CurrentProfile != null
+                            && Client.Game.UO.World.Profile.CurrentProfile.ActivateChatAfterEnter
+                            && ui.SystemChat.IsActive
+                        || ui.KeyboardFocusControl != ui.SystemChat.TextBoxControl
                     )
             )
             {
@@ -753,7 +754,7 @@ namespace ClassicUO.Network
 
         internal static short OnGetPacketLength(int id)
         {
-            return NetClient.Socket.PacketsTable.GetPacketLength(id);
+            return Client.Game.UO.World.Network.PacketsTable.GetPacketLength(id);
         }
 
         internal static bool OnPluginRecv(ref byte[] data, ref int length)
@@ -768,9 +769,9 @@ namespace ClassicUO.Network
 
         internal static bool OnPluginSend(ref byte[] data, ref int length)
         {
-            if (NetClient.Socket.IsConnected)
+            if (Client.Game.UO.World.Network.IsConnected)
             {
-                NetClient.Socket.Send(data.AsSpan(0, length), true);
+                Client.Game.UO.World.Network.Send(data.AsSpan(0, length), true);
             }
 
             return true;
@@ -793,7 +794,7 @@ namespace ClassicUO.Network
         {
             if (buffer != IntPtr.Zero && length > 0)
             {
-                NetClient.Socket.Send(new Span<byte>((void*)buffer, length), true);
+                Client.Game.UO.World.Network.Send(new Span<byte>((void*)buffer, length), true);
             }
 
             return true;

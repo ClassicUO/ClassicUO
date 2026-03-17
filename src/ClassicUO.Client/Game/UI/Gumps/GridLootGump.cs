@@ -19,8 +19,9 @@ namespace ClassicUO.Game.UI.Gumps
         private const int MAX_WIDTH = 300;
         private const int MAX_HEIGHT = 420;
 
-        private static int _lastX = ProfileManager.CurrentProfile.GridLootType == 2 ? 200 : 100;
+        private static int _lastX = 100;
         private static int _lastY = 100;
+        private static bool _lastXInitialized;
         private readonly AlphaBlendControl _background;
         private readonly NiceButton _buttonPrev,
             _buttonNext,
@@ -35,6 +36,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         public GridLootGump(World world, uint local) : base(world, local, 0)
         {
+            if (!_lastXInitialized)
+            {
+                _lastX = World.Profile.CurrentProfile.GridLootType == 2 ? 200 : 100;
+                _lastXInitialized = true;
+            }
+
             _corpse = World.Items.Get(local);
 
             if (_corpse == null)
@@ -50,8 +57,8 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else if (
                 World.Player.AutoOpenedCorpses.Contains(LocalSerial)
-                && ProfileManager.CurrentProfile != null
-                && ProfileManager.CurrentProfile.SkipEmptyCorpse
+                && World.Profile.CurrentProfile != null
+                && World.Profile.CurrentProfile.SkipEmptyCorpse
             )
             {
                 IsVisible = false;
@@ -65,7 +72,7 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = true;
             WantUpdateSize = true;
             CanCloseWithRightClick = true;
-            _background = new AlphaBlendControl();
+            _background = new AlphaBlendControl(World.Context);
             //_background.Width = MAX_WIDTH;
             //_background.Height = MAX_HEIGHT;
             Add(_background);
@@ -73,7 +80,7 @@ namespace ClassicUO.Game.UI.Gumps
             Width = _background.Width;
             Height = _background.Height;
 
-            _setlootbag = new NiceButton(
+            _setlootbag = new NiceButton(World.Context, 
                 3,
                 Height - 23,
                 100,
@@ -88,7 +95,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_setlootbag);
 
-            _buttonPrev = new NiceButton(
+            _buttonPrev = new NiceButton(World.Context, 
                 Width - 80,
                 Height - 20,
                 40,
@@ -101,7 +108,7 @@ namespace ClassicUO.Game.UI.Gumps
                 IsSelectable = false
             };
 
-            _buttonNext = new NiceButton(
+            _buttonNext = new NiceButton(World.Context, 
                 Width - 40,
                 Height - 20,
                 40,
@@ -120,7 +127,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_buttonNext);
 
             Add(
-                _currentPageLabel = new Label("1", true, 999, align: TEXT_ALIGN_TYPE.TS_CENTER)
+                _currentPageLabel = new Label(World.Context, "1", true, 999, align: TEXT_ALIGN_TYPE.TS_CENTER)
                 {
                     X = Width / 2 - 5,
                     Y = Height - 20
@@ -128,7 +135,7 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             Add(
-                _corpseNameLabel = new Label(
+                _corpseNameLabel = new Label(World.Context, 
                     GetCorpseName(),
                     true,
                     0x0481,
@@ -387,10 +394,10 @@ namespace ClassicUO.Game.UI.Gumps
             if (
                 _corpse != null
                 && !_corpse.IsDestroyed
-                && UIManager.MouseOverControl != null
+                && World.Context.UI.MouseOverControl != null
                 && (
-                    UIManager.MouseOverControl == this
-                    || UIManager.MouseOverControl.RootParent == this
+                    World.Context.UI.MouseOverControl == this
+                    || World.Context.UI.MouseOverControl.RootParent == this
                 )
             )
             {
@@ -417,7 +424,7 @@ namespace ClassicUO.Game.UI.Gumps
             private readonly GridLootGump _gump;
             private readonly HitBox _hit;
 
-            public GridLootItem(GridLootGump gump, uint serial, int size)
+            public GridLootItem(GridLootGump gump, uint serial, int size) : base(gump.World.Context)
             {
                 _gump = gump;
                 LocalSerial = serial;
@@ -433,7 +440,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 CanMove = false;
 
-                HSliderBar amount = new HSliderBar(
+                HSliderBar amount = new HSliderBar(Context, 
                     0,
                     0,
                     size,
@@ -453,13 +460,13 @@ namespace ClassicUO.Game.UI.Gumps
 
                 amount.IsVisible = amount.IsEnabled = amount.MaxValue > 1;
 
-                AlphaBlendControl background = new AlphaBlendControl();
+                AlphaBlendControl background = new AlphaBlendControl(Context);
                 background.Y = 15;
                 background.Width = size;
                 background.Height = size;
                 Add(background);
 
-                _hit = new HitBox(0, 15, size, size, null, 0f);
+                _hit = new HitBox(Context, 0, 15, size, size, null, 0f);
                 Add(_hit);
 
                 if (_gump.World.ClientFeatures.TooltipsEnabled)
@@ -492,9 +499,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (item != null)
                 {
-                    ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(item.DisplayedGraphic);
+                    ref readonly var artInfo = ref _gump.World.Context.Game.UO.Arts.GetArt(item.DisplayedGraphic);
 
-                    var rect = Client.Game.UO.Arts.GetRealArtBounds(item.DisplayedGraphic);
+                    var rect = _gump.World.Context.Game.UO.Arts.GetRealArtBounds(item.DisplayedGraphic);
 
                     hueVector = ShaderHueTranslator.GetHueVector(
                         item.Hue,

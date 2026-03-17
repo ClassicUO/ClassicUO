@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using System;
+using ClassicUO.Game;
 using ClassicUO.Renderer;
 
 namespace ClassicUO.Game.UI.Controls
@@ -15,6 +16,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public ArrowNumbersTextBox
         (
+            GameContext context,
             int x,
             int y,
             int width,
@@ -26,7 +28,7 @@ namespace ClassicUO.Game.UI.Controls
             bool isunicode = true,
             FontStyle style = FontStyle.None,
             ushort hue = 0
-        )
+        ) : base(context)
         {
             int height = 20;
             X = x;
@@ -38,14 +40,14 @@ namespace ClassicUO.Game.UI.Controls
 
             Add
             (
-                new ResizePic(0x0BB8)
+                new ResizePic(0x0BB8, context)
                 {
                     Width = width,
                     Height = height + 4
                 }
             );
 
-            _up = new Button(raiseamount, 0x983, 0x984)
+            _up = new Button(context, raiseamount, 0x983, 0x984)
             {
                 X = width - 12,
                 ButtonAction = ButtonAction.Activate
@@ -62,7 +64,7 @@ namespace ClassicUO.Game.UI.Controls
 
             Add(_up);
 
-            _down = new Button(-raiseamount, 0x985, 0x986)
+            _down = new Button(context, -raiseamount, 0x985, 0x986)
             {
                 X = width - 12,
                 Y = height - 7,
@@ -84,6 +86,7 @@ namespace ClassicUO.Game.UI.Controls
             (
                 _textBox = new StbTextBox
                 (
+                    context,
                     font,
                     maxcharlength,
                     width,

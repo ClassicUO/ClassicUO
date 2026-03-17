@@ -20,7 +20,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             protected override void OnDragEnd(int x, int y)
             {
-                if (UIManager.MouseOverControl == this || UIManager.MouseOverControl?.RootParent == this)
+                if (World.Context.UI.MouseOverControl == this || World.Context.UI.MouseOverControl?.RootParent == this)
                 {
                     Children.First()?.InvokeDragEnd(new Point(x, y));
                 }

@@ -28,7 +28,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             _scene = scene;
             AcceptMouseInput = false;
-            CanMove = !ProfileManager.CurrentProfile.GameWindowLock;
+            CanMove = !World.Profile.CurrentProfile.GameWindowLock;
             CanCloseWithEsc = false;
             CanCloseWithRightClick = false;
             LayerOrder = UILayer.Under;
@@ -39,11 +39,11 @@ namespace ClassicUO.Game.UI.Gumps
                 scene.Camera.Bounds.Height
             );
 
-            _button = new Button(0, 0x837, 0x838, 0x838);
+            _button = new Button(World.Context, 0, 0x837, 0x838, 0x838);
 
             _button.MouseDown += (sender, e) =>
             {
-                if (!ProfileManager.CurrentProfile.GameWindowLock)
+                if (!World.Profile.CurrentProfile.GameWindowLock)
                 {
                     _clicked = true;
                 }
@@ -51,16 +51,16 @@ namespace ClassicUO.Game.UI.Gumps
 
             _button.MouseUp += (sender, e) =>
             {
-                if (!ProfileManager.CurrentProfile.GameWindowLock)
+                if (!World.Profile.CurrentProfile.GameWindowLock)
                 {
-                    var s = new Point(Client.Game.ScaleWithDpi(_lastSize.X), Client.Game.ScaleWithDpi(_lastSize.Y));
+                    var s = new Point(World.Context.Game.ScaleWithDpi(_lastSize.X), World.Context.Game.ScaleWithDpi(_lastSize.Y));
                     Point n = ResizeGameWindow(s);
 
-                    UIManager.GetGump<OptionsGump>()?.UpdateVideo();
+                    World.Context.UI.GetGump<OptionsGump>()?.UpdateVideo();
 
-                    if (Client.Game.UO.Version >= ClientVersion.CV_200)
+                    if (World.Context.Game.UO.Version >= ClientVersion.CV_200)
                     {
-                        NetClient.Socket.Send_GameWindowSize((uint)n.X, (uint)n.Y);
+                        World.Network.Send_GameWindowSize((uint)n.X, (uint)n.Y);
                     }
 
                     _clicked = false;
@@ -71,14 +71,14 @@ namespace ClassicUO.Game.UI.Gumps
             Width = scene.Camera.Bounds.Width + BORDER_WIDTH * 2;
             Height = scene.Camera.Bounds.Height + BORDER_WIDTH * 2;
 
-            _borderControl = new BorderControl(0, 0, Width, Height, 4);
+            _borderControl = new BorderControl(World.Context, 0, 0, Width, Height, 4);
 
             _borderControl.DragEnd += (sender, e) =>
             {
-                UIManager.GetGump<OptionsGump>()?.UpdateVideo();
+                World.Context.UI.GetGump<OptionsGump>()?.UpdateVideo();
             };
 
-            UIManager.SystemChat = _systemChatControl = new SystemChatControl(
+            World.Context.UI.SystemChat = _systemChatControl = new SystemChatControl(
                 this,
                 BORDER_WIDTH,
                 BORDER_WIDTH,
@@ -125,14 +125,14 @@ namespace ClassicUO.Game.UI.Gumps
                         h = targetHeight;
                     }
 
-                    if (w > Client.Game.ClientBounds.Width - BORDER_WIDTH)
+                    if (w > World.Context.Game.ClientBounds.Width - BORDER_WIDTH)
                     {
-                        w = Client.Game.ClientBounds.Width - BORDER_WIDTH;
+                        w = World.Context.Game.ClientBounds.Width - BORDER_WIDTH;
                     }
 
-                    if (h > Client.Game.ClientBounds.Height - BORDER_WIDTH)
+                    if (h > World.Context.Game.ClientBounds.Height - BORDER_WIDTH)
                     {
-                        h = Client.Game.ClientBounds.Height - BORDER_WIDTH;
+                        h = World.Context.Game.ClientBounds.Height - BORDER_WIDTH;
                     }
 
                     _lastSize.X = w;
@@ -160,9 +160,9 @@ namespace ClassicUO.Game.UI.Gumps
 
             Point position = Location;
 
-            if (position.X + Width - BORDER_WIDTH > Client.Game.ClientBounds.Width)
+            if (position.X + Width - BORDER_WIDTH > World.Context.Game.ClientBounds.Width)
             {
-                position.X = Client.Game.ClientBounds.Width - (Width - BORDER_WIDTH);
+                position.X = World.Context.Game.ClientBounds.Width - (Width - BORDER_WIDTH);
             }
 
             if (position.X < -BORDER_WIDTH)
@@ -170,9 +170,9 @@ namespace ClassicUO.Game.UI.Gumps
                 position.X = -BORDER_WIDTH;
             }
 
-            if (position.Y + Height - BORDER_WIDTH > Client.Game.ClientBounds.Height)
+            if (position.Y + Height - BORDER_WIDTH > World.Context.Game.ClientBounds.Height)
             {
-                position.Y = Client.Game.ClientBounds.Height - (Height - BORDER_WIDTH);
+                position.Y = World.Context.Game.ClientBounds.Height - (Height - BORDER_WIDTH);
             }
 
             if (position.Y < -BORDER_WIDTH)
@@ -184,7 +184,7 @@ namespace ClassicUO.Game.UI.Gumps
             _scene.Camera.Bounds.X = position.X + BORDER_WIDTH;
             _scene.Camera.Bounds.Y = position.Y + BORDER_WIDTH;
 
-            UIManager.GetGump<OptionsGump>()?.UpdateVideo();
+            World.Context.UI.GetGump<OptionsGump>()?.UpdateVideo();
             UpdateGameWindowPos();
         }
 
@@ -232,8 +232,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public Point ResizeGameWindow(Point newSize)
         {
-            newSize.X = (int)(newSize.X / Client.Game.DpiScale);
-            newSize.Y = (int)(newSize.Y / Client.Game.DpiScale);
+            newSize.X = (int)(newSize.X / World.Context.Game.DpiScale);
+            newSize.Y = (int)(newSize.Y / World.Context.Game.DpiScale);
             int targetWidth = 640;
             int targetHeight = 480;
             if (newSize.X < targetWidth)
@@ -296,7 +296,7 @@ namespace ClassicUO.Game.UI.Gumps
         const ushort H_BORDER = 0x0A8C;
         const ushort V_BORDER = 0x0A8D;
 
-        public BorderControl(int x, int y, int w, int h, int borderSize)
+        public BorderControl(GameContext context, int x, int y, int w, int h, int borderSize) : base(context)
         {
             X = x;
             Y = y;
@@ -323,7 +323,7 @@ namespace ClassicUO.Game.UI.Gumps
             renderLists.AddGumpWithAtlas(
                 (batcher) =>
                 {
-                    ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(H_BORDER);
+                    ref readonly var gumpInfo = ref Context.Game.UO.Gumps.GetGump(H_BORDER);
 
                     // sopra
                     batcher.DrawTiled(
@@ -343,7 +343,7 @@ namespace ClassicUO.Game.UI.Gumps
                         layerDepth
                     );
 
-                    gumpInfo = ref Client.Game.UO.Gumps.GetGump(V_BORDER);
+                    gumpInfo = ref Context.Game.UO.Gumps.GetGump(V_BORDER);
                     //sx
                     batcher.DrawTiled(
                         gumpInfo.Texture,

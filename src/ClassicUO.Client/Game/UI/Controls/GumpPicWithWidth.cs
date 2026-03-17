@@ -8,8 +8,8 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class GumpPicWithWidth : GumpPic
     {
-        public GumpPicWithWidth(int x, int y, ushort graphic, ushort hue, int perc)
-            : base(x, y, graphic, hue)
+        public GumpPicWithWidth(GameContext context, int x, int y, ushort graphic, ushort hue, int perc)
+            : base(x, y, graphic, hue, context)
         {
             Percent = perc;
             CanMove = true;
@@ -23,7 +23,7 @@ namespace ClassicUO.Game.UI.Controls
             float layerDepth = layerDepthRef;
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue);
 
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(Graphic);
+            ref readonly var gumpInfo = ref Context.Game.UO.Gumps.GetGump(Graphic);
 
             var texture = gumpInfo.Texture;
             if (gumpInfo.Texture != null)

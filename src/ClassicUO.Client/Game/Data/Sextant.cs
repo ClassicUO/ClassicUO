@@ -1,5 +1,6 @@
 using System;
 using System.Text.RegularExpressions;
+using ClassicUO.Assets;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 
@@ -21,7 +22,7 @@ internal static partial class Sextant
     /// <param name="map"></param>
     /// <param name="coords"></param>
     /// <returns>Point representing the map X/Y on success, or an invalid point on failure</returns>
-    public static bool Parse(Map.Map map, string coords, out Point point)
+    public static bool Parse(MapLoader maps, Map.Map map, string coords, out Point point)
     {
         Match match = SextantCoordsRegex().Match(coords.Trim());
         
@@ -42,7 +43,7 @@ internal static partial class Sextant
             int longMinutes = int.Parse(match.Groups["LongMinutes"].Value);
             string longDirection = match.Groups["LongDirection"].Value;
 
-            point = ReverseLookup(map, longDegrees, latDegrees, longMinutes, latMinutes, longDirection == "E", latDirection == "S");
+            point = ReverseLookup(maps, map, longDegrees, latDegrees, longMinutes, latMinutes, longDirection == "E", latDirection == "S");
 
             return true;
         }
@@ -54,13 +55,13 @@ internal static partial class Sextant
         return false;
     }
 
-    private static bool ComputeMapDetails(Map.Map map, int x, int y, out int xCenter, out int yCenter, out int xWidth, out int yHeight)
+    private static bool ComputeMapDetails(MapLoader maps, Map.Map map, int x, int y, out int xCenter, out int yCenter, out int xWidth, out int yHeight)
     {
         xWidth = 5120;
         yHeight = 4096;
 
-        var mapWidth = Client.Game.UO.FileManager.Maps.MapsDefaultSize[map.Index, 0];
-        var mapHeight = Client.Game.UO.FileManager.Maps.MapsDefaultSize[map.Index, 1];
+        var mapWidth = maps.MapsDefaultSize[map.Index, 0];
+        var mapHeight = maps.MapsDefaultSize[map.Index, 1];
 
         var isTrammel = map.Index == 0 && mapWidth == 7168 && mapHeight == 4096;
         var isFelucca = map.Index == 1 && mapWidth == 7168 && mapHeight == 4096;
@@ -106,12 +107,12 @@ internal static partial class Sextant
         return true;
     }
 
-    public static Point ReverseLookup(Map.Map map, int xLong, int yLat, int xMins, int yMins, bool xEast, bool ySouth)
+    public static Point ReverseLookup(MapLoader maps, Map.Map map, int xLong, int yLat, int xMins, int yMins, bool xEast, bool ySouth)
     {
         if (map == null)
             return InvalidPoint;
 
-        if (!ComputeMapDetails(map, 0, 0, out int xCenter, out int yCenter, out int xWidth, out int yHeight))
+        if (!ComputeMapDetails(maps, map, 0, 0, out int xCenter, out int yCenter, out int xWidth, out int yHeight))
             return InvalidPoint;
 
         double absLong = xLong + ((double)xMins / 60);
@@ -139,12 +140,12 @@ internal static partial class Sextant
         return new Point(x, y);
     }
 
-    public static bool Format(Point p, Map.Map map, ref int xLong, ref int yLat, ref int xMins, ref int yMins, ref bool xEast, ref bool ySouth)
+    public static bool Format(MapLoader maps, Point p, Map.Map map, ref int xLong, ref int yLat, ref int xMins, ref int yMins, ref bool xEast, ref bool ySouth)
     {
         if (map == null)
             return false;
 
-        if (!ComputeMapDetails(map, p.X, p.Y, out int xCenter, out int yCenter, out int xWidth, out int yHeight))
+        if (!ComputeMapDetails(maps, map, p.X, p.Y, out int xCenter, out int yCenter, out int xWidth, out int yHeight))
             return false;
 
         double absLong = (double)((p.X - xCenter) * 360) / xWidth;
@@ -176,12 +177,12 @@ internal static partial class Sextant
         return true;
     }
 
-    public static bool FormatString(Point p, Map.Map map, out string text)
+    public static bool FormatString(MapLoader maps, Point p, Map.Map map, out string text)
     {
         int xLong = 0, yLat = 0, xMins = 0, yMins = 0;
         bool xEast = false, ySouth = false;
 
-        if (!Format(p, map, ref xLong, ref yLat, ref xMins, ref yMins, ref xEast, ref ySouth))
+        if (!Format(maps, p, map, ref xLong, ref yLat, ref xMins, ref yMins, ref xEast, ref ySouth))
         {
             text = string.Empty;
             return false;

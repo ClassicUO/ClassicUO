@@ -49,7 +49,7 @@ namespace ClassicUO.Game.Managers
 
                 IgnoredCharsList.Add(charName);
                 // Redraw list of chars
-                UIManager.GetGump<IgnoreManagerGump>()?.Redraw();
+                _world.Context.UI.GetGump<IgnoreManagerGump>()?.Redraw();
 
                 GameActions.Print(_world,string.Format(ResGumps.AddToIgnoreListSuccess, charName));
                 return;
@@ -75,7 +75,7 @@ namespace ClassicUO.Game.Managers
         {
             HashSet<string> list = new HashSet<string>();
 
-            string ignoreXmlPath = Path.Combine(ProfileManager.ProfilePath, "ignore_list.xml");
+            string ignoreXmlPath = Path.Combine(_world.Profile.ProfilePath, "ignore_list.xml");
 
             if (!File.Exists(ignoreXmlPath))
             {
@@ -117,7 +117,7 @@ namespace ClassicUO.Game.Managers
         /// </summary>
         public void SaveIgnoreList()
         {
-            string ignoreXmlPath = Path.Combine(ProfileManager.ProfilePath, "ignore_list.xml");
+            string ignoreXmlPath = Path.Combine(_world.Profile.ProfilePath, "ignore_list.xml");
 
             using (XmlTextWriter xml = new XmlTextWriter(ignoreXmlPath, Encoding.UTF8)
             {

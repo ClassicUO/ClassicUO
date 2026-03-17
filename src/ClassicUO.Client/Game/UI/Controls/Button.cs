@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.Game;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
@@ -20,13 +21,16 @@ namespace ClassicUO.Game.UI.Controls
     internal class Button : Control
     {
         private readonly string _caption;
+        private readonly byte _font;
+        private readonly bool _isunicode;
         private bool _entered;
-        private readonly RenderedText[] _fontTexture;
+        private RenderedText[] _fontTexture;
         private ushort _normal,
             _pressed,
             _over;
 
         public Button(
+            GameContext context,
             int buttonID,
             ushort normal,
             ushort pressed,
@@ -36,48 +40,32 @@ namespace ClassicUO.Game.UI.Controls
             bool isunicode = true,
             ushort normalHue = ushort.MaxValue,
             ushort hoverHue = ushort.MaxValue
-        )
+        ) : base(context)
         {
             ButtonID = buttonID;
             _normal = normal;
             _pressed = pressed;
             _over = over;
+            _font = font;
+            _isunicode = isunicode;
 
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(normal);
-            if (gumpInfo.Texture == null)
-            {
-                Dispose();
-
-                return;
-            }
-
-            Width = gumpInfo.UV.Width;
-            Height = gumpInfo.UV.Height;
             FontHue = normalHue == ushort.MaxValue ? (ushort)0 : normalHue;
             HueHover = hoverHue == ushort.MaxValue ? normalHue : hoverHue;
 
-            if (!string.IsNullOrEmpty(caption) && normalHue != ushort.MaxValue)
-            {
-                _fontTexture = new RenderedText[2];
-
-                _caption = caption;
-
-                _fontTexture[0] = RenderedText.Create(caption, FontHue, font, isunicode);
-
-                if (hoverHue != ushort.MaxValue)
-                {
-                    _fontTexture[1] = RenderedText.Create(caption, HueHover, font, isunicode);
-                }
-            }
+            _caption = !string.IsNullOrEmpty(caption) && normalHue != ushort.MaxValue ? caption : null;
 
             CanMove = false;
             AcceptMouseInput = true;
             //CanCloseWithRightClick = false;
             CanCloseWithEsc = false;
+
+            InitializeSize();
+            InitializeRenderedText();
         }
 
-        public Button(List<string> parts)
+        public Button(List<string> parts, GameContext context)
             : this(
+                context,
                 parts.Count >= 8 ? int.Parse(parts[7]) : 0,
                 UInt16Converter.Parse(parts[3]),
                 UInt16Converter.Parse(parts[4])
@@ -99,6 +87,41 @@ namespace ClassicUO.Game.UI.Controls
             IsFromServer = true;
         }
 
+        private void InitializeSize()
+        {
+            var uo = Context?.Game?.UO;
+            if (uo == null)
+                return;
+
+            ref readonly var gumpInfo = ref uo.Gumps.GetGump(_normal);
+            if (gumpInfo.Texture == null)
+            {
+                Dispose();
+                return;
+            }
+
+            Width = gumpInfo.UV.Width;
+            Height = gumpInfo.UV.Height;
+        }
+
+        private void InitializeRenderedText()
+        {
+            if (_caption == null)
+                return;
+
+            var uo = Context?.Game?.UO;
+            if (uo == null)
+                return;
+
+            _fontTexture = new RenderedText[2];
+            _fontTexture[0] = RenderedText.Create(uo, _caption, FontHue, _font, _isunicode);
+
+            if (HueHover != ushort.MaxValue)
+            {
+                _fontTexture[1] = RenderedText.Create(uo, _caption, HueHover, _font, _isunicode);
+            }
+        }
+
         public bool IsClicked { get; set; }
 
         public int ButtonID { get; }
@@ -115,11 +138,7 @@ namespace ClassicUO.Game.UI.Controls
             set
             {
                 _normal = value;
-
-                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(value);
-
-                Width = gumpInfo.UV.Width;
-                Height = gumpInfo.UV.Height;
+                InitializeSize();
             }
         }
 
@@ -129,11 +148,6 @@ namespace ClassicUO.Game.UI.Controls
             set
             {
                 _pressed = value;
-
-                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(value);
-
-                Width = gumpInfo.UV.Width;
-                Height = gumpInfo.UV.Height;
             }
         }
 
@@ -143,11 +157,6 @@ namespace ClassicUO.Game.UI.Controls
             set
             {
                 _over = value;
-
-                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(value);
-
-                Width = gumpInfo.UV.Width;
-                Height = gumpInfo.UV.Height;
             }
         }
 
@@ -172,6 +181,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
+            if (IsDisposed || Context?.Game?.UO == null)
+                return false;
+
             float layerDepth = layerDepthRef;
             Texture2D texture = null;
             Rectangle bounds = Rectangle.Empty;
@@ -180,14 +192,14 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (IsClicked && _pressed > 0)
                 {
-                    ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(_pressed);
+                    ref readonly var gumpInfo = ref Context.Game.UO.Gumps.GetGump(_pressed);
                     texture = gumpInfo.Texture;
                     bounds = gumpInfo.UV;
                 }
 
                 if (texture == null && _over > 0)
                 {
-                    ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(_over);
+                    ref readonly var gumpInfo = ref Context.Game.UO.Gumps.GetGump(_over);
                     texture = gumpInfo.Texture;
                     bounds = gumpInfo.UV;
                 }
@@ -195,7 +207,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (texture == null)
             {
-                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(_normal);
+                ref readonly var gumpInfo = ref Context.Game.UO.Gumps.GetGump(_normal);
                 texture = gumpInfo.Texture;
                 bounds = gumpInfo.UV;
             }
@@ -213,29 +225,32 @@ namespace ClassicUO.Game.UI.Controls
                     batcher.Draw(texture, new Rectangle(x, y, Width, Height), bounds, hue, layerDepth);
                     return true;
                 });
-            
 
-            if (!string.IsNullOrEmpty(_caption))
+
+            if (_caption != null && _fontTexture != null)
             {
                 RenderedText textTexture = _fontTexture[_entered ? 1 : 0];
 
-                if (FontCenter)
+                if (textTexture != null)
                 {
-                    int yoffset = IsClicked ? 1 : 0;
+                    if (FontCenter)
+                    {
+                        int yoffset = IsClicked ? 1 : 0;
 
-                    renderLists.AddGumpNoAtlas(
-                        batcher => textTexture.Draw(
-                        batcher,
-                        x + ((Width - textTexture.Width) >> 1),
-                        y + yoffset + ((Height - textTexture.Height) >> 1),
-                        depth: layerDepth
-                    ));
-                }
-                else
-                {
-                    renderLists.AddGumpNoAtlas(
-                        batcher => textTexture.Draw(batcher, x, y, depth: layerDepth)
-                    );
+                        renderLists.AddGumpNoAtlas(
+                            batcher => textTexture.Draw(
+                            batcher,
+                            x + ((Width - textTexture.Width) >> 1),
+                            y + yoffset + ((Height - textTexture.Height) >> 1),
+                            depth: layerDepth
+                        ));
+                    }
+                    else
+                    {
+                        renderLists.AddGumpNoAtlas(
+                            batcher => textTexture.Draw(batcher, x, y, depth: layerDepth)
+                        );
+                    }
                 }
             }
 
@@ -261,7 +276,7 @@ namespace ClassicUO.Game.UI.Controls
                     return;
                 }
 
-                if (_entered || Client.Game.Scene is GameScene)
+                if (_entered || Context.Game.Scene is GameScene)
                 {
                     switch (ButtonAction)
                     {
@@ -291,7 +306,7 @@ namespace ClassicUO.Game.UI.Controls
 
             return ContainsByBounds
                 ? base.Contains(x, y)
-                : Client.Game.UO.Gumps.PixelCheck(_normal, x - Offset.X, y - Offset.Y);
+                : Context.Game.UO.Gumps.PixelCheck(_normal, x - Offset.X, y - Offset.Y);
         }
 
         public sealed override void Dispose()

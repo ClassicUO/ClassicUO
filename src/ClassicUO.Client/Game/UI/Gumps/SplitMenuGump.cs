@@ -35,13 +35,13 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = false;
             CanCloseWithRightClick = true;
 
-            GumpPic background = new GumpPic(0, 0, 0x085C, 0) { ContainsByBounds = true };
+            GumpPic background = new GumpPic(0, 0, 0x085C, 0, World.Context) { ContainsByBounds = true };
             Add(background);
 
             Add
             (
                 _slider = new HSliderBar
-                (
+                (World.Context, 
                     29,
                     16,
                     105,
@@ -56,7 +56,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                _okButton = new Button(0, 0x085d, 0x085e, 0x085f)
+                _okButton = new Button(World.Context, 0, 0x085d, 0x085e, 0x085f)
                 {
                     ButtonAction = ButtonAction.Default,
                     X = 102, Y = 37
@@ -67,7 +67,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                _textBox = new StbTextBox(1, isunicode: false, hue: 0x0386, maxWidth: 60)
+                _textBox = new StbTextBox(World.Context, 1, isunicode: false, hue: 0x0386, maxWidth: 60)
                 {
                     X = 29, Y = 42,
                     Width = 60,

@@ -9,7 +9,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
     {
         public LoginBackground(World world) : base(world, 0, 0)
         {
-            if (Client.Game.UO.Version >= ClientVersion.CV_706400)
+            if (World.Context.Game.UO.Version >= ClientVersion.CV_706400)
             {
                 // Background
                 Add
@@ -20,12 +20,12 @@ namespace ClassicUO.Game.UI.Gumps.Login
                         0,
                         640,
                         480,
-                        0x0150
+                        0x0150, World.Context
                     ) { AcceptKeyboardInput = false }
                 );
 
                 // UO Flag
-                Add(new GumpPic(0, 4, 0x0151, 0) { AcceptKeyboardInput = false });
+                Add(new GumpPic(0, 4, 0x0151, 0, World.Context) { AcceptKeyboardInput = false });
             }
             else
             {
@@ -38,19 +38,19 @@ namespace ClassicUO.Game.UI.Gumps.Login
                         0,
                         640,
                         480,
-                        0x0E14
+                        0x0E14, World.Context
                     ) { AcceptKeyboardInput = false }
                 );
 
                 // Border
-                Add(new GumpPic(0, 0, 0x157C, 0) { AcceptKeyboardInput = false });
+                Add(new GumpPic(0, 0, 0x157C, 0, World.Context) { AcceptKeyboardInput = false });
                 // UO Flag
-                Add(new GumpPic(0, 4, 0x15A0, 0) { AcceptKeyboardInput = false });
+                Add(new GumpPic(0, 4, 0x15A0, 0, World.Context) { AcceptKeyboardInput = false });
 
                 // Quit Button
                 Add
                 (
-                    new Button(0, 0x1589, 0x158B, 0x158A)
+                    new Button(World.Context, 0, 0x1589, 0x158B, 0x158A)
                     {
                         X = 555,
                         Y = 4,
@@ -71,7 +71,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         public override void OnButtonClick(int buttonID)
         {
-            Client.Game.Exit();
+            World.Context.Game.Exit();
         }
     }
 }

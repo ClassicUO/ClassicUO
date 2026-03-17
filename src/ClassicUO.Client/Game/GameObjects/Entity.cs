@@ -115,7 +115,7 @@ namespace ClassicUO.Game.GameObjects
                         color = 0x0058;
                     }
 
-                    rtext = RenderedText.Create($"[{perc}%]", color, 3, false);
+                    rtext = RenderedText.Create(World.Context.Game.UO, $"[{perc}%]", color, 3, false);
                 }
             }
         }
@@ -134,12 +134,12 @@ namespace ClassicUO.Game.GameObjects
 
                 // TODO: Some servers may not want to receive this (causing original client to not send it),
                 //but all servers tested (latest POL, old POL, ServUO, Outlands) do.
-                if ( /*Client.Game.UO.Version > ClientVersion.CV_200 &&*/ SerialHelper.IsMobile(Serial))
+                if (SerialHelper.IsMobile(Serial))
                 {
-                    Socket.Send_NameRequest(Serial);
+                    World.Network.Send_NameRequest(Serial);
                 }
 
-                UIManager.Add(new NameOverheadGump(World, this));
+                World.Context.UI.Add(new NameOverheadGump(World, this));
             }
 
 

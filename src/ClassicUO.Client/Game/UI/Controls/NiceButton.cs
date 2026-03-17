@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Assets;
+using ClassicUO.Game;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
@@ -17,6 +18,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public NiceButton
         (
+            GameContext context,
             int x,
             int y,
             int w,
@@ -28,7 +30,7 @@ namespace ClassicUO.Game.UI.Controls
             ushort hue = 0xFFFF,
             bool unicode = true,
             byte font = 0xFF
-        ) : base(x, y, w, h)
+        ) : base(context, x, y, w, h)
         {
             _action = action;
 
@@ -36,6 +38,7 @@ namespace ClassicUO.Game.UI.Controls
             (
                 TextLabel = new Label
                 (
+                    context,
                     text,
                     unicode,
                     hue,

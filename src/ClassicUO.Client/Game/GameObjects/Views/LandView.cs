@@ -22,18 +22,18 @@ namespace ClassicUO.Game.GameObjects
 
             ushort hue = Hue;
 
-            if (ProfileManager.CurrentProfile.HighlightGameObjects && SelectedObject.Object == this)
+            if (World.Profile.CurrentProfile.HighlightGameObjects && SelectedObject.Object == this)
             {
                 hue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
             }
             else if (
-                ProfileManager.CurrentProfile.NoColorObjectsOutOfRange
+                World.Profile.CurrentProfile.NoColorObjectsOutOfRange
                 && Distance > World.ClientViewRange
             )
             {
                 hue = Constants.OUT_RANGE_COLOR;
             }
-            else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
+            else if (World.Player.IsDead && World.Profile.CurrentProfile.EnableBlackWhiteEffect)
             {
                 hue = Constants.DEAD_RANGE_COLOR;
             }
@@ -59,8 +59,8 @@ namespace ClassicUO.Game.GameObjects
             {
                 posY += Z << 2;
 
-                ref readonly var texmapInfo = ref Client.Game.UO.Texmaps.GetTexmap(
-                    Client.Game.UO.FileManager.TileData.LandData[Graphic].TexID
+                ref readonly var texmapInfo = ref World.Context.Game.UO.Texmaps.GetTexmap(
+                    World.Context.Game.UO.FileManager.TileData.LandData[Graphic].TexID
                 );
 
                 if (texmapInfo.Texture != null)
@@ -82,25 +82,26 @@ namespace ClassicUO.Game.GameObjects
                 {
                     DrawStatic(
                         batcher,
+                        World.Context.Game.UO,
                         Graphic,
                         posX,
                         posY,
                         hueVec,
                         depth,
-                        ProfileManager.CurrentProfile.AnimatedWaterEffect && TileData.IsWet
+                        World.Profile.CurrentProfile.AnimatedWaterEffect && TileData.IsWet
                     );
                 }
             }
             else
             {
-                ref readonly var artInfo = ref Client.Game.UO.Arts.GetLand(Graphic);
+                ref readonly var artInfo = ref World.Context.Game.UO.Arts.GetLand(Graphic);
 
                 if (artInfo.Texture != null)
                 {
                     var pos = new Vector2(posX, posY);
                     var scale = Vector2.One;
 
-                    if (ProfileManager.CurrentProfile.AnimatedWaterEffect && TileData.IsWet)
+                    if (World.Profile.CurrentProfile.AnimatedWaterEffect && TileData.IsWet)
                     {
                         batcher.Draw(
                             artInfo.Texture,

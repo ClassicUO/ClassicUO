@@ -56,9 +56,9 @@ namespace ClassicUO.Game.Managers
             get
             {
                 return ((_world.ClientFeatures.Flags & CharacterListFlags.CLF_NEW_MOVEMENT_SYSTEM) == 0 || _ackReceived) &&
-                        (NetClient.Socket.Encryption == null || NetClient.Socket.Encryption.EncryptionType == 0) &&
-                        ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.WorldMapShowParty &&
-                        UIManager.GetGump<WorldMapGump>() != null; // horrible, but works
+                        (_world.Network.Encryption == null || _world.Network.Encryption.EncryptionType == 0) &&
+                        _world.Profile.CurrentProfile != null && _world.Profile.CurrentProfile.WorldMapShowParty &&
+                        _world.Context.UI.GetGump<WorldMapGump>() != null; // horrible, but works
             }
         }
 
@@ -76,7 +76,7 @@ namespace ClassicUO.Game.Managers
                 Log.Warn("Server support new movement system. Can't use the 0xF0 packet to query guild/party position");
                 v = false;
             }
-            else if (NetClient.Socket.Encryption?.EncryptionType != 0 && !_ackReceived)
+            else if (_world.Network.Encryption?.EncryptionType != 0 && !_ackReceived)
             {
                 Log.Warn("Server has encryption. Can't use the 0xF0 packet to query guild/party position");
                 v = false;
@@ -215,7 +215,7 @@ namespace ClassicUO.Game.Managers
                 //    return;
                 //}
 
-                NetClient.Socket.Send_QueryGuildPosition();
+                _world.Network.Send_QueryGuildPosition();
 
                 if (_world.Party != null && _world.Party.Leader != 0)
                 {
@@ -227,7 +227,7 @@ namespace ClassicUO.Game.Managers
 
                             if (mob == null || mob.Distance > _world.ClientViewRange)
                             {
-                                NetClient.Socket.Send_QueryPartyPosition();
+                                _world.Network.Send_QueryPartyPosition();
 
                                 break;
                             }

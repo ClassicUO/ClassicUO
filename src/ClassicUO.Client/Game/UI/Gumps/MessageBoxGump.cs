@@ -37,7 +37,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new ResizePic(0x0A28)
+                new ResizePic(0x0A28, World.Context)
                 {
                     Width = w, Height = h
                 }
@@ -45,7 +45,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (hasBackground)
             {
-                ResizePic background = new ResizePic(3000)
+                ResizePic background = new ResizePic(3000, World.Context)
                 {
                     X = X + 30,
                     Y = Y + 40,
@@ -59,7 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new Label
-                (
+                (World.Context, 
                     message,
                     false,
                     0x0386,
@@ -72,15 +72,15 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
 
-            X = (Client.Game.ClientBounds.Width - Width) >> 1;
-            Y = (Client.Game.ClientBounds.Height - Height) >> 1;
+            X = (World.Context.Game.ClientBounds.Width - Width) >> 1;
+            Y = (World.Context.Game.ClientBounds.Height - Height) >> 1;
 
             // OK
             Button b;
 
             Add
             (
-                b = new Button(0, 0x0481, 0x0483, 0x0482)
+                b = new Button(World.Context, 0, 0x0481, 0x0483, 0x0482)
                 {
                     Y = Height - 45,
                     ButtonAction = ButtonAction.Activate
@@ -96,7 +96,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add
                 (
-                    bCancel = new Button(1, 0x047E, 0x047F, 0x0480)
+                    bCancel = new Button(World.Context, 1, 0x047E, 0x047F, 0x0480)
                     {
                         Y = Height - 45,
                         ButtonAction = ButtonAction.Activate
@@ -111,8 +111,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             WantUpdateSize = false;
 
-            UIManager.KeyboardFocusControl = this;
-            UIManager.KeyboardFocusControl.SetKeyboardFocus();
+            World.Context.UI.KeyboardFocusControl = this;
+            World.Context.UI.KeyboardFocusControl.SetKeyboardFocus();
         }
 
         protected override void OnKeyUp(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
@@ -167,7 +167,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new ResizePic(0x0A28)
+                new ResizePic(0x0A28, World.Context)
                 {
                     Width = w,
                     Height = h
@@ -179,7 +179,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 l = new Label
-                (
+                (World.Context, 
                     message,
                     false,
                     0x0386,
@@ -194,7 +194,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new ResizePic(0x0BB8)
+                new ResizePic(0x0BB8, World.Context)
                 {
                     X = 40,
                     Y = 45 + l.Height + 5,
@@ -206,7 +206,7 @@ namespace ClassicUO.Game.UI.Gumps
             int ww = w - 94;
 
             _textBox = new StbTextBox
-            (
+            (World.Context, 
                 0xFF,
                 -1,
                 ww,
@@ -223,8 +223,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_textBox);
 
-            X = (Client.Game.ClientBounds.Width - Width) >> 1;
-            Y = (Client.Game.ClientBounds.Height - Height) >> 1;
+            X = (World.Context.Game.ClientBounds.Width - Width) >> 1;
+            Y = (World.Context.Game.ClientBounds.Height - Height) >> 1;
 
 
             // OK
@@ -232,7 +232,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                b = new Button(0, 0x0481, 0x0482, 0x0483)
+                b = new Button(World.Context, 0, 0x0481, 0x0482, 0x0483)
                 {
                     Y = Height - 45,
                     ButtonAction = ButtonAction.Activate

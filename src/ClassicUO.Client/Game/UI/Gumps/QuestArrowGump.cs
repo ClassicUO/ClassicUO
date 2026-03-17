@@ -44,9 +44,9 @@ namespace ClassicUO.Game.UI.Gumps
                 Dispose();
             }
 
-            GameScene scene = Client.Game.GetScene<GameScene>();
+            GameScene scene = World.Context.Game.GetScene<GameScene>();
 
-            if (IsDisposed || ProfileManager.CurrentProfile == null || scene == null)
+            if (IsDisposed || World.Profile.CurrentProfile == null || scene == null)
             {
                 return;
             }
@@ -68,7 +68,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (_arrow == null)
                 {
-                    Add(_arrow = new GumpPic(0, 0, gumpID, 0));
+                    Add(_arrow = new GumpPic(0, 0, gumpID, 0, World.Context));
                 }
                 else
                 {
@@ -83,8 +83,8 @@ namespace ClassicUO.Game.UI.Gumps
             int goy = World.Player.Y - _my;
 
 
-            int x = (Client.Game.Scene.Camera.Bounds.Width >> 1) - (gox - goy) * 22;
-            int y = (Client.Game.Scene.Camera.Bounds.Height >> 1) - (gox + goy) * 22;
+            int x = (World.Context.Game.Scene.Camera.Bounds.Width >> 1) - (gox - goy) * 22;
+            int y = (World.Context.Game.Scene.Camera.Bounds.Height >> 1) - (gox + goy) * 22;
 
             x -= (int) World.Player.Offset.X;
             y -= (int) (World.Player.Offset.Y - World.Player.Offset.Z);
@@ -139,7 +139,7 @@ namespace ClassicUO.Game.UI.Gumps
             var camera = scene.Camera;
 
             Point p = new Point(x, y);
-            p = Client.Game.Scene.Camera.WorldToScreen(p);
+            p = World.Context.Game.Scene.Camera.WorldToScreen(p);
             p.X += camera.Bounds.X;
             p.Y += camera.Bounds.Y;
             x = p.X;
@@ -184,7 +184,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (leftClick || rightClick)
             {
-                GameActions.QuestArrow(rightClick);
+                GameActions.QuestArrow(World, rightClick);
             }
         }
 

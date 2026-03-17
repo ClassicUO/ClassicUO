@@ -47,7 +47,7 @@ namespace ClassicUO.Game.GameObjects
             drawX += 22;
             drawY += 22;
 
-            bool hasShadow = !IsDead && !IsHidden && ProfileManager.CurrentProfile.ShadowsEnabled;
+            bool hasShadow = !IsDead && !IsHidden && World.Profile.CurrentProfile.ShadowsEnabled;
 
             if (World.AuraManager.IsEnabled)
             {
@@ -55,9 +55,9 @@ namespace ClassicUO.Game.GameObjects
                     batcher,
                     drawX,
                     drawY,
-                    ProfileManager.CurrentProfile.PartyAura && World.Party.Contains(this)
-                        ? ProfileManager.CurrentProfile.PartyAuraHue
-                        : Notoriety.GetHue(NotorietyFlag),
+                    World.Profile.CurrentProfile.PartyAura && World.Party.Contains(this)
+                        ? World.Profile.CurrentProfile.PartyAuraHue
+                        : Notoriety.GetHue(NotorietyFlag, World.Profile.CurrentProfile),
                     depth
                 );
             }
@@ -65,13 +65,13 @@ namespace ClassicUO.Game.GameObjects
             bool isHuman = IsHuman;
 
             bool isGargoyle =
-                Client.Game.UO.Version >= ClientVersion.CV_7000
+                World.Context.Game.UO.Version >= ClientVersion.CV_7000
                 && (Graphic == 666 || Graphic == 667 || Graphic == 0x02B7 || Graphic == 0x02B6);
 
             Vector3 hueVec = ShaderHueTranslator.GetHueVector(0, false, AlphaHue / 255f);
 
             if (
-                ProfileManager.CurrentProfile.HighlightGameObjects
+                World.Profile.CurrentProfile.HighlightGameObjects
                 && ReferenceEquals(SelectedObject.Object, this)
             )
             {
@@ -80,17 +80,17 @@ namespace ClassicUO.Game.GameObjects
             }
             else if (SelectedObject.HealthbarObject == this)
             {
-                overridedHue = Notoriety.GetHue(NotorietyFlag);
+                overridedHue = Notoriety.GetHue(NotorietyFlag, World.Profile.CurrentProfile);
             }
             else if (
-                ProfileManager.CurrentProfile.NoColorObjectsOutOfRange
+                World.Profile.CurrentProfile.NoColorObjectsOutOfRange
                 && Distance > World.ClientViewRange
             )
             {
                 overridedHue = Constants.OUT_RANGE_COLOR;
                 hueVec.Y = 1;
             }
-            else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
+            else if (World.Player.IsDead && World.Profile.CurrentProfile.EnableBlackWhiteEffect)
             {
                 overridedHue = Constants.DEAD_RANGE_COLOR;
                 hueVec.Y = 1;
@@ -112,25 +112,25 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else
                 {
-                    if (ProfileManager.CurrentProfile.HighlightMobilesByPoisoned)
+                    if (World.Profile.CurrentProfile.HighlightMobilesByPoisoned)
                     {
                         if (IsPoisoned)
                         {
-                            overridedHue = ProfileManager.CurrentProfile.PoisonHue;
+                            overridedHue = World.Profile.CurrentProfile.PoisonHue;
                         }
                     }
-                    if (ProfileManager.CurrentProfile.HighlightMobilesByParalize)
+                    if (World.Profile.CurrentProfile.HighlightMobilesByParalize)
                     {
                         if (IsParalyzed && NotorietyFlag != NotorietyFlag.Invulnerable)
                         {
-                            overridedHue = ProfileManager.CurrentProfile.ParalyzedHue;
+                            overridedHue = World.Profile.CurrentProfile.ParalyzedHue;
                         }
                     }
-                    if (ProfileManager.CurrentProfile.HighlightMobilesByInvul)
+                    if (World.Profile.CurrentProfile.HighlightMobilesByInvul)
                     {
                         if (NotorietyFlag != NotorietyFlag.Invulnerable && IsYellowHits)
                         {
-                            overridedHue = ProfileManager.CurrentProfile.InvulnerableHue;
+                            overridedHue = World.Profile.CurrentProfile.InvulnerableHue;
                         }
                     }
                 }
@@ -144,14 +144,14 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (isAttack || isUnderMouse)
                 {
-                    overridedHue = Notoriety.GetHue(NotorietyFlag);
+                    overridedHue = Notoriety.GetHue(NotorietyFlag, World.Profile.CurrentProfile);
                 }
             }
 
             ProcessSteps(out byte dir);
             byte layerDir = dir;
 
-            Client.Game.UO.Animations.GetAnimDirection(ref dir, ref IsFlipped);
+            World.Context.Game.UO.Animations.GetAnimDirection(ref dir, ref IsFlipped);
 
             ushort graphic = GetGraphicForAnimation();
             byte animGroup = GetGroupForAnimation(this, graphic, true);
@@ -167,7 +167,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (
                     mountGraphic != 0xFFFF
-                    && mountGraphic < Client.Game.UO.Animations.MaxAnimationCount
+                    && mountGraphic < World.Context.Game.UO.Animations.MaxAnimationCount
                 )
                 {
                     if (Mounts.TryGet(mount.Graphic, out var mountInfo))
@@ -265,7 +265,7 @@ namespace ClassicUO.Game.GameObjects
 
                     ProcessSteps(out dir);
 
-                    Client.Game.UO.FileManager.Animations.FixSittingDirection(
+                    World.Context.Game.UO.FileManager.Animations.FixSittingDirection(
                         ref dir,
                         ref IsFlipped,
                         ref drawX,
@@ -381,7 +381,7 @@ namespace ClassicUO.Game.GameObjects
                             }
 
                             if (
-                                Client.Game.UO.FileManager.Animations.EquipConversions.TryGetValue(
+                                World.Context.Game.UO.FileManager.Animations.EquipConversions.TryGetValue(
                                     Graphic,
                                     out Dictionary<ushort, EquipConvData> map
                                 )
@@ -424,7 +424,7 @@ namespace ClassicUO.Game.GameObjects
                         {
                             if (item.ItemData.IsLight)
                             {
-                                Client.Game
+                                World.Context.Game
                                     .GetScene<GameScene>()
                                     .AddLight(this, item, drawX, drawY);
                             }
@@ -436,7 +436,7 @@ namespace ClassicUO.Game.GameObjects
                     {
                         if (item.ItemData.IsLight)
                         {
-                            Client.Game.GetScene<GameScene>().AddLight(this, item, drawX, drawY);
+                            World.Context.Game.GetScene<GameScene>().AddLight(this, item, drawX, drawY);
 
                             /*DrawInternal
                             (
@@ -494,7 +494,7 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 if (
-                    Client.Game.UO.FileManager.Animations.EquipConversions.TryGetValue(
+                    owner.World.Context.Game.UO.FileManager.Animations.EquipConversions.TryGetValue(
                         owner.Graphic,
                         out Dictionary<ushort, EquipConvData> map
                     )
@@ -594,6 +594,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
         private static bool GetTexture(
+            World world,
             ushort graphic,
             byte animGroup,
             ref byte animIndex,
@@ -604,7 +605,7 @@ namespace ClassicUO.Game.GameObjects
         {
             spriteInfo = default;
 
-            var frames = Client.Game.UO.Animations.GetAnimationFrames(
+            var frames = world.Context.Game.UO.Animations.GetAnimationFrames(
                 graphic,
                 animGroup,
                 direction,
@@ -657,12 +658,12 @@ namespace ClassicUO.Game.GameObjects
             bool charIsSitting
         )
         {
-            if (id >= Client.Game.UO.Animations.MaxAnimationCount || owner == null)
+            if (owner == null || id >= owner.World.Context.Game.UO.Animations.MaxAnimationCount)
             {
                 return;
             }
 
-            var frames = Client.Game.UO.Animations.GetAnimationFrames(
+            var frames = owner.World.Context.Game.UO.Animations.GetAnimationFrames(
                 id,
                 animGroup,
                 dir,
@@ -840,7 +841,7 @@ namespace ClassicUO.Game.GameObjects
 
                 if (entity != null && entity.ItemData.IsLight)
                 {
-                    Client.Game
+                    owner.World.Context.Game
                         .GetScene<GameScene>()
                         .AddLight(owner, entity, mirror ? x + spriteInfo.UV.Width : x, y);
                 }
@@ -984,10 +985,10 @@ namespace ClassicUO.Game.GameObjects
 
             bool isHuman = IsHuman;
             bool isGargoyle =
-                Client.Game.UO.Version >= ClientVersion.CV_7000
+                World.Context.Game.UO.Version >= ClientVersion.CV_7000
                 && (Graphic == 666 || Graphic == 667 || Graphic == 0x02B7 || Graphic == 0x02B6);
 
-            var animations = Client.Game.UO.Animations;
+            var animations = World.Context.Game.UO.Animations;
 
             ProcessSteps(out byte dir);
             bool isFlipped = IsFlipped;
@@ -1016,6 +1017,7 @@ namespace ClassicUO.Game.GameObjects
 
                         if (
                             GetTexture(
+                                World,
                                 mountGraphic,
                                 animGroupMount,
                                 ref animIndex,
@@ -1062,7 +1064,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            if (GetTexture(graphic, animGroup, ref animIndex, dir, out spriteInfo, out isUop))
+            if (GetTexture(World, graphic, animGroup, ref animIndex, dir, out spriteInfo, out isUop))
             {
                 int x =
                     position.X
@@ -1113,6 +1115,7 @@ namespace ClassicUO.Game.GameObjects
 
                         if (
                             GetTexture(
+                                World,
                                 graphic,
                                 animGroup,
                                 ref animIndex,

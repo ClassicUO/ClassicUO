@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BSD-2-Clause
+﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
@@ -154,14 +154,16 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _showStatsMessage, _showSkillsMessage;
         private HSliderBar _showSkillsMessageDelta;
 
-        private GlobalProfile _globalProfile = ProfileManager.GlobalProfile;
-        private Profile _currentProfile = ProfileManager.CurrentProfile;
+        private GlobalProfile _globalProfile;
+        private Profile _currentProfile;
 
         public OptionsGump(World world) : base(world, 0, 0)
         {
+            _globalProfile = world.Profile.GlobalProfile;
+            _currentProfile = world.Profile.CurrentProfile;
             Add
             (
-                new AlphaBlendControl(0.95f)
+                new AlphaBlendControl(World.Context, 0.95f)
                 {
                     X = 1,
                     Y = 1,
@@ -177,7 +179,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new NiceButton
-                (
+                (World.Context, 
                     10,
                     10 + 30 * i++,
                     140,
@@ -190,7 +192,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new NiceButton
-                (
+                (World.Context, 
                     10,
                     10 + 30 * i++,
                     140,
@@ -203,7 +205,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new NiceButton
-                (
+                (World.Context, 
                     10,
                     10 + 30 * i++,
                     140,
@@ -216,7 +218,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new NiceButton
-                (
+                (World.Context, 
                     10,
                     10 + 30 * i++,
                     140,
@@ -229,7 +231,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new NiceButton
-                (
+                (World.Context, 
                     10,
                     10 + 30 * i++,
                     140,
@@ -242,7 +244,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new NiceButton
-                (
+                (World.Context, 
                     10,
                     10 + 30 * i++,
                     140,
@@ -255,7 +257,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new NiceButton
-                (
+                (World.Context, 
                     10,
                     10 + 30 * i++,
                     140,
@@ -268,7 +270,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new NiceButton
-                (
+                (World.Context, 
                     10,
                     10 + 30 * i++,
                     140,
@@ -281,7 +283,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new NiceButton
-                (
+                (World.Context, 
                     10,
                     10 + 30 * i++,
                     140,
@@ -294,7 +296,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new NiceButton
-                (
+                (World.Context, 
                     10,
                     10 + 30 * i++,
                     140,
@@ -307,7 +309,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new NiceButton
-                (
+                (World.Context, 
                     10,
                     10 + 30 * i++,
                     140,
@@ -320,7 +322,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new NiceButton
-                (
+                (World.Context, 
                     10,
                     10 + 30 * i++,
                     140,
@@ -333,7 +335,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new NiceButton
-                (
+                (World.Context, 
                     10,
                     10 + 30 * i++,
                     140,
@@ -349,7 +351,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new Line
-                (
+                (World.Context, 
                     160,
                     5,
                     1,
@@ -364,7 +366,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new Line
-                (
+                (World.Context, 
                     160,
                     405 + 35 + 1,
                     WIDTH - 160,
@@ -375,7 +377,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new Button((int) Buttons.Cancel, 0x00F3, 0x00F1, 0x00F2)
+                new Button(World.Context, (int) Buttons.Cancel, 0x00F3, 0x00F1, 0x00F2)
                 {
                     X = 154 + offsetX, Y = 405 + offsetY, ButtonAction = ButtonAction.Activate
                 }
@@ -383,7 +385,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new Button((int) Buttons.Apply, 0x00EF, 0x00F0, 0x00EE)
+                new Button(World.Context, (int) Buttons.Apply, 0x00EF, 0x00F0, 0x00EE)
                 {
                     X = 248 + offsetX, Y = 405 + offsetY, ButtonAction = ButtonAction.Activate
                 }
@@ -391,7 +393,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new Button((int) Buttons.Default, 0x00F6, 0x00F4, 0x00F5)
+                new Button(World.Context, (int) Buttons.Default, 0x00F6, 0x00F4, 0x00F5)
                 {
                     X = 346 + offsetX, Y = 405 + offsetY, ButtonAction = ButtonAction.Activate
                 }
@@ -399,7 +401,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new Button((int) Buttons.Ok, 0x00F9, 0x00F8, 0x00F7)
+                new Button(World.Context, (int) Buttons.Ok, 0x00F9, 0x00F8, 0x00F7)
                 {
                     X = 443 + offsetX, Y = 405 + offsetY, ButtonAction = ButtonAction.Activate
                 }
@@ -425,14 +427,14 @@ namespace ClassicUO.Game.UI.Gumps
             ChangePage(1);
         }
 
-        private static Texture2D LogoTexture
+        private Texture2D LogoTexture
         {
             get
             {
                 if (_logoTexture2D == null || _logoTexture2D.IsDisposed)
                 {
                     using var stream = new MemoryStream(Loader.GetCuoLogo().ToArray());
-                    _logoTexture2D = Texture2D.FromStream(Client.Game.GraphicsDevice, stream);
+                    _logoTexture2D = Texture2D.FromStream(World.Context.Game.GraphicsDevice, stream);
                 }
 
                 return _logoTexture2D;
@@ -444,7 +446,7 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 1;
 
             ScrollArea rightArea = new ScrollArea
-            (
+            (World.Context, 
                 190,
                 20,
                 WIDTH - 210,
@@ -456,7 +458,7 @@ namespace ClassicUO.Game.UI.Gumps
             int startY = 5;
 
 
-            DataBox box = new DataBox(startX, startY, rightArea.Width - 15, 1);
+            DataBox box = new DataBox(World.Context, startX, startY, rightArea.Width - 15, 1);
             box.WantUpdateSize = true;
             rightArea.Add(box);
 
@@ -664,7 +666,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            _showHouseContent.IsVisible = Client.Game.UO.Version >= ClientVersion.CV_70796;
+            _showHouseContent.IsVisible = World.Context.Game.UO.Version >= ClientVersion.CV_70796;
 
             section.Add
             (
@@ -678,7 +680,7 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            _use_smooth_boat_movement.IsVisible = Client.Game.UO.Version >= ClientVersion.CV_7090;
+            _use_smooth_boat_movement.IsVisible = World.Context.Game.UO.Version >= ClientVersion.CV_7090;
 
 
             SettingsSection section2 = AddSettingsSection(box, "Mobiles");
@@ -1284,11 +1286,11 @@ namespace ClassicUO.Game.UI.Gumps
                 )
             );
 
-            section4.Add(new Label(ResGumps.DragSelectStartingPosX, true, HUE_FONT));
-            section4.Add(_dragSelectStartX = new HSliderBar(startX, startY, 200, 0, Client.Game.Scene.Camera.Bounds.Width, _currentProfile.DragSelectStartX, HSliderBarStyle.MetalWidgetRecessedBar, true, 0, HUE_FONT));
+            section4.Add(new Label(World.Context, ResGumps.DragSelectStartingPosX, true, HUE_FONT));
+            section4.Add(_dragSelectStartX = new HSliderBar(World.Context, startX, startY, 200, 0, World.Context.Game.Scene.Camera.Bounds.Width, _currentProfile.DragSelectStartX, HSliderBarStyle.MetalWidgetRecessedBar, true, 0, HUE_FONT));
 
-            section4.Add(new Label(ResGumps.DragSelectStartingPosY, true, HUE_FONT));
-            section4.Add(_dragSelectStartY = new HSliderBar(startX, startY, 200, 0, Client.Game.Scene.Camera.Bounds.Height, _currentProfile.DragSelectStartY, HSliderBarStyle.MetalWidgetRecessedBar, true, 0, HUE_FONT));
+            section4.Add(new Label(World.Context, ResGumps.DragSelectStartingPosY, true, HUE_FONT));
+            section4.Add(_dragSelectStartY = new HSliderBar(World.Context, startX, startY, 200, 0, World.Context.Game.Scene.Camera.Bounds.Height, _currentProfile.DragSelectStartY, HSliderBarStyle.MetalWidgetRecessedBar, true, 0, HUE_FONT));
             section4.Add
             (
                 _dragSelectAsAnchor = AddCheckBox
@@ -1345,7 +1347,7 @@ namespace ClassicUO.Game.UI.Gumps
             section4.Add
             (
                 _setAsNewDefault = new NiceButton
-                (
+                (World.Context, 
                     startX, 
                     startY,
                     section4.Width - 18,
@@ -1357,7 +1359,7 @@ namespace ClassicUO.Game.UI.Gumps
             );
             _setAsNewDefault.MouseUp += (s, e) => 
             {
-                ProfileManager.SetProfileAsDefault(_currentProfile);
+                World.Profile.SetProfileAsDefault(_currentProfile);
                 GameActions.Print(World, ResGeneral.DefaultProfileSet);
             };
 
@@ -1443,7 +1445,7 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 2;
 
             ScrollArea rightArea = new ScrollArea
-            (
+            (World.Context, 
                 190,
                 20,
                 WIDTH - 210,
@@ -1478,7 +1480,7 @@ namespace ClassicUO.Game.UI.Gumps
             (
                 rightArea,
                 ResGumps.LoginMusic,
-                Settings.GlobalSettings.LoginMusic,
+                World.Settings.LoginMusic,
                 startX,
                 startY + _enableSounds.Height + 2 + _enableMusic.Height + 2
             );
@@ -1513,7 +1515,7 @@ namespace ClassicUO.Game.UI.Gumps
                 rightArea,
                 0,
                 100,
-                Settings.GlobalSettings.LoginMusicVolume,
+                World.Settings.LoginMusicVolume,
                 startX,
                 startY + _enableSounds.Height + 2 + _enableMusic.Height + 2,
                 VOLUME_WIDTH
@@ -1563,7 +1565,7 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 3;
 
             ScrollArea rightArea = new ScrollArea
-            (
+            (World.Context, 
                 190,
                 20,
                 WIDTH - 210,
@@ -1583,7 +1585,7 @@ namespace ClassicUO.Game.UI.Gumps
                 rightArea,
                 Constants.MIN_FPS,
                 Constants.MAX_FPS,
-                Settings.GlobalSettings.FPS,
+                World.Settings.FPS,
                 startX,
                 startY,
                 250
@@ -1606,7 +1608,7 @@ namespace ClassicUO.Game.UI.Gumps
             startY += 20;
 
 
-            DataBox box = new DataBox(startX, startY, rightArea.Width - 15, 1);
+            DataBox box = new DataBox(World.Context, startX, startY, rightArea.Width - 15, 1);
             box.WantUpdateSize = true;
             rightArea.Add(box);
 
@@ -1667,7 +1669,7 @@ namespace ClassicUO.Game.UI.Gumps
                 4
             );
 
-            var camera = Client.Game.Scene.Camera;
+            var camera = World.Context.Game.Scene.Camera;
 
             _gameWindowPositionX.SetText(camera.Bounds.X.ToString());
 
@@ -1736,7 +1738,7 @@ namespace ClassicUO.Game.UI.Gumps
                 null,
                 -SCREEN_ZOOM_STEPS,
                 SCREEN_ZOOM_STEPS,
-                GetScreenZoom(Settings.GlobalSettings.ScreenScale),
+                GetScreenZoom(World.Settings.ScreenScale),
                 startX,
                 startY,
                 250
@@ -1902,7 +1904,7 @@ namespace ClassicUO.Game.UI.Gumps
                 (
                     null,
                     ResGumps.RunMouseInASeparateThread,
-                    Settings.GlobalSettings.RunMouseInASeparateThread,
+                    World.Settings.RunMouseInASeparateThread,
                     startX,
                     startY
                 )
@@ -1976,7 +1978,7 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 4;
 
             ScrollArea rightArea = new ScrollArea
-            (
+            (World.Context, 
                 190,
                 52 + 25 + 4,
                 150,
@@ -1987,7 +1989,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new Line
-                (
+                (World.Context, 
                     190,
                     52 + 25 + 2,
                     150,
@@ -2000,7 +2002,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new Line
-                (
+                (World.Context, 
                     191 + 150,
                     21,
                     1,
@@ -2011,7 +2013,7 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             NiceButton addButton = new NiceButton
-            (
+            (World.Context, 
                 190,
                 20,
                 130,
@@ -2023,7 +2025,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(addButton, PAGE);
 
             NiceButton delButton = new NiceButton
-            (
+            (World.Context, 
                 190,
                 52,
                 130,
@@ -2038,7 +2040,7 @@ namespace ClassicUO.Game.UI.Gumps
             int startX = 5;
             int startY = 5;
 
-            DataBox databox = new DataBox(startX, startY, 1, 1);
+            DataBox databox = new DataBox(World.Context, startX, startY, 1, 1);
             databox.WantUpdateSize = true;
             rightArea.Add(databox);
 
@@ -2070,7 +2072,7 @@ namespace ClassicUO.Game.UI.Gumps
                         databox.Add
                         (
                             nb = new NiceButton
-                            (
+                            (World.Context, 
                                 0,
                                 0,
                                 130,
@@ -2102,21 +2104,21 @@ namespace ClassicUO.Game.UI.Gumps
 
                         nb.DragBegin += (sss, eee) =>
                         {
-                            if (UIManager.DraggingControl != this || UIManager.MouseOverControl != sss)
+                            if (World.Context.UI.DraggingControl != this || World.Context.UI.MouseOverControl != sss)
                             {
                                 return;
                             }
 
-                            UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == _macroControl.Macro)?.Dispose();
+                            World.Context.UI.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == _macroControl.Macro)?.Dispose();
 
                             MacroButtonGump macroButtonGump = new MacroButtonGump(World, _macroControl.Macro, Mouse.Position.X, Mouse.Position.Y);
 
                             macroButtonGump.X = Mouse.Position.X - (macroButtonGump.Width >> 1);
                             macroButtonGump.Y = Mouse.Position.Y - (macroButtonGump.Height >> 1);
 
-                            UIManager.Add(macroButtonGump);
+                            World.Context.UI.Add(macroButtonGump);
 
-                            UIManager.AttemptDragControl(macroButtonGump, true);
+                            World.Context.UI.AttemptDragControl(macroButtonGump, true);
                         };
 
                         nb.MouseUp += (sss, eee) =>
@@ -2137,7 +2139,7 @@ namespace ClassicUO.Game.UI.Gumps
                     CanCloseWithRightClick = true
                 };
 
-                UIManager.Add(dialog);
+                World.Context.UI.Add(dialog);
             };
 
             delButton.MouseUp += (ss, ee) =>
@@ -2159,7 +2161,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (_macroControl != null)
                             {
-                                UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == _macroControl.Macro)?.Dispose();
+                                World.Context.UI.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == _macroControl.Macro)?.Dispose();
 
                                 World.Macros.Remove(_macroControl.Macro);
 
@@ -2171,7 +2173,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                     );
 
-                    UIManager.Add(dialog);
+                    World.Context.UI.Add(dialog);
                 }
             };
 
@@ -2185,7 +2187,7 @@ namespace ClassicUO.Game.UI.Gumps
                 databox.Add
                 (
                     nb = new NiceButton
-                    (
+                    (World.Context, 
                         0,
                         0,
                         130,
@@ -2213,21 +2215,21 @@ namespace ClassicUO.Game.UI.Gumps
                         return;
                     }
 
-                    if (UIManager.DraggingControl != this || UIManager.MouseOverControl != sss)
+                    if (World.Context.UI.DraggingControl != this || World.Context.UI.MouseOverControl != sss)
                     {
                         return;
                     }
 
-                    UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == m)?.Dispose();
+                    World.Context.UI.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == m)?.Dispose();
 
                     MacroButtonGump macroButtonGump = new MacroButtonGump(World, m, Mouse.Position.X, Mouse.Position.Y);
 
                     macroButtonGump.X = Mouse.Position.X - (macroButtonGump.Width >> 1);
                     macroButtonGump.Y = Mouse.Position.Y - (macroButtonGump.Height >> 1);
 
-                    UIManager.Add(macroButtonGump);
+                    World.Context.UI.Add(macroButtonGump);
 
-                    UIManager.AttemptDragControl(macroButtonGump, true);
+                    World.Context.UI.AttemptDragControl(macroButtonGump, true);
                 };
 
                 nb.MouseUp += (sss, eee) =>
@@ -2263,7 +2265,7 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 5;
 
             ScrollArea rightArea = new ScrollArea
-            (
+            (World.Context, 
                 190,
                 20,
                 WIDTH - 210,
@@ -2355,7 +2357,7 @@ namespace ClassicUO.Game.UI.Gumps
             startY += text.Height + 2;
             startX += 40;
 
-            _tooltip_font_selector = new FontSelector(7, _currentProfile.TooltipFont, ResGumps.TooltipFontSelect)
+            _tooltip_font_selector = new FontSelector(World.Context, 7, _currentProfile.TooltipFont, ResGumps.TooltipFontSelect)
             {
                 X = startX,
                 Y = startY
@@ -2371,7 +2373,7 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 6;
 
             ScrollArea rightArea = new ScrollArea
-            (
+            (World.Context, 
                 190,
                 20,
                 WIDTH - 210,
@@ -2424,7 +2426,7 @@ namespace ClassicUO.Game.UI.Gumps
             startX += 40;
             startY += text.Height + 2;
 
-            _fontSelectorChat = new FontSelector(20, _currentProfile.ChatFont, ResGumps.ThatSClassicUO)
+            _fontSelectorChat = new FontSelector(World.Context, 20, _currentProfile.ChatFont, ResGumps.ThatSClassicUO)
             {
                 X = startX,
                 Y = startY
@@ -2440,7 +2442,7 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 7;
 
             ScrollArea rightArea = new ScrollArea
-            (
+            (World.Context, 
                 190,
                 20,
                 WIDTH - 210,
@@ -2638,7 +2640,7 @@ namespace ClassicUO.Game.UI.Gumps
             startY += 35;
 
             _randomizeColorsButton = new NiceButton
-            (
+            (World.Context, 
                 startX,
                 startY,
                 140,
@@ -2773,7 +2775,7 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 8;
 
             ScrollArea rightArea = new ScrollArea
-            (
+            (World.Context, 
                 190,
                 20,
                 WIDTH - 210,
@@ -3025,7 +3027,7 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 9;
 
             ScrollArea rightArea = new ScrollArea
-            (
+            (World.Context, 
                 190,
                 20,
                 WIDTH - 210,
@@ -3150,7 +3152,7 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 12;
 
             ScrollArea rightArea = new ScrollArea
-            (
+            (World.Context, 
                 190,
                 20,
                 WIDTH - 210,
@@ -3226,7 +3228,7 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 10;
 
             ScrollArea rightArea = new ScrollArea
-            (
+            (World.Context, 
                 190,
                 20,
                 WIDTH - 210,
@@ -3267,7 +3269,7 @@ namespace ClassicUO.Game.UI.Gumps
             startY += _infoBarHighlightType.Height + 5;
 
             NiceButton nb = new NiceButton
-            (
+            (World.Context, 
                 startX,
                 startY,
                 90,
@@ -3313,7 +3315,7 @@ namespace ClassicUO.Game.UI.Gumps
             rightArea.Add
             (
                 new Line
-                (
+                (World.Context, 
                     startX,
                     startY,
                     rightArea.Width,
@@ -3329,7 +3331,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _infoBarBuilderControls = new List<InfoBarBuilderControl>();
 
-            _databox = new DataBox(startX, startY, 10, 10)
+            _databox = new DataBox(World.Context, startX, startY, 10, 10)
             {
                 WantUpdateSize = true
             };
@@ -3354,7 +3356,7 @@ namespace ClassicUO.Game.UI.Gumps
             const int PAGE = 11;
 
             ScrollArea rightArea = new ScrollArea
-            (
+            (World.Context, 
                 190,
                 20,
                 WIDTH - 210,
@@ -3366,7 +3368,7 @@ namespace ClassicUO.Game.UI.Gumps
             int startY = 5;
             Label text;
 
-            bool hasBackpacks = Client.Game.UO.Version >= ClientVersion.CV_705301;
+            bool hasBackpacks = World.Context.Game.UO.Version >= ClientVersion.CV_705301;
 
             if(hasBackpacks)
             {
@@ -3433,7 +3435,7 @@ namespace ClassicUO.Game.UI.Gumps
                 startY
             );
 
-            _useLargeContianersGumps.IsVisible = Client.Game.UO.Version >= ClientVersion.CV_706000;
+            _useLargeContianersGumps.IsVisible = World.Context.Game.UO.Version >= ClientVersion.CV_706000;
 
             if (_useLargeContianersGumps.IsVisible)
             {
@@ -3513,7 +3515,7 @@ namespace ClassicUO.Game.UI.Gumps
             startY += _overrideContainerLocation.Height + 2 + 10;
 
             NiceButton button = new NiceButton
-            (
+            (World.Context, 
                 startX,
                 startY,
                 130,
@@ -3572,9 +3574,9 @@ namespace ClassicUO.Game.UI.Gumps
                 case Buttons.DeleteMacro: break;
                 case Buttons.OpenIgnoreList:
                     // If other IgnoreManagerGump exist - Dispose it
-                    UIManager.GetGump<IgnoreManagerGump>()?.Dispose();
+                    World.Context.UI.GetGump<IgnoreManagerGump>()?.Dispose();
                     // Open new
-                    UIManager.Add(new IgnoreManagerGump(World));
+                    World.Context.UI.Add(new IgnoreManagerGump(World));
                     break;
             }
         }
@@ -3684,7 +3686,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _gameWindowFullsize.IsChecked = false;
                     _enableDeathScreen.IsChecked = true;
                     _enableBlackWhiteEffect.IsChecked = true;
-                    Client.Game.Scene.Camera.Zoom = 1f;
+                    World.Context.Game.Scene.Camera.Zoom = 1f;
                     _currentProfile.DefaultScale = 1f;
                     _sliderScreenZoom.Value = 0;
                     _lightBar.Value = 0;
@@ -3735,7 +3737,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _allyMessageColorPickerBox.Hue = 0x0057;
                     _chatMessageColorPickerBox.Hue = 0x0256;
                     _chatAfterEnter.IsChecked = false;
-                    UIManager.SystemChat.IsActive = !_chatAfterEnter.IsChecked;
+                    World.Context.UI.SystemChat.IsActive = !_chatAfterEnter.IsChecked;
                     _chatAdditionalButtonsCheckbox.IsChecked = true;
                     _chatShiftEnterCheckbox.IsChecked = true;
                     _saveJournalCheckBox.IsChecked = false;
@@ -3815,12 +3817,12 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void Apply()
         {
-            WorldViewportGump vp = UIManager.GetGump<WorldViewportGump>();
+            WorldViewportGump vp = World.Context.UI.GetGump<WorldViewportGump>();
 
             // general
-            if (Settings.GlobalSettings.FPS != _sliderFPS.Value)
+            if (World.Settings.FPS != _sliderFPS.Value)
             {
-                Client.Game.SetRefreshRate(_sliderFPS.Value);
+                World.Context.Game.SetRefreshRate(_sliderFPS.Value);
             }
 
             _currentProfile.HighlightGameObjects = _highlightObjects.IsChecked;
@@ -3856,14 +3858,14 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _currentProfile.DrawRoofs = !_drawRoofs.IsChecked;
 
-                Client.Game.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
+                World.Context.Game.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
             }
 
             if (_currentProfile.TopbarGumpIsDisabled != _enableTopbar.IsChecked)
             {
                 if (_enableTopbar.IsChecked)
                 {
-                    UIManager.GetGump<TopBarGump>()?.Dispose();
+                    World.Context.UI.GetGump<TopBarGump>()?.Dispose();
                 }
                 else
                 {
@@ -3895,22 +3897,22 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_useStandardSkillsGump.IsChecked)
             {
-                SkillGumpAdvanced newGump = UIManager.GetGump<SkillGumpAdvanced>();
+                SkillGumpAdvanced newGump = World.Context.UI.GetGump<SkillGumpAdvanced>();
 
                 if (newGump != null)
                 {
-                    UIManager.Add(new StandardSkillsGump(World) { X = newGump.X, Y = newGump.Y });
+                    World.Context.UI.Add(new StandardSkillsGump(World) { X = newGump.X, Y = newGump.Y });
 
                     newGump.Dispose();
                 }
             }
             else
             {
-                StandardSkillsGump standardGump = UIManager.GetGump<StandardSkillsGump>();
+                StandardSkillsGump standardGump = World.Context.UI.GetGump<StandardSkillsGump>();
 
                 if (standardGump != null)
                 {
-                    UIManager.Add(new SkillGumpAdvanced(World) { X = standardGump.X, Y = standardGump.Y });
+                    World.Context.UI.Add(new SkillGumpAdvanced(World) { X = standardGump.X, Y = standardGump.Y });
 
                     standardGump.Dispose();
                 }
@@ -3928,7 +3930,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_currentProfile.ShowHouseContent != _showHouseContent.IsChecked)
             {
                 _currentProfile.ShowHouseContent = _showHouseContent.IsChecked;
-                NetClient.Socket.Send_ShowPublicHouseContent(_currentProfile.ShowHouseContent);
+                World.Network.Send_ShowPublicHouseContent(_currentProfile.ShowHouseContent);
             }
 
 
@@ -3940,20 +3942,20 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.ReproduceSoundsInBackground = _musicInBackground.IsChecked;
             _currentProfile.SoundVolume = _soundsVolume.Value;
             _currentProfile.MusicVolume = _musicVolume.Value;
-            Settings.GlobalSettings.LoginMusicVolume = _loginMusicVolume.Value;
-            Settings.GlobalSettings.LoginMusic = _loginMusic.IsChecked;
+            World.Settings.LoginMusicVolume = _loginMusicVolume.Value;
+            World.Settings.LoginMusic = _loginMusic.IsChecked;
 
-            Client.Game.Audio.UpdateCurrentMusicVolume();
-            Client.Game.Audio.UpdateCurrentSoundsVolume();
+            World.Context.Game.Audio.UpdateCurrentMusicVolume();
+            World.Context.Game.Audio.UpdateCurrentSoundsVolume();
 
             if (!_currentProfile.EnableMusic)
             {
-                Client.Game.Audio.StopMusic();
+                World.Context.Game.Audio.StopMusic();
             }
 
             if (!_currentProfile.EnableSound)
             {
-                Client.Game.Audio.StopSounds();
+                World.Context.Game.Audio.StopSounds();
             }
 
             // speech
@@ -3970,7 +3972,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_currentProfile.ActivateChatAfterEnter != _chatAfterEnter.IsChecked)
             {
-                UIManager.SystemChat.IsActive = !_chatAfterEnter.IsChecked;
+                World.Context.UI.SystemChat.IsActive = !_chatAfterEnter.IsChecked;
                 _currentProfile.ActivateChatAfterEnter = _chatAfterEnter.IsChecked;
             }
 
@@ -4002,13 +4004,13 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.EnableDeathScreen = _enableDeathScreen.IsChecked;
             _currentProfile.EnableBlackWhiteEffect = _enableBlackWhiteEffect.IsChecked;
 
-            Settings.GlobalSettings.ScreenScale = GetScreenScale(_sliderScreenZoom.Value);
-            if (Client.Game.ScreenScale != Settings.GlobalSettings.ScreenScale) {
-                Client.Game.ScreenScale = Settings.GlobalSettings.ScreenScale;
+            World.Settings.ScreenScale = GetScreenScale(_sliderScreenZoom.Value);
+            if (World.Context.Game.ScreenScale != World.Settings.ScreenScale) {
+                World.Context.Game.ScreenScale = World.Settings.ScreenScale;
                 RecenterGump();
             }
 
-            var camera = Client.Game.Scene.Camera;
+            var camera = World.Context.Game.Scene.Camera;
             _currentProfile.DefaultScale = camera.Zoom = (_sliderZoom.Value * camera.ZoomStep) + camera.ZoomMin;
 
             _currentProfile.EnableMousewheelScaleZoom = _zoomCheckbox.IsChecked;
@@ -4016,7 +4018,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_use_old_status_gump.IsChecked != _currentProfile.UseOldStatusGump)
             {
-                StatusGumpBase status = StatusGumpBase.GetStatusGump();
+                StatusGumpBase status = StatusGumpBase.GetStatusGump(World.Profile.CurrentProfile, World.Context.UI);
 
                 _currentProfile.UseOldStatusGump = _use_old_status_gump.IsChecked;
 
@@ -4024,7 +4026,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (_currentProfile.StatusGumpBarMutuallyExclusive)
                         status.Dispose();
-                    UIManager.Add(StatusGumpBase.AddStatusGump(World, status.ScreenCoordinateX, status.ScreenCoordinateY));
+                    World.Context.UI.Add(StatusGumpBase.AddStatusGump(World, status.ScreenCoordinateX, status.ScreenCoordinateY));
                 }
             }
             
@@ -4032,7 +4034,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 var active = _currentProfile.StatusGumpBarMutuallyExclusive = _statusGumpBarMutuallyExclusive.IsChecked;
 
-                if (active && StatusGumpBase.GetStatusGump() != null && UIManager.GetGump<BaseHealthBarGump>(World.Player) is {} bar)
+                if (active && StatusGumpBase.GetStatusGump(World.Profile.CurrentProfile, World.Context.UI) != null && World.Context.UI.GetGump<BaseHealthBarGump>(World.Player) is {} bar)
                     bar.Dispose();
             }
 
@@ -4040,11 +4042,11 @@ namespace ClassicUO.Game.UI.Gumps
             int.TryParse(_gameWindowWidth.Text, out int gameWindowSizeWidth);
             int.TryParse(_gameWindowHeight.Text, out int gameWindowSizeHeight);
 
-            if (gameWindowSizeWidth != Client.Game.Scene.Camera.Bounds.Width || gameWindowSizeHeight != Client.Game.Scene.Camera.Bounds.Height)
+            if (gameWindowSizeWidth != World.Context.Game.Scene.Camera.Bounds.Width || gameWindowSizeHeight != World.Context.Game.Scene.Camera.Bounds.Height)
             {
                 if (vp != null)
                 {
-                    var s = new Point(Client.Game.ScaleWithDpi(gameWindowSizeWidth), Client.Game.ScaleWithDpi(gameWindowSizeHeight));
+                    var s = new Point(World.Context.Game.ScaleWithDpi(gameWindowSizeWidth), World.Context.Game.ScaleWithDpi(gameWindowSizeHeight));
 
                     Point n = vp.ResizeGameWindow(s);
 
@@ -4083,7 +4085,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (vp != null)
                     {
-                        var size = new Point(Client.Game.Window.ClientBounds.Width, Client.Game.Window.ClientBounds.Height);
+                        var size = new Point(World.Context.Game.Window.ClientBounds.Width, World.Context.Game.Window.ClientBounds.Height);
                         n = vp.ResizeGameWindow(size);
                         vp.SetGameWindowPosition(new Point(-5, -5));
                         _currentProfile.GameWindowPosition = vp.Location;
@@ -4110,7 +4112,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_currentProfile.WindowBorderless != _windowBorderless.IsChecked)
             {
                 _currentProfile.WindowBorderless = _windowBorderless.IsChecked;
-                Client.Game.SetWindowBorderless(_windowBorderless.IsChecked);
+                World.Context.Game.SetWindowBorderless(_windowBorderless.IsChecked);
             }
 
             _currentProfile.UseAlternativeLights = _altLights.IsChecked;
@@ -4136,7 +4138,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.TerrainShadowsLevel = _terrainShadowLevel.Value;
             _currentProfile.AuraUnderFeetType = _auraType.SelectedIndex;
 
-            Client.Game.IsMouseVisible = Settings.GlobalSettings.RunMouseInASeparateThread = _runMouseInSeparateThread.IsChecked;
+            World.Context.Game.IsMouseVisible = World.Settings.RunMouseInASeparateThread = _runMouseInSeparateThread.IsChecked;
 
             _currentProfile.AuraOnMouse = _auraMouse.IsChecked;
             _currentProfile.AnimatedWaterEffect = _animatedWaterEffect.IsChecked;
@@ -4156,7 +4158,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_currentProfile.ChatFont != _fontValue)
             {
                 _currentProfile.ChatFont = _fontValue;
-                UIManager.SystemChat.TextBoxControl.Font = _fontValue;
+                World.Context.UI.SystemChat.TextBoxControl.Font = _fontValue;
             }
 
             // combat
@@ -4207,7 +4209,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.CounterBarHighlightOnAmount = _highlightOnAmount.IsChecked;
             _currentProfile.CounterBarDisplayAbbreviatedAmount = _enableAbbreviatedAmount.IsChecked;
 
-            CounterBarGump counterGump = UIManager.GetGump<CounterBarGump>();
+            CounterBarGump counterGump = World.Context.UI.GetGump<CounterBarGump>();
 
             if (before != _currentProfile.CounterBarEnabled)
             {
@@ -4215,7 +4217,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (_currentProfile.CounterBarEnabled)
                     {
-                        UIManager.Add
+                        World.Context.UI.Add
                         (
                             new CounterBarGump
                             (
@@ -4288,22 +4290,22 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (_currentProfile.CustomBarsToggled)
                 {
-                    List<HealthBarGump> hbgstandard = UIManager.Gumps.OfType<HealthBarGump>().ToList();
+                    List<HealthBarGump> hbgstandard = World.Context.UI.Gumps.OfType<HealthBarGump>().ToList();
 
                     foreach (HealthBarGump healthbar in hbgstandard)
                     {
-                        UIManager.Add(new HealthBarGumpCustom(World, healthbar.LocalSerial) { X = healthbar.X, Y = healthbar.Y });
+                        World.Context.UI.Add(new HealthBarGumpCustom(World, healthbar.LocalSerial) { X = healthbar.X, Y = healthbar.Y });
 
                         healthbar.Dispose();
                     }
                 }
                 else
                 {
-                    List<HealthBarGumpCustom> hbgcustom = UIManager.Gumps.OfType<HealthBarGumpCustom>().ToList();
+                    List<HealthBarGumpCustom> hbgcustom = World.Context.UI.Gumps.OfType<HealthBarGumpCustom>().ToList();
 
                     foreach (HealthBarGumpCustom customhealthbar in hbgcustom)
                     {
-                        UIManager.Add(new HealthBarGump(World, customhealthbar.LocalSerial) { X = customhealthbar.X, Y = customhealthbar.Y });
+                        World.Context.UI.Add(new HealthBarGump(World, customhealthbar.LocalSerial) { X = customhealthbar.X, Y = customhealthbar.Y });
 
                         customhealthbar.Dispose();
                     }
@@ -4330,13 +4332,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             World.InfoBars.Save();
 
-            InfoBarGump infoBarGump = UIManager.GetGump<InfoBarGump>();
+            InfoBarGump infoBarGump = World.Context.UI.GetGump<InfoBarGump>();
 
             if (_currentProfile.ShowInfoBar)
             {
                 if (infoBarGump == null)
                 {
-                    UIManager.Add(new InfoBarGump(World) { X = 300, Y = 300 });
+                    World.Context.UI.Add(new InfoBarGump(World) { X = 300, Y = 300 });
                 }
                 else
                 {
@@ -4359,10 +4361,10 @@ namespace ClassicUO.Game.UI.Gumps
             if ((byte) _containersScale.Value != containerScale || _currentProfile.ScaleItemsInsideContainers != _containerScaleItems.IsChecked)
             {
                 containerScale = _currentProfile.ContainersScale = (byte) _containersScale.Value;
-                UIManager.ContainerScale = containerScale / 100f;
+                World.Context.UI.ContainerScale = containerScale / 100f;
                 _currentProfile.ScaleItemsInsideContainers = _containerScaleItems.IsChecked;
 
-                foreach (ContainerGump resizableGump in UIManager.Gumps.OfType<ContainerGump>())
+                foreach (ContainerGump resizableGump in World.Context.UI.Gumps.OfType<ContainerGump>())
                 {
                     resizableGump.RequestUpdateContents();
                 }
@@ -4377,7 +4379,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_currentProfile.BackpackStyle != _backpackStyle.SelectedIndex)
             {
                 _currentProfile.BackpackStyle = _backpackStyle.SelectedIndex;
-                UIManager.GetGump<PaperDollGump>(World.Player.Serial)?.RequestUpdateContents();
+                World.Context.UI.GetGump<PaperDollGump>(World.Player.Serial)?.RequestUpdateContents();
                 Item backpack = World.Player.FindItemByLayer(Layer.Backpack);
                 GameActions.DoubleClick(World, backpack);
             }
@@ -4391,12 +4393,12 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.TooltipDisplayZoom = _tooltip_zoom.Value;
             _currentProfile.TooltipFont = _tooltip_font_selector.GetSelectedFont();
 
-            _currentProfile?.Save(World, ProfileManager.ProfilePath);
+            _currentProfile?.Save(World, World.Profile.ProfilePath);
         }
 
         internal void UpdateVideo()
         {
-            var camera = Client.Game.Scene.Camera;
+            var camera = World.Context.Game.Scene.Camera;
 
             _gameWindowPositionX.SetText(camera.Bounds.X.ToString());
             _gameWindowPositionY.SetText(camera.Bounds.Y.ToString());
@@ -4457,6 +4459,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             InputField elem = new InputField
             (
+                World.Context,
                 0x0BB8,
                 FONT,
                 HUE_FONT,
@@ -4494,7 +4497,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private Label AddLabel(ScrollArea area, string text, int x, int y)
         {
-            Label label = new Label(text, true, HUE_FONT)
+            Label label = new Label(World.Context, text, true, HUE_FONT)
             {
                 X = x,
                 Y = y
@@ -4508,7 +4511,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox AddCheckBox(ScrollArea area, string text, bool ischecked, int x, int y)
         {
             Checkbox box = new Checkbox
-            (
+            (World.Context, 
                 0x00D2,
                 0x00D3,
                 text,
@@ -4536,7 +4539,7 @@ namespace ClassicUO.Game.UI.Gumps
             int width
         )
         {
-            Combobox combobox = new Combobox(x, y, width, values)
+            Combobox combobox = new Combobox(World.Context, x, y, width, values)
             {
                 SelectedIndex = currentIndex
             };
@@ -4558,7 +4561,7 @@ namespace ClassicUO.Game.UI.Gumps
         )
         {
             HSliderBar slider = new HSliderBar
-            (
+            (World.Context, 
                 x,
                 y,
                 width,
@@ -4592,7 +4595,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             area?.Add
             (
-                new Label(text, true, HUE_FONT)
+                new Label(World.Context, text, true, HUE_FONT)
                 {
                     X = x + box.Width + 10,
                     Y = y
@@ -4604,7 +4607,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private SettingsSection AddSettingsSection(DataBox area, string label)
         {
-            SettingsSection section = new SettingsSection(label, area.Width);
+            SettingsSection section = new SettingsSection(World.Context, label, area.Width);
             area.Add(section);
             area.WantUpdateSize = true;
             //area.ReArrangeChildren();
@@ -4614,9 +4617,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragBegin(int x, int y)
         {
-            if (UIManager.MouseOverControl?.RootParent == this)
+            if (World.Context.UI.MouseOverControl?.RootParent == this)
             {
-                UIManager.MouseOverControl.InvokeDragBegin(new Point(x, y));
+                World.Context.UI.MouseOverControl.InvokeDragBegin(new Point(x, y));
             }
 
             base.OnDragBegin(x, y);
@@ -4624,9 +4627,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragEnd(int x, int y)
         {
-            if (UIManager.MouseOverControl?.RootParent == this)
+            if (World.Context.UI.MouseOverControl?.RootParent == this)
             {
-                UIManager.MouseOverControl.InvokeDragEnd(new Point(x, y));
+                World.Context.UI.MouseOverControl.InvokeDragEnd(new Point(x, y));
             }
 
             base.OnDragEnd(x, y);
@@ -4663,21 +4666,21 @@ namespace ClassicUO.Game.UI.Gumps
             private readonly DataBox _databox;
             private int _indent;
 
-            public SettingsSection(string title, int width)
+            public SettingsSection(GameContext context, string title, int width) : base(context)
             {
                 CanMove = true;
                 AcceptMouseInput = true;
                 WantUpdateSize = true;
 
 
-                Label label = new Label(title, true, HUE_FONT, font: FONT);
+                Label label = new Label(Context, title, true, HUE_FONT, font: FONT);
                 label.X = 5;
                 base.Add(label);
 
                 base.Add
                 (
                     new Line
-                    (
+                    (Context, 
                         0,
                         label.Height,
                         width - 30,
@@ -4689,7 +4692,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Width = width;
                 Height = label.Height + 1;
 
-                _databox = new DataBox(label.X + 10, label.Height + 4, 0, 0);
+                _databox = new DataBox(Context, label.X + 10, label.Height + 4, 0, 0);
 
                 base.Add(_databox);
             }
@@ -4761,7 +4764,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private readonly RadioButton[] _buttons;
 
-            public FontSelector(int max_font, int current_font_index, string markup)
+            public FontSelector(GameContext context, int max_font, int current_font_index, string markup) : base(context)
             {
                 CanMove = false;
                 CanCloseWithRightClick = false;
@@ -4772,12 +4775,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                 for (byte i = 0; i < max_font; i++)
                 {
-                    if (Client.Game.UO.FileManager.Fonts.UnicodeFontExists(i))
+                    if (Context.Game.UO.FileManager.Fonts.UnicodeFontExists(i))
                     {
                         Add
                         (
                             _buttons[i] = new RadioButton
-                            (
+                            (Context, 
                                 0,
                                 0x00D0,
                                 0x00D1,
@@ -4827,6 +4830,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public InputField
             (
+                GameContext context,
                 ushort backgroundGraphic,
                 byte font,
                 ushort hue,
@@ -4835,21 +4839,21 @@ namespace ClassicUO.Game.UI.Gumps
                 int height,
                 int maxWidthText = 0,
                 int maxCharsCount = -1
-            )
+            ) : base(context)
             {
                 WantUpdateSize = false;
 
                 Width = width;
                 Height = height;
 
-                ResizePic background = new ResizePic(backgroundGraphic)
+                ResizePic background = new ResizePic(backgroundGraphic, Context)
                 {
                     Width = width,
                     Height = height
                 };
 
                 _textbox = new StbTextBox
-                (
+                (Context, 
                     font,
                     maxCharsCount,
                     maxWidthText,
@@ -4935,8 +4939,8 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
         private void RecenterGump() {
-            X = (Client.Game.ClientBounds.Width >> 1) - WIDTH/2;
-            Y = (Client.Game.ClientBounds.Height >> 1) - HEIGHT/2;
+            X = (World.Context.Game.ClientBounds.Width >> 1) - WIDTH/2;
+            Y = (World.Context.Game.ClientBounds.Height >> 1) - HEIGHT/2;
         }
     }
 }

@@ -175,7 +175,7 @@ namespace ClassicUO
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         delegate void dCastSpell(int index);
         [MarshalAs(UnmanagedType.FunctionPtr)]
-        private readonly dCastSpell _castSpell = GameActions.CastSpell;
+        private readonly dCastSpell _castSpell = (index) => GameActions.CastSpell(Client.Game.UO.World, index);
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         delegate IntPtr dGetCliloc(int cliloc, IntPtr args, bool capitalize);
@@ -219,7 +219,7 @@ namespace ClassicUO
 
         static short getPacketLength(int id)
         {
-            return NetClient.Socket.PacketsTable.GetPacketLength(id);
+            return Client.Game.UO.World.Network.PacketsTable.GetPacketLength(id);
         }
 
         static void setWindowTitle(IntPtr ptr)
@@ -292,7 +292,7 @@ namespace ClassicUO
                 return;
 
             var pluginPathPtr = Marshal.StringToHGlobalAnsi(pluginPath);
-            var uoAssetsPtr = Marshal.StringToHGlobalAnsi(Settings.GlobalSettings.UltimaOnlineDirectory);
+            var uoAssetsPtr = Marshal.StringToHGlobalAnsi(Client.Game.UO.World.Settings.UltimaOnlineDirectory);
 
             _loadPlugin
             (

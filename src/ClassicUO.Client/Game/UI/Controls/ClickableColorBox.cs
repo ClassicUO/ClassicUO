@@ -21,14 +21,14 @@ namespace ClassicUO.Game.UI.Controls
             int w,
             int h,
             ushort hue
-        ) : base(w, h, hue)
+        ) : base(world.Context, w, h, hue)
         {
             _world = world;
             X = x;
             Y = y;
             WantUpdateSize = false;
 
-            GumpPic background = new GumpPic(0, 0, 0x00D4, 0);
+            GumpPic background = new GumpPic(0, 0, 0x00D4, 0, world.Context);
             Add(background);
 
             Width = background.Width;
@@ -73,7 +73,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (button == MouseButtonType.Left)
             {
-                UIManager.GetGump<ColorPickerGump>()?.Dispose();
+                _world.Context.UI.GetGump<ColorPickerGump>()?.Dispose();
 
                 ColorPickerGump pickerGump = new ColorPickerGump
                 (
@@ -85,7 +85,7 @@ namespace ClassicUO.Game.UI.Controls
                     s => Hue = s
                 );
 
-                UIManager.Add(pickerGump);
+                _world.Context.UI.Add(pickerGump);
             }
         }
     }

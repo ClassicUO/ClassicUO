@@ -2,14 +2,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
-using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
 using ClassicUO.Utility.Logging;
 using SDL3;
 
@@ -33,8 +30,8 @@ namespace ClassicUO.Utility.Platforms
 
             try
             {
-                if (Client.Game?.Window != null)
-                    _customWindow = new CustomWindow(Client.Game.Window.Handle, world, "UOASSIST-TP-MSG-WND");
+                if (_world.Context.Game?.Window != null)
+                    _customWindow = new CustomWindow(_world.Context.Game.Window.Handle, world, "UOASSIST-TP-MSG-WND");
             }
             catch
             { }
@@ -94,7 +91,7 @@ namespace ClassicUO.Utility.Platforms
                 if (CUOEnviroment.IsWindows)
                 {
                     hwnd = SDL.SDL_GetPointerProperty(
-                        SDL.SDL_GetWindowProperties(Client.Game.Window.Handle),
+                        SDL.SDL_GetWindowProperties(_world.Context.Game.Window.Handle),
                         SDL.SDL_PROP_WINDOW_WIN32_HWND_POINTER, IntPtr.Zero
                     );
                 }
@@ -368,7 +365,7 @@ namespace ClassicUO.Utility.Platforms
                         if (CUOEnviroment.IsWindows)
                         {
                             hwnd = SDL.SDL_GetPointerProperty(
-                                SDL.SDL_GetWindowProperties(Client.Game.Window.Handle),
+                                SDL.SDL_GetWindowProperties(_world.Context.Game.Window.Handle),
                                 SDL.SDL_PROP_WINDOW_WIN32_HWND_POINTER, IntPtr.Zero
                             );
                         }

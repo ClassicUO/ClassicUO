@@ -19,12 +19,28 @@ namespace ClassicUO.Game.GameObjects
 
         public PlayerMobile(World world, uint serial) : base(world, serial)
         {
-            Skills = new Skill[Client.Game.UO.FileManager.Skills.SkillsCount];
+            Skills = new Skill[World.Context.Game.UO.FileManager.Skills.SkillsCount];
 
             for (int i = 0; i < Skills.Length; i++)
             {
-                SkillEntry skill = Client.Game.UO.FileManager.Skills.Skills[i];
+                SkillEntry skill = World.Context.Game.UO.FileManager.Skills.Skills[i];
                 Skills[i] = new Skill(skill.Name, skill.Index, skill.HasAction);
+            }
+
+            Walker = new WalkerManager(this);
+            Pathfinder = new Pathfinder(world);
+        }
+
+        /// <summary>
+        /// Test-friendly constructor that does not depend on FileManager.
+        /// </summary>
+        internal PlayerMobile(World world, uint serial, int skillCount) : base(world, serial)
+        {
+            Skills = new Skill[skillCount];
+
+            for (int i = 0; i < skillCount; i++)
+            {
+                Skills[i] = new Skill($"Skill{i}", i, true);
             }
 
             Walker = new WalkerManager(this);
@@ -285,11 +301,11 @@ namespace ClassicUO.Game.GameObjects
                 ushort animId = weapon.ItemData.AnimID;
                 ushort animGraphic = 0;
 
-                if (Client.Game.UO.FileManager.TileData.StaticData[weapon.Graphic - 1].AnimID == animId)
+                if (World.Context.Game.UO.FileManager.TileData.StaticData[weapon.Graphic - 1].AnimID == animId)
                 {
                     animGraphic = (ushort)(weapon.Graphic - 1);
                 }
-                else if (Client.Game.UO.FileManager.TileData.StaticData[weapon.Graphic + 1].AnimID == animId)
+                else if (World.Context.Game.UO.FileManager.TileData.StaticData[weapon.Graphic + 1].AnimID == animId)
                 {
                     animGraphic = (ushort)(weapon.Graphic + 1);
                 }
@@ -304,7 +320,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            for (LinkedListNode<Gump> gump = UIManager.Gumps.First; gump != null; gump = gump.Next)
+            for (LinkedListNode<Gump> gump = World.Context.UI.Gumps.First; gump != null; gump = gump.Next)
             {
                 if (gump.Value is UseAbilityButtonGump or CombatBookGump)
                     gump.Value.RequestUpdateContents();
@@ -323,24 +339,24 @@ namespace ClassicUO.Game.GameObjects
 
         public void TryOpenCorpses()
         {
-            if (ProfileManager.CurrentProfile.AutoOpenCorpses)
+            if (World.Profile.CurrentProfile.AutoOpenCorpses)
             {
-                if ((ProfileManager.CurrentProfile.CorpseOpenOptions == 1 || ProfileManager.CurrentProfile.CorpseOpenOptions == 3) && World.TargetManager.IsTargeting)
+                if ((World.Profile.CurrentProfile.CorpseOpenOptions == 1 || World.Profile.CurrentProfile.CorpseOpenOptions == 3) && World.TargetManager.IsTargeting)
                 {
                     return;
                 }
 
-                if ((ProfileManager.CurrentProfile.CorpseOpenOptions == 2 || ProfileManager.CurrentProfile.CorpseOpenOptions == 3) && IsHidden)
+                if ((World.Profile.CurrentProfile.CorpseOpenOptions == 2 || World.Profile.CurrentProfile.CorpseOpenOptions == 3) && IsHidden)
                 {
                     return;
                 }
 
                 foreach (Item item in World.Items.Values)
                 {
-                    if (!item.IsDestroyed && item.IsCorpse && item.Distance <= ProfileManager.CurrentProfile.AutoOpenCorpseRange && !AutoOpenedCorpses.Contains(item.Serial))
+                    if (!item.IsDestroyed && item.IsCorpse && item.Distance <= World.Profile.CurrentProfile.AutoOpenCorpseRange && !AutoOpenedCorpses.Contains(item.Serial))
                     {
                         AutoOpenedCorpses.Add(item.Serial);
-                        GameActions.DoubleClickQueued(item.Serial);
+                        GameActions.DoubleClickQueued(World, item.Serial);
                     }
                 }
             }
@@ -355,14 +371,14 @@ namespace ClassicUO.Game.GameObjects
 
         private void TryOpenDoors()
         {
-            if (!World.Player.IsDead && ProfileManager.CurrentProfile.AutoOpenDoors)
+            if (!World.Player.IsDead && World.Profile.CurrentProfile.AutoOpenDoors)
             {
                 int x = X, y = Y, z = Z;
                 Pathfinder.GetNewXY((byte) Direction, ref x, ref y);
 
                 if (World.Items.Values.Any(s => s.ItemData.IsDoor && s.X == x && s.Y == y && s.Z - 15 <= z && s.Z + 15 >= z))
                 {
-                    GameActions.OpenDoor();
+                    GameActions.OpenDoor(World);
                 }
             }
         }
@@ -402,7 +418,7 @@ namespace ClassicUO.Game.GameObjects
                     bank.Items = null;
                 }
 
-                UIManager.GetGump<ContainerGump>(bank.Serial)?.Dispose();
+                World.Context.UI.GetGump<ContainerGump>(bank.Serial)?.Dispose();
 
                 bank.Opened = false;
             }
@@ -410,7 +426,7 @@ namespace ClassicUO.Game.GameObjects
 
         public void CloseRangedGumps()
         {
-            foreach (Gump gump in UIManager.Gumps)
+            foreach (Gump gump in World.Context.UI.Gumps)
             {
                 switch (gump)
                 {
@@ -522,14 +538,14 @@ namespace ClassicUO.Game.GameObjects
 
         public bool Walk(Direction direction, bool run)
         {
-            if (Walker.WalkingFailed || Walker.LastStepRequestTime > Time.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT || Client.Game.UO.Version >= ClientVersion.CV_60142 && IsParalyzed)
+            if (Walker.WalkingFailed || Walker.LastStepRequestTime > Time.Ticks || Walker.StepsCount >= Constants.MAX_STEP_COUNT || World.Context.Game.UO.Version >= ClientVersion.CV_60142 && IsParalyzed)
             {
                 return false;
             }
 
-            run |= ProfileManager.CurrentProfile.AlwaysRun;
+            run |= World.Profile.CurrentProfile.AlwaysRun;
 
-            if (SpeedMode >= CharacterSpeedType.CantRun || Stamina <= 1 && !IsDead || IsHidden && ProfileManager.CurrentProfile.AlwaysRunUnlessHidden)
+            if (SpeedMode >= CharacterSpeedType.CantRun || Stamina <= 1 && !IsDead || IsHidden && World.Profile.CurrentProfile.AlwaysRunUnlessHidden)
             {
                 run = false;
             }
@@ -665,7 +681,7 @@ namespace ClassicUO.Game.GameObjects
             );
 
 
-            NetClient.Socket.Send_WalkRequest(direction, Walker.WalkSequence, run, Walker.FastWalkStack.GetValue());
+            World.Network.Send_WalkRequest(direction, Walker.WalkSequence, run, Walker.FastWalkStack.GetValue());
 
             _serverDirection = direction;
 

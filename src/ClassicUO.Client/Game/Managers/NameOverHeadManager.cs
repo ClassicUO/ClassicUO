@@ -34,14 +34,14 @@ namespace ClassicUO.Game.Managers
 
         public NameOverheadTypeAllowed TypeAllowed
         {
-            get => ProfileManager.CurrentProfile.NameOverheadTypeAllowed;
-            set => ProfileManager.CurrentProfile.NameOverheadTypeAllowed = value;
+            get => _world.Profile.CurrentProfile.NameOverheadTypeAllowed;
+            set => _world.Profile.CurrentProfile.NameOverheadTypeAllowed = value;
         }
 
         public bool IsToggled
         {
-            get => ProfileManager.CurrentProfile.NameOverheadToggled;
-            set => ProfileManager.CurrentProfile.NameOverheadToggled = value;
+            get => _world.Profile.CurrentProfile.NameOverheadToggled;
+            set => _world.Profile.CurrentProfile.NameOverheadToggled = value;
         }
 
         public bool IsAllowed(Entity entity)
@@ -82,7 +82,7 @@ namespace ClassicUO.Game.Managers
             if (_gump == null || _gump.IsDisposed)
             {
                 _gump = new NameOverHeadHandlerGump(_world);
-                UIManager.Add(_gump);
+                _world.Context.UI.Add(_gump);
             }
 
             _gump.IsEnabled = true;
@@ -102,7 +102,7 @@ namespace ClassicUO.Game.Managers
             if (_gump == null)
             { //Required in case nameplates are active when closing and reopening the client
                 _gump = new NameOverHeadHandlerGump(_world);
-                UIManager.Add(_gump);
+                _world.Context.UI.Add(_gump);
             }
 
 

@@ -4,11 +4,13 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
+using ClassicUO.Game;
+
 namespace ClassicUO.Game.UI.Controls
 {
     internal sealed class AlphaBlendControl : Control
     {
-        public AlphaBlendControl(float alpha = 0.5f)
+        public AlphaBlendControl(GameContext context, float alpha = 0.5f) : base(context)
         {
             Alpha = alpha;
             AcceptMouseInput = false;

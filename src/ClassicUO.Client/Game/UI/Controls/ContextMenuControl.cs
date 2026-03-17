@@ -45,14 +45,14 @@ namespace ClassicUO.Game.UI.Controls
 
         public void Show()
         {
-            UIManager.ShowContextMenu(null);
+            _gump.World.Context.UI.ShowContextMenu(null);
 
             if (_items.Count == 0)
             {
                 return;
             }
 
-            UIManager.ShowContextMenu
+            _gump.World.Context.UI.ShowContextMenu
             (
                 new ContextMenuShowMenu(_gump.World, _items)
             );
@@ -60,7 +60,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public void Dispose()
         {
-            UIManager.ShowContextMenu(null);
+            _gump.World.Context.UI.ShowContextMenu(null);
             _items.Clear();
         }
     }
@@ -105,7 +105,7 @@ namespace ClassicUO.Game.UI.Controls
             AcceptMouseInput = true;
 
 
-            _background = new AlphaBlendControl(0.7f);
+            _background = new AlphaBlendControl(Context, 0.7f);
             Add(_background);
 
             int y = 0;
@@ -134,14 +134,14 @@ namespace ClassicUO.Game.UI.Controls
             X = Mouse.Position.X + 5;
             Y = Mouse.Position.Y - 20;
 
-            if (X + _background.Width > Client.Game.ClientBounds.Width)
+            if (X + _background.Width > World.Context.Game.ClientBounds.Width)
             {
-                X = Client.Game.ClientBounds.Width - _background.Width;
+                X = World.Context.Game.ClientBounds.Width - _background.Width;
             }
 
-            if (Y + _background.Height > Client.Game.ClientBounds.Height)
+            if (Y + _background.Height > World.Context.Game.ClientBounds.Height)
             {
-                Y = Client.Game.ClientBounds.Height - _background.Height;
+                Y = World.Context.Game.ClientBounds.Height - _background.Height;
             }
 
             foreach (ContextMenuItem mitem in FindControls<ContextMenuItem>())
@@ -208,7 +208,8 @@ namespace ClassicUO.Game.UI.Controls
 
         private class ContextMenuItem : Control
         {
-            private static readonly RenderedText _moreMenuLabel = RenderedText.Create(">", 0xFFFF, isunicode: true, style: FontStyle.BlackBorder);
+            private RenderedText _moreMenuLabelInstance;
+            private RenderedText _moreMenuLabel => _moreMenuLabelInstance ??= RenderedText.Create(Context.Game.UO, ">", 0xFFFF, isunicode: true, style: FontStyle.BlackBorder);
             private readonly ContextMenuItemEntry _entry;
             private readonly Label _label;
             private readonly GumpPic _selectedPic;
@@ -216,14 +217,14 @@ namespace ClassicUO.Game.UI.Controls
             private readonly ContextMenuShowMenu _gump;
 
 
-            public ContextMenuItem(ContextMenuShowMenu parent, ContextMenuItemEntry entry)
+            public ContextMenuItem(ContextMenuShowMenu parent, ContextMenuItemEntry entry) : base(parent.World.Context)
             {
                 _gump = parent;
                 CanCloseWithRightClick = false;
                 _entry = entry;
 
                 _label = new Label
-                (
+                (Context, 
                     entry.Text,
                     true,
                     0xFFFF,
@@ -239,7 +240,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (entry.CanBeSelected)
                 {
-                    _selectedPic = new GumpPic(3, 0, 0x838, 0)
+                    _selectedPic = new GumpPic(3, 0, 0x838, 0, Context)
                     {
                         IsVisible = entry.IsSelected,
                         IsEnabled = false
@@ -304,7 +305,7 @@ namespace ClassicUO.Game.UI.Controls
                     }
                     else
                     {
-                        Control p = UIManager.MouseOverControl?.Parent;
+                        Control p = _gump.World.Context.UI.MouseOverControl?.Parent;
 
                         while (p != null)
                         {

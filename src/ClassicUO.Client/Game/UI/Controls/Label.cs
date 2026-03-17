@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Assets;
+using ClassicUO.Game;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Utility;
 using System.Collections.Generic;
@@ -9,10 +10,11 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class Label : Control
     {
-        private readonly RenderedText _gText;
+        private RenderedText _gText;
 
         public Label
         (
+            GameContext context,
             string text,
             bool isunicode,
             ushort hue,
@@ -21,27 +23,34 @@ namespace ClassicUO.Game.UI.Controls
             FontStyle style = FontStyle.None,
             TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT,
             bool ishtml = false
-        )
+        ) : base(context)
         {
-            _gText = RenderedText.Create
-            (
-                text,
-                hue,
-                font,
-                isunicode,
-                style,
-                align,
-                maxwidth,
-                isHTML: ishtml
-            );
-
             AcceptMouseInput = false;
-            Width = _gText.Width;
-            Height = _gText.Height;
+
+            var uo = Context?.Game?.UO;
+            if (uo != null)
+            {
+                _gText = RenderedText.Create
+                (
+                    uo,
+                    text,
+                    hue,
+                    font,
+                    isunicode,
+                    style,
+                    align,
+                    maxwidth,
+                    isHTML: ishtml
+                );
+
+                Width = _gText.Width;
+                Height = _gText.Height;
+            }
         }
 
-        public Label(List<string> parts, string[] lines) : this
+        public Label(List<string> parts, string[] lines, GameContext context) : this
         (
+            context,
             int.TryParse(parts[4], out int lineIndex) && lineIndex >= 0 && lineIndex < lines.Length ? lines[lineIndex] : string.Empty,
             true,
             (ushort) (UInt16Converter.Parse(parts[3]) + 1),
@@ -56,22 +65,25 @@ namespace ClassicUO.Game.UI.Controls
 
         public string Text
         {
-            get => _gText.Text;
+            get => _gText?.Text ?? string.Empty;
             set
             {
-                _gText.Text = value;
-                Width = _gText.Width;
-                Height = _gText.Height;
+                if (_gText != null)
+                {
+                    _gText.Text = value;
+                    Width = _gText.Width;
+                    Height = _gText.Height;
+                }
             }
         }
 
 
         public ushort Hue
         {
-            get => _gText.Hue;
+            get => _gText?.Hue ?? 0;
             set
             {
-                if (_gText.Hue != value)
+                if (_gText != null && _gText.Hue != value)
                 {
                     _gText.Hue = value;
                     _gText.CreateTexture();
@@ -80,9 +92,15 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-        public byte Font => _gText.Font;
+        public byte Font
+        {
+            get => _gText?.Font ?? 0xFF;
+        }
 
-        public bool Unicode => _gText.IsUnicode;
+        public bool Unicode
+        {
+            get => _gText?.IsUnicode ?? false;
+        }
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
@@ -90,6 +108,10 @@ namespace ClassicUO.Game.UI.Controls
             {
                 return false;
             }
+
+            if (_gText == null)
+                return false;
+
             float layerDepth = layerDepthRef;
             renderLists.AddGumpNoAtlas(
                 batcher =>
@@ -106,7 +128,7 @@ namespace ClassicUO.Game.UI.Controls
         public override void Dispose()
         {
             base.Dispose();
-            _gText.Destroy();
+            _gText?.Destroy();
         }
     }
 }

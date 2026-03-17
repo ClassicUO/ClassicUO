@@ -46,7 +46,7 @@ namespace ClassicUO.Game.Managers
             _world = world;
             Serial = serial;
 
-            var fileManager = Client.Game.UO.FileManager;
+            var fileManager = _world.Context.Game.UO.FileManager;
             // TODO: don't load the file txt every time the housemanager get initialized
             ParseFileWithCategory<CustomHouseWall, CustomHouseWallCategory>(Walls, fileManager.GetUOFilePath("walls.txt"));
 
@@ -669,7 +669,7 @@ namespace ClassicUO.Game.Managers
             // apply a minor offset for roof tiles
             int zOffset = -3;
 
-            HouseCustomizationGump gump = UIManager.GetGump<HouseCustomizationGump>(Serial);
+            HouseCustomizationGump gump = _world.Context.UI.GetGump<HouseCustomizationGump>(Serial);
 
             if (CurrentFloor == 1)
             {
@@ -842,24 +842,24 @@ namespace ClassicUO.Game.Managers
                                 {
                                     int pz = piece.Z - (foundationItem.Z + (7 + (CurrentFloor - 1) * 20)) + (7 + (CurrentFloor - 1) * 20);
 
-                                    NetClient.Socket.Send_CustomHouseDeleteItem(_world, piece.Graphic, piece.X - foundationItem.X, piece.Y - foundationItem.Y, pz);
+                                    _world.Network.Send_CustomHouseDeleteItem(_world, piece.Graphic, piece.X - foundationItem.X, piece.Y - foundationItem.Y, pz);
                                     piece.Destroy();
                                 }
                             }
                             else
                             {
-                                NetClient.Socket.Send_CustomHouseDeleteItem(_world, place.Graphic, place.X - foundationItem.X, place.Y - foundationItem.Y, z);
+                                _world.Network.Send_CustomHouseDeleteItem(_world, place.Graphic, place.X - foundationItem.X, place.Y - foundationItem.Y, z);
                                 place.Destroy();
                             }
                         }
                         else if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF)
                         {
-                            NetClient.Socket.Send_CustomHouseDeleteRoof(_world, place.Graphic, place.X - foundationItem.X, place.Y - foundationItem.Y, z);
+                            _world.Network.Send_CustomHouseDeleteRoof(_world, place.Graphic, place.X - foundationItem.X, place.Y - foundationItem.Y, z);
                             place.Destroy();
                         }
                         else
                         {
-                            NetClient.Socket.Send_CustomHouseDeleteItem(_world, place.Graphic, place.X - foundationItem.X, place.Y - foundationItem.Y, z);
+                            _world.Network.Send_CustomHouseDeleteItem(_world, place.Graphic, place.X - foundationItem.X, place.Y - foundationItem.Y, z);
                             place.Destroy();
                         }
                     }
@@ -903,7 +903,7 @@ namespace ClassicUO.Game.Managers
 
                                 if (graphic != 0)
                                 {
-                                    NetClient.Socket.Send_CustomHouseAddStair(_world, graphic, placeX - foundationItem.X, placeY - foundationItem.Y);
+                                    _world.Network.Send_CustomHouseAddStair(_world, graphic, placeX - foundationItem.X, placeY - foundationItem.Y);
                                 }
                             }
                         }
@@ -977,11 +977,11 @@ namespace ClassicUO.Game.Managers
 
                                 if (type == CUSTOM_HOUSE_BUILD_TYPE.CHBT_ROOF)
                                 {
-                                    NetClient.Socket.Send_CustomHouseAddRoof(_world, item.Graphic, x, y, item.Z);
+                                    _world.Network.Send_CustomHouseAddRoof(_world, item.Graphic, x, y, item.Z);
                                 }
                                 else
                                 {
-                                    NetClient.Socket.Send_CustomHouseAddItem(_world, item.Graphic, x, y);
+                                    _world.Network.Send_CustomHouseAddItem(_world, item.Graphic, x, y);
                                 }
                             }
                         }
@@ -1024,7 +1024,7 @@ namespace ClassicUO.Game.Managers
             if (res1 != -1 && res2 != -1)
             {
                 State = state;
-                HouseCustomizationGump gump = UIManager.GetGump<HouseCustomizationGump>(Serial);
+                HouseCustomizationGump gump = _world.Context.UI.GetGump<HouseCustomizationGump>(Serial);
 
                 if (State == CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL || State == CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF || State == CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC)
                 {

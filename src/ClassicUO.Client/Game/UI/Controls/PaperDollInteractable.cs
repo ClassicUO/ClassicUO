@@ -74,7 +74,7 @@ namespace ClassicUO.Game.UI.Controls
 
         private bool _updateUI;
 
-        public PaperDollInteractable(int x, int y, uint serial, PaperDollGump paperDollGump)
+        public PaperDollInteractable(int x, int y, uint serial, PaperDollGump paperDollGump) : base(paperDollGump.World.Context)
         {
             X = x;
             Y = y;
@@ -165,12 +165,12 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             // body
-            Add(new GumpPic(0, 0, body, hue) { IsPartialHue = true });
+            Add(new GumpPic(0, 0, body, hue, Context) { IsPartialHue = true });
 
             if (mobile.Graphic == 0x03DB)
             {
                 Add(
-                    new GumpPic(0, 0, 0xC72B, mobile.Hue)
+                    new GumpPic(0, 0, 0xC72B, mobile.Hue, Context)
                     {
                         AcceptMouseInput = true,
                         IsPartialHue = true
@@ -190,14 +190,14 @@ namespace ClassicUO.Game.UI.Controls
             }
             else if (
                 HasFakeItem
-                && Client.Game.UO.GameCursor.ItemHold.Enabled
-                && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition
-                && (byte)Layer.Arms == Client.Game.UO.GameCursor.ItemHold.ItemData.Layer
+                && Context.Game.UO.GameCursor.ItemHold.Enabled
+                && !Context.Game.UO.GameCursor.ItemHold.IsFixedPosition
+                && (byte)Layer.Arms == Context.Game.UO.GameCursor.ItemHold.ItemData.Layer
             )
             {
                 switch_arms_with_torso =
-                    Client.Game.UO.GameCursor.ItemHold.Graphic == 0x1410
-                    || Client.Game.UO.GameCursor.ItemHold.Graphic == 0x1417;
+                    Context.Game.UO.GameCursor.ItemHold.Graphic == 0x1410
+                    || Context.Game.UO.GameCursor.ItemHold.Graphic == 0x1417;
             }
 
             Layer[] layers;
@@ -208,12 +208,12 @@ namespace ClassicUO.Game.UI.Controls
             }
             else if (
                 HasFakeItem
-                && Client.Game.UO.GameCursor.ItemHold.Enabled
-                && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition
-                && (byte)Layer.Cloak == Client.Game.UO.GameCursor.ItemHold.ItemData.Layer
+                && Context.Game.UO.GameCursor.ItemHold.Enabled
+                && !Context.Game.UO.GameCursor.ItemHold.IsFixedPosition
+                && (byte)Layer.Cloak == Context.Game.UO.GameCursor.ItemHold.ItemData.Layer
             )
             {
-                layers = Client.Game.UO.GameCursor.ItemHold.ItemData.IsContainer
+                layers = Context.Game.UO.GameCursor.ItemHold.ItemData.IsContainer
                     ? _layerOrder_quiver_fix
                     : _layerOrder;
             }
@@ -248,6 +248,7 @@ namespace ClassicUO.Game.UI.Controls
                     }
 
                     ushort id = GetAnimID(
+                        Context.Game.UO,
                         mobile.Graphic,
                         equipItem.Graphic,
                         equipItem.ItemData.AnimID,
@@ -278,16 +279,17 @@ namespace ClassicUO.Game.UI.Controls
                 }
                 else if (
                     HasFakeItem
-                    && Client.Game.UO.GameCursor.ItemHold.Enabled
-                    && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition
-                    && (byte)layer == Client.Game.UO.GameCursor.ItemHold.ItemData.Layer
-                    && Client.Game.UO.GameCursor.ItemHold.ItemData.AnimID != 0
+                    && Context.Game.UO.GameCursor.ItemHold.Enabled
+                    && !Context.Game.UO.GameCursor.ItemHold.IsFixedPosition
+                    && (byte)layer == Context.Game.UO.GameCursor.ItemHold.ItemData.Layer
+                    && Context.Game.UO.GameCursor.ItemHold.ItemData.AnimID != 0
                 )
                 {
                     ushort id = GetAnimID(
+                        Context.Game.UO,
                         mobile.Graphic,
-                        Client.Game.UO.GameCursor.ItemHold.Graphic,
-                        Client.Game.UO.GameCursor.ItemHold.ItemData.AnimID,
+                        Context.Game.UO.GameCursor.ItemHold.Graphic,
+                        Context.Game.UO.GameCursor.ItemHold.ItemData.AnimID,
                         mobile.IsFemale
                     );
 
@@ -298,12 +300,12 @@ namespace ClassicUO.Game.UI.Controls
                             0,
                             0,
                             id,
-                            (ushort)(Client.Game.UO.GameCursor.ItemHold.Hue & 0x3FFF),
-                            Client.Game.UO.GameCursor.ItemHold.Layer
+                            (ushort)(Context.Game.UO.GameCursor.ItemHold.Hue & 0x3FFF),
+                            Context.Game.UO.GameCursor.ItemHold.Layer
                         )
                         {
                             AcceptMouseInput = true,
-                            IsPartialHue = Client.Game.UO.GameCursor.ItemHold.IsPartialHue,
+                            IsPartialHue = Context.Game.UO.GameCursor.ItemHold.IsPartialHue,
                             Alpha = 0.5f
                         }
                     );
@@ -321,9 +323,9 @@ namespace ClassicUO.Game.UI.Controls
                 // If player, apply backpack skin
                 if (mobile.Serial == _paperDollGump.World.Player.Serial)
                 {
-                    var gump = Client.Game.UO.Gumps;
+                    var gump = Context.Game.UO.Gumps;
 
-                    switch (ProfileManager.CurrentProfile.BackpackStyle)
+                    switch (_paperDollGump.World.Profile.CurrentProfile.BackpackStyle)
                     {
                         case 1:
                             if (gump.GetGump(0x777B).Texture != null)
@@ -385,12 +387,12 @@ namespace ClassicUO.Game.UI.Controls
             _updateUI = true;
         }
 
-        protected static ushort GetAnimID(ushort mobileGraphic, ushort itemGraphic, ushort animID, bool isfemale)
+        protected static ushort GetAnimID(UltimaOnline uo, ushort mobileGraphic, ushort itemGraphic, ushort animID, bool isfemale)
         {
             int offset = isfemale ? Constants.FEMALE_GUMP_OFFSET : Constants.MALE_GUMP_OFFSET;
 
             if (
-                    Client.Game.UO.Version >= ClientVersion.CV_7000
+                    uo.Version >= ClientVersion.CV_7000
                     && animID == 0x03CA // graphic for dead shroud
                     && (mobileGraphic == 0x02B7 || mobileGraphic == 0x02B6)
                 ) // dead gargoyle graphics
@@ -398,10 +400,10 @@ namespace ClassicUO.Game.UI.Controls
                     animID = 0x0223;
                 }
 
-            Client.Game.UO.Animations.ConvertBodyIfNeeded(ref mobileGraphic);
+            uo.Animations.ConvertBodyIfNeeded(ref mobileGraphic);
 
             if (
-                Client.Game.UO.FileManager.Animations.EquipConversions.TryGetValue(
+                uo.FileManager.Animations.EquipConversions.TryGetValue(
                     mobileGraphic,
                     out Dictionary<ushort, EquipConvData> dict
                 )
@@ -424,12 +426,12 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            if (Client.Game.UO.FileManager.TileArt.TryGetTileArtInfo(itemGraphic, out var tileArtInfo))
+            if (uo.FileManager.TileArt.TryGetTileArtInfo(itemGraphic, out var tileArtInfo))
             {
                 if (tileArtInfo.TryGetAppearance(mobileGraphic, out var appareanceId))
                 {
                     var gumpId = (ushort)(Constants.MALE_GUMP_OFFSET + appareanceId);
-                    if (Client.Game.UO.Gumps.GetGump(gumpId).Texture != null)
+                    if (uo.Gumps.GetGump(gumpId).Texture != null)
                     {
                         Log.Info($"Equip conversion through tileart.uop done: old {animID} -> new {appareanceId}");
                         return gumpId;
@@ -437,23 +439,23 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            _ = IsAnimExistsInGump(animID, ref offset, isfemale);
+            _ = IsAnimExistsInGump(uo, animID, ref offset, isfemale);
 
             return (ushort)(animID + offset);
         }
 
-        private static bool IsAnimExistsInGump(ushort animID, ref int offset, bool isFemale)
+        private static bool IsAnimExistsInGump(UltimaOnline uo, ushort animID, ref int offset, bool isFemale)
         {
             if (
                     animID + offset > GumpsLoader.MAX_GUMP_DATA_INDEX_COUNT
-                    || Client.Game.UO.Gumps.GetGump((ushort)(animID + offset)).Texture == null
+                    || uo.Gumps.GetGump((ushort)(animID + offset)).Texture == null
                 )
             {
                 // inverse
                 offset = isFemale ? Constants.MALE_GUMP_OFFSET : Constants.FEMALE_GUMP_OFFSET;
             }
 
-            if (Client.Game.UO.Gumps.GetGump((ushort)(animID + offset)).Texture == null)
+            if (uo.Gumps.GetGump((ushort)(animID + offset)).Texture == null)
             {
                 Log.Error(
                     $"Texture not found in paperdoll: gump_graphic: {(ushort)(animID + offset)}"
@@ -478,7 +480,7 @@ namespace ClassicUO.Game.UI.Controls
                 ushort graphic,
                 ushort hue,
                 Layer layer
-            ) : base(x, y, graphic, hue)
+            ) : base(x, y, graphic, hue, gump.World.Context)
             {
                 _gump = gump;
                 LocalSerial = serial;
@@ -523,9 +525,9 @@ namespace ClassicUO.Game.UI.Controls
                 {
                     if (
                         CanLift
-                        && !Client.Game.UO.GameCursor.ItemHold.Enabled
+                        && !Context.Game.UO.GameCursor.ItemHold.Enabled
                         && Mouse.LButtonPressed
-                        && UIManager.LastControlMouseDown(MouseButtonType.Left) == this
+                        && _gump.World.Context.UI.LastControlMouseDown(MouseButtonType.Left) == this
                         && (
                             Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF
                                 && Mouse.LastLeftButtonClickTime != 0

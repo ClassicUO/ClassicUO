@@ -25,7 +25,7 @@ using static SDL3.SDL;
 
 namespace ClassicUO
 {
-    internal unsafe class GameController : Microsoft.Xna.Framework.Game
+    internal unsafe class GameController : Microsoft.Xna.Framework.Game, IGameController
     {
         private SDL_EventFilter _filter;
 
@@ -39,6 +39,7 @@ namespace ClassicUO
         private bool _suppressedDraw;
         private bool _pluginsInitialized = false;
         private float _displayScale;
+        private IUIManager _ui;
 
         public GameController(IPluginHost pluginHost)
         {
@@ -83,7 +84,7 @@ namespace ClassicUO
             }
         }
 
-        public readonly uint[] FrameDelay = new uint[2];
+        public uint[] FrameDelay { get; } = new uint[2];
 
         private readonly List<(uint, Action)> _queuedActions = new ();
 
@@ -120,7 +121,6 @@ namespace ClassicUO
 
             Fonts.Initialize(GraphicsDevice);
             SolidColorTextureCache.Initialize(GraphicsDevice);
-            Audio = new AudioManager();
 
             var bytes = Loader.GetBackgroundImage().ToArray();
             using var ms = new MemoryStream(bytes);
@@ -129,9 +129,10 @@ namespace ClassicUO
             SetScene(new MainScene(this));
 #else
             UO.Load(this);
+            Audio = new AudioManager(Settings.GlobalSettings, this, UO.World.Profile);
             Audio.Initialize();
             // TODO: temporary fix to avoid crash when laoding plugins
-            Settings.GlobalSettings.Encryption = (byte) NetClient.Socket.Load(UO.FileManager.Version, (EncryptionType) Settings.GlobalSettings.Encryption);
+            Settings.GlobalSettings.Encryption = (byte) UO.World.Network.Load(UO.FileManager.Version, (EncryptionType) Settings.GlobalSettings.Encryption);
 
             Log.Trace("Loading plugins...");
             PluginHost?.Initialize();
@@ -143,6 +144,8 @@ namespace ClassicUO
             _pluginsInitialized = true;
 
             Log.Trace("Done!");
+
+            _ui = UO.World.Context.UI;
 
             SetScene(new LoginScene(UO.World));
 #endif
@@ -244,8 +247,6 @@ namespace ClassicUO
 
         public void SetWindowSize(int width, int height)
         {
-            //width = (int) ((double) width * Client.Game.GraphicManager.PreferredBackBufferWidth / Client.Game.Window.ClientBounds.Width);
-            //height = (int) ((double) height * Client.Game.GraphicManager.PreferredBackBufferHeight / Client.Game.Window.ClientBounds.Height);
 
             /*if (CUOEnviroment.IsHighDPI)
             {
@@ -301,9 +302,9 @@ namespace ClassicUO
                 SetWindowPositionBySettings();
             }
 
-            WorldViewportGump viewport = UIManager.GetGump<WorldViewportGump>();
+            WorldViewportGump viewport = _ui.GetGump<WorldViewportGump>();
 
-            if (viewport != null && ProfileManager.CurrentProfile.GameWindowFullSize)
+            if (viewport != null && UO.World?.Profile?.CurrentProfile is { } borderlessProfile && borderlessProfile.GameWindowFullSize)
             {
                 viewport.ResizeGameWindow(new Point(width, height));
                 viewport.X = -5;
@@ -315,8 +316,8 @@ namespace ClassicUO
         {
             SDL_MaximizeWindow(Window.Handle);
 
-            GraphicManager.PreferredBackBufferWidth = Client.Game.Window.ClientBounds.Width;
-            GraphicManager.PreferredBackBufferHeight = Client.Game.Window.ClientBounds.Height;
+            GraphicManager.PreferredBackBufferWidth = Window.ClientBounds.Width;
+            GraphicManager.PreferredBackBufferHeight = Window.ClientBounds.Height;
             GraphicManager.ApplyChanges();
         }
 
@@ -388,13 +389,14 @@ namespace ClassicUO
             Time.Ticks = (uint)gameTime.TotalGameTime.TotalMilliseconds;
             Time.Delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-            Mouse.Update();
+            Mouse.Update(this);
 
-            var data = NetClient.Socket.CollectAvailableData();
-            var packetsCount = PacketHandlers.Handler.ParsePackets(NetClient.Socket, UO.World, data);
+            var network = UO.World.Network;
+            var data = network.CollectAvailableData();
+            var packetsCount = PacketHandlers.Handler.ParsePackets(network, UO.World, data);
 
-            NetClient.Socket.Statistics.TotalPacketsReceived += (uint)packetsCount;
-            NetClient.Socket.Flush();
+            network.Statistics.TotalPacketsReceived += (uint)packetsCount;
+            network.Flush();
 
             Plugin.Tick();
 
@@ -405,7 +407,7 @@ namespace ClassicUO
                 Profiler.ExitContext(Profiler.ProfilerContext.UPDATE_WORLD);
             }
 
-            UIManager.Update();
+            _ui.Update();
 
             _totalElapsed += gameTime.ElapsedGameTime.TotalMilliseconds;
             _currentFpsTime += gameTime.ElapsedGameTime.TotalMilliseconds;
@@ -420,8 +422,7 @@ namespace ClassicUO
 
             double x = _intervalFixedUpdate[
                 !IsActive
-                && ProfileManager.CurrentProfile != null
-                && ProfileManager.CurrentProfile.ReduceFPSWhenInactive
+                && UO.World?.Profile?.CurrentProfile is { ReduceFPSWhenInactive: true }
                     ? 1
                     : 0
             ];
@@ -514,7 +515,7 @@ namespace ClassicUO
             }
             _uoSpriteBatch.End();
 
-            UIManager.Draw(_uoSpriteBatch);
+            _ui.Draw(_uoSpriteBatch);
 
             _uoSpriteBatch.Begin();
             UO.GameCursor?.Draw(_uoSpriteBatch);
@@ -570,15 +571,15 @@ namespace ClassicUO
         {
             if (!IsWindowMaximized() && Window.AllowUserResizing)
             {
-                if (ProfileManager.CurrentProfile != null)
-                    ProfileManager.CurrentProfile.WindowClientBounds = new Point(width, height);
+                if (UO.World?.Profile?.CurrentProfile is { } resizeProfile)
+                    resizeProfile.WindowClientBounds = new Point(width, height);
             }
 
             SetWindowSize(width, height);
 
-            WorldViewportGump viewport = UIManager.GetGump<WorldViewportGump>();
+            WorldViewportGump viewport = _ui.GetGump<WorldViewportGump>();
 
-            if (viewport != null && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.GameWindowFullSize)
+            if (viewport != null && UO.World?.Profile?.CurrentProfile is { GameWindowFullSize: true })
             {
                 viewport.ResizeGameWindow(new Point(width, height));
                 viewport.X = -5;
@@ -645,7 +646,7 @@ namespace ClassicUO
                     {
                         _ignoreNextTextInput = false;
 
-                        UIManager.KeyboardFocusControl?.InvokeKeyDown(
+                        _ui.KeyboardFocusControl?.InvokeKeyDown(
                             (SDL_Keycode)sdlEvent->key.key,
                             sdlEvent->key.mod
                         );
@@ -662,7 +663,7 @@ namespace ClassicUO
                 case SDL_EventType.SDL_EVENT_KEY_UP:
 
                     Keyboard.OnKeyUp(sdlEvent->key);
-                    UIManager.KeyboardFocusControl?.InvokeKeyUp(
+                    _ui.KeyboardFocusControl?.InvokeKeyUp(
                         (SDL_Keycode)sdlEvent->key.key,
                         sdlEvent->key.mod
                     );
@@ -707,7 +708,7 @@ namespace ClassicUO
 
                     if (!string.IsNullOrEmpty(s))
                     {
-                        UIManager.KeyboardFocusControl?.InvokeTextInput(s);
+                        _ui.KeyboardFocusControl?.InvokeTextInput(s);
                         Scene.OnTextInput(s);
                     }
 
@@ -721,27 +722,27 @@ namespace ClassicUO
                         UO.GameCursor.Graphic = 0xFFFF;
                     }
 
-                    Mouse.Update();
+                    Mouse.Update(this);
 
                     if (Mouse.IsDragging)
                     {
                         if (!Scene.OnMouseDragging())
                         {
-                            UIManager.OnMouseDragging();
+                            _ui.OnMouseDragging();
                         }
                     }
 
                     break;
 
                 case SDL_EventType.SDL_EVENT_MOUSE_WHEEL:
-                    Mouse.Update();
+                    Mouse.Update(this);
                     bool isScrolledUp = sdlEvent->wheel.y > 0;
 
                     Plugin.ProcessMouse(0, (int)sdlEvent->wheel.y);
 
                     if (!Scene.OnMouseWheel(isScrolledUp))
                     {
-                        UIManager.OnMouseWheel(isScrolledUp);
+                        _ui.OnMouseWheel(isScrolledUp);
                     }
 
                     break;
@@ -783,7 +784,7 @@ namespace ClassicUO
                     }
 
                     Mouse.ButtonPress(buttonType);
-                    Mouse.Update();
+                    Mouse.Update(this);
 
                     uint ticks = Time.Ticks;
 
@@ -793,13 +794,13 @@ namespace ClassicUO
 
                         bool res =
                             Scene.OnMouseDoubleClick(buttonType)
-                            || UIManager.OnMouseDoubleClick(buttonType);
+                            || _ui.OnMouseDoubleClick(buttonType);
 
                         if (!res)
                         {
                             if (!Scene.OnMouseDown(buttonType))
                             {
-                                UIManager.OnMouseButtonDown(buttonType);
+                                _ui.OnMouseButtonDown(buttonType);
                             }
                         }
                         else
@@ -819,7 +820,7 @@ namespace ClassicUO
 
                         if (!Scene.OnMouseDown(buttonType))
                         {
-                            UIManager.OnMouseButtonDown(buttonType);
+                            _ui.OnMouseButtonDown(buttonType);
                         }
 
                         lastClickTime = Mouse.CancelDoubleClick ? 0 : ticks;
@@ -882,15 +883,15 @@ namespace ClassicUO
                     {
                         if (
                             !Scene.OnMouseUp(buttonType)
-                            || UIManager.LastControlMouseDown(buttonType) != null
+                            || _ui.LastControlMouseDown(buttonType) != null
                         )
                         {
-                            UIManager.OnMouseButtonUp(buttonType);
+                            _ui.OnMouseButtonUp(buttonType);
                         }
                     }
 
                     Mouse.ButtonRelease(buttonType);
-                    Mouse.Update();
+                    Mouse.Update(this);
 
                     break;
                 }
@@ -905,16 +906,16 @@ namespace ClassicUO
                         // This is especially important when the window size is restricted, for example
                         // in the LoginScene
                         WindowOnClientSizeChanged(
-                            Client.Game.ScaleWithDpi(Window.ClientBounds.Width, previousDpi: _displayScale),
-                            Client.Game.ScaleWithDpi(Window.ClientBounds.Height, previousDpi: _displayScale)
+                            ScaleWithDpi(Window.ClientBounds.Width, previousDpi: _displayScale),
+                            ScaleWithDpi(Window.ClientBounds.Height, previousDpi: _displayScale)
                         );
 
-                        SDL_GetWindowMinimumSize(Client.Game.Window.Handle, out int previousMinWidth, out int previousMinHeight);
+                        SDL_GetWindowMinimumSize(Window.Handle, out int previousMinWidth, out int previousMinHeight);
 
                         SDL_SetWindowMinimumSize(
-                            Client.Game.Window.Handle,
-                            Client.Game.ScaleWithDpi(previousMinWidth, previousDpi: _displayScale),
-                            Client.Game.ScaleWithDpi(previousMinHeight, previousDpi: _displayScale)
+                            Window.Handle,
+                            ScaleWithDpi(previousMinWidth, previousDpi: _displayScale),
+                            ScaleWithDpi(previousMinHeight, previousDpi: _displayScale)
                         );
 
                         _displayScale = DpiScale;
@@ -969,8 +970,8 @@ namespace ClassicUO
                 string message = string.Format(ResGeneral.ScreenshotStoredIn0, path);
 
                 if (
-                    ProfileManager.CurrentProfile == null
-                    || ProfileManager.CurrentProfile.HideScreenshotStoredInMessage
+                    UO.World?.Profile?.CurrentProfile is not { } screenshotProfile
+                    || screenshotProfile.HideScreenshotStoredInMessage
                 )
                 {
                     Log.Info(message);

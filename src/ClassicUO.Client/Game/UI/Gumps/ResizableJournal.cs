@@ -61,7 +61,7 @@ namespace ClassicUO.Game.UI.Gumps
 
 
             #region Background
-            _background = new AlphaBlendControl(0.7f);
+            _background = new AlphaBlendControl(World.Context, 0.7f);
             _background.Hue = 0x0000;
             _background.Width = Width - (BORDER_WIDTH * 2);
             _background.Height = Height - (BORDER_WIDTH * 2);
@@ -79,9 +79,10 @@ namespace ClassicUO.Game.UI.Gumps
             _scrollBarBase = new ScrollBar(
                 Width - SCROLL_BAR_WIDTH - BORDER_WIDTH,
                 BORDER_WIDTH + TAB_HEIGHT,
-                Height - TAB_HEIGHT - (BORDER_WIDTH * 2));
+                Height - TAB_HEIGHT - (BORDER_WIDTH * 2), World.Context);
 
             _journalArea = new JournalEntriesContainer(
+                World.Context,
                 BORDER_WIDTH,
                 BORDER_WIDTH + TAB_HEIGHT,
                 Width - SCROLL_BAR_WIDTH - (BORDER_WIDTH * 2),
@@ -97,14 +98,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(_journalArea);
 
-            Add(_newTabButton = new NiceButton(0, 0, 20, TAB_HEIGHT, ButtonAction.Activate, "+") { IsSelectable = false });
+            Add(_newTabButton = new NiceButton(World.Context, 0, 0, 20, TAB_HEIGHT, ButtonAction.Activate, "+") { IsSelectable = false });
             _newTabButton.SetTooltip("Add a new tab");
             _newTabButton.MouseUp += (s, e) =>
             {
                 if (e.Button == MouseButtonType.Left)
                 {
-                    UIManager.Add(new EntryDialog(world, 250, 150, "Enter a tab name", (s) => {
-                         ProfileManager.CurrentProfile.JournalTabs.Add(s, new MessageType[] { MessageType.Regular });
+                    World.Context.UI.Add(new EntryDialog(world, 250, 150, "Enter a tab name", (s) => {
+                         World.Profile.CurrentProfile.JournalTabs.Add(s, new MessageType[] { MessageType.Regular });
                          ReloadTabs = true;
                     }));
                 }
@@ -135,7 +136,7 @@ namespace ClassicUO.Game.UI.Gumps
             _tabName.Clear();
             _tabTypes.Clear();
 
-            foreach (var tab in ProfileManager.CurrentProfile.JournalTabs)
+            foreach (var tab in World.Profile.CurrentProfile.JournalTabs)
             {
                 AddTab(tab.Key, tab.Value);
             }
@@ -231,7 +232,7 @@ namespace ClassicUO.Game.UI.Gumps
         private void AddTab(string Name, MessageType[] filters)
         {
             NiceButton nb;
-            _tab.Add(nb = new NiceButton((_tab.Count * TAB_WIDTH) + 4, 0, TAB_WIDTH, TAB_HEIGHT, ButtonAction.Activate, Name, 1)
+            _tab.Add(nb = new NiceButton(World.Context, (_tab.Count * TAB_WIDTH) + 4, 0, TAB_WIDTH, TAB_HEIGHT, ButtonAction.Activate, Name, 1)
             {
                 ButtonParameter = _tab.Count,
                 IsSelectable = true,
@@ -308,7 +309,7 @@ namespace ClassicUO.Game.UI.Gumps
             private int lastWidth = 0, lastHeight = 0;
             private ResizableJournal _resizableJournal;
 
-            public JournalEntriesContainer(int x, int y, int width, int height, ScrollBarBase scrollBarControl, ResizableJournal resizableJournal)
+            public JournalEntriesContainer(GameContext context, int x, int y, int width, int height, ScrollBarBase scrollBarControl, ResizableJournal resizableJournal) : base(context)
             {
                 _resizableJournal = resizableJournal;
                 _scrollBar = scrollBarControl;
@@ -375,7 +376,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     foreach (JournalData jdata in journalDatas)
                     {
-                        jdata.EntryText = new Label(jdata.EntryText.Text, jdata.EntryText.Unicode, jdata.EntryText.Hue, Width - BORDER_WIDTH - jdata.TimeStamp.Width, font: jdata.EntryText.Font);
+                        jdata.EntryText = new Label(Context, jdata.EntryText.Text, jdata.EntryText.Unicode, jdata.EntryText.Hue, Width - BORDER_WIDTH - jdata.TimeStamp.Width, font: jdata.EntryText.Font);
                         jdata.EntryText.Update();
                     }
 
@@ -422,11 +423,11 @@ namespace ClassicUO.Game.UI.Gumps
                 while (journalDatas.Count > Constants.MAX_JOURNAL_HISTORY_COUNT)
                     journalDatas.RemoveFromFront().Destroy();
 
-                Label timeS = new Label($"{e.Time:t}", e.IsUnicode, e.Hue, font: e.Font);
+                Label timeS = new Label(Context, $"{e.Time:t}", e.IsUnicode, e.Hue, font: e.Font);
 
                 journalDatas.AddToBack(
                     new JournalData(
-                        new Label($"{e.Name}: {e.Text}", e.IsUnicode, e.Hue, Width - BORDER_WIDTH - timeS.Width, font: e.Font),
+                        new Label(Context, $"{e.Name}: {e.Text}", e.IsUnicode, e.Hue, Width - BORDER_WIDTH - timeS.Width, font: e.Font),
                         timeS,
                         e.TextType,
                         e.MessageType
@@ -504,9 +505,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             public TabContextEntry(World world, Gump parent, string name) : base(parent)
             {
-                if (ProfileManager.CurrentProfile.JournalTabs.ContainsKey(name))
+                if (world.Profile.CurrentProfile.JournalTabs.ContainsKey(name))
                 {
-                    MessageType[] selectedTypes = ProfileManager.CurrentProfile.JournalTabs[name];
+                    MessageType[] selectedTypes = world.Profile.CurrentProfile.JournalTabs[name];
 
                     foreach (MessageType item in Enum.GetValues(typeof(MessageType)))
                     {
@@ -560,18 +561,18 @@ namespace ClassicUO.Game.UI.Gumps
                         Add(entryName,
                             () =>
                             {
-                                if (ProfileManager.CurrentProfile.JournalTabs.ContainsKey(name))
+                                if (world.Profile.CurrentProfile.JournalTabs.ContainsKey(name))
                                 {
-                                    MessageType[] selectedTypes = ProfileManager.CurrentProfile.JournalTabs[name];
+                                    MessageType[] selectedTypes = world.Profile.CurrentProfile.JournalTabs[name];
 
                                     if (selectedTypes.Contains(item))
                                     {
-                                        ProfileManager.CurrentProfile.JournalTabs[name] = RemoveType(selectedTypes, item);
+                                        world.Profile.CurrentProfile.JournalTabs[name] = RemoveType(selectedTypes, item);
                                         ResizableJournal.ReloadTabs = true;
                                     }
                                     else
                                     {
-                                        ProfileManager.CurrentProfile.JournalTabs[name] = AddType(selectedTypes, item);
+                                        world.Profile.CurrentProfile.JournalTabs[name] = AddType(selectedTypes, item);
                                         ResizableJournal.ReloadTabs = true;
                                     }
                                 }
@@ -583,13 +584,13 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add("X Delete Tab", () =>
                 {
-                    UIManager.Add(new QuestionGump(world, $"Delete [{name}] tab?", (yes) =>
+                    world.Context.UI.Add(new QuestionGump(world, $"Delete [{name}] tab?", (yes) =>
                     {
                         if (yes)
                         {
-                            if (ProfileManager.CurrentProfile.JournalTabs.ContainsKey(name))
+                            if (world.Profile.CurrentProfile.JournalTabs.ContainsKey(name))
                             {
-                                ProfileManager.CurrentProfile.JournalTabs.Remove(name);
+                                world.Profile.CurrentProfile.JournalTabs.Remove(name);
                                 ReloadTabs = true;
                             }
                         }

@@ -35,7 +35,7 @@ namespace ClassicUO.Game.Data
         public bool PaperdollBooks { get; private set; }
         public uint MaxChars { get; private set; } = 5;
 
-        public void SetFlags(CharacterListFlags flags)
+        public void SetFlags(CharacterListFlags flags, ClientVersion clientVersion)
         {
             Flags = flags;
 
@@ -54,7 +54,7 @@ namespace ClassicUO.Game.Data
 
             PopupEnabled = (flags & CharacterListFlags.CLF_CONTEXT_MENU) != 0;
 
-            TooltipsEnabled = (flags & CharacterListFlags.CLF_PALADIN_NECROMANCER_TOOLTIPS) != 0 && Client.Game.UO.Version >= ClientVersion.CV_308Z;
+            TooltipsEnabled = (flags & CharacterListFlags.CLF_PALADIN_NECROMANCER_TOOLTIPS) != 0 && clientVersion >= ClientVersion.CV_308Z;
 
             PaperdollBooks = (flags & CharacterListFlags.CLF_PALADIN_NECROMANCER_TOOLTIPS) != 0;
         }

@@ -87,7 +87,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Restore(xml);
 
-            Client.Game.GetScene<GameScene>().DoubleClickDelayed(LocalSerial);
+            World.Context.Game.GetScene<GameScene>().DoubleClickDelayed(LocalSerial);
 
             Dispose();
         }
@@ -115,10 +115,10 @@ namespace ClassicUO.Game.UI.Gumps
                 out int dictionaryPagesCount
             );
 
-            Add(_picBase = new GumpPic(0, 0, bookGraphic, 0));
+            Add(_picBase = new GumpPic(0, 0, bookGraphic, 0, World.Context));
             _picBase.MouseDoubleClick += _picBase_MouseDoubleClick;
 
-            _dataBox = new DataBox(0, 0, 0, 0)
+            _dataBox = new DataBox(World.Context, 0, 0, 0, 0)
             {
                 CanMove = true,
                 AcceptMouseInput = true,
@@ -126,16 +126,16 @@ namespace ClassicUO.Game.UI.Gumps
             };
 
             Add(_dataBox);
-            _hitBox = new HitBox(0, 98, 27, 23);
+            _hitBox = new HitBox(World.Context, 0, 98, 27, 23);
             Add(_hitBox);
             _hitBox.MouseUp += _hitBox_MouseUp;
 
-            Add(_pageCornerLeft = new GumpPic(50, 8, 0x08BB, 0));
+            Add(_pageCornerLeft = new GumpPic(50, 8, 0x08BB, 0, World.Context));
             _pageCornerLeft.LocalSerial = 0;
             _pageCornerLeft.Page = int.MaxValue;
             _pageCornerLeft.MouseUp += PageCornerOnMouseClick;
             _pageCornerLeft.MouseDoubleClick += PageCornerOnMouseDoubleClick;
-            Add(_pageCornerRight = new GumpPic(321, 8, 0x08BC, 0));
+            Add(_pageCornerRight = new GumpPic(321, 8, 0x08BC, 0, World.Context));
             _pageCornerRight.LocalSerial = 1;
             _pageCornerRight.Page = 1;
             _pageCornerRight.MouseUp += PageCornerOnMouseClick;
@@ -143,7 +143,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             RequestUpdateContents();
 
-            Client.Game.Audio.PlaySound(0x0055);
+            World.Context.Game.Audio.PlaySound(0x0055);
         }
 
         private void _picBase_MouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
@@ -164,8 +164,8 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            Client.Game.Audio.PlaySound(0x0055);
-            UIManager.SavePosition(LocalSerial, Location);
+            World.Context.Game.Audio.PlaySound(0x0055);
+            World.Context.UI.SavePosition(LocalSerial, Location);
             base.Dispose();
         }
 
@@ -219,7 +219,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (_spellBookType == SpellBookType.Magery)
             {
                 _dataBox.Add(
-                    new Button((int)ButtonCircle.Circle_1_2, 0x08B1, 0x08B1)
+                    new Button(World.Context, (int)ButtonCircle.Circle_1_2, 0x08B1, 0x08B1)
                     {
                         X = 58,
                         Y = 175,
@@ -229,7 +229,7 @@ namespace ClassicUO.Game.UI.Gumps
                 );
 
                 _dataBox.Add(
-                    new Button((int)ButtonCircle.Circle_1_2, 0x08B2, 0x08B2)
+                    new Button(World.Context, (int)ButtonCircle.Circle_1_2, 0x08B2, 0x08B2)
                     {
                         X = 93,
                         Y = 175,
@@ -239,7 +239,7 @@ namespace ClassicUO.Game.UI.Gumps
                 );
 
                 _dataBox.Add(
-                    new Button((int)ButtonCircle.Circle_3_4, 0x08B3, 0x08B3)
+                    new Button(World.Context, (int)ButtonCircle.Circle_3_4, 0x08B3, 0x08B3)
                     {
                         X = 130,
                         Y = 175,
@@ -249,7 +249,7 @@ namespace ClassicUO.Game.UI.Gumps
                 );
 
                 _dataBox.Add(
-                    new Button((int)ButtonCircle.Circle_3_4, 0x08B4, 0x08B4)
+                    new Button(World.Context, (int)ButtonCircle.Circle_3_4, 0x08B4, 0x08B4)
                     {
                         X = 164,
                         Y = 175,
@@ -259,7 +259,7 @@ namespace ClassicUO.Game.UI.Gumps
                 );
 
                 _dataBox.Add(
-                    new Button((int)ButtonCircle.Circle_5_6, 0x08B5, 0x08B5)
+                    new Button(World.Context, (int)ButtonCircle.Circle_5_6, 0x08B5, 0x08B5)
                     {
                         X = 227,
                         Y = 175,
@@ -269,7 +269,7 @@ namespace ClassicUO.Game.UI.Gumps
                 );
 
                 _dataBox.Add(
-                    new Button((int)ButtonCircle.Circle_5_6, 0x08B6, 0x08B6)
+                    new Button(World.Context, (int)ButtonCircle.Circle_5_6, 0x08B6, 0x08B6)
                     {
                         X = 260,
                         Y = 175,
@@ -279,7 +279,7 @@ namespace ClassicUO.Game.UI.Gumps
                 );
 
                 _dataBox.Add(
-                    new Button((int)ButtonCircle.Circle_7_8, 0x08B7, 0x08B7)
+                    new Button(World.Context, (int)ButtonCircle.Circle_7_8, 0x08B7, 0x08B7)
                     {
                         X = 297,
                         Y = 175,
@@ -289,7 +289,7 @@ namespace ClassicUO.Game.UI.Gumps
                 );
 
                 _dataBox.Add(
-                    new Button((int)ButtonCircle.Circle_7_8, 0x08B8, 0x08B8)
+                    new Button(World.Context, (int)ButtonCircle.Circle_7_8, 0x08B8, 0x08B8)
                     {
                         X = 332,
                         Y = 175,
@@ -307,7 +307,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (page == 1 && _spellBookType == SpellBookType.Chivalry)
                     {
-                        Label label = new Label(
+                        Label label = new Label(World.Context, 
                             ResGumps.TithingPointsAvailable + World.Player.TithingPoints,
                             false,
                             0x0288,
@@ -331,7 +331,7 @@ namespace ClassicUO.Game.UI.Gumps
                         dataX = 225;
                     }
 
-                    Label text = new Label(ResGumps.Index, false, 0x0288, font: 6)
+                    Label text = new Label(World.Context, ResGumps.Index, false, 0x0288, font: 6)
                     {
                         X = indexX,
                         Y = 10
@@ -341,7 +341,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (_spellBookType == SpellBookType.Mastery && j >= 1)
                     {
-                        text = new Label(ResGumps.Abilities, false, 0x0288, font: 6)
+                        text = new Label(World.Context, ResGumps.Abilities, false, 0x0288, font: 6)
                         {
                             X = dataX,
                             Y = 30
@@ -402,7 +402,7 @@ namespace ClassicUO.Game.UI.Gumps
                                                     225,
                                                     iconMY,
                                                     iconGraphic,
-                                                    0
+                                                    0, World.Context
                                                 )
                                                 {
                                                     LocalSerial = (uint)(id - 1)
@@ -412,7 +412,7 @@ namespace ClassicUO.Game.UI.Gumps
                                                 icon.MouseDoubleClick += OnIconDoubleClick;
                                                 icon.DragBegin += OnIconDragBegin;
 
-                                                text = new Label(spell.Name, false, 0x0288, 80, 6)
+                                                text = new Label(World.Context, spell.Name, false, 0x0288, 80, 6)
                                                 {
                                                     X = 225 + 44 + 4,
                                                     Y = iconMY + 2
@@ -423,7 +423,7 @@ namespace ClassicUO.Game.UI.Gumps
                                                 if (toolTipCliloc > 0)
                                                 {
                                                     string tooltip =
-                                                        Client.Game.UO.FileManager.Clilocs.GetString(
+                                                        World.Context.Game.UO.FileManager.Clilocs.GetString(
                                                             toolTipCliloc + id
                                                         );
 
@@ -443,7 +443,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (_spellBookType == SpellBookType.Magery)
                     {
-                        text = new Label(
+                        text = new Label(World.Context, 
                             SpellsMagery.CircleNames[(page - 1) * 2 + j % 2],
                             false,
                             0x0288,
@@ -458,7 +458,7 @@ namespace ClassicUO.Game.UI.Gumps
                     }
                     else if (_spellBookType == SpellBookType.Mastery)
                     {
-                        text = new Label(
+                        text = new Label(World.Context, 
                             page == pagesToFill ? ResGumps.Passive : ResGumps.Activated,
                             false,
                             0x0288,
@@ -498,7 +498,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                                 spellDone++;
 
-                                text = new HoveredLabel(
+                                text = new HoveredLabel(World.Context, 
                                     name,
                                     false,
                                     0x0288,
@@ -545,7 +545,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                                 spellDone++;
 
-                                text = new HoveredLabel(
+                                text = new HoveredLabel(World.Context, 
                                     name,
                                     false,
                                     0x0288,
@@ -613,7 +613,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     case SpellBookType.Magery:
                     {
-                        Label text = new Label(
+                        Label text = new Label(World.Context, 
                             SpellsMagery.CircleNames[i >> 3],
                             false,
                             0x0288,
@@ -626,7 +626,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         _dataBox.Add(text, page1);
 
-                        text = new Label(name, false, 0x0288, 80, 6) { X = iconTextX, Y = 34 };
+                        text = new Label(World.Context, name, false, 0x0288, 80, 6) { X = iconTextX, Y = 34 };
 
                         _dataBox.Add(text, page1);
                         int abbreviatureY = 26;
@@ -638,7 +638,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         abbreviatureY += text.Height;
 
-                        text = new Label(abbreviature, false, 0x0288, font: 8)
+                        text = new Label(World.Context, abbreviature, false, 0x0288, font: 8)
                         {
                             X = iconTextX,
                             Y = abbreviatureY
@@ -651,7 +651,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     case SpellBookType.Mastery:
                     {
-                        Label text = new Label(
+                        Label text = new Label(World.Context, 
                             SpellsMastery.GetMasteryGroupByID(i + 1),
                             false,
                             0x0288,
@@ -664,7 +664,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         _dataBox.Add(text, page1);
 
-                        text = new Label(name, false, 0x0288, 80, 6) { X = iconTextX, Y = 34 };
+                        text = new Label(World.Context, name, false, 0x0288, 80, 6) { X = iconTextX, Y = 34 };
 
                         _dataBox.Add(text, page1);
 
@@ -679,7 +679,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             abbreviatureY += text.Height;
 
-                            text = new Label(abbreviature, false, 0x0288, 80, 6)
+                            text = new Label(World.Context, abbreviature, false, 0x0288, 80, 6)
                             {
                                 X = iconTextX,
                                 Y = abbreviatureY
@@ -693,7 +693,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     default:
                     {
-                        Label text = new Label(name, false, 0x0288, font: 6)
+                        Label text = new Label(World.Context, name, false, 0x0288, font: 6)
                         {
                             X = topTextX,
                             Y = topTextY
@@ -703,7 +703,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (!string.IsNullOrEmpty(abbreviature))
                         {
-                            text = new Label(abbreviature, false, 0x0288, 80, 6)
+                            text = new Label(World.Context, abbreviature, false, 0x0288, 80, 6)
                             {
                                 X = iconTextX,
                                 Y = 34
@@ -749,7 +749,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (toolTipCliloc > 0)
                 {
-                    string tooltip = Client.Game.UO.FileManager.Clilocs.GetString(toolTipCliloc + i);
+                    string tooltip = World.Context.Game.UO.FileManager.Clilocs.GetString(toolTipCliloc + i);
                     icon.SetTooltip(tooltip, 250);
                 }
 
@@ -762,10 +762,10 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (_spellBookType != SpellBookType.Mastery)
                     {
-                        _dataBox.Add(new GumpPicTiled(iconX, 88, 120, 5, 0x0835), page1);
+                        _dataBox.Add(new GumpPicTiled(iconX, 88, 120, 5, 0x0835, World.Context), page1);
                     }
 
-                    Label text = new Label(ResGumps.Reagents, false, 0x0288, font: 6)
+                    Label text = new Label(World.Context, ResGumps.Reagents, false, 0x0288, font: 6)
                     {
                         X = iconX,
                         Y = 92
@@ -773,7 +773,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     _dataBox.Add(text, page1);
 
-                    text = new Label(reagents, false, 0x0288, font: 9) { X = iconX, Y = 114 };
+                    text = new Label(World.Context, reagents, false, 0x0288, font: 9) { X = iconX, Y = 114 };
 
                     _dataBox.Add(text, page1);
                 }
@@ -782,7 +782,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     GetSpellRequires(i, out int requiriesY, out string requires);
 
-                    Label text = new Label(requires, false, 0x0288, font: 6)
+                    Label text = new Label(World.Context, requires, false, 0x0288, font: 6)
                     {
                         X = iconX,
                         Y = requiriesY
@@ -819,14 +819,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (def != null)
                 {
-                    GameActions.CastSpell(def.ID);
+                    GameActions.CastSpell(World, def.ID);
                 }
             }
         }
 
         private void OnIconDragBegin(object sender, EventArgs e)
         {
-            if (UIManager.DraggingControl != this || UIManager.MouseOverControl != sender)
+            if (World.Context.UI.DraggingControl != this || World.Context.UI.MouseOverControl != sender)
             {
                 return;
             }
@@ -846,13 +846,13 @@ namespace ClassicUO.Game.UI.Gumps
                 Y = Mouse.LClickPosition.Y - 22
             };
 
-            UIManager.Add(gump);
-            UIManager.AttemptDragControl(gump, true);
+            World.Context.UI.Add(gump);
+            World.Context.UI.AttemptDragControl(gump, true);
         }
 
-        private static UseSpellButtonGump GetSpellFloatingButton(int id)
+        private UseSpellButtonGump GetSpellFloatingButton(int id)
         {
-            for (LinkedListNode<Gump> i = UIManager.Gumps.Last; i != null; i = i.Previous)
+            for (LinkedListNode<Gump> i = World.Context.UI.Gumps.Last; i != null; i = i.Previous)
             {
                 if (i.Value is UseSpellButtonGump g && g.SpellID == id)
                 {
@@ -1143,9 +1143,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragBegin(int x, int y)
         {
-            if (UIManager.MouseOverControl?.RootParent == this)
+            if (World.Context.UI.MouseOverControl?.RootParent == this)
             {
-                UIManager.MouseOverControl.InvokeDragBegin(new Point(x, y));
+                World.Context.UI.MouseOverControl.InvokeDragBegin(new Point(x, y));
             }
 
             base.OnDragBegin(x, y);
@@ -1153,9 +1153,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragEnd(int x, int y)
         {
-            if (UIManager.MouseOverControl?.RootParent == this)
+            if (World.Context.UI.MouseOverControl?.RootParent == this)
             {
-                UIManager.MouseOverControl.InvokeDragEnd(new Point(x, y));
+                World.Context.UI.MouseOverControl.InvokeDragEnd(new Point(x, y));
             }
 
             base.OnDragEnd(x, y);
@@ -1257,7 +1257,7 @@ namespace ClassicUO.Game.UI.Gumps
             _pageCornerLeft.Page = _dataBox.ActivePage != 1 ? 0 : int.MaxValue;
             _pageCornerRight.Page = _dataBox.ActivePage != _maxPage ? 0 : int.MaxValue;
 
-            Client.Game.Audio.PlaySound(0x0055);
+            World.Context.Game.Audio.PlaySound(0x0055);
         }
 
         private void OnLabelMouseUp(object sender, MouseEventArgs e)
@@ -1280,7 +1280,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (def != null)
                 {
-                    GameActions.CastSpell(def.ID);
+                    GameActions.CastSpell(World, def.ID);
                 }
 
                 _enqueuePage = -1;
@@ -1437,7 +1437,7 @@ namespace ClassicUO.Game.UI.Gumps
             /// ShowEdit button when user pressing ctrl + alt
             /// </summary>
             private bool ShowEdit =>
-                Keyboard.Ctrl && Keyboard.Alt && ProfileManager.CurrentProfile.FastSpellsAssign;
+                Keyboard.Ctrl && Keyboard.Alt && _gump.World.Profile.CurrentProfile.FastSpellsAssign;
 
             public HueGumpPic(
                 SpellbookGump gump,
@@ -1447,7 +1447,7 @@ namespace ClassicUO.Game.UI.Gumps
                 ushort hue,
                 ushort spellID,
                 string spellName
-            ) : base(x, y, graphic, hue)
+            ) : base(x, y, graphic, hue, gump.World.Context)
             {
                 _gump = gump;
                 _spellID = spellID;
@@ -1486,15 +1486,15 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-                    ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(0x09CF);
+                    ref readonly var gumpInfo = ref Context.Game.UO.Gumps.GetGump(0x09CF);
 
                     if (gumpInfo.Texture != null)
                     {
                         if (
-                            UIManager.MouseOverControl != null
+                            Context?.UI?.MouseOverControl != null
                             && (
-                                UIManager.MouseOverControl == this
-                                || UIManager.MouseOverControl.RootParent == this
+                                Context.UI.MouseOverControl == this
+                                || Context.UI.MouseOverControl.RootParent == this
                             )
                         )
                         {

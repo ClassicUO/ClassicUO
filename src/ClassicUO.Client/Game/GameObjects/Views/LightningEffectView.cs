@@ -15,11 +15,11 @@ namespace ClassicUO.Game.GameObjects
         {
             ushort hue = Hue;
 
-            if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
+            if (World.Profile.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 hue = Constants.OUT_RANGE_COLOR;
             }
-            else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
+            else if (World.Player.IsDead && World.Profile.CurrentProfile.EnableBlackWhiteEffect)
             {
                 hue = Constants.DEAD_RANGE_COLOR;
             }
@@ -27,7 +27,7 @@ namespace ClassicUO.Game.GameObjects
             Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue, false, 1);
             hueVec.Y = hueVec.X > 1.0f ? ShaderHueTranslator.SHADER_LIGHTS : ShaderHueTranslator.SHADER_NONE;
 
-            ref var index = ref Client.Game.UO.FileManager.Gumps.File.GetValidRefEntry(AnimationGraphic);
+            ref var index = ref World.Context.Game.UO.FileManager.Gumps.File.GetValidRefEntry(AnimationGraphic);
 
             posX -= index.Width >> 1;
             posY -= index.Height;
@@ -37,6 +37,7 @@ namespace ClassicUO.Game.GameObjects
             DrawGump
             (
                 batcher,
+                World.Context.Game.UO,
                 AnimationGraphic,
                 posX,
                 posY,

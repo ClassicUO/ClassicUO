@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Configuration;
+using ClassicUO.Game;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
@@ -20,6 +21,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public Combobox
         (
+            GameContext context,
             int x,
             int y,
             int width,
@@ -29,7 +31,7 @@ namespace ClassicUO.Game.UI.Controls
             bool showArrow = true,
             string emptyString = "",
             byte font = 9
-        )
+        ) : base(context)
         {
             X = x;
             Y = y;
@@ -42,7 +44,7 @@ namespace ClassicUO.Game.UI.Controls
 
             Add
             (
-                new ResizePic(0x0BB8)
+                new ResizePic(0x0BB8, context)
                 {
                     Width = width, Height = Height
                 }
@@ -50,16 +52,16 @@ namespace ClassicUO.Game.UI.Controls
 
             string initialText = selected > -1 ? items[selected] : emptyString;
 
-            bool isAsianLang = string.Compare(Settings.GlobalSettings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 ||
-                string.Compare(Settings.GlobalSettings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
-                string.Compare(Settings.GlobalSettings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
+            bool isAsianLang = string.Compare(Context?.Settings?.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 ||
+                string.Compare(Context?.Settings?.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
+                string.Compare(Context?.Settings?.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
 
             bool unicode = isAsianLang;
             byte font1 = (byte)(isAsianLang ? 1 : _font);
 
             Add
             (
-                _label = new Label(initialText, unicode, 0x0453, font: font1)
+                _label = new Label(context, initialText, unicode, 0x0453, font: font1)
                 {
                     X = 2, Y = 5
                 }
@@ -67,7 +69,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (showArrow)
             {
-                Add(new GumpPic(width - 18, 2, 0x00FC, 0));
+                Add(new GumpPic(width - 18, 2, 0x00FC, 0, context));
             }
         }
 
@@ -131,12 +133,12 @@ namespace ClassicUO.Game.UI.Controls
             {
                 comboY = 0;
             }
-            else if (comboY + _maxHeight > Client.Game.ClientBounds.Height)
+            else if (comboY + _maxHeight > Context.Game.ClientBounds.Height)
             {
-                comboY = Client.Game.ClientBounds.Height - _maxHeight;
+                comboY = Context.Game.ClientBounds.Height - _maxHeight;
             }
 
-            UIManager.Add
+            Context.UI.Add
             (
                 new ComboboxGump
                 (
@@ -186,14 +188,14 @@ namespace ClassicUO.Game.UI.Controls
                 _combobox = combobox;
 
                 ResizePic background;
-                Add(background = new ResizePic(0x0BB8));
+                Add(background = new ResizePic(0x0BB8, World.Context));
                 background.AcceptMouseInput = false;
 
                 HoveredLabel[] labels = new HoveredLabel[items.Length];
 
-                bool isAsianLang = string.Compare(Settings.GlobalSettings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 ||
-                    string.Compare(Settings.GlobalSettings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
-                    string.Compare(Settings.GlobalSettings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
+                bool isAsianLang = string.Compare(World.Settings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 ||
+                    string.Compare(World.Settings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
+                    string.Compare(World.Settings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
 
                 bool unicode = isAsianLang;
                 byte font1 = (byte)(isAsianLang ? 1 : font);
@@ -209,6 +211,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     HoveredLabel label = new HoveredLabel
                     (
+                        World.Context,
                         item,
                         unicode,
                         0x0453,
@@ -234,6 +237,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 ScrollArea area = new ScrollArea
                 (
+                    World.Context,
                     0,
                     0,
                     maxWidth + 15,

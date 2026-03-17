@@ -41,20 +41,20 @@ namespace ClassicUO.Game.GameObjects
             ushort hue = Hue;
             bool partial = ItemData.IsPartialHue;
 
-            if (ProfileManager.CurrentProfile.HighlightGameObjects && SelectedObject.Object == this)
+            if (World.Profile.CurrentProfile.HighlightGameObjects && SelectedObject.Object == this)
             {
                 hue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
                 partial = false;
             }
             else if (
-                ProfileManager.CurrentProfile.NoColorObjectsOutOfRange
+                World.Profile.CurrentProfile.NoColorObjectsOutOfRange
                 && Distance > World.ClientViewRange
             )
             {
                 hue = Constants.OUT_RANGE_COLOR;
                 partial = false;
             }
-            else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
+            else if (World.Player.IsDead && World.Profile.CurrentProfile.EnableBlackWhiteEffect)
             {
                 hue = Constants.DEAD_RANGE_COLOR;
                 partial = false;
@@ -66,27 +66,28 @@ namespace ClassicUO.Game.GameObjects
             bool cot = !isTree && !ItemData.IsFoliage && TransparentTest(World.Player.Z + 5);
             Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue, partial, AlphaHue / 255f, circletrans: cot);
 
-            if (isTree && ProfileManager.CurrentProfile.TreeToStumps)
+            if (isTree && World.Profile.CurrentProfile.TreeToStumps)
             {
                 graphic = Constants.TREE_REPLACE_GRAPHIC;
             }
 
             DrawStaticAnimated(
                 batcher,
+                World.Context.Game.UO,
                 graphic,
                 posX,
                 posY,
                 hueVec,
-                ProfileManager.CurrentProfile.ShadowsEnabled
-                    && ProfileManager.CurrentProfile.ShadowsStatics
+                World.Profile.CurrentProfile.ShadowsEnabled
+                    && World.Profile.CurrentProfile.ShadowsStatics
                     && (isTree || ItemData.IsFoliage || StaticFilters.IsRock(graphic)),
                 depth,
-                ProfileManager.CurrentProfile.AnimatedWaterEffect && ItemData.IsWet
+                World.Profile.CurrentProfile.AnimatedWaterEffect && ItemData.IsWet
             );
 
             if (ItemData.IsLight && !InChunkMesh)
             {
-                Client.Game.GetScene<GameScene>().AddLight(this, this, posX + 22, posY + 22);
+                World.Context.Game.GetScene<GameScene>().AddLight(this, this, posX + 22, posY + 22);
             }
 
             return true;
@@ -98,7 +99,7 @@ namespace ClassicUO.Game.GameObjects
                 !(
                     SelectedObject.Object == this
                     || FoliageIndex != -1
-                        && Client.Game.GetScene<GameScene>().FoliageIndex == FoliageIndex
+                        && World.Context.Game.GetScene<GameScene>().FoliageIndex == FoliageIndex
                 )
             )
             {
@@ -106,18 +107,18 @@ namespace ClassicUO.Game.GameObjects
 
                 bool isTree = StaticFilters.IsTree(graphic, out _);
 
-                if (isTree && ProfileManager.CurrentProfile.TreeToStumps)
+                if (isTree && World.Profile.CurrentProfile.TreeToStumps)
                 {
                     graphic = Constants.TREE_REPLACE_GRAPHIC;
                 }
 
-                ref var index = ref Client.Game.UO.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
+                ref var index = ref World.Context.Game.UO.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
 
                 Point position = RealScreenPosition;
                 position.X -= index.Width;
                 position.Y -= index.Height;
 
-                return Client.Game.UO.Arts.PixelCheck(
+                return World.Context.Game.UO.Arts.PixelCheck(
                     graphic,
                     SelectedObject.TranslatedMousePositionByViewport.X - position.X,
                     SelectedObject.TranslatedMousePositionByViewport.Y - position.Y

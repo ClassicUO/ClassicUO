@@ -62,7 +62,7 @@ namespace ClassicUO.Game
                 return false;
             }
 
-            bool ignoreGameCharacters = ProfileManager.CurrentProfile.IgnoreStaminaCheck || stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM || _world.Player.IgnoreCharacters || !(_world.Player.Stamina < _world.Player.StaminaMax && _world.Map.Index == 0);
+            bool ignoreGameCharacters = _world.Profile.CurrentProfile.IgnoreStaminaCheck || stepState == (int) PATH_STEP_STATE.PSS_DEAD_OR_GM || _world.Player.IgnoreCharacters || !(_world.Player.Stamina < _world.Player.StaminaMax && _world.Map.Index == 0);
 
             bool isGM = _world.Player.Graphic == 0x03DB;
 
@@ -171,7 +171,7 @@ namespace ClassicUO.Game
                                 {
                                     dropFlags = true;
                                 }
-                                else if (ProfileManager.CurrentProfile.SmoothDoors && item2.ItemData.IsDoor)
+                                else if (_world.Profile.CurrentProfile.SmoothDoors && item2.ItemData.IsDoor)
                                 {
                                     dropFlags = true;
                                 }
@@ -204,7 +204,7 @@ namespace ClassicUO.Game
                             if (!(obj is Mobile))
                             {
                                 var graphic = obj is Item it && it.IsMulti ? it.MultiGraphic : obj.Graphic;
-                                ref StaticTiles itemdata = ref Client.Game.UO.FileManager.TileData.StaticData[graphic];
+                                ref StaticTiles itemdata = ref _world.Context.Game.UO.FileManager.TileData.StaticData[graphic];
 
                                 if (stepState == (int) PATH_STEP_STATE.PSS_ON_SEA_HORSE)
                                 {

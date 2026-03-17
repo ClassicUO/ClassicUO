@@ -36,24 +36,24 @@ namespace ClassicUO.Game.UI.Gumps.Login
             byte font;
             ushort hue;
 
-            if (Client.Game.UO.Version < ClientVersion.CV_706400)
+            if (World.Context.Game.UO.Version < ClientVersion.CV_706400)
             {
                 _buttonNormal = 0x15A4;
                 _buttonOver = 0x15A5;
                 const ushort HUE = 0x0386;
 
-                if (Client.Game.UO.Version >= ClientVersion.CV_500A)
+                if (World.Context.Game.UO.Version >= ClientVersion.CV_500A)
                 {
-                    Add(new GumpPic(0, 0, 0x2329, 0));
+                    Add(new GumpPic(0, 0, 0x2329, 0, World.Context));
                 }
 
                 //UO Flag
-                Add(new GumpPic(0, 4, 0x15A0, 0) { AcceptKeyboardInput = false });
+                Add(new GumpPic(0, 4, 0x15A0, 0, World.Context) { AcceptKeyboardInput = false });
 
                 // Quit Button
                 Add
                 (
-                    new Button((int) Buttons.Quit, 0x1589, 0x158B, 0x158A)
+                    new Button(World.Context, (int) Buttons.Quit, 0x1589, 0x158B, 0x158A)
                     {
                         X = 555,
                         Y = 4,
@@ -64,7 +64,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 //Login Panel
                 Add
                 (
-                    new ResizePic(0x13BE)
+                    new ResizePic(0x13BE, World.Context)
                     {
                         X = 128,
                         Y = 288,
@@ -73,15 +73,15 @@ namespace ClassicUO.Game.UI.Gumps.Login
                     }
                 );
 
-                if (Client.Game.UO.Version < ClientVersion.CV_500A)
+                if (World.Context.Game.UO.Version < ClientVersion.CV_500A)
                 {
-                    Add(new GumpPic(286, 45, 0x058A, 0));
+                    Add(new GumpPic(286, 45, 0x058A, 0, World.Context));
                 }
 
                 // Credits
                 Add
                 (
-                    new Button((int)Buttons.Credits, 0x1583, 0x1585, 0x1584)
+                    new Button(World.Context, (int)Buttons.Credits, 0x1583, 0x1585, 0x1584)
                     {
                         X = 60,
                         Y = 385,
@@ -91,7 +91,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    new Label(ResGumps.LoginToUO, false, HUE, font: 2)
+                    new Label(World.Context, ResGumps.LoginToUO, false, HUE, font: 2)
                     {
                         X = 253,
                         Y = 305
@@ -100,7 +100,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    new Label(ResGumps.Account, false, HUE, font: 2)
+                    new Label(World.Context, ResGumps.Account, false, HUE, font: 2)
                     {
                         X = 183,
                         Y = 345
@@ -109,7 +109,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    new Label(ResGumps.Password, false, HUE, font: 2)
+                    new Label(World.Context, ResGumps.Password, false, HUE, font: 2)
                     {
                         X = 183,
                         Y = 385
@@ -119,7 +119,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 // Arrow Button
                 Add
                 (
-                    _nextArrow0 = new Button((int) Buttons.NextArrow, 0x15A4, 0x15A6, 0x15A5)
+                    _nextArrow0 = new Button(World.Context, (int) Buttons.NextArrow, 0x15A4, 0x15A6, 0x15A5)
                     {
                         X = 610,
                         Y = 445,
@@ -134,7 +134,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    new Label($"UO Version {Settings.GlobalSettings.ClientVersion}.", false, 0x034E, font: 9)
+                    new Label(World.Context, $"UO Version {World.Settings.ClientVersion}.", false, 0x034E, font: 9)
                     {
                         X = 286,
                         Y = 453
@@ -143,7 +143,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    new Label(string.Format(ResGumps.CUOVersion0, CUOEnviroment.Version), false, 0x034E, font: 9)
+                    new Label(World.Context, string.Format(ResGumps.CUOVersion0, CUOEnviroment.Version), false, 0x034E, font: 9)
                     {
                         X = 286,
                         Y = 465
@@ -154,7 +154,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Add
                 (
                     _checkboxAutologin = new Checkbox
-                    (
+                    (World.Context, 
                         0x00D2,
                         0x00D3,
                         ResGumps.Autologin,
@@ -171,7 +171,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Add
                 (
                     _checkboxSaveAccount = new Checkbox
-                    (
+                    (World.Context, 
                         0x00D2,
                         0x00D3,
                         ResGumps.SaveAccount,
@@ -193,12 +193,12 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 _buttonNormal = 0x5CD;
                 _buttonOver = 0x5CB;
 
-                Add(new GumpPic(0, 0, 0x014E, 0));
+                Add(new GumpPic(0, 0, 0x014E, 0, World.Context));
 
                 //// Quit Button
                 Add
                 (
-                    new Button((int) Buttons.Quit, 0x05CA, 0x05C9, 0x05C8)
+                    new Button(World.Context, (int) Buttons.Quit, 0x05CA, 0x05C9, 0x05C8)
                     {
                         X = 25,
                         Y = 240,
@@ -209,7 +209,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 //// Credit Button
                 Add
                 (
-                    new Button((int)Buttons.Credits, 0x05D0, 0x05CF, 0x5CE)
+                    new Button(World.Context, (int)Buttons.Credits, 0x05D0, 0x05CF, 0x5CE)
                     {
                         X = 530,
                         Y = 125,
@@ -220,7 +220,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 // Arrow Button
                 Add
                 (
-                    _nextArrow0 = new Button((int) Buttons.NextArrow, 0x5CD, 0x5CC, 0x5CB)
+                    _nextArrow0 = new Button(World.Context, (int) Buttons.NextArrow, 0x5CD, 0x5CC, 0x5CB)
                     {
                         X = 280,
                         Y = 365,
@@ -235,7 +235,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    new Label($"UO Version {Settings.GlobalSettings.ClientVersion}.", false, 0x0481, font: 9)
+                    new Label(World.Context, $"UO Version {World.Settings.ClientVersion}.", false, 0x0481, font: 9)
                     {
                         X = 286,
                         Y = 453
@@ -244,7 +244,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                 Add
                 (
-                    new Label(string.Format(ResGumps.CUOVersion0, CUOEnviroment.Version), false, 0x0481, font: 9)
+                    new Label(World.Context, string.Format(ResGumps.CUOVersion0, CUOEnviroment.Version), false, 0x0481, font: 9)
                     {
                         X = 286,
                         Y = 465
@@ -255,7 +255,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Add
                 (
                     _checkboxAutologin = new Checkbox
-                    (
+                    (World.Context, 
                         0x00D2,
                         0x00D3,
                         ResGumps.Autologin,
@@ -272,7 +272,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 Add
                 (
                     _checkboxSaveAccount = new Checkbox
-                    (
+                    (World.Context, 
                         0x00D2,
                         0x00D3,
                         ResGumps.SaveAccount,
@@ -294,7 +294,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             // Account Text Input Background
             Add
             (
-                new ResizePic(0x0BB8)
+                new ResizePic(0x0BB8, World.Context)
                 {
                     X = offsetX,
                     Y = offsetY,
@@ -306,7 +306,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             // Password Text Input Background
             Add
             (
-                new ResizePic(0x0BB8)
+                new ResizePic(0x0BB8, World.Context)
                 {
                     X = offsetX,
                     Y = offsetY + offtextY,
@@ -321,7 +321,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             Add
             (
                 _textboxAccount = new StbTextBox
-                (
+                (World.Context, 
                     5,
                     16,
                     190,
@@ -336,12 +336,13 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 }
             );
 
-            _textboxAccount.SetText(Settings.GlobalSettings.Username);
+            _textboxAccount.SetText(World.Settings.Username);
 
             Add
             (
                 _passwordFake = new PasswordStbTextBox
                 (
+                    World.Context,
                     5,
                     16,
                     190,
@@ -356,10 +357,10 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 }
             );
 
-            _passwordFake.RealText = Crypter.Decrypt(Settings.GlobalSettings.Password);
+            _passwordFake.RealText = Crypter.Decrypt(World.Settings.Password);
 
-            _checkboxSaveAccount.IsChecked = Settings.GlobalSettings.SaveAccount;
-            _checkboxAutologin.IsChecked = Settings.GlobalSettings.AutoLogin;
+            _checkboxSaveAccount.IsChecked = World.Settings.SaveAccount;
+            _checkboxAutologin.IsChecked = World.Settings.AutoLogin;
 
 
             int htmlX = 130;
@@ -369,7 +370,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             Add
             (
                 new HtmlControl
-                (
+                (World.Context, 
                     htmlX,
                     htmlY,
                     150,
@@ -389,7 +390,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             Add
             (
                 new HtmlControl
-                (
+                (World.Context, 
                     505,
                     htmlY,
                     100,
@@ -408,7 +409,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
             Add
             (
                 new HtmlControl
-                (
+                (World.Context, 
                     505,
                     htmlY + 19,
                     100,
@@ -426,7 +427,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
 
             Checkbox loginmusic_checkbox = new Checkbox
-            (
+            (World.Context, 
                 0x00D2,
                 0x00D3,
                 "Music",
@@ -437,19 +438,19 @@ namespace ClassicUO.Game.UI.Gumps.Login
             {
                 X = _checkboxSaveAccount.X + _checkboxSaveAccount.Width + 10,
                 Y = 417,
-                IsChecked = Settings.GlobalSettings.LoginMusic
+                IsChecked = World.Settings.LoginMusic
             };
 
             Add(loginmusic_checkbox);
 
             HSliderBar login_music = new HSliderBar
-            (
+            (World.Context, 
                 loginmusic_checkbox.X + loginmusic_checkbox.Width + 10,
                 loginmusic_checkbox.Y + 4,
                 80,
                 0,
                 100,
-                Settings.GlobalSettings.LoginMusicVolume,
+                World.Settings.LoginMusicVolume,
                 HSliderBarStyle.MetalWidgetRecessedBar,
                 true,
                 font,
@@ -458,20 +459,20 @@ namespace ClassicUO.Game.UI.Gumps.Login
             );
 
             Add(login_music);
-            login_music.IsVisible = Settings.GlobalSettings.LoginMusic;
+            login_music.IsVisible = World.Settings.LoginMusic;
 
             loginmusic_checkbox.ValueChanged += (sender, e) =>
             {
-                Settings.GlobalSettings.LoginMusic = loginmusic_checkbox.IsChecked;
-                Client.Game.Audio.UpdateCurrentMusicVolume(true);
+                World.Settings.LoginMusic = loginmusic_checkbox.IsChecked;
+                World.Context.Game.Audio.UpdateCurrentMusicVolume(true);
 
-                login_music.IsVisible = Settings.GlobalSettings.LoginMusic;
+                login_music.IsVisible = World.Settings.LoginMusic;
             };
 
             login_music.ValueChanged += (sender, e) =>
             {
-                Settings.GlobalSettings.LoginMusicVolume = login_music.Value;
-                Client.Game.Audio.UpdateCurrentMusicVolume(true);
+                World.Settings.LoginMusicVolume = login_music.Value;
+                World.Context.Game.Audio.UpdateCurrentMusicVolume(true);
             };
 
 
@@ -488,7 +489,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
         public override void OnKeyboardReturn(int textID, string text)
         {
             SaveCheckboxStatus();
-            LoginScene ls = Client.Game.GetScene<LoginScene>();
+            LoginScene ls = World.Context.Game.GetScene<LoginScene>();
 
             if (ls.CurrentLoginStep == LoginSteps.Main)
             {
@@ -498,8 +499,8 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
         private void SaveCheckboxStatus()
         {
-            Settings.GlobalSettings.SaveAccount = _checkboxSaveAccount.IsChecked;
-            Settings.GlobalSettings.AutoLogin = _checkboxAutologin.IsChecked;
+            World.Settings.SaveAccount = _checkboxSaveAccount.IsChecked;
+            World.Settings.AutoLogin = _checkboxAutologin.IsChecked;
         }
 
         public override void Update()
@@ -552,18 +553,18 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
                     if (!_textboxAccount.IsDisposed)
                     {
-                        Client.Game.GetScene<LoginScene>().Connect(_textboxAccount.Text, _passwordFake.RealText);
+                        World.Context.Game.GetScene<LoginScene>().Connect(_textboxAccount.Text, _passwordFake.RealText);
                     }
 
                     break;
 
                 case Buttons.Quit:
-                    Client.Game.Exit();
+                    World.Context.Game.Exit();
 
                     break;
 
                 case Buttons.Credits:
-                    UIManager.Add(new CreditsGump(World));
+                    World.Context.UI.Add(new CreditsGump(World));
 
                     break;
             }
@@ -572,12 +573,20 @@ namespace ClassicUO.Game.UI.Gumps.Login
         private class PasswordStbTextBox : StbTextBox
         {
             private new Point _caretScreenPosition;
-            private new readonly RenderedText _rendererCaret;
+            private new RenderedText _rendererCaret;
+            private new RenderedText _rendererText;
 
-            private new readonly RenderedText _rendererText;
+            private readonly byte _pwFont;
+            private readonly int _pwMaxWidth;
+            private readonly bool _pwIsUnicode;
+            private readonly FontStyle _pwStyle;
+            private readonly ushort _pwHue;
+            private readonly TEXT_ALIGN_TYPE _pwAlign;
+            private bool _pwInitialized;
 
             public PasswordStbTextBox
             (
+                GameContext context,
                 byte font,
                 int max_char_count = -1,
                 int maxWidth = 0,
@@ -587,6 +596,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT
             ) : base
             (
+                context,
                 font,
                 max_char_count,
                 maxWidth,
@@ -596,28 +606,49 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 align
             )
             {
+                _pwFont = font;
+                _pwMaxWidth = maxWidth;
+                _pwIsUnicode = isunicode;
+                _pwStyle = style;
+                _pwHue = hue;
+                _pwAlign = align;
+
+                NoSelection = true;
+            }
+
+            private void EnsurePwRenderer()
+            {
+                if (_pwInitialized)
+                    return;
+
+                var uo = Context?.Game?.UO;
+                if (uo == null)
+                    return;
+
+                _pwInitialized = true;
+
                 _rendererText = RenderedText.Create
                 (
+                    uo,
                     string.Empty,
-                    hue,
-                    font,
-                    isunicode,
-                    style,
-                    align,
-                    maxWidth
+                    _pwHue,
+                    _pwFont,
+                    _pwIsUnicode,
+                    _pwStyle,
+                    _pwAlign,
+                    _pwMaxWidth
                 );
 
                 _rendererCaret = RenderedText.Create
                 (
+                    uo,
                     "_",
-                    hue,
-                    font,
-                    isunicode,
-                    (style & FontStyle.BlackBorder) != 0 ? FontStyle.BlackBorder : FontStyle.None,
-                    align
+                    _pwHue,
+                    _pwFont,
+                    _pwIsUnicode,
+                    (_pwStyle & FontStyle.BlackBorder) != 0 ? FontStyle.BlackBorder : FontStyle.None,
+                    _pwAlign
                 );
-
-                NoSelection = true;
             }
 
             internal string RealText
@@ -628,10 +659,11 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             public new ushort Hue
             {
-                get => _rendererText.Hue;
+                get { EnsurePwRenderer(); return _rendererText?.Hue ?? _pwHue; }
                 set
                 {
-                    if (_rendererText.Hue != value)
+                    EnsurePwRenderer();
+                    if (_rendererText != null && _rendererText.Hue != value)
                     {
                         _rendererText.Hue = value;
                         _rendererCaret.Hue = value;
@@ -644,7 +676,7 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             protected override void DrawCaret(UltimaBatcher2D batcher, int x, int y, float layerDepth)
             {
-                if (HasKeyboardFocus)
+                if (HasKeyboardFocus && _rendererCaret != null)
                 {
                     _rendererCaret.Draw(batcher, x + _caretScreenPosition.X, y + _caretScreenPosition.Y, layerDepth);
                 }
@@ -681,13 +713,17 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             protected override void OnTextChanged(string previousText)
             {
-                if (Text.Length > 0)
+                EnsurePwRenderer();
+                if (_rendererText != null)
                 {
-                    _rendererText.Text = new string('*', Text.Length);
-                }
-                else
-                {
-                    _rendererText.Text = string.Empty;
+                    if (Text.Length > 0)
+                    {
+                        _rendererText.Text = new string('*', Text.Length);
+                    }
+                    else
+                    {
+                        _rendererText.Text = string.Empty;
+                    }
                 }
 
                 base.OnTextChanged(previousText);
@@ -703,11 +739,17 @@ namespace ClassicUO.Game.UI.Gumps.Login
 
             private new void UpdateCaretScreenPosition()
             {
-                _caretScreenPosition = _rendererText.GetCaretPosition(Stb.CursorIndex);
+                if (_rendererText != null)
+                    _caretScreenPosition = _rendererText.GetCaretPosition(Stb.CursorIndex);
             }
 
             public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
             {
+                EnsurePwRenderer();
+
+                if (_rendererText == null)
+                    return false;
+
                 float layerDepth = layerDepthRef;
                 renderLists.AddGumpNoAtlas(
                     batcher =>

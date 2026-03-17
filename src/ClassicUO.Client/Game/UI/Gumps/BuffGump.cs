@@ -59,10 +59,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             Clear();
 
-            Add(_background = new GumpPic(0, 0, _graphic, 0) { LocalSerial = 1 });
+            Add(_background = new GumpPic(0, 0, _graphic, 0, World.Context) { LocalSerial = 1 });
 
             Add(
-                _button = new Button(0, 0x7585, 0x7589, 0x7589)
+                _button = new Button(World.Context, 0, 0x7585, 0x7589, 0x7589)
                 {
                     ButtonAction = ButtonAction.Activate
                 }
@@ -96,13 +96,13 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
             }
 
-            Add(_box = new DataBox(0, 0, 0, 0) { WantUpdateSize = true });
+            Add(_box = new DataBox(World.Context, 0, 0, 0, 0) { WantUpdateSize = true });
 
             if (World.Player != null)
             {
                 foreach (var k in World.Player.BuffIcons)
                 {
-                    _box.Add(new BuffControlEntry(World.Player.BuffIcons[k.Key]));
+                    _box.Add(new BuffControlEntry(World.Context, World.Player.BuffIcons[k.Key]));
                 }
             }
 
@@ -285,10 +285,12 @@ namespace ClassicUO.Game.UI.Gumps
         {
             private byte _alpha;
             private bool _decreaseAlpha;
-            private readonly RenderedText _gText;
+            private RenderedText _gText;
+            private bool _gTextInitialized;
             private float _updateTooltipTime;
+            private IProfileProvider _profileProvider => Context?.Profile;
 
-            public BuffControlEntry(BuffIcon icon) : base(0, 0, icon.Graphic, 0)
+            public BuffControlEntry(GameContext context, BuffIcon icon) : base(0, 0, icon.Graphic, 0, context)
             {
                 if (IsDisposed)
                 {
@@ -299,7 +301,25 @@ namespace ClassicUO.Game.UI.Gumps
                 _alpha = 0xFF;
                 _decreaseAlpha = true;
 
+                AcceptMouseInput = true;
+                WantUpdateSize = false;
+                CanMove = true;
+
+                SetTooltip(icon.Text + $"\nID: {icon.Type}");
+            }
+
+            private void EnsureGText()
+            {
+                if (_gTextInitialized)
+                    return;
+
+                var uo = Context?.Game?.UO;
+                if (uo == null)
+                    return;
+
+                _gTextInitialized = true;
                 _gText = RenderedText.Create(
+                    uo,
                     "",
                     0xFFFF,
                     2,
@@ -308,12 +328,6 @@ namespace ClassicUO.Game.UI.Gumps
                     TEXT_ALIGN_TYPE.TS_CENTER,
                     Width
                 );
-
-                AcceptMouseInput = true;
-                WantUpdateSize = false;
-                CanMove = true;
-
-                SetTooltip(icon.Text + $"\nID: {icon.Type}");
             }
 
             public BuffIcon Icon { get; }
@@ -321,6 +335,7 @@ namespace ClassicUO.Game.UI.Gumps
             public override void Update()
             {
                 base.Update();
+                EnsureGText();
 
                 if (!IsDisposed && Icon != null)
                 {
@@ -342,16 +357,19 @@ namespace ClassicUO.Game.UI.Gumps
 
                         _updateTooltipTime = (float)Time.Ticks + 1000;
 
-                        if (span.Hours > 0)
+                        if (_gText != null)
                         {
-                            _gText.Text = string.Format(ResGumps.Span0Hours, span.Hours);
-                        }
-                        else
-                        {
-                            _gText.Text =
-                                span.Minutes > 0
-                                    ? $"{span.Minutes}:{span.Seconds:00}"
-                                    : $"{span.Seconds:00}s";
+                            if (span.Hours > 0)
+                            {
+                                _gText.Text = string.Format(ResGumps.Span0Hours, span.Hours);
+                            }
+                            else
+                            {
+                                _gText.Text =
+                                    span.Minutes > 0
+                                        ? $"{span.Minutes}:{span.Seconds:00}"
+                                        : $"{span.Seconds:00}s";
+                            }
                         }
                     }
 
@@ -398,7 +416,7 @@ namespace ClassicUO.Game.UI.Gumps
                 float layerDepth = layerDepthRef;
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, _alpha / 255f, true);
 
-                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(Graphic);
+                ref readonly var gumpInfo = ref Context.Game.UO.Gumps.GetGump(Graphic);
                 var texture = gumpInfo.Texture;
                 if (texture != null)
                 {
@@ -413,8 +431,8 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                     );
                     if (
-                        ProfileManager.CurrentProfile != null
-                        && ProfileManager.CurrentProfile.BuffBarTime
+                        _profileProvider.CurrentProfile != null
+                        && _profileProvider.CurrentProfile.BuffBarTime
                     )
                     {
                         renderLists.AddGumpNoAtlas

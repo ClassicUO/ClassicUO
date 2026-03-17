@@ -56,7 +56,7 @@ namespace ClassicUO.Game.Managers
                                 break;
                             }
 
-                            BaseHealthBarGump gump = UIManager.GetGump<BaseHealthBarGump>(Members[i].Serial);
+                            BaseHealthBarGump gump = _world.Context.UI.GetGump<BaseHealthBarGump>(Members[i].Serial);
 
 
                             if (gump != null)
@@ -72,7 +72,7 @@ namespace ClassicUO.Game.Managers
 
                         Clear();
 
-                        UIManager.GetGump<PartyGump>()?.RequestUpdateContents();
+                        _world.Context.UI.GetGump<PartyGump>()?.RequestUpdateContents();
 
                         break;
                     }
@@ -85,7 +85,7 @@ namespace ClassicUO.Game.Managers
                     {
                         to_remove = p.ReadUInt32BE();
 
-                        UIManager.GetGump<BaseHealthBarGump>(to_remove)?.RequestUpdateContents();
+                        _world.Context.UI.GetGump<BaseHealthBarGump>(to_remove)?.RequestUpdateContents();
                     }
 
                     bool remove_all = !add && to_remove == _world.Player;
@@ -116,7 +116,7 @@ namespace ClassicUO.Game.Managers
                             Leader = serial;
                         }
 
-                        BaseHealthBarGump gump = UIManager.GetGump<BaseHealthBarGump>(serial);
+                        BaseHealthBarGump gump = _world.Context.UI.GetGump<BaseHealthBarGump>(serial);
 
                         if (gump != null)
                         {
@@ -140,7 +140,7 @@ namespace ClassicUO.Game.Managers
 
                                 Members[i] = null;
 
-                                UIManager.GetGump<BaseHealthBarGump>(serial)?.RequestUpdateContents();
+                                _world.Context.UI.GetGump<BaseHealthBarGump>(serial)?.RequestUpdateContents();
                             }
                         }
 
@@ -148,7 +148,7 @@ namespace ClassicUO.Game.Managers
                     }
 
 
-                    UIManager.GetGump<PartyGump>()?.RequestUpdateContents();
+                    _world.Context.UI.GetGump<PartyGump>()?.RequestUpdateContents();
 
                     break;
 
@@ -166,7 +166,7 @@ namespace ClassicUO.Game.Managers
                                 null,
                                 name,
                                 Members[i].Name,
-                                ProfileManager.CurrentProfile.PartyMessageHue,
+                                _world.Profile.CurrentProfile.PartyMessageHue,
                                 MessageType.Party,
                                 3,
                                 TextType.GUILD_ALLY
@@ -181,9 +181,9 @@ namespace ClassicUO.Game.Managers
                 case 7:
                     Inviter = p.ReadUInt32BE();
 
-                    if (ProfileManager.CurrentProfile.PartyInviteGump)
+                    if (_world.Profile.CurrentProfile.PartyInviteGump)
                     {
-                        UIManager.Add(new PartyInviteGump(_world, Inviter));
+                        _world.Context.UI.Add(new PartyInviteGump(_world, Inviter));
                     }
 
                     break;

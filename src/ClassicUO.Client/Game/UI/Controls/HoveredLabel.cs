@@ -13,6 +13,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public HoveredLabel
         (
+            GameContext context,
             string text,
             bool isunicode,
             ushort hue,
@@ -24,6 +25,7 @@ namespace ClassicUO.Game.UI.Controls
             TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT
         ) : base
         (
+            context,
             $" {text}",
             isunicode,
             hue,

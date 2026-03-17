@@ -18,15 +18,15 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             _Parent = parent;
 
-            if (parent == null || !Client.Game.UO.FileManager.Professions.Professions.TryGetValue(parent, out List<ProfessionInfo> professions) || professions == null)
+            if (parent == null || !World.Context.Game.UO.FileManager.Professions.Professions.TryGetValue(parent, out List<ProfessionInfo> professions) || professions == null)
             {
-                professions = new List<ProfessionInfo>(Client.Game.UO.FileManager.Professions.Professions.Keys);
+                professions = new List<ProfessionInfo>(World.Context.Game.UO.FileManager.Professions.Professions.Keys);
             }
 
             /* Build the gump */
             Add
             (
-                new ResizePic(2600)
+                new ResizePic(2600, World.Context)
                 {
                     X = 100,
                     Y = 80,
@@ -35,15 +35,15 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 }
             );
 
-            Add(new GumpPic(291, 42, 0x0589, 0));
-            Add(new GumpPic(214, 58, 0x058B, 0));
-            Add(new GumpPic(300, 51, 0x15A9, 0));
+            Add(new GumpPic(291, 42, 0x0589, 0, World.Context));
+            Add(new GumpPic(214, 58, 0x058B, 0, World.Context));
+            Add(new GumpPic(300, 51, 0x15A9, 0, World.Context));
 
-            ClilocLoader localization = Client.Game.UO.FileManager.Clilocs;
+            ClilocLoader localization = World.Context.Game.UO.FileManager.Clilocs;
 
-            bool isAsianLang = string.Compare(Settings.GlobalSettings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 ||
-                string.Compare(Settings.GlobalSettings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
-                string.Compare(Settings.GlobalSettings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
+            bool isAsianLang = string.Compare(World.Settings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 ||
+                string.Compare(World.Settings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
+                string.Compare(World.Settings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
 
             bool unicode = isAsianLang;
             byte font = (byte)(isAsianLang ? 1 : 2);
@@ -51,7 +51,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                new Label(localization.GetString(3000326, "Choose a Trade for Your Character"), unicode, hue, font: font)
+                new Label(World.Context, localization.GetString(3000326, "Choose a Trade for Your Character"), unicode, hue, font: font)
                 {
                     X = 158,
                     Y = 132
@@ -65,7 +65,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 Add
                 (
-                    new ProfessionInfoGump(professions[i])
+                    new ProfessionInfoGump(World.Context, professions[i])
                     {
                         X = 145 + cx * 195,
                         Y = 168 + cy * 70,
@@ -77,7 +77,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
+                new Button(World.Context, (int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
                 {
                     X = 586,
                     Y = 445,
@@ -88,14 +88,14 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public void SelectProfession(ProfessionInfo info)
         {
-            if (info.Type == ProfessionLoader.PROF_TYPE.CATEGORY && Client.Game.UO.FileManager.Professions.Professions.TryGetValue(info, out List<ProfessionInfo> list) && list != null)
+            if (info.Type == ProfessionLoader.PROF_TYPE.CATEGORY && World.Context.Game.UO.FileManager.Professions.Professions.TryGetValue(info, out List<ProfessionInfo> list) && list != null)
             {
                 Parent.Add(new CreateCharProfessionGump(World, info));
                 Parent.Remove(this);
             }
             else
             {
-                CharCreationGump charCreationGump = UIManager.GetGump<CharCreationGump>();
+                CharCreationGump charCreationGump = World.Context.UI.GetGump<CharCreationGump>();
 
                 charCreationGump?.SetProfession(info);
             }
@@ -116,7 +116,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     else
                     {
                         Parent.Remove(this);
-                        CharCreationGump charCreationGump = UIManager.GetGump<CharCreationGump>();
+                        CharCreationGump charCreationGump = World.Context.UI.GetGump<CharCreationGump>();
                         charCreationGump?.StepBack();
                     }
 
@@ -137,13 +137,13 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
     {
         private readonly ProfessionInfo _info;
 
-        public ProfessionInfoGump(ProfessionInfo info)
+        public ProfessionInfoGump(GameContext context, ProfessionInfo info) : base(context)
         {
             _info = info;
 
-            ClilocLoader localization = Client.Game.UO.FileManager.Clilocs;
+            ClilocLoader localization = context.Game.UO.FileManager.Clilocs;
 
-            ResizePic background = new ResizePic(3000)
+            ResizePic background = new ResizePic(3000, Context)
             {
                 Width = 175,
                 Height = 34
@@ -155,14 +155,14 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                new Label(localization.GetString(info.Localization), true, 0x00, font: 1)
+                new Label(Context, localization.GetString(info.Localization), true, 0x00, font: 1)
                 {
                     X = 7,
                     Y = 8
                 }
             );
 
-            Add(new GumpPic(121, -12, info.Graphic, 0));
+            Add(new GumpPic(121, -12, info.Graphic, 0, Context));
         }
 
         public Action<ProfessionInfo> Selected;

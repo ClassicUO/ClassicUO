@@ -48,7 +48,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             CityInfo city;
 
-            if (Client.Game.UO.Version >= ClientVersion.CV_70130)
+            if (World.Context.Game.UO.Version >= ClientVersion.CV_70130)
             {
                 city = scene.GetCity(0);
             }
@@ -78,7 +78,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }
 
             _facetName = new Label
-            (
+            (World.Context, 
                 "",
                 true,
                 0x0481,
@@ -91,15 +91,15 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             };
 
 
-            if (Client.Game.UO.Version >= ClientVersion.CV_70130)
+            if (World.Context.Game.UO.Version >= ClientVersion.CV_70130)
             {
-                Add(new GumpPic(62, 54, (ushort) (0x15D9 + map), 0));
-                Add(new GumpPic(57, 49, 0x15DF, 0));
+                Add(new GumpPic(62, 54, (ushort) (0x15D9 + map), 0, World.Context));
+                Add(new GumpPic(57, 49, 0x15DF, 0, World.Context));
                 _facetName.Text = _cityNames[map];
             }
             else
             {
-                Add(new GumpPic(57, 49, 0x1598, 0));
+                Add(new GumpPic(57, 49, 0x1598, 0, World.Context));
                 _facetName.IsVisible = false;
             }
 
@@ -107,7 +107,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                new Button((int) Buttons.PreviousScreen, 0x15A1, 0x15A3, 0x15A2)
+                new Button(World.Context, (int) Buttons.PreviousScreen, 0x15A1, 0x15A3, 0x15A2)
                 {
                     X = 586,
                     Y = 445,
@@ -117,7 +117,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                new Button((int) Buttons.Finish, 0x15A4, 0x15A6, 0x15A5)
+                new Button(World.Context, (int) Buttons.Finish, 0x15A4, 0x15A6, 0x15A5)
                 {
                     X = 610,
                     Y = 445,
@@ -127,7 +127,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
 
             _htmlControl = new HtmlControl
-            (
+            (World.Context, 
                 452,
                 60,
                 175,
@@ -161,8 +161,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         cityFacet = 5;
                     }
 
-                    x = 62 + MathHelper.PercetangeOf(Client.Game.UO.FileManager.Maps.MapsDefaultSize[cityFacet, 0] - 2048, c.X, 383);
-                    y = 54 + MathHelper.PercetangeOf(Client.Game.UO.FileManager.Maps.MapsDefaultSize[cityFacet, 1], c.Y, 384);
+                    x = 62 + MathHelper.PercetangeOf(World.Context.Game.UO.FileManager.Maps.MapsDefaultSize[cityFacet, 0] - 2048, c.X, 383);
+                    y = 54 + MathHelper.PercetangeOf(World.Context.Game.UO.FileManager.Maps.MapsDefaultSize[cityFacet, 1], c.Y, 384);
                 }
                 else if (i < _townButtonsText.Length)
                 {
@@ -171,7 +171,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     y = _townButtonsText[i].Y;
                 }
 
-                CityControl control = new CityControl(c, x, y, i);
+                CityControl control = new CityControl(World.Context, c, x, y, i);
                 Add(control);
                 _cityControls.Add(control);
             }
@@ -199,7 +199,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         private void SetFacet(uint index)
         {
-            if (Client.Game.UO.Version < ClientVersion.CV_70130)
+            if (World.Context.Game.UO.Version < ClientVersion.CV_70130)
             {
                 return;
             }
@@ -215,7 +215,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public override void OnButtonClick(int buttonID)
         {
-            CharCreationGump charCreationGump = UIManager.GetGump<CharCreationGump>();
+            CharCreationGump charCreationGump = World.Context.UI.GetGump<CharCreationGump>();
 
             if (charCreationGump == null)
             {
@@ -270,14 +270,14 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             private bool _isSelected;
             private readonly HoveredLabel _label;
 
-            public CityControl(CityInfo c, int x, int y, int index)
+            public CityControl(GameContext context, CityInfo c, int x, int y, int index) : base(context)
             {
                 CanMove = false;
 
 
                 Add
                 (
-                    _button = new Button(2 + index, 0x04B9, 0x04BA, 0x04BA)
+                    _button = new Button(Context, 2 + index, 0x04B9, 0x04BA, 0x04BA)
                     {
                         ButtonAction = ButtonAction.Activate,
                         X = x,
@@ -288,7 +288,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 y -= 20;
 
                 _label = new HoveredLabel
-                (
+                (Context, 
                     c.City,
                     false,
                     0x0058,

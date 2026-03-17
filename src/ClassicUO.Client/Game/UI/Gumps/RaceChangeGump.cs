@@ -1,4 +1,4 @@
-using ClassicUO.Assets;
+﻿using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -99,7 +99,7 @@ namespace ClassicUO.Game.UI.Gumps
             #region Background elements
             Add
             (
-                new ResizePic(0x0E10)
+                new ResizePic(0x0E10, World.Context)
                 {
                     X = 0,
                     Y = 0,
@@ -111,7 +111,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new ResizePic(0x0E10)
+                new ResizePic(0x0E10, World.Context)
                 {
                     X = 25,
                     Y = 45,
@@ -123,7 +123,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new ResizePic(0x0E10)
+                new ResizePic(0x0E10, World.Context)
                 {
                     X = 419,
                     Y = 45,
@@ -134,12 +134,12 @@ namespace ClassicUO.Game.UI.Gumps
             ); //Right side tone/colors
             #endregion
 
-            Add(new GumpPic(176 - raceTextWidth, 360, raceTextGraphic, 0)); //non-functional "Button" that says Human, Elf, or Gargoyle
+            Add(new GumpPic(176 - raceTextWidth, 360, raceTextGraphic, 0, World.Context)); //non-functional "Button" that says Human, Elf, or Gargoyle
 
-            Add(new GumpPic(419, 360, genderTextGraphic, 0)); //non-functional "Button" that says Male or Female
+            Add(new GumpPic(419, 360, genderTextGraphic, 0, World.Context)); //non-functional "Button" that says Male or Female
 
             Button confirmButton;
-            Add(confirmButton = new Button(0, 0x15A4, 0x15A6, 0x15A5) { X = 560, Y = 360 }); //Button to confirm, in classic client it is an arrow pointing right.
+            Add(confirmButton = new Button(World.Context, 0, 0x15A4, 0x15A6, 0x15A5) { X = 560, Y = 360 }); //Button to confirm, in classic client it is an arrow pointing right.
             confirmButton.MouseUp += ConfirmButton_MouseUp;
 
             //Add hair styles
@@ -153,7 +153,7 @@ namespace ClassicUO.Game.UI.Gumps
             UpdateEquipments();
 
             //Add the main paperdoll graphic
-            Add(new GumpPic(185, 25, 0x708, 0));
+            Add(new GumpPic(185, 25, 0x708, 0, World.Context));
             Add
             (
                 paperDollInteractable = new CustomPaperDollGump(this, 210, 75, fakeMobile, hair, beard)
@@ -164,7 +164,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             paperDollInteractable.RequestUpdate();
 
-            Add(new GumpPic(211, 15, 0x769, 0)); //Character Race Changer text
+            Add(new GumpPic(211, 15, 0x769, 0, World.Context)); //Character Race Changer text
         }
 
         /// <summary>
@@ -175,16 +175,16 @@ namespace ClassicUO.Game.UI.Gumps
         private void BuildHairStyles(int x, int y)
         {
             #region TextSetup
-            bool isAsianLang = string.Compare(Settings.GlobalSettings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 ||
-                string.Compare(Settings.GlobalSettings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
-                string.Compare(Settings.GlobalSettings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
+            bool isAsianLang = string.Compare(World.Settings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 ||
+                string.Compare(World.Settings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
+                string.Compare(World.Settings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
 
             bool unicode = isAsianLang;
             byte font = (byte)(isAsianLang ? 3 : 9);
             ushort hue = (ushort)(isAsianLang ? 0xFFFF : 0);
             #endregion
 
-            CharacterCreationValues.ComboContent content = CharacterCreationValues.GetHairComboContent(isFemale, selectedRace);
+            CharacterCreationValues.ComboContent content = CharacterCreationValues.GetHairComboContent(World.Context.Game.UO.FileManager.Clilocs, isFemale, selectedRace);
 
             CurrentOption[Layer.Beard] = 0;
             CurrentOption[Layer.Hair] = 0;
@@ -192,7 +192,7 @@ namespace ClassicUO.Game.UI.Gumps
             #region Hair style
             Add
             (
-                new Label(Client.Game.UO.FileManager.Clilocs.GetString(selectedRace == RaceType.GARGOYLE ? 1112309 : 3000121), unicode, hue, font: font)
+                new Label(World.Context, World.Context.Game.UO.FileManager.Clilocs.GetString(selectedRace == RaceType.GARGOYLE ? 1112309 : 3000121), unicode, hue, font: font)
                 {
                     X = x + 1,
                     Y = y
@@ -204,7 +204,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (hair =
                 new Combobox
-                (
+                (World.Context, 
                     x,
                     y,
                     120,
@@ -224,11 +224,11 @@ namespace ClassicUO.Game.UI.Gumps
             #region Facial Hair
             if (!isFemale && selectedRace != RaceType.ELF)
             {
-                content = CharacterCreationValues.GetFacialHairComboContent(selectedRace);
+                content = CharacterCreationValues.GetFacialHairComboContent(World.Context.Game.UO.FileManager.Clilocs, selectedRace);
 
                 Add
                 (
-                    new Label(Client.Game.UO.FileManager.Clilocs.GetString(selectedRace == RaceType.GARGOYLE ? 1112511 : 3000122), unicode, hue, font: font)
+                    new Label(World.Context, World.Context.Game.UO.FileManager.Clilocs.GetString(selectedRace == RaceType.GARGOYLE ? 1112511 : 3000122), unicode, hue, font: font)
                     {
                         X = x + 1,
                         Y = y
@@ -240,7 +240,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Add
                 (facialHair =
                     new Combobox
-                    (
+                    (World.Context, 
                         x,
                         y,
                         120,
@@ -438,19 +438,19 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (!isFemale && selectedRace != RaceType.ELF) //Has beard
                 {
-                    NetClient.Socket.Send_ChangeRaceRequest(
+                    World.Network.Send_ChangeRaceRequest(
                         CurrentColorOption[Layer.Invalid].Item2,
-                        (ushort)CharacterCreationValues.GetHairComboContent(isFemale, selectedRace).GetGraphic(CurrentOption[Layer.Hair]),
+                        (ushort)CharacterCreationValues.GetHairComboContent(World.Context.Game.UO.FileManager.Clilocs, isFemale, selectedRace).GetGraphic(CurrentOption[Layer.Hair]),
                         CurrentColorOption[Layer.Hair].Item2,
-                        (ushort)CharacterCreationValues.GetFacialHairComboContent(selectedRace).GetGraphic(CurrentOption[Layer.Beard]),
+                        (ushort)CharacterCreationValues.GetFacialHairComboContent(World.Context.Game.UO.FileManager.Clilocs, selectedRace).GetGraphic(CurrentOption[Layer.Beard]),
                         CurrentColorOption[Layer.Beard].Item2
                     );
                 }
                 else //No beard
                 {
-                    NetClient.Socket.Send_ChangeRaceRequest(
+                    World.Network.Send_ChangeRaceRequest(
                         CurrentColorOption[Layer.Invalid].Item2,
-                        (ushort)CharacterCreationValues.GetHairComboContent(isFemale, selectedRace).GetGraphic(CurrentOption[Layer.Hair]),
+                        (ushort)CharacterCreationValues.GetHairComboContent(World.Context.Game.UO.FileManager.Clilocs, isFemale, selectedRace).GetGraphic(CurrentOption[Layer.Hair]),
                         CurrentColorOption[Layer.Hair].Item2,
                         0,
                         0
@@ -480,14 +480,14 @@ namespace ClassicUO.Game.UI.Gumps
             if (beard != null)
             {
                 layer = Layer.Beard;
-                content = CharacterCreationValues.GetFacialHairComboContent(selectedRace);
+                content = CharacterCreationValues.GetFacialHairComboContent(World.Context.Game.UO.FileManager.Clilocs, selectedRace);
 
                 beard.Graphic = (ushort)content.GetGraphic(CurrentOption[layer]);
                 beard.Hue = CurrentColorOption[layer].Item2;
             }
 
             layer = Layer.Hair;
-            content = CharacterCreationValues.GetHairComboContent(isFemale, selectedRace);
+            content = CharacterCreationValues.GetHairComboContent(World.Context.Game.UO.FileManager.Clilocs, isFemale, selectedRace);
 
             hair.Graphic = (ushort)content.GetGraphic(CurrentOption[layer]);
             hair.Hue = CurrentColorOption[layer].Item2;
@@ -541,7 +541,7 @@ namespace ClassicUO.Game.UI.Gumps
             private readonly ushort[] _pallet;
             private readonly RaceChangeGump _gump;
 
-            public CustomColorPicker(RaceChangeGump gump, Layer layer, int label, ushort[] pallet, int rows, int columns)
+            public CustomColorPicker(RaceChangeGump gump, Layer layer, int label, ushort[] pallet, int rows, int columns) : base(gump.World.Context)
             {
                 _gump = gump;
                 Width = 121;
@@ -553,9 +553,9 @@ namespace ClassicUO.Game.UI.Gumps
                 _layer = layer;
                 _pallet = pallet;
 
-                bool isAsianLang = string.Compare(Settings.GlobalSettings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 ||
-                    string.Compare(Settings.GlobalSettings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
-                    string.Compare(Settings.GlobalSettings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
+                bool isAsianLang = string.Compare(_gump.World.Settings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 ||
+                    string.Compare(_gump.World.Settings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
+                    string.Compare(_gump.World.Settings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
 
                 bool unicode = isAsianLang;
                 byte font = (byte)(isAsianLang ? 3 : 9);
@@ -563,7 +563,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add
                 (
-                    new Label(Client.Game.UO.FileManager.Clilocs.GetString(label), unicode, hue, font: font)
+                    new Label(Context, _gump.World.Context.Game.UO.FileManager.Clilocs.GetString(label), unicode, hue, font: font)
                     {
                         X = 0,
                         Y = 0
@@ -572,7 +572,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add
                 (
-                    _colorPicker = new ColorBox(121, 23, (ushort)((pallet?[0] ?? 1) + 1))
+                    _colorPicker = new ColorBox(Context, 121, 23, (ushort)((pallet?[0] ?? 1) + 1))
                     {
                         X = 1,
                         Y = 15
@@ -645,7 +645,7 @@ namespace ClassicUO.Game.UI.Gumps
                             SelectedIndex = _lastSelectedIndex
                         };
 
-                        UIManager.Add(_colorPickerBox);
+                        _gump.World.Context.UI.Add(_colorPickerBox);
 
                         _colorPickerBox.ColorSelectedIndex += ColorPickerBoxOnColorSelectedIndex;
                         _colorPickerBox.MouseUp += ColorPickerBoxOnMouseUp;
@@ -741,7 +741,7 @@ namespace ClassicUO.Game.UI.Gumps
                 // body
                 Add
                 (
-                    new GumpPic(0, 0, body, hue)
+                    new GumpPic(0, 0, body, hue, Context)
                     {
                         IsPartialHue = true
                     }
@@ -752,7 +752,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     Add
                     (
-                        new GumpPic(0, 0, 0xC72B, mobile.Hue)
+                        new GumpPic(0, 0, 0xC72B, mobile.Hue, Context)
                         {
                             AcceptMouseInput = true,
                             IsPartialHue = true
@@ -765,7 +765,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (hair != null)
                 {
-                    ushort id = GetAnimID(mobile.Graphic, hair.Graphic, hair.ItemData.AnimID, mobile.IsFemale);
+                    ushort id = GetAnimID(Context.Game.UO, mobile.Graphic, hair.Graphic, hair.ItemData.AnimID, mobile.IsFemale);
 
                     Add
                     (
@@ -789,7 +789,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (beard != null)
                 {
-                    ushort id = GetAnimID(mobile.Graphic, beard.Graphic, beard.ItemData.AnimID, mobile.IsFemale);
+                    ushort id = GetAnimID(Context.Game.UO, mobile.Graphic, beard.Graphic, beard.ItemData.AnimID, mobile.IsFemale);
 
                     Add
                     (

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BSD-2-Clause
+﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using System;
 using ClassicUO.Game.Managers;
@@ -41,7 +41,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                alpha = new AlphaBlendControl(0.7f)
+                alpha = new AlphaBlendControl(World.Context, 0.7f)
                 {
                     Hue = 34
                 }
@@ -50,7 +50,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 stayActive = new Checkbox
-                (
+                (World.Context, 
                     0x00D2,
                     0x00D3,
                     ResGumps.StayActive,
@@ -69,7 +69,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Checkbox MakeCheckbox(string label, bool isChecked, ref int y)
             {
-                var cb = new Checkbox(0x00D2, 0x00D3, label, color: 0xFFFF)
+                var cb = new Checkbox(World.Context, 0x00D2, 0x00D3, label, color: 0xFFFF)
                 {
                     IsChecked = isChecked,
                     Y = y

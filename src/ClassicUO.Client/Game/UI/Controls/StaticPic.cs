@@ -1,5 +1,6 @@
-﻿// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.Game;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -12,18 +13,21 @@ namespace ClassicUO.Game.UI.Controls
     {
         private ushort _graphic;
 
-        public StaticPic(ushort graphic, ushort hue)
+        public StaticPic(ushort graphic, ushort hue, GameContext context) : base(context)
         {
             Hue = hue;
-            Graphic = graphic;
+            _graphic = graphic;
             CanMove = true;
             WantUpdateSize = false;
+
+            InitializeSize();
         }
 
-        public StaticPic(List<string> parts)
+        public StaticPic(List<string> parts, GameContext context)
             : this(
                 UInt16Converter.Parse(parts[3]),
-                parts.Count > 4 ? UInt16Converter.Parse(parts[4]) : (ushort)0
+                parts.Count > 4 ? UInt16Converter.Parse(parts[4]) : (ushort)0,
+                context
             )
         {
             X = int.Parse(parts[1]);
@@ -40,29 +44,39 @@ namespace ClassicUO.Game.UI.Controls
             set
             {
                 _graphic = value;
-
-                ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(value);
-
-                if (artInfo.Texture == null)
-                {
-                    Dispose();
-
-                    return;
-                }
-
-                Width = artInfo.UV.Width;
-                Height = artInfo.UV.Height;
-
-                IsPartialHue = Client.Game.UO.FileManager.TileData.StaticData[value].IsPartialHue;
+                InitializeSize();
             }
+        }
+
+        private void InitializeSize()
+        {
+            var uo = Context?.Game?.UO;
+            if (uo == null)
+                return;
+
+            ref readonly var artInfo = ref uo.Arts.GetArt(_graphic);
+
+            if (artInfo.Texture == null)
+            {
+                Dispose();
+                return;
+            }
+
+            Width = artInfo.UV.Width;
+            Height = artInfo.UV.Height;
+
+            IsPartialHue = uo.FileManager.TileData.StaticData[_graphic].IsPartialHue;
         }
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
+            if (IsDisposed || Context?.Game?.UO == null)
+                return false;
+
             float layerDepth = layerDepthRef;
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, IsPartialHue, 1);
 
-            ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(Graphic);
+            ref readonly var artInfo = ref Context.Game.UO.Arts.GetArt(Graphic);
 
             var texture = artInfo.Texture;
             if (texture != null)
@@ -89,7 +103,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool Contains(int x, int y)
         {
-            return Client.Game.UO.Arts.PixelCheck(Graphic, x - Offset.X, y - Offset.Y);
+            return Context.Game.UO.Arts.PixelCheck(Graphic, x - Offset.X, y - Offset.Y);
         }
     }
 }

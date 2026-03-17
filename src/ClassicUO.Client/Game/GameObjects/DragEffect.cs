@@ -82,11 +82,11 @@ namespace ClassicUO.Game.GameObjects
             }
 
             ushort hue;
-            if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
+            if (World.Profile.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 hue = Constants.OUT_RANGE_COLOR;
             }
-            else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
+            else if (World.Player.IsDead && World.Profile.CurrentProfile.EnableBlackWhiteEffect)
             {
                 hue = Constants.DEAD_RANGE_COLOR;
             }
@@ -102,6 +102,7 @@ namespace ClassicUO.Game.GameObjects
             DrawStatic
             (
                 batcher,
+                World.Context.Game.UO,
                 AnimationGraphic,
                 posX - ((int) Offset.X + 22),
                 posY - ((int) -Offset.Y + 22),
@@ -109,11 +110,11 @@ namespace ClassicUO.Game.GameObjects
                 depth
             );
 
-            ref var data = ref Client.Game.UO.FileManager.TileData.StaticData[Graphic];
+            ref var data = ref World.Context.Game.UO.FileManager.TileData.StaticData[Graphic];
 
             if (data.IsLight && Source != null)
             {
-                Client.Game.GetScene<GameScene>().AddLight(Source, Source, posX + 22, posY + 22);
+                World.Context.Game.GetScene<GameScene>().AddLight(Source, Source, posX + 22, posY + 22);
             }
 
             return true;

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.Game;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -12,24 +13,18 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class ResizePic : Control
     {
-        private int _maxIndex;
+        private int _maxIndex = -1;
 
-        public ResizePic(ushort graphic)
+        public ResizePic(ushort graphic, GameContext context) : base(context)
         {
             CanMove = true;
             CanCloseWithRightClick = true;
             Graphic = graphic;
 
-            for (_maxIndex = 0; _maxIndex < 9; ++_maxIndex)
-            {
-                if (Client.Game.UO.Gumps.GetGump((ushort)(Graphic + _maxIndex)).Texture == null)
-                {
-                    break;
-                }
-            }
+            InitializeMaxIndex();
         }
 
-        public ResizePic(List<string> parts) : this(UInt16Converter.Parse(parts[3]))
+        public ResizePic(List<string> parts, GameContext context) : this(UInt16Converter.Parse(parts[3]), context)
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -40,8 +35,31 @@ namespace ClassicUO.Game.UI.Controls
 
         public ushort Graphic { get; }
 
+        private void InitializeMaxIndex()
+        {
+            var uo = Context?.Game?.UO;
+            if (uo == null)
+            {
+                _maxIndex = 0;
+                return;
+            }
+
+            _maxIndex = 0;
+            for (int i = 0; i < 9; ++i)
+            {
+                if (uo.Gumps.GetGump((ushort)(Graphic + i)).Texture == null)
+                {
+                    break;
+                }
+                _maxIndex = i;
+            }
+        }
+
         public override bool Contains(int x, int y)
         {
+            if (_maxIndex < 0)
+                InitializeMaxIndex();
+
             x -= Offset.X;
             y -= Offset.Y;
 
@@ -178,7 +196,7 @@ namespace ClassicUO.Game.UI.Controls
             return false;
         }
 
-        private static bool PixelsInXY(
+        private bool PixelsInXY(
             ref Rectangle bounds,
             ushort graphic,
             int x,
@@ -232,11 +250,14 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            return Client.Game.UO.Gumps.PixelCheck(graphic, x, y);
+            return Context.Game.UO.Gumps.PixelCheck(graphic, x, y);
         }
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
+            if (_maxIndex < 0)
+                InitializeMaxIndex();
+
             float layerDepth = layerDepthRef;
             renderLists.AddGumpNoAtlas(
                 batcher =>
@@ -409,7 +430,7 @@ namespace ClassicUO.Game.UI.Controls
                     ++index;
                 }
 
-                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(
+                ref readonly var gumpInfo = ref Context.Game.UO.Gumps.GetGump(
                     (ushort)(Graphic + index)
                 );
 

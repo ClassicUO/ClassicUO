@@ -74,7 +74,7 @@ namespace ClassicUO.Game.Scenes
             sbyte maxGroundZ = 127;
             _maxGroundZ = 127;
             _maxZ = 127;
-            _noDrawRoofs = !ProfileManager.CurrentProfile.DrawRoofs;
+            _noDrawRoofs = !_world.Profile.CurrentProfile.DrawRoofs;
             int bx = playerX;
             int by = playerY;
             Chunk chunk = _world.Map.GetChunk(bx, by, false);
@@ -120,7 +120,7 @@ namespace ClassicUO.Game.Scenes
 
                     if (tileZ > pz14 && _maxZ > tileZ)
                     {
-                        ref StaticTiles itemdata = ref Client.Game.UO.FileManager.TileData.StaticData[
+                        ref StaticTiles itemdata = ref _world.Context.Game.UO.FileManager.TileData.StaticData[
                             obj.Graphic
                         ];
 
@@ -169,7 +169,7 @@ namespace ClassicUO.Game.Scenes
                         {
                             if (!(obj2 is Land))
                             {
-                                ref StaticTiles itemdata = ref Client.Game.UO.FileManager.TileData.StaticData[
+                                ref StaticTiles itemdata = ref _world.Context.Game.UO.FileManager.TileData.StaticData[
                                     obj2.Graphic
                                 ];
 
@@ -301,7 +301,7 @@ namespace ClassicUO.Game.Scenes
 
                     if (check)
                     {
-                        var rect = Client.Game.UO.Arts.GetRealArtBounds(obj.Graphic);
+                        var rect = _world.Context.Game.UO.Arts.GetRealArtBounds(obj.Graphic);
 
                         rect.X = obj.RealScreenPosition.X - (rect.Width >> 1) + rect.X;
                         rect.Y = obj.RealScreenPosition.Y - rect.Height + rect.Y;
@@ -395,11 +395,11 @@ namespace ClassicUO.Game.Scenes
             return (byte)(ratio * ratio * ratio * 255f);
         }
 
-        private static bool CalculateAlpha(ref byte alphaHue, int maxAlpha)
+        private bool CalculateAlpha(ref byte alphaHue, int maxAlpha)
         {
             if (
-                ProfileManager.CurrentProfile != null
-                && !ProfileManager.CurrentProfile.UseObjectsFading
+                _world.Profile.CurrentProfile != null
+                && !_world.Profile.CurrentProfile.UseObjectsFading
             )
             {
                 alphaHue = (byte)maxAlpha;
@@ -504,7 +504,7 @@ namespace ClassicUO.Game.Scenes
 
                         if (tile.Z > mob.Z && (tile is Static || tile is Multi))
                         {
-                            ref var itemData = ref Client.Game.UO.FileManager.TileData.StaticData[tile.Graphic];
+                            ref var itemData = ref _world.Context.Game.UO.FileManager.TileData.StaticData[tile.Graphic];
 
                             if (itemData.IsNoShoot || itemData.IsWindow)
                             {
@@ -575,7 +575,7 @@ namespace ClassicUO.Game.Scenes
             // If in chunk mesh, mark visible instead of adding to render list
             if (obj.InChunkMesh && obj.MeshSpriteIndex >= 0)
             {
-                bool cot = ProfileManager.CurrentProfile.UseCircleOfTransparency
+                bool cot = _world.Profile.CurrentProfile.UseCircleOfTransparency
                     && obj.TransparentTest(_world.Player.Z + 5);
 
                 if (cot && _cotGradientMode)
@@ -610,7 +610,7 @@ namespace ClassicUO.Game.Scenes
             CheckIfBehindATree(obj, ref itemData);
 
             // Gradient CoT for non-mesh objects (trees, foliage, animated statics)
-            if (_cotGradientMode && ProfileManager.CurrentProfile.UseCircleOfTransparency
+            if (_cotGradientMode && _world.Profile.CurrentProfile.UseCircleOfTransparency
                 && obj.TransparentTest(_world.Player.Z + 5))
             {
                 obj.AlphaHue = GetGradientCotAlpha(obj);
@@ -621,8 +621,8 @@ namespace ClassicUO.Game.Scenes
 
             // hacky way to render shadows without z-fight
             bool isShadow =
-                ProfileManager.CurrentProfile.ShadowsEnabled
-                && ProfileManager.CurrentProfile.ShadowsStatics
+                _world.Profile.CurrentProfile.ShadowsEnabled
+                && _world.Profile.CurrentProfile.ShadowsStatics
                 && (
                     StaticFilters.IsTree(obj.Graphic, out _)
                     || itemData.IsFoliage
@@ -636,7 +636,7 @@ namespace ClassicUO.Game.Scenes
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void ApplyMeshHue(GameObject obj, MeshLayer layer)
         {
-            var profile = ProfileManager.CurrentProfile;
+            var profile = _world.Profile.CurrentProfile;
             int hue = obj.Hue;
             bool partial = false;
 
@@ -718,7 +718,7 @@ namespace ClassicUO.Game.Scenes
                 allowSelection
                 && obj.Z <= _maxGroundZ
                 && obj.AllowedToDraw
-                && !(ProfileManager.CurrentProfile.UseCircleOfTransparency
+                && !(_world.Profile.CurrentProfile.UseCircleOfTransparency
                     && obj.TransparentTest(_world.Player.Z + 5)
                     && IsMouseInsideCotCircle())
                 && obj.CheckMouseSelection()
@@ -747,7 +747,7 @@ namespace ClassicUO.Game.Scenes
             Chunk chunk
         )
         {
-            var profile = ProfileManager.CurrentProfile;
+            var profile = _world.Profile.CurrentProfile;
             var mesh = chunk.Mesh;
 
             for (; obj != null; obj = obj.TNext)
@@ -874,7 +874,7 @@ namespace ClassicUO.Game.Scenes
                         continue;
                     }
 
-                    bool meshCot = ProfileManager.CurrentProfile.UseCircleOfTransparency
+                    bool meshCot = _world.Profile.CurrentProfile.UseCircleOfTransparency
                         && obj.TransparentTest(_world.Player.Z + 5);
 
                     // Gradient CoT: set alpha on CPU and route to transparent list
@@ -1056,7 +1056,7 @@ namespace ClassicUO.Game.Scenes
                         {
                             ref StaticTiles itemData = ref (
                                 item.IsMulti
-                                    ? ref Client.Game.UO.FileManager.TileData.StaticData[item.MultiGraphic]
+                                    ? ref _world.Context.Game.UO.FileManager.TileData.StaticData[item.MultiGraphic]
                                     : ref item.ItemData
                             );
 
@@ -1147,7 +1147,7 @@ namespace ClassicUO.Game.Scenes
                         if (effect is not LightningEffect &&
                             !ProcessAlpha(
                                 obj,
-                                ref Client.Game.UO.FileManager.TileData.StaticData[effect.Graphic],
+                                ref _world.Context.Game.UO.FileManager.TileData.StaticData[effect.Graphic],
                                 out _
                             ))
                         {

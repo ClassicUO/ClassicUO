@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Assets;
+using ClassicUO.Game;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Utility;
@@ -16,7 +17,7 @@ namespace ClassicUO.Game.UI.Controls
         private RenderedText _gameText;
         private ScrollBarBase _scrollBar;
 
-        public HtmlControl(List<string> parts, string[] lines) : this()
+        public HtmlControl(List<string> parts, string[] lines, GameContext context) : this(context)
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
@@ -26,18 +27,31 @@ namespace ClassicUO.Game.UI.Controls
             HasBackground = parts[6] == "1";
             HasScrollbar = parts[7] != "0";
             UseFlagScrollbar = HasScrollbar && parts[7] == "2";
-            _gameText.IsHTML = true;
-            _gameText.MaxWidth = Width - (HasScrollbar ? 16 : 0) - (HasBackground ? 8 : 0);
             IsFromServer = true;
+
+            string text = string.Empty;
+            int hue = 0;
 
             if (textIndex >= 0 && textIndex < lines.Length)
             {
-                InternalBuild(lines[textIndex], 0);
+                text = lines[textIndex];
+            }
+
+            var uo = Context?.Game?.UO;
+            if (uo != null)
+            {
+                int maxWidth = Width - (HasScrollbar ? 16 : 0) - (HasBackground ? 8 : 0);
+                _gameText = RenderedText.Create(uo, string.Empty, isunicode: true, font: 1);
+                _gameText.IsHTML = true;
+                _gameText.MaxWidth = maxWidth;
+
+                InternalBuild(text, hue);
             }
         }
 
         public HtmlControl
         (
+            GameContext context,
             int x,
             int y,
             int w,
@@ -52,7 +66,7 @@ namespace ClassicUO.Game.UI.Controls
             bool isunicode = true,
             FontStyle style = FontStyle.None,
             TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT
-        ) : this()
+        ) : this(context)
         {
             X = x;
             Y = y;
@@ -60,25 +74,35 @@ namespace ClassicUO.Game.UI.Controls
             Height = h;
             HasBackground = hasbackground;
             HasScrollbar = hasscrollbar;
-            UseFlagScrollbar = useflagscrollbar; //hasscrollbar != 0 && hasscrollbar == 2;
+            UseFlagScrollbar = useflagscrollbar;
 
-            if (!string.IsNullOrEmpty(text))
+            var uo = Context?.Game?.UO;
+            if (uo != null)
             {
-                _gameText.IsHTML = ishtml;
-                _gameText.FontStyle = style;
-                _gameText.Align = align;
-                _gameText.Font = font;
-                _gameText.IsUnicode = isunicode;
-                _gameText.MaxWidth = w - (HasScrollbar ? 16 : 0) - (HasBackground ? 8 : 0);
-            }
+                _gameText = RenderedText.Create(uo, string.Empty, isunicode: isunicode, font: font);
 
-            InternalBuild(text, hue);
+                if (!string.IsNullOrEmpty(text))
+                {
+                    int maxWidth = w - (HasScrollbar ? 16 : 0) - (HasBackground ? 8 : 0);
+                    _gameText.IsHTML = ishtml;
+                    _gameText.FontStyle = style;
+                    _gameText.Align = align;
+                    _gameText.Font = font;
+                    _gameText.IsUnicode = isunicode;
+                    _gameText.MaxWidth = maxWidth;
+                }
+                else if (w - (HasScrollbar ? 16 : 0) - (HasBackground ? 8 : 0) > 0)
+                {
+                    _gameText.IsHTML = ishtml;
+                    _gameText.MaxWidth = w - (HasScrollbar ? 16 : 0) - (HasBackground ? 8 : 0);
+                }
+
+                InternalBuild(text, hue);
+            }
         }
 
-        public HtmlControl()
+        public HtmlControl(GameContext context) : base(context)
         {
-            _gameText = RenderedText.Create(string.Empty, isunicode: true, font: 1);
-
             CanMove = true;
         }
 
@@ -94,8 +118,8 @@ namespace ClassicUO.Game.UI.Controls
 
         public string Text
         {
-            get => _gameText.Text;
-            set => _gameText.Text = value;
+            get => _gameText?.Text;
+            set { if (_gameText != null) _gameText.Text = value; }
         }
 
         private void InternalBuild(string text, int hue)
@@ -149,7 +173,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 Add
                 (
-                    new ResizePic(0x2486)
+                    new ResizePic(0x2486, Context)
                     {
                         Width = Width - (HasScrollbar ? 16 : 0), Height = Height, AcceptMouseInput = false
                     }
@@ -159,29 +183,26 @@ namespace ClassicUO.Game.UI.Controls
 
             if (UseFlagScrollbar)
             {
-                _scrollBar = new ScrollFlag
+                _scrollBar = new ScrollFlag(Context)
                 {
                     Location = new Point(Width - 14, 0),
                 };
             }
             else
             {
-                _scrollBar = new ScrollBar(Width - 14, 0, Height);
+                _scrollBar = new ScrollBar(Width - 14, 0, Height, Context);
             }
 
             _scrollBar.IsVisible = HasScrollbar;
             _scrollBar.Height = Height;
             _scrollBar.MinValue = 0;
 
-            _scrollBar.MaxValue = /* _gameText.Height*/ /* Children.Sum(s => s.Height) - Height +*/
+            _scrollBar.MaxValue =
                 _gameText.Height - Height + (HasBackground ? 8 : 0);
 
             ScrollY = _scrollBar.Value;
 
             Add(_scrollBar);
-
-            //if (Width != _gameText.Width)
-            //    Width = _gameText.Width;
         }
 
         protected override void OnMouseWheel(MouseEventType delta)
@@ -202,24 +223,27 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Update()
         {
-            if (WantUpdateSize)
+            if (_gameText != null && WantUpdateSize)
             {
                 _scrollBar.Height = Height;
                 _scrollBar.MinValue = 0;
 
-                _scrollBar.MaxValue = /* _gameText.Height*/ /*Children.Sum(s => s.Height) - Height */
+                _scrollBar.MaxValue =
                     _gameText.Height - Height + (HasBackground ? 8 : 0);
 
-                //_scrollBar.IsVisible = _scrollBar.MaxValue > _scrollBar.MinValue;
                 WantUpdateSize = false;
             }
 
-            ScrollY = _scrollBar.Value;
+            if (_scrollBar != null)
+                ScrollY = _scrollBar.Value;
             base.Update();
         }
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
+            if (_gameText == null)
+                return false;
+
             float layerDepth = layerDepthRef;
             if (IsDisposed)
             {
@@ -272,7 +296,7 @@ namespace ClassicUO.Game.UI.Controls
 
                         bool inbounds = link.Bounds.Contains(x, (_scrollBar == null ? 0 : _scrollBar.Value) + y);
 
-                        if (inbounds && Client.Game.UO.FileManager.Fonts.GetWebLink(link.LinkID, out WebLink result))
+                        if (inbounds && Context.Game.UO.FileManager.Fonts.GetWebLink(link.LinkID, out WebLink result))
                         {
                             Log.Info("LINK CLICKED: " + result.Link);
 

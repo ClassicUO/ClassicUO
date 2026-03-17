@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Assets;
+using ClassicUO.Game;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
@@ -37,8 +38,12 @@ namespace ClassicUO.Game.UI.Controls
             public int NewCaretIndex { get; set; }
         }
 
+        private readonly byte _fontValue;
+        private readonly bool _isUnicodeValue;
+
         public StbTextBox
         (
+            GameContext context,
             byte font,
             int max_char_count = -1,
             int maxWidth = 0,
@@ -46,7 +51,7 @@ namespace ClassicUO.Game.UI.Controls
             FontStyle style = FontStyle.None,
             ushort hue = 0,
             TEXT_ALIGN_TYPE align = 0
-        )
+        ) : base(context)
         {
             AcceptKeyboardInput = true;
             AcceptMouseInput = true;
@@ -54,6 +59,8 @@ namespace ClassicUO.Game.UI.Controls
             IsEditable = true;
 
             _maxCharCount = max_char_count;
+            _fontValue = font;
+            _isUnicodeValue = isunicode;
 
             Stb = new TextEdit(this);
             Stb.SingleLine = true;
@@ -71,49 +78,62 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             // stb_textedit will handle part of these tag
-            style &= ~( /*FontStyle.Fixed | */FontStyle.Cropped | FontStyle.CropTexture);
+            var renderStyle = style & ~( /*FontStyle.Fixed | */FontStyle.Cropped | FontStyle.CropTexture);
 
-            _rendererText = RenderedText.Create
-            (
-                string.Empty,
-                hue,
-                font,
-                isunicode,
-                style,
-                align,
-                maxWidth
-            );
+            var uo = Context?.Game?.UO;
+            if (uo != null)
+            {
+                _rendererText = RenderedText.Create
+                (
+                    uo,
+                    string.Empty,
+                    hue,
+                    font,
+                    isunicode,
+                    renderStyle,
+                    align,
+                    maxWidth
+                );
 
-            _rendererCaret = RenderedText.Create
-            (
-                "_",
-                hue,
-                font,
-                isunicode,
-                (style & FontStyle.BlackBorder) != 0 ? FontStyle.BlackBorder : FontStyle.None,
-                align
-            );
+                _rendererCaret = RenderedText.Create
+                (
+                    uo,
+                    "_",
+                    hue,
+                    font,
+                    isunicode,
+                    (renderStyle & FontStyle.BlackBorder) != 0 ? FontStyle.BlackBorder : FontStyle.None,
+                    align
+                );
 
-            Height = _rendererCaret.Height;
+                Height = _rendererCaret.Height;
+            }
         }
 
-        public StbTextBox(List<string> parts, string[] lines) : this
+        public StbTextBox(List<string> parts, string[] lines, GameContext context) : this
         (
+            context,
             1,
             parts[0] == "textentrylimited" ? int.Parse(parts[8]) : byte.MaxValue,
             int.Parse(parts[3]),
             style: FontStyle.BlackBorder | FontStyle.CropTexture,
-            hue: (ushort) (UInt16Converter.Parse(parts[5]) + 1)
-        )
+            hue: (ushort) (UInt16Converter.Parse(parts[5]) + 1))
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);
-            Width = _rendererText.MaxWidth; //int.Parse(parts[3]);
-            Height = _rendererText.MaxHeight = int.Parse(parts[4]);
+            Width = int.Parse(parts[3]);
+            int maxHeight = int.Parse(parts[4]);
+            Height = maxHeight;
             Multiline = false;
             _fromServer = true;
             LocalSerial = SerialHelper.Parse(parts[6]);
             IsFromServer = true;
+
+            if (_rendererText != null && maxHeight > 0)
+            {
+                _rendererText.MaxHeight = maxHeight;
+                Height = maxHeight;
+            }
 
             int index = int.Parse(parts[7]);
 
@@ -130,10 +150,10 @@ namespace ClassicUO.Game.UI.Controls
 
         public byte Font
         {
-            get => _rendererText.Font;
+            get { return _rendererText?.Font ?? _fontValue; }
             set
             {
-                if (_rendererText.Font != value)
+                if (_rendererText != null && _rendererText.Font != value)
                 {
                     _rendererText.Font = value;
                     _rendererText.CreateTexture();
@@ -193,14 +213,14 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool AllowSelection { get; set; } = true;
 
-        public bool IsUnicode => _rendererText.IsUnicode;
+        public bool IsUnicode { get { return _rendererText?.IsUnicode ?? _isUnicodeValue; } }
 
         public ushort Hue
         {
-            get => _rendererText.Hue;
+            get { return _rendererText?.Hue ?? 0; }
             set
             {
-                if (_rendererText.Hue != value)
+                if (_rendererText != null && _rendererText.Hue != value)
                 {
                     _rendererText.Hue = value;
                     _rendererCaret.Hue = value;
@@ -230,7 +250,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public string Text
         {
-            get => _rendererText.Text;
+            get { return _rendererText?.Text; }
 
             set
             {
@@ -248,6 +268,9 @@ namespace ClassicUO.Game.UI.Controls
 
                 //Sanitize(ref value);
 
+                if (_rendererText == null)
+                    return;
+
                 string previousText = _rendererText.Text;
 
                 _rendererText.Text = value;
@@ -263,7 +286,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public float GetWidth(int index)
         {
-            return _rendererText.GetCharWidthAtIndex(index);
+            return _rendererText?.GetCharWidthAtIndex(index) ?? 0;
         }
 
         public TextEditRow LayoutRow(int startIndex)
@@ -293,7 +316,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (IsUnicode)
             {
-                return Client.Game.UO.FileManager.Fonts.GetInfoUnicode
+                return Context.Game.UO.FileManager.Fonts.GetInfoUnicode
                 (
                     _rendererText.Font,
                     text,
@@ -305,7 +328,7 @@ namespace ClassicUO.Game.UI.Controls
                 );
             }
 
-            return Client.Game.UO.FileManager.Fonts.GetInfoASCII
+            return Context.Game.UO.FileManager.Fonts.GetInfoASCII
             (
                 _rendererText.Font,
                 text,
@@ -328,7 +351,8 @@ namespace ClassicUO.Game.UI.Controls
 
         protected void UpdateCaretScreenPosition()
         {
-            _caretScreenPosition = _rendererText.GetCaretPosition(Stb.CursorIndex);
+            if (_rendererText != null)
+                _caretScreenPosition = _rendererText.GetCaretPosition(Stb.CursorIndex);
         }
 
         private ControlKeys ApplyShiftIfNecessary(ControlKeys k)
@@ -363,7 +387,7 @@ namespace ClassicUO.Game.UI.Controls
                 }
 
 
-                int realWidth = _rendererText.IsUnicode ? Client.Game.UO.FileManager.Fonts.GetWidthUnicode(_rendererText.Font, text) : Client.Game.UO.FileManager.Fonts.GetWidthASCII(_rendererText.Font, text);
+                int realWidth = _rendererText.IsUnicode ? Context.Game.UO.FileManager.Fonts.GetWidthUnicode(_rendererText.Font, text) : Context.Game.UO.FileManager.Fonts.GetWidthASCII(_rendererText.Font, text);
 
                 if (realWidth > _rendererText.MaxWidth)
                 {
@@ -376,7 +400,7 @@ namespace ClassicUO.Game.UI.Controls
                     }
 
                     //MultilinesFontInfo info = _rendererText.IsUnicode
-                    //                              ? Client.Game.UO.FileManager.Fonts.GetInfoUnicode(
+                    //                              ? Context.Game.UO.FileManager.Fonts.GetInfoUnicode(
                     //                                                                    _rendererText.Font,
                     //                                                                    text,
                     //                                                                    text.Length,
@@ -384,7 +408,7 @@ namespace ClassicUO.Game.UI.Controls
                     //                                                                    (ushort) _rendererText.FontStyle,
                     //                                                                    realWidth
                     //                                                                   )
-                    //                              : Client.Game.UO.FileManager.Fonts.GetInfoASCII(
+                    //                              : Context.Game.UO.FileManager.Fonts.GetInfoASCII(
                     //                                                                  _rendererText.Font,
                     //                                                                  text,
                     //                                                                  text.Length,
@@ -467,7 +491,7 @@ namespace ClassicUO.Game.UI.Controls
 
         protected MultilinesFontInfo GetInfo()
         {
-            return _rendererText.GetInfo();
+            return _rendererText?.GetInfo();
         }
 
         internal override void OnFocusEnter()
@@ -715,16 +739,16 @@ namespace ClassicUO.Game.UI.Controls
                         {
                             Parent?.OnKeyboardReturn(0, Text);
 
-                            if (UIManager.SystemChat != null && UIManager.SystemChat.TextBoxControl != null && IsFocused)
+                            if (Context?.UI?.SystemChat != null && Context.UI.SystemChat.TextBoxControl != null && IsFocused)
                             {
-                                if (!IsFromServer || !UIManager.SystemChat.TextBoxControl.IsVisible)
+                                if (!IsFromServer || !Context.UI.SystemChat.TextBoxControl.IsVisible)
                                 {
                                     OnFocusLost();
                                     OnFocusEnter();
                                 }
-                                else if (UIManager.KeyboardFocusControl == null || UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl)
+                                else if (Context.UI.KeyboardFocusControl == null || Context.UI.KeyboardFocusControl != Context.UI.SystemChat.TextBoxControl)
                                 {
-                                    UIManager.SystemChat.TextBoxControl.SetKeyboardFocus();
+                                    Context.UI.SystemChat.TextBoxControl.SetKeyboardFocus();
                                 }
                             }
                         }
@@ -887,6 +911,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
+            if (_rendererText == null)
+                return false;
+
             float layerDepth = layerDepthRef;
             renderLists.AddGumpNoAtlas(
                 batcher =>

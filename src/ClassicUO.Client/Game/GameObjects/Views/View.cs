@@ -102,6 +102,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected static void DrawStatic(
             UltimaBatcher2D batcher,
+            UltimaOnline uo,
             ushort graphic,
             int x,
             int y,
@@ -110,11 +111,11 @@ namespace ClassicUO.Game.GameObjects
             bool isWet = false
         )
         {
-            ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(graphic);
+            ref readonly var artInfo = ref uo.Arts.GetArt(graphic);
 
             if (artInfo.Texture != null)
             {
-                ref var index = ref Client.Game.UO.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
+                ref var index = ref uo.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
                 index.Width = (short)((artInfo.UV.Width >> 1) - 22);
                 index.Height = (short)(artInfo.UV.Height - 44);
 
@@ -158,6 +159,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected static void DrawGump(
             UltimaBatcher2D batcher,
+            UltimaOnline uo,
             ushort graphic,
             int x,
             int y,
@@ -165,7 +167,7 @@ namespace ClassicUO.Game.GameObjects
             float depth
         )
         {
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(graphic);
+            ref readonly var gumpInfo = ref uo.Gumps.GetGump(graphic);
 
             if (gumpInfo.Texture != null)
             {
@@ -185,6 +187,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected static void DrawStaticRotated(
             UltimaBatcher2D batcher,
+            UltimaOnline uo,
             ushort graphic,
             int x,
             int y,
@@ -193,11 +196,11 @@ namespace ClassicUO.Game.GameObjects
             float depth
         )
         {
-            ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(graphic);
+            ref readonly var artInfo = ref uo.Arts.GetArt(graphic);
 
             if (artInfo.Texture != null)
             {
-                ref var index = ref Client.Game.UO.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
+                ref var index = ref uo.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
                 index.Width = (short)((artInfo.UV.Width >> 1) - 22);
                 index.Height = (short)(artInfo.UV.Height - 44);
 
@@ -221,6 +224,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected static void DrawStaticAnimated(
             UltimaBatcher2D batcher,
+            UltimaOnline uo,
             ushort graphic,
             int x,
             int y,
@@ -230,15 +234,15 @@ namespace ClassicUO.Game.GameObjects
             bool isWet = false
         )
         {
-            ref UOFileIndex index = ref Client.Game.UO.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
+            ref UOFileIndex index = ref uo.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
 
             graphic = (ushort)(graphic + index.AnimOffset);
 
-            ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(graphic);
+            ref readonly var artInfo = ref uo.Arts.GetArt(graphic);
 
             if (artInfo.Texture != null)
             {
-                index = ref Client.Game.UO.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
+                index = ref uo.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
                 index.Width = (short)((artInfo.UV.Width >> 1) - 22);
                 index.Height = (short)(artInfo.UV.Height - 44);
 

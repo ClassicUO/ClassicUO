@@ -49,7 +49,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new ResizePic(0x24B8)
+                new ResizePic(0x24B8, World.Context)
                 {
                     Width = Width,
                     Height = Height,
@@ -63,7 +63,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 label = new Label
-                (
+                (World.Context, 
                     _skill.Name,
                     true,
                     0,
@@ -89,17 +89,17 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.OnMouseUp(x, y, button);
 
-            if (ProfileManager.CurrentProfile.CastSpellsByOneClick && button == MouseButtonType.Left && !Keyboard.Alt)
+            if (World.Profile.CurrentProfile.CastSpellsByOneClick && button == MouseButtonType.Left && !Keyboard.Alt)
             {
-                GameActions.UseSkill(_skill.Index);
+                GameActions.UseSkill(World, _skill.Index);
             }
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
-            if (!ProfileManager.CurrentProfile.CastSpellsByOneClick && button == MouseButtonType.Left && !Keyboard.Alt)
+            if (!World.Profile.CurrentProfile.CastSpellsByOneClick && button == MouseButtonType.Left && !Keyboard.Alt)
             {
-                GameActions.UseSkill(_skill.Index);
+                GameActions.UseSkill(World, _skill.Index);
 
                 return true;
             }

@@ -22,6 +22,8 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         private readonly HSliderBar[] _skillSliders;
         private readonly List<SkillEntry> _skillList;
 
+        private int SkillsCount => World.Context.Game.UO.Version >= ClientVersion.CV_70160 ? 4 : 3;
+
 
 
         public CreateCharTradeGump(World world, PlayerMobile character, ProfessionInfo profession) : base(world, 0, 0)
@@ -38,7 +40,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                new ResizePic(2600)
+                new ResizePic(2600, World.Context)
                 {
                     X = 100, Y = 80, Width = 470, Height = 372
                 }
@@ -46,13 +48,13 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             // center menu with fancy top
             // public GumpPic(AControl parent, int x, int y, int gumpID, int hue)
-            Add(new GumpPic(291, 42, 0x0589, 0));
-            Add(new GumpPic(214, 58, 0x058B, 0));
-            Add(new GumpPic(300, 51, 0x15A9, 0));
+            Add(new GumpPic(291, 42, 0x0589, 0, World.Context));
+            Add(new GumpPic(214, 58, 0x058B, 0, World.Context));
+            Add(new GumpPic(300, 51, 0x15A9, 0, World.Context));
 
-            bool isAsianLang = string.Compare(Settings.GlobalSettings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 ||
-                string.Compare(Settings.GlobalSettings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
-                string.Compare(Settings.GlobalSettings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
+            bool isAsianLang = string.Compare(World.Settings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 ||
+                string.Compare(World.Settings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
+                string.Compare(World.Settings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
 
             bool unicode = isAsianLang;
             byte font = (byte)(isAsianLang ? 1 : 2);
@@ -62,7 +64,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             //TextLabelAscii(AControl parent, int x, int y, int font, int hue, string text, int width = 400)
             Add
             (
-                new Label(Client.Game.UO.FileManager.Clilocs.GetString(3000326), unicode, hue, font: font)
+                new Label(World.Context, World.Context.Game.UO.FileManager.Clilocs.GetString(3000326), unicode, hue, font: font)
                 {
                     X = 148, Y = 132
                 }
@@ -71,7 +73,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             // strength, dexterity, intelligence
             Add
             (
-                new Label(Client.Game.UO.FileManager.Clilocs.GetString(3000111), unicode, 1, font: 1)
+                new Label(World.Context, World.Context.Game.UO.FileManager.Clilocs.GetString(3000111), unicode, 1, font: 1)
                 {
                     X = 158, Y = 170
                 }
@@ -79,7 +81,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                new Label(Client.Game.UO.FileManager.Clilocs.GetString(3000112), unicode, 1, font: 1)
+                new Label(World.Context, World.Context.Game.UO.FileManager.Clilocs.GetString(3000112), unicode, 1, font: 1)
                 {
                     X = 158, Y = 250
                 }
@@ -87,7 +89,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                new Label(Client.Game.UO.FileManager.Clilocs.GetString(3000113), unicode, 1, font: 1)
+                new Label(World.Context, World.Context.Game.UO.FileManager.Clilocs.GetString(3000113), unicode, 1, font: 1)
                 {
                     X = 158, Y = 330
                 }
@@ -96,12 +98,12 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             // sliders for attributes
             _attributeSliders = new HSliderBar[3];
 
-            (var defSkillsValues, var defStatsValues) = ProfessionInfo.GetDefaults(Client.Game.UO.Version);
+            (var defSkillsValues, var defStatsValues) = ProfessionInfo.GetDefaults(World.Context.Game.UO.Version);
 
             Add
             (
                 _attributeSliders[0] = new HSliderBar
-                (
+                (World.Context, 
                     164,
                     196,
                     93,
@@ -116,7 +118,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             Add
             (
                 _attributeSliders[1] = new HSliderBar
-                (
+                (World.Context, 
                     164,
                     276,
                     93,
@@ -131,7 +133,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             Add
             (
                 _attributeSliders[2] = new HSliderBar
-                (
+                (World.Context, 
                     164,
                     356,
                     93,
@@ -145,7 +147,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             var clientFlags = World.ClientLockedFeatures.Flags;
 
-            _skillList = Client.Game.UO.FileManager.Skills.SortedSkills
+            _skillList = World.Context.Game.UO.FileManager.Skills.SortedSkills
                          .Where(s =>
                                      // All standard client versions ignore these skills by defualt
                                      //s.Index != 26 && // MagicResist
@@ -193,15 +195,15 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             var skillNames = _skillList.Select(s => s.Name).ToArray();
 
             int y = 172;
-            _skillSliders = new HSliderBar[CharCreationGump._skillsCount];
-            _skillsCombobox = new Combobox[CharCreationGump._skillsCount];
+            _skillSliders = new HSliderBar[SkillsCount];
+            _skillsCombobox = new Combobox[SkillsCount];
 
-            for (int i = 0; i < CharCreationGump._skillsCount; i++)
+            for (int i = 0; i < SkillsCount; i++)
             {
                 Add
                 (
                     _skillsCombobox[i] = new Combobox
-                    (
+                    (World.Context, 
                         344,
                         y,
                         182,
@@ -216,7 +218,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 Add
                 (
                     _skillSliders[i] = new HSliderBar
-                    (
+                    (World.Context, 
                         344,
                         y + 32,
                         93,
@@ -233,7 +235,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
+                new Button(World.Context, (int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
                 {
                     X = 586, Y = 445, ButtonAction = ButtonAction.Activate
                 }
@@ -241,7 +243,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                new Button((int) Buttons.Next, 0x15A4, 0x15A6, 0x15A5)
+                new Button(World.Context, (int) Buttons.Next, 0x15A4, 0x15A6, 0x15A5)
                 {
                     X = 610, Y = 445, ButtonAction = ButtonAction.Activate
                 }
@@ -272,7 +274,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public override void OnButtonClick(int buttonID)
         {
-            CharCreationGump charCreationGump = UIManager.GetGump<CharCreationGump>();
+            CharCreationGump charCreationGump = World.Context.UI.GetGump<CharCreationGump>();
 
             switch ((Buttons) buttonID)
             {
@@ -318,14 +320,14 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 if (duplicated > 0)
                 {
-                    UIManager.GetGump<CharCreationGump>()?.ShowMessage(Client.Game.UO.FileManager.Clilocs.GetString(1080032));
+                    World.Context.UI.GetGump<CharCreationGump>()?.ShowMessage(World.Context.Game.UO.FileManager.Clilocs.GetString(1080032));
 
                     return false;
                 }
             }
             else
             {
-                UIManager.GetGump<CharCreationGump>()?.ShowMessage(Client.Game.UO.Version <= ClientVersion.CV_5090 ? ResGumps.YouMustHaveThreeUniqueSkillsChosen : Client.Game.UO.FileManager.Clilocs.GetString(1080032));
+                World.Context.UI.GetGump<CharCreationGump>()?.ShowMessage(World.Context.Game.UO.Version <= ClientVersion.CV_5090 ? ResGumps.YouMustHaveThreeUniqueSkillsChosen : World.Context.Game.UO.FileManager.Clilocs.GetString(1080032));
 
                 return false;
             }

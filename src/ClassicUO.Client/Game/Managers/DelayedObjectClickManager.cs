@@ -38,7 +38,7 @@ namespace ClassicUO.Game.Managers
 
                 if (_world.ClientFeatures.PopupEnabled)
                 {
-                    GameActions.OpenPopupMenu(Serial);
+                    GameActions.OpenPopupMenu(_world, Serial, currentProfile: _world.Profile.CurrentProfile);
                 }
             }
 

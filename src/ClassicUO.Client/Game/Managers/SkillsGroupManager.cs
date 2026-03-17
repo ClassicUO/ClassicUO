@@ -95,18 +95,18 @@ namespace ClassicUO.Game.Managers
             return false;
         }
 
-        public unsafe void Sort()
+        public unsafe void Sort(UOFileManager fileManager)
         {
             byte* table = stackalloc byte[60];
             int index = 0;
 
-            int count = Client.Game.UO.FileManager.Skills.SkillsCount;
+            int count = fileManager.Skills.SkillsCount;
 
             for (int i = 0; i < count; i++)
             {
                 for (int j = 0; j < Count; j++)
                 {
-                    if (Client.Game.UO.FileManager.Skills.GetSortedIndex(i) == _list[j])
+                    if (fileManager.Skills.GetSortedIndex(i) == _list[j])
                     {
                         table[index++] = _list[j];
 
@@ -121,14 +121,14 @@ namespace ClassicUO.Game.Managers
             }
         }
 
-        public void TransferTo(SkillsGroup group)
+        public void TransferTo(SkillsGroup group, UOFileManager fileManager)
         {
             for (int i = 0; i < Count; i++)
             {
                 group.Add(_list[i]);
             }
 
-            group.Sort();
+            group.Sort(fileManager);
         }
 
         public void Save(XmlTextWriter xml)
@@ -173,7 +173,7 @@ namespace ClassicUO.Game.Managers
         {
             if (Groups[0] == g)
             {
-                var camera = Client.Game.Scene.Camera;
+                var camera = _world.Context.Game.Scene.Camera;
 
                 MessageBoxGump messageBox = new MessageBoxGump(_world, 200, 125, ResGeneral.CannotDeleteThisGroup, null)
                 {
@@ -181,13 +181,13 @@ namespace ClassicUO.Game.Managers
                     Y = camera.Bounds.Y + camera.Bounds.Height / 2 - 62
                 };
 
-                UIManager.Add(messageBox);
+                _world.Context.UI.Add(messageBox);
 
                 return false;
             }
 
             Groups.Remove(g);
-            g.TransferTo(Groups[0]);
+            g.TransferTo(Groups[0], _world.Context.Game.UO.FileManager);
 
             return true;
         }
@@ -196,7 +196,7 @@ namespace ClassicUO.Game.Managers
         {
             Groups.Clear();
 
-            string path = Path.Combine(ProfileManager.ProfilePath, "skillsgroups.xml");
+            string path = Path.Combine(_world.Profile.ProfilePath, "skillsgroups.xml");
 
             if (!File.Exists(path))
             {
@@ -241,7 +241,7 @@ namespace ClassicUO.Game.Managers
                         }
                     }
 
-                    g.Sort();
+                    g.Sort(_world.Context.Game.UO.FileManager);
                     Add(g);
                 }
             }
@@ -250,7 +250,7 @@ namespace ClassicUO.Game.Managers
 
         public void Save()
         {
-            string path = Path.Combine(ProfileManager.ProfilePath, "skillsgroups.xml");
+            string path = Path.Combine(_world.Profile.ProfilePath, "skillsgroups.xml");
 
             using (XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8)
             {
@@ -277,7 +277,7 @@ namespace ClassicUO.Game.Managers
         {
             Groups.Clear();
 
-            if (!LoadMULFile(Client.Game.UO.FileManager.GetUOFilePath("skillgrp.mul")))
+            if (!LoadMULFile(_world.Context.Game.UO.FileManager.GetUOFilePath("skillgrp.mul")))
             {
                 MakeDefaultMiscellaneous();
                 MakeDefaultCombat();
@@ -290,7 +290,7 @@ namespace ClassicUO.Game.Managers
 
             foreach (SkillsGroup g in Groups)
             {
-                g.Sort();
+                g.Sort(_world.Context.Game.UO.FileManager);
             }
 
             Save();
@@ -313,7 +313,7 @@ namespace ClassicUO.Game.Managers
 
         private void MakeDefaultCombat()
         {
-            int count = Client.Game.UO.FileManager.Skills.SkillsCount;
+            int count = _world.Context.Game.UO.FileManager.Skills.SkillsCount;
 
             SkillsGroup g = new SkillsGroup();
             g.Name = ResGeneral.Combat;
@@ -376,7 +376,7 @@ namespace ClassicUO.Game.Managers
 
         private void MakeDefaultMagic()
         {
-            int count = Client.Game.UO.FileManager.Skills.SkillsCount;
+            int count = _world.Context.Game.UO.FileManager.Skills.SkillsCount;
 
             SkillsGroup g = new SkillsGroup();
             g.Name = ResGeneral.Magic;
@@ -525,7 +525,7 @@ namespace ClassicUO.Game.Managers
                     {
                         int grp = bin.ReadInt32();
 
-                        if (grp < groups.Length && skillidx < Client.Game.UO.FileManager.Skills.SkillsCount)
+                        if (grp < groups.Length && skillidx < _world.Context.Game.UO.FileManager.Skills.SkillsCount)
                         {
                             groups[grp].Add(skillidx++);
                         }

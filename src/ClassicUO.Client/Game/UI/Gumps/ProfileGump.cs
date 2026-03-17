@@ -26,13 +26,13 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptKeyboardInput = true;
             CanCloseWithRightClick = true;
 
-            Add(_gumpPic = new GumpPic(143, 0, 0x82D, 0));
+            Add(_gumpPic = new GumpPic(143, 0, 0x82D, 0, World.Context));
             _gumpPic.MouseDoubleClick += _picBase_MouseDoubleClick;
 
-            Add(new ExpandableScroll(0, _diffY, Height - _diffY, 0x0820));
+            Add(new ExpandableScroll(0, _diffY, Height - _diffY, 0x0820, World.Context));
 
             _scrollArea = new ScrollArea
-            (
+            (World.Context, 
                 22,
                 32 + _diffY,
                 272 - 22,
@@ -41,7 +41,7 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             Label topText = new Label
-            (
+            (World.Context, 
                 header,
                 true,
                 0,
@@ -57,7 +57,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             int offsetY = topText.Height - 15;
 
-            _scrollArea.Add(new GumpPic(4, offsetY, 0x005C, 0));
+            _scrollArea.Add(new GumpPic(4, offsetY, 0x005C, 0, World.Context));
 
             _scrollArea.Add
             (
@@ -67,15 +67,15 @@ namespace ClassicUO.Game.UI.Gumps
                     offsetY,
                     138,
                     0,
-                    0x005D
+                    0x005D, World.Context
                 )
             );
 
-            _scrollArea.Add(new GumpPic(194, offsetY, 0x005E, 0));
+            _scrollArea.Add(new GumpPic(194, offsetY, 0x005E, 0, World.Context));
 
             offsetY += 44;
 
-            _textBox = new StbTextBox(1, -1, 220)
+            _textBox = new StbTextBox(World.Context, 1, -1, 220)
             {
                 Width = 220,
                 X = 4,
@@ -90,10 +90,10 @@ namespace ClassicUO.Game.UI.Gumps
             _scrollArea.Add(_textBox);
 
 
-            _databox = new DataBox(4, _textBox.Height + 3, 1, 1);
+            _databox = new DataBox(World.Context, 4, _textBox.Height + 3, 1, 1);
             _databox.WantUpdateSize = true;
 
-            _databox.Add(new GumpPic(4, 0, 0x005F, 0));
+            _databox.Add(new GumpPic(4, 0, 0x005F, 0, World.Context));
 
             _databox.Add
             (
@@ -103,16 +103,16 @@ namespace ClassicUO.Game.UI.Gumps
                     0 + 9,
                     197,
                     0,
-                    0x0060
+                    0x0060, World.Context
                 )
             );
 
-            _databox.Add(new GumpPic(210, 0, 0x0061, 0));
+            _databox.Add(new GumpPic(210, 0, 0x0061, 0, World.Context));
 
             _databox.Add
             (
                 new Label
-                (
+                (World.Context, 
                     footer,
                     true,
                     0,
@@ -128,7 +128,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_scrollArea);
             _scrollArea.Add(_databox);
 
-            Add(_hitBox = new HitBox(143, 0, 23, 24));
+            Add(_hitBox = new HitBox(World.Context, 143, 0, 23, 24));
             _hitBox.MouseUp += _hitBox_MouseUp;
         }
 
@@ -178,7 +178,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             _textBox.Height = Math.Max
             (
-                Client.Game.UO.FileManager.Fonts.GetHeightUnicode
+                World.Context.Game.UO.FileManager.Fonts.GetHeightUnicode
                 (
                     1,
                     _textBox.Text,
@@ -214,9 +214,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            if (_originalText != _textBox.Text && World.Player != null && !World.Player.IsDestroyed && NetClient.Socket.IsConnected)
+            if (_originalText != _textBox.Text && World.Player != null && !World.Player.IsDestroyed && World.Network.IsConnected)
             {
-                NetClient.Socket.Send_ProfileUpdate(LocalSerial, _textBox.Text);
+                World.Network.Send_ProfileUpdate(LocalSerial, _textBox.Text);
             }
 
             base.Dispose();

@@ -52,8 +52,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             CanMove = true;
 
-            _mapMaxX= Client.Game.UO.FileManager.Maps.MapsDefaultSize[world.MapIndex, 0];
-            _mapMaxY = Client.Game.UO.FileManager.Maps.MapsDefaultSize[world.MapIndex, 1];
+            _mapMaxX= World.Context.Game.UO.FileManager.Maps.MapsDefaultSize[world.MapIndex, 0];
+            _mapMaxY = World.Context.Game.UO.FileManager.Maps.MapsDefaultSize[world.MapIndex, 1];
 
             _markers = markers;
             _markerIdx = markerIdx;
@@ -71,11 +71,11 @@ namespace ClassicUO.Game.UI.Gumps
             if (selectedColor < 0)
                 selectedColor = 0;
 
-            AlphaBlendControl markersGumpBackground = new AlphaBlendControl
+            AlphaBlendControl markersGumpBackground = new AlphaBlendControl(World.Context)
             {
                 Width = 320,
                 Height = 220,
-                X = Client.Game.Scene.Camera.Bounds.Width / 2 - 125,
+                X = World.Context.Game.Scene.Camera.Bounds.Width / 2 - 125,
                 Y = 150,
                 Alpha = 0.7f,
                 CanMove = true,
@@ -86,13 +86,13 @@ namespace ClassicUO.Game.UI.Gumps
             Add(markersGumpBackground);
 
             if (!isEdit)
-                Add(new Label(ResGumps.AddMarker, true, HUE_FONT, 0, 255, FontStyle.BlackBorder)
+                Add(new Label(World.Context, ResGumps.AddMarker, true, HUE_FONT, 0, 255, FontStyle.BlackBorder)
                 {
                     X = markersGumpBackground.X + 100,
                     Y = markersGumpBackground.Y + 3,
                 });
             else
-                Add(new Label(ResGumps.EditMarker, true, HUE_FONT, 0, 255, FontStyle.BlackBorder)
+                Add(new Label(World.Context, ResGumps.EditMarker, true, HUE_FONT, 0, 255, FontStyle.BlackBorder)
                 {
                     X = markersGumpBackground.X + 100,
                     Y = markersGumpBackground.Y + 3,
@@ -101,7 +101,7 @@ namespace ClassicUO.Game.UI.Gumps
             // X Field
             var fx = markersGumpBackground.X + 5;
             var fy = markersGumpBackground.Y + 25;
-            Add(new ResizePic(0x0BB8)
+            Add(new ResizePic(0x0BB8, World.Context)
             {
                 X = fx + LABEL_OFFSET,
                 Y = fy,
@@ -109,7 +109,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = 25
             });
 
-            _textBoxX = new StbTextBox(
+            _textBoxX = new StbTextBox(World.Context, 
                 0xFF,
                 MAX_CORD_LEN,
                 90,
@@ -124,11 +124,11 @@ namespace ClassicUO.Game.UI.Gumps
                 Text = x.ToString()
             };
             Add(_textBoxX);
-            Add(new Label(ResGumps.MarkerX, true, HUE_FONT, 0, 255, FontStyle.BlackBorder) { X = fx, Y = fy });
+            Add(new Label(World.Context, ResGumps.MarkerX, true, HUE_FONT, 0, 255, FontStyle.BlackBorder) { X = fx, Y = fy });
 
             // Y Field
             fy += Y_OFFSET;
-            Add(new ResizePic(0x0BB8)
+            Add(new ResizePic(0x0BB8, World.Context)
             {
                 X = fx + LABEL_OFFSET,
                 Y = fy,
@@ -136,7 +136,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = 25
             });
 
-            _textBoxY = new StbTextBox(
+            _textBoxY = new StbTextBox(World.Context, 
                 0xFF,
                 MAX_CORD_LEN,
                 90,
@@ -151,11 +151,11 @@ namespace ClassicUO.Game.UI.Gumps
                 Text = y.ToString()
             };
             Add(_textBoxY);
-            Add(new Label(ResGumps.MarkerY, true, HUE_FONT, 0, 255, FontStyle.BlackBorder) { X = fx, Y = fy });
+            Add(new Label(World.Context, ResGumps.MarkerY, true, HUE_FONT, 0, 255, FontStyle.BlackBorder) { X = fx, Y = fy });
 
             // Marker Name field
             fy += Y_OFFSET;
-            Add(new ResizePic(0x0BB8)
+            Add(new ResizePic(0x0BB8, World.Context)
             {
                 X = fx + LABEL_OFFSET,
                 Y = fy,
@@ -163,7 +163,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Height = 25
             });
 
-            _markerName = new StbTextBox(
+            _markerName = new StbTextBox(World.Context, 
                 0xFF,
                 MAX_NAME_LEN,
                 250,
@@ -178,12 +178,12 @@ namespace ClassicUO.Game.UI.Gumps
                 Text = markerName
             };
             Add(_markerName);
-            Add(new Label(ResGumps.MarkerName, true, HUE_FONT, 0, 255, FontStyle.BlackBorder) { X = fx, Y = fy });
+            Add(new Label(World.Context, ResGumps.MarkerName, true, HUE_FONT, 0, 255, FontStyle.BlackBorder) { X = fx, Y = fy });
 
             // Color Combobox
             fy += Y_OFFSET;
             _colorsCombo = new Combobox
-                (
+                (World.Context, 
                     fx + LABEL_OFFSET,
                     fy,
                     250,
@@ -191,14 +191,14 @@ namespace ClassicUO.Game.UI.Gumps
                     selectedColor
                 );
             Add(_colorsCombo);
-            Add(new Label(ResGumps.MarkerColor, true, HUE_FONT, 0, 255, FontStyle.BlackBorder) { X = fx, Y = fy });
+            Add(new Label(World.Context, ResGumps.MarkerColor, true, HUE_FONT, 0, 255, FontStyle.BlackBorder) { X = fx, Y = fy });
 
             if (_icons.Length > 0)
             {
                 // Icon combobox
                 fy += Y_OFFSET;
                 _iconsCombo = new Combobox
-                    (
+                    (World.Context, 
                         fx + LABEL_OFFSET,
                         fy,
                         250,
@@ -206,7 +206,7 @@ namespace ClassicUO.Game.UI.Gumps
                         selectedIcon
                     );
                 Add(_iconsCombo);
-                Add(new Label(ResGumps.MarkerIcon, true, HUE_FONT, 0, 255, FontStyle.BlackBorder) { X = fx, Y = fy });
+                Add(new Label(World.Context, ResGumps.MarkerIcon, true, HUE_FONT, 0, 255, FontStyle.BlackBorder) { X = fx, Y = fy });
             }
 
             // Buttons Add and Edit depend of state
@@ -215,7 +215,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Add
                 (
                     new NiceButton
-                        (
+                        (World.Context, 
                             markersGumpBackground.X + 13,
                             markersGumpBackground.Y + markersGumpBackground.Height - 30,
                             60,
@@ -231,7 +231,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Add
                 (
                     new NiceButton
-                        (
+                        (World.Context, 
                             markersGumpBackground.X + 13,
                             markersGumpBackground.Y + markersGumpBackground.Height - 30,
                             60,
@@ -246,7 +246,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new NiceButton
-                    (
+                    (World.Context, 
                         markersGumpBackground.X + 78,
                         markersGumpBackground.Y + markersGumpBackground.Height - 30,
                         60,

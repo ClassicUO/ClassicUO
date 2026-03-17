@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.Game;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Network;
@@ -14,7 +15,7 @@ namespace ClassicUO.Game.UI.Controls
     {
         private ushort _graphic;
 
-        protected GumpPicBase()
+        protected GumpPicBase(GameContext context) : base(context)
         {
             CanMove = true;
             AcceptMouseInput = true;
@@ -27,12 +28,15 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _graphic = value;
 
-                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(_graphic);
+                var uo = Context?.Game?.UO;
+                if (uo == null)
+                    return;
+
+                ref readonly var gumpInfo = ref uo.Gumps.GetGump(_graphic);
 
                 if (gumpInfo.Texture == null)
                 {
                     Dispose();
-
                     return;
                 }
 
@@ -41,20 +45,37 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
+        protected bool EnsureSize()
+        {
+            // Now that we have eager init via Graphic setter, just check validity
+            if (Context?.Game?.UO == null)
+                return false;
+
+            ref readonly var gumpInfo = ref Context.Game.UO.Gumps.GetGump(_graphic);
+            if (gumpInfo.Texture == null)
+                return false;
+
+            return !IsDisposed;
+        }
+
         public ushort Hue { get; set; }
         public bool IsPartialHue { get; set; }
 
 
         public override bool Contains(int x, int y)
         {
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(_graphic);
+            var uo = Context?.Game?.UO;
+            if (uo == null)
+                return false;
+
+            ref readonly var gumpInfo = ref uo.Gumps.GetGump(_graphic);
 
             if (gumpInfo.Texture == null)
             {
                 return false;
             }
 
-            if (Client.Game.UO.Gumps.PixelCheck(Graphic, x - Offset.X, y - Offset.Y))
+            if (uo.Gumps.PixelCheck(Graphic, x - Offset.X, y - Offset.Y))
             {
                 return true;
             }
@@ -76,7 +97,7 @@ namespace ClassicUO.Game.UI.Controls
 
     internal class GumpPic : GumpPicBase
     {
-        public GumpPic(int x, int y, ushort graphic, ushort hue)
+        public GumpPic(int x, int y, ushort graphic, ushort hue, GameContext context) : base(context)
         {
             X = x;
             Y = y;
@@ -85,7 +106,7 @@ namespace ClassicUO.Game.UI.Controls
             IsFromServer = true;
         }
 
-        public GumpPic(List<string> parts)
+        public GumpPic(List<string> parts, GameContext context)
             : this(
                 int.Parse(parts[1]),
                 int.Parse(parts[2]),
@@ -99,7 +120,8 @@ namespace ClassicUO.Game.UI.Controls
                             )
                         )
                         : 0
-                )
+                ),
+                context
             )
         { }
 
@@ -117,22 +139,19 @@ namespace ClassicUO.Game.UI.Controls
                 hue = 0;
             }
 
-            //if (hue < 2)
-            //    hue = 1;
             return hue;
         }
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            float layerDepth = layerDepthRef;
-            if (IsDisposed)
-            {
+            if (!EnsureSize())
                 return false;
-            }
+
+            float layerDepth = layerDepthRef;
 
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, IsPartialHue, Alpha, true);
 
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(Graphic);
+            ref readonly var gumpInfo = ref Context.Game.UO.Gumps.GetGump(Graphic);
 
             if (gumpInfo.Texture != null)
             {
@@ -160,7 +179,7 @@ namespace ClassicUO.Game.UI.Controls
     {
         private readonly World _world;
 
-        public VirtueGumpPic(World world, List<string> parts) : base(parts)
+        public VirtueGumpPic(World world, List<string> parts) : base(parts, world?.Context)
         {
             _world = world;
         }
@@ -169,7 +188,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (button == MouseButtonType.Left)
             {
-                NetClient.Socket.Send_VirtueGumpResponse(_world.Player, Graphic);
+                _world.Network.Send_VirtueGumpResponse(_world.Player, Graphic);
 
                 return true;
             }
@@ -189,8 +208,9 @@ namespace ClassicUO.Game.UI.Controls
             ushort sx,
             ushort sy,
             ushort width,
-            ushort height
-        )
+            ushort height,
+            GameContext context
+        ) : base(context)
         {
             X = x;
             Y = y;
@@ -201,7 +221,7 @@ namespace ClassicUO.Game.UI.Controls
             IsFromServer = true;
         }
 
-        public GumpPicInPic(List<string> parts)
+        public GumpPicInPic(List<string> parts, GameContext context)
             : this(
                 int.Parse(parts[1]),
                 int.Parse(parts[2]),
@@ -209,7 +229,8 @@ namespace ClassicUO.Game.UI.Controls
                 UInt16Converter.Parse(parts[4]),
                 UInt16Converter.Parse(parts[5]),
                 UInt16Converter.Parse(parts[6]),
-                UInt16Converter.Parse(parts[7])
+                UInt16Converter.Parse(parts[7]),
+                context
             )
         { }
 
@@ -220,15 +241,14 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            float layerDepth = layerDepthRef;
-            if (IsDisposed)
-            {
+            if (!EnsureSize())
                 return false;
-            }
+
+            float layerDepth = layerDepthRef;
 
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, IsPartialHue, Alpha, true);
 
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(Graphic);
+            ref readonly var gumpInfo = ref Context.Game.UO.Gumps.GetGump(Graphic);
 
             var sourceBounds = new Rectangle(gumpInfo.UV.X + _picInPicBounds.X, gumpInfo.UV.Y + _picInPicBounds.Y, _picInPicBounds.Width, _picInPicBounds.Height);
 

@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BSD-2-Clause
+﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
@@ -43,8 +43,9 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             _renderedText = RenderedText.Create(
+                World.Context.Game.UO,
                 string.Empty,
-                entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort)0x0481,
+                entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag, World.Profile.CurrentProfile) : (ushort)0x0481,
                 0xFF,
                 true,
                 FontStyle.BlackBorder,
@@ -79,7 +80,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     if (string.IsNullOrEmpty(item.ItemData.Name))
                     {
-                        t += Client.Game.UO.FileManager.Clilocs.GetString(1020000 + item.Graphic, true, t);
+                        t += World.Context.Game.UO.FileManager.Clilocs.GetString(1020000 + item.Graphic, true, t);
                     }
                     else
                     {
@@ -97,14 +98,14 @@ namespace ClassicUO.Game.UI.Gumps
                     return false;
                 }
 
-                Client.Game.UO.FileManager.Fonts.SetUseHTML(true);
-                Client.Game.UO.FileManager.Fonts.RecalculateWidthByInfo = true;
+                World.Context.Game.UO.FileManager.Fonts.SetUseHTML(true);
+                World.Context.Game.UO.FileManager.Fonts.RecalculateWidthByInfo = true;
 
-                int width = Client.Game.UO.FileManager.Fonts.GetWidthUnicode(_renderedText.Font, t);
+                int width = World.Context.Game.UO.FileManager.Fonts.GetWidthUnicode(_renderedText.Font, t);
 
                 if (width > Constants.OBJECT_HANDLES_GUMP_WIDTH)
                 {
-                    t = Client.Game.UO.FileManager.Fonts.GetTextByWidthUnicode(
+                    t = World.Context.Game.UO.FileManager.Fonts.GetTextByWidthUnicode(
                         _renderedText.Font,
                         t.AsSpan(),
                         Constants.OBJECT_HANDLES_GUMP_WIDTH,
@@ -119,8 +120,8 @@ namespace ClassicUO.Game.UI.Gumps
                 _renderedText.MaxWidth = width;
                 _renderedText.Text = t;
 
-                Client.Game.UO.FileManager.Fonts.RecalculateWidthByInfo = false;
-                Client.Game.UO.FileManager.Fonts.SetUseHTML(false);
+                World.Context.Game.UO.FileManager.Fonts.RecalculateWidthByInfo = false;
+                World.Context.Game.UO.FileManager.Fonts.SetUseHTML(false);
 
                 Width = _background.Width = Constants.OBJECT_HANDLES_GUMP_WIDTH + 4;
                 _showHpBar = false;
@@ -135,11 +136,11 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 string t = entity.Name;
 
-                int width = Client.Game.UO.FileManager.Fonts.GetWidthUnicode(_renderedText.Font, t);
+                int width = World.Context.Game.UO.FileManager.Fonts.GetWidthUnicode(_renderedText.Font, t);
 
                 if (width > Constants.OBJECT_HANDLES_GUMP_WIDTH)
                 {
-                    t = Client.Game.UO.FileManager.Fonts.GetTextByWidthUnicode(
+                    t = World.Context.Game.UO.FileManager.Fonts.GetTextByWidthUnicode(
                         _renderedText.Font,
                         t.AsSpan(),
                         Constants.OBJECT_HANDLES_GUMP_WIDTH,
@@ -156,7 +157,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _renderedText.Text = t;
 
                 Width = _background.Width = Constants.OBJECT_HANDLES_GUMP_WIDTH + 4;
-                _showHpBar = entity is Mobile && ProfileManager.CurrentProfile.NameOverheadShowHpBar;
+                _showHpBar = entity is Mobile && World.Profile.CurrentProfile.NameOverheadShowHpBar;
                 int hpBarExtra = _showHpBar ? Constants.OBJECT_HANDLES_HP_BAR_HEIGHT + 1 : 0;
                 Height = _background.Height = Constants.OBJECT_HANDLES_GUMP_HEIGHT + 4 + hpBarExtra;
 
@@ -180,10 +181,10 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             Add(
-                _background = new AlphaBlendControl(.7f)
+                _background = new AlphaBlendControl(World.Context, .7f)
                 {
                     WantUpdateSize = false,
-                    Hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag) : (ushort)0x0481
+                    Hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag, World.Profile.CurrentProfile) : (ushort)0x0481
                 }
             );
         }
@@ -219,20 +220,20 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (entity is Mobile || entity is Item it && it.IsDamageable)
             {
-                if (UIManager.IsDragging)
+                if (World.Context.UI.IsDragging)
                 {
                     return;
                 }
 
-                BaseHealthBarGump gump = UIManager.GetGump<BaseHealthBarGump>(LocalSerial);
+                BaseHealthBarGump gump = World.Context.UI.GetGump<BaseHealthBarGump>(LocalSerial);
                 gump?.Dispose();
 
-                if (entity == World.Player && ProfileManager.CurrentProfile.StatusGumpBarMutuallyExclusive)
+                if (entity == World.Player && World.Profile.CurrentProfile.StatusGumpBarMutuallyExclusive)
                 {
-                    StatusGumpBase.GetStatusGump()?.Dispose();
+                    StatusGumpBase.GetStatusGump(World.Profile.CurrentProfile, World.Context.UI)?.Dispose();
                 }
 
-                if (ProfileManager.CurrentProfile.CustomBarsToggled)
+                if (World.Profile.CurrentProfile.CustomBarsToggled)
                 {
                     Rectangle rect = new Rectangle(
                         0,
@@ -241,7 +242,7 @@ namespace ClassicUO.Game.UI.Gumps
                         HealthBarGumpCustom.HPB_HEIGHT_SINGLELINE
                     );
 
-                    UIManager.Add(
+                    World.Context.UI.Add(
                         gump = new HealthBarGumpCustom(World, entity)
                         {
                             X = Mouse.Position.X - (rect.Width >> 1),
@@ -251,9 +252,9 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(0x0804);
+                    ref readonly var gumpInfo = ref World.Context.Game.UO.Gumps.GetGump(0x0804);
 
-                    UIManager.Add(
+                    World.Context.UI.Add(
                         gump = new HealthBarGump(World, entity)
                         {
                             X = Mouse.LClickPosition.X - (gumpInfo.UV.Width >> 1),
@@ -262,7 +263,7 @@ namespace ClassicUO.Game.UI.Gumps
                     );
                 }
 
-                UIManager.AttemptDragControl(gump, true);
+                World.Context.UI.AttemptDragControl(gump, true);
             }
             else if (entity != null)
             {
@@ -321,10 +322,10 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _leftMouseIsDown = false;
 
-                if (!Client.Game.UO.GameCursor.ItemHold.Enabled)
+                if (!World.Context.Game.UO.GameCursor.ItemHold.Enabled)
                 {
                     if (
-                        UIManager.IsDragging
+                        World.Context.UI.IsDragging
                         || Math.Max(Math.Abs(Mouse.LDragOffset.X), Math.Abs(Mouse.LDragOffset.Y))
                             >= 1
                     )
@@ -352,7 +353,7 @@ namespace ClassicUO.Game.UI.Gumps
                         case CursorTarget.SetTargetClientSide:
                             World.TargetManager.Target(LocalSerial);
                             Mouse.LastLeftButtonClickTime = 0;
-                            UIManager.Add(new InspectorGump(World, World.Get(LocalSerial)));
+                            World.Context.UI.Add(new InspectorGump(World, World.Get(LocalSerial)));
 
                             break;
 
@@ -365,8 +366,8 @@ namespace ClassicUO.Game.UI.Gumps
                 else
                 {
                     if (
-                        Client.Game.UO.GameCursor.ItemHold.Enabled
-                        && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition
+                        World.Context.Game.UO.GameCursor.ItemHold.Enabled
+                        && !World.Context.Game.UO.GameCursor.ItemHold.IsFixedPosition
                     )
                     {
                         uint drop_container = 0xFFFF_FFFF;
@@ -396,7 +397,7 @@ namespace ClassicUO.Game.UI.Gumps
                                         it2.ItemData.IsSurface
                                         || it2.ItemData.IsStackable
                                             && it2.DisplayedGraphic
-                                                == Client.Game.UO.GameCursor.ItemHold.DisplayedGraphic
+                                                == World.Context.Game.UO.GameCursor.ItemHold.DisplayedGraphic
                                     )
                                 )
                                 {
@@ -418,7 +419,7 @@ namespace ClassicUO.Game.UI.Gumps
                             }
                             else
                             {
-                                Client.Game.Audio.PlaySound(0x0051);
+                                World.Context.Game.Audio.PlaySound(0x0051);
                             }
 
                             if (can_drop)
@@ -431,7 +432,8 @@ namespace ClassicUO.Game.UI.Gumps
                                 if (can_drop)
                                 {
                                     GameActions.DropItem(
-                                        Client.Game.UO.GameCursor.ItemHold.Serial,
+                                        World,
+                                        World.Context.Game.UO.GameCursor.ItemHold.Serial,
                                         dropX,
                                         dropY,
                                         dropZ,
@@ -476,7 +478,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _positionLocked = true;
 
-                Client.Game.UO.Animations.GetAnimationDimensions(
+                World.Context.Game.UO.Animations.GetAnimationDimensions(
                     m.AnimIndex,
                     m.GetGraphicForAnimation(),
                     /*(byte) m.GetDirectionForAnimation()*/
@@ -538,14 +540,14 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _borderColor = SolidColorTextureCache.GetTexture(Color.Red);
                     _background.Hue = _renderedText.Hue = entity is Mobile m
-                        ? Notoriety.GetHue(m.NotorietyFlag)
+                        ? Notoriety.GetHue(m.NotorietyFlag, World.Profile.CurrentProfile)
                         : (ushort)0x0481;
                 }
                 else
                 {
                     _borderColor = SolidColorTextureCache.GetTexture(Color.Black);
                     _background.Hue = _renderedText.Hue = entity is Mobile m
-                        ? Notoriety.GetHue(m.NotorietyFlag)
+                        ? Notoriety.GetHue(m.NotorietyFlag, World.Profile.CurrentProfile)
                         : (ushort)0x0481;
                 }
             }
@@ -576,7 +578,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    Client.Game.UO.Animations.GetAnimationDimensions(
+                    World.Context.Game.UO.Animations.GetAnimationDimensions(
                         m.AnimIndex,
                         m.GetGraphicForAnimation(),
                         /*(byte) m.GetDirectionForAnimation()*/
@@ -618,7 +620,7 @@ namespace ClassicUO.Game.UI.Gumps
                     return false;
                 }
 
-                var bounds = Client.Game.UO.Arts.GetRealArtBounds(item.Graphic);
+                var bounds = World.Context.Game.UO.Arts.GetRealArtBounds(item.Graphic);
 
                 x = item.RealScreenPosition.X + (int)item.Offset.X + 22 + 5;
                 y =
@@ -629,11 +631,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-            Point p = Client.Game.Scene.Camera.WorldToScreen(new Point(x, y));
+            Point p = World.Context.Game.Scene.Camera.WorldToScreen(new Point(x, y));
             x = p.X - (Width >> 1);
             y = p.Y - (Height >> 1);
 
-            var camera = Client.Game.Scene.Camera;
+            var camera = World.Context.Game.Scene.Camera;
             x += camera.Bounds.X;
             y += camera.Bounds.Y;
 

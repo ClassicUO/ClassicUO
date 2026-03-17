@@ -1,5 +1,6 @@
-﻿// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.Game;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
@@ -23,10 +24,11 @@ namespace ClassicUO.Game.UI.Controls
         private readonly List<HSliderBar> _pairedSliders = new List<HSliderBar>();
         private int _sliderX;
         private readonly HSliderBarStyle _style;
-        private readonly RenderedText _text;
+        private RenderedText _text;
         private int _value = -1;
 
         public HSliderBar(
+            GameContext context,
             int x,
             int y,
             int w,
@@ -39,16 +41,12 @@ namespace ClassicUO.Game.UI.Controls
             ushort color = 0,
             bool unicode = true,
             bool drawUp = false
-        )
+        ) : base(context)
         {
             X = x;
             Y = y;
 
-            if (hasText)
-            {
-                _text = RenderedText.Create(string.Empty, color, font, unicode);
-                _drawUp = drawUp;
-            }
+            _drawUp = drawUp;
 
             MinValue = min;
             MaxValue = max;
@@ -56,19 +54,27 @@ namespace ClassicUO.Game.UI.Controls
             _style = style;
             AcceptMouseInput = true;
 
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(
-                (uint)(_style == HSliderBarStyle.MetalWidgetRecessedBar ? 216 : 0x845)
-            );
-
             Width = BarWidth;
 
-            if (gumpInfo.Texture != null)
+            var uo = Context?.Game?.UO;
+            if (uo != null)
             {
-                Height = gumpInfo.UV.Height;
+                if (hasText)
+                {
+                    _text = RenderedText.Create(uo, string.Empty, color, font, unicode);
+                }
+
+                ref readonly var gumpInfo = ref uo.Gumps.GetGump(
+                    (uint)(_style == HSliderBarStyle.MetalWidgetRecessedBar ? 216 : 0x845)
+                );
+
+                if (gumpInfo.Texture != null)
+                {
+                    Height = gumpInfo.UV.Height;
+                }
             }
 
             CalculateOffset();
-
             Value = value;
         }
 
@@ -90,8 +96,6 @@ namespace ClassicUO.Game.UI.Controls
                     int oldValue = _value;
                     _value = /*_newValue =*/
                     value;
-                    //if (IsInitialized)
-                    //    RecalculateSliderX();
 
                     if (_value < MinValue)
                     {
@@ -136,6 +140,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
+            if (Context?.Game?.UO == null)
+                return false;
+
             float layerDepth = layerDepthRef;
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
@@ -146,10 +153,10 @@ namespace ClassicUO.Game.UI.Controls
 
                     if (_style == HSliderBarStyle.MetalWidgetRecessedBar)
                     {
-                        ref readonly var gumpInfo0 = ref Client.Game.UO.Gumps.GetGump(213);
-                        ref readonly var gumpInfo1 = ref Client.Game.UO.Gumps.GetGump(214);
-                        ref readonly var gumpInfo2 = ref Client.Game.UO.Gumps.GetGump(215);
-                        ref readonly var gumpInfo3 = ref Client.Game.UO.Gumps.GetGump(216);
+                        ref readonly var gumpInfo0 = ref Context.Game.UO.Gumps.GetGump(213);
+                        ref readonly var gumpInfo1 = ref Context.Game.UO.Gumps.GetGump(214);
+                        ref readonly var gumpInfo2 = ref Context.Game.UO.Gumps.GetGump(215);
+                        ref readonly var gumpInfo3 = ref Context.Game.UO.Gumps.GetGump(216);
 
                         batcher.Draw(gumpInfo0.Texture, new Vector2(x, y), gumpInfo0.UV, hueVector, layerDepth);
 
@@ -184,7 +191,7 @@ namespace ClassicUO.Game.UI.Controls
                     }
                     else
                     {
-                        ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(idx: 0x845);
+                        ref readonly var gumpInfo = ref Context.Game.UO.Gumps.GetGump(idx: 0x845);
 
                         batcher.Draw(
                             gumpInfo.Texture,
@@ -270,10 +277,14 @@ namespace ClassicUO.Game.UI.Controls
 
         private void CalculateNew(int x)
         {
+            var uo = Context?.Game?.UO;
+            if (uo == null)
+                return;
+
             int len = BarWidth;
             int maxValue = MaxValue - MinValue;
 
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(
+            ref readonly var gumpInfo = ref uo.Gumps.GetGump(
                 (uint)(_style == HSliderBarStyle.MetalWidgetRecessedBar ? 216 : 0x845)
             );
 
@@ -298,10 +309,14 @@ namespace ClassicUO.Game.UI.Controls
             int maxValue = MaxValue - MinValue;
             int length = BarWidth;
 
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(
-                (uint)(_style == HSliderBarStyle.MetalWidgetRecessedBar ? 216 : 0x845)
-            );
-            length -= gumpInfo.UV.Width;
+            var uo = Context?.Game?.UO;
+            if (uo != null)
+            {
+                ref readonly var gumpInfo = ref uo.Gumps.GetGump(
+                    (uint)(_style == HSliderBarStyle.MetalWidgetRecessedBar ? 216 : 0x845)
+                );
+                length -= gumpInfo.UV.Width;
+            }
 
             if (maxValue > 0)
             {

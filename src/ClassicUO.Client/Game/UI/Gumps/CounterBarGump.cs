@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BSD-2-Clause
+﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
@@ -148,12 +148,12 @@ namespace ClassicUO.Game.UI.Gumps
             WantUpdateSize = false;
             int borderSize = BoderSize;
 
-            Add(_background = new AlphaBlendControl(0.7f) { X = borderSize, Y = borderSize, Width = Width - borderSize * 2, Height = Height - borderSize * 2 });
+            Add(_background = new AlphaBlendControl(World.Context, 0.7f) { X = borderSize, Y = borderSize, Width = Width - borderSize * 2, Height = Height - borderSize * 2 });
 
-            Add(_scissor = new ScissorControl(true, borderSize, borderSize, 0, 0));
-            _dataBox = new DataBox(borderSize, borderSize, 0, 0);
+            Add(_scissor = new ScissorControl(World.Context, true, borderSize, borderSize, 0, 0));
+            _dataBox = new DataBox(World.Context, borderSize, borderSize, 0, 0);
             Add(_dataBox);
-            Add(new ScissorControl(false));
+            Add(new ScissorControl(World.Context, false));
             _dataBox.WantUpdateSize = true;
 
             ResizeWindow(new Point(Width, Height));
@@ -163,9 +163,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragBegin(int x, int y)
         {
-            if (UIManager.MouseOverControl?.RootParent == this)
+            if (World.Context.UI.MouseOverControl?.RootParent == this)
             {
-                UIManager.MouseOverControl.InvokeDragBegin(new Point(x, y));
+                World.Context.UI.MouseOverControl.InvokeDragBegin(new Point(x, y));
             }
 
             base.OnDragBegin(x, y);
@@ -173,9 +173,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnDragEnd(int x, int y)
         {
-            if (UIManager.MouseOverControl?.RootParent == this)
+            if (World.Context.UI.MouseOverControl?.RootParent == this)
             {
-                UIManager.MouseOverControl.InvokeDragEnd(new Point(x, y));
+                World.Context.UI.MouseOverControl.InvokeDragEnd(new Point(x, y));
             }
 
             base.OnDragEnd(x, y);
@@ -214,7 +214,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_dataBox?.Children.Count == 0 && _helpTextLabel == null)
             {
-                Add(_helpTextLabel = new Label(ResGumps.CounterEmptyHelpText, true, HELP_TEXT_HUE)
+                Add(_helpTextLabel = new Label(World.Context, ResGumps.CounterEmptyHelpText, true, HELP_TEXT_HUE)
                 {
                     X = BORDER_LEFT * 4,
                     Y = BORDER_TOP * 4,
@@ -269,14 +269,14 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButtonType.Left)
             {
-                if (Client.Game.UO.GameCursor.ItemHold.Enabled && Client.Game.UO.GameCursor.ItemHold.Graphic != 0)
+                if (World.Context.Game.UO.GameCursor.ItemHold.Enabled && World.Context.Game.UO.GameCursor.ItemHold.Graphic != 0)
                 {
                     if (!ReadOnly)
                     {
-                        CounterItem item = new CounterItem(this, Client.Game.UO.GameCursor.ItemHold.Graphic, Client.Game.UO.GameCursor.ItemHold.Hue, 0);
+                        CounterItem item = new CounterItem(this, World.Context.Game.UO.GameCursor.ItemHold.Graphic, World.Context.Game.UO.GameCursor.ItemHold.Hue, 0);
                         _dataBox.Add(item);
                     }
-                    GameActions.DropItem(Client.Game.UO.GameCursor.ItemHold.Serial, Client.Game.UO.GameCursor.ItemHold.X, Client.Game.UO.GameCursor.ItemHold.Y, 0, Client.Game.UO.GameCursor.ItemHold.Container);
+                    GameActions.DropItem(World, World.Context.Game.UO.GameCursor.ItemHold.Serial, World.Context.Game.UO.GameCursor.ItemHold.X, World.Context.Game.UO.GameCursor.ItemHold.Y, 0, World.Context.Game.UO.GameCursor.ItemHold.Container);
 
                     SetupLayout();
 
@@ -401,7 +401,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            IsEnabled = IsVisible = ProfileManager.CurrentProfile.CounterBarEnabled;
+            IsEnabled = IsVisible = World.Profile.CurrentProfile.CounterBarEnabled;
 
             // resize only after items have been added
             // because an empty counter bar will always receive a minimum width for the help text

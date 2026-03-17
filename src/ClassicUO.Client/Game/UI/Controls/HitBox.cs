@@ -5,19 +5,22 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
+using ClassicUO.Game;
+
 namespace ClassicUO.Game.UI.Controls
 {
     internal class HitBox : Control
     {
         public HitBox
         (
+            GameContext context,
             int x,
             int y,
             int w,
             int h,
             string tooltip = null,
             float alpha = 0.25f
-        )
+        ) : base(context)
         {
             CanMove = false;
             AcceptMouseInput = true;

@@ -143,9 +143,9 @@ namespace ClassicUO.Game.Map
 
         private ref IndexMap GetIndex(int map)
         {
-            Client.Game.UO.FileManager.Maps.SanitizeMapIndex(ref map);
+            _world.Context.Game.UO.FileManager.Maps.SanitizeMapIndex(ref map);
 
-            return ref Client.Game.UO.FileManager.Maps.GetIndex(map, X, Y);
+            return ref _world.Context.Game.UO.FileManager.Maps.GetIndex(map, X, Y);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -244,7 +244,7 @@ namespace ClassicUO.Game.Map
                     goto default;
 
                 default:
-                    ref StaticTiles data = ref Client.Game.UO.FileManager.TileData.StaticData[graphic];
+                    ref StaticTiles data = ref _world.Context.Game.UO.FileManager.TileData.StaticData[graphic];
 
                     if (data.IsBackground)
                     {

@@ -29,7 +29,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             CanCloseWithRightClick = false;
         }
 
-        internal static int _skillsCount => Client.Game.UO.Version >= ClientVersion.CV_70160 ? 4 : 3;
+        internal int _skillsCount => World.Context.Game.UO.Version >= ClientVersion.CV_70160 ? 4 : 3;
 
         public void SetCharacter(PlayerMobile character)
         {
@@ -75,7 +75,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         World,
                         400,
                         300,
-                        Client.Game.UO.FileManager.Clilocs.GetString(1063016),
+                        World.Context.Game.UO.FileManager.Clilocs.GetString(1063016),
                         null,
                         true
                     )
@@ -85,7 +85,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                         CanMove = false
                     };
 
-                    UIManager.Add(messageBox);
+                    World.Context.UI.Add(messageBox);
 
                     return;
                 }

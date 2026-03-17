@@ -58,7 +58,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new AlphaBlendControl(0.95f)
+                new AlphaBlendControl(World.Context, 0.95f)
                 {
                     X = 1,
                     Y = 1,
@@ -75,7 +75,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new Line
-                (
+                (World.Context, 
                     0,
                     0,
                     WIDTH,
@@ -87,7 +87,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new Line
-                (
+                (World.Context, 
                     0,
                     0,
                     1,
@@ -99,7 +99,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new Line
-                (
+                (World.Context, 
                     0,
                     HEIGHT,
                     WIDTH,
@@ -111,7 +111,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new Line
-                (
+                (World.Context, 
                     WIDTH,
                     0,
                     1,
@@ -125,28 +125,28 @@ namespace ClassicUO.Game.UI.Gumps
 
             #region Legend
 
-            Add(new Label(ResGumps.MarkerIcon, true, HUE_FONT, 185, 255, FontStyle.BlackBorder) { X = 5, Y = initY });
+            Add(new Label(World.Context, ResGumps.MarkerIcon, true, HUE_FONT, 185, 255, FontStyle.BlackBorder) { X = 5, Y = initY });
 
-            Add(new Label(ResGumps.MarkerName, true, HUE_FONT, 185, 255, FontStyle.BlackBorder) { X = 50, Y = initY });
+            Add(new Label(World.Context, ResGumps.MarkerName, true, HUE_FONT, 185, 255, FontStyle.BlackBorder) { X = 50, Y = initY });
 
-            Add(new Label(ResGumps.MarkerX, true, HUE_FONT, 35, 255, FontStyle.BlackBorder) { X = 315, Y = initY });
+            Add(new Label(World.Context, ResGumps.MarkerX, true, HUE_FONT, 35, 255, FontStyle.BlackBorder) { X = 315, Y = initY });
 
-            Add(new Label(ResGumps.MarkerY, true, HUE_FONT, 35, 255, FontStyle.BlackBorder) { X = 380, Y = initY });
+            Add(new Label(World.Context, ResGumps.MarkerY, true, HUE_FONT, 35, 255, FontStyle.BlackBorder) { X = 380, Y = initY });
 
-            Add(new Label(ResGumps.MarkerColor, true, HUE_FONT, 35, 255, FontStyle.BlackBorder) { X = 420, Y = initY });
+            Add(new Label(World.Context, ResGumps.MarkerColor, true, HUE_FONT, 35, 255, FontStyle.BlackBorder) { X = 420, Y = initY });
 
-            Add(new Label(ResGumps.Edit, true, HUE_FONT, 35, 255, FontStyle.BlackBorder) { X = 475, Y = initY });
+            Add(new Label(World.Context, ResGumps.Edit, true, HUE_FONT, 35, 255, FontStyle.BlackBorder) { X = 475, Y = initY });
 
-            Add(new Label(ResGumps.Remove, true, HUE_FONT, 40, 255, FontStyle.BlackBorder) { X = 505, Y = initY });
+            Add(new Label(World.Context, ResGumps.Remove, true, HUE_FONT, 40, 255, FontStyle.BlackBorder) { X = 505, Y = initY });
 
-            Add(new Label(ResGumps.MarkerGoTo, true, HUE_FONT, 40, 255, FontStyle.BlackBorder) { X = 550, Y = initY });
+            Add(new Label(World.Context, ResGumps.MarkerGoTo, true, HUE_FONT, 40, 255, FontStyle.BlackBorder) { X = 550, Y = initY });
 
             #endregion
 
             Add
             (
                 new Line
-                (
+                (World.Context, 
                     0,
                     initY + 20,
                     WIDTH,
@@ -156,14 +156,14 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             // Search Field
-            Add(_searchTextBox = new SearchTextBoxControl(WIDTH / 2 - 150, 40));
+            Add(_searchTextBox = new SearchTextBoxControl(World.Context, WIDTH / 2 - 150, 40));
 
             DrawArea(_markerFiles[_categoryId].IsEditable);
 
             var initX = 0;
             foreach (var file in _markerFiles)
             {
-                var b = new NiceButton(
+                var b = new NiceButton(World.Context, 
                         button_width * initX,
                         HEIGHT - 40,
                         button_width,
@@ -185,7 +185,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Add
                 (
                     new Line
-                    (
+                    (World.Context, 
                         b.X,
                         b.Y,
                         1,
@@ -199,7 +199,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new Line
-                (
+                (World.Context, 
                     0,
                     HEIGHT - 40,
                     WIDTH,
@@ -214,7 +214,7 @@ namespace ClassicUO.Game.UI.Gumps
         private void DrawArea(bool isEditable)
         {
             _scrollArea = new ScrollArea
-            (
+            (World.Context, 
                 10,
                 80,
                 WIDTH - 20,
@@ -316,7 +316,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             public Texture2D Texture;
 
-            public DrawTexture(Texture2D texture)
+            public DrawTexture(GameContext context, Texture2D texture) : base(context)
             {
                 Texture = texture;
                 Width = Height = 15;
@@ -360,7 +360,7 @@ namespace ClassicUO.Game.UI.Gumps
                 GOTO_MARKER_BTN
             }
 
-            public MakerManagerControl(MarkersManagerGump gump, WMapMarker marker, int y, int idx, bool isEditable)
+            public MakerManagerControl(MarkersManagerGump gump, WMapMarker marker, int y, int idx, bool isEditable) : base(gump.World.Context)
             {
                 _gump = gump;
                 CanMove = true;
@@ -377,26 +377,26 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (_marker.MarkerIcon != null)
                 {
-                    _iconTexture = new DrawTexture(_marker.MarkerIcon) { X = 0, Y = _y - 5 };
+                    _iconTexture = new DrawTexture(Context, _marker.MarkerIcon) { X = 0, Y = _y - 5 };
                     Add(_iconTexture);
                 }
 
-                _labelName = new Label($"{_marker.Name}", true, HUE_FONT, 280) { X = 30, Y = _y };
+                _labelName = new Label(Context, $"{_marker.Name}", true, HUE_FONT, 280) { X = 30, Y = _y };
                 Add(_labelName);
 
-                _labelX = new Label($"{_marker.X}", true, HUE_FONT, 35) { X = 305, Y = _y };
+                _labelX = new Label(Context, $"{_marker.X}", true, HUE_FONT, 35) { X = 305, Y = _y };
                 Add(_labelX);
 
-                _labelY = new Label($"{_marker.Y}", true, HUE_FONT, 35) { X = 350, Y = _y };
+                _labelY = new Label(Context, $"{_marker.Y}", true, HUE_FONT, 35) { X = 350, Y = _y };
                 Add(_labelY);
 
-                _labelColor = new Label($"{_marker.ColorName}", true, HUE_FONT, 35) { X = 410, Y = _y };
+                _labelColor = new Label(Context, $"{_marker.ColorName}", true, HUE_FONT, 35) { X = 410, Y = _y };
                 Add(_labelColor);
 
                 if (_isEditable)
                 {
                     Add(
-                        new Button((int)ButtonsOption.EDIT_MARKER_BTN, 0xFAB, 0xFAC)
+                        new Button(Context, (int)ButtonsOption.EDIT_MARKER_BTN, 0xFAB, 0xFAC)
                         {
                             X = 470,
                             Y = _y,
@@ -405,7 +405,7 @@ namespace ClassicUO.Game.UI.Gumps
                     );
 
                     Add(
-                        new Button((int)ButtonsOption.REMOVE_MARKER_BTN, 0xFB1, 0xFB2)
+                        new Button(Context, (int)ButtonsOption.REMOVE_MARKER_BTN, 0xFB1, 0xFB2)
                         {
                             X = 505,
                             Y = _y,
@@ -415,7 +415,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 Add(
-                    new Button((int)ButtonsOption.GOTO_MARKER_BTN, 0xFA5, 0xFA7)
+                    new Button(Context, (int)ButtonsOption.GOTO_MARKER_BTN, 0xFA5, 0xFA7)
                     {
                         X = 540,
                         Y = _y,
@@ -435,7 +435,7 @@ namespace ClassicUO.Game.UI.Gumps
                     if (editedMarker.MarkerIcon != null)
                     {
                         _iconTexture?.Dispose();
-                        _iconTexture = new DrawTexture(editedMarker.MarkerIcon);
+                        _iconTexture = new DrawTexture(Context, editedMarker.MarkerIcon);
                     }
                         
 
@@ -448,21 +448,21 @@ namespace ClassicUO.Game.UI.Gumps
                 switch (buttonId)
                 {
                     case (int)ButtonsOption.EDIT_MARKER_BTN:
-                        UserMarkersGump existingGump = UIManager.GetGump<UserMarkersGump>();
+                        UserMarkersGump existingGump = _gump.World.Context.UI.GetGump<UserMarkersGump>();
 
                         existingGump?.Dispose();
 
                         var editUserMarkerGump = new UserMarkersGump(_gump.World, _marker.X, _marker.Y, _markers, _marker.ColorName, _marker.MarkerIconName, true, _idx);
                         editUserMarkerGump.EditEnd += OnEditEnd;
 
-                        UIManager.Add(editUserMarkerGump);
+                        _gump.World.Context.UI.Add(editUserMarkerGump);
 
                         break;
                     case (int)ButtonsOption.REMOVE_MARKER_BTN:
                         RemoveMarkerEvent.Raise(_idx);
                         break;
                     case (int)ButtonsOption.GOTO_MARKER_BTN:
-                        var wmGump = UIManager.GetGump<WorldMapGump>();
+                        var wmGump = _gump.World.Context.UI.GetGump<WorldMapGump>();
                         if (wmGump != null)
                         {
                             wmGump.GoToMarker(_marker.X, _marker.Y, false);
@@ -477,7 +477,7 @@ namespace ClassicUO.Game.UI.Gumps
             private readonly StbTextBox _textBox;
             public string SearchText { get => _textBox.Text; }
 
-            public SearchTextBoxControl(int x, int y)
+            public SearchTextBoxControl(GameContext context, int x, int y) : base(context)
             {
                 AcceptMouseInput = true;
                 AcceptKeyboardInput = true;
@@ -485,7 +485,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Add
                 (
                     new Label
-                    (
+                    (Context, 
                         ResGumps.MarkerSearch,
                         true,
                         HUE_FONT,
@@ -500,7 +500,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add
                 (
-                    new ResizePic(0x0BB8)
+                    new ResizePic(0x0BB8, Context)
                     {
                         X = x + 50,
                         Y = y,
@@ -510,7 +510,7 @@ namespace ClassicUO.Game.UI.Gumps
                 );
 
                 _textBox = new StbTextBox
-                (
+                (Context, 
                     0xFF,
                     30,
                     200,
@@ -527,7 +527,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Add(_textBox);
 
                 Add(
-                    new Button((int)ButtonsOption.SEARCH_BTN, 0xFB7, 0xFB9)
+                    new Button(Context, (int)ButtonsOption.SEARCH_BTN, 0xFB7, 0xFB9)
                     {
                         X = x + 250,
                         Y = y + 1,
@@ -536,7 +536,7 @@ namespace ClassicUO.Game.UI.Gumps
                 );
 
                 Add(
-                    new Button((int)ButtonsOption.CLEAR_SEARCH_BTN, 0xFB1, 0xFB2)
+                    new Button(Context, (int)ButtonsOption.CLEAR_SEARCH_BTN, 0xFB1, 0xFB2)
                     {
                         X = x + 285,
                         Y = y + 1,

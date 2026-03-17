@@ -23,21 +23,21 @@ namespace ClassicUO.Game.Managers
         public HealthLinesManager(World world) { _world = world; }
 
         public bool IsEnabled =>
-            ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.ShowMobilesHP;
+            _world.Profile.CurrentProfile != null && _world.Profile.CurrentProfile.ShowMobilesHP;
 
         public void Draw(UltimaBatcher2D batcher, float layerDepth)
         {
-            var camera = Client.Game.Scene.Camera;
-            int mode = ProfileManager.CurrentProfile.MobileHPType;
+            var camera = _world.Context.Game.Scene.Camera;
+            int mode = _world.Profile.CurrentProfile.MobileHPType;
 
             if (mode < 0)
             {
                 return;
             }
 
-            int showWhen = ProfileManager.CurrentProfile.MobileHPShowWhen;
-            var useNewTargetSystem = ProfileManager.CurrentProfile.UseNewTargetSystem;
-            var animations = Client.Game.UO.Animations;
+            int showWhen = _world.Profile.CurrentProfile.MobileHPShowWhen;
+            var useNewTargetSystem = _world.Profile.CurrentProfile.UseNewTargetSystem;
+            var animations = _world.Context.Game.UO.Animations;
             var isEnabled = IsEnabled;
 
             foreach (Mobile mobile in _world.Mobiles.Values)
@@ -118,14 +118,14 @@ namespace ClassicUO.Game.Managers
                                     p1.Y += 22;
                                 }
 
-                                p1 = Client.Game.Scene.Camera.WorldToScreen(p1, true);
+                                p1 = _world.Context.Game.Scene.Camera.WorldToScreen(p1, true);
                                 p1.X -= (mobile.HitsTexture.Width >> 1) + 5;
                                 p1.Y -= mobile.HitsTexture.Height;
 
                                 if (mobile.ObjectHandlesStatus == ObjectHandlesStatus.DISPLAYING)
                                 {
                                     int ohHeight = Constants.OBJECT_HANDLES_GUMP_HEIGHT
-                                        + (ProfileManager.CurrentProfile.NameOverheadShowHpBar
+                                        + (_world.Profile.CurrentProfile.NameOverheadShowHpBar
                                             ? Constants.OBJECT_HANDLES_HP_BAR_HEIGHT + 1 : 0);
                                     p1.Y -= ohHeight + 5;
                                     offsetY += ohHeight + 5;
@@ -153,7 +153,7 @@ namespace ClassicUO.Game.Managers
                 }
 
                 p.X -= 5;
-                p = Client.Game.Scene.Camera.WorldToScreen(p, true);
+                p = _world.Context.Game.Scene.Camera.WorldToScreen(p, true);
 
                 p.X -= BAR_WIDTH_HALF;
                 p.Y -= BAR_HEIGHT_HALF;
@@ -198,8 +198,8 @@ namespace ClassicUO.Game.Managers
             float alpha = passive && !newTargetSystem ? 0.5f : 1.0f;
             ushort hue =
                 mobile != null
-                    ? Notoriety.GetHue(mobile.NotorietyFlag)
-                    : Notoriety.GetHue(NotorietyFlag.Gray);
+                    ? Notoriety.GetHue(mobile.NotorietyFlag, _world.Profile.CurrentProfile)
+                    : Notoriety.GetHue(NotorietyFlag.Gray, _world.Profile.CurrentProfile);
 
             //Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue, false, alpha);
             Vector3 hueVecZero = ShaderHueTranslator.GetHueVector(0, false, alpha);
@@ -214,7 +214,7 @@ namespace ClassicUO.Game.Managers
 
             if (newTargetSystem && mobile != null && mobile.Serial != _world.Player.Serial)
             {
-                Client.Game.UO.Animations.GetAnimationDimensions(
+                _world.Context.Game.UO.Animations.GetAnimationDimensions(
                     mobile.AnimIndex,
                     mobile.GetGraphicForAnimation(),
                     (byte) mobile.GetDirectionForAnimation(),
@@ -269,11 +269,11 @@ namespace ClassicUO.Game.Managers
                     bottomGump = 0x756C;
                 }
 
-                ref readonly var hueGumpInfo = ref Client.Game.UO.Gumps.GetGump(gumpHue);
+                ref readonly var hueGumpInfo = ref _world.Context.Game.UO.Gumps.GetGump(gumpHue);
                 var targetX = x + BAR_WIDTH_HALF - hueGumpInfo.UV.Width / 2f;
                 var topTargetY = height + centerY + 8 + 22 + offsetY;
 
-                ref readonly var newTargGumpInfo = ref Client.Game.UO.Gumps.GetGump(topGump);
+                ref readonly var newTargGumpInfo = ref _world.Context.Game.UO.Gumps.GetGump(topGump);
                 if (newTargGumpInfo.Texture != null)
                     batcher.Draw(
                         newTargGumpInfo.Texture,
@@ -294,7 +294,7 @@ namespace ClassicUO.Game.Managers
 
                 y += 7 + newTargGumpInfo.UV.Height / 2 - centerY;
 
-                newTargGumpInfo = ref Client.Game.UO.Gumps.GetGump(bottomGump);
+                newTargGumpInfo = ref _world.Context.Game.UO.Gumps.GetGump(bottomGump);
                 if (newTargGumpInfo.Texture != null)
                     batcher.Draw(
                         newTargGumpInfo.Texture,
@@ -306,7 +306,7 @@ namespace ClassicUO.Game.Managers
             }
 
 
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(BACKGROUND_GRAPHIC);
+            ref readonly var gumpInfo = ref _world.Context.Game.UO.Gumps.GetGump(BACKGROUND_GRAPHIC);
 
             batcher.Draw(
                 gumpInfo.Texture,
@@ -327,7 +327,7 @@ namespace ClassicUO.Game.Managers
                     offset = per;
                 }
 
-                gumpInfo = ref Client.Game.UO.Gumps.GetGump(HP_GRAPHIC);
+                gumpInfo = ref _world.Context.Game.UO.Gumps.GetGump(HP_GRAPHIC);
 
                 batcher.DrawTiled(
                     gumpInfo.Texture,
@@ -361,7 +361,7 @@ namespace ClassicUO.Game.Managers
 
                 hueVecNoto.X = hue;
 
-                gumpInfo = ref Client.Game.UO.Gumps.GetGump(HP_GRAPHIC);
+                gumpInfo = ref _world.Context.Game.UO.Gumps.GetGump(HP_GRAPHIC);
                 batcher.DrawTiled(
                     gumpInfo.Texture,
                     new Rectangle(x, y, per * MULTIPLER, gumpInfo.UV.Height * MULTIPLER),

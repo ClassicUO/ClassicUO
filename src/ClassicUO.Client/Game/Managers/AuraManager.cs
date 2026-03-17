@@ -109,12 +109,12 @@ namespace ClassicUO.Game.Managers
         {
             get
             {
-                if (ProfileManager.CurrentProfile == null)
+                if (_world.Profile.CurrentProfile == null)
                 {
                     return false;
                 }
 
-                switch (ProfileManager.CurrentProfile.AuraUnderFeetType)
+                switch (_world.Profile.CurrentProfile.AuraUnderFeetType)
                 {
                     default:
                     case 0: return false;
@@ -128,7 +128,7 @@ namespace ClassicUO.Game.Managers
 
         public void ToggleVisibility()
         {
-            Profile currentProfile = ProfileManager.CurrentProfile;
+            Profile currentProfile = _world.Profile.CurrentProfile;
 
             if (!IsEnabled)
             {

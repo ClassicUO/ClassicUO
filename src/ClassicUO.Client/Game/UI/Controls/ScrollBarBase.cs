@@ -1,6 +1,7 @@
-﻿// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: BSD-2-Clause
 
 using System;
+using ClassicUO.Game;
 using ClassicUO.Input;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
@@ -18,6 +19,9 @@ namespace ClassicUO.Game.UI.Controls
         protected Rectangle _rectUpButton, _rectDownButton;
         protected int _sliderPosition;
 
+        protected ScrollBarBase(GameContext context) : base(context)
+        {
+        }
 
         public int Value
         {
@@ -114,8 +118,6 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             _sliderPosition = GetSliderYPosition();
-
-            //_rectSlider.Y = _textureUpButton[0].Height + _sliderPosition;
 
             if (_btUpClicked || _btDownClicked)
             {

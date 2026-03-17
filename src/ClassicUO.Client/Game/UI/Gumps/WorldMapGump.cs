@@ -174,79 +174,79 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void LoadSettings()
         {
-            Width = ProfileManager.CurrentProfile.WorldMapWidth;
-            Height = ProfileManager.CurrentProfile.WorldMapHeight;
+            Width = World.Profile.CurrentProfile.WorldMapWidth;
+            Height = World.Profile.CurrentProfile.WorldMapHeight;
 
-            SetFont(ProfileManager.CurrentProfile.WorldMapFont);
+            SetFont(World.Profile.CurrentProfile.WorldMapFont);
 
             ResizeWindow(new Point(Width, Height));
 
-            _flipMap = ProfileManager.CurrentProfile.WorldMapFlipMap;
-            _showPartyMembers = ProfileManager.CurrentProfile.WorldMapShowParty;
+            _flipMap = World.Profile.CurrentProfile.WorldMapFlipMap;
+            _showPartyMembers = World.Profile.CurrentProfile.WorldMapShowParty;
 
             World.WMapManager.SetEnable(_showPartyMembers);
 
-            _zoomIndex = ProfileManager.CurrentProfile.WorldMapZoomIndex;
+            _zoomIndex = World.Profile.CurrentProfile.WorldMapZoomIndex;
 
-            _showCoordinates = ProfileManager.CurrentProfile.WorldMapShowCoordinates;
-            _showSextantCoordinates = ProfileManager.CurrentProfile.WorldMapShowSextantCoordinates;
-            _showMouseCoordinates = ProfileManager.CurrentProfile.WorldMapShowMouseCoordinates;
-            _showMobiles = ProfileManager.CurrentProfile.WorldMapShowMobiles;
+            _showCoordinates = World.Profile.CurrentProfile.WorldMapShowCoordinates;
+            _showSextantCoordinates = World.Profile.CurrentProfile.WorldMapShowSextantCoordinates;
+            _showMouseCoordinates = World.Profile.CurrentProfile.WorldMapShowMouseCoordinates;
+            _showMobiles = World.Profile.CurrentProfile.WorldMapShowMobiles;
 
-            _showPlayerName = ProfileManager.CurrentProfile.WorldMapShowPlayerName;
-            _showPlayerBar = ProfileManager.CurrentProfile.WorldMapShowPlayerBar;
-            _showGroupName = ProfileManager.CurrentProfile.WorldMapShowGroupName;
-            _showGroupBar = ProfileManager.CurrentProfile.WorldMapShowGroupBar;
-            _showMarkers = ProfileManager.CurrentProfile.WorldMapShowMarkers;
-            _showMultis = ProfileManager.CurrentProfile.WorldMapShowMultis;
-            _showMarkerNames = ProfileManager.CurrentProfile.WorldMapShowMarkersNames;
+            _showPlayerName = World.Profile.CurrentProfile.WorldMapShowPlayerName;
+            _showPlayerBar = World.Profile.CurrentProfile.WorldMapShowPlayerBar;
+            _showGroupName = World.Profile.CurrentProfile.WorldMapShowGroupName;
+            _showGroupBar = World.Profile.CurrentProfile.WorldMapShowGroupBar;
+            _showMarkers = World.Profile.CurrentProfile.WorldMapShowMarkers;
+            _showMultis = World.Profile.CurrentProfile.WorldMapShowMultis;
+            _showMarkerNames = World.Profile.CurrentProfile.WorldMapShowMarkersNames;
 
 
-            _hiddenMarkerFiles = string.IsNullOrEmpty(ProfileManager.CurrentProfile.WorldMapHiddenMarkerFiles) ? new List<string>() : ProfileManager.CurrentProfile.WorldMapHiddenMarkerFiles.Split(',').ToList();
-            _hiddenZoneFiles = string.IsNullOrEmpty(ProfileManager.CurrentProfile.WorldMapHiddenZoneFiles) ? new List<string>() : ProfileManager.CurrentProfile.WorldMapHiddenZoneFiles.Split(',').ToList();
+            _hiddenMarkerFiles = string.IsNullOrEmpty(World.Profile.CurrentProfile.WorldMapHiddenMarkerFiles) ? new List<string>() : World.Profile.CurrentProfile.WorldMapHiddenMarkerFiles.Split(',').ToList();
+            _hiddenZoneFiles = string.IsNullOrEmpty(World.Profile.CurrentProfile.WorldMapHiddenZoneFiles) ? new List<string>() : World.Profile.CurrentProfile.WorldMapHiddenZoneFiles.Split(',').ToList();
 
-            _showGridIfZoomed = ProfileManager.CurrentProfile.WorldMapShowGridIfZoomed;
-            _allowPositionalTarget = ProfileManager.CurrentProfile.WorldMapAllowPositionalTarget;
-            TopMost = ProfileManager.CurrentProfile.WorldMapTopMost;
-            FreeView = ProfileManager.CurrentProfile.WorldMapFreeView;
+            _showGridIfZoomed = World.Profile.CurrentProfile.WorldMapShowGridIfZoomed;
+            _allowPositionalTarget = World.Profile.CurrentProfile.WorldMapAllowPositionalTarget;
+            TopMost = World.Profile.CurrentProfile.WorldMapTopMost;
+            FreeView = World.Profile.CurrentProfile.WorldMapFreeView;
         }
 
         public void SaveSettings()
         {
-            if (ProfileManager.CurrentProfile == null)
+            if (World.Profile.CurrentProfile == null)
             {
                 return;
             }
 
 
-            ProfileManager.CurrentProfile.WorldMapWidth = Width;
-            ProfileManager.CurrentProfile.WorldMapHeight = Height;
+            World.Profile.CurrentProfile.WorldMapWidth = Width;
+            World.Profile.CurrentProfile.WorldMapHeight = Height;
 
-            ProfileManager.CurrentProfile.WorldMapFlipMap = _flipMap;
-            ProfileManager.CurrentProfile.WorldMapTopMost = TopMost;
-            ProfileManager.CurrentProfile.WorldMapFreeView = FreeView;
-            ProfileManager.CurrentProfile.WorldMapShowParty = _showPartyMembers;
+            World.Profile.CurrentProfile.WorldMapFlipMap = _flipMap;
+            World.Profile.CurrentProfile.WorldMapTopMost = TopMost;
+            World.Profile.CurrentProfile.WorldMapFreeView = FreeView;
+            World.Profile.CurrentProfile.WorldMapShowParty = _showPartyMembers;
 
-            ProfileManager.CurrentProfile.WorldMapZoomIndex = _zoomIndex;
+            World.Profile.CurrentProfile.WorldMapZoomIndex = _zoomIndex;
 
-            ProfileManager.CurrentProfile.WorldMapShowCoordinates = _showCoordinates;
-            ProfileManager.CurrentProfile.WorldMapShowSextantCoordinates = _showSextantCoordinates;
-            ProfileManager.CurrentProfile.WorldMapShowMouseCoordinates = _showMouseCoordinates;
-            ProfileManager.CurrentProfile.WorldMapShowMobiles = _showMobiles;
+            World.Profile.CurrentProfile.WorldMapShowCoordinates = _showCoordinates;
+            World.Profile.CurrentProfile.WorldMapShowSextantCoordinates = _showSextantCoordinates;
+            World.Profile.CurrentProfile.WorldMapShowMouseCoordinates = _showMouseCoordinates;
+            World.Profile.CurrentProfile.WorldMapShowMobiles = _showMobiles;
 
-            ProfileManager.CurrentProfile.WorldMapShowPlayerName = _showPlayerName;
-            ProfileManager.CurrentProfile.WorldMapShowPlayerBar = _showPlayerBar;
-            ProfileManager.CurrentProfile.WorldMapShowGroupName = _showGroupName;
-            ProfileManager.CurrentProfile.WorldMapShowGroupBar = _showGroupBar;
-            ProfileManager.CurrentProfile.WorldMapShowMarkers = _showMarkers;
-            ProfileManager.CurrentProfile.WorldMapShowMultis = _showMultis;
-            ProfileManager.CurrentProfile.WorldMapShowMarkersNames = _showMarkerNames;
+            World.Profile.CurrentProfile.WorldMapShowPlayerName = _showPlayerName;
+            World.Profile.CurrentProfile.WorldMapShowPlayerBar = _showPlayerBar;
+            World.Profile.CurrentProfile.WorldMapShowGroupName = _showGroupName;
+            World.Profile.CurrentProfile.WorldMapShowGroupBar = _showGroupBar;
+            World.Profile.CurrentProfile.WorldMapShowMarkers = _showMarkers;
+            World.Profile.CurrentProfile.WorldMapShowMultis = _showMultis;
+            World.Profile.CurrentProfile.WorldMapShowMarkersNames = _showMarkerNames;
 
-            ProfileManager.CurrentProfile.WorldMapHiddenMarkerFiles = string.Join(",", _hiddenMarkerFiles);
-            ProfileManager.CurrentProfile.WorldMapHiddenZoneFiles = string.Join(",", _hiddenZoneFiles);
+            World.Profile.CurrentProfile.WorldMapHiddenMarkerFiles = string.Join(",", _hiddenMarkerFiles);
+            World.Profile.CurrentProfile.WorldMapHiddenZoneFiles = string.Join(",", _hiddenZoneFiles);
 
-            ProfileManager.CurrentProfile.WorldMapShowGridIfZoomed = _showGridIfZoomed;
-            ProfileManager.CurrentProfile.WorldMapAllowPositionalTarget = _allowPositionalTarget;
+            World.Profile.CurrentProfile.WorldMapShowGridIfZoomed = _showGridIfZoomed;
+            World.Profile.CurrentProfile.WorldMapAllowPositionalTarget = _allowPositionalTarget;
         }
 
         private bool ParseBool(string boolStr)
@@ -271,7 +271,7 @@ namespace ClassicUO.Game.UI.Gumps
             _options["goto_location"] = new ContextMenuItemEntry
             (
                 ResGumps.GotoLocation,
-                () => UIManager.Add(new LocationGoGump(World, (x, y) => GoToMarker(x, y, true)))
+                () => World.Context.UI.Add(new LocationGoGump(World, (x, y) => GoToMarker(x, y, true)))
             );
 
             _options["top_most"] = new ContextMenuItemEntry(ResGumps.TopMost, () => { TopMost = !TopMost; }, true, _isTopMost);
@@ -333,7 +333,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     var mm = new MarkersManagerGump(World);
 
-                    UIManager.Add(mm);
+                    World.Context.UI.Add(mm);
                 }
             );
 
@@ -543,7 +543,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void ChangeMap(int index)
         {
-            Client.Game.UO.FileManager.Maps.LoadMap(index, World.ClientFeatures.Flags.HasFlag(CharacterListFlags.CLF_UNLOCK_FELUCCA_AREAS));
+            World.Context.Game.UO.FileManager.Maps.LoadMap(index, World.ClientFeatures.Flags.HasFlag(CharacterListFlags.CLF_UNLOCK_FELUCCA_AREAS));
             _map = new Map.Map(World, index);
 
 
@@ -703,7 +703,7 @@ namespace ClassicUO.Game.UI.Gumps
             SaveSettings();
             World.WMapManager.SetEnable(false);
 
-            Client.Game.UO.GameCursor.IsDraggingCursorForced = false;
+            World.Context.Game.UO.GameCursor.IsDraggingCursorForced = false;
 
             base.Dispose();
         }
@@ -792,7 +792,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class CurLoader
         {
-            public static unsafe Texture2D CreateTextureFromICO_Cur(Stream stream)
+            public static unsafe Texture2D CreateTextureFromICO_Cur(GraphicsDevice graphicsDevice, Stream stream)
             {
                 byte[] buffer = System.Buffers.ArrayPool<byte>.Shared.Rent((int) stream.Length);
 
@@ -1054,7 +1054,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                     }
 
-                    Texture2D texture = new Texture2D(Client.Game.GraphicsDevice, surface->w, surface->h);
+                    Texture2D texture = new Texture2D(graphicsDevice, surface->w, surface->h);
                     texture.SetDataPointerEXT(0, new Rectangle(0, 0, surface->w, surface->h), surface->pixels, len);
 
                     SDL.SDL_DestroySurface((IntPtr)surface);
@@ -1107,16 +1107,16 @@ namespace ClassicUO.Game.UI.Gumps
                 const int OFFSET_PIX = 2;
                 const int OFFSET_PIX_HALF = OFFSET_PIX / 2;
 
-                int realWidth = Client.Game.UO.FileManager.Maps.MapsDefaultSize[mapIndex, 0];
-                int realHeight = Client.Game.UO.FileManager.Maps.MapsDefaultSize[mapIndex, 1];
+                int realWidth = World.Context.Game.UO.FileManager.Maps.MapsDefaultSize[mapIndex, 0];
+                int realHeight = World.Context.Game.UO.FileManager.Maps.MapsDefaultSize[mapIndex, 1];
 
-                int fixedWidth = Client.Game.UO.FileManager.Maps.MapBlocksSize[mapIndex, 0];
-                int fixedHeight = Client.Game.UO.FileManager.Maps.MapBlocksSize[mapIndex, 1];
+                int fixedWidth = World.Context.Game.UO.FileManager.Maps.MapBlocksSize[mapIndex, 0];
+                int fixedHeight = World.Context.Game.UO.FileManager.Maps.MapBlocksSize[mapIndex, 1];
 
                 _mapTexture?.Dispose();
 
-                var mapFile = Client.Game.UO.FileManager.Maps.GetMapFile(mapIndex);
-                var staticFile = Client.Game.UO.FileManager.Maps.GetStaticFile(mapIndex);
+                var mapFile = World.Context.Game.UO.FileManager.Maps.GetMapFile(mapIndex);
+                var staticFile = World.Context.Game.UO.FileManager.Maps.GetStaticFile(mapIndex);
 
                 if (!_mapCache.TryGetValue(mapFile.FilePath, out var fileMapPath))
                 {
@@ -1174,7 +1174,7 @@ namespace ClassicUO.Game.UI.Gumps
                         img.DangerousTryGetSinglePixelMemory(out var imgBuffer);
                         var imgSpan = imgBuffer.Span;
 
-                        var huesLoader = Client.Game.UO.FileManager.Hues;
+                        var huesLoader = World.Context.Game.UO.FileManager.Hues;
 
                         int bx, by, mapX = 0, mapY = 0, x, y;
 
@@ -1350,7 +1350,7 @@ namespace ClassicUO.Game.UI.Gumps
                 if (File.Exists(fileMapPath))
                 {
                     using var stream = File.OpenRead(fileMapPath);
-                    _mapTexture = Texture2D.FromStream(Client.Game.GraphicsDevice, stream);
+                    _mapTexture = Texture2D.FromStream(World.Context.Game.GraphicsDevice, stream);
                 }
 
                 GameActions.Print(World, ResGumps.WorldMapLoaded, 0x48);
@@ -1539,7 +1539,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         try
                         {
-                            Texture2D texture = CurLoader.CreateTextureFromICO_Cur(ms);
+                            Texture2D texture = CurLoader.CreateTextureFromICO_Cur(World.Context.Game.GraphicsDevice, ms);
 
                             _markerIcons.Add(Path.GetFileNameWithoutExtension(icon).ToLower(), texture);
                         }
@@ -1563,7 +1563,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         try
                         {
-                            Texture2D texture = Texture2D.FromStream(Client.Game.GraphicsDevice, ms);
+                            Texture2D texture = Texture2D.FromStream(World.Context.Game.GraphicsDevice, ms);
 
                             _markerIcons.Add(Path.GetFileNameWithoutExtension(icon).ToLower(), texture);
                         }
@@ -1772,7 +1772,7 @@ namespace ClassicUO.Game.UI.Gumps
                 CanCloseWithRightClick = true
             };
 
-            UIManager.Add(entryDialog);
+            World.Context.UI.Add(entryDialog);
         }
 
         private void SaveMakerOnPlayer(string markerName)
@@ -2278,7 +2278,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 string text = $"{World.Player.X}, {World.Player.Y} ({World.Player.Z}) [{_zoomIndex}]";
 
-                if (_showSextantCoordinates && Sextant.FormatString(new Point(World.Player.X, World.Player.Y), _map, out var sextantCoords))
+                if (_showSextantCoordinates && Sextant.FormatString(World.Context.Game.UO.FileManager.Maps, new Point(World.Player.X, World.Player.Y), _map, out var sextantCoords))
                     text += "\n" + sextantCoords;
 
                 Vector3 hueVector = new(0f, 1f, 1f);
@@ -2294,7 +2294,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 string mouseCoordinateString = $"{mouseWorldX} {mouseWorldY}";
 
-                if (_showSextantCoordinates && Sextant.FormatString(new Point(mouseWorldX, mouseWorldY), _map, out var sextantCoords))
+                if (_showSextantCoordinates && Sextant.FormatString(World.Context.Game.UO.FileManager.Maps, new Point(mouseWorldX, mouseWorldY), _map, out var sextantCoords))
                     mouseCoordinateString += "\n" + sextantCoords;
 
                 Vector2 size = Fonts.Regular.MeasureString(mouseCoordinateString);
@@ -2445,7 +2445,7 @@ namespace ClassicUO.Game.UI.Gumps
                     layerDepth
                 );
 
-                hueVector.X = isparty ? 0x0034 : Notoriety.GetHue(mobile.NotorietyFlag);
+                hueVector.X = isparty ? 0x0034 : Notoriety.GetHue(mobile.NotorietyFlag, World.Profile.CurrentProfile);
                 hueVector.Y = 1;
                 hueVector.Z = 1;
 
@@ -3062,14 +3062,14 @@ namespace ClassicUO.Game.UI.Gumps
                 _lastScroll.Y = _center.Y;
             }
 
-            Client.Game.UO.GameCursor.IsDraggingCursorForced = false;
+            World.Context.Game.UO.GameCursor.IsDraggingCursorForced = false;
 
             base.OnMouseUp(x, y, button);
         }
 
         protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
-            if (!Client.Game.UO.GameCursor.ItemHold.Enabled)
+            if (!World.Context.Game.UO.GameCursor.ItemHold.Enabled)
             {
                 if (button == MouseButtonType.Left && (Keyboard.Alt || _freeView) || button == MouseButtonType.Middle)
                 {
@@ -3085,7 +3085,7 @@ namespace ClassicUO.Game.UI.Gumps
                         _isScrolling = true;
                         CanMove = false;
 
-                        Client.Game.UO.GameCursor.IsDraggingCursorForced = true;
+                        World.Context.Game.UO.GameCursor.IsDraggingCursorForced = true;
                     }
                 }
 
@@ -3101,10 +3101,10 @@ namespace ClassicUO.Game.UI.Gumps
                         return;
                     }
 
-                    UserMarkersGump existingGump = UIManager.GetGump<UserMarkersGump>();
+                    UserMarkersGump existingGump = World.Context.UI.GetGump<UserMarkersGump>();
 
                     existingGump?.Dispose();
-                    UIManager.Add(new UserMarkersGump(World, _mouseCenter.X, _mouseCenter.Y, userFile.Markers));
+                    World.Context.UI.Add(new UserMarkersGump(World, _mouseCenter.X, _mouseCenter.Y, userFile.Markers));
                 }
             }
 
@@ -3159,14 +3159,14 @@ namespace ClassicUO.Game.UI.Gumps
                     _center.Y = 0;
                 }
 
-                if (_center.X > Client.Game.UO.FileManager.Maps.MapsDefaultSize[_map.Index, 0])
+                if (_center.X > World.Context.Game.UO.FileManager.Maps.MapsDefaultSize[_map.Index, 0])
                 {
-                    _center.X = Client.Game.UO.FileManager.Maps.MapsDefaultSize[_map.Index, 0];
+                    _center.X = World.Context.Game.UO.FileManager.Maps.MapsDefaultSize[_map.Index, 0];
                 }
 
-                if (_center.Y > Client.Game.UO.FileManager.Maps.MapsDefaultSize[_map.Index, 1])
+                if (_center.Y > World.Context.Game.UO.FileManager.Maps.MapsDefaultSize[_map.Index, 1])
                 {
-                    _center.Y = Client.Game.UO.FileManager.Maps.MapsDefaultSize[_map.Index, 1];
+                    _center.Y = World.Context.Game.UO.FileManager.Maps.MapsDefaultSize[_map.Index, 1];
                 }
             }
             else

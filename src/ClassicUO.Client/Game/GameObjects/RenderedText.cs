@@ -28,12 +28,15 @@ namespace ClassicUO.Game
     }
     internal sealed class RenderedText
     {
+        private UltimaOnline _uo;
+
         private static readonly QueuedPool<RenderedText> _pool = new QueuedPool<RenderedText>(
             3000,
             r =>
             {
                 r.IsDestroyed = false;
                 r.Links.Clear();
+                r._uo = null;
             }
         );
 
@@ -52,7 +55,7 @@ namespace ClassicUO.Game
             {
                 if (value == 0xFF)
                 {
-                    value = (byte)(Client.Game.UO.Version >= ClientVersion.CV_305D ? 1 : 0);
+                    value = (byte)(_uo.Version >= ClientVersion.CV_305D ? 1 : 0);
                 }
 
                 _font = value;
@@ -106,14 +109,12 @@ namespace ClassicUO.Game
                         Width = 0;
                         Height = 0;
 
-                        if (IsHTML)
+                        if (IsHTML && _uo != null)
                         {
-                            Client.Game.UO.FileManager.Fonts.SetUseHTML(false);
+                            _uo.FileManager.Fonts.SetUseHTML(false);
                         }
 
                         Links.Clear();
-                        Texture?.Dispose();
-                        Texture = null;
                         _info = null;
                         _htmlBgColor = 0;
                     }
@@ -125,12 +126,12 @@ namespace ClassicUO.Game
                         // For HTML text, enable HTML parsing so per-char colors/fonts/flags are populated.
                         if (IsHTML)
                         {
-                            Client.Game.UO.FileManager.Fonts.SetUseHTML(true, HTMLColor, HasBackgroundColor);
+                            _uo.FileManager.Fonts.SetUseHTML(true, HTMLColor, HasBackgroundColor);
                         }
 
                         if (IsUnicode)
                         {
-                            _info = Client.Game.UO.FileManager.Fonts.GetInfoUnicode(
+                            _info = _uo.FileManager.Fonts.GetInfoUnicode(
                                 Font,
                                 Text,
                                 Text.Length,
@@ -143,7 +144,7 @@ namespace ClassicUO.Game
                         }
                         else
                         {
-                            _info = Client.Game.UO.FileManager.Fonts.GetInfoASCII(
+                            _info = _uo.FileManager.Fonts.GetInfoASCII(
                                 Font,
                                 Text,
                                 Text.Length,
@@ -157,7 +158,7 @@ namespace ClassicUO.Game
 
                         if (IsHTML)
                         {
-                            Client.Game.UO.FileManager.Fonts.SetUseHTML(false);
+                            _uo.FileManager.Fonts.SetUseHTML(false);
                         }
                     }
                 }
@@ -174,9 +175,9 @@ namespace ClassicUO.Game
 
         public int Height { get; private set; }
 
-        public Texture2D Texture { get; set; }
 
         public static RenderedText Create(
+            UltimaOnline uo,
             string text,
             ushort hue = 0xFFFF,
             byte font = 0xFF,
@@ -191,6 +192,7 @@ namespace ClassicUO.Game
         )
         {
             RenderedText r = _pool.GetOne();
+            r._uo = uo;
             r.Hue = hue;
             r.Font = font;
             r.IsUnicode = isunicode;
@@ -224,7 +226,7 @@ namespace ClassicUO.Game
 
             if (IsUnicode)
             {
-                (p.X, p.Y) = Client.Game.UO.FileManager.Fonts.GetCaretPosUnicode(
+                (p.X, p.Y) = _uo.FileManager.Fonts.GetCaretPosUnicode(
                     Font,
                     Text,
                     caret_index,
@@ -235,7 +237,7 @@ namespace ClassicUO.Game
             }
             else
             {
-                (p.X, p.Y) = Client.Game.UO.FileManager.Fonts.GetCaretPosASCII(
+                (p.X, p.Y) = _uo.FileManager.Fonts.GetCaretPosASCII(
                     Font,
                     Text,
                     caret_index,
@@ -371,10 +373,10 @@ namespace ClassicUO.Game
 
                         if (IsUnicode)
                         {
-                            return Client.Game.UO.FileManager.Fonts.GetCharWidthUnicode(Font, c);
+                            return _uo.FileManager.Fonts.GetCharWidthUnicode(Font, c);
                         }
 
-                        return Client.Game.UO.FileManager.Fonts.GetCharWidthASCII(Font, c);
+                        return _uo.FileManager.Fonts.GetCharWidthASCII(Font, c);
                     }
                 }
 
@@ -389,10 +391,10 @@ namespace ClassicUO.Game
         {
             if (IsUnicode)
             {
-                return Client.Game.UO.FileManager.Fonts.GetCharWidthUnicode(Font, c);
+                return _uo.FileManager.Fonts.GetCharWidthUnicode(Font, c);
             }
 
-            return Client.Game.UO.FileManager.Fonts.GetCharWidthASCII(Font, c);
+            return _uo.FileManager.Fonts.GetCharWidthASCII(Font, c);
         }
 
         private Vector3 GetHueVector(ushort hue, float alpha)
@@ -449,7 +451,7 @@ namespace ClassicUO.Game
                 return false;
             }
 
-            var atlas = Client.Game.UO.FontGlyphAtlas;
+            var atlas = _uo.FontGlyphAtlas;
             if (atlas == null)
                 return false;
 
@@ -480,7 +482,7 @@ namespace ClassicUO.Game
                 if (Hue != 0xFFFF)
                 {
                     baseColor = HuesHelper.RgbaToArgb(
-                        (Client.Game.UO.FileManager.Hues.GetPolygoneColor(Cell, Hue) << 8) | 0xFF
+                        (_uo.FileManager.Hues.GetPolygoneColor(Cell, Hue) << 8) | 0xFF
                     );
                 }
             }
@@ -731,34 +733,32 @@ namespace ClassicUO.Game
             );
         }
 
-        public unsafe void CreateTexture()
+        public void CreateTexture()
         {
-            // Atlas path: generate FontInfo for Width/Height/LinesCount/Links,
-            // but don't create a per-string Texture2D — glyphs are drawn from the shared atlas.
-            if (Texture != null && !Texture.IsDisposed)
+            if (_uo == null)
             {
-                Texture.Dispose();
-                Texture = null;
+                Utility.Logging.Log.Warn($"RenderedText.CreateTexture called with null _uo. Text='{_text}', Font={_font}, IsUnicode={IsUnicode}");
+                return;
             }
 
             if (IsHTML)
             {
-                Client.Game.UO.FileManager.Fonts.SetUseHTML(true, HTMLColor, HasBackgroundColor);
+                _uo.FileManager.Fonts.SetUseHTML(true, HTMLColor, HasBackgroundColor);
             }
 
-            Client.Game.UO.FileManager.Fonts.RecalculateWidthByInfo = RecalculateWidthByInfo;
+            _uo.FileManager.Fonts.RecalculateWidthByInfo = RecalculateWidthByInfo;
 
             FontsLoader.FontInfo fi;
             if (IsUnicode)
             {
-                fi = Client.Game.UO.FileManager.Fonts.GenerateUnicode(
+                fi = _uo.FileManager.Fonts.GenerateUnicode(
                     Font, Text, Hue, Cell, MaxWidth, Align,
                     (ushort)FontStyle, SaveHitMap, MaxHeight
                 );
             }
             else
             {
-                fi = Client.Game.UO.FileManager.Fonts.GenerateASCII(
+                fi = _uo.FileManager.Fonts.GenerateASCII(
                     Font, Text, Hue, MaxWidth, Align,
                     (ushort)FontStyle, SaveHitMap, MaxHeight
                 );
@@ -793,10 +793,10 @@ namespace ClassicUO.Game
 
             if (IsHTML)
             {
-                Client.Game.UO.FileManager.Fonts.SetUseHTML(false);
+                _uo.FileManager.Fonts.SetUseHTML(false);
             }
 
-            Client.Game.UO.FileManager.Fonts.RecalculateWidthByInfo = false;
+            _uo.FileManager.Fonts.RecalculateWidthByInfo = false;
         }
 
         public void Destroy()
@@ -807,12 +807,6 @@ namespace ClassicUO.Game
             }
 
             IsDestroyed = true;
-
-            if (Texture != null && !Texture.IsDisposed)
-            {
-                Texture.Dispose();
-            }
-
             _pool.ReturnOne(this);
         }
     }

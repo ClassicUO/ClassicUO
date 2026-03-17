@@ -53,7 +53,7 @@ namespace ClassicUO.Game.UI.Gumps
         private static readonly ChatMode[] SINGLE_LINE_CHAT_MODES = [ChatMode.ClientCommand, ChatMode.Prompt];
 
 
-        public SystemChatControl(WorldViewportGump gump, int x, int y, int w, int h)
+        public SystemChatControl(WorldViewportGump gump, int x, int y, int w, int h) : base(gump.World.Context)
         {
             _gump = gump;
             X = x;
@@ -66,8 +66,8 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptKeyboardInput = false;
 
             TextBoxControl = new StbTextBox
-            (
-                ProfileManager.CurrentProfile.ChatFont,
+            (Context, 
+                _gump.World.Profile.CurrentProfile.ChatFont,
                 TEXTBOX_LENGTH,
                 Width,
                 true,
@@ -85,13 +85,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             _gump.World.MessageManager.ServerPromptChanged += MessageManager_ServerPromptChanged;
 
-            float gradientTransparency = ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.HideChatGradient ? 0.0f : 0.5f;
+            float gradientTransparency = _gump.World.Profile.CurrentProfile != null && _gump.World.Profile.CurrentProfile.HideChatGradient ? 0.0f : 0.5f;
 
             Add
             (
-                _trans = new AlphaBlendControl(gradientTransparency)
+                _trans = new AlphaBlendControl(Context, gradientTransparency)
                 {
-                    IsVisible = !ProfileManager.CurrentProfile.ActivateChatAfterEnter,
+                    IsVisible = !_gump.World.Profile.CurrentProfile.ActivateChatAfterEnter,
                     AcceptMouseInput = true
                 }
             );
@@ -100,7 +100,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                _currentChatModeLabel = new Label(string.Empty, true, 0, style: FontStyle.BlackBorder)
+                _currentChatModeLabel = new Label(Context, string.Empty, true, 0, style: FontStyle.BlackBorder)
                 {
                     IsVisible = false
                 }
@@ -112,7 +112,7 @@ namespace ClassicUO.Game.UI.Gumps
             Mode = ChatMode.Default;
             TextBoxControl.Hue = GetChatHue(Mode);
 
-            IsActive = !ProfileManager.CurrentProfile.ActivateChatAfterEnter;
+            IsActive = !_gump.World.Profile.CurrentProfile.ActivateChatAfterEnter;
 
             SetFocus();
         }
@@ -299,16 +299,16 @@ namespace ClassicUO.Game.UI.Gumps
         {
             return mode switch
             {
-                ChatMode.Default => ProfileManager.CurrentProfile.SpeechHue,
-                ChatMode.Whisper => ProfileManager.CurrentProfile.WhisperHue,
-                ChatMode.Emote => ProfileManager.CurrentProfile.EmoteHue,
-                ChatMode.Yell => ProfileManager.CurrentProfile.YellHue,
-                ChatMode.Party => ProfileManager.CurrentProfile.PartyMessageHue,
-                ChatMode.Guild => ProfileManager.CurrentProfile.GuildMessageHue,
-                ChatMode.Alliance => ProfileManager.CurrentProfile.AllyMessageHue,
+                ChatMode.Default => _gump.World.Profile.CurrentProfile.SpeechHue,
+                ChatMode.Whisper => _gump.World.Profile.CurrentProfile.WhisperHue,
+                ChatMode.Emote => _gump.World.Profile.CurrentProfile.EmoteHue,
+                ChatMode.Yell => _gump.World.Profile.CurrentProfile.YellHue,
+                ChatMode.Party => _gump.World.Profile.CurrentProfile.PartyMessageHue,
+                ChatMode.Guild => _gump.World.Profile.CurrentProfile.GuildMessageHue,
+                ChatMode.Alliance => _gump.World.Profile.CurrentProfile.AllyMessageHue,
                 ChatMode.ClientCommand => 1161,
                 ChatMode.UOAMChat => 83,
-                ChatMode.UOChat => ProfileManager.CurrentProfile.ChatMessageHue,
+                ChatMode.UOChat => _gump.World.Profile.CurrentProfile.ChatMessageHue,
                 ChatMode.Prompt => 946,
                 _ => 33,
             };
@@ -357,17 +357,17 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case MessageType.Party:
-                    AddLine(string.Format(ResGumps.PartyName0Text1, e.Name, e.Text), e.Font, ProfileManager.CurrentProfile.PartyMessageHue, e.IsUnicode);
+                    AddLine(string.Format(ResGumps.PartyName0Text1, e.Name, e.Text), e.Font, _gump.World.Profile.CurrentProfile.PartyMessageHue, e.IsUnicode);
 
                     break;
 
                 case MessageType.Guild:
-                    AddLine(string.Format(ResGumps.GuildName0Text1, e.Name, e.Text), e.Font, ProfileManager.CurrentProfile.GuildMessageHue, e.IsUnicode);
+                    AddLine(string.Format(ResGumps.GuildName0Text1, e.Name, e.Text), e.Font, _gump.World.Profile.CurrentProfile.GuildMessageHue, e.IsUnicode);
 
                     break;
 
                 case MessageType.Alliance:
-                    AddLine(string.Format(ResGumps.AllianceName0Text1, e.Name, e.Text), e.Font, ProfileManager.CurrentProfile.AllyMessageHue, e.IsUnicode);
+                    AddLine(string.Format(ResGumps.AllianceName0Text1, e.Name, e.Text), e.Font, _gump.World.Profile.CurrentProfile.AllyMessageHue, e.IsUnicode);
 
                     break;
 
@@ -429,7 +429,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _textEntries.Remove(lineToRemove);
             }
 
-            _textEntries.AddLast(new ChatLineTime(text, font, isunicode, hue));
+            _textEntries.AddLast(new ChatLineTime(Context.Game.UO, text, font, isunicode, hue));
         }
 
         internal void Resize()
@@ -556,7 +556,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Mode = ChatMode.UOAMChat;
             }
 
-            _trans.Alpha = ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.HideChatGradient ? 0.0f : 0.5f;
+            _trans.Alpha = _gump.World.Profile.CurrentProfile != null && _gump.World.Profile.CurrentProfile.HideChatGradient ? 0.0f : 0.5f;
 
             base.Update();
         }
@@ -602,9 +602,9 @@ namespace ClassicUO.Game.UI.Gumps
         {
             switch (key)
             {
-                case SDL.SDL_Keycode.SDLK_Q when Keyboard.Ctrl && _messageHistoryIndex > -1 && !ProfileManager.CurrentProfile.DisableCtrlQWBtn:
+                case SDL.SDL_Keycode.SDLK_Q when Keyboard.Ctrl && _messageHistoryIndex > -1 && !_gump.World.Profile.CurrentProfile.DisableCtrlQWBtn:
 
-                    GameScene scene = Client.Game.GetScene<GameScene>();
+                    GameScene scene = Context.Game.GetScene<GameScene>();
 
                     if (scene == null)
                     {
@@ -632,9 +632,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                     break;
 
-                case SDL.SDL_Keycode.SDLK_W when Keyboard.Ctrl && !ProfileManager.CurrentProfile.DisableCtrlQWBtn:
+                case SDL.SDL_Keycode.SDLK_W when Keyboard.Ctrl && !_gump.World.Profile.CurrentProfile.DisableCtrlQWBtn:
 
-                    scene = Client.Game.GetScene<GameScene>();
+                    scene = Context.Game.GetScene<GameScene>();
 
                     if (scene == null)
                     {
@@ -756,7 +756,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void OnKeyboardReturn(int textID, string text)
         {
-            if (!IsActive && ProfileManager.CurrentProfile.ActivateChatAfterEnter || string.IsNullOrEmpty(text))
+            if (!IsActive && _gump.World.Profile.CurrentProfile.ActivateChatAfterEnter || string.IsNullOrEmpty(text))
             {
                 ResetTextBox();
             }
@@ -825,23 +825,23 @@ namespace ClassicUO.Game.UI.Gumps
             switch (sentMode)
             {
                 case ChatMode.Default:
-                    GameActions.Say(text, ProfileManager.CurrentProfile.SpeechHue);
+                    GameActions.Say(_gump.World, text, _gump.World.Profile.CurrentProfile.SpeechHue);
 
                     break;
 
                 case ChatMode.Whisper:
-                    GameActions.Say(text, ProfileManager.CurrentProfile.WhisperHue, MessageType.Whisper);
+                    GameActions.Say(_gump.World, text, _gump.World.Profile.CurrentProfile.WhisperHue, MessageType.Whisper);
 
                     break;
 
                 case ChatMode.Emote:
                     text = ResGeneral.EmoteChar + text + ResGeneral.EmoteChar;
-                    GameActions.Say(text, ProfileManager.CurrentProfile.EmoteHue, MessageType.Emote);
+                    GameActions.Say(_gump.World, text, _gump.World.Profile.CurrentProfile.EmoteHue, MessageType.Emote);
 
                     break;
 
                 case ChatMode.Yell:
-                    GameActions.Say(text, ProfileManager.CurrentProfile.YellHue, MessageType.Yell);
+                    GameActions.Say(_gump.World, text, _gump.World.Profile.CurrentProfile.YellHue, MessageType.Yell);
 
                     break;
 
@@ -856,7 +856,7 @@ namespace ClassicUO.Game.UI.Gumps
                         case "add":
                             if (_gump.World.Party.Leader == 0 || _gump.World.Party.Leader == _gump.World.Player)
                             {
-                                GameActions.RequestPartyInviteByTarget();
+                                GameActions.RequestPartyInviteByTarget(_gump.World);
                             }
                             else
                             {
@@ -929,7 +929,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (_gump.World.Party.Leader == 0 && (_gump.World.Party.Inviter != 0))
                             {
-                                GameActions.RequestPartyAccept(_gump.World.Party.Inviter);
+                                GameActions.RequestPartyAccept(_gump.World, _gump.World.Party.Inviter);
                                 _gump.World.Party.Leader = _gump.World.Party.Inviter;
                                 _gump.World.Party.Inviter = 0;
                             }
@@ -953,7 +953,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (_gump.World.Party.Leader == 0 && _gump.World.Party.Inviter != 0)
                             {
-                                NetClient.Socket.Send_PartyDecline(_gump.World.Party.Inviter);
+                                _gump.World.Network.Send_PartyDecline(_gump.World.Party.Inviter);
                                 _gump.World.Party.Leader = 0;
                                 _gump.World.Party.Inviter = 0;
                             }
@@ -978,7 +978,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                             if (_gump.World.Party.Leader != 0 && _gump.World.Party.Leader == _gump.World.Player)
                             {
-                                GameActions.RequestPartyRemoveMemberByTarget();
+                                GameActions.RequestPartyRemoveMemberByTarget(_gump.World);
                             }
                             else
                             {
@@ -1018,7 +1018,7 @@ namespace ClassicUO.Game.UI.Gumps
                                     }
                                 }
 
-                                GameActions.SayParty(text, serial);
+                                GameActions.SayParty(_gump.World, text, serial);
                             }
                             else
                             {
@@ -1039,12 +1039,12 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case ChatMode.Guild:
-                    GameActions.Say(text, ProfileManager.CurrentProfile.GuildMessageHue, MessageType.Guild);
+                    GameActions.Say(_gump.World, text, _gump.World.Profile.CurrentProfile.GuildMessageHue, MessageType.Guild);
 
                     break;
 
                 case ChatMode.Alliance:
-                    GameActions.Say(text, ProfileManager.CurrentProfile.AllyMessageHue, MessageType.Alliance);
+                    GameActions.Say(_gump.World, text, _gump.World.Profile.CurrentProfile.AllyMessageHue, MessageType.Alliance);
 
                     break;
 
@@ -1064,7 +1064,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case ChatMode.UOChat:
-                    NetClient.Socket.Send_ChatMessageCommand(text);
+                    _gump.World.Network.Send_ChatMessageCommand(_gump.World.Settings.Language, text);
 
                     break;
             }
@@ -1075,10 +1075,11 @@ namespace ClassicUO.Game.UI.Gumps
             private uint _createdTime;
             private RenderedText _renderedText;
 
-            public ChatLineTime(string text, byte font, bool isunicode, ushort hue)
+            public ChatLineTime(UltimaOnline uo, string text, byte font, bool isunicode, ushort hue)
             {
                 _renderedText = RenderedText.Create
                 (
+                    uo,
                     text,
                     hue,
                     font,

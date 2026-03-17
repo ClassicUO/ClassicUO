@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BSD-2-Clause
+ï»¿// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -34,7 +34,7 @@ namespace ClassicUO.Game.UI.Gumps
             private AlphaBlendControl _background;
             private readonly CounterBarGump _gump;
 
-            public CounterItem(CounterBarGump gump, ushort graphic, ushort? hue, int compareTo)
+            public CounterItem(CounterBarGump gump, ushort graphic, ushort? hue, int compareTo) : base(gump.World.Context)
             {
                 _gump = gump;
                 CompareTo = compareTo;
@@ -44,8 +44,8 @@ namespace ClassicUO.Game.UI.Gumps
                 CanMove = true;
                 CanCloseWithRightClick = false;
 
-                Add(_background = new AlphaBlendControl(0.0f) { X = 0, Y = 0 });
-                Add(_image = new ImageWithText());
+                Add(_background = new AlphaBlendControl(Context, 0.0f) { X = 0, Y = 0 });
+                Add(_image = new ImageWithText(Context));
 
                 SetGraphic(graphic, hue);
             }
@@ -97,7 +97,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             private void CompareToSelected()
             {
-                UIManager.Add(new EntryDialog(_gump.World, 250, 160,
+                _gump.World.Context.UI.Add(new EntryDialog(_gump.World, 250, 160,
                     string.Format("{0}\n{1}", ResGumps.CounterCompareToDialogText1, ResGumps.CounterCompareToDialogText2),
                     CompareToDialogClosed, _amount.ToString()));
             }
@@ -114,7 +114,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else
                 {
-                    UIManager.Add(new EntryDialog(_gump.World, 250, 180,
+                    _gump.World.Context.UI.Add(new EntryDialog(_gump.World, 250, 180,
                         string.Format("{0}\n{1}\n\n{2}", ResGumps.CounterCompareToDialogText1, ResGumps.CounterCompareToDialogText2, ResGumps.CounterCompareToDialogInvalid),
                         CompareToDialogClosed, newValue));
                 }
@@ -186,9 +186,9 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 0;
                 Y = 0;
 
-                UIManager.Add(gump);
+                _gump.World.Context.UI.Add(gump);
 
-                UIManager.AttemptDragControl(gump, true);
+                _gump.World.Context.UI.AttemptDragControl(gump, true);
 
                 _gump.SetupLayout();
             }
@@ -203,7 +203,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Control oldParent = this.Parent;
                 if (oldParent is DraggableGump)
                 {
-                    FinalizeDragDrop(oldParent, UIManager.GetAllMouseOverControlsOfType<CounterBarGump>());
+                    FinalizeDragDrop(oldParent, _gump.World.Context.UI.GetAllMouseOverControlsOfType<CounterBarGump>());
                 }
 
                 base.OnDragEnd(x, y);
@@ -244,25 +244,26 @@ namespace ClassicUO.Game.UI.Gumps
                 switch (button)
                 {
                     case MouseButtonType.Left:
-                        if (Client.Game.UO.GameCursor.ItemHold.Enabled)
+                        if (_gump.World.Context.Game.UO.GameCursor.ItemHold.Enabled)
                         {
                             if (!_gump.ReadOnly)
                             {
                                 SetGraphic(
-                                    Client.Game.UO.GameCursor.ItemHold.Graphic,
-                                    Client.Game.UO.GameCursor.ItemHold.Hue
+                                    _gump.World.Context.Game.UO.GameCursor.ItemHold.Graphic,
+                                    _gump.World.Context.Game.UO.GameCursor.ItemHold.Hue
                                 );
                             }
 
                             GameActions.DropItem(
-                                Client.Game.UO.GameCursor.ItemHold.Serial,
-                                Client.Game.UO.GameCursor.ItemHold.X,
-                                Client.Game.UO.GameCursor.ItemHold.Y,
+                                _gump.World,
+                                _gump.World.Context.Game.UO.GameCursor.ItemHold.Serial,
+                                _gump.World.Context.Game.UO.GameCursor.ItemHold.X,
+                                _gump.World.Context.Game.UO.GameCursor.ItemHold.Y,
                                 0,
-                                Client.Game.UO.GameCursor.ItemHold.Container
+                                _gump.World.Context.Game.UO.GameCursor.ItemHold.Container
                             );
                         }
-                        else if (ProfileManager.CurrentProfile.CastSpellsByOneClick)
+                        else if (_gump.World.Profile.CurrentProfile.CastSpellsByOneClick)
                         {
                             Use();
                         }
@@ -290,7 +291,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (
                     button == MouseButtonType.Left
-                    && !ProfileManager.CurrentProfile.CastSpellsByOneClick
+                    && !_gump.World.Profile.CurrentProfile.CastSpellsByOneClick
                 )
                 {
                     Use();
@@ -340,7 +341,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             private void UpdateOnChangeAnimation(int previousAmount)
             {
-                if (ProfileManager.CurrentProfile.CounterBarHighlightOnChange)
+                if (_gump.World.Profile.CurrentProfile.CounterBarHighlightOnChange)
                 {
                     if (_amount > previousAmount)
                     {
@@ -369,10 +370,10 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 string displayText = prefix + displayAmount.ToString();
-                if (ProfileManager.CurrentProfile.CounterBarDisplayAbbreviatedAmount)
+                if (_gump.World.Profile.CurrentProfile.CounterBarDisplayAbbreviatedAmount)
                 {
                     if (
-                        Math.Abs(displayAmount) >= ProfileManager.CurrentProfile.CounterBarAbbreviatedAmount
+                        Math.Abs(displayAmount) >= _gump.World.Profile.CurrentProfile.CounterBarAbbreviatedAmount
                     )
                     {
                         displayText = prefix + StringHelper.IntToAbbreviatedString(displayAmount);
@@ -391,7 +392,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (displayAmount == 0)
                 {
-                    prefix = "±";
+                    prefix = "ï¿½";
                 }
                 else if (displayAmount > 0)
                 {
@@ -413,8 +414,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Texture2D color = SolidColorTextureCache.GetTexture(
                     MouseIsOver
                         ? Color.Yellow
-                        : ProfileManager.CurrentProfile.CounterBarHighlightOnAmount
-                        && CalculateDisplayAmount() < ProfileManager.CurrentProfile.CounterBarHighlightAmount
+                        : _gump.World.Profile.CurrentProfile.CounterBarHighlightOnAmount
+                        && CalculateDisplayAmount() < _gump.World.Profile.CurrentProfile.CounterBarHighlightAmount
                         && Graphic != 0
                             ? Color.Red
                             : Color.Gray
@@ -439,13 +440,13 @@ namespace ClassicUO.Game.UI.Gumps
                 private ushort _hue;
                 private bool _partial;
 
-                public ImageWithText()
+                public ImageWithText(GameContext context) : base(context)
                 {
                     CanMove = true;
                     WantUpdateSize = true;
                     AcceptMouseInput = false;
 
-                    _label = new Label("", true, 0x35, 0, 1, FontStyle.BlackBorder)
+                    _label = new Label(Context, "", true, 0x35, 0, 1, FontStyle.BlackBorder)
                     {
                         X = 2,
                         Y = Height - 15
@@ -460,7 +461,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         _graphic = graphic;
                         _hue = hue;
-                        _partial = Client.Game.UO.FileManager.TileData.StaticData[graphic].IsPartialHue;
+                        _partial = Context.Game.UO.FileManager.TileData.StaticData[graphic].IsPartialHue;
                     }
                     else
                     {
@@ -485,8 +486,8 @@ namespace ClassicUO.Game.UI.Gumps
                     if (_graphic != 0)
                     {
                         float layerDepth = layerDepthRef;
-                        ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(_graphic);
-                        var rect = Client.Game.UO.Arts.GetRealArtBounds(_graphic);
+                        ref readonly var artInfo = ref Context.Game.UO.Arts.GetArt(_graphic);
+                        var rect = Context.Game.UO.Arts.GetRealArtBounds(_graphic);
 
                         Vector3 hueVector = ShaderHueTranslator.GetHueVector(_hue, _partial, 1f);
 

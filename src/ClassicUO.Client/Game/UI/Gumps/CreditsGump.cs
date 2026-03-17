@@ -36,16 +36,16 @@ Ultima Online(R) 2021 Electronic Arts Inc. All Rights Reserved.
 
         public CreditsGump(World world) : base(world, 0, 0)
         {
-            Client.Game.Audio.PlayMusic(8, false, true);
+            World.Context.Game.Audio.PlayMusic(8, false, true);
 
             LayerOrder = UILayer.Over;
             CanCloseWithRightClick = true;
 
-            GumpPic background = new GumpPic(0, 0, BACKGROUND_IMG, 0);
+            GumpPic background = new GumpPic(0, 0, BACKGROUND_IMG, 0, World.Context);
             Width = background.Width;
             Height = background.Height;
 
-            Add(new AlphaBlendControl(1f) { Width = background.Width, Height = background.Height});
+            Add(new AlphaBlendControl(World.Context, 1f) { Width = background.Width, Height = background.Height});
 
             Add(background);
 

@@ -52,7 +52,7 @@ namespace ClassicUO.Game.UI.Gumps
             Height = HEIGHT;
 
             Add(
-                new AlphaBlendControl(0.95f)
+                new AlphaBlendControl(World.Context, 0.95f)
                 {
                     X = 1,
                     Y = 1,
@@ -61,20 +61,20 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
 
-            ScrollArea area = new ScrollArea(20, 60, WIDTH - 40, 250, true)
+            ScrollArea area = new ScrollArea(World.Context, 20, 60, WIDTH - 40, 250, true)
             {
                 AcceptMouseInput = true
             };
 
             Add(area);
 
-            _databox = new DataBox(0, 0, 1, 1);
+            _databox = new DataBox(World.Context, 0, 0, 1, 1);
             _databox.WantUpdateSize = true;
 
             area.Add(_databox);
 
             Add(
-                new NiceButton(10, 10, 180, 25, ButtonAction.Activate, ResGumps.Name)
+                new NiceButton(World.Context, 10, 10, 180, 25, ButtonAction.Activate, ResGumps.Name)
                 {
                     ButtonParameter = (int)Buttons.SortName,
                     IsSelected = true,
@@ -84,7 +84,7 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             Add(
-                new NiceButton(10, 10, 80, 25, ButtonAction.Activate, ResGumps.Real)
+                new NiceButton(World.Context, 10, 10, 80, 25, ButtonAction.Activate, ResGumps.Real)
                 {
                     ButtonParameter = (int)Buttons.SortReal,
                     X = 220,
@@ -93,7 +93,7 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             Add(
-                new NiceButton(10, 10, 80, 25, ButtonAction.Activate, ResGumps.Base)
+                new NiceButton(World.Context, 10, 10, 80, 25, ButtonAction.Activate, ResGumps.Base)
                 {
                     ButtonParameter = (int)Buttons.SortBase,
                     X = 300,
@@ -102,7 +102,7 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             Add(
-                new NiceButton(10, 10, 80, 25, ButtonAction.Activate, ResGumps.Cap)
+                new NiceButton(World.Context, 10, 10, 80, 25, ButtonAction.Activate, ResGumps.Cap)
                 {
                     ButtonParameter = (int)Buttons.SortCap,
                     X = 380,
@@ -110,11 +110,11 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
 
-            Add(new Line(20, 60, 435, 1, 0xFFFFFFFF));
+            Add(new Line(World.Context, 20, 60, 435, 1, 0xFFFFFFFF));
 
-            Add(new Line(20, 310, 435, 1, 0xFFFFFFFF));
+            Add(new Line(World.Context, 20, 310, 435, 1, 0xFFFFFFFF));
 
-            Add(_sortOrderIndicator = new GumpPic(0, 0, 0x985, 0));
+            Add(_sortOrderIndicator = new GumpPic(0, 0, 0x985, 0, World.Context));
             OnButtonClick((int)Buttons.SortName);
         }
 
@@ -176,10 +176,10 @@ namespace ClassicUO.Game.UI.Gumps
                 _totalReal += skill.Base;
                 _totalValue += skill.Value;
 
-                Label skillName = new Label(skill.Name, true, 1153, font: 3);
-                Label skillValueBase = new Label(skill.Base.ToString(), true, 1153, font: 3);
-                Label skillValue = new Label(skill.Value.ToString(), true, 1153, font: 3);
-                Label skillCap = new Label(skill.Cap.ToString(), true, 1153, font: 3);
+                Label skillName = new Label(World.Context, skill.Name, true, 1153, font: 3);
+                Label skillValueBase = new Label(World.Context, skill.Base.ToString(), true, 1153, font: 3);
+                Label skillValue = new Label(World.Context, skill.Value.ToString(), true, 1153, font: 3);
+                Label skillCap = new Label(World.Context, skill.Cap.ToString(), true, 1153, font: 3);
 
                 _skillListEntries.Add(
                     new SkillListEntry(this, skillName, skillValueBase, skillValue, skillCap, skill)
@@ -194,9 +194,9 @@ namespace ClassicUO.Game.UI.Gumps
             _databox.WantUpdateSize = true;
             _databox.ReArrangeChildren();
 
-            Add(new Label(ResGumps.Total, true, 1153) { X = 40, Y = 320 });
-            Add(new Label(_totalReal.ToString("F1"), true, 1153) { X = 220, Y = 320 });
-            Add(new Label(_totalValue.ToString("F1"), true, 1153) { X = 300, Y = 320 });
+            Add(new Label(World.Context, ResGumps.Total, true, 1153) { X = 40, Y = 320 });
+            Add(new Label(World.Context, _totalReal.ToString("F1"), true, 1153) { X = 220, Y = 320 });
+            Add(new Label(World.Context, _totalValue.ToString("F1"), true, 1153) { X = 300, Y = 320 });
         }
 
         public override void Update()
@@ -266,7 +266,7 @@ namespace ClassicUO.Game.UI.Gumps
             Label skillvalue,
             Label skillcap,
             Skill skill
-        )
+        ) : base(gump.World.Context)
         {
             _gump = gump;
             Height = 20;
@@ -281,7 +281,7 @@ namespace ClassicUO.Game.UI.Gumps
             if (skill.IsClickable)
             {
                 Add(
-                    _activeUse = new Button((int)Buttons.ActiveSkillUse, 0x837, 0x838)
+                    _activeUse = new Button(Context, (int)Buttons.ActiveSkillUse, 0x837, 0x838)
                     {
                         X = 0,
                         Y = 4,
@@ -311,7 +311,7 @@ namespace ClassicUO.Game.UI.Gumps
                             ? 0x985
                             : 0x82C
                 ),
-                0
+                0, Context
             );
 
             Add(loc);
@@ -322,21 +322,21 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     case Lock.Up:
                         _skill.Lock = Lock.Down;
-                        GameActions.ChangeSkillLockStatus((ushort)_skill.Index, (byte)Lock.Down);
+                        GameActions.ChangeSkillLockStatus(_gump.World, (ushort)_skill.Index, (byte)Lock.Down);
                         loc.Graphic = 0x985;
 
                         break;
 
                     case Lock.Down:
                         _skill.Lock = Lock.Locked;
-                        GameActions.ChangeSkillLockStatus((ushort)_skill.Index, (byte)Lock.Locked);
+                        GameActions.ChangeSkillLockStatus(_gump.World, (ushort)_skill.Index, (byte)Lock.Locked);
                         loc.Graphic = 0x82C;
 
                         break;
 
                     case Lock.Locked:
                         _skill.Lock = Lock.Up;
-                        GameActions.ChangeSkillLockStatus((ushort)_skill.Index, (byte)Lock.Up);
+                        GameActions.ChangeSkillLockStatus(_gump.World, (ushort)_skill.Index, (byte)Lock.Up);
                         loc.Graphic = 0x983;
 
                         break;
@@ -350,7 +350,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 GetSpellFloatingButton(_skill.Index)?.Dispose();
 
-                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(0x24B8);
+                ref readonly var gumpInfo = ref _gump.World.Context.Game.UO.Gumps.GetGump(0x24B8);
 
                 SkillButtonGump skillButtonGump = new SkillButtonGump(
                     _gump.World,
@@ -359,14 +359,14 @@ namespace ClassicUO.Game.UI.Gumps
                     Mouse.LClickPosition.Y + (gumpInfo.UV.Height >> 1)
                 );
 
-                UIManager.Add(skillButtonGump);
-                UIManager.AttemptDragControl(skillButtonGump, true);
+                _gump.World.Context.UI.Add(skillButtonGump);
+                _gump.World.Context.UI.AttemptDragControl(skillButtonGump, true);
             }
         }
 
-        private static SkillButtonGump GetSpellFloatingButton(int id)
+        private SkillButtonGump GetSpellFloatingButton(int id)
         {
-            for (LinkedListNode<Gump> i = UIManager.Gumps.Last; i != null; i = i.Previous)
+            for (LinkedListNode<Gump> i = _gump.World.Context.UI.Gumps.Last; i != null; i = i.Previous)
             {
                 if (i.Value is SkillButtonGump g && g.SkillID == id)
                 {
@@ -382,7 +382,7 @@ namespace ClassicUO.Game.UI.Gumps
             switch ((Buttons)buttonID)
             {
                 case Buttons.ActiveSkillUse:
-                    GameActions.UseSkill(_skill.Index);
+                    GameActions.UseSkill(_gump.World, _skill.Index);
 
                     break;
             }

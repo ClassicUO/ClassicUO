@@ -1,5 +1,6 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.Game;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -54,7 +55,7 @@ namespace ClassicUO.Game.UI.Controls
         //    AcceptMouseInput = false;
         //}
 
-        public CheckerTrans(List<string> parts)
+        public CheckerTrans(List<string> parts, GameContext context) : base(context)
         {
             X = int.Parse(parts[1]);
             Y = int.Parse(parts[2]);

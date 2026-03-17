@@ -46,25 +46,25 @@ namespace ClassicUO.Game.Managers
 
         public void CalculateContainerPosition(uint serial, ushort g)
         {
-            if (UIManager.GetGumpCachePosition(serial, out Point location))
+            if (_world.Context.UI.GetGumpCachePosition(serial, out Point location))
             {
                 X = location.X;
                 Y = location.Y;
             }
             else
             {
-                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(g);
+                ref readonly var gumpInfo = ref _world.Context.Game.UO.Gumps.GetGump(g);
 
                 if (gumpInfo.Texture != null)
                 {
-                    float scale = UIManager.ContainerScale;
+                    float scale = _world.Context.UI.ContainerScale;
 
                     int width = (int)(gumpInfo.UV.Width * scale);
                     int height = (int)(gumpInfo.UV.Height * scale);
 
-                    if (ProfileManager.CurrentProfile.OverrideContainerLocation)
+                    if (_world.Profile.CurrentProfile.OverrideContainerLocation)
                     {
-                        switch (ProfileManager.CurrentProfile.OverrideContainerLocationSetting)
+                        switch (_world.Profile.CurrentProfile.OverrideContainerLocationSetting)
                         {
                             case 0:
                                 SetPositionNearGameObject(g, serial, width, height);
@@ -72,7 +72,7 @@ namespace ClassicUO.Game.Managers
                                 break;
 
                             case 1:
-                                X = Client.Game.ClientBounds.Width - width;
+                                X = _world.Context.Game.ClientBounds.Width - width;
                                 Y = 0;
 
                                 break;
@@ -80,12 +80,12 @@ namespace ClassicUO.Game.Managers
                             case 2:
                             case 3:
                                 X =
-                                    ProfileManager
+                                    _world.Profile
                                         .CurrentProfile
                                         .OverrideContainerLocationPosition
                                         .X - (width >> 1);
                                 Y =
-                                    ProfileManager
+                                    _world.Profile
                                         .CurrentProfile
                                         .OverrideContainerLocationPosition
                                         .Y - (height >> 1);
@@ -93,12 +93,12 @@ namespace ClassicUO.Game.Managers
                                 break;
                         }
 
-                        if (X + width > Client.Game.ClientBounds.Width)
+                        if (X + width > _world.Context.Game.ClientBounds.Width)
                         {
                             X -= width;
                         }
 
-                        if (Y + height > Client.Game.ClientBounds.Height)
+                        if (Y + height > _world.Context.Game.ClientBounds.Height)
                         {
                             Y -= height;
                         }
@@ -111,14 +111,14 @@ namespace ClassicUO.Game.Managers
                         {
                             if (
                                 X + width + Constants.CONTAINER_RECT_STEP
-                                > Client.Game.ClientBounds.Width
+                                > _world.Context.Game.ClientBounds.Width
                             )
                             {
                                 X = Constants.CONTAINER_RECT_DEFAULT_POSITION;
 
                                 if (
                                     Y + height + Constants.CONTAINER_RECT_LINESTEP
-                                    > Client.Game.ClientBounds.Height
+                                    > _world.Context.Game.ClientBounds.Height
                                 )
                                 {
                                     Y = Constants.CONTAINER_RECT_DEFAULT_POSITION;
@@ -130,12 +130,12 @@ namespace ClassicUO.Game.Managers
                             }
                             else if (
                                 Y + height + Constants.CONTAINER_RECT_STEP
-                                > Client.Game.ClientBounds.Height
+                                > _world.Context.Game.ClientBounds.Height
                             )
                             {
                                 if (
                                     X + width + Constants.CONTAINER_RECT_LINESTEP
-                                    > Client.Game.ClientBounds.Width
+                                    > _world.Context.Game.ClientBounds.Width
                                 )
                                 {
                                     X = Constants.CONTAINER_RECT_DEFAULT_POSITION;
@@ -178,7 +178,7 @@ namespace ClassicUO.Game.Managers
             }
 
             Item bank = _world.Player.FindItemByLayer(Layer.Bank);
-            var camera = Client.Game.Scene.Camera;
+            var camera = _world.Context.Game.Scene.Camera;
 
             if (bank != null && serial == bank)
             {
@@ -206,7 +206,7 @@ namespace ClassicUO.Game.Managers
             else
             {
                 // in a container, open near the container
-                ContainerGump parentContainer = UIManager.GetGump<ContainerGump>(item.Container);
+                ContainerGump parentContainer = _world.Context.UI.GetGump<ContainerGump>(item.Container);
 
                 if (parentContainer != null)
                 {

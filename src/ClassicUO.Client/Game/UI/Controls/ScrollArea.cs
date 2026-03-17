@@ -1,5 +1,6 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.Game;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using Microsoft.Xna.Framework;
@@ -20,13 +21,14 @@ namespace ClassicUO.Game.UI.Controls
 
         public ScrollArea
         (
+            GameContext context,
             int x,
             int y,
             int w,
             int h,
             bool normalScrollbar,
             int scroll_max_height = -1
-        )
+        ) : base(context)
         {
             X = x;
             Y = y;
@@ -36,11 +38,11 @@ namespace ClassicUO.Game.UI.Controls
 
             if (normalScrollbar)
             {
-                _scrollBar = new ScrollBar(Width - 14, 0, Height);
+                _scrollBar = new ScrollBar(Width - 14, 0, Height, Context);
             }
             else
             {
-                _scrollBar = new ScrollFlag
+                _scrollBar = new ScrollFlag(Context)
                 {
                     X = Width - 19, Height = h
                 };

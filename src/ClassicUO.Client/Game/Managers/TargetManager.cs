@@ -168,7 +168,7 @@ namespace ClassicUO.Game.Managers
 
             if (IsTargeting)
             {
-                //UIManager.RemoveTargetLineGump(LastTarget);
+                //_world.Context.UI.RemoveTargetLineGump(LastTarget);
             }
             else if (lastTargetting)
             {
@@ -196,7 +196,7 @@ namespace ClassicUO.Game.Managers
                     _world.CustomHouseManager.SelectedGraphic = 0;
                     _world.CustomHouseManager.CombinedStair = false;
 
-                    UIManager.GetGump<HouseCustomizationGump>()?.Update();
+                    _world.Context.UI.GetGump<HouseCustomizationGump>()?.Update();
                 }
             }
 
@@ -207,7 +207,7 @@ namespace ClassicUO.Game.Managers
 
             if (IsTargeting || TargetingType == TargetType.Cancel)
             {
-                NetClient.Socket.Send_TargetCancel(TargetingState, _targetCursorId, (byte)TargetingType);
+                _world.Network.Send_TargetCancel(TargetingState, _targetCursorId, (byte)TargetingType);
                 IsTargeting = false;
             }
 
@@ -271,16 +271,16 @@ namespace ClassicUO.Game.Managers
                             {
                                 bool showCriminalQuery = false;
 
-                                if (TargetingType == TargetType.Harmful && ProfileManager.CurrentProfile.EnabledCriminalActionQuery && mobile.NotorietyFlag == NotorietyFlag.Innocent)
+                                if (TargetingType == TargetType.Harmful && _world.Profile.CurrentProfile.EnabledCriminalActionQuery && mobile.NotorietyFlag == NotorietyFlag.Innocent)
                                 {
                                     showCriminalQuery = true;
                                 }
-                                else if (TargetingType == TargetType.Beneficial && ProfileManager.CurrentProfile.EnabledBeneficialCriminalActionQuery && (mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Murderer || mobile.NotorietyFlag == NotorietyFlag.Gray))
+                                else if (TargetingType == TargetType.Beneficial && _world.Profile.CurrentProfile.EnabledBeneficialCriminalActionQuery && (mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Murderer || mobile.NotorietyFlag == NotorietyFlag.Gray))
                                 {
                                     showCriminalQuery = true;
                                 }
 
-                                if (showCriminalQuery && UIManager.GetGump<QuestionGump>() == null)
+                                if (showCriminalQuery && _world.Context.UI.GetGump<QuestionGump>() == null)
                                 {
                                     QuestionGump messageBox = new QuestionGump
                                     (
@@ -290,7 +290,7 @@ namespace ClassicUO.Game.Managers
                                         {
                                             if (s)
                                             {
-                                                NetClient.Socket.Send_TargetObject(entity,
+                                                _world.Network.Send_TargetObject(entity,
                                                                                    entity.Graphic,
                                                                                    entity.X,
                                                                                    entity.Y,
@@ -308,7 +308,7 @@ namespace ClassicUO.Game.Managers
                                         }
                                     );
 
-                                    UIManager.Add(messageBox);
+                                    _world.Context.UI.Add(messageBox);
 
                                     return;
                                 }
@@ -346,7 +346,7 @@ namespace ClassicUO.Game.Managers
                             _lastDataBuffer[18] = (byte)entity.Graphic;
 
 
-                            NetClient.Socket.Send_TargetObject(entity,
+                            _world.Network.Send_TargetObject(entity,
                                                                entity.Graphic,
                                                                entity.X,
                                                                entity.Y,
@@ -381,7 +381,7 @@ namespace ClassicUO.Game.Managers
 
                         if (SerialHelper.IsItem(serial))
                         {
-                            ProfileManager.CurrentProfile.GrabBagSerial = serial;
+                            _world.Profile.CurrentProfile.GrabBagSerial = serial;
                             GameActions.Print(_world, string.Format(ResGeneral.GrabBagSet0, serial));
                         }
 
@@ -439,14 +439,14 @@ namespace ClassicUO.Game.Managers
             }
             else
             {
-                if (graphic >= Client.Game.UO.FileManager.TileData.StaticData.Length)
+                if (graphic >= _world.Context.Game.UO.FileManager.TileData.StaticData.Length)
                 {
                     return;
                 }
 
-                ref StaticTiles itemData = ref Client.Game.UO.FileManager.TileData.StaticData[graphic];
+                ref StaticTiles itemData = ref _world.Context.Game.UO.FileManager.TileData.StaticData[graphic];
 
-                if (Client.Game.UO.Version >= ClientVersion.CV_7090 && itemData.IsSurface)
+                if (_world.Context.Game.UO.Version >= ClientVersion.CV_7090 && itemData.IsSurface)
                 {
                     z += itemData.Height;
                 }
@@ -478,7 +478,7 @@ namespace ClassicUO.Game.Managers
             _lastDataBuffer[5] = (byte) _targetCursorId;
             _lastDataBuffer[6] = (byte) TargetingType;
 
-            NetClient.Socket.Send(_lastDataBuffer);
+            _world.Network.Send(_lastDataBuffer);
             Mouse.CancelDoubleClick = true;
             ClearTargetingWithoutTargetCancelPacket();
         }
@@ -520,7 +520,7 @@ namespace ClassicUO.Game.Managers
 
 
 
-            NetClient.Socket.Send_TargetXYZ(graphic,
+            _world.Network.Send_TargetXYZ(graphic,
                                             x,
                                             y,
                                             z,

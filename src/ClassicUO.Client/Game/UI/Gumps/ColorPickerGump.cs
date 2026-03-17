@@ -28,11 +28,11 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptMouseInput = false;
             X = x;
             Y = y;
-            Add(new GumpPic(0, 0, 0x0906, 0));
+            Add(new GumpPic(0, 0, 0x0906, 0, World.Context));
 
             Add
             (
-                new Button(1, 0x5669, 0x566B, 0x566A)
+                new Button(World.Context, 1, 0x5669, 0x566B, 0x566A)
                 {
                     X = 212,
                     Y = 33,
@@ -42,7 +42,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new Button(0, 0x0907, 0x0908, 0x909)
+                new Button(World.Context, 0, 0x0907, 0x0908, 0x909)
                 {
                     X = 208, Y = 138, ButtonAction = ButtonAction.Activate
                 }
@@ -51,7 +51,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 _slider = new HSliderBar
-                (
+                (World.Context, 
                     39,
                     142,
                     145,
@@ -68,7 +68,7 @@ namespace ClassicUO.Game.UI.Gumps
             
             Add
             (
-                _dyeTybeImage = new StaticPic(0x0FAB, 0)
+                _dyeTybeImage = new StaticPic(0x0FAB, 0, World.Context)
                 {
                     X = 200, Y = 78
                 }
@@ -88,7 +88,7 @@ namespace ClassicUO.Game.UI.Gumps
                     // "Okay"
                     if (LocalSerial != 0)
                     {
-                        NetClient.Socket.Send_DyeDataResponse(LocalSerial, _graphic, _box.SelectedHue);
+                        World.Network.Send_DyeDataResponse(LocalSerial, _graphic, _box.SelectedHue);
                     }
 
                     _okClicked?.Invoke(_box.SelectedHue);
@@ -121,7 +121,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     // If the hue is not valid (rejected by the setter), send a message to the user
 
-                    string badHueMessage = Client.Game.UO.FileManager.Clilocs.GetString(1042295);
+                    string badHueMessage = World.Context.Game.UO.FileManager.Clilocs.GetString(1042295);
 
                     World.MessageManager.HandleMessage(
                         obj as Entity,

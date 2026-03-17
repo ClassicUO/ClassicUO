@@ -99,18 +99,18 @@ namespace ClassicUO.Game.GameObjects
                 return false;
             }
 
-            ref StaticTiles data = ref Client.Game.UO.FileManager.TileData.StaticData[Graphic];
+            ref StaticTiles data = ref World.Context.Game.UO.FileManager.TileData.StaticData[Graphic];
 
             posX += (int)Offset.X;
             posY += (int)(Offset.Z + Offset.Y);
 
             ushort hue = Hue;
 
-            if (ProfileManager.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
+            if (World.Profile.CurrentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
             {
                 hue = Constants.OUT_RANGE_COLOR;
             }
-            else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
+            else if (World.Player.IsDead && World.Profile.CurrentProfile.EnableBlackWhiteEffect)
             {
                 hue = Constants.DEAD_RANGE_COLOR;
             }
@@ -130,6 +130,7 @@ namespace ClassicUO.Game.GameObjects
                     DrawStaticRotated
                     (
                         batcher,
+                        World.Context.Game.UO,
                         AnimationGraphic,
                         posX,
                         posY,
@@ -149,6 +150,7 @@ namespace ClassicUO.Game.GameObjects
                     DrawStaticRotated
                     (
                         batcher,
+                        World.Context.Game.UO,
                         AnimationGraphic,
                         posX,
                         posY,
@@ -167,6 +169,7 @@ namespace ClassicUO.Game.GameObjects
                     DrawStaticRotated
                     (
                         batcher,
+                        World.Context.Game.UO,
                         AnimationGraphic,
                         posX,
                         posY,
@@ -185,6 +188,7 @@ namespace ClassicUO.Game.GameObjects
                     DrawStaticRotated
                     (
                         batcher,
+                        World.Context.Game.UO,
                         AnimationGraphic,
                         posX,
                         posY,
@@ -203,6 +207,7 @@ namespace ClassicUO.Game.GameObjects
                     DrawStaticRotated
                     (
                         batcher,
+                        World.Context.Game.UO,
                         AnimationGraphic,
                         posX,
                         posY,
@@ -231,6 +236,7 @@ namespace ClassicUO.Game.GameObjects
                     DrawStaticRotated
                     (
                         batcher,
+                        World.Context.Game.UO,
                         AnimationGraphic,
                         posX,
                         posY,
@@ -247,7 +253,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (data.IsLight && Source != null)
             {
-                Client.Game.GetScene<GameScene>().AddLight(Source, Source, posX + 22, posY + 22);
+                World.Context.Game.GetScene<GameScene>().AddLight(Source, Source, posX + 22, posY + 22);
             }
 
             return true;

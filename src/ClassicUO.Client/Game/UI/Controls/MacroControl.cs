@@ -1,7 +1,8 @@
-﻿// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: BSD-2-Clause
 
 using System;
 using System.Linq;
+using ClassicUO.Game;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
@@ -29,11 +30,11 @@ namespace ClassicUO.Game.UI.Controls
             OpenMacroOptions
         }
 
-        public MacroControl(Gumps.Gump gump, string name, bool isFastAssign = false)
+        public MacroControl(Gumps.Gump gump, string name, bool isFastAssign = false) : base(gump.World.Context)
         {
             CanMove = true;
             _gump = gump;
-            _hotkeyBox = new HotkeyBox();
+            _hotkeyBox = new HotkeyBox(Context);
             _hotkeyBox.HotkeyChanged += BoxOnHotkeyChanged;
             _hotkeyBox.HotkeyCancelled += BoxOnHotkeyCancelled;
 
@@ -44,6 +45,7 @@ namespace ClassicUO.Game.UI.Controls
             (
                 new NiceButton
                 (
+                    Context,
                     0,
                     _hotkeyBox.Height + 3,
                     170,
@@ -61,6 +63,7 @@ namespace ClassicUO.Game.UI.Controls
                 (
                     new NiceButton
                     (
+                        Context,
                         0,
                         _hotkeyBox.Height + 30,
                         50,
@@ -75,6 +78,7 @@ namespace ClassicUO.Game.UI.Controls
                 (
                     new NiceButton
                     (
+                        Context,
                         52,
                         _hotkeyBox.Height + 30,
                         50,
@@ -91,6 +95,7 @@ namespace ClassicUO.Game.UI.Controls
                 (
                     new NiceButton
                     (
+                        Context,
                         0,
                         _hotkeyBox.Height + 30,
                         170,
@@ -107,6 +112,7 @@ namespace ClassicUO.Game.UI.Controls
 
             ScrollArea area = new ScrollArea
             (
+                Context,
                 10,
                 _hotkeyBox.Bounds.Bottom + 80,
                 scrollAreaW,
@@ -116,7 +122,7 @@ namespace ClassicUO.Game.UI.Controls
 
             Add(area);
 
-            _databox = new DataBox(0, 0, 280, 280)
+            _databox = new DataBox(Context, 0, 0, 280, 280)
             {
                 WantUpdateSize = true
             };
@@ -270,7 +276,7 @@ namespace ClassicUO.Game.UI.Controls
                     }
 
                     SetupKeyByDefault();
-                    UIManager.Add(new MessageBoxGump(_gump.World, 250, 150, string.Format(ResGumps.ThisKeyCombinationAlreadyExists, macro.Name), null));
+                    _gump.World.Context.UI.Add(new MessageBoxGump(_gump.World, 250, 150, string.Format(ResGumps.ThisKeyCombinationAlreadyExists, macro.Name), null));
 
                     return;
                 }
@@ -287,7 +293,7 @@ namespace ClassicUO.Game.UI.Controls
                     }
 
                     SetupKeyByDefault();
-                    UIManager.Add(new MessageBoxGump(_gump.World, 250, 150, string.Format(ResGumps.ThisKeyCombinationAlreadyExists, macro.Name), null));
+                    _gump.World.Context.UI.Add(new MessageBoxGump(_gump.World, 250, 150, string.Format(ResGumps.ThisKeyCombinationAlreadyExists, macro.Name), null));
 
                     return;
                 }
@@ -304,7 +310,7 @@ namespace ClassicUO.Game.UI.Controls
                     }
 
                     SetupKeyByDefault();
-                    UIManager.Add(new MessageBoxGump(_gump.World, 250, 150, string.Format(ResGumps.ThisKeyCombinationAlreadyExists, macro.Name), null));
+                    _gump.World.Context.UI.Add(new MessageBoxGump(_gump.World, 250, 150, string.Format(ResGumps.ThisKeyCombinationAlreadyExists, macro.Name), null));
 
                     return;
                 }
@@ -344,13 +350,13 @@ namespace ClassicUO.Game.UI.Controls
                     RemoveLastCommand();
                     break;
                 case (int)buttonsOption.CreateNewMacro:
-                    UIManager.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == Macro)?.Dispose();
+                    _gump.World.Context.UI.Gumps.OfType<MacroButtonGump>().FirstOrDefault(s => s._macro == Macro)?.Dispose();
 
                     MacroButtonGump macroButtonGump = new MacroButtonGump(_gump.World, Macro, Mouse.Position.X, Mouse.Position.Y);
-                    UIManager.Add(macroButtonGump);
+                    _gump.World.Context.UI.Add(macroButtonGump);
                     break;
                 case (int)buttonsOption.OpenMacroOptions:
-                    UIManager.Gumps.OfType<MacroGump>().FirstOrDefault()?.Dispose();
+                    _gump.World.Context.UI.Gumps.OfType<MacroGump>().FirstOrDefault()?.Dispose();
 
                     GameActions.OpenSettings(_gump.World, 4);
                     break;
@@ -363,13 +369,14 @@ namespace ClassicUO.Game.UI.Controls
             private readonly MacroControl _control;
             private readonly string[] _items;
 
-            public MacroEntry(MacroControl control, MacroObject obj, string[] items)
+            public MacroEntry(MacroControl control, MacroObject obj, string[] items) : base(control.Context)
             {
                 _control = control;
                 _items = items;
 
                 Combobox mainBox = new Combobox
                 (
+                    Context,
                     0,
                     0,
                     200,
@@ -416,6 +423,7 @@ namespace ClassicUO.Game.UI.Controls
 
                         Combobox sub = new Combobox
                         (
+                            Context,
                             20,
                             Height,
                             180,
@@ -440,7 +448,7 @@ namespace ClassicUO.Game.UI.Controls
 
                     case 2:
 
-                        ResizePic background = new ResizePic(0x0BB8)
+                        ResizePic background = new ResizePic(0x0BB8, Context)
                         {
                             X = 16,
                             Y = Height,
@@ -452,6 +460,7 @@ namespace ClassicUO.Game.UI.Controls
 
                         StbTextBox textbox = new StbTextBox
                         (
+                            Context,
                             0xFF,
                             80,
                             236,

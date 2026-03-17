@@ -1,5 +1,6 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
@@ -85,11 +86,12 @@ namespace ClassicUO.Game
         private readonly Tooltip _tooltip;
         private readonly World _world;
 
-        public GameCursor(World world, float dpiScale)
+        public GameCursor(World world, float dpiScale, TileDataLoader tileData)
         {
             _world = world;
             _tooltip = new Tooltip(world);
             _aura = new Aura(30);
+            ItemHold = new ItemHold(tileData);
 
             CreateGraphic(dpiScale);
         }
@@ -101,7 +103,7 @@ namespace ClassicUO.Game
                 {
                     ushort id = _cursorData[i, j];
 
-                    var surface = Client.Game.UO.Arts.CreateCursorSurfacePtr(
+                    var surface = _world.Context.Game.UO.Arts.CreateCursorSurfacePtr(
                         id,
                         (ushort)(i == 2 ? 0x0033 : 0),
                         out int hotX,
@@ -141,7 +143,7 @@ namespace ClassicUO.Game
         public bool IsDraggingCursorForced { get; set; }
         public bool AllowDrawSDLCursor { get; set; } = true;
 
-        public ItemHold ItemHold { get; } = new ItemHold();
+        public ItemHold ItemHold { get; private set; }
 
         private ushort GetDraggingItemGraphic()
         {
@@ -167,16 +169,16 @@ namespace ClassicUO.Game
                 return Point.Zero;
             }
 
-            ref readonly var artInfo = ref (ItemHold.IsGumpTexture ? ref Client.Game.UO.Gumps.GetGump(graphic) : ref Client.Game.UO.Arts.GetArt(graphic));
+            ref readonly var artInfo = ref (ItemHold.IsGumpTexture ? ref _world.Context.Game.UO.Gumps.GetGump(graphic) : ref _world.Context.Game.UO.Arts.GetArt(graphic));
 
             float scale = 1;
 
             if (
-                ProfileManager.CurrentProfile != null
-                && ProfileManager.CurrentProfile.ScaleItemsInsideContainers
+                _world.Profile.CurrentProfile != null
+                && _world.Profile.CurrentProfile.ScaleItemsInsideContainers
             )
             {
-                scale = UIManager.ContainerScale;
+                scale = _world.Context.UI.ContainerScale;
             }
 
             return new Point(
@@ -193,7 +195,7 @@ namespace ClassicUO.Game
             {
                 _needGraphicUpdate = false;
 
-                if (AllowDrawSDLCursor && Settings.GlobalSettings.RunMouseInASeparateThread)
+                if (AllowDrawSDLCursor && _world.Settings.RunMouseInASeparateThread)
                 {
                     ushort id = Graphic;
 
@@ -228,11 +230,11 @@ namespace ClassicUO.Game
             }
             ushort draggingGraphic = GetDraggingItemGraphic();
 
-            if (draggingGraphic == 0xFFFF || !ItemHold.IsFixedPosition || UIManager.IsDragging)
+            if (draggingGraphic == 0xFFFF || !ItemHold.IsFixedPosition || _world.Context.UI.IsDragging)
             {
                 return;
             }
-            ref readonly var artInfo = ref (ItemHold.IsGumpTexture ? ref Client.Game.UO.Gumps.GetGump(draggingGraphic) : ref Client.Game.UO.Arts.GetArt(draggingGraphic));
+            ref readonly var artInfo = ref (ItemHold.IsGumpTexture ? ref _world.Context.Game.UO.Gumps.GetGump(draggingGraphic) : ref _world.Context.Game.UO.Arts.GetArt(draggingGraphic));
 
             Point offset = GetDraggingItemOffset();
 
@@ -261,7 +263,7 @@ namespace ClassicUO.Game
 
         public void Draw(UltimaBatcher2D sb)
         {
-            if (_world.InGame && _world.TargetManager.IsTargeting && ProfileManager.CurrentProfile != null)
+            if (_world.InGame && _world.TargetManager.IsTargeting && _world.Profile.CurrentProfile != null)
             {
                 if (_world.TargetManager.TargetingState == CursorTarget.MultiPlacement)
                 {
@@ -345,7 +347,7 @@ namespace ClassicUO.Game
                     _temp.Clear();
                 }
 
-                if (ProfileManager.CurrentProfile.AuraOnMouse)
+                if (_world.Profile.CurrentProfile.AuraOnMouse)
                 {
                     ushort id = Graphic;
 
@@ -381,9 +383,9 @@ namespace ClassicUO.Game
                     _aura.Draw(sb, Mouse.Position.X, Mouse.Position.Y, hue, 0f);
                 }
 
-                if (ProfileManager.CurrentProfile.ShowTargetRangeIndicator)
+                if (_world.Profile.CurrentProfile.ShowTargetRangeIndicator)
                 {
-                    if (UIManager.IsMouseOverWorld)
+                    if (_world.Context.UI.IsMouseOverWorld)
                     {
                         if (SelectedObject.Object is GameObject obj)
                         {
@@ -423,16 +425,16 @@ namespace ClassicUO.Game
                 float scale = 1;
 
                 if (
-                    ProfileManager.CurrentProfile != null
-                    && ProfileManager.CurrentProfile.ScaleItemsInsideContainers
+                    _world.Profile.CurrentProfile != null
+                    && _world.Profile.CurrentProfile.ScaleItemsInsideContainers
                 )
                 {
-                    scale = UIManager.ContainerScale;
+                    scale = _world.Context.UI.ContainerScale;
                 }
 
                 ushort draggingGraphic = GetDraggingItemGraphic();
 
-                ref readonly var artInfo = ref (ItemHold.IsGumpTexture ? ref Client.Game.UO.Gumps.GetGump(draggingGraphic) : ref Client.Game.UO.Arts.GetArt(draggingGraphic));
+                ref readonly var artInfo = ref (ItemHold.IsGumpTexture ? ref _world.Context.Game.UO.Gumps.GetGump(draggingGraphic) : ref _world.Context.Game.UO.Arts.GetArt(draggingGraphic));
 
                 if (artInfo.Texture != null)
                 {
@@ -474,7 +476,7 @@ namespace ClassicUO.Game
 
             DrawToolTip(sb, Mouse.Position);
 
-            if (!Settings.GlobalSettings.RunMouseInASeparateThread)
+            if (!_world.Settings.RunMouseInASeparateThread)
             {
                 Graphic = AssignGraphicByState();
 
@@ -503,7 +505,7 @@ namespace ClassicUO.Game
                     hueVec = ShaderHueTranslator.GetHueVector(0);
                 }
 
-                ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(Graphic);
+                ref readonly var artInfo = ref _world.Context.Game.UO.Arts.GetArt(Graphic);
 
                 var rect = artInfo.UV;
 
@@ -525,7 +527,7 @@ namespace ClassicUO.Game
 
         private void DrawToolTip(UltimaBatcher2D batcher, Point position)
         {
-            if (Client.Game.Scene is GameScene gs)
+            if (_world.Context.Game.Scene is GameScene gs)
             {
                 if (
                     !_world.ClientFeatures.TooltipsEnabled
@@ -544,7 +546,7 @@ namespace ClassicUO.Game
                 {
                     if (
                         !_tooltip.IsEmpty
-                        && (UIManager.MouseOverControl == null || UIManager.IsMouseOverWorld)
+                        && (_world.Context.UI.MouseOverControl == null || _world.Context.UI.IsMouseOverWorld)
                     )
                     {
                         _tooltip.Clear();
@@ -553,7 +555,7 @@ namespace ClassicUO.Game
                 else
                 {
                     if (
-                        UIManager.IsMouseOverWorld
+                        _world.Context.UI.IsMouseOverWorld
                         && SelectedObject.Object is Entity item
                         && _world.OPL.Contains(item)
                     )
@@ -569,8 +571,8 @@ namespace ClassicUO.Game
                     }
 
                     if (
-                        UIManager.MouseOverControl != null
-                        && UIManager.MouseOverControl.Tooltip is uint serial
+                        _world.Context.UI.MouseOverControl != null
+                        && _world.Context.UI.MouseOverControl.Tooltip is uint serial
                     )
                     {
                         if (SerialHelper.IsValid(serial) && _world.OPL.Contains(serial))
@@ -589,16 +591,16 @@ namespace ClassicUO.Game
             }
 
             if (
-                UIManager.MouseOverControl != null
-                && UIManager.MouseOverControl.HasTooltip
+                _world.Context.UI.MouseOverControl != null
+                && _world.Context.UI.MouseOverControl.HasTooltip
                 && !Mouse.IsDragging
             )
             {
-                if (UIManager.MouseOverControl.Tooltip is string text)
+                if (_world.Context.UI.MouseOverControl.Tooltip is string text)
                 {
                     if (_tooltip.IsEmpty || _tooltip.Text != text)
                     {
-                        _tooltip.SetText(text, UIManager.MouseOverControl.TooltipMaxLength);
+                        _tooltip.SetText(text, _world.Context.UI.MouseOverControl.TooltipMaxLength);
                     }
 
                     _tooltip.Draw(batcher, position.X, position.Y + 24);
@@ -619,7 +621,7 @@ namespace ClassicUO.Game
                 return _cursorData[war, 12];
             }
 
-            if (UIManager.IsDragging || IsDraggingCursorForced)
+            if (_world.Context.UI.IsDragging || IsDraggingCursorForced)
             {
                 return _cursorData[war, 8];
             }
@@ -630,9 +632,9 @@ namespace ClassicUO.Game
             }
 
             if (
-                UIManager.MouseOverControl != null
-                && UIManager.MouseOverControl.AcceptKeyboardInput
-                && UIManager.MouseOverControl.IsEditable
+                _world.Context.UI.MouseOverControl != null
+                && _world.Context.UI.MouseOverControl.AcceptKeyboardInput
+                && _world.Context.UI.MouseOverControl.IsEditable
             )
             {
                 return _cursorData[war, 14];
@@ -640,17 +642,17 @@ namespace ClassicUO.Game
 
             ushort result = _cursorData[war, 9];
 
-            if (!UIManager.IsMouseOverWorld)
+            if (!_world.Context.UI.IsMouseOverWorld)
             {
                 return result;
             }
 
-            if (ProfileManager.CurrentProfile == null)
+            if (_world.Profile.CurrentProfile == null)
             {
                 return result;
             }
 
-            var camera = Client.Game.Scene.Camera;
+            var camera = _world.Context.Game.Scene.Camera;
 
             int windowCenterX = camera.Bounds.X + (camera.Bounds.Width >> 1);
             int windowCenterY = camera.Bounds.Y + (camera.Bounds.Height >> 1);

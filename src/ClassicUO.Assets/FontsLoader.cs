@@ -423,7 +423,7 @@ namespace ClassicUO.Assets
             public FastList<WebLinkRect> Links;
             public uint HtmlBackgroundColor;
 
-            public static FontInfo Empty = new FontInfo() { Data = null };
+            public static readonly FontInfo Empty = new FontInfo() { Data = null };
         }
 
         public FontInfo GenerateASCII(
@@ -1715,6 +1715,10 @@ namespace ClassicUO.Assets
 
             height += _htmlStatus.Margins.Y + _htmlStatus.Margins.Height + 4;
             int blocksize = height * width;
+            if (blocksize < 0)
+            {
+
+            }
             uint[] pData = new uint[blocksize]; // System.Buffers.ArrayPool<uint>.Shared.Rent(blocksize);
 
             try

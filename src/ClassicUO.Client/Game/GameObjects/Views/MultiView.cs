@@ -62,7 +62,7 @@ namespace ClassicUO.Game.GameObjects
             ushort graphic = Graphic;
             bool partial = ItemData.IsPartialHue;
 
-            Profile currentProfile = ProfileManager.CurrentProfile;
+            Profile currentProfile = World.Profile.CurrentProfile;
 
             if (currentProfile.HighlightGameObjects && SelectedObject.Object == this)
             {
@@ -91,11 +91,11 @@ namespace ClassicUO.Game.GameObjects
             posX += (int)Offset.X;
             posY += (int)(Offset.Y + Offset.Z);
 
-            DrawStaticAnimated(batcher, graphic, posX, posY, hueVec, false, depth);
+            DrawStaticAnimated(batcher, World.Context.Game.UO, graphic, posX, posY, hueVec, false, depth);
 
             if (ItemData.IsLight && !InChunkMesh)
             {
-                Client.Game.GetScene<GameScene>().AddLight(this, this, posX + 22, posY + 22);
+                World.Context.Game.GetScene<GameScene>().AddLight(this, this, posX + 22, posY + 22);
             }
 
             return true;
@@ -108,7 +108,7 @@ namespace ClassicUO.Game.GameObjects
                     SelectedObject.Object == this
                     || IsHousePreview
                     || FoliageIndex != -1
-                        && Client.Game.GetScene<GameScene>().FoliageIndex == FoliageIndex
+                        && World.Context.Game.GetScene<GameScene>().FoliageIndex == FoliageIndex
                 )
             )
             {
@@ -128,13 +128,13 @@ namespace ClassicUO.Game.GameObjects
                     }
                 }
 
-                ref UOFileIndex index = ref Client.Game.UO.FileManager.Arts.File.GetValidRefEntry(Graphic + 0x4000);
+                ref UOFileIndex index = ref World.Context.Game.UO.FileManager.Arts.File.GetValidRefEntry(Graphic + 0x4000);
 
                 Point position = RealScreenPosition;
                 position.X -= index.Width;
                 position.Y -= index.Height;
 
-                return Client.Game.UO.Arts.PixelCheck(
+                return World.Context.Game.UO.Arts.PixelCheck(
                     Graphic,
                     SelectedObject.TranslatedMousePositionByViewport.X - position.X,
                     SelectedObject.TranslatedMousePositionByViewport.Y - position.Y

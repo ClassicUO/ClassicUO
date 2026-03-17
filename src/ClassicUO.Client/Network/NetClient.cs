@@ -11,7 +11,7 @@ using ClassicUO.Network.Socket;
 
 namespace ClassicUO.Network
 {
-    internal sealed class NetClient
+    internal sealed class NetClient : INetworkClient
     {
         private const int BUFF_SIZE = 0x10000;
 
@@ -32,7 +32,6 @@ namespace ClassicUO.Network
             _sendStream = new CircularBuffer();
         }
 
-        public static NetClient Socket { get; private set; } = new();
 
         public EncryptionType Load(ClientVersion clientVersion, EncryptionType encryption)
         {

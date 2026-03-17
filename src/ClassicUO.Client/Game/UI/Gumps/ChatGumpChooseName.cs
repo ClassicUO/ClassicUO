@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BSD-2-Clause
+﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Network;
@@ -25,7 +25,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new AlphaBlendControl
+                new AlphaBlendControl(World.Context)
                 {
                     Alpha = 1f,
                     Width = Width,
@@ -36,7 +36,8 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new BorderControl
-                (
+                    (
+                        World.Context,
                     0,
                     0,
                     Width,
@@ -46,7 +47,7 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             Label text = new Label
-            (
+            (World.Context, 
                 ResGumps.ChooseName,
                 true,
                 23,
@@ -63,7 +64,8 @@ namespace ClassicUO.Game.UI.Gumps
             int BORDER_SIZE = 4;
 
             BorderControl border = new BorderControl
-            (
+                (
+                    World.Context,
                 0,
                 text.Y + text.Height,
                 Width,
@@ -74,7 +76,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(border);
 
             text = new Label
-            (
+            (World.Context, 
                 ResGumps.Name,
                 true,
                 0x033,
@@ -91,7 +93,7 @@ namespace ClassicUO.Game.UI.Gumps
             int x = text.X + text.Width + 2;
 
             _textBox = new StbTextBox
-            (
+            (World.Context, 
                 1,
                 -1,
                 Width - x - 17,
@@ -111,7 +113,8 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new BorderControl
-                (
+                    (
+                        World.Context,
                     0,
                     text.Y + text.Height,
                     Width,
@@ -123,7 +126,7 @@ namespace ClassicUO.Game.UI.Gumps
             // close
             Add
             (
-                new Button(0, 0x0A94, 0x0A95, 0x0A94)
+                new Button(World.Context, 0, 0x0A94, 0x0A95, 0x0A94)
                 {
                     X = Width - 19 - BORDER_SIZE,
                     Y = Height - 19 - BORDER_SIZE * 1,
@@ -134,7 +137,7 @@ namespace ClassicUO.Game.UI.Gumps
             // ok
             Add
             (
-                new Button(1, 0x0A9A, 0x0A9B, 0x0A9A)
+                new Button(World.Context, 1, 0x0A9A, 0x0A9B, 0x0A9A)
                 {
                     X = Width - 19 * 2 - BORDER_SIZE,
                     Y = Height - 19 - BORDER_SIZE * 1,
@@ -153,7 +156,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 if (!string.IsNullOrWhiteSpace(_textBox.Text))
                 {
-                    NetClient.Socket.Send_OpenChat(_textBox.Text);
+                    World.Network.Send_OpenChat(_textBox.Text);
                 }
             }
 

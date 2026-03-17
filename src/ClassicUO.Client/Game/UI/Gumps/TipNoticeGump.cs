@@ -20,7 +20,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
 
             _scrollArea = new ScrollArea
-            (
+            (World.Context, 
                 0,
                 32,
                 272,
@@ -28,7 +28,7 @@ namespace ClassicUO.Game.UI.Gumps
                 false
             );
 
-            _textBox = new StbTextBox(6, -1, 220, isunicode: false)
+            _textBox = new StbTextBox(World.Context, 6, -1, 220, isunicode: false)
             {
                 Height = 20,
                 X = 35,
@@ -38,15 +38,15 @@ namespace ClassicUO.Game.UI.Gumps
             };
 
             _textBox.SetText(text);
-            Add(_background = new ExpandableScroll(0, 0, Height, 0x0820));
+            Add(_background = new ExpandableScroll(0, 0, Height, 0x0820, World.Context));
             _scrollArea.Add(_textBox);
             Add(_scrollArea);
 
             if (type == 0)
             {
                 _background.TitleGumpID = 0x9CA;
-                Add(new Button(1, 0x9cc, 0x9cc) { X = 35, ContainsByBounds = true, ButtonAction = ButtonAction.Activate });
-                Add(new Button(2, 0x9cd, 0x9cd) { X = 240, ContainsByBounds = true, ButtonAction = ButtonAction.Activate });
+                Add(new Button(World.Context, 1, 0x9cc, 0x9cc) { X = 35, ContainsByBounds = true, ButtonAction = ButtonAction.Activate });
+                Add(new Button(World.Context, 2, 0x9cd, 0x9cd) { X = 240, ContainsByBounds = true, ButtonAction = ButtonAction.Activate });
             }
             else
             {
@@ -68,13 +68,13 @@ namespace ClassicUO.Game.UI.Gumps
             switch (buttonID)
             {
                 case 1: // prev
-                    NetClient.Socket.Send_TipRequest((ushort)LocalSerial, 0);
+                    World.Network.Send_TipRequest((ushort)LocalSerial, 0);
                     Dispose();
 
                     break;
 
                 case 2: // next
-                    NetClient.Socket.Send_TipRequest((ushort)LocalSerial, 1);
+                    World.Network.Send_TipRequest((ushort)LocalSerial, 1);
 
                     Dispose();
 

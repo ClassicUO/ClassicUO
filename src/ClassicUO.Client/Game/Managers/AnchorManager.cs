@@ -12,6 +12,13 @@ namespace ClassicUO.Game.Managers
 {
     internal sealed class AnchorManager
     {
+        private readonly IUIManager _ui;
+
+        public AnchorManager(IUIManager ui)
+        {
+            _ui = ui;
+        }
+
         private static readonly Vector2[][] _anchorTriangles =
         {
             new[] { new Vector2(0f, 0f), new Vector2(0.5f, 0.5f), new Vector2(0f, 1f) },
@@ -212,7 +219,7 @@ namespace ClassicUO.Game.Managers
             AnchorableGump closestControl = null;
             int closestDistance = 99999;
 
-            foreach (Gump c in UIManager.Gumps)
+            foreach (Gump c in _ui.Gumps)
             {
                 if (!c.IsDisposed && c is AnchorableGump host && host.AnchorType == control.AnchorType)
                 {
@@ -315,7 +322,7 @@ namespace ClassicUO.Game.Managers
                 writer.WriteEndElement();
             }
 
-            public void MakeTopMost()
+            public void MakeTopMost(IUIManager ui)
             {
                 for (int x = 0; x < controlMatrix.GetLength(0); x++)
                 {
@@ -323,7 +330,7 @@ namespace ClassicUO.Game.Managers
                     {
                         if (controlMatrix[x, y] != null)
                         {
-                            UIManager.MakeTopMostGump(controlMatrix[x, y]);
+                            ui.MakeTopMostGump(controlMatrix[x, y]);
                         }
                     }
                 }

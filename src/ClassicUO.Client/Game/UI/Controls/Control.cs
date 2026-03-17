@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.Game;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
@@ -28,8 +30,9 @@ namespace ClassicUO.Game.UI.Controls
         private Point _offset;
         private Control _parent;
 
-        protected Control(Control parent = null)
+        protected Control(GameContext context, Control parent = null)
         {
+            Context = context;
             Parent = parent;
             Children = new List<Control>();
             AllowedToDraw = true;
@@ -71,9 +74,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool IsEnabled { get; set; }
 
-        public bool HasKeyboardFocus => UIManager.KeyboardFocusControl == this;
+        public bool HasKeyboardFocus => Context?.UI?.KeyboardFocusControl == this;
 
-        public bool MouseIsOver => UIManager.MouseOverControl == this;
+        public bool MouseIsOver => Context?.UI?.MouseOverControl == this;
 
         public bool CanMove { get; set; }
 
@@ -163,6 +166,8 @@ namespace ClassicUO.Game.UI.Controls
                 return p;
             }
         }
+
+        public GameContext Context { get; }
 
         public UILayer LayerOrder { get; set; } = UILayer.Default;
         public bool IsModal { get; set; }
@@ -353,7 +358,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public void BringOnTop()
         {
-            UIManager.MakeTopMostGump(this);
+            Context?.UI?.MakeTopMostGump(this);
         }
 
         public void SetTooltip(string text, int maxWidth = 0)
@@ -382,7 +387,7 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (AcceptKeyboardInput && !HasKeyboardFocus)
             {
-                UIManager.KeyboardFocusControl = this;
+                if (Context?.UI != null) Context.UI.KeyboardFocusControl = this;
             }
         }
 

@@ -77,10 +77,11 @@ namespace ClassicUO.Game.GameObjects
 
             string dmgString = damage.ToString();
 
-            if (ProfileManager.CurrentProfile.ShowDPSWithDamageNumbers && Parent != null)
+            if (_world.Profile.CurrentProfile.ShowDPSWithDamageNumbers && Parent != null)
                 dmgString += $" (DPS: {Parent.GetCurrentDPS()})";
 
             text_obj.RenderedText = RenderedText.Create(
+                _world.Context.Game.UO,
                 dmgString,
                 (ushort)(ReferenceEquals(Parent, _world.Player) ? 0x0034 : 0x0021),
                 3,
@@ -166,7 +167,7 @@ namespace ClassicUO.Game.GameObjects
                         offY = -22;
                     }
 
-                    Client.Game.UO.Animations.GetAnimationDimensions(
+                    _world.Context.Game.UO.Animations.GetAnimationDimensions(
                         m.AnimIndex,
                         m.GetGraphicForAnimation(),
                         /*(byte) m.GetDirectionForAnimation()*/
@@ -187,7 +188,7 @@ namespace ClassicUO.Game.GameObjects
                 }
                 else
                 {
-                    ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(Parent.Graphic);
+                    ref readonly var artInfo = ref _world.Context.Game.UO.Arts.GetArt(Parent.Graphic);
 
                     if (artInfo.Texture != null)
                     {
@@ -211,7 +212,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            p = Client.Game.Scene.Camera.WorldToScreen(p, true);
+            p = _world.Context.Game.Scene.Camera.WorldToScreen(p, true);
 
             foreach (TextObject item in _messages)
             {

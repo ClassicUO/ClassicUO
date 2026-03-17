@@ -148,7 +148,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public ref StaticTiles ItemData =>
-            ref Client.Game.UO.FileManager.TileData.StaticData[IsMulti ? MultiGraphic : Graphic];
+            ref World.Context.Game.UO.FileManager.TileData.StaticData[IsMulti ? MultiGraphic : Graphic];
 
         public bool IsLootable =>
             ItemData.Layer != (int)Layer.Hair
@@ -187,17 +187,17 @@ namespace ClassicUO.Game.GameObjects
 
             if (Opened)
             {
-                UIManager.GetGump<ContainerGump>(Serial)?.Dispose();
-                UIManager.GetGump<SpellbookGump>(Serial)?.Dispose();
-                UIManager.GetGump<MapGump>(Serial)?.Dispose();
+                World.Context.UI.GetGump<ContainerGump>(Serial)?.Dispose();
+                World.Context.UI.GetGump<SpellbookGump>(Serial)?.Dispose();
+                World.Context.UI.GetGump<MapGump>(Serial)?.Dispose();
 
                 if (IsCorpse)
                 {
-                    UIManager.GetGump<GridLootGump>(Serial)?.Dispose();
+                    World.Context.UI.GetGump<GridLootGump>(Serial)?.Dispose();
                 }
 
-                UIManager.GetGump<BulletinBoardGump>(Serial)?.Dispose();
-                UIManager.GetGump<SplitMenuGump>(Serial)?.Dispose();
+                World.Context.UI.GetGump<BulletinBoardGump>(Serial)?.Dispose();
+                World.Context.UI.GetGump<SplitMenuGump>(Serial)?.Dispose();
 
                 Opened = false;
             }
@@ -227,7 +227,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             var movable = false;
-            var multis = Client.Game.UO.FileManager.Multis.GetMultis(Graphic);
+            var multis = World.Context.Game.UO.FileManager.Multis.GetMultis(Graphic);
 
             for (var i = 0; i < multis.Count; ++i)
             {
@@ -309,11 +309,11 @@ namespace ClassicUO.Game.GameObjects
 
             house.Bounds = MultiInfo.Value;
 
-            UIManager.GetGump<MiniMapGump>()?.RequestUpdateContents();
+            World.Context.UI.GetGump<MiniMapGump>()?.RequestUpdateContents();
 
             if (World.HouseManager.EntityIntoHouse(Serial, World.Player))
             {
-                Client.Game.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
+                World.Context.Game.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
             }
 
             World.BoatMovingManager.ClearSteps(Serial);
@@ -433,13 +433,13 @@ namespace ClassicUO.Game.GameObjects
             {
                 Point p = RealScreenPosition;
 
-                var bounds = Client.Game.UO.Arts.GetRealArtBounds(Graphic);
+                var bounds = World.Context.Game.UO.Arts.GetRealArtBounds(Graphic);
                 p.Y -= bounds.Height >> 1;
 
                 p.X += (int)Offset.X + 22;
                 p.Y += (int)(Offset.Y - Offset.Z) + 22;
 
-                p = Client.Game.Scene.Camera.WorldToScreen(p, true);
+                p = World.Context.Game.Scene.Camera.WorldToScreen(p, true);
 
                 for (; last != null; last = (TextObject)last.Previous)
                 {
@@ -497,7 +497,7 @@ namespace ClassicUO.Game.GameObjects
 
                 bool mirror = false;
 
-                var animations = Client.Game.UO.Animations;
+                var animations = World.Context.Game.UO.Animations;
                 animations.GetAnimDirection(ref dir, ref mirror);
 
                 if (id < animations.MaxAnimationCount && dir < 5)
@@ -505,7 +505,7 @@ namespace ClassicUO.Game.GameObjects
                     animations.ConvertBodyIfNeeded(ref id);
                     var animGroup = animations.GetAnimType(id);
                     var animFlags = animations.GetAnimFlags(id);
-                    byte action = Client.Game.UO.FileManager.Animations.GetDeathAction(
+                    byte action = World.Context.Game.UO.FileManager.Animations.GetDeathAction(
                         id,
                         animFlags,
                         animGroup,

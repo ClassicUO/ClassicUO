@@ -23,11 +23,11 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
             IsFromServer = true;
 
-            Add(new GumpPic(0, 0, 0x0910, 0));
+            Add(new GumpPic(0, 0, 0x0910, 0, World.Context));
 
-            Add(new ColorBox(217, 49, 1) { X = 40, Y = 42 });
+            Add(new ColorBox(World.Context, 217, 49, 1) { X = 40, Y = 42 });
 
-            Label label = new Label(name, false, 0x0386, 200, 1, FontStyle.Fixed)
+            Label label = new Label(World.Context, name, false, 0x0386, 200, 1, FontStyle.Fixed)
             {
                 X = 39,
                 Y = 18
@@ -35,7 +35,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(label);
 
-            _container = new ContainerHorizontal
+            _container = new ContainerHorizontal(World.Context)
             {
                 X = 40,
                 Y = 42,
@@ -47,7 +47,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_container);
 
             Add(
-                _slider = new HSliderBar(
+                _slider = new HSliderBar(World.Context, 
                     40,
                     _container.Y + _container.Height + 12,
                     217,
@@ -63,7 +63,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _container.Value = _slider.Value;
             };
 
-            HitBox left = new HitBox(25, 60, 10, 15) { Alpha = 0f };
+            HitBox left = new HitBox(World.Context, 25, 60, 10, 15) { Alpha = 0f };
 
             left.MouseDown += (sender, e) =>
             {
@@ -77,7 +77,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
             Add(left);
 
-            HitBox right = new HitBox(260, 60, 10, 15) { Alpha = 0f };
+            HitBox right = new HitBox(World.Context, 260, 60, 10, 15) { Alpha = 0f };
 
             right.MouseDown += (sender, e) =>
             {
@@ -104,7 +104,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void AddItem(ushort graphic, ushort hue, string name, int x, int y, int index)
         {
-            var view = new ItemView(graphic, hue)
+            var view = new ItemView(World.Context, graphic, hue)
             {
                 X = x,
                 Y = y
@@ -112,7 +112,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             view.MouseDoubleClick += (sender, e) =>
             {
-                NetClient.Socket.Send_MenuResponse(
+                World.Network.Send_MenuResponse(
                     LocalSerial,
                     (ushort)ServerSerial,
                     index,
@@ -135,7 +135,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.CloseWithRightClick();
 
-            NetClient.Socket.Send_MenuResponse(LocalSerial, (ushort)ServerSerial, 0, 0, 0);
+            World.Network.Send_MenuResponse(LocalSerial, (ushort)ServerSerial, 0, 0, 0);
         }
 
         class ItemView : Control
@@ -144,19 +144,19 @@ namespace ClassicUO.Game.UI.Gumps
             private readonly ushort _hue;
             private readonly bool _isPartial;
 
-            public ItemView(ushort graphic, ushort hue)
+            public ItemView(GameContext context, ushort graphic, ushort hue) : base(context)
             {
                 AcceptMouseInput = true;
                 WantUpdateSize = true;
 
                 _graphic = graphic;
 
-                ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(_graphic);
+                ref readonly var artInfo = ref Context.Game.UO.Arts.GetArt(_graphic);
 
                 Width = artInfo.UV.Width;
                 Height = artInfo.UV.Height;
                 _hue = hue;
-                _isPartial = Client.Game.UO.FileManager.TileData.StaticData[graphic].IsPartialHue;
+                _isPartial = Context.Game.UO.FileManager.TileData.StaticData[graphic].IsPartialHue;
             }
 
             public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
@@ -168,7 +168,7 @@ namespace ClassicUO.Game.UI.Gumps
                     (
                         (batcher) =>
                         {
-                            ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(_graphic);
+                            ref readonly var artInfo = ref Context.Game.UO.Arts.GetArt(_graphic);
 
                             Vector3 hueVector = ShaderHueTranslator.GetHueVector(_hue, _isPartial, 1f);
 
@@ -184,6 +184,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private class ContainerHorizontal : Control
         {
+            public ContainerHorizontal(GameContext context) : base(context) { }
             private int _value;
 
             public int Value
@@ -279,11 +280,11 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = false;
             IsFromServer = true;
 
-            Add(_resizePic = new ResizePic(0x13EC) { Width = 400, Height = 111111 });
+            Add(_resizePic = new ResizePic(0x13EC, World.Context) { Width = 400, Height = 111111 });
 
             Label l;
 
-            Add(l = new Label(name, false, 0x0386, 370, 1) { X = 20, Y = 16 });
+            Add(l = new Label(World.Context, name, false, 0x0386, 370, 1) { X = 20, Y = 16 });
 
             Width = _resizePic.Width;
             Height = l.Height;
@@ -298,7 +299,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public int AddItem(string name, int y)
         {
-            RadioButton radio = new RadioButton(0, 0x138A, 0x138B, name, 1, 0x0386, false, 330)
+            RadioButton radio = new RadioButton(World.Context, 0, 0x138A, 0x138B, name, 1, 0x0386, false, 330)
             {
                 X = 50,
                 Y = y
@@ -314,7 +315,7 @@ namespace ClassicUO.Game.UI.Gumps
             switch (buttonID)
             {
                 case 0: // cancel
-                    NetClient.Socket.Send_GrayMenuResponse(LocalSerial, (ushort)ServerSerial, 0);
+                    World.Network.Send_GrayMenuResponse(LocalSerial, (ushort)ServerSerial, 0);
 
                     Dispose();
 
@@ -328,7 +329,7 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         if (radioButton.IsChecked)
                         {
-                            NetClient.Socket.Send_GrayMenuResponse(
+                            World.Network.Send_GrayMenuResponse(
                                 LocalSerial,
                                 (ushort)ServerSerial,
                                 index

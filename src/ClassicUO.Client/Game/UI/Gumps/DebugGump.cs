@@ -43,7 +43,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                _alphaBlendControl = new AlphaBlendControl(.7f)
+                _alphaBlendControl = new AlphaBlendControl(World.Context, .7f)
                 {
                     Width = Width, Height = Height
                 }
@@ -83,7 +83,7 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _timeToUpdate = Time.Ticks + 100;
 
-                GameScene scene = Client.Game.GetScene<GameScene>();
+                GameScene scene = World.Context.Game.GetScene<GameScene>();
                 Span<char> span = stackalloc char[256];
                 ValueStringBuilder sb = new ValueStringBuilder(span);
 
@@ -100,7 +100,7 @@ namespace ClassicUO.Game.UI.Gumps
                          )
                      );
 
-                    sb.Append($"- CUO version: {CUOEnviroment.Version}, Client version: {Settings.GlobalSettings.ClientVersion}\n");
+                    sb.Append($"- CUO version: {CUOEnviroment.Version}, Client version: {World.Settings.ClientVersion}\n");
 
                     //_sb.AppendFormat(DEBUG_STRING_1, Engine.DebugInfo.MobilesRendered, Engine.DebugInfo.ItemsRendered, Engine.DebugInfo.StaticsRendered, Engine.DebugInfo.MultiRendered, Engine.DebugInfo.LandsRendered, Engine.DebugInfo.EffectsRendered);
                     sb.Append(string.Format(DEBUG_STRING_2, World.InGame ? $"{World.Player.X}, {World.Player.Y}, {World.Player.Z}" : "0xFFFF, 0xFFFF, 0", Mouse.Position, SelectedObject.Object is GameObject gobj ? $"{gobj.X}, {gobj.Y}, {gobj.Z}" : "0xFFFF, 0xFFFF, 0"));

@@ -1,10 +1,12 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.Game;
+
 namespace ClassicUO.Game.UI.Controls
 {
     internal class DataBox : Control
     {
-        public DataBox(int x, int y, int w, int h)
+        public DataBox(GameContext context, int x, int y, int w, int h) : base(context)
         {
             CanMove = false;
             AcceptMouseInput = true;

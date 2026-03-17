@@ -49,15 +49,15 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
         {
             Add
             (
-                new ResizePic(0x0E10)
+                new ResizePic(0x0E10, World.Context)
                 {
                     X = 82, Y = 125, Width = 151, Height = 310
                 },
                 1
             );
 
-            Add(new GumpPic(280, 53, 0x0709, 0), 1);
-            Add(new GumpPic(240, 73, 0x070A, 0), 1);
+            Add(new GumpPic(280, 53, 0x0709, 0, World.Context), 1);
+            Add(new GumpPic(240, 73, 0x070A, 0, World.Context), 1);
 
             Add
             (
@@ -67,17 +67,17 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                     73,
                     215,
                     16,
-                    0x070B
+                    0x070B, World.Context
                 ),
                 1
             );
 
-            Add(new GumpPic(463, 73, 0x070C, 0), 1);
-            Add(new GumpPic(238, 98, 0x0708, 0), 1);
+            Add(new GumpPic(463, 73, 0x070C, 0, World.Context), 1);
+            Add(new GumpPic(238, 98, 0x0708, 0, World.Context), 1);
 
             Add
             (
-                new ResizePic(0x0E10)
+                new ResizePic(0x0E10, World.Context)
                 {
                     X = 475, Y = 125, Width = 151, Height = 310
                 },
@@ -87,7 +87,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             // Male/Female Radios
             Add
             (
-                _maleRadio = new Button((int)Buttons.MaleButton, 0x0768, 0x0767)
+                _maleRadio = new Button(World.Context, (int)Buttons.MaleButton, 0x0768, 0x0767)
                 {
                     X = 425, Y = 435, ButtonAction = ButtonAction.Activate
                 },
@@ -96,7 +96,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                _femaleRadio = new Button((int)Buttons.FemaleButton, 0x0768, 0x0767)
+                _femaleRadio = new Button(World.Context, (int)Buttons.FemaleButton, 0x0768, 0x0767)
                 {
                     X = 425, Y = 455, ButtonAction = ButtonAction.Activate
                 },
@@ -105,7 +105,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                new Button((int) Buttons.MaleButton, 0x0710, 0x0712, 0x0711)
+                new Button(World.Context, (int) Buttons.MaleButton, 0x0710, 0x0712, 0x0711)
                 {
                     X = 445, Y = 435, ButtonAction = ButtonAction.Activate
                 },
@@ -114,7 +114,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                new Button((int) Buttons.FemaleButton, 0x070D, 0x070F, 0x070E)
+                new Button(World.Context, (int) Buttons.FemaleButton, 0x070D, 0x070F, 0x070E)
                 {
                     X = 445, Y = 455, ButtonAction = ButtonAction.Activate
                 },
@@ -124,7 +124,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             Add
             (
                 _nameTextBox = new StbTextBox
-                (
+                (World.Context, 
                     5,
                     16,
                     200,
@@ -142,7 +142,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             // Races
             Add
             (
-                _humanRadio = new Button((int)Buttons.HumanButton, 0x0768, 0x0767)
+                _humanRadio = new Button(World.Context, (int)Buttons.HumanButton, 0x0768, 0x0767)
                 {
                     X = 180, Y = 435, ButtonAction = ButtonAction.Activate
                 },
@@ -151,7 +151,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                new Button((int) Buttons.HumanButton, 0x0702, 0x0704, 0x0703)
+                new Button(World.Context, (int) Buttons.HumanButton, 0x0702, 0x0704, 0x0703)
                 {
                     X = 200, Y = 435, ButtonAction = ButtonAction.Activate
                 },
@@ -160,7 +160,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                _elfRadio = new Button((int)Buttons.ElfButton, 0x0768, 0x0767, 0x0768)
+                _elfRadio = new Button(World.Context, (int)Buttons.ElfButton, 0x0768, 0x0767, 0x0768)
                 {
                     X = 180, Y = 455, ButtonAction = ButtonAction.Activate
                 },
@@ -169,18 +169,18 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                new Button((int) Buttons.ElfButton, 0x0705, 0x0707, 0x0706)
+                new Button(World.Context, (int) Buttons.ElfButton, 0x0705, 0x0707, 0x0706)
                 {
                     X = 200, Y = 455, ButtonAction = ButtonAction.Activate
                 },
                 1
             );
 
-            if (Client.Game.UO.Version >= ClientVersion.CV_60144)
+            if (World.Context.Game.UO.Version >= ClientVersion.CV_60144)
             {
                 Add
                 (
-                    _gargoyleRadio = new Button((int)Buttons.GargoyleButton, 0x0768, 0x0767)
+                    _gargoyleRadio = new Button(World.Context, (int)Buttons.GargoyleButton, 0x0768, 0x0767)
                     {
                         X = 60, Y = 435, ButtonAction = ButtonAction.Activate
                     },
@@ -189,7 +189,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 Add
                 (
-                    new Button((int) Buttons.GargoyleButton, 0x07D3, 0x07D5, 0x07D4)
+                    new Button(World.Context, (int) Buttons.GargoyleButton, 0x07D3, 0x07D5, 0x07D4)
                     {
                         X = 80, Y = 435, ButtonAction = ButtonAction.Activate
                     },
@@ -200,7 +200,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             // Prev/Next
             Add
             (
-                new Button((int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
+                new Button(World.Context, (int) Buttons.Prev, 0x15A1, 0x15A3, 0x15A2)
                 {
                     X = 586, Y = 445, ButtonAction = ButtonAction.Activate
                 },
@@ -209,7 +209,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                _nextButton = new Button((int) Buttons.Next, 0x15A4, 0x15A6, 0x15A5)
+                _nextButton = new Button(World.Context, (int) Buttons.Next, 0x15A4, 0x15A6, 0x15A5)
                 {
                     X = 610, Y = 445, ButtonAction = ButtonAction.Activate
                 },
@@ -346,7 +346,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             if (!_characterInfo.IsFemale && race != RaceType.ELF)
             {
                 layer = Layer.Beard;
-                content = CharacterCreationValues.GetFacialHairComboContent(race);
+                content = CharacterCreationValues.GetFacialHairComboContent(World.Context.Game.UO.FileManager.Clilocs, race);
 
                 Item iti = CreateItem(content.GetGraphic(CurrentOption[layer]), CurrentColorOption[layer].Item2, layer);
 
@@ -354,7 +354,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }
 
             layer = Layer.Hair;
-            content = CharacterCreationValues.GetHairComboContent(_characterInfo.IsFemale, race);
+            content = CharacterCreationValues.GetHairComboContent(World.Context.Game.UO.FileManager.Clilocs, _characterInfo.IsFemale, race);
 
             Item it = CreateItem(content.GetGraphic(CurrentOption[layer]), CurrentColorOption[layer].Item2, layer);
 
@@ -419,11 +419,11 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             }
 
             // Hair
-            CharacterCreationValues.ComboContent content = CharacterCreationValues.GetHairComboContent(_characterInfo.IsFemale, race);
+            CharacterCreationValues.ComboContent content = CharacterCreationValues.GetHairComboContent(World.Context.Game.UO.FileManager.Clilocs, _characterInfo.IsFemale, race);
 
-            bool isAsianLang = string.Compare(Settings.GlobalSettings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 ||
-                string.Compare(Settings.GlobalSettings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
-                string.Compare(Settings.GlobalSettings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
+            bool isAsianLang = string.Compare(World.Settings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 ||
+                string.Compare(World.Settings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
+                string.Compare(World.Settings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
 
             bool unicode = isAsianLang;
             byte font = (byte)(isAsianLang ? 3 : 9);
@@ -431,7 +431,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
             Add
             (
-                _hairLabel = new Label(Client.Game.UO.FileManager.Clilocs.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), unicode, hue, font: font)
+                _hairLabel = new Label(World.Context, World.Context.Game.UO.FileManager.Clilocs.GetString(race == RaceType.GARGOYLE ? 1112309 : 3000121), unicode, hue, font: font)
                 {
                     X = 98, Y = 140
                 },
@@ -441,7 +441,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             Add
             (
                 _hairCombobox = new Combobox
-                (
+                (World.Context, 
                     97,
                     155,
                     120,
@@ -456,11 +456,11 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             // Facial Hair
             if (!_characterInfo.IsFemale && race != RaceType.ELF)
             {
-                content = CharacterCreationValues.GetFacialHairComboContent(race);
+                content = CharacterCreationValues.GetFacialHairComboContent(World.Context.Game.UO.FileManager.Clilocs, race);
 
                 Add
                 (
-                    _facialLabel = new Label(Client.Game.UO.FileManager.Clilocs.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), unicode, hue, font: font)
+                    _facialLabel = new Label(World.Context, World.Context.Game.UO.FileManager.Clilocs.GetString(race == RaceType.GARGOYLE ? 1112511 : 3000122), unicode, hue, font: font)
                     {
                         X = 98, Y = 184
                     },
@@ -470,7 +470,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 Add
                 (
                     _facialCombobox = new Combobox
-                    (
+                    (World.Context, 
                         97,
                         199,
                         120,
@@ -669,7 +669,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         public override void OnButtonClick(int buttonID)
         {
-            CharCreationGump charCreationGump = UIManager.GetGump<CharCreationGump>();
+            CharCreationGump charCreationGump = World.Context.UI.GetGump<CharCreationGump>();
 
             switch ((Buttons) buttonID)
             {
@@ -769,10 +769,10 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
         private bool ValidateCharacter(PlayerMobile character)
         {
-            int invalid = Validate(character.Name);
+            int invalid = Validate(character.Name, World.Context.Game.UO.Version);
             if (invalid > 0)
             {
-                UIManager.GetGump<CharCreationGump>()?.ShowMessage(Client.Game.UO.FileManager.Clilocs.GetString(invalid));
+                World.Context.UI.GetGump<CharCreationGump>()?.ShowMessage(World.Context.Game.UO.FileManager.Clilocs.GetString(invalid));
 
                 return false;
             }
@@ -782,9 +782,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             return true;
         }
 
-        public static int Validate(string name)
+        public static int Validate(string name, ClientVersion version)
         {
-            return Validate(name, 2, 16, true, false, true, 1, _SpaceDashPeriodQuote, Client.Game.UO.Version >= ClientVersion.CV_5020 ? _Disallowed : new string[] { }, _StartDisallowed);
+            return Validate(name, 2, 16, true, false, true, 1, _SpaceDashPeriodQuote, version >= ClientVersion.CV_5020 ? _Disallowed : new string[] { }, _StartDisallowed);
         }
 
         public static int Validate(string name, int minLength, int maxLength, bool allowLetters, bool allowDigits, bool noExceptionsAtStart, int maxExceptions, char[] exceptions, string[] disallowed, string[] startDisallowed)
@@ -1031,7 +1031,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
             private readonly ushort[] _pallet;
             private readonly Gump _gump;
 
-            public CustomColorPicker(Gump gump, Layer layer, int label, ushort[] pallet, int rows, int columns)
+            public CustomColorPicker(Gump gump, Layer layer, int label, ushort[] pallet, int rows, int columns) : base(gump.World.Context)
             {
                 _gump = gump;
                 Width = 121;
@@ -1043,9 +1043,9 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                 _layer = layer;
                 _pallet = pallet;
 
-                bool isAsianLang = string.Compare(Settings.GlobalSettings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 ||
-                    string.Compare(Settings.GlobalSettings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
-                    string.Compare(Settings.GlobalSettings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
+                bool isAsianLang = string.Compare(_gump.World.Settings.Language, "CHT", StringComparison.InvariantCultureIgnoreCase) == 0 ||
+                    string.Compare(_gump.World.Settings.Language, "KOR", StringComparison.InvariantCultureIgnoreCase) == 0 ||
+                    string.Compare(_gump.World.Settings.Language, "JPN", StringComparison.InvariantCultureIgnoreCase) == 0;
 
                 bool unicode = isAsianLang;
                 byte font = (byte)(isAsianLang ? 3 : 9);
@@ -1053,7 +1053,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 Add
                 (
-                    new Label(Client.Game.UO.FileManager.Clilocs.GetString(label), unicode, hue, font: font)
+                    new Label(Context, _gump.World.Context.Game.UO.FileManager.Clilocs.GetString(label), unicode, hue, font: font)
                     {
                         X = 0,
                         Y = 0
@@ -1062,7 +1062,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
 
                 Add
                 (
-                    _colorPicker = new ColorBox(121, 23, (ushort) ((pallet?[0] ?? 1) + 1))
+                    _colorPicker = new ColorBox(Context, 121, 23, (ushort) ((pallet?[0] ?? 1) + 1))
                     {
                         X = 1,
                         Y = 15
@@ -1135,7 +1135,7 @@ namespace ClassicUO.Game.UI.Gumps.CharCreation
                             SelectedIndex = _lastSelectedIndex
                         };
 
-                        UIManager.Add(_colorPickerBox);
+                        _gump.World.Context.UI.Add(_colorPickerBox);
 
                         _colorPickerBox.ColorSelectedIndex += ColorPickerBoxOnColorSelectedIndex;
                         _colorPickerBox.MouseUp += ColorPickerBoxOnMouseUp;

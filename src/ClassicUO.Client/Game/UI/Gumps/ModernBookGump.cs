@@ -56,9 +56,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         public ushort BookPageCount { get; internal set; }
         public HashSet<int> KnownPages { get; internal set; } = new HashSet<int>();
-        public static bool IsNewBook => Client.Game.UO.Version > ClientVersion.CV_200;
+        public bool IsNewBook => World.Context.Game.UO.Version > ClientVersion.CV_200;
         public bool UseNewHeader { get; set; } = true;
-        public static byte DefaultFont => (byte) (IsNewBook ? 1 : 4);
+        public byte DefaultFont => (byte) (IsNewBook ? 1 : 4);
 
         public bool IntroChanges => _pagesChanged[0];
         internal int MaxPage => (BookPageCount >> 1) + 1;
@@ -83,7 +83,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             for (int i = 0, l = BookLines.Length; i < l; i++)
             {
-                int w = IsNewBook ? Client.Game.UO.FileManager.Fonts.GetWidthUnicode(_bookPage.renderedText.Font, BookLines[i]) : Client.Game.UO.FileManager.Fonts.GetWidthASCII(_bookPage.renderedText.Font, BookLines[i]);
+                int w = IsNewBook ? World.Context.Game.UO.FileManager.Fonts.GetWidthUnicode(_bookPage.renderedText.Font, BookLines[i]) : World.Context.Game.UO.FileManager.Fonts.GetWidthASCII(_bookPage.renderedText.Font, BookLines[i]);
 
                 sb.Append(BookLines[i]);
 
@@ -111,15 +111,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                new GumpPic(0, 0, 0x1FE, 0)
+                new GumpPic(0, 0, 0x1FE, 0, World.Context)
                 {
                     CanMove = true
                 }
             );
 
-            Add(_backwardGumpPic = new GumpPic(0, 0, 0x1FF, 0));
+            Add(_backwardGumpPic = new GumpPic(0, 0, 0x1FF, 0, World.Context));
 
-            Add(_forwardGumpPic = new GumpPic(356, 0, 0x200, 0));
+            Add(_forwardGumpPic = new GumpPic(356, 0, 0x200, 0, World.Context));
 
             _forwardGumpPic.MouseUp += (sender, e) =>
             {
@@ -155,6 +155,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _bookPage = new StbPageTextBox
             (
+                World.Context,
                 DefaultFont,
                 BookPageCount,
                 this,
@@ -175,7 +176,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                _titleTextBox = new StbTextBox(DefaultFont, 47, 150, IsNewBook)
+                _titleTextBox = new StbTextBox(World.Context, DefaultFont, 47, 150, IsNewBook)
                 {
                     X = 40,
                     Y = 60,
@@ -188,11 +189,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             _titleTextBox.SetText(title);
             _titleTextBox.TextChanged += PageZero_TextChanged;
-            Add(new Label(ResGumps.By, true, 1) { X = 40, Y = 130 }, 1);
+            Add(new Label(World.Context, ResGumps.By, true, 1) { X = 40, Y = 130 }, 1);
 
             Add
             (
-                _authorTextBox = new StbTextBox(DefaultFont, 29, 150, IsNewBook)
+                _authorTextBox = new StbTextBox(World.Context, DefaultFont, 29, 150, IsNewBook)
                 {
                     X = 40,
                     Y = 160,
@@ -225,13 +226,13 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 page >>= 1;
-                Add(new Label(k.ToString(), true, 1) { X = x + 80, Y = 200 }, page);
+                Add(new Label(World.Context, k.ToString(), true, 1) { X = x + 80, Y = 200 }, page);
             }
 
             ActivePage = 1;
             UpdatePageButtonVisibility();
 
-            Client.Game.Audio.PlaySound(0x0055);
+            World.Context.Game.Audio.PlaySound(0x0055);
         }
 
         private void PageZero_TextChanged(object sender, EventArgs e)
@@ -276,7 +277,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (page != ActivePage)
             {
-                Client.Game.Audio.PlaySound(0x0055);
+                World.Context.Game.Audio.PlaySound(0x0055);
             }
 
             //Non-editable books may only have data for the currently displayed pages,
@@ -288,12 +289,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (leftPage > 0 && !KnownPages.Contains(leftPage))
                 {
-                    NetClient.Socket.Send_BookPageDataRequest(LocalSerial, (ushort)leftPage);
+                    World.Network.Send_BookPageDataRequest(LocalSerial, (ushort)leftPage);
                 }
 
                 if (rightPage < MaxPage * 2 && !KnownPages.Contains(rightPage))
                 {
-                    NetClient.Socket.Send_BookPageDataRequest(LocalSerial, (ushort)rightPage);
+                    World.Network.Send_BookPageDataRequest(LocalSerial, (ushort)rightPage);
                 }
             }
             else
@@ -308,11 +309,11 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             if (UseNewHeader)
                             {
-                                NetClient.Socket.Send_BookHeaderChanged(LocalSerial, _titleTextBox.Text, _authorTextBox.Text);
+                                World.Network.Send_BookHeaderChanged(LocalSerial, _titleTextBox.Text, _authorTextBox.Text);
                             }
                             else
                             {
-                                NetClient.Socket.Send_BookHeaderChanged_Old(LocalSerial, _titleTextBox.Text, _authorTextBox.Text);
+                                World.Network.Send_BookHeaderChanged_Old(LocalSerial, _titleTextBox.Text, _authorTextBox.Text);
                             }
                         }
                         else
@@ -324,7 +325,7 @@ namespace ClassicUO.Game.UI.Gumps
                                 text[l] = BookLines[x];
                             }
 
-                            NetClient.Socket.Send_BookPageData(LocalSerial, text, i);
+                            World.Network.Send_BookPageData(LocalSerial, text, i);
                         }
                     }
                 }
@@ -333,9 +334,9 @@ namespace ClassicUO.Game.UI.Gumps
             ActivePage = page;
             UpdatePageButtonVisibility();
 
-            if (UIManager.KeyboardFocusControl == null || UIManager.KeyboardFocusControl != UIManager.SystemChat.TextBoxControl && UIManager.KeyboardFocusControl != _bookPage && page != _bookPage._focusPage / 2 + 1)
+            if (World.Context.UI.KeyboardFocusControl == null || World.Context.UI.KeyboardFocusControl != World.Context.UI.SystemChat.TextBoxControl && World.Context.UI.KeyboardFocusControl != _bookPage && page != _bookPage._focusPage / 2 + 1)
             {
-                UIManager.SystemChat.TextBoxControl.SetKeyboardFocus();
+                World.Context.UI.SystemChat.TextBoxControl.SetKeyboardFocus();
             }
         }
 
@@ -538,6 +539,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             public StbPageTextBox
             (
+                GameContext context,
                 byte font,
                 int bookpages,
                 ModernBookGump gump,
@@ -548,6 +550,7 @@ namespace ClassicUO.Game.UI.Gumps
                 ushort hue = 0
             ) : base
             (
+                context,
                 font,
                 max_char_count,
                 maxWidth,

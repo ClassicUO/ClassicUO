@@ -59,7 +59,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _gold = value;
 
-                    if (Client.Game.UO.Version >= ClientVersion.CV_704565)
+                    if (World.Context.Game.UO.Version >= ClientVersion.CV_704565)
                     {
                         _myCoins[0].Text = _gold.ToString("N0");
                     }
@@ -76,7 +76,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _platinum = value;
 
-                    if (Client.Game.UO.Version >= ClientVersion.CV_704565)
+                    if (World.Context.Game.UO.Version >= ClientVersion.CV_704565)
                     {
                         _myCoins[1].Text = _platinum.ToString("N0");
                     }
@@ -93,7 +93,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _hisGold = value;
 
-                    if (Client.Game.UO.Version >= ClientVersion.CV_704565)
+                    if (World.Context.Game.UO.Version >= ClientVersion.CV_704565)
                     {
                         _hisCoins[0].Text = _hisGold.ToString("N0");
                     }
@@ -110,7 +110,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _hisPlatinum = value;
 
-                    if (Client.Game.UO.Version >= ClientVersion.CV_704565)
+                    if (World.Context.Game.UO.Version >= ClientVersion.CV_704565)
                     {
                         _hisCoins[1].Text = _hisPlatinum.ToString("N0");
                     }
@@ -158,7 +158,7 @@ namespace ClassicUO.Game.UI.Gumps
                 v.Dispose();
             }
 
-            ArtLoader loader = Client.Game.UO.FileManager.Arts;
+            ArtLoader loader = World.Context.Game.UO.FileManager.Arts;
 
             for (LinkedObject i = container.Items; i != null; i = i.Next)
             {
@@ -172,7 +172,7 @@ namespace ClassicUO.Game.UI.Gumps
                 int x = g.X;
                 int y = g.Y;
 
-                ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(it.DisplayedGraphic);
+                ref readonly var artInfo = ref World.Context.Game.UO.Arts.GetArt(it.DisplayedGraphic);
 
                 if (artInfo.Texture != null)
                 {
@@ -227,7 +227,7 @@ namespace ClassicUO.Game.UI.Gumps
                 int x = g.X;
                 int y = g.Y;
 
-                ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(it.DisplayedGraphic);
+                ref readonly var artInfo = ref World.Context.Game.UO.Arts.GetArt(it.DisplayedGraphic);
 
                 if (artInfo.Texture != null)
                 {
@@ -264,13 +264,13 @@ namespace ClassicUO.Game.UI.Gumps
             if (button == MouseButtonType.Left)
             {
                 if (
-                    Client.Game.UO.GameCursor.ItemHold.Enabled
-                    && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition
+                    World.Context.Game.UO.GameCursor.ItemHold.Enabled
+                    && !World.Context.Game.UO.GameCursor.ItemHold.IsFixedPosition
                 )
                 {
                     if (_myBox != null && _myBox.Bounds.Contains(x, y))
                     {
-                        ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(Client.Game.UO.GameCursor.ItemHold.DisplayedGraphic);
+                        ref readonly var artInfo = ref World.Context.Game.UO.Arts.GetArt(World.Context.Game.UO.GameCursor.ItemHold.DisplayedGraphic);
                         x -= _myBox.X;
                         y -= _myBox.Y;
 
@@ -300,7 +300,7 @@ namespace ClassicUO.Game.UI.Gumps
                             y = 0;
                         }
 
-                        GameActions.DropItem(Client.Game.UO.GameCursor.ItemHold.Serial, x, y, 0, ID1);
+                        GameActions.DropItem(World, World.Context.Game.UO.GameCursor.ItemHold.Serial, x, y, 0, ID1);
                     }
                 }
                 else if (SelectedObject.Object is Item it)
@@ -312,7 +312,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (World.TargetManager.TargetingState == CursorTarget.SetTargetClientSide)
                         {
-                            UIManager.Add(new InspectorGump(World, it));
+                            World.Context.UI.Add(new InspectorGump(World, it));
                         }
                     }
                     else if (!World.DelayedObjectClickManager.IsEnabled)
@@ -333,7 +333,7 @@ namespace ClassicUO.Game.UI.Gumps
         public override void Dispose()
         {
             base.Dispose();
-            GameActions.CancelTrade(ID1);
+            GameActions.CancelTrade(World, ID1);
         }
 
         private void SetCheckboxes()
@@ -346,7 +346,7 @@ namespace ClassicUO.Game.UI.Gumps
                 otherX,
                 otherY;
 
-            if (Client.Game.UO.Version >= ClientVersion.CV_704565)
+            if (World.Context.Game.UO.Version >= ClientVersion.CV_704565)
             {
                 myX = 37;
                 myY = 29;
@@ -365,11 +365,11 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (ImAccepting)
             {
-                _myCheckbox = new Checkbox(0x0869, 0x086A) { X = myX, Y = myY };
+                _myCheckbox = new Checkbox(World.Context, 0x0869, 0x086A) { X = myX, Y = myY };
             }
             else
             {
-                _myCheckbox = new Checkbox(0x0867, 0x0868) { X = myX, Y = myY };
+                _myCheckbox = new Checkbox(World.Context, 0x0867, 0x0868) { X = myX, Y = myY };
             }
 
             _myCheckbox.ValueChanged -= MyCheckboxOnValueChanged;
@@ -378,8 +378,8 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_myCheckbox);
 
             _hisPic = HeIsAccepting
-                ? new GumpPic(otherX, otherY, 0x0869, 0)
-                : new GumpPic(otherX, otherY, 0x0867, 0);
+                ? new GumpPic(otherX, otherY, 0x0869, 0, World.Context)
+                : new GumpPic(otherX, otherY, 0x0867, 0, World.Context);
 
             Add(_hisPic);
         }
@@ -391,33 +391,33 @@ namespace ClassicUO.Game.UI.Gumps
                 opdbX,
                 opdbY;
 
-            if (Client.Game.UO.Version >= ClientVersion.CV_704565)
+            if (World.Context.Game.UO.Version >= ClientVersion.CV_704565)
             {
-                Add(new GumpPic(0, 0, 0x088A, 0));
+                Add(new GumpPic(0, 0, 0x088A, 0, World.Context));
 
-                Add(new Label(World.Player.Name, false, 0x0481, font: 3) { X = 73, Y = 32 });
+                Add(new Label(World.Context, World.Player.Name, false, 0x0481, font: 3) { X = 73, Y = 32 });
 
-                int fontWidth = 250 - Client.Game.UO.FileManager.Fonts.GetWidthASCII(3, _name);
+                int fontWidth = 250 - World.Context.Game.UO.FileManager.Fonts.GetWidthASCII(3, _name);
 
-                Add(new Label(_name, false, 0x0481, font: 3) { X = fontWidth, Y = 244 });
+                Add(new Label(World.Context, _name, false, 0x0481, font: 3) { X = fontWidth, Y = 244 });
 
-                _myCoins[0] = new Label("0", false, 0x0481, font: 9) { X = 43, Y = 67 };
+                _myCoins[0] = new Label(World.Context, "0", false, 0x0481, font: 9) { X = 43, Y = 67 };
 
                 Add(_myCoins[0]);
 
-                _myCoins[1] = new Label("0", false, 0x0481, font: 9) { X = 180, Y = 67 };
+                _myCoins[1] = new Label(World.Context, "0", false, 0x0481, font: 9) { X = 180, Y = 67 };
 
                 Add(_myCoins[1]);
 
-                _hisCoins[0] = new Label("0", false, 0x0481, font: 9) { X = 180, Y = 190 };
+                _hisCoins[0] = new Label(World.Context, "0", false, 0x0481, font: 9) { X = 180, Y = 190 };
 
                 Add(_hisCoins[0]);
 
-                _hisCoins[1] = new Label("0", false, 0x0481, font: 9) { X = 180, Y = 210 };
+                _hisCoins[1] = new Label(World.Context, "0", false, 0x0481, font: 9) { X = 180, Y = 210 };
 
                 Add(_hisCoins[1]);
 
-                _myCoinsEntries[0] = new StbTextBox(9, -1, 100, false)
+                _myCoinsEntries[0] = new StbTextBox(World.Context, 9, -1, 100, false)
                 {
                     X = 43,
                     Y = 190,
@@ -431,7 +431,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Add(_myCoinsEntries[0]);
 
-                _myCoinsEntries[1] = new StbTextBox(9, -1, 100, false)
+                _myCoinsEntries[1] = new StbTextBox(World.Context, 9, -1, 100, false)
                 {
                     X = 43,
                     Y = 210,
@@ -514,7 +514,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                         if (send)
                         {
-                            NetClient.Socket.Send_TradeUpdateGold(
+                            World.Network.Send_TradeUpdateGold(
                                 ID1,
                                 my_gold_entry,
                                 my_plat_entry
@@ -534,13 +534,13 @@ namespace ClassicUO.Game.UI.Gumps
             }
             else
             {
-                Add(new GumpPic(0, 0, 0x0866, 0));
+                Add(new GumpPic(0, 0, 0x0866, 0, World.Context));
 
-                Add(new Label(World.Player.Name, false, 0x0386, font: 1) { X = 84, Y = 40 });
+                Add(new Label(World.Context, World.Player.Name, false, 0x0386, font: 1) { X = 84, Y = 40 });
 
-                int fontWidth = 260 - Client.Game.UO.FileManager.Fonts.GetWidthASCII(1, _name);
+                int fontWidth = 260 - World.Context.Game.UO.FileManager.Fonts.GetWidthASCII(1, _name);
 
-                Add(new Label(_name, false, 0x0386, font: 1) { X = fontWidth, Y = 170 });
+                Add(new Label(World.Context, _name, false, 0x0386, font: 1) { X = fontWidth, Y = 170 });
 
                 mydbX = 45;
                 mydbY = 70;
@@ -548,15 +548,15 @@ namespace ClassicUO.Game.UI.Gumps
                 opdbY = 70;
             }
 
-            if (Client.Game.UO.Version < ClientVersion.CV_500A)
+            if (World.Context.Game.UO.Version < ClientVersion.CV_500A)
             {
-                Add(new ColorBox(110, 60, 0) { X = 45, Y = 90 });
+                Add(new ColorBox(World.Context, 110, 60, 0) { X = 45, Y = 90 });
 
-                Add(new ColorBox(110, 60, 0) { X = 192, Y = 70 });
+                Add(new ColorBox(World.Context, 110, 60, 0) { X = 192, Y = 70 });
             }
 
             Add(
-                _myBox = new DataBox(mydbX, mydbY, 110, 80)
+                _myBox = new DataBox(World.Context, mydbX, mydbY, 110, 80)
                 {
                     WantUpdateSize = false,
                     ContainsByBounds = true,
@@ -566,7 +566,7 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             Add(
-                _hisBox = new DataBox(opdbX, opdbY, 110, 80)
+                _hisBox = new DataBox(World.Context, opdbX, opdbY, 110, 80)
                 {
                     WantUpdateSize = false,
                     ContainsByBounds = true,
@@ -583,7 +583,7 @@ namespace ClassicUO.Game.UI.Gumps
         private void MyCheckboxOnValueChanged(object sender, EventArgs e)
         {
             ImAccepting = !ImAccepting;
-            GameActions.AcceptTrade(ID1, ImAccepting);
+            GameActions.AcceptTrade(World, ID1, ImAccepting);
         }
     }
 }

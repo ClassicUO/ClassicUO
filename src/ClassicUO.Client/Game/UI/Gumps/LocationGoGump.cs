@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Text.RegularExpressions;
 using ClassicUO.Assets;
 using ClassicUO.Game.Data;
@@ -44,7 +44,7 @@ internal partial class LocationGoGump : Gump
 
         Add
         (
-            new AlphaBlendControl(0.7f)
+            new AlphaBlendControl(World.Context, 0.7f)
             {
                 Width = Width,
                 Height = Height,
@@ -56,7 +56,7 @@ internal partial class LocationGoGump : Gump
         
         Label l = Add
         (
-            new Label(_message, true, 0xFFFF, Width - 90, 0xFF)
+            new Label(World.Context, _message, true, 0xFFFF, Width - 90, 0xFF)
             {
                 X = 12,
                 Y = 12
@@ -68,7 +68,7 @@ internal partial class LocationGoGump : Gump
 
         Add
         (
-            new ResizePic(0x0BB8)
+            new ResizePic(0x0BB8, World.Context)
             {
                 X = 20,
                 Y = 20 + l.Height + 5,
@@ -79,7 +79,7 @@ internal partial class LocationGoGump : Gump
 
         _textBox = Add
         (
-            new StbTextBox(0xFF, -1, ww, true, FontStyle.BlackBorder, align: TEXT_ALIGN_TYPE.TS_LEFT)
+            new StbTextBox(World.Context, 0xFF, -1, ww, true, FontStyle.BlackBorder, align: TEXT_ALIGN_TYPE.TS_LEFT)
             {
                 X = 26,
                 Y = 20 + l.Height + 7,
@@ -94,7 +94,7 @@ internal partial class LocationGoGump : Gump
         // OK
         Button b = Add
         (
-            new Button(0, 0x0481, 0x0482, 0x0483)
+            new Button(World.Context, 0, 0x0481, 0x0482, 0x0483)
             {
                 X = _textBox.X + _textBox.Width + 12,
                 Y = _textBox.Y,
@@ -104,15 +104,15 @@ internal partial class LocationGoGump : Gump
         
         Add
         (
-            new Label("Examples:\n 1639, 1532\n 100o25'S,40o04'E\n 9 14'N 91 37'W", true, 0xFFFF, Width - 90, 0xFF)
+            new Label(World.Context, "Examples:\n 1639, 1532\n 100o25'S,40o04'E\n 9 14'N 91 37'W", true, 0xFFFF, Width - 90, 0xFF)
             {
                 X = _textBox.X - 6,
                 Y = _textBox.Y + 28,
             }
         );
 
-        X = (Client.Game.ClientBounds.Width - Width) >> 1;
-        Y = (Client.Game.ClientBounds.Height - Height) >> 1;
+        X = (World.Context.Game.ClientBounds.Width - Width) >> 1;
+        Y = (World.Context.Game.ClientBounds.Height - Height) >> 1;
     }
 
     private bool ParsePoint(string text, out Point point)
@@ -157,7 +157,7 @@ internal partial class LocationGoGump : Gump
         if (string.IsNullOrWhiteSpace(text))
             return;
 
-        _textBox.Hue = (ushort)(Sextant.Parse(_world.Map, text, out _location) || ParsePoint(text, out _location) ? 0x40 : 0x33);
+        _textBox.Hue = (ushort)(Sextant.Parse(_world.Context.Game.UO.FileManager.Maps, _world.Map, text, out _location) || ParsePoint(text, out _location) ? 0x40 : 0x33);
     }
 
     public override void OnButtonClick(int id)

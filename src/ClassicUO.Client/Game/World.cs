@@ -25,8 +25,26 @@ namespace ClassicUO.Game
         private readonly List<uint> _toRemove = new List<uint>();
         private uint _timeToDelete;
 
-        public World()
+        public GameContext Context { get; }
+
+        // Convenience accessors that delegate to Context
+        public IProfileProvider Profile => Context.Profile;
+        public ISettingsProvider Settings => Context.Settings;
+        public INetworkClient Network => Context.Network;
+
+        /// <summary>
+        /// Production constructor – uses the real static singletons via GameContext.CreateDefault().
+        /// </summary>
+        public World() : this(GameContext.CreateDefault())
         {
+        }
+
+        /// <summary>
+        /// Testable constructor – accepts a fully-configured GameContext (real or mocked).
+        /// </summary>
+        public World(GameContext context)
+        {
+            Context = context;
             WMapManager = new WorldMapEntityManager(this);
             CorpseManager = new CorpseManager(this);
             Party = new PartyManager(this);
@@ -48,6 +66,7 @@ namespace ClassicUO.Game
             CommandManager = new CommandManager(this);
             Weather = new Weather(this);
             InfoBars = new InfoBarManager(this);
+            Journal = new JournalManager(context.Profile);
         }
 
         public Point RangeSize;
@@ -117,7 +136,7 @@ namespace ClassicUO.Game
 
         public WorldTextManager WorldTextManager { get; }
 
-        public JournalManager Journal { get; } = new JournalManager();
+        public JournalManager Journal { get; }
 
 
         public int MapIndex
@@ -155,7 +174,7 @@ namespace ClassicUO.Game
                             value = 0;
                         }
 
-                        Client.Game.UO.FileManager.Maps.LoadMap(value, ClientFeatures.Flags.HasFlag(CharacterListFlags.CLF_UNLOCK_FELUCCA_AREAS));
+                        Context.Game.UO.FileManager.Maps.LoadMap(value, ClientFeatures.Flags.HasFlag(CharacterListFlags.CLF_UNLOCK_FELUCCA_AREAS));
                         Map = new Map.Map(this, value);
 
                         Player.SetInWorldTile(x, y, z);
@@ -163,14 +182,14 @@ namespace ClassicUO.Game
                     }
                     else
                     {
-                        Client.Game.UO.FileManager.Maps.LoadMap(value, ClientFeatures.Flags.HasFlag(CharacterListFlags.CLF_UNLOCK_FELUCCA_AREAS));
+                        Context.Game.UO.FileManager.Maps.LoadMap(value, ClientFeatures.Flags.HasFlag(CharacterListFlags.CLF_UNLOCK_FELUCCA_AREAS));
                         Map = new Map.Map(this, value);
                     }
 
                     // force cursor update when switching map
-                    if (Client.Game.UO.GameCursor != null)
+                    if (Context.Game.UO.GameCursor != null)
                     {
-                        Client.Game.UO.GameCursor.Graphic = 0xFFFF;
+                        Context.Game.UO.GameCursor.Graphic = 0xFFFF;
                     }
 
                     UoAssist.SignalMapChanged(value);
@@ -198,10 +217,10 @@ namespace ClassicUO.Game
 
         public void CreatePlayer(uint serial)
         {
-            if (ProfileManager.CurrentProfile == null)
+            if (Profile.CurrentProfile == null)
             {
                 string lastChar = LastCharacterManager.GetLastCharacter(LoginScene.Account, ServerName);
-                ProfileManager.Load(ServerName, LoginScene.Account, lastChar);
+                Profile.Load(ServerName, LoginScene.Account, lastChar);
             }
 
             if (Player != null)
@@ -213,6 +232,20 @@ namespace ClassicUO.Game
             Mobiles.Add(Player);
 
             Log.Trace($"Player [0x{serial:X8}] created");
+        }
+
+        /// <summary>
+        /// Creates a player for test purposes without static FileManager dependencies.
+        /// </summary>
+        internal void CreatePlayerForTest(uint serial, int skillCount = 58)
+        {
+            if (Player != null)
+            {
+                Clear();
+            }
+
+            Player = new PlayerMobile(this, serial, skillCount);
+            Mobiles.Add(Player);
         }
 
         public void ChangeSeason(Season season, int music)
@@ -234,10 +267,10 @@ namespace ClassicUO.Game
             }
 
             //TODO(deccer): refactor this out into _audioPlayer.PlayMusic(...)
-            UOMusic currentMusic = Client.Game.Audio.GetCurrentMusic();
-            if (currentMusic == null || currentMusic.Index == Client.Game.Audio.LoginMusicIndex)
+            UOMusic currentMusic = Context.Game.Audio.GetCurrentMusic();
+            if (currentMusic == null || currentMusic.Index == Context.Game.Audio.LoginMusicIndex)
             {
-                Client.Game.Audio.PlayMusic(music, false);
+                Context.Game.Audio.PlayMusic(music, false);
             }
         }
 
@@ -276,15 +309,15 @@ namespace ClassicUO.Game
                         {
                             if (SerialHelper.IsMobile(container.Serial))
                             {
-                                UIManager.GetGump<PaperDollGump>(container.Serial)?.RequestUpdateContents();
+                                Context.UI.GetGump<PaperDollGump>(container.Serial)?.RequestUpdateContents();
                             }
                             else if (SerialHelper.IsItem(container.Serial))
                             {
-                                UIManager.GetGump<ContainerGump>(container.Serial)?.RequestUpdateContents();
+                                Context.UI.GetGump<ContainerGump>(container.Serial)?.RequestUpdateContents();
 
                                 if (container.Graphic == 0x2006)
                                 {
-                                    UIManager.GetGump<GridLootGump>(container)?.RequestUpdateContents();
+                                    Context.UI.GetGump<GridLootGump>(container)?.RequestUpdateContents();
                                 }
                             }
                         }
@@ -492,11 +525,11 @@ namespace ClassicUO.Game
             {
                 if (SerialHelper.IsMobile(containerSerial))
                 {
-                    UIManager.GetGump<PaperDollGump>(containerSerial)?.RequestUpdateContents();
+                    Context.UI.GetGump<PaperDollGump>(containerSerial)?.RequestUpdateContents();
                 }
                 else if (SerialHelper.IsItem(containerSerial))
                 {
-                    UIManager.GetGump<ContainerGump>(containerSerial)?.RequestUpdateContents();
+                    Context.UI.GetGump<ContainerGump>(containerSerial)?.RequestUpdateContents();
                 }
 
                 Entity container = Get(containerSerial);
@@ -787,7 +820,7 @@ namespace ClassicUO.Game
                 RemoveItem(item);
             }
 
-            UIManager.GetGump<BaseHealthBarGump>(Player?.Serial)?.Dispose();
+            Context.UI.GetGump<BaseHealthBarGump>(Player?.Serial)?.Dispose();
 
             ObjectToRemove = 0;
             LastObject = 0;

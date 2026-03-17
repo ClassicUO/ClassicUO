@@ -2,11 +2,13 @@
 
 using ClassicUO.Game.Scenes;
 
+using ClassicUO.Game;
+
 namespace ClassicUO.Game.UI.Controls
 {
     internal class ScissorControl : Control
     {
-        public ScissorControl(bool enabled, int x, int y, int width, int height) : this(enabled)
+        public ScissorControl(GameContext context, bool enabled, int x, int y, int width, int height) : this(context, enabled)
         {
             X = x;
             Y = y;
@@ -14,7 +16,7 @@ namespace ClassicUO.Game.UI.Controls
             Height = height;
         }
 
-        public ScissorControl(bool enabled)
+        public ScissorControl(GameContext context, bool enabled) : base(context)
         {
             CanMove = false;
             AcceptMouseInput = false;

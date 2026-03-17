@@ -37,7 +37,8 @@ namespace ClassicUO.Game.UI.Gumps
         ) : base(world, local, server)
         {
             _borderControl = new BorderControl
-            (
+                (
+                    World.Context,
                 0,
                 0,
                 Width,
@@ -49,7 +50,7 @@ namespace ClassicUO.Game.UI.Gumps
             };
 
             Add(_borderControl);
-            _button = new Button(0, 0x837, 0x838, 0x838);
+            _button = new Button(World.Context, 0, 0x837, 0x838, 0x838);
             Add(_button);
 
             _button.MouseDown += (sender, e) => { 

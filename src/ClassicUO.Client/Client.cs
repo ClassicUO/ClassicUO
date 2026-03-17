@@ -90,10 +90,11 @@ namespace ClassicUO
             Sounds = new Renderer.Sounds.Sound(FileManager.Sounds);
             FontGlyphAtlas = new Renderer.FontGlyphAtlas(FileManager.Fonts, game.GraphicsDevice);
 
+
             LightColors.LoadLights();
 
             World = new World();
-            GameCursor = new GameCursor(World, game.DpiScale);
+            GameCursor = new GameCursor(World, game.DpiScale, FileManager.TileData);
         }
 
         public void Unload()

@@ -124,7 +124,7 @@ namespace ClassicUO.Game.GameObjects
         public bool IsParalyzed => (Flags & Flags.Frozen) != 0;
         public bool IsYellowHits => (Flags & Flags.YellowBar) != 0;
         public bool IsPoisoned =>
-            Client.Game.UO.Version >= ClientVersion.CV_7000
+            World.Context.Game.UO.Version >= ClientVersion.CV_7000
                 ? _isSA_Poisoned
                 : (Flags & Flags.Poisoned) != 0;
         public bool IgnoreCharacters => (Flags & Flags.IgnoreMobiles) != 0;
@@ -142,7 +142,7 @@ namespace ClassicUO.Game.GameObjects
         }
 
         public bool IsFlying =>
-            Client.Game.UO.Version >= ClientVersion.CV_7000 && (Flags & Flags.Poisoned) != 0;
+            World.Context.Game.UO.Version >= ClientVersion.CV_7000 && (Flags & Flags.Poisoned) != 0;
 
         public virtual bool InWarMode
         {
@@ -166,7 +166,7 @@ namespace ClassicUO.Game.GameObjects
             || Graphic == 0x04E5;
 
         public bool IsGargoyle =>
-            Client.Game.UO.Version >= ClientVersion.CV_7000 && Graphic == 0x029A || Graphic == 0x029B;
+            World.Context.Game.UO.Version >= ClientVersion.CV_7000 && Graphic == 0x029A || Graphic == 0x029B;
 
         public bool IsMounted
         {
@@ -388,7 +388,7 @@ namespace ClassicUO.Game.GameObjects
 
                 ushort graphic = GetGraphicForAnimation();
 
-                var animations = Client.Game.UO.Animations;
+                var animations = World.Context.Game.UO.Animations;
                 if (graphic >= animations.MaxAnimationCount)
                 {
                     return;
@@ -397,12 +397,6 @@ namespace ClassicUO.Game.GameObjects
                 //byte action = 0;
                 //ushort hue = 0;
 
-                //Client.Game.UO.Animations.ReplaceAnimationValues(
-                //    ref graphic,
-                //    ref action,
-                //    ref hue,
-                //    out var useUOP
-                //);
 
                 AnimationGroupsType type = animations.GetAnimType(graphic);
                 AnimationFlags  flags = animations.GetAnimFlags(graphic);
@@ -489,7 +483,7 @@ namespace ClassicUO.Game.GameObjects
                         && animations.AnimationExists(graphic, 17)
                     )
                     {
-                        _animationGroup = GetReplacedObjectAnimation(graphic, 17);
+                        _animationGroup = GetReplacedObjectAnimation(World.Context.Game.UO.FileManager.Animations, animations, graphic, 17);
                     }
                     else
                     {
@@ -527,7 +521,7 @@ namespace ClassicUO.Game.GameObjects
         private void ProcessFootstepsSound()
         {
             if (
-                ProfileManager.CurrentProfile.EnableFootstepsSound
+                World.Profile.CurrentProfile.EnableFootstepsSound
                 && IsHuman
                 && !IsHidden
                 && !IsDead
@@ -562,7 +556,7 @@ namespace ClassicUO.Game.GameObjects
 
                     StepSoundOffset = (incID + 1) % 2;
 
-                    Client.Game.Audio.PlaySoundWithDistance(World, soundID, step.X, step.Y);
+                    World.Context.Game.Audio.PlaySoundWithDistance(World, soundID, step.X, step.Y);
                     LastStepSoundTime = Time.Ticks + delaySound;
                 }
             }
@@ -578,7 +572,7 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            var animations = Client.Game.UO.Animations;
+            var animations = World.Context.Game.UO.Animations;
 
             ushort id = GetGraphicForAnimation();
             byte action = GetGroupForAnimation(this, id, true);
@@ -740,7 +734,7 @@ namespace ClassicUO.Game.GameObjects
 
                     int maxDelay =
                         MovementSpeed.TimeToCompleteMovement(run, mounted)
-                        - (int)Client.Game.FrameDelay[1];
+                        - (int)World.Context.Game.FrameDelay[1];
 
                     bool removeStep = delay >= maxDelay;
                     bool directionChange = false;
@@ -932,9 +926,9 @@ namespace ClassicUO.Game.GameObjects
 
             int offY = 0;
 
-            bool health = ProfileManager.CurrentProfile.ShowMobilesHP;
-            int alwaysHP = ProfileManager.CurrentProfile.MobileHPShowWhen;
-            int mode = ProfileManager.CurrentProfile.MobileHPType;
+            bool health = World.Profile.CurrentProfile.ShowMobilesHP;
+            int alwaysHP = World.Profile.CurrentProfile.MobileHPShowWhen;
+            int mode = World.Profile.CurrentProfile.MobileHPType;
 
             Point p = RealScreenPosition;
 
@@ -947,7 +941,7 @@ namespace ClassicUO.Game.GameObjects
                 p.Y += 22;
             }
 
-            Client.Game.UO.Animations.GetAnimationDimensions(
+            World.Context.Game.UO.Animations.GetAnimationDimensions(
                 AnimIndex,
                 GetGraphicForAnimation(),
                 /*(byte) m.GetDirectionForAnimation()*/
@@ -965,12 +959,12 @@ namespace ClassicUO.Game.GameObjects
 
             p.X += (int)Offset.X + 22;
             p.Y += (int)(Offset.Y - Offset.Z - (height + centerY + 8));
-            p = Client.Game.Scene.Camera.WorldToScreen(p, true);
+            p = World.Context.Game.Scene.Camera.WorldToScreen(p, true);
 
             if (ObjectHandlesStatus == ObjectHandlesStatus.DISPLAYING)
             {
                 p.Y -= Constants.OBJECT_HANDLES_GUMP_HEIGHT
-                    + (ProfileManager.CurrentProfile.NameOverheadShowHpBar
+                    + (World.Profile.CurrentProfile.NameOverheadShowHpBar
                         ? Constants.OBJECT_HANDLES_HP_BAR_HEIGHT + 1 : 0);
             }
 
@@ -1070,7 +1064,7 @@ namespace ClassicUO.Game.GameObjects
 
             if (!(this is PlayerMobile))
             {
-                UIManager.GetGump<PaperDollGump>(serial)?.Dispose();
+                World.Context.UI.GetGump<PaperDollGump>(serial)?.Dispose();
 
                 //_pool.ReturnOne(this);
             }

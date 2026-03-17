@@ -170,8 +170,8 @@ namespace ClassicUO.Game.GameObjects
             AddMessage(
                 type,
                 message,
-                ProfileManager.CurrentProfile.ChatFont,
-                ProfileManager.CurrentProfile.SpeechHue,
+                World.Profile.CurrentProfile.ChatFont,
+                World.Profile.CurrentProfile.SpeechHue,
                 true,
                 text_type
             );
@@ -200,14 +200,14 @@ namespace ClassicUO.Game.GameObjects
 
             Point p = RealScreenPosition;
 
-            var bounds = Client.Game.UO.Arts.GetRealArtBounds(Graphic);
+            var bounds = World.Context.Game.UO.Arts.GetRealArtBounds(Graphic);
 
             p.Y -= bounds.Height >> 1;
 
             p.X += (int)Offset.X + 22;
             p.Y += (int)(Offset.Y - Offset.Z) + 44;
 
-            p = Client.Game.Scene.Camera.WorldToScreen(p, true);
+            p = World.Context.Game.Scene.Camera.WorldToScreen(p, true);
 
             for (; last != null; last = (TextObject)last.Previous)
             {
@@ -236,12 +236,12 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            int topLeftGameWorldX = Client.Game.Scene.Camera.Bounds.X + 4;
-            int topLeftGameWorldY = Client.Game.Scene.Camera.Bounds.Y;
+            int topLeftGameWorldX = World.Context.Game.Scene.Camera.Bounds.X + 4;
+            int topLeftGameWorldY = World.Context.Game.Scene.Camera.Bounds.Y;
 
-            int bottomRightGameWorldX = Client.Game.Scene.Camera.Bounds.X + Client.Game.Scene.Camera.Bounds.Width;
-            int systemChatHeight = UIManager.SystemChat.TextBoxControl.IsVisible ? UIManager.SystemChat.TextBoxControl.Height : 0;
-            int bottomRightGameWorldY = Client.Game.Scene.Camera.Bounds.Y + Client.Game.Scene.Camera.Bounds.Height - systemChatHeight;
+            int bottomRightGameWorldX = World.Context.Game.Scene.Camera.Bounds.X + World.Context.Game.Scene.Camera.Bounds.Width;
+            int systemChatHeight = World.Context.UI.SystemChat.TextBoxControl.IsVisible ? World.Context.UI.SystemChat.TextBoxControl.Height : 0;
+            int bottomRightGameWorldY = World.Context.Game.Scene.Camera.Bounds.Y + World.Context.Game.Scene.Camera.Bounds.Height - systemChatHeight;
             
             for (
                 TextObject item = (TextObject)TextContainer.Items;
@@ -366,7 +366,7 @@ namespace ClassicUO.Game.GameObjects
 
         public static bool CanBeDrawn(World world, ushort g)
         {
-            if (Client.Game == null)
+            if (world?.Context?.Game == null)
                 return true;
 
             switch (g)
@@ -384,7 +384,7 @@ namespace ClassicUO.Game.GameObjects
                 case 0x9E64:
                 case 0x9E65:
                 case 0x9E7D:
-                    ref var data = ref Client.Game.UO.FileManager.TileData.StaticData[g];
+                    ref var data = ref world.Context.Game.UO.FileManager.TileData.StaticData[g];
 
                     return !data.IsBackground && !data.IsSurface;
             }
@@ -400,14 +400,14 @@ namespace ClassicUO.Game.GameObjects
                 // In older clients the tiledata flag for this
                 // item contains NoDiagonal for some reason.
                 // So the next check will make the item invisible.
-                if (g == 0x0F65 && Client.Game.UO.Version < ClientVersion.CV_60144)
+                if (g == 0x0F65 && world.Context.Game.UO.Version < ClientVersion.CV_60144)
                 {
                     return true;
                 }
 
-                if (g < Client.Game.UO.FileManager.TileData.StaticData.Length)
+                if (g < world.Context.Game.UO.FileManager.TileData.StaticData.Length)
                 {
-                    ref var data = ref Client.Game.UO.FileManager.TileData.StaticData[g];
+                    ref var data = ref world.Context.Game.UO.FileManager.TileData.StaticData[g];
 
                     // Hacky way to do not render "nodraw"
                     if (!string.IsNullOrEmpty(data.Name) && data.Name.StartsWith("nodraw", StringComparison.OrdinalIgnoreCase))

@@ -32,7 +32,8 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new BorderControl
-                (
+                    (
+                        World.Context,
                     0,
                     0,
                     WIDTH,
@@ -49,7 +50,7 @@ namespace ClassicUO.Game.UI.Gumps
                     4,
                     WIDTH - 8,
                     HEIGHT - 8,
-                    0x0A40
+                    0x0A40, World.Context
                 )
                 {
                     Alpha = 0.5f
@@ -64,19 +65,19 @@ namespace ClassicUO.Game.UI.Gumps
                     4,
                     WIDTH - 8,
                     HEIGHT - 8,
-                    0x0A40
+                    0x0A40, World.Context
                 )
                 {
                     Alpha = 0.5f
                 }
             );
 
-            Add(new Label(ResGumps.ObjectInformation, true, 1153, font: 3) { X = 20, Y = 10 });
+            Add(new Label(World.Context, ResGumps.ObjectInformation, true, 1153, font: 3) { X = 20, Y = 10 });
 
             Add
             (
                 new Line
-                (
+                (World.Context, 
                     20,
                     30,
                     WIDTH - 50,
@@ -88,7 +89,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add
             (
                 new NiceButton
-                (
+                (World.Context, 
                     WIDTH - 115,
                     5,
                     100,
@@ -102,7 +103,7 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             ScrollArea scrollArea = new ScrollArea
-            (
+            (World.Context, 
                 20,
                 35,
                 WIDTH - 40,
@@ -115,7 +116,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(scrollArea);
 
-            DataBox databox = new DataBox(0, 0, 1, 1);
+            DataBox databox = new DataBox(World.Context, 0, 0, 1, 1);
             databox.WantUpdateSize = true;
             scrollArea.Add(databox);
 
@@ -129,7 +130,7 @@ namespace ClassicUO.Game.UI.Gumps
                 foreach (KeyValuePair<string, string> item in dict.OrderBy(s => s.Key))
                 {
                     Label label = new Label
-                    (
+                    (World.Context, 
                         item.Key + ":",
                         true,
                         33,
@@ -146,7 +147,7 @@ namespace ClassicUO.Game.UI.Gumps
                     int height = label.Height;
 
                     label = new Label
-                    (
+                    (World.Context, 
                         item.Value,
                         true,
                         1153,
@@ -172,7 +173,7 @@ namespace ClassicUO.Game.UI.Gumps
                     databox.Add
                     (
                         new Line
-                        (
+                        (World.Context, 
                             startX,
                             startY + height + 2,
                             WIDTH - 65,

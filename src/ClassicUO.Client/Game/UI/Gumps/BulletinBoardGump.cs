@@ -24,10 +24,10 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = true;
             CanCloseWithRightClick = true;
 
-            Add(new GumpPic(0, 0, 0x087A, 0));
+            Add(new GumpPic(0, 0, 0x087A, 0, World.Context));
 
             Label label = new Label
-            (
+            (World.Context, 
                 name,
                 true,
                 1,
@@ -42,16 +42,16 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(label);
 
-            HitBox hitbox = new HitBox(15, 170, 80, 80)
+            HitBox hitbox = new HitBox(World.Context, 15, 170, 80, 80)
             {
                 Alpha = 0f
             };
 
             hitbox.MouseUp += (sender, e) =>
             {
-                UIManager.GetGump<BulletinBoardItem>(LocalSerial)?.Dispose();
+                World.Context.UI.GetGump<BulletinBoardItem>(LocalSerial)?.Dispose();
 
-                UIManager.Add
+                World.Context.UI.Add
                 (
                     new BulletinBoardItem
                     (
@@ -70,7 +70,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(hitbox);
 
             ScrollArea area = new ScrollArea
-            (
+            (World.Context, 
                 127,
                 159,
                 241,
@@ -80,7 +80,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(area);
 
-            _databox = new DataBox(0, 0, 1, 1);
+            _databox = new DataBox(World.Context, 0, 0, 1, 1);
             _databox.WantUpdateSize = true;
 
             area.Add(_databox);
@@ -92,7 +92,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            for (LinkedListNode<Gump> g = UIManager.Gumps.Last; g != null; g = g.Previous)
+            for (LinkedListNode<Gump> g = World.Context.UI.Gumps.Last; g != null; g = g.Previous)
             {
                 if (g.Value is BulletinBoardItem)
                 {
@@ -131,7 +131,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            BulletinBoardObject obj = new BulletinBoardObject(serial, msg);
+            BulletinBoardObject obj = new BulletinBoardObject(World.Context, serial, msg);
             _databox.Add(obj);
 
             _databox.WantUpdateSize = true;
@@ -169,7 +169,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = true;
             _datatime = datatime;
 
-            _articleContainer = new ExpandableScroll(0, 0, 408, 0x0820)
+            _articleContainer = new ExpandableScroll(0, 0, 408, 0x0820, World.Context)
             {
                 TitleGumpID = 0x0820,
                 AcceptMouseInput = true
@@ -178,7 +178,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(_articleContainer);
 
             ScrollArea area = new ScrollArea
-            (
+            (World.Context, 
                 0,
                 120,
                 272,
@@ -188,10 +188,10 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(area);
 
-            _databox = new DataBox(0, 0, 1, 1);
+            _databox = new DataBox(World.Context, 0, 0, 1, 1);
             area.Add(_databox);
 
-            bool useUnicode = Client.Game.UO.Version >= ClientVersion.CV_305D;
+            bool useUnicode = World.Context.Game.UO.Version >= ClientVersion.CV_305D;
             byte unicodeFontIndex = 1;
             int unicodeFontHeightOffset = 0;
 
@@ -203,7 +203,7 @@ namespace ClassicUO.Game.UI.Gumps
                 textColor = 0;
             }
 
-            Label text = new Label(ResGumps.Author, useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte) 6)
+            Label text = new Label(World.Context, ResGumps.Author, useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte) 6)
             {
                 X = 30,
                 Y = 40
@@ -211,7 +211,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(text);
 
-            text = new Label(poster, useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte) 9)
+            text = new Label(World.Context, poster, useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte) 9)
             {
                 X = 30 + text.Width,
                 Y = 46 + unicodeFontHeightOffset
@@ -220,7 +220,7 @@ namespace ClassicUO.Game.UI.Gumps
             Add(text);
 
 
-            text = new Label(ResGumps.Date, useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte) 6)
+            text = new Label(World.Context, ResGumps.Date, useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte) 6)
             {
                 X = 30,
                 Y = 58
@@ -228,7 +228,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(text);
 
-            text = new Label(datatime, useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte) 9)
+            text = new Label(World.Context, datatime, useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte) 9)
             {
                 X = 32 + text.Width,
                 Y = 64 + unicodeFontHeightOffset
@@ -236,7 +236,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add(text);
 
-            text = new Label(ResGumps.Title, useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte) 6)
+            text = new Label(World.Context, ResGumps.Title, useUnicode, textColor, font: useUnicode ? unicodeFontIndex : (byte) 6)
             {
                 X = 30,
                 Y = 77
@@ -253,7 +253,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Add
             (
-                _subjectTextbox = new StbTextBox(useUnicode ? unicodeFontIndex : (byte) 9, maxWidth: 150, isunicode: useUnicode, hue: subjectColor)
+                _subjectTextbox = new StbTextBox(World.Context, useUnicode ? unicodeFontIndex : (byte) 9, maxWidth: 150, isunicode: useUnicode, hue: subjectColor)
                 {
                     X = 30 + text.Width,
                     Y = 83 + unicodeFontHeightOffset,
@@ -272,14 +272,14 @@ namespace ClassicUO.Game.UI.Gumps
                     106,
                     235,
                     4,
-                    0x0835
+                    0x0835, World.Context
                 )
             );
 
             _databox.Add
             (
                 _textBox = new StbTextBox
-                (
+                (World.Context, 
                     useUnicode ? unicodeFontIndex : (byte) 9,
                     -1,
                     220,
@@ -302,11 +302,11 @@ namespace ClassicUO.Game.UI.Gumps
             switch (variant)
             {
                 case 0:
-                    Add(new GumpPic(97, 12, 0x0883, 0));
+                    Add(new GumpPic(97, 12, 0x0883, 0, World.Context));
 
                     Add
                     (
-                        _buttonPost = new Button((int) ButtonType.Post, 0x0886, 0x0886)
+                        _buttonPost = new Button(World.Context, (int) ButtonType.Post, 0x0886, 0x0886)
                         {
                             X = 37,
                             Y = Height - 50,
@@ -321,7 +321,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     Add
                     (
-                        _buttonReply = new Button((int) ButtonType.Reply, 0x0884, 0x0884)
+                        _buttonReply = new Button(World.Context, (int) ButtonType.Reply, 0x0884, 0x0884)
                         {
                             X = 37,
                             Y = Height - 50,
@@ -336,7 +336,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                     Add
                     (
-                        _buttonRemove = new Button((int) ButtonType.Remove, 0x0885, 0x0885) //DISABLED
+                        _buttonRemove = new Button(World.Context, (int) ButtonType.Remove, 0x0885, 0x0885) //DISABLED
                         {
                             X = 235,
                             Y = Height - 50,
@@ -356,7 +356,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             _textBox.Height = Math.Max
             (
-                Client.Game.UO.FileManager.Fonts.GetHeightUnicode
+                World.Context.Game.UO.FileManager.Fonts.GetHeightUnicode
                 (
                     1,
                     _textBox.Text,
@@ -395,7 +395,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             //if (!_textBox.IsDisposed && _textBox.IsChanged)
             //{
-            //    _textBox.Height = System.Math.Max(Client.Game.UO.FileManager.Fonts.GetHeightUnicode(1, _textBox.TxEntry.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 20, 40);
+            //    _textBox.Height = System.Math.Max(World.Context.Game.UO.FileManager.Fonts.GetHeightUnicode(1, _textBox.TxEntry.Text, 220, TEXT_ALIGN_TYPE.TS_LEFT, 0x0) + 20, 40);
 
             //    foreach (Control c in _scrollArea.Children)
             //    {
@@ -419,14 +419,14 @@ namespace ClassicUO.Game.UI.Gumps
             switch ((ButtonType) buttonID)
             {
                 case ButtonType.Post:
-                    NetClient.Socket.Send_BulletinBoardPostMessage(LocalSerial, _msgSerial, _subjectTextbox.Text, _textBox.Text);
+                    World.Network.Send_BulletinBoardPostMessage(LocalSerial, _msgSerial, _subjectTextbox.Text, _textBox.Text);
 
                     Dispose();
 
                     break;
 
                 case ButtonType.Reply:
-                    UIManager.Add
+                    World.Context.UI.Add
                     (
                         new BulletinBoardItem
                         (
@@ -446,7 +446,7 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case ButtonType.Remove:
-                    NetClient.Socket.Send_BulletinBoardRemoveMessage(LocalSerial, _msgSerial);
+                    World.Network.Send_BulletinBoardRemoveMessage(LocalSerial, _msgSerial);
                     Dispose();
 
                     break;
@@ -486,21 +486,21 @@ namespace ClassicUO.Game.UI.Gumps
     {
         public const int ITEM_HEIGHT = 18;
 
-        public BulletinBoardObject(uint serial, string text)
+        public BulletinBoardObject(GameContext context, uint serial, string text) : base(context)
         {
             LocalSerial = serial; //board
             CanMove = true;
             Width = 230;
             Height = ITEM_HEIGHT;
 
-            Add(new GumpPic(0, 0, 0x1523, 0));
+            Add(new GumpPic(0, 0, 0x1523, 0, Context));
 
-            if (Client.Game.UO.Version >= ClientVersion.CV_305D)
+            if (Context.Game.UO.Version >= ClientVersion.CV_305D)
             {
                 Add
                 (
                     new Label
-                    (
+                    (Context, 
                         text,
                         true,
                         0,
@@ -518,7 +518,7 @@ namespace ClassicUO.Game.UI.Gumps
                 Add
                 (
                     new Label
-                    (
+                    (Context, 
                         text,
                         false,
                         0x0386,
@@ -548,7 +548,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (root != null)
             {
-                NetClient.Socket.Send_BulletinBoardRequestMessage(root.LocalSerial, LocalSerial);
+                (root as Gump)?.World?.Network.Send_BulletinBoardRequestMessage(root.LocalSerial, LocalSerial);
             }
 
             return true;

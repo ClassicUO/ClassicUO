@@ -4,11 +4,13 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
+using ClassicUO.Game;
+
 namespace ClassicUO.Game.UI.Controls
 {
     internal class ColorBox : Control
     {
-        public ColorBox(int width, int height, ushort hue)
+        public ColorBox(GameContext context, int width, int height, ushort hue) : base(context)
         {
             CanMove = false;
 

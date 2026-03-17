@@ -111,12 +111,12 @@ namespace ClassicUO.Input
 
         public static bool MouseInWindow { get; set; }
 
-        public static void Update()
+        public static void Update(GameController controller)
         {
             if (!MouseInWindow)
             {
                 SDL.SDL_GetGlobalMouseState(out float x, out float y);
-                SDL.SDL_GetWindowPosition(Client.Game.Window.Handle, out int winX, out int winY);
+                SDL.SDL_GetWindowPosition(controller.Window.Handle, out int winX, out int winY);
                 Position.X = (int)x - winX;
                 Position.Y = (int)y - winY;
             }
@@ -128,9 +128,8 @@ namespace ClassicUO.Input
             }
 
             // Scale the mouse coordinates for the faux-backbuffer and DPI settings
-            Position.X = (int) ((double) Position.X * (Client.Game.GraphicManager.PreferredBackBufferWidth / Client.Game.Window.ClientBounds.Width) / Client.Game.DpiScale);
-
-            Position.Y = (int) ((double) Position.Y * (Client.Game.GraphicManager.PreferredBackBufferHeight / Client.Game.Window.ClientBounds.Height) / Client.Game.DpiScale);
+            Position.X = (int) ((double) Position.X * (controller.GraphicManager.PreferredBackBufferWidth / controller.Window.ClientBounds.Width) / controller.DpiScale);
+            Position.Y = (int) ((double) Position.Y * (controller.GraphicManager.PreferredBackBufferHeight / controller.Window.ClientBounds.Height) / controller.DpiScale);
 
             IsDragging = LButtonPressed || RButtonPressed || MButtonPressed;
         }

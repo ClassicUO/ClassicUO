@@ -35,17 +35,17 @@ namespace ClassicUO.Game.UI.Gumps
         public int WidthMultiplier { get; protected set; } = 1;
         public int HeightMultiplier { get; protected set; } = 1;
 
-        public bool ShowLock => Keyboard.Alt && UIManager.AnchorManager[this] != null;
+        public bool ShowLock => Keyboard.Alt && World.Context.UI.AnchorManager[this] != null;
 
         protected override void OnMove(int x, int y)
         {
-            if (Keyboard.Alt && !ProfileManager.CurrentProfile.HoldAltToMoveGumps)
+            if (Keyboard.Alt && !World.Profile.CurrentProfile.HoldAltToMoveGumps)
             {
-                UIManager.AnchorManager.DetachControl(this);
+                World.Context.UI.AnchorManager.DetachControl(this);
             }
             else
             {
-                UIManager.AnchorManager[this]?.UpdateLocation(this, X - _prevX, Y - _prevY);
+                World.Context.UI.AnchorManager[this]?.UpdateLocation(this, X - _prevX, Y - _prevY);
             }
 
             _prevX = X;
@@ -56,7 +56,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseDown(int x, int y, MouseButtonType button)
         {
-            UIManager.AnchorManager[this]?.MakeTopMost();
+            World.Context.UI.AnchorManager[this]?.MakeTopMost(World.Context.UI);
 
             _prevX = X;
             _prevY = Y;
@@ -66,9 +66,9 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override void OnMouseOver(int x, int y)
         {
-            if (!IsDisposed && UIManager.IsDragging && UIManager.DraggingControl == this)
+            if (!IsDisposed && World.Context.UI.IsDragging && World.Context.UI.DraggingControl == this)
             {
-                _anchorCandidate = UIManager.AnchorManager.GetAnchorableControlUnder(this);
+                _anchorCandidate = World.Context.UI.AnchorManager.GetAnchorableControlUnder(this);
             }
 
             base.OnMouseOver(x, y);
@@ -83,7 +83,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void TryAttacheToExist()
         {
-            _anchorCandidate = UIManager.AnchorManager.GetAnchorableControlUnder(this);
+            _anchorCandidate = World.Context.UI.AnchorManager.GetAnchorableControlUnder(this);
 
             Attache();
         }
@@ -92,8 +92,8 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (_anchorCandidate != null)
             {
-                Location = UIManager.AnchorManager.GetCandidateDropLocation(this, _anchorCandidate);
-                UIManager.AnchorManager.DropControl(this, _anchorCandidate);
+                Location = World.Context.UI.AnchorManager.GetCandidateDropLocation(this, _anchorCandidate);
+                World.Context.UI.AnchorManager.DropControl(this, _anchorCandidate);
                 _anchorCandidate = null;
             }
         }
@@ -102,7 +102,7 @@ namespace ClassicUO.Game.UI.Gumps
         {
             if (button == MouseButtonType.Left && ShowLock)
             {
-                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(LOCK_GRAPHIC);
+                ref readonly var gumpInfo = ref World.Context.Game.UO.Gumps.GetGump(LOCK_GRAPHIC);
                 if (gumpInfo.Texture != null)
                 {
                     if (
@@ -112,7 +112,7 @@ namespace ClassicUO.Game.UI.Gumps
                         && y <= gumpInfo.UV.Height
                     )
                     {
-                        UIManager.AnchorManager.DetachControl(this);
+                        World.Context.UI.AnchorManager.DetachControl(this);
                     }
                 }
             }
@@ -130,16 +130,16 @@ namespace ClassicUO.Game.UI.Gumps
             if (ShowLock)
             {
                 hueVector = ShaderHueTranslator.GetHueVector(0);
-                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(LOCK_GRAPHIC);
+                ref readonly var gumpInfo = ref World.Context.Game.UO.Gumps.GetGump(LOCK_GRAPHIC);
 
                 var texture = gumpInfo.Texture;
                 if (texture != null)
                 {
                     if (
-                        UIManager.MouseOverControl != null
+                        World.Context.UI.MouseOverControl != null
                         && (
-                            UIManager.MouseOverControl == this
-                            || UIManager.MouseOverControl.RootParent == this
+                            World.Context.UI.MouseOverControl == this
+                            || World.Context.UI.MouseOverControl.RootParent == this
                         )
                     )
                     {
@@ -169,7 +169,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (_anchorCandidate != null)
             {
-                Point drawLoc = UIManager.AnchorManager.GetCandidateDropLocation(
+                Point drawLoc = World.Context.UI.AnchorManager.GetCandidateDropLocation(
                     this,
                     _anchorCandidate
                 );
@@ -225,14 +225,14 @@ namespace ClassicUO.Game.UI.Gumps
         protected override void CloseWithRightClick()
         {
             if (
-                UIManager.AnchorManager[this] == null
+                World.Context.UI.AnchorManager[this] == null
                 || Keyboard.Alt
-                || !ProfileManager.CurrentProfile.HoldDownKeyAltToCloseAnchored
+                || !World.Profile.CurrentProfile.HoldDownKeyAltToCloseAnchored
             )
             {
-                if (ProfileManager.CurrentProfile.CloseAllAnchoredGumpsInGroupWithRightClick)
+                if (World.Profile.CurrentProfile.CloseAllAnchoredGumpsInGroupWithRightClick)
                 {
-                    UIManager.AnchorManager.DisposeAllControls(this);
+                    World.Context.UI.AnchorManager.DisposeAllControls(this);
                 }
 
                 base.CloseWithRightClick();
@@ -241,7 +241,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override void Dispose()
         {
-            UIManager.AnchorManager.DetachControl(this);
+            World.Context.UI.AnchorManager.DetachControl(this);
 
             base.Dispose();
         }

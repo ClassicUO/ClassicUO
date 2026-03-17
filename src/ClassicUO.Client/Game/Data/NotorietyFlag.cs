@@ -18,21 +18,21 @@ namespace ClassicUO.Game.Data
 
     internal static class Notoriety
     {
-        public static ushort GetHue(NotorietyFlag flag)
+        public static ushort GetHue(NotorietyFlag flag, Profile currentProfile)
         {
             switch (flag)
             {
-                case NotorietyFlag.Innocent: return ProfileManager.CurrentProfile.InnocentHue;
+                case NotorietyFlag.Innocent: return currentProfile.InnocentHue;
 
-                case NotorietyFlag.Ally: return ProfileManager.CurrentProfile.FriendHue;
+                case NotorietyFlag.Ally: return currentProfile.FriendHue;
 
-                case NotorietyFlag.Criminal: return ProfileManager.CurrentProfile.CriminalHue;
+                case NotorietyFlag.Criminal: return currentProfile.CriminalHue;
 
-                case NotorietyFlag.Gray: return ProfileManager.CurrentProfile.CanAttackHue;
+                case NotorietyFlag.Gray: return currentProfile.CanAttackHue;
 
-                case NotorietyFlag.Enemy: return ProfileManager.CurrentProfile.EnemyHue;
+                case NotorietyFlag.Enemy: return currentProfile.EnemyHue;
 
-                case NotorietyFlag.Murderer: return ProfileManager.CurrentProfile.MurdererHue;
+                case NotorietyFlag.Murderer: return currentProfile.MurdererHue;
 
                 case NotorietyFlag.Invulnerable: return 0x0034;
 

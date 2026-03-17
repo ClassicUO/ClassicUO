@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using System;
+using ClassicUO.Game;
 using ClassicUO.Input;
 using ClassicUO.Assets;
 using ClassicUO.Renderer;
@@ -15,7 +16,7 @@ namespace ClassicUO.Game.UI.Controls
         private readonly Button _buttonOK, _buttonCancel;
         private readonly HoveredLabel _label;
 
-        public HotkeyBox()
+        public HotkeyBox(GameContext context) : base(context)
         {
             CanMove = false;
             AcceptMouseInput = true;
@@ -29,7 +30,7 @@ namespace ClassicUO.Game.UI.Controls
 
             Add
             (
-                pic = new ResizePic(0x0BB8)
+                pic = new ResizePic(0x0BB8, context)
                 {
                     Width = 150,
                     Height = Height,
@@ -43,6 +44,7 @@ namespace ClassicUO.Game.UI.Controls
             (
                 _label = new HoveredLabel
                 (
+                    context,
                     string.Empty,
                     true,
                     1,
@@ -63,7 +65,7 @@ namespace ClassicUO.Game.UI.Controls
 
             Add
             (
-                _buttonOK = new Button((int) ButtonState.Ok, 0x0481, 0x0483, 0x0482)
+                _buttonOK = new Button(context, (int) ButtonState.Ok, 0x0481, 0x0483, 0x0482)
                 {
                     X = 152,
                     ButtonAction = ButtonAction.Activate
@@ -73,7 +75,7 @@ namespace ClassicUO.Game.UI.Controls
 
             Add
             (
-                _buttonCancel = new Button((int) ButtonState.Cancel, 0x047E, 0x0480, 0x047F)
+                _buttonCancel = new Button(context, (int) ButtonState.Cancel, 0x047E, 0x0480, 0x047F)
                 {
                     X = 182,
                     ButtonAction = ButtonAction.Activate

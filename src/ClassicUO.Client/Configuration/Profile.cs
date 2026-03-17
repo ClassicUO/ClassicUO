@@ -359,7 +359,7 @@ namespace ClassicUO.Configuration
         {
             Log.Trace($"Saving path:\t\t{path}");
 
-            ProfileManager.Save(this, path);
+            world.Profile.Save(this, path);
 
             // Save opened gumps
             SaveGumps(world, path);
@@ -381,13 +381,13 @@ namespace ClassicUO.Configuration
                 xml.WriteStartDocument(true);
                 xml.WriteStartElement("gumps");
 
-                UIManager.AnchorManager.Save(xml);
+                world.Context.UI.AnchorManager.Save(xml);
 
                 LinkedList<Gump> gumps = new LinkedList<Gump>();
 
-                foreach (Gump gump in UIManager.Gumps)
+                foreach (Gump gump in world.Context.UI.Gumps)
                 {
-                    if (!gump.IsDisposed && gump.CanBeSaved && !(gump is AnchorableGump anchored && UIManager.AnchorManager[anchored] != null))
+                    if (!gump.IsDisposed && gump.CanBeSaved && !(gump is AnchorableGump anchored && world.Context.UI.AnchorManager[anchored] != null))
                     {
                         gumps.AddLast(gump);
                     }
@@ -569,7 +569,7 @@ namespace ClassicUO.Configuration
                                     break;
 
                                 case GumpType.Journal:
-                                    if(ProfileManager.CurrentProfile.UseAlternateJournal)
+                                    if(world.Profile.CurrentProfile.UseAlternateJournal)
                                         gump = new ResizableJournal(world);
                                     else
                                         gump = new JournalGump(world);
@@ -669,7 +669,7 @@ namespace ClassicUO.Configuration
 
                             if (gump.LocalSerial != 0)
                             {
-                                UIManager.SavePosition(gump.LocalSerial, new Point(x, y));
+                                world.Context.UI.SavePosition(gump.LocalSerial, new Point(x, y));
                             }
 
                             if (!gump.IsDisposed)
@@ -749,10 +749,10 @@ namespace ClassicUO.Configuration
 
                                     if (!gump.IsDisposed)
                                     {
-                                        if (UIManager.AnchorManager[gump] == null && ancoGroup.IsEmptyDirection(matrix_x, matrix_y))
+                                        if (world.Context.UI.AnchorManager[gump] == null && ancoGroup.IsEmptyDirection(matrix_x, matrix_y))
                                         {
                                             gumps.Add(gump);
-                                            UIManager.AnchorManager[gump] = ancoGroup;
+                                            world.Context.UI.AnchorManager[gump] = ancoGroup;
                                             ancoGroup.AddControlToMatrix(matrix_x, matrix_y, gump);
                                         }
                                         else

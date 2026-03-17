@@ -14,11 +14,18 @@ namespace ClassicUO.Game.Managers
     {
         private readonly FastList<StaticAnimationInfo> _staticInfos = new FastList<StaticAnimationInfo>();
         private uint _processTime;
+        private readonly IProfileProvider _profileProvider;
+        private readonly UltimaOnline _uo;
 
+        public AnimatedStaticsManager(UltimaOnline uo, IProfileProvider profileProvider)
+        {
+            _uo = uo;
+            _profileProvider = profileProvider;
+        }
 
         public unsafe void Initialize()
         {
-            UOFile file = Client.Game.UO.FileManager.AnimData.AnimDataFile;
+            UOFile file = _uo.FileManager.AnimData.AnimDataFile;
 
             if (file == null)
             {
@@ -27,9 +34,9 @@ namespace ClassicUO.Game.Managers
 
             uint lastaddr = (uint)(file.Length - sizeof(AnimDataFrame));
 
-            for (int i = 0; i < Client.Game.UO.FileManager.TileData.StaticData.Length; i++)
+            for (int i = 0; i < _uo.FileManager.TileData.StaticData.Length; i++)
             {
-                if (Client.Game.UO.FileManager.TileData.StaticData[i].IsAnimated)
+                if (_uo.FileManager.TileData.StaticData[i].IsAnimated)
                 {
                     uint addr = (uint)(i * 68 + 4 * (i / 8 + 1));
 
@@ -55,7 +62,7 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            var file = Client.Game.UO.FileManager.AnimData.AnimDataFile;
+            var file = _uo.FileManager.AnimData.AnimDataFile;
 
             if (file == null)
             {
@@ -66,8 +73,8 @@ namespace ClassicUO.Game.Managers
             // fix static animations time to reflect the standard client
             uint delay = Constants.ITEM_EFFECT_ANIMATION_DELAY * 2;
             uint next_time = Time.Ticks + 250;
-            bool no_animated_field = ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.FieldsType != 0;
-            UOFileIndex[] static_data = Client.Game.UO.FileManager.Arts.File.Entries;
+            bool no_animated_field = _profileProvider.CurrentProfile != null && _profileProvider.CurrentProfile.FieldsType != 0;
+            UOFileIndex[] static_data = _uo.FileManager.Arts.File.Entries;
 
             for (int i = 0; i < _staticInfos.Length; i++)
             {

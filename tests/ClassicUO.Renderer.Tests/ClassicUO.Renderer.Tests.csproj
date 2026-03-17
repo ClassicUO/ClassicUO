@@ -1,0 +1,5 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\ClassicUO.Renderer\ClassicUO.Renderer.csproj" />
+  </ItemGroup>
+</Project>

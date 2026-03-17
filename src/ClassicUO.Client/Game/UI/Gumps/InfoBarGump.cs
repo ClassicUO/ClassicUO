@@ -28,7 +28,7 @@ namespace ClassicUO.Game.UI.Gumps
             CanCloseWithRightClick = false;
             Height = 20;
 
-            Add(_background = new AlphaBlendControl(0.7f) { Width = Width, Height = Height });
+            Add(_background = new AlphaBlendControl(World.Context, 0.7f) { Width = Width, Height = Height });
 
             ResetItems();
         }
@@ -133,17 +133,17 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Label _label;
         private ushort _warningLinesHue;
 
-        public InfoBarControl(InfoBarGump gump, string label, InfoBarVars var, ushort hue)
+        public InfoBarControl(InfoBarGump gump, string label, InfoBarVars var, ushort hue) : base(gump.World.Context)
         {
             _gump = gump;
             AcceptMouseInput = false;
             WantUpdateSize = true;
             CanMove = false;
 
-            _label = new Label(label, true, 999) { Height = 20, Hue = hue };
+            _label = new Label(Context, label, true, 999) { Height = 20, Hue = hue };
             Var = var;
 
-            _data = new Label("", true, 999) { Height = 20, X = _label.Width, Hue = 0x0481 };
+            _data = new Label(Context, "", true, 999) { Height = 20, X = _label.Width, Hue = 0x0481 };
             Add(_label);
             Add(_data);
         }
@@ -167,7 +167,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _data.Text = GetVarData(Var);
 
-                if (ProfileManager.CurrentProfile.InfoBarHighlightType == 0 || Var == InfoBarVars.NameNotoriety)
+                if (_gump.World.Profile.CurrentProfile.InfoBarHighlightType == 0 || Var == InfoBarVars.NameNotoriety)
                 {
                     _data.Hue = GetVarHue(Var);
                 }
@@ -190,7 +190,7 @@ namespace ClassicUO.Game.UI.Gumps
             base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
             float layerDepth = layerDepthRef;
 
-            if (Var != InfoBarVars.NameNotoriety && ProfileManager.CurrentProfile.InfoBarHighlightType == 1 && _warningLinesHue != 0x0481)
+            if (Var != InfoBarVars.NameNotoriety && _gump.World.Profile.CurrentProfile.InfoBarHighlightType == 1 && _warningLinesHue != 0x0481)
             {
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector(_warningLinesHue);
 
@@ -376,7 +376,7 @@ namespace ClassicUO.Game.UI.Gumps
                         return 0x0481;
                     }
 
-                case InfoBarVars.NameNotoriety: return Notoriety.GetHue(_gump.World.Player.NotorietyFlag);
+                case InfoBarVars.NameNotoriety: return Notoriety.GetHue(_gump.World.Player.NotorietyFlag, _gump.World.Profile.CurrentProfile);
 
                 default: return 0x0481;
             }

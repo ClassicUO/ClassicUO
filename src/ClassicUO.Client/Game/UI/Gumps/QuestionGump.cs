@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BSD-2-Clause
+﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using System;
 using ClassicUO.Game.UI.Controls;
@@ -14,17 +14,17 @@ namespace ClassicUO.Game.UI.Gumps
         public QuestionGump(World world, string message, Action<bool> result) : base(world, 0, 0)
         {
             CanCloseWithRightClick = true;
-            Add(new GumpPic(0, 0, 0x0816, 0));
+            Add(new GumpPic(0, 0, 0x0816, 0, World.Context));
 
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(0x0816);
+            ref readonly var gumpInfo = ref World.Context.Game.UO.Gumps.GetGump(0x0816);
 
             Width = gumpInfo.UV.Width;
             Height = gumpInfo.UV.Height;
 
-            Add(new Label(message, false, 0x0386, 165, font: 1) { X = 33, Y = 30 });
+            Add(new Label(World.Context, message, false, 0x0386, 165, font: 1) { X = 33, Y = 30 });
 
             Add(
-                new Button((int)Buttons.Cancel, 0x817, 0x818, 0x0819)
+                new Button(World.Context, (int)Buttons.Cancel, 0x817, 0x818, 0x0819)
                 {
                     X = 37,
                     Y = 75,
@@ -33,7 +33,7 @@ namespace ClassicUO.Game.UI.Gumps
             );
 
             Add(
-                new Button((int)Buttons.Ok, 0x81A, 0x81B, 0x081C)
+                new Button(World.Context, (int)Buttons.Ok, 0x81A, 0x81B, 0x081C)
                 {
                     X = 100,
                     Y = 75,
@@ -44,8 +44,8 @@ namespace ClassicUO.Game.UI.Gumps
             CanMove = false;
             IsModal = true;
 
-            X = (Client.Game.ClientBounds.Width - Width) >> 1;
-            Y = (Client.Game.ClientBounds.Height - Height) >> 1;
+            X = (World.Context.Game.ClientBounds.Width - Width) >> 1;
+            Y = (World.Context.Game.ClientBounds.Height - Height) >> 1;
 
             WantUpdateSize = false;
             _result = result;

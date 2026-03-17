@@ -1,6 +1,7 @@
-﻿// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Configuration;
+using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
@@ -20,6 +21,7 @@ namespace ClassicUO.Game.UI.Controls
         private readonly Gump _gump;
 
         public ItemGump(Gump gump, uint serial, ushort graphic, ushort hue, int x, int y, bool is_gump = false)
+            : base(gump?.World?.Context)
         {
             _gump = gump;
             _is_gump = is_gump;
@@ -46,22 +48,32 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _graphic = value;
 
-                ref readonly var spriteInfo = ref _is_gump
-                    ? ref Client.Game.UO.Gumps.GetGump(value)
-                    : ref Client.Game.UO.Arts.GetArt(value);
-
-                if (spriteInfo.Texture == null)
-                {
-                    Dispose();
-
-                    return;
-                }
-
-                Width = spriteInfo.UV.Width;
-                Height = spriteInfo.UV.Height;
-
-                IsPartialHue = !_is_gump && Client.Game.UO.FileManager.TileData.StaticData[value].IsPartialHue;
+                var uo = Context?.Game?.UO;
+                if (uo != null)
+                    InitializeSize(uo);
             }
+        }
+
+        private void InitializeSize(UltimaOnline uo = null)
+        {
+            uo ??= Context?.Game?.UO;
+            if (uo == null)
+                return;
+
+            ref readonly var spriteInfo = ref _is_gump
+                ? ref uo.Gumps.GetGump(_graphic)
+                : ref uo.Arts.GetArt(_graphic);
+
+            if (spriteInfo.Texture == null)
+            {
+                Dispose();
+                return;
+            }
+
+            Width = spriteInfo.UV.Width;
+            Height = spriteInfo.UV.Height;
+
+            IsPartialHue = !_is_gump && uo.FileManager.TileData.StaticData[_graphic].IsPartialHue;
         }
 
         public ushort Hue { get; set; }
@@ -82,9 +94,9 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (
                     CanPickUp
-                    && !Client.Game.UO.GameCursor.ItemHold.Enabled
+                    && !Context.Game.UO.GameCursor.ItemHold.Enabled
                     && Mouse.LButtonPressed
-                    && UIManager.LastControlMouseDown(MouseButtonType.Left) == this
+                    && _gump.World.Context.UI.LastControlMouseDown(MouseButtonType.Left) == this
                     && (
                         Mouse.LastLeftButtonClickTime != 0xFFFF_FFFF
                             && Mouse.LastLeftButtonClickTime != 0
@@ -105,7 +117,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            if (IsDisposed)
+            if (IsDisposed || Context?.Game?.UO == null)
             {
                 return false;
             }
@@ -125,8 +137,8 @@ namespace ClassicUO.Game.UI.Controls
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(hue, partialHue, 1);
 
             ref readonly var spriteInfo = ref _is_gump
-                ? ref Client.Game.UO.Gumps.GetGump(Graphic)
-                : ref Client.Game.UO.Arts.GetArt(Graphic);
+                ? ref Context.Game.UO.Gumps.GetGump(Graphic)
+                : ref Context.Game.UO.Arts.GetArt(Graphic);
 
             var texture = spriteInfo.Texture;
             if (spriteInfo.Texture != null)
@@ -169,8 +181,8 @@ namespace ClassicUO.Game.UI.Controls
         public override bool Contains(int x, int y)
         {
             ref readonly var spriteInfo = ref _is_gump
-                ? ref Client.Game.UO.Gumps.GetGump(Graphic)
-                : ref Client.Game.UO.Arts.GetArt(Graphic);
+                ? ref Context.Game.UO.Gumps.GetGump(Graphic)
+                : ref Context.Game.UO.Arts.GetArt(Graphic);
 
             if (spriteInfo.Texture == null)
             {
@@ -181,11 +193,11 @@ namespace ClassicUO.Game.UI.Controls
             y -= Offset.Y;
 
             if (
-                ProfileManager.CurrentProfile != null
-                && ProfileManager.CurrentProfile.ScaleItemsInsideContainers
+                _gump.World.Profile.CurrentProfile != null
+                && _gump.World.Profile.CurrentProfile.ScaleItemsInsideContainers
             )
             {
-                float scale = UIManager.ContainerScale;
+                float scale = _gump.World.Context.UI.ContainerScale;
 
                 x = (int)(x / scale);
                 y = (int)(y / scale);
@@ -193,7 +205,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (_is_gump)
             {
-                if (Client.Game.UO.Gumps.PixelCheck(Graphic, x, y))
+                if (Context.Game.UO.Gumps.PixelCheck(Graphic, x, y))
                 {
                     return true;
                 }
@@ -202,7 +214,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (item != null && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
                 {
-                    if (Client.Game.UO.Gumps.PixelCheck(Graphic, x - 5, y - 5))
+                    if (Context.Game.UO.Gumps.PixelCheck(Graphic, x - 5, y - 5))
                     {
                         return true;
                     }
@@ -210,7 +222,7 @@ namespace ClassicUO.Game.UI.Controls
             }
             else
             {
-                if (Client.Game.UO.Arts.PixelCheck(Graphic, x, y))
+                if (Context.Game.UO.Arts.PixelCheck(Graphic, x, y))
                 {
                     return true;
                 }
@@ -219,7 +231,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (item != null && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
                 {
-                    if (Client.Game.UO.Arts.PixelCheck(Graphic, x - 5, y - 5))
+                    if (Context.Game.UO.Arts.PixelCheck(Graphic, x - 5, y - 5))
                     {
                         return true;
                     }
@@ -252,7 +264,7 @@ namespace ClassicUO.Game.UI.Controls
                 return false;
             }
 
-            SplitMenuGump split = UIManager.GetGump<SplitMenuGump>(LocalSerial);
+            SplitMenuGump split = _gump.World.Context.UI.GetGump<SplitMenuGump>(LocalSerial);
 
             if (split == null)
             {
@@ -261,7 +273,7 @@ namespace ClassicUO.Game.UI.Controls
 
             split.X = Mouse.LClickPosition.X - 80;
             split.Y = Mouse.LClickPosition.Y - 40;
-            UIManager.AttemptDragControl(split, true);
+            _gump.World.Context.UI.AttemptDragControl(split, true);
             split.BringOnTop();
 
             return false;
@@ -279,7 +291,7 @@ namespace ClassicUO.Game.UI.Controls
 
             if (
                 !Keyboard.Ctrl
-                && ProfileManager.CurrentProfile.DoubleClickToLootInsideContainers
+                && _gump.World.Profile.CurrentProfile.DoubleClickToLootInsideContainers
                 && item != null
                 && !item.IsDestroyed
                 && !item.ItemData.IsContainer
@@ -303,25 +315,25 @@ namespace ClassicUO.Game.UI.Controls
             if (CanPickUp)
             {
                 ref readonly var spriteInfo = ref _is_gump
-                    ? ref Client.Game.UO.Gumps.GetGump(Graphic)
-                    : ref Client.Game.UO.Arts.GetArt(Graphic);
+                    ? ref Context.Game.UO.Gumps.GetGump(Graphic)
+                    : ref Context.Game.UO.Arts.GetArt(Graphic);
 
                 int centerX = spriteInfo.UV.Width >> 1;
                 int centerY = spriteInfo.UV.Height >> 1;
 
                 if (
-                    ProfileManager.CurrentProfile != null
-                    && ProfileManager.CurrentProfile.ScaleItemsInsideContainers
+                    _gump.World.Profile.CurrentProfile != null
+                    && _gump.World.Profile.CurrentProfile.ScaleItemsInsideContainers
                 )
                 {
-                    float scale = UIManager.ContainerScale;
+                    float scale = _gump.World.Context.UI.ContainerScale;
                     centerX = (int)(centerX * scale);
                     centerY = (int)(centerY * scale);
                 }
 
                 if (
-                    ProfileManager.CurrentProfile != null
-                    && ProfileManager.CurrentProfile.RelativeDragAndDropItems
+                    _gump.World.Profile.CurrentProfile != null
+                    && _gump.World.Profile.CurrentProfile.RelativeDragAndDropItems
                 )
                 {
                     Point p = new Point(

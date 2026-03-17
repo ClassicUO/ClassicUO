@@ -37,14 +37,14 @@ namespace ClassicUO.Game.UI.Gumps
 
             ref readonly AbilityDefinition def = ref AbilityData.Abilities[Index - 1];
 
-            _button = new GumpPic(0, 0, def.Icon, 0)
+            _button = new GumpPic(0, 0, def.Icon, 0, World.Context)
             {
                 AcceptMouseInput = false
             };
 
             Add(_button);
 
-            SetTooltip(Client.Game.UO.FileManager.Clilocs.GetString(1028838 + (Index - 1)), 80);
+            SetTooltip(World.Context.Game.UO.FileManager.Clilocs.GetString(1028838 + (Index - 1)), 80);
 
             WantUpdateSize = true;
             AcceptMouseInput = true;

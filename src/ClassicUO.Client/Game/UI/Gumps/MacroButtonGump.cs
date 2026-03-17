@@ -49,7 +49,7 @@ namespace ClassicUO.Game.UI.Gumps
             Height = 44;
 
             label = new Label
-            (
+            (World.Context, 
                 _macro.Name,
                 true,
                 0x03b2,
@@ -90,7 +90,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             Point offset = Mouse.LDragOffset;
 
-            if (ProfileManager.CurrentProfile.CastSpellsByOneClick && button == MouseButtonType.Left && !Keyboard.Alt && Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
+            if (World.Profile.CurrentProfile.CastSpellsByOneClick && button == MouseButtonType.Left && !Keyboard.Alt && Math.Abs(offset.X) < 5 && Math.Abs(offset.Y) < 5)
             {
                 RunMacro();
             }
@@ -98,7 +98,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
-            if (ProfileManager.CurrentProfile.CastSpellsByOneClick || button != MouseButtonType.Left)
+            if (World.Profile.CurrentProfile.CastSpellsByOneClick || button != MouseButtonType.Left)
             {
                 return false;
             }

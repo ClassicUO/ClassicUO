@@ -1,0 +1,46 @@
+name: Tests
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore
+
+      - name: Build
+        run: dotnet build --no-restore
+
+      - name: Run Tests
+        run: |
+          dotnet test --no-build \
+            --settings coverlet.runsettings \
+            --results-directory ./TestResults \
+            --collect:"XPlat Code Coverage" \
+            --verbosity minimal
+
+      - name: Generate Coverage Report
+        if: always()
+        uses: danielpalme/ReportGenerator-GitHub-Action@5
+        with:
+          reports: './TestResults/**/coverage.cobertura.xml'
+          targetdir: './CoverageReport'
+          reporttypes: 'MarkdownSummaryGithub'
+
+      - name: Publish Coverage Summary
+        if: github.event_name == 'pull_request'
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          path: CoverageReport/SummaryGithub.md
