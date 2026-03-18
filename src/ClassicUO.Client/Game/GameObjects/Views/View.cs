@@ -102,7 +102,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected static void DrawStatic(
             UltimaBatcher2D batcher,
-            UltimaOnline uo,
+            UOAssets uo,
             ushort graphic,
             int x,
             int y,
@@ -159,7 +159,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected static void DrawGump(
             UltimaBatcher2D batcher,
-            UltimaOnline uo,
+            UOAssets uo,
             ushort graphic,
             int x,
             int y,
@@ -187,7 +187,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected static void DrawStaticRotated(
             UltimaBatcher2D batcher,
-            UltimaOnline uo,
+            UOAssets uo,
             ushort graphic,
             int x,
             int y,
@@ -224,7 +224,7 @@ namespace ClassicUO.Game.GameObjects
 
         protected static void DrawStaticAnimated(
             UltimaBatcher2D batcher,
-            UltimaOnline uo,
+            UOAssets uo,
             ushort graphic,
             int x,
             int y,

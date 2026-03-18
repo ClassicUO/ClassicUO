@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
+using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
 using ClassicUO.Network;
@@ -42,12 +43,16 @@ namespace ClassicUO.Game
             var game = Client.Game;
             var settings = Configuration.Settings.GlobalSettings;
             var profile = new ProfileProviderInstance(settings);
+            var netClient = new NetClient();
+            netClient.SendFilter = (ref Span<byte> message) => Plugin.ProcessSendPacket(ref message);
+            netClient.Statistics.SendPingAction = (client, idx) => client.Send_Ping(idx);
+            PacketLogger.Default = new PacketLogger(CUOEnviroment.ExecutablePath);
             return new GameContext(
                 game,
                 new UIManagerInstance(game, profile),
                 profile,
                 settings,
-                new NetClient()
+                netClient
             );
         }
     }

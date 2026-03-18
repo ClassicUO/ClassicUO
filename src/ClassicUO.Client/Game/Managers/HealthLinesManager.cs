@@ -198,8 +198,8 @@ namespace ClassicUO.Game.Managers
             float alpha = passive && !newTargetSystem ? 0.5f : 1.0f;
             ushort hue =
                 mobile != null
-                    ? Notoriety.GetHue(mobile.NotorietyFlag, _world.Profile.CurrentProfile)
-                    : Notoriety.GetHue(NotorietyFlag.Gray, _world.Profile.CurrentProfile);
+                    ? NotorietyExtensions.GetHue(mobile.NotorietyFlag, _world.Profile.CurrentProfile)
+                    : NotorietyExtensions.GetHue(NotorietyFlag.Gray, _world.Profile.CurrentProfile);
 
             //Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue, false, alpha);
             Vector3 hueVecZero = ShaderHueTranslator.GetHueVector(0, false, alpha);

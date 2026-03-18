@@ -571,7 +571,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (mobile != null)
                 {
-                    textColor = Notoriety.GetHue(mobile.NotorietyFlag, World.Profile.CurrentProfile);
+                    textColor = NotorietyExtensions.GetHue(mobile.NotorietyFlag, World.Profile.CurrentProfile);
                 }
 
                 if (_textBox != null && _textBox.Hue != textColor)
@@ -579,7 +579,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _textBox.Hue = textColor;
                 }
 
-                ushort barColor = mobile != null ? Notoriety.GetHue(mobile.NotorietyFlag, World.Profile.CurrentProfile) : (ushort) 912;
+                ushort barColor = mobile != null ? NotorietyExtensions.GetHue(mobile.NotorietyFlag, World.Profile.CurrentProfile) : (ushort) 912;
 
                 if (_background.Hue != barColor)
                 {
@@ -713,7 +713,7 @@ namespace ClassicUO.Game.UI.Gumps
                             HPB_WIDTH,
                             true,
                             FontStyle.Cropped | FontStyle.BlackBorder,
-                            Notoriety.GetHue(World.Player.NotorietyFlag, World.Profile.CurrentProfile),
+                            NotorietyExtensions.GetHue(World.Player.NotorietyFlag, World.Profile.CurrentProfile),
                             TEXT_ALIGN_TYPE.TS_CENTER
                         )
                         {
@@ -736,7 +736,7 @@ namespace ClassicUO.Game.UI.Gumps
                             HPB_WIDTH,
                             true,
                             FontStyle.Cropped | FontStyle.BlackBorder,
-                            Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray, World.Profile.CurrentProfile),
+                            NotorietyExtensions.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray, World.Profile.CurrentProfile),
                             TEXT_ALIGN_TYPE.TS_CENTER
                         )
                         {
@@ -910,7 +910,7 @@ namespace ClassicUO.Game.UI.Gumps
                             32,
                             isunicode: true,
                             style: FontStyle.Cropped | FontStyle.BlackBorder,
-                            hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray, World.Profile.CurrentProfile),
+                            hue: NotorietyExtensions.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray, World.Profile.CurrentProfile),
                             maxWidth: Width,
                             align: TEXT_ALIGN_TYPE.TS_CENTER
                         )
@@ -1182,7 +1182,7 @@ namespace ClassicUO.Game.UI.Gumps
                             32,
                             HPB_WIDTH,
                             true,
-                            hue: Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray, World.Profile.CurrentProfile),
+                            hue: NotorietyExtensions.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray, World.Profile.CurrentProfile),
                             style: FontStyle.Cropped | FontStyle.BlackBorder,
                             align: TEXT_ALIGN_TYPE.TS_CENTER
                         )
@@ -1393,7 +1393,7 @@ namespace ClassicUO.Game.UI.Gumps
                             120,
                             false,
                             FontStyle.Fixed,
-                            Notoriety.GetHue(World.Player.NotorietyFlag, World.Profile.CurrentProfile)
+                            NotorietyExtensions.GetHue(World.Player.NotorietyFlag, World.Profile.CurrentProfile)
                         )
                         {
                             X = 0,
@@ -1418,7 +1418,7 @@ namespace ClassicUO.Game.UI.Gumps
                             109,
                             false,
                             FontStyle.Fixed | FontStyle.BlackBorder,
-                            Notoriety.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray, World.Profile.CurrentProfile)
+                            NotorietyExtensions.GetHue((entity as Mobile)?.NotorietyFlag ?? NotorietyFlag.Gray, World.Profile.CurrentProfile)
                         )
                         {
                             X = 0,
@@ -1552,7 +1552,7 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                     }
 
-                    ushort barColor = entity == null || entity == World.Player || mobile == null || mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Gray ? (ushort) 0 : Notoriety.GetHue(mobile.NotorietyFlag, World.Profile.CurrentProfile);
+                    ushort barColor = entity == null || entity == World.Player || mobile == null || mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Gray ? (ushort) 0 : NotorietyExtensions.GetHue(mobile.NotorietyFlag, World.Profile.CurrentProfile);
 
                     Add(_background = new GumpPic(0, 0, 0x0804, barColor, World.Context) { ContainsByBounds = true });
                     Add(_hpLineRed = new GumpPic(34, 38, LINE_RED, hitsColor, World.Context));
@@ -1793,7 +1793,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (inparty && mobile != null)
                 {
-                    textColor = Notoriety.GetHue(mobile.NotorietyFlag, World.Profile.CurrentProfile);
+                    textColor = NotorietyExtensions.GetHue(mobile.NotorietyFlag, World.Profile.CurrentProfile);
                 }
                 else
                 {
@@ -1809,7 +1809,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _textBox.Hue = textColor;
                 }
 
-                ushort barColor = entity == World.Player || mobile == null || mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Gray ? (ushort) 0 : Notoriety.GetHue(mobile.NotorietyFlag, World.Profile.CurrentProfile);
+                ushort barColor = entity == World.Player || mobile == null || mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Gray ? (ushort) 0 : NotorietyExtensions.GetHue(mobile.NotorietyFlag, World.Profile.CurrentProfile);
 
                 if (_background.Hue != barColor)
                 {

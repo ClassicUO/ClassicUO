@@ -16,7 +16,7 @@ namespace ClassicUO
     {
         Scene Scene { get; }
         AudioManager Audio { get; }
-        UltimaOnline UO { get; }
+        UOAssets UO { get; }
         IPluginHost PluginHost { get; }
         Rectangle ClientBounds { get; }
         float ScreenScale { get; set; }

@@ -1075,7 +1075,7 @@ namespace ClassicUO.Game.UI.Gumps
             private uint _createdTime;
             private RenderedText _renderedText;
 
-            public ChatLineTime(UltimaOnline uo, string text, byte font, bool isunicode, ushort hue)
+            public ChatLineTime(UOAssets uo, string text, byte font, bool isunicode, ushort hue)
             {
                 _renderedText = RenderedText.Create
                 (

@@ -15,9 +15,9 @@ namespace ClassicUO.Game.Managers
         private readonly FastList<StaticAnimationInfo> _staticInfos = new FastList<StaticAnimationInfo>();
         private uint _processTime;
         private readonly IProfileProvider _profileProvider;
-        private readonly UltimaOnline _uo;
+        private readonly UOAssets _uo;
 
-        public AnimatedStaticsManager(UltimaOnline uo, IProfileProvider profileProvider)
+        public AnimatedStaticsManager(UOAssets uo, IProfileProvider profileProvider)
         {
             _uo = uo;
             _profileProvider = profileProvider;

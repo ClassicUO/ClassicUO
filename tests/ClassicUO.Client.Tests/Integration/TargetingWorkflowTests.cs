@@ -1,5 +1,6 @@
 using ClassicUO.Client.Tests;
 using ClassicUO.Game;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using FluentAssertions;

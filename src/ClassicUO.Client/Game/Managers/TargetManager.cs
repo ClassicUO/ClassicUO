@@ -32,14 +32,6 @@ namespace ClassicUO.Game.Managers
         public static readonly uint Target = 6983686;
     }
 
-    internal enum TargetType
-    {
-        Neutral,
-        Harmful,
-        Beneficial,
-        Cancel
-    }
-
     internal class MultiTargetInfo
     {
         public MultiTargetInfo(ushort model, ushort x, ushort y, ushort z, ushort hue)

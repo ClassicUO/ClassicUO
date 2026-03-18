@@ -57,7 +57,7 @@ namespace ClassicUO.Game.GameObjects
                     drawY,
                     World.Profile.CurrentProfile.PartyAura && World.Party.Contains(this)
                         ? World.Profile.CurrentProfile.PartyAuraHue
-                        : Notoriety.GetHue(NotorietyFlag, World.Profile.CurrentProfile),
+                        : NotorietyExtensions.GetHue(NotorietyFlag, World.Profile.CurrentProfile),
                     depth
                 );
             }
@@ -80,7 +80,7 @@ namespace ClassicUO.Game.GameObjects
             }
             else if (SelectedObject.HealthbarObject == this)
             {
-                overridedHue = Notoriety.GetHue(NotorietyFlag, World.Profile.CurrentProfile);
+                overridedHue = NotorietyExtensions.GetHue(NotorietyFlag, World.Profile.CurrentProfile);
             }
             else if (
                 World.Profile.CurrentProfile.NoColorObjectsOutOfRange
@@ -144,7 +144,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (isAttack || isUnderMouse)
                 {
-                    overridedHue = Notoriety.GetHue(NotorietyFlag, World.Profile.CurrentProfile);
+                    overridedHue = NotorietyExtensions.GetHue(NotorietyFlag, World.Profile.CurrentProfile);
                 }
             }
 

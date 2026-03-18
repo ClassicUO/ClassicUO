@@ -1,3 +1,5 @@
+using ClassicUO.Game.Data;
+
 namespace ClassicUO.Game.Managers
 {
     internal interface ITargetManager

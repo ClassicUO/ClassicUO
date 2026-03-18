@@ -166,7 +166,7 @@ namespace ClassicUO.Game.UI.Gumps
                             int gy = xx + yy;
 
                             hueVector = ShaderHueTranslator.GetHueVector(
-                                Notoriety.GetHue(mob.NotorietyFlag, World.Profile.CurrentProfile)
+                                NotorietyExtensions.GetHue(mob.NotorietyFlag, World.Profile.CurrentProfile)
                             );
 
                             batcher.Draw(

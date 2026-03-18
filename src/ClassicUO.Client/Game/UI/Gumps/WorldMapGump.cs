@@ -2445,7 +2445,7 @@ namespace ClassicUO.Game.UI.Gumps
                     layerDepth
                 );
 
-                hueVector.X = isparty ? 0x0034 : Notoriety.GetHue(mobile.NotorietyFlag, World.Profile.CurrentProfile);
+                hueVector.X = isparty ? 0x0034 : NotorietyExtensions.GetHue(mobile.NotorietyFlag, World.Profile.CurrentProfile);
                 hueVector.Y = 1;
                 hueVector.Z = 1;
 

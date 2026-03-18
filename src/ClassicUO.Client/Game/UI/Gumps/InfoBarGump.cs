@@ -376,7 +376,7 @@ namespace ClassicUO.Game.UI.Gumps
                         return 0x0481;
                     }
 
-                case InfoBarVars.NameNotoriety: return Notoriety.GetHue(_gump.World.Player.NotorietyFlag, _gump.World.Profile.CurrentProfile);
+                case InfoBarVars.NameNotoriety: return NotorietyExtensions.GetHue(_gump.World.Player.NotorietyFlag, _gump.World.Profile.CurrentProfile);
 
                 default: return 0x0481;
             }

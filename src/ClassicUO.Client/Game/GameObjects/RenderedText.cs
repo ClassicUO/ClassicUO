@@ -28,7 +28,7 @@ namespace ClassicUO.Game
     }
     internal sealed class RenderedText
     {
-        private UltimaOnline _uo;
+        private UOAssets _uo;
 
         private static readonly QueuedPool<RenderedText> _pool = new QueuedPool<RenderedText>(
             3000,
@@ -177,7 +177,7 @@ namespace ClassicUO.Game
 
 
         public static RenderedText Create(
-            UltimaOnline uo,
+            UOAssets uo,
             string text,
             ushort hue = 0xFFFF,
             byte font = 0xFF,

@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>ClassicUO.Client.Tests</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>ClassicUO.UnitTests</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>DynamicProxyGenAssembly2</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ClassicUO.Assets\ClassicUO.Assets.csproj" />
+    <ProjectReference Include="..\ClassicUO.IO\ClassicUO.IO.csproj" />
+    <ProjectReference Include="..\ClassicUO.Utility\ClassicUO.Utility.csproj" />
+    <ProjectReference Include="..\..\external\FNA\FNA.Core.csproj" />
+  </ItemGroup>
+
+</Project>

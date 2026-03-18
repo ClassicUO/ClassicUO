@@ -1817,7 +1817,7 @@ namespace ClassicUO.Game.Managers
                 {
                     if (ent != null)
                     {
-                        GameActions.MessageOverhead(_world, string.Format(ResGeneral.Target0, ent.Name), Notoriety.GetHue(((Mobile) ent).NotorietyFlag, _world.Profile.CurrentProfile), _world.Player);
+                        GameActions.MessageOverhead(_world, string.Format(ResGeneral.Target0, ent.Name), NotorietyExtensions.GetHue(((Mobile) ent).NotorietyFlag, _world.Profile.CurrentProfile), _world.Player);
 
                         _world.TargetManager.NewTargetSystemSerial = serial;
                         _world.TargetManager.SelectedTarget = serial;

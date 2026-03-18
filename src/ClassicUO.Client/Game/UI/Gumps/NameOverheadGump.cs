@@ -45,7 +45,7 @@ namespace ClassicUO.Game.UI.Gumps
             _renderedText = RenderedText.Create(
                 World.Context.Game.UO,
                 string.Empty,
-                entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag, World.Profile.CurrentProfile) : (ushort)0x0481,
+                entity is Mobile m ? NotorietyExtensions.GetHue(m.NotorietyFlag, World.Profile.CurrentProfile) : (ushort)0x0481,
                 0xFF,
                 true,
                 FontStyle.BlackBorder,
@@ -184,7 +184,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _background = new AlphaBlendControl(World.Context, .7f)
                 {
                     WantUpdateSize = false,
-                    Hue = entity is Mobile m ? Notoriety.GetHue(m.NotorietyFlag, World.Profile.CurrentProfile) : (ushort)0x0481
+                    Hue = entity is Mobile m ? NotorietyExtensions.GetHue(m.NotorietyFlag, World.Profile.CurrentProfile) : (ushort)0x0481
                 }
             );
         }
@@ -540,14 +540,14 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     _borderColor = SolidColorTextureCache.GetTexture(Color.Red);
                     _background.Hue = _renderedText.Hue = entity is Mobile m
-                        ? Notoriety.GetHue(m.NotorietyFlag, World.Profile.CurrentProfile)
+                        ? NotorietyExtensions.GetHue(m.NotorietyFlag, World.Profile.CurrentProfile)
                         : (ushort)0x0481;
                 }
                 else
                 {
                     _borderColor = SolidColorTextureCache.GetTexture(Color.Black);
                     _background.Hue = _renderedText.Hue = entity is Mobile m
-                        ? Notoriety.GetHue(m.NotorietyFlag, World.Profile.CurrentProfile)
+                        ? NotorietyExtensions.GetHue(m.NotorietyFlag, World.Profile.CurrentProfile)
                         : (ushort)0x0481;
                 }
             }

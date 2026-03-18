@@ -54,7 +54,7 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        private void InitializeSize(UltimaOnline uo = null)
+        private void InitializeSize(UOAssets uo = null)
         {
             uo ??= Context?.Game?.UO;
             if (uo == null)

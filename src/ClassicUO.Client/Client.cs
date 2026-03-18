@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
@@ -16,7 +16,7 @@ using System.IO;
 
 namespace ClassicUO
 {
-    sealed class UltimaOnline
+    sealed class UOAssets
     {
         public Renderer.Animations.Animations Animations { get; private set; }
         public Renderer.Arts.Art Arts { get; private set; }
@@ -35,7 +35,7 @@ namespace ClassicUO
         public UOFileManager FileManager { get; private set; }
 
 
-        public UltimaOnline()
+        public UOAssets()
         {
 
         }

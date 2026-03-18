@@ -387,7 +387,7 @@ namespace ClassicUO.Game.UI.Controls
             _updateUI = true;
         }
 
-        protected static ushort GetAnimID(UltimaOnline uo, ushort mobileGraphic, ushort itemGraphic, ushort animID, bool isfemale)
+        protected static ushort GetAnimID(UOAssets uo, ushort mobileGraphic, ushort itemGraphic, ushort animID, bool isfemale)
         {
             int offset = isfemale ? Constants.FEMALE_GUMP_OFFSET : Constants.MALE_GUMP_OFFSET;
 
@@ -444,7 +444,7 @@ namespace ClassicUO.Game.UI.Controls
             return (ushort)(animID + offset);
         }
 
-        private static bool IsAnimExistsInGump(UltimaOnline uo, ushort animID, ref int offset, bool isFemale)
+        private static bool IsAnimExistsInGump(UOAssets uo, ushort animID, ref int offset, bool isFemale)
         {
             if (
                     animID + offset > GumpsLoader.MAX_GUMP_DATA_INDEX_COUNT

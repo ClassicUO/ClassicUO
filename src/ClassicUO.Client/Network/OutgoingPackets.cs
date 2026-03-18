@@ -308,7 +308,7 @@ namespace ClassicUO.Network
             int serverIndex,
             uint slot,
             byte profession,
-            UltimaOnline uo
+            UOAssets uo
         )
         {
             const byte ID = 0x00;
