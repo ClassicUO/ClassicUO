@@ -71,6 +71,11 @@ namespace ClassicUO.Game.Scenes
         {
             _world = world;
             _useItemQueue = new UseItemQueue(world);
+
+            _lightsPass = new Passes.LightsPass(this);
+            _worldPass = new Passes.WorldPass(this);
+            _deathScreenPass = new Passes.DeathScreenPass(this);
+            _lightsClearPass = new Passes.ClearPass("LightsClear");
         }
 
         public bool UpdateDrawPosition { get; set; }
@@ -919,142 +924,82 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, RenderTargets renderTargets)
+        private readonly Passes.LightsPass _lightsPass;
+        private readonly Passes.WorldPass _worldPass;
+        private readonly Passes.DeathScreenPass _deathScreenPass;
+        private readonly Passes.ClearPass _lightsClearPass;
+
+        public override void BuildRenderPasses(RenderPipeline pipeline, RenderTargets renderTargets)
         {
             if (!_world.InGame)
             {
-                return false;
+                return;
             }
 
-            if (CheckDeathScreen(batcher))
+            InitializeRenderTargets(renderTargets);
+
+            // Death screen — skip world/lights, just show death text
+            if (ShouldShowDeathScreen())
             {
-                return true;
+                pipeline.Add(_deathScreenPass);
+                return;
             }
 
-            Viewport r_viewport = batcher.GraphicsDevice.Viewport;
-            Viewport camera_viewport = Camera.GetViewport();
-            Matrix matrix = Camera.ViewTransformMatrix;
+            // Lights pass
+            bool drawLights = (UseLights || UseAltLights)
+                && !(_world.Player.IsDead && _world.Profile.CurrentProfile.EnableBlackWhiteEffect);
 
-            bool can_draw_lights = false;
-
-            can_draw_lights = PrepareLightsRendering(batcher, ref matrix, renderTargets);
-            batcher.GraphicsDevice.Viewport = camera_viewport;
-
-            DrawWorld(batcher, ref matrix, renderTargets);
-
-            batcher.GraphicsDevice.Viewport = r_viewport;
-
-            return base.Draw(batcher, renderTargets);
-        }
-
-        private void DrawWorld(UltimaBatcher2D batcher, ref Matrix matrix, RenderTargets renderTargets)
-        {
-            batcher.GraphicsDevice.SetRenderTarget(renderTargets.WorldRenderTarget);
-            SelectedObject.Object = null;
-            Profiler.EnterContext(Profiler.ProfilerContext.RENDER_FRAME_WORLD_PREPARE);
-            FillGameObjectList();
-            Profiler.ExitContext(Profiler.ProfilerContext.RENDER_FRAME_WORLD_PREPARE);
-            Profiler.EnterContext(Profiler.ProfilerContext.RENDER_FRAME_WORLD);
-            batcher.SetSampler(SamplerState.PointClamp);
-
-            batcher.Begin(null, matrix);
-            batcher.SetBrightlight(_world.Profile.CurrentProfile.TerrainShadowsLevel * 0.1f);
-
-            if (_world.Profile.CurrentProfile.UseCircleOfTransparency
-                && _world.Profile.CurrentProfile.CircleOfTransparencyType != 1) // gradient mode uses CPU alpha, not shader
+            if (drawLights)
             {
-                batcher.SetCircleOfTransparencyRadius(
-                    (float)_world.Profile.CurrentProfile.CircleOfTransparencyRadius / Camera.Zoom
-                );
+                if (!UseAltLights)
+                {
+                    float lightColor = _world.Light.IsometricLevel;
+                    if (_world.Profile.CurrentProfile.UseDarkNights)
+                    {
+                        lightColor -= 0.04f;
+                    }
+                    _lightsPass.ClearColor = new Color(new Vector4(lightColor, lightColor, lightColor, 1));
+                }
+                else
+                {
+                    _lightsPass.ClearColor = Color.Black;
+                }
+
+                pipeline.Add(_lightsPass);
             }
             else
             {
-                batcher.SetCircleOfTransparencyRadius(0f);
+                _lightsClearPass.Target = renderTargets.LightRenderTarget;
+                _lightsClearPass.ClearColor = Color.Transparent;
+                pipeline.Add(_lightsClearPass);
             }
 
-            // https://shawnhargreaves.com/blog/depth-sorting-alpha-blended-objects.html
-            batcher.SetStencil(DepthStencilState.Default);
-
-            RenderedObjectsCount = _renderLists.DrawRenderLists(
-                batcher,
-                _maxGroundZ,
-                _visibleChunks,
-                _offset.X,
-                _offset.Y
-            );
-
-
-            if (
-                _multi != null
-                && _world.TargetManager.IsTargeting
-                && _world.TargetManager.TargetingState == CursorTarget.MultiPlacement
-            )
-            {
-                _multi.Draw(
-                    batcher,
-                    _multi.RealScreenPosition.X,
-                    _multi.RealScreenPosition.Y,
-                    _multi.CalculateDepthZ()
-                );
-            }
-
-            // draw weather
-            _world.Weather.Draw(batcher, 0, 0, MAX_LAYER_DEPTH - 1);
-
-            DrawSelection(batcher, MAX_LAYER_DEPTH);
-
-            batcher.SetSampler(null);
-            batcher.SetStencil(null);
-            batcher.SetCircleOfTransparencyRadius(0f);
-            batcher.End();
-
-            int flushes = batcher.FlushesDone;
-            int switches = batcher.TextureSwitches;
-            batcher.GraphicsDevice.SetRenderTarget(null);
-            Profiler.ExitContext(Profiler.ProfilerContext.RENDER_FRAME_WORLD);
+            // World pass
+            pipeline.Add(_worldPass);
         }
 
-        private bool PrepareLightsRendering(UltimaBatcher2D batcher, ref Matrix matrix, RenderTargets renderTargets)
+        internal bool ShouldShowDeathScreen()
         {
-            InitializeRenderTargets(renderTargets);
+            return _world.Profile.CurrentProfile != null
+                && _world.Profile.CurrentProfile.EnableDeathScreen
+                && _world.InGame
+                && _world.Player.IsDead
+                && _world.Player.DeathScreenTimer > Time.Ticks;
+        }
 
-            if (
-                !UseLights && !UseAltLights
-                || _world.Player.IsDead && _world.Profile.CurrentProfile.EnableBlackWhiteEffect
-            )
-            {
-                batcher.GraphicsDevice.SetRenderTarget(renderTargets.LightRenderTarget);
-                batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.Transparent, 0f, 0);
-                batcher.GraphicsDevice.SetRenderTarget(null);
+        internal void DrawDeathScreen(UltimaBatcher2D batcher)
+        {
+            _youAreDeadText.Draw(
+                batcher,
+                Camera.Bounds.X + (Camera.Bounds.Width / 2 - _youAreDeadText.Width / 2),
+                Camera.Bounds.Bottom / 2,
+                0f
+            );
+        }
 
-                return false;
-            }
-
-            batcher.GraphicsDevice.SetRenderTarget(renderTargets.LightRenderTarget);
-            batcher.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0f, 0);
-
-            if (!UseAltLights)
-            {
-                float lightColor = _world.Light.IsometricLevel;
-
-                if (_world.Profile.CurrentProfile.UseDarkNights)
-                {
-                    lightColor -= 0.04f;
-                }
-
-                batcher.GraphicsDevice.Clear(
-                    ClearOptions.Target,
-                    new Vector4(lightColor, lightColor, lightColor, 1),
-                    0f,
-                    0
-                );
-            }
-
-            batcher.Begin(null, matrix);
-            batcher.SetBlendState(BlendState.Additive);
-
+        internal void DrawLightSprites(UltimaBatcher2D batcher)
+        {
             Vector3 hue = Vector3.Zero;
-
             hue.Z = 1f;
 
             for (int i = 0; i < _lightCount; i++)
@@ -1088,13 +1033,58 @@ namespace ClassicUO.Game.Scenes
             }
 
             _lightCount = 0;
+        }
 
-            batcher.SetBlendState(null);
-            batcher.End();
+        internal void DrawWorldContent(UltimaBatcher2D batcher)
+        {
+            SelectedObject.Object = null;
+            Profiler.EnterContext(Profiler.ProfilerContext.RENDER_FRAME_WORLD_PREPARE);
+            FillGameObjectList();
+            Profiler.ExitContext(Profiler.ProfilerContext.RENDER_FRAME_WORLD_PREPARE);
+            Profiler.EnterContext(Profiler.ProfilerContext.RENDER_FRAME_WORLD);
 
-            batcher.GraphicsDevice.SetRenderTarget(null);
+            batcher.SetBrightlight(_world.Profile.CurrentProfile.TerrainShadowsLevel * 0.1f);
 
-            return true;
+            if (_world.Profile.CurrentProfile.UseCircleOfTransparency
+                && _world.Profile.CurrentProfile.CircleOfTransparencyType != 1)
+            {
+                batcher.SetCircleOfTransparencyRadius(
+                    (float)_world.Profile.CurrentProfile.CircleOfTransparencyRadius / Camera.Zoom
+                );
+            }
+            else
+            {
+                batcher.SetCircleOfTransparencyRadius(0f);
+            }
+
+            RenderedObjectsCount = _renderLists.DrawRenderLists(
+                batcher,
+                _maxGroundZ,
+                _visibleChunks,
+                _offset.X,
+                _offset.Y
+            );
+
+            if (
+                _multi != null
+                && _world.TargetManager.IsTargeting
+                && _world.TargetManager.TargetingState == CursorTarget.MultiPlacement
+            )
+            {
+                _multi.Draw(
+                    batcher,
+                    _multi.RealScreenPosition.X,
+                    _multi.RealScreenPosition.Y,
+                    _multi.CalculateDepthZ()
+                );
+            }
+
+            _world.Weather.Draw(batcher, 0, 0, MAX_LAYER_DEPTH - 1);
+            DrawSelection(batcher, MAX_LAYER_DEPTH);
+
+            batcher.SetCircleOfTransparencyRadius(0f);
+
+            Profiler.ExitContext(Profiler.ProfilerContext.RENDER_FRAME_WORLD);
         }
 
         private void InitializeRenderTargets(RenderTargets renderTargets)
@@ -1180,34 +1170,6 @@ namespace ClassicUO.Game.Scenes
             FontStyle.BlackBorder,
             TEXT_ALIGN_TYPE.TS_LEFT
         );
-
-        private bool CheckDeathScreen(UltimaBatcher2D batcher)
-        {
-            if (
-                _world.Profile.CurrentProfile != null
-                && _world.Profile.CurrentProfile.EnableDeathScreen
-            )
-            {
-                if (_world.InGame)
-                {
-                    if (_world.Player.IsDead && _world.Player.DeathScreenTimer > Time.Ticks)
-                    {
-                        batcher.Begin();
-                        _youAreDeadText.Draw(
-                            batcher,
-                            Camera.Bounds.X + (Camera.Bounds.Width / 2 - _youAreDeadText.Width / 2),
-                            Camera.Bounds.Bottom / 2,
-                            0f
-                        );
-                        batcher.End();
-
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
 
         private void StopFollowing()
         {

@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Input;
 using ClassicUO.Renderer;
@@ -35,6 +35,10 @@ namespace ClassicUO.Game.Scenes
         public virtual bool Draw(UltimaBatcher2D batcher, RenderTargets renderTargets)
         {
             return true;
+        }
+
+        public virtual void BuildRenderPasses(RenderPipeline pipeline, RenderTargets renderTargets)
+        {
         }
 
         public virtual void DrawUI(UltimaBatcher2D batcher)

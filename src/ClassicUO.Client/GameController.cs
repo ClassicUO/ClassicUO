@@ -34,6 +34,9 @@ namespace ClassicUO
         private UltimaBatcher2D _uoSpriteBatch;
         private RenderTargets _renderTargets = new();
         private readonly RenderLists _renderLists = new();
+        private readonly RenderPipeline _renderPipeline = new();
+        private Rendering.UIPass _uiPass;
+        private readonly Rendering.CompositePass _compositePass = new();
         private bool _suppressedDraw;
 
         private InputDispatcher _input;
@@ -141,6 +144,8 @@ namespace ClassicUO
             Microsoft.Xna.Framework.Input.TextInputEXT.StartTextInput();
 
             DisplayScale = DpiScale;
+
+            _uiPass = new Rendering.UIPass(this);
 
             base.Initialize();
         }
@@ -360,47 +365,16 @@ namespace ClassicUO
 
             _totalFrames++;
 
-            GraphicsDevice.Clear(Color.Black);
-
+            // Scene-specific passes (Lights, World, etc.)
             if (Scene != null && Scene.IsLoaded && !Scene.IsDestroyed)
             {
-                Scene.Draw(_uoSpriteBatch, _renderTargets);
+                Scene.BuildRenderPasses(_renderPipeline, _renderTargets);
             }
 
-            _uoSpriteBatch.GraphicsDevice.SetRenderTarget(_renderTargets.UiRenderTarget);
-            GraphicsDevice.Clear(Color.Transparent);
+            _renderPipeline.Add(_uiPass);
+            _renderPipeline.Add(_compositePass);
 
-            if ((UO.World?.InGame ?? false) && SelectedObject.Object is TextObject t)
-            {
-                if (t.IsTextGump)
-                {
-                    t.ToTopD();
-                }
-                else
-                {
-                    UO.World.WorldTextManager?.MoveToTop(t);
-                }
-            }
-
-            SelectedObject.HealthbarObject = null;
-            SelectedObject.SelectedContainer = null;
-
-            _uoSpriteBatch.Begin();
-            if (Scene != null && Scene.IsLoaded && !Scene.IsDestroyed)
-            {
-                Scene.DrawUI(_uoSpriteBatch);
-            }
-            _uoSpriteBatch.End();
-
-            UI.Draw(_uoSpriteBatch);
-
-            _uoSpriteBatch.Begin();
-            UO.GameCursor?.Draw(_uoSpriteBatch);
-            _uoSpriteBatch.End();
-
-            _uoSpriteBatch.GraphicsDevice.SetRenderTarget(null);
-
-            _renderTargets.Draw(_uoSpriteBatch);
+            _renderPipeline.Execute(_uoSpriteBatch, _renderTargets);
 
             Profiler.ExitContext(Profiler.ProfilerContext.RENDER_FRAME);
             Profiler.EnterContext(Profiler.ProfilerContext.OUT_OF_CONTEXT);
