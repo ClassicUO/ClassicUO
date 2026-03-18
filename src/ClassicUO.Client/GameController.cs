@@ -267,10 +267,14 @@ namespace ClassicUO
             Mouse.Update(Window.Handle, GraphicManager.PreferredBackBufferWidth, GraphicManager.PreferredBackBufferHeight, Window.ClientBounds.Width, Window.ClientBounds.Height, DpiScale);
 
             var network = UO.World.Network;
-            var data = network.CollectAvailableData();
-            var packetsCount = PacketHandlers.Handler.ParsePackets(network, UO.World, data);
 
-            network.Statistics.TotalPacketsReceived += (uint)packetsCount;
+            ArraySegment<byte> data;
+            while ((data = network.CollectAvailableData()).Count > 0)
+            {
+                var packetsCount = PacketHandlers.Handler.ParsePackets(network, UO.World, data);
+                network.Statistics.TotalPacketsReceived += (uint)packetsCount;
+            }
+           
             network.Flush();
 
             Plugin.Tick();
