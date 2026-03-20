@@ -67,6 +67,9 @@ namespace ClassicUO.Game.Scenes
 
         private readonly World _world;
 
+        // Track the previously highlighted mesh sprite so we can restore its hue
+        private GameObject _prevMeshHighlight;
+
         public GameScene(World world)
         {
             _world = world;
@@ -953,6 +956,41 @@ namespace ClassicUO.Game.Scenes
             SelectedObject.Object = null;
             Profiler.EnterContext(Profiler.ProfilerContext.RENDER_FRAME_WORLD_PREPARE);
             FillGameObjectList();
+
+            // Restore previous highlight's original hue before applying new one
+            if (_prevMeshHighlight != null && _prevMeshHighlight.InChunkMesh && _prevMeshHighlight.MeshSpriteIndex >= 0)
+            {
+                var prevChunk = _world.Map.GetChunk(_prevMeshHighlight.X, _prevMeshHighlight.Y);
+                if (prevChunk?.Mesh != null)
+                {
+                    var prevLayer = _prevMeshHighlight is Land ? prevChunk.Mesh.Land : prevChunk.Mesh.Statics;
+                    ApplyMeshHue(_prevMeshHighlight, prevLayer);
+                }
+                _prevMeshHighlight = null;
+            }
+
+            // Apply highlight hue to mesh vertex for selected meshed object
+            // (instead of redrawing it on top, which breaks z-order for overlapping objects)
+            if (ProfileManager.CurrentProfile.HighlightGameObjects
+                && SelectedObject.Object is GameObject selObj
+                && selObj.InChunkMesh && selObj.MeshSpriteIndex >= 0)
+            {
+                var chunk = _world.Map.GetChunk(selObj.X, selObj.Y);
+                if (chunk?.Mesh != null)
+                {
+                    var layer = selObj is Land ? chunk.Mesh.Land : chunk.Mesh.Statics;
+                    float shaderType = selObj is Land land && land.IsStretched
+                        ? ShaderHueTranslator.SHADER_LAND_HUED
+                        : ShaderHueTranslator.SHADER_HUED;
+                    layer.SetHue(
+                        selObj.MeshSpriteIndex,
+                        Constants.HIGHLIGHT_CURRENT_OBJECT_HUE - 1,
+                        shaderType
+                    );
+                    _prevMeshHighlight = selObj;
+                }
+            }
+
             Profiler.ExitContext(Profiler.ProfilerContext.RENDER_FRAME_WORLD_PREPARE);
             Profiler.EnterContext(Profiler.ProfilerContext.RENDER_FRAME_WORLD);
             batcher.SetSampler(SamplerState.PointClamp);

@@ -159,16 +159,6 @@ namespace ClassicUO.Game.Scenes
                    DrawRenderList(batcher, _animations, maxGroundZ) +
                    DrawRenderList(batcher, _effects, maxGroundZ);
 
-            // Draw selected object highlight on top if it's in a chunk mesh
-            if (SelectedObject.Object is GameObject selectedObj && selectedObj.InChunkMesh)
-            {
-                float depth = selectedObj.CalculateDepthZ();
-                if (selectedObj.Draw(batcher, selectedObj.RealScreenPosition.X, selectedObj.RealScreenPosition.Y, depth))
-                {
-                    result++;
-                }
-            }
-
             if (_transparentObjects.Count > 0 || _gumpSprites.Count > 0 || _gumpTexts.Count > 0)
             {
                 //batcher.SetStencil(DepthStencilState.DepthRead);
