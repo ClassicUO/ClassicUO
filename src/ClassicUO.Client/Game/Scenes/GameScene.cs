@@ -958,7 +958,10 @@ namespace ClassicUO.Game.Scenes
             FillGameObjectList();
 
             // Restore previous highlight's original hue before applying new one
-            if (_prevMeshHighlight != null && _prevMeshHighlight.InChunkMesh && _prevMeshHighlight.MeshSpriteIndex >= 0)
+            if (_prevMeshHighlight != null
+                && !_prevMeshHighlight.IsDestroyed
+                && _prevMeshHighlight.InChunkMesh
+                && _prevMeshHighlight.MeshSpriteIndex >= 0)
             {
                 var prevChunk = _world.Map.GetChunk(_prevMeshHighlight.X, _prevMeshHighlight.Y);
                 if (prevChunk?.Mesh != null)
@@ -966,8 +969,8 @@ namespace ClassicUO.Game.Scenes
                     var prevLayer = _prevMeshHighlight is Land ? prevChunk.Mesh.Land : prevChunk.Mesh.Statics;
                     ApplyMeshHue(_prevMeshHighlight, prevLayer);
                 }
-                _prevMeshHighlight = null;
             }
+            _prevMeshHighlight = null;
 
             // Apply highlight hue to mesh vertex for selected meshed object
             // (instead of redrawing it on top, which breaks z-order for overlapping objects)

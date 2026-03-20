@@ -45,8 +45,6 @@ namespace ClassicUO.Renderer
         // Track which sprite indices had alpha modified (avoids full scan in ResetAlpha)
         private int[] _alphaDirtyIndices = new int[16];
         private int _alphaDirtyCount;
-        private int _alphaDirtyMin;
-        private int _alphaDirtyMax;
 
 
         /// <summary>
@@ -110,7 +108,7 @@ namespace ClassicUO.Renderer
                 Array.Resize(ref _alphaDirtyIndices, _alphaDirtyIndices.Length * 2);
             _alphaDirtyIndices[_alphaDirtyCount++] = index;
 
-            MarkVertexDirty(index);
+            MarkVertexDirty();
         }
 
         /// <summary>
@@ -149,23 +147,12 @@ namespace ClassicUO.Renderer
             var h = new Vector3(hueX, hueY, alpha);
             v.Hue0 = v.Hue1 = v.Hue2 = v.Hue3 = h;
 
-            MarkVertexDirty(index);
+            MarkVertexDirty();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void MarkVertexDirty(int index)
+        private void MarkVertexDirty()
         {
-            if (!_alphaDirty)
-            {
-                _alphaDirtyMin = index;
-                _alphaDirtyMax = index;
-            }
-            else
-            {
-                if (index < _alphaDirtyMin) _alphaDirtyMin = index;
-                if (index > _alphaDirtyMax) _alphaDirtyMax = index;
-            }
-
             _alphaDirty = true;
         }
 
@@ -347,25 +334,23 @@ namespace ClassicUO.Renderer
         }
 
         /// <summary>
-        /// Re-uploads vertex data when alpha has been modified (fading).
-        /// Only uploads the dirty range rather than the entire buffer.
+        /// Re-uploads vertex data when alpha/hue has been modified.
+        /// Uses full buffer Discard to avoid partial-update driver bugs on Intel GPUs.
         /// </summary>
         public unsafe void FlushAlphaChanges()
         {
-            if (!_alphaDirty || VertexBuffer == null || VertexBuffer.IsDisposed)
+            if (!_alphaDirty || Count == 0 || VertexBuffer == null || VertexBuffer.IsDisposed)
                 return;
 
             _alphaDirty = false;
-            int rangeStart = _alphaDirtyMin;
-            int rangeCount = _alphaDirtyMax - _alphaDirtyMin + 1;
 
-            fixed (PositionNormalTextureColor4* p = &Vertices[rangeStart])
+            fixed (PositionNormalTextureColor4* p = &Vertices[0])
             {
                 VertexBuffer.SetDataPointerEXT(
-                    rangeStart * PositionNormalTextureColor4.SIZE_IN_BYTES,
+                    0,
                     (IntPtr)p,
-                    rangeCount * PositionNormalTextureColor4.SIZE_IN_BYTES,
-                    SetDataOptions.None
+                    Count * PositionNormalTextureColor4.SIZE_IN_BYTES,
+                    SetDataOptions.Discard
                 );
             }
         }
@@ -376,6 +361,8 @@ namespace ClassicUO.Renderer
             VisibleSpriteCount = 0;
             VisibleRunCount = 0;
             _visibilityDirty = true;
+            _alphaDirty = false;
+            _alphaDirtyCount = 0;
         }
 
         /// <summary>
