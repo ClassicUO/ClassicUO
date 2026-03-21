@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
+using ClassicUO.Renderer.Animations;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -151,7 +152,7 @@ namespace ClassicUO.Game.GameObjects
             ProcessSteps(out byte dir);
             byte layerDir = dir;
 
-            Client.Game.UO.Animations.GetAnimDirection(ref dir, ref IsFlipped);
+            Animations.GetAnimDirection(ref dir, ref IsFlipped);
 
             ushort graphic = GetGraphicForAnimation();
             byte animGroup = GetGroupForAnimation(this, graphic, true);
@@ -991,7 +992,7 @@ namespace ClassicUO.Game.GameObjects
 
             ProcessSteps(out byte dir);
             bool isFlipped = IsFlipped;
-            animations.GetAnimDirection(ref dir, ref isFlipped);
+            Animations.GetAnimDirection(ref dir, ref isFlipped);
 
             ushort graphic = GetGraphicForAnimation();
             byte animGroup = GetGroupForAnimation(this, graphic, true);
