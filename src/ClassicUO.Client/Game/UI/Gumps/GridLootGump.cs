@@ -544,7 +544,12 @@ namespace ClassicUO.Game.UI.Gumps
                     );
                 }
 
-                hueVector = ShaderHueTranslator.GetHueVector(0);
+                hueVector = ShaderHueTranslator.GetHueVector(
+                    item.Hue,
+                    item.ItemData.IsPartialHue,
+                    1f
+                );
+                
                 renderLists.AddGumpNoAtlas(
                     batcher =>
                     {
@@ -562,14 +567,15 @@ namespace ClassicUO.Game.UI.Gumps
                 );
                 if (_hit.MouseIsOver)
                 {
-                    hueVector.Z = 0.7f;
+                    Vector3 hoverHue = ShaderHueTranslator.GetHueVector(0);
+                    hoverHue.Z = 0.2f;
                     renderLists.AddGumpNoAtlas(
                         batcher =>
                         {
                             batcher.Draw(
                                 SolidColorTextureCache.GetTexture(Color.Yellow),
                                 new Rectangle(x + 1, y + 15, Width - 1, Height - 15),
-                                hueVector,
+                                hoverHue,
                                 layerDepth
                             );
                             return true;
