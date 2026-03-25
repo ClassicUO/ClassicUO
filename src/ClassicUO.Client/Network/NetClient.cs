@@ -126,7 +126,7 @@ namespace ClassicUO.Network
             if (string.IsNullOrEmpty(ip))
                 throw new ArgumentNullException(nameof(ip));
 
-            var isWebsocketAddress = ip.ToLowerInvariant().Substring(0, 2) is "ws" or "wss";
+            var isWebsocketAddress = ip.StartsWith("ws", StringComparison.OrdinalIgnoreCase);
             var addr = $"{(isWebsocketAddress ? "" : "tcp://")}{ip}:{port}";
 
             if (!Uri.TryCreate(addr, UriKind.RelativeOrAbsolute, out var uri))
