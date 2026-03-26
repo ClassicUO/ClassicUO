@@ -22,15 +22,9 @@ namespace ClassicUO.Configuration
 
             var text = File.ReadAllText(file);
 
-            text = Regex.Replace
-            (
-                text,
-                @"(?<!\\)  # lookbehind: Check that previous character isn't a \
-                                                \\         # match a \
-                                                (?!\\)     # lookahead: Check that the following character isn't a \",
-                @"\\",
-                RegexOptions.IgnorePatternWhitespace
-            );
+            // Remove the problematic regex replacement that could corrupt JSON data
+            // The original pattern was attempting to fix escape sequences but had logic flaws
+            // Better to let JsonSerializer handle validation and report errors
 
             return JsonSerializer.Deserialize(text, ctx);
         }
