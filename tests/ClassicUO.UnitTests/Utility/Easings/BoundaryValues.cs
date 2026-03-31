@@ -1,3 +1,4 @@
+using System;
 using FluentAssertions;
 using Xunit;
 
@@ -5,6 +6,7 @@ namespace ClassicUO.UnitTests.Utility.Easings
 {
     public class BoundaryValues
     {
+        private const float Exact = 0f;
         private const float Precision = 1e-6f;
         private const float LoosePrecision = 0.01f;
 
@@ -21,404 +23,119 @@ namespace ClassicUO.UnitTests.Utility.Easings
                 .Be(t);
         }
 
-        [Fact]
-        public void InQuad_At_Zero_Should_Return_Zero()
+        [Theory]
+        [InlineData("InQuad", 0f, Exact)]
+        [InlineData("OutQuad", 0f, Exact)]
+        [InlineData("InCubic", 0f, Exact)]
+        [InlineData("OutCubic", 0f, Exact)]
+        [InlineData("InQuart", 0f, Exact)]
+        [InlineData("OutQuart", 0f, Exact)]
+        [InlineData("InQuint", 0f, Exact)]
+        [InlineData("OutQuint", 0f, Exact)]
+        [InlineData("InSine", -1f, Precision)]
+        [InlineData("OutSine", 0f, Precision)]
+        [InlineData("InExpo", 0f, LoosePrecision)]
+        [InlineData("OutExpo", 0f, Exact)]
+        [InlineData("InCirc", 0f, Precision)]
+        [InlineData("OutCirc", 0f, Precision)]
+        [InlineData("InElastic", 0f, LoosePrecision)]
+        [InlineData("OutElastic", 0f, Precision)]
+        [InlineData("InBack", 0f, Exact)]
+        [InlineData("OutBack", 0f, Exact)]
+        [InlineData("InBounce", 0f, Exact)]
+        [InlineData("OutBounce", 0f, Exact)]
+        public void Easing_At_Zero_Should_Return_Expected(string name, float expected, float precision)
         {
-            ClassicUO.Utility.Easings.InQuad(0f)
-                .Should()
-                .Be(0f);
+            var result = GetEasing(name)(0f);
+
+            if (precision == Exact)
+                result.Should().Be(expected);
+            else
+                result.Should().BeApproximately(expected, precision);
         }
 
-        [Fact]
-        public void OutQuad_At_Zero_Should_Return_Zero()
+        [Theory]
+        [InlineData("InQuad", 1f, Exact)]
+        [InlineData("OutQuad", 1f, Exact)]
+        [InlineData("InCubic", 1f, Exact)]
+        [InlineData("OutCubic", 1f, Exact)]
+        [InlineData("InQuart", 1f, Exact)]
+        [InlineData("OutQuart", 1f, Exact)]
+        [InlineData("InQuint", 1f, Exact)]
+        [InlineData("OutQuint", 1f, Exact)]
+        [InlineData("InSine", 0f, Precision)]
+        [InlineData("OutSine", 1f, Precision)]
+        [InlineData("InExpo", 1f, Exact)]
+        [InlineData("OutExpo", 1f, LoosePrecision)]
+        [InlineData("InCirc", 1f, Precision)]
+        [InlineData("OutCirc", 1f, Precision)]
+        [InlineData("InElastic", 1f, Precision)]
+        [InlineData("OutElastic", 1f, LoosePrecision)]
+        [InlineData("InBack", 1f, Precision)]
+        [InlineData("OutBack", 1f, Exact)]
+        [InlineData("InBounce", 1f, Precision)]
+        [InlineData("OutBounce", 1f, Precision)]
+        public void Easing_At_One_Should_Return_Expected(string name, float expected, float precision)
         {
-            ClassicUO.Utility.Easings.OutQuad(0f)
-                .Should()
-                .Be(0f);
+            var result = GetEasing(name)(1f);
+
+            if (precision == Exact)
+                result.Should().Be(expected);
+            else
+                result.Should().BeApproximately(expected, precision);
         }
 
-        [Fact]
-        public void InCubic_At_Zero_Should_Return_Zero()
+        [Theory]
+        [InlineData("InOutQuad", Precision)]
+        [InlineData("InOutCubic", Precision)]
+        [InlineData("InOutQuart", Precision)]
+        [InlineData("InOutQuint", Precision)]
+        [InlineData("InOutSine", Precision)]
+        [InlineData("InOutExpo", LoosePrecision)]
+        [InlineData("InOutCirc", Precision)]
+        [InlineData("InOutElastic", LoosePrecision)]
+        [InlineData("InOutBack", Precision)]
+        [InlineData("InOutBounce", LoosePrecision)]
+        public void InOutEasing_At_Half_Should_Return_Half(string name, float precision)
         {
-            ClassicUO.Utility.Easings.InCubic(0f)
+            GetEasing(name)(0.5f)
                 .Should()
-                .Be(0f);
+                .BeApproximately(0.5f, precision);
         }
 
-        [Fact]
-        public void OutCubic_At_Zero_Should_Return_Zero()
+        private static Func<float, float> GetEasing(string name) => name switch
         {
-            ClassicUO.Utility.Easings.OutCubic(0f)
-                .Should()
-                .Be(0f);
-        }
-
-        [Fact]
-        public void InQuart_At_Zero_Should_Return_Zero()
-        {
-            ClassicUO.Utility.Easings.InQuart(0f)
-                .Should()
-                .Be(0f);
-        }
-
-        [Fact]
-        public void OutQuart_At_Zero_Should_Return_Zero()
-        {
-            ClassicUO.Utility.Easings.OutQuart(0f)
-                .Should()
-                .Be(0f);
-        }
-
-        [Fact]
-        public void InQuint_At_Zero_Should_Return_Zero()
-        {
-            ClassicUO.Utility.Easings.InQuint(0f)
-                .Should()
-                .Be(0f);
-        }
-
-        [Fact]
-        public void OutQuint_At_Zero_Should_Return_Zero()
-        {
-            ClassicUO.Utility.Easings.OutQuint(0f)
-                .Should()
-                .Be(0f);
-        }
-
-        [Fact]
-        public void InSine_At_Zero_Should_Return_Negative_One()
-        {
-            ClassicUO.Utility.Easings.InSine(0f)
-                .Should()
-                .BeApproximately(-1f, Precision);
-        }
-
-        [Fact]
-        public void OutSine_At_Zero_Should_Return_Zero()
-        {
-            ClassicUO.Utility.Easings.OutSine(0f)
-                .Should()
-                .BeApproximately(0f, Precision);
-        }
-
-        [Fact]
-        public void InExpo_At_Zero_Should_Return_Approximately_Zero()
-        {
-            ClassicUO.Utility.Easings.InExpo(0f)
-                .Should()
-                .BeApproximately(0f, LoosePrecision);
-        }
-
-        [Fact]
-        public void OutExpo_At_Zero_Should_Return_Zero()
-        {
-            ClassicUO.Utility.Easings.OutExpo(0f)
-                .Should()
-                .Be(0f);
-        }
-
-        [Fact]
-        public void InCirc_At_Zero_Should_Return_Zero()
-        {
-            ClassicUO.Utility.Easings.InCirc(0f)
-                .Should()
-                .BeApproximately(0f, Precision);
-        }
-
-        [Fact]
-        public void OutCirc_At_Zero_Should_Return_Zero()
-        {
-            ClassicUO.Utility.Easings.OutCirc(0f)
-                .Should()
-                .BeApproximately(0f, Precision);
-        }
-
-        [Fact]
-        public void InElastic_At_Zero_Should_Return_Approximately_Zero()
-        {
-            ClassicUO.Utility.Easings.InElastic(0f)
-                .Should()
-                .BeApproximately(0f, LoosePrecision);
-        }
-
-        [Fact]
-        public void OutElastic_At_Zero_Should_Return_Zero()
-        {
-            ClassicUO.Utility.Easings.OutElastic(0f)
-                .Should()
-                .BeApproximately(0f, Precision);
-        }
-
-        [Fact]
-        public void InBack_At_Zero_Should_Return_Zero()
-        {
-            ClassicUO.Utility.Easings.InBack(0f)
-                .Should()
-                .Be(0f);
-        }
-
-        [Fact]
-        public void OutBack_At_Zero_Should_Return_Zero()
-        {
-            ClassicUO.Utility.Easings.OutBack(0f)
-                .Should()
-                .Be(0f);
-        }
-
-        [Fact]
-        public void InBounce_At_Zero_Should_Return_Zero()
-        {
-            ClassicUO.Utility.Easings.InBounce(0f)
-                .Should()
-                .Be(0f);
-        }
-
-        [Fact]
-        public void OutBounce_At_Zero_Should_Return_Zero()
-        {
-            ClassicUO.Utility.Easings.OutBounce(0f)
-                .Should()
-                .Be(0f);
-        }
-
-        [Fact]
-        public void InQuad_At_One_Should_Return_One()
-        {
-            ClassicUO.Utility.Easings.InQuad(1f)
-                .Should()
-                .Be(1f);
-        }
-
-        [Fact]
-        public void OutQuad_At_One_Should_Return_One()
-        {
-            ClassicUO.Utility.Easings.OutQuad(1f)
-                .Should()
-                .Be(1f);
-        }
-
-        [Fact]
-        public void InCubic_At_One_Should_Return_One()
-        {
-            ClassicUO.Utility.Easings.InCubic(1f)
-                .Should()
-                .Be(1f);
-        }
-
-        [Fact]
-        public void OutCubic_At_One_Should_Return_One()
-        {
-            ClassicUO.Utility.Easings.OutCubic(1f)
-                .Should()
-                .Be(1f);
-        }
-
-        [Fact]
-        public void InQuart_At_One_Should_Return_One()
-        {
-            ClassicUO.Utility.Easings.InQuart(1f)
-                .Should()
-                .Be(1f);
-        }
-
-        [Fact]
-        public void OutQuart_At_One_Should_Return_One()
-        {
-            ClassicUO.Utility.Easings.OutQuart(1f)
-                .Should()
-                .Be(1f);
-        }
-
-        [Fact]
-        public void InQuint_At_One_Should_Return_One()
-        {
-            ClassicUO.Utility.Easings.InQuint(1f)
-                .Should()
-                .Be(1f);
-        }
-
-        [Fact]
-        public void OutQuint_At_One_Should_Return_One()
-        {
-            ClassicUO.Utility.Easings.OutQuint(1f)
-                .Should()
-                .Be(1f);
-        }
-
-        [Fact]
-        public void InSine_At_One_Should_Return_Approximately_Zero()
-        {
-            ClassicUO.Utility.Easings.InSine(1f)
-                .Should()
-                .BeApproximately(0f, Precision);
-        }
-
-        [Fact]
-        public void OutSine_At_One_Should_Return_One()
-        {
-            ClassicUO.Utility.Easings.OutSine(1f)
-                .Should()
-                .BeApproximately(1f, Precision);
-        }
-
-        [Fact]
-        public void InExpo_At_One_Should_Return_One()
-        {
-            ClassicUO.Utility.Easings.InExpo(1f)
-                .Should()
-                .Be(1f);
-        }
-
-        [Fact]
-        public void OutExpo_At_One_Should_Return_Approximately_One()
-        {
-            ClassicUO.Utility.Easings.OutExpo(1f)
-                .Should()
-                .BeApproximately(1f, LoosePrecision);
-        }
-
-        [Fact]
-        public void InCirc_At_One_Should_Return_One()
-        {
-            ClassicUO.Utility.Easings.InCirc(1f)
-                .Should()
-                .BeApproximately(1f, Precision);
-        }
-
-        [Fact]
-        public void OutCirc_At_One_Should_Return_One()
-        {
-            ClassicUO.Utility.Easings.OutCirc(1f)
-                .Should()
-                .BeApproximately(1f, Precision);
-        }
-
-        [Fact]
-        public void InElastic_At_One_Should_Return_One()
-        {
-            ClassicUO.Utility.Easings.InElastic(1f)
-                .Should()
-                .BeApproximately(1f, Precision);
-        }
-
-        [Fact]
-        public void OutElastic_At_One_Should_Return_Approximately_One()
-        {
-            ClassicUO.Utility.Easings.OutElastic(1f)
-                .Should()
-                .BeApproximately(1f, LoosePrecision);
-        }
-
-        [Fact]
-        public void InBack_At_One_Should_Return_One()
-        {
-            ClassicUO.Utility.Easings.InBack(1f)
-                .Should()
-                .BeApproximately(1f, Precision);
-        }
-
-        [Fact]
-        public void OutBack_At_One_Should_Return_One()
-        {
-            ClassicUO.Utility.Easings.OutBack(1f)
-                .Should()
-                .Be(1f);
-        }
-
-        [Fact]
-        public void InBounce_At_One_Should_Return_One()
-        {
-            ClassicUO.Utility.Easings.InBounce(1f)
-                .Should()
-                .BeApproximately(1f, Precision);
-        }
-
-        [Fact]
-        public void OutBounce_At_One_Should_Return_One()
-        {
-            ClassicUO.Utility.Easings.OutBounce(1f)
-                .Should()
-                .BeApproximately(1f, Precision);
-        }
-
-        [Fact]
-        public void InOutQuad_At_Half_Should_Return_Half()
-        {
-            ClassicUO.Utility.Easings.InOutQuad(0.5f)
-                .Should()
-                .BeApproximately(0.5f, Precision);
-        }
-
-        [Fact]
-        public void InOutCubic_At_Half_Should_Return_Half()
-        {
-            ClassicUO.Utility.Easings.InOutCubic(0.5f)
-                .Should()
-                .BeApproximately(0.5f, Precision);
-        }
-
-        [Fact]
-        public void InOutQuart_At_Half_Should_Return_Half()
-        {
-            ClassicUO.Utility.Easings.InOutQuart(0.5f)
-                .Should()
-                .BeApproximately(0.5f, Precision);
-        }
-
-        [Fact]
-        public void InOutQuint_At_Half_Should_Return_Half()
-        {
-            ClassicUO.Utility.Easings.InOutQuint(0.5f)
-                .Should()
-                .BeApproximately(0.5f, Precision);
-        }
-
-        [Fact]
-        public void InOutSine_At_Half_Should_Return_Half()
-        {
-            ClassicUO.Utility.Easings.InOutSine(0.5f)
-                .Should()
-                .BeApproximately(0.5f, Precision);
-        }
-
-        [Fact]
-        public void InOutExpo_At_Half_Should_Return_Half()
-        {
-            ClassicUO.Utility.Easings.InOutExpo(0.5f)
-                .Should()
-                .BeApproximately(0.5f, LoosePrecision);
-        }
-
-        [Fact]
-        public void InOutCirc_At_Half_Should_Return_Half()
-        {
-            ClassicUO.Utility.Easings.InOutCirc(0.5f)
-                .Should()
-                .BeApproximately(0.5f, Precision);
-        }
-
-        [Fact]
-        public void InOutElastic_At_Half_Should_Return_Half()
-        {
-            ClassicUO.Utility.Easings.InOutElastic(0.5f)
-                .Should()
-                .BeApproximately(0.5f, LoosePrecision);
-        }
-
-        [Fact]
-        public void InOutBack_At_Half_Should_Return_Half()
-        {
-            ClassicUO.Utility.Easings.InOutBack(0.5f)
-                .Should()
-                .BeApproximately(0.5f, Precision);
-        }
-
-        [Fact]
-        public void InOutBounce_At_Half_Should_Return_Half()
-        {
-            ClassicUO.Utility.Easings.InOutBounce(0.5f)
-                .Should()
-                .BeApproximately(0.5f, LoosePrecision);
-        }
+            "InQuad" => ClassicUO.Utility.Easings.InQuad,
+            "OutQuad" => ClassicUO.Utility.Easings.OutQuad,
+            "InCubic" => ClassicUO.Utility.Easings.InCubic,
+            "OutCubic" => ClassicUO.Utility.Easings.OutCubic,
+            "InQuart" => ClassicUO.Utility.Easings.InQuart,
+            "OutQuart" => ClassicUO.Utility.Easings.OutQuart,
+            "InQuint" => ClassicUO.Utility.Easings.InQuint,
+            "OutQuint" => ClassicUO.Utility.Easings.OutQuint,
+            "InSine" => ClassicUO.Utility.Easings.InSine,
+            "OutSine" => ClassicUO.Utility.Easings.OutSine,
+            "InExpo" => ClassicUO.Utility.Easings.InExpo,
+            "OutExpo" => ClassicUO.Utility.Easings.OutExpo,
+            "InCirc" => ClassicUO.Utility.Easings.InCirc,
+            "OutCirc" => ClassicUO.Utility.Easings.OutCirc,
+            "InElastic" => ClassicUO.Utility.Easings.InElastic,
+            "OutElastic" => ClassicUO.Utility.Easings.OutElastic,
+            "InBack" => ClassicUO.Utility.Easings.InBack,
+            "OutBack" => ClassicUO.Utility.Easings.OutBack,
+            "InBounce" => ClassicUO.Utility.Easings.InBounce,
+            "OutBounce" => ClassicUO.Utility.Easings.OutBounce,
+            "InOutQuad" => ClassicUO.Utility.Easings.InOutQuad,
+            "InOutCubic" => ClassicUO.Utility.Easings.InOutCubic,
+            "InOutQuart" => ClassicUO.Utility.Easings.InOutQuart,
+            "InOutQuint" => ClassicUO.Utility.Easings.InOutQuint,
+            "InOutSine" => ClassicUO.Utility.Easings.InOutSine,
+            "InOutExpo" => ClassicUO.Utility.Easings.InOutExpo,
+            "InOutCirc" => ClassicUO.Utility.Easings.InOutCirc,
+            "InOutElastic" => ClassicUO.Utility.Easings.InOutElastic,
+            "InOutBack" => ClassicUO.Utility.Easings.InOutBack,
+            "InOutBounce" => ClassicUO.Utility.Easings.InOutBounce,
+            _ => throw new ArgumentException($"Unknown easing function: {name}")
+        };
     }
 }
