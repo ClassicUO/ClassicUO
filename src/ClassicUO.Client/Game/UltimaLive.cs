@@ -250,7 +250,7 @@ namespace ClassicUO.Game
 
                             Span<byte> idxData = stackalloc byte[8];
                             BinaryPrimitives.WriteUInt32LittleEndian(idxData.Slice(0, 4), lookup);
-                            BinaryPrimitives.WriteUInt32LittleEndian(idxData.Slice(4, 4), totalLength);
+                            BinaryPrimitives.WriteInt32LittleEndian(idxData.Slice(4, 4), totalLength);
                             //update lookup AND index length on disk
                             _UL._filesIdxStatics[mapId].WriteArray(block * 12, idxData);
 
