@@ -10,6 +10,7 @@ using ClassicUO.Network;
 using ClassicUO.Utility.Logging;
 using System;
 using System.Buffers;
+using System.Buffers.Binary;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
