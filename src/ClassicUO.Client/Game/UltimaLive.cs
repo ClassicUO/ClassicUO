@@ -9,6 +9,8 @@ using ClassicUO.Assets;
 using ClassicUO.Network;
 using ClassicUO.Utility.Logging;
 using System;
+using System.Buffers;
+using System.Buffers.Binary;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -25,6 +27,8 @@ namespace ClassicUO.Game
         private const int LAND_BLOCK_LENGTH = 192;
 
         private static UltimaLive _UL;
+        // Reusable scratch list for game-object rebuild - allocated once, main-thread only.
+        private static readonly List<GameObject> _scratchGameObjects = new List<GameObject>(64);
 
         private static readonly char[] _pathSeparatorChars = { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
         private uint[] _EOF;
@@ -115,7 +119,7 @@ namespace ClassicUO.Game
 
                     mapHeightInBlocks = blockY < _UL.MapSizeWrapSize[mapId, 3] >> 3 ? _UL.MapSizeWrapSize[mapId, 3] >> 3 : mapHeightInBlocks;
 
-                    ushort[] checkSumsToBeSent = new ushort[CRC_LENGTH]; //byte 015 through 64   -  25 block CRCs
+                    Span<ushort> checkSumsToBeSent = stackalloc ushort[CRC_LENGTH]; //byte 015 through 64 - 25 block CRCs
 
                     for (int x = -2; x <= 2; x++)
                     {
@@ -164,7 +168,7 @@ namespace ClassicUO.Game
                         }
                     }
 
-                    NetClient.Socket.Send_UOLive_HashResponse((uint) block, (byte) mapId, checkSumsToBeSent.AsSpan(0, CRC_LENGTH));
+                    NetClient.Socket.Send_UOLive_HashResponse((uint) block, (byte) mapId, checkSumsToBeSent);
 
                     break;
                 }
@@ -206,11 +210,6 @@ namespace ClassicUO.Game
                         return;
                     }
 
-                    // TODO(andrea): using a struct range instead of allocate the array to the heap?
-                    byte[] staticsData = new byte[totalLength];
-                    p.Buffer.Slice(p.Position, totalLength).CopyTo(staticsData);
-
-
                     if (block >= 0 && block < Client.Game.UO.FileManager.Maps.MapBlocksSize[mapId, 0] * Client.Game.UO.FileManager.Maps.MapBlocksSize[mapId, 1])
                     {
                         int index = block * 12;
@@ -218,12 +217,17 @@ namespace ClassicUO.Game
                         if (totalLength <= 0)
                         {
                             //update index lookup AND static size on disk (first 4 bytes lookup, next 4 is statics size)
-                            _UL._filesIdxStatics[mapId].WriteArray(index, [0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00]);
+                            ReadOnlySpan<byte> zeroIdx = stackalloc byte[8] { 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00 };
+                            _UL._filesIdxStatics[mapId].WriteArray(index, zeroIdx);
 
                             Log.Trace($"writing zero length statics to index at 0x{index:X8}");
                         }
                         else
                         {
+                            // Rent buffer from pool: avoids heap allocation per statics packet.
+                            byte[] staticsData = ArrayPool<byte>.Shared.Rent(totalLength);
+                            p.Buffer.Slice(p.Position, totalLength).CopyTo(staticsData);
+
                             var reader = _UL._filesIdxStatics[mapId];
                             reader.Seek(index, SeekOrigin.Begin);
 
@@ -243,22 +247,13 @@ namespace ClassicUO.Game
                             }
 
                             _UL._filesStatics[mapId].WriteArray(lookup, staticsData);
+                            ArrayPool<byte>.Shared.Return(staticsData);
 
+                            Span<byte> idxData = stackalloc byte[8];
+                            BinaryPrimitives.WriteUInt32LittleEndian(idxData.Slice(0, 4), lookup);
+                            BinaryPrimitives.WriteInt32LittleEndian(idxData.Slice(4, 4), totalLength);
                             //update lookup AND index length on disk
-                            Span<byte> idxData =
-                            [
-                                (byte) lookup,
-                                (byte) (lookup >> 8),
-                                (byte) (lookup >> 16),
-                                (byte) (lookup >> 24),
-                                (byte) totalLength,
-                                (byte) (totalLength >> 8),
-                                (byte) (totalLength >> 16),
-                                (byte) (totalLength >> 24),
-                            ];
-
-                                //update lookup AND index length on disk
-                                _UL._filesIdxStatics[mapId].WriteArray(block * 12, idxData);
+                            _UL._filesIdxStatics[mapId].WriteArray(block * 12, idxData);
 
                             Chunk mapChunk = world.Map.GetChunk(block);
 
@@ -268,7 +263,7 @@ namespace ClassicUO.Game
                             }
 
                             LinkedList<int> linkedList = mapChunk.Node?.List;
-                            List<GameObject> gameObjects = new List<GameObject>();
+                            _scratchGameObjects.Clear();
 
                             for (int x = 0; x < 8; x++)
                             {
@@ -283,7 +278,7 @@ namespace ClassicUO.Game
 
                                         if (!(currentGameObject is Land) && !(currentGameObject is Static))
                                         {
-                                            gameObjects.Add(currentGameObject);
+                                            _scratchGameObjects.Add(currentGameObject);
                                             currentGameObject.RemoveFromTile();
                                         }
                                     }
@@ -294,11 +289,10 @@ namespace ClassicUO.Game
                             _UL._ULMap.ReloadBlock(mapId, block);
                             mapChunk.Load(mapId);
 
-                            //linkedList?.AddLast(c.Node);
-
-                            foreach (GameObject gameObject in gameObjects)
+                            for (int gi = 0; gi < _scratchGameObjects.Count; ++gi)
                             {
-                                mapChunk.AddGameObject(gameObject, gameObject.X % 8, gameObject.Y % 8);
+                                GameObject go = _scratchGameObjects[gi];
+                                mapChunk.AddGameObject(go, go.X % 8, go.Y % 8);
                             }
                         }
 
@@ -448,11 +442,8 @@ namespace ClassicUO.Game
         {
             int block = (int) p.ReadUInt32BE();
             Span<byte> landData = stackalloc byte[LAND_BLOCK_LENGTH];
-
-            for (int i = 0; i < LAND_BLOCK_LENGTH; i++)
-            {
-                landData[i] = p.ReadUInt8();
-            }
+            // one atomic read, not multiple ones
+            p.Buffer.Slice(p.Position, LAND_BLOCK_LENGTH).CopyTo(landData);
 
             p.Seek(200);
             byte mapId = p.ReadUInt8();
@@ -476,8 +467,6 @@ namespace ClassicUO.Game
                 blockX = Math.Min(mapWidthInBlocks, blockX + 1);
                 blockY = Math.Min(mapHeightInBlocks, blockY + 1);
 
-                var gameObjects = new List<GameObject>();
-
                 for (; blockX >= minx; --blockX)
                 {
                     for (int by = blockY; by >= miny; --by)
@@ -489,7 +478,7 @@ namespace ClassicUO.Game
                             continue;
                         }
 
-                        gameObjects.Clear();
+                        _scratchGameObjects.Clear();
 
                         for (int x = 0; x < 8; x++)
                         {
@@ -504,7 +493,7 @@ namespace ClassicUO.Game
 
                                     if (!(currentGameObject is Land) && !(currentGameObject is Static))
                                     {
-                                        gameObjects.Add(currentGameObject);
+                                        _scratchGameObjects.Add(currentGameObject);
                                         currentGameObject.RemoveFromTile();
                                     }
                                 }
@@ -514,8 +503,9 @@ namespace ClassicUO.Game
                         mapChunk.Clear();
                         mapChunk.Load(mapId);
 
-                        foreach (GameObject obj in gameObjects)
+                        for (int gi = 0; gi < _scratchGameObjects.Count; gi++)
                         {
+                            GameObject obj = _scratchGameObjects[gi];
                             mapChunk.AddGameObject(obj, obj.X % 8, obj.Y % 8);
                         }
 
@@ -545,61 +535,52 @@ namespace ClassicUO.Game
             var staidxReader = _UL._filesIdxStatics[mapId];
             staidxReader.Seek(block * 12, SeekOrigin.Begin);
 
-            uint lookup = staidxReader.ReadUInt32();
+            uint lookup    = staidxReader.ReadUInt32();
+            int  byteCount = Math.Max(0, staidxReader.ReadInt32());
 
-            int byteCount = Math.Max(0, staidxReader.ReadInt32());
+            int totalLen = LAND_BLOCK_LENGTH + byteCount;
+            // Rent from pool to avoid heap allocation per CRC check.
+            byte[] blockData = ArrayPool<byte>.Shared.Rent(totalLen);
 
-            byte[] blockData = new byte[LAND_BLOCK_LENGTH + byteCount];
-
-            //we prevent the system from reading beyond the end of file, causing an exception, if the data isn't there, we don't read it and leave the array blank, simple...
-            var mapReader = _UL._filesMap[mapId];
-            mapReader.Seek(block * 196 + 4, SeekOrigin.Begin);
-
-            var staticsReader = _UL._filesStatics[mapId];
-
-            for (int x = 0; x < 192; x++)
+            try
             {
-                if (mapReader.Position + 1 >= mapReader.Length)
+                // Bulk-read 192 map bytes in one atomic call instead of byte-by-byte
+                var mapReader = _UL._filesMap[mapId];
+                mapReader.Seek(block * 196 + 4, SeekOrigin.Begin);
+                long mapAvail = mapReader.Length - mapReader.Position;
+                int  mapRead  = (int)Math.Min(LAND_BLOCK_LENGTH, mapAvail);
+                if (mapRead > 0)
+                    mapReader.Read(blockData.AsSpan(0, mapRead));
+
+                if (lookup != 0xFFFFFFFF && byteCount > 0)
                 {
-                    break;
-                }
-
-                blockData[x] = mapReader.ReadUInt8();
-            }
-
-            if (lookup != 0xFFFFFFFF && byteCount > 0)
-            {
-                if (lookup < staticsReader.Length)
-                {
-                    staticsReader.Seek(lookup, SeekOrigin.Begin);
-
-                    for (int x = LAND_BLOCK_LENGTH; x < blockData.Length; x++)
+                    var staticsReader = _UL._filesStatics[mapId];
+                    if (lookup < staticsReader.Length)
                     {
-                        if (staticsReader.Position + 1 >= staticsReader.Length)
-                        {
-                            break;
-                        }
-
-                        blockData[x] = staticsReader.ReadUInt8();
+                        staticsReader.Seek(lookup, SeekOrigin.Begin);
+                        long staAvail = staticsReader.Length - staticsReader.Position;
+                        int  staRead  = (int)Math.Min(byteCount, staAvail);
+                        if (staRead > 0)
+                            staticsReader.Read(blockData.AsSpan(LAND_BLOCK_LENGTH, staRead));
                     }
                 }
+
+                return Fletcher16(blockData.AsSpan(0, totalLen));
             }
-
-            ushort crc = Fletcher16(blockData);
-
-            return crc;
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(blockData);
+            }
         }
 
-        private static ushort Fletcher16(byte[] data)
+        private static ushort Fletcher16(ReadOnlySpan<byte> data)
         {
-            ushort sum1 = 0;
-            ushort sum2 = 0;
-            int index;
+            ushort sum1 = 0, sum2 = 0;
 
-            for (index = 0; index < data.Length; index++)
+            for (int i = 0; i < data.Length; ++i)
             {
-                sum1 = (ushort) ((sum1 + data[index]) % 255);
-                sum2 = (ushort) ((sum2 + sum1) % 255);
+                sum1 = (ushort)((sum1 + data[i]) % 255);
+                sum2 = (ushort)((sum2 + sum1) % 255);
             }
 
             return (ushort) ((sum2 << 8) | sum1);
