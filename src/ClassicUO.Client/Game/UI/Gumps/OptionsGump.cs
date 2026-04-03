@@ -57,7 +57,7 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _enableDragSelect, _dragSelectHumanoidsOnly, _dragSelectHostileOnly;
 
         // sounds
-        private Checkbox _enableSounds, _enableMusic, _footStepsSound, _combatMusic, _musicInBackground, _loginMusic;
+        private Checkbox _enableSounds, _enableMusic, _footStepsSound, _rainSound, _combatMusic, _musicInBackground, _loginMusic;
 
         // fonts
         private FontSelector _fontSelectorChat;
@@ -144,7 +144,7 @@ namespace ClassicUO.Game.UI.Gumps
         private NiceButton _setAsNewDefault;
 
         // video
-        private Checkbox _use_old_status_gump, _statusGumpBarMutuallyExclusive, _windowBorderless, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _enableShadowsStatics, _auraMouse, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura, _hideChatGradient, _animatedWaterEffect;
+        private Checkbox _use_old_status_gump, _statusGumpBarMutuallyExclusive, _windowBorderless, _enableDeathScreen, _enableBlackWhiteEffect, _altLights, _enableLight, _enableShadows, _enableShadowsStatics, _auraMouse, _runMouseInSeparateThread, _useColoredLights, _darkNights, _partyAura, _hideChatGradient, _animatedWaterEffect, _weatherEffects;
         private Combobox _lightLevelType;
         private Checkbox _use_smooth_boat_movement;
         private HSliderBar _terrainShadowLevel;
@@ -1533,6 +1533,17 @@ namespace ClassicUO.Game.UI.Gumps
 
             startY += _footStepsSound.Height + 2;
 
+            _rainSound = AddCheckBox
+            (
+                rightArea,
+                ResGumps.PlayRainSound,
+                _currentProfile.EnableRainSound,
+                startX,
+                startY
+            );
+
+            startY += _rainSound.Height + 2;
+
             _combatMusic = AddCheckBox
             (
                 rightArea,
@@ -1927,6 +1938,20 @@ namespace ClassicUO.Game.UI.Gumps
                     null,
                     ResGumps.AnimatedWaterEffect,
                     _currentProfile.AnimatedWaterEffect,
+                    startX,
+                    startY
+                )
+            );
+
+            startY += 25;
+
+            section4.Add
+            (
+                _weatherEffects = AddCheckBox
+                (
+                    null,
+                    ResGumps.WeatherEffects,
+                    _currentProfile.EnableWeatherEffects,
                     startX,
                     startY
                 )
@@ -3665,6 +3690,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _musicVolume.Value = 100;
                     _musicInBackground.IsChecked = false;
                     _footStepsSound.IsChecked = true;
+                    _rainSound.IsChecked = true;
                     _loginMusicVolume.Value = 100;
                     _loginMusic.IsChecked = true;
                     _soundsVolume.IsVisible = _enableSounds.IsChecked;
@@ -3699,6 +3725,7 @@ namespace ClassicUO.Game.UI.Gumps
                     _auraMouse.IsChecked = true;
                     _partyAura.IsChecked = true;
                     _animatedWaterEffect.IsChecked = false;
+                    _weatherEffects.IsChecked = true;
                     _partyAuraColorPickerBox.Hue = 0x0044;
 
                     break;
@@ -3936,6 +3963,7 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.EnableSound = _enableSounds.IsChecked;
             _currentProfile.EnableMusic = _enableMusic.IsChecked;
             _currentProfile.EnableFootstepsSound = _footStepsSound.IsChecked;
+            _currentProfile.EnableRainSound = _rainSound.IsChecked;
             _currentProfile.EnableCombatMusic = _combatMusic.IsChecked;
             _currentProfile.ReproduceSoundsInBackground = _musicInBackground.IsChecked;
             _currentProfile.SoundVolume = _soundsVolume.Value;
@@ -4140,6 +4168,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             _currentProfile.AuraOnMouse = _auraMouse.IsChecked;
             _currentProfile.AnimatedWaterEffect = _animatedWaterEffect.IsChecked;
+            _currentProfile.EnableWeatherEffects = _weatherEffects.IsChecked;
             _currentProfile.PartyAura = _partyAura.IsChecked;
             _currentProfile.PartyAuraHue = _partyAuraColorPickerBox.Hue;
             _currentProfile.HideChatGradient = _hideChatGradient.IsChecked;
