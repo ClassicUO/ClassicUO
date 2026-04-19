@@ -22,7 +22,7 @@ using System.Text;
 
 namespace ClassicUO.Network
 {
-    sealed class PacketHandlers
+    internal sealed partial class PacketHandlers
     {
         public delegate void OnPacketBufferReader(World world, ref StackDataReader p);
 
@@ -300,14 +300,7 @@ namespace ClassicUO.Network
             Handler.Add(0xF7, PacketList);
 
             // login
-            Handler.Add(0xA8, ServerListReceived);
-            Handler.Add(0x8C, ReceiveServerRelay);
-            Handler.Add(0x86, UpdateCharacterList);
-            Handler.Add(0xA9, ReceiveCharacterList);
-            Handler.Add(0x82, ReceiveLoginRejection);
-            Handler.Add(0x85, ReceiveLoginRejection);
-            Handler.Add(0x53, ReceiveLoginRejection);
-            Handler.Add(0xFD, LoginDelay);
+            RegisterLoginHandlers(Handler);
         }
 
         public static void SendMegaClilocRequests(World world)
@@ -5923,96 +5916,6 @@ namespace ClassicUO.Network
 
                     break;
                 }
-            }
-        }
-
-        private static void ServerListReceived(World world, ref StackDataReader p)
-        {
-            if (world.InGame)
-            {
-                return;
-            }
-
-            LoginScene scene = Client.Game.GetScene<LoginScene>();
-
-            if (scene != null)
-            {
-                scene.ServerListReceived(ref p);
-            }
-        }
-
-        private static void ReceiveServerRelay(World world, ref StackDataReader p)
-        {
-            if (world.InGame)
-            {
-                return;
-            }
-
-            LoginScene scene = Client.Game.GetScene<LoginScene>();
-
-            if (scene != null)
-            {
-                scene.HandleRelayServerPacket(ref p);
-            }
-        }
-
-        private static void UpdateCharacterList(World world, ref StackDataReader p)
-        {
-            if (world.InGame)
-            {
-                return;
-            }
-
-            LoginScene scene = Client.Game.GetScene<LoginScene>();
-
-            if (scene != null)
-            {
-                scene.UpdateCharacterList(ref p);
-            }
-        }
-
-        private static void ReceiveCharacterList(World world, ref StackDataReader p)
-        {
-            if (world.InGame)
-            {
-                return;
-            }
-
-            LoginScene scene = Client.Game.GetScene<LoginScene>();
-
-            if (scene != null)
-            {
-                scene.ReceiveCharacterList(ref p);
-            }
-        }
-
-        private static void LoginDelay(World world, ref StackDataReader p)
-        {
-            if (world.InGame)
-            {
-                return;
-            }
-
-            LoginScene scene = Client.Game.GetScene<LoginScene>();
-
-            if (scene != null)
-            {
-                scene.HandleLoginDelayPacket(ref p);
-            }
-        }
-
-        private static void ReceiveLoginRejection(World world, ref StackDataReader p)
-        {
-            if (world.InGame)
-            {
-                return;
-            }
-
-            LoginScene scene = Client.Game.GetScene<LoginScene>();
-
-            if (scene != null)
-            {
-                scene.HandleErrorCode(ref p);
             }
         }
 
