@@ -189,20 +189,9 @@ namespace ClassicUO.Network
         {
             Handler.Add(0x3A, UpdateSkills);
             Handler.Add(0x66, BookData);
-            Handler.Add(0x6C, TargetCursor);
             Handler.Add(0x93, OpenBook);
-            Handler.Add(0x9A, ASCIIPrompt);
-            Handler.Add(0xA5, OpenUrl);
-            Handler.Add(0xA6, TipWindow);
-            Handler.Add(0xAB, TextEntryDialog);
-            Handler.Add(0xB0, OpenGump);
-            Handler.Add(0xBA, DisplayQuestArrow);
             Handler.Add(0xBF, ExtendedCommand);
-            Handler.Add(0xC2, UnicodePrompt);
             Handler.Add(0xD4, OpenBook);
-            Handler.Add(0xDD, OpenCompressedGump);
-            Handler.Add(0xE5, DisplayWaypoint);
-            Handler.Add(0xE6, RemoveWaypoint);
 
             RegisterLoginHandlers(Handler);
             RegisterCombatHandlers(Handler);
@@ -214,6 +203,7 @@ namespace ClassicUO.Network
             RegisterVendorHandlers(Handler);
             RegisterHousingHandlers(Handler);
             RegisterSystemHandlers(Handler);
+            RegisterUIHandlers(Handler);
         }
 
         public static void SendMegaClilocRequests(World world)
@@ -262,21 +252,6 @@ namespace ClassicUO.Network
             Handler._clilocRequests.Add(serial);
         }
 
-        private static void TargetCursor(World world, ref StackDataReader p)
-        {
-            world.TargetManager.SetTargeting(
-                (CursorTarget)p.ReadUInt8(),
-                p.ReadUInt32BE(),
-                (TargetType)p.ReadUInt8()
-            );
-
-            if (world.Party.PartyHealTimer < Time.Ticks && world.Party.PartyHealTarget != 0)
-            {
-                world.TargetManager.Target(world.Party.PartyHealTarget);
-                world.Party.PartyHealTimer = 0;
-                world.Party.PartyHealTarget = 0;
-            }
-        }
 
 
 
@@ -599,195 +574,22 @@ namespace ClassicUO.Network
 
 
 
-        private static void ASCIIPrompt(World world, ref StackDataReader p)
-        {
-            if (!world.InGame)
-            {
-                return;
-            }
-
-            world.MessageManager.PromptData = new PromptData(ConsolePrompt.ASCII, p.ReadUInt64BE());
-        }
 
 
 
 
 
-        private static void OpenUrl(World world, ref StackDataReader p)
-        {
-            string url = p.ReadASCII();
-
-            if (!string.IsNullOrEmpty(url))
-            {
-                PlatformHelper.LaunchBrowser(url);
-            }
-        }
-
-        private static void TipWindow(World world, ref StackDataReader p)
-        {
-            byte flag = p.ReadUInt8();
-
-            if (flag == 1)
-            {
-                return;
-            }
-
-            uint tip = p.ReadUInt32BE();
-            string str = p.ReadASCII(p.ReadUInt16BE())?.Replace('\r', '\n');
-
-            int x = 20;
-            int y = 20;
-
-            if (flag == 0)
-            {
-                x = 200;
-                y = 100;
-            }
-
-            UIManager.Add(new TipNoticeGump(world, tip, flag, str) { X = x, Y = y });
-        }
-
-
-        private static void TextEntryDialog(World world, ref StackDataReader p)
-        {
-            if (!world.InGame)
-            {
-                return;
-            }
-
-            uint serial = p.ReadUInt32BE();
-            byte parentID = p.ReadUInt8();
-            byte buttonID = p.ReadUInt8();
-
-            ushort textLen = p.ReadUInt16BE();
-            string text = p.ReadASCII(textLen);
-
-            bool haveCancel = p.ReadBool();
-            byte variant = p.ReadUInt8();
-            uint maxLength = p.ReadUInt32BE();
-
-            ushort descLen = p.ReadUInt16BE();
-            string desc = p.ReadASCII(descLen);
-
-            TextEntryDialogGump gump = new TextEntryDialogGump(
-                world,
-                serial,
-                143,
-                172,
-                variant,
-                (int)maxLength,
-                text,
-                desc,
-                buttonID,
-                parentID
-            )
-            {
-                CanCloseWithRightClick = haveCancel
-            };
-
-            UIManager.Add(gump);
-        }
-
-
-
-        private static void OpenGump(World world, ref StackDataReader p)
-        {
-            if (world.Player == null)
-            {
-                return;
-            }
-
-            uint sender = p.ReadUInt32BE();
-            uint gumpID = p.ReadUInt32BE();
-            int x = (int)p.ReadUInt32BE();
-            int y = (int)p.ReadUInt32BE();
-
-            ushort cmdLen = p.ReadUInt16BE();
-            string cmd = p.ReadASCII(cmdLen);
-
-            ushort textLinesCount = p.ReadUInt16BE();
-
-            string[] lines = new string[textLinesCount];
-
-            for (int i = 0; i < textLinesCount; ++i)
-            {
-                int length = p.ReadUInt16BE();
-
-                if (length > 0)
-                {
-                    lines[i] = p.ReadUnicodeBE(length);
-                }
-                else
-                {
-                    lines[i] = string.Empty;
-                }
-            }
-
-            //for (int i = 0, index = p.Position; i < textLinesCount; i++)
-            //{
-            //    int length = ((p[index++] << 8) | p[index++]) << 1;
-            //    int true_length = 0;
-
-            //    while (true_length < length)
-            //    {
-            //        if (((p[index + true_length++] << 8) | p[index + true_length++]) << 1 == '\0')
-            //        {
-            //            break;
-            //        }
-            //    }
-
-            //    unsafe
-            //    {
-
-            //        fixed (byte* ptr = &p.Buffer[index])
-            //        {
-            //            lines[i] = Encoding.BigEndianUnicode.GetString(ptr, true_length);
-            //        }
-            //    }
-            //    index += length;
-            //}
-
-            CreateGump(world, sender, gumpID, x, y, cmd, lines);
-        }
 
 
 
 
 
-        private static void DisplayQuestArrow(World world, ref StackDataReader p)
-        {
-            bool display = p.ReadBool();
-            ushort mx = p.ReadUInt16BE();
-            ushort my = p.ReadUInt16BE();
 
-            uint serial = 0;
 
-            if (Client.Game.UO.Version >= Utility.ClientVersion.CV_7090)
-            {
-                serial = p.ReadUInt32BE();
-            }
 
-            QuestArrowGump arrow = UIManager.GetGump<QuestArrowGump>(serial);
 
-            if (display)
-            {
-                if (arrow == null)
-                {
-                    UIManager.Add(new QuestArrowGump(world, serial, mx, my));
-                }
-                else
-                {
-                    arrow.SetRelativePosition(mx, my);
-                }
-            }
-            else
-            {
-                if (arrow != null)
-                {
-                    arrow.Dispose();
-                }
-            }
-        }
+
+
 
 
 
@@ -1403,15 +1205,6 @@ namespace ClassicUO.Network
         }
 
 
-        private static void UnicodePrompt(World world, ref StackDataReader p)
-        {
-            if (!world.InGame)
-            {
-                return;
-            }
-
-            world.MessageManager.PromptData = new PromptData(ConsolePrompt.Unicode, p.ReadUInt64BE());
-        }
 
 
 
@@ -1590,127 +1383,11 @@ namespace ClassicUO.Network
 
 
 
-        private static void OpenCompressedGump(World world, ref StackDataReader p)
-        {
-            uint sender = p.ReadUInt32BE();
-            uint gumpID = p.ReadUInt32BE();
-            uint x = p.ReadUInt32BE();
-            uint y = p.ReadUInt32BE();
-            uint clen = p.ReadUInt32BE() - 4;
-            int dlen = (int)p.ReadUInt32BE();
-            byte[] decData = System.Buffers.ArrayPool<byte>.Shared.Rent(dlen);
-            string layout;
-
-            try
-            {
-                ZLib.Decompress(p.Buffer.Slice(p.Position, (int)clen), decData.AsSpan(0, dlen));
-
-                layout = Encoding.UTF8.GetString(decData.AsSpan(0, dlen));
-            }
-            finally
-            {
-                System.Buffers.ArrayPool<byte>.Shared.Return(decData);
-            }
-
-            p.Skip((int)clen);
-
-            uint linesNum = p.ReadUInt32BE();
-            string[] lines = new string[linesNum];
-
-            try
-            {
-                if (linesNum != 0)
-                {
-                    clen = p.ReadUInt32BE() - 4;
-                    dlen = (int)p.ReadUInt32BE();
-                    decData = System.Buffers.ArrayPool<byte>.Shared.Rent(dlen);
-
-                    try
-                    {
-                        ZLib.Decompress(p.Buffer.Slice(p.Position, (int)clen), decData.AsSpan(0, dlen));
-                        p.Skip((int)clen);
-
-                        var reader = new StackDataReader(decData.AsSpan(0, dlen));
-
-                        for (int i = 0; i < linesNum; ++i)
-                        {
-                            int remaining = reader.Remaining;
-
-                            if (remaining >= 2)
-                            {
-                                int length = reader.ReadUInt16BE();
-
-                                if (length > 0)
-                                {
-                                    lines[i] = reader.ReadUnicodeBE(length);
-                                }
-                                else
-                                {
-                                    lines[i] = string.Empty;
-                                }
-                            }
-                            else
-                            {
-                                lines[i] = string.Empty;
-                            }
-                        }
-
-                        reader.Release();
-
-                        //for (int i = 0, index = 0; i < linesNum && index < dlen; i++)
-                        //{
-                        //    int length = ((decData[index++] << 8) | decData[index++]) << 1;
-                        //    int true_length = 0;
-
-                        //    for (int k = 0; k < length && true_length < length && index + true_length < dlen; ++k, true_length += 2)
-                        //    {
-                        //        ushort c = (ushort)(((decData[index + true_length] << 8) | decData[index + true_length + 1]) << 1);
-
-                        //        if (c == '\0')
-                        //        {
-                        //            break;
-                        //        }
-                        //    }
-
-                        //    lines[i] = Encoding.BigEndianUnicode.GetString(decData, index, true_length);
-
-                        //    index += length;
-                        //}
-                    }
-                    finally
-                    {
-                        System.Buffers.ArrayPool<byte>.Shared.Return(decData);
-                    }
-                }
-
-                CreateGump(world, sender, gumpID, (int)x, (int)y, layout, lines);
-            }
-            finally
-            {
-                //System.Buffers.ArrayPool<string>.Shared.Return(lines);
-            }
-        }
 
 
 
 
-        private static void DisplayWaypoint(World world, ref StackDataReader p)
-        {
-            uint serial = p.ReadUInt32BE();
-            ushort x = p.ReadUInt16BE();
-            ushort y = p.ReadUInt16BE();
-            sbyte z = p.ReadInt8();
-            byte map = p.ReadUInt8();
-            WaypointsType type = (WaypointsType)p.ReadUInt16BE();
-            bool ignoreobject = p.ReadUInt16BE() != 0;
-            uint cliloc = p.ReadUInt32BE();
-            string name = p.ReadUnicodeLE();
-        }
 
-        private static void RemoveWaypoint(World world, ref StackDataReader p)
-        {
-            uint serial = p.ReadUInt32BE();
-        }
 
 
 
