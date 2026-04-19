@@ -188,13 +188,9 @@ namespace ClassicUO.Network
         static PacketHandlers()
         {
             Handler.Add(0x03, ClientTalk);
-            Handler.Add(0x15, FollowR);
             Handler.Add(0x1A, UpdateItem);
             Handler.Add(0x1C, Talk);
             Handler.Add(0x1D, DeleteObject);
-            Handler.Add(0x20, UpdatePlayer);
-            Handler.Add(0x21, DenyWalk);
-            Handler.Add(0x22, ConfirmWalk);
             Handler.Add(0x23, DragAnimation);
             Handler.Add(0x24, OpenContainer);
             Handler.Add(0x25, UpdateContainedItem);
@@ -203,7 +199,6 @@ namespace ClassicUO.Network
             Handler.Add(0x29, DropItemAccepted);
             Handler.Add(0x2E, EquipItem);
             Handler.Add(0x32, Unknown_0x32);
-            Handler.Add(0x38, Pathfinding);
             Handler.Add(0x3A, UpdateSkills);
             Handler.Add(0x3B, CloseVendorInterface);
             Handler.Add(0x3C, UpdateContainedItems);
@@ -230,7 +225,6 @@ namespace ClassicUO.Network
             Handler.Add(0x90, DisplayMap);
             Handler.Add(0x93, OpenBook);
             Handler.Add(0x95, DyeData);
-            Handler.Add(0x97, MovePlayer);
             Handler.Add(0x98, UpdateName);
             Handler.Add(0x99, MultiPlacement);
             Handler.Add(0x9A, ASCIIPrompt);
@@ -275,11 +269,11 @@ namespace ClassicUO.Network
             Handler.Add(0xF1, FreeshardListR);
             Handler.Add(0xF3, UpdateItemSA);
             Handler.Add(0xF5, DisplayMap);
-            Handler.Add(0xF6, BoatMoving);
             Handler.Add(0xF7, PacketList);
 
             RegisterLoginHandlers(Handler);
             RegisterCombatHandlers(Handler);
+            RegisterMovementHandlers(Handler);
         }
 
         public static void SendMegaClilocRequests(World world)
@@ -433,11 +427,6 @@ namespace ClassicUO.Network
         }
 
 
-        private static void FollowR(World world, ref StackDataReader p)
-        {
-            uint tofollow = p.ReadUInt32BE();
-            uint isfollowing = p.ReadUInt32BE();
-        }
 
         private static void UpdateItem(World world, ref StackDataReader p)
         {
@@ -744,67 +733,8 @@ namespace ClassicUO.Network
             }
         }
 
-        private static void UpdatePlayer(World world, ref StackDataReader p)
-        {
-            if (world.Player == null)
-            {
-                return;
-            }
 
-            uint serial = p.ReadUInt32BE();
-            ushort graphic = p.ReadUInt16BE();
-            byte graphic_inc = p.ReadUInt8();
-            ushort hue = p.ReadUInt16BE();
-            Flags flags = (Flags)p.ReadUInt8();
-            ushort x = p.ReadUInt16BE();
-            ushort y = p.ReadUInt16BE();
-            ushort serverID = p.ReadUInt16BE();
-            Direction direction = (Direction)p.ReadUInt8();
-            sbyte z = p.ReadInt8();
 
-            UpdatePlayer(world, serial, graphic, graphic_inc, hue, flags, x, y, z, serverID, direction);
-        }
-
-        private static void DenyWalk(World world, ref StackDataReader p)
-        {
-            if (world.Player == null)
-            {
-                return;
-            }
-
-            byte seq = p.ReadUInt8();
-            ushort x = p.ReadUInt16BE();
-            ushort y = p.ReadUInt16BE();
-            Direction direction = (Direction)p.ReadUInt8();
-            direction &= Direction.Up;
-            sbyte z = p.ReadInt8();
-
-            world.Player.Walker.DenyWalk(seq, x, y, z);
-            world.Player.Direction = direction;
-
-            world.Weather.Reset();
-        }
-
-        private static void ConfirmWalk(World world, ref StackDataReader p)
-        {
-            if (world.Player == null)
-            {
-                return;
-            }
-
-            byte seq = p.ReadUInt8();
-            byte noto = (byte)(p.ReadUInt8() & ~0x40);
-
-            if (noto == 0 || noto >= 8)
-            {
-                noto = 0x01;
-            }
-
-            world.Player.NotorietyFlag = (NotorietyFlag)noto;
-            world.Player.Walker.ConfirmWalk(seq);
-
-            world.Player.AddToTile();
-        }
 
         private static void DragAnimation(World world, ref StackDataReader p)
         {
@@ -1550,19 +1480,6 @@ namespace ClassicUO.Network
             }
         }
 
-        private static void Pathfinding(World world, ref StackDataReader p)
-        {
-            if (!world.InGame)
-            {
-                return;
-            }
-
-            ushort x = p.ReadUInt16BE();
-            ushort y = p.ReadUInt16BE();
-            ushort z = p.ReadUInt16BE();
-
-            world.Player.Pathfinder.WalkTo(x, y, z, 0);
-        }
 
         private static void UpdateContainedItems(World world, ref StackDataReader p)
         {
@@ -2693,16 +2610,6 @@ namespace ClassicUO.Network
             }
         }
 
-        private static void MovePlayer(World world, ref StackDataReader p)
-        {
-            if (!world.InGame)
-            {
-                return;
-            }
-
-            Direction direction = (Direction)p.ReadUInt8();
-            world.Player.Walk(direction & Direction.Mask, (direction & Direction.Running) != 0);
-        }
 
         private static void UpdateName(World world, ref StackDataReader p)
         {
@@ -4883,168 +4790,6 @@ namespace ClassicUO.Network
             }
         }
 
-        private static void BoatMoving(World world, ref StackDataReader p)
-        {
-            if (!world.InGame)
-            {
-                return;
-            }
-
-            uint serial = p.ReadUInt32BE();
-            byte boatSpeed = p.ReadUInt8();
-            Direction movingDirection = (Direction)p.ReadUInt8() & Direction.Mask;
-            Direction facingDirection = (Direction)p.ReadUInt8() & Direction.Mask;
-            ushort x = p.ReadUInt16BE();
-            ushort y = p.ReadUInt16BE();
-            ushort z = p.ReadUInt16BE();
-
-            Item multi = world.Items.Get(serial);
-
-            if (multi == null)
-            {
-                return;
-            }
-
-            //multi.LastX = x;
-            //multi.LastY = y;
-
-            //if (World.HouseManager.TryGetHouse(serial, out var house))
-            //{
-            //    foreach (Multi component in house.Components)
-            //    {
-            //        component.LastX = (ushort) (x + component.MultiOffsetX);
-            //        component.LastY = (ushort) (y + component.MultiOffsetY);
-            //    }
-            //}
-
-            bool smooth =
-                ProfileManager.CurrentProfile != null
-                && ProfileManager.CurrentProfile.UseSmoothBoatMovement;
-
-            if (smooth)
-            {
-                world.BoatMovingManager.AddStep(
-                    serial,
-                    boatSpeed,
-                    movingDirection,
-                    facingDirection,
-                    x,
-                    y,
-                    (sbyte)z
-                );
-            }
-            else
-            {
-                //UpdateGameObject(serial,
-                //                 multi.Graphic,
-                //                 0,
-                //                 multi.Amount,
-                //                 x,
-                //                 y,
-                //                 (sbyte) z,
-                //                 facingDirection,
-                //                 multi.Hue,
-                //                 multi.Flags,
-                //                 0,
-                //                 2,
-                //                 1);
-
-                multi.SetInWorldTile(x, y, (sbyte)z);
-
-                if (world.HouseManager.TryGetHouse(serial, out House house))
-                {
-                    house.Generate(true, true, true);
-                }
-            }
-
-            int count = p.ReadUInt16BE();
-
-            for (int i = 0; i < count; i++)
-            {
-                uint cSerial = p.ReadUInt32BE();
-                ushort cx = p.ReadUInt16BE();
-                ushort cy = p.ReadUInt16BE();
-                ushort cz = p.ReadUInt16BE();
-
-                if (cSerial == world.Player)
-                {
-                    world.RangeSize.X = cx;
-                    world.RangeSize.Y = cy;
-                }
-
-                Entity ent = world.Get(cSerial);
-
-                if (ent == null)
-                {
-                    continue;
-                }
-
-                //if (SerialHelper.IsMobile(cSerial))
-                //{
-                //    Mobile m = (Mobile) ent;
-
-                //    if (m.Steps.Count != 0)
-                //    {
-                //        ref var step = ref m.Steps.Back();
-
-                //        step.X = cx;
-                //        step.Y = cy;
-                //    }
-                //}
-
-                //ent.LastX = cx;
-                //ent.LastY = cy;
-
-                if (smooth)
-                {
-                    world.BoatMovingManager.PushItemToList(
-                        serial,
-                        cSerial,
-                        x - cx,
-                        y - cy,
-                        (sbyte)(z - cz)
-                    );
-                }
-                else
-                {
-                    if (cSerial == world.Player)
-                    {
-                        UpdatePlayer(
-                            world,
-                            cSerial,
-                            ent.Graphic,
-                            0,
-                            ent.Hue,
-                            ent.Flags,
-                            cx,
-                            cy,
-                            (sbyte)cz,
-                            0,
-                            world.Player.Direction
-                        );
-                    }
-                    else
-                    {
-                        UpdateGameObject(
-                            world,
-                            cSerial,
-                            ent.Graphic,
-                            0,
-                            (ushort)(ent.Graphic == 0x2006 ? ((Item)ent).Amount : 0),
-                            cx,
-                            cy,
-                            (sbyte)cz,
-                            SerialHelper.IsMobile(ent) ? ent.Direction : 0,
-                            ent.Hue,
-                            ent.Flags,
-                            0,
-                            0,
-                            1
-                        );
-                    }
-                }
-            }
-        }
 
         private static void PacketList(World world, ref StackDataReader p)
         {
@@ -5455,71 +5200,6 @@ namespace ClassicUO.Network
             }
         }
 
-        private static void UpdatePlayer(
-            World world,
-            uint serial,
-            ushort graphic,
-            byte graph_inc,
-            ushort hue,
-            Flags flags,
-            ushort x,
-            ushort y,
-            sbyte z,
-            ushort serverID,
-            Direction direction
-        )
-        {
-            if (serial == world.Player)
-            {
-                world.RangeSize.X = x;
-                world.RangeSize.Y = y;
-
-                bool olddead = world.Player.IsDead;
-                ushort old_graphic = world.Player.Graphic;
-
-                world.Player.CloseBank();
-                world.Player.Walker.WalkingFailed = false;
-                world.Player.Graphic = graphic;
-                world.Player.Direction = direction & Direction.Mask;
-                world.Player.FixHue(hue);
-                world.Player.Flags = flags;
-                world.Player.Walker.DenyWalk(0xFF, -1, -1, -1);
-
-                GameScene gs = Client.Game.GetScene<GameScene>();
-
-                if (gs != null)
-                {
-                    world.Weather.Reset();
-                    gs.UpdateDrawPosition = true;
-                }
-
-                // std client keeps the target open!
-                /*if (old_graphic != 0 && old_graphic != world.Player.Graphic)
-                {
-                    if (world.Player.IsDead)
-                    {
-                        TargetManager.Reset();
-                    }
-                }*/
-
-                if (olddead != world.Player.IsDead)
-                {
-                    if (world.Player.IsDead)
-                    {
-                        world.ChangeSeason(Game.Managers.Season.Desolation, 42);
-                    }
-                    else
-                    {
-                        world.ChangeSeason(world.OldSeason, world.OldMusicIndex);
-                    }
-                }
-
-                world.Player.Walker.ResendPacketResync = false;
-                world.Player.CloseRangedGumps();
-                world.Player.SetInWorldTile(x, y, z);
-                world.Player.UpdateAbilities();
-            }
-        }
 
         private static void ClearContainerAndRemoveItems(
             World world,
