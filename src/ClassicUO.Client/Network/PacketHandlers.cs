@@ -187,9 +187,6 @@ namespace ClassicUO.Network
 
         static PacketHandlers()
         {
-            Handler.Add(0x1B, EnterWorld);
-            Handler.Add(0x55, LoginComplete);
-            Handler.Add(0xBD, ClientVersion);
             Handler.Add(0x03, ClientTalk);
             Handler.Add(0x0B, Damage);
             Handler.Add(0x11, CharacterStatus);
@@ -263,7 +260,6 @@ namespace ClassicUO.Network
             Handler.Add(0xBA, DisplayQuestArrow);
             Handler.Add(0xBB, UltimaMessengerR);
             Handler.Add(0xBC, Season);
-            Handler.Add(0xBE, AssistVersion);
             Handler.Add(0xBF, ExtendedCommand);
             Handler.Add(0xC0, GraphicEffect);
             Handler.Add(0xC1, DisplayClilocString);
@@ -276,7 +272,6 @@ namespace ClassicUO.Network
             Handler.Add(0xCB, GlobalQueCount);
             Handler.Add(0xCC, DisplayClilocString);
             Handler.Add(0xD0, ConfigurationFileR);
-            Handler.Add(0xD1, Logout);
             Handler.Add(0xD2, UpdateCharacter);
             Handler.Add(0xD3, UpdateObject);
             Handler.Add(0xD4, OpenBook);
@@ -289,7 +284,6 @@ namespace ClassicUO.Network
             Handler.Add(0xDE, UpdateMobileStatus);
             Handler.Add(0xDF, BuffDebuff);
             Handler.Add(0xE2, NewCharacterAnimation);
-            Handler.Add(0xE3, KREncryptionResponse);
             Handler.Add(0xE5, DisplayWaypoint);
             Handler.Add(0xE6, RemoveWaypoint);
             Handler.Add(0xF0, KrriosClientSpecial);
@@ -871,79 +865,6 @@ namespace ClassicUO.Network
                 type,
                 1
             );
-        }
-
-        private static void EnterWorld(World world, ref StackDataReader p)
-        {
-            uint serial = p.ReadUInt32BE();
-
-            world.CreatePlayer(serial);
-
-            p.Skip(4);
-            world.Player.Graphic = p.ReadUInt16BE();
-            world.Player.CheckGraphicChange();
-            ushort x = p.ReadUInt16BE();
-            ushort y = p.ReadUInt16BE();
-            sbyte z = (sbyte)p.ReadUInt16BE();
-
-            if (world.Map == null)
-            {
-                world.MapIndex = 0;
-            }
-
-            world.Player.SetInWorldTile(x, y, z);
-            world.Player.Direction = (Direction)(p.ReadUInt8() & 0x7);
-            world.RangeSize.X = x;
-            world.RangeSize.Y = y;
-
-            if (
-                ProfileManager.CurrentProfile != null
-                && ProfileManager.CurrentProfile.UseCustomLightLevel
-            )
-            {
-                world.Light.Overall =
-                    ProfileManager.CurrentProfile.LightLevelType == 1
-                        ? Math.Min(world.Light.Overall, ProfileManager.CurrentProfile.LightLevel)
-                        : ProfileManager.CurrentProfile.LightLevel;
-            }
-
-            Client.Game.Audio.UpdateCurrentMusicVolume();
-
-            if (Client.Game.UO.Version >= Utility.ClientVersion.CV_200)
-            {
-                if (ProfileManager.CurrentProfile != null)
-                {
-                    NetClient.Socket.Send_GameWindowSize(
-                        (uint)Client.Game.Scene.Camera.Bounds.Width,
-                        (uint)Client.Game.Scene.Camera.Bounds.Height
-                    );
-                }
-
-                NetClient.Socket.Send_Language(Settings.GlobalSettings.Language);
-            }
-
-            NetClient.Socket.Send_ClientVersion(Settings.GlobalSettings.ClientVersion);
-
-            GameActions.SingleClick(world, world.Player);
-            NetClient.Socket.Send_SkillsRequest(world.Player.Serial);
-
-            if (world.Player.IsDead)
-            {
-                world.ChangeSeason(Game.Managers.Season.Desolation, 42);
-            }
-
-            if (
-                Client.Game.UO.Version >= Utility.ClientVersion.CV_70796
-                && ProfileManager.CurrentProfile != null
-            )
-            {
-                NetClient.Socket.Send_ShowPublicHouseContent(
-                    ProfileManager.CurrentProfile.ShowHouseContent
-                );
-            }
-
-            NetClient.Socket.Send_ToPlugins_AllSkills();
-            NetClient.Socket.Send_ToPlugins_AllSpells();
         }
 
         private static void Talk(World world, ref StackDataReader p)
@@ -2222,45 +2143,6 @@ namespace ClassicUO.Network
             {
                 ushort index = p.ReadUInt16BE();
                 Client.Game.Audio.PlayMusic(index);
-            }
-        }
-
-        private static void LoginComplete(World world, ref StackDataReader p)
-        {
-            if (world.Player != null && Client.Game.Scene is LoginScene)
-            {
-                var scene = new GameScene(world);
-                Client.Game.SetScene(scene);
-
-                //GameActions.OpenPaperdoll(world.Player);
-                GameActions.RequestMobileStatus(world, world.Player);
-                NetClient.Socket.Send_OpenChat("");
-
-                NetClient.Socket.Send_SkillsRequest(world.Player);
-                scene.DoubleClickDelayed(world.Player);
-
-                if (Client.Game.UO.Version >= Utility.ClientVersion.CV_306E)
-                {
-                    NetClient.Socket.Send_ClientType();
-                }
-
-                if (Client.Game.UO.Version >= Utility.ClientVersion.CV_305D)
-                {
-                    NetClient.Socket.Send_ClientViewRange(world.ClientViewRange);
-                }
-
-                List<Gump> gumps = ProfileManager.CurrentProfile.ReadGumps(
-                    world,
-                    ProfileManager.ProfilePath
-                );
-
-                if (gumps != null)
-                {
-                    foreach (Gump gump in gumps)
-                    {
-                        UIManager.Add(gump);
-                    }
-                }
             }
         }
 
@@ -4100,22 +3982,6 @@ namespace ClassicUO.Network
             world.ChangeSeason((Season)season, music);
         }
 
-        private static void ClientVersion(World world, ref StackDataReader p)
-        {
-            NetClient.Socket.Send_ClientVersion(Settings.GlobalSettings.ClientVersion);
-        }
-
-        private static void AssistVersion(World world, ref StackDataReader p)
-        {
-            //uint version = p.ReadUInt32BE();
-
-            //string[] parts = Service.GetByLocalSerial<Settings>().ClientVersion.Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries);
-            //byte[] clientVersionBuffer =
-            //    {byte.Parse(parts[0]), byte.Parse(parts[1]), byte.Parse(parts[2]), byte.Parse(parts[3])};
-
-            //NetClient.Socket.Send(new PAssistVersion(clientVersionBuffer, version));
-        }
-
         private static void ExtendedCommand(World world, ref StackDataReader p)
         {
             ushort cmd = p.ReadUInt16BE();
@@ -4862,31 +4728,6 @@ namespace ClassicUO.Network
 
         private static void ConfigurationFileR(World world, ref StackDataReader p) { }
 
-        private static void Logout(World world, ref StackDataReader p)
-        {
-            // http://docs.polserver.com/packets/index.php?Packet=0xD1
-
-            if (
-                Client.Game.GetScene<GameScene>().DisconnectionRequested
-                && (
-                    world.ClientFeatures.Flags
-                    & CharacterListFlags.CLF_OWERWRITE_CONFIGURATION_BUTTON
-                ) != 0
-            )
-            {
-                if (p.ReadBool())
-                {
-                    // client can disconnect
-                    NetClient.Socket.Disconnect();
-                    Client.Game.SetScene(new LoginScene(world));
-                }
-                else
-                {
-                    Log.Warn("0x1D - client asked to disconnect but server answered 'NO!'");
-                }
-            }
-        }
-
         private static void MegaCliloc(World world, ref StackDataReader p)
         {
             if (!world.InGame)
@@ -5589,8 +5430,6 @@ namespace ClassicUO.Network
                 fromServer: true
             );
         }
-
-        private static void KREncryptionResponse(World world, ref StackDataReader p) { }
 
         private static void DisplayWaypoint(World world, ref StackDataReader p)
         {
