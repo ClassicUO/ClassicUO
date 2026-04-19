@@ -187,36 +187,22 @@ namespace ClassicUO.Network
 
         static PacketHandlers()
         {
-            Handler.Add(0x32, Unknown_0x32);
             Handler.Add(0x3A, UpdateSkills);
             Handler.Add(0x66, BookData);
             Handler.Add(0x6C, TargetCursor);
-            Handler.Add(0x73, Ping);
             Handler.Add(0x93, OpenBook);
             Handler.Add(0x9A, ASCIIPrompt);
             Handler.Add(0xA5, OpenUrl);
             Handler.Add(0xA6, TipWindow);
             Handler.Add(0xAB, TextEntryDialog);
             Handler.Add(0xB0, OpenGump);
-            Handler.Add(0xB7, Help);
-            Handler.Add(0xB9, EnableLockedFeatures);
             Handler.Add(0xBA, DisplayQuestArrow);
             Handler.Add(0xBF, ExtendedCommand);
             Handler.Add(0xC2, UnicodePrompt);
-            Handler.Add(0xC6, InvalidMapEnable);
-            Handler.Add(0xC8, ClientViewRange);
-            Handler.Add(0xCA, GetUserServerPingGodClientR);
-            Handler.Add(0xCB, GlobalQueCount);
-            Handler.Add(0xD0, ConfigurationFileR);
             Handler.Add(0xD4, OpenBook);
-            Handler.Add(0xD7, GenericAOSCommandsR);
-            Handler.Add(0xDB, CharacterTransferLog);
-            Handler.Add(0xDC, OPLInfo);
             Handler.Add(0xDD, OpenCompressedGump);
             Handler.Add(0xE5, DisplayWaypoint);
             Handler.Add(0xE6, RemoveWaypoint);
-            Handler.Add(0xF0, KrriosClientSpecial);
-            Handler.Add(0xF1, FreeshardListR);
 
             RegisterLoginHandlers(Handler);
             RegisterCombatHandlers(Handler);
@@ -227,6 +213,7 @@ namespace ClassicUO.Network
             RegisterObjectsHandlers(Handler);
             RegisterVendorHandlers(Handler);
             RegisterHousingHandlers(Handler);
+            RegisterSystemHandlers(Handler);
         }
 
         public static void SendMegaClilocRequests(World world)
@@ -311,7 +298,6 @@ namespace ClassicUO.Network
 
 
 
-        private static void Unknown_0x32(World world, ref StackDataReader p) { }
 
         private static void UpdateSkills(World world, ref StackDataReader p)
         {
@@ -543,17 +529,9 @@ namespace ClassicUO.Network
 
 
 
-        private static void ClientViewRange(World world, ref StackDataReader p)
-        {
-            world.ClientViewRange = p.ReadUInt8();
-        }
 
 
 
-        private static void Ping(World world, ref StackDataReader p)
-        {
-            NetClient.Socket.Statistics.PingReceived(p.ReadUInt8());
-        }
 
 
 
@@ -773,44 +751,8 @@ namespace ClassicUO.Network
         }
 
 
-        private static void Help(World world, ref StackDataReader p) { }
 
 
-        private static void EnableLockedFeatures(World world, ref StackDataReader p)
-        {
-            LockedFeatureFlags flags = 0;
-
-            if (Client.Game.UO.Version >= Utility.ClientVersion.CV_60142)
-            {
-                flags = (LockedFeatureFlags)p.ReadUInt32BE();
-            }
-            else
-            {
-                flags = (LockedFeatureFlags)p.ReadUInt16BE();
-            }
-
-            world.ClientLockedFeatures.SetFlags(flags);
-
-            world.ChatManager.ChatIsEnabled = world.ClientLockedFeatures.Flags.HasFlag(
-                LockedFeatureFlags.T2A
-            )
-                ? ChatStatus.Enabled
-                : 0;
-
-            BodyConvFlags bcFlags = 0;
-            if (flags.HasFlag(LockedFeatureFlags.UOR))
-                bcFlags |= BodyConvFlags.Anim1 | BodyConvFlags.Anim2;
-            if (flags.HasFlag(LockedFeatureFlags.LBR))
-                bcFlags |= BodyConvFlags.Anim1;
-            if (flags.HasFlag(LockedFeatureFlags.AOS))
-                bcFlags |= BodyConvFlags.Anim2;
-            if (flags.HasFlag(LockedFeatureFlags.SE))
-                bcFlags |= BodyConvFlags.Anim3;
-            if (flags.HasFlag(LockedFeatureFlags.ML))
-                bcFlags |= BodyConvFlags.Anim4;
-
-            Client.Game.UO.Animations.UpdateAnimationTable(bcFlags);
-        }
 
         private static void DisplayQuestArrow(World world, ref StackDataReader p)
         {
@@ -1472,18 +1414,13 @@ namespace ClassicUO.Network
         }
 
 
-        private static void InvalidMapEnable(World world, ref StackDataReader p) { }
 
         private static void ParticleEffect3D(World world, ref StackDataReader p) { }
 
-        private static void GetUserServerPingGodClientR(World world, ref StackDataReader p) { }
-
-        private static void GlobalQueCount(World world, ref StackDataReader p) { }
-
-        private static void ConfigurationFileR(World world, ref StackDataReader p) { }
 
 
-        private static void GenericAOSCommandsR(World world, ref StackDataReader p) { }
+
+
 
         private static unsafe void ReadUnsafeCustomHouseData(
             ReadOnlySpan<byte> source,
@@ -1651,21 +1588,7 @@ namespace ClassicUO.Network
         }
 
 
-        private static void CharacterTransferLog(World world, ref StackDataReader p) { }
 
-        private static void OPLInfo(World world, ref StackDataReader p)
-        {
-            if (world.ClientFeatures.TooltipsEnabled)
-            {
-                uint serial = p.ReadUInt32BE();
-                uint revision = p.ReadUInt32BE();
-
-                if (!world.OPL.IsRevisionEquals(serial, revision))
-                {
-                    AddMegaClilocRequest(serial);
-                }
-            }
-        }
 
         private static void OpenCompressedGump(World world, ref StackDataReader p)
         {
@@ -1789,73 +1712,7 @@ namespace ClassicUO.Network
             uint serial = p.ReadUInt32BE();
         }
 
-        private static void KrriosClientSpecial(World world, ref StackDataReader p)
-        {
-            byte type = p.ReadUInt8();
 
-            switch (type)
-            {
-                case 0x00: // accepted
-                    Log.Trace("Krrios special packet accepted");
-                    world.WMapManager.SetACKReceived();
-                    world.WMapManager.SetEnable(true);
-
-                    break;
-
-                case 0x01: // custom party info
-                case 0x02: // guild track info
-                    bool locations = type == 0x01 || p.ReadBool();
-
-                    uint serial;
-
-                    while ((serial = p.ReadUInt32BE()) != 0)
-                    {
-                        if (locations)
-                        {
-                            ushort x = p.ReadUInt16BE();
-                            ushort y = p.ReadUInt16BE();
-                            byte map = p.ReadUInt8();
-                            int hits = type == 1 ? 0 : p.ReadUInt8();
-
-                            world.WMapManager.AddOrUpdate(
-                                serial,
-                                x,
-                                y,
-                                hits,
-                                map,
-                                type == 0x02,
-                                null,
-                                true
-                            );
-                        }
-                    }
-
-                    world.WMapManager.RemoveUnupdatedWEntity();
-
-                    break;
-
-                case 0x03: // runebook contents
-                    break;
-
-                case 0x04: // guardline data
-                    break;
-
-                case 0xF0:
-                    break;
-
-                case 0xFE:
-
-                    Client.Game.EnqueueAction(5000, () =>
-                    {
-                        Log.Info("Razor ACK sent");
-                        NetClient.Socket.Send_RazorACK();
-                    });
-
-                    break;
-            }
-        }
-
-        private static void FreeshardListR(World world, ref StackDataReader p) { }
 
 
 
