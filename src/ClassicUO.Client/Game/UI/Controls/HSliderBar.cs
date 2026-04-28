@@ -136,85 +136,62 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            float layerDepth = layerDepthRef;
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-            renderLists.AddGumpWithAtlas
-            (
-                batcher =>
-                {
+            if (_style == HSliderBarStyle.MetalWidgetRecessedBar)
+            {
+                ref readonly var gumpInfo0 = ref Client.Game.UO.Gumps.GetGump(213);
+                ref readonly var gumpInfo1 = ref Client.Game.UO.Gumps.GetGump(214);
+                ref readonly var gumpInfo2 = ref Client.Game.UO.Gumps.GetGump(215);
+                ref readonly var gumpInfo3 = ref Client.Game.UO.Gumps.GetGump(216);
 
-                    if (_style == HSliderBarStyle.MetalWidgetRecessedBar)
-                    {
-                        ref readonly var gumpInfo0 = ref Client.Game.UO.Gumps.GetGump(213);
-                        ref readonly var gumpInfo1 = ref Client.Game.UO.Gumps.GetGump(214);
-                        ref readonly var gumpInfo2 = ref Client.Game.UO.Gumps.GetGump(215);
-                        ref readonly var gumpInfo3 = ref Client.Game.UO.Gumps.GetGump(216);
+                // Left cap
+                renderLists.AddGumpSprite(
+                    gumpInfo0.Texture, gumpInfo0.UV,
+                    new Rectangle(x, y, gumpInfo0.UV.Width, gumpInfo0.UV.Height),
+                    hueVector, layerDepthRef);
 
-                        batcher.Draw(gumpInfo0.Texture, new Vector2(x, y), gumpInfo0.UV, hueVector, layerDepth);
+                // Middle track (tiled)
+                renderLists.AddGumpSpriteTiled(
+                    gumpInfo1.Texture, gumpInfo1.UV,
+                    new Rectangle(
+                        x + gumpInfo0.UV.Width,
+                        y,
+                        BarWidth - gumpInfo2.UV.Width - gumpInfo0.UV.Width,
+                        gumpInfo1.UV.Height),
+                    hueVector, layerDepthRef);
 
-                        batcher.DrawTiled(
-                            gumpInfo1.Texture,
-                            new Rectangle(
-                                x + gumpInfo0.UV.Width,
-                                y,
-                                BarWidth - gumpInfo2.UV.Width - gumpInfo0.UV.Width,
-                                gumpInfo1.UV.Height
-                            ),
-                            gumpInfo1.UV,
-                            hueVector,
-                            layerDepth
-                        );
+                // Right cap
+                renderLists.AddGumpSprite(
+                    gumpInfo2.Texture, gumpInfo2.UV,
+                    new Rectangle(
+                        x + BarWidth - gumpInfo2.UV.Width, y,
+                        gumpInfo2.UV.Width, gumpInfo2.UV.Height),
+                    hueVector, layerDepthRef);
 
-                        batcher.Draw(
-                            gumpInfo2.Texture,
-                            new Vector2(x + BarWidth - gumpInfo2.UV.Width, y),
-                            gumpInfo2.UV,
-                            hueVector,
-                            layerDepth
-                        );
+                // Thumb
+                renderLists.AddGumpSprite(
+                    gumpInfo3.Texture, gumpInfo3.UV,
+                    new Rectangle(x + _sliderX, y, gumpInfo3.UV.Width, gumpInfo3.UV.Height),
+                    hueVector, layerDepthRef);
+            }
+            else
+            {
+                ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(idx: 0x845);
 
-                        batcher.Draw(
-                            gumpInfo3.Texture,
-                            new Vector2(x + _sliderX, y),
-                            gumpInfo3.UV,
-                            hueVector,
-                            layerDepth
-                        );
-                    }
-                    else
-                    {
-                        ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(idx: 0x845);
+                renderLists.AddGumpSprite(
+                    gumpInfo.Texture, gumpInfo.UV,
+                    new Rectangle(x + _sliderX, y, gumpInfo.UV.Width, gumpInfo.UV.Height),
+                    hueVector, layerDepthRef);
+            }
 
-                        batcher.Draw(
-                            gumpInfo.Texture,
-                            new Vector2(x + _sliderX, y),
-                            gumpInfo.UV,
-                            hueVector,
-                            layerDepth
-                        );
-                    }
-                    return true;
-                }
-            );
             if (_text != null)
             {
-                renderLists.AddGumpNoAtlas
-                (
-                    batcher =>
-                    {
-                        if (_drawUp)
-                        {
-                            _text.Draw(batcher, x, y - _text.Height, layerDepth);
-                        }
-                        else
-                        {
-                            _text.Draw(batcher, x + BarWidth + 2, y + (Height >> 1) - (_text.Height >> 1), layerDepth);
-                        }
-                        return true;
-                    }
-                    );
+                int tx = _drawUp ? x : x + BarWidth + 2;
+                int ty = _drawUp ? y - _text.Height : y + (Height >> 1) - (_text.Height >> 1);
+                renderLists.AddGumpNoAtlas(_text, tx, ty, layerDepthRef);
             }
+
             return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
         }
 

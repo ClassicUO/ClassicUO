@@ -220,42 +220,33 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            float layerDepth = layerDepthRef;
             if (IsDisposed)
             {
                 return false;
             }
-            renderLists.AddGumpNoAtlas(
-                batcher =>
-                {
-                    if (batcher.ClipBegin(x, y, Width, Height))
-                    {
-                        RenderLists childRenderLists = new();
 
-                        base.AddToRenderLists(childRenderLists, x, y, ref layerDepth);
+            // Clip all children AND the scrolled text to this control's bounds.
+            renderLists.PushClip(new Rectangle(x, y, Width, Height));
 
-                        childRenderLists.DrawRenderLists(batcher, sbyte.MaxValue);
+            // Children emit directly into the parent command stream so they benefit
+            // from any retained-mode gump cache higher up. Previously these went into
+            // a throwaway nested RenderLists created inside a per-frame closure.
+            base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
 
-                        int offset = HasBackground ? 4 : 0;
+            if (_gameText != null)
+            {
+                int offset = HasBackground ? 4 : 0;
 
-                        _gameText.Draw
-                        (
-                            batcher,
-                            x + offset,
-                            y + offset,
-                            ScrollX,
-                            ScrollY,
-                            Width + ScrollX,
-                            Height + ScrollY,
-                            layerDepth
-                        );
+                renderLists.AddGumpNoAtlasScrolled(
+                    _gameText,
+                    x + offset,
+                    y + offset,
+                    new Rectangle(ScrollX, ScrollY, Width + ScrollX, Height + ScrollY),
+                    layerDepthRef
+                );
+            }
 
-                        batcher.ClipEnd();
-                    }
-                    return true;
-                }
-            );
-
+            renderLists.PopClip();
 
             return true;
         }

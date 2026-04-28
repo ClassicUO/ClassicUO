@@ -40,7 +40,6 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            float layerDepth = layerDepthRef;
             if (IsDisposed)
             {
                 return false;
@@ -48,27 +47,13 @@ namespace ClassicUO.Game.UI.Controls
 
             if (MouseIsOver)
             {
-                Vector3 hueVector = ShaderHueTranslator.GetHueVector
-                                    (
-                                        0,
-                                        false,
-                                        Alpha,
-                                        true
-                                    );
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, Alpha, true);
 
-                renderLists.AddGumpNoAtlas(
-                    batcher => 
-                    {
-                        batcher.Draw
-                        (
-                            _texture,
-                            new Vector2(x, y),
-                            new Rectangle(0, 0, Width, Height),
-                            hueVector,
-                            layerDepth
-                        );
-                        return true;
-                    }
+                renderLists.AddGumpSprite(
+                    _texture,
+                    new Rectangle(x, y, Width, Height),
+                    hueVector,
+                    layerDepthRef
                 );
             }
 

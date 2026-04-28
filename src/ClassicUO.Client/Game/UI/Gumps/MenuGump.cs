@@ -164,17 +164,15 @@ namespace ClassicUO.Game.UI.Gumps
                 if (_graphic != 0)
                 {
                     float layerDepth = layerDepthRef;
-                    renderLists.AddGumpWithAtlas
-                    (
-                        (batcher) =>
-                        {
-                            ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(_graphic);
+                    ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(_graphic);
+                    Vector3 hueVector = ShaderHueTranslator.GetHueVector(_hue, _isPartial, 1f);
 
-                            Vector3 hueVector = ShaderHueTranslator.GetHueVector(_hue, _isPartial, 1f);
-
-                            batcher.Draw(artInfo.Texture, new Vector2(x, y), artInfo.UV, hueVector, layerDepth);
-                            return true;
-                        }
+                    renderLists.AddGumpSprite(
+                        artInfo.Texture,
+                        artInfo.UV,
+                        new Rectangle(x, y, artInfo.UV.Width, artInfo.UV.Height),
+                        hueVector,
+                        layerDepth
                     );
                 }
 
@@ -208,52 +206,46 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
             {
-                float layerDepth = layerDepthRef;
-                renderLists.AddGumpNoAtlas
-                (
-                    batcher =>
+                // Emit clipped scrolling menu contents as typed commands in the
+                // parent stream.
+                renderLists.PushClip(new Rectangle(x, y, Width, Height));
+
+                int width = 0;
+                int maxWidth = Value + Width;
+                bool drawOnly1 = true;
+
+                foreach (Control child in Children)
+                {
+                    if (!child.IsVisible)
                     {
-                        if (batcher.ClipBegin(x, y, Width, Height))
-                        {
-                            int width = 0;
-                            int maxWidth = Value + Width;
-                            bool drawOnly1 = true;
-
-                            RenderLists childRenderLists = new();
-                            foreach (Control child in Children)
-                            {
-                                if (!child.IsVisible)
-                                {
-                                    continue;
-                                }
-
-                                child.X = width - Value;
-
-                                if (width + child.Width <= Value) { }
-                                else if (width + child.Width <= maxWidth)
-                                {
-                                    child.AddToRenderLists(childRenderLists, child.X + x, y, ref layerDepth);
-                                }
-                                else
-                                {
-                                    if (drawOnly1)
-                                    {
-                                        child.AddToRenderLists(childRenderLists, child.X + x, y, ref layerDepth);
-                                        drawOnly1 = false;
-                                    }
-                                }
-
-                                width += child.Width;
-                            }
-                            childRenderLists.DrawRenderLists(batcher, sbyte.MaxValue);
-
-                            batcher.ClipEnd();
-                        }
-                        return true;
+                        continue;
                     }
-                );
 
-                return true; // base.Draw(batcher,position, hue);
+                    child.X = width - Value;
+
+                    if (width + child.Width <= Value)
+                    {
+                        // entirely scrolled off to the left
+                    }
+                    else if (width + child.Width <= maxWidth)
+                    {
+                        child.AddToRenderLists(renderLists, child.X + x, y, ref layerDepthRef);
+                    }
+                    else
+                    {
+                        if (drawOnly1)
+                        {
+                            child.AddToRenderLists(renderLists, child.X + x, y, ref layerDepthRef);
+                            drawOnly1 = false;
+                        }
+                    }
+
+                    width += child.Width;
+                }
+
+                renderLists.PopClip();
+
+                return true;
             }
 
             public void CalculateWidth()

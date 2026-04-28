@@ -188,44 +188,26 @@ namespace ClassicUO.Game.UI.Gumps
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
             base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
-            float layerDepth = layerDepthRef;
 
             if (Var != InfoBarVars.NameNotoriety && ProfileManager.CurrentProfile.InfoBarHighlightType == 1 && _warningLinesHue != 0x0481)
             {
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector(_warningLinesHue);
+                var whiteTex = SolidColorTextureCache.GetTexture(Color.White);
 
-                renderLists.AddGumpNoAtlas(
-                    batcher =>
-                    {
-                        batcher.Draw
-                        (
-                            SolidColorTextureCache.GetTexture(Color.White),
-                            new Rectangle
-                            (
-                                _data.ScreenCoordinateX,
-                                _data.ScreenCoordinateY,
-                                _data.Width,
-                                2
-                            ),
-                            hueVector,
-                            layerDepth
-                        );
+                // Top warning line
+                renderLists.AddGumpSprite(
+                    whiteTex,
+                    new Rectangle(_data.ScreenCoordinateX, _data.ScreenCoordinateY, _data.Width, 2),
+                    hueVector,
+                    layerDepthRef
+                );
 
-                        batcher.Draw
-                        (
-                            SolidColorTextureCache.GetTexture(Color.White),
-                            new Rectangle
-                            (
-                                _data.ScreenCoordinateX,
-                                _data.ScreenCoordinateY + Parent.Height - 2,
-                                _data.Width,
-                                2
-                            ),
-                            hueVector,
-                            layerDepth
-                        );
-                        return true;
-                    }
+                // Bottom warning line
+                renderLists.AddGumpSprite(
+                    whiteTex,
+                    new Rectangle(_data.ScreenCoordinateX, _data.ScreenCoordinateY + Parent.Height - 2, _data.Width, 2),
+                    hueVector,
+                    layerDepthRef
                 );
             }
 

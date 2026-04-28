@@ -42,7 +42,7 @@ namespace ClassicUO.Game.UI.Controls
             {
                 _scrollBar = new ScrollFlag
                 {
-                    X = Width - 19, Height = h
+                    X = Width - 15, Height = h
                 };
 
                 Width += 15;
@@ -61,7 +61,7 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-        public int ScrollMaxHeight { get; set; } = -1;
+        public int ScrollMaxHeight { get; set; }
         public ScrollbarBehaviour ScrollbarBehaviour { get; set; }
         public int ScrollValue => _scrollBar.Value;
         public int ScrollMinValue => _scrollBar.MinValue;
@@ -103,34 +103,31 @@ namespace ClassicUO.Game.UI.Controls
         {
             ScrollBarBase scrollbar = (ScrollBarBase)Children[0];
             scrollbar.AddToRenderLists(renderLists, x + scrollbar.X, y + scrollbar.Y, ref layerDepthRef);
-            float layerDepth = layerDepthRef;
 
-            renderLists.AddGumpNoAtlas(
-                batcher =>
+            // Clip children to the scroll viewport and emit them directly into the
+            // parent command stream. Previously this built a throwaway nested
+            // RenderLists inside a closure and flushed it mid-frame, which
+            // defeated the owning gump's render cache.
+            renderLists.PushClip(new Rectangle(
+                x + ScissorRectangle.X,
+                y + ScissorRectangle.Y,
+                Width - 14 + ScissorRectangle.Width,
+                Height + ScissorRectangle.Height));
+
+            for (int i = 1; i < Children.Count; i++)
+            {
+                Control child = Children[i];
+
+                if (!child.IsVisible)
                 {
-                    if (batcher.ClipBegin(x + ScissorRectangle.X, y + ScissorRectangle.Y, Width - 14 + ScissorRectangle.Width, Height + ScissorRectangle.Height))
-                    {
-                        RenderLists childRenderLists = new();
-
-                        for (int i = 1; i < Children.Count; i++)
-                        {
-                            Control child = Children[i];
-
-                            if (!child.IsVisible)
-                            {
-                                continue;
-                            }
-
-                            int finalY = y + child.Y - scrollbar.Value + ScissorRectangle.Y;
-
-                            child.AddToRenderLists(childRenderLists, x + child.X, finalY, ref layerDepth);
-                        }
-                        childRenderLists.DrawRenderLists(batcher, sbyte.MaxValue);
-                        batcher.ClipEnd();
-                    }
-                    return true;
+                    continue;
                 }
-            );
+
+                int finalY = y + child.Y - scrollbar.Value + ScissorRectangle.Y;
+                child.AddToRenderLists(renderLists, x + child.X, finalY, ref layerDepthRef);
+            }
+
+            renderLists.PopClip();
 
             return true;
         }

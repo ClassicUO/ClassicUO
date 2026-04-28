@@ -4406,37 +4406,22 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            float layerDepth = layerDepthRef;
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-            renderLists.AddGumpNoAtlas(batcher =>
-            {
-                batcher.Draw
-                (
-                    LogoTexture,
-                    new Rectangle
-                    (
-                        x + 190,
-                        y + 20,
-                        WIDTH - 250,
-                        400
-                    ),
-                    hueVector,
-                    layerDepth
-                );
+            // Logo watermark behind the options panel
+            renderLists.AddGumpSprite(
+                LogoTexture,
+                new Rectangle(x + 190, y + 20, WIDTH - 250, 400),
+                hueVector,
+                layerDepthRef
+            );
 
-                batcher.DrawRectangle
-                (
-                    SolidColorTextureCache.GetTexture(Color.Gray),
-                    x,
-                    y,
-                    Width,
-                    Height,
-                    hueVector,
-                    layerDepth
-                );
-                return true;
-            });
+            // 1-pixel gray outline around the whole options gump
+            var grayTex = SolidColorTextureCache.GetTexture(Color.Gray);
+            renderLists.AddGumpSprite(grayTex, new Rectangle(x, y, Width, 1), hueVector, layerDepthRef);              // top
+            renderLists.AddGumpSprite(grayTex, new Rectangle(x + Width - 1, y, 1, Height), hueVector, layerDepthRef); // right
+            renderLists.AddGumpSprite(grayTex, new Rectangle(x, y + Height - 1, Width, 1), hueVector, layerDepthRef); // bottom
+            renderLists.AddGumpSprite(grayTex, new Rectangle(x, y, 1, Height), hueVector, layerDepthRef);             // left
 
             return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
         }
@@ -4871,19 +4856,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
             {
-                float layerDepth = layerDepthRef;
-                renderLists.AddGumpNoAtlas(batcher =>
-                {
-                    if (batcher.ClipBegin(x, y, Width, Height))
-                    {
-                        RenderLists childRenderLists = new();
-                        base.AddToRenderLists(childRenderLists, x, y, ref layerDepth);
+                // Clip the text input children (textbox, cursor, etc.) to the field
+                // bounds so text that exceeds the field's width doesn't bleed out.
+                renderLists.PushClip(new Rectangle(x, y, Width, Height));
+                base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
+                renderLists.PopClip();
 
-                        childRenderLists.DrawRenderLists(batcher, sbyte.MaxValue);
-                        batcher.ClipEnd();
-                    }
-                    return true;
-                });
                 return true;
             }
 

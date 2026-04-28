@@ -95,9 +95,14 @@ namespace ClassicUO.Game.UI.Gumps
                     sb.Append($"Ping: {_ping} ms\n{"In:"} {NetStatistics.GetSizeAdaptive(_deltaBytesReceived),-6} {"Out:"} {NetStatistics.GetSizeAdaptive(_deltaBytesSent),-6}");
                 }
 
-                _cacheText = sb.ToString();
-
+                string newCache = sb.ToString();
                 sb.Dispose();
+
+                if (newCache != _cacheText)
+                {
+                    _cacheText = newCache;
+                    NotifyRenderDirty();
+                }
 
                 Vector2 size = Fonts.Bold.MeasureString(_cacheText);
 
@@ -113,7 +118,6 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 return false;
             }
-            float layerDepth = layerDepthRef;
 
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
@@ -136,20 +140,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             hueVector.Y = 1;
 
-            renderLists.AddGumpNoAtlas(
-                batcher =>
-                {
-                    batcher.DrawString
-                    (
-                        Fonts.Bold,
-                        _cacheText,
-                        x + 10,
-                        y + 10,
-                        hueVector,
-                        layerDepth
-                    );
-                    return true;
-                }
+            renderLists.AddGumpString(
+                Fonts.Bold,
+                _cacheText,
+                x + 10,
+                y + 10,
+                hueVector,
+                layerDepthRef
             );
 
             return true;

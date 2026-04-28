@@ -237,30 +237,27 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            float layerDepth = layerDepthRef;
-            renderLists.AddGumpNoAtlas(
-                batcher =>
-                {
-                    if (batcher.ClipBegin(x, y, Width, Height))
-                    {
-                        Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, Alpha, true);
+            // Clip everything drawn inside this 9-slice to the control bounds. Children
+            // emit directly into the parent stream so the owning gump's retained cache
+            // can observe them (previously this was a closure spinning up a throwaway
+            // RenderLists, which defeated caching).
+            renderLists.PushClip(new Rectangle(x, y, Width, Height));
 
-                        DrawInternal(batcher, x, y, hueVector, layerDepth);
-                        RenderLists childRenderLists = new();
-                        base.AddToRenderLists(childRenderLists, x, y, ref layerDepth);
-                        childRenderLists.DrawRenderLists(batcher, sbyte.MaxValue);
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, Alpha, true);
+            EmitNineSlice(renderLists, x, y, hueVector, layerDepthRef);
 
-                        batcher.ClipEnd();
-                    }
+            base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
 
-                    return true;
-                }
-            );
+            renderLists.PopClip();
 
             return true;
         }
 
-        private void DrawInternal(UltimaBatcher2D batcher, int x, int y, Vector3 color, float layerDepth)
+        // 9-slice layout:
+        //    0  1  2       corners  = simple Sprite draw
+        //    3  8  4       middle   = SpriteTiled (3,4,1,6) and the centre (8)
+        //    5  6  7
+        private void EmitNineSlice(RenderLists renderLists, int x, int y, Vector3 color, float layerDepth)
         {
             var texture0 = GetTexture(0, out var bounds0);
             var texture1 = GetTexture(1, out var bounds1);
@@ -277,122 +274,117 @@ namespace ClassicUO.Game.UI.Controls
             int offsetLeft = Math.Abs(Math.Max(bounds0.Width, bounds5.Width) - bounds2.Width);
             int offsetRight = Math.Max(bounds2.Width, bounds7.Width) - bounds4.Width;
 
+            // Top-left corner
             if (texture0 != null)
             {
-                batcher.Draw(texture0, new Vector2(x, y), bounds0, color, layerDepth);
+                renderLists.AddGumpSprite(
+                    texture0, bounds0,
+                    new Rectangle(x, y, bounds0.Width, bounds0.Height),
+                    color, layerDepth);
             }
 
+            // Top edge (tiled)
             if (texture1 != null)
             {
-                batcher.DrawTiled(
-                    texture1,
+                renderLists.AddGumpSpriteTiled(
+                    texture1, bounds1,
                     new Rectangle(
                         x + bounds0.Width,
                         y,
                         Width - bounds0.Width - bounds2.Width,
-                        bounds1.Height
-                    ),
-                    bounds1,
-                    color,
-                    layerDepth
-                );
+                        bounds1.Height),
+                    color, layerDepth);
             }
 
+            // Top-right corner
             if (texture2 != null)
             {
-                batcher.Draw(
-                    texture2,
-                    new Vector2(x + (Width - bounds2.Width), y + offsetTop),
-                    bounds2,
-                    color,
-                    layerDepth
-                );
+                renderLists.AddGumpSprite(
+                    texture2, bounds2,
+                    new Rectangle(
+                        x + (Width - bounds2.Width),
+                        y + offsetTop,
+                        bounds2.Width,
+                        bounds2.Height),
+                    color, layerDepth);
             }
 
+            // Left edge (tiled)
             if (texture3 != null)
             {
-                batcher.DrawTiled(
-                    texture3,
+                renderLists.AddGumpSpriteTiled(
+                    texture3, bounds3,
                     new Rectangle(
                         x,
                         y + bounds0.Height,
                         bounds3.Width,
-                        Height - bounds0.Height - bounds5.Height
-                    ),
-                    bounds3,
-                    color,
-                    layerDepth
-                );
+                        Height - bounds0.Height - bounds5.Height),
+                    color, layerDepth);
             }
 
+            // Right edge (tiled)
             if (texture4 != null)
             {
-                batcher.DrawTiled(
-                    texture4,
+                renderLists.AddGumpSpriteTiled(
+                    texture4, bounds4,
                     new Rectangle(
                         x + (Width - bounds4.Width),
                         y + bounds2.Height,
                         bounds4.Width,
-                        Height - bounds2.Height - bounds7.Height
-                    ),
-                    bounds4,
-                    color,
-                    layerDepth
-                );
+                        Height - bounds2.Height - bounds7.Height),
+                    color, layerDepth);
             }
 
+            // Bottom-left corner
             if (texture5 != null)
             {
-                batcher.Draw(
-                    texture5,
-                    new Vector2(x, y + (Height - bounds5.Height)),
-                    bounds5,
-                    color,
-                    layerDepth
-                );
+                renderLists.AddGumpSprite(
+                    texture5, bounds5,
+                    new Rectangle(
+                        x,
+                        y + (Height - bounds5.Height),
+                        bounds5.Width,
+                        bounds5.Height),
+                    color, layerDepth);
             }
 
+            // Bottom edge (tiled)
             if (texture6 != null)
             {
-                batcher.DrawTiled(
-                    texture6,
+                renderLists.AddGumpSpriteTiled(
+                    texture6, bounds6,
                     new Rectangle(
                         x + bounds5.Width,
                         y + (Height - bounds6.Height - offsetBottom),
                         Width - bounds5.Width - bounds7.Width,
-                        bounds6.Height
-                    ),
-                    bounds6,
-                    color,
-                    layerDepth
-                );
+                        bounds6.Height),
+                    color, layerDepth);
             }
 
+            // Bottom-right corner
             if (texture7 != null)
             {
-                batcher.Draw(
-                    texture7,
-                    new Vector2(x + (Width - bounds7.Width), y + (Height - bounds7.Height)),
-                    bounds7,
-                    color,
-                    layerDepth
-                );
+                renderLists.AddGumpSprite(
+                    texture7, bounds7,
+                    new Rectangle(
+                        x + (Width - bounds7.Width),
+                        y + (Height - bounds7.Height),
+                        bounds7.Width,
+                        bounds7.Height),
+                    color, layerDepth);
             }
 
+            // Centre (tiled)
             if (texture8 != null)
             {
-                batcher.DrawTiled(
-                    texture8,
+                renderLists.AddGumpSpriteTiled(
+                    texture8, bounds8,
                     new Rectangle(
                         x + bounds0.Width,
                         y + bounds0.Height,
                         (Width - bounds0.Width - bounds2.Width) + (offsetLeft + offsetRight),
-                        Height - bounds2.Height - bounds7.Height
-                    ),
-                    bounds8,
-                    color,
-                    layerDepth
-                );
+                        Height - bounds2.Height - bounds7.Height),
+                    color, layerDepth);
             }
         }
 

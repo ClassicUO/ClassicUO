@@ -642,11 +642,11 @@ namespace ClassicUO.Game.UI.Gumps.Login
                 }
             }
 
-            protected override void DrawCaret(UltimaBatcher2D batcher, int x, int y, float layerDepth)
+            protected override void EmitCaret(RenderLists renderLists, int x, int y, float layerDepth)
             {
                 if (HasKeyboardFocus)
                 {
-                    _rendererCaret.Draw(batcher, x + _caretScreenPosition.X, y + _caretScreenPosition.Y, layerDepth);
+                    renderLists.AddGumpNoAtlas(_rendererCaret, x + _caretScreenPosition.X, y + _caretScreenPosition.Y, layerDepth);
                 }
             }
 
@@ -704,28 +704,6 @@ namespace ClassicUO.Game.UI.Gumps.Login
             private new void UpdateCaretScreenPosition()
             {
                 _caretScreenPosition = _rendererText.GetCaretPosition(Stb.CursorIndex);
-            }
-
-            public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
-            {
-                float layerDepth = layerDepthRef;
-                renderLists.AddGumpNoAtlas(
-                    batcher =>
-                    {
-                        if (batcher.ClipBegin(x, y, Width, Height))
-                        {
-                            DrawSelection(batcher, x, y, layerDepth);
-
-                            _rendererText.Draw(batcher, x, y, layerDepth);
-
-                            DrawCaret(batcher, x, y, layerDepth);
-                            batcher.ClipEnd();
-                        }
-                        return true;
-                    }
-                );
-
-                return true;
             }
         }
 

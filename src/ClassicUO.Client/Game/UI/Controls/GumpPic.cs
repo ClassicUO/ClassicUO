@@ -124,32 +124,24 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            float layerDepth = layerDepthRef;
             if (IsDisposed)
             {
                 return false;
             }
 
-            Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, IsPartialHue, Alpha, true);
-
             ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(Graphic);
 
             if (gumpInfo.Texture != null)
             {
-                var texture = gumpInfo.Texture;
-                var sourceRectangle = gumpInfo.UV;
-                renderLists.AddGumpWithAtlas(
-                    batcher =>
-                    {
-                        batcher.Draw(
-                            texture,
-                            new Rectangle(x, y, Width, Height),
-                            sourceRectangle,
-                            hueVector,
-                            layerDepth
-                        );
-                        return true;
-                    });
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, IsPartialHue, Alpha, true);
+
+                renderLists.AddGumpSprite(
+                    gumpInfo.Texture,
+                    gumpInfo.UV,
+                    new Rectangle(x, y, Width, Height),
+                    hueVector,
+                    layerDepthRef
+                );
             }
 
             return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
@@ -220,33 +212,30 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            float layerDepth = layerDepthRef;
             if (IsDisposed)
             {
                 return false;
             }
 
-            Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, IsPartialHue, Alpha, true);
-
             ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(Graphic);
 
-            var sourceBounds = new Rectangle(gumpInfo.UV.X + _picInPicBounds.X, gumpInfo.UV.Y + _picInPicBounds.Y, _picInPicBounds.Width, _picInPicBounds.Height);
-
-            var texture = gumpInfo.Texture;
-            if (texture != null)
+            if (gumpInfo.Texture != null)
             {
-                renderLists.AddGumpWithAtlas(
-                    batcher =>
-                    {
-                        batcher.Draw(
-                            texture,
-                            new Rectangle(x, y, Width, Height),
-                            sourceBounds,
-                            hueVector,
-                            layerDepth
-                        );
-                        return true;
-                    }
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, IsPartialHue, Alpha, true);
+
+                var sourceBounds = new Rectangle(
+                    gumpInfo.UV.X + _picInPicBounds.X,
+                    gumpInfo.UV.Y + _picInPicBounds.Y,
+                    _picInPicBounds.Width,
+                    _picInPicBounds.Height
+                );
+
+                renderLists.AddGumpSprite(
+                    gumpInfo.Texture,
+                    sourceBounds,
+                    new Rectangle(x, y, Width, Height),
+                    hueVector,
+                    layerDepthRef
                 );
             }
 

@@ -179,6 +179,15 @@ namespace ClassicUO.Game.UI.Gumps
             _borderControl.Height = Height;
             _button.X = Width - (_button.Width >> 0) + 2;
             _button.Y = Height - (_button.Height >> 0) + 2;
+
+            // Width/Height on Control are `ref int` accessors into a Rectangle, which
+            // callers mutate directly — there's no property setter we can hook, so the
+            // retained-mode render cache has no idea the gump just resized. Notify
+            // explicitly here so subsequent frames rebuild instead of replaying a
+            // snapshot taken at the old dimensions. Without this, children whose
+            // positions depend on Height (e.g. resize grip, button bar) freeze in
+            // place until some other notify path (drag, focus, etc.) fires.
+            NotifyRenderDirty();
         }
     }
 }

@@ -6,6 +6,7 @@ using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using SDL3;
 using System;
@@ -27,6 +28,9 @@ namespace ClassicUO.Game.UI.Controls
         private bool _handlesKeyboardFocus;
         private Point _offset;
         private Control _parent;
+        private bool _isVisible = true;
+        private int _page;
+        private float _alpha = 1.0f;
 
         protected Control(Control parent = null)
         {
@@ -48,16 +52,31 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool IsFromServer { get; set; }
 
-        public int Page { get; set; }
+        public int Page
+        {
+            get => _page;
+            set
+            {
+                if (_page != value)
+                {
+                    _page = value;
+                    NotifyRenderDirty();
+                }
+            }
+        }
 
         public Point Location
         {
             get => _bounds.Location;
             set
             {
-                X = value.X;
-                Y = value.Y;
-                _bounds.Location = value;
+                if (_bounds.Location != value)
+                {
+                    X = value.X;
+                    Y = value.Y;
+                    _bounds.Location = value;
+                    NotifyRenderDirty();
+                }
             }
         }
 
@@ -67,7 +86,18 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool IsDisposed { get; private set; }
 
-        public bool IsVisible { get; set; } = true;
+        public bool IsVisible
+        {
+            get => _isVisible;
+            set
+            {
+                if (_isVisible != value)
+                {
+                    _isVisible = value;
+                    NotifyRenderDirty();
+                }
+            }
+        }
 
         public bool IsEnabled { get; set; }
 
@@ -85,7 +115,18 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool IsFocused { get; set; }
 
-        public float Alpha { get; set; } = 1.0f;
+        public float Alpha
+        {
+            get => _alpha;
+            set
+            {
+                if (_alpha != value)
+                {
+                    _alpha = value;
+                    NotifyRenderDirty();
+                }
+            }
+        }
 
         public List<Control> Children { get; }
 
@@ -107,13 +148,69 @@ namespace ClassicUO.Game.UI.Controls
             set => _acceptMouseInput = value;
         }
 
-        public ref int X => ref _bounds.X;
+        // X / Y / Width / Height used to be `ref int` accessors returning a
+        // reference into the underlying Rectangle, which let callers mutate the
+        // field directly with no setter interception. That meant any layout
+        // recompute (e.g. `child.Y = Height - offset;` inside an Update override)
+        // silently bypassed NotifyRenderDirty, leaving the retained render
+        // cache stale. Converting to full properties funnels every write through
+        // a change-detect + notify. A repo-wide grep confirmed there are no
+        // callers of `ref control.X` style usages — only the declarations
+        // themselves — so dropping ref is safe. Compound-assignment forms
+        // (`control.X += 5`, `control.X++`) still compile fine against regular
+        // properties.
 
-        public ref int Y => ref _bounds.Y;
+        public int X
+        {
+            get => _bounds.X;
+            set
+            {
+                if (_bounds.X != value)
+                {
+                    _bounds.X = value;
+                    NotifyRenderDirty();
+                }
+            }
+        }
 
-        public ref int Width => ref _bounds.Width;
+        public int Y
+        {
+            get => _bounds.Y;
+            set
+            {
+                if (_bounds.Y != value)
+                {
+                    _bounds.Y = value;
+                    NotifyRenderDirty();
+                }
+            }
+        }
 
-        public ref int Height => ref _bounds.Height;
+        public int Width
+        {
+            get => _bounds.Width;
+            set
+            {
+                if (_bounds.Width != value)
+                {
+                    _bounds.Width = value;
+                    NotifyRenderDirty();
+                }
+            }
+        }
+
+        public int Height
+        {
+            get => _bounds.Height;
+            set
+            {
+                if (_bounds.Height != value)
+                {
+                    _bounds.Height = value;
+                    NotifyRenderDirty();
+                }
+            }
+        }
 
         public int ParentX => Parent != null ? Parent.X + Parent.ParentX : 0;
 
@@ -206,9 +303,12 @@ namespace ClassicUO.Game.UI.Controls
             get => _activePage;
             set
             {
-                _activePage = value;
-
-                OnPageChanged();
+                if (_activePage != value)
+                {
+                    _activePage = value;
+                    NotifyRenderDirty();
+                    OnPageChanged();
+                }
             }
         }
 
@@ -330,24 +430,12 @@ namespace ClassicUO.Game.UI.Controls
             if (IsVisible && CUOEnviroment.Debug)
             {
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
+                Texture2D pixel = SolidColorTextureCache.GetTexture(Color.Green);
 
-                renderLists.AddGumpNoAtlas
-                (
-                    (batcher) =>
-                    {
-                        batcher.DrawRectangle
-                        (
-                            SolidColorTextureCache.GetTexture(Color.Green),
-                            x,
-                            y,
-                            Width,
-                            Height,
-                            hueVector,
-                            layerDepth
-                        );
-                        return true;
-                    }
-                );
+                renderLists.AddGumpSprite(pixel, new Rectangle(x, y, Width, 1), hueVector, layerDepth); // top
+                renderLists.AddGumpSprite(pixel, new Rectangle(x + Width - 1, y, 1, Height), hueVector, layerDepth); // right
+                renderLists.AddGumpSprite(pixel, new Rectangle(x, y + Height - 1, Width, 1), hueVector, layerDepth); // bottom
+                renderLists.AddGumpSprite(pixel, new Rectangle(x, y, 1, Height), hueVector, layerDepth); // left
             }
         }
 
@@ -526,6 +614,11 @@ namespace ClassicUO.Game.UI.Controls
             int y = position.Y - Y - ParentY;
             OnMouseDown(x, y, button);
             MouseDown.Raise(new MouseEventArgs(x, y, button, ButtonState.Pressed), this);
+            // Controls that render a "pressed" state (Button, NiceButton, checkboxes
+            // whose click flips IsChecked in OnMouseUp, etc.) need the cache to
+            // rebuild after the state change. Invalidating unconditionally is cheap
+            // and keeps opt-in simple — any interactive control just works.
+            NotifyRenderDirty();
         }
 
         public void InvokeMouseUp(Point position, MouseButtonType button)
@@ -534,6 +627,7 @@ namespace ClassicUO.Game.UI.Controls
             int y = position.Y - Y - ParentY;
             OnMouseUp(x, y, button);
             MouseUp.Raise(new MouseEventArgs(x, y, button), this);
+            NotifyRenderDirty();
         }
 
         public void InvokeMouseCloseGumpWithRClick()
@@ -558,6 +652,11 @@ namespace ClassicUO.Game.UI.Controls
             int y = position.Y - Y - ParentY;
             OnMouseEnter(x, y);
             MouseEnter.Raise(new MouseEventArgs(x, y), this);
+            // Many controls render differently on hover (HitBox highlight, Button
+            // _entered sprite, HoveredLabel, etc.). Invalidate the owning gump's
+            // cache so the next frame rebuilds with the new hover state instead of
+            // replaying the non-hover snapshot.
+            NotifyRenderDirty();
         }
 
         public void InvokeMouseExit(Point position)
@@ -566,6 +665,7 @@ namespace ClassicUO.Game.UI.Controls
             int y = position.Y - Y - ParentY;
             OnMouseExit(x, y);
             MouseExit.Raise(new MouseEventArgs(x, y), this);
+            NotifyRenderDirty();
         }
 
         public bool InvokeMouseDoubleClick(Point position, MouseButtonType button)
@@ -584,6 +684,9 @@ namespace ClassicUO.Game.UI.Controls
         public void InvokeTextInput(string c)
         {
             OnTextInput(c);
+            // Typing into a text box changes what the control renders. Invalidate
+            // so the cache rebuilds with the new text / caret position next frame.
+            NotifyRenderDirty();
         }
 
         public void InvokeKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
@@ -591,6 +694,9 @@ namespace ClassicUO.Game.UI.Controls
             OnKeyDown(key, mod);
             KeyboardEventArgs arg = new KeyboardEventArgs(key, mod, KeyboardEventType.Down);
             KeyDown?.Raise(arg);
+            // Editing keys (Backspace, Delete, arrows for selection, etc.) also
+            // change render state even when they don't insert a character.
+            NotifyRenderDirty();
         }
 
         public void InvokeKeyUp(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
@@ -604,6 +710,9 @@ namespace ClassicUO.Game.UI.Controls
         {
             OnMouseWheel(delta);
             MouseWheel.Raise(new MouseWheelEventArgs(delta), this);
+            // Scroll changes what the control shows (scroll bar position, clipped
+            // region contents).
+            NotifyRenderDirty();
         }
 
         public void InvokeDragBegin(Point position)
@@ -720,10 +829,33 @@ namespace ClassicUO.Game.UI.Controls
 
         protected virtual void OnChildAdded()
         {
+            NotifyRenderDirty();
         }
 
         protected virtual void OnChildRemoved()
         {
+            NotifyRenderDirty();
+        }
+
+        /// <summary>
+        /// Walks up the parent chain to find the owning <see cref="Gumps.Gump"/> and
+        /// bumps its render version so the gump's retained command cache will be
+        /// rebuilt on the next frame. Called automatically from render-affecting
+        /// property setters on this class; subclasses that add their own render-
+        /// affecting properties should call it from their setters too.
+        /// </summary>
+        protected internal virtual void NotifyRenderDirty()
+        {
+            Control p = this;
+            while (p != null)
+            {
+                if (p is Gumps.Gump gump)
+                {
+                    gump.InvalidateRenderCache();
+                    return;
+                }
+                p = p._parent;
+            }
         }
 
         protected virtual void CloseWithRightClick()

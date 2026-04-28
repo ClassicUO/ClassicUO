@@ -125,11 +125,9 @@ namespace ClassicUO.Game.UI.Gumps
             base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
             float layerDepth = layerDepthRef;
 
-            Vector3 hueVector;
-
             if (ShowLock)
             {
-                hueVector = ShaderHueTranslator.GetHueVector(0);
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
                 ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(LOCK_GRAPHIC);
 
                 var texture = gumpInfo.Texture;
@@ -148,24 +146,20 @@ namespace ClassicUO.Game.UI.Gumps
                     }
 
                     var sourceRectangle = gumpInfo.UV;
-                    renderLists.AddGumpWithAtlas
-                    (
-                        (batcher) =>
-                        {
-                            batcher.Draw(
-                                texture,
-                                new Vector2(x + (Width - sourceRectangle.Width), y),
-                                sourceRectangle,
-                                hueVector,
-                                layerDepth
-                            );
-                            return true;
-                        }
+                    renderLists.AddGumpSprite(
+                        texture,
+                        sourceRectangle,
+                        new Rectangle(
+                            x + (Width - sourceRectangle.Width),
+                            y,
+                            sourceRectangle.Width,
+                            sourceRectangle.Height
+                        ),
+                        hueVector,
+                        layerDepth
                     );
                 }
             }
-
-            hueVector = ShaderHueTranslator.GetHueVector(0);
 
             if (_anchorCandidate != null)
             {
@@ -177,45 +171,28 @@ namespace ClassicUO.Game.UI.Gumps
                 if (drawLoc != Location)
                 {
                     Texture2D previewColor = SolidColorTextureCache.GetTexture(Color.Silver);
-                    hueVector = ShaderHueTranslator.GetHueVector(0, false, 0.5f);
-                    renderLists.AddGumpNoAtlas
-                    (
-                        (batcher) =>
-                        {
-                            batcher.Draw(
-                                previewColor,
-                                new Rectangle(drawLoc.X, drawLoc.Y, Width, Height),
-                                hueVector,
-                                layerDepth
-                            );
+                    Vector3 fillVector = ShaderHueTranslator.GetHueVector(0, false, 0.5f);
+                    Vector3 strokeVector = fillVector;
+                    strokeVector.Z = 1f;
 
-
-                            hueVector.Z = 1f;
-
-                            // double rectangle for thicker "stroke"
-                            batcher.DrawRectangle(
-                                previewColor,
-                                drawLoc.X,
-                                drawLoc.Y,
-                                Width,
-                                Height,
-                                hueVector,
-                                layerDepth
-                            );
-
-                            batcher.DrawRectangle(
-                                previewColor,
-                                drawLoc.X + 1,
-                                drawLoc.Y + 1,
-                                Width - 2,
-                                Height - 2,
-                                hueVector,
-                                layerDepth
-                            );
-
-                            return true;
-                        }
+                    renderLists.AddGumpSprite(
+                        previewColor,
+                        new Rectangle(drawLoc.X, drawLoc.Y, Width, Height),
+                        fillVector,
+                        layerDepth
                     );
+
+                    // double rectangle for thicker "stroke" — outer
+                    renderLists.AddGumpSprite(previewColor, new Rectangle(drawLoc.X, drawLoc.Y, Width, 1), strokeVector, layerDepth); // top
+                    renderLists.AddGumpSprite(previewColor, new Rectangle(drawLoc.X + Width - 1, drawLoc.Y, 1, Height), strokeVector, layerDepth); // right
+                    renderLists.AddGumpSprite(previewColor, new Rectangle(drawLoc.X, drawLoc.Y + Height - 1, Width, 1), strokeVector, layerDepth); // bottom
+                    renderLists.AddGumpSprite(previewColor, new Rectangle(drawLoc.X, drawLoc.Y, 1, Height), strokeVector, layerDepth); // left
+
+                    // inner stroke (offset 1, shrunk 2)
+                    renderLists.AddGumpSprite(previewColor, new Rectangle(drawLoc.X + 1, drawLoc.Y + 1, Width - 2, 1), strokeVector, layerDepth); // top
+                    renderLists.AddGumpSprite(previewColor, new Rectangle(drawLoc.X + Width - 2, drawLoc.Y + 1, 1, Height - 2), strokeVector, layerDepth); // right
+                    renderLists.AddGumpSprite(previewColor, new Rectangle(drawLoc.X + 1, drawLoc.Y + Height - 2, Width - 2, 1), strokeVector, layerDepth); // bottom
+                    renderLists.AddGumpSprite(previewColor, new Rectangle(drawLoc.X + 1, drawLoc.Y + 1, 1, Height - 2), strokeVector, layerDepth); // left
                 }
             }
 

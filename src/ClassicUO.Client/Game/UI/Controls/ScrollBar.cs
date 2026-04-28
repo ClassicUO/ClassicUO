@@ -60,130 +60,94 @@ namespace ClassicUO.Game.UI.Controls
             {
                 return false;
             }
-            float layerDepth = layerDepthRef;
 
-            renderLists.AddGumpWithAtlas(batcher =>
+            var hueVector = ShaderHueTranslator.GetHueVector(0);
+
+            ref readonly var gumpInfoUp0 = ref Client.Game.UO.Gumps.GetGump(BUTTON_UP_0);
+            ref readonly var gumpInfoUp1 = ref Client.Game.UO.Gumps.GetGump(BUTTON_UP_1);
+            ref readonly var gumpInfoDown0 = ref Client.Game.UO.Gumps.GetGump(BUTTON_DOWN_0);
+            ref readonly var gumpInfoDown1 = ref Client.Game.UO.Gumps.GetGump(BUTTON_DOWN_1);
+            ref readonly var gumpInfoBackground0 = ref Client.Game.UO.Gumps.GetGump(BACKGROUND_0);
+            ref readonly var gumpInfoBackground1 = ref Client.Game.UO.Gumps.GetGump(BACKGROUND_1);
+            ref readonly var gumpInfoBackground2 = ref Client.Game.UO.Gumps.GetGump(BACKGROUND_2);
+            ref readonly var gumpInfoSlider = ref Client.Game.UO.Gumps.GetGump(SLIDER);
+
+            // Track: top cap + tiled middle + bottom cap (or just tiled middle when short).
+            int middleHeight =
+                Height
+                - gumpInfoUp0.UV.Height
+                - gumpInfoDown0.UV.Height
+                - gumpInfoBackground0.UV.Height
+                - gumpInfoBackground2.UV.Height;
+
+            if (middleHeight > 0)
             {
+                // Top cap
+                renderLists.AddGumpSprite(
+                    gumpInfoBackground0.Texture, gumpInfoBackground0.UV,
+                    new Rectangle(x, y + gumpInfoUp0.UV.Height, gumpInfoBackground0.UV.Width, gumpInfoBackground0.UV.Height),
+                    hueVector, layerDepthRef);
 
-                var hueVector = ShaderHueTranslator.GetHueVector(0);
+                // Tiled middle
+                renderLists.AddGumpSpriteTiled(
+                    gumpInfoBackground1.Texture, gumpInfoBackground1.UV,
+                    new Rectangle(
+                        x,
+                        y + gumpInfoUp1.UV.Height + gumpInfoBackground0.UV.Height,
+                        gumpInfoBackground0.UV.Width,
+                        middleHeight),
+                    hueVector, layerDepthRef);
 
-                ref readonly var gumpInfoUp0 = ref Client.Game.UO.Gumps.GetGump(BUTTON_UP_0);
-                ref readonly var gumpInfoUp1 = ref Client.Game.UO.Gumps.GetGump(BUTTON_UP_1);
-                ref readonly var gumpInfoDown0 = ref Client.Game.UO.Gumps.GetGump(BUTTON_DOWN_0);
-                ref readonly var gumpInfoDown1 = ref Client.Game.UO.Gumps.GetGump(BUTTON_DOWN_1);
-                ref readonly var gumpInfoBackground0 = ref Client.Game.UO.Gumps.GetGump(BACKGROUND_0);
-                ref readonly var gumpInfoBackground1 = ref Client.Game.UO.Gumps.GetGump(BACKGROUND_1);
-                ref readonly var gumpInfoBackground2 = ref Client.Game.UO.Gumps.GetGump(BACKGROUND_2);
-                ref readonly var gumpInfoSlider = ref Client.Game.UO.Gumps.GetGump(SLIDER);
+                // Bottom cap
+                renderLists.AddGumpSprite(
+                    gumpInfoBackground2.Texture, gumpInfoBackground2.UV,
+                    new Rectangle(
+                        x,
+                        y + Height - gumpInfoDown0.UV.Height - gumpInfoBackground2.UV.Height,
+                        gumpInfoBackground2.UV.Width,
+                        gumpInfoBackground2.UV.Height),
+                    hueVector, layerDepthRef);
+            }
+            else
+            {
+                middleHeight = Height - gumpInfoUp0.UV.Height - gumpInfoDown0.UV.Height;
 
-                // draw scrollbar background
-                int middleHeight =
-                    Height
-                    - gumpInfoUp0.UV.Height
-                    - gumpInfoDown0.UV.Height
-                    - gumpInfoBackground0.UV.Height
-                    - gumpInfoBackground2.UV.Height;
+                renderLists.AddGumpSpriteTiled(
+                    gumpInfoBackground1.Texture, gumpInfoBackground1.UV,
+                    new Rectangle(
+                        x,
+                        y + gumpInfoUp0.UV.Height,
+                        gumpInfoBackground0.UV.Width,
+                        middleHeight),
+                    hueVector, layerDepthRef);
+            }
 
-                if (middleHeight > 0)
-                {
-                    batcher.Draw(
-                        gumpInfoBackground0.Texture,
-                        new Vector2(x, y + gumpInfoUp0.UV.Height),
-                        gumpInfoBackground0.UV,
-                        hueVector,
-                        layerDepth
-                    );
+            // Up button (pressed variant swaps the graphic)
+            var upInfo = _btUpClicked ? gumpInfoUp1 : gumpInfoUp0;
+            renderLists.AddGumpSprite(
+                upInfo.Texture, upInfo.UV,
+                new Rectangle(x, y, upInfo.UV.Width, upInfo.UV.Height),
+                hueVector, layerDepthRef);
 
-                    batcher.DrawTiled(
-                        gumpInfoBackground1.Texture,
-                        new Rectangle(
-                            x,
-                            y + gumpInfoUp1.UV.Height + gumpInfoBackground0.UV.Height,
-                            gumpInfoBackground0.UV.Width,
-                            middleHeight
-                        ),
-                        gumpInfoBackground1.UV,
-                        hueVector,
-                        layerDepth
-                    );
+            // Down button
+            var downInfo = _btDownClicked ? gumpInfoDown1 : gumpInfoDown0;
+            renderLists.AddGumpSprite(
+                downInfo.Texture, downInfo.UV,
+                new Rectangle(x, y + Height - gumpInfoDown0.UV.Height, downInfo.UV.Width, downInfo.UV.Height),
+                hueVector, layerDepthRef);
 
-                    batcher.Draw(
-                        gumpInfoBackground2.Texture,
-                        new Vector2(
-                            x,
-                            y + Height - gumpInfoDown0.UV.Height - gumpInfoBackground2.UV.Height
-                        ),
-                        gumpInfoBackground2.UV,
-                        hueVector,
-                        layerDepth
-                    );
-                }
-                else
-                {
-                    middleHeight = Height - gumpInfoUp0.UV.Height - gumpInfoDown0.UV.Height;
-
-                    batcher.DrawTiled(
-                        gumpInfoBackground1.Texture,
-                        new Rectangle(
-                            x,
-                            y + gumpInfoUp0.UV.Height,
-                            gumpInfoBackground0.UV.Width,
-                            middleHeight
-                        ),
-                        gumpInfoBackground1.UV,
-                        hueVector,
-                        layerDepth
-                    );
-                }
-
-                // draw up button
-                if (_btUpClicked)
-                {
-                    batcher.Draw(gumpInfoUp1.Texture, new Vector2(x, y), gumpInfoUp1.UV, hueVector, layerDepth);
-                }
-                else
-                {
-                    batcher.Draw(gumpInfoUp0.Texture, new Vector2(x, y), gumpInfoUp0.UV, hueVector, layerDepth);
-                }
-
-                // draw down button
-                if (_btDownClicked)
-                {
-                    batcher.Draw(
-                        gumpInfoDown1.Texture,
-                        new Vector2(x, y + Height - gumpInfoDown0.UV.Height),
-                        gumpInfoDown1.UV,
-                        hueVector,
-                        layerDepth
-                    );
-                }
-                else
-                {
-                    batcher.Draw(
-                        gumpInfoDown0.Texture,
-                        new Vector2(x, y + Height - gumpInfoDown0.UV.Height),
-                        gumpInfoDown0.UV,
-                        hueVector,
-                        layerDepth
-                    );
-                }
-
-                // draw slider
-                if (MaxValue > MinValue && middleHeight > 0)
-                {
-                    batcher.Draw(
-                        gumpInfoSlider.Texture,
-                        new Vector2(
-                            x + ((gumpInfoBackground0.UV.Width - gumpInfoSlider.UV.Width) >> 1),
-                            y + gumpInfoUp0.UV.Height + _sliderPosition
-                        ),
-                        gumpInfoSlider.UV,
-                        hueVector,
-                        layerDepth
-                    );
-                }
-                return true;
-            });
+            // Slider thumb
+            if (MaxValue > MinValue && middleHeight > 0)
+            {
+                renderLists.AddGumpSprite(
+                    gumpInfoSlider.Texture, gumpInfoSlider.UV,
+                    new Rectangle(
+                        x + ((gumpInfoBackground0.UV.Width - gumpInfoSlider.UV.Width) >> 1),
+                        y + gumpInfoUp0.UV.Height + _sliderPosition,
+                        gumpInfoSlider.UV.Width,
+                        gumpInfoSlider.UV.Height),
+                    hueVector, layerDepthRef);
+            }
 
             return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
         }

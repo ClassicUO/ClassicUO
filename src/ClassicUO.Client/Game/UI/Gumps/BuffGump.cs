@@ -402,29 +402,27 @@ namespace ClassicUO.Game.UI.Gumps
                 var texture = gumpInfo.Texture;
                 if (texture != null)
                 {
-
                     var sourceRectangle = gumpInfo.UV;
-                    renderLists.AddGumpWithAtlas
-                    (
-                        (batcher) =>
-                        {
-                            batcher.Draw(texture, new Vector2(x, y), sourceRectangle, hueVector, layerDepth);
-                            return true;
-                        }
+                    renderLists.AddGumpSprite(
+                        texture,
+                        sourceRectangle,
+                        new Rectangle(x, y, sourceRectangle.Width, sourceRectangle.Height),
+                        hueVector,
+                        layerDepth
                     );
+
                     if (
                         ProfileManager.CurrentProfile != null
                         && ProfileManager.CurrentProfile.BuffBarTime
                     )
                     {
-                        renderLists.AddGumpNoAtlas
-                    (
-                        (batcher) =>
-                        {
-                            _gText.Draw(batcher, x - 3, y + sourceRectangle.Height / 2 - 3, hueVector.Z);
-                            return true;
-                        }
-                    );
+                        renderLists.AddGumpNoAtlas(
+                            _gText,
+                            x - 3,
+                            y + sourceRectangle.Height / 2 - 3,
+                            layerDepth,
+                            alpha: hueVector.Z
+                        );
                     }
                 }
 

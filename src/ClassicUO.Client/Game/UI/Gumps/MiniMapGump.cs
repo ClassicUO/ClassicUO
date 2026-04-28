@@ -125,6 +125,13 @@ namespace ClassicUO.Game.UI.Gumps
 
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
+            // INTENTIONAL Callback: this gump rebuilds its minimap texture
+            // (CreateMiniMapTexture) every frame inside the draw path and iterates
+            // World.Mobiles to plot coloured dots whose positions depend on the
+            // player's continuously changing world coordinates. A typed command
+            // stream can't cache any of this because every frame's command list
+            // is different; using the Callback escape hatch is correct here.
+            // Do NOT convert.
             renderLists.AddGumpNoAtlas(
                 batcher =>
                 {

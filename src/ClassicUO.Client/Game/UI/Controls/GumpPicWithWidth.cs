@@ -20,28 +20,18 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            float layerDepth = layerDepthRef;
-            Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue);
-
             ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(Graphic);
 
-            var texture = gumpInfo.Texture;
             if (gumpInfo.Texture != null)
             {
-                var sourceRectangle = gumpInfo.UV;
-                renderLists.AddGumpWithAtlas
-                (
-                    (batcher) =>
-                    {
-                        batcher.DrawTiled(
-                            texture,
-                            new Rectangle(x, y, Percent, Height),
-                            sourceRectangle,
-                            hueVector,
-                            layerDepth
-                        );
-                        return true;
-                    }
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue);
+
+                renderLists.AddGumpSpriteTiled(
+                    gumpInfo.Texture,
+                    gumpInfo.UV,
+                    new Rectangle(x, y, Percent, Height),
+                    hueVector,
+                    layerDepthRef
                 );
 
                 return true;

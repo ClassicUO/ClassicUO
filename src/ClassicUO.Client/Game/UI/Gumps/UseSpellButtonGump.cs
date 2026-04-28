@@ -99,19 +99,17 @@ namespace ClassicUO.Game.UI.Gumps
 
                     var texture = gumpInfo.Texture;
                     var sourceRectangle = gumpInfo.UV;
-                    renderLists.AddGumpWithAtlas
-                    (
-                        (batcher) =>
-                        {
-                           batcher.Draw(
-                                texture,
-                                new Vector2(x + (Width - sourceRectangle.Width), y),
-                                sourceRectangle,
-                                hueVector,
-                                layerDepth
-                            );
-                            return true;
-                        }
+                    renderLists.AddGumpSprite(
+                        texture,
+                        sourceRectangle,
+                        new Rectangle(
+                            x + (Width - sourceRectangle.Width),
+                            y,
+                            sourceRectangle.Width,
+                            sourceRectangle.Height
+                        ),
+                        hueVector,
+                        layerDepth
                     );
                 }
             }

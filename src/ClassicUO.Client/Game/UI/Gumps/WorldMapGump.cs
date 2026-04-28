@@ -1906,6 +1906,12 @@ namespace ClassicUO.Game.UI.Gumps
 
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
+            // INTENTIONAL Callback: the world map re-renders its entire viewport
+            // every frame — the canvas is a rotated/zoomed blit of the chunk
+            // texture, followed by player/party/mobile/marker dots driven by live
+            // coordinates, plus zoom/centre text overlays. Every frame's draw
+            // content is unique, so a typed command stream can't meaningfully
+            // cache or translate any of it. Do NOT convert.
             renderLists.AddGumpNoAtlas(batcher =>
             {
                 batcher.Draw

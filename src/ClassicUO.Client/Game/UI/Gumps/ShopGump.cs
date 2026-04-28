@@ -777,7 +777,6 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
             {
-                float layerDepth = layerDepthRef;
                 Vector3 hueVector;
 
                 if (InBuyGump && SerialHelper.IsMobile(LocalSerial))
@@ -811,28 +810,18 @@ namespace ClassicUO.Game.UI.Gumps
 
                         ref var spriteInfo = ref frames[0];
 
-                        var texture = spriteInfo.Texture;
-                        if (texture != null)
+                        if (spriteInfo.Texture != null)
                         {
-                            var sourceRectangle = spriteInfo.UV;
-                            renderLists.AddGumpWithAtlas
-                            (
-                                (batcher) =>
-                                {
-                                    batcher.Draw(
-                                        texture,
-                                        new Rectangle(
-                                            x - 3,
-                                            y + 5 + 15,
-                                            Math.Min(sourceRectangle.Width, 45),
-                                            Math.Min(sourceRectangle.Height, 45)
-                                        ),
-                                        sourceRectangle,
-                                        hueVector,
-                                        layerDepth
-                                    );
-                                    return true;
-                                }
+                            renderLists.AddGumpSprite(
+                                spriteInfo.Texture,
+                                spriteInfo.UV,
+                                new Rectangle(
+                                    x - 3,
+                                    y + 5 + 15,
+                                    Math.Min(spriteInfo.UV.Width, 45),
+                                    Math.Min(spriteInfo.UV.Height, 45)),
+                                hueVector,
+                                layerDepthRef
                             );
                         }
                     }
@@ -865,31 +854,20 @@ namespace ClassicUO.Game.UI.Gumps
                         point.Y = (Height >> 1) - (originalSize.Y >> 1);
                     }
 
-                    var texture = artInfo.Texture;
-                    var sourceRectangle = artInfo.UV;
-                    renderLists.AddGumpWithAtlas
-                    (
-                        (batcher) =>
-                        {
-                            batcher.Draw(
-                                texture,
-                                new Rectangle(
-                                    x + point.X - 5,
-                                    y + point.Y + 10,
-                                    originalSize.X,
-                                    originalSize.Y
-                                ),
-                                new Rectangle(
-                                    sourceRectangle.X + rect.X,
-                                    sourceRectangle.Y + rect.Y,
-                                    rect.Width,
-                                    rect.Height
-                                ),
-                                hueVector,
-                                layerDepth
-                            );
-                            return true;
-                        }
+                    renderLists.AddGumpSprite(
+                        artInfo.Texture,
+                        new Rectangle(
+                            artInfo.UV.X + rect.X,
+                            artInfo.UV.Y + rect.Y,
+                            rect.Width,
+                            rect.Height),
+                        new Rectangle(
+                            x + point.X - 5,
+                            y + point.Y + 10,
+                            originalSize.X,
+                            originalSize.Y),
+                        hueVector,
+                        layerDepthRef
                     );
                 }
 
@@ -1119,39 +1097,32 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
             {
-                float layerDepth = layerDepthRef;
-                renderLists.AddGumpWithAtlas
-                (
-                    batcher =>
-                    {
-                        ref readonly var gumpInfo0 = ref Client.Game.UO.Gumps.GetGump(_graphic);
-                        ref readonly var gumpInfo1 = ref Client.Game.UO.Gumps.GetGump((uint)(_graphic + 1));
-                        ref readonly var gumpInfo2 = ref Client.Game.UO.Gumps.GetGump((uint)(_graphic + 2));
+                ref readonly var gumpInfo0 = ref Client.Game.UO.Gumps.GetGump(_graphic);
+                ref readonly var gumpInfo1 = ref Client.Game.UO.Gumps.GetGump((uint)(_graphic + 1));
+                ref readonly var gumpInfo2 = ref Client.Game.UO.Gumps.GetGump((uint)(_graphic + 2));
 
-                        var hueVector = ShaderHueTranslator.GetHueVector(0, false, Alpha, true);
+                var hueVector = ShaderHueTranslator.GetHueVector(0, false, Alpha, true);
 
-                        int middleWidth = Width - gumpInfo0.UV.Width - gumpInfo2.UV.Width;
+                int middleWidth = Width - gumpInfo0.UV.Width - gumpInfo2.UV.Width;
 
-                        batcher.Draw(gumpInfo0.Texture, new Vector2(x, y), gumpInfo0.UV, hueVector, layerDepth);
+                // Left cap
+                renderLists.AddGumpSprite(
+                    gumpInfo0.Texture, gumpInfo0.UV,
+                    new Rectangle(x, y, gumpInfo0.UV.Width, gumpInfo0.UV.Height),
+                    hueVector, layerDepthRef);
 
-                        batcher.DrawTiled(
-                            gumpInfo1.Texture,
-                            new Rectangle(x + gumpInfo0.UV.Width, y, middleWidth, gumpInfo1.UV.Height),
-                            gumpInfo1.UV,
-                            hueVector,
-                            layerDepth
-                        );
+                // Tiled middle
+                renderLists.AddGumpSpriteTiled(
+                    gumpInfo1.Texture, gumpInfo1.UV,
+                    new Rectangle(x + gumpInfo0.UV.Width, y, middleWidth, gumpInfo1.UV.Height),
+                    hueVector, layerDepthRef);
 
-                        batcher.Draw(
-                            gumpInfo2.Texture,
-                            new Vector2(x + Width - gumpInfo2.UV.Width, y),
-                            gumpInfo2.UV,
-                            hueVector,
-                            layerDepth
-                        );
-                        return true;
-                    }
-                );
+                // Right cap
+                renderLists.AddGumpSprite(
+                    gumpInfo2.Texture, gumpInfo2.UV,
+                    new Rectangle(x + Width - gumpInfo2.UV.Width, y, gumpInfo2.UV.Width, gumpInfo2.UV.Height),
+                    hueVector, layerDepthRef);
+
                 return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
             }
         }
@@ -1179,44 +1150,24 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
             {
-                float layerDepth = layerDepthRef;
                 var gumpInfo = Client.Game.UO.Gumps.GetGump(_graphic);
                 var hueVector = ShaderHueTranslator.GetHueVector(0);
 
-                renderLists.AddGumpWithAtlas(batcher =>
+                var source = new Rectangle(
+                    gumpInfo.UV.X + _rect.X,
+                    gumpInfo.UV.Y + _rect.Y,
+                    _rect.Width,
+                    _rect.Height);
+                var dest = new Rectangle(x, y, Width, Height);
+
+                if (_tiled)
                 {
-                    if (_tiled)
-                    {
-                        batcher.DrawTiled(
-                            gumpInfo.Texture,
-                            new Rectangle(x, y, Width, Height),
-                            new Rectangle(
-                                gumpInfo.UV.X + _rect.X,
-                                gumpInfo.UV.Y + _rect.Y,
-                                _rect.Width,
-                                _rect.Height
-                            ),
-                            hueVector,
-                            layerDepth
-                        );
-                    }
-                    else
-                    {
-                        batcher.Draw(
-                            gumpInfo.Texture,
-                            new Rectangle(x, y, Width, Height),
-                            new Rectangle(
-                                gumpInfo.UV.X + _rect.X,
-                                gumpInfo.UV.Y + _rect.Y,
-                                _rect.Width,
-                                _rect.Height
-                            ),
-                            hueVector,
-                            layerDepth
-                        );
-                    }
-                    return true;
-                });
+                    renderLists.AddGumpSpriteTiled(gumpInfo.Texture, source, dest, hueVector, layerDepthRef);
+                }
+                else
+                {
+                    renderLists.AddGumpSprite(gumpInfo.Texture, source, dest, hueVector, layerDepthRef);
+                }
 
                 return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
             }

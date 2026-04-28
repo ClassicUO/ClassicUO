@@ -67,46 +67,15 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            float layerDepth = layerDepthRef;
-            //batcher.SetBlendState(_checkerBlend.Value);
-            //batcher.SetStencil(_checkerStencil.Value);
-
-            //batcher.Draw2D(TransparentTexture, new Rectangle(position.X, position.Y, Width, Height), Vector3.Zero /*ShaderHueTranslator.GetHueVector(0, false, 0.5f, false)*/);
-
-            //batcher.SetBlendState(null);
-            //batcher.SetStencil(null);
-
-            //return true;
-
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, 0.5f);
 
-            //batcher.SetStencil(_checkerStencil.Value);
-
-            renderLists.AddGumpNoAtlas
-            (
-                (batcher) =>
-                {
-                    batcher.Draw
-                    (
-                        SolidColorTextureCache.GetTexture(Color.Black),
-                        new Rectangle
-                        (
-                            x,
-                            y,
-                            Width,
-                            Height
-                        ),
-                        hueVector,
-                        layerDepth
-                    );
-
-                    return true;
-                }
+            renderLists.AddGumpSprite(
+                SolidColorTextureCache.GetTexture(Color.Black),
+                new Rectangle(x, y, Width, Height),
+                hueVector,
+                layerDepthRef
             );
 
-            
-
-            //batcher.SetStencil(null);
             return true;
         }
     }

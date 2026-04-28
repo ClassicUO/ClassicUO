@@ -5,6 +5,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
+using Microsoft.Xna.Framework;
 using System;
 using System.Linq;
 
@@ -94,25 +95,9 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            float layerDepth = layerDepthRef;
-            renderLists.AddGumpNoAtlas
-            (
-                (batcher) =>
-                {
-                    // work-around to allow clipping children
-                    RenderLists comboBoxRenderLists = new();
-                    base.AddToRenderLists(comboBoxRenderLists, x, y, ref layerDepth);
-
-                    if (batcher.ClipBegin(x, y, Width, Height))
-                    {
-                        comboBoxRenderLists.DrawRenderLists(batcher, sbyte.MaxValue);
-                        batcher.ClipEnd();
-                    }
-                    return true;
-                }
-            );
-
-
+            renderLists.PushClip(new Rectangle(x, y, Width, Height));
+            base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
+            renderLists.PopClip();
 
             return true;
         }
@@ -256,23 +241,10 @@ namespace ClassicUO.Game.UI.Controls
 
             public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
             {
-                float layerDepth = layerDepthRef + 100f; // Combo list should be over other gumps
-                renderLists.AddGumpNoAtlas
-                (
-                    (batcher) =>
-                    {
-                        // work-around to allow clipping children
-                        RenderLists comboBoxRenderLists = new();
-                        base.AddToRenderLists(comboBoxRenderLists, x, y, ref layerDepth);
-
-                        if (batcher.ClipBegin(x, y, Width, Height))
-                        {
-                            comboBoxRenderLists.DrawRenderLists(batcher, sbyte.MaxValue);
-                            batcher.ClipEnd();
-                        }
-                        return true;
-                    }
-                );
+                float adjustedDepth = layerDepthRef + 100f; // Combo list should be over other gumps
+                renderLists.PushClip(new Rectangle(x, y, Width, Height));
+                base.AddToRenderLists(renderLists, x, y, ref adjustedDepth);
+                renderLists.PopClip();
 
                 return true;
             }

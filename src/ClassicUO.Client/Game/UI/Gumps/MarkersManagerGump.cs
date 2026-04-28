@@ -324,13 +324,15 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
             {
-                float layerDepth = layerDepthRef;
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
-                renderLists.AddGumpNoAtlas(batcher =>
-                {
-                    batcher.Draw(Texture, new Rectangle(x, y + 7, Width, Height), hueVector, layerDepth);
-                    return true;
-                });
+
+                renderLists.AddGumpSprite(
+                    Texture,
+                    new Rectangle(x, y + 7, Width, Height),
+                    hueVector,
+                    layerDepthRef
+                );
+
                 return true;
             }
         }

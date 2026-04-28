@@ -711,53 +711,24 @@ namespace ClassicUO.Game.UI.Gumps
 
             public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
             {
-                float layerDepth = layerDepthRef;
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
                 if (_status == 2)
                 {
-                    renderLists.AddGumpNoAtlas
-                    (
-                        batcher =>
-                        {
-                            batcher.Draw
-                            (
-                                SolidColorTextureCache.GetTexture(Color.Beige),
-                                new Rectangle
-                                (
-                                    x,
-                                    y,
-                                    Width,
-                                    17
-                                ),
-                                hueVector,
-                                layerDepth
-                            );
-                            return true;
-                        }
+                    renderLists.AddGumpSprite(
+                        SolidColorTextureCache.GetTexture(Color.Beige),
+                        new Rectangle(x, y, Width, 17),
+                        hueVector,
+                        layerDepthRef
                     );
                 }
                 else if (_status == 1)
                 {
-                    renderLists.AddGumpNoAtlas
-                    (
-                        batcher =>
-                        {
-                            batcher.Draw
-                            (
-                                SolidColorTextureCache.GetTexture(Color.Bisque),
-                                new Rectangle
-                                (
-                                    x + 16,
-                                    y,
-                                    200,
-                                    17
-                                ),
-                                hueVector,
-                                layerDepth
-                            );
-                            return true;
-                        }
+                    renderLists.AddGumpSprite(
+                        SolidColorTextureCache.GetTexture(Color.Bisque),
+                        new Rectangle(x + 16, y, 200, 17),
+                        hueVector,
+                        layerDepthRef
                     );
                 }
 
@@ -973,27 +944,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                 if (UIManager.LastControlMouseDown(MouseButtonType.Left) == this)
                 {
-                    float layerDepth = layerDepthRef;
-                    renderLists.AddGumpNoAtlas
-                    (
-                        batcher =>
-                        {
-                            batcher.Draw
-                            (
-                                SolidColorTextureCache.GetTexture(Color.Wheat),
-                                new Rectangle
-                                (
-                                    x,
-                                    y,
-                                    Width,
-                                    Height
-                                ),
-                                hueVector,
-                                layerDepth
-                            );
-
-                            return true;
-                        }
+                    renderLists.AddGumpSprite(
+                        SolidColorTextureCache.GetTexture(Color.Wheat),
+                        new Rectangle(x, y, Width, Height),
+                        hueVector,
+                        layerDepthRef
                     );
                 }
 

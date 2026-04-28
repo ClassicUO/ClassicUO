@@ -207,12 +207,13 @@ namespace ClassicUO.Game.UI.Controls
 
             var hue = ShaderHueTranslator.GetHueVector(Hue, false, Alpha, true);
 
-            renderLists.AddGumpWithAtlas(
-                batcher =>
-                {
-                    batcher.Draw(texture, new Rectangle(x, y, Width, Height), bounds, hue, layerDepth);
-                    return true;
-                });
+            renderLists.AddGumpSprite(
+                texture,
+                bounds,
+                new Rectangle(x, y, Width, Height),
+                hue,
+                layerDepth
+            );
             
 
             if (!string.IsNullOrEmpty(_caption))

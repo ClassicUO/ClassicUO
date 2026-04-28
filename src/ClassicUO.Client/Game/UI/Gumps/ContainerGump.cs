@@ -660,7 +660,6 @@ namespace ClassicUO.Game.UI.Gumps
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
             base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
-            float layerDepth = layerDepthRef;
 
             if (CUOEnviroment.Debug && !IsMinimized)
             {
@@ -672,22 +671,17 @@ namespace ClassicUO.Game.UI.Gumps
                 ushort boundHeight = (ushort)(bounds.Height * scale);
 
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
+                var redTex = SolidColorTextureCache.GetTexture(Color.Red);
+                int rx = x + boundX;
+                int ry = y + boundY;
+                int rw = boundWidth - boundX;
+                int rh = boundHeight - boundY;
 
-                renderLists.AddGumpNoAtlas(
-                    batcher =>
-                    {
-                        batcher.DrawRectangle(
-                            SolidColorTextureCache.GetTexture(Color.Red),
-                            x + boundX,
-                            y + boundY,
-                            boundWidth - boundX,
-                            boundHeight - boundY,
-                            hueVector,
-                            layerDepth
-                        );
-                        return true;
-                    }
-                );
+                // Debug bounds outline — four 1-pixel edges.
+                renderLists.AddGumpSprite(redTex, new Rectangle(rx, ry, rw, 1), hueVector, layerDepthRef);            // top
+                renderLists.AddGumpSprite(redTex, new Rectangle(rx + rw - 1, ry, 1, rh), hueVector, layerDepthRef);   // right
+                renderLists.AddGumpSprite(redTex, new Rectangle(rx, ry + rh - 1, rw, 1), hueVector, layerDepthRef);   // bottom
+                renderLists.AddGumpSprite(redTex, new Rectangle(rx, ry, 1, rh), hueVector, layerDepthRef);            // left
             }
 
             return true;

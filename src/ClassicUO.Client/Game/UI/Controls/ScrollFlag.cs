@@ -59,49 +59,40 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            float layerDepth = layerDepthRef;
-            renderLists.AddGumpWithAtlas
-            (
-                (batcher) =>
+            var hueVector = ShaderHueTranslator.GetHueVector(0);
+
+            ref readonly var gumpInfoFlag = ref Client.Game.UO.Gumps.GetGump(BUTTON_FLAG);
+
+            if (MaxValue != MinValue && gumpInfoFlag.Texture != null)
+            {
+                renderLists.AddGumpSprite(
+                    gumpInfoFlag.Texture, gumpInfoFlag.UV,
+                    new Rectangle(x, y + _sliderPosition, gumpInfoFlag.UV.Width, gumpInfoFlag.UV.Height),
+                    hueVector, layerDepthRef);
+            }
+
+            if (_showButtons)
+            {
+                ref readonly var gumpInfoUp = ref Client.Game.UO.Gumps.GetGump(BUTTON_UP);
+                ref readonly var gumpInfoDown = ref Client.Game.UO.Gumps.GetGump(BUTTON_DOWN);
+
+                if (gumpInfoUp.Texture != null)
                 {
-                    var hueVector = ShaderHueTranslator.GetHueVector(0);
-
-                    ref readonly var gumpInfoFlag = ref Client.Game.UO.Gumps.GetGump(BUTTON_FLAG);
-                    ref readonly var gumpInfoUp = ref Client.Game.UO.Gumps.GetGump(BUTTON_UP);
-                    ref readonly var gumpInfoDown = ref Client.Game.UO.Gumps.GetGump(BUTTON_DOWN);
-
-                    if (MaxValue != MinValue && gumpInfoFlag.Texture != null)
-                    {
-                        batcher.Draw(
-                            gumpInfoFlag.Texture,
-                            new Vector2(x, y + _sliderPosition),
-                            gumpInfoFlag.UV,
-                            hueVector,
-                            layerDepth
-                        );
-                    }
-
-                    if (_showButtons)
-                    {
-                        if (gumpInfoUp.Texture != null)
-                        {
-                            batcher.Draw(gumpInfoUp.Texture, new Vector2(x, y), gumpInfoUp.UV, hueVector, layerDepth);
-                        }
-
-                        if (gumpInfoDown.Texture != null)
-                        {
-                            batcher.Draw(
-                                gumpInfoDown.Texture,
-                                new Vector2(x, y + Height),
-                                gumpInfoDown.UV,
-                                hueVector,
-                                layerDepth
-                            );
-                        }
-                    }
-                    return true;
+                    renderLists.AddGumpSprite(
+                        gumpInfoUp.Texture, gumpInfoUp.UV,
+                        new Rectangle(x, y, gumpInfoUp.UV.Width, gumpInfoUp.UV.Height),
+                        hueVector, layerDepthRef);
                 }
-            );
+
+                if (gumpInfoDown.Texture != null)
+                {
+                    renderLists.AddGumpSprite(
+                        gumpInfoDown.Texture, gumpInfoDown.UV,
+                        new Rectangle(x, y + Height, gumpInfoDown.UV.Width, gumpInfoDown.UV.Height),
+                        hueVector, layerDepthRef);
+                }
+            }
+
             return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
         }
 

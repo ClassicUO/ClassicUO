@@ -88,44 +88,34 @@ namespace ClassicUO.Game.UI.Controls
             }
 
             var ok = base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
-            float layerDepth = layerDepthRef;
 
             ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(
                 IsChecked ? _active : _inactive
             );
-            var texture = gumpInfo.Texture;
-            var sourceRectangle = gumpInfo.UV;
-            renderLists.AddGumpWithAtlas
-            (
-                (batcher) =>
-                {
-                    batcher.Draw(
-                        texture,
-                        new Vector2(x, y),
-                        sourceRectangle,
-                        ShaderHueTranslator.GetHueVector(0),
-                        layerDepth
-                     );
 
-                    return true;
-                }
-            );
+            if (gumpInfo.Texture != null)
+            {
+                renderLists.AddGumpSprite(
+                    gumpInfo.Texture,
+                    gumpInfo.UV,
+                    new Rectangle(x, y, gumpInfo.UV.Width, gumpInfo.UV.Height),
+                    ShaderHueTranslator.GetHueVector(0),
+                    layerDepthRef
+                );
+            }
 
-            renderLists.AddGumpNoAtlas
-            (
-                (batcher) =>
-                {
-                    _text.Draw(batcher, x + sourceRectangle.Width + 2, y, layerDepth);
-
-                    return true;
-                }
-            );
+            renderLists.AddGumpNoAtlas(_text, x + gumpInfo.UV.Width + 2, y, layerDepthRef);
 
             return ok;
         }
 
         protected virtual void OnCheckedChanged()
         {
+            // The check state selects between _active and _inactive graphics in
+            // AddToRenderLists; without this notify, the owning gump's retained
+            // render cache keeps replaying the old sprite until some other path
+            // (drag, resize, etc.) bumps the version.
+            NotifyRenderDirty();
             ValueChanged.Raise(this);
         }
 

@@ -391,7 +391,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
                 else if (displayAmount == 0)
                 {
-                    prefix = "±";
+                    prefix = "ï¿½";
                 }
                 else if (displayAmount > 0)
                 {
@@ -408,7 +408,6 @@ namespace ClassicUO.Game.UI.Gumps
             public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
             {
                 base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
-                float layerDepth = layerDepthRef;
 
                 Texture2D color = SolidColorTextureCache.GetTexture(
                     MouseIsOver
@@ -422,12 +421,12 @@ namespace ClassicUO.Game.UI.Gumps
 
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-                renderLists.AddGumpNoAtlas(batcher =>
-                {
-                    batcher.DrawRectangle(color, x, y, Width, Height, hueVector, layerDepth);
-
-                    return true;
-                });
+                // 1-pixel outline (batcher.DrawRectangle would emit 4 batcher.Draw
+                // internally; we inline the 4 edges as typed Sprite commands).
+                renderLists.AddGumpSprite(color, new Rectangle(x, y, Width, 1), hueVector, layerDepthRef);               // top
+                renderLists.AddGumpSprite(color, new Rectangle(x + Width - 1, y, 1, Height), hueVector, layerDepthRef); // right
+                renderLists.AddGumpSprite(color, new Rectangle(x, y + Height - 1, Width, 1), hueVector, layerDepthRef); // bottom
+                renderLists.AddGumpSprite(color, new Rectangle(x, y, 1, Height), hueVector, layerDepthRef);             // left
 
                 return true;
             }
@@ -484,7 +483,6 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     if (_graphic != 0)
                     {
-                        float layerDepth = layerDepthRef;
                         ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(_graphic);
                         var rect = Client.Game.UO.Arts.GetRealArtBounds(_graphic);
 
@@ -505,26 +503,16 @@ namespace ClassicUO.Game.UI.Gumps
                             point.Y = (Height >> 1) - (originalSize.Y >> 1);
                         }
 
-                        var texture = artInfo.Texture;
-                        var sourceRectangle = artInfo.UV;
-                        renderLists.AddGumpWithAtlas
-                        (
-                            (batcher) =>
-                            {
-                                batcher.Draw(
-                                    texture,
-                                    new Rectangle(x + point.X, y + point.Y, originalSize.X, originalSize.Y),
-                                    new Rectangle(
-                                        sourceRectangle.X + rect.X,
-                                        sourceRectangle.Y + rect.Y,
-                                        rect.Width,
-                                        rect.Height
-                                    ),
-                                    hueVector,
-                                    layerDepth
-                                );
-                                return true;
-                            }
+                        renderLists.AddGumpSprite(
+                            artInfo.Texture,
+                            new Rectangle(
+                                artInfo.UV.X + rect.X,
+                                artInfo.UV.Y + rect.Y,
+                                rect.Width,
+                                rect.Height),
+                            new Rectangle(x + point.X, y + point.Y, originalSize.X, originalSize.Y),
+                            hueVector,
+                            layerDepthRef
                         );
                     }
 

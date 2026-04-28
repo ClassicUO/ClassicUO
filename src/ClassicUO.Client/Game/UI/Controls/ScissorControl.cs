@@ -1,9 +1,20 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Game.Scenes;
+using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Controls
 {
+    /// <summary>
+    /// Marker control that toggles a gump-level clip region. Place an instance with
+    /// <see cref="DoScissor"/> = true before the children to clip, and a second instance
+    /// with <see cref="DoScissor"/> = false after them to pop the clip.
+    /// <para/>
+    /// Previously this emitted its clip operation as a closure into both atlas and
+    /// non-atlas gump streams because there were two separate flush passes. With the
+    /// unified <see cref="RenderLists"/> command stream a single typed ClipPush /
+    /// ClipPop entry is sufficient.
+    /// </summary>
     internal class ScissorControl : Control
     {
         public ScissorControl(bool enabled, int x, int y, int width, int height) : this(enabled)
@@ -28,21 +39,14 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            bool clipIt(Renderer.UltimaBatcher2D batcher)
+            if (DoScissor)
             {
-                if (DoScissor)
-                {
-                    batcher.ClipBegin(x, y, Width, Height);
-                }
-                else
-                {
-                    batcher.ClipEnd();
-                }
-                return true;
+                renderLists.PushClip(new Rectangle(x, y, Width, Height));
             }
-
-            renderLists.AddGumpWithAtlas(clipIt);
-            renderLists.AddGumpNoAtlas(clipIt);
+            else
+            {
+                renderLists.PopClip();
+            }
 
             return true;
         }

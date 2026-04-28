@@ -50,6 +50,11 @@ namespace ClassicUO.Game.UI.Gumps
             //TextRenderer.MoveToTopIfSelected();
             TextRenderer.ProcessWorldText(true);
 
+            // INTENTIONAL Callback: TextRenderer.Draw walks a per-frame linked list
+            // of floating world texts (overhead chat, damage numbers) whose
+            // positions follow mobiles and fade/expire on their own timers.
+            // The draw content is genuinely different every frame, so there is
+            // nothing a typed command stream can cache. Do NOT convert.
             renderLists.AddGumpNoAtlas(
                 batcher =>
                 {

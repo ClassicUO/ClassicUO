@@ -646,36 +646,27 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 return false;
             }
-            float layerDepth = layerDepthRef;
 
             X = x;
             Y = y;
-            renderLists.AddGumpNoAtlas(
-                batcher =>
-                {
-                    batcher.DrawRectangle(_borderColor, x - 1, y - 1, Width + 1, Height + 1, hueVector, layerDepth);
-                    return true;
-                }
-            );
+
+            // Border outline (1-px rect around the label). batcher.DrawRectangle was
+            // a four-edge macro; inlining the four typed Sprite commands gives the
+            // cache something to batch with neighbouring sprites.
+            renderLists.AddGumpSprite(_borderColor, new Rectangle(x - 1, y - 1, Width + 1, 1), hueVector, layerDepthRef);                    // top
+            renderLists.AddGumpSprite(_borderColor, new Rectangle(x - 1 + Width, y - 1, 1, Height + 1), hueVector, layerDepthRef);           // right
+            renderLists.AddGumpSprite(_borderColor, new Rectangle(x - 1, y - 1 + Height, Width + 1, 1), hueVector, layerDepthRef);           // bottom
+            renderLists.AddGumpSprite(_borderColor, new Rectangle(x - 1, y - 1, 1, Height + 1), hueVector, layerDepthRef);                   // left
 
             base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
 
+            // Text clipped to the label width (long names get cropped to the box).
             int renderedTextOffset = Math.Max(0, Width - _renderedText.Width - 4) >> 1;
-            renderLists.AddGumpNoAtlas(batcher =>
-                {
-                    return _renderedText.Draw(
-                        batcher,
-                        Width,
-                        Height,
-                        x + 2 + renderedTextOffset,
-                        y + 2,
-                        Width,
-                        Height,
-                        0,
-                        0,
-                        layerDepth + CHILD_LAYER_INCREMENT * 2
-                    );
-                }
+            renderLists.AddGumpNoAtlasClipped(
+                _renderedText,
+                dest: new Rectangle(x + 2 + renderedTextOffset, y + 2, Width, Height),
+                sourceOffset: new Rectangle(0, 0, Width, Height),
+                layerDepth: layerDepthRef + CHILD_LAYER_INCREMENT * 2
             );
 
             if (_showHpBar && World.Get(LocalSerial) is Mobile mob)
@@ -689,17 +680,21 @@ namespace ClassicUO.Game.UI.Gumps
                               : mob.HitsPercentage >= 50 ? Color.YellowGreen
                               : mob.HitsPercentage >= 30 ? Color.Yellow
                               : Color.Red;
-                float barDepth = layerDepth + CHILD_LAYER_INCREMENT * 3;
+                float barDepth = layerDepthRef + CHILD_LAYER_INCREMENT * 3;
 
-                renderLists.AddGumpNoAtlas(batcher =>
+                // Bar background (black) then filled portion overlaid.
+                renderLists.AddGumpSprite(
+                    SolidColorTextureCache.GetTexture(Color.Black),
+                    new Rectangle(barX, barY, barWidth, barHeight),
+                    hueVector, barDepth);
+
+                if (filledWidth > 0)
                 {
-                    batcher.Draw(SolidColorTextureCache.GetTexture(Color.Black),
-                        new Rectangle(barX, barY, barWidth, barHeight), hueVector, barDepth);
-                    if (filledWidth > 0)
-                        batcher.Draw(SolidColorTextureCache.GetTexture(hpColor),
-                            new Rectangle(barX, barY, filledWidth, barHeight), hueVector, barDepth + CHILD_LAYER_INCREMENT);
-                    return true;
-                });
+                    renderLists.AddGumpSprite(
+                        SolidColorTextureCache.GetTexture(hpColor),
+                        new Rectangle(barX, barY, filledWidth, barHeight),
+                        hueVector, barDepth + CHILD_LAYER_INCREMENT);
+                }
             }
 
             return true;

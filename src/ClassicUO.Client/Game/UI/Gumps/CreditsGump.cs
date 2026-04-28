@@ -62,23 +62,28 @@ Ultima Online(R) 2021 Electronic Arts Inc. All Rights Reserved.
             {
                 _offset.Y -= 1;
                 _lastUpdate = Time.Ticks + 25;
+                // Credits scroll vertically every ~25 ms. _offset is a Point struct
+                // so mutating it doesn't trip any property setter; bump the cache
+                // explicitly so the StringFont command re-emits at the new Y.
+                NotifyRenderDirty();
             }
         }
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
             base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
-            float layerDepth = layerDepthRef;
 
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-            renderLists.AddGumpNoAtlas(
-                batcher =>
-                {
-                    batcher.DrawString(Fonts.Bold, CREDITS, x + _offset.X, y + _offset.Y, hueVector, layerDepth);
-                    return true;
-                }
+            renderLists.AddGumpString(
+                Fonts.Bold,
+                CREDITS,
+                x + _offset.X,
+                y + _offset.Y,
+                hueVector,
+                layerDepthRef
             );
+
             return true;
         }
     }

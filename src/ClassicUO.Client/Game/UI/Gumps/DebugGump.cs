@@ -132,6 +132,31 @@ namespace ClassicUO.Game.UI.Gumps
                             $"    - AvgDraw:{avgDrawMs:0.0}ms {CUOEnviroment.CurrentRefreshRate} FPS\n"
                         );
                     }
+
+                    // Gump render-cache telemetry. Values are a single-frame snapshot
+                    // captured at the end of the previous UIManager.Draw call.
+                    int total = GumpRenderMetrics.GumpsRendered;
+                    int hits = GumpRenderMetrics.CacheHits;
+                    int transl = GumpRenderMetrics.CacheTranslationHits;
+                    int miss = GumpRenderMetrics.CacheMisses;
+                    int bypass = GumpRenderMetrics.CacheBypassed;
+                    int cacheable = total - bypass;
+                    double hitPct = cacheable > 0 ? 100d * (hits + transl) / cacheable : 0d;
+
+                    sb.Append("- Gump Render Cache (global ");
+                    sb.Append(Gump.DefaultEnableRenderCache ? "ON)\n" : "off)\n");
+                    sb.Append(
+                        $"    - Gumps:{total} (cacheable:{cacheable}, bypass:{bypass})\n" +
+                        $"    - Cache: hit:{hits} drag:{transl} miss:{miss}  ({hitPct:0.0}% hit)\n" +
+                        $"    - Commands:{GumpRenderMetrics.CommandsEmitted} " +
+                        $"(spr:{GumpRenderMetrics.SpriteCommands} " +
+                        $"txt:{GumpRenderMetrics.TextCommands}" +
+                        (GumpRenderMetrics.TextScrolledCommands > 0 ? $"+{GumpRenderMetrics.TextScrolledCommands}" : "") +
+                        $" clip:{GumpRenderMetrics.ClipCommands} " +
+                        $"cb:{GumpRenderMetrics.CallbackCommands})\n" +
+                        $"    - Batcher: switches:{GumpRenderMetrics.BatcherTextureSwitches} " +
+                        $"flushes:{GumpRenderMetrics.BatcherFlushes}\n"
+                    );
                 }
                 else
                 {
@@ -149,9 +174,19 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
 
-                _cacheText = sb.ToString();
-
+                string newCache = sb.ToString();
                 sb.Dispose();
+
+                if (newCache != _cacheText)
+                {
+                    _cacheText = newCache;
+                    // The typed StringFont command captures _cacheText by reference.
+                    // When the string changes the cache needs to rebuild with the new
+                    // reference; Width/Height changes below will also notify via the
+                    // Control property setters, so this is belt+braces for frames
+                    // where only the text content shifted.
+                    NotifyRenderDirty();
+                }
 
                 Vector2 size = Fonts.Bold.MeasureString(_cacheText);
 
@@ -168,25 +203,18 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 return false;
             }
-            float layerDepth = layerDepthRef;
 
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-            renderLists.AddGumpNoAtlas(
-                batcher =>
-                {
-                    batcher.DrawString
-                    (
-                        Fonts.Bold,
-                        _cacheText,
-                        x + 10,
-                        y + 10,
-                        hueVector,
-                        layerDepth
-                    );
-                    return true;
-                }
+            renderLists.AddGumpString(
+                Fonts.Bold,
+                _cacheText,
+                x + 10,
+                y + 10,
+                hueVector,
+                layerDepthRef
             );
+
             return true;
         }
 

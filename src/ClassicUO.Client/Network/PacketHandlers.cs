@@ -3226,7 +3226,7 @@ namespace ClassicUO.Network
             {
                 p.Skip(2);
                 bgump.IsEditable = editable;
-                bgump.SetTile(
+                bgump.SetTitle(
                     oldpacket ? p.ReadUTF8(60, true) : p.ReadUTF8(p.ReadUInt16BE(), true),
                     editable
                 );

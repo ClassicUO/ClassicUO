@@ -59,28 +59,18 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            float layerDepth = layerDepthRef;
-            Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, IsPartialHue, 1);
-
             ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(Graphic);
 
-            var texture = artInfo.Texture;
-            if (texture != null)
+            if (artInfo.Texture != null)
             {
-                var sourceRectangle = artInfo.UV;
-                renderLists.AddGumpWithAtlas
-                (
-                    (batcher) =>
-                    {
-                        batcher.Draw(
-                            texture,
-                            new Rectangle(x, y, Width, Height),
-                            sourceRectangle,
-                            hueVector,
-                            layerDepth
-                        );
-                        return true;
-                    }
+                Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, IsPartialHue, 1);
+
+                renderLists.AddGumpSprite(
+                    artInfo.Texture,
+                    artInfo.UV,
+                    new Rectangle(x, y, Width, Height),
+                    hueVector,
+                    layerDepthRef
                 );
             }
 

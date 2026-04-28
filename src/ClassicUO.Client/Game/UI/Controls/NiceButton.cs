@@ -126,22 +126,13 @@ namespace ClassicUO.Game.UI.Controls
         {
             if (IsSelected)
             {
-                float layerDepth = layerDepthRef;
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, Alpha);
 
-                renderLists.AddGumpNoAtlas(
-                    batcher =>
-                    {
-                        batcher.Draw
-                        (
-                            _texture,
-                            new Vector2(x, y),
-                            new Rectangle(0, 0, Width, Height),
-                            hueVector,
-                            layerDepth
-                        );
-                        return true;
-                    }
+                renderLists.AddGumpSprite(
+                    _texture,
+                    new Rectangle(x, y, Width, Height),
+                    hueVector,
+                    layerDepthRef
                 );
             }
 

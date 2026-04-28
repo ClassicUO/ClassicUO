@@ -120,38 +120,25 @@ namespace ClassicUO.Game.UI.Gumps
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            float layerDepth = layerDepthRef;
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
-            renderLists.AddGumpNoAtlas(
-                batcher =>
-                {
-                    batcher.Draw
-                    (
-                        backgroundTexture,
-                        new Rectangle
-                        (
-                            x,
-                            y,
-                            Width,
-                            Height
-                        ),
-                        hueVector,
-                        layerDepth
-                    );
 
-                    batcher.DrawRectangle
-                    (
-                        SolidColorTextureCache.GetTexture(Color.Gray),
-                        x,
-                        y,
-                        Width,
-                        Height,
-                        hueVector,
-                        layerDepth
-                    );
-                    return true;
-                }
+            // Solid fill
+            renderLists.AddGumpSprite(
+                backgroundTexture,
+                new Rectangle(x, y, Width, Height),
+                hueVector,
+                layerDepthRef
             );
+
+            // 1-pixel grey outline. batcher.DrawRectangle is a macro that emits four
+            // batcher.Draw calls (one per edge); we inline the same four as typed Sprite
+            // commands so the whole outline participates in the cache.
+            var grayTex = SolidColorTextureCache.GetTexture(Color.Gray);
+            renderLists.AddGumpSprite(grayTex, new Rectangle(x, y, Width, 1), hueVector, layerDepthRef);              // top
+            renderLists.AddGumpSprite(grayTex, new Rectangle(x + Width - 1, y, 1, Height), hueVector, layerDepthRef);  // right
+            renderLists.AddGumpSprite(grayTex, new Rectangle(x, y + Height - 1, Width, 1), hueVector, layerDepthRef); // bottom
+            renderLists.AddGumpSprite(grayTex, new Rectangle(x, y, 1, Height), hueVector, layerDepthRef);             // left
+
             base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
 
             return true;

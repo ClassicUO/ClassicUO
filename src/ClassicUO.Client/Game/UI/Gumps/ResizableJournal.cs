@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 using Point = Microsoft.Xna.Framework.Point;
+using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -168,6 +169,10 @@ namespace ClassicUO.Game.UI.Gumps
             _scrollBarBase.X = Width - SCROLL_BAR_WIDTH - BORDER_WIDTH;
             _scrollBarBase.Y = _journalArea.Y;
             _scrollBarBase.Height = Height - BORDER_WIDTH - TAB_HEIGHT;
+
+            // Child X/Y/Width/Height went through the ref-int accessors so no setter
+            // fired NotifyRenderDirty. Tell the cache explicitly that layout moved.
+            NotifyRenderDirty();
         }
 
         public override void Save(XmlTextWriter writer)
@@ -281,16 +286,35 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 _lastX = X;
                 _lastY = Y;
-
             }
-            if (((Width != _lastWidth || Height != _lastHeight) && !Mouse.LButtonPressed))
+
+            // Note: Reposition used to be gated on !Mouse.LButtonPressed (i.e. only
+            // after the resize was released). That worked with the old per-frame
+            // tree walk because the base renderer saw the updated gump size and
+            // every child position was recomputed on the fly from a closure. With
+            // the retained command cache enabled, a cache miss rebuilds the tree
+            // during the drag — but the children still had their stale pre-drag
+            // dimensions, so the background and journal area froze at their old
+            // size while the resize grip tracked the new corner. OnResize now
+            // calls Reposition directly every frame of the drag instead. The guard
+            // here still catches external width/height changes (e.g. XML restore)
+            // that don't go through the resize grip path.
+            if (Width != _lastWidth || Height != _lastHeight)
+            {
                 Reposition();
+            }
 
             if (ReloadTabs)
             {
                 ReloadTabs = false;
                 BuildTabs();
             }
+        }
+
+        public override void OnResize()
+        {
+            base.OnResize();
+            Reposition();
         }
 
         public override void Dispose()
@@ -327,36 +351,35 @@ namespace ClassicUO.Game.UI.Gumps
             public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
             {
                 base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
-                float layerDepth = layerDepthRef;
+
+                // Clip everything below to the journal viewport, then walk the entry
+                // list emitting each visible line as typed Label / Text commands into
+                // the parent stream. Previously this was a closure that built a
+                // throwaway nested RenderLists and flushed it; the closure path also
+                // had the "accumulating captured `my`" bug fixed earlier, but with a
+                // typed stream we sidestep both problems and get cache participation.
+                renderLists.PushClip(new Rectangle(x, y, Width, Height));
+
                 int my = y;
+                foreach (JournalData journalEntry in journalDatas)
+                {
+                    if (journalEntry == null || string.IsNullOrEmpty(journalEntry.EntryText.Text))
+                        continue;
 
-                renderLists.AddGumpNoAtlas(
-                    batcher =>
+                    if (!CanBeDrawn(journalEntry.TextType, journalEntry.MessageType))
+                        continue;
+
+                    if (my + journalEntry.EntryText.Height - y >= _scrollBar.Value && my - y <= _scrollBar.Value + _scrollBar.Height)
                     {
-                        if (batcher.ClipBegin(x, y, Width, Height))
-                        {
-                            RenderLists childRenderLists = new();
-                            foreach (JournalData journalEntry in journalDatas)
-                            {
-                                if (journalEntry == null || string.IsNullOrEmpty(journalEntry.EntryText.Text))
-                                    continue;
-
-                                if (!CanBeDrawn(journalEntry.TextType, journalEntry.MessageType))
-                                    continue;
-
-                                if (my + journalEntry.EntryText.Height - y >= _scrollBar.Value && my - y <= _scrollBar.Value + _scrollBar.Height)
-                                {
-                                    journalEntry.TimeStamp.AddToRenderLists(childRenderLists, x, my - _scrollBar.Value, ref layerDepth);
-                                    journalEntry.EntryText.AddToRenderLists(childRenderLists, x + (journalEntry.TimeStamp.Width + 5), my - _scrollBar.Value, ref layerDepth);
-                                }
-                                my += journalEntry.EntryText.Height;
-                            }
-                            childRenderLists.DrawRenderLists(batcher, sbyte.MaxValue);
-                            batcher.ClipEnd();
-                        }
-                        return true;
+                        float depth = layerDepthRef;
+                        journalEntry.TimeStamp.AddToRenderLists(renderLists, x, my - _scrollBar.Value, ref depth);
+                        journalEntry.EntryText.AddToRenderLists(renderLists, x + (journalEntry.TimeStamp.Width + 5), my - _scrollBar.Value, ref depth);
                     }
-                );
+                    my += journalEntry.EntryText.Height;
+                }
+
+                renderLists.PopClip();
+
                 return true;
             }
 

@@ -320,54 +320,49 @@ namespace ClassicUO.Game.UI.Gumps
             }
             float layerDepth = layerDepthRef;
 
-            renderLists.AddGumpWithAtlas(
-                (batcher) =>
-                {
-                    ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(H_BORDER);
+            ref readonly var hBorder = ref Client.Game.UO.Gumps.GetGump(H_BORDER);
 
-                    // sopra
-                    batcher.DrawTiled(
-                        gumpInfo.Texture,
-                        new Rectangle(x, y, Width, BorderSize),
-                        gumpInfo.UV,
-                        hueVector,
-                        layerDepth
-                    );
+            // sopra
+            renderLists.AddGumpSpriteTiled(
+                hBorder.Texture,
+                hBorder.UV,
+                new Rectangle(x, y, Width, BorderSize),
+                hueVector,
+                layerDepth
+            );
 
-                    // sotto
-                    batcher.DrawTiled(
-                        gumpInfo.Texture,
-                        new Rectangle(x, y + Height - BorderSize, Width, BorderSize),
-                        gumpInfo.UV,
-                        hueVector,
-                        layerDepth
-                    );
+            // sotto
+            renderLists.AddGumpSpriteTiled(
+                hBorder.Texture,
+                hBorder.UV,
+                new Rectangle(x, y + Height - BorderSize, Width, BorderSize),
+                hueVector,
+                layerDepth
+            );
 
-                    gumpInfo = ref Client.Game.UO.Gumps.GetGump(V_BORDER);
-                    //sx
-                    batcher.DrawTiled(
-                        gumpInfo.Texture,
-                        new Rectangle(x, y, BorderSize, Height),
-                        gumpInfo.UV,
-                        hueVector,
-                        layerDepth
-                    );
+            ref readonly var vBorder = ref Client.Game.UO.Gumps.GetGump(V_BORDER);
 
-                    //dx
-                    batcher.DrawTiled(
-                        gumpInfo.Texture,
-                        new Rectangle(
-                            x + Width - BorderSize,
-                            y + (gumpInfo.UV.Width >> 1),
-                            BorderSize,
-                            Height - BorderSize
-                        ),
-                        gumpInfo.UV,
-                        hueVector,
-                        layerDepth
-                    );
-                    return true;
-                }
+            // sx
+            renderLists.AddGumpSpriteTiled(
+                vBorder.Texture,
+                vBorder.UV,
+                new Rectangle(x, y, BorderSize, Height),
+                hueVector,
+                layerDepth
+            );
+
+            // dx
+            renderLists.AddGumpSpriteTiled(
+                vBorder.Texture,
+                vBorder.UV,
+                new Rectangle(
+                    x + Width - BorderSize,
+                    y + (vBorder.UV.Width >> 1),
+                    BorderSize,
+                    Height - BorderSize
+                ),
+                hueVector,
+                layerDepth
             );
 
             return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);

@@ -320,25 +320,16 @@ namespace ClassicUO.Game.UI.Gumps
             }
 
             base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
-            float layerDepth = layerDepthRef;
 
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
+            var grayTex = SolidColorTextureCache.GetTexture(Color.Gray);
 
-            renderLists.AddGumpNoAtlas(
-                batcher =>
-                {
-                    batcher.DrawRectangle(
-                        SolidColorTextureCache.GetTexture(Color.Gray),
-                        x,
-                        y,
-                        Width,
-                        Height,
-                        hueVector,
-                        layerDepth
-                    );
-                    return true;
-                }
-            );
+            // 1-pixel gray outline around the loot grid.
+            renderLists.AddGumpSprite(grayTex, new Rectangle(x, y, Width, 1), hueVector, layerDepthRef);              // top
+            renderLists.AddGumpSprite(grayTex, new Rectangle(x + Width - 1, y, 1, Height), hueVector, layerDepthRef); // right
+            renderLists.AddGumpSprite(grayTex, new Rectangle(x, y + Height - 1, Width, 1), hueVector, layerDepthRef); // bottom
+            renderLists.AddGumpSprite(grayTex, new Rectangle(x, y, 1, Height), hueVector, layerDepthRef);             // left
+
             return true;
         }
 
@@ -484,7 +475,6 @@ namespace ClassicUO.Game.UI.Gumps
             public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
             {
                 base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
-                float layerDepth = layerDepthRef;
 
                 Item item = _gump.World.Items.Get(LocalSerial);
 
@@ -516,31 +506,21 @@ namespace ClassicUO.Game.UI.Gumps
                         originalSize.Y = rect.Height;
                         point.Y = (_hit.Height >> 1) - (originalSize.Y >> 1);
                     }
-                    var texture = artInfo.Texture;
-                    var sourceRectangle = artInfo.UV;
-                    renderLists.AddGumpWithAtlas
-                    (
-                        (batcher) =>
-                        {
-                            batcher.Draw(
-                                texture,
-                                new Rectangle(
-                                    x + point.X,
-                                    y + point.Y + _hit.Y,
-                                    originalSize.X,
-                                    originalSize.Y
-                                ),
-                                new Rectangle(
-                                    sourceRectangle.X + rect.X,
-                                    sourceRectangle.Y + rect.Y,
-                                    rect.Width,
-                                    rect.Height
-                                ),
-                                hueVector,
-                                layerDepth
-                            );
-                            return true;
-                        }
+
+                    renderLists.AddGumpSprite(
+                        artInfo.Texture,
+                        new Rectangle(
+                            artInfo.UV.X + rect.X,
+                            artInfo.UV.Y + rect.Y,
+                            rect.Width,
+                            rect.Height),
+                        new Rectangle(
+                            x + point.X,
+                            y + point.Y + _hit.Y,
+                            originalSize.X,
+                            originalSize.Y),
+                        hueVector,
+                        layerDepthRef
                     );
                 }
 
@@ -549,37 +529,26 @@ namespace ClassicUO.Game.UI.Gumps
                     item.ItemData.IsPartialHue,
                     1f
                 );
-                
-                renderLists.AddGumpNoAtlas(
-                    batcher =>
-                    {
-                        batcher.DrawRectangle(
-                            SolidColorTextureCache.GetTexture(Color.Gray),
-                            x,
-                            y + 15,
-                            Width,
-                            Height - 15,
-                            hueVector,
-                            layerDepth
-                        );
-                        return true;
-                    }
-                );
+
+                // 1-pixel gray outline around the item cell (below the count text at y+15).
+                var grayTex = SolidColorTextureCache.GetTexture(Color.Gray);
+                int ry = y + 15;
+                int rh = Height - 15;
+                renderLists.AddGumpSprite(grayTex, new Rectangle(x, ry, Width, 1), hueVector, layerDepthRef);                // top
+                renderLists.AddGumpSprite(grayTex, new Rectangle(x + Width - 1, ry, 1, rh), hueVector, layerDepthRef);       // right
+                renderLists.AddGumpSprite(grayTex, new Rectangle(x, ry + rh - 1, Width, 1), hueVector, layerDepthRef);       // bottom
+                renderLists.AddGumpSprite(grayTex, new Rectangle(x, ry, 1, rh), hueVector, layerDepthRef);                   // left
+
                 if (_hit.MouseIsOver)
                 {
                     Vector3 hoverHue = ShaderHueTranslator.GetHueVector(0);
                     hoverHue.Z = 0.2f;
-                    renderLists.AddGumpNoAtlas(
-                        batcher =>
-                        {
-                            batcher.Draw(
-                                SolidColorTextureCache.GetTexture(Color.Yellow),
-                                new Rectangle(x + 1, y + 15, Width - 1, Height - 15),
-                                hoverHue,
-                                layerDepth
-                            );
-                            return true;
-                        }
+
+                    renderLists.AddGumpSprite(
+                        SolidColorTextureCache.GetTexture(Color.Yellow),
+                        new Rectangle(x + 1, y + 15, Width - 1, Height - 15),
+                        hoverHue,
+                        layerDepthRef
                     );
                     hueVector.Z = 1;
                 }

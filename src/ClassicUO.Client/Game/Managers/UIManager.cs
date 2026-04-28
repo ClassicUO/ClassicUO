@@ -361,19 +361,33 @@ namespace ClassicUO.Game.Managers
         public static void Draw(UltimaBatcher2D batcher)
         {
             _renderLists.Clear();
+            GumpRenderMetrics.BeginFrame();
 
             SortControlsByInfo();
 
+            // batcher.Begin() resets its TextureSwitches / FlushesDone counters,
+            // so everything we read after batcher.End() reflects only this UI pass.
             batcher.Begin();
             batcher.SetStencil(DepthStencilState.Default);
 
-            float layerDepth = -10000;
+            // Per-gump depth stride: each gump gets a fixed 10-unit slice for its children.
+            // Previously each iteration bumped layerDepth by 10 *after* the inner call had
+            // advanced it by (childCount * CHILD_LAYER_INCREMENT), so gump N's starting
+            // depth depended on all previous gumps' child counts. That coupling made any
+            // per-gump retained render cache fragile — a neighbouring gump's child count
+            // change would invalidate the cached depths. Using an explicit stride here
+            // decouples gump depths: gump N always starts at -10000 + N*10 (up to 1000
+            // children per gump, well under the 10 / CHILD_LAYER_INCREMENT budget).
+            const float GumpDepthStride = 10f;
+            float gumpStartDepth = -10000f;
 
             for (LinkedListNode<Gump> last = Gumps.Last; last != null; last = last.Previous)
             {
-                Control g = last.Value;
-                layerDepth+=10;
-                g.AddToRenderLists(_renderLists, g.X, g.Y, ref layerDepth);
+                Gump g = last.Value;
+                gumpStartDepth += GumpDepthStride;
+                float innerDepth = gumpStartDepth;
+
+                g.EmitCommandsInto(_renderLists, g.X, g.Y, ref innerDepth);
             }
 
             Profiler.EnterContext(Profiler.ProfilerContext.RENDER_FRAME_UI);
@@ -382,6 +396,9 @@ namespace ClassicUO.Game.Managers
 
             batcher.SetStencil(null);
             batcher.End();
+
+            GumpRenderMetrics.BatcherTextureSwitches = batcher.TextureSwitches;
+            GumpRenderMetrics.BatcherFlushes = batcher.FlushesDone;
         }
 
         public static void Add(Gump gump, bool front = true)

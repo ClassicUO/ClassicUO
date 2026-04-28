@@ -139,57 +139,37 @@ namespace ClassicUO.Game.UI.Controls
             float colorLayerDepth = layerDepthRef += 0.001f;
             float selectorLayerDepth = layerDepthRef += 0.001f;
 
-            Texture2D texture = SolidColorTextureCache.GetTexture(Color.White);
+            Texture2D whiteTex = SolidColorTextureCache.GetTexture(Color.White);
 
+            // Colour grid — one typed Sprite per cell.
             for (int i = 0; i < _rows; i++)
             {
                 for (int j = 0; j < _columns; j++)
                 {
                     Vector3 hueVector = ShaderHueTranslator.GetHueVector(_hues[i * _columns + j]);
-
-                    Rectangle rect = new(x + j * _cellWidth, y + i * _cellHeight, _cellWidth, _cellHeight);
-
-                    renderLists.AddGumpNoAtlas(
-                        batcher =>
-                        {
-                            batcher.Draw
-                            (
-                                texture,
-                                rect,
-                                hueVector,
-                                colorLayerDepth
-                            );
-                            return true;
-                        }
+                    renderLists.AddGumpSprite(
+                        whiteTex,
+                        new Rectangle(x + j * _cellWidth, y + i * _cellHeight, _cellWidth, _cellHeight),
+                        hueVector,
+                        colorLayerDepth
                     );
                 }
             }
 
-                      
-
+            // Selection indicator — a 2x2 dot on top of the selected cell.
             if (_hues.Length > 1)
             {
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-                Rectangle rect = new(
-                                    (int)(x + Width / _columns * (SelectedIndex % _columns + .5f) - 1),
-                                    (int)(y + Height / _rows * (SelectedIndex / _columns + .5f) - 1),
-                                    rect.Width = 2,
-                                    rect.Height = 2
-                                    );
-
-                renderLists.AddGumpNoAtlas(
-                    batcher =>
-                    {
-                        batcher.Draw
-                        (
-                            SolidColorTextureCache.GetTexture(Color.White),
-                            rect,
-                            hueVector,
-                            selectorLayerDepth
-                        );
-                        return true;
-                    }
+                renderLists.AddGumpSprite(
+                    whiteTex,
+                    new Rectangle(
+                        (int)(x + Width / _columns * (SelectedIndex % _columns + .5f) - 1),
+                        (int)(y + Height / _rows * (SelectedIndex / _columns + .5f) - 1),
+                        2,
+                        2),
+                    hueVector,
+                    selectorLayerDepth
                 );
             }
 

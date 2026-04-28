@@ -8,6 +8,7 @@ using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
 using ClassicUO.Resources;
 using ClassicUO.Utility.Collections;
+using Microsoft.Xna.Framework;
 using System;
 using System.Xml;
 
@@ -254,11 +255,30 @@ namespace ClassicUO.Game.UI.Gumps
             base.Update();
 
             WantUpdateSize = true;
-            _journalEntries.Height = Height - (98 + DIFF_Y);
+
+            // Per-frame layout recompute: the journal grows/shrinks with the
+            // resize gem and these children's Y depends on _background.Height.
+            // Both of these go through `ref int` accessors on Control so no
+            // setter hooks NotifyRenderDirty automatically — track the prior
+            // values and invalidate when they change so the retained cache
+            // rebuilds with the new layout.
+            int newJournalHeight = Height - (98 + DIFF_Y);
+            bool layoutChanged = _journalEntries.Height != newJournalHeight;
+            _journalEntries.Height = newJournalHeight;
 
             for (int i = 0; i < _filters_chekboxes.Length; i++)
             {
-                _filters_chekboxes[i].Y = _background.Height - _filters_chekboxes[i].Height - DIFF_Y + 10;
+                int newY = _background.Height - _filters_chekboxes[i].Height - DIFF_Y + 10;
+                if (_filters_chekboxes[i].Y != newY)
+                {
+                    _filters_chekboxes[i].Y = newY;
+                    layoutChanged = true;
+                }
+            }
+
+            if (layoutChanged)
+            {
+                NotifyRenderDirty();
             }
         }
 
@@ -361,120 +381,81 @@ namespace ClassicUO.Game.UI.Gumps
                 float layerDepth = layerDepthRef;
 
                 int mx = x;
-                int my = y;
-
                 int height = 0;
+                int my = y;
                 int maxheight = _scrollBar.Value + _scrollBar.Height;
 
+                for (int i = 0; i < _entries.Count; i++)
+                {
+                    RenderedText t = _entries[i];
+                    RenderedText hour = _hours[i];
+                    TextType type = _text_types[i];
 
-                renderLists.AddGumpNoAtlas
-                (
-                    batcher =>
+                    if (!CanBeDrawn(type))
                     {
-                        for (int i = 0; i < _entries.Count; i++)
-                        {
-                            RenderedText t = _entries[i];
-                            RenderedText hour = _hours[i];
-                            TextType type = _text_types[i];
-
-
-                            if (!CanBeDrawn(type))
-                            {
-                                continue;
-                            }
-
-
-                            if (height + t.Height <= _scrollBar.Value)
-                            {
-                                // this entry is above the renderable area.
-                                height += t.Height;
-                            }
-                            else if (height + t.Height <= maxheight)
-                            {
-                                int yy = height - _scrollBar.Value;
-
-                                if (yy < 0)
-                                {
-                                    // this entry starts above the renderable area, but exists partially within it.
-                                    hour.Draw
-                                    (
-                                        batcher,
-                                        hour.Width,
-                                        hour.Height,
-                                        mx,
-                                        y,
-                                        t.Width,
-                                        t.Height + yy,
-                                        0,
-                                        -yy,
-                                        layerDepth
-                                    );
-
-                                    t.Draw
-                                    (
-                                        batcher,
-                                        t.Width,
-                                        t.Height,
-                                        mx + hour.Width,
-                                        y,
-                                        t.Width,
-                                        t.Height + yy,
-                                        0,
-                                        -yy,
-                                        layerDepth
-                                    );
-
-                                    my += t.Height + yy;
-                                }
-                                else
-                                {
-                                    // this entry is completely within the renderable area.
-                                    hour.Draw(batcher, mx, my, layerDepth);
-                                    t.Draw(batcher, mx + hour.Width, my, layerDepth);
-                                    my += t.Height;
-                                }
-
-                                height += t.Height;
-                            }
-                            else
-                            {
-                                int yyy = maxheight - height;
-
-                                hour.Draw
-                                (
-                                    batcher,
-                                    hour.Width,
-                                    hour.Height,
-                                    mx,
-                                    y + _scrollBar.Height - yyy,
-                                    t.Width,
-                                    yyy,
-                                    0,
-                                    0,
-                                    layerDepth
-                                );
-
-                                t.Draw
-                                (
-                                    batcher,
-                                    t.Width,
-                                    t.Height,
-                                    mx + hour.Width,
-                                    y + _scrollBar.Height - yyy,
-                                    t.Width,
-                                    yyy,
-                                    0,
-                                    0,
-                                    layerDepth
-                                );
-
-                                // can't fit any more entries - so we break!
-                                break;
-                            }
-                        }
-                        return true;
+                        continue;
                     }
-                );
+
+                    if (height + t.Height <= _scrollBar.Value)
+                    {
+                        // this entry is above the renderable area.
+                        height += t.Height;
+                    }
+                    else if (height + t.Height <= maxheight)
+                    {
+                        int yy = height - _scrollBar.Value;
+
+                        if (yy < 0)
+                        {
+                            // this entry starts above the renderable area, but exists partially within it.
+                            renderLists.AddGumpNoAtlasClipped(
+                                hour,
+                                dest: new Rectangle(mx, y, t.Width, t.Height + yy),
+                                sourceOffset: new Rectangle(0, -yy, hour.Width, hour.Height),
+                                layerDepth: layerDepth
+                            );
+
+                            renderLists.AddGumpNoAtlasClipped(
+                                t,
+                                dest: new Rectangle(mx + hour.Width, y, t.Width, t.Height + yy),
+                                sourceOffset: new Rectangle(0, -yy, t.Width, t.Height),
+                                layerDepth: layerDepth
+                            );
+
+                            my += t.Height + yy;
+                        }
+                        else
+                        {
+                            // this entry is completely within the renderable area.
+                            renderLists.AddGumpNoAtlas(hour, mx, my, layerDepth);
+                            renderLists.AddGumpNoAtlas(t, mx + hour.Width, my, layerDepth);
+                            my += t.Height;
+                        }
+
+                        height += t.Height;
+                    }
+                    else
+                    {
+                        int yyy = maxheight - height;
+
+                        renderLists.AddGumpNoAtlasClipped(
+                            hour,
+                            dest: new Rectangle(mx, y + _scrollBar.Height - yyy, t.Width, yyy),
+                            sourceOffset: new Rectangle(0, 0, hour.Width, hour.Height),
+                            layerDepth: layerDepth
+                        );
+
+                        renderLists.AddGumpNoAtlasClipped(
+                            t,
+                            dest: new Rectangle(mx + hour.Width, y + _scrollBar.Height - yyy, t.Width, yyy),
+                            sourceOffset: new Rectangle(0, 0, t.Width, t.Height),
+                            layerDepth: layerDepth
+                        );
+
+                        // can't fit any more entries - so we break!
+                        break;
+                    }
+                }
 
                 return true;
             }
@@ -488,8 +469,15 @@ namespace ClassicUO.Game.UI.Gumps
                     return;
                 }
 
-                _scrollBar.X = X + Width - (_scrollBar.Width >> 1) + 5;
-                _scrollBar.Height = Height;
+                int newX = X + Width - (_scrollBar.Width >> 1) + 8;
+                int newHeight = Height;
+                if (_scrollBar.X != newX || _scrollBar.Height != newHeight)
+                {
+                    _scrollBar.X = newX;
+                    _scrollBar.Height = newHeight;
+                    NotifyRenderDirty();
+                }
+
                 CalculateScrollBarMaxValue();
                 _scrollBar.IsVisible = _scrollBar.MaxValue > _scrollBar.MinValue;
             }

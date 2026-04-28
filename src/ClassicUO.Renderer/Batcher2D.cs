@@ -354,8 +354,9 @@ namespace ClassicUO.Renderer
 
             SetDefaultNormals(ref vertex);
 
-            vertex.Hue0.Z = vertex.Hue1.Z = vertex.Hue2.Z = vertex.Hue3.Z = vertex.Hue0.X = vertex.Hue1.X = vertex.Hue2.X = vertex.Hue3.X = 0;
+            vertex.Hue0.X = vertex.Hue1.X = vertex.Hue2.X = vertex.Hue3.X = 0;
             vertex.Hue0.Y = vertex.Hue1.Y = vertex.Hue2.Y = vertex.Hue3.Y = ShaderHueTranslator.SHADER_SHADOW;
+            vertex.Hue0.Z = vertex.Hue1.Z = vertex.Hue2.Z = vertex.Hue3.Z = 1f;
 
             PushSprite(texture);
         }

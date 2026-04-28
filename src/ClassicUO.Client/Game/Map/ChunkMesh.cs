@@ -391,6 +391,9 @@ namespace ClassicUO.Game.Map
             if (StaticFilters.IsTree(graphic, out _))
                 return true;
 
+            if (StaticFilters.IsRock(graphic))
+                return true;
+
             return false;
         }
 

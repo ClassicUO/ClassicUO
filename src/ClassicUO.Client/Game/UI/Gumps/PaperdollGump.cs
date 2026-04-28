@@ -842,34 +842,22 @@ namespace ClassicUO.Game.UI.Gumps
 
                     ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(item.DisplayedGraphic);
 
-                    var texture = artInfo.Texture;
-                    if (texture != null)
+                    if (artInfo.Texture != null)
                     {
-                        float layerDepth = layerDepthRef;
-                        var sourceRectangle = artInfo.UV;
-                        renderLists.AddGumpWithAtlas
-                        (
-                            (batcher) =>
-                            {
-                                batcher.Draw(
-                                    texture,
-                                    new Rectangle(
-                                        x + _point.X,
-                                        y + _point.Y,
-                                        _originalSize.X,
-                                        _originalSize.Y
-                                    ),
-                                    new Rectangle(
-                                        sourceRectangle.X + _rect.X,
-                                        sourceRectangle.Y + _rect.Y,
-                                        _rect.Width,
-                                        _rect.Height
-                                    ),
-                                    hueVector,
-                                    layerDepth
-                                );
-                                return true;
-                            }
+                        renderLists.AddGumpSprite(
+                            artInfo.Texture,
+                            new Rectangle(
+                                artInfo.UV.X + _rect.X,
+                                artInfo.UV.Y + _rect.Y,
+                                _rect.Width,
+                                _rect.Height),
+                            new Rectangle(
+                                x + _point.X,
+                                y + _point.Y,
+                                _originalSize.X,
+                                _originalSize.Y),
+                            hueVector,
+                            layerDepthRef
                         );
 
                         return true;

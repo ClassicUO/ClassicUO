@@ -72,6 +72,22 @@ namespace ClassicUO.Game.Managers
 
                 }
             );
+
+            // Toggle the gump retained-render cache globally. With the DebugGump
+            // expanded (double-click), the "Gump Render Cache" section shows the
+            // per-frame hit / miss / translation counts so the effect is directly
+            // observable.
+            Register(
+                "gumpcache",
+                s =>
+                {
+                    UI.Gumps.Gump.DefaultEnableRenderCache = !UI.Gumps.Gump.DefaultEnableRenderCache;
+                    GameActions.Print(
+                        _world,
+                        $"Gump render cache {(UI.Gumps.Gump.DefaultEnableRenderCache ? "ON" : "OFF")}"
+                    );
+                }
+            );
         }
 
 

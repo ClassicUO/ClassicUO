@@ -128,39 +128,32 @@ namespace ClassicUO.Game.UI.Controls
                 ? ref Client.Game.UO.Gumps.GetGump(Graphic)
                 : ref Client.Game.UO.Arts.GetArt(Graphic);
 
-            var texture = spriteInfo.Texture;
             if (spriteInfo.Texture != null)
             {
-                Rectangle rect = new Rectangle(x, y, Width, Height);
-
-
-                var sourceRectangle = spriteInfo.UV;
-                renderLists.AddGumpWithAtlas
-                (
-                    batcher =>
-                    {
-
-                        batcher.Draw(texture, rect, sourceRectangle, hueVector, layerDepth);
-
-                        Item item = _gump.World.Items.Get(LocalSerial);
-
-                        if (
-                            item != null
-                            && !item.IsMulti
-                            && !item.IsCoin
-                            && item.Amount > 1
-                            && item.ItemData.IsStackable
-                        )
-                        {
-                            rect.X += 5;
-                            rect.Y += 5;
-
-                            batcher.Draw(texture, rect, sourceRectangle, hueVector, layerDepth);
-                        }
-
-                        return true;
-                    }
+                renderLists.AddGumpSprite(
+                    spriteInfo.Texture,
+                    spriteInfo.UV,
+                    new Rectangle(x, y, Width, Height),
+                    hueVector,
+                    layerDepthRef
                 );
+
+                // Stacked-item shadow: a second offset copy to suggest depth.
+                Item item = _gump.World.Items.Get(LocalSerial);
+                if (item != null
+                    && !item.IsMulti
+                    && !item.IsCoin
+                    && item.Amount > 1
+                    && item.ItemData.IsStackable)
+                {
+                    renderLists.AddGumpSprite(
+                        spriteInfo.Texture,
+                        spriteInfo.UV,
+                        new Rectangle(x + 5, y + 5, Width, Height),
+                        hueVector,
+                        layerDepthRef
+                    );
+                }
             }
 
             return true;
