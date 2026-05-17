@@ -1788,6 +1788,7 @@ namespace ClassicUO.Assets
                 bool isUnderline = (flags & UOFONT_UNDERLINE) != 0;
                 uint blackColor = 0xFF010101;
                 bool isLink = false;
+                ushort oldLink = 0;
                 int linkStartX = 0;
                 int linkStartY = 0;
                 int linesCount = 0;
@@ -1836,7 +1837,6 @@ namespace ClassicUO.Assets
                             break;
                     }
 
-                    ushort oldLink = 0;
                     var dataSize = ptr.Data.Count;
                     var dataSpan = CollectionsMarshal.AsSpan(ptr.Data);
 
