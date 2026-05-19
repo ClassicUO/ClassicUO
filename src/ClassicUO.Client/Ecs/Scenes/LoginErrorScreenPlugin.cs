@@ -1,10 +1,8 @@
 using ClassicUO.Network;
-using Clay_cs;
 using TinyEcs;
 using TinyEcs.Bevy;
-using TinyEcs.UI.Clay;
-using TinyEcs.UI.Bevy;
-using TinyEcs.UI;
+using TinyEcs.Bevy.UI;
+using ClayColor = Clay.Color;
 
 namespace ClassicUO.Ecs;
 
@@ -27,7 +25,9 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
             .Build();
     }
 
-    private static void Cleanup(Commands commands, Query<Data<ClayNode>, Filter<With<LoginErrorScene>, Without<Parent>>> query)
+    private static void Cleanup(
+        Commands commands,
+        Query<Data<Node>, Filter<With<LoginErrorScene>>> query)
     {
         foreach ((var ent, _) in query)
         {
@@ -35,105 +35,132 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
         }
     }
 
-    private static void LoginErrorInfoSetup(Commands commands, EventReader<LoginErrorsInfoEvent> reader)
+    private static void LoginErrorInfoSetup(
+        Commands commands,
+        Res<NetClient> network,
+        ResMut<NextState<GameState>> nextState,
+        EventReader<LoginErrorsInfoEvent> reader)
     {
+        // Root: full-screen vertical column, centered.
         var root = commands.Spawn()
             .Insert<LoginErrorScene>()
-            .Insert(ClayNode.Configure()
-                .WidthGrow()
-                .HeightGrow()
-                .Column()
-                .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER)
-                .Background(51, 51, 51, 255)
-                .Build());
+            .Insert(new Node
+            {
+                Width = Val.Percent(100f),
+                Height = Val.Percent(100f),
+                FlexDirection = FlexDirection.Column,
+                JustifyContent = JustifyContent.Center,
+                AlignItems = AlignItems.Center,
+                Padding = UiRect.All(8),
+                Gap = Val.Px(4),
+            })
+            .Insert(new BackgroundColor(new ClayColor(51, 51, 51, 255)));
+        var rootId = root.Id;
 
-        var loginErrorLabel = commands.Spawn()
+        // Title label.
+        var header = commands.Spawn()
             .Insert<LoginErrorScene>()
-            .Insert(ClayNode.Configure()
-                .WidthPercent(0.5f)
-                .HeightFit()
-                .Column()
-                .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_LEFT, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_TOP)
-                .Padding(8)
-                .Gap(4)
-                .Background(76, 76, 76, 255)
-                .Text("Error on login", 28, new Clay_Color(255, 255, 255, 255))
-                .Build());
+            .Insert(new Node
+            {
+                Width = Val.Percent(50f),
+                Height = Val.Auto,
+                FlexDirection = FlexDirection.Column,
+                JustifyContent = JustifyContent.Start,
+                AlignItems = AlignItems.Start,
+                Padding = UiRect.All(8),
+                Gap = Val.Px(4),
+            })
+            .Insert(new BackgroundColor(new ClayColor(76, 76, 76, 255)))
+            .Insert(BorderRadius.All(8))
+            .Insert(new Text("Error on login"))
+            .Insert(new TextFont { FontId = 0, Size = 28 })
+            .Insert(new TextColor(ClayColor.White));
+        commands.AddChild(rootId, header.Id);
 
+        // Menu container.
         var menu = commands.Spawn()
             .Insert<LoginErrorScene>()
-            .Insert(ClayNode.Configure()
-                .WidthPercent(0.5f)
-                .HeightPercent(0.5f)
-                .Column()
-                .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_TOP)
-                .Padding(8)
-                .Gap(4)
-                .Background(76, 76, 76, 255)
-                .Build());
+            .Insert(new Node
+            {
+                Width = Val.Percent(50f),
+                Height = Val.Percent(50f),
+                FlexDirection = FlexDirection.Column,
+                JustifyContent = JustifyContent.Start,
+                AlignItems = AlignItems.Center,
+                Padding = UiRect.All(8),
+                Gap = Val.Px(4),
+            })
+            .Insert(new BackgroundColor(new ClayColor(76, 76, 76, 255)))
+            .Insert(BorderRadius.All(8));
+        commands.AddChild(rootId, menu.Id);
+        var menuId = menu.Id;
 
         foreach (var ev in reader.Read())
         {
-            var serverEnt = commands.Spawn()
+            var errorEntry = commands.Spawn()
                 .Insert<LoginErrorScene>()
                 .Insert(ev.Error)
-                .Insert(ClayNode.Configure()
-                    .WidthPercent(0.8f)
-                    .HeightFit()
-                    .Column()
-                    .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER)
-                    .Padding(8)
-                    .Gap(4)
-                    .Background(153, 153, 153, 255)
-                    .Text(ev.Error.ErrorMessage, 24, new Clay_Color(255, 255, 255, 255))
-                    .Build());
-
-            menu.AddChild(serverEnt);
+                .Insert(new Node
+                {
+                    Width = Val.Auto,
+                    Height = Val.Auto,
+                    FlexDirection = FlexDirection.Column,
+                    JustifyContent = JustifyContent.Center,
+                    AlignItems = AlignItems.Center,
+                    Padding = UiRect.All(8),
+                    Gap = Val.Px(4),
+                })
+                .Insert(new BackgroundColor(new ClayColor(153, 153, 153, 255)))
+                .Insert(BorderRadius.All(8))
+                .Insert(new Text(ev.Error.ErrorMessage))
+                .Insert(new TextFont { FontId = 0, Size = 24 })
+                .Insert(new TextColor(ClayColor.White));
+            commands.AddChild(menuId, errorEntry.Id);
         }
 
-        var footerMenu = commands.Spawn()
+        // Footer row, anchored at the bottom-end.
+        var footer = commands.Spawn()
             .Insert<LoginErrorScene>()
-            .Insert(ClayNode.Configure()
-                .WidthGrow()
-                .HeightGrow()
-                .Column()
-                .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_BOTTOM)
-                .Padding(8)
-                .Gap(4)
-                .Build());
+            .Insert(new Node
+            {
+                Width = Val.Percent(100f),
+                Height = Val.Percent(100f),
+                FlexDirection = FlexDirection.Column,
+                JustifyContent = JustifyContent.End,
+                AlignItems = AlignItems.Center,
+                Padding = UiRect.All(8),
+                Gap = Val.Px(4),
+            });
+        commands.AddChild(menuId, footer.Id);
+        var footerId = footer.Id;
 
-        var okButtonEntity = commands.Spawn()
+        // OK button.
+        var okButton = commands.Spawn()
             .Insert<LoginErrorScene>()
-            .Insert(ClayNode.Configure()
-                .WidthPercent(0.4f)
-                .HeightFit()
-                .Column()
-                .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER)
-                .Padding(8)
-                .Gap(4)
-                .Background(153, 153, 153, 255)
-                .Text("OK", 24, new Clay_Color(255, 255, 255, 255))
-                .Build())
             .Insert(LoginButtons.Ok)
-            .Observe<On<ClayPointerEvent>, Res<NetClient>, Res<NextState<GameState>>>(OkButtonHandler);
-
-        footerMenu.AddChild(okButtonEntity);
-        menu.AddChild(footerMenu);
-        root.AddChild(loginErrorLabel);
-        root.AddChild(menu);
-    }
-
-    private static void OkButtonHandler(
-        On<ClayPointerEvent> trigger,
-        Res<NetClient> network,
-        Res<NextState<GameState>> state
-    )
-    {
-        if (!trigger.Event.IsLeftButton || trigger.Event.EventType != ClayPointerEventType.Click)
-            return;
-
-        state.Value.Set(GameState.LoginScreen);
-        network.Value.Disconnect();
+            .Insert(new Node
+            {
+                Width = Val.Percent(40f),
+                Height = Val.Auto,
+                FlexDirection = FlexDirection.Column,
+                JustifyContent = JustifyContent.Center,
+                AlignItems = AlignItems.Center,
+                Padding = UiRect.All(8),
+                Gap = Val.Px(4),
+            })
+            .Insert(new BackgroundColor(new ClayColor(153, 153, 153, 255)))
+            .Insert(BorderRadius.All(8))
+            .Insert(new Text("OK"))
+            .Insert(new TextFont { FontId = 0, Size = 24 })
+            .Insert(new TextColor(ClayColor.White))
+            .Insert(Interaction.None)
+            .Insert(new FocusPolicy { Block = true })
+            .Observe<On<UiClick>>(_ =>
+            {
+                nextState.Value.Set(GameState.LoginScreen);
+                network.Value.Disconnect();
+            });
+        commands.AddChild(footerId, okButton.Id);
     }
 
     private struct LoginErrorScene;

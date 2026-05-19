@@ -20,7 +20,7 @@ internal readonly struct PickupPlugin : IPlugin
             .AddSystem(pickupItemDelayedFn)
             .InStage(Stage.Update)
             .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
-            .RunIf(w => w.HasResource<SelectedEntity>() && w.HasResource<GrabbedItem>())
+            .RunIf((Commands cmds) => cmds.HasResource<SelectedEntity>() && cmds.HasResource<GrabbedItem>())
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial == 0)
             .RunIf((Res<MouseContext> mouseCtx, Res<Camera> camera, Local<float?> delay, Res<Time> time) =>
             {
@@ -63,7 +63,7 @@ internal readonly struct PickupPlugin : IPlugin
             .AddSystem(pickupItemFn)
             .InStage(Stage.Update)
             .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
-            .RunIf(w => w.HasResource<SelectedEntity>() && w.HasResource<GrabbedItem>())
+            .RunIf((Commands cmds) => cmds.HasResource<SelectedEntity>() && cmds.HasResource<GrabbedItem>())
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial == 0)
             .RunIf((Res<MouseContext> mouseCtx, Res<Camera> camera, Local<float?> delay, Res<Time> time) =>
             {
@@ -106,7 +106,7 @@ internal readonly struct PickupPlugin : IPlugin
             .AddSystem(dropItemFn)
             .InStage(Stage.Update)
             .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
-            .RunIf(w => w.HasResource<SelectedEntity>() && w.HasResource<GrabbedItem>())
+            .RunIf((Commands cmds) => cmds.HasResource<SelectedEntity>() && cmds.HasResource<GrabbedItem>())
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial != 0)
             .RunIf((Res<MouseContext> mouseCtx) => mouseCtx.Value.IsReleased(Input.MouseButtonType.Left));
 

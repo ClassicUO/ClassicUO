@@ -34,7 +34,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\external\FNA\FNA.Core.csproj" />
     <ProjectReference Include="..\..\external\TinyEcs\src\TinyEcs.Bevy\TinyEcs.Bevy.csproj" />
-    <ProjectReference Include="..\..\external\TinyEcs\src\TinyEcs.UI.Clay\TinyEcs.UI.Clay.csproj" />
+    <ProjectReference Include="..\..\external\TinyEcs\src\TinyEcs.Bevy.UI\TinyEcs.Bevy.UI.csproj" />
     <ProjectReference Include="..\..\external\TinyEcs\src\TinyEcs\TinyEcs.csproj" />
     <ProjectReference Include="..\ClassicUO.Assets\ClassicUO.Assets.csproj" />
     <ProjectReference Include="..\ClassicUO.Renderer\ClassicUO.Renderer.csproj" />

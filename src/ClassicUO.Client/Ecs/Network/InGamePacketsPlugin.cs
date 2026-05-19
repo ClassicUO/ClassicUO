@@ -24,14 +24,6 @@ internal readonly struct MobileBundle : IBundle
     public MobAnimation Animation { get; init; }
     public ScreenPositionOffset Offset { get; init; }
 
-    public void Insert(EntityView entity)
-    {
-        entity.Set(Serial);
-        entity.Set(Animation);
-        entity.Set(Offset);
-        entity.Set<Mobiles>();
-    }
-
     public void Insert(EntityCommands entity)
     {
         entity.Insert(Serial);
@@ -44,12 +36,6 @@ internal readonly struct MobileBundle : IBundle
 internal readonly struct ItemBundle : IBundle
 {
     public NetworkSerial Serial { get; init; }
-
-    public void Insert(EntityView entity)
-    {
-        entity.Set(Serial);
-        entity.Set<Items>();
-    }
 
     public void Insert(EntityCommands entity)
     {
@@ -102,6 +88,24 @@ sealed class NetworkEntitiesMap
         }
 
         return default;
+    }
+
+    public bool TryGet(Commands commands, uint serial, out EntityCommands entityCommands)
+    {
+        if (_entities.TryGetValue(serial, out var id))
+        {
+            if (commands.Exists(id))
+            {
+                entityCommands = commands.Entity(id);
+
+                return true;
+            }
+
+            _entities.Remove(serial);
+        }
+
+        entityCommands = default;
+        return false;
     }
 
     public void Clear()
@@ -169,20 +173,20 @@ readonly struct InGamePacketsPlugin : IPlugin
         public Query<Data<WorldPosition, Graphic>> qPosAndGraphic { get; } = new();
         public Query<Empty, With<IsMulti>> qMultis { get; } = new();
 
-        public void Initialize(World world)
+        public void Initialize(App app)
         {
-            qHouseRevision.Initialize(world);
-            qEquipmentSlots.Initialize(world);
-            qPosAndGraphic.Initialize(world);
-            qMultis.Initialize(world);
+            qHouseRevision.Initialize(app);
+            qEquipmentSlots.Initialize(app);
+            qPosAndGraphic.Initialize(app);
+            qMultis.Initialize(app);
         }
 
-        public void Fetch(World world)
+        public void Fetch(App app)
         {
-            qHouseRevision.Fetch(world);
-            qEquipmentSlots.Fetch(world);
-            qPosAndGraphic.Fetch(world);
-            qMultis.Fetch(world);
+            qHouseRevision.Fetch(app);
+            qEquipmentSlots.Fetch(app);
+            qPosAndGraphic.Fetch(app);
+            qMultis.Fetch(app);
         }
 
         public SystemParamAccess GetAccess()
@@ -285,7 +289,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 break;
 
             case OnDeleteObjectPacket_0x1D deleteObject:
-                HandleDeleteObject(deleteObject, entitiesMap, gameCtx);
+                HandleDeleteObject(deleteObject, commands, entitiesMap, gameCtx);
                 break;
 
             case OnUpdatePlayerPacket_0x20 updatePlayer:
@@ -935,6 +939,7 @@ readonly struct InGamePacketsPlugin : IPlugin
 
     static void HandleDeleteObject(
         OnDeleteObjectPacket_0x1D packet,
+        Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
         ResMut<GameContext> gameCtx
     )
@@ -943,7 +948,11 @@ readonly struct InGamePacketsPlugin : IPlugin
             return;
 
         Console.WriteLine("delete obj from packet: 0x{0:X8}", packet.Serial);
-        entitiesMap.Value.Remove(packet.Serial);
+
+        if (entitiesMap.Value.TryGet(commands, packet.Serial, out var ent))
+        {
+            ent.Despawn();
+        }
     }
 
     static void HandleUpdatePlayer(

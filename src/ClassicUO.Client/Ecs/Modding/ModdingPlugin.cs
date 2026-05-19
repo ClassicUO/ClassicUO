@@ -17,7 +17,6 @@ using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Utility;
-using Clay_cs;
 using Extism.Sdk;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;

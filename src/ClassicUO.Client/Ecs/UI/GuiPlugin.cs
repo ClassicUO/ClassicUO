@@ -1,69 +1,40 @@
 using System;
-using System.Buffers;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Text;
-using ClassicUO.Game.GameObjects;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
-using Clay_cs;
-using Flexbox;
+using Clay;
 using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TinyEcs;
 using TinyEcs.Bevy;
-using TinyEcs.UI.Clay;
+using TinyEcs.Bevy.UI;
 
 namespace ClassicUO.Ecs;
 
 internal readonly struct GuiPlugin : IPlugin
 {
-    private const FontSystemEffect FONT_EFFECT = FontSystemEffect.Stroked;
-    private const int FONT_EFFECT_AMOUNT = 1;
-
-    public unsafe void Build(App app)
+    public void Build(App app)
     {
-        var updateInputStateFn = UpdateInputState;
-        var updateUOButtonStateFn = UpdateUOButtonsState;
-        // var updateFocusedInputFn = UpdateFocusedInput;
-        // var readCharInputsFn = ReadCharInputs;
-        // var moveFocusedElementsByMouseFn = MoveFocusedElementsByMouse;
-        // var handleNodeStatesFn = HandleNodeStates;
-
-        // Add Clay UI plugin with text measurement function
-        var clayOptions = new ClayUiOptions
+        // Bevy.UI must already be installed by this plugin: it owns the layout
+        // resources/stages and our render plugin reads from UiRenderCommands.
+        app.AddPlugin(new UiPlugin
         {
-            LayoutDimensions = new Clay_Dimensions(800, 600),
-            ArenaSize = 1024 * 1024 * 2, // 2MB for UI
-            EnableDebugMode = true,
-            EnableCulling = true,
-            MeasureTextFunction = OnMeasureText,
-            ErrorHandler = OnClayError
-        };
-
-        app.AddClayUi(clayOptions);
+            TextMeasurer = new FontStashTextMeasurer(),
+            LogicalSize = new System.Numerics.Vector2(1280, 720),
+            MaxElements = 8192,
+        });
 
         app
-            .AddResource(new ClayUOCommandBuffer())
             .AddResource(new FocusedInput())
             .AddResource(new ImageCache())
 
-            // Initialize ClayElementId when UINode is added to an entity
-            // .AddObserver((OnAdd<UINode> trigger, Commands commands) =>
-            // {
-            //     var entityId = trigger.EntityId;
-            //     commands.Entity(entityId).Insert(new ClayElementId(Clay.Id(entityId.ToString())));
-            // })
-
-            .AddSystem(Stage.Startup, (Commands commands, Res<AssetsServer> assets, Res<ClayUOCommandBuffer> buffer) =>
+            .AddSystem(Stage.Startup, (Commands commands, Res<AssetsServer> assets) =>
             {
-                commands.InsertResource(new GumpBuilder(assets.Value, buffer.Value));
+                commands.InsertResource(new GumpBuilder(assets.Value));
             });
 
         var states = Enum.GetValues<GameState>();
-
         foreach (var state in states)
         {
             app.AddSystem((Res<FocusedInput> focusedInput) => focusedInput.Value.Entity = 0)
@@ -71,171 +42,107 @@ internal readonly struct GuiPlugin : IPlugin
                 .Build();
         }
 
-        app
-            .AddSystem(Stage.First, updateInputStateFn)
-            .AddSystem(Stage.Update, updateUOButtonStateFn)
+        // Sync FNA surface size + pointer state into Bevy.UI before the layout stage.
+        Action<Res<GraphicsDevice>, ResMut<UiSurface>> syncSurfaceFn = SyncSurface;
+        Action<Res<MouseContext>, ResMut<UiPointer>> syncPointerFn = SyncPointer;
+        Action<Res<Time>, Res<MouseContext>, ResMut<UiClayContext>> syncDeltaAndScrollFn = SyncDeltaAndScroll;
+        Action<Query<Data<UOCustomRender, UOButton, Interaction>>> updateUOButtonsStateFn = UpdateUOButtonsState;
+        Action<Query<Data<Text, MaskedText>, Filter<Changed<MaskedText>>>> syncMaskedTextFn = SyncMaskedText;
 
-            // .AddSystem(Stage.Update, updateUOButtonsStateFn)
-
-            // .AddSystem(updateFocusedInputFn)
-            // .InStage(Stage.Update)
-            // .RunIf((Res<KeyboardContext> keyboardCtx) => keyboardCtx.Value.IsPressedOnce(Microsoft.Xna.Framework.Input.Keys.Tab))
-            // .Build()
-
-            // .AddSystem(readCharInputsFn)
-            // .InStage(Stage.Update)
-            // .RunIf((EventReader<CharInputEvent> reader,
-            //         Res<FocusedInput> focusedInput,
-            //         Query<Data<UINode>, Filter<With<TextInput>>> query) =>
-            //            reader.HasEvents && focusedInput.Value.Entity != 0 && query.Count() > 0)
-            // .Build()
-
-            // .AddSystem(Stage.Update, moveFocusedElementsByMouseFn)
-            // .AddSystem(Stage.Last, handleNodeStatesFn)
-            ;
+        app.AddSystem(Stage.First, syncSurfaceFn);
+        app.AddSystem(Stage.First, syncPointerFn);
+        app.AddSystem(Stage.First, syncDeltaAndScrollFn);
+        // Must run after InteractionSystem.PostLayout writes Hovered/Pressed,
+        // before UiRenderStage reads UOCustomRender.AssetId.
+        app.AddSystem(updateUOButtonsStateFn)
+            .InStage(UiPlugin.UiPostLayoutStage)
+            .Build();
+        // Mirror MaskedText.Value into Text as mask chars before layout reads Text.
+        app.AddSystem(Stage.PreUpdate, syncMaskedTextFn);
     }
 
-
-    private static unsafe Clay_Dimensions OnMeasureText(
-        Clay_StringSlice slice,
-        Clay_TextElementConfig* config,
-        void* userData
-    )
+    private static void SyncSurface(
+        Res<GraphicsDevice> device,
+        ResMut<UiSurface> surface)
     {
-        var raw = new ReadOnlySpan<byte>(slice.chars, slice.length);
-        var text = Encoding.UTF8.GetString(raw);
-
-        var font = FontCache.GetFont(config->fontId);
-        var dynFont = font.GetFont(config->fontSize);
-        var size = dynFont.MeasureString(
-            text,
-            characterSpacing: config->letterSpacing,
-            lineSpacing: config->lineHeight,
-            effect: FONT_EFFECT, effectAmount: FONT_EFFECT_AMOUNT);
-
-        return new Clay_Dimensions(size.X, size.Y);
+        var pp = device.Value.PresentationParameters;
+        surface.Value.LogicalSize = new System.Numerics.Vector2(pp.BackBufferWidth, pp.BackBufferHeight);
+        surface.Value.PhysicalSize = surface.Value.LogicalSize;
     }
 
-    private static void OnClayError(Clay_ErrorData errorData)
+    private static void SyncPointer(
+        Res<MouseContext> mouseCtx,
+        ResMut<UiPointer> pointer)
     {
-        unsafe
-        {
-            var raw = new ReadOnlySpan<byte>(errorData.errorText.chars, errorData.errorText.length);
-            var text = Encoding.UTF8.GetString(raw);
-            Console.WriteLine($"Clay error: {errorData.errorType} - {text}");
-        }
+        pointer.Value.Position = new System.Numerics.Vector2(mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y);
+        pointer.Value.Down = mouseCtx.Value.IsPressed(MouseButtonType.Left);
+        // WasDown is latched by InteractionSystem.PostLayout.
+    }
+
+    private static void SyncDeltaAndScroll(
+        Res<Time> time,
+        Res<MouseContext> mouseCtx,
+        ResMut<UiClayContext> ctx)
+    {
+        ctx.Value.DeltaTime = time.Value.Frame;
+        ctx.Value.ScrollDelta = new System.Numerics.Vector2(0, mouseCtx.Value.Wheel * 3);
+        ctx.Value.EnableDragScrolling = false;
     }
 
     private static void UpdateUOButtonsState(
-        Query<Data<ClayUOCommandData, UOButton, ClayInteraction>, Changed<ClayInteraction>> query
-    )
+        Query<Data<UOCustomRender, UOButton, Interaction>> query)
     {
-        foreach (var (data, button, interaction) in query)
+        foreach (var (custom, button, interaction) in query)
         {
-            data.Ref.Id = interaction.Ref switch
+            custom.Ref.AssetId = interaction.Ref switch
             {
-                { State: ClayInteractionState.Pressed } => button.Ref.Pressed,
-                { State: ClayInteractionState.Hovered } => button.Ref.Over,
-                _ => button.Ref.Normal
+                Interaction.Pressed => button.Ref.Pressed,
+                Interaction.Hovered => button.Ref.Over,
+                _ => button.Ref.Normal,
             };
         }
     }
 
-    private static void UpdateInputState(
-        Res<GraphicsDevice> device,
-        Res<MouseContext> mouseCtx,
-        Res<Time> time,
-        ResMut<ClayUiState> uiState,
-        ResMut<ClayPointerState> pointerState,
-        ResMut<ClayTextInputState> textInputState,
-        EventReader<CharInputEvent> charInputReader
-    )
+    private static void SyncMaskedText(
+        Query<Data<Text, MaskedText>, Filter<Changed<MaskedText>>> query)
     {
-        // Update layout dimensions
-        uiState.Value.LayoutDimensions = new Clay_Dimensions
+        foreach (var (text, masked) in query)
         {
-            width = device.Value.PresentationParameters.BackBufferWidth,
-            height = device.Value.PresentationParameters.BackBufferHeight
-        };
-
-        // Update pointer state
-        var wasPressed = pointerState.Value.IsLeftDown;
-        var isPressed = mouseCtx.Value.IsPressed(MouseButtonType.Left);
-
-        pointerState.Value.Position = new(mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y);
-        pointerState.Value.IsLeftDown = isPressed;
-        pointerState.Value.IsLeftPressed = mouseCtx.Value.IsPressedOnce(MouseButtonType.Left);
-        pointerState.Value.IsLeftReleased = wasPressed && !isPressed;
-        pointerState.Value.ScrollDelta = new(0, mouseCtx.Value.Wheel * 3);
-        pointerState.Value.DeltaTime = time.Value.Frame;
-        pointerState.Value.EnableDragScrolling = false;
-
-        // Update text input state
-        foreach (var charEvent in charInputReader.Read())
-        {
-            textInputState.Value.AddChar(charEvent.Value);
+            var value = masked.Ref.Value ?? string.Empty;
+            text.Ref.Value = value.Length == 0
+                ? string.Empty
+                : new string(masked.Ref.MaskChar, value.Length);
         }
     }
-
-    // private static void UpdateFocusedInput(
-    //     Query<Data<Text>, Filter<With<TextInput>>> query,
-    //     Res<FocusedInput> focusedInput
-    // )
-    // {
-    //     var ok = false;
-    //     var last = 0ul;
-    //     foreach ((var ent, var textInput) in query)
-    //     {
-    //         if (focusedInput.Value.Entity == ent.Ref)
-    //         {
-    //             ok = true;
-    //             continue;
-    //         }
-
-    //         if (ok)
-    //             last = ent.Ref;
-    //     }
-
-    //     if (ok && last == 0)
-    //     {
-    //         foreach ((var ent, var textInput) in query)
-    //         {
-    //             last = ent.Ref;
-    //             break;
-    //         }
-    //     }
-
-    //     if (last != 0)
-    //     {
-    //         focusedInput.Value.Entity = last;
-    //     }
-    // }
-
-    // private static void ReadCharInputs(
-    //     EventReader<CharInputEvent> reader,
-    //     Res<FocusedInput> focusedInput,
-    //     Query<Data<Text>, Filter<With<TextInput>>> query)
-    // {
-    //     if (!query.Contains(focusedInput.Value.Entity))
-    //         return;
-
-    //     (_, var node) = query.Get(focusedInput.Value.Entity);
-
-    //     foreach (var c in reader.Read())
-    //         node.Ref.Value = TextComposer.Compose(node.Ref.Value, c.Value);
-    // }
 }
 
-
-struct UOButton
+// FontStashSharp-backed text measurer for Bevy.UI / Clay.
+internal sealed class FontStashTextMeasurer : ITextMeasurer
 {
-    public ushort Normal, Pressed, Over;
+    private const FontSystemEffect FONT_EFFECT = FontSystemEffect.Stroked;
+    private const int FONT_EFFECT_AMOUNT = 1;
+
+    public Dimensions MeasureText(ReadOnlySpan<char> text, ushort fontId, ushort fontSize, ushort letterSpacing)
+    {
+        if (text.IsEmpty)
+            return new Dimensions(0, fontSize);
+
+        var font = FontCache.GetFont(fontId);
+        var dynFont = font.GetFont(fontSize);
+        // FontStashSharp's MeasureString doesn't take ReadOnlySpan<char>; pay the
+        // allocation here. Layout pass calls this once per text node per frame.
+        var size = dynFont.MeasureString(
+            text.ToString(),
+            characterSpacing: letterSpacing,
+            effect: FONT_EFFECT, effectAmount: FONT_EFFECT_AMOUNT);
+        return new Dimensions(size.X, size.Y);
+    }
 }
 
-enum ClayUOCommandType : byte
+// UO-specific render marker stored as a component on a UI entity. The render
+// system maps Clay's element id -> entity at render time and pulls this struct.
+internal enum UOCustomKind : byte
 {
-    None,
-    Text,
     Gump,
     GumpNinePatch,
     Art,
@@ -243,34 +150,33 @@ enum ClayUOCommandType : byte
     Animation,
 }
 
-[StructLayout(LayoutKind.Sequential)]
-internal struct ClayUOCommandData
+internal struct UOCustomRender
 {
-    public ClayUOCommandType Type;
-    public uint Id;
+    public UOCustomKind Kind;
+    public uint AssetId;
     public Vector3 Hue;
 }
 
-internal struct UOClayUiBundle : IBundle
+// Marker for the UO button widget. UpdateUOButtonsState rewrites the visible
+// asset id on the entity's UOCustomRender based on Interaction state.
+internal struct UOButton
 {
-    public ClayNode Node { get; init; }
-    public ClayUOCommandData UONodeData { get; init; }
-
-    public void Insert(EntityView entity)
-    {
-        entity.Set(Node);
-        entity.Set(UONodeData);
-    }
-
-    public void Insert(EntityCommands entity)
-    {
-        entity.Insert(Node);
-        entity.Insert(UONodeData);
-    }
+    public ushort Normal, Pressed, Over;
 }
 
+// Marker tags carried over from the old plugin.
 internal struct UIMovable;
 internal struct TextInput;
+
+// Real text storage for masked fields (passwords). SyncMaskedText keeps
+// the sibling `Text` component populated with `MaskChar` repeated for the
+// length of `Value`. Editors and consumers (e.g. login) read/write Value;
+// the renderer only ever sees the masked Text.
+internal struct MaskedText
+{
+    public string Value;
+    public char MaskChar;
+}
 
 internal sealed class FocusedInput
 {
@@ -278,5 +184,3 @@ internal sealed class FocusedInput
 }
 
 internal sealed class ImageCache : Dictionary<nint, Texture2D>;
-
-internal sealed class ClayUOCommandBuffer : List<ClayUOCommandData>;

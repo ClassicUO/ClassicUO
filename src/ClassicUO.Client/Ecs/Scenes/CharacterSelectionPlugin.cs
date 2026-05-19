@@ -1,13 +1,9 @@
 using System.Collections.Generic;
-using ClassicUO.Game.Data;
-using ClassicUO.Input;
 using ClassicUO.Network;
-using Clay_cs;
 using TinyEcs;
 using TinyEcs.Bevy;
-using TinyEcs.UI.Clay;
-using TinyEcs.UI.Bevy;
-using TinyEcs.UI;
+using TinyEcs.Bevy.UI;
+using ClayColor = Clay.Color;
 
 namespace ClassicUO.Ecs;
 
@@ -30,7 +26,9 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
             .Build();
     }
 
-    private static void Cleanup(Commands commands, Query<Data<ClayNode>, Filter<With<CharacterSelectionScene>, Without<Parent>>> query)
+    private static void Cleanup(
+        Commands commands,
+        Query<Data<Node>, Filter<With<CharacterSelectionScene>>> query)
     {
         foreach ((var ent, _) in query)
         {
@@ -38,50 +36,67 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
         }
     }
 
-    private static void CharacterInfoSetup(Commands commands, EventReader<CharacterSelectionInfoEvent> reader)
+    private static void CharacterInfoSetup(
+        Commands commands,
+        Res<NetClient> network,
+        Res<GameContext> gameCtx,
+        EventReader<CharacterSelectionInfoEvent> reader)
     {
+        // Root: full-screen vertical column, centered.
         var root = commands.Spawn()
             .Insert<CharacterSelectionScene>()
-            .Insert(ClayNode.Configure()
-                .WidthGrow()
-                .HeightGrow()
-                .Column()
-                .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER)
-                .Background(51, 51, 51, 255)
-                .Build());
+            .Insert(new Node
+            {
+                Width = Val.Percent(100f),
+                Height = Val.Percent(100f),
+                FlexDirection = FlexDirection.Column,
+                JustifyContent = JustifyContent.Center,
+                AlignItems = AlignItems.Center,
+                Padding = UiRect.All(8),
+                Gap = Val.Px(4),
+            })
+            .Insert(new BackgroundColor(new ClayColor(51, 51, 51, 255)));
+        var rootId = root.Id;
 
-        var characterSelectionLabel = commands.Spawn()
+        // Title label.
+        var header = commands.Spawn()
             .Insert<CharacterSelectionScene>()
-            .Insert(ClayNode.Configure()
-                .WidthPercent(0.5f)
-                .HeightFit()
-                .Column()
-                .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_LEFT, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_TOP)
-                .Padding(8)
-                .Gap(4)
-                .Background(76, 76, 76, 255)
-                .Text("Select the character", 28, new Clay_Color(255, 255, 255, 255))
-                .Build());
+            .Insert(new Node
+            {
+                Width = Val.Percent(50f),
+                Height = Val.Auto,
+                FlexDirection = FlexDirection.Column,
+                JustifyContent = JustifyContent.Start,
+                AlignItems = AlignItems.Start,
+                Padding = UiRect.All(8),
+                Gap = Val.Px(4),
+            })
+            .Insert(new BackgroundColor(new ClayColor(76, 76, 76, 255)))
+            .Insert(BorderRadius.All(8))
+            .Insert(new Text("Select the character"))
+            .Insert(new TextFont { FontId = 0, Size = 28 })
+            .Insert(new TextColor(ClayColor.White));
+        commands.AddChild(rootId, header.Id);
 
-        var menuNode = ClayNode.Configure()
-            .WidthPercent(0.5f)
-            .HeightPercent(0.5f)
-            .Column()
-            .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_TOP)
-            .Padding(8)
-            .Gap(4)
-            .Background(76, 76, 76, 255)
-            .Build();
-
-        menuNode.Clip = new Clay_ClipElementConfig { vertical = true };
-
+        // Scrollable menu container.
         var menu = commands.Spawn()
             .Insert<CharacterSelectionScene>()
-            .Insert(menuNode);
-
-        root.AddChild(characterSelectionLabel);
-        root.AddChild(menu);
-
+            .Insert(new Node
+            {
+                Width = Val.Percent(50f),
+                Height = Val.Percent(50f),
+                FlexDirection = FlexDirection.Column,
+                JustifyContent = JustifyContent.Start,
+                AlignItems = AlignItems.Center,
+                Padding = UiRect.All(8),
+                Gap = Val.Px(4),
+                Overflow = Overflow.Scroll,
+            })
+            .Insert(new BackgroundColor(new ClayColor(76, 76, 76, 255)))
+            .Insert(BorderRadius.All(8))
+            .Insert(new ScrollPosition());
+        commands.AddChild(rootId, menu.Id);
+        var menuId = menu.Id;
 
         foreach (var ev in reader.Read())
         {
@@ -89,47 +104,39 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
 
             foreach (var character in ev.Characters)
             {
-                var characterEnt = commands.Spawn()
+                var capturedCharacter = character;
+                var entry = commands.Spawn()
                     .Insert<CharacterSelectionScene>()
                     .Insert(character)
-                    .Insert(ClayNode.Configure()
-                        .WidthPercent(0.8f)
-                        .HeightFit()
-                        .Column()
-                        .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER)
-                        .Padding(8)
-                        .Gap(4)
-                        .Background(153, 153, 153, 255)
-                        .CornerRadius(8)
-                        .Text(character.Name, 24, new Clay_Color(255, 255, 255, 255))
-                        .Build())
-                    .Observe<On<ClayPointerEvent>, Res<NetClient>, Res<GameContext>, Query<Data<CharacterInfo>, With<CharacterSelectionScene>>>(CharacterSelected);
-
-                menu.AddChild(characterEnt);
+                    .Insert(new Node
+                    {
+                        Width = Val.Percent(80f),
+                        Height = Val.Auto,
+                        FlexDirection = FlexDirection.Column,
+                        JustifyContent = JustifyContent.Center,
+                        AlignItems = AlignItems.Center,
+                        Padding = UiRect.All(8),
+                        Gap = Val.Px(4),
+                    })
+                    .Insert(new BackgroundColor(new ClayColor(153, 153, 153, 255)))
+                    .Insert(BorderRadius.All(8))
+                    .Insert(new Text(character.Name))
+                    .Insert(new TextFont { FontId = 0, Size = 24 })
+                    .Insert(new TextColor(ClayColor.White))
+                    .Insert(Interaction.None)
+                    .Insert(new FocusPolicy { Block = true })
+                    .Observe<On<UiClick>>(_ =>
+                    {
+                        network.Value.Send_SelectCharacter(
+                            capturedCharacter.Index,
+                            capturedCharacter.Name,
+                            network.Value.LocalIP,
+                            gameCtx.Value.Protocol
+                        );
+                    });
+                commands.AddChild(menuId, entry.Id);
             }
         }
-    }
-
-    private static void CharacterSelected(
-        On<ClayPointerEvent> trigger,
-        Res<NetClient> network,
-        Res<GameContext> gameCtx,
-        Query<Data<CharacterInfo>, With<CharacterSelectionScene>> query
-    )
-    {
-        if (!trigger.Event.IsLeftButton || trigger.Event.EventType != ClayPointerEventType.Click)
-            return;
-
-        if (!query.Contains(trigger.EntityId))
-            return;
-
-        var (_, characterInfo) = query.Get(trigger.EntityId);
-        network.Value.Send_SelectCharacter(
-            characterInfo.Ref.Index,
-            characterInfo.Ref.Name,
-            network.Value.LocalIP,
-            gameCtx.Value.Protocol
-        );
     }
 
     private struct CharacterSelectionScene;

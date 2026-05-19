@@ -1,17 +1,25 @@
+// Container packet handling + container window UI.
+//
+// Migrated from the old Clay_cs / TinyEcs.UI.Clay path onto TinyEcs.Bevy.UI:
+//   * `ClayNode`/`UINode`              -> `Node`            (Bevy.UI)
+//   * `ClayInteraction` / mouse action -> `Interaction`     (Bevy.UI)
+//   * `UOClayUiBundle.UONodeData`      -> `UOCustomRender`  (GuiPlugin.cs)
+//
+// Right-click close: Bevy.UI's interaction system only wires the LEFT mouse
+// button. There is no `UiPointerUp` for right-click. We work around this with
+// a small `Stage.Update` system that walks `MouseContext` directly, picks the
+// topmost UIMovable container under the cursor (using its `ComputedNode`
+// bounding box), and tears down the UI components when right-button is pressed.
+
+using System;
 using ClassicUO.Assets;
 using ClassicUO.Ecs.Modding.Host;
 using ClassicUO.Game.Data;
-using ClassicUO.IO;
 using ClassicUO.Network;
-using ClassicUO.Utility;
-using Clay_cs;
 using Microsoft.Xna.Framework;
-using System;
-using System.Collections.Generic;
 using TinyEcs;
 using TinyEcs.Bevy;
-using TinyEcs.UI.Clay;
-using TinyEcs.UI.Clay.Widgets;
+using TinyEcs.Bevy.UI;
 
 namespace ClassicUO.Ecs;
 
@@ -19,9 +27,10 @@ internal readonly struct ContainersPlugin : IPlugin
 {
     public void Build(App app)
     {
+        var processPacketsFn = ProcessContainerPackets;
         var onOpenContainersFn = OnOpenContainers;
         var closeContainersTooFarFromPlayerFn = CloseContainersTooFarFromPlayer;
-        var processPacketsFn = ProcessContainerPackets;
+        var closeContainersOnRightClickFn = CloseContainersOnRightClick;
 
         app
             .AddSystem(processPacketsFn)
@@ -37,17 +46,20 @@ internal readonly struct ContainersPlugin : IPlugin
             .AddSystem(closeContainersTooFarFromPlayerFn)
             .InStage(Stage.Update)
             .RunIf((Query<Data<WorldPosition>, With<Player>> queryPlayer) => queryPlayer.Count() > 0)
+            .Build()
+
+            .AddSystem(closeContainersOnRightClickFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<MouseContext> mouseCtx) => mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Right))
             .Build();
     }
-
 
     private static void CloseContainersTooFarFromPlayer(
         Commands commands,
         Query<Data<WorldPosition, NetworkSerial>,
-             Filter<With<IsContainer>, With<ClayNode>, With<ClayInteraction>, With<UIMovable>>> query,
+             Filter<With<IsContainer>, With<Node>, With<UIMovable>>> query,
         Single<Data<WorldPosition>, With<Player>> queryPlayer,
-        EventWriter<HostMessage> hostMsgs
-    )
+        EventWriter<HostMessage> hostMsgs)
     {
         const int MAX_CONTAINER_DIST = 5;
         (_, var playerPos) = queryPlayer.Get();
@@ -57,78 +69,102 @@ internal readonly struct ContainersPlugin : IPlugin
             if (Math.Abs(playerPos.Ref.X - pos.Ref.X) >= MAX_CONTAINER_DIST ||
                 Math.Abs(playerPos.Ref.Y - pos.Ref.Y) >= MAX_CONTAINER_DIST)
             {
-                commands.Entity(ent.Ref)
-                    .Remove<ClayNode>()
-                    .Remove<ClayUOCommandData>()
-                    .Remove<UIMovable>();
-
+                TearDownContainerUI(commands, ent.Ref);
                 hostMsgs.Send(new HostMessage.ContainerClosed(serial.Ref.Value));
             }
         }
+    }
+
+    // Bevy.UI doesn't fire right-button pointer events. Manually pick the
+    // topmost UIMovable container under the cursor each frame the right
+    // button is pressed and tear it down.
+    private static void CloseContainersOnRightClick(
+        Commands commands,
+        Res<MouseContext> mouseCtx,
+        Query<Data<ComputedNode, NetworkSerial>,
+             Filter<With<UIMovable>, With<IsContainer>>> query,
+        EventWriter<HostMessage> hostMsgs)
+    {
+        var pos = mouseCtx.Value.Position;
+        ulong topId = 0;
+        uint topClayId = 0;
+        uint topSerial = 0;
+
+        // Higher Clay ids are emitted later in the render command stream and
+        // therefore draw on top. Pick that one.
+        foreach ((var ent, var computed, var serial) in query)
+        {
+            var bb = computed.Ref;
+            if (pos.X < bb.Position.X || pos.Y < bb.Position.Y) continue;
+            if (pos.X >= bb.Position.X + bb.Size.X) continue;
+            if (pos.Y >= bb.Position.Y + bb.Size.Y) continue;
+
+            if (bb.ClayId >= topClayId)
+            {
+                topClayId = bb.ClayId;
+                topId = ent.Ref;
+                topSerial = serial.Ref.Value;
+            }
+        }
+
+        if (topId == 0)
+            return;
+
+        TearDownContainerUI(commands, topId);
+        hostMsgs.Send(new HostMessage.ContainerClosed(topSerial));
+    }
+
+    private static void TearDownContainerUI(Commands commands, ulong entityId)
+    {
+        commands.Entity(entityId)
+            .Remove<Node>()
+            .Remove<UOCustomRender>()
+            .Remove<UIMovable>()
+            .Remove<Interaction>()
+            .Remove<FloatingWindowState>();
     }
 
     private static void OnOpenContainers(
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
         Res<AssetsServer> assets,
-        EventReader<ContainerOpenedEvent> reader
-    )
+        EventReader<ContainerOpenedEvent> reader)
     {
         foreach (var ev in reader.Read())
         {
-            if (ev.Graphic == 0xFFFF)
-            {
+            if (ev.Graphic == 0xFFFF || ev.Graphic == 0x0030)
+                continue;
 
-            }
-            else if (ev.Graphic == 0x0030)
-            {
+            ref readonly var gumpInfo = ref assets.Value.Gumps.GetGump(ev.Graphic);
+            var width = gumpInfo.UV.Width;
+            var height = gumpInfo.UV.Height;
 
-            }
-            else
-            {
-                ref readonly var gumpInfo = ref assets.Value.Gumps.GetGump(ev.Graphic);
-                var ent = entitiesMap.Value.GetOrCreate(commands, ev.Serial)
-                    .InsertBundle(new UOClayUiBundle()
-                    {
-                        Node = ClayNode.Configure()
-                            .Width(gumpInfo.UV.Width)
-                            .Height(gumpInfo.UV.Height)
-                            .Column()
-                            .Floating()
-                            .FloatingOffset(0, 0)
-                            .Build(),
-                        UONodeData = new ClayUOCommandData
-                        {
-                            Type = ClayUOCommandType.Gump,
-                            Id = ev.Graphic,
-                            Hue = Vector3.UnitZ,
-                        }
-                    })
-                     .Insert(new FloatingWindowState()
-                     {
-                         InitialX = 0,
-                         InitialY = 0,
-                         InitialWidth = gumpInfo.UV.Width,
-                         InitialHeight = gumpInfo.UV.Height
-                     })
-                    .Insert<UIMovable>()
-                    .Observe(static (On<ClayPointerEvent> trigger, Commands commands) =>
-                    {
-                        if (trigger.Event.EventType != ClayPointerEventType.Released || !trigger.Event.IsRightButton)
-                            return;
-
-                        commands.Entity(trigger.EntityId)
-                            .Remove<ClayNode>()
-                            .Remove<ClayInteraction>()
-                            .Remove<UIMovable>();
-
-                        // hostMsgs.Send(new HostMessage.ContainerClosed(serial.Ref.Value));
-                    })
-                    .Observe(static (OnDespawn trigger) =>
-                    {
-
-                    });
-            }
+            entitiesMap.Value.GetOrCreate(commands, ev.Serial)
+                .Insert(new Node
+                {
+                    Display = Display.Flex,
+                    PositionType = PositionType.Absolute,
+                    Left = Val.Px(0),
+                    Top = Val.Px(0),
+                    Width = Val.Px(width),
+                    Height = Val.Px(height),
+                })
+                .Insert(new UOCustomRender
+                {
+                    Kind = UOCustomKind.Gump,
+                    AssetId = ev.Graphic,
+                    Hue = Vector3.UnitZ,
+                })
+                .Insert(Interaction.None)
+                .Insert(new FloatingWindowState
+                {
+                    InitialX = 0,
+                    InitialY = 0,
+                    InitialWidth = width,
+                    InitialHeight = height,
+                })
+                .Insert<UIMovable>()
+                .Insert<IsContainer>();
         }
     }
 
@@ -139,8 +175,7 @@ internal readonly struct ContainersPlugin : IPlugin
         EventWriter<ContainerUpdateEvent> writer,
         EventWriter<ContainerOpenedEvent> openedWriter,
         EventWriter<HostMessage> hostMsgs,
-        EventReader<IPacket> packets
-    )
+        EventReader<IPacket> packets)
     {
         foreach (var packet in packets.Read())
         {
@@ -176,8 +211,7 @@ internal readonly struct ContainersPlugin : IPlugin
         Res<NetworkEntitiesMap> entitiesMap,
         Res<AssetsServer> assets,
         EventWriter<ContainerUpdateEvent> writer,
-        EventWriter<HostMessage> hostMsgs
-    )
+        EventWriter<HostMessage> hostMsgs)
     {
         var finalGraphic = (ushort)(packet.Graphic + packet.GraphicIncrement);
         var amount = packet.Amount == 0 ? (ushort)1 : packet.Amount;
@@ -204,35 +238,9 @@ internal readonly struct ContainersPlugin : IPlugin
             packet.X,
             packet.Y,
             gridIdx,
-            packet.Hue
-        ));
+            packet.Hue));
 
-        ref readonly var artInfo = ref assets.Value.Arts.GetArt(finalGraphic);
-
-        ent.Insert<UIMovable>()
-            .InsertBundle(new UOClayUiBundle()
-            {
-                Node = ClayNode.Configure()
-                    .Width(artInfo.UV.Width)
-                    .Height(artInfo.UV.Height)
-                    .Column()
-                    .Floating()
-                    .FloatingOffset(packet.X, packet.Y)
-                    .Build(),
-                UONodeData = new ClayUOCommandData
-                {
-                    Type = ClayUOCommandType.Art,
-                    Id = finalGraphic,
-                    Hue = new Vector3(packet.Hue, 1, 1),
-                }
-            })
-            .Insert(new FloatingWindowState()
-            {
-                InitialX = packet.X,
-                InitialY = packet.Y,
-                InitialWidth = artInfo.UV.Width,
-                InitialHeight = artInfo.UV.Height
-            });
+        SpawnContainerItemUI(ent, assets.Value, finalGraphic, packet.X, packet.Y, packet.Hue);
     }
 
     private static void HandleUpdateContainerItems(
@@ -241,27 +249,26 @@ internal readonly struct ContainersPlugin : IPlugin
         Res<NetworkEntitiesMap> entitiesMap,
         Res<AssetsServer> assets,
         EventWriter<ContainerUpdateEvent> writer,
-        EventWriter<HostMessage> hostMsgs
-    )
+        EventWriter<HostMessage> hostMsgs)
     {
         foreach (var item in packet.Items)
         {
             hostMsgs.Send(new HostMessage.ContainerItemAdded(
-               item.ContainerSerial,
-               item.Serial,
-               (ushort)(item.Graphic + item.GraphicInc),
-               item.Amount,
-               item.X,
-               item.Y,
-               item.GridIndex,
-               item.Hue
-           ));
+                item.ContainerSerial,
+                item.Serial,
+                (ushort)(item.Graphic + item.GraphicInc),
+                item.Amount,
+                item.X,
+                item.Y,
+                item.GridIndex,
+                item.Hue));
 
             var parentEnt = entitiesMap.Value.GetOrCreate(commands, item.ContainerSerial)
                 .Insert<IsContainer>();
             var ent = entitiesMap.Value.GetOrCreate(commands, item.Serial);
 
-            ent.Insert(new Graphic() { Value = (ushort)(item.Graphic + item.GraphicInc) })
+            var finalGraphic = (ushort)(item.Graphic + item.GraphicInc);
+            ent.Insert(new Graphic() { Value = finalGraphic })
                 .Insert(new Hue() { Value = item.Hue })
                 .Insert(new WorldPosition() { X = item.X, Y = item.Y, Z = 0 })
                 .Insert(new Amount() { Value = item.Amount })
@@ -270,27 +277,57 @@ internal readonly struct ContainersPlugin : IPlugin
 
             writer.Send(new ContainerUpdateEvent(item.ContainerSerial, item.Serial));
 
-            ref readonly var artInfo = ref assets.Value.Arts.GetArt((ushort)(item.Graphic + item.GraphicInc));
-
-            ent.Insert<UIMovable>()
-                .InsertBundle(new UOClayUiBundle()
-                {
-                    Node = ClayNode.Configure()
-                        .Width(artInfo.UV.Width)
-                        .Height(artInfo.UV.Height)
-                        .Column()
-                        .Floating()
-                        .FloatingOffset(item.X, item.Y)
-                        .Build(),
-                    UONodeData = new ClayUOCommandData
-                    {
-                        Type = ClayUOCommandType.Art,
-                        Id = (ushort)(item.Graphic + item.GraphicInc),
-                        Hue = new Vector3(item.Hue, 1, 1),
-                    }
-                });
+            SpawnContainerItemUI(ent, assets.Value, finalGraphic, item.X, item.Y, item.Hue);
         }
     }
+
+    private static void SpawnContainerItemUI(
+        EntityCommands ent,
+        AssetsServer assets,
+        ushort graphic,
+        ushort x,
+        ushort y,
+        ushort hue)
+    {
+        ref readonly var artInfo = ref assets.Arts.GetArt(graphic);
+        var width = artInfo.UV.Width;
+        var height = artInfo.UV.Height;
+
+        ent.Insert(new Node
+            {
+                Display = Display.Flex,
+                PositionType = PositionType.Absolute,
+                Left = Val.Px(x),
+                Top = Val.Px(y),
+                Width = Val.Px(width),
+                Height = Val.Px(height),
+            })
+            .Insert(new UOCustomRender
+            {
+                Kind = UOCustomKind.Art,
+                AssetId = graphic,
+                Hue = new Vector3(hue, 1, 1),
+            })
+            .Insert(Interaction.None)
+            .Insert(new FloatingWindowState
+            {
+                InitialX = x,
+                InitialY = y,
+                InitialWidth = width,
+                InitialHeight = height,
+            })
+            .Insert<UIMovable>();
+    }
+}
+
+// Snapshot of a movable container window's initial placement & size. The
+// drag/resize system (not migrated yet) reads this when it first attaches.
+internal struct FloatingWindowState
+{
+    public float InitialX;
+    public float InitialY;
+    public float InitialWidth;
+    public float InitialHeight;
 }
 
 internal record struct ContainerOpenedEvent(uint Serial, ushort Graphic);

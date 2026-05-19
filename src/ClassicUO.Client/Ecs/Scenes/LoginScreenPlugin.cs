@@ -1,14 +1,14 @@
 using System;
+using System.Numerics;
 using ClassicUO.Configuration;
-using ClassicUO.Input;
 using ClassicUO.Utility;
-using Clay_cs;
 using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
-using TinyEcs.UI.Clay;
-using TinyEcs.UI.Bevy;
-using TinyEcs.UI;
+using TinyEcs.Bevy.UI;
+using ClayColor = Clay.Color;
+using XnaVector2 = Microsoft.Xna.Framework.Vector2;
+using XnaVector3 = Microsoft.Xna.Framework.Vector3;
 
 namespace ClassicUO.Ecs;
 
@@ -40,135 +40,179 @@ internal readonly struct LoginScreenPlugin : IPlugin
             .AddPlugin<LoginErrorScreenPlugin>();
     }
 
-    private static void Setup(Commands commands, Res<GumpBuilder> gumpBuilder, Res<ClayUOCommandBuffer> clay, Res<AssetsServer> assets, Res<Settings> settings)
+    private static void Setup(
+        Commands commands,
+        Res<GumpBuilder> gumpBuilder,
+        Res<Settings> settings)
     {
+        var bg = new ClayColor(51, 51, 51, 255);
+
+        // Root: full-screen column, center-aligned.
         var root = commands.Spawn()
             .Insert<LoginScene>()
-            .Insert(ClayNode.Configure()
-                .WidthGrow()
-                .HeightGrow()
-                .Column()
-                .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER)
-                .Background(51, 51, 51, 255)
-                .Build());
+            .Insert(new Node
+            {
+                Display = Display.Flex,
+                PositionType = PositionType.Relative,
+                FlexDirection = FlexDirection.Column,
+                JustifyContent = JustifyContent.Center,
+                AlignItems = AlignItems.Center,
+                Width = Val.Percent(100),
+                Height = Val.Percent(100),
+            })
+            .Insert(new BackgroundColor(bg));
 
+        // MainMenu: column, fits content.
         var mainMenu = commands.Spawn()
             .Insert<LoginScene>()
-            .Insert(ClayNode.Configure()
-                .WidthFit()
-                .HeightFit()
-                .Column()
-                .Background(51, 51, 51, 255)
-                .Build());
+            .Insert(new Node
+            {
+                Display = Display.Flex,
+                PositionType = PositionType.Relative,
+                FlexDirection = FlexDirection.Column,
+                JustifyContent = JustifyContent.Start,
+                AlignItems = AlignItems.Start,
+                Width = Val.Auto,
+                Height = Val.Auto,
+            })
+            .Insert(new BackgroundColor(bg));
 
-        // background
+        root.AddChild(mainMenu);
+
+        // Background gump.
         mainMenu.AddChild(gumpBuilder.Value.AddGump(
             commands,
             0x014E,
-            Vector3.UnitZ
+            XnaVector3.UnitZ
         ).Insert<LoginScene>());
 
-        // quit button
+        // Quit button.
         mainMenu.AddChild(gumpBuilder.Value.AddButton(
             commands,
             (0x05CA, 0x05C9, 0x05C8),
-            Vector3.UnitZ,
-            new(25, 240)
-        ).Insert(ButtonAction.Quit).Insert<LoginScene>());
-
-        // credit button
-        mainMenu.AddChild(gumpBuilder.Value.AddButton(
-            commands,
-            (0x05D0, 0x05CF, 0x5CE),
-            Vector3.UnitZ,
-            new(530, 125)
-        ).Insert(ButtonAction.Credits).Insert<LoginScene>()
-        .Observe<On<ClayPointerEvent>>((On<ClayPointerEvent> trigger) =>
+            XnaVector3.UnitZ,
+            new XnaVector2(25, 240)
+        )
+        .Insert(ButtonAction.Quit)
+        .Insert<LoginScene>()
+        .Observe((On<UiClick> trigger) =>
         {
-            if (trigger.Event.EventType == ClayPointerEventType.Pressed)
-                Console.WriteLine("pressed button");
-            else if (trigger.Event.EventType == ClayPointerEventType.Released)
-                Console.WriteLine("released button");
+            // TODO: route to a real quit handler.
+            Console.WriteLine("[LoginScreen] Quit clicked");
         }));
 
-        // arrow button
+        // Credits button.
+        mainMenu.AddChild(gumpBuilder.Value.AddButton(
+            commands,
+            (0x05D0, 0x05CF, 0x05CE),
+            XnaVector3.UnitZ,
+            new XnaVector2(530, 125)
+        )
+        .Insert(ButtonAction.Credits)
+        .Insert<LoginScene>()
+        .Observe((On<UiPointerDown> _) => Console.WriteLine("pressed credits"))
+        .Observe((On<UiPointerUp> _)   => Console.WriteLine("released credits")));
+
+        // Arrow login button.
         var arrowButton = gumpBuilder.Value.AddButton(
             commands,
             (0x5CD, 0x5CC, 0x5CB),
-            Vector3.UnitZ,
-            new(280, 365)
+            XnaVector3.UnitZ,
+            new XnaVector2(280, 365)
         )
-        .Insert(ButtonAction.Login).Insert<LoginScene>()
+        .Insert(ButtonAction.Login)
+        .Insert<LoginScene>()
         .Observe((
-            On<ClayPointerEvent> trigger,
-            Commands commands,
-            Res<Settings> settings,
-            ResMut<NextState<LoginInteraction>> state
+            On<UiClick> trigger,
+            Commands innerCommands,
+            Res<Settings> innerSettings,
+            ResMut<NextState<LoginInteraction>> state,
+            Single<Data<Text>, Filter<With<UsernameInput>, With<LoginScene>, With<TextInput>>> queryUsername,
+            Single<Data<MaskedText>, Filter<With<PasswordInput>, With<LoginScene>, With<TextInput>>> queryPassword
         ) =>
         {
-            if (trigger.Event is { EventType: ClayPointerEventType.Click, IsLeftButton: true })
-            {
-                Console.WriteLine("login button clicked");
-                // TODO: Get username and password from text input components once implemented
-                Login(commands, settings.Value, settings.Value.Username, Crypter.Decrypt(settings.Value.Password));
-                state.Value.Set(LoginInteraction.LoginRequested);
-            }
+            (_, var username) = queryUsername.Get();
+            (_, var password) = queryPassword.Get();
+            Login(innerCommands, innerSettings.Value, username.Ref.Value, password.Ref.Value ?? string.Empty);
+            state.Value.Set(LoginInteraction.LoginRequested);
         });
 
         mainMenu.AddChild(arrowButton);
 
-        var usernameBackground = gumpBuilder.Value.AddGumpNinePatch(
+        // Username field background + text child.
+        var usernameField = gumpBuilder.Value.AddGumpNinePatch(
             commands,
             0x0BB8,
-            Vector3.UnitZ,
-            new(218, 283),
-            new(210, 30))
+            XnaVector3.UnitZ,
+            new XnaVector2(218, 283),
+            new XnaVector2(210, 30))
             .Insert<LoginScene>();
 
-        var usernameField = commands.Spawn()
-            .Insert<UsernameInput>()
+        // Static text inside username field. Carries the markers so the
+        // FocusedInput-clearing system in GuiPlugin still sees the inputs.
+        // TODO: wire real text editing (StbTextEdit integration) — for now we
+        // render the saved username read-only.
+        var usernameText = commands.Spawn()
+            .Insert(new Node
+            {
+                PositionType = PositionType.Absolute,
+                Left = Val.Px(4),
+                Top = Val.Px(4),
+                Width = Val.Auto,
+                Height = Val.Auto,
+            })
+            .Insert(new Text(settings.Value.Username ?? string.Empty))
+            .Insert(new TextFont { FontId = 0, Size = 20 })
+            .Insert(new TextColor(new ClayColor(51, 51, 51, 255)))
             .Insert<TextInput>()
-            .Insert(ClayNode.Configure()
-            .WidthFit()
-            .HeightFit()
-            .Text(settings.Value.Username, 20)
-            .Build());
+            .Insert<UsernameInput>()
+            .Insert<LoginScene>();
 
-        usernameBackground.AddChild(usernameField);
-        mainMenu.AddChild(usernameBackground);
+        usernameField.AddChild(usernameText);
+        mainMenu.AddChild(usernameField);
 
-        var passwordBackground = gumpBuilder.Value.AddGumpNinePatch(
+        // Password field background + text child (masked).
+        var passwordField = gumpBuilder.Value.AddGumpNinePatch(
             commands,
             0x0BB8,
-            Vector3.UnitZ,
-            new(218, 283 + 50),
-            new(210, 30))
-            .Insert<LoginScene>()
-            ;
+            XnaVector3.UnitZ,
+            new XnaVector2(218, 283 + 50),
+            new XnaVector2(210, 30))
+            .Insert<LoginScene>();
 
-        var psw = Crypter.Decrypt(settings.Value.Password);
-        var masked = new string('*', psw.Length);
-        var passwordField = commands.Spawn()
-            .Insert(new PasswordInput() { Masked = masked, Real = psw })
+        // Real password kept in MaskedText.Value; SyncMaskedText (GuiPlugin)
+        // mirrors it into Text as mask chars before the renderer sees it.
+        var decrypted = Crypter.Decrypt(settings.Value.Password ?? string.Empty) ?? string.Empty;
+
+        var passwordText = commands.Spawn()
+            .Insert(new Node
+            {
+                PositionType = PositionType.Absolute,
+                Left = Val.Px(4),
+                Top = Val.Px(4),
+                Width = Val.Auto,
+                Height = Val.Auto,
+            })
+            .Insert(new Text(string.Empty))
+            .Insert(new MaskedText { Value = decrypted, MaskChar = '*' })
+            .Insert(new TextFont { FontId = 0, Size = 20 })
+            .Insert(new TextColor(ClayColor.White))
             .Insert<TextInput>()
-            .Insert(ClayNode.Configure()
-            .WidthFit()
-            .HeightFit()
-            .Text(masked, 20)
-            .Build());
+            .Insert<PasswordInput>()
+            .Insert<LoginScene>();
 
-        passwordBackground.AddChild(passwordField);
-        mainMenu.AddChild(passwordBackground);
-
-        root.AddChild(mainMenu);
+        passwordField.AddChild(passwordText);
+        mainMenu.AddChild(passwordField);
     }
 
-    private static void DeleteMenu(Commands commands, Query<Data<ClayNode>, Filter<Without<Parent>, With<LoginScene>>> query)
+    private static void DeleteMenu(
+        Commands commands,
+        Query<Data<Node>, Filter<With<LoginScene>>> query)
     {
-        Console.WriteLine("[LoginScreen] cleanup start");
-        foreach ((var ent, _) in query)
+        foreach (var (ent, _) in query)
+        {
             commands.Entity(ent.Ref).Despawn();
-        Console.WriteLine("[LoginScreen] cleanup done");
+        }
     }
 
     private static void Login(Commands commands, Settings settings, string username, string password)
@@ -208,9 +252,5 @@ internal readonly struct LoginScreenPlugin : IPlugin
 
     private struct LoginScene;
     private struct UsernameInput;
-    private struct PasswordInput
-    {
-        public string Real;
-        public string Masked;
-    }
+    private struct PasswordInput;
 }

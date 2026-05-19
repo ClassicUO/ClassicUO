@@ -1,188 +1,127 @@
-
-using Clay_cs;
 using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
-using TinyEcs.UI.Clay;
+using TinyEcs.Bevy.UI;
+using ClayColor = Clay.Color;
 
 namespace ClassicUO.Ecs;
 
-internal unsafe sealed class GumpBuilder
+/// Spawns ClassicUO-flavoured UI entities backed by Bevy.UI's Node/Interaction model.
+/// Each helper returns an EntityCommands so callers can chain .Insert(...) /
+/// .AddChild(...). Positioning uses absolute (floating) placement to mimic the
+/// behaviour of the old gump/Clay-cs path.
+internal sealed class GumpBuilder
 {
     private readonly AssetsServer _assets;
-    private readonly ClayUOCommandBuffer _buffer;
 
-    public GumpBuilder(AssetsServer assets, ClayUOCommandBuffer buffer)
+    public GumpBuilder(AssetsServer assets)
     {
         _assets = assets;
-        _buffer = buffer;
     }
 
+    /// Spawn a floating text label. If position is supplied, the node is placed
+    /// absolutely relative to its parent at that offset.
     public EntityCommands AddLabel(Commands commands, string text, Vector2? position = null, Vector2? size = null)
     {
-        var node = ClayNode.Configure()
-            .Width(size.HasValue ? size.Value.X : 0)
-            .Height(size.HasValue ? size.Value.Y : 0)
-            .Floating()
-            .FloatingOffset(position?.X ?? 0, position?.Y ?? 0)
-            .Text(text, 12, new Clay_Color(255, 255, 255, 255), 0)
-            .Build();
+        var node = MakeFloatingNode(position, size, autoFit: !size.HasValue);
 
-        if (node.Floating.HasValue)
-        {
-            var floating = node.Floating.Value;
-            floating.attachTo = position.HasValue ? Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT : Clay_FloatingAttachToElement.CLAY_ATTACH_TO_NONE;
-            floating.clipTo = Clay_FloatingClipToElement.CLAY_CLIP_TO_ATTACHED_PARENT;
-            node.Floating = floating;
-        }
-
-        var ent = commands.Spawn()
-            .InsertBundle(new UOClayUiBundle()
-            {
-                Node = node
-            });
-
-        return ent;
+        return commands.Spawn()
+            .Insert(node)
+            .Insert(new Text(text))
+            .Insert(new TextFont { FontId = 0, Size = 12 })
+            .Insert(new TextColor(ClayColor.White));
     }
 
+    /// Spawn a UO button. The visible asset id is rewritten by the GuiPlugin
+    /// in reaction to Interaction state changes (normal/over/pressed).
     public EntityCommands AddButton(Commands commands, (ushort normal, ushort pressed, ushort over) ids, Vector3 hue, Vector2? position = null)
     {
         return AddGump(commands, ids.normal, hue, position)
-            .Insert(new UOButton() { Normal = ids.normal, Pressed = ids.pressed, Over = ids.over });
+            .Insert(new UOButton { Normal = ids.normal, Pressed = ids.pressed, Over = ids.over })
+            .Insert(Interaction.None)
+            .Insert(new Button());
     }
 
+    private static readonly object CustomMarker = new();
+
+    /// Spawn a single gump sprite at the given position.
     public EntityCommands AddGump(Commands commands, ushort id, Vector3 hue, Vector2? position = null)
     {
         ref readonly var gumpInfo = ref _assets.Gumps.GetGump(id);
+        var size = new Vector2(gumpInfo.UV.Width, gumpInfo.UV.Height);
+        var node = MakeFloatingNode(position, size);
 
-        var node = ClayNode.Configure()
-            .Width(gumpInfo.UV.Width)
-            .Height(gumpInfo.UV.Height)
-            .Floating()
-            .FloatingOffset(position?.X ?? 0, position?.Y ?? 0)
-            .Build();
-
-        if (node.Floating.HasValue)
-        {
-            var floating = node.Floating.Value;
-            floating.attachTo = position.HasValue ? Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT : Clay_FloatingAttachToElement.CLAY_ATTACH_TO_NONE;
-            floating.clipTo = Clay_FloatingClipToElement.CLAY_CLIP_TO_ATTACHED_PARENT;
-            node.Floating = floating;
-        }
-
-        _buffer.Add(new()
-        {
-            Type = ClayUOCommandType.Gump,
-            Id = id,
-            Hue = hue,
-        });
-        node.Custom = new Clay_CustomElementConfig()
-        {
-            customData = (void*)(nint)_buffer.Count
-        };
-
-        var ent = commands.Spawn()
-            .InsertBundle(new UOClayUiBundle()
+        return commands.Spawn()
+            .Insert(node)
+            .Insert(new UiCustom { Data = CustomMarker })
+            .Insert(new UOCustomRender
             {
-                Node = node,
-                UONodeData = new()
-                {
-                    Type = ClayUOCommandType.Gump,
-                    Id = id,
-                    Hue = hue,
-                }
+                Kind = UOCustomKind.Gump,
+                AssetId = id,
+                Hue = hue,
             });
-
-        return ent;
     }
 
+    /// Spawn a nine-patch (scalable) gump. The supplied size overrides the
+    /// natural sprite size.
     public EntityCommands AddGumpNinePatch(Commands commands, ushort id, Vector3 hue, Vector2? position = null, Vector2? size = null)
     {
         ref readonly var gumpInfo = ref _assets.Gumps.GetGump(id);
+        var resolved = size ?? new Vector2(gumpInfo.UV.Width, gumpInfo.UV.Height);
+        var node = MakeFloatingNode(position, resolved);
 
-        var node = ClayNode.Configure()
-            .Width(size.HasValue ? size.Value.X : gumpInfo.UV.Width)
-            .Height(size.HasValue ? size.Value.Y : gumpInfo.UV.Height)
-            .Floating()
-            .FloatingOffset(position?.X ?? 0, position?.Y ?? 0)
-            .Build();
-
-        if (node.Floating.HasValue)
-        {
-            var floating = node.Floating.Value;
-            floating.attachTo = position.HasValue ? Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT : Clay_FloatingAttachToElement.CLAY_ATTACH_TO_NONE;
-            floating.clipTo = Clay_FloatingClipToElement.CLAY_CLIP_TO_ATTACHED_PARENT;
-            node.Floating = floating;
-        }
-
-        _buffer.Add(new()
-        {
-            Type = ClayUOCommandType.Gump,
-            Id = id,
-            Hue = hue,
-        });
-        node.Custom = new Clay_CustomElementConfig()
-        {
-            customData = (void*)(nint)_buffer.Count
-        };
-
-        var ent = commands.Spawn()
-           .InsertBundle(new UOClayUiBundle()
-           {
-               Node = node,
-               UONodeData = new()
-               {
-                   Type = ClayUOCommandType.GumpNinePatch,
-                   Id = id,
-                   Hue = hue,
-               }
-           });
-
-        return ent;
+        return commands.Spawn()
+            .Insert(node)
+            .Insert(new UiCustom { Data = CustomMarker })
+            .Insert(new UOCustomRender
+            {
+                Kind = UOCustomKind.GumpNinePatch,
+                AssetId = id,
+                Hue = hue,
+            });
     }
 
+    /// Spawn an item/art sprite at the given position.
     public EntityCommands AddArt(Commands commands, ushort id, Vector3 hue, Vector2? position = null)
     {
         ref readonly var artInfo = ref _assets.Arts.GetArt(id);
+        var size = new Vector2(artInfo.UV.Width, artInfo.UV.Height);
+        var node = MakeFloatingNode(position, size);
 
-        var node = ClayNode.Configure()
-            .Width(artInfo.UV.Width)
-            .Height(artInfo.UV.Height)
-            .Floating()
-            .FloatingOffset(position?.X ?? 0, position?.Y ?? 0)
-            .Build();
+        return commands.Spawn()
+            .Insert(node)
+            .Insert(new UiCustom { Data = CustomMarker })
+            .Insert(new UOCustomRender
+            {
+                Kind = UOCustomKind.Art,
+                AssetId = id,
+                Hue = hue,
+            });
+    }
 
-        if (node.Floating.HasValue)
+    private static Node MakeFloatingNode(Vector2? position, Vector2? size, bool autoFit = false)
+    {
+        var node = Node.Default;
+
+        if (size.HasValue)
         {
-            var floating = node.Floating.Value;
-            floating.attachTo = position.HasValue ? Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT : Clay_FloatingAttachToElement.CLAY_ATTACH_TO_NONE;
-            floating.clipTo = Clay_FloatingClipToElement.CLAY_CLIP_TO_ATTACHED_PARENT;
-            node.Floating = floating;
+            node.Width = Val.Px(size.Value.X);
+            node.Height = Val.Px(size.Value.Y);
+        }
+        else if (autoFit)
+        {
+            // Default: let Clay fit-to-content.
+            node.Width = Val.Auto;
+            node.Height = Val.Auto;
         }
 
-        _buffer.Add(new()
+        if (position.HasValue)
         {
-            Type = ClayUOCommandType.Gump,
-            Id = id,
-            Hue = hue,
-        });
-        node.Custom = new Clay_CustomElementConfig()
-        {
-            customData = (void*)(nint)_buffer.Count
-        };
+            node.PositionType = PositionType.Absolute;
+            node.Left = Val.Px(position.Value.X);
+            node.Top = Val.Px(position.Value.Y);
+        }
 
-        var ent = commands.Spawn()
-            .InsertBundle(new UOClayUiBundle()
-            {
-                Node = node,
-                UONodeData = new()
-                {
-                    Type = ClayUOCommandType.Art,
-                    Id = id,
-                    Hue = hue,
-                }
-            });
-
-        return ent;
+        return node;
     }
 }

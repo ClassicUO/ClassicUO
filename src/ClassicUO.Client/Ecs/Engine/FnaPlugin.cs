@@ -49,19 +49,19 @@ internal readonly struct FnaPlugin : IPlugin
             })
             .InStage(Stage.Update)
             .SingleThreaded()
-            .RunIf((World world) => world.HasResource<UoGame>())
+            .RunIf((Commands cmds) => cmds.HasResource<UoGame>())
             .Build()
 
             .AddSystem((Res<GraphicsDevice> device) => device.Value.Clear(Color.Black))
             .InStage(Stage.First)
             .SingleThreaded()
-            .RunIf((World world) => world.HasResource<GraphicsDevice>())
+            .RunIf((Commands cmds) => cmds.HasResource<GraphicsDevice>())
             .Build()
 
             .AddSystem((Res<GraphicsDevice> device) => device.Value.Present())
             .InStage(Stage.Last)
             .SingleThreaded()
-            .RunIf((World world) => world.HasResource<GraphicsDevice>())
+            .RunIf((Commands cmds) => cmds.HasResource<GraphicsDevice>())
             .Build()
 
             .AddSystem(_ => Environment.Exit(0))

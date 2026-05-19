@@ -103,7 +103,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             .SingleThreaded()
             .Label("cuo:rendering:rendering")
             .After("cuo:rendering:begin")
-            .RunIf(w => w.HasResource<GraphicsDevice>())
+            .RunIf((Commands cmds) => cmds.HasResource<GraphicsDevice>())
             .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
             .RunIf((Query<Data<WorldPosition>, With<Player>> playerQuery) => playerQuery.Count() > 0)
             .Build()

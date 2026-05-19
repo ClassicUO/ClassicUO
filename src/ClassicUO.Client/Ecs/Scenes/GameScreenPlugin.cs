@@ -1,15 +1,12 @@
 using System;
 using ClassicUO.Input;
-using ClassicUO.Network;
 using ClassicUO.Renderer;
-using Clay_cs;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TinyEcs;
 using TinyEcs.Bevy;
-using TinyEcs.UI.Clay;
-using TinyEcs.UI.Bevy;
-using TinyEcs.UI;
+using TinyEcs.Bevy.UI;
+using ClayColor = Clay.Color;
 
 namespace ClassicUO.Ecs;
 
@@ -22,10 +19,15 @@ internal readonly struct GameScreenPlugin : IPlugin
         var setupFn = Setup;
         var cleanupFn = Cleanup;
         var updateEntitiesCountFn = UpdateEntitiesCount;
-        var adjustCameraAndBoundsFn = AdjustCameraAndBounds;
+        var updateSelectedEntityFn = UpdateSelectedEntity;
+        var dragWindowFn = DragWindow;
+        var resizeWindowFn = ResizeWindow;
+        var syncWindowToCameraFn = SyncWindowToCamera;
+        var bindRenderTargetFn = BindRenderTarget;
 
         app
-            .AddResource<RenderTarget2D>(null)
+            .AddResource<RenderTarget2D>(null!)
+            .AddResource(new DragGate())
 
             .AddSystem(setupFn)
             .OnEnter(GameState.GameScreen)
@@ -33,6 +35,32 @@ internal readonly struct GameScreenPlugin : IPlugin
 
             .AddSystem(cleanupFn)
             .OnExit(GameState.GameScreen)
+            .Build()
+
+            // Drag/resize before the rest of Update so the layout sees fresh sizes.
+            .AddSystem(dragWindowFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
+            .Build()
+
+            .AddSystem(resizeWindowFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
+            .Build()
+
+            // Push current Node positions/sizes into Camera.Bounds so the world
+            // renderer matches the on-screen game window.
+            .AddSystem(syncWindowToCameraFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
+            .Build()
+
+            // (Re)create the RenderTarget2D when the backbuffer changes, then
+            // bind it to the game-window entity's UiImage so the GUI renderer
+            // draws the latest frame each tick.
+            .AddSystem(bindRenderTargetFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
             .Build()
 
             .AddSystem(updateEntitiesCountFn)
@@ -49,249 +77,383 @@ internal readonly struct GameScreenPlugin : IPlugin
             })
             .Build()
 
-            .AddSystem(adjustCameraAndBoundsFn)
+            .AddSystem(updateSelectedEntityFn)
             .InStage(Stage.Update)
             .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
-            .RunIf(w => w.HasResource<Camera>())
             .Build();
     }
 
-    private static void Setup(Commands commands, Res<GumpBuilder> gumpBuilder, Res<ClayUOCommandBuffer> clay)
+    private static void Setup(Commands commands)
     {
+        var bgRoot = new ClayColor(18, 18, 18, 0);          // transparent
+        var bgBorder = new ClayColor(38, 38, 38, 255);
+        var bgResize = new ClayColor(255, 0, 0, 255);
+        var bgWindow = new ClayColor(255, 255, 255, 255);
+        var bgMenu   = new ClayColor(0, 0, 0, 255);
+        var bgButton = new ClayColor(0, 0, 127, 255);
+
+        // Root: full-screen column with padding.
         var root = commands.Spawn()
             .Insert<GameScene>()
-            .Insert(ClayNode.Configure()
-                .WidthGrow()
-                .HeightGrow()
-                .Column()
-                .Padding(4)
-                .Background(18, 18, 18, 0)
-                .Build());
+            .Insert(new Node
+            {
+                Display = Display.Flex,
+                PositionType = PositionType.Relative,
+                FlexDirection = FlexDirection.Column,
+                JustifyContent = JustifyContent.Start,
+                AlignItems = AlignItems.Start,
+                Width = Val.Percent(100),
+                Height = Val.Percent(100),
+                Padding = UiRect.All(4),
+            })
+            .Insert(new BackgroundColor(bgRoot));
 
-        var floating = new Clay_FloatingElementConfig()
-        {
-            attachTo = Clay_FloatingAttachToElement.CLAY_ATTACH_TO_PARENT,
-            clipTo = Clay_FloatingClipToElement.CLAY_CLIP_TO_ATTACHED_PARENT,
-            zIndex = -1
-        };
-
+        // Game window border (the draggable handle). Floating/absolute so we
+        // can mutate Left/Top each frame.
         var gameWindowBorder = commands.Spawn()
-            .Insert(ClayNode.Configure()
-                .Width(BORDER_SIZE)
-                .Height(BORDER_SIZE)
-                .Background(38, 38, 38, 255)
-                .Floating()
-                .Build())
-            .Insert(new ClayInteraction())
+            .Insert<GameScene>()
             .Insert<GameWindowBorderUI>()
-            .Insert<GameScene>();
+            .Insert(new Node
+            {
+                Display = Display.Flex,
+                PositionType = PositionType.Absolute,
+                Left = Val.Px(0),
+                Top = Val.Px(0),
+                Width = Val.Px(BORDER_SIZE),
+                Height = Val.Px(BORDER_SIZE),
+            })
+            .Insert(new BackgroundColor(bgBorder))
+            .Insert(Interaction.None)
+            .Insert(new Button());
 
+        // Resize handle (bottom-right corner). Same absolute story.
         var gameWindowBorderResize = commands.Spawn()
-            .Insert(ClayNode.Configure()
-                .Width(BORDER_SIZE)
-                .Height(BORDER_SIZE)
-                .Background(255, 0, 0, 255)
-                .Floating()
-                .Build())
-            .Insert(new ClayInteraction())
+            .Insert<GameScene>()
             .Insert<GameWindowBorderResizeUI>()
-            .Insert<GameScene>();
+            .Insert(new Node
+            {
+                Display = Display.Flex,
+                PositionType = PositionType.Absolute,
+                Left = Val.Px(0),
+                Top = Val.Px(0),
+                Width = Val.Px(BORDER_SIZE),
+                Height = Val.Px(BORDER_SIZE),
+            })
+            .Insert(new BackgroundColor(bgResize))
+            .Insert(Interaction.None)
+            .Insert(new Button());
 
+        // Game window itself — holds the world render target as a UiImage.
         var gameWindow = commands.Spawn()
-            .Insert(ClayNode.Configure()
-                .Width(BORDER_SIZE)
-                .Height(BORDER_SIZE)
-                .Background(255, 255, 255, 255)
-                .Floating()
-                .Build())
+            .Insert<GameScene>()
             .Insert<GameWindowUI>()
-            .Insert<GameScene>();
+            .Insert(new Node
+            {
+                Display = Display.Flex,
+                PositionType = PositionType.Absolute,
+                Left = Val.Px(0),
+                Top = Val.Px(0),
+                Width = Val.Px(BORDER_SIZE),
+                Height = Val.Px(BORDER_SIZE),
+            })
+            .Insert(new BackgroundColor(bgWindow))
+            // BindRenderTarget will overwrite ImageData with the real texture
+            // once the RenderTarget2D resource has been created.
+            .Insert(new UiImage { ImageData = null, Tint = ClayColor.White });
 
-
-
+        // Menu bar (row, grow width, fit height, right-aligned).
         var menuBar = commands.Spawn()
             .Insert<GameScene>()
-            .Insert(ClayNode.Configure()
-                .WidthGrow()
-                .HeightFit()
-                .Row()
-                .Gap(4)
-                .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_RIGHT, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER)
-                .Padding(4)
-                .Background(0, 0, 0, 255)
-                .Build());
+            .Insert(new Node
+            {
+                Display = Display.Flex,
+                PositionType = PositionType.Relative,
+                FlexDirection = FlexDirection.Row,
+                JustifyContent = JustifyContent.End,
+                AlignItems = AlignItems.Center,
+                Width = Val.Percent(100),
+                Height = Val.Auto,
+                Padding = UiRect.All(4),
+                Gap = Val.Px(4),
+            })
+            .Insert(new BackgroundColor(bgMenu));
 
-        var menuBarItem = commands.Spawn()
+        // Logout button.
+        var logoutBtn = commands.Spawn()
             .Insert<GameScene>()
             .Insert(ButtonAction.Logout)
-            .Insert(ClayNode.Configure()
-                .WidthFit()
-                .HeightGrow()
-                .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER)
-                .Padding(4)
-                .Background(0, 0, 127, 255)
-                .Text("Logout", 18, new Clay_Color(255, 255, 255, 255))
-                .Build())
-            .Observe<On<ClayPointerEvent>, Res<NextState<GameState>>>(LogoutButtonHandler);
+            .Insert(new Node
+            {
+                Display = Display.Flex,
+                PositionType = PositionType.Relative,
+                JustifyContent = JustifyContent.Center,
+                AlignItems = AlignItems.Center,
+                Width = Val.Auto,
+                Height = Val.Percent(100),
+                Padding = UiRect.All(4),
+            })
+            .Insert(new BackgroundColor(bgButton))
+            .Insert(Interaction.None)
+            .Insert(new Button())
+            .Observe((On<UiClick> _, ResMut<NextState<GameState>> state) =>
+            {
+                Console.WriteLine("Logout button pressed");
+                state.Value.Set(GameState.LoginScreen);
+            });
 
-        var menuBarItem2 = commands.Spawn()
-            .Insert(ClayNode.Configure()
-                .WidthFit()
-                .HeightGrow()
-                .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER)
-                .Padding(4)
-                .Background(0, 0, 127, 255)
-                .Text("Total entities: 0", 18, new Clay_Color(255, 255, 255, 255))
-                .Build())
+        // Logout label (child of the logout button so it inherits position).
+        var logoutLabel = commands.Spawn()
             .Insert<GameScene>()
-            .Insert<TotalEntitiesMenu>();
+            .Insert(new Node
+            {
+                Width = Val.Auto,
+                Height = Val.Auto,
+            })
+            .Insert(new Text("Logout"))
+            .Insert(new TextFont { FontId = 0, Size = 18 })
+            .Insert(new TextColor(ClayColor.White));
 
-        menuBar.AddChild(menuBarItem);
-        menuBar.AddChild(menuBarItem2);
+        // Entity-count display.
+        var totalBtn = commands.Spawn()
+            .Insert<GameScene>()
+            .Insert<TotalEntitiesMenu>()
+            .Insert(new Node
+            {
+                Display = Display.Flex,
+                PositionType = PositionType.Relative,
+                JustifyContent = JustifyContent.Center,
+                AlignItems = AlignItems.Center,
+                Width = Val.Auto,
+                Height = Val.Percent(100),
+                Padding = UiRect.All(4),
+            })
+            .Insert(new BackgroundColor(bgButton));
+
+        var totalLabel = commands.Spawn()
+            .Insert<GameScene>()
+            .Insert<TotalEntitiesText>()
+            .Insert(new Node
+            {
+                Width = Val.Auto,
+                Height = Val.Auto,
+            })
+            .Insert(new Text("Total entities: 0"))
+            .Insert(new TextFont { FontId = 0, Size = 18 })
+            .Insert(new TextColor(ClayColor.White));
+
+        // Selected entity overlay — semi-transparent panel, top-right.
+        var bgOverlay = new ClayColor(0, 0, 0, 160);
+        var selectionOverlay = commands.Spawn()
+            .Insert<GameScene>()
+            .Insert(new Node
+            {
+                Display = Display.Flex,
+                PositionType = PositionType.Absolute,
+                Top = Val.Px(48),
+                Right = Val.Px(8),
+                Width = Val.Auto,
+                Height = Val.Auto,
+                Padding = UiRect.All(8),
+            })
+            .Insert(new BackgroundColor(bgOverlay));
+
+        var selectionText = commands.Spawn()
+            .Insert<GameScene>()
+            .Insert<SelectedEntityText>()
+            .Insert(new Node
+            {
+                Width = Val.Auto,
+                Height = Val.Auto,
+            })
+            .Insert(new Text("No selection"))
+            .Insert(new TextFont { FontId = 0, Size = 16 })
+            .Insert(new TextColor(ClayColor.White));
+
+        selectionOverlay.AddChild(selectionText);
+
+        logoutBtn.AddChild(logoutLabel);
+        totalBtn.AddChild(totalLabel);
+
+        menuBar.AddChild(logoutBtn);
+        menuBar.AddChild(totalBtn);
 
         root.AddChild(gameWindowBorder);
         root.AddChild(gameWindowBorderResize);
         root.AddChild(gameWindow);
-
-        // root.AddChild(gameWindowRoot);
         root.AddChild(menuBar);
+        root.AddChild(selectionOverlay);
     }
 
-
-    class CameraBounds
+    // Anchor at press; derive bounds from absolute mouse delta. Avoids
+    // accumulating per-frame deltas (sub-pixel truncation, clamp-eaten
+    // offsets, initial-frame jump that includes pre-press movement).
+    private struct DragAnchor
     {
-        public Rectangle Rectangle;
+        public bool Active;
+        public Vector2 Mouse;
+        public int X, Y, W, H;
     }
 
-    private static void AdjustCameraAndBounds(
-        Res<Camera> camera,
-        ResMut<RenderTarget2D> renderTarget,
-        Res<ImageCache> imageCache,
-        Res<UltimaBatcher2D> batch,
+    // Cross-system gate. Whichever drag system latches first owns the gesture
+    // until the mouse is released. Prevents the border from hijacking a resize
+    // mid-drag (the cursor often slides off the handle onto the border).
+    private enum ActiveDrag { None, Move, Resize }
+    private sealed class DragGate { public ActiveDrag Mode; }
+
+    private static void DragWindow(
         Res<MouseContext> mouseCtx,
-        Local<CameraBounds> lastSize,
-        Single<Data<ClayNode, ClayInteraction>, Filter<With<GameWindowBorderUI>, With<GameScene>>> queryGameWindowBorder,
-        Single<Data<ClayNode, ClayInteraction>, Filter<With<GameWindowBorderResizeUI>, With<GameScene>>> queryGameWindowBorderResize,
-        Single<Data<ClayNode>, Filter<With<GameWindowUI>, With<GameScene>>> queryGameWindow
+        Res<Camera> camera,
+        Res<DragGate> gate,
+        Local<DragAnchor> anchor,
+        Single<Data<Interaction>, Filter<With<GameWindowBorderUI>, With<GameScene>>> queryBorder
     )
     {
-        (var nodeBorder, var interaction) = queryGameWindowBorder.Get();
-        (var nodeBorderResize, var interactionResize) = queryGameWindowBorderResize.Get();
-
-
-        if (interaction.Ref.State == ClayInteractionState.Pressed && interaction.Ref.PressedButtons.HasFlag(ClayMouseButton.Left))
+        if (!mouseCtx.Value.IsPressed(MouseButtonType.Left))
         {
-            camera.Value.Bounds.X += (int)mouseCtx.Value.PositionOffset.X;
-            camera.Value.Bounds.Y += (int)mouseCtx.Value.PositionOffset.Y;
+            anchor.Value.Active = false;
+            if (gate.Value.Mode == ActiveDrag.Move) gate.Value.Mode = ActiveDrag.None;
+            return;
         }
 
-        if (interactionResize.Ref.State == ClayInteractionState.Pressed && interactionResize.Ref.PressedButtons.HasFlag(ClayMouseButton.Left))
+        if (!anchor.Value.Active)
         {
-            ref var newBounds = ref lastSize.Value.Rectangle;
-            newBounds.Width += (int)mouseCtx.Value.PositionOffset.X;
-            newBounds.Height += (int)mouseCtx.Value.PositionOffset.Y;
-
-            if (newBounds.Width >= 300)
-                camera.Value.Bounds.Width = newBounds.Width;
-            if (newBounds.Height >= 300)
-                camera.Value.Bounds.Height = newBounds.Height;
-        }
-        else
-        {
-            lastSize.Value.Rectangle = camera.Value.Bounds;
-        }
-
-        if (nodeBorderResize.Ref.Floating.HasValue)
-        {
-            var floating = nodeBorderResize.Ref.Floating.Value;
-            floating.offset = new()
+            if (gate.Value.Mode != ActiveDrag.None) return; // someone else owns the gesture
+            if (!queryBorder.TryGet(out var data))
+                return;
+            (_, var interaction) = data;
+            if (interaction.Ref != Interaction.Pressed)
+                return;
+            anchor.Value = new DragAnchor
             {
-                x = camera.Value.Bounds.X + camera.Value.Bounds.Width + BORDER_SIZE - nodeBorderResize.Ref.Layout.sizing.width.size.minMax.max,
-                y = camera.Value.Bounds.Y + camera.Value.Bounds.Height + BORDER_SIZE - nodeBorderResize.Ref.Layout.sizing.height.size.minMax.max,
+                Active = true,
+                Mouse = mouseCtx.Value.Position,
+                X = camera.Value.Bounds.X,
+                Y = camera.Value.Bounds.Y,
             };
-            nodeBorderResize.Ref.Floating = floating;
+            gate.Value.Mode = ActiveDrag.Move;
         }
 
-        if (nodeBorder.Ref.Floating.HasValue)
+        var delta = mouseCtx.Value.Position - anchor.Value.Mouse;
+        camera.Value.Bounds.X = anchor.Value.X + (int)delta.X;
+        camera.Value.Bounds.Y = anchor.Value.Y + (int)delta.Y;
+    }
+
+    private static void ResizeWindow(
+        Res<MouseContext> mouseCtx,
+        Res<Camera> camera,
+        Res<DragGate> gate,
+        Local<DragAnchor> anchor,
+        Single<Data<Interaction>, Filter<With<GameWindowBorderResizeUI>, With<GameScene>>> queryHandle
+    )
+    {
+        if (!mouseCtx.Value.IsPressed(MouseButtonType.Left))
         {
-            var floating = nodeBorder.Ref.Floating.Value;
-            floating.offset = new()
+            anchor.Value.Active = false;
+            if (gate.Value.Mode == ActiveDrag.Resize) gate.Value.Mode = ActiveDrag.None;
+            return;
+        }
+
+        if (!anchor.Value.Active)
+        {
+            if (gate.Value.Mode != ActiveDrag.None) return;
+            if (!queryHandle.TryGet(out var data))
+                return;
+            (_, var interaction) = data;
+            if (interaction.Ref != Interaction.Pressed)
+                return;
+            anchor.Value = new DragAnchor
             {
-                x = camera.Value.Bounds.X - BORDER_SIZE * 0.5f,
-                y = camera.Value.Bounds.Y - BORDER_SIZE * 0.5f,
+                Active = true,
+                Mouse = mouseCtx.Value.Position,
+                W = camera.Value.Bounds.Width,
+                H = camera.Value.Bounds.Height,
             };
-            nodeBorder.Ref.Floating = floating;
+            gate.Value.Mode = ActiveDrag.Resize;
         }
 
-        var layout = nodeBorder.Ref.Layout;
-        layout.sizing = new()
-        {
-            width = Clay_SizingAxis.Fixed(camera.Value.Bounds.Width + BORDER_SIZE),
-            height = Clay_SizingAxis.Fixed(camera.Value.Bounds.Height + BORDER_SIZE),
-        };
-        nodeBorder.Ref.Layout = layout;
+        var delta = mouseCtx.Value.Position - anchor.Value.Mouse;
+        var newW = anchor.Value.W + (int)delta.X;
+        var newH = anchor.Value.H + (int)delta.Y;
+        if (newW < 300) newW = 300;
+        if (newH < 300) newH = 300;
+        camera.Value.Bounds.Width = newW;
+        camera.Value.Bounds.Height = newH;
+    }
 
+    // Pull camera bounds into the three floating UI elements so what you see
+    // on screen matches where the world renderer is drawing.
+    private static void SyncWindowToCamera(
+        Res<Camera> camera,
+        Single<Data<Node>, Filter<With<GameWindowBorderUI>, With<GameScene>>> queryBorder,
+        Single<Data<Node>, Filter<With<GameWindowBorderResizeUI>, With<GameScene>>> queryResize,
+        Single<Data<Node>, Filter<With<GameWindowUI>, With<GameScene>>> queryWindow
+    )
+    {
+        var b = camera.Value.Bounds;
 
-        (_, var node) = queryGameWindow.Get();
-        if (node.Ref.Floating.HasValue)
+        if (queryBorder.TryGet(out var borderData))
         {
-            var floating = node.Ref.Floating.Value;
-            floating.offset = new()
-            {
-                x = camera.Value.Bounds.X,
-                y = camera.Value.Bounds.Y,
-            };
-            node.Ref.Floating = floating;
+            (_, var node) = borderData;
+            node.Ref.Left = Val.Px(b.X - BORDER_SIZE * 0.5f);
+            node.Ref.Top = Val.Px(b.Y - BORDER_SIZE * 0.5f);
+            node.Ref.Width = Val.Px(b.Width + BORDER_SIZE);
+            node.Ref.Height = Val.Px(b.Height + BORDER_SIZE);
         }
 
-        var nodeLayout = node.Ref.Layout;
-        nodeLayout.sizing = new()
+        if (queryResize.TryGet(out var resizeData))
         {
-            width = Clay_SizingAxis.Fixed(camera.Value.Bounds.Width),
-            height = Clay_SizingAxis.Fixed(camera.Value.Bounds.Height),
-        };
-        node.Ref.Layout = nodeLayout;
+            (_, var node) = resizeData;
+            node.Ref.Left = Val.Px(b.X + b.Width);
+            node.Ref.Top = Val.Px(b.Y + b.Height);
+            node.Ref.Width = Val.Px(BORDER_SIZE);
+            node.Ref.Height = Val.Px(BORDER_SIZE);
+        }
+
+        if (queryWindow.TryGet(out var winData))
+        {
+            (_, var node) = winData;
+            node.Ref.Left = Val.Px(b.X);
+            node.Ref.Top = Val.Px(b.Y);
+            node.Ref.Width = Val.Px(b.Width);
+            node.Ref.Height = Val.Px(b.Height);
+        }
+    }
+
+    // Allocate / reallocate the RenderTarget2D and rebind it to the game-window
+    // entity's UiImage. Mirrors the old AdjustCameraAndBounds tail.
+    private static void BindRenderTarget(
+        ResMut<RenderTarget2D> renderTarget,
+        Res<UltimaBatcher2D> batch,
+        Single<Data<UiImage>, Filter<With<GameWindowUI>, With<GameScene>>> queryWindow
+    )
+    {
+        var device = batch.Value.GraphicsDevice;
+        var pp = device.PresentationParameters;
 
         if (renderTarget.Value == null || renderTarget.Value.IsDisposed ||
-            renderTarget.Value.Width != batch.Value.GraphicsDevice.PresentationParameters.BackBufferWidth ||
-            renderTarget.Value.Height != batch.Value.GraphicsDevice.PresentationParameters.BackBufferHeight)
+            renderTarget.Value.Width != pp.BackBufferWidth ||
+            renderTarget.Value.Height != pp.BackBufferHeight)
         {
             renderTarget.Value?.Dispose();
-            renderTarget.Value = new(
-                batch.Value.GraphicsDevice,
-                batch.Value.GraphicsDevice.PresentationParameters.BackBufferWidth,
-                batch.Value.GraphicsDevice.PresentationParameters.BackBufferHeight,
+            renderTarget.Value = new RenderTarget2D(
+                device,
+                pp.BackBufferWidth,
+                pp.BackBufferHeight,
                 false,
                 SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
-
-            imageCache.Value[renderTarget.Value.GetHashCode()] = renderTarget.Value;
         }
-        else
+
+        if (queryWindow.TryGet(out var data))
         {
-            unsafe
-            {
-                var image = node.Ref.Image ?? new Clay_ImageElementConfig();
-                image.imageData = (void*)renderTarget.Value.GetHashCode();
-                node.Ref.Image = image;
-            }
+            (_, var img) = data;
+            img.Ref.ImageData = renderTarget.Value;
+            img.Ref.SourceSize = new System.Numerics.Vector2(renderTarget.Value.Width, renderTarget.Value.Height);
+            img.Ref.Tint = ClayColor.White;
         }
-    }
-
-    private static void LogoutButtonHandler(
-        On<ClayPointerEvent> trigger,
-        Res<NextState<GameState>> state
-    )
-    {
-        if (!trigger.Event.IsLeftButton || trigger.Event.EventType != ClayPointerEventType.Click)
-            return;
-
-        Console.WriteLine("Logout button pressed");
-        state.Value.Set(GameState.LoginScreen);
     }
 
     private static void UpdateEntitiesCount(
-        Commands commands,
-        Query<Data<ClayNode>, With<TotalEntitiesMenu>> query,
+        Query<Data<Text>, With<TotalEntitiesText>> query,
         Query<Empty, With<IsTile>> queryTiles,
         Query<Empty, With<IsStatic>> queryStatics
     )
@@ -299,31 +461,54 @@ internal readonly struct GameScreenPlugin : IPlugin
         var total = 0; // world.EntityCount;
         var countTiles = queryTiles.Count();
         var countStatics = queryStatics.Count();
-        foreach ((var entity, var node) in query)
+        foreach (var (_, text) in query)
         {
-            var newText = $"Total entities: {total} - tiles: {countTiles} - statics: {countStatics}";
-            // Update the text in the ClayNode
-            if (node.Ref.Text.HasValue)
-            {
-                var textConfig = node.Ref.Text.Value.Config;
-                // Create a new node with updated text
-                var updatedNode = ClayNode.Configure()
-                    .WidthFit()
-                    .HeightGrow()
-                    .Align(Clay_LayoutAlignmentX.CLAY_ALIGN_X_CENTER, Clay_LayoutAlignmentY.CLAY_ALIGN_Y_CENTER)
-                    .Padding(4)
-                    .Background(0, 0, 127, 255)
-                    .Text(newText, textConfig.fontSize, textConfig.textColor)
-                    .Build();
-                commands.Entity(entity.Ref).Insert(updatedNode);
-            }
+            text.Ref.Value = $"Total entities: {total} - tiles: {countTiles} - statics: {countStatics}";
         }
     }
 
-    private static void Cleanup(Commands commands, Query<Data<ClayNode>, Filter<Without<Parent>, With<GameScene>>> query)
+    private static void UpdateSelectedEntity(
+        Res<SelectedEntity> selected,
+        Query<Data<Text>, With<SelectedEntityText>> queryText,
+        Query<Data<WorldPosition, Graphic>, Filter<Optional<WorldPosition>, Optional<Graphic>>> queryInfo,
+        Query<Data<NetworkSerial>, Filter<Optional<NetworkSerial>>> querySerial
+    )
+    {
+        var ent = selected.Value.Entity;
+        string label;
+        if (ent == 0)
+        {
+            label = "No selection";
+        }
+        else
+        {
+            label = $"Entity: 0x{ent:X}";
+            if (queryInfo.Contains(ent))
+            {
+                var (_, pos, gfx) = queryInfo.Get(ent);
+                if (gfx.IsValid())
+                    label += $"\nGraphic: 0x{gfx.Ref.Value:X4}";
+                if (pos.IsValid())
+                    label += $"\nPos: {pos.Ref.X}, {pos.Ref.Y}, {pos.Ref.Z}";
+            }
+            if (querySerial.Contains(ent))
+            {
+                var (_, serial) = querySerial.Get(ent);
+                if (serial.IsValid())
+                    label += $"\nSerial: 0x{serial.Ref.Value:X8}";
+            }
+        }
+
+        foreach (var (_, text) in queryText)
+            text.Ref.Value = label;
+    }
+
+    private static void Cleanup(
+        Commands commands,
+        Query<Data<Node>, Filter<With<GameScene>>> query)
     {
         Console.WriteLine("[GameScreen] cleanup start");
-        foreach ((var ent, _) in query)
+        foreach (var (ent, _) in query)
             commands.Entity(ent.Ref).Despawn();
         Console.WriteLine("[GameScreen] cleanup done");
     }
@@ -333,6 +518,8 @@ internal readonly struct GameScreenPlugin : IPlugin
     private struct GameWindowBorderUI;
     private struct GameWindowBorderResizeUI;
     private struct TotalEntitiesMenu;
+    private struct TotalEntitiesText;
+    private struct SelectedEntityText;
 
     private enum ButtonAction
     {
