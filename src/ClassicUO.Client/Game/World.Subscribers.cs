@@ -55,6 +55,7 @@ namespace ClassicUO.Game
             SubscribeGumpsUI();
             SubscribeMapData();
             SubscribeBoat();
+            SubscribeVendor();
         }
 
         public void UnsubscribeEvents()
@@ -100,6 +101,7 @@ namespace ClassicUO.Game
             UnsubscribeGumpsUI();
             UnsubscribeMapData();
             UnsubscribeBoat();
+            UnsubscribeVendor();
         }
 
         private void OnItemDragAnimation(ItemDragAnimationArgs e)

@@ -91,11 +91,23 @@ namespace ClassicUO.Game.Events
 
     internal readonly record struct ItemDropAcceptedArgs;
 
-    internal readonly record struct ShopBuyListReceivedArgs(uint VendorSerial, byte Count);
+    internal readonly record struct ShopBuyListReceivedArgs(
+        uint VendorSerial,
+        byte Count,
+        byte[] Data,
+        int Offset);
 
-    internal readonly record struct ShopSellListReceivedArgs(uint VendorSerial, ushort Count);
+    internal readonly record struct ShopSellListReceivedArgs(
+        uint VendorSerial,
+        ushort Count,
+        byte[] Data,
+        int Offset);
 
-    internal readonly record struct TradeWindowArgs(byte SubType, uint Serial);
+    internal readonly record struct TradeWindowArgs(
+        byte SubType,
+        uint Serial,
+        byte[] Data,
+        int Offset);
 
     internal readonly record struct CustomHouseReceivedArgs(
         uint Serial,
