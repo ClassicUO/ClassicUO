@@ -97,5 +97,9 @@ namespace ClassicUO.Game.Events
 
     internal readonly record struct TradeWindowArgs(byte SubType, uint Serial);
 
-    internal readonly record struct CustomHouseReceivedArgs(uint Serial, uint Revision);
+    internal readonly record struct CustomHouseReceivedArgs(
+        uint Serial,
+        uint Revision,
+        byte[] Data,
+        int Offset);
 }
