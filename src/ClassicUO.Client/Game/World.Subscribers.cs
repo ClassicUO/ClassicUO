@@ -54,6 +54,7 @@ namespace ClassicUO.Game
             SubscribeEnterWorldExtras();
             SubscribeGumpsUI();
             SubscribeMapData();
+            SubscribeBoat();
         }
 
         public void UnsubscribeEvents()
@@ -98,6 +99,7 @@ namespace ClassicUO.Game
             UnsubscribeEnterWorldExtras();
             UnsubscribeGumpsUI();
             UnsubscribeMapData();
+            UnsubscribeBoat();
         }
 
         private void OnItemDragAnimation(ItemDragAnimationArgs e)

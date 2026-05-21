@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
+using System.Collections.Generic;
+
 namespace ClassicUO.Game.Events
 {
     internal readonly record struct WeatherChangedArgs(byte WeatherType, byte Count, byte Temperature);
@@ -36,6 +38,8 @@ namespace ClassicUO.Game.Events
 
     internal readonly record struct MultiPlacementReceivedArgs(byte AllowGround, uint TargetId, byte Flags, ushort MultiId, ushort OffsetX, ushort OffsetY, ushort OffsetZ, ushort Hue);
 
+    internal readonly record struct BoatPassenger(uint Serial, ushort X, ushort Y, ushort Z);
+
     internal readonly record struct BoatMovingReceivedArgs(
         uint Serial,
         byte Speed,
@@ -43,7 +47,8 @@ namespace ClassicUO.Game.Events
         byte FacingDirection,
         ushort X,
         ushort Y,
-        ushort Z);
+        ushort Z,
+        IReadOnlyList<BoatPassenger> Passengers);
 
     internal readonly record struct MapDataReceivedArgs(
         uint Serial,

@@ -3751,11 +3751,6 @@ namespace ClassicUO.Network
 
         private static void BoatMoving(World world, ref StackDataReader p)
         {
-            if (!world.InGame)
-            {
-                return;
-            }
-
             uint serial = p.ReadUInt32BE();
             byte boatSpeed = p.ReadUInt8();
             Direction movingDirection = (Direction)p.ReadUInt8() & Direction.Mask;
@@ -3764,152 +3759,18 @@ namespace ClassicUO.Network
             ushort y = p.ReadUInt16BE();
             ushort z = p.ReadUInt16BE();
 
-            EventSink.RaiseBoatMovingReceived(new BoatMovingReceivedArgs(serial, boatSpeed, (byte)movingDirection, (byte)facingDirection, x, y, z));
-
-            Item multi = world.Items.Get(serial);
-
-            if (multi == null)
-            {
-                return;
-            }
-
-            //multi.LastX = x;
-            //multi.LastY = y;
-
-            //if (World.HouseManager.TryGetHouse(serial, out var house))
-            //{
-            //    foreach (Multi component in house.Components)
-            //    {
-            //        component.LastX = (ushort) (x + component.MultiOffsetX);
-            //        component.LastY = (ushort) (y + component.MultiOffsetY);
-            //    }
-            //}
-
-            bool smooth =
-                ProfileManager.CurrentProfile != null
-                && ProfileManager.CurrentProfile.UseSmoothBoatMovement;
-
-            if (smooth)
-            {
-                world.BoatMovingManager.AddStep(
-                    serial,
-                    boatSpeed,
-                    movingDirection,
-                    facingDirection,
-                    x,
-                    y,
-                    (sbyte)z
-                );
-            }
-            else
-            {
-                //UpdateGameObject(serial,
-                //                 multi.Graphic,
-                //                 0,
-                //                 multi.Amount,
-                //                 x,
-                //                 y,
-                //                 (sbyte) z,
-                //                 facingDirection,
-                //                 multi.Hue,
-                //                 multi.Flags,
-                //                 0,
-                //                 2,
-                //                 1);
-
-                multi.SetInWorldTile(x, y, (sbyte)z);
-
-                if (world.HouseManager.TryGetHouse(serial, out House house))
-                {
-                    house.Generate(true, true, true);
-                }
-            }
-
             int count = p.ReadUInt16BE();
-
+            var passengers = new List<BoatPassenger>(count);
             for (int i = 0; i < count; i++)
             {
                 uint cSerial = p.ReadUInt32BE();
                 ushort cx = p.ReadUInt16BE();
                 ushort cy = p.ReadUInt16BE();
                 ushort cz = p.ReadUInt16BE();
-
-                if (cSerial == world.Player)
-                {
-                    world.RangeSize.X = cx;
-                    world.RangeSize.Y = cy;
-                }
-
-                Entity ent = world.Get(cSerial);
-
-                if (ent == null)
-                {
-                    continue;
-                }
-
-                //if (SerialHelper.IsMobile(cSerial))
-                //{
-                //    Mobile m = (Mobile) ent;
-
-                //    if (m.Steps.Count != 0)
-                //    {
-                //        ref var step = ref m.Steps.Back();
-
-                //        step.X = cx;
-                //        step.Y = cy;
-                //    }
-                //}
-
-                //ent.LastX = cx;
-                //ent.LastY = cy;
-
-                if (smooth)
-                {
-                    world.BoatMovingManager.PushItemToList(
-                        serial,
-                        cSerial,
-                        x - cx,
-                        y - cy,
-                        (sbyte)(z - cz)
-                    );
-                }
-                else
-                {
-                    if (cSerial == world.Player)
-                    {
-                        world.UpdatePlayer(
-                            cSerial,
-                            ent.Graphic,
-                            0,
-                            ent.Hue,
-                            ent.Flags,
-                            cx,
-                            cy,
-                            (sbyte)cz,
-                            0,
-                            world.Player.Direction
-                        );
-                    }
-                    else
-                    {
-                        world.UpdateGameObject(
-                            cSerial,
-                            ent.Graphic,
-                            0,
-                            (ushort)(ent.Graphic == 0x2006 ? ((Item)ent).Amount : 0),
-                            cx,
-                            cy,
-                            (sbyte)cz,
-                            SerialHelper.IsMobile(ent) ? ent.Direction : 0,
-                            ent.Hue,
-                            ent.Flags,
-                            0,
-                            0,
-                            1
-                        );
-                    }
-                }
+                passengers.Add(new BoatPassenger(cSerial, cx, cy, cz));
             }
+
+            EventSink.RaiseBoatMovingReceived(new BoatMovingReceivedArgs(serial, boatSpeed, (byte)movingDirection, (byte)facingDirection, x, y, z, passengers));
         }
 
         private static void PacketList(World world, ref StackDataReader p)
