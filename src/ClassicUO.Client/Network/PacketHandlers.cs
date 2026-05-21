@@ -709,13 +709,6 @@ namespace ClassicUO.Network
             }
 
             uint mobSerial = p.ReadUInt32BE();
-            Mobile mobile = world.Mobiles.Get(mobSerial);
-
-            if (mobile == null)
-            {
-                return;
-            }
-
             ushort count = p.ReadUInt16BE();
 
             for (int i = 0; i < count; i++)
@@ -724,47 +717,6 @@ namespace ClassicUO.Network
                 bool enabled = p.ReadBool();
 
                 EventSink.RaiseHealthBarStateChanged(new HealthBarStateChangedArgs(mobSerial, type, enabled));
-
-                if (type == 1)
-                {
-                    if (enabled)
-                    {
-                        if (Client.Game.UO.Version >= Utility.ClientVersion.CV_7000)
-                        {
-                            mobile.SetSAPoison(true);
-                        }
-                        else
-                        {
-                            mobile.Flags |= Flags.Poisoned;
-                        }
-                    }
-                    else
-                    {
-                        if (Client.Game.UO.Version >= Utility.ClientVersion.CV_7000)
-                        {
-                            mobile.SetSAPoison(false);
-                        }
-                        else
-                        {
-                            mobile.Flags &= ~Flags.Poisoned;
-                        }
-                    }
-                }
-                else if (type == 2)
-                {
-                    if (enabled)
-                    {
-                        mobile.Flags |= Flags.YellowBar;
-                    }
-                    else
-                    {
-                        mobile.Flags &= ~Flags.YellowBar;
-                    }
-                }
-                else if (type == 3)
-                {
-                    // ???
-                }
             }
         }
 
@@ -1555,9 +1507,6 @@ namespace ClassicUO.Network
             }
 
             EventSink.RaiseItemDragEnded(new ItemDragEndedArgs());
-
-            Client.Game.UO.GameCursor.ItemHold.Enabled = false;
-            Client.Game.UO.GameCursor.ItemHold.Dropped = false;
         }
 
         private static void DropItemAccepted(World world, ref StackDataReader p)
@@ -1568,11 +1517,6 @@ namespace ClassicUO.Network
             }
 
             EventSink.RaiseItemDropAccepted(new ItemDropAcceptedArgs());
-
-            Client.Game.UO.GameCursor.ItemHold.Enabled = false;
-            Client.Game.UO.GameCursor.ItemHold.Dropped = false;
-
-            Console.WriteLine("PACKET - ITEM DROP OK!");
         }
 
         private static void DeathScreen(World world, ref StackDataReader p)
@@ -1908,8 +1852,6 @@ namespace ClassicUO.Network
             ushort z = p.ReadUInt16BE();
 
             EventSink.RaisePathfindingReceived(new PathfindingReceivedArgs(x, y, z));
-
-            world.Player.Pathfinder.WalkTo(x, y, z, 0);
         }
 
         private static void UpdateContainedItems(World world, ref StackDataReader p)
@@ -3124,7 +3066,6 @@ namespace ClassicUO.Network
             Direction direction = (Direction)p.ReadUInt8();
             bool running = (direction & Direction.Running) != 0;
             EventSink.RaisePlayerMoved(new PlayerMovedArgs(direction & Direction.Mask, running));
-            world.Player.Walk(direction & Direction.Mask, running);
         }
 
         private static void UpdateName(World world, ref StackDataReader p)
@@ -3169,7 +3110,7 @@ namespace ClassicUO.Network
                 return;
             }
 
-            world.MessageManager.PromptData = new PromptData(ConsolePrompt.ASCII, p.ReadUInt64BE());
+            EventSink.RaiseAsciiPrompt(new AsciiPromptArgs(p.ReadUInt64BE()));
         }
 
         private static void SellList(World world, ref StackDataReader p)
@@ -3304,17 +3245,6 @@ namespace ClassicUO.Network
             uint serial = p.ReadUInt32BE();
 
             EventSink.RaiseAttackTargetChanged(new AttackTargetChangedArgs(serial));
-
-            //if (TargetManager.LastAttack != serial && World.InGame)
-            //{
-
-
-
-            //}
-
-            GameActions.SendCloseStatus(world, world.TargetManager.LastAttack);
-            world.TargetManager.LastAttack = serial;
-            GameActions.RequestMobileStatus(world, serial);
         }
 
         private static void TextEntryDialog(World world, ref StackDataReader p)
@@ -4561,7 +4491,7 @@ namespace ClassicUO.Network
                 return;
             }
 
-            world.MessageManager.PromptData = new PromptData(ConsolePrompt.Unicode, p.ReadUInt64BE());
+            EventSink.RaiseUnicodePrompt(new UnicodePromptArgs(p.ReadUInt64BE()));
         }
 
         private static void Semivisible(World world, ref StackDataReader p) { }

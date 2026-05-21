@@ -34,4 +34,8 @@ namespace ClassicUO.Game.Events
         string Arguments,
         string Affix,
         byte AffixFlags);
+
+    internal readonly record struct AsciiPromptArgs(ulong PromptId);
+
+    internal readonly record struct UnicodePromptArgs(ulong PromptId);
 }

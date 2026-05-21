@@ -113,11 +113,13 @@ namespace ClassicUO.Game.Managers
         {
             _world = world;
             EventSink.TargetCursorReceived += OnTargetCursorReceived;
+            EventSink.AttackTargetChanged += OnAttackTargetChanged;
         }
 
         public void Unsubscribe()
         {
             EventSink.TargetCursorReceived -= OnTargetCursorReceived;
+            EventSink.AttackTargetChanged -= OnAttackTargetChanged;
         }
 
         private void OnTargetCursorReceived(TargetCursorReceivedArgs e)
@@ -130,6 +132,13 @@ namespace ClassicUO.Game.Managers
                 _world.Party.PartyHealTimer = 0;
                 _world.Party.PartyHealTarget = 0;
             }
+        }
+
+        private void OnAttackTargetChanged(AttackTargetChangedArgs e)
+        {
+            GameActions.SendCloseStatus(_world, LastAttack);
+            LastAttack = e.Serial;
+            GameActions.RequestMobileStatus(_world, e.Serial);
         }
 
         public uint LastAttack, SelectedTarget, NewTargetSystemSerial;

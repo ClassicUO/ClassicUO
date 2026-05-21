@@ -50,6 +50,8 @@ namespace ClassicUO.Game.Managers
             EventSink.ChatMessage += OnChatMessage;
             EventSink.UnicodeChatMessage += OnUnicodeChatMessage;
             EventSink.ClilocMessage += OnClilocMessage;
+            EventSink.AsciiPrompt += OnAsciiPrompt;
+            EventSink.UnicodePrompt += OnUnicodePrompt;
         }
 
         public void Unsubscribe()
@@ -57,6 +59,18 @@ namespace ClassicUO.Game.Managers
             EventSink.ChatMessage -= OnChatMessage;
             EventSink.UnicodeChatMessage -= OnUnicodeChatMessage;
             EventSink.ClilocMessage -= OnClilocMessage;
+            EventSink.AsciiPrompt -= OnAsciiPrompt;
+            EventSink.UnicodePrompt -= OnUnicodePrompt;
+        }
+
+        private void OnAsciiPrompt(AsciiPromptArgs e)
+        {
+            PromptData = new PromptData(ConsolePrompt.ASCII, e.PromptId);
+        }
+
+        private void OnUnicodePrompt(UnicodePromptArgs e)
+        {
+            PromptData = new PromptData(ConsolePrompt.Unicode, e.PromptId);
         }
 
         private void OnChatMessage(ChatMessageArgs e)

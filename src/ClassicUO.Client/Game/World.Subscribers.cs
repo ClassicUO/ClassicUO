@@ -30,6 +30,11 @@ namespace ClassicUO.Game
             EventSink.BuffApplied += OnBuffApplied;
             EventSink.BuffRemoved += OnBuffRemoved;
             EventSink.ObjectDeleted += OnObjectDeleted;
+            EventSink.PlayerMoved += OnPlayerMoved;
+            EventSink.PathfindingReceived += OnPathfindingReceived;
+            EventSink.HealthBarStateChanged += OnHealthBarStateChanged;
+            EventSink.ItemDragEnded += OnItemDragEnded;
+            EventSink.ItemDropAccepted += OnItemDropAccepted;
         }
 
         public void UnsubscribeEvents()
@@ -50,6 +55,64 @@ namespace ClassicUO.Game
             EventSink.BuffApplied -= OnBuffApplied;
             EventSink.BuffRemoved -= OnBuffRemoved;
             EventSink.ObjectDeleted -= OnObjectDeleted;
+            EventSink.PlayerMoved -= OnPlayerMoved;
+            EventSink.PathfindingReceived -= OnPathfindingReceived;
+            EventSink.HealthBarStateChanged -= OnHealthBarStateChanged;
+            EventSink.ItemDragEnded -= OnItemDragEnded;
+            EventSink.ItemDropAccepted -= OnItemDropAccepted;
+        }
+
+        private void OnItemDragEnded(ItemDragEndedArgs e)
+        {
+            Client.Game.UO.GameCursor.ItemHold.Enabled = false;
+            Client.Game.UO.GameCursor.ItemHold.Dropped = false;
+        }
+
+        private void OnItemDropAccepted(ItemDropAcceptedArgs e)
+        {
+            Client.Game.UO.GameCursor.ItemHold.Enabled = false;
+            Client.Game.UO.GameCursor.ItemHold.Dropped = false;
+        }
+
+        private void OnPlayerMoved(PlayerMovedArgs e)
+        {
+            if (Player == null) return;
+            Player.Walk(e.Direction & Direction.Mask, e.IsRunning);
+        }
+
+        private void OnPathfindingReceived(PathfindingReceivedArgs e)
+        {
+            if (Player == null) return;
+            Player.Pathfinder.WalkTo(e.X, e.Y, e.Z, 0);
+        }
+
+        private void OnHealthBarStateChanged(HealthBarStateChangedArgs e)
+        {
+            Mobile mobile = Mobiles.Get(e.Serial);
+            if (mobile == null) return;
+
+            switch (e.StateType)
+            {
+                case 1: // poison
+                    if (Client.Game.UO.Version >= Utility.ClientVersion.CV_7000)
+                    {
+                        mobile.SetSAPoison(e.Enabled);
+                    }
+                    else if (e.Enabled)
+                    {
+                        mobile.Flags |= Flags.Poisoned;
+                    }
+                    else
+                    {
+                        mobile.Flags &= ~Flags.Poisoned;
+                    }
+                    break;
+
+                case 2: // yellow bar
+                    if (e.Enabled) mobile.Flags |= Flags.YellowBar;
+                    else mobile.Flags &= ~Flags.YellowBar;
+                    break;
+            }
         }
 
         private void OnObjectDeleted(ObjectDeletedArgs e)
