@@ -1435,46 +1435,8 @@ namespace ClassicUO.Network
             }
 
             uint serial = p.ReadUInt32BE();
-            byte action = p[5]; // peek for event
-            EventSink.RaiseMapDataReceived(new MapDataReceivedArgs(serial, action));
-
-            MapGump gump = UIManager.GetGump<MapGump>(serial);
-
-            if (gump != null)
-            {
-                switch ((MapMessageType)p.ReadUInt8())
-                {
-                    case MapMessageType.Add:
-                        p.Skip(1);
-
-                        ushort x = p.ReadUInt16BE();
-                        ushort y = p.ReadUInt16BE();
-
-                        gump.AddPin(x, y);
-
-                        break;
-
-                    case MapMessageType.Insert:
-                        break;
-                    case MapMessageType.Move:
-                        break;
-                    case MapMessageType.Remove:
-                        break;
-
-                    case MapMessageType.Clear:
-                        gump.ClearContainer();
-
-                        break;
-
-                    case MapMessageType.Edit:
-                        break;
-
-                    case MapMessageType.EditResponse:
-                        gump.SetPlotState(p.ReadUInt8());
-
-                        break;
-                }
-            }
+            byte action = p.Position < p.Length ? p[p.Position] : (byte)0;
+            EventSink.RaiseMapDataReceived(new MapDataReceivedArgs(serial, action, p.Buffer.ToArray(), p.Position));
         }
 
         private static void SetTime(World world, ref StackDataReader p) { }
