@@ -3,6 +3,7 @@
 using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.IO;
@@ -17,7 +18,25 @@ namespace ClassicUO.Game.Managers
 
         private readonly World _world;
 
-        public PartyManager(World world) { _world = world; }
+        public PartyManager(World world)
+        {
+            _world = world;
+            EventSink.PartyPacket += OnPartyPacket;
+        }
+
+        public void Unsubscribe()
+        {
+            EventSink.PartyPacket -= OnPartyPacket;
+        }
+
+        private void OnPartyPacket(PartyPacketArgs e)
+        {
+            byte[] bytes = e.Bytes;
+            if (bytes == null || bytes.Length == 0) return;
+
+            StackDataReader reader = new StackDataReader(bytes);
+            ParsePacket(ref reader);
+        }
 
         public uint Leader { get; set; }
         public uint Inviter { get; set; }

@@ -256,6 +256,55 @@ namespace ClassicUO.Game.Events
         public static void RaiseWaypointDisplayed(in WaypointDisplayedArgs e) => Invoke(WaypointDisplayed, e);
         public static void RaiseWaypointRemoved(in WaypointRemovedArgs e) => Invoke(WaypointRemoved, e);
 
+        // ---- ExtendedCommand (0xBF) sub-command events ----
+        public static event Action<FastWalkStackInitArgs> FastWalkStackInit;
+        public static event Action<FastWalkStackAddArgs> FastWalkStackAdd;
+        public static event Action<GenericGumpCloseArgs> GenericGumpClose;
+        public static event Action<PartyPacketArgs> PartyPacket;
+        public static event Action<MapIndexChangedArgs> MapIndexChanged;
+        public static event Action<CloseStatusbarGumpArgs> CloseStatusbarGump;
+        public static event Action<EquipInfoArgs> EquipInfoReceived;
+        public static event Action<PopupMenuArgs> PopupMenuReceived;
+        public static event Action<CloseUserInterfaceArgs> CloseUserInterface;
+        public static event Action<MapPatchesEnabledArgs> MapPatchesEnabled;
+        public static event Action<ExtendedStatsBondedArgs> ExtendedStatsBonded;
+        public static event Action<ExtendedStatsLocksArgs> ExtendedStatsLocks;
+        public static event Action<ExtendedStatsAnimationArgs> ExtendedStatsAnimation;
+        public static event Action<SpellbookContentArgs> SpellbookContent;
+        public static event Action<HouseRevisionStateArgs> HouseRevisionState;
+        public static event Action<HouseDesignStateArgs> HouseDesignState;
+        public static event Action<AbilityIconsResetArgs> AbilityIconsReset;
+        public static event Action<DamageOverheadArgs> DamageOverhead;
+        public static event Action<SpellIconToggleArgs> SpellIconToggle;
+        public static event Action<CharacterSpeedModeArgs> CharacterSpeedMode;
+        public static event Action<RaceChangeRequestedArgs> RaceChangeRequested;
+        public static event Action<MobileAnimationFrameArgs> MobileAnimationFrame;
+        public static event Action<CuoCommandArgs> CuoCommand;
+
+        public static void RaiseFastWalkStackInit(in FastWalkStackInitArgs e) => Invoke(FastWalkStackInit, e);
+        public static void RaiseFastWalkStackAdd(in FastWalkStackAddArgs e) => Invoke(FastWalkStackAdd, e);
+        public static void RaiseGenericGumpClose(in GenericGumpCloseArgs e) => Invoke(GenericGumpClose, e);
+        public static void RaisePartyPacket(in PartyPacketArgs e) => Invoke(PartyPacket, e);
+        public static void RaiseMapIndexChanged(in MapIndexChangedArgs e) => Invoke(MapIndexChanged, e);
+        public static void RaiseCloseStatusbarGump(in CloseStatusbarGumpArgs e) => Invoke(CloseStatusbarGump, e);
+        public static void RaiseEquipInfoReceived(in EquipInfoArgs e) => Invoke(EquipInfoReceived, e);
+        public static void RaisePopupMenuReceived(in PopupMenuArgs e) => Invoke(PopupMenuReceived, e);
+        public static void RaiseCloseUserInterface(in CloseUserInterfaceArgs e) => Invoke(CloseUserInterface, e);
+        public static void RaiseMapPatchesEnabled(in MapPatchesEnabledArgs e) => Invoke(MapPatchesEnabled, e);
+        public static void RaiseExtendedStatsBonded(in ExtendedStatsBondedArgs e) => Invoke(ExtendedStatsBonded, e);
+        public static void RaiseExtendedStatsLocks(in ExtendedStatsLocksArgs e) => Invoke(ExtendedStatsLocks, e);
+        public static void RaiseExtendedStatsAnimation(in ExtendedStatsAnimationArgs e) => Invoke(ExtendedStatsAnimation, e);
+        public static void RaiseSpellbookContent(in SpellbookContentArgs e) => Invoke(SpellbookContent, e);
+        public static void RaiseHouseRevisionState(in HouseRevisionStateArgs e) => Invoke(HouseRevisionState, e);
+        public static void RaiseHouseDesignState(in HouseDesignStateArgs e) => Invoke(HouseDesignState, e);
+        public static void RaiseAbilityIconsReset(in AbilityIconsResetArgs e) => Invoke(AbilityIconsReset, e);
+        public static void RaiseDamageOverhead(in DamageOverheadArgs e) => Invoke(DamageOverhead, e);
+        public static void RaiseSpellIconToggle(in SpellIconToggleArgs e) => Invoke(SpellIconToggle, e);
+        public static void RaiseCharacterSpeedMode(in CharacterSpeedModeArgs e) => Invoke(CharacterSpeedMode, e);
+        public static void RaiseRaceChangeRequested(in RaceChangeRequestedArgs e) => Invoke(RaceChangeRequested, e);
+        public static void RaiseMobileAnimationFrame(in MobileAnimationFrameArgs e) => Invoke(MobileAnimationFrame, e);
+        public static void RaiseCuoCommand(in CuoCommandArgs e) => Invoke(CuoCommand, e);
+
         private static void Invoke<T>(Action<T> handler, in T args)
         {
             if (handler is null) return;
@@ -395,6 +444,30 @@ namespace ClassicUO.Game.Events
             QuestArrowDisplayed = null;
             WaypointDisplayed = null;
             WaypointRemoved = null;
+
+            FastWalkStackInit = null;
+            FastWalkStackAdd = null;
+            GenericGumpClose = null;
+            PartyPacket = null;
+            MapIndexChanged = null;
+            CloseStatusbarGump = null;
+            EquipInfoReceived = null;
+            PopupMenuReceived = null;
+            CloseUserInterface = null;
+            MapPatchesEnabled = null;
+            ExtendedStatsBonded = null;
+            ExtendedStatsLocks = null;
+            ExtendedStatsAnimation = null;
+            SpellbookContent = null;
+            HouseRevisionState = null;
+            HouseDesignState = null;
+            AbilityIconsReset = null;
+            DamageOverhead = null;
+            SpellIconToggle = null;
+            CharacterSpeedMode = null;
+            RaceChangeRequested = null;
+            MobileAnimationFrame = null;
+            CuoCommand = null;
         }
     }
 }

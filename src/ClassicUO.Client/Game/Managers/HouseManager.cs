@@ -6,6 +6,7 @@ using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
+using ClassicUO.Network;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 
@@ -20,11 +21,13 @@ namespace ClassicUO.Game.Managers
         {
             _world = world;
             EventSink.CustomHouseReceived += OnCustomHouseReceived;
+            EventSink.HouseRevisionState += OnHouseRevisionState;
         }
 
         public void Unsubscribe()
         {
             EventSink.CustomHouseReceived -= OnCustomHouseReceived;
+            EventSink.HouseRevisionState -= OnHouseRevisionState;
         }
 
         public IReadOnlyCollection<House> Houses => _houses.Values;
@@ -230,6 +233,40 @@ namespace ClassicUO.Game.Managers
             }
 
             _world.BoatMovingManager.ClearSteps(serial);
+        }
+
+        private void OnHouseRevisionState(HouseRevisionStateArgs e)
+        {
+            uint serial = e.Serial;
+            uint revision = e.Revision;
+
+            Item multi = _world.Items.Get(serial);
+
+            if (multi == null)
+            {
+                Remove(serial);
+            }
+
+            if (
+                !TryGetHouse(serial, out House house)
+                || !house.IsCustom
+                || house.Revision != revision
+            )
+            {
+                PacketHandlers.Handler._customHouseRequests.Add(serial);
+            }
+            else
+            {
+                house.Generate();
+                _world.BoatMovingManager.ClearSteps(serial);
+
+                UIManager.GetGump<MiniMapGump>()?.RequestUpdateContents();
+
+                if (EntityIntoHouse(serial, _world.Player))
+                {
+                    Client.Game.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
+                }
+            }
         }
     }
 }

@@ -56,6 +56,10 @@ namespace ClassicUO.Game
             SubscribeMapData();
             SubscribeBoat();
             SubscribeVendor();
+            SubscribeExtendedWalk();
+            SubscribeExtendedGumps();
+            SubscribeExtendedStats();
+            SubscribeExtendedMisc();
         }
 
         public void UnsubscribeEvents()
@@ -102,6 +106,10 @@ namespace ClassicUO.Game
             UnsubscribeMapData();
             UnsubscribeBoat();
             UnsubscribeVendor();
+            UnsubscribeExtendedWalk();
+            UnsubscribeExtendedGumps();
+            UnsubscribeExtendedStats();
+            UnsubscribeExtendedMisc();
         }
 
         private void OnItemDragAnimation(ItemDragAnimationArgs e)
