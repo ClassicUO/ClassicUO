@@ -50,6 +50,7 @@ namespace ClassicUO.Game
             SubscribeMobileUpdates();
             SubscribeDeathDisplay();
             SubscribeDenyMove();
+            SubscribeOpenContainer();
         }
 
         public void UnsubscribeEvents()
@@ -90,6 +91,7 @@ namespace ClassicUO.Game
             UnsubscribeMobileUpdates();
             UnsubscribeDeathDisplay();
             UnsubscribeDenyMove();
+            UnsubscribeOpenContainer();
         }
 
         private void OnItemDragAnimation(ItemDragAnimationArgs e)
