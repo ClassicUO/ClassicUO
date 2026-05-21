@@ -75,7 +75,7 @@ namespace ClassicUO.Game.Events
 
     internal readonly record struct HealthBarStateChangedArgs(uint Serial, ushort StateType, bool Enabled);
 
-    internal readonly record struct BuffAppliedArgs(uint Serial, ushort IconType, ushort Timer);
+    internal readonly record struct BuffAppliedArgs(uint Serial, ushort IconType, ushort IconId, ushort Timer, string Text);
 
     internal readonly record struct BuffRemovedArgs(uint Serial, ushort IconType);
 

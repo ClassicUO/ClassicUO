@@ -2,6 +2,7 @@
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
@@ -108,7 +109,28 @@ namespace ClassicUO.Game.Managers
         private Action<GameObject> _targetCallback;
 
 
-        public TargetManager(World world) { _world = world; }
+        public TargetManager(World world)
+        {
+            _world = world;
+            EventSink.TargetCursorReceived += OnTargetCursorReceived;
+        }
+
+        public void Unsubscribe()
+        {
+            EventSink.TargetCursorReceived -= OnTargetCursorReceived;
+        }
+
+        private void OnTargetCursorReceived(TargetCursorReceivedArgs e)
+        {
+            SetTargeting((CursorTarget)e.CursorType, e.TargetId, (TargetType)e.TargetType);
+
+            if (_world.Party.PartyHealTimer < Time.Ticks && _world.Party.PartyHealTarget != 0)
+            {
+                Target(_world.Party.PartyHealTarget);
+                _world.Party.PartyHealTimer = 0;
+                _world.Party.PartyHealTarget = 0;
+            }
+        }
 
         public uint LastAttack, SelectedTarget, NewTargetSystemSerial;
 

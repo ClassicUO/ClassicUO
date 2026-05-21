@@ -364,19 +364,6 @@ namespace ClassicUO.Network
             byte targetType = p.ReadUInt8();
 
             EventSink.RaiseTargetCursorReceived(new TargetCursorReceivedArgs(cursorType, targetId, targetType));
-
-            world.TargetManager.SetTargeting(
-                (CursorTarget)cursorType,
-                targetId,
-                (TargetType)targetType
-            );
-
-            if (world.Party.PartyHealTimer < Time.Ticks && world.Party.PartyHealTarget != 0)
-            {
-                world.TargetManager.Target(world.Party.PartyHealTarget);
-                world.Party.PartyHealTimer = 0;
-                world.Party.PartyHealTarget = 0;
-            }
         }
 
         private static void SecureTrading(World world, ref StackDataReader p)
@@ -477,18 +464,9 @@ namespace ClassicUO.Network
             }
 
             uint serial = p.ReadUInt32BE();
-            Entity entity = world.Get(serial);
+            ushort damage = p.ReadUInt16BE();
 
-            if (entity != null)
-            {
-                ushort damage = p.ReadUInt16BE();
-
-                if (damage > 0)
-                {
-                    EventSink.RaiseDamageReceived(new DamageReceivedArgs(serial, damage));
-                    world.WorldTextManager.AddDamage(entity, damage);
-                }
-            }
+            EventSink.RaiseDamageReceived(new DamageReceivedArgs(serial, damage));
         }
 
         private static void CharacterStatus(World world, ref StackDataReader p)
@@ -1002,146 +980,8 @@ namespace ClassicUO.Network
 
         private static void DeleteObject(World world, ref StackDataReader p)
         {
-            if (world.Player == null)
-            {
-                return;
-            }
-
             uint serial = p.ReadUInt32BE();
-
-            if (world.Player == serial)
-            {
-                return;
-            }
-
             EventSink.RaiseObjectDeleted(new ObjectDeletedArgs(serial));
-
-            Entity entity = world.Get(serial);
-
-            if (entity == null)
-            {
-                return;
-            }
-
-            bool updateAbilities = false;
-
-            if (entity is Item it)
-            {
-                uint cont = it.Container & 0x7FFFFFFF;
-
-                if (SerialHelper.IsValid(it.Container))
-                {
-                    Entity top = world.Get(it.RootContainer);
-
-                    if (top != null)
-                    {
-                        if (top == world.Player)
-                        {
-                            updateAbilities =
-                                it.Layer == Layer.OneHanded || it.Layer == Layer.TwoHanded;
-                            Item tradeBoxItem = world.Player.GetSecureTradeBox();
-
-                            if (tradeBoxItem != null)
-                            {
-                                UIManager.GetTradingGump(tradeBoxItem)?.RequestUpdateContents();
-                            }
-                        }
-                    }
-
-                    if (cont == world.Player && it.Layer == Layer.Invalid)
-                    {
-                        Client.Game.UO.GameCursor.ItemHold.Enabled = false;
-                    }
-
-                    if (it.Layer != Layer.Invalid)
-                    {
-                        UIManager.GetGump<PaperDollGump>(cont)?.RequestUpdateContents();
-                    }
-
-                    UIManager.GetGump<ContainerGump>(cont)?.RequestUpdateContents();
-
-                    if (
-                        top != null
-                        && top.Graphic == 0x2006
-                        && (
-                            ProfileManager.CurrentProfile.GridLootType == 1
-                            || ProfileManager.CurrentProfile.GridLootType == 2
-                        )
-                    )
-                    {
-                        UIManager.GetGump<GridLootGump>(cont)?.RequestUpdateContents();
-                    }
-
-                    if (it.Graphic == 0x0EB0)
-                    {
-                        UIManager.GetGump<BulletinBoardItem>(serial)?.Dispose();
-
-                        BulletinBoardGump bbgump = UIManager.GetGump<BulletinBoardGump>();
-
-                        if (bbgump != null)
-                        {
-                            bbgump.RemoveBulletinObject(serial);
-                        }
-                    }
-                }
-            }
-
-            if (world.CorpseManager.Exists(0, serial))
-            {
-                return;
-            }
-
-            if (entity is Mobile m)
-            {
-                if (world.Party.Contains(serial))
-                {
-                    // m.RemoveFromTile();
-                }
-
-                // else
-                {
-                    //BaseHealthBarGump bar = UIManager.GetGump<BaseHealthBarGump>(serial);
-
-                    //if (bar == null)
-                    //{
-                    //    NetClient.Socket.Send(new PCloseStatusBarGump(serial));
-                    //}
-
-                    world.RemoveMobile(serial, true);
-                }
-            }
-            else
-            {
-                Item item = (Item)entity;
-
-                if (item.IsMulti)
-                {
-                    world.HouseManager.Remove(serial);
-                }
-
-                Entity cont = world.Get(item.Container);
-
-                if (cont != null)
-                {
-                    cont.Remove(item);
-
-                    if (item.Layer != Layer.Invalid)
-                    {
-                        UIManager.GetGump<PaperDollGump>(cont)?.RequestUpdateContents();
-                    }
-                }
-                else if (item.IsMulti)
-                {
-                    UIManager.GetGump<MiniMapGump>()?.RequestUpdateContents();
-                }
-
-                world.RemoveItem(serial, true);
-
-                if (updateAbilities)
-                {
-                    world.Player.UpdateAbilities();
-                }
-            }
         }
 
         private static void UpdatePlayer(World world, ref StackDataReader p)
@@ -2142,24 +1982,14 @@ namespace ClassicUO.Network
             }
 
             uint lightSerial = p.ReadUInt32BE();
-            if (world.Player == lightSerial)
+            byte level = p.ReadUInt8();
+
+            if (level > 0x1E)
             {
-                byte level = p.ReadUInt8();
-
-                if (level > 0x1E)
-                {
-                    level = 0x1E;
-                }
-
-                EventSink.RaiseLightLevelChanged(new LightLevelChangedArgs(lightSerial, level, true));
-
-                world.Light.RealPersonal = level;
-
-                if (!ProfileManager.CurrentProfile.UseCustomLightLevel)
-                {
-                    world.Light.Personal = level;
-                }
+                level = 0x1E;
             }
+
+            EventSink.RaiseLightLevelChanged(new LightLevelChangedArgs(lightSerial, level, true));
         }
 
         private static void LightLevel(World world, ref StackDataReader p)
@@ -2177,19 +2007,6 @@ namespace ClassicUO.Network
             }
 
             EventSink.RaiseLightLevelChanged(new LightLevelChangedArgs(0, level, false));
-
-            world.Light.RealOverall = level;
-
-            if (
-                !ProfileManager.CurrentProfile.UseCustomLightLevel
-                || ProfileManager.CurrentProfile.LightLevelType == 1
-            )
-            {
-                world.Light.Overall =
-                    ProfileManager.CurrentProfile.LightLevelType == 1
-                        ? Math.Min(level, ProfileManager.CurrentProfile.LightLevel)
-                        : level;
-            }
         }
 
         private static void PlaySoundEffect(World world, ref StackDataReader p)
@@ -2517,26 +2334,6 @@ namespace ClassicUO.Network
                 fixedDirection,
                 doesExplode,
                 (byte)blendmode));
-
-            world.SpawnEffect(
-                type,
-                source,
-                target,
-                graphic,
-                (ushort)hue,
-                srcX,
-                srcY,
-                srcZ,
-                targetX,
-                targetY,
-                targetZ,
-                speed,
-                duration,
-                fixedDirection,
-                doesExplode,
-                false,
-                blendmode
-            );
         }
 
         private static void ClientViewRange(World world, ref StackDataReader p)
@@ -4075,26 +3872,6 @@ namespace ClassicUO.Network
             byte music = p.ReadUInt8();
 
             EventSink.RaiseSeasonChanged(new SeasonChangedArgs(season, music));
-
-            if (season > 4)
-            {
-                season = 0;
-            }
-
-            if (world.Player.IsDead && season == 4)
-            {
-                return;
-            }
-
-            world.OldSeason = (Season)season;
-            world.OldMusicIndex = music;
-
-            if (world.Season == Game.Managers.Season.Desolation)
-            {
-                world.OldMusicIndex = 42;
-            }
-
-            world.ChangeSeason((Season)season, music);
         }
 
         private static void ClientVersion(World world, ref StackDataReader p)
@@ -5429,14 +5206,11 @@ namespace ClassicUO.Network
 
             if (iconID < BuffTable.Table.Length)
             {
-                BuffGump gump = UIManager.GetGump<BuffGump>();
                 ushort count = p.ReadUInt16BE();
 
                 if (count == 0)
                 {
                     EventSink.RaiseBuffRemoved(new BuffRemovedArgs(serial, (ushort)ic));
-                    world.Player.RemoveBuff(ic);
-                    gump?.RequestUpdateContents();
                 }
                 else
                 {
@@ -5502,14 +5276,7 @@ namespace ClassicUO.Network
                         }
 
                         string text = $"<left>{title}{description}{wtf}</left>";
-                        bool alreadyExists = world.Player.IsBuffIconExists(ic);
-                        EventSink.RaiseBuffApplied(new BuffAppliedArgs(serial, (ushort)ic, timer));
-                        world.Player.AddBuff(ic, BuffTable.Table[iconID], timer, text);
-
-                        if (!alreadyExists)
-                        {
-                            gump?.RequestUpdateContents();
-                        }
+                        EventSink.RaiseBuffApplied(new BuffAppliedArgs(serial, (ushort)ic, iconID, timer, text));
                     }
                 }
             }

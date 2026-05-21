@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Renderer;
 using System;
@@ -13,7 +14,23 @@ namespace ClassicUO.Game.Managers
         private readonly List<Tuple<uint, uint>> _subst = new List<Tuple<uint, uint>>();
         private readonly List<uint> _toRemoveDamages = new List<uint>();
 
-        public WorldTextManager(World world) : base(world) { }
+        public WorldTextManager(World world) : base(world)
+        {
+            EventSink.DamageReceived += OnDamageReceived;
+        }
+
+        public void Unsubscribe()
+        {
+            EventSink.DamageReceived -= OnDamageReceived;
+        }
+
+        private void OnDamageReceived(DamageReceivedArgs e)
+        {
+            Entity entity = World.Get(e.Serial);
+            if (entity == null || e.Damage == 0) return;
+
+            AddDamage(entity.Serial, e.Damage);
+        }
 
         public override void Update()
         {
