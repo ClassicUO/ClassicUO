@@ -2,6 +2,7 @@
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
@@ -67,6 +68,8 @@ namespace ClassicUO.Game.Scenes
         {
             base.Load();
 
+            SubscribeLoginEvents();
+
             Client.Game.Window.AllowUserResizing = false;
 
             _autoLogin = Settings.GlobalSettings.AutoLogin;
@@ -105,6 +108,8 @@ namespace ClassicUO.Game.Scenes
                 return;
             }
 
+            UnsubscribeLoginEvents();
+
             Client.Game.Audio?.StopMusic();
             Client.Game.Audio?.StopSounds();
 
@@ -118,6 +123,68 @@ namespace ClassicUO.Game.Scenes
 
             Client.Game.UO.GameCursor.IsLoading = false;
             base.Unload();
+        }
+
+        private void SubscribeLoginEvents()
+        {
+            EventSink.ServerListReceived += OnServerListReceived;
+            EventSink.ServerRelayReceived += OnServerRelayReceived;
+            EventSink.CharacterListUpdated += OnCharacterListUpdated;
+            EventSink.CharacterListReceived += OnCharacterListReceived;
+            EventSink.LoginDelayReceived += OnLoginDelayReceived;
+            EventSink.LoginRejected += OnLoginRejected;
+        }
+
+        private void UnsubscribeLoginEvents()
+        {
+            EventSink.ServerListReceived -= OnServerListReceived;
+            EventSink.ServerRelayReceived -= OnServerRelayReceived;
+            EventSink.CharacterListUpdated -= OnCharacterListUpdated;
+            EventSink.CharacterListReceived -= OnCharacterListReceived;
+            EventSink.LoginDelayReceived -= OnLoginDelayReceived;
+            EventSink.LoginRejected -= OnLoginRejected;
+        }
+
+        private void OnServerListReceived(ServerListReceivedArgs e)
+        {
+            var reader = new StackDataReader(e.Data);
+            reader.Seek(e.Offset);
+            ServerListReceived(ref reader);
+        }
+
+        private void OnServerRelayReceived(ServerRelayReceivedArgs e)
+        {
+            var reader = new StackDataReader(e.Data);
+            reader.Seek(e.Offset);
+            HandleRelayServerPacket(ref reader);
+        }
+
+        private void OnCharacterListUpdated(CharacterListUpdatedArgs e)
+        {
+            var reader = new StackDataReader(e.Data);
+            reader.Seek(e.Offset);
+            UpdateCharacterList(ref reader);
+        }
+
+        private void OnCharacterListReceived(CharacterListReceivedArgs e)
+        {
+            var reader = new StackDataReader(e.Data);
+            reader.Seek(e.Offset);
+            ReceiveCharacterList(ref reader);
+        }
+
+        private void OnLoginDelayReceived(LoginDelayReceivedArgs e)
+        {
+            var reader = new StackDataReader(e.Data);
+            reader.Seek(e.Offset);
+            HandleLoginDelayPacket(ref reader);
+        }
+
+        private void OnLoginRejected(LoginRejectedArgs e)
+        {
+            var reader = new StackDataReader(e.Data);
+            reader.Seek(e.Offset);
+            HandleErrorCode(ref reader);
         }
 
         public override void Update()
@@ -547,7 +614,7 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        public void ServerListReceived(ref StackDataReader p)
+        private void ServerListReceived(ref StackDataReader p)
         {
             byte flags = p.ReadUInt8();
             ushort count = p.ReadUInt16BE();
@@ -572,7 +639,7 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        public void UpdateCharacterList(ref StackDataReader p)
+        private void UpdateCharacterList(ref StackDataReader p)
         {
             ParseCharacterList(ref p);
 
@@ -595,7 +662,7 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        public void ReceiveCharacterList(ref StackDataReader p)
+        private void ReceiveCharacterList(ref StackDataReader p)
         {
             ParseCharacterList(ref p);
             ParseCities(ref p);
@@ -640,7 +707,7 @@ namespace ClassicUO.Game.Scenes
             }
         }
 
-        public void HandleErrorCode(ref StackDataReader p)
+        private void HandleErrorCode(ref StackDataReader p)
         {
             byte code = p.ReadUInt8();
 
@@ -649,13 +716,13 @@ namespace ClassicUO.Game.Scenes
             LoginDelay = default;
         }
 
-        public void HandleLoginDelayPacket(ref StackDataReader p)
+        private void HandleLoginDelayPacket(ref StackDataReader p)
         {
             var delay = p.ReadUInt8();
             LoginDelay = ((delay - 1) * 10, delay * 10);
         }
 
-        public void HandleRelayServerPacket(ref StackDataReader p)
+        private void HandleRelayServerPacket(ref StackDataReader p)
         {
             long ip = p.ReadUInt32LE(); // use LittleEndian here
             ushort port = p.ReadUInt16BE();

@@ -5347,14 +5347,7 @@ namespace ClassicUO.Network
                 return;
             }
 
-            EventSink.RaiseServerListReceived(new ServerListReceivedArgs());
-
-            LoginScene scene = Client.Game.GetScene<LoginScene>();
-
-            if (scene != null)
-            {
-                scene.ServerListReceived(ref p);
-            }
+            EventSink.RaiseServerListReceived(new ServerListReceivedArgs(p.Buffer.ToArray(), p.Position));
         }
 
         private static void ReceiveServerRelay(World world, ref StackDataReader p)
@@ -5364,14 +5357,7 @@ namespace ClassicUO.Network
                 return;
             }
 
-            EventSink.RaiseServerRelayReceived(new ServerRelayReceivedArgs());
-
-            LoginScene scene = Client.Game.GetScene<LoginScene>();
-
-            if (scene != null)
-            {
-                scene.HandleRelayServerPacket(ref p);
-            }
+            EventSink.RaiseServerRelayReceived(new ServerRelayReceivedArgs(p.Buffer.ToArray(), p.Position));
         }
 
         private static void UpdateCharacterList(World world, ref StackDataReader p)
@@ -5381,14 +5367,7 @@ namespace ClassicUO.Network
                 return;
             }
 
-            EventSink.RaiseCharacterListUpdated(new CharacterListUpdatedArgs());
-
-            LoginScene scene = Client.Game.GetScene<LoginScene>();
-
-            if (scene != null)
-            {
-                scene.UpdateCharacterList(ref p);
-            }
+            EventSink.RaiseCharacterListUpdated(new CharacterListUpdatedArgs(p.Buffer.ToArray(), p.Position));
         }
 
         private static void ReceiveCharacterList(World world, ref StackDataReader p)
@@ -5398,14 +5377,7 @@ namespace ClassicUO.Network
                 return;
             }
 
-            EventSink.RaiseCharacterListReceived(new CharacterListReceivedArgs());
-
-            LoginScene scene = Client.Game.GetScene<LoginScene>();
-
-            if (scene != null)
-            {
-                scene.ReceiveCharacterList(ref p);
-            }
+            EventSink.RaiseCharacterListReceived(new CharacterListReceivedArgs(p.Buffer.ToArray(), p.Position));
         }
 
         private static void LoginDelay(World world, ref StackDataReader p)
@@ -5415,14 +5387,7 @@ namespace ClassicUO.Network
                 return;
             }
 
-            EventSink.RaiseLoginDelayReceived(new LoginDelayReceivedArgs());
-
-            LoginScene scene = Client.Game.GetScene<LoginScene>();
-
-            if (scene != null)
-            {
-                scene.HandleLoginDelayPacket(ref p);
-            }
+            EventSink.RaiseLoginDelayReceived(new LoginDelayReceivedArgs(p.Buffer.ToArray(), p.Position));
         }
 
         private static void ReceiveLoginRejection(World world, ref StackDataReader p)
@@ -5436,14 +5401,7 @@ namespace ClassicUO.Network
                 ? p.Buffer[1]
                 : (byte)0;
 
-            EventSink.RaiseLoginRejected(new LoginRejectedArgs(rejectReason));
-
-            LoginScene scene = Client.Game.GetScene<LoginScene>();
-
-            if (scene != null)
-            {
-                scene.HandleErrorCode(ref p);
-            }
+            EventSink.RaiseLoginRejected(new LoginRejectedArgs(rejectReason, p.Buffer.ToArray(), p.Position));
         }
 
         private static void AddItemToContainer(
