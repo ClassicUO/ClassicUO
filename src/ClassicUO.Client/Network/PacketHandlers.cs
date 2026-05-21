@@ -4,6 +4,7 @@ using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
@@ -2204,6 +2205,8 @@ namespace ClassicUO.Network
             ushort x = p.ReadUInt16BE();
             ushort y = p.ReadUInt16BE();
             short z = (short)p.ReadUInt16BE();
+
+            EventSink.RaiseSoundPlay(new SoundPlayArgs(index, audio, x, y, z));
 
             Client.Game.Audio.PlaySoundWithDistance(world, index, x, y);
         }
