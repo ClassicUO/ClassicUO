@@ -103,7 +103,10 @@ namespace ClassicUO.Game.Events
         public static event Action<ItemDropAcceptedArgs> ItemDropAccepted;
         public static event Action<ShopBuyListReceivedArgs> ShopBuyListReceived;
         public static event Action<ShopSellListReceivedArgs> ShopSellListReceived;
-        public static event Action<TradeWindowArgs> TradeWindow;
+        public static event Action<TradeWindowOpenArgs> TradeWindowOpened;
+        public static event Action<TradeWindowClosedArgs> TradeWindowClosed;
+        public static event Action<TradeWindowAcceptUpdatedArgs> TradeWindowAcceptUpdated;
+        public static event Action<TradeWindowCurrencyUpdatedArgs> TradeWindowCurrencyUpdated;
         public static event Action<CustomHouseReceivedArgs> CustomHouseReceived;
 
         public static void RaiseItemSpawned(in ItemSpawnedArgs e) => Invoke(ItemSpawned, e);
@@ -123,7 +126,10 @@ namespace ClassicUO.Game.Events
         public static void RaiseItemDropAccepted(in ItemDropAcceptedArgs e) => Invoke(ItemDropAccepted, e);
         public static void RaiseShopBuyListReceived(in ShopBuyListReceivedArgs e) => Invoke(ShopBuyListReceived, e);
         public static void RaiseShopSellListReceived(in ShopSellListReceivedArgs e) => Invoke(ShopSellListReceived, e);
-        public static void RaiseTradeWindow(in TradeWindowArgs e) => Invoke(TradeWindow, e);
+        public static void RaiseTradeWindowOpened(in TradeWindowOpenArgs e) => Invoke(TradeWindowOpened, e);
+        public static void RaiseTradeWindowClosed(in TradeWindowClosedArgs e) => Invoke(TradeWindowClosed, e);
+        public static void RaiseTradeWindowAcceptUpdated(in TradeWindowAcceptUpdatedArgs e) => Invoke(TradeWindowAcceptUpdated, e);
+        public static void RaiseTradeWindowCurrencyUpdated(in TradeWindowCurrencyUpdatedArgs e) => Invoke(TradeWindowCurrencyUpdated, e);
         public static void RaiseCustomHouseReceived(in CustomHouseReceivedArgs e) => Invoke(CustomHouseReceived, e);
 
         // ---- Combat ----
@@ -325,7 +331,10 @@ namespace ClassicUO.Game.Events
             ItemDropAccepted = null;
             ShopBuyListReceived = null;
             ShopSellListReceived = null;
-            TradeWindow = null;
+            TradeWindowOpened = null;
+            TradeWindowClosed = null;
+            TradeWindowAcceptUpdated = null;
+            TradeWindowCurrencyUpdated = null;
             CustomHouseReceived = null;
 
             DamageReceived = null;

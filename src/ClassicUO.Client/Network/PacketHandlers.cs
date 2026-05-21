@@ -374,11 +374,60 @@ namespace ClassicUO.Network
                 return;
             }
 
-            int startPosition = p.Position;
             byte type = p.ReadUInt8();
             uint serial = p.ReadUInt32BE();
 
-            EventSink.RaiseTradeWindow(new TradeWindowArgs(type, serial, p.Buffer.ToArray(), startPosition));
+            switch (type)
+            {
+                case 0:
+                {
+                    uint id1 = p.ReadUInt32BE();
+                    uint id2 = p.ReadUInt32BE();
+
+                    // standard client doesn't allow the trading system if one of the traders is invisible (=not sent by server)
+                    if (world.Get(id1) == null || world.Get(id2) == null)
+                    {
+                        return;
+                    }
+
+                    bool hasName = p.ReadBool();
+                    string name = string.Empty;
+
+                    if (hasName && p.Position < p.Length)
+                    {
+                        name = p.ReadASCII();
+                    }
+
+                    EventSink.RaiseTradeWindowOpened(new TradeWindowOpenArgs(serial, id1, id2, name));
+                    break;
+                }
+
+                case 1:
+                {
+                    EventSink.RaiseTradeWindowClosed(new TradeWindowClosedArgs(serial));
+                    break;
+                }
+
+                case 2:
+                {
+                    uint id1 = p.ReadUInt32BE();
+                    uint id2 = p.ReadUInt32BE();
+
+                    EventSink.RaiseTradeWindowAcceptUpdated(new TradeWindowAcceptUpdatedArgs(serial, id1 != 0, id2 != 0));
+                    break;
+                }
+
+                case 3:
+                case 4:
+                {
+                    uint v1 = p.ReadUInt32BE();
+                    uint v2 = p.ReadUInt32BE();
+                    bool isMine = type == 4;
+
+                    EventSink.RaiseTradeWindowCurrencyUpdated(new TradeWindowCurrencyUpdatedArgs(serial, isMine, v1, v2));
+                    break;
+                }
+            }
         }
 
         private static void ClientTalk(World world, ref StackDataReader p)
@@ -1670,7 +1719,6 @@ namespace ClassicUO.Network
                 return;
             }
 
-            int startPosition = p.Position;
             uint containerSerial = p.ReadUInt32BE();
             Item container = world.Items.Get(containerSerial);
 
@@ -1686,14 +1734,66 @@ namespace ClassicUO.Network
                 return;
             }
 
-            byte count = 0;
+            List<ShopBuyListEntry> entries = null;
 
             if (container.Layer == Layer.ShopBuyRestock || container.Layer == Layer.ShopBuy)
             {
-                count = p.ReadUInt8();
+                byte count = p.ReadUInt8();
+
+                LinkedObject first = container.Items;
+
+                if (first != null)
+                {
+                    bool reverse = false;
+
+                    if (container.Graphic == 0x2AF8) //hardcoded logic in original client that we must match
+                    {
+                        //sort the contents
+                        first = container.SortContents<Item>((x, y) => x.X - y.X);
+                    }
+                    else
+                    {
+                        //skip to last item and read in reverse later
+                        reverse = true;
+
+                        while (first?.Next != null)
+                        {
+                            first = first.Next;
+                        }
+                    }
+
+                    entries = new List<ShopBuyListEntry>(count);
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        if (first == null)
+                        {
+                            break;
+                        }
+
+                        Item it = (Item)first;
+
+                        uint price = p.ReadUInt32BE();
+                        byte nameLen = p.ReadUInt8();
+                        string name = p.ReadASCII(nameLen);
+
+                        entries.Add(new ShopBuyListEntry(it.Serial, price, name));
+
+                        if (reverse)
+                        {
+                            first = first.Previous;
+                        }
+                        else
+                        {
+                            first = first.Next;
+                        }
+                    }
+                }
             }
 
-            EventSink.RaiseShopBuyListReceived(new ShopBuyListReceivedArgs(vendor.Serial, count, p.Buffer.ToArray(), startPosition));
+            EventSink.RaiseShopBuyListReceived(new ShopBuyListReceivedArgs(
+                vendor.Serial,
+                (IReadOnlyList<ShopBuyListEntry>)entries ?? Array.Empty<ShopBuyListEntry>()));
         }
 
         private static void UpdateCharacter(World world, ref StackDataReader p)
@@ -2042,7 +2142,6 @@ namespace ClassicUO.Network
                 return;
             }
 
-            int startPosition = p.Position;
             uint vendorSerial = p.ReadUInt32BE();
             Mobile vendor = world.Mobiles.Get(vendorSerial);
 
@@ -2058,7 +2157,21 @@ namespace ClassicUO.Network
                 return;
             }
 
-            EventSink.RaiseShopSellListReceived(new ShopSellListReceivedArgs(vendorSerial, countItems, p.Buffer.ToArray(), startPosition));
+            var entries = new List<ShopSellListEntry>(countItems);
+
+            for (int i = 0; i < countItems; i++)
+            {
+                uint serial = p.ReadUInt32BE();
+                ushort graphic = p.ReadUInt16BE();
+                ushort hue = p.ReadUInt16BE();
+                ushort amount = p.ReadUInt16BE();
+                ushort price = p.ReadUInt16BE();
+                string name = p.ReadASCII(p.ReadUInt16BE());
+
+                entries.Add(new ShopSellListEntry(serial, graphic, hue, amount, price, name));
+            }
+
+            EventSink.RaiseShopSellListReceived(new ShopSellListReceivedArgs(vendorSerial, entries));
         }
 
         private static void UpdateHitpoints(World world, ref StackDataReader p)

@@ -91,23 +91,48 @@ namespace ClassicUO.Game.Events
 
     internal readonly record struct ItemDropAcceptedArgs;
 
+    internal readonly record struct ShopBuyListEntry(uint ItemSerial, uint Price, string Name);
+
     internal readonly record struct ShopBuyListReceivedArgs(
         uint VendorSerial,
-        byte Count,
-        byte[] Data,
-        int Offset);
+        IReadOnlyList<ShopBuyListEntry> Entries);
+
+    internal readonly record struct ShopSellListEntry(
+        uint Serial,
+        ushort Graphic,
+        ushort Hue,
+        ushort Amount,
+        ushort Price,
+        string Name);
 
     internal readonly record struct ShopSellListReceivedArgs(
         uint VendorSerial,
-        ushort Count,
-        byte[] Data,
-        int Offset);
+        IReadOnlyList<ShopSellListEntry> Entries);
 
-    internal readonly record struct TradeWindowArgs(
-        byte SubType,
+    // TradeWindow design: split per sub-type into discrete events.
+    // The original 0x6F packet multiplexes five very different payloads on a
+    // single byte sub-type; collapsing them into one record forced every
+    // subscriber to switch on SubType and re-interpret generic fields. By
+    // splitting we make the contract self-describing and let subscribers
+    // ignore sub-types they don't care about.
+    internal readonly record struct TradeWindowOpenArgs(
         uint Serial,
-        byte[] Data,
-        int Offset);
+        uint Id1,
+        uint Id2,
+        string Name);
+
+    internal readonly record struct TradeWindowClosedArgs(uint Serial);
+
+    internal readonly record struct TradeWindowAcceptUpdatedArgs(
+        uint Serial,
+        bool ImAccepting,
+        bool HeIsAccepting);
+
+    internal readonly record struct TradeWindowCurrencyUpdatedArgs(
+        uint Serial,
+        bool IsMine,
+        uint Gold,
+        uint Platinum);
 
     internal readonly record struct CustomHouseComponent(
         ushort Graphic,

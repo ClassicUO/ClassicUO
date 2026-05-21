@@ -5,7 +5,6 @@ using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.IO;
 
 namespace ClassicUO.Game
 {
@@ -15,14 +14,20 @@ namespace ClassicUO.Game
         {
             EventSink.ShopBuyListReceived += OnShopBuyListReceived;
             EventSink.ShopSellListReceived += OnShopSellListReceived;
-            EventSink.TradeWindow += OnTradeWindow;
+            EventSink.TradeWindowOpened += OnTradeWindowOpened;
+            EventSink.TradeWindowClosed += OnTradeWindowClosed;
+            EventSink.TradeWindowAcceptUpdated += OnTradeWindowAcceptUpdated;
+            EventSink.TradeWindowCurrencyUpdated += OnTradeWindowCurrencyUpdated;
         }
 
         private void UnsubscribeVendor()
         {
             EventSink.ShopBuyListReceived -= OnShopBuyListReceived;
             EventSink.ShopSellListReceived -= OnShopSellListReceived;
-            EventSink.TradeWindow -= OnTradeWindow;
+            EventSink.TradeWindowOpened -= OnTradeWindowOpened;
+            EventSink.TradeWindowClosed -= OnTradeWindowClosed;
+            EventSink.TradeWindowAcceptUpdated -= OnTradeWindowAcceptUpdated;
+            EventSink.TradeWindowCurrencyUpdated -= OnTradeWindowCurrencyUpdated;
         }
 
         private void OnShopBuyListReceived(ShopBuyListReceivedArgs e)
@@ -32,17 +37,7 @@ namespace ClassicUO.Game
                 return;
             }
 
-            var p = new StackDataReader(e.Data);
-            p.Seek(e.Offset);
-
-            Item container = Items.Get(p.ReadUInt32BE());
-
-            if (container == null)
-            {
-                return;
-            }
-
-            Mobile vendor = Mobiles.Get(container.Container);
+            Mobile vendor = Mobiles.Get(e.VendorSerial);
 
             if (vendor == null)
             {
@@ -63,77 +58,36 @@ namespace ClassicUO.Game
                 UIManager.Add(gump);
             }
 
-            if (container.Layer == Layer.ShopBuyRestock || container.Layer == Layer.ShopBuy)
+            foreach (var entry in e.Entries)
             {
-                byte count = p.ReadUInt8();
+                Item it = Items.Get(entry.ItemSerial);
 
-                LinkedObject first = container.Items;
-
-                if (first == null)
+                if (it == null)
                 {
-                    return;
+                    continue;
                 }
 
-                bool reverse = false;
+                it.Price = entry.Price;
 
-                if (container.Graphic == 0x2AF8) //hardcoded logic in original client that we must match
+                if (this.OPL.TryGetNameAndData(it.Serial, out string s, out _))
                 {
-                    //sort the contents
-                    first = container.SortContents<Item>((x, y) => x.X - y.X);
+                    it.Name = s;
+                }
+                else if (int.TryParse(entry.Name, out int cliloc))
+                {
+                    it.Name = Client.Game.UO.FileManager.Clilocs.Translate(
+                        cliloc,
+                        $"\t{it.ItemData.Name}: \t{it.Amount}",
+                        true
+                    );
+                }
+                else if (string.IsNullOrEmpty(entry.Name))
+                {
+                    it.Name = it.ItemData.Name;
                 }
                 else
                 {
-                    //skip to last item and read in reverse later
-                    reverse = true;
-
-                    while (first?.Next != null)
-                    {
-                        first = first.Next;
-                    }
-                }
-
-                for (int i = 0; i < count; i++)
-                {
-                    if (first == null)
-                    {
-                        break;
-                    }
-
-                    Item it = (Item)first;
-
-                    it.Price = p.ReadUInt32BE();
-                    byte nameLen = p.ReadUInt8();
-                    string name = p.ReadASCII(nameLen);
-
-                    if (this.OPL.TryGetNameAndData(it.Serial, out string s, out _))
-                    {
-                        it.Name = s;
-                    }
-                    else if (int.TryParse(name, out int cliloc))
-                    {
-                        it.Name = Client.Game.UO.FileManager.Clilocs.Translate(
-                            cliloc,
-                            $"\t{it.ItemData.Name}: \t{it.Amount}",
-                            true
-                        );
-                    }
-                    else if (string.IsNullOrEmpty(name))
-                    {
-                        it.Name = it.ItemData.Name;
-                    }
-                    else
-                    {
-                        it.Name = name;
-                    }
-
-                    if (reverse)
-                    {
-                        first = first.Previous;
-                    }
-                    else
-                    {
-                        first = first.Next;
-                    }
+                    it.Name = entry.Name;
                 }
             }
         }
@@ -145,20 +99,14 @@ namespace ClassicUO.Game
                 return;
             }
 
-            var p = new StackDataReader(e.Data);
-            p.Seek(e.Offset);
-
-            uint vendorSerial = p.ReadUInt32BE();
-            Mobile vendor = Mobiles.Get(vendorSerial);
+            Mobile vendor = Mobiles.Get(e.VendorSerial);
 
             if (vendor == null)
             {
                 return;
             }
 
-            ushort countItems = p.ReadUInt16BE();
-
-            if (countItems <= 0)
+            if (e.Entries.Count <= 0)
             {
                 return;
             }
@@ -167,14 +115,9 @@ namespace ClassicUO.Game
             gump?.Dispose();
             gump = new ShopGump(this, vendor, false, 100, 0);
 
-            for (int i = 0; i < countItems; i++)
+            foreach (var entry in e.Entries)
             {
-                uint serial = p.ReadUInt32BE();
-                ushort graphic = p.ReadUInt16BE();
-                ushort hue = p.ReadUInt16BE();
-                ushort amount = p.ReadUInt16BE();
-                ushort price = p.ReadUInt16BE();
-                string name = p.ReadASCII(p.ReadUInt16BE());
+                string name = entry.Name;
                 bool fromcliloc = false;
 
                 if (int.TryParse(name, out int clilocnum))
@@ -184,99 +127,81 @@ namespace ClassicUO.Game
                 }
                 else if (string.IsNullOrEmpty(name))
                 {
-                    bool success = this.OPL.TryGetNameAndData(serial, out name, out _);
+                    bool success = this.OPL.TryGetNameAndData(entry.Serial, out name, out _);
 
                     if (!success)
                     {
-                        name = Client.Game.UO.FileManager.TileData.StaticData[graphic].Name;
+                        name = Client.Game.UO.FileManager.TileData.StaticData[entry.Graphic].Name;
                     }
                 }
 
-                //if (string.IsNullOrEmpty(item.Name))
-                //    item.Name = name;
-
-                gump.AddItem(serial, graphic, hue, amount, price, name, fromcliloc);
+                gump.AddItem(entry.Serial, entry.Graphic, entry.Hue, entry.Amount, entry.Price, name, fromcliloc);
             }
 
             UIManager.Add(gump);
         }
 
-        private void OnTradeWindow(TradeWindowArgs e)
+        private void OnTradeWindowOpened(TradeWindowOpenArgs e)
         {
             if (!InGame)
             {
                 return;
             }
 
-            byte type = e.SubType;
-            uint serial = e.Serial;
+            UIManager.Add(new TradingGump(this, e.Serial, e.Name, e.Id1, e.Id2));
+        }
 
-            if (type == 1)
+        private void OnTradeWindowClosed(TradeWindowClosedArgs e)
+        {
+            if (!InGame)
             {
-                UIManager.GetTradingGump(serial)?.Dispose();
                 return;
             }
 
-            var p = new StackDataReader(e.Data);
-            p.Seek(e.Offset);
+            UIManager.GetTradingGump(e.Serial)?.Dispose();
+        }
 
-            // Re-read header (subtype + serial) to advance position to payload.
-            p.ReadUInt8();
-            p.ReadUInt32BE();
-
-            if (type == 0)
+        private void OnTradeWindowAcceptUpdated(TradeWindowAcceptUpdatedArgs e)
+        {
+            if (!InGame)
             {
-                uint id1 = p.ReadUInt32BE();
-                uint id2 = p.ReadUInt32BE();
-
-                // standard client doesn't allow the trading system if one of the traders is invisible (=not sent by server)
-                if (this.Get(id1) == null || this.Get(id2) == null)
-                {
-                    return;
-                }
-
-                bool hasName = p.ReadBool();
-                string name = string.Empty;
-
-                if (hasName && p.Position < p.Length)
-                {
-                    name = p.ReadASCII();
-                }
-
-                UIManager.Add(new TradingGump(this, serial, name, id1, id2));
+                return;
             }
-            else if (type == 2)
+
+            TradingGump trading = UIManager.GetTradingGump(e.Serial);
+
+            if (trading != null)
             {
-                uint id1 = p.ReadUInt32BE();
-                uint id2 = p.ReadUInt32BE();
+                trading.ImAccepting = e.ImAccepting;
+                trading.HeIsAccepting = e.HeIsAccepting;
 
-                TradingGump trading = UIManager.GetTradingGump(serial);
-
-                if (trading != null)
-                {
-                    trading.ImAccepting = id1 != 0;
-                    trading.HeIsAccepting = id2 != 0;
-
-                    trading.RequestUpdateContents();
-                }
+                trading.RequestUpdateContents();
             }
-            else if (type == 3 || type == 4)
-            {
-                TradingGump trading = UIManager.GetTradingGump(serial);
+        }
 
-                if (trading != null)
-                {
-                    if (type == 4)
-                    {
-                        trading.Gold = p.ReadUInt32BE();
-                        trading.Platinum = p.ReadUInt32BE();
-                    }
-                    else
-                    {
-                        trading.HisGold = p.ReadUInt32BE();
-                        trading.HisPlatinum = p.ReadUInt32BE();
-                    }
-                }
+        private void OnTradeWindowCurrencyUpdated(TradeWindowCurrencyUpdatedArgs e)
+        {
+            if (!InGame)
+            {
+                return;
+            }
+
+            TradingGump trading = UIManager.GetTradingGump(e.Serial);
+
+            if (trading == null)
+            {
+                return;
+            }
+
+            if (e.IsMine)
+            {
+                trading.Gold = e.Gold;
+                trading.Platinum = e.Platinum;
+            }
+            else
+            {
+                trading.HisGold = e.Gold;
+                trading.HisPlatinum = e.Platinum;
             }
         }
     }
