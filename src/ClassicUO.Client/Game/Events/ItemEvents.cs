@@ -60,7 +60,12 @@ namespace ClassicUO.Game.Events
 
     internal readonly record struct OplInfoReceivedArgs(uint Serial, uint Revision);
 
-    internal readonly record struct MegaClilocReceivedArgs(uint Serial, uint Revision);
+    internal readonly record struct MegaClilocReceivedArgs(
+        uint Serial,
+        uint Revision,
+        string Name,
+        string Properties,
+        int NameCliloc);
 
     internal readonly record struct ItemDragAnimationArgs(
         ushort Graphic,

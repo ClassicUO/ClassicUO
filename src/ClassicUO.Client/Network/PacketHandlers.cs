@@ -4374,20 +4374,6 @@ namespace ClassicUO.Network
 
             uint revision = p.ReadUInt32BE();
 
-            EventSink.RaiseMegaClilocReceived(new MegaClilocReceivedArgs(serial, revision));
-
-            Entity entity = world.Mobiles.Get(serial);
-
-            if (entity == null)
-            {
-                if (SerialHelper.IsMobile(serial))
-                {
-                    Log.Warn("Searching a mobile into World.Items from MegaCliloc packet");
-                }
-
-                entity = world.Items.Get(serial);
-            }
-
             List<(int, string, int)> list = new List<(int, string, int)>();
             int totalLength = 0;
 
@@ -4466,25 +4452,6 @@ namespace ClassicUO.Network
                 totalLength += str.Length;
             }
 
-            Item container = null;
-
-            if (entity is Item it && SerialHelper.IsValid(it.Container))
-            {
-                container = world.Items.Get(it.Container);
-            }
-
-            bool inBuyList = false;
-
-            if (container != null)
-            {
-                inBuyList =
-                    container.Layer == Layer.ShopBuy
-                    || container.Layer == Layer.ShopBuyRestock
-                    || container.Layer == Layer.ShopSell;
-            }
-
-            bool first = true;
-
             string name = string.Empty;
             string data = string.Empty;
             int namecliloc = 0;
@@ -4494,6 +4461,8 @@ namespace ClassicUO.Network
                 Span<char> span = stackalloc char[totalLength];
                 ValueStringBuilder sb = new ValueStringBuilder(span);
 
+                bool first = true;
+
                 foreach (var s in list)
                 {
                     string str = s.Item2;
@@ -4502,9 +4471,8 @@ namespace ClassicUO.Network
                     {
                         name = str;
 
-                        if (entity != null && !SerialHelper.IsMobile(serial))
+                        if (!SerialHelper.IsMobile(serial))
                         {
-                            entity.Name = str;
                             namecliloc = s.Item3 > 0 ? s.Item3 : s.Item1;
                         }
 
@@ -4526,12 +4494,7 @@ namespace ClassicUO.Network
                 sb.Dispose();
             }
 
-            world.OPL.Add(serial, revision, name, data, namecliloc);
-
-            if (inBuyList && container != null && SerialHelper.IsValid(container.Serial))
-            {
-                UIManager.GetGump<ShopGump>(container.RootContainer)?.SetNameTo((Item)entity, name);
-            }
+            EventSink.RaiseMegaClilocReceived(new MegaClilocReceivedArgs(serial, revision, name, data, namecliloc));
         }
 
         private static void GenericAOSCommandsR(World world, ref StackDataReader p) { }
@@ -4811,11 +4774,6 @@ namespace ClassicUO.Network
                 uint revision = p.ReadUInt32BE();
 
                 EventSink.RaiseOplInfoReceived(new OplInfoReceivedArgs(serial, revision));
-
-                if (!world.OPL.IsRevisionEquals(serial, revision))
-                {
-                    AddMegaClilocRequest(serial);
-                }
             }
         }
 

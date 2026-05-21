@@ -1,14 +1,98 @@
-﻿// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: BSD-2-Clause
 
 using System.Collections.Generic;
+using ClassicUO.Game.Data;
+using ClassicUO.Game.Events;
+using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
+using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Managers
 {
     internal sealed class ObjectPropertiesListManager
     {
         private readonly Dictionary<uint, ItemProperty> _itemsProperties = new Dictionary<uint, ItemProperty>();
+        private readonly World _world;
 
+        public ObjectPropertiesListManager(World world)
+        {
+            _world = world;
+            EventSink.OplInfoReceived += OnOplInfoReceived;
+            EventSink.MegaClilocReceived += OnMegaClilocReceived;
+        }
+
+        public void Unsubscribe()
+        {
+            EventSink.OplInfoReceived -= OnOplInfoReceived;
+            EventSink.MegaClilocReceived -= OnMegaClilocReceived;
+        }
+
+        private void OnOplInfoReceived(OplInfoReceivedArgs e)
+        {
+            if (!_world.ClientFeatures.TooltipsEnabled)
+            {
+                return;
+            }
+
+            if (!IsRevisionEquals(e.Serial, e.Revision))
+            {
+                PacketHandlers.AddMegaClilocRequest(e.Serial);
+            }
+        }
+
+        private void OnMegaClilocReceived(MegaClilocReceivedArgs e)
+        {
+            if (!_world.InGame)
+            {
+                return;
+            }
+
+            uint serial = e.Serial;
+
+            Entity entity = _world.Mobiles.Get(serial);
+
+            if (entity == null)
+            {
+                if (SerialHelper.IsMobile(serial))
+                {
+                    Log.Warn("Searching a mobile into World.Items from MegaCliloc packet");
+                }
+
+                entity = _world.Items.Get(serial);
+            }
+
+            // Original behaviour assigned entity.Name only when the cliloc list was non-empty;
+            // we use a non-empty Name as the equivalent guard since name was initialized to "".
+            if (entity != null && !SerialHelper.IsMobile(serial) && !string.IsNullOrEmpty(e.Name))
+            {
+                entity.Name = e.Name;
+            }
+
+            Item container = null;
+
+            if (entity is Item it && SerialHelper.IsValid(it.Container))
+            {
+                container = _world.Items.Get(it.Container);
+            }
+
+            bool inBuyList = false;
+
+            if (container != null)
+            {
+                inBuyList =
+                    container.Layer == Layer.ShopBuy
+                    || container.Layer == Layer.ShopBuyRestock
+                    || container.Layer == Layer.ShopSell;
+            }
+
+            Add(serial, e.Revision, e.Name, e.Properties, e.NameCliloc);
+
+            if (inBuyList && container != null && SerialHelper.IsValid(container.Serial))
+            {
+                UIManager.GetGump<ShopGump>(container.RootContainer)?.SetNameTo((Item)entity, e.Name);
+            }
+        }
 
         public void Add(uint serial, uint revision, string name, string data, int namecliloc)
         {

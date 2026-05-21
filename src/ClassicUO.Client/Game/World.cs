@@ -48,6 +48,7 @@ namespace ClassicUO.Game
             CommandManager = new CommandManager(this);
             Weather = new Weather(this);
             InfoBars = new InfoBarManager(this);
+            OPL = new ObjectPropertiesListManager(this);
 
             SubscribeEvents();
         }
@@ -64,7 +65,7 @@ namespace ClassicUO.Game
 
         public uint LastObject, ObjectToRemove;
 
-        public ObjectPropertiesListManager OPL { get; } = new ObjectPropertiesListManager();
+        public ObjectPropertiesListManager OPL { get; }
 
         public CorpseManager CorpseManager { get; }
 
