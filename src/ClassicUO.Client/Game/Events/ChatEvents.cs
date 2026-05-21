@@ -32,5 +32,6 @@ namespace ClassicUO.Game.Events
         uint Cliloc,
         string Name,
         string Arguments,
-        string Affix);
+        string Affix,
+        byte AffixFlags);
 }

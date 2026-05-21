@@ -35,6 +35,7 @@ namespace ClassicUO.Game
         {
             _world = world;
             EventSink.WeatherChanged += OnWeatherChanged;
+            EventSink.WalkDenied += OnWalkDenied;
         }
 
         private void OnWeatherChanged(WeatherChangedArgs e)
@@ -45,6 +46,11 @@ namespace ClassicUO.Game
             {
                 Generate(type, e.Count, e.Temperature);
             }
+        }
+
+        private void OnWalkDenied(WalkDeniedArgs e)
+        {
+            Reset();
         }
 
 

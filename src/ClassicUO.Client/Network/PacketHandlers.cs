@@ -903,21 +903,11 @@ namespace ClassicUO.Network
             world.CreatePlayer(serial);
 
             p.Skip(4);
-            world.Player.Graphic = p.ReadUInt16BE();
-            ushort enterGraphic = world.Player.Graphic;
-            world.Player.CheckGraphicChange();
+            ushort enterGraphic = p.ReadUInt16BE();
             ushort x = p.ReadUInt16BE();
             ushort y = p.ReadUInt16BE();
             sbyte z = (sbyte)p.ReadUInt16BE();
-
-            if (world.Map == null)
-            {
-                world.MapIndex = 0;
-            }
-
-            world.Player.SetInWorldTile(x, y, z);
             Direction enterDirection = (Direction)(p.ReadUInt8() & 0x7);
-            world.Player.Direction = enterDirection;
 
             EventSink.RaisePlayerEnteredWorld(new PlayerEnteredWorldArgs(serial, enterGraphic, x, y, z, enterDirection));
             world.RangeSize.X = x;
@@ -976,7 +966,6 @@ namespace ClassicUO.Network
         private static void Talk(World world, ref StackDataReader p)
         {
             uint serial = p.ReadUInt32BE();
-            Entity entity = world.Get(serial);
             ushort graphic = p.ReadUInt16BE();
             MessageType type = (MessageType)p.ReadUInt8();
             ushort hue = p.ReadUInt16BE();
@@ -1008,30 +997,7 @@ namespace ClassicUO.Network
                 return;
             }
 
-            TextType text_type = TextType.SYSTEM;
-
-            if (
-                type == MessageType.System
-                || serial == 0xFFFF_FFFF
-                || serial == 0
-                || name.ToLower() == "system" && entity == null
-            )
-            {
-                // do nothing
-            }
-            else if (entity != null)
-            {
-                text_type = TextType.OBJECT;
-
-                if (string.IsNullOrEmpty(entity.Name))
-                {
-                    entity.Name = string.IsNullOrEmpty(name) ? text : name;
-                }
-            }
-
             EventSink.RaiseChatMessage(new ChatMessageArgs(serial, graphic, type, hue, (byte)font, name, text));
-
-            world.MessageManager.HandleMessage(entity, text, name, hue, type, (byte)font, text_type);
         }
 
         private static void DeleteObject(World world, ref StackDataReader p)
@@ -1216,11 +1182,6 @@ namespace ClassicUO.Network
             sbyte z = p.ReadInt8();
 
             EventSink.RaiseWalkDenied(new WalkDeniedArgs(seq, x, y, z, direction));
-
-            world.Player.Walker.DenyWalk(seq, x, y, z);
-            world.Player.Direction = direction;
-
-            world.Weather.Reset();
         }
 
         private static void ConfirmWalk(World world, ref StackDataReader p)
@@ -1233,17 +1194,7 @@ namespace ClassicUO.Network
             byte seq = p.ReadUInt8();
             byte noto = (byte)(p.ReadUInt8() & ~0x40);
 
-            if (noto == 0 || noto >= 8)
-            {
-                noto = 0x01;
-            }
-
             EventSink.RaiseWalkConfirmed(new WalkConfirmedArgs(seq, noto));
-
-            world.Player.NotorietyFlag = (NotorietyFlag)noto;
-            world.Player.Walker.ConfirmWalk(seq);
-
-            world.Player.AddToTile();
         }
 
         private static void DragAnimation(World world, ref StackDataReader p)
@@ -3390,31 +3341,6 @@ namespace ClassicUO.Network
             string name = p.ReadASCII();
 
             EventSink.RaiseMobileNameChanged(new MobileNameChangedArgs(serial, name));
-
-            WMapEntity wme = world.WMapManager.GetEntity(serial);
-
-            if (wme != null && !string.IsNullOrEmpty(name))
-            {
-                wme.Name = name;
-            }
-
-            Entity entity = world.Get(serial);
-
-            if (entity != null)
-            {
-                entity.Name = name;
-
-                if (
-                    serial == world.Player.Serial
-                    && !string.IsNullOrEmpty(name)
-                    && name != world.Player.Name
-                )
-                {
-                    Client.Game.SetWindowTitle(name);
-                }
-
-                UIManager.GetGump<NameOverheadGump>(serial)?.SetName();
-            }
         }
 
         private static void MultiPlacement(World world, ref StackDataReader p)
@@ -3666,7 +3592,6 @@ namespace ClassicUO.Network
             }
 
             uint serial = p.ReadUInt32BE();
-            Entity entity = world.Get(serial);
             ushort graphic = p.ReadUInt16BE();
             MessageType type = (MessageType)p.ReadUInt8();
             ushort hue = p.ReadUInt16BE();
@@ -3740,44 +3665,7 @@ namespace ClassicUO.Network
                 text = p.ReadUnicodeBE();
             }
 
-            TextType text_type = TextType.SYSTEM;
-
-            if (type == MessageType.Alliance || type == MessageType.Guild)
-            {
-                text_type = TextType.GUILD_ALLY;
-            }
-            else if (
-                type == MessageType.System
-                || serial == 0xFFFF_FFFF
-                || serial == 0
-                || name.ToLower() == "system" && entity == null
-            )
-            {
-                // do nothing
-            }
-            else if (entity != null)
-            {
-                text_type = TextType.OBJECT;
-
-                if (string.IsNullOrEmpty(entity.Name))
-                {
-                    entity.Name = string.IsNullOrEmpty(name) ? text : name;
-                }
-            }
-
             EventSink.RaiseUnicodeChatMessage(new UnicodeChatMessageArgs(serial, graphic, type, hue, (byte)font, lang, name, text));
-
-            world.MessageManager.HandleMessage(
-                entity,
-                text,
-                name,
-                hue,
-                type,
-                ProfileManager.CurrentProfile.ChatFont,
-                text_type,
-                true,
-                lang
-            );
         }
 
         private static void DisplayDeath(World world, ref StackDataReader p)
@@ -4850,7 +4738,6 @@ namespace ClassicUO.Network
             }
 
             uint serial = p.ReadUInt32BE();
-            Entity entity = world.Get(serial);
             ushort graphic = p.ReadUInt16BE();
             MessageType type = (MessageType)p.ReadUInt8();
             ushort hue = p.ReadUInt16BE();
@@ -4887,74 +4774,7 @@ namespace ClassicUO.Network
                 }
             }
 
-            string text = Client.Game.UO.FileManager.Clilocs.Translate((int)cliloc, arguments);
-
-            if (text == null)
-            {
-                return;
-            }
-
-            if (!string.IsNullOrWhiteSpace(affix))
-            {
-                if ((flags & AffixType.Prepend) != 0)
-                {
-                    text = $"{affix}{text}";
-                }
-                else
-                {
-                    text = $"{text}{affix}";
-                }
-            }
-
-            if ((flags & AffixType.System) != 0)
-            {
-                type = MessageType.System;
-            }
-
-            if (!Client.Game.UO.FileManager.Fonts.UnicodeFontExists((byte)font))
-            {
-                font = 0;
-            }
-
-            TextType text_type = TextType.SYSTEM;
-
-            if (
-                serial == 0xFFFF_FFFF
-                || serial == 0
-                || !string.IsNullOrEmpty(name)
-                    && string.Equals(name, "system", StringComparison.InvariantCultureIgnoreCase)
-            )
-            {
-                // do nothing
-            }
-            else if (entity != null)
-            {
-                //entity.Graphic = graphic;
-                text_type = TextType.OBJECT;
-
-                if (string.IsNullOrEmpty(entity.Name))
-                {
-                    entity.Name = name;
-                }
-            }
-            else
-            {
-                if (type == MessageType.Label)
-                    return;
-            }
-
-            EventSink.RaiseClilocMessage(new ClilocMessageArgs(serial, graphic, type, hue, (byte)font, cliloc, name, arguments, affix));
-
-            world.MessageManager.HandleMessage(
-                entity,
-                text,
-                name,
-                hue,
-                type,
-                (byte)font,
-                text_type,
-                true
-            );
+            EventSink.RaiseClilocMessage(new ClilocMessageArgs(serial, graphic, type, hue, (byte)font, cliloc, name, arguments, affix, (byte)flags));
         }
 
         private static void UnicodePrompt(World world, ref StackDataReader p)

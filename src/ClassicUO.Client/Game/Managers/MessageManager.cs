@@ -3,6 +3,7 @@
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
@@ -43,7 +44,155 @@ namespace ClassicUO.Game.Managers
 
         public event EventHandler<PromptData> ServerPromptChanged;
 
-        public MessageManager(World world) => _world = world;
+        public MessageManager(World world)
+        {
+            _world = world;
+            EventSink.ChatMessage += OnChatMessage;
+            EventSink.UnicodeChatMessage += OnUnicodeChatMessage;
+            EventSink.ClilocMessage += OnClilocMessage;
+        }
+
+        public void Unsubscribe()
+        {
+            EventSink.ChatMessage -= OnChatMessage;
+            EventSink.UnicodeChatMessage -= OnUnicodeChatMessage;
+            EventSink.ClilocMessage -= OnClilocMessage;
+        }
+
+        private void OnChatMessage(ChatMessageArgs e)
+        {
+            Entity entity = _world.Get(e.Serial);
+            TextType textType = ResolveTextType(e.Serial, e.Type, e.Name, entity);
+
+            if (entity != null && string.IsNullOrEmpty(entity.Name))
+            {
+                entity.Name = string.IsNullOrEmpty(e.Name) ? e.Text : e.Name;
+            }
+
+            HandleMessage(entity, e.Text, e.Name, e.Hue, e.Type, e.Font, textType);
+        }
+
+        private void OnUnicodeChatMessage(UnicodeChatMessageArgs e)
+        {
+            Entity entity = _world.Get(e.Serial);
+            TextType textType = TextType.SYSTEM;
+
+            if (e.Type == MessageType.Alliance || e.Type == MessageType.Guild)
+            {
+                textType = TextType.GUILD_ALLY;
+            }
+            else if (
+                e.Type == MessageType.System
+                || e.Serial == 0xFFFF_FFFF
+                || e.Serial == 0
+                || (e.Name?.ToLower() == "system" && entity == null)
+            )
+            {
+                // keep SYSTEM
+            }
+            else if (entity != null)
+            {
+                textType = TextType.OBJECT;
+
+                if (string.IsNullOrEmpty(entity.Name))
+                {
+                    entity.Name = string.IsNullOrEmpty(e.Name) ? e.Text : e.Name;
+                }
+            }
+
+            HandleMessage(
+                entity,
+                e.Text,
+                e.Name,
+                e.Hue,
+                e.Type,
+                ProfileManager.CurrentProfile.ChatFont,
+                textType,
+                true,
+                e.Lang
+            );
+        }
+
+        private void OnClilocMessage(ClilocMessageArgs e)
+        {
+            Entity entity = _world.Get(e.Serial);
+
+            string text = Client.Game.UO.FileManager.Clilocs.Translate((int)e.Cliloc, e.Arguments);
+            if (text == null) return;
+
+            MessageType type = e.Type;
+            AffixType affixFlags = (AffixType)e.AffixFlags;
+
+            if (!string.IsNullOrWhiteSpace(e.Affix))
+            {
+                if ((affixFlags & AffixType.Prepend) != 0)
+                {
+                    text = $"{e.Affix}{text}";
+                }
+                else
+                {
+                    text = $"{text}{e.Affix}";
+                }
+            }
+
+            if ((affixFlags & AffixType.System) != 0)
+            {
+                type = MessageType.System;
+            }
+
+            byte font = e.Font;
+            if (!Client.Game.UO.FileManager.Fonts.UnicodeFontExists(font))
+            {
+                font = 0;
+            }
+
+            TextType textType = TextType.SYSTEM;
+
+            if (
+                e.Serial == 0xFFFF_FFFF
+                || e.Serial == 0
+                || (!string.IsNullOrEmpty(e.Name)
+                    && string.Equals(e.Name, "system", StringComparison.InvariantCultureIgnoreCase))
+            )
+            {
+                // SYSTEM
+            }
+            else if (entity != null)
+            {
+                textType = TextType.OBJECT;
+
+                if (string.IsNullOrEmpty(entity.Name))
+                {
+                    entity.Name = e.Name;
+                }
+            }
+            else if (type == MessageType.Label)
+            {
+                return;
+            }
+
+            HandleMessage(entity, text, e.Name, e.Hue, type, font, textType, true);
+        }
+
+        private TextType ResolveTextType(uint serial, MessageType type, string name, Entity entity)
+        {
+            if (
+                type == MessageType.System
+                || serial == 0xFFFF_FFFF
+                || serial == 0
+                || (name?.ToLower() == "system" && entity == null)
+            )
+            {
+                return TextType.SYSTEM;
+            }
+
+            if (entity != null)
+            {
+                return TextType.OBJECT;
+            }
+
+            return TextType.SYSTEM;
+        }
 
 
         public PromptData PromptData
