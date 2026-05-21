@@ -806,23 +806,7 @@ namespace ClassicUO.Network
                 type = 2;
             }
 
-            EventSink.RaiseItemUpdated(new ItemUpdatedArgs(serial, graphic, graphicInc, count, x, y, z, (Direction)direction, hue, (Flags)flags));
-
-            world.UpdateGameObject(
-                serial,
-                graphic,
-                graphicInc,
-                count,
-                x,
-                y,
-                z,
-                (Direction)direction,
-                hue,
-                (Flags)flags,
-                count,
-                type,
-                1
-            );
+            EventSink.RaiseItemUpdated(new ItemUpdatedArgs(serial, graphic, graphicInc, count, x, y, z, (Direction)direction, hue, (Flags)flags, type, count, 1));
         }
 
         private static void EnterWorld(World world, ref StackDataReader p)
@@ -954,8 +938,6 @@ namespace ClassicUO.Network
             sbyte z = p.ReadInt8();
 
             EventSink.RaisePlayerUpdated(new PlayerUpdatedArgs(serial, graphic, graphic_inc, hue, flags, x, y, z, serverID, direction));
-
-            world.UpdatePlayer(serial, graphic, graphic_inc, hue, flags, x, y, z, serverID, direction);
         }
 
         private static void DenyWalk(World world, ref StackDataReader p)
@@ -2387,9 +2369,8 @@ namespace ClassicUO.Network
             }
 
             uint serial = p.ReadUInt32BE();
-            Mobile mobile = world.Mobiles.Get(serial);
 
-            if (mobile == null)
+            if (world.Mobiles.Get(serial) == null)
             {
                 return;
             }
@@ -2404,21 +2385,6 @@ namespace ClassicUO.Network
             NotorietyFlag notoriety = (NotorietyFlag)p.ReadUInt8();
 
             EventSink.RaiseMobileUpdated(new MobileUpdatedArgs(serial, graphic, x, y, z, direction, hue, flags, notoriety));
-
-            mobile.NotorietyFlag = notoriety;
-
-            if (serial == world.Player)
-            {
-                mobile.Flags = flags;
-                mobile.Graphic = graphic;
-                mobile.CheckGraphicChange();
-                mobile.FixHue(hue);
-                // TODO: x,y,z, direction cause elastic effect, ignore 'em for the moment
-            }
-            else
-            {
-                world.UpdateGameObject(serial, graphic, 0, 0, x, y, z, direction, hue, flags, 0, 1, 1);
-            }
         }
 
         private static void UpdateObject(World world, ref StackDataReader p)
@@ -2438,68 +2404,16 @@ namespace ClassicUO.Network
             Flags flags = (Flags)p.ReadUInt8();
             NotorietyFlag notoriety = (NotorietyFlag)p.ReadUInt8();
 
-            EventSink.RaiseMobileUpdated(new MobileUpdatedArgs(serial, graphic, x, y, z, direction, hue, flags, notoriety));
-
-            bool oldDead = false;
-            //bool alreadyExists =world.Get(serial) != null;
-
-            if (serial == world.Player)
-            {
-                oldDead = world.Player.IsDead;
-                world.Player.Graphic = graphic;
-                world.Player.CheckGraphicChange();
-                world.Player.FixHue(hue);
-                world.Player.Flags = flags;
-            }
-            else
-            {
-                world.UpdateGameObject(serial, graphic, 0, 0, x, y, z, direction, hue, flags, 0, 0, 1);
-            }
-
-            Entity obj = world.Get(serial);
-
-            if (obj == null)
-            {
-                return;
-            }
-
-            if (!obj.IsEmpty)
-            {
-                LinkedObject o = obj.Items;
-
-                while (o != null)
-                {
-                    LinkedObject next = o.Next;
-                    Item it = (Item)o;
-
-                    if (!it.Opened && it.Layer != Layer.Backpack)
-                    {
-                        world.RemoveItem(it.Serial, true);
-                    }
-
-                    o = next;
-                }
-            }
-
-            if (SerialHelper.IsMobile(serial) && obj is Mobile mob)
-            {
-                mob.NotorietyFlag = notoriety;
-
-                UIManager.GetGump<PaperDollGump>(serial)?.RequestUpdateContents();
-            }
-
             if (p[0] != 0x78)
             {
                 p.Skip(6);
             }
 
+            var equipment = new List<MobileUpdatedEquipmentEntry>();
             uint itemSerial = p.ReadUInt32BE();
 
             while (itemSerial != 0 && p.Position < p.Length)
             {
-                //if (!SerialHelper.IsItem(itemSerial))
-                //    break;
-
                 ushort itemGraphic = p.ReadUInt16BE();
                 byte layer = p.ReadUInt8();
                 ushort item_hue = 0;
@@ -2514,43 +2428,12 @@ namespace ClassicUO.Network
                     item_hue = p.ReadUInt16BE();
                 }
 
-                Item item = world.GetOrCreateItem(itemSerial);
-                item.Graphic = itemGraphic;
-                item.FixHue(item_hue);
-                item.Amount = 1;
-                world.RemoveItemFromContainer(item);
-                item.Container = serial;
-                item.Layer = (Layer)layer;
-
-                item.CheckGraphicChange();
-
-                obj.PushToBack(item);
+                equipment.Add(new MobileUpdatedEquipmentEntry(itemSerial, itemGraphic, (Layer)layer, item_hue));
 
                 itemSerial = p.ReadUInt32BE();
             }
 
-            if (serial == world.Player)
-            {
-                if (oldDead != world.Player.IsDead)
-                {
-                    if (world.Player.IsDead)
-                    {
-                        // NOTE: This packet causes some weird issue on sphere servers.
-                        //       When the character dies, this packet trigger a "reset" and
-                        //       somehow it messes up the packet reading server side
-                        //NetClient.Socket.Send_DeathScreen();
-                        world.ChangeSeason(Game.Managers.Season.Desolation, 42);
-                    }
-                    else
-                    {
-                        world.ChangeSeason(world.OldSeason, world.OldMusicIndex);
-                    }
-                }
-
-                UIManager.GetGump<PaperDollGump>(serial)?.RequestUpdateContents();
-
-                world.Player.UpdateAbilities();
-            }
+            EventSink.RaiseMobileUpdated(new MobileUpdatedArgs(serial, graphic, x, y, z, direction, hue, flags, notoriety, true, equipment));
         }
 
         private static void OpenMenu(World world, ref StackDataReader p)
@@ -5051,35 +4934,9 @@ namespace ClassicUO.Network
             Flags flags = (Flags)p.ReadUInt8();
             ushort unk2 = p.ReadUInt16BE();
 
-            EventSink.RaiseItemUpdated(new ItemUpdatedArgs(serial, graphic, graphicInc, amount, x, y, z, dir, hue, flags));
+            bool isFromPacketList = p[0] == 0xF7;
 
-            if (serial != world.Player)
-            {
-                world.UpdateGameObject(
-                    serial,
-                    graphic,
-                    graphicInc,
-                    amount,
-                    x,
-                    y,
-                    z,
-                    dir,
-                    hue,
-                    flags,
-                    unk,
-                    type,
-                    unk2
-                );
-
-                if (graphic == 0x2006 && ProfileManager.CurrentProfile.AutoOpenCorpses)
-                {
-                    world.Player.TryOpenCorpses();
-                }
-            }
-            else if (p[0] == 0xF7)
-            {
-                world.UpdatePlayer(serial, graphic, graphicInc, hue, flags, x, y, z, 0, dir);
-            }
+            EventSink.RaiseItemUpdated(new ItemUpdatedArgs(serial, graphic, graphicInc, amount, x, y, z, dir, hue, flags, type, unk, unk2, true, isFromPacketList));
         }
 
         private static void BoatMoving(World world, ref StackDataReader p)

@@ -26,7 +26,12 @@ namespace ClassicUO.Game.Events
         sbyte Z,
         Direction Direction,
         ushort Hue,
-        Flags Flags);
+        Flags Flags,
+        byte Type = 0,
+        int Unk = 0,
+        ushort Unk2 = 1,
+        bool IsItemSA = false,
+        bool IsFromPacketList = false);
 
     internal readonly record struct ItemRemovedArgs(uint Serial);
 

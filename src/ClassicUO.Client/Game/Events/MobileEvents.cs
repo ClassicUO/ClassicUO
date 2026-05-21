@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
+using System.Collections.Generic;
 using ClassicUO.Game.Data;
 
 namespace ClassicUO.Game.Events
@@ -15,6 +16,12 @@ namespace ClassicUO.Game.Events
         Flags Flags,
         NotorietyFlag Notoriety);
 
+    internal readonly record struct MobileUpdatedEquipmentEntry(
+        uint Serial,
+        ushort Graphic,
+        Layer Layer,
+        ushort Hue);
+
     internal readonly record struct MobileUpdatedArgs(
         uint Serial,
         ushort Graphic,
@@ -24,7 +31,9 @@ namespace ClassicUO.Game.Events
         Direction Direction,
         ushort Hue,
         Flags Flags,
-        NotorietyFlag Notoriety);
+        NotorietyFlag Notoriety,
+        bool IsFullObject = false,
+        IReadOnlyList<MobileUpdatedEquipmentEntry> Equipment = null);
 
     internal readonly record struct PlayerUpdatedArgs(
         uint Serial,

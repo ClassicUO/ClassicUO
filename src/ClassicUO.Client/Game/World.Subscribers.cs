@@ -47,6 +47,7 @@ namespace ClassicUO.Game
             EventSink.CombatSwing += OnCombatSwing;
             SubscribeEquipment();
             SubscribeContainerItems();
+            SubscribeMobileUpdates();
         }
 
         public void UnsubscribeEvents()
@@ -84,6 +85,7 @@ namespace ClassicUO.Game
             EventSink.CombatSwing -= OnCombatSwing;
             UnsubscribeEquipment();
             UnsubscribeContainerItems();
+            UnsubscribeMobileUpdates();
         }
 
         private void OnItemDragAnimation(ItemDragAnimationArgs e)
