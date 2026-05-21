@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
+using System.Collections.Generic;
 using ClassicUO.Game.Data;
 
 namespace ClassicUO.Game.Events
@@ -49,7 +50,11 @@ namespace ClassicUO.Game.Events
         uint ContainerSerial,
         ushort Hue);
 
-    internal readonly record struct CorpseEquipmentReceivedArgs(uint CorpseSerial);
+    internal readonly record struct CorpseEquipmentEntry(Layer Layer, uint ItemSerial);
+
+    internal readonly record struct CorpseEquipmentReceivedArgs(
+        uint CorpseSerial,
+        IReadOnlyList<CorpseEquipmentEntry> Entries);
 
     internal readonly record struct DyeDataReceivedArgs(uint Serial, ushort Graphic);
 

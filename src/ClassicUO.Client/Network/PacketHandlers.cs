@@ -27,7 +27,7 @@ namespace ClassicUO.Network
     {
         public delegate void OnPacketBufferReader(World world, ref StackDataReader p);
 
-        private static uint _requestedGridLoot;
+        internal static uint _requestedGridLoot;
 
         private static readonly TextFileParser _parser = new TextFileParser(
             string.Empty,
@@ -2793,26 +2793,17 @@ namespace ClassicUO.Network
                 return;
             }
 
-            EventSink.RaiseCorpseEquipmentReceived(new CorpseEquipmentReceivedArgs(serial));
-
+            var entries = new List<CorpseEquipmentEntry>();
             Layer layer = (Layer)p.ReadUInt8();
 
             while (layer != Layer.Invalid && p.Position < p.Length)
             {
                 uint item_serial = p.ReadUInt32BE();
-
-                if (layer - 1 != Layer.Backpack)
-                {
-                    Item item = world.GetOrCreateItem(item_serial);
-
-                    world.RemoveItemFromContainer(item);
-                    item.Container = serial;
-                    item.Layer = layer - 1;
-                    corpse.PushToBack(item);
-                }
-
+                entries.Add(new CorpseEquipmentEntry(layer, item_serial));
                 layer = (Layer)p.ReadUInt8();
             }
+
+            EventSink.RaiseCorpseEquipmentReceived(new CorpseEquipmentReceivedArgs(serial, entries));
         }
 
         private static void DisplayMap(World world, ref StackDataReader p)

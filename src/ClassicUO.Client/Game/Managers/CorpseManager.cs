@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Utility.Collections;
 
@@ -14,6 +15,51 @@ namespace ClassicUO.Game.Managers
         public CorpseManager(World world)
         {
             _world = world;
+            EventSink.CorpseEquipmentReceived += OnCorpseEquipmentReceived;
+        }
+
+        public void Unsubscribe()
+        {
+            EventSink.CorpseEquipmentReceived -= OnCorpseEquipmentReceived;
+        }
+
+        private void OnCorpseEquipmentReceived(CorpseEquipmentReceivedArgs e)
+        {
+            Entity corpse = _world.Get(e.CorpseSerial);
+
+            if (corpse == null)
+            {
+                return;
+            }
+
+            // if it's not a corpse we should skip this [?]
+            if (corpse.Graphic != 0x2006)
+            {
+                return;
+            }
+
+            if (e.Entries == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < e.Entries.Count; i++)
+            {
+                CorpseEquipmentEntry entry = e.Entries[i];
+                Layer layer = entry.Layer - 1;
+
+                if (layer == Layer.Backpack)
+                {
+                    continue;
+                }
+
+                Item item = _world.GetOrCreateItem(entry.ItemSerial);
+
+                _world.RemoveItemFromContainer(item);
+                item.Container = e.CorpseSerial;
+                item.Layer = layer;
+                corpse.PushToBack(item);
+            }
         }
 
         public void Add(uint corpse, uint obj, Direction dir, bool run)
