@@ -1294,8 +1294,6 @@ namespace ClassicUO.Network
             ushort hue = p.ReadUInt16BE();
 
             EventSink.RaiseContainerItemAdded(new ContainerItemAddedArgs(serial, graphic, amount, x, y, containerSerial, hue));
-
-            world.AddItemToContainer(serial, graphic, amount, x, y, hue, containerSerial);
         }
 
         private static void DenyMoveItem(World world, ref StackDataReader p)
@@ -1715,7 +1713,7 @@ namespace ClassicUO.Network
             }
 
             ushort count = p.ReadUInt16BE();
-            uint firstContainer = 0;
+            bool firstEmitted = false;
 
             for (int i = 0; i < count; i++)
             {
@@ -1733,25 +1731,13 @@ namespace ClassicUO.Network
                 uint containerSerial = p.ReadUInt32BE();
                 ushort hue = p.ReadUInt16BE();
 
-                EventSink.RaiseContainerItemAdded(new ContainerItemAddedArgs(serial, graphic, amount, x, y, containerSerial, hue));
-
-                if (i == 0)
+                if (!firstEmitted)
                 {
-                    firstContainer = containerSerial;
-                    Entity container = world.Get(containerSerial);
-
-                    if (container != null)
-                    {
-                        world.ClearContainerAndRemoveItems(container, container.Graphic == 0x2006);
-                    }
+                    EventSink.RaiseContainerItemsReceived(new ContainerItemsReceivedArgs(containerSerial, count));
+                    firstEmitted = true;
                 }
 
-                world.AddItemToContainer(serial, graphic, amount, x, y, hue, containerSerial);
-            }
-
-            if (firstContainer != 0)
-            {
-                EventSink.RaiseContainerItemsReceived(new ContainerItemsReceivedArgs(firstContainer, count));
+                EventSink.RaiseContainerItemAdded(new ContainerItemAddedArgs(serial, graphic, amount, x, y, containerSerial, hue));
             }
         }
 

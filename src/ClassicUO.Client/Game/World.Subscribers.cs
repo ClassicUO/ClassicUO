@@ -46,6 +46,7 @@ namespace ClassicUO.Game
             EventSink.NewCharacterAnimation += OnNewCharacterAnimation;
             EventSink.CombatSwing += OnCombatSwing;
             SubscribeEquipment();
+            SubscribeContainerItems();
         }
 
         public void UnsubscribeEvents()
@@ -82,6 +83,7 @@ namespace ClassicUO.Game
             EventSink.NewCharacterAnimation -= OnNewCharacterAnimation;
             EventSink.CombatSwing -= OnCombatSwing;
             UnsubscribeEquipment();
+            UnsubscribeContainerItems();
         }
 
         private void OnItemDragAnimation(ItemDragAnimationArgs e)
