@@ -45,7 +45,12 @@ namespace ClassicUO.Game.Events
         ushort Y,
         ushort Z);
 
-    internal readonly record struct MapDataReceivedArgs(uint Serial, byte Action, byte[] Data, int Offset);
+    internal readonly record struct MapDataReceivedArgs(
+        uint Serial,
+        byte Action,
+        ushort PinX,
+        ushort PinY,
+        byte PlotState);
 
     internal readonly record struct PathfindingReceivedArgs(ushort X, ushort Y, ushort Z);
 }

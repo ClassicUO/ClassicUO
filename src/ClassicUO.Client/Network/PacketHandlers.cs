@@ -1435,8 +1435,26 @@ namespace ClassicUO.Network
             }
 
             uint serial = p.ReadUInt32BE();
-            byte action = p.Position < p.Length ? p[p.Position] : (byte)0;
-            EventSink.RaiseMapDataReceived(new MapDataReceivedArgs(serial, action, p.Buffer.ToArray(), p.Position));
+            byte action = p.ReadUInt8();
+
+            ushort pinX = 0;
+            ushort pinY = 0;
+            byte plotState = 0;
+
+            switch ((MapMessageType)action)
+            {
+                case MapMessageType.Add:
+                    p.Skip(1);
+                    pinX = p.ReadUInt16BE();
+                    pinY = p.ReadUInt16BE();
+                    break;
+
+                case MapMessageType.EditResponse:
+                    plotState = p.ReadUInt8();
+                    break;
+            }
+
+            EventSink.RaiseMapDataReceived(new MapDataReceivedArgs(serial, action, pinX, pinY, plotState));
         }
 
         private static void SetTime(World world, ref StackDataReader p) { }
