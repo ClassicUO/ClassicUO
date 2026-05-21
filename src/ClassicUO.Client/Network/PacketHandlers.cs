@@ -808,8 +808,7 @@ namespace ClassicUO.Network
 
             EventSink.RaiseItemUpdated(new ItemUpdatedArgs(serial, graphic, graphicInc, count, x, y, z, (Direction)direction, hue, (Flags)flags));
 
-            UpdateGameObject(
-                world,
+            world.UpdateGameObject(
                 serial,
                 graphic,
                 graphicInc,
@@ -956,7 +955,7 @@ namespace ClassicUO.Network
 
             EventSink.RaisePlayerUpdated(new PlayerUpdatedArgs(serial, graphic, graphic_inc, hue, flags, x, y, z, serverID, direction));
 
-            UpdatePlayer(world, serial, graphic, graphic_inc, hue, flags, x, y, z, serverID, direction);
+            world.UpdatePlayer(serial, graphic, graphic_inc, hue, flags, x, y, z, serverID, direction);
         }
 
         private static void DenyWalk(World world, ref StackDataReader p)
@@ -1267,7 +1266,7 @@ namespace ClassicUO.Network
 
                     if (!it.IsCorpse && graphic != 0xFFFF)
                     {
-                        ClearContainerAndRemoveItems(world, it);
+                        world.ClearContainerAndRemoveItems(it);
                     }
                 }
             }
@@ -1296,7 +1295,7 @@ namespace ClassicUO.Network
 
             EventSink.RaiseContainerItemAdded(new ContainerItemAddedArgs(serial, graphic, amount, x, y, containerSerial, hue));
 
-            AddItemToContainer(world, serial, graphic, amount, x, y, hue, containerSerial);
+            world.AddItemToContainer(serial, graphic, amount, x, y, hue, containerSerial);
         }
 
         private static void DenyMoveItem(World world, ref StackDataReader p)
@@ -1334,8 +1333,7 @@ namespace ClassicUO.Network
                             // Server should send an UpdateContainedItem after this packet.
                             Console.WriteLine("=== DENY === ADD TO CONTAINER");
 
-                            AddItemToContainer(
-                                world,
+                            world.AddItemToContainer(
                                 Client.Game.UO.GameCursor.ItemHold.Serial,
                                 Client.Game.UO.GameCursor.ItemHold.Graphic,
                                 Client.Game.UO.GameCursor.ItemHold.TotalAmount,
@@ -1794,11 +1792,11 @@ namespace ClassicUO.Network
 
                     if (container != null)
                     {
-                        ClearContainerAndRemoveItems(world, container, container.Graphic == 0x2006);
+                        world.ClearContainerAndRemoveItems(container, container.Graphic == 0x2006);
                     }
                 }
 
-                AddItemToContainer(world, serial, graphic, amount, x, y, hue, containerSerial);
+                world.AddItemToContainer(serial, graphic, amount, x, y, hue, containerSerial);
             }
 
             if (firstContainer != 0)
@@ -2483,7 +2481,7 @@ namespace ClassicUO.Network
             }
             else
             {
-                UpdateGameObject(world, serial, graphic, 0, 0, x, y, z, direction, hue, flags, 0, 1, 1);
+                world.UpdateGameObject(serial, graphic, 0, 0, x, y, z, direction, hue, flags, 0, 1, 1);
             }
         }
 
@@ -2519,7 +2517,7 @@ namespace ClassicUO.Network
             }
             else
             {
-                UpdateGameObject(world, serial, graphic, 0, 0, x, y, z, direction, hue, flags, 0, 0, 1);
+                world.UpdateGameObject(serial, graphic, 0, 0, x, y, z, direction, hue, flags, 0, 0, 1);
             }
 
             Entity obj = world.Get(serial);
@@ -5121,8 +5119,7 @@ namespace ClassicUO.Network
 
             if (serial != world.Player)
             {
-                UpdateGameObject(
-                    world,
+                world.UpdateGameObject(
                     serial,
                     graphic,
                     graphicInc,
@@ -5145,7 +5142,7 @@ namespace ClassicUO.Network
             }
             else if (p[0] == 0xF7)
             {
-                UpdatePlayer(world, serial, graphic, graphicInc, hue, flags, x, y, z, 0, dir);
+                world.UpdatePlayer(serial, graphic, graphicInc, hue, flags, x, y, z, 0, dir);
             }
         }
 
@@ -5277,8 +5274,7 @@ namespace ClassicUO.Network
                 {
                     if (cSerial == world.Player)
                     {
-                        UpdatePlayer(
-                            world,
+                        world.UpdatePlayer(
                             cSerial,
                             ent.Graphic,
                             0,
@@ -5293,8 +5289,7 @@ namespace ClassicUO.Network
                     }
                     else
                     {
-                        UpdateGameObject(
-                            world,
+                        world.UpdateGameObject(
                             cSerial,
                             ent.Graphic,
                             0,
@@ -5402,492 +5397,6 @@ namespace ClassicUO.Network
                 : (byte)0;
 
             EventSink.RaiseLoginRejected(new LoginRejectedArgs(rejectReason, p.Buffer.ToArray(), p.Position));
-        }
-
-        private static void AddItemToContainer(
-            World world,
-            uint serial,
-            ushort graphic,
-            ushort amount,
-            ushort x,
-            ushort y,
-            ushort hue,
-            uint containerSerial
-        )
-        {
-            if (Client.Game.UO.GameCursor.ItemHold.Serial == serial)
-            {
-                if (Client.Game.UO.GameCursor.ItemHold.Dropped)
-                {
-                    Console.WriteLine("ADD ITEM TO CONTAINER -- CLEAR HOLD");
-                    Client.Game.UO.GameCursor.ItemHold.Clear();
-                }
-
-                //else if (ItemHold.Graphic == graphic && ItemHold.Amount == amount &&
-                //         ItemHold.Container == containerSerial)
-                //{
-                //    ItemHold.Enabled = false;
-                //    ItemHold.Dropped = false;
-                //}
-            }
-
-            Entity container = world.Get(containerSerial);
-
-            if (container == null)
-            {
-                Log.Warn($"No container ({containerSerial}) found");
-
-                //container = world.GetOrCreateItem(containerSerial);
-                return;
-            }
-
-            Item item = world.Items.Get(serial);
-
-            if (SerialHelper.IsMobile(serial))
-            {
-                world.RemoveMobile(serial, true);
-                Log.Warn("AddItemToContainer function adds mobile as Item");
-            }
-
-            if (item != null && (container.Graphic != 0x2006 || item.Layer == Layer.Invalid))
-            {
-                world.RemoveItem(item, true);
-            }
-
-            item = world.GetOrCreateItem(serial);
-            item.Graphic = graphic;
-            item.CheckGraphicChange();
-            item.Amount = amount;
-            item.FixHue(hue);
-            item.X = x;
-            item.Y = y;
-            item.Z = 0;
-
-            world.RemoveItemFromContainer(item);
-            item.Container = containerSerial;
-            container.PushToBack(item);
-
-            if (SerialHelper.IsMobile(containerSerial))
-            {
-                Mobile m = world.Mobiles.Get(containerSerial);
-                Item secureBox = m?.GetSecureTradeBox();
-
-                if (secureBox != null)
-                {
-                    UIManager.GetTradingGump(secureBox)?.RequestUpdateContents();
-                }
-                else
-                {
-                    UIManager.GetGump<PaperDollGump>(containerSerial)?.RequestUpdateContents();
-                }
-            }
-            else if (SerialHelper.IsItem(containerSerial))
-            {
-                Gump gump = UIManager.GetGump<BulletinBoardGump>(containerSerial);
-
-                if (gump != null)
-                {
-                    NetClient.Socket.Send_BulletinBoardRequestMessageSummary(
-                        containerSerial,
-                        serial
-                    );
-                }
-                else
-                {
-                    gump = UIManager.GetGump<SpellbookGump>(containerSerial);
-
-                    if (gump == null)
-                    {
-                        gump = UIManager.GetGump<ContainerGump>(containerSerial);
-
-                        if (gump != null)
-                        {
-                            ((ContainerGump)gump).CheckItemControlPosition(item);
-                        }
-
-                        if (ProfileManager.CurrentProfile.GridLootType > 0)
-                        {
-                            GridLootGump grid_gump = UIManager.GetGump<GridLootGump>(
-                                containerSerial
-                            );
-
-                            if (
-                                grid_gump == null
-                                && SerialHelper.IsValid(_requestedGridLoot)
-                                && _requestedGridLoot == containerSerial
-                            )
-                            {
-                                grid_gump = new GridLootGump(world, _requestedGridLoot);
-                                UIManager.Add(grid_gump);
-                                _requestedGridLoot = 0;
-                            }
-
-                            grid_gump?.RequestUpdateContents();
-                        }
-                    }
-
-                    if (gump != null)
-                    {
-                        if (SerialHelper.IsItem(containerSerial))
-                        {
-                            ((Item)container).Opened = true;
-                        }
-
-                        gump.RequestUpdateContents();
-                    }
-                }
-            }
-
-            UIManager.GetTradingGump(containerSerial)?.RequestUpdateContents();
-        }
-
-        private static void UpdateGameObject(
-            World world,
-            uint serial,
-            ushort graphic,
-            byte graphic_inc,
-            ushort count,
-            ushort x,
-            ushort y,
-            sbyte z,
-            Direction direction,
-            ushort hue,
-            Flags flagss,
-            int UNK,
-            byte type,
-            ushort UNK_2
-        )
-        {
-            Mobile mobile = null;
-            Item item = null;
-            Entity obj = world.Get(serial);
-
-            if (
-                Client.Game.UO.GameCursor.ItemHold.Enabled
-                && Client.Game.UO.GameCursor.ItemHold.Serial == serial
-            )
-            {
-                if (SerialHelper.IsValid(Client.Game.UO.GameCursor.ItemHold.Container))
-                {
-                    if (Client.Game.UO.GameCursor.ItemHold.Layer == 0)
-                    {
-                        UIManager
-                            .GetGump<ContainerGump>(Client.Game.UO.GameCursor.ItemHold.Container)
-                            ?.RequestUpdateContents();
-                    }
-                    else
-                    {
-                        UIManager
-                            .GetGump<PaperDollGump>(Client.Game.UO.GameCursor.ItemHold.Container)
-                            ?.RequestUpdateContents();
-                    }
-                }
-
-                Client.Game.UO.GameCursor.ItemHold.UpdatedInWorld = true;
-            }
-
-            bool created = false;
-
-            if (obj == null || obj.IsDestroyed)
-            {
-                created = true;
-
-                if (SerialHelper.IsMobile(serial) && type != 3)
-                {
-                    mobile = world.GetOrCreateMobile(serial);
-
-                    if (mobile == null)
-                    {
-                        return;
-                    }
-
-                    obj = mobile;
-                    mobile.Graphic = (ushort)(graphic + graphic_inc);
-                    mobile.CheckGraphicChange();
-                    mobile.Direction = direction & Direction.Up;
-                    mobile.FixHue(hue);
-                    mobile.X = x;
-                    mobile.Y = y;
-                    mobile.Z = z;
-                    mobile.Flags = flagss;
-                }
-                else
-                {
-                    item = world.GetOrCreateItem(serial);
-
-                    if (item == null)
-                    {
-                        return;
-                    }
-
-                    obj = item;
-                }
-            }
-            else
-            {
-                if (obj is Item item1)
-                {
-                    item = item1;
-
-                    if (SerialHelper.IsValid(item.Container))
-                    {
-                        world.RemoveItemFromContainer(item);
-                    }
-                }
-                else
-                {
-                    mobile = (Mobile)obj;
-                }
-            }
-
-            if (obj == null)
-            {
-                return;
-            }
-
-            if (item != null)
-            {
-                if (graphic != 0x2006)
-                {
-                    graphic += graphic_inc;
-                }
-
-                if (type == 2)
-                {
-                    item.IsMulti = true;
-                    item.WantUpdateMulti =
-                        (graphic & 0x3FFF) != item.Graphic
-                        || item.X != x
-                        || item.Y != y
-                        || item.Z != z
-                        || item.Hue != hue;
-                    item.Graphic = (ushort)(graphic & 0x3FFF);
-                }
-                else
-                {
-                    item.IsDamageable = type == 3;
-                    item.IsMulti = false;
-                    item.Graphic = graphic;
-                }
-
-                item.X = x;
-                item.Y = y;
-                item.Z = z;
-                item.LightID = (byte)direction;
-
-                if (graphic == 0x2006)
-                {
-                    item.Layer = (Layer)direction;
-                }
-
-                item.FixHue(hue);
-
-                if (count == 0)
-                {
-                    count = 1;
-                }
-
-                item.Amount = count;
-                item.Flags = flagss;
-                item.Direction = direction;
-                item.CheckGraphicChange(item.AnimIndex);
-            }
-            else
-            {
-                graphic += graphic_inc;
-
-                if (serial != world.Player)
-                {
-                    Direction cleaned_dir = direction & Direction.Up;
-                    bool isrun = (direction & Direction.Running) != 0;
-
-                    if (world.Get(mobile) == null || mobile.X == 0xFFFF && mobile.Y == 0xFFFF)
-                    {
-                        mobile.X = x;
-                        mobile.Y = y;
-                        mobile.Z = z;
-                        mobile.Direction = cleaned_dir;
-                        mobile.IsRunning = isrun;
-                        mobile.ClearSteps();
-                    }
-
-                    if (!mobile.EnqueueStep(x, y, z, cleaned_dir, isrun))
-                    {
-                        mobile.X = x;
-                        mobile.Y = y;
-                        mobile.Z = z;
-                        mobile.Direction = cleaned_dir;
-                        mobile.IsRunning = isrun;
-                        mobile.ClearSteps();
-                    }
-                }
-
-                mobile.Graphic = (ushort)(graphic & 0x3FFF);
-                mobile.FixHue(hue);
-                mobile.Flags = flagss;
-            }
-
-            if (created && !obj.IsClicked)
-            {
-                if (mobile != null)
-                {
-                    if (ProfileManager.CurrentProfile.ShowNewMobileNameIncoming)
-                    {
-                        GameActions.SingleClick(world, serial);
-                    }
-                }
-                else if (graphic == 0x2006)
-                {
-                    if (ProfileManager.CurrentProfile.ShowNewCorpseNameIncoming)
-                    {
-                        GameActions.SingleClick(world, serial);
-                    }
-                }
-            }
-
-            if (mobile != null)
-            {
-                mobile.SetInWorldTile(mobile.X, mobile.Y, mobile.Z);
-
-                if (created)
-                {
-                    // This is actually a way to get all Hp from all new mobiles.
-                    // Real UO client does it only when LastAttack == serial.
-                    // We force to close suddenly.
-                    GameActions.RequestMobileStatus(world, serial);
-
-                    //if (TargetManager.LastAttack != serial)
-                    //{
-                    //    GameActions.SendCloseStatus(serial);
-                    //}
-                }
-            }
-            else
-            {
-                if (
-                    Client.Game.UO.GameCursor.ItemHold.Serial == serial
-                    && Client.Game.UO.GameCursor.ItemHold.Dropped
-                )
-                {
-                    // we want maintain the item data due to the denymoveitem packet
-                    //ItemHold.Clear();
-                    Client.Game.UO.GameCursor.ItemHold.Enabled = false;
-                    Client.Game.UO.GameCursor.ItemHold.Dropped = false;
-                }
-
-                if (item.OnGround)
-                {
-                    item.SetInWorldTile(item.X, item.Y, item.Z);
-
-                    if (graphic == 0x2006 && ProfileManager.CurrentProfile.AutoOpenCorpses)
-                    {
-                        world.Player.TryOpenCorpses();
-                    }
-                }
-            }
-        }
-
-        private static void UpdatePlayer(
-            World world,
-            uint serial,
-            ushort graphic,
-            byte graph_inc,
-            ushort hue,
-            Flags flags,
-            ushort x,
-            ushort y,
-            sbyte z,
-            ushort serverID,
-            Direction direction
-        )
-        {
-            if (serial == world.Player)
-            {
-                world.RangeSize.X = x;
-                world.RangeSize.Y = y;
-
-                bool olddead = world.Player.IsDead;
-                ushort old_graphic = world.Player.Graphic;
-
-                world.Player.CloseBank();
-                world.Player.Walker.WalkingFailed = false;
-                world.Player.Graphic = graphic;
-                world.Player.Direction = direction & Direction.Mask;
-                world.Player.FixHue(hue);
-                world.Player.Flags = flags;
-                world.Player.Walker.DenyWalk(0xFF, -1, -1, -1);
-
-                GameScene gs = Client.Game.GetScene<GameScene>();
-
-                if (gs != null)
-                {
-                    world.Weather.Reset();
-                    gs.UpdateDrawPosition = true;
-                }
-
-                // std client keeps the target open!
-                /*if (old_graphic != 0 && old_graphic != world.Player.Graphic)
-                {
-                    if (world.Player.IsDead)
-                    {
-                        TargetManager.Reset();
-                    }
-                }*/
-
-                if (olddead != world.Player.IsDead)
-                {
-                    if (world.Player.IsDead)
-                    {
-                        world.ChangeSeason(Game.Managers.Season.Desolation, 42);
-                    }
-                    else
-                    {
-                        world.ChangeSeason(world.OldSeason, world.OldMusicIndex);
-                    }
-                }
-
-                world.Player.Walker.ResendPacketResync = false;
-                world.Player.CloseRangedGumps();
-                world.Player.SetInWorldTile(x, y, z);
-                world.Player.UpdateAbilities();
-            }
-        }
-
-        private static void ClearContainerAndRemoveItems(
-            World world,
-            Entity container,
-            bool remove_unequipped = false
-        )
-        {
-            if (container == null || container.IsEmpty)
-            {
-                return;
-            }
-
-            LinkedObject first = container.Items;
-            LinkedObject new_first = null;
-
-            while (first != null)
-            {
-                LinkedObject next = first.Next;
-                Item it = (Item)first;
-
-                if (remove_unequipped && it.Layer != 0)
-                {
-                    if (new_first == null)
-                    {
-                        new_first = first;
-                    }
-                }
-                else
-                {
-                    world.RemoveItem(it, true);
-                }
-
-                first = next;
-            }
-
-            container.Items = remove_unequipped ? new_first : null;
         }
 
         private static Gump CreateGump(
