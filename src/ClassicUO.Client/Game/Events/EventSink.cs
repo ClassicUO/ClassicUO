@@ -198,7 +198,9 @@ namespace ClassicUO.Game.Events
         public static event Action<BookDataReceivedArgs> BookDataReceived;
         public static event Action<TextEntryDialogArgs> TextEntryDialogOpened;
         public static event Action<TipWindowDisplayedArgs> TipWindowDisplayed;
-        public static event Action<BulletinBoardDataReceivedArgs> BulletinBoardDataReceived;
+        public static event Action<BulletinBoardOpenedArgs> BulletinBoardOpened;
+        public static event Action<BulletinBoardSummaryArgs> BulletinBoardSummary;
+        public static event Action<BulletinBoardMessageArgs> BulletinBoardMessage;
         public static event Action<OpenUrlRequestedArgs> OpenUrlRequested;
         public static event Action<CharacterProfileOpenedArgs> CharacterProfileOpened;
         public static event Action<VendorWindowClosedArgs> VendorWindowClosed;
@@ -216,7 +218,9 @@ namespace ClassicUO.Game.Events
         public static void RaiseBookDataReceived(in BookDataReceivedArgs e) => Invoke(BookDataReceived, e);
         public static void RaiseTextEntryDialogOpened(in TextEntryDialogArgs e) => Invoke(TextEntryDialogOpened, e);
         public static void RaiseTipWindowDisplayed(in TipWindowDisplayedArgs e) => Invoke(TipWindowDisplayed, e);
-        public static void RaiseBulletinBoardDataReceived(in BulletinBoardDataReceivedArgs e) => Invoke(BulletinBoardDataReceived, e);
+        public static void RaiseBulletinBoardOpened(in BulletinBoardOpenedArgs e) => Invoke(BulletinBoardOpened, e);
+        public static void RaiseBulletinBoardSummary(in BulletinBoardSummaryArgs e) => Invoke(BulletinBoardSummary, e);
+        public static void RaiseBulletinBoardMessage(in BulletinBoardMessageArgs e) => Invoke(BulletinBoardMessage, e);
         public static void RaiseOpenUrlRequested(in OpenUrlRequestedArgs e) => Invoke(OpenUrlRequested, e);
         public static void RaiseCharacterProfileOpened(in CharacterProfileOpenedArgs e) => Invoke(CharacterProfileOpened, e);
         public static void RaiseVendorWindowClosed(in VendorWindowClosedArgs e) => Invoke(VendorWindowClosed, e);
@@ -340,7 +344,9 @@ namespace ClassicUO.Game.Events
             BookDataReceived = null;
             TextEntryDialogOpened = null;
             TipWindowDisplayed = null;
-            BulletinBoardDataReceived = null;
+            BulletinBoardOpened = null;
+            BulletinBoardSummary = null;
+            BulletinBoardMessage = null;
             OpenUrlRequested = null;
             CharacterProfileOpened = null;
             VendorWindowClosed = null;

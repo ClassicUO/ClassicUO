@@ -1,14 +1,11 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System;
 using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 
@@ -21,7 +18,9 @@ namespace ClassicUO.Game
             EventSink.MapDisplayed += OnMapDisplayed;
             EventSink.BookOpened += OnBookOpened;
             EventSink.BookDataReceived += OnBookDataReceived;
-            EventSink.BulletinBoardDataReceived += OnBulletinBoardDataReceived;
+            EventSink.BulletinBoardOpened += OnBulletinBoardOpened;
+            EventSink.BulletinBoardSummary += OnBulletinBoardSummary;
+            EventSink.BulletinBoardMessage += OnBulletinBoardMessage;
             EventSink.PaperdollOpened += OnPaperdollOpened;
         }
 
@@ -30,7 +29,9 @@ namespace ClassicUO.Game
             EventSink.MapDisplayed -= OnMapDisplayed;
             EventSink.BookOpened -= OnBookOpened;
             EventSink.BookDataReceived -= OnBookDataReceived;
-            EventSink.BulletinBoardDataReceived -= OnBulletinBoardDataReceived;
+            EventSink.BulletinBoardOpened -= OnBulletinBoardOpened;
+            EventSink.BulletinBoardSummary -= OnBulletinBoardSummary;
+            EventSink.BulletinBoardMessage -= OnBulletinBoardMessage;
             EventSink.PaperdollOpened -= OnPaperdollOpened;
         }
 
@@ -63,22 +64,12 @@ namespace ClassicUO.Game
 
         private void OnBookOpened(BookOpenedArgs e)
         {
-            var p = new StackDataReader(e.Data);
-            p.Seek(e.Offset);
-
             ModernBookGump bgump = UIManager.GetGump<ModernBookGump>(e.Serial);
 
             if (bgump == null || bgump.IsDisposed)
             {
-                string title = e.OldPacket
-                    ? p.ReadUTF8(60, true)
-                    : p.ReadUTF8(p.ReadUInt16BE(), true);
-                string author = e.OldPacket
-                    ? p.ReadUTF8(30, true)
-                    : p.ReadUTF8(p.ReadUInt16BE(), true);
-
                 UIManager.Add(
-                    new ModernBookGump(this, e.Serial, e.PageCount, title, author, e.Editable, e.OldPacket)
+                    new ModernBookGump(this, e.Serial, e.PageCount, e.Title, e.Author, e.Editable, e.OldPacket)
                     {
                         X = 100,
                         Y = 100
@@ -90,14 +81,8 @@ namespace ClassicUO.Game
             else
             {
                 bgump.IsEditable = e.Editable;
-                bgump.SetTitle(
-                    e.OldPacket ? p.ReadUTF8(60, true) : p.ReadUTF8(p.ReadUInt16BE(), true),
-                    e.Editable
-                );
-                bgump.SetAuthor(
-                    e.OldPacket ? p.ReadUTF8(30, true) : p.ReadUTF8(p.ReadUInt16BE(), true),
-                    e.Editable
-                );
+                bgump.SetTitle(e.Title, e.Editable);
+                bgump.SetAuthor(e.Author, e.Editable);
                 bgump.UseNewHeader = !e.OldPacket;
                 bgump.SetInScreen();
                 bgump.BringOnTop();
@@ -113,17 +98,14 @@ namespace ClassicUO.Game
                 return;
             }
 
-            var p = new StackDataReader(e.Data);
-            p.Seek(e.Offset);
-
-            for (int i = 0; i < e.PageCount; i++)
+            foreach (BookPage page in e.Pages)
             {
-                int pageNum = p.ReadUInt16BE() - 1;
+                int pageNum = page.PageNumber;
                 gump.KnownPages.Add(pageNum);
 
                 if (pageNum < gump.BookPageCount && pageNum >= 0)
                 {
-                    ushort lineCnt = p.ReadUInt16BE();
+                    int lineCnt = page.Lines.Count;
 
                     for (int line = 0; line < lineCnt; line++)
                     {
@@ -131,9 +113,7 @@ namespace ClassicUO.Game
 
                         if (index < gump.BookLines.Length)
                         {
-                            gump.BookLines[index] = ModernBookGump.IsNewBook
-                                ? p.ReadUTF8(true)
-                                : p.ReadASCII();
+                            gump.BookLines[index] = page.Lines[line];
                         }
                         else
                         {
@@ -163,127 +143,67 @@ namespace ClassicUO.Game
             gump.ServerSetBookText();
         }
 
-        private void OnBulletinBoardDataReceived(BulletinBoardDataReceivedArgs e)
+        private void OnBulletinBoardOpened(BulletinBoardOpenedArgs e)
         {
-            var p = new StackDataReader(e.Data);
-            p.Seek(e.Offset);
+            Item item = Items.Get(e.Serial);
 
-            switch (e.Action)
+            if (item == null)
             {
-                case 0: // open
-                    {
-                        Item item = Items.Get(e.Serial);
-
-                        if (item != null)
-                        {
-                            BulletinBoardGump bulletinBoard = UIManager.GetGump<BulletinBoardGump>(e.Serial);
-                            bulletinBoard?.Dispose();
-
-                            int x = (Client.Game.ClientBounds.Width >> 1) - 245;
-                            int y = (Client.Game.ClientBounds.Height >> 1) - 205;
-
-                            bulletinBoard = new BulletinBoardGump(this, item, x, y, p.ReadUTF8(22, true));
-                            UIManager.Add(bulletinBoard);
-
-                            item.Opened = true;
-                        }
-                    }
-                    break;
-
-                case 1: // summary msg
-                    {
-                        BulletinBoardGump bulletinBoard = UIManager.GetGump<BulletinBoardGump>(e.Serial);
-
-                        if (bulletinBoard != null)
-                        {
-                            uint serial = p.ReadUInt32BE();
-                            uint parendID = p.ReadUInt32BE();
-
-                            // poster
-                            int len = p.ReadUInt8();
-                            string text = (len <= 0 ? string.Empty : p.ReadUTF8(len, true)) + " - ";
-
-                            // subject
-                            len = p.ReadUInt8();
-                            text += (len <= 0 ? string.Empty : p.ReadUTF8(len, true)) + " - ";
-
-                            // datetime
-                            len = p.ReadUInt8();
-                            text += (len <= 0 ? string.Empty : p.ReadUTF8(len, true));
-
-                            bulletinBoard.AddBulletinObject(serial, text);
-                        }
-                    }
-                    break;
-
-                case 2: // message
-                    {
-                        BulletinBoardGump bulletinBoard = UIManager.GetGump<BulletinBoardGump>(e.Serial);
-
-                        if (bulletinBoard != null)
-                        {
-                            uint serial = p.ReadUInt32BE();
-
-                            int len = p.ReadUInt8();
-                            string poster = len > 0 ? p.ReadASCII(len) : string.Empty;
-
-                            len = p.ReadUInt8();
-                            string subject = len > 0 ? p.ReadUTF8(len, true) : string.Empty;
-
-                            len = p.ReadUInt8();
-                            string dataTime = len > 0 ? p.ReadASCII(len) : string.Empty;
-
-                            p.Skip(4);
-
-                            byte unk = p.ReadUInt8();
-
-                            if (unk > 0)
-                            {
-                                p.Skip(unk * 4);
-                            }
-
-                            byte lines = p.ReadUInt8();
-
-                            Span<char> span = stackalloc char[256];
-                            ValueStringBuilder sb = new ValueStringBuilder(span);
-
-                            for (int i = 0; i < lines; i++)
-                            {
-                                byte lineLen = p.ReadUInt8();
-
-                                if (lineLen > 0)
-                                {
-                                    string putta = p.ReadUTF8(lineLen, true);
-                                    sb.Append(putta);
-                                    sb.Append('\n');
-                                }
-                            }
-
-                            string msg = sb.ToString();
-                            byte variant = (byte)(1 + (poster == Player.Name ? 1 : 0));
-
-                            UIManager.Add(
-                                new BulletinBoardItem(
-                                    this,
-                                    e.Serial,
-                                    serial,
-                                    poster,
-                                    subject,
-                                    dataTime,
-                                    msg.TrimStart(),
-                                    variant
-                                )
-                                {
-                                    X = 40,
-                                    Y = 40
-                                }
-                            );
-
-                            sb.Dispose();
-                        }
-                    }
-                    break;
+                return;
             }
+
+            BulletinBoardGump bulletinBoard = UIManager.GetGump<BulletinBoardGump>(e.Serial);
+            bulletinBoard?.Dispose();
+
+            int x = (Client.Game.ClientBounds.Width >> 1) - 245;
+            int y = (Client.Game.ClientBounds.Height >> 1) - 205;
+
+            bulletinBoard = new BulletinBoardGump(this, item, x, y, e.Name);
+            UIManager.Add(bulletinBoard);
+
+            item.Opened = true;
+        }
+
+        private void OnBulletinBoardSummary(BulletinBoardSummaryArgs e)
+        {
+            BulletinBoardGump bulletinBoard = UIManager.GetGump<BulletinBoardGump>(e.BoardSerial);
+
+            if (bulletinBoard == null)
+            {
+                return;
+            }
+
+            string text = e.Poster + " - " + e.Subject + " - " + e.DateTime;
+            bulletinBoard.AddBulletinObject(e.MessageSerial, text);
+        }
+
+        private void OnBulletinBoardMessage(BulletinBoardMessageArgs e)
+        {
+            BulletinBoardGump bulletinBoard = UIManager.GetGump<BulletinBoardGump>(e.BoardSerial);
+
+            if (bulletinBoard == null)
+            {
+                return;
+            }
+
+            byte variant = (byte)(1 + (e.Poster == Player.Name ? 1 : 0));
+
+            UIManager.Add(
+                new BulletinBoardItem(
+                    this,
+                    e.BoardSerial,
+                    e.MessageSerial,
+                    e.Poster,
+                    e.Subject,
+                    e.DateTime,
+                    e.Message.TrimStart(),
+                    variant
+                )
+                {
+                    X = 40,
+                    Y = 40
+                }
+            );
         }
 
         private void OnPaperdollOpened(PaperdollOpenedArgs e)

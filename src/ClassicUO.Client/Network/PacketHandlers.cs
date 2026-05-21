@@ -1427,7 +1427,26 @@ namespace ClassicUO.Network
             uint serial = p.ReadUInt32BE();
             ushort pageCnt = p.ReadUInt16BE();
 
-            EventSink.RaiseBookDataReceived(new BookDataReceivedArgs(serial, pageCnt, p.Buffer.ToArray(), p.Position));
+            bool isNewBook = Client.Game.UO.Version > Utility.ClientVersion.CV_200;
+
+            var pages = new List<BookPage>(pageCnt);
+
+            for (int i = 0; i < pageCnt; i++)
+            {
+                int pageNum = p.ReadUInt16BE() - 1;
+                ushort lineCnt = p.ReadUInt16BE();
+
+                var lines = new string[lineCnt];
+
+                for (int line = 0; line < lineCnt; line++)
+                {
+                    lines[line] = isNewBook ? p.ReadUTF8(true) : p.ReadASCII();
+                }
+
+                pages.Add(new BookPage(pageNum, lines));
+            }
+
+            EventSink.RaiseBookDataReceived(new BookDataReceivedArgs(serial, pageCnt, pages));
         }
 
         private static void CharacterAnimation(World world, ref StackDataReader p)
@@ -1539,7 +1558,90 @@ namespace ClassicUO.Network
             byte action = p.ReadUInt8();
             uint serial = p.ReadUInt32BE();
 
-            EventSink.RaiseBulletinBoardDataReceived(new BulletinBoardDataReceivedArgs(action, serial, p.Buffer.ToArray(), p.Position));
+            switch (action)
+            {
+                case 0: // open
+                    {
+                        string name = p.ReadUTF8(22, true);
+                        EventSink.RaiseBulletinBoardOpened(new BulletinBoardOpenedArgs(serial, name));
+                    }
+                    break;
+
+                case 1: // summary
+                    {
+                        uint messageSerial = p.ReadUInt32BE();
+                        uint parentSerial = p.ReadUInt32BE();
+
+                        int len = p.ReadUInt8();
+                        string poster = len > 0 ? p.ReadUTF8(len, true) : string.Empty;
+
+                        len = p.ReadUInt8();
+                        string subject = len > 0 ? p.ReadUTF8(len, true) : string.Empty;
+
+                        len = p.ReadUInt8();
+                        string dateTime = len > 0 ? p.ReadUTF8(len, true) : string.Empty;
+
+                        EventSink.RaiseBulletinBoardSummary(new BulletinBoardSummaryArgs(
+                            serial,
+                            messageSerial,
+                            parentSerial,
+                            poster,
+                            subject,
+                            dateTime));
+                    }
+                    break;
+
+                case 2: // message
+                    {
+                        uint messageSerial = p.ReadUInt32BE();
+
+                        int len = p.ReadUInt8();
+                        string poster = len > 0 ? p.ReadASCII(len) : string.Empty;
+
+                        len = p.ReadUInt8();
+                        string subject = len > 0 ? p.ReadUTF8(len, true) : string.Empty;
+
+                        len = p.ReadUInt8();
+                        string dateTime = len > 0 ? p.ReadASCII(len) : string.Empty;
+
+                        p.Skip(4);
+
+                        byte unk = p.ReadUInt8();
+                        if (unk > 0)
+                        {
+                            p.Skip(unk * 4);
+                        }
+
+                        byte lineCount = p.ReadUInt8();
+
+                        Span<char> span = stackalloc char[256];
+                        ValueStringBuilder sb = new ValueStringBuilder(span);
+
+                        for (int i = 0; i < lineCount; i++)
+                        {
+                            byte lineLen = p.ReadUInt8();
+
+                            if (lineLen > 0)
+                            {
+                                string putta = p.ReadUTF8(lineLen, true);
+                                sb.Append(putta);
+                                sb.Append('\n');
+                            }
+                        }
+
+                        string message = sb.ToString();
+                        sb.Dispose();
+
+                        EventSink.RaiseBulletinBoardMessage(new BulletinBoardMessageArgs(
+                            serial,
+                            messageSerial,
+                            poster,
+                            subject,
+                            dateTime,
+                            message));
+                    }
+                    break;
+            }
         }
 
         private static void Warmode(World world, ref StackDataReader p)
@@ -1858,7 +1960,14 @@ namespace ClassicUO.Network
 
             ushort pageCount = p.ReadUInt16BE();
 
-            EventSink.RaiseBookOpened(new BookOpenedArgs(serial, editable, pageCount, oldpacket, p.Buffer.ToArray(), p.Position));
+            string title = oldpacket
+                ? p.ReadUTF8(60, true)
+                : p.ReadUTF8(p.ReadUInt16BE(), true);
+            string author = oldpacket
+                ? p.ReadUTF8(30, true)
+                : p.ReadUTF8(p.ReadUInt16BE(), true);
+
+            EventSink.RaiseBookOpened(new BookOpenedArgs(serial, editable, pageCount, oldpacket, title, author));
         }
 
         private static void DyeData(World world, ref StackDataReader p)

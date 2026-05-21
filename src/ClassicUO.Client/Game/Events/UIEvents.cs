@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
+using System.Collections.Generic;
+
 namespace ClassicUO.Game.Events
 {
     internal readonly record struct GumpOpenedArgs(uint Sender, uint GumpId, int X, int Y);
@@ -28,14 +30,20 @@ namespace ClassicUO.Game.Events
         bool Editable,
         ushort PageCount,
         bool OldPacket,
-        byte[] Data,
-        int Offset);
+        string Title,
+        string Author);
+
+    /// <summary>
+    /// One page of a book payload. <see cref="PageNumber"/> is the 0-based page
+    /// index (already decremented from the wire 1-based value). <see cref="Lines"/>
+    /// contains the raw line strings as parsed from the packet.
+    /// </summary>
+    internal readonly record struct BookPage(int PageNumber, IReadOnlyList<string> Lines);
 
     internal readonly record struct BookDataReceivedArgs(
         uint Serial,
         ushort PageCount,
-        byte[] Data,
-        int Offset);
+        IReadOnlyList<BookPage> Pages);
 
     internal readonly record struct TextEntryDialogArgs(
         uint Serial,
@@ -47,11 +55,26 @@ namespace ClassicUO.Game.Events
 
     internal readonly record struct TipWindowDisplayedArgs(uint TipId, byte Flag, string Text);
 
-    internal readonly record struct BulletinBoardDataReceivedArgs(
-        byte Action,
-        uint Serial,
-        byte[] Data,
-        int Offset);
+    /// <summary>Bulletin board "open" sub-action (0): server provides board title.</summary>
+    internal readonly record struct BulletinBoardOpenedArgs(uint Serial, string Name);
+
+    /// <summary>Bulletin board "summary" sub-action (1): server provides one post header.</summary>
+    internal readonly record struct BulletinBoardSummaryArgs(
+        uint BoardSerial,
+        uint MessageSerial,
+        uint ParentSerial,
+        string Poster,
+        string Subject,
+        string DateTime);
+
+    /// <summary>Bulletin board "message" sub-action (2): server provides one full post body.</summary>
+    internal readonly record struct BulletinBoardMessageArgs(
+        uint BoardSerial,
+        uint MessageSerial,
+        string Poster,
+        string Subject,
+        string DateTime,
+        string Message);
 
     internal readonly record struct OpenUrlRequestedArgs(string Url);
 
