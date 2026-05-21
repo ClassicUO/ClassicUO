@@ -19,6 +19,7 @@ using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace ClassicUO.Network
@@ -4054,7 +4055,16 @@ namespace ClassicUO.Network
                 return;
             }
 
-            EventSink.RaiseServerListReceived(new ServerListReceivedArgs(p.Buffer.ToArray(), p.Position));
+            byte flags = p.ReadUInt8();
+            ushort count = p.ReadUInt16BE();
+            ServerListEntry[] servers = new ServerListEntry[count];
+
+            for (ushort i = 0; i < count; i++)
+            {
+                servers[i] = ServerListEntry.Create(ref p);
+            }
+
+            EventSink.RaiseServerListReceived(new ServerListReceivedArgs(flags, servers));
         }
 
         private static void ReceiveServerRelay(World world, ref StackDataReader p)
@@ -4064,7 +4074,11 @@ namespace ClassicUO.Network
                 return;
             }
 
-            EventSink.RaiseServerRelayReceived(new ServerRelayReceivedArgs(p.Buffer.ToArray(), p.Position));
+            uint ip = p.ReadUInt32LE(); // use LittleEndian here
+            ushort port = p.ReadUInt16BE();
+            uint seed = p.ReadUInt32BE();
+
+            EventSink.RaiseServerRelayReceived(new ServerRelayReceivedArgs(ip, port, seed));
         }
 
         private static void UpdateCharacterList(World world, ref StackDataReader p)
@@ -4074,7 +4088,9 @@ namespace ClassicUO.Network
                 return;
             }
 
-            EventSink.RaiseCharacterListUpdated(new CharacterListUpdatedArgs(p.Buffer.ToArray(), p.Position));
+            string[] characters = ParseCharacterList(ref p);
+
+            EventSink.RaiseCharacterListUpdated(new CharacterListUpdatedArgs(characters));
         }
 
         private static void ReceiveCharacterList(World world, ref StackDataReader p)
@@ -4084,7 +4100,11 @@ namespace ClassicUO.Network
                 return;
             }
 
-            EventSink.RaiseCharacterListReceived(new CharacterListReceivedArgs(p.Buffer.ToArray(), p.Position));
+            string[] characters = ParseCharacterList(ref p);
+            CityInfo[] cities = ParseCities(ref p);
+            uint clientFlags = p.ReadUInt32BE();
+
+            EventSink.RaiseCharacterListReceived(new CharacterListReceivedArgs(characters, cities, clientFlags));
         }
 
         private static void LoginDelay(World world, ref StackDataReader p)
@@ -4094,7 +4114,9 @@ namespace ClassicUO.Network
                 return;
             }
 
-            EventSink.RaiseLoginDelayReceived(new LoginDelayReceivedArgs(p.Buffer.ToArray(), p.Position));
+            byte delay = p.ReadUInt8();
+
+            EventSink.RaiseLoginDelayReceived(new LoginDelayReceivedArgs(delay));
         }
 
         private static void ReceiveLoginRejection(World world, ref StackDataReader p)
@@ -4104,11 +4126,215 @@ namespace ClassicUO.Network
                 return;
             }
 
-            byte rejectReason = p[0] == 0x82 || p[0] == 0x85 || p[0] == 0x53
+            byte packetId = p[0];
+            byte rejectReason = packetId == 0x82 || packetId == 0x85 || packetId == 0x53
                 ? p.Buffer[1]
                 : (byte)0;
 
-            EventSink.RaiseLoginRejected(new LoginRejectedArgs(rejectReason, p.Buffer.ToArray(), p.Position));
+            EventSink.RaiseLoginRejected(new LoginRejectedArgs(packetId, rejectReason));
+        }
+
+        private static string[] ParseCharacterList(ref StackDataReader p)
+        {
+            int count = p.ReadUInt8();
+            string[] characters = new string[count];
+
+            for (ushort i = 0; i < count; i++)
+            {
+                characters[i] = p.ReadASCII(30).TrimEnd('\0');
+
+                p.Skip(30);
+            }
+
+            return characters;
+        }
+
+        private static CityInfo[] ParseCities(ref StackDataReader p)
+        {
+            byte count = p.ReadUInt8();
+            CityInfo[] cities = new CityInfo[count];
+
+            bool isNew = Client.Game.UO.Version >= Utility.ClientVersion.CV_70130;
+            string[] descriptions = null;
+
+            if (!isNew)
+            {
+                descriptions = ReadCityTextFile(count);
+            }
+
+            Point[] oldtowns =
+            {
+                new Point(105, 130), new Point(245, 90),
+                new Point(165, 200), new Point(395, 160),
+                new Point(200, 305), new Point(335, 250),
+                new Point(160, 395), new Point(100, 250),
+                new Point(270, 130), new Point(0xFFFF, 0xFFFF)
+            };
+
+            for (int i = 0; i < count; i++)
+            {
+                CityInfo cityInfo;
+
+                if (isNew)
+                {
+                    byte cityIndex = p.ReadUInt8();
+                    string cityName = p.ReadASCII(32);
+                    string cityBuilding = p.ReadASCII(32);
+                    ushort cityX = (ushort) p.ReadUInt32BE();
+                    ushort cityY = (ushort) p.ReadUInt32BE();
+                    sbyte cityZ = (sbyte) p.ReadUInt32BE();
+                    uint cityMapIndex = p.ReadUInt32BE();
+                    uint cityDescription = p.ReadUInt32BE();
+                    p.Skip(4);
+
+                    cityInfo = new CityInfo
+                    (
+                        cityIndex,
+                        cityName,
+                        cityBuilding,
+                        Client.Game.UO.FileManager.Clilocs.GetString((int) cityDescription),
+                        cityX,
+                        cityY,
+                        cityZ,
+                        cityMapIndex,
+                        isNew
+                    );
+                }
+                else
+                {
+                    byte cityIndex = p.ReadUInt8();
+                    string cityName = p.ReadASCII(31);
+                    string cityBuilding = p.ReadASCII(31);
+
+                    cityInfo = new CityInfo
+                    (
+                        cityIndex,
+                        cityName,
+                        cityBuilding,
+                        descriptions != null ? descriptions[i] : string.Empty,
+                        (ushort) oldtowns[i % oldtowns.Length].X,
+                        (ushort) oldtowns[i % oldtowns.Length].Y,
+                        0,
+                        0,
+                        isNew
+                    );
+                }
+
+                cities[i] = cityInfo;
+            }
+
+            return cities;
+        }
+
+        private static string[] ReadCityTextFile(int count)
+        {
+            string path = Client.Game.UO.FileManager.GetUOFilePath("citytext.enu");
+
+            if (!File.Exists(path))
+            {
+                return null;
+            }
+
+            string[] descr = new string[count];
+
+            // TODO: stackalloc ?
+            byte[] data = new byte[4];
+
+            StringBuilder name = new StringBuilder();
+            StringBuilder text = new StringBuilder();
+
+            using (FileStream stream = File.OpenRead(path))
+            {
+                int cityIndex = 0;
+
+                while (stream.Position < stream.Length)
+                {
+                    int r = stream.Read(data, 0, 4);
+
+                    if (r == -1)
+                    {
+                        break;
+                    }
+
+                    string dataText = Encoding.UTF8.GetString(data, 0, 4);
+
+                    if (dataText == "END\0")
+                    {
+                        name.Clear();
+
+                        while (stream.Position < stream.Length)
+                        {
+                            char b = (char) stream.ReadByte();
+
+                            if (b == '<')
+                            {
+                                stream.Position -= 1;
+
+                                break;
+                            }
+
+                            name.Append(b);
+                        }
+
+                        text.Clear();
+
+                        while (stream.Position < stream.Length)
+                        {
+                            char b;
+
+                            while ((b = (char) stream.ReadByte()) != '\0')
+                            {
+                                text.Append(b);
+                            }
+
+                            if (text.Length != 0)
+                            {
+                                string t = text + "\n\n";
+                                text.Clear();
+
+                                text.Append(t);
+                            }
+
+                            long pos = stream.Position;
+                            byte end = (byte) stream.ReadByte();
+                            stream.Position = pos;
+
+                            if (end == 0x2E)
+                            {
+                                break;
+                            }
+
+                            int r1 = stream.Read(data, 0, 4);
+                            stream.Position = pos;
+
+                            if (r1 == -1)
+                            {
+                                break;
+                            }
+
+                            string dataText1 = Encoding.UTF8.GetString(data, 0, 4);
+
+                            if (dataText1 == "END\0")
+                            {
+                                break;
+                            }
+                        }
+
+                        if (descr.Length <= cityIndex)
+                        {
+                            break;
+                        }
+
+                        descr[cityIndex++] = text.ToString();
+                    }
+                    else
+                    {
+                        stream.Position -= 3;
+                    }
+                }
+            }
+
+            return descr;
         }
 
         private static Gump CreateGump(
