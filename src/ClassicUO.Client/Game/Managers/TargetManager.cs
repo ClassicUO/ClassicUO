@@ -114,12 +114,19 @@ namespace ClassicUO.Game.Managers
             _world = world;
             EventSink.TargetCursorReceived += OnTargetCursorReceived;
             EventSink.AttackTargetChanged += OnAttackTargetChanged;
+            EventSink.MultiPlacementReceived += OnMultiPlacementReceived;
         }
 
         public void Unsubscribe()
         {
             EventSink.TargetCursorReceived -= OnTargetCursorReceived;
             EventSink.AttackTargetChanged -= OnAttackTargetChanged;
+            EventSink.MultiPlacementReceived -= OnMultiPlacementReceived;
+        }
+
+        private void OnMultiPlacementReceived(MultiPlacementReceivedArgs e)
+        {
+            SetTargetingMulti(e.TargetId, e.MultiId, e.OffsetX, e.OffsetY, e.OffsetZ, e.Hue);
         }
 
         private void OnTargetCursorReceived(TargetCursorReceivedArgs e)

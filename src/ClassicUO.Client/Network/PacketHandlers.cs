@@ -1006,67 +1006,6 @@ namespace ClassicUO.Network
 
             EventSink.RaiseItemDragAnimation(new ItemDragAnimationArgs(graphic, hue, count, source, sourceX, sourceY, sourceZ, dest, destX, destY, destZ));
 
-            if (graphic == 0x0EED)
-            {
-                graphic = 0x0EEF;
-            }
-            else if (graphic == 0x0EEA)
-            {
-                graphic = 0x0EEC;
-            }
-            else if (graphic == 0x0EF0)
-            {
-                graphic = 0x0EF2;
-            }
-
-            Mobile entity = world.Mobiles.Get(source);
-
-            if (entity == null)
-            {
-                source = 0;
-            }
-            else
-            {
-                sourceX = entity.X;
-                sourceY = entity.Y;
-                sourceZ = entity.Z;
-            }
-
-            Mobile destEntity = world.Mobiles.Get(dest);
-
-            if (destEntity == null)
-            {
-                dest = 0;
-            }
-            else
-            {
-                destX = destEntity.X;
-                destY = destEntity.Y;
-                destZ = destEntity.Z;
-            }
-
-            world.SpawnEffect(
-                !SerialHelper.IsValid(source) || !SerialHelper.IsValid(dest)
-                    ? GraphicEffectType.Moving
-                    : GraphicEffectType.DragEffect,
-                source,
-                dest,
-                graphic,
-                hue,
-                sourceX,
-                sourceY,
-                sourceZ,
-                destX,
-                destY,
-                destZ,
-                5,
-                5000,
-                true,
-                false,
-                false,
-                GraphicEffectBlendMode.Normal
-            );
-
             //if (effect.AnimDataFrame.FrameCount != 0)
             //{
             //    effect.IntervalInMs = (uint) (effect.AnimDataFrame.FrameInterval * 45);
@@ -1647,40 +1586,6 @@ namespace ClassicUO.Network
             uint defenders = p.ReadUInt32BE();
 
             EventSink.RaiseCombatSwing(new CombatSwingArgs(attackers, defenders));
-
-            const int TIME_TURN_TO_LASTTARGET = 2000;
-
-            if (
-                world.TargetManager.LastAttack == defenders
-                && world.Player.InWarMode
-                && world.Player.Walker.LastStepRequestTime + TIME_TURN_TO_LASTTARGET < Time.Ticks
-                && world.Player.Steps.Count == 0
-            )
-            {
-                Mobile enemy = world.Mobiles.Get(defenders);
-
-                if (enemy != null)
-                {
-                    Direction pdir = DirectionHelper.GetDirectionAB(
-                        world.Player.X,
-                        world.Player.Y,
-                        enemy.X,
-                        enemy.Y
-                    );
-
-                    int x = world.Player.X;
-                    int y = world.Player.Y;
-                    sbyte z = world.Player.Z;
-
-                    if (
-                        world.Player.Pathfinder.CanWalk(ref pdir, ref x, ref y, ref z)
-                        && world.Player.Direction != pdir
-                    )
-                    {
-                        world.Player.Walk(pdir, false);
-                    }
-                }
-            }
         }
 
         private static void Unknown_0x32(World world, ref StackDataReader p) { }
@@ -1912,8 +1817,6 @@ namespace ClassicUO.Network
             uint serial = p.ReadUInt32BE();
 
             EventSink.RaiseVendorWindowClosed(new VendorWindowClosedArgs(serial));
-
-            UIManager.GetGump<ShopGump>(serial)?.Dispose();
         }
 
         private static void PersonalLightLevel(World world, ref StackDataReader p)
@@ -2171,13 +2074,6 @@ namespace ClassicUO.Network
         private static void CharacterAnimation(World world, ref StackDataReader p)
         {
             uint serial = p.ReadUInt32BE();
-            Mobile mobile = world.Mobiles.Get(serial);
-
-            if (mobile == null)
-            {
-                return;
-            }
-
             ushort action = p.ReadUInt16BE();
             ushort frame_count = p.ReadUInt16BE();
             ushort repeat_count = p.ReadUInt16BE();
@@ -2186,16 +2082,6 @@ namespace ClassicUO.Network
             byte delay = p.ReadUInt8();
 
             EventSink.RaiseCharacterAnimation(new CharacterAnimationArgs(serial, action, frame_count, repeat_count, forward, repeat, delay));
-
-            mobile.SetAnimation(
-                Mobile.GetReplacedObjectAnimation(mobile.Graphic, action),
-                delay,
-                (byte)frame_count,
-                (byte)repeat_count,
-                repeat,
-                forward,
-                true
-            );
         }
 
         private static void GraphicEffect(World world, ref StackDataReader p)
@@ -3038,22 +2924,6 @@ namespace ClassicUO.Network
             ushort graphic = p.ReadUInt16BE();
 
             EventSink.RaiseDyeDataReceived(new DyeDataReceivedArgs(serial, graphic));
-
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(0x0906);
-
-            int x = (Client.Game.ClientBounds.Width >> 1) - (gumpInfo.UV.Width >> 1);
-            int y = (Client.Game.ClientBounds.Height >> 1) - (gumpInfo.UV.Height >> 1);
-
-            ColorPickerGump gump = UIManager.GetGump<ColorPickerGump>(serial);
-
-            if (gump == null || gump.IsDisposed || gump.Graphic != graphic)
-            {
-                gump?.Dispose();
-
-                gump = new ColorPickerGump(world, serial, graphic, x, y, null);
-
-                UIManager.Add(gump);
-            }
         }
 
         private static void MovePlayer(World world, ref StackDataReader p)
@@ -3099,8 +2969,6 @@ namespace ClassicUO.Network
             ushort hue = p.ReadUInt16BE();
 
             EventSink.RaiseMultiPlacementReceived(new MultiPlacementReceivedArgs((byte)(allowGround ? 1 : 0), targID, flags, multiID, xOff, yOff, zOff, hue));
-
-            world.TargetManager.SetTargetingMulti(targID, multiID, xOff, yOff, zOff, hue);
         }
 
         private static void ASCIIPrompt(World world, ref StackDataReader p)
@@ -3207,11 +3075,6 @@ namespace ClassicUO.Network
             string url = p.ReadASCII();
 
             EventSink.RaiseOpenUrlRequested(new OpenUrlRequestedArgs(url));
-
-            if (!string.IsNullOrEmpty(url))
-            {
-                PlatformHelper.LaunchBrowser(url);
-            }
         }
 
         private static void TipWindow(World world, ref StackDataReader p)
@@ -3227,17 +3090,6 @@ namespace ClassicUO.Network
             string str = p.ReadASCII(p.ReadUInt16BE())?.Replace('\r', '\n');
 
             EventSink.RaiseTipWindowDisplayed(new TipWindowDisplayedArgs(tip, flag, str));
-
-            int x = 20;
-            int y = 20;
-
-            if (flag == 0)
-            {
-                x = 200;
-                y = 100;
-            }
-
-            UIManager.Add(new TipNoticeGump(world, tip, flag, str) { X = x, Y = y });
         }
 
         private static void AttackCharacter(World world, ref StackDataReader p)
@@ -3269,24 +3121,6 @@ namespace ClassicUO.Network
             string desc = p.ReadASCII(descLen);
 
             EventSink.RaiseTextEntryDialogOpened(new TextEntryDialogArgs(serial, parentID, buttonID, maxLength, text, desc));
-
-            TextEntryDialogGump gump = new TextEntryDialogGump(
-                world,
-                serial,
-                143,
-                172,
-                variant,
-                (int)maxLength,
-                text,
-                desc,
-                buttonID,
-                parentID
-            )
-            {
-                CanCloseWithRightClick = haveCancel
-            };
-
-            UIManager.Add(gump);
         }
 
         private static void UnicodeTalk(World world, ref StackDataReader p)
@@ -3706,12 +3540,6 @@ namespace ClassicUO.Network
             string body = p.ReadUnicodeBE();
 
             EventSink.RaiseCharacterProfileOpened(new CharacterProfileOpenedArgs(serial, header, footer, body));
-
-            UIManager.GetGump<ProfileGump>(serial)?.Dispose();
-
-            UIManager.Add(
-                new ProfileGump(world, serial, header, footer, body, serial == world.Player.Serial)
-            );
         }
 
         private static void EnableLockedFeatures(World world, ref StackDataReader p)
@@ -5220,28 +5048,11 @@ namespace ClassicUO.Network
             }
 
             uint serial = p.ReadUInt32BE();
-            Mobile mobile = world.Mobiles.Get(serial);
-
-            if (mobile == null)
-            {
-                return;
-            }
-
             ushort type = p.ReadUInt16BE();
             ushort action = p.ReadUInt16BE();
             byte mode = p.ReadUInt8();
 
             EventSink.RaiseNewCharacterAnimation(new NewCharacterAnimationArgs(serial, type, action, mode));
-
-            byte group = Mobile.GetObjectNewAnimation(mobile, type, action, mode);
-
-            mobile.SetAnimation(
-                group,
-                repeatCount: 1,
-                repeat: (type == 1 || type == 2) && mobile.Graphic == 0x0015,
-                forward: true,
-                fromServer: true
-            );
         }
 
         private static void KREncryptionResponse(World world, ref StackDataReader p) { }

@@ -35,6 +35,16 @@ namespace ClassicUO.Game
             EventSink.HealthBarStateChanged += OnHealthBarStateChanged;
             EventSink.ItemDragEnded += OnItemDragEnded;
             EventSink.ItemDropAccepted += OnItemDropAccepted;
+            EventSink.ItemDragAnimation += OnItemDragAnimation;
+            EventSink.TipWindowDisplayed += OnTipWindowDisplayed;
+            EventSink.OpenUrlRequested += OnOpenUrlRequested;
+            EventSink.VendorWindowClosed += OnVendorWindowClosed;
+            EventSink.CharacterProfileOpened += OnCharacterProfileOpened;
+            EventSink.TextEntryDialogOpened += OnTextEntryDialogOpened;
+            EventSink.DyeDataReceived += OnDyeDataReceived;
+            EventSink.CharacterAnimation += OnCharacterAnimation;
+            EventSink.NewCharacterAnimation += OnNewCharacterAnimation;
+            EventSink.CombatSwing += OnCombatSwing;
         }
 
         public void UnsubscribeEvents()
@@ -60,6 +70,180 @@ namespace ClassicUO.Game
             EventSink.HealthBarStateChanged -= OnHealthBarStateChanged;
             EventSink.ItemDragEnded -= OnItemDragEnded;
             EventSink.ItemDropAccepted -= OnItemDropAccepted;
+            EventSink.ItemDragAnimation -= OnItemDragAnimation;
+            EventSink.TipWindowDisplayed -= OnTipWindowDisplayed;
+            EventSink.OpenUrlRequested -= OnOpenUrlRequested;
+            EventSink.VendorWindowClosed -= OnVendorWindowClosed;
+            EventSink.CharacterProfileOpened -= OnCharacterProfileOpened;
+            EventSink.TextEntryDialogOpened -= OnTextEntryDialogOpened;
+            EventSink.DyeDataReceived -= OnDyeDataReceived;
+            EventSink.CharacterAnimation -= OnCharacterAnimation;
+            EventSink.NewCharacterAnimation -= OnNewCharacterAnimation;
+            EventSink.CombatSwing -= OnCombatSwing;
+        }
+
+        private void OnItemDragAnimation(ItemDragAnimationArgs e)
+        {
+            ushort graphic = e.Graphic;
+            if (graphic == 0x0EED) graphic = 0x0EEF;
+            else if (graphic == 0x0EEA) graphic = 0x0EEC;
+            else if (graphic == 0x0EF0) graphic = 0x0EF2;
+
+            uint source = e.Source;
+            uint dest = e.Destination;
+            ushort srcX = e.SourceX, srcY = e.SourceY;
+            sbyte srcZ = e.SourceZ;
+            ushort dstX = e.DestinationX, dstY = e.DestinationY;
+            sbyte dstZ = e.DestinationZ;
+
+            Mobile sourceEntity = Mobiles.Get(source);
+            if (sourceEntity == null) source = 0;
+            else { srcX = sourceEntity.X; srcY = sourceEntity.Y; srcZ = sourceEntity.Z; }
+
+            Mobile destEntity = Mobiles.Get(dest);
+            if (destEntity == null) dest = 0;
+            else { dstX = destEntity.X; dstY = destEntity.Y; dstZ = destEntity.Z; }
+
+            SpawnEffect(
+                !SerialHelper.IsValid(source) || !SerialHelper.IsValid(dest)
+                    ? GraphicEffectType.Moving
+                    : GraphicEffectType.DragEffect,
+                source,
+                dest,
+                graphic,
+                e.Hue,
+                srcX, srcY, srcZ,
+                dstX, dstY, dstZ,
+                5,
+                5000,
+                true,
+                false,
+                false,
+                GraphicEffectBlendMode.Normal
+            );
+        }
+
+        private void OnTipWindowDisplayed(TipWindowDisplayedArgs e)
+        {
+            int x = e.Flag == 0 ? 200 : 20;
+            int y = e.Flag == 0 ? 100 : 20;
+            UIManager.Add(new TipNoticeGump(this, e.TipId, e.Flag, e.Text) { X = x, Y = y });
+        }
+
+        private void OnOpenUrlRequested(OpenUrlRequestedArgs e)
+        {
+            if (!string.IsNullOrEmpty(e.Url))
+            {
+                Utility.Platforms.PlatformHelper.LaunchBrowser(e.Url);
+            }
+        }
+
+        private void OnVendorWindowClosed(VendorWindowClosedArgs e)
+        {
+            UIManager.GetGump<ShopGump>(e.VendorSerial)?.Dispose();
+        }
+
+        private void OnCharacterProfileOpened(CharacterProfileOpenedArgs e)
+        {
+            if (Player == null) return;
+
+            UIManager.GetGump<ProfileGump>(e.Serial)?.Dispose();
+            UIManager.Add(new ProfileGump(this, e.Serial, e.Header, e.Footer, e.Body, e.Serial == Player.Serial));
+        }
+
+        private void OnTextEntryDialogOpened(TextEntryDialogArgs e)
+        {
+            UIManager.Add(new TextEntryDialogGump(
+                this,
+                e.Serial,
+                143,
+                172,
+                0,
+                (int)e.MaxLength,
+                e.Text,
+                e.Description,
+                e.ButtonId,
+                e.ParentId
+            )
+            {
+                CanCloseWithRightClick = true
+            });
+        }
+
+        private void OnDyeDataReceived(DyeDataReceivedArgs e)
+        {
+            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(0x0906);
+            int x = (Client.Game.ClientBounds.Width >> 1) - (gumpInfo.UV.Width >> 1);
+            int y = (Client.Game.ClientBounds.Height >> 1) - (gumpInfo.UV.Height >> 1);
+
+            ColorPickerGump gump = UIManager.GetGump<ColorPickerGump>(e.Serial);
+            if (gump == null || gump.IsDisposed || gump.Graphic != e.Graphic)
+            {
+                gump?.Dispose();
+                UIManager.Add(new ColorPickerGump(this, e.Serial, e.Graphic, x, y, null));
+            }
+        }
+
+        private void OnCharacterAnimation(CharacterAnimationArgs e)
+        {
+            Mobile mobile = Mobiles.Get(e.Serial);
+            if (mobile == null) return;
+
+            mobile.SetAnimation(
+                Mobile.GetReplacedObjectAnimation(mobile.Graphic, e.Action),
+                e.Delay,
+                (byte)e.FrameCount,
+                (byte)e.RepeatCount,
+                e.Repeat,
+                e.Forward,
+                true
+            );
+        }
+
+        private void OnNewCharacterAnimation(NewCharacterAnimationArgs e)
+        {
+            Mobile mobile = Mobiles.Get(e.Serial);
+            if (mobile == null) return;
+
+            byte group = Mobile.GetObjectNewAnimation(mobile, e.Type, e.Action, e.Mode);
+            mobile.SetAnimation(
+                group,
+                repeatCount: 1,
+                repeat: (e.Type == 1 || e.Type == 2) && mobile.Graphic == 0x0015,
+                forward: true,
+                fromServer: true
+            );
+        }
+
+        private void OnCombatSwing(CombatSwingArgs e)
+        {
+            if (Player == null) return;
+            if (e.Attacker != Player.Serial) return;
+
+            const int TIME_TURN_TO_LASTTARGET = 2000;
+
+            if (
+                TargetManager.LastAttack == e.Defender
+                && Player.InWarMode
+                && Player.Walker.LastStepRequestTime + TIME_TURN_TO_LASTTARGET < Time.Ticks
+                && Player.Steps.Count == 0
+            )
+            {
+                Mobile enemy = Mobiles.Get(e.Defender);
+                if (enemy != null)
+                {
+                    Direction pdir = DirectionHelper.GetDirectionAB(Player.X, Player.Y, enemy.X, enemy.Y);
+
+                    int x = Player.X;
+                    int y = Player.Y;
+                    sbyte z = Player.Z;
+
+                    if (Player.Pathfinder.CanWalk(ref pdir, ref x, ref y, ref z) && Player.Direction != pdir)
+                    {
+                        Player.Walk(pdir, false);
+                    }
+                }
+            }
         }
 
         private void OnItemDragEnded(ItemDragEndedArgs e)
