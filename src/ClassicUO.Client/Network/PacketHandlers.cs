@@ -1505,60 +1505,7 @@ namespace ClassicUO.Network
             uint serial = p.ReadUInt32BE();
             ushort pageCnt = p.ReadUInt16BE();
 
-            EventSink.RaiseBookDataReceived(new BookDataReceivedArgs(serial, pageCnt));
-
-            ModernBookGump gump = UIManager.GetGump<ModernBookGump>(serial);
-
-            if (gump == null || gump.IsDisposed)
-            {
-                return;
-            }
-
-            for (int i = 0; i < pageCnt; i++)
-            {
-                int pageNum = p.ReadUInt16BE() - 1;
-                gump.KnownPages.Add(pageNum);
-
-                if (pageNum < gump.BookPageCount && pageNum >= 0)
-                {
-                    ushort lineCnt = p.ReadUInt16BE();
-
-                    for (int line = 0; line < lineCnt; line++)
-                    {
-                        int index = pageNum * ModernBookGump.MAX_BOOK_LINES + line;
-
-                        if (index < gump.BookLines.Length)
-                        {
-                            gump.BookLines[index] = ModernBookGump.IsNewBook
-                                ? p.ReadUTF8(true)
-                                : p.ReadASCII();
-                        }
-                        else
-                        {
-                            Log.Error(
-                                "BOOKGUMP: The server is sending a page number GREATER than the allowed number of pages in BOOK!"
-                            );
-                        }
-                    }
-
-                    if (lineCnt < ModernBookGump.MAX_BOOK_LINES)
-                    {
-                        for (int line = lineCnt; line < ModernBookGump.MAX_BOOK_LINES; line++)
-                        {
-                            gump.BookLines[pageNum * ModernBookGump.MAX_BOOK_LINES + line] =
-                                string.Empty;
-                        }
-                    }
-                }
-                else
-                {
-                    Log.Error(
-                        "BOOKGUMP: The server is sending a page number GREATER than the allowed number of pages in BOOK!"
-                    );
-                }
-            }
-
-            gump.ServerSetBookText();
+            EventSink.RaiseBookDataReceived(new BookDataReceivedArgs(serial, pageCnt, p.Buffer.ToArray(), p.Position));
         }
 
         private static void CharacterAnimation(World world, ref StackDataReader p)
@@ -1668,141 +1615,9 @@ namespace ClassicUO.Network
             }
 
             byte action = p.ReadUInt8();
+            uint serial = p.ReadUInt32BE();
 
-            switch (action)
-            {
-                case 0: // open
-
-                    {
-                        uint serial = p.ReadUInt32BE();
-                        EventSink.RaiseBulletinBoardDataReceived(new BulletinBoardDataReceivedArgs(action, serial));
-                        Item item = world.Items.Get(serial);
-
-                        if (item != null)
-                        {
-                            BulletinBoardGump bulletinBoard = UIManager.GetGump<BulletinBoardGump>(
-                                serial
-                            );
-                            bulletinBoard?.Dispose();
-
-                            int x = (Client.Game.ClientBounds.Width >> 1) - 245;
-                            int y = (Client.Game.ClientBounds.Height >> 1) - 205;
-
-                            bulletinBoard = new BulletinBoardGump(world, item, x, y, p.ReadUTF8(22, true)); //p.ReadASCII(22));
-                            UIManager.Add(bulletinBoard);
-
-                            item.Opened = true;
-                        }
-                    }
-
-                    break;
-
-                case 1: // summary msg
-
-                    {
-                        uint boardSerial = p.ReadUInt32BE();
-                        EventSink.RaiseBulletinBoardDataReceived(new BulletinBoardDataReceivedArgs(action, boardSerial));
-                        BulletinBoardGump bulletinBoard = UIManager.GetGump<BulletinBoardGump>(
-                            boardSerial
-                        );
-
-                        if (bulletinBoard != null)
-                        {
-                            uint serial = p.ReadUInt32BE();
-                            uint parendID = p.ReadUInt32BE();
-
-                            // poster
-                            int len = p.ReadUInt8();
-                            string text = (len <= 0 ? string.Empty : p.ReadUTF8(len, true)) + " - ";
-
-                            // subject
-                            len = p.ReadUInt8();
-                            text += (len <= 0 ? string.Empty : p.ReadUTF8(len, true)) + " - ";
-
-                            // datetime
-                            len = p.ReadUInt8();
-                            text += (len <= 0 ? string.Empty : p.ReadUTF8(len, true));
-
-                            bulletinBoard.AddBulletinObject(serial, text);
-                        }
-                    }
-
-                    break;
-
-                case 2: // message
-
-                    {
-                        uint boardSerial = p.ReadUInt32BE();
-                        EventSink.RaiseBulletinBoardDataReceived(new BulletinBoardDataReceivedArgs(action, boardSerial));
-                        BulletinBoardGump bulletinBoard = UIManager.GetGump<BulletinBoardGump>(
-                            boardSerial
-                        );
-
-                        if (bulletinBoard != null)
-                        {
-                            uint serial = p.ReadUInt32BE();
-
-                            int len = p.ReadUInt8();
-                            string poster = len > 0 ? p.ReadASCII(len) : string.Empty;
-
-                            len = p.ReadUInt8();
-                            string subject = len > 0 ? p.ReadUTF8(len, true) : string.Empty;
-
-                            len = p.ReadUInt8();
-                            string dataTime = len > 0 ? p.ReadASCII(len) : string.Empty;
-
-                            p.Skip(4);
-
-                            byte unk = p.ReadUInt8();
-
-                            if (unk > 0)
-                            {
-                                p.Skip(unk * 4);
-                            }
-
-                            byte lines = p.ReadUInt8();
-
-                            Span<char> span = stackalloc char[256];
-                            ValueStringBuilder sb = new ValueStringBuilder(span);
-
-                            for (int i = 0; i < lines; i++)
-                            {
-                                byte lineLen = p.ReadUInt8();
-
-                                if (lineLen > 0)
-                                {
-                                    string putta = p.ReadUTF8(lineLen, true);
-                                    sb.Append(putta);
-                                    sb.Append('\n');
-                                }
-                            }
-
-                            string msg = sb.ToString();
-                            byte variant = (byte)(1 + (poster == world.Player.Name ? 1 : 0));
-
-                            UIManager.Add(
-                                new BulletinBoardItem(
-                                    world,
-                                    boardSerial,
-                                    serial,
-                                    poster,
-                                    subject,
-                                    dataTime,
-                                    msg.TrimStart(),
-                                    variant
-                                )
-                                {
-                                    X = 40,
-                                    Y = 40
-                                }
-                            );
-
-                            sb.Dispose();
-                        }
-                    }
-
-                    break;
-            }
+            EventSink.RaiseBulletinBoardDataReceived(new BulletinBoardDataReceivedArgs(action, serial, p.Buffer.ToArray(), p.Position));
         }
 
         private static void Warmode(World world, ref StackDataReader p)
@@ -2118,49 +1933,10 @@ namespace ClassicUO.Network
         private static void OpenPaperdoll(World world, ref StackDataReader p)
         {
             uint mobSerial = p.ReadUInt32BE();
-            Mobile mobile = world.Mobiles.Get(mobSerial);
-
-            if (mobile == null)
-            {
-                return;
-            }
-
             string text = p.ReadASCII(60);
             byte flags = p.ReadUInt8();
 
             EventSink.RaisePaperdollOpened(new PaperdollOpenedArgs(mobSerial, text, flags));
-
-            mobile.Title = text;
-
-            PaperDollGump paperdoll = UIManager.GetGump<PaperDollGump>(mobile);
-
-            if (paperdoll == null)
-            {
-                if (!UIManager.GetGumpCachePosition(mobile, out Point location))
-                {
-                    location = new Point(100, 100);
-                }
-
-                UIManager.Add(
-                    new PaperDollGump(world, mobile, (flags & 0x02) != 0) { Location = location }
-                );
-            }
-            else
-            {
-                bool old = paperdoll.CanLift;
-                bool newLift = (flags & 0x02) != 0;
-
-                paperdoll.CanLift = newLift;
-                paperdoll.UpdateTitle(text);
-
-                if (old != newLift)
-                {
-                    paperdoll.RequestUpdateContents();
-                }
-
-                paperdoll.SetInScreen();
-                paperdoll.BringOnTop();
-            }
         }
 
         private static void CorpseEquipment(World world, ref StackDataReader p)
@@ -2208,38 +1984,18 @@ namespace ClassicUO.Network
             ushort width = p.ReadUInt16BE();
             ushort height = p.ReadUInt16BE();
 
-            EventSink.RaiseMapDisplayed(new MapDisplayedArgs(serial, gumpid, startX, startY, endX, endY, width, height));
+            ushort? facet = null;
 
-            MapGump gump = new MapGump(world, serial, gumpid, width, height);
-            SpriteInfo multiMapInfo;
-
-            if (p[0] == 0xF5 || Client.Game.UO.Version >= Utility.ClientVersion.CV_308Z)
+            if (p[0] == 0xF5)
             {
-                ushort facet = 0;
-
-                if (p[0] == 0xF5)
-                {
-                    facet = p.ReadUInt16BE();
-                }
-
-                multiMapInfo = Client.Game.UO.MultiMaps.GetMap(facet, width, height, startX, startY, endX, endY);
+                facet = p.ReadUInt16BE();
             }
-            else
+            else if (Client.Game.UO.Version >= Utility.ClientVersion.CV_308Z)
             {
-                multiMapInfo = Client.Game.UO.MultiMaps.GetMap(null, width, height, startX, startY, endX, endY);
+                facet = 0;
             }
 
-            if (multiMapInfo.Texture != null)
-                gump.SetMapTexture(multiMapInfo.Texture);
-
-            UIManager.Add(gump);
-
-            Item it = world.Items.Get(serial);
-
-            if (it != null)
-            {
-                it.Opened = true;
-            }
+            EventSink.RaiseMapDisplayed(new MapDisplayedArgs(serial, gumpid, startX, startY, endX, endY, width, height, facet));
         }
 
         private static void OpenBook(World world, ref StackDataReader p)
@@ -2257,46 +2013,9 @@ namespace ClassicUO.Network
                 p.Skip(1);
             }
 
-            ModernBookGump bgump = UIManager.GetGump<ModernBookGump>(serial);
+            ushort pageCount = p.ReadUInt16BE();
 
-            if (bgump == null || bgump.IsDisposed)
-            {
-                ushort page_count = p.ReadUInt16BE();
-
-                EventSink.RaiseBookOpened(new BookOpenedArgs(serial, editable, page_count));
-                string title = oldpacket
-                    ? p.ReadUTF8(60, true)
-                    : p.ReadUTF8(p.ReadUInt16BE(), true);
-                string author = oldpacket
-                    ? p.ReadUTF8(30, true)
-                    : p.ReadUTF8(p.ReadUInt16BE(), true);
-
-                UIManager.Add(
-                    new ModernBookGump(world, serial, page_count, title, author, editable, oldpacket)
-                    {
-                        X = 100,
-                        Y = 100
-                    }
-                );
-
-                NetClient.Socket.Send_BookPageDataRequest(serial, 1);
-            }
-            else
-            {
-                p.Skip(2);
-                bgump.IsEditable = editable;
-                bgump.SetTitle(
-                    oldpacket ? p.ReadUTF8(60, true) : p.ReadUTF8(p.ReadUInt16BE(), true),
-                    editable
-                );
-                bgump.SetAuthor(
-                    oldpacket ? p.ReadUTF8(30, true) : p.ReadUTF8(p.ReadUInt16BE(), true),
-                    editable
-                );
-                bgump.UseNewHeader = !oldpacket;
-                bgump.SetInScreen();
-                bgump.BringOnTop();
-            }
+            EventSink.RaiseBookOpened(new BookOpenedArgs(serial, editable, pageCount, oldpacket, p.Buffer.ToArray(), p.Position));
         }
 
         private static void DyeData(World world, ref StackDataReader p)

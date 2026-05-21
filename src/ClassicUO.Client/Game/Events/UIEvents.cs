@@ -20,11 +20,22 @@ namespace ClassicUO.Game.Events
         ushort EndX,
         ushort EndY,
         ushort Width,
-        ushort Height);
+        ushort Height,
+        ushort? Facet);
 
-    internal readonly record struct BookOpenedArgs(uint Serial, bool Editable, ushort PageCount);
+    internal readonly record struct BookOpenedArgs(
+        uint Serial,
+        bool Editable,
+        ushort PageCount,
+        bool OldPacket,
+        byte[] Data,
+        int Offset);
 
-    internal readonly record struct BookDataReceivedArgs(uint Serial, ushort PageCount);
+    internal readonly record struct BookDataReceivedArgs(
+        uint Serial,
+        ushort PageCount,
+        byte[] Data,
+        int Offset);
 
     internal readonly record struct TextEntryDialogArgs(
         uint Serial,
@@ -36,7 +47,11 @@ namespace ClassicUO.Game.Events
 
     internal readonly record struct TipWindowDisplayedArgs(uint TipId, byte Flag, string Text);
 
-    internal readonly record struct BulletinBoardDataReceivedArgs(byte Action, uint Serial);
+    internal readonly record struct BulletinBoardDataReceivedArgs(
+        byte Action,
+        uint Serial,
+        byte[] Data,
+        int Offset);
 
     internal readonly record struct OpenUrlRequestedArgs(string Url);
 
