@@ -3320,11 +3320,231 @@ namespace ClassicUO.Network
             uint serial = p.ReadUInt32BE();
             uint revision = p.ReadUInt32BE();
 
-            // Snapshot the remaining packet bytes so the subscriber can parse
-            // the plane data without depending on the ref-struct reader.
-            byte[] data = p.Buffer.Slice(p.Position).ToArray();
+            // The original 0xD8 stream contains 4 bytes here (size/flags) that
+            // the existing logic skipped before the plane count.
+            p.Skip(4);
 
-            EventSink.RaiseCustomHouseReceived(new CustomHouseReceivedArgs(serial, revision, data, 0));
+            // Look up the foundation so plane mode 2 can compute its tile
+            // coordinates which depend on the multi bounds.
+            Item foundation = world.Items.Get(serial);
+            Rectangle? multi = foundation?.MultiInfo;
+
+            List<CustomHouseComponent> components;
+            byte planes = p.ReadUInt8();
+
+            if (foundation == null || !foundation.IsMulti || multi == null)
+            {
+                // Skip the remaining plane payload so the stream is fully
+                // consumed; we still raise the event with an empty list so
+                // the subscriber can no-op cleanly.
+                for (int plane = 0; plane < planes; plane++)
+                {
+                    uint header = p.ReadUInt32BE();
+                    int clen = (int)(((header & 0xFF00) >> 8) | ((header & 0x0F) << 8));
+
+                    if (clen > 0)
+                    {
+                        p.Skip(clen);
+                    }
+                }
+
+                components = new List<CustomHouseComponent>(0);
+            }
+            else
+            {
+                short minX = (short)multi.Value.X;
+                short minY = (short)multi.Value.Y;
+                short maxY = (short)multi.Value.Height;
+
+                if (minX == 0 && minY == 0 && maxY == 0 && multi.Value.Width == 0)
+                {
+                    // Drain remaining payload to keep the reader consistent.
+                    for (int plane = 0; plane < planes; plane++)
+                    {
+                        uint header = p.ReadUInt32BE();
+                        int clen = (int)(((header & 0xFF00) >> 8) | ((header & 0x0F) << 8));
+
+                        if (clen > 0)
+                        {
+                            p.Skip(clen);
+                        }
+                    }
+
+                    components = new List<CustomHouseComponent>(0);
+                }
+                else
+                {
+                    components = new List<CustomHouseComponent>();
+
+                    for (int plane = 0; plane < planes; plane++)
+                    {
+                        uint header = p.ReadUInt32BE();
+                        int dlen = (int)(((header & 0xFF0000) >> 16) | ((header & 0xF0) << 4));
+                        int clen = (int)(((header & 0xFF00) >> 8) | ((header & 0x0F) << 8));
+                        int planeZ = (int)((header & 0x0F000000) >> 24);
+                        int planeMode = (int)((header & 0xF0000000) >> 28);
+
+                        if (clen <= 0)
+                        {
+                            continue;
+                        }
+
+                        ReadUnsafeCustomHouseData(
+                            p.Buffer,
+                            p.Position,
+                            dlen,
+                            clen,
+                            planeZ,
+                            planeMode,
+                            minX,
+                            minY,
+                            maxY,
+                            components
+                        );
+
+                        p.Skip(clen);
+                    }
+                }
+            }
+
+            EventSink.RaiseCustomHouseReceived(new CustomHouseReceivedArgs(serial, revision, components));
+        }
+
+        private static unsafe void ReadUnsafeCustomHouseData(
+            ReadOnlySpan<byte> source,
+            int sourcePosition,
+            int dlen,
+            int clen,
+            int planeZ,
+            int planeMode,
+            short minX,
+            short minY,
+            short maxY,
+            List<CustomHouseComponent> components
+        )
+        {
+            byte[] buffer = null;
+            Span<byte> span =
+                dlen <= 1024
+                    ? stackalloc byte[dlen]
+                    : (buffer = System.Buffers.ArrayPool<byte>.Shared.Rent(dlen));
+
+            try
+            {
+                var result = ZLib.Decompress(source.Slice(sourcePosition, clen), span.Slice(0, dlen));
+                var reader = new StackDataReader(span.Slice(0, dlen));
+
+                ushort id = 0;
+                sbyte x = 0,
+                    y = 0,
+                    z = 0;
+
+                switch (planeMode)
+                {
+                    case 0:
+                        int c = dlen / 5;
+
+                        for (uint i = 0; i < c; i++)
+                        {
+                            id = reader.ReadUInt16BE();
+                            x = reader.ReadInt8();
+                            y = reader.ReadInt8();
+                            z = reader.ReadInt8();
+
+                            if (id != 0)
+                            {
+                                components.Add(new CustomHouseComponent(id, x, y, z));
+                            }
+                        }
+
+                        break;
+
+                    case 1:
+
+                        if (planeZ > 0)
+                        {
+                            z = (sbyte)((planeZ - 1) % 4 * 20 + 7);
+                        }
+                        else
+                        {
+                            z = 0;
+                        }
+
+                        c = dlen >> 2;
+
+                        for (uint i = 0; i < c; i++)
+                        {
+                            id = reader.ReadUInt16BE();
+                            x = reader.ReadInt8();
+                            y = reader.ReadInt8();
+
+                            if (id != 0)
+                            {
+                                components.Add(new CustomHouseComponent(id, x, y, z));
+                            }
+                        }
+
+                        break;
+
+                    case 2:
+                        short offX = 0,
+                            offY = 0;
+                        short multiHeight = 0;
+
+                        if (planeZ > 0)
+                        {
+                            z = (sbyte)((planeZ - 1) % 4 * 20 + 7);
+                        }
+                        else
+                        {
+                            z = 0;
+                        }
+
+                        if (planeZ <= 0)
+                        {
+                            offX = minX;
+                            offY = minY;
+                            multiHeight = (short)(maxY - minY + 2);
+                        }
+                        else if (planeZ <= 4)
+                        {
+                            offX = (short)(minX + 1);
+                            offY = (short)(minY + 1);
+                            multiHeight = (short)(maxY - minY);
+                        }
+                        else
+                        {
+                            offX = minX;
+                            offY = minY;
+                            multiHeight = (short)(maxY - minY + 1);
+                        }
+
+                        c = dlen >> 1;
+
+                        for (uint i = 0; i < c; i++)
+                        {
+                            id = reader.ReadUInt16BE();
+                            x = (sbyte)(i / multiHeight + offX);
+                            y = (sbyte)(i % multiHeight + offY);
+
+                            if (id != 0)
+                            {
+                                components.Add(new CustomHouseComponent(id, x, y, z));
+                            }
+                        }
+
+                        break;
+                }
+
+                reader.Release();
+            }
+            finally
+            {
+                if (buffer != null)
+                {
+                    System.Buffers.ArrayPool<byte>.Shared.Return(buffer);
+                }
+            }
         }
 
         private static void CharacterTransferLog(World world, ref StackDataReader p) { }

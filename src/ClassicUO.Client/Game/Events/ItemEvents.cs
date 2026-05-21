@@ -109,9 +109,14 @@ namespace ClassicUO.Game.Events
         byte[] Data,
         int Offset);
 
+    internal readonly record struct CustomHouseComponent(
+        ushort Graphic,
+        sbyte OffsetX,
+        sbyte OffsetY,
+        sbyte OffsetZ);
+
     internal readonly record struct CustomHouseReceivedArgs(
         uint Serial,
         uint Revision,
-        byte[] Data,
-        int Offset);
+        IReadOnlyList<CustomHouseComponent> Components);
 }
