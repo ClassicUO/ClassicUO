@@ -1,8 +1,9 @@
 # EventSink Refactor Status
 
-Branch: `refactor/eventsink-phase0` (30 commits ahead of `main`)
+Branch: `refactor/eventsink-phase0` (32 commits ahead of `main`)
 Build: green (0 errors)
 Tests: 190/190 pass
+`PacketHandlers.cs`: 4823 lines (down from ~7200 at start of refactor)
 
 ## Goal
 
@@ -177,6 +178,27 @@ Migrated to subscribers (handlers shrunk to parse+emit):
 - `World.ClearContainerAndRemoveItems`
 - `PacketHandlers._requestedGridLoot` now `internal static` so the relocated
   `AddItemToContainer` can still see it.
+- `PacketHandlers._customHouseRequests` now `internal static` so the relocated
+  `HouseManager.OnHouseRevisionState` can enqueue.
+
+**0xBF ExtendedCommand sweep** — every sub-command split into typed events:
+- 0x00, 0x01 FastWalkStackInit, 0x02 FastWalkStackAdd, 0x08 MapIndexChanged →
+  `World.Subscribers.ExtendedWalk`
+- 0x04 GenericGumpClose, 0x0C CloseStatusbarGump, 0x10 EquipInfo, 0x14
+  PopupMenu, 0x16 CloseUserInterface, 0x20 HouseDesignState, 0x2A
+  RaceChangeRequested → `World.Subscribers.ExtendedGumps`
+- 0x19 ExtendedStats (Bonded/Locks/Animation variants), 0x1B SpellbookContent →
+  `World.Subscribers.ExtendedStats`
+- 0x18 MapPatchesEnabled, 0x21 AbilityIconsReset, 0x22 DamageOverhead, 0x25
+  SpellIconToggle, 0x26 CharacterSpeedMode, 0x2B MobileAnimationFrame, 0xBEEF
+  CuoCommand → `World.Subscribers.ExtendedMisc`
+- 0x1D HouseRevisionState → `HouseManager.OnHouseRevisionState`
+- 0x06 PartyPacket → `PartyManager.OnPartyPacket`
+
+Two args still carry `byte[]` payload: `PartyPacketArgs` and
+`MapPatchesEnabledArgs`. Both inner consumers (`PartyManager.ParsePacket`,
+`MapLoader.ApplyPatches`) take `ref StackDataReader`, so the subscriber
+re-wraps. Full parse migration of those would be invasive — deferred.
 
 ## To Do
 
@@ -185,15 +207,17 @@ Migrated to subscribers (handlers shrunk to parse+emit):
   network sends still happen directly in the handler. Confirm vs. design intent.
 - **0x6D PlayMusic** uses `0xFFFF` sentinel in `MusicPlayArgs.Index` to mean
   "stop". Cleaner: separate `MusicStopArgs` / `MusicPlayArgs`.
-- **0xBF ExtendedCommand** — never migrated. Big switch with many sub-commands.
-  Each sub-command should get its own typed event.
 - **0xC2 UnicodePrompt** is wired but 0x9A vs 0xC2 should share semantics —
   audit.
+- **0xBF 0x06 PartyPacket** / **0xBF 0x18 MapPatchesEnabled** still carry
+  `byte[]` payload because the inner consumers want a `ref StackDataReader`.
+  Full parse migration deferred.
 
 ### Subscribers / managers
-- `_requestedGridLoot` should move out of `PacketHandlers` into
-  `ContainerManager` or `World`. Currently `internal static` global mutable
-  state on the packet handler class — a refactor smell.
+- `_requestedGridLoot` AND `_customHouseRequests` should move out of
+  `PacketHandlers` into `ContainerManager` / `HouseManager` / `World`.
+  Currently `internal static` globals on the packet handler class — refactor
+  smell, two now instead of one.
 - `LoginScene` lifecycle: `Load()`/`Unload()` subscribes/unsubscribes; if
   multiple scene instances overlap, double-subscription is possible. Audit
   edge cases.
@@ -214,7 +238,8 @@ Migrated to subscribers (handlers shrunk to parse+emit):
 1. Move folder layout from current ad-hoc to the target structure
    (`Net/`, `Game/State/`, `Game/Systems/`, etc.).
 2. Split god files:
-   - `Network/PacketHandlers.cs` (still ~5800 lines) into per-domain partials.
+   - `Network/PacketHandlers.cs` (now 4823 lines, down from ~7200) into
+     per-domain partials.
    - `Network/OutgoingPackets.cs` (4670 lines).
    - `Game/UI/Gumps/OptionsGump.cs` (4941 lines) per-tab partial.
    - `Game/UI/Gumps/WorldMapGump.cs`, `HouseCustomizationGump.cs`, etc.
