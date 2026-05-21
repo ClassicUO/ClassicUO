@@ -13,12 +13,14 @@ namespace ClassicUO.Game.Events
         public static event Action<ClilocMessageArgs> ClilocMessage;
         public static event Action<AsciiPromptArgs> AsciiPrompt;
         public static event Action<UnicodePromptArgs> UnicodePrompt;
+        public static event Action<ChannelChatReceivedArgs> ChannelChatReceived;
 
         public static void RaiseChatMessage(in ChatMessageArgs e) => Invoke(ChatMessage, e);
         public static void RaiseUnicodeChatMessage(in UnicodeChatMessageArgs e) => Invoke(UnicodeChatMessage, e);
         public static void RaiseClilocMessage(in ClilocMessageArgs e) => Invoke(ClilocMessage, e);
         public static void RaiseAsciiPrompt(in AsciiPromptArgs e) => Invoke(AsciiPrompt, e);
         public static void RaiseUnicodePrompt(in UnicodePromptArgs e) => Invoke(UnicodePrompt, e);
+        public static void RaiseChannelChatReceived(in ChannelChatReceivedArgs e) => Invoke(ChannelChatReceived, e);
 
         // ---- Mobiles ----
         public static event Action<MobileSpawnedArgs> MobileSpawned;
@@ -247,6 +249,7 @@ namespace ClassicUO.Game.Events
             ClilocMessage = null;
             AsciiPrompt = null;
             UnicodePrompt = null;
+            ChannelChatReceived = null;
 
             MobileSpawned = null;
             MobileUpdated = null;

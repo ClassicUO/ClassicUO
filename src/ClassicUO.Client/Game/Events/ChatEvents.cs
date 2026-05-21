@@ -38,4 +38,6 @@ namespace ClassicUO.Game.Events
     internal readonly record struct AsciiPromptArgs(ulong PromptId);
 
     internal readonly record struct UnicodePromptArgs(ulong PromptId);
+
+    internal readonly record struct ChannelChatReceivedArgs(ushort Command, byte[] Data, int Offset);
 }
