@@ -1507,62 +1507,12 @@ namespace ClassicUO.Network
             }
 
             uint serial = p.ReadUInt32BE();
-
-            Item item = world.GetOrCreateItem(serial);
-
-            if (item.Graphic != 0 && item.Layer != Layer.Backpack)
-            {
-                //ClearContainerAndRemoveItems(item);
-                world.RemoveItemFromContainer(item);
-            }
-
-            if (SerialHelper.IsValid(item.Container))
-            {
-                UIManager.GetGump<ContainerGump>(item.Container)?.RequestUpdateContents();
-
-                UIManager.GetGump<PaperDollGump>(item.Container)?.RequestUpdateContents();
-            }
-
             ushort eqGraphic = (ushort)(p.ReadUInt16BE() + p.ReadInt8());
             Layer eqLayer = (Layer)p.ReadUInt8();
             uint eqContainer = p.ReadUInt32BE();
             ushort eqHue = p.ReadUInt16BE();
 
             EventSink.RaiseItemEquipped(new ItemEquippedArgs(serial, eqGraphic, eqLayer, eqContainer, eqHue));
-
-            item.Graphic = eqGraphic;
-            item.Layer = eqLayer;
-            item.Container = eqContainer;
-            item.FixHue(eqHue);
-            item.Amount = 1;
-
-            Entity entity = world.Get(item.Container);
-
-            entity?.PushToBack(item);
-
-            if (item.Layer >= Layer.ShopBuyRestock && item.Layer <= Layer.ShopSell)
-            {
-                //item.Clear();
-            }
-            else if (SerialHelper.IsValid(item.Container) && item.Layer < Layer.Mount)
-            {
-                UIManager.GetGump<PaperDollGump>(item.Container)?.RequestUpdateContents();
-            }
-
-            if (
-                entity == world.Player
-                && (item.Layer == Layer.OneHanded || item.Layer == Layer.TwoHanded)
-            )
-            {
-                world.Player?.UpdateAbilities();
-            }
-
-            //if (ItemHold.Serial == item.Serial)
-            //{
-            //    Console.WriteLine("PACKET - ITEM EQUIP");
-            //    ItemHold.Enabled = false;
-            //    ItemHold.Dropped = true;
-            //}
         }
 
         private static void Swing(World world, ref StackDataReader p)
