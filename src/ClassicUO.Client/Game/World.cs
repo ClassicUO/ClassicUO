@@ -19,7 +19,7 @@ using ClassicUO.Network;
 
 namespace ClassicUO.Game
 {
-    internal sealed class World
+    internal sealed partial class World
     {
         private readonly EffectManager _effectManager;
         private readonly List<uint> _toRemove = new List<uint>();
@@ -48,6 +48,8 @@ namespace ClassicUO.Game
             CommandManager = new CommandManager(this);
             Weather = new Weather(this);
             InfoBars = new InfoBarManager(this);
+
+            SubscribeEvents();
         }
 
         public Point RangeSize;

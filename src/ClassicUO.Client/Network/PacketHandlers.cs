@@ -1809,50 +1809,17 @@ namespace ClassicUO.Network
         private static void MobileAttributes(World world, ref StackDataReader p)
         {
             uint serial = p.ReadUInt32BE();
-
-            Entity entity = world.Get(serial);
-
-            if (entity == null)
-            {
-                return;
-            }
-
             ushort hitsMax = p.ReadUInt16BE();
             ushort hits = p.ReadUInt16BE();
-            entity.HitsMax = hitsMax;
-            entity.Hits = hits;
-
-            if (entity.HitsRequest == HitsRequestStatus.Pending)
-            {
-                entity.HitsRequest = HitsRequestStatus.Received;
-            }
 
             if (SerialHelper.IsMobile(serial))
             {
-                Mobile mobile = entity as Mobile;
-
-                if (mobile == null)
-                {
-                    return;
-                }
-
                 ushort manaMax = p.ReadUInt16BE();
                 ushort mana = p.ReadUInt16BE();
                 ushort stamMax = p.ReadUInt16BE();
                 ushort stam = p.ReadUInt16BE();
-                mobile.ManaMax = manaMax;
-                mobile.Mana = mana;
-                mobile.StaminaMax = stamMax;
-                mobile.Stamina = stam;
 
                 EventSink.RaiseMobileAttributesUpdated(new MobileAttributesUpdatedArgs(serial, hitsMax, hits, manaMax, mana, stamMax, stam));
-
-                if (mobile == world.Player)
-                {
-                    world.UoAssist.SignalHits();
-                    world.UoAssist.SignalStamina();
-                    world.UoAssist.SignalMana();
-                }
             }
             else
             {
@@ -2290,8 +2257,6 @@ namespace ClassicUO.Network
             short z = (short)p.ReadUInt16BE();
 
             EventSink.RaiseSoundPlay(new SoundPlayArgs(index, audio, x, y, z));
-
-            Client.Game.Audio.PlaySoundWithDistance(world, index, x, y);
         }
 
         private static void PlayMusic(World world, ref StackDataReader p)
@@ -2305,19 +2270,16 @@ namespace ClassicUO.Network
                 if (cmd == 0x1F && index == 0xFF)
                 {
                     EventSink.RaiseMusicPlay(new MusicPlayArgs(0xFFFF));
-                    Client.Game.Audio.StopMusic();
                 }
                 else
                 {
                     EventSink.RaiseMusicPlay(new MusicPlayArgs(index));
-                    Client.Game.Audio.PlayMusic(index);
                 }
             }
             else
             {
                 ushort index = p.ReadUInt16BE();
                 EventSink.RaiseMusicPlay(new MusicPlayArgs(index));
-                Client.Game.Audio.PlayMusic(index);
             }
         }
 
@@ -2424,16 +2386,10 @@ namespace ClassicUO.Network
             }
 
             WeatherType type = (WeatherType)p.ReadUInt8();
+            byte count = p.ReadUInt8();
+            byte temp = p.ReadUInt8();
 
-            if (world.Weather.CurrentWeather != type)
-            {
-                byte count = p.ReadUInt8();
-                byte temp = p.ReadUInt8();
-
-                EventSink.RaiseWeatherChanged(new WeatherChangedArgs((byte)type, count, temp));
-
-                world.Weather.Generate(type, count, temp);
-            }
+            EventSink.RaiseWeatherChanged(new WeatherChangedArgs((byte)type, count, temp));
         }
 
         private static void BookData(World world, ref StackDataReader p)
@@ -2636,7 +2592,6 @@ namespace ClassicUO.Network
         {
             byte range = p.ReadUInt8();
             EventSink.RaiseClientViewRangeChanged(new ClientViewRangeChangedArgs(range));
-            world.ClientViewRange = range;
         }
 
         private static void BulletinBoardData(World world, ref StackDataReader p)
@@ -2792,7 +2747,6 @@ namespace ClassicUO.Network
             }
 
             bool inWar = p.ReadBool();
-            world.Player.InWarMode = inWar;
             EventSink.RaiseWarModeChanged(new WarModeChangedArgs(world.Player.Serial, inWar));
         }
 
@@ -3560,75 +3514,28 @@ namespace ClassicUO.Network
         private static void UpdateHitpoints(World world, ref StackDataReader p)
         {
             uint serial = p.ReadUInt32BE();
-            Entity entity = world.Get(serial);
-
-            if (entity == null)
-            {
-                return;
-            }
-
             ushort hitsMax = p.ReadUInt16BE();
             ushort hits = p.ReadUInt16BE();
-            entity.HitsMax = hitsMax;
-            entity.Hits = hits;
 
             EventSink.RaiseHitpointsUpdated(new HitpointsUpdatedArgs(serial, hitsMax, hits));
-
-            if (entity.HitsRequest == HitsRequestStatus.Pending)
-            {
-                entity.HitsRequest = HitsRequestStatus.Received;
-            }
-
-            if (entity == world.Player)
-            {
-                world.UoAssist.SignalHits();
-            }
         }
 
         private static void UpdateMana(World world, ref StackDataReader p)
         {
             uint serial = p.ReadUInt32BE();
-            Mobile mobile = world.Mobiles.Get(serial);
-
-            if (mobile == null)
-            {
-                return;
-            }
-
             ushort manaMax = p.ReadUInt16BE();
             ushort mana = p.ReadUInt16BE();
-            mobile.ManaMax = manaMax;
-            mobile.Mana = mana;
 
             EventSink.RaiseManaUpdated(new ManaUpdatedArgs(serial, manaMax, mana));
-
-            if (mobile == world.Player)
-            {
-                world.UoAssist.SignalMana();
-            }
         }
 
         private static void UpdateStamina(World world, ref StackDataReader p)
         {
             uint serial = p.ReadUInt32BE();
-            Mobile mobile = world.Mobiles.Get(serial);
-
-            if (mobile == null)
-            {
-                return;
-            }
-
             ushort stamMax = p.ReadUInt16BE();
             ushort stam = p.ReadUInt16BE();
-            mobile.StaminaMax = stamMax;
-            mobile.Stamina = stam;
 
             EventSink.RaiseStaminaUpdated(new StaminaUpdatedArgs(serial, stamMax, stam));
-
-            if (mobile == world.Player)
-            {
-                world.UoAssist.SignalStamina();
-            }
         }
 
         private static void OpenUrl(World world, ref StackDataReader p)

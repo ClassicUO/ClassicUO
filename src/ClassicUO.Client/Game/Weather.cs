@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Events;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
@@ -33,6 +34,17 @@ namespace ClassicUO.Game
         public Weather(World world)
         {
             _world = world;
+            EventSink.WeatherChanged += OnWeatherChanged;
+        }
+
+        private void OnWeatherChanged(WeatherChangedArgs e)
+        {
+            var type = (WeatherType)e.WeatherType;
+
+            if (CurrentWeather != type)
+            {
+                Generate(type, e.Count, e.Temperature);
+            }
         }
 
 

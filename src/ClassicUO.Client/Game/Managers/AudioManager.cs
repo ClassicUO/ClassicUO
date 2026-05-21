@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using ClassicUO.Utility;
 using ClassicUO.Configuration;
+using ClassicUO.Game.Events;
 using ClassicUO.IO.Audio;
 using ClassicUO.Assets;
 using ClassicUO.Utility.Logging;
@@ -19,8 +20,43 @@ namespace ClassicUO.Game.Managers
         private readonly LinkedList<UOSound> _currentSounds = new LinkedList<UOSound>();
         private readonly UOMusic[] _currentMusic = { null, null };
         private readonly int[] _currentMusicIndices = { 0, 0 };
+        private World _world;
         public int LoginMusicIndex { get; private set; }
         public int DeathMusicIndex { get; } = 42;
+
+        public void Subscribe(World world)
+        {
+            _world = world;
+            EventSink.SoundPlay += OnSoundPlay;
+            EventSink.MusicPlay += OnMusicPlay;
+        }
+
+        public void Unsubscribe()
+        {
+            EventSink.SoundPlay -= OnSoundPlay;
+            EventSink.MusicPlay -= OnMusicPlay;
+            _world = null;
+        }
+
+        private void OnSoundPlay(SoundPlayArgs e)
+        {
+            if (_world != null)
+            {
+                PlaySoundWithDistance(_world, e.Index, e.X, e.Y);
+            }
+        }
+
+        private void OnMusicPlay(MusicPlayArgs e)
+        {
+            if (e.Index == 0xFFFF)
+            {
+                StopMusic();
+            }
+            else
+            {
+                PlayMusic(e.Index);
+            }
+        }
 
         public void Initialize()
         {

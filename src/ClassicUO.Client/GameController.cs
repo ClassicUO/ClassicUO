@@ -130,6 +130,7 @@ namespace ClassicUO
 #else
             UO.Load(this);
             Audio.Initialize();
+            Audio.Subscribe(UO.World);
             // TODO: temporary fix to avoid crash when laoding plugins
             Settings.GlobalSettings.Encryption = (byte) NetClient.Socket.Load(UO.FileManager.Version, (EncryptionType) Settings.GlobalSettings.Encryption);
 
