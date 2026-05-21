@@ -39,5 +39,28 @@ namespace ClassicUO.Game.Events
 
     internal readonly record struct UnicodePromptArgs(ulong PromptId);
 
-    internal readonly record struct ChannelChatReceivedArgs(ushort Command, byte[] Data, int Offset);
+    // ---- Channel chat (0xB2) sub-commands ----
+    internal readonly record struct ChatConferenceCreatedArgs(string ChannelName, bool HasPassword);
+
+    internal readonly record struct ChatConferenceDestroyedArgs(string ChannelName);
+
+    internal readonly record struct ChatUsernameRequestArgs();
+
+    internal readonly record struct ChatClosedArgs();
+
+    internal readonly record struct ChatUsernameAcceptedArgs(string Username);
+
+    internal readonly record struct ChatUserAddedArgs(ushort UserType, string Username);
+
+    internal readonly record struct ChatUserRemovedArgs(string Username);
+
+    internal readonly record struct ChatClearAllPlayersArgs();
+
+    internal readonly record struct ChatConferenceJoinedArgs(string ChannelName);
+
+    internal readonly record struct ChatConferenceLeftArgs(string ChannelName);
+
+    internal readonly record struct ChatTextReceivedArgs(ushort Cmd, string Username, string Message);
+
+    internal readonly record struct ChatSystemMessageArgs(ushort Cmd, string Text);
 }

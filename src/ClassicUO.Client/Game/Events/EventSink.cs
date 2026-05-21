@@ -13,14 +13,36 @@ namespace ClassicUO.Game.Events
         public static event Action<ClilocMessageArgs> ClilocMessage;
         public static event Action<AsciiPromptArgs> AsciiPrompt;
         public static event Action<UnicodePromptArgs> UnicodePrompt;
-        public static event Action<ChannelChatReceivedArgs> ChannelChatReceived;
+        public static event Action<ChatConferenceCreatedArgs> ChatConferenceCreated;
+        public static event Action<ChatConferenceDestroyedArgs> ChatConferenceDestroyed;
+        public static event Action<ChatUsernameRequestArgs> ChatUsernameRequest;
+        public static event Action<ChatClosedArgs> ChatClosed;
+        public static event Action<ChatUsernameAcceptedArgs> ChatUsernameAccepted;
+        public static event Action<ChatUserAddedArgs> ChatUserAdded;
+        public static event Action<ChatUserRemovedArgs> ChatUserRemoved;
+        public static event Action<ChatClearAllPlayersArgs> ChatClearAllPlayers;
+        public static event Action<ChatConferenceJoinedArgs> ChatConferenceJoined;
+        public static event Action<ChatConferenceLeftArgs> ChatConferenceLeft;
+        public static event Action<ChatTextReceivedArgs> ChatTextReceived;
+        public static event Action<ChatSystemMessageArgs> ChatSystemMessage;
 
         public static void RaiseChatMessage(in ChatMessageArgs e) => Invoke(ChatMessage, e);
         public static void RaiseUnicodeChatMessage(in UnicodeChatMessageArgs e) => Invoke(UnicodeChatMessage, e);
         public static void RaiseClilocMessage(in ClilocMessageArgs e) => Invoke(ClilocMessage, e);
         public static void RaiseAsciiPrompt(in AsciiPromptArgs e) => Invoke(AsciiPrompt, e);
         public static void RaiseUnicodePrompt(in UnicodePromptArgs e) => Invoke(UnicodePrompt, e);
-        public static void RaiseChannelChatReceived(in ChannelChatReceivedArgs e) => Invoke(ChannelChatReceived, e);
+        public static void RaiseChatConferenceCreated(in ChatConferenceCreatedArgs e) => Invoke(ChatConferenceCreated, e);
+        public static void RaiseChatConferenceDestroyed(in ChatConferenceDestroyedArgs e) => Invoke(ChatConferenceDestroyed, e);
+        public static void RaiseChatUsernameRequest(in ChatUsernameRequestArgs e) => Invoke(ChatUsernameRequest, e);
+        public static void RaiseChatClosed(in ChatClosedArgs e) => Invoke(ChatClosed, e);
+        public static void RaiseChatUsernameAccepted(in ChatUsernameAcceptedArgs e) => Invoke(ChatUsernameAccepted, e);
+        public static void RaiseChatUserAdded(in ChatUserAddedArgs e) => Invoke(ChatUserAdded, e);
+        public static void RaiseChatUserRemoved(in ChatUserRemovedArgs e) => Invoke(ChatUserRemoved, e);
+        public static void RaiseChatClearAllPlayers(in ChatClearAllPlayersArgs e) => Invoke(ChatClearAllPlayers, e);
+        public static void RaiseChatConferenceJoined(in ChatConferenceJoinedArgs e) => Invoke(ChatConferenceJoined, e);
+        public static void RaiseChatConferenceLeft(in ChatConferenceLeftArgs e) => Invoke(ChatConferenceLeft, e);
+        public static void RaiseChatTextReceived(in ChatTextReceivedArgs e) => Invoke(ChatTextReceived, e);
+        public static void RaiseChatSystemMessage(in ChatSystemMessageArgs e) => Invoke(ChatSystemMessage, e);
 
         // ---- Mobiles ----
         public static event Action<MobileSpawnedArgs> MobileSpawned;
@@ -253,7 +275,18 @@ namespace ClassicUO.Game.Events
             ClilocMessage = null;
             AsciiPrompt = null;
             UnicodePrompt = null;
-            ChannelChatReceived = null;
+            ChatConferenceCreated = null;
+            ChatConferenceDestroyed = null;
+            ChatUsernameRequest = null;
+            ChatClosed = null;
+            ChatUsernameAccepted = null;
+            ChatUserAdded = null;
+            ChatUserRemoved = null;
+            ChatClearAllPlayers = null;
+            ChatConferenceJoined = null;
+            ChatConferenceLeft = null;
+            ChatTextReceived = null;
+            ChatSystemMessage = null;
 
             MobileSpawned = null;
             MobileUpdated = null;

@@ -2326,7 +2326,99 @@ namespace ClassicUO.Network
         {
             ushort cmd = p.ReadUInt16BE();
 
-            EventSink.RaiseChannelChatReceived(new ChannelChatReceivedArgs(cmd, p.Buffer.ToArray(), p.Position));
+            switch (cmd)
+            {
+                case 0x03E8: // create conference
+                {
+                    p.Skip(4);
+                    string channelName = p.ReadUnicodeBE();
+                    bool hasPassword = p.ReadUInt16BE() == 0x31;
+                    EventSink.RaiseChatConferenceCreated(new ChatConferenceCreatedArgs(channelName, hasPassword));
+                    break;
+                }
+
+                case 0x03E9: // destroy conference
+                {
+                    p.Skip(4);
+                    string channelName = p.ReadUnicodeBE();
+                    EventSink.RaiseChatConferenceDestroyed(new ChatConferenceDestroyedArgs(channelName));
+                    break;
+                }
+
+                case 0x03EB: // display enter username window
+                    EventSink.RaiseChatUsernameRequest(new ChatUsernameRequestArgs());
+                    break;
+
+                case 0x03EC: // close chat
+                    EventSink.RaiseChatClosed(new ChatClosedArgs());
+                    break;
+
+                case 0x03ED: // username accepted, display chat
+                {
+                    p.Skip(4);
+                    string username = p.ReadUnicodeBE();
+                    EventSink.RaiseChatUsernameAccepted(new ChatUsernameAcceptedArgs(username));
+                    break;
+                }
+
+                case 0x03EE: // add user
+                {
+                    p.Skip(4);
+                    ushort userType = p.ReadUInt16BE();
+                    string username = p.ReadUnicodeBE();
+                    EventSink.RaiseChatUserAdded(new ChatUserAddedArgs(userType, username));
+                    break;
+                }
+
+                case 0x03EF: // remove user
+                {
+                    p.Skip(4);
+                    string username = p.ReadUnicodeBE();
+                    EventSink.RaiseChatUserRemoved(new ChatUserRemovedArgs(username));
+                    break;
+                }
+
+                case 0x03F0: // clear all players
+                    EventSink.RaiseChatClearAllPlayers(new ChatClearAllPlayersArgs());
+                    break;
+
+                case 0x03F1: // you have joined a conference
+                {
+                    p.Skip(4);
+                    string channelName = p.ReadUnicodeBE();
+                    EventSink.RaiseChatConferenceJoined(new ChatConferenceJoinedArgs(channelName));
+                    break;
+                }
+
+                case 0x03F4: // you have left a conference
+                {
+                    p.Skip(4);
+                    string channelName = p.ReadUnicodeBE();
+                    EventSink.RaiseChatConferenceLeft(new ChatConferenceLeftArgs(channelName));
+                    break;
+                }
+
+                case 0x0025:
+                case 0x0026:
+                case 0x0027:
+                {
+                    p.Skip(4);
+                    p.ReadUInt16BE(); // msgType (unused)
+                    string username = p.ReadUnicodeBE();
+                    string message = p.ReadUnicodeBE();
+                    EventSink.RaiseChatTextReceived(new ChatTextReceivedArgs(cmd, username, message));
+                    break;
+                }
+
+                default:
+                    if (cmd >= 0x0001 && cmd <= 0x0024 || cmd >= 0x0028 && cmd <= 0x002C)
+                    {
+                        p.Skip(4);
+                        string text = p.ReadUnicodeBE();
+                        EventSink.RaiseChatSystemMessage(new ChatSystemMessageArgs(cmd, text));
+                    }
+                    break;
+            }
         }
 
         private static void Help(World world, ref StackDataReader p) { }
