@@ -20,7 +20,15 @@ namespace ClassicUO.Game.Map
         {
             _world = world;
             Index = index;
-            BlocksCount = Client.Game.UO.FileManager.Maps.MapBlocksSize[Index, 0] * Client.Game.UO.FileManager.Maps.MapBlocksSize[Index, 1];
+
+            // Block sizes come from the global MapLoader. Use a null-safe path
+            // so Map can be constructed in unit tests where Client.Game is null.
+            // In that case BlocksCount is 0 and chunk lookups return null.
+            var mapsFile = Client.Game?.UO?.FileManager?.Maps;
+            if (mapsFile != null)
+            {
+                BlocksCount = mapsFile.MapBlocksSize[Index, 0] * mapsFile.MapBlocksSize[Index, 1];
+            }
 
             if (_terrainChunks == null || BlocksCount > _terrainChunks.Length)
                 _terrainChunks = new Chunk[BlocksCount];

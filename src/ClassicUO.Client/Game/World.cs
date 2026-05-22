@@ -183,13 +183,24 @@ namespace ClassicUO.Game
 
         public bool InGame => _inGameForTests ?? (Player != null && Map != null);
 
-        // Test-only seam. PacketHandlers tests need to satisfy the
-        // `world.InGame` gate inside handler methods. PlayerMobile and Map
-        // constructors read unmockable file-IO globals
-        // (Client.Game.UO.FileManager.Skills, .Maps) so seeding real instances
-        // isn't possible from a unit test. Tests set this flag instead.
+        // Test-only seams. Three options for satisfying handler gates from tests:
+        //
+        //   SetInGameForTests(true)         — overrides InGame without seeding
+        //                                     Player/Map. Use when the test only
+        //                                     needs the InGame gate to pass.
+        //   SetPlayerForTests(playerMobile) — seeds Player. PlayerMobile ctor is
+        //                                     null-safe over the global skills
+        //                                     table, so `new PlayerMobile(world,
+        //                                     serial)` works in tests.
+        //   SetMapForTests(map)             — seeds Map. Map ctor is null-safe
+        //                                     over MapLoader, so `new Map.Map(
+        //                                     world, 0)` works in tests.
+        //
+        // None of these are called by production code.
         private bool? _inGameForTests;
         internal void SetInGameForTests(bool value) => _inGameForTests = value;
+        internal void SetPlayerForTests(PlayerMobile player) => Player = player;
+        internal void SetMapForTests(Map.Map map) => Map = map;
 
         public IsometricLight Light { get; } = new IsometricLight
         {

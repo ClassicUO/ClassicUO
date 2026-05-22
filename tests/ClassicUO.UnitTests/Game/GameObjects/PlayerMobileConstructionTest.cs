@@ -7,11 +7,11 @@ using Xunit;
 
 namespace ClassicUO.UnitTests.Game.GameObjects
 {
-    // Regression: PlayerMobile ctor used to dereference
-    // Client.Game.UO.FileManager.Skills unconditionally, which NREs in unit
-    // tests where Client.Game is null. The ctor was changed to use a null-safe
-    // path so PlayerMobile can be constructed in tests. This test pins that
-    // behaviour.
+    // Regression: PlayerMobile and Map ctors used to dereference
+    // Client.Game.UO.FileManager.{Skills,Maps} unconditionally, which NREs in
+    // unit tests where Client.Game is null. Both ctors were changed to use a
+    // null-safe path so they can be constructed in tests, and World exposes
+    // SetPlayerForTests / SetMapForTests internal seams that drive InGame.
     public class PlayerMobileConstructionTest
     {
         [Fact]
@@ -26,6 +26,19 @@ namespace ClassicUO.UnitTests.Game.GameObjects
             player.Skills.Length.Should().Be(0);
             player.Walker.Should().NotBeNull();
             player.Pathfinder.Should().NotBeNull();
+        }
+
+        [Fact]
+        public void SetPlayerForTests_And_SetMapForTests_Drive_InGame()
+        {
+            var world = new World();
+            world.InGame.Should().BeFalse();
+
+            world.SetPlayerForTests(new PlayerMobile(world, 0x0000_2222u));
+            world.InGame.Should().BeFalse(); // Player set, Map still null
+
+            world.SetMapForTests(new ClassicUO.Game.Map.Map(world, 0));
+            world.InGame.Should().BeTrue();
         }
     }
 }
