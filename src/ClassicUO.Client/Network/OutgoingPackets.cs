@@ -2119,6 +2119,8 @@ namespace ClassicUO.Network
 
         public static void Send_CloseStatusBarGump(this NetClient socket, uint serial)
         {
+            OutgoingEventSink.RaiseCloseStatusBarGumpSent(new CloseStatusBarGumpSentArgs(serial));
+
             const byte ID = 0xBF;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -2373,6 +2375,8 @@ namespace ClassicUO.Network
 
         public static void Send_GameWindowSize(this NetClient socket, uint w, uint h)
         {
+            OutgoingEventSink.RaiseGameWindowSizeSent(new GameWindowSizeSentArgs(w, h));
+
             const byte ID = 0xBF;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -2406,6 +2410,8 @@ namespace ClassicUO.Network
 
         public static void Send_BulletinBoardRequestMessage(this NetClient socket, uint serial, uint msgSerial)
         {
+            OutgoingEventSink.RaiseBulletinBoardRequestMessageSent(new BulletinBoardRequestMessageSentArgs(serial, msgSerial));
+
             const byte ID = 0x71;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -2439,6 +2445,8 @@ namespace ClassicUO.Network
 
         public static void Send_BulletinBoardRequestMessageSummary(this NetClient socket, uint serial, uint msgSerial)
         {
+            OutgoingEventSink.RaiseBulletinBoardRequestMessageSummarySent(new BulletinBoardRequestMessageSummarySentArgs(serial, msgSerial));
+
             const byte ID = 0x71;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -2472,6 +2480,8 @@ namespace ClassicUO.Network
 
         public static void Send_BulletinBoardPostMessage(this NetClient socket, uint serial, uint msgSerial, string subject, string text)
         {
+            OutgoingEventSink.RaiseBulletinBoardPostMessageSent(new BulletinBoardPostMessageSentArgs(serial, msgSerial, subject, text));
+
             const byte ID = 0x71;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -2539,6 +2549,8 @@ namespace ClassicUO.Network
 
         public static void Send_BulletinBoardRemoveMessage(this NetClient socket, uint serial, uint msgSerial)
         {
+            OutgoingEventSink.RaiseBulletinBoardRemoveMessageSent(new BulletinBoardRemoveMessageSentArgs(serial, msgSerial));
+
             const byte ID = 0x71;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -2606,6 +2618,8 @@ namespace ClassicUO.Network
 
         public static void Send_QueryGuildPosition(this NetClient socket)
         {
+            OutgoingEventSink.RaiseQueryGuildPositionSent(new QueryGuildPositionSentArgs());
+
             const byte ID = 0xF0;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -2638,6 +2652,8 @@ namespace ClassicUO.Network
 
         public static void Send_QueryPartyPosition(this NetClient socket)
         {
+            OutgoingEventSink.RaiseQueryPartyPositionSent(new QueryPartyPositionSentArgs());
+
             const byte ID = 0xF0;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -3059,6 +3075,8 @@ namespace ClassicUO.Network
 
         public static void Send_GuildMenuRequest(this NetClient socket, World world)
         {
+            OutgoingEventSink.RaiseGuildMenuRequestSent(new GuildMenuRequestSentArgs());
+
             const byte ID = 0xD7;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -3092,6 +3110,8 @@ namespace ClassicUO.Network
 
         public static void Send_QuestMenuRequest(this NetClient socket, World world)
         {
+            OutgoingEventSink.RaiseQuestMenuRequestSent(new QuestMenuRequestSentArgs());
+
             const byte ID = 0xD7;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -3125,6 +3145,8 @@ namespace ClassicUO.Network
 
         public static void Send_EquipLastWeapon(this NetClient socket, World world)
         {
+            OutgoingEventSink.RaiseEquipLastWeaponSent(new EquipLastWeaponSentArgs());
+
             const byte ID = 0xD7;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -3345,6 +3367,8 @@ namespace ClassicUO.Network
 
         public static void Send_BookHeaderChanged_Old(this NetClient socket, uint serial, string title, string author)
         {
+            OutgoingEventSink.RaiseBookHeaderChangedOldSent(new BookHeaderChangedOldSentArgs(serial, title, author));
+
             const byte ID = 0x93;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -3382,6 +3406,8 @@ namespace ClassicUO.Network
 
         public static void Send_BookHeaderChanged(this NetClient socket, uint serial, string title, string author)
         {
+            OutgoingEventSink.RaiseBookHeaderChangedSent(new BookHeaderChangedSentArgs(serial, title, author));
+
             const byte ID = 0xD4;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -3423,6 +3449,8 @@ namespace ClassicUO.Network
 
         public static void Send_BookPageData(this NetClient socket, uint serial, string[] text, int page)
         {
+            OutgoingEventSink.RaiseBookPageDataSent(new BookPageDataSentArgs(serial, text, page));
+
             const byte ID = 0x66;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -3493,6 +3521,8 @@ namespace ClassicUO.Network
 
         public static void Send_BookPageDataRequest(this NetClient socket, uint serial, ushort page)
         {
+            OutgoingEventSink.RaiseBookPageDataRequestSent(new BookPageDataRequestSentArgs(serial, page));
+
             const byte ID = 0x66;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -3729,6 +3759,8 @@ namespace ClassicUO.Network
 
         public static void Send_CustomHouseDataRequest(this NetClient socket, uint serial)
         {
+            OutgoingEventSink.RaiseCustomHouseDataRequestSent(new CustomHouseDataRequestSentArgs(serial));
+
             const byte ID = 0xBF;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -3983,6 +4015,8 @@ namespace ClassicUO.Network
 
         public static void Send_CustomHouseBackup(this NetClient socket, World world)
         {
+            OutgoingEventSink.RaiseCustomHouseBackupSent(new CustomHouseBackupSentArgs());
+
             const byte ID = 0xD7;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -4017,6 +4051,8 @@ namespace ClassicUO.Network
 
         public static void Send_CustomHouseRestore(this NetClient socket, World world)
         {
+            OutgoingEventSink.RaiseCustomHouseRestoreSent(new CustomHouseRestoreSentArgs());
+
             const byte ID = 0xD7;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -4051,6 +4087,8 @@ namespace ClassicUO.Network
 
         public static void Send_CustomHouseCommit(this NetClient socket, World world)
         {
+            OutgoingEventSink.RaiseCustomHouseCommitSent(new CustomHouseCommitSentArgs());
+
             const byte ID = 0xD7;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -4085,6 +4123,8 @@ namespace ClassicUO.Network
 
         public static void Send_CustomHouseBuildingExit(this NetClient socket, World world)
         {
+            OutgoingEventSink.RaiseCustomHouseBuildingExitSent(new CustomHouseBuildingExitSentArgs());
+
             const byte ID = 0xD7;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -4118,6 +4158,8 @@ namespace ClassicUO.Network
 
         public static void Send_CustomHouseGoToFloor(this NetClient socket, World world, byte floor)
         {
+            OutgoingEventSink.RaiseCustomHouseGoToFloorSent(new CustomHouseGoToFloorSentArgs(floor));
+
             const byte ID = 0xD7;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -4154,6 +4196,8 @@ namespace ClassicUO.Network
 
         public static void Send_CustomHouseSync(this NetClient socket, World world)
         {
+            OutgoingEventSink.RaiseCustomHouseSyncSent(new CustomHouseSyncSentArgs());
+
             const byte ID = 0xD7;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -4188,6 +4232,8 @@ namespace ClassicUO.Network
 
         public static void Send_CustomHouseClear(this NetClient socket, World world)
         {
+            OutgoingEventSink.RaiseCustomHouseClearSent(new CustomHouseClearSentArgs());
+
             const byte ID = 0xD7;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -4222,6 +4268,8 @@ namespace ClassicUO.Network
 
         public static void Send_CustomHouseRevert(this NetClient socket, World world)
         {
+            OutgoingEventSink.RaiseCustomHouseRevertSent(new CustomHouseRevertSentArgs());
+
             const byte ID = 0xD7;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -4255,6 +4303,8 @@ namespace ClassicUO.Network
 
         public static void Send_CustomHouseResponse(this NetClient socket, World world)
         {
+            OutgoingEventSink.RaiseCustomHouseResponseSent(new CustomHouseResponseSentArgs());
+
             const byte ID = 0xD7;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -4288,6 +4338,8 @@ namespace ClassicUO.Network
 
         public static void Send_CustomHouseAddItem(this NetClient socket, World world, ushort graphic, int x, int y)
         {
+            OutgoingEventSink.RaiseCustomHouseAddItemSent(new CustomHouseAddItemSentArgs(graphic, x, y));
+
             const byte ID = 0xD7;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -4327,6 +4379,8 @@ namespace ClassicUO.Network
 
         public static void Send_CustomHouseDeleteItem(this NetClient socket, World world, ushort graphic, int x, int y, int z)
         {
+            OutgoingEventSink.RaiseCustomHouseDeleteItemSent(new CustomHouseDeleteItemSentArgs(graphic, x, y, z));
+
             const byte ID = 0xD7;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -4368,6 +4422,8 @@ namespace ClassicUO.Network
 
         public static void Send_CustomHouseAddRoof(this NetClient socket, World world, ushort graphic, int x, int y, int z)
         {
+            OutgoingEventSink.RaiseCustomHouseAddRoofSent(new CustomHouseAddRoofSentArgs(graphic, x, y, z));
+
             const byte ID = 0xD7;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -4409,6 +4465,8 @@ namespace ClassicUO.Network
 
         public static void Send_CustomHouseDeleteRoof(this NetClient socket, World world, ushort graphic, int x, int y, int z)
         {
+            OutgoingEventSink.RaiseCustomHouseDeleteRoofSent(new CustomHouseDeleteRoofSentArgs(graphic, x, y, z));
+
             const byte ID = 0xD7;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -4450,6 +4508,8 @@ namespace ClassicUO.Network
 
         public static void Send_CustomHouseAddStair(this NetClient socket, World world, ushort graphic, int x, int y)
         {
+            OutgoingEventSink.RaiseCustomHouseAddStairSent(new CustomHouseAddStairSentArgs(graphic, x, y));
+
             const byte ID = 0xD7;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -4489,6 +4549,8 @@ namespace ClassicUO.Network
 
         public static void Send_ClientViewRange(this NetClient socket, byte range)
         {
+            OutgoingEventSink.RaiseClientViewRangeSent(new ClientViewRangeSentArgs(range));
+
             const byte ID = 0xC8;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -4529,6 +4591,8 @@ namespace ClassicUO.Network
 
         public static void Send_OpenUOStore(this NetClient socket)
         {
+            OutgoingEventSink.RaiseOpenUoStoreSent(new OpenUoStoreSentArgs());
+
             const byte ID = 0xFA;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -4558,6 +4622,8 @@ namespace ClassicUO.Network
 
         public static void Send_ShowPublicHouseContent(this NetClient socket, bool show)
         {
+            OutgoingEventSink.RaiseShowPublicHouseContentSent(new ShowPublicHouseContentSentArgs(show));
+
             const byte ID = 0xFB;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -4589,6 +4655,8 @@ namespace ClassicUO.Network
 
         public static void Send_DeathScreen(this NetClient socket)
         {
+            OutgoingEventSink.RaiseDeathScreenSent(new DeathScreenSentArgs());
+
             const byte ID = 0x2C;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -4690,6 +4758,8 @@ namespace ClassicUO.Network
 
         public static void Send_UOLive_HashResponse(this NetClient socket, uint block, byte mapIndex, Span<ushort> checksums)
         {
+            OutgoingEventSink.RaiseUoLiveHashResponseSent(new UoLiveHashResponseSentArgs(block, mapIndex, checksums.ToArray()));
+
             const byte ID = 0x3F;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -4730,6 +4800,8 @@ namespace ClassicUO.Network
 
         public static void Send_ToPlugins_AllSpells(this NetClient socket)
         {
+            OutgoingEventSink.RaiseToPluginsAllSpellsSent(new ToPluginsAllSpellsSentArgs());
+
             const byte ID = 0xBF;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -4807,6 +4879,8 @@ namespace ClassicUO.Network
 
         public static void Send_ToPlugins_AllSkills(this NetClient socket)
         {
+            OutgoingEventSink.RaiseToPluginsAllSkillsSent(new ToPluginsAllSkillsSentArgs());
+
             const byte ID = 0xBF;
 
             int length = socket.PacketsTable.GetPacketLength(ID);

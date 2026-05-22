@@ -232,6 +232,100 @@ namespace ClassicUO.Game.Events.Outgoing
 
         public static void RaiseAsciiPromptResponseSent(in AsciiPromptResponseSentArgs e) => Invoke(AsciiPromptResponseSent, e);
         public static void RaiseUnicodePromptResponseSent(in UnicodePromptResponseSentArgs e) => Invoke(UnicodePromptResponseSent, e);
+        // ---- Books ----
+        public static event Action<BookHeaderChangedOldSentArgs> BookHeaderChangedOldSent;
+        public static event Action<BookHeaderChangedSentArgs> BookHeaderChangedSent;
+        public static event Action<BookPageDataSentArgs> BookPageDataSent;
+        public static event Action<BookPageDataRequestSentArgs> BookPageDataRequestSent;
+
+        public static void RaiseBookHeaderChangedOldSent(in BookHeaderChangedOldSentArgs e) => Invoke(BookHeaderChangedOldSent, e);
+        public static void RaiseBookHeaderChangedSent(in BookHeaderChangedSentArgs e) => Invoke(BookHeaderChangedSent, e);
+        public static void RaiseBookPageDataSent(in BookPageDataSentArgs e) => Invoke(BookPageDataSent, e);
+        public static void RaiseBookPageDataRequestSent(in BookPageDataRequestSentArgs e) => Invoke(BookPageDataRequestSent, e);
+
+        // ---- Bulletin Board ----
+        public static event Action<BulletinBoardRequestMessageSentArgs> BulletinBoardRequestMessageSent;
+        public static event Action<BulletinBoardRequestMessageSummarySentArgs> BulletinBoardRequestMessageSummarySent;
+        public static event Action<BulletinBoardPostMessageSentArgs> BulletinBoardPostMessageSent;
+        public static event Action<BulletinBoardRemoveMessageSentArgs> BulletinBoardRemoveMessageSent;
+
+        public static void RaiseBulletinBoardRequestMessageSent(in BulletinBoardRequestMessageSentArgs e) => Invoke(BulletinBoardRequestMessageSent, e);
+        public static void RaiseBulletinBoardRequestMessageSummarySent(in BulletinBoardRequestMessageSummarySentArgs e) => Invoke(BulletinBoardRequestMessageSummarySent, e);
+        public static void RaiseBulletinBoardPostMessageSent(in BulletinBoardPostMessageSentArgs e) => Invoke(BulletinBoardPostMessageSent, e);
+        public static void RaiseBulletinBoardRemoveMessageSent(in BulletinBoardRemoveMessageSentArgs e) => Invoke(BulletinBoardRemoveMessageSent, e);
+
+        // ---- House Customization ----
+        public static event Action<CustomHouseDataRequestSentArgs> CustomHouseDataRequestSent;
+        public static event Action<CustomHouseBackupSentArgs> CustomHouseBackupSent;
+        public static event Action<CustomHouseRestoreSentArgs> CustomHouseRestoreSent;
+        public static event Action<CustomHouseCommitSentArgs> CustomHouseCommitSent;
+        public static event Action<CustomHouseBuildingExitSentArgs> CustomHouseBuildingExitSent;
+        public static event Action<CustomHouseGoToFloorSentArgs> CustomHouseGoToFloorSent;
+        public static event Action<CustomHouseSyncSentArgs> CustomHouseSyncSent;
+        public static event Action<CustomHouseClearSentArgs> CustomHouseClearSent;
+        public static event Action<CustomHouseRevertSentArgs> CustomHouseRevertSent;
+        public static event Action<CustomHouseResponseSentArgs> CustomHouseResponseSent;
+        public static event Action<CustomHouseAddItemSentArgs> CustomHouseAddItemSent;
+        public static event Action<CustomHouseDeleteItemSentArgs> CustomHouseDeleteItemSent;
+        public static event Action<CustomHouseAddRoofSentArgs> CustomHouseAddRoofSent;
+        public static event Action<CustomHouseDeleteRoofSentArgs> CustomHouseDeleteRoofSent;
+        public static event Action<CustomHouseAddStairSentArgs> CustomHouseAddStairSent;
+
+        public static void RaiseCustomHouseDataRequestSent(in CustomHouseDataRequestSentArgs e) => Invoke(CustomHouseDataRequestSent, e);
+        public static void RaiseCustomHouseBackupSent(in CustomHouseBackupSentArgs e) => Invoke(CustomHouseBackupSent, e);
+        public static void RaiseCustomHouseRestoreSent(in CustomHouseRestoreSentArgs e) => Invoke(CustomHouseRestoreSent, e);
+        public static void RaiseCustomHouseCommitSent(in CustomHouseCommitSentArgs e) => Invoke(CustomHouseCommitSent, e);
+        public static void RaiseCustomHouseBuildingExitSent(in CustomHouseBuildingExitSentArgs e) => Invoke(CustomHouseBuildingExitSent, e);
+        public static void RaiseCustomHouseGoToFloorSent(in CustomHouseGoToFloorSentArgs e) => Invoke(CustomHouseGoToFloorSent, e);
+        public static void RaiseCustomHouseSyncSent(in CustomHouseSyncSentArgs e) => Invoke(CustomHouseSyncSent, e);
+        public static void RaiseCustomHouseClearSent(in CustomHouseClearSentArgs e) => Invoke(CustomHouseClearSent, e);
+        public static void RaiseCustomHouseRevertSent(in CustomHouseRevertSentArgs e) => Invoke(CustomHouseRevertSent, e);
+        public static void RaiseCustomHouseResponseSent(in CustomHouseResponseSentArgs e) => Invoke(CustomHouseResponseSent, e);
+        public static void RaiseCustomHouseAddItemSent(in CustomHouseAddItemSentArgs e) => Invoke(CustomHouseAddItemSent, e);
+        public static void RaiseCustomHouseDeleteItemSent(in CustomHouseDeleteItemSentArgs e) => Invoke(CustomHouseDeleteItemSent, e);
+        public static void RaiseCustomHouseAddRoofSent(in CustomHouseAddRoofSentArgs e) => Invoke(CustomHouseAddRoofSent, e);
+        public static void RaiseCustomHouseDeleteRoofSent(in CustomHouseDeleteRoofSentArgs e) => Invoke(CustomHouseDeleteRoofSent, e);
+        public static void RaiseCustomHouseAddStairSent(in CustomHouseAddStairSentArgs e) => Invoke(CustomHouseAddStairSent, e);
+
+        // ---- World / Window ----
+        public static event Action<GameWindowSizeSentArgs> GameWindowSizeSent;
+        public static event Action<ClientViewRangeSentArgs> ClientViewRangeSent;
+        public static event Action<OpenUoStoreSentArgs> OpenUoStoreSent;
+        public static event Action<ShowPublicHouseContentSentArgs> ShowPublicHouseContentSent;
+        public static event Action<DeathScreenSentArgs> DeathScreenSent;
+
+        public static void RaiseGameWindowSizeSent(in GameWindowSizeSentArgs e) => Invoke(GameWindowSizeSent, e);
+        public static void RaiseClientViewRangeSent(in ClientViewRangeSentArgs e) => Invoke(ClientViewRangeSent, e);
+        public static void RaiseOpenUoStoreSent(in OpenUoStoreSentArgs e) => Invoke(OpenUoStoreSent, e);
+        public static void RaiseShowPublicHouseContentSent(in ShowPublicHouseContentSentArgs e) => Invoke(ShowPublicHouseContentSent, e);
+        public static void RaiseDeathScreenSent(in DeathScreenSentArgs e) => Invoke(DeathScreenSent, e);
+
+        // ---- Meta / Admin ----
+        public static event Action<QueryGuildPositionSentArgs> QueryGuildPositionSent;
+        public static event Action<QueryPartyPositionSentArgs> QueryPartyPositionSent;
+        public static event Action<CloseStatusBarGumpSentArgs> CloseStatusBarGumpSent;
+        public static event Action<GuildMenuRequestSentArgs> GuildMenuRequestSent;
+        public static event Action<QuestMenuRequestSentArgs> QuestMenuRequestSent;
+        public static event Action<EquipLastWeaponSentArgs> EquipLastWeaponSent;
+
+        public static void RaiseQueryGuildPositionSent(in QueryGuildPositionSentArgs e) => Invoke(QueryGuildPositionSent, e);
+        public static void RaiseQueryPartyPositionSent(in QueryPartyPositionSentArgs e) => Invoke(QueryPartyPositionSent, e);
+        public static void RaiseCloseStatusBarGumpSent(in CloseStatusBarGumpSentArgs e) => Invoke(CloseStatusBarGumpSent, e);
+        public static void RaiseGuildMenuRequestSent(in GuildMenuRequestSentArgs e) => Invoke(GuildMenuRequestSent, e);
+        public static void RaiseQuestMenuRequestSent(in QuestMenuRequestSentArgs e) => Invoke(QuestMenuRequestSent, e);
+        public static void RaiseEquipLastWeaponSent(in EquipLastWeaponSentArgs e) => Invoke(EquipLastWeaponSent, e);
+
+        // ---- UOLive ----
+        public static event Action<UoLiveHashResponseSentArgs> UoLiveHashResponseSent;
+
+        public static void RaiseUoLiveHashResponseSent(in UoLiveHashResponseSentArgs e) => Invoke(UoLiveHashResponseSent, e);
+
+        // ---- Plugins ----
+        public static event Action<ToPluginsAllSpellsSentArgs> ToPluginsAllSpellsSent;
+        public static event Action<ToPluginsAllSkillsSentArgs> ToPluginsAllSkillsSent;
+
+        public static void RaiseToPluginsAllSpellsSent(in ToPluginsAllSpellsSentArgs e) => Invoke(ToPluginsAllSpellsSent, e);
+        public static void RaiseToPluginsAllSkillsSent(in ToPluginsAllSkillsSentArgs e) => Invoke(ToPluginsAllSkillsSent, e);
 
         // Per-category event blocks land here as the outgoing migration phases
         // wire packets in. See OUTGOING-PACKETS-MIGRATION for the rollout plan.
@@ -360,6 +454,49 @@ namespace ClassicUO.Game.Events.Outgoing
 
             AsciiPromptResponseSent = null;
             UnicodePromptResponseSent = null;
+            BookHeaderChangedOldSent = null;
+            BookHeaderChangedSent = null;
+            BookPageDataSent = null;
+            BookPageDataRequestSent = null;
+
+            BulletinBoardRequestMessageSent = null;
+            BulletinBoardRequestMessageSummarySent = null;
+            BulletinBoardPostMessageSent = null;
+            BulletinBoardRemoveMessageSent = null;
+
+            CustomHouseDataRequestSent = null;
+            CustomHouseBackupSent = null;
+            CustomHouseRestoreSent = null;
+            CustomHouseCommitSent = null;
+            CustomHouseBuildingExitSent = null;
+            CustomHouseGoToFloorSent = null;
+            CustomHouseSyncSent = null;
+            CustomHouseClearSent = null;
+            CustomHouseRevertSent = null;
+            CustomHouseResponseSent = null;
+            CustomHouseAddItemSent = null;
+            CustomHouseDeleteItemSent = null;
+            CustomHouseAddRoofSent = null;
+            CustomHouseDeleteRoofSent = null;
+            CustomHouseAddStairSent = null;
+
+            GameWindowSizeSent = null;
+            ClientViewRangeSent = null;
+            OpenUoStoreSent = null;
+            ShowPublicHouseContentSent = null;
+            DeathScreenSent = null;
+
+            QueryGuildPositionSent = null;
+            QueryPartyPositionSent = null;
+            CloseStatusBarGumpSent = null;
+            GuildMenuRequestSent = null;
+            QuestMenuRequestSent = null;
+            EquipLastWeaponSent = null;
+
+            UoLiveHashResponseSent = null;
+
+            ToPluginsAllSpellsSent = null;
+            ToPluginsAllSkillsSent = null;
         }
     }
 }
