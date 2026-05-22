@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Opl;
@@ -8,7 +9,7 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
 using ClassicUO.Utility.Logging;
 
-namespace ClassicUO.Game.Managers
+namespace ClassicUO.Game.Opl
 {
     /// <summary>
     /// Facade over the OPL cache collaborator: keeps the existing public

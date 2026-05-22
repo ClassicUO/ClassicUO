@@ -3,7 +3,7 @@
 using ClassicUO.Game.Audio;
 using ClassicUO.IO.Audio;
 
-namespace ClassicUO.Game.Managers
+namespace ClassicUO.Game.Audio
 {
     /// <summary>
     /// Facade over the four <see cref="Audio"/> collaborators: keeps the

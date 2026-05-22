@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.WorldText;
 using ClassicUO.Renderer;
 
-namespace ClassicUO.Game.Managers
+namespace ClassicUO.Game.WorldText
 {
     /// <summary>
     /// Facade over the world-overhead text renderer and the floating

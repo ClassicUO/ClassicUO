@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 using System.Collections.Generic;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Houses;
@@ -9,7 +10,7 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.Managers
+namespace ClassicUO.Game.Houses
 {
     /// <summary>
     /// Facade over the three Houses collaborators: keeps the existing public

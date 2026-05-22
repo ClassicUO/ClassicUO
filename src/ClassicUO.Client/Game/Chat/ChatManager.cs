@@ -2,12 +2,13 @@
 
 using System.Collections.Generic;
 using ClassicUO.Game.Chat;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Events;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
 using ClassicUO.Resources;
 
-namespace ClassicUO.Game.Managers
+namespace ClassicUO.Game.Chat
 {
     /// <summary>
     /// Facade over the three Chat collaborators: keeps the existing public

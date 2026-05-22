@@ -6,7 +6,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Party;
 using ClassicUO.Resources;
 
-namespace ClassicUO.Game.Managers
+namespace ClassicUO.Game.Party
 {
     /// <summary>
     /// Facade over the three Party collaborators: keeps the existing public

@@ -5,7 +5,7 @@ using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Utility.Collections;
 
-namespace ClassicUO.Game.Managers
+namespace ClassicUO.Game.Corpses
 {
     internal sealed class CorpseManager : IEventListener
     {

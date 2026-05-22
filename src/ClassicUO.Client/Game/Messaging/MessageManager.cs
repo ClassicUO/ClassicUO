@@ -3,12 +3,13 @@
 using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Messaging;
 using ClassicUO.Network;
 
-namespace ClassicUO.Game.Managers
+namespace ClassicUO.Game.Messaging
 {
     //enum MessageFont : byte
     //{
