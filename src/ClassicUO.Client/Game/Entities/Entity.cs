@@ -10,7 +10,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using static ClassicUO.Network.NetClient;
 
-namespace ClassicUO.Game.GameObjects
+namespace ClassicUO.Game.Entities
 {
     enum HitsRequestStatus
     {

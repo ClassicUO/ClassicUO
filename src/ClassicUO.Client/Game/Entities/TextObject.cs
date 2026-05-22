@@ -6,7 +6,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.GameObjects
+namespace ClassicUO.Game.Entities
 {
     internal class TextObject : BaseGameObject
     {

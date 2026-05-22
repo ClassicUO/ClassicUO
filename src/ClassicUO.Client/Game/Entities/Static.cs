@@ -6,7 +6,7 @@ using ClassicUO.Assets;
 using ClassicUO.Utility;
 using System.Runtime.CompilerServices;
 
-namespace ClassicUO.Game.GameObjects
+namespace ClassicUO.Game.Entities
 {
     internal sealed partial class Static : GameObject
     {

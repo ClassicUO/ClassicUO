@@ -11,7 +11,7 @@ using ClassicUO.Utility.Logging;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ClassicUO.Game.GameObjects
+namespace ClassicUO.Game.Entities
 {
     internal class PlayerMobile : Mobile
     {

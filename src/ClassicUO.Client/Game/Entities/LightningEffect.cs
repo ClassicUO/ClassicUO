@@ -2,7 +2,7 @@
 
 using ClassicUO.Game.Managers;
 
-namespace ClassicUO.Game.GameObjects
+namespace ClassicUO.Game.Entities
 {
     internal sealed partial class LightningEffect : GameEffect
     {

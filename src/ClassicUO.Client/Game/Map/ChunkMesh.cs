@@ -114,7 +114,7 @@ namespace ClassicUO.Game.Map
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void MarkDirtyIfNeeded(GameObject obj)
         {
-            if (!IsDirty && obj is GameObjects.Land or Static or Multi)
+            if (!IsDirty && obj is Entities.Land or Static or Multi)
                 IsDirty = true;
         }
 
@@ -145,7 +145,7 @@ namespace ClassicUO.Game.Map
 
                         switch (obj)
                         {
-                            case GameObjects.Land land:
+                            case Entities.Land land:
                                 CountLand(land);
                                 break;
 
@@ -178,7 +178,7 @@ namespace ClassicUO.Game.Map
                     {
                         switch (obj)
                         {
-                            case GameObjects.Land land:
+                            case Entities.Land land:
                                 TryAddLand(land);
                                 break;
 
@@ -221,7 +221,7 @@ namespace ClassicUO.Game.Map
 
         #region Pass 1: Texture counting
 
-        private void CountLand(GameObjects.Land land)
+        private void CountLand(Entities.Land land)
         {
             if (!land.AllowedToDraw || land.IsDestroyed)
                 return;
@@ -292,7 +292,7 @@ namespace ClassicUO.Game.Map
 
         #region Pass 2: Vertex building
 
-        private void TryAddLand(GameObjects.Land land)
+        private void TryAddLand(Entities.Land land)
         {
             if (!land.AllowedToDraw || land.IsDestroyed)
                 return;

@@ -10,7 +10,7 @@ namespace ClassicUO.UnitTests.Game.GameObjects.Mobile
         public void GetSecureTradeBox_Returns_Null_Without_Items()
         {
             var world = new World();
-            var sut = new ClassicUO.Game.GameObjects.Mobile(world);
+            var sut = new ClassicUO.Game.Entities.Mobile(world);
 
             Assert.Null(sut.GetSecureTradeBox());
 
@@ -25,7 +25,7 @@ namespace ClassicUO.UnitTests.Game.GameObjects.Mobile
             var irrelevantItem1 = new Item(world);
             var irrelevantItem2 = new Item(world);
 
-            var sut = new ClassicUO.Game.GameObjects.Mobile(world);
+            var sut = new ClassicUO.Game.Entities.Mobile(world);
 
             sut.Insert(sut.Items, irrelevantItem1);
             sut.Insert(sut.Items, irrelevantItem2);
@@ -49,7 +49,7 @@ namespace ClassicUO.UnitTests.Game.GameObjects.Mobile
                 Layer = 0
             };
 
-            var sut = new ClassicUO.Game.GameObjects.Mobile(world);
+            var sut = new ClassicUO.Game.Entities.Mobile(world);
 
             sut.Insert(sut.Items, irrelevantItem1);
             sut.Insert(sut.Items, relevantItem);

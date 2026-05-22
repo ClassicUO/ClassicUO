@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework;
 using System;
 using System.Runtime.CompilerServices;
 
-namespace ClassicUO.Game.GameObjects
+namespace ClassicUO.Game.Entities
 {
     internal abstract class BaseGameObject : LinkedObject
     {

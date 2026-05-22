@@ -3,7 +3,7 @@
 using ClassicUO.Game.Managers;
 using ClassicUO.Utility;
 
-namespace ClassicUO.Game.GameObjects
+namespace ClassicUO.Game.Entities
 {
     internal sealed class FixedEffect : GameEffect
     {

@@ -1,19 +1,18 @@
-﻿// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Configuration;
-using ClassicUO.Game.Managers;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Scenes;
 using ClassicUO.IO;
 using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.GameObjects
+namespace ClassicUO.Game.Entities
 {
-    internal partial class Multi
+    internal sealed partial class Static
     {
         private int _canBeTransparent;
-        public bool IsHousePreview;
 
         public override bool TransparentTest(int z)
         {
@@ -38,60 +37,52 @@ namespace ClassicUO.Game.GameObjects
                 return false;
             }
 
-            ushort hue = Hue;
-
-            if (State != 0)
-            {
-                if ((State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER) != 0)
-                {
-                    return false;
-                }
-
-                if ((State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) != 0)
-                {
-                    hue = 0x002B;
-                }
-
-                if ((State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_TRANSPARENT) != 0)
-                {
-                    AlphaHue = 192;
-                    depth -= 0.01f;
-                }
-            }
-
             ushort graphic = Graphic;
+            ushort hue = Hue;
             bool partial = ItemData.IsPartialHue;
 
-            Profile currentProfile = ProfileManager.CurrentProfile;
-
-            if (currentProfile.HighlightGameObjects && SelectedObject.Object == this)
+            if (ProfileManager.CurrentProfile.HighlightGameObjects && SelectedObject.Object == this)
             {
                 hue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
                 partial = false;
             }
-            else if (currentProfile.NoColorObjectsOutOfRange && Distance > World.ClientViewRange)
+            else if (
+                ProfileManager.CurrentProfile.NoColorObjectsOutOfRange
+                && Distance > World.ClientViewRange
+            )
             {
                 hue = Constants.OUT_RANGE_COLOR;
                 partial = false;
             }
-            else if (World.Player.IsDead && currentProfile.EnableBlackWhiteEffect)
+            else if (World.Player.IsDead && ProfileManager.CurrentProfile.EnableBlackWhiteEffect)
             {
                 hue = Constants.DEAD_RANGE_COLOR;
                 partial = false;
             }
 
-            bool cot = TransparentTest(World.Player.Z + 5);
+            bool isTree = StaticFilters.IsTree(graphic, out _);
+
+            // Trees and foliage stay visible inside CoT circle
+            bool cot = !isTree && !ItemData.IsFoliage && TransparentTest(World.Player.Z + 5);
             Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue, partial, AlphaHue / 255f, circletrans: cot);
 
-            if (IsHousePreview)
+            if (isTree && ProfileManager.CurrentProfile.TreeToStumps)
             {
-                hueVec.Z *= 0.5f;
+                graphic = Constants.TREE_REPLACE_GRAPHIC;
             }
 
-            posX += (int)Offset.X;
-            posY += (int)(Offset.Y + Offset.Z);
-
-            DrawStaticAnimated(batcher, graphic, posX, posY, hueVec, false, depth);
+            DrawStaticAnimated(
+                batcher,
+                graphic,
+                posX,
+                posY,
+                hueVec,
+                ProfileManager.CurrentProfile.ShadowsEnabled
+                    && ProfileManager.CurrentProfile.ShadowsStatics
+                    && (isTree || ItemData.IsFoliage || StaticFilters.IsRock(graphic)),
+                depth,
+                ProfileManager.CurrentProfile.AnimatedWaterEffect && ItemData.IsWet
+            );
 
             if (ItemData.IsLight && !InChunkMesh)
             {
@@ -106,36 +97,28 @@ namespace ClassicUO.Game.GameObjects
             if (
                 !(
                     SelectedObject.Object == this
-                    || IsHousePreview
                     || FoliageIndex != -1
                         && Client.Game.GetScene<GameScene>().FoliageIndex == FoliageIndex
                 )
             )
             {
-                if (State != 0)
+                ushort graphic = Graphic;
+
+                bool isTree = StaticFilters.IsTree(graphic, out _);
+
+                if (isTree && ProfileManager.CurrentProfile.TreeToStumps)
                 {
-                    if (
-                        (
-                            State
-                            & (
-                                CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_IGNORE_IN_RENDER
-                                | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_PREVIEW
-                            )
-                        ) != 0
-                    )
-                    {
-                        return false;
-                    }
+                    graphic = Constants.TREE_REPLACE_GRAPHIC;
                 }
 
-                ref UOFileIndex index = ref Client.Game.UO.FileManager.Arts.File.GetValidRefEntry(Graphic + 0x4000);
+                ref var index = ref Client.Game.UO.FileManager.Arts.File.GetValidRefEntry(graphic + 0x4000);
 
                 Point position = RealScreenPosition;
                 position.X -= index.Width;
                 position.Y -= index.Height;
 
                 return Client.Game.UO.Arts.PixelCheck(
-                    Graphic,
+                    graphic,
                     SelectedObject.TranslatedMousePositionByViewport.X - position.X,
                     SelectedObject.TranslatedMousePositionByViewport.Y - position.Y
                 );

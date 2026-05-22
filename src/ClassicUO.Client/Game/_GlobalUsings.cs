@@ -12,8 +12,10 @@ global using ClassicUO.Game.Commands;
 global using ClassicUO.Game.Containers;
 global using ClassicUO.Game.Corpses;
 global using ClassicUO.Game.Effects;
+global using ClassicUO.Game.Entities;
 global using ClassicUO.Game.Entities.Items;
 global using ClassicUO.Game.Entities.Mobiles;
+
 global using ClassicUO.Game.Events;
 global using ClassicUO.Game.Houses;
 global using ClassicUO.Game.Houses.Customization;

@@ -4,7 +4,7 @@ using System;
 using ClassicUO.Game.Managers;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.GameObjects
+namespace ClassicUO.Game.Entities
 {
     internal sealed class MovingEffect : GameEffect
     {

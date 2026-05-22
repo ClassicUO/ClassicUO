@@ -11,7 +11,7 @@ using ClassicUO.Utility.Collections;
 using Microsoft.Xna.Framework;
 using System;
 
-namespace ClassicUO.Game.GameObjects
+namespace ClassicUO.Game.Entities
 {
     internal partial class Mobile : Entity
     {

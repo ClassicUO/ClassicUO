@@ -8,7 +8,7 @@ using ClassicUO.Game.UI.Gumps;
 using Microsoft.Xna.Framework;
 using System;
 
-namespace ClassicUO.Game.GameObjects
+namespace ClassicUO.Game.Entities
 {
     internal partial class Item : Entity
     {

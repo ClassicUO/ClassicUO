@@ -7,7 +7,7 @@ using ClassicUO.Game.Managers;
 using ClassicUO.Utility.Collections;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game.GameObjects
+namespace ClassicUO.Game.Entities
 {
     internal sealed class House : IEquatable<uint>
     {
