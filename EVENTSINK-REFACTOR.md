@@ -1,8 +1,8 @@
 # EventSink Refactor Status
 
-Branch: `refactor/eventsink-phase0` (41 commits ahead of `main`)
+Branch: `refactor/eventsink-phase0` (45 commits ahead of `main`)
 Build: green (0 errors)
-Tests: 246/246 pass
+Tests: 324/324 pass
 `PacketHandlers.cs`: ~4830 lines (down from ~7200 at start of refactor)
 
 LoginScene lifecycle reviewed: `SetScene` calls `oldScene.Dispose()` (which
@@ -277,8 +277,37 @@ All event args are now fully typed — no remaining `byte[]` payloads.
   `FileManager.Clilocs` / `FileManager.Fonts`; anything requiring
   `Client.Game.UO.Sounds` for audio playback; anything that dereferences
   `NetClient.Socket.PacketsTable` (null in tests).
-- Still missing: coverage for the remaining ~85 packet handlers, and for
-  the World partial subscribers (HitpointsUpdated, ManaUpdated, etc).
+- `tests/.../Game/Events/CombatMobilePacketTests.cs`,
+  `ItemContainerVendorPacketTests.cs`, `UiChatSkillsPacketTests.cs`,
+  `AtmosphereLoginExtendedPacketTests.cs` — 78 additional golden-byte
+  tests across 4 buckets, produced in parallel by four worktree agents.
+  Hard rules during this batch: no reflection, no
+  `RuntimeHelpers.GetUninitializedObject`, no production code changes.
+  All in-world handlers that gate on `world.InGame` / `world.Player`
+  remain UNCOVERED on the positive path because the project disallows
+  reflection seams to satisfy those gates. Several agents added "stays
+  silent" negative tests asserting the gate triggers — better than
+  nothing, but doesn't exercise the parse path.
+- Skipped on positive path (gate-blocked): 0x0B Damage, 0x16/0x17
+  Healthbar, 0x20 UpdatePlayer, 0x21/0x22 walk deny/confirm, 0x2F Swing,
+  0x72 Warmode, 0x77/0xD2 UpdateCharacter, 0x78/0xD3 UpdateObject, 0x97
+  MovePlayer, 0x98 UpdateName, 0xAF DisplayDeath, 0xDF BuffDebuff, 0x1A
+  UpdateItem, 0xF3 UpdateItemSA, 0x24 OpenContainer, 0x25/0x3C contained
+  items, 0x2E EquipItem, 0x89 CorpseEquipment, 0xD6 MegaCliloc, 0x28/0x29
+  drag end/accept, 0x74 BuyList, 0x9E SellList, 0x6F SecureTrading (all 4
+  sub-events), 0x7C OpenMenu, 0x66 BookData, 0x71 BulletinBoard, 0xAB
+  TextEntryDialog, 0xB8 CharacterProfile, 0xB0 OpenGump, 0x3B
+  CloseVendorInterface, 0x56 MapData, 0xAE UnicodeTalk, 0xC1/0xCC
+  DisplayCliloc, 0x9A AsciiPrompt, 0xC2 UnicodePrompt, 0x3A UpdateSkills,
+  0xBC Season, 0x4E/0x4F LightLevel, 0x70/0xC0/0xC7 GraphicEffect, 0x99
+  MultiPlacement, 0x38 Pathfinding, 0x54 PlaySoundEffect.
+- Skipped on positive path (NRE on `Client.Game.UO.*` deref): 0x90
+  DisplayMap, 0xBA DisplayQuestArrow, 0x65 SetWeather, 0xA9
+  ReceiveCharacterList, 0xB9 EnableLockedFeatures, 0xD1 Logout.
+- Still missing: coverage for the gate-blocked handlers (would need an
+  internal test-only setter on `World.Player`/`World.Map` or a similar
+  seam), and for the World partial subscribers
+  (HitpointsUpdated, ManaUpdated, etc).
 
 ## Notes / lessons
 
