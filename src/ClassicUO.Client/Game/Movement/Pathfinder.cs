@@ -10,7 +10,7 @@ using ClassicUO.Assets;
 using Microsoft.Xna.Framework;
 using MathHelper = ClassicUO.Utility.MathHelper;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Movement
 {
     internal sealed class Pathfinder
     {

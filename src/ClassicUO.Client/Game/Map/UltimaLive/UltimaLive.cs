@@ -16,7 +16,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Runtime.InteropServices;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Map.UltimaLive
 {
     public sealed class UltimaLive
     {

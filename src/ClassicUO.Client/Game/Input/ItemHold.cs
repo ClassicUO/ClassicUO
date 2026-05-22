@@ -5,7 +5,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Assets;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Input
 {
     sealed class ItemHold
     {

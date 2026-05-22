@@ -13,7 +13,7 @@ using SDL3;
 using System;
 using System.Collections.Generic;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Input
 {
     internal sealed class GameCursor
     {

@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Input
 {
     internal enum ScanModeObject
     {

@@ -9,7 +9,7 @@ using Microsoft.Xna.Framework;
 using System;
 using MathHelper = Microsoft.Xna.Framework.MathHelper;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Weather
 {
     enum WeatherType
     {

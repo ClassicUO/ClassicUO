@@ -5,7 +5,7 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Input
 {
     internal static class SelectedObject
     {
