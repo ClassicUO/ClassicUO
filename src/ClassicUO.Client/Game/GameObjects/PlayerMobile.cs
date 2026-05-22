@@ -19,11 +19,18 @@ namespace ClassicUO.Game.GameObjects
 
         public PlayerMobile(World world, uint serial) : base(world, serial)
         {
-            Skills = new Skill[Client.Game.UO.FileManager.Skills.SkillsCount];
+            // Skill name table is global client state owned by FileManager.Skills.
+            // Use a null-safe path so PlayerMobile can be constructed in unit
+            // tests where Client.Game is null. In that case Skills is an empty
+            // array and subscriber paths that index Skills[id] simply no-op or
+            // bounds-check.
+            var skillsFile = Client.Game?.UO?.FileManager?.Skills;
+            int count = skillsFile?.SkillsCount ?? 0;
+            Skills = new Skill[count];
 
-            for (int i = 0; i < Skills.Length; i++)
+            for (int i = 0; i < count; i++)
             {
-                SkillEntry skill = Client.Game.UO.FileManager.Skills.Skills[i];
+                SkillEntry skill = skillsFile.Skills[i];
                 Skills[i] = new Skill(skill.Name, skill.Index, skill.HasAction);
             }
 
