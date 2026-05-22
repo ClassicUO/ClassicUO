@@ -1,43 +1,54 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System;
 using System.Collections.Generic;
 using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Houses;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.Network;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.Managers
 {
-    internal sealed class HouseManager
+    /// <summary>
+    /// Facade over the three Houses collaborators: keeps the existing public
+    /// surface (<c>_world.HouseManager.X</c>) and owns the EventSink
+    /// subscriptions. Storage, geometry and revision-request queue live in
+    /// dedicated cohesive classes under <see cref="Game.Houses"/>.
+    /// </summary>
+    internal sealed class HouseManager : IEventListener
     {
-        private readonly Dictionary<uint, House> _houses = new Dictionary<uint, House>();
-        private readonly List<uint> _pendingRevisionRequests = new List<uint>();
+        private readonly IHouseStore _store;
+        private readonly IHouseGeometry _geometry;
+        private readonly IHouseRevisionTracker _revisions;
         private readonly World _world;
 
+        /// <summary>Production composition root. Defaults to concrete collaborators.</summary>
         public HouseManager(World world)
+            : this(world, new HouseStore(), new HouseRevisionTracker())
         {
-            _world = world;
-            EventSink.CustomHouseReceived += OnCustomHouseReceived;
-            EventSink.HouseRevisionState += OnHouseRevisionState;
         }
 
-        public void DrainRevisionRequests()
+        /// <summary>Test / extension seam — inject a fake store / tracker.</summary>
+        internal HouseManager(World world, IHouseStore store, IHouseRevisionTracker revisions)
+            : this(world, store, new HouseGeometry(world, store), revisions)
         {
-            if (_pendingRevisionRequests.Count == 0)
-            {
-                return;
-            }
+        }
 
-            for (int i = 0; i < _pendingRevisionRequests.Count; ++i)
-            {
-                NetClient.Socket.Send_CustomHouseDataRequest(_pendingRevisionRequests[i]);
-            }
+        /// <summary>Full DI seam — inject all three collaborators.</summary>
+        internal HouseManager(World world, IHouseStore store, IHouseGeometry geometry, IHouseRevisionTracker revisions)
+        {
+            _world = world;
+            _store = store;
+            _geometry = geometry;
+            _revisions = revisions;
+        }
 
-            _pendingRevisionRequests.Clear();
+        public void Subscribe()
+        {
+            EventSink.CustomHouseReceived += OnCustomHouseReceived;
+            EventSink.HouseRevisionState += OnHouseRevisionState;
         }
 
         public void Unsubscribe()
@@ -46,183 +57,55 @@ namespace ClassicUO.Game.Managers
             EventSink.HouseRevisionState -= OnHouseRevisionState;
         }
 
-        public IReadOnlyCollection<House> Houses => _houses.Values;
+        // ---- Storage facade ----
+        public IReadOnlyCollection<House> Houses => _store.Houses;
+        public bool TryGetHouse(uint serial, out House house) => _store.TryGetHouse(serial, out house);
+        public bool Exists(uint serial) => _store.Exists(serial);
+        public void Add(uint serial, House house) => _store.Add(serial, house);
+        public void Remove(uint serial) => _store.Remove(serial);
+        public void RemoveMultiTargetHouse() => _store.RemoveMultiTargetHouse();
+        public void Clear() => _store.Clear();
 
-        public void Add(uint serial, House revision)
-        {
-            _houses[serial] = revision;
-        }
+        // ---- Geometry facade ----
+        public bool IsHouseInRange(uint serial, int distance) => _geometry.IsHouseInRange(serial, distance);
+        public bool EntityIntoHouse(uint house, GameObject obj) => _geometry.EntityIntoHouse(house, obj);
+        public bool TryToRemove(uint serial, int distance) => _geometry.TryToRemove(serial, distance);
 
-        public bool TryGetHouse(uint serial, out House house)
-        {
-            return _houses.TryGetValue(serial, out house);
-        }
+        // ---- Revision queue facade ----
+        public void DrainRevisionRequests() => _revisions.Drain();
 
-        public bool TryToRemove(uint serial, int distance)
-        {
-            if (!IsHouseInRange(serial, distance))
-            {
-                if (_houses.TryGetValue(serial, out House house))
-                {
-                    house.ClearComponents();
-                    _houses.Remove(serial);
-                }
-
-
-                return true;
-            }
-
-            return false;
-        }
-
-        public bool IsHouseInRange(uint serial, int distance)
-        {
-            if (TryGetHouse(serial, out _))
-            {
-                int currX = _world.RangeSize.X;
-                int currY = _world.RangeSize.Y;
-
-                //if (World.Player.IsMoving)
-                //{
-                //    Mobile.Step step = World.Player.Steps.Back();
-
-                //    currX = step.X;
-                //    currY = step.Y;
-                //}
-                //else
-                //{
-                //    currX = World.Player.X;
-                //    currY = World.Player.Y;
-                //}
-
-                Item found = _world.Items.Get(serial);
-
-                if (found == null)
-                {
-                    return true;
-                }
-
-                distance += found.MultiDistanceBonus;
-
-                return Math.Abs(found.X - currX) <= distance && Math.Abs(found.Y - currY) <= distance;
-            }
-
-            return false;
-        }
-
-        public bool EntityIntoHouse(uint house, GameObject obj)
-        {
-            if (obj != null && TryGetHouse(house, out _))
-            {
-                Item found = _world.Items.Get(house);
-
-                if (found == null || !found.MultiInfo.HasValue)
-                {
-                    return true;
-                }
-
-                int minX = found.X + found.MultiInfo.Value.X;
-                int maxX = found.X + found.MultiInfo.Value.Width;
-                int minY = found.Y + found.MultiInfo.Value.Y;
-                int maxY = found.Y + found.MultiInfo.Value.Height;
-
-                return obj.X >= minX && obj.X <= maxX && obj.Y >= minY && obj.Y <= maxY;
-            }
-
-            return false;
-        }
-
-        public void Remove(uint serial)
-        {
-            if (TryGetHouse(serial, out House house))
-            {
-                house.ClearComponents();
-                _houses.Remove(serial);
-            }
-        }
-
-        public void RemoveMultiTargetHouse()
-        {
-            if (_houses.TryGetValue(0, out House house))
-            {
-                house.ClearComponents();
-                _houses.Remove(0);
-            }
-        }
-
-        public bool Exists(uint serial)
-        {
-            return _houses.ContainsKey(serial);
-        }
-
-        public void Clear()
-        {
-            foreach (KeyValuePair<uint, House> house in _houses)
-            {
-                house.Value.ClearComponents();
-            }
-
-            _houses.Clear();
-        }
-
+        // ---- Event handlers ----
         private void OnCustomHouseReceived(CustomHouseReceivedArgs e)
         {
-            uint serial = e.Serial;
-            uint revision = e.Revision;
-            IReadOnlyList<CustomHouseComponent> components = e.Components;
+            if (e.Components == null) return;
 
-            if (components == null)
+            Item foundation = _world.Items.Get(e.Serial);
+            if (foundation == null) return;
+            if (!foundation.IsMulti || foundation.MultiInfo is not Rectangle multi) return;
+
+            if (multi.X == 0 && multi.Y == 0 && multi.Height == 0 && multi.Width == 0)
             {
+                Log.Warn("[CustomHouse (0xD8) - Invalid multi dimentions. Maybe missing some installation required files");
                 return;
             }
 
-            Item foundation = _world.Items.Get(serial);
-
-            if (foundation == null)
+            if (!_store.TryGetHouse(e.Serial, out House house))
             {
-                return;
-            }
-
-            Rectangle? multi = foundation.MultiInfo;
-
-            if (!foundation.IsMulti || multi == null)
-            {
-                return;
-            }
-
-            short minX = (short)multi.Value.X;
-            short minY = (short)multi.Value.Y;
-            short maxY = (short)multi.Value.Height;
-
-            if (minX == 0 && minY == 0 && maxY == 0 && multi.Value.Width == 0)
-            {
-                Log.Warn(
-                    "[CustomHouse (0xD8) - Invalid multi dimentions. Maybe missing some installation required files"
-                );
-
-                return;
-            }
-
-            if (!TryGetHouse(foundation, out House house))
-            {
-                house = new House(_world, foundation, revision, true);
-                Add(foundation, house);
+                house = new House(_world, foundation, e.Revision, true);
+                _store.Add(e.Serial, house);
             }
             else
             {
                 house.ClearComponents(true);
-                house.Revision = revision;
+                house.Revision = e.Revision;
                 house.IsCustom = true;
             }
 
             house.ClearCustomHouseComponents(0);
+            bool movable = foundation.ItemData.IsMultiMovable;
 
-            bool ismovable = foundation.ItemData.IsMultiMovable;
-
-            for (int i = 0; i < components.Count; i++)
+            foreach (var comp in e.Components)
             {
-                CustomHouseComponent comp = components[i];
-
                 house.Add(
                     comp.Graphic,
                     0,
@@ -230,58 +113,46 @@ namespace ClassicUO.Game.Managers
                     (ushort)(foundation.Y + comp.OffsetY),
                     (sbyte)(foundation.Z + comp.OffsetZ),
                     true,
-                    ismovable
+                    movable
                 );
             }
 
             if (_world.CustomHouseManager != null)
             {
                 _world.CustomHouseManager.GenerateFloorPlace();
-
                 UIManager.GetGump<HouseCustomizationGump>(house.Serial)?.Update();
             }
 
             UIManager.GetGump<MiniMapGump>()?.RequestUpdateContents();
 
-            if (EntityIntoHouse(serial, _world.Player))
+            if (_geometry.EntityIntoHouse(e.Serial, _world.Player))
             {
                 Client.Game.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
             }
 
-            _world.BoatMovingManager.ClearSteps(serial);
+            _world.BoatMovingManager.ClearSteps(e.Serial);
         }
 
         private void OnHouseRevisionState(HouseRevisionStateArgs e)
         {
-            uint serial = e.Serial;
-            uint revision = e.Revision;
-
-            Item multi = _world.Items.Get(serial);
-
-            if (multi == null)
+            if (_world.Items.Get(e.Serial) == null)
             {
-                Remove(serial);
+                _store.Remove(e.Serial);
             }
 
-            if (
-                !TryGetHouse(serial, out House house)
-                || !house.IsCustom
-                || house.Revision != revision
-            )
+            if (!_store.TryGetHouse(e.Serial, out House house) || !house.IsCustom || house.Revision != e.Revision)
             {
-                _pendingRevisionRequests.Add(serial);
+                _revisions.Enqueue(e.Serial);
+                return;
             }
-            else
+
+            house.Generate();
+            _world.BoatMovingManager.ClearSteps(e.Serial);
+            UIManager.GetGump<MiniMapGump>()?.RequestUpdateContents();
+
+            if (_geometry.EntityIntoHouse(e.Serial, _world.Player))
             {
-                house.Generate();
-                _world.BoatMovingManager.ClearSteps(serial);
-
-                UIManager.GetGump<MiniMapGump>()?.RequestUpdateContents();
-
-                if (EntityIntoHouse(serial, _world.Player))
-                {
-                    Client.Game.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
-                }
+                Client.Game.GetScene<GameScene>()?.UpdateMaxDrawZ(true);
             }
         }
     }
