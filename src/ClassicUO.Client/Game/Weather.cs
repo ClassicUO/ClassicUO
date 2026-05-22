@@ -38,6 +38,12 @@ namespace ClassicUO.Game
             EventSink.WalkDenied += OnWalkDenied;
         }
 
+        public void Unsubscribe()
+        {
+            EventSink.WeatherChanged -= OnWeatherChanged;
+            EventSink.WalkDenied -= OnWalkDenied;
+        }
+
         private void OnWeatherChanged(WeatherChangedArgs e)
         {
             var type = (WeatherType)e.WeatherType;
