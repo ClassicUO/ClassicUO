@@ -7,18 +7,29 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Entities.Mobiles
 {
-    internal sealed partial class World
+    /// <summary>
+    /// Listens for player/mobile/item update events and routes them to the
+    /// appropriate world mutations on <see cref="World"/>.
+    /// </summary>
+    internal sealed class MobileUpdatesHandler : IEventListener
     {
-        private void SubscribeMobileUpdates()
+        private readonly World _world;
+
+        public MobileUpdatesHandler(World world)
+        {
+            _world = world;
+        }
+
+        public void Subscribe()
         {
             EventSink.PlayerUpdated += OnPlayerUpdated;
             EventSink.MobileUpdated += OnMobileUpdated;
             EventSink.ItemUpdated += OnItemUpdated;
         }
 
-        private void UnsubscribeMobileUpdates()
+        public void Unsubscribe()
         {
             EventSink.PlayerUpdated -= OnPlayerUpdated;
             EventSink.MobileUpdated -= OnMobileUpdated;
@@ -27,9 +38,9 @@ namespace ClassicUO.Game
 
         private void OnPlayerUpdated(PlayerUpdatedArgs e)
         {
-            if (Player == null) return;
+            if (_world.Player == null) return;
 
-            UpdatePlayer(
+            _world.UpdatePlayer(
                 e.Serial,
                 e.Graphic,
                 e.GraphicIncrement,
@@ -45,7 +56,7 @@ namespace ClassicUO.Game
 
         private void OnMobileUpdated(MobileUpdatedArgs e)
         {
-            if (Player == null) return;
+            if (_world.Player == null) return;
 
             if (e.IsFullObject)
             {
@@ -59,12 +70,12 @@ namespace ClassicUO.Game
 
         private void OnUpdateCharacter(MobileUpdatedArgs e)
         {
-            Mobile mobile = Mobiles.Get(e.Serial);
+            Mobile mobile = _world.Mobiles.Get(e.Serial);
             if (mobile == null) return;
 
             mobile.NotorietyFlag = e.Notoriety;
 
-            if (e.Serial == Player)
+            if (e.Serial == _world.Player)
             {
                 mobile.Flags = e.Flags;
                 mobile.Graphic = e.Graphic;
@@ -74,7 +85,7 @@ namespace ClassicUO.Game
             }
             else
             {
-                UpdateGameObject(e.Serial, e.Graphic, 0, 0, e.X, e.Y, e.Z, e.Direction, e.Hue, e.Flags, 0, 1, 1);
+                _world.UpdateGameObject(e.Serial, e.Graphic, 0, 0, e.X, e.Y, e.Z, e.Direction, e.Hue, e.Flags, 0, 1, 1);
             }
         }
 
@@ -82,20 +93,20 @@ namespace ClassicUO.Game
         {
             bool oldDead = false;
 
-            if (e.Serial == Player)
+            if (e.Serial == _world.Player)
             {
-                oldDead = Player.IsDead;
-                Player.Graphic = e.Graphic;
-                Player.CheckGraphicChange();
-                Player.FixHue(e.Hue);
-                Player.Flags = e.Flags;
+                oldDead = _world.Player.IsDead;
+                _world.Player.Graphic = e.Graphic;
+                _world.Player.CheckGraphicChange();
+                _world.Player.FixHue(e.Hue);
+                _world.Player.Flags = e.Flags;
             }
             else
             {
-                UpdateGameObject(e.Serial, e.Graphic, 0, 0, e.X, e.Y, e.Z, e.Direction, e.Hue, e.Flags, 0, 0, 1);
+                _world.UpdateGameObject(e.Serial, e.Graphic, 0, 0, e.X, e.Y, e.Z, e.Direction, e.Hue, e.Flags, 0, 0, 1);
             }
 
-            Entity obj = Get(e.Serial);
+            Entity obj = _world.Get(e.Serial);
 
             if (obj == null)
             {
@@ -113,7 +124,7 @@ namespace ClassicUO.Game
 
                     if (!it.Opened && it.Layer != Layer.Backpack)
                     {
-                        RemoveItem(it.Serial, true);
+                        _world.RemoveItem(it.Serial, true);
                     }
 
                     o = next;
@@ -133,11 +144,11 @@ namespace ClassicUO.Game
                 {
                     var entry = e.Equipment[i];
 
-                    Item item = GetOrCreateItem(entry.Serial);
+                    Item item = _world.GetOrCreateItem(entry.Serial);
                     item.Graphic = entry.Graphic;
                     item.FixHue(entry.Hue);
                     item.Amount = 1;
-                    RemoveItemFromContainer(item);
+                    _world.RemoveItemFromContainer(item);
                     item.Container = e.Serial;
                     item.Layer = entry.Layer;
 
@@ -147,39 +158,39 @@ namespace ClassicUO.Game
                 }
             }
 
-            if (e.Serial == Player)
+            if (e.Serial == _world.Player)
             {
-                if (oldDead != Player.IsDead)
+                if (oldDead != _world.Player.IsDead)
                 {
-                    if (Player.IsDead)
+                    if (_world.Player.IsDead)
                     {
                         // NOTE: This packet causes some weird issue on sphere servers.
                         //       When the character dies, this packet trigger a "reset" and
                         //       somehow it messes up the packet reading server side
                         //NetClient.Socket.Send_DeathScreen();
-                        ChangeSeason(Seasons.Season.Desolation, 42);
+                        _world.ChangeSeason(Seasons.Season.Desolation, 42);
                     }
                     else
                     {
-                        ChangeSeason(OldSeason, OldMusicIndex);
+                        _world.ChangeSeason(_world.OldSeason, _world.OldMusicIndex);
                     }
                 }
 
                 UIManager.GetGump<PaperDollGump>(e.Serial)?.RequestUpdateContents();
 
-                Player.UpdateAbilities();
+                _world.Player.UpdateAbilities();
             }
         }
 
         private void OnItemUpdated(ItemUpdatedArgs e)
         {
-            if (Player == null) return;
+            if (_world.Player == null) return;
 
             if (e.IsItemSA)
             {
-                if (e.Serial != Player)
+                if (e.Serial != _world.Player)
                 {
-                    UpdateGameObject(
+                    _world.UpdateGameObject(
                         e.Serial,
                         e.Graphic,
                         e.GraphicInc,
@@ -197,12 +208,12 @@ namespace ClassicUO.Game
 
                     if (e.Graphic == 0x2006 && ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.AutoOpenCorpses)
                     {
-                        Player.TryOpenCorpses();
+                        _world.Player.TryOpenCorpses();
                     }
                 }
                 else if (e.IsFromPacketList)
                 {
-                    UpdatePlayer(
+                    _world.UpdatePlayer(
                         e.Serial,
                         e.Graphic,
                         e.GraphicInc,
@@ -218,7 +229,7 @@ namespace ClassicUO.Game
             }
             else
             {
-                UpdateGameObject(
+                _world.UpdateGameObject(
                     e.Serial,
                     e.Graphic,
                     e.GraphicInc,

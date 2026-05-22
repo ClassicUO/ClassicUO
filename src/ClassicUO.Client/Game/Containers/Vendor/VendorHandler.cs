@@ -1,16 +1,27 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using ClassicUO.Game.Data;
 using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Containers.Vendor
 {
-    internal sealed partial class World
+    /// <summary>
+    /// Listens for shop buy/sell lists and trade-window lifecycle events.
+    /// Builds <see cref="ShopGump"/> and <see cref="TradingGump"/> instances
+    /// and keeps them in sync with server-side state.
+    /// </summary>
+    internal sealed class VendorHandler : IEventListener
     {
-        private void SubscribeVendor()
+        private readonly World _world;
+
+        public VendorHandler(World world)
+        {
+            _world = world;
+        }
+
+        public void Subscribe()
         {
             EventSink.ShopBuyListReceived += OnShopBuyListReceived;
             EventSink.ShopSellListReceived += OnShopSellListReceived;
@@ -20,7 +31,7 @@ namespace ClassicUO.Game
             EventSink.TradeWindowCurrencyUpdated += OnTradeWindowCurrencyUpdated;
         }
 
-        private void UnsubscribeVendor()
+        public void Unsubscribe()
         {
             EventSink.ShopBuyListReceived -= OnShopBuyListReceived;
             EventSink.ShopSellListReceived -= OnShopSellListReceived;
@@ -32,12 +43,12 @@ namespace ClassicUO.Game
 
         private void OnShopBuyListReceived(ShopBuyListReceivedArgs e)
         {
-            if (!InGame)
+            if (!_world.InGame)
             {
                 return;
             }
 
-            Mobile vendor = Mobiles.Get(e.VendorSerial);
+            Mobile vendor = _world.Mobiles.Get(e.VendorSerial);
 
             if (vendor == null)
             {
@@ -54,13 +65,13 @@ namespace ClassicUO.Game
 
             if (gump == null)
             {
-                gump = new ShopGump(this, vendor, true, 150, 5);
+                gump = new ShopGump(_world, vendor, true, 150, 5);
                 UIManager.Add(gump);
             }
 
             foreach (var entry in e.Entries)
             {
-                Item it = Items.Get(entry.ItemSerial);
+                Item it = _world.Items.Get(entry.ItemSerial);
 
                 if (it == null)
                 {
@@ -69,7 +80,7 @@ namespace ClassicUO.Game
 
                 it.Price = entry.Price;
 
-                if (this.OPL.TryGetNameAndData(it.Serial, out string s, out _))
+                if (_world.OPL.TryGetNameAndData(it.Serial, out string s, out _))
                 {
                     it.Name = s;
                 }
@@ -94,12 +105,12 @@ namespace ClassicUO.Game
 
         private void OnShopSellListReceived(ShopSellListReceivedArgs e)
         {
-            if (!InGame)
+            if (!_world.InGame)
             {
                 return;
             }
 
-            Mobile vendor = Mobiles.Get(e.VendorSerial);
+            Mobile vendor = _world.Mobiles.Get(e.VendorSerial);
 
             if (vendor == null)
             {
@@ -113,7 +124,7 @@ namespace ClassicUO.Game
 
             ShopGump gump = UIManager.GetGump<ShopGump>(vendor);
             gump?.Dispose();
-            gump = new ShopGump(this, vendor, false, 100, 0);
+            gump = new ShopGump(_world, vendor, false, 100, 0);
 
             foreach (var entry in e.Entries)
             {
@@ -127,7 +138,7 @@ namespace ClassicUO.Game
                 }
                 else if (string.IsNullOrEmpty(name))
                 {
-                    bool success = this.OPL.TryGetNameAndData(entry.Serial, out name, out _);
+                    bool success = _world.OPL.TryGetNameAndData(entry.Serial, out name, out _);
 
                     if (!success)
                     {
@@ -143,17 +154,17 @@ namespace ClassicUO.Game
 
         private void OnTradeWindowOpened(TradeWindowOpenArgs e)
         {
-            if (!InGame)
+            if (!_world.InGame)
             {
                 return;
             }
 
-            UIManager.Add(new TradingGump(this, e.Serial, e.Name, e.Id1, e.Id2));
+            UIManager.Add(new TradingGump(_world, e.Serial, e.Name, e.Id1, e.Id2));
         }
 
         private void OnTradeWindowClosed(TradeWindowClosedArgs e)
         {
-            if (!InGame)
+            if (!_world.InGame)
             {
                 return;
             }
@@ -163,7 +174,7 @@ namespace ClassicUO.Game
 
         private void OnTradeWindowAcceptUpdated(TradeWindowAcceptUpdatedArgs e)
         {
-            if (!InGame)
+            if (!_world.InGame)
             {
                 return;
             }
@@ -181,7 +192,7 @@ namespace ClassicUO.Game
 
         private void OnTradeWindowCurrencyUpdated(TradeWindowCurrencyUpdatedArgs e)
         {
-            if (!InGame)
+            if (!_world.InGame)
             {
                 return;
             }

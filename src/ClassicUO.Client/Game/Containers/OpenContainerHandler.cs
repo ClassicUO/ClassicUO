@@ -6,27 +6,38 @@ using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.Network;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Containers
 {
-    internal sealed partial class World
+    /// <summary>
+    /// Listens for <see cref="EventSink.ContainerOpened"/> and opens the
+    /// appropriate gump (spellbook, shop, container, grid loot, ...) for the
+    /// incoming serial.
+    /// </summary>
+    internal sealed class OpenContainerHandler : IEventListener
     {
-        private void SubscribeOpenContainer()
+        private readonly World _world;
+
+        public OpenContainerHandler(World world)
+        {
+            _world = world;
+        }
+
+        public void Subscribe()
         {
             EventSink.ContainerOpened += OnContainerOpened;
         }
 
-        private void UnsubscribeOpenContainer()
+        public void Unsubscribe()
         {
             EventSink.ContainerOpened -= OnContainerOpened;
         }
 
         private void OnContainerOpened(ContainerOpenedArgs e)
         {
-            if (Player == null)
+            if (_world.Player == null)
             {
                 return;
             }
@@ -36,7 +47,7 @@ namespace ClassicUO.Game
 
             if (graphic == 0xFFFF)
             {
-                Item spellBookItem = Items.Get(serial);
+                Item spellBookItem = _world.Items.Get(serial);
 
                 if (spellBookItem == null)
                 {
@@ -45,7 +56,7 @@ namespace ClassicUO.Game
 
                 UIManager.GetGump<SpellbookGump>(serial)?.Dispose();
 
-                SpellbookGump spellbookGump = new SpellbookGump(this, spellBookItem);
+                SpellbookGump spellbookGump = new SpellbookGump(_world, spellBookItem);
 
                 if (!UIManager.GetGumpCachePosition(spellBookItem, out Point location))
                 {
@@ -59,7 +70,7 @@ namespace ClassicUO.Game
             }
             else if (graphic == 0x0030)
             {
-                Mobile vendor = Mobiles.Get(serial);
+                Mobile vendor = _world.Mobiles.Get(serial);
 
                 if (vendor == null)
                 {
@@ -68,7 +79,7 @@ namespace ClassicUO.Game
 
                 UIManager.GetGump<ShopGump>(serial)?.Dispose();
 
-                ShopGump gump = new ShopGump(this, serial, true, 150, 5);
+                ShopGump gump = new ShopGump(_world, serial, true, 150, 5);
                 UIManager.Add(gump);
 
                 for (Layer layer = Layer.ShopBuyRestock; layer < Layer.ShopBuy + 1; layer++)
@@ -120,7 +131,7 @@ namespace ClassicUO.Game
             }
             else
             {
-                Item item = Items.Get(serial);
+                Item item = _world.Items.Get(serial);
 
                 if (item != null)
                 {
@@ -134,7 +145,7 @@ namespace ClassicUO.Game
                     {
                         //UIManager.GetGump<GridLootGump>(serial)?.Dispose();
                         //UIManager.Add(new GridLootGump(serial));
-                        ContainerManager.PendingGridLootSerial = serial;
+                        _world.ContainerManager.PendingGridLootSerial = serial;
 
                         if (ProfileManager.CurrentProfile.GridLootType == 1)
                         {
@@ -240,14 +251,14 @@ namespace ClassicUO.Game
                     }
                     else
                     {
-                        ContainerManager.CalculateContainerPosition(serial, graphic);
-                        x = ContainerManager.X;
-                        y = ContainerManager.Y;
+                        _world.ContainerManager.CalculateContainerPosition(serial, graphic);
+                        x = _world.ContainerManager.X;
+                        y = _world.ContainerManager.Y;
                         playsound = true;
                     }
 
                     UIManager.Add(
-                        new ContainerGump(this, item, graphic, playsound)
+                        new ContainerGump(_world, item, graphic, playsound)
                         {
                             X = x,
                             Y = y,
@@ -265,7 +276,7 @@ namespace ClassicUO.Game
 
             if (graphic != 0x0030)
             {
-                Item it = Items.Get(serial);
+                Item it = _world.Items.Get(serial);
 
                 if (it != null)
                 {
@@ -273,7 +284,7 @@ namespace ClassicUO.Game
 
                     if (!it.IsCorpse && graphic != 0xFFFF)
                     {
-                        ClearContainerAndRemoveItems(it);
+                        _world.ClearContainerAndRemoveItems(it);
                     }
                 }
             }

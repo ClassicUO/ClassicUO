@@ -56,6 +56,10 @@ namespace ClassicUO.Game
             Weather = RegisterListener(new ClassicUO.Game.Weather.Weather(this));
             InfoBars = new InfoBarManager(this);
             OPL = RegisterListener(new ObjectPropertiesListManager(this));
+            RegisterListener(new Entities.Mobiles.MobileUpdatesHandler(this));
+            RegisterListener(new Containers.OpenContainerHandler(this));
+            RegisterListener(new Skills.SkillsHandler(this));
+            RegisterListener(new Containers.Vendor.VendorHandler(this));
 
             RegisterListener(new BoatMovementHandler(this));
             RegisterListener(new CharacterStatusHandler(this));

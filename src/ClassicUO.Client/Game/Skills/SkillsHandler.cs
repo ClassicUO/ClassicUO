@@ -7,20 +7,30 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.Events;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.Network;
 using ClassicUO.Resources;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Skills
 {
-    internal sealed partial class World
+    /// <summary>
+    /// Listens for skill list and skill update events; rebuilds the cached
+    /// skill table and updates open skill gumps with delta notifications.
+    /// </summary>
+    internal sealed class SkillsHandler : IEventListener
     {
-        private void SubscribeSkills()
+        private readonly World _world;
+
+        public SkillsHandler(World world)
+        {
+            _world = world;
+        }
+
+        public void Subscribe()
         {
             EventSink.SkillListReceived += OnSkillListReceived;
             EventSink.SkillsUpdated += OnSkillsUpdated;
         }
 
-        private void UnsubscribeSkills()
+        public void Unsubscribe()
         {
             EventSink.SkillListReceived -= OnSkillListReceived;
             EventSink.SkillsUpdated -= OnSkillsUpdated;
@@ -28,7 +38,7 @@ namespace ClassicUO.Game
 
         private void OnSkillListReceived(SkillListReceivedArgs e)
         {
-            if (!InGame) return;
+            if (!_world.InGame) return;
 
             var skills = Client.Game.UO.FileManager.Skills.Skills;
             var sorted = Client.Game.UO.FileManager.Skills.SortedSkills;
@@ -51,7 +61,7 @@ namespace ClassicUO.Game
 
         private void OnSkillsUpdated(SkillsUpdatedArgs e)
         {
-            if (!InGame) return;
+            if (!_world.InGame) return;
 
             byte type = e.UpdateType;
             bool isSingleUpdate = e.IsSingleUpdate;
@@ -68,23 +78,23 @@ namespace ClassicUO.Game
                 advanced = UIManager.GetGump<SkillGumpAdvanced>();
             }
 
-            if (!isSingleUpdate && (type == 1 || type == 3 || SkillsRequested))
+            if (!isSingleUpdate && (type == 1 || type == 3 || _world.SkillsRequested))
             {
-                SkillsRequested = false;
+                _world.SkillsRequested = false;
 
                 // TODO: make a base class for this gump
                 if (ProfileManager.CurrentProfile.StandardSkillsGump)
                 {
                     if (standard == null)
                     {
-                        UIManager.Add(standard = new StandardSkillsGump(this) { X = 100, Y = 100 });
+                        UIManager.Add(standard = new StandardSkillsGump(_world) { X = 100, Y = 100 });
                     }
                 }
                 else
                 {
                     if (advanced == null)
                     {
-                        UIManager.Add(advanced = new SkillGumpAdvanced(this) { X = 100, Y = 100 });
+                        UIManager.Add(advanced = new SkillGumpAdvanced(_world) { X = 100, Y = 100 });
                     }
                 }
             }
@@ -97,12 +107,12 @@ namespace ClassicUO.Game
                 var u = updates[i];
                 ushort id = u.Id;
 
-                if (id >= Player.Skills.Length)
+                if (id >= _world.Player.Skills.Length)
                 {
                     continue;
                 }
 
-                Skill skill = Player.Skills[id];
+                Skill skill = _world.Player.Skills[id];
                 if (skill == null)
                 {
                     continue;
@@ -122,7 +132,7 @@ namespace ClassicUO.Game
                     )
                     {
                         GameActions.Print(
-                            this,
+                            _world,
                             string.Format(
                                 ResGeneral.YourSkillIn0Has1By2ItIsNow3,
                                 skill.Name,
