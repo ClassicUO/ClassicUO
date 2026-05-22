@@ -90,6 +90,12 @@ namespace ClassicUO.Game
             RegisterListener(new global::ClassicUO.Game.Map.LightLevelHandler(this));
             RegisterListener(new global::ClassicUO.Game.Map.ClientViewRangeHandler(this));
 
+            // R4.6 (F-3): effects + buffs + items + lifecycle handlers
+            RegisterListener(new global::ClassicUO.Game.Effects.GraphicEffectSpawnedHandler(this));
+            RegisterListener(new global::ClassicUO.Game.Entities.Players.BuffHandler(this));
+            RegisterListener(new global::ClassicUO.Game.Entities.ObjectDeletedHandler(this));
+            RegisterListener(new global::ClassicUO.Game.Entities.Items.ItemDragHandler(this));
+
             SubscribeEvents();
         }
 
