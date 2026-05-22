@@ -1,9 +1,32 @@
 # EventSink Refactor Status
 
-Branch: `refactor/eventsink-phase0` (45 commits ahead of `main`)
+Branch: `refactor/eventsink-phase0` (50 commits ahead of `main`)
 Build: green (0 errors)
-Tests: 324/324 pass
-`PacketHandlers.cs`: ~4830 lines (down from ~7200 at start of refactor)
+Tests: 334/334 pass
+`PacketHandlers.cs`: ~4700 lines (down from ~7200 at start of refactor)
+
+Three big remaining un-migrated handlers landed in this batch:
+- 0x11 CharacterStatus → `CharacterStatusReceivedArgs` (50-field record) +
+  `World.Subscribers.CharacterStatus` partial owns entity lookup, name +
+  hits writes, mobile attribute writes, full player stat block, window
+  title update, stat-change messages, UoAssist signals.
+- 0x3A UpdateSkills → split into `SkillListReceivedArgs` (full list path)
+  and `SkillsUpdatedArgs` (per-entry update path) + `World.Subscribers.Skills`
+  partial owns `FileManager.Skills` population, sort, player skill row
+  writes, skill gump open.
+- 0x55 LoginComplete → `LoginScene.OnLoginCompleted` owns scene swap to
+  GameScene, RequestMobileStatus, post-login network sends
+  (OpenChat / SkillsRequest / ClientType / ClientViewRange), saved-gump
+  load.
+
+Test seams added on `World`:
+- `SetInGameForTests(bool)` overrides the InGame computation. Needed
+  because PlayerMobile + Map.Map ctors read unmockable file globals.
+- `ProfileManager.CurrentProfile` setter promoted to internal so tests
+  can seed a default profile without reflection.
+
+No reflection or `RuntimeHelpers.GetUninitializedObject` in test sources
+anymore.
 
 LoginScene lifecycle reviewed: `SetScene` calls `oldScene.Dispose()` (which
 calls `Unload()` → unsubscribe) before assigning + loading the new scene, so
