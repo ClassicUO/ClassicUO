@@ -74,6 +74,10 @@ namespace ClassicUO.Game
             RegisterListener(new ExtendedWalkHandler(this));
             RegisterListener(new GumpsUIHandler(this));
             RegisterListener(new MapDataHandler(this));
+            RegisterListener(new MobileStatsHandler(this));
+            RegisterListener(new MobileNameHandler(this));
+            RegisterListener(new MobileAnimationHandler(this));
+            RegisterListener(new global::ClassicUO.Game.UI.HealthBars.HealthBarStateHandler(this));
 
             SubscribeEvents();
         }

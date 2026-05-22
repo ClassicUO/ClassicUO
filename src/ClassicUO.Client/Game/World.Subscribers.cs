@@ -28,15 +28,10 @@ namespace ClassicUO.Game
 
         private void SubscribeEvents()
         {
-            EventSink.HitpointsUpdated += OnHitpointsUpdated;
-            EventSink.ManaUpdated += OnManaUpdated;
-            EventSink.StaminaUpdated += OnStaminaUpdated;
-            EventSink.MobileAttributesUpdated += OnMobileAttributesUpdated;
             EventSink.WarModeChanged += OnWarModeChanged;
             EventSink.ClientViewRangeChanged += OnClientViewRangeChanged;
             EventSink.WalkDenied += OnWalkDenied;
             EventSink.WalkConfirmed += OnWalkConfirmed;
-            EventSink.MobileNameChanged += OnMobileNameChanged;
             EventSink.PlayerEnteredWorld += OnPlayerEnteredWorld;
             EventSink.SeasonChanged += OnSeasonChanged;
             EventSink.LightLevelChanged += OnLightLevelChanged;
@@ -46,7 +41,6 @@ namespace ClassicUO.Game
             EventSink.ObjectDeleted += OnObjectDeleted;
             EventSink.PlayerMoved += OnPlayerMoved;
             EventSink.PathfindingReceived += OnPathfindingReceived;
-            EventSink.HealthBarStateChanged += OnHealthBarStateChanged;
             EventSink.ItemDragEnded += OnItemDragEnded;
             EventSink.ItemDropAccepted += OnItemDropAccepted;
             EventSink.ItemDragAnimation += OnItemDragAnimation;
@@ -56,8 +50,6 @@ namespace ClassicUO.Game
             EventSink.CharacterProfileOpened += OnCharacterProfileOpened;
             EventSink.TextEntryDialogOpened += OnTextEntryDialogOpened;
             EventSink.DyeDataReceived += OnDyeDataReceived;
-            EventSink.CharacterAnimation += OnCharacterAnimation;
-            EventSink.NewCharacterAnimation += OnNewCharacterAnimation;
             EventSink.CombatSwing += OnCombatSwing;
 
             foreach (var listener in _listeners) listener.Subscribe();
@@ -67,15 +59,10 @@ namespace ClassicUO.Game
         {
             foreach (var listener in _listeners) listener.Unsubscribe();
 
-            EventSink.HitpointsUpdated -= OnHitpointsUpdated;
-            EventSink.ManaUpdated -= OnManaUpdated;
-            EventSink.StaminaUpdated -= OnStaminaUpdated;
-            EventSink.MobileAttributesUpdated -= OnMobileAttributesUpdated;
             EventSink.WarModeChanged -= OnWarModeChanged;
             EventSink.ClientViewRangeChanged -= OnClientViewRangeChanged;
             EventSink.WalkDenied -= OnWalkDenied;
             EventSink.WalkConfirmed -= OnWalkConfirmed;
-            EventSink.MobileNameChanged -= OnMobileNameChanged;
             EventSink.PlayerEnteredWorld -= OnPlayerEnteredWorld;
             EventSink.SeasonChanged -= OnSeasonChanged;
             EventSink.LightLevelChanged -= OnLightLevelChanged;
@@ -85,7 +72,6 @@ namespace ClassicUO.Game
             EventSink.ObjectDeleted -= OnObjectDeleted;
             EventSink.PlayerMoved -= OnPlayerMoved;
             EventSink.PathfindingReceived -= OnPathfindingReceived;
-            EventSink.HealthBarStateChanged -= OnHealthBarStateChanged;
             EventSink.ItemDragEnded -= OnItemDragEnded;
             EventSink.ItemDropAccepted -= OnItemDropAccepted;
             EventSink.ItemDragAnimation -= OnItemDragAnimation;
@@ -95,8 +81,6 @@ namespace ClassicUO.Game
             EventSink.CharacterProfileOpened -= OnCharacterProfileOpened;
             EventSink.TextEntryDialogOpened -= OnTextEntryDialogOpened;
             EventSink.DyeDataReceived -= OnDyeDataReceived;
-            EventSink.CharacterAnimation -= OnCharacterAnimation;
-            EventSink.NewCharacterAnimation -= OnNewCharacterAnimation;
             EventSink.CombatSwing -= OnCombatSwing;
         }
 
@@ -202,37 +186,6 @@ namespace ClassicUO.Game
             }
         }
 
-        private void OnCharacterAnimation(CharacterAnimationArgs e)
-        {
-            Mobile mobile = Mobiles.Get(e.Serial);
-            if (mobile == null) return;
-
-            mobile.SetAnimation(
-                Mobile.GetReplacedObjectAnimation(mobile.Graphic, e.Action),
-                e.Delay,
-                (byte)e.FrameCount,
-                (byte)e.RepeatCount,
-                e.Repeat,
-                e.Forward,
-                true
-            );
-        }
-
-        private void OnNewCharacterAnimation(NewCharacterAnimationArgs e)
-        {
-            Mobile mobile = Mobiles.Get(e.Serial);
-            if (mobile == null) return;
-
-            byte group = Mobile.GetObjectNewAnimation(mobile, e.Type, e.Action, e.Mode);
-            mobile.SetAnimation(
-                group,
-                repeatCount: 1,
-                repeat: (e.Type == 1 || e.Type == 2) && mobile.Graphic == 0x0015,
-                forward: true,
-                fromServer: true
-            );
-        }
-
         private void OnCombatSwing(CombatSwingArgs e)
         {
             if (Player == null) return;
@@ -286,35 +239,6 @@ namespace ClassicUO.Game
         {
             if (Player == null) return;
             Player.Pathfinder.WalkTo(e.X, e.Y, e.Z, 0);
-        }
-
-        private void OnHealthBarStateChanged(HealthBarStateChangedArgs e)
-        {
-            Mobile mobile = Mobiles.Get(e.Serial);
-            if (mobile == null) return;
-
-            switch (e.StateType)
-            {
-                case 1: // poison
-                    if (Client.Game.UO.Version >= Utility.ClientVersion.CV_7000)
-                    {
-                        mobile.SetSAPoison(e.Enabled);
-                    }
-                    else if (e.Enabled)
-                    {
-                        mobile.Flags |= Flags.Poisoned;
-                    }
-                    else
-                    {
-                        mobile.Flags &= ~Flags.Poisoned;
-                    }
-                    break;
-
-                case 2: // yellow bar
-                    if (e.Enabled) mobile.Flags |= Flags.YellowBar;
-                    else mobile.Flags &= ~Flags.YellowBar;
-                    break;
-            }
         }
 
         private void OnObjectDeleted(ObjectDeletedArgs e)
@@ -527,32 +451,6 @@ namespace ClassicUO.Game
             Player.AddToTile();
         }
 
-        private void OnMobileNameChanged(MobileNameChangedArgs e)
-        {
-            WMapEntity wme = WMapManager.GetEntity(e.Serial);
-            if (wme != null && !string.IsNullOrEmpty(e.Name))
-            {
-                wme.Name = e.Name;
-            }
-
-            Entity entity = Get(e.Serial);
-            if (entity == null) return;
-
-            entity.Name = e.Name;
-
-            if (
-                Player != null
-                && e.Serial == Player.Serial
-                && !string.IsNullOrEmpty(e.Name)
-                && e.Name != Player.Name
-            )
-            {
-                Client.Game.SetWindowTitle(e.Name);
-            }
-
-            UIManager.GetGump<NameOverheadGump>(e.Serial)?.SetName();
-        }
-
         private void OnPlayerEnteredWorld(PlayerEnteredWorldArgs e)
         {
             CreatePlayer(e.Serial);
@@ -587,80 +485,5 @@ namespace ClassicUO.Game
             ClientViewRange = e.Range;
         }
 
-        private void OnHitpointsUpdated(HitpointsUpdatedArgs e)
-        {
-            var entity = Get(e.Serial);
-            if (entity == null) return;
-
-            entity.HitsMax = e.HitsMax;
-            entity.Hits = e.Hits;
-
-            if (entity.HitsRequest == HitsRequestStatus.Pending)
-            {
-                entity.HitsRequest = HitsRequestStatus.Received;
-            }
-
-            if (entity == Player)
-            {
-                UoAssist.SignalHits();
-            }
-        }
-
-        private void OnManaUpdated(ManaUpdatedArgs e)
-        {
-            var mobile = Mobiles.Get(e.Serial);
-            if (mobile == null) return;
-
-            mobile.ManaMax = e.ManaMax;
-            mobile.Mana = e.Mana;
-
-            if (mobile == Player)
-            {
-                UoAssist.SignalMana();
-            }
-        }
-
-        private void OnStaminaUpdated(StaminaUpdatedArgs e)
-        {
-            var mobile = Mobiles.Get(e.Serial);
-            if (mobile == null) return;
-
-            mobile.StaminaMax = e.StaminaMax;
-            mobile.Stamina = e.Stamina;
-
-            if (mobile == Player)
-            {
-                UoAssist.SignalStamina();
-            }
-        }
-
-        private void OnMobileAttributesUpdated(MobileAttributesUpdatedArgs e)
-        {
-            var entity = Get(e.Serial);
-            if (entity == null) return;
-
-            entity.HitsMax = e.HitsMax;
-            entity.Hits = e.Hits;
-
-            if (entity.HitsRequest == HitsRequestStatus.Pending)
-            {
-                entity.HitsRequest = HitsRequestStatus.Received;
-            }
-
-            if (SerialHelper.IsMobile(e.Serial) && entity is Mobile mobile)
-            {
-                mobile.ManaMax = e.ManaMax;
-                mobile.Mana = e.Mana;
-                mobile.StaminaMax = e.StaminaMax;
-                mobile.Stamina = e.Stamina;
-
-                if (mobile == Player)
-                {
-                    UoAssist.SignalHits();
-                    UoAssist.SignalStamina();
-                    UoAssist.SignalMana();
-                }
-            }
-        }
     }
 }
