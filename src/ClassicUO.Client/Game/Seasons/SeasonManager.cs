@@ -7,14 +7,15 @@ namespace ClassicUO.Game.Seasons
     /// (<c>SeasonManager.LoadSeasonFile()</c>,
     /// <c>SeasonManager.GetSeasonGraphic(...)</c>,
     /// <c>SeasonManager.GetLandSeasonGraphic(...)</c>) while delegating
-    /// to cohesive collaborators: <see cref="ISeasonAssetTable"/> owns the
-    /// per-season remap arrays and <see cref="ISeasonFileLoader"/> handles
-    /// <c>seasons.txt</c> parsing / default-file generation.
+    /// to three cohesive collaborators: <see cref="ISeasonCalendar"/> reads
+    /// <c>seasons.txt</c>, <see cref="ISeasonAssetSwap"/> owns the static-art
+    /// remap and <see cref="ISeasonTileRemap"/> owns the land-tile remap.
     /// </summary>
     internal static class SeasonManager
     {
-        private static readonly ISeasonAssetTable _table = new SeasonAssetTable();
-        private static readonly ISeasonFileLoader _loader = new SeasonFileLoader();
+        private static readonly ISeasonAssetSwap _assets = new SeasonAssetSwap();
+        private static readonly ISeasonTileRemap _tiles = new SeasonTileRemap();
+        private static readonly ISeasonCalendar _calendar = new SeasonCalendar();
 
         static SeasonManager()
         {
@@ -23,17 +24,17 @@ namespace ClassicUO.Game.Seasons
 
         public static void LoadSeasonFile()
         {
-            _loader.Load(_table);
+            _calendar.Load(_assets, _tiles);
         }
 
         public static ushort GetSeasonGraphic(Season season, ushort graphic)
         {
-            return _table.GetSeasonGraphic(season, graphic);
+            return _assets.GetSeasonGraphic(season, graphic);
         }
 
         public static ushort GetLandSeasonGraphic(Season season, ushort graphic)
         {
-            return _table.GetLandSeasonGraphic(season, graphic);
+            return _tiles.GetLandSeasonGraphic(season, graphic);
         }
     }
 }

@@ -6,17 +6,20 @@ using System.IO;
 namespace ClassicUO.Game.Seasons
 {
     /// <summary>
-    /// Concrete <see cref="ISeasonFileLoader"/>: reads <c>Data/Client/seasons.txt</c>
-    /// off disk, writing the default content out when the file is missing.
+    /// Concrete <see cref="ISeasonCalendar"/>: reads <c>Data/Client/seasons.txt</c>
+    /// off disk, writing the default content out when the file is missing,
+    /// then dispatches every line into the matching asset-swap or tile-remap
+    /// table.
     /// </summary>
-    internal sealed class SeasonFileLoader : ISeasonFileLoader
+    internal sealed class SeasonCalendar : ISeasonCalendar
     {
         private static readonly string _seasonsFilePath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Client");
         private static readonly string _seasonsFile = Path.Combine(_seasonsFilePath, "seasons.txt");
 
-        public void Load(ISeasonAssetTable table)
+        public void Load(ISeasonAssetSwap assets, ISeasonTileRemap tiles)
         {
-            table.Reset();
+            assets.Reset();
+            tiles.Reset();
 
             if (!File.Exists(_seasonsFile))
             {
@@ -58,11 +61,11 @@ namespace ClassicUO.Game.Seasons
 
                     if (isStatic)
                     {
-                        table.SetStatic(season, orig, replace);
+                        assets.Set(season, orig, replace);
                     }
                     else
                     {
-                        table.SetLand(season, orig, replace);
+                        tiles.Set(season, orig, replace);
                     }
                 }
             }
