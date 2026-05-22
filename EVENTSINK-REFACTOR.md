@@ -1,9 +1,14 @@
 # EventSink Refactor Status
 
-Branch: `refactor/eventsink-phase0` (34 commits ahead of `main`)
+Branch: `refactor/eventsink-phase0` (36 commits ahead of `main`)
 Build: green (0 errors)
 Tests: 190/190 pass
-`PacketHandlers.cs`: 4807 lines (down from ~7200 at start of refactor)
+`PacketHandlers.cs`: ~4830 lines (down from ~7200 at start of refactor)
+
+LoginScene lifecycle reviewed: `SetScene` calls `oldScene.Dispose()` (which
+calls `Unload()` → unsubscribe) before assigning + loading the new scene, so
+subscribe/unsubscribe is strictly sequential and double-subscription is not
+reachable under current control flow.
 
 ## Goal
 
@@ -195,26 +200,24 @@ Migrated to subscribers (handlers shrunk to parse+emit):
   SpellIconToggle, 0x26 CharacterSpeedMode, 0x2B MobileAnimationFrame, 0xBEEF
   CuoCommand → `World.Subscribers.ExtendedMisc`
 - 0x1D HouseRevisionState → `HouseManager.OnHouseRevisionState`
-- 0x06 PartyPacket → `PartyManager.OnPartyPacket`
+- 0x06 PartyPacket → 3 typed events on `PartyManager`:
+  - `PartyListUpdated` (codes 0x01/0x02, roster add/remove with parsed serial list)
+  - `PartyChatMessage` (codes 0x03/0x04, serial + unicode text)
+  - `PartyInviteReceived` (code 0x07, inviter serial)
+- 0x18 MapPatchesEnabled → `World.Subscribers.ExtendedMisc.OnMapPatchesEnabled`,
+  payload parsed into `(int PatchesCount, IReadOnlyList<MapPatchEntry> Entries)`.
+  `MapLoader.ApplyPatches` signature changed to take the parsed entries
+  directly (`MapPatchEntry` lives in `ClassicUO.Assets`).
 
-Two args still carry `byte[]` payload: `PartyPacketArgs` and
-`MapPatchesEnabledArgs`. Both inner consumers (`PartyManager.ParsePacket`,
-`MapLoader.ApplyPatches`) take `ref StackDataReader`, so the subscriber
-re-wraps. Full parse migration of those would be invasive — deferred.
+All event args are now fully typed — no remaining `byte[]` payloads.
+
+### Login flow handler refinement
+- 0x1B EnterWorld: `world.CreatePlayer(serial)` was moved out of the handler
+  into `World.OnPlayerEnteredWorld` so the handler is parse+emit only.
 
 ## To Do
 
-### Packet handlers still doing non-trivial work
-- **0x1B EnterWorld** — extras subscriber owns most side effects but a few
-  network sends still happen directly in the handler. Confirm vs. design intent.
-- **0xBF 0x06 PartyPacket** / **0xBF 0x18 MapPatchesEnabled** still carry
-  `byte[]` payload because the inner consumers want a `ref StackDataReader`.
-  Full parse migration deferred.
-
 ### Subscribers / managers
-- `LoginScene` lifecycle: `Load()`/`Unload()` subscribes/unsubscribes; if
-  multiple scene instances overlap, double-subscription is possible. Audit
-  edge cases.
 - `LoginScene` still owns parsing-style code for some scene-driven flows.
   Consider extracting a `LoginCoordinator` so the scene is purely view.
 
