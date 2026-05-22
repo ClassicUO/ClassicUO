@@ -31,7 +31,7 @@ namespace ClassicUO.Game
             CorpseManager = new CorpseManager(this);
             Party = new PartyManager(this);
             HouseManager = RegisterListener(new HouseManager(this));
-            WorldTextManager = new WorldTextManager(this);
+            WorldTextManager = RegisterListener(new WorldTextManager(this));
             _effectManager = new EffectManager(this);
             MessageManager = RegisterListener(new MessageManager(this));
             ContainerManager = new ContainerManager(this);

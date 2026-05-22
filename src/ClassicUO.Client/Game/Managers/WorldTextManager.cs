@@ -2,19 +2,37 @@
 
 using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.WorldText;
 using ClassicUO.Renderer;
-using System;
-using System.Collections.Generic;
 
 namespace ClassicUO.Game.Managers
 {
-    internal class WorldTextManager : TextRenderer
+    /// <summary>
+    /// Facade over the world-overhead text renderer and the floating
+    /// damage overlay. Keeps <see cref="TextRenderer"/> inheritance so the
+    /// existing public surface (<c>World.WorldTextManager.X</c>, base
+    /// virtuals) is preserved. Damage state lives behind
+    /// <see cref="IDamageOverlay"/>; this class only routes the
+    /// <see cref="EventSink.DamageReceived"/> handler into it.
+    /// </summary>
+    internal class WorldTextManager : TextRenderer, IEventListener
     {
-        private readonly Dictionary<uint, OverheadDamage> _damages = new Dictionary<uint, OverheadDamage>();
-        private readonly List<Tuple<uint, uint>> _subst = new List<Tuple<uint, uint>>();
-        private readonly List<uint> _toRemoveDamages = new List<uint>();
+        private readonly IDamageOverlay _damageOverlay;
 
-        public WorldTextManager(World world) : base(world)
+        /// <summary>Production composition root.</summary>
+        public WorldTextManager(World world)
+            : this(world, new DamageOverlay(world))
+        {
+        }
+
+        /// <summary>Test / extension seam — inject a fake overlay.</summary>
+        internal WorldTextManager(World world, IDamageOverlay damageOverlay)
+            : base(world)
+        {
+            _damageOverlay = damageOverlay;
+        }
+
+        public void Subscribe()
         {
             EventSink.DamageReceived += OnDamageReceived;
         }
@@ -29,27 +47,15 @@ namespace ClassicUO.Game.Managers
             Entity entity = World.Get(e.Serial);
             if (entity == null || e.Damage == 0) return;
 
-            AddDamage(entity.Serial, e.Damage);
+            _damageOverlay.AddDamage(entity.Serial, e.Damage);
         }
 
         public override void Update()
         {
             base.Update();
 
-
-            UpdateDamageOverhead();
-
-            if (_toRemoveDamages.Count > 0)
-            {
-                foreach (uint s in _toRemoveDamages)
-                {
-                    _damages.Remove(s);
-                }
-
-                _toRemoveDamages.Clear();
-            }
+            _damageOverlay.Update();
         }
-
 
         public override void Draw(UltimaBatcher2D batcher, int startX, int startY, float layerDepth, bool isGump = false)
         {
@@ -62,89 +68,14 @@ namespace ClassicUO.Game.Managers
                 isGump
             );
 
-            foreach (KeyValuePair<uint, OverheadDamage> overheadDamage in _damages)
-            {
-                Entity mob = World.Get(overheadDamage.Key);
-
-                if (mob == null || mob.IsDestroyed)
-                {
-                    uint ser = overheadDamage.Key | 0x8000_0000;
-
-                    if (World.CorpseManager.Exists(0, ser))
-                    {
-                        Item item = World.CorpseManager.GetCorpseObject(ser);
-
-                        if (item != null && !ReferenceEquals(item, overheadDamage.Value.Parent))
-                        {
-                            _subst.Add(Tuple.Create(overheadDamage.Key, item.Serial));
-                            overheadDamage.Value.SetParent(item);
-                        }
-                    }
-                    else
-                    {
-                        continue;
-                    }
-                }
-
-                overheadDamage.Value.Draw(batcher, layerDepth);
-            }
+            _damageOverlay.Draw(batcher, layerDepth);
         }
 
-        private void UpdateDamageOverhead()
-        {
-            if (_subst.Count != 0)
-            {
-                foreach (Tuple<uint, uint> tuple in _subst)
-                {
-                    if (_damages.TryGetValue(tuple.Item1, out OverheadDamage dmg))
-                    {
-                        _damages.Remove(tuple.Item1);
-                        _damages[tuple.Item2] = dmg;
-                    }
-                }
-
-                _subst.Clear();
-            }
-
-            foreach (KeyValuePair<uint, OverheadDamage> overheadDamage in _damages)
-            {
-                overheadDamage.Value.Update();
-
-                if (overheadDamage.Value.IsEmpty)
-                {
-                    _toRemoveDamages.Add(overheadDamage.Key);
-                }
-            }
-        }
-
-
-        internal void AddDamage(uint obj, int dmg)
-        {
-            if (!_damages.TryGetValue(obj, out OverheadDamage dm) || dm == null)
-            {
-                dm = new OverheadDamage(World, World.Get(obj));
-                _damages[obj] = dm;
-            }
-
-            dm.Add(dmg);
-        }
+        internal void AddDamage(uint obj, int dmg) => _damageOverlay.AddDamage(obj, dmg);
 
         public override void Clear()
         {
-            if (_toRemoveDamages.Count > 0)
-            {
-                foreach (uint s in _toRemoveDamages)
-                {
-                    _damages.Remove(s);
-                }
-
-                _toRemoveDamages.Clear();
-            }
-
-            _subst.Clear();
-
-            //_staticToUpdate.Clear();
-
+            _damageOverlay.Clear();
             base.Clear();
         }
     }
