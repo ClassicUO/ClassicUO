@@ -160,6 +160,78 @@ namespace ClassicUO.Game.Events.Outgoing
         public static void RaiseProfileRequestSent(in ProfileRequestSentArgs e) => Invoke(ProfileRequestSent, e);
         public static void RaiseProfileUpdateSent(in ProfileUpdateSentArgs e) => Invoke(ProfileUpdateSent, e);
         public static void RaiseTipRequestSent(in TipRequestSentArgs e) => Invoke(TipRequestSent, e);
+        // ---- Chat / Social ----
+        public static event Action<EmoteActionSentArgs> EmoteActionSent;
+        public static event Action<AsciiSpeechRequestSentArgs> AsciiSpeechRequestSent;
+        public static event Action<UnicodeSpeechRequestSentArgs> UnicodeSpeechRequestSent;
+        public static event Action<ChatJoinCommandSentArgs> ChatJoinCommandSent;
+        public static event Action<ChatCreateChannelCommandSentArgs> ChatCreateChannelCommandSent;
+        public static event Action<ChatLeaveChannelCommandSentArgs> ChatLeaveChannelCommandSent;
+        public static event Action<ChatMessageCommandSentArgs> ChatMessageCommandSent;
+        public static event Action<OpenChatSentArgs> OpenChatSent;
+        public static event Action<MapMessageSentArgs> MapMessageSent;
+        public static event Action<RazorAckSentArgs> RazorAckSent;
+
+        public static void RaiseEmoteActionSent(in EmoteActionSentArgs e) => Invoke(EmoteActionSent, e);
+        public static void RaiseAsciiSpeechRequestSent(in AsciiSpeechRequestSentArgs e) => Invoke(AsciiSpeechRequestSent, e);
+        public static void RaiseUnicodeSpeechRequestSent(in UnicodeSpeechRequestSentArgs e) => Invoke(UnicodeSpeechRequestSent, e);
+        public static void RaiseChatJoinCommandSent(in ChatJoinCommandSentArgs e) => Invoke(ChatJoinCommandSent, e);
+        public static void RaiseChatCreateChannelCommandSent(in ChatCreateChannelCommandSentArgs e) => Invoke(ChatCreateChannelCommandSent, e);
+        public static void RaiseChatLeaveChannelCommandSent(in ChatLeaveChannelCommandSentArgs e) => Invoke(ChatLeaveChannelCommandSent, e);
+        public static void RaiseChatMessageCommandSent(in ChatMessageCommandSentArgs e) => Invoke(ChatMessageCommandSent, e);
+        public static void RaiseOpenChatSent(in OpenChatSentArgs e) => Invoke(OpenChatSent, e);
+        public static void RaiseMapMessageSent(in MapMessageSentArgs e) => Invoke(MapMessageSent, e);
+        public static void RaiseRazorAckSent(in RazorAckSentArgs e) => Invoke(RazorAckSent, e);
+
+        // ---- Party ----
+        public static event Action<PartyInviteRequestSentArgs> PartyInviteRequestSent;
+        public static event Action<PartyRemoveRequestSentArgs> PartyRemoveRequestSent;
+        public static event Action<PartyChangeLootTypeRequestSentArgs> PartyChangeLootTypeRequestSent;
+        public static event Action<PartyAcceptSentArgs> PartyAcceptSent;
+        public static event Action<PartyDeclineSentArgs> PartyDeclineSent;
+        public static event Action<PartyMessageSentArgs> PartyMessageSent;
+
+        public static void RaisePartyInviteRequestSent(in PartyInviteRequestSentArgs e) => Invoke(PartyInviteRequestSent, e);
+        public static void RaisePartyRemoveRequestSent(in PartyRemoveRequestSentArgs e) => Invoke(PartyRemoveRequestSent, e);
+        public static void RaisePartyChangeLootTypeRequestSent(in PartyChangeLootTypeRequestSentArgs e) => Invoke(PartyChangeLootTypeRequestSent, e);
+        public static void RaisePartyAcceptSent(in PartyAcceptSentArgs e) => Invoke(PartyAcceptSent, e);
+        public static void RaisePartyDeclineSent(in PartyDeclineSentArgs e) => Invoke(PartyDeclineSent, e);
+        public static void RaisePartyMessageSent(in PartyMessageSentArgs e) => Invoke(PartyMessageSent, e);
+
+        // ---- Trade / Vendor ----
+        public static event Action<TradeResponseSentArgs> TradeResponseSent;
+        public static event Action<TradeUpdateGoldSentArgs> TradeUpdateGoldSent;
+        public static event Action<BuyRequestSentArgs> BuyRequestSent;
+        public static event Action<SellRequestSentArgs> SellRequestSent;
+
+        public static void RaiseTradeResponseSent(in TradeResponseSentArgs e) => Invoke(TradeResponseSent, e);
+        public static void RaiseTradeUpdateGoldSent(in TradeUpdateGoldSentArgs e) => Invoke(TradeUpdateGoldSent, e);
+        public static void RaiseBuyRequestSent(in BuyRequestSentArgs e) => Invoke(BuyRequestSent, e);
+        public static void RaiseSellRequestSent(in SellRequestSentArgs e) => Invoke(SellRequestSent, e);
+
+        // ---- Gumps / Menus ----
+        public static event Action<GumpResponseSentArgs> GumpResponseSent;
+        public static event Action<VirtueGumpResponseSentArgs> VirtueGumpResponseSent;
+        public static event Action<MenuResponseSentArgs> MenuResponseSent;
+        public static event Action<GrayMenuResponseSentArgs> GrayMenuResponseSent;
+        public static event Action<RequestPopupMenuSentArgs> RequestPopupMenuSent;
+        public static event Action<PopupMenuSelectionSentArgs> PopupMenuSelectionSent;
+        public static event Action<TextEntryDialogResponseSentArgs> TextEntryDialogResponseSent;
+
+        public static void RaiseGumpResponseSent(in GumpResponseSentArgs e) => Invoke(GumpResponseSent, e);
+        public static void RaiseVirtueGumpResponseSent(in VirtueGumpResponseSentArgs e) => Invoke(VirtueGumpResponseSent, e);
+        public static void RaiseMenuResponseSent(in MenuResponseSentArgs e) => Invoke(MenuResponseSent, e);
+        public static void RaiseGrayMenuResponseSent(in GrayMenuResponseSentArgs e) => Invoke(GrayMenuResponseSent, e);
+        public static void RaiseRequestPopupMenuSent(in RequestPopupMenuSentArgs e) => Invoke(RequestPopupMenuSent, e);
+        public static void RaisePopupMenuSelectionSent(in PopupMenuSelectionSentArgs e) => Invoke(PopupMenuSelectionSent, e);
+        public static void RaiseTextEntryDialogResponseSent(in TextEntryDialogResponseSentArgs e) => Invoke(TextEntryDialogResponseSent, e);
+
+        // ---- Prompts ----
+        public static event Action<AsciiPromptResponseSentArgs> AsciiPromptResponseSent;
+        public static event Action<UnicodePromptResponseSentArgs> UnicodePromptResponseSent;
+
+        public static void RaiseAsciiPromptResponseSent(in AsciiPromptResponseSentArgs e) => Invoke(AsciiPromptResponseSent, e);
+        public static void RaiseUnicodePromptResponseSent(in UnicodePromptResponseSentArgs e) => Invoke(UnicodePromptResponseSent, e);
 
         // Per-category event blocks land here as the outgoing migration phases
         // wire packets in. See OUTGOING-PACKETS-MIGRATION for the rollout plan.
@@ -255,6 +327,39 @@ namespace ClassicUO.Game.Events.Outgoing
             ProfileRequestSent = null;
             ProfileUpdateSent = null;
             TipRequestSent = null;
+            EmoteActionSent = null;
+            AsciiSpeechRequestSent = null;
+            UnicodeSpeechRequestSent = null;
+            ChatJoinCommandSent = null;
+            ChatCreateChannelCommandSent = null;
+            ChatLeaveChannelCommandSent = null;
+            ChatMessageCommandSent = null;
+            OpenChatSent = null;
+            MapMessageSent = null;
+            RazorAckSent = null;
+
+            PartyInviteRequestSent = null;
+            PartyRemoveRequestSent = null;
+            PartyChangeLootTypeRequestSent = null;
+            PartyAcceptSent = null;
+            PartyDeclineSent = null;
+            PartyMessageSent = null;
+
+            TradeResponseSent = null;
+            TradeUpdateGoldSent = null;
+            BuyRequestSent = null;
+            SellRequestSent = null;
+
+            GumpResponseSent = null;
+            VirtueGumpResponseSent = null;
+            MenuResponseSent = null;
+            GrayMenuResponseSent = null;
+            RequestPopupMenuSent = null;
+            PopupMenuSelectionSent = null;
+            TextEntryDialogResponseSent = null;
+
+            AsciiPromptResponseSent = null;
+            UnicodePromptResponseSent = null;
         }
     }
 }
