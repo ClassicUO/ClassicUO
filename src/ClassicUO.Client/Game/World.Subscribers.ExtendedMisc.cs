@@ -5,7 +5,6 @@ using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.IO;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game
@@ -36,12 +35,7 @@ namespace ClassicUO.Game
 
         private void OnMapPatchesEnabled(MapPatchesEnabledArgs e)
         {
-            byte[] bytes = e.Bytes;
-            if (bytes == null || bytes.Length == 0) return;
-
-            StackDataReader reader = new StackDataReader(bytes);
-
-            if (Client.Game.UO.FileManager.Maps.ApplyPatches(ref reader))
+            if (Client.Game.UO.FileManager.Maps.ApplyPatches(e.PatchesCount, e.Entries))
             {
                 int map = MapIndex;
                 MapIndex = -1;

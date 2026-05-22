@@ -15,8 +15,17 @@ namespace ClassicUO.Game.Events
     /// <summary>Sub-cmd 0x04: server requests the client to close a generic gump (or dispatch a virtual button click on it).</summary>
     internal readonly record struct GenericGumpCloseArgs(uint Serial, int Button);
 
-    /// <summary>Sub-cmd 0x06: party manager packet payload (multi-format inner packet). Bytes carried verbatim because the party manager owns its own sub-format parser.</summary>
-    internal readonly record struct PartyPacketArgs(byte[] Bytes);
+    /// <summary>Sub-cmd 0x06 inner code 0x01/0x02: party roster snapshot. <see cref="IsAdd"/> distinguishes add vs remove. <see cref="RemovedSerial"/> is meaningful only when <c>!IsAdd</c>.</summary>
+    internal readonly record struct PartyListUpdatedArgs(
+        bool IsAdd,
+        uint RemovedSerial,
+        IReadOnlyList<uint> Serials);
+
+    /// <summary>Sub-cmd 0x06 inner code 0x03/0x04: party chat message line (unicode).</summary>
+    internal readonly record struct PartyChatMessageArgs(uint Serial, string Text);
+
+    /// <summary>Sub-cmd 0x06 inner code 0x07: party invite received.</summary>
+    internal readonly record struct PartyInviteReceivedArgs(uint Inviter);
 
     /// <summary>Sub-cmd 0x08: server changes the active map facet.</summary>
     internal readonly record struct MapIndexChangedArgs(byte MapIndex);
@@ -43,8 +52,8 @@ namespace ClassicUO.Game.Events
     /// <summary>Sub-cmd 0x16: server requests the client to close a UI window of a known kind.</summary>
     internal readonly record struct CloseUserInterfaceArgs(uint GumpKindId, uint Serial);
 
-    /// <summary>Sub-cmd 0x18: server pushed a map patches update. Bytes are forwarded verbatim because the map loader consumes them with its own reader.</summary>
-    internal readonly record struct MapPatchesEnabledArgs(byte[] Bytes);
+    /// <summary>Sub-cmd 0x18: server pushed a map patches update. <see cref="PatchesCount"/> is the raw count from the wire; <see cref="Entries"/> has the parsed (mapPatchCount, staticPatchCount) pair per map index.</summary>
+    internal readonly record struct MapPatchesEnabledArgs(int PatchesCount, IReadOnlyList<Assets.MapPatchEntry> Entries);
 
     /// <summary>Sub-cmd 0x19 version 0: bonded-pet dead flag update.</summary>
     internal readonly record struct ExtendedStatsBondedArgs(uint Serial, bool IsDead);

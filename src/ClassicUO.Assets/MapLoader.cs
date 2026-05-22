@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 
 namespace ClassicUO.Assets
 {
+    public readonly record struct MapPatchEntry(int MapPatchCount, int StaticPatchCount);
+
     public class MapLoader : UOFileLoader
     {
         private UOFileMul[] _mapDif;
@@ -427,11 +429,11 @@ namespace ClassicUO.Assets
             BlockData[0][block].StaticCount = BlockData[0][block].OriginalStaticCount = count;
         }
 
-        public unsafe bool ApplyPatches(ref StackDataReader reader)
+        public unsafe bool ApplyPatches(int patchesCount, System.Collections.Generic.IReadOnlyList<MapPatchEntry> entries)
         {
             ResetPatchesInBlockTable();
 
-            PatchesCount = (int) reader.ReadUInt32BE();
+            PatchesCount = patchesCount;
 
             if (PatchesCount < 0)
             {
@@ -456,14 +458,12 @@ namespace ClassicUO.Assets
 
                 if (_currentMapFiles[idx] == null || _currentMapFiles[idx].Length == 0)
                 {
-                    reader.Skip(8);
-
                     continue;
                 }
 
-                int mapPatchesCount = (int)reader.ReadUInt32BE();
+                int mapPatchesCount = entries[i].MapPatchCount;
                 MapPatchCount[i] = mapPatchesCount;
-                int staticPatchesCount = (int)reader.ReadUInt32BE();
+                int staticPatchesCount = entries[i].StaticPatchCount;
                 StaticPatchCount[i] = staticPatchesCount;
 
                 int w = MapBlocksSize[i, 0];

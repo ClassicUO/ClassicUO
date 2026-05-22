@@ -791,9 +791,6 @@ namespace ClassicUO.Network
         private static void EnterWorld(World world, ref StackDataReader p)
         {
             uint serial = p.ReadUInt32BE();
-
-            world.CreatePlayer(serial);
-
             p.Skip(4);
             ushort enterGraphic = p.ReadUInt16BE();
             ushort x = p.ReadUInt16BE();
@@ -2689,17 +2686,57 @@ namespace ClassicUO.Network
 
                 case 6: // party
                 {
-                    // Party packet has its own multi-format inner parser owned by PartyManager.
-                    // Snapshot remaining bytes so the subscriber can re-wrap them.
-                    int remaining = p.Remaining;
-                    byte[] bytes = new byte[remaining];
-                    if (remaining > 0)
-                    {
-                        p.Buffer.Slice(p.Position, remaining).CopyTo(bytes);
-                    }
-                    p.Skip(remaining);
+                    byte innerCode = p.ReadUInt8();
 
-                    EventSink.RaisePartyPacket(new PartyPacketArgs(bytes));
+                    switch (innerCode)
+                    {
+                        case 0x01:
+                        case 0x02:
+                        {
+                            bool isAdd = innerCode == 0x01;
+                            byte count = p.ReadUInt8();
+                            uint removedSerial = 0;
+                            uint[] serials;
+
+                            if (count <= 1)
+                            {
+                                serials = Array.Empty<uint>();
+                            }
+                            else
+                            {
+                                if (!isAdd)
+                                {
+                                    removedSerial = p.ReadUInt32BE();
+                                }
+
+                                serials = new uint[count];
+                                for (int i = 0; i < count; i++)
+                                {
+                                    serials[i] = p.ReadUInt32BE();
+                                }
+                            }
+
+                            EventSink.RaisePartyListUpdated(new PartyListUpdatedArgs(isAdd, removedSerial, serials));
+                            break;
+                        }
+
+                        case 0x03:
+                        case 0x04:
+                        {
+                            uint chatSerial = p.ReadUInt32BE();
+                            string text = p.ReadUnicodeBE();
+                            EventSink.RaisePartyChatMessage(new PartyChatMessageArgs(chatSerial, text));
+                            break;
+                        }
+
+                        case 0x07:
+                        {
+                            uint inviter = p.ReadUInt32BE();
+                            EventSink.RaisePartyInviteReceived(new PartyInviteReceivedArgs(inviter));
+                            break;
+                        }
+                    }
+
                     break;
                 }
 
@@ -2792,17 +2829,18 @@ namespace ClassicUO.Network
 
                 case 0x18: // enable map patches
                 {
-                    // The map loader consumes the rest of the packet with its own
-                    // StackDataReader. Snapshot remaining bytes for the subscriber to re-wrap.
-                    int remaining = p.Remaining;
-                    byte[] bytes = new byte[remaining];
-                    if (remaining > 0)
-                    {
-                        p.Buffer.Slice(p.Position, remaining).CopyTo(bytes);
-                    }
-                    p.Skip(remaining);
+                    int patchesCount = (int)p.ReadUInt32BE();
+                    int entryCount = Math.Max(0, patchesCount);
+                    MapPatchEntry[] entries = new MapPatchEntry[entryCount];
 
-                    EventSink.RaiseMapPatchesEnabled(new MapPatchesEnabledArgs(bytes));
+                    for (int i = 0; i < entryCount; i++)
+                    {
+                        int mapPatchCount = (int)p.ReadUInt32BE();
+                        int staticPatchCount = (int)p.ReadUInt32BE();
+                        entries[i] = new MapPatchEntry(mapPatchCount, staticPatchCount);
+                    }
+
+                    EventSink.RaiseMapPatchesEnabled(new MapPatchesEnabledArgs(patchesCount, entries));
                     break;
                 }
 

@@ -262,7 +262,9 @@ namespace ClassicUO.Game.Events
         public static event Action<FastWalkStackInitArgs> FastWalkStackInit;
         public static event Action<FastWalkStackAddArgs> FastWalkStackAdd;
         public static event Action<GenericGumpCloseArgs> GenericGumpClose;
-        public static event Action<PartyPacketArgs> PartyPacket;
+        public static event Action<PartyListUpdatedArgs> PartyListUpdated;
+        public static event Action<PartyChatMessageArgs> PartyChatMessage;
+        public static event Action<PartyInviteReceivedArgs> PartyInviteReceived;
         public static event Action<MapIndexChangedArgs> MapIndexChanged;
         public static event Action<CloseStatusbarGumpArgs> CloseStatusbarGump;
         public static event Action<EquipInfoArgs> EquipInfoReceived;
@@ -286,7 +288,9 @@ namespace ClassicUO.Game.Events
         public static void RaiseFastWalkStackInit(in FastWalkStackInitArgs e) => Invoke(FastWalkStackInit, e);
         public static void RaiseFastWalkStackAdd(in FastWalkStackAddArgs e) => Invoke(FastWalkStackAdd, e);
         public static void RaiseGenericGumpClose(in GenericGumpCloseArgs e) => Invoke(GenericGumpClose, e);
-        public static void RaisePartyPacket(in PartyPacketArgs e) => Invoke(PartyPacket, e);
+        public static void RaisePartyListUpdated(in PartyListUpdatedArgs e) => Invoke(PartyListUpdated, e);
+        public static void RaisePartyChatMessage(in PartyChatMessageArgs e) => Invoke(PartyChatMessage, e);
+        public static void RaisePartyInviteReceived(in PartyInviteReceivedArgs e) => Invoke(PartyInviteReceived, e);
         public static void RaiseMapIndexChanged(in MapIndexChangedArgs e) => Invoke(MapIndexChanged, e);
         public static void RaiseCloseStatusbarGump(in CloseStatusbarGumpArgs e) => Invoke(CloseStatusbarGump, e);
         public static void RaiseEquipInfoReceived(in EquipInfoArgs e) => Invoke(EquipInfoReceived, e);
@@ -451,7 +455,9 @@ namespace ClassicUO.Game.Events
             FastWalkStackInit = null;
             FastWalkStackAdd = null;
             GenericGumpClose = null;
-            PartyPacket = null;
+            PartyListUpdated = null;
+            PartyChatMessage = null;
+            PartyInviteReceived = null;
             MapIndexChanged = null;
             CloseStatusbarGump = null;
             EquipInfoReceived = null;

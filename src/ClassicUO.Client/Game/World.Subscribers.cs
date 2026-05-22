@@ -567,6 +567,8 @@ namespace ClassicUO.Game
 
         private void OnPlayerEnteredWorld(PlayerEnteredWorldArgs e)
         {
+            CreatePlayer(e.Serial);
+
             if (Player == null) return;
 
             Player.Graphic = e.Graphic;
