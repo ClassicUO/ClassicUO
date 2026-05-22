@@ -1,8 +1,8 @@
 # EventSink Refactor Status
 
-Branch: `refactor/eventsink-phase0` (55 commits ahead of `main`)
+Branch: `refactor/eventsink-phase0` (60 commits ahead of `main`)
 Build: green (0 errors)
-Tests: 464/464 pass
+Tests: 518/518 pass
 `PacketHandlers.cs`: ~4700 lines (down from ~7200 at start of refactor)
 
 Three big remaining un-migrated handlers landed in this batch:
@@ -348,10 +348,20 @@ Caller API unchanged. Inverse-flow rewrite (B option, UI raises
 - Skipped on positive path (NRE on `Client.Game.UO.*` deref): 0x90
   DisplayMap, 0xBA DisplayQuestArrow, 0x65 SetWeather, 0xA9
   ReceiveCharacterList, 0xB9 EnableLockedFeatures, 0xD1 Logout.
-- Still missing: coverage for the gate-blocked handlers (would need an
-  internal test-only setter on `World.Player`/`World.Map` or a similar
-  seam), and for the World partial subscribers
-  (HitpointsUpdated, ManaUpdated, etc).
+- `tests/.../Game/Subscribers/World*SubscriberTests.cs` — 54 World
+  subscriber behavioural tests across 4 files (B-A mobile stats, B-B
+  lifecycle/atmosphere, B-C buffs/extended, B-D items/containers).
+  Produced in parallel by four worktree agents.
+  Player-only paths skipped (PlayerMobile ctor reads unmockable
+  globals); UI-construction paths skipped (UIManager.Add of gumps);
+  effect-manager paths skipped (GameEffect ctor reads asset stack).
+- Notable test-blocker discovered by agent B-D: `GameActions.SendCloseStatus`
+  (called from `Entity.Destroy`) reads `Client.Game.UO.Version` before
+  the `world.InGame` short-circuit, so any subscriber path destroying
+  items NREs in tests. EventSink swallows the NRE — tests stay green but
+  the path is uncovered.
+- Still missing: coverage for the gate-blocked handlers (parse-side
+  positive paths still skipped by 4 bucket agents).
 
 ## Notes / lessons
 
