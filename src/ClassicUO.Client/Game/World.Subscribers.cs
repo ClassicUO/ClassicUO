@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Events;
@@ -28,19 +27,10 @@ namespace ClassicUO.Game
 
         private void SubscribeEvents()
         {
-            EventSink.WarModeChanged += OnWarModeChanged;
-            EventSink.ClientViewRangeChanged += OnClientViewRangeChanged;
-            EventSink.WalkDenied += OnWalkDenied;
-            EventSink.WalkConfirmed += OnWalkConfirmed;
-            EventSink.PlayerEnteredWorld += OnPlayerEnteredWorld;
-            EventSink.SeasonChanged += OnSeasonChanged;
-            EventSink.LightLevelChanged += OnLightLevelChanged;
             EventSink.GraphicEffectSpawned += OnGraphicEffectSpawned;
             EventSink.BuffApplied += OnBuffApplied;
             EventSink.BuffRemoved += OnBuffRemoved;
             EventSink.ObjectDeleted += OnObjectDeleted;
-            EventSink.PlayerMoved += OnPlayerMoved;
-            EventSink.PathfindingReceived += OnPathfindingReceived;
             EventSink.ItemDragEnded += OnItemDragEnded;
             EventSink.ItemDropAccepted += OnItemDropAccepted;
             EventSink.ItemDragAnimation += OnItemDragAnimation;
@@ -50,7 +40,6 @@ namespace ClassicUO.Game
             EventSink.CharacterProfileOpened += OnCharacterProfileOpened;
             EventSink.TextEntryDialogOpened += OnTextEntryDialogOpened;
             EventSink.DyeDataReceived += OnDyeDataReceived;
-            EventSink.CombatSwing += OnCombatSwing;
 
             foreach (var listener in _listeners) listener.Subscribe();
         }
@@ -59,19 +48,10 @@ namespace ClassicUO.Game
         {
             foreach (var listener in _listeners) listener.Unsubscribe();
 
-            EventSink.WarModeChanged -= OnWarModeChanged;
-            EventSink.ClientViewRangeChanged -= OnClientViewRangeChanged;
-            EventSink.WalkDenied -= OnWalkDenied;
-            EventSink.WalkConfirmed -= OnWalkConfirmed;
-            EventSink.PlayerEnteredWorld -= OnPlayerEnteredWorld;
-            EventSink.SeasonChanged -= OnSeasonChanged;
-            EventSink.LightLevelChanged -= OnLightLevelChanged;
             EventSink.GraphicEffectSpawned -= OnGraphicEffectSpawned;
             EventSink.BuffApplied -= OnBuffApplied;
             EventSink.BuffRemoved -= OnBuffRemoved;
             EventSink.ObjectDeleted -= OnObjectDeleted;
-            EventSink.PlayerMoved -= OnPlayerMoved;
-            EventSink.PathfindingReceived -= OnPathfindingReceived;
             EventSink.ItemDragEnded -= OnItemDragEnded;
             EventSink.ItemDropAccepted -= OnItemDropAccepted;
             EventSink.ItemDragAnimation -= OnItemDragAnimation;
@@ -81,7 +61,6 @@ namespace ClassicUO.Game
             EventSink.CharacterProfileOpened -= OnCharacterProfileOpened;
             EventSink.TextEntryDialogOpened -= OnTextEntryDialogOpened;
             EventSink.DyeDataReceived -= OnDyeDataReceived;
-            EventSink.CombatSwing -= OnCombatSwing;
         }
 
         private void OnItemDragAnimation(ItemDragAnimationArgs e)
@@ -186,35 +165,6 @@ namespace ClassicUO.Game
             }
         }
 
-        private void OnCombatSwing(CombatSwingArgs e)
-        {
-            if (Player == null) return;
-            if (e.Attacker != Player.Serial) return;
-
-            const int TIME_TURN_TO_LASTTARGET = 2000;
-
-            if (
-                TargetManager.LastAttack == e.Defender
-                && Player.InWarMode
-                && Player.Walker.LastStepRequestTime + TIME_TURN_TO_LASTTARGET < Time.Ticks
-                && Player.Steps.Count == 0
-            )
-            {
-                Mobile enemy = Mobiles.Get(e.Defender);
-                if (enemy != null)
-                {
-                    Direction pdir = DirectionHelper.GetDirectionAB(Player.X, Player.Y, enemy.X, enemy.Y);
-
-                    int x = Player.X;
-                    int y = Player.Y;
-                    sbyte z = Player.Z;
-
-                    if (Player.Pathfinder.CanWalk(ref pdir, ref x, ref y, ref z) && Player.Direction != pdir)
-                    {
-                        Player.Walk(pdir, false);
-                    }
-                }
-            }
         }
 
         private void OnItemDragEnded(ItemDragEndedArgs e)
@@ -229,16 +179,6 @@ namespace ClassicUO.Game
             Client.Game.UO.GameCursor.ItemHold.Dropped = false;
         }
 
-        private void OnPlayerMoved(PlayerMovedArgs e)
-        {
-            if (Player == null) return;
-            Player.Walk(e.Direction & Direction.Mask, e.IsRunning);
-        }
-
-        private void OnPathfindingReceived(PathfindingReceivedArgs e)
-        {
-            if (Player == null) return;
-            Player.Pathfinder.WalkTo(e.X, e.Y, e.Z, 0);
         }
 
         private void OnObjectDeleted(ObjectDeletedArgs e)
@@ -336,53 +276,6 @@ namespace ClassicUO.Game
             }
         }
 
-        private void OnSeasonChanged(SeasonChangedArgs e)
-        {
-            if (Player == null) return;
-
-            byte season = e.Season;
-            if (season > 4) season = 0;
-
-            if (Player.IsDead && season == 4) return;
-
-            OldSeason = (Seasons.Season)season;
-            OldMusicIndex = e.MusicCue;
-
-            if (Season == Seasons.Season.Desolation)
-            {
-                OldMusicIndex = 42;
-            }
-
-            ChangeSeason((Seasons.Season)season, e.MusicCue);
-        }
-
-        private void OnLightLevelChanged(LightLevelChangedArgs e)
-        {
-            if (e.IsPersonal)
-            {
-                if (Player == null || Player.Serial != e.Serial) return;
-
-                Light.RealPersonal = e.Level;
-
-                if (ProfileManager.CurrentProfile == null || !ProfileManager.CurrentProfile.UseCustomLightLevel)
-                {
-                    Light.Personal = e.Level;
-                }
-            }
-            else
-            {
-                Light.RealOverall = e.Level;
-
-                var profile = ProfileManager.CurrentProfile;
-                if (profile == null || !profile.UseCustomLightLevel || profile.LightLevelType == 1)
-                {
-                    Light.Overall = profile != null && profile.LightLevelType == 1
-                        ? Math.Min(e.Level, profile.LightLevel)
-                        : e.Level;
-                }
-            }
-        }
-
         private void OnGraphicEffectSpawned(GraphicEffectSpawnedArgs e)
         {
             SpawnEffect(
@@ -426,63 +319,6 @@ namespace ClassicUO.Game
 
             Player.RemoveBuff((BuffIconType)e.IconType);
             UIManager.GetGump<BuffGump>()?.RequestUpdateContents();
-        }
-
-        private void OnWalkDenied(WalkDeniedArgs e)
-        {
-            if (Player == null) return;
-
-            Player.Walker.DenyWalk(e.Sequence, e.X, e.Y, e.Z);
-            Player.Direction = e.Direction;
-        }
-
-        private void OnWalkConfirmed(WalkConfirmedArgs e)
-        {
-            if (Player == null) return;
-
-            byte noto = e.Notoriety;
-            if (noto == 0 || noto >= 8)
-            {
-                noto = 0x01;
-            }
-
-            Player.NotorietyFlag = (Data.NotorietyFlag)noto;
-            Player.Walker.ConfirmWalk(e.Sequence);
-            Player.AddToTile();
-        }
-
-        private void OnPlayerEnteredWorld(PlayerEnteredWorldArgs e)
-        {
-            CreatePlayer(e.Serial);
-
-            if (Player == null) return;
-
-            Player.Graphic = e.Graphic;
-            Player.CheckGraphicChange();
-
-            if (Map == null)
-            {
-                MapIndex = 0;
-            }
-
-            Player.SetInWorldTile(e.X, e.Y, e.Z);
-            Player.Direction = e.Direction;
-
-            RangeSize.X = e.X;
-            RangeSize.Y = e.Y;
-        }
-
-        private void OnWarModeChanged(WarModeChangedArgs e)
-        {
-            if (Player != null && Player.Serial == e.Serial)
-            {
-                Player.InWarMode = e.InWarMode;
-            }
-        }
-
-        private void OnClientViewRangeChanged(ClientViewRangeChangedArgs e)
-        {
-            ClientViewRange = e.Range;
         }
 
     }

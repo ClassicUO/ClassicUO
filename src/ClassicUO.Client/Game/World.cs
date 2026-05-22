@@ -79,6 +79,17 @@ namespace ClassicUO.Game
             RegisterListener(new MobileAnimationHandler(this));
             RegisterListener(new global::ClassicUO.Game.UI.HealthBars.HealthBarStateHandler(this));
 
+            // R4.6 (F-2): combat + movement + atmosphere/seasons handlers
+            RegisterListener(new WarModeHandler(this));
+            RegisterListener(new CombatSwingHandler(this));
+            RegisterListener(new WalkHandler(this));
+            RegisterListener(new PlayerMovedHandler(this));
+            RegisterListener(new PathfindingHandler(this));
+            RegisterListener(new PlayerEnteredWorldHandler(this));
+            RegisterListener(new global::ClassicUO.Game.Seasons.SeasonChangedHandler(this));
+            RegisterListener(new global::ClassicUO.Game.Map.LightLevelHandler(this));
+            RegisterListener(new global::ClassicUO.Game.Map.ClientViewRangeHandler(this));
+
             SubscribeEvents();
         }
 
