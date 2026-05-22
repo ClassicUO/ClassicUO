@@ -56,7 +56,7 @@ namespace ClassicUO.Game
 
             if (Player.IsDead)
             {
-                ChangeSeason(Managers.Season.Desolation, 42);
+                ChangeSeason(Seasons.Season.Desolation, 42);
             }
 
             if (

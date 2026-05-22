@@ -157,7 +157,7 @@ namespace ClassicUO.Game
                         //       When the character dies, this packet trigger a "reset" and
                         //       somehow it messes up the packet reading server side
                         //NetClient.Socket.Send_DeathScreen();
-                        ChangeSeason(Managers.Season.Desolation, 42);
+                        ChangeSeason(Seasons.Season.Desolation, 42);
                     }
                     else
                     {

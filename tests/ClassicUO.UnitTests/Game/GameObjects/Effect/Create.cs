@@ -15,7 +15,7 @@ namespace ClassicUO.UnitTests.Game.GameObjects.Effect
         public void Create_Returns_Effect_Instance(int graphicEffectType, Type type)
         {
             var world = new World();
-            var em = new ClassicUO.Game.Managers.EffectManager(world);
+            var em = new ClassicUO.Game.Effects.EffectManager(world);
 
             em.CreateEffect((ClassicUO.Game.Data.GraphicEffectType) graphicEffectType, 0, 0, 1, 0,0, 0 , 0,0 ,0,0 ,0, 0, false, false, false, ClassicUO.Game.Data.GraphicEffectBlendMode.Normal);
             

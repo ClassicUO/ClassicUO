@@ -434,7 +434,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void ConfirmButton_MouseUp(object sender, MouseEventArgs e)
         {
-            if (e.Button == Input.MouseButtonType.Left)
+            if (e.Button == ClassicUO.Input.MouseButtonType.Left)
             {
                 if (!isFemale && selectedRace != RaceType.ELF) //Has beard
                 {

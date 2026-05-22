@@ -455,15 +455,15 @@ namespace ClassicUO.Game
 
             if (Player.IsDead && season == 4) return;
 
-            OldSeason = (Managers.Season)season;
+            OldSeason = (Seasons.Season)season;
             OldMusicIndex = e.MusicCue;
 
-            if (Season == Managers.Season.Desolation)
+            if (Season == Seasons.Season.Desolation)
             {
                 OldMusicIndex = 42;
             }
 
-            ChangeSeason((Managers.Season)season, e.MusicCue);
+            ChangeSeason((Seasons.Season)season, e.MusicCue);
         }
 
         private void OnLightLevelChanged(LightLevelChangedArgs e)
