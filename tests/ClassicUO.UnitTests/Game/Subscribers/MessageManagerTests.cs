@@ -36,7 +36,12 @@ namespace ClassicUO.UnitTests.Game.Subscribers
             EventSink.ClearAll();
         }
 
-        private static MessageManager NewManager() => new MessageManager(world: null);
+        private static MessageManager NewManager()
+        {
+            var manager = new MessageManager(world: null);
+            manager.Subscribe();
+            return manager;
+        }
 
         // ---- AsciiPrompt → PromptData ----
 

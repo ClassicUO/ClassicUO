@@ -33,7 +33,7 @@ namespace ClassicUO.Game
             HouseManager = RegisterListener(new HouseManager(this));
             WorldTextManager = new WorldTextManager(this);
             _effectManager = new EffectManager(this);
-            MessageManager = new MessageManager(this);
+            MessageManager = RegisterListener(new MessageManager(this));
             ContainerManager = new ContainerManager(this);
             IgnoreManager = new IgnoreManager(this);
             SkillsGroupManager = new SkillsGroupManager(this);
