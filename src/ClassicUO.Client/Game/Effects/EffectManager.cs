@@ -1,38 +1,41 @@
-﻿// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
 using ClassicUO.Game.Data;
-using ClassicUO.Game.GameObjects;
-using ClassicUO.Utility.Logging;
+using ClassicUO.Game.Entities;
 
 namespace ClassicUO.Game.Effects
 {
+    /// <summary>
+    /// Facade over the two Effects collaborators. Keeps the existing public
+    /// surface (<c>_world.EffectManager.CreateEffect / Update / Clear</c>)
+    /// and the <see cref="LinkedObject"/> inheritance so that
+    /// <see cref="GameEffect"/> can still call
+    /// <c>_manager.PushToBack(effect)</c> and tests can poke
+    /// <see cref="LinkedObject.Items"/>. Spawning and per-frame lifecycle
+    /// live in dedicated cohesive classes under
+    /// <see cref="Game.Effects"/>.
+    /// </summary>
     internal sealed class EffectManager : LinkedObject
     {
-        private readonly World _world;
+        private readonly IEffectSpawner _spawner;
+        private readonly IEffectLifecycle _lifecycle;
 
+        /// <summary>Production composition root. Defaults to concrete collaborators.</summary>
         public EffectManager(World world)
+            : this(new EffectSpawner(world), new EffectLifecycle(world))
         {
-            _world = world;
         }
 
-        public void Update()
+        /// <summary>Full DI seam — inject both collaborators.</summary>
+        internal EffectManager(IEffectSpawner spawner, IEffectLifecycle lifecycle)
         {
-            for (GameEffect f = (GameEffect) Items; f != null;)
-            {
-                GameEffect next = (GameEffect) f.Next;
-
-                f.Update();
-
-                if (!f.IsDestroyed && f.Distance > _world.ClientViewRange)
-                {
-                    f.Destroy();
-                }
-
-                f = next;
-            }
+            _spawner = spawner;
+            _lifecycle = lifecycle;
         }
 
+        public void Update() => _lifecycle.Update(this);
+
+        public new void Clear() => _lifecycle.Clear(this);
 
         public void CreateEffect
         (
@@ -55,189 +58,32 @@ namespace ClassicUO.Game.Effects
             GraphicEffectBlendMode blendmode
         )
         {
-            if (hasparticles)
+            GameEffect effect = _spawner.Create
+            (
+                this,
+                type,
+                source,
+                target,
+                graphic,
+                hue,
+                srcX,
+                srcY,
+                srcZ,
+                targetX,
+                targetY,
+                targetZ,
+                speed,
+                duration,
+                fixedDir,
+                doesExplode,
+                hasparticles,
+                blendmode
+            );
+
+            if (effect != null)
             {
-                Log.Warn("Unhandled particles in an effects packet.");
+                PushToBack(effect);
             }
-
-            GameEffect effect;
-
-            if (hue != 0)
-            {
-                hue++;
-            }
-
-            duration *= Constants.ITEM_EFFECT_ANIMATION_DELAY;
-
-            switch (type)
-            {
-                case GraphicEffectType.Moving:
-                    if (graphic <= 0)
-                    {
-                        return;
-                    }
-
-                    // TODO: speed == 0 means run at standard frameInterval got from anim.mul?
-                    if (speed == 0)
-                    {
-                        speed++;
-                    }
-
-                    effect = new MovingEffect
-                    (
-                        _world,
-                        this,
-                        source,
-                        target,
-                        srcX,
-                        srcY,
-                        srcZ,
-                        targetX,
-                        targetY,
-                        targetZ,
-                        graphic,
-                        hue,
-                        fixedDir,
-                        duration,
-                        speed
-                    )
-                    {
-                        Blend = blendmode,
-                        CanCreateExplosionEffect = doesExplode
-                    };
-
-                    break;
-
-                case GraphicEffectType.DragEffect:
-
-                    if (graphic <= 0)
-                    {
-                        return;
-                    }
-
-                    if (speed == 0)
-                    {
-                        speed++;
-                    }
-
-                    effect = new DragEffect
-                    (
-                        _world,
-                        this,
-                        source,
-                        target,
-                        srcX,
-                        srcY,
-                        srcZ,
-                        targetX,
-                        targetY,
-                        targetZ,
-                        graphic,
-                        hue,
-                        duration,
-                        speed
-                    )
-                    {
-                        Blend = blendmode,
-                        CanCreateExplosionEffect = doesExplode
-                    };
-
-                    break;
-
-                case GraphicEffectType.Lightning:
-                    effect = new LightningEffect
-                    (
-                        _world,
-                        this,
-                        source,
-                        srcX,
-                        srcY,
-                        srcZ,
-                        hue
-                    );
-
-                    break;
-
-                case GraphicEffectType.FixedXYZ:
-
-                    if (graphic <= 0)
-                    {
-                        return;
-                    }
-
-                    effect = new FixedEffect
-                    (
-                        _world,
-                        this,
-                        srcX,
-                        srcY,
-                        srcZ,
-                        graphic,
-                        hue,
-                        duration,
-                        0 //speed [use 50ms]
-                    )
-                    {
-                        Blend = blendmode
-                    };
-
-                    break;
-
-                case GraphicEffectType.FixedFrom:
-
-                    if (graphic <= 0)
-                    {
-                        return;
-                    }
-
-                    effect = new FixedEffect
-                    (
-                        _world,
-                        this,
-                        source,
-                        srcX,
-                        srcY,
-                        srcZ,
-                        graphic,
-                        hue,
-                        duration,
-                        0 //speed [use 50ms]
-                    )
-                    {
-                        Blend = blendmode
-                    };
-
-                    break;
-
-                case GraphicEffectType.ScreenFade:
-                    Log.Warn("Unhandled 'Screen Fade' effect.");
-
-                    return;
-
-                default:
-                    Log.Warn("Unhandled effect.");
-
-                    return;
-            }
-
-
-            PushToBack(effect);
-        }
-
-        public new void Clear()
-        {
-            GameEffect first = (GameEffect) Items;
-
-            while (first != null)
-            {
-                LinkedObject n = first.Next;
-
-                first.Destroy();
-
-                first = (GameEffect) n;
-            }
-
-            Items = null;
         }
     }
 }
