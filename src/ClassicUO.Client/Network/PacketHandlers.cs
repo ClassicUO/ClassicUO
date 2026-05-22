@@ -130,7 +130,7 @@ namespace ClassicUO.Network
             (fromPlugins ? _pluginsBuffer : _buffer).Enqueue(data);
         }
 
-        private void AnalyzePacket(World world, ReadOnlySpan<byte> data, int offset)
+        internal void AnalyzePacket(World world, ReadOnlySpan<byte> data, int offset)
         {
             if (data.IsEmpty)
                 return;
