@@ -37,7 +37,7 @@ namespace ClassicUO.Game
             ContainerManager = new ContainerManager(this);
             IgnoreManager = new IgnoreManager(this);
             SkillsGroupManager = new SkillsGroupManager(this);
-            ChatManager = new ChatManager(this);
+            ChatManager = RegisterListener(new ChatManager(this));
             AuraManager = new AuraManager(this);
             UoAssist = new UoAssist(this);
             TargetManager = new TargetManager(this);

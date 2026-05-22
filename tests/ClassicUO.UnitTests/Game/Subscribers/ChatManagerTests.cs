@@ -39,7 +39,14 @@ namespace ClassicUO.UnitTests.Game.Subscribers
             EventSink.ClearAll();
         }
 
-        private static ChatManager NewManager() => new ChatManager(world: null);
+        private static ChatManager NewManager()
+        {
+            // World wires Subscribe() centrally via RegisterListener now; in
+            // unit tests we wire it ourselves so the EventSink handlers run.
+            var manager = new ChatManager(world: null);
+            manager.Subscribe();
+            return manager;
+        }
 
         // ---- OnConferenceCreated ----
 

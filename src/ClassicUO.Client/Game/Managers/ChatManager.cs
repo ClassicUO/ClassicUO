@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 using System.Collections.Generic;
-using ClassicUO.Configuration;
-using ClassicUO.Game.Data;
+using ClassicUO.Game.Chat;
 using ClassicUO.Game.Events;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
@@ -10,13 +9,34 @@ using ClassicUO.Resources;
 
 namespace ClassicUO.Game.Managers
 {
-    internal sealed class ChatManager
+    /// <summary>
+    /// Facade over the three Chat collaborators: keeps the existing public
+    /// surface (<c>_world.ChatManager.X</c>) and owns the EventSink
+    /// subscriptions. Channel storage, user roster and message routing live
+    /// in dedicated cohesive classes under <see cref="Game.Chat"/>.
+    /// </summary>
+    internal sealed class ChatManager : IEventListener
     {
-        private readonly World _world;
+        private readonly IChatChannelStore _channels;
+        private readonly IChatRoster _roster;
+        private readonly IChatMessageRouter _router;
 
+        /// <summary>Production composition root. Defaults to concrete collaborators.</summary>
         public ChatManager(World world)
+            : this(new ChatChannelStore(), new ChatRoster(), new ChatMessageRouter(world))
         {
-            _world = world;
+        }
+
+        /// <summary>Full DI seam — inject all three collaborators.</summary>
+        internal ChatManager(IChatChannelStore channels, IChatRoster roster, IChatMessageRouter router)
+        {
+            _channels = channels;
+            _roster = roster;
+            _router = router;
+        }
+
+        public void Subscribe()
+        {
             EventSink.ChatConferenceCreated += OnConferenceCreated;
             EventSink.ChatConferenceDestroyed += OnConferenceDestroyed;
             EventSink.ChatUsernameRequest += OnUsernameRequest;
@@ -47,152 +67,102 @@ namespace ClassicUO.Game.Managers
             EventSink.ChatSystemMessage -= OnSystemMessage;
         }
 
+        // ---- Public facade: channel store ----
+        public Dictionary<string, ChatChannel> Channels => _channels.Channels;
+
+        public string CurrentChannelName
+        {
+            get => _channels.CurrentChannelName;
+            set => _channels.CurrentChannelName = value;
+        }
+
+        public ChatStatus ChatIsEnabled
+        {
+            get => _channels.ChatIsEnabled;
+            set => _channels.ChatIsEnabled = value;
+        }
+
+        public void AddChannel(string text, bool hasPassword) => _channels.AddChannel(text, hasPassword);
+        public void RemoveChannel(string name) => _channels.RemoveChannel(name);
+        public void Clear() => _channels.Clear();
+
+        // ---- Event handlers ----
         private void OnConferenceCreated(ChatConferenceCreatedArgs e)
         {
-            CurrentChannelName = e.ChannelName;
-            AddChannel(e.ChannelName, e.HasPassword);
+            _channels.CurrentChannelName = e.ChannelName;
+            _channels.AddChannel(e.ChannelName, e.HasPassword);
 
             UIManager.GetGump<ChatGump>()?.RequestUpdateContents();
         }
 
         private void OnConferenceDestroyed(ChatConferenceDestroyedArgs e)
         {
-            RemoveChannel(e.ChannelName);
+            _channels.RemoveChannel(e.ChannelName);
 
             UIManager.GetGump<ChatGump>()?.RequestUpdateContents();
         }
 
         private void OnUsernameRequest(ChatUsernameRequestArgs e)
         {
-            ChatIsEnabled = ChatStatus.EnabledUserRequest;
+            _channels.ChatIsEnabled = ChatStatus.EnabledUserRequest;
         }
 
         private void OnChatClosed(ChatClosedArgs e)
         {
-            Clear();
-            ChatIsEnabled = ChatStatus.Disabled;
+            _channels.Clear();
+            _channels.ChatIsEnabled = ChatStatus.Disabled;
 
             UIManager.GetGump<ChatGump>()?.Dispose();
         }
 
         private void OnUsernameAccepted(ChatUsernameAcceptedArgs e)
         {
-            ChatIsEnabled = ChatStatus.Enabled;
+            _channels.ChatIsEnabled = ChatStatus.Enabled;
+            _roster.Username = e.Username;
+            _roster.IsUsernameAccepted = true;
             NetClient.Socket.Send_ChatJoinCommand("General");
         }
 
         private void OnUserAdded(ChatUserAddedArgs e)
         {
-            // currently nothing tracked; placeholder for future per-channel user list
+            _roster.AddUser(e.UserType, e.Username);
         }
 
         private void OnUserRemoved(ChatUserRemovedArgs e)
         {
-            // currently nothing tracked; placeholder for future per-channel user list
+            _roster.RemoveUser(e.Username);
         }
 
         private void OnClearAllPlayers(ChatClearAllPlayersArgs e)
         {
-            // currently nothing tracked; placeholder for future per-channel user list
+            _roster.ClearAllPlayers();
         }
 
         private void OnConferenceJoined(ChatConferenceJoinedArgs e)
         {
-            CurrentChannelName = e.ChannelName;
+            _channels.CurrentChannelName = e.ChannelName;
 
             UIManager.GetGump<ChatGump>()?.UpdateConference();
 
-            GameActions.Print(
-                _world,
-                string.Format(ResGeneral.YouHaveJoinedThe0Channel, e.ChannelName),
-                ProfileManager.CurrentProfile.ChatMessageHue,
-                MessageType.Regular,
-                1
-            );
+            _router.AnnounceConferenceJoined(e.ChannelName);
         }
 
         private void OnConferenceLeft(ChatConferenceLeftArgs e)
         {
-            GameActions.Print(
-                _world,
-                string.Format(ResGeneral.YouHaveLeftThe0Channel, e.ChannelName),
-                ProfileManager.CurrentProfile.ChatMessageHue,
-                MessageType.Regular,
-                1
-            );
+            _router.AnnounceConferenceLeft(e.ChannelName);
         }
 
         private void OnTextReceived(ChatTextReceivedArgs e)
         {
-            string msgSent = e.Message;
-
-            if (!string.IsNullOrEmpty(msgSent))
-            {
-                int idx = msgSent.IndexOf('{');
-                int idxLast = msgSent.IndexOf('}') + 1;
-
-                if (idxLast > idx && idx > -1)
-                {
-                    msgSent = msgSent.Remove(idx, idxLast - idx);
-                }
-            }
-
-            GameActions.Print(
-                _world,
-                $"{e.Username}: {msgSent}",
-                ProfileManager.CurrentProfile.ChatMessageHue,
-                MessageType.Regular,
-                1
-            );
+            _router.RouteText(e.Username, e.Message);
         }
 
         private void OnSystemMessage(ChatSystemMessageArgs e)
         {
-            // TODO: read Chat.enu ?
-            // http://docs.polserver.com/packets/index.php?Packet=0xB2
-
-            string msg = GetMessage(e.Cmd - 1);
-
-            if (string.IsNullOrEmpty(msg))
-            {
-                return;
-            }
-
-            string text = e.Text;
-
-            if (!string.IsNullOrEmpty(text))
-            {
-                int idx = msg.IndexOf("%1");
-
-                if (idx >= 0)
-                {
-                    msg = msg.Replace("%1", text);
-                }
-
-                if (e.Cmd - 1 == 0x000A || e.Cmd - 1 == 0x0017)
-                {
-                    idx = msg.IndexOf("%2");
-
-                    if (idx >= 0)
-                    {
-                        msg = msg.Replace("%2", text);
-                    }
-                }
-            }
-
-            GameActions.Print(
-                _world,
-                msg,
-                ProfileManager.CurrentProfile.ChatMessageHue,
-                MessageType.Regular,
-                1
-            );
+            _router.RouteSystemMessage(e.Cmd, e.Text);
         }
 
-
-        public readonly Dictionary<string, ChatChannel> Channels = new Dictionary<string, ChatChannel>();
-        public ChatStatus ChatIsEnabled;
-        public string CurrentChannelName = string.Empty;
+        // ---- Static system-message template table ----
 
         private static readonly string[] _messages =
         {
@@ -239,43 +209,9 @@ namespace ClassicUO.Game.Managers
             ResGeneral.YouHaveBeenBanned
         };
 
-
         public static string GetMessage(int index)
         {
             return index < _messages.Length ? _messages[index] : string.Empty;
         }
-
-        public void AddChannel(string text, bool hasPassword)
-        {
-            if (!Channels.TryGetValue(text, out ChatChannel channel))
-            {
-                channel = new ChatChannel(text, hasPassword);
-                Channels[text] = channel;
-            }
-        }
-
-        public void RemoveChannel(string name)
-        {
-            if (Channels.ContainsKey(name))
-            {
-                Channels.Remove(name);
-            }
-        }
-
-        public void Clear()
-        {
-            Channels.Clear();
-        }
-
-        //static ChatManager()
-        //{
-        //    using (StreamReader reader = new StreamReader(File.OpenRead(UOFileManager.GetUOFilePath("Chat.enu"))))
-        //    {
-        //        while (!reader.EndOfStream)
-        //        {
-        //            string line = reader.ReadLine();
-        //        }
-        //    }
-        //}
     }
 }
