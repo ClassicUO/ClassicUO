@@ -7,25 +7,29 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Resources;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Entities.Players
 {
-    internal sealed partial class World
+    internal sealed class CharacterStatusHandler : IEventListener
     {
-        private void SubscribeCharacterStatus()
+        private readonly World _world;
+
+        public CharacterStatusHandler(World world) => _world = world;
+
+        public void Subscribe()
         {
             EventSink.CharacterStatusReceived += OnCharacterStatusReceived;
         }
 
-        private void UnsubscribeCharacterStatus()
+        public void Unsubscribe()
         {
             EventSink.CharacterStatusReceived -= OnCharacterStatusReceived;
         }
 
         private void OnCharacterStatusReceived(CharacterStatusReceivedArgs e)
         {
-            if (Player == null) return;
+            if (_world.Player == null) return;
 
-            Entity entity = Get(e.Serial);
+            Entity entity = _world.Get(e.Serial);
             if (entity == null) return;
 
             string oldName = entity.Name;
@@ -48,20 +52,20 @@ namespace ClassicUO.Game
             {
                 mobile.IsFemale = e.IsFemale;
 
-                if (mobile == Player)
+                if (mobile == _world.Player)
                 {
-                    if (!string.IsNullOrEmpty(Player.Name) && oldName != Player.Name)
+                    if (!string.IsNullOrEmpty(_world.Player.Name) && oldName != _world.Player.Name)
                     {
-                        Client.Game.SetWindowTitle(Player.Name);
+                        Client.Game.SetWindowTitle(_world.Player.Name);
                     }
 
-                    if (Player.Strength != 0
+                    if (_world.Player.Strength != 0
                         && ProfileManager.CurrentProfile != null
                         && ProfileManager.CurrentProfile.ShowStatsChangedMessage)
                     {
-                        ushort currentStr = Player.Strength;
-                        ushort currentDex = Player.Dexterity;
-                        ushort currentInt = Player.Intelligence;
+                        ushort currentStr = _world.Player.Strength;
+                        ushort currentDex = _world.Player.Dexterity;
+                        ushort currentInt = _world.Player.Intelligence;
 
                         int deltaStr = e.Strength - currentStr;
                         int deltaDex = e.Dexterity - currentDex;
@@ -70,7 +74,7 @@ namespace ClassicUO.Game
                         if (deltaStr != 0)
                         {
                             GameActions.Print(
-                                this,
+                                _world,
                                 string.Format(
                                     ResGeneral.Your0HasChangedBy1ItIsNow2,
                                     ResGeneral.Strength,
@@ -87,7 +91,7 @@ namespace ClassicUO.Game
                         if (deltaDex != 0)
                         {
                             GameActions.Print(
-                                this,
+                                _world,
                                 string.Format(
                                     ResGeneral.Your0HasChangedBy1ItIsNow2,
                                     ResGeneral.Dexterity,
@@ -104,7 +108,7 @@ namespace ClassicUO.Game
                         if (deltaInt != 0)
                         {
                             GameActions.Print(
-                                this,
+                                _world,
                                 string.Format(
                                     ResGeneral.Your0HasChangedBy1ItIsNow2,
                                     ResGeneral.Intelligence,
@@ -119,81 +123,81 @@ namespace ClassicUO.Game
                         }
                     }
 
-                    Player.Strength = e.Strength;
-                    Player.Dexterity = e.Dexterity;
-                    Player.Intelligence = e.Intelligence;
-                    Player.Stamina = e.Stamina;
-                    Player.StaminaMax = e.StaminaMax;
-                    Player.Mana = e.Mana;
-                    Player.ManaMax = e.ManaMax;
-                    Player.Gold = e.Gold;
-                    Player.PhysicalResistance = e.PhysicalResistance;
-                    Player.Weight = e.Weight;
+                    _world.Player.Strength = e.Strength;
+                    _world.Player.Dexterity = e.Dexterity;
+                    _world.Player.Intelligence = e.Intelligence;
+                    _world.Player.Stamina = e.Stamina;
+                    _world.Player.StaminaMax = e.StaminaMax;
+                    _world.Player.Mana = e.Mana;
+                    _world.Player.ManaMax = e.ManaMax;
+                    _world.Player.Gold = e.Gold;
+                    _world.Player.PhysicalResistance = e.PhysicalResistance;
+                    _world.Player.Weight = e.Weight;
 
                     if (e.Type >= 5)
                     {
-                        Player.WeightMax = e.WeightMax;
+                        _world.Player.WeightMax = e.WeightMax;
                         byte race = e.Race;
                         if (race == 0) race = 1;
-                        Player.Race = (RaceType)race;
+                        _world.Player.Race = (RaceType)race;
                     }
                     else
                     {
                         if (Client.Game.UO.Version >= Utility.ClientVersion.CV_500A)
                         {
-                            Player.WeightMax = (ushort)(7 * (Player.Strength >> 1) + 40);
+                            _world.Player.WeightMax = (ushort)(7 * (_world.Player.Strength >> 1) + 40);
                         }
                         else
                         {
-                            Player.WeightMax = (ushort)(Player.Strength * 4 + 25);
+                            _world.Player.WeightMax = (ushort)(_world.Player.Strength * 4 + 25);
                         }
                     }
 
                     if (e.HasRenaissanceStats)
                     {
-                        Player.StatsCap = e.StatsCap;
-                        Player.Followers = e.Followers;
-                        Player.FollowersMax = e.FollowersMax;
+                        _world.Player.StatsCap = e.StatsCap;
+                        _world.Player.Followers = e.Followers;
+                        _world.Player.FollowersMax = e.FollowersMax;
                     }
 
                     if (e.HasAosStats)
                     {
-                        Player.FireResistance = e.FireResistance;
-                        Player.ColdResistance = e.ColdResistance;
-                        Player.PoisonResistance = e.PoisonResistance;
-                        Player.EnergyResistance = e.EnergyResistance;
-                        Player.Luck = e.Luck;
-                        Player.DamageMin = e.DamageMin;
-                        Player.DamageMax = e.DamageMax;
-                        Player.TithingPoints = e.TithingPoints;
+                        _world.Player.FireResistance = e.FireResistance;
+                        _world.Player.ColdResistance = e.ColdResistance;
+                        _world.Player.PoisonResistance = e.PoisonResistance;
+                        _world.Player.EnergyResistance = e.EnergyResistance;
+                        _world.Player.Luck = e.Luck;
+                        _world.Player.DamageMin = e.DamageMin;
+                        _world.Player.DamageMax = e.DamageMax;
+                        _world.Player.TithingPoints = e.TithingPoints;
                     }
 
                     if (e.HasKrSaStats)
                     {
-                        Player.MaxPhysicResistence = e.MaxPhysicResistence;
-                        Player.MaxFireResistence = e.MaxFireResistence;
-                        Player.MaxColdResistence = e.MaxColdResistence;
-                        Player.MaxPoisonResistence = e.MaxPoisonResistence;
-                        Player.MaxEnergyResistence = e.MaxEnergyResistence;
-                        Player.DefenseChanceIncrease = e.DefenseChanceIncrease;
-                        Player.MaxDefenseChanceIncrease = e.MaxDefenseChanceIncrease;
-                        Player.HitChanceIncrease = e.HitChanceIncrease;
-                        Player.SwingSpeedIncrease = e.SwingSpeedIncrease;
-                        Player.DamageIncrease = e.DamageIncrease;
-                        Player.LowerReagentCost = e.LowerReagentCost;
-                        Player.SpellDamageIncrease = e.SpellDamageIncrease;
-                        Player.FasterCastRecovery = e.FasterCastRecovery;
-                        Player.FasterCasting = e.FasterCasting;
-                        Player.LowerManaCost = e.LowerManaCost;
+                        _world.Player.MaxPhysicResistence = e.MaxPhysicResistence;
+                        _world.Player.MaxFireResistence = e.MaxFireResistence;
+                        _world.Player.MaxColdResistence = e.MaxColdResistence;
+                        _world.Player.MaxPoisonResistence = e.MaxPoisonResistence;
+                        _world.Player.MaxEnergyResistence = e.MaxEnergyResistence;
+                        _world.Player.DefenseChanceIncrease = e.DefenseChanceIncrease;
+                        _world.Player.MaxDefenseChanceIncrease = e.MaxDefenseChanceIncrease;
+                        _world.Player.HitChanceIncrease = e.HitChanceIncrease;
+                        _world.Player.SwingSpeedIncrease = e.SwingSpeedIncrease;
+                        _world.Player.DamageIncrease = e.DamageIncrease;
+                        _world.Player.LowerReagentCost = e.LowerReagentCost;
+                        _world.Player.SpellDamageIncrease = e.SpellDamageIncrease;
+                        _world.Player.FasterCastRecovery = e.FasterCastRecovery;
+                        _world.Player.FasterCasting = e.FasterCasting;
+                        _world.Player.LowerManaCost = e.LowerManaCost;
                     }
                 }
             }
 
-            if (mobile == Player)
+            if (mobile == _world.Player)
             {
-                UoAssist.SignalHits();
-                UoAssist.SignalStamina();
-                UoAssist.SignalMana();
+                _world.UoAssist.SignalHits();
+                _world.UoAssist.SignalStamina();
+                _world.UoAssist.SignalMana();
             }
         }
     }

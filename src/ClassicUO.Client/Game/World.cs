@@ -12,6 +12,11 @@ using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
 using MathHelper = ClassicUO.Utility.MathHelper;
 using ClassicUO.Configuration;
+using ClassicUO.Game.Boats;
+using ClassicUO.Game.Combat;
+using ClassicUO.Game.Containers;
+using ClassicUO.Game.Entities.Players;
+using ClassicUO.Game.Input;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Assets;
@@ -49,6 +54,12 @@ namespace ClassicUO.Game
             Weather = RegisterListener(new ClassicUO.Game.Weather.Weather(this));
             InfoBars = new InfoBarManager(this);
             OPL = RegisterListener(new ObjectPropertiesListManager(this));
+
+            RegisterListener(new BoatMovementHandler(this));
+            RegisterListener(new CharacterStatusHandler(this));
+            RegisterListener(new ContainerItemsHandler(this));
+            RegisterListener(new DeathDisplayHandler(this));
+            RegisterListener(new DenyMoveHandler(this));
 
             SubscribeEvents();
         }

@@ -5,25 +5,28 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.Scenes;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Boats
 {
-    internal sealed partial class World
+    internal sealed class BoatMovementHandler : IEventListener
     {
-        private void SubscribeBoat()
+        private readonly World _world;
+
+        public BoatMovementHandler(World world) => _world = world;
+
+        public void Subscribe()
         {
             EventSink.BoatMovingReceived += OnBoatMovingReceived;
         }
 
-        private void UnsubscribeBoat()
+        public void Unsubscribe()
         {
             EventSink.BoatMovingReceived -= OnBoatMovingReceived;
         }
 
         private void OnBoatMovingReceived(BoatMovingReceivedArgs e)
         {
-            if (!InGame)
+            if (!_world.InGame)
             {
                 return;
             }
@@ -35,7 +38,7 @@ namespace ClassicUO.Game
             Direction movingDirection = (Direction)e.MovingDirection;
             Direction facingDirection = (Direction)e.FacingDirection;
 
-            Item multi = Items.Get(serial);
+            Item multi = _world.Items.Get(serial);
 
             if (multi == null)
             {
@@ -48,7 +51,7 @@ namespace ClassicUO.Game
 
             if (smooth)
             {
-                BoatMovingManager.AddStep(
+                _world.BoatMovingManager.AddStep(
                     serial,
                     e.Speed,
                     movingDirection,
@@ -62,7 +65,7 @@ namespace ClassicUO.Game
             {
                 multi.SetInWorldTile(x, y, (sbyte)z);
 
-                if (HouseManager.TryGetHouse(serial, out House house))
+                if (_world.HouseManager.TryGetHouse(serial, out House house))
                 {
                     house.Generate(true, true, true);
                 }
@@ -79,13 +82,13 @@ namespace ClassicUO.Game
                 ushort cy = passenger.Y;
                 ushort cz = passenger.Z;
 
-                if (cSerial == Player)
+                if (cSerial == _world.Player)
                 {
-                    RangeSize.X = cx;
-                    RangeSize.Y = cy;
+                    _world.RangeSize.X = cx;
+                    _world.RangeSize.Y = cy;
                 }
 
-                Entity ent = Get(cSerial);
+                Entity ent = _world.Get(cSerial);
 
                 if (ent == null)
                 {
@@ -94,7 +97,7 @@ namespace ClassicUO.Game
 
                 if (smooth)
                 {
-                    BoatMovingManager.PushItemToList(
+                    _world.BoatMovingManager.PushItemToList(
                         serial,
                         cSerial,
                         x - cx,
@@ -104,9 +107,9 @@ namespace ClassicUO.Game
                 }
                 else
                 {
-                    if (cSerial == Player)
+                    if (cSerial == _world.Player)
                     {
-                        UpdatePlayer(
+                        _world.UpdatePlayer(
                             cSerial,
                             ent.Graphic,
                             0,
@@ -116,12 +119,12 @@ namespace ClassicUO.Game
                             cy,
                             (sbyte)cz,
                             0,
-                            Player.Direction
+                            _world.Player.Direction
                         );
                     }
                     else
                     {
-                        UpdateGameObject(
+                        _world.UpdateGameObject(
                             cSerial,
                             ent.Graphic,
                             0,

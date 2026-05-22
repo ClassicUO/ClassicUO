@@ -9,28 +9,32 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
 using ClassicUO.Utility.Logging;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Input
 {
-    internal sealed partial class World
+    internal sealed class DenyMoveHandler : IEventListener
     {
-        private void SubscribeDenyMove()
+        private readonly World _world;
+
+        public DenyMoveHandler(World world) => _world = world;
+
+        public void Subscribe()
         {
             EventSink.ItemMoveDenied += OnItemMoveDenied;
         }
 
-        private void UnsubscribeDenyMove()
+        public void Unsubscribe()
         {
             EventSink.ItemMoveDenied -= OnItemMoveDenied;
         }
 
         private void OnItemMoveDenied(ItemMoveDeniedArgs e)
         {
-            if (!InGame)
+            if (!_world.InGame)
             {
                 return;
             }
 
-            Item firstItem = Items.Get(Client.Game.UO.GameCursor.ItemHold.Serial);
+            Item firstItem = _world.Items.Get(Client.Game.UO.GameCursor.ItemHold.Serial);
 
             if (
                 Client.Game.UO.GameCursor.ItemHold.Enabled
@@ -38,9 +42,9 @@ namespace ClassicUO.Game
                     && (firstItem == null || !firstItem.AllowedToDraw)
             )
             {
-                if (ObjectToRemove == Client.Game.UO.GameCursor.ItemHold.Serial)
+                if (_world.ObjectToRemove == Client.Game.UO.GameCursor.ItemHold.Serial)
                 {
-                    ObjectToRemove = 0;
+                    _world.ObjectToRemove = 0;
                 }
 
                 if (
@@ -58,7 +62,7 @@ namespace ClassicUO.Game
                             // Server should send an UpdateContainedItem after this packet.
                             Console.WriteLine("=== DENY === ADD TO CONTAINER");
 
-                            this.AddItemToContainer(
+                            _world.AddItemToContainer(
                                 Client.Game.UO.GameCursor.ItemHold.Serial,
                                 Client.Game.UO.GameCursor.ItemHold.Graphic,
                                 Client.Game.UO.GameCursor.ItemHold.TotalAmount,
@@ -74,7 +78,7 @@ namespace ClassicUO.Game
                         }
                         else
                         {
-                            Item item = this.GetOrCreateItem(
+                            Item item = _world.GetOrCreateItem(
                                 Client.Game.UO.GameCursor.ItemHold.Serial
                             );
 
@@ -88,7 +92,7 @@ namespace ClassicUO.Game
                             item.Z = Client.Game.UO.GameCursor.ItemHold.Z;
                             item.CheckGraphicChange();
 
-                            Entity container = Get(Client.Game.UO.GameCursor.ItemHold.Container);
+                            Entity container = _world.Get(Client.Game.UO.GameCursor.ItemHold.Container);
 
                             if (container != null)
                             {
@@ -96,7 +100,7 @@ namespace ClassicUO.Game
                                 {
                                     Console.WriteLine("=== DENY === ADD TO PAPERDOLL");
 
-                                    this.RemoveItemFromContainer(item);
+                                    _world.RemoveItemFromContainer(item);
                                     container.PushToBack(item);
                                     item.Container = container.Serial;
 
@@ -108,14 +112,14 @@ namespace ClassicUO.Game
                                 {
                                     Console.WriteLine("=== DENY === SOMETHING WRONG");
 
-                                    this.RemoveItem(item, true);
+                                    _world.RemoveItem(item, true);
                                 }
                             }
                             else
                             {
                                 Console.WriteLine("=== DENY === ADD TO TERRAIN");
 
-                                this.RemoveItemFromContainer(item);
+                                _world.RemoveItemFromContainer(item);
 
                                 item.SetInWorldTile(item.X, item.Y, item.Z);
                             }
@@ -145,7 +149,7 @@ namespace ClassicUO.Game
 
             if (e.Code < 5)
             {
-                MessageManager.HandleMessage(
+                _world.MessageManager.HandleMessage(
                     null,
                     ServerErrorMessages.GetError(0x27, e.Code),
                     string.Empty,

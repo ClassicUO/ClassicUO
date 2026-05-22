@@ -3,17 +3,21 @@
 using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Containers
 {
-    internal sealed partial class World
+    internal sealed class ContainerItemsHandler : IEventListener
     {
-        private void SubscribeContainerItems()
+        private readonly World _world;
+
+        public ContainerItemsHandler(World world) => _world = world;
+
+        public void Subscribe()
         {
             EventSink.ContainerItemAdded += OnContainerItemAdded;
             EventSink.ContainerItemsReceived += OnContainerItemsReceived;
         }
 
-        private void UnsubscribeContainerItems()
+        public void Unsubscribe()
         {
             EventSink.ContainerItemAdded -= OnContainerItemAdded;
             EventSink.ContainerItemsReceived -= OnContainerItemsReceived;
@@ -21,15 +25,15 @@ namespace ClassicUO.Game
 
         private void OnContainerItemAdded(ContainerItemAddedArgs e)
         {
-            AddItemToContainer(e.Serial, e.Graphic, e.Amount, e.X, e.Y, e.Hue, e.ContainerSerial);
+            _world.AddItemToContainer(e.Serial, e.Graphic, e.Amount, e.X, e.Y, e.Hue, e.ContainerSerial);
         }
 
         private void OnContainerItemsReceived(ContainerItemsReceivedArgs e)
         {
-            Entity container = Get(e.ContainerSerial);
+            Entity container = _world.Get(e.ContainerSerial);
             if (container == null) return;
 
-            ClearContainerAndRemoveItems(container, container.Graphic == 0x2006);
+            _world.ClearContainerAndRemoveItems(container, container.Graphic == 0x2006);
         }
     }
 }

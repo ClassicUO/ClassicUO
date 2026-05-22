@@ -5,23 +5,27 @@ using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Utility;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Combat
 {
-    internal sealed partial class World
+    internal sealed class DeathDisplayHandler : IEventListener
     {
-        private void SubscribeDeathDisplay()
+        private readonly World _world;
+
+        public DeathDisplayHandler(World world) => _world = world;
+
+        public void Subscribe()
         {
             EventSink.MobileDeath += OnMobileDeath;
         }
 
-        private void UnsubscribeDeathDisplay()
+        public void Unsubscribe()
         {
             EventSink.MobileDeath -= OnMobileDeath;
         }
 
         private void OnMobileDeath(MobileDeathArgs e)
         {
-            if (!InGame)
+            if (!_world.InGame)
             {
                 return;
             }
@@ -30,16 +34,16 @@ namespace ClassicUO.Game
             uint corpseSerial = e.CorpseSerial;
             bool running = e.IsRunning;
 
-            Mobile owner = Mobiles.Get(serial);
+            Mobile owner = _world.Mobiles.Get(serial);
 
-            if (owner == null || serial == Player)
+            if (owner == null || serial == _world.Player)
             {
                 return;
             }
 
             serial |= 0x80000000;
 
-            if (Mobiles.Remove(owner.Serial))
+            if (_world.Mobiles.Remove(owner.Serial))
             {
                 for (LinkedObject i = owner.Items; i != null; i = i.Next)
                 {
@@ -47,13 +51,13 @@ namespace ClassicUO.Game
                     it.Container = serial;
                 }
 
-                Mobiles[serial] = owner;
+                _world.Mobiles[serial] = owner;
                 owner.Serial = serial;
             }
 
             if (SerialHelper.IsValid(corpseSerial))
             {
-                CorpseManager.Add(corpseSerial, serial, owner.Direction, running);
+                _world.CorpseManager.Add(corpseSerial, serial, owner.Direction, running);
             }
 
             var animations = Client.Game.UO.Animations;
@@ -73,7 +77,7 @@ namespace ClassicUO.Game
 
             if (ProfileManager.CurrentProfile.AutoOpenCorpses)
             {
-                Player.TryOpenCorpses();
+                _world.Player.TryOpenCorpses();
             }
         }
     }
