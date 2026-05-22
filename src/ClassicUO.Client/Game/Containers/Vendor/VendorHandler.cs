@@ -29,6 +29,7 @@ namespace ClassicUO.Game.Containers.Vendor
             EventSink.TradeWindowClosed += OnTradeWindowClosed;
             EventSink.TradeWindowAcceptUpdated += OnTradeWindowAcceptUpdated;
             EventSink.TradeWindowCurrencyUpdated += OnTradeWindowCurrencyUpdated;
+            EventSink.VendorWindowClosed += OnVendorWindowClosed;
         }
 
         public void Unsubscribe()
@@ -39,6 +40,12 @@ namespace ClassicUO.Game.Containers.Vendor
             EventSink.TradeWindowClosed -= OnTradeWindowClosed;
             EventSink.TradeWindowAcceptUpdated -= OnTradeWindowAcceptUpdated;
             EventSink.TradeWindowCurrencyUpdated -= OnTradeWindowCurrencyUpdated;
+            EventSink.VendorWindowClosed -= OnVendorWindowClosed;
+        }
+
+        private void OnVendorWindowClosed(VendorWindowClosedArgs e)
+        {
+            UIManager.GetGump<ShopGump>(e.VendorSerial)?.Dispose();
         }
 
         private void OnShopBuyListReceived(ShopBuyListReceivedArgs e)

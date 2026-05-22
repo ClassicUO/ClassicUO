@@ -96,6 +96,13 @@ namespace ClassicUO.Game
             RegisterListener(new global::ClassicUO.Game.Entities.ObjectDeletedHandler(this));
             RegisterListener(new global::ClassicUO.Game.Entities.Items.ItemDragHandler(this));
 
+            // R4.6 (F-4): UI-side handlers
+            RegisterListener(new global::ClassicUO.Game.UI.Gumps.TipWindowHandler(this));
+            RegisterListener(new global::ClassicUO.Game.Input.OpenUrlHandler(this));
+            RegisterListener(new global::ClassicUO.Game.UI.Gumps.CharacterProfileHandler(this));
+            RegisterListener(new global::ClassicUO.Game.UI.Gumps.TextEntryDialogHandler(this));
+            RegisterListener(new global::ClassicUO.Game.UI.Gumps.DyeDataHandler(this));
+
             SubscribeEvents();
         }
 
