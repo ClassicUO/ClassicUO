@@ -1,23 +1,41 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System.Collections.Generic;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Opl;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
 using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.Managers
 {
-    internal sealed class ObjectPropertiesListManager
+    /// <summary>
+    /// Facade over the OPL cache collaborator: keeps the existing public
+    /// surface (<c>_world.OPL.X</c>) and owns the EventSink subscriptions.
+    /// Per-serial Name / Properties / Revision / NameCliloc storage lives
+    /// in a dedicated cohesive class under <see cref="Game.Opl"/>.
+    /// </summary>
+    internal sealed class ObjectPropertiesListManager : IEventListener
     {
-        private readonly Dictionary<uint, ItemProperty> _itemsProperties = new Dictionary<uint, ItemProperty>();
+        private readonly IOplCache _cache;
         private readonly World _world;
 
+        /// <summary>Production composition root. Defaults to the concrete cache.</summary>
         public ObjectPropertiesListManager(World world)
+            : this(world, new OplCache())
+        {
+        }
+
+        /// <summary>Test / extension seam — inject a fake cache.</summary>
+        internal ObjectPropertiesListManager(World world, IOplCache cache)
         {
             _world = world;
+            _cache = cache;
+        }
+
+        public void Subscribe()
+        {
             EventSink.OplInfoReceived += OnOplInfoReceived;
             EventSink.MegaClilocReceived += OnMegaClilocReceived;
         }
@@ -28,6 +46,36 @@ namespace ClassicUO.Game.Managers
             EventSink.MegaClilocReceived -= OnMegaClilocReceived;
         }
 
+        // ---- Cache facade ----
+        public bool IsRevisionEquals(uint serial, uint revision) => _cache.IsRevisionEquals(serial, revision);
+        public bool TryGetRevision(uint serial, out uint revision) => _cache.TryGetRevision(serial, out revision);
+        public bool TryGetNameAndData(uint serial, out string name, out string data) => _cache.TryGetNameAndData(serial, out name, out data);
+        public int GetNameCliloc(uint serial) => _cache.GetNameCliloc(serial);
+        public void Add(uint serial, uint revision, string name, string data, int namecliloc) => _cache.Set(serial, revision, name, data, namecliloc);
+        public void Remove(uint serial) => _cache.Remove(serial);
+        public void Clear() => _cache.Clear();
+
+        /// <summary>
+        /// Cache miss requests an OPL fetch from the server. Original
+        /// behaviour: callers (e.g. GameCursor hover) used <c>Contains</c> as
+        /// both a presence check and an implicit request trigger.
+        /// </summary>
+        public bool Contains(uint serial)
+        {
+            if (_cache.Contains(serial))
+            {
+                return true; // revision == 0 can still contain the name.
+            }
+
+            // if we don't have the OPL of this item, let's request it to the server.
+            // Original client seems asking for OPL when character is not running.
+            // We'll ask OPL when mouse is over an object.
+            PacketHandlers.AddMegaClilocRequest(serial);
+
+            return false;
+        }
+
+        // ---- Event handlers ----
         private void OnOplInfoReceived(OplInfoReceivedArgs e)
         {
             if (!_world.ClientFeatures.TooltipsEnabled)
@@ -35,7 +83,7 @@ namespace ClassicUO.Game.Managers
                 return;
             }
 
-            if (!IsRevisionEquals(e.Serial, e.Revision))
+            if (!_cache.IsRevisionEquals(e.Serial, e.Revision))
             {
                 PacketHandlers.AddMegaClilocRequest(e.Serial);
             }
@@ -86,107 +134,12 @@ namespace ClassicUO.Game.Managers
                     || container.Layer == Layer.ShopSell;
             }
 
-            Add(serial, e.Revision, e.Name, e.Properties, e.NameCliloc);
+            _cache.Set(serial, e.Revision, e.Name, e.Properties, e.NameCliloc);
 
             if (inBuyList && container != null && SerialHelper.IsValid(container.Serial))
             {
                 UIManager.GetGump<ShopGump>(container.RootContainer)?.SetNameTo((Item)entity, e.Name);
             }
-        }
-
-        public void Add(uint serial, uint revision, string name, string data, int namecliloc)
-        {
-            if (!_itemsProperties.TryGetValue(serial, out ItemProperty prop))
-            {
-                prop = new ItemProperty();
-                _itemsProperties[serial] = prop;
-            }
-            else
-            {
-
-            }
-
-            prop.Serial = serial;
-            prop.Revision = revision;
-            prop.Name = name;
-            prop.Data = data;
-            prop.NameCliloc = namecliloc;
-        }
-
-
-        public bool Contains(uint serial)
-        {
-            if (_itemsProperties.TryGetValue(serial, out ItemProperty p))
-            {
-                return true; //p.Revision != 0;  <-- revision == 0 can contain the name.
-            }
-
-            // if we don't have the OPL of this item, let's request it to the server.
-            // Original client seems asking for OPL when character is not running.
-            // We'll ask OPL when mouse is over an object.
-            PacketHandlers.AddMegaClilocRequest(serial);
-
-            return false;
-        }
-
-        public bool IsRevisionEquals(uint serial, uint revision)
-        {
-            if (_itemsProperties.TryGetValue(serial, out ItemProperty prop))
-            {
-                return (revision & ~0x40000000) == prop.Revision || // remove the mask
-                       revision == prop.Revision;                   // if mask removing didn't work, try a simple compare.
-            }
-
-            return false;
-        }
-
-        public bool TryGetRevision(uint serial, out uint revision)
-        {
-            if (_itemsProperties.TryGetValue(serial, out ItemProperty p))
-            {
-                revision = p.Revision;
-
-                return true;
-            }
-
-            revision = 0;
-
-            return false;
-        }
-
-        public bool TryGetNameAndData(uint serial, out string name, out string data)
-        {
-            if (_itemsProperties.TryGetValue(serial, out ItemProperty p))
-            {
-                name = p.Name;
-                data = p.Data;
-
-                return true;
-            }
-
-            name = data = null;
-
-            return false;
-        }
-
-        public int GetNameCliloc(uint serial)
-        {
-            if (_itemsProperties.TryGetValue(serial, out ItemProperty p))
-            {
-                return p.NameCliloc;
-            }
-
-            return 0;
-        }
-
-        public void Remove(uint serial)
-        {
-            _itemsProperties.Remove(serial);
-        }
-
-        public void Clear()
-        {
-            _itemsProperties.Clear();
         }
     }
 

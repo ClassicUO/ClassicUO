@@ -48,7 +48,7 @@ namespace ClassicUO.Game
             CommandManager = new CommandManager(this);
             Weather = new Weather(this);
             InfoBars = new InfoBarManager(this);
-            OPL = new ObjectPropertiesListManager(this);
+            OPL = RegisterListener(new ObjectPropertiesListManager(this));
 
             SubscribeEvents();
         }
