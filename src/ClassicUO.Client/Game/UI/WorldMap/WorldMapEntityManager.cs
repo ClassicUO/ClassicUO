@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: BSD-2-Clause
 
 using System.Collections.Generic;
 using ClassicUO.Configuration;
@@ -42,14 +42,40 @@ namespace ClassicUO.Game.UI.WorldMap
         //}
     }
 
+    /// <summary>
+    /// Facade over the two world-map collaborators: keeps the existing
+    /// public surface (<c>_world.WMapManager.X</c>) and owns gating /
+    /// network-request state. Per-serial storage lives in
+    /// <see cref="IWorldMapEntityStore"/>; TTL pruning lives in
+    /// <see cref="IWorldMapStalenessFilter"/>.
+    /// </summary>
     internal sealed class WorldMapEntityManager
     {
         private bool _ackReceived;
-        private uint _lastUpdate, _lastPacketSend, _lastPacketRecv;
-        private readonly List<WMapEntity> _toRemove = new List<WMapEntity>();
+        private uint _lastPacketSend, _lastPacketRecv;
         private readonly World _world;
+        private readonly IWorldMapEntityStore _store;
+        private readonly IWorldMapStalenessFilter _staleness;
 
-        public WorldMapEntityManager(World world) { _world = world; }
+        /// <summary>Production composition root. Defaults to concrete collaborators.</summary>
+        public WorldMapEntityManager(World world)
+            : this(world, new WorldMapEntityStore())
+        {
+        }
+
+        /// <summary>Test / extension seam — inject a fake store. Filter is derived.</summary>
+        internal WorldMapEntityManager(World world, IWorldMapEntityStore store)
+            : this(world, store, new WorldMapStalenessFilter(store))
+        {
+        }
+
+        /// <summary>Full DI seam — inject all collaborators.</summary>
+        internal WorldMapEntityManager(World world, IWorldMapEntityStore store, IWorldMapStalenessFilter staleness)
+        {
+            _world = world;
+            _store = store;
+            _staleness = staleness;
+        }
 
         public bool Enabled
         {
@@ -62,7 +88,11 @@ namespace ClassicUO.Game.UI.WorldMap
             }
         }
 
-        public readonly Dictionary<uint, WMapEntity> Entities = new Dictionary<uint, WMapEntity>();
+        /// <summary>
+        /// Legacy public surface: callers (e.g. <c>WorldMapGump</c>) iterate
+        /// <c>WMapManager.Entities.Values</c> directly. Backed by the store.
+        /// </summary>
+        public Dictionary<uint, WMapEntity> Entities => _store.Entities;
 
         public void SetACKReceived()
         {
@@ -124,76 +154,16 @@ namespace ClassicUO.Game.UI.WorldMap
                 }
             }
 
-            if (!Entities.TryGetValue(serial, out WMapEntity entity) || entity == null)
-            {
-                entity = new WMapEntity(serial)
-                {
-                    X = x, Y = y, HP = hp, Map = map,
-                    LastUpdate = Time.Ticks + 1000,
-                    IsGuild = isguild,
-                    Name = name
-                };
-
-                Entities[serial] = entity;
-            }
-            else
-            {
-                entity.X = x;
-                entity.Y = y;
-                entity.HP = hp;
-                entity.Map = map;
-                entity.IsGuild = isguild;
-                entity.LastUpdate = Time.Ticks + 1000;
-
-                if (string.IsNullOrEmpty(entity.Name) && !string.IsNullOrEmpty(name))
-                {
-                    entity.Name = name;
-                }
-            }
+            _store.AddOrUpdate(serial, x, y, hp, map, isguild, name);
         }
 
-        public void Remove(uint serial)
-        {
-            if (Entities.ContainsKey(serial))
-            {
-                Entities.Remove(serial);
-            }
-        }
+        public void Remove(uint serial) => _store.Remove(serial);
 
-        public void RemoveUnupdatedWEntity()
-        {
-            if (_lastUpdate > Time.Ticks)
-            {
-                return;
-            }
-
-            _lastUpdate = Time.Ticks + 1000;
-
-            long ticks = Time.Ticks - 1000;
-
-            foreach (WMapEntity entity in Entities.Values)
-            {
-                if (entity.LastUpdate < ticks)
-                {
-                    _toRemove.Add(entity);
-                }
-            }
-
-            if (_toRemove.Count != 0)
-            {
-                foreach (WMapEntity entity in _toRemove)
-                {
-                    Entities.Remove(entity.Serial);
-                }
-
-                _toRemove.Clear();
-            }
-        }
+        public void RemoveUnupdatedWEntity() => _staleness.Prune();
 
         public WMapEntity GetEntity(uint serial)
         {
-            Entities.TryGetValue(serial, out WMapEntity entity);
-
+            _store.TryGet(serial, out WMapEntity entity);
             return entity;
         }
 
@@ -239,7 +209,7 @@ namespace ClassicUO.Game.UI.WorldMap
 
         public void Clear()
         {
-            Entities.Clear();
+            _store.Clear();
             _ackReceived = false;
             SetEnable(false);
         }
