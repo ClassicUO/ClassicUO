@@ -1,8 +1,8 @@
 # EventSink Refactor Status
 
-Branch: `refactor/eventsink-phase0` (36 commits ahead of `main`)
+Branch: `refactor/eventsink-phase0` (38 commits ahead of `main`)
 Build: green (0 errors)
-Tests: 190/190 pass
+Tests: 202/202 pass
 `PacketHandlers.cs`: ~4830 lines (down from ~7200 at start of refactor)
 
 LoginScene lifecycle reviewed: `SetScene` calls `oldScene.Dispose()` (which
@@ -224,9 +224,13 @@ All event args are now fully typed — no remaining `byte[]` payloads.
 ### Architecture cleanup
 - Many sibling `World.Subscribers.*.cs` partials. Could group them under a
   `World.Subscribers/` subfolder or split `World` further. Cosmetic.
-- `EventSink` clears `event` fields in `ClearAll()` but doesn't enforce
-  unsubscribe on production code. Audit for handler leaks across
-  `LoginScene`/`World` lifecycles.
+- Subscriber leak audit complete: World + every manager are singletons
+  created once in `Client.cs:95` and never torn down — static events pin
+  singletons to themselves, no GC leak. Every manager `Unsubscribe()`
+  method is dead code (no caller), kept as documentation of subscription
+  pairs. `LoginScene` is the only object with a real lifecycle, and its
+  Load/Unload pair was already verified. `Weather.Unsubscribe()` added for
+  symmetry with sibling managers.
 - Many `World.Subscribers.*.cs` files contain logic that touches
   `Client.Game.UO.*` directly (e.g. `Animations`, `FileManager`). Long term:
   inject those services via constructor rather than reaching for globals.
@@ -251,10 +255,17 @@ All event args are now fully typed — no remaining `byte[]` payloads.
   introduce `OutgoingEventSink` or similar.
 
 ### Testing
-- Only `EventSinkTests` added. Each typed event arg + each subscriber should
-  have a unit test (golden-byte tests for the parsing side, behavioral tests
-  for the subscriber side). Currently relying on existing 190 tests + manual
-  validation that build is green.
+- `EventSinkTests` covers subscribe/raise/exception isolation.
+- `PacketHandlersTests` golden-byte tests cover the handler-side parse for
+  0x73 Ping, 0x6D PlayMusic (short / stop sentinel / long form), 0xFD
+  LoginDelay, 0x82 LoginRejected, 0xA8 ServerListReceived, 0xBF 0x06 Party
+  (codes 0x01 / 0x02 / 0x03 / 0x07), 0xBF 0x18 MapPatchesEnabled.
+  `PacketHandlers.AnalyzePacket` was promoted from `private` to `internal`
+  so tests can dispatch raw packet bytes through the production handler
+  table.
+- Still missing: subscriber-side behavioral tests (e.g. assert
+  `PartyManager` mutates roster correctly when `PartyListUpdated` fires),
+  and coverage for the remaining ~85 packet handlers.
 
 ## Notes / lessons
 
