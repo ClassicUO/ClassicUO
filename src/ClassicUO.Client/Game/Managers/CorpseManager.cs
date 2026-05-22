@@ -7,7 +7,7 @@ using ClassicUO.Utility.Collections;
 
 namespace ClassicUO.Game.Managers
 {
-    internal sealed class CorpseManager
+    internal sealed class CorpseManager : IEventListener
     {
         private readonly Deque<CorpseInfo> _corpses = new Deque<CorpseInfo>();
         private readonly World _world;
@@ -15,6 +15,10 @@ namespace ClassicUO.Game.Managers
         public CorpseManager(World world)
         {
             _world = world;
+        }
+
+        public void Subscribe()
+        {
             EventSink.CorpseEquipmentReceived += OnCorpseEquipmentReceived;
         }
 

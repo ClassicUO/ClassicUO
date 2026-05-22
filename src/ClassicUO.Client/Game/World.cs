@@ -28,7 +28,7 @@ namespace ClassicUO.Game
         public World()
         {
             WMapManager = new WorldMapEntityManager(this);
-            CorpseManager = new CorpseManager(this);
+            CorpseManager = RegisterListener(new CorpseManager(this));
             Party = RegisterListener(new PartyManager(this));
             HouseManager = RegisterListener(new HouseManager(this));
             WorldTextManager = RegisterListener(new WorldTextManager(this));
