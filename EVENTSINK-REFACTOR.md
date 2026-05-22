@@ -1,8 +1,8 @@
 # EventSink Refactor Status
 
-Branch: `refactor/eventsink-phase0` (38 commits ahead of `main`)
+Branch: `refactor/eventsink-phase0` (41 commits ahead of `main`)
 Build: green (0 errors)
-Tests: 202/202 pass
+Tests: 246/246 pass
 `PacketHandlers.cs`: ~4830 lines (down from ~7200 at start of refactor)
 
 LoginScene lifecycle reviewed: `SetScene` calls `oldScene.Dispose()` (which
@@ -263,9 +263,22 @@ All event args are now fully typed — no remaining `byte[]` payloads.
   `PacketHandlers.AnalyzePacket` was promoted from `private` to `internal`
   so tests can dispatch raw packet bytes through the production handler
   table.
-- Still missing: subscriber-side behavioral tests (e.g. assert
-  `PartyManager` mutates roster correctly when `PartyListUpdated` fires),
-  and coverage for the remaining ~85 packet handlers.
+- `tests/.../Game/Subscribers/*Tests.cs` — subscriber-side behavioural
+  tests for `AudioManager`, `TargetManager`, `MessageManager`, `ChatManager`,
+  `PartyManager`, `ObjectPropertiesListManager`, `CorpseManager`. 44
+  tests across 7 files, produced in parallel by three worktree agents.
+  Test fixtures `EventSink.ClearAll()` after constructing `World` to
+  isolate test subscribers, and re-instantiate the manager under test so
+  its ctor re-subscribes. Parallelization is disabled assembly-wide via
+  `tests/.../AssemblyInfo.cs` because `EventSink`'s static state cannot
+  tolerate concurrent test classes.
+- Skipped subscriber paths (per-agent reports): anything routing through
+  `MessageManager.HandleMessage` → `ProfileManager.CurrentProfile` /
+  `FileManager.Clilocs` / `FileManager.Fonts`; anything requiring
+  `Client.Game.UO.Sounds` for audio playback; anything that dereferences
+  `NetClient.Socket.PacketsTable` (null in tests).
+- Still missing: coverage for the remaining ~85 packet handlers, and for
+  the World partial subscribers (HitpointsUpdated, ManaUpdated, etc).
 
 ## Notes / lessons
 
