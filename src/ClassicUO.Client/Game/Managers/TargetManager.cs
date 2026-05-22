@@ -1,9 +1,10 @@
-﻿// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Targeting;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Assets;
@@ -101,17 +102,45 @@ namespace ClassicUO.Game.Managers
         }
     }
 
-    internal sealed class TargetManager
+    /// <summary>
+    /// Facade over the three Targeting collaborators: keeps the existing public
+    /// surface (<c>_world.TargetManager.X</c>) and owns the EventSink
+    /// subscriptions. Cursor state, attack tracking and multi-placement
+    /// translation live in dedicated cohesive classes under
+    /// <see cref="Game.Targeting"/>.
+    /// </summary>
+    internal sealed class TargetManager : IEventListener
     {
-        private uint _targetCursorId;
         private readonly World _world;
+        private readonly ITargetCursorState _cursor;
+        private readonly IAttackTargetTracker _attack;
+        private readonly IMultiPlacementCoordinator _multi;
         private readonly byte[] _lastDataBuffer = new byte[19];
-        private Action<GameObject> _targetCallback;
 
 
+        /// <summary>Production composition root. Defaults to concrete collaborators.</summary>
         public TargetManager(World world)
+            : this(world, new TargetCursorState(world), new AttackTargetTracker(world))
+        {
+        }
+
+        /// <summary>Test / extension seam — inject cursor + attack collaborators.</summary>
+        internal TargetManager(World world, ITargetCursorState cursor, IAttackTargetTracker attack)
+            : this(world, cursor, attack, new MultiPlacementCoordinator(cursor))
+        {
+        }
+
+        /// <summary>Full DI seam — inject all three collaborators.</summary>
+        internal TargetManager(World world, ITargetCursorState cursor, IAttackTargetTracker attack, IMultiPlacementCoordinator multi)
         {
             _world = world;
+            _cursor = cursor;
+            _attack = attack;
+            _multi = multi;
+        }
+
+        public void Subscribe()
+        {
             EventSink.TargetCursorReceived += OnTargetCursorReceived;
             EventSink.AttackTargetChanged += OnAttackTargetChanged;
             EventSink.MultiPlacementReceived += OnMultiPlacementReceived;
@@ -124,106 +153,45 @@ namespace ClassicUO.Game.Managers
             EventSink.MultiPlacementReceived -= OnMultiPlacementReceived;
         }
 
-        private void OnMultiPlacementReceived(MultiPlacementReceivedArgs e)
+        // ---- Event handlers (delegate to collaborators) ----
+
+        private void OnTargetCursorReceived(TargetCursorReceivedArgs e) => _cursor.OnTargetCursorReceived(e);
+        private void OnAttackTargetChanged(AttackTargetChangedArgs e) => _attack.OnAttackTargetChanged(e);
+        private void OnMultiPlacementReceived(MultiPlacementReceivedArgs e) => _multi.OnMultiPlacementReceived(e);
+
+        // ---- Attack tracker facade ----
+        public uint LastAttack
         {
-            SetTargetingMulti(e.TargetId, e.MultiId, e.OffsetX, e.OffsetY, e.OffsetZ, e.Hue);
+            get => _attack.LastAttack;
+            set => _attack.LastAttack = value;
         }
 
-        private void OnTargetCursorReceived(TargetCursorReceivedArgs e)
-        {
-            SetTargeting((CursorTarget)e.CursorType, e.TargetId, (TargetType)e.TargetType);
+        // ---- Cursor state facade ----
+        public CursorTarget TargetingState => _cursor.TargetingState;
+        public TargetType TargetingType => _cursor.TargetingType;
+        public bool IsTargeting => _cursor.IsTargeting;
+        public MultiTargetInfo MultiTargetInfo => _cursor.MultiTargetInfo;
 
-            if (_world.Party.PartyHealTimer < Time.Ticks && _world.Party.PartyHealTarget != 0)
-            {
-                Target(_world.Party.PartyHealTarget);
-                _world.Party.PartyHealTimer = 0;
-                _world.Party.PartyHealTarget = 0;
-            }
-        }
-
-        private void OnAttackTargetChanged(AttackTargetChangedArgs e)
-        {
-            GameActions.SendCloseStatus(_world, LastAttack);
-            LastAttack = e.Serial;
-            GameActions.RequestMobileStatus(_world, e.Serial);
-        }
-
-        public uint LastAttack, SelectedTarget, NewTargetSystemSerial;
+        public uint SelectedTarget, NewTargetSystemSerial;
 
         public readonly LastTargetInfo LastTargetInfo = new LastTargetInfo();
 
 
-        public MultiTargetInfo MultiTargetInfo { get; private set; }
-
-        public CursorTarget TargetingState { get; private set; } = CursorTarget.Invalid;
-
-        public bool IsTargeting { get; private set; }
-
-        public TargetType TargetingType { get; private set; }
-
-        private void ClearTargetingWithoutTargetCancelPacket()
-        {
-            if (TargetingState == CursorTarget.MultiPlacement)
-            {
-                MultiTargetInfo = null;
-                TargetingState = 0;
-                _world.HouseManager.Remove(0);
-            }
-
-            IsTargeting = false;
-        }
-
-        public void Reset()
-        {
-            ClearTargetingWithoutTargetCancelPacket();
-
-            _targetCallback = null;
-
-            TargetingState = 0;
-            _targetCursorId = 0;
-            MultiTargetInfo = null;
-            TargetingType = 0;
-        }
+        public void Reset() => _cursor.ResetAll();
 
         public void SetTargeting(Action<GameObject> callback, uint cursorID, TargetType cursorType)
-        {
-            SetTargeting(CursorTarget.CallbackTarget, cursorID, cursorType);
-
-            _targetCallback = callback;
-        }
+            => _cursor.SetTargeting(callback, cursorID, cursorType);
 
         public void SetTargeting(CursorTarget targeting, uint cursorID, TargetType cursorType)
-        {
-            if (targeting == CursorTarget.Invalid)
-            {
-                return;
-            }
+            => _cursor.SetTargeting(targeting, cursorID, cursorType);
 
-            bool lastTargetting = IsTargeting;
-            IsTargeting = cursorType < TargetType.Cancel;
-            TargetingState = targeting;
-            TargetingType = cursorType;
-
-            if (IsTargeting)
-            {
-                //UIManager.RemoveTargetLineGump(LastTarget);
-            }
-            else if (lastTargetting)
-            {
-                CancelTarget();
-            }
-
-            // https://github.com/andreakarasho/ClassicUO/issues/1373
-            // when receiving a cancellation target from the server we need
-            // to send the last active cursorID, so update cursor data later
-
-            _targetCursorId = cursorID;
-        }
+        public void SetTargetingMulti(uint deedSerial, ushort model, ushort x, ushort y, ushort z, ushort hue)
+            => _cursor.SetTargetingMulti(deedSerial, model, x, y, z, hue);
 
 
         public void CancelTarget()
         {
-            if (TargetingState == CursorTarget.MultiPlacement)
+            if (_cursor.TargetingState == CursorTarget.MultiPlacement)
             {
                 _world.HouseManager.Remove(0);
 
@@ -238,46 +206,23 @@ namespace ClassicUO.Game.Managers
                 }
             }
 
-            if (TargetingState == CursorTarget.CallbackTarget)
+            if (_cursor.TargetingState == CursorTarget.CallbackTarget)
             {
-                _targetCallback?.Invoke(null);
+                _cursor.TargetCallback?.Invoke(null);
             }
 
-            if (IsTargeting || TargetingType == TargetType.Cancel)
+            if (_cursor.IsTargeting || _cursor.TargetingType == TargetType.Cancel)
             {
-                NetClient.Socket.Send_TargetCancel(TargetingState, _targetCursorId, (byte)TargetingType);
-                IsTargeting = false;
+                NetClient.Socket.Send_TargetCancel(_cursor.TargetingState, _cursor.TargetCursorId, (byte)_cursor.TargetingType);
+                _cursor.IsTargeting = false;
             }
 
             Reset();
         }
 
-        public void SetTargetingMulti
-        (
-            uint deedSerial,
-            ushort model,
-            ushort x,
-            ushort y,
-            ushort z,
-            ushort hue
-        )
-        {
-            SetTargeting(CursorTarget.MultiPlacement, deedSerial, TargetType.Neutral);
-
-            //if (model != 0)
-            MultiTargetInfo = new MultiTargetInfo
-            (
-                model,
-                x,
-                y,
-                z,
-                hue
-            );
-        }
-
         public void Target(uint serial)
         {
-            if (!IsTargeting)
+            if (!_cursor.IsTargeting)
             {
                 return;
             }
@@ -286,7 +231,7 @@ namespace ClassicUO.Game.Managers
 
             if (entity != null)
             {
-                switch (TargetingState)
+                switch (_cursor.TargetingState)
                 {
                     case CursorTarget.Invalid: return;
 
@@ -309,11 +254,11 @@ namespace ClassicUO.Game.Managers
                             {
                                 bool showCriminalQuery = false;
 
-                                if (TargetingType == TargetType.Harmful && ProfileManager.CurrentProfile.EnabledCriminalActionQuery && mobile.NotorietyFlag == NotorietyFlag.Innocent)
+                                if (_cursor.TargetingType == TargetType.Harmful && ProfileManager.CurrentProfile.EnabledCriminalActionQuery && mobile.NotorietyFlag == NotorietyFlag.Innocent)
                                 {
                                     showCriminalQuery = true;
                                 }
-                                else if (TargetingType == TargetType.Beneficial && ProfileManager.CurrentProfile.EnabledBeneficialCriminalActionQuery && (mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Murderer || mobile.NotorietyFlag == NotorietyFlag.Gray))
+                                else if (_cursor.TargetingType == TargetType.Beneficial && ProfileManager.CurrentProfile.EnabledBeneficialCriminalActionQuery && (mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Murderer || mobile.NotorietyFlag == NotorietyFlag.Gray))
                                 {
                                     showCriminalQuery = true;
                                 }
@@ -333,10 +278,10 @@ namespace ClassicUO.Game.Managers
                                                                                    entity.X,
                                                                                    entity.Y,
                                                                                    entity.Z,
-                                                                                   _targetCursorId,
-                                                                                   (byte)TargetingType);
+                                                                                   _cursor.TargetCursorId,
+                                                                                   (byte)_cursor.TargetingType);
 
-                                                ClearTargetingWithoutTargetCancelPacket();
+                                                _cursor.ClearTargetingWithoutTargetCancelPacket();
 
                                                 if (LastTargetInfo.Serial != serial)
                                                 {
@@ -353,18 +298,18 @@ namespace ClassicUO.Game.Managers
                             }
                         }
 
-                        if (TargetingState != CursorTarget.SetTargetClientSide)
+                        if (_cursor.TargetingState != CursorTarget.SetTargetClientSide)
                         {
                             _lastDataBuffer[0] = 0x6C;
 
                             _lastDataBuffer[1] = 0x00;
 
-                            _lastDataBuffer[2] = (byte)(_targetCursorId >> 24);
-                            _lastDataBuffer[3] = (byte)(_targetCursorId >> 16);
-                            _lastDataBuffer[4] = (byte)(_targetCursorId >> 8);
-                            _lastDataBuffer[5] = (byte)_targetCursorId;
+                            _lastDataBuffer[2] = (byte)(_cursor.TargetCursorId >> 24);
+                            _lastDataBuffer[3] = (byte)(_cursor.TargetCursorId >> 16);
+                            _lastDataBuffer[4] = (byte)(_cursor.TargetCursorId >> 8);
+                            _lastDataBuffer[5] = (byte)_cursor.TargetCursorId;
 
-                            _lastDataBuffer[6] = (byte) TargetingType;
+                            _lastDataBuffer[6] = (byte) _cursor.TargetingType;
 
                             _lastDataBuffer[7] = (byte)(entity.Serial >> 24);
                             _lastDataBuffer[8] = (byte)(entity.Serial >> 16);
@@ -389,8 +334,8 @@ namespace ClassicUO.Game.Managers
                                                                entity.X,
                                                                entity.Y,
                                                                entity.Z,
-                                                               _targetCursorId,
-                                                               (byte)TargetingType);
+                                                               _cursor.TargetCursorId,
+                                                               (byte)_cursor.TargetingType);
 
                             if (SerialHelper.IsMobile(serial) && LastTargetInfo.Serial != serial)
                             {
@@ -398,7 +343,7 @@ namespace ClassicUO.Game.Managers
                             }
                         }
 
-                        ClearTargetingWithoutTargetCancelPacket();
+                        _cursor.ClearTargetingWithoutTargetCancelPacket();
 
                         Mouse.CancelDoubleClick = true;
 
@@ -411,7 +356,7 @@ namespace ClassicUO.Game.Managers
                             GameActions.GrabItem(_world, serial, ((Item) entity).Amount);
                         }
 
-                        ClearTargetingWithoutTargetCancelPacket();
+                        _cursor.ClearTargetingWithoutTargetCancelPacket();
 
                         return;
 
@@ -423,7 +368,7 @@ namespace ClassicUO.Game.Managers
                             GameActions.Print(_world, string.Format(ResGeneral.GrabBagSet0, serial));
                         }
 
-                        ClearTargetingWithoutTargetCancelPacket();
+                        _cursor.ClearTargetingWithoutTargetCancelPacket();
 
                         return;
                     case CursorTarget.IgnorePlayerTarget:
@@ -434,9 +379,9 @@ namespace ClassicUO.Game.Managers
                         CancelTarget();
                         return;
                     case CursorTarget.CallbackTarget:
-                        _targetCallback?.Invoke(entity);
+                        _cursor.TargetCallback?.Invoke(entity);
 
-                        ClearTargetingWithoutTargetCancelPacket();
+                        _cursor.ClearTargetingWithoutTargetCancelPacket();
                         return;
                 }
             }
@@ -444,12 +389,12 @@ namespace ClassicUO.Game.Managers
 
         public void Target(ushort graphic, ushort x, ushort y, short z, bool wet = false)
         {
-            if (!IsTargeting)
+            if (!_cursor.IsTargeting)
             {
                 return;
             }
 
-            switch (TargetingState)
+            switch (_cursor.TargetingState)
             {
                 case CursorTarget.CallbackTarget:
                     GameObject candidate = _world.Map.GetTile(x, y);
@@ -458,19 +403,19 @@ namespace ClassicUO.Game.Managers
                     {
                         if (candidate.Graphic == graphic && candidate.Z == z)
                         {
-                            _targetCallback?.Invoke(candidate);
+                            _cursor.TargetCallback?.Invoke(candidate);
                             break;
                         }
                         candidate = candidate.TNext;
                     }
 
-                    ClearTargetingWithoutTargetCancelPacket();
+                    _cursor.ClearTargetingWithoutTargetCancelPacket();
                     return;
             }
 
             if (graphic == 0)
             {
-                if (TargetingState == CursorTarget.Object)
+                if (_cursor.TargetingState == CursorTarget.Object)
                 {
                     return;
                 }
@@ -498,32 +443,32 @@ namespace ClassicUO.Game.Managers
         public void SendMultiTarget(ushort x, ushort y, sbyte z)
         {
             TargetPacket(0, x, y, z);
-            MultiTargetInfo = null;
+            _cursor.ClearMultiTargetInfo();
         }
 
         public void TargetLast()
         {
-            if (!IsTargeting)
+            if (!_cursor.IsTargeting)
             {
                 return;
             }
 
             _lastDataBuffer[0] = 0x6C;
-            _lastDataBuffer[1] = (byte) TargetingState;
-            _lastDataBuffer[2] = (byte) (_targetCursorId >> 24);
-            _lastDataBuffer[3] = (byte) (_targetCursorId >> 16);
-            _lastDataBuffer[4] = (byte) (_targetCursorId >> 8);
-            _lastDataBuffer[5] = (byte) _targetCursorId;
-            _lastDataBuffer[6] = (byte) TargetingType;
+            _lastDataBuffer[1] = (byte) _cursor.TargetingState;
+            _lastDataBuffer[2] = (byte) (_cursor.TargetCursorId >> 24);
+            _lastDataBuffer[3] = (byte) (_cursor.TargetCursorId >> 16);
+            _lastDataBuffer[4] = (byte) (_cursor.TargetCursorId >> 8);
+            _lastDataBuffer[5] = (byte) _cursor.TargetCursorId;
+            _lastDataBuffer[6] = (byte) _cursor.TargetingType;
 
             NetClient.Socket.Send(_lastDataBuffer);
             Mouse.CancelDoubleClick = true;
-            ClearTargetingWithoutTargetCancelPacket();
+            _cursor.ClearTargetingWithoutTargetCancelPacket();
         }
 
         private void TargetPacket(ushort graphic, ushort x, ushort y, sbyte z)
         {
-            if (!IsTargeting)
+            if (!_cursor.IsTargeting)
             {
                 return;
             }
@@ -532,12 +477,12 @@ namespace ClassicUO.Game.Managers
 
             _lastDataBuffer[1] = 0x01;
 
-            _lastDataBuffer[2] = (byte)(_targetCursorId >> 24);
-            _lastDataBuffer[3] = (byte)(_targetCursorId >> 16);
-            _lastDataBuffer[4] = (byte)(_targetCursorId >> 8);
-            _lastDataBuffer[5] = (byte)_targetCursorId;
+            _lastDataBuffer[2] = (byte)(_cursor.TargetCursorId >> 24);
+            _lastDataBuffer[3] = (byte)(_cursor.TargetCursorId >> 16);
+            _lastDataBuffer[4] = (byte)(_cursor.TargetCursorId >> 8);
+            _lastDataBuffer[5] = (byte)_cursor.TargetCursorId;
 
-            _lastDataBuffer[6] = (byte)TargetingType;
+            _lastDataBuffer[6] = (byte)_cursor.TargetingType;
 
             _lastDataBuffer[7] = (byte)(0 >> 24);
             _lastDataBuffer[8] = (byte)(0 >> 16);
@@ -562,12 +507,12 @@ namespace ClassicUO.Game.Managers
                                             x,
                                             y,
                                             z,
-                                            _targetCursorId,
-                                            (byte)TargetingType);
+                                            _cursor.TargetCursorId,
+                                            (byte)_cursor.TargetingType);
 
 
             Mouse.CancelDoubleClick = true;
-            ClearTargetingWithoutTargetCancelPacket();
+            _cursor.ClearTargetingWithoutTargetCancelPacket();
         }
     }
 }

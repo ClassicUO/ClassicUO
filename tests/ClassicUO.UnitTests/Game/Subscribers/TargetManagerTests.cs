@@ -11,10 +11,11 @@ namespace ClassicUO.UnitTests.Game.Subscribers
 {
     // Behavioral tests for TargetManager's EventSink subscriptions.
     //
-    // Pattern: re-instantiate TargetManager AFTER EventSink.ClearAll() so
-    // the manager's ctor re-wires its handlers (TargetCursorReceived,
-    // AttackTargetChanged, MultiPlacementReceived). The test then raises
-    // each event and asserts the observable state on the new manager.
+    // Pattern: build a fresh TargetManager AFTER EventSink.ClearAll() and
+    // call Subscribe() explicitly so the manager wires its handlers
+    // (TargetCursorReceived, AttackTargetChanged, MultiPlacementReceived).
+    // The test then raises each event and asserts the observable state on
+    // the new manager.
     //
     // World ctor already creates a TargetManager that subscribes, so we
     // explicitly clear and rebuild to keep the test's manager the only
@@ -42,6 +43,7 @@ namespace ClassicUO.UnitTests.Game.Subscribers
             _world = new World();
             EventSink.ClearAll();
             _target = new TargetManager(_world);
+            _target.Subscribe();
         }
 
         public void Dispose()

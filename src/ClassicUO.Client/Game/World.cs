@@ -40,7 +40,7 @@ namespace ClassicUO.Game
             ChatManager = RegisterListener(new ChatManager(this));
             AuraManager = new AuraManager(this);
             UoAssist = new UoAssist(this);
-            TargetManager = new TargetManager(this);
+            TargetManager = RegisterListener(new TargetManager(this));
             DelayedObjectClickManager = new DelayedObjectClickManager(this);
             BoatMovingManager = new BoatMovingManager(this);
             NameOverHeadManager = new NameOverHeadManager(this);
