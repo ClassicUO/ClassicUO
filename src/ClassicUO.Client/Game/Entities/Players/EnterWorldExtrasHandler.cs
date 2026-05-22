@@ -5,32 +5,36 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Events;
 using ClassicUO.Network;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Entities.Players
 {
-    internal sealed partial class World
+    /// <summary>
+    /// Handles the post-<see cref="EventSink.PlayerEnteredWorld"/> housekeeping
+    /// (light-level, music volume, version-gated handshake packets, initial
+    /// click + skill request, dead-player season override, plugin notifications).
+    /// Replaces the legacy <c>World.Subscribers.EnterWorld</c> partial.
+    /// </summary>
+    internal sealed class EnterWorldExtrasHandler : IEventListener
     {
-        private void SubscribeEnterWorldExtras()
-        {
-            EventSink.PlayerEnteredWorld += OnPlayerEnteredWorldExtras;
-        }
+        private readonly World _world;
 
-        private void UnsubscribeEnterWorldExtras()
-        {
-            EventSink.PlayerEnteredWorld -= OnPlayerEnteredWorldExtras;
-        }
+        public EnterWorldExtrasHandler(World world) => _world = world;
+
+        public void Subscribe() => EventSink.PlayerEnteredWorld += OnPlayerEnteredWorldExtras;
+
+        public void Unsubscribe() => EventSink.PlayerEnteredWorld -= OnPlayerEnteredWorldExtras;
 
         private void OnPlayerEnteredWorldExtras(PlayerEnteredWorldArgs e)
         {
-            if (Player == null) return;
+            if (_world.Player == null) return;
 
             if (
                 ProfileManager.CurrentProfile != null
                 && ProfileManager.CurrentProfile.UseCustomLightLevel
             )
             {
-                Light.Overall =
+                _world.Light.Overall =
                     ProfileManager.CurrentProfile.LightLevelType == 1
-                        ? Math.Min(Light.Overall, ProfileManager.CurrentProfile.LightLevel)
+                        ? Math.Min(_world.Light.Overall, ProfileManager.CurrentProfile.LightLevel)
                         : ProfileManager.CurrentProfile.LightLevel;
             }
 
@@ -51,12 +55,12 @@ namespace ClassicUO.Game
 
             NetClient.Socket.Send_ClientVersion(Settings.GlobalSettings.ClientVersion);
 
-            GameActions.SingleClick(this, Player);
-            NetClient.Socket.Send_SkillsRequest(Player.Serial);
+            GameActions.SingleClick(_world, _world.Player);
+            NetClient.Socket.Send_SkillsRequest(_world.Player.Serial);
 
-            if (Player.IsDead)
+            if (_world.Player.IsDead)
             {
-                ChangeSeason(Seasons.Season.Desolation, 42);
+                _world.ChangeSeason(Seasons.Season.Desolation, 42);
             }
 
             if (

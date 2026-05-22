@@ -6,33 +6,37 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Entities.Items
 {
-    internal sealed partial class World
+    /// <summary>
+    /// Handles <see cref="EventSink.ItemEquipped"/> — promotes the item to its
+    /// equip layer, refreshes container/paperdoll gumps, and recomputes the
+    /// player's ability glyphs when a primary weapon changes.
+    /// Replaces the legacy <c>World.Subscribers.Equipment</c> partial.
+    /// </summary>
+    internal sealed class EquipmentHandler : IEventListener
     {
-        private void SubscribeEquipment()
-        {
-            EventSink.ItemEquipped += OnItemEquipped;
-        }
+        private readonly World _world;
 
-        private void UnsubscribeEquipment()
-        {
-            EventSink.ItemEquipped -= OnItemEquipped;
-        }
+        public EquipmentHandler(World world) => _world = world;
+
+        public void Subscribe() => EventSink.ItemEquipped += OnItemEquipped;
+
+        public void Unsubscribe() => EventSink.ItemEquipped -= OnItemEquipped;
 
         private void OnItemEquipped(ItemEquippedArgs e)
         {
-            if (!InGame)
+            if (!_world.InGame)
             {
                 return;
             }
 
-            Item item = GetOrCreateItem(e.Serial);
+            Item item = _world.GetOrCreateItem(e.Serial);
 
             if (item.Graphic != 0 && item.Layer != Layer.Backpack)
             {
                 //ClearContainerAndRemoveItems(item);
-                RemoveItemFromContainer(item);
+                _world.RemoveItemFromContainer(item);
             }
 
             if (SerialHelper.IsValid(item.Container))
@@ -48,7 +52,7 @@ namespace ClassicUO.Game
             item.FixHue(e.Hue);
             item.Amount = 1;
 
-            Entity entity = Get(item.Container);
+            Entity entity = _world.Get(item.Container);
 
             entity?.PushToBack(item);
 
@@ -62,11 +66,11 @@ namespace ClassicUO.Game
             }
 
             if (
-                entity == Player
+                entity == _world.Player
                 && (item.Layer == Layer.OneHanded || item.Layer == Layer.TwoHanded)
             )
             {
-                Player?.UpdateAbilities();
+                _world.Player?.UpdateAbilities();
             }
         }
     }

@@ -60,6 +60,10 @@ namespace ClassicUO.Game
             RegisterListener(new ContainerItemsHandler(this));
             RegisterListener(new DeathDisplayHandler(this));
             RegisterListener(new DenyMoveHandler(this));
+            RegisterListener(new global::ClassicUO.Game.Entities.Players.EnterWorldExtrasHandler(this));
+            RegisterListener(new global::ClassicUO.Game.Entities.Items.EquipmentHandler(this));
+            RegisterListener(new global::ClassicUO.Game.UI.Gumps.ExtendedGumpsHandler(this));
+            RegisterListener(new global::ClassicUO.Game.UI.Gumps.ExtendedMiscHandler(this));
 
             SubscribeEvents();
         }

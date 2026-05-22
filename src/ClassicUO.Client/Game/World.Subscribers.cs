@@ -59,17 +59,13 @@ namespace ClassicUO.Game
             EventSink.CharacterAnimation += OnCharacterAnimation;
             EventSink.NewCharacterAnimation += OnNewCharacterAnimation;
             EventSink.CombatSwing += OnCombatSwing;
-            SubscribeEquipment();
             SubscribeMobileUpdates();
             SubscribeOpenContainer();
-            SubscribeEnterWorldExtras();
             SubscribeGumpsUI();
             SubscribeMapData();
             SubscribeVendor();
             SubscribeExtendedWalk();
-            SubscribeExtendedGumps();
             SubscribeExtendedStats();
-            SubscribeExtendedMisc();
             SubscribeSkills();
 
             foreach (var listener in _listeners) listener.Subscribe();
@@ -110,17 +106,13 @@ namespace ClassicUO.Game
             EventSink.CharacterAnimation -= OnCharacterAnimation;
             EventSink.NewCharacterAnimation -= OnNewCharacterAnimation;
             EventSink.CombatSwing -= OnCombatSwing;
-            UnsubscribeEquipment();
             UnsubscribeMobileUpdates();
             UnsubscribeOpenContainer();
-            UnsubscribeEnterWorldExtras();
             UnsubscribeGumpsUI();
             UnsubscribeMapData();
             UnsubscribeVendor();
             UnsubscribeExtendedWalk();
-            UnsubscribeExtendedGumps();
             UnsubscribeExtendedStats();
-            UnsubscribeExtendedMisc();
             UnsubscribeSkills();
         }
 

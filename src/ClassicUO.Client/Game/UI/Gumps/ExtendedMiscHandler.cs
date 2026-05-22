@@ -4,14 +4,23 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Utility.Logging;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.UI.Gumps
 {
-    internal sealed partial class World
+    /// <summary>
+    /// Handles miscellaneous server-driven hooks (map patches, ability glyph
+    /// reset, damage overhead, spell-icon toggle, character speed mode, mobile
+    /// animation frame, ClassicUO extension command). Replaces the legacy
+    /// <c>World.Subscribers.ExtendedMisc</c> partial.
+    /// </summary>
+    internal sealed class ExtendedMiscHandler : IEventListener
     {
-        private void SubscribeExtendedMisc()
+        private readonly World _world;
+
+        public ExtendedMiscHandler(World world) => _world = world;
+
+        public void Subscribe()
         {
             EventSink.MapPatchesEnabled += OnMapPatchesEnabled;
             EventSink.AbilityIconsReset += OnAbilityIconsReset;
@@ -22,7 +31,7 @@ namespace ClassicUO.Game
             EventSink.CuoCommand += OnCuoCommand;
         }
 
-        private void UnsubscribeExtendedMisc()
+        public void Unsubscribe()
         {
             EventSink.MapPatchesEnabled -= OnMapPatchesEnabled;
             EventSink.AbilityIconsReset -= OnAbilityIconsReset;
@@ -37,9 +46,9 @@ namespace ClassicUO.Game
         {
             if (Client.Game.UO.FileManager.Maps.ApplyPatches(e.PatchesCount, e.Entries))
             {
-                int map = MapIndex;
-                MapIndex = -1;
-                MapIndex = map;
+                int map = _world.MapIndex;
+                _world.MapIndex = -1;
+                _world.MapIndex = map;
 
                 Log.Trace("Map Patches applied.");
             }
@@ -47,21 +56,21 @@ namespace ClassicUO.Game
 
         private void OnAbilityIconsReset(AbilityIconsResetArgs e)
         {
-            if (Player == null) return;
+            if (_world.Player == null) return;
 
             for (int i = 0; i < 2; i++)
             {
-                Player.Abilities[i] &= (Ability)0x7F;
+                _world.Player.Abilities[i] &= (Ability)0x7F;
             }
         }
 
         private void OnDamageOverhead(DamageOverheadArgs e)
         {
-            Entity en = Get(e.Serial);
+            Entity en = _world.Get(e.Serial);
             if (en == null) return;
             if (e.Damage == 0) return;
 
-            WorldTextManager.AddDamage(en, e.Damage);
+            _world.WorldTextManager.AddDamage(en, e.Damage);
         }
 
         private void OnSpellIconToggle(SpellIconToggleArgs e)
@@ -77,12 +86,12 @@ namespace ClassicUO.Game
                         if (e.Active)
                         {
                             spellButton.Hue = 38;
-                            ActiveSpellIcons.Add(spell);
+                            _world.ActiveSpellIcons.Add(spell);
                         }
                         else
                         {
                             spellButton.Hue = 0;
-                            ActiveSpellIcons.Remove(spell);
+                            _world.ActiveSpellIcons.Remove(spell);
                         }
 
                         break;
@@ -93,7 +102,7 @@ namespace ClassicUO.Game
 
         private void OnCharacterSpeedMode(CharacterSpeedModeArgs e)
         {
-            if (Player == null) return;
+            if (_world.Player == null) return;
 
             byte val = e.SpeedMode;
             if (val > (int)CharacterSpeedType.FastUnmountAndCantRun)
@@ -101,7 +110,7 @@ namespace ClassicUO.Game
                 val = 0;
             }
 
-            Player.SpeedMode = (CharacterSpeedType)val;
+            _world.Player.SpeedMode = (CharacterSpeedType)val;
         }
 
         private void OnMobileAnimationFrame(MobileAnimationFrameArgs e)
@@ -110,7 +119,7 @@ namespace ClassicUO.Game
             byte animID = e.AnimationId;
             byte frameCount = e.FrameCount;
 
-            foreach (Mobile m in Mobiles.Values)
+            foreach (Mobile m in _world.Mobiles.Values)
             {
                 if ((m.Serial & 0xFFFF) == partial)
                 {

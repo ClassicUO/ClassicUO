@@ -6,16 +6,25 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.UI.Gumps
 {
-    internal sealed partial class World
+    /// <summary>
+    /// Handles the misc. extended-gump server events (generic-gump close,
+    /// statusbar close, equipment-info, popup menu, close-UI by kind, house
+    /// design state, race-change request). Replaces the legacy
+    /// <c>World.Subscribers.ExtendedGumps</c> partial.
+    /// </summary>
+    internal sealed class ExtendedGumpsHandler : IEventListener
     {
-        private void SubscribeExtendedGumps()
+        private readonly World _world;
+
+        public ExtendedGumpsHandler(World world) => _world = world;
+
+        public void Subscribe()
         {
             EventSink.GenericGumpClose += OnGenericGumpClose;
             EventSink.CloseStatusbarGump += OnCloseStatusbarGump;
@@ -26,7 +35,7 @@ namespace ClassicUO.Game
             EventSink.RaceChangeRequested += OnRaceChangeRequested;
         }
 
-        private void UnsubscribeExtendedGumps()
+        public void Unsubscribe()
         {
             EventSink.GenericGumpClose -= OnGenericGumpClose;
             EventSink.CloseStatusbarGump -= OnCloseStatusbarGump;
@@ -80,7 +89,7 @@ namespace ClassicUO.Game
 
         private void OnEquipInfoReceived(EquipInfoArgs e)
         {
-            Item item = Items.Get(e.ItemSerial);
+            Item item = _world.Items.Get(e.ItemSerial);
             if (item == null) return;
 
             uint cliloc = e.Cliloc;
@@ -95,7 +104,7 @@ namespace ClassicUO.Game
                     item.Name = str;
                 }
 
-                MessageManager.HandleMessage(
+                _world.MessageManager.HandleMessage(
                     item,
                     str,
                     item.Name,
@@ -170,7 +179,7 @@ namespace ClassicUO.Game
 
             if (strBuffer.Length != 0)
             {
-                MessageManager.HandleMessage(
+                _world.MessageManager.HandleMessage(
                     item,
                     strBuffer.ToString(),
                     item.Name,
@@ -190,10 +199,10 @@ namespace ClassicUO.Game
         private void OnPopupMenuReceived(PopupMenuArgs e)
         {
             UIManager.ShowGamePopup(
-                new PopupMenuGump(this, e.Data)
+                new PopupMenuGump(_world, e.Data)
                 {
-                    X = DelayedObjectClickManager.LastMouseX,
-                    Y = DelayedObjectClickManager.LastMouseY
+                    X = _world.DelayedObjectClickManager.LastMouseX,
+                    Y = _world.DelayedObjectClickManager.LastMouseY
                 }
             );
         }
@@ -211,7 +220,7 @@ namespace ClassicUO.Game
 
                 case 2: // statusbar
                     UIManager.GetGump<HealthBarGump>(serial)?.Dispose();
-                    if (Player != null && serial == Player.Serial)
+                    if (_world.Player != null && serial == _world.Player.Serial)
                     {
                         StatusGumpBase.GetStatusGump()?.Dispose();
                     }
@@ -247,7 +256,7 @@ namespace ClassicUO.Game
                     HouseCustomizationGump gump = UIManager.GetGump<HouseCustomizationGump>();
                     if (gump != null) break;
 
-                    gump = new HouseCustomizationGump(this, serial, 50, 50);
+                    gump = new HouseCustomizationGump(_world, serial, 50, 50);
                     UIManager.Add(gump);
                     break;
                 }
@@ -261,7 +270,7 @@ namespace ClassicUO.Game
         private void OnRaceChangeRequested(RaceChangeRequestedArgs e)
         {
             UIManager.GetGump<RaceChangeGump>()?.Dispose();
-            UIManager.Add(new RaceChangeGump(this, e.IsFemale, e.Race));
+            UIManager.Add(new RaceChangeGump(_world, e.IsFemale, e.Race));
         }
     }
 }
