@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 using System;
-using System.Reflection;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Events;
@@ -18,8 +17,8 @@ namespace ClassicUO.UnitTests.Game.Subscribers
     // subscribes it to EventSink). We do NOT call EventSink.ClearAll() because
     // the chat handler dereferences _world.MessageManager and other paths read
     // ProfileManager.CurrentProfile; keeping the World-wired manager avoids
-    // re-instantiation pitfalls. ProfileManager.CurrentProfile is seeded via
-    // reflection so the invite/chat paths don't NRE.
+    // re-instantiation pitfalls. ProfileManager.CurrentProfile is seeded with a
+    // default Profile so handlers referencing it don't NRE.
     //
     // Collection serializes execution against other EventSink test classes since
     // EventSink is a static, process-wide bus.
@@ -31,7 +30,7 @@ namespace ClassicUO.UnitTests.Game.Subscribers
 
         public PartyManagerTests()
         {
-            SeedCurrentProfile();
+            ProfileManager.CurrentProfile = new Profile();
             _world = new World();
             _party = _world.Party;
         }
@@ -39,16 +38,6 @@ namespace ClassicUO.UnitTests.Game.Subscribers
         public void Dispose()
         {
             EventSink.ClearAll();
-        }
-
-        private static void SeedCurrentProfile()
-        {
-            // CurrentProfile has a private setter — set via reflection so handlers
-            // referencing ProfileManager.CurrentProfile.X don't NRE.
-            PropertyInfo prop = typeof(ProfileManager).GetProperty(
-                nameof(ProfileManager.CurrentProfile),
-                BindingFlags.Public | BindingFlags.Static);
-            prop?.SetValue(null, new Profile());
         }
 
         [Fact]

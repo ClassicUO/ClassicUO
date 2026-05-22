@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System.Reflection;
 using ClassicUO.Game;
 using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
@@ -12,12 +11,10 @@ namespace ClassicUO.UnitTests.Game.Subscribers
 {
     // Behavioral tests for ObjectPropertiesListManager.
     //
-    // OnMegaClilocReceived is gated on _world.InGame (Player != null && Map != null).
-    // We construct a fresh World (default-wires its OPL manager) then poke Player +
-    // Map via reflection so the InGame guard passes. The Map constructor reads
-    // unmockable globals (Client.Game.UO.FileManager.Maps) — we use
-    // FormatterServices.GetUninitializedObject to bypass it; only non-null
-    // identity is required for the guard.
+    // OnMegaClilocReceived is gated on _world.InGame. PlayerMobile / Map ctors
+    // read unmockable globals (Client.Game.UO.FileManager.*), so we satisfy the
+    // gate via World.SetInGameForTests(true) — an internal seam that overrides
+    // the InGame computation for unit tests.
     [Collection("EventSinkSerial")]
     public class ObjectPropertiesListManagerTests : System.IDisposable
     {
@@ -28,33 +25,12 @@ namespace ClassicUO.UnitTests.Game.Subscribers
         {
             _world = new World();
             _opl = _world.OPL;
-            SetInGame(_world);
+            _world.SetInGameForTests(true);
         }
 
         public void Dispose()
         {
             EventSink.ClearAll();
-        }
-
-        private static void SetInGame(World world)
-        {
-            // Bypass Map constructor (it reads unmockable globals) by allocating an
-            // uninitialized instance. World.InGame only checks Player != null && Map != null.
-            object mapInstance = System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(typeof(ClassicUO.Game.Map.Map));
-            PropertyInfo mapProp = typeof(World).GetProperty(
-                nameof(World.Map),
-                BindingFlags.Public | BindingFlags.Instance);
-            mapProp.SetValue(world, mapInstance);
-
-            // PlayerMobile ctor reads Client.Game.UO.FileManager.Skills (unmockable).
-            // Bypass via uninitialized object — World.InGame just checks Player != null.
-            object player = System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(typeof(PlayerMobile));
-            PropertyInfo playerProp = typeof(World).GetProperty(
-                nameof(World.Player),
-                BindingFlags.Public | BindingFlags.Instance);
-            playerProp.SetValue(world, player);
-
-            world.InGame.Should().BeTrue();
         }
 
         [Fact]
@@ -125,11 +101,7 @@ namespace ClassicUO.UnitTests.Game.Subscribers
         [Fact]
         public void MegaClilocReceived_Ignored_When_Not_InGame()
         {
-            // Reset to non-InGame: null Player.
-            PropertyInfo playerProp = typeof(World).GetProperty(
-                nameof(World.Player),
-                BindingFlags.Public | BindingFlags.Instance);
-            playerProp.SetValue(_world, null);
+            _world.SetInGameForTests(false);
             _world.InGame.Should().BeFalse();
 
             uint serial = 0x4000_0053u;

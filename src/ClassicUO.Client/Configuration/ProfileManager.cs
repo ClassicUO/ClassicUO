@@ -10,7 +10,7 @@ namespace ClassicUO.Configuration
     internal static class ProfileManager
     {
         public static GlobalProfile GlobalProfile { get; private set; }
-        public static Profile CurrentProfile { get; private set; }
+        public static Profile CurrentProfile { get; internal set; }
         public static string ProfilePath { get; private set; }
 
         private static string _rootPath;
