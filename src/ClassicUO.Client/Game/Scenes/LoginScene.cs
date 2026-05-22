@@ -16,6 +16,7 @@ using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 using SDL3;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.NetworkInformation;
@@ -133,6 +134,7 @@ namespace ClassicUO.Game.Scenes
             EventSink.CharacterListReceived += OnCharacterListReceived;
             EventSink.LoginDelayReceived += OnLoginDelayReceived;
             EventSink.LoginRejected += OnLoginRejected;
+            EventSink.LoginCompleted += OnLoginCompleted;
         }
 
         private void UnsubscribeLoginEvents()
@@ -143,6 +145,7 @@ namespace ClassicUO.Game.Scenes
             EventSink.CharacterListReceived -= OnCharacterListReceived;
             EventSink.LoginDelayReceived -= OnLoginDelayReceived;
             EventSink.LoginRejected -= OnLoginRejected;
+            EventSink.LoginCompleted -= OnLoginCompleted;
         }
 
         private void OnServerListReceived(ServerListReceivedArgs e)
@@ -295,6 +298,49 @@ namespace ClassicUO.Game.Scenes
             PopupMessage = ServerErrorMessages.GetError(e.PacketId, e.Reason, LoginDelay);
             CurrentLoginStep = LoginSteps.PopUpMessage;
             LoginDelay = default;
+        }
+
+        private void OnLoginCompleted(LoginCompletedArgs e)
+        {
+            // Mirrors the original 0x55 LoginComplete handler tail: now owned by
+            // the LoginScene subscriber so the packet handler stays parse-and-emit-only.
+            if (_world.Player == null || Client.Game.Scene is not LoginScene)
+            {
+                return;
+            }
+
+            var scene = new GameScene(_world);
+            Client.Game.SetScene(scene);
+
+            //GameActions.OpenPaperdoll(_world.Player);
+            GameActions.RequestMobileStatus(_world, _world.Player);
+            NetClient.Socket.Send_OpenChat("");
+
+            NetClient.Socket.Send_SkillsRequest(_world.Player);
+            scene.DoubleClickDelayed(_world.Player);
+
+            if (Client.Game.UO.Version >= ClientVersion.CV_306E)
+            {
+                NetClient.Socket.Send_ClientType();
+            }
+
+            if (Client.Game.UO.Version >= ClientVersion.CV_305D)
+            {
+                NetClient.Socket.Send_ClientViewRange(_world.ClientViewRange);
+            }
+
+            List<Gump> gumps = ProfileManager.CurrentProfile.ReadGumps(
+                _world,
+                ProfileManager.ProfilePath
+            );
+
+            if (gumps != null)
+            {
+                foreach (Gump gump in gumps)
+                {
+                    UIManager.Add(gump);
+                }
+            }
         }
 
         public override void Update()

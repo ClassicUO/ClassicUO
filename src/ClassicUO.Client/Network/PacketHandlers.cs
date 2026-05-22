@@ -1365,42 +1365,6 @@ namespace ClassicUO.Network
         private static void LoginComplete(World world, ref StackDataReader p)
         {
             EventSink.RaiseLoginCompleted(new LoginCompletedArgs());
-
-            if (world.Player != null && Client.Game.Scene is LoginScene)
-            {
-                var scene = new GameScene(world);
-                Client.Game.SetScene(scene);
-
-                //GameActions.OpenPaperdoll(world.Player);
-                GameActions.RequestMobileStatus(world, world.Player);
-                NetClient.Socket.Send_OpenChat("");
-
-                NetClient.Socket.Send_SkillsRequest(world.Player);
-                scene.DoubleClickDelayed(world.Player);
-
-                if (Client.Game.UO.Version >= Utility.ClientVersion.CV_306E)
-                {
-                    NetClient.Socket.Send_ClientType();
-                }
-
-                if (Client.Game.UO.Version >= Utility.ClientVersion.CV_305D)
-                {
-                    NetClient.Socket.Send_ClientViewRange(world.ClientViewRange);
-                }
-
-                List<Gump> gumps = ProfileManager.CurrentProfile.ReadGumps(
-                    world,
-                    ProfileManager.ProfilePath
-                );
-
-                if (gumps != null)
-                {
-                    foreach (Gump gump in gumps)
-                    {
-                        UIManager.Add(gump);
-                    }
-                }
-            }
         }
 
         private static void MapData(World world, ref StackDataReader p)
