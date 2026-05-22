@@ -9,6 +9,7 @@ using System.Text;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Events.Outgoing;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO;
@@ -88,6 +89,8 @@ namespace ClassicUO.Network
 
         public static void Send_Ping(this NetClient socket, byte idx)
         {
+            OutgoingEventSink.RaisePingSent(new PingSentArgs(idx));
+
             const byte ID = 0x73;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
