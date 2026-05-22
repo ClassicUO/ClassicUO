@@ -92,6 +92,75 @@ namespace ClassicUO.Game.Events.Outgoing
         public static void RaiseNameRequestSent(in NameRequestSentArgs e) => Invoke(NameRequestSent, e);
         public static void RaiseOpenDoorSent(in OpenDoorSentArgs e) => Invoke(OpenDoorSent, e);
 
+        // ---- Items / Equip ----
+        public static event Action<PickUpRequestSentArgs> PickUpRequestSent;
+        public static event Action<DropRequestSentArgs> DropRequestSent;
+        public static event Action<DropRequestOldSentArgs> DropRequestOldSent;
+        public static event Action<EquipRequestSentArgs> EquipRequestSent;
+        public static event Action<EquipMacroKrSentArgs> EquipMacroKrSent;
+        public static event Action<UnequipMacroKrSentArgs> UnequipMacroKrSent;
+        public static event Action<DyeDataResponseSentArgs> DyeDataResponseSent;
+        public static event Action<RenameRequestSentArgs> RenameRequestSent;
+
+        public static void RaisePickUpRequestSent(in PickUpRequestSentArgs e) => Invoke(PickUpRequestSent, e);
+        public static void RaiseDropRequestSent(in DropRequestSentArgs e) => Invoke(DropRequestSent, e);
+        public static void RaiseDropRequestOldSent(in DropRequestOldSentArgs e) => Invoke(DropRequestOldSent, e);
+        public static void RaiseEquipRequestSent(in EquipRequestSentArgs e) => Invoke(EquipRequestSent, e);
+        public static void RaiseEquipMacroKrSent(in EquipMacroKrSentArgs e) => Invoke(EquipMacroKrSent, e);
+        public static void RaiseUnequipMacroKrSent(in UnequipMacroKrSentArgs e) => Invoke(UnequipMacroKrSent, e);
+        public static void RaiseDyeDataResponseSent(in DyeDataResponseSentArgs e) => Invoke(DyeDataResponseSent, e);
+        public static void RaiseRenameRequestSent(in RenameRequestSentArgs e) => Invoke(RenameRequestSent, e);
+
+        // ---- Spells / Abilities ----
+        public static event Action<CastSpellSentArgs> CastSpellSent;
+        public static event Action<CastSpellFromBookSentArgs> CastSpellFromBookSent;
+        public static event Action<OpenSpellBookSentArgs> OpenSpellBookSent;
+        public static event Action<StunRequestSentArgs> StunRequestSent;
+        public static event Action<DisarmRequestSentArgs> DisarmRequestSent;
+        public static event Action<ToggleGargoyleFlyingSentArgs> ToggleGargoyleFlyingSent;
+        public static event Action<InvokeVirtueRequestSentArgs> InvokeVirtueRequestSent;
+        public static event Action<ChangeRaceRequestSentArgs> ChangeRaceRequestSent;
+
+        public static void RaiseCastSpellSent(in CastSpellSentArgs e) => Invoke(CastSpellSent, e);
+        public static void RaiseCastSpellFromBookSent(in CastSpellFromBookSentArgs e) => Invoke(CastSpellFromBookSent, e);
+        public static void RaiseOpenSpellBookSent(in OpenSpellBookSentArgs e) => Invoke(OpenSpellBookSent, e);
+        public static void RaiseStunRequestSent(in StunRequestSentArgs e) => Invoke(StunRequestSent, e);
+        public static void RaiseDisarmRequestSent(in DisarmRequestSentArgs e) => Invoke(DisarmRequestSent, e);
+        public static void RaiseToggleGargoyleFlyingSent(in ToggleGargoyleFlyingSentArgs e) => Invoke(ToggleGargoyleFlyingSent, e);
+        public static void RaiseInvokeVirtueRequestSent(in InvokeVirtueRequestSentArgs e) => Invoke(InvokeVirtueRequestSent, e);
+        public static void RaiseChangeRaceRequestSent(in ChangeRaceRequestSentArgs e) => Invoke(ChangeRaceRequestSent, e);
+
+        // ---- Status / Skills ----
+        public static event Action<StatusRequestSentArgs> StatusRequestSent;
+        public static event Action<SkillsRequestSentArgs> SkillsRequestSent;
+        public static event Action<SkillsStatusRequestSentArgs> SkillsStatusRequestSent;
+        public static event Action<StatLockStateRequestSentArgs> StatLockStateRequestSent;
+        public static event Action<SkillStatusChangeRequestSentArgs> SkillStatusChangeRequestSent;
+        public static event Action<HelpRequestSentArgs> HelpRequestSent;
+
+        public static void RaiseStatusRequestSent(in StatusRequestSentArgs e) => Invoke(StatusRequestSent, e);
+        public static void RaiseSkillsRequestSent(in SkillsRequestSentArgs e) => Invoke(SkillsRequestSent, e);
+        public static void RaiseSkillsStatusRequestSent(in SkillsStatusRequestSentArgs e) => Invoke(SkillsStatusRequestSent, e);
+        public static void RaiseStatLockStateRequestSent(in StatLockStateRequestSentArgs e) => Invoke(StatLockStateRequestSent, e);
+        public static void RaiseSkillStatusChangeRequestSent(in SkillStatusChangeRequestSentArgs e) => Invoke(SkillStatusChangeRequestSent, e);
+        public static void RaiseHelpRequestSent(in HelpRequestSentArgs e) => Invoke(HelpRequestSent, e);
+
+        // ---- OPL / Cliloc ----
+        public static event Action<MegaClilocRequestOldSentArgs> MegaClilocRequestOldSent;
+        public static event Action<MegaClilocRequestSentArgs> MegaClilocRequestSent;
+
+        public static void RaiseMegaClilocRequestOldSent(in MegaClilocRequestOldSentArgs e) => Invoke(MegaClilocRequestOldSent, e);
+        public static void RaiseMegaClilocRequestSent(in MegaClilocRequestSentArgs e) => Invoke(MegaClilocRequestSent, e);
+
+        // ---- Profile ----
+        public static event Action<ProfileRequestSentArgs> ProfileRequestSent;
+        public static event Action<ProfileUpdateSentArgs> ProfileUpdateSent;
+        public static event Action<TipRequestSentArgs> TipRequestSent;
+
+        public static void RaiseProfileRequestSent(in ProfileRequestSentArgs e) => Invoke(ProfileRequestSent, e);
+        public static void RaiseProfileUpdateSent(in ProfileUpdateSentArgs e) => Invoke(ProfileUpdateSent, e);
+        public static void RaiseTipRequestSent(in TipRequestSentArgs e) => Invoke(TipRequestSent, e);
+
         // Per-category event blocks land here as the outgoing migration phases
         // wire packets in. See OUTGOING-PACKETS-MIGRATION for the rollout plan.
 
@@ -149,6 +218,43 @@ namespace ClassicUO.Game.Events.Outgoing
             UseSkillSent = null;
             NameRequestSent = null;
             OpenDoorSent = null;
+
+            // Items / Equip
+            PickUpRequestSent = null;
+            DropRequestSent = null;
+            DropRequestOldSent = null;
+            EquipRequestSent = null;
+            EquipMacroKrSent = null;
+            UnequipMacroKrSent = null;
+            DyeDataResponseSent = null;
+            RenameRequestSent = null;
+
+            // Spells / Abilities
+            CastSpellSent = null;
+            CastSpellFromBookSent = null;
+            OpenSpellBookSent = null;
+            StunRequestSent = null;
+            DisarmRequestSent = null;
+            ToggleGargoyleFlyingSent = null;
+            InvokeVirtueRequestSent = null;
+            ChangeRaceRequestSent = null;
+
+            // Status / Skills
+            StatusRequestSent = null;
+            SkillsRequestSent = null;
+            SkillsStatusRequestSent = null;
+            StatLockStateRequestSent = null;
+            SkillStatusChangeRequestSent = null;
+            HelpRequestSent = null;
+
+            // OPL / Cliloc
+            MegaClilocRequestOldSent = null;
+            MegaClilocRequestSent = null;
+
+            // Profile
+            ProfileRequestSent = null;
+            ProfileUpdateSent = null;
+            TipRequestSent = null;
         }
     }
 }

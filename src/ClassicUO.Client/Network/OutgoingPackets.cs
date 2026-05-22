@@ -538,6 +538,8 @@ namespace ClassicUO.Network
 
         public static void Send_PickUpRequest(this NetClient socket, uint serial, ushort count)
         {
+            OutgoingEventSink.RaisePickUpRequestSent(new PickUpRequestSentArgs(serial, count));
+
             const byte ID = 0x07;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -577,6 +579,8 @@ namespace ClassicUO.Network
             uint container
         )
         {
+            OutgoingEventSink.RaiseDropRequestOldSent(new DropRequestOldSentArgs(serial, x, y, z, container));
+
             const byte ID = 0x08;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -620,6 +624,8 @@ namespace ClassicUO.Network
             uint container
         )
         {
+            OutgoingEventSink.RaiseDropRequestSent(new DropRequestSentArgs(serial, x, y, z, slot, container));
+
             const byte ID = 0x08;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -655,6 +661,8 @@ namespace ClassicUO.Network
 
         public static void Send_EquipRequest(this NetClient socket, uint serial, Layer layer, uint container)
         {
+            OutgoingEventSink.RaiseEquipRequestSent(new EquipRequestSentArgs(serial, layer, container));
+
             const byte ID = 0x13;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -721,6 +729,8 @@ namespace ClassicUO.Network
 
         public static void Send_HelpRequest(this NetClient socket)
         {
+            OutgoingEventSink.RaiseHelpRequestSent(new HelpRequestSentArgs());
+
             const byte ID = 0x9B;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -751,6 +761,8 @@ namespace ClassicUO.Network
 
         public static void Send_StatusRequest(this NetClient socket, uint serial)
         {
+            OutgoingEventSink.RaiseStatusRequestSent(new StatusRequestSentArgs(serial));
+
             const byte ID = 0x34;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -783,6 +795,8 @@ namespace ClassicUO.Network
 
         public static void Send_SkillsRequest(this NetClient socket, uint serial)
         {
+            OutgoingEventSink.RaiseSkillsRequestSent(new SkillsRequestSentArgs(serial));
+
             const byte ID = 0x34;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -815,6 +829,8 @@ namespace ClassicUO.Network
 
         public static void Send_SkillsStatusRequest(this NetClient socket, ushort skillIndex, byte lockState)
         {
+            OutgoingEventSink.RaiseSkillsStatusRequestSent(new SkillsStatusRequestSentArgs(skillIndex, lockState));
+
             const byte ID = 0x3A;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -1083,6 +1099,8 @@ namespace ClassicUO.Network
 
         public static void Send_CastSpell(this NetClient socket, int idx)
         {
+            OutgoingEventSink.RaiseCastSpellSent(new CastSpellSentArgs(idx));
+
             const byte ID = 0xBF;
             const byte ID_OLD = 0x12;
 
@@ -1132,6 +1150,8 @@ namespace ClassicUO.Network
 
         public static void Send_CastSpellFromBook(this NetClient socket, int idx, uint serial)
         {
+            OutgoingEventSink.RaiseCastSpellFromBookSent(new CastSpellFromBookSentArgs(idx, serial));
+
             const byte ID = 0x12;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -1232,6 +1252,8 @@ namespace ClassicUO.Network
 
         public static void Send_OpenSpellBook(this NetClient socket, byte type)
         {
+            OutgoingEventSink.RaiseOpenSpellBookSent(new OpenSpellBookSentArgs(type));
+
             const byte ID = 0x12;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -1627,6 +1649,8 @@ namespace ClassicUO.Network
 
         public static void Send_RenameRequest(this NetClient socket, uint serial, string name)
         {
+            OutgoingEventSink.RaiseRenameRequestSent(new RenameRequestSentArgs(serial, name));
+
             const byte ID = 0x75;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -1692,6 +1716,8 @@ namespace ClassicUO.Network
 
         public static void Send_TipRequest(this NetClient socket, ushort id, byte flag)
         {
+            OutgoingEventSink.RaiseTipRequestSent(new TipRequestSentArgs(id, flag));
+
             const byte ID = 0xA7;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -1929,6 +1955,8 @@ namespace ClassicUO.Network
 
         public static void Send_DyeDataResponse(this NetClient socket, uint serial, ushort graphic, ushort hue)
         {
+            OutgoingEventSink.RaiseDyeDataResponseSent(new DyeDataResponseSentArgs(serial, graphic, hue));
+
             const byte ID = 0x95;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -1962,6 +1990,8 @@ namespace ClassicUO.Network
 
         public static void Send_ProfileRequest(this NetClient socket, uint serial)
         {
+            OutgoingEventSink.RaiseProfileRequestSent(new ProfileRequestSentArgs(serial));
+
             const byte ID = 0xB8;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -1994,6 +2024,8 @@ namespace ClassicUO.Network
 
         public static void Send_ProfileUpdate(this NetClient socket, uint serial, string text)
         {
+            OutgoingEventSink.RaiseProfileUpdateSent(new ProfileUpdateSentArgs(serial, text));
+
             const byte ID = 0xB8;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -3072,6 +3104,8 @@ namespace ClassicUO.Network
 
         public static void Send_InvokeVirtueRequest(this NetClient socket, byte id)
         {
+            OutgoingEventSink.RaiseInvokeVirtueRequestSent(new InvokeVirtueRequestSentArgs(id));
+
             const byte ID = 0x12;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -3105,6 +3139,8 @@ namespace ClassicUO.Network
 
         public static void Send_MegaClilocRequest_Old(this NetClient socket, uint serial)
         {
+            OutgoingEventSink.RaiseMegaClilocRequestOldSent(new MegaClilocRequestOldSentArgs(serial));
+
             const byte ID = 0xBF;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -3137,6 +3173,16 @@ namespace ClassicUO.Network
 
         public static void Send_MegaClilocRequest(this NetClient socket, List<uint> serials)
         {
+            {
+                int snapshotCount = Math.Min(15, serials.Count);
+                var snapshot = new uint[snapshotCount];
+                for (int i = 0; i < snapshotCount; ++i)
+                {
+                    snapshot[i] = serials[i];
+                }
+                OutgoingEventSink.RaiseMegaClilocRequestSent(new MegaClilocRequestSentArgs(snapshot));
+            }
+
             const byte ID = 0xD6;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -3175,6 +3221,8 @@ namespace ClassicUO.Network
 
         public static void Send_StatLockStateRequest(this NetClient socket, byte stat, Lock state)
         {
+            OutgoingEventSink.RaiseStatLockStateRequestSent(new StatLockStateRequestSentArgs(stat, state));
+
             const byte ID = 0xBF;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -3209,6 +3257,8 @@ namespace ClassicUO.Network
 
         public static void Send_SkillStatusChangeRequest(this NetClient socket, ushort skillindex, byte lockstate)
         {
+            OutgoingEventSink.RaiseSkillStatusChangeRequestSent(new SkillStatusChangeRequestSentArgs(skillindex, lockstate));
+
             const byte ID = 0x3A;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -3586,6 +3636,8 @@ namespace ClassicUO.Network
 
         public static void Send_ToggleGargoyleFlying(this NetClient socket)
         {
+            OutgoingEventSink.RaiseToggleGargoyleFlyingSent(new ToggleGargoyleFlyingSentArgs());
+
             const byte ID = 0xBF;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -3651,6 +3703,8 @@ namespace ClassicUO.Network
 
         public static void Send_StunRequest(this NetClient socket)
         {
+            OutgoingEventSink.RaiseStunRequestSent(new StunRequestSentArgs());
+
             const byte ID = 0xBF;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -3682,6 +3736,8 @@ namespace ClassicUO.Network
 
         public static void Send_DisarmRequest(this NetClient socket)
         {
+            OutgoingEventSink.RaiseDisarmRequestSent(new DisarmRequestSentArgs());
+
             const byte ID = 0xBF;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -3721,6 +3777,8 @@ namespace ClassicUO.Network
             ushort beardHue
         )
         {
+            OutgoingEventSink.RaiseChangeRaceRequestSent(new ChangeRaceRequestSentArgs(skinHue, hairStyle, hairHue, beardStyle, beardHue));
+
             const byte ID = 0xBF;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -4504,6 +4562,8 @@ namespace ClassicUO.Network
 
         public static void Send_EquipMacroKR(this NetClient socket, ReadOnlySpan<uint> serials)
         {
+            OutgoingEventSink.RaiseEquipMacroKrSent(new EquipMacroKrSentArgs(serials.ToArray()));
+
             const byte ID = 0xEC;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
@@ -4537,6 +4597,8 @@ namespace ClassicUO.Network
 
         public static void Send_UnequipMacroKR(this NetClient socket, ReadOnlySpan<Layer> layers)
         {
+            OutgoingEventSink.RaiseUnequipMacroKrSent(new UnequipMacroKrSentArgs(layers.ToArray()));
+
             const byte ID = 0xED;
 
             int length = socket.PacketsTable.GetPacketLength(ID);
