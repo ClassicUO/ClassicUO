@@ -1,8 +1,8 @@
 # EventSink Refactor Status
 
-Branch: `refactor/eventsink-phase0` (60 commits ahead of `main`)
+Branch: `refactor/eventsink-phase0` (69 commits ahead of `main`)
 Build: green (0 errors)
-Tests: 518/518 pass
+Tests: 613/613 pass
 `PacketHandlers.cs`: ~4700 lines (down from ~7200 at start of refactor)
 
 Three big remaining un-migrated handlers landed in this batch:
@@ -360,8 +360,31 @@ Caller API unchanged. Inverse-flow rewrite (B option, UI raises
   the `world.InGame` short-circuit, so any subscriber path destroying
   items NREs in tests. EventSink swallows the NRE — tests stay green but
   the path is uncovered.
-- Still missing: coverage for the gate-blocked handlers (parse-side
-  positive paths still skipped by 4 bucket agents).
+- Test seam unlocks landed: `PlayerMobile` and `Map` ctors now null-safe
+  over `Client.Game?.UO?.FileManager?.{Skills,Maps}`, and `World`
+  exposes `SetPlayerForTests` / `SetMapForTests` / `SetInGameForTests`.
+  Tests can construct a fresh `PlayerMobile` and `Map.Map` without
+  reflection.
+- `tests/.../Game/Events/*PacketInGameTests.cs` — 58 additional gate-
+  blocked parser tests across 4 files (combat, items, UI, atmosphere).
+  Flips most of the "stays silent" gate-contract tests into positive
+  parse-and-emit assertions.
+- `tests/.../Game/Subscribers/WorldPlayer*SubscriberTests.cs` — 35
+  player-only subscriber tests across 2 files (buffs/abilities/speed,
+  movement/walk/war-mode). Previously unreachable because PlayerMobile
+  couldn't be constructed in tests.
+- Remaining skip causes (all NRE before raise / after raise on a path
+  unrelated to the seams):
+  - `Client.Game.UO.Version` reads inside handlers / subscribers
+    (Mobile.IsPoisoned, GameActions, etc) — needs a `Client.Game` test
+    seam or moving the parse before the deref.
+  - `Client.Game.GetScene<GameScene>()` in 0x65 SetWeather and 0xD1
+    Logout.
+  - `BuffTable._table` is null until `BuffTable.Load()` runs.
+  - `Client.Game.UO.Animations.UpdateAnimationTable` in 0xB9
+    EnableLockedFeatures.
+  - `GameActions.SendCloseStatus` reads Version BEFORE the InGame
+    short-circuit — gate-order smell, fixable.
 
 ## Notes / lessons
 
