@@ -6,11 +6,18 @@ using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Entities.Mobiles
 {
-    internal sealed partial class World
+    internal sealed class ExtendedStatsHandler : IEventListener
     {
-        private void SubscribeExtendedStats()
+        private readonly World _world;
+
+        public ExtendedStatsHandler(World world)
+        {
+            _world = world;
+        }
+
+        public void Subscribe()
         {
             EventSink.ExtendedStatsBonded += OnExtendedStatsBonded;
             EventSink.ExtendedStatsLocks += OnExtendedStatsLocks;
@@ -18,7 +25,7 @@ namespace ClassicUO.Game
             EventSink.SpellbookContent += OnSpellbookContent;
         }
 
-        private void UnsubscribeExtendedStats()
+        public void Unsubscribe()
         {
             EventSink.ExtendedStatsBonded -= OnExtendedStatsBonded;
             EventSink.ExtendedStatsLocks -= OnExtendedStatsLocks;
@@ -28,7 +35,7 @@ namespace ClassicUO.Game
 
         private void OnExtendedStatsBonded(ExtendedStatsBondedArgs e)
         {
-            Mobile bonded = Mobiles.Get(e.Serial);
+            Mobile bonded = _world.Mobiles.Get(e.Serial);
             if (bonded == null) return;
 
             bonded.IsDead = e.IsDead;
@@ -36,19 +43,19 @@ namespace ClassicUO.Game
 
         private void OnExtendedStatsLocks(ExtendedStatsLocksArgs e)
         {
-            if (Player == null) return;
-            if (e.Serial != Player.Serial) return;
+            if (_world.Player == null) return;
+            if (e.Serial != _world.Player.Serial) return;
 
-            Player.StrLock = (Lock)e.StrLock;
-            Player.DexLock = (Lock)e.DexLock;
-            Player.IntLock = (Lock)e.IntLock;
+            _world.Player.StrLock = (Lock)e.StrLock;
+            _world.Player.DexLock = (Lock)e.DexLock;
+            _world.Player.IntLock = (Lock)e.IntLock;
 
             StatusGumpBase.GetStatusGump()?.RequestUpdateContents();
         }
 
         private void OnExtendedStatsAnimation(ExtendedStatsAnimationArgs e)
         {
-            Mobile mobile = Mobiles.Get(e.Serial);
+            Mobile mobile = _world.Mobiles.Get(e.Serial);
             if (mobile == null) return;
 
             mobile.SetAnimation(
@@ -60,7 +67,7 @@ namespace ClassicUO.Game
 
         private void OnSpellbookContent(SpellbookContentArgs e)
         {
-            Item spellbook = GetOrCreateItem(e.Serial);
+            Item spellbook = _world.GetOrCreateItem(e.Serial);
             spellbook.Graphic = e.SpellbookGraphic;
             spellbook.Clear();
 
@@ -70,7 +77,7 @@ namespace ClassicUO.Game
             for (int i = 0; i < count; i++)
             {
                 ushort cc = (ushort)ids[i];
-                Item spellItem = Item.Create(this, cc);
+                Item spellItem = Item.Create(_world, cc);
                 spellItem.Serial = cc;
                 spellItem.Graphic = 0x1F2E;
                 spellItem.Amount = cc;

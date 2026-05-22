@@ -21,6 +21,8 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Assets;
 using ClassicUO.Network;
+using ClassicUO.Game.Entities.Mobiles;
+using ClassicUO.Game.Movement;
 
 namespace ClassicUO.Game
 {
@@ -64,6 +66,10 @@ namespace ClassicUO.Game
             RegisterListener(new global::ClassicUO.Game.Entities.Items.EquipmentHandler(this));
             RegisterListener(new global::ClassicUO.Game.UI.Gumps.ExtendedGumpsHandler(this));
             RegisterListener(new global::ClassicUO.Game.UI.Gumps.ExtendedMiscHandler(this));
+            RegisterListener(new ExtendedStatsHandler(this));
+            RegisterListener(new ExtendedWalkHandler(this));
+            RegisterListener(new GumpsUIHandler(this));
+            RegisterListener(new MapDataHandler(this));
 
             SubscribeEvents();
         }

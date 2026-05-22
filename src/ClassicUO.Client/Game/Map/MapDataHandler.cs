@@ -5,23 +5,30 @@ using ClassicUO.Game.Events;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Map
 {
-    internal sealed partial class World
+    internal sealed class MapDataHandler : IEventListener
     {
-        private void SubscribeMapData()
+        private readonly World _world;
+
+        public MapDataHandler(World world)
+        {
+            _world = world;
+        }
+
+        public void Subscribe()
         {
             EventSink.MapDataReceived += OnMapDataReceived;
         }
 
-        private void UnsubscribeMapData()
+        public void Unsubscribe()
         {
             EventSink.MapDataReceived -= OnMapDataReceived;
         }
 
         private void OnMapDataReceived(MapDataReceivedArgs e)
         {
-            if (!InGame) return;
+            if (!_world.InGame) return;
 
             MapGump gump = UIManager.GetGump<MapGump>(e.Serial);
             if (gump == null) return;

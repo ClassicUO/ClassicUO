@@ -2,18 +2,25 @@
 
 using ClassicUO.Game.Events;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.Movement
 {
-    internal sealed partial class World
+    internal sealed class ExtendedWalkHandler : IEventListener
     {
-        private void SubscribeExtendedWalk()
+        private readonly World _world;
+
+        public ExtendedWalkHandler(World world)
+        {
+            _world = world;
+        }
+
+        public void Subscribe()
         {
             EventSink.FastWalkStackInit += OnFastWalkStackInit;
             EventSink.FastWalkStackAdd += OnFastWalkStackAdd;
             EventSink.MapIndexChanged += OnMapIndexChanged;
         }
 
-        private void UnsubscribeExtendedWalk()
+        public void Unsubscribe()
         {
             EventSink.FastWalkStackInit -= OnFastWalkStackInit;
             EventSink.FastWalkStackAdd -= OnFastWalkStackAdd;
@@ -22,7 +29,7 @@ namespace ClassicUO.Game
 
         private void OnFastWalkStackInit(FastWalkStackInitArgs e)
         {
-            if (Player == null) return;
+            if (_world.Player == null) return;
 
             var values = e.Values;
             int count = values?.Count ?? 0;
@@ -30,20 +37,20 @@ namespace ClassicUO.Game
             for (int i = 0; i < 6; i++)
             {
                 uint v = i < count ? values[i] : 0;
-                Player.Walker.FastWalkStack.SetValue(i, v);
+                _world.Player.Walker.FastWalkStack.SetValue(i, v);
             }
         }
 
         private void OnFastWalkStackAdd(FastWalkStackAddArgs e)
         {
-            if (Player == null) return;
+            if (_world.Player == null) return;
 
-            Player.Walker.FastWalkStack.AddValue(e.Value);
+            _world.Player.Walker.FastWalkStack.AddValue(e.Value);
         }
 
         private void OnMapIndexChanged(MapIndexChangedArgs e)
         {
-            MapIndex = e.MapIndex;
+            _world.MapIndex = e.MapIndex;
         }
     }
 }

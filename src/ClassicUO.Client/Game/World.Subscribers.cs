@@ -61,11 +61,7 @@ namespace ClassicUO.Game
             EventSink.CombatSwing += OnCombatSwing;
             SubscribeMobileUpdates();
             SubscribeOpenContainer();
-            SubscribeGumpsUI();
-            SubscribeMapData();
             SubscribeVendor();
-            SubscribeExtendedWalk();
-            SubscribeExtendedStats();
             SubscribeSkills();
 
             foreach (var listener in _listeners) listener.Subscribe();
@@ -108,11 +104,7 @@ namespace ClassicUO.Game
             EventSink.CombatSwing -= OnCombatSwing;
             UnsubscribeMobileUpdates();
             UnsubscribeOpenContainer();
-            UnsubscribeGumpsUI();
-            UnsubscribeMapData();
             UnsubscribeVendor();
-            UnsubscribeExtendedWalk();
-            UnsubscribeExtendedStats();
             UnsubscribeSkills();
         }
 

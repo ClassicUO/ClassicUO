@@ -3,17 +3,23 @@
 using ClassicUO.Game.Events;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
 
-namespace ClassicUO.Game
+namespace ClassicUO.Game.UI.Gumps
 {
-    internal sealed partial class World
+    internal sealed class GumpsUIHandler : IEventListener
     {
-        private void SubscribeGumpsUI()
+        private readonly World _world;
+
+        public GumpsUIHandler(World world)
+        {
+            _world = world;
+        }
+
+        public void Subscribe()
         {
             EventSink.MapDisplayed += OnMapDisplayed;
             EventSink.BookOpened += OnBookOpened;
@@ -24,7 +30,7 @@ namespace ClassicUO.Game
             EventSink.PaperdollOpened += OnPaperdollOpened;
         }
 
-        private void UnsubscribeGumpsUI()
+        public void Unsubscribe()
         {
             EventSink.MapDisplayed -= OnMapDisplayed;
             EventSink.BookOpened -= OnBookOpened;
@@ -37,7 +43,7 @@ namespace ClassicUO.Game
 
         private void OnMapDisplayed(MapDisplayedArgs e)
         {
-            MapGump gump = new MapGump(this, e.Serial, e.GumpId, e.Width, e.Height);
+            MapGump gump = new MapGump(_world, e.Serial, e.GumpId, e.Width, e.Height);
             SpriteInfo multiMapInfo;
 
             if (e.Facet.HasValue)
@@ -54,7 +60,7 @@ namespace ClassicUO.Game
 
             UIManager.Add(gump);
 
-            Item it = Items.Get(e.Serial);
+            Item it = _world.Items.Get(e.Serial);
 
             if (it != null)
             {
@@ -69,7 +75,7 @@ namespace ClassicUO.Game
             if (bgump == null || bgump.IsDisposed)
             {
                 UIManager.Add(
-                    new ModernBookGump(this, e.Serial, e.PageCount, e.Title, e.Author, e.Editable, e.OldPacket)
+                    new ModernBookGump(_world, e.Serial, e.PageCount, e.Title, e.Author, e.Editable, e.OldPacket)
                     {
                         X = 100,
                         Y = 100
@@ -145,7 +151,7 @@ namespace ClassicUO.Game
 
         private void OnBulletinBoardOpened(BulletinBoardOpenedArgs e)
         {
-            Item item = Items.Get(e.Serial);
+            Item item = _world.Items.Get(e.Serial);
 
             if (item == null)
             {
@@ -158,7 +164,7 @@ namespace ClassicUO.Game
             int x = (Client.Game.ClientBounds.Width >> 1) - 245;
             int y = (Client.Game.ClientBounds.Height >> 1) - 205;
 
-            bulletinBoard = new BulletinBoardGump(this, item, x, y, e.Name);
+            bulletinBoard = new BulletinBoardGump(_world, item, x, y, e.Name);
             UIManager.Add(bulletinBoard);
 
             item.Opened = true;
@@ -186,11 +192,11 @@ namespace ClassicUO.Game
                 return;
             }
 
-            byte variant = (byte)(1 + (e.Poster == Player.Name ? 1 : 0));
+            byte variant = (byte)(1 + (e.Poster == _world.Player.Name ? 1 : 0));
 
             UIManager.Add(
                 new BulletinBoardItem(
-                    this,
+                    _world,
                     e.BoardSerial,
                     e.MessageSerial,
                     e.Poster,
@@ -208,7 +214,7 @@ namespace ClassicUO.Game
 
         private void OnPaperdollOpened(PaperdollOpenedArgs e)
         {
-            Mobile mobile = Mobiles.Get(e.Serial);
+            Mobile mobile = _world.Mobiles.Get(e.Serial);
 
             if (mobile == null)
             {
@@ -227,7 +233,7 @@ namespace ClassicUO.Game
                 }
 
                 UIManager.Add(
-                    new PaperDollGump(this, mobile, (e.Flags & 0x02) != 0) { Location = location }
+                    new PaperDollGump(_world, mobile, (e.Flags & 0x02) != 0) { Location = location }
                 );
             }
             else
