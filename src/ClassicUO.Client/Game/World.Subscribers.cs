@@ -61,6 +61,7 @@ namespace ClassicUO.Game
             SubscribeExtendedStats();
             SubscribeExtendedMisc();
             SubscribeCharacterStatus();
+            SubscribeSkills();
         }
 
         public void UnsubscribeEvents()
@@ -112,6 +113,7 @@ namespace ClassicUO.Game
             UnsubscribeExtendedStats();
             UnsubscribeExtendedMisc();
             UnsubscribeCharacterStatus();
+            UnsubscribeSkills();
         }
 
         private void OnItemDragAnimation(ItemDragAnimationArgs e)

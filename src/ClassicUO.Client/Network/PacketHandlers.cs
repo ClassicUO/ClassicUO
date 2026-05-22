@@ -960,157 +960,67 @@ namespace ClassicUO.Network
 
         private static void UpdateSkills(World world, ref StackDataReader p)
         {
-            if (!world.InGame)
-            {
-                return;
-            }
-
             byte type = p.ReadUInt8();
-            EventSink.RaiseSkillsUpdated(new SkillsUpdatedArgs(type));
             bool haveCap = type != 0u && type <= 0x03 || type == 0xDF;
             bool isSingleUpdate = type == 0xFF || type == 0xDF;
 
             if (type == 0xFE)
             {
                 int count = p.ReadUInt16BE();
-
-                Client.Game.UO.FileManager.Skills.Skills.Clear();
-                Client.Game.UO.FileManager.Skills.SortedSkills.Clear();
+                var entries = new List<SkillNameEntry>(count);
 
                 for (int i = 0; i < count; i++)
                 {
                     bool haveButton = p.ReadBool();
                     int nameLength = p.ReadUInt8();
-
-                    Client.Game.UO.FileManager.Skills.Skills.Add(
-                        new SkillEntry(i, p.ReadASCII(nameLength), haveButton)
-                    );
+                    string name = p.ReadASCII(nameLength);
+                    entries.Add(new SkillNameEntry(i, name, haveButton));
                 }
 
-                Client.Game.UO.FileManager.Skills.SortedSkills.AddRange(Client.Game.UO.FileManager.Skills.Skills);
-
-                Client.Game.UO.FileManager.Skills.SortedSkills.Sort(
-                    (a, b) => string.Compare(a.Name, b.Name, StringComparison.InvariantCulture)
-                );
+                EventSink.RaiseSkillListReceived(new SkillListReceivedArgs(entries));
+                return;
             }
-            else
+
+            var updates = new List<SkillEntryUpdate>();
+
+            while (p.Position < p.Length)
             {
-                StandardSkillsGump standard = null;
-                SkillGumpAdvanced advanced = null;
+                ushort id = p.ReadUInt16BE();
 
-                if (ProfileManager.CurrentProfile.StandardSkillsGump)
+                if (p.Position >= p.Length)
                 {
-                    standard = UIManager.GetGump<StandardSkillsGump>();
-                }
-                else
-                {
-                    advanced = UIManager.GetGump<SkillGumpAdvanced>();
+                    break;
                 }
 
-                if (!isSingleUpdate && (type == 1 || type == 3 || world.SkillsRequested))
+                if (id == 0 && type == 0)
                 {
-                    world.SkillsRequested = false;
-
-                    // TODO: make a base class for this gump
-                    if (ProfileManager.CurrentProfile.StandardSkillsGump)
-                    {
-                        if (standard == null)
-                        {
-                            UIManager.Add(standard = new StandardSkillsGump(world) { X = 100, Y = 100 });
-                        }
-                    }
-                    else
-                    {
-                        if (advanced == null)
-                        {
-                            UIManager.Add(advanced = new SkillGumpAdvanced(world) { X = 100, Y = 100 });
-                        }
-                    }
+                    break;
                 }
 
-                while (p.Position < p.Length)
+                if (type == 0 || type == 0x02)
                 {
-                    ushort id = p.ReadUInt16BE();
+                    id--;
+                }
 
-                    if (p.Position >= p.Length)
-                    {
-                        break;
-                    }
+                ushort realVal = p.ReadUInt16BE();
+                ushort baseVal = p.ReadUInt16BE();
+                byte locked = p.ReadUInt8();
+                ushort cap = 1000;
 
-                    if (id == 0 && type == 0)
-                    {
-                        break;
-                    }
+                if (haveCap)
+                {
+                    cap = p.ReadUInt16BE();
+                }
 
-                    if (type == 0 || type == 0x02)
-                    {
-                        id--;
-                    }
+                updates.Add(new SkillEntryUpdate(id, realVal, baseVal, locked, cap));
 
-                    ushort realVal = p.ReadUInt16BE();
-                    ushort baseVal = p.ReadUInt16BE();
-                    Lock locked = (Lock)p.ReadUInt8();
-                    ushort cap = 1000;
-
-                    if (haveCap)
-                    {
-                        cap = p.ReadUInt16BE();
-                    }
-
-                    if (id < world.Player.Skills.Length)
-                    {
-                        Skill skill = world.Player.Skills[id];
-
-                        if (skill != null)
-                        {
-                            if (isSingleUpdate)
-                            {
-                                float change = realVal / 10.0f - skill.Value;
-
-                                if (
-                                    change != 0.0f
-                                    && !float.IsNaN(change)
-                                    && ProfileManager.CurrentProfile != null
-                                    && ProfileManager.CurrentProfile.ShowSkillsChangedMessage
-                                    && Math.Abs(change * 10)
-                                        >= ProfileManager.CurrentProfile.ShowSkillsChangedDeltaValue
-                                )
-                                {
-                                    GameActions.Print(
-                                        world,
-                                        string.Format(
-                                            ResGeneral.YourSkillIn0Has1By2ItIsNow3,
-                                            skill.Name,
-                                            change < 0
-                                                ? ResGeneral.Decreased
-                                                : ResGeneral.Increased,
-                                            Math.Abs(change),
-                                            skill.Value + change
-                                        ),
-                                        0x58,
-                                        MessageType.System,
-                                        3,
-                                        false
-                                    );
-                                }
-                            }
-
-                            skill.BaseFixed = baseVal;
-                            skill.ValueFixed = realVal;
-                            skill.CapFixed = cap;
-                            skill.Lock = locked;
-
-                            standard?.Update(id);
-                            advanced?.ForceUpdate();
-                        }
-                    }
-
-                    if (isSingleUpdate)
-                    {
-                        break;
-                    }
+                if (isSingleUpdate)
+                {
+                    break;
                 }
             }
+
+            EventSink.RaiseSkillsUpdated(new SkillsUpdatedArgs(type, haveCap, isSingleUpdate, updates));
         }
 
         private static void Pathfinding(World world, ref StackDataReader p)

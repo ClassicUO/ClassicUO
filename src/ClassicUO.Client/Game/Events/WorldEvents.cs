@@ -32,7 +32,22 @@ namespace ClassicUO.Game.Events
         bool DoesExplode,
         byte BlendMode);
 
-    internal readonly record struct SkillsUpdatedArgs(byte UpdateType);
+    internal readonly record struct SkillNameEntry(int Index, string Name, bool HasButton);
+
+    internal readonly record struct SkillListReceivedArgs(IReadOnlyList<SkillNameEntry> Entries);
+
+    internal readonly record struct SkillEntryUpdate(
+        ushort Id,
+        ushort RealValue,
+        ushort BaseValue,
+        byte LockState,
+        ushort Cap);
+
+    internal readonly record struct SkillsUpdatedArgs(
+        byte UpdateType,
+        bool HasCap,
+        bool IsSingleUpdate,
+        IReadOnlyList<SkillEntryUpdate> Updates);
 
     internal readonly record struct TargetCursorReceivedArgs(byte CursorType, uint TargetId, byte TargetType);
 

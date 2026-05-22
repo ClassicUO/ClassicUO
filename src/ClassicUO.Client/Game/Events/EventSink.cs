@@ -157,6 +157,7 @@ namespace ClassicUO.Game.Events
         public static event Action<ClientViewRangeChangedArgs> ClientViewRangeChanged;
         public static event Action<GraphicEffectSpawnedArgs> GraphicEffectSpawned;
         public static event Action<SkillsUpdatedArgs> SkillsUpdated;
+        public static event Action<SkillListReceivedArgs> SkillListReceived;
         public static event Action<TargetCursorReceivedArgs> TargetCursorReceived;
         public static event Action<MultiPlacementReceivedArgs> MultiPlacementReceived;
         public static event Action<BoatMovingReceivedArgs> BoatMovingReceived;
@@ -170,6 +171,7 @@ namespace ClassicUO.Game.Events
         public static void RaiseClientViewRangeChanged(in ClientViewRangeChangedArgs e) => Invoke(ClientViewRangeChanged, e);
         public static void RaiseGraphicEffectSpawned(in GraphicEffectSpawnedArgs e) => Invoke(GraphicEffectSpawned, e);
         public static void RaiseSkillsUpdated(in SkillsUpdatedArgs e) => Invoke(SkillsUpdated, e);
+        public static void RaiseSkillListReceived(in SkillListReceivedArgs e) => Invoke(SkillListReceived, e);
         public static void RaiseTargetCursorReceived(in TargetCursorReceivedArgs e) => Invoke(TargetCursorReceived, e);
         public static void RaiseMultiPlacementReceived(in MultiPlacementReceivedArgs e) => Invoke(MultiPlacementReceived, e);
         public static void RaiseBoatMovingReceived(in BoatMovingReceivedArgs e) => Invoke(BoatMovingReceived, e);
@@ -409,6 +411,7 @@ namespace ClassicUO.Game.Events
             ClientViewRangeChanged = null;
             GraphicEffectSpawned = null;
             SkillsUpdated = null;
+            SkillListReceived = null;
             TargetCursorReceived = null;
             MultiPlacementReceived = null;
             BoatMovingReceived = null;
