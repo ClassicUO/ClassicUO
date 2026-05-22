@@ -1,0 +1,315 @@
+// SPDX-License-Identifier: BSD-2-Clause
+
+using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
+using ClassicUO.Game.GameObjects;
+using ClassicUO.Renderer;
+using Microsoft.Xna.Framework;
+
+namespace ClassicUO.Game.UI.HealthBars
+{
+    /// <summary>
+    /// Concrete renderer for the over-mobile HP overlay. Owns the bar
+    /// constants and the notoriety -&gt; gump-hue table for the new-target
+    /// system reticule. Mutates nothing on the world; reads camera + animation
+    /// data from <see cref="Client.Game"/>.
+    /// </summary>
+    internal sealed class HealthBarRenderer : IHealthBarRenderer
+    {
+        public const int BAR_WIDTH = 34;
+        public const int BAR_HEIGHT = 8;
+        public const int BAR_WIDTH_HALF = BAR_WIDTH >> 1;
+        public const int BAR_HEIGHT_HALF = BAR_HEIGHT >> 1;
+
+        private const ushort BACKGROUND_GRAPHIC = 0x1068;
+        private const ushort HP_GRAPHIC = 0x1069;
+
+        private readonly World _world;
+
+        public HealthBarRenderer(World world)
+        {
+            _world = world;
+        }
+
+        public void DrawTopLabel(
+            UltimaBatcher2D batcher,
+            Mobile mobile,
+            in Point worldAnchor,
+            bool newTargetSystem,
+            int mode,
+            int showWhen,
+            float layerDepth,
+            ref int offsetY)
+        {
+            if (mode == 1 || mobile.IsDead)
+            {
+                return;
+            }
+
+            int current = mobile.Hits;
+            int max = mobile.HitsMax;
+
+            if (!(showWhen == 2 && current != max || showWhen <= 1))
+            {
+                return;
+            }
+
+            if (mobile.HitsPercentage == 0)
+            {
+                return;
+            }
+
+            var animations = Client.Game.UO.Animations;
+            var camera = Client.Game.Scene.Camera;
+
+            animations.GetAnimationDimensions(
+                mobile.AnimIndex,
+                mobile.GetGraphicForAnimation(),
+                0,
+                0,
+                mobile.IsMounted,
+                0,
+                out _,
+                out int centerY,
+                out _,
+                out int height
+            );
+
+            Point p1 = worldAnchor;
+            p1.Y -= height + centerY + 8 + 22;
+
+            if (mobile.IsGargoyle && mobile.IsFlying)
+            {
+                p1.Y -= 22;
+            }
+            else if (!mobile.IsMounted)
+            {
+                p1.Y += 22;
+            }
+
+            p1 = camera.WorldToScreen(p1, true);
+            p1.X -= (mobile.HitsTexture.Width >> 1) + 5;
+            p1.Y -= mobile.HitsTexture.Height;
+
+            if (mobile.ObjectHandlesStatus == ObjectHandlesStatus.DISPLAYING)
+            {
+                int ohHeight = Constants.OBJECT_HANDLES_GUMP_HEIGHT
+                    + (ProfileManager.CurrentProfile.NameOverheadShowHpBar
+                        ? Constants.OBJECT_HANDLES_HP_BAR_HEIGHT + 1 : 0);
+                p1.Y -= ohHeight + 5;
+                offsetY += ohHeight + 5;
+            }
+
+            if (!(p1.X < 0
+                || p1.X > camera.Bounds.Width - mobile.HitsTexture.Width
+                || p1.Y < 0
+                || p1.Y > camera.Bounds.Height))
+            {
+                mobile.HitsTexture.Draw(batcher, p1.X, p1.Y, layerDepth);
+            }
+
+            if (newTargetSystem)
+            {
+                offsetY += mobile.HitsTexture.Height;
+            }
+        }
+
+        public void DrawHealthLine(
+            UltimaBatcher2D batcher,
+            Entity entity,
+            int x,
+            int y,
+            int offsetY,
+            bool passive,
+            bool newTargetSystem,
+            float layerDepth)
+        {
+            if (entity == null)
+            {
+                return;
+            }
+
+            int per = BAR_WIDTH * entity.HitsPercentage / 100;
+
+            Mobile mobile = entity as Mobile;
+
+            float alpha = passive && !newTargetSystem ? 0.5f : 1.0f;
+            ushort hue =
+                mobile != null
+                    ? Notoriety.GetHue(mobile.NotorietyFlag)
+                    : Notoriety.GetHue(NotorietyFlag.Gray);
+
+            Vector3 hueVecZero = ShaderHueTranslator.GetHueVector(0, false, alpha);
+            Vector3 hueVecNoto = ShaderHueTranslator.GetHueVector(hue, false, alpha);
+
+            if (mobile == null)
+            {
+                y += 22;
+            }
+
+            const int MULTIPLER = 1;
+
+            if (newTargetSystem && mobile != null && mobile.Serial != _world.Player.Serial)
+            {
+                DrawNewTargetSystemGumps(batcher, mobile, x, ref y, offsetY, hueVecZero, layerDepth);
+            }
+
+            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(BACKGROUND_GRAPHIC);
+
+            batcher.Draw(
+                gumpInfo.Texture,
+                new Rectangle(x, y, gumpInfo.UV.Width * MULTIPLER, gumpInfo.UV.Height * MULTIPLER),
+                gumpInfo.UV,
+                hueVecNoto,
+                layerDepth
+            );
+
+            hueVecNoto.X = 0x21;
+
+            if (entity.Hits != entity.HitsMax || entity.HitsMax == 0)
+            {
+                int offset = 2;
+
+                if (per >> 2 == 0)
+                {
+                    offset = per;
+                }
+
+                gumpInfo = ref Client.Game.UO.Gumps.GetGump(HP_GRAPHIC);
+
+                batcher.DrawTiled(
+                    gumpInfo.Texture,
+                    new Rectangle(
+                        x + per * MULTIPLER - offset,
+                        y,
+                        (BAR_WIDTH - per) * MULTIPLER - offset / 2,
+                        gumpInfo.UV.Height * MULTIPLER
+                    ),
+                    gumpInfo.UV,
+                    hueVecNoto,
+                    layerDepth
+                );
+            }
+
+            hue = 90;
+
+            if (per > 0)
+            {
+                if (mobile != null)
+                {
+                    if (mobile.IsPoisoned)
+                    {
+                        hue = 63;
+                    }
+                    else if (mobile.IsYellowHits)
+                    {
+                        hue = 53;
+                    }
+                }
+
+                hueVecNoto.X = hue;
+
+                gumpInfo = ref Client.Game.UO.Gumps.GetGump(HP_GRAPHIC);
+                batcher.DrawTiled(
+                    gumpInfo.Texture,
+                    new Rectangle(x, y, per * MULTIPLER, gumpInfo.UV.Height * MULTIPLER),
+                    gumpInfo.UV,
+                    hueVecNoto,
+                    layerDepth
+                );
+            }
+        }
+
+        private static void DrawNewTargetSystemGumps(
+            UltimaBatcher2D batcher,
+            Mobile mobile,
+            int x,
+            ref int y,
+            int offsetY,
+            Vector3 hueVecZero,
+            float layerDepth)
+        {
+            Client.Game.UO.Animations.GetAnimationDimensions(
+                mobile.AnimIndex,
+                mobile.GetGraphicForAnimation(),
+                (byte) mobile.GetDirectionForAnimation(),
+                Mobile.GetGroupForAnimation(mobile, isParent: true),
+                mobile.IsMounted,
+                0,
+                out _,
+                out int centerY,
+                out int width,
+                out int height
+            );
+
+            uint topGump;
+            uint bottomGump;
+            uint gumpHue = 0x7572; // gray
+
+            if (mobile.NotorietyFlag == NotorietyFlag.Innocent)
+                gumpHue = 0x7570; // blue
+            else if (mobile.NotorietyFlag == NotorietyFlag.Ally)
+                gumpHue = 0x7571; // green
+            else if (mobile.NotorietyFlag == NotorietyFlag.Criminal || mobile.NotorietyFlag == NotorietyFlag.Gray)
+                gumpHue = 0x7572; // grey
+            else if (mobile.NotorietyFlag == NotorietyFlag.Enemy)
+                gumpHue = 0x7573; // orange
+
+            if (mobile.NotorietyFlag == NotorietyFlag.Invulnerable)
+                gumpHue = 0x7575; // yellow
+            else if (mobile.NotorietyFlag == NotorietyFlag.Murderer)
+                gumpHue = 0x7577; // red
+
+            if (width >= 80)
+            {
+                topGump = 0x756D;
+                bottomGump = 0x756A;
+            }
+            else if (width >= 40)
+            {
+                topGump = 0x756E;
+                bottomGump = 0x756B;
+            }
+            else
+            {
+                topGump = 0x756F;
+                bottomGump = 0x756C;
+            }
+
+            ref readonly var hueGumpInfo = ref Client.Game.UO.Gumps.GetGump(gumpHue);
+            var targetX = x + BAR_WIDTH_HALF - hueGumpInfo.UV.Width / 2f;
+            var topTargetY = height + centerY + 8 + 22 + offsetY;
+
+            ref readonly var newTargGumpInfo = ref Client.Game.UO.Gumps.GetGump(topGump);
+            if (newTargGumpInfo.Texture != null)
+                batcher.Draw(
+                    newTargGumpInfo.Texture,
+                    new Vector2(targetX, y - topTargetY),
+                    newTargGumpInfo.UV,
+                    hueVecZero,
+                    layerDepth
+                );
+
+            if (hueGumpInfo.Texture != null)
+                batcher.Draw(
+                    hueGumpInfo.Texture,
+                    new Vector2(targetX, y - topTargetY),
+                    hueGumpInfo.UV,
+                    hueVecZero,
+                    layerDepth
+                );
+
+            y += 7 + newTargGumpInfo.UV.Height / 2 - centerY;
+
+            newTargGumpInfo = ref Client.Game.UO.Gumps.GetGump(bottomGump);
+            if (newTargGumpInfo.Texture != null)
+                batcher.Draw(
+                    newTargGumpInfo.Texture,
+                    new Vector2(targetX, y - 1 - newTargGumpInfo.UV.Height / 2f),
+                    newTargGumpInfo.UV,
+                    hueVecZero,
+                    layerDepth
+                );
+        }
+    }
+}
