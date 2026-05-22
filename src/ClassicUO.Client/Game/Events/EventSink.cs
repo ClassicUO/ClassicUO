@@ -64,6 +64,7 @@ namespace ClassicUO.Game.Events
         public static event Action<CharacterAnimationArgs> CharacterAnimation;
         public static event Action<NewCharacterAnimationArgs> NewCharacterAnimation;
         public static event Action<MobileStatusUpdatedArgs> MobileStatusUpdated;
+        public static event Action<CharacterStatusReceivedArgs> CharacterStatusReceived;
 
         public static void RaiseMobileSpawned(in MobileSpawnedArgs e) => Invoke(MobileSpawned, e);
         public static void RaiseMobileUpdated(in MobileUpdatedArgs e) => Invoke(MobileUpdated, e);
@@ -84,6 +85,7 @@ namespace ClassicUO.Game.Events
         public static void RaiseCharacterAnimation(in CharacterAnimationArgs e) => Invoke(CharacterAnimation, e);
         public static void RaiseNewCharacterAnimation(in NewCharacterAnimationArgs e) => Invoke(NewCharacterAnimation, e);
         public static void RaiseMobileStatusUpdated(in MobileStatusUpdatedArgs e) => Invoke(MobileStatusUpdated, e);
+        public static void RaiseCharacterStatusReceived(in CharacterStatusReceivedArgs e) => Invoke(CharacterStatusReceived, e);
 
         // ---- Items ----
         public static event Action<ItemSpawnedArgs> ItemSpawned;
@@ -368,6 +370,7 @@ namespace ClassicUO.Game.Events
             CharacterAnimation = null;
             NewCharacterAnimation = null;
             MobileStatusUpdated = null;
+            CharacterStatusReceived = null;
 
             ItemSpawned = null;
             ItemUpdated = null;

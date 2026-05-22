@@ -450,223 +450,113 @@ namespace ClassicUO.Network
 
         private static void CharacterStatus(World world, ref StackDataReader p)
         {
-            if (world.Player == null)
-            {
-                return;
-            }
-
             uint serial = p.ReadUInt32BE();
-            Entity entity = world.Get(serial);
+            string name = p.ReadASCII(30);
+            ushort hits = p.ReadUInt16BE();
+            ushort hitsMax = p.ReadUInt16BE();
 
-            if (entity == null)
-            {
-                return;
-            }
-
-            string oldName = entity.Name;
-            entity.Name = p.ReadASCII(30);
-            entity.Hits = p.ReadUInt16BE();
-            entity.HitsMax = p.ReadUInt16BE();
-
-            if (entity.HitsRequest == HitsRequestStatus.Pending)
-            {
-                entity.HitsRequest = HitsRequestStatus.Received;
-            }
+            bool isRenamable = false;
+            bool isFemale = false;
+            byte type = 0;
+            bool hasExtended = false;
+            ushort str = 0, dex = 0, intell = 0;
+            ushort stam = 0, stamMax = 0, mana = 0, manaMax = 0;
+            uint gold = 0;
+            short physRes = 0;
+            ushort weight = 0;
+            ushort weightMax = 0;
+            byte race = 0;
+            bool hasRenaissance = false;
+            short statsCap = 0;
+            byte followers = 0, followersMax = 0;
+            bool hasAos = false;
+            short fireRes = 0, coldRes = 0, poisonRes = 0, energyRes = 0;
+            ushort luck = 0;
+            short dmgMin = 0, dmgMax = 0;
+            uint tithing = 0;
+            bool hasKrSa = false;
+            short maxPhysRes = 0, maxFireRes = 0, maxColdRes = 0, maxPoisonRes = 0, maxEnergyRes = 0;
+            short dci = 0, maxDci = 0, hci = 0, ssi = 0, di = 0;
+            short lrc = 0, sdi = 0, fcr = 0, fc = 0, lmc = 0;
 
             if (SerialHelper.IsMobile(serial))
             {
-                Mobile mobile = entity as Mobile;
-
-                if (mobile == null)
-                {
-                    return;
-                }
-
-                mobile.IsRenamable = p.ReadBool();
-                byte type = p.ReadUInt8();
+                isRenamable = p.ReadBool();
+                type = p.ReadUInt8();
 
                 if (type > 0 && p.Position + 1 <= p.Length)
                 {
-                    mobile.IsFemale = p.ReadBool();
+                    hasExtended = true;
+                    isFemale = p.ReadBool();
 
-                    if (mobile == world.Player)
+                    str = p.ReadUInt16BE();
+                    dex = p.ReadUInt16BE();
+                    intell = p.ReadUInt16BE();
+                    stam = p.ReadUInt16BE();
+                    stamMax = p.ReadUInt16BE();
+                    mana = p.ReadUInt16BE();
+                    manaMax = p.ReadUInt16BE();
+                    gold = p.ReadUInt32BE();
+                    physRes = (short)p.ReadUInt16BE();
+                    weight = p.ReadUInt16BE();
+
+                    if (type >= 5)
                     {
-                        if (
-                            !string.IsNullOrEmpty(world.Player.Name) && oldName != world.Player.Name
-                        )
-                        {
-                            Client.Game.SetWindowTitle(world.Player.Name);
-                        }
+                        weightMax = p.ReadUInt16BE();
+                        race = p.ReadUInt8();
+                    }
 
-                        ushort str = p.ReadUInt16BE();
-                        ushort dex = p.ReadUInt16BE();
-                        ushort intell = p.ReadUInt16BE();
-                        world.Player.Stamina = p.ReadUInt16BE();
-                        world.Player.StaminaMax = p.ReadUInt16BE();
-                        world.Player.Mana = p.ReadUInt16BE();
-                        world.Player.ManaMax = p.ReadUInt16BE();
-                        world.Player.Gold = p.ReadUInt32BE();
-                        world.Player.PhysicalResistance = (short)p.ReadUInt16BE();
-                        world.Player.Weight = p.ReadUInt16BE();
+                    if (type >= 3)
+                    {
+                        hasRenaissance = true;
+                        statsCap = (short)p.ReadUInt16BE();
+                        followers = p.ReadUInt8();
+                        followersMax = p.ReadUInt8();
+                    }
 
-                        if (
-                            world.Player.Strength != 0
-                            && ProfileManager.CurrentProfile != null
-                            && ProfileManager.CurrentProfile.ShowStatsChangedMessage
-                        )
-                        {
-                            ushort currentStr = world.Player.Strength;
-                            ushort currentDex = world.Player.Dexterity;
-                            ushort currentInt = world.Player.Intelligence;
+                    if (type >= 4)
+                    {
+                        hasAos = true;
+                        fireRes = (short)p.ReadUInt16BE();
+                        coldRes = (short)p.ReadUInt16BE();
+                        poisonRes = (short)p.ReadUInt16BE();
+                        energyRes = (short)p.ReadUInt16BE();
+                        luck = p.ReadUInt16BE();
+                        dmgMin = (short)p.ReadUInt16BE();
+                        dmgMax = (short)p.ReadUInt16BE();
+                        tithing = p.ReadUInt32BE();
+                    }
 
-                            int deltaStr = str - currentStr;
-                            int deltaDex = dex - currentDex;
-                            int deltaInt = intell - currentInt;
-
-                            if (deltaStr != 0)
-                            {
-                                GameActions.Print(
-                                    world,
-                                    string.Format(
-                                        ResGeneral.Your0HasChangedBy1ItIsNow2,
-                                        ResGeneral.Strength,
-                                        deltaStr,
-                                        str
-                                    ),
-                                    0x0170,
-                                    MessageType.System,
-                                    3,
-                                    false
-                                );
-                            }
-
-                            if (deltaDex != 0)
-                            {
-                                GameActions.Print(
-                                    world,
-                                    string.Format(
-                                        ResGeneral.Your0HasChangedBy1ItIsNow2,
-                                        ResGeneral.Dexterity,
-                                        deltaDex,
-                                        dex
-                                    ),
-                                    0x0170,
-                                    MessageType.System,
-                                    3,
-                                    false
-                                );
-                            }
-
-                            if (deltaInt != 0)
-                            {
-                                GameActions.Print(
-                                    world,
-                                    string.Format(
-                                        ResGeneral.Your0HasChangedBy1ItIsNow2,
-                                        ResGeneral.Intelligence,
-                                        deltaInt,
-                                        intell
-                                    ),
-                                    0x0170,
-                                    MessageType.System,
-                                    3,
-                                    false
-                                );
-                            }
-                        }
-
-                        world.Player.Strength = str;
-                        world.Player.Dexterity = dex;
-                        world.Player.Intelligence = intell;
-
-                        if (type >= 5) //ML
-                        {
-                            world.Player.WeightMax = p.ReadUInt16BE();
-                            byte race = p.ReadUInt8();
-
-                            if (race == 0)
-                            {
-                                race = 1;
-                            }
-
-                            world.Player.Race = (RaceType)race;
-                        }
-                        else
-                        {
-                            if (Client.Game.UO.Version >= Utility.ClientVersion.CV_500A)
-                            {
-                                world.Player.WeightMax = (ushort)(
-                                    7 * (world.Player.Strength >> 1) + 40
-                                );
-                            }
-                            else
-                            {
-                                world.Player.WeightMax = (ushort)(world.Player.Strength * 4 + 25);
-                            }
-                        }
-
-                        if (type >= 3) //Renaissance
-                        {
-                            world.Player.StatsCap = (short)p.ReadUInt16BE();
-                            world.Player.Followers = p.ReadUInt8();
-                            world.Player.FollowersMax = p.ReadUInt8();
-                        }
-
-                        if (type >= 4) //AOS
-                        {
-                            world.Player.FireResistance = (short)p.ReadUInt16BE();
-                            world.Player.ColdResistance = (short)p.ReadUInt16BE();
-                            world.Player.PoisonResistance = (short)p.ReadUInt16BE();
-                            world.Player.EnergyResistance = (short)p.ReadUInt16BE();
-                            world.Player.Luck = p.ReadUInt16BE();
-                            world.Player.DamageMin = (short)p.ReadUInt16BE();
-                            world.Player.DamageMax = (short)p.ReadUInt16BE();
-                            world.Player.TithingPoints = p.ReadUInt32BE();
-                        }
-
-                        if (type >= 6)
-                        {
-                            world.Player.MaxPhysicResistence =
-                                p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                            world.Player.MaxFireResistence =
-                                p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                            world.Player.MaxColdResistence =
-                                p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                            world.Player.MaxPoisonResistence =
-                                p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                            world.Player.MaxEnergyResistence =
-                                p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                            world.Player.DefenseChanceIncrease =
-                                p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                            world.Player.MaxDefenseChanceIncrease =
-                                p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                            world.Player.HitChanceIncrease =
-                                p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                            world.Player.SwingSpeedIncrease =
-                                p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                            world.Player.DamageIncrease =
-                                p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                            world.Player.LowerReagentCost =
-                                p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                            world.Player.SpellDamageIncrease =
-                                p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                            world.Player.FasterCastRecovery =
-                                p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                            world.Player.FasterCasting =
-                                p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                            world.Player.LowerManaCost =
-                                p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
-                        }
+                    if (type >= 6)
+                    {
+                        hasKrSa = true;
+                        maxPhysRes = p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
+                        maxFireRes = p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
+                        maxColdRes = p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
+                        maxPoisonRes = p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
+                        maxEnergyRes = p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
+                        dci = p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
+                        maxDci = p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
+                        hci = p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
+                        ssi = p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
+                        di = p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
+                        lrc = p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
+                        sdi = p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
+                        fcr = p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
+                        fc = p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
+                        lmc = p.Position + 2 > p.Length ? (short)0 : (short)p.ReadUInt16BE();
                     }
                 }
-
-                if (mobile == world.Player)
-                {
-                    world.UoAssist.SignalHits();
-                    world.UoAssist.SignalStamina();
-                    world.UoAssist.SignalMana();
-                }
             }
+
+            EventSink.RaiseCharacterStatusReceived(new CharacterStatusReceivedArgs(
+                serial, name, hits, hitsMax, isRenamable, isFemale, type, hasExtended,
+                str, dex, intell, stam, stamMax, mana, manaMax, gold, physRes, weight,
+                weightMax, race,
+                hasRenaissance, statsCap, followers, followersMax,
+                hasAos, fireRes, coldRes, poisonRes, energyRes, luck, dmgMin, dmgMax, tithing,
+                hasKrSa, maxPhysRes, maxFireRes, maxColdRes, maxPoisonRes, maxEnergyRes,
+                dci, maxDci, hci, ssi, di, lrc, sdi, fcr, fc, lmc));
         }
 
         private static void FollowR(World world, ref StackDataReader p)
