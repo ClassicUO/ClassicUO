@@ -1,9 +1,9 @@
 # EventSink Refactor Status
 
-Branch: `refactor/eventsink-phase0` (32 commits ahead of `main`)
+Branch: `refactor/eventsink-phase0` (34 commits ahead of `main`)
 Build: green (0 errors)
 Tests: 190/190 pass
-`PacketHandlers.cs`: 4823 lines (down from ~7200 at start of refactor)
+`PacketHandlers.cs`: 4807 lines (down from ~7200 at start of refactor)
 
 ## Goal
 
@@ -51,6 +51,7 @@ Migrated to subscribers (handlers shrunk to parse+emit):
 **Audio**
 - 0x54 PlaySoundEffect → `AudioManager.OnSoundPlay`
 - 0x6D PlayMusic → `AudioManager.OnMusicPlay`
+- 0x6D 0x1F 0xFF stop → `AudioManager.OnMusicStop` (separate `MusicStopArgs`)
 
 **Weather / World atmosphere**
 - 0x65 SetWeather → `Weather.OnWeatherChanged`
@@ -176,10 +177,11 @@ Migrated to subscribers (handlers shrunk to parse+emit):
 - `World.UpdatePlayer` (11-arg overload)
 - `World.AddItemToContainer`
 - `World.ClearContainerAndRemoveItems`
-- `PacketHandlers._requestedGridLoot` now `internal static` so the relocated
-  `AddItemToContainer` can still see it.
-- `PacketHandlers._customHouseRequests` now `internal static` so the relocated
-  `HouseManager.OnHouseRevisionState` can enqueue.
+- `_requestedGridLoot` global moved to `ContainerManager.PendingGridLootSerial`
+  (instance prop on the world-scoped manager).
+- `_customHouseRequests` global moved to `HouseManager._pendingRevisionRequests`
+  with `HouseManager.DrainRevisionRequests()` called once per frame from
+  `GameScene.Update`.
 
 **0xBF ExtendedCommand sweep** — every sub-command split into typed events:
 - 0x00, 0x01 FastWalkStackInit, 0x02 FastWalkStackAdd, 0x08 MapIndexChanged →
@@ -205,19 +207,11 @@ re-wraps. Full parse migration of those would be invasive — deferred.
 ### Packet handlers still doing non-trivial work
 - **0x1B EnterWorld** — extras subscriber owns most side effects but a few
   network sends still happen directly in the handler. Confirm vs. design intent.
-- **0x6D PlayMusic** uses `0xFFFF` sentinel in `MusicPlayArgs.Index` to mean
-  "stop". Cleaner: separate `MusicStopArgs` / `MusicPlayArgs`.
-- **0xC2 UnicodePrompt** is wired but 0x9A vs 0xC2 should share semantics —
-  audit.
 - **0xBF 0x06 PartyPacket** / **0xBF 0x18 MapPatchesEnabled** still carry
   `byte[]` payload because the inner consumers want a `ref StackDataReader`.
   Full parse migration deferred.
 
 ### Subscribers / managers
-- `_requestedGridLoot` AND `_customHouseRequests` should move out of
-  `PacketHandlers` into `ContainerManager` / `HouseManager` / `World`.
-  Currently `internal static` globals on the packet handler class — refactor
-  smell, two now instead of one.
 - `LoginScene` lifecycle: `Load()`/`Unload()` subscribes/unsubscribes; if
   multiple scene instances overlap, double-subscription is possible. Audit
   edge cases.
