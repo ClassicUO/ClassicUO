@@ -15,6 +15,7 @@ namespace ClassicUO.Game.Managers
     internal sealed class HouseManager
     {
         private readonly Dictionary<uint, House> _houses = new Dictionary<uint, House>();
+        private readonly List<uint> _pendingRevisionRequests = new List<uint>();
         private readonly World _world;
 
         public HouseManager(World world)
@@ -22,6 +23,21 @@ namespace ClassicUO.Game.Managers
             _world = world;
             EventSink.CustomHouseReceived += OnCustomHouseReceived;
             EventSink.HouseRevisionState += OnHouseRevisionState;
+        }
+
+        public void DrainRevisionRequests()
+        {
+            if (_pendingRevisionRequests.Count == 0)
+            {
+                return;
+            }
+
+            for (int i = 0; i < _pendingRevisionRequests.Count; ++i)
+            {
+                NetClient.Socket.Send_CustomHouseDataRequest(_pendingRevisionRequests[i]);
+            }
+
+            _pendingRevisionRequests.Clear();
         }
 
         public void Unsubscribe()
@@ -253,7 +269,7 @@ namespace ClassicUO.Game.Managers
                 || house.Revision != revision
             )
             {
-                PacketHandlers.Handler._customHouseRequests.Add(serial);
+                _pendingRevisionRequests.Add(serial);
             }
             else
             {

@@ -123,13 +123,13 @@ namespace ClassicUO.Game
 
                             if (
                                 grid_gump == null
-                                && SerialHelper.IsValid(PacketHandlers._requestedGridLoot)
-                                && PacketHandlers._requestedGridLoot == containerSerial
+                                && SerialHelper.IsValid(ContainerManager.PendingGridLootSerial)
+                                && ContainerManager.PendingGridLootSerial == containerSerial
                             )
                             {
-                                grid_gump = new GridLootGump(this, PacketHandlers._requestedGridLoot);
+                                grid_gump = new GridLootGump(this, ContainerManager.PendingGridLootSerial);
                                 UIManager.Add(grid_gump);
-                                PacketHandlers._requestedGridLoot = 0;
+                                ContainerManager.PendingGridLootSerial = 0;
                             }
 
                             grid_gump?.RequestUpdateContents();

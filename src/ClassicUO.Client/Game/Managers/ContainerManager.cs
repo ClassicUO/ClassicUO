@@ -33,6 +33,8 @@ namespace ClassicUO.Game.Managers
         public int X { get; private set; } = 40;
         public int Y { get; private set; } = 40;
 
+        public uint PendingGridLootSerial { get; set; }
+
         public ContainerData Get(ushort graphic)
         {
             //if the server requests for a non present gump in container data dictionary, create it, but without any particular sound.

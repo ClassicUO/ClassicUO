@@ -28,8 +28,6 @@ namespace ClassicUO.Network
     {
         public delegate void OnPacketBufferReader(World world, ref StackDataReader p);
 
-        internal static uint _requestedGridLoot;
-
         private static readonly TextFileParser _parser = new TextFileParser(
             string.Empty,
             new[] { ' ' },
@@ -44,7 +42,6 @@ namespace ClassicUO.Network
         );
 
         private List<uint> _clilocRequests = new List<uint>();
-        internal List<uint> _customHouseRequests = new List<uint>();
         private readonly OnPacketBufferReader[] _handlers = new OnPacketBufferReader[0x100];
 
         public static PacketHandlers Handler { get; } = new PacketHandlers();
@@ -332,16 +329,6 @@ namespace ClassicUO.Network
 
                     Handler._clilocRequests.Clear();
                 }
-            }
-
-            if (Handler._customHouseRequests.Count > 0)
-            {
-                for (int i = 0; i < Handler._customHouseRequests.Count; ++i)
-                {
-                    NetClient.Socket.Send_CustomHouseDataRequest(Handler._customHouseRequests[i]);
-                }
-
-                Handler._customHouseRequests.Clear();
             }
         }
 

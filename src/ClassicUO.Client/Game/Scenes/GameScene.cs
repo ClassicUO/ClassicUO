@@ -728,6 +728,7 @@ namespace ClassicUO.Game.Scenes
             }
 
             PacketHandlers.SendMegaClilocRequests(_world);
+            _world.HouseManager.DrainRevisionRequests();
 
             if (_forceStopScene)
             {

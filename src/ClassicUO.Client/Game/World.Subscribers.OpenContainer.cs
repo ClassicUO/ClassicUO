@@ -134,7 +134,7 @@ namespace ClassicUO.Game
                     {
                         //UIManager.GetGump<GridLootGump>(serial)?.Dispose();
                         //UIManager.Add(new GridLootGump(serial));
-                        PacketHandlers._requestedGridLoot = serial;
+                        ContainerManager.PendingGridLootSerial = serial;
 
                         if (ProfileManager.CurrentProfile.GridLootType == 1)
                         {
