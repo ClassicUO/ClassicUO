@@ -22,6 +22,76 @@ namespace ClassicUO.Game.Events.Outgoing
 
         public static void RaisePingSent(in PingSentArgs e) => Invoke(PingSent, e);
 
+        // ---- Login ----
+        public static event Action<AckTalkSentArgs> AckTalkSent;
+        public static event Action<SeedSentArgs> SeedSent;
+        public static event Action<SeedOldSentArgs> SeedOldSent;
+        public static event Action<FirstLoginSentArgs> FirstLoginSent;
+        public static event Action<SecondLoginSentArgs> SecondLoginSent;
+        public static event Action<SelectServerSentArgs> SelectServerSent;
+        public static event Action<SelectCharacterSentArgs> SelectCharacterSent;
+        public static event Action<CreateCharacterSentArgs> CreateCharacterSent;
+        public static event Action<DeleteCharacterSentArgs> DeleteCharacterSent;
+        public static event Action<LogoutNotificationSentArgs> LogoutNotificationSent;
+        public static event Action<ClientVersionSentArgs> ClientVersionSent;
+        public static event Action<LanguageSentArgs> LanguageSent;
+        public static event Action<ClientTypeSentArgs> ClientTypeSent;
+
+        public static void RaiseAckTalkSent(in AckTalkSentArgs e) => Invoke(AckTalkSent, e);
+        public static void RaiseSeedSent(in SeedSentArgs e) => Invoke(SeedSent, e);
+        public static void RaiseSeedOldSent(in SeedOldSentArgs e) => Invoke(SeedOldSent, e);
+        public static void RaiseFirstLoginSent(in FirstLoginSentArgs e) => Invoke(FirstLoginSent, e);
+        public static void RaiseSecondLoginSent(in SecondLoginSentArgs e) => Invoke(SecondLoginSent, e);
+        public static void RaiseSelectServerSent(in SelectServerSentArgs e) => Invoke(SelectServerSent, e);
+        public static void RaiseSelectCharacterSent(in SelectCharacterSentArgs e) => Invoke(SelectCharacterSent, e);
+        public static void RaiseCreateCharacterSent(in CreateCharacterSentArgs e) => Invoke(CreateCharacterSent, e);
+        public static void RaiseDeleteCharacterSent(in DeleteCharacterSentArgs e) => Invoke(DeleteCharacterSent, e);
+        public static void RaiseLogoutNotificationSent(in LogoutNotificationSentArgs e) => Invoke(LogoutNotificationSent, e);
+        public static void RaiseClientVersionSent(in ClientVersionSentArgs e) => Invoke(ClientVersionSent, e);
+        public static void RaiseLanguageSent(in LanguageSentArgs e) => Invoke(LanguageSent, e);
+        public static void RaiseClientTypeSent(in ClientTypeSentArgs e) => Invoke(ClientTypeSent, e);
+
+        // ---- Movement ----
+        public static event Action<WalkRequestSentArgs> WalkRequestSent;
+        public static event Action<ResyncSentArgs> ResyncSent;
+        public static event Action<MultiBoatMoveRequestSentArgs> MultiBoatMoveRequestSent;
+
+        public static void RaiseWalkRequestSent(in WalkRequestSentArgs e) => Invoke(WalkRequestSent, e);
+        public static void RaiseResyncSent(in ResyncSentArgs e) => Invoke(ResyncSent, e);
+        public static void RaiseMultiBoatMoveRequestSent(in MultiBoatMoveRequestSentArgs e) => Invoke(MultiBoatMoveRequestSent, e);
+
+        // ---- Combat ----
+        public static event Action<AttackRequestSentArgs> AttackRequestSent;
+        public static event Action<TargetObjectSentArgs> TargetObjectSent;
+        public static event Action<TargetXyzSentArgs> TargetXyzSent;
+        public static event Action<TargetCancelSentArgs> TargetCancelSent;
+        public static event Action<TargetSelectedObjectSentArgs> TargetSelectedObjectSent;
+        public static event Action<ChangeWarModeSentArgs> ChangeWarModeSent;
+        public static event Action<UseCombatAbilitySentArgs> UseCombatAbilitySent;
+        public static event Action<ClickQuestArrowSentArgs> ClickQuestArrowSent;
+
+        public static void RaiseAttackRequestSent(in AttackRequestSentArgs e) => Invoke(AttackRequestSent, e);
+        public static void RaiseTargetObjectSent(in TargetObjectSentArgs e) => Invoke(TargetObjectSent, e);
+        public static void RaiseTargetXyzSent(in TargetXyzSentArgs e) => Invoke(TargetXyzSent, e);
+        public static void RaiseTargetCancelSent(in TargetCancelSentArgs e) => Invoke(TargetCancelSent, e);
+        public static void RaiseTargetSelectedObjectSent(in TargetSelectedObjectSentArgs e) => Invoke(TargetSelectedObjectSent, e);
+        public static void RaiseChangeWarModeSent(in ChangeWarModeSentArgs e) => Invoke(ChangeWarModeSent, e);
+        public static void RaiseUseCombatAbilitySent(in UseCombatAbilitySentArgs e) => Invoke(UseCombatAbilitySent, e);
+        public static void RaiseClickQuestArrowSent(in ClickQuestArrowSentArgs e) => Invoke(ClickQuestArrowSent, e);
+
+        // ---- Interaction ----
+        public static event Action<DoubleClickSentArgs> DoubleClickSent;
+        public static event Action<ClickRequestSentArgs> ClickRequestSent;
+        public static event Action<UseSkillSentArgs> UseSkillSent;
+        public static event Action<NameRequestSentArgs> NameRequestSent;
+        public static event Action<OpenDoorSentArgs> OpenDoorSent;
+
+        public static void RaiseDoubleClickSent(in DoubleClickSentArgs e) => Invoke(DoubleClickSent, e);
+        public static void RaiseClickRequestSent(in ClickRequestSentArgs e) => Invoke(ClickRequestSent, e);
+        public static void RaiseUseSkillSent(in UseSkillSentArgs e) => Invoke(UseSkillSent, e);
+        public static void RaiseNameRequestSent(in NameRequestSentArgs e) => Invoke(NameRequestSent, e);
+        public static void RaiseOpenDoorSent(in OpenDoorSentArgs e) => Invoke(OpenDoorSent, e);
+
         // Per-category event blocks land here as the outgoing migration phases
         // wire packets in. See OUTGOING-PACKETS-MIGRATION for the rollout plan.
 
@@ -46,6 +116,39 @@ namespace ClassicUO.Game.Events.Outgoing
         public static void ClearAll()
         {
             PingSent = null;
+
+            AckTalkSent = null;
+            SeedSent = null;
+            SeedOldSent = null;
+            FirstLoginSent = null;
+            SecondLoginSent = null;
+            SelectServerSent = null;
+            SelectCharacterSent = null;
+            CreateCharacterSent = null;
+            DeleteCharacterSent = null;
+            LogoutNotificationSent = null;
+            ClientVersionSent = null;
+            LanguageSent = null;
+            ClientTypeSent = null;
+
+            WalkRequestSent = null;
+            ResyncSent = null;
+            MultiBoatMoveRequestSent = null;
+
+            AttackRequestSent = null;
+            TargetObjectSent = null;
+            TargetXyzSent = null;
+            TargetCancelSent = null;
+            TargetSelectedObjectSent = null;
+            ChangeWarModeSent = null;
+            UseCombatAbilitySent = null;
+            ClickQuestArrowSent = null;
+
+            DoubleClickSent = null;
+            ClickRequestSent = null;
+            UseSkillSent = null;
+            NameRequestSent = null;
+            OpenDoorSent = null;
         }
     }
 }
