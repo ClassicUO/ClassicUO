@@ -13,12 +13,11 @@ namespace ClassicUO.UnitTests.Game.Subscribers
     // Behavioral tests for PartyManager — proves the manager mutates Leader /
     // Inviter / Members in response to EventSink events.
     //
-    // Fixture: build a fresh World (which auto-instantiates _world.Party and
-    // subscribes it to EventSink). We do NOT call EventSink.ClearAll() because
-    // the chat handler dereferences _world.MessageManager and other paths read
-    // ProfileManager.CurrentProfile; keeping the World-wired manager avoids
-    // re-instantiation pitfalls. ProfileManager.CurrentProfile is seeded with a
-    // default Profile so handlers referencing it don't NRE.
+    // Fixture: build a fresh World (which auto-instantiates _world.Party). The
+    // World wires Subscribe() centrally via RegisterListener at SubscribeEvents
+    // time; in unit tests we drive Subscribe() ourselves so the EventSink
+    // handlers run. ProfileManager.CurrentProfile is seeded with a default
+    // Profile so handlers referencing it don't NRE.
     //
     // Collection serializes execution against other EventSink test classes since
     // EventSink is a static, process-wide bus.
@@ -33,6 +32,7 @@ namespace ClassicUO.UnitTests.Game.Subscribers
             ProfileManager.CurrentProfile = new Profile();
             _world = new World();
             _party = _world.Party;
+            _party.Subscribe();
         }
 
         public void Dispose()

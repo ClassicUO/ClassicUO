@@ -29,7 +29,7 @@ namespace ClassicUO.Game
         {
             WMapManager = new WorldMapEntityManager(this);
             CorpseManager = new CorpseManager(this);
-            Party = new PartyManager(this);
+            Party = RegisterListener(new PartyManager(this));
             HouseManager = RegisterListener(new HouseManager(this));
             WorldTextManager = RegisterListener(new WorldTextManager(this));
             _effectManager = new EffectManager(this);
