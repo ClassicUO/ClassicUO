@@ -177,9 +177,11 @@ namespace ClassicUO.Game.Events
         // ---- Audio ----
         public static event Action<SoundPlayArgs> SoundPlay;
         public static event Action<MusicPlayArgs> MusicPlay;
+        public static event Action<MusicStopArgs> MusicStop;
 
         public static void RaiseSoundPlay(in SoundPlayArgs e) => Invoke(SoundPlay, e);
         public static void RaiseMusicPlay(in MusicPlayArgs e) => Invoke(MusicPlay, e);
+        public static void RaiseMusicStop(in MusicStopArgs e) => Invoke(MusicStop, e);
 
         // ---- Network / session ----
         public static event Action<ConnectedArgs> Connected;
@@ -408,6 +410,7 @@ namespace ClassicUO.Game.Events
 
             SoundPlay = null;
             MusicPlay = null;
+            MusicStop = null;
 
             Connected = null;
             Disconnected = null;

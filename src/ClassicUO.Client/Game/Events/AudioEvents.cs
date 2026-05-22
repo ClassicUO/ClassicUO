@@ -10,4 +10,6 @@ namespace ClassicUO.Game.Events
         short Z);
 
     internal readonly record struct MusicPlayArgs(ushort Index);
+
+    internal readonly record struct MusicStopArgs;
 }

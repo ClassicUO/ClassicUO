@@ -1351,7 +1351,7 @@ namespace ClassicUO.Network
                 // Check for stop music packet (6D 1F FF)
                 if (cmd == 0x1F && index == 0xFF)
                 {
-                    EventSink.RaiseMusicPlay(new MusicPlayArgs(0xFFFF));
+                    EventSink.RaiseMusicStop(new MusicStopArgs());
                 }
                 else
                 {

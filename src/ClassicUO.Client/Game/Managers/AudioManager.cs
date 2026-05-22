@@ -29,12 +29,14 @@ namespace ClassicUO.Game.Managers
             _world = world;
             EventSink.SoundPlay += OnSoundPlay;
             EventSink.MusicPlay += OnMusicPlay;
+            EventSink.MusicStop += OnMusicStop;
         }
 
         public void Unsubscribe()
         {
             EventSink.SoundPlay -= OnSoundPlay;
             EventSink.MusicPlay -= OnMusicPlay;
+            EventSink.MusicStop -= OnMusicStop;
             _world = null;
         }
 
@@ -48,14 +50,12 @@ namespace ClassicUO.Game.Managers
 
         private void OnMusicPlay(MusicPlayArgs e)
         {
-            if (e.Index == 0xFFFF)
-            {
-                StopMusic();
-            }
-            else
-            {
-                PlayMusic(e.Index);
-            }
+            PlayMusic(e.Index);
+        }
+
+        private void OnMusicStop(MusicStopArgs e)
+        {
+            StopMusic();
         }
 
         public void Initialize()
