@@ -1,8 +1,8 @@
 # EventSink Refactor Status
 
-Branch: `refactor/eventsink-phase0` (50 commits ahead of `main`)
+Branch: `refactor/eventsink-phase0` (55 commits ahead of `main`)
 Build: green (0 errors)
-Tests: 334/334 pass
+Tests: 464/464 pass
 `PacketHandlers.cs`: ~4700 lines (down from ~7200 at start of refactor)
 
 Three big remaining un-migrated handlers landed in this batch:
@@ -272,10 +272,31 @@ All event args are now fully typed — no remaining `byte[]` payloads.
 5. Extract pure logic (`Pathfinder`, `MobileAnimation`, `ChairTable`,
    spell tables) to `ClassicUO.Core`.
 
-### Outgoing packets
-- `OutgoingPackets.cs` (the `Send_*` family) has not been touched. If the
-  inverse event flow is desired (UI raises `RequestX`, network subscribes),
-  introduce `OutgoingEventSink` or similar.
+### Outgoing packets — OutgoingEventSink (Phase O0–O-D)
+
+Additive layer. Each `Send_*` raises one typed event before serializing
+bytes; caller API is unchanged. Architecture mirrors inbound `EventSink`:
+static class with `event Action<XSentArgs>` + `RaiseXSent` helper +
+`ClearAll()` + exception-isolating `Invoke`.
+
+- **Phase O0** — infrastructure committed: `OutgoingEventSink` static
+  class, `Game/Events/Outgoing/` folder for args, `Send_Ping` wired as
+  the template, `OutgoingEventSinkTests` covers subscribe/raise/
+  exception isolation/ClearAll.
+- **Phase O-A** — login + movement + combat + interaction (29 packets).
+- **Phase O-B** — items + equip + spells/abilities + status/skills +
+  OPL + profile (27 packets).
+- **Phase O-C** — chat + party + trade + vendor + gumps + menus +
+  prompts (30 packets).
+- **Phase O-D** — books + bulletin board + house customization +
+  world/window + meta/admin + UOLive + plugins (35 packets).
+
+Total: **122 outgoing packets** now raise typed events. 126 new tests
+across 4 bucket suites verify each event's subscribe-and-capture
+contract. Live network not exercised — tests assert raise plumbing only.
+
+Caller API unchanged. Inverse-flow rewrite (B option, UI raises
+`RequestX`) **deferred**: too disruptive for benefit ratio.
 
 ### Testing
 - `EventSinkTests` covers subscribe/raise/exception isolation.
