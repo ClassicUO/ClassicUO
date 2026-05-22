@@ -22,7 +22,7 @@ namespace ClassicUO.Game.Weather
         WT_INVALID_1 = 0xFF
     }
 
-    internal sealed class Weather
+    internal sealed class Weather : IEventListener
     {
         private const int MAX_WEATHER_EFFECT = 70;
         private const float SIMULATION_TIME = 37.0f;
@@ -34,6 +34,10 @@ namespace ClassicUO.Game.Weather
         public Weather(World world)
         {
             _world = world;
+        }
+
+        public void Subscribe()
+        {
             EventSink.WeatherChanged += OnWeatherChanged;
             EventSink.WalkDenied += OnWalkDenied;
         }

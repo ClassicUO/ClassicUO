@@ -46,7 +46,7 @@ namespace ClassicUO.Game
             NameOverHeadManager = new NameOverHeadManager(this);
             Macros = new MacroManager(this);
             CommandManager = new CommandManager(this);
-            Weather = new ClassicUO.Game.Weather.Weather(this);
+            Weather = RegisterListener(new ClassicUO.Game.Weather.Weather(this));
             InfoBars = new InfoBarManager(this);
             OPL = RegisterListener(new ObjectPropertiesListManager(this));
 
