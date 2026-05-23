@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
-// Synthetic mouse input on the main (pre-ECS) branch. Synthesis goes
-// through ClassicUO.Input.Mouse's AGENT_BUILD-only synth state path,
-// not via real OS input — so events reach the game without focus theft,
-// raise-Z tricks, or OS cursor movement that interferes with the human
-// running the agent.
+// Synthetic mouse + keyboard input. Synthesis goes through MouseContext's
+// AGENT_BUILD-only synth state path, not via real OS input — so events
+// reach the ECS without focus theft, raise-Z tricks, or OS cursor
+// movement that interferes with the human running the agent.
 //
 // Multi-frame sequences (click = down+up = 2 frames, double-click = 4
 // frames) are enqueued as separate frames on AgentServerState.
@@ -20,10 +19,13 @@
 #if AGENT_BUILD
 #nullable enable
 
+using System;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using ClassicUO.Agent.Contracts;
 using Microsoft.Xna.Framework.Input;
+using SDL2;
 
 namespace ClassicUO.Agent.Agent.Handlers;
 
@@ -110,6 +112,69 @@ internal static class InputHandlers
         ctx.State.CurrentMouseSynth = default;
         ClassicUO.Input.Mouse.AgentClearSynthetic();
         return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["cleared"] = true } };
+    }
+
+    public static JsonRpcResponse Type(JsonRpcRequest req, in AgentRpcContext ctx)
+    {
+        if (req.Params is not JsonElement p || p.ValueKind != JsonValueKind.Object)
+            return AgentServer.ErrorResponse(req.Id, JsonRpcErrorCodes.InvalidParams,
+                "input.type expects { text }");
+        if (!p.TryGetProperty("text", out var tEl) || tEl.ValueKind != JsonValueKind.String)
+            return AgentServer.ErrorResponse(req.Id, JsonRpcErrorCodes.InvalidParams,
+                "input.type: 'text' must be a string");
+
+        var text = tEl.GetString() ?? string.Empty;
+        var pushed = PushTextInputEvents(text);
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["pushed"] = pushed } };
+    }
+
+    // SDL_TEXTINPUT event payload is a fixed 32-byte UTF-8 buffer (the
+    // first null terminates). FNA's TextInputEXT.TextInput callback fires
+    // once PER CHAR inside the buffer, so we can pack many chars into one
+    // event. To stay safely below the limit we cap at 30 bytes per push
+    // and chunk longer strings across multiple events.
+    private const int SDL_TEXTINPUTEVENT_TEXT_SIZE = 32;
+
+    private static int PushTextInputEvents(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return 0;
+
+        var bytes = Encoding.UTF8.GetBytes(text);
+        var pushed = 0;
+        var offset = 0;
+        while (offset < bytes.Length)
+        {
+            var room = SDL_TEXTINPUTEVENT_TEXT_SIZE - 2; // null terminator + safety
+            var take = Math.Min(room, bytes.Length - offset);
+
+            // Don't split a multi-byte UTF-8 sequence across events: walk
+            // back from the end until we land on a byte that is NOT a
+            // 0b10xxxxxx continuation byte.
+            while (take > 0 && offset + take < bytes.Length
+                   && (bytes[offset + take] & 0xC0) == 0x80)
+            {
+                take--;
+            }
+            if (take == 0) break;
+
+            PushSingleTextInputEvent(bytes, offset, take);
+            pushed++;
+            offset += take;
+        }
+        return pushed;
+    }
+
+    private static unsafe void PushSingleTextInputEvent(byte[] bytes, int offset, int len)
+    {
+        var evt = default(SDL.SDL_Event);
+        evt.type = SDL.SDL_EventType.SDL_TEXTINPUT;
+        evt.text.type = SDL.SDL_EventType.SDL_TEXTINPUT;
+        for (var i = 0; i < len && i < SDL_TEXTINPUTEVENT_TEXT_SIZE - 1; i++)
+        {
+            evt.text.text[i] = bytes[offset + i];
+        }
+        // text[len] stays zero from default(SDL_Event) → null-terminated.
+        SDL.SDL_PushEvent(ref evt);
     }
 
     private static SynthMouseFrame SetButton(SynthMouseFrame s, MouseButton b, ButtonState v)

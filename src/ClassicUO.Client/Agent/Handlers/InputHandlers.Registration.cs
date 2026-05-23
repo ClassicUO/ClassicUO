@@ -24,6 +24,7 @@ internal static partial class AgentDispatcher
         routes["input.mouseHold"]        = (req, in ctx) => InputHandlers.MouseHold(req, in ctx);
         routes["input.mouseRelease"]     = (req, in ctx) => InputHandlers.MouseRelease(req, in ctx);
         routes["input.clear"]            = (req, in ctx) => InputHandlers.InputClear(req, in ctx);
+        routes["input.type"]             = (req, in ctx) => InputHandlers.Type(req, in ctx);
     }
 }
 

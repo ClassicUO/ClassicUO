@@ -31,8 +31,15 @@ namespace ClassicUO.Agent;
 internal static class AgentBootstrap
 {
     private static AgentServerState? s_state;
-    private static SynthMouseFrame s_lastApplied;
-    private static bool s_haveLastApplied;
+    // Track the previous applied state so EmitEdge can detect transitions.
+    // Initialized to all-Released so the first applied frame with a
+    // Pressed button correctly emits SDL_MOUSEBUTTONDOWN.
+    private static SynthMouseFrame s_lastApplied = new()
+    {
+        Left = ButtonState.Released,
+        Middle = ButtonState.Released,
+        Right = ButtonState.Released,
+    };
 
     public static AgentServerState? State => s_state;
 
@@ -101,14 +108,10 @@ internal static class AgentBootstrap
         // which are the actual click pathways on the main branch (the
         // engine reads button state only as a held-mode bit; clicks come
         // from SDL events).
-        if (s_haveLastApplied)
-        {
-            EmitEdge(s_lastApplied.Left, f.Left, (byte)SDL.SDL_BUTTON_LEFT, f.X, f.Y);
-            EmitEdge(s_lastApplied.Middle, f.Middle, (byte)SDL.SDL_BUTTON_MIDDLE, f.X, f.Y);
-            EmitEdge(s_lastApplied.Right, f.Right, (byte)SDL.SDL_BUTTON_RIGHT, f.X, f.Y);
-        }
+        EmitEdge(s_lastApplied.Left, f.Left, (byte)SDL.SDL_BUTTON_LEFT, f.X, f.Y);
+        EmitEdge(s_lastApplied.Middle, f.Middle, (byte)SDL.SDL_BUTTON_MIDDLE, f.X, f.Y);
+        EmitEdge(s_lastApplied.Right, f.Right, (byte)SDL.SDL_BUTTON_RIGHT, f.X, f.Y);
         s_lastApplied = f;
-        s_haveLastApplied = true;
     }
 
     private static void EmitEdge(ButtonState prev, ButtonState curr, byte sdlButton, int x, int y)
