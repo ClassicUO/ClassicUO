@@ -76,6 +76,13 @@ namespace ClassicUO
             _queuedActions.Add((Time.Ticks + time, action));
         }
 
+#if AGENT_BUILD
+        // Bring up the agent TCP listener once, lazily on first frame.
+        // Done outside Initialize/LoadContent so a startup crash there
+        // doesn't prevent the ping fast-path from answering.
+        private static bool s_agentStarted;
+#endif
+
         protected override void Initialize()
         {
             if (GraphicManager.GraphicsDevice.Adapter.IsProfileSupported(GraphicsProfile.HiDef))
@@ -339,6 +346,20 @@ namespace ClassicUO
             Time.Ticks = (uint)gameTime.TotalGameTime.TotalMilliseconds;
             Time.Delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+#if AGENT_BUILD
+            if (!s_agentStarted)
+            {
+                ClassicUO.Agent.AgentBootstrap.Start();
+                s_agentStarted = true;
+            }
+            // Drain one synth-mouse frame BEFORE Mouse.Update so the
+            // upcoming Mouse.Update reflects this frame's synthetic state.
+            ClassicUO.Agent.AgentBootstrap.OnFrameUpdateBefore();
+            // Drain pending RPC calls. Handlers may mutate Mouse synth
+            // state or enqueue a capture request.
+            ClassicUO.Agent.AgentBootstrap.DrainInbox(this);
+#endif
+
             Mouse.Update();
 
             var data = NetClient.Socket.CollectAvailableData();
@@ -473,6 +494,15 @@ namespace ClassicUO
             Profiler.EnterContext("OutOfContext");
 
             Plugin.ProcessDrawCmdList(GraphicsDevice);
+
+#if AGENT_BUILD
+            // After everything has been drawn and before Present (base.Draw
+            // ends the frame), service any pending screenshot request by
+            // reading the backbuffer. Flush the outbox so the response (and
+            // any earlier queued responses) lands on the socket this tick.
+            ClassicUO.Agent.AgentBootstrap.ServiceCapture(GraphicsDevice);
+            ClassicUO.Agent.AgentBootstrap.FlushOutbox();
+#endif
 
             base.Draw(gameTime);
         }
