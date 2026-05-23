@@ -458,26 +458,36 @@ internal readonly struct PaperdollPlugin : IPlugin
         }
     }
 
-    // The 6 left-side jewelry slot frames. Mirrors main's
-    // PaperDollGump.cs lines 263-273: 19x20 px frames at X=2, Y=75+21*i
-    // for Helmet, Earrings, Necklace, Ring, Bracelet, Tunic. The frame
-    // is gump 0x2344 (the legacy code also tiles 0x243A behind it; we
-    // skip the tile background — it shows through to the paperdoll
-    // panel's own color which already looks correct). Each slot
-    // renders the equipped item's *art* graphic centered when a slot
-    // is filled.
-    private static readonly Layer[] s_jewelryLayers =
+    // Equipment slot frames around the paperdoll body. Mirrors main's
+    // post-`show more paperdoll slots` (Dec 2025) layout: 9 slots in a
+    // left column at X=2 and 6 slots in a right column at X=162, both
+    // starting Y=70, step 21. Frame is gump 0x2344 (the legacy code
+    // also tiles 0x243A behind it; we skip the tile background — it
+    // shows through to the paperdoll panel's own color which already
+    // looks correct). Each slot renders the equipped item's *art*
+    // graphic centered when filled.
+    private static readonly (int X, Layer Layer)[] s_slotPositions =
     {
-        Layer.Helmet,
-        Layer.Earrings,
-        Layer.Necklace,
-        Layer.Ring,
-        Layer.Bracelet,
-        Layer.Tunic,
+        // Left column.
+        (2, Layer.Helmet),
+        (2, Layer.Earrings),
+        (2, Layer.Necklace),
+        (2, Layer.Ring),
+        (2, Layer.Bracelet),
+        (2, Layer.Tunic),
+        (2, Layer.OneHanded),
+        (2, Layer.TwoHanded),
+        (2, Layer.Talisman),
+        // Right column starts at (162, 70).
+        (162, Layer.Robe),
+        (162, Layer.Gloves),
+        (162, Layer.Pants),
+        (162, Layer.Arms),
+        (162, Layer.Cloak),
+        (162, Layer.Shoes),
     };
 
-    private const int JewelrySlotX = 2;
-    private const int JewelrySlotY0 = 75;
+    private const int JewelrySlotY0 = 70;
     private const int JewelrySlotStep = 21;
     private const int JewelrySlotW = 19;
     private const int JewelrySlotH = 20;
@@ -491,11 +501,17 @@ internal readonly struct PaperdollPlugin : IPlugin
         Query<Data<Graphic, Hue>> qItem,
         Query<Data<NetworkSerial>> qSerial)
     {
-        for (var i = 0; i < s_jewelryLayers.Length; i++)
+        // Y index resets at the start of each column. Track the X
+        // currently being walked so the right column begins fresh.
+        var leftIdx = 0;
+        var rightIdx = 0;
+        for (var i = 0; i < s_slotPositions.Length; i++)
         {
-            var layer = s_jewelryLayers[i];
-            var slotX = JewelrySlotX;
-            var slotY = JewelrySlotY0 + i * JewelrySlotStep;
+            var (slotX, layer) = s_slotPositions[i];
+            int idx;
+            if (slotX <= 2) { idx = leftIdx++; }
+            else            { idx = rightIdx++; }
+            var slotY = JewelrySlotY0 + idx * JewelrySlotStep;
 
             uint itemSerial = 0;
             ushort itemGraphic = 0;

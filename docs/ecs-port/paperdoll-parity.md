@@ -56,15 +56,19 @@ parity.
   clears `GrabbedItem`.
 - **`PlayerData.IsFemale`:** field added to `Components.cs`,
   populated from packet 0x11 in `HandleCharacterStatus`.
-- **6 jewelry-slot frames** on the left edge of the panel (gump
-  `0x2344`, 19x20, at X=2 Y=75+21*i for Helmet/Earrings/Necklace/
-  Ring/Bracelet/Tunic). When a slot is filled, an 18x18
-  `UOCustomKind.Art` child renders the equipped item's art at the
-  slot origin. Each slot is `PaperdollJewelrySlot { WindowEntity,
-  Layer, ItemSerial }`; left-click fires
-  `Send_PickUpRequest(serial, 1)`. `RefreshEquipmentOverlays`
-  despawns + respawns the slots alongside the body overlays so the
-  slot icons stay in sync with `EquipmentSlots`.
+- **15 equipment-slot frames** around the panel (gump `0x2344`,
+  19x20 each). Matches main's post-`show more paperdoll slots`
+  (Dec 2025) layout: left column at X=2 for Helmet, Earrings,
+  Necklace, Ring, Bracelet, Tunic, OneHanded, TwoHanded, Talisman
+  starting Y=70 step 21; right column at X=162 for Robe, Gloves,
+  Pants, Arms, Cloak, Shoes from the same Y=70. When a slot is
+  filled, an 18x18 `UOCustomKind.Art` child renders the equipped
+  item's art at the slot origin. Each slot is
+  `PaperdollJewelrySlot { WindowEntity, Layer, ItemSerial }`;
+  left-click fires `Send_PickUpRequest(serial, 1)`.
+  `RefreshEquipmentOverlays` despawns + respawns the slots
+  alongside the body overlays so the slot icons stay in sync with
+  `EquipmentSlots`.
 
 ### Visual baseline captures
 
