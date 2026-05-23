@@ -20,12 +20,12 @@
 #nullable enable
 
 using System;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using ClassicUO.Agent.Contracts;
 using Microsoft.Xna.Framework.Input;
-using SDL2;
 
 namespace ClassicUO.Agent.Agent.Handlers;
 
@@ -124,57 +124,25 @@ internal static class InputHandlers
                 "input.type: 'text' must be a string");
 
         var text = tEl.GetString() ?? string.Empty;
-        var pushed = PushTextInputEvents(text);
+        var pushed = PushTextInputEvents(text, in ctx);
         return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["pushed"] = pushed } };
     }
 
-    // SDL_TEXTINPUT event payload is a fixed 32-byte UTF-8 buffer (the
-    // first null terminates). FNA's TextInputEXT.TextInput callback fires
-    // once PER CHAR inside the buffer, so we can pack many chars into one
-    // event. To stay safely below the limit we cap at 30 bytes per push
-    // and chunk longer strings across multiple events.
-    private const int SDL_TEXTINPUTEVENT_TEXT_SIZE = 32;
-
-    private static int PushTextInputEvents(string text)
+    // Queue typed text into AgentServerState. A per-frame system in
+    // AgentServerPlugin drains it and emits CharInputEvent via the
+    // engine's EventWriter — same channel the real keyboard path uses
+    // through TextInputEXT.TextInput → CharInputEvent. SDL_PushEvent
+    // would be the more direct route but is brittle on the SDL3 path
+    // where bindings forward to a native dll with a different event
+    // struct layout.
+    private static int PushTextInputEvents(string text, in AgentRpcContext ctx)
     {
         if (string.IsNullOrEmpty(text)) return 0;
-
-        var bytes = Encoding.UTF8.GetBytes(text);
-        var pushed = 0;
-        var offset = 0;
-        while (offset < bytes.Length)
+        foreach (var ch in text)
         {
-            var room = SDL_TEXTINPUTEVENT_TEXT_SIZE - 2; // null terminator + safety
-            var take = Math.Min(room, bytes.Length - offset);
-
-            // Don't split a multi-byte UTF-8 sequence across events: walk
-            // back from the end until we land on a byte that is NOT a
-            // 0b10xxxxxx continuation byte.
-            while (take > 0 && offset + take < bytes.Length
-                   && (bytes[offset + take] & 0xC0) == 0x80)
-            {
-                take--;
-            }
-            if (take == 0) break;
-
-            PushSingleTextInputEvent(bytes, offset, take);
-            pushed++;
-            offset += take;
+            ctx.State.PendingTypedChars.Enqueue(ch);
         }
-        return pushed;
-    }
-
-    private static unsafe void PushSingleTextInputEvent(byte[] bytes, int offset, int len)
-    {
-        var evt = default(SDL.SDL_Event);
-        evt.type = SDL.SDL_EventType.SDL_TEXTINPUT;
-        evt.text.type = SDL.SDL_EventType.SDL_TEXTINPUT;
-        for (var i = 0; i < len && i < SDL_TEXTINPUTEVENT_TEXT_SIZE - 1; i++)
-        {
-            evt.text.text[i] = bytes[offset + i];
-        }
-        // text[len] stays zero from default(SDL_Event) → null-terminated.
-        SDL.SDL_PushEvent(ref evt);
+        return text.Length;
     }
 
     private static SynthMouseFrame SetButton(SynthMouseFrame s, MouseButton b, ButtonState v)

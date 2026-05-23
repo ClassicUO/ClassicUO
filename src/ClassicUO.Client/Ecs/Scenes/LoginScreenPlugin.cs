@@ -19,6 +19,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
     {
         var setupFn = Setup;
         var deleteMenuFn = DeleteMenu;
+        var typeIntoFocusedFn = TypeIntoFocused;
 
         app
             .AddState(LoginInteraction.None)
@@ -35,9 +36,66 @@ internal readonly struct LoginScreenPlugin : IPlugin
             .OnExit(GameState.LoginScreen)
             .Build()
 
+            // Drain CharInputEvent and append into the currently focused
+            // text input (Text or MaskedText, depending on which marker the
+            // entity carries). RunIf gates on the LoginScreen state so the
+            // chat plugin's chars don't accidentally land in textboxes.
+            .AddSystem(typeIntoFocusedFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> s, EventReader<CharInputEvent> r)
+                => s.Value.Current == GameState.LoginScreen && r.HasEvents)
+            .Build()
+
             .AddPlugin<ServerSelectionPlugin>()
             .AddPlugin<CharacterSelectionPlugin>()
             .AddPlugin<LoginErrorScreenPlugin>();
+    }
+
+    // Append CharInputEvent chars to the focused TextInput entity. If the
+    // entity has a MaskedText component (password field), update its Value
+    // and let SyncMaskedText mirror the mask chars into Text. Otherwise
+    // update Text directly.
+    private static void TypeIntoFocused(
+        EventReader<CharInputEvent> reader,
+        Res<FocusedInput> focused,
+        Query<Data<Text>, Filter<With<TextInput>, Without<MaskedText>>> textQuery,
+        Query<Data<MaskedText>, Filter<With<TextInput>>> maskedQuery)
+    {
+        var focusEnt = focused.Value.Entity;
+        if (focusEnt == 0) return;
+
+        foreach (var ev in reader.Read())
+        {
+            var ch = ev.Value;
+            if (ch == '\n' || ch == '\t') continue;
+
+            if (maskedQuery.Contains(focusEnt))
+            {
+                (_, var mt) = maskedQuery.Get(focusEnt);
+                if (ch == '\b')
+                {
+                    if (!string.IsNullOrEmpty(mt.Ref.Value))
+                        mt.Ref.Value = mt.Ref.Value[..^1];
+                }
+                else
+                {
+                    mt.Ref.Value = (mt.Ref.Value ?? string.Empty) + ch;
+                }
+            }
+            else if (textQuery.Contains(focusEnt))
+            {
+                (_, var t) = textQuery.Get(focusEnt);
+                if (ch == '\b')
+                {
+                    if (!string.IsNullOrEmpty(t.Ref.Value))
+                        t.Ref.Value = t.Ref.Value[..^1];
+                }
+                else
+                {
+                    t.Ref.Value = (t.Ref.Value ?? string.Empty) + ch;
+                }
+            }
+        }
     }
 
     private static void Setup(
@@ -146,12 +204,12 @@ internal readonly struct LoginScreenPlugin : IPlugin
             XnaVector3.UnitZ,
             new XnaVector2(218, 283),
             new XnaVector2(210, 30))
-            .Insert<LoginScene>();
+            .Insert<LoginScene>()
+            // Interaction.None makes the gump frame clickable so a click
+            // anywhere over the field sets the keyboard focus to the
+            // child Text entity (which is what TypeIntoFocused queries).
+            .Insert(Interaction.None);
 
-        // Static text inside username field. Carries the markers so the
-        // FocusedInput-clearing system in GuiPlugin still sees the inputs.
-        // TODO: wire real text editing (StbTextEdit integration) — for now we
-        // render the saved username read-only.
         var usernameText = commands.Spawn()
             .Insert(new Node
             {
@@ -168,6 +226,12 @@ internal readonly struct LoginScreenPlugin : IPlugin
             .Insert<UsernameInput>()
             .Insert<LoginScene>();
 
+        var usernameTextId = usernameText.Id;
+        usernameField.Observe((On<UiPointerDown> _, ResMut<FocusedInput> focused) =>
+        {
+            focused.Value.Entity = usernameTextId;
+        });
+
         usernameField.AddChild(usernameText);
         mainMenu.AddChild(usernameField);
 
@@ -178,7 +242,8 @@ internal readonly struct LoginScreenPlugin : IPlugin
             XnaVector3.UnitZ,
             new XnaVector2(218, 283 + 50),
             new XnaVector2(210, 30))
-            .Insert<LoginScene>();
+            .Insert<LoginScene>()
+            .Insert(Interaction.None);
 
         // Real password kept in MaskedText.Value; SyncMaskedText (GuiPlugin)
         // mirrors it into Text as mask chars before the renderer sees it.
@@ -200,6 +265,12 @@ internal readonly struct LoginScreenPlugin : IPlugin
             .Insert<TextInput>()
             .Insert<PasswordInput>()
             .Insert<LoginScene>();
+
+        var passwordTextId = passwordText.Id;
+        passwordField.Observe((On<UiPointerDown> _, ResMut<FocusedInput> focused) =>
+        {
+            focused.Value.Entity = passwordTextId;
+        });
 
         passwordField.AddChild(passwordText);
         mainMenu.AddChild(passwordField);

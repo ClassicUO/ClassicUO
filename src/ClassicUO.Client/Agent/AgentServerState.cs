@@ -75,6 +75,12 @@ internal sealed class AgentServerState
     // Pending capture request (single in-flight). The render system fills
     // the TaskCompletionSource on the next frame after the request lands.
     public CaptureRequest? PendingCapture;
+
+    // Typed characters waiting to be turned into CharInputEvent instances
+    // by an engine-side system. Used instead of SDL_PushEvent because the
+    // ECS branch uses SDL3 bindings, where SDL2-flavor event pushes don't
+    // make it through to FNA's TextInputEXT pipeline.
+    public readonly Queue<char> PendingTypedChars = new();
 }
 
 #endif

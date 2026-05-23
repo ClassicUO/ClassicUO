@@ -87,6 +87,15 @@ internal readonly struct AgentServerPlugin : IPlugin
             .SingleThreaded()
             .Build();
 
+        // Drain queued synthetic-keyboard text into CharInputEvent so
+        // gameplay subscribers (chat, login-screen text input) see the
+        // chars on the same channel real keyboard input uses.
+        Action<Res<AgentServerState>, EventWriter<CharInputEvent>> drainTypedFn = DrainTypedCharsSystem;
+        app.AddSystem(drainTypedFn)
+            .InStage(Stage.First)
+            .SingleThreaded()
+            .Build();
+
         // Stage.Last: flush responses after handler systems and any
         // engine-side event emitters have written to the outbox this tick.
         Action<Res<AgentServerState>> flushFn = static s => AgentServer.FlushOutbox(s.Value!);
@@ -118,6 +127,18 @@ internal readonly struct AgentServerPlugin : IPlugin
             // between ticks (defensive; nothing currently does this).
             var c = state.CurrentMouseSynth;
             mouseCtx.AgentSetSynthetic(c.X, c.Y, c.Left, c.Middle, c.Right);
+        }
+    }
+
+    private static void DrainTypedCharsSystem(
+        Res<AgentServerState> stateRes,
+        EventWriter<CharInputEvent> writer)
+    {
+        var state = stateRes.Value!;
+        while (state.PendingTypedChars.Count > 0)
+        {
+            var ch = state.PendingTypedChars.Dequeue();
+            writer.Send(new CharInputEvent { Value = ch });
         }
     }
 
