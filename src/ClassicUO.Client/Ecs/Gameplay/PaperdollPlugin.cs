@@ -194,6 +194,19 @@ internal readonly struct PaperdollPlugin : IPlugin
                     (_, var slotsData) = qSlots.Get(targetEnt.Id);
                     SpawnEquipmentOverlays(commands, windowId, ref slotsData.Ref,
                         fileManager.Value.TileData, assets.Value, qItem, qSerial, isFemale);
+                    SpawnJewelrySlots(commands, windowId, ref slotsData.Ref,
+                        assets.Value, qItem, qSerial);
+                }
+                else
+                {
+                    // Slots aren't populated yet (no items equipped, or
+                    // the EquipItem packets haven't arrived for this
+                    // mobile). Spawn empty frames so the UI looks right;
+                    // RefreshEquipmentOverlays will fill the item arts
+                    // when EquipmentSlots first lands.
+                    var empty = default(EquipmentSlots);
+                    SpawnJewelrySlots(commands, windowId, ref empty,
+                        assets.Value, qItem, qSerial);
                 }
             }
 
@@ -302,7 +315,10 @@ internal readonly struct PaperdollPlugin : IPlugin
         return ent;
     }
 
-    // Re-render equipment children on EquipmentSlots changes.
+    // Re-render equipment children on EquipmentSlots changes. Same
+    // teardown-and-respawn applies to the left-side jewelry slots since
+    // their item-art children depend on the current EquipmentSlots
+    // contents.
     private static void RefreshEquipmentOverlays(
         Commands commands,
         Res<AssetsServer> assets,
@@ -312,6 +328,7 @@ internal readonly struct PaperdollPlugin : IPlugin
         Query<Data<EquipmentSlots>> qSlots,
         Query<Data<PaperdollTarget>, With<IsPaperdoll>> qWindows,
         Query<Data<PaperdollEquipChild>> qEquipChildren,
+        Query<Data<PaperdollJewelrySlot>> qJewelrySlots,
         Query<Data<Graphic, Hue>> qItem,
         Query<Data<NetworkSerial>> qSerial,
         Query<Data<PlayerData>> qPlayerData)
@@ -328,6 +345,11 @@ internal readonly struct PaperdollPlugin : IPlugin
                 if (info.Ref.WindowEntity != winEnt.Ref) continue;
                 commands.Entity(childEnt.Ref).Despawn();
             }
+            foreach ((var childEnt, var info) in qJewelrySlots)
+            {
+                if (info.Ref.WindowEntity != winEnt.Ref) continue;
+                commands.Entity(childEnt.Ref).Despawn();
+            }
 
             var isFemale = false;
             if (qPlayerData.Contains(targetEnt.Id))
@@ -339,6 +361,8 @@ internal readonly struct PaperdollPlugin : IPlugin
             (_, var slotsData) = qSlots.Get(targetEnt.Id);
             SpawnEquipmentOverlays(commands, winEnt.Ref, ref slotsData.Ref,
                 fileManager.Value.TileData, assets.Value, qItem, qSerial, isFemale);
+            SpawnJewelrySlots(commands, winEnt.Ref, ref slotsData.Ref,
+                assets.Value, qItem, qSerial);
         }
     }
 
@@ -434,6 +458,125 @@ internal readonly struct PaperdollPlugin : IPlugin
         }
     }
 
+    // The 6 left-side jewelry slot frames. Mirrors main's
+    // PaperDollGump.cs lines 263-273: 19x20 px frames at X=2, Y=75+21*i
+    // for Helmet, Earrings, Necklace, Ring, Bracelet, Tunic. The frame
+    // is gump 0x2344 (the legacy code also tiles 0x243A behind it; we
+    // skip the tile background — it shows through to the paperdoll
+    // panel's own color which already looks correct). Each slot
+    // renders the equipped item's *art* graphic centered when a slot
+    // is filled.
+    private static readonly Layer[] s_jewelryLayers =
+    {
+        Layer.Helmet,
+        Layer.Earrings,
+        Layer.Necklace,
+        Layer.Ring,
+        Layer.Bracelet,
+        Layer.Tunic,
+    };
+
+    private const int JewelrySlotX = 2;
+    private const int JewelrySlotY0 = 75;
+    private const int JewelrySlotStep = 21;
+    private const int JewelrySlotW = 19;
+    private const int JewelrySlotH = 20;
+    private const ushort JewelrySlotFrameGump = 0x2344;
+
+    private static void SpawnJewelrySlots(
+        Commands commands,
+        ulong windowEntity,
+        ref EquipmentSlots slots,
+        AssetsServer assets,
+        Query<Data<Graphic, Hue>> qItem,
+        Query<Data<NetworkSerial>> qSerial)
+    {
+        for (var i = 0; i < s_jewelryLayers.Length; i++)
+        {
+            var layer = s_jewelryLayers[i];
+            var slotX = JewelrySlotX;
+            var slotY = JewelrySlotY0 + i * JewelrySlotStep;
+
+            uint itemSerial = 0;
+            ushort itemGraphic = 0;
+            ushort itemHue = 0;
+            var itemId = slots[layer];
+            if (itemId != 0 && qItem.Contains(itemId))
+            {
+                (_, var gfx, var hue) = qItem.Get(itemId);
+                itemGraphic = gfx.Ref.Value;
+                itemHue = hue.Ref.Value;
+                if (qSerial.Contains(itemId))
+                {
+                    (_, var serialData) = qSerial.Get(itemId);
+                    itemSerial = serialData.Ref.Value;
+                }
+            }
+
+            var slotEnt = commands.Spawn()
+                .Insert(new Node
+                {
+                    PositionType = PositionType.Absolute,
+                    Left = Val.Px(slotX),
+                    Top = Val.Px(slotY),
+                    Width = Val.Px(JewelrySlotW),
+                    Height = Val.Px(JewelrySlotH),
+                })
+                .Insert(new ZIndex(102))
+                .Insert(new UiCustom { Data = CustomMarker })
+                .Insert(new UOCustomRender
+                {
+                    Kind = UOCustomKind.Gump,
+                    AssetId = JewelrySlotFrameGump,
+                    Hue = Vector3.UnitZ,
+                })
+                .Insert(Interaction.None)
+                .Insert(new PaperdollJewelrySlot
+                {
+                    WindowEntity = windowEntity,
+                    Layer = layer,
+                    ItemSerial = itemSerial,
+                });
+
+            // Empty slot: only the frame. Click does nothing useful
+            // (server rejects pickup on serial 0).
+            if (itemSerial != 0 && itemGraphic != 0)
+            {
+                var capturedSerial = itemSerial;
+                slotEnt.Observe((On<UiPointerDown> _, Res<NetClient> net) =>
+                {
+                    net.Value.Send_PickUpRequest(capturedSerial, 1);
+                });
+
+                // Item art icon inside the slot. Centered at (0, 0) of
+                // the 19x20 frame and scaled to 18x18 — same as the
+                // legacy ItemGumpFixed nested control.
+                var artEnt = commands.Spawn()
+                    .Insert(new Node
+                    {
+                        PositionType = PositionType.Absolute,
+                        Left = Val.Px(0),
+                        Top = Val.Px(0),
+                        Width = Val.Px(18),
+                        Height = Val.Px(18),
+                    })
+                    .Insert(new ZIndex(103))
+                    .Insert(new UiCustom { Data = CustomMarker })
+                    .Insert(new UOCustomRender
+                    {
+                        Kind = UOCustomKind.Art,
+                        AssetId = itemGraphic,
+                        Hue = itemHue != 0
+                            ? new Vector3(itemHue, 1, 1)
+                            : Vector3.UnitZ,
+                    });
+                commands.AddChild(slotEnt.Id, artEnt.Id);
+            }
+
+            commands.AddChild(windowEntity, slotEnt.Id);
+        }
+    }
+
     // Right-click on a paperdoll tears it down. Mirrors
     // ContainersPlugin.CloseContainersOnRightClick: pick the topmost
     // paperdoll under the cursor (highest ClayId draws latest, so it's
@@ -446,7 +589,8 @@ internal readonly struct PaperdollPlugin : IPlugin
         Res<MouseContext> mouseCtx,
         Query<Data<ComputedNode>, Filter<With<IsPaperdoll>>> query,
         Query<Data<PaperdollEquipChild>> qEquip,
-        Query<Data<PaperdollStatText>> qStats)
+        Query<Data<PaperdollStatText>> qStats,
+        Query<Data<PaperdollJewelrySlot>> qJewelry)
     {
         var pos = mouseCtx.Value.Position;
         ulong topId = 0;
@@ -475,6 +619,11 @@ internal readonly struct PaperdollPlugin : IPlugin
                 commands.Entity(childEnt.Ref).Despawn();
         }
         foreach ((var childEnt, var info) in qStats)
+        {
+            if (info.Ref.WindowEntity == topId)
+                commands.Entity(childEnt.Ref).Despawn();
+        }
+        foreach ((var childEnt, var info) in qJewelry)
         {
             if (info.Ref.WindowEntity == topId)
                 commands.Entity(childEnt.Ref).Despawn();
@@ -560,4 +709,14 @@ internal struct PaperdollEquipChild
 internal struct PaperdollStatText
 {
     public ulong WindowEntity;
+}
+
+// Marker on each of the 6 left-side jewelry slot frames. Layer is
+// stored so a future right-click context menu can show layer-specific
+// actions without re-querying.
+internal struct PaperdollJewelrySlot
+{
+    public ulong WindowEntity;
+    public Layer Layer;
+    public uint ItemSerial;
 }

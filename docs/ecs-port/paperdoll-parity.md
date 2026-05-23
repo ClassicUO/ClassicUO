@@ -2,7 +2,8 @@
 
 **Status:** in progress.
 **Branch:** `impl/ecs`.
-**Last commit on this work:** `0fb049d12`.
+**Last commit on this work:** see `git log --oneline -5`. The most
+recent paperdoll commits are listed under "Already shipped" below.
 
 ## Goal
 
@@ -55,6 +56,15 @@ parity.
   clears `GrabbedItem`.
 - **`PlayerData.IsFemale`:** field added to `Components.cs`,
   populated from packet 0x11 in `HandleCharacterStatus`.
+- **6 jewelry-slot frames** on the left edge of the panel (gump
+  `0x2344`, 19x20, at X=2 Y=75+21*i for Helmet/Earrings/Necklace/
+  Ring/Bracelet/Tunic). When a slot is filled, an 18x18
+  `UOCustomKind.Art` child renders the equipped item's art at the
+  slot origin. Each slot is `PaperdollJewelrySlot { WindowEntity,
+  Layer, ItemSerial }`; left-click fires
+  `Send_PickUpRequest(serial, 1)`. `RefreshEquipmentOverlays`
+  despawns + respawns the slots alongside the body overlays so the
+  slot icons stay in sync with `EquipmentSlots`.
 
 ### Visual baseline captures
 
@@ -71,13 +81,6 @@ Audited against `src/ClassicUO.Client/Game/UI/Gumps/PaperdollGump.cs`
 on `main`. Grouped by effort.
 
 ### Small (1-2h each)
-
-- **6 jewelry-slot frames on the left side**
-  (`PaperDollGump.cs:263-273`). EquipmentSlot at (2, 75) +
-  21*N for Layer.Helmet, Earrings, Necklace, Ring, Bracelet,
-  Tunic. Each is its own clickable control showing the item's
-  *art* graphic (`Arts.GetArt`) — not the body-painted equip
-  gump.
 
 - **Help icon (?)** at top-right of panel. Just a `GumpPic`
   with a `UiPointerDown` observer that opens help. Help can
