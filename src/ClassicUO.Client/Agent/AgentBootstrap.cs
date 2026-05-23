@@ -24,7 +24,7 @@
 
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using SDL2;
+using SDL3;
 
 namespace ClassicUO.Agent;
 
@@ -108,9 +108,10 @@ internal static class AgentBootstrap
         // which are the actual click pathways on the main branch (the
         // engine reads button state only as a held-mode bit; clicks come
         // from SDL events).
-        EmitEdge(s_lastApplied.Left, f.Left, (byte)SDL.SDL_BUTTON_LEFT, f.X, f.Y);
-        EmitEdge(s_lastApplied.Middle, f.Middle, (byte)SDL.SDL_BUTTON_MIDDLE, f.X, f.Y);
-        EmitEdge(s_lastApplied.Right, f.Right, (byte)SDL.SDL_BUTTON_RIGHT, f.X, f.Y);
+        // SDL mouse-button constants are stable across SDL2/SDL3: 1=L, 2=M, 3=R.
+        EmitEdge(s_lastApplied.Left,   f.Left,   sdlButton: 1, f.X, f.Y);
+        EmitEdge(s_lastApplied.Middle, f.Middle, sdlButton: 2, f.X, f.Y);
+        EmitEdge(s_lastApplied.Right,  f.Right,  sdlButton: 3, f.X, f.Y);
         s_lastApplied = f;
     }
 
@@ -118,13 +119,14 @@ internal static class AgentBootstrap
     {
         if (prev == curr) return;
 
+        var kind = curr == ButtonState.Pressed
+            ? SDL.SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN
+            : SDL.SDL_EventType.SDL_EVENT_MOUSE_BUTTON_UP;
         var evt = default(SDL.SDL_Event);
-        evt.type = curr == ButtonState.Pressed
-            ? SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN
-            : SDL.SDL_EventType.SDL_MOUSEBUTTONUP;
-        evt.button.type = evt.type;
+        evt.type = (uint)kind;
+        evt.button.type = kind;
         evt.button.button = sdlButton;
-        evt.button.state = curr == ButtonState.Pressed ? SDL.SDL_PRESSED : (byte)0;
+        evt.button.down = curr == ButtonState.Pressed;
         evt.button.clicks = 1;
         evt.button.x = x;
         evt.button.y = y;
