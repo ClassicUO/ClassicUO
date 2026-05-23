@@ -1,22 +1,18 @@
-// Container packet handling + container window UI.
+// Container packet handling + close detection. UI lifecycle lives in
+// `ContainerGumpPlugin` (separate UI entities; see note there about Bevy.UI
+// roots needing `Without<Parent>`).
 //
-// Migrated from the old Clay_cs / TinyEcs.UI.Clay path onto TinyEcs.Bevy.UI:
-//   * `ClayNode`/`UINode`              -> `Node`            (Bevy.UI)
-//   * `ClayInteraction` / mouse action -> `Interaction`     (Bevy.UI)
-//   * `UOClayUiBundle.UONodeData`      -> `UOCustomRender`  (GuiPlugin.cs)
-//
-// Right-click close: Bevy.UI's interaction system only wires the LEFT mouse
-// button. There is no `UiPointerUp` for right-click. We work around this with
-// a small `Stage.Update` system that walks `MouseContext` directly, picks the
-// topmost UIMovable container under the cursor (using its `ComputedNode`
-// bounding box), and tears down the UI components when right-button is pressed.
+//   * Translate 0x24 (open) / 0x25 (single update) / 0x3C (batch update)
+//     packets into ECS data components on game entities + emit
+//     `ContainerOpenedEvent` / `ContainerUpdateEvent`.
+//   * Detect close on distance > MAX_CONTAINER_DIST and emit
+//     `ContainerClosedEvent`. Right-click close is handled generically in
+//     WindowDragPlugin for any UIMovable.
 
 using System;
 using ClassicUO.Assets;
 using ClassicUO.Ecs.Modding.Host;
-using ClassicUO.Game.Data;
 using ClassicUO.Network;
-using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
 using TinyEcs.Bevy.UI;
@@ -28,150 +24,74 @@ internal readonly struct ContainersPlugin : IPlugin
     public void Build(App app)
     {
         var processPacketsFn = ProcessContainerPackets;
-        var onOpenContainersFn = OnOpenContainers;
         var closeContainersTooFarFromPlayerFn = CloseContainersTooFarFromPlayer;
-        var closeContainersOnRightClickFn = CloseContainersOnRightClick;
 
         app
             .AddSystem(processPacketsFn)
-            .InStage(Stage.Update)
-            .RunIf((EventReader<IPacket> reader) => reader.HasEvents)
-            .Build()
-
-            .AddSystem(onOpenContainersFn)
-            .InStage(Stage.Update)
-            .RunIf((EventReader<ContainerOpenedEvent> reader) => reader.HasEvents)
-            .Build()
+                .InStage(Stage.Update)
+                .RunIf((EventReader<IPacket> reader) => reader.HasEvents)
+                .Build()
 
             .AddSystem(closeContainersTooFarFromPlayerFn)
-            .InStage(Stage.Update)
-            .RunIf((Query<Data<WorldPosition>, With<Player>> queryPlayer) => queryPlayer.Count() > 0)
-            .Build()
-
-            .AddSystem(closeContainersOnRightClickFn)
-            .InStage(Stage.Update)
-            .RunIf((Res<MouseContext> mouseCtx) => mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Right))
-            .Build();
+                .InStage(Stage.Update)
+                .RunIf((Query<Data<WorldPosition>, With<Player>> queryPlayer) => queryPlayer.Count() > 0)
+                .Build();
     }
 
     private static void CloseContainersTooFarFromPlayer(
-        Commands commands,
-        Query<Data<WorldPosition, NetworkSerial>,
-             Filter<With<IsContainer>, With<Node>, With<UIMovable>>> query,
+        Res<NetworkEntitiesMap> entitiesMap,
+        Query<Data<ContainerWindow>> windowsQuery,
+        Query<Data<WorldPosition>> worldPosQuery,
+        Query<Data<TinyEcs.Parent>> parentQuery,
         Single<Data<WorldPosition>, With<Player>> queryPlayer,
-        EventWriter<HostMessage> hostMsgs)
+        EventWriter<HostMessage> hostMsgs,
+        EventWriter<ContainerClosedEvent> closedWriter)
     {
         const int MAX_CONTAINER_DIST = 5;
-        (_, var playerPos) = queryPlayer.Get();
+        (var playerEnt, var playerPos) = queryPlayer.Get();
 
-        foreach ((var ent, var pos, var serial) in query)
+        foreach (var (_, window) in windowsQuery)
         {
+            var serial = window.Ref.Serial;
+            if (!entitiesMap.Value.TryGet(serial, out var gameEnt)) continue;
+
+            // Walk up the parent chain to find the entity that actually owns
+            // a world tile (chest on ground / corpse / mobile). Nested
+            // containers only carry ContainerSlotPosition — no WorldPosition
+            // — so reading their position would be a hole in the data model.
+            var root = ResolveRootHolder(gameEnt, parentQuery);
+            if (root == playerEnt.Ref) continue;
+
+            if (!worldPosQuery.Contains(root)) continue;
+            var (_, pos) = worldPosQuery.Get(root);
             if (Math.Abs(playerPos.Ref.X - pos.Ref.X) >= MAX_CONTAINER_DIST ||
                 Math.Abs(playerPos.Ref.Y - pos.Ref.Y) >= MAX_CONTAINER_DIST)
             {
-                TearDownContainerUI(commands, ent.Ref);
-                hostMsgs.Send(new HostMessage.ContainerClosed(serial.Ref.Value));
+                closedWriter.Send(new ContainerClosedEvent(serial));
+                hostMsgs.Send(new HostMessage.ContainerClosed(serial));
             }
         }
     }
 
-    // Bevy.UI doesn't fire right-button pointer events. Manually pick the
-    // topmost UIMovable container under the cursor each frame the right
-    // button is pressed and tear it down.
-    private static void CloseContainersOnRightClick(
-        Commands commands,
-        Res<MouseContext> mouseCtx,
-        Query<Data<ComputedNode, NetworkSerial>,
-             Filter<With<UIMovable>, With<IsContainer>>> query,
-        EventWriter<HostMessage> hostMsgs)
+    // Walk TinyEcs.Parent links up to the topmost owner. Hard cap on depth so a
+    // malformed cycle can't spin forever.
+    private static ulong ResolveRootHolder(ulong start, Query<Data<TinyEcs.Parent>> parentQuery)
     {
-        var pos = mouseCtx.Value.Position;
-        ulong topId = 0;
-        uint topClayId = 0;
-        uint topSerial = 0;
-
-        // Higher Clay ids are emitted later in the render command stream and
-        // therefore draw on top. Pick that one.
-        foreach ((var ent, var computed, var serial) in query)
+        var cur = start;
+        for (int i = 0; i < 16; i++)
         {
-            var bb = computed.Ref;
-            if (pos.X < bb.Position.X || pos.Y < bb.Position.Y) continue;
-            if (pos.X >= bb.Position.X + bb.Size.X) continue;
-            if (pos.Y >= bb.Position.Y + bb.Size.Y) continue;
-
-            if (bb.ClayId >= topClayId)
-            {
-                topClayId = bb.ClayId;
-                topId = ent.Ref;
-                topSerial = serial.Ref.Value;
-            }
+            if (!parentQuery.Contains(cur)) return cur;
+            var (_, parent) = parentQuery.Get(cur);
+            var pid = (ulong)parent.Ref.Id;
+            if (pid == 0 || pid == cur) return cur;
+            cur = pid;
         }
-
-        if (topId == 0)
-            return;
-
-        TearDownContainerUI(commands, topId);
-        hostMsgs.Send(new HostMessage.ContainerClosed(topSerial));
-    }
-
-    private static void TearDownContainerUI(Commands commands, ulong entityId)
-    {
-        commands.Entity(entityId)
-            .Remove<Node>()
-            .Remove<UOCustomRender>()
-            .Remove<UIMovable>()
-            .Remove<Interaction>()
-            .Remove<FloatingWindowState>();
-    }
-
-    private static void OnOpenContainers(
-        Commands commands,
-        Res<NetworkEntitiesMap> entitiesMap,
-        Res<AssetsServer> assets,
-        EventReader<ContainerOpenedEvent> reader)
-    {
-        foreach (var ev in reader.Read())
-        {
-            if (ev.Graphic == 0xFFFF || ev.Graphic == 0x0030)
-                continue;
-
-            ref readonly var gumpInfo = ref assets.Value.Gumps.GetGump(ev.Graphic);
-            var width = gumpInfo.UV.Width;
-            var height = gumpInfo.UV.Height;
-
-            entitiesMap.Value.GetOrCreate(commands, ev.Serial)
-                .Insert(new Node
-                {
-                    Display = Display.Flex,
-                    PositionType = PositionType.Absolute,
-                    Left = Val.Px(0),
-                    Top = Val.Px(0),
-                    Width = Val.Px(width),
-                    Height = Val.Px(height),
-                })
-                .Insert(new UOCustomRender
-                {
-                    Kind = UOCustomKind.Gump,
-                    AssetId = ev.Graphic,
-                    Hue = Vector3.UnitZ,
-                })
-                .Insert(Interaction.None)
-                .Insert(new FloatingWindowState
-                {
-                    InitialX = 0,
-                    InitialY = 0,
-                    InitialWidth = width,
-                    InitialHeight = height,
-                })
-                .Insert<UIMovable>()
-                .Insert<IsContainer>();
-        }
+        return cur;
     }
 
     private static void ProcessContainerPackets(
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
-        Res<AssetsServer> assets,
         EventWriter<ContainerUpdateEvent> writer,
         EventWriter<ContainerOpenedEvent> openedWriter,
         EventWriter<HostMessage> hostMsgs,
@@ -187,19 +107,19 @@ internal readonly struct ContainersPlugin : IPlugin
                     break;
 
                 case OnUpdateContainerPacket_0x25_Pre6017 updatePre:
-                    HandleUpdateContainer(updatePre, commands, entitiesMap, assets, writer, hostMsgs);
+                    HandleUpdateContainer(updatePre, commands, entitiesMap, writer, hostMsgs);
                     break;
 
                 case OnUpdateContainerPacket_0x25_Post6017 updatePost:
-                    HandleUpdateContainer(updatePost, commands, entitiesMap, assets, writer, hostMsgs);
+                    HandleUpdateContainer(updatePost, commands, entitiesMap, writer, hostMsgs);
                     break;
 
                 case OnUpdateContainerItemsPacket_0x3C_Pre6017 updateItemsPre:
-                    HandleUpdateContainerItems(updateItemsPre, commands, entitiesMap, assets, writer, hostMsgs);
+                    HandleUpdateContainerItems(updateItemsPre, commands, entitiesMap, writer, hostMsgs);
                     break;
 
                 case OnUpdateContainerItemsPacket_0x3C_Post6017 updateItemsPost:
-                    HandleUpdateContainerItems(updateItemsPost, commands, entitiesMap, assets, writer, hostMsgs);
+                    HandleUpdateContainerItems(updateItemsPost, commands, entitiesMap, writer, hostMsgs);
                     break;
             }
         }
@@ -209,7 +129,6 @@ internal readonly struct ContainersPlugin : IPlugin
         IUpdateContainerPacket packet,
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
-        Res<AssetsServer> assets,
         EventWriter<ContainerUpdateEvent> writer,
         EventWriter<HostMessage> hostMsgs)
     {
@@ -221,14 +140,22 @@ internal readonly struct ContainersPlugin : IPlugin
         var parentEnt = entitiesMap.Value.GetOrCreate(commands, packet.ContainerSerial)
             .Insert<IsContainer>();
 
+        // Note: don't Remove<WorldPosition> here. Server can despawn the
+        // game entity (0x1D) in the same frame; a queued Detach on a dead
+        // entity panics in TinyEcs.World.Detach. Stale WorldPosition is
+        // harmless because every distance / drop consumer prefers
+        // ContainerSlotPosition when present.
         ent.Insert(new Graphic() { Value = finalGraphic })
-            .Insert(new WorldPosition() { X = packet.X, Y = packet.Y, Z = 0 })
+            .Insert(new ContainerSlotPosition() { X = packet.X, Y = packet.Y, GridIndex = gridIdx })
             .Insert(new Hue() { Value = packet.Hue })
             .Insert(new Amount() { Value = amount })
             .Insert<ContainedInto>();
 
         parentEnt.AddChild(ent);
-        writer.Send(new ContainerUpdateEvent(packet.ContainerSerial, packet.Serial));
+        Console.WriteLine("[PKT-0x25 ADD] container=0x{0:X8} item=0x{1:X8} graphic=0x{2:X4} pos=({3},{4}) amount={5}",
+            packet.ContainerSerial, packet.Serial, finalGraphic, packet.X, packet.Y, amount);
+        writer.Send(new ContainerUpdateEvent(
+            packet.ContainerSerial, packet.Serial, finalGraphic, packet.Hue, packet.X, packet.Y, amount));
 
         hostMsgs.Send(new HostMessage.ContainerItemAdded(
             packet.ContainerSerial,
@@ -239,15 +166,12 @@ internal readonly struct ContainersPlugin : IPlugin
             packet.Y,
             gridIdx,
             packet.Hue));
-
-        SpawnContainerItemUI(ent, assets.Value, finalGraphic, packet.X, packet.Y, packet.Hue);
     }
 
     private static void HandleUpdateContainerItems(
         IUpdateContainerItemsPacket packet,
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
-        Res<AssetsServer> assets,
         EventWriter<ContainerUpdateEvent> writer,
         EventWriter<HostMessage> hostMsgs)
     {
@@ -268,60 +192,25 @@ internal readonly struct ContainersPlugin : IPlugin
             var ent = entitiesMap.Value.GetOrCreate(commands, item.Serial);
 
             var finalGraphic = (ushort)(item.Graphic + item.GraphicInc);
+            // See HandleUpdateContainer above: don't Remove<WorldPosition>
+            // here — same despawn-race panic risk.
             ent.Insert(new Graphic() { Value = finalGraphic })
                 .Insert(new Hue() { Value = item.Hue })
-                .Insert(new WorldPosition() { X = item.X, Y = item.Y, Z = 0 })
+                .Insert(new ContainerSlotPosition() { X = item.X, Y = item.Y, GridIndex = item.GridIndex })
                 .Insert(new Amount() { Value = item.Amount })
                 .Insert<ContainedInto>();
             parentEnt.AddChild(ent);
 
-            writer.Send(new ContainerUpdateEvent(item.ContainerSerial, item.Serial));
-
-            SpawnContainerItemUI(ent, assets.Value, finalGraphic, item.X, item.Y, item.Hue);
+            Console.WriteLine("[PKT-0x3C ITEM] container=0x{0:X8} item=0x{1:X8} graphic=0x{2:X4} pos=({3},{4}) amount={5}",
+                item.ContainerSerial, item.Serial, finalGraphic, item.X, item.Y, item.Amount);
+            writer.Send(new ContainerUpdateEvent(
+                item.ContainerSerial, item.Serial, finalGraphic, item.Hue, item.X, item.Y, item.Amount));
         }
-    }
-
-    private static void SpawnContainerItemUI(
-        EntityCommands ent,
-        AssetsServer assets,
-        ushort graphic,
-        ushort x,
-        ushort y,
-        ushort hue)
-    {
-        ref readonly var artInfo = ref assets.Arts.GetArt(graphic);
-        var width = artInfo.UV.Width;
-        var height = artInfo.UV.Height;
-
-        ent.Insert(new Node
-            {
-                Display = Display.Flex,
-                PositionType = PositionType.Absolute,
-                Left = Val.Px(x),
-                Top = Val.Px(y),
-                Width = Val.Px(width),
-                Height = Val.Px(height),
-            })
-            .Insert(new UOCustomRender
-            {
-                Kind = UOCustomKind.Art,
-                AssetId = graphic,
-                Hue = new Vector3(hue, 1, 1),
-            })
-            .Insert(Interaction.None)
-            .Insert(new FloatingWindowState
-            {
-                InitialX = x,
-                InitialY = y,
-                InitialWidth = width,
-                InitialHeight = height,
-            })
-            .Insert<UIMovable>();
     }
 }
 
-// Snapshot of a movable container window's initial placement & size. The
-// drag/resize system (not migrated yet) reads this when it first attaches.
+// Snapshot of a movable container window's initial placement & size. Read by
+// WindowDragPlugin / persistence work.
 internal struct FloatingWindowState
 {
     public float InitialX;
@@ -332,4 +221,14 @@ internal struct FloatingWindowState
 
 internal record struct ContainerOpenedEvent(uint Serial, ushort Graphic);
 internal record struct ContainerClosedEvent(uint Serial);
-internal record struct ContainerUpdateEvent(uint Serial, uint ItemSerial);
+// Carries the item payload inline so consumers don't have to query the game
+// entity in the same frame — those components are still in the deferred
+// command queue when ContainerGumpPlugin runs.
+internal record struct ContainerUpdateEvent(
+    uint Serial,
+    uint ItemSerial,
+    ushort Graphic,
+    ushort Hue,
+    ushort X,
+    ushort Y,
+    ushort Amount);

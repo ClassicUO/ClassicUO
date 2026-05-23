@@ -35,7 +35,8 @@ internal readonly struct TextOverheadPlugin : IPlugin
         var readTextOverHeadFn = ReadTextOverhead;
         app.AddSystem(readTextOverHeadFn)
             .InStage(Stage.Update)
-            .RunIf((EventReader<TextOverheadEvent> texts) => texts.HasEvents);
+            .RunIf((EventReader<TextOverheadEvent> texts) => texts.HasEvents)
+            .Build();
     }
 
     private static void ReadTextOverhead(

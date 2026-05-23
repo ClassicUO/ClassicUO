@@ -1,5 +1,7 @@
 using System;
+using ClassicUO.Game.Data;
 using ClassicUO.Input;
+using ClassicUO.Network;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -24,6 +26,7 @@ internal readonly struct GameScreenPlugin : IPlugin
         var resizeWindowFn = ResizeWindow;
         var syncWindowToCameraFn = SyncWindowToCamera;
         var bindRenderTargetFn = BindRenderTarget;
+        var inventoryClickFn = HandleInventoryClick;
 
         app
             .AddResource<RenderTarget2D>(null!)
@@ -80,7 +83,38 @@ internal readonly struct GameScreenPlugin : IPlugin
             .AddSystem(updateSelectedEntityFn)
             .InStage(Stage.Update)
             .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
+            .Build()
+
+            .AddSystem(inventoryClickFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
+            .RunIf((Res<MouseContext> m) => m.Value.IsReleased(MouseButtonType.Left))
             .Build();
+    }
+
+    // Edge-trigger on left-button release while the inventory button is in the
+    // Pressed interaction state. Same release-on-press idiom Bevy.UI uses for
+    // its built-in Button widget.
+    private static void HandleInventoryClick(
+        Res<NetClient> network,
+        Query<Data<Interaction>, With<InventoryButton>> buttonQuery,
+        Single<Data<EquipmentSlots>, With<Player>> playerSlots,
+        Query<Data<NetworkSerial>> serialQuery)
+    {
+        bool pressed = false;
+        foreach (var (_, interaction) in buttonQuery)
+        {
+            if (interaction.Ref == Interaction.Pressed) { pressed = true; break; }
+        }
+        if (!pressed) return;
+
+        if (!playerSlots.TryGet(out var data)) return;
+        (_, var slots) = data;
+        ref var s = ref slots.Ref;
+        var backpackEnt = s[Layer.Backpack];
+        if (backpackEnt == 0 || !serialQuery.Contains(backpackEnt)) return;
+        var (_, serial) = serialQuery.Get(backpackEnt);
+        network.Value.Send_DoubleClick(serial.Ref.Value);
     }
 
     private static void Setup(Commands commands)
@@ -161,7 +195,10 @@ internal readonly struct GameScreenPlugin : IPlugin
             // once the RenderTarget2D resource has been created.
             .Insert(new UiImage { ImageData = null, Tint = ClayColor.White });
 
-        // Menu bar (row, grow width, fit height, right-aligned).
+        // Menu bar (row, grow width, fixed height, right-aligned). Fixed
+        // height avoids Auto-height + Percent(100) children producing zero or
+        // jittery rows.
+        const int MENU_BAR_HEIGHT = 32;
         var menuBar = commands.Spawn()
             .Insert<GameScene>()
             .Insert(new Node
@@ -172,11 +209,40 @@ internal readonly struct GameScreenPlugin : IPlugin
                 JustifyContent = JustifyContent.End,
                 AlignItems = AlignItems.Center,
                 Width = Val.Percent(100),
-                Height = Val.Auto,
-                Padding = UiRect.All(4),
+                Height = Val.Px(MENU_BAR_HEIGHT),
+                Padding = UiRect.Symmetric(4, 2),
                 Gap = Val.Px(4),
             })
             .Insert(new BackgroundColor(bgMenu));
+
+        // Inventory button — tagged with InventoryButton; a Stage.Update
+        // system polls it and sends Send_DoubleClick on the player's backpack
+        // serial. Server replies with 0x24 + 0x3C which the container plugins
+        // pick up. Observer path is intentionally not used here because the
+        // 4-param signature trips Observe's overload resolution.
+        var inventoryBtn = commands.Spawn()
+            .Insert<GameScene>()
+            .Insert<InventoryButton>()
+            .Insert(new Node
+            {
+                Display = Display.Flex,
+                PositionType = PositionType.Relative,
+                JustifyContent = JustifyContent.Center,
+                AlignItems = AlignItems.Center,
+                Width = Val.Auto,
+                Height = Val.Percent(100),
+                Padding = UiRect.Symmetric(8, 0),
+            })
+            .Insert(new BackgroundColor(bgButton))
+            .Insert(Interaction.None)
+            .Insert(new Button());
+
+        var inventoryLabel = commands.Spawn()
+            .Insert<GameScene>()
+            .Insert(new Node { Width = Val.Auto, Height = Val.Auto })
+            .Insert(new Text("Inventory"))
+            .Insert(new TextFont { FontId = 0, Size = 16 })
+            .Insert(new TextColor(ClayColor.White));
 
         // Logout button.
         var logoutBtn = commands.Spawn()
@@ -271,9 +337,11 @@ internal readonly struct GameScreenPlugin : IPlugin
 
         selectionOverlay.AddChild(selectionText);
 
+        inventoryBtn.AddChild(inventoryLabel);
         logoutBtn.AddChild(logoutLabel);
         totalBtn.AddChild(totalLabel);
 
+        menuBar.AddChild(inventoryBtn);
         menuBar.AddChild(logoutBtn);
         menuBar.AddChild(totalBtn);
 
@@ -297,70 +365,120 @@ internal readonly struct GameScreenPlugin : IPlugin
     // Cross-system gate. Whichever drag system latches first owns the gesture
     // until the mouse is released. Prevents the border from hijacking a resize
     // mid-drag (the cursor often slides off the handle onto the border).
-    private enum ActiveDrag { None, Move, Resize }
-    private sealed class DragGate { public ActiveDrag Mode; }
+    // (DragGate / ActiveDrag are file-scoped below this class.)
 
     private static void DragWindow(
         Res<MouseContext> mouseCtx,
         Res<Camera> camera,
         Res<DragGate> gate,
+        Res<GrabbedItem> grabbed,
         Local<DragAnchor> anchor,
-        Single<Data<Interaction>, Filter<With<GameWindowBorderUI>, With<GameScene>>> queryBorder
+        Single<Data<Interaction, ComputedNode>, Filter<With<GameWindowBorderUI>, With<GameScene>>> queryBorder,
+        Query<Data<ComputedNode>, Filter<With<UIMovable>>> movableQ
     )
     {
-        if (!mouseCtx.Value.IsPressed(MouseButtonType.Left))
+        // `IsPressed` semantics in MouseContext: true only when BOTH this and
+        // the previous frame were Pressed (steady-state held). On the press-
+        // once frame the previous state is Released, so IsPressed is false
+        // there — we still need to handle it for the initial latch.
+        bool held = mouseCtx.Value.IsPressed(MouseButtonType.Left)
+                 || mouseCtx.Value.IsPressedOnce(MouseButtonType.Left);
+        if (!held || grabbed.Value.Serial != 0)
         {
             anchor.Value.Active = false;
             if (gate.Value.Mode == ActiveDrag.Move) gate.Value.Mode = ActiveDrag.None;
             return;
         }
 
-        if (!anchor.Value.Active)
+        // Latch on press-once via direct bbox hit-test of the cursor against
+        // the border's ComputedNode. Avoids the continuous-held pattern
+        // (which lets the cursor wander onto the border mid-drag and latch
+        // unexpectedly) and avoids the press-once Interaction-staleness
+        // problem (Interaction is rewritten in UiPostLayoutStage).
+        if (mouseCtx.Value.IsPressedOnce(MouseButtonType.Left))
         {
-            if (gate.Value.Mode != ActiveDrag.None) return; // someone else owns the gesture
-            if (!queryBorder.TryGet(out var data))
-                return;
-            (_, var interaction) = data;
-            if (interaction.Ref != Interaction.Pressed)
-                return;
+            if (gate.Value.Mode != ActiveDrag.None) return;
+            if (!queryBorder.TryGet(out var data)) return;
+            (_, _, var computed) = data;
+            var bb = computed.Ref;
+            var pos = mouseCtx.Value.Position;
+            // Border bbox is the OUTER rectangle (camera ± BORDER_SIZE/2),
+            // which also covers the rendered world. Drag only when the click
+            // landed on the border strip itself, i.e. inside the outer bbox
+            // AND outside the inner camera viewport.
+            if (pos.X < bb.Position.X || pos.Y < bb.Position.Y) return;
+            if (pos.X >= bb.Position.X + bb.Size.X) return;
+            if (pos.Y >= bb.Position.Y + bb.Size.Y) return;
+            var inner = camera.Value.Bounds;
+            if (pos.X >= inner.X && pos.X < inner.X + inner.Width
+                && pos.Y >= inner.Y && pos.Y < inner.Y + inner.Height) return;
+
+            // Floating UIMovable windows draw above the game viewport border,
+            // so if any of them sits under the cursor we let WindowDragPlugin
+            // claim the gesture instead. Without this the border drag latches
+            // first (registered earlier in the schedule) and the container
+            // gump never moves.
+            if (CursorOverAnyMovable(pos, movableQ)) return;
+
             anchor.Value = new DragAnchor
             {
                 Active = true,
-                Mouse = mouseCtx.Value.Position,
+                Mouse = pos,
                 X = camera.Value.Bounds.X,
                 Y = camera.Value.Bounds.Y,
             };
             gate.Value.Mode = ActiveDrag.Move;
         }
 
+        if (!anchor.Value.Active) return;
+
         var delta = mouseCtx.Value.Position - anchor.Value.Mouse;
         camera.Value.Bounds.X = anchor.Value.X + (int)delta.X;
         camera.Value.Bounds.Y = anchor.Value.Y + (int)delta.Y;
+    }
+
+    private static bool CursorOverAnyMovable(Vector2 pos, Query<Data<ComputedNode>, Filter<With<UIMovable>>> q)
+    {
+        foreach (var (_, computed) in q)
+        {
+            var bb = computed.Ref;
+            if (pos.X < bb.Position.X || pos.Y < bb.Position.Y) continue;
+            if (pos.X >= bb.Position.X + bb.Size.X) continue;
+            if (pos.Y >= bb.Position.Y + bb.Size.Y) continue;
+            return true;
+        }
+        return false;
     }
 
     private static void ResizeWindow(
         Res<MouseContext> mouseCtx,
         Res<Camera> camera,
         Res<DragGate> gate,
+        Res<GrabbedItem> grabbed,
         Local<DragAnchor> anchor,
-        Single<Data<Interaction>, Filter<With<GameWindowBorderResizeUI>, With<GameScene>>> queryHandle
+        Single<Data<Interaction, ComputedNode>, Filter<With<GameWindowBorderResizeUI>, With<GameScene>>> queryHandle
     )
     {
-        if (!mouseCtx.Value.IsPressed(MouseButtonType.Left))
+        bool held = mouseCtx.Value.IsPressed(MouseButtonType.Left)
+                 || mouseCtx.Value.IsPressedOnce(MouseButtonType.Left);
+        if (!held || grabbed.Value.Serial != 0)
         {
             anchor.Value.Active = false;
             if (gate.Value.Mode == ActiveDrag.Resize) gate.Value.Mode = ActiveDrag.None;
             return;
         }
 
-        if (!anchor.Value.Active)
+        if (mouseCtx.Value.IsPressedOnce(MouseButtonType.Left))
         {
             if (gate.Value.Mode != ActiveDrag.None) return;
-            if (!queryHandle.TryGet(out var data))
-                return;
-            (_, var interaction) = data;
-            if (interaction.Ref != Interaction.Pressed)
-                return;
+            if (!queryHandle.TryGet(out var data)) return;
+            (_, _, var computed) = data;
+            var bb = computed.Ref;
+            var pos = mouseCtx.Value.Position;
+            if (pos.X < bb.Position.X || pos.Y < bb.Position.Y) return;
+            if (pos.X >= bb.Position.X + bb.Size.X) return;
+            if (pos.Y >= bb.Position.Y + bb.Size.Y) return;
+
             anchor.Value = new DragAnchor
             {
                 Active = true,
@@ -370,6 +488,8 @@ internal readonly struct GameScreenPlugin : IPlugin
             };
             gate.Value.Mode = ActiveDrag.Resize;
         }
+
+        if (!anchor.Value.Active) return;
 
         var delta = mouseCtx.Value.Position - anchor.Value.Mouse;
         var newW = anchor.Value.W + (int)delta.X;
@@ -523,6 +643,17 @@ internal readonly struct GameScreenPlugin : IPlugin
 
     private enum ButtonAction
     {
-        Logout
+        Logout,
+        OpenInventory,
     }
 }
+
+internal struct InventoryButton;
+
+// Cross-system drag arbitration. First system to claim the gesture wins;
+// others see Mode != None at press-once and skip latching until release
+// clears it. Shared between GameScreenPlugin (border move/resize) and
+// WindowDragPlugin (floating UIMovable windows) so a press inside a stacked
+// container can't simultaneously start a container drag AND a viewport drag.
+internal enum ActiveDrag { None, Move, Resize, UIWindow }
+internal sealed class DragGate { public ActiveDrag Mode; }

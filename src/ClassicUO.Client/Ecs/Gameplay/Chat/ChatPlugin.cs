@@ -87,6 +87,7 @@ internal readonly struct ChatPlugin : IPlugin
         )
         .InStage(Stage.Update)
             .RunIf((EventReader<CharInputEvent> reader, Res<NetClient> network)
-            => reader.HasEvents && network.Value.IsConnected);
+            => reader.HasEvents && network.Value.IsConnected)
+            .Build();
     }
 }

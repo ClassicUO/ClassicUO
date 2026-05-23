@@ -108,6 +108,11 @@ sealed class NetworkEntitiesMap
         return false;
     }
 
+    public bool TryGet(uint serial, out ulong entityId)
+    {
+        return _entities.TryGetValue(serial, out entityId);
+    }
+
     public void Clear()
     {
         _entities.Clear();
@@ -356,7 +361,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 break;
 
             default:
-                Console.WriteLine("Unhandled packet 0x{0:X2}", packet.Id);
+                //Console.WriteLine("Unhandled packet 0x{0:X2}", packet.Id);
                 break;
         }
     }

@@ -34,14 +34,17 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         app.AddResource(new Viewport());
 
         app
-            .AddSystem((Res<MouseContext> mouseCtx, Res<KeyboardContext> keyboardCtx, ResMut<GameContext> gameCtx, Res<Camera> camera, Local<bool> canMove) =>
+            .AddSystem((Res<MouseContext> mouseCtx, Res<KeyboardContext> keyboardCtx, ResMut<GameContext> gameCtx, Res<Camera> camera, Res<GrabbedItem> grabbed, Local<bool> canMove) =>
             {
                 if (mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Left))
                 {
                     canMove.Value = camera.Value.Bounds.Contains((int)mouseCtx.Value.Position.X, (int)mouseCtx.Value.Position.Y);
                 }
 
-                if (canMove.Value && mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
+                // Suspend camera-offset dragging while an item is held by the
+                // cursor — otherwise hauling an item across the world view
+                // pans the camera by the same delta.
+                if (canMove.Value && mouseCtx.Value.IsPressed(Input.MouseButtonType.Left) && grabbed.Value.Serial == 0)
                 {
                     gameCtx.Value.CenterOffset += mouseCtx.Value.PositionOffset * camera.Value.Zoom;
                 }

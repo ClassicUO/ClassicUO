@@ -23,13 +23,28 @@ internal readonly struct UseObjectPlugin : IPlugin
         Res<MouseContext> mouseContext,
         Res<SelectedEntity> selectedEntity,
         Res<NetClient> network,
-        Query<Data<NetworkSerial>> query
+        Query<Data<NetworkSerial>> query,
+        Query<Data<ContainerItemUI>> uiItemQ
     )
     {
-        if (!query.Contains(selectedEntity.Value.Entity))
+        var target = selectedEntity.Value.Entity;
+
+        // Container slot UIs aren't game entities — pull the serial straight
+        // off ContainerItemUI and double-click that (mirrors legacy
+        // ItemGump.OnMouseDoubleClick which calls GameActions.DoubleClick
+        // on LocalSerial).
+        if (uiItemQ.Contains(target))
+        {
+            var (_, link) = uiItemQ.Get(target);
+            if (link.Ref.Serial != 0)
+                network.Value.Send_DoubleClick(link.Ref.Serial);
+            return;
+        }
+
+        if (!query.Contains(target))
             return;
 
-        (var ent, var serial) = query.Get(selectedEntity.Value.Entity);
+        (var ent, var serial) = query.Get(target);
         if (serial.IsValid())
         {
             network.Value.Send_DoubleClick(serial.Ref.Value);

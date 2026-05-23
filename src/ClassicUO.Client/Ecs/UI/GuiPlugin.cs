@@ -28,6 +28,7 @@ internal readonly struct GuiPlugin : IPlugin
         app
             .AddResource(new FocusedInput())
             .AddResource(new ImageCache())
+            .AddResource(new UIScale())
 
             .AddSystem(Stage.Startup, (Commands commands, Res<AssetsServer> assets) =>
             {
@@ -155,6 +156,10 @@ internal struct UOCustomRender
     public UOCustomKind Kind;
     public uint AssetId;
     public Vector3 Hue;
+    // When true the renderer draws the same sprite a second time at +5/+5
+    // to mirror legacy ItemGump.Draw's stacked-item visual (Amount > 1 &&
+    // ItemData.IsStackable).
+    public bool Stacked;
 }
 
 // Marker for the UO button widget. UpdateUOButtonsState rewrites the visible

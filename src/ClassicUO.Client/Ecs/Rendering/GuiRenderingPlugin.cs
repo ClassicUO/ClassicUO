@@ -225,6 +225,19 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                         1f,
                         SpriteEffects.None,
                         cmd.ZIndex);
+                    if (custom.Stacked)
+                    {
+                        b.Draw(
+                            info.Texture,
+                            new Vector2(bb.X + 5, bb.Y + 5),
+                            info.UV,
+                            custom.Hue,
+                            0f,
+                            Vector2.Zero,
+                            1f,
+                            SpriteEffects.None,
+                            cmd.ZIndex);
+                    }
                 }
                 break;
             }
@@ -248,6 +261,19 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                         1f,
                         SpriteEffects.None,
                         cmd.ZIndex);
+                    if (custom.Stacked)
+                    {
+                        b.Draw(
+                            info.Texture,
+                            new Vector2(bb.X + 5, bb.Y + 5),
+                            info.UV,
+                            custom.Hue,
+                            0f,
+                            Vector2.Zero,
+                            1f,
+                            SpriteEffects.None,
+                            cmd.ZIndex);
+                    }
                 }
                 break;
             }

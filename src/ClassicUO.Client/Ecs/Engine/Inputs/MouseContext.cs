@@ -12,6 +12,10 @@ internal sealed class MouseContext : InputContext<MouseButtonType>
     private float _lastClickTime, _currentTime;
     private readonly MouseButtonType?[] _lastClickButtons = new MouseButtonType?[2];
     private Vector2 _lastMouseClickPosition;
+    // Buttons consumed by a UI handler this frame. Cleared at the start of
+    // Update so the flag only suppresses reads for the remainder of the tick.
+    // Lets UI close systems eat a right-click before PlayerMovement sees it.
+    private readonly bool[] _consumed = new bool[(int)MouseButtonType.Size];
 
     internal MouseContext(Microsoft.Xna.Framework.Game game) : base(game) { }
 
@@ -21,16 +25,32 @@ internal sealed class MouseContext : InputContext<MouseButtonType>
     public Vector2 DraggingOffset => new (_newState.X - _lastMouseClickPosition.X, _newState.Y - _lastMouseClickPosition.Y);
     public float Wheel { get; private set; }
 
-    public override bool IsPressed(MouseButtonType input) => VerifyCondition(input, ButtonState.Pressed, ButtonState.Pressed);
+    public override bool IsPressed(MouseButtonType input) => !IsConsumed(input) && VerifyCondition(input, ButtonState.Pressed, ButtonState.Pressed);
 
-    public override bool IsPressedOnce(MouseButtonType input) => VerifyCondition(input, ButtonState.Pressed, ButtonState.Released);
+    public override bool IsPressedOnce(MouseButtonType input) => !IsConsumed(input) && VerifyCondition(input, ButtonState.Pressed, ButtonState.Released);
 
-    public override bool IsReleased(MouseButtonType input) => VerifyCondition(input, ButtonState.Released, ButtonState.Pressed);
+    public override bool IsReleased(MouseButtonType input) => !IsConsumed(input) && VerifyCondition(input, ButtonState.Released, ButtonState.Pressed);
 
-    public bool IsPressedDouble(MouseButtonType input) => _lastClickButtons[0] == input && _lastClickButtons[1] == input;
+    public bool IsPressedDouble(MouseButtonType input) => !IsConsumed(input) && _lastClickButtons[0] == input && _lastClickButtons[1] == input;
+
+    public void Consume(MouseButtonType input)
+    {
+        var idx = (int)input;
+        if (idx >= 0 && idx < _consumed.Length)
+            _consumed[idx] = true;
+    }
+
+    public bool IsConsumed(MouseButtonType input)
+    {
+        var idx = (int)input;
+        return idx >= 0 && idx < _consumed.Length && _consumed[idx];
+    }
 
     public override void Update(float deltaTime)
     {
+        for (int i = 0; i < _consumed.Length; i++)
+            _consumed[i] = false;
+
         for (var button = MouseButtonType.None + 1; button < MouseButtonType.Size; button++)
         {
             if (IsPressedDouble(button))

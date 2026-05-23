@@ -49,6 +49,17 @@ struct Amount
 struct ContainedInto;
 struct IsContainer;
 
+// Position inside a parent container. Mutually exclusive with WorldPosition:
+// items on the ground/in the world carry WorldPosition, items nested in a
+// container carry ContainerSlotPosition. Keeping the two as separate types
+// stops distance / hit-test code from confusing slot coords with map coords.
+struct ContainerSlotPosition
+{
+    public ushort X;
+    public ushort Y;
+    public byte GridIndex;
+}
+
 struct Hits
 {
     public ushort Value, MaxValue;

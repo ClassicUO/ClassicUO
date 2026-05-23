@@ -42,8 +42,6 @@ internal sealed class GumpBuilder
             .Insert(new Button());
     }
 
-    private static readonly object CustomMarker = new();
-
     /// Spawn a single gump sprite at the given position.
     public EntityCommands AddGump(Commands commands, ushort id, Vector3 hue, Vector2? position = null)
     {
@@ -53,7 +51,7 @@ internal sealed class GumpBuilder
 
         return commands.Spawn()
             .Insert(node)
-            .Insert(new UiCustom { Data = CustomMarker })
+            .Insert(new UiCustom())
             .Insert(new UOCustomRender
             {
                 Kind = UOCustomKind.Gump,
@@ -72,7 +70,7 @@ internal sealed class GumpBuilder
 
         return commands.Spawn()
             .Insert(node)
-            .Insert(new UiCustom { Data = CustomMarker })
+            .Insert(new UiCustom())
             .Insert(new UOCustomRender
             {
                 Kind = UOCustomKind.GumpNinePatch,
@@ -90,7 +88,7 @@ internal sealed class GumpBuilder
 
         return commands.Spawn()
             .Insert(node)
-            .Insert(new UiCustom { Data = CustomMarker })
+            .Insert(new UiCustom())
             .Insert(new UOCustomRender
             {
                 Kind = UOCustomKind.Art,
