@@ -1,72 +1,140 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System.Collections.Generic;
-using System.IO;
-using System.Xml;
 using ClassicUO.Configuration;
-using ClassicUO.Game.Data;
-using ClassicUO.Game.GameObjects;
+using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
-using ClassicUO.Renderer;
 using ClassicUO.Resources;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Xml;
 
 namespace ClassicUO.Game.UI.Gumps
 {
-    internal class CounterBarGump : Gump
+    internal partial class CounterBarGump : ResizableGump
     {
+        private const int MIN_SIZE = 30;
+        private const int MAX_SIZE = 80;
+        private static readonly int BORDER_LEFT = 2;
+        private static readonly int BORDER_RIGHT = 2;
+        private static readonly int BORDER_TOP = 2;
+        private static readonly int BORDER_BOTTOM = 2;
+
+        private static readonly ushort HELP_TEXT_HUE = 0x32; // light yellow
+
         private AlphaBlendControl _background;
+        private Label _helpTextLabel;
 
-        private int _rows,
-            _columns,
-            _rectSize;
+        private DataBox _dataBox;
+        private int _rectSize;
+        private ScissorControl _scissor;
 
-        //private bool _isVertical;
+        public bool ReadOnly
+        {
+            get => !ShowBorder;
+            set => ShowBorder = !value || _helpTextLabel != null;
+            // It makes no sense to put the bar into read-only mode
+            // while the text is shown to drop an item there to get started
+        }
 
-        public CounterBarGump(World world) : base(world, 0, 0) { }
+        public CounterBarGump(World world) : base(world, 0, 0, 50, 50, 0, 0, 0)
+        {
+            ContextMenu = ConfigureContextMenu(new ContextMenuControl(this));
+
+            ResizeCompleted += CounterBarGump_ResizeCompleted;
+        }
+
+        private void CounterBarGump_ResizeCompleted(object sender, ResizeCompletedEventArgs e)
+        {
+            SnapToGrid();
+        }
+
+        private void SnapToGrid()
+        {
+            int desiredWidth = Width;
+            int desiredHeight = Height;
+
+            if (_helpTextLabel != null)
+            {
+                desiredWidth = Math.Max(desiredWidth, 6 * _rectSize + BORDER_LEFT + BORDER_RIGHT); // wide enough to show the help Text
+            }
+
+            int tooWide = (desiredWidth - BoderSize * 2) % _rectSize;
+            int tooHigh = (desiredHeight - BoderSize * 2) % _rectSize;
+
+            if (tooWide > 0 || tooHigh > 0)
+            {
+                ResizeWindow(new Point(desiredWidth - tooWide, desiredHeight - tooHigh));
+            }
+        }
+
+        private ContextMenuControl ConfigureContextMenu(ContextMenuControl control)
+        {
+            control.Add(ResGumps.Add, AddPlaceholder);
+            if (ReadOnly)
+            {
+                control.Add(ResGumps.CounterReadonlyOn, ToggleReadOnly);
+            }
+            else
+            {
+                control.Add(ResGumps.CounterReadonlyOff, ToggleReadOnly);
+            }
+
+            return control;
+        }
+
+        private void ToggleReadOnly()
+        {
+            ReadOnly = !ReadOnly;
+
+            ContextMenu = ConfigureContextMenu(new ContextMenuControl(this));
+
+            _dataBox.Children.ForEach(child => { (child as CounterItem)?.ConfigureContextMenu(); });
+        }
 
         public CounterBarGump(
             World world,
             int x,
             int y,
-            int rectSize = 30,
-            int rows = 1,
-            int columns = 1 /*, bool vertical = false*/
-        ) : base(world, 0, 0)
+            int rectSize = MIN_SIZE
+        ) : this(world)
         {
             X = x;
             Y = y;
 
-            if (rectSize < 30)
-            {
-                rectSize = 30;
-            }
-            else if (rectSize > 80)
-            {
-                rectSize = 80;
-            }
-
-            if (rows < 1)
-            {
-                rows = 1;
-            }
-
-            if (columns < 1)
-            {
-                columns = 1;
-            }
-
-            _rows = rows;
-            _columns = columns;
-            _rectSize = rectSize;
-            //_isVertical = vertical;
+            SetCellSize(rectSize);
 
             BuildGump();
+        }
+
+        private void AddPlaceholder()
+        {
+            _dataBox.Add(new CounterItem(this, 0, 0, 0));
+            SetupLayout();
+        }
+
+        public void SetCellSize(int size)
+        {
+            if (size != _rectSize)
+            {
+                if (size < MIN_SIZE)
+                {
+                    size = MIN_SIZE;
+                }
+                else if (size > MAX_SIZE)
+                {
+                    size = MAX_SIZE;
+                }
+                _rectSize = size;
+
+                MinH = size + BoderSize * 2;
+                MinW = size + BoderSize * 2;
+
+                SnapToGrid();
+                SetupLayout();
+            }
         }
 
         public override GumpType GumpType => GumpType.CounterBar;
@@ -78,174 +146,191 @@ namespace ClassicUO.Game.UI.Gumps
             AcceptKeyboardInput = false;
             CanCloseWithRightClick = false;
             WantUpdateSize = false;
+            int borderSize = BoderSize;
 
-            Width = _rectSize * _columns + 1;
-            Height = _rectSize * _rows + 1;
+            Add(_background = new AlphaBlendControl(0.7f) { X = borderSize, Y = borderSize, Width = Width - borderSize * 2, Height = Height - borderSize * 2 });
 
-            Add(_background = new AlphaBlendControl(0.7f) { Width = Width, Height = Height });
+            Add(_scissor = new ScissorControl(true, borderSize, borderSize, 0, 0));
+            _dataBox = new DataBox(borderSize, borderSize, 0, 0);
+            Add(_dataBox);
+            Add(new ScissorControl(false));
+            _dataBox.WantUpdateSize = true;
 
-            for (int row = 0; row < _rows; row++)
+            ResizeWindow(new Point(Width, Height));
+            SnapToGrid();
+            OnResize();
+        }
+
+        protected override void OnDragBegin(int x, int y)
+        {
+            if (UIManager.MouseOverControl?.RootParent == this)
             {
-                for (int col = 0; col < _columns; col++)
+                UIManager.MouseOverControl.InvokeDragBegin(new Point(x, y));
+            }
+
+            base.OnDragBegin(x, y);
+        }
+
+        protected override void OnDragEnd(int x, int y)
+        {
+            if (UIManager.MouseOverControl?.RootParent == this)
+            {
+                UIManager.MouseOverControl.InvokeDragEnd(new Point(x, y));
+            }
+
+            base.OnDragEnd(x, y);
+        }
+
+        public override void OnResize()
+        {
+            base.OnResize();
+
+            if (_background != null)
+            {
+                SetupLayout();
+            }
+        }
+
+        private void SetupLayout()
+        {
+            if (_background == null)
+            {
+                return;
+            }
+
+            int width = Width - this.BoderSize * 2;
+            int height = Height - this.BoderSize * 2;
+            _background.Width = width;
+            _background.Height = height;
+            _dataBox.Width = 0;
+            _dataBox.Height = 0;
+            _dataBox.WantUpdateSize = true;
+
+            _scissor.Width = width;
+            _scissor.Height = height;
+
+            int x = 0;
+            int y = 0;
+
+            if (_dataBox?.Children.Count == 0 && _helpTextLabel == null)
+            {
+                Add(_helpTextLabel = new Label(ResGumps.CounterEmptyHelpText, true, HELP_TEXT_HUE)
                 {
-                    Add(
-                        new CounterItem(
-                            this,
-                            col * _rectSize + 2,
-                            row * _rectSize + 2,
-                            _rectSize - 4,
-                            _rectSize - 4
-                        )
-                    );
+                    X = BORDER_LEFT * 4,
+                    Y = BORDER_TOP * 4,
+                    Width = width - (BORDER_LEFT - BORDER_RIGHT) * 4,
+                    Height = height - (BORDER_TOP - BORDER_BOTTOM) * 4
+                });
+
+                SnapToGrid();
+            }
+
+            if (_dataBox?.Children.Count > 0 && _helpTextLabel != null)
+            {
+                _helpTextLabel.Dispose();
+                _helpTextLabel = null;
+            }
+
+            for (int i = 0; i < _dataBox.Children.Count; i++)
+            {
+                CounterItem c = _dataBox.Children[i] as CounterItem;
+                if (c != null && !c.IsDisposed)
+                {
+                    c.X = x + BORDER_LEFT;
+                    c.Y = y + BORDER_TOP;
+                    c.Width = _rectSize - BORDER_LEFT - BORDER_RIGHT;
+                    c.Height = _rectSize - BORDER_TOP - BORDER_BOTTOM;
+
+                    x += _rectSize;
+
+                    if (x + _rectSize > width)
+                    {
+                        x = 0;
+                        y += _rectSize;
+                    }
+
+                    continue;
                 }
             }
         }
 
-        public void SetLayout(int size, int rows, int columns)
+        protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
         {
-            bool ok = false;
-
-            //if (_isVertical != isvertical)
-            //{
-            //    _isVertical = isvertical;
-            //    int temp = _rows;
-            //    _rows = _columns;
-            //    _columns = temp;
-            //    ok = true;
-            //}
-
-            if (rows > 30)
+            if (button == MouseButtonType.Left)
             {
-                rows = 30;
+                ToggleReadOnly();
+                return true;
             }
 
-            if (columns > 30)
-            {
-                columns = 30;
-            }
-
-            if (size < 30)
-            {
-                size = 30;
-            }
-            else if (size > 80)
-            {
-                size = 80;
-            }
-
-            if (_rectSize != size)
-            {
-                ok = true;
-                _rectSize = size;
-            }
-
-            if (rows < 1)
-            {
-                rows = 1;
-            }
-
-            if (_rows != rows)
-            {
-                ok = true;
-                _rows = rows;
-            }
-
-            if (columns < 1)
-            {
-                columns = 1;
-            }
-
-            if (_columns != columns)
-            {
-                ok = true;
-                _columns = columns;
-            }
-
-            if (ok)
-            {
-                ApplyLayout();
-            }
+            return false;
         }
 
-        private void ApplyLayout()
+        protected override void OnMouseUp(int x, int y, MouseButtonType button)
         {
-            Width = _rectSize * _columns + 1;
-            Height = _rectSize * _rows + 1;
-
-            _background.Width = Width;
-            _background.Height = Height;
-
-            CounterItem[] items = GetControls<CounterItem>();
-
-            int[] indices = new int[items.Length];
-
-            for (int row = 0; row < _rows; row++)
+            if (button == MouseButtonType.Left)
             {
-                for (int col = 0; col < _columns; col++)
+                if (Client.Game.UO.GameCursor.ItemHold.Enabled && Client.Game.UO.GameCursor.ItemHold.Graphic != 0)
                 {
-                    int index = /*_isVertical ? col * _rows + row :*/
-                        row * _columns + col;
-
-                    if (index < items.Length)
+                    if (!ReadOnly)
                     {
-                        CounterItem c = items[index];
-
-                        c.X = col * _rectSize + 2;
-                        c.Y = row * _rectSize + 2;
-                        c.Width = _rectSize - 4;
-                        c.Height = _rectSize - 4;
-
-                        c.SetGraphic(c.Graphic, c.Hue);
-
-                        indices[index] = -1;
+                        CounterItem item = new CounterItem(this, Client.Game.UO.GameCursor.ItemHold.Graphic, Client.Game.UO.GameCursor.ItemHold.Hue, 0);
+                        _dataBox.Add(item);
                     }
-                    else
-                    {
-                        Add(
-                            new CounterItem(
-                                this,
-                                col * _rectSize + 2,
-                                row * _rectSize + 2,
-                                _rectSize - 4,
-                                _rectSize - 4
-                            )
-                        );
-                    }
+                    GameActions.DropItem(Client.Game.UO.GameCursor.ItemHold.Serial, Client.Game.UO.GameCursor.ItemHold.X, Client.Game.UO.GameCursor.ItemHold.Y, 0, Client.Game.UO.GameCursor.ItemHold.Container);
+
+                    SetupLayout();
+
+                    return;
                 }
             }
 
-            for (int i = 0; i < indices.Length; i++)
+            base.OnMouseUp(x, y, button);
+        }
+
+        internal void UseSlot(string slotString)
+        {
+            if (!string.IsNullOrEmpty(slotString) && ushort.TryParse(slotString, out ushort slot))
             {
-                int index = indices[i];
+                // slot index is 1-based since we have to assume the average user is non-technical
+                // everything else would be confusing
 
-                if (index >= 0 && index < items.Length)
+                if (_dataBox.Children.Skip(slot - 1).FirstOrDefault() is CounterItem item)
                 {
-                    items[i].Parent = null;
-
-                    items[i].Dispose();
+                    item.Use();
+                }
+                else
+                {
+                    GameActions.Print(World, string.Format(ResGumps.CounterErrorSlotNotFound, slotString));
                 }
             }
-
-            SetInScreen();
+            else
+            {
+                GameActions.Print(World, string.Format(ResGumps.CounterErrorSlotNotValid, slotString));
+            }
         }
 
         public override void Save(XmlTextWriter writer)
         {
             base.Save(writer);
 
-            writer.WriteAttributeString("rows", _rows.ToString());
-            writer.WriteAttributeString("columns", _columns.ToString());
             writer.WriteAttributeString("rectsize", _rectSize.ToString());
+            writer.WriteAttributeString("width", Width.ToString());
+            writer.WriteAttributeString("height", Height.ToString());
+            writer.WriteAttributeString("readonly", ReadOnly.ToString());
 
             IEnumerable<CounterItem> controls = FindControls<CounterItem>();
 
             writer.WriteStartElement("controls");
 
-            foreach (CounterItem control in controls)
+            foreach (CounterItem control in _dataBox.Children.FindAll(c => c is CounterItem).Cast<CounterItem>())
             {
                 writer.WriteStartElement("control");
                 writer.WriteAttributeString("graphic", control.Graphic.ToString());
-                writer.WriteAttributeString("hue", control.Hue.ToString());
+                if (control.Hue != null)
+                {
+                    writer.WriteAttributeString("hue", control.Hue.Value.ToString());
+                }
+                writer.WriteAttributeString("compareto", control.CompareTo.ToString());
                 writer.WriteEndElement();
             }
 
@@ -256,9 +341,37 @@ namespace ClassicUO.Game.UI.Gumps
         {
             base.Restore(xml);
 
-            _rows = int.Parse(xml.GetAttribute("rows"));
-            _columns = int.Parse(xml.GetAttribute("columns"));
-            _rectSize = int.Parse(xml.GetAttribute("rectsize"));
+            SetCellSize(int.Parse(xml.GetAttribute("rectsize")));
+
+
+            if (!int.TryParse(xml.GetAttribute("width"), out int width))
+            {
+                if (int.TryParse(xml.GetAttribute("columns"), out int columns)) //legacy
+                {
+                    width = columns * _rectSize + BoderSize * 2; // outer border
+                }
+                else
+                {
+                    width = 200;
+                }
+            }
+
+            if (!int.TryParse(xml.GetAttribute("height"), out int height))
+            {
+                if (int.TryParse(xml.GetAttribute("rows"), out int rows)) //legacy
+                {
+                    height = rows * _rectSize + BoderSize * 2; // outer border
+                }
+                else
+                {
+                    height = MAX_SIZE;
+                }
+            }
+
+            if (bool.TryParse(xml.GetAttribute("readonly"), out bool isReadOnly))
+            {
+                ReadOnly = isReadOnly;
+            }
 
             BuildGump();
 
@@ -266,347 +379,35 @@ namespace ClassicUO.Game.UI.Gumps
 
             if (controlsXml != null)
             {
-                CounterItem[] items = GetControls<CounterItem>();
-                int index = 0;
-
                 foreach (XmlElement controlXml in controlsXml.GetElementsByTagName("control"))
                 {
-                    if (index < items.Length)
+                    ushort graphic = ushort.Parse(controlXml.GetAttribute("graphic"));
+
+                    if (graphic == 0)
                     {
-                        items[index++]?.SetGraphic(
-                            ushort.Parse(controlXml.GetAttribute("graphic")),
-                            ushort.Parse(controlXml.GetAttribute("hue"))
-                        );
+                        _dataBox.Add(new CounterItem(this, 0, 0, 0));
+                        continue;
                     }
-                    else
+                    if (!int.TryParse(controlXml.GetAttribute("compareto"), out int compareTo))
                     {
-                        Log.Error(ResGumps.IndexOutOfbounds);
+                        compareTo = 0;
                     }
+
+                    string hue = controlXml.GetAttribute("hue");
+
+                    CounterItem c = new(this, graphic, string.IsNullOrEmpty(hue) ? null : ushort.Parse(controlXml.GetAttribute("hue")), compareTo);
+
+                    _dataBox.Add(c);
                 }
             }
 
             IsEnabled = IsVisible = ProfileManager.CurrentProfile.CounterBarEnabled;
-        }
 
-        private class CounterItem : Control
-        {
-            private int _amount;
-            private readonly ImageWithText _image;
-            private uint _time;
-            private readonly CounterBarGump _gump;
+            // resize only after items have been added
+            // because an empty counter bar will always receive a minimum width for the help text
+            ResizeWindow(new Point(width, height));
 
-            public CounterItem(CounterBarGump gump, int x, int y, int w, int h)
-            {
-                _gump = gump;
-                AcceptMouseInput = true;
-                WantUpdateSize = false;
-                CanMove = true;
-                CanCloseWithRightClick = false;
-
-                X = x;
-                Y = y;
-                Width = w;
-                Height = h;
-
-                _image = new ImageWithText();
-                Add(_image);
-
-                ContextMenu = new ContextMenuControl(_gump);
-                ContextMenu.Add(ResGumps.UseObject, Use);
-                ContextMenu.Add(ResGumps.Remove, RemoveItem);
-            }
-
-            public ushort Graphic { get; private set; }
-
-            public ushort Hue { get; private set; }
-
-            public void SetGraphic(ushort graphic, ushort hue)
-            {
-                _image.ChangeGraphic(graphic, hue);
-
-                if (graphic == 0)
-                {
-                    return;
-                }
-
-                Graphic = graphic;
-                Hue = hue;
-            }
-
-            public void RemoveItem()
-            {
-                _image?.ChangeGraphic(0, 0);
-                _amount = 0;
-                Graphic = 0;
-            }
-
-            public void Use()
-            {
-                if (Graphic == 0)
-                {
-                    return;
-                }
-
-                Item backpack = _gump.World.Player.FindItemByLayer(Layer.Backpack);
-
-                if (backpack == null)
-                {
-                    return;
-                }
-
-                Item item = backpack.FindItem(Graphic, Hue);
-
-                if (item != null)
-                {
-                    GameActions.DoubleClick(_gump.World, item);
-                }
-            }
-
-            protected override void OnMouseOver(int x, int y)
-            {
-                base.OnMouseOver(x, y);
-
-                if (_gump.World.Player.FindItemByLayer(Layer.Backpack)?.FindItem(Graphic, Hue) is {} item)
-                    SetTooltip(item);
-            }
-
-            protected override void OnMouseExit(int x, int y)
-            {
-                base.OnMouseExit(x, y);
-                ClearTooltip();
-            }
-
-            protected override void OnMouseUp(int x, int y, MouseButtonType button)
-            {
-                if (button == MouseButtonType.Left)
-                {
-                    if (Client.Game.UO.GameCursor.ItemHold.Enabled)
-                    {
-                        SetGraphic(
-                            Client.Game.UO.GameCursor.ItemHold.Graphic,
-                            Client.Game.UO.GameCursor.ItemHold.Hue
-                        );
-
-                        GameActions.DropItem(
-                            Client.Game.UO.GameCursor.ItemHold.Serial,
-                            Client.Game.UO.GameCursor.ItemHold.X,
-                            Client.Game.UO.GameCursor.ItemHold.Y,
-                            0,
-                            Client.Game.UO.GameCursor.ItemHold.Container
-                        );
-                    }
-                    else if (ProfileManager.CurrentProfile.CastSpellsByOneClick)
-                    {
-                        Use();
-                    }
-                }
-                else if (button == MouseButtonType.Right && Keyboard.Alt && Graphic != 0)
-                {
-                    RemoveItem();
-                }
-                else if (Graphic != 0)
-                {
-                    base.OnMouseUp(x, y, button);
-                }
-            }
-
-            protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)
-            {
-                if (
-                    button == MouseButtonType.Left
-                    && !ProfileManager.CurrentProfile.CastSpellsByOneClick
-                )
-                {
-                    Use();
-                }
-
-                return true;
-            }
-
-            public override void Update()
-            {
-                base.Update();
-
-                if (Parent != null && Parent.IsEnabled && _time < Time.Ticks)
-                {
-                    _time = Time.Ticks + 100;
-
-                    if (Graphic == 0)
-                    {
-                        _image.SetAmount(string.Empty);
-                    }
-                    else
-                    {
-                        _amount = 0;
-
-                        for (
-                            Item item = (Item)_gump.World.Player.Items;
-                            item != null;
-                            item = (Item)item.Next
-                        )
-                        {
-                            if (
-                                item.ItemData.IsContainer
-                                && !item.IsEmpty
-                                && item.Layer >= Layer.OneHanded
-                                && item.Layer <= Layer.Legs
-                            )
-                            {
-                                GetAmount(item, Graphic, Hue, ref _amount);
-                            }
-                        }
-
-                        if (ProfileManager.CurrentProfile.CounterBarDisplayAbbreviatedAmount)
-                        {
-                            if (
-                                _amount >= ProfileManager.CurrentProfile.CounterBarAbbreviatedAmount
-                            )
-                            {
-                                _image.SetAmount(StringHelper.IntToAbbreviatedString(_amount));
-
-                                return;
-                            }
-                        }
-
-                        _image.SetAmount(_amount.ToString());
-                    }
-                }
-            }
-
-            private static void GetAmount(Item parent, ushort graphic, ushort hue, ref int amount)
-            {
-                if (parent == null)
-                {
-                    return;
-                }
-
-                for (LinkedObject i = parent.Items; i != null; i = i.Next)
-                {
-                    Item item = (Item)i;
-
-                    GetAmount(item, graphic, hue, ref amount);
-
-                    if (item.Graphic == graphic && item.Hue == hue && item.Exists)
-                    {
-                        amount += item.Amount;
-                    }
-                }
-            }
-
-            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-            {
-                base.Draw(batcher, x, y);
-
-                Texture2D color = SolidColorTextureCache.GetTexture(
-                    MouseIsOver
-                        ? Color.Yellow
-                        : ProfileManager.CurrentProfile.CounterBarHighlightOnAmount
-                        && _amount < ProfileManager.CurrentProfile.CounterBarHighlightAmount
-                        && Graphic != 0
-                            ? Color.Red
-                            : Color.Gray
-                );
-
-                Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
-
-                batcher.DrawRectangle(color, x, y, Width, Height, hueVector);
-
-                return true;
-            }
-
-            private class ImageWithText : Control
-            {
-                private readonly Label _label;
-                private ushort _graphic;
-                private ushort _hue;
-                private bool _partial;
-
-                public ImageWithText()
-                {
-                    CanMove = true;
-                    WantUpdateSize = true;
-                    AcceptMouseInput = false;
-
-                    _label = new Label("", true, 0x35, 0, 1, FontStyle.BlackBorder)
-                    {
-                        X = 2,
-                        Y = Height - 15
-                    };
-
-                    Add(_label);
-                }
-
-                public void ChangeGraphic(ushort graphic, ushort hue)
-                {
-                    if (graphic != 0)
-                    {
-                        _graphic = graphic;
-                        _hue = hue;
-                        _partial = Client.Game.UO.FileManager.TileData.StaticData[graphic].IsPartialHue;
-                        _label.Y = Parent.Height - 15;
-                    }
-                    else
-                    {
-                        _graphic = 0;
-                    }
-                }
-
-                public override void Update()
-                {
-                    base.Update();
-
-                    if (Parent != null)
-                    {
-                        Width = Parent.Width;
-                        Height = Parent.Height;
-                    }
-                }
-
-                public override bool Draw(UltimaBatcher2D batcher, int x, int y)
-                {
-                    if (_graphic != 0)
-                    {
-                        ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(_graphic);
-                        var rect = Client.Game.UO.Arts.GetRealArtBounds(_graphic);
-
-                        Vector3 hueVector = ShaderHueTranslator.GetHueVector(_hue, _partial, 1f);
-
-                        Point originalSize = new Point(Width, Height);
-                        Point point = new Point();
-
-                        if (rect.Width < Width)
-                        {
-                            originalSize.X = rect.Width;
-                            point.X = (Width >> 1) - (originalSize.X >> 1);
-                        }
-
-                        if (rect.Height < Height)
-                        {
-                            originalSize.Y = rect.Height;
-                            point.Y = (Height >> 1) - (originalSize.Y >> 1);
-                        }
-
-                        batcher.Draw(
-                            artInfo.Texture,
-                            new Rectangle(x + point.X, y + point.Y, originalSize.X, originalSize.Y),
-                            new Rectangle(
-                                artInfo.UV.X + rect.X,
-                                artInfo.UV.Y + rect.Y,
-                                rect.Width,
-                                rect.Height
-                            ),
-                            hueVector
-                        );
-                    }
-
-                    return base.Draw(batcher, x, y);
-                }
-
-                public void SetAmount(string amount)
-                {
-                    _label.Text = amount;
-                }
-            }
+            SetupLayout();
         }
     }
 }

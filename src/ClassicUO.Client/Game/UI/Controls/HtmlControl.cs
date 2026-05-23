@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using ClassicUO.Input;
 using ClassicUO.Assets;
-using ClassicUO.Renderer;
+using ClassicUO.Game.Scenes;
+using ClassicUO.Input;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -158,30 +156,29 @@ namespace ClassicUO.Game.UI.Controls
                 );
             }
 
-            if (HasScrollbar)
+
+            if (UseFlagScrollbar)
             {
-                if (UseFlagScrollbar)
+                _scrollBar = new ScrollFlag
                 {
-                    _scrollBar = new ScrollFlag
-                    {
-                        Location = new Point(Width - 14, 0)
-                    };
-                }
-                else
-                {
-                    _scrollBar = new ScrollBar(Width - 14, 0, Height);
-                }
-
-                _scrollBar.Height = Height;
-                _scrollBar.MinValue = 0;
-
-                _scrollBar.MaxValue = /* _gameText.Height*/ /* Children.Sum(s => s.Height) - Height +*/
-                    _gameText.Height - Height + (HasBackground ? 8 : 0);
-
-                ScrollY = _scrollBar.Value;
-
-                Add(_scrollBar);
+                    Location = new Point(Width - 14, 0),
+                };
             }
+            else
+            {
+                _scrollBar = new ScrollBar(Width - 14, 0, Height);
+            }
+
+            _scrollBar.IsVisible = HasScrollbar;
+            _scrollBar.Height = Height;
+            _scrollBar.MinValue = 0;
+
+            _scrollBar.MaxValue = /* _gameText.Height*/ /* Children.Sum(s => s.Height) - Height +*/
+                _gameText.Height - Height + (HasBackground ? 8 : 0);
+
+            ScrollY = _scrollBar.Value;
+
+            Add(_scrollBar);
 
             //if (Width != _gameText.Width)
             //    Width = _gameText.Width;
@@ -189,11 +186,6 @@ namespace ClassicUO.Game.UI.Controls
 
         protected override void OnMouseWheel(MouseEventType delta)
         {
-            if (!HasScrollbar)
-            {
-                return;
-            }
-
             switch (delta)
             {
                 case MouseEventType.WheelScrollUp:
@@ -210,52 +202,59 @@ namespace ClassicUO.Game.UI.Controls
 
         public override void Update()
         {
-            if (HasScrollbar)
+            if (WantUpdateSize)
             {
-                if (WantUpdateSize)
-                {
-                    _scrollBar.Height = Height;
-                    _scrollBar.MinValue = 0;
+                _scrollBar.Height = Height;
+                _scrollBar.MinValue = 0;
 
-                    _scrollBar.MaxValue = /* _gameText.Height*/ /*Children.Sum(s => s.Height) - Height */
-                        _gameText.Height - Height + (HasBackground ? 8 : 0);
+                _scrollBar.MaxValue = /* _gameText.Height*/ /*Children.Sum(s => s.Height) - Height */
+                    _gameText.Height - Height + (HasBackground ? 8 : 0);
 
-                    //_scrollBar.IsVisible = _scrollBar.MaxValue > _scrollBar.MinValue;
-                    WantUpdateSize = false;
-                }
-
-                ScrollY = _scrollBar.Value;
+                //_scrollBar.IsVisible = _scrollBar.MaxValue > _scrollBar.MinValue;
+                WantUpdateSize = false;
             }
 
+            ScrollY = _scrollBar.Value;
             base.Update();
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
+            float layerDepth = layerDepthRef;
             if (IsDisposed)
             {
                 return false;
             }
+            renderLists.AddGumpNoAtlas(
+                batcher =>
+                {
+                    if (batcher.ClipBegin(x, y, Width, Height))
+                    {
+                        RenderLists childRenderLists = new();
 
-            if (batcher.ClipBegin(x, y, Width, Height))
-            {
-                base.Draw(batcher, x, y);
+                        base.AddToRenderLists(childRenderLists, x, y, ref layerDepth);
 
-                int offset = HasBackground ? 4 : 0;
+                        childRenderLists.DrawRenderLists(batcher, sbyte.MaxValue);
 
-                _gameText.Draw
-                (
-                    batcher,
-                    x + offset,
-                    y + offset,
-                    ScrollX,
-                    ScrollY,
-                    Width + ScrollX,
-                    Height + ScrollY
-                );
+                        int offset = HasBackground ? 4 : 0;
 
-                batcher.ClipEnd();
-            }
+                        _gameText.Draw
+                        (
+                            batcher,
+                            x + offset,
+                            y + offset,
+                            ScrollX,
+                            ScrollY,
+                            Width + ScrollX,
+                            Height + ScrollY,
+                            layerDepth
+                        );
+
+                        batcher.ClipEnd();
+                    }
+                    return true;
+                }
+            );
 
 
             return true;
@@ -273,11 +272,12 @@ namespace ClassicUO.Game.UI.Controls
 
                         bool inbounds = link.Bounds.Contains(x, (_scrollBar == null ? 0 : _scrollBar.Value) + y);
 
-                        if (inbounds && Client.Game.UO.FileManager.Fonts.GetWebLink(link.LinkID, out WebLink result))
+                        if (inbounds && !string.IsNullOrEmpty(link.Url))
                         {
-                            Log.Info("LINK CLICKED: " + result.Link);
+                            Log.Info("LINK CLICKED: " + link.Url);
 
-                            PlatformHelper.LaunchBrowser(result.Link);
+                            Client.Game.UO.FileManager.Fonts.MarkVisited(link.Url);
+                            PlatformHelper.LaunchBrowser(link.Url);
 
                             _gameText.CreateTexture();
 

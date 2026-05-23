@@ -1,9 +1,9 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 
@@ -35,26 +35,35 @@ namespace ClassicUO.Game.UI.Controls
             Height = background.Height;
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
             if (Children.Count != 0)
             {
-                Children[0].Draw(batcher, x, y);
+                layerDepthRef += 0.1f;
+                Children[0].AddToRenderLists(renderLists, x, y, ref layerDepthRef);
             }
+            float layerDepth = layerDepthRef;
 
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue);
 
-            batcher.Draw
-            (
-               SolidColorTextureCache.GetTexture(Color.White),
-               new Rectangle
-               (
-                   x + 3,
-                   y + 3,
-                   Width - 6,
-                   Height - 6
-                ),
-                hueVector
+            renderLists.AddGumpNoAtlas(
+                batcher =>
+                {
+                    batcher.Draw
+                    (
+                        SolidColorTextureCache.GetTexture(Color.White),
+                        new Rectangle
+                        (
+                            x + 3,
+                            y + 3,
+                            Width - 6,
+                            Height - 6
+                        ),
+                        hueVector,
+                        layerDepth
+                    );
+                    return true;
+                }
             );
 
             return true;

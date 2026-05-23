@@ -85,29 +85,57 @@ namespace ClassicUO.Renderer
             UpdateMatrices();
         }
 
-        public Point ScreenToWorld(Point point)
+        public Point ScreenToWorld(Point point, bool withOffset = false)
         {
             UpdateMatrices();
 
-            Transform(ref point, ref _inverseTransform, out point);
+            int offsetX = 0;
+            int offsetY = 0;
+            if (withOffset)
+            {
+                offsetX = -Bounds.X;
+                offsetY = -Bounds.Y;
+            }
+
+            Transform(ref point, ref _inverseTransform, out point, offsetX, offsetY);
 
             return point;
         }
 
-        public Point WorldToScreen(Point point)
+        /// <summary>
+        ///     Returns screen coordinates from world coordinates.
+        ///     There are two variants for screen coordinates:
+        ///     1. Relative to the game window (withOffset = true)
+        ///     2. Relative to the camera viewport (withOffset = false)
+        ///     Because of the fact that the camera viewport content now
+        ///     fully scales with the zoom level, everything that
+        ///     is not supposed to zoom (UI, etc.) is drawn
+        ///     in the UI render target now.
+        ///     Only those aspects need to adjust for case 1 above.
+        /// </summary>
+        public Point WorldToScreen(Point point, bool withOffset = false)
         {
             UpdateMatrices();
 
-            Transform(ref point, ref _transform, out point);
+            int offsetX = 0;
+            int offsetY = 0;
+            if (withOffset)
+            {
+                offsetX = Bounds.X;
+                offsetY = Bounds.Y;
+            }
+
+            Transform(ref point, ref _transform, out point, offsetX, offsetY);
 
             return point;
         }
+
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static void Transform(ref Point position, ref Matrix matrix, out Point result)
+        private static void Transform(ref Point position, ref Matrix matrix, out Point result, int offsetX, int offsetY)
         {
-            float x = position.X * matrix.M11 + position.Y * matrix.M21 + matrix.M41;
-            float y = position.X * matrix.M12 + position.Y * matrix.M22 + matrix.M42;
+            float x = position.X * matrix.M11 + position.Y * matrix.M21 + matrix.M41 + offsetX;
+            float y = position.X * matrix.M12 + position.Y * matrix.M22 + matrix.M42 + offsetY;
             result.X = (int) x;
             result.Y = (int) y;
         }

@@ -8,7 +8,7 @@ using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Assets;
 using ClassicUO.Resources;
-using SDL2;
+using SDL3;
 using ClassicUO.Renderer.Gumps;
 
 namespace ClassicUO.Game.UI.Controls
@@ -221,21 +221,21 @@ namespace ClassicUO.Game.UI.Controls
                 return;
             }
 
-            SDL.SDL_Keymod mod = SDL.SDL_Keymod.KMOD_NONE;
+            SDL.SDL_Keymod mod = SDL.SDL_Keymod.SDL_KMOD_NONE;
 
             if (Macro.Alt)
             {
-                mod |= SDL.SDL_Keymod.KMOD_ALT;
+                mod |= SDL.SDL_Keymod.SDL_KMOD_ALT;
             }
 
             if (Macro.Shift)
             {
-                mod |= SDL.SDL_Keymod.KMOD_SHIFT;
+                mod |= SDL.SDL_Keymod.SDL_KMOD_SHIFT;
             }
 
             if (Macro.Ctrl)
             {
-                mod |= SDL.SDL_Keymod.KMOD_CTRL;
+                mod |= SDL.SDL_Keymod.SDL_KMOD_CTRL;
             }
 
             if (Macro.Key != SDL.SDL_Keycode.SDLK_UNKNOWN)
@@ -254,9 +254,9 @@ namespace ClassicUO.Game.UI.Controls
 
         private void BoxOnHotkeyChanged(object sender, EventArgs e)
         {
-            bool shift = (_hotkeyBox.Mod & SDL.SDL_Keymod.KMOD_SHIFT) != SDL.SDL_Keymod.KMOD_NONE;
-            bool alt = (_hotkeyBox.Mod & SDL.SDL_Keymod.KMOD_ALT) != SDL.SDL_Keymod.KMOD_NONE;
-            bool ctrl = (_hotkeyBox.Mod & SDL.SDL_Keymod.KMOD_CTRL) != SDL.SDL_Keymod.KMOD_NONE;
+            bool shift = (_hotkeyBox.Mod & SDL.SDL_Keymod.SDL_KMOD_SHIFT) != SDL.SDL_Keymod.SDL_KMOD_NONE;
+            bool alt = (_hotkeyBox.Mod & SDL.SDL_Keymod.SDL_KMOD_ALT) != SDL.SDL_Keymod.SDL_KMOD_NONE;
+            bool ctrl = (_hotkeyBox.Mod & SDL.SDL_Keymod.SDL_KMOD_CTRL) != SDL.SDL_Keymod.SDL_KMOD_NONE;
 
             if (_hotkeyBox.Key != SDL.SDL_Keycode.SDLK_UNKNOWN)
             {

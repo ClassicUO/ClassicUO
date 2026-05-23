@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System.Collections.Generic;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -41,6 +42,8 @@ namespace ClassicUO.Game.UI.Controls
         }
 
         public ushort Hue { get; set; }
+        public bool IsPartialHue { get; set; }
+
 
         public override bool Contains(int x, int y)
         {
@@ -100,7 +103,6 @@ namespace ClassicUO.Game.UI.Controls
             )
         { }
 
-        public bool IsPartialHue { get; set; }
         public bool ContainsByBounds { get; set; }
 
         public override bool Contains(int x, int y)
@@ -120,8 +122,9 @@ namespace ClassicUO.Game.UI.Controls
             return hue;
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
+            float layerDepth = layerDepthRef;
             if (IsDisposed)
             {
                 return false;
@@ -133,15 +136,23 @@ namespace ClassicUO.Game.UI.Controls
 
             if (gumpInfo.Texture != null)
             {
-                batcher.Draw(
-                    gumpInfo.Texture,
-                    new Rectangle(x, y, Width, Height),
-                    gumpInfo.UV,
-                    hueVector
-                );
+                var texture = gumpInfo.Texture;
+                var sourceRectangle = gumpInfo.UV;
+                renderLists.AddGumpWithAtlas(
+                    batcher =>
+                    {
+                        batcher.Draw(
+                            texture,
+                            new Rectangle(x, y, Width, Height),
+                            sourceRectangle,
+                            hueVector,
+                            layerDepth
+                        );
+                        return true;
+                    });
             }
 
-            return base.Draw(batcher, x, y);
+            return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
         }
     }
 
@@ -207,30 +218,39 @@ namespace ClassicUO.Game.UI.Controls
             return true;
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
+            float layerDepth = layerDepthRef;
             if (IsDisposed)
             {
                 return false;
             }
 
-            Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, false, Alpha, true);
+            Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, IsPartialHue, Alpha, true);
 
             ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(Graphic);
 
             var sourceBounds = new Rectangle(gumpInfo.UV.X + _picInPicBounds.X, gumpInfo.UV.Y + _picInPicBounds.Y, _picInPicBounds.Width, _picInPicBounds.Height);
 
-            if (gumpInfo.Texture != null)
+            var texture = gumpInfo.Texture;
+            if (texture != null)
             {
-                batcher.Draw(
-                    gumpInfo.Texture,
-                    new Rectangle(x, y, Width, Height),
-                    sourceBounds,
-                    hueVector
+                renderLists.AddGumpWithAtlas(
+                    batcher =>
+                    {
+                        batcher.Draw(
+                            texture,
+                            new Rectangle(x, y, Width, Height),
+                            sourceBounds,
+                            hueVector,
+                            layerDepth
+                        );
+                        return true;
+                    }
                 );
             }
 
-            return base.Draw(batcher, x, y);
+            return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
         }
     }
 }

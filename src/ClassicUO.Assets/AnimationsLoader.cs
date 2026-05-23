@@ -138,10 +138,10 @@ namespace ClassicUO.Assets
                             }
 
                             // Some installs ship mobtypes.txt with trailing
-                            // BOM/control bytes on flag tokens (seen on UO
-                            // NEW LEGACY). Strip non-hex chars before parse
-                            // so AGENT_BUILD doesn't crash on first load.
-                            var rawFlags = parts[2];
+                            // BOM/control bytes (seen on UO NEW LEGACY) that
+                            // survive parts[2].Trim() because they aren't
+                            // Unicode whitespace. Walk hex digits explicitly.
+                            var rawFlags = parts[2].Trim();
                             int flagsEnd = 0;
                             while (flagsEnd < rawFlags.Length && Uri.IsHexDigit(rawFlags[flagsEnd])) flagsEnd++;
                             if (flagsEnd == 0)
@@ -226,6 +226,12 @@ namespace ClassicUO.Assets
         {
             if (_bodyInfos.TryGetValue(body, out var bodyInfo))
             {
+                if (body == bodyInfo.Graphic)
+                {
+                    hue = bodyInfo.Hue;
+                    return false;
+                }
+
                 body = bodyInfo.Graphic;
                 hue = bodyInfo.Hue;
 
@@ -239,6 +245,12 @@ namespace ClassicUO.Assets
         {
             if (_corpseInfos.TryGetValue(body, out var bodyInfo))
             {
+                if (body == bodyInfo.Graphic)
+                {
+                    hue = bodyInfo.Hue;
+                    return false;
+                }
+
                 body = bodyInfo.Graphic;
                 hue = bodyInfo.Hue;
 

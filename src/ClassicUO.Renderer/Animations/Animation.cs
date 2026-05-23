@@ -2,7 +2,6 @@ using System;
 using System.Runtime.CompilerServices;
 using ClassicUO.Assets;
 using Microsoft.Xna.Framework.Graphics;
-using static System.Collections.Specialized.BitVector32;
 
 namespace ClassicUO.Renderer.Animations
 {
@@ -150,34 +149,15 @@ namespace ClassicUO.Renderer.Animations
             height = ismounted ? 100 : 60;
         }
 
-        public Span<SpriteInfo> GetAnimationFrames(
-            ushort id,
-            byte action,
-            byte dir,
-            out ushort hue,
-            out bool useUOP,
-            bool isEquip = false,
-            bool isCorpse = false
-        )
+        private IndexAnimation GetIndexAnim(ushort id, ref ushort hue, bool isCorpse)
         {
-            hue = 0;
-            useUOP = false;
-
-            if (action >= AnimationsLoader.MAX_ACTIONS || dir >= AnimationsLoader.MAX_DIRECTIONS)
-            {
-                return Span<SpriteInfo>.Empty;
-            }
-
             if (id >= ushort.MaxValue)
-                return Span<SpriteInfo>.Empty;
+                return null;
 
             if (id >= _dataIndex.Length)
-            {
                 Array.Resize(ref _dataIndex, id + 1);
-            }
 
             ref var index = ref _dataIndex[id];
-
             do
             {
                 if (index == null)
@@ -207,41 +187,80 @@ namespace ClassicUO.Renderer.Animations
                                 index.UopGroups[i].Offset = indices[i].Position;
                                 index.UopGroups[i].CompressionType = indices[i].CompressionType;
                             }
-                        }
-                        else
-                        {
-                            index.Groups = new AnimationGroup[indices.Length / AnimationsLoader.MAX_DIRECTIONS];
-                            for (int i = 0; i < index.Groups.Length; i++)
-                            {
-                                index.Groups[i] = new AnimationGroup();
 
-                                for (int d = 0; d < AnimationsLoader.MAX_DIRECTIONS; d++)
-                                {
-                                    ref readonly var animIdx = ref indices[i * AnimationsLoader.MAX_DIRECTIONS + d];
-                                    index.Groups[i].Direction[d].Address = animIdx.Position;
-                                    index.Groups[i].Direction[d].Size = /*index.FileIndex > 0 ? Math.Max(1, animIdx.Size) :*/ animIdx.Size;
-                                }
+                            break;
+                        }
+
+                        index.Groups = new AnimationGroup[indices.Length / AnimationsLoader.MAX_DIRECTIONS];
+                        for (int i = 0; i < index.Groups.Length; i++)
+                        {
+                            index.Groups[i] = new AnimationGroup();
+
+                            for (int d = 0; d < AnimationsLoader.MAX_DIRECTIONS; d++)
+                            {
+                                ref readonly var animIdx = ref indices[i * AnimationsLoader.MAX_DIRECTIONS + d];
+                                index.Groups[i].Direction[d].Address = animIdx.Position;
+                                index.Groups[i].Direction[d].Size = /*index.FileIndex > 0 ? Math.Max(1, animIdx.Size) :*/ animIdx.Size;
                             }
                         }
-                    }
-                }
 
-                if (index.FileIndex == 0)
-                {
-                    var replaced = isCorpse ? _animationLoader.ReplaceCorpse(ref id, ref hue) : _animationLoader.ReplaceBody(ref id, ref hue);
-                    if (replaced)
-                    {
-                        if (id >= _dataIndex.Length)
-                        {
-                            Array.Resize(ref _dataIndex, id + 1);
-                        }
+                        //if (index.FileIndex == 0)
+                        //{
+                        //    var replaced = isCorpse ? _animationLoader.ReplaceCorpse(ref id, ref hue) : _animationLoader.ReplaceBody(ref id, ref hue);
+                        //    if (replaced)
+                        //    {
+                        //        if (id >= _dataIndex.Length)
+                        //        {
+                        //            Array.Resize(ref _dataIndex, id + 1);
+                        //        }
 
-                        index = ref _dataIndex[id];
+                        //        index = ref _dataIndex[id];
+                        //    }
+                        //}
                     }
                 }
             } while (index == null);
 
+            return index;
+        }
+
+        public Span<SpriteInfo> GetAnimationFrames(
+            ushort id,
+            byte action,
+            byte dir,
+            out ushort hue,
+            out bool useUOP,
+            bool isEquip = false,
+            bool isCorpse = false,
+            bool forceUOP = false
+        )
+        {
+            hue = 0;
+            useUOP = false;
+
+            if (action >= AnimationsLoader.MAX_ACTIONS || dir >= AnimationsLoader.MAX_DIRECTIONS)
+            {
+                return Span<SpriteInfo>.Empty;
+            }
+
+            var index = GetIndexAnim(id, ref hue, isCorpse);
+            if (index == null)
+                return Span<SpriteInfo>.Empty;
+
             useUOP = (index.Flags & AnimationFlags.UseUopAnimation) != 0;
+
+            while (!useUOP && index.FileIndex == 0)
+            {
+                var replaced = isCorpse ? _animationLoader.ReplaceCorpse(ref id, ref hue) : _animationLoader.ReplaceBody(ref id, ref hue);
+                if (!replaced)
+                    break;
+
+                index = GetIndexAnim(id, ref hue, isCorpse);
+                if (index == null)
+                    return Span<SpriteInfo>.Empty;
+            }
+
+
             index.Hue = hue;
 
             if (useUOP)

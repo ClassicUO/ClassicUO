@@ -5,14 +5,11 @@ using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.IO;
-using ClassicUO.Network;
-using ClassicUO.Network.Encryption;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
-using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework.Graphics;
-using SDL2;
+using SDL3;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -28,6 +25,7 @@ namespace ClassicUO
         public Renderer.Lights.Light Lights { get; private set; }
         public Renderer.MultiMaps.MultiMap MultiMaps { get; private set; }
         public Renderer.Sounds.Sound Sounds { get; private set; }
+        public Renderer.FontGlyphAtlas FontGlyphAtlas { get; private set; }
         public World World { get; private set; }
         public GameCursor GameCursor { get; private set; }
 
@@ -90,11 +88,12 @@ namespace ClassicUO
             Lights = new Renderer.Lights.Light(FileManager.Lights, game.GraphicsDevice);
             MultiMaps = new Renderer.MultiMaps.MultiMap(FileManager.MultiMaps, game.GraphicsDevice);
             Sounds = new Renderer.Sounds.Sound(FileManager.Sounds);
+            FontGlyphAtlas = new Renderer.FontGlyphAtlas(FileManager.Fonts, game.GraphicsDevice);
 
             LightColors.LoadLights();
 
             World = new World();
-            GameCursor = new GameCursor(World);
+            GameCursor = new GameCursor(World, game.DpiScale);
         }
 
         public void Unload()
@@ -187,7 +186,9 @@ namespace ClassicUO
             Log.Trace($"Client version: {clientVersion}");
             Log.Trace($"Protocol: {Protocol}");
 
-            FileManager = new UOFileManager(clientVersion, clientPath);
+            var filesOverride = new UOFilesOverrideMap(Settings.GlobalSettings.OverrideFile);
+            filesOverride.Load();
+            FileManager = new UOFileManager(clientVersion, clientPath, filesOverride);
             FileManager.Load(Settings.GlobalSettings.UseVerdata, Settings.GlobalSettings.Language, Settings.GlobalSettings.MapsLayouts);
 
             StaticFilters.Load(FileManager.TileData);

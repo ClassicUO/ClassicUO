@@ -1,12 +1,13 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Collections.Generic;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using System;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -133,14 +134,14 @@ namespace ClassicUO.Game.UI.Controls
             X = Mouse.Position.X + 5;
             Y = Mouse.Position.Y - 20;
 
-            if (X + _background.Width > Client.Game.Window.ClientBounds.Width)
+            if (X + _background.Width > Client.Game.ClientBounds.Width)
             {
-                X = Client.Game.Window.ClientBounds.Width - _background.Width;
+                X = Client.Game.ClientBounds.Width - _background.Width;
             }
 
-            if (Y + _background.Height > Client.Game.Window.ClientBounds.Height)
+            if (Y + _background.Height > Client.Game.ClientBounds.Height)
             {
-                Y = Client.Game.Window.ClientBounds.Height - _background.Height;
+                Y = Client.Game.ClientBounds.Height - _background.Height;
             }
 
             foreach (ContextMenuItem mitem in FindControls<ContextMenuItem>())
@@ -159,21 +160,29 @@ namespace ClassicUO.Game.UI.Controls
             WantUpdateSize = true;
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
+            float layerDepth = layerDepthRef;
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-            batcher.DrawRectangle
+            renderLists.AddGumpNoAtlas
             (
-                SolidColorTextureCache.GetTexture(Color.Gray),
-                x - 1,
-                y - 1,
-                _background.Width + 1,
-                _background.Height + 1,
-                hueVector
+                (batcher) =>
+                {
+                    batcher.DrawRectangle
+                    (
+                        SolidColorTextureCache.GetTexture(Color.Gray),
+                        x - 1,
+                        y - 1,
+                        _background.Width + 1,
+                        _background.Height + 1,
+                        hueVector,
+                        layerDepth
+                    );
+                    return true;
+                }
             );
-
-            return base.Draw(batcher, x, y);
+            return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
         }
 
         public override bool Contains(int x, int y)
@@ -332,31 +341,48 @@ namespace ClassicUO.Game.UI.Controls
                 }
             }
 
-            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
             {
                 if (!string.IsNullOrWhiteSpace(_label.Text) && MouseIsOver)
                 {
                     Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-                    batcher.Draw
+                    float layerDepth = layerDepthRef;
+                    renderLists.AddGumpNoAtlas
                     (
-                        SolidColorTextureCache.GetTexture(Color.Gray),
-                        new Rectangle
-                        (
-                            x + 2,
-                            y + 5,
-                            Width - 4,
-                            Height - 10
-                        ),
-                        hueVector
+                        (batcher) =>
+                        {
+                            batcher.Draw
+                            (
+                                SolidColorTextureCache.GetTexture(Color.Gray),
+                                new Rectangle
+                                (
+                                    x + 2,
+                                    y + 5,
+                                    Width - 4,
+                                    Height - 10
+                                ),
+                                hueVector,
+                                layerDepth
+                            );
+                            return true;
+                        }
                     );
                 }
 
-                base.Draw(batcher, x, y);
+                base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
 
                 if (_entry.Items != null && _entry.Items.Count != 0)
                 {
-                    _moreMenuLabel.Draw(batcher, x + Width - _moreMenuLabel.Width, y + (Height >> 1) - (_moreMenuLabel.Height >> 1) - 1);
+                    float layerDepth = layerDepthRef;
+                    renderLists.AddGumpNoAtlas
+                   (
+                       (batcher) =>
+                       {
+                           _moreMenuLabel.Draw(batcher, x + Width - _moreMenuLabel.Width, y + (Height >> 1) - (_moreMenuLabel.Height >> 1) - 1, layerDepth);
+                           return true;
+                       }
+                   );
                 }
 
                 return true;

@@ -1,9 +1,9 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
-using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using System;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -99,29 +99,38 @@ namespace ClassicUO.Game.UI.Controls
             }
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            ScrollBarBase scrollbar = (ScrollBarBase) Children[0];
-            scrollbar.Draw(batcher, x + scrollbar.X, y + scrollbar.Y);
+            ScrollBarBase scrollbar = (ScrollBarBase)Children[0];
+            scrollbar.AddToRenderLists(renderLists, x + scrollbar.X, y + scrollbar.Y, ref layerDepthRef);
+            float layerDepth = layerDepthRef;
 
-            if (batcher.ClipBegin(x + ScissorRectangle.X, y + ScissorRectangle.Y, Width - 14 + ScissorRectangle.Width, Height + ScissorRectangle.Height))
-            {
-                for (int i = 1; i < Children.Count; i++)
+            renderLists.AddGumpNoAtlas(
+                batcher =>
                 {
-                    Control child = Children[i];
-
-                    if (!child.IsVisible)
+                    if (batcher.ClipBegin(x + ScissorRectangle.X, y + ScissorRectangle.Y, Width - 14 + ScissorRectangle.Width, Height + ScissorRectangle.Height))
                     {
-                        continue;
+                        RenderLists childRenderLists = new();
+
+                        for (int i = 1; i < Children.Count; i++)
+                        {
+                            Control child = Children[i];
+
+                            if (!child.IsVisible)
+                            {
+                                continue;
+                            }
+
+                            int finalY = y + child.Y - scrollbar.Value + ScissorRectangle.Y;
+
+                            child.AddToRenderLists(childRenderLists, x + child.X, finalY, ref layerDepth);
+                        }
+                        childRenderLists.DrawRenderLists(batcher, sbyte.MaxValue);
+                        batcher.ClipEnd();
                     }
-
-                    int finalY = y + child.Y - scrollbar.Value + ScissorRectangle.Y;
-
-                    child.Draw(batcher, x + child.X, finalY);
+                    return true;
                 }
-
-                batcher.ClipEnd();
-            }
+            );
 
             return true;
         }

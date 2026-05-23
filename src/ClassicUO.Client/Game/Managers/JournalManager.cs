@@ -20,7 +20,7 @@ namespace ClassicUO.Game.Managers
         public event EventHandler<JournalEntry> EntryAdded;
 
 
-        public void Add(string text, ushort hue, string name, TextType type, bool isunicode = true, MessageType messageType = MessageType.Regular)
+        public void Add(string text, ushort hue, string name, uint? serial, TextType type, bool isunicode = true, MessageType messageType = MessageType.Regular)
         {
             JournalEntry entry = Entries.Count >= Constants.MAX_JOURNAL_HISTORY_COUNT ? Entries.RemoveFromFront() : new JournalEntry();
 
@@ -57,11 +57,14 @@ namespace ClassicUO.Game.Managers
                 CreateWriter();
             }
 
-            string output = $"[{timeNow:G}]  {name}: {text}";
+            bool saveSerial = ProfileManager.GlobalProfile != null && ProfileManager.GlobalProfile.JournalFileWithSerial;
+            string serialText = saveSerial && serial.HasValue ? $"<0x{serial.Value:X8}> " : string.Empty;
+
+            string output = $"[{timeNow:G}]  {serialText}{name}: {text}";
 
             if (string.IsNullOrWhiteSpace(name))
             {
-                output = $"[{timeNow:G}]  {text}";
+                output = $"[{timeNow:G}]  {serialText}{text}";
             }
 
             _fileWriter?.WriteLine(output);
@@ -75,25 +78,31 @@ namespace ClassicUO.Game.Managers
                 {
                     string path = FileSystemHelper.CreateFolderIfNotExists(Path.Combine(CUOEnviroment.ExecutablePath, "Data"), "Client", "JournalLogs");
 
+                    int maxJournalFiles = ProfileManager.GlobalProfile?.MaxJournalFiles ?? -1;
+
+                    if (maxJournalFiles >= 0)
+                    {
+                        try
+                        {
+                            string[] files = Directory.GetFiles(path, "*_journal.txt");
+                            Array.Sort(files);
+                            Array.Reverse(files);
+
+                            for (int i = files.Length - 1; i >= maxJournalFiles; --i)
+                            {
+                                File.Delete(files[i]);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error($"Failed to delete old journal files. Original Error: {ex.Message}");
+                        }
+                    }
+
                     _fileWriter = new StreamWriter(File.Open(Path.Combine(path, $"{DateTime.Now:yyyy_MM_dd_HH_mm_ss}_journal.txt"), FileMode.Create, FileAccess.Write, FileShare.Read))
                     {
                         AutoFlush = true
                     };
-
-                    try
-                    {
-                        string[] files = Directory.GetFiles(path, "*_journal.txt");
-                        Array.Sort(files);
-                        Array.Reverse(files);
-
-                        for (int i = files.Length - 1; i >= 100; --i)
-                        {
-                            File.Delete(files[i]);
-                        }
-                    }
-                    catch
-                    {
-                    }
                 }
                 catch (Exception ex)
                 {

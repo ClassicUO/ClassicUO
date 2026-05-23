@@ -2,7 +2,7 @@
 
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
-using ClassicUO.Renderer;
+using ClassicUO.Game.Scenes;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -42,19 +42,27 @@ namespace ClassicUO.Game.UI.Gumps
         }
 
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            base.Draw(batcher, x, y);
+            base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
+            float layerDepth = layerDepthRef;
 
             //TextRenderer.MoveToTopIfSelected();
             TextRenderer.ProcessWorldText(true);
 
-            TextRenderer.Draw
-            (
-                batcher,
-                x,
-                y,
-                true
+            renderLists.AddGumpNoAtlas(
+                batcher =>
+                {
+                    TextRenderer.Draw
+                    (
+                        batcher,
+                        x,
+                        y,
+                        layerDepth,
+                        true
+                    );
+                    return true;
+                }
             );
 
             return true;

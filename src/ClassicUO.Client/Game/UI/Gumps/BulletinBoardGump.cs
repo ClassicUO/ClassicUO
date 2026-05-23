@@ -74,7 +74,7 @@ namespace ClassicUO.Game.UI.Gumps
                 127,
                 159,
                 241,
-                195,
+                BulletinBoardObject.ITEM_HEIGHT * 9,
                 false
             );
 
@@ -484,12 +484,14 @@ namespace ClassicUO.Game.UI.Gumps
 
     internal class BulletinBoardObject : Control
     {
+        public const int ITEM_HEIGHT = 18;
+
         public BulletinBoardObject(uint serial, string text)
         {
             LocalSerial = serial; //board
             CanMove = true;
             Width = 230;
-            Height = 18;
+            Height = ITEM_HEIGHT;
 
             Add(new GumpPic(0, 0, 0x1523, 0));
 

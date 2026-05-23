@@ -80,7 +80,8 @@ namespace ClassicUO.Game.GameObjects
                 partial = false;
             }
 
-            Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue, partial, AlphaHue / 255f);
+            bool cot = TransparentTest(World.Player.Z + 5);
+            Vector3 hueVec = ShaderHueTranslator.GetHueVector(hue, partial, AlphaHue / 255f, circletrans: cot);
 
             if (IsHousePreview)
             {
@@ -92,7 +93,7 @@ namespace ClassicUO.Game.GameObjects
 
             DrawStaticAnimated(batcher, graphic, posX, posY, hueVec, false, depth);
 
-            if (ItemData.IsLight)
+            if (ItemData.IsLight && !InChunkMesh)
             {
                 Client.Game.GetScene<GameScene>().AddLight(this, this, posX + 22, posY + 22);
             }

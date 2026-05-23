@@ -211,7 +211,7 @@ namespace ClassicUO.Renderer
                 unsafe
                 {
                     fixed (byte* ptr = levelData)
-                        texture.SetDataPointerEXT(0, null, (IntPtr)ptr, width * height * sizeof(byte));
+                        texture.SetDataPointerEXT(0, null, (IntPtr)ptr, levelDataSizeInBytes);
                 }
 
                 reader.Read7BitEncodedInt();

@@ -3,7 +3,7 @@
 using System;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using static SDL2.SDL;
+using static SDL3.SDL;
 
 namespace ClassicUO.Input
 {

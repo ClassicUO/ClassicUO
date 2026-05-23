@@ -20,6 +20,7 @@ using Microsoft.Xna.Framework;
 namespace ClassicUO.Configuration
 {
     //[JsonSourceGenerationOptions(WriteIndented = true, PropertyNamingPolicy = JsonKnownNamingPolicy.Unspecified)]
+    [JsonSerializable(typeof(GlobalProfile), GenerationMode = JsonSourceGenerationMode.Metadata)]
     [JsonSerializable(typeof(Profile), GenerationMode = JsonSourceGenerationMode.Metadata)]
     sealed partial class ProfileJsonContext : JsonSerializerContext
     {
@@ -45,7 +46,11 @@ namespace ClassicUO.Configuration
         public static ProfileJsonContext DefaultToUse { get; } = new ProfileJsonContext(_jsonOptions.Value);
     }
 
-
+    internal sealed class GlobalProfile
+    {
+        public int MaxJournalFiles { get; set; } = 100;
+        public bool JournalFileWithSerial { get; set; } = false;
+    }
 
     internal sealed class Profile
     {
@@ -143,6 +148,7 @@ namespace ClassicUO.Configuration
         public bool UseShiftToPathfind { get; set; }
         public bool AlwaysRun { get; set; }
         public bool AlwaysRunUnlessHidden { get; set; }
+        public bool FastRotation { get; set; }
         public bool SmoothMovements { get; set; } = true;
         public bool HoldDownKeyTab { get; set; } = true;
         public bool HoldShiftForContext { get; set; } = false;
@@ -206,6 +212,8 @@ namespace ClassicUO.Configuration
         public bool DragSelectAsAnchor { get; set; } = false;
         public NameOverheadTypeAllowed NameOverheadTypeAllowed { get; set; } = NameOverheadTypeAllowed.All;
         public bool NameOverheadToggled { get; set; } = false;
+        public bool NameOverheadShowGump { get; set; } = true;
+        public bool NameOverheadShowHpBar { get; set; } = true;
         public bool ShowTargetRangeIndicator { get; set; }
         public bool PartyInviteGump { get; set; }
         public bool CustomBarsToggled { get; set; }
@@ -215,14 +223,12 @@ namespace ClassicUO.Configuration
         public int InfoBarHighlightType { get; set; } // 0 = text colour changes, 1 = underline
 
         public bool CounterBarEnabled { get; set; }
-        public bool CounterBarHighlightOnUse { get; set; }
+        public bool CounterBarHighlightOnChange { get; set; } = true;
         public bool CounterBarHighlightOnAmount { get; set; }
         public bool CounterBarDisplayAbbreviatedAmount { get; set; }
         public int CounterBarAbbreviatedAmount { get; set; } = 1000;
         public int CounterBarHighlightAmount { get; set; } = 5;
         public int CounterBarCellSize { get; set; } = 40;
-        public int CounterBarRows { get; set; } = 1;
-        public int CounterBarColumns { get; set; } = 1;
 
         public bool ShowSkillsChangedMessage { get; set; } = true;
         public int ShowSkillsChangedDeltaValue { get; set; } = 1;
@@ -353,18 +359,12 @@ namespace ClassicUO.Configuration
         {
             Log.Trace($"Saving path:\t\t{path}");
 
-            // Save profile settings
-            ConfigurationResolver.Save(this, Path.Combine(path, "profile.json"), ProfileJsonContext.DefaultToUse.Profile);
+            ProfileManager.Save(this, path);
 
             // Save opened gumps
             SaveGumps(world, path);
 
             Log.Trace("Saving done!");
-        }
-
-        public void SaveAs(string path, string filename = "default.json")
-        {
-            ConfigurationResolver.Save(this, Path.Combine(path, filename), ProfileJsonContext.DefaultToUse.Profile);
         }
 
         private void SaveGumps(World world, string path)

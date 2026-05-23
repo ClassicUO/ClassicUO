@@ -1,17 +1,19 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Collections.Generic;
-using System.Text;
+using ClassicUO.Assets;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using SDL3;
+using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -257,7 +259,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public void SetTile(string title, bool editable)
+        public void SetTitle(string title, bool editable)
         {
             _titleTextBox.SetText(title);
             _titleTextBox.IsEditable = editable;
@@ -349,141 +351,101 @@ namespace ClassicUO.Game.UI.Gumps
             base.CloseWithRightClick();
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            base.Draw(batcher, x, y);
+            base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
+            float layerDepth = layerDepthRef;
 
-            if (batcher.ClipBegin(x, y, Width, Height))
-            {
-                RenderedText t = _bookPage.renderedText;
-                int startpage = (ActivePage - 1) * 2;
-
-                if (startpage < BookPageCount)
+            // Render path is intentionally PURE — no state mutation, no SetActivePage,
+            // no _caretPage/_focusPage writes. Caret/page realignment runs from input
+            // handlers via _bookPage.RealignCaretAndActivePage(), so a single mismatch
+            // between _caretScreenPosition and _pageCoords cannot spin SetActivePage
+            // every frame.
+            renderLists.AddGumpNoAtlas
+            (
+                batcher =>
                 {
-                    int poy = _bookPage._pageCoords[startpage, 0], phy = _bookPage._pageCoords[startpage, 1];
-
-                    _bookPage.DrawSelection
-                    (
-                        batcher,
-                        x + RIGHT_X,
-                        y + UPPER_MARGIN,
-                        poy,
-                        poy + phy
-                    );
-
-                    t.Draw
-                    (
-                        batcher,
-                        x + RIGHT_X,
-                        y + UPPER_MARGIN,
-                        0,
-                        poy,
-                        t.Width,
-                        phy
-                    );
-
-                    if (startpage == _bookPage._caretPage)
+                    if (!batcher.ClipBegin(x, y, Width, Height))
                     {
-                        if (_bookPage._caretPos.Y < poy + phy)
-                        {
-                            if (_bookPage._caretPos.Y >= poy)
-                            {
-                                if (_bookPage.HasKeyboardFocus)
-                                {
-                                    _bookPage.renderedCaret.Draw
-                                    (
-                                        batcher,
-                                        _bookPage._caretPos.X + x + RIGHT_X,
-                                        _bookPage._caretPos.Y + y + UPPER_MARGIN - poy,
-                                        0,
-                                        0,
-                                        _bookPage.renderedCaret.Width,
-                                        _bookPage.renderedCaret.Height
-                                    );
-                                }
-                            }
-                            else
-                            {
-                                _bookPage._caretPage = _bookPage.GetCaretPage();
-                            }
-                        }
-                        else if (_bookPage._caretPos.Y <= _bookPage.Height)
-                        {
-                            if (_bookPage._caretPage + 2 < _bookPage._pagesChanged.Length)
-                            {
-                                _bookPage._focusPage = _bookPage._caretPage++;
-                                SetActivePage(_bookPage._caretPage / 2 + 2);
-                            }
-                        }
+                        return true;
                     }
+
+                    DrawBookPage(batcher, x, y, layerDepth, (ActivePage - 1) * 2, RIGHT_X);
+                    DrawBookPage(batcher, x, y, layerDepth, (ActivePage - 1) * 2 - 1, LEFT_X);
+
+                    batcher.ClipEnd();
+                    return true;
                 }
-
-                startpage--;
-
-                if (startpage > 0)
-                {
-                    int poy = _bookPage._pageCoords[startpage, 0], phy = _bookPage._pageCoords[startpage, 1];
-
-                    _bookPage.DrawSelection
-                    (
-                        batcher,
-                        x + LEFT_X,
-                        y + UPPER_MARGIN,
-                        poy,
-                        poy + phy
-                    );
-
-                    t.Draw
-                    (
-                        batcher,
-                        x + LEFT_X,
-                        y + UPPER_MARGIN,
-                        0,
-                        poy,
-                        t.Width,
-                        phy
-                    );
-
-                    if (startpage == _bookPage._caretPage)
-                    {
-                        if (_bookPage._caretPos.Y < poy + phy)
-                        {
-                            if (_bookPage._caretPos.Y >= poy)
-                            {
-                                if (_bookPage.HasKeyboardFocus)
-                                {
-                                    _bookPage.renderedCaret.Draw
-                                    (
-                                        batcher,
-                                        _bookPage._caretPos.X + x + LEFT_X,
-                                        _bookPage._caretPos.Y + y + UPPER_MARGIN - poy,
-                                        0,
-                                        0,
-                                        _bookPage.renderedCaret.Width,
-                                        _bookPage.renderedCaret.Height
-                                    );
-                                }
-                            }
-                            else if (_bookPage._caretPage > 0)
-                            {
-                                _bookPage._focusPage = _bookPage._caretPage--;
-                                SetActivePage(_bookPage._caretPage / 2 + 1);
-                            }
-                        }
-                        else if (_bookPage._caretPos.Y <= _bookPage.Height)
-                        {
-                            if (_bookPage._caretPage + 2 < _bookPage._pagesChanged.Length)
-                            {
-                                _bookPage._caretPage++;
-                            }
-                        }
-                    }
-                }
-
-                batcher.ClipEnd();
-            }
+            );
 
             return true;
+        }
+
+        private void DrawBookPage(UltimaBatcher2D batcher, int x, int y, float layerDepth, int pageIndex, int pageX)
+        {
+            if (pageIndex < 0 || pageIndex >= BookPageCount)
+            {
+                return;
+            }
+
+            int poy = _bookPage._pageCoords[pageIndex, 0];
+            int phy = _bookPage._pageCoords[pageIndex, 1];
+            RenderedText t = _bookPage.renderedText;
+
+            _bookPage.DrawSelection(batcher, x + pageX, y + UPPER_MARGIN, poy, poy + phy, layerDepth);
+            t.Draw(batcher, x + pageX, y + UPPER_MARGIN, 0, poy, t.Width, phy, layerDepth);
+
+            if (pageIndex == _bookPage._caretPage
+                && _bookPage.HasKeyboardFocus
+                && _bookPage._caretPos.Y >= poy
+                && _bookPage._caretPos.Y < poy + phy)
+            {
+                _bookPage.renderedCaret.Draw(
+                    batcher,
+                    _bookPage._caretPos.X + x + pageX,
+                    _bookPage._caretPos.Y + y + UPPER_MARGIN - poy,
+                    0, 0,
+                    _bookPage.renderedCaret.Width,
+                    _bookPage.renderedCaret.Height,
+                    layerDepth
+                );
+            }
+        }
+
+        // Re-snap ActivePage to whichever page the caret is actually on. Called from
+        // _bookPage's input handlers (mouse click, key, text change) — never from the
+        // render path. If the caret didn't move into a different page, this is a no-op.
+        internal void RealignCaretAndActivePage()
+        {
+            if (_bookPage == null || IsDisposed)
+            {
+                return;
+            }
+
+            int newCaretPage = _bookPage.GetCaretPage();
+
+            if (newCaretPage != _bookPage._caretPage)
+            {
+                _bookPage._focusPage = _bookPage._caretPage;
+                _bookPage._caretPage = newCaretPage;
+            }
+
+            // Page-to-ActivePage mapping: page 0 is the right page of AP 1, then
+            // each subsequent ActivePage shows {left=odd, right=even} pairs.
+            //   page 0           → ActivePage 1
+            //   pages 1,2        → ActivePage 2
+            //   pages 3,4        → ActivePage 3
+            //   pages 2k-1, 2k   → ActivePage k+1
+            // So target = (page + 1) / 2 + 1 with integer division.
+            int targetActivePage = (newCaretPage + 1) / 2 + 1;
+            int maxActivePage = MaxPage;
+
+            if (targetActivePage != ActivePage
+                && targetActivePage >= 1
+                && targetActivePage <= maxActivePage)
+            {
+                SetActivePage(targetActivePage);
+            }
         }
 
         public override void Dispose()
@@ -604,8 +566,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                     Stb.Click(x, y);
                     UpdateCaretScreenPosition();
-                    _caretPage = GetCaretPage();
+                    _gump.RealignCaretAndActivePage();
                 }
+            }
+
+            protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
+            {
+                base.OnKeyDown(key, mod);
+                _gump.RealignCaretAndActivePage();
             }
 
             protected override void OnMouseOver(int x, int y)
@@ -673,7 +641,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            internal void DrawSelection(UltimaBatcher2D batcher, int x, int y, int starty, int endy)
+            internal void DrawSelection(UltimaBatcher2D batcher, int x, int y, int starty, int endy, float layerDepth)
             {
                 Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, 0.5f);
 
@@ -727,7 +695,8 @@ namespace ClassicUO.Game.UI.Gumps
                                             endX,
                                             info.MaxHeight + 1
                                         ),
-                                        hueVector
+                                        hueVector,
+                                        layerDepth
                                     );
                                 }
 
@@ -748,7 +717,8 @@ namespace ClassicUO.Game.UI.Gumps
                                         info.Width - drawX,
                                         info.MaxHeight + 1
                                     ),
-                                    hueVector
+                                    hueVector,
+                                    layerDepth
                                 );
                             }
 
@@ -763,7 +733,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             }
 
-            protected override void OnTextChanged()
+            protected override void OnTextChanged(string previousText)
             {
                 _is_writing = true;
 
@@ -836,8 +806,13 @@ namespace ClassicUO.Game.UI.Gumps
                     UpdatePageCoords();
                 }
 
-                base.OnTextChanged();
+                base.OnTextChanged(previousText);
                 _is_writing = false;
+
+                if (!_ServerUpdate)
+                {
+                    _gump.RealignCaretAndActivePage();
+                }
             }
 
             protected override void CloseWithRightClick()

@@ -36,7 +36,14 @@ namespace ClassicUO.Game.Managers
                 ConfigurationResolver.Save(LastCharacters, _lastCharacterFile, LastCharacterJsonContext.Default.ListLastCharacterInfo);
             }
 
-            LastCharacters = ConfigurationResolver.Load<List<LastCharacterInfo>>(_lastCharacterFile, LastCharacterJsonContext.Default.ListLastCharacterInfo);
+            try
+            {
+                LastCharacters = ConfigurationResolver.Load<List<LastCharacterInfo>>(_lastCharacterFile, LastCharacterJsonContext.Default.ListLastCharacterInfo);
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Error reading the file '{_lastCharacterFile}'; it may have gotten corrupted? Ignoring the file until it gets overridden in the next save.\n{ex}");
+            }
 
             // safety check
             if (LastCharacters == null)

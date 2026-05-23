@@ -417,6 +417,9 @@
   <data name="GamePlayWindowPosition" xml:space="preserve">
     <value>Game Play Window Position: </value>
   </data>
+  <data name="ScreenZoom" xml:space="preserve">
+    <value>Screen zoom:</value>
+  </data>
   <data name="DefaultZoom" xml:space="preserve">
     <value>Default zoom:</value>
   </data>
@@ -638,8 +641,8 @@ Murderers, Criminals, Grays (Monsters/Animals)</value>
   <data name="EnableCounters" xml:space="preserve">
     <value>Enable Counters</value>
   </data>
-  <data name="HighlightOnUse" xml:space="preserve">
-    <value>Highlight On Use</value>
+  <data name="HighlightOnChange" xml:space="preserve">
+    <value>Highlight On Change</value>
   </data>
   <data name="EnableAbbreviatedAmountCountrs" xml:space="preserve">
     <value>Enable abbreviated amount values
@@ -1620,5 +1623,48 @@ Client version: '{0}'</value>
   </data>
   <data name="OverheadPartyMessages" xml:space="preserve">
     <value>Show party messages overhead</value>
+  </data>
+  <data name="CounterCompareTo" xml:space="preserve">
+    <value>Compare amount to...</value>
+  </data>
+  <data name="CounterCompareToDialogText1" xml:space="preserve">
+    <value>Compare to value</value>
+  </data>
+  <data name="CounterCompareToDialogText2" xml:space="preserve">
+    <value>(leave empty to reset)</value>
+  </data>
+  <data name="CounterCompareToDialogInvalid" xml:space="preserve">
+    <value>The value must be a valid number!</value>
+  </data>
+  <data name="CounterIgnoreHueOff" xml:space="preserve">
+    <value>Compare Hue (ON)</value>
+  </data>
+  <data name="CounterIgnoreHueOn" xml:space="preserve">
+    <value>Compare Hue (OFF)</value>
+  </data>
+  <data name="CounterErrorSlotNotFound" xml:space="preserve">
+    <value>Counter Bar: Slot number '{0}' could not be found</value>
+  </data>
+  <data name="CounterErrorSlotNotValid" xml:space="preserve">
+    <value>Counter Bar: Slot '{0}' is not a valid number</value>
+  </data>
+  <data name="CounterReadonlyOn" xml:space="preserve">
+    <value>Read-only mode (ON)</value>
+  </data>
+  <data name="CounterReadonlyOff" xml:space="preserve">
+    <value>Read-only mode (OFF)</value>
+  </data>
+  <data name="CounterEmptyHelpText" xml:space="preserve">
+    <value>Drop an item here to
+start your first counter</value>
+  </data>
+  <data name="Prompt" xml:space="preserve">
+    <value>[Prompt]:</value>
+  </data>
+  <data name="MaxJournalFiles" xml:space="preserve">
+    <value>Keep at most this many journal files:</value>
+  </data>
+  <data name="JournalFileWithSerial" xml:space="preserve">
+    <value>Add speaker serial to journal entries</value>
   </data>
 </root>

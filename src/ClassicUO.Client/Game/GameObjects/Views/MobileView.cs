@@ -1,17 +1,15 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Collections.Generic;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
-using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
-using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -60,7 +58,7 @@ namespace ClassicUO.Game.GameObjects
                     ProfileManager.CurrentProfile.PartyAura && World.Party.Contains(this)
                         ? ProfileManager.CurrentProfile.PartyAuraHue
                         : Notoriety.GetHue(NotorietyFlag),
-                    depth + 1f
+                    depth
                 );
             }
 

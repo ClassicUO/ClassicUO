@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Xml;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
-using ClassicUO.Renderer;
-using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using System;
+using System.Collections.Generic;
+using System.Xml;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -74,7 +72,7 @@ namespace ClassicUO.Game.UI.Gumps
 
         public void SetInScreen()
         {
-            Rectangle windowBounds = Client.Game.Window.ClientBounds;
+            Rectangle windowBounds = Client.Game.ClientBounds;
             Rectangle bounds = Bounds;
             bounds.X += windowBounds.X;
             bounds.Y += windowBounds.Y;
@@ -117,22 +115,22 @@ namespace ClassicUO.Game.UI.Gumps
                 position.Y = -halfHeight;
             }
 
-            if (X > Client.Game.Window.ClientBounds.Width - (Width - halfWidth))
+            if (X > Client.Game.ClientBounds.Width - (Width - halfWidth))
             {
-                position.X = Client.Game.Window.ClientBounds.Width - (Width - halfWidth);
+                position.X = Client.Game.ClientBounds.Width - (Width - halfWidth);
             }
 
-            if (Y > Client.Game.Window.ClientBounds.Height - (Height - halfHeight))
+            if (Y > Client.Game.ClientBounds.Height - (Height - halfHeight))
             {
-                position.Y = Client.Game.Window.ClientBounds.Height - (Height - halfHeight);
+                position.Y = Client.Game.ClientBounds.Height - (Height - halfHeight);
             }
 
             Location = position;
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            return IsVisible && base.Draw(batcher, x, y);
+            return IsVisible && base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
         }
 
         public override void OnButtonClick(int buttonID)

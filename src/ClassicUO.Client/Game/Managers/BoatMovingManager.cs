@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Network;
@@ -18,7 +19,7 @@ namespace ClassicUO.Game.Managers
 
         private readonly Dictionary<uint, Deque<BoatStep>> _steps = new Dictionary<uint, Deque<BoatStep>>();
         private readonly List<uint> _toRemove = new List<uint>();
-        private readonly Dictionary<uint, FastList<ItemInside>> _items = new Dictionary<uint, FastList<ItemInside>>();
+        private readonly Dictionary<uint, List<ItemInside>> _items = new Dictionary<uint, List<ItemInside>>();
 
         private uint _timePacket;
         private readonly World _world;
@@ -136,9 +137,10 @@ namespace ClassicUO.Game.Managers
 
                 if (_items.TryGetValue(serial, out var list))
                 {
-                    for (int i = 0; i < list.Length; i++)
+                    var span = CollectionsMarshal.AsSpan(list);
+                    for (int i = 0; i < span.Length; i++)
                     {
-                        ref var it = ref list.Buffer[i];
+                        ref var it = ref span[i];
 
                         Entity ent = _world.Get(it.Serial);
 
@@ -174,14 +176,15 @@ namespace ClassicUO.Game.Managers
         {
             if (!_items.TryGetValue(serial, out var list))
             {
-                list = new FastList<ItemInside>();
+                list = new List<ItemInside>();
 
                 _items[serial] = list;
             }
 
-            for (int i = 0; i < list.Length; i++)
+            var span = CollectionsMarshal.AsSpan(list);
+            for (int i = 0; i < span.Length; i++)
             {
-                ref var item = ref list.Buffer[i];
+                ref var item = ref span[i];
 
                 if (!SerialHelper.IsValid(item.Serial))
                 {
@@ -347,9 +350,10 @@ namespace ClassicUO.Game.Managers
             {
                 Item item = _world.Items.Get(serial);
 
-                for (int i = 0; i < list.Length; i++)
+                var span = CollectionsMarshal.AsSpan(list);
+                for (int i = 0; i < span.Length; i++)
                 {
-                    ref var it = ref list.Buffer[i];
+                    ref var it = ref span[i];
 
                     //if (!SerialHelper.IsValid(it.Serial))
                     //    break;
