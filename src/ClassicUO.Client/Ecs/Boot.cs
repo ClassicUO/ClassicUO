@@ -43,6 +43,12 @@ internal readonly struct CuoPlugin : IPlugin
         app.AddPlugin<RenderingPlugin>();
 
         app.AddPlugin<ModdingPlugin>();
+
+#if AGENT_BUILD
+        // Dev-loop agent server: TCP+JSON-RPC listener on loopback,
+        // gated by -p:AGENT_BUILD=true. Stripped entirely from prod builds.
+        app.AddPlugin<Agent.AgentServerPlugin>();
+#endif
     }
 }
 

@@ -137,7 +137,17 @@ namespace ClassicUO.Assets
                                 continue;
                             }
 
-                            uint number = uint.Parse(parts[2], NumberStyles.HexNumber);
+                            // Some UO installs ship mobtypes.txt with trailing
+                            // BOM/control bytes on flag tokens (UO NEW LEGACY).
+                            // Strip non-hex chars before parse.
+                            var rawFlags = parts[2];
+                            int flagsEnd = 0;
+                            while (flagsEnd < rawFlags.Length && Uri.IsHexDigit(rawFlags[flagsEnd])) flagsEnd++;
+                            if (flagsEnd == 0)
+                            {
+                                continue;
+                            }
+                            uint number = uint.Parse(rawFlags.AsSpan(0, flagsEnd), NumberStyles.HexNumber);
 
                             for (int i = 0; i < 5; i++)
                             {

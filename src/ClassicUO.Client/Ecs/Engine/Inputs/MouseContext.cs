@@ -17,6 +17,25 @@ internal sealed class MouseContext : InputContext<MouseButtonType>
     // Lets UI close systems eat a right-click before PlayerMovement sees it.
     private readonly bool[] _consumed = new bool[(int)MouseButtonType.Size];
 
+#if AGENT_BUILD
+    private bool _agentSynthEnabled;
+    private int _agentSynthX, _agentSynthY;
+    private ButtonState _agentSynthLeft, _agentSynthMiddle, _agentSynthRight;
+
+    internal void AgentSetSynthetic(int x, int y, ButtonState left, ButtonState middle, ButtonState right)
+    {
+        _agentSynthEnabled = true;
+        _agentSynthX = x; _agentSynthY = y;
+        _agentSynthLeft = left;
+        _agentSynthMiddle = middle;
+        _agentSynthRight = right;
+    }
+
+    internal void AgentClearSynthetic() => _agentSynthEnabled = false;
+
+    internal bool AgentSyntheticActive => _agentSynthEnabled;
+#endif
+
     internal MouseContext(Microsoft.Xna.Framework.Game game) : base(game) { }
 
 
@@ -87,7 +106,20 @@ internal sealed class MouseContext : InputContext<MouseButtonType>
         }
 
         _oldState = _newState;
-        _newState = Microsoft.Xna.Framework.Input.Mouse.GetState();
+#if AGENT_BUILD
+        if (_agentSynthEnabled)
+        {
+            _newState = new MouseState(
+                _agentSynthX, _agentSynthY,
+                _newState.ScrollWheelValue,
+                _agentSynthLeft, _agentSynthMiddle, _agentSynthRight,
+                _newState.XButton1, _newState.XButton2);
+        }
+        else
+#endif
+        {
+            _newState = Microsoft.Xna.Framework.Input.Mouse.GetState();
+        }
         _currentTime = deltaTime;
         Wheel = (_newState.ScrollWheelValue - _oldState.ScrollWheelValue) / 120f;
 
@@ -95,7 +127,11 @@ internal sealed class MouseContext : InputContext<MouseButtonType>
     }
 
     private bool VerifyCondition(MouseButtonType button, ButtonState stateNew, ButtonState stateOld)
+#if AGENT_BUILD
+        => (_agentSynthEnabled || _game.IsActive) && button switch
+#else
         => _game.IsActive && button switch
+#endif
         {
             MouseButtonType.Left => _newState.LeftButton == stateNew && _oldState.LeftButton == stateOld,
             MouseButtonType.Middle => _newState.MiddleButton == stateNew && _oldState.MiddleButton == stateOld,

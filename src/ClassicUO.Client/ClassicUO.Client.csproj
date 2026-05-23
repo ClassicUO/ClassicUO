@@ -40,6 +40,7 @@
     <ProjectReference Include="..\ClassicUO.Renderer\ClassicUO.Renderer.csproj" />
     <ProjectReference Include="..\ClassicUO.Schema\ClassicUO.Schema.csproj" />
     <ProjectReference Include="..\ClassicUO.Utility\ClassicUO.Utility.csproj" />
+    <ProjectReference Include="..\ClassicUO.Agent.Contracts\ClassicUO.Agent.Contracts.csproj" Condition="'$(AGENT_BUILD)' == 'true'" />
   </ItemGroup>
 
   <ItemGroup>
@@ -128,5 +129,10 @@
     <Copy SourceFiles="@(MonockickstartPath)" DestinationFolder="$(PublishDir)\" SkipUnchangedFiles="true" Condition="'$(_IsLinux)' == 'true' Or '$(_IsMacOS)' == 'true'" />
 
   </Target>
+
+  <!-- Agent dev-loop flavor (opt-in via -p:AGENT_BUILD=true). Imported
+       LAST so its conditional <AssemblyName>cuo.agent</AssemblyName> and
+       <OutputPath>bin/agent/</OutputPath> override the defaults. -->
+  <Import Project="$(MSBuildThisFileDirectory)..\..\ClassicUO.Agent.Settings.props" Condition="Exists('$(MSBuildThisFileDirectory)..\..\ClassicUO.Agent.Settings.props')" />
 
 </Project>

@@ -1,0 +1,23 @@
+<Project>
+
+  <!--
+    Agent dev-loop flavor for the desktop ClassicUO client. Imported from
+    src/ClassicUO.Client/ClassicUO.Client.csproj when present.
+
+    Activated by passing `-p:AGENT_BUILD=true` to dotnet build/publish.
+    Defines the AGENT_BUILD constant (gates every file under
+    src/ClassicUO.Client/Agent/), renames the assembly to cuo.agent, and
+    redirects output under bin/agent/ so a prod artefact never contains
+    agent code by accident. CI grep must enforce that the prod publish
+    contains no AgentServer / RpcVerbAttribute symbols.
+
+    See docs/agent-desktop/design.md.
+  -->
+  <PropertyGroup Condition="'$(AGENT_BUILD)' == 'true'">
+    <DefineConstants>$(DefineConstants);AGENT_BUILD</DefineConstants>
+    <AssemblyName>cuo.agent</AssemblyName>
+    <OutputPath>$(ProjectDir)..\..\bin\agent\</OutputPath>
+    <PublishDir>$(ProjectDir)..\..\bin\agent\dist\</PublishDir>
+  </PropertyGroup>
+
+</Project>
