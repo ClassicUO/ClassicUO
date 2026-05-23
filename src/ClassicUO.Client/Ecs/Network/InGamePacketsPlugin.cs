@@ -1008,6 +1008,35 @@ readonly struct InGamePacketsPlugin : IPlugin
                 MaxValue = packet.ManaMax.Value
             });
         }
+
+        // Populate PlayerData so the paperdoll stat panel can read
+        // Str/Dex/Int/Gold/Weight off the player entity instead of
+        // re-decoding the packet.
+        if (packet.Strength.HasValue)
+        {
+            var data = new PlayerData
+            {
+                Str = packet.Strength.GetValueOrDefault(),
+                Dex = packet.Dexterity.GetValueOrDefault(),
+                Int = packet.Intelligence.GetValueOrDefault(),
+                Weight = packet.Weight.GetValueOrDefault(),
+                WeightMax = packet.WeightMax.GetValueOrDefault(),
+                Gold = packet.Gold.GetValueOrDefault(),
+                StatsCap = packet.StatsCap.GetValueOrDefault(),
+                Followers = packet.Followers.GetValueOrDefault(),
+                FollowersMax = packet.MaxFollowers.GetValueOrDefault(),
+                Luck = packet.Luck.GetValueOrDefault(),
+                DamageMin = packet.DamageMin.GetValueOrDefault(),
+                DamageMax = packet.DamageMax.GetValueOrDefault(),
+                PhysicalRes = packet.PhysicalResistance.GetValueOrDefault(),
+                FireRes = packet.FireResistance.GetValueOrDefault(),
+                ColdRes = packet.ColdResistance.GetValueOrDefault(),
+                PoisonRes = packet.PoisonResistance.GetValueOrDefault(),
+                EnergyRes = packet.EnergyResistance.GetValueOrDefault(),
+                ThithingPoints = packet.TithingPoints.GetValueOrDefault(),
+            };
+            ent.Insert(data);
+        }
     }
 
     static void HandleMobileAttributes(
