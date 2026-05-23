@@ -1,8 +1,7 @@
-﻿// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: BSD-2-Clause
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Xml;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
@@ -10,6 +9,15 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Game.UI.Anchoring
 {
+    /// <summary>
+    /// Facade over the Anchoring collaborators: preserves the existing
+    /// public surface (<c>UIManager.AnchorManager.X</c>) and the nested
+    /// <see cref="AnchorGroup"/> matrix helper while delegating control-to-
+    /// group bookkeeping to <see cref="IAnchorStore"/> and overlap / bounds
+    /// math to <see cref="IAnchorGeometry"/>. The drop / detach / dispose
+    /// orchestration stays on the facade because it spans both
+    /// collaborators and the matrix.
+    /// </summary>
     internal sealed class AnchorManager
     {
         private static readonly Vector2[][] _anchorTriangles =
@@ -36,33 +44,31 @@ namespace ClassicUO.Game.UI.Anchoring
             new Point(0, 1)
         };
 
-        private readonly Dictionary<AnchorableGump, AnchorGroup> reverseMap = new Dictionary<AnchorableGump, AnchorGroup>();
+        private readonly IAnchorStore _store;
+        private readonly IAnchorGeometry _geometry;
+
+        /// <summary>Production composition root. Defaults to concrete collaborators.</summary>
+        public AnchorManager()
+            : this(new AnchorStore(), new AnchorGeometry())
+        {
+        }
+
+        /// <summary>Full DI seam — inject all collaborators.</summary>
+        internal AnchorManager(IAnchorStore store, IAnchorGeometry geometry)
+        {
+            _store = store;
+            _geometry = geometry;
+        }
 
         public AnchorGroup this[AnchorableGump control]
         {
-            get
-            {
-                reverseMap.TryGetValue(control, out AnchorGroup group);
-
-                return group;
-            }
-
-            set
-            {
-                if (reverseMap.ContainsKey(control) && value == null)
-                {
-                    reverseMap.Remove(control);
-                }
-                else
-                {
-                    reverseMap.Add(control, value);
-                }
-            }
+            get => _store.Get(control);
+            set => _store.Set(control, value);
         }
 
         public void Save(XmlTextWriter writer)
         {
-            foreach (AnchorGroup value in reverseMap.Values.Distinct())
+            foreach (AnchorGroup value in _store.DistinctGroups())
             {
                 value.Save(writer);
             }
@@ -132,7 +138,7 @@ namespace ClassicUO.Game.UI.Anchoring
         {
             if (this[control] != null)
             {
-                List<AnchorableGump> group = reverseMap.Where(o => o.Value == this[control]).Select(o => o.Key).ToList();
+                List<AnchorableGump> group = _store.GetControlsInGroup(this[control]);
 
                 if (group.Count == 2) // if detach 1+1 - need destroy all group
                 {
@@ -156,7 +162,7 @@ namespace ClassicUO.Game.UI.Anchoring
         {
             if (this[control] != null)
             {
-                foreach (AnchorableGump ctrl in reverseMap.Where(o => o.Value == this[control]).Select(o => o.Key).ToList())
+                foreach (AnchorableGump ctrl in _store.GetControlsInGroup(this[control]))
                 {
                     this[ctrl] = null;
                     ctrl.Dispose();
@@ -216,7 +222,7 @@ namespace ClassicUO.Game.UI.Anchoring
             {
                 if (!c.IsDisposed && c is AnchorableGump host && host.AnchorType == control.AnchorType)
                 {
-                    if (IsOverlapping(control, host))
+                    if (_geometry.IsOverlapping(control, host))
                     {
                         int dirtyDistance = Math.Abs(control.X - host.X) + Math.Abs(control.Y - host.Y);
 
@@ -230,26 +236,6 @@ namespace ClassicUO.Game.UI.Anchoring
             }
 
             return closestControl;
-        }
-
-        private bool IsOverlapping(AnchorableGump control, AnchorableGump host)
-        {
-            if (control == host)
-            {
-                return false;
-            }
-
-            if (control.Bounds.Top > host.Bounds.Bottom || control.Bounds.Bottom < host.Bounds.Top)
-            {
-                return false;
-            }
-
-            if (control.Bounds.Right < host.Bounds.Left || control.Bounds.Left > host.Bounds.Right)
-            {
-                return false;
-            }
-
-            return true;
         }
 
         private enum AnchorDirection
