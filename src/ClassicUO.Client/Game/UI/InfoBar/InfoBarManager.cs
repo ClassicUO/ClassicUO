@@ -1,125 +1,58 @@
-﻿// SPDX-License-Identifier: BSD-2-Clause
+// SPDX-License-Identifier: BSD-2-Clause
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using System.Xml;
-using ClassicUO.Configuration;
-using ClassicUO.Resources;
-using ClassicUO.Utility.Logging;
 
 namespace ClassicUO.Game.UI.InfoBar
 {
+    /// <summary>
+    /// Facade over the InfoBar collaborators. Keeps the existing public
+    /// surface (<c>_world.InfoBars.X</c>) so consumers like
+    /// <see cref="UI.Gumps.InfoBarGump"/> and
+    /// <see cref="UI.Gumps.OptionsGump"/> are unchanged. The
+    /// <see cref="InfoBarItem"/> list and <c>infobar.xml</c> persistence
+    /// live in <see cref="IInfoBarStore"/>, and the stock item set in
+    /// <see cref="IInfoBarDefaults"/>.
+    /// </summary>
     internal sealed class InfoBarManager
     {
-        private readonly World _world;
-        private readonly List<InfoBarItem> infoBarItems;
+        private readonly IInfoBarStore _store;
+        private readonly IInfoBarDefaults _defaults;
 
+        /// <summary>Production composition root. Defaults to concrete collaborators. The <paramref name="world"/> parameter is retained for API compatibility; collaborators are world-independent.</summary>
         public InfoBarManager(World world)
+            : this(new InfoBarStore(), new InfoBarDefaults())
         {
-            infoBarItems = new List<InfoBarItem>();
-            _world = world;
         }
 
-        public List<InfoBarItem> GetInfoBars()
+        /// <summary>Full DI seam — inject the store and defaults collaborators.</summary>
+        internal InfoBarManager(IInfoBarStore store, IInfoBarDefaults defaults)
         {
-            return infoBarItems;
+            _store = store;
+            _defaults = defaults;
         }
 
+        /// <summary>Backing list of info bar items, exposed for read-only iteration by gumps.</summary>
+        public List<InfoBarItem> GetInfoBars() => _store.Items;
+
+        /// <summary>Returns the names of all <see cref="InfoBarVars"/> values, used by the info bar builder UI.</summary>
         public static string[] GetVars()
         {
             return Enum.GetNames(typeof(InfoBarVars));
         }
 
-        public void AddItem(InfoBarItem ibi)
-        {
-            infoBarItems.Add(ibi);
-        }
+        public void AddItem(InfoBarItem ibi) => _store.Add(ibi);
 
-        public void RemoveItem(InfoBarItem item)
-        {
-            infoBarItems.Remove(item);
-        }
+        public void RemoveItem(InfoBarItem item) => _store.Remove(item);
 
-        public void Clear()
-        {
-            infoBarItems.Clear();
-        }
+        public void Clear() => _store.Clear();
 
-        public void Save()
-        {
-            string path = Path.Combine(ProfileManager.ProfilePath, "infobar.xml");
+        public void Save() => _store.Save();
 
-            using (XmlTextWriter xml = new XmlTextWriter(path, Encoding.UTF8)
-            {
-                Formatting = Formatting.Indented,
-                IndentChar = '\t',
-                Indentation = 1
-            })
-            {
-                xml.WriteStartDocument(true);
-                xml.WriteStartElement("infos");
+        public void Load() => _store.Load(_defaults);
 
-                foreach (InfoBarItem info in infoBarItems)
-                {
-                    info.Save(xml);
-                }
-
-                xml.WriteEndElement();
-                xml.WriteEndDocument();
-            }
-        }
-
-        public void Load()
-        {
-            string path = Path.Combine(ProfileManager.ProfilePath, "infobar.xml");
-
-            if (!File.Exists(path))
-            {
-                CreateDefault();
-                Save();
-
-                return;
-            }
-
-            XmlDocument doc = new XmlDocument();
-
-            try
-            {
-                doc.Load(path);
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex.ToString());
-
-                return;
-            }
-
-            infoBarItems.Clear();
-
-            XmlElement root = doc["infos"];
-
-            if (root != null)
-            {
-                foreach (XmlElement xml in root.GetElementsByTagName("info"))
-                {
-                    InfoBarItem item = new InfoBarItem(xml);
-                    infoBarItems.Add(item);
-                }
-            }
-        }
-
-        public void CreateDefault()
-        {
-            infoBarItems.Clear();
-
-            infoBarItems.Add(new InfoBarItem("", InfoBarVars.NameNotoriety, 0x3D2));
-            infoBarItems.Add(new InfoBarItem(ResGeneral.Hits, InfoBarVars.HP, 0x1B6));
-            infoBarItems.Add(new InfoBarItem(ResGeneral.Mana, InfoBarVars.Mana, 0x1ED));
-            infoBarItems.Add(new InfoBarItem(ResGeneral.Stam, InfoBarVars.Stamina, 0x22E));
-            infoBarItems.Add(new InfoBarItem(ResGeneral.Weight, InfoBarVars.Weight, 0x3D2));
-        }
+        public void CreateDefault() => _defaults.CreateDefault(_store);
     }
 
     internal enum InfoBarVars
