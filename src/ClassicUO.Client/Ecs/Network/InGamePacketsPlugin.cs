@@ -1034,6 +1034,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 PoisonRes = packet.PoisonResistance.GetValueOrDefault(),
                 EnergyRes = packet.EnergyResistance.GetValueOrDefault(),
                 ThithingPoints = packet.TithingPoints.GetValueOrDefault(),
+                IsFemale = packet.IsFemale.GetValueOrDefault(),
             };
             ent.Insert(data);
         }

@@ -32,6 +32,7 @@ using ClassicUO.Assets;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Network;
+using ClassicUO.Assets;
 using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
@@ -77,6 +78,7 @@ internal readonly struct PaperdollPlugin : IPlugin
         var processFn = ProcessPaperdollPackets;
         var refreshEquipFn = RefreshEquipmentOverlays;
         var refreshStatsFn = RefreshStatPanel;
+        var closeFn = ClosePaperdollOnRightClick;
 
         app
             .AddSystem(processFn)
@@ -93,6 +95,12 @@ internal readonly struct PaperdollPlugin : IPlugin
             .AddSystem(refreshStatsFn)
             .InStage(Stage.Update)
             .RunIf((Query<Empty, With<IsPaperdoll>> open) => open.Count() > 0)
+            .Build()
+
+            .AddSystem(closeFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<MouseContext> m) => m.Value.IsPressedOnce(Input.MouseButtonType.Right))
+            .RunIf((Query<Empty, With<IsPaperdoll>> open) => open.Count() > 0)
             .Build();
     }
 
@@ -106,6 +114,7 @@ internal readonly struct PaperdollPlugin : IPlugin
         Query<Data<EquipmentSlots>> qSlots,
         Query<Data<Graphic, Hue>> qItem,
         Query<Data<NetworkSerial>> qSerial,
+        Query<Data<PlayerData>> qPlayerData,
         EventReader<IPacket> packets)
     {
         foreach (var packet in packets.Read())
@@ -150,13 +159,42 @@ internal readonly struct PaperdollPlugin : IPlugin
             var targetSerial = pd.Serial;
             var windowId = window.Id;
 
-            // Initial equipment overlays.
-            if (entitiesMap.Value.TryGet(commands, pd.Serial, out var targetEnt)
-                && qSlots.Contains(targetEnt.Id))
+            // Drop-on-paperdoll → equip. When a GrabbedItem is in flight
+            // and the user clicks on the paperdoll panel, send an
+            // EquipRequest for that item onto the target mobile. The
+            // layer is taken from the held item's TileData; if zero we
+            // skip — the server will reject malformed equips anyway, no
+            // need to spam packets for non-wearables.
+            window.Observe((On<UiPointerDown> _,
+                            Res<GrabbedItem> grabbed,
+                            Res<NetClient> net,
+                            Res<UOFileManager> fm) =>
             {
-                (_, var slotsData) = qSlots.Get(targetEnt.Id);
-                SpawnEquipmentOverlays(commands, windowId, ref slotsData.Ref,
-                    fileManager.Value.TileData, assets.Value, qItem, qSerial);
+                if (grabbed.Value.Serial == 0) return;
+                var staticData = fm.Value.TileData.StaticData[grabbed.Value.Graphic];
+                var layer = (Layer)staticData.Layer;
+                if (layer == Layer.Invalid) return;
+                net.Value.Send_EquipRequest(grabbed.Value.Serial, layer, targetSerial);
+                grabbed.Value.Clear();
+            });
+
+            // Initial equipment overlays. Resolve IsFemale from
+            // PlayerData (available only on the local player on
+            // impl/ecs); fall back to male for other mobiles.
+            var isFemale = false;
+            if (entitiesMap.Value.TryGet(commands, pd.Serial, out var targetEnt))
+            {
+                if (qPlayerData.Contains(targetEnt.Id))
+                {
+                    (_, var data) = qPlayerData.Get(targetEnt.Id);
+                    isFemale = data.Ref.IsFemale;
+                }
+                if (qSlots.Contains(targetEnt.Id))
+                {
+                    (_, var slotsData) = qSlots.Get(targetEnt.Id);
+                    SpawnEquipmentOverlays(commands, windowId, ref slotsData.Ref,
+                        fileManager.Value.TileData, assets.Value, qItem, qSerial, isFemale);
+                }
             }
 
             // Virtue menu button at (80, 4) — matches main's
@@ -180,6 +218,22 @@ internal readonly struct PaperdollPlugin : IPlugin
                 {
                     net.Value.Send_ProfileRequest(targetSerial);
                 });
+
+            // Party manifest button at (25+SCROLLS_STEP, 196). Main
+            // restricts this to clients with party-manifest support
+            // (post-CV_500A); we always spawn it on impl/ecs since the
+            // ECS scenes don't currently surface client-version flags
+            // here. Click handler is a stub — no PartyGump on impl/ecs
+            // yet, so we log a TODO line; wiring it to the future party
+            // window only requires changing the body of the observer.
+            if (isPlayer)
+            {
+                SpawnButton(commands, windowId, 0x07D2, 25 + 14, 196)
+                    .Observe((On<UiPointerDown> _) =>
+                    {
+                        Console.WriteLine("[paperdoll] party manifest click — PartyGump not ported");
+                    });
+            }
 
             // Title at the bottom of the panel.
             var title = commands.Spawn()
@@ -259,7 +313,8 @@ internal readonly struct PaperdollPlugin : IPlugin
         Query<Data<PaperdollTarget>, With<IsPaperdoll>> qWindows,
         Query<Data<PaperdollEquipChild>> qEquipChildren,
         Query<Data<Graphic, Hue>> qItem,
-        Query<Data<NetworkSerial>> qSerial)
+        Query<Data<NetworkSerial>> qSerial,
+        Query<Data<PlayerData>> qPlayerData)
     {
         foreach ((var winEnt, var target) in qWindows)
         {
@@ -274,9 +329,16 @@ internal readonly struct PaperdollPlugin : IPlugin
                 commands.Entity(childEnt.Ref).Despawn();
             }
 
+            var isFemale = false;
+            if (qPlayerData.Contains(targetEnt.Id))
+            {
+                (_, var data) = qPlayerData.Get(targetEnt.Id);
+                isFemale = data.Ref.IsFemale;
+            }
+
             (_, var slotsData) = qSlots.Get(targetEnt.Id);
             SpawnEquipmentOverlays(commands, winEnt.Ref, ref slotsData.Ref,
-                fileManager.Value.TileData, assets.Value, qItem, qSerial);
+                fileManager.Value.TileData, assets.Value, qItem, qSerial, isFemale);
         }
     }
 
@@ -287,7 +349,8 @@ internal readonly struct PaperdollPlugin : IPlugin
         TileDataLoader tileData,
         AssetsServer assets,
         Query<Data<Graphic, Hue>> qItem,
-        Query<Data<NetworkSerial>> qSerial)
+        Query<Data<NetworkSerial>> qSerial,
+        bool isFemale)
     {
         foreach (var layer in s_layerOrder)
         {
@@ -299,9 +362,27 @@ internal readonly struct PaperdollPlugin : IPlugin
             var animId = tileData.StaticData[gfx.Ref.Value].AnimID;
             if (animId == 0) continue;
 
-            var equipGump = (ushort)(Constants.MALE_GUMP_OFFSET + animId);
-            ref readonly var equipInfo = ref assets.Gumps.GetGump(equipGump);
-            if (equipInfo.UV.Width == 0) continue;
+            // Female-body gumps live in a parallel range starting at
+            // FEMALE_GUMP_OFFSET. Mirrors main's GetAnimID. If the
+            // chosen offset has no texture, fall back to the opposite
+            // sex offset — many items only ship one variant.
+            var primaryOffset = isFemale
+                ? Constants.FEMALE_GUMP_OFFSET
+                : Constants.MALE_GUMP_OFFSET;
+            var fallbackOffset = isFemale
+                ? Constants.MALE_GUMP_OFFSET
+                : Constants.FEMALE_GUMP_OFFSET;
+
+            var equipGump = (ushort)(primaryOffset + animId);
+            var equipW = assets.Gumps.GetGump(equipGump).UV.Width;
+            var equipH = assets.Gumps.GetGump(equipGump).UV.Height;
+            if (equipW == 0)
+            {
+                equipGump = (ushort)(fallbackOffset + animId);
+                equipW = assets.Gumps.GetGump(equipGump).UV.Width;
+                equipH = assets.Gumps.GetGump(equipGump).UV.Height;
+                if (equipW == 0) continue;
+            }
 
             var hueValue = hue.Ref.Value;
             var hueVec = hueValue != 0
@@ -323,8 +404,8 @@ internal readonly struct PaperdollPlugin : IPlugin
                     PositionType = PositionType.Absolute,
                     Left = Val.Px(8),
                     Top = Val.Px(19),
-                    Width = Val.Px(equipInfo.UV.Width),
-                    Height = Val.Px(equipInfo.UV.Height),
+                    Width = Val.Px(equipW),
+                    Height = Val.Px(equipH),
                 })
                 .Insert(new ZIndex(101))
                 .Insert(new UiCustom { Data = CustomMarker })
@@ -351,6 +432,55 @@ internal readonly struct PaperdollPlugin : IPlugin
 
             commands.AddChild(windowEntity, equipEnt.Id);
         }
+    }
+
+    // Right-click on a paperdoll tears it down. Mirrors
+    // ContainersPlugin.CloseContainersOnRightClick: pick the topmost
+    // paperdoll under the cursor (highest ClayId draws latest, so it's
+    // on top) and remove its UI components plus the child overlay /
+    // stat / button entities. We Remove<Node> instead of Despawn on the
+    // window so PaperdollTarget stays around if any other system wants
+    // to remember the window existed — matches the container pattern.
+    private static void ClosePaperdollOnRightClick(
+        Commands commands,
+        Res<MouseContext> mouseCtx,
+        Query<Data<ComputedNode>, Filter<With<IsPaperdoll>>> query,
+        Query<Data<PaperdollEquipChild>> qEquip,
+        Query<Data<PaperdollStatText>> qStats)
+    {
+        var pos = mouseCtx.Value.Position;
+        ulong topId = 0;
+        uint topClayId = 0;
+
+        foreach ((var ent, var computed) in query)
+        {
+            var bb = computed.Ref;
+            if (pos.X < bb.Position.X || pos.Y < bb.Position.Y) continue;
+            if (pos.X >= bb.Position.X + bb.Size.X) continue;
+            if (pos.Y >= bb.Position.Y + bb.Size.Y) continue;
+            if (bb.ClayId >= topClayId)
+            {
+                topClayId = bb.ClayId;
+                topId = ent.Ref;
+            }
+        }
+
+        if (topId == 0) return;
+
+        // Tear down the children before the window so the renderer
+        // doesn't try to layout free-floating equipment for one frame.
+        foreach ((var childEnt, var info) in qEquip)
+        {
+            if (info.Ref.WindowEntity == topId)
+                commands.Entity(childEnt.Ref).Despawn();
+        }
+        foreach ((var childEnt, var info) in qStats)
+        {
+            if (info.Ref.WindowEntity == topId)
+                commands.Entity(childEnt.Ref).Despawn();
+        }
+
+        commands.Entity(topId).Despawn();
     }
 
     // Per-frame stat panel refresh.

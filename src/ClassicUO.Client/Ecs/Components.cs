@@ -98,6 +98,8 @@ struct PlayerData
     public short ColdRes;
     public short PoisonRes;
     public short EnergyRes;
+
+    public bool IsFemale;
 }
 
 [InlineArray(0x1D + 1)]
