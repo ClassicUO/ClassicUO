@@ -126,7 +126,8 @@ internal readonly struct PaperdollPlugin : IPlugin
         Query<Data<PaperdollWindow>> existingQ,
         Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> mobileGraphicQ,
         Query<Data<EquipmentSlots>> equipQ,
-        Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> itemQ)
+        Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> itemQ,
+        Query<Data<NetworkSerial>> itemSerialQ)
     {
         var tileData = fileManager.Value.TileData.StaticData;
 
@@ -148,7 +149,7 @@ internal readonly struct PaperdollPlugin : IPlugin
             }
 
             BuildWindow(commands, assets.Value, builder.Value, gameCtx.Value, tileData,
-                entitiesMap.Value, mobileGraphicQ, equipQ, itemQ,
+                entitiesMap.Value, mobileGraphicQ, equipQ, itemQ, itemSerialQ,
                 zCounter.Value, existingQ.Count(),
                 p.Serial, p.Title, p.Flags);
         }
@@ -167,11 +168,12 @@ internal readonly struct PaperdollPlugin : IPlugin
         Res<GameContext> gameCtx,
         Res<UOFileManager> fileManager,
         Query<Data<NetworkSerial, EquipmentSlots>, Filter<Changed<EquipmentSlots>>> changedMobilesQ,
-        Query<Data<PaperdollWindow>> windowsQ,
+        Query<Data<PaperdollWindow, GlobalZIndex>> windowsQ,
         Query<Data<PaperdollBodyChild>> bodyChildQ,
         Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> mobileGraphicQ,
         Query<Data<EquipmentSlots>> equipQ,
-        Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> itemQ)
+        Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> itemQ,
+        Query<Data<NetworkSerial>> itemSerialQ)
     {
         if (changedMobilesQ.Count() == 0) return;
         if (windowsQ.Count() == 0) return;
@@ -182,14 +184,10 @@ internal readonly struct PaperdollPlugin : IPlugin
         {
             var serial = ns.Ref.Value;
 
-            foreach (var (windowEnt, win) in windowsQ)
+            foreach (var (windowEnt, win, winZ) in windowsQ)
             {
                 if (win.Ref.Serial != serial) continue;
 
-                // Despawn every body+overlay child belonging to this window.
-                // Static children (slot frames, buttons, profile / virtue,
-                // title) are NOT tagged so they survive — only the body
-                // sprite and equipment overlays rebuild.
                 foreach (var (childEnt, child) in bodyChildQ)
                 {
                     if (child.Ref.WindowEntity != windowEnt.Ref) continue;
@@ -198,8 +196,8 @@ internal readonly struct PaperdollPlugin : IPlugin
 
                 BuildBodyAndOverlays(commands, assets.Value, builder.Value,
                     gameCtx.Value, tileData, entitiesMap.Value,
-                    mobileGraphicQ, equipQ, itemQ,
-                    windowEnt.Ref, serial);
+                    mobileGraphicQ, equipQ, itemQ, itemSerialQ,
+                    windowEnt.Ref, serial, winZ.Ref.Value);
             }
         }
     }
@@ -214,6 +212,7 @@ internal readonly struct PaperdollPlugin : IPlugin
         Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> mobileGraphicQ,
         Query<Data<EquipmentSlots>> equipQ,
         Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> itemQ,
+        Query<Data<NetworkSerial>> itemSerialQ,
         UiZCounter zCounter,
         int existingWindowCount,
         uint serial,
@@ -239,7 +238,7 @@ internal readonly struct PaperdollPlugin : IPlugin
             });
 
         BuildBodyAndOverlays(commands, assets, builder, gameCtx, tileData, entitiesMap,
-            mobileGraphicQ, equipQ, itemQ, root.Id, serial);
+            mobileGraphicQ, equipQ, itemQ, itemSerialQ, root.Id, serial, parentZ: null);
 
         // Equipment slot frames (15) — left column 9, right column 6.
         // Same coords as main's BuildGump (PaperDollGump.cs:264..283).
@@ -414,8 +413,10 @@ internal readonly struct PaperdollPlugin : IPlugin
         Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> mobileGraphicQ,
         Query<Data<EquipmentSlots>> equipQ,
         Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> itemQ,
+        Query<Data<NetworkSerial>> itemSerialQ,
         ulong rootId,
-        uint serial)
+        uint serial,
+        int? parentZ)
     {
         // Mobile lookup for body graphic + equipment iteration. Tolerant of
         // a missing mobile entity (paperdoll for an unloaded NPC just gets a
@@ -445,6 +446,8 @@ internal readonly struct PaperdollPlugin : IPlugin
         var bodyHue = ToShaderHue(mobileHue);
         var body = builder.AddGump(commands, bodyId, bodyHue, new Vector2(8, 19))
             .Insert(new PaperdollBodyChild { WindowEntity = rootId });
+        if (parentZ.HasValue)
+            body.Insert(new GlobalZIndex(parentZ.Value));
         commands.AddChild(rootId, body.Id);
 
         if (!slots.HasValue) return;
@@ -473,8 +476,23 @@ internal readonly struct PaperdollPlugin : IPlugin
             }
 
             var equipHue = ih.IsValid() ? ToShaderHue((ushort)(ih.Ref.Value & 0x3FFF)) : Vector3.UnitZ;
+            // Pickup-from-paperdoll: tag the overlay with the item's serial
+            // + layer + owning mobile so PickupPlugin can latch on press and
+            // resolve to the game entity. Interaction.None makes the sprite
+            // hit-testable by Bevy.UI.
+            var (_, itemNs) = itemSerialQ.Get(itemEnt);
             var equipPic = builder.AddGump(commands, equipGump, equipHue, new Vector2(8, 19))
-                .Insert(new PaperdollBodyChild { WindowEntity = rootId });
+                .Insert(new PaperdollBodyChild { WindowEntity = rootId })
+                .Insert(Interaction.None)
+                .Insert(new PaperdollEquipUI
+                {
+                    ItemSerial = itemNs.Ref.Value,
+                    Layer = layer,
+                    MobileSerial = serial,
+                    WindowEntity = rootId,
+                });
+            if (parentZ.HasValue)
+                equipPic.Insert(new GlobalZIndex(parentZ.Value));
             commands.AddChild(rootId, equipPic.Id);
         }
 
@@ -500,8 +518,19 @@ internal readonly struct PaperdollPlugin : IPlugin
                     // Body sprite lives at (8, 19) absolute; backpack offsets
                     // from there (-bx, 0). Mirrors main's PaperDollInteractable
                     // origin + GumpPicEquipment relative coords.
+                    var (_, bpNs) = itemSerialQ.Get(backpackEnt);
                     var bpPic = builder.AddGump(commands, bpGump, bpHue, new Vector2(8 - bx, 19))
-                        .Insert(new PaperdollBodyChild { WindowEntity = rootId });
+                        .Insert(new PaperdollBodyChild { WindowEntity = rootId })
+                        .Insert(Interaction.None)
+                        .Insert(new PaperdollEquipUI
+                        {
+                            ItemSerial = bpNs.Ref.Value,
+                            Layer = GameLayer.Backpack,
+                            MobileSerial = serial,
+                            WindowEntity = rootId,
+                        });
+                    if (parentZ.HasValue)
+                        bpPic.Insert(new GlobalZIndex(parentZ.Value));
                     commands.AddChild(rootId, bpPic.Id);
                 }
             }
@@ -582,5 +611,18 @@ internal struct PaperdollSlot
 // children (slot frames, buttons, profile pics, label) untouched.
 internal struct PaperdollBodyChild
 {
+    public ulong WindowEntity;
+}
+
+// Carried by each equipment overlay sprite that represents a real equipped
+// item (clothing/armor/backpack/etc). PickupPlugin uses this to (a) hit-
+// test paperdoll drags on press and (b) resolve to the backing game
+// entity via NetworkEntitiesMap, then send Send_PickUpRequest. Mirrors
+// main's PaperDollInteractable.GumpPicEquipment role.
+internal struct PaperdollEquipUI
+{
+    public uint ItemSerial;
+    public GameLayer Layer;
+    public uint MobileSerial;
     public ulong WindowEntity;
 }

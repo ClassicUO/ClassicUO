@@ -1,12 +1,14 @@
 using System;
 using ClassicUO.Assets;
 using ClassicUO.Game;
+using ClassicUO.Game.Data;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
 using TinyEcs.Bevy.UI;
+using GameLayer = ClassicUO.Game.Data.Layer;
 
 namespace ClassicUO.Ecs;
 
@@ -37,7 +39,9 @@ internal readonly struct PickupPlugin : IPlugin
                 Res<Camera> camera,
                 ResMut<LeftPressLatch> latch,
                 Query<Data<ContainerItemUI, ComputedNode, Node, GlobalZIndex>> uiItemsQ,
-                Query<Data<ContainerWindow, ComputedNode, GlobalZIndex>> windowsQ) =>
+                Query<Data<ContainerWindow, ComputedNode, GlobalZIndex>> windowsQ,
+                Query<Data<PaperdollEquipUI, ComputedNode, Node, GlobalZIndex>> equipUiQ,
+                Query<Data<PaperdollWindow, ComputedNode, GlobalZIndex>> pdWindowsQ) =>
             {
                 // Clear on release edge. NOTE: don't rely on `!IsPressed` to
                 // detect "not held" — IsPressed returns false on the press-
@@ -54,15 +58,29 @@ internal readonly struct PickupPlugin : IPlugin
 
                 var pos = m.Value.Position;
 
-                // Find the topmost container window under the cursor first;
-                // its z bounds which item slots are eligible. Items inherit
-                // their owning window's GlobalZIndex via PropagateZIndex, so
-                // any item with z < topWindowZ sits behind the front window
-                // and must NOT be hit even if its sprite peeks out.
+                // Find the topmost container window OR paperdoll window
+                // under the cursor first; its z bounds which item-level UIs
+                // (container items, equipment overlays) are eligible.
+                // Items inherit their owning window's GlobalZIndex via the
+                // shared propagation, so any item with z < topWindowZ sits
+                // behind the front window and must NOT be hit.
                 int topWindowZ = int.MinValue;
                 uint topWindowClayId = 0;
                 ulong topWindow = 0;
                 foreach (var (ent, _, computed, z) in windowsQ)
+                {
+                    var bb = computed.Ref;
+                    if (pos.X < bb.Position.X || pos.Y < bb.Position.Y) continue;
+                    if (pos.X >= bb.Position.X + bb.Size.X) continue;
+                    if (pos.Y >= bb.Position.Y + bb.Size.Y) continue;
+                    if (z.Ref.Value > topWindowZ || (z.Ref.Value == topWindowZ && bb.ClayId >= topWindowClayId))
+                    {
+                        topWindowZ = z.Ref.Value;
+                        topWindowClayId = bb.ClayId;
+                        topWindow = ent.Ref;
+                    }
+                }
+                foreach (var (ent, _, computed, z) in pdWindowsQ)
                 {
                     var bb = computed.Ref;
                     if (pos.X < bb.Position.X || pos.Y < bb.Position.Y) continue;
@@ -81,6 +99,21 @@ internal readonly struct PickupPlugin : IPlugin
                 int topItemZ = int.MinValue;
 
                 foreach (var (ent, _, computed, node, z) in uiItemsQ)
+                {
+                    if (node.Ref.Display == Display.None) continue;
+                    if (topWindow != 0 && z.Ref.Value < topWindowZ) continue;
+                    var bb = computed.Ref;
+                    if (pos.X < bb.Position.X || pos.Y < bb.Position.Y) continue;
+                    if (pos.X >= bb.Position.X + bb.Size.X) continue;
+                    if (pos.Y >= bb.Position.Y + bb.Size.Y) continue;
+                    if (z.Ref.Value > topItemZ || (z.Ref.Value == topItemZ && bb.ClayId >= topClayId))
+                    {
+                        topItemZ = z.Ref.Value;
+                        topClayId = bb.ClayId;
+                        topUi = ent.Ref;
+                    }
+                }
+                foreach (var (ent, _, computed, node, z) in equipUiQ)
                 {
                     if (node.Ref.Display == Display.None) continue;
                     if (topWindow != 0 && z.Ref.Value < topWindowZ) continue;
@@ -154,7 +187,8 @@ internal readonly struct PickupPlugin : IPlugin
                 Res<LeftPressLatch> latch,
                 Res<NetworkEntitiesMap> entitiesMap,
                 Query<Data<NetworkSerial>, Filter<With<Items>>> q,
-                Query<Data<ContainerItemUI>> uiItemQ) =>
+                Query<Data<ContainerItemUI>> uiItemQ,
+                Query<Data<PaperdollEquipUI>> equipUiQ) =>
             {
                 // Pickup eligibility is gated on the PRESS-ORIGIN entity, not
                 // the currently hovered one — otherwise dragging the cursor
@@ -179,6 +213,16 @@ internal readonly struct PickupPlugin : IPlugin
                     var (_, link) = uiItemQ.Get(ent);
                     if (!SerialHelper.IsItem(link.Ref.Serial)) return false;
                     return entitiesMap.Value.TryGet(link.Ref.Serial, out var gameEnt)
+                        && q.Contains(gameEnt);
+                }
+                // Paperdoll equipment overlay -> game entity by ItemSerial.
+                // Mirrors main's PaperDollInteractable.GumpPicEquipment.Update
+                // pickup gate (drag threshold + CanLift).
+                if (equipUiQ.Contains(ent))
+                {
+                    var (_, link) = equipUiQ.Get(ent);
+                    if (!SerialHelper.IsItem(link.Ref.ItemSerial)) return false;
+                    return entitiesMap.Value.TryGet(link.Ref.ItemSerial, out var gameEnt)
                         && q.Contains(gameEnt);
                 }
                 return false;
@@ -217,7 +261,8 @@ internal readonly struct PickupPlugin : IPlugin
                 Res<LeftPressLatch> latch,
                 Res<NetworkEntitiesMap> entitiesMap,
                 Query<Data<NetworkSerial>, Filter<With<Items>>> q,
-                Query<Data<ContainerItemUI>> uiItemQ) =>
+                Query<Data<ContainerItemUI>> uiItemQ,
+                Query<Data<PaperdollEquipUI>> equipUiQ) =>
             {
                 // Pickup eligibility is gated on the PRESS-ORIGIN entity, not
                 // the currently hovered one — otherwise dragging the cursor
@@ -242,6 +287,16 @@ internal readonly struct PickupPlugin : IPlugin
                     var (_, link) = uiItemQ.Get(ent);
                     if (!SerialHelper.IsItem(link.Ref.Serial)) return false;
                     return entitiesMap.Value.TryGet(link.Ref.Serial, out var gameEnt)
+                        && q.Contains(gameEnt);
+                }
+                // Paperdoll equipment overlay -> game entity by ItemSerial.
+                // Mirrors main's PaperDollInteractable.GumpPicEquipment.Update
+                // pickup gate (drag threshold + CanLift).
+                if (equipUiQ.Contains(ent))
+                {
+                    var (_, link) = equipUiQ.Get(ent);
+                    if (!SerialHelper.IsItem(link.Ref.ItemSerial)) return false;
+                    return entitiesMap.Value.TryGet(link.Ref.ItemSerial, out var gameEnt)
                         && q.Contains(gameEnt);
                 }
                 return false;
@@ -364,11 +419,12 @@ internal readonly struct PickupPlugin : IPlugin
         Res<GrabbedItem> grabbedItem,
         Res<NetClient> network,
         Res<NetworkEntitiesMap> entitiesMap,
-        Query<Data<NetworkSerial, Amount, Graphic, Hue>> q,
+        Query<Data<NetworkSerial, Amount, Graphic, Hue>, Filter<Optional<Amount>>> q,
         Query<Data<WorldPosition>> worldPosQ,
         Query<Data<ContainerSlotPosition>> slotPosQ,
         Query<Data<ContainerItemUI>> uiItemQ,
         Query<Data<ContainerWindow>> windowQ,
+        Query<Data<PaperdollEquipUI>> equipUiQ,
         Query<Data<Node>> nodeQ
     )
     {
@@ -397,6 +453,17 @@ internal readonly struct PickupPlugin : IPlugin
                 sourceContainer = win.Ref.Serial;
             }
         }
+        // Paperdoll equipment overlay: resolve item serial -> game entity.
+        // sourceContainer = mobile serial (matches main's PickUpRequest
+        // semantics where the equipped item's "container" is the wearer).
+        else if (equipUiQ.Contains(sel))
+        {
+            var (_, link) = equipUiQ.Get(sel);
+            if (!entitiesMap.Value.TryGet(link.Ref.ItemSerial, out target))
+                return;
+            sourceUi = sel;
+            sourceContainer = link.Ref.MobileSerial;
+        }
 
         var (serial, amount, graphic, hue) = q.Get(target);
 
@@ -419,21 +486,25 @@ internal readonly struct PickupPlugin : IPlugin
             origX = wp.Ref.X; origY = wp.Ref.Y; origZ = wp.Ref.Z;
         }
 
+        // Equipped items often lack an Amount component (server doesn't
+        // send a stack count for worn gear). Default to 1 in that case;
+        // ground/stackable items always carry it.
+        int amountValue = amount.IsValid() ? amount.Ref.Value : 1;
         Console.WriteLine("[PICKUP] serial=0x{0:X8} amount={1} graphic=0x{2:X4} sourceUi={3} sourceContainer=0x{4:X8} origin=({5},{6},{7}) fromSlot={8}",
-            serial.Ref.Value, amount.Ref.Value, graphic.Ref.Value, sourceUi, sourceContainer,
+            serial.Ref.Value, amountValue, graphic.Ref.Value, sourceUi, sourceContainer,
             origX, origY, origZ, fromSlot);
-        network.Value.Send_PickUpRequest(serial.Ref.Value, (ushort)amount.Ref.Value);
+        network.Value.Send_PickUpRequest(serial.Ref.Value, (ushort)amountValue);
 
         grabbedItem.Value.Clear();
         grabbedItem.Value.IsActive = true;
         grabbedItem.Value.Serial = serial.Ref.Value;
         grabbedItem.Value.Graphic = graphic.Ref.Value;
         grabbedItem.Value.Hue = hue.Ref.Value;
-        grabbedItem.Value.Amount = amount.Ref.Value;
+        grabbedItem.Value.Amount = amountValue;
         grabbedItem.Value.SourceUiEntity = sourceUi;
         grabbedItem.Value.OriginalGraphic = graphic.Ref.Value;
         grabbedItem.Value.OriginalHue = hue.Ref.Value;
-        grabbedItem.Value.OriginalAmount = (ushort)amount.Ref.Value;
+        grabbedItem.Value.OriginalAmount = (ushort)amountValue;
         grabbedItem.Value.OriginalX = origX;
         grabbedItem.Value.OriginalY = origY;
         grabbedItem.Value.OriginalZ = origZ;
@@ -493,9 +564,13 @@ internal readonly struct PickupPlugin : IPlugin
         Query<Data<ContainerItemUI>> containerItemQuery,
         Query<Data<Graphic, WorldPosition>> itemDataQuery,
         Query<Data<Graphic, ContainerSlotPosition>> slotItemQuery,
-        Query<Data<TinyEcs.Parent>> parentQuery
+        Query<Data<TinyEcs.Parent>> parentQuery,
+        PaperdollDropParams paperdoll
     )
     {
+        var paperdollWindowQ = paperdoll.WindowQ;
+        var paperdollEquipQ = paperdoll.EquipQ;
+        var equipmentSlotsQ = paperdoll.EquipmentSlotsQ;
         var target = selectedEntity.Value.Entity;
         Console.WriteLine("[DROP-ENTER] target={0} heldSerial=0x{1:X8}", target, grabbedItem.Value.Serial);
         if (target == 0)
@@ -506,6 +581,64 @@ internal readonly struct PickupPlugin : IPlugin
         }
 
         var (_, playerPos) = playerQuery.Get();
+
+        // Drop on paperdoll body (PaperdollWindow root or any equip overlay
+        // child) -> equip the held item on that mobile. Mirrors main's
+        // PaperDollGump.OnMouseUp Equip path. Two pre-conditions match
+        // GameActions.Equip: held item must be wearable, and the target
+        // layer must be empty on the mobile (otherwise legacy aborts).
+        if (paperdollWindowQ.Contains(target) || paperdollEquipQ.Contains(target))
+        {
+            uint mobileSerial = 0;
+            if (paperdollWindowQ.Contains(target))
+            {
+                var (_, pw) = paperdollWindowQ.Get(target);
+                mobileSerial = pw.Ref.Serial;
+            }
+            else
+            {
+                var (_, pe) = paperdollEquipQ.Get(target);
+                mobileSerial = pe.Ref.MobileSerial;
+            }
+
+            var tileData = fileManager.Value.TileData.StaticData;
+            var heldGraphic = grabbedItem.Value.Graphic;
+            if (heldGraphic == 0 || heldGraphic >= tileData.Length)
+            {
+                Console.WriteLine("[DROP-DENY] held graphic invalid");
+                grabbedItem.Value.Clear();
+                return;
+            }
+            ref readonly var td = ref tileData[heldGraphic];
+            if (!td.IsWearable)
+            {
+                Console.WriteLine("[DROP-DENY] held item not wearable");
+                grabbedItem.Value.Clear();
+                return;
+            }
+            var heldLayer = (GameLayer)td.Layer;
+
+            // Check target layer slot is empty (legacy behavior — main's
+            // PaperDollGump.OnMouseUp guards via FindItemByLayer).
+            if (entitiesMap.Value.TryGet(mobileSerial, out var mobileEnt)
+                && equipmentSlotsQ.Contains(mobileEnt))
+            {
+                var (_, slots) = equipmentSlotsQ.Get(mobileEnt);
+                if (slots.Ref[heldLayer] != 0)
+                {
+                    Console.WriteLine("[DROP-DENY] layer {0} already occupied on mobile 0x{1:X8}",
+                        heldLayer, mobileSerial);
+                    grabbedItem.Value.Clear();
+                    return;
+                }
+            }
+
+            Console.WriteLine("[DROP] equip heldSerial=0x{0:X8} layer={1} mobile=0x{2:X8}",
+                grabbedItem.Value.Serial, heldLayer, mobileSerial);
+            network.Value.Send_EquipRequest(grabbedItem.Value.Serial, heldLayer, mobileSerial);
+            grabbedItem.Value.Clear();
+            return;
+        }
 
         // Case 1: dropping directly onto a container window (UI entity).
         if (containerQuery.Contains(target))
@@ -728,6 +861,47 @@ internal readonly struct PickupPlugin : IPlugin
 
         // Reverse scale back to server-space coordinates.
         return ((ushort)(x / scale), (ushort)(y / scale));
+    }
+}
+
+// Composite system param: bundles paperdoll-related drop queries so
+// DropItem stays under TinyEcs's delegate arity ceiling. Each inner
+// query advertises its access independently so the scheduler can still
+// parallelize correctly.
+internal sealed class PaperdollDropParams : ISystemParam
+{
+    public Query<Data<PaperdollWindow>> WindowQ { get; } = new();
+    public Query<Data<PaperdollEquipUI>> EquipQ { get; } = new();
+    public Query<Data<EquipmentSlots>> EquipmentSlotsQ { get; } = new();
+
+    public void Initialize(App app)
+    {
+        WindowQ.Initialize(app);
+        EquipQ.Initialize(app);
+        EquipmentSlotsQ.Initialize(app);
+    }
+
+    public void Fetch(App app)
+    {
+        WindowQ.Fetch(app);
+        EquipQ.Fetch(app);
+        EquipmentSlotsQ.Fetch(app);
+    }
+
+    public SystemParamAccess GetAccess()
+    {
+        var access = new SystemParamAccess();
+        foreach (var src in new SystemParamAccess[]
+        {
+            WindowQ.GetAccess(),
+            EquipQ.GetAccess(),
+            EquipmentSlotsQ.GetAccess(),
+        })
+        {
+            foreach (var r in src.ReadResources) access.ReadResources.Add(r);
+            foreach (var w in src.WriteResources) access.WriteResources.Add(w);
+        }
+        return access;
     }
 }
 
