@@ -76,6 +76,29 @@ internal static class RpcInputCommands
         return cmd;
     }
 
+    public static Command BuildDoubleClickSerial()
+    {
+        var host = new Option<string?>("--host");
+        var port = new Option<int?>("--port");
+        var serial = new Option<string>("--serial",
+            "Serial: hex (0x40000001), decimal, or 'player'.") { IsRequired = true };
+
+        var cmd = new Command("rpc-double-click-serial",
+            "Send Send_DoubleClick(serial) without routing through a pixel click. Use 'player' to target the local player.");
+        cmd.AddOption(host);
+        cmd.AddOption(port);
+        cmd.AddOption(serial);
+        cmd.SetHandler(async (string? h, int? p, string s) =>
+        {
+            var (host2, port2) = RpcClient.ResolveEndpoint(h, p);
+            await using var rpc = await RpcClient.ConnectAsync(host2, port2);
+            var resp = await rpc.CallAsync("input.doubleClickSerial", new { serial = s });
+            EmitResponse(resp);
+            if (resp.Error is not null) Environment.ExitCode = 1;
+        }, host, port, serial);
+        return cmd;
+    }
+
     public static Command BuildShot()
     {
         var host = new Option<string?>("--host");

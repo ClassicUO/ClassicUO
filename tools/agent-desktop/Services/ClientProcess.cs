@@ -16,7 +16,7 @@ namespace ClassicUO.Agent.Desktop.Services;
 
 internal static class ClientProcess
 {
-    private const string AgentDllRelative = "bin/agent/net9.0/cuo.agent.dll";
+    private const string AgentDllRelative = "bin/agent/net10.0/cuo.agent.dll";
 
     public static string GetAgentDllPath(string repoRoot)
         => Path.Combine(repoRoot, AgentDllRelative.Replace('/', Path.DirectorySeparatorChar));

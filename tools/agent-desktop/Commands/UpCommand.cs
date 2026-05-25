@@ -120,15 +120,20 @@ internal static class UpCommand
 
     private static string FindRepoRoot()
     {
+        // Walk up until we find a marker that uniquely identifies the
+        // cuo-agents repo root. No top-level .sln on impl/ecs, so anchor
+        // on the canonical client project file path instead.
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
         while (dir is not null)
         {
-            if (File.Exists(Path.Combine(dir.FullName, "ClassicUO.sln")))
+            var marker = Path.Combine(dir.FullName, "src", "ClassicUO.Client", "ClassicUO.Client.csproj");
+            if (File.Exists(marker))
                 return dir.FullName;
             dir = dir.Parent;
         }
         throw new InvalidOperationException(
-            "could not locate ClassicUO.sln by walking up from " + AppContext.BaseDirectory);
+            "could not locate src/ClassicUO.Client/ClassicUO.Client.csproj by walking up from "
+            + AppContext.BaseDirectory);
     }
 
     private static void TryKill(Process? child)

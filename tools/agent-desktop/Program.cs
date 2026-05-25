@@ -27,24 +27,11 @@ internal static class Program
         root.AddCommand(SmokeCommand.Build());
         root.AddCommand(PingCommand.Build());
 
-        if (OperatingSystem.IsWindowsVersionAtLeast(5))
-        {
-            root.AddCommand(WindowsListCommand.Build());
-            root.AddCommand(ShotCommand.Build());
-            root.AddCommand(InputCommands.BuildMove());
-            root.AddCommand(InputCommands.BuildClick());
-            root.AddCommand(InputCommands.BuildDoubleClick());
-            root.AddCommand(InputCommands.BuildHold());
-            root.AddCommand(InputCommands.BuildRelease());
-            root.AddCommand(InputCommands.BuildType());
-            root.AddCommand(DiffCommand.Build());
-            root.AddCommand(ScenarioCommand.Build());
-        }
-
-        // RPC-based commands work on any platform with an active agent
-        // server connection (loopback TCP). These exercise the in-process
-        // synthetic input + backbuffer capture path (preferred). The os-*
-        // commands above stay as a branch-agnostic fallback.
+        // All input + capture goes through the in-process JSON-RPC channel
+        // (synthetic mouse/keyboard events + FNA backbuffer capture). The
+        // OS-driver verbs (window-finder click/type/shot) were removed —
+        // they captured the host window chrome and HUD instead of the
+        // ECS-rendered scene.
         root.AddCommand(RpcInputCommands.BuildMove());
         root.AddCommand(RpcInputCommands.BuildClick());
         root.AddCommand(RpcInputCommands.BuildDoubleClick());
@@ -53,6 +40,8 @@ internal static class Program
         root.AddCommand(RpcInputCommands.BuildClear());
         root.AddCommand(RpcInputCommands.BuildType());
         root.AddCommand(RpcInputCommands.BuildShot());
+        root.AddCommand(RpcInputCommands.BuildDoubleClickSerial());
+        root.AddCommand(ScriptCommand.Build());
 
         var invokeExit = await root.InvokeAsync(args);
         // System.CommandLine's InvokeAsync returns its own code (0 on success);
