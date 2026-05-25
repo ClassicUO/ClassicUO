@@ -93,12 +93,18 @@ internal static class InputHandlers
         var s = ctx.State.CurrentMouseSynth;
         s.X = x; s.Y = y;
         var down = SetButton(s, btn, ButtonState.Pressed);
-        var up = SetButton(s, btn, ButtonState.Released);
+        var up = SetButton(down, btn, ButtonState.Released);
+        // Each click is enqueued as (down, down, up) so the press edge
+        // detector sees two consecutive Pressed frames (matches MouseClick).
+        // A single d/u/d/u sequence registered only as IsPressedOnce and
+        // the second UiClick was lost — see AGENTS.md pitfalls (now stale).
+        ctx.State.PendingMouseFrames.Enqueue(down);
         ctx.State.PendingMouseFrames.Enqueue(down);
         ctx.State.PendingMouseFrames.Enqueue(up);
         ctx.State.PendingMouseFrames.Enqueue(down);
+        ctx.State.PendingMouseFrames.Enqueue(down);
         ctx.State.PendingMouseFrames.Enqueue(up);
-        return Ok(req, 4);
+        return Ok(req, 6);
     }
 
     public static JsonRpcResponse MouseHold(JsonRpcRequest req, in AgentRpcContext ctx)

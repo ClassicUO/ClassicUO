@@ -131,10 +131,6 @@ Full constants in `src/ClassicUO.Agent.Contracts/RpcVerbs.cs`. Highlights:
 
 ## Pitfalls
 
-- **`input.mouseDoubleClick` too fast for `InteractionSystem`.** Queues 4
-  synthetic frames back-to-back; the press/release edge detector misses
-  the second `UiClick`. For double-click use two `input.mouseClick` calls
-  ~200 ms apart.
 - **`input.type` on legacy SDL2 handler.** If the committed handler
   P/Invokes SDL2 but FNA is on SDL3, events go to a queue nothing reads.
   Fix: bypass SDL and call `UIManager.KeyboardFocusControl.InvokeTextInput`
