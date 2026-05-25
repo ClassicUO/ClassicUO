@@ -180,6 +180,34 @@ internal readonly struct WindowDragPlugin : IPlugin
             Recurse(commands, cid, z, childrenQ, aliveQ);
     }
 
+    // Walk parent -> descendants and set GlobalZIndex on every child.
+    // Existing components mutate in-place (visible to this frame's
+    // layout); children that lack the component get one queued via
+    // Commands (visible from next frame on, same as PropagateZIndex).
+    private static void PropagateZInline(
+        Commands commands,
+        ulong entity,
+        int z,
+        Query<Data<TinyEcs.Children>> childrenQ,
+        Query<Data<GlobalZIndex>> zQ)
+    {
+        if (!childrenQ.Contains(entity)) return;
+        var (_, kids) = childrenQ.Get(entity);
+        foreach (var cid in kids.Ref)
+        {
+            if (zQ.Contains(cid))
+            {
+                var (_, cz) = zQ.Get(cid);
+                cz.Ref.Value = z;
+            }
+            else
+            {
+                commands.Entity(cid).Insert(new GlobalZIndex(z));
+            }
+            PropagateZInline(commands, cid, z, childrenQ, zQ);
+        }
+    }
+
     private struct DragAnchor
     {
         public bool Active;
@@ -197,7 +225,9 @@ internal readonly struct WindowDragPlugin : IPlugin
         Res<DragGate> gate,
         Local<DragAnchor> anchor,
         Query<Data<Node, Interaction, ComputedNode, GlobalZIndex>, Filter<With<UIMovable>>> q,
-        Query<Data<ContainerItemUI, ComputedNode, Node>> itemsQ)
+        Query<Data<ContainerItemUI, ComputedNode, Node>> itemsQ,
+        Query<Data<TinyEcs.Children>> childrenQ,
+        Query<Data<GlobalZIndex>> zQ)
     {
         // IsPressed is false on the press-once frame (oldState=Released), so
         // include IsPressedOnce in the "held" check or the latch attempt
@@ -284,10 +314,16 @@ internal readonly struct WindowDragPlugin : IPlugin
             // Bring window to front on focus. Bevy.UI's GlobalZIndex maps to
             // Clay's Floating.ZIndex (signed 16-bit), so a monotonically
             // increasing counter is enough until we hit ~32k clicks per
-            // session. PropagateZIndex (below) mirrors the new z onto every
-            // floating descendant so item children stay tied to their window.
+            // session. Mutate the root z in-place AND walk the subtree
+            // setting child z directly. Relying on PropagateZIndex's
+            // Changed<GlobalZIndex> pickup leaves descendants on the old z
+            // for one frame and produces a click-flicker; children that
+            // lack a GlobalZIndex component get one inserted so the
+            // backstop covers them on the very next frame.
             var newZ = zCounter.Value.Bump();
-            commands.Entity(topId).Insert(new GlobalZIndex(newZ));
+            var (_, _, _, _, rootZ) = q.Get(topId);
+            rootZ.Ref.Value = newZ;
+            PropagateZInline(commands, topId, newZ, childrenQ, zQ);
         }
 
         if (!anchor.Value.Active) return;
