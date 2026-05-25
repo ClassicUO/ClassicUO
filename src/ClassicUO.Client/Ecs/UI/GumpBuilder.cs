@@ -60,6 +60,22 @@ internal sealed class GumpBuilder
             });
     }
 
+    /// Spawn a tiled gump (single sprite tiled to fill the given size).
+    /// Used for backgrounds like LoginBackground's 0x0150 wallpaper.
+    public EntityCommands AddGumpTiled(Commands commands, ushort id, Vector3 hue, Vector2 position, Vector2 size)
+    {
+        var node = MakeFloatingNode(position, size);
+        return commands.Spawn()
+            .Insert(node)
+            .Insert(new UiCustom())
+            .Insert(new UOCustomRender
+            {
+                Kind = UOCustomKind.GumpTiled,
+                AssetId = id,
+                Hue = hue,
+            });
+    }
+
     /// Spawn a nine-patch (scalable) gump. The supplied size overrides the
     /// natural sprite size.
     public EntityCommands AddGumpNinePatch(Commands commands, ushort id, Vector3 hue, Vector2? position = null, Vector2? size = null)
