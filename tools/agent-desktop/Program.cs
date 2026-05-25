@@ -40,7 +40,6 @@ internal static class Program
         root.AddCommand(RpcInputCommands.BuildClear());
         root.AddCommand(RpcInputCommands.BuildType());
         root.AddCommand(RpcInputCommands.BuildShot());
-        root.AddCommand(RpcInputCommands.BuildDoubleClickSerial());
         root.AddCommand(ScriptCommand.Build());
 
         var invokeExit = await root.InvokeAsync(args);

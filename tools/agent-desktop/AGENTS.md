@@ -98,7 +98,6 @@ One file per verb in `Commands/<Verb>.cs`, wired in `Program.cs`. Run
 | `rpc-input-clear` | `Commands/RpcInputCommands.cs` | resets synth state |
 | `rpc-type --text <s>` | `Commands/RpcInputCommands.cs` | `input.type` |
 | `rpc-shot --out <path>` | `Commands/RpcInputCommands.cs` | `capture.shot`; FNA `GetBackBufferData` + StbImageWrite. Path absolute or relative to client CWD |
-| `rpc-double-click-serial --serial <hex\|dec\|'player'>` | `Commands/RpcInputCommands.cs` | `input.doubleClickSerial`; only valid in-world |
 
 ### Script step shapes
 
@@ -123,8 +122,6 @@ Full constants in `src/ClassicUO.Agent.Contracts/RpcVerbs.cs`. Highlights:
 - `input.mouseMove` / `input.mouseClick` / `input.mouseDoubleClick` /
   `input.mouseHold` / `input.mouseRelease` / `input.clear`
 - `input.type` — text input via the focused control
-- `input.doubleClickSerial` — skip pixel hit-test; `serial` accepts hex
-  (`0x40000001`), decimal, or `"player"`
 - `agent.login` — auto-pick server 0 + character 0
 - `gump.tree` / `gump.dump` / `gump.close`
 - `capture.shot` — deferred; reply arrives after the next render tick

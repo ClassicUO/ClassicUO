@@ -121,68 +121,6 @@ internal static class InputHandlers
         return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["cleared"] = true } };
     }
 
-    // Resolve a serial argument that's either a number or "player". Lets
-    // scenarios reference the local player without pre-resolving the
-    // serial via world.dumpState.
-    public static JsonRpcResponse DoubleClickSerial(JsonRpcRequest req, in AgentRpcContext ctx)
-    {
-        if (req.Params is not JsonElement p || p.ValueKind != JsonValueKind.Object)
-            return AgentServer.ErrorResponse(req.Id, JsonRpcErrorCodes.InvalidParams,
-                "input.doubleClickSerial expects { serial }");
-
-        uint serial;
-        if (!p.TryGetProperty("serial", out var sEl))
-            return AgentServer.ErrorResponse(req.Id, JsonRpcErrorCodes.InvalidParams,
-                "input.doubleClickSerial: missing 'serial'");
-
-        if (sEl.ValueKind == JsonValueKind.String)
-        {
-            var s = sEl.GetString();
-            if (string.Equals(s, "player", StringComparison.OrdinalIgnoreCase))
-            {
-                var gc = ctx.GameCtx.Value;
-                if (gc.PlayerSerial == 0)
-                    return AgentServer.ErrorResponse(req.Id, JsonRpcErrorCodes.NotInWorld,
-                        "not in world");
-                serial = gc.PlayerSerial;
-            }
-            else if (s is not null && s.StartsWith("0x", StringComparison.OrdinalIgnoreCase)
-                && uint.TryParse(s.AsSpan(2), System.Globalization.NumberStyles.HexNumber,
-                    System.Globalization.CultureInfo.InvariantCulture, out var hex))
-            {
-                serial = hex;
-            }
-            else if (s is not null && uint.TryParse(s, out var dec))
-            {
-                serial = dec;
-            }
-            else
-            {
-                return AgentServer.ErrorResponse(req.Id, JsonRpcErrorCodes.InvalidParams,
-                    "serial must be a number, hex string (0x...), or 'player'");
-            }
-        }
-        else if (sEl.ValueKind == JsonValueKind.Number && sEl.TryGetUInt32(out var n))
-        {
-            serial = n;
-        }
-        else
-        {
-            return AgentServer.ErrorResponse(req.Id, JsonRpcErrorCodes.InvalidParams,
-                "serial must be a number, hex string (0x...), or 'player'");
-        }
-
-        // Use the Bevy-registered NetClient (the live socket) instead of
-        // the NetClient.Socket static singleton — the singleton is a
-        // *different* instance on the ECS branch and is never connected.
-        ctx.Network.Send_DoubleClick(serial);
-        return new JsonRpcResponse
-        {
-            Id = req.Id,
-            Result = new JsonObject { ["sent"] = true, ["serial"] = serial },
-        };
-    }
-
     public static JsonRpcResponse Type(JsonRpcRequest req, in AgentRpcContext ctx)
     {
         if (req.Params is not JsonElement p || p.ValueKind != JsonValueKind.Object)
