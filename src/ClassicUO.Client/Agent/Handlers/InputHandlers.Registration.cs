@@ -21,6 +21,7 @@ internal static partial class AgentDispatcher
         routes["input.mouseUp"]          = (req, in ctx) => InputHandlers.MouseUp(req, in ctx);
         routes["input.mouseClick"]       = (req, in ctx) => InputHandlers.MouseClick(req, in ctx);
         routes["input.mouseDoubleClick"] = (req, in ctx) => InputHandlers.MouseDoubleClick(req, in ctx);
+        routes["input.doubleClickSerial"] = (req, in ctx) => InputHandlers.DoubleClickSerial(req, in ctx);
         routes["input.mouseHold"]        = (req, in ctx) => InputHandlers.MouseHold(req, in ctx);
         routes["input.mouseRelease"]     = (req, in ctx) => InputHandlers.MouseRelease(req, in ctx);
         routes["input.clear"]            = (req, in ctx) => InputHandlers.InputClear(req, in ctx);

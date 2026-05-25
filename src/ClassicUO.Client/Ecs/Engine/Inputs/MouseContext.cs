@@ -39,9 +39,52 @@ internal sealed class MouseContext : InputContext<MouseButtonType>
     internal MouseContext(Microsoft.Xna.Framework.Game game) : base(game) { }
 
 
-    public Vector2 Position => new(_newState.X, _newState.Y);
-    public Vector2 PositionOffset => new(_newState.X - _oldState.X, _newState.Y - _oldState.Y);
-    public Vector2 DraggingOffset => new (_newState.X - _lastMouseClickPosition.X, _newState.Y - _lastMouseClickPosition.Y);
+    // All public positions return LOGICAL pixels (post-DpiScale). Mirrors
+    // main's Mouse.Update which divides physical input by DpiScale before
+    // storing. UI layout, Camera.Bounds, and gump hit-tests all reason in
+    // logical space, so a single conversion here keeps every downstream
+    // consumer (GameScene world picks, UI clicks, drag offsets) consistent.
+    // AGENT_BUILD synthetic input is already in logical pixels (the agent
+    // sends UO-grid coords), so no division needed in that path — _newState
+    // values are stored pre-scaled below.
+    public Vector2 Position
+    {
+        get
+        {
+            var (sx, sy) = GetScale();
+            return new(_newState.X / sx, _newState.Y / sy);
+        }
+    }
+    public Vector2 PositionOffset
+    {
+        get
+        {
+            var (sx, sy) = GetScale();
+            return new((_newState.X - _oldState.X) / sx, (_newState.Y - _oldState.Y) / sy);
+        }
+    }
+    public Vector2 DraggingOffset
+    {
+        get
+        {
+            var (sx, sy) = GetScale();
+            return new((_newState.X - _lastMouseClickPosition.X) / sx, (_newState.Y - _lastMouseClickPosition.Y) / sy);
+        }
+    }
+
+    private (float, float) GetScale()
+    {
+#if AGENT_BUILD
+        if (_agentSynthEnabled) return (1f, 1f);
+#endif
+        if (_game is UoGame ug)
+        {
+            var d = ug.DpiScale;
+            if (d <= 0f) d = 1f;
+            return (d, d);
+        }
+        return (1f, 1f);
+    }
     public float Wheel { get; private set; }
 
     public override bool IsPressed(MouseButtonType input) => !IsConsumed(input) && VerifyCondition(input, ButtonState.Pressed, ButtonState.Pressed);

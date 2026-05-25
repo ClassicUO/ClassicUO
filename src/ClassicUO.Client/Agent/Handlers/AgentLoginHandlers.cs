@@ -90,6 +90,22 @@ internal static class AgentLoginHandlers
         settings.Username = username!;
         settings.Password = Crypter.Encrypt(password!);
 
+        // Auto-progress through ServerSelection + CharacterSelection by
+        // default so the script can skip the UI clicks. Caller can disable
+        // via "autoSelect": false to drive the menus manually.
+        var autoSelect = true;
+        if (p.TryGetProperty("autoSelect", out var asEl) && asEl.ValueKind == JsonValueKind.False)
+            autoSelect = false;
+        ctx.State.AutoLoginActive = autoSelect;
+        ctx.State.AutoServerIndex =
+            p.TryGetProperty("serverIndex", out var srvEl)
+            && srvEl.ValueKind == JsonValueKind.Number
+            && srvEl.TryGetInt32(out var sIdx) ? sIdx : 0;
+        ctx.State.AutoCharacterIndex =
+            p.TryGetProperty("characterIndex", out var chrEl)
+            && chrEl.ValueKind == JsonValueKind.Number
+            && chrEl.TryGetInt32(out var cIdx) ? cIdx : 0;
+
         // EmitTrigger goes through Commands; TinyEcs.Bevy flushes the
         // command queue after the DrainInbox system completes, then fires
         // observers synchronously. HandleLoginRequests therefore runs this

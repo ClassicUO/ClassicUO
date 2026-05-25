@@ -25,15 +25,29 @@ internal readonly struct GuiRenderingPlugin : IPlugin
         public Texture2D? Texture;
     }
 
+    // Persistent UI render target. Mirrors main's RenderTargets.UiRenderTarget:
+    // sized at backbuffer/DPI (logical 640x480 at 800x600 / 1.25), repopulated
+    // each frame, then blitted to the backbuffer with LinearClamp at fractional
+    // DPI so neighbouring sprites don't seam — sampling happens ONCE per RT
+    // pixel during the blit instead of per sprite during layout.
+    private sealed class UiRtState
+    {
+        public RenderTarget2D? Rt;
+        public int Width;
+        public int Height;
+    }
+
     public void Build(App app)
     {
         // Run in Bevy.UI's render stage so UiRenderCommands is guaranteed populated
         // (RenderSystem.Publish runs first in this stage by declaration order).
         Action<
             Local<DumbTexture>,
+            Local<UiRtState>,
             Res<UltimaBatcher2D>,
             Res<AssetsServer>,
             Res<ImageCache>,
+            Res<UoGame>,
             Res<UiRenderCommands>,
             Res<UiClayContext>,
             Query<Data<UOCustomRender>>> renderFn = Render;
@@ -47,9 +61,11 @@ internal readonly struct GuiRenderingPlugin : IPlugin
 
     private static void Render(
         Local<DumbTexture> dumbTexture,
+        Local<UiRtState> uiRt,
         Res<UltimaBatcher2D> batcher,
         Res<AssetsServer> assets,
         Res<ImageCache> imageCache,
+        Res<UoGame> game,
         Res<UiRenderCommands> renderCommands,
         Res<UiClayContext> uiCtx,
         Query<Data<UOCustomRender>> customQuery)
@@ -57,7 +73,34 @@ internal readonly struct GuiRenderingPlugin : IPlugin
         dumbTexture.Value.Texture ??= MakeWhitePixel(batcher.Value.GraphicsDevice);
 
         var b = batcher.Value;
-        b.Begin();
+        var device = b.GraphicsDevice;
+        var pp = device.PresentationParameters;
+        var dpi = game.Value.DpiScale;
+        if (dpi <= 0f) dpi = 1f;
+
+        // Allocate / resize the off-screen UI render target at LOGICAL size.
+        // All UI sprites draw into it at 1:1 (no scaling), so adjacent tiles
+        // share exact pixel boundaries — no seams.
+        var logicalW = Math.Max(1, (int)(pp.BackBufferWidth / dpi));
+        var logicalH = Math.Max(1, (int)(pp.BackBufferHeight / dpi));
+        if (uiRt.Value.Rt == null || uiRt.Value.Rt.IsDisposed
+            || uiRt.Value.Width != logicalW || uiRt.Value.Height != logicalH)
+        {
+            uiRt.Value.Rt?.Dispose();
+            uiRt.Value.Rt = new RenderTarget2D(
+                device, logicalW, logicalH, false,
+                pp.BackBufferFormat, pp.DepthStencilFormat,
+                pp.MultiSampleCount, RenderTargetUsage.DiscardContents);
+            uiRt.Value.Width = logicalW;
+            uiRt.Value.Height = logicalH;
+        }
+
+        // Phase 1: render UI into the RT at logical pixels with PointClamp.
+        device.SetRenderTarget(uiRt.Value.Rt);
+        device.Clear(XnaColor.Transparent);
+
+        b.Begin(null, Matrix.Identity);
+        b.SetSampler(SamplerState.PointClamp);
 
         var cmds = renderCommands.Value.Span;
 
@@ -115,7 +158,12 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                 }
 
                 case RenderCommandType.ScissorStart:
-                    b.ClipBegin((int)bb.X, (int)bb.Y, (int)bb.Width, (int)bb.Height);
+                    // RT is at logical size; scissor uses logical coords too.
+                    b.ClipBegin(
+                        (int)bb.X,
+                        (int)bb.Y,
+                        (int)bb.Width,
+                        (int)bb.Height);
                     break;
 
                 case RenderCommandType.ScissorEnd:
@@ -126,6 +174,22 @@ internal readonly struct GuiRenderingPlugin : IPlugin
             }
         }
 
+        b.End();
+
+        // Phase 2: blit RT to the backbuffer scaled to physical size.
+        // LinearClamp at fractional DPI smooths the single upscale step
+        // without the per-sprite seam artifacts that PointClamp + scaled
+        // sprite draws produced.
+        device.SetRenderTarget(null);
+        b.Begin();
+        b.SetSampler(dpi == Math.Floor(dpi)
+            ? SamplerState.PointClamp
+            : SamplerState.LinearClamp);
+        b.Draw(
+            uiRt.Value.Rt,
+            new Rectangle(0, 0, pp.BackBufferWidth, pp.BackBufferHeight),
+            Vector3.UnitZ);
+        b.SetSampler(null);
         b.End();
     }
 
@@ -246,19 +310,50 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                 DrawGumpNinePatch(b, assets, in cmd, in custom);
                 break;
 
+            case UOCustomKind.GumpTiled:
+            {
+                ref readonly var info = ref assets.Gumps.GetGump(custom.AssetId);
+                if (info.Texture != null)
+                {
+                    b.DrawTiled(
+                        info.Texture,
+                        new Rectangle((int)bb.X, (int)bb.Y, (int)bb.Width, (int)bb.Height),
+                        info.UV,
+                        custom.Hue,
+                        cmd.ZIndex);
+                }
+                break;
+            }
+
             case UOCustomKind.Art:
             {
                 ref readonly var info = ref assets.Arts.GetArt(custom.AssetId);
-                if (info.Texture != null)
+                if (info.Texture != null && info.UV.Width > 0 && info.UV.Height > 0)
                 {
+                    // Scale-to-fit: shrink down items larger than the node
+                    // bounds (e.g. equipment slot frame items), preserve
+                    // aspect, never scale up. Mirrors main's ItemGumpFixed,
+                    // which clamps draw size to (Width, Height) and centers
+                    // smaller art inside the slot.
+                    float artW = info.UV.Width;
+                    float artH = info.UV.Height;
+                    float boundW = bb.Width  > 0 ? bb.Width  : artW;
+                    float boundH = bb.Height > 0 ? bb.Height : artH;
+                    float scale = Math.Min(1f, Math.Min(boundW / artW, boundH / artH));
+                    float destW = artW * scale;
+                    float destH = artH * scale;
+                    var destRect = new Rectangle(
+                        (int)(bb.X + (boundW - destW) * 0.5f),
+                        (int)(bb.Y + (boundH - destH) * 0.5f),
+                        (int)destW,
+                        (int)destH);
                     b.Draw(
                         info.Texture,
-                        new Vector2(bb.X, bb.Y),
+                        destRect,
                         info.UV,
                         custom.Hue,
                         0f,
                         Vector2.Zero,
-                        1f,
                         SpriteEffects.None,
                         cmd.ZIndex);
                     if (custom.Stacked)
@@ -292,6 +387,15 @@ internal readonly struct GuiRenderingPlugin : IPlugin
         var hue = custom.Hue;
         var z = cmd.ZIndex;
 
+        // Snap bounding box to integers up-front so every piece (corner draws
+        // + tiled fills) shares the exact same pixel grid. Mixing float corner
+        // placements with int tiled rects left sub-pixel seams that flashed
+        // as gaps after the SpriteBatch CreateScale(dpi) magnified them.
+        int x = (int)bb.X;
+        int y = (int)bb.Y;
+        int w = (int)bb.Width;
+        int h = (int)bb.Height;
+
         // 9-patch layout (matches the previous implementation):
         //   0 1 2
         //   3 8 4
@@ -312,66 +416,66 @@ internal readonly struct GuiRenderingPlugin : IPlugin
         var offsetRight = Math.Max(g2.UV.Width, g7.UV.Width) - g4.UV.Width;
 
         if (g0.Texture != null)
-            b.Draw(g0.Texture, new Vector2(bb.X, bb.Y), g0.UV, hue, z);
+            b.Draw(g0.Texture, new Vector2(x, y), g0.UV, hue, z);
 
         if (g1.Texture != null)
             b.DrawTiled(g1.Texture,
                 new Rectangle(
-                    (int)bb.X + g0.UV.Width,
-                    (int)bb.Y,
-                    (int)bb.Width - g0.UV.Width - g2.UV.Width,
+                    x + g0.UV.Width,
+                    y,
+                    w - g0.UV.Width - g2.UV.Width,
                     g1.UV.Height),
                 g1.UV, hue, z);
 
         if (g2.Texture != null)
             b.Draw(g2.Texture,
-                new Vector2(bb.X + (bb.Width - g2.UV.Width), bb.Y + offsetTop),
+                new Vector2(x + (w - g2.UV.Width), y + offsetTop),
                 g2.UV, hue, z);
 
         if (g3.Texture != null)
             b.DrawTiled(g3.Texture,
                 new Rectangle(
-                    (int)bb.X,
-                    (int)bb.Y + g0.UV.Height,
+                    x,
+                    y + g0.UV.Height,
                     g3.UV.Width,
-                    (int)bb.Height - g0.UV.Height - g5.UV.Height),
+                    h - g0.UV.Height - g5.UV.Height),
                 g3.UV, hue, z);
 
         if (g4.Texture != null)
             b.DrawTiled(g4.Texture,
                 new Rectangle(
-                    (int)bb.X + ((int)bb.Width - g4.UV.Width),
-                    (int)bb.Y + g2.UV.Height,
+                    x + (w - g4.UV.Width),
+                    y + g2.UV.Height,
                     g4.UV.Width,
-                    (int)bb.Height - g2.UV.Height - g7.UV.Height),
+                    h - g2.UV.Height - g7.UV.Height),
                 g4.UV, hue, z);
 
         if (g5.Texture != null)
             b.Draw(g5.Texture,
-                new Vector2(bb.X, bb.Y + (bb.Height - g5.UV.Height)),
+                new Vector2(x, y + (h - g5.UV.Height)),
                 g5.UV, hue, z);
 
         if (g6.Texture != null)
             b.DrawTiled(g6.Texture,
                 new Rectangle(
-                    (int)bb.X + g5.UV.Width,
-                    (int)bb.Y + ((int)bb.Height - g6.UV.Height - offsetBottom),
-                    (int)bb.Width - g5.UV.Width - g7.UV.Width,
+                    x + g5.UV.Width,
+                    y + (h - g6.UV.Height - offsetBottom),
+                    w - g5.UV.Width - g7.UV.Width,
                     g6.UV.Height),
                 g6.UV, hue, z);
 
         if (g7.Texture != null)
             b.Draw(g7.Texture,
-                new Vector2(bb.X + (bb.Width - g7.UV.Width), bb.Y + (bb.Height - g7.UV.Height)),
+                new Vector2(x + (w - g7.UV.Width), y + (h - g7.UV.Height)),
                 g7.UV, hue, z);
 
         if (g8.Texture != null)
             b.DrawTiled(g8.Texture,
                 new Rectangle(
-                    (int)bb.X + g0.UV.Width,
-                    (int)bb.Y + g0.UV.Height,
-                    ((int)bb.Width - g0.UV.Width - g2.UV.Width) + (offsetLeft + offsetRight),
-                    (int)bb.Height - g2.UV.Height - g7.UV.Height),
+                    x + g0.UV.Width,
+                    y + g0.UV.Height,
+                    (w - g0.UV.Width - g2.UV.Width) + (offsetLeft + offsetRight),
+                    h - g2.UV.Height - g7.UV.Height),
                 g8.UV, hue, z);
     }
 

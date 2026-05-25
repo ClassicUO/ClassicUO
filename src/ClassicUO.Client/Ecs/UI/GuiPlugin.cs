@@ -44,8 +44,8 @@ internal readonly struct GuiPlugin : IPlugin
         }
 
         // Sync FNA surface size + pointer state into Bevy.UI before the layout stage.
-        Action<Res<GraphicsDevice>, ResMut<UiSurface>> syncSurfaceFn = SyncSurface;
-        Action<Res<MouseContext>, ResMut<UiPointer>> syncPointerFn = SyncPointer;
+        Action<Res<GraphicsDevice>, Res<UoGame>, ResMut<UiSurface>> syncSurfaceFn = SyncSurface;
+        Action<Res<MouseContext>, Res<UoGame>, ResMut<UiPointer>> syncPointerFn = SyncPointer;
         Action<Res<Time>, Res<MouseContext>, ResMut<UiClayContext>> syncDeltaAndScrollFn = SyncDeltaAndScroll;
         Action<Query<Data<UOCustomRender, UOButton, Interaction>>> updateUOButtonsStateFn = UpdateUOButtonsState;
         Action<Query<Data<Text, MaskedText>, Filter<Changed<MaskedText>>>> syncMaskedTextFn = SyncMaskedText;
@@ -64,18 +64,29 @@ internal readonly struct GuiPlugin : IPlugin
 
     private static void SyncSurface(
         Res<GraphicsDevice> device,
+        Res<UoGame> game,
         ResMut<UiSurface> surface)
     {
         var pp = device.Value.PresentationParameters;
-        surface.Value.LogicalSize = new System.Numerics.Vector2(pp.BackBufferWidth, pp.BackBufferHeight);
-        surface.Value.PhysicalSize = surface.Value.LogicalSize;
+        var dpi = game.Value.DpiScale;
+        if (dpi <= 0f) dpi = 1f;
+        // Clay lays out in LOGICAL pixels (UO's native UI grid). Render pass
+        // applies CreateScale(DpiScale) so layout fills the physical backbuffer
+        // — mirrors main's RenderTargets pipeline.
+        surface.Value.LogicalSize = new System.Numerics.Vector2(pp.BackBufferWidth / dpi, pp.BackBufferHeight / dpi);
+        surface.Value.PhysicalSize = new System.Numerics.Vector2(pp.BackBufferWidth, pp.BackBufferHeight);
     }
 
     private static void SyncPointer(
         Res<MouseContext> mouseCtx,
+        Res<UoGame> game,
         ResMut<UiPointer> pointer)
     {
-        pointer.Value.Position = new System.Numerics.Vector2(mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y);
+        // MouseContext.Position is already LOGICAL pixels (see MouseContext.cs).
+        // Clay layouts in logical too, so feed it through unchanged for both
+        // real-mouse and AGENT_BUILD synthetic paths.
+        var p = mouseCtx.Value.Position;
+        pointer.Value.Position = new System.Numerics.Vector2(p.X, p.Y);
         pointer.Value.Down = mouseCtx.Value.IsPressed(MouseButtonType.Left);
         // WasDown is latched by InteractionSystem.PostLayout.
     }
@@ -146,6 +157,7 @@ internal enum UOCustomKind : byte
 {
     Gump,
     GumpNinePatch,
+    GumpTiled,
     Art,
     Land,
     Animation,

@@ -37,6 +37,7 @@ internal readonly struct CuoPlugin : IPlugin
 
         app.AddPlugin<LoginScreenPlugin>();
         app.AddPlugin<GameScreenPlugin>();
+        app.AddPlugin<TopBarPlugin>();
 
         app.AddPlugin<NetworkPlugin>();
         app.AddPlugin<GameplayPlugin>();
@@ -64,6 +65,17 @@ struct GameContext
     public CharacterListFlags ClientFeatures;
     public ClientVersion ClientVersion;
     public int MaxObjectsDistance;
+    // Last server-pushed season (0=Spring, 1=Summer, 2=Fall, 3=Winter,
+    // 4=Desolation) and the music index that came with it. Set by the
+    // 0xBC handler; consumed by terrain tile-art selection and the
+    // music plugin once those are wired into ECS.
+    public byte Season;
+    public byte SeasonMusicIndex;
+    // Last server-pushed light levels (0..30; lower = darker). Consumed
+    // by the world light pass once it's ported. Cached here so the
+    // lighting plugin can pick them up at startup.
+    public byte ServerLightLevel;
+    public byte PersonalLightLevel;
 }
 
 public enum GameState : byte

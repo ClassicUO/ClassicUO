@@ -25,6 +25,7 @@
 
 using ClassicUO.Configuration;
 using ClassicUO.Ecs;
+using ClassicUO.Network;
 using TinyEcs;
 using TinyEcs.Bevy;
 
@@ -38,6 +39,7 @@ internal readonly ref struct AgentRpcContext
     public readonly Res<Settings> Settings;
     public readonly Commands Commands;
     public readonly MouseContext MouseCtx;
+    public readonly NetClient Network;
 
     public AgentRpcContext(
         AgentServerState state,
@@ -45,7 +47,8 @@ internal readonly ref struct AgentRpcContext
         Res<GameContext> gameCtx,
         Res<Settings> settings,
         Commands commands,
-        MouseContext mouseCtx)
+        MouseContext mouseCtx,
+        NetClient network)
     {
         State = state;
         World = world;
@@ -53,6 +56,7 @@ internal readonly ref struct AgentRpcContext
         Settings = settings;
         Commands = commands;
         MouseCtx = mouseCtx;
+        Network = network;
     }
 }
 

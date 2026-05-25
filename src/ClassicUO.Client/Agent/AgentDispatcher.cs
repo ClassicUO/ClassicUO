@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using ClassicUO.Agent.Contracts;
 using ClassicUO.Configuration;
 using ClassicUO.Ecs;
+using ClassicUO.Network;
 using TinyEcs;
 using TinyEcs.Bevy;
 
@@ -70,10 +71,11 @@ internal static partial class AgentDispatcher
         Res<GameContext> gameCtx,
         Res<Settings> settings,
         Commands commands,
-        MouseContext mouseCtx)
+        MouseContext mouseCtx,
+        NetClient network)
     {
         var state = stateRes.Value!;
-        var ctx = new AgentRpcContext(state, world, gameCtx, settings, commands, mouseCtx);
+        var ctx = new AgentRpcContext(state, world, gameCtx, settings, commands, mouseCtx, network);
 
         while (state.Inbox.Reader.TryRead(out var req))
         {

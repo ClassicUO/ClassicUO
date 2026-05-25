@@ -81,6 +81,24 @@ internal sealed class AgentServerState
     // ECS branch uses SDL3 bindings, where SDL2-flavor event pushes don't
     // make it through to FNA's TextInputEXT pipeline.
     public readonly Queue<char> PendingTypedChars = new();
+
+    // Auto-progress through ServerSelection and CharacterSelection after
+    // an agent.login dispatch — bypasses the UI clicks the human player
+    // would otherwise issue. Indices default to 0. Cleared once
+    // character is selected.
+    public bool AutoLoginActive;
+    public int AutoServerIndex;
+    public int AutoCharacterIndex;
+
+    // Cached selection lists. Populated by AgentLoginCachePlugin from the
+    // corresponding ECS events so RPC handlers can resolve a character by
+    // index without re-querying the server.
+    public string[]? LastCharacterNames;
+    public int LastServerCount;
+
+    // Current high-level game state surfaced via lifecycle.gameState. Set
+    // by AgentLoginCachePlugin on every NextState<GameState> change.
+    public string CurrentGameState = string.Empty;
 }
 
 #endif

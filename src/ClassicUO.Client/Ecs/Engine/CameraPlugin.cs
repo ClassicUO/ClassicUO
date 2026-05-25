@@ -1,5 +1,6 @@
 using ClassicUO.Configuration;
 using ClassicUO.Renderer;
+using Microsoft.Xna.Framework.Graphics;
 using TinyEcs;
 using TinyEcs.Bevy;
 
@@ -11,12 +12,22 @@ internal readonly struct CameraPlugin : IPlugin
     {
         var updateCameraFn = UpdateCamera;
         var setCameraBoundsFn = SetCameraBounds;
+        var maximizeOnEnterFn = MaximizeOnEnterGameScreen;
+        var watchDpiFn = WatchDpiChange;
 
         app
             .AddResource(new Camera(0.5f, 2.5f, 0.1f) { Bounds = new(0, 0, 800, 600) })
 
+            .AddSystem(maximizeOnEnterFn)
+            .OnEnter(GameState.GameScreen)
+            .Build()
+
             .AddSystem(setCameraBoundsFn)
             .OnEnter(GameState.GameScreen)
+            .Build()
+
+            .AddSystem(watchDpiFn)
+            .InStage(Stage.First)
             .Build()
 
             .AddSystem(updateCameraFn)
@@ -26,11 +37,80 @@ internal readonly struct CameraPlugin : IPlugin
 
     }
 
-    private static void SetCameraBounds(
-        Res<Camera> camera,
-        Res<Profile> profile
+    // Poll-based equivalent of main's SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED
+    // / DISPLAY_CHANGED handler. ECS doesn't install an SDL_SetEventFilter
+    // (FNA pumps SDL inside Tick), so we detect DPI changes by comparing
+    // the current scale to the last-applied value each frame. When it
+    // moves, rescale the window so the LOGICAL backbuffer dim stays the
+    // same on the new monitor — matches main's WindowOnClientSizeChanged
+    // call with previousDpi=_displayScale.
+    private static void WatchDpiChange(
+        Res<UoGame> game,
+        Local<float> lastDpi,
+        Res<GraphicsDevice> device,
+        Res<Settings> settings)
+    {
+        var current = game.Value.DpiScale;
+        if (current <= 0f) current = 1f;
+
+        if (lastDpi.Value == 0f)
+        {
+            lastDpi.Value = current;
+            return;
+        }
+
+        if (System.Math.Abs(lastDpi.Value - current) < 0.001f)
+            return;
+
+        // Re-apply the current logical size scaled by the new DPI. We
+        // can't read the prior logical size cheaply from FNA so derive
+        // it from the current physical backbuffer divided by the OLD
+        // DPI, then multiply by the NEW DPI for the resize.
+        var pp = device.Value.PresentationParameters;
+        var logicalW = (int)(pp.BackBufferWidth / lastDpi.Value);
+        var logicalH = (int)(pp.BackBufferHeight / lastDpi.Value);
+        game.Value.SetWindowSize((int)(logicalW * current), (int)(logicalH * current));
+        lastDpi.Value = current;
+    }
+
+    // Mirror main's GameScene.Load: when settings say the window should be
+    // maximized, maximize it on world entry. Without this the backbuffer
+    // stays at LoginScreen's 640x480 default and every in-world capture
+    // is letterboxed compared to main.
+    private static void MaximizeOnEnterGameScreen(
+        Res<UoGame> game,
+        Res<Settings> settings
     )
     {
+        if (settings.Value.IsWindowMaximized)
+            game.Value.MaximizeWindow();
+    }
+
+    // Camera bounds in LOGICAL pixels (after DpiScale). Position from
+    // profile.GameWindowPosition; size from profile.GameWindowSize unless
+    // GameWindowFullSize is on AND the window is maximized, in which case
+    // the viewport fills the backbuffer minus the TopBarGump reservation.
+    // Mirrors main's WorldViewportGump sizing path.
+    private static void SetCameraBounds(
+        Res<Camera> camera,
+        Res<Profile> profile,
+        Res<Settings> settings,
+        Res<UoGame> game,
+        Res<GraphicsDevice> device
+    )
+    {
+        if (settings.Value.IsWindowMaximized && profile.Value.GameWindowFullSize)
+        {
+            const int TopBarHeight = 27;
+            var dpi = game.Value.DpiScale;
+            if (dpi <= 0f) dpi = 1f;
+            var pp = device.Value.PresentationParameters;
+            var logicalW = (int)(pp.BackBufferWidth / dpi);
+            var logicalH = (int)(pp.BackBufferHeight / dpi);
+            camera.Value.Bounds = new(0, TopBarHeight, logicalW, logicalH - TopBarHeight);
+            return;
+        }
+
         camera.Value.Bounds = new(
             profile.Value.GameWindowPosition.X,
             profile.Value.GameWindowPosition.Y,

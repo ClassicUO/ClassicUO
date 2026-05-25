@@ -2,6 +2,14 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Agent harness
+
+For driving the `AGENT_BUILD` desktop client over JSON-RPC (login flows,
+parity checks, screenshots, scripted scenarios), read
+`tools/agent-desktop/AGENTS.md` before invoking any `agent-desktop` verb.
+That doc covers build commands, the verb catalog, settings to pin,
+ModernUO boot, and known pitfalls.
+
 ## Project Overview
 
 ClassicUO is an open source implementation of the Ultima Online Classic Client written in C# (.NET 9.0). It uses FNA-XNA for cross-platform game development and features an Entity Component System (ECS) architecture.

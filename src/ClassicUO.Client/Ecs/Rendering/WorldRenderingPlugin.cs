@@ -148,10 +148,18 @@ internal readonly struct WorldRenderingPlugin : IPlugin
     )
     {
         viewport.Value = batch.Value.GraphicsDevice.Viewport;
-        var cameraViewport = camera.Value.GetViewport();
 
-        batch.Value.GraphicsDevice.Viewport = cameraViewport;
+        // RT may not exist on the very first frame after GameScreen entry
+        // (BindRenderTarget runs in the same stage, no ordering guarantee).
+        // Bail rather than NPE — the next frame will succeed.
+        if (renderTarget.Value == null) return;
+
+        // World RT now sized at LOGICAL viewport dim (matches main's
+        // backbuffer/DpiScale sizing). Set viewport to full RT so the
+        // camera transform projects into the full RT space; Clay's
+        // panel sampler does the final upscale to display dim.
         batch.Value.GraphicsDevice.SetRenderTarget(renderTarget.Value);
+        batch.Value.GraphicsDevice.Viewport = new Viewport(0, 0, renderTarget.Value.Width, renderTarget.Value.Height);
         batch.Value.GraphicsDevice.Clear(ClearOptions.Target, Color.Black, 0, 0);
     }
 
@@ -169,6 +177,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         Res<AssetsServer> assetsServer,
         Res<UOFileManager> fileManager,
         Res<Camera> camera,
+        Res<UoGame> game,
         Local<(int lastPosX, int lastPosY, int lastPosZ)?> lastPos,
         Local<MaxZInfo> workingZInfo,
         Query<Data<Graphic, Hue>> qLayers,
@@ -182,7 +191,10 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             Filter<Without<ContainedInto>, Optional<MobileSteps>, Optional<MobAnimation>>> queryEquipmentSlots
     )
     {
-        // Setup rendering state
+        // Setup rendering state. World RT is sized at logical viewport
+        // dim (see BindRenderTarget); use the bare camera transform so
+        // the world renders at logical scale, then Clay's panel sampler
+        // upscales to display size — matches main's pixel-art aesthetic.
         batch.Value.Begin(null, camera.Value.ViewTransformMatrix);
         batch.Value.SetBrightlight(1.7f);
         batch.Value.SetSampler(SamplerState.PointClamp);

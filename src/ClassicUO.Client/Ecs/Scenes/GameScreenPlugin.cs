@@ -348,8 +348,23 @@ internal readonly struct GameScreenPlugin : IPlugin
         root.AddChild(gameWindowBorder);
         root.AddChild(gameWindowBorderResize);
         root.AddChild(gameWindow);
-        root.AddChild(menuBar);
-        root.AddChild(selectionOverlay);
+        if (string.Equals(System.Environment.GetEnvironmentVariable("ECS_DEBUG_HUD"), "1"))
+        {
+            root.AddChild(menuBar);
+            root.AddChild(selectionOverlay);
+        }
+        else
+        {
+            // Despawn the dev-only entities so orphan Nodes don't get
+            // rendered at root-level positions by Clay.
+            menuBar.Despawn();
+            logoutBtn.Despawn();
+            logoutLabel.Despawn();
+            totalBtn.Despawn();
+            totalLabel.Despawn();
+            selectionOverlay.Despawn();
+            selectionText.Despawn();
+        }
     }
 
     // Anchor at press; derive bounds from absolute mouse delta. Avoids
@@ -539,26 +554,32 @@ internal readonly struct GameScreenPlugin : IPlugin
         }
     }
 
-    // Allocate / reallocate the RenderTarget2D and rebind it to the game-window
-    // entity's UiImage. Mirrors the old AdjustCameraAndBounds tail.
+    // Allocate / reallocate the world RenderTarget2D at LOGICAL viewport
+    // size (camera.Bounds dim, NOT scaled by DpiScale). The Clay panel
+    // then samples this RT into its DPI-scaled display rect, producing
+    // main's signature point-upscaled pixel-art look on hi-DPI displays
+    // rather than a crisp 1:1 render.
     private static void BindRenderTarget(
         ResMut<RenderTarget2D> renderTarget,
         Res<UltimaBatcher2D> batch,
+        Res<Camera> camera,
         Single<Data<UiImage>, Filter<With<GameWindowUI>, With<GameScene>>> queryWindow
     )
     {
         var device = batch.Value.GraphicsDevice;
-        var pp = device.PresentationParameters;
+
+        var w = System.Math.Max(1, camera.Value.Bounds.Width);
+        var h = System.Math.Max(1, camera.Value.Bounds.Height);
 
         if (renderTarget.Value == null || renderTarget.Value.IsDisposed ||
-            renderTarget.Value.Width != pp.BackBufferWidth ||
-            renderTarget.Value.Height != pp.BackBufferHeight)
+            renderTarget.Value.Width != w ||
+            renderTarget.Value.Height != h)
         {
             renderTarget.Value?.Dispose();
             renderTarget.Value = new RenderTarget2D(
                 device,
-                pp.BackBufferWidth,
-                pp.BackBufferHeight,
+                w,
+                h,
                 false,
                 SurfaceFormat.Color, DepthFormat.Depth24Stencil8);
         }

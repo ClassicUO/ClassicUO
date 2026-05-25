@@ -56,6 +56,11 @@ namespace ClassicUO.Configuration
 
         [JsonPropertyName("fps")] public int FPS { get; set; } = 60;
 
+        // User-configurable multiplier on top of the OS display scale. Final
+        // DpiScale = SDL_GetWindowDisplayScale * ScreenScale. Default 1.0
+        // matches main's Settings.GlobalSettings.ScreenScale default.
+        [JsonPropertyName("screen_scale")] public float ScreenScale { get; set; } = 1f;
+
         [JsonConverter(typeof(NullablePoint2Converter))] [JsonPropertyName("window_position")] public Point? WindowPosition { get; set; }
         [JsonConverter(typeof(NullablePoint2Converter))] [JsonPropertyName("window_size")] public Point? WindowSize { get; set; }
 

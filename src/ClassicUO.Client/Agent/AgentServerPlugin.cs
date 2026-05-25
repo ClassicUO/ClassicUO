@@ -21,6 +21,7 @@
 using System;
 using ClassicUO.Configuration;
 using ClassicUO.Ecs;
+using ClassicUO.Network;
 using Microsoft.Xna.Framework.Graphics;
 using TinyEcs;
 using TinyEcs.Bevy;
@@ -96,6 +97,34 @@ internal readonly struct AgentServerPlugin : IPlugin
             .SingleThreaded()
             .Build();
 
+        // Auto-progress through ServerSelection / CharacterSelection after
+        // agent.login when state.AutoLoginActive is set. Sends the same
+        // Send_SelectServer / Send_SelectCharacter the UI clicks emit.
+        Action<Res<AgentServerState>, EventReader<ServerSelectionInfoEvent>, Res<NetClient>>
+            serverSelFn = AutoServerSelectSystem;
+        app.AddSystem(serverSelFn)
+            .InStage(Stage.Update)
+            .RunIf((EventReader<ServerSelectionInfoEvent> r) => r.HasEvents)
+            .SingleThreaded()
+            .Build();
+
+        Action<Res<AgentServerState>, EventReader<CharacterSelectionInfoEvent>,
+            Res<NetClient>, Res<GameContext>> charSelFn = AutoCharacterSelectSystem;
+        app.AddSystem(charSelFn)
+            .InStage(Stage.Update)
+            .RunIf((EventReader<CharacterSelectionInfoEvent> r) => r.HasEvents)
+            .SingleThreaded()
+            .Build();
+
+        // Track current high-level GameState so lifecycle.gameState can
+        // return a stable string without poking ECS internals from the
+        // handler thread.
+        Action<Res<AgentServerState>, Res<State<GameState>>> trackStateFn = TrackGameStateSystem;
+        app.AddSystem(trackStateFn)
+            .InStage(Stage.Last)
+            .SingleThreaded()
+            .Build();
+
         // Stage.Last: flush responses after handler systems and any
         // engine-side event emitters have written to the outbox this tick.
         Action<Res<AgentServerState>> flushFn = static s => AgentServer.FlushOutbox(s.Value!);
@@ -155,15 +184,73 @@ internal readonly struct AgentServerPlugin : IPlugin
         state.Outbox.Writer.TryWrite(resp);
     }
 
+    private static void AutoServerSelectSystem(
+        Res<AgentServerState> stateRes,
+        EventReader<ServerSelectionInfoEvent> reader,
+        Res<NetClient> net)
+    {
+        var state = stateRes.Value!;
+        foreach (var ev in reader.Read())
+        {
+            state.LastServerCount = ev.Servers?.Count ?? 0;
+            if (!state.AutoLoginActive) continue;
+            if (state.LastServerCount == 0) continue;
+            var idx = state.AutoServerIndex;
+            if (idx < 0 || idx >= state.LastServerCount) idx = 0;
+            net.Value.Send_SelectServer((byte)idx);
+        }
+    }
+
+    private static void AutoCharacterSelectSystem(
+        Res<AgentServerState> stateRes,
+        EventReader<CharacterSelectionInfoEvent> reader,
+        Res<NetClient> net,
+        Res<GameContext> gameCtx)
+    {
+        var state = stateRes.Value!;
+        foreach (var ev in reader.Read())
+        {
+            var chars = ev.Characters;
+            if (chars is null || chars.Count == 0)
+            {
+                state.LastCharacterNames = Array.Empty<string>();
+                continue;
+            }
+
+            var names = new string[chars.Count];
+            for (var i = 0; i < chars.Count; i++) names[i] = chars[i].Name;
+            state.LastCharacterNames = names;
+
+            if (!state.AutoLoginActive) continue;
+            var idx = state.AutoCharacterIndex;
+            if (idx < 0 || idx >= chars.Count) idx = 0;
+            net.Value.Send_SelectCharacter(
+                chars[idx].Index, chars[idx].Name,
+                net.Value.LocalIP, gameCtx.Value.Protocol);
+            // One-shot: clear so a subsequent login flow can opt out.
+            state.AutoLoginActive = false;
+        }
+    }
+
+    private static void TrackGameStateSystem(
+        Res<AgentServerState> stateRes,
+        Res<State<GameState>> state)
+    {
+        var s = stateRes.Value!;
+        var name = state.Value.Current.ToString();
+        if (s.CurrentGameState != name) s.CurrentGameState = name;
+    }
+
     private static void DrainInboxSystem(
         Res<AgentServerState> stateRes,
         WorldParam world,
         Res<GameContext> gameCtx,
         Res<Settings> settings,
         Commands commands,
-        Res<MouseContext> mouseCtx)
+        Res<MouseContext> mouseCtx,
+        Res<NetClient> network)
     {
-        AgentDispatcher.DrainInbox(stateRes, world.World, gameCtx, settings, commands, mouseCtx.Value!);
+        AgentDispatcher.DrainInbox(stateRes, world.World, gameCtx, settings, commands, mouseCtx.Value!, network.Value!);
     }
 }
 

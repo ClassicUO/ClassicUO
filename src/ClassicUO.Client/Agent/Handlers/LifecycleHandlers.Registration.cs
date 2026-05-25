@@ -19,6 +19,8 @@ internal static partial class AgentDispatcher
     {
         routes[RpcVerbs.LifecyclePing] = LifecycleHandlers.Ping;
         routes[RpcVerbs.LifecycleInWorld] = LifecycleHandlers.InWorld;
+        routes["lifecycle.gameState"] = LifecycleHandlers.GameState;
+        routes["lifecycle.characters"] = LifecycleHandlers.Characters;
     }
 }
 
