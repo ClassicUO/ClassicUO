@@ -22,6 +22,7 @@
 #if AGENT_BUILD
 #nullable enable
 
+using ClassicUO.Game.Scenes;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using SDL3;
@@ -74,6 +75,46 @@ internal static class AgentBootstrap
         var state = s_state;
         if (state is null) return;
         AgentDispatcher.DrainInbox(state, game);
+        AdvanceAutoLogin(state, game);
+    }
+
+    // After agent.login dispatches LoginScene.Connect, the scene cycles
+    // through ServerSelection → CharacterSelection states as packets land.
+    // Auto-click each gate by calling SelectServer / SelectCharacter when
+    // the scene reports it is parked on that step with the data loaded.
+    private static void AdvanceAutoLogin(AgentServerState state, GameController game)
+    {
+        if (!state.AutoLoginActive) return;
+        var login = game.GetScene<LoginScene>();
+        if (login is null)
+        {
+            // Scene transitioned to GameScene — login flow is done.
+            state.AutoLoginActive = false;
+            return;
+        }
+
+        switch (login.CurrentLoginStep)
+        {
+            case LoginSteps.ServerSelection:
+                var servers = login.Servers;
+                if (servers is null || servers.Length == 0) return;
+                var sIdx = state.AutoServerIndex;
+                if (sIdx < 0 || sIdx >= servers.Length) sIdx = 0;
+                login.SelectServer((byte)servers[sIdx].Index);
+                break;
+
+            case LoginSteps.CharacterSelection:
+                var chars = login.Characters;
+                if (chars is null || chars.Length == 0) return;
+                var cIdx = state.AutoCharacterIndex;
+                if (cIdx < 0 || cIdx >= chars.Length) cIdx = 0;
+                login.SelectCharacter((uint)cIdx);
+                // SelectCharacter advances to EnteringBritania; stop here
+                // so we don't re-fire on the next tick before the scene
+                // tears down to GameScene.
+                state.AutoLoginActive = false;
+                break;
+        }
     }
 
     public static void ServiceCapture(GraphicsDevice device)

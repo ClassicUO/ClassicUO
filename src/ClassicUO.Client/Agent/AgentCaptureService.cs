@@ -8,8 +8,8 @@
 //
 // The file is written to req.OutPath. Returning the PNG bytes inline in
 // the JSON-RPC response would bloat the wire (a 1920x1080 PNG can easily
-// be 1-2 MB after base64 encoding); the disk-roundtrip model matches the
-// existing OS-driver workflow and keeps the JSON-RPC envelope small.
+// be 1-2 MB after base64 encoding); the disk-roundtrip model keeps the
+// JSON-RPC envelope small.
 
 #if AGENT_BUILD
 #nullable enable
@@ -63,19 +63,12 @@ internal static class AgentCaptureService
                 tex.SaveAsPng(fs, w, h);
             }
 
-            // Paired raw sidecar matches tools/agent-desktop/OsDriver/RawImage.cs
-            // CUORAW1 format so the CLI's `diff` command can post-hoc
-            // compare two captures without decoding PNG.
-            var rawPath = Path.ChangeExtension(outPath, ".raw.bin");
-            WriteRawSidecar(rawPath, pixels, w, h);
-
             return new JsonRpcResponse
             {
                 Id = req.RequestId,
                 Result = new JsonObject
                 {
                     ["path"] = Path.GetFullPath(outPath),
-                    ["raw"] = Path.GetFullPath(rawPath),
                     ["width"] = w,
                     ["height"] = h,
                 },
@@ -90,31 +83,6 @@ internal static class AgentCaptureService
         }
     }
 
-    private static readonly byte[] s_rawMagic = System.Text.Encoding.ASCII.GetBytes("CUORAW1\0");
-
-    private static void WriteRawSidecar(string path, Color[] pixels, int width, int height)
-    {
-        // CUORAW1: magic + width + height + channels + BGRA top-down.
-        // FNA's Color is RGBA byte order; convert to BGRA for the sidecar.
-        var bgra = new byte[width * height * 4];
-        for (var i = 0; i < pixels.Length; i++)
-        {
-            var c = pixels[i];
-            var o = i * 4;
-            bgra[o]     = c.B;
-            bgra[o + 1] = c.G;
-            bgra[o + 2] = c.R;
-            bgra[o + 3] = 255;
-        }
-
-        using var fs = File.Create(path);
-        using var bw = new BinaryWriter(fs);
-        bw.Write(s_rawMagic);
-        bw.Write(width);
-        bw.Write(height);
-        bw.Write(4);
-        bw.Write(bgra);
-    }
 }
 
 #endif

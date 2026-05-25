@@ -75,6 +75,13 @@ internal sealed class AgentServerState
     // Pending capture request (single in-flight). The render system fills
     // the TaskCompletionSource on the next frame after the request lands.
     public CaptureRequest? PendingCapture;
+
+    // Auto-progress through ServerSelection and CharacterSelection after
+    // an agent.login dispatch — bypasses the UI clicks the human player
+    // would otherwise issue. Cleared once character is selected.
+    public bool AutoLoginActive;
+    public int AutoServerIndex;
+    public int AutoCharacterIndex;
 }
 
 #endif

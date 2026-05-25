@@ -38,12 +38,16 @@ internal static partial class AgentDispatcher
         RegisterLifecycleRoutes(routes);
         RegisterInputRoutes(routes);
         RegisterCaptureRoutes(routes);
+        RegisterAgentLoginRoutes(routes);
+        RegisterWorldRoutes(routes);
         return routes;
     }
 
     static partial void RegisterLifecycleRoutes(Dictionary<string, RpcHandler> routes);
     static partial void RegisterInputRoutes(Dictionary<string, RpcHandler> routes);
     static partial void RegisterCaptureRoutes(Dictionary<string, RpcHandler> routes);
+    static partial void RegisterAgentLoginRoutes(Dictionary<string, RpcHandler> routes);
+    static partial void RegisterWorldRoutes(Dictionary<string, RpcHandler> routes);
 
     public static void DrainInbox(AgentServerState state, GameController game)
     {

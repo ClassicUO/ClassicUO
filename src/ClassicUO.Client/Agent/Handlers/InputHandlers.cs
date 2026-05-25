@@ -24,8 +24,9 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using ClassicUO.Agent.Contracts;
+using ClassicUO.Game.Managers;
+using ClassicUO.Network;
 using Microsoft.Xna.Framework.Input;
-using SDL2;
 
 namespace ClassicUO.Agent.Agent.Handlers;
 
@@ -92,12 +93,18 @@ internal static class InputHandlers
         var s = ctx.State.CurrentMouseSynth;
         s.X = x; s.Y = y;
         var down = SetButton(s, btn, ButtonState.Pressed);
-        var up = SetButton(s, btn, ButtonState.Released);
+        var up = SetButton(down, btn, ButtonState.Released);
+        // Each click is enqueued as (down, down, up) so the press edge
+        // detector sees two consecutive Pressed frames (matches MouseClick).
+        // A single d/u/d/u sequence registered only as IsPressedOnce and
+        // the second UiClick was lost.
+        ctx.State.PendingMouseFrames.Enqueue(down);
         ctx.State.PendingMouseFrames.Enqueue(down);
         ctx.State.PendingMouseFrames.Enqueue(up);
         ctx.State.PendingMouseFrames.Enqueue(down);
+        ctx.State.PendingMouseFrames.Enqueue(down);
         ctx.State.PendingMouseFrames.Enqueue(up);
-        return Ok(req, 4);
+        return Ok(req, 6);
     }
 
     public static JsonRpcResponse MouseHold(JsonRpcRequest req, in AgentRpcContext ctx)
@@ -124,57 +131,21 @@ internal static class InputHandlers
                 "input.type: 'text' must be a string");
 
         var text = tEl.GetString() ?? string.Empty;
-        var pushed = PushTextInputEvents(text);
+        var pushed = PushTextInputEvents(text, in ctx);
         return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["pushed"] = pushed } };
     }
 
-    // SDL_TEXTINPUT event payload is a fixed 32-byte UTF-8 buffer (the
-    // first null terminates). FNA's TextInputEXT.TextInput callback fires
-    // once PER CHAR inside the buffer, so we can pack many chars into one
-    // event. To stay safely below the limit we cap at 30 bytes per push
-    // and chunk longer strings across multiple events.
-    private const int SDL_TEXTINPUTEVENT_TEXT_SIZE = 32;
-
-    private static int PushTextInputEvents(string text)
+    // Main's GameController consumes SDL_EVENT_TEXT_INPUT directly from its
+    // poll loop and forwards to UIManager.KeyboardFocusControl.InvokeTextInput
+    // and Scene.OnTextInput. Bypass SDL entirely and call those same sinks —
+    // works regardless of whether FNA is on SDL2 or SDL3.
+    private static int PushTextInputEvents(string text, in AgentRpcContext ctx)
     {
         if (string.IsNullOrEmpty(text)) return 0;
 
-        var bytes = Encoding.UTF8.GetBytes(text);
-        var pushed = 0;
-        var offset = 0;
-        while (offset < bytes.Length)
-        {
-            var room = SDL_TEXTINPUTEVENT_TEXT_SIZE - 2; // null terminator + safety
-            var take = Math.Min(room, bytes.Length - offset);
-
-            // Don't split a multi-byte UTF-8 sequence across events: walk
-            // back from the end until we land on a byte that is NOT a
-            // 0b10xxxxxx continuation byte.
-            while (take > 0 && offset + take < bytes.Length
-                   && (bytes[offset + take] & 0xC0) == 0x80)
-            {
-                take--;
-            }
-            if (take == 0) break;
-
-            PushSingleTextInputEvent(bytes, offset, take);
-            pushed++;
-            offset += take;
-        }
-        return pushed;
-    }
-
-    private static unsafe void PushSingleTextInputEvent(byte[] bytes, int offset, int len)
-    {
-        var evt = default(SDL.SDL_Event);
-        evt.type = SDL.SDL_EventType.SDL_TEXTINPUT;
-        evt.text.type = SDL.SDL_EventType.SDL_TEXTINPUT;
-        for (var i = 0; i < len && i < SDL_TEXTINPUTEVENT_TEXT_SIZE - 1; i++)
-        {
-            evt.text.text[i] = bytes[offset + i];
-        }
-        // text[len] stays zero from default(SDL_Event) → null-terminated.
-        SDL.SDL_PushEvent(ref evt);
+        UIManager.KeyboardFocusControl?.InvokeTextInput(text);
+        ctx.Game.Scene?.OnTextInput(text);
+        return text.Length;
     }
 
     private static SynthMouseFrame SetButton(SynthMouseFrame s, MouseButton b, ButtonState v)
