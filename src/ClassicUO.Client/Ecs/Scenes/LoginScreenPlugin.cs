@@ -20,9 +20,14 @@ internal readonly struct LoginScreenPlugin : IPlugin
         var setupFn = Setup;
         var deleteMenuFn = DeleteMenu;
         var typeIntoFocusedFn = TypeIntoFocused;
+        var applyDpiFn = ApplyLoginScreenDpiSize;
 
         app
             .AddState(LoginInteraction.None)
+
+            .AddSystem(applyDpiFn)
+            .OnEnter(GameState.LoginScreen)
+            .Build()
 
             .AddSystem(setupFn)
             .OnEnter(GameState.LoginScreen)
@@ -98,14 +103,28 @@ internal readonly struct LoginScreenPlugin : IPlugin
         }
     }
 
+    // Mirror main's LoginScene.Load: resize the window to ScaleWithDpi(640,
+    // 480) so the login chest gump renders at the same logical UO size as
+    // main on the same monitor. Also propagate the user's ScreenScale
+    // setting onto UoGame so DpiScale = SDL_GetWindowDisplayScale * scale.
+    private static void ApplyLoginScreenDpiSize(
+        Res<UoGame> game,
+        Res<Settings> settings)
+    {
+        game.Value.ScreenScale = settings.Value.ScreenScale <= 0f ? 1f : settings.Value.ScreenScale;
+        var w = game.Value.ScaleWithDpi(640);
+        var h = game.Value.ScaleWithDpi(480);
+        game.Value.SetWindowSize(w, h);
+    }
+
     private static void Setup(
         Commands commands,
         Res<GumpBuilder> gumpBuilder,
-        Res<Settings> settings)
+        Res<Settings> settings,
+        ResMut<FocusedInput> focused)
     {
-        var bg = new ClayColor(51, 51, 51, 255);
-
-        // Root: full-screen column, center-aligned.
+        // Root: full-screen, top-left anchored. Main's LoginGump places the
+        // chest at (0,0); mirror that by NOT centering with Flex.
         var root = commands.Spawn()
             .Insert<LoginScene>()
             .Insert(new Node
@@ -113,14 +132,16 @@ internal readonly struct LoginScreenPlugin : IPlugin
                 Display = Display.Flex,
                 PositionType = PositionType.Relative,
                 FlexDirection = FlexDirection.Column,
-                JustifyContent = JustifyContent.Center,
-                AlignItems = AlignItems.Center,
+                JustifyContent = JustifyContent.Start,
+                AlignItems = AlignItems.Start,
                 Width = Val.Percent(100),
                 Height = Val.Percent(100),
-            })
-            .Insert(new BackgroundColor(bg));
+            });
 
-        // MainMenu: column, fits content.
+        // MainMenu: fixed 640x480 (the chest gump's natural size). All child
+        // positions are absolute UO logical pixels measured from (0,0) —
+        // same coord space as main's LoginGump. Explicit size so absolute
+        // children get a non-zero parent box for hit-testing.
         var mainMenu = commands.Spawn()
             .Insert<LoginScene>()
             .Insert(new Node
@@ -130,18 +151,28 @@ internal readonly struct LoginScreenPlugin : IPlugin
                 FlexDirection = FlexDirection.Column,
                 JustifyContent = JustifyContent.Start,
                 AlignItems = AlignItems.Start,
-                Width = Val.Auto,
-                Height = Val.Auto,
-            })
-            .Insert(new BackgroundColor(bg));
+                Width = Val.Px(640),
+                Height = Val.Px(480),
+            });
 
         root.AddChild(mainMenu);
 
-        // Background gump.
+        // Tiled wallpaper 0x0150 + UO flag 0x0151 — mirrors main's
+        // LoginBackground (CV>=706400 branch).
+        mainMenu.AddChild(gumpBuilder.Value.AddGumpTiled(
+            commands, 0x0150, XnaVector3.UnitZ,
+            new XnaVector2(0, 0), new XnaVector2(640, 480))
+            .Insert<LoginScene>());
+        mainMenu.AddChild(gumpBuilder.Value.AddGump(
+            commands, 0x0151, XnaVector3.UnitZ, new XnaVector2(0, 4))
+            .Insert<LoginScene>());
+
+        // Chest gump on top of wallpaper.
         mainMenu.AddChild(gumpBuilder.Value.AddGump(
             commands,
             0x014E,
-            XnaVector3.UnitZ
+            XnaVector3.UnitZ,
+            new XnaVector2(0, 0)
         ).Insert<LoginScene>());
 
         // Quit button.
@@ -235,6 +266,13 @@ internal readonly struct LoginScreenPlugin : IPlugin
         usernameField.AddChild(usernameText);
         mainMenu.AddChild(usernameField);
 
+        // Parity with main's LoginGump: auto-focus username field on entry
+        // when empty (LoginGump calls SetKeyboardFocus on the account box).
+        if (string.IsNullOrEmpty(settings.Value.Username))
+        {
+            focused.Value.Entity = usernameTextId;
+        }
+
         // Password field background + text child (masked).
         var passwordField = gumpBuilder.Value.AddGumpNinePatch(
             commands,
@@ -274,6 +312,83 @@ internal readonly struct LoginScreenPlugin : IPlugin
 
         passwordField.AddChild(passwordText);
         mainMenu.AddChild(passwordField);
+
+        // Version text — matches main's LoginGump.ctor else-branch
+        // (CV>=500A): two lines at (286, 453) and (286, 465), small
+        // font 9, hue 0x0481. ECS color picker doesn't speak UO hues
+        // yet so approximate with light gray.
+        // Approximation of main's UO hue 0x0481 (dark orange-red).
+        var versionColor = new ClayColor(208, 138, 78, 255);
+        var uoVersion = commands.Spawn()
+            .Insert<LoginScene>()
+            .Insert(new Node
+            {
+                PositionType = PositionType.Absolute,
+                Left = Val.Px(286),
+                Top = Val.Px(453),
+                Width = Val.Auto,
+                Height = Val.Auto,
+            })
+            .Insert(new Text($"UO Version {settings.Value.ClientVersion}."))
+            .Insert(new TextFont { FontId = 0, Size = 10 })
+            .Insert(new TextColor(versionColor));
+        mainMenu.AddChild(uoVersion);
+
+        var cuoVersion = commands.Spawn()
+            .Insert<LoginScene>()
+            .Insert(new Node
+            {
+                PositionType = PositionType.Absolute,
+                Left = Val.Px(286),
+                Top = Val.Px(465),
+                Width = Val.Auto,
+                Height = Val.Auto,
+            })
+            .Insert(new Text($"ClassicUO Version {ClassicUO.CUOEnviroment.Version}"))
+            .Insert(new TextFont { FontId = 0, Size = 10 })
+            .Insert(new TextColor(versionColor));
+        mainMenu.AddChild(cuoVersion);
+
+        // Autologin / SaveAccount checkboxes — main's LoginGump positions
+        // these via 0x00D2 unchecked / 0x00D3 checked. ECS doesn't have a
+        // toggle widget yet; render the unchecked gump as a placeholder so
+        // the bottom strip visually matches main.
+        var checkboxColor = new ClayColor(180, 100, 50, 255);
+        mainMenu.AddChild(gumpBuilder.Value.AddGump(
+            commands, 0x00D2, XnaVector3.UnitZ, new XnaVector2(150, 417))
+            .Insert<LoginScene>());
+        var autologinLabel = commands.Spawn()
+            .Insert<LoginScene>()
+            .Insert(new Node
+            {
+                PositionType = PositionType.Absolute,
+                Left = Val.Px(170),
+                Top = Val.Px(419),
+                Width = Val.Auto,
+                Height = Val.Auto,
+            })
+            .Insert(new Text("Autologin"))
+            .Insert(new TextFont { FontId = 0, Size = 11 })
+            .Insert(new TextColor(checkboxColor));
+        mainMenu.AddChild(autologinLabel);
+
+        mainMenu.AddChild(gumpBuilder.Value.AddGump(
+            commands, 0x00D2, XnaVector3.UnitZ, new XnaVector2(240, 417))
+            .Insert<LoginScene>());
+        var saveAccountLabel = commands.Spawn()
+            .Insert<LoginScene>()
+            .Insert(new Node
+            {
+                PositionType = PositionType.Absolute,
+                Left = Val.Px(260),
+                Top = Val.Px(419),
+                Width = Val.Auto,
+                Height = Val.Auto,
+            })
+            .Insert(new Text("Save Account"))
+            .Insert(new TextFont { FontId = 0, Size = 11 })
+            .Insert(new TextColor(checkboxColor));
+        mainMenu.AddChild(saveAccountLabel);
     }
 
     private static void DeleteMenu(
