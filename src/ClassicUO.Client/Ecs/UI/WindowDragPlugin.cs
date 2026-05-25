@@ -33,6 +33,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         var dragFn = Drag;
         var propagateZFn = PropagateZIndex;
         var closeOnRightClickFn = CloseOnRightClick;
+        var claimSelectionFn = ClaimSelectedFromMovable;
         app.AddSystem(dragFn).InStage(Stage.Update).Build();
         // Push the parent's GlobalZIndex onto all descendants whenever the
         // parent's value changes. Clay sorts float-roots globally by z, so
@@ -46,6 +47,41 @@ internal readonly struct WindowDragPlugin : IPlugin
             .InStage(Stage.PreUpdate)
             .RunIf((Res<MouseContext> m) => m.Value.IsPressedOnce(MouseButtonType.Right))
             .Build();
+        // Click-capture: any UIMovable under the cursor claims SelectedEntity
+        // at float.MaxValue so world / pickup / use systems see the window
+        // entity (which carries no NetworkSerial / Items / ContainerItemUI)
+        // and bail. Container windows have their own item-aware claim in
+        // ContainerGumpPlugin.UpdateSelectedFromContainerUI; filter them out
+        // here so the two systems don't race on the same entity.
+        app.AddSystem(claimSelectionFn).InStage(Stage.Last).Build();
+    }
+
+    private static void ClaimSelectedFromMovable(
+        Res<MouseContext> mouse,
+        Res<SelectedEntity> selected,
+        Query<Data<ComputedNode, GlobalZIndex>, Filter<With<UIMovable>, Without<ContainerWindow>>> q)
+    {
+        var pos = mouse.Value.Position;
+        ulong topEnt = 0;
+        int topZ = int.MinValue;
+        uint topClayId = 0;
+
+        foreach (var (ent, computed, z) in q)
+        {
+            var bb = computed.Ref;
+            if (pos.X < bb.Position.X || pos.Y < bb.Position.Y) continue;
+            if (pos.X >= bb.Position.X + bb.Size.X) continue;
+            if (pos.Y >= bb.Position.Y + bb.Size.Y) continue;
+            if (z.Ref.Value > topZ || (z.Ref.Value == topZ && bb.ClayId >= topClayId))
+            {
+                topZ = z.Ref.Value;
+                topClayId = bb.ClayId;
+                topEnt = ent.Ref;
+            }
+        }
+
+        if (topEnt == 0) return;
+        selected.Value.Set(topEnt, float.MaxValue);
     }
 
     // Find the topmost UIMovable under the cursor and close it.

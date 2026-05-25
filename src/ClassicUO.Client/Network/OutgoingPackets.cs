@@ -2953,6 +2953,9 @@ namespace ClassicUO.Network
         }
 
         public static void Send_QuestMenuRequest(this NetClient socket, World world)
+            => socket.Send_QuestMenuRequest(world.Player.Serial);
+
+        public static void Send_QuestMenuRequest(this NetClient socket, uint playerSerial)
         {
             const byte ID = 0xD7;
 
@@ -2967,7 +2970,7 @@ namespace ClassicUO.Network
                 writer.WriteZero(2);
             }
 
-            writer.WriteUInt32BE(world.Player.Serial);
+            writer.WriteUInt32BE(playerSerial);
             writer.WriteUInt16BE(0x32);
             writer.WriteUInt8(0x00);
 

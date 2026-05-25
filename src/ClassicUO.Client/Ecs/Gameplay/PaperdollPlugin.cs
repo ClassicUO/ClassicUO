@@ -1,0 +1,586 @@
+// Port of main's Game/UI/Gumps/PaperDollGump.cs to the ECS branch.
+//
+// Spawn lifecycle: server pushes OnOpenPaperdollPacket_0x88 -> Spawn system
+// queries existing PaperdollWindow entities for the same serial. Found ->
+// focus (bump z, refocus). Not found -> build a fresh window tree on a new
+// entity, parented to nothing (Bevy.UI floating root) so Clay places it
+// independently.
+//
+// Movability / right-click close / topmost-on-click / click-capture come
+// from the shared UIMovable infra in WindowDragPlugin — paperdoll does NOT
+// reimplement any of those (rule 4). The bg root carries the UIMovable
+// marker via GumpBuilder.AddGumpRoot; everything else falls out.
+//
+// Body + equipment overlays mirror PaperDollInteractable.UpdateUI: pick a
+// body graphic from mobile.Graphic, then layer equipped item gumps using
+// MALE_GUMP_OFFSET / FEMALE_GUMP_OFFSET + tile data AnimID. Each overlay
+// entity carries PaperdollBodyChild { WindowEntity } so the refresh system
+// can despawn-and-rebuild on EquipmentSlots change without disturbing the
+// static frame / button / label children.
+
+using System;
+using ClassicUO.Assets;
+using ClassicUO.Game;
+using ClassicUO.Game.Data;
+using ClassicUO.Network;
+using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
+using TinyEcs;
+using TinyEcs.Bevy;
+using TinyEcs.Bevy.UI;
+using ClayColor = Clay.Color;
+using GameLayer = ClassicUO.Game.Data.Layer;
+
+namespace ClassicUO.Ecs;
+
+internal readonly struct PaperdollPlugin : IPlugin
+{
+    // PaperDollInteractable._layerOrder (the non-quiver variant). Used to
+    // stack equipment gumps on top of the body sprite in the same z-order
+    // main draws them. Quiver-fix variant is skipped for the port — the
+    // visual diff only matters when the player wears a cloak-with-quiver.
+    private static readonly GameLayer[] s_layerOrder =
+    {
+        GameLayer.Cloak,
+        GameLayer.Shirt,
+        GameLayer.Pants,
+        GameLayer.Shoes,
+        GameLayer.Legs,
+        GameLayer.Arms,
+        GameLayer.Torso,
+        GameLayer.Tunic,
+        GameLayer.Ring,
+        GameLayer.Bracelet,
+        GameLayer.Face,
+        GameLayer.Gloves,
+        GameLayer.Skirt,
+        GameLayer.Robe,
+        GameLayer.Waist,
+        GameLayer.Necklace,
+        GameLayer.Hair,
+        GameLayer.Beard,
+        GameLayer.Earrings,
+        GameLayer.Helmet,
+        GameLayer.OneHanded,
+        GameLayer.TwoHanded,
+        GameLayer.Talisman,
+    };
+
+    public void Build(App app)
+    {
+        var spawnFn = SpawnOnOpenPaperdoll;
+        var refreshFn = RefreshOnEquipmentChange;
+        var disposeFn = DisposeOnLogout;
+
+        app
+            .AddSystem(spawnFn)
+                .InStage(Stage.Update)
+                .RunIf((EventReader<IPacket> r) => r.HasEvents)
+                .Build()
+
+            // Live refresh: any mobile whose EquipmentSlots changed this
+            // tick triggers a body+overlay rebuild on every paperdoll window
+            // pointing at that serial. Cheap because the change-detect
+            // filter prunes to mobiles actually mutated this frame.
+            .AddSystem(refreshFn)
+                .InStage(Stage.Update)
+                .Build()
+
+            .AddSystem(disposeFn)
+                .OnExit(GameState.GameScreen)
+                .Build();
+    }
+
+    private static void DisposeOnLogout(
+        Commands commands,
+        Query<Data<TinyEcs.Children>, Filter<With<PaperdollWindow>>> windowsQ,
+        Query<Data<TinyEcs.Children>> childrenQ)
+    {
+        foreach (var (ent, _) in windowsQ)
+            DespawnSubtree(commands, ent.Ref, childrenQ);
+    }
+
+    private static void DespawnSubtree(
+        Commands commands,
+        ulong entity,
+        Query<Data<TinyEcs.Children>> childrenQ)
+    {
+        if (childrenQ.Contains(entity))
+        {
+            var (_, kids) = childrenQ.Get(entity);
+            foreach (var cid in kids.Ref)
+                DespawnSubtree(commands, cid, childrenQ);
+        }
+        commands.Entity(entity).Despawn();
+    }
+
+    private static void SpawnOnOpenPaperdoll(
+        Commands commands,
+        EventReader<IPacket> packets,
+        Res<NetworkEntitiesMap> entitiesMap,
+        Res<AssetsServer> assets,
+        Res<GumpBuilder> builder,
+        Res<GameContext> gameCtx,
+        Res<UOFileManager> fileManager,
+        Res<UiZCounter> zCounter,
+        Query<Data<PaperdollWindow>> existingQ,
+        Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> mobileGraphicQ,
+        Query<Data<EquipmentSlots>> equipQ,
+        Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> itemQ)
+    {
+        var tileData = fileManager.Value.TileData.StaticData;
+
+        foreach (var packet in packets.Read())
+        {
+            if (packet is not OnOpenPaperdollPacket_0x88 p) continue;
+
+            // Already open for this serial -> focus instead of duplicating.
+            ulong existing = 0;
+            foreach (var (ent, w) in existingQ)
+            {
+                if (w.Ref.Serial == p.Serial) { existing = ent.Ref; break; }
+            }
+            if (existing != 0)
+            {
+                var newZ = zCounter.Value.Bump();
+                commands.Entity(existing).Insert(new GlobalZIndex(newZ));
+                continue;
+            }
+
+            BuildWindow(commands, assets.Value, builder.Value, gameCtx.Value, tileData,
+                entitiesMap.Value, mobileGraphicQ, equipQ, itemQ,
+                zCounter.Value, existingQ.Count(),
+                p.Serial, p.Title, p.Flags);
+        }
+    }
+
+    // Despawn-and-rebuild body+overlays for any paperdoll whose target
+    // mobile's EquipmentSlots changed since the last system run. Mirrors
+    // main's PaperDollInteractable.UpdateUI which clears its sub-control
+    // tree and re-adds gumps each tick — but gated here on Changed<> so we
+    // only pay the cost on actual equip/unequip events.
+    private static void RefreshOnEquipmentChange(
+        Commands commands,
+        Res<NetworkEntitiesMap> entitiesMap,
+        Res<AssetsServer> assets,
+        Res<GumpBuilder> builder,
+        Res<GameContext> gameCtx,
+        Res<UOFileManager> fileManager,
+        Query<Data<NetworkSerial, EquipmentSlots>, Filter<Changed<EquipmentSlots>>> changedMobilesQ,
+        Query<Data<PaperdollWindow>> windowsQ,
+        Query<Data<PaperdollBodyChild>> bodyChildQ,
+        Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> mobileGraphicQ,
+        Query<Data<EquipmentSlots>> equipQ,
+        Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> itemQ)
+    {
+        if (changedMobilesQ.Count() == 0) return;
+        if (windowsQ.Count() == 0) return;
+
+        var tileData = fileManager.Value.TileData.StaticData;
+
+        foreach (var (_, ns, _) in changedMobilesQ)
+        {
+            var serial = ns.Ref.Value;
+
+            foreach (var (windowEnt, win) in windowsQ)
+            {
+                if (win.Ref.Serial != serial) continue;
+
+                // Despawn every body+overlay child belonging to this window.
+                // Static children (slot frames, buttons, profile / virtue,
+                // title) are NOT tagged so they survive — only the body
+                // sprite and equipment overlays rebuild.
+                foreach (var (childEnt, child) in bodyChildQ)
+                {
+                    if (child.Ref.WindowEntity != windowEnt.Ref) continue;
+                    commands.Entity(childEnt.Ref).Despawn();
+                }
+
+                BuildBodyAndOverlays(commands, assets.Value, builder.Value,
+                    gameCtx.Value, tileData, entitiesMap.Value,
+                    mobileGraphicQ, equipQ, itemQ,
+                    windowEnt.Ref, serial);
+            }
+        }
+    }
+
+    private static void BuildWindow(
+        Commands commands,
+        AssetsServer assets,
+        GumpBuilder builder,
+        GameContext gameCtx,
+        ClassicUO.Assets.StaticTiles[] tileData,
+        NetworkEntitiesMap entitiesMap,
+        Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> mobileGraphicQ,
+        Query<Data<EquipmentSlots>> equipQ,
+        Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> itemQ,
+        UiZCounter zCounter,
+        int existingWindowCount,
+        uint serial,
+        string title,
+        byte flags)
+    {
+        bool isPlayer = serial == gameCtx.PlayerSerial;
+        ushort bgId = (ushort)(isPlayer ? 0x07D0 : 0x07D1);
+        bool showBooks = (gameCtx.ClientFeatures & CharacterListFlags.CLF_PALADIN_NECROMANCER_TOOLTIPS) != 0
+            && isPlayer;
+        bool showRacialBook = showBooks && gameCtx.ClientVersion >= ClientVersion.CV_7000;
+
+        // Stagger spawn position so multiple paperdolls don't overlap pixel-
+        // perfect. Mirrors main's UIManager.SavePosition fallback (anchored
+        // to mouse pos when no saved position exists) — close enough for v1.
+        var spawnPos = new Vector2(100 + (existingWindowCount & 0x07) * 24, 100);
+
+        var root = builder.AddGumpRoot(commands, bgId, Vector3.UnitZ, spawnPos, zCounter)
+            .Insert(new PaperdollWindow
+            {
+                Serial = serial,
+                IsPlayer = isPlayer,
+            });
+
+        BuildBodyAndOverlays(commands, assets, builder, gameCtx, tileData, entitiesMap,
+            mobileGraphicQ, equipQ, itemQ, root.Id, serial);
+
+        // Equipment slot frames (15) — left column 9, right column 6.
+        // Same coords as main's BuildGump (PaperDollGump.cs:264..283).
+        var leftLayers = new[]
+        {
+            GameLayer.Helmet, GameLayer.Earrings, GameLayer.Necklace,
+            GameLayer.Ring, GameLayer.Bracelet, GameLayer.Tunic,
+            GameLayer.OneHanded, GameLayer.TwoHanded, GameLayer.Talisman,
+        };
+        for (int i = 0; i < leftLayers.Length; i++)
+            AddSlot(commands, builder, root.Id, serial, leftLayers[i], 2, 70 + 21 * i);
+
+        var rightLayers = new[]
+        {
+            GameLayer.Robe, GameLayer.Gloves, GameLayer.Pants,
+            GameLayer.Arms, GameLayer.Cloak, GameLayer.Shoes,
+        };
+        for (int i = 0; i < rightLayers.Length; i++)
+            AddSlot(commands, builder, root.Id, serial, rightLayers[i], 162, 70 + 21 * i);
+
+        if (isPlayer)
+        {
+            // Player-only button column at x=185.
+            var btnHelp = builder.AddButton(commands, (0x07EF, 0x07F0, 0x07F1), Vector3.UnitZ, new Vector2(185, 44 + 27 * 0));
+            btnHelp.Observe((On<UiPointerDown> _, Res<NetClient> net) => net.Value.Send_HelpRequest());
+            commands.AddChild(root.Id, btnHelp.Id);
+
+            // Options: pure client-side gump in main; no ECS settings gump
+            // ported yet so the click is a no-op log. Wire when an ECS
+            // OptionsGump exists.
+            var btnOptions = builder.AddButton(commands, (0x07D6, 0x07D7, 0x07D8), Vector3.UnitZ, new Vector2(185, 44 + 27 * 1));
+            btnOptions.Observe((On<UiPointerDown> _) => Console.WriteLine("[Paperdoll] Options clicked — no ECS OptionsGump"));
+            commands.AddChild(root.Id, btnOptions.Id);
+
+            var btnLogout = builder.AddButton(commands, (0x07D9, 0x07DA, 0x07DB), Vector3.UnitZ, new Vector2(185, 44 + 27 * 2));
+            btnLogout.Observe((On<UiPointerDown> _, Res<NetClient> net) => net.Value.Send_LogoutNotification());
+            commands.AddChild(root.Id, btnLogout.Id);
+
+            // Quests button (CV >= 500A — assume so). 0xD7 with subcommand
+            // 0x32 mirrors main's GameActions.RequestQuestMenu.
+            var btnQuests = builder.AddButton(commands, (0x57B5, 0x57B7, 0x57B6), Vector3.UnitZ, new Vector2(185, 44 + 27 * 3));
+            btnQuests.Observe((On<UiPointerDown> _, Res<NetClient> net, Res<GameContext> ctx) =>
+            {
+                if (ctx.Value.PlayerSerial != 0)
+                    net.Value.Send_QuestMenuRequest(ctx.Value.PlayerSerial);
+            });
+            commands.AddChild(root.Id, btnQuests.Id);
+
+            // Skills: main re-requests via Send_SkillsRequest and pops the
+            // local SkillsGump. ECS has no SkillsGump yet so just refresh
+            // server-side skills (server pushes 0x3A which the in-game
+            // packet handler currently swallows — at least the user gets
+            // feedback in their journal).
+            var btnSkills = builder.AddButton(commands, (0x07DF, 0x07E0, 0x07E1), Vector3.UnitZ, new Vector2(185, 44 + 27 * 4));
+            btnSkills.Observe((On<UiPointerDown> _, Res<NetClient> net, Res<GameContext> ctx) =>
+            {
+                if (ctx.Value.PlayerSerial != 0)
+                    net.Value.Send_SkillsRequest(ctx.Value.PlayerSerial);
+            });
+            commands.AddChild(root.Id, btnSkills.Id);
+
+            // Guild: opens local GuildGump in main, no server packet. ECS
+            // has no GuildGump so the click is a no-op log.
+            var btnGuild = builder.AddButton(commands, (0x57B2, 0x57B4, 0x57B3), Vector3.UnitZ, new Vector2(185, 44 + 27 * 5));
+            btnGuild.Observe((On<UiPointerDown> _) => Console.WriteLine("[Paperdoll] Guild clicked — no ECS GuildGump"));
+            commands.AddChild(root.Id, btnGuild.Id);
+
+            // Peace/war toggle starts in peace graphic. Toggling needs main's
+            // ChangeWarMode + WarMode tracking; for v1 send the request and
+            // let the server's response refresh state.
+            var btnPeaceWar = builder.AddButton(commands, (0x07E5, 0x07E6, 0x07E7), Vector3.UnitZ, new Vector2(185, 44 + 27 * 6));
+            btnPeaceWar.Observe((On<UiPointerDown> _, Res<NetClient> net) => net.Value.Send_ChangeWarMode(true));
+            commands.AddChild(root.Id, btnPeaceWar.Id);
+        }
+
+        // Status button — both player and other mobiles. No ECS status gump
+        // yet; re-request character status so the server pushes 0x11.
+        var capturedPlayerSerial = gameCtx.PlayerSerial;
+        var btnStatus = builder.AddButton(commands, (0x07EB, 0x07EC, 0x07ED), Vector3.UnitZ, new Vector2(185, 44 + 27 * 7));
+        btnStatus.Observe((On<UiPointerDown> _, Res<NetClient> net) =>
+        {
+            if (capturedPlayerSerial != 0)
+                net.Value.Send_StatusRequest(capturedPlayerSerial);
+        });
+        commands.AddChild(root.Id, btnStatus.Id);
+
+        // Virtue gump (0x0071) at (80, 4) — double-click in main, treat as
+        // single-click for ECS button infra (Bevy.UI emits UiPointerDown).
+        // Sends GumpResponse mirroring main's VirtueMenu_MouseDoubleClickEvent.
+        {
+            var capturedSerial = serial;
+            var virtuePic = builder.AddGump(commands, 0x0071, Vector3.UnitZ, new Vector2(80, 4))
+                .Insert(Interaction.None);
+            virtuePic.Observe((On<UiPointerDown> _, Res<NetClient> net, Res<GameContext> ctx) =>
+            {
+                if (ctx.Value.PlayerSerial != 0)
+                    net.Value.Send_GumpResponse(ctx.Value.PlayerSerial, 0x000001CD, 0x00000001,
+                        new uint[] { capturedSerial }, Array.Empty<Tuple<ushort, string>>());
+            });
+            commands.AddChild(root.Id, virtuePic.Id);
+        }
+
+        // Profile gump (0x07D2) — both player and other. Shifted +14 if the
+        // racial-abilities book is showing (so the icon doesn't overlap the
+        // book sprite at x=23). Mirrors main's profileX adjustment.
+        {
+            var capturedSerial = serial;
+            int profileX = 25;
+            if (showRacialBook) profileX += 14;
+            var profilePic = builder.AddGump(commands, 0x07D2, Vector3.UnitZ, new Vector2(profileX, 196))
+                .Insert(Interaction.None);
+            profilePic.Observe((On<UiPointerDown> _, Res<NetClient> net) =>
+            {
+                net.Value.Send_ProfileRequest(capturedSerial);
+            });
+            commands.AddChild(root.Id, profilePic.Id);
+
+            if (isPlayer)
+            {
+                // Party manifest gump (0x07D2 again, second slot). Click
+                // opens PartyGump in main — ECS has no party UI yet.
+                int partyX = profileX + 14;
+                var partyPic = builder.AddGump(commands, 0x07D2, Vector3.UnitZ, new Vector2(partyX, 196))
+                    .Insert(Interaction.None);
+                partyPic.Observe((On<UiPointerDown> _) =>
+                    Console.WriteLine("[Paperdoll] Party manifest clicked — no ECS PartyGump"));
+                commands.AddChild(root.Id, partyPic.Id);
+            }
+        }
+
+        // Combat / racial-abilities book gump-pics. Combat at (156, 200)
+        // when ClientFeatures.PaperdollBooks. Racial at (23, 200) when
+        // CV >= 7000. ECS has no AbilitiesBookGump / RacialAbilitiesBookGump
+        // so the click logs only.
+        if (showBooks)
+        {
+            var combatBook = builder.AddGump(commands, 0x2B34, Vector3.UnitZ, new Vector2(156, 200))
+                .Insert(Interaction.None);
+            combatBook.Observe((On<UiPointerDown> _) =>
+                Console.WriteLine("[Paperdoll] Combat book clicked — no ECS AbilitiesBook"));
+            commands.AddChild(root.Id, combatBook.Id);
+
+            if (showRacialBook)
+            {
+                var racialBook = builder.AddGump(commands, 0x2B28, Vector3.UnitZ, new Vector2(23, 200))
+                    .Insert(Interaction.None);
+                racialBook.Observe((On<UiPointerDown> _) =>
+                    Console.WriteLine("[Paperdoll] Racial book clicked — no ECS RacialAbilitiesBook"));
+                commands.AddChild(root.Id, racialBook.Id);
+            }
+        }
+
+        // Title label (39, 262), font 1, hue 0x0386. Bevy.UI's Text node
+        // doesn't expose font 1 directly — use the default font for now.
+        var titleText = title?.Trim() ?? string.Empty;
+        var titleEnt = builder.AddLabel(commands, titleText, new Vector2(39, 262), new Vector2(185, 18));
+        commands.AddChild(root.Id, titleEnt.Id);
+    }
+
+    // Body sprite + equipment overlays. Split out from BuildWindow so the
+    // refresh system can rebuild just this subtree on EquipmentSlots change.
+    // Every entity spawned here is tagged PaperdollBodyChild { WindowEntity }
+    // so the refresh can despawn precisely these without touching frames /
+    // buttons / labels.
+    private static void BuildBodyAndOverlays(
+        Commands commands,
+        AssetsServer assets,
+        GumpBuilder builder,
+        GameContext gameCtx,
+        ClassicUO.Assets.StaticTiles[] tileData,
+        NetworkEntitiesMap entitiesMap,
+        Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> mobileGraphicQ,
+        Query<Data<EquipmentSlots>> equipQ,
+        Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> itemQ,
+        ulong rootId,
+        uint serial)
+    {
+        // Mobile lookup for body graphic + equipment iteration. Tolerant of
+        // a missing mobile entity (paperdoll for an unloaded NPC just gets a
+        // blank background — preferable to crashing the spawn).
+        ushort mobileGraphic = 0;
+        ushort mobileHue = 0;
+        EquipmentSlots? slots = null;
+        if (entitiesMap.TryGet(serial, out var mobileEnt))
+        {
+            if (mobileGraphicQ.Contains(mobileEnt))
+            {
+                var (_, gfx, hue) = mobileGraphicQ.Get(mobileEnt);
+                mobileGraphic = gfx.Ref.Value;
+                if (hue.IsValid()) mobileHue = hue.Ref.Value;
+            }
+            if (equipQ.Contains(mobileEnt))
+            {
+                var (_, s) = equipQ.Get(mobileEnt);
+                slots = s.Ref;
+            }
+        }
+
+        bool isFemale = ResolveIsFemale(mobileGraphic);
+        var bodyId = ResolveBodyGraphic(mobileGraphic, isFemale);
+        if (bodyId == 0) return;
+
+        var bodyHue = ToShaderHue(mobileHue);
+        var body = builder.AddGump(commands, bodyId, bodyHue, new Vector2(8, 19))
+            .Insert(new PaperdollBodyChild { WindowEntity = rootId });
+        commands.AddChild(rootId, body.Id);
+
+        if (!slots.HasValue) return;
+
+        foreach (var layer in s_layerOrder)
+        {
+            var itemEnt = slots.Value[layer];
+            if (itemEnt == 0) continue;
+            if (!itemQ.Contains(itemEnt)) continue;
+
+            var (_, ig, ih) = itemQ.Get(itemEnt);
+            var itemGraphic = ig.Ref.Value;
+            if (itemGraphic == 0 || itemGraphic >= tileData.Length) continue;
+            var animId = tileData[itemGraphic].AnimID;
+            if (animId == 0) continue;
+
+            var offset = isFemale ? Constants.FEMALE_GUMP_OFFSET : Constants.MALE_GUMP_OFFSET;
+            var equipGump = (ushort)(animId + offset);
+            // Try male fallback if female gump missing (main does the same
+            // — IsAnimExistsInGump swaps offset on miss).
+            ref readonly var info = ref assets.Gumps.GetGump(equipGump);
+            if (info.Texture == null)
+            {
+                var altOffset = isFemale ? Constants.MALE_GUMP_OFFSET : Constants.FEMALE_GUMP_OFFSET;
+                equipGump = (ushort)(animId + altOffset);
+            }
+
+            var equipHue = ih.IsValid() ? ToShaderHue((ushort)(ih.Ref.Value & 0x3FFF)) : Vector3.UnitZ;
+            var equipPic = builder.AddGump(commands, equipGump, equipHue, new Vector2(8, 19))
+                .Insert(new PaperdollBodyChild { WindowEntity = rootId });
+            commands.AddChild(rootId, equipPic.Id);
+        }
+
+        // Backpack overlay. Layer.Backpack uses MALE_GUMP_OFFSET regardless
+        // of body sex (matches main). Skip the per-profile backpack-style
+        // swap (Suede / Polar Bear / Ghoul) — that's a settings concern.
+        var backpackEnt = slots.Value[GameLayer.Backpack];
+        if (backpackEnt != 0 && itemQ.Contains(backpackEnt))
+        {
+            var (_, bg, bh) = itemQ.Get(backpackEnt);
+            var backpackGraphic = bg.Ref.Value;
+            if (backpackGraphic != 0 && backpackGraphic < tileData.Length)
+            {
+                var bpAnimId = tileData[backpackGraphic].AnimID;
+                if (bpAnimId != 0)
+                {
+                    var bpGump = (ushort)(bpAnimId + Constants.MALE_GUMP_OFFSET);
+                    // Main shifts the backpack left by 6 when PaperdollBooks
+                    // is on so the combat-book sprite has room. Cheap check:
+                    // re-derive from GameContext.
+                    int bx = (gameCtx.ClientFeatures & CharacterListFlags.CLF_PALADIN_NECROMANCER_TOOLTIPS) != 0 ? 6 : 0;
+                    var bpHue = bh.IsValid() ? ToShaderHue((ushort)(bh.Ref.Value & 0x3FFF)) : Vector3.UnitZ;
+                    // Body sprite lives at (8, 19) absolute; backpack offsets
+                    // from there (-bx, 0). Mirrors main's PaperDollInteractable
+                    // origin + GumpPicEquipment relative coords.
+                    var bpPic = builder.AddGump(commands, bpGump, bpHue, new Vector2(8 - bx, 19))
+                        .Insert(new PaperdollBodyChild { WindowEntity = rootId });
+                    commands.AddChild(rootId, bpPic.Id);
+                }
+            }
+        }
+    }
+
+    private static void AddSlot(
+        Commands commands,
+        GumpBuilder builder,
+        ulong rootId,
+        uint mobileSerial,
+        GameLayer layer,
+        int x,
+        int y)
+    {
+        // Two-sprite frame: 0x243A tiled bg + 0x2344 overlay. Sized 19x20.
+        var bg = builder.AddGumpTiled(commands, 0x243A, Vector3.UnitZ,
+            new Vector2(x, y), new Vector2(19, 20));
+        commands.AddChild(rootId, bg.Id);
+
+        var frame = builder.AddGump(commands, 0x2344, Vector3.UnitZ, new Vector2(x, y))
+            .Insert(new PaperdollSlot { MobileSerial = mobileSerial, Layer = layer });
+        commands.AddChild(rootId, frame.Id);
+    }
+
+    // Mirrors PaperDollInteractable.UpdateUI's body picker.
+    private static ushort ResolveBodyGraphic(ushort mobileGraphic, bool isFemale)
+    {
+        return mobileGraphic switch
+        {
+            0x0191 or 0x0193 => 0x000D,
+            0x025D           => 0x000E,
+            0x025E           => 0x000F,
+            0x029A or 0x02B6 => 0x029A,
+            0x029B or 0x02B7 => 0x0299,
+            0x04E5           => 0xC835,
+            0x03DB           => 0x000C,
+            _ => isFemale ? (ushort)0x000D : (ushort)0x000C,
+        };
+    }
+
+    // Hue=0 means "no hue applied" — must select the pass-through shader
+    // (Vector3.UnitZ), NOT (0, 1, 1) which selects SHADER_HUED with hue 0
+    // and renders the sprite black/transparent depending on backend.
+    private static Vector3 ToShaderHue(ushort hue)
+        => hue == 0 ? Vector3.UnitZ : new Vector3(hue, 1f, 1f);
+
+    private static bool ResolveIsFemale(ushort mobileGraphic)
+    {
+        // Best-effort: known female body ids. PlayerData.IsFemale would be
+        // more authoritative but reads a separate component; treat unknown
+        // ids as male (matches main's default fall-through).
+        return mobileGraphic == 0x0191 || mobileGraphic == 0x0193
+            || mobileGraphic == 0x025D || mobileGraphic == 0x029B
+            || mobileGraphic == 0x02B7;
+    }
+}
+
+// Marker carried by the paperdoll bg root. Lets DisposeOnLogout walk all
+// open windows and lets duplicate-open detection deduplicate by serial.
+internal struct PaperdollWindow
+{
+    public uint Serial;
+    public bool IsPlayer;
+}
+
+// Carried by each of the 15 equipment slot frames. Future UpdateSlots
+// system (not in v1) will query this to refresh the slot's child item icon
+// when the mobile's EquipmentSlots changes.
+internal struct PaperdollSlot
+{
+    public uint MobileSerial;
+    public GameLayer Layer;
+}
+
+// Tag on the body sprite + each equipment overlay sprite. Refresh system
+// queries this to despawn the dynamic subtree precisely, leaving static
+// children (slot frames, buttons, profile pics, label) untouched.
+internal struct PaperdollBodyChild
+{
+    public ulong WindowEntity;
+}

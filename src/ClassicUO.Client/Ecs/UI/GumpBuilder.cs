@@ -42,6 +42,38 @@ internal sealed class GumpBuilder
             .Insert(new Button());
     }
 
+    /// Spawn a draggable, stackable, right-click-closable, click-capturing
+    /// gump window root. Mirrors main's Game/UI/Controls/Gump.cs defaults
+    /// (CanMove + CanCloseWithRightClick on every gump). Caller is responsible
+    /// for AddChild'ing controls onto the returned entity. zCounter.Bump()
+    /// sets the initial focus z so the new window draws on top.
+    public EntityCommands AddGumpRoot(Commands commands, ushort id, Vector3 hue, Vector2 position, UiZCounter zCounter)
+    {
+        ref readonly var gumpInfo = ref _assets.Gumps.GetGump(id);
+        var size = new Vector2(gumpInfo.UV.Width, gumpInfo.UV.Height);
+
+        return commands.Spawn()
+            .Insert(new Node
+            {
+                Display = Display.Flex,
+                PositionType = PositionType.Absolute,
+                Left = Val.Px(position.X),
+                Top = Val.Px(position.Y),
+                Width = Val.Px(size.X),
+                Height = Val.Px(size.Y),
+            })
+            .Insert(new UiCustom())
+            .Insert(new UOCustomRender
+            {
+                Kind = UOCustomKind.Gump,
+                AssetId = id,
+                Hue = hue,
+            })
+            .Insert(Interaction.None)
+            .Insert<UIMovable>()
+            .Insert(new GlobalZIndex(zCounter.Bump()));
+    }
+
     /// Spawn a single gump sprite at the given position.
     public EntityCommands AddGump(Commands commands, ushort id, Vector3 hue, Vector2? position = null)
     {

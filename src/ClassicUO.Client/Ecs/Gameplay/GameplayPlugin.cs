@@ -15,6 +15,7 @@ internal readonly struct GameplayPlugin : IPlugin
         app.AddPlugin<PlayerMovementPlugin>();
         app.AddPlugin<ContainersPlugin>();
         app.AddPlugin<ContainerGumpPlugin>();
+        app.AddPlugin<PaperdollPlugin>();
         app.AddPlugin<WindowDragPlugin>();
         app.AddPlugin<NetworkEntitiesMapPlugin>();
     }
