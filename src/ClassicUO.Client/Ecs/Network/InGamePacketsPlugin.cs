@@ -360,6 +360,53 @@ readonly struct InGamePacketsPlugin : IPlugin
                 HandleCustomHouse(customHouse, commands, entitiesMap, multiCache, queries);
                 break;
 
+            case OnSeasonChangePacket_0xBC season:
+                // Mirror main's Season handler: stash season + music index
+                // on GameContext for terrain art selection. Tile recolor /
+                // music swap consume these once those subsystems are wired.
+                gameCtx.Value.Season = season.Season;
+                gameCtx.Value.SeasonMusicIndex = season.Music;
+                break;
+
+            case OnServerLightLevelPacket_0x4F overall:
+                // World ambient. Main feeds this into the world render
+                // pass; ECS keeps it on GameContext until the light pass
+                // lands.
+                gameCtx.Value.ServerLightLevel = overall.Level;
+                break;
+
+            case OnPlayerLightLevelPacket_0x4E personal:
+                // Per-player light radius. Same storage pattern as 0x4F.
+                if (personal.Serial == gameCtx.Value.PlayerSerial)
+                    gameCtx.Value.PersonalLightLevel = personal.Level;
+                break;
+
+            case OnPlayMusicPacket_0x6D music:
+                // Background-music switch. Audio playback isn't wired in
+                // ECS yet (no AudioManager port); silently accept the
+                // packet so it stops landing in the Unhandled log.
+                _ = music;
+                break;
+
+            case OnUpdateSkillsPacket_0x3A skills:
+                // SkillsGump not ported; accept to silence unhandled log.
+                _ = skills;
+                break;
+
+            case OnClilocMessagePacket_0xC1 cliloc:
+                // Localized server message. ClilocLoader-backed string
+                // expansion + journal entry not wired through ECS chat
+                // yet; consume to silence unhandled log.
+                _ = cliloc;
+                break;
+
+            case OnOplInfoPacket_0xDC opl:
+                // Object Property List revision echo (serial, rev). Used
+                // by main to invalidate the tooltip cache; ECS tooltip
+                // system not yet ported. Accept to silence log.
+                _ = opl;
+                break;
+
             default:
                 //Console.WriteLine("Unhandled packet 0x{0:X2}", packet.Id);
                 break;
@@ -417,6 +464,13 @@ readonly struct InGamePacketsPlugin : IPlugin
         network.Value.Send_StatusRequest(gameCtx.Value.PlayerSerial);
         network.Value.Send_OpenChat("");
         network.Value.Send_SkillsRequest(gameCtx.Value.PlayerSerial);
+
+        // Mirror main's PacketHandlers.LoginComplete (GameScene.DoubleClickDelayed):
+        // implicit double-click on the local player to coax the server into
+        // sending the autoload 0x88 paperdoll packet. Without this, the
+        // paperdoll only spawns when the user manually double-clicks
+        // themselves later.
+        network.Value.Send_DoubleClick(gameCtx.Value.PlayerSerial);
 
         if (gameCtx.Value.ClientVersion >= ClientVersion.CV_306E)
             network.Value.Send_ClientType(gameCtx.Value.Protocol);
