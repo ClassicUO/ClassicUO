@@ -37,11 +37,13 @@ internal readonly struct PickupPlugin : IPlugin
                 Res<MouseContext> m,
                 Res<SelectedEntity> sel,
                 Res<Camera> camera,
+                Res<AssetsServer> assets,
                 ResMut<LeftPressLatch> latch,
-                Query<Data<ContainerItemUI, ComputedNode, Node, GlobalZIndex>> uiItemsQ,
-                Query<Data<ContainerWindow, ComputedNode, GlobalZIndex>> windowsQ,
-                Query<Data<PaperdollEquipUI, ComputedNode, Node, GlobalZIndex>> equipUiQ,
-                Query<Data<PaperdollWindow, ComputedNode, GlobalZIndex>> pdWindowsQ) =>
+                Query<Data<ContainerItemUI, ComputedNode, Node, GlobalZIndex, UOCustomRender>> uiItemsQ,
+                Query<Data<ContainerWindow, ComputedNode, GlobalZIndex, UOCustomRender>> windowsQ,
+                Query<Data<PaperdollEquipUI, ComputedNode, Node, UOCustomRender>> equipUiQ,
+                Query<Data<PaperdollWindow, ComputedNode, GlobalZIndex, UOCustomRender>> pdWindowsQ,
+                Query<Data<GlobalZIndex>> zLookupQ) =>
             {
                 // Clear on release edge. NOTE: don't rely on `!IsPressed` to
                 // detect "not held" — IsPressed returns false on the press-
@@ -65,66 +67,68 @@ internal readonly struct PickupPlugin : IPlugin
                 // shared propagation, so any item with z < topWindowZ sits
                 // behind the front window and must NOT be hit.
                 int topWindowZ = int.MinValue;
-                uint topWindowClayId = 0;
+                int topWindowOrder = int.MinValue;
                 ulong topWindow = 0;
-                foreach (var (ent, _, computed, z) in windowsQ)
+                foreach (var (ent, _, computed, z, custom) in windowsQ)
                 {
                     var bb = computed.Ref;
-                    if (pos.X < bb.Position.X || pos.Y < bb.Position.Y) continue;
-                    if (pos.X >= bb.Position.X + bb.Size.X) continue;
-                    if (pos.Y >= bb.Position.Y + bb.Size.Y) continue;
-                    if (z.Ref.Value > topWindowZ || (z.Ref.Value == topWindowZ && bb.ClayId >= topWindowClayId))
+                    if (!UiHitTest.PixelHit(assets.Value, custom.Ref, bb, pos)) continue;
+                    if (z.Ref.Value > topWindowZ || (z.Ref.Value == topWindowZ && bb.PaintOrder >= topWindowOrder))
                     {
                         topWindowZ = z.Ref.Value;
-                        topWindowClayId = bb.ClayId;
+                        topWindowOrder = bb.PaintOrder;
                         topWindow = ent.Ref;
                     }
                 }
-                foreach (var (ent, _, computed, z) in pdWindowsQ)
+                foreach (var (ent, _, computed, z, custom) in pdWindowsQ)
                 {
                     var bb = computed.Ref;
-                    if (pos.X < bb.Position.X || pos.Y < bb.Position.Y) continue;
-                    if (pos.X >= bb.Position.X + bb.Size.X) continue;
-                    if (pos.Y >= bb.Position.Y + bb.Size.Y) continue;
-                    if (z.Ref.Value > topWindowZ || (z.Ref.Value == topWindowZ && bb.ClayId >= topWindowClayId))
+                    if (!UiHitTest.PixelHit(assets.Value, custom.Ref, bb, pos)) continue;
+                    if (z.Ref.Value > topWindowZ || (z.Ref.Value == topWindowZ && bb.PaintOrder >= topWindowOrder))
                     {
                         topWindowZ = z.Ref.Value;
-                        topWindowClayId = bb.ClayId;
+                        topWindowOrder = bb.PaintOrder;
                         topWindow = ent.Ref;
                     }
                 }
 
                 ulong topUi = 0;
-                uint topClayId = 0;
+                int topItemOrder = int.MinValue;
                 int topItemZ = int.MinValue;
 
-                foreach (var (ent, _, computed, node, z) in uiItemsQ)
+                foreach (var (ent, _, computed, node, z, custom) in uiItemsQ)
                 {
                     if (node.Ref.Display == Display.None) continue;
                     if (topWindow != 0 && z.Ref.Value < topWindowZ) continue;
                     var bb = computed.Ref;
-                    if (pos.X < bb.Position.X || pos.Y < bb.Position.Y) continue;
-                    if (pos.X >= bb.Position.X + bb.Size.X) continue;
-                    if (pos.Y >= bb.Position.Y + bb.Size.Y) continue;
-                    if (z.Ref.Value > topItemZ || (z.Ref.Value == topItemZ && bb.ClayId >= topClayId))
+                    if (!UiHitTest.PixelHit(assets.Value, custom.Ref, bb, pos)) continue;
+                    // Tiebreak among overlapping items by paint order (topmost-
+                    // drawn wins), not ClayId — ClayId is an entity-id hash and
+                    // flips across despawn/respawn (e.g. re-equipping over a
+                    // shirt would otherwise pick the shirt instead of the robe).
+                    if (z.Ref.Value > topItemZ || (z.Ref.Value == topItemZ && bb.PaintOrder >= topItemOrder))
                     {
                         topItemZ = z.Ref.Value;
-                        topClayId = bb.ClayId;
+                        topItemOrder = bb.PaintOrder;
                         topUi = ent.Ref;
                     }
                 }
-                foreach (var (ent, _, computed, node, z) in equipUiQ)
+                foreach (var (ent, link, computed, node, custom) in equipUiQ)
                 {
                     if (node.Ref.Display == Display.None) continue;
-                    if (topWindow != 0 && z.Ref.Value < topWindowZ) continue;
+                    // Equip overlays carry no GlobalZIndex of their own (paperdoll
+                    // uses root-only z + layout inheritance); their effective z is
+                    // their owning window's. Resolve it via WindowEntity.
+                    int z = zLookupQ.Contains(link.Ref.WindowEntity)
+                        ? GetZ(zLookupQ, link.Ref.WindowEntity)
+                        : 0;
+                    if (topWindow != 0 && z < topWindowZ) continue;
                     var bb = computed.Ref;
-                    if (pos.X < bb.Position.X || pos.Y < bb.Position.Y) continue;
-                    if (pos.X >= bb.Position.X + bb.Size.X) continue;
-                    if (pos.Y >= bb.Position.Y + bb.Size.Y) continue;
-                    if (z.Ref.Value > topItemZ || (z.Ref.Value == topItemZ && bb.ClayId >= topClayId))
+                    if (!UiHitTest.PixelHit(assets.Value, custom.Ref, bb, pos)) continue;
+                    if (z > topItemZ || (z == topItemZ && bb.PaintOrder >= topItemOrder))
                     {
-                        topItemZ = z.Ref.Value;
-                        topClayId = bb.ClayId;
+                        topItemZ = z;
+                        topItemOrder = bb.PaintOrder;
                         topUi = ent.Ref;
                     }
                 }
@@ -135,7 +139,7 @@ internal readonly struct PickupPlugin : IPlugin
                 if (topUi != 0)
                 {
                     latch.Value.Entity = topUi;
-                    Console.WriteLine("[LATCH] ui entity={0} clayId={1}", topUi, topClayId);
+                    Console.WriteLine("[LATCH] ui entity={0} paintOrder={1}", topUi, topItemOrder);
                     return;
                 }
 
@@ -307,7 +311,11 @@ internal readonly struct PickupPlugin : IPlugin
             .InStage(Stage.Update)
             .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
             .RunIf((Commands cmds) => cmds.HasResource<SelectedEntity>() && cmds.HasResource<GrabbedItem>())
-            .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial != 0)
+            // Skip while awaiting a server response to a previous drop — the
+            // user can't initiate another drop on the same held item until the
+            // server acknowledges (0x27 deny / 0x28 end / 0x29 ok). Prevents
+            // phantom drop packets while the network round-trips.
+            .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial != 0 && !grabbedItem.Value.PendingDrop)
             .RunIf((Res<MouseContext> mouseCtx) => mouseCtx.Value.IsReleased(Input.MouseButtonType.Left))
             .Build();
 
@@ -361,9 +369,37 @@ internal readonly struct PickupPlugin : IPlugin
                         commands.Entity(grabbedItem.Value.SourceUiEntity).Despawn();
                         grabbedItem.Value.SourceUiEntity = 0;
                     }
+                    // Server accepted the drop; finalize local state. Clear()
+                    // resets PendingDrop too so further pickups/drops are
+                    // unblocked.
+                    grabbedItem.Value.Clear();
+                    break;
+
+                // ModernUO (and most server flavors) don't follow up container /
+                // equip drops with an explicit 0x29 — the item simply reappears
+                // via 0x25 (container add) or 0x2E (equip item) addressed to the
+                // serial we just dropped. Treat those as implicit drop accepts
+                // so PendingDrop / grabbed don't stick forever.
+                case OnUpdateContainerPacket_0x25_Post6017 add25Post when grabbedItem.Value.PendingDrop && add25Post.Serial == grabbedItem.Value.Serial:
+                case OnUpdateContainerPacket_0x25_Pre6017 add25Pre when grabbedItem.Value.PendingDrop && add25Pre.Serial == grabbedItem.Value.Serial:
+                case OnEquipItemPacket_0x2E equip2E when grabbedItem.Value.PendingDrop && equip2E.Serial == grabbedItem.Value.Serial:
+                    Console.WriteLine("[PKT-implicit-ACK] heldSerial=0x{0:X8} sourceUi={1} (0x25/0x2E)",
+                        grabbedItem.Value.Serial, grabbedItem.Value.SourceUiEntity);
+                    if (grabbedItem.Value.SourceUiEntity != 0)
+                    {
+                        commands.Entity(grabbedItem.Value.SourceUiEntity).Despawn();
+                        grabbedItem.Value.SourceUiEntity = 0;
+                    }
+                    grabbedItem.Value.Clear();
                     break;
             }
         }
+    }
+
+    private static int GetZ(Query<Data<GlobalZIndex>> q, ulong ent)
+    {
+        var (_, z) = q.Get(ent);
+        return z.Ref.Value;
     }
 
     private static void RestoreSourceUi(GrabbedItem grabbed, Query<Data<Node>> nodeQ)
@@ -425,6 +461,7 @@ internal readonly struct PickupPlugin : IPlugin
         Query<Data<ContainerItemUI>> uiItemQ,
         Query<Data<ContainerWindow>> windowQ,
         Query<Data<PaperdollEquipUI>> equipUiQ,
+        Query<Data<EquipmentSlots>> equipmentSlotsQ,
         Query<Data<Node>> nodeQ
     )
     {
@@ -456,6 +493,12 @@ internal readonly struct PickupPlugin : IPlugin
         // Paperdoll equipment overlay: resolve item serial -> game entity.
         // sourceContainer = mobile serial (matches main's PickUpRequest
         // semantics where the equipped item's "container" is the wearer).
+        // Also clear the mobile's EquipmentSlots[layer] in-place so the
+        // refresh system fires its Changed<EquipmentSlots> path and
+        // rebuilds the paperdoll body without the picked-up overlay.
+        // Server's drop-ok ack doesn't re-broadcast equipment state, so
+        // without this the body stays stale until the user re-equips
+        // something or relogs.
         else if (equipUiQ.Contains(sel))
         {
             var (_, link) = equipUiQ.Get(sel);
@@ -463,6 +506,16 @@ internal readonly struct PickupPlugin : IPlugin
                 return;
             sourceUi = sel;
             sourceContainer = link.Ref.MobileSerial;
+
+            if (entitiesMap.Value.TryGet(link.Ref.MobileSerial, out var mobileEnt)
+                && equipmentSlotsQ.Contains(mobileEnt))
+            {
+                var (_, slots) = equipmentSlotsQ.Get(mobileEnt);
+                slots.Ref[link.Ref.Layer] = 0;
+                // Re-Insert to bump the Changed tick (in-place mutation of
+                // an InlineArray field doesn't trigger TinyEcs's tick).
+                commands.Entity(mobileEnt).Insert(slots.Ref);
+            }
         }
 
         var (serial, amount, graphic, hue) = q.Get(target);
@@ -636,7 +689,7 @@ internal readonly struct PickupPlugin : IPlugin
             Console.WriteLine("[DROP] equip heldSerial=0x{0:X8} layer={1} mobile=0x{2:X8}",
                 grabbedItem.Value.Serial, heldLayer, mobileSerial);
             network.Value.Send_EquipRequest(grabbedItem.Value.Serial, heldLayer, mobileSerial);
-            grabbedItem.Value.Clear();
+            grabbedItem.Value.PendingDrop = true;
             return;
         }
 
@@ -656,7 +709,7 @@ internal readonly struct PickupPlugin : IPlugin
             Console.WriteLine("[DROP] into-container heldSerial=0x{0:X8} container=0x{1:X8} pos=({2},{3})",
                 grabbedItem.Value.Serial, window.Ref.Serial, x, y);
             network.Value.Send_DropRequest(grabbedItem.Value.Serial, x, y, 0, 0, window.Ref.Serial);
-            grabbedItem.Value.Clear();
+            grabbedItem.Value.PendingDrop = true;
             return;
         }
 
@@ -709,12 +762,14 @@ internal readonly struct PickupPlugin : IPlugin
             var tileData = fileManager.Value.TileData.StaticData;
             ref readonly var td = ref tileData[targetGraphic];
 
+            bool itemSent = false;
             if (td.IsContainer)
             {
                 Console.WriteLine("[DROP] onto-item-as-container heldSerial=0x{0:X8} target=0x{1:X8}",
                     grabbedItem.Value.Serial, targetSerial);
                 network.Value.Send_DropRequest(
                     grabbedItem.Value.Serial, 0xFFFF, 0xFFFF, 0, 0, targetSerial);
+                itemSent = true;
             }
             else if ((td.IsStackable && targetGraphic == grabbedItem.Value.Graphic) || IsPileGraphic(targetGraphic))
             {
@@ -722,6 +777,7 @@ internal readonly struct PickupPlugin : IPlugin
                     grabbedItem.Value.Serial, targetSerial, targetItemX, targetItemY);
                 network.Value.Send_DropRequest(
                     grabbedItem.Value.Serial, targetItemX, targetItemY, 0, 0, targetSerial);
+                itemSent = true;
             }
             else if (containerQuery.Contains(link.Ref.Container))
             {
@@ -732,8 +788,12 @@ internal readonly struct PickupPlugin : IPlugin
                 Console.WriteLine("[DROP] into-parent-container heldSerial=0x{0:X8} container=0x{1:X8} pos=({2},{3})",
                     grabbedItem.Value.Serial, pwindow.Ref.Serial, x, y);
                 network.Value.Send_DropRequest(grabbedItem.Value.Serial, x, y, 0, 0, pwindow.Ref.Serial);
+                itemSent = true;
             }
-            grabbedItem.Value.Clear();
+            if (itemSent)
+                grabbedItem.Value.PendingDrop = true;
+            else
+                grabbedItem.Value.Clear();
             return;
         }
 
@@ -747,14 +807,14 @@ internal readonly struct PickupPlugin : IPlugin
             Console.WriteLine("[DROP] world heldSerial=0x{0:X8} target=0x{1:X8} pos=({2},{3},{4})",
                 grabbedItem.Value.Serial, serial, tx, ty, tz);
             network.Value.Send_DropRequest(grabbedItem.Value.Serial, tx, ty, tz, 0, serial);
+            grabbedItem.Value.PendingDrop = true;
         }
         else
         {
             Console.WriteLine("[DROP-MISS] no matching target — heldSerial=0x{0:X8} selectedEntity={1}",
                 grabbedItem.Value.Serial, target);
+            grabbedItem.Value.Clear();
         }
-
-        grabbedItem.Value.Clear();
     }
 
     // Chebyshev distance between player and the container's world tile. Legacy
@@ -943,6 +1003,13 @@ internal sealed class GrabbedItem
     // true -> ContainerSlotPosition (X/Y/GridIndex), false -> WorldPosition.
     public bool OriginalFromSlot { get; set; }
 
+    // True between sending a drop request and receiving the server's
+    // accept/deny/end response. While set, further drop / pickup actions are
+    // blocked so the user can't fire phantom drops on the same held item
+    // before the server has acknowledged the first one. Cleared by the packet
+    // handlers (0x27/0x28/0x29).
+    public bool PendingDrop { get; set; }
+
 
     public void Clear()
     {
@@ -951,5 +1018,6 @@ internal sealed class GrabbedItem
         Graphic = 0;
         Hue = 0;
         Amount = 0;
+        PendingDrop = false;
     }
 }
