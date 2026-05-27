@@ -38,6 +38,9 @@ namespace ClassicUO
         private bool _suppressedDraw;
         private Texture2D _background;
         private bool _pluginsInitialized = false;
+#if AGENT_BUILD
+        private static bool s_agentStarted;
+#endif
 
         public GameController(IPluginHost pluginHost)
         {
@@ -340,6 +343,20 @@ namespace ClassicUO
             Time.Ticks = (uint)gameTime.TotalGameTime.TotalMilliseconds;
             Time.Delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
+#if AGENT_BUILD
+            if (!s_agentStarted)
+            {
+                ClassicUO.Agent.AgentBootstrap.Start();
+                s_agentStarted = true;
+            }
+            // Drain one synth-mouse frame BEFORE Mouse.Update so the upcoming
+            // Mouse.Update reflects this frame's synthetic state.
+            ClassicUO.Agent.AgentBootstrap.OnFrameUpdateBefore();
+            // Drain pending RPC calls. Handlers may mutate Mouse synth state
+            // or enqueue a capture request.
+            ClassicUO.Agent.AgentBootstrap.DrainInbox(this);
+#endif
+
             Mouse.Update();
 
             var data = NetClient.Socket.CollectAvailableData();
@@ -474,6 +491,15 @@ namespace ClassicUO
             Profiler.EnterContext("OutOfContext");
 
             Plugin.ProcessDrawCmdList(GraphicsDevice);
+
+#if AGENT_BUILD
+            // After everything has been drawn and before Present (base.Draw
+            // ends the frame), service any pending screenshot request by
+            // reading the backbuffer. Flush the outbox so the response (and
+            // any earlier queued responses) lands on the socket this tick.
+            ClassicUO.Agent.AgentBootstrap.ServiceCapture(GraphicsDevice);
+            ClassicUO.Agent.AgentBootstrap.FlushOutbox();
+#endif
 
             base.Draw(gameTime);
         }

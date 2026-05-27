@@ -225,10 +225,7 @@ namespace ClassicUO
 
                 Console.WriteLine("FNA3D_FORCE_DRIVER: " + Environment.GetEnvironmentVariable("FNA3D_FORCE_DRIVER"));
 
-                // ECS entry moved to ClassicUO.Ecs project. This exe retains
-                // the legacy OOP code (Game/, Network/PacketHandlers, …) as a
-                // standalone build target — run `cuo-ecs` for the ECS path.
-                Log.Trace("ClassicUO.Client (legacy/OOP) — no runtime path wired in this build.");
+                Client.Run(pluginHost);
             }
 
             Log.Trace("Closing...");

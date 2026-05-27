@@ -27,7 +27,7 @@ using ClassicUO.Agent.Host;
 using ClassicUO.Game.Scenes;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using SDL3;
+using SDL2;
 
 namespace ClassicUO.Agent;
 
@@ -182,13 +182,13 @@ internal static class AgentBootstrap
         if (prev == curr) return;
 
         var kind = curr == ButtonState.Pressed
-            ? SDL.SDL_EventType.SDL_EVENT_MOUSE_BUTTON_DOWN
-            : SDL.SDL_EventType.SDL_EVENT_MOUSE_BUTTON_UP;
+            ? SDL.SDL_EventType.SDL_MOUSEBUTTONDOWN
+            : SDL.SDL_EventType.SDL_MOUSEBUTTONUP;
         var evt = default(SDL.SDL_Event);
-        evt.type = (uint)kind;
+        evt.type = kind;
         evt.button.type = kind;
         evt.button.button = sdlButton;
-        evt.button.down = curr == ButtonState.Pressed;
+        evt.button.state = curr == ButtonState.Pressed ? (byte)1 : (byte)0;
         evt.button.clicks = 1;
         evt.button.x = x;
         evt.button.y = y;
