@@ -114,6 +114,18 @@ struct EquipmentSlots
 
     [UnscopedRef]
     public ref ulong this[Layer layer] => ref _array[(int)layer];
+
+    // Content equality over all layer slots. Packet handlers dirty-check
+    // against the stored value before re-Insert so an unchanged equipment
+    // payload doesn't bump the component's change tick (which would make
+    // Changed<EquipmentSlots> misfire on every benign mobile-update packet).
+    public bool ContentEquals(in EquipmentSlots other)
+    {
+        for (int i = 0; i <= 0x1D; i++)
+            if (_array[i] != other._array[i])
+                return false;
+        return true;
+    }
 }
 
 public struct ScreenPosition

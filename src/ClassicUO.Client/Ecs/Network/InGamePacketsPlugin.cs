@@ -914,10 +914,13 @@ readonly struct InGamePacketsPlugin : IPlugin
             .Insert(new ServerFlags() { Value = packet.Flags });
 
         EquipmentSlots slots;
-        if (queries.qEquipmentSlots.Contains(ent.Id))
+        bool existed = queries.qEquipmentSlots.Contains(ent.Id);
+        EquipmentSlots old = default;
+        if (existed)
         {
             (_, var existing) = queries.qEquipmentSlots.Get(ent.Id);
-            slots = existing.Ref;
+            old = existing.Ref;
+            slots = old;
         }
         else
         {
@@ -936,7 +939,10 @@ readonly struct InGamePacketsPlugin : IPlugin
             }
         }
 
-        ent.Insert(slots);
+        // Skip re-Insert when slots are unchanged so the change tick only
+        // moves on a real equip/unequip — see EquipmentSlots.ContentEquals.
+        if (!existed || !slots.ContentEquals(old))
+            ent.Insert(slots);
 
         mobileQueuedSteps.Send(new MobileQueuedStep
         {
@@ -962,10 +968,13 @@ readonly struct InGamePacketsPlugin : IPlugin
             .Insert(new ServerFlags() { Value = packet.Flags });
 
         EquipmentSlots slots;
-        if (queries.qEquipmentSlots.Contains(ent.Id))
+        bool existed = queries.qEquipmentSlots.Contains(ent.Id);
+        EquipmentSlots old = default;
+        if (existed)
         {
             (_, var existing) = queries.qEquipmentSlots.Get(ent.Id);
-            slots = existing.Ref;
+            old = existing.Ref;
+            slots = old;
         }
         else
         {
@@ -984,7 +993,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             }
         }
 
-        ent.Insert(slots);
+        if (!existed || !slots.ContentEquals(old))
+            ent.Insert(slots);
 
         mobileQueuedSteps.Send(new MobileQueuedStep
         {
@@ -1119,10 +1129,13 @@ readonly struct InGamePacketsPlugin : IPlugin
             .Insert(new Hue() { Value = packet.Hue });
 
         EquipmentSlots slots;
-        if (queries.qEquipmentSlots.Contains(parentEnt.Id))
+        bool existed = queries.qEquipmentSlots.Contains(parentEnt.Id);
+        EquipmentSlots old = default;
+        if (existed)
         {
             (_, var existing) = queries.qEquipmentSlots.Get(parentEnt.Id);
-            slots = existing.Ref;
+            old = existing.Ref;
+            slots = old;
         }
         else
         {
@@ -1130,7 +1143,8 @@ readonly struct InGamePacketsPlugin : IPlugin
         }
 
         slots[packet.Layer] = childEnt.Id;
-        parentEnt.Insert(slots);
+        if (!existed || !slots.ContentEquals(old))
+            parentEnt.Insert(slots);
     }
 
     static void HandleUpdateHits(
