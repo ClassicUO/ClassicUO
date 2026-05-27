@@ -74,6 +74,23 @@ internal sealed class GumpBuilder
             .Insert(new GlobalZIndex(zCounter.Bump()));
     }
 
+    /// Spawn a UO gump window via UOGumpBundle. Resolves the background sprite
+    /// size from assets and stamps the focus z on the root only — children
+    /// added under it inherit that z at layout time (no propagation). Movable +
+    /// right-click-close come from the UIMovable marker the bundle carries.
+    public EntityCommands SpawnUOGump(Commands commands, ushort bgId, Vector3 hue, Vector2 position, UiZCounter zCounter)
+    {
+        ref readonly var gumpInfo = ref _assets.Gumps.GetGump(bgId);
+        return commands.SpawnBundle(new UOGumpBundle
+        {
+            Position = position,
+            Size = new Vector2(gumpInfo.UV.Width, gumpInfo.UV.Height),
+            BackgroundId = bgId,
+            Hue = hue,
+            ZOrder = zCounter.Bump(),
+        });
+    }
+
     /// Spawn a single gump sprite at the given position.
     public EntityCommands AddGump(Commands commands, ushort id, Vector3 hue, Vector2? position = null)
     {
@@ -134,6 +151,23 @@ internal sealed class GumpBuilder
         var size = new Vector2(artInfo.UV.Width, artInfo.UV.Height);
         var node = MakeFloatingNode(position, size);
 
+        return commands.Spawn()
+            .Insert(node)
+            .Insert(new UiCustom())
+            .Insert(new UOCustomRender
+            {
+                Kind = UOCustomKind.Art,
+                AssetId = id,
+                Hue = hue,
+            });
+    }
+
+    /// Spawn an item/art sprite clamped to an explicit box. The renderer
+    /// scales art larger than the box down to fit (preserving aspect, never
+    /// upscaling) and centers it — used for equipment-slot item icons.
+    public EntityCommands AddArtSized(Commands commands, ushort id, Vector3 hue, Vector2 position, Vector2 size)
+    {
+        var node = MakeFloatingNode(position, size);
         return commands.Spawn()
             .Insert(node)
             .Insert(new UiCustom())

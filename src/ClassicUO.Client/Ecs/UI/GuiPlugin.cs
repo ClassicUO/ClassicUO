@@ -30,9 +30,37 @@ internal readonly struct GuiPlugin : IPlugin
             .AddResource(new ImageCache())
             .AddResource(new UIScale())
 
-            .AddSystem(Stage.Startup, (Commands commands, Res<AssetsServer> assets) =>
+            .AddSystem(Stage.Startup, (
+                Commands commands,
+                Res<AssetsServer> assets,
+                ResMut<UiClayContext> clay,
+                Query<Data<UOCustomRender>> customQuery) =>
             {
-                commands.InsertResource(new GumpBuilder(assets.Value));
+                var assetsServer = assets.Value;
+                commands.InsertResource(new GumpBuilder(assetsServer));
+
+                // Pixel-perfect hit-testing for every interactive UO gump across
+                // all plugins (login, char-select, buttons, paperdoll, etc.).
+                // Bevy.UI's InteractionSystem calls this per pointer-over
+                // candidate; a transparent sprite pixel returns false so the
+                // hover passes through to whatever is behind. Non-UO elements
+                // (no UOCustomRender) stay bbox-interactive. Captures the
+                // AssetsServer + the cached Query once — no per-call resource
+                // fetches and no World traversal.
+                // Drag / pickup run their own bbox loops and call
+                // UiHitTest.PixelHit directly; this covers the Interaction path.
+                clay.Value.PixelHitTest = (entityId, pos, box) =>
+                {
+                    if (!customQuery.Contains(entityId)) return true;
+                    var (_, customPtr) = customQuery.Get(entityId);
+                    var bb = new ComputedNode
+                    {
+                        Position = new System.Numerics.Vector2(box.X, box.Y),
+                        Size = new System.Numerics.Vector2(box.Width, box.Height),
+                    };
+                    return UiHitTest.PixelHit(assetsServer, in customPtr.Ref, in bb,
+                        new Microsoft.Xna.Framework.Vector2(pos.X, pos.Y));
+                };
             });
 
         var states = Enum.GetValues<GameState>();

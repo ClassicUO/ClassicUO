@@ -31,15 +31,13 @@ internal readonly struct WindowDragPlugin : IPlugin
     {
         app.AddResource(new UiZCounter());
         var dragFn = Drag;
-        var propagateZFn = PropagateZIndex;
         var closeOnRightClickFn = CloseOnRightClick;
         var claimSelectionFn = ClaimSelectedFromMovable;
         app.AddSystem(dragFn).InStage(Stage.Update).Build();
-        // Push the parent's GlobalZIndex onto all descendants whenever the
-        // parent's value changes. Clay sorts float-roots globally by z, so
-        // without this the window comes to the top on focus but its item
-        // children stay on the old layer and end up behind it.
-        app.AddSystem(propagateZFn).InStage(Stage.Update).Build();
+        // No z-propagation: only the window root carries a GlobalZIndex.
+        // LayoutSystem threads that z down to every descendant float at layout
+        // time (an element with no z of its own inherits its ancestor's), so
+        // the whole window rides one layer without per-child bookkeeping.
         // Right-click on any UIMovable closes it. Runs in PreUpdate so it
         // can consume the click before PlayerMovementPlugin (Stage.Update)
         // sees it and starts walking the player.
@@ -59,23 +57,24 @@ internal readonly struct WindowDragPlugin : IPlugin
     private static void ClaimSelectedFromMovable(
         Res<MouseContext> mouse,
         Res<SelectedEntity> selected,
-        Query<Data<ComputedNode, GlobalZIndex>, Filter<With<UIMovable>, Without<ContainerWindow>>> q)
+        Res<AssetsServer> assets,
+        Query<Data<ComputedNode, GlobalZIndex, UOCustomRender>, Filter<With<UIMovable>, Without<ContainerWindow>>> q)
     {
         var pos = mouse.Value.Position;
         ulong topEnt = 0;
         int topZ = int.MinValue;
-        uint topClayId = 0;
+        int topOrder = int.MinValue;
 
-        foreach (var (ent, computed, z) in q)
+        foreach (var (ent, computed, z, custom) in q)
         {
             var bb = computed.Ref;
-            if (pos.X < bb.Position.X || pos.Y < bb.Position.Y) continue;
-            if (pos.X >= bb.Position.X + bb.Size.X) continue;
-            if (pos.Y >= bb.Position.Y + bb.Size.Y) continue;
-            if (z.Ref.Value > topZ || (z.Ref.Value == topZ && bb.ClayId >= topClayId))
+            // Pixel-perfect: a click on a transparent pixel of the window's bg
+            // gump passes through (doesn't claim selection).
+            if (!UiHitTest.PixelHit(assets.Value, custom.Ref, bb, pos)) continue;
+            if (z.Ref.Value > topZ || (z.Ref.Value == topZ && bb.PaintOrder >= topOrder))
             {
                 topZ = z.Ref.Value;
-                topClayId = bb.ClayId;
+                topOrder = bb.PaintOrder;
                 topEnt = ent.Ref;
             }
         }
@@ -94,7 +93,8 @@ internal readonly struct WindowDragPlugin : IPlugin
     private static void CloseOnRightClick(
         Commands commands,
         Res<MouseContext> mouse,
-        Query<Data<ComputedNode>, Filter<With<UIMovable>>> movableQuery,
+        Res<AssetsServer> assets,
+        Query<Data<ComputedNode, UOCustomRender>, Filter<With<UIMovable>>> movableQuery,
         Query<Data<ContainerWindow>> containerQuery,
         Query<Data<TinyEcs.Children>> childrenQ,
         EventWriter<ContainerClosedEvent> closedWriter,
@@ -102,18 +102,18 @@ internal readonly struct WindowDragPlugin : IPlugin
     {
         var pos = mouse.Value.Position;
         ulong topEnt = 0;
-        uint topClayId = 0;
+        int topOrder = int.MinValue;
 
-        foreach (var (ent, computed) in movableQuery)
+        foreach (var (ent, computed, custom) in movableQuery)
         {
             var bb = computed.Ref;
-            if (pos.X < bb.Position.X || pos.Y < bb.Position.Y) continue;
-            if (pos.X >= bb.Position.X + bb.Size.X) continue;
-            if (pos.Y >= bb.Position.Y + bb.Size.Y) continue;
+            // Pixel-perfect: right-click on a transparent bg pixel passes
+            // through instead of closing the window.
+            if (!UiHitTest.PixelHit(assets.Value, custom.Ref, bb, pos)) continue;
 
-            if (bb.ClayId >= topClayId)
+            if (bb.PaintOrder >= topOrder)
             {
-                topClayId = bb.ClayId;
+                topOrder = bb.PaintOrder;
                 topEnt = ent.Ref;
             }
         }
@@ -147,67 +147,6 @@ internal readonly struct WindowDragPlugin : IPlugin
         commands.Entity(entity).Despawn();
     }
 
-    private static void PropagateZIndex(
-        Commands commands,
-        Query<Data<GlobalZIndex, TinyEcs.Children>, Filter<With<UIMovable>, Changed<GlobalZIndex>>> q,
-        Query<Data<TinyEcs.Children>> childrenQ,
-        Query<Data<Node>> aliveQ)
-    {
-        foreach (var (_, z, kids) in q)
-        {
-            int val = z.Ref.Value;
-            foreach (var cid in kids.Ref)
-                Recurse(commands, cid, val, childrenQ, aliveQ);
-        }
-    }
-
-    // Parent's Children list can outlive its members (e.g. SlotDedup /
-    // pickup ok despawn a ContainerItemUI without scrubbing the entry from
-    // the content entity's child list). Skip dead ids so a queued Insert
-    // doesn't panic in TinyEcs.World.Attach during Merge.
-    private static void Recurse(
-        Commands commands,
-        ulong entity,
-        int z,
-        Query<Data<TinyEcs.Children>> childrenQ,
-        Query<Data<Node>> aliveQ)
-    {
-        if (!aliveQ.Contains(entity)) return;
-        commands.Entity(entity).Insert(new GlobalZIndex(z));
-        if (!childrenQ.Contains(entity)) return;
-        var (_, kids) = childrenQ.Get(entity);
-        foreach (var cid in kids.Ref)
-            Recurse(commands, cid, z, childrenQ, aliveQ);
-    }
-
-    // Walk parent -> descendants and set GlobalZIndex on every child.
-    // Existing components mutate in-place (visible to this frame's
-    // layout); children that lack the component get one queued via
-    // Commands (visible from next frame on, same as PropagateZIndex).
-    private static void PropagateZInline(
-        Commands commands,
-        ulong entity,
-        int z,
-        Query<Data<TinyEcs.Children>> childrenQ,
-        Query<Data<GlobalZIndex>> zQ)
-    {
-        if (!childrenQ.Contains(entity)) return;
-        var (_, kids) = childrenQ.Get(entity);
-        foreach (var cid in kids.Ref)
-        {
-            if (zQ.Contains(cid))
-            {
-                var (_, cz) = zQ.Get(cid);
-                cz.Ref.Value = z;
-            }
-            else
-            {
-                commands.Entity(cid).Insert(new GlobalZIndex(z));
-            }
-            PropagateZInline(commands, cid, z, childrenQ, zQ);
-        }
-    }
-
     private struct DragAnchor
     {
         public bool Active;
@@ -218,16 +157,14 @@ internal readonly struct WindowDragPlugin : IPlugin
     }
 
     private static void Drag(
-        Commands commands,
         Res<MouseContext> mouse,
         Res<UiZCounter> zCounter,
         Res<GrabbedItem> grabbed,
         Res<DragGate> gate,
+        Res<AssetsServer> assets,
         Local<DragAnchor> anchor,
-        Query<Data<Node, Interaction, ComputedNode, GlobalZIndex>, Filter<With<UIMovable>>> q,
-        Query<Data<ContainerItemUI, ComputedNode, Node>> itemsQ,
-        Query<Data<TinyEcs.Children>> childrenQ,
-        Query<Data<GlobalZIndex>> zQ)
+        Query<Data<Node, Interaction, ComputedNode, GlobalZIndex, UOCustomRender>, Filter<With<UIMovable>>> q,
+        Query<Data<ContainerItemUI, ComputedNode, Node>> itemsQ)
     {
         // IsPressed is false on the press-once frame (oldState=Released), so
         // include IsPressedOnce in the "held" check or the latch attempt
@@ -281,23 +218,24 @@ internal readonly struct WindowDragPlugin : IPlugin
 
             ulong topId = 0;
             int topZ = int.MinValue;
-            uint topClayId = 0;
-            foreach (var (ent, _, _, computed, z) in q)
+            int topOrder = int.MinValue;
+            foreach (var (ent, _, _, computed, z, custom) in q)
             {
                 var bb = computed.Ref;
-                if (pos.X < bb.Position.X || pos.Y < bb.Position.Y) continue;
-                if (pos.X >= bb.Position.X + bb.Size.X) continue;
-                if (pos.Y >= bb.Position.Y + bb.Size.Y) continue;
-                if (z.Ref.Value > topZ || (z.Ref.Value == topZ && bb.ClayId >= topClayId))
+                // Pixel-perfect: clicking a transparent bg pixel (e.g. the
+                // paperdoll arch corners) misses the window so the drag never
+                // latches there.
+                if (!UiHitTest.PixelHit(assets.Value, custom.Ref, bb, pos)) continue;
+                if (z.Ref.Value > topZ || (z.Ref.Value == topZ && bb.PaintOrder >= topOrder))
                 {
                     topZ = z.Ref.Value;
-                    topClayId = bb.ClayId;
+                    topOrder = bb.PaintOrder;
                     topId = ent.Ref;
                 }
             }
             if (topId == 0) return;
 
-            var (_, node, _, _, _) = q.Get(topId);
+            var (_, node, _, _, _, _) = q.Get(topId);
             float ox = node.Ref.Left.Type == ValType.Px ? node.Ref.Left.Value : 0f;
             float oy = node.Ref.Top.Type == ValType.Px ? node.Ref.Top.Value : 0f;
 
@@ -311,19 +249,15 @@ internal readonly struct WindowDragPlugin : IPlugin
             };
             gate.Value.Mode = ActiveDrag.UIWindow;
 
-            // Bring window to front on focus. Bevy.UI's GlobalZIndex maps to
-            // Clay's Floating.ZIndex (signed 16-bit), so a monotonically
-            // increasing counter is enough until we hit ~32k clicks per
-            // session. Mutate the root z in-place AND walk the subtree
-            // setting child z directly. Relying on PropagateZIndex's
-            // Changed<GlobalZIndex> pickup leaves descendants on the old z
-            // for one frame and produces a click-flicker; children that
-            // lack a GlobalZIndex component get one inserted so the
-            // backstop covers them on the very next frame.
+            // Bring window to front on focus. Only the root carries a z;
+            // LayoutSystem threads it down to every descendant float at layout
+            // time, so a single in-place bump lifts the whole window — no
+            // subtree walk, no one-frame child-lag flicker. Bevy.UI maps
+            // GlobalZIndex to Clay's Floating.ZIndex (signed 16-bit); a
+            // monotonic counter suffices until ~32k focus clicks per session.
             var newZ = zCounter.Value.Bump();
-            var (_, _, _, _, rootZ) = q.Get(topId);
+            var (_, _, _, _, rootZ, _) = q.Get(topId);
             rootZ.Ref.Value = newZ;
-            PropagateZInline(commands, topId, newZ, childrenQ, zQ);
         }
 
         if (!anchor.Value.Active) return;
@@ -336,7 +270,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         }
 
         var delta = mouse.Value.Position - anchor.Value.Mouse;
-        var (_, ownerNode, _, _, _) = q.Get(anchor.Value.Owner);
+        var (_, ownerNode, _, _, _, _) = q.Get(anchor.Value.Owner);
         ownerNode.Ref.PositionType = PositionType.Absolute;
         ownerNode.Ref.Left = Val.Px(anchor.Value.OriginX + delta.X);
         ownerNode.Ref.Top = Val.Px(anchor.Value.OriginY + delta.Y);
