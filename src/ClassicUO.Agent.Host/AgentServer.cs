@@ -1,11 +1,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 // TCP accept loop + frame reader/writer for the agent dev loop. Runs on a
-// dedicated background Task started by AgentServerPlugin in Stages.Startup.
-// Never touches ECS state directly — only the Channels in AgentServerState
-// and the socket.
+// dedicated background Task started during plugin / bootstrap registration.
+// Never touches engine / ECS state directly — only the Channels in
+// AgentServerState and the socket.
 
-#if AGENT_BUILD
 #nullable enable
 
 using System;
@@ -19,9 +18,9 @@ using System.Threading.Tasks;
 using ClassicUO.Agent.Contracts;
 using ClassicUO.Agent.Contracts.Dto;
 
-namespace ClassicUO.Agent;
+namespace ClassicUO.Agent.Host;
 
-internal static class AgentServer
+public static class AgentServer
 {
     private static Task? s_acceptLoop;
 
@@ -170,5 +169,3 @@ internal static class AgentServer
         state.PortAdvertisedAt = path;
     }
 }
-
-#endif

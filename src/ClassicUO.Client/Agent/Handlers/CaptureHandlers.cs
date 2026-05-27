@@ -2,8 +2,9 @@
 //
 // capture.shot: queue a backbuffer screenshot. Response is deferred —
 // the handler returns null after enqueueing the request, and
-// ServiceCaptureRequestSystem at Stage.PostUpdate writes the actual
-// JsonRpcResponse to the outbox after reading the backbuffer.
+// AgentBootstrap.ServiceCapture (called from GameController.Draw after
+// the scene draws but before Present) writes the actual JsonRpcResponse
+// to the outbox after reading the backbuffer.
 //
 // Params: { path } — server-side filesystem path to write the PNG to.
 // The full path is returned in the response result.
@@ -13,12 +14,18 @@
 
 using System.Text.Json;
 using ClassicUO.Agent.Contracts;
+using ClassicUO.Agent.Host;
 
 namespace ClassicUO.Agent.Agent.Handlers;
 
 internal static class CaptureHandlers
 {
-    public static JsonRpcResponse? Shot(JsonRpcRequest req, in AgentRpcContext ctx)
+    public static void Register(AgentDispatcher<GameController> d)
+    {
+        d.Register(RpcVerbs.CaptureShot, Shot);
+    }
+
+    public static JsonRpcResponse? Shot(JsonRpcRequest req, in AgentRpcContext<GameController> ctx)
     {
         if (req.Params is not JsonElement p || p.ValueKind != JsonValueKind.Object)
         {
@@ -46,9 +53,9 @@ internal static class CaptureHandlers
             OutPath = pathEl.GetString(),
         };
 
-        // Defer the response — ServiceCaptureRequestSystem will write the
-        // JsonRpcResponse for this request id once the backbuffer has
-        // been read and encoded.
+        // Defer the response — AgentBootstrap.ServiceCapture will write
+        // the JsonRpcResponse for this request id once the backbuffer
+        // has been read and encoded.
         return null;
     }
 }

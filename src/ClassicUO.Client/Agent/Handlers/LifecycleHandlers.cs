@@ -10,12 +10,21 @@
 
 using System.Text.Json.Nodes;
 using ClassicUO.Agent.Contracts;
+using ClassicUO.Agent.Host;
 
 namespace ClassicUO.Agent.Agent.Handlers;
 
 internal static class LifecycleHandlers
 {
-    public static JsonRpcResponse Ping(JsonRpcRequest req, in AgentRpcContext ctx) => new()
+    public static void Register(AgentDispatcher<GameController> d)
+    {
+        d.Register(RpcVerbs.LifecyclePing, Ping);
+        d.Register(RpcVerbs.LifecycleInWorld, InWorld);
+        d.Register("lifecycle.gameState", GameState);
+        d.Register("lifecycle.characters", Characters);
+    }
+
+    public static JsonRpcResponse Ping(JsonRpcRequest req, in AgentRpcContext<GameController> ctx) => new()
     {
         Id = req.Id,
         Result = new JsonObject
@@ -25,12 +34,12 @@ internal static class LifecycleHandlers
         },
     };
 
-    public static JsonRpcResponse InWorld(JsonRpcRequest req, in AgentRpcContext ctx) => new()
+    public static JsonRpcResponse InWorld(JsonRpcRequest req, in AgentRpcContext<GameController> ctx) => new()
     {
         Id = req.Id,
         Result = new JsonObject
         {
-            ["inWorld"] = ctx.Game.UO.World.InGame,
+            ["inWorld"] = ctx.Runtime.UO.World.InGame,
         },
     };
 
@@ -46,9 +55,9 @@ internal static class LifecycleHandlers
     //   LoginScreen         — LoginScene.CurrentLoginStep is Main
     //   <other LoginStep names> verbatim (Connecting, VerifyingAccount, ...)
     //   <other Scene names>      verbatim (MainScene, ...)
-    public static JsonRpcResponse GameState(JsonRpcRequest req, in AgentRpcContext ctx)
+    public static JsonRpcResponse GameState(JsonRpcRequest req, in AgentRpcContext<GameController> ctx)
     {
-        var scene = ctx.Game.Scene;
+        var scene = ctx.Runtime.Scene;
         string state;
         if (scene is ClassicUO.Game.Scenes.GameScene)
         {
@@ -80,12 +89,12 @@ internal static class LifecycleHandlers
     // the list yet (e.g. still on login screen / not connected).
     //
     // Returns: { characters: ["name1", "name2", ...] }
-    public static JsonRpcResponse Characters(JsonRpcRequest req, in AgentRpcContext ctx)
+    public static JsonRpcResponse Characters(JsonRpcRequest req, in AgentRpcContext<GameController> ctx)
     {
         // Manual JSON build mirrors the ECS branch — AgentJsonContext
         // source-gen does not register System.String for AOT, so a
         // JsonArray<string> serialization would throw NoMetadataForType.
-        var names = (ctx.Game.Scene as ClassicUO.Game.Scenes.LoginScene)?.Characters
+        var names = (ctx.Runtime.Scene as ClassicUO.Game.Scenes.LoginScene)?.Characters
                     ?? System.Array.Empty<string>();
         var sb = new System.Text.StringBuilder();
         sb.Append('[');

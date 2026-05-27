@@ -13,12 +13,19 @@
 
 using System.Text.Json;
 using ClassicUO.Agent.Contracts;
+using ClassicUO.Agent.Host;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Agent.Agent.Handlers;
 
 internal static class CaptureHandlers
 {
-    public static JsonRpcResponse? Shot(JsonRpcRequest req, in AgentRpcContext ctx)
+    public static void Register(AgentDispatcher<App> d)
+    {
+        d.Register(RpcVerbs.CaptureShot, Shot);
+    }
+
+    public static JsonRpcResponse? Shot(JsonRpcRequest req, in AgentRpcContext<App> ctx)
     {
         if (req.Params is not JsonElement p || p.ValueKind != JsonValueKind.Object)
         {

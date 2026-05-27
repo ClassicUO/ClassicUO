@@ -25,6 +25,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using ClassicUO.Agent.Contracts;
+using ClassicUO.Agent.Host;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Scenes;
 
@@ -32,7 +33,12 @@ namespace ClassicUO.Agent.Agent.Handlers;
 
 internal static class AgentLoginHandlers
 {
-    public static JsonRpcResponse Login(JsonRpcRequest req, in AgentRpcContext ctx)
+    public static void Register(AgentDispatcher<GameController> d)
+    {
+        d.Register(RpcVerbs.AgentLogin, Login);
+    }
+
+    public static JsonRpcResponse Login(JsonRpcRequest req, in AgentRpcContext<GameController> ctx)
     {
         if (req.Params is not JsonElement p || p.ValueKind != JsonValueKind.Object)
         {
@@ -99,7 +105,7 @@ internal static class AgentLoginHandlers
 
         // LoginScene.Connect expects PLAINTEXT password — it handles
         // Crypter.Encrypt + Settings.Save internally when SaveAccount is on.
-        var loginScene = ctx.Game.GetScene<LoginScene>();
+        var loginScene = ctx.Runtime.GetScene<LoginScene>();
         if (loginScene is null)
         {
             return AgentServer.ErrorResponse(

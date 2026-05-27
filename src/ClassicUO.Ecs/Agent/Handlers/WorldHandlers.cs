@@ -16,9 +16,6 @@
 //     return 0 (TODO).
 //   - There's no open-gump registry or journal store on this branch yet;
 //     both lists are returned empty (TODOs).
-//
-// Routes are wired in via a partial implementation of
-// AgentDispatcher.RegisterWorldRoutes — see WorldHandlers.Registration.cs.
 
 #if AGENT_BUILD
 #nullable enable
@@ -29,8 +26,10 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using ClassicUO.Agent.Contracts;
 using ClassicUO.Agent.Contracts.Dto;
+using ClassicUO.Agent.Host;
 using ClassicUO.Ecs;
 using TinyEcs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Agent.Agent.Handlers;
 
@@ -39,12 +38,18 @@ internal static class WorldHandlers
     // "Nearby" radius when GameContext.MaxObjectsDistance is unset (0).
     private const int DefaultNearbyRange = 18;
 
-    public static JsonRpcResponse DumpState(JsonRpcRequest req, in AgentRpcContext ctx)
+    public static void Register(AgentDispatcher<App> d)
     {
+        d.Register(RpcVerbs.WorldDumpState, DumpState);
+    }
+
+    public static JsonRpcResponse DumpState(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        var world = ctx.Runtime.GetWorld();
         // TinyEcs.Bevy now distinguishes Res<T> (ref readonly) from
         // ResMut<T> (ref). DumpState is read-only so we copy GameContext
         // out by value into a local and pass it as `ref`.
-        var gameCtx = ctx.GameCtx.Value;
+        var gameCtx = ctx.Runtime.GetResource<GameContext>();
         if (gameCtx.PlayerSerial == 0)
         {
             return AgentServer.ErrorResponse(
@@ -53,7 +58,7 @@ internal static class WorldHandlers
                 "not in world");
         }
 
-        var dto = BuildSnapshot(ctx.World, ref gameCtx);
+        var dto = BuildSnapshot(world, ref gameCtx);
 
         var json = JsonSerializer.Serialize(dto, AgentJsonContext.Default.AgentWorldStateDto);
 

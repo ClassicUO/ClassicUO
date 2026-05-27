@@ -1,16 +1,17 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
 // Agent dev-loop server, ECS plugin entry point. Wired into the App
-// from src/ClassicUO.Client/Ecs/Boot.cs only when the AGENT_BUILD
-// constant is defined (see ClassicUO.Agent.Settings.props).
+// from src/ClassicUO.Ecs/Boot.cs only when the AGENT_BUILD constant is
+// defined (see ClassicUO.Agent.Settings.props).
 //
 // Split of execution between threads:
 //   1. AgentServer (background Task started during plugin Build) owns the
 //      TcpListener, reads JSON-RPC frames, pushes requests into the inbox
 //      Channel, drains the outbox Channel and writes responses/events back.
 //   2. DrainInbox system (per-frame, on the game thread) reads from inbox,
-//      routes via AgentDispatcher to handlers that touch ECS state via
-//      Commands, and enqueues responses to outbox.
+//      routes via AgentDispatcher<App> to handlers that touch ECS state
+//      via the App resource bag and the underlying World, and enqueues
+//      responses to outbox.
 //
 // All engine reads happen on the game thread. The background thread only
 // ever touches the Channels and the socket.
@@ -19,6 +20,8 @@
 #nullable enable
 
 using System;
+using ClassicUO.Agent.Agent.Handlers;
+using ClassicUO.Agent.Host;
 using ClassicUO.Configuration;
 using ClassicUO.Ecs;
 using ClassicUO.Network;
@@ -37,6 +40,14 @@ internal readonly struct AgentServerPlugin : IPlugin
     // there, but the UI runs in UiRenderStage which comes after PostUpdate.
     public static readonly Stage AgentCaptureStage = Stage.Custom("AgentCapture");
 
+    // Per-runtime dispatcher instance. Handler registration runs once
+    // during plugin Build; DrainInboxSystem then calls Dispatcher.DrainInbox
+    // each frame. Static-on-the-plugin-struct keeps the dispatcher reachable
+    // from both Build (registers routes) and the per-frame system without
+    // threading it through an additional resource.
+    internal static readonly AgentDispatcher<App> Dispatcher = new();
+    private static bool s_routesRegistered;
+
     public void Build(App app)
     {
         app.AddStage(AgentCaptureStage)
@@ -46,6 +57,20 @@ internal readonly struct AgentServerPlugin : IPlugin
         var state = new AgentServerState();
         app.AddResource(state);
 
+        // Wire every *Handlers.Register(Dispatcher) once. Plugin Build can
+        // be called multiple times in test rigs that build several Apps
+        // back-to-back; the dispatcher is process-static so a second call
+        // would double-register.
+        if (!s_routesRegistered)
+        {
+            LifecycleHandlers.Register(Dispatcher);
+            AgentLoginHandlers.Register(Dispatcher);
+            WorldHandlers.Register(Dispatcher);
+            InputHandlers.Register(Dispatcher);
+            CaptureHandlers.Register(Dispatcher);
+            s_routesRegistered = true;
+        }
+
         // Start the listener IMMEDIATELY during plugin registration so the
         // socket binds before any other plugin's Stage.Startup system can
         // crash. This lets the CLI ping the listener even when downstream
@@ -54,14 +79,10 @@ internal readonly struct AgentServerPlugin : IPlugin
         AgentServer.StartAcceptLoop(state);
 
         // DrainInbox runs on the game thread. Stage.First so handlers and
-        // any downstream observer triggers they emit via Commands (e.g.
-        // agent.login → OnLoginRequest → HandleLoginRequests) fire before
-        // gameplay systems read state this frame. SingleThreaded because
-        // handlers mutate ECS state through Commands.
-        //
-        // Method-group form so the compiler binds to the generic
-        // AddSystem<T1..T5>(this App, Action<T1..T5>) extension instead
-        // of the instance AddSystem(ISystem) overload.
+        // any downstream observer triggers they emit (e.g. agent.login →
+        // OnLoginRequest → HandleLoginRequests) fire before gameplay
+        // systems read state this frame. SingleThreaded because handlers
+        // mutate ECS state through the world directly.
         var drainFn = DrainInboxSystem;
         app.AddSystem(drainFn)
             .InStage(Stage.First)
@@ -241,16 +262,14 @@ internal readonly struct AgentServerPlugin : IPlugin
         if (s.CurrentGameState != name) s.CurrentGameState = name;
     }
 
+    // The dispatcher takes the App as its TRuntime, so we capture the App
+    // from the AppParam system param. AppParam exposes the engine's App
+    // instance (TinyEcs.Bevy injects it automatically as an ISystemParam).
     private static void DrainInboxSystem(
         Res<AgentServerState> stateRes,
-        WorldParam world,
-        Res<GameContext> gameCtx,
-        Res<Settings> settings,
-        Commands commands,
-        Res<MouseContext> mouseCtx,
-        Res<NetClient> network)
+        AppParam appParam)
     {
-        AgentDispatcher.DrainInbox(stateRes, world.World, gameCtx, settings, commands, mouseCtx.Value!, network.Value!);
+        Dispatcher.DrainInbox(stateRes.Value!, appParam.App);
     }
 }
 

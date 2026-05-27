@@ -1,17 +1,15 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
-// Backbuffer → PNG service. Called from ServiceCaptureRequestSystem at
-// Stage.PostUpdate (after game.Tick has Drawn the frame; before Present
-// at Stage.Last). FNA's GraphicsDevice.GetBackBufferData reads the
-// current backbuffer contents; Texture2D.SaveAsPng writes a portable
-// PNG.
+// Backbuffer → PNG service. Called from the runtime-side service system
+// (after the frame has been drawn; before Present). FNA's
+// GraphicsDevice.GetBackBufferData reads the current backbuffer contents;
+// Texture2D.SaveAsPng writes a portable PNG.
 //
 // The file is written to req.OutPath. Returning the PNG bytes inline in
 // the JSON-RPC response would bloat the wire (a 1920x1080 PNG can easily
 // be 1-2 MB after base64 encoding); the disk-roundtrip model keeps the
 // JSON-RPC envelope small.
 
-#if AGENT_BUILD
 #nullable enable
 
 using System;
@@ -21,9 +19,9 @@ using ClassicUO.Agent.Contracts;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace ClassicUO.Agent;
+namespace ClassicUO.Agent.Host;
 
-internal static class AgentCaptureService
+public static class AgentCaptureService
 {
     public static JsonRpcResponse Run(GraphicsDevice device, CaptureRequest req)
     {
@@ -82,7 +80,4 @@ internal static class AgentCaptureService
                 $"capture failed: {ex.Message}");
         }
     }
-
 }
-
-#endif

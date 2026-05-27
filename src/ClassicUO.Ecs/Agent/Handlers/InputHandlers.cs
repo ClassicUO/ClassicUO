@@ -20,19 +20,33 @@
 #nullable enable
 
 using System;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using ClassicUO.Agent.Contracts;
-using ClassicUO.Network;
+using ClassicUO.Agent.Host;
+using ClassicUO.Ecs;
 using Microsoft.Xna.Framework.Input;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Agent.Agent.Handlers;
 
 internal static class InputHandlers
 {
-    public static JsonRpcResponse MouseMove(JsonRpcRequest req, in AgentRpcContext ctx)
+    public static void Register(AgentDispatcher<App> d)
+    {
+        d.Register("input.mouseMove", MouseMove);
+        d.Register("input.mouseDown", MouseDown);
+        d.Register("input.mouseUp", MouseUp);
+        d.Register("input.mouseClick", MouseClick);
+        d.Register("input.mouseDoubleClick", MouseDoubleClick);
+        d.Register("input.mouseHold", MouseHold);
+        d.Register("input.mouseRelease", MouseRelease);
+        d.Register("input.clear", InputClear);
+        d.Register("input.type", Type);
+    }
+
+    public static JsonRpcResponse MouseMove(JsonRpcRequest req, in AgentRpcContext<App> ctx)
     {
         if (!TryGetXY(req, out var x, out var y, out var err)) return err!;
         var current = ctx.State.CurrentMouseSynth;
@@ -44,7 +58,7 @@ internal static class InputHandlers
         return Ok(req, 1);
     }
 
-    public static JsonRpcResponse MouseDown(JsonRpcRequest req, in AgentRpcContext ctx)
+    public static JsonRpcResponse MouseDown(JsonRpcRequest req, in AgentRpcContext<App> ctx)
     {
         if (!TryGetXY(req, out var x, out var y, out var err)) return err!;
         if (!TryGetButton(req, out var btn, out err)) return err!;
@@ -55,7 +69,7 @@ internal static class InputHandlers
         return Ok(req, 1);
     }
 
-    public static JsonRpcResponse MouseUp(JsonRpcRequest req, in AgentRpcContext ctx)
+    public static JsonRpcResponse MouseUp(JsonRpcRequest req, in AgentRpcContext<App> ctx)
     {
         if (!TryGetXY(req, out var x, out var y, out var err)) return err!;
         if (!TryGetButton(req, out var btn, out err)) return err!;
@@ -66,7 +80,7 @@ internal static class InputHandlers
         return Ok(req, 1);
     }
 
-    public static JsonRpcResponse MouseClick(JsonRpcRequest req, in AgentRpcContext ctx)
+    public static JsonRpcResponse MouseClick(JsonRpcRequest req, in AgentRpcContext<App> ctx)
     {
         if (!TryGetXY(req, out var x, out var y, out var err)) return err!;
         if (!TryGetButton(req, out var btn, out err)) return err!;
@@ -86,7 +100,7 @@ internal static class InputHandlers
         return Ok(req, 3);
     }
 
-    public static JsonRpcResponse MouseDoubleClick(JsonRpcRequest req, in AgentRpcContext ctx)
+    public static JsonRpcResponse MouseDoubleClick(JsonRpcRequest req, in AgentRpcContext<App> ctx)
     {
         if (!TryGetXY(req, out var x, out var y, out var err)) return err!;
         if (!TryGetButton(req, out var btn, out err)) return err!;
@@ -107,21 +121,21 @@ internal static class InputHandlers
         return Ok(req, 6);
     }
 
-    public static JsonRpcResponse MouseHold(JsonRpcRequest req, in AgentRpcContext ctx)
+    public static JsonRpcResponse MouseHold(JsonRpcRequest req, in AgentRpcContext<App> ctx)
         => MouseDown(req, in ctx);
 
-    public static JsonRpcResponse MouseRelease(JsonRpcRequest req, in AgentRpcContext ctx)
+    public static JsonRpcResponse MouseRelease(JsonRpcRequest req, in AgentRpcContext<App> ctx)
         => MouseUp(req, in ctx);
 
-    public static JsonRpcResponse InputClear(JsonRpcRequest req, in AgentRpcContext ctx)
+    public static JsonRpcResponse InputClear(JsonRpcRequest req, in AgentRpcContext<App> ctx)
     {
         ctx.State.PendingMouseFrames.Clear();
         ctx.State.CurrentMouseSynth = default;
-        ctx.MouseCtx.AgentClearSynthetic();
+        ctx.Runtime.GetResource<MouseContext>().AgentClearSynthetic();
         return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["cleared"] = true } };
     }
 
-    public static JsonRpcResponse Type(JsonRpcRequest req, in AgentRpcContext ctx)
+    public static JsonRpcResponse Type(JsonRpcRequest req, in AgentRpcContext<App> ctx)
     {
         if (req.Params is not JsonElement p || p.ValueKind != JsonValueKind.Object)
             return AgentServer.ErrorResponse(req.Id, JsonRpcErrorCodes.InvalidParams,
@@ -142,7 +156,7 @@ internal static class InputHandlers
     // would be the more direct route but is brittle on the SDL3 path
     // where bindings forward to a native dll with a different event
     // struct layout.
-    private static int PushTextInputEvents(string text, in AgentRpcContext ctx)
+    private static int PushTextInputEvents(string text, in AgentRpcContext<App> ctx)
     {
         if (string.IsNullOrEmpty(text)) return 0;
         foreach (var ch in text)

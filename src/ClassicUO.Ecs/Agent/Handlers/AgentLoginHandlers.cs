@@ -3,7 +3,7 @@
 // agent.login: bypass the GUI login screen and emit OnLoginRequest
 // directly so the network plugin can connect. The handler mirrors the
 // LoginScreenPlugin path — encrypts the password via Crypter.Encrypt,
-// writes Username/Password back into Settings, then enqueues the event
+// writes Username/Password back into Settings, then emits the trigger
 // for HandleLoginRequests to consume next tick.
 //
 // Params: { username, password, address?, port? }
@@ -22,6 +22,8 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using ClassicUO.Agent.Contracts;
+using ClassicUO.Agent.Host;
+using ClassicUO.Configuration;
 using ClassicUO.Ecs;
 using ClassicUO.Utility;
 using TinyEcs.Bevy;
@@ -30,7 +32,12 @@ namespace ClassicUO.Agent.Agent.Handlers;
 
 internal static class AgentLoginHandlers
 {
-    public static JsonRpcResponse Login(JsonRpcRequest req, in AgentRpcContext ctx)
+    public static void Register(AgentDispatcher<App> d)
+    {
+        d.Register(RpcVerbs.AgentLogin, Login);
+    }
+
+    public static JsonRpcResponse Login(JsonRpcRequest req, in AgentRpcContext<App> ctx)
     {
         if (req.Params is not JsonElement p || p.ValueKind != JsonValueKind.Object)
         {
@@ -56,7 +63,7 @@ internal static class AgentLoginHandlers
                 "agent.login: 'password' is required and must be a non-empty string");
         }
 
-        var settings = ctx.Settings.Value!;
+        var settings = ctx.Runtime.GetResource<Settings>();
 
         var address = settings.IP;
         if (TryGetString(p, "address", out var overrideAddress) && !string.IsNullOrWhiteSpace(overrideAddress))
@@ -106,11 +113,14 @@ internal static class AgentLoginHandlers
             && chrEl.ValueKind == JsonValueKind.Number
             && chrEl.TryGetInt32(out var cIdx) ? cIdx : 0;
 
-        // EmitTrigger goes through Commands; TinyEcs.Bevy flushes the
-        // command queue after the DrainInbox system completes, then fires
-        // observers synchronously. HandleLoginRequests therefore runs this
-        // same frame — no inbox→event→reader ordering hazard.
-        ctx.Commands.EmitTrigger(new OnLoginRequest
+        // Fire the OnLoginRequest trigger synchronously against the world.
+        // The original LoginScreenPlugin path used Commands.EmitTrigger to
+        // queue a deferred trigger; we don't have a Commands handle inside
+        // the dispatcher (it's not on App), so we emit straight through
+        // world.EmitTrigger with EntityId=0 → only the global observer
+        // (HandleLoginRequests) fires. Same observable behaviour, just
+        // synchronous instead of deferred.
+        ctx.Runtime.GetWorld().EmitTrigger(0UL, new OnLoginRequest
         {
             Username = settings.Username,
             Password = settings.Password,

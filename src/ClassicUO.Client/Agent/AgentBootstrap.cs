@@ -22,6 +22,8 @@
 #if AGENT_BUILD
 #nullable enable
 
+using ClassicUO.Agent.Agent.Handlers;
+using ClassicUO.Agent.Host;
 using ClassicUO.Game.Scenes;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -31,7 +33,15 @@ namespace ClassicUO.Agent;
 
 internal static class AgentBootstrap
 {
+    // Per-runtime dispatcher. Routes are registered exactly once during
+    // Start(); the per-frame DrainInbox call forwards the live
+    // GameController instance so handlers can reach Scene / UO.World /
+    // GraphicsDevice via the TRuntime field on AgentRpcContext.
+    private static readonly AgentDispatcher<GameController> Dispatcher = new();
+
     private static AgentServerState? s_state;
+    private static bool s_routesRegistered;
+
     // Track the previous applied state so EmitEdge can detect transitions.
     // Initialized to all-Released so the first applied frame with a
     // Pressed button correctly emits SDL_MOUSEBUTTONDOWN.
@@ -48,6 +58,17 @@ internal static class AgentBootstrap
     {
         if (s_state is not null) return;
         s_state = new AgentServerState();
+
+        if (!s_routesRegistered)
+        {
+            LifecycleHandlers.Register(Dispatcher);
+            AgentLoginHandlers.Register(Dispatcher);
+            WorldHandlers.Register(Dispatcher);
+            InputHandlers.Register(Dispatcher);
+            CaptureHandlers.Register(Dispatcher);
+            s_routesRegistered = true;
+        }
+
         AgentServer.StartAcceptLoop(s_state);
     }
 
@@ -74,7 +95,7 @@ internal static class AgentBootstrap
     {
         var state = s_state;
         if (state is null) return;
-        AgentDispatcher.DrainInbox(state, game);
+        Dispatcher.DrainInbox(state, game);
         AdvanceAutoLogin(state, game);
     }
 

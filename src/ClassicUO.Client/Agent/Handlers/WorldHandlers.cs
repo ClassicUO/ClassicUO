@@ -9,9 +9,8 @@
 // Returns: AgentWorldStateDto. Error JsonRpcErrorCodes.NotInWorld if
 // World.Player is null or its serial is 0 (still on login/charlist).
 //
-// Field parity with the ECS branch (cuo-agents/Ecs/Agent/Handlers/
-// WorldHandlers.cs): same DTO surface, so the same scripts and
-// assertions work on both loops.
+// Field parity with the ECS branch: same DTO surface, so the same
+// scripts and assertions work on both loops.
 
 #if AGENT_BUILD
 #nullable enable
@@ -22,6 +21,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using ClassicUO.Agent.Contracts;
 using ClassicUO.Agent.Contracts.Dto;
+using ClassicUO.Agent.Host;
 using ClassicUO.Game.GameObjects;
 
 namespace ClassicUO.Agent.Agent.Handlers;
@@ -33,9 +33,14 @@ internal static class WorldHandlers
     // dumpState returns comparable mobile sets on both loops.
     private const int DefaultNearbyRange = 18;
 
-    public static JsonRpcResponse DumpState(JsonRpcRequest req, in AgentRpcContext ctx)
+    public static void Register(AgentDispatcher<GameController> d)
     {
-        var world = ctx.Game.UO.World;
+        d.Register(RpcVerbs.WorldDumpState, DumpState);
+    }
+
+    public static JsonRpcResponse DumpState(JsonRpcRequest req, in AgentRpcContext<GameController> ctx)
+    {
+        var world = ctx.Runtime.UO.World;
         var player = world.Player;
         if (player is null || player.Serial == 0)
         {

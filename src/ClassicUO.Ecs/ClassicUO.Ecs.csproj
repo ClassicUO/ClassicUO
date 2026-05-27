@@ -63,6 +63,7 @@
     <ProjectReference Include="..\ClassicUO.Schema\ClassicUO.Schema.csproj" />
     <ProjectReference Include="..\ClassicUO.Utility\ClassicUO.Utility.csproj" />
     <ProjectReference Include="..\ClassicUO.Agent.Contracts\ClassicUO.Agent.Contracts.csproj" Condition="'$(AGENT_BUILD)' == 'true'" />
+    <ProjectReference Include="..\ClassicUO.Agent.Host\ClassicUO.Agent.Host.csproj" Condition="'$(AGENT_BUILD)' == 'true'" />
   </ItemGroup>
 
   <ItemGroup>

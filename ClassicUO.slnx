@@ -51,6 +51,7 @@
     <File Path="src/Directory.Build.props" />
   </Folder>
   <Folder Name="/src/">
+    <Project Path="src/ClassicUO.Agent.Host/ClassicUO.Agent.Host.csproj" />
     <Project Path="src/ClassicUO.Assets/ClassicUO.Assets.csproj" />
     <Project Path="src/ClassicUO.Bootstrap/src/ClassicUO.Bootstrap.csproj" />
     <Project Path="src/ClassicUO.Client/ClassicUO.Client.csproj" />

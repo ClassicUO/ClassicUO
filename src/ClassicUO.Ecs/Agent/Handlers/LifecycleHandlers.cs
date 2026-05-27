@@ -1,28 +1,35 @@
 // SPDX-License-Identifier: BSD-2-Clause
 //
-// Lifecycle verbs: ping (sanity check), ready (set by the engine once
-// asset loading + first frame complete; CLI polls this during `up`),
-// inWorld (whether the player has past character select), shutdown
-// (graceful exit; engine teardown happens on the next frame).
-//
-// Routes are wired in via a partial implementation of
-// AgentDispatcher.RegisterLifecycleRoutes — see bottom of this file.
+// Lifecycle verbs: ping (sanity check), inWorld (whether the player has
+// past character select), gameState (high-level state machine), and the
+// cached characters list. Each handler is a static method matching the
+// RpcHandler<App> delegate. Register() wires the routes into the
+// dispatcher; AgentServerPlugin.Build calls it once at startup.
 
 #if AGENT_BUILD
 #nullable enable
 
-using System.Collections.Generic;
-using System.Text.Json.Nodes;
 using ClassicUO.Agent.Contracts;
+using ClassicUO.Agent.Host;
+using ClassicUO.Ecs;
+using TinyEcs.Bevy;
 
 namespace ClassicUO.Agent.Agent.Handlers;
 
 internal static class LifecycleHandlers
 {
-    public static JsonRpcResponse Ping(JsonRpcRequest req, in AgentRpcContext ctx) => new()
+    public static void Register(AgentDispatcher<App> d)
+    {
+        d.Register(RpcVerbs.LifecyclePing, Ping);
+        d.Register(RpcVerbs.LifecycleInWorld, InWorld);
+        d.Register("lifecycle.gameState", GameState);
+        d.Register("lifecycle.characters", Characters);
+    }
+
+    public static JsonRpcResponse Ping(JsonRpcRequest req, in AgentRpcContext<App> ctx) => new()
     {
         Id = req.Id,
-        Result = new JsonObject
+        Result = new System.Text.Json.Nodes.JsonObject
         {
             ["pong"] = true,
             ["port"] = ctx.State.Port,
@@ -33,12 +40,12 @@ internal static class LifecycleHandlers
     // server (i.e. we're past character select and into the game world).
     // PlayerSerial == 0 covers both the pre-connect state and the
     // login/charlist screens.
-    public static JsonRpcResponse InWorld(JsonRpcRequest req, in AgentRpcContext ctx) => new()
+    public static JsonRpcResponse InWorld(JsonRpcRequest req, in AgentRpcContext<App> ctx) => new()
     {
         Id = req.Id,
-        Result = new JsonObject
+        Result = new System.Text.Json.Nodes.JsonObject
         {
-            ["inWorld"] = ctx.GameCtx.Value!.PlayerSerial != 0,
+            ["inWorld"] = ctx.Runtime.GetResource<GameContext>().PlayerSerial != 0,
         },
     };
 
@@ -46,10 +53,10 @@ internal static class LifecycleHandlers
     // AgentServerPlugin.TrackGameStateSystem. Useful for scenarios that
     // need to gate on ServerSelection / CharacterSelection / GameScreen
     // without polling the engine directly.
-    public static JsonRpcResponse GameState(JsonRpcRequest req, in AgentRpcContext ctx) => new()
+    public static JsonRpcResponse GameState(JsonRpcRequest req, in AgentRpcContext<App> ctx) => new()
     {
         Id = req.Id,
-        Result = new JsonObject
+        Result = new System.Text.Json.Nodes.JsonObject
         {
             ["state"] = ctx.State.CurrentGameState,
         },
@@ -57,7 +64,7 @@ internal static class LifecycleHandlers
 
     // Cached character list from the most recent CharacterSelectionInfoEvent.
     // Empty until the first agent.login completes server selection.
-    public static JsonRpcResponse Characters(JsonRpcRequest req, in AgentRpcContext ctx)
+    public static JsonRpcResponse Characters(JsonRpcRequest req, in AgentRpcContext<App> ctx)
     {
         // Manual JSON build: AgentJsonContext source-gen does not register
         // System.String for AOT, so JsonArray<string> serialization throws
@@ -83,11 +90,12 @@ internal static class LifecycleHandlers
         return new JsonRpcResponse
         {
             Id = req.Id,
-            Result = new JsonObject { ["characters"] = JsonNode.Parse(sb.ToString()) },
+            Result = new System.Text.Json.Nodes.JsonObject
+            {
+                ["characters"] = System.Text.Json.Nodes.JsonNode.Parse(sb.ToString()),
+            },
         };
     }
-
-    // TODO: Ready, Shutdown.
 }
 
 #endif
