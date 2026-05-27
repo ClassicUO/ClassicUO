@@ -30,11 +30,13 @@ internal readonly struct CursorPlugin : IPlugin
     }
 
 
+
     private static void RenderCursor(
         Res<UltimaBatcher2D> batch,
         Res<MouseContext> mouseCtx,
         Res<GrabbedItem> grabbedItem,
-        Res<AssetsServer> assets
+        Res<AssetsServer> assets,
+        Res<UoGame> game
     )
     {
         var grabbed = grabbedItem.Value;
@@ -46,11 +48,25 @@ internal readonly struct CursorPlugin : IPlugin
         }
 
         var b = batch.Value;
-        b.Begin();
+        // Cursor position is in LOGICAL pixels; the batch otherwise draws in
+        // PHYSICAL pixels, so without the dpi scale the held sprite drifts
+        // (1 - dpi) * pos away from the cursor (visible as a growing offset
+        // toward bottom-right). Matches GuiRenderingPlugin's transform.
+        var dpi = game.Value.DpiScale;
+        if (dpi <= 0f) dpi = 1f;
+        b.Begin(null, Matrix.CreateScale(dpi));
+        // PointClamp keeps pixel art crisp at integer DPI; LinearClamp smooths
+        // the per-sprite upscale at fractional DPI. Mirrors GuiRenderingPlugin.
+        b.SetSampler(dpi == Math.Floor(dpi) ? SamplerState.PointClamp : SamplerState.LinearClamp);
 
+        // Center the held sprite on the cursor (mirrors main's GameCursor.Draw:
+        // offset = (W/2, H/2) - ItemHold.MouseOffset). MouseOffset is not yet
+        // tracked in the ECS — half-size centering is the visually-correct base
+        // case (grab-point precision is a follow-up when MouseOffset is wired).
+        var halfSize = new Vector2(artInfo.UV.Width * 0.5f, artInfo.UV.Height * 0.5f);
         b.Draw(
             artInfo.Texture,
-            mouseCtx.Value.Position,
+            mouseCtx.Value.Position - halfSize,
             artInfo.UV,
             grabbed.Hue == 0 ? Vector3.UnitZ : new(grabbed.Hue, 1, 1f),
             0f,
@@ -60,6 +76,7 @@ internal readonly struct CursorPlugin : IPlugin
             0f
         );
 
+        b.SetSampler(null);
         b.End();
     }
 }
