@@ -32,7 +32,7 @@ namespace ClassicUO.Network
                 int off = sizeof(ulong) + 2;
 
                 output.Append(' ', off);
-                output.Append(string.Format("Ticks: {0} | {1} |  ID: {2:X2}   Length: {3}\n", Time.Ticks, (toServer ? "Client -> Server" : "Server -> Client"), message[0], message.Length));
+                output.Append(string.Format("Ticks: {0} | {1} |  ID: {2:X2}   Length: {3}\n", (uint)Environment.TickCount, (toServer ? "Client -> Server" : "Server -> Client"), message[0], message.Length));
 
                 if (message[0] == 0x80 || message[0] == 0x91)
                 {

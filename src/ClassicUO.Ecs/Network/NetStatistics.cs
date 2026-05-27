@@ -65,7 +65,7 @@ namespace ClassicUO.Network
 
         public void PingReceived(byte idx)
         {
-            _pings[idx % _pings.Length] = Time.Ticks - _startTickValue;
+            _pings[idx % _pings.Length] = (uint)Environment.TickCount - _startTickValue;
         }
 
         public void SendPing()
@@ -75,7 +75,7 @@ namespace ClassicUO.Network
                 return;
             }
 
-            _startTickValue = Time.Ticks;
+            _startTickValue = (uint)Environment.TickCount;
             _socket.Send_Ping(_pingIdx);
             _pingIdx = (byte)((_pingIdx + 1) % _pings.Length);
         }
@@ -91,9 +91,9 @@ namespace ClassicUO.Network
 
         public void Update()
         {
-            if (_statisticsTimer > Time.Ticks) return;
+            if (_statisticsTimer > (uint)Environment.TickCount) return;
 
-            _statisticsTimer = Time.Ticks + 500;
+            _statisticsTimer = (uint)Environment.TickCount + 500;
 
             DeltaBytesReceived = TotalBytesReceived - _lastTotalBytesReceived;
             DeltaBytesSent = TotalBytesSent - _lastTotalBytesSent;

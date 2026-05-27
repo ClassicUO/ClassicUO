@@ -224,11 +224,6 @@ namespace ClassicUO.Network
                 return;
             }
 
-            if (!ignorePlugin && !Plugin.ProcessSendPacket(ref message))
-            {
-                return;
-            }
-
             if (message.IsEmpty)
                 return;
 

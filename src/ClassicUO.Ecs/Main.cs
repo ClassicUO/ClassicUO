@@ -3,7 +3,6 @@
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
-using ClassicUO.Game.Managers;
 using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Resources;
@@ -31,25 +30,11 @@ namespace ClassicUO
 {
     internal static class Bootstrap
     {
-        [UnmanagedCallersOnly(EntryPoint = "Initialize", CallConvs = new Type[] { typeof(CallConvCdecl) })]
-        static unsafe void Initialize(IntPtr* argv, int argc, HostBindings* hostSetup)
-        {
-            var args = new string[argc];
-            for (int i = 0; i < argc; i++)
-            {
-                args[i] = Marshal.PtrToStringAnsi(argv[i]);
-            }
-
-            var host = new UnmanagedAssistantHost(hostSetup);
-            Boot(host, args);
-        }
-
-
         [STAThread]
-        public static void Main(string[] args) => Boot(null, args);
+        public static void Main(string[] args) => Boot(args);
 
 
-        public static void Boot(UnmanagedAssistantHost pluginHost, string[] args)
+        public static void Boot(string[] args)
         {
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
@@ -202,11 +187,11 @@ namespace ClassicUO
             {
                 if ((flags & INVALID_UO_DIRECTORY) != 0)
                 {
-                    Client.ShowErrorMessage(ResGeneral.YourUODirectoryIsInvalid);
+                    Log.Error(ResGeneral.YourUODirectoryIsInvalid);
                 }
                 else if ((flags & INVALID_UO_VERSION) != 0)
                 {
-                    Client.ShowErrorMessage(ResGeneral.YourUOClientVersionIsInvalid);
+                    Log.Error(ResGeneral.YourUOClientVersionIsInvalid);
                 }
 
                 PlatformHelper.LaunchBrowser(ResGeneral.ClassicUOLink);
@@ -329,12 +314,6 @@ namespace ClassicUO
 
                     case "clientversion":
                         Settings.GlobalSettings.ClientVersion = value;
-
-                        break;
-
-                    case "lastcharactername":
-                    case "lastcharname":
-                        LastCharacterManager.OverrideLastCharacter(value);
 
                         break;
 
