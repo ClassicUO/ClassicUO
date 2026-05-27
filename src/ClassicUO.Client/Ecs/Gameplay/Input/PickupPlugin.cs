@@ -376,14 +376,17 @@ internal readonly struct PickupPlugin : IPlugin
                     break;
 
                 // ModernUO (and most server flavors) don't follow up container /
-                // equip drops with an explicit 0x29 — the item simply reappears
-                // via 0x25 (container add) or 0x2E (equip item) addressed to the
-                // serial we just dropped. Treat those as implicit drop accepts
-                // so PendingDrop / grabbed don't stick forever.
+                // equip / ground drops with an explicit 0x29 — the item simply
+                // reappears via 0x25 (container add), 0x2E (equip item), or
+                // 0x1A/0xF3 (world item) addressed to the serial we just
+                // dropped. Treat those as implicit drop accepts so PendingDrop
+                // / grabbed don't stick forever.
                 case OnUpdateContainerPacket_0x25_Post6017 add25Post when grabbedItem.Value.PendingDrop && add25Post.Serial == grabbedItem.Value.Serial:
                 case OnUpdateContainerPacket_0x25_Pre6017 add25Pre when grabbedItem.Value.PendingDrop && add25Pre.Serial == grabbedItem.Value.Serial:
                 case OnEquipItemPacket_0x2E equip2E when grabbedItem.Value.PendingDrop && equip2E.Serial == grabbedItem.Value.Serial:
-                    Console.WriteLine("[PKT-implicit-ACK] heldSerial=0x{0:X8} sourceUi={1} (0x25/0x2E)",
+                case OnUpdateItemPacket_0x1A upd1A when grabbedItem.Value.PendingDrop && upd1A.Serial == grabbedItem.Value.Serial:
+                case OnUpdateItemSAPacket_0xF3 updF3 when grabbedItem.Value.PendingDrop && updF3.Serial == grabbedItem.Value.Serial:
+                    Console.WriteLine("[PKT-implicit-ACK] heldSerial=0x{0:X8} sourceUi={1} (0x25/0x2E/0x1A/0xF3)",
                         grabbedItem.Value.Serial, grabbedItem.Value.SourceUiEntity);
                     if (grabbedItem.Value.SourceUiEntity != 0)
                     {
