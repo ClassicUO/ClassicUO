@@ -4,6 +4,14 @@ Supervisor + CLI that brings up ModernUO and an `AGENT_BUILD` flavor of the
 ClassicUO desktop client, then drives it over JSON-RPC on loopback. TCP to
 an in-process server inside the desktop client.
 
+**Source of truth for the harness is `ClassicUO.Client` (legacy OOP exe,
+`cuo`).** All `src/ClassicUO.Client/Agent/` code is the canonical harness
+and any porting / debugging should land here first. The ECS exe
+(`ClassicUO.Ecs` / `cuo-ecs`) has its own parallel harness under
+`src/ClassicUO.Ecs/Agent/`, but it lags behind and is updated by
+re-porting from the OOP version. Run the harness against `ClassicUO.Client`
+unless you specifically need the ECS path.
+
 Source under `Commands/` (one file per verb), `Services/` (process / pid
 helpers), `RpcClient.cs`, `Program.cs`.
 
@@ -12,7 +20,7 @@ helpers), `RpcClient.cs`, `Program.cs`.
 ```bash
 # one-time
 dotnet build tools/agent-desktop/AgentDesktop.csproj
-dotnet build src/ClassicUO.Ecs/ClassicUO.Ecs.csproj -p:AGENT_BUILD=true
+dotnet build src/ClassicUO.Client/ClassicUO.Client.csproj -p:AGENT_BUILD=true
 
 # bring up rig (foreground; Ctrl-C tears down unless --persist)
 dotnet tools/agent-desktop/bin/Debug/net10.0/agent-desktop.dll up --persist
@@ -114,7 +122,7 @@ Each step prints a JSON line to stdout. Final line:
 
 ## RPC verbs (server side)
 
-Registered in `src/ClassicUO.Ecs/Agent/Handlers/*Handlers.Registration.cs`.
+Registered in `src/ClassicUO.Client/Agent/Handlers/*Handlers.Registration.cs`.
 Full constants in `src/ClassicUO.Agent.Contracts/RpcVerbs.cs`. Highlights:
 
 - `lifecycle.ping` / `lifecycle.inWorld` / `lifecycle.ready` / `lifecycle.shutdown`
@@ -132,7 +140,7 @@ Full constants in `src/ClassicUO.Agent.Contracts/RpcVerbs.cs`. Highlights:
   P/Invokes SDL2 but FNA is on SDL3, events go to a queue nothing reads.
   Fix: bypass SDL and call `UIManager.KeyboardFocusControl.InvokeTextInput`
   + `Scene.OnTextInput` directly. See
-  `src/ClassicUO.Ecs/Agent/Handlers/InputHandlers.cs`.
+  `src/ClassicUO.Client/Agent/Handlers/InputHandlers.cs`.
 - **Stale `port.json`.** `up` deletes it before spawning; standalone
   `dotnet bin/agent/net10.0/cuo.agent.dll` spawns leave it behind. Delete
   manually before re-spawning if the rig won't come back up.
@@ -141,14 +149,14 @@ Full constants in `src/ClassicUO.Agent.Contracts/RpcVerbs.cs`. Highlights:
 
 All agent code gated on `AGENT_BUILD` (defined by
 `ClassicUO.Agent.Settings.props` when `-p:AGENT_BUILD=true`). Prod build
-strips `src/ClassicUO.Ecs/Agent/`, outputs the standard client
+strips `src/ClassicUO.Client/Agent/`, outputs the standard client
 assembly in `bin/Debug/` or `bin/Release/` (`cuo.dll` for `dotnet run`
 builds; `cuo.exe` on Windows / `cuo` on Linux/macOS for AOT/self-contained
 publish). Agent flavor outputs to `bin/agent/net10.0/cuo.agent.dll`.
 
 Rebuild after C# edits:
 ```bash
-dotnet build src/ClassicUO.Ecs/ClassicUO.Ecs.csproj -p:AGENT_BUILD=true
+dotnet build src/ClassicUO.Client/ClassicUO.Client.csproj -p:AGENT_BUILD=true
 ```
 
 ## Service diagnostics
@@ -169,19 +177,18 @@ dotnet build src/ClassicUO.Ecs/ClassicUO.Ecs.csproj -p:AGENT_BUILD=true
 
 ## Useful references
 
-- Agent server core: `src/ClassicUO.Ecs/Agent/AgentServer.cs`
-- Per-frame plugin (drains synthetic mouse/text, services capture):
-  `src/ClassicUO.Ecs/Agent/AgentServerPlugin.cs`
-- Dispatcher route table: `src/ClassicUO.Ecs/Agent/AgentDispatcher.cs`
-- Handlers: `src/ClassicUO.Ecs/Agent/Handlers/`
+- Agent server core: `src/ClassicUO.Client/Agent/AgentServer.cs`
+- Boot wiring (SDL hooks + GameController instrumentation):
+  `src/ClassicUO.Client/Agent/AgentBootstrap.cs`
+- Dispatcher route table: `src/ClassicUO.Client/Agent/AgentDispatcher.cs`
+- Handlers: `src/ClassicUO.Client/Agent/Handlers/`
 - Verb constants: `src/ClassicUO.Agent.Contracts/RpcVerbs.cs`
-- Synthetic mouse bridge: `src/ClassicUO.Ecs/Engine/Inputs/MouseContext.cs` (AGENT_BUILD branch)
+- Synthetic mouse bridge: `src/ClassicUO.Client/Input/Mouse.cs` (AGENT_BUILD branch — `AgentSetSyntheticPosition` / `AgentSetSyntheticButtons` / `AgentClearSynthetic`)
 - Build flavor toggle: `ClassicUO.Agent.Settings.props`
-- Design doc: `docs/agent-desktop/design.md`
 
 ## Security boundary
 
 Every agent surface lives under `#if AGENT_BUILD`. Default build
-(`dotnet build src/ClassicUO.Ecs`) compiles it out entirely — prod
+(`dotnet build src/ClassicUO.Client`) compiles it out entirely — prod
 artefact contains no `AgentServer`, no `RpcVerbAttribute`, no synthetic
 mouse hooks. Do not move automation logic out of the `AGENT_BUILD` gate.
