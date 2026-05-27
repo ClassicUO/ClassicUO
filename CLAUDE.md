@@ -4,7 +4,7 @@ Guidance for Claude Code when working in this repo.
 
 ## Project Overview
 
-ClassicUO — open-source Ultima Online Classic Client. C# / .NET 9.0 / FNA-XNA. Architecture is ECS-first (TinyEcs + Bevy-style plugin layering). Game logic lives in `src/ClassicUO.Ecs/Ecs/`. Mods are out-of-process WASM (Extism); the host C# code does NOT use the modding API.
+ClassicUO — open-source Ultima Online Classic Client. C# / .NET 9.0 / FNA-XNA. Architecture is ECS-first (TinyEcs + Bevy-style plugin layering). Game logic lives in `src/ClassicUO.Ecs/`. Mods are out-of-process WASM (Extism); the host C# code does NOT use the modding API.
 
 ## Build & Run
 
@@ -27,11 +27,15 @@ For UI / gump work the deterministic harness is preferred — see Agent Harness 
 src/
 ├── ClassicUO.Assets/         UO file-format loaders (ART, MAP, GUMP, SOUND…)
 ├── ClassicUO.Bootstrap/       entry point + WASM host init
-├── ClassicUO.Ecs/             ECS exe (cuo-ecs) — current runtime path
-│   ├── Ecs/                   all gameplay/UI/rendering systems live here
-│   └── Agent/                 AGENT_BUILD JSON-RPC harness
-├── ClassicUO.Client/          legacy OOP exe (cuo) — Game/Network/etc kept as
-│                              parity reference; same source duped from Ecs
+├── ClassicUO.Ecs/             ECS exe (cuo-ecs) — current runtime path.
+│   ├── Assets/Engine/Gameplay/Modding/Network/Rendering/Scenes/UI/
+│   │                          all ECS plugins + systems live here
+│   ├── Agent/                 AGENT_BUILD JSON-RPC harness
+│   └── Game/Configuration/Input/Network/Resources/...
+│                              copied stub support trees (only types
+│                              transitively reached from ECS code)
+├── ClassicUO.Client/          legacy OOP exe (cuo) — full Game/Network
+│                              source kept as parity reference
 ├── ClassicUO.IO/              low-level file I/O
 ├── ClassicUO.Renderer/        rendering primitives + effects + batcher
 ├── ClassicUO.Utility/         common helpers
@@ -43,7 +47,7 @@ tools/agent-desktop/           JSON-RPC harness for driving the AGENT_BUILD clie
 
 ## ECS Rules (HARD)
 
-These are the rules. Apply them every time you write or review host ECS code in `src/ClassicUO.Ecs/Ecs/`.
+These are the rules. Apply them every time you write or review host ECS code in `src/ClassicUO.Ecs/`.
 
 ### 1. Never touch `TinyEcs.World` directly
 
@@ -105,7 +109,7 @@ app.AddPlugin<ChildPlugin>();
 
 Systems are static methods taking `Res<...> / ResMut<...> / Local<...> / Query<...> / Commands / EventWriter<...> / EventReader<...>` parameters — never `World`.
 
-Plugins are composed in `src/ClassicUO.Ecs/Ecs/Boot.cs` (`CuoPlugin.Build`).
+Plugins are composed in `src/ClassicUO.Ecs/Boot.cs` (`CuoPlugin.Build`).
 
 ---
 
@@ -121,7 +125,7 @@ Every UO gump window (server-pushed paperdoll, container, status bar, custom mod
 | **Stack on interact (topmost on top)** | Only the window ROOT carries `GlobalZIndex`; `LayoutSystem` threads that z down to every descendant float automatically. On click latch, bump the root via `UiZCounter.Bump()` — the whole window lifts in one assignment. **Do NOT add per-child GlobalZIndex.** |
 | **Click-capture to game world** | `WindowDragPlugin.ClaimSelectedFromMovable` (Stage.Last) claims `SelectedEntity` at `float.MaxValue` so world/pickup/use systems bail when the cursor is over a window. |
 
-**To spawn a gump**: use `UOGumpBundle` (`src/ClassicUO.Ecs/Ecs/UI/UOGump.cs`). It inserts `Node` + `UiCustom` + `UOCustomRender` + `Interaction.None` + `UOGump` + `UIMovable` + `GlobalZIndex(ZOrder)` in one go. Children are normal Bevy.UI nodes — no tags.
+**To spawn a gump**: use `UOGumpBundle` (`src/ClassicUO.Ecs/UI/UOGump.cs`). It inserts `Node` + `UiCustom` + `UOCustomRender` + `Interaction.None` + `UOGump` + `UIMovable` + `GlobalZIndex(ZOrder)` in one go. Children are normal Bevy.UI nodes — no tags.
 
 **Closing**: do not despawn from inside the gump's own systems. Right-click + `CloseOnRightClick` is the canonical close path. For server-driven closes (e.g. server cancels a container), send `ContainerClosedEvent` / equivalent and let `ContainerGumpPlugin.TearDownClosedUi` despawn.
 
@@ -133,19 +137,19 @@ Container windows have an extra item-aware selection path in `ContainerGumpPlugi
 
 UO-specific rendering primitives are dispatched through `ClayUOCommandType` inside Clay's `CLAY_RENDER_COMMAND_TYPE_CUSTOM`. To add a new primitive:
 
-1. Add an enum value in `ClayUOCommandType` (`src/ClassicUO.Ecs/Ecs/UI/GuiPlugin.cs`).
+1. Add an enum value in `ClayUOCommandType` (`src/ClassicUO.Ecs/UI/GuiPlugin.cs`).
 2. Add a `case` in `GuiRenderingPlugin.cs` custom command switch.
 3. Pull asset via `Res<AssetsServer>` (`assets.Value.Gumps`, `.Arts`, `.Lands`, …).
 4. Draw with `UltimaBatcher2D`. Respect `cmd.zIndex`.
-5. If pixel-perfect hit-test is needed, extend `UiHitTest.PixelHit` (`src/ClassicUO.Ecs/Ecs/UI/UiHitTest.cs`) with a matching case — bounding-box-only is not enough for transparent-area passthrough.
+5. If pixel-perfect hit-test is needed, extend `UiHitTest.PixelHit` (`src/ClassicUO.Ecs/UI/UiHitTest.cs`) with a matching case — bounding-box-only is not enough for transparent-area passthrough.
 
-`ClayUOCommandData` lives at `src/ClassicUO.Ecs/Ecs/UI/GuiPlugin.cs`; commands are buffered via `ClayUOCommandBuffer` and reset per frame.
+`ClayUOCommandData` lives at `src/ClassicUO.Ecs/UI/GuiPlugin.cs`; commands are buffered via `ClayUOCommandBuffer` and reset per frame.
 
 ---
 
 ## Networking
 
-Packet handlers are individual `IncomingPacket` structs registered in `NetworkPlugin.cs`. Each is its own file under `src/ClassicUO.Ecs/Ecs/Network/IncomingPackets/On…Packet_0xXX.cs`. To handle a new packet: write the struct, register it in `NetworkPlugin.Build`, react via Commands / Observers — same ECS rules.
+Packet handlers are individual `IncomingPacket` structs registered in `NetworkPlugin.cs`. Each is its own file under `src/ClassicUO.Ecs/Network/IncomingPackets/On…Packet_0xXX.cs`. To handle a new packet: write the struct, register it in `NetworkPlugin.Build`, react via Commands / Observers — same ECS rules.
 
 ---
 
@@ -153,8 +157,8 @@ Packet handlers are individual `IncomingPacket` structs registered in `NetworkPl
 
 Mods are out-of-process WASM, loaded by Extism. The host (`src/ClassicUO.Ecs/`) talks to mods through:
 
-- **Host → guest**: `HostMessage` (`src/ClassicUO.Ecs/Ecs/Modding/Host/HostMessages.cs`).
-- **Guest → host**: `PluginMessage` (`src/ClassicUO.Ecs/Ecs/Modding/Guest/PluginMessages.cs`) + `Api.Functions` bindings in `Modding/Host/Api.cs`.
+- **Host → guest**: `HostMessage` (`src/ClassicUO.Ecs/Modding/Host/HostMessages.cs`).
+- **Guest → host**: `PluginMessage` (`src/ClassicUO.Ecs/Modding/Guest/PluginMessages.cs`) + `Api.Functions` bindings in `Modding/Host/Api.cs`.
 - **UI**: mods construct UI through `cuo_ui_node` (JSON UINode tree) — host deserializes into ECS entities and routes through `GuiPlugin` / `GuiRenderingPlugin`.
 
 The React reconciler (`src/Mods/user-interface/src/react/reconciler.ts`) is one mod example built on top of those bindings. It is NOT used by host C# code.

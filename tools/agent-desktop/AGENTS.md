@@ -175,7 +175,7 @@ dotnet build src/ClassicUO.Ecs/ClassicUO.Ecs.csproj -p:AGENT_BUILD=true
 - Dispatcher route table: `src/ClassicUO.Ecs/Agent/AgentDispatcher.cs`
 - Handlers: `src/ClassicUO.Ecs/Agent/Handlers/`
 - Verb constants: `src/ClassicUO.Agent.Contracts/RpcVerbs.cs`
-- Synthetic mouse bridge: `src/ClassicUO.Ecs/Ecs/Engine/Inputs/MouseContext.cs` (AGENT_BUILD branch)
+- Synthetic mouse bridge: `src/ClassicUO.Ecs/Engine/Inputs/MouseContext.cs` (AGENT_BUILD branch)
 - Build flavor toggle: `ClassicUO.Agent.Settings.props`
 - Design doc: `docs/agent-desktop/design.md`
 
