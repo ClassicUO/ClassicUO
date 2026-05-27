@@ -330,18 +330,29 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                 ref readonly var info = ref assets.Arts.GetArt(custom.AssetId);
                 if (info.Texture != null && info.UV.Width > 0 && info.UV.Height > 0)
                 {
-                    // Scale-to-fit: shrink down items larger than the node
-                    // bounds (e.g. equipment slot frame items), preserve
-                    // aspect, never scale up. Mirrors main's ItemGumpFixed,
-                    // which clamps draw size to (Width, Height) and centers
-                    // smaller art inside the slot.
+                    // Size rule for slot-clamped item art:
+                    //   * item bounds > slot in either dim → fill slot bounds
+                    //     exactly (no aspect preserve; UO item art is roughly
+                    //     square so distortion is mild),
+                    //   * item bounds ≤ slot in both dims → draw at native
+                    //     size, centered.
+                    // Replaces aspect-preserve "contain" which shrunk elongated
+                    // art so the short dim looked very small in the slot.
                     float artW = info.UV.Width;
                     float artH = info.UV.Height;
                     float boundW = bb.Width  > 0 ? bb.Width  : artW;
                     float boundH = bb.Height > 0 ? bb.Height : artH;
-                    float scale = Math.Min(1f, Math.Min(boundW / artW, boundH / artH));
-                    float destW = artW * scale;
-                    float destH = artH * scale;
+                    float destW, destH;
+                    if (artW > boundW || artH > boundH)
+                    {
+                        destW = boundW;
+                        destH = boundH;
+                    }
+                    else
+                    {
+                        destW = artW;
+                        destH = artH;
+                    }
                     var destRect = new Rectangle(
                         (int)(bb.X + (boundW - destW) * 0.5f),
                         (int)(bb.Y + (boundH - destH) * 0.5f),
