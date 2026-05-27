@@ -22,6 +22,7 @@ float4x4 MatrixTransform;
 float4x4 WorldMatrix;
 float2 Viewport;
 float Brightlight;
+float CircleOfTransparencyRadius;
 
 sampler DrawSampler : register(s0);
 sampler HueSampler0 : register(s1);
@@ -41,6 +42,7 @@ struct PS_INPUT
 	float3 TexCoord : TEXCOORD0;
 	float3 Normal	: TEXCOORD1;
 	float3 Hue		: TEXCOORD2;
+	float3 PixelPos : TEXCOORD3;
 };
 
 float3 get_rgb(float gray, float hue)
@@ -85,6 +87,7 @@ PS_INPUT VertexShaderFunction(VS_INPUT IN)
 	OUT.TexCoord = IN.TexCoord;
 	OUT.Normal = IN.Normal;
 	OUT.Hue = IN.Hue;
+	OUT.PixelPos = OUT.Position.xyz;
 
 	return OUT;
 }
@@ -99,8 +102,32 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	int mode = int(IN.Hue.y);
 	float alpha = IN.Hue.z;
 
+	// CoT flag: callers stuff `alpha + 1.0` to opt in. Use >= 1.5 not > 1.0
+	// so vertex-interpolator float drift around alpha=1.0 can't false-trip.
+	bool useTrans = false;
+	if (alpha >= 1.5f)
+	{
+		useTrans = true;
+		alpha -= 1.0f;
+	}
+
 	if (mode == NONE)
 	{
+		// Keep the un-hued fast path. CoT applies to NONE too if requested.
+		if (useTrans && CircleOfTransparencyRadius > 0)
+		{
+			float2 pixelDist = IN.PixelPos.xy * Viewport * 0.5;
+			float ratio = length(pixelDist) / CircleOfTransparencyRadius;
+			if (ratio < 0.85f)
+				discard;
+			if (ratio < 1.0f)
+			{
+				float t = (ratio - 0.85f) / 0.15f;
+				alpha *= t * t * t;
+				if (alpha < 0.02f)
+					discard;
+			}
+		}
 		return color * alpha;
 	}
 
@@ -162,6 +189,21 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	else if (mode == EFFECT_HUED)
 	{
 		color.rgb = get_rgb(color.g, hue);
+	}
+
+	if (useTrans && CircleOfTransparencyRadius > 0)
+	{
+		float2 pixelDist = IN.PixelPos.xy * Viewport * 0.5;
+		float ratio = length(pixelDist) / CircleOfTransparencyRadius;
+		if (ratio < 0.85f)
+			discard;
+		if (ratio < 1.0f)
+		{
+			float t = (ratio - 0.85f) / 0.15f;
+			alpha *= t * t * t;
+			if (alpha < 0.02f)
+				discard;
+		}
 	}
 
 	return color * alpha;
