@@ -241,6 +241,10 @@ readonly struct InGamePacketsPlugin : IPlugin
         app.AddObserver<On<PacketReceived<OnServerLightLevelPacket_0x4F>>,
             ResMut<GameContext>>(OnServerLightLevel);
 
+        app.AddObserver<On<PacketReceived<OnWarmodePacket_0x72>>,
+            Commands,
+            Query<Data<ServerFlags>, With<Player>>>(OnWarmode);
+
         // Empty stubs — every registered packet has at least one observer so
         // the trigger is consumed silently. Replace with a real observer when
         // the packet gets implemented.
@@ -270,7 +274,6 @@ readonly struct InGamePacketsPlugin : IPlugin
         Stub<OnCharacterAnimationPacket_0x6E>(app);
         Stub<OnGraphicEffectPacket_0x70>(app);
         Stub<OnBulletinBoardPacket_0x71>(app);
-        Stub<OnWarmodePacket_0x72>(app);
         Stub<OnPingPacket_0x73>(app);
         Stub<OnBuyListPacket_0x74>(app);
         Stub<OnUpdateCharacterPacket_0x77>(app);
@@ -1166,5 +1169,26 @@ readonly struct InGamePacketsPlugin : IPlugin
         ResMut<GameContext> gameCtx)
     {
         gameCtx.Value.ServerLightLevel = trig.Event.Packet.Level;
+    }
+
+    // Server echoes the player's warmode state via 0x72 (response to our
+    // Send_ChangeWarMode + spontaneous server-side flips). Mirror main's
+    // PacketHandlers.Warmode by updating the player's ServerFlags. Reinsert
+    // via Commands so OnInsert<ServerFlags> fires — paperdoll button refresh
+    // hooks that observer to swap peace/war button graphics.
+    static void OnWarmode(
+        On<PacketReceived<OnWarmodePacket_0x72>> trig,
+        Commands commands,
+        Query<Data<ServerFlags>, With<Player>> playerQ)
+    {
+        var enabled = trig.Event.Packet.WarmodeEnabled;
+        foreach (var (ent, sf) in playerQ)
+        {
+            var newFlags = enabled
+                ? sf.Ref.Value | Flags.WarMode
+                : sf.Ref.Value & ~Flags.WarMode;
+            if (newFlags == sf.Ref.Value) continue;
+            commands.Entity(ent.Ref).Insert(new ServerFlags { Value = newFlags });
+        }
     }
 }

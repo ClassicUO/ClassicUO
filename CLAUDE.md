@@ -131,6 +131,8 @@ Every UO gump window (server-pushed paperdoll, container, status bar, custom mod
 
 Container windows have an extra item-aware selection path in `ContainerGumpPlugin.UpdateSelectedFromContainerUI`; the generic `ClaimSelectedFromMovable` filters them out via `Without<ContainerWindow>`. Mirror this filter if you add another item-aware claim.
 
+**Buttons fire on release.** Click handlers use `On<UiClick>` (press+release inside same element; drag-off cancels). `On<UiPointerDown>` for drag latch / focus capture only. `On<UiPointerUp>` only when off-target release matters.
+
 ---
 
 ## Custom Rendering (ClayUO commands)

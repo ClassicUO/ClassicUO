@@ -115,6 +115,31 @@ internal readonly struct PaperdollPlugin : IPlugin
         // Commands is passed top-level (not inside the composite) so the
         // observer harness auto-applies its deferred spawns/despawns.
         app.AddObserver<OnInsert<EquipmentSlots>, Commands, PaperdollRebuildParams>(RebuildOnEquip);
+
+        // War mode bit flips ServerFlags.Value -> swap the peace/war button's
+        // UOButton triplet. OnWarmode (0x72) reinserts ServerFlags on the
+        // player; this observer matches buttons by MobileSerial and mutates
+        // UOButton.Normal/Pressed/Over in place (UpdateUOButtonsState then
+        // picks the right asset id per frame from Interaction state).
+        app.AddObserver((
+            OnInsert<ServerFlags> trigger,
+            Query<Data<NetworkSerial>> serialQ,
+            Query<Data<UOButton, PaperdollWarModeButton>> btnQ) =>
+        {
+            if (!serialQ.Contains(trigger.EntityId)) return;
+            var (_, ns) = serialQ.Get(trigger.EntityId);
+            var serial = ns.Ref.Value;
+            bool isWar = (trigger.Component.Value & Flags.WarMode) != 0;
+            var ids = isWar ? (n: (ushort)0x07E8, p: (ushort)0x07E9, o: (ushort)0x07EA)
+                            : (n: (ushort)0x07E5, p: (ushort)0x07E6, o: (ushort)0x07E7);
+            foreach (var (_, btn, tag) in btnQ)
+            {
+                if (tag.Ref.MobileSerial != serial) continue;
+                btn.Ref.Normal = ids.n;
+                btn.Ref.Pressed = ids.p;
+                btn.Ref.Over = ids.o;
+            }
+        });
     }
 
     private static void DisposeOnLogout(
@@ -153,7 +178,8 @@ internal readonly struct PaperdollPlugin : IPlugin
         Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> mobileGraphicQ,
         Query<Data<EquipmentSlots>> equipQ,
         Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> itemQ,
-        Query<Data<NetworkSerial>> itemSerialQ)
+        Query<Data<NetworkSerial>> itemSerialQ,
+        Query<Data<ServerFlags>> flagsQ)
     {
         var tileData = fileManager.Value.TileData.StaticData;
 
@@ -175,7 +201,7 @@ internal readonly struct PaperdollPlugin : IPlugin
             }
 
             BuildWindow(commands, assets.Value, builder.Value, gameCtx.Value, tileData,
-                entitiesMap.Value, mobileGraphicQ, equipQ, itemQ, itemSerialQ,
+                entitiesMap.Value, mobileGraphicQ, equipQ, itemQ, itemSerialQ, flagsQ,
                 zCounter.Value, existingQ.Count(),
                 p.Serial, p.Title, p.Flags);
         }
@@ -228,6 +254,7 @@ internal readonly struct PaperdollPlugin : IPlugin
         Query<Data<EquipmentSlots>> equipQ,
         Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> itemQ,
         Query<Data<NetworkSerial>> itemSerialQ,
+        Query<Data<ServerFlags>> flagsQ,
         UiZCounter zCounter,
         int existingWindowCount,
         uint serial,
@@ -306,11 +333,30 @@ internal readonly struct PaperdollPlugin : IPlugin
             btnGuild.Observe((On<UiPointerDown> _) => Console.WriteLine("[Paperdoll] Guild clicked — no ECS GuildGump"));
             commands.AddChild(root.Id, btnGuild.Id);
 
-            // Peace/war toggle starts in peace graphic. Toggling needs main's
-            // ChangeWarMode + WarMode tracking; for v1 send the request and
-            // let the server's response refresh state.
-            var btnPeaceWar = builder.AddButton(commands, (0x07E5, 0x07E6, 0x07E7), Vector3.UnitZ, new Vector2(185, 44 + 27 * 6));
-            btnPeaceWar.Observe((On<UiPointerDown> _, Res<NetClient> net) => net.Value.Send_ChangeWarMode(true));
+            // Peace/war toggle. Initial graphic mirrors player's current
+            // ServerFlags.WarMode bit; click sends Send_ChangeWarMode(!current);
+            // server echoes 0x72 -> OnWarmode reinserts ServerFlags ->
+            // RefreshWarModeButtons observer flips this button's UOButton
+            // gump triplet (peace 0x07E5/6/7 <-> war 0x07E8/9/A).
+            bool isWarMode = false;
+            if (entitiesMap.TryGet(serial, out var playerEnt) && flagsQ.Contains(playerEnt))
+            {
+                var (_, sf) = flagsQ.Get(playerEnt);
+                isWarMode = (sf.Ref.Value & Flags.WarMode) != 0;
+            }
+            var warIds = isWarMode ? (0x07E8, 0x07E9, 0x07EA) : (0x07E5, 0x07E6, 0x07E7);
+            var btnPeaceWar = builder.AddButton(commands, ((ushort)warIds.Item1, (ushort)warIds.Item2, (ushort)warIds.Item3), Vector3.UnitZ, new Vector2(185, 44 + 27 * 6))
+                .Insert(new PaperdollWarModeButton { MobileSerial = serial });
+            btnPeaceWar.Observe((On<UiClick> _, Res<NetClient> net, Query<Data<ServerFlags>, With<Player>> playerQ) =>
+            {
+                bool current = false;
+                foreach (var (_, sf) in playerQ)
+                {
+                    current = (sf.Ref.Value & Flags.WarMode) != 0;
+                    break;
+                }
+                net.Value.Send_ChangeWarMode(!current);
+            });
             commands.AddChild(root.Id, btnPeaceWar.Id);
         }
 
@@ -645,6 +691,15 @@ internal struct PaperdollSlot
 internal struct PaperdollBodyChild
 {
     public ulong WindowEntity;
+}
+
+// Carried by the player's peace/war toggle button. RefreshWarModeButtons
+// observer matches MobileSerial to the player whose ServerFlags just
+// flipped and rewrites UOButton's Normal/Pressed/Over to the right gump
+// triplet (peace 0x07E5/6/7 or war 0x07E8/9/A).
+internal struct PaperdollWarModeButton
+{
+    public uint MobileSerial;
 }
 
 // Carried by each equipment overlay sprite that represents a real equipped
