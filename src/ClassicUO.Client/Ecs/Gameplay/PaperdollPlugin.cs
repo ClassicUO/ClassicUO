@@ -66,10 +66,36 @@ internal readonly struct PaperdollPlugin : IPlugin
         GameLayer.Talisman,
     };
 
+    // Equipment slot frame positions, mirroring main's BuildGump: left column
+    // (9 slots) at x=2, right column (6 slots) at x=162, each 21px apart from
+    // y=70. Each slot draws a tiled bg + 0x2344 border frame; the equipped
+    // item's art icon is layered between them.
+    private static readonly (GameLayer Layer, int X, int Y)[] s_slotLayout = BuildSlotLayout();
+
+    private static (GameLayer, int, int)[] BuildSlotLayout()
+    {
+        var left = new[]
+        {
+            GameLayer.Helmet, GameLayer.Earrings, GameLayer.Necklace,
+            GameLayer.Ring, GameLayer.Bracelet, GameLayer.Tunic,
+            GameLayer.OneHanded, GameLayer.TwoHanded, GameLayer.Talisman,
+        };
+        var right = new[]
+        {
+            GameLayer.Robe, GameLayer.Gloves, GameLayer.Pants,
+            GameLayer.Arms, GameLayer.Cloak, GameLayer.Shoes,
+        };
+        var list = new System.Collections.Generic.List<(GameLayer, int, int)>(left.Length + right.Length);
+        for (int i = 0; i < left.Length; i++)
+            list.Add((left[i], 2, 70 + 21 * i));
+        for (int i = 0; i < right.Length; i++)
+            list.Add((right[i], 162, 70 + 21 * i));
+        return list.ToArray();
+    }
+
     public void Build(App app)
     {
         var spawnFn = SpawnOnOpenPaperdoll;
-        var refreshFn = RefreshOnEquipmentChange;
         var disposeFn = DisposeOnLogout;
 
         app
@@ -78,17 +104,17 @@ internal readonly struct PaperdollPlugin : IPlugin
                 .RunIf((EventReader<IPacket> r) => r.HasEvents)
                 .Build()
 
-            // Live refresh: any mobile whose EquipmentSlots changed this
-            // tick triggers a body+overlay rebuild on every paperdoll window
-            // pointing at that serial. Cheap because the change-detect
-            // filter prunes to mobiles actually mutated this frame.
-            .AddSystem(refreshFn)
-                .InStage(Stage.Update)
-                .Build()
-
             .AddSystem(disposeFn)
                 .OnExit(GameState.GameScreen)
                 .Build();
+
+        // Event-driven refresh: rebuild body+overlays only when a mobile's
+        // EquipmentSlots is actually (re)inserted. Packet handlers dirty-check
+        // before insert (EquipmentSlots.ContentEquals), so this fires on real
+        // equip/unequip only — no per-frame Changed scan, no polling system.
+        // Commands is passed top-level (not inside the composite) so the
+        // observer harness auto-applies its deferred spawns/despawns.
+        app.AddObserver<OnInsert<EquipmentSlots>, Commands, PaperdollRebuildParams>(RebuildOnEquip);
     }
 
     private static void DisposeOnLogout(
@@ -155,50 +181,39 @@ internal readonly struct PaperdollPlugin : IPlugin
         }
     }
 
-    // Despawn-and-rebuild body+overlays for any paperdoll whose target
-    // mobile's EquipmentSlots changed since the last system run. Mirrors
-    // main's PaperDollInteractable.UpdateUI which clears its sub-control
-    // tree and re-adds gumps each tick — but gated here on Changed<> so we
-    // only pay the cost on actual equip/unequip events.
-    private static void RefreshOnEquipmentChange(
+    // Observer: a mobile's EquipmentSlots was (re)inserted. Rebuild the
+    // body+overlay subtree of every open paperdoll targeting that mobile.
+    // Fires only on a real equip/unequip — packet handlers dirty-check
+    // before insert (EquipmentSlots.ContentEquals) — so there is no polling
+    // system and no per-frame Changed scan. trigger.EntityId is the mobile
+    // entity; resolve its NetworkSerial to match PaperdollWindow.Serial.
+    private static void RebuildOnEquip(
+        OnInsert<EquipmentSlots> trigger,
         Commands commands,
-        Res<NetworkEntitiesMap> entitiesMap,
-        Res<AssetsServer> assets,
-        Res<GumpBuilder> builder,
-        Res<GameContext> gameCtx,
-        Res<UOFileManager> fileManager,
-        Query<Data<NetworkSerial, EquipmentSlots>, Filter<Changed<EquipmentSlots>>> changedMobilesQ,
-        Query<Data<PaperdollWindow, GlobalZIndex>> windowsQ,
-        Query<Data<PaperdollBodyChild>> bodyChildQ,
-        Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> mobileGraphicQ,
-        Query<Data<EquipmentSlots>> equipQ,
-        Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> itemQ,
-        Query<Data<NetworkSerial>> itemSerialQ)
+        PaperdollRebuildParams p)
     {
-        if (changedMobilesQ.Count() == 0) return;
-        if (windowsQ.Count() == 0) return;
+        var mobileEnt = trigger.EntityId;
+        if (!p.SerialQ.Contains(mobileEnt)) return;
+        var (_, mns) = p.SerialQ.Get(mobileEnt);
+        var serial = mns.Ref.Value;
 
-        var tileData = fileManager.Value.TileData.StaticData;
+        if (p.WindowsQ.Count() == 0) return;
+        var tileData = p.Files.Value.TileData.StaticData;
 
-        foreach (var (_, ns, _) in changedMobilesQ)
+        foreach (var (windowEnt, win) in p.WindowsQ)
         {
-            var serial = ns.Ref.Value;
+            if (win.Ref.Serial != serial) continue;
 
-            foreach (var (windowEnt, win, winZ) in windowsQ)
+            foreach (var (childEnt, child) in p.BodyChildQ)
             {
-                if (win.Ref.Serial != serial) continue;
-
-                foreach (var (childEnt, child) in bodyChildQ)
-                {
-                    if (child.Ref.WindowEntity != windowEnt.Ref) continue;
-                    commands.Entity(childEnt.Ref).Despawn();
-                }
-
-                BuildBodyAndOverlays(commands, assets.Value, builder.Value,
-                    gameCtx.Value, tileData, entitiesMap.Value,
-                    mobileGraphicQ, equipQ, itemQ, itemSerialQ,
-                    windowEnt.Ref, serial, winZ.Ref.Value);
+                if (child.Ref.WindowEntity != windowEnt.Ref) continue;
+                commands.Entity(childEnt.Ref).Despawn();
             }
+
+            BuildBodyAndOverlays(commands, p.Assets.Value, p.Builder.Value,
+                p.GameCtx.Value, tileData, p.Entities.Value,
+                p.GraphicHueQ, p.EquipQ, p.GraphicHueQ, p.SerialQ,
+                windowEnt.Ref, serial);
         }
     }
 
@@ -230,34 +245,19 @@ internal readonly struct PaperdollPlugin : IPlugin
         // to mouse pos when no saved position exists) — close enough for v1.
         var spawnPos = new Vector2(100 + (existingWindowCount & 0x07) * 24, 100);
 
-        var root = builder.AddGumpRoot(commands, bgId, Vector3.UnitZ, spawnPos, zCounter)
+        var root = builder.SpawnUOGump(commands, bgId, Vector3.UnitZ, spawnPos, zCounter)
             .Insert(new PaperdollWindow
             {
                 Serial = serial,
                 IsPlayer = isPlayer,
             });
 
+        // Body, equipment overlays, and the equipment-slot frames + item icons
+        // are all built here (and rebuilt by the equip observer). Slots live in
+        // BuildBodyAndOverlays so the bg→icon→frame paint order is stable and
+        // the icon tracks equip changes.
         BuildBodyAndOverlays(commands, assets, builder, gameCtx, tileData, entitiesMap,
-            mobileGraphicQ, equipQ, itemQ, itemSerialQ, root.Id, serial, parentZ: null);
-
-        // Equipment slot frames (15) — left column 9, right column 6.
-        // Same coords as main's BuildGump (PaperDollGump.cs:264..283).
-        var leftLayers = new[]
-        {
-            GameLayer.Helmet, GameLayer.Earrings, GameLayer.Necklace,
-            GameLayer.Ring, GameLayer.Bracelet, GameLayer.Tunic,
-            GameLayer.OneHanded, GameLayer.TwoHanded, GameLayer.Talisman,
-        };
-        for (int i = 0; i < leftLayers.Length; i++)
-            AddSlot(commands, builder, root.Id, serial, leftLayers[i], 2, 70 + 21 * i);
-
-        var rightLayers = new[]
-        {
-            GameLayer.Robe, GameLayer.Gloves, GameLayer.Pants,
-            GameLayer.Arms, GameLayer.Cloak, GameLayer.Shoes,
-        };
-        for (int i = 0; i < rightLayers.Length; i++)
-            AddSlot(commands, builder, root.Id, serial, rightLayers[i], 162, 70 + 21 * i);
+            mobileGraphicQ, equipQ, itemQ, itemSerialQ, root.Id, serial);
 
         if (isPlayer)
         {
@@ -415,8 +415,7 @@ internal readonly struct PaperdollPlugin : IPlugin
         Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> itemQ,
         Query<Data<NetworkSerial>> itemSerialQ,
         ulong rootId,
-        uint serial,
-        int? parentZ)
+        uint serial)
     {
         // Mobile lookup for body graphic + equipment iteration. Tolerant of
         // a missing mobile entity (paperdoll for an unloaded NPC just gets a
@@ -443,12 +442,69 @@ internal readonly struct PaperdollPlugin : IPlugin
         var bodyId = ResolveBodyGraphic(mobileGraphic, isFemale);
         if (bodyId == 0) return;
 
+        // AddChild at increasing indices starting from 0 so body children land
+        // at the FRONT of root.Children. On initial spawn root has no children
+        // yet — TinyEcs's AddChild appends when index >= count, so insertion
+        // degrades to append. On rebuild (despawn-then-respawn after equip)
+        // root.Children already holds the chrome (buttons / virtue pic / profile
+        // / title); inserting at the front keeps body+overlays UNDER those in
+        // paint order so wide gumps (cloaks/robes) can't visually or
+        // hit-test-wise cover the x=185 button column.
+        int childIdx = 0;
+
         var bodyHue = ToShaderHue(mobileHue);
         var body = builder.AddGump(commands, bodyId, bodyHue, new Vector2(8, 19))
             .Insert(new PaperdollBodyChild { WindowEntity = rootId });
-        if (parentZ.HasValue)
-            body.Insert(new GlobalZIndex(parentZ.Value));
-        commands.AddChild(rootId, body.Id);
+        commands.AddChild(rootId, body.Id, childIdx++);
+
+        // Equipment slot frames (always) + the equipped item's art icon, in
+        // bg → icon → frame paint order. The 0x2344 frame is a hollow border,
+        // so the centered icon shows through it. Icons carry PaperdollEquipUI
+        // so each slot is draggable (lift the item out) like the body overlays.
+        // AddArtSized clamps oversized art to the 19x20 slot (renderer scales
+        // down + centers, never upscales).
+        foreach (var (slLayer, sx, sy) in s_slotLayout)
+        {
+            var slotBg = builder.AddGumpTiled(commands, 0x243A, Vector3.UnitZ, new Vector2(sx, sy), new Vector2(19, 20))
+                .Insert(new PaperdollBodyChild { WindowEntity = rootId });
+            commands.AddChild(rootId, slotBg.Id, childIdx++);
+
+            if (slots.HasValue)
+            {
+                var slotItemEnt = slots.Value[slLayer];
+                if (slotItemEnt != 0 && itemQ.Contains(slotItemEnt) && itemSerialQ.Contains(slotItemEnt))
+                {
+                    var (_, sig, sih) = itemQ.Get(slotItemEnt);
+                    var artId = sig.Ref.Value;
+                    if (artId != 0)
+                    {
+                        var artHue = sih.IsValid() ? ToShaderHue((ushort)(sih.Ref.Value & 0x3FFF)) : Vector3.UnitZ;
+                        var (_, slNs) = itemSerialQ.Get(slotItemEnt);
+                        // No Interaction component: PickupPlugin's latch reads
+                        // bbox+PixelHit directly via equipUiQ — Interaction is
+                        // unused. Adding it makes Bevy.UI's InteractionSystem
+                        // route hovers/presses to this icon, which steals
+                        // UiPointerDown from buttons/chrome when the icon's
+                        // bbox+opaque-pixel overlaps theirs.
+                        var icon = builder.AddArtSized(commands, artId, artHue, new Vector2(sx, sy), new Vector2(19, 20))
+                            .Insert(new PaperdollBodyChild { WindowEntity = rootId })
+                            .Insert(new PaperdollEquipUI
+                            {
+                                ItemSerial = slNs.Ref.Value,
+                                Layer = slLayer,
+                                MobileSerial = serial,
+                                WindowEntity = rootId,
+                            });
+                        commands.AddChild(rootId, icon.Id, childIdx++);
+                    }
+                }
+            }
+
+            var slotFrame = builder.AddGump(commands, 0x2344, Vector3.UnitZ, new Vector2(sx, sy))
+                .Insert(new PaperdollBodyChild { WindowEntity = rootId })
+                .Insert(new PaperdollSlot { MobileSerial = serial, Layer = slLayer });
+            commands.AddChild(rootId, slotFrame.Id, childIdx++);
+        }
 
         if (!slots.HasValue) return;
 
@@ -476,24 +532,30 @@ internal readonly struct PaperdollPlugin : IPlugin
             }
 
             var equipHue = ih.IsValid() ? ToShaderHue((ushort)(ih.Ref.Value & 0x3FFF)) : Vector3.UnitZ;
-            // Pickup-from-paperdoll: tag the overlay with the item's serial
-            // + layer + owning mobile so PickupPlugin can latch on press and
-            // resolve to the game entity. Interaction.None makes the sprite
-            // hit-testable by Bevy.UI.
-            var (_, itemNs) = itemSerialQ.Get(itemEnt);
             var equipPic = builder.AddGump(commands, equipGump, equipHue, new Vector2(8, 19))
-                .Insert(new PaperdollBodyChild { WindowEntity = rootId })
-                .Insert(Interaction.None)
-                .Insert(new PaperdollEquipUI
+                .Insert(new PaperdollBodyChild { WindowEntity = rootId });
+
+            // Liftability mirrors main's PaperDollInteractable.CanLift: Hair and
+            // Beard are never liftable (they're part of the body). Liftable
+            // overlays carry PaperdollEquipUI so PickupPlugin's latch (bbox +
+            // PixelHit, no Interaction filter) can resolve them; non-liftable
+            // ones just render. No Interaction component on purpose — adding it
+            // would put the overlay in Bevy.UI's interactives query and let its
+            // bbox+opaque-pixel steal UiPointerDown from buttons/chrome it
+            // overlaps (wide cloaks/robes can reach the x=185 button column).
+            bool liftable = layer != GameLayer.Hair && layer != GameLayer.Beard;
+            if (liftable && itemSerialQ.Contains(itemEnt))
+            {
+                var (_, itemNs) = itemSerialQ.Get(itemEnt);
+                equipPic.Insert(new PaperdollEquipUI
                 {
                     ItemSerial = itemNs.Ref.Value,
                     Layer = layer,
                     MobileSerial = serial,
                     WindowEntity = rootId,
                 });
-            if (parentZ.HasValue)
-                equipPic.Insert(new GlobalZIndex(parentZ.Value));
-            commands.AddChild(rootId, equipPic.Id);
+            }
+            commands.AddChild(rootId, equipPic.Id, childIdx++);
         }
 
         // Backpack overlay. Layer.Backpack uses MALE_GUMP_OFFSET regardless
@@ -516,44 +578,15 @@ internal readonly struct PaperdollPlugin : IPlugin
                     int bx = (gameCtx.ClientFeatures & CharacterListFlags.CLF_PALADIN_NECROMANCER_TOOLTIPS) != 0 ? 6 : 0;
                     var bpHue = bh.IsValid() ? ToShaderHue((ushort)(bh.Ref.Value & 0x3FFF)) : Vector3.UnitZ;
                     // Body sprite lives at (8, 19) absolute; backpack offsets
-                    // from there (-bx, 0). Mirrors main's PaperDollInteractable
-                    // origin + GumpPicEquipment relative coords.
-                    var (_, bpNs) = itemSerialQ.Get(backpackEnt);
+                    // from there (-bx, 0). Backpack is NOT liftable in main
+                    // (GumpPicEquipment with no CanLift — it's a double-click-to-
+                    // open target), so no PaperdollEquipUI: render only.
                     var bpPic = builder.AddGump(commands, bpGump, bpHue, new Vector2(8 - bx, 19))
-                        .Insert(new PaperdollBodyChild { WindowEntity = rootId })
-                        .Insert(Interaction.None)
-                        .Insert(new PaperdollEquipUI
-                        {
-                            ItemSerial = bpNs.Ref.Value,
-                            Layer = GameLayer.Backpack,
-                            MobileSerial = serial,
-                            WindowEntity = rootId,
-                        });
-                    if (parentZ.HasValue)
-                        bpPic.Insert(new GlobalZIndex(parentZ.Value));
-                    commands.AddChild(rootId, bpPic.Id);
+                        .Insert(new PaperdollBodyChild { WindowEntity = rootId });
+                    commands.AddChild(rootId, bpPic.Id, childIdx++);
                 }
             }
         }
-    }
-
-    private static void AddSlot(
-        Commands commands,
-        GumpBuilder builder,
-        ulong rootId,
-        uint mobileSerial,
-        GameLayer layer,
-        int x,
-        int y)
-    {
-        // Two-sprite frame: 0x243A tiled bg + 0x2344 overlay. Sized 19x20.
-        var bg = builder.AddGumpTiled(commands, 0x243A, Vector3.UnitZ,
-            new Vector2(x, y), new Vector2(19, 20));
-        commands.AddChild(rootId, bg.Id);
-
-        var frame = builder.AddGump(commands, 0x2344, Vector3.UnitZ, new Vector2(x, y))
-            .Insert(new PaperdollSlot { MobileSerial = mobileSerial, Layer = layer });
-        commands.AddChild(rootId, frame.Id);
     }
 
     // Mirrors PaperDollInteractable.UpdateUI's body picker.
@@ -625,4 +658,37 @@ internal struct PaperdollEquipUI
     public GameLayer Layer;
     public uint MobileSerial;
     public ulong WindowEntity;
+}
+
+// Composite param for the OnInsert<EquipmentSlots> observer. Bundles the
+// resources + queries the rebuild needs into one param so the observer's
+// generic arity stays small. Commands is NOT here — it's passed top-level
+// so the observer harness auto-applies its deferred ops. GraphicHueQ doubles
+// for mobile + item lookups; SerialQ for mobile + item serials.
+internal sealed class PaperdollRebuildParams : CompositeSystemParam
+{
+    public readonly Res<NetworkEntitiesMap> Entities;
+    public readonly Res<AssetsServer> Assets;
+    public readonly Res<GumpBuilder> Builder;
+    public readonly Res<GameContext> GameCtx;
+    public readonly Res<UOFileManager> Files;
+    public readonly Query<Data<NetworkSerial>> SerialQ;
+    public readonly Query<Data<PaperdollWindow>> WindowsQ;
+    public readonly Query<Data<PaperdollBodyChild>> BodyChildQ;
+    public readonly Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> GraphicHueQ;
+    public readonly Query<Data<EquipmentSlots>> EquipQ;
+
+    public PaperdollRebuildParams()
+    {
+        Entities    = Add(new Res<NetworkEntitiesMap>());
+        Assets      = Add(new Res<AssetsServer>());
+        Builder     = Add(new Res<GumpBuilder>());
+        GameCtx     = Add(new Res<GameContext>());
+        Files       = Add(new Res<UOFileManager>());
+        SerialQ     = Add(new Query<Data<NetworkSerial>>());
+        WindowsQ    = Add(new Query<Data<PaperdollWindow>>());
+        BodyChildQ  = Add(new Query<Data<PaperdollBodyChild>>());
+        GraphicHueQ = Add(new Query<Data<Graphic, Hue>, Filter<Optional<Hue>>>());
+        EquipQ      = Add(new Query<Data<EquipmentSlots>>());
+    }
 }
