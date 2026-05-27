@@ -19,23 +19,57 @@ struct OnLoginRequest
     public ushort Port;
 }
 
+internal struct PacketReceived<T> where T : struct, IPacket
+{
+    public T Packet;
+}
+
 internal sealed class PacketsMap
 {
-    private readonly Dictionary<byte, Func<IPacket>> _map = new();
+    private delegate void TypedDispatch(Commands commands, ReadOnlySpan<byte> payload);
 
-    public void Add<T>(byte id) where T : IPacket, new()
+    private readonly Dictionary<byte, Func<IPacket>> _map = new();
+    private readonly Dictionary<byte, TypedDispatch> _typedMap = new();
+
+    public void Add<T>(byte id) where T : struct, IPacket
     {
-        var fn = () => (IPacket)new T();
+        var fn = () => (IPacket)default(T);
         _map[id] = fn;
     }
 
-    public void Add<T>() where T : IPacket, new()
+    public void Add<T>() where T : struct, IPacket
     {
-        var temp = new T();
-        Add<T>(temp.Id);
+        Add<T>(default(T).Id);
+    }
+
+    public void AddTyped<T>() where T : struct, IPacket
+    {
+        var id = default(T).Id;
+        _typedMap[id] = (commands, payload) =>
+        {
+            var reader = new StackDataReader(payload);
+            var p = new T();
+            p.Fill(reader);
+            commands.EmitTrigger(new PacketReceived<T> { Packet = p });
+        };
+    }
+
+    // Register both boxed (Add) and typed (AddTyped) dispatch so consumers can
+    // pick either EventReader<IPacket> or On<PacketReceived<T>> observers.
+    public void Register<T>() where T : struct, IPacket
+    {
+        Add<T>();
+        AddTyped<T>();
     }
 
     public bool TryGetValue(byte id, out Func<IPacket> fn) => _map.TryGetValue(id, out fn);
+
+    public bool TryDispatch(byte id, Commands commands, ReadOnlySpan<byte> payload)
+    {
+        if (!_typedMap.TryGetValue(id, out var d)) return false;
+        d(commands, payload);
+        return true;
+    }
 }
 
 readonly struct NetworkPlugin : IPlugin
@@ -57,115 +91,118 @@ readonly struct NetworkPlugin : IPlugin
                 Res<GameContext> gameCtx
             ) =>
             {
-                packetsMap.Value.Add<OnEnterWorldPacket_0x1B>();
-                packetsMap.Value.Add<OnLoginCompletePacket_0x55>();
-                packetsMap.Value.Add<OnExtendedCommandPacket_0xBF>();
-                packetsMap.Value.Add<OnClientVersionPacket_0xBD>();
-                packetsMap.Value.Add<OnUnicodeSpeechPacket_0xAE>();
-                packetsMap.Value.Add<OnUpdateObjectPacket_0xD3>();
-                packetsMap.Value.Add<OnUpdateObjectAltPacket_0x78>();
-                packetsMap.Value.Add<OnViewRangePacket_0xC8>();
-                packetsMap.Value.Add<OnAsciiSpeechPacket_0x1C>();
-                packetsMap.Value.Add<OnUpdateItemPacket_0x1A>();
-                packetsMap.Value.Add<OnDamagePacket_0x0B>();
-                packetsMap.Value.Add<OnCharacterStatusPacket_0x11>();
-                packetsMap.Value.Add<OnDenyWalkPacket_0x21>();
-                packetsMap.Value.Add<OnConfirmWalkPacket_0x22>();
-                packetsMap.Value.Add<OnOpenContainerPacket_0x24>();
+                packetsMap.Value.Register<OnDamagePacket_0x0B>();
+                packetsMap.Value.Register<OnCharacterStatusPacket_0x11>();
+                packetsMap.Value.Register<OnHealthBarStatusPacket_0x16>();
+                packetsMap.Value.Register<OnHealthBarStatusDetailsPacket_0x17>();
+                packetsMap.Value.Register<OnUpdateItemPacket_0x1A>();
+                packetsMap.Value.Register<OnEnterWorldPacket_0x1B>();
+                packetsMap.Value.Register<OnAsciiSpeechPacket_0x1C>();
+                packetsMap.Value.Register<OnDeleteObjectPacket_0x1D>();
+                packetsMap.Value.Register<OnUpdatePlayerPacket_0x20>();
+                packetsMap.Value.Register<OnDenyWalkPacket_0x21>();
+                packetsMap.Value.Register<OnConfirmWalkPacket_0x22>();
+                packetsMap.Value.Register<OnDragAnimationPacket_0x23>();
+                packetsMap.Value.Register<OnOpenContainerPacket_0x24>();
                 if (gameCtx.Value.ClientVersion < ClientVersion.CV_6017)
-                    packetsMap.Value.Add<OnUpdateContainerPacket_0x25_Pre6017>();
+                    packetsMap.Value.Register<OnUpdateContainerPacket_0x25_Pre6017>();
                 else
-                    packetsMap.Value.Add<OnUpdateContainerPacket_0x25_Post6017>();
-                packetsMap.Value.Add<OnDenyMoveItemPacket_0x27>();
-                packetsMap.Value.Add<OnEndDraggingItemPacket_0x28>();
-                packetsMap.Value.Add<OnDropItemOkPacket_0x29>();
-                packetsMap.Value.Add<OnHealthBarStatusPacket_0x16>();
-                packetsMap.Value.Add<OnHealthBarStatusDetailsPacket_0x17>();
-                packetsMap.Value.Add<OnDeleteObjectPacket_0x1D>();
-                packetsMap.Value.Add<OnUpdatePlayerPacket_0x20>();
-                packetsMap.Value.Add<OnDragAnimationPacket_0x23>();
-                packetsMap.Value.Add<OnShowDeathScreenPacket_0x2C>();
-                packetsMap.Value.Add<OnMobileAttributesPacket_0x2D>();
-                packetsMap.Value.Add<OnEquipItemPacket_0x2E>();
-                packetsMap.Value.Add<OnSwingPacket_0x2F>();
-                packetsMap.Value.Add<OnUpdateSkillsPacket_0x3A>();
-                packetsMap.Value.Add<OnPathfindingPacket_0x38>();
+                    packetsMap.Value.Register<OnUpdateContainerPacket_0x25_Post6017>();
+                packetsMap.Value.Register<OnDenyMoveItemPacket_0x27>();
+                packetsMap.Value.Register<OnEndDraggingItemPacket_0x28>();
+                packetsMap.Value.Register<OnDropItemOkPacket_0x29>();
+                packetsMap.Value.Register<OnShowDeathScreenPacket_0x2C>();
+                packetsMap.Value.Register<OnMobileAttributesPacket_0x2D>();
+                packetsMap.Value.Register<OnEquipItemPacket_0x2E>();
+                packetsMap.Value.Register<OnSwingPacket_0x2F>();
+                packetsMap.Value.Register<OnPathfindingPacket_0x38>();
+                packetsMap.Value.Register<OnUpdateSkillsPacket_0x3A>();
                 if (gameCtx.Value.ClientVersion < ClientVersion.CV_6017)
-                    packetsMap.Value.Add<OnUpdateContainerItemsPacket_0x3C_Pre6017>();
+                    packetsMap.Value.Register<OnUpdateContainerItemsPacket_0x3C_Pre6017>();
                 else
-                    packetsMap.Value.Add<OnUpdateContainerItemsPacket_0x3C_Post6017>();
-                packetsMap.Value.Add<OnPlayerLightLevelPacket_0x4E>();
-                packetsMap.Value.Add<OnServerLightLevelPacket_0x4F>();
-                packetsMap.Value.Add<OnSoundEffectPacket_0x54>();
-                packetsMap.Value.Add<OnPlayMusicPacket_0x6D>();
-                packetsMap.Value.Add<OnMapDataPacket_0x56>();
-                packetsMap.Value.Add<OnWeatherPacket_0x65>();
-                packetsMap.Value.Add<OnBookPagesPacket_0x66>();
-                packetsMap.Value.Add<OnCharacterAnimationPacket_0x6E>();
-                packetsMap.Value.Add<OnGraphicEffectPacket_0x70>();
-                packetsMap.Value.Add<OnGraphicEffectC0Packet_0xC0>();
-                packetsMap.Value.Add<OnGraphicEffectC7Packet_0xC7>();
-                packetsMap.Value.Add<OnBulletinBoardPacket_0x71>();
-                packetsMap.Value.Add<OnWarmodePacket_0x72>();
-                packetsMap.Value.Add<OnPingPacket_0x73>();
-                packetsMap.Value.Add<OnBuyListPacket_0x74>();
-                packetsMap.Value.Add<OnUpdateCharacterPacket_0x77>();
-                packetsMap.Value.Add<OnUpdateCharacterAltPacket_0xD2>();
-                packetsMap.Value.Add<OnOpenMenuPacket_0x7C>();
-                packetsMap.Value.Add<OnOpenPaperdollPacket_0x88>();
-                packetsMap.Value.Add<OnCorpseEquipmentPacket_0x89>();
-                packetsMap.Value.Add<OnShowMapPacket_0x90_Pre308Z>();
+                    packetsMap.Value.Register<OnUpdateContainerItemsPacket_0x3C_Post6017>();
+                packetsMap.Value.Register<OnPlayerLightLevelPacket_0x4E>();
+                packetsMap.Value.Register<OnServerLightLevelPacket_0x4F>();
+                packetsMap.Value.Register<OnSoundEffectPacket_0x54>();
+                packetsMap.Value.Register<OnLoginCompletePacket_0x55>();
+                packetsMap.Value.Register<OnMapDataPacket_0x56>();
+                packetsMap.Value.Register<OnWeatherPacket_0x65>();
+                packetsMap.Value.Register<OnBookPagesPacket_0x66>();
+                packetsMap.Value.Register<OnPlayMusicPacket_0x6D>();
+                packetsMap.Value.Register<OnCharacterAnimationPacket_0x6E>();
+                packetsMap.Value.Register<OnGraphicEffectPacket_0x70>();
+                packetsMap.Value.Register<OnBulletinBoardPacket_0x71>();
+                packetsMap.Value.Register<OnWarmodePacket_0x72>();
+                packetsMap.Value.Register<OnPingPacket_0x73>();
+                packetsMap.Value.Register<OnBuyListPacket_0x74>();
+                packetsMap.Value.Register<OnUpdateCharacterPacket_0x77>();
+                packetsMap.Value.Register<OnUpdateObjectAltPacket_0x78>();
+                packetsMap.Value.Register<OnOpenMenuPacket_0x7C>();
+                packetsMap.Value.Register<OnOpenPaperdollPacket_0x88>();
+                packetsMap.Value.Register<OnCorpseEquipmentPacket_0x89>();
                 if (gameCtx.Value.ClientVersion < ClientVersion.CV_308Z)
-                    packetsMap.Value.Add<OnShowMapFacetPacket_0xF5_Pre308Z>();
+                    packetsMap.Value.Register<OnShowMapPacket_0x90_Pre308Z>();
                 else
-                    packetsMap.Value.Add<OnShowMapFacetPacket_0xF5_Post308Z>();
-                packetsMap.Value.Add<OnOpenBookPacket_0x93>();
-                packetsMap.Value.Add<OnOpenBookAltPacket_0xD4>();
-                packetsMap.Value.Add<OnColorPickerPacket_0x95>();
-                packetsMap.Value.Add<OnMovePlayerPacket_0x97>();
-                packetsMap.Value.Add<OnUpdateNamePacket_0x98>();
-                packetsMap.Value.Add<OnPlaceMultiPacket_0x99>();
-                packetsMap.Value.Add<OnAsciiPromptPacket_0x9A>();
-                packetsMap.Value.Add<OnSellListPacket_0x9E>();
-                packetsMap.Value.Add<OnUpdateHitsPacket_0xA1>();
-                packetsMap.Value.Add<OnUpdateManaPacket_0xA2>();
-                packetsMap.Value.Add<OnUpdateStaminaPacket_0xA3>();
-                packetsMap.Value.Add<OnOpenUrlPacket_0xA5>();
-                packetsMap.Value.Add<OnWindowTipPacket_0xA6>();
-                packetsMap.Value.Add<OnAttackEntityPacket_0xAA>();
-                packetsMap.Value.Add<OnTextEntryDialogPacket_0xAB>();
-                packetsMap.Value.Add<OnShowDeathActionPacket_0xAF>();
-                packetsMap.Value.Add<OnOpenGumpPacket_0xB0>();
-                packetsMap.Value.Add<OnChatMessagePacket_0xB2>();
-                packetsMap.Value.Add<OnOpenCharacterProfilePacket_0xB8>();
+                    packetsMap.Value.Register<OnShowMapPacket_0x90_Post308Z>();
+                packetsMap.Value.Register<OnOpenBookPacket_0x93>();
+                packetsMap.Value.Register<OnColorPickerPacket_0x95>();
+                packetsMap.Value.Register<OnMovePlayerPacket_0x97>();
+                packetsMap.Value.Register<OnUpdateNamePacket_0x98>();
+                packetsMap.Value.Register<OnPlaceMultiPacket_0x99>();
+                packetsMap.Value.Register<OnAsciiPromptPacket_0x9A>();
+                packetsMap.Value.Register<OnSellListPacket_0x9E>();
+                packetsMap.Value.Register<OnUpdateHitsPacket_0xA1>();
+                packetsMap.Value.Register<OnUpdateManaPacket_0xA2>();
+                packetsMap.Value.Register<OnUpdateStaminaPacket_0xA3>();
+                packetsMap.Value.Register<OnOpenUrlPacket_0xA5>();
+                packetsMap.Value.Register<OnWindowTipPacket_0xA6>();
+                packetsMap.Value.Register<OnAttackEntityPacket_0xAA>();
+                packetsMap.Value.Register<OnTextEntryDialogPacket_0xAB>();
+                packetsMap.Value.Register<OnUnicodeSpeechPacket_0xAE>();
+                packetsMap.Value.Register<OnShowDeathActionPacket_0xAF>();
+                packetsMap.Value.Register<OnOpenGumpPacket_0xB0>();
+                packetsMap.Value.Register<OnChatMessagePacket_0xB2>();
+                packetsMap.Value.Register<OnOpenCharacterProfilePacket_0xB8>();
                 if (gameCtx.Value.ClientVersion < ClientVersion.CV_60142)
-                    packetsMap.Value.Add<OnLockFeaturesPacket_0xB9_Pre60142>();
+                    packetsMap.Value.Register<OnLockFeaturesPacket_0xB9_Pre60142>();
                 else
-                    packetsMap.Value.Add<OnLockFeaturesPacket_0xB9_Post60142>();
+                    packetsMap.Value.Register<OnLockFeaturesPacket_0xB9_Post60142>();
 
                 if (gameCtx.Value.ClientVersion < ClientVersion.CV_7090)
-                    packetsMap.Value.Add<OnQuestPointerPacket_0xBA_Pre7090>();
+                    packetsMap.Value.Register<OnQuestPointerPacket_0xBA_Pre7090>();
                 else
-                    packetsMap.Value.Add<OnQuestPointerPacket_0xBA_Post7090>();
+                    packetsMap.Value.Register<OnQuestPointerPacket_0xBA_Post7090>();
 
-                packetsMap.Value.Add<OnSeasonChangePacket_0xBC>();
-                packetsMap.Value.Add<OnClilocMessagePacket_0xC1>();
-                packetsMap.Value.Add<OnClilocMessageAffixPacket_0xCC>();
-                packetsMap.Value.Add<OnUnicodePromptPacket_0xC2>();
-                packetsMap.Value.Add<OnLogoutRequestPacket_0xD1>();
-                packetsMap.Value.Add<OnMegaClilocPacket_0xD6>();
-                packetsMap.Value.Add<OnCustomHousePacket_0xD8>();
-                packetsMap.Value.Add<OnOplInfoPacket_0xDC>();
-                packetsMap.Value.Add<OnOpenCompressedGumpPacket_0xDD>();
-                packetsMap.Value.Add<OnUpdateMobileStatusPacket_0xDE>();
-                packetsMap.Value.Add<OnBuffDebuffPacket_0xDF>();
-                packetsMap.Value.Add<OnNewCharacterAnimationPacket_0xE2>();
-                packetsMap.Value.Add<OnAddWaypointPacket_0xE5>();
-                packetsMap.Value.Add<OnRemoveWaypointPacket_0xE6>();
-                packetsMap.Value.Add<OnKrriosClientPacket_0xF0>();
-                packetsMap.Value.Add<OnUpdateItemSAPacket_0xF3>();
-                packetsMap.Value.Add<OnBoatMovingPacket_0xF6>();
-                packetsMap.Value.Add<OnPacketListPacket_0xF7>();
+                packetsMap.Value.Register<OnSeasonChangePacket_0xBC>();
+                packetsMap.Value.Register<OnClientVersionPacket_0xBD>();
+                packetsMap.Value.Register<OnExtendedCommandPacket_0xBF>();
+                packetsMap.Value.Register<OnGraphicEffectC0Packet_0xC0>();
+                packetsMap.Value.Register<OnClilocMessagePacket_0xC1>();
+                packetsMap.Value.Register<OnUnicodePromptPacket_0xC2>();
+                packetsMap.Value.Register<OnGraphicEffectC7Packet_0xC7>();
+                packetsMap.Value.Register<OnViewRangePacket_0xC8>();
+                packetsMap.Value.Register<OnClilocMessageAffixPacket_0xCC>();
+                packetsMap.Value.Register<OnLogoutRequestPacket_0xD1>();
+                packetsMap.Value.Register<OnUpdateCharacterAltPacket_0xD2>();
+                packetsMap.Value.Register<OnUpdateObjectPacket_0xD3>();
+                packetsMap.Value.Register<OnOpenBookAltPacket_0xD4>();
+                packetsMap.Value.Register<OnMegaClilocPacket_0xD6>();
+                packetsMap.Value.Register<OnCustomHousePacket_0xD8>();
+                packetsMap.Value.Register<OnOplInfoPacket_0xDC>();
+                packetsMap.Value.Register<OnOpenCompressedGumpPacket_0xDD>();
+                packetsMap.Value.Register<OnUpdateMobileStatusPacket_0xDE>();
+                packetsMap.Value.Register<OnBuffDebuffPacket_0xDF>();
+                packetsMap.Value.Register<OnNewCharacterAnimationPacket_0xE2>();
+                packetsMap.Value.Register<OnAddWaypointPacket_0xE5>();
+                packetsMap.Value.Register<OnRemoveWaypointPacket_0xE6>();
+                packetsMap.Value.Register<OnKrriosClientPacket_0xF0>();
+                packetsMap.Value.Register<OnUpdateItemSAPacket_0xF3>();
+                if (gameCtx.Value.ClientVersion < ClientVersion.CV_308Z)
+                    packetsMap.Value.Register<OnShowMapFacetPacket_0xF5_Pre308Z>();
+                else
+                    packetsMap.Value.Register<OnShowMapFacetPacket_0xF5_Post308Z>();
+                packetsMap.Value.Register<OnBoatMovingPacket_0xF6>();
+                packetsMap.Value.Register<OnPacketListPacket_0xF7>();
             })
 
             .AddPlugin<LoginPacketsPlugin>()
@@ -254,7 +291,8 @@ readonly struct NetworkPlugin : IPlugin
         Res<GameContext> gameCtx,
         Res<CircularBuffer> buffer,
         Local<PacketBuffer> packetBuffer,
-        EventWriter<IPacket> queuePackets
+        EventWriter<IPacket> queuePackets,
+        Commands commands
     )
     {
         var availableData = network.Value.CollectAvailableData();
@@ -314,9 +352,16 @@ readonly struct NetworkPlugin : IPlugin
             if (sp.IsEmpty)
                 continue;
 
+            var payload = sp.Slice(packetHeaderOffset, packetLen - packetHeaderOffset);
+
+            // Dispatch both typed (observer trigger) and boxed (EventWriter<IPacket>)
+            // when both are registered for the same id — some packets are consumed
+            // by observers in InGamePacketsPlugin AND by EventReader<IPacket> in
+            // PickupPlugin/PaperdollPlugin/etc.
+            packetsMap.Value.TryDispatch(packetId, commands, payload);
+
             if (packetsMap.Value.TryGetValue(packetId, out var fn))
             {
-                var payload = sp.Slice(packetHeaderOffset, packetLen - packetHeaderOffset);
                 var reader = new StackDataReader(payload);
                 var packet = fn();
                 packet.Fill(reader);

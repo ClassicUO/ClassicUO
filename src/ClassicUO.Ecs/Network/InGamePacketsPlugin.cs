@@ -1,20 +1,15 @@
 using System;
-using System.Buffers;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
-using ClassicUO.Game.Managers;
 using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Utility;
-using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
-using World = TinyEcs.World;
 
 namespace ClassicUO.Ecs;
 
@@ -128,48 +123,206 @@ readonly struct InGamePacketsPlugin : IPlugin
 {
     public void Build(App app)
     {
-        app
-            .AddSystem((
-                EventReader<IPacket> reader,
-                Commands commands,
-                Res<NetworkEntitiesMap> entitiesMap,
-                Res<NetClient> network,
-                Res<Settings> settings,
-                Res<UOFileManager> fileManager,
-                Res<Profile> profile,
-                ResMut<GameContext> gameCtx,
-                Res<MultiCache> multiCache,
-                Res<DelayedAction> delayedActions,
-                ResMut<NextState<GameState>> state,
-                EventWriter<MobileQueuedStep> mobileQueuedSteps,
-                EventWriter<TextOverheadEvent> textOverHeadQueue,
-                InGameQueries queries
-            ) =>
-            {
-                foreach (var packet in reader.Read())
-                {
-                    HandlePacket(
-                        packet,
-                        commands,
-                        entitiesMap,
-                        network,
-                        settings,
-                        fileManager,
-                        profile,
-                        gameCtx,
-                        multiCache,
-                        delayedActions,
-                        state,
-                        mobileQueuedSteps,
-                        textOverHeadQueue,
-                        queries);
-                }
-            })
-            .InStage(Stage.Update)
-            .RunIf((EventReader<IPacket> reader) => reader.HasEvents)
-            .Build();
+        app.AddObserver<On<PacketReceived<OnEnterWorldPacket_0x1B>>,
+            Commands,
+            Res<NetworkEntitiesMap>,
+            Res<NetClient>,
+            Res<Settings>,
+            ResMut<GameContext>,
+            ResMut<NextState<GameState>>>(OnEnterWorld);
+
+        app.AddObserver<On<PacketReceived<OnLoginCompletePacket_0x55>>,
+            Res<NetClient>,
+            ResMut<GameContext>>(OnLoginComplete);
+
+        app.AddObserver<On<PacketReceived<OnClientVersionPacket_0xBD>>,
+            Res<NetClient>,
+            Res<Settings>>(OnClientVersion);
+
+        app.AddObserver<On<PacketReceived<OnUnicodeSpeechPacket_0xAE>>,
+            Res<NetClient>,
+            EventWriter<TextOverheadEvent>>(OnUnicodeSpeech);
+
+        app.AddObserver<On<PacketReceived<OnAsciiSpeechPacket_0x1C>>,
+            Res<NetClient>,
+            EventWriter<TextOverheadEvent>>(OnAsciiSpeech);
+
+        app.AddObserver<On<PacketReceived<OnViewRangePacket_0xC8>>,
+            ResMut<GameContext>>(OnViewRange);
+
+        app.AddObserver<On<PacketReceived<OnExtendedCommandPacket_0xBF>>,
+            Commands,
+            Res<NetworkEntitiesMap>,
+            Res<NetClient>,
+            Res<UOFileManager>,
+            ResMut<GameContext>,
+            Res<DelayedAction>,
+            InGameQueries>(OnExtendedCommand);
+
+        app.AddObserver<On<PacketReceived<OnUpdateItemPacket_0x1A>>,
+            Commands,
+            Res<NetworkEntitiesMap>,
+            Res<MultiCache>,
+            EventWriter<MobileQueuedStep>,
+            InGameQueries>(OnUpdateItem);
+
+        app.AddObserver<On<PacketReceived<OnUpdateItemSAPacket_0xF3>>,
+            Commands,
+            Res<NetworkEntitiesMap>,
+            Res<MultiCache>,
+            EventWriter<MobileQueuedStep>,
+            InGameQueries>(OnUpdateItemSA);
+
+        app.AddObserver<On<PacketReceived<OnUpdateObjectPacket_0xD3>>,
+            Commands,
+            Res<NetworkEntitiesMap>,
+            EventWriter<MobileQueuedStep>,
+            InGameQueries>(OnUpdateObjectD3);
+
+        app.AddObserver<On<PacketReceived<OnUpdateObjectAltPacket_0x78>>,
+            Commands,
+            Res<NetworkEntitiesMap>,
+            EventWriter<MobileQueuedStep>,
+            InGameQueries>(OnUpdateObject78);
+
+        app.AddObserver<On<PacketReceived<OnDeleteObjectPacket_0x1D>>,
+            Commands,
+            Res<NetworkEntitiesMap>,
+            Res<GameContext>>(OnDeleteObject);
+
+        app.AddObserver<On<PacketReceived<OnUpdatePlayerPacket_0x20>>,
+            Commands,
+            Res<NetworkEntitiesMap>,
+            EventWriter<MobileQueuedStep>>(OnUpdatePlayer);
+
+        app.AddObserver<On<PacketReceived<OnCharacterStatusPacket_0x11>>,
+            Commands,
+            Res<NetworkEntitiesMap>>(OnCharacterStatus);
+
+        app.AddObserver<On<PacketReceived<OnMobileAttributesPacket_0x2D>>,
+            Commands,
+            Res<NetworkEntitiesMap>>(OnMobileAttributes);
+
+        app.AddObserver<On<PacketReceived<OnEquipItemPacket_0x2E>>,
+            Commands,
+            Res<NetworkEntitiesMap>,
+            InGameQueries>(OnEquipItem);
+
+        app.AddObserver<On<PacketReceived<OnUpdateManaPacket_0xA2>>,
+            Commands,
+            Res<NetworkEntitiesMap>>(OnUpdateMana);
+
+        app.AddObserver<On<PacketReceived<OnUpdateStaminaPacket_0xA3>>,
+            Commands,
+            Res<NetworkEntitiesMap>>(OnUpdateStamina);
+
+        app.AddObserver<On<PacketReceived<OnUpdateHitsPacket_0xA1>>,
+            Commands,
+            Res<NetworkEntitiesMap>>(OnUpdateHits);
+
+        app.AddObserver<On<PacketReceived<OnLockFeaturesPacket_0xB9_Pre60142>>,
+            Res<UOFileManager>>(OnLockFeaturesPre);
+
+        app.AddObserver<On<PacketReceived<OnLockFeaturesPacket_0xB9_Post60142>>,
+            Res<UOFileManager>>(OnLockFeaturesPost);
+
+        app.AddObserver<On<PacketReceived<OnCustomHousePacket_0xD8>>,
+            Commands,
+            Res<NetworkEntitiesMap>,
+            Res<MultiCache>,
+            InGameQueries>(OnCustomHouse);
+
+        app.AddObserver<On<PacketReceived<OnSeasonChangePacket_0xBC>>,
+            ResMut<GameContext>>(OnSeasonChange);
+
+        app.AddObserver<On<PacketReceived<OnPlayerLightLevelPacket_0x4E>>,
+            ResMut<GameContext>>(OnPlayerLightLevel);
+
+        app.AddObserver<On<PacketReceived<OnServerLightLevelPacket_0x4F>>,
+            ResMut<GameContext>>(OnServerLightLevel);
+
+        // Empty stubs — every registered packet has at least one observer so
+        // the trigger is consumed silently. Replace with a real observer when
+        // the packet gets implemented.
+        Stub<OnDamagePacket_0x0B>(app);
+        Stub<OnHealthBarStatusPacket_0x16>(app);
+        Stub<OnHealthBarStatusDetailsPacket_0x17>(app);
+        Stub<OnDenyWalkPacket_0x21>(app);
+        Stub<OnConfirmWalkPacket_0x22>(app);
+        Stub<OnDragAnimationPacket_0x23>(app);
+        Stub<OnOpenContainerPacket_0x24>(app);
+        Stub<OnUpdateContainerPacket_0x25_Pre6017>(app);
+        Stub<OnUpdateContainerPacket_0x25_Post6017>(app);
+        Stub<OnDenyMoveItemPacket_0x27>(app);
+        Stub<OnEndDraggingItemPacket_0x28>(app);
+        Stub<OnDropItemOkPacket_0x29>(app);
+        Stub<OnShowDeathScreenPacket_0x2C>(app);
+        Stub<OnSwingPacket_0x2F>(app);
+        Stub<OnPathfindingPacket_0x38>(app);
+        Stub<OnUpdateSkillsPacket_0x3A>(app);
+        Stub<OnUpdateContainerItemsPacket_0x3C_Pre6017>(app);
+        Stub<OnUpdateContainerItemsPacket_0x3C_Post6017>(app);
+        Stub<OnSoundEffectPacket_0x54>(app);
+        Stub<OnMapDataPacket_0x56>(app);
+        Stub<OnWeatherPacket_0x65>(app);
+        Stub<OnBookPagesPacket_0x66>(app);
+        Stub<OnPlayMusicPacket_0x6D>(app);
+        Stub<OnCharacterAnimationPacket_0x6E>(app);
+        Stub<OnGraphicEffectPacket_0x70>(app);
+        Stub<OnBulletinBoardPacket_0x71>(app);
+        Stub<OnWarmodePacket_0x72>(app);
+        Stub<OnPingPacket_0x73>(app);
+        Stub<OnBuyListPacket_0x74>(app);
+        Stub<OnUpdateCharacterPacket_0x77>(app);
+        Stub<OnOpenMenuPacket_0x7C>(app);
+        Stub<OnOpenPaperdollPacket_0x88>(app);
+        Stub<OnCorpseEquipmentPacket_0x89>(app);
+        Stub<OnShowMapPacket_0x90_Pre308Z>(app);
+        Stub<OnShowMapPacket_0x90_Post308Z>(app);
+        Stub<OnOpenBookPacket_0x93>(app);
+        Stub<OnColorPickerPacket_0x95>(app);
+        Stub<OnMovePlayerPacket_0x97>(app);
+        Stub<OnUpdateNamePacket_0x98>(app);
+        Stub<OnPlaceMultiPacket_0x99>(app);
+        Stub<OnAsciiPromptPacket_0x9A>(app);
+        Stub<OnSellListPacket_0x9E>(app);
+        Stub<OnOpenUrlPacket_0xA5>(app);
+        Stub<OnWindowTipPacket_0xA6>(app);
+        Stub<OnAttackEntityPacket_0xAA>(app);
+        Stub<OnTextEntryDialogPacket_0xAB>(app);
+        Stub<OnShowDeathActionPacket_0xAF>(app);
+        Stub<OnOpenGumpPacket_0xB0>(app);
+        Stub<OnChatMessagePacket_0xB2>(app);
+        Stub<OnOpenCharacterProfilePacket_0xB8>(app);
+        Stub<OnQuestPointerPacket_0xBA_Pre7090>(app);
+        Stub<OnQuestPointerPacket_0xBA_Post7090>(app);
+        Stub<OnGraphicEffectC0Packet_0xC0>(app);
+        Stub<OnClilocMessagePacket_0xC1>(app);
+        Stub<OnUnicodePromptPacket_0xC2>(app);
+        Stub<OnGraphicEffectC7Packet_0xC7>(app);
+        Stub<OnClilocMessageAffixPacket_0xCC>(app);
+        Stub<OnLogoutRequestPacket_0xD1>(app);
+        Stub<OnUpdateCharacterAltPacket_0xD2>(app);
+        Stub<OnOpenBookAltPacket_0xD4>(app);
+        Stub<OnMegaClilocPacket_0xD6>(app);
+        Stub<OnOplInfoPacket_0xDC>(app);
+        Stub<OnOpenCompressedGumpPacket_0xDD>(app);
+        Stub<OnUpdateMobileStatusPacket_0xDE>(app);
+        Stub<OnBuffDebuffPacket_0xDF>(app);
+        Stub<OnNewCharacterAnimationPacket_0xE2>(app);
+        Stub<OnAddWaypointPacket_0xE5>(app);
+        Stub<OnRemoveWaypointPacket_0xE6>(app);
+        Stub<OnKrriosClientPacket_0xF0>(app);
+        Stub<OnShowMapFacetPacket_0xF5_Pre308Z>(app);
+        Stub<OnShowMapFacetPacket_0xF5_Post308Z>(app);
+        Stub<OnBoatMovingPacket_0xF6>(app);
+        Stub<OnPacketListPacket_0xF7>(app);
     }
 
+    static void Stub<T>(App app) where T : struct, IPacket
+    {
+        app.AddObserver<On<PacketReceived<T>>>(static trigger => Console.WriteLine("packet {0:X2}", trigger.Event.Packet.Id));
+    }
 
     sealed class InGameQueries : ISystemParam
     {
@@ -215,214 +368,17 @@ readonly struct InGamePacketsPlugin : IPlugin
         }
     }
 
-    static void HandlePacket(
-        IPacket packet,
-        Commands commands,
-        Res<NetworkEntitiesMap> entitiesMap,
-        Res<NetClient> network,
-        Res<Settings> settings,
-        Res<UOFileManager> fileManager,
-        Res<Profile> profile,
-        ResMut<GameContext> gameCtx,
-        Res<MultiCache> multiCache,
-        Res<DelayedAction> delayedActions,
-        ResMut<NextState<GameState>> state,
-        EventWriter<MobileQueuedStep> mobileQueuedSteps,
-        EventWriter<TextOverheadEvent> textOverHeadQueue,
-        InGameQueries queries
-    )
-    {
-        _ = profile;
-
-        switch (packet)
-        {
-            case OnEnterWorldPacket_0x1B enterWorld:
-                HandleEnterWorld(enterWorld, commands, entitiesMap, network, settings, gameCtx, state);
-                break;
-
-            case OnLoginCompletePacket_0x55 loginComplete:
-                HandleLoginComplete(loginComplete, network, gameCtx, settings);
-                break;
-
-            case OnClientVersionPacket_0xBD clientVersion:
-                HandleClientVersion(clientVersion, network, settings);
-                break;
-
-            case OnUnicodeSpeechPacket_0xAE unicodeSpeech:
-                HandleUnicodeSpeech(unicodeSpeech, network, textOverHeadQueue);
-                break;
-
-            case OnViewRangePacket_0xC8 viewRange:
-                HandleViewRange(viewRange, gameCtx);
-                break;
-
-            case OnAsciiSpeechPacket_0x1C asciiSpeech:
-                HandleAsciiSpeech(asciiSpeech, network, textOverHeadQueue);
-                break;
-
-            case OnExtendedCommandPacket_0xBF extendedCommand:
-                HandleExtendedCommand(
-                    extendedCommand,
-                    commands,
-                    entitiesMap,
-                    network,
-                    settings,
-                    fileManager,
-                    gameCtx,
-                    multiCache,
-                    delayedActions,
-                    mobileQueuedSteps,
-                    textOverHeadQueue,
-                    queries
-                );
-                break;
-
-            case OnUpdateItemPacket_0x1A updateItem:
-                HandleUpdateItem(updateItem, commands, entitiesMap, multiCache, gameCtx, mobileQueuedSteps, queries);
-                break;
-
-            case OnUpdateItemSAPacket_0xF3 updateItemSA:
-                HandleUpdateItemSA(updateItemSA, commands, entitiesMap, multiCache, mobileQueuedSteps, queries);
-                break;
-
-            case OnUpdateObjectPacket_0xD3 updateObject:
-                HandleUpdateObject(updateObject, commands, entitiesMap, mobileQueuedSteps, queries);
-                break;
-
-            case OnUpdateObjectAltPacket_0x78 updateObjectAlt:
-                HandleUpdateObject(updateObjectAlt, commands, entitiesMap, mobileQueuedSteps, queries);
-                break;
-
-            case OnDeleteObjectPacket_0x1D deleteObject:
-                HandleDeleteObject(deleteObject, commands, entitiesMap, gameCtx);
-                break;
-
-            case OnUpdatePlayerPacket_0x20 updatePlayer:
-                HandleUpdatePlayer(updatePlayer, commands, entitiesMap, mobileQueuedSteps);
-                break;
-
-            case OnCharacterStatusPacket_0x11 status:
-                HandleCharacterStatus(status, commands, entitiesMap);
-                break;
-
-            case OnMobileAttributesPacket_0x2D mobileAttributes:
-                HandleMobileAttributes(mobileAttributes, commands, entitiesMap);
-                break;
-
-            case OnEquipItemPacket_0x2E equipItem:
-                HandleEquipItem(equipItem, commands, entitiesMap, queries);
-                break;
-
-            case OnUpdateHitsPacket_0xA1 updateHits:
-                HandleUpdateHits(updateHits, commands, entitiesMap);
-                break;
-
-            case OnUpdateManaPacket_0xA2 updateMana:
-                HandleUpdateMana(updateMana, commands, entitiesMap);
-                break;
-
-            case OnUpdateStaminaPacket_0xA3 updateStamina:
-                HandleUpdateStamina(updateStamina, commands, entitiesMap);
-                break;
-
-            case OnLockFeaturesPacket_0xB9_Pre60142 lockFeaturesPre:
-                HandleLockFeatures(lockFeaturesPre.Flags, fileManager);
-                break;
-
-            case OnLockFeaturesPacket_0xB9_Post60142 lockFeaturesPost:
-                HandleLockFeatures(lockFeaturesPost.Flags, fileManager);
-                break;
-
-            case OnQuestPointerPacket_0xBA_Pre7090 questPointerPre:
-                HandleQuestPointer(questPointerPre.Display, questPointerPre.X, questPointerPre.Y, null);
-                break;
-
-            case OnQuestPointerPacket_0xBA_Post7090 questPointerPost:
-                HandleQuestPointer(questPointerPost.Display, questPointerPost.X, questPointerPost.Y, questPointerPost.Serial);
-                break;
-
-            case OnShowMapPacket_0x90_Pre308Z showMapPre:
-                HandleShowMap(showMapPre.Serial, showMapPre.GumpId, showMapPre.StartX, showMapPre.StartY, showMapPre.EndX, showMapPre.EndY, showMapPre.Width, showMapPre.Height, null);
-                break;
-
-            case OnShowMapPacket_0x90_Post308Z showMapPost:
-                HandleShowMap(showMapPost.Serial, showMapPost.GumpId, showMapPost.StartX, showMapPost.StartY, showMapPost.EndX, showMapPost.EndY, showMapPost.Width, showMapPost.Height, showMapPost.Facet);
-                break;
-
-            case OnShowMapFacetPacket_0xF5_Pre308Z showFacetPre:
-                HandleShowMapFacet(showFacetPre.Serial, showFacetPre.GumpId, showFacetPre.StartX, showFacetPre.StartY, showFacetPre.EndX, showFacetPre.EndY, showFacetPre.Width, showFacetPre.Height, 0);
-                break;
-
-            case OnShowMapFacetPacket_0xF5_Post308Z showFacetPost:
-                HandleShowMapFacet(showFacetPost.Serial, showFacetPost.GumpId, showFacetPost.StartX, showFacetPost.StartY, showFacetPost.EndX, showFacetPost.EndY, showFacetPost.Width, showFacetPost.Height, showFacetPost.Facet);
-                break;
-            case OnCustomHousePacket_0xD8 customHouse:
-                HandleCustomHouse(customHouse, commands, entitiesMap, multiCache, queries);
-                break;
-
-            case OnSeasonChangePacket_0xBC season:
-                // Mirror main's Season handler: stash season + music index
-                // on GameContext for terrain art selection. Tile recolor /
-                // music swap consume these once those subsystems are wired.
-                gameCtx.Value.Season = season.Season;
-                gameCtx.Value.SeasonMusicIndex = season.Music;
-                break;
-
-            case OnServerLightLevelPacket_0x4F overall:
-                // World ambient. Main feeds this into the world render
-                // pass; ECS keeps it on GameContext until the light pass
-                // lands.
-                gameCtx.Value.ServerLightLevel = overall.Level;
-                break;
-
-            case OnPlayerLightLevelPacket_0x4E personal:
-                // Per-player light radius. Same storage pattern as 0x4F.
-                if (personal.Serial == gameCtx.Value.PlayerSerial)
-                    gameCtx.Value.PersonalLightLevel = personal.Level;
-                break;
-
-            case OnPlayMusicPacket_0x6D music:
-                // Background-music switch. Audio playback isn't wired in
-                // ECS yet (no AudioManager port); silently accept the
-                // packet so it stops landing in the Unhandled log.
-                _ = music;
-                break;
-
-            case OnUpdateSkillsPacket_0x3A skills:
-                // SkillsGump not ported; accept to silence unhandled log.
-                _ = skills;
-                break;
-
-            case OnClilocMessagePacket_0xC1 cliloc:
-                // Localized server message. ClilocLoader-backed string
-                // expansion + journal entry not wired through ECS chat
-                // yet; consume to silence unhandled log.
-                _ = cliloc;
-                break;
-
-            case OnOplInfoPacket_0xDC opl:
-                // Object Property List revision echo (serial, rev). Used
-                // by main to invalidate the tooltip cache; ECS tooltip
-                // system not yet ported. Accept to silence log.
-                _ = opl;
-                break;
-
-            default:
-                //Console.WriteLine("Unhandled packet 0x{0:X2}", packet.Id);
-                break;
-        }
-    }
-
-    static void HandleEnterWorld(
-        OnEnterWorldPacket_0x1B packet,
+    static void OnEnterWorld(
+        On<PacketReceived<OnEnterWorldPacket_0x1B>> trig,
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
         Res<NetClient> network,
         Res<Settings> settings,
         ResMut<GameContext> gameCtx,
-        ResMut<NextState<GameState>> state
-    )
+        ResMut<NextState<GameState>> state)
     {
+        var packet = trig.Event.Packet;
+
         if (gameCtx.Value.ClientVersion >= ClientVersion.CV_200)
         {
             network.Value.Send_GameWindowSize(800, 400);
@@ -451,13 +407,13 @@ readonly struct InGamePacketsPlugin : IPlugin
         state.Value.Set(GameState.GameScreen);
     }
 
-    static void HandleLoginComplete(
-        OnLoginCompletePacket_0x55 packet,
+    static void OnLoginComplete(
+        On<PacketReceived<OnLoginCompletePacket_0x55>> trig,
         Res<NetClient> network,
-        ResMut<GameContext> gameCtx,
-        Res<Settings> settings
-    )
+        ResMut<GameContext> gameCtx)
     {
+        _ = trig;
+
         if (gameCtx.Value.PlayerSerial == 0)
             return;
 
@@ -466,10 +422,9 @@ readonly struct InGamePacketsPlugin : IPlugin
         network.Value.Send_SkillsRequest(gameCtx.Value.PlayerSerial);
 
         // Mirror main's PacketHandlers.LoginComplete (GameScene.DoubleClickDelayed):
-        // implicit double-click on the local player to coax the server into
-        // sending the autoload 0x88 paperdoll packet. Without this, the
-        // paperdoll only spawns when the user manually double-clicks
-        // themselves later.
+        // implicit double-click on local player to coax the server into sending
+        // the autoload 0x88 paperdoll packet. Without this, the paperdoll only
+        // spawns when the user manually double-clicks themselves later.
         network.Value.Send_DoubleClick(gameCtx.Value.PlayerSerial);
 
         if (gameCtx.Value.ClientVersion >= ClientVersion.CV_306E)
@@ -479,18 +434,22 @@ readonly struct InGamePacketsPlugin : IPlugin
             network.Value.Send_ClientViewRange(24);
     }
 
-    static void HandleClientVersion(
-        OnClientVersionPacket_0xBD packet,
+    static void OnClientVersion(
+        On<PacketReceived<OnClientVersionPacket_0xBD>> trig,
         Res<NetClient> network,
-        Res<Settings> settings
-    ) => network.Value.Send_ClientVersion(settings.Value.ClientVersion);
-
-    static void HandleUnicodeSpeech(
-        OnUnicodeSpeechPacket_0xAE packet,
-        Res<NetClient> network,
-        EventWriter<TextOverheadEvent> textOverHeadQueue
-    )
+        Res<Settings> settings)
     {
+        _ = trig;
+        network.Value.Send_ClientVersion(settings.Value.ClientVersion);
+    }
+
+    static void OnUnicodeSpeech(
+        On<PacketReceived<OnUnicodeSpeechPacket_0xAE>> trig,
+        Res<NetClient> network,
+        EventWriter<TextOverheadEvent> textOverHeadQueue)
+    {
+        var packet = trig.Event.Packet;
+
         if (packet.IsSystemMessage)
         {
             network.Value.Send(
@@ -516,12 +475,13 @@ readonly struct InGamePacketsPlugin : IPlugin
         });
     }
 
-    static void HandleAsciiSpeech(
-        OnAsciiSpeechPacket_0x1C packet,
+    static void OnAsciiSpeech(
+        On<PacketReceived<OnAsciiSpeechPacket_0x1C>> trig,
         Res<NetClient> network,
-        EventWriter<TextOverheadEvent> textOverHeadQueue
-    )
+        EventWriter<TextOverheadEvent> textOverHeadQueue)
     {
+        var packet = trig.Event.Packet;
+
         if (packet.IsSystemMessage)
         {
             network.Value.Send_ACKTalk();
@@ -541,100 +501,67 @@ readonly struct InGamePacketsPlugin : IPlugin
         });
     }
 
-    static void HandleViewRange(
-        OnViewRangePacket_0xC8 packet,
-        ResMut<GameContext> gameCtx
-    ) => gameCtx.Value.MaxObjectsDistance = packet.Range;
+    static void OnViewRange(
+        On<PacketReceived<OnViewRangePacket_0xC8>> trig,
+        ResMut<GameContext> gameCtx)
+    {
+        gameCtx.Value.MaxObjectsDistance = trig.Event.Packet.Range;
+    }
 
-    static void HandleExtendedCommand(
-        OnExtendedCommandPacket_0xBF packet,
+    static void OnExtendedCommand(
+        On<PacketReceived<OnExtendedCommandPacket_0xBF>> trig,
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
         Res<NetClient> network,
-        Res<Settings> settings,
         Res<UOFileManager> fileManager,
         ResMut<GameContext> gameCtx,
-        Res<MultiCache> multiCache,
         Res<DelayedAction> delayedActions,
-        EventWriter<MobileQueuedStep> mobileQueuedSteps,
-        EventWriter<TextOverheadEvent> textOverHeadQueue,
-        InGameQueries queries
-    )
+        InGameQueries queries)
     {
-        _ = settings;
-        _ = multiCache;
-        _ = mobileQueuedSteps;
-        _ = textOverHeadQueue;
+        var packet = trig.Event.Packet;
 
         switch (packet.Command)
         {
             case 0x08:
-                HandleExtendedCommand_MapChange(packet, fileManager, gameCtx);
+                if (packet.MapIndex.HasValue)
+                {
+                    var mapIdx = packet.MapIndex.Value;
+                    fileManager.Value.Maps.LoadMap(mapIdx);
+                    if (gameCtx.Value.Map != mapIdx)
+                        gameCtx.Value.Map = mapIdx;
+                }
                 break;
 
             case 0x1D:
-                HandleExtendedCommand_HouseRevision(packet, commands, entitiesMap, network, delayedActions, queries);
+                if (packet.HouseRevisionSerial.HasValue && packet.HouseRevision.HasValue)
+                {
+                    var serial = packet.HouseRevisionSerial.Value;
+                    var revision = packet.HouseRevision.Value;
+                    var house = entitiesMap.Value.GetOrCreate(commands, serial);
+
+                    if (queries.qHouseRevision.Contains(house.Id))
+                    {
+                        (_, var houseRev) = queries.qHouseRevision.Get(house.Id);
+                        if (houseRev.Ref.Value == revision)
+                            break;
+                    }
+
+                    house.Insert(new HouseRevision { Value = revision });
+                    delayedActions.Value.Add(() => network.Value.Send_CustomHouseDataRequest(serial), 1000);
+                }
                 break;
         }
     }
 
-    static void HandleExtendedCommand_MapChange(
-        OnExtendedCommandPacket_0xBF packet,
-        Res<UOFileManager> fileManager,
-        ResMut<GameContext> gameCtx
-    )
-    {
-        if (!packet.MapIndex.HasValue)
-            return;
-
-        var mapIdx = packet.MapIndex.Value;
-        fileManager.Value.Maps.LoadMap(mapIdx);
-
-        if (gameCtx.Value.Map != mapIdx)
-        {
-            gameCtx.Value.Map = mapIdx;
-        }
-    }
-
-    static void HandleExtendedCommand_HouseRevision(
-        OnExtendedCommandPacket_0xBF packet,
-        Commands commands,
-        Res<NetworkEntitiesMap> entitiesMap,
-        Res<NetClient> network,
-        Res<DelayedAction> delayedActions,
-        InGameQueries queries
-    )
-    {
-        if (!packet.HouseRevisionSerial.HasValue || !packet.HouseRevision.HasValue)
-            return;
-
-        var serial = packet.HouseRevisionSerial.Value;
-        var revision = packet.HouseRevision.Value;
-
-        var house = entitiesMap.Value.GetOrCreate(commands, serial);
-
-        if (queries.qHouseRevision.Contains(house.Id))
-        {
-            (_, var houseRev) = queries.qHouseRevision.Get(house.Id);
-            if (houseRev.Ref.Value == revision)
-                return;
-        }
-
-        house.Insert(new HouseRevision { Value = revision });
-        delayedActions.Value.Add(() => network.Value.Send_CustomHouseDataRequest(serial), 1000);
-    }
-
-    static void HandleUpdateItem(
-        OnUpdateItemPacket_0x1A packet,
+    static void OnUpdateItem(
+        On<PacketReceived<OnUpdateItemPacket_0x1A>> trig,
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
         Res<MultiCache> multiCache,
-        ResMut<GameContext> gameCtx,
         EventWriter<MobileQueuedStep> mobileQueuedSteps,
-        InGameQueries queries
-    )
+        InGameQueries queries)
     {
-        _ = gameCtx;
+        var packet = trig.Event.Packet;
 
         var finalGraphic = (ushort)(packet.Graphic + packet.GraphicIncrement);
         var ent = entitiesMap.Value.GetOrCreate(commands, packet.Serial);
@@ -688,15 +615,16 @@ readonly struct InGamePacketsPlugin : IPlugin
         }
     }
 
-    static void HandleUpdateItemSA(
-        OnUpdateItemSAPacket_0xF3 packet,
+    static void OnUpdateItemSA(
+        On<PacketReceived<OnUpdateItemSAPacket_0xF3>> trig,
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
         Res<MultiCache> multiCache,
         EventWriter<MobileQueuedStep> mobileQueuedSteps,
-        InGameQueries queries
-    )
+        InGameQueries queries)
     {
+        var packet = trig.Event.Packet;
+
         var finalGraphic = (ushort)(packet.Graphic + packet.GraphicIncrement);
         var ent = entitiesMap.Value.GetOrCreate(commands, packet.Serial);
         ent.Insert(new Graphic() { Value = finalGraphic })
@@ -704,7 +632,7 @@ readonly struct InGamePacketsPlugin : IPlugin
             .Insert(new Amount() { Value = packet.Amount })
             .Insert(new ServerFlags() { Value = packet.Flags });
 
-        if (ClassicUO.Game.SerialHelper.IsMobile(packet.Serial))
+        if (Game.SerialHelper.IsMobile(packet.Serial))
         {
             mobileQueuedSteps.Send(new MobileQueuedStep
             {
@@ -747,14 +675,15 @@ readonly struct InGamePacketsPlugin : IPlugin
         }
     }
 
-    static void HandleCustomHouse(
-        OnCustomHousePacket_0xD8 packet,
+    static void OnCustomHouse(
+        On<PacketReceived<OnCustomHousePacket_0xD8>> trig,
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
         Res<MultiCache> multiCache,
-        InGameQueries queries
-    )
+        InGameQueries queries)
     {
+        var packet = trig.Event.Packet;
+
         if (packet.Planes == null || packet.Planes.Count == 0)
             return;
 
@@ -900,14 +829,14 @@ readonly struct InGamePacketsPlugin : IPlugin
         }
     }
 
-    static void HandleUpdateObject(
-        OnUpdateObjectPacket_0xD3 packet,
+    static void OnUpdateObjectD3(
+        On<PacketReceived<OnUpdateObjectPacket_0xD3>> trig,
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
         EventWriter<MobileQueuedStep> mobileQueuedSteps,
-        InGameQueries queries
-    )
+        InGameQueries queries)
     {
+        var packet = trig.Event.Packet;
         var ent = entitiesMap.Value.GetOrCreate(commands, packet.Serial);
         ent.Insert(new Graphic() { Value = packet.Graphic })
             .Insert(new Hue() { Value = packet.Hue })
@@ -939,8 +868,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             }
         }
 
-        // Skip re-Insert when slots are unchanged so the change tick only
-        // moves on a real equip/unequip — see EquipmentSlots.ContentEquals.
+        // Skip re-Insert when slots unchanged so the change tick only moves on
+        // a real equip/unequip — see EquipmentSlots.ContentEquals.
         if (!existed || !slots.ContentEquals(old))
             ent.Insert(slots);
 
@@ -954,14 +883,14 @@ readonly struct InGamePacketsPlugin : IPlugin
         });
     }
 
-    static void HandleUpdateObject(
-        OnUpdateObjectAltPacket_0x78 packet,
+    static void OnUpdateObject78(
+        On<PacketReceived<OnUpdateObjectAltPacket_0x78>> trig,
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
         EventWriter<MobileQueuedStep> mobileQueuedSteps,
-        InGameQueries queries
-    )
+        InGameQueries queries)
     {
+        var packet = trig.Event.Packet;
         var ent = entitiesMap.Value.GetOrCreate(commands, packet.Serial);
         ent.Insert(new Graphic() { Value = packet.Graphic })
             .Insert(new Hue() { Value = packet.Hue })
@@ -1006,16 +935,16 @@ readonly struct InGamePacketsPlugin : IPlugin
         });
     }
 
-    static void HandleDeleteObject(
-        OnDeleteObjectPacket_0x1D packet,
+    static void OnDeleteObject(
+        On<PacketReceived<OnDeleteObjectPacket_0x1D>> trig,
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
-        ResMut<GameContext> gameCtx
-    )
+        Res<GameContext> gameCtx)
     {
         if (gameCtx.Value.PlayerSerial == 0)
             return;
 
+        var packet = trig.Event.Packet;
         Console.WriteLine("delete obj from packet: 0x{0:X8}", packet.Serial);
 
         if (entitiesMap.Value.TryGet(commands, packet.Serial, out var ent))
@@ -1024,13 +953,13 @@ readonly struct InGamePacketsPlugin : IPlugin
         }
     }
 
-    static void HandleUpdatePlayer(
-        OnUpdatePlayerPacket_0x20 packet,
+    static void OnUpdatePlayer(
+        On<PacketReceived<OnUpdatePlayerPacket_0x20>> trig,
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
-        EventWriter<MobileQueuedStep> mobileQueuedSteps
-    )
+        EventWriter<MobileQueuedStep> mobileQueuedSteps)
     {
+        var packet = trig.Event.Packet;
         var ent = entitiesMap.Value.GetOrCreate(commands, packet.Serial);
         ent.Insert(new Graphic() { Value = (ushort)(packet.Graphic + packet.GraphicIncrement) })
             .Insert(new Hue() { Value = packet.Hue })
@@ -1046,12 +975,12 @@ readonly struct InGamePacketsPlugin : IPlugin
         });
     }
 
-    static void HandleCharacterStatus(
-        OnCharacterStatusPacket_0x11 packet,
+    static void OnCharacterStatus(
+        On<PacketReceived<OnCharacterStatusPacket_0x11>> trig,
         Commands commands,
-        Res<NetworkEntitiesMap> entitiesMap
-    )
+        Res<NetworkEntitiesMap> entitiesMap)
     {
+        var packet = trig.Event.Packet;
         var ent = entitiesMap.Value.GetOrCreate(commands, packet.Serial);
         ent.Insert(new Hits() { Value = packet.Hits, MaxValue = packet.HitsMax });
 
@@ -1073,9 +1002,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             });
         }
 
-        // Populate PlayerData so the paperdoll stat panel can read
-        // Str/Dex/Int/Gold/Weight off the player entity instead of
-        // re-decoding the packet.
+        // Populate PlayerData so paperdoll stat panel reads Str/Dex/Int/Gold/
+        // Weight off the player entity instead of re-decoding the packet.
         if (packet.Strength.HasValue)
         {
             var data = new PlayerData
@@ -1104,25 +1032,25 @@ readonly struct InGamePacketsPlugin : IPlugin
         }
     }
 
-    static void HandleMobileAttributes(
-        OnMobileAttributesPacket_0x2D packet,
+    static void OnMobileAttributes(
+        On<PacketReceived<OnMobileAttributesPacket_0x2D>> trig,
         Commands commands,
-        Res<NetworkEntitiesMap> entitiesMap
-    )
+        Res<NetworkEntitiesMap> entitiesMap)
     {
+        var packet = trig.Event.Packet;
         var ent = entitiesMap.Value.GetOrCreate(commands, packet.Serial);
         ent.Insert(new Hits() { Value = packet.Hits, MaxValue = packet.HitsMax })
             .Insert(new Mana() { Value = packet.Mana, MaxValue = packet.ManaMax })
             .Insert(new Stamina() { Value = packet.Stamina, MaxValue = packet.StaminaMax });
     }
 
-    static void HandleEquipItem(
-        OnEquipItemPacket_0x2E packet,
+    static void OnEquipItem(
+        On<PacketReceived<OnEquipItemPacket_0x2E>> trig,
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
-        InGameQueries queries
-    )
+        InGameQueries queries)
     {
+        var packet = trig.Event.Packet;
         var parentEnt = entitiesMap.Value.GetOrCreate(commands, packet.ContainerSerial);
         var childEnt = entitiesMap.Value.GetOrCreate(commands, packet.Serial);
         childEnt.Insert(new Graphic() { Value = (ushort)(packet.Graphic + packet.GraphicIncrement) })
@@ -1147,34 +1075,34 @@ readonly struct InGamePacketsPlugin : IPlugin
             parentEnt.Insert(slots);
     }
 
-    static void HandleUpdateHits(
-        OnUpdateHitsPacket_0xA1 packet,
+    static void OnUpdateMana(
+        On<PacketReceived<OnUpdateManaPacket_0xA2>> trig,
         Commands commands,
-        Res<NetworkEntitiesMap> entitiesMap
-    )
+        Res<NetworkEntitiesMap> entitiesMap)
     {
-        var ent = entitiesMap.Value.GetOrCreate(commands, packet.Serial);
-        ent.Insert(new Hits() { Value = packet.Hits, MaxValue = packet.HitsMax });
-    }
-
-    static void HandleUpdateMana(
-        OnUpdateManaPacket_0xA2 packet,
-        Commands commands,
-        Res<NetworkEntitiesMap> entitiesMap
-    )
-    {
+        var packet = trig.Event.Packet;
         var ent = entitiesMap.Value.GetOrCreate(commands, packet.Serial);
         ent.Insert(new Mana() { Value = packet.Mana, MaxValue = packet.ManaMax });
     }
 
-    static void HandleUpdateStamina(
-        OnUpdateStaminaPacket_0xA3 packet,
+    static void OnUpdateStamina(
+        On<PacketReceived<OnUpdateStaminaPacket_0xA3>> trig,
         Commands commands,
-        Res<NetworkEntitiesMap> entitiesMap
-    )
+        Res<NetworkEntitiesMap> entitiesMap)
     {
+        var packet = trig.Event.Packet;
         var ent = entitiesMap.Value.GetOrCreate(commands, packet.Serial);
         ent.Insert(new Stamina() { Value = packet.Stamina, MaxValue = packet.StaminaMax });
+    }
+
+    static void OnUpdateHits(
+        On<PacketReceived<OnUpdateHitsPacket_0xA1>> trig,
+        Commands commands,
+        Res<NetworkEntitiesMap> entitiesMap)
+    {
+        var packet = trig.Event.Packet;
+        var ent = entitiesMap.Value.GetOrCreate(commands, packet.Serial);
+        ent.Insert(new Hits() { Value = packet.Hits, MaxValue = packet.HitsMax });
     }
 
     static BodyConvFlags ComputeBodyConvFlags(LockedFeatureFlags flags)
@@ -1195,66 +1123,48 @@ readonly struct InGamePacketsPlugin : IPlugin
         return bcFlags;
     }
 
-    static void HandleLockFeatures(
-        LockedFeatureFlags flags,
-        Res<UOFileManager> fileManager
-    )
+    static void OnLockFeaturesPre(
+        On<PacketReceived<OnLockFeaturesPacket_0xB9_Pre60142>> trig,
+        Res<UOFileManager> fileManager)
     {
-        var conv = ComputeBodyConvFlags(flags);
+        var conv = ComputeBodyConvFlags(trig.Event.Packet.Flags);
         fileManager.Value.Animations.ProcessBodyConvDef(conv);
     }
 
-    static void HandleQuestPointer(bool display, ushort x, ushort y, uint? serial)
+    static void OnLockFeaturesPost(
+        On<PacketReceived<OnLockFeaturesPacket_0xB9_Post60142>> trig,
+        Res<UOFileManager> fileManager)
     {
-        _ = display;
-        _ = x;
-        _ = y;
-        _ = serial;
+        var conv = ComputeBodyConvFlags(trig.Event.Packet.Flags);
+        fileManager.Value.Animations.ProcessBodyConvDef(conv);
     }
 
-    static void HandleShowMap(
-        uint serial,
-        ushort gumpId,
-        ushort startX,
-        ushort startY,
-        ushort endX,
-        ushort endY,
-        ushort width,
-        ushort height,
-        ushort? facet
-    )
+    static void OnSeasonChange(
+        On<PacketReceived<OnSeasonChangePacket_0xBC>> trig,
+        ResMut<GameContext> gameCtx)
     {
-        _ = serial;
-        _ = gumpId;
-        _ = startX;
-        _ = startY;
-        _ = endX;
-        _ = endY;
-        _ = width;
-        _ = height;
-        _ = facet;
+        // Mirror main's Season handler: stash season + music index on
+        // GameContext for terrain art selection. Tile recolor / music swap
+        // consume these once those subsystems are wired.
+        var packet = trig.Event.Packet;
+        gameCtx.Value.Season = packet.Season;
+        gameCtx.Value.SeasonMusicIndex = packet.Music;
     }
 
-    static void HandleShowMapFacet(
-        uint serial,
-        ushort gumpId,
-        ushort startX,
-        ushort startY,
-        ushort endX,
-        ushort endY,
-        ushort width,
-        ushort height,
-        ushort facet
-    )
+    static void OnPlayerLightLevel(
+        On<PacketReceived<OnPlayerLightLevelPacket_0x4E>> trig,
+        ResMut<GameContext> gameCtx)
     {
-        _ = serial;
-        _ = gumpId;
-        _ = startX;
-        _ = startY;
-        _ = endX;
-        _ = endY;
-        _ = width;
-        _ = height;
-        _ = facet;
+        // Per-player light radius. Same storage pattern as 0x4F.
+        var packet = trig.Event.Packet;
+        if (packet.Serial == gameCtx.Value.PlayerSerial)
+            gameCtx.Value.PersonalLightLevel = packet.Level;
+    }
+
+    static void OnServerLightLevel(
+        On<PacketReceived<OnServerLightLevelPacket_0x4F>> trig,
+        ResMut<GameContext> gameCtx)
+    {
+        gameCtx.Value.ServerLightLevel = trig.Event.Packet.Level;
     }
 }
