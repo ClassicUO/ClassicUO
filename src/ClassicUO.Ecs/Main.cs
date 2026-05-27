@@ -24,6 +24,9 @@ using System.Net;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
+using TinyEcs;
+using TinyEcs.Bevy;
+
 namespace ClassicUO
 {
     internal static class Bootstrap
@@ -225,10 +228,17 @@ namespace ClassicUO
 
                 Console.WriteLine("FNA3D_FORCE_DRIVER: " + Environment.GetEnvironmentVariable("FNA3D_FORCE_DRIVER"));
 
-                // ECS entry moved to ClassicUO.Ecs project. This exe retains
-                // the legacy OOP code (Game/, Network/PacketHandlers, …) as a
-                // standalone build target — run `cuo-ecs` for the ECS path.
-                Log.Trace("ClassicUO.Client (legacy/OOP) — no runtime path wired in this build.");
+                using var ecs = new TinyEcs.World();
+                var app = new App(ecs, ThreadingMode.Auto);
+
+                app.AddPlugin<Ecs.CuoPlugin>();
+
+                while (true)
+                    app.Update();
+
+                // scheduler.Run(() => false);
+
+                // Client.Run(pluginHost);
             }
 
             Log.Trace("Closing...");

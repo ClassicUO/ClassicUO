@@ -1,0 +1,521 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="BlackPearl" xml:space="preserve">
+    <value>Black Pearl</value>
+  </data>
+  <data name="Bloodmoss" xml:space="preserve">
+    <value>Bloodmoss</value>
+  </data>
+  <data name="Garlic" xml:space="preserve">
+    <value>Garlic</value>
+  </data>
+  <data name="Ginseng" xml:space="preserve">
+    <value>Ginseng</value>
+  </data>
+  <data name="MandrakeRoot" xml:space="preserve">
+    <value>Mandrake Root</value>
+  </data>
+  <data name="Nightshade" xml:space="preserve">
+    <value>Nightshade</value>
+  </data>
+  <data name="SulfurousAsh" xml:space="preserve">
+    <value>Sulfurous Ash</value>
+  </data>
+  <data name="SpidersSilk" xml:space="preserve">
+    <value>Spiders Silk</value>
+  </data>
+  <data name="GraveDust" xml:space="preserve">
+    <value>Grave Dust</value>
+  </data>
+  <data name="BatWing" xml:space="preserve">
+    <value>Bat Wing</value>
+  </data>
+  <data name="DaemonBlood" xml:space="preserve">
+    <value>Daemon Blood</value>
+  </data>
+  <data name="NoxCrystal" xml:space="preserve">
+    <value>Nox Crystal</value>
+  </data>
+  <data name="PigIron" xml:space="preserve">
+    <value>Pig Iron</value>
+  </data>
+  <data name="ThisMayFlagYouCriminal" xml:space="preserve">
+    <value>This may flag
+you criminal!</value>
+  </data>
+  <data name="GrabBagNotFound" xml:space="preserve">
+    <value>Grab Bag not found, setting to Backpack.</value>
+  </data>
+  <data name="Ouch" xml:space="preserve">
+    <value>Ouch!</value>
+  </data>
+  <data name="CurrentDateTimeNowIs0" xml:space="preserve">
+    <value>Current DateTime.Now is {0}</value>
+  </data>
+  <data name="ItemID0Hue1" xml:space="preserve">
+    <value>Item ID: {0}
+Hue: {1}</value>
+  </data>
+  <data name="Hits" xml:space="preserve">
+    <value>Hits</value>
+  </data>
+  <data name="Mana" xml:space="preserve">
+    <value>Mana</value>
+  </data>
+  <data name="Stam" xml:space="preserve">
+    <value>Stam</value>
+  </data>
+  <data name="Weight" xml:space="preserve">
+    <value>Weight</value>
+  </data>
+  <data name="Paperdoll" xml:space="preserve">
+    <value>Paperdoll</value>
+  </data>
+  <data name="Options" xml:space="preserve">
+    <value>Options</value>
+  </data>
+  <data name="Journal" xml:space="preserve">
+    <value>Journal</value>
+  </data>
+  <data name="Backpack" xml:space="preserve">
+    <value>Backpack</value>
+  </data>
+  <data name="Radar" xml:space="preserve">
+    <value>Radar</value>
+  </data>
+  <data name="Bow" xml:space="preserve">
+    <value>Bow</value>
+  </data>
+  <data name="Salute" xml:space="preserve">
+    <value>Salute</value>
+  </data>
+  <data name="EmoteChar" xml:space="preserve">
+    <value>*</value>
+  </data>
+  <data name="AlwaysRunIsNowOn" xml:space="preserve">
+    <value>Always run is now on.</value>
+  </data>
+  <data name="AlwaysRunIsNowOff" xml:space="preserve">
+    <value>Always run is now off.</value>
+  </data>
+  <data name="TargetSystemNotImplemented" xml:space="preserve">
+    <value>[WARN] - TargetSystem On/Off not implemented</value>
+  </data>
+  <data name="ClientViewRangeIsNow0" xml:space="preserve">
+    <value>ClientViewRange is now {0}.</value>
+  </data>
+  <data name="TargetAnItemToGrabIt" xml:space="preserve">
+    <value>Target an Item to grab it.</value>
+  </data>
+  <data name="Target0" xml:space="preserve">
+    <value>Target: {0}</value>
+  </data>
+  <data name="EntityNotFound" xml:space="preserve">
+    <value>Entity not found.</value>
+  </data>
+  <data name="NotSeeing" xml:space="preserve">
+    <value>&lt;not seeing&gt;</value>
+  </data>
+  <data name="NoName" xml:space="preserve">
+    <value>No name</value>
+  </data>
+  <data name="CannotDeleteThisGroup" xml:space="preserve">
+    <value>Cannot delete this group.</value>
+  </data>
+  <data name="Combat" xml:space="preserve">
+    <value>Combat</value>
+  </data>
+  <data name="TradeSkills" xml:space="preserve">
+    <value>Trade Skills</value>
+  </data>
+  <data name="Magic" xml:space="preserve">
+    <value>Magic</value>
+  </data>
+  <data name="Wilderness" xml:space="preserve">
+    <value>Wilderness</value>
+  </data>
+  <data name="Thieving" xml:space="preserve">
+    <value>Thieving</value>
+  </data>
+  <data name="Bard" xml:space="preserve">
+    <value>Bard</value>
+  </data>
+  <data name="Miscellaneous" xml:space="preserve">
+    <value>Miscellaneous</value>
+  </data>
+  <data name="YouAreAlreadyIgnoringMaximum" xml:space="preserve">
+    <value>You are already ignoring the maximum number of people.</value>
+  </data>
+  <data name="YouAreAlreadyIgnoring1" xml:space="preserve">
+    <value>You are already ignoring %1.</value>
+  </data>
+  <data name="YouAreNowIgnoring1" xml:space="preserve">
+    <value>You are now ignoring %1.</value>
+  </data>
+  <data name="YouAreNoLongerIgnoring1" xml:space="preserve">
+    <value>You are no longer ignoring %1.</value>
+  </data>
+  <data name="YouAreNotIgnoring1" xml:space="preserve">
+    <value>You are not ignoring %1.</value>
+  </data>
+  <data name="YouAreNoLongerIgnoringAnyone" xml:space="preserve">
+    <value>You are no longer ignoring anyone.</value>
+  </data>
+  <data name="ThatIsNotAValidConferenceName" xml:space="preserve">
+    <value>That is not a valid conference name.</value>
+  </data>
+  <data name="ThereIsAlreadyAConference" xml:space="preserve">
+    <value>There is already a conference of that name.</value>
+  </data>
+  <data name="YouMustHaveOperatorStatus" xml:space="preserve">
+    <value>You must have operator status to do this.</value>
+  </data>
+  <data name="Conference1RenamedTo2" xml:space="preserve">
+    <value>Conference %1 renamed to %2.</value>
+  </data>
+  <data name="YouMustBeInAConference" xml:space="preserve">
+    <value>You must be in a conference to do this. To join a conference, select one from the Conference menu.</value>
+  </data>
+  <data name="ThereIsNoPlayerNamed1" xml:space="preserve">
+    <value>There is no player named '%1'.</value>
+  </data>
+  <data name="ThereIsNoConferenceNamed1" xml:space="preserve">
+    <value>There is no conference named '%1'.</value>
+  </data>
+  <data name="ThatIsNotTheCorrectPassword" xml:space="preserve">
+    <value>That is not the correct password.</value>
+  </data>
+  <data name="HasChosenToIgnoreYou" xml:space="preserve">
+    <value>%1 has chosen to ignore you. None of your messages to them will get through.</value>
+  </data>
+  <data name="NotGivenYouSpeakingPrivileges" xml:space="preserve">
+    <value>The moderator of this conference has not given you speaking privileges.</value>
+  </data>
+  <data name="YouCanNowReceivePM" xml:space="preserve">
+    <value>You can now receive private messages.</value>
+  </data>
+  <data name="YouWillNoLongerReceivePM" xml:space="preserve">
+    <value>You will no longer receive private messages. Those who send you a message will be notified that you are blocking incoming messages.</value>
+  </data>
+  <data name="YouAreShowingYourCharName" xml:space="preserve">
+    <value>You are now showing your character name to any players who inquire with the whois command.</value>
+  </data>
+  <data name="YouAreNotShowingYourCharName" xml:space="preserve">
+    <value>You are no longer showing your character name to any players who inquire with the whois command.</value>
+  </data>
+  <data name="IsRemainingAnonymous" xml:space="preserve">
+    <value>%1 is remaining anonymous.</value>
+  </data>
+  <data name="HasChosenToNotReceivePM" xml:space="preserve">
+    <value>%1 has chosen to not receive private messages at the moment.</value>
+  </data>
+  <data name="IsKnownInTheLandsOfBritanniaAs2" xml:space="preserve">
+    <value>%1 is known in the lands of Britannia as %2.</value>
+  </data>
+  <data name="HasBeenKickedOutOfTheConference" xml:space="preserve">
+    <value>%1 has been kicked out of the conference.</value>
+  </data>
+  <data name="AConferenceModeratorKickedYou" xml:space="preserve">
+    <value>%1, a conference moderator, has kicked you out of the conference.</value>
+  </data>
+  <data name="YouAreAlreadyInTheConference1" xml:space="preserve">
+    <value>You are already in the conference '%1'.</value>
+  </data>
+  <data name="IsNoLongerAConferenceModerator" xml:space="preserve">
+    <value>%1 is no longer a conference moderator.</value>
+  </data>
+  <data name="IsNowAConferenceModerator" xml:space="preserve">
+    <value>%1 is now a conference moderator.</value>
+  </data>
+  <data name="HasRemovedYouFromModerators" xml:space="preserve">
+    <value>%1 has removed you from the list of conference moderators.</value>
+  </data>
+  <data name="HasMadeYouAConferenceModerator" xml:space="preserve">
+    <value>%1 has made you a conference moderator.</value>
+  </data>
+  <data name="NoLongerHasSpeakingPrivileges" xml:space="preserve">
+    <value>%1 no longer has speaking privileges in this conference.</value>
+  </data>
+  <data name="NowHasSpeakingPrivileges" xml:space="preserve">
+    <value>%1 now has speaking privileges in this conference.</value>
+  </data>
+  <data name="RemovedYourSpeakingPrivileges" xml:space="preserve">
+    <value>%1, a conference moderator, has removed your speaking privileges for this conference.</value>
+  </data>
+  <data name="GrantedYouSpeakingPrivileges" xml:space="preserve">
+    <value>%1, a conference moderator, has granted you speaking privileges in this conference.</value>
+  </data>
+  <data name="EveryoneWillHaveSpeakingPrivs" xml:space="preserve">
+    <value>From now on, everyone in the conference will have speaking privileges by default.</value>
+  </data>
+  <data name="ModeratorsWillHaveSpeakingPrivs" xml:space="preserve">
+    <value>From now on, only moderators will have speaking privileges in this conference by default.</value>
+  </data>
+  <data name="PasswordToTheConferenceChanged" xml:space="preserve">
+    <value>The password to the conference has been changed.</value>
+  </data>
+  <data name="TheConferenceNamed1IsFull" xml:space="preserve">
+    <value>Sorry--the conference named '%1' is full and no more players are allowed in.</value>
+  </data>
+  <data name="YouAreBanning1FromThisConference" xml:space="preserve">
+    <value>You are banning %1 from this conference.</value>
+  </data>
+  <data name="BannedYouFromTheConference" xml:space="preserve">
+    <value>%1, a conference moderator, has banned you from the conference.</value>
+  </data>
+  <data name="YouHaveBeenBanned" xml:space="preserve">
+    <value>You have been banned from this conference.</value>
+  </data>
+  <data name="YourUODirectoryIsInvalid" xml:space="preserve">
+    <value>Your Ultima Online directory seems to be invalid.
+Download the official Launcher to setup and run your game.
+
+Link: classicuo.eu</value>
+  </data>
+  <data name="YourUOClientVersionIsInvalid" xml:space="preserve">
+    <value>Your Ultima Online client version seems to be invalid.
+Download the official Launcher to setup and run your game.
+
+Link: classicuo.eu</value>
+  </data>
+  <data name="ClassicUOLink" xml:space="preserve">
+    <value>https://classicuo.eu</value>
+  </data>
+  <data name="ItBeginsToRain" xml:space="preserve">
+    <value>It begins to rain.</value>
+  </data>
+  <data name="AFierceStormApproaches" xml:space="preserve">
+    <value>A fierce storm approaches.</value>
+  </data>
+  <data name="ItBeginsToSnow" xml:space="preserve">
+    <value>It begins to snow.</value>
+  </data>
+  <data name="AStormIsBrewing" xml:space="preserve">
+    <value>A storm is brewing.</value>
+  </data>
+  <data name="Your0HasChangedBy1ItIsNow2" xml:space="preserve">
+    <value>Your {0} has changed by {1}.  It is now {2}</value>
+  </data>
+  <data name="Dexterity" xml:space="preserve">
+    <value>dexterity</value>
+  </data>
+  <data name="Intelligence" xml:space="preserve">
+    <value>intelligence</value>
+  </data>
+  <data name="Strength" xml:space="preserve">
+    <value>strength</value>
+  </data>
+  <data name="Decreased" xml:space="preserve">
+    <value>decreased</value>
+  </data>
+  <data name="Increased" xml:space="preserve">
+    <value>increased</value>
+  </data>
+  <data name="YourSkillIn0Has1By2ItIsNow3" xml:space="preserve">
+    <value>Your skill in {0} has {1} by {2:F1}.  It is now {3:F1}.</value>
+  </data>
+  <data name="YouHaveJoinedThe0Channel" xml:space="preserve">
+    <value>You have joined the '{0}' channel.</value>
+  </data>
+  <data name="YouHaveLeftThe0Channel" xml:space="preserve">
+    <value>You have left the '{0}' channel.</value>
+  </data>
+  <data name="CraftedBy" xml:space="preserve">
+    <value>Crafted by </value>
+  </data>
+  <data name="Name0Val1" xml:space="preserve">
+    <value>Name: {0} - {1:F1}</value>
+  </data>
+  <data name="GrabBagSet0" xml:space="preserve">
+    <value>Grab Bag set: {0}</value>
+  </data>
+  <data name="System" xml:space="preserve">
+    <value>System</value>
+  </data>
+  <data name="YouSee" xml:space="preserve">
+    <value>You see</value>
+  </data>
+  <data name="Party0" xml:space="preserve">
+    <value>[Party][{0}]</value>
+  </data>
+  <data name="Alliance0" xml:space="preserve">
+    <value>[Alliance][{0}]</value>
+  </data>
+  <data name="Guild0" xml:space="preserve">
+    <value>[Guild][{0}]</value>
+  </data>
+  <data name="ConnectionLost0" xml:space="preserve">
+    <value>Connection lost:
+{0}</value>
+  </data>
+  <data name="QuitPrompt" xml:space="preserve">
+    <value>Quit
+Ultima Online?</value>
+  </data>
+  <data name="YouAreDead" xml:space="preserve">
+    <value>You are dead.</value>
+  </data>
+  <data name="StoppedFollowing" xml:space="preserve">
+    <value>Stopped following.</value>
+  </data>
+  <data name="NowFollowing" xml:space="preserve">
+    <value>Now following.</value>
+  </data>
+  <data name="Pathfinding" xml:space="preserve">
+    <value>Pathfinding!</value>
+  </data>
+  <data name="Connecting" xml:space="preserve">
+    <value>Connecting...</value>
+  </data>
+  <data name="VerifyingAccount" xml:space="preserve">
+    <value>Verifying Account...</value>
+  </data>
+  <data name="LoggingIntoShard" xml:space="preserve">
+    <value>Logging into Shard</value>
+  </data>
+  <data name="EnteringBritannia" xml:space="preserve">
+    <value>Entering Britannia...</value>
+  </data>
+  <data name="CreatingCharacter" xml:space="preserve">
+    <value>Creating character...</value>
+  </data>
+  <data name="CheckYourConnectionAndTryAgain" xml:space="preserve">
+    <value>Check your internet connection and try again</value>
+  </data>
+  <data name="ReconnectPleaseWait01" xml:space="preserve">
+    <value>Reconnect, please wait...`{0}`
+`{1}`</value>
+  </data>
+  <data name="ScreenshotStoredIn0" xml:space="preserve">
+    <value>Screenshot stored in: {0}</value>
+  </data>
+  <data name="WindowTitle0" xml:space="preserve">
+    <value>ClassicUO - {0}</value>
+  </data>
+  <data name="Invariant" xml:space="preserve">
+    <value>Invariant</value>
+  </data>
+  <data name="English" xml:space="preserve">
+    <value>English</value>
+  </data>
+  <data name="Czech" xml:space="preserve">
+    <value>Czech</value>
+  </data>
+</root>
