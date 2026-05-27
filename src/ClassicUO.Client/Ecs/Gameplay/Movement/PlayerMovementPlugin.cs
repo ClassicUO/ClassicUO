@@ -78,17 +78,11 @@ readonly struct PlayerMovementPlugin : IPlugin
 
             .AddSystem(enqueuePlayerStepsFn)
             .InStage(Stage.Update)
-            .RunIf((Res<MouseContext> mouseCtx, Res<Camera> camera, Res<UoGame> game, Local<(float X, float Y)> clickedPos) =>
+            .RunIf((Res<MouseContext> mouseCtx, Res<Camera> camera, Local<(float X, float Y)> clickedPos) =>
             {
-                // MouseContext.Position is in PHYSICAL pixels; Camera.Bounds
-                // is in LOGICAL (DPI-scaled) pixels. Convert mouse to logical
-                // before the contains-check or the comparison always fails on
-                // hi-DPI displays.
-                var dpi = game.Value.DpiScale;
-                if (dpi <= 0f) dpi = 1f;
                 if (mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Right))
                 {
-                    clickedPos.Value = (mouseCtx.Value.Position.X / dpi, mouseCtx.Value.Position.Y / dpi);
+                    clickedPos.Value = (mouseCtx.Value.Position.X, mouseCtx.Value.Position.Y);
                 }
 
                 return camera.Value.Bounds.Contains((int)clickedPos.Value.X, (int)clickedPos.Value.Y);
@@ -168,7 +162,6 @@ readonly struct PlayerMovementPlugin : IPlugin
         Local<List<TerrainInfo>> terrainList,
         Res<UOFileManager> fileManager,
         Res<MouseContext> mouseCtx,
-        Res<UoGame> game,
         Res<NetClient> network,
         ResMut<PlayerStepsContext> playerRequestedSteps,
         Res<Camera> camera,
@@ -186,20 +179,14 @@ readonly struct PlayerMovementPlugin : IPlugin
         terrainList.Value ??= new();
         Span<sbyte> diag = [1, -1];
 
-        // Mouse pos in physical pixels; Camera.Bounds in logical (DPI-scaled).
-        // Convert mouse to logical so direction + range math live in the
-        // same coordinate space.
-        var dpi = game.Value.DpiScale;
-        if (dpi <= 0f) dpi = 1f;
-        var mouseLogicalX = mouseCtx.Value.Position.X / dpi;
-        var mouseLogicalY = mouseCtx.Value.Position.Y / dpi;
+        var mousePos = mouseCtx.Value.Position;
 
         var center = new Vector2(camera.Value.Bounds.Right, camera.Value.Bounds.Bottom);
         center.X -= camera.Value.Bounds.Width / 2f;
         center.Y -= camera.Value.Bounds.Height / 2f;
 
-        var mouseDir = (Direction)ClassicUO.Game.GameCursor.GetMouseDirection((int)center.X, (int)center.Y, (int)mouseLogicalX, (int)mouseLogicalY, 1);
-        var mouseRange = Utility.MathHelper.Hypotenuse(center.X - mouseLogicalX, center.Y - mouseLogicalY);
+        var mouseDir = (Direction)ClassicUO.Game.GameCursor.GetMouseDirection((int)center.X, (int)center.Y, (int)mousePos.X, (int)mousePos.Y, 1);
+        var mouseRange = Utility.MathHelper.Hypotenuse(center.X - mousePos.X, center.Y - mousePos.Y);
         var facing = mouseDir == Direction.North ? Direction.Mask : mouseDir - 1;
         var run = mouseRange >= Constants.THREESHOLD_MOUSE_WALK_RUN || false;
 
