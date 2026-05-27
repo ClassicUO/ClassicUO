@@ -54,6 +54,7 @@
     <Project Path="src/ClassicUO.Assets/ClassicUO.Assets.csproj" />
     <Project Path="src/ClassicUO.Bootstrap/src/ClassicUO.Bootstrap.csproj" />
     <Project Path="src/ClassicUO.Client/ClassicUO.Client.csproj" />
+    <Project Path="src/ClassicUO.Ecs/ClassicUO.Ecs.csproj" />
     <Project Path="src/ClassicUO.IO/ClassicUO.IO.csproj" />
     <Project Path="src/ClassicUO.Renderer/ClassicUO.Renderer.csproj" />
     <Project Path="src/ClassicUO.Schema/ClassicUO.Schema.csproj" />
