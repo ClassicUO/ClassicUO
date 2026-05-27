@@ -2,7 +2,6 @@
 
 using ClassicUO.Configuration;
 using ClassicUO.Game;
-using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO;
 using ClassicUO.Network;
@@ -10,20 +9,14 @@ using ClassicUO.Resources;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Input;
-using SDL2;
+using SDL3;
 using System;
-using System.Buffers;
-using System.Buffers.Binary;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Net;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
+
 namespace ClassicUO
 {
     internal static class Bootstrap
@@ -223,8 +216,6 @@ namespace ClassicUO
                         break;
                 }
 
-                Console.WriteLine("FNA3D_FORCE_DRIVER: " + Environment.GetEnvironmentVariable("FNA3D_FORCE_DRIVER"));
-
                 Client.Run(pluginHost);
             }
 
@@ -299,7 +290,7 @@ namespace ClassicUO
 
                     case "filesoverride":
                     case "uofilesoverride":
-                        UOFilesOverrideMap.OverrideFile = value;
+                        Settings.GlobalSettings.OverrideFile = value;
 
                         break;
 

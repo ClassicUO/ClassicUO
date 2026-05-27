@@ -1,17 +1,15 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Collections.Generic;
-using System.Text;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.Assets;
-using ClassicUO.Renderer;
+using ClassicUO.Network;
 using ClassicUO.Utility;
-using ClassicUO.Game.Scenes;
+using System;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.Managers
 {
@@ -43,15 +41,43 @@ namespace ClassicUO.Game.Managers
     {
         private readonly World _world;
 
+        public event EventHandler<PromptData> ServerPromptChanged;
+
         public MessageManager(World world) => _world = world;
 
 
-        public PromptData PromptData { get; set; }
+        public PromptData PromptData
+        {
+            get => field;
+            set
+            {
+                field = value;
+                ServerPromptChanged?.Invoke(this, value);
+            }
+        }
 
         public event EventHandler<MessageEventArgs> MessageReceived;
 
         public event EventHandler<MessageEventArgs> LocalizedMessageReceived;
 
+        public void CancelServerPrompt()
+        {
+            SendServerPromptResponse(string.Empty);
+        }
+
+        public void SendServerPromptResponse(string text)
+        {
+            if (PromptData.Prompt == ConsolePrompt.ASCII)
+            {
+                NetClient.Socket.Send_ASCIIPromptResponse(_world, text, text.Length < 1);
+            }
+            else if (PromptData.Prompt == ConsolePrompt.Unicode)
+            {
+                NetClient.Socket.Send_UnicodePromptResponse(_world, text, Settings.GlobalSettings.Language, text.Length < 1);
+            }
+
+            PromptData = default;
+        }
 
         public void HandleMessage
         (
@@ -85,6 +111,37 @@ namespace ClassicUO.Game.Managers
                 case MessageType.Encoded:
                 case MessageType.System:
                 case MessageType.Party:
+                    if (!currentProfile.OverheadPartyMessages)
+                        break;
+
+                    if (parent == null) //No parent entity, need to check party members by name
+                    {
+                        foreach (PartyMember member in _world.Party.Members)
+                            if (member != null)
+                                if (member.Name == name) //Name matches message from server
+                                {
+                                    Mobile m = _world.Mobiles.Get(member.Serial);
+                                    if (m != null) //Mobile exists
+                                    {
+                                        parent = m;
+                                        break;
+                                    }
+                                }
+                    }
+
+                    if (type != MessageType.Spell && parent != null && _world.IgnoreManager.IgnoredCharsList.Contains(parent.Name))
+                        break;
+
+                    //Add null check in case parent was not found above.
+                    parent?.AddMessage(CreateMessage
+                    (
+                        text,
+                        hue,
+                        font,
+                        unicode,
+                        type,
+                        textType
+                    ));
                     break;
 
                 case MessageType.Guild:
@@ -169,7 +226,7 @@ namespace ClassicUO.Game.Managers
                         msg.IsTextGump = true;
                         bool found = false;
 
-                        for (LinkedListNode<Gump> gump = UIManager.Gumps.Last; gump != null; gump = gump.Previous)
+                        for (LinkedListNode<UI.Gumps.Gump> gump = UIManager.Gumps.Last; gump != null; gump = gump.Previous)
                         {
                             Control g = gump.Value;
 

@@ -104,7 +104,8 @@ namespace ClassicUO.Renderer.Arts
             int index,
             ushort customHue,
             out int hotX,
-            out int hotY
+            out int hotY,
+            float dpiScale = 1f
         )
         {
             hotX = hotY = 0;
@@ -188,6 +189,30 @@ namespace ClassicUO.Renderer.Arts
                     p_line_end += stride;
 
                     ++curY;
+                }
+
+                if (dpiScale != 1f)
+                {
+                    int scaledW = (int)(artInfo.Width * dpiScale);
+                    int scaledH = (int)(artInfo.Height * dpiScale);
+
+                    IntPtr scaled = SDL.SDL_CreateRGBSurfaceWithFormat(
+                        0,
+                        scaledW,
+                        scaledH,
+                        32,
+                        SDL.SDL_PIXELFORMAT_ABGR8888);
+
+                    if (scaled != IntPtr.Zero)
+                    {
+                        SDL.SDL_Rect dst = new SDL.SDL_Rect { x = 0, y = 0, w = scaledW, h = scaledH };
+                        SDL.SDL_BlitScaled((IntPtr)surface, IntPtr.Zero, scaled, ref dst);
+                        SDL.SDL_FreeSurface((IntPtr)surface);
+
+                        hotX = (int)(hotX * dpiScale);
+                        hotY = (int)(hotY * dpiScale);
+                        return scaled;
+                    }
                 }
 
                 return (IntPtr)surface;

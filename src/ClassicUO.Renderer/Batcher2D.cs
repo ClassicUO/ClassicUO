@@ -56,6 +56,9 @@ namespace ClassicUO.Renderer
         private Texture2D[] _textureInfo;
         private PositionNormalTextureColor4[] _vertexInfo;
 
+        private DynamicIndexBuffer _dynamicIndexBuffer;
+        private bool _worldOffsetActive;
+
 
         public UltimaBatcher2D(GraphicsDevice device)
         {
@@ -112,12 +115,85 @@ namespace ClassicUO.Renderer
             _basicUOEffect?.Dispose();
             _vertexBuffer.Dispose();
             _indexBuffer.Dispose();
+            _dynamicIndexBuffer?.Dispose();
         }
 
 
         public void SetBrightlight(float f)
         {
             _basicUOEffect.Brighlight.SetValue(f);
+        }
+
+        public void SetCircleOfTransparencyRadius(float radius)
+        {
+            _basicUOEffect.CircleOfTransparencyRadius?.SetValue(radius);
+        }
+
+        public DynamicIndexBuffer GetDynamicIndexBuffer(int requiredIndices)
+        {
+            if (_dynamicIndexBuffer == null || _dynamicIndexBuffer.IndexCount < requiredIndices)
+            {
+                _dynamicIndexBuffer?.Dispose();
+                _dynamicIndexBuffer = new DynamicIndexBuffer(
+                    GraphicsDevice,
+                    IndexElementSize.SixteenBits,
+                    Math.Max(requiredIndices, 1024),
+                    BufferUsage.WriteOnly
+                );
+            }
+            return _dynamicIndexBuffer;
+        }
+
+        public void DrawDirectIndexed(Texture2D texture, int startIndex, int primitiveCount, int numVertices)
+        {
+            GraphicsDevice.Textures[0] = texture;
+            _basicUOEffect.Pass.Apply();
+
+            if (_customEffect != null)
+            {
+                foreach (EffectPass pass in _customEffect.CurrentTechnique.Passes)
+                {
+                    pass.Apply();
+                    GraphicsDevice.DrawIndexedPrimitives(
+                        PrimitiveType.TriangleList,
+                        0,
+                        0,
+                        numVertices,
+                        startIndex,
+                        primitiveCount
+                    );
+                }
+            }
+            else
+            {
+                GraphicsDevice.DrawIndexedPrimitives(
+                    PrimitiveType.TriangleList,
+                    0,
+                    0,
+                    numVertices,
+                    startIndex,
+                    primitiveCount
+                );
+            }
+        }
+
+        public void SetWorldOffset(int offsetX, int offsetY)
+        {
+            Flush();
+            ApplyStates();
+            _worldOffsetActive = true;
+            _basicUOEffect.WorldMatrix.SetValue(Matrix.CreateTranslation(-offsetX, -offsetY, 0));
+            _basicUOEffect.Pass.Apply();
+        }
+
+        public void ResetWorldOffset()
+        {
+            Flush();
+            _worldOffsetActive = false;
+            _basicUOEffect.WorldMatrix.SetValue(Matrix.Identity);
+            _basicUOEffect.Pass.Apply();
+            GraphicsDevice.SetVertexBuffer(_vertexBuffer);
+            GraphicsDevice.Indices = _indexBuffer;
         }
 
         public void Draw(Texture2D texture, Vector2 position, Rectangle? sourceRectangle, Color color, float rotation, Vector2 scale, float depth)
@@ -213,9 +289,15 @@ namespace ClassicUO.Renderer
         }
 
         public void DrawString(SpriteFont spriteFont, ReadOnlySpan<char> text, int x, int y, Vector3 color)
-            => DrawString(spriteFont, text, new Vector2(x, y), color);
+            => DrawString(spriteFont, text, new Vector2(x, y), color, 0f);
+
+        public void DrawString(SpriteFont spriteFont, ReadOnlySpan<char> text, int x, int y, Vector3 color, float layerDepth)
+            => DrawString(spriteFont, text, new Vector2(x, y), color, layerDepth);
 
         public void DrawString(SpriteFont spriteFont, ReadOnlySpan<char> text, Vector2 position, Vector3 color)
+            => DrawString(spriteFont, text, position, color, 0f);
+
+        public void DrawString(SpriteFont spriteFont, ReadOnlySpan<char> text, Vector2 position, Vector3 color, float layerDepth)
         {
             if (text.IsEmpty)
             {
@@ -305,7 +387,8 @@ namespace ClassicUO.Renderer
                     textureValue,
                     position + pos,
                     cGlyph,
-                    color
+                    color,
+                    layerDepth
                 );
 
                 curOffset.X += cKern.Y + cKern.Z;
@@ -762,6 +845,16 @@ namespace ClassicUO.Renderer
             Vector2 end,
             Vector3 color,
             float stroke
+        ) => DrawLine(texture, start, end, color, stroke, 0f);
+
+        public void DrawLine
+        (
+            Texture2D texture,
+            Vector2 start,
+            Vector2 end,
+            Vector3 color,
+            float stroke,
+            float depth
         )
         {
             var radians = ClassicUO.Utility.MathHelper.AngleBetweenVectors(start, end);
@@ -777,7 +870,7 @@ namespace ClassicUO.Renderer
                 Vector2.Zero,
                 new Vector2(length, stroke),
                 SpriteEffects.None,
-                0
+                depth
             );
         }
 
@@ -792,6 +885,17 @@ namespace ClassicUO.Renderer
         )
         {
             AddSprite(texture, 0f, 0f, 1f, 1f, position.X, position.Y, texture.Width, texture.Height, color, 0f, 0f, 0f, 1f, 0f, 0);
+        }
+
+        public void Draw
+        (
+            Texture2D texture,
+            Vector2 position,
+            Vector3 color,
+            float depth
+        )
+        {
+            AddSprite(texture, 0f, 0f, 1f, 1f, position.X, position.Y, texture.Width, texture.Height, color, 0f, 0f, 0f, 1f, depth, 0);
         }
 
         public void Draw
@@ -970,8 +1074,45 @@ namespace ClassicUO.Renderer
         (
             Texture2D texture,
             Rectangle destinationRectangle,
+            Vector3 color,
+            float layerDepth
+        )
+        {
+            AddSprite(
+                texture,
+                0.0f,
+                0.0f,
+                1.0f,
+                1.0f,
+                destinationRectangle.X,
+                destinationRectangle.Y,
+                destinationRectangle.Width,
+                destinationRectangle.Height,
+                color,
+                0.0f,
+                0.0f,
+                0.0f,
+                1.0f,
+                layerDepth,
+                0
+            );
+        }
+
+        public void Draw
+        (
+            Texture2D texture,
+            Rectangle destinationRectangle,
             Rectangle? sourceRectangle,
             Vector3 color
+        ) => Draw(texture, destinationRectangle, sourceRectangle, color, 0f);
+
+        public void Draw
+        (
+            Texture2D texture,
+            Rectangle destinationRectangle,
+            Rectangle? sourceRectangle,
+            Vector3 color,
+            float layerDepth
         )
         {
             float sourceX, sourceY, sourceW, sourceH;
@@ -1006,7 +1147,7 @@ namespace ClassicUO.Renderer
                 0.0f,
                 0.0f,
                 1.0f,
-                0.0f,
+                layerDepth,
                 0
             );
         }
@@ -1626,7 +1767,7 @@ namespace ClassicUO.Renderer
 
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
-        private struct PositionNormalTextureColor4 : IVertexType
+        public struct PositionNormalTextureColor4 : IVertexType
         {
             public Vector3 Position0;
             public Vector3 Normal0;

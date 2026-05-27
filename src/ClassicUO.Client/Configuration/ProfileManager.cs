@@ -1,5 +1,6 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
+using System;
 using System.IO;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
@@ -8,27 +9,40 @@ namespace ClassicUO.Configuration
 {
     internal static class ProfileManager
     {
+        public static GlobalProfile GlobalProfile { get; private set; }
         public static Profile CurrentProfile { get; private set; }
         public static string ProfilePath { get; private set; }
 
+        private static string _rootPath;
+        private static string RootPath
+        {
+            get
+            {
+                if (string.IsNullOrEmpty(_rootPath))
+                {
+                    if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.ProfilesPath))
+                    {
+                        _rootPath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles");
+                    }
+                    else
+                    {
+                        _rootPath = Settings.GlobalSettings.ProfilesPath;
+                    }
+                }
+
+                return _rootPath;
+            }
+        }
+
         public static void Load(string servername, string username, string charactername)
         {
-            string rootpath;
+            GlobalProfile = ConfigurationResolver.Load<GlobalProfile>(Path.Combine(RootPath, "globalprofile.json"), ProfileJsonContext.DefaultToUse.GlobalProfile) ?? new GlobalProfile();
 
-            if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.ProfilesPath))
-            {
-                rootpath = Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Profiles");
-            }
-            else
-            {
-                rootpath = Settings.GlobalSettings.ProfilesPath;
-            }
-
-            string path = FileSystemHelper.CreateFolderIfNotExists(rootpath, username, servername, charactername);
+            string path = FileSystemHelper.CreateFolderIfNotExists(RootPath, username, servername, charactername);
             string fileToLoad = Path.Combine(path, "profile.json");
 
             ProfilePath = path;
-            CurrentProfile = ConfigurationResolver.Load<Profile>(fileToLoad, ProfileJsonContext.DefaultToUse.Profile) ?? new Profile();
+            CurrentProfile = ConfigurationResolver.Load<Profile>(fileToLoad, ProfileJsonContext.DefaultToUse.Profile) ?? NewFromDefault();
 
             CurrentProfile.Username = username;
             CurrentProfile.ServerName = servername;
@@ -37,6 +51,15 @@ namespace ClassicUO.Configuration
             ValidateFields(CurrentProfile);
         }
 
+        public static void SetProfileAsDefault(Profile profile)
+        {
+            Save(profile, RootPath, "default.json");
+        }
+
+        public static Profile NewFromDefault()
+        {
+            return ConfigurationResolver.Load<Profile>(Path.Combine(RootPath, "default.json"), ProfileJsonContext.DefaultToUse.Profile) ?? new Profile();
+        }
 
         private static void ValidateFields(Profile profile)
         {
@@ -73,7 +96,17 @@ namespace ClassicUO.Configuration
 
         public static void UnLoadProfile()
         {
+            GlobalProfile = null;
             CurrentProfile = null;
+        }
+
+        internal static void Save(Profile profile, string path, string filename = "profile.json")
+        {
+            ConfigurationResolver.Save(profile, Path.Combine(path, filename), ProfileJsonContext.DefaultToUse.Profile);
+            if (GlobalProfile != null)
+            {
+                ConfigurationResolver.Save(GlobalProfile, Path.Combine(RootPath, "globalprofile.json"), ProfileJsonContext.DefaultToUse.GlobalProfile);
+            }
         }
     }
 }

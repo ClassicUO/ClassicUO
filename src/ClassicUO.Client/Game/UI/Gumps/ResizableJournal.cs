@@ -2,9 +2,9 @@
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Renderer;
 using ClassicUO.Utility.Collections;
 using System;
 using System.Collections.Generic;
@@ -324,31 +324,39 @@ namespace ClassicUO.Game.UI.Gumps
                 WantUpdateSize = false;
             }
 
-            public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+            public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
             {
-                base.Draw(batcher, x, y);
+                base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
+                float layerDepth = layerDepthRef;
                 int my = y;
 
-                if (batcher.ClipBegin(x, y, Width, Height))
-                {
-                    foreach (JournalData journalEntry in journalDatas)
+                renderLists.AddGumpNoAtlas(
+                    batcher =>
                     {
-                        if (journalEntry == null || string.IsNullOrEmpty(journalEntry.EntryText.Text))
-                            continue;
-
-                        if (!CanBeDrawn(journalEntry.TextType, journalEntry.MessageType))
-                            continue;
-
-                        if (my + journalEntry.EntryText.Height - y >= _scrollBar.Value && my - y <= _scrollBar.Value + _scrollBar.Height)
+                        if (batcher.ClipBegin(x, y, Width, Height))
                         {
-                            journalEntry.TimeStamp.Draw(batcher, x, my - _scrollBar.Value);
-                            journalEntry.EntryText.Draw(batcher, x + (journalEntry.TimeStamp.Width + 5), my - _scrollBar.Value);
-                        }
-                        my += journalEntry.EntryText.Height;
-                    }
+                            RenderLists childRenderLists = new();
+                            foreach (JournalData journalEntry in journalDatas)
+                            {
+                                if (journalEntry == null || string.IsNullOrEmpty(journalEntry.EntryText.Text))
+                                    continue;
 
-                    batcher.ClipEnd();
-                }
+                                if (!CanBeDrawn(journalEntry.TextType, journalEntry.MessageType))
+                                    continue;
+
+                                if (my + journalEntry.EntryText.Height - y >= _scrollBar.Value && my - y <= _scrollBar.Value + _scrollBar.Height)
+                                {
+                                    journalEntry.TimeStamp.AddToRenderLists(childRenderLists, x, my - _scrollBar.Value, ref layerDepth);
+                                    journalEntry.EntryText.AddToRenderLists(childRenderLists, x + (journalEntry.TimeStamp.Width + 5), my - _scrollBar.Value, ref layerDepth);
+                                }
+                                my += journalEntry.EntryText.Height;
+                            }
+                            childRenderLists.DrawRenderLists(batcher, sbyte.MaxValue);
+                            batcher.ClipEnd();
+                        }
+                        return true;
+                    }
+                );
                 return true;
             }
 
@@ -365,10 +373,10 @@ namespace ClassicUO.Game.UI.Gumps
                     lastWidth = Width;
                     lastHeight = Height;
 
-                    foreach (JournalData _ in journalDatas)
+                    foreach (JournalData jdata in journalDatas)
                     {
-                        _.EntryText.Width = Width - BORDER_WIDTH - _.TimeStamp.Width;
-                        _.EntryText.Update();
+                        jdata.EntryText = new Label(jdata.EntryText.Text, jdata.EntryText.Unicode, jdata.EntryText.Hue, Width - BORDER_WIDTH - jdata.TimeStamp.Width, font: jdata.EntryText.Font);
+                        jdata.EntryText.Update();
                     }
 
                     CalculateScrollBarMaxValue();
@@ -418,7 +426,7 @@ namespace ClassicUO.Game.UI.Gumps
 
                 journalDatas.AddToBack(
                     new JournalData(
-                        new Label($"{e.Name}: {e.Text}", e.IsUnicode, e.Hue, font: e.Font),
+                        new Label($"{e.Name}: {e.Text}", e.IsUnicode, e.Hue, Width - BORDER_WIDTH - timeS.Width, font: e.Font),
                         timeS,
                         e.TextType,
                         e.MessageType
@@ -485,7 +493,7 @@ namespace ClassicUO.Game.UI.Gumps
                     TimeStamp?.Dispose();
                 }
 
-                public Label EntryText { get; }
+                public Label EntryText { get; set; }
                 public Label TimeStamp { get; }
                 public TextType TextType { get; }
                 public MessageType MessageType { get; }

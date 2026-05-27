@@ -1708,7 +1708,7 @@ namespace ClassicUO.Network
             {
                 world.MessageManager.HandleMessage(
                     null,
-                    ServerErrorMessages.GetError(Client.Game.UO.FileManager.Clilocs, p[0], code),
+                    ServerErrorMessages.GetError(p[0], code),
                     string.Empty,
                     0x03b2,
                     MessageType.System,
@@ -2248,7 +2248,7 @@ namespace ClassicUO.Network
 
                 if (Client.Game.UO.Version >= Utility.ClientVersion.CV_306E)
                 {
-                    NetClient.Socket.Send_ClientType(Client.Game.UO.Protocol);
+                    NetClient.Socket.Send_ClientType();
                 }
 
                 if (Client.Game.UO.Version >= Utility.ClientVersion.CV_305D)
@@ -2541,8 +2541,8 @@ namespace ClassicUO.Network
                             );
                             bulletinBoard?.Dispose();
 
-                            int x = (Client.Game.Window.ClientBounds.Width >> 1) - 245;
-                            int y = (Client.Game.Window.ClientBounds.Height >> 1) - 205;
+                            int x = (Client.Game.ClientBounds.Width >> 1) - 245;
+                            int y = (Client.Game.ClientBounds.Height >> 1) - 205;
 
                             bulletinBoard = new BulletinBoardGump(world, item, x, y, p.ReadUTF8(22, true)); //p.ReadASCII(22));
                             UIManager.Add(bulletinBoard);
@@ -3007,8 +3007,8 @@ namespace ClassicUO.Network
             {
                 GrayMenuGump gump = new GrayMenuGump(world, serial, id, name)
                 {
-                    X = (Client.Game.Window.ClientBounds.Width >> 1) - 200,
-                    Y = (Client.Game.Window.ClientBounds.Height >> 1) - ((121 + count * 21) >> 1)
+                    X = (Client.Game.ClientBounds.Width >> 1) - 200,
+                    Y = (Client.Game.ClientBounds.Height >> 1) - ((121 + count * 21) >> 1)
                 };
 
                 int offsetY = 35 + gump.Height;
@@ -3226,7 +3226,7 @@ namespace ClassicUO.Network
             {
                 p.Skip(2);
                 bgump.IsEditable = editable;
-                bgump.SetTile(
+                bgump.SetTitle(
                     oldpacket ? p.ReadUTF8(60, true) : p.ReadUTF8(p.ReadUInt16BE(), true),
                     editable
                 );
@@ -3248,8 +3248,8 @@ namespace ClassicUO.Network
 
             ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(0x0906);
 
-            int x = (Client.Game.Window.ClientBounds.Width >> 1) - (gumpInfo.UV.Width >> 1);
-            int y = (Client.Game.Window.ClientBounds.Height >> 1) - (gumpInfo.UV.Height >> 1);
+            int x = (Client.Game.ClientBounds.Width >> 1) - (gumpInfo.UV.Width >> 1);
+            int y = (Client.Game.ClientBounds.Height >> 1) - (gumpInfo.UV.Height >> 1);
 
             ColorPickerGump gump = UIManager.GetGump<ColorPickerGump>(serial);
 
@@ -3337,11 +3337,7 @@ namespace ClassicUO.Network
                 return;
             }
 
-            world.MessageManager.PromptData = new PromptData
-            {
-                Prompt = ConsolePrompt.ASCII,
-                Data = p.ReadUInt64BE()
-            };
+            world.MessageManager.PromptData = new PromptData(ConsolePrompt.ASCII, p.ReadUInt64BE());
         }
 
         private static void SellList(World world, ref StackDataReader p)
@@ -4858,11 +4854,7 @@ namespace ClassicUO.Network
                 return;
             }
 
-            world.MessageManager.PromptData = new PromptData
-            {
-                Prompt = ConsolePrompt.Unicode,
-                Data = p.ReadUInt64BE()
-            };
+            world.MessageManager.PromptData = new PromptData(ConsolePrompt.Unicode, p.ReadUInt64BE());
         }
 
         private static void Semivisible(World world, ref StackDataReader p) { }
@@ -6629,6 +6621,7 @@ namespace ClassicUO.Network
                     gump.Add(new CroppedText(gparams, lines), page);
                 }
                 else if (
+                    string.Equals(entry, "tilepicasgumppic", StringComparison.InvariantCultureIgnoreCase) ||
                     string.Equals(entry, "gumppic", StringComparison.InvariantCultureIgnoreCase)
                 )
                 {
@@ -6931,8 +6924,8 @@ namespace ClassicUO.Network
                     gump.Add(textBox, page);
                 }
                 else if (
-                    string.Equals(entry, "tilepichue", StringComparison.InvariantCultureIgnoreCase)
-                    || string.Equals(entry, "tilepic", StringComparison.InvariantCultureIgnoreCase)
+                    string.Equals(entry, "tilepichue", StringComparison.InvariantCultureIgnoreCase) ||
+                    string.Equals(entry, "tilepic", StringComparison.InvariantCultureIgnoreCase)
                 )
                 {
                     gump.Add(new StaticPic(gparams), page);
@@ -7062,13 +7055,24 @@ namespace ClassicUO.Network
                 {
                     gump.MasterGumpSerial = gparams.Count > 0 ? SerialHelper.Parse(gparams[1]) : 0;
                 }
-                else if (
+                else if (string.Equals(entry, "picinpichued", StringComparison.InvariantCultureIgnoreCase) ||
+                    string.Equals(entry, "picinpicphued", StringComparison.InvariantCultureIgnoreCase) ||
                     string.Equals(entry, "picinpic", StringComparison.InvariantCultureIgnoreCase)
                 )
                 {
                     if (gparams.Count > 7)
                     {
-                        gump.Add(new GumpPicInPic(gparams), page);
+                        var g = gump.Add(new GumpPicInPic(gparams), page);
+
+                        if (gparams.Count > 8)
+                        {
+                            g.Hue = UInt16Converter.Parse(gparams[8]);
+
+                            if (string.Equals(entry, "picinpicphued", StringComparison.InvariantCultureIgnoreCase))
+                            {
+                                g.IsPartialHue = true;
+                            }
+                        }
                     }
                 }
                 else if (string.Equals(entry, "\0", StringComparison.InvariantCultureIgnoreCase))

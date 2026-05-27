@@ -72,7 +72,7 @@ namespace ClassicUO.Game.Managers
                                 break;
 
                             case 1:
-                                X = Client.Game.Window.ClientBounds.Width - width;
+                                X = Client.Game.ClientBounds.Width - width;
                                 Y = 0;
 
                                 break;
@@ -93,12 +93,12 @@ namespace ClassicUO.Game.Managers
                                 break;
                         }
 
-                        if (X + width > Client.Game.Window.ClientBounds.Width)
+                        if (X + width > Client.Game.ClientBounds.Width)
                         {
                             X -= width;
                         }
 
-                        if (Y + height > Client.Game.Window.ClientBounds.Height)
+                        if (Y + height > Client.Game.ClientBounds.Height)
                         {
                             Y -= height;
                         }
@@ -111,14 +111,14 @@ namespace ClassicUO.Game.Managers
                         {
                             if (
                                 X + width + Constants.CONTAINER_RECT_STEP
-                                > Client.Game.Window.ClientBounds.Width
+                                > Client.Game.ClientBounds.Width
                             )
                             {
                                 X = Constants.CONTAINER_RECT_DEFAULT_POSITION;
 
                                 if (
                                     Y + height + Constants.CONTAINER_RECT_LINESTEP
-                                    > Client.Game.Window.ClientBounds.Height
+                                    > Client.Game.ClientBounds.Height
                                 )
                                 {
                                     Y = Constants.CONTAINER_RECT_DEFAULT_POSITION;
@@ -130,12 +130,12 @@ namespace ClassicUO.Game.Managers
                             }
                             else if (
                                 Y + height + Constants.CONTAINER_RECT_STEP
-                                > Client.Game.Window.ClientBounds.Height
+                                > Client.Game.ClientBounds.Height
                             )
                             {
                                 if (
                                     X + width + Constants.CONTAINER_RECT_LINESTEP
-                                    > Client.Game.Window.ClientBounds.Width
+                                    > Client.Game.ClientBounds.Width
                                 )
                                 {
                                     X = Constants.CONTAINER_RECT_DEFAULT_POSITION;

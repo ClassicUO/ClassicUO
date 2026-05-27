@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System.Collections.Generic;
 using ClassicUO.Assets;
-using ClassicUO.Renderer;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Utility;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -84,16 +84,16 @@ namespace ClassicUO.Game.UI.Controls
 
         public bool Unicode => _gText.IsUnicode;
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
             if (IsDisposed)
             {
                 return false;
             }
 
-            _gText.Draw(batcher, x, y, Alpha);
+            renderLists.AddGumpNoAtlas(_gText, x, y, layerDepthRef, Alpha);
 
-            return base.Draw(batcher, x, y);
+            return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
         }
 
         public override void Dispose()

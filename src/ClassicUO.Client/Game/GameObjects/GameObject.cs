@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Runtime.CompilerServices;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
-using ClassicUO.Assets;
-using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using System;
+using System.Runtime.CompilerServices;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -29,6 +27,7 @@ namespace ClassicUO.Game.GameObjects
         public bool IsDestroyed { get; protected set; }
         public bool IsPositionChanged { get; protected set; }
         public TextContainer TextContainer { get; private set; }
+        private AverageOverTime _averageOverTime;
 
         public int Distance
         {
@@ -78,6 +77,21 @@ namespace ClassicUO.Game.GameObjects
         public ushort X,
             Y;
         public sbyte Z;
+
+        public void AddDamage(int damage)
+        {
+            _averageOverTime ??= new AverageOverTime(TimeSpan.FromSeconds(15));
+
+            _averageOverTime.AddValue(Time.Ticks, damage);
+        }
+        public double GetCurrentDPS()
+        {
+            if (_averageOverTime == null)
+            {
+                return 0;
+            }
+            return Math.Round(_averageOverTime.LastAveragePerSecond, 1);
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Vector2 GetScreenPosition()
@@ -193,7 +207,7 @@ namespace ClassicUO.Game.GameObjects
             p.X += (int)Offset.X + 22;
             p.Y += (int)(Offset.Y - Offset.Z) + 44;
 
-            p = Client.Game.Scene.Camera.WorldToScreen(p);
+            p = Client.Game.Scene.Camera.WorldToScreen(p, true);
 
             for (; last != null; last = (TextObject)last.Previous)
             {
@@ -222,13 +236,13 @@ namespace ClassicUO.Game.GameObjects
                 return;
             }
 
-            int offsetY = 0;
+            int topLeftGameWorldX = Client.Game.Scene.Camera.Bounds.X + 4;
+            int topLeftGameWorldY = Client.Game.Scene.Camera.Bounds.Y;
 
-            int minX = 6;
-            int maxX = minX + Client.Game.Scene.Camera.Bounds.Width - 6;
-            int minY = 0;
-            //int maxY = minY + ProfileManager.CurrentProfile.GameWindowSize.Y - 6;
-
+            int bottomRightGameWorldX = Client.Game.Scene.Camera.Bounds.X + Client.Game.Scene.Camera.Bounds.Width;
+            int systemChatHeight = UIManager.SystemChat.TextBoxControl.IsVisible ? UIManager.SystemChat.TextBoxControl.Height : 0;
+            int bottomRightGameWorldY = Client.Game.Scene.Camera.Bounds.Y + Client.Game.Scene.Camera.Bounds.Height - systemChatHeight;
+            
             for (
                 TextObject item = (TextObject)TextContainer.Items;
                 item != null;
@@ -238,7 +252,7 @@ namespace ClassicUO.Game.GameObjects
                 if (
                     item.RenderedText == null
                     || item.RenderedText.IsDestroyed
-                    || item.RenderedText.Texture == null
+                    || !item.RenderedText.HasContent
                     || item.Time < Time.Ticks
                 )
                 {
@@ -248,32 +262,27 @@ namespace ClassicUO.Game.GameObjects
                 int startX = item.RealScreenPosition.X;
                 int endX = startX + item.RenderedText.Width;
 
-                if (startX < minX)
+                if (startX < topLeftGameWorldX)
                 {
-                    item.RealScreenPosition.X += minX - startX;
+                    item.RealScreenPosition.X += topLeftGameWorldX - startX;
                 }
 
-                if (endX > maxX)
+                if (endX > bottomRightGameWorldX)
                 {
-                    item.RealScreenPosition.X -= endX - maxX;
+                    item.RealScreenPosition.X -= endX - bottomRightGameWorldX;
                 }
 
                 int startY = item.RealScreenPosition.Y;
+                int endY = startY + item.RenderedText.Height;
 
-                if (startY < minY && offsetY == 0)
+                if (startY < topLeftGameWorldY)
                 {
-                    offsetY = minY - startY;
+                    item.RealScreenPosition.Y += topLeftGameWorldY - startY;
                 }
 
-                //int endY = startY + item.RenderedText.Height;
-
-                //if (endY > maxY)
-                //    UseInRender = 0xFF;
-                //    //item.RealScreenPosition.Y -= endY - maxY;
-
-                if (offsetY != 0)
+                if (endY > bottomRightGameWorldY)
                 {
-                    item.RealScreenPosition.Y += offsetY;
+                    item.RealScreenPosition.Y -= endY - bottomRightGameWorldY;
                 }
             }
         }
@@ -342,7 +351,7 @@ namespace ClassicUO.Game.GameObjects
             Clear();
             RemoveFromTile();
             TextContainer?.Clear();
-
+            _averageOverTime = null;
             IsDestroyed = true;
             PriorityZ = 0;
             IsPositionChanged = false;

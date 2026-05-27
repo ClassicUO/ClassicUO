@@ -1,6 +1,6 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using ClassicUO.Assets;
+using ClassicUO.Configuration;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Collections;
 using Microsoft.Xna.Framework;
@@ -71,10 +71,17 @@ namespace ClassicUO.Game.GameObjects
 
         public void Add(int damage)
         {
+            Parent?.AddDamage(damage);
+
             TextObject text_obj = TextObject.Create(_world);
 
+            string dmgString = damage.ToString();
+
+            if (ProfileManager.CurrentProfile.ShowDPSWithDamageNumbers && Parent != null)
+                dmgString += $" (DPS: {Parent.GetCurrentDPS()})";
+
             text_obj.RenderedText = RenderedText.Create(
-                damage.ToString(),
+                dmgString,
                 (ushort)(ReferenceEquals(Parent, _world.Player) ? 0x0034 : 0x0021),
                 3,
                 false
@@ -129,7 +136,7 @@ namespace ClassicUO.Game.GameObjects
             }
         }
 
-        public void Draw(UltimaBatcher2D batcher)
+        public void Draw(UltimaBatcher2D batcher, float layerDepth)
         {
             if (IsDestroyed || _messages.Count == 0)
             {
@@ -204,7 +211,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            p = Client.Game.Scene.Camera.WorldToScreen(p);
+            p = Client.Game.Scene.Camera.WorldToScreen(p, true);
 
             foreach (TextObject item in _messages)
             {
@@ -216,7 +223,7 @@ namespace ClassicUO.Game.GameObjects
                 item.X = p.X - (item.RenderedText.Width >> 1);
                 item.Y = p.Y - offY - item.RenderedText.Height - item.OffsetY;
 
-                item.RenderedText.Draw(batcher, item.X, item.Y, item.Alpha / 255f);
+                item.RenderedText.Draw(batcher, item.X, item.Y, layerDepth, item.Alpha / 255f);
                 offY += item.RenderedText.Height;
             }
         }

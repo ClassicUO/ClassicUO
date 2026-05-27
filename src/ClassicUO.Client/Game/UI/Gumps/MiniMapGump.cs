@@ -1,19 +1,17 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.IO;
-using System.Xml;
+using ClassicUO.Assets;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Map;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
-using ClassicUO.IO;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System.Runtime.CompilerServices;
+using System;
+using System.Xml;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -117,74 +115,82 @@ namespace ClassicUO.Game.UI.Gumps
             return _useLargeMap;
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
             if (IsDisposed)
             {
                 return false;
             }
+            float layerDepth = layerDepthRef;
 
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0);
 
-            ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(
-                _useLargeMap ? BIG_MAP_GRAPHIC : SMALL_MAP_GRAPHIC
-            );
-
-            if (gumpInfo.Texture == null)
-            {
-                Dispose();
-
-                return false;
-            }
-
-            batcher.Draw(gumpInfo.Texture, new Vector2(x, y), gumpInfo.UV, hueVector);
-
-            CreateMiniMapTexture(gumpInfo.Texture, gumpInfo.UV);
-
-            batcher.Draw(gumpInfo.Texture, new Vector2(x, y), gumpInfo.UV, hueVector);
-
-            if (_draw)
-            {
-                int w = Width >> 1;
-                int h = Height >> 1;
-
-                Texture2D mobilesTextureDot = SolidColorTextureCache.GetTexture(Color.Red);
-
-                foreach (Mobile mob in World.Mobiles.Values)
+            renderLists.AddGumpNoAtlas(
+                batcher =>
                 {
-                    if (mob == World.Player)
+                    ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(
+                            _useLargeMap ? BIG_MAP_GRAPHIC : SMALL_MAP_GRAPHIC
+                        );
+
+                    if (gumpInfo.Texture == null)
                     {
-                        continue;
+                        Dispose();
+
+                        return false;
                     }
 
-                    int xx = mob.X - World.Player.X;
-                    int yy = mob.Y - World.Player.Y;
+                    batcher.Draw(gumpInfo.Texture, new Vector2(x, y), gumpInfo.UV, hueVector, layerDepth);
 
-                    int gx = xx - yy;
-                    int gy = xx + yy;
+                    CreateMiniMapTexture(gumpInfo.Texture, gumpInfo.UV);
 
-                    hueVector = ShaderHueTranslator.GetHueVector(
-                        Notoriety.GetHue(mob.NotorietyFlag)
-                    );
+                    batcher.Draw(gumpInfo.Texture, new Vector2(x, y), gumpInfo.UV, hueVector, layerDepth);
 
-                    batcher.Draw(
-                        mobilesTextureDot,
-                        new Rectangle(x + w + gx, y + h + gy, 2, 2),
-                        hueVector
-                    );
+                    if (_draw)
+                    {
+                        int w = Width >> 1;
+                        int h = Height >> 1;
+
+                        Texture2D mobilesTextureDot = SolidColorTextureCache.GetTexture(Color.Red);
+
+                        foreach (Mobile mob in World.Mobiles.Values)
+                        {
+                            if (mob == World.Player)
+                            {
+                                continue;
+                            }
+
+                            int xx = mob.X - World.Player.X;
+                            int yy = mob.Y - World.Player.Y;
+
+                            int gx = xx - yy;
+                            int gy = xx + yy;
+
+                            hueVector = ShaderHueTranslator.GetHueVector(
+                                Notoriety.GetHue(mob.NotorietyFlag)
+                            );
+
+                            batcher.Draw(
+                                mobilesTextureDot,
+                                new Rectangle(x + w + gx, y + h + gy, 2, 2),
+                                hueVector,
+                                layerDepth
+                            );
+                        }
+
+                        //DRAW PLAYER DOT
+                        hueVector = ShaderHueTranslator.GetHueVector(0);
+
+                        batcher.Draw(
+                            SolidColorTextureCache.GetTexture(Color.White),
+                            new Rectangle(x + w, y + h, 2, 2),
+                            hueVector,
+                            layerDepth
+                        );
+                    }
+                    return true;
                 }
-
-                //DRAW PLAYER DOT
-                hueVector = ShaderHueTranslator.GetHueVector(0);
-
-                batcher.Draw(
-                    SolidColorTextureCache.GetTexture(Color.White),
-                    new Rectangle(x + w, y + h, 2, 2),
-                    hueVector
-                );
-            }
-
-            return base.Draw(batcher, x, y);
+            );
+            return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
         }
 
         protected override bool OnMouseDoubleClick(int x, int y, MouseButtonType button)

@@ -18,7 +18,11 @@ namespace ClassicUO.Assets
     {
         private readonly UOFilesOverrideMap _overrideMap;
 
-        public UOFileManager(ClientVersion clientVersion, string uoPath)
+        public UOFileManager(ClientVersion clientVersion, string uoPath) : this(clientVersion, uoPath, null)
+        {
+        }
+
+        public UOFileManager(ClientVersion clientVersion, string uoPath, UOFilesOverrideMap overrideMap)
         {
             Version = clientVersion;
             BasePath = uoPath;
@@ -44,7 +48,7 @@ namespace ClassicUO.Assets
             TileArt = new TileArtLoader(this);
             StringDictionary = new StringDictionaryLoader(this);
 
-            _overrideMap = new UOFilesOverrideMap();
+            _overrideMap = overrideMap ?? new UOFilesOverrideMap();
         }
 
         public ClientVersion Version { get; }

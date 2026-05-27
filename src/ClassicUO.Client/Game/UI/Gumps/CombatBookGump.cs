@@ -6,8 +6,6 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Input;
-using ClassicUO.Assets;
-using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
@@ -48,8 +46,11 @@ namespace ClassicUO.Game.UI.Gumps
 
         private void BuildGump()
         {
+            Clear();
+            _primAbility = null;
+            _secAbility = null;
+            
             Add(new GumpPic(0, 0, 0x2B02, 0));
-
 
             Add(_pageCornerLeft = new GumpPic(50, 8, 0x08BB, 0));
             _pageCornerLeft.LocalSerial = 0;
@@ -249,6 +250,11 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
+        protected override void UpdateContents()
+        {
+            BuildGump();
+            SetActivePage(Page, false);
+        }
 
         private void PrimaryAbilityMouseDoubleClick(object sender, MouseDoubleClickEventArgs e)
         {
@@ -418,7 +424,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        private void SetActivePage(int page)
+        private void SetActivePage(int page, bool playSound = true)
         {
             if (page < 1)
             {
@@ -438,7 +444,8 @@ namespace ClassicUO.Game.UI.Gumps
 
             _primAbility.IsVisible = _secAbility.IsVisible = page <= _dictionaryPagesCount - _abilityCount;
 
-            Client.Game.Audio.PlaySound(0x0055);
+            if(playSound)
+                Client.Game.Audio.PlaySound(0x0055);
         }
 
 

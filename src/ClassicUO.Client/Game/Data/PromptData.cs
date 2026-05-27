@@ -9,9 +9,9 @@ namespace ClassicUO.Game.Data
         Unicode
     }
 
-    internal struct PromptData
+    internal readonly struct PromptData(ConsolePrompt prompt, ulong data)
     {
-        public ConsolePrompt Prompt;
-        public ulong Data;
+        public readonly ConsolePrompt Prompt = prompt;
+        public readonly ulong Data = data;
     }
 }

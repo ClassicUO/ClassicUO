@@ -4,7 +4,7 @@ using System;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Controls;
 using ClassicUO.Renderer;
-using SDL2;
+using SDL3;
 
 namespace ClassicUO.Game.UI.Gumps
 {
@@ -72,8 +72,8 @@ namespace ClassicUO.Game.UI.Gumps
                 }
             );
 
-            X = (Client.Game.Window.ClientBounds.Width - Width) >> 1;
-            Y = (Client.Game.Window.ClientBounds.Height - Height) >> 1;
+            X = (Client.Game.ClientBounds.Width - Width) >> 1;
+            Y = (Client.Game.ClientBounds.Height - Height) >> 1;
 
             // OK
             Button b;
@@ -150,7 +150,7 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Action<string> _action;
         private readonly StbTextBox _textBox;
 
-        public EntryDialog(World world, int w, int h, string message, Action<string> action) : base(world, 0, 0)
+        public EntryDialog(World world, int w, int h, string message, Action<string> action, string initialValue = "") : base(world, 0, 0)
         {
             CanMove = false;
             CanCloseWithRightClick = false;
@@ -217,13 +217,14 @@ namespace ClassicUO.Game.UI.Gumps
                 X = 42,
                 Y = 45 + l.Height + 7,
                 Width = ww,
-                Height = 25
+                Height = 25,
+                Text = initialValue
             };
 
             Add(_textBox);
 
-            X = (Client.Game.Window.ClientBounds.Width - Width) >> 1;
-            Y = (Client.Game.Window.ClientBounds.Height - Height) >> 1;
+            X = (Client.Game.ClientBounds.Width - Width) >> 1;
+            Y = (Client.Game.ClientBounds.Height - Height) >> 1;
 
 
             // OK

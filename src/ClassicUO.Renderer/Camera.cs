@@ -94,11 +94,17 @@ namespace ClassicUO.Renderer
             return point;
         }
 
-        public Point WorldToScreen(Point point)
+        public Point WorldToScreen(Point point, bool withOffset = false)
         {
             UpdateMatrices();
 
             Transform(ref point, ref _transform, out point);
+
+            if (withOffset)
+            {
+                point.X += Bounds.X;
+                point.Y += Bounds.Y;
+            }
 
             return point;
         }

@@ -9,6 +9,7 @@ using ClassicUO.Assets;
 using ClassicUO.Network;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
+using System;
 
 namespace ClassicUO.Game.Managers
 {
@@ -22,7 +23,8 @@ namespace ClassicUO.Game.Managers
         Grab,
         SetGrabBag,
         HueCommandTarget,
-        IgnorePlayerTarget
+        IgnorePlayerTarget,
+        CallbackTarget
     }
 
     internal class CursorType
@@ -103,6 +105,7 @@ namespace ClassicUO.Game.Managers
         private uint _targetCursorId;
         private readonly World _world;
         private readonly byte[] _lastDataBuffer = new byte[19];
+        private Action<GameObject> _targetCallback;
 
 
         public TargetManager(World world) { _world = world; }
@@ -136,10 +139,19 @@ namespace ClassicUO.Game.Managers
         {
             ClearTargetingWithoutTargetCancelPacket();
 
+            _targetCallback = null;
+
             TargetingState = 0;
             _targetCursorId = 0;
             MultiTargetInfo = null;
             TargetingType = 0;
+        }
+
+        public void SetTargeting(Action<GameObject> callback, uint cursorID, TargetType cursorType)
+        {
+            SetTargeting(CursorTarget.CallbackTarget, cursorID, cursorType);
+
+            _targetCallback = callback;
         }
 
         public void SetTargeting(CursorTarget targeting, uint cursorID, TargetType cursorType)
@@ -186,6 +198,11 @@ namespace ClassicUO.Game.Managers
 
                     UIManager.GetGump<HouseCustomizationGump>()?.Update();
                 }
+            }
+
+            if (TargetingState == CursorTarget.CallbackTarget)
+            {
+                _targetCallback?.Invoke(null);
             }
 
             if (IsTargeting || TargetingType == TargetType.Cancel)
@@ -378,6 +395,11 @@ namespace ClassicUO.Game.Managers
                         }
                         CancelTarget();
                         return;
+                    case CursorTarget.CallbackTarget:
+                        _targetCallback?.Invoke(entity);
+
+                        ClearTargetingWithoutTargetCancelPacket();
+                        return;
                 }
             }
         }
@@ -387,6 +409,25 @@ namespace ClassicUO.Game.Managers
             if (!IsTargeting)
             {
                 return;
+            }
+
+            switch (TargetingState)
+            {
+                case CursorTarget.CallbackTarget:
+                    GameObject candidate = _world.Map.GetTile(x, y);
+
+                    while (candidate != null)
+                    {
+                        if (candidate.Graphic == graphic && candidate.Z == z)
+                        {
+                            _targetCallback?.Invoke(candidate);
+                            break;
+                        }
+                        candidate = candidate.TNext;
+                    }
+
+                    ClearTargetingWithoutTargetCancelPacket();
+                    return;
             }
 
             if (graphic == 0)

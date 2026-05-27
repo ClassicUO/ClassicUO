@@ -2,8 +2,8 @@
 
 using ClassicUO.Configuration;
 using ClassicUO.Game.Managers;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Input;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -120,9 +120,10 @@ namespace ClassicUO.Game.UI.Gumps
             base.OnMouseUp(x, y, button);
         }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            base.Draw(batcher, x, y);
+            base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
+            float layerDepth = layerDepthRef;
 
             Vector3 hueVector;
 
@@ -131,7 +132,8 @@ namespace ClassicUO.Game.UI.Gumps
                 hueVector = ShaderHueTranslator.GetHueVector(0);
                 ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(LOCK_GRAPHIC);
 
-                if (gumpInfo.Texture != null)
+                var texture = gumpInfo.Texture;
+                if (texture != null)
                 {
                     if (
                         UIManager.MouseOverControl != null
@@ -145,11 +147,20 @@ namespace ClassicUO.Game.UI.Gumps
                         hueVector.Y = 1;
                     }
 
-                    batcher.Draw(
-                        gumpInfo.Texture,
-                        new Vector2(x + (Width - gumpInfo.UV.Width), y),
-                        gumpInfo.UV,
-                        hueVector
+                    var sourceRectangle = gumpInfo.UV;
+                    renderLists.AddGumpWithAtlas
+                    (
+                        (batcher) =>
+                        {
+                            batcher.Draw(
+                                texture,
+                                new Vector2(x + (Width - sourceRectangle.Width), y),
+                                sourceRectangle,
+                                hueVector,
+                                layerDepth
+                            );
+                            return true;
+                        }
                     );
                 }
             }
@@ -167,32 +178,43 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     Texture2D previewColor = SolidColorTextureCache.GetTexture(Color.Silver);
                     hueVector = ShaderHueTranslator.GetHueVector(0, false, 0.5f);
+                    renderLists.AddGumpNoAtlas
+                    (
+                        (batcher) =>
+                        {
+                            batcher.Draw(
+                                previewColor,
+                                new Rectangle(drawLoc.X, drawLoc.Y, Width, Height),
+                                hueVector,
+                                layerDepth
+                            );
 
-                    batcher.Draw(
-                        previewColor,
-                        new Rectangle(drawLoc.X, drawLoc.Y, Width, Height),
-                        hueVector
-                    );
 
-                    hueVector.Z = 1f;
+                            hueVector.Z = 1f;
 
-                    // double rectangle for thicker "stroke"
-                    batcher.DrawRectangle(
-                        previewColor,
-                        drawLoc.X,
-                        drawLoc.Y,
-                        Width,
-                        Height,
-                        hueVector
-                    );
+                            // double rectangle for thicker "stroke"
+                            batcher.DrawRectangle(
+                                previewColor,
+                                drawLoc.X,
+                                drawLoc.Y,
+                                Width,
+                                Height,
+                                hueVector,
+                                layerDepth
+                            );
 
-                    batcher.DrawRectangle(
-                        previewColor,
-                        drawLoc.X + 1,
-                        drawLoc.Y + 1,
-                        Width - 2,
-                        Height - 2,
-                        hueVector
+                            batcher.DrawRectangle(
+                                previewColor,
+                                drawLoc.X + 1,
+                                drawLoc.Y + 1,
+                                Width - 2,
+                                Height - 2,
+                                hueVector,
+                                layerDepth
+                            );
+
+                            return true;
+                        }
                     );
                 }
             }

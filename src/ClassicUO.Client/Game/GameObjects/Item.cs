@@ -1,20 +1,12 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Collections.Generic;
+using ClassicUO.Assets;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
-using ClassicUO.IO;
-using ClassicUO.Assets;
-using ClassicUO.Renderer;
-using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
-using ClassicUO.Utility.Platforms;
 using Microsoft.Xna.Framework;
-using System.Runtime.InteropServices;
-using System.Runtime.CompilerServices;
+using System;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -447,7 +439,7 @@ namespace ClassicUO.Game.GameObjects
                 p.X += (int)Offset.X + 22;
                 p.Y += (int)(Offset.Y - Offset.Z) + 22;
 
-                p = Client.Game.Scene.Camera.WorldToScreen(p);
+                p = Client.Game.Scene.Camera.WorldToScreen(p, true);
 
                 for (; last != null; last = (TextObject)last.Previous)
                 {
@@ -541,6 +533,22 @@ namespace ClassicUO.Game.GameObjects
                 }
 
                 LastAnimationChangeTime = Time.Ticks + Constants.CHARACTER_ANIMATION_DELAY;
+            }
+        }
+
+        public void GetTotalAmount(ushort graphic, ushort? hue, ref int amount)
+        {
+            for (LinkedObject i = Items; i != null; i = i.Next)
+            {
+                if (i is Item item)
+                {
+                    item.GetTotalAmount(graphic, hue, ref amount);
+
+                    if (item.Graphic == graphic && (hue == null || item.Hue == hue.Value) && item.Exists)
+                    {
+                        amount += item.Amount;
+                    }
+                }
             }
         }
     }

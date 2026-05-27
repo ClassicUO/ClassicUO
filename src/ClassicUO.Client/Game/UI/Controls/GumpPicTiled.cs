@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System.Collections.Generic;
-using ClassicUO.Assets;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -70,23 +70,34 @@ namespace ClassicUO.Game.UI.Controls
 
         public ushort Hue { get; set; }
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
+            float layerDepth = layerDepthRef;
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(Hue, false, Alpha, true);
 
             ref readonly var gumpInfo = ref Client.Game.UO.Gumps.GetGump(Graphic);
 
-            if (gumpInfo.Texture != null)
-            {
-                batcher.DrawTiled(
-                    gumpInfo.Texture,
-                    new Rectangle(x, y, Width, Height),
-                    gumpInfo.UV,
-                    hueVector
+            var texture = gumpInfo.Texture;
+            if (texture != null)
+            {                
+                var sourceRectangle = gumpInfo.UV;
+                renderLists.AddGumpWithAtlas
+                (
+                    (batcher) =>
+                    {
+                        batcher.DrawTiled(
+                            texture,
+                            new Rectangle(x, y, Width, Height),
+                            sourceRectangle,
+                            hueVector,
+                            layerDepth
+                        );
+                        return true;
+                    }
                 );
             }
 
-            return base.Draw(batcher, x, y);
+            return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
         }
 
         public override bool Contains(int x, int y)

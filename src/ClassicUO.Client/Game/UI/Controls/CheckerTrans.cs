@@ -1,10 +1,11 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Collections.Generic;
+using ClassicUO.Game.Scenes;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using System;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Controls
 {
@@ -64,8 +65,9 @@ namespace ClassicUO.Game.UI.Controls
         }
 
 
-        public override bool Draw(UltimaBatcher2D batcher, int x, int y)
+        public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
+            float layerDepth = layerDepthRef;
             //batcher.SetBlendState(_checkerBlend.Value);
             //batcher.SetStencil(_checkerStencil.Value);
 
@@ -79,18 +81,30 @@ namespace ClassicUO.Game.UI.Controls
             Vector3 hueVector = ShaderHueTranslator.GetHueVector(0, false, 0.5f);
 
             //batcher.SetStencil(_checkerStencil.Value);
-            batcher.Draw
+
+            renderLists.AddGumpNoAtlas
             (
-                SolidColorTextureCache.GetTexture(Color.Black),
-                new Rectangle
-                (
-                    x,
-                    y,
-                    Width,
-                    Height
-                ),
-                hueVector
+                (batcher) =>
+                {
+                    batcher.Draw
+                    (
+                        SolidColorTextureCache.GetTexture(Color.Black),
+                        new Rectangle
+                        (
+                            x,
+                            y,
+                            Width,
+                            Height
+                        ),
+                        hueVector,
+                        layerDepth
+                    );
+
+                    return true;
+                }
             );
+
+            
 
             //batcher.SetStencil(null);
             return true;

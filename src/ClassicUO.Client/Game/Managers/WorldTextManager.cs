@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Collections.Generic;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Renderer;
+using System;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.Managers
 {
@@ -34,13 +34,14 @@ namespace ClassicUO.Game.Managers
         }
 
 
-        public override void Draw(UltimaBatcher2D batcher, int startX, int startY, bool isGump = false)
+        public override void Draw(UltimaBatcher2D batcher, int startX, int startY, float layerDepth, bool isGump = false)
         {
             base.Draw
             (
                 batcher,
                 startX,
                 startY,
+                layerDepth,
                 isGump
             );
 
@@ -68,7 +69,7 @@ namespace ClassicUO.Game.Managers
                     }
                 }
 
-                overheadDamage.Value.Draw(batcher);
+                overheadDamage.Value.Draw(batcher, layerDepth);
             }
         }
 

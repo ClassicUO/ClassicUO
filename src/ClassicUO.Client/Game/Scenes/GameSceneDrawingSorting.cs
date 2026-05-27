@@ -1,20 +1,17 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
-using System;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
+using System.Collections.Generic;
+using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Game.GameObjects;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.Map;
-using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
-using ClassicUO.Utility.Logging;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
+using System;
+using System.Runtime.CompilerServices;
 
 namespace ClassicUO.Game.Scenes
 {
@@ -48,27 +45,12 @@ namespace ClassicUO.Game.Scenes
             _oldPlayerY,
             _oldPlayerZ;
         private int _foliageCount;
+        private float _cotRadiusSq;
+        private Vector2 _cotPlayerScreenPos;
+        private bool _cotGradientMode;
 
-
-        private readonly List<GameObject> _renderListStatics = new List<GameObject>();
-        private readonly List<GameObject> _renderListTransparentObjects = new List<GameObject>();
-        private readonly List<GameObject> _renderListAnimations = new List<GameObject>();
-        private readonly List<GameObject> _renderListEffects = new List<GameObject>();
-
-        //// statics
-        //private GameObject _renderListStaticsHead, _renderList;
-        //private int _renderListStaticsCount;
-
-        //// lands
-        //private GameObject _renderListTransparentObjectsHead, _renderListTransparentObjects;
-        //private int _renderListTransparentObjectsCount;
-
-        //// animations
-        //private GameObject _renderListAnimationsHead, _renderListAnimations;
-        //private int _renderListAnimationCount;
-
-        //private GameObject _renderListEffectsHead, _renderListEffects;
-        //private int _renderListEffectCount;
+        private readonly RenderLists _renderLists = new();
+        private readonly List<Map.Chunk> _visibleChunks = new();
 
         public sbyte FoliageIndex { get; private set; }
 
@@ -348,10 +330,7 @@ namespace ClassicUO.Game.Scenes
 
         private bool ProcessAlpha(
             GameObject obj,
-            ref StaticTiles itemData,
-            bool useCoT,
-            ref Vector2 playerPos,
-            int cotZ,
+            ref readonly StaticTiles itemData,
             out bool allowSelection
         )
         {
@@ -394,62 +373,26 @@ namespace ClassicUO.Game.Scenes
                     CalculateAlpha(ref obj.AlphaHue, 178);
                 }
             }
-            else if (!itemData.IsFoliage)
+            else if (_alphaChanged && obj.AlphaHue != 0xFF && !itemData.IsFoliage)
             {
-                if (
-                    useCoT
-                    && CheckCircleOfTransparencyRadius(obj, cotZ, ref playerPos, ref allowSelection)
-                ) { }
-                else if (_alphaChanged && obj.AlphaHue != 0xFF)
-                {
-                    CalculateAlpha(ref obj.AlphaHue, 0xFF);
-                }
+                CalculateAlpha(ref obj.AlphaHue, 0xFF);
             }
 
             return true;
         }
 
-        private bool CheckCircleOfTransparencyRadius(
-            GameObject obj,
-            int maxZ,
-            ref Vector2 playerPos,
-            ref bool allowSelection
-        )
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private byte GetGradientCotAlpha(GameObject obj)
         {
-            if (ProfileManager.CurrentProfile.UseCircleOfTransparency && obj.TransparentTest(maxZ))
-            {
-                int maxDist = ProfileManager.CurrentProfile.CircleOfTransparencyRadius + 0;
-                Vector2 pos = new Vector2(obj.RealScreenPosition.X, obj.RealScreenPosition.Y - 44);
-                Vector2.Distance(ref playerPos, ref pos, out float dist);
+            float dx = obj.RealScreenPosition.X - _cotPlayerScreenPos.X;
+            float dy = (obj.RealScreenPosition.Y - 44) - _cotPlayerScreenPos.Y;
+            float distSq = dx * dx + dy * dy;
 
-                if (dist <= maxDist)
-                {
-                    float delta = (maxDist - 44) * 0.5f;
-                    float fraction = (dist - delta) / (maxDist - delta);
+            if (distSq >= _cotRadiusSq)
+                return 0xFF;
 
-                    obj.AlphaHue = (byte)
-                        Microsoft.Xna.Framework.MathHelper.Clamp(
-                            fraction * 255f,
-                            byte.MinValue,
-                            byte.MaxValue
-                        );
-
-                    //const byte ALPHA_ERROR = 44;
-
-                    //if (obj.AlphaHue > ALPHA_ERROR && obj.AlphaHue >= byte.MaxValue - ALPHA_ERROR)
-                    //{
-                    //    obj.AlphaHue = 255;
-
-                    //    return false;
-                    //}
-
-                    allowSelection = obj.AlphaHue >= 127;
-
-                    return true;
-                }
-            }
-
-            return false;
+            float ratio = (float)Math.Sqrt(distSq / _cotRadiusSq);
+            return (byte)(ratio * ratio * ratio * 255f);
         }
 
         private static bool CalculateAlpha(ref byte alphaHue, int maxAlpha)
@@ -531,13 +474,18 @@ namespace ClassicUO.Game.Scenes
             return !(itemData.IsFoliage && !itemData.IsMultiMovable && season >= Season.Winter);
         }
 
-        private bool HasSurfaceOverhead(Entity obj)
+        private bool HasSurfaceOverhead(Mobile mob)
         {
             if (
-                obj.Serial == _world.Player.Serial /* || _maxZ == _maxGroundZ*/
+                mob.Serial == _world.Player.Serial /* || _maxZ == _maxGroundZ*/
             )
             {
                 return false;
+            }
+
+            if (mob._surfaceOverheadCacheX == mob.X && mob._surfaceOverheadCacheY == mob.Y && mob._surfaceOverheadCacheMaxZ == _maxZ)
+            {
+                return mob._surfaceOverheadCache;
             }
 
             bool found = false;
@@ -546,7 +494,7 @@ namespace ClassicUO.Game.Scenes
             {
                 for (int x = -1; x <= 2; ++x)
                 {
-                    GameObject tile = _world.Map.GetTile(obj.X + x, obj.Y + y);
+                    GameObject tile = _world.Map.GetTile(mob.X + x, mob.Y + y);
 
                     found = false;
 
@@ -554,13 +502,13 @@ namespace ClassicUO.Game.Scenes
                     {
                         var next = tile.TNext;
 
-                        if (tile.Z > obj.Z && (tile is Static || tile is Multi))
+                        if (tile.Z > mob.Z && (tile is Static || tile is Multi))
                         {
                             ref var itemData = ref Client.Game.UO.FileManager.TileData.StaticData[tile.Graphic];
 
                             if (itemData.IsNoShoot || itemData.IsWindow)
                             {
-                                if (_maxZ - tile.Z + 5 >= tile.Z - obj.Z)
+                                if (_maxZ - tile.Z + 5 >= tile.Z - mob.Z)
                                 {
                                     found = true;
 
@@ -574,17 +522,190 @@ namespace ClassicUO.Game.Scenes
 
                     if (!found)
                     {
-                        return false;
+                        break;
                     }
                 }
+
+                if (!found)
+                {
+                    break;
+                }
             }
+
+            mob._surfaceOverheadCacheX = (ushort)mob.X;
+            mob._surfaceOverheadCacheY = (ushort)mob.Y;
+            mob._surfaceOverheadCacheMaxZ = _maxZ;
+            mob._surfaceOverheadCache = found;
 
             return found;
         }
 
-        private void PushToRenderList(
+        // Returns: 0 = break (handled), 1 = continue (skip), 2 = return retValue from AddTileToRenderList
+        private int ProcessStaticLikeTail(
             GameObject obj,
-            List<GameObject> renderList,
+            ref StaticTiles itemData,
+            bool allowSelection,
+            int screenY,
+            ref int maxObjectZ,
+            int maxZ,
+            out bool retValue,
+            ChunkMesh mesh
+        )
+        {
+            retValue = false;
+
+            byte height = 0;
+
+            if (obj.AllowedToDraw)
+            {
+                height = CalculateObjectHeight(ref maxObjectZ, ref itemData);
+            }
+
+            if (maxObjectZ > maxZ)
+            {
+                retValue = itemData.Height != 0 && maxObjectZ - maxZ < height;
+                return 2;
+            }
+
+            if (screenY < _minPixel.Y || screenY > _maxPixel.Y)
+            {
+                return 1;
+            }
+
+            // If in chunk mesh, mark visible instead of adding to render list
+            if (obj.InChunkMesh && obj.MeshSpriteIndex >= 0)
+            {
+                bool cot = ProfileManager.CurrentProfile.UseCircleOfTransparency
+                    && obj.TransparentTest(_world.Player.Z + 5);
+
+                if (cot && _cotGradientMode)
+                {
+                    obj.AlphaHue = GetGradientCotAlpha(obj);
+                    if (obj.AlphaHue > 0)
+                        PushToRenderQueue(obj, true, allowSelection);
+                    return 0;
+                }
+
+                mesh.Statics.SetVisible(obj.MeshSpriteIndex, obj.AlphaHue, cot);
+                ApplyMeshHue(obj, mesh.Statics);
+
+                if (itemData.IsLight)
+                {
+                    AddLight(obj, obj, obj.RealScreenPosition.X + 22, obj.RealScreenPosition.Y + 22);
+                }
+
+                if (allowSelection && !(cot && IsMouseInsideCotCircle()) && obj.AllowedToDraw && obj.CheckMouseSelection())
+                {
+                    if (SelectedObject.Object is GameObject prev)
+                    {
+                        if (obj.CalculateDepthZ() >= prev.CalculateDepthZ())
+                            SelectedObject.Object = obj;
+                    }
+                    else
+                        SelectedObject.Object = obj;
+                }
+                return 0;
+            }
+
+            CheckIfBehindATree(obj, ref itemData);
+
+            // Gradient CoT for non-mesh objects (trees, foliage, animated statics)
+            if (_cotGradientMode && ProfileManager.CurrentProfile.UseCircleOfTransparency
+                && obj.TransparentTest(_world.Player.Z + 5))
+            {
+                obj.AlphaHue = GetGradientCotAlpha(obj);
+                if (obj.AlphaHue > 0)
+                    PushToRenderQueue(obj, true, allowSelection);
+                return 0;
+            }
+
+            // hacky way to render shadows without z-fight
+            bool isShadow =
+                ProfileManager.CurrentProfile.ShadowsEnabled
+                && ProfileManager.CurrentProfile.ShadowsStatics
+                && (
+                    StaticFilters.IsTree(obj.Graphic, out _)
+                    || itemData.IsFoliage
+                    || StaticFilters.IsRock(obj.Graphic)
+                );
+
+            PushToRenderQueue(obj, isShadow, allowSelection);
+            return 0;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void ApplyMeshHue(GameObject obj, MeshLayer layer)
+        {
+            var profile = ProfileManager.CurrentProfile;
+            int hue = obj.Hue;
+            bool partial = false;
+
+            if (profile.NoColorObjectsOutOfRange && obj.Distance > _world.ClientViewRange)
+            {
+                hue = Constants.OUT_RANGE_COLOR;
+            }
+            else if (_world.Player.IsDead && profile.EnableBlackWhiteEffect)
+            {
+                hue = Constants.DEAD_RANGE_COLOR;
+            }
+            else if (obj is Static s)
+            {
+                partial = s.ItemData.IsPartialHue;
+            }
+            else if (obj is Multi m)
+            {
+                partial = m.ItemData.IsPartialHue;
+            }
+
+            float hueX, hueY;
+            if (hue != 0)
+            {
+                hueX = hue - 1;
+                if (obj is Land land && land.IsStretched)
+                    hueY = ShaderHueTranslator.SHADER_LAND_HUED;
+                else
+                    hueY = partial ? ShaderHueTranslator.SHADER_PARTIAL_HUED : ShaderHueTranslator.SHADER_HUED;
+            }
+            else
+            {
+                hueX = 0;
+                if (obj is Land land && land.IsStretched)
+                    hueY = ShaderHueTranslator.SHADER_LAND;
+                else
+                    hueY = ShaderHueTranslator.SHADER_NONE;
+            }
+
+            layer.SetHue(obj.MeshSpriteIndex, hueX, hueY);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool IsMouseInsideCotCircle()
+        {
+            if (_cotRadiusSq <= 0)
+                return false;
+            float dx = SelectedObject.TranslatedMousePositionByViewport.X - _cotPlayerScreenPos.X;
+            float dy = SelectedObject.TranslatedMousePositionByViewport.Y - _cotPlayerScreenPos.Y;
+            return (dx * dx + dy * dy) < _cotRadiusSq;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void TrySelectObject(GameObject obj, bool allowSelection)
+        {
+            if (allowSelection && obj.AllowedToDraw && obj.CheckMouseSelection())
+            {
+                if (SelectedObject.Object is GameObject prev)
+                {
+                    if (obj.CalculateDepthZ() >= prev.CalculateDepthZ())
+                        SelectedObject.Object = obj;
+                }
+                else
+                    SelectedObject.Object = obj;
+            }
+        }
+
+        private void PushToRenderQueue(
+            GameObject obj,
+            bool isTransparent,
             bool allowSelection
         )
         {
@@ -593,11 +714,13 @@ namespace ClassicUO.Game.Scenes
                 return;
             }
 
-            // slow as fuck
             if (
                 allowSelection
                 && obj.Z <= _maxGroundZ
                 && obj.AllowedToDraw
+                && !(ProfileManager.CurrentProfile.UseCircleOfTransparency
+                    && obj.TransparentTest(_world.Player.Z + 5)
+                    && IsMouseInsideCotCircle())
                 && obj.CheckMouseSelection()
             )
             {
@@ -614,24 +737,19 @@ namespace ClassicUO.Game.Scenes
                 }
             }
 
-            if (obj.AlphaHue != byte.MaxValue)
-            {
-                _renderListTransparentObjects.Add(obj);
-            }
-            else
-            {
-                renderList.Add(obj);
-            }
+            _renderLists.Add(obj, isTransparent || obj.AlphaHue != byte.MaxValue);
         }
 
         private unsafe bool AddTileToRenderList(
             GameObject obj,
             bool useObjectHandles,
             int maxZ,
-            int cotZ,
-            ref Vector2 playerScreePos
+            Chunk chunk
         )
         {
+            var profile = ProfileManager.CurrentProfile;
+            var mesh = chunk.Mesh;
+
             for (; obj != null; obj = obj.TNext)
             {
                 if (UpdateDrawPosition || obj.IsPositionChanged)
@@ -648,6 +766,138 @@ namespace ClassicUO.Game.Scenes
 
                 int screenY = obj.RealScreenPosition.Y;
                 int maxObjectZ = obj.PriorityZ;
+
+                // Fast path: meshed objects (statics, multis, land) skip type-switch entirely
+                if (obj.InChunkMesh)
+                {
+                    if (obj is Land meshLand)
+                    {
+                        // For stretched tiles, the visible area extends below screenY
+                        // based on MinZ, so use adjustedY for the top-of-screen cull.
+                        if (meshLand.IsStretched)
+                        {
+                            int adjustedY = screenY + (meshLand.Z << 2) - (meshLand.MinZ << 2);
+                            if (adjustedY < _minPixel.Y || screenY > _maxPixel.Y)
+                                continue;
+                        }
+                        else if (screenY < _minPixel.Y || screenY > _maxPixel.Y)
+                        {
+                            continue;
+                        }
+
+                        if (maxObjectZ > maxZ)
+                            return false;
+
+                        // Simplified alpha for land (no itemData needed)
+                        if (obj.Z > _maxGroundZ)
+                        {
+                            bool changed = _alphaChanged
+                                ? CalculateAlpha(ref obj.AlphaHue, 0)
+                                : obj.AlphaHue != 0;
+
+                            if (!changed)
+                                break;
+                        }
+                        else if (_alphaChanged && obj.AlphaHue != 0xFF)
+                        {
+                            CalculateAlpha(ref obj.AlphaHue, 0xFF);
+                        }
+
+                        if (obj.AlphaHue != 0)
+                        {
+                            mesh.Land.SetVisible(obj.MeshSpriteIndex, obj.AlphaHue);
+                            ApplyMeshHue(obj, mesh.Land);
+                            TrySelectObject(obj, true);
+                        }
+                        continue;
+                    }
+
+                    if (screenY < _minPixel.Y || screenY > _maxPixel.Y)
+                        continue;
+
+                    // Static or Multi — meshed objects are never foliage/trees/internal/animated
+                    ref StaticTiles meshItemData = ref (obj is Static meshStatic
+                        ? ref meshStatic.ItemData
+                        : ref Unsafe.As<Multi>(obj).ItemData);
+
+                    // Simplified ProcessAlpha for meshed statics: skip IsFoliage branch (never true)
+                    bool meshAllowSelection = true;
+                    bool meshFadingOut = false;
+                    if (obj.Z >= _maxZ)
+                    {
+                        bool changed = _alphaChanged
+                            ? CalculateAlpha(ref obj.AlphaHue, 0)
+                            : obj.AlphaHue != 0;
+
+                        if (!changed)
+                            continue;
+
+                        meshFadingOut = true;
+                        meshAllowSelection = false;
+                    }
+                    else if (_noDrawRoofs && meshItemData.IsRoof)
+                    {
+                        if (_alphaChanged && !CalculateAlpha(ref obj.AlphaHue, 0))
+                            continue;
+                        if (obj.AlphaHue == 0)
+                            continue;
+
+                        meshFadingOut = true;
+                        meshAllowSelection = false;
+                    }
+                    else if (meshItemData.IsTranslucent)
+                    {
+                        if (_alphaChanged)
+                            CalculateAlpha(ref obj.AlphaHue, 178);
+                    }
+                    else if (_alphaChanged && obj.AlphaHue != 0xFF)
+                    {
+                        CalculateAlpha(ref obj.AlphaHue, 0xFF);
+                    }
+
+                    if (obj.AlphaHue == 0)
+                        continue;
+
+                    // Z-height culling
+                    if (obj.AllowedToDraw)
+                        CalculateObjectHeight(ref maxObjectZ, ref meshItemData);
+
+                    if (maxObjectZ > maxZ)
+                        continue;
+
+                    // Fading statics must not be drawn from the mesh GPU buffer because
+                    // they write to the depth buffer and block objects underneath (mobiles, items).
+                    // Instead, draw them via the CPU transparent list (rendered after mobiles).
+                    if (meshFadingOut)
+                    {
+                        PushToRenderQueue(obj, true, false);
+                        continue;
+                    }
+
+                    bool meshCot = ProfileManager.CurrentProfile.UseCircleOfTransparency
+                        && obj.TransparentTest(_world.Player.Z + 5);
+
+                    // Gradient CoT: set alpha on CPU and route to transparent list
+                    // so depth buffer doesn't block mobiles underneath.
+                    if (meshCot && _cotGradientMode)
+                    {
+                        obj.AlphaHue = GetGradientCotAlpha(obj);
+                        if (obj.AlphaHue > 0)
+                            PushToRenderQueue(obj, true, meshAllowSelection);
+                        continue;
+                    }
+
+                    mesh.Statics.SetVisible(obj.MeshSpriteIndex, obj.AlphaHue, meshCot);
+                    ApplyMeshHue(obj, mesh.Statics);
+
+                    if (meshItemData.IsLight)
+                    {
+                        AddLight(obj, obj, obj.RealScreenPosition.X + 22, obj.RealScreenPosition.Y + 22);
+                    }
+
+                    TrySelectObject(obj, meshAllowSelection && !(meshCot && IsMouseInsideCotCircle()));
+                    continue;
+                }
 
                 switch (obj)
                 {
@@ -673,9 +923,9 @@ namespace ClassicUO.Game.Scenes
                             continue;
                         }
 
-                        PushToRenderList(
+                        PushToRenderQueue(
                             obj,
-                            _renderListStatics,
+                            false,
                             true
                         );
                         break;
@@ -697,9 +947,6 @@ namespace ClassicUO.Game.Scenes
                                 !ProcessAlpha(
                                     obj,
                                     ref itemData,
-                                    true,
-                                    ref playerScreePos,
-                                    cotZ,
                                     out bool allowSelection
                                 )
                             )
@@ -707,8 +954,7 @@ namespace ClassicUO.Game.Scenes
                                 continue;
                             }
 
-                            //we avoid to hide impassable foliage or bushes, if present...
-                            if (itemData.IsFoliage && ProfileManager.CurrentProfile.TreeToStumps)
+                            if (itemData.IsFoliage && profile.TreeToStumps)
                             {
                                 continue;
                             }
@@ -716,57 +962,15 @@ namespace ClassicUO.Game.Scenes
                             if (
                                 !itemData.IsMultiMovable
                                 && staticc.IsVegetation
-                                && ProfileManager.CurrentProfile.HideVegetation
+                                && profile.HideVegetation
                             )
                             {
                                 continue;
                             }
 
-                            byte height = 0;
-
-                            if (obj.AllowedToDraw)
-                            {
-                                height = CalculateObjectHeight(ref maxObjectZ, ref itemData);
-                            }
-
-                            if (maxObjectZ > maxZ)
-                            {
-                                return itemData.Height != 0 && maxObjectZ - maxZ < height;
-                            }
-
-                            if (screenY < _minPixel.Y || screenY > _maxPixel.Y)
-                            {
-                                continue;
-                            }
-
-                            CheckIfBehindATree(obj, ref itemData);
-
-                            // hacky way to render shadows without z-fight
-                            if (
-                                ProfileManager.CurrentProfile.ShadowsEnabled
-                                && ProfileManager.CurrentProfile.ShadowsStatics
-                                && (
-                                    StaticFilters.IsTree(obj.Graphic, out _)
-                                    || itemData.IsFoliage
-                                    || StaticFilters.IsRock(obj.Graphic)
-                                )
-                            )
-                            {
-                                PushToRenderList(
-                                    obj,
-                                    _renderListTransparentObjects,
-                                    allowSelection
-                                );
-                            }
-                            else
-                            {
-                                PushToRenderList(
-                                    obj,
-                                    _renderListStatics,
-                                    allowSelection
-                                );
-                            }
-
+                            int cf = ProcessStaticLikeTail(obj, ref itemData, allowSelection, screenY, ref maxObjectZ, maxZ, out bool retVal, mesh);
+                            if (cf == 1) continue;
+                            if (cf == 2) return retVal;
                             break;
                         }
 
@@ -783,9 +987,6 @@ namespace ClassicUO.Game.Scenes
                                 !ProcessAlpha(
                                     obj,
                                     ref itemData,
-                                    true,
-                                    ref playerScreePos,
-                                    cotZ,
                                     out bool allowSelection
                                 )
                             )
@@ -793,66 +994,22 @@ namespace ClassicUO.Game.Scenes
                                 continue;
                             }
 
-                            //we avoid to hide impassable foliage or bushes, if present...
-
                             if (!itemData.IsMultiMovable)
                             {
-                                if (itemData.IsFoliage && ProfileManager.CurrentProfile.TreeToStumps)
+                                if (itemData.IsFoliage && profile.TreeToStumps)
                                 {
                                     continue;
                                 }
 
-                                if (multi.IsVegetation && ProfileManager.CurrentProfile.HideVegetation)
+                                if (multi.IsVegetation && profile.HideVegetation)
                                 {
                                     continue;
                                 }
                             }
 
-                            byte height = 0;
-
-                            if (obj.AllowedToDraw)
-                            {
-                                height = CalculateObjectHeight(ref maxObjectZ, ref itemData);
-                            }
-
-                            if (maxObjectZ > maxZ)
-                            {
-                                return itemData.Height != 0 && maxObjectZ - maxZ < height;
-                            }
-
-                            if (screenY < _minPixel.Y || screenY > _maxPixel.Y)
-                            {
-                                continue;
-                            }
-
-                            CheckIfBehindATree(obj, ref itemData);
-
-                            // hacky way to render shadows without z-fight
-                            if (
-                                ProfileManager.CurrentProfile.ShadowsEnabled
-                                && ProfileManager.CurrentProfile.ShadowsStatics
-                                && (
-                                    StaticFilters.IsTree(obj.Graphic, out _)
-                                    || itemData.IsFoliage
-                                    || StaticFilters.IsRock(obj.Graphic)
-                                )
-                            )
-                            {
-                                PushToRenderList(
-                                    obj,
-                                    _renderListTransparentObjects,
-                                    allowSelection
-                                );
-                            }
-                            else
-                            {
-                                PushToRenderList(
-                                    obj,
-                                    _renderListStatics,
-                                    allowSelection
-                                );
-                            }
-
+                            int cf = ProcessStaticLikeTail(obj, ref itemData, allowSelection, screenY, ref maxObjectZ, maxZ, out bool retVal, mesh);
+                            if (cf == 1) continue;
+                            if (cf == 2) return retVal;
                             break;
                         }
 
@@ -873,9 +1030,6 @@ namespace ClassicUO.Game.Scenes
                                 !ProcessAlpha(
                                     obj,
                                     ref empty,
-                                    false,
-                                    ref playerScreePos,
-                                    cotZ,
                                     out bool allowSelection
                                 )
                             )
@@ -890,9 +1044,9 @@ namespace ClassicUO.Game.Scenes
 
                             obj.AllowedToDraw = !HasSurfaceOverhead(mobile);
 
-                            PushToRenderList(
+                            PushToRenderQueue(
                                 obj,
-                                _renderListAnimations,
+                                false,
                                 allowSelection
                             );
                             break;
@@ -931,9 +1085,6 @@ namespace ClassicUO.Game.Scenes
                                 !ProcessAlpha(
                                     obj,
                                     ref itemData,
-                                    false,
-                                    ref playerScreePos,
-                                    cotZ,
                                     out bool allowSelection
                                 )
                             )
@@ -944,7 +1095,7 @@ namespace ClassicUO.Game.Scenes
                             if (
                                 !itemData.IsMultiMovable
                                 && itemData.IsFoliage
-                                && ProfileManager.CurrentProfile.TreeToStumps
+                                && profile.TreeToStumps
                             )
                             {
                                 continue;
@@ -974,17 +1125,17 @@ namespace ClassicUO.Game.Scenes
 
                             if (item.IsCorpse)
                             {
-                                PushToRenderList(
+                                PushToRenderQueue(
                                     obj,
-                                    _renderListAnimations,
+                                    false,
                                     allowSelection
                                 );
                             }
                             else
                             {
-                                PushToRenderList(
+                                PushToRenderQueue(
                                     obj,
-                                    _renderListStatics,
+                                    false,
                                     true
                                 );
                             }
@@ -993,16 +1144,12 @@ namespace ClassicUO.Game.Scenes
                         }
 
                     case GameEffect effect:
-                        if (
-                                            !ProcessAlpha(
-                                                obj,
-                                                ref Client.Game.UO.FileManager.TileData.StaticData[effect.Graphic],
-                                                false,
-                                                ref playerScreePos,
-                                                cotZ,
-                                                out _
-                                            )
-                                        )
+                        if (effect is not LightningEffect &&
+                            !ProcessAlpha(
+                                obj,
+                                ref Client.Game.UO.FileManager.TileData.StaticData[effect.Graphic],
+                                out _
+                            ))
                         {
                             continue;
                         }
@@ -1017,9 +1164,9 @@ namespace ClassicUO.Game.Scenes
 
                         //PushToRenderList(obj, ref _renderList, ref _renderListStaticsHead, ref _renderListStaticsCount, false);
 
-                        PushToRenderList(
+                        PushToRenderQueue(
                             obj,
-                            _renderListEffects,
+                            false,
                             false
                         );
                         break;
@@ -1079,12 +1226,6 @@ namespace ClassicUO.Game.Scenes
                 winGameScaledHeight = 0;
             }
 
-            //if (_use_render_target)
-            //{
-            //    winDrawOffsetX += winGameScaledOffsetX >> 1;
-            //    winDrawOffsetY += winGameScaledOffsetY >> 1;
-            //}
-
             int size = (int)(Math.Max(winGameWidth / 44f + 1, winGameHeight / 44f + 1) * zoom);
 
             if (Camera.Offset.X != 0 || Camera.Offset.Y != 0)
@@ -1125,53 +1266,6 @@ namespace ClassicUO.Game.Scenes
             {
                 UpdateDrawPosition = true;
                 _lastCamOffset = Camera.Offset;
-
-                if (
-                    _use_render_target
-                    && (
-                        _world_render_target == null
-                        || _world_render_target.Width != (int)(winGameWidth * zoom)
-                        || _world_render_target.Height != (int)(winGameHeight * zoom)
-                    )
-                )
-                {
-                    _world_render_target?.Dispose();
-
-                    PresentationParameters pp = Client.Game.GraphicsDevice.PresentationParameters;
-
-                    _world_render_target = new RenderTarget2D(
-                        Client.Game.GraphicsDevice,
-                        winGameWidth * 1,
-                        winGameHeight * 1,
-                        false,
-                        pp.BackBufferFormat,
-                        pp.DepthStencilFormat,
-                        pp.MultiSampleCount,
-                        pp.RenderTargetUsage
-                    );
-                }
-
-                if (
-                    _lightRenderTarget == null
-                    || _lightRenderTarget.Width != winGameWidth
-                    || _lightRenderTarget.Height != winGameHeight
-                )
-                {
-                    _lightRenderTarget?.Dispose();
-
-                    PresentationParameters pp = Client.Game.GraphicsDevice.PresentationParameters;
-
-                    _lightRenderTarget = new RenderTarget2D(
-                        Client.Game.GraphicsDevice,
-                        winGameWidth,
-                        winGameHeight,
-                        false,
-                        pp.BackBufferFormat,
-                        pp.DepthStencilFormat,
-                        pp.MultiSampleCount,
-                        pp.RenderTargetUsage
-                    );
-                }
             }
 
             _minTile.X = realMinRangeX;

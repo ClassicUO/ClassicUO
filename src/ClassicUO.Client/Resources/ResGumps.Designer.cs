@@ -898,11 +898,111 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Compare amount to....
+        /// </summary>
+        public static string CounterCompareTo {
+            get {
+                return ResourceManager.GetString("CounterCompareTo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The value must be a valid number!.
+        /// </summary>
+        public static string CounterCompareToDialogInvalid {
+            get {
+                return ResourceManager.GetString("CounterCompareToDialogInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Compare to value.
+        /// </summary>
+        public static string CounterCompareToDialogText1 {
+            get {
+                return ResourceManager.GetString("CounterCompareToDialogText1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to (leave empty to reset).
+        /// </summary>
+        public static string CounterCompareToDialogText2 {
+            get {
+                return ResourceManager.GetString("CounterCompareToDialogText2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Drop an item here to
+        ///start your first counter.
+        /// </summary>
+        public static string CounterEmptyHelpText {
+            get {
+                return ResourceManager.GetString("CounterEmptyHelpText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Counter Bar: Slot number &apos;{0}&apos; could not be found.
+        /// </summary>
+        public static string CounterErrorSlotNotFound {
+            get {
+                return ResourceManager.GetString("CounterErrorSlotNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Counter Bar: Slot &apos;{0}&apos; is not a valid number.
+        /// </summary>
+        public static string CounterErrorSlotNotValid {
+            get {
+                return ResourceManager.GetString("CounterErrorSlotNotValid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Compare Hue (ON).
+        /// </summary>
+        public static string CounterIgnoreHueOff {
+            get {
+                return ResourceManager.GetString("CounterIgnoreHueOff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Compare Hue (OFF).
+        /// </summary>
+        public static string CounterIgnoreHueOn {
+            get {
+                return ResourceManager.GetString("CounterIgnoreHueOn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Counter Layout:.
         /// </summary>
         public static string CounterLayout {
             get {
                 return ResourceManager.GetString("CounterLayout", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Read-only mode (OFF).
+        /// </summary>
+        public static string CounterReadonlyOff {
+            get {
+                return ResourceManager.GetString("CounterReadonlyOff", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Read-only mode (ON).
+        /// </summary>
+        public static string CounterReadonlyOn {
+            get {
+                return ResourceManager.GetString("CounterReadonlyOn", resourceCulture);
             }
         }
         
@@ -1056,6 +1156,15 @@ namespace ClassicUO.Resources {
         public static string Decline {
             get {
                 return ResourceManager.GetString("Decline", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Screen zoom:.
+        /// </summary>
+        public static string ScreenZoom {
+            get {
+                return ResourceManager.GetString("ScreenZoom", resourceCulture);
             }
         }
         
@@ -1844,11 +1953,11 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Highlight On Use.
+        ///   Looks up a localized string similar to Highlight On Change.
         /// </summary>
-        public static string HighlightOnUse {
+        public static string HighlightOnChange {
             get {
-                return ResourceManager.GetString("HighlightOnUse", resourceCulture);
+                return ResourceManager.GetString("HighlightOnChange", resourceCulture);
             }
         }
         
@@ -2210,6 +2319,15 @@ namespace ClassicUO.Resources {
         public static string Journal {
             get {
                 return ResourceManager.GetString("Journal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Add speaker serial to journal entries.
+        /// </summary>
+        public static string JournalFileWithSerial {
+            get {
+                return ResourceManager.GetString("JournalFileWithSerial", resourceCulture);
             }
         }
         
@@ -2639,6 +2757,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Keep at most this many journal files:.
+        /// </summary>
+        public static string MaxJournalFiles {
+            get {
+                return ResourceManager.GetString("MaxJournalFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Max Stats.
         /// </summary>
         public static string MaxStats {
@@ -2891,6 +3018,15 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Show party messages overhead.
+        /// </summary>
+        public static string OverheadPartyMessages {
+            get {
+                return ResourceManager.GetString("OverheadPartyMessages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Override container gump location.
         /// </summary>
         public static string OverrideContainerGumpLocation {
@@ -3094,6 +3230,15 @@ namespace ClassicUO.Resources {
         public static string PrimaryAbilityIcon {
             get {
                 return ResourceManager.GetString("PrimaryAbilityIcon", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to [Prompt]:.
+        /// </summary>
+        public static string Prompt {
+            get {
+                return ResourceManager.GetString("Prompt", resourceCulture);
             }
         }
         
@@ -3423,7 +3568,7 @@ namespace ClassicUO.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Set current profile as default for new characters.
+        ///   Looks up a localized string similar to Save current settings as defaults for new users.
         /// </summary>
         public static string SetAsNewDefault {
             get {
@@ -3923,6 +4068,15 @@ namespace ClassicUO.Resources {
         public static string StatusGumpOpenBar {
             get {
                 return ResourceManager.GetString("StatusGumpOpenBar", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Stay active.
+        /// </summary>
+        public static string StayActive {
+            get {
+                return ResourceManager.GetString("StayActive", resourceCulture);
             }
         }
         
