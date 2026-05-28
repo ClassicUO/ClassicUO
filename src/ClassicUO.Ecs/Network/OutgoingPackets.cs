@@ -1070,6 +1070,39 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
+        public static void Send_GuildMenuRequest(this NetClient socket, uint playerSerial)
+        {
+            const byte ID = 0xD7;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt32BE(playerSerial);
+            writer.WriteUInt16BE(0x28);
+            writer.WriteUInt8(0x0A);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
         public static void Send_CustomHouseDataRequest(this NetClient socket, uint serial)
         {
             const byte ID = 0xBF;

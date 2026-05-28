@@ -286,26 +286,28 @@ internal readonly struct PaperdollPlugin : IPlugin
 
         if (isPlayer)
         {
-            // Player-only button column at x=185.
+            // Player-only button column at x=185. Buttons fire on release
+            // (UiClick) per the UO Gump contract — UiPointerDown would
+            // double-fire if the user drags out and back, and OOP's
+            // ButtonAction.Activate also fires on mouse-up.
             var btnHelp = builder.AddButton(commands, (0x07EF, 0x07F0, 0x07F1), Vector3.UnitZ, new Vector2(185, 44 + 27 * 0));
-            btnHelp.Observe((On<UiPointerDown> _, Res<NetClient> net) => net.Value.Send_HelpRequest());
+            btnHelp.Observe((On<UiClick> _, Res<NetClient> net) => net.Value.Send_HelpRequest());
             commands.AddChild(root.Id, btnHelp.Id);
 
-            // Options: pure client-side gump in main; no ECS settings gump
-            // ported yet so the click is a no-op log. Wire when an ECS
-            // OptionsGump exists.
+            // Options: OOP opens OptionsGump (client-side); no ECS OptionsGump
+            // yet so the click is a no-op log.
             var btnOptions = builder.AddButton(commands, (0x07D6, 0x07D7, 0x07D8), Vector3.UnitZ, new Vector2(185, 44 + 27 * 1));
-            btnOptions.Observe((On<UiPointerDown> _) => Console.WriteLine("[Paperdoll] Options clicked — no ECS OptionsGump"));
+            btnOptions.Observe((On<UiClick> _) => Console.WriteLine("[Paperdoll] Options clicked — no ECS OptionsGump"));
             commands.AddChild(root.Id, btnOptions.Id);
 
             var btnLogout = builder.AddButton(commands, (0x07D9, 0x07DA, 0x07DB), Vector3.UnitZ, new Vector2(185, 44 + 27 * 2));
-            btnLogout.Observe((On<UiPointerDown> _, Res<NetClient> net) => net.Value.Send_LogoutNotification());
+            btnLogout.Observe((On<UiClick> _, Res<NetClient> net) => net.Value.Send_LogoutNotification());
             commands.AddChild(root.Id, btnLogout.Id);
 
             // Quests button (CV >= 500A — assume so). 0xD7 with subcommand
             // 0x32 mirrors main's GameActions.RequestQuestMenu.
             var btnQuests = builder.AddButton(commands, (0x57B5, 0x57B7, 0x57B6), Vector3.UnitZ, new Vector2(185, 44 + 27 * 3));
-            btnQuests.Observe((On<UiPointerDown> _, Res<NetClient> net, Res<GameContext> ctx) =>
+            btnQuests.Observe((On<UiClick> _, Res<NetClient> net, Res<GameContext> ctx) =>
             {
                 if (ctx.Value.PlayerSerial != 0)
                     net.Value.Send_QuestMenuRequest(ctx.Value.PlayerSerial);
@@ -314,21 +316,23 @@ internal readonly struct PaperdollPlugin : IPlugin
 
             // Skills: main re-requests via Send_SkillsRequest and pops the
             // local SkillsGump. ECS has no SkillsGump yet so just refresh
-            // server-side skills (server pushes 0x3A which the in-game
-            // packet handler currently swallows — at least the user gets
-            // feedback in their journal).
+            // server-side skills.
             var btnSkills = builder.AddButton(commands, (0x07DF, 0x07E0, 0x07E1), Vector3.UnitZ, new Vector2(185, 44 + 27 * 4));
-            btnSkills.Observe((On<UiPointerDown> _, Res<NetClient> net, Res<GameContext> ctx) =>
+            btnSkills.Observe((On<UiClick> _, Res<NetClient> net, Res<GameContext> ctx) =>
             {
                 if (ctx.Value.PlayerSerial != 0)
                     net.Value.Send_SkillsRequest(ctx.Value.PlayerSerial);
             });
             commands.AddChild(root.Id, btnSkills.Id);
 
-            // Guild: opens local GuildGump in main, no server packet. ECS
-            // has no GuildGump so the click is a no-op log.
+            // Guild: mirrors OOP's GameActions.OpenGuildGump → 0xD7 subcommand
+            // 0x28 with trailing 0x0A. Server pushes the guild menu gump.
             var btnGuild = builder.AddButton(commands, (0x57B2, 0x57B4, 0x57B3), Vector3.UnitZ, new Vector2(185, 44 + 27 * 5));
-            btnGuild.Observe((On<UiPointerDown> _) => Console.WriteLine("[Paperdoll] Guild clicked — no ECS GuildGump"));
+            btnGuild.Observe((On<UiClick> _, Res<NetClient> net, Res<GameContext> ctx) =>
+            {
+                if (ctx.Value.PlayerSerial != 0)
+                    net.Value.Send_GuildMenuRequest(ctx.Value.PlayerSerial);
+            });
             commands.AddChild(root.Id, btnGuild.Id);
 
             // Peace/war toggle. Initial graphic mirrors player's current
@@ -362,21 +366,21 @@ internal readonly struct PaperdollPlugin : IPlugin
         // yet; re-request character status so the server pushes 0x11.
         var capturedPlayerSerial = gameCtx.PlayerSerial;
         var btnStatus = builder.AddButton(commands, (0x07EB, 0x07EC, 0x07ED), Vector3.UnitZ, new Vector2(185, 44 + 27 * 7));
-        btnStatus.Observe((On<UiPointerDown> _, Res<NetClient> net) =>
+        btnStatus.Observe((On<UiClick> _, Res<NetClient> net) =>
         {
             if (capturedPlayerSerial != 0)
                 net.Value.Send_StatusRequest(capturedPlayerSerial);
         });
         commands.AddChild(root.Id, btnStatus.Id);
 
-        // Virtue gump (0x0071) at (80, 4) — double-click in main, treat as
-        // single-click for ECS button infra (Bevy.UI emits UiPointerDown).
-        // Sends GumpResponse mirroring main's VirtueMenu_MouseDoubleClickEvent.
+        // Virtue gump (0x0071) at (80, 4). OOP fires on left double-click —
+        // route the synthesized UiDoubleClick to Send_GumpResponse mirroring
+        // VirtueMenu_MouseDoubleClickEvent.
         {
             var capturedSerial = serial;
             var virtuePic = builder.AddGump(commands, 0x0071, Vector3.UnitZ, new Vector2(80, 4))
                 .Insert(Interaction.None);
-            virtuePic.Observe((On<UiPointerDown> _, Res<NetClient> net, Res<GameContext> ctx) =>
+            virtuePic.Observe((On<UiDoubleClick> _, Res<NetClient> net, Res<GameContext> ctx) =>
             {
                 if (ctx.Value.PlayerSerial != 0)
                     net.Value.Send_GumpResponse(ctx.Value.PlayerSerial, 0x000001CD, 0x00000001,
@@ -385,16 +389,15 @@ internal readonly struct PaperdollPlugin : IPlugin
             commands.AddChild(root.Id, virtuePic.Id);
         }
 
-        // Profile gump (0x07D2) — both player and other. Shifted +14 if the
-        // racial-abilities book is showing (so the icon doesn't overlap the
-        // book sprite at x=23). Mirrors main's profileX adjustment.
+        // Profile gump (0x07D2) — both player and other. OOP fires on left
+        // double-click. Shifted +14 if the racial-abilities book is showing.
         {
             var capturedSerial = serial;
             int profileX = 25;
             if (showRacialBook) profileX += 14;
             var profilePic = builder.AddGump(commands, 0x07D2, Vector3.UnitZ, new Vector2(profileX, 196))
                 .Insert(Interaction.None);
-            profilePic.Observe((On<UiPointerDown> _, Res<NetClient> net) =>
+            profilePic.Observe((On<UiDoubleClick> _, Res<NetClient> net) =>
             {
                 net.Value.Send_ProfileRequest(capturedSerial);
             });
@@ -402,26 +405,26 @@ internal readonly struct PaperdollPlugin : IPlugin
 
             if (isPlayer)
             {
-                // Party manifest gump (0x07D2 again, second slot). Click
-                // opens PartyGump in main — ECS has no party UI yet.
+                // Party manifest gump (0x07D2 again, second slot). OOP opens
+                // PartyGump on left double-click — ECS has no party UI yet.
                 int partyX = profileX + 14;
                 var partyPic = builder.AddGump(commands, 0x07D2, Vector3.UnitZ, new Vector2(partyX, 196))
                     .Insert(Interaction.None);
-                partyPic.Observe((On<UiPointerDown> _) =>
+                partyPic.Observe((On<UiDoubleClick> _) =>
                     Console.WriteLine("[Paperdoll] Party manifest clicked — no ECS PartyGump"));
                 commands.AddChild(root.Id, partyPic.Id);
             }
         }
 
-        // Combat / racial-abilities book gump-pics. Combat at (156, 200)
-        // when ClientFeatures.PaperdollBooks. Racial at (23, 200) when
-        // CV >= 7000. ECS has no AbilitiesBookGump / RacialAbilitiesBookGump
-        // so the click logs only.
+        // Combat / racial-abilities book gump-pics. OOP fires on left
+        // double-click. Combat at (156, 200) when ClientFeatures.PaperdollBooks.
+        // Racial at (23, 200) when CV >= 7000. ECS has no AbilitiesBookGump /
+        // RacialAbilitiesBookGump so the click logs only.
         if (showBooks)
         {
             var combatBook = builder.AddGump(commands, 0x2B34, Vector3.UnitZ, new Vector2(156, 200))
                 .Insert(Interaction.None);
-            combatBook.Observe((On<UiPointerDown> _) =>
+            combatBook.Observe((On<UiDoubleClick> _) =>
                 Console.WriteLine("[Paperdoll] Combat book clicked — no ECS AbilitiesBook"));
             commands.AddChild(root.Id, combatBook.Id);
 
@@ -429,7 +432,7 @@ internal readonly struct PaperdollPlugin : IPlugin
             {
                 var racialBook = builder.AddGump(commands, 0x2B28, Vector3.UnitZ, new Vector2(23, 200))
                     .Insert(Interaction.None);
-                racialBook.Observe((On<UiPointerDown> _) =>
+                racialBook.Observe((On<UiDoubleClick> _) =>
                     Console.WriteLine("[Paperdoll] Racial book clicked — no ECS RacialAbilitiesBook"));
                 commands.AddChild(root.Id, racialBook.Id);
             }

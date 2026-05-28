@@ -1,3 +1,4 @@
+using System;
 using ClassicUO.Configuration;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework.Graphics;
@@ -128,7 +129,8 @@ internal readonly struct CameraPlugin : IPlugin
     {
         var mousePos = mouseCtx.Value.Position;
 
-        if (camera.Value.Bounds.Contains((int)mouseCtx.Value.Position.X, (int)mouseCtx.Value.Position.Y))
+        if (!mouseCtx.Value.WheelConsumed &&
+            camera.Value.Bounds.Contains((int)mouseCtx.Value.Position.X, (int)mouseCtx.Value.Position.Y))
         {
             if (mouseCtx.Value.Wheel > 0)
                 camera.Value.ZoomIn();

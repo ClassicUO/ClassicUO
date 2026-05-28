@@ -91,6 +91,18 @@ internal sealed class MouseContext : InputContext<MouseButtonType>
         return (1f, 1f);
     }
     public float Wheel { get; private set; }
+    // Set by a UI handler when the scroll wheel has been consumed for the
+    // current frame (e.g. a scrollable gump was hovered + scrolled). The
+    // camera plugin checks this before applying zoom so wheel input doesn't
+    // pass through gump UI to the world. ConsumeWheel ALSO zeroes the
+    // Wheel reading so any downstream consumer that doesn't honour the
+    // flag still sees a no-op.
+    public bool WheelConsumed { get; private set; }
+    public void ConsumeWheel()
+    {
+        WheelConsumed = true;
+        Wheel = 0f;
+    }
 
     public override bool IsPressed(MouseButtonType input) => !IsConsumed(input) && VerifyCondition(input, ButtonState.Pressed, ButtonState.Pressed);
 
@@ -117,6 +129,7 @@ internal sealed class MouseContext : InputContext<MouseButtonType>
     {
         for (int i = 0; i < _consumed.Length; i++)
             _consumed[i] = false;
+        WheelConsumed = false;
 
         // Advance state FIRST so press-edge detection below uses the same
         // (_oldState, _newState) pair that downstream systems will see this
