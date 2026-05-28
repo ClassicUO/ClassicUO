@@ -79,6 +79,17 @@ For mutation of an existing component's fields, use the mutable ref from the que
 
 Register singletons with `app.AddResource(new T())` at plugin build time. Do NOT use a static class to share state between systems — that hides ordering and breaks parallel scheduling. If two systems share state, it is a `Res` / `ResMut`.
 
+**Time uses `Res<Time>`, never `System.Environment.TickCount64` / `DateTime.Now` / `Stopwatch`.** `Time.Total` is the engine clock in milliseconds (float, monotonic from boot). `Time.Frame` is the per-frame delta in seconds. Wall-clock APIs jump on system clock changes, miss frame-paused state, and bypass the deterministic harness — agent screenshots and replays drift.
+
+**No closure-captured mutable state in system / observer lambdas.** A captured local survives one invocation only by accident — the lambda is stored, but the entity it observes (or the system instance) may be despawned and rebuilt between frames, resetting the closure to its captured initial value. Use the proper ECS slot for the lifetime you need:
+
+- **System scratch** (counters, last-X timestamps, cached lookups): `Local<T>`.
+- **Cross-system / cross-observer state**: register a `Res<T>` / `ResMut<T>` (`app.AddResource(new T())`).
+- **Per-entity state**: a component on the entity itself (queried by the observer).
+- **Constants needed inside the lambda** (a captured ushort / serial / lookup table): only capture immutable values whose lifetime exceeds the lambda's targets, and *never* capture an entity id whose entity might be rebuilt.
+
+Counter-example: paperdoll backpack dclick originally stored `lastClick` as a closure local on the sprite's `Observe<UiClick>` — equip changes despawn+respawn the sprite mid-gesture, so the second click's closure was a fresh instance and the gap never tripped. Fix: `Res<PaperdollDClickState>` + a marker component on the sprite (`PaperdollBackpackUI`) read inside the observer.
+
 ### 4. Prefer Observers for system→system interop
 
 When system A produces an event that system B reacts to, the default is an **observer** keyed on a component change (`OnInsert<T>`, `OnRemove<T>`, `OnAdd<T>`) or a custom trigger. Reasons:

@@ -67,8 +67,13 @@ internal sealed class MouseContext : InputContext<MouseButtonType>
     {
         get
         {
-            var (sx, sy) = GetScale();
-            return new((_newState.X - _lastMouseClickPosition.X) / sx, (_newState.Y - _lastMouseClickPosition.Y) / sy);
+            // _lastMouseClickPosition is stored in logical pixels (set via
+            // Position which already divides by DpiScale). Subtract in
+            // logical space — do NOT mix raw _newState (physical) with
+            // logical, that double-counts the scale and produces a non-zero
+            // offset on press-down for any DpiScale != 1.
+            var p = Position;
+            return new(p.X - _lastMouseClickPosition.X, p.Y - _lastMouseClickPosition.Y);
         }
     }
 
@@ -113,6 +118,29 @@ internal sealed class MouseContext : InputContext<MouseButtonType>
         for (int i = 0; i < _consumed.Length; i++)
             _consumed[i] = false;
 
+        // Advance state FIRST so press-edge detection below uses the same
+        // (_oldState, _newState) pair that downstream systems will see this
+        // frame. Otherwise _lastMouseClickPosition lags by one frame and
+        // DraggingOffset reads as (cursor − 0) on the press-once frame —
+        // tripping pickup drag thresholds instantly.
+        _oldState = _newState;
+#if AGENT_BUILD
+        if (_agentSynthEnabled)
+        {
+            _newState = new MouseState(
+                _agentSynthX, _agentSynthY,
+                _newState.ScrollWheelValue,
+                _agentSynthLeft, _agentSynthMiddle, _agentSynthRight,
+                _newState.XButton1, _newState.XButton2);
+        }
+        else
+#endif
+        {
+            _newState = Microsoft.Xna.Framework.Input.Mouse.GetState();
+        }
+        _currentTime = deltaTime;
+        Wheel = (_newState.ScrollWheelValue - _oldState.ScrollWheelValue) / 120f;
+
         for (var button = MouseButtonType.None + 1; button < MouseButtonType.Size; button++)
         {
             if (IsPressedDouble(button))
@@ -147,24 +175,6 @@ internal sealed class MouseContext : InputContext<MouseButtonType>
         {
             _lastClickButtons[0] = _lastClickButtons[1] = null;
         }
-
-        _oldState = _newState;
-#if AGENT_BUILD
-        if (_agentSynthEnabled)
-        {
-            _newState = new MouseState(
-                _agentSynthX, _agentSynthY,
-                _newState.ScrollWheelValue,
-                _agentSynthLeft, _agentSynthMiddle, _agentSynthRight,
-                _newState.XButton1, _newState.XButton2);
-        }
-        else
-#endif
-        {
-            _newState = Microsoft.Xna.Framework.Input.Mouse.GetState();
-        }
-        _currentTime = deltaTime;
-        Wheel = (_newState.ScrollWheelValue - _oldState.ScrollWheelValue) / 120f;
 
         base.Update(deltaTime);
     }

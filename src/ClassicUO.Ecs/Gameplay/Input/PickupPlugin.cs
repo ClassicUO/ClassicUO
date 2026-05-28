@@ -16,7 +16,6 @@ internal readonly struct PickupPlugin : IPlugin
 {
     public void Build(App app)
     {
-        var pickupItemDelayedFn = PickupItem;
         var pickupItemFn = PickupItem;
         var dropItemFn = DropItem;
 
@@ -159,107 +158,35 @@ internal readonly struct PickupPlugin : IPlugin
             .InStage(Stage.First)
             .Build()
 
-            .AddSystem(pickupItemDelayedFn)
-            .InStage(Stage.Update)
-            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
-            .RunIf((Commands cmds) => cmds.HasResource<SelectedEntity>() && cmds.HasResource<GrabbedItem>())
-            .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial == 0)
-            .RunIf((Res<MouseContext> mouseCtx, Local<float?> delay, Res<Time> time) =>
-            {
-                // Mirror legacy ItemGump pickup gate: fire once the user has
-                // either dragged past MIN_PICKUP_DRAG_DISTANCE_PIXELS from the
-                // press origin, or held long enough that a double-click can no
-                // longer be in progress. Drop the camera.Bounds gate — pickup
-                // now works on container UI sitting outside the world view too;
-                // the selection RunIf still rejects spurious presses.
-                if (mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Left))
-                    delay.Value = time.Value.Total + 1000f;
-                else if (mouseCtx.Value.IsReleased(Input.MouseButtonType.Left))
-                    delay.Value = null;
-
-                if (!mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
-                    return false;
-
-                var dragOffset = mouseCtx.Value.DraggingOffset;
-                if (Math.Abs(dragOffset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS
-                    || Math.Abs(dragOffset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
-                    return true;
-
-                return delay.Value.HasValue && time.Value.Total > delay.Value;
-            })
-            .RunIf((
-                Res<LeftPressLatch> latch,
-                Res<NetworkEntitiesMap> entitiesMap,
-                Query<Data<NetworkSerial>, Filter<With<Items>>> q,
-                Query<Data<ContainerItemUI>> uiItemQ,
-                Query<Data<PaperdollEquipUI>> equipUiQ) =>
-            {
-                // Pickup eligibility is gated on the PRESS-ORIGIN entity, not
-                // the currently hovered one — otherwise dragging the cursor
-                // off the item before the drag-distance threshold trips would
-                // cancel pickup. Mirrors legacy
-                // UIManager.LastControlMouseDown(Left) == this.
-                var ent = latch.Value.Entity;
-                if (!ent.IsValid()) return false;
-                // Items have serials in [0x40000000, 0x80000000). Reject
-                // mobiles / multis / anything else so pickup never fires on
-                // non-items (matches legacy GameActions.OpenCorpse-style
-                // SerialHelper.IsItem guards).
-                if (q.Contains(ent))
-                {
-                    var (_, ns) = q.Get(ent);
-                    return SerialHelper.IsItem(ns.Ref.Value);
-                }
-                // Container item UI selections resolve to their backing game
-                // entity via NetworkEntitiesMap. Pickup body re-resolves.
-                if (uiItemQ.Contains(ent))
-                {
-                    var (_, link) = uiItemQ.Get(ent);
-                    if (!SerialHelper.IsItem(link.Ref.Serial)) return false;
-                    return entitiesMap.Value.TryGet(link.Ref.Serial, out var gameEnt)
-                        && q.Contains(gameEnt);
-                }
-                // Paperdoll equipment overlay -> game entity by ItemSerial.
-                // Mirrors main's PaperDollInteractable.GumpPicEquipment.Update
-                // pickup gate (drag threshold + CanLift).
-                if (equipUiQ.Contains(ent))
-                {
-                    var (_, link) = equipUiQ.Get(ent);
-                    if (!SerialHelper.IsItem(link.Ref.ItemSerial)) return false;
-                    return entitiesMap.Value.TryGet(link.Ref.ItemSerial, out var gameEnt)
-                        && q.Contains(gameEnt);
-                }
-                return false;
-            })
-            .Build()
-
             .AddSystem(pickupItemFn)
             .InStage(Stage.Update)
             .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
             .RunIf((Commands cmds) => cmds.HasResource<SelectedEntity>() && cmds.HasResource<GrabbedItem>())
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial == 0)
-            .RunIf((Res<MouseContext> mouseCtx, Local<float?> delay, Res<Time> time) =>
+            .RunIf((Res<MouseContext> mouseCtx, Local<float?> holdDeadline, Res<Time> time) =>
             {
-                // Mirror legacy ItemGump pickup gate: fire once the user has
-                // either dragged past MIN_PICKUP_DRAG_DISTANCE_PIXELS from the
-                // press origin, or held long enough that a double-click can no
-                // longer be in progress. Drop the camera.Bounds gate — pickup
-                // now works on container UI sitting outside the world view too;
-                // the selection RunIf still rejects spurious presses.
+                // Pickup fires on EITHER trigger:
+                //   1. Left held + mouse dragged >= MIN_PICKUP_DRAG_DISTANCE_PIXELS
+                //      from the press origin.
+                //   2. Left held continuously for >= 1000ms (held-still pickup).
+                // Hold deadline armed on press-once, cleared on release.
+                // Time.Total accumulates in milliseconds (FnaPlugin.cs:46
+                // multiplies frame seconds by 1000f), matching the rest of
+                // the codebase. CLAUDE.md's "seconds" claim is stale.
                 if (mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Left))
-                    delay.Value = time.Value.Total + 1000f;
+                    holdDeadline.Value = time.Value.Total + 1000f;
                 else if (mouseCtx.Value.IsReleased(Input.MouseButtonType.Left))
-                    delay.Value = null;
+                    holdDeadline.Value = null;
 
                 if (!mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
                     return false;
 
                 var dragOffset = mouseCtx.Value.DraggingOffset;
-                if (Math.Abs(dragOffset.X) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS
-                    || Math.Abs(dragOffset.Y) > Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
+                if (Math.Abs(dragOffset.X) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS
+                    || Math.Abs(dragOffset.Y) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
                     return true;
 
-                return delay.Value.HasValue && time.Value.Total > delay.Value;
+                return holdDeadline.Value.HasValue && time.Value.Total >= holdDeadline.Value;
             })
             .RunIf((
                 Res<LeftPressLatch> latch,
@@ -319,84 +246,108 @@ internal readonly struct PickupPlugin : IPlugin
             .RunIf((Res<MouseContext> mouseCtx) => mouseCtx.Value.IsReleased(Input.MouseButtonType.Left))
             .Build();
 
-        var handlePacketsFn = HandlePickupPackets;
-        app
-            .AddSystem(handlePacketsFn)
-            .InStage(Stage.Update)
-            .RunIf((EventReader<IPacket> packets) => packets.HasEvents)
-            .Build();
+        // Per-packet observers replace the boxed EventReader<IPacket> scan.
+        // 0x27/0x28 restore source UI + revert item props (server rejected
+        // the move). 0x29 accepts the drop. 0x25/0x2E/0x1A/0xF3 are treated
+        // as implicit drop-acks when they readdress the held serial (most
+        // server flavors skip the explicit 0x29).
+        app.AddObserver((
+            On<PacketReceived<OnDenyMoveItemPacket_0x27>> trig,
+            Res<GrabbedItem> grabbedItem,
+            Res<NetworkEntitiesMap> entitiesMap,
+            Query<Data<Node>> nodeQ,
+            Query<Data<Graphic, Hue, Amount>> itemPropsQ,
+            Query<Data<WorldPosition>> worldPosQ,
+            Query<Data<ContainerSlotPosition>> slotPosQ) =>
+        {
+            Console.WriteLine("[PKT-0x27 DENY] code=0x{0:X2} heldSerial=0x{1:X8} sourceUi={2}",
+                trig.Event.Packet.Code, grabbedItem.Value.Serial, grabbedItem.Value.SourceUiEntity);
+            RestoreSourceUi(grabbedItem.Value, nodeQ);
+            RestoreItemProps(grabbedItem.Value, entitiesMap.Value, itemPropsQ, worldPosQ, slotPosQ);
+            grabbedItem.Value.Clear();
+            grabbedItem.Value.SourceUiEntity = 0;
+        });
+
+        app.AddObserver((
+            On<PacketReceived<OnEndDraggingItemPacket_0x28>> _,
+            Res<GrabbedItem> grabbedItem,
+            Res<NetworkEntitiesMap> entitiesMap,
+            Query<Data<Node>> nodeQ,
+            Query<Data<Graphic, Hue, Amount>> itemPropsQ,
+            Query<Data<WorldPosition>> worldPosQ,
+            Query<Data<ContainerSlotPosition>> slotPosQ) =>
+        {
+            Console.WriteLine("[PKT-0x28 END-DRAG] heldSerial=0x{0:X8} sourceUi={1}",
+                grabbedItem.Value.Serial, grabbedItem.Value.SourceUiEntity);
+            RestoreSourceUi(grabbedItem.Value, nodeQ);
+            RestoreItemProps(grabbedItem.Value, entitiesMap.Value, itemPropsQ, worldPosQ, slotPosQ);
+            grabbedItem.Value.Clear();
+            grabbedItem.Value.SourceUiEntity = 0;
+        });
+
+        app.AddObserver((
+            On<PacketReceived<OnDropItemOkPacket_0x29>> _,
+            Commands commands,
+            Res<GrabbedItem> grabbedItem) => FinalizeDrop(commands, grabbedItem.Value, "0x29 DROP-OK"));
+
+        // Implicit-ACK observers — only commit drop completion when the
+        // readdressed serial matches the pending-drop serial.
+        app.AddObserver((
+            On<PacketReceived<OnUpdateContainerPacket_0x25_Pre6017>> trig,
+            Commands commands,
+            Res<GrabbedItem> grabbedItem) =>
+        {
+            if (grabbedItem.Value.PendingDrop && trig.Event.Packet.Serial == grabbedItem.Value.Serial)
+                FinalizeDrop(commands, grabbedItem.Value, "0x25");
+        });
+
+        app.AddObserver((
+            On<PacketReceived<OnUpdateContainerPacket_0x25_Post6017>> trig,
+            Commands commands,
+            Res<GrabbedItem> grabbedItem) =>
+        {
+            if (grabbedItem.Value.PendingDrop && trig.Event.Packet.Serial == grabbedItem.Value.Serial)
+                FinalizeDrop(commands, grabbedItem.Value, "0x25");
+        });
+
+        app.AddObserver((
+            On<PacketReceived<OnEquipItemPacket_0x2E>> trig,
+            Commands commands,
+            Res<GrabbedItem> grabbedItem) =>
+        {
+            if (grabbedItem.Value.PendingDrop && trig.Event.Packet.Serial == grabbedItem.Value.Serial)
+                FinalizeDrop(commands, grabbedItem.Value, "0x2E");
+        });
+
+        app.AddObserver((
+            On<PacketReceived<OnUpdateItemPacket_0x1A>> trig,
+            Commands commands,
+            Res<GrabbedItem> grabbedItem) =>
+        {
+            if (grabbedItem.Value.PendingDrop && trig.Event.Packet.Serial == grabbedItem.Value.Serial)
+                FinalizeDrop(commands, grabbedItem.Value, "0x1A");
+        });
+
+        app.AddObserver((
+            On<PacketReceived<OnUpdateItemSAPacket_0xF3>> trig,
+            Commands commands,
+            Res<GrabbedItem> grabbedItem) =>
+        {
+            if (grabbedItem.Value.PendingDrop && trig.Event.Packet.Serial == grabbedItem.Value.Serial)
+                FinalizeDrop(commands, grabbedItem.Value, "0xF3");
+        });
     }
 
-
-    static void HandlePickupPackets(
-        Commands commands,
-        EventReader<IPacket> packets,
-        Res<GrabbedItem> grabbedItem,
-        Res<NetworkEntitiesMap> entitiesMap,
-        Query<Data<Node>> nodeQ,
-        Query<Data<Graphic, Hue, Amount>> itemPropsQ,
-        Query<Data<WorldPosition>> worldPosQ,
-        Query<Data<ContainerSlotPosition>> slotPosQ
-    )
+    private static void FinalizeDrop(Commands commands, GrabbedItem grabbed, string tag)
     {
-        foreach (var packet in packets.Read())
+        Console.WriteLine("[PKT-{0} DROP-OK] heldSerial=0x{1:X8} sourceUi={2} despawning",
+            tag, grabbed.Serial, grabbed.SourceUiEntity);
+        if (grabbed.SourceUiEntity != 0)
         {
-            switch (packet)
-            {
-                case OnDenyMoveItemPacket_0x27 deny:
-                    Console.WriteLine("[PKT-0x27 DENY] code=0x{0:X2} heldSerial=0x{1:X8} sourceUi={2}",
-                        deny.Code, grabbedItem.Value.Serial, grabbedItem.Value.SourceUiEntity);
-                    RestoreSourceUi(grabbedItem.Value, nodeQ);
-                    RestoreItemProps(grabbedItem.Value, entitiesMap.Value, itemPropsQ, worldPosQ, slotPosQ);
-                    grabbedItem.Value.Clear();
-                    grabbedItem.Value.SourceUiEntity = 0;
-                    break;
-
-                case OnEndDraggingItemPacket_0x28:
-                    Console.WriteLine("[PKT-0x28 END-DRAG] heldSerial=0x{0:X8} sourceUi={1}",
-                        grabbedItem.Value.Serial, grabbedItem.Value.SourceUiEntity);
-                    RestoreSourceUi(grabbedItem.Value, nodeQ);
-                    RestoreItemProps(grabbedItem.Value, entitiesMap.Value, itemPropsQ, worldPosQ, slotPosQ);
-                    grabbedItem.Value.Clear();
-                    grabbedItem.Value.SourceUiEntity = 0;
-                    break;
-
-                case OnDropItemOkPacket_0x29:
-                    Console.WriteLine("[PKT-0x29 DROP-OK] heldSerial=0x{0:X8} sourceUi={1} despawning",
-                        grabbedItem.Value.Serial, grabbedItem.Value.SourceUiEntity);
-                    if (grabbedItem.Value.SourceUiEntity != 0)
-                    {
-                        commands.Entity(grabbedItem.Value.SourceUiEntity).Despawn();
-                        grabbedItem.Value.SourceUiEntity = 0;
-                    }
-                    // Server accepted the drop; finalize local state. Clear()
-                    // resets PendingDrop too so further pickups/drops are
-                    // unblocked.
-                    grabbedItem.Value.Clear();
-                    break;
-
-                // ModernUO (and most server flavors) don't follow up container /
-                // equip / ground drops with an explicit 0x29 — the item simply
-                // reappears via 0x25 (container add), 0x2E (equip item), or
-                // 0x1A/0xF3 (world item) addressed to the serial we just
-                // dropped. Treat those as implicit drop accepts so PendingDrop
-                // / grabbed don't stick forever.
-                case OnUpdateContainerPacket_0x25_Post6017 add25Post when grabbedItem.Value.PendingDrop && add25Post.Serial == grabbedItem.Value.Serial:
-                case OnUpdateContainerPacket_0x25_Pre6017 add25Pre when grabbedItem.Value.PendingDrop && add25Pre.Serial == grabbedItem.Value.Serial:
-                case OnEquipItemPacket_0x2E equip2E when grabbedItem.Value.PendingDrop && equip2E.Serial == grabbedItem.Value.Serial:
-                case OnUpdateItemPacket_0x1A upd1A when grabbedItem.Value.PendingDrop && upd1A.Serial == grabbedItem.Value.Serial:
-                case OnUpdateItemSAPacket_0xF3 updF3 when grabbedItem.Value.PendingDrop && updF3.Serial == grabbedItem.Value.Serial:
-                    Console.WriteLine("[PKT-implicit-ACK] heldSerial=0x{0:X8} sourceUi={1} (0x25/0x2E/0x1A/0xF3)",
-                        grabbedItem.Value.Serial, grabbedItem.Value.SourceUiEntity);
-                    if (grabbedItem.Value.SourceUiEntity != 0)
-                    {
-                        commands.Entity(grabbedItem.Value.SourceUiEntity).Despawn();
-                        grabbedItem.Value.SourceUiEntity = 0;
-                    }
-                    grabbedItem.Value.Clear();
-                    break;
-            }
+            commands.Entity(grabbed.SourceUiEntity).Despawn();
+            grabbed.SourceUiEntity = 0;
         }
+        grabbed.Clear();
     }
 
     private static int GetZ(Query<Data<GlobalZIndex>> q, ulong ent)
