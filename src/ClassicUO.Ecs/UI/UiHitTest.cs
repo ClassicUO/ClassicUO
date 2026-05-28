@@ -11,24 +11,26 @@ internal static class UiHitTest
     // but over a fully-transparent pixel misses the sprite and passes through
     // to whatever is behind. Kinds without a pixel mask (tiled / nine-patch /
     // none) stay bbox-opaque.
-    public static bool PixelHit(AssetsServer assets, in UOCustomRender custom, in ComputedNode bb, Vector2 pos)
+    public static bool PixelHit(AssetsServer assets, UOCustomRender custom, in ComputedNode bb, Vector2 pos)
     {
         // Bounding-box reject first.
         if (pos.X < bb.Position.X || pos.Y < bb.Position.Y) return false;
         if (pos.X >= bb.Position.X + bb.Size.X) return false;
         if (pos.Y >= bb.Position.Y + bb.Size.Y) return false;
 
+        // No custom payload on the element (shouldn't happen for UO sprites) —
+        // treat the whole bounding box as opaque.
+        if (custom is null) return true;
+
         switch (custom.Kind)
         {
             case UOCustomKind.Gump:
-            case UOCustomKind.GumpNinePatch:
             {
                 ref readonly var info = ref assets.Gumps.GetGump(custom.AssetId);
                 if (info.Texture == null || info.UV.Width <= 0 || info.UV.Height <= 0)
                     return true;
-                // Proportional map from box to native mask. Plain Gump draws at
-                // native size (scale 1); NinePatch stretches to the box, so the
-                // box/native ratio maps the cursor back into the source sprite.
+                // Plain Gump draws at native size (scale 1): map the cursor
+                // straight into the source mask.
                 float sx = bb.Size.X / info.UV.Width;
                 float sy = bb.Size.Y / info.UV.Height;
                 if (sx <= 0f || sy <= 0f) return true;
@@ -80,7 +82,10 @@ internal static class UiHitTest
                 return assets.Arts.PixelCheck(custom.AssetId, lx, ly);
             }
             default:
-                // GumpTiled / GumpNinePatch / None: solid fill within bounds.
+                // GumpNinePatch (resizepic window bg) / None: solid fill within
+                // bounds — a stretched nine-patch has no meaningful per-pixel
+                // mask, and a window background should capture clicks anywhere
+                // inside it (drag, right-click-close, click-capture).
                 return true;
         }
     }

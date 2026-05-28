@@ -38,10 +38,10 @@ internal readonly struct PickupPlugin : IPlugin
                 Res<Camera> camera,
                 Res<AssetsServer> assets,
                 ResMut<LeftPressLatch> latch,
-                Query<Data<ContainerItemUI, ComputedNode, Node, GlobalZIndex, UOCustomRender>> uiItemsQ,
-                Query<Data<ContainerWindow, ComputedNode, GlobalZIndex, UOCustomRender>> windowsQ,
-                Query<Data<PaperdollEquipUI, ComputedNode, Node, UOCustomRender>> equipUiQ,
-                Query<Data<PaperdollWindow, ComputedNode, GlobalZIndex, UOCustomRender>> pdWindowsQ,
+                Query<Data<ContainerItemUI, ComputedNode, Node, GlobalZIndex, UiCustom>> uiItemsQ,
+                Query<Data<ContainerWindow, ComputedNode, GlobalZIndex, UiCustom>> windowsQ,
+                Query<Data<PaperdollEquipUI, ComputedNode, Node, UiCustom>> equipUiQ,
+                Query<Data<PaperdollWindow, ComputedNode, GlobalZIndex, UiCustom>> pdWindowsQ,
                 Query<Data<GlobalZIndex>> zLookupQ) =>
             {
                 // Clear on release edge. NOTE: don't rely on `!IsPressed` to
@@ -71,7 +71,7 @@ internal readonly struct PickupPlugin : IPlugin
                 foreach (var (ent, _, computed, z, custom) in windowsQ)
                 {
                     var bb = computed.Ref;
-                    if (!UiHitTest.PixelHit(assets.Value, custom.Ref, bb, pos)) continue;
+                    if (!UiHitTest.PixelHit(assets.Value, custom.Ref.Render(), bb, pos)) continue;
                     if (z.Ref.Value > topWindowZ || (z.Ref.Value == topWindowZ && bb.PaintOrder >= topWindowOrder))
                     {
                         topWindowZ = z.Ref.Value;
@@ -82,7 +82,7 @@ internal readonly struct PickupPlugin : IPlugin
                 foreach (var (ent, _, computed, z, custom) in pdWindowsQ)
                 {
                     var bb = computed.Ref;
-                    if (!UiHitTest.PixelHit(assets.Value, custom.Ref, bb, pos)) continue;
+                    if (!UiHitTest.PixelHit(assets.Value, custom.Ref.Render(), bb, pos)) continue;
                     if (z.Ref.Value > topWindowZ || (z.Ref.Value == topWindowZ && bb.PaintOrder >= topWindowOrder))
                     {
                         topWindowZ = z.Ref.Value;
@@ -100,7 +100,7 @@ internal readonly struct PickupPlugin : IPlugin
                     if (node.Ref.Display == Display.None) continue;
                     if (topWindow != 0 && z.Ref.Value < topWindowZ) continue;
                     var bb = computed.Ref;
-                    if (!UiHitTest.PixelHit(assets.Value, custom.Ref, bb, pos)) continue;
+                    if (!UiHitTest.PixelHit(assets.Value, custom.Ref.Render(), bb, pos)) continue;
                     // Tiebreak among overlapping items by paint order (topmost-
                     // drawn wins), not ClayId — ClayId is an entity-id hash and
                     // flips across despawn/respawn (e.g. re-equipping over a
@@ -123,7 +123,7 @@ internal readonly struct PickupPlugin : IPlugin
                         : 0;
                     if (topWindow != 0 && z < topWindowZ) continue;
                     var bb = computed.Ref;
-                    if (!UiHitTest.PixelHit(assets.Value, custom.Ref, bb, pos)) continue;
+                    if (!UiHitTest.PixelHit(assets.Value, custom.Ref.Render(), bb, pos)) continue;
                     if (z > topItemZ || (z == topItemZ && bb.PaintOrder >= topItemOrder))
                     {
                         topItemZ = z;

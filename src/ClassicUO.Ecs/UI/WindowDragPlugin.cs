@@ -58,7 +58,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         Res<MouseContext> mouse,
         Res<SelectedEntity> selected,
         Res<AssetsServer> assets,
-        Query<Data<ComputedNode, GlobalZIndex, UOCustomRender>, Filter<With<UIMovable>, Without<ContainerWindow>>> q)
+        Query<Data<ComputedNode, GlobalZIndex, UiCustom>, Filter<With<UIMovable>, Without<ContainerWindow>>> q)
     {
         var pos = mouse.Value.Position;
         ulong topEnt = 0;
@@ -70,7 +70,7 @@ internal readonly struct WindowDragPlugin : IPlugin
             var bb = computed.Ref;
             // Pixel-perfect: a click on a transparent pixel of the window's bg
             // gump passes through (doesn't claim selection).
-            if (!UiHitTest.PixelHit(assets.Value, custom.Ref, bb, pos)) continue;
+            if (!UiHitTest.PixelHit(assets.Value, custom.Ref.Render(), bb, pos)) continue;
             if (z.Ref.Value > topZ || (z.Ref.Value == topZ && bb.PaintOrder >= topOrder))
             {
                 topZ = z.Ref.Value;
@@ -94,7 +94,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         Commands commands,
         Res<MouseContext> mouse,
         Res<AssetsServer> assets,
-        Query<Data<ComputedNode, UOCustomRender>, Filter<With<UIMovable>>> movableQuery,
+        Query<Data<ComputedNode, UiCustom>, Filter<With<UIMovable>>> movableQuery,
         Query<Data<ContainerWindow>> containerQuery,
         Query<Data<TinyEcs.Children>> childrenQ,
         EventWriter<ContainerClosedEvent> closedWriter,
@@ -109,7 +109,7 @@ internal readonly struct WindowDragPlugin : IPlugin
             var bb = computed.Ref;
             // Pixel-perfect: right-click on a transparent bg pixel passes
             // through instead of closing the window.
-            if (!UiHitTest.PixelHit(assets.Value, custom.Ref, bb, pos)) continue;
+            if (!UiHitTest.PixelHit(assets.Value, custom.Ref.Render(), bb, pos)) continue;
 
             if (bb.PaintOrder >= topOrder)
             {
@@ -163,7 +163,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         Res<DragGate> gate,
         Res<AssetsServer> assets,
         Local<DragAnchor> anchor,
-        Query<Data<Node, Interaction, ComputedNode, GlobalZIndex, UOCustomRender>, Filter<With<UIMovable>>> q,
+        Query<Data<Node, Interaction, ComputedNode, GlobalZIndex, UiCustom>, Filter<With<UIMovable>>> q,
         Query<Data<ContainerItemUI, ComputedNode, Node>> itemsQ)
     {
         // IsPressed is false on the press-once frame (oldState=Released), so
@@ -225,7 +225,7 @@ internal readonly struct WindowDragPlugin : IPlugin
                 // Pixel-perfect: clicking a transparent bg pixel (e.g. the
                 // paperdoll arch corners) misses the window so the drag never
                 // latches there.
-                if (!UiHitTest.PixelHit(assets.Value, custom.Ref, bb, pos)) continue;
+                if (!UiHitTest.PixelHit(assets.Value, custom.Ref.Render(), bb, pos)) continue;
                 if (z.Ref.Value > topZ || (z.Ref.Value == topZ && bb.PaintOrder >= topOrder))
                 {
                     topZ = z.Ref.Value;

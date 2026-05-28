@@ -20,10 +20,22 @@ internal readonly struct GuiPlugin : IPlugin
         // resources/stages and our render plugin reads from UiRenderCommands.
         app.AddPlugin(new UiPlugin
         {
-            TextMeasurer = new FontStashTextMeasurer(),
+            // UO bitmap font measurer. Reads dimensions from FontsLoader at
+            // measure time so Clay's layout pass + the eventual DrawText
+            // both agree on glyph metrics. UoFontRuntime.Fonts is null until
+            // Stage.Startup runs UoFontPlugin's wiring system — measurer
+            // returns a 0xfontSize fallback in that window.
+            TextMeasurer = new UoFontTextMeasurer(),
             LogicalSize = new System.Numerics.Vector2(1280, 720),
             MaxElements = 8192,
         });
+
+        app.AddPlugin<UoFontPlugin>();
+        // ScrollbarPlugin handles thumb dragging + track-click jumps on
+        // Scrollbar widgets. Mouse-wheel scrolling on Overflow.Scroll
+        // containers is already in Clay's input loop without this plugin —
+        // adding it just unlocks the visible scroll-thumb widget.
+        app.AddPlugin<TinyEcs.Bevy.UI.Widgets.ScrollbarPlugin>();
 
         app
             .AddResource(new FocusedInput())
@@ -34,7 +46,7 @@ internal readonly struct GuiPlugin : IPlugin
                 Commands commands,
                 Res<AssetsServer> assets,
                 ResMut<UiClayContext> clay,
-                Query<Data<UOCustomRender>> customQuery) =>
+                Query<Data<UiCustom>> customQuery) =>
             {
                 var assetsServer = assets.Value;
                 commands.InsertResource(new GumpBuilder(assetsServer));
@@ -58,7 +70,7 @@ internal readonly struct GuiPlugin : IPlugin
                         Position = new System.Numerics.Vector2(box.X, box.Y),
                         Size = new System.Numerics.Vector2(box.Width, box.Height),
                     };
-                    return UiHitTest.PixelHit(assetsServer, in customPtr.Ref, in bb,
+                    return UiHitTest.PixelHit(assetsServer, customPtr.Ref.Render(), in bb,
                         new Microsoft.Xna.Framework.Vector2(pos.X, pos.Y));
                 };
             });
@@ -75,12 +87,29 @@ internal readonly struct GuiPlugin : IPlugin
         Action<Res<GraphicsDevice>, Res<UoGame>, ResMut<UiSurface>> syncSurfaceFn = SyncSurface;
         Action<Res<MouseContext>, Res<UoGame>, ResMut<UiPointer>> syncPointerFn = SyncPointer;
         Action<Res<Time>, Res<MouseContext>, ResMut<UiClayContext>> syncDeltaAndScrollFn = SyncDeltaAndScroll;
-        Action<Query<Data<UOCustomRender, UOButton, Interaction>>> updateUOButtonsStateFn = UpdateUOButtonsState;
+        Action<Query<Data<UiCustom, UOButton, Interaction>>> updateUOButtonsStateFn = UpdateUOButtonsState;
         Action<Query<Data<Text, MaskedText>, Filter<Changed<MaskedText>>>> syncMaskedTextFn = SyncMaskedText;
 
         app.AddSystem(Stage.First, syncSurfaceFn);
         app.AddSystem(Stage.First, syncPointerFn);
         app.AddSystem(Stage.First, syncDeltaAndScrollFn);
+        // Wheel routing runs in Stage.First (before Stage.Update where
+        // CameraPlugin reads WheelConsumed) and after syncDeltaAndScrollFn.
+        // It locates the scrollable container under the cursor and scrolls it
+        // by mutating its ScrollPosition component (the supported sync path;
+        // see RouteWheelToScrollable), then consumes the wheel so it doesn't
+        // also zoom the camera.
+        // ResMut<MouseContext> because ConsumeWheel mutates the singleton —
+        // Res<T> would skip scheduler write-tracking + risk parallel run.
+        Action<
+            ResMut<MouseContext>,
+            ResMut<UiClayContext>,
+            Res<AssetsServer>,
+            Query<Data<ScrollPosition>>,
+            Query<Data<ComputedNode, UiCustom>, Filter<With<UIMovable>>>,
+            Query<Data<TinyEcs.Parent>>,
+            Query<Data<GlobalZIndex>>> routeWheelFn = RouteWheelToScrollable;
+        app.AddSystem(Stage.First, routeWheelFn);
         // Must run after InteractionSystem.PostLayout writes Hovered/Pressed,
         // before UiRenderStage reads UOCustomRender.AssetId.
         app.AddSystem(updateUOButtonsStateFn)
@@ -129,12 +158,117 @@ internal readonly struct GuiPlugin : IPlugin
         ctx.Value.EnableDragScrolling = false;
     }
 
+    // Route the wheel notch to the scrollable container under the cursor and
+    // scroll it; consume the wheel so it doesn't also zoom the camera.
+    //
+    // Scroll containers (the clip+scroll wrappers built by ServerGumpPlugin's
+    // SpawnWrappedText, journal, etc.) paint nothing of their own, so Clay
+    // emits no render command for them and InteractionSystem writes them no
+    // ComputedNode — an ECS Query<Data<ComputedNode, …>> can't find them. We
+    // hit-test them through Clay's own layout bbox (TryGetElementBoundingBox)
+    // and drive the scroll by mutating the ScrollPosition component, which
+    // LayoutSystem syncs into Clay (the supported, tested path — native wheel
+    // scroll via ScrollDelta doesn't reach floating containers here).
+    private static void RouteWheelToScrollable(
+        ResMut<MouseContext> mouseCtx,
+        ResMut<UiClayContext> ctx,
+        Res<AssetsServer> assets,
+        Query<Data<ScrollPosition>> scrollPosQ,
+        Query<Data<ComputedNode, UiCustom>, Filter<With<UIMovable>>> movableQ,
+        Query<Data<TinyEcs.Parent>> parentQ,
+        Query<Data<GlobalZIndex>> zQ)
+    {
+        var wheel = mouseCtx.Value.Wheel;
+        if (Math.Abs(wheel) < 0.001f) return;
+
+        var pos = mouseCtx.Value.Position;
+
+        // Topmost scrollable container under the cursor. Scroll containers
+        // paint nothing → no ComputedNode/PaintOrder to rank by, so resolve
+        // each candidate's stacking order from its owning window root's
+        // GlobalZIndex (only the root carries one — walk the parent chain).
+        // Highest z wins so the active (front) gump scrolls, not an
+        // overlapping one behind it. Uses last frame's Clay layout (one-frame
+        // lag invisible at 60fps).
+        ulong topScroll = 0;
+        float maxY = 0f;
+        int topZ = int.MinValue;
+        foreach (var (ent, _) in scrollPosQ)
+        {
+            var clayId = global::Clay.ElementId.HashNumber((uint)ent.Ref).Id;
+            var data = ctx.Value.GetScrollContainerData(clayId);
+            if (!data.Found || data.MaxScrollY <= 0f) continue;
+            if (!ctx.Value.TryGetElementBoundingBox(ent.Ref, out var bb)) continue;
+            if (pos.X < bb.X || pos.X > bb.X + bb.Width) continue;
+            if (pos.Y < bb.Y || pos.Y > bb.Y + bb.Height) continue;
+            var z = ResolveWindowZ(ent.Ref, parentQ, zQ);
+            if (z < topZ) continue;
+            topZ = z;
+            topScroll = ent.Ref;
+            maxY = data.MaxScrollY;
+        }
+
+        // No scrollable hit, but cursor over a movable gump bg (pixel-hit-
+        // tested so transparent sprite corners don't capture the wheel)?
+        // Still consume — the wheel shouldn't fall through a gump to the world.
+        bool overGump = topScroll != 0;
+        if (!overGump)
+        {
+            foreach (var (_, computed, custom) in movableQ)
+            {
+                if (!UiHitTest.PixelHit(assets.Value, custom.Ref.Render(), computed.Ref, pos)) continue;
+                overGump = true;
+                break;
+            }
+        }
+
+        if (!overGump) return;
+
+        // Kill Clay's native ScrollDelta (we drive scroll via the component)
+        // and mark the wheel consumed so CameraPlugin doesn't also zoom.
+        ctx.Value.ScrollDelta = System.Numerics.Vector2.Zero;
+        mouseCtx.Value.ConsumeWheel();
+
+        if (topScroll == 0) return;
+
+        var (_, sp) = scrollPosQ.Get(topScroll);
+        // wheel > 0 (up) → OffsetY decreases. ~90px/notch matches Clay's
+        // wheel*3 input factor × 30 internal multiplier.
+        sp.Ref.OffsetY = Math.Clamp(sp.Ref.OffsetY - wheel * 90f, 0f, maxY);
+    }
+
+    // Walk up the parent chain to the nearest GlobalZIndex (carried only by the
+    // window root) and return its value — the window's stacking order. Returns
+    // int.MinValue when no ancestor carries one (e.g. an orphan scroll area).
+    private static int ResolveWindowZ(
+        ulong entity,
+        Query<Data<TinyEcs.Parent>> parentQ,
+        Query<Data<GlobalZIndex>> zQ)
+    {
+        var cur = entity;
+        for (var guard = 0; guard < 64; guard++)
+        {
+            if (zQ.Contains(cur))
+            {
+                var (_, z) = zQ.Get(cur);
+                return z.Ref.Value;
+            }
+            if (!parentQ.Contains(cur)) break;
+            var (_, parent) = parentQ.Get(cur);
+            cur = parent.Ref.Id;
+        }
+        return int.MinValue;
+    }
+
     private static void UpdateUOButtonsState(
-        Query<Data<UOCustomRender, UOButton, Interaction>> query)
+        Query<Data<UiCustom, UOButton, Interaction>> query)
     {
         foreach (var (custom, button, interaction) in query)
         {
-            custom.Ref.AssetId = interaction.Ref switch
+            // Mutates the same UOCustomRender instance the Custom command
+            // captured (reference), so the renderer sees the new graphic this
+            // frame even though this runs post-layout.
+            custom.Ref.Render().AssetId = interaction.Ref switch
             {
                 Interaction.Pressed => button.Ref.Pressed,
                 Interaction.Hovered => button.Ref.Over,
@@ -189,9 +323,19 @@ internal enum UOCustomKind : byte
     Art,
     Land,
     Animation,
+    // Renders nothing, but still emits a Custom command so the element gets a
+    // ComputedNode and a solid (bbox) hit-test. Used as an invisible drag/close
+    // surface for gump roots that have no background sprite of their own.
+    None,
 }
 
-internal struct UOCustomRender
+// Reference type (NOT an ECS component) — the instance lives in UiCustom.Data
+// and is what flows into Clay's Custom render command (cmd.Custom.CustomData).
+// Because it's a reference, the post-layout button system can mutate AssetId on
+// the same object the command captured, so the renderer reads the current
+// graphic with no entity lookup and no one-frame lag. Hit-test / drag / pickup
+// read it off UiCustom.Data the same way.
+internal sealed class UOCustomRender
 {
     public UOCustomKind Kind;
     public uint AssetId;
@@ -200,6 +344,13 @@ internal struct UOCustomRender
     // to mirror legacy ItemGump.Draw's stacked-item visual (Amount > 1 &&
     // ItemData.IsStackable).
     public bool Stacked;
+}
+
+// The UO render payload lives in UiCustom.Data (a reference, so it threads into
+// Clay's Custom command and stays live). This pulls it back out.
+internal static class UiCustomRenderExtensions
+{
+    public static UOCustomRender Render(this in UiCustom c) => c.Data as UOCustomRender;
 }
 
 // Marker for the UO button widget. UpdateUOButtonsState rewrites the visible

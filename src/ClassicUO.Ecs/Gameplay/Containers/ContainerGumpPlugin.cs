@@ -165,8 +165,8 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         Res<MouseContext> mouse,
         Res<SelectedEntity> selected,
         Res<AssetsServer> assets,
-        Query<Data<ContainerItemUI, ComputedNode, UOCustomRender, Node, GlobalZIndex>> itemQuery,
-        Query<Data<ContainerWindow, ComputedNode, UOCustomRender, GlobalZIndex>> windowQuery)
+        Query<Data<ContainerItemUI, ComputedNode, UiCustom, Node, GlobalZIndex>> itemQuery,
+        Query<Data<ContainerWindow, ComputedNode, UiCustom, GlobalZIndex>> windowQuery)
     {
         var pos = mouse.Value.Position;
 
@@ -180,7 +180,7 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         foreach (var (ent, _, computed, custom, z) in windowQuery)
         {
             var bb = computed.Ref;
-            if (!UiHitTest.PixelHit(assets.Value, custom.Ref, bb, pos)) continue;
+            if (!UiHitTest.PixelHit(assets.Value, custom.Ref.Render(), bb, pos)) continue;
             if (z.Ref.Value > topWindowZ || (z.Ref.Value == topWindowZ && bb.ClayId >= topWindowClayId))
             {
                 topWindowZ = z.Ref.Value;
@@ -198,7 +198,7 @@ internal readonly struct ContainerGumpPlugin : IPlugin
             if (node.Ref.Display == Display.None) continue;
             if (topWindow != 0 && z.Ref.Value < topWindowZ) continue;
             var bb = computed.Ref;
-            if (!UiHitTest.PixelHit(assets.Value, custom.Ref, bb, pos)) continue;
+            if (!UiHitTest.PixelHit(assets.Value, custom.Ref.Render(), bb, pos)) continue;
             if (z.Ref.Value > topZ || (z.Ref.Value == topZ && bb.ClayId >= topClayId))
             {
                 topZ = z.Ref.Value;
@@ -212,7 +212,7 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         // as the hit-test so we don't need a second iteration or extra state.
         foreach (var (ent, link, _, render, _, _) in itemQuery)
         {
-            render.Ref.Hue = ent.Ref == topEnt ? link.Ref.HoverHue : link.Ref.OriginalHue;
+            render.Ref.Render().Hue = ent.Ref == topEnt ? link.Ref.HoverHue : link.Ref.OriginalHue;
         }
 
         if (topEnt == 0)
@@ -304,12 +304,14 @@ internal readonly struct ContainerGumpPlugin : IPlugin
                     Width = Val.Px(width),
                     Height = Val.Px(height),
                 })
-                .Insert(new UiCustom())
-                .Insert(new UOCustomRender
+                .Insert(new UiCustom
                 {
-                    Kind = UOCustomKind.Gump,
-                    AssetId = graphic,
-                    Hue = hueVec,
+                    Data = new UOCustomRender
+                    {
+                        Kind = UOCustomKind.Gump,
+                        AssetId = graphic,
+                        Hue = hueVec,
+                    }
                 })
                 .Insert(Interaction.None)
                 .Insert(new FloatingWindowState
@@ -383,12 +385,14 @@ internal readonly struct ContainerGumpPlugin : IPlugin
                         Left = Val.Px(45f * scale),
                         Top = Val.Px(30f * scale),
                     })
-                    .Insert(new UiCustom())
-                    .Insert(new UOCustomRender
+                    .Insert(new UiCustom
                     {
-                        Kind = UOCustomKind.Gump,
-                        AssetId = 0x0045,
-                        Hue = Vector3.UnitZ,
+                        Data = new UOCustomRender
+                        {
+                            Kind = UOCustomKind.Gump,
+                            AssetId = 0x0045,
+                            Hue = Vector3.UnitZ,
+                        }
                     })
                     .Insert(new ContainerEyeTag { NextTickMs = 0 });
                 ui.AddChild(eye);
@@ -505,13 +509,15 @@ internal readonly struct ContainerGumpPlugin : IPlugin
                     Width = Val.Px(spriteW),
                     Height = Val.Px(spriteH),
                 })
-                .Insert(new UiCustom())
-                .Insert(new UOCustomRender
+                .Insert(new UiCustom
                 {
-                    Kind = entry.IsBoard ? UOCustomKind.Gump : UOCustomKind.Art,
-                    AssetId = drawGraphic,
-                    Hue = origHue,
-                    Stacked = stacked,
+                    Data = new UOCustomRender
+                    {
+                        Kind = entry.IsBoard ? UOCustomKind.Gump : UOCustomKind.Art,
+                        AssetId = drawGraphic,
+                        Hue = origHue,
+                        Stacked = stacked,
+                    }
                 })
                 .Insert(Interaction.None)
                 .Insert(new ContainerItemUI
@@ -545,12 +551,13 @@ internal readonly struct ContainerGumpPlugin : IPlugin
 
     private static void AnimateCorpseEye(
         Res<Time> time,
-        Query<Data<ContainerEyeTag, UOCustomRender>> q)
+        Query<Data<ContainerEyeTag, UiCustom>> q)
     {
         foreach (var (tag, render) in q)
         {
             if (time.Value.Total < tag.Ref.NextTickMs) continue;
-            render.Ref.AssetId = render.Ref.AssetId == 0x0045 ? 0x0046u : 0x0045u;
+            var r = render.Ref.Render();
+            r.AssetId = r.AssetId == 0x0045 ? 0x0046u : 0x0045u;
             tag.Ref.NextTickMs = time.Value.Total + 750f;
         }
     }
@@ -559,8 +566,8 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         Res<MouseContext> mouse,
         Res<AssetsServer> assets,
         Query<Data<MinimizeHitbox, Interaction>> hitboxQuery,
-        Query<Data<ContainerGumpTag, UOCustomRender, Node>> containerQuery,
-        Query<Data<Node, UOCustomRender>> childNodes,
+        Query<Data<ContainerGumpTag, UiCustom, Node>> containerQuery,
+        Query<Data<Node, UiCustom>> childNodes,
         Query<Data<TinyEcs.Children>> childrenQ)
     {
         if (!mouse.Value.IsPressedOnce(MouseButtonType.Left)) return;
@@ -577,7 +584,7 @@ internal readonly struct ContainerGumpPlugin : IPlugin
                 ? tag.Ref.IconizedGraphic
                 : tag.Ref.Graphic;
 
-            render.Ref.AssetId = newGraphic;
+            render.Ref.Render().AssetId = newGraphic;
             tag.Ref.IsMinimized = willMinimize;
 
             ref readonly var gi = ref assets.Value.Gumps.GetGump(newGraphic);

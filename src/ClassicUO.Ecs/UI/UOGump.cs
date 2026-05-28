@@ -24,6 +24,9 @@ internal struct UOGumpBundle : IBundle
     public ushort BackgroundId;
     public Vector3 Hue;
     public int ZOrder;
+    // Kind selects the background sprite shape. Server gumps (resizepic) use
+    // GumpNinePatch — single-sprite paperdoll/container windows use Gump.
+    public UOCustomKind Kind;
 
     public readonly void Insert(EntityCommands entity)
     {
@@ -37,12 +40,14 @@ internal struct UOGumpBundle : IBundle
                 Width = Val.Px(Size.X),
                 Height = Val.Px(Size.Y),
             })
-            .Insert(new UiCustom())
-            .Insert(new UOCustomRender
+            .Insert(new UiCustom
             {
-                Kind = UOCustomKind.Gump,
-                AssetId = BackgroundId,
-                Hue = Hue,
+                Data = new UOCustomRender
+                {
+                    Kind = Kind == default ? UOCustomKind.Gump : Kind,
+                    AssetId = BackgroundId,
+                    Hue = Hue,
+                }
             })
             .Insert(Interaction.None)
             .Insert<UOGump>()

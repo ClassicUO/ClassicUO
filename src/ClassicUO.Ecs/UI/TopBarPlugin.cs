@@ -29,7 +29,6 @@ namespace ClassicUO.Ecs;
 
 internal readonly struct TopBarPlugin : IPlugin
 {
-    private static readonly object CustomMarker = new();
 
     public void Build(App app)
     {
@@ -129,12 +128,14 @@ internal readonly struct TopBarPlugin : IPlugin
                 Width = Val.Px(totalWidth),
                 Height = Val.Px(BarHeight),
             })
-            .Insert(new UiCustom { Data = CustomMarker })
-            .Insert(new UOCustomRender
+            .Insert(new UiCustom
             {
-                Kind = UOCustomKind.GumpNinePatch,
-                AssetId = 0x13BE,
-                Hue = Vector3.UnitZ,
+                Data = new UOCustomRender
+                {
+                    Kind = UOCustomKind.GumpNinePatch,
+                    AssetId = 0x13BE,
+                    Hue = Vector3.UnitZ,
+                }
             });
         commands.AddChild(root.Id, bg.Id);
 
@@ -149,12 +150,14 @@ internal readonly struct TopBarPlugin : IPlugin
                 Width = Val.Px(15),
                 Height = Val.Px(20),
             })
-            .Insert(new UiCustom { Data = CustomMarker })
-            .Insert(new UOCustomRender
+            .Insert(new UiCustom
             {
-                Kind = UOCustomKind.Gump,
-                AssetId = 0x15A4,
-                Hue = Vector3.UnitZ,
+                Data = new UOCustomRender
+                {
+                    Kind = UOCustomKind.Gump,
+                    AssetId = 0x15A4,
+                    Hue = Vector3.UnitZ,
+                }
             })
             .Insert(Interaction.None);
         commands.AddChild(root.Id, minBtn.Id);
@@ -179,12 +182,14 @@ internal readonly struct TopBarPlugin : IPlugin
                     Width = Val.Px(w),
                     Height = Val.Px(h),
                 })
-                .Insert(new UiCustom { Data = CustomMarker })
-                .Insert(new UOCustomRender
+                .Insert(new UiCustom
                 {
-                    Kind = UOCustomKind.Gump,
-                    AssetId = gumpId,
-                    Hue = Vector3.UnitZ,
+                    Data = new UOCustomRender
+                    {
+                        Kind = UOCustomKind.Gump,
+                        AssetId = gumpId,
+                        Hue = Vector3.UnitZ,
+                    }
                 })
                 .Insert(Interaction.None);
 

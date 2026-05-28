@@ -62,12 +62,14 @@ internal sealed class GumpBuilder
                 Width = Val.Px(size.X),
                 Height = Val.Px(size.Y),
             })
-            .Insert(new UiCustom())
-            .Insert(new UOCustomRender
+            .Insert(new UiCustom
             {
-                Kind = UOCustomKind.Gump,
-                AssetId = id,
-                Hue = hue,
+                Data = new UOCustomRender
+                {
+                    Kind = UOCustomKind.Gump,
+                    AssetId = id,
+                    Hue = hue,
+                }
             })
             .Insert(Interaction.None)
             .Insert<UIMovable>()
@@ -100,12 +102,14 @@ internal sealed class GumpBuilder
 
         return commands.Spawn()
             .Insert(node)
-            .Insert(new UiCustom())
-            .Insert(new UOCustomRender
+            .Insert(new UiCustom
             {
-                Kind = UOCustomKind.Gump,
-                AssetId = id,
-                Hue = hue,
+                Data = new UOCustomRender
+                {
+                    Kind = UOCustomKind.Gump,
+                    AssetId = id,
+                    Hue = hue,
+                }
             });
     }
 
@@ -116,12 +120,14 @@ internal sealed class GumpBuilder
         var node = MakeFloatingNode(position, size);
         return commands.Spawn()
             .Insert(node)
-            .Insert(new UiCustom())
-            .Insert(new UOCustomRender
+            .Insert(new UiCustom
             {
-                Kind = UOCustomKind.GumpTiled,
-                AssetId = id,
-                Hue = hue,
+                Data = new UOCustomRender
+                {
+                    Kind = UOCustomKind.GumpTiled,
+                    AssetId = id,
+                    Hue = hue,
+                }
             });
     }
 
@@ -135,12 +141,14 @@ internal sealed class GumpBuilder
 
         return commands.Spawn()
             .Insert(node)
-            .Insert(new UiCustom())
-            .Insert(new UOCustomRender
+            .Insert(new UiCustom
             {
-                Kind = UOCustomKind.GumpNinePatch,
-                AssetId = id,
-                Hue = hue,
+                Data = new UOCustomRender
+                {
+                    Kind = UOCustomKind.GumpNinePatch,
+                    AssetId = id,
+                    Hue = hue,
+                }
             });
     }
 
@@ -153,12 +161,14 @@ internal sealed class GumpBuilder
 
         return commands.Spawn()
             .Insert(node)
-            .Insert(new UiCustom())
-            .Insert(new UOCustomRender
+            .Insert(new UiCustom
             {
-                Kind = UOCustomKind.Art,
-                AssetId = id,
-                Hue = hue,
+                Data = new UOCustomRender
+                {
+                    Kind = UOCustomKind.Art,
+                    AssetId = id,
+                    Hue = hue,
+                }
             });
     }
 
@@ -170,12 +180,14 @@ internal sealed class GumpBuilder
         var node = MakeFloatingNode(position, size);
         return commands.Spawn()
             .Insert(node)
-            .Insert(new UiCustom())
-            .Insert(new UOCustomRender
+            .Insert(new UiCustom
             {
-                Kind = UOCustomKind.Art,
-                AssetId = id,
-                Hue = hue,
+                Data = new UOCustomRender
+                {
+                    Kind = UOCustomKind.Art,
+                    AssetId = id,
+                    Hue = hue,
+                }
             });
     }
 
