@@ -28,53 +28,52 @@ internal readonly struct LoginPacketsPlugin : IPlugin
                 packetsMap.Value.Register<OnCharacterListPacket_0xA9>();
             })
 
-            .AddSystem(
-                (
-                    EventReader<IPacket> packets,
-                    Res<Settings> settings,
-                    Res<NetClient> network,
-                    Res<UOFileManager> fileManager,
-                    ResMut<GameContext> gameCtx,
-                    ResMut<NextState<GameState>> gameState,
-                    EventWriter<ServerSelectionInfoEvent> serverWriter,
-                    EventWriter<CharacterSelectionInfoEvent> characterWriter,
-                    EventWriter<LoginErrorsInfoEvent> loginErrorWriter,
-                    EventWriter<HostMessage> hostMsgsWriter
-                ) =>
-                {
-                    foreach (var packet in packets.Read())
-                    {
-                        switch (packet)
-                        {
-                            case OnServerListPacket_0xA8 serverList:
-                                HandleServerListPacket(serverList, gameState, serverWriter, hostMsgsWriter);
-                                break;
+            ;
 
-                            case OnCharacterListPacket_0xA9 characterList:
-                                HandleCharacterListPacket(characterList, gameCtx, gameState, characterWriter, hostMsgsWriter);
-                                break;
+        // Per-packet observers — fire on the typed PacketReceived<T> trigger
+        // emitted by NetworkPlugin's typed dispatch. No EventReader<IPacket>
+        // scan, no RunIf gate, no boxed type-test cascade.
+        app.AddObserver((
+            On<PacketReceived<OnServerListPacket_0xA8>> trig,
+            ResMut<NextState<GameState>> gameState,
+            EventWriter<ServerSelectionInfoEvent> serverWriter,
+            EventWriter<HostMessage> hostMsgsWriter)
+            => HandleServerListPacket(trig.Event.Packet, gameState, serverWriter, hostMsgsWriter));
 
-                            case OnServerRelayPacket_0x8C serverRelay:
-                                HandleServerRelayPacket(serverRelay, settings, network);
-                                break;
+        app.AddObserver((
+            On<PacketReceived<OnCharacterListPacket_0xA9>> trig,
+            ResMut<GameContext> gameCtx,
+            ResMut<NextState<GameState>> gameState,
+            EventWriter<CharacterSelectionInfoEvent> characterWriter,
+            EventWriter<HostMessage> hostMsgsWriter)
+            => HandleCharacterListPacket(trig.Event.Packet, gameCtx, gameState, characterWriter, hostMsgsWriter));
 
-                            case OnLoginErrorPacket_0x82 loginError82:
-                                HandleLoginErrorPacket(packet.Id, loginError82, fileManager, gameState, loginErrorWriter);
-                                break;
+        app.AddObserver((
+            On<PacketReceived<OnServerRelayPacket_0x8C>> trig,
+            Res<Settings> settings,
+            Res<NetClient> network)
+            => HandleServerRelayPacket(trig.Event.Packet, settings, network));
 
-                            case OnLoginErrorPacket_0x85 loginError85:
-                                HandleLoginErrorPacket(packet.Id, loginError85, fileManager, gameState, loginErrorWriter);
-                                break;
+        app.AddObserver((
+            On<PacketReceived<OnLoginErrorPacket_0x82>> trig,
+            Res<UOFileManager> fileManager,
+            ResMut<NextState<GameState>> gameState,
+            EventWriter<LoginErrorsInfoEvent> loginErrorWriter)
+            => HandleLoginErrorPacket(trig.Event.Packet.Id, trig.Event.Packet, fileManager, gameState, loginErrorWriter));
 
-                            case OnLoginErrorPacket_0x53 loginError53:
-                                HandleLoginErrorPacket(packet.Id, loginError53, fileManager, gameState, loginErrorWriter);
-                                break;
-                        }
-                    }
-                })
-            .InStage(Stage.Update)
-            .RunIf((EventReader<IPacket> packets) => packets.HasEvents)
-            .Build();
+        app.AddObserver((
+            On<PacketReceived<OnLoginErrorPacket_0x85>> trig,
+            Res<UOFileManager> fileManager,
+            ResMut<NextState<GameState>> gameState,
+            EventWriter<LoginErrorsInfoEvent> loginErrorWriter)
+            => HandleLoginErrorPacket(trig.Event.Packet.Id, trig.Event.Packet, fileManager, gameState, loginErrorWriter));
+
+        app.AddObserver((
+            On<PacketReceived<OnLoginErrorPacket_0x53>> trig,
+            Res<UOFileManager> fileManager,
+            ResMut<NextState<GameState>> gameState,
+            EventWriter<LoginErrorsInfoEvent> loginErrorWriter)
+            => HandleLoginErrorPacket(trig.Event.Packet.Id, trig.Event.Packet, fileManager, gameState, loginErrorWriter));
     }
 
     static void HandleServerListPacket(

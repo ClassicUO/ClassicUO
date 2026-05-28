@@ -54,8 +54,9 @@ internal sealed class PacketsMap
         };
     }
 
-    // Register both boxed (Add) and typed (AddTyped) dispatch so consumers can
-    // pick either EventReader<IPacket> or On<PacketReceived<T>> observers.
+    // Register both boxed (Add) and typed (AddTyped) dispatch. Host gameplay
+    // code reads via On<PacketReceived<T>> observers; the boxed IPacket queue
+    // exists for mods and aggregate bridges.
     public void Register<T>() where T : struct, IPacket
     {
         Add<T>();
@@ -355,9 +356,9 @@ readonly struct NetworkPlugin : IPlugin
             var payload = sp.Slice(packetHeaderOffset, packetLen - packetHeaderOffset);
 
             // Dispatch both typed (observer trigger) and boxed (EventWriter<IPacket>)
-            // when both are registered for the same id — some packets are consumed
-            // by observers in InGamePacketsPlugin AND by EventReader<IPacket> in
-            // PickupPlugin/PaperdollPlugin/etc.
+            // when both are registered for the same id. Host gameplay code now uses
+            // observers exclusively; the boxed queue is kept around for mods and
+            // future bridges that want a single IPacket stream.
             packetsMap.Value.TryDispatch(packetId, commands, payload);
 
             if (packetsMap.Value.TryGetValue(packetId, out var fn))

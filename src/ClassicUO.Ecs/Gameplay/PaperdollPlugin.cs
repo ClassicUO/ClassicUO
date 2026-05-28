@@ -95,18 +95,31 @@ internal readonly struct PaperdollPlugin : IPlugin
 
     public void Build(App app)
     {
-        var spawnFn = SpawnOnOpenPaperdoll;
         var disposeFn = DisposeOnLogout;
 
-        app
-            .AddSystem(spawnFn)
-                .InStage(Stage.Update)
-                .RunIf((EventReader<IPacket> r) => r.HasEvents)
-                .Build()
+        app.AddSystem(disposeFn)
+            .OnExit(GameState.GameScreen)
+            .Build();
 
-            .AddSystem(disposeFn)
-                .OnExit(GameState.GameScreen)
-                .Build();
+        // Backpack double-click. Bevy.UI synthesizes UiDoubleClick from
+        // two UiClick events within UiClayContext.DoubleClickWindow on the
+        // same entity; this observer just routes that to Send_DoubleClick
+        // on the backpack's NetworkSerial (carried on the sprite via
+        // PaperdollBackpackUI).
+        app.AddObserver((
+            On<UiDoubleClick> trig,
+            Res<NetClient> net,
+            Query<Data<PaperdollBackpackUI>> bpQ) =>
+        {
+            if (!bpQ.Contains(trig.EntityId)) return;
+            var (_, bp) = bpQ.Get(trig.EntityId);
+            net.Value.Send_DoubleClick(bp.Ref.ItemSerial);
+        });
+
+        // 0x88 (open paperdoll) -> spawn (or focus existing) window. Observer
+        // on the typed packet trigger; no polling, no EventReader<IPacket>
+        // scan per frame.
+        app.AddObserver<On<PacketReceived<OnOpenPaperdollPacket_0x88>>, Commands, PaperdollSpawnParams>(SpawnOnOpenPaperdoll);
 
         // Event-driven refresh: rebuild body+overlays only when a mobile's
         // EquipmentSlots is actually (re)inserted. Packet handlers dirty-check
@@ -166,45 +179,30 @@ internal readonly struct PaperdollPlugin : IPlugin
     }
 
     private static void SpawnOnOpenPaperdoll(
+        On<PacketReceived<OnOpenPaperdollPacket_0x88>> trig,
         Commands commands,
-        EventReader<IPacket> packets,
-        Res<NetworkEntitiesMap> entitiesMap,
-        Res<AssetsServer> assets,
-        Res<GumpBuilder> builder,
-        Res<GameContext> gameCtx,
-        Res<UOFileManager> fileManager,
-        Res<UiZCounter> zCounter,
-        Query<Data<PaperdollWindow>> existingQ,
-        Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> mobileGraphicQ,
-        Query<Data<EquipmentSlots>> equipQ,
-        Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> itemQ,
-        Query<Data<NetworkSerial>> itemSerialQ,
-        Query<Data<ServerFlags>> flagsQ)
+        PaperdollSpawnParams p)
     {
-        var tileData = fileManager.Value.TileData.StaticData;
+        var packet = trig.Event.Packet;
 
-        foreach (var packet in packets.Read())
+        // Already open for this serial -> focus instead of duplicating.
+        ulong existing = 0;
+        foreach (var (ent, w) in p.ExistingQ)
         {
-            if (packet is not OnOpenPaperdollPacket_0x88 p) continue;
-
-            // Already open for this serial -> focus instead of duplicating.
-            ulong existing = 0;
-            foreach (var (ent, w) in existingQ)
-            {
-                if (w.Ref.Serial == p.Serial) { existing = ent.Ref; break; }
-            }
-            if (existing != 0)
-            {
-                var newZ = zCounter.Value.Bump();
-                commands.Entity(existing).Insert(new GlobalZIndex(newZ));
-                continue;
-            }
-
-            BuildWindow(commands, assets.Value, builder.Value, gameCtx.Value, tileData,
-                entitiesMap.Value, mobileGraphicQ, equipQ, itemQ, itemSerialQ, flagsQ,
-                zCounter.Value, existingQ.Count(),
-                p.Serial, p.Title, p.Flags);
+            if (w.Ref.Serial == packet.Serial) { existing = ent.Ref; break; }
         }
+        if (existing != 0)
+        {
+            var newZ = p.ZCounter.Value.Bump();
+            commands.Entity(existing).Insert(new GlobalZIndex(newZ));
+            return;
+        }
+
+        var tileData = p.Files.Value.TileData.StaticData;
+        BuildWindow(commands, p.Assets.Value, p.Builder.Value, p.GameCtx.Value, tileData,
+            p.Entities.Value, p.GraphicHueQ, p.EquipQ, p.GraphicHueQ, p.SerialQ, p.FlagsQ,
+            p.ZCounter.Value, p.ExistingQ.Count(),
+            packet.Serial, packet.Title, packet.Flags);
     }
 
     // Observer: a mobile's EquipmentSlots was (re)inserted. Rebuild the
@@ -625,10 +623,25 @@ internal readonly struct PaperdollPlugin : IPlugin
                     var bpHue = bh.IsValid() ? ToShaderHue((ushort)(bh.Ref.Value & 0x3FFF)) : Vector3.UnitZ;
                     // Body sprite lives at (8, 19) absolute; backpack offsets
                     // from there (-bx, 0). Backpack is NOT liftable in main
-                    // (GumpPicEquipment with no CanLift — it's a double-click-to-
-                    // open target), so no PaperdollEquipUI: render only.
+                    // (GumpPicEquipment with no CanLift), but IS double-click-
+                    // to-open: synthesize dclick via UiClick + timestamp gap
+                    // (Bevy.UI has no UiDoubleClick). 350ms matches main's
+                    // Mouse.MOUSE_DELAY_DOUBLE_CLICK. Interaction.None on the
+                    // sprite so UiClick is routed here; drag on body area
+                    // still works because UIMovable lives on root (drag latch
+                    // reads root's Interaction, not children's).
                     var bpPic = builder.AddGump(commands, bpGump, bpHue, new Vector2(8 - bx, 19))
                         .Insert(new PaperdollBodyChild { WindowEntity = rootId });
+                    if (itemSerialQ.Contains(backpackEnt))
+                    {
+                        var (_, bpNs) = itemSerialQ.Get(backpackEnt);
+                        bpPic.Insert(Interaction.None)
+                             .Insert(new PaperdollBackpackUI
+                             {
+                                 ItemSerial = bpNs.Ref.Value,
+                                 MobileSerial = serial,
+                             });
+                    }
                     commands.AddChild(rootId, bpPic.Id, childIdx++);
                 }
             }
@@ -702,6 +715,15 @@ internal struct PaperdollWarModeButton
     public uint MobileSerial;
 }
 
+// Carried by the backpack overlay sprite on a paperdoll. The global
+// UiClick observer matches this to know which clicked sprite is a
+// double-click target + which item to Send_DoubleClick on.
+internal struct PaperdollBackpackUI
+{
+    public uint ItemSerial;
+    public uint MobileSerial;
+}
+
 // Carried by each equipment overlay sprite that represents a real equipped
 // item (clothing/armor/backpack/etc). PickupPlugin uses this to (a) hit-
 // test paperdoll drags on press and (b) resolve to the backing game
@@ -745,5 +767,39 @@ internal sealed class PaperdollRebuildParams : CompositeSystemParam
         BodyChildQ  = Add(new Query<Data<PaperdollBodyChild>>());
         GraphicHueQ = Add(new Query<Data<Graphic, Hue>, Filter<Optional<Hue>>>());
         EquipQ      = Add(new Query<Data<EquipmentSlots>>());
+    }
+}
+
+// Composite param for the 0x88 (open paperdoll) observer. Same resources
+// as the rebuild path plus UiZCounter (for focus bump) + FlagsQ (initial
+// peace/war button graphic). GraphicHueQ is reused for both mobile body
+// graphic and item icon graphics — same component signature.
+internal sealed class PaperdollSpawnParams : CompositeSystemParam
+{
+    public readonly Res<NetworkEntitiesMap> Entities;
+    public readonly Res<AssetsServer> Assets;
+    public readonly Res<GumpBuilder> Builder;
+    public readonly Res<GameContext> GameCtx;
+    public readonly Res<UOFileManager> Files;
+    public readonly Res<UiZCounter> ZCounter;
+    public readonly Query<Data<PaperdollWindow>> ExistingQ;
+    public readonly Query<Data<NetworkSerial>> SerialQ;
+    public readonly Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> GraphicHueQ;
+    public readonly Query<Data<EquipmentSlots>> EquipQ;
+    public readonly Query<Data<ServerFlags>> FlagsQ;
+
+    public PaperdollSpawnParams()
+    {
+        Entities    = Add(new Res<NetworkEntitiesMap>());
+        Assets      = Add(new Res<AssetsServer>());
+        Builder     = Add(new Res<GumpBuilder>());
+        GameCtx     = Add(new Res<GameContext>());
+        Files       = Add(new Res<UOFileManager>());
+        ZCounter    = Add(new Res<UiZCounter>());
+        ExistingQ   = Add(new Query<Data<PaperdollWindow>>());
+        SerialQ     = Add(new Query<Data<NetworkSerial>>());
+        GraphicHueQ = Add(new Query<Data<Graphic, Hue>, Filter<Optional<Hue>>>());
+        EquipQ      = Add(new Query<Data<EquipmentSlots>>());
+        FlagsQ      = Add(new Query<Data<ServerFlags>>());
     }
 }

@@ -23,19 +23,55 @@ internal readonly struct ContainersPlugin : IPlugin
 {
     public void Build(App app)
     {
-        var processPacketsFn = ProcessContainerPackets;
         var closeContainersTooFarFromPlayerFn = CloseContainersTooFarFromPlayer;
 
-        app
-            .AddSystem(processPacketsFn)
-                .InStage(Stage.Update)
-                .RunIf((EventReader<IPacket> reader) => reader.HasEvents)
-                .Build()
+        app.AddSystem(closeContainersTooFarFromPlayerFn)
+            .InStage(Stage.Update)
+            .RunIf((Query<Data<WorldPosition>, With<Player>> queryPlayer) => queryPlayer.Count() > 0)
+            .Build();
 
-            .AddSystem(closeContainersTooFarFromPlayerFn)
-                .InStage(Stage.Update)
-                .RunIf((Query<Data<WorldPosition>, With<Player>> queryPlayer) => queryPlayer.Count() > 0)
-                .Build();
+        // Per-packet observers replace the boxed EventReader<IPacket> scan.
+        app.AddObserver((
+            On<PacketReceived<OnOpenContainerPacket_0x24>> trig,
+            EventWriter<ContainerOpenedEvent> openedWriter,
+            EventWriter<HostMessage> hostMsgs) =>
+        {
+            var open = trig.Event.Packet;
+            openedWriter.Send(new(open.Serial, open.Graphic));
+            hostMsgs.Send(new HostMessage.ContainerOpened(open.Serial, open.Graphic));
+        });
+
+        app.AddObserver((
+            On<PacketReceived<OnUpdateContainerPacket_0x25_Pre6017>> trig,
+            Commands commands,
+            Res<NetworkEntitiesMap> entitiesMap,
+            EventWriter<ContainerUpdateEvent> writer,
+            EventWriter<HostMessage> hostMsgs)
+            => HandleUpdateContainer(trig.Event.Packet, commands, entitiesMap, writer, hostMsgs));
+
+        app.AddObserver((
+            On<PacketReceived<OnUpdateContainerPacket_0x25_Post6017>> trig,
+            Commands commands,
+            Res<NetworkEntitiesMap> entitiesMap,
+            EventWriter<ContainerUpdateEvent> writer,
+            EventWriter<HostMessage> hostMsgs)
+            => HandleUpdateContainer(trig.Event.Packet, commands, entitiesMap, writer, hostMsgs));
+
+        app.AddObserver((
+            On<PacketReceived<OnUpdateContainerItemsPacket_0x3C_Pre6017>> trig,
+            Commands commands,
+            Res<NetworkEntitiesMap> entitiesMap,
+            EventWriter<ContainerUpdateEvent> writer,
+            EventWriter<HostMessage> hostMsgs)
+            => HandleUpdateContainerItems(trig.Event.Packet, commands, entitiesMap, writer, hostMsgs));
+
+        app.AddObserver((
+            On<PacketReceived<OnUpdateContainerItemsPacket_0x3C_Post6017>> trig,
+            Commands commands,
+            Res<NetworkEntitiesMap> entitiesMap,
+            EventWriter<ContainerUpdateEvent> writer,
+            EventWriter<HostMessage> hostMsgs)
+            => HandleUpdateContainerItems(trig.Event.Packet, commands, entitiesMap, writer, hostMsgs));
     }
 
     private static void CloseContainersTooFarFromPlayer(
@@ -87,42 +123,6 @@ internal readonly struct ContainersPlugin : IPlugin
             cur = pid;
         }
         return cur;
-    }
-
-    private static void ProcessContainerPackets(
-        Commands commands,
-        Res<NetworkEntitiesMap> entitiesMap,
-        EventWriter<ContainerUpdateEvent> writer,
-        EventWriter<ContainerOpenedEvent> openedWriter,
-        EventWriter<HostMessage> hostMsgs,
-        EventReader<IPacket> packets)
-    {
-        foreach (var packet in packets.Read())
-        {
-            switch (packet)
-            {
-                case OnOpenContainerPacket_0x24 open:
-                    openedWriter.Send(new(open.Serial, open.Graphic));
-                    hostMsgs.Send(new HostMessage.ContainerOpened(open.Serial, open.Graphic));
-                    break;
-
-                case OnUpdateContainerPacket_0x25_Pre6017 updatePre:
-                    HandleUpdateContainer(updatePre, commands, entitiesMap, writer, hostMsgs);
-                    break;
-
-                case OnUpdateContainerPacket_0x25_Post6017 updatePost:
-                    HandleUpdateContainer(updatePost, commands, entitiesMap, writer, hostMsgs);
-                    break;
-
-                case OnUpdateContainerItemsPacket_0x3C_Pre6017 updateItemsPre:
-                    HandleUpdateContainerItems(updateItemsPre, commands, entitiesMap, writer, hostMsgs);
-                    break;
-
-                case OnUpdateContainerItemsPacket_0x3C_Post6017 updateItemsPost:
-                    HandleUpdateContainerItems(updateItemsPost, commands, entitiesMap, writer, hostMsgs);
-                    break;
-            }
-        }
     }
 
     private static void HandleUpdateContainer(

@@ -58,8 +58,6 @@ readonly struct PlayerMovementPlugin : IPlugin
         var enqueuePlayerStepsFn = EnqueuePlayerSteps;
         var parseAcceptedStepsFn = ParseAcceptedSteps;
         var parseDeniedStepsFn = ParseDeniedSteps;
-        var processMovementPacketsFn = ProcessMovementPackets;
-
 
         app
             .AddResource(new PlayerStepsContext())
@@ -69,11 +67,6 @@ readonly struct PlayerMovementPlugin : IPlugin
                 playerRequestedSteps.Value = new PlayerStepsContext();
             })
             .OnEnter(GameState.GameScreen)
-            .Build()
-
-            .AddSystem(processMovementPacketsFn)
-            .InStage(Stage.Update)
-            .RunIf((EventReader<IPacket> packets) => packets.HasEvents)
             .Build()
 
             .AddSystem(enqueuePlayerStepsFn)
@@ -123,39 +116,36 @@ readonly struct PlayerMovementPlugin : IPlugin
             .InStage(Stage.Update)
             .RunIf((EventReader<RejectedStep> responses) => responses.HasEvents)
             .Build();
-    }
 
-
-    static void ProcessMovementPackets(
-        EventReader<IPacket> packets,
-        EventWriter<AcceptedStep> acceptedSteps,
-        EventWriter<RejectedStep> rejectedSteps
-    )
-    {
-        foreach (var packet in packets.Read())
+        // Per-packet observers replace the boxed EventReader<IPacket> scan.
+        // 0x21 deny / 0x22 confirm fan into the dedicated event writers so
+        // the accept/reject systems above still consume them in-order.
+        app.AddObserver((
+            On<PacketReceived<OnDenyWalkPacket_0x21>> trig,
+            EventWriter<RejectedStep> rejectedSteps) =>
         {
-            switch (packet)
+            var deny = trig.Event.Packet;
+            rejectedSteps.Send(new RejectedStep
             {
-                case OnDenyWalkPacket_0x21 deny:
-                    rejectedSteps.Send(new RejectedStep
-                    {
-                        Sequence = deny.Sequence,
-                        Direction = deny.Direction,
-                        X = deny.X,
-                        Y = deny.Y,
-                        Z = deny.Z
-                    });
-                    break;
+                Sequence = deny.Sequence,
+                Direction = deny.Direction,
+                X = deny.X,
+                Y = deny.Y,
+                Z = deny.Z
+            });
+        });
 
-                case OnConfirmWalkPacket_0x22 confirm:
-                    acceptedSteps.Send(new AcceptedStep
-                    {
-                        Sequence = confirm.Sequence,
-                        Notoriety = confirm.Notoriety
-                    });
-                    break;
-            }
-        }
+        app.AddObserver((
+            On<PacketReceived<OnConfirmWalkPacket_0x22>> trig,
+            EventWriter<AcceptedStep> acceptedSteps) =>
+        {
+            var confirm = trig.Event.Packet;
+            acceptedSteps.Send(new AcceptedStep
+            {
+                Sequence = confirm.Sequence,
+                Notoriety = confirm.Notoriety
+            });
+        });
     }
 
     static void EnqueuePlayerSteps(

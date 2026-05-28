@@ -251,21 +251,11 @@ readonly struct InGamePacketsPlugin : IPlugin
         Stub<OnDamagePacket_0x0B>(app);
         Stub<OnHealthBarStatusPacket_0x16>(app);
         Stub<OnHealthBarStatusDetailsPacket_0x17>(app);
-        Stub<OnDenyWalkPacket_0x21>(app);
-        Stub<OnConfirmWalkPacket_0x22>(app);
         Stub<OnDragAnimationPacket_0x23>(app);
-        Stub<OnOpenContainerPacket_0x24>(app);
-        Stub<OnUpdateContainerPacket_0x25_Pre6017>(app);
-        Stub<OnUpdateContainerPacket_0x25_Post6017>(app);
-        Stub<OnDenyMoveItemPacket_0x27>(app);
-        Stub<OnEndDraggingItemPacket_0x28>(app);
-        Stub<OnDropItemOkPacket_0x29>(app);
         Stub<OnShowDeathScreenPacket_0x2C>(app);
         Stub<OnSwingPacket_0x2F>(app);
         Stub<OnPathfindingPacket_0x38>(app);
         Stub<OnUpdateSkillsPacket_0x3A>(app);
-        Stub<OnUpdateContainerItemsPacket_0x3C_Pre6017>(app);
-        Stub<OnUpdateContainerItemsPacket_0x3C_Post6017>(app);
         Stub<OnSoundEffectPacket_0x54>(app);
         Stub<OnMapDataPacket_0x56>(app);
         Stub<OnWeatherPacket_0x65>(app);
@@ -278,7 +268,6 @@ readonly struct InGamePacketsPlugin : IPlugin
         Stub<OnBuyListPacket_0x74>(app);
         Stub<OnUpdateCharacterPacket_0x77>(app);
         Stub<OnOpenMenuPacket_0x7C>(app);
-        Stub<OnOpenPaperdollPacket_0x88>(app);
         Stub<OnCorpseEquipmentPacket_0x89>(app);
         Stub<OnShowMapPacket_0x90_Pre308Z>(app);
         Stub<OnShowMapPacket_0x90_Post308Z>(app);
@@ -324,7 +313,7 @@ readonly struct InGamePacketsPlugin : IPlugin
 
     static void Stub<T>(App app) where T : struct, IPacket
     {
-        app.AddObserver<On<PacketReceived<T>>>(static trigger => Console.WriteLine("packet {0:X2}", trigger.Event.Packet.Id));
+        app.AddObserver<On<PacketReceived<T>>>(static trigger => { });
     }
 
     sealed class InGameQueries : ISystemParam

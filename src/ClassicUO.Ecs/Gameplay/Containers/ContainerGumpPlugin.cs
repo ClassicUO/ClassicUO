@@ -15,6 +15,7 @@ using ClassicUO.Assets;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Input;
+using ClassicUO.Network;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using TinyEcs;
@@ -76,6 +77,29 @@ internal readonly struct ContainerGumpPlugin : IPlugin
                 .InStage(Stage.Last)
                 .Build()
 
+            // Sync each item slot's GlobalZIndex to its parent window. Window
+            // root z is bumped by WindowDragPlugin.Drag in Stage.Update (in-
+            // place mutation, no observer fires), and Bevy.UI's z propagation
+            // only covers descendants WITHOUT their own GlobalZIndex — items
+            // carry theirs so they sort against world UI. Run in PostUpdate
+            // (AFTER Drag's bump, BEFORE Last where layout/render snapshot z)
+            // so the lift lands in the SAME frame as the click — PreUpdate
+            // would leave items one frame behind and flicker the bg over them.
+            .AddSystem((
+                Query<Data<ContainerItemUI, GlobalZIndex>> items,
+                Query<Data<GlobalZIndex>, Filter<With<ContainerWindow>>> windows) =>
+            {
+                foreach (var (_, link, itemZ) in items)
+                {
+                    if (!windows.Contains(link.Ref.Container)) continue;
+                    var (_, winZ) = windows.Get(link.Ref.Container);
+                    if (itemZ.Ref.Value != winZ.Ref.Value)
+                        itemZ.Ref.Value = winZ.Ref.Value;
+                }
+            })
+                .InStage(Stage.PostUpdate)
+                .Build()
+
             // Logout / scene exit: drop every container window UI, all child
             // item slots, and the serial->ui map. Game entities (held by
             // NetworkEntitiesMap) survive — they get cleaned up when the
@@ -83,6 +107,22 @@ internal readonly struct ContainerGumpPlugin : IPlugin
             .AddSystem(disposeOnLogoutFn)
                 .OnExit(GameState.GameScreen)
                 .Build();
+
+        // Double-click on a container slot -> Send_DoubleClick on the item's
+        // serial. Server reacts according to the item type: opens it (sub-
+        // container, book, scroll), uses it (food, potion), etc. UiDoubleClick
+        // is synthesized by Bevy.UI from two UiClick events on the same entity
+        // within UiClayContext.DoubleClickWindow. Pickup gate is drag-only so
+        // a held-still click never grabs — both clicks land cleanly here.
+        app.AddObserver((
+            On<UiDoubleClick> trig,
+            Res<NetClient> net,
+            Query<Data<ContainerItemUI>> itemQ) =>
+        {
+            if (!itemQ.Contains(trig.EntityId)) return;
+            var (_, link) = itemQ.Get(trig.EntityId);
+            net.Value.Send_DoubleClick(link.Ref.Serial);
+        });
     }
 
     private static void DisposeOnLogout(
@@ -124,24 +164,23 @@ internal readonly struct ContainerGumpPlugin : IPlugin
     private static void UpdateSelectedFromContainerUI(
         Res<MouseContext> mouse,
         Res<SelectedEntity> selected,
+        Res<AssetsServer> assets,
         Query<Data<ContainerItemUI, ComputedNode, UOCustomRender, Node, GlobalZIndex>> itemQuery,
-        Query<Data<ContainerWindow, ComputedNode, GlobalZIndex>> windowQuery)
+        Query<Data<ContainerWindow, ComputedNode, UOCustomRender, GlobalZIndex>> windowQuery)
     {
         var pos = mouse.Value.Position;
 
         // Find topmost window under cursor first — items below it must NOT
-        // be hit even if their sprites peek out. PropagateZIndex keeps each
-        // item's GlobalZIndex aligned with its owning window, so the z-filter
-        // below is enough to reject pass-through hits.
+        // be hit even if their sprites peek out. Z-propagation system keeps
+        // each item's GlobalZIndex aligned with its owning window, so the
+        // z-filter below is enough to reject pass-through hits.
         int topWindowZ = int.MinValue;
         uint topWindowClayId = 0;
         ulong topWindow = 0;
-        foreach (var (ent, _, computed, z) in windowQuery)
+        foreach (var (ent, _, computed, custom, z) in windowQuery)
         {
             var bb = computed.Ref;
-            if (pos.X < bb.Position.X || pos.Y < bb.Position.Y) continue;
-            if (pos.X >= bb.Position.X + bb.Size.X) continue;
-            if (pos.Y >= bb.Position.Y + bb.Size.Y) continue;
+            if (!UiHitTest.PixelHit(assets.Value, custom.Ref, bb, pos)) continue;
             if (z.Ref.Value > topWindowZ || (z.Ref.Value == topWindowZ && bb.ClayId >= topWindowClayId))
             {
                 topWindowZ = z.Ref.Value;
@@ -154,14 +193,12 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         int topZ = int.MinValue;
         uint topClayId = 0;
 
-        foreach (var (ent, _, computed, _, node, z) in itemQuery)
+        foreach (var (ent, _, computed, custom, node, z) in itemQuery)
         {
             if (node.Ref.Display == Display.None) continue;
             if (topWindow != 0 && z.Ref.Value < topWindowZ) continue;
             var bb = computed.Ref;
-            if (pos.X < bb.Position.X || pos.Y < bb.Position.Y) continue;
-            if (pos.X >= bb.Position.X + bb.Size.X) continue;
-            if (pos.Y >= bb.Position.Y + bb.Size.Y) continue;
+            if (!UiHitTest.PixelHit(assets.Value, custom.Ref, bb, pos)) continue;
             if (z.Ref.Value > topZ || (z.Ref.Value == topZ && bb.ClayId >= topClayId))
             {
                 topZ = z.Ref.Value;
