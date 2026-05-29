@@ -504,6 +504,9 @@ namespace ClassicUO.Game
                 if (container != null)
                 {
                     container.Remove(obj);
+
+                    if (container is Mobile removeMob)
+                        removeMob._equipmentGeneration++;
                 }
 
                 obj.Container = 0xFFFF_FFFF;

@@ -1659,6 +1659,9 @@ namespace ClassicUO.Network
                                     container.PushToBack(item);
                                     item.Container = container.Serial;
 
+                                    if (container is Mobile denyMob)
+                                        denyMob._equipmentGeneration++;
+
                                     UIManager
                                         .GetGump<PaperDollGump>(item.Container)
                                         ?.RequestUpdateContents();
@@ -1837,6 +1840,9 @@ namespace ClassicUO.Network
             Entity entity = world.Get(item.Container);
 
             entity?.PushToBack(item);
+
+            if (entity is Mobile equipMob1)
+                equipMob1._equipmentGeneration++;
 
             if (item.Layer >= Layer.ShopBuyRestock && item.Layer <= Layer.ShopSell)
             {
@@ -2925,6 +2931,9 @@ namespace ClassicUO.Network
                 item.CheckGraphicChange();
 
                 obj.PushToBack(item);
+
+                if (obj is Mobile equipMob2)
+                    equipMob2._equipmentGeneration++;
 
                 itemSerial = p.ReadUInt32BE();
             }
@@ -6078,6 +6087,9 @@ namespace ClassicUO.Network
             world.RemoveItemFromContainer(item);
             item.Container = containerSerial;
             container.PushToBack(item);
+
+            if (container is Mobile equipMob3)
+                equipMob3._equipmentGeneration++;
 
             if (SerialHelper.IsMobile(containerSerial))
             {
