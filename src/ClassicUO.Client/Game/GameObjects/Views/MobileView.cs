@@ -1170,85 +1170,31 @@ namespace ClassicUO.Game.GameObjects
                 return false;
             }
 
+            // Most occlusion is handled purely by the paint order (the robe/legs/skirt
+            // layers are drawn on top of the body layers they cover, so the underlying
+            // gump is simply overpainted). Only the cases the order CANNOT express are
+            // kept here: layers that paint on TOP of their occluder and must be hidden
+            // explicitly — surcoat-style tunics over a robe, hair/helmet under a hood,
+            // and plate legs (pants 0x1411) over shoes.
             switch (layer)
             {
                 case Layer.Shoes:
+                    // plate/studded legs paint under shoes, so order can't hide them
                     Item pants = mobile.FindItemByLayer(Layer.Pants);
-                    Item robe;
 
-                    if (
-                        mobile.FindItemByLayer(Layer.Legs) != null
-                        || pants != null
-                            && (
-                                pants.Graphic == 0x1411 /*|| pants.Graphic == 0x141A*/
-                            )
-                    )
+                    if (pants != null && pants.Graphic == 0x1411)
                     {
                         return true;
-                    }
-                    else
-                    {
-                        robe = mobile.FindItemByLayer(Layer.Robe);
-
-                        if (
-                            pants != null && (pants.Graphic == 0x0513 || pants.Graphic == 0x0514)
-                            || robe != null && robe.Graphic == 0x0504
-                        )
-                        {
-                            return true;
-                        }
-                    }
-
-                    break;
-
-                case Layer.Pants:
-
-                    robe = mobile.FindItemByLayer(Layer.Robe);
-                    pants = mobile.FindItemByLayer(Layer.Pants);
-
-                    if (
-                        mobile.FindItemByLayer(Layer.Legs) != null
-                        || robe != null && robe.Graphic == 0x0504
-                    )
-                    {
-                        return true;
-                    }
-
-                    if (
-                        pants != null
-                        && (
-                            pants.Graphic == 0x01EB
-                            || pants.Graphic == 0x03E5
-                            || pants.Graphic == 0x03eB
-                        )
-                    )
-                    {
-                        Item skirt = mobile.FindItemByLayer(Layer.Skirt);
-
-                        if (skirt != null && skirt.Graphic != 0x01C7 && skirt.Graphic != 0x01E4)
-                        {
-                            return true;
-                        }
-
-                        if (
-                            robe != null
-                            && robe.Graphic != 0x0229
-                            && (robe.Graphic <= 0x04E7 || robe.Graphic > 0x04EB)
-                        )
-                        {
-                            return true;
-                        }
                     }
 
                     break;
 
                 case Layer.Tunic:
-                    robe = mobile.FindItemByLayer(Layer.Robe);
+                    Item robe = mobile.FindItemByLayer(Layer.Robe);
                     Item tunic = mobile.FindItemByLayer(Layer.Tunic);
 
-                    /*if (robe != null && robe.Graphic != 0)
-                        return true;
-                    else*/
+                    // tunic 0x238 is moved on top of the robe (surcoat); hide it when a
+                    // full robe is worn underneath.
                     if (tunic != null && tunic.Graphic == 0x0238)
                     {
                         return robe != null
@@ -1258,49 +1204,6 @@ namespace ClassicUO.Game.GameObjects
                     }
 
                     break;
-
-                case Layer.Torso:
-                    robe = mobile.FindItemByLayer(Layer.Robe);
-
-                    if (
-                        robe != null
-                        && robe.Graphic != 0
-                        && robe.Graphic != 0x9985
-                        && robe.Graphic != 0x9986
-                        && robe.Graphic != 0xA412
-                        && robe.Graphic != 0xA2CA
-                    )
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        tunic = mobile.FindItemByLayer(Layer.Tunic);
-
-                        if (tunic != null && tunic.Graphic != 0x1541 && tunic.Graphic != 0x1542)
-                        {
-                            Item torso = mobile.FindItemByLayer(Layer.Torso);
-
-                            if (
-                                torso != null
-                                && (torso.Graphic == 0x782A || torso.Graphic == 0x782B)
-                            )
-                            {
-                                return true;
-                            }
-                        }
-                    }
-
-                    break;
-
-                case Layer.Arms:
-                    robe = mobile.FindItemByLayer(Layer.Robe);
-
-                    return robe != null
-                        && robe.Graphic != 0
-                        && robe.Graphic != 0x9985
-                        && robe.Graphic != 0x9986
-                        && robe.Graphic != 0xA412;
 
                 case Layer.Helmet:
                 case Layer.Hair:
