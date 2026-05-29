@@ -103,7 +103,7 @@ namespace ClassicUO.IO.Audio
 
         protected int Frequency = 22050;
 
-        protected abstract byte[] GetBuffer();
+        protected abstract ArraySegment<byte> GetBuffer();
         protected abstract void OnBufferNeeded(object sender, EventArgs e);
 
         protected virtual void AfterStop()
@@ -137,18 +137,18 @@ namespace ClassicUO.IO.Audio
             }
 
 
-            byte[] buffer = GetBuffer();
+            var buffer = GetBuffer();
 
-            if (buffer != null && buffer.Length > 0)
+            if (buffer.Count > 0)
             {
                 _lastPlayedTime = curTime + Delay;
 
                 SoundInstance.BufferNeeded += OnBufferNeeded;
-                SoundInstance.SubmitBuffer(buffer, 0, buffer.Length);
+                SoundInstance.SubmitBuffer(buffer.Array, buffer.Offset, buffer.Count);
                 VolumeFactor = volumeFactor;
                 Volume = volume;
 
-                DurationTime = curTime + SoundInstance.GetSampleDuration(buffer.Length).TotalMilliseconds;
+                DurationTime = curTime + SoundInstance.GetSampleDuration(buffer.Count).TotalMilliseconds;
 
                 SoundInstance.Play();
 

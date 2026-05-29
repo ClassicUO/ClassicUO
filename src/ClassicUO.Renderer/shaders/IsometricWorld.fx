@@ -9,6 +9,7 @@
 #define SHADOW 8
 #define LIGHTS 9
 #define EFFECT_HUED 10
+#define RGB_TINT 11
 #define GUMP 20
 
 const static float3 LIGHT_DIRECTION = float3(0.0f, 1.0f, 1.0f);
@@ -50,7 +51,7 @@ float3 get_rgb(float gray, float hue)
     float halfPixelX = (1.0f / (HUE_COLUMNS * HUE_WIDTH)) * 0.5f;
     float hueColumnWidth = 1.0f / HUE_COLUMNS;
     float hueStart = frac(hue / HUE_COLUMNS);
-
+    
     float xPos = hueStart + gray / HUE_COLUMNS;
     xPos = clamp(xPos, hueStart + halfPixelX, hueStart + hueColumnWidth - halfPixelX);
     float yPos = (hue % HUES_PER_TEXTURE) / (HUES_PER_TEXTURE - 1);
@@ -78,9 +79,9 @@ float3 get_colored_light(float shader, float gray)
 PS_INPUT VertexShaderFunction(VS_INPUT IN)
 {
 	PS_INPUT OUT;
-
+	
 	OUT.Position = mul(mul(IN.Position, WorldMatrix), MatrixTransform);
-
+	
 	OUT.Position.x -= 0.5 / Viewport.x;
 	OUT.Position.y += 0.5 / Viewport.y;
 
@@ -93,43 +94,24 @@ PS_INPUT VertexShaderFunction(VS_INPUT IN)
 }
 
 float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
-{
+{	
 	float4 color = tex2D(DrawSampler, IN.TexCoord.xy);
-
+		
 	if (color.a == 0.0f)
 		discard;
 
 	int mode = int(IN.Hue.y);
 	float alpha = IN.Hue.z;
 
-	// CoT flag: callers stuff `alpha + 1.0` to opt in. Use >= 1.5 not > 1.0
-	// so vertex-interpolator float drift around alpha=1.0 can't false-trip.
 	bool useTrans = false;
-	if (alpha >= 1.5f)
+	if (alpha > 1.0f)
 	{
 		useTrans = true;
 		alpha -= 1.0f;
 	}
 
-	if (mode == NONE)
-	{
-		// Keep the un-hued fast path. CoT applies to NONE too if requested.
-		if (useTrans && CircleOfTransparencyRadius > 0)
-		{
-			float2 pixelDist = IN.PixelPos.xy * Viewport * 0.5;
-			float ratio = length(pixelDist) / CircleOfTransparencyRadius;
-			if (ratio < 0.85f)
-				discard;
-			if (ratio < 1.0f)
-			{
-				float t = (ratio - 0.85f) / 0.15f;
-				alpha *= t * t * t;
-				if (alpha < 0.02f)
-					discard;
-			}
-		}
-		return color * alpha;
-	}
+	if (alpha == 0.0f)
+		discard;
 
 	float hue = IN.Hue.x;
 
@@ -149,16 +131,15 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	}
 	else if (mode == HUE_TEXT_NO_BLACK)
 	{
-		if (color.r > 0.08f || color.g > 0.08f || color.b > 0.08f)
+		if (color.r > 0.04f || color.g > 0.04f || color.b > 0.04f)
 		{
 			color.rgb = get_rgb(1.0f, hue);
 		}
 	}
 	else if (mode == HUE_TEXT)
 	{
-		color.rgb = color.rgb * IN.Normal;
 		// 31 is max red, so this is just selecting the color of the darkest pixel in the hue
-		// color.rgb = get_rgb(1.0f, hue);
+		color.rgb = get_rgb(1.0f, hue);
 	}
 	else if (mode == LAND)
 	{
@@ -190,17 +171,26 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 	{
 		color.rgb = get_rgb(color.g, hue);
 	}
+	else if (mode == RGB_TINT)
+	{
+		// ECS UI path: white-baked texture (fonts, 1x1 fill, gump art)
+		// tinted by an arbitrary RGB color carried in the vertex Normal.
+		color.rgb *= IN.Normal;
+	}
 
 	if (useTrans && CircleOfTransparencyRadius > 0)
 	{
 		float2 pixelDist = IN.PixelPos.xy * Viewport * 0.5;
 		float ratio = length(pixelDist) / CircleOfTransparencyRadius;
+
 		if (ratio < 0.85f)
 			discard;
+
 		if (ratio < 1.0f)
 		{
 			float t = (ratio - 0.85f) / 0.15f;
 			alpha *= t * t * t;
+
 			if (alpha < 0.02f)
 				discard;
 		}

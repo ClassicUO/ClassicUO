@@ -272,12 +272,12 @@ namespace ClassicUO.Utility
 
         public static string IntToAbbreviatedString(int num)
         {
-            if (num > 999999)
+            if (num > 999999 || num < -999999)
             {
                 return string.Format("{0}M+", num / 1000000);
             }
 
-            if (num > 999)
+            if (num > 999 || num < -999)
             {
                 return string.Format("{0}K+", num / 1000);
             }

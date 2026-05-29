@@ -407,7 +407,7 @@ namespace ClassicUO.Game
 
                     if (x >= 0)
                     {
-                        char c = x >= info.Data.Length ? '\n' : info.Data[x].Item;
+                        char c = x >= info.Data.Count ? '\n' : info.Data[x].Item;
 
                         if (IsUnicode)
                         {
@@ -581,8 +581,8 @@ namespace ClassicUO.Game
                         break;
                 }
 
-                int dataLen = ptr.Data.Length;
-                var dataSpan = ptr.Data.Buffer.AsSpan(0, dataLen);
+                int dataLen = ptr.Data.Count;
+                var dataSpan = CollectionsMarshal.AsSpan(ptr.Data);
 
                 for (int i = 0; i < dataLen; i++)
                 {

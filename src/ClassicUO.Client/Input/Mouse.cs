@@ -111,47 +111,8 @@ namespace ClassicUO.Input
 
         public static bool MouseInWindow { get; set; }
 
-#if AGENT_BUILD
-        // Agent dev-loop input synthesis. When enabled, Update() skips
-        // the SDL polling path and uses the synthetic coordinates instead.
-        // Button state is set directly on LButtonPressed / RButtonPressed /
-        // MButtonPressed via AgentSetSyntheticButtons before the agent's
-        // per-frame drain runs Mouse.Update().
-        private static bool _agentSynthEnabled;
-        private static int _agentSynthX, _agentSynthY;
-
-        internal static void AgentSetSyntheticPosition(int x, int y)
-        {
-            _agentSynthEnabled = true;
-            _agentSynthX = x;
-            _agentSynthY = y;
-        }
-
-        internal static void AgentSetSyntheticButtons(bool left, bool middle, bool right)
-        {
-            _agentSynthEnabled = true;
-            LButtonPressed = left;
-            MButtonPressed = middle;
-            RButtonPressed = right;
-        }
-
-        internal static void AgentClearSynthetic() => _agentSynthEnabled = false;
-
-        internal static bool AgentSyntheticActive => _agentSynthEnabled;
-#endif
-
         public static void Update()
         {
-#if AGENT_BUILD
-            if (_agentSynthEnabled)
-            {
-                Position.X = _agentSynthX;
-                Position.Y = _agentSynthY;
-                IsDragging = LButtonPressed || RButtonPressed || MButtonPressed;
-                return;
-            }
-#endif
-
             if (!MouseInWindow)
             {
                 SDL.SDL_GetGlobalMouseState(out float x, out float y);

@@ -35,7 +35,7 @@ namespace ClassicUO.IO
 
         public readonly byte this[int index] => _data[index];
 
-        public readonly ReadOnlySpan<byte> Buffer => _data;
+        public ReadOnlySpan<byte> Buffer => _data;
 
 
         [MethodImpl(IMPL_OPTION)]
@@ -382,11 +382,14 @@ namespace ClassicUO.IO
         public string ReadASCII(bool safe = false)
         {
             return ReadRawString(-1, 1, safe);
+            //return ReadString(StringHelper.Cp1252Encoding, -1, 1, safe);
         }
 
         public string ReadASCII(int length, bool safe = false)
         {
             return ReadRawString(length, 1, safe);
+
+            //return ReadString(StringHelper.Cp1252Encoding, length, 1, safe);
         }
 
         public string ReadUnicodeBE(bool safe = false)

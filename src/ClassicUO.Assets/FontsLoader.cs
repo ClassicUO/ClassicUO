@@ -10,7 +10,6 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 
 namespace ClassicUO.Assets
 {
@@ -75,12 +74,35 @@ namespace ClassicUO.Assets
         private FontCharacterDataUnicode[,] _fontDataUNICODE;
         private readonly UOFile[] _unicodeFontAddress = new UOFile[20];
         private readonly long[] _unicodeFontSize = new long[20];
-        private readonly Dictionary<ushort, WebLink> _webLinks = new Dictionary<ushort, WebLink>();
+        private readonly VisitedUrlCache _visitedUrls = new VisitedUrlCache(1024);
         private readonly int[] _offsetCharTable = { 2, 0, 2, 2, 0, 0, 2, 2, 0, 0 };
         private readonly int[] _offsetSymbolTable = { 1, 0, 1, 1, -1, 0, 1, 1, 0, 0 };
 
         public FontsLoader(UOFileManager fileManager) : base(fileManager) { }
 
+
+        // Resize ptr.Data to exactly `target` elements, growing with default-initialized
+        // slots or shrinking via CollectionsMarshal.SetCount. Used by GetInfo* to
+        // reconcile MultilinesFontInfo.Data with CharCount when wrap/newline/countspaces
+        // logic adjusts the logical character count out of step with the natural Add
+        // sequence. Replaces the FastList-era `Data.Length = X` idiom that silently
+        // violated `Length <= Buffer.Length` when growing past a backing-array boundary.
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void SetDataCount(List<MultilinesFontData> data, int target)
+        {
+            if (target > data.Count)
+            {
+                data.EnsureCapacity(target);
+                for (int n = data.Count; n < target; n++)
+                {
+                    data.Add(default);
+                }
+            }
+            else if (target < data.Count)
+            {
+                CollectionsMarshal.SetCount(data, target);
+            }
+        }
 
         public int FontCount { get; private set; }
 
@@ -420,7 +442,9 @@ namespace ClassicUO.Assets
             public int Height;
 
             public int LineCount;
-            public FastList<WebLinkRect> Links;
+            // Built once in GenerateUnicode/GenerateHTML and read-only thereafter — a
+            // plain array is the natural fit (no spare-capacity overhead, exact size).
+            public WebLinkRect[] Links;
             public uint HtmlBackgroundColor;
 
             public static FontInfo Empty = new FontInfo() { Data = null };
@@ -532,14 +556,14 @@ namespace ClassicUO.Assets
                 {
                     HTMLChar* chars = stackalloc HTMLChar[strLen];
 
-                    GetHTMLData(chars, font, str.AsSpan(), ref strLen, align, flags);
+                    GetHTMLData(chars, font, str.AsSpan(), ref strLen, align, flags, urls: null);
                 }
 
                 int size = str.Length - strLen;
 
                 if (size > 0)
                 {
-                    sb.Append(str.Substring(0, size));
+                    sb.Append(str.AsSpan(0, size));
                     str = str.Substring(str.Length - strLen, strLen);
 
                     if (GetWidthASCII(font, str) < width)
@@ -686,17 +710,19 @@ namespace ClassicUO.Assets
                             break;
                     }
 
-                    var count = ptr.Data.Length;
+                    var count = ptr.Data.Count;
+                    var dataSpan = CollectionsMarshal.AsSpan(ptr.Data);
 
                     for (int i = 0; i < count; i++)
                     {
-                        byte index = (byte)ptr.Data[i].Item;
+                        ref var item = ref dataSpan[i];
+                        byte index = (byte)item.Item;
 
                         int offsY = GetFontOffsetY(font, index);
 
                         ref FontCharacterData fcd = ref _fontDataASCII[
                             font,
-                            GetASCIIIndex(ptr.Data[i].Item)
+                            GetASCIIIndex(item.Item)
                         ];
 
                         int dw = fcd.Width;
@@ -877,7 +903,7 @@ namespace ClassicUO.Assets
                             ptr.MaxHeight = 14;
                         }
 
-                        ptr.Data.Length = ptr.CharCount - newlineval;
+                        SetDataCount(ptr.Data, ptr.CharCount - newlineval);
 
                         MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
@@ -949,6 +975,17 @@ namespace ClassicUO.Assets
                             ptr.Width += readWidth;
                             ptr.CharCount += charCount;
                         }
+                        else if (isCropped)
+                        {
+                            // Commit the characters accumulated so far. Without this, a
+                            // cropped single-word string (no spaces) would exit with
+                            // CharCount == 0 and the subsequent `Data.Length = CharCount`
+                            // would truncate every processed char out of ptr.Data — the
+                            // glyph-atlas draw path then has nothing to iterate and the
+                            // label renders blank.
+                            ptr.Width += readWidth;
+                            ptr.CharCount += charCount;
+                        }
 
                         i = lastSpace + 1;
                         si = i < len ? str[i] : '\0';
@@ -969,7 +1006,7 @@ namespace ClassicUO.Assets
 
                         //ptr.CharCount = charCount;
                         charCount = 0;
-                        ptr.Data.Length = ptr.CharCount;
+                        SetDataCount(ptr.Data, ptr.CharCount);
 
                         if (isFixed || isCropped)
                         {
@@ -1156,7 +1193,7 @@ namespace ClassicUO.Assets
                 {
                     HTMLChar* data = stackalloc HTMLChar[strLen];
 
-                    GetHTMLData(data, font, str, ref strLen, align, flags);
+                    GetHTMLData(data, font, str, ref strLen, align, flags, urls: null);
                 }
 
                 int size = str.Length - strLen;
@@ -1435,7 +1472,7 @@ namespace ClassicUO.Assets
                             ptr.MaxHeight = 14 + extraheight;
                         }
 
-                        ptr.Data.Length = ptr.CharCount - newlineval;
+                        SetDataCount(ptr.Data, ptr.CharCount - newlineval);
                         MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
                         ptr.Next = newptr;
@@ -1509,6 +1546,17 @@ namespace ClassicUO.Assets
                             ptr.Width += readWidth;
                             ptr.CharCount += charCount;
                         }
+                        else if (isCropped)
+                        {
+                            // Commit the characters accumulated so far. Without this, a
+                            // cropped single-word string (no spaces) would exit with
+                            // CharCount == 0 and the subsequent `Data.Length = CharCount`
+                            // would truncate every processed char out of ptr.Data — the
+                            // glyph-atlas draw path then has nothing to iterate and the
+                            // label renders blank.
+                            ptr.Width += readWidth;
+                            ptr.CharCount += charCount;
+                        }
 
                         i = lastSpace + 1;
                         charcolor = lastspace_charcolor;
@@ -1532,7 +1580,7 @@ namespace ClassicUO.Assets
                         //ptr.CharCount = charCount;
 
                         charCount = 0;
-                        ptr.Data.Length = ptr.CharCount;
+                        SetDataCount(ptr.Data, ptr.CharCount);
 
                         if (isFixed || isCropped)
                         {
@@ -1740,10 +1788,16 @@ namespace ClassicUO.Assets
                 bool isUnderline = (flags & UOFONT_UNDERLINE) != 0;
                 uint blackColor = 0xFF010101;
                 bool isLink = false;
+                ushort oldLink = 0;
                 int linkStartX = 0;
                 int linkStartY = 0;
                 int linesCount = 0;
-                var links = new FastList<WebLinkRect>();
+                using var links = new PooledList<WebLinkRect>(8);
+
+                // Captured before the walk because `info` is reassigned to
+                // each segment as we iterate. The head node carries the
+                // per-parse URL list; LinkID values index into it (1-based).
+                List<string> urls = info.WebLinks;
 
                 while (ptr != null)
                 {
@@ -1783,12 +1837,12 @@ namespace ClassicUO.Assets
                             break;
                     }
 
-                    ushort oldLink = 0;
-                    var dataSize = ptr.Data.Length;
+                    var dataSize = ptr.Data.Count;
+                    var dataSpan = CollectionsMarshal.AsSpan(ptr.Data);
 
                     for (int i = 0; i < dataSize; i++)
                     {
-                        ref MultilinesFontData dataPtr = ref ptr.Data.Buffer[i];
+                        ref MultilinesFontData dataPtr = ref dataSpan[i];
                         char si = dataPtr.Item;
                         ref var @char = ref GetCharUni(dataPtr.Font, si);
 
@@ -1827,14 +1881,10 @@ namespace ClassicUO.Assets
                                 ofsX = @char.OffsetX;
                             }
 
-                            string linkUrl = null;
-                            if (_webLinks.TryGetValue(oldLink, out WebLink wl))
-                                linkUrl = wl.Link;
                             WebLinkRect wlr = new WebLinkRect
                             {
-                                LinkID = oldLink,
-                                Bounds = new Margin(linkStartX, linkStartY, w - ofsX, linkHeight),
-                                Url = linkUrl
+                                Url = urls[oldLink - 1],
+                                Bounds = new Margin(linkStartX, linkStartY, w - ofsX, linkHeight)
                             };
 
                             links.Add(wlr);
@@ -1874,7 +1924,7 @@ namespace ClassicUO.Assets
 
                         if (si != ' ')
                         {
-                            if (IsUsingHTML && i < ptr.Data.Length)
+                            if (IsUsingHTML && i < ptr.Data.Count)
                             {
                                 isItalic = (dataPtr.Flags & UOFONT_ITALIC) != 0;
                                 isSolid = (dataPtr.Flags & UOFONT_SOLID) != 0;
@@ -2246,7 +2296,10 @@ namespace ClassicUO.Assets
                 fi.Width = width;
                 fi.Height = height;
                 fi.Data = pData;
-                fi.Links = links;
+                fi.Links = links.Count == 0 ? null : links.AsSpan.ToArray();
+                fi.HtmlBackgroundColor = (IsUsingHTML && _htmlStatus.IsHtmlBackgroundColored && _htmlStatus.BackgroundColor != 0)
+                    ? HuesHelper.RgbaToArgb(_htmlStatus.BackgroundColor | 0xFF)
+                    : 0;
                 return fi;
             }
             finally
@@ -2271,7 +2324,13 @@ namespace ClassicUO.Assets
 
             HTMLChar* htmlData = stackalloc HTMLChar[len];
 
-            GetHTMLData(htmlData, font, str.AsSpan(), ref len, align, flags);
+            // Per-parse URL accumulator. The 1-based index assigned to each
+            // <a href> becomes the MultilinesFontData.LinkID for chars under
+            // that tag. Attached to the head MultilinesFontInfo on return so
+            // the renderer can look up URLs when emitting WebLinkRect entries.
+            List<string> urls = new List<string>();
+
+            GetHTMLData(htmlData, font, str.AsSpan(), ref len, align, flags, urls);
 
             if (len <= 0)
             {
@@ -2281,6 +2340,7 @@ namespace ClassicUO.Assets
             MultilinesFontInfo info = new MultilinesFontInfo();
             info.Reset();
             info.Align = align;
+            info.WebLinks = urls;
             MultilinesFontInfo ptr = info;
             int indentionOffset = 0;
             ptr.IndentionOffset = indentionOffset;
@@ -2290,10 +2350,7 @@ namespace ClassicUO.Assets
             bool isFixed = (flags & UOFONT_FIXED) != 0;
             bool isCropped = (flags & UOFONT_CROPPED) != 0;
 
-            if (len != 0)
-            {
-                ptr.Align = htmlData[0].Align;
-            }
+            ptr.Align = htmlData[0].Align;
 
             for (int i = 0; i < len; i++)
             {
@@ -2349,7 +2406,7 @@ namespace ClassicUO.Assets
                         }
 
                         ptr.MaxHeight = MAX_HTML_TEXT_HEIGHT;
-                        ptr.Data.Length = ptr.CharCount;
+                        SetDataCount(ptr.Data, ptr.CharCount);
                         MultilinesFontInfo newptr = new MultilinesFontInfo();
                         newptr.Reset();
                         ptr.Next = newptr;
@@ -2418,6 +2475,17 @@ namespace ClassicUO.Assets
                             ptr.Width += readWidth;
                             ptr.CharCount += charCount;
                         }
+                        else if (isCropped)
+                        {
+                            // Commit the characters accumulated so far. Without this, a
+                            // cropped single-word string (no spaces) would exit with
+                            // CharCount == 0 and the subsequent `Data.Length = CharCount`
+                            // would truncate every processed char out of ptr.Data — the
+                            // glyph-atlas draw path then has nothing to iterate and the
+                            // label renders blank.
+                            ptr.Width += readWidth;
+                            ptr.CharCount += charCount;
+                        }
 
                         i = lastSpace + 1;
 
@@ -2436,7 +2504,7 @@ namespace ClassicUO.Assets
                         }
 
                         ptr.MaxHeight = MAX_HTML_TEXT_HEIGHT;
-                        ptr.Data.Length = ptr.CharCount;
+                        SetDataCount(ptr.Data, ptr.CharCount);
                         charCount = 0;
 
                         if (isFixed || isCropped)
@@ -2501,7 +2569,8 @@ namespace ClassicUO.Assets
             ReadOnlySpan<char> str,
             ref int len,
             TEXT_ALIGN_TYPE align,
-            ushort flags
+            ushort flags,
+            List<string> urls
         )
         {
             int newlen = 0;
@@ -2516,7 +2585,7 @@ namespace ClassicUO.Assets
                 Link = 0
             };
 
-            var stack = new FastList<HTMLDataInfo>();
+            using var stack = new PooledList<HTMLDataInfo>(8);
             stack.Add(info);
             HTMLDataInfo currentInfo = info;
 
@@ -2538,7 +2607,7 @@ namespace ClassicUO.Assets
                         Link = 0
                     };
 
-                    HTML_TAG_TYPE tag = ParseHTMLTag(str, len, ref i, ref endTag, ref newInfo);
+                    HTML_TAG_TYPE tag = ParseHTMLTag(str, len, ref i, ref endTag, ref newInfo, urls);
 
                     if (tag == HTML_TAG_TYPE.HTT_NONE)
                     {
@@ -2549,7 +2618,7 @@ namespace ClassicUO.Assets
                     {
                         if (newInfo.Font == 0xFF)
                         {
-                            newInfo.Font = stack[stack.Length - 1].Font;
+                            newInfo.Font = stack[stack.Count - 1].Font;
                         }
 
                         if (tag != HTML_TAG_TYPE.HTT_BODY)
@@ -2569,11 +2638,11 @@ namespace ClassicUO.Assets
                             stack.Add(info);
                         }
                     }
-                    else if (stack.Length > 1)
+                    else if (stack.Count > 1)
                     {
                         //int index = -1;
 
-                        for (var j = stack.Length - 1; j >= 1; j--)
+                        for (var j = stack.Count - 1; j >= 1; j--)
                         {
                             if (stack[j].Tag == tag)
                             {
@@ -2584,7 +2653,7 @@ namespace ClassicUO.Assets
                         }
                     }
 
-                    GetCurrentHTMLInfo(ref stack, ref currentInfo);
+                    GetCurrentHTMLInfo(stack.AsSpan, ref currentInfo);
 
                     switch (tag)
                     {
@@ -2644,7 +2713,7 @@ namespace ClassicUO.Assets
             len = newlen;
         }
 
-        private void GetCurrentHTMLInfo(ref FastList<HTMLDataInfo> list, ref HTMLDataInfo info)
+        private void GetCurrentHTMLInfo(ReadOnlySpan<HTMLDataInfo> list, ref HTMLDataInfo info)
         {
             info.Tag = HTML_TAG_TYPE.HTT_NONE;
             info.Align = TEXT_ALIGN_TYPE.TS_LEFT;
@@ -2655,7 +2724,7 @@ namespace ClassicUO.Assets
 
             for (int i = 0; i < list.Length; i++)
             {
-                ref var current = ref list.Buffer[i];
+                ref readonly var current = ref list[i];
 
                 switch (current.Tag)
                 {
@@ -2753,7 +2822,8 @@ namespace ClassicUO.Assets
             int len,
             ref int i,
             ref bool endTag,
-            ref HTMLDataInfo info
+            ref HTMLDataInfo info,
+            List<string> urls
         )
         {
             HTML_TAG_TYPE tag = HTML_TAG_TYPE.HTT_NONE;
@@ -2959,7 +3029,7 @@ namespace ClassicUO.Assets
 
                                 if (str.Length != 0 && cmdLen >= 0 && str.Length > j && str.Length >= cmdLen)
                                 {
-                                    GetHTMLInfoFromContent(ref info, str.Slice(j, cmdLen));
+                                    GetHTMLInfoFromContent(ref info, str.Slice(j, cmdLen), urls);
                                 }
 
                                 break;
@@ -2971,7 +3041,7 @@ namespace ClassicUO.Assets
             return tag;
         }
 
-        private void GetHTMLInfoFromContent(ref HTMLDataInfo info, ReadOnlySpan<char> content)
+        private void GetHTMLInfoFromContent(ref HTMLDataInfo info, ReadOnlySpan<char> content, List<string> urls)
         {
             if (content.IsEmpty)
                 return;
@@ -3057,38 +3127,38 @@ namespace ClassicUO.Assets
                     case HTML_TAG_TYPE.HTT_BODY:
                     case HTML_TAG_TYPE.HTT_BODYBGCOLOR:
 
-                        if (MemoryExtensions.Equals(command, "text", StringComparison.InvariantCultureIgnoreCase))
+                        if (command.Equals("text", StringComparison.InvariantCultureIgnoreCase))
                         {
                             ReadColorFromTextBuffer(value, ref info.Color);
                         }
-                        else if (MemoryExtensions.Equals(command, "bgcolor", StringComparison.InvariantCultureIgnoreCase))
+                        else if (command.Equals("bgcolor", StringComparison.InvariantCultureIgnoreCase))
                         {
                             if (_htmlStatus.IsHtmlBackgroundColored)
                             {
                                 ReadColorFromTextBuffer(value, ref _htmlStatus.BackgroundColor);
                             }
                         }
-                        else if (MemoryExtensions.Equals(command, "link", StringComparison.InvariantCultureIgnoreCase))
+                        else if (command.Equals("link", StringComparison.InvariantCultureIgnoreCase))
                         {
                             ReadColorFromTextBuffer(value, ref _htmlStatus.WebLinkColor);
                         }
-                        else if (MemoryExtensions.Equals(command, "vlink", StringComparison.InvariantCultureIgnoreCase))
+                        else if (command.Equals("vlink", StringComparison.InvariantCultureIgnoreCase))
                         {
                             ReadColorFromTextBuffer(value, ref _htmlStatus.VisitedWebLinkColor);
                         }
-                        else if (MemoryExtensions.Equals(command, "leftmargin", StringComparison.InvariantCultureIgnoreCase))
+                        else if (command.Equals("leftmargin", StringComparison.InvariantCultureIgnoreCase))
                         {
                             _htmlStatus.Margins.X = int.Parse(value);
                         }
-                        else if (MemoryExtensions.Equals(command, "topmargin", StringComparison.InvariantCultureIgnoreCase))
+                        else if (command.Equals("topmargin", StringComparison.InvariantCultureIgnoreCase))
                         {
                             _htmlStatus.Margins.Y = int.Parse(value);
                         }
-                        else if (MemoryExtensions.Equals(command, "rightmargin", StringComparison.InvariantCultureIgnoreCase))
+                        else if (command.Equals("rightmargin", StringComparison.InvariantCultureIgnoreCase))
                         {
                             _htmlStatus.Margins.Width = int.Parse(value);
                         }
-                        else if (MemoryExtensions.Equals(command, "bottommargin", StringComparison.InvariantCultureIgnoreCase))
+                        else if (command.Equals("bottommargin", StringComparison.InvariantCultureIgnoreCase))
                         {
                             _htmlStatus.Margins.Height = int.Parse(value);
                         }
@@ -3097,17 +3167,17 @@ namespace ClassicUO.Assets
 
                     case HTML_TAG_TYPE.HTT_BASEFONT:
 
-                        if (MemoryExtensions.Equals(command, "color", StringComparison.InvariantCultureIgnoreCase))
+                        if (command.Equals("color", StringComparison.InvariantCultureIgnoreCase))
                         {
                             ReadColorFromTextBuffer(value, ref info.Color);
                         }
-                        else if (MemoryExtensions.Equals(command, "size", StringComparison.InvariantCultureIgnoreCase))
+                        else if (command.Equals("size", StringComparison.InvariantCultureIgnoreCase))
                         {
                             if (!byte.TryParse(value, out var font))
                             {
-                                if (MemoryExtensions.Equals(value, "big", StringComparison.InvariantCultureIgnoreCase))
+                                if (value.Equals("big", StringComparison.InvariantCultureIgnoreCase))
                                     info.Font = 4;
-                                else if (MemoryExtensions.Equals(value, "small", StringComparison.InvariantCultureIgnoreCase))
+                                else if (value.Equals("small", StringComparison.InvariantCultureIgnoreCase))
                                     info.Font = 0;
                                 else
                                     info.Font = 1;
@@ -3136,11 +3206,11 @@ namespace ClassicUO.Assets
 
                     case HTML_TAG_TYPE.HTT_A:
 
-                        if (MemoryExtensions.Equals(command, "href", StringComparison.InvariantCultureIgnoreCase))
+                        if (command.Equals("href", StringComparison.InvariantCultureIgnoreCase))
                         {
                             info.Flags = UOFONT_UNDERLINE;
                             info.Color = _htmlStatus.WebLinkColor;
-                            info.Link = GetWebLinkID(value, ref info.Color);
+                            info.Link = RegisterParseUrl(urls, value, ref info.Color);
                         }
 
                         break;
@@ -3148,17 +3218,17 @@ namespace ClassicUO.Assets
                     case HTML_TAG_TYPE.HTT_P:
                     case HTML_TAG_TYPE.HTT_DIV:
 
-                        if (MemoryExtensions.Equals(command, "align", StringComparison.InvariantCultureIgnoreCase))
+                        if (command.Equals("align", StringComparison.InvariantCultureIgnoreCase))
                         {
-                            if (MemoryExtensions.Equals(value, "left", StringComparison.InvariantCultureIgnoreCase))
+                            if (value.Equals("left", StringComparison.InvariantCultureIgnoreCase))
                             {
                                 info.Align = TEXT_ALIGN_TYPE.TS_LEFT;
                             }
-                            else if (MemoryExtensions.Equals(value, "center", StringComparison.InvariantCultureIgnoreCase))
+                            else if (value.Equals("center", StringComparison.InvariantCultureIgnoreCase))
                             {
                                 info.Align = TEXT_ALIGN_TYPE.TS_CENTER;
                             }
-                            else if (MemoryExtensions.Equals(value, "right", StringComparison.InvariantCultureIgnoreCase))
+                            else if (value.Equals("right", StringComparison.InvariantCultureIgnoreCase))
                             {
                                 info.Align = TEXT_ALIGN_TYPE.TS_RIGHT;
                             }
@@ -3172,60 +3242,46 @@ namespace ClassicUO.Assets
             }
         }
 
-        private ushort GetWebLinkID(ReadOnlySpan<char> link, ref uint color)
+        // Append `link` to the parse-scoped URL list and return its 1-based
+        // index (used as MultilinesFontData.LinkID). If the URL has been
+        // visited in a prior parse, swap `color` to the visited color. The
+        // urls list dies with the FontInfo it's attached to — no global state.
+        // urls == null means "throwaway parse" (cropping/measurement); skip
+        // accumulation entirely.
+        private ushort RegisterParseUrl(List<string> urls, ReadOnlySpan<char> link, ref uint color)
         {
-            foreach (KeyValuePair<ushort, WebLink> ll in _webLinks)
+            if (urls == null)
             {
-                if (link.SequenceEqual(ll.Value.Link))
-                {
-                    if (ll.Value.IsVisited)
-                    {
-                        color = _htmlStatus.VisitedWebLinkColor;
-                    }
-
-                    return ll.Key;
-                }
+                return 0;
             }
 
-            ushort linkID = (ushort)(_webLinks.Count + 1);
+            string url = link.ToString();
 
-            if (!_webLinks.TryGetValue(linkID, out WebLink webLink))
+            if (_visitedUrls.IsVisited(url))
             {
-                webLink = new WebLink();
-                webLink.IsVisited = false;
-                webLink.Link = link.ToString();
-
-                _webLinks[linkID] = webLink;
+                color = _htmlStatus.VisitedWebLinkColor;
             }
 
-            return linkID;
+            // ushort cap: refuse to register past 65 535 anchor tags in a single
+            // parse — return 0 ("no link"). The text still renders styled but
+            // is non-clickable. In practice no real HTML chunk hits this.
+            if (urls.Count >= ushort.MaxValue)
+            {
+                return 0;
+            }
+
+            urls.Add(url);
+            return (ushort)urls.Count;
         }
 
-        public bool GetWebLink(ushort link, out WebLink result)
-        {
-            if (!_webLinks.TryGetValue(link, out result))
-            {
-                return false;
-            }
-
-            result.IsVisited = true;
-
-            return true;
-        }
-
+        // Called by click handlers to record that a URL has been opened, so
+        // subsequent renders draw it in the visited color. Bounded by the
+        // VisitedUrlCache's LRU capacity.
         public void MarkVisited(string url)
         {
-            if (string.IsNullOrEmpty(url))
+            if (!string.IsNullOrEmpty(url))
             {
-                return;
-            }
-
-            foreach (var kv in _webLinks)
-            {
-                if (string.Equals(kv.Value.Link, url, StringComparison.OrdinalIgnoreCase))
-                {
-                    kv.Value.IsVisited = true;
-                }
+                _visitedUrls.Mark(url);
             }
         }
 
@@ -3260,76 +3316,76 @@ namespace ClassicUO.Assets
                 }
                 else
                 {
-                    if (MemoryExtensions.Equals(buffer, "red", StringComparison.InvariantCultureIgnoreCase))
+                    if (buffer.Equals("red", StringComparison.InvariantCultureIgnoreCase))
                     {
                         color = 0x0000FFFF;
                     }
-                    else if (MemoryExtensions.Equals(buffer, "cyan", StringComparison.InvariantCultureIgnoreCase))
+                    else if (buffer.Equals("cyan", StringComparison.InvariantCultureIgnoreCase))
                     {
                         color = 0xFFFF00FF;
                     }
-                    else if (MemoryExtensions.Equals(buffer, "blue", StringComparison.InvariantCultureIgnoreCase))
+                    else if (buffer.Equals("blue", StringComparison.InvariantCultureIgnoreCase))
                     {
                         color = 0xFF0000FF;
                     }
-                    else if (MemoryExtensions.Equals(buffer, "darkblue", StringComparison.InvariantCultureIgnoreCase))
+                    else if (buffer.Equals("darkblue", StringComparison.InvariantCultureIgnoreCase))
                     {
                         color = 0xA00000FF;
                     }
-                    else if (MemoryExtensions.Equals(buffer, "lightblue", StringComparison.InvariantCultureIgnoreCase))
+                    else if (buffer.Equals("lightblue", StringComparison.InvariantCultureIgnoreCase))
                     {
                         color = 0xE6D8ADFF;
                     }
-                    else if (MemoryExtensions.Equals(buffer, "purple", StringComparison.InvariantCultureIgnoreCase))
+                    else if (buffer.Equals("purple", StringComparison.InvariantCultureIgnoreCase))
                     {
                         color = 0x800080FF;
                     }
-                    else if (MemoryExtensions.Equals(buffer, "yellow", StringComparison.InvariantCultureIgnoreCase))
+                    else if (buffer.Equals("yellow", StringComparison.InvariantCultureIgnoreCase))
                     {
                         color = 0x00FFFFFF;
                     }
-                    else if (MemoryExtensions.Equals(buffer, "lime", StringComparison.InvariantCultureIgnoreCase))
+                    else if (buffer.Equals("lime", StringComparison.InvariantCultureIgnoreCase))
                     {
                         color = 0x00FF00FF;
                     }
-                    else if (MemoryExtensions.Equals(buffer, "magenta", StringComparison.InvariantCultureIgnoreCase))
+                    else if (buffer.Equals("magenta", StringComparison.InvariantCultureIgnoreCase))
                     {
                         color = 0xFF00FFFF;
                     }
-                    else if (MemoryExtensions.Equals(buffer, "white", StringComparison.InvariantCultureIgnoreCase))
+                    else if (buffer.Equals("white", StringComparison.InvariantCultureIgnoreCase))
                     {
                         color = 0xFFFEFEFF;
                     }
-                    else if (MemoryExtensions.Equals(buffer, "silver", StringComparison.InvariantCultureIgnoreCase))
+                    else if (buffer.Equals("silver", StringComparison.InvariantCultureIgnoreCase))
                     {
                         color = 0xC0C0C0FF;
                     }
-                    else if (MemoryExtensions.Equals(buffer, "grey", StringComparison.InvariantCultureIgnoreCase) ||
-                             MemoryExtensions.Equals(buffer, "gray", StringComparison.InvariantCultureIgnoreCase))
+                    else if (buffer.Equals("grey", StringComparison.InvariantCultureIgnoreCase) ||
+                             buffer.Equals("gray", StringComparison.InvariantCultureIgnoreCase))
                     {
                         color = 0x808080FF;
                     }
-                    else if (MemoryExtensions.Equals(buffer, "black", StringComparison.InvariantCultureIgnoreCase))
+                    else if (buffer.Equals("black", StringComparison.InvariantCultureIgnoreCase))
                     {
                         color = 0x010101FF;
                     }
-                    else if (MemoryExtensions.Equals(buffer, "orange", StringComparison.InvariantCultureIgnoreCase))
+                    else if (buffer.Equals("orange", StringComparison.InvariantCultureIgnoreCase))
                     {
                         color = 0x00A5FFFF;
                     }
-                    else if (MemoryExtensions.Equals(buffer, "brown", StringComparison.InvariantCultureIgnoreCase))
+                    else if (buffer.Equals("brown", StringComparison.InvariantCultureIgnoreCase))
                     {
                         color = 0x2A2AA5FF;
                     }
-                    else if (MemoryExtensions.Equals(buffer, "maroon", StringComparison.InvariantCultureIgnoreCase))
+                    else if (buffer.Equals("maroon", StringComparison.InvariantCultureIgnoreCase))
                     {
                         color = 0x000080FF;
                     }
-                    else if (MemoryExtensions.Equals(buffer, "green", StringComparison.InvariantCultureIgnoreCase))
+                    else if (buffer.Equals("green", StringComparison.InvariantCultureIgnoreCase))
                     {
                         color = 0x008000FF;
                     }
-                    else if (MemoryExtensions.Equals(buffer, "olive", StringComparison.InvariantCultureIgnoreCase))
+                    else if (buffer.Equals("olive", StringComparison.InvariantCultureIgnoreCase))
                     {
                         color = 0x008080FF;
                     }
@@ -3570,7 +3626,7 @@ namespace ClassicUO.Assets
                     return (x, y);
                 }
 
-                if (pos <= info.CharStart + len && info.Data.Length >= len)
+                if (pos <= info.CharStart + len && info.Data.Count >= len)
                 {
                     for (int i = 0; i < len; i++)
                     {
@@ -3684,7 +3740,7 @@ namespace ClassicUO.Assets
                     return (x, y);
                 }
 
-                if (pos <= info.CharStart + len && info.Data.Length >= len)
+                if (pos <= info.CharStart + len && info.Data.Count >= len)
                 {
                     for (int i = 0; i < len; i++)
                     {
@@ -4053,11 +4109,17 @@ namespace ClassicUO.Assets
         public TEXT_ALIGN_TYPE Align;
         public int CharCount;
         public int CharStart;
-        public FastList<MultilinesFontData> Data = new FastList<MultilinesFontData>();
+        public List<MultilinesFontData> Data = new List<MultilinesFontData>();
         public int IndentionOffset;
         public int MaxHeight;
         public MultilinesFontInfo Next;
         public int Width;
+
+        // Set on the head node only by GetInfoHTML — the per-parse list of
+        // URLs collected from <a href> tags. MultilinesFontData.LinkID is a
+        // 1-based index into this list (0 means "no link"). Lifetime: dies
+        // with the FontInfo it belongs to.
+        public List<string> WebLinks;
 
         public void Reset()
         {
@@ -4068,6 +4130,7 @@ namespace ClassicUO.Assets
             CharCount = 0;
             Align = TEXT_ALIGN_TYPE.TS_LEFT;
             Next = null;
+            WebLinks = null;
         }
     }
 
@@ -4092,15 +4155,8 @@ namespace ClassicUO.Assets
 
     public struct WebLinkRect
     {
-        public ushort LinkID;
-        public FontsLoader.Margin Bounds;
         public string Url;
-    }
-
-    public class WebLink
-    {
-        public bool IsVisited;
-        public string Link;
+        public FontsLoader.Margin Bounds;
     }
 
     public struct HTMLChar

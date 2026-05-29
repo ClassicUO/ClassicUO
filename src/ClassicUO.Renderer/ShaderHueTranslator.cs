@@ -18,6 +18,7 @@ namespace ClassicUO.Renderer
         public const byte SHADER_SHADOW = 8;
         public const byte SHADER_LIGHTS = 9;
         public const byte SHADER_EFFECT_HUED = 10;
+        public const byte SHADER_RGB_TINT = 11;
 
         private const byte GUMP_OFFSET = 20;
 

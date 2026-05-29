@@ -5,39 +5,35 @@ namespace ClassicUO.Renderer
 {
     public sealed class PixelPicker
     {
-        private struct TextureInfo
-        {
-            public int Width;
-            public int Height;
-            public int StartIndex;
-        }
+        const int InitialDataCount = 0x40000; // 256kb
 
-        private readonly Dictionary<ulong, TextureInfo> _ids = new();
-        private byte[] _data = new byte[0x40000];
-        private int _dataCount = 0;
+        Dictionary<ulong, int> m_IDs = new Dictionary<ulong, int>();
+        readonly List<byte> m_Data = new List<byte>(InitialDataCount); // list<t> access is 10% slower than t[].
 
         public bool Get(ulong textureID, int x, int y, int extraRange = 0)
         {
-            if (!_ids.TryGetValue(textureID, out TextureInfo info))
+            int index;
+            if (!m_IDs.TryGetValue(textureID, out index))
             {
                 return false;
             }
-
-            if (x < 0 || x >= info.Width || y < 0 || y >= info.Height)
+            int width = ReadIntegerFromData(ref index);
+            if (x < 0 || x >= width)
             {
                 return false;
             }
-
-            int index = info.StartIndex;
+            int height = ReadIntegerFromData(ref index);
+            if (y < 0 || y >= height)
+            {
+                return false;
+            }
             int current = 0;
-            int target = x + y * info.Width;
+            int target = x + y * width;
             bool inTransparentSpan = true;
-
-            while (current <= target)
+            while (current < target)
             {
                 int spanLength = ReadIntegerFromData(ref index);
                 current += spanLength;
-
                 if (extraRange == 0)
                 {
                     if (target < current)
@@ -47,12 +43,20 @@ namespace ClassicUO.Renderer
                 }
                 else
                 {
-                    if (!inTransparentSpan && IsWithinRange(current, spanLength, x, y, info.Width, extraRange))
+                    if (!inTransparentSpan)
                     {
-                        return true;
+                        int y0 = current / width;
+                        int x1 = current % width;
+                        int x0 = x1 - spanLength;
+                        for (int range = -extraRange; range <= extraRange; range++)
+                        {
+                            if (y + range == y0 && (x + extraRange >= x0) && (x - extraRange <= x1))
+                            {
+                                return true;
+                            }
+                        }
                     }
                 }
-
                 inTransparentSpan = !inTransparentSpan;
             }
             return false;
@@ -60,100 +64,71 @@ namespace ClassicUO.Renderer
 
         public void GetDimensions(ulong textureID, out int width, out int height)
         {
-            if (_ids.TryGetValue(textureID, out TextureInfo info))
-            {
-                width = info.Width;
-                height = info.Height;
-            }
-            else
+            int index;
+            if (!m_IDs.TryGetValue(textureID, out index))
             {
                 width = height = 0;
+                return;
             }
+            width = ReadIntegerFromData(ref index);
+            height = ReadIntegerFromData(ref index);
         }
 
-        public void Set(ulong textureID, int width, int height, ReadOnlySpan<uint> pixels, bool replace = false)
+        public void Set(ulong textureID, int width, int height, ReadOnlySpan<uint> pixels)
         {
-            if (_ids.ContainsKey(textureID))
+            if (Has(textureID))
             {
-                if (!replace)
-                {
-                    return;
-                }
-
-                _ids.Remove(textureID);
+                return;
             }
 
-            int startIdx = _dataCount;
-            bool isTransparent = true;
+            int begin = m_Data.Count;
+            WriteIntegerToData(width);
+            WriteIntegerToData(height);
+            bool countingTransparent = true;
             int count = 0;
-
             for (int i = 0, len = width * height; i < len; i++)
             {
-                bool pixelIsTransparent = pixels[i] == 0;
-                if (isTransparent != pixelIsTransparent)
+                bool isTransparent = pixels[i] == 0;
+                if (countingTransparent != isTransparent)
                 {
                     WriteIntegerToData(count);
-                    isTransparent = pixelIsTransparent;
+                    countingTransparent = !countingTransparent;
                     count = 0;
                 }
-                count++;
+                count += 1;
             }
             WriteIntegerToData(count);
-
-            _ids[textureID] = new TextureInfo { Width = width, Height = height, StartIndex = startIdx };
+            m_IDs[textureID] = begin;
         }
 
-        private bool IsWithinRange(int current, int spanLength, int x, int y, int width, int range)
+        bool Has(ulong textureID)
         {
-            int y0 = current / width;
-            int x1 = current % width;
-            int x0 = x1 - spanLength;
-
-            for (int offsetY = -range; offsetY <= range; offsetY++)
-            {
-                if (y + offsetY == y0 && (x + range >= x0) && (x - range <= x1))
-                {
-                    return true;
-                }
-            }
-            return false;
+            return m_IDs.ContainsKey(textureID);
         }
 
-        private void WriteIntegerToData(int value)
+        void WriteIntegerToData(int value)
         {
-            EnsureCapacity();
-            while (value > 0x7F)
+            while (value > 0x7f)
             {
-                _data[_dataCount++] = (byte)((value & 0x7F) | 0x80);
+                m_Data.Add((byte)((value & 0x7f) | 0x80));
                 value >>= 7;
-                EnsureCapacity();
             }
-            _data[_dataCount++] = (byte)value;
+            m_Data.Add((byte)value);
         }
 
-        private int ReadIntegerFromData(ref int index)
+        int ReadIntegerFromData(ref int index)
         {
             int value = 0;
             int shift = 0;
-
             while (true)
             {
-                byte data = _data[index++];
-                value |= (data & 0x7F) << shift;
-
-                if ((data & 0x80) == 0)
+                byte data = m_Data[index++];
+                value += (data & 0x7f) << shift;
+                if ((data & 0x80) == 0x00)
                 {
                     return value;
                 }
                 shift += 7;
-            }
-        }
-
-        private void EnsureCapacity()
-        {
-            if (_dataCount >= _data.Length)
-            {
-                Array.Resize(ref _data, _dataCount * 2);
             }
         }
     }

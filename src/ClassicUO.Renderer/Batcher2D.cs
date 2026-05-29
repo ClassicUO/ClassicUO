@@ -52,12 +52,10 @@ namespace ClassicUO.Renderer
         private DepthStencilState _stencil;
         private Matrix _transformMatrix;
         private readonly DynamicVertexBuffer _vertexBuffer;
+        private DynamicIndexBuffer _dynamicIndexBuffer;
         private readonly BasicUOEffect _basicUOEffect;
         private Texture2D[] _textureInfo;
         private PositionNormalTextureColor4[] _vertexInfo;
-
-        private DynamicIndexBuffer _dynamicIndexBuffer;
-        private bool _worldOffsetActive;
 
 
         public UltimaBatcher2D(GraphicsDevice device)
@@ -106,6 +104,7 @@ namespace ClassicUO.Renderer
         public GraphicsDevice GraphicsDevice { get; }
 
         public int TextureSwitches, FlushesDone;
+        private bool _worldOffsetActive;
 
 
 
@@ -115,7 +114,6 @@ namespace ClassicUO.Renderer
             _basicUOEffect?.Dispose();
             _vertexBuffer.Dispose();
             _indexBuffer.Dispose();
-            _dynamicIndexBuffer?.Dispose();
         }
 
 
@@ -126,176 +124,11 @@ namespace ClassicUO.Renderer
 
         public void SetCircleOfTransparencyRadius(float radius)
         {
-            _basicUOEffect.CircleOfTransparencyRadius?.SetValue(radius);
+            _basicUOEffect.CircleOfTransparencyRadius.SetValue(radius);
         }
-
-        public DynamicIndexBuffer GetDynamicIndexBuffer(int requiredIndices)
-        {
-            if (_dynamicIndexBuffer == null || _dynamicIndexBuffer.IndexCount < requiredIndices)
-            {
-                _dynamicIndexBuffer?.Dispose();
-                _dynamicIndexBuffer = new DynamicIndexBuffer(
-                    GraphicsDevice,
-                    IndexElementSize.SixteenBits,
-                    Math.Max(requiredIndices, 1024),
-                    BufferUsage.WriteOnly
-                );
-            }
-            return _dynamicIndexBuffer;
-        }
-
-        public void DrawDirectIndexed(Texture2D texture, int startIndex, int primitiveCount, int numVertices)
-        {
-            GraphicsDevice.Textures[0] = texture;
-            _basicUOEffect.Pass.Apply();
-
-            if (_customEffect != null)
-            {
-                foreach (EffectPass pass in _customEffect.CurrentTechnique.Passes)
-                {
-                    pass.Apply();
-                    GraphicsDevice.DrawIndexedPrimitives(
-                        PrimitiveType.TriangleList,
-                        0,
-                        0,
-                        numVertices,
-                        startIndex,
-                        primitiveCount
-                    );
-                }
-            }
-            else
-            {
-                GraphicsDevice.DrawIndexedPrimitives(
-                    PrimitiveType.TriangleList,
-                    0,
-                    0,
-                    numVertices,
-                    startIndex,
-                    primitiveCount
-                );
-            }
-        }
-
-        public void SetWorldOffset(int offsetX, int offsetY)
-        {
-            Flush();
-            ApplyStates();
-            _worldOffsetActive = true;
-            _basicUOEffect.WorldMatrix.SetValue(Matrix.CreateTranslation(-offsetX, -offsetY, 0));
-            _basicUOEffect.Pass.Apply();
-        }
-
-        public void ResetWorldOffset()
-        {
-            Flush();
-            _worldOffsetActive = false;
-            _basicUOEffect.WorldMatrix.SetValue(Matrix.Identity);
-            _basicUOEffect.Pass.Apply();
-            GraphicsDevice.SetVertexBuffer(_vertexBuffer);
-            GraphicsDevice.Indices = _indexBuffer;
-        }
-
-        public void Draw(Texture2D texture, Vector2 position, Rectangle? sourceRectangle, Color color, float rotation, Vector2 scale, float depth)
-        {
-            Vector3 hueVector = new Vector3(0, ShaderHueTranslator.SHADER_TEXT_HUE, MathHelper.Clamp(color.A / 255f, 0f, 1f));
-
-            float sourceX, sourceY, sourceW, sourceH;
-            if (sourceRectangle.HasValue)
-            {
-                sourceX = sourceRectangle.Value.X / (float)texture.Width;
-                sourceY = sourceRectangle.Value.Y / (float)texture.Height;
-                sourceW = Math.Sign(sourceRectangle.Value.Width) * Math.Max(Math.Abs(sourceRectangle.Value.Width), Utility.MathHelper.MachineEpsilonFloat) / (float)texture.Width;
-                sourceH = Math.Sign(sourceRectangle.Value.Height) * Math.Max(Math.Abs(sourceRectangle.Value.Height), Utility.MathHelper.MachineEpsilonFloat) / (float)texture.Height;
-                scale.X *= sourceRectangle.Value.Width;
-                scale.Y *= sourceRectangle.Value.Height;
-            }
-            else
-            {
-                sourceX = 0.0f;
-                sourceY = 0.0f;
-                sourceW = 1.0f;
-                sourceH = 1.0f;
-                scale.X *= texture.Width;
-                scale.Y *= texture.Height;
-            }
-
-            EnsureSize();
-
-            ref var sprite = ref _vertexInfo[_numSprites];
-
-            var rotationSin = (float)Math.Sin(rotation);
-            var rotationCos = (float)Math.Cos(rotation);
-
-            sprite.Position0.X = position.X;
-            sprite.Position0.Y = position.Y;
-            sprite.Position0.Z = depth;
-
-            sprite.Position1.X = (rotationCos * scale.X) + position.X;
-            sprite.Position1.Y = (rotationSin * scale.X) + position.Y;
-            sprite.Position1.Z = depth;
-
-            sprite.Position2.X = (-rotationSin * scale.Y) + position.X;
-            sprite.Position2.Y = (rotationCos * scale.Y) + position.Y;
-            sprite.Position2.Z = depth;
-
-            sprite.Position3.X = ((-rotationSin * scale.Y) + (rotationCos * scale.X) + position.X);
-            sprite.Position3.Y = ((rotationCos * scale.Y) + (rotationSin * scale.X) + position.Y);
-            sprite.Position3.Z = depth;
-
-            sprite.TextureCoordinate0.X = (_cornerOffsetX[0] * sourceW) + sourceX;
-            sprite.TextureCoordinate0.Y = (_cornerOffsetY[0] * sourceH) + sourceY;
-            sprite.TextureCoordinate0.Z = 0;
-
-            sprite.TextureCoordinate1.X = (_cornerOffsetX[1] * sourceW) + sourceX;
-            sprite.TextureCoordinate1.Y = (_cornerOffsetY[1] * sourceH) + sourceY;
-            sprite.TextureCoordinate1.Z = 0;
-
-            sprite.TextureCoordinate2.X = (_cornerOffsetX[2] * sourceW) + sourceX;
-            sprite.TextureCoordinate2.Y = (_cornerOffsetY[2] * sourceH) + sourceY;
-            sprite.TextureCoordinate2.Z = 0;
-
-            sprite.TextureCoordinate3.X = (_cornerOffsetX[3] * sourceW) + sourceX;
-            sprite.TextureCoordinate3.Y = (_cornerOffsetY[3] * sourceH) + sourceY;
-            sprite.TextureCoordinate3.Z = 0;
-
-            sprite.Hue0 = hueVector;
-            sprite.Hue1 = hueVector;
-            sprite.Hue2 = hueVector;
-            sprite.Hue3 = hueVector;
-
-            var r = MathHelper.Clamp(color.R / 255f, 0f, 1f);
-            var g = MathHelper.Clamp(color.G / 255f, 0f, 1f);
-            var b = MathHelper.Clamp(color.B / 255f, 0f, 1f);
-
-            sprite.Normal0.X = r;
-            sprite.Normal0.Y = g;
-            sprite.Normal0.Z = b;
-
-            sprite.Normal1.X = r;
-            sprite.Normal1.Y = g;
-            sprite.Normal1.Z = b;
-
-            sprite.Normal2.X = r;
-            sprite.Normal2.Y = g;
-            sprite.Normal2.Z = b;
-
-            sprite.Normal3.X = r;
-            sprite.Normal3.Y = g;
-            sprite.Normal3.Z = b;
-
-            _textureInfo[_numSprites] = texture;
-            ++_numSprites;
-        }
-
-        public void DrawString(SpriteFont spriteFont, ReadOnlySpan<char> text, int x, int y, Vector3 color)
-            => DrawString(spriteFont, text, new Vector2(x, y), color, 0f);
 
         public void DrawString(SpriteFont spriteFont, ReadOnlySpan<char> text, int x, int y, Vector3 color, float layerDepth)
             => DrawString(spriteFont, text, new Vector2(x, y), color, layerDepth);
-
-        public void DrawString(SpriteFont spriteFont, ReadOnlySpan<char> text, Vector2 position, Vector3 color)
-            => DrawString(spriteFont, text, position, color, 0f);
 
         public void DrawString(SpriteFont spriteFont, ReadOnlySpan<char> text, Vector2 position, Vector3 color, float layerDepth)
         {
@@ -425,10 +258,8 @@ namespace ClassicUO.Renderer
             ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
 
             // we need to apply an offset to the texture
-            float sourceX = ((sourceRect.X + 0.5f) / (float)texture.Width);
-            float sourceY = ((sourceRect.Y + 0.5f) / (float)texture.Height);
-            float sourceW = ((sourceRect.Width - 1f) / (float)texture.Width);
-            float sourceH = ((sourceRect.Height - 1f) / (float)texture.Height);
+            CalculateHalfPixelUVs(sourceRect, texture.Width, texture.Height,
+                out float sourceX, out float sourceY, out float sourceW, out float sourceH);
 
             vertex.TextureCoordinate0.X = (_cornerOffsetX[0] * sourceW) + sourceX;
             vertex.TextureCoordinate0.Y = (_cornerOffsetY[0] * sourceH) + sourceY;
@@ -504,10 +335,8 @@ namespace ClassicUO.Renderer
             vertex.Position3.Z = depth;
 
 
-            float sourceX = ((sourceRect.X + 0.5f) / (float)texture.Width);
-            float sourceY = ((sourceRect.Y + 0.5f) / (float)texture.Height);
-            float sourceW = ((sourceRect.Width - 1f) / (float)texture.Width);
-            float sourceH = ((sourceRect.Height - 1f) / (float)texture.Height);
+            CalculateHalfPixelUVs(sourceRect, texture.Width, texture.Height,
+                out float sourceX, out float sourceY, out float sourceW, out float sourceH);
 
             byte effects = (byte)((flip ? SpriteEffects.FlipHorizontally : SpriteEffects.None) & (SpriteEffects)0x03);
 
@@ -524,24 +353,11 @@ namespace ClassicUO.Renderer
             vertex.TextureCoordinate2.Z = 0;
             vertex.TextureCoordinate3.Z = 0;
 
-            vertex.Normal0.X = 0;
-            vertex.Normal0.Y = 0;
-            vertex.Normal0.Z = 1;
+            SetDefaultNormals(ref vertex);
 
-            vertex.Normal1.X = 0;
-            vertex.Normal1.Y = 0;
-            vertex.Normal1.Z = 1;
-
-            vertex.Normal2.X = 0;
-            vertex.Normal2.Y = 0;
-            vertex.Normal2.Z = 1;
-
-            vertex.Normal3.X = 0;
-            vertex.Normal3.Y = 0;
-            vertex.Normal3.Z = 1;
-
-            vertex.Hue0.Z = vertex.Hue1.Z = vertex.Hue2.Z = vertex.Hue3.Z = vertex.Hue0.X = vertex.Hue1.X = vertex.Hue2.X = vertex.Hue3.X = 0;
+            vertex.Hue0.X = vertex.Hue1.X = vertex.Hue2.X = vertex.Hue3.X = 0;
             vertex.Hue0.Y = vertex.Hue1.Y = vertex.Hue2.Y = vertex.Hue3.Y = ShaderHueTranslator.SHADER_SHADOW;
+            vertex.Hue0.Z = vertex.Hue1.Z = vertex.Hue2.Z = vertex.Hue3.Z = 1f;
 
             PushSprite(texture);
         }
@@ -570,195 +386,95 @@ namespace ClassicUO.Renderer
 
             if (mod.X != 0.0f)
             {
-                EnsureSize();
-
-                ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
-
-                vertex.Position0.X = position.X + sittingOffset;
-                vertex.Position0.Y = position.Y;
-
-                vertex.Position1.X = position.X + widthOffset;
-                vertex.Position1.Y = position.Y;
-
-                vertex.Position2.X = position.X + sittingOffset;
-                vertex.Position2.Y = position.Y + h03;
-
-                vertex.Position3.X = position.X + widthOffset;
-                vertex.Position3.Y = position.Y + h03;
-
-                vertex.Position0.Z = depth;
-                vertex.Position1.Z = depth;
-                vertex.Position2.Z = depth;
-                vertex.Position3.Z = depth;
-
-                float sourceX = ((sourceRect.X + 0.5f) / (float)texture.Width);
-                float sourceY = ((sourceRect.Y + 0.5f) / (float)texture.Height);
-                float sourceW = ((sourceRect.Width - 1f) / (float)texture.Width);
-                float sourceH = ((sourceRect.Height - 1f) / (float)texture.Height);
-
-                byte effects = (byte)((flip ? SpriteEffects.FlipHorizontally : SpriteEffects.None) & (SpriteEffects)0x03);
-
-                vertex.TextureCoordinate0.X = (_cornerOffsetX[0 ^ effects] * sourceW) + sourceX;
-                vertex.TextureCoordinate0.Y = (_cornerOffsetY[0 ^ effects] * sourceH) + sourceY;
-                vertex.TextureCoordinate1.X = (_cornerOffsetX[1 ^ effects] * sourceW) + sourceX;
-                vertex.TextureCoordinate1.Y = (_cornerOffsetY[1 ^ effects] * sourceH) + sourceY;
-                vertex.TextureCoordinate2.X = (_cornerOffsetX[2 ^ effects] * sourceW) + sourceX;
-                vertex.TextureCoordinate2.Y = (_cornerOffsetY[2 ^ effects] * sourceH * mod.X) + sourceY;
-                vertex.TextureCoordinate3.X = (_cornerOffsetX[3 ^ effects] * sourceW) + sourceX;
-                vertex.TextureCoordinate3.Y = (_cornerOffsetY[3 ^ effects] * sourceH * mod.X) + sourceY;
-                vertex.TextureCoordinate0.Z = 0;
-                vertex.TextureCoordinate1.Z = 0;
-                vertex.TextureCoordinate2.Z = 0;
-                vertex.TextureCoordinate3.Z = 0;
-
-                vertex.Normal0.X = 0;
-                vertex.Normal0.Y = 0;
-                vertex.Normal0.Z = 1;
-
-                vertex.Normal1.X = 0;
-                vertex.Normal1.Y = 0;
-                vertex.Normal1.Z = 1;
-
-                vertex.Normal2.X = 0;
-                vertex.Normal2.Y = 0;
-                vertex.Normal2.Z = 1;
-
-                vertex.Normal3.X = 0;
-                vertex.Normal3.Y = 0;
-                vertex.Normal3.Z = 1;
-
-                vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
-
-                PushSprite(texture);
+                DrawSittedSection(
+                    texture, ref sourceRect, ref hue, flip, depth, mod.X,
+                    position.X + sittingOffset, position.Y,
+                    position.X + widthOffset, position.Y,
+                    position.X + sittingOffset, position.Y + h03,
+                    position.X + widthOffset, position.Y + h03,
+                    0f);
             }
 
             if (mod.Y != 0.0f)
             {
-                EnsureSize();
-
-                ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
-
-                vertex.Position0.X = position.X + sittingOffset;
-                vertex.Position0.Y = position.Y + h03;
-
-                vertex.Position1.X = position.X + widthOffset;
-                vertex.Position1.Y = position.Y + h03;
-
-                vertex.Position2.X = position.X;
-                vertex.Position2.Y = position.Y + h06;
-
-                vertex.Position3.X = position.X + width;
-                vertex.Position3.Y = position.Y + h06;
-
-                vertex.Position0.Z = depth;
-                vertex.Position1.Z = depth;
-                vertex.Position2.Z = depth;
-                vertex.Position3.Z = depth;
-
-                float sourceX = ((sourceRect.X + 0.5f) / (float)texture.Width);
-                float sourceY = ((sourceRect.Y + 0.5f + h03) / (float)texture.Height);
-                float sourceW = ((sourceRect.Width - 1f) / (float)texture.Width);
-                float sourceH = ((sourceRect.Height - 1f - h03) / (float)texture.Height);
-
-                byte effects = (byte)((flip ? SpriteEffects.FlipHorizontally : SpriteEffects.None) & (SpriteEffects)0x03);
-
-                vertex.TextureCoordinate0.X = (_cornerOffsetX[0 ^ effects] * sourceW) + sourceX;
-                vertex.TextureCoordinate0.Y = (_cornerOffsetY[0 ^ effects] * sourceH) + sourceY;
-                vertex.TextureCoordinate1.X = (_cornerOffsetX[1 ^ effects] * sourceW) + sourceX;
-                vertex.TextureCoordinate1.Y = (_cornerOffsetY[1 ^ effects] * sourceH) + sourceY;
-                vertex.TextureCoordinate2.X = (_cornerOffsetX[2 ^ effects] * sourceW) + sourceX;
-                vertex.TextureCoordinate2.Y = (_cornerOffsetY[2 ^ effects] * sourceH * mod.Y) + sourceY;
-                vertex.TextureCoordinate3.X = (_cornerOffsetX[3 ^ effects] * sourceW) + sourceX;
-                vertex.TextureCoordinate3.Y = (_cornerOffsetY[3 ^ effects] * sourceH * mod.Y) + sourceY;
-                vertex.TextureCoordinate0.Z = 0;
-                vertex.TextureCoordinate1.Z = 0;
-                vertex.TextureCoordinate2.Z = 0;
-                vertex.TextureCoordinate3.Z = 0;
-
-                vertex.Normal0.X = 0;
-                vertex.Normal0.Y = 0;
-                vertex.Normal0.Z = 1;
-
-                vertex.Normal1.X = 0;
-                vertex.Normal1.Y = 0;
-                vertex.Normal1.Z = 1;
-
-                vertex.Normal2.X = 0;
-                vertex.Normal2.Y = 0;
-                vertex.Normal2.Z = 1;
-
-                vertex.Normal3.X = 0;
-                vertex.Normal3.Y = 0;
-                vertex.Normal3.Z = 1;
-
-                vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
-
-                PushSprite(texture);
+                DrawSittedSection(
+                    texture, ref sourceRect, ref hue, flip, depth, mod.Y,
+                    position.X + sittingOffset, position.Y + h03,
+                    position.X + widthOffset, position.Y + h03,
+                    position.X, position.Y + h06,
+                    position.X + width, position.Y + h06,
+                    h03);
             }
 
             if (mod.Z != 0.0f)
             {
-                EnsureSize();
-
-                ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
-
-                vertex.Position0.X = position.X;
-                vertex.Position0.Y = position.Y + h06;
-
-                vertex.Position1.X = position.X + width;
-                vertex.Position1.Y = position.Y + h06;
-
-                vertex.Position2.X = position.X;
-                vertex.Position2.Y = position.Y + h09;
-
-                vertex.Position3.X = position.X + width;
-                vertex.Position3.Y = position.Y + h09;
-
-                vertex.Position0.Z = depth;
-                vertex.Position1.Z = depth;
-                vertex.Position2.Z = depth;
-                vertex.Position3.Z = depth;
-
-                float sourceX = ((sourceRect.X + 0.5f) / (float)texture.Width);
-                float sourceY = ((sourceRect.Y + 0.5f + h06) / (float)texture.Height);
-                float sourceW = ((sourceRect.Width - 1f) / (float)texture.Width);
-                float sourceH = ((sourceRect.Height - 1f - h06) / (float)texture.Height);
-
-                byte effects = (byte)((flip ? SpriteEffects.FlipHorizontally : SpriteEffects.None) & (SpriteEffects)0x03);
-
-                vertex.TextureCoordinate0.X = (_cornerOffsetX[0 ^ effects] * sourceW) + sourceX;
-                vertex.TextureCoordinate0.Y = (_cornerOffsetY[0 ^ effects] * sourceH) + sourceY;
-                vertex.TextureCoordinate1.X = (_cornerOffsetX[1 ^ effects] * sourceW) + sourceX;
-                vertex.TextureCoordinate1.Y = (_cornerOffsetY[1 ^ effects] * sourceH) + sourceY;
-                vertex.TextureCoordinate2.X = (_cornerOffsetX[2 ^ effects] * sourceW) + sourceX;
-                vertex.TextureCoordinate2.Y = (_cornerOffsetY[2 ^ effects] * sourceH * mod.Z) + sourceY;
-                vertex.TextureCoordinate3.X = (_cornerOffsetX[3 ^ effects] * sourceW) + sourceX;
-                vertex.TextureCoordinate3.Y = (_cornerOffsetY[3 ^ effects] * sourceH * mod.Z) + sourceY;
-                vertex.TextureCoordinate0.Z = 0;
-                vertex.TextureCoordinate1.Z = 0;
-                vertex.TextureCoordinate2.Z = 0;
-                vertex.TextureCoordinate3.Z = 0;
-
-                vertex.Normal0.X = 0;
-                vertex.Normal0.Y = 0;
-                vertex.Normal0.Z = 1;
-
-                vertex.Normal1.X = 0;
-                vertex.Normal1.Y = 0;
-                vertex.Normal1.Z = 1;
-
-                vertex.Normal2.X = 0;
-                vertex.Normal2.Y = 0;
-                vertex.Normal2.Z = 1;
-
-                vertex.Normal3.X = 0;
-                vertex.Normal3.Y = 0;
-                vertex.Normal3.Z = 1;
-
-                vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
-
-                PushSprite(texture);
+                DrawSittedSection(
+                    texture, ref sourceRect, ref hue, flip, depth, mod.Z,
+                    position.X, position.Y + h06,
+                    position.X + width, position.Y + h06,
+                    position.X, position.Y + h09,
+                    position.X + width, position.Y + h09,
+                    h06);
             }
+        }
+
+        private void DrawSittedSection(
+            Texture2D texture,
+            ref Rectangle sourceRect,
+            ref Vector3 hue,
+            bool flip,
+            float depth,
+            float modValue,
+            float x0, float y0,
+            float x1, float y1,
+            float x2, float y2,
+            float x3, float y3,
+            float uvYOffset)
+        {
+            EnsureSize();
+
+            ref PositionNormalTextureColor4 vertex = ref _vertexInfo[_numSprites];
+
+            vertex.Position0.X = x0;
+            vertex.Position0.Y = y0;
+            vertex.Position1.X = x1;
+            vertex.Position1.Y = y1;
+            vertex.Position2.X = x2;
+            vertex.Position2.Y = y2;
+            vertex.Position3.X = x3;
+            vertex.Position3.Y = y3;
+
+            vertex.Position0.Z = depth;
+            vertex.Position1.Z = depth;
+            vertex.Position2.Z = depth;
+            vertex.Position3.Z = depth;
+
+            CalculateHalfPixelUVs(sourceRect, texture.Width, texture.Height,
+                out float sourceX, out float sourceY, out float sourceW, out float sourceH);
+            float invH = 1f / texture.Height;
+            sourceY += uvYOffset * invH;
+            sourceH -= uvYOffset * invH;
+
+            byte effects = (byte)((flip ? SpriteEffects.FlipHorizontally : SpriteEffects.None) & (SpriteEffects)0x03);
+
+            vertex.TextureCoordinate0.X = (_cornerOffsetX[0 ^ effects] * sourceW) + sourceX;
+            vertex.TextureCoordinate0.Y = (_cornerOffsetY[0 ^ effects] * sourceH) + sourceY;
+            vertex.TextureCoordinate1.X = (_cornerOffsetX[1 ^ effects] * sourceW) + sourceX;
+            vertex.TextureCoordinate1.Y = (_cornerOffsetY[1 ^ effects] * sourceH) + sourceY;
+            vertex.TextureCoordinate2.X = (_cornerOffsetX[2 ^ effects] * sourceW) + sourceX;
+            vertex.TextureCoordinate2.Y = (_cornerOffsetY[2 ^ effects] * sourceH * modValue) + sourceY;
+            vertex.TextureCoordinate3.X = (_cornerOffsetX[3 ^ effects] * sourceW) + sourceX;
+            vertex.TextureCoordinate3.Y = (_cornerOffsetY[3 ^ effects] * sourceH * modValue) + sourceY;
+            vertex.TextureCoordinate0.Z = 0;
+            vertex.TextureCoordinate1.Z = 0;
+            vertex.TextureCoordinate2.Z = 0;
+            vertex.TextureCoordinate3.Z = 0;
+
+            SetDefaultNormals(ref vertex);
+
+            vertex.Hue0 = vertex.Hue1 = vertex.Hue2 = vertex.Hue3 = hue;
+
+            PushSprite(texture);
         }
 
         public void DrawTiled
@@ -767,7 +483,7 @@ namespace ClassicUO.Renderer
             Rectangle destinationRectangle,
             Rectangle sourceRectangle,
             Vector3 hue,
-            float depth = 0f
+            float layerDepth
         )
         {
             int h = destinationRectangle.Height;
@@ -792,7 +508,7 @@ namespace ClassicUO.Renderer
                         pos,
                         rect,
                         hue,
-                        depth
+                        layerDepth
                     );
 
                     w -= sourceRectangle.Width;
@@ -812,7 +528,7 @@ namespace ClassicUO.Renderer
             int width,
             int height,
             Vector3 hue,
-            float depth = 0f
+            float depth
         )
         {
             Rectangle rect = new Rectangle(x, y, width, 1);
@@ -837,15 +553,6 @@ namespace ClassicUO.Renderer
 
             return true;
         }
-
-        public void DrawLine
-        (
-            Texture2D texture,
-            Vector2 start,
-            Vector2 end,
-            Vector3 color,
-            float stroke
-        ) => DrawLine(texture, start, end, color, stroke, 0f);
 
         public void DrawLine
         (
@@ -881,16 +588,6 @@ namespace ClassicUO.Renderer
         (
             Texture2D texture,
             Vector2 position,
-            Vector3 color
-        )
-        {
-            AddSprite(texture, 0f, 0f, 1f, 1f, position.X, position.Y, texture.Width, texture.Height, color, 0f, 0f, 0f, 1f, 0f, 0);
-        }
-
-        public void Draw
-        (
-            Texture2D texture,
-            Vector2 position,
             Vector3 color,
             float depth
         )
@@ -904,7 +601,7 @@ namespace ClassicUO.Renderer
             Vector2 position,
             Rectangle? sourceRectangle,
             Vector3 color,
-            float layerDepth = 0.0f
+            float depth
         )
         {
             float sourceX, sourceY, sourceW, sourceH;
@@ -912,10 +609,8 @@ namespace ClassicUO.Renderer
 
             if (sourceRectangle.HasValue)
             {
-                sourceX = sourceRectangle.Value.X / (float)texture.Width;
-                sourceY = sourceRectangle.Value.Y / (float)texture.Height;
-                sourceW = sourceRectangle.Value.Width / (float)texture.Width;
-                sourceH = sourceRectangle.Value.Height / (float)texture.Height;
+                CalculateUVs(sourceRectangle.Value, texture.Width, texture.Height,
+                    out sourceX, out sourceY, out sourceW, out sourceH);
                 destW = sourceRectangle.Value.Width;
                 destH = sourceRectangle.Value.Height;
             }
@@ -929,7 +624,7 @@ namespace ClassicUO.Renderer
                 destH = texture.Height;
             }
 
-            AddSprite(texture, sourceX, sourceY, sourceW, sourceH, position.X, position.Y, destW, destH, color, 0.0f, 0.0f, 0.0f, 1.0f, layerDepth, 0);
+            AddSprite(texture, sourceX, sourceY, sourceW, sourceH, position.X, position.Y, destW, destH, color, 0.0f, 0.0f, 0.0f, 1.0f, depth, 0);
         }
 
         public void Draw
@@ -951,10 +646,8 @@ namespace ClassicUO.Renderer
 
             if (sourceRectangle.HasValue)
             {
-                sourceX = sourceRectangle.Value.X / (float)texture.Width;
-                sourceY = sourceRectangle.Value.Y / (float)texture.Height;
-                sourceW = Math.Sign(sourceRectangle.Value.Width) * Math.Max(Math.Abs(sourceRectangle.Value.Width), Utility.MathHelper.MachineEpsilonFloat) / (float)texture.Width;
-                sourceH = Math.Sign(sourceRectangle.Value.Height) * Math.Max(Math.Abs(sourceRectangle.Value.Height), Utility.MathHelper.MachineEpsilonFloat) / (float)texture.Height;
+                CalculateUVsSafe(sourceRectangle.Value, texture.Width, texture.Height,
+                    out sourceX, out sourceY, out sourceW, out sourceH);
                 destW *= sourceRectangle.Value.Width;
                 destH *= sourceRectangle.Value.Height;
             }
@@ -1005,10 +698,8 @@ namespace ClassicUO.Renderer
             float sourceX, sourceY, sourceW, sourceH;
             if (sourceRectangle.HasValue)
             {
-                sourceX = sourceRectangle.Value.X / (float)texture.Width;
-                sourceY = sourceRectangle.Value.Y / (float)texture.Height;
-                sourceW = Math.Sign(sourceRectangle.Value.Width) * Math.Max(Math.Abs(sourceRectangle.Value.Width), Utility.MathHelper.MachineEpsilonFloat) / (float)texture.Width;
-                sourceH = Math.Sign(sourceRectangle.Value.Height) * Math.Max(Math.Abs(sourceRectangle.Value.Height), Utility.MathHelper.MachineEpsilonFloat) / (float)texture.Height;
+                CalculateUVsSafe(sourceRectangle.Value, texture.Width, texture.Height,
+                    out sourceX, out sourceY, out sourceW, out sourceH);
                 scale.X *= sourceRectangle.Value.Width;
                 scale.Y *= sourceRectangle.Value.Height;
             }
@@ -1047,33 +738,6 @@ namespace ClassicUO.Renderer
         (
             Texture2D texture,
             Rectangle destinationRectangle,
-            Vector3 color
-        )
-        {
-            AddSprite(
-                texture,
-                0.0f,
-                0.0f,
-                1.0f,
-                1.0f,
-                destinationRectangle.X,
-                destinationRectangle.Y,
-                destinationRectangle.Width,
-                destinationRectangle.Height,
-                color,
-                0.0f,
-                0.0f,
-                0.0f,
-                1.0f,
-                0.0f,
-                0
-            );
-        }
-
-        public void Draw
-        (
-            Texture2D texture,
-            Rectangle destinationRectangle,
             Vector3 color,
             float layerDepth
         )
@@ -1103,14 +767,6 @@ namespace ClassicUO.Renderer
             Texture2D texture,
             Rectangle destinationRectangle,
             Rectangle? sourceRectangle,
-            Vector3 color
-        ) => Draw(texture, destinationRectangle, sourceRectangle, color, 0f);
-
-        public void Draw
-        (
-            Texture2D texture,
-            Rectangle destinationRectangle,
-            Rectangle? sourceRectangle,
             Vector3 color,
             float layerDepth
         )
@@ -1118,10 +774,8 @@ namespace ClassicUO.Renderer
             float sourceX, sourceY, sourceW, sourceH;
             if (sourceRectangle.HasValue)
             {
-                sourceX = sourceRectangle.Value.X / (float)texture.Width;
-                sourceY = sourceRectangle.Value.Y / (float)texture.Height;
-                sourceW = sourceRectangle.Value.Width / (float)texture.Width;
-                sourceH = sourceRectangle.Value.Height / (float)texture.Height;
+                CalculateUVs(sourceRectangle.Value, texture.Width, texture.Height,
+                    out sourceX, out sourceY, out sourceW, out sourceH);
             }
             else
             {
@@ -1167,16 +821,8 @@ namespace ClassicUO.Renderer
             float sourceX, sourceY, sourceW, sourceH;
             if (sourceRectangle.HasValue)
             {
-                sourceX = sourceRectangle.Value.X / (float)texture.Width;
-                sourceY = sourceRectangle.Value.Y / (float)texture.Height;
-                sourceW = Math.Sign(sourceRectangle.Value.Width) * Math.Max(
-                    Math.Abs(sourceRectangle.Value.Width),
-                    Utility.MathHelper.MachineEpsilonFloat
-                ) / (float)texture.Width;
-                sourceH = Math.Sign(sourceRectangle.Value.Height) * Math.Max(
-                    Math.Abs(sourceRectangle.Value.Height),
-                    Utility.MathHelper.MachineEpsilonFloat
-                ) / (float)texture.Height;
+                CalculateUVsSafe(sourceRectangle.Value, texture.Width, texture.Height,
+                    out sourceX, out sourceY, out sourceW, out sourceH);
             }
             else
             {
@@ -1259,6 +905,7 @@ namespace ClassicUO.Renderer
         {
             EnsureNotStarted();
             _started = true;
+            _worldOffsetActive = false;
             TextureSwitches = 0;
             FlushesDone = 0;
 
@@ -1341,25 +988,77 @@ namespace ClassicUO.Renderer
             sprite.Hue2 = color;
             sprite.Hue3 = color;
 
-
-
-            sprite.Normal0.X = 0;
-            sprite.Normal0.Y = 0;
-            sprite.Normal0.Z = 1;
-
-            sprite.Normal1.X = 0;
-            sprite.Normal1.Y = 0;
-            sprite.Normal1.Z = 1;
-
-            sprite.Normal2.X = 0;
-            sprite.Normal2.Y = 0;
-            sprite.Normal2.Z = 1;
-
-            sprite.Normal3.X = 0;
-            sprite.Normal3.Y = 0;
-            sprite.Normal3.Z = 1;
+            SetDefaultNormals(ref sprite);
         }
 
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void SetDefaultNormals(ref PositionNormalTextureColor4 vertex)
+        {
+            vertex.Normal0.X = 0;
+            vertex.Normal0.Y = 0;
+            vertex.Normal0.Z = 1;
+
+            vertex.Normal1.X = 0;
+            vertex.Normal1.Y = 0;
+            vertex.Normal1.Z = 1;
+
+            vertex.Normal2.X = 0;
+            vertex.Normal2.Y = 0;
+            vertex.Normal2.Z = 1;
+
+            vertex.Normal3.X = 0;
+            vertex.Normal3.Y = 0;
+            vertex.Normal3.Z = 1;
+        }
+
+        /// <summary>
+        /// Calculates UVs with epsilon-safe width/height to avoid division artifacts when dimensions can be negative or zero.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void CalculateUVsSafe(
+            Rectangle source,
+            int textureWidth, int textureHeight,
+            out float sourceX, out float sourceY,
+            out float sourceW, out float sourceH)
+        {
+            float invW = 1f / textureWidth;
+            float invH = 1f / textureHeight;
+            sourceX = source.X * invW;
+            sourceY = source.Y * invH;
+            sourceW = Math.Sign(source.Width) * Math.Max(Math.Abs(source.Width), Utility.MathHelper.MachineEpsilonFloat) * invW;
+            sourceH = Math.Sign(source.Height) * Math.Max(Math.Abs(source.Height), Utility.MathHelper.MachineEpsilonFloat) * invH;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void CalculateUVs(
+            Rectangle source,
+            int textureWidth, int textureHeight,
+            out float sourceX, out float sourceY,
+            out float sourceW, out float sourceH)
+        {
+            float invW = 1f / textureWidth;
+            float invH = 1f / textureHeight;
+            sourceX = source.X * invW;
+            sourceY = source.Y * invH;
+            sourceW = source.Width * invW;
+            sourceH = source.Height * invH;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static void CalculateHalfPixelUVs(
+            Rectangle sourceRect,
+            int textureWidth, int textureHeight,
+            out float sourceX, out float sourceY,
+            out float sourceW, out float sourceH)
+        {
+            float invW = 1f / textureWidth;
+            float invH = 1f / textureHeight;
+            sourceX = (sourceRect.X + 0.5f) * invW;
+            sourceY = (sourceRect.Y + 0.5f) * invH;
+            sourceW = (sourceRect.Width - 1f) * invW;
+            sourceH = (sourceRect.Height - 1f) * invH;
+        }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void EnsureSize()
@@ -1395,6 +1094,147 @@ namespace ClassicUO.Renderer
             return true;
         }
 
+        public void DrawBatch(PositionNormalTextureColor4[] vertices, Texture2D[] textures, sbyte[] zValues, int count, int offsetX, int offsetY, sbyte maxGroundZ)
+        {
+            if (count == 0)
+                return;
+
+            EnsureBatchCapacity(count);
+
+            for (int i = 0; i < count; i++)
+            {
+                if (zValues[i] > maxGroundZ)
+                    continue;
+
+                CopyBatchSprite(vertices, textures, i, offsetX, offsetY);
+            }
+        }
+
+        public void DrawBatch(PositionNormalTextureColor4[] vertices, Texture2D[] textures, bool[] visible, int count, int offsetX, int offsetY)
+        {
+            if (count == 0)
+                return;
+
+            EnsureBatchCapacity(count);
+
+            for (int i = 0; i < count; i++)
+            {
+                if (!visible[i])
+                    continue;
+
+                CopyBatchSprite(vertices, textures, i, offsetX, offsetY);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void EnsureBatchCapacity(int count)
+        {
+            while (_numSprites + count >= _vertexInfo.Length)
+            {
+                int newMax = _vertexInfo.Length + MAX_SPRITES;
+                Array.Resize(ref _vertexInfo, newMax);
+                Array.Resize(ref _textureInfo, newMax);
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void CopyBatchSprite(PositionNormalTextureColor4[] vertices, Texture2D[] textures, int i, int offsetX, int offsetY)
+        {
+            var tex = textures[i];
+            if (tex == null || tex.IsDisposed)
+                return;
+
+            ref var dst = ref _vertexInfo[_numSprites];
+            dst = vertices[i];
+
+            if (!_worldOffsetActive)
+            {
+                dst.Position0.X -= offsetX;
+                dst.Position0.Y -= offsetY;
+                dst.Position1.X -= offsetX;
+                dst.Position1.Y -= offsetY;
+                dst.Position2.X -= offsetX;
+                dst.Position2.Y -= offsetY;
+                dst.Position3.X -= offsetX;
+                dst.Position3.Y -= offsetY;
+            }
+
+            _textureInfo[_numSprites] = tex;
+            _numSprites++;
+        }
+
+        public void DirectDraw(Texture2D texture, int spriteStart, int spriteCount)
+        {
+            InternalDraw(texture, spriteStart, spriteCount);
+        }
+
+        public DynamicIndexBuffer GetDynamicIndexBuffer(int requiredIndices)
+        {
+            if (_dynamicIndexBuffer == null || _dynamicIndexBuffer.IndexCount < requiredIndices)
+            {
+                _dynamicIndexBuffer?.Dispose();
+                _dynamicIndexBuffer = new DynamicIndexBuffer(
+                    GraphicsDevice,
+                    IndexElementSize.SixteenBits,
+                    Math.Max(requiredIndices, 1024),
+                    BufferUsage.WriteOnly
+                );
+            }
+            return _dynamicIndexBuffer;
+        }
+
+        public void DrawDirectIndexed(Texture2D texture, int startIndex, int primitiveCount, int numVertices)
+        {
+            GraphicsDevice.Textures[0] = texture;
+            _basicUOEffect.Pass.Apply();
+
+            if (_customEffect != null)
+            {
+                foreach (EffectPass pass in _customEffect.CurrentTechnique.Passes)
+                {
+                    pass.Apply();
+                    GraphicsDevice.DrawIndexedPrimitives(
+                        PrimitiveType.TriangleList,
+                        0,
+                        0,
+                        numVertices,
+                        startIndex,
+                        primitiveCount
+                    );
+                }
+            }
+            else
+            {
+                GraphicsDevice.DrawIndexedPrimitives(
+                    PrimitiveType.TriangleList,
+                    0,
+                    0,
+                    numVertices,
+                    startIndex,
+                    primitiveCount
+                );
+            }
+        }
+
+        public void SetWorldOffset(int offsetX, int offsetY)
+        {
+            Flush();
+            ApplyStates();
+            _worldOffsetActive = true;
+            _basicUOEffect.WorldMatrix.SetValue(Matrix.CreateTranslation(-offsetX, -offsetY, 0));
+            _basicUOEffect.Pass.Apply();
+        }
+
+        public void ResetWorldOffset()
+        {
+            Flush();
+            _worldOffsetActive = false;
+            _basicUOEffect.WorldMatrix.SetValue(Matrix.Identity);
+            _basicUOEffect.Pass.Apply();
+            GraphicsDevice.SetVertexBuffer(_vertexBuffer);
+            GraphicsDevice.Indices = _indexBuffer;
+        }
+
         private void ApplyStates()
         {
             GraphicsDevice.BlendState = _blendState;
@@ -1413,6 +1253,7 @@ namespace ClassicUO.Renderer
             _projectionMatrix.M11 = (float)(2.0 / GraphicsDevice.Viewport.Width);
             _projectionMatrix.M22 = (float)(-2.0 / GraphicsDevice.Viewport.Height);
 
+            Matrix matrix = _projectionMatrix;
             Matrix.CreateOrthographicOffCenter
             (
                 0f,
@@ -1421,7 +1262,7 @@ namespace ClassicUO.Renderer
                 0,
                 short.MinValue,
                 short.MaxValue,
-                out var matrix
+                out matrix
             );
             Matrix.Multiply(ref _transformMatrix, ref matrix, out matrix);
 
@@ -1429,7 +1270,8 @@ namespace ClassicUO.Renderer
             //Matrix halfPixelOffset = Matrix.CreateTranslation(-0.5f, -0.5f, 0);
             //Matrix.Multiply(ref halfPixelOffset, ref matrix, out matrix);
 
-            _basicUOEffect.WorldMatrix.SetValue(Matrix.Identity);
+            if (!_worldOffsetActive)
+                _basicUOEffect.WorldMatrix.SetValue(Matrix.Identity);
             _basicUOEffect.Viewport.SetValue(new Vector2(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
             _basicUOEffect.MatrixTransform.SetValue(matrix);
             _basicUOEffect.Pass.Apply();
@@ -1657,28 +1499,108 @@ namespace ClassicUO.Renderer
             }
         }
 
+        // ECS UI render path (GuiRenderingPlugin / UoFontPlugin): draw a texture
+        // tinted by an arbitrary RGB Color. Color RGB rides in Normal, the
+        // SHADER_TEXT_HUE mode + alpha in Hue. Distinct from the Vector3-hue
+        // overloads so both rendering conventions coexist on the shared batcher.
+        public void Draw(Texture2D texture, Vector2 position, Rectangle? sourceRectangle, Color color, float rotation, Vector2 scale, float depth)
+        {
+            Vector3 hueVector = new Vector3(0, ShaderHueTranslator.SHADER_RGB_TINT, MathHelper.Clamp(color.A / 255f, 0f, 1f));
 
-        public void DrawRoundedRectangleFilled(
-            Texture2D texture,
-            Rectangle rectangle,
-            float cornerRadius,
-            Color color,
-            float depth = 0.0f)
+            float sourceX, sourceY, sourceW, sourceH;
+            if (sourceRectangle.HasValue)
+            {
+                CalculateUVsSafe(sourceRectangle.Value, texture.Width, texture.Height,
+                    out sourceX, out sourceY, out sourceW, out sourceH);
+                scale.X *= sourceRectangle.Value.Width;
+                scale.Y *= sourceRectangle.Value.Height;
+            }
+            else
+            {
+                sourceX = 0.0f;
+                sourceY = 0.0f;
+                sourceW = 1.0f;
+                sourceH = 1.0f;
+                scale.X *= texture.Width;
+                scale.Y *= texture.Height;
+            }
+
+            EnsureSize();
+
+            ref var sprite = ref _vertexInfo[_numSprites];
+
+            var rotationSin = (float)Math.Sin(rotation);
+            var rotationCos = (float)Math.Cos(rotation);
+
+            sprite.Position0.X = position.X;
+            sprite.Position0.Y = position.Y;
+            sprite.Position0.Z = depth;
+
+            sprite.Position1.X = (rotationCos * scale.X) + position.X;
+            sprite.Position1.Y = (rotationSin * scale.X) + position.Y;
+            sprite.Position1.Z = depth;
+
+            sprite.Position2.X = (-rotationSin * scale.Y) + position.X;
+            sprite.Position2.Y = (rotationCos * scale.Y) + position.Y;
+            sprite.Position2.Z = depth;
+
+            sprite.Position3.X = ((-rotationSin * scale.Y) + (rotationCos * scale.X) + position.X);
+            sprite.Position3.Y = ((rotationCos * scale.Y) + (rotationSin * scale.X) + position.Y);
+            sprite.Position3.Z = depth;
+
+            sprite.TextureCoordinate0.X = (_cornerOffsetX[0] * sourceW) + sourceX;
+            sprite.TextureCoordinate0.Y = (_cornerOffsetY[0] * sourceH) + sourceY;
+            sprite.TextureCoordinate0.Z = 0;
+
+            sprite.TextureCoordinate1.X = (_cornerOffsetX[1] * sourceW) + sourceX;
+            sprite.TextureCoordinate1.Y = (_cornerOffsetY[1] * sourceH) + sourceY;
+            sprite.TextureCoordinate1.Z = 0;
+
+            sprite.TextureCoordinate2.X = (_cornerOffsetX[2] * sourceW) + sourceX;
+            sprite.TextureCoordinate2.Y = (_cornerOffsetY[2] * sourceH) + sourceY;
+            sprite.TextureCoordinate2.Z = 0;
+
+            sprite.TextureCoordinate3.X = (_cornerOffsetX[3] * sourceW) + sourceX;
+            sprite.TextureCoordinate3.Y = (_cornerOffsetY[3] * sourceH) + sourceY;
+            sprite.TextureCoordinate3.Z = 0;
+
+            sprite.Hue0 = hueVector;
+            sprite.Hue1 = hueVector;
+            sprite.Hue2 = hueVector;
+            sprite.Hue3 = hueVector;
+
+            var r = MathHelper.Clamp(color.R / 255f, 0f, 1f);
+            var g = MathHelper.Clamp(color.G / 255f, 0f, 1f);
+            var b = MathHelper.Clamp(color.B / 255f, 0f, 1f);
+
+            sprite.Normal0.X = r; sprite.Normal0.Y = g; sprite.Normal0.Z = b;
+            sprite.Normal1.X = r; sprite.Normal1.Y = g; sprite.Normal1.Z = b;
+            sprite.Normal2.X = r; sprite.Normal2.Y = g; sprite.Normal2.Z = b;
+            sprite.Normal3.X = r; sprite.Normal3.Y = g; sprite.Normal3.Z = b;
+
+            _textureInfo[_numSprites] = texture;
+            ++_numSprites;
+        }
+
+        public void Draw(Texture2D texture, Rectangle destinationRectangle, Vector3 color)
+            => Draw(texture, destinationRectangle, color, 0f);
+
+        public void Draw(Texture2D texture, Rectangle destinationRectangle, Rectangle? sourceRectangle, Vector3 color)
+            => Draw(texture, destinationRectangle, sourceRectangle, color, 0f);
+
+        public void DrawRoundedRectangleFilled(Texture2D texture, Rectangle rectangle, float cornerRadius, Color color, float depth = 0.0f)
         {
             if (cornerRadius <= 0)
             {
-                // Fallback to regular filled rectangle - convert Vector3 to Color
-                Draw(texture, position: new Vector2(rectangle.X, rectangle.Y),
-                     sourceRectangle: new Rectangle(0, 0, rectangle.Width, rectangle.Height),
-                     color, rotation: 0f, scale: Vector2.One, depth: depth);
+                Draw(texture, new Vector2(rectangle.X, rectangle.Y),
+                     new Rectangle(0, 0, rectangle.Width, rectangle.Height),
+                     color, 0f, Vector2.One, depth);
                 return;
             }
 
-            // Clamp corner radius
             float maxRadius = Math.Min(rectangle.Width, rectangle.Height) * 0.5f;
             cornerRadius = Math.Min(cornerRadius, maxRadius);
 
-            // Draw the main body (center rectangle)
             var centerRect = new Rectangle(
                 rectangle.X + (int)cornerRadius,
                 rectangle.Y,
@@ -1692,7 +1614,6 @@ namespace ClassicUO.Renderer
                      color, 0f, Vector2.One, depth);
             }
 
-            // Draw left and right rectangles
             var leftRect = new Rectangle(
                 rectangle.X,
                 rectangle.Y + (int)cornerRadius,
@@ -1719,17 +1640,15 @@ namespace ClassicUO.Renderer
                      color, 0f, Vector2.One, depth);
             }
 
-            // Draw the four rounded corners using circles
-            DrawRoundedCorner(texture, rectangle.X + cornerRadius, rectangle.Y + cornerRadius, cornerRadius, color, depth, 0); // Top-left
-            DrawRoundedCorner(texture, rectangle.X + rectangle.Width - cornerRadius, rectangle.Y + cornerRadius, cornerRadius, color, depth, 1); // Top-right
-            DrawRoundedCorner(texture, rectangle.X + rectangle.Width - cornerRadius, rectangle.Y + rectangle.Height - cornerRadius, cornerRadius, color, depth, 2); // Bottom-right
-            DrawRoundedCorner(texture, rectangle.X + cornerRadius, rectangle.Y + rectangle.Height - cornerRadius, cornerRadius, color, depth, 3); // Bottom-left
+            DrawRoundedCorner(texture, rectangle.X + cornerRadius, rectangle.Y + cornerRadius, cornerRadius, color, depth, 0);
+            DrawRoundedCorner(texture, rectangle.X + rectangle.Width - cornerRadius, rectangle.Y + cornerRadius, cornerRadius, color, depth, 1);
+            DrawRoundedCorner(texture, rectangle.X + rectangle.Width - cornerRadius, rectangle.Y + rectangle.Height - cornerRadius, cornerRadius, color, depth, 2);
+            DrawRoundedCorner(texture, rectangle.X + cornerRadius, rectangle.Y + rectangle.Height - cornerRadius, cornerRadius, color, depth, 3);
         }
 
         private void DrawRoundedCorner(Texture2D texture, float centerX, float centerY, float radius, Color color, float depth, int quadrant)
         {
-            // Draw the corner as overlapping small rectangles in a grid pattern
-            int steps = (int)(radius * 2); // Number of pixels to cover
+            int steps = (int)(radius * 2);
 
             for (int x = 0; x < steps; x++)
             {
@@ -1738,21 +1657,19 @@ namespace ClassicUO.Renderer
                     float px = centerX + (x - radius) + 0.5f;
                     float py = centerY + (y - radius) + 0.5f;
 
-                    // Check if this pixel is within the quarter circle for this quadrant
                     float dx = px - centerX;
                     float dy = py - centerY;
                     float distance = (float)Math.Sqrt(dx * dx + dy * dy);
 
                     if (distance <= radius)
                     {
-                        // Check if it's in the correct quadrant
                         bool inQuadrant = false;
                         switch (quadrant)
                         {
-                            case 0: inQuadrant = dx <= 0 && dy <= 0; break; // Top-left
-                            case 1: inQuadrant = dx >= 0 && dy <= 0; break; // Top-right
-                            case 2: inQuadrant = dx >= 0 && dy >= 0; break; // Bottom-right
-                            case 3: inQuadrant = dx <= 0 && dy >= 0; break; // Bottom-left
+                            case 0: inQuadrant = dx <= 0 && dy <= 0; break;
+                            case 1: inQuadrant = dx >= 0 && dy <= 0; break;
+                            case 2: inQuadrant = dx >= 0 && dy >= 0; break;
+                            case 3: inQuadrant = dx <= 0 && dy >= 0; break;
                         }
 
                         if (inQuadrant)
@@ -1763,7 +1680,6 @@ namespace ClassicUO.Renderer
                 }
             }
         }
-
 
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]

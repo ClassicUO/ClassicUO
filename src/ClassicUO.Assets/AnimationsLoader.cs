@@ -137,17 +137,7 @@ namespace ClassicUO.Assets
                                 continue;
                             }
 
-                            // Some UO installs ship mobtypes.txt with trailing
-                            // BOM/control bytes on flag tokens (UO NEW LEGACY).
-                            // Strip non-hex chars before parse.
-                            var rawFlags = parts[2];
-                            int flagsEnd = 0;
-                            while (flagsEnd < rawFlags.Length && Uri.IsHexDigit(rawFlags[flagsEnd])) flagsEnd++;
-                            if (flagsEnd == 0)
-                            {
-                                continue;
-                            }
-                            uint number = uint.Parse(rawFlags.AsSpan(0, flagsEnd), NumberStyles.HexNumber);
+                            uint number = uint.Parse(parts[2].Trim(), NumberStyles.HexNumber);
 
                             for (int i = 0; i < 5; i++)
                             {
@@ -225,6 +215,12 @@ namespace ClassicUO.Assets
         {
             if (_bodyInfos.TryGetValue(body, out var bodyInfo))
             {
+                if (body == bodyInfo.Graphic)
+                {
+                    hue = bodyInfo.Hue;
+                    return false;
+                }
+
                 body = bodyInfo.Graphic;
                 hue = bodyInfo.Hue;
 
@@ -238,6 +234,12 @@ namespace ClassicUO.Assets
         {
             if (_corpseInfos.TryGetValue(body, out var bodyInfo))
             {
+                if (body == bodyInfo.Graphic)
+                {
+                    hue = bodyInfo.Hue;
+                    return false;
+                }
+
                 body = bodyInfo.Graphic;
                 hue = bodyInfo.Hue;
 
@@ -1237,11 +1239,10 @@ namespace ClassicUO.Assets
             uint dataStart = reader.ReadUInt32LE();
             reader.Seek(dataStart);
 
-            var maxFrameCount = Math.Max(fc, 50);
-            UOPFrameData[] sharedBuffer = ArrayPool<UOPFrameData>.Shared.Rent(maxFrameCount);
+            UOPFrameData[] sharedBuffer = ArrayPool<UOPFrameData>.Shared.Rent(fc);
             try
             {
-                var frameData = sharedBuffer.AsSpan(0, maxFrameCount);
+                var frameData = sharedBuffer.AsSpan(0, fc);
                 frameData.Clear();
 
                 for (var i = 0; i < fc; ++i)
@@ -1279,8 +1280,13 @@ namespace ClassicUO.Assets
                 }
 
                 frameData = CollectionsMarshal.AsSpan(list);
-                maxFrameCount = frameData.Length;
-                var realFrameCount = (int)Math.Round(maxFrameCount / (float)MAX_DIRECTIONS);
+                var maxFrameCount = frameData.Length;
+
+                // Looks like the min amount of frames is 10 for equipment
+                var realFrameCount = type == AnimationGroupsType.Equipment ?
+                    Math.Max(10, (int)Math.Round(maxFrameCount / (float)MAX_DIRECTIONS))
+                    :
+                    (int)Math.Round(maxFrameCount / (float)MAX_DIRECTIONS);
 
 
                 if (realFrameCount > _frames.Length)
@@ -1293,10 +1299,8 @@ namespace ClassicUO.Assets
 
                 // var dirFrameStartIdx = realFrameCount * direction;
 
-                for (int i = 0; i < maxFrameCount; ++i)
+                foreach (ref readonly var frame in frameData)
                 {
-                    ref readonly var frame = ref frameData[i];
-
                     // validate the group only if the frame is valid
                     if (frame.Position > 0)
                     {
