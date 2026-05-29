@@ -114,16 +114,20 @@ internal static class UoFontRenderer
     // (server gumps) — caller knows the box size and wants the texture
     // ready before layout runs. Returns (texture, width, height); texture
     // may be null when fonts/device aren't loaded yet or text is empty.
-    public static (Texture2D? Texture, int Width, int Height) Bake(string text, byte font, ushort hue, int maxWidth, bool isHtml)
+    // htmlStartColor: default colour for untagged HTML segments. Mirrors
+    // OOP RenderedText.HTMLColor → SetUseHTML(true, HTMLColor, ...). 0xFFFFFFFF
+    // = white (FontsLoader default); the Help-menu path passes 0x010101FF
+    // (black) so body text reads on the parchment bg instead of vanishing.
+    public static (Texture2D? Texture, int Width, int Height) Bake(string text, byte font, ushort hue, int maxWidth, bool isHtml, uint htmlStartColor = 0xFFFFFFFF, bool htmlBgColored = false)
     {
         if (string.IsNullOrEmpty(text) || UoFontRuntime.Fonts == null || UoFontRuntime.Device == null)
             return (null, 0, 0);
 
-        var key = new BakeKey(text, font, hue, maxWidth, isHtml);
+        var key = new BakeKey(text, font, hue, maxWidth, isHtml, htmlStartColor);
         if (_bakeCache.TryGetValue(key, out var entry) && entry.Texture != null)
             return (entry.Texture, entry.Width, entry.Height);
 
-        entry = GenerateColored(UoFontRuntime.Device, text, font, hue, maxWidth, isHtml);
+        entry = GenerateColored(UoFontRuntime.Device, text, font, hue, maxWidth, isHtml, htmlStartColor, htmlBgColored);
         _bakeCache[key] = entry;
         return (entry.Texture, entry.Width, entry.Height);
     }
@@ -135,35 +139,59 @@ internal static class UoFontRenderer
         public readonly ushort Hue;
         public readonly int Width;
         public readonly bool IsHtml;
+        public readonly uint HtmlStartColor;
 
-        public BakeKey(string text, byte font, ushort hue, int width, bool isHtml)
+        public BakeKey(string text, byte font, ushort hue, int width, bool isHtml, uint htmlStartColor)
         {
-            Text = text; Font = font; Hue = hue; Width = width; IsHtml = isHtml;
+            Text = text; Font = font; Hue = hue; Width = width; IsHtml = isHtml; HtmlStartColor = htmlStartColor;
         }
 
-        public bool Equals(BakeKey o) => Text == o.Text && Font == o.Font && Hue == o.Hue && Width == o.Width && IsHtml == o.IsHtml;
+        public bool Equals(BakeKey o) => Text == o.Text && Font == o.Font && Hue == o.Hue && Width == o.Width && IsHtml == o.IsHtml && HtmlStartColor == o.HtmlStartColor;
         public override bool Equals(object? o) => o is BakeKey k && Equals(k);
-        public override int GetHashCode() => HashCode.Combine(Text, Font, Hue, Width, IsHtml);
+        public override int GetHashCode() => HashCode.Combine(Text, Font, Hue, Width, IsHtml, HtmlStartColor);
     }
 
     private static readonly Dictionary<BakeKey, Cached> _bakeCache = new();
 
-    private static Cached GenerateColored(GraphicsDevice device, string text, byte font, ushort hue, int maxWidth, bool isHtml)
+    // Remove <U></U> tags (case-insensitive). OOP's atlas renderer ignores the
+    // per-char underline these set; stripping them matches it without disturbing
+    // other tags (<basefont>, <a>, <i>, …) or text width.
+    private static string StripUnderlineTags(string text)
+    {
+        if (string.IsNullOrEmpty(text) || text.IndexOf('<') < 0)
+            return text;
+        return text
+            .Replace("<U>", string.Empty).Replace("</U>", string.Empty)
+            .Replace("<u>", string.Empty).Replace("</u>", string.Empty);
+    }
+
+    private static Cached GenerateColored(GraphicsDevice device, string text, byte font, ushort hue, int maxWidth, bool isHtml, uint htmlStartColor, bool htmlBgColored)
     {
         var fonts = UoFontRuntime.Fonts!;
-        // OOP HtmlControl.InternalBuild path (HasBackground == false):
-        //   _gameText.HTMLColor = 0x010101FF  (default body color before tags)
+        // OOP HtmlControl.InternalBuild path:
+        //   _gameText.HTMLColor = htmlStartColor (default body colour before tags;
+        //                         0x010101FF black for bg/no-scroll, else white)
         //   _gameText.Hue       = 0xFFFF      (pass-through; FontsLoader picks
         //                                       datacolor = 0xFEFFFFFF white)
-        // The BASEFONT/FONT tags inside the text override per-segment colour
-        // during GetInfoHTML. Untagged segments use the htmlStartColor.
+        // SetUseHTML(true, HTMLColor, HasBackgroundColor) seeds the start colour;
+        // BASEFONT/FONT tags inside the text override per-segment colour during
+        // GetInfoHTML. Untagged segments use htmlStartColor.
         //
         // Plain (non-HTML): OOP passes parts[3] + 1 as `Hue` to RenderedText →
         // FontsLoader.GenerateUnicode tints all pixels via Hues.GetPolygoneColor.
         ushort bakeColor = isHtml ? (ushort)0xFFFF : (ushort)(hue == 0 ? 0 : hue + 1);
         byte cell = 30;
 
-        if (isHtml) fonts.SetUseHTML(true);
+        // OOP's atlas glyph renderer (RenderedText.DrawGlyphs) draws an underline
+        // ONLY from the control-level FontStyle.Underline — it ignores the
+        // per-char UOFONT_UNDERLINE flag that the <U> HTML tag sets. Our baked
+        // path (FontsLoader.GenerateUnicode → DrawUnicode) DOES honour the per-char
+        // flag, so <U> server text comes out underlined where OOP shows none.
+        // Strip <U>/</U> before baking to match OOP (the tag carries no width, so
+        // wrapping is unaffected; italic/bold/colour/link tags are kept).
+        if (isHtml) text = StripUnderlineTags(text);
+
+        if (isHtml) fonts.SetUseHTML(true, htmlStartColor, htmlBgColored);
         try
         {
             var info = fonts.GenerateUnicode(font, text, bakeColor, cell, maxWidth,

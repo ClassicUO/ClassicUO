@@ -21,6 +21,10 @@ internal sealed class MouseContext : InputContext<MouseButtonType>
     private bool _agentSynthEnabled;
     private int _agentSynthX, _agentSynthY;
     private ButtonState _agentSynthLeft, _agentSynthMiddle, _agentSynthRight;
+    // Accumulated synthetic scroll-wheel value (mirrors MouseState's running
+    // ScrollWheelValue total). Update diffs it against last frame to produce
+    // Wheel, exactly like real input. One notch = 120.
+    private int _agentSynthWheel;
 
     internal void AgentSetSynthetic(int x, int y, ButtonState left, ButtonState middle, ButtonState right)
     {
@@ -30,6 +34,8 @@ internal sealed class MouseContext : InputContext<MouseButtonType>
         _agentSynthMiddle = middle;
         _agentSynthRight = right;
     }
+
+    internal void AgentAddSyntheticWheel(int notches) => _agentSynthWheel += notches * 120;
 
     internal void AgentClearSynthetic() => _agentSynthEnabled = false;
 
@@ -142,7 +148,7 @@ internal sealed class MouseContext : InputContext<MouseButtonType>
         {
             _newState = new MouseState(
                 _agentSynthX, _agentSynthY,
-                _newState.ScrollWheelValue,
+                _agentSynthWheel,
                 _agentSynthLeft, _agentSynthMiddle, _agentSynthRight,
                 _newState.XButton1, _newState.XButton2);
         }

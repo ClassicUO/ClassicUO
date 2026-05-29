@@ -169,6 +169,8 @@ internal readonly struct AgentServerPlugin : IPlugin
             state.CurrentMouseSynth = state.PendingMouseFrames.Dequeue();
             var c = state.CurrentMouseSynth;
             mouseCtx.AgentSetSynthetic(c.X, c.Y, c.Left, c.Middle, c.Right);
+            if (c.Wheel != 0)
+                mouseCtx.AgentAddSyntheticWheel(c.Wheel);
         }
         else if (mouseCtx.AgentSyntheticActive)
         {

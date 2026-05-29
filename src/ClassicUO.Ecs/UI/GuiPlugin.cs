@@ -31,11 +31,16 @@ internal readonly struct GuiPlugin : IPlugin
         });
 
         app.AddPlugin<UoFontPlugin>();
-        // ScrollbarPlugin handles thumb dragging + track-click jumps on
-        // Scrollbar widgets. Mouse-wheel scrolling on Overflow.Scroll
-        // containers is already in Clay's input loop without this plugin —
-        // adding it just unlocks the visible scroll-thumb widget.
+        // Widget plugins from Bevy.UI. Scrollbar/Slider handle thumb dragging
+        // + track-click jumps; Checkbox flips Checkbox.Checked on UiClick and
+        // fires CheckboxChanged. The visible UO sprite for buttons/checkboxes
+        // is swapped post-layout by UpdateUOButtonsState / UpdateUOCheckboxes.
+        // Mouse-wheel scrolling on Overflow.Scroll containers is already in
+        // Clay's input loop without ScrollbarPlugin — it just unlocks the
+        // visible scroll-thumb widget.
         app.AddPlugin<TinyEcs.Bevy.UI.Widgets.ScrollbarPlugin>();
+        app.AddPlugin<TinyEcs.Bevy.UI.Widgets.SliderPlugin>();
+        app.AddPlugin<TinyEcs.Bevy.UI.Widgets.CheckboxPlugin>();
 
         app
             .AddResource(new FocusedInput())
@@ -88,6 +93,7 @@ internal readonly struct GuiPlugin : IPlugin
         Action<Res<MouseContext>, Res<UoGame>, ResMut<UiPointer>> syncPointerFn = SyncPointer;
         Action<Res<Time>, Res<MouseContext>, ResMut<UiClayContext>> syncDeltaAndScrollFn = SyncDeltaAndScroll;
         Action<Query<Data<UiCustom, UOButton, Interaction>>> updateUOButtonsStateFn = UpdateUOButtonsState;
+        Action<Query<Data<UiCustom, UOCheckbox, TinyEcs.Bevy.UI.Widgets.Checkbox>>> updateUOCheckboxesFn = UpdateUOCheckboxes;
         Action<Query<Data<Text, MaskedText>, Filter<Changed<MaskedText>>>> syncMaskedTextFn = SyncMaskedText;
 
         app.AddSystem(Stage.First, syncSurfaceFn);
@@ -106,13 +112,19 @@ internal readonly struct GuiPlugin : IPlugin
             ResMut<UiClayContext>,
             Res<AssetsServer>,
             Query<Data<ScrollPosition>>,
-            Query<Data<ComputedNode, UiCustom>, Filter<With<UIMovable>>>,
+            Query<Data<ComputedNode, UiCustom, GlobalZIndex>, Filter<With<UIMovable>>>,
             Query<Data<TinyEcs.Parent>>,
             Query<Data<GlobalZIndex>>> routeWheelFn = RouteWheelToScrollable;
         app.AddSystem(Stage.First, routeWheelFn);
         // Must run after InteractionSystem.PostLayout writes Hovered/Pressed,
         // before UiRenderStage reads UOCustomRender.AssetId.
         app.AddSystem(updateUOButtonsStateFn)
+            .InStage(UiPlugin.UiPostLayoutStage)
+            .Build();
+        // CheckboxPlugin flips Checkbox.Checked on click; this swaps the visible
+        // sprite (Off/On) on the same UOCustomRender the command captured, so the
+        // renderer shows the new state this frame with no one-frame lag.
+        app.AddSystem(updateUOCheckboxesFn)
             .InStage(UiPlugin.UiPostLayoutStage)
             .Build();
         // Mirror MaskedText.Value into Text as mask chars before layout reads Text.
@@ -174,7 +186,7 @@ internal readonly struct GuiPlugin : IPlugin
         ResMut<UiClayContext> ctx,
         Res<AssetsServer> assets,
         Query<Data<ScrollPosition>> scrollPosQ,
-        Query<Data<ComputedNode, UiCustom>, Filter<With<UIMovable>>> movableQ,
+        Query<Data<ComputedNode, UiCustom, GlobalZIndex>, Filter<With<UIMovable>>> movableQ,
         Query<Data<TinyEcs.Parent>> parentQ,
         Query<Data<GlobalZIndex>> zQ)
     {
@@ -208,20 +220,18 @@ internal readonly struct GuiPlugin : IPlugin
             maxY = data.MaxScrollY;
         }
 
-        // No scrollable hit, but cursor over a movable gump bg (pixel-hit-
-        // tested so transparent sprite corners don't capture the wheel)?
-        // Still consume — the wheel shouldn't fall through a gump to the world.
-        bool overGump = topScroll != 0;
-        if (!overGump)
+        // Topmost movable gump under the cursor (pixel-hit so transparent
+        // sprite corners don't capture the wheel). Tracks the HIGHEST window z
+        // — a non-scroll gump stacked above the scrollable one must capture the
+        // wheel so it doesn't fall through to scroll the gump behind it.
+        int topGumpZ = int.MinValue;
+        foreach (var (_, computed, custom, z) in movableQ)
         {
-            foreach (var (_, computed, custom) in movableQ)
-            {
-                if (!UiHitTest.PixelHit(assets.Value, custom.Ref.Render(), computed.Ref, pos)) continue;
-                overGump = true;
-                break;
-            }
+            if (!UiHitTest.PixelHit(assets.Value, custom.Ref.Render(), computed.Ref, pos)) continue;
+            if (z.Ref.Value > topGumpZ) topGumpZ = z.Ref.Value;
         }
 
+        bool overGump = topGumpZ != int.MinValue || topScroll != 0;
         if (!overGump) return;
 
         // Kill Clay's native ScrollDelta (we drive scroll via the component)
@@ -230,6 +240,10 @@ internal readonly struct GuiPlugin : IPlugin
         mouseCtx.Value.ConsumeWheel();
 
         if (topScroll == 0) return;
+
+        // A higher gump covers the cursor — it captures the wheel (consumed
+        // above) instead of letting it scroll the gump beneath.
+        if (topZ < topGumpZ) return;
 
         var (_, sp) = scrollPosQ.Get(topScroll);
         // wheel > 0 (up) → OffsetY decreases. ~90px/notch matches Clay's
@@ -274,6 +288,15 @@ internal readonly struct GuiPlugin : IPlugin
                 Interaction.Hovered => button.Ref.Over,
                 _ => button.Ref.Normal,
             };
+        }
+    }
+
+    private static void UpdateUOCheckboxes(
+        Query<Data<UiCustom, UOCheckbox, TinyEcs.Bevy.UI.Widgets.Checkbox>> query)
+    {
+        foreach (var (custom, box, state) in query)
+        {
+            custom.Ref.Render().AssetId = state.Ref.Checked ? box.Ref.On : box.Ref.Off;
         }
     }
 
@@ -323,6 +346,9 @@ internal enum UOCustomKind : byte
     Art,
     Land,
     Animation,
+    // Minimap radar window: renderer draws the bg gump (AssetId) then the
+    // per-frame baked radar+dots texture carried in UOCustomRender.Dynamic.
+    MiniMap,
     // Renders nothing, but still emits a Custom command so the element gets a
     // ComputedNode and a solid (bbox) hit-test. Used as an invisible drag/close
     // surface for gump roots that have no background sprite of their own.
@@ -344,6 +370,10 @@ internal sealed class UOCustomRender
     // to mirror legacy ItemGump.Draw's stacked-item visual (Amount > 1 &&
     // ItemData.IsStackable).
     public bool Stacked;
+    // For UOCustomKind.MiniMap: the per-frame baked radar+dots texture. Owned
+    // and updated by MiniMapPlugin's bake system; the renderer just draws it
+    // over the bg gump. Null until the first bake.
+    public Microsoft.Xna.Framework.Graphics.Texture2D Dynamic;
 }
 
 // The UO render payload lives in UiCustom.Data (a reference, so it threads into
@@ -358,6 +388,14 @@ internal static class UiCustomRenderExtensions
 internal struct UOButton
 {
     public ushort Normal, Pressed, Over;
+}
+
+// Marker for the UO checkbox widget. Bevy.UI's CheckboxPlugin flips the sibling
+// Checkbox.Checked on click; UpdateUOCheckboxes rewrites the visible asset id
+// (Off/On gump) on the entity's UOCustomRender based on that state.
+internal struct UOCheckbox
+{
+    public ushort Off, On;
 }
 
 // Marker tags carried over from the old plugin.

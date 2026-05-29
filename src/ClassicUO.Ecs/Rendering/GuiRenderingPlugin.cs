@@ -360,6 +360,31 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                 break;
             }
 
+            case UOCustomKind.MiniMap:
+            {
+                // Baked radar texture already contains the bg frame + radar
+                // pixels + dots (MiniMapPlugin starts each bake from a copy of
+                // the bg gump's pixels). Draw it if present; fall back to the
+                // raw bg gump on the first frame before the first bake.
+                if (custom.Dynamic != null && !custom.Dynamic.IsDisposed)
+                {
+                    b.Draw(
+                        custom.Dynamic,
+                        new Vector2(bb.X, bb.Y),
+                        new Rectangle(0, 0, custom.Dynamic.Width, custom.Dynamic.Height),
+                        custom.Hue,
+                        0f, Vector2.Zero, 1f, SpriteEffects.None, cmd.ZIndex);
+                }
+                else
+                {
+                    ref readonly var info = ref assets.Gumps.GetGump(custom.AssetId);
+                    if (info.Texture != null)
+                        b.Draw(info.Texture, new Vector2(bb.X, bb.Y), info.UV, custom.Hue,
+                            0f, Vector2.Zero, 1f, SpriteEffects.None, cmd.ZIndex);
+                }
+                break;
+            }
+
             case UOCustomKind.None:
                 // Invisible hit/drag surface — draws nothing on purpose.
                 break;

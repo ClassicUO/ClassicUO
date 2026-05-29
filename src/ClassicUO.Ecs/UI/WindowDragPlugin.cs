@@ -16,8 +16,10 @@
 // when Interaction is still None from the previous frame. The continuous-held
 // pattern dodges that race without needing observers.
 
+using System;
 using ClassicUO.Ecs.Modding.Host;
 using ClassicUO.Input;
+using ClassicUO.Network;
 using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
@@ -41,9 +43,12 @@ internal readonly struct WindowDragPlugin : IPlugin
         // Right-click on any UIMovable closes it. Runs in PreUpdate so it
         // can consume the click before PlayerMovementPlugin (Stage.Update)
         // sees it and starts walking the player.
+        // Runs every frame (PreUpdate, before PlayerMovementPlugin in Update):
+        // it must keep consuming the held right button so the player doesn't
+        // walk while the press is parked over a window, and fire the close on
+        // RELEASE (UiClick semantics — press + release over the same window).
         app.AddSystem(closeOnRightClickFn)
             .InStage(Stage.PreUpdate)
-            .RunIf((Res<MouseContext> m) => m.Value.IsPressedOnce(MouseButtonType.Right))
             .Build();
         // Click-capture: any UIMovable under the cursor claims SelectedEntity
         // at float.MaxValue so world / pickup / use systems see the window
@@ -83,54 +88,110 @@ internal readonly struct WindowDragPlugin : IPlugin
         selected.Value.Set(topEnt, float.MaxValue);
     }
 
-    // Find the topmost UIMovable under the cursor and close it.
+    // Right-click-close with UiClick semantics: the close fires on the right
+    // button RELEASE over the window the press started on (drag-off cancels),
+    // not on press-down. While the right button is held over a window the
+    // press is consumed each frame so the player doesn't walk underneath it.
     //   * Container windows route through ContainerClosedEvent +
     //     HostMessage.ContainerClosed so the server / mods learn about it;
     //     ContainerGumpPlugin.TearDownClosedUi does the actual despawn.
+    //   * Server-pushed gumps reply GumpResponse button 0 (OOP
+    //     Gump.CloseWithRightClick → OnButtonClick(0)) and drop the registry
+    //     entry, then despawn.
     //   * Any other UIMovable is despawned in-place along with its subtree.
-    // In all cases the right-click is consumed so it doesn't leak into the
-    // movement / world-interaction systems that also poll mouse state.
     private static void CloseOnRightClick(
         Commands commands,
         Res<MouseContext> mouse,
         Res<AssetsServer> assets,
+        Local<ulong> pressTarget,
         Query<Data<ComputedNode, UiCustom>, Filter<With<UIMovable>>> movableQuery,
         Query<Data<ContainerWindow>> containerQuery,
+        Query<Data<ServerGump>> serverGumpQuery,
         Query<Data<TinyEcs.Children>> childrenQ,
+        Res<NetClient> net,
+        ResMut<ServerGumpRegistry> serverGumpRegistry,
         EventWriter<ContainerClosedEvent> closedWriter,
         EventWriter<HostMessage> hostMsgs)
     {
-        var pos = mouse.Value.Position;
-        ulong topEnt = 0;
-        int topOrder = int.MinValue;
+        bool once = mouse.Value.IsPressedOnce(MouseButtonType.Right);
+        bool held = mouse.Value.IsPressed(MouseButtonType.Right);
+        bool released = mouse.Value.IsReleased(MouseButtonType.Right);
 
-        foreach (var (ent, computed, custom) in movableQuery)
+        if (!once && !held && !released && pressTarget.Value == 0)
+            return;
+
+        // Press: latch the window under the cursor (don't close yet) and
+        // consume so the world / movement systems don't see the right press.
+        if (once)
         {
-            var bb = computed.Ref;
-            // Pixel-perfect: right-click on a transparent bg pixel passes
-            // through instead of closing the window.
-            if (!UiHitTest.PixelHit(assets.Value, custom.Ref.Render(), bb, pos)) continue;
-
-            if (bb.PaintOrder >= topOrder)
-            {
-                topOrder = bb.PaintOrder;
-                topEnt = ent.Ref;
-            }
-        }
-
-        if (topEnt == 0) return;
-
-        mouse.Value.Consume(MouseButtonType.Right);
-
-        if (containerQuery.Contains(topEnt))
-        {
-            var (_, window) = containerQuery.Get(topEnt);
-            closedWriter.Send(new ContainerClosedEvent(window.Ref.Serial));
-            hostMsgs.Send(new HostMessage.ContainerClosed(window.Ref.Serial));
+            pressTarget.Value = TopmostMovable(mouse.Value.Position, assets.Value, movableQuery);
+            if (pressTarget.Value != 0)
+                mouse.Value.Consume(MouseButtonType.Right);
             return;
         }
 
-        DespawnSubtree(commands, topEnt, childrenQ);
+        // Held: keep the press consumed while parked over the latched window.
+        if (held)
+        {
+            if (pressTarget.Value != 0)
+                mouse.Value.Consume(MouseButtonType.Right);
+            return;
+        }
+
+        // Release: close only if the cursor is still over the latched window.
+        if (released)
+        {
+            var target = pressTarget.Value;
+            pressTarget.Value = 0;
+            if (target == 0)
+                return;
+
+            mouse.Value.Consume(MouseButtonType.Right);
+
+            if (TopmostMovable(mouse.Value.Position, assets.Value, movableQuery) != target)
+                return; // dragged off — cancel, like UiClick
+
+            if (containerQuery.Contains(target))
+            {
+                var (_, window) = containerQuery.Get(target);
+                closedWriter.Send(new ContainerClosedEvent(window.Ref.Serial));
+                hostMsgs.Send(new HostMessage.ContainerClosed(window.Ref.Serial));
+                return;
+            }
+
+            if (serverGumpQuery.Contains(target))
+            {
+                var (_, sg) = serverGumpQuery.Get(target);
+                net.Value.Send_GumpResponse(sg.Ref.Sender, sg.Ref.GumpId, 0,
+                    Array.Empty<uint>(), Array.Empty<Tuple<ushort, string>>());
+                if (serverGumpRegistry.Value.ByGumpId.TryGetValue(sg.Ref.GumpId, out var r) && r == target)
+                    serverGumpRegistry.Value.ByGumpId.Remove(sg.Ref.GumpId);
+            }
+
+            DespawnSubtree(commands, target, childrenQ);
+        }
+    }
+
+    // Topmost UIMovable whose bg sprite is opaque under `pos` (0 if none).
+    // Pixel-perfect so a click on a transparent bg pixel passes through.
+    private static ulong TopmostMovable(
+        Vector2 pos,
+        AssetsServer assets,
+        Query<Data<ComputedNode, UiCustom>, Filter<With<UIMovable>>> movableQuery)
+    {
+        ulong top = 0;
+        int topOrder = int.MinValue;
+        foreach (var (ent, computed, custom) in movableQuery)
+        {
+            var bb = computed.Ref;
+            if (!UiHitTest.PixelHit(assets, custom.Ref.Render(), bb, pos)) continue;
+            if (bb.PaintOrder >= topOrder)
+            {
+                topOrder = bb.PaintOrder;
+                top = ent.Ref;
+            }
+        }
+        return top;
     }
 
     private static void DespawnSubtree(

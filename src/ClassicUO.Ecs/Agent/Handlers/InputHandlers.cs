@@ -42,6 +42,7 @@ internal static class InputHandlers
         d.Register("input.mouseDoubleClick", MouseDoubleClick);
         d.Register("input.mouseHold", MouseHold);
         d.Register("input.mouseRelease", MouseRelease);
+        d.Register("input.mouseWheel", MouseWheel);
         d.Register("input.clear", InputClear);
         d.Register("input.type", Type);
     }
@@ -119,6 +120,25 @@ internal static class InputHandlers
         ctx.State.PendingMouseFrames.Enqueue(down);
         ctx.State.PendingMouseFrames.Enqueue(up);
         return Ok(req, 6);
+    }
+
+    // input.mouseWheel { x, y, delta } — delta in notches (+up / -down). Moves
+    // the synthetic cursor to (x,y) and applies the wheel on that frame so the
+    // UI scroll container under the cursor receives it.
+    public static JsonRpcResponse MouseWheel(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        if (!TryGetXY(req, out var x, out var y, out var err)) return err!;
+        int delta = 0;
+        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object
+            && p.TryGetProperty("delta", out var dEl) && dEl.TryGetInt32(out var d))
+            delta = d;
+        var s = ctx.State.CurrentMouseSynth;
+        s.X = x; s.Y = y; s.Wheel = delta;
+        ctx.State.PendingMouseFrames.Enqueue(s);
+        // Follow-up frame with Wheel=0 so the per-frame delta resets next tick.
+        var rest = s; rest.Wheel = 0;
+        ctx.State.PendingMouseFrames.Enqueue(rest);
+        return Ok(req, 2);
     }
 
     public static JsonRpcResponse MouseHold(JsonRpcRequest req, in AgentRpcContext<App> ctx)

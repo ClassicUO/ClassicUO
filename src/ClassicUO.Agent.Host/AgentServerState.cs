@@ -35,6 +35,9 @@ public struct SynthMouseFrame
     public ButtonState Left;
     public ButtonState Middle;
     public ButtonState Right;
+    // Scroll-wheel notches to apply on the frame this is drained (+up / -down).
+    // 0 for ordinary move/click frames.
+    public int Wheel;
 }
 
 // Pending screenshot request. capture.shot enqueues this from the inbox

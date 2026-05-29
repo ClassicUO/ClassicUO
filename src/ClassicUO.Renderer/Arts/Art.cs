@@ -3,7 +3,7 @@ using ClassicUO.Assets;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using SDL2;
+using SDL3;
 
 namespace ClassicUO.Renderer.Arts
 {
@@ -120,13 +120,12 @@ namespace ClassicUO.Renderer.Arts
             fixed (uint* ptr = artInfo.Pixels)
             {
                 SDL.SDL_Surface* surface = (SDL.SDL_Surface*)
-                    SDL.SDL_CreateRGBSurfaceWithFormatFrom(
-                        (IntPtr)ptr,
+                    SDL.SDL_CreateSurfaceFrom(
                         artInfo.Width,
                         artInfo.Height,
-                        32,
-                        4 * artInfo.Width,
-                        SDL.SDL_PIXELFORMAT_ABGR8888
+                        SDL.SDL_PixelFormat.SDL_PIXELFORMAT_ABGR8888,
+                        (IntPtr)ptr,
+                        4 * artInfo.Width
                     );
 
                 int stride = surface->pitch >> 2;
@@ -196,18 +195,17 @@ namespace ClassicUO.Renderer.Arts
                     int scaledW = (int)(artInfo.Width * dpiScale);
                     int scaledH = (int)(artInfo.Height * dpiScale);
 
-                    IntPtr scaled = SDL.SDL_CreateRGBSurfaceWithFormat(
-                        0,
+                    IntPtr scaled = SDL.SDL_CreateSurface(
                         scaledW,
                         scaledH,
-                        32,
-                        SDL.SDL_PIXELFORMAT_ABGR8888);
+                        SDL.SDL_PixelFormat.SDL_PIXELFORMAT_ABGR8888);
 
                     if (scaled != IntPtr.Zero)
                     {
-                        SDL.SDL_Rect dst = new SDL.SDL_Rect { x = 0, y = 0, w = scaledW, h = scaledH };
-                        SDL.SDL_BlitScaled((IntPtr)surface, IntPtr.Zero, scaled, ref dst);
-                        SDL.SDL_FreeSurface((IntPtr)surface);
+                        // SDL3: dstrect=NULL scales into the whole destination
+                        // surface, which is exactly scaledW×scaledH here.
+                        SDL.SDL_BlitSurfaceScaled((IntPtr)surface, IntPtr.Zero, scaled, IntPtr.Zero, SDL.SDL_ScaleMode.SDL_SCALEMODE_LINEAR);
+                        SDL.SDL_DestroySurface((IntPtr)surface);
 
                         hotX = (int)(hotX * dpiScale);
                         hotY = (int)(hotY * dpiScale);

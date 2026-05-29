@@ -23,6 +23,7 @@
 using System;
 using System.Collections.Generic;
 using ClassicUO.Assets;
+using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Utility;
@@ -84,6 +85,109 @@ internal readonly struct ServerGumpPlugin : IPlugin
                 }
             };
         app.AddSystem(applyPageFn).InStage(Stage.Update).Build();
+
+        // Slide each scrollbar thumb to match its text container's live scroll
+        // offset. LayoutSystem writes ScrollPosition.OffsetY post-layout from
+        // Clay's ScrollContainerData; we read it here (PostUpdate) and set the
+        // thumb's Node.Top. One-frame lag is invisible for a scrollbar.
+        Action<Query<Data<ServerGumpScrollThumb, Node>>, Query<Data<ScrollPosition>>> thumbFn =
+            (thumbQ, scrollQ) =>
+            {
+                foreach (var (_, thumb, node) in thumbQ)
+                {
+                    float ratio = 0f;
+                    if (thumb.Ref.MaxScroll > 0f && scrollQ.Contains(thumb.Ref.ScrollEntity))
+                    {
+                        var (_, sp) = scrollQ.Get(thumb.Ref.ScrollEntity);
+                        ratio = Math.Clamp(Math.Abs(sp.Ref.OffsetY) / thumb.Ref.MaxScroll, 0f, 1f);
+                    }
+                    var target = thumb.Ref.TrackTop + ratio * thumb.Ref.Travel;
+                    if (node.Ref.Top.Value != target)
+                        node.Ref.Top = Val.Px(target);
+                }
+            };
+        app.AddSystem(thumbFn).InStage(Stage.PostUpdate).Build();
+
+        // Drag the scrollbar thumb to scroll. Runs in PreUpdate (before
+        // WindowDragPlugin.Drag in Update) so a press that lands on a thumb
+        // claims the shared DragGate first — WindowDragPlugin then sees the
+        // gate taken and won't drag the whole window instead. Delta-based:
+        // map vertical mouse travel through (MaxScroll / Travel) onto the
+        // container's ScrollPosition.OffsetY.
+        var thumbDragFn = ScrollThumbDrag;
+        app.AddSystem(thumbDragFn).InStage(Stage.PreUpdate).Build();
+    }
+
+    private struct ScrollThumbAnchor
+    {
+        public bool Active;
+        public bool ClaimedGate;
+        public ulong ScrollEntity;
+        public float MouseY0;
+        public float OffsetY0;
+        public float Travel;
+        public float MaxScroll;
+    }
+
+    private static void ScrollThumbDrag(
+        Res<MouseContext> mouse,
+        Res<DragGate> gate,
+        Local<ScrollThumbAnchor> anchor,
+        Query<Data<ServerGumpScrollThumb, ComputedNode, Node>> thumbsQ,
+        Query<Data<ScrollPosition>> scrollQ)
+    {
+        bool held = mouse.Value.IsPressed(MouseButtonType.Left)
+                 || mouse.Value.IsPressedOnce(MouseButtonType.Left);
+        if (!held)
+        {
+            if (anchor.Value.ClaimedGate && gate.Value.Mode == ActiveDrag.UIWindow)
+                gate.Value.Mode = ActiveDrag.None;
+            anchor.Value.Active = false;
+            anchor.Value.ClaimedGate = false;
+            return;
+        }
+
+        if (mouse.Value.IsPressedOnce(MouseButtonType.Left))
+        {
+            if (gate.Value.Mode != ActiveDrag.None) return; // another drag owns the gesture
+            var pos = mouse.Value.Position;
+            foreach (var (_, thumb, cn, node) in thumbsQ)
+            {
+                if (node.Ref.Display == Display.None) continue;
+                if (thumb.Ref.MaxScroll <= 0f || thumb.Ref.Travel <= 0f) continue;
+                var bb = cn.Ref;
+                if (pos.X < bb.Position.X || pos.Y < bb.Position.Y) continue;
+                if (pos.X >= bb.Position.X + bb.Size.X || pos.Y >= bb.Position.Y + bb.Size.Y) continue;
+
+                float off0 = 0f;
+                if (scrollQ.Contains(thumb.Ref.ScrollEntity))
+                {
+                    var (_, sp0) = scrollQ.Get(thumb.Ref.ScrollEntity);
+                    off0 = sp0.Ref.OffsetY;
+                }
+                anchor.Value = new ScrollThumbAnchor
+                {
+                    Active = true,
+                    ClaimedGate = true,
+                    ScrollEntity = thumb.Ref.ScrollEntity,
+                    MouseY0 = pos.Y,
+                    OffsetY0 = off0,
+                    Travel = thumb.Ref.Travel,
+                    MaxScroll = thumb.Ref.MaxScroll,
+                };
+                gate.Value.Mode = ActiveDrag.UIWindow;
+                break;
+            }
+        }
+
+        if (anchor.Value.Active && anchor.Value.Travel > 0f && scrollQ.Contains(anchor.Value.ScrollEntity))
+        {
+            var (_, sp) = scrollQ.Get(anchor.Value.ScrollEntity);
+            float delta = mouse.Value.Position.Y - anchor.Value.MouseY0;
+            sp.Ref.OffsetY = Math.Clamp(
+                anchor.Value.OffsetY0 + delta * (anchor.Value.MaxScroll / anchor.Value.Travel),
+                0f, anchor.Value.MaxScroll);
+        }
     }
 
     private static void SpawnOnB0(
@@ -229,7 +333,6 @@ internal readonly struct ServerGumpPlugin : IPlugin
         int page = 0;
         int group = 0;
         bool nomove = false;
-        bool rootBgAssigned = false;
         float maxRight = 0f;
         float maxBottom = 0f;
 
@@ -263,22 +366,14 @@ internal readonly struct ServerGumpPlugin : IPlugin
                     ushort.TryParse(gparams[3], out var rid) &&
                     int.TryParse(gparams[4], out var rw) && int.TryParse(gparams[5], out var rh))
                 {
-                    if (!rootBgAssigned)
-                    {
-                        commands.Entity(rootId).InsertBundle(new UOGumpBundle
-                        {
-                            Position = new Vector2(x + rx, y + ry),
-                            Size = new Vector2(rw, rh),
-                            BackgroundId = rid,
-                            Hue = Vector3.UnitZ,
-                            ZOrder = z,
-                            Kind = UOCustomKind.GumpNinePatch,
-                        });
-                        rootBgAssigned = true;
-                        cx0 = rx; cy0 = ry; cw0 = rw; ch0 = rh;
-                        continue;
-                    }
-
+                    // Background panel — a normal child at its gump-local
+                    // (rx,ry). The root is a frame at the gump origin (x,y) so
+                    // every child sits at its true gump-local coord; see the
+                    // root-frame install at the end. (Earlier the first
+                    // resizepic became the root AT (x+rx,y+ry), which shifted
+                    // every other control by (rx,ry) and pushed edge content —
+                    // text, CANCEL — outside the panel on gumps with a nonzero
+                    // resizepic origin.)
                     childId = p.Builder.Value.AddGumpNinePatch(commands, rid, Vector3.UnitZ,
                         new Vector2(rx, ry), new Vector2(rw, rh)).Id;
                     cx0 = rx; cy0 = ry; cw0 = rw; ch0 = rh;
@@ -405,7 +500,7 @@ internal readonly struct ServerGumpPlugin : IPlugin
                     int.TryParse(gparams[6], out var lid))
                 {
                     var text = SafeLine(lines, lid);
-                    childId = SpawnWrappedText(commands, new Vector2(tx, ty), new Vector2(tw, th), text, thue);
+                    childId = SpawnWrappedText(commands, new Vector2(tx, ty), new Vector2(tw, th), text, thue, false, false, out _);
                     cx0 = tx; cy0 = ty; cw0 = tw; ch0 = th;
                 }
             }
@@ -428,7 +523,11 @@ internal readonly struct ServerGumpPlugin : IPlugin
                     }
                     var text = SafeLine(lines, lid);
                     var (txtX, txtY, txtW, txtH) = HtmlInnerRect(tx, ty, tw, th, hasBg, hasScroll);
-                    childId = SpawnWrappedText(commands, new Vector2(txtX, txtY), new Vector2(txtW, txtH), text, 0);
+                    childId = SpawnWrappedText(commands, new Vector2(txtX, txtY), new Vector2(txtW, txtH), text, 0, hasBg, hasScroll, out var contentH);
+                    if (hasScroll)
+                        SpawnScrollBar(commands, p.Builder.Value, p.Assets.Value,
+                            new Vector2(tx, ty), new Vector2(tw, th), page, group, rootId,
+                            scrollEntity: childId, maxScroll: Math.Max(0, contentH - txtH));
                     cx0 = tx; cy0 = ty; cw0 = tw; ch0 = th;
                 }
             }
@@ -450,7 +549,11 @@ internal readonly struct ServerGumpPlugin : IPlugin
                     var cliloc = ParseClilocId(gparams[5]);
                     var text = p.Files.Value.Clilocs.GetString(cliloc) ?? string.Empty;
                     var (txtX, txtY, txtW, txtH) = HtmlInnerRect(tx, ty, tw, th, hasBg, hasScroll);
-                    childId = SpawnWrappedText(commands, new Vector2(txtX, txtY), new Vector2(txtW, txtH), text, 0);
+                    childId = SpawnWrappedText(commands, new Vector2(txtX, txtY), new Vector2(txtW, txtH), text, 0, hasBg, hasScroll, out var contentH);
+                    if (hasScroll)
+                        SpawnScrollBar(commands, p.Builder.Value, p.Assets.Value,
+                            new Vector2(tx, ty), new Vector2(tw, th), page, group, rootId,
+                            scrollEntity: childId, maxScroll: Math.Max(0, contentH - txtH));
                     cx0 = tx; cy0 = ty; cw0 = tw; ch0 = th;
                 }
             }
@@ -483,7 +586,11 @@ internal readonly struct ServerGumpPlugin : IPlugin
                         text = p.Files.Value.Clilocs.GetString(cliloc) ?? string.Empty;
                     }
                     var (txtX, txtY, txtW, txtH) = HtmlInnerRect(tx, ty, tw, th, hasBg, hasScroll);
-                    childId = SpawnWrappedText(commands, new Vector2(txtX, txtY), new Vector2(txtW, txtH), text, 0);
+                    childId = SpawnWrappedText(commands, new Vector2(txtX, txtY), new Vector2(txtW, txtH), text, 0, hasBg, hasScroll, out var contentH);
+                    if (hasScroll)
+                        SpawnScrollBar(commands, p.Builder.Value, p.Assets.Value,
+                            new Vector2(tx, ty), new Vector2(tw, th), page, group, rootId,
+                            scrollEntity: childId, maxScroll: Math.Max(0, contentH - txtH));
                     cx0 = tx; cy0 = ty; cw0 = tw; ch0 = th;
                 }
             }
@@ -509,7 +616,7 @@ internal readonly struct ServerGumpPlugin : IPlugin
                     int.TryParse(gparams[7], out var lid))
                 {
                     var text = SafeLine(lines, lid);
-                    childId = SpawnWrappedText(commands, new Vector2(tx, ty), new Vector2(tw, th), text, thue);
+                    childId = SpawnWrappedText(commands, new Vector2(tx, ty), new Vector2(tw, th), text, thue, false, false, out _);
                     cx0 = tx; cy0 = ty; cw0 = tw; ch0 = th;
                 }
             }
@@ -621,12 +728,15 @@ internal readonly struct ServerGumpPlugin : IPlugin
             }
         }
 
-        // Apply the computed extent to the root when no resizepic absorbed it.
-        // Give it an invisible Custom surface (UOCustomKind.None) so it gets a
-        // ComputedNode + solid hit-test and behaves like any gump window:
-        // draggable, right-click-closable, and click-capturing over its whole
-        // area (otherwise empty regions fall through to the world).
-        if (!rootBgAssigned && maxRight > 0f && maxBottom > 0f)
+        // Root is an invisible frame at the GUMP ORIGIN (x,y) sized to the full
+        // content extent. The background resizepic (if any) is a normal child
+        // at its own (rx,ry), so every control lands at its true gump-local
+        // coord relative to this frame — no (rx,ry) shift. UOCustomKind.None
+        // gives the frame a ComputedNode + solid hit-test so it behaves like
+        // any gump window: draggable, right-click-closable, click-capturing
+        // over its whole area. Only the root carries GlobalZIndex (threaded to
+        // descendants by LayoutSystem).
+        if (maxRight > 0f && maxBottom > 0f)
         {
             commands.Entity(rootId)
                 .Insert(new Node
@@ -685,7 +795,108 @@ internal readonly struct ServerGumpPlugin : IPlugin
         return bg.Id;
     }
 
-    private static ulong SpawnWrappedText(Commands commands, Vector2 position, Vector2 size, string text, ushort hue)
+    // Pixels scrolled per up/down arrow click (~two text lines).
+    private const float ScrollArrowStep = 40f;
+
+    // The vertical scrollbar OOP's HtmlControl adds when hasScrollbar (the
+    // non-flag ScrollBar: up/down arrow buttons + a 3-piece background track +
+    // a slider thumb). Mirrors OOP ScrollBar.Draw geometry; placed at the box's
+    // right edge (OOP `ScrollBar(Width - 14, 0, Height)`). The arrows scroll on
+    // click and the thumb both tracks the live scroll (SyncScrollThumbs) and
+    // drags it (ScrollThumbDragSystem).
+    private static void SpawnScrollBar(Commands commands, GumpBuilder builder, AssetsServer assets, Vector2 position, Vector2 size, int page, int group, ulong rootId, ulong scrollEntity, float maxScroll)
+    {
+        const ushort UP = 251, UP_PRESSED = 250, DOWN = 253, DOWN_PRESSED = 252, BG_TOP = 257, BG_MID = 256, BG_BOTTOM = 255, SLIDER = 254;
+
+        int upH = assets.Gumps.GetGump(UP).UV.Height;
+        int downH = assets.Gumps.GetGump(DOWN).UV.Height;
+        int bgTopH = assets.Gumps.GetGump(BG_TOP).UV.Height;
+        int bgBottomH = assets.Gumps.GetGump(BG_BOTTOM).UV.Height;
+        int bgW = assets.Gumps.GetGump(BG_TOP).UV.Width;
+        int sliderW = assets.Gumps.GetGump(SLIDER).UV.Width;
+        int sliderH = assets.Gumps.GetGump(SLIDER).UV.Height;
+
+        int h = (int)size.Y;
+        float sx = position.X + size.X - 14f;
+        float y0 = position.Y;
+
+        void Attach(ulong id)
+        {
+            commands.Entity(id).Insert(new ServerGumpChild { RootEntity = rootId, Page = page, Group = group });
+            commands.AddChild(rootId, id);
+        }
+
+        int middleHeight = h - upH - downH - bgTopH - bgBottomH;
+        if (middleHeight > 0)
+        {
+            Attach(builder.AddGump(commands, BG_TOP, Vector3.UnitZ, new Vector2(sx, y0 + upH)).Id);
+            Attach(builder.AddGumpTiled(commands, BG_MID, Vector3.UnitZ, new Vector2(sx, y0 + upH + bgTopH), new Vector2(bgW, middleHeight)).Id);
+            Attach(builder.AddGump(commands, BG_BOTTOM, Vector3.UnitZ, new Vector2(sx, y0 + h - downH - bgBottomH)).Id);
+        }
+        else
+        {
+            Attach(builder.AddGumpTiled(commands, BG_MID, Vector3.UnitZ, new Vector2(sx, y0 + upH), new Vector2(bgW, Math.Max(1, h - upH - downH))).Id);
+        }
+
+        // Up / down arrow buttons — click to scroll. Capture only immutable
+        // values (scroll entity id + maxScroll); the buttons share this gump's
+        // rebuild cohort, so the captured id stays valid for their lifetime.
+        var capScroll = scrollEntity;
+        var capMax = maxScroll;
+        var upBtn = builder.AddButton(commands, (UP, UP_PRESSED, UP), Vector3.UnitZ, new Vector2(sx, y0));
+        upBtn.Observe((On<UiClick> _, Query<Data<ScrollPosition>> sq) =>
+        {
+            if (sq.Contains(capScroll))
+            {
+                var (_, sp) = sq.Get(capScroll);
+                sp.Ref.OffsetY = Math.Clamp(sp.Ref.OffsetY - ScrollArrowStep, 0f, capMax);
+            }
+        });
+        Attach(upBtn.Id);
+
+        var downBtn = builder.AddButton(commands, (DOWN, DOWN_PRESSED, DOWN), Vector3.UnitZ, new Vector2(sx, y0 + h - downH));
+        downBtn.Observe((On<UiClick> _, Query<Data<ScrollPosition>> sq) =>
+        {
+            if (sq.Contains(capScroll))
+            {
+                var (_, sp) = sq.Get(capScroll);
+                sp.Ref.OffsetY = Math.Clamp(sp.Ref.OffsetY + ScrollArrowStep, 0f, capMax);
+            }
+        });
+        Attach(downBtn.Id);
+
+        // Slider thumb. Tagged with ServerGumpScrollThumb so SyncScrollThumbs
+        // tracks it to the text container's live scroll offset each frame.
+        var thumbTop = y0 + upH;
+        var travel = Math.Max(0f, h - upH - downH - sliderH);
+        var thumbId = builder.AddGump(commands, SLIDER, Vector3.UnitZ, new Vector2(sx + (bgW - sliderW) / 2f, thumbTop)).Id;
+        commands.Entity(thumbId).Insert(new ServerGumpScrollThumb
+        {
+            ScrollEntity = scrollEntity,
+            TrackTop = thumbTop,
+            Travel = travel,
+            MaxScroll = maxScroll,
+        });
+        Attach(thumbId);
+    }
+
+    // OOP HtmlControl.InternalBuild default body colour (HTMLColor) for HTML
+    // text. Untagged segments render in this colour; <basefont>/<a> tags
+    // override per-segment. Mirrors the exact branch logic so the Help menu's
+    // body text comes out black on the 0x2486 parchment instead of white.
+    private static uint HtmlStartColor(ushort hue, bool hasBg, bool hasScroll)
+    {
+        if (hue > 0)
+        {
+            if (hue == 0x00FFFFFF || hue == 0xFFFF || hue == 0xFF) return 0xFFFFFFFE;
+            return (HuesHelper.Color16To32(hue) << 8) | 0xFF;
+        }
+        if (!hasBg)
+            return hasScroll ? 0xFFFFFFFF : 0x010101FF;
+        return 0x010101FF;
+    }
+
+    private static ulong SpawnWrappedText(Commands commands, Vector2 position, Vector2 size, string text, ushort hue, bool hasBg, bool hasScroll, out int contentHeight)
     {
         // Pre-bake text into a Texture2D via FontsLoader. Handles HTML
         // markup AND word-wrap to size.X internally. Render as UiImage so
@@ -700,7 +911,9 @@ internal readonly struct ServerGumpPlugin : IPlugin
         // which forces the texture into the container size and hides
         // overflowing lines.
         bool isHtml = !string.IsNullOrEmpty(text) && text.IndexOf('<') >= 0;
-        var (tex, w, h) = UoFontRenderer.Bake(text ?? string.Empty, font: 1, hue, (int)size.X, isHtml);
+        var htmlStartColor = HtmlStartColor(hue, hasBg, hasScroll);
+        var (tex, w, h) = UoFontRenderer.Bake(text ?? string.Empty, font: 1, hue, (int)size.X, isHtml, htmlStartColor, htmlBgColored: !hasBg);
+        contentHeight = tex != null ? h : 0;
 
         bool needsScroll = tex != null && h > size.Y;
         var outerCmd = commands.Spawn().Insert(new Node
@@ -876,6 +1089,18 @@ internal struct ServerGumpChild
     public ulong RootEntity;
     public int Page;
     public int Group;
+}
+
+// Scrollbar slider thumb. SyncScrollThumbs reads the linked text container's
+// ScrollPosition.OffsetY each frame and slides the thumb along its track to
+// match (so the visual scrollbar tracks wheel scrolling). Travel/MaxScroll are
+// 0 when the text fits — thumb stays parked at TrackTop.
+internal struct ServerGumpScrollThumb
+{
+    public ulong ScrollEntity;
+    public float TrackTop;
+    public float Travel;
+    public float MaxScroll;
 }
 
 internal sealed class ServerGumpParams : CompositeSystemParam

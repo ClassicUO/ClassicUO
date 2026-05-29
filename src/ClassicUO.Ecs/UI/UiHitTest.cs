@@ -24,6 +24,10 @@ internal static class UiHitTest
 
         switch (custom.Kind)
         {
+            // MiniMap draws its baked texture at native bg-gump size; the bg
+            // gump's own alpha mask is the correct hit mask (radar pixels only
+            // fill where the frame is opaque), so share the plain Gump path.
+            case UOCustomKind.MiniMap:
             case UOCustomKind.Gump:
             {
                 ref readonly var info = ref assets.Gumps.GetGump(custom.AssetId);

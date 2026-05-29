@@ -1,0 +1,6 @@
+[
+  { "log": "agent.login admin/admin" },
+  { "verb": "agent.login", "params": { "username": "admin", "password": "admin", "autoSelect": true, "serverIndex": 0, "characterIndex": 0 }, "queueWait": 5 },
+  { "poll": { "verb": "lifecycle.inWorld", "field": "inWorld", "expect": true, "timeoutMs": 45000, "intervalMs": 500 } },
+  { "sleepMs": 1500 }
+]

@@ -2,6 +2,7 @@ using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
 using TinyEcs.Bevy.UI;
+using TinyEcs.Bevy.UI.Widgets;
 using ClayColor = Clay.Color;
 
 namespace ClassicUO.Ecs;
@@ -189,6 +190,79 @@ internal sealed class GumpBuilder
                     Hue = hue,
                 }
             });
+    }
+
+    /// Default UO checkbox graphics (classic empty / checked box).
+    public const ushort CheckboxOff = 0x00D2;
+    public const ushort CheckboxOn = 0x00D3;
+    /// Classic vertical scrollbar thumb + background gump ids (ScrollBar.cs).
+    public const ushort ScrollThumb = 254;
+    public const ushort ScrollBackground = 256;
+    /// Classic horizontal slider knob gump id (HSliderBar.cs default style).
+    public const ushort SliderKnob = 0x845;
+
+    /// Spawn a UO checkbox. CheckboxPlugin toggles the sibling Checkbox.Checked
+    /// on click + fires CheckboxChanged (observe it for the value); the GuiPlugin
+    /// swaps the Off/On sprite to match. Caller positions a label separately.
+    public EntityCommands AddCheckbox(Commands commands, bool isChecked, Vector2? position = null, ushort off = CheckboxOff, ushort on = CheckboxOn, Vector3 hue = default)
+    {
+        return AddGump(commands, isChecked ? on : off, hue, position)
+            .Insert(new UOCheckbox { Off = off, On = on })
+            .Insert(new Checkbox { Checked = isChecked })
+            .Insert(Interaction.None);
+    }
+
+    /// Spawn a vertical scrollbar bound to a scrollable container (an entity with
+    /// Overflow.Scroll + ScrollPosition). Builds the track (tiled background) +
+    /// a draggable thumb child; ScrollbarPlugin positions/drags the thumb from
+    /// the target's scroll data. Returns the track entity.
+    public EntityCommands AddVScrollbar(Commands commands, ulong target, Vector2 position, float height, Vector3 hue = default)
+    {
+        ref readonly var thumbInfo = ref _assets.Gumps.GetGump(ScrollThumb);
+        var width = thumbInfo.UV.Width;
+
+        var track = commands.Spawn()
+            .Insert(MakeFloatingNode(position, new Vector2(width, height)))
+            .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.GumpTiled, AssetId = ScrollBackground, Hue = hue } })
+            .Insert(new Scrollbar { Target = target, Orientation = ScrollbarOrientation.Vertical, MinThumbLength = 16f })
+            .Insert(Interaction.None);
+
+        var thumb = commands.Spawn()
+            .Insert(MakeFloatingNode(new Vector2(0, 0), new Vector2(width, thumbInfo.UV.Height)))
+            .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.Gump, AssetId = ScrollThumb, Hue = hue } })
+            .Insert(new ScrollbarThumb())
+            .Insert(new ScrollbarDragState())
+            .Insert(Interaction.None);
+
+        commands.AddChild(track.Id, thumb.Id);
+        return track;
+    }
+
+    /// Spawn a horizontal slider over [min,max]. Builds the track + a draggable
+    /// knob child; SliderPlugin positions/drags the knob and fires SliderChanged.
+    /// Returns the track entity (carries the Slider component to read Value).
+    public EntityCommands AddHSlider(Commands commands, float min, float max, float value, Vector2 position, float width, Vector3 hue = default)
+    {
+        ref readonly var knobInfo = ref _assets.Gumps.GetGump(SliderKnob);
+        var height = knobInfo.UV.Height;
+
+        var track = commands.Spawn()
+            .Insert(MakeFloatingNode(position, new Vector2(width, height)))
+            // No background sprite of its own — the recessed-bar look is the knob
+            // sliding over an empty track; None keeps the element hit-testable.
+            .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.None, AssetId = 0, Hue = hue } })
+            .Insert(new Slider { Min = min, Max = max, Value = value, ThumbLength = knobInfo.UV.Width, Orientation = ScrollbarOrientation.Horizontal })
+            .Insert(Interaction.None);
+
+        var knob = commands.Spawn()
+            .Insert(MakeFloatingNode(new Vector2(0, 0), new Vector2(knobInfo.UV.Width, height)))
+            .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.Gump, AssetId = SliderKnob, Hue = hue } })
+            .Insert(new SliderThumb())
+            .Insert(new SliderDragState())
+            .Insert(Interaction.None);
+
+        commands.AddChild(track.Id, knob.Id);
+        return track;
     }
 
     private static Node MakeFloatingNode(Vector2? position, Vector2? size, bool autoFit = false)

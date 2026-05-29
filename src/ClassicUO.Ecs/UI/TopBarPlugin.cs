@@ -1,48 +1,61 @@
-// Minimal port of main's TopBarGump (src/Game/UI/Gumps/TopBarGump.cs):
-// the always-on-top toolbar with Map / Paperdoll / Inventory / Journal /
-// Chat / Help / WorldMap / Info / Debug / NetStats / UOStore / GlobalChat
-// buttons. Spawned once on entering GameScreen, despawned on exit.
+// Port of main's TopBarGump (src/Game/UI/Gumps/TopBarGump.cs): the always-on-top
+// toolbar. Spawned on entering GameScreen, despawned on exit.
 //
-// Scope of this port:
-//   * Background ResizePic (gump 0x13BE).
-//   * 12 button slots using 0x098B (small) / 0x098D (large) graphics
-//     with hardcoded captions (cliloc lookups deferred until ClilocLoader
-//     is wired into the ECS UI text path).
-//   * Wired actions: Paperdoll → Send_DoubleClick(player). All other
-//     buttons spawn but no-op for now — port the corresponding gumps /
-//     scenes as separate gaps.
-//   * Page/minimize button (0x15A4 / 0x15A1) NOT yet wired — needs Clay
-//     page-switching, deferred.
+// Patterns mirror MiniMapPlugin: each button action is an entity-scoped
+// On<UiClick> observer; captions are interactive entity-children so clicks on
+// the text BUBBLE to the button's observer. Toggle buttons are UOButtons
+// (normal/pressed/over swapped by GuiPlugin.UpdateUOButtonsState).
+//
+// Tree: root[IsTopBar] -> { fullGroup[TopBarFull] -> bg + minimizeBtn + N×
+// (button -> caption); arrowBtn[TopBarArrow] (minimized state) }. Minimize hides
+// fullGroup + shows the arrow; the arrow re-expands.
+//
+// Drag: press on the background (or the minimized arrow) and move — drags the
+// root. Pressing a button activates it instead. Right-click resets to (0,0).
 
+using System;
 using ClassicUO.Assets;
-using ClassicUO.Configuration;
 using ClassicUO.Game;
+using ClassicUO.Input;
 using ClassicUO.Network;
-using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
 using TinyEcs.Bevy.UI;
 using ClayColor = Clay.Color;
+using GameLayer = ClassicUO.Game.Data.Layer;
 
 namespace ClassicUO.Ecs;
 
 internal readonly struct TopBarPlugin : IPlugin
 {
+    private const int BarHeight = 27;
+    private const int CaptionTop = 5; // resting caption Y; +1 when the button is pressed
+    private static ClayColor s_capNormal = new(0, 0, 0, 255);
+    private static ClayColor s_capHover = new(238, 238, 49, 255);
 
     public void Build(App app)
     {
         var spawnFn = Spawn;
         var despawnFn = Despawn;
+        var dragFn = Drag;
+        var resetFn = RightClickReset;
+        var pressFn = PressOffsetCaptions;
 
         app
-            .AddSystem(spawnFn)
-            .OnEnter(GameState.GameScreen)
-            .Build()
-
-            .AddSystem(despawnFn)
-            .OnExit(GameState.GameScreen)
-            .Build();
+            .AddSystem(spawnFn).OnEnter(GameState.GameScreen).Build()
+            .AddSystem(despawnFn).OnExit(GameState.GameScreen).Build()
+            // PreUpdate so the bar claims the shared DragGate BEFORE the
+            // Stage.Update drags (GameScreen border-drag, WindowDragPlugin) —
+            // the bar is on top, so a press on it must win over the game-window
+            // border / windows beneath. Node moves apply at the same frame's
+            // layout (UiLayoutStage runs after PreUpdate).
+            .AddSystem(dragFn).InStage(Stage.PreUpdate).Build()
+            .AddSystem(pressFn).InStage(Stage.Update).Build()
+            .AddSystem(resetFn)
+                .InStage(Stage.PreUpdate)
+                .RunIf((Res<MouseContext> m) => m.Value.IsPressedOnce(MouseButtonType.Right))
+                .Build();
     }
 
     // Mirrors TopBarGump.textTable: 0 = small (0x098B), 1 = large (0x098D).
@@ -64,18 +77,8 @@ internal readonly struct TopBarPlugin : IPlugin
 
     private enum Buttons : int
     {
-        Map,
-        Paperdoll,
-        Inventory,
-        Journal,
-        Chat,
-        Help,
-        WorldMap,
-        Info,
-        Debug,
-        NetStats,
-        UOStore,
-        GlobalChat,
+        Map, Paperdoll, Inventory, Journal, Chat, Help,
+        WorldMap, Info, Debug, NetStats, UOStore, GlobalChat,
     }
 
     private static void Spawn(
@@ -83,8 +86,6 @@ internal readonly struct TopBarPlugin : IPlugin
         Res<AssetsServer> assets,
         Res<GameContext> gameCtx)
     {
-        // Resolve button gump dims once. Fallback to main's hard-coded
-        // 50 / 100 if the asset is missing — matches TopBarGump.ctor.
         var smallInfo = assets.Value.Gumps.GetGump(0x098B);
         var smallWidth = smallInfo.UV.Width > 0 ? smallInfo.UV.Width : 50;
         var smallHeight = smallInfo.UV.Height > 0 ? smallInfo.UV.Height : 22;
@@ -93,7 +94,6 @@ internal readonly struct TopBarPlugin : IPlugin
         var largeWidth = largeInfo.UV.Width > 0 ? largeInfo.UV.Width : 100;
         var largeHeight = largeInfo.UV.Height > 0 ? largeInfo.UV.Height : 22;
 
-        // Compute total row width.
         var hasUOStore = gameCtx.Value.ClientVersion >= ClassicUO.Utility.ClientVersion.CV_706400;
         var startX = 30;
         for (var i = 0; i < s_buttons.Length; i++)
@@ -102,67 +102,67 @@ internal readonly struct TopBarPlugin : IPlugin
             startX += (s_buttons[i].sizeKind == 1 ? largeWidth : smallWidth) + 1;
         }
         var totalWidth = startX + 1;
-        const int BarHeight = 27;
 
-        // Root container at (0, 0). Z-index high so it sits over world / UI.
         var root = commands.Spawn()
             .Insert(new Node
             {
                 PositionType = PositionType.Absolute,
-                Left = Val.Px(0),
-                Top = Val.Px(0),
-                Width = Val.Px(totalWidth),
-                Height = Val.Px(BarHeight),
+                Left = Val.Px(0), Top = Val.Px(0),
+                Width = Val.Px(totalWidth), Height = Val.Px(BarHeight),
             })
             .Insert(new ZIndex(50))
             .Insert<IsTopBar>();
 
-        // Background ResizePic (0x13BE).
-        ref readonly var bgInfo = ref assets.Value.Gumps.GetGump(0x13BE);
+        var fullGroup = commands.Spawn()
+            .Insert(new Node
+            {
+                PositionType = PositionType.Absolute,
+                Left = Val.Px(0), Top = Val.Px(0),
+                Width = Val.Px(totalWidth), Height = Val.Px(BarHeight),
+            })
+            .Insert<TopBarFull>();
+        commands.AddChild(root.Id, fullGroup.Id);
+
+        // Background ResizePic (0x13BE) — also the drag handle.
         var bg = commands.Spawn()
             .Insert(new Node
             {
                 PositionType = PositionType.Absolute,
-                Left = Val.Px(0),
-                Top = Val.Px(0),
-                Width = Val.Px(totalWidth),
-                Height = Val.Px(BarHeight),
+                Left = Val.Px(0), Top = Val.Px(0),
+                Width = Val.Px(totalWidth), Height = Val.Px(BarHeight),
             })
-            .Insert(new UiCustom
-            {
-                Data = new UOCustomRender
-                {
-                    Kind = UOCustomKind.GumpNinePatch,
-                    AssetId = 0x13BE,
-                    Hue = Vector3.UnitZ,
-                }
-            });
-        commands.AddChild(root.Id, bg.Id);
+            .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.GumpNinePatch, AssetId = 0x13BE, Hue = Vector3.UnitZ } })
+            .Insert(Interaction.None)
+            .Insert<TopBarDragHandle>();
+        commands.AddChild(fullGroup.Id, bg.Id);
 
-        // Minimize-toggle button (0x15A4) at (5, 3). Page-switching not
-        // implemented yet — click currently no-ops.
+        // Minimize handle (UOButton 0x15A4/5/6) — hides full bar, shows arrow.
         var minBtn = commands.Spawn()
             .Insert(new Node
             {
                 PositionType = PositionType.Absolute,
-                Left = Val.Px(5),
-                Top = Val.Px(3),
-                Width = Val.Px(15),
-                Height = Val.Px(20),
+                Left = Val.Px(5), Top = Val.Px(3),
+                Width = Val.Px(15), Height = Val.Px(20),
             })
-            .Insert(new UiCustom
-            {
-                Data = new UOCustomRender
-                {
-                    Kind = UOCustomKind.Gump,
-                    AssetId = 0x15A4,
-                    Hue = Vector3.UnitZ,
-                }
-            })
-            .Insert(Interaction.None);
-        commands.AddChild(root.Id, minBtn.Id);
+            .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.Gump, AssetId = 0x15A4, Hue = Vector3.UnitZ } })
+            .Insert(new UOButton { Normal = 0x15A4, Pressed = 0x15A6, Over = 0x15A5 })
+            .Insert(new Button())
+            .Insert(Interaction.None)
+            .Insert<TopBarButton>();
+        minBtn.Observe((On<UiClick> _,
+                        Query<Data<Node>, Filter<With<TopBarFull>>> fullQ,
+                        Query<Data<Node>, Filter<With<TopBarArrow>>> arrowQ) =>
+            SetMinimized(fullQ, arrowQ, minimized: true));
+        commands.AddChild(fullGroup.Id, minBtn.Id);
 
-        // Row of action buttons, ordered exactly as main's textTable.
+        // Caption hues: legacy RighClickableButton(normalHue:0, hoverHue:0x0036).
+        // hue 0 renders black; hover swaps to hue 0x0036's colour (a yellow).
+        // The caption (Text, no UiCustom) isn't hit-testable, so hover is driven
+        // off the parent BUTTON's Interaction in PressOffsetCaptions.
+        s_capNormal = new ClayColor(0, 0, 0, 255);
+        uint hc = UoFontRuntime.Hues != null ? UoFontRuntime.Hues.GetPolygoneColor(0x1F, 0x36) : 0x00FFFFFFu;
+        s_capHover = new ClayColor((int)(hc & 0xFF), (int)((hc >> 8) & 0xFF), (int)((hc >> 16) & 0xFF), 255);
+
         var x = 30;
         for (var i = 0; i < s_buttons.Length; i++)
         {
@@ -177,69 +177,319 @@ internal readonly struct TopBarPlugin : IPlugin
                 .Insert(new Node
                 {
                     PositionType = PositionType.Absolute,
-                    Left = Val.Px(x),
-                    Top = Val.Px(1),
-                    Width = Val.Px(w),
-                    Height = Val.Px(h),
+                    Left = Val.Px(x), Top = Val.Px(1),
+                    Width = Val.Px(w), Height = Val.Px(h),
                 })
-                .Insert(new UiCustom
-                {
-                    Data = new UOCustomRender
-                    {
-                        Kind = UOCustomKind.Gump,
-                        AssetId = gumpId,
-                        Hue = Vector3.UnitZ,
-                    }
-                })
-                .Insert(Interaction.None);
+                .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.Gump, AssetId = gumpId, Hue = Vector3.UnitZ } })
+                .Insert(Interaction.None)
+                .Insert<TopBarButton>();
+            commands.AddChild(fullGroup.Id, btn.Id);
 
-            commands.AddChild(root.Id, btn.Id);
-
-            // Caption label centered over the button. Hardcoded strings
-            // until ClilocLoader is on the UI text path.
+            // Caption: absolute (button-relative) so it renders like the legacy
+            // bar (unicode font 1, white, centered), but an entity-child of the
+            // button with Interaction so clicks on the text bubble to the
+            // button. The Draw path is left-aligned, so center via the measured
+            // unicode width.
+            int textW = (int)(UoFontRuntime.Fonts?.GetWidthUnicode(1, caption) ?? w);
+            int captionX = Math.Max(0, (w - textW) / 2);
             var label = commands.Spawn()
                 .Insert(new Node
                 {
                     PositionType = PositionType.Absolute,
-                    Left = Val.Px(x),
-                    Top = Val.Px(6),
-                    Width = Val.Px(w),
-                    Height = Val.Px(h),
+                    Left = Val.Px(captionX), Top = Val.Px(CaptionTop),
+                    Width = Val.Px(textW), Height = Val.Px(h),
                 })
                 .Insert(new Text(caption))
-                .Insert(new TextFont { FontId = 0, Size = 12 })
-                .Insert(new TextColor(new ClayColor(220, 220, 220, 255)));
-            commands.AddChild(root.Id, label.Id);
+                // Legacy uses unicode font 1, hue 0 — which renders BLACK, not
+                // white (the top-bar captions are dark on the marble button).
+                .Insert(new TextFont { FontId = 1, Size = 12 })
+                .Insert(new TextColor(new ClayColor(0, 0, 0, 255)))
+                .Insert(Interaction.None)
+                .Insert<TopBarCaption>();
+            commands.AddChild(btn.Id, label.Id);
 
-            // Wire actions one-by-one as the corresponding gumps land.
-            // Currently only Paperdoll has an ECS path (Send_DoubleClick
-            // on player triggers server 0x88 → PaperdollPlugin).
-            switch (btnId)
-            {
-                case Buttons.Paperdoll:
-                    btn.Observe((On<UiPointerDown> _,
-                                 Res<NetClient> net,
-                                 Res<GameContext> ctx) =>
-                    {
-                        if (ctx.Value.PlayerSerial != 0)
-                            net.Value.Send_DoubleClick(ctx.Value.PlayerSerial);
-                    });
-                    break;
-            }
+            WireButton(btn, btnId);
 
             x += w + 1;
+        }
+
+        // Minimized state: the expand arrow (UOButton 0x15A1/2/3). Hidden until
+        // minimized; also a drag handle.
+        ref readonly var arrowInfo = ref assets.Value.Gumps.GetGump(0x15A1);
+        var arrowW = arrowInfo.UV.Width > 0 ? arrowInfo.UV.Width : 30;
+        var arrowH = arrowInfo.UV.Height > 0 ? arrowInfo.UV.Height : BarHeight;
+        var arrowBtn = commands.Spawn()
+            .Insert(new Node
+            {
+                Display = Display.None,
+                PositionType = PositionType.Absolute,
+                Left = Val.Px(0), Top = Val.Px(0),
+                Width = Val.Px(arrowW), Height = Val.Px(arrowH),
+            })
+            .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.Gump, AssetId = 0x15A1, Hue = Vector3.UnitZ } })
+            .Insert(new UOButton { Normal = 0x15A1, Pressed = 0x15A3, Over = 0x15A2 })
+            .Insert(new Button())
+            .Insert(Interaction.None)
+            .Insert<TopBarArrow>()
+            .Insert<TopBarDragHandle>();
+        arrowBtn.Observe((On<UiClick> _,
+                          Query<Data<Node>, Filter<With<TopBarFull>>> fullQ,
+                          Query<Data<Node>, Filter<With<TopBarArrow>>> arrowQ) =>
+            SetMinimized(fullQ, arrowQ, minimized: false));
+        commands.AddChild(root.Id, arrowBtn.Id);
+    }
+
+    private static void SetMinimized(
+        Query<Data<Node>, Filter<With<TopBarFull>>> fullQ,
+        Query<Data<Node>, Filter<With<TopBarArrow>>> arrowQ,
+        bool minimized)
+    {
+        foreach (var (_, n) in fullQ) n.Ref.Display = minimized ? Display.None : Display.Flex;
+        foreach (var (_, n) in arrowQ) n.Ref.Display = minimized ? Display.Flex : Display.None;
+    }
+
+    private struct DragAnchor
+    {
+        public bool Active;   // currently moving the bar (press began on bg/arrow)
+        public bool Claimed;  // holds the shared DragGate (any press over the bar)
+        public ulong Root;
+        public Vector2 Mouse;
+        public float OriginX, OriginY;
+    }
+
+    // Drag the whole bar by its background (or the minimized arrow). Pressing a
+    // button activates it instead — buttons are skipped as latch targets. Mirrors
+    // WindowDragPlugin's continuous-held + press-once bbox latch (Interaction is
+    // stale on the press-once frame).
+    private static void Drag(
+        Res<MouseContext> mouse,
+        Res<DragGate> gate,
+        Local<DragAnchor> anchor,
+        Query<Data<ComputedNode, Node>, Filter<With<TopBarButton>>> buttonsQ,
+        Query<Data<ComputedNode, Node>, Filter<With<TopBarDragHandle>>> handlesQ,
+        Query<Data<Node>, Filter<With<IsTopBar>>> rootQ)
+    {
+        bool held = mouse.Value.IsPressed(MouseButtonType.Left)
+                 || mouse.Value.IsPressedOnce(MouseButtonType.Left);
+        if (!held)
+        {
+            // Release the shared gate only if WE claimed it.
+            if (anchor.Value.Claimed && gate.Value.Mode == ActiveDrag.UIWindow)
+                gate.Value.Mode = ActiveDrag.None;
+            anchor.Value.Active = false;
+            anchor.Value.Claimed = false;
+            anchor.Value.Root = 0;
+            return;
+        }
+
+        if (mouse.Value.IsPressedOnce(MouseButtonType.Left))
+        {
+            // Another drag (window / pickup / resize) owns this gesture.
+            if (gate.Value.Mode != ActiveDrag.None) return;
+
+            var pos = mouse.Value.Position;
+
+            // Over the bar at all? The bg (or minimized arrow) handle spans the
+            // whole bar and sits under the buttons. Any press over it CLAIMS the
+            // gesture so WindowDragPlugin / pickup don't grab a gump beneath the
+            // bar (the bar is on top). Buttons still fire their UiClick.
+            bool overBar = false;
+            foreach (var (_, bb, node) in handlesQ)
+            {
+                if (node.Ref.Display == Display.None) continue;
+                if (Inside(bb.Ref, pos)) { overBar = true; break; }
+            }
+            if (!overBar) return;
+
+            gate.Value.Mode = ActiveDrag.UIWindow;
+            anchor.Value.Claimed = true;
+
+            // Only the bg/arrow area drags the bar; a press on a button just
+            // claims the gate and lets the button's own UiClick run.
+            bool overButton = false;
+            foreach (var (_, bb, node) in buttonsQ)
+            {
+                if (node.Ref.Display == Display.None) continue;
+                if (Inside(bb.Ref, pos)) { overButton = true; break; }
+            }
+
+            if (!overButton)
+            {
+                foreach (var (ent, node) in rootQ)
+                {
+                    anchor.Value.Active = true;
+                    anchor.Value.Root = ent.Ref;
+                    anchor.Value.Mouse = pos;
+                    anchor.Value.OriginX = node.Ref.Left.Type == ValType.Px ? node.Ref.Left.Value : 0f;
+                    anchor.Value.OriginY = node.Ref.Top.Type == ValType.Px ? node.Ref.Top.Value : 0f;
+                    break;
+                }
+            }
+        }
+
+        if (!anchor.Value.Active || !rootQ.Contains(anchor.Value.Root))
+        {
+            anchor.Value.Active = false;
+            return;
+        }
+
+        var delta = mouse.Value.Position - anchor.Value.Mouse;
+        var (_, rootNode) = rootQ.Get(anchor.Value.Root);
+        rootNode.Ref.Left = Val.Px(anchor.Value.OriginX + delta.X);
+        rootNode.Ref.Top = Val.Px(anchor.Value.OriginY + delta.Y);
+    }
+
+    // Legacy: right-click on the bar snaps it back to (0,0).
+    private static void RightClickReset(
+        Res<MouseContext> mouse,
+        Query<Data<ComputedNode, Node>, Filter<With<TopBarDragHandle>>> handlesQ,
+        Query<Data<Node>, Filter<With<IsTopBar>>> rootQ)
+    {
+        var pos = mouse.Value.Position;
+        bool over = false;
+        foreach (var (_, bb, node) in handlesQ)
+        {
+            if (node.Ref.Display == Display.None) continue;
+            if (Inside(bb.Ref, pos)) { over = true; break; }
+        }
+        if (!over) return;
+
+        mouse.Value.Consume(MouseButtonType.Right);
+        foreach (var (_, node) in rootQ)
+        {
+            node.Ref.Left = Val.Px(0);
+            node.Ref.Top = Val.Px(0);
+        }
+    }
+
+    private static bool Inside(in ComputedNode bb, Vector2 p)
+        => p.X >= bb.Position.X && p.Y >= bb.Position.Y
+        && p.X < bb.Position.X + bb.Size.X && p.Y < bb.Position.Y + bb.Size.Y;
+
+    private static void WireButton(EntityCommands btn, Buttons id)
+    {
+        switch (id)
+        {
+            case Buttons.Map:
+                btn.Observe((On<UiClick> _,
+                             Commands cmd,
+                             Res<GumpBuilder> gb,
+                             Res<UiZCounter> z,
+                             Query<Data<MiniMapWindow>> existing) =>
+                    MiniMapPlugin.OpenOrFocus(cmd, gb.Value, z.Value, existing));
+                break;
+
+            case Buttons.Paperdoll:
+                btn.Observe((On<UiClick> _, Res<NetClient> net, Res<GameContext> ctx) =>
+                {
+                    if (ctx.Value.PlayerSerial != 0)
+                        net.Value.Send_DoubleClick(ctx.Value.PlayerSerial);
+                });
+                break;
+
+            case Buttons.Inventory:
+                btn.Observe((On<UiClick> _,
+                             Res<NetClient> net,
+                             Query<Data<EquipmentSlots>, Filter<With<Player>>> playerQ,
+                             Query<Data<NetworkSerial>> serialQ) =>
+                {
+                    foreach (var (_, slots) in playerQ)
+                    {
+                        var bp = slots.Ref[GameLayer.Backpack];
+                        if (bp != 0 && serialQ.Contains(bp))
+                        {
+                            var (_, ns) = serialQ.Get(bp);
+                            net.Value.Send_DoubleClick(ns.Ref.Value);
+                        }
+                        break;
+                    }
+                });
+                break;
+
+            case Buttons.Help:
+                btn.Observe((On<UiClick> _, Res<NetClient> net) => net.Value.Send_HelpRequest());
+                break;
+
+            case Buttons.Journal:
+                btn.Observe((On<UiClick> _) => Console.WriteLine("[TopBar] Journal — no ECS gump yet"));
+                break;
+            case Buttons.Chat:
+                btn.Observe((On<UiClick> _) => Console.WriteLine("[TopBar] Chat — no ECS gump yet"));
+                break;
+            case Buttons.WorldMap:
+                btn.Observe((On<UiClick> _) => Console.WriteLine("[TopBar] World Map — no ECS gump yet"));
+                break;
+            case Buttons.Debug:
+                btn.Observe((On<UiClick> _) => Console.WriteLine("[TopBar] Debug — no ECS gump yet"));
+                break;
+            case Buttons.NetStats:
+                btn.Observe((On<UiClick> _) => Console.WriteLine("[TopBar] NetStats — no ECS gump yet"));
+                break;
+            case Buttons.UOStore:
+                btn.Observe((On<UiClick> _) => Console.WriteLine("[TopBar] UO Store — no ECS path yet"));
+                break;
+            case Buttons.GlobalChat:
+                btn.Observe((On<UiClick> _) => Console.WriteLine("[TopBar] Global Chat — not implemented (matches legacy)"));
+                break;
+
+            case Buttons.Info:
+                break;
+        }
+    }
+
+    // Drives caption press-feedback from the parent button's Interaction (the
+    // caption itself isn't hit-testable — Text has no UiCustom — so it never
+    // hovers; the button beneath it does). Replicates legacy Button.Draw:
+    //   * pressed -> caption +1px down (yoffset = IsClicked ? 1 : 0)
+    //   * hovered/pressed -> caption recoloured to hoverHue 0x0036, else hue 0.
+    private static void PressOffsetCaptions(
+        Query<Data<Interaction, Node, TextColor, TinyEcs.Parent>, Filter<With<TopBarCaption>>> captionsQ,
+        Query<Data<Interaction>> interQ)
+    {
+        foreach (var (_, capInter, node, color, parent) in captionsQ)
+        {
+            // The caption captures the press when clicked over the text; the
+            // parent button captures it when clicked on the bare button face.
+            // Honour either.
+            var btnInter = Interaction.None;
+            if (interQ.Contains(parent.Ref.Id))
+            {
+                var (_, pInter) = interQ.Get(parent.Ref.Id);
+                btnInter = pInter.Ref;
+            }
+
+            bool pressed = capInter.Ref == Interaction.Pressed || btnInter == Interaction.Pressed;
+            bool over = pressed
+                     || capInter.Ref == Interaction.Hovered || btnInter == Interaction.Hovered;
+            node.Ref.Top = Val.Px(pressed ? CaptionTop + 1 : CaptionTop);
+            color.Ref.Value = over ? s_capHover : s_capNormal;
         }
     }
 
     private static void Despawn(
         Commands commands,
-        Query<Data<Node>, Filter<With<IsTopBar>>> query)
+        Query<Data<Node>, Filter<With<IsTopBar>>> roots,
+        Query<Data<TinyEcs.Children>> childrenQ)
     {
-        foreach (var (ent, _) in query)
+        foreach (var (ent, _) in roots)
+            DespawnSubtree(commands, ent.Ref, childrenQ);
+    }
+
+    private static void DespawnSubtree(Commands commands, ulong entity, Query<Data<TinyEcs.Children>> childrenQ)
+    {
+        if (childrenQ.Contains(entity))
         {
-            commands.Entity(ent.Ref).Despawn();
+            var (_, kids) = childrenQ.Get(entity);
+            foreach (var cid in kids.Ref)
+                DespawnSubtree(commands, cid, childrenQ);
         }
+        commands.Entity(entity).Despawn();
     }
 }
 
 internal struct IsTopBar;
+internal struct TopBarFull;       // wraps the expanded bar; hidden when minimized
+internal struct TopBarArrow;      // minimized expand-arrow; hidden when expanded
+internal struct TopBarButton;     // clickable buttons (skipped as drag latch targets)
+internal struct TopBarDragHandle; // bg + arrow: press here to drag the bar
+internal struct TopBarCaption;    // button caption; nudges down +1px while pressed
