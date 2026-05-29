@@ -255,9 +255,14 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                 ref readonly var info = ref assets.Gumps.GetGump(custom.AssetId);
                 if (info.Texture != null)
                 {
+                    // Snap to integer logical pixels. The RT is point-sampled at
+                    // logical size and text / rect / image / ninepatch siblings
+                    // all floor; drawing this sprite at fractional coords made it
+                    // drift up to 1px against them while a gump window is dragged
+                    // (Left/Top go fractional) — read as a flicker.
                     b.Draw(
                         info.Texture,
-                        new Vector2(bb.X, bb.Y),
+                        new Vector2((int)bb.X, (int)bb.Y),
                         info.UV,
                         custom.Hue,
                         0f,
@@ -269,7 +274,7 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                     {
                         b.Draw(
                             info.Texture,
-                            new Vector2(bb.X + 5, bb.Y + 5),
+                            new Vector2((int)bb.X + 5, (int)bb.Y + 5),
                             info.UV,
                             custom.Hue,
                             0f,
@@ -347,7 +352,7 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                     {
                         b.Draw(
                             info.Texture,
-                            new Vector2(bb.X + 5, bb.Y + 5),
+                            new Vector2((int)bb.X + 5, (int)bb.Y + 5),
                             info.UV,
                             custom.Hue,
                             0f,
@@ -370,7 +375,7 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                 {
                     b.Draw(
                         custom.Dynamic,
-                        new Vector2(bb.X, bb.Y),
+                        new Vector2((int)bb.X, (int)bb.Y),
                         new Rectangle(0, 0, custom.Dynamic.Width, custom.Dynamic.Height),
                         custom.Hue,
                         0f, Vector2.Zero, 1f, SpriteEffects.None, cmd.ZIndex);
@@ -379,7 +384,7 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                 {
                     ref readonly var info = ref assets.Gumps.GetGump(custom.AssetId);
                     if (info.Texture != null)
-                        b.Draw(info.Texture, new Vector2(bb.X, bb.Y), info.UV, custom.Hue,
+                        b.Draw(info.Texture, new Vector2((int)bb.X, (int)bb.Y), info.UV, custom.Hue,
                             0f, Vector2.Zero, 1f, SpriteEffects.None, cmd.ZIndex);
                 }
                 break;
