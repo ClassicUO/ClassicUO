@@ -1,5 +1,6 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
+using System;
 using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
@@ -16,60 +17,6 @@ namespace ClassicUO.Game.UI.Controls
 {
     internal class PaperDollInteractable : Control
     {
-        private static readonly Layer[] _layerOrder =
-        {
-            Layer.Cloak,
-            Layer.Shirt,
-            Layer.Pants,
-            Layer.Shoes,
-            Layer.Legs,
-            Layer.Arms,
-            Layer.Torso,
-            Layer.Tunic,
-            Layer.Ring,
-            Layer.Bracelet,
-            Layer.Face,
-            Layer.Gloves,
-            Layer.Skirt,
-            Layer.Robe,
-            Layer.Waist,
-            Layer.Necklace,
-            Layer.Hair,
-            Layer.Beard,
-            Layer.Earrings,
-            Layer.Helmet,
-            Layer.OneHanded,
-            Layer.TwoHanded,
-            Layer.Talisman
-        };
-
-        private static readonly Layer[] _layerOrder_quiver_fix =
-        {
-            Layer.Shirt,
-            Layer.Pants,
-            Layer.Shoes,
-            Layer.Legs,
-            Layer.Arms,
-            Layer.Torso,
-            Layer.Tunic,
-            Layer.Ring,
-            Layer.Bracelet,
-            Layer.Face,
-            Layer.Gloves,
-            Layer.Skirt,
-            Layer.Robe,
-            Layer.Cloak,
-            Layer.Waist,
-            Layer.Necklace,
-            Layer.Hair,
-            Layer.Beard,
-            Layer.Earrings,
-            Layer.Helmet,
-            Layer.OneHanded,
-            Layer.TwoHanded,
-            Layer.Talisman
-        };
-
         private readonly PaperDollGump _paperDollGump;
 
         private bool _updateUI;
@@ -178,65 +125,41 @@ namespace ClassicUO.Game.UI.Controls
                 );
             }
 
-            // equipment
-            Item equipItem = mobile.FindItemByLayer(Layer.Cloak);
-            Item arms = mobile.FindItemByLayer(Layer.Arms);
+            // equipment — draw order built from the paperdoll layer algorithm
+            // (PaperdollOrder), keyed on the equipped item graphics. This subsumes the
+            // old _layerOrder / quiver-fix tables and the hardcoded arms<->torso swap.
+            // Stack-allocated, no GC churn.
+            Span<ushort> layerGraphics = stackalloc ushort[PaperdollOrder.N];
+            PaperdollOrder.GraphicsFromEntity(mobile, layerGraphics);
 
-            bool switch_arms_with_torso = false;
-
-            if (arms != null)
-            {
-                switch_arms_with_torso = arms.Graphic == 0x1410 || arms.Graphic == 0x1417;
-            }
-            else if (
+            // account for an item held over an empty slot so the preview order matches
+            if (
                 HasFakeItem
                 && Client.Game.UO.GameCursor.ItemHold.Enabled
                 && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition
-                && (byte)Layer.Arms == Client.Game.UO.GameCursor.ItemHold.ItemData.Layer
             )
             {
-                switch_arms_with_torso =
-                    Client.Game.UO.GameCursor.ItemHold.Graphic == 0x1410
-                    || Client.Game.UO.GameCursor.ItemHold.Graphic == 0x1417;
+                byte holdLayer = Client.Game.UO.GameCursor.ItemHold.ItemData.Layer;
+
+                if (holdLayer > 0 && holdLayer < layerGraphics.Length && layerGraphics[holdLayer] == 0)
+                {
+                    layerGraphics[holdLayer] = Client.Game.UO.GameCursor.ItemHold.Graphic;
+                }
             }
 
-            Layer[] layers;
+            bool altTorso = mobile.IsFemale || IsGargoyleBody(mobile.Graphic);
 
-            if (equipItem != null)
-            {
-                layers = equipItem.ItemData.IsContainer ? _layerOrder_quiver_fix : _layerOrder;
-            }
-            else if (
-                HasFakeItem
-                && Client.Game.UO.GameCursor.ItemHold.Enabled
-                && !Client.Game.UO.GameCursor.ItemHold.IsFixedPosition
-                && (byte)Layer.Cloak == Client.Game.UO.GameCursor.ItemHold.ItemData.Layer
-            )
-            {
-                layers = Client.Game.UO.GameCursor.ItemHold.ItemData.IsContainer
-                    ? _layerOrder_quiver_fix
-                    : _layerOrder;
-            }
-            else
-            {
-                layers = _layerOrder;
-            }
+            Span<Layer> order = stackalloc Layer[PaperdollOrder.N];
+            PaperdollOrder.Build(layerGraphics, altTorso, order);
 
-            for (int i = 0; i < layers.Length; i++)
+            Span<Layer> layers = stackalloc Layer[PaperdollOrder.N];
+            int layerCount = PaperdollOrder.Filter(order, includeBackpack: false, layers);
+
+            Item equipItem;
+
+            for (int i = 0; i < layerCount; i++)
             {
                 Layer layer = layers[i];
-
-                if (switch_arms_with_torso)
-                {
-                    if (layer == Layer.Arms)
-                    {
-                        layer = Layer.Torso;
-                    }
-                    else if (layer == Layer.Torso)
-                    {
-                        layer = Layer.Arms;
-                    }
-                }
 
                 equipItem = mobile.FindItemByLayer(layer);
 
@@ -383,6 +306,12 @@ namespace ClassicUO.Game.UI.Controls
         public void RequestUpdate()
         {
             _updateUI = true;
+        }
+
+        private static bool IsGargoyleBody(ushort graphic)
+        {
+            return graphic == 0x029A || graphic == 0x029B
+                || graphic == 0x02B6 || graphic == 0x02B7;
         }
 
         protected static ushort GetAnimID(ushort mobileGraphic, ushort itemGraphic, ushort animID, bool isfemale)
