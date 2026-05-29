@@ -110,7 +110,9 @@ internal readonly struct TopBarPlugin : IPlugin
                 Left = Val.Px(0), Top = Val.Px(0),
                 Width = Val.Px(totalWidth), Height = Val.Px(BarHeight),
             })
-            .Insert(new ZIndex(50))
+            // Sit one above the game window (z 0) — just over the world view,
+            // below draggable gump windows (UiZCounter bumps from 1 upward).
+            .Insert(new ZIndex(1))
             .Insert<IsTopBar>();
 
         var fullGroup = commands.Spawn()
