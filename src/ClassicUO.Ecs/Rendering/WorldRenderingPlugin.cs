@@ -264,6 +264,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         center -= gameCtx.Value.CenterOffset;
 
         var mousePos = camera.Value.MouseToWorldPosition2();
+        selectedEntity.Value.Enabled = camera.Value.IsMouseInsideBounds();
         selectedEntity.Value.Clear();
 
         var cameraBounds = camera.Value.Bounds;
@@ -1220,8 +1221,14 @@ internal sealed class SelectedEntity
     public ulong Entity { get; private set; }
     public float DepthZ { get; private set; }
 
+    // Gated each frame by mouse-in-viewport; off => no world object picks.
+    public bool Enabled = true;
+
     public void Set(ulong entity, float depth)
     {
+        if (!Enabled)
+            return;
+
         if (_lastEntity.IsValid() && _lastEntity != entity)
         {
             if (depth >= DepthZ)

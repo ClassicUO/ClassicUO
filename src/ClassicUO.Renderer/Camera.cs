@@ -140,6 +140,10 @@ namespace ClassicUO.Renderer
             result.Y = (int) y;
         }
 
+        // World-object selection must be confined to the game viewport.
+        // _mousePos is in window space, same frame as Bounds.
+        public bool IsMouseInsideBounds() => Bounds.Contains(_mousePos);
+
         public Point MouseToWorldPosition()
         {
             Point mouse = _mousePos;
