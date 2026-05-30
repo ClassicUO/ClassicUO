@@ -138,7 +138,6 @@ internal readonly struct PickupPlugin : IPlugin
                 if (topUi != 0)
                 {
                     latch.Value.Entity = topUi;
-                    Console.WriteLine("[LATCH] ui entity={0} paintOrder={1}", topUi, topItemOrder);
                     return;
                 }
 
@@ -148,12 +147,10 @@ internal readonly struct PickupPlugin : IPlugin
                 if (!camera.Value.Bounds.Contains((int)pos.X, (int)pos.Y))
                 {
                     latch.Value.Entity = 0;
-                    Console.WriteLine("[LATCH] cleared (outside camera, no UI)");
                     return;
                 }
 
                 latch.Value.Entity = sel.Value.Entity;
-                Console.WriteLine("[LATCH] world fallback entity={0}", sel.Value.Entity);
             })
             .InStage(Stage.First)
             .Build()
@@ -260,8 +257,6 @@ internal readonly struct PickupPlugin : IPlugin
             Query<Data<WorldPosition>> worldPosQ,
             Query<Data<ContainerSlotPosition>> slotPosQ) =>
         {
-            Console.WriteLine("[PKT-0x27 DENY] code=0x{0:X2} heldSerial=0x{1:X8} sourceUi={2}",
-                trig.Event.Packet.Code, grabbedItem.Value.Serial, grabbedItem.Value.SourceUiEntity);
             RestoreSourceUi(grabbedItem.Value, nodeQ);
             RestoreItemProps(grabbedItem.Value, entitiesMap.Value, itemPropsQ, worldPosQ, slotPosQ);
             grabbedItem.Value.Clear();
@@ -277,8 +272,6 @@ internal readonly struct PickupPlugin : IPlugin
             Query<Data<WorldPosition>> worldPosQ,
             Query<Data<ContainerSlotPosition>> slotPosQ) =>
         {
-            Console.WriteLine("[PKT-0x28 END-DRAG] heldSerial=0x{0:X8} sourceUi={1}",
-                grabbedItem.Value.Serial, grabbedItem.Value.SourceUiEntity);
             RestoreSourceUi(grabbedItem.Value, nodeQ);
             RestoreItemProps(grabbedItem.Value, entitiesMap.Value, itemPropsQ, worldPosQ, slotPosQ);
             grabbedItem.Value.Clear();
@@ -340,8 +333,6 @@ internal readonly struct PickupPlugin : IPlugin
 
     private static void FinalizeDrop(Commands commands, GrabbedItem grabbed, string tag)
     {
-        Console.WriteLine("[PKT-{0} DROP-OK] heldSerial=0x{1:X8} sourceUi={2} despawning",
-            tag, grabbed.Serial, grabbed.SourceUiEntity);
         if (grabbed.SourceUiEntity != 0)
         {
             commands.Entity(grabbed.SourceUiEntity).Despawn();
@@ -426,7 +417,6 @@ internal readonly struct PickupPlugin : IPlugin
         var target = sel;
         ulong sourceUi = 0;
         uint sourceContainer = 0;
-        Console.WriteLine("[PICKUP-ENTRY] latch={0} target={1}", sel, target);
         // Container item UIs are not game entities — resolve to the backing
         // game entity (carrying NetworkSerial/Amount/Graphic/Hue) first.
         if (uiItemQ.Contains(sel))
@@ -497,9 +487,6 @@ internal readonly struct PickupPlugin : IPlugin
         // send a stack count for worn gear). Default to 1 in that case;
         // ground/stackable items always carry it.
         int amountValue = amount.IsValid() ? amount.Ref.Value : 1;
-        Console.WriteLine("[PICKUP] serial=0x{0:X8} amount={1} graphic=0x{2:X4} sourceUi={3} sourceContainer=0x{4:X8} origin=({5},{6},{7}) fromSlot={8}",
-            serial.Ref.Value, amountValue, graphic.Ref.Value, sourceUi, sourceContainer,
-            origX, origY, origZ, fromSlot);
         network.Value.Send_PickUpRequest(serial.Ref.Value, (ushort)amountValue);
 
         grabbedItem.Value.Clear();
@@ -526,11 +513,6 @@ internal readonly struct PickupPlugin : IPlugin
         {
             var (_, node) = nodeQ.Get(sourceUi);
             node.Ref.Display = Display.None;
-            Console.WriteLine("[PICKUP] hide sourceUi={0}", sourceUi);
-        }
-        else if (sourceUi != 0)
-        {
-            Console.WriteLine("[PICKUP-WARN] sourceUi={0} has no Node!", sourceUi);
         }
     }
 
@@ -579,10 +561,8 @@ internal readonly struct PickupPlugin : IPlugin
         var paperdollEquipQ = paperdoll.EquipQ;
         var equipmentSlotsQ = paperdoll.EquipmentSlotsQ;
         var target = selectedEntity.Value.Entity;
-        Console.WriteLine("[DROP-ENTER] target={0} heldSerial=0x{1:X8}", target, grabbedItem.Value.Serial);
         if (target == 0)
         {
-            Console.WriteLine("[DROP-NULL-TARGET] clearing grabbed without sending packet");
             grabbedItem.Value.Clear();
             return;
         }
@@ -612,14 +592,12 @@ internal readonly struct PickupPlugin : IPlugin
             var heldGraphic = grabbedItem.Value.Graphic;
             if (heldGraphic == 0 || heldGraphic >= tileData.Length)
             {
-                Console.WriteLine("[DROP-DENY] held graphic invalid");
                 grabbedItem.Value.Clear();
                 return;
             }
             ref readonly var td = ref tileData[heldGraphic];
             if (!td.IsWearable)
             {
-                Console.WriteLine("[DROP-DENY] held item not wearable");
                 grabbedItem.Value.Clear();
                 return;
             }
@@ -633,15 +611,11 @@ internal readonly struct PickupPlugin : IPlugin
                 var (_, slots) = equipmentSlotsQ.Get(mobileEnt);
                 if (slots.Ref[heldLayer] != 0)
                 {
-                    Console.WriteLine("[DROP-DENY] layer {0} already occupied on mobile 0x{1:X8}",
-                        heldLayer, mobileSerial);
                     grabbedItem.Value.Clear();
                     return;
                 }
             }
 
-            Console.WriteLine("[DROP] equip heldSerial=0x{0:X8} layer={1} mobile=0x{2:X8}",
-                grabbedItem.Value.Serial, heldLayer, mobileSerial);
             network.Value.Send_EquipRequest(grabbedItem.Value.Serial, heldLayer, mobileSerial);
             grabbedItem.Value.PendingDrop = true;
             return;
@@ -653,15 +627,12 @@ internal readonly struct PickupPlugin : IPlugin
             var (_, tag, computed, window) = containerQuery.Get(target);
             if (!IsContainerInRange(window.Ref.Serial, playerPos.Ref, entitiesMap.Value, itemDataQuery, parentQuery, playerQuery))
             {
-                Console.WriteLine("[DROP-DENY] container=0x{0:X8} out of range", window.Ref.Serial);
                 grabbedItem.Value.Clear();
                 return;
             }
             var (x, y) = ClampToContainer(
                 mouse.Value.Position, computed.Ref, tag.Ref,
                 assets.Value, grabbedItem.Value.Graphic, uiScale.Value);
-            Console.WriteLine("[DROP] into-container heldSerial=0x{0:X8} container=0x{1:X8} pos=({2},{3})",
-                grabbedItem.Value.Serial, window.Ref.Serial, x, y);
             network.Value.Send_DropRequest(grabbedItem.Value.Serial, x, y, 0, 0, window.Ref.Serial);
             grabbedItem.Value.PendingDrop = true;
             return;
@@ -719,16 +690,12 @@ internal readonly struct PickupPlugin : IPlugin
             bool itemSent = false;
             if (td.IsContainer)
             {
-                Console.WriteLine("[DROP] onto-item-as-container heldSerial=0x{0:X8} target=0x{1:X8}",
-                    grabbedItem.Value.Serial, targetSerial);
                 network.Value.Send_DropRequest(
                     grabbedItem.Value.Serial, 0xFFFF, 0xFFFF, 0, 0, targetSerial);
                 itemSent = true;
             }
             else if ((td.IsStackable && targetGraphic == grabbedItem.Value.Graphic) || IsPileGraphic(targetGraphic))
             {
-                Console.WriteLine("[DROP] onto-stackable heldSerial=0x{0:X8} target=0x{1:X8} pos=({2},{3})",
-                    grabbedItem.Value.Serial, targetSerial, targetItemX, targetItemY);
                 network.Value.Send_DropRequest(
                     grabbedItem.Value.Serial, targetItemX, targetItemY, 0, 0, targetSerial);
                 itemSent = true;
@@ -739,8 +706,6 @@ internal readonly struct PickupPlugin : IPlugin
                 var (x, y) = ClampToContainer(
                     mouse.Value.Position, pcomputed.Ref, ptag.Ref,
                     assets.Value, grabbedItem.Value.Graphic, uiScale.Value);
-                Console.WriteLine("[DROP] into-parent-container heldSerial=0x{0:X8} container=0x{1:X8} pos=({2},{3})",
-                    grabbedItem.Value.Serial, pwindow.Ref.Serial, x, y);
                 network.Value.Send_DropRequest(grabbedItem.Value.Serial, x, y, 0, 0, pwindow.Ref.Serial);
                 itemSent = true;
             }
@@ -758,15 +723,11 @@ internal readonly struct PickupPlugin : IPlugin
             var serial = targetSerial.IsValid() ? targetSerial.Ref.Value : 0xFFFF_FFFF;
             (ushort tx, ushort ty, sbyte tz) = targetWorldPos.Ref;
             if (serial != 0xFFFF_FFFF) (tx, ty, tz) = (0, 0, 0);
-            Console.WriteLine("[DROP] world heldSerial=0x{0:X8} target=0x{1:X8} pos=({2},{3},{4})",
-                grabbedItem.Value.Serial, serial, tx, ty, tz);
             network.Value.Send_DropRequest(grabbedItem.Value.Serial, tx, ty, tz, 0, serial);
             grabbedItem.Value.PendingDrop = true;
         }
         else
         {
-            Console.WriteLine("[DROP-MISS] no matching target — heldSerial=0x{0:X8} selectedEntity={1}",
-                grabbedItem.Value.Serial, target);
             grabbedItem.Value.Clear();
         }
     }

@@ -225,7 +225,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         Res<AssetsServer> assets,
         Local<DragAnchor> anchor,
         Query<Data<Node, Interaction, ComputedNode, GlobalZIndex, UiCustom>, Filter<With<UIMovable>>> q,
-        Query<Data<ContainerItemUI, ComputedNode, Node>> itemsQ)
+        Query<Data<ContainerItemUI, ComputedNode, Node, GlobalZIndex, UiCustom>> itemsQ)
     {
         // IsPressed is false on the press-once frame (oldState=Released), so
         // include IsPressedOnce in the "held" check or the latch attempt
@@ -263,20 +263,6 @@ internal readonly struct WindowDragPlugin : IPlugin
             if (gate.Value.Mode != ActiveDrag.None) return; // another drag owns the gesture
             var pos = mouse.Value.Position;
 
-            // If the cursor is over a container item slot, the pickup system
-            // owns the gesture — don't latch the parent window or the item
-            // sprite ends up moving the whole container instead of being
-            // picked up.
-            foreach (var (_, _, computed, itemNode) in itemsQ)
-            {
-                if (itemNode.Ref.Display == Display.None) continue;
-                var ib = computed.Ref;
-                if (pos.X < ib.Position.X || pos.Y < ib.Position.Y) continue;
-                if (pos.X >= ib.Position.X + ib.Size.X) continue;
-                if (pos.Y >= ib.Position.Y + ib.Size.Y) continue;
-                return;
-            }
-
             ulong topId = 0;
             int topZ = int.MinValue;
             int topOrder = int.MinValue;
@@ -295,6 +281,21 @@ internal readonly struct WindowDragPlugin : IPlugin
                 }
             }
             if (topId == 0) return;
+
+            // If a container item belonging to the FRONT window (z >= topZ)
+            // sits under the cursor, the pickup system owns the gesture — don't
+            // latch the window or the item drags the whole container. Items in
+            // windows BELOW the front one (z < topZ) are occluded and must NOT
+            // block the drag; the old z-blind bbox scan let a back container's
+            // item veto dragging the window stacked on top of it. Pixel-perfect
+            // so a transparent item pixel still drags the bg behind it.
+            foreach (var (_, _, computed, itemNode, iz, icustom) in itemsQ)
+            {
+                if (itemNode.Ref.Display == Display.None) continue;
+                if (iz.Ref.Value < topZ) continue;
+                if (!UiHitTest.PixelHit(assets.Value, icustom.Ref.Render(), computed.Ref, pos)) continue;
+                return;
+            }
 
             var (_, node, _, _, _, _) = q.Get(topId);
             float ox = node.Ref.Left.Type == ValType.Px ? node.Ref.Left.Value : 0f;

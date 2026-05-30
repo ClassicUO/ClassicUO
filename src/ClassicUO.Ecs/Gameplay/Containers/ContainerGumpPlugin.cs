@@ -180,23 +180,23 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         // each item's GlobalZIndex aligned with its owning window, so the
         // z-filter below is enough to reject pass-through hits.
         int topWindowZ = int.MinValue;
-        uint topWindowClayId = 0;
+        int topWindowOrder = int.MinValue;
         ulong topWindow = 0;
         foreach (var (ent, _, computed, custom, z) in windowQuery)
         {
             var bb = computed.Ref;
             if (!UiHitTest.PixelHit(assets.Value, custom.Ref.Render(), bb, pos)) continue;
-            if (z.Ref.Value > topWindowZ || (z.Ref.Value == topWindowZ && bb.ClayId >= topWindowClayId))
+            if (z.Ref.Value > topWindowZ || (z.Ref.Value == topWindowZ && bb.PaintOrder >= topWindowOrder))
             {
                 topWindowZ = z.Ref.Value;
-                topWindowClayId = bb.ClayId;
+                topWindowOrder = bb.PaintOrder;
                 topWindow = ent.Ref;
             }
         }
 
         ulong topEnt = 0;
         int topZ = int.MinValue;
-        uint topClayId = 0;
+        int topOrder = int.MinValue;
 
         foreach (var (ent, _, computed, custom, node, z) in itemQuery)
         {
@@ -204,10 +204,15 @@ internal readonly struct ContainerGumpPlugin : IPlugin
             if (topWindow != 0 && z.Ref.Value < topWindowZ) continue;
             var bb = computed.Ref;
             if (!UiHitTest.PixelHit(assets.Value, custom.Ref.Render(), bb, pos)) continue;
-            if (z.Ref.Value > topZ || (z.Ref.Value == topZ && bb.ClayId >= topClayId))
+            // Tiebreak overlapping items by paint order (topmost-drawn wins),
+            // NOT ClayId. ClayId is an entity-id hash — unrelated to draw order
+            // and flips across despawn/respawn (stack/equip churn), so it picks
+            // an arbitrary (often occluded) item. PaintOrder = render-command
+            // index = painter order, matching PickupPlugin/WindowDragPlugin.
+            if (z.Ref.Value > topZ || (z.Ref.Value == topZ && bb.PaintOrder >= topOrder))
             {
                 topZ = z.Ref.Value;
-                topClayId = bb.ClayId;
+                topOrder = bb.PaintOrder;
                 topEnt = ent.Ref;
             }
         }
@@ -363,6 +368,7 @@ internal readonly struct ContainerGumpPlugin : IPlugin
                 Scale = scale,
                 IsBoard = isBoard,
                 ZBase = zBase,
+                Bounds = data.Bounds,
             });
 
             if (data.MinimizerArea.Width > 0 && data.MinimizerArea.Height > 0)
@@ -456,8 +462,6 @@ internal readonly struct ContainerGumpPlugin : IPlugin
             foreach (var (oldEnt, oldLink) in existingItemsQ)
             {
                 if (oldLink.Ref.Serial != itemSerial) continue;
-                Console.WriteLine("[SLOT-DEDUP] despawn stale uiEntity={0} for item=0x{1:X8}",
-                    oldEnt.Ref, itemSerial);
                 commands.Entity(oldEnt.Ref).Despawn();
                 if (grabbed.Value.SourceUiEntity == oldEnt.Ref)
                     grabbed.Value.SourceUiEntity = 0;
@@ -510,14 +514,29 @@ internal readonly struct ContainerGumpPlugin : IPlugin
                 spriteH = (int)(spriteH * scale);
             }
 
+            // Clamp the server-sent slot position into the container's content
+            // bounds so an item dropped/added at an out-of-bounds coord renders
+            // (and stays pickable) inside the gump. Mirrors legacy
+            // ContainerGump bounds math + ClampToContainer: left/top edge is
+            // Bounds.X/Y, right/bottom edge is Bounds.Width/Height (both scaled).
+            float bx = entry.Bounds.X * scale;
+            float by = entry.Bounds.Y * scale;
+            float bw = entry.Bounds.Width * scale;
+            float bh = entry.Bounds.Height * scale;
+
             float drawX = ev.X * scale;
-            float drawY = ((short)ev.Y - (entry.Graphic == 0x091A ? 20 : 0)) * scale;
+            float drawY = (short)ev.Y * scale;
+            if (drawX + spriteW > bw) drawX = bw - spriteW;
+            if (drawY + spriteH > bh) drawY = bh - spriteH;
+            if (drawX < bx) drawX = bx;
+            if (drawY < by) drawY = by;
+
+            // Chessboard (0x091A) renders items shifted up 20px; apply after the
+            // clamp so the bounds check runs in unshifted space.
+            if (entry.Graphic == 0x091A) drawY -= 20 * scale;
 
             var origHue = ShaderHueTranslator.GetHueVector(ev.Hue, partial: false, alpha: 1f, gump: entry.IsBoard);
             var hoverHue = ShaderHueTranslator.GetHueVector(0x0035, partial: false, alpha: 1f, gump: entry.IsBoard);
-
-            Console.WriteLine("[SLOT-SPAWN] container=0x{0:X8} item=0x{1:X8} graphic=0x{2:X4} pos=({3},{4}) amount={5}",
-                ev.ContainerSerial, ev.ItemSerial, displayed, ev.X, ev.Y, ev.Amount);
 
             // Mirror legacy ItemGump.Draw: stackable items with Amount > 1 get
             // drawn twice (+5/+5 offset) to fake a pile. Coins are excluded
@@ -719,6 +738,7 @@ internal sealed class ContainerUiMap
         public float Scale;
         public bool IsBoard;
         public int ZBase;              // Window's GlobalZIndex; items use ZBase+1
+        public Rectangle Bounds;       // Container content rect (unscaled); item draw pos is clamped into it
     }
 
     private readonly Dictionary<uint, Entry> _map = new();

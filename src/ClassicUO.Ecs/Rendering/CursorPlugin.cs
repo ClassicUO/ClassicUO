@@ -42,10 +42,7 @@ internal readonly struct CursorPlugin : IPlugin
         var grabbed = grabbedItem.Value;
         ref readonly var artInfo = ref assets.Value.Arts.GetArt(grabbed.Graphic);
         if (artInfo.Texture == null)
-        {
-            Console.WriteLine("[CURSOR-RENDER] no texture for graphic=0x{0:X4}", grabbed.Graphic);
             return;
-        }
 
         var b = batch.Value;
         // Cursor position is in LOGICAL pixels; the batch otherwise draws in

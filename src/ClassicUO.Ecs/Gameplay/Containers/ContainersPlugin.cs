@@ -199,8 +199,6 @@ internal readonly struct ContainersPlugin : IPlugin
 
         parentEnt.AddChild(ent);
         ClearEquipReference(commands, packet.Serial, equipQ, serialQ);
-        Console.WriteLine("[PKT-0x25 ADD] container=0x{0:X8} item=0x{1:X8} graphic=0x{2:X4} pos=({3},{4}) amount={5}",
-            packet.ContainerSerial, packet.Serial, finalGraphic, packet.X, packet.Y, amount);
         writer.Send(ContainerSlotEvent.Add(
             packet.ContainerSerial, packet.Serial, finalGraphic, packet.Hue, packet.X, packet.Y, amount));
 
@@ -251,8 +249,6 @@ internal readonly struct ContainersPlugin : IPlugin
             parentEnt.AddChild(ent);
             ClearEquipReference(commands, item.Serial, equipQ, serialQ);
 
-            Console.WriteLine("[PKT-0x3C ITEM] container=0x{0:X8} item=0x{1:X8} graphic=0x{2:X4} pos=({3},{4}) amount={5}",
-                item.ContainerSerial, item.Serial, finalGraphic, item.X, item.Y, item.Amount);
             writer.Send(ContainerSlotEvent.Add(
                 item.ContainerSerial, item.Serial, finalGraphic, item.Hue, item.X, item.Y, item.Amount));
         }
