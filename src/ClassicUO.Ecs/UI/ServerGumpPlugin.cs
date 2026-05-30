@@ -500,7 +500,7 @@ internal readonly struct ServerGumpPlugin : IPlugin
                     int.TryParse(gparams[6], out var lid))
                 {
                     var text = SafeLine(lines, lid);
-                    childId = SpawnWrappedText(commands, new Vector2(tx, ty), new Vector2(tw, th), text, thue, false, false, out _);
+                    childId = SpawnWrappedText(commands, new Vector2(tx, ty), new Vector2(tw, th), text, thue, false, false, isHtml: false, out _);
                     cx0 = tx; cy0 = ty; cw0 = tw; ch0 = th;
                 }
             }
@@ -523,7 +523,7 @@ internal readonly struct ServerGumpPlugin : IPlugin
                     }
                     var text = SafeLine(lines, lid);
                     var (txtX, txtY, txtW, txtH) = HtmlInnerRect(tx, ty, tw, th, hasBg, hasScroll);
-                    childId = SpawnWrappedText(commands, new Vector2(txtX, txtY), new Vector2(txtW, txtH), text, 0, hasBg, hasScroll, out var contentH);
+                    childId = SpawnWrappedText(commands, new Vector2(txtX, txtY), new Vector2(txtW, txtH), text, 0, hasBg, hasScroll, isHtml: true, out var contentH);
                     if (hasScroll)
                         SpawnScrollBar(commands, p.Builder.Value, p.Assets.Value,
                             new Vector2(tx, ty), new Vector2(tw, th), page, group, rootId,
@@ -548,8 +548,14 @@ internal readonly struct ServerGumpPlugin : IPlugin
                     }
                     var cliloc = ParseClilocId(gparams[5]);
                     var text = p.Files.Value.Clilocs.GetString(cliloc) ?? string.Empty;
+                    // xmfhtmlgumpcolor carries an HTML start colour in gparams[8];
+                    // 0x7FFF is the "default white" sentinel (OOP remaps to
+                    // 0x00FFFFFF). Plain xmfhtmlgump has no colour → 0.
+                    int htmlHue = 0;
+                    if (Eq(entry, "xmfhtmlgumpcolor") && gparams.Count >= 9 && int.TryParse(gparams[8], out var hc))
+                        htmlHue = hc == 0x7FFF ? 0x00FFFFFF : hc;
                     var (txtX, txtY, txtW, txtH) = HtmlInnerRect(tx, ty, tw, th, hasBg, hasScroll);
-                    childId = SpawnWrappedText(commands, new Vector2(txtX, txtY), new Vector2(txtW, txtH), text, 0, hasBg, hasScroll, out var contentH);
+                    childId = SpawnWrappedText(commands, new Vector2(txtX, txtY), new Vector2(txtW, txtH), text, htmlHue, hasBg, hasScroll, isHtml: true, out var contentH);
                     if (hasScroll)
                         SpawnScrollBar(commands, p.Builder.Value, p.Assets.Value,
                             new Vector2(tx, ty), new Vector2(tw, th), page, group, rootId,
@@ -566,6 +572,10 @@ internal readonly struct ServerGumpPlugin : IPlugin
                 {
                     bool hasBg = gparams[5] == "1";
                     bool hasScroll = gparams[6] != "0";
+                    // gparams[7] is the HTML start colour (0x7FFF → default white).
+                    int htmlHue = 0;
+                    if (int.TryParse(gparams[7], out var hc))
+                        htmlHue = hc == 0x7FFF ? 0x00FFFFFF : hc;
                     if (hasBg)
                     {
                         var bg = SpawnHtmlBackground(commands, p.Builder.Value,
@@ -586,7 +596,7 @@ internal readonly struct ServerGumpPlugin : IPlugin
                         text = p.Files.Value.Clilocs.GetString(cliloc) ?? string.Empty;
                     }
                     var (txtX, txtY, txtW, txtH) = HtmlInnerRect(tx, ty, tw, th, hasBg, hasScroll);
-                    childId = SpawnWrappedText(commands, new Vector2(txtX, txtY), new Vector2(txtW, txtH), text, 0, hasBg, hasScroll, out var contentH);
+                    childId = SpawnWrappedText(commands, new Vector2(txtX, txtY), new Vector2(txtW, txtH), text, htmlHue, hasBg, hasScroll, isHtml: true, out var contentH);
                     if (hasScroll)
                         SpawnScrollBar(commands, p.Builder.Value, p.Assets.Value,
                             new Vector2(tx, ty), new Vector2(tw, th), page, group, rootId,
@@ -616,7 +626,7 @@ internal readonly struct ServerGumpPlugin : IPlugin
                     int.TryParse(gparams[7], out var lid))
                 {
                     var text = SafeLine(lines, lid);
-                    childId = SpawnWrappedText(commands, new Vector2(tx, ty), new Vector2(tw, th), text, thue, false, false, out _);
+                    childId = SpawnWrappedText(commands, new Vector2(tx, ty), new Vector2(tw, th), text, thue, false, false, isHtml: false, out _);
                     cx0 = tx; cy0 = ty; cw0 = tw; ch0 = th;
                 }
             }
@@ -884,38 +894,46 @@ internal readonly struct ServerGumpPlugin : IPlugin
     // text. Untagged segments render in this colour; <basefont>/<a> tags
     // override per-segment. Mirrors the exact branch logic so the Help menu's
     // body text comes out black on the 0x2486 parchment instead of white.
-    private static uint HtmlStartColor(ushort hue, bool hasBg, bool hasScroll)
+    private static uint HtmlStartColor(int hue, bool hasBg, bool hasScroll)
     {
         if (hue > 0)
         {
             if (hue == 0x00FFFFFF || hue == 0xFFFF || hue == 0xFF) return 0xFFFFFFFE;
-            return (HuesHelper.Color16To32(hue) << 8) | 0xFF;
+            return (HuesHelper.Color16To32((ushort)hue) << 8) | 0xFF;
         }
         if (!hasBg)
             return hasScroll ? 0xFFFFFFFF : 0x010101FF;
         return 0x010101FF;
     }
 
-    private static ulong SpawnWrappedText(Commands commands, Vector2 position, Vector2 size, string text, ushort hue, bool hasBg, bool hasScroll, out int contentHeight)
+    // `hue` is overloaded by command: a UO hue index for plain text
+    // (text/croppedtext), or the HTML start colour for xmfhtmlgumpcolor/
+    // xmfhtmltok (which can be 0x00FFFFFF — hence int, not ushort).
+    private static ulong SpawnWrappedText(Commands commands, Vector2 position, Vector2 size, string text, int hue, bool hasBg, bool hasScroll, bool isHtml, out int contentHeight)
     {
-        // Pre-bake text into a Texture2D via FontsLoader. Handles HTML
-        // markup AND word-wrap to size.X internally. Render as UiImage so
-        // the existing DrawImage path picks it up — Clay.NET's text-wrap
-        // pipeline doesn't honour parent-Width on the .NET port.
+        // Measure + lay out the wrapped (optionally HTML) run, then render it
+        // glyph-by-glyph from the shared font atlas via a UOCustomKind.WrappedText
+        // node. Clay.NET's text-wrap pipeline doesn't honour parent-Width on the
+        // .NET port, so the run is pre-wrapped to size.X by FontsLoader.
         //
         // Two-node structure so taller content scrolls instead of squishing:
         //   outer (Width/Height = container, Overflow.Scroll)
-        //     └─ inner (Width=texW, Height=texH, UiImage)
+        //     └─ inner (Width=measuredW, Height=measuredH, WrappedText)
         // Outer clips + handles mouse-wheel scroll via Clay's ScrollConfig.
-        // Without the inner wrapper the UiImage would render at outer.bbox
-        // which forces the texture into the container size and hides
-        // overflowing lines.
-        bool isHtml = !string.IsNullOrEmpty(text) && text.IndexOf('<') >= 0;
+        // Without the inner wrapper the text would render at outer.bbox which
+        // forces it into the container size and hides overflowing lines.
+        // isHtml is decided by the COMMAND (param), not by sniffing for '<':
+        // the htmlgump/xmfhtml* family is always HTML (mirrors OOP HtmlControl,
+        // which sets _gameText.IsHTML = true unconditionally). A tag-free body
+        // still needs the HTML parse so untagged chars pick up htmlStartColor
+        // (black on the parchment bg) instead of falling through to the white
+        // plain-text tint.
         var htmlStartColor = HtmlStartColor(hue, hasBg, hasScroll);
-        var (tex, w, h) = UoFontRenderer.Bake(text ?? string.Empty, font: 1, hue, (int)size.X, isHtml, htmlStartColor, htmlBgColored: !hasBg);
-        contentHeight = tex != null ? h : 0;
+        var safeText = text ?? string.Empty;
+        var (w, h) = UoFontRenderer.Measure(safeText, font: 1, (int)size.X, isHtml, htmlStartColor, htmlBg: !hasBg);
+        contentHeight = h;
 
-        bool needsScroll = tex != null && h > size.Y;
+        bool needsScroll = h > size.Y;
         var outerCmd = commands.Spawn().Insert(new Node
         {
             Display = Display.Flex,
@@ -935,7 +953,7 @@ internal readonly struct ServerGumpPlugin : IPlugin
         if (needsScroll)
             commands.Entity(outerCmd.Id).Insert(new ScrollPosition());
 
-        if (tex != null)
+        if (w > 0 && h > 0)
         {
             var inner = commands.Spawn()
                 .Insert(new Node
@@ -944,11 +962,22 @@ internal readonly struct ServerGumpPlugin : IPlugin
                     Width = Val.Px(w),
                     Height = Val.Px(h),
                 })
-                .Insert(new UiImage
+                .Insert(new UiCustom
                 {
-                    ImageData = tex,
-                    SourceSize = new System.Numerics.Vector2(w, h),
-                    Tint = ClayColor.White,
+                    Data = new UOCustomRender
+                    {
+                        Kind = UOCustomKind.WrappedText,
+                        Hue = Vector3.UnitZ,
+                        Text = safeText,
+                        TextFont = 1,
+                        // Only meaningful for plain text (HTML carries per-segment
+                        // colour); the HTML colour rides in HtmlStartColor instead.
+                        TextHue = (ushort)hue,
+                        WrapWidth = (int)size.X,
+                        IsHtml = isHtml,
+                        HtmlStartColor = htmlStartColor,
+                        HtmlBg = !hasBg,
+                    },
                 });
             commands.AddChild(outerCmd.Id, inner.Id);
         }
@@ -985,17 +1014,14 @@ internal readonly struct ServerGumpPlugin : IPlugin
     private static ClayColor HueToClayColor(HuesLoader hues, ushort hue)
     {
         if (hue == 0) return ClayColor.Black;
-        // OOP RenderedText defaults cell=30 → ColorTable[30] (brightest end
-        // of the hue gradient). Cell=8 is the dim center; using that made
-        // every text element render dark grey/olive. parts[3] + 1 mirrors
-        // OOP's Label ctor "+1" offset.
-        // OOP RenderedText defaults cell=30 (brightest end of gradient) and
-        // blends per-glyph alpha against the gump bg, so even pale tints
-        // remain visible. Bevy.UI TTF text is rendered as solid color with
-        // no per-pixel blend — picking the bright end produces near-white
-        // text that vanishes on a cream gump. cell=4 sits near the middle
-        // of the gradient and reads correctly on both dark and light bg.
-        var packed = hues.GetPolygoneColor(4, (ushort)(hue + 1));
+        // OOP RenderedText defaults cell=30 (RenderedText.Create cell=30 arg →
+        // GenerateUnicode), the brightest end of the hue gradient. The tinted
+        // ClayColor multiplies a white glyph drawn from the shared atlas
+        // (UoFontRenderer.Draw → SHADER_RGB_TINT), so it keeps per-glyph alpha
+        // exactly like OOP — a bright gold hue reads as bright gold, not the
+        // muted olive cell=4 produced. Mirrors HueToTint (wrapped-text path),
+        // which already uses 30. parts[3] + 1 mirrors OOP's Label ctor "+1".
+        var packed = hues.GetPolygoneColor(30, (ushort)(hue + 1));
         if (packed == 0 || packed == 0xFF010101) return ClayColor.Black;
         byte r = (byte)(packed & 0xFF);
         byte g = (byte)((packed >> 8) & 0xFF);
