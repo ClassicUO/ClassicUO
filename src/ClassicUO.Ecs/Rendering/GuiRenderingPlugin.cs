@@ -183,11 +183,10 @@ internal readonly struct GuiRenderingPlugin : IPlugin
         // is ignored (UO bitmap fonts are fixed-size per font index). The
         // ClayColor on TextColor becomes the per-draw tint applied to the
         // white-baked bitmap.
-        var font = UoFontRuntime.ResolveFont(t.FontId);
         UoFontRenderer.Draw(
             b,
             t.Text,
-            font,
+            t.FontId,
             ToXnaColor(t.TextColor),
             (int)cmd.BoundingBox.X,
             (int)cmd.BoundingBox.Y,
@@ -389,6 +388,21 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                 }
                 break;
             }
+
+            case UOCustomKind.WrappedText:
+                UoFontRenderer.DrawWrapped(
+                    b,
+                    custom.Text,
+                    custom.TextFont,
+                    custom.TextHue,
+                    custom.WrapWidth,
+                    custom.IsHtml,
+                    custom.HtmlStartColor,
+                    custom.HtmlBg,
+                    (int)bb.X,
+                    (int)bb.Y,
+                    cmd.ZIndex);
+                break;
 
             case UOCustomKind.None:
                 // Invisible hit/drag surface — draws nothing on purpose.

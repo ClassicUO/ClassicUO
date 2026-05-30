@@ -103,12 +103,17 @@ internal readonly struct ServerSelectionPlugin : IPlugin
             })
             .Insert<ServerSelectionScene>());
 
-        // Header labels (textColor 0x0481 approximated by light cream).
-        var labelColor = new ClayColor(255, 234, 196, 255);
-        AddLabel(commands, mainMenu, "Select which shard to play on:", 155, 70, labelColor);
-        AddLabel(commands, mainMenu, "Latency:", 400, 70, labelColor);
-        AddLabel(commands, mainMenu, "Packet Loss:", 470, 70, labelColor);
-        AddLabel(commands, mainMenu, "Sort by:", 153, 368, labelColor);
+        // Header labels: OOP (CV>=500A) draws these unicode, font 1, hue
+        // 0xFFFF — i.e. plain white. Match exactly.
+        var headerColor = new ClayColor(255, 255, 255, 255);
+        AddLabel(commands, mainMenu, "Select which shard to play on:", 155, 70, headerColor);
+        AddLabel(commands, mainMenu, "Latency:", 400, 70, headerColor);
+        AddLabel(commands, mainMenu, "Packet Loss:", 470, 70, headerColor);
+        AddLabel(commands, mainMenu, "Sort by:", 153, 368, headerColor);
+
+        // Row text: OOP ServerEntryGump uses ASCII font 5, hue 0x034F. The
+        // TextColor carries the hue (renderer bakes it per pixel).
+        var rowColor = UoFontRuntime.AsciiHue(0x034F);
 
         // Sort buttons (TimeZone / Full / Connection).
         mainMenu.AddChild(gumpBuilder.Value.AddButton(
@@ -163,9 +168,9 @@ internal readonly struct ServerSelectionPlugin : IPlugin
                         network.Value.Send_SelectServer((byte)capturedServer.Index);
                     });
 
-                AddLabelChild(commands, rowEnt, server.Name, 74, 4, labelColor);
-                AddLabelChild(commands, rowEnt, "-", 250, 4, labelColor);
-                AddLabelChild(commands, rowEnt, "-", 320, 4, labelColor);
+                AddLabelChild(commands, rowEnt, server.Name, 74, 4, rowColor);
+                AddLabelChild(commands, rowEnt, "-", 250, 4, rowColor);
+                AddLabelChild(commands, rowEnt, "-", 320, 4, rowColor);
 
                 mainMenu.AddChild(rowEnt);
                 rowY += 25;
@@ -188,7 +193,7 @@ internal readonly struct ServerSelectionPlugin : IPlugin
                 Height = Val.Auto,
             })
             .Insert(new Text(text))
-            .Insert(new TextFont { FontId = 0, Size = 12 })
+            .Insert(new TextFont { FontId = 1, Size = 12 })
             .Insert(new TextColor(color));
         parent.AddChild(label);
     }
@@ -208,7 +213,7 @@ internal readonly struct ServerSelectionPlugin : IPlugin
                 Height = Val.Auto,
             })
             .Insert(new Text(text))
-            .Insert(new TextFont { FontId = 0, Size = 12 })
+            .Insert(new TextFont { FontId = (ushort)(5 | UoFontRuntime.AsciiFlag), Size = 12 })
             .Insert(new TextColor(color));
         parent.AddChild(label);
     }

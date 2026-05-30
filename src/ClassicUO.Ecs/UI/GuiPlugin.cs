@@ -353,6 +353,11 @@ internal enum UOCustomKind : byte
     // ComputedNode and a solid (bbox) hit-test. Used as an invisible drag/close
     // surface for gump roots that have no background sprite of their own.
     None,
+    // Wrapped (and optionally HTML) text block drawn glyph-by-glyph from the
+    // shared font atlas at the node bbox. The node is sized at spawn to the
+    // measured content so the scroll container clips/scrolls correctly. Text
+    // params ride in the UOCustomRender.Text* fields.
+    WrappedText,
 }
 
 // Reference type (NOT an ECS component) — the instance lives in UiCustom.Data
@@ -374,6 +379,17 @@ internal sealed class UOCustomRender
     // and updated by MiniMapPlugin's bake system; the renderer just draws it
     // over the bg gump. Null until the first bake.
     public Microsoft.Xna.Framework.Graphics.Texture2D Dynamic;
+
+    // For UOCustomKind.WrappedText: the wrapped (optionally HTML) text run plus
+    // the parse params. The atlas drawer reproduces the same layout that
+    // sized this node at spawn time.
+    public string Text;
+    public byte TextFont;
+    public ushort TextHue;
+    public int WrapWidth;
+    public bool IsHtml;
+    public uint HtmlStartColor;
+    public bool HtmlBg;
 }
 
 // The UO render payload lives in UiCustom.Data (a reference, so it threads into
