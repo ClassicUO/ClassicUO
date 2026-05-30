@@ -161,20 +161,32 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
                 // each character row (CharacterEntryGump.ctor in main). Carries
                 // the CharacterInfo so the global UiDoubleClick observer can log
                 // it in.
+                // Center the name in the 280x30 row via flex (both axes). The row
+                // is a custom-render (GumpNinePatch) node; its gump fill now paints
+                // BEFORE its children (Clay.NET ClayContext custom-command order
+                // fix), so a flow label renders on top — no Absolute / manual
+                // measure. Mirrors OOP CharacterEntryGump (Label maxwidth 270,
+                // TS_CENTER). The override Node is the last Node insert, which wins.
+                var rowTop = yOffset + posInList * 40;
                 var rowEnt = gumpBuilder.Value.AddGumpNinePatch(
                     commands, 0x0BB8, XnaVector3.UnitZ,
-                    new XnaVector2(224, yOffset + posInList * 40),
+                    new XnaVector2(224, rowTop),
                     new XnaVector2(280, 30))
+                    .Insert(new Node
+                    {
+                        Display = Display.Flex,
+                        PositionType = PositionType.Absolute,
+                        Left = Val.Px(224), Top = Val.Px(rowTop),
+                        Width = Val.Px(280), Height = Val.Px(30),
+                        JustifyContent = JustifyContent.Center,
+                        AlignItems = AlignItems.Center,
+                    })
                     .Insert<CharacterSelectionScene>()
                     .Insert(character)
                     .Insert(Interaction.None)
                     .Observe((On<UiClick> _, Commands innerCmd) => handleRowSelect(innerCmd));
 
-                // Center the name in the 280px row, mirroring OOP's
-                // CharacterEntryGump (Label maxwidth 270, TS_CENTER at X=0).
-                var nameW = UoFontRuntime.Fonts?.GetWidthASCII(5, character.Name) ?? 0;
-                var nameX = Math.Max(0, (280 - nameW) / 2);
-                var labelEnt = SpawnLabelChild(commands, rowEnt, character.Name, nameX, 8, normalColor);
+                var labelEnt = SpawnRowLabel(commands, rowEnt, character.Name, normalColor);
                 // Clicking the name (not just the tan border) selects too, and
                 // the label carries CharacterInfo so a double-click on the text
                 // logs in via the same global observer.
@@ -270,6 +282,22 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
         string text, int x, int y, ClayColor color)
     {
         SpawnLabelChild(commands, parent, text, x, y, color);
+    }
+
+    // Row name label: a flow (non-absolute) child so the row's
+    // JustifyContent/AlignItems = Center centers it in both axes. Auto size lets
+    // Clay measure the glyph run. Returns the id so selection can recolour it.
+    private static ulong SpawnRowLabel(
+        Commands commands, EntityCommands parent, string text, ClayColor color)
+    {
+        var label = commands.Spawn()
+            .Insert<CharacterSelectionScene>()
+            .Insert(new Node { Width = Val.Auto, Height = Val.Auto })
+            .Insert(new Text(text))
+            .Insert(new TextFont { FontId = (ushort)(5 | UoFontRuntime.AsciiFlag), Size = 14 })
+            .Insert(new TextColor(color));
+        parent.AddChild(label);
+        return label.Id;
     }
 
     // Spawn label and return its entity id so the caller can mutate
