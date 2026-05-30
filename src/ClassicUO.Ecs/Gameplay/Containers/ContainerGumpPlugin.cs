@@ -35,6 +35,7 @@ internal readonly struct ContainerGumpPlugin : IPlugin
 
         var spawnUiFn = SpawnContainerWindow;
         var spawnItemFn = SpawnContainerItemUI;
+        var removeItemFn = RemoveContainerItemUI;
         var animateEyeFn = AnimateCorpseEye;
         var handleMinimizeFn = HandleMinimizeClick;
         var tearDownFn = TearDownClosedUi;
@@ -50,6 +51,17 @@ internal readonly struct ContainerGumpPlugin : IPlugin
             .AddSystem(spawnItemFn)
                 .InStage(Stage.Update)
                 .RunIf((EventReader<ContainerUpdateEvent> r) => r.HasEvents)
+                .Build()
+
+            // Item left a container (0x1D delete / 0x2E equip): drop its UI
+            // slot. Without this the backpack gump keeps drawing the item after
+            // the server moved it (e.g. ethereal mount equipped to the mount
+            // layer leaves a phantom in the pack). Declared after the spawn
+            // system so declaration order runs it second — a slot removed and
+            // re-added in one frame ends up gone, not stale.
+            .AddSystem(removeItemFn)
+                .InStage(Stage.Update)
+                .RunIf((EventReader<ContainerItemRemovedEvent> r) => r.HasEvents)
                 .Build()
 
             .AddSystem(animateEyeFn)
@@ -411,10 +423,26 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         Res<UOFileManager> fileManager,
         Res<GrabbedItem> grabbed,
         EventReader<ContainerUpdateEvent> reader,
+        EventReader<ContainerItemRemovedEvent> removedReader,
         Query<Data<ContainerItemUI>> existingItemsQ,
         Query<Data<GlobalZIndex>> windowZQ)
     {
         var tileData = fileManager.Value.TileData.StaticData;
+
+        // Latest-action-wins. A serial can be both added (0x25/0x3C) and removed
+        // (0x1D delete / 0x2E equip) in one packet read. Order decides the final
+        // state and the two are NOT symmetric:
+        //   mount    = add(0x3EAA) then equip/delete  -> remove newer -> no slot
+        //   dismount = delete      then add(statuette) -> add newer    -> slot
+        // RemoveContainerItemUI can't catch a slot we'd spawn here (its
+        // ContainerItemUI insert is still deferred -> not in the query yet), so
+        // suppress the spawn when the remove for this serial carries a higher
+        // emit Seq than this add. Own reader cursor; RemoveContainerItemUI still
+        // sees the events for the cross-frame case.
+        var removeSeq = new Dictionary<uint, ulong>();
+        foreach (var rem in removedReader.Read())
+            if (!removeSeq.TryGetValue(rem.ItemSerial, out var s) || rem.Seq > s)
+                removeSeq[rem.ItemSerial] = rem.Seq;
 
         foreach (var ev in reader.Read())
         {
@@ -434,6 +462,12 @@ internal readonly struct ContainerGumpPlugin : IPlugin
                 if (grabbed.Value.SourceUiEntity == oldEnt.Ref)
                     grabbed.Value.SourceUiEntity = 0;
             }
+
+            // Item also left the container later in this read (equipped/deleted
+            // with a higher Seq) — the add is stale, don't materialize a slot.
+            // Dedup above still ran, so any prior slot is gone too.
+            if (removeSeq.TryGetValue(ev.ItemSerial, out var remSeq) && remSeq > ev.Seq)
+                continue;
 
             // Read window snapshot + item payload from the event itself —
             // querying the game entity here would race the deferred commands
@@ -539,6 +573,42 @@ internal readonly struct ContainerGumpPlugin : IPlugin
                 // bump propagates a new value to them.
                 .Insert(new GlobalZIndex(ResolveCurrentZ(entry, windowZQ)));
             commands.Entity(entry.ContentEntity).AddChild(itemUi);
+        }
+    }
+
+    // Despawn the UI slot(s) for an item the server moved out of a container.
+    // Mirrors the legacy ContainerGump.RequestUpdateContents path: when an item
+    // is deleted (0x1D) or equipped away (0x2E) the gump must stop drawing it.
+    // Keyed by serial like the SLOT-DEDUP pass; clears the grabbed source ref
+    // too so a pending drop doesn't point at a despawned slot.
+    private static void RemoveContainerItemUI(
+        Commands commands,
+        Res<GrabbedItem> grabbed,
+        EventReader<ContainerItemRemovedEvent> reader,
+        EventReader<ContainerUpdateEvent> addReader,
+        Query<Data<ContainerItemUI>> itemsQ)
+    {
+        // Latest-action-wins (see SpawnContainerItemUI). If a higher-Seq add for
+        // the same serial arrived this read (dismount: delete then re-add to the
+        // pack), the item is back in a container — the spawn system materializes
+        // it and we must NOT despawn. Own cursor; spawn system reads adds too.
+        var addSeq = new Dictionary<uint, ulong>();
+        foreach (var add in addReader.Read())
+            if (!addSeq.TryGetValue(add.ItemSerial, out var s) || add.Seq > s)
+                addSeq[add.ItemSerial] = add.Seq;
+
+        foreach (var ev in reader.Read())
+        {
+            if (addSeq.TryGetValue(ev.ItemSerial, out var aSeq) && aSeq > ev.Seq)
+                continue;
+
+            foreach (var (ent, link) in itemsQ)
+            {
+                if (link.Ref.Serial != ev.ItemSerial) continue;
+                commands.Entity(ent.Ref).Despawn();
+                if (grabbed.Value.SourceUiEntity == ent.Ref)
+                    grabbed.Value.SourceUiEntity = 0;
+            }
         }
     }
 

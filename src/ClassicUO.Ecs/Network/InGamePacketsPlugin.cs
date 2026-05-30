@@ -188,7 +188,11 @@ readonly struct InGamePacketsPlugin : IPlugin
         app.AddObserver<On<PacketReceived<OnDeleteObjectPacket_0x1D>>,
             Commands,
             Res<NetworkEntitiesMap>,
-            Res<GameContext>>(OnDeleteObject);
+            Res<GameContext>,
+            EventWriter<ContainerItemRemovedEvent>,
+            ResMut<ContainerSeq>,
+            Query<Data<EquipmentSlots>>,
+            Query<Data<NetworkSerial>>>(OnDeleteObject);
 
         app.AddObserver<On<PacketReceived<OnUpdatePlayerPacket_0x20>>,
             Commands,
@@ -206,7 +210,9 @@ readonly struct InGamePacketsPlugin : IPlugin
         app.AddObserver<On<PacketReceived<OnEquipItemPacket_0x2E>>,
             Commands,
             Res<NetworkEntitiesMap>,
-            InGameQueries>(OnEquipItem);
+            InGameQueries,
+            EventWriter<ContainerItemRemovedEvent>,
+            ResMut<ContainerSeq>>(OnEquipItem);
 
         app.AddObserver<On<PacketReceived<OnUpdateManaPacket_0xA2>>,
             Commands,
@@ -322,6 +328,7 @@ readonly struct InGamePacketsPlugin : IPlugin
         public Query<Data<EquipmentSlots>> qEquipmentSlots { get; } = new();
         public Query<Data<WorldPosition, Graphic>> qPosAndGraphic { get; } = new();
         public Query<Empty, With<IsMulti>> qMultis { get; } = new();
+        public Query<Empty, With<ContainedInto>> qContainedItems { get; } = new();
 
         public void Initialize(App app)
         {
@@ -329,6 +336,7 @@ readonly struct InGamePacketsPlugin : IPlugin
             qEquipmentSlots.Initialize(app);
             qPosAndGraphic.Initialize(app);
             qMultis.Initialize(app);
+            qContainedItems.Initialize(app);
         }
 
         public void Fetch(App app)
@@ -337,6 +345,7 @@ readonly struct InGamePacketsPlugin : IPlugin
             qEquipmentSlots.Fetch(app);
             qPosAndGraphic.Fetch(app);
             qMultis.Fetch(app);
+            qContainedItems.Fetch(app);
         }
 
         public SystemParamAccess GetAccess()
@@ -346,6 +355,7 @@ readonly struct InGamePacketsPlugin : IPlugin
             var equipSlots = qEquipmentSlots.GetAccess();
             var posAndGraphic = qPosAndGraphic.GetAccess();
             var multis = qMultis.GetAccess();
+            var contained = qContainedItems.GetAccess();
 
             foreach (var read in houseRev.ReadResources) access.ReadResources.Add(read);
             foreach (var write in houseRev.WriteResources) access.WriteResources.Add(write);
@@ -355,6 +365,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             foreach (var write in posAndGraphic.WriteResources) access.WriteResources.Add(write);
             foreach (var read in multis.ReadResources) access.ReadResources.Add(read);
             foreach (var write in multis.WriteResources) access.WriteResources.Add(write);
+            foreach (var read in contained.ReadResources) access.ReadResources.Add(read);
+            foreach (var write in contained.WriteResources) access.WriteResources.Add(write);
 
             return access;
         }
@@ -413,11 +425,14 @@ readonly struct InGamePacketsPlugin : IPlugin
         network.Value.Send_OpenChat("");
         network.Value.Send_SkillsRequest(gameCtx.Value.PlayerSerial);
 
-        // Mirror main's PacketHandlers.LoginComplete (GameScene.DoubleClickDelayed):
-        // implicit double-click on local player to coax the server into sending
-        // the autoload 0x88 paperdoll packet. Without this, the paperdoll only
-        // spawns when the user manually double-clicks themselves later.
-        network.Value.Send_DoubleClick(gameCtx.Value.PlayerSerial);
+        // Mirror main's PacketHandlers.LoginComplete (GameScene.DoubleClickDelayed →
+        // UseItemQueue): implicit double-click on local player to coax the server
+        // into sending the autoload 0x88 paperdoll packet. The 0x80000000 high bit
+        // is the protocol's explicit paperdoll-request flag — UseItemQueue ORs it
+        // into every mobile serial. Without it the server runs the default mobile
+        // action (Mobile.OnDoubleClick): paperdoll only on foot, and a *dismount*
+        // when mounted — so a mounted login never opened the paperdoll.
+        network.Value.Send_DoubleClick(gameCtx.Value.PlayerSerial | 0x80000000);
 
         if (gameCtx.Value.ClientVersion >= ClientVersion.CV_306E)
             network.Value.Send_ClientType(gameCtx.Value.Protocol);
@@ -931,7 +946,11 @@ readonly struct InGamePacketsPlugin : IPlugin
         On<PacketReceived<OnDeleteObjectPacket_0x1D>> trig,
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
-        Res<GameContext> gameCtx)
+        Res<GameContext> gameCtx,
+        EventWriter<ContainerItemRemovedEvent> itemRemoved,
+        ResMut<ContainerSeq> seq,
+        Query<Data<EquipmentSlots>> equipQ,
+        Query<Data<NetworkSerial>> serialQ)
     {
         if (gameCtx.Value.PlayerSerial == 0)
             return;
@@ -939,9 +958,27 @@ readonly struct InGamePacketsPlugin : IPlugin
         var packet = trig.Event.Packet;
         Console.WriteLine("delete obj from packet: 0x{0:X8}", packet.Serial);
 
+        // Drop the container UI slot if this item was sitting in a gump.
+        itemRemoved.Send(new ContainerItemRemovedEvent(packet.Serial, seq.Value.Next()));
+
         if (entitiesMap.Value.TryGet(commands, packet.Serial, out var ent))
         {
+            // A destroyed item drops off whatever mobile wore it (legacy:
+            // Item.Destroy unlinks it from the layer). Dismount sends 0x1D for
+            // the mount item but no equipment update, so without this the mount
+            // layer keeps rendering it. Clear by serial — entity-id churn means
+            // the slot can hold a different live entity than this delete targets.
+            ContainersPlugin.ClearEquipReference(commands, packet.Serial, equipQ, serialQ);
             ent.Despawn();
+            // Despawn is deferred (applies at EndDeferred), but the serial map
+            // entry is otherwise cleared only by the OnRemove<NetworkSerial>
+            // observer — which also fires at EndDeferred. A follow-up packet in
+            // the SAME read (e.g. 0x2E equipping the ethereal mount the server
+            // just removed from the pack) would then GetOrCreate this doomed
+            // entity and pin it into EquipmentSlots[Mount], leaving a dangling
+            // slot once the despawn lands. Removing the map entry now forces
+            // that GetOrCreate to spawn a fresh, live entity instead.
+            entitiesMap.Value.Remove(packet.Serial);
         }
     }
 
@@ -1040,11 +1077,27 @@ readonly struct InGamePacketsPlugin : IPlugin
         On<PacketReceived<OnEquipItemPacket_0x2E>> trig,
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
-        InGameQueries queries)
+        InGameQueries queries,
+        EventWriter<ContainerItemRemovedEvent> itemRemoved,
+        ResMut<ContainerSeq> seq)
     {
         var packet = trig.Event.Packet;
         var parentEnt = entitiesMap.Value.GetOrCreate(commands, packet.ContainerSerial);
         var childEnt = entitiesMap.Value.GetOrCreate(commands, packet.Serial);
+
+        // Parity with legacy EquipItem -> world.RemoveItemFromContainer: an item
+        // moving to an equipment layer leaves whatever container it was in. Drop
+        // the contained-item state + detach the ECS parent link, and tell the
+        // container gump to despawn its slot — otherwise it lingers as a phantom
+        // in the pack (e.g. equipping an ethereal mount from the backpack).
+        if (queries.qContainedItems.Contains(childEnt.Id))
+        {
+            childEnt.Remove<ContainedInto>()
+                .Remove<ContainerSlotPosition>();
+            commands.RemoveChild(childEnt.Id);
+            itemRemoved.Send(new ContainerItemRemovedEvent(packet.Serial, seq.Value.Next()));
+        }
+
         childEnt.Insert(new Graphic() { Value = (ushort)(packet.Graphic + packet.GraphicIncrement) })
             .Insert(new Hue() { Value = packet.Hue });
 

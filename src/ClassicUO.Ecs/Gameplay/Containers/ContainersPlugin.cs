@@ -12,6 +12,7 @@
 using System;
 using ClassicUO.Assets;
 using ClassicUO.Ecs.Modding.Host;
+using ClassicUO.Game.Data;
 using ClassicUO.Network;
 using TinyEcs;
 using TinyEcs.Bevy;
@@ -23,6 +24,8 @@ internal readonly struct ContainersPlugin : IPlugin
 {
     public void Build(App app)
     {
+        app.AddResource(new ContainerSeq());
+
         var closeContainersTooFarFromPlayerFn = CloseContainersTooFarFromPlayer;
 
         app.AddSystem(closeContainersTooFarFromPlayerFn)
@@ -46,32 +49,79 @@ internal readonly struct ContainersPlugin : IPlugin
             Commands commands,
             Res<NetworkEntitiesMap> entitiesMap,
             EventWriter<ContainerUpdateEvent> writer,
-            EventWriter<HostMessage> hostMsgs)
-            => HandleUpdateContainer(trig.Event.Packet, commands, entitiesMap, writer, hostMsgs));
+            EventWriter<HostMessage> hostMsgs,
+            Query<Data<EquipmentSlots>> equipQ,
+            Query<Data<NetworkSerial>> serialQ,
+            ResMut<ContainerSeq> seq)
+            => HandleUpdateContainer(trig.Event.Packet, commands, entitiesMap, writer, hostMsgs, equipQ, serialQ, seq));
 
         app.AddObserver((
             On<PacketReceived<OnUpdateContainerPacket_0x25_Post6017>> trig,
             Commands commands,
             Res<NetworkEntitiesMap> entitiesMap,
             EventWriter<ContainerUpdateEvent> writer,
-            EventWriter<HostMessage> hostMsgs)
-            => HandleUpdateContainer(trig.Event.Packet, commands, entitiesMap, writer, hostMsgs));
+            EventWriter<HostMessage> hostMsgs,
+            Query<Data<EquipmentSlots>> equipQ,
+            Query<Data<NetworkSerial>> serialQ,
+            ResMut<ContainerSeq> seq)
+            => HandleUpdateContainer(trig.Event.Packet, commands, entitiesMap, writer, hostMsgs, equipQ, serialQ, seq));
 
         app.AddObserver((
             On<PacketReceived<OnUpdateContainerItemsPacket_0x3C_Pre6017>> trig,
             Commands commands,
             Res<NetworkEntitiesMap> entitiesMap,
             EventWriter<ContainerUpdateEvent> writer,
-            EventWriter<HostMessage> hostMsgs)
-            => HandleUpdateContainerItems(trig.Event.Packet, commands, entitiesMap, writer, hostMsgs));
+            EventWriter<HostMessage> hostMsgs,
+            Query<Data<EquipmentSlots>> equipQ,
+            Query<Data<NetworkSerial>> serialQ,
+            ResMut<ContainerSeq> seq)
+            => HandleUpdateContainerItems(trig.Event.Packet, commands, entitiesMap, writer, hostMsgs, equipQ, serialQ, seq));
 
         app.AddObserver((
             On<PacketReceived<OnUpdateContainerItemsPacket_0x3C_Post6017>> trig,
             Commands commands,
             Res<NetworkEntitiesMap> entitiesMap,
             EventWriter<ContainerUpdateEvent> writer,
-            EventWriter<HostMessage> hostMsgs)
-            => HandleUpdateContainerItems(trig.Event.Packet, commands, entitiesMap, writer, hostMsgs));
+            EventWriter<HostMessage> hostMsgs,
+            Query<Data<EquipmentSlots>> equipQ,
+            Query<Data<NetworkSerial>> serialQ,
+            ResMut<ContainerSeq> seq)
+            => HandleUpdateContainerItems(trig.Event.Packet, commands, entitiesMap, writer, hostMsgs, equipQ, serialQ, seq));
+    }
+
+    // An item just entered a container, so it can no longer be worn. Clear any
+    // mobile's EquipmentSlots reference to it (e.g. double-clicking yourself
+    // dismounts: the mount item moves back into the pack and must vanish from
+    // the mount layer). Mirrors legacy Mobile losing the item from its layer
+    // list when item.Container changes. Re-Insert bumps the Changed tick so the
+    // paperdoll refresh path fires — in-place InlineArray writes don't.
+    // Clear any mobile's EquipmentSlots reference to the item with this serial.
+    // Matches by SERIAL (via each slot entity's NetworkSerial), NOT by entity
+    // id: GetOrCreate churns entity ids for a serial (despawn + immediate map
+    // remove + recreate), so the slot can hold a still-live entity whose id no
+    // longer equals the map's current entity for that serial. Serial is stable.
+    // Re-Insert bumps the Changed tick so the paperdoll refresh path fires.
+    internal static void ClearEquipReference(
+        Commands commands,
+        uint serial,
+        Query<Data<EquipmentSlots>> equipQ,
+        Query<Data<NetworkSerial>> serialQ)
+    {
+        foreach (var (mob, slots) in equipQ)
+        {
+            bool changed = false;
+            for (var layer = Layer.Invalid + 1; layer <= Layer.Bank; ++layer)
+            {
+                var slotEnt = slots.Ref[layer];
+                if (slotEnt == 0 || !serialQ.Contains(slotEnt)) continue;
+                var (_, ns) = serialQ.Get(slotEnt);
+                if (ns.Ref.Value != serial) continue;
+                slots.Ref[layer] = 0;
+                changed = true;
+            }
+            if (changed)
+                commands.Entity(mob.Ref).Insert(slots.Ref);
+        }
     }
 
     private static void CloseContainersTooFarFromPlayer(
@@ -130,7 +180,10 @@ internal readonly struct ContainersPlugin : IPlugin
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
         EventWriter<ContainerUpdateEvent> writer,
-        EventWriter<HostMessage> hostMsgs)
+        EventWriter<HostMessage> hostMsgs,
+        Query<Data<EquipmentSlots>> equipQ,
+        Query<Data<NetworkSerial>> serialQ,
+        ResMut<ContainerSeq> seq)
     {
         var finalGraphic = (ushort)(packet.Graphic + packet.GraphicIncrement);
         var amount = packet.Amount == 0 ? (ushort)1 : packet.Amount;
@@ -152,10 +205,11 @@ internal readonly struct ContainersPlugin : IPlugin
             .Insert<ContainedInto>();
 
         parentEnt.AddChild(ent);
+        ClearEquipReference(commands, packet.Serial, equipQ, serialQ);
         Console.WriteLine("[PKT-0x25 ADD] container=0x{0:X8} item=0x{1:X8} graphic=0x{2:X4} pos=({3},{4}) amount={5}",
             packet.ContainerSerial, packet.Serial, finalGraphic, packet.X, packet.Y, amount);
         writer.Send(new ContainerUpdateEvent(
-            packet.ContainerSerial, packet.Serial, finalGraphic, packet.Hue, packet.X, packet.Y, amount));
+            packet.ContainerSerial, packet.Serial, finalGraphic, packet.Hue, packet.X, packet.Y, amount, seq.Value.Next()));
 
         hostMsgs.Send(new HostMessage.ContainerItemAdded(
             packet.ContainerSerial,
@@ -173,7 +227,10 @@ internal readonly struct ContainersPlugin : IPlugin
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
         EventWriter<ContainerUpdateEvent> writer,
-        EventWriter<HostMessage> hostMsgs)
+        EventWriter<HostMessage> hostMsgs,
+        Query<Data<EquipmentSlots>> equipQ,
+        Query<Data<NetworkSerial>> serialQ,
+        ResMut<ContainerSeq> seq)
     {
         foreach (var item in packet.Items)
         {
@@ -200,11 +257,12 @@ internal readonly struct ContainersPlugin : IPlugin
                 .Insert(new Amount() { Value = item.Amount })
                 .Insert<ContainedInto>();
             parentEnt.AddChild(ent);
+            ClearEquipReference(commands, item.Serial, equipQ, serialQ);
 
             Console.WriteLine("[PKT-0x3C ITEM] container=0x{0:X8} item=0x{1:X8} graphic=0x{2:X4} pos=({3},{4}) amount={5}",
                 item.ContainerSerial, item.Serial, finalGraphic, item.X, item.Y, item.Amount);
             writer.Send(new ContainerUpdateEvent(
-                item.ContainerSerial, item.Serial, finalGraphic, item.Hue, item.X, item.Y, item.Amount));
+                item.ContainerSerial, item.Serial, finalGraphic, item.Hue, item.X, item.Y, item.Amount, seq.Value.Next()));
         }
     }
 }
@@ -221,9 +279,17 @@ internal struct FloatingWindowState
 
 internal record struct ContainerOpenedEvent(uint Serial, ushort Graphic);
 internal record struct ContainerClosedEvent(uint Serial);
+// Item left a container (deleted via 0x1D, or equipped via 0x2E). The game
+// entity is handled by the packet observer; this drops the matching container
+// UI slot so the backpack/chest gump stops drawing a phantom. Seq is a global
+// emit order stamp shared with ContainerUpdateEvent: when a serial is both
+// added and removed in one packet read (mount = add-then-equip; dismount =
+// delete-then-readd), the higher Seq is the server's final intent and wins.
+internal record struct ContainerItemRemovedEvent(uint ItemSerial, ulong Seq);
 // Carries the item payload inline so consumers don't have to query the game
 // entity in the same frame — those components are still in the deferred
-// command queue when ContainerGumpPlugin runs.
+// command queue when ContainerGumpPlugin runs. See ContainerItemRemovedEvent
+// for Seq semantics.
 internal record struct ContainerUpdateEvent(
     uint Serial,
     uint ItemSerial,
@@ -231,4 +297,15 @@ internal record struct ContainerUpdateEvent(
     ushort Hue,
     ushort X,
     ushort Y,
-    ushort Amount);
+    ushort Amount,
+    ulong Seq);
+
+// Monotonic emit-order counter shared by container add (ContainerUpdateEvent)
+// and remove (ContainerItemRemovedEvent) so the UI can resolve which action a
+// server sent last for a given item within one packet read. Never reset —
+// ulong wrap is not reachable in a session.
+internal sealed class ContainerSeq
+{
+    private ulong _value;
+    public ulong Next() => ++_value;
+}
