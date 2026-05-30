@@ -564,58 +564,47 @@ namespace ClassicUO.Game.Managers
                     }
                 }
 
-                // After both validation passes, flood-fill propagate correctness
-                // from walls with direct support to connected same-floor walls.
-                // This fixes processing-order dependency in same-floor propagation.
-                if (i > 0)
+                // Re-validate pieces still marked incorrect until nothing changes.
+                // A piece can become valid once a neighbor it depends on is validated,
+                // and the single forward scan above misses those late dependencies.
+                bool changed = true;
+
+                while (changed)
                 {
-                    var propagationQueue = new Queue<Multi>();
+                    changed = false;
+                    validatedFloors.Clear();
 
-                    const CUSTOM_HOUSE_MULTI_OBJECT_FLAGS excludeMask =
-                        CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR |
-                        CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR |
-                        CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF |
-                        CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE |
-                        CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL;
-
-                    // Seed: all wall-type items on this floor that are validated and correct.
                     for (int x = _bounds.X; x < EndPos.X + 1; x++)
                     {
                         for (int y = _bounds.Y; y < EndPos.Y + 1; y++)
                         {
-                            foreach (Multi item in house.GetMultiAt(x, y))
+                            IEnumerable<Multi> multi = house.GetMultiAt(x, y);
+
+                            if (multi == null)
                             {
-                                if (item.IsCustom &&
-                                    item.Z >= minZ && item.Z < maxZ &&
-                                    (item.State & excludeMask) == 0 &&
-                                    (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0 &&
+                                continue;
+                            }
+
+                            foreach (Multi item in multi)
+                            {
+                                if (!item.IsCustom ||
+                                    item.Z < minZ || item.Z >= maxZ ||
+                                    (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) != 0 ||
                                     (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0)
                                 {
-                                    propagationQueue.Enqueue(item);
+                                    continue;
                                 }
-                            }
-                        }
-                    }
 
-                    int[] pdx = { -1, 1, 0, 0 };
-                    int[] pdy = { 0, 0, -1, 1 };
+                                item.State &= ~(CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE);
 
-                    while (propagationQueue.Count > 0)
-                    {
-                        Multi seed = propagationQueue.Dequeue();
-
-                        for (int d = 0; d < 4; d++)
-                        {
-                            foreach (Multi neighbor in house.GetMultiAt(seed.X + pdx[d], seed.Y + pdy[d]))
-                            {
-                                if (neighbor.IsCustom &&
-                                    neighbor.Z >= minZ && neighbor.Z < maxZ &&
-                                    (neighbor.State & excludeMask) == 0 &&
-                                    (neighbor.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0 &&
-                                    (neighbor.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) != 0)
+                                if (ValidateItemPlace(foundationItem, item, minZ, maxZ, validatedFloors))
                                 {
-                                    neighbor.State &= ~CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE;
-                                    propagationQueue.Enqueue(neighbor);
+                                    item.State |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
+                                    changed = true;
+                                }
+                                else
+                                {
+                                    item.State |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE;
                                 }
                             }
                         }
