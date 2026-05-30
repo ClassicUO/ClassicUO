@@ -189,8 +189,7 @@ readonly struct InGamePacketsPlugin : IPlugin
             Commands,
             Res<NetworkEntitiesMap>,
             Res<GameContext>,
-            EventWriter<ContainerItemRemovedEvent>,
-            ResMut<ContainerSeq>,
+            EventWriter<ContainerSlotEvent>,
             Query<Data<EquipmentSlots>>,
             Query<Data<NetworkSerial>>>(OnDeleteObject);
 
@@ -211,8 +210,7 @@ readonly struct InGamePacketsPlugin : IPlugin
             Commands,
             Res<NetworkEntitiesMap>,
             InGameQueries,
-            EventWriter<ContainerItemRemovedEvent>,
-            ResMut<ContainerSeq>>(OnEquipItem);
+            EventWriter<ContainerSlotEvent>>(OnEquipItem);
 
         app.AddObserver<On<PacketReceived<OnUpdateManaPacket_0xA2>>,
             Commands,
@@ -947,8 +945,7 @@ readonly struct InGamePacketsPlugin : IPlugin
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
         Res<GameContext> gameCtx,
-        EventWriter<ContainerItemRemovedEvent> itemRemoved,
-        ResMut<ContainerSeq> seq,
+        EventWriter<ContainerSlotEvent> itemRemoved,
         Query<Data<EquipmentSlots>> equipQ,
         Query<Data<NetworkSerial>> serialQ)
     {
@@ -959,7 +956,7 @@ readonly struct InGamePacketsPlugin : IPlugin
         Console.WriteLine("delete obj from packet: 0x{0:X8}", packet.Serial);
 
         // Drop the container UI slot if this item was sitting in a gump.
-        itemRemoved.Send(new ContainerItemRemovedEvent(packet.Serial, seq.Value.Next()));
+        itemRemoved.Send(ContainerSlotEvent.Remove(packet.Serial));
 
         if (entitiesMap.Value.TryGet(commands, packet.Serial, out var ent))
         {
@@ -1078,8 +1075,7 @@ readonly struct InGamePacketsPlugin : IPlugin
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
         InGameQueries queries,
-        EventWriter<ContainerItemRemovedEvent> itemRemoved,
-        ResMut<ContainerSeq> seq)
+        EventWriter<ContainerSlotEvent> itemRemoved)
     {
         var packet = trig.Event.Packet;
         var parentEnt = entitiesMap.Value.GetOrCreate(commands, packet.ContainerSerial);
@@ -1095,7 +1091,7 @@ readonly struct InGamePacketsPlugin : IPlugin
             childEnt.Remove<ContainedInto>()
                 .Remove<ContainerSlotPosition>();
             commands.RemoveChild(childEnt.Id);
-            itemRemoved.Send(new ContainerItemRemovedEvent(packet.Serial, seq.Value.Next()));
+            itemRemoved.Send(ContainerSlotEvent.Remove(packet.Serial));
         }
 
         childEnt.Insert(new Graphic() { Value = (ushort)(packet.Graphic + packet.GraphicIncrement) })
