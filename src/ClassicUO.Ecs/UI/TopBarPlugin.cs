@@ -267,9 +267,11 @@ internal readonly struct TopBarPlugin : IPlugin
     private static void Drag(
         Res<MouseContext> mouse,
         Res<DragGate> gate,
+        Res<AssetsServer> assets,
         Local<DragAnchor> anchor,
         Query<Data<ComputedNode, Node>, Filter<With<TopBarButton>>> buttonsQ,
         Query<Data<ComputedNode, Node>, Filter<With<TopBarDragHandle>>> handlesQ,
+        Query<Data<ComputedNode, UiCustom>, Filter<With<UIMovable>>> movablesQ,
         Query<Data<Node>, Filter<With<IsTopBar>>> rootQ)
     {
         bool held = mouse.Value.IsPressed(MouseButtonType.Left)
@@ -297,12 +299,20 @@ internal readonly struct TopBarPlugin : IPlugin
             // gesture so WindowDragPlugin / pickup don't grab a gump beneath the
             // bar (the bar is on top). Buttons still fire their UiClick.
             bool overBar = false;
+            int barOrder = int.MinValue;
             foreach (var (_, bb, node) in handlesQ)
             {
                 if (node.Ref.Display == Display.None) continue;
-                if (Inside(bb.Ref, pos)) { overBar = true; break; }
+                if (Inside(bb.Ref, pos)) { overBar = true; barOrder = bb.Ref.PaintOrder; break; }
             }
             if (!overBar) return;
+
+            // A draggable gump window painted above the bar at this pixel owns
+            // the gesture — bail WITHOUT claiming the gate so WindowDragPlugin
+            // (Stage.Update) can latch the gump. Bbox-over-bar is not enough:
+            // gumps stack above the bar (z=1, bumped from 1 up) and a press
+            // there must reach the gump, not get swallowed by the bar.
+            if (GumpAbove(assets.Value, pos, barOrder, movablesQ)) return;
 
             gate.Value.Mode = ActiveDrag.UIWindow;
             anchor.Value.Claimed = true;
@@ -345,17 +355,24 @@ internal readonly struct TopBarPlugin : IPlugin
     // Legacy: right-click on the bar snaps it back to (0,0).
     private static void RightClickReset(
         Res<MouseContext> mouse,
+        Res<AssetsServer> assets,
         Query<Data<ComputedNode, Node>, Filter<With<TopBarDragHandle>>> handlesQ,
+        Query<Data<ComputedNode, UiCustom>, Filter<With<UIMovable>>> movablesQ,
         Query<Data<Node>, Filter<With<IsTopBar>>> rootQ)
     {
         var pos = mouse.Value.Position;
         bool over = false;
+        int barOrder = int.MinValue;
         foreach (var (_, bb, node) in handlesQ)
         {
             if (node.Ref.Display == Display.None) continue;
-            if (Inside(bb.Ref, pos)) { over = true; break; }
+            if (Inside(bb.Ref, pos)) { over = true; barOrder = bb.Ref.PaintOrder; break; }
         }
         if (!over) return;
+
+        // Gump painted above the bar here owns the right-click (close-on-right
+        // click) — don't consume it for the bar reset.
+        if (GumpAbove(assets.Value, pos, barOrder, movablesQ)) return;
 
         mouse.Value.Consume(MouseButtonType.Right);
         foreach (var (_, node) in rootQ)
@@ -368,6 +385,23 @@ internal readonly struct TopBarPlugin : IPlugin
     private static bool Inside(in ComputedNode bb, Vector2 p)
         => p.X >= bb.Position.X && p.Y >= bb.Position.Y
         && p.X < bb.Position.X + bb.Size.X && p.Y < bb.Position.Y + bb.Size.Y;
+
+    // True when a draggable gump window is painted above the bar at `pos`
+    // (higher PaintOrder = drawn later = on top), with a pixel-perfect check so
+    // a transparent gump pixel over the bar still passes through to the bar.
+    private static bool GumpAbove(
+        AssetsServer assets,
+        Vector2 pos,
+        int barOrder,
+        Query<Data<ComputedNode, UiCustom>, Filter<With<UIMovable>>> movablesQ)
+    {
+        foreach (var (_, bb, custom) in movablesQ)
+        {
+            if (bb.Ref.PaintOrder <= barOrder) continue;
+            if (UiHitTest.PixelHit(assets, custom.Ref.Render(), bb.Ref, pos)) return true;
+        }
+        return false;
+    }
 
     private static void WireButton(EntityCommands btn, Buttons id)
     {
