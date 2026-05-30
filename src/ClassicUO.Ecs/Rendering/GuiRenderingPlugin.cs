@@ -142,7 +142,11 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                     b.ClipEnd();
                     break;
 
-                // Border/Shadow not yet implemented for UO renderer.
+                case RenderCommandType.Border:
+                    DrawBorder(b, dumbTexture.Value.Texture!, in cmd);
+                    break;
+
+                // Shadow not yet implemented for UO renderer.
             }
         }
 
@@ -170,6 +174,29 @@ internal readonly struct GuiRenderingPlugin : IPlugin
         var t = new Texture2D(device, 1, 1);
         t.SetData([XnaColor.White]);
         return t;
+    }
+
+    // Inset border: four edge quads of the white pixel tinted by the border
+    // color. Clay emits Border framing an element (and the pointer-highlight
+    // debug overlay). Each side honors its own width.
+    private static void DrawBorder(UltimaBatcher2D b, Texture2D white, in RenderCommand cmd)
+    {
+        ref readonly var bb = ref cmd.BoundingBox;
+        ref readonly var border = ref cmd.Border;
+        var color = ToXnaColor(border.Color);
+
+        int x = (int)bb.X, y = (int)bb.Y, w = (int)bb.Width, h = (int)bb.Height;
+        int l = border.Width.Left, r = border.Width.Right, t = border.Width.Top, bo = border.Width.Bottom;
+
+        if (t > 0) DrawQuad(b, white, x, y, w, t, color, cmd.ZIndex);
+        if (bo > 0) DrawQuad(b, white, x, y + h - bo, w, bo, color, cmd.ZIndex);
+        if (l > 0) DrawQuad(b, white, x, y, l, h, color, cmd.ZIndex);
+        if (r > 0) DrawQuad(b, white, x + w - r, y, r, h, color, cmd.ZIndex);
+    }
+
+    private static void DrawQuad(UltimaBatcher2D b, Texture2D white, int x, int y, int w, int h, XnaColor color, int z)
+    {
+        b.Draw(white, new Vector2(x, y), new Rectangle(0, 0, w, h), color, 0f, Vector2.One, z);
     }
 
     private static void DrawText(UltimaBatcher2D b, in RenderCommand cmd)

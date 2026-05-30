@@ -78,6 +78,10 @@ internal readonly struct GuiPlugin : IPlugin
                     return UiHitTest.PixelHit(assetsServer, customPtr.Ref.Render(), in bb,
                         new Microsoft.Xna.Framework.Vector2(pos.X, pos.Y));
                 };
+
+                // Debug overlay: outline the topmost element under the pointer
+                // lime, occluded elements beneath it red. Flip to false to hide.
+                global::Clay.Clay.SetPointerHighlightEnabled(true);
             });
 
         var states = Enum.GetValues<GameState>();
